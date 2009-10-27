@@ -1,0 +1,214 @@
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                  MPItrace                                 *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *                                                             ___           *
+ *   +---------+     http:// www.cepba.upc.edu/tools_i.htm    /  __          *
+ *   |    o//o |     http:// www.bsc.es                      /  /  _____     *
+ *   |   o//o  |                                            /  /  /     \    *
+ *   |  o//o   |     E-mail: cepbatools@cepba.upc.edu      (  (  ( B S C )   *
+ *   | o//o    |     Phone:          +34-93-401 71 78       \  \  \_____/    *
+ *   +---------+     Fax:            +34-93-401 25 77        \  \__          *
+ *    C E P B A                                               \___           *
+ *                                                                           *
+ * This software is subject to the terms of the CEPBA/BSC license agreement. *
+ *      You must accept the terms of this license to use this software.      *
+ *                                 ---------                                 *
+ *                European Center for Parallelism of Barcelona               *
+ *                      Barcelona Supercomputing Center                      *
+\*****************************************************************************/
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+ | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/hash_table.c,v $
+ | 
+ | @last_commit: $Date: 2008/07/21 13:39:18 $
+ | @version:     $Revision: 1.3 $
+ | 
+ | History:
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
+
+static char UNUSED rcsid[] = "$Id: hash_table.c,v 1.3 2008/07/21 13:39:18 harald Exp $";
+
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#include "hash_table.h"
+
+#if !defined(MPI_SUPPORT) /* This shouldn't be compiled if MPI is not used */
+# error "This should not be compiled outside MPI bounds"
+#endif
+
+/*
+ *   Initializes hashing table.
+ */
+void hash_init (hash_t * hash)
+{
+  int i;
+
+  for (i = 0; i < HASH_TABLE_SIZE; i++)
+    hash->table[i].ovf_link = HASH_FREE;
+
+  /*
+   * All overflow cells are free 
+   */
+  for (i = 0; i < HASH_OVERFLOW_SIZE - 1; i++)
+    hash->overflow[i].next = i + 1;
+  /*
+   * Last in the list has different 'next' 
+   */
+  hash->overflow[HASH_OVERFLOW_SIZE - 1].next = HASH_NULL;
+  hash->ovf_free = 0;
+}
+
+/*
+ *   Adds a new hash entry to the hash table. Returns != 0 when there is no
+ *  space left in the table.
+ */
+int hash_add (hash_t * hash, const hash_data_t * data)
+{
+  int cell, free;
+
+  cell = HASH_FUNCTION (data->key);
+
+  if (hash->table[cell].ovf_link == HASH_FREE)
+  {
+    hash->table[cell].ovf_link = HASH_NULL;     /* No longer free */
+    hash->table[cell].data = *data;
+  }
+  else
+  {
+    /*
+     * Get a free overflow cell 
+     */
+    if ((free = hash->ovf_free) == HASH_NULL)
+    {
+      fprintf (stderr, "mpitrace: hash_add: No space left in hash table. Size is %d+%d\n", HASH_TABLE_SIZE, HASH_OVERFLOW_SIZE);
+      return TRUE;
+    }
+    hash->ovf_free = hash->overflow[free].next;
+
+    /*
+     * Insert free into overflow list of cell 
+     */
+    hash->overflow[free].next = hash->table[cell].ovf_link;
+    hash->table[cell].ovf_link = free;
+    /*
+     * Update user data 
+     */
+    hash->overflow[free].data = *data;
+  }
+  return FALSE;
+}
+
+
+/*
+ *   Searches for key in the hash table. Returns NULL when the key is not
+ *  found in the table.
+ */
+hash_data_t *hash_search (const hash_t * hash, MPI_Request key)
+{
+  int cell, ovf;
+
+  cell = HASH_FUNCTION (key);
+
+  if (hash->table[cell].ovf_link == HASH_FREE)
+    return NULL;
+  if (hash->table[cell].data.key == key)
+    return (hash_data_t *) & hash->table[cell].data;
+
+  /*
+   * Look for key in overflow list 
+   */
+  ovf = hash->table[cell].ovf_link;
+  while (ovf != HASH_NULL)
+  {
+    if (hash->overflow[ovf].data.key == key)
+      return (hash_data_t *) & hash->overflow[ovf].data;
+    ovf = hash->overflow[ovf].next;
+  }
+  return NULL;
+}
+
+
+/*
+ *   Removes entry key in the hash table. Returns != 0 when key is not found in
+ *  the table.
+ */
+int hash_remove (hash_t * hash, MPI_Request key)
+{
+  int cell, ovf, prev;
+
+  cell = HASH_FUNCTION (key);
+
+  if (hash->table[cell].ovf_link == HASH_FREE)
+  {
+#if SIZEOF_LONG == 8
+		fprintf (stderr, "mpitrace: hash_remove: Key %08lx not in hash table\n", (long) key);
+#elif SIZEOF_LONG == 4
+		fprintf (stderr, "mpitrace: hash_remove: Key %04x not in hash table\n", (long) key);
+#endif
+
+    return TRUE;
+  }
+  if (hash->table[cell].data.key == key)
+	{
+    /*
+     * Remove the main entry 
+     */
+    if ((ovf = hash->table[cell].ovf_link) != HASH_NULL)
+    {
+      /*
+       * Bring 1st overflow to main entry 
+       */
+      hash->table[cell].data = hash->overflow[ovf].data;
+      hash->table[cell].ovf_link = hash->overflow[ovf].next;
+      /*
+       * Put freed ovf in free list 
+       */
+      hash->overflow[ovf].next = hash->ovf_free;
+      hash->ovf_free = ovf;
+    }
+    else
+		{
+      hash->table[cell].ovf_link = HASH_FREE;   /* Mark as free */
+		}
+	}
+  else
+  {
+    /*
+     * Search key in overflow list 
+     */
+    ovf = hash->table[cell].ovf_link;
+    prev = HASH_NULL;
+    while (ovf != HASH_NULL && hash->overflow[ovf].data.key != key)
+    {
+      prev = ovf;
+      ovf = hash->overflow[ovf].next;
+    }
+    if (ovf == HASH_NULL)       /* Not found */
+    {
+#if SIZEOF_LONG == 8
+			fprintf (stderr, "mpitrace: hash_remove: Key %08lx not in hash table\n", (long) key);
+#elif SIZEOF_LONG == 4
+			fprintf (stderr, "mpitrace: hash_remove: Key %04x not in hash table\n", (long) key);
+#endif
+      return TRUE;
+    }
+    if (prev == HASH_NULL)
+      hash->table[cell].ovf_link = hash->overflow[ovf].next;
+    else
+      hash->overflow[prev].next = hash->overflow[ovf].next;
+    hash->overflow[ovf].next = hash->ovf_free;
+    hash->ovf_free = ovf;
+  }
+  return FALSE;
+}
+

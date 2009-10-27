@@ -1,0 +1,39 @@
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                  MPItrace                                 *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *                                                             ___           *
+ *   +---------+     http:// www.cepba.upc.edu/tools_i.htm    /  __          *
+ *   |    o//o |     http:// www.bsc.es                      /  /  _____     *
+ *   |   o//o  |                                            /  /  /     \    *
+ *   |  o//o   |     E-mail: cepbatools@cepba.upc.edu      (  (  ( B S C )   *
+ *   | o//o    |     Phone:          +34-93-401 71 78       \  \  \_____/    *
+ *   +---------+     Fax:            +34-93-401 25 77        \  \__          *
+ *    C E P B A                                               \___           *
+ *                                                                           *
+ * This software is subject to the terms of the CEPBA/BSC license agreement. *
+ *      You must accept the terms of this license to use this software.      *
+ *                                 ---------                                 *
+ *                European Center for Parallelism of Barcelona               *
+ *                      Barcelona Supercomputing Center                      *
+\*****************************************************************************/
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+ | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/clocks/ia64_clock.h,v $
+ | 
+ | @last_commit: $Date: 2008/01/23 15:00:00 $
+ | @version:     $Revision: 1.2 $
+ | 
+ | History:
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
+#if defined(OS_LINUX) && defined(ARCH_IA64)
+
+#include "clock.h"
+
+iotimer_t ia64_getTime (void);
+void ia64_Initialize (void);
+void ia64_Initialize_thread (void);
+
+#endif

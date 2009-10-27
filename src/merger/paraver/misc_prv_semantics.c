@@ -1,0 +1,647 @@
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                 MPItrace                                  *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *                                                             ___           *
+ *   +---------+     http:// www.cepba.upc.edu/tools_i.htm    /  __          *
+ *   |    o//o |     http:// www.bsc.es                      /  /  _____     *
+ *   |   o//o  |                                            /  /  /     \    *
+ *   |  o//o   |     E-mail: cepbatools@cepba.upc.edu      (  (  ( B S C )   *
+ *   | o//o    |     Phone:          +34-93-401 71 78       \  \  \_____/    *
+ *   +---------+     Fax:            +34-93-401 25 77        \  \__          *
+ *    C E P B A                                               \___           *
+ *                                                                           *
+ * This software is subject to the terms of the CEPBA/BSC license agreement. *
+ *      You must accept the terms of this license to use this software.      *
+ *                                 ---------                                 *
+ *                European Center for Parallelism of Barcelona               *
+ *                      Barcelona Supercomputing Center                      *
+\*****************************************************************************/
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+ | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/misc_prv_semantics.c,v $
+ | 
+ | @last_commit: $Date: 2009/06/03 12:41:30 $
+ | @version:     $Revision: 1.15 $
+ | 
+ | History:
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
+
+static char UNUSED rcsid[] = "$Id: misc_prv_semantics.c,v 1.15 2009/06/03 12:41:30 harald Exp $";
+
+#include <config.h>
+
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+
+#include "file_set.h"
+#include "object_tree.h"
+#include "misc_prv_semantics.h"
+#include "trace_to_prv.h"
+#include "misc_prv_events.h"
+#include "semantics.h"
+#include "paraver_generator.h"
+
+#if USE_HARDWARE_COUNTERS
+# include "HardwareCounters.h"
+#endif
+
+#ifdef HAVE_BFD
+# include "addr2info.h" 
+#endif
+
+#include "events.h"
+#include "paraver_state.h"
+
+int MPI_Caller_Multiple_Levels_Traced = FALSE;
+int *MPI_Caller_Labels_Used = NULL;
+
+int Sample_Caller_Multiple_Levels_Traced = FALSE;
+int *Sample_Caller_Labels_Used = NULL;
+
+int Rusage_Events_Found = FALSE;
+int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
+int MPIStats_Events_Found = FALSE;
+int MPIStats_Labels_Used[MPI_STATS_EVENTS_COUNT];
+
+int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
+
+/******************************************************************************
+ ***  Flush_Event
+ ******************************************************************************/
+
+static int Flush_Event (event_t * current_event,
+                        unsigned long long current_time,
+                        unsigned int cpu,
+                        unsigned int ptask,
+                        unsigned int task,
+                        unsigned int thread,
+                        FileSet_t *fset )
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Switch_State (STATE_FLUSH, (EvValue == EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  Read_Event
+ ******************************************************************************/
+
+static int ReadWrite_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	unsigned long EvParam;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+	EvParam = Get_EvParam (current_event);
+
+	Switch_State (STATE_IO, (EvValue == EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	switch (EvValue)
+	{
+		case EVT_BEGIN:
+		trace_paraver_event (cpu, ptask, task, thread, current_time, IOSIZE_EV, EvParam);
+		break;
+		case EVT_END:
+		break;
+	}
+	return 0;
+}
+
+/******************************************************************************
+ ***   Tracing_Event
+ ******************************************************************************/
+
+static int Tracing_Event (event_t * current_event,
+                          unsigned long long current_time,
+                          unsigned int cpu,
+                          unsigned int ptask,
+                          unsigned int task,
+                          unsigned int thread,
+                          FileSet_t *fset)
+{
+	unsigned int EvType, EvValue, i;
+	struct task_t * task_info;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	task_info = GET_TASK_INFO(ptask, task);
+	task_info -> tracing_disabled = TRUE;
+
+	/* Mark all threads of the current task as not tracing */
+	for (i = 0; i < task_info->nthreads; i++)
+	{
+		Switch_State (STATE_NOT_TRACING, (EvValue == EVT_END), ptask, task, i+1);
+
+		trace_paraver_state (cpu, ptask, task, i + 1, current_time);
+	}
+
+	/* Only the task writes the event */
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  Appl_Event
+ ******************************************************************************/
+
+static int Appl_Event (event_t * current_event,
+                       unsigned long long current_time,
+                       unsigned int cpu,
+                       unsigned int ptask,
+                       unsigned int task,
+                       unsigned int thread,
+                       FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	if (EvValue == EVT_END)
+		Pop_State (STATE_ANY, ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  User_Event
+ ******************************************************************************/
+
+static int User_Event (event_t * current_event,
+                       unsigned long long current_time,
+                       unsigned int cpu,
+                       unsigned int ptask,
+                       unsigned int task,
+                       unsigned int thread,
+                       FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvValue (current_event);     /* Value is the user event type.  */
+	EvValue = Get_EvMiscParam (current_event); /* Param is the user event value. */
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+#if defined(IS_MN_MACHINE)
+	if (EvType  == LINEAR_HOST_EVENT || EvType == LINECARD_EVENT || EvType == HOST_EVENT)
+	{
+		Enable_Topology();
+	}
+#endif
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  MPI_Caller_Event
+ ******************************************************************************/
+
+static int MPI_Caller_Event (event_t * current_event,
+                             unsigned long long current_time,
+                             unsigned int cpu,
+                             unsigned int ptask,
+                             unsigned int task,
+                             unsigned int thread,
+                             FileSet_t *fset)
+{
+	int i, deepness;	
+	UINT64 mpi_caller_func, mpi_caller_line;
+	UINT64 EvValue = Get_EvValue(current_event);
+	UNREFERENCED_PARAMETER(fset);
+
+	mpi_caller_func = mpi_caller_line = EvValue;
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	deepness = Get_EvEvent(current_event) - MPI_CALLER_EV;
+	if (deepness > 0) 
+	{
+		MPI_Caller_Multiple_Levels_Traced = TRUE;	
+		if (MPI_Caller_Labels_Used == NULL) 
+		{
+			MPI_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+			for (i = 0; i < MAX_CALLERS; i++) 
+			{
+				MPI_Caller_Labels_Used[i] = FALSE;
+			}
+		}
+		if (MPI_Caller_Labels_Used != NULL) 
+		{
+			MPI_Caller_Labels_Used [deepness-1] = TRUE; 
+		}
+	}
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_CALLER_EV+deepness, mpi_caller_func);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_CALLER_LINE_EV+deepness, mpi_caller_line);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  GetRusage_Event
+ ******************************************************************************/
+
+static int GetRusage_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	int i;
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
+	EvValue = Get_EvMiscParam (current_event);   /* Param is the user event value. */
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, RUSAGE_BASE+EvType, EvValue);
+
+	if (!Rusage_Events_Found) 
+	{
+		Rusage_Events_Found = TRUE;
+		for (i=0; i<RUSAGE_EVENTS_COUNT; i++)
+		{
+			GetRusage_Labels_Used[i] = FALSE;
+		}
+	}
+	GetRusage_Labels_Used[EvType] = TRUE;
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  MPIStats_Event
+ ******************************************************************************/
+
+static int MPIStats_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	int i;
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
+	EvValue = Get_EvMiscParam (current_event); /* Param is the event value. */
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_STATS_BASE+EvType, EvValue);
+
+	if (!MPIStats_Events_Found)
+	{
+		MPIStats_Events_Found = TRUE;
+		for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
+		{
+			MPIStats_Labels_Used[i] = FALSE;
+		}
+	}
+	MPIStats_Labels_Used[EvType] = TRUE;
+
+	return 0;
+}
+
+static int USRFunction_Event (event_t * current,
+  unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+  unsigned int task, unsigned int thread, FileSet_t *fset )
+{
+	unsigned int EvType;
+	UINT64 EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current);
+	EvValue = Get_EvValue (current);
+
+	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, USRFUNC_EV, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, USRFUNC_LINE_EV, EvValue);
+
+	return 0;
+}
+
+static int Sampling_Caller_Event (event_t * current,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned LINE_EV_DELTA;
+	unsigned int EvTypeDelta, i;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvTypeDelta = Get_EvEvent (current) - SAMPLING_EV;
+	LINE_EV_DELTA = SAMPLING_LINE_EV - SAMPLING_EV;
+
+	if (Sample_Caller_Labels_Used == NULL) 
+	{
+		Sample_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+		for (i = 0; i < MAX_CALLERS; i++) 
+			Sample_Caller_Labels_Used[i] = FALSE;
+	}	     
+	if (Sample_Caller_Labels_Used != NULL) 
+		Sample_Caller_Labels_Used [EvTypeDelta] = TRUE; 
+	  
+	if (Get_EvValue (current) != 0)
+	{
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent (current), Get_EvValue (current));
+		trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent (current)+LINE_EV_DELTA, Get_EvValue (current));
+	}
+
+	return 0;
+}
+
+#if USE_HARDWARE_COUNTERS
+static int Set_Overflow_Event (event_t * current_event,
+  unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+  unsigned int task, unsigned int thread, FileSet_t *fset )
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	HardwareCounters_SetOverflow (ptask, task, thread, current_event);
+
+	return 0;
+}
+#endif
+
+static int Tracing_Mode_Event (event_t * current_event,
+    unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+    unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Initialize_Trace_Mode_States (cpu, ptask, task, thread, EvValue);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+#if USE_HARDWARE_COUNTERS
+/******************************************************************************
+ **      Function name : ResetCounters
+ **      Description :
+ ******************************************************************************/
+
+static void ResetCounters (int ptask, int task)
+{
+	int thread, cnt;
+
+	obj_table[ptask].tasks[task].tracing_disabled = FALSE;
+
+	for (thread = 0; thread < obj_table[ptask].tasks[task].nthreads; thread++)
+		for (cnt = 0; cnt < MAX_HWC; cnt++)
+			obj_table[ptask].tasks[task].threads[thread].counters[cnt] = 0LL;
+}
+
+/******************************************************************************
+ **      Function name : Evt_SetCounters
+ **      Description :
+ ******************************************************************************/
+
+static int Evt_SetCounters (
+   event_t * current,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	int i;
+	unsigned int hwctype[MAX_HWC+1];
+	unsigned long long hwcvalue[MAX_HWC+1];
+	unsigned int prev_hwctype[MAX_HWC];
+	struct thread_t * Sthread;
+	UNREFERENCED_PARAMETER(fset);
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
+
+	/* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
+	for (i=0; i<MAX_HWC; i++)
+		prev_hwctype[i] = HWC_COUNTER_TYPE(Sthread->counterEvents[i]);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	ResetCounters (ptask-1, task-1);
+	HardwareCounters_Change (cpu, ptask, task, thread, current, current_time, hwctype, hwcvalue);
+
+	for (i = 0; i < MAX_HWC+1; i++)
+	{
+		if (NO_COUNTER != hwctype[i])
+		{
+			int found = FALSE, k = 0;
+
+			/* Check the current counter (hwctype[i]) did not appear on the previous set. We don't want 
+			 * it to appear twice in the same timestamp. This may happen because the HWC_CHANGE_EV is traced
+			 * right after the last valid emission of counters with the previous set, at the same timestamp. 
+			 */
+
+			while ((!found) && (k < MAX_HWC))
+			{
+				if (hwctype[i] == prev_hwctype[k]) found = TRUE;
+				k ++;
+			}
+
+			if (!found) 
+				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+		}
+	}
+
+  return 0;
+}
+#endif /* HARDWARE_COUNTERS */
+
+static int CPU_Burst_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Switch_State (STATE_RUNNING, (EvValue == EVT_BEGIN), ptask, task, thread);
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+/* We don't trace this event in CPU Burst mode. This is just for debugging purposes
+   trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue); 
+*/
+
+	return 0;
+}
+
+
+/******************************************************************************
+ **      Function name : traceCounters
+ **      Description :
+ ******************************************************************************/
+
+static int traceCounters (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	UNREFERENCED_PARAMETER(fset);
+	UNREFERENCED_PARAMETER(current_event);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	return 0;
+}
+
+static int SetTracing_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	if (!Get_EvValue (current_event))
+	{
+		Push_State (STATE_NOT_TRACING, ptask, task, thread);
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+		/* Mark when the tracing is disabled! */
+		EnabledTasks_time[ptask - 1][task - 1] = current_time;
+	}
+/*
+   else if (Top_State (ptask, task, thread) == STATE_NOT_TRACING)
+   {
+      Pop_State (ptask, task, thread);
+   }
+*/
+	else 
+	{
+		Pop_State (STATE_NOT_TRACING, ptask, task, thread);
+	}
+
+	EnabledTasks[ptask - 1][task - 1] = Get_EvValue (current_event);
+
+	return 0;
+}
+
+static int MRNet_Event (event_t * current_event,
+    unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+    unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+static int Clustering_Event (event_t * current_event,
+    unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+    unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	MaxClusterId = MAX(MaxClusterId, EvValue);
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
+	{ FLUSH_EV, Flush_Event },
+	{ READ_EV, ReadWrite_Event },
+	{ WRITE_EV, ReadWrite_Event },
+	{ APPL_EV, Appl_Event },
+	{ USER_EV, User_Event },
+	{ HWC_EV, traceCounters },
+#if USE_HARDWARE_COUNTERS
+	{ HWC_CHANGE_EV, Evt_SetCounters },
+	{ HWC_SET_OVERFLOW_EV, Set_Overflow_Event },
+#else
+	{ HWC_CHANGE_EV, SkipHandler },
+	{ HWC_SET_OVERFLOW_EV, SkipHandler },
+#endif
+	{ TRACING_EV, Tracing_Event },
+	{ SET_TRACE_EV, SetTracing_Event },
+	{ CPU_BURST_EV, CPU_Burst_Event },
+	{ RUSAGE_EV, GetRusage_Event },
+	{ MPI_STATS_EV, MPIStats_Event },
+	{ USRFUNC_EV, USRFunction_Event },
+	{ TRACING_MODE_EV, Tracing_Mode_Event },
+	{ MRNET_EV, MRNet_Event },
+	{ CLUSTER_ID_EV, Clustering_Event },
+	{ NULL_EV, NULL }
+};
+
+RangeEv_Handler_t PRV_MISC_Range_Handlers[] = {
+	{ MPI_CALLER_EV, MPI_CALLER_EV + MAX_CALLERS, MPI_Caller_Event },
+	{ SAMPLING_EV, SAMPLING_EV + MAX_CALLERS, Sampling_Caller_Event },
+	{ NULL_EV, NULL_EV, NULL }
+};
+

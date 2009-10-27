@@ -1,0 +1,11 @@
+#
+# The information below must be detected at configure time
+#
+BITS=64
+CLUSTERS_HOME = /gpfs/apps/CEPBATOOLS/burst-clusterizer-devel/$(BITS)
+CLUSTERS_INCS = -I$(CLUSTERS_HOME)/include
+CLUSTERS_LIBS = -L$(CLUSTERS_HOME)/lib -lMRNetClustering
+SPECTRAL_HOME = /home/bsc41/bsc41127/apps/spectral2.1b/$(BITS)
+SPECTRAL_INCS = -I$(SPECTRAL_HOME)
+SPECTRAL_LIBS = $(SPECTRAL_HOME)/libspectral.a -L/gpfs/apps/FFTW/3.1.1/${BITS}/lib -lfftw3
+

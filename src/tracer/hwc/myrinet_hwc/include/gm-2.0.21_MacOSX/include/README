@@ -1,0 +1,4 @@
+Any file in this directory that will ultimately be included by user
+programs outside Myricom should use a prefixed filename to prevent
+header name space pollution in the include directory on the user's
+machine.

@@ -1,0 +1,146 @@
+\chapter{\TRACE API}\label{cha:API}
+
+\section{Basic API}\label{sec:BasicAPI}
+
+The following routines are defined in the {\tt \$\{MPITRACE\_HOME\}/include/mpitrace\_user\_events.h}.
+
+\begin{itemize}
+
+ \item {\tt void OMPItrace\_init (void)}\\
+ Initializes the tracing library.\\
+ {\bf NOTE:} This routine is called automatically by {\tt MPI\_Init} and when tracing is performed by the DynInst launcher.
+
+ \item {\tt void OMPItrace\_fini (void)}\\
+ Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
+ {\bf NOTE:} This routine is called automatically by {\tt MPI\_Finalize} and when the tracing is performed by the DynInst launcher.
+
+ \item {\tt void OMPItrace\_event (int event, int value)}\\
+ The OMPItrace\_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
+
+ Some common use of events are:
+  \begin{itemize}
+   \item Identify loop iterations (or any code block): Given a loop, the user can set a unique type for the loop and a value related to the iterator value of the loop. For example:
+    \begin{verbatim}
+     for (i = 1; i <= MAX_LOOP; i++)
+     {
+       OMPItrace_event (1000, i);
+       [original loop code]
+     }
+     OMPItrace_event (1000, 0);
+    \end{verbatim}
+   The last added call to OMPItrace\_event marks the end of the loop setting the event value to 0, which facilitates the analysis with Paraver.
+   \item Identify user routines: Choosing a constant type (6000019 is usual in our tracing tools) and different values for different routines (set to 0 to mark a "leave" event) 
+    \begin{verbatim}
+     void routine1 (void)
+     {
+      OMPItrace_event (6000019, 1);
+      [routine 1 code]
+      OMPItrace_event (6000019, 0);
+     }
+
+     void routine2 (void)
+     {
+      OMPItrace_event (6000019, 2);
+      [routine 2 code]
+      OMPItrace_event (6000019, 0);
+     }
+   \end{verbatim}
+   \item Identify any point in the application using a unique combination of type and value.
+  \end{itemize}
+
+ \item {\tt void OMPItrace\_Nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
+  Allows the user to place {\em count} events with the same timestamp at the given position.
+
+ \item {\tt void OMPItrace\_counters (void)}\\
+  Emits the value of the active hardware counters set. See chapter \ref{cha:XML} for further information.
+
+ \item {\tt void OMPItrace\_eventandcounters (int event, int value)}\\
+  This routine lets the user add an event and obtain the performance counters with one call and a single timestamp.
+
+ \item {\tt void OMPItrace\_Neventandcounters (int event, int value)}\\
+  This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
+
+ \item {\tt void OMPItrace\_shutdown (void)}\\
+  Turns off the instrumentation.
+
+ \item {\tt void OMPItrace\_restart (void)}\\
+  Turns on the instrumentation.
+
+ \item {\tt void OMPItrace\_previous\_hwc\_set (void)}\\
+  Makes the previous hardware counter set defined in the XML file to be the active set (see section \ref{sec:XMLSectionMPI} for further information).
+
+ \item {\tt void OMPItrace\_next\_hwc\_set (void)}\\
+  Makes the following hardware counter set defined in the XML file to be the active set (see section \ref{sec:XMLSectionMPI} for further information).
+
+ \item {\tt void OMPItrace\_set\_tracing\_tasks (int from, int to)}\\
+  Allows the user to choose from which tasks (not {\em threads}!) store informartion in the tracefile
+
+ \item {\tt void OMPItrace\_set\_options (int options)}\\
+  Permits configuring several tracing options at runtime. The {\tt options} parameter has to be a bitwise or combination of the following options, depending on the user's needs:
+  \begin{itemize}
+   \item {\tt MPITRACE\_CALLER\_OPTION}\\
+    Dumps caller information at each entry or exit point of the MPI routines. Caller levels need to be configured at XML (see chapter \ref{cha:XML}).
+   \item {\tt MPITRACE\_HWC\_OPTION}\\
+    Activates hardware counter gathering.
+   \item {\tt MPITRACE\_MPI\_OPTION}\\
+    Activates tracing of MPI calls.
+   \item {\tt MPITRACE\_MPI\_HWC\_OPTION}\\
+    Activates hardware counter gathering in MPI routines.
+   \item {\tt MPITRACE\_OMP\_OPTION}\\
+    Activates tracing of OpenMP runtime or outlined routines.
+   \item {\tt MPITRACE\_OMP\_HWC\_OPTION}\\
+    Activates hardware counter gathering in OpenMP runtime or outlined routines.
+   \item {\tt MPITRACE\_UF\_HWC\_OPTION}\\
+    Activates hardware counter gathering in the user functions.
+  \end{itemize}
+
+ \item {\tt void OMPItrace\_network\_counters (void)}\\
+  Emits the value of the network counters if the system has this capability. {\em (Only available for systems with Myrinet GM/MX networks).}
+
+ \item {\tt void OMPItrace\_network\_routes (int task)}\\
+  Emits the network routes for an specific {\tt task}. {\em (Only available for systems with Myrinet GM/MX networks).}
+
+\end{itemize}
+
+\section{Special considerations for Cell Broadband Engine tracing package}
+
+Instead of including {\tt \$\{MPITRACE\_HOME\}/include/mpitrace\_user\_events.h} include:
+\begin{itemize}
+ \item {\tt \$\{MPITRACE\_HOME\}/include/ppu\_trace\_sdk2.h} on the PPE side, and,
+ \item {\tt \$\{MPITRACE\_HOME\}/include/sputrace\_user\_events.h} on the SPE side.
+\end{itemize}
+
+\subsection{PPE side}\label{subsec:PPEside}
+
+The routines shown on section \ref{sec:BasicAPI} are available for the PPE element. In addition, two additional routines are available to control the creation and finalization of the SPE threads. These routines are:
+
+\begin{itemize}
+
+ \item {\tt int  CELLtrace\_init (int spus, spe\_context\_ptr\_t * spe\_ids)}\\
+ Contacts with the SPE thread to initialize once the SPE tracing environment. Such call has to be synchronized with the invocation of {\tt SPUtrace\_init} (see \ref{subsec:SPEside}) call on the SPE side due to the presence of message passing using the mailboxes. The routine receives the total number of contexts created by the Cell SDK {\tt spe\_context\_create} and a vector pointing to those contexts. Each of those contexts will reference to a single SPE thread created by a call to {\tt pthread\_create}.
+
+ \item {\tt void CELLtrace\_fini (void)}\\
+ Waits for the finalization of all the threads registered in {\tt CELLtrace\_init} and dumps their intermediate tracing buffers.
+
+\end{itemize}
+
+\subsection{SPE side}\label{subsec:SPEside}
+
+Due to the lack of parallel paradigms and hardware counters inside the SPE element, the SPE tracing library is a subset of the typical tracing library. The following API calls are available for the SPE element:
+
+\begin{itemize}
+
+ \item {\tt void SPUtrace\_init (void)}\\
+ Initializes the tracing package in the SPE side. It has to be synchronized with {\tt CELLtrace\_init} due to the message passing using mailboxes.
+
+ \item {\tt void SPUtrace\_fini (void)}\\
+ Notifies the finalization of the work performed in the SPE thread and transfers the tracing buffer to the PPE element.
+
+ \item {\tt void SPUtrace\_event (int event, int value)}\\
+ Has the same semantics as {\tt OMPItrace\_event}.
+
+ \item {\tt void SPUtrace\_Nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
+ Has the same semantics as {\tt OMPItrace\_Nevent}.
+
+\end{itemize}
+

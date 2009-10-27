@@ -1,0 +1,76 @@
+#!/bin/bash
+
+### Paths
+export MPITRACE_HOME=@sed_MPITRACE_HOME@
+export SPECTRAL_HOME=@sed_SPECTRAL_HOME@
+export LD_LIBRARY_PATH=${SPECTRAL_HOME}:${LD_LIBRARY_PATH}
+
+### Check arguments
+if [ $# -lt 2 ]; then
+	echo "`basename $0`: Invalid arguments."
+	echo "Syntax: `basename $0` <nprocs> <appl> [appl_args]"
+	exit
+fi
+
+SLURM_MLIST=rlist${SLURM_JOBID}
+MRNET_MLIST=mlist${SLURM_JOBID}
+APLIC_MLIST=alist${SLURM_JOBID}
+
+### Get application resources
+APLIC_NPROC=$1
+shift
+APLIC_NAME=$@
+
+### Get assigned resources
+/opt/perf/bin/sl_get_machine_list > ${SLURM_MLIST}
+SLURM_NPROC=`cat ${SLURM_MLIST} | wc -l`
+
+### Build MRNet topology 
+let MRNET_NPROC=${SLURM_NPROC}-${APLIC_NPROC}
+### XXX: At the moment, every MRN process has to be alone in its node (due to FE parser limitations)
+let XTRA=${MRNET_NPROC}/4
+
+if [ $XTRA = 1 ]; then
+    # BE's connected to the root directly
+    export MRNET_TOPOLOGY=
+elif [ $XTRA -gt 1 ]; then
+    # 1 for the root, the rest for commnodes
+    let OTHER_TOP=$XTRA-1
+    export MRNET_TOPOLOGY=${OTHER_TOP}
+else
+	let MIN_NPROC=${APLIC_NPROC}+4
+    echo "`basename $0`: Insufficient resources! (requested ${SLURM_NPROC}, minimum ${MIN_NPROC})"
+    exit
+fi
+### export MRNET_TOPOLOGY=4^1 Balanced topologies are defined like this
+
+export MRNET_OUTPUT_LEVEL=3
+#export MONITOR_HOST=login3
+#export MONITOR_PORT=12000
+export MRNET_NUM_BE=${APLIC_NPROC}
+head -n${MRNET_NPROC} ${SLURM_MLIST} | sort -u | awk '{ print $1 "-gigabit1" }' > ${MRNET_MLIST}
+#head -n${MRNET_NPROC} ${SLURM_MLIST} | sort -u > ${MRNET_MLIST}
+### Run the front-end
+BE_TOP_FILE=BE.map
+${MPITRACE_HOME}/bin/mrnet_root ${MRNET_MLIST} ${BE_TOP_FILE} &
+
+sleep 10
+
+### Build application's machine list
+tail -n${APLIC_NPROC} ${SLURM_MLIST} | tr -s '\n' , > ${APLIC_MLIST}
+
+### Print resources lists
+#echo "====== SLURM_MLIST (${SLURM_NPROC}) ======"
+#cat ${SLURM_MLIST}
+#echo "====== MRNET_MLIST (${MRNET_NPROC}) ======"
+#cat ${MRNET_MLIST}
+#echo "====== APLIC_MLIST (${APLIC_NPROC}) ======"
+#cat ${APLIC_MLIST}
+#echo ""
+
+### Run application
+time srun -m arbitrary -n ${APLIC_NPROC} --nodelist=`cat ${APLIC_MLIST}` ${APLIC_NAME}
+
+### Clean
+rm -f ${SLURM_MLIST} ${MRNET_MLIST} ${APLIC_MLIST} BE.map
+

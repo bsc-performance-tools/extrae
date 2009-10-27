@@ -1,0 +1,1069 @@
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                 MPItrace                                  *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *                                                             ___           *
+ *   +---------+     http:// www.cepba.upc.edu/tools_i.htm    /  __          *
+ *   |    o//o |     http:// www.bsc.es                      /  /  _____     *
+ *   |   o//o  |                                            /  /  /     \    *
+ *   |  o//o   |     E-mail: cepbatools@cepba.upc.edu      (  (  ( B S C )   *
+ *   | o//o    |     Phone:          +34-93-401 71 78       \  \  \_____/    *
+ *   +---------+     Fax:            +34-93-401 25 77        \  \__          *
+ *    C E P B A                                               \___           *
+ *                                                                           *
+ * This software is subject to the terms of the CEPBA/BSC license agreement. *
+ *      You must accept the terms of this license to use this software.      *
+ *                                 ---------                                 *
+ *                European Center for Parallelism of Barcelona               *
+ *                      Barcelona Supercomputing Center                      *
+\*****************************************************************************/
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+ | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/paraver_generator.c,v $
+ | 
+ | @last_commit: $Date: 2009/06/15 10:25:57 $
+ | @version:     $Revision: 1.16 $
+ | 
+ | History:
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
+
+static char UNUSED rcsid[] = "$Id: paraver_generator.c,v 1.16 2009/06/15 10:25:57 harald Exp $";
+
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_STDIO_H
+# ifdef HAVE_FOPEN64
+#  define __USE_LARGEFILE64
+# endif
+# include <stdio.h>
+#endif
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#if defined (PARALLEL_MERGE)
+# include "mpi.h"
+# include "mpi-tags.h"
+# include "mpi-aux.h"
+#endif
+
+#include "file_set.h"
+#include "events.h"
+#include "record.h"
+#include "object_tree.h"
+#include "mpi2out.h"
+#include "trace_to_prv.h"
+#include "mpi_prv_semantics.h"
+#include "misc_prv_semantics.h"
+#include "omp_prv_semantics.h"
+#include "pthread_prv_semantics.h"
+#include "mpi_comunicadors.h"
+#include "labels.h"
+#include "trace_mode.h"
+#include "semantics.h"
+#include "dump.h"
+#include "paraver_generator.h"
+#include "paraver_state.h"
+
+#include "mpi_prv_events.h"
+#include "addr2info.h"
+
+#if USE_HARDWARE_COUNTERS
+# include "HardwareCounters.h"
+#endif
+
+#if defined(PARALLEL_MERGE)
+# include "parallel_merge_aux.h"
+#endif
+
+/******************************************************************************
+ ***  PRVWRITECNTL
+ ***  Macro per controlar si hi ha un error d'escriptura al fitxer .prv
+ ******************************************************************************/
+#define PRVWRITECNTL(a) \
+  if ((a)<0) \
+  { \
+    fprintf(stderr,"mpi2prv ERROR : Writing to disk the tracefile\n"); \
+    return -1; \
+  }
+
+/******************************************************************************
+ ***  trace_paraver_record & trace_paraver_recordAt
+ ******************************************************************************/
+static void trace_paraver_record (WriteFileBuffer_t *wfb,
+	paraver_rec_t *record)
+{
+	WriteFileBuffer_write (wfb, record);
+}
+
+static void trace_paraver_recordAt (WriteFileBuffer_t *wfb,
+	paraver_rec_t *record, off_t position)
+{
+	WriteFileBuffer_writeAt (wfb, record, position);
+}
+
+/******************************************************************************
+ ***  trace_paraver_state
+ ******************************************************************************/
+void trace_paraver_state (
+   unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+   unsigned long long current_time)
+{
+	struct thread_t * thread_info;
+	unsigned int current_state;
+	WriteFileBuffer_t *wfb = obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb;
+
+	thread_info = GET_THREAD_INFO (ptask, task, thread);
+	current_state = Top_State(ptask, task, thread);
+
+	/* Complete the previous state */
+	if (thread_info->incomplete_state_offset != (off_t)-1) /* This isn't the first state */
+	{
+		/* Do not split states whether appropriate */
+		if (Get_Joint_States() && !Get_Last_State())
+			if (thread_info->incomplete_state_record.value == current_state)
+				return;
+		/* Write the record into the *.tmp file if the state isn't excluded */
+#if defined(DEBUG_STATES)
+		fprintf(stderr, "mpi2prv: DEBUG [T:%d] Closing state %u at %llu\n", task,  
+		(unsigned int)thread_info->incomplete_state_record.value, current_time);
+#endif
+		if (!State_Excluded(thread_info->incomplete_state_record.value))
+		{
+			thread_info->incomplete_state_record.end_time = current_time;
+			WriteFileBuffer_writeAt (wfb, &(thread_info->incomplete_state_record), thread_info->incomplete_state_offset);
+		}
+	}
+
+	/* Start the next state */
+	thread_info->incomplete_state_record.type   = STATE;
+	thread_info->incomplete_state_record.cpu    = cpu;
+	thread_info->incomplete_state_record.ptask  = ptask;
+	thread_info->incomplete_state_record.task   = task;
+	thread_info->incomplete_state_record.thread = thread;
+	thread_info->incomplete_state_record.time   = current_time;
+	thread_info->incomplete_state_record.value  = current_state;
+	/* Save a slot in the *.tmp file for this record if this state isn't excluded */
+#if defined(DEBUG_STATES)
+	fprintf(stderr, "mpi2prv: DEBUG [T:%d] Starting state %u at %llu\n", task, current_state, current_time);
+#endif
+	if (!State_Excluded(current_state))
+	{
+		paraver_rec_t fake_record;
+		fake_record.type = UNFINISHED_STATE;
+		thread_info->incomplete_state_offset = WriteFileBuffer_getPosition (wfb);
+		trace_paraver_record (wfb, &fake_record);
+	}
+}
+
+
+/******************************************************************************
+ ***  trace_paraver_event
+ ******************************************************************************/
+void trace_paraver_event (
+   unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+   unsigned long long time, 
+   unsigned int type, UINT64 value)
+{
+	paraver_rec_t record;
+	int tipus;
+	UINT64 valor;
+	WriteFileBuffer_t *wfb = obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb;
+
+	if (!EnabledTasks[ptask - 1][task - 1])
+		return;
+
+	if (type >= MPI_MIN_EV && type <= MPI_MAX_EV)
+	{
+		Translate_MPI_MPIT2PRV (type, value, &tipus, &valor);
+	}
+	else
+	{
+		tipus = type;
+		valor = value;
+	}
+	
+	record.type = EVENT;
+	record.cpu = cpu;
+	record.ptask = ptask;
+	record.task = task;
+	record.thread = thread;
+	record.time = time;
+	record.event = tipus;
+	record.value = valor;
+
+	trace_paraver_record (wfb, &record);
+}
+
+/******************************************************************************
+ ***  trace_paraver_unmatched_communication
+ ******************************************************************************/
+void trace_paraver_unmatched_communication (unsigned ptask_s, unsigned task_s,
+	unsigned thread_s)
+{
+	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
+	paraver_rec_t record;
+
+	if (!EnabledTasks[ptask_s-1][task_s-1])
+		return;
+
+	record.type = UNMATCHED_COMMUNICATION;
+
+	trace_paraver_record (wfb, &record);
+}
+
+/******************************************************************************
+ ***  trace_paraver_communication
+ ******************************************************************************/
+void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
+	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,
+	unsigned long long phy_s, unsigned int cpu_r, unsigned int ptask_r,
+	unsigned int task_r, unsigned int thread_r, unsigned long long log_r,
+	unsigned long long phy_r, unsigned int size, unsigned int tag,
+	int giveOffset, off_t position)
+{
+	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
+	paraver_rec_t record;
+
+	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
+		return;
+
+	record.type = COMMUNICATION;
+	record.cpu = cpu_s;
+	record.ptask = ptask_s;
+	record.task = task_s;
+	record.thread = thread_s;
+	record.time = log_s;
+	record.end_time = phy_s;
+	record.event = size;
+	record.value = tag;
+	record.cpu_r = cpu_r;
+	record.ptask_r = ptask_r;
+	record.task_r = task_r;
+	record.thread_r = thread_r;
+	record.receive[LOGICAL_COMMUNICATION] = log_r;
+	record.receive[PHYSICAL_COMMUNICATION] = phy_r;
+
+	if (!giveOffset)
+		trace_paraver_record (wfb, &record);
+	else
+		trace_paraver_recordAt (wfb, &record, position);
+}
+
+#if defined(PARALLEL_MERGE)
+int trace_paraver_pending_communication (unsigned int cpu_s, 
+	unsigned int ptask_s, unsigned int task_s, unsigned int thread_s,
+	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r, 
+	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r,
+	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
+	unsigned int tag)
+{
+	off_t where;
+	paraver_rec_t record;
+	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
+
+	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
+		return 0;
+
+	record.type = PENDING_COMMUNICATION;
+	record.cpu = cpu_s;
+	record.ptask = ptask_s;
+	record.task = task_s;
+	record.thread = thread_s;
+	record.time = log_s;
+	record.end_time = phy_s;
+	record.event = size;
+	record.value = tag;
+	record.cpu_r = cpu_r;
+	record.ptask_r = ptask_r;
+	record.task_r = task_r;
+	record.thread_r = thread_r;
+  record.receive[LOGICAL_COMMUNICATION] = 0;
+  record.receive[PHYSICAL_COMMUNICATION] = 0;
+
+	where = WriteFileBuffer_getPosition (wfb);
+	AddPendingCommunication (WriteFileBuffer_getFD(wfb), where, tag, task_r-1, task_s-1);
+	trace_paraver_record (wfb, &record);
+
+	return 0;
+}
+#endif
+
+void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, unsigned long long time,
+	unsigned int com_id, unsigned int send_size, unsigned int recv_size,
+	unsigned int is_root)
+{
+	trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_SENDSIZE, send_size);
+	trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_RECVSIZE, recv_size);
+	trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_COMM, com_id);
+	if (is_root)
+		trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_ROOT, is_root);
+}
+
+/******************************************************************************
+ ***  paraver_state
+ ******************************************************************************/
+int paraver_state (struct fdz_fitxer fdz, unsigned int cpu,
+                   unsigned int ptask, unsigned int task, unsigned int thread,
+                   unsigned long long ini_time, unsigned long long end_time,
+                   unsigned int state)
+{
+   char buffer[1024];
+   int ret;
+
+   /*
+    * Format state line is :
+    *      1:cpu:ptask:task:thread:ini_time:end_time:state
+    */
+#if SIZEOF_LONG == 8
+   sprintf (buffer, "1:%d:%d:%d:%d:%lu:%lu:%d\n",
+      cpu, ptask, task, thread, ini_time, end_time, state);
+#elif SIZEOF_LONG == 4
+   sprintf (buffer, "1:%d:%d:%d:%d:%llu:%llu:%d\n",
+      cpu, ptask, task, thread, ini_time, end_time, state);
+#endif
+
+   /* Filter the states with negative or 0 duration */
+   if (ini_time < end_time)
+   {
+      ret = FDZ_WRITE (fdz, buffer);
+
+      if (ret < 0)
+      {
+         fprintf (stderr, "mpi2prv ERROR : Writing to disk the tracefile\n");
+         return -1;
+      }
+   }
+   else if ((int)(end_time - ini_time) < 0)
+   {
+      fprintf(stderr, "mpi2prv WARNING: Skipping state with negative duration: %s", buffer);
+   }
+   return 0;
+}
+
+
+
+/******************************************************************************
+ ***  paraver_event
+ ******************************************************************************/
+int paraver_event (struct fdz_fitxer fdz, unsigned int cpu,
+                   unsigned int ptask, unsigned int task, unsigned int thread,
+                   unsigned long long time, unsigned int type,
+                   UINT64 value)
+{
+  char buffer[1024];
+  int ret;
+
+  /*
+   * Format event line is :
+   *      2:cpu:ptask:task:thread:time:type:value
+   */
+#if SIZEOF_LONG == 8
+  sprintf (buffer, "2:%d:%d:%d:%d:%lu:%d:%lu\n",
+           cpu, ptask, task, thread, time, type, value);
+#elif SIZEOF_LONG == 4
+  sprintf (buffer, "2:%d:%d:%d:%d:%llu:%d:%llu\n",
+           cpu, ptask, task, thread, time, type, value);
+#endif
+
+  ret = FDZ_WRITE (fdz, buffer);
+
+  if (ret < 0)
+  {
+    fprintf (stderr, "mpi2prv ERROR: Writing to disk the tracefile\n");
+    return -1;
+  }
+  return 0;
+}
+
+/******************************************************************************
+ ***  paraver_multi_event
+ ******************************************************************************/
+int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
+  unsigned int ptask, unsigned int task, unsigned int thread,
+  unsigned long long time, unsigned int count, unsigned int *type,
+  UINT64 *value)
+{
+  char buffer[1024];
+  int i, ret;
+
+  /*
+   * Format event line is :
+   *      2:cpu:ptask:task:thread:time:(type:value)*
+   */
+
+  if (count == 0)
+    return 0;
+
+#if SIZEOF_LONG == 8
+  sprintf (buffer, "2:%d:%d:%d:%d:%lu", cpu, ptask, task, thread, time);
+#elif SIZEOF_LONG == 4
+  sprintf (buffer, "2:%d:%d:%d:%d:%llu", cpu, ptask, task, thread, time);
+#endif
+  ret = FDZ_WRITE (fdz, buffer);
+  for (i = 0; i < count; i++)
+  {
+#if SIZEOF_LONG == 8
+    sprintf (buffer, ":%d:%lu", type[i], value[i]);
+#elif SIZEOF_LONG == 4
+    sprintf (buffer, ":%d:%llu", type[i], value[i]);
+#endif
+    ret = FDZ_WRITE (fdz, buffer);
+  }
+
+  ret = FDZ_WRITE (fdz, "\n");
+
+  if (ret < 0)
+  {
+    fprintf (stderr, "mpi2prv ERROR : Writing to disk the tracefile\n");
+    return (-1);
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ ***  paraver_communication
+ ******************************************************************************/
+int paraver_communication (struct fdz_fitxer fdz, unsigned int cpu_s,
+  unsigned int ptask_s, unsigned int task_s, unsigned int thread_s,
+  unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
+  unsigned int ptask_r, unsigned int task_r, unsigned int thread_r,
+  unsigned long long log_r, unsigned long long phy_r, unsigned int size,
+  unsigned int tag)
+{
+  int ret;
+  char buffer[1024];
+
+  /*
+   * Format event line is :
+   *   3:cpu_s:ptask_s:task_s:thread_s:log_s:phy_s:cpu_r:ptask_r:task_r:
+   thread_r:log_r:phy_r:size:tag
+   */
+#if SIZEOF_LONG == 8
+  sprintf (buffer, "3:%d:%d:%d:%d:%lu:%lu:%d:%d:%d:%d:%lu:%lu:%d:%d\n",
+           cpu_s, ptask_s, task_s, thread_s, log_s, phy_s,
+           cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
+#elif SIZEOF_LONG == 4
+  sprintf (buffer, "3:%d:%d:%d:%d:%llu:%llu:%d:%d:%d:%d:%llu:%llu:%d:%d\n",
+           cpu_s, ptask_s, task_s, thread_s, log_s, phy_s,
+           cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
+#endif
+
+  ret = FDZ_WRITE (fdz, buffer);
+
+  if (ret < 0)
+  {
+    fprintf (stderr, "mpi2prv ERROR : Writing to disk the tracefile\n");
+    return (-1);
+  }
+  return 0;
+}
+
+#if defined(HAVE_BFD)
+static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
+{
+	if (eventtype == USRFUNC_EV)
+		return Address2Info_Translate (eventvalue, ADDR2UF_FUNCTION, option_UniqueCallerID);
+	else if (eventtype >= MPI_CALLER_EV && eventtype <= MPI_CALLER_EV + MAX_CALLERS)
+		return Address2Info_Translate (eventvalue, ADDR2MPI_FUNCTION, option_UniqueCallerID);
+	else if (eventtype >= MPI_CALLER_LINE_EV && eventtype <= MPI_CALLER_LINE_EV + MAX_CALLERS)
+		return Address2Info_Translate (eventvalue, ADDR2MPI_LINE, option_UniqueCallerID);
+	else if (eventtype == USRFUNC_LINE_EV)
+		return Address2Info_Translate (eventvalue, ADDR2UF_LINE, option_UniqueCallerID);
+	else if (eventtype >= SAMPLING_EV && eventtype <= SAMPLING_EV + MAX_CALLERS)
+		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_FUNCTION, option_UniqueCallerID);
+	else if (eventtype >= SAMPLING_LINE_EV && eventtype <= SAMPLING_LINE_EV + MAX_CALLERS)
+		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_LINE, option_UniqueCallerID);
+	else if (eventtype == OMPFUNC_EV)
+		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, option_UniqueCallerID);
+	else if (eventtype == OMPFUNC_LINE_EV)
+		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, option_UniqueCallerID);
+	else if (eventtype == PTHREADFUNC_EV)
+		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, option_UniqueCallerID);
+	else if (eventtype == PTHREADFUNC_LINE_EV)
+		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, option_UniqueCallerID);
+	else
+		return eventvalue;
+}
+#endif /* HAVE_BFD */
+
+static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
+	PRVFileSet_t * fset, unsigned long long *num_events)
+{
+#define MAX_EVENT_COUNT_IN_MULTI_EVENT	1024
+	unsigned int events[MAX_EVENT_COUNT_IN_MULTI_EVENT];
+	UINT64 values[MAX_EVENT_COUNT_IN_MULTI_EVENT];
+	int prev_cpu, prev_ptask, prev_task, prev_thread;
+	unsigned long long prev_time;
+	paraver_rec_t *cur;
+	int i = 0;
+
+	cur = *current;
+
+	prev_cpu = cur->cpu;
+	prev_ptask = cur->ptask;
+	prev_task = cur->task;
+	prev_thread = cur->thread;
+	prev_time = cur->time;
+
+	while (cur != NULL)
+	{
+#if defined(IS_BG_MACHINE)
+	/*
+	* Per cadascun dels events, hem de comprovar si cal anotar les
+	* localitzacions del torus a la trasa 
+	*/
+		if (cur->type == 2 && option_XYZT
+		&& (cur->event == BGL_PERSONALITY_TORUS_X
+		|| cur->event == BGL_PERSONALITY_TORUS_Y
+		|| cur->event == BGL_PERSONALITY_TORUS_Z
+		|| cur->event == BGL_PERSONALITY_PROCESSOR_ID))
+		AnotaBGLPersonality (cur->event, cur->value, cur->task);
+#endif
+
+
+	/* Merge multiple events if they are in the same cpu, task, thread and time */
+		if (prev_cpu == cur->cpu && prev_ptask == cur->ptask &&
+		prev_task == cur->task && prev_thread == cur->thread &&
+		prev_time == cur->time && cur->type == 2 &&
+		i < MAX_EVENT_COUNT_IN_MULTI_EVENT)
+		{
+			/* Copy the value by default... we'll change it if needed */
+			values[i] = cur->value;
+			events[i] = cur->event;
+
+			if (cur->event == MPI_GLOBAL_OP_COMM)
+				values[i] = (UINT64)alies_comunicador ((int) cur->value, cur->ptask, cur->task);
+#if defined(HAVE_BFD)
+			else
+				values[i] = translate_bfd_event (cur->event, cur->value);
+#endif
+			i++;
+		}
+		else
+			break;
+
+		/* Keep searching ... */
+		cur = GetNextParaver_Rec (fset, 0);
+	}
+
+	paraver_multi_event (fdz, prev_cpu, prev_ptask, prev_task, prev_thread,
+                       prev_time, i, events, values);
+
+	*current = cur;
+	if (num_events != NULL)
+		*num_events = i;
+	return 0;
+#undef MAX_EVENT_COUNT_IN_MULTI_EVENT
+}
+
+
+
+/******************************************************************************
+ *** Paraver_WriteHeader
+ ******************************************************************************/
+static int Paraver_WriteHeader (unsigned long long Ftime,
+  struct fdz_fitxer prv_fd, struct Pair_NodeCPU *info)
+{
+	int NumNodes;
+  time_t h;
+  char Date[80];
+  char Header[1024];
+  unsigned int threads, task, ptask, node, num_cpus = 1;
+#if defined(HAVE_MPI)  /* Sequential tracing does not use comunicators */
+  TipusComunicador com;
+  int i, final;
+  unsigned int num_tasks;
+#endif
+
+  time (&h);
+  strftime (Date, 80, "%d/%m/%Y at %H:%M", localtime (&h));
+
+  for (ptask = 0; ptask < num_ptasks; ptask++)
+    num_cpus = MAX (num_cpus, obj_table[ptask].ntasks);
+
+  /* Write the Paraver header */
+#if SIZEOF_LONG == 8
+  sprintf (Header, "#Paraver (%s):%lu_ns:", Date, Ftime);
+#elif SIZEOF_LONG == 4
+  sprintf (Header, "#Paraver (%s):%llu_ns:", Date, Ftime);
+#endif
+	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+	NumNodes = 0;
+	while (info[NumNodes].NodeName != NULL)
+		NumNodes++;
+
+	sprintf (Header, "%d(", NumNodes);
+	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+	if (NumNodes > 0)
+	{
+		sprintf (Header, "%d", info[0].CPUs);
+		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+		NumNodes = 1;
+		while (info[NumNodes].NodeName != NULL)
+		{
+			sprintf (Header,",%d", info[NumNodes].CPUs);
+			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+			NumNodes++;
+		}
+	}
+	sprintf (Header, "):%d:", num_ptasks);
+	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+	/* For every application, write down its resources */
+  for (ptask = 0; ptask < num_ptasks; ptask++)
+  {
+    sprintf (Header, "%d(", obj_table[ptask].ntasks);
+		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+    for (task = 0; task < obj_table[ptask].ntasks - 1; task++)
+    {
+      threads = obj_table[ptask].tasks[task].nthreads;
+      node = obj_table[ptask].tasks[task].nodeid;
+
+      sprintf (Header, "%d:%d,", threads, node);
+			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+    }
+    threads = obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nthreads;
+    node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
+
+#if defined(HAVE_MPI)
+    sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
+#else
+    sprintf (Header, "%d:%d),0", threads, node);
+#endif
+		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+  }
+  sprintf (Header, "\n");
+  PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+
+#if defined(HAVE_MPI)
+	/* Write the communicator definition for every application */
+  for (ptask = 1; ptask <= num_ptasks; ptask++)
+  {
+    num_tasks = obj_table[ptask - 1].ntasks;
+
+		/* Write the communicators created manually by the application */
+    final = (primer_comunicador (&com) < 0);
+    while (!final)
+    {
+      /* Write this communicator */
+      sprintf (Header, "c:%d:%d:%d", ptask, com.id, com.num_tasks);
+      PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+      for (i = 0; i < com.num_tasks; i++)
+      {
+        sprintf (Header, ":%d", com.tasks[i] + 1);
+        PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+      }
+      PRVWRITECNTL (FDZ_WRITE (prv_fd, "\n"));
+
+      /* Get the next communicator */
+      final = (seguent_comunicador (&com) < 0);
+    }
+  }
+#endif
+
+  return 0;
+}
+
+#if defined(PARALLEL_MERGE)
+static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
+{
+	int rank;
+	/* Fix parallel pending communication */
+	struct ForeignRecv_t* tmp;
+	int group;
+
+	group = inWhichGroup (current->task_r-1, fset);
+
+	tmp = SearchForeignRecv (group, current->task-1, current->task_r-1, current->value);
+
+	if (NULL != tmp)
+	{
+		current->receive[LOGICAL_COMMUNICATION] = tmp->logic;
+		current->receive[PHYSICAL_COMMUNICATION] = tmp->physic;
+		current->type = COMMUNICATION;
+		tmp->logic = tmp->physic = 0;
+		return TRUE;
+	}
+	return FALSE;
+}
+#endif
+
+static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
+	struct fdz_fitxer prv_fd, unsigned long long num_of_events)
+{
+	/* Master-side. Master will ask all slaves for their parts as needed */
+	paraver_rec_t *current;
+	double pct, last_pct;
+	unsigned long long actual_events, tmp;
+	int error;
+	int num_incomplete_state = 0;
+	int num_incomplete_comm = 0;
+	int num_pending_comm = 0;
+	
+	fprintf (stdout, "mpi2prv: Generating tracefile (intermediate buffers of %llu events)\n", prvfset->records_per_block);
+	fprintf (stdout, "         This process can take a while. Please, be patient.\n");
+	if (numtasks > 1)
+		fprintf (stdout, "mpi2prv: Progress ... ");
+	else
+		fprintf (stdout, "mpi2prv: Progress 2 of 2 ... ");
+	fflush (stdout);
+
+	current = GetNextParaver_Rec (prvfset, 0);
+	actual_events = 0;
+	last_pct = 0.0f;
+
+	do
+	{
+		switch (current->type)
+		{
+			case UNFINISHED_STATE:
+			if (num_incomplete_state == 0)
+				fprintf (stderr, "mpi2prv: Error! Found an unfinished state! Continuing...\n");
+			num_incomplete_state++;
+			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			actual_events++;
+			break;
+
+			case STATE:
+			error = paraver_state (prv_fd, current->cpu, current->ptask,
+				current->task, current->thread,
+				current->time, current->end_time,
+				current->value);
+			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			actual_events++;
+			break;
+		
+			case EVENT:
+			error = build_multi_event (prv_fd, &current, prvfset, &tmp);
+			actual_events += tmp;
+			break;
+
+			case UNMATCHED_COMMUNICATION:
+			if (num_incomplete_comm == 0)
+				fprintf (stderr, "mpi2prv: Error! Found unmatched communication! Continuing...\n");
+			num_incomplete_comm++;
+			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			actual_events++;
+			break;
+			
+			case PENDING_COMMUNICATION:
+#if defined(PARALLEL_MERGE)
+			if (FixPendingCommunication (current, prvfset->fset))
+				error = paraver_communication (prv_fd, current->cpu,
+					current->ptask, current->task,
+					current->thread, current->time,
+					current->end_time, current->cpu_r,
+					current->ptask_r, current->task_r,
+					current->thread_r,
+					current->receive[LOGICAL_COMMUNICATION],
+					current->receive[PHYSICAL_COMMUNICATION],
+					current->event, current->value);
+			else
+#endif
+				num_pending_comm++;
+
+			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			actual_events++;
+			break;
+
+			case COMMUNICATION:
+			error = paraver_communication (prv_fd, current->cpu,
+				current->ptask, current->task,
+				current->thread, current->time,
+				current->end_time, current->cpu_r,
+				current->ptask_r, current->task_r,
+				current->thread_r,
+				current->receive[LOGICAL_COMMUNICATION],
+				current->receive[PHYSICAL_COMMUNICATION],
+				current->event, current->value);
+			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			actual_events++;
+			break;
+
+			default:
+			fprintf(stderr, "\nmpi2prv: ERROR! Invalid paraver_rec_t (type=%d)\n", current->type);
+			exit(-1);
+			break;
+		}
+
+		pct = ((double) actual_events)/((double) num_of_events)*100.0f;
+
+		if (pct > last_pct + 5.0 && pct <= 100.0)
+		{
+			fprintf (stdout, "%.1lf%% ", pct);
+			fflush (stdout);
+			last_pct += 5.0;
+		}
+	}
+	while ((current != NULL) && !(error));
+
+	fprintf (stdout, "done\n");
+	fflush (stdout);
+
+	if (num_incomplete_state > 0)
+		fprintf (stderr, "mpi2prv: Error! Found %d incomplete states. Resulting tracefile may be inconsistent.\n", num_incomplete_state);
+	if (num_incomplete_comm > 0)
+		fprintf (stderr, "mpi2prv: Error! Found %d incomplete communications. Resulting tracefile may be inconsistent.\n", num_incomplete_comm);
+	if (num_pending_comm > 0)
+		fprintf (stderr, "mpi2prv: Error! Found %d pending communications. Resulting tracefile may be inconsistent.\n", num_pending_comm);
+}
+
+#if defined(PARALLEL_MERGE)
+static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer prv_fd, int taskid)
+{
+	/* Slave-side. Master will ask all slaves for their parts as needed */
+	paraver_rec_t *current;
+	paraver_rec_t *buffer;
+	MPI_Status s;
+	int res;
+	unsigned tmp, nevents;
+
+	buffer = malloc (sizeof(paraver_rec_t)*prvfset->records_per_block);
+	if (buffer == NULL)
+	{
+		fprintf (stderr, "mpi2prv: ERROR! Slave %d was unable to allocate %llu bytes to hold records buffer\n", 
+			taskid, sizeof(paraver_rec_t)*prvfset->records_per_block);
+		fflush (stderr);
+		exit (0);
+	}
+
+	/* This loop will locally sort the files. Master will only have 
+	   to partially sort all the events*/
+
+	nevents = 0;
+	current = GetNextParaver_Rec (prvfset, taskid);
+	do
+	{
+		if (current->type == PENDING_COMMUNICATION)
+			FixPendingCommunication (current, prvfset->fset);
+
+		bcopy (current, &(buffer[nevents++]), sizeof(paraver_rec_t));
+		
+		if (nevents == prvfset->records_per_block)
+		{
+			res = MPI_Recv (&tmp, 1, MPI_INT, 0, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
+			MPI_CHECK(res, MPI_Recv, "Failed to receive remote request!");
+
+			res = MPI_Send (&nevents, 1, MPI_UNSIGNED, 0, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+			MPI_CHECK(res, MPI_Send, "Failed to send the number of events to the MASTER");
+
+			res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, 0, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+			MPI_CHECK(res, MPI_Send, "Failed to send the buffer of events to the MASTER");
+
+			nevents = 0;
+		}
+		current = GetNextParaver_Rec (prvfset, taskid);
+	}
+	while (current != NULL);
+	
+	res = MPI_Recv (&tmp, 1, MPI_INT, 0, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
+	MPI_CHECK(res, MPI_Recv, "Failed to receive remote request!");
+
+	res = MPI_Send (&nevents, 1, MPI_UNSIGNED, 0, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+	MPI_CHECK(res, MPI_Send, "Failed to send the number of events to the MASTER");
+
+	if (nevents != 0)
+	{
+		res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, 0, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+		MPI_CHECK(res, MPI_Send, "Failed to send the buffer of events to the MASTER");
+	}
+}
+#endif
+
+/******************************************************************************
+ ***  Paraver_JoinFiles
+ ******************************************************************************/
+
+int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime,
+  int nfiles,  struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
+  unsigned long long records_per_task)
+{
+#if defined(PARALLEL_MERGE)
+	int res;
+#endif
+	PRVFileSet_t *prvfset;
+	unsigned long long num_of_events;
+	struct fdz_fitxer prv_fd;
+	int error = FALSE;
+#if defined(IS_BG_MACHINE)
+	FILE *crd_fd;
+	int i;
+	char envName[PATH_MAX], *tmpName;
+#endif
+
+	if (0 == taskid)
+	{
+#ifdef HAVE_ZLIB
+		if (strlen (outName) >= 7 &&
+		strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
+		{
+			/*
+			* Open GZ handle for the file, and mark normal handle as unused! 
+			*/
+			prv_fd.handleGZ = gzopen (outName, "wb6");
+			prv_fd.handle = NULL;
+			if (prv_fd.handleGZ == NULL)
+			{
+				fprintf (stderr, "mpi2prv ERROR: creating GZ paraver tracefile : %s\n",
+					outName);
+				return -1;
+			}
+		}
+		else
+		{
+			/*
+			* Open normal handle for the file, and mark GZ handle as unused! 
+			*/
+#if HAVE_FOPEN64
+			prv_fd.handle = fopen64 (outName, "w");
+#else
+			prv_fd.handle = fopen (outName, "w");
+#endif
+			prv_fd.handleGZ = NULL;
+			if (prv_fd.handle == NULL)
+			{
+				fprintf (stderr, "mpi2prv ERROR: Creating Paraver tracefile : %s\n",
+					outName);
+				return -1;
+			}
+		}
+#else
+		/*
+		* Open normal handle for the file, and mark GZ handle as unused! 
+		*/
+#if HAVE_FOPEN64
+		prv_fd.handle = fopen64 (outName, "w");
+#else
+		prv_fd.handle = fopen (outName, "w");
+#endif
+		if (prv_fd.handle == NULL)
+		{
+			fprintf (stderr, "mpi2prv ERROR: Creating Paraver tracefile : %s\n",
+				outName);
+			return -1;
+		}
+#endif
+	} /* taskid == 0 */
+
+#if defined(IS_BG_MACHINE)
+#if defined(DEAD_CODE)
+	/* FIXME must be implemented in parallel */
+	if (option_XYZT)
+	{
+		coords = (struct QuadCoord *) malloc (nfiles * sizeof (struct QuadCoord));
+		if (coords == NULL)
+		{
+			fprintf (stderr,
+			"mpi2prv: ERROR: Unable to allocate memory for coordinates file\n");
+			return -1;
+		}
+	}
+#endif /* FIXME */
+#endif
+
+	if (0 == taskid)
+		error = Paraver_WriteHeader (Ftime, prv_fd, NodeCPUinfo);
+
+#if defined(PARALLEL_MERGE)
+	res = MPI_Bcast (&error, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Bcast, "Error! Failed to propagate status");
+#endif
+	if (error)
+		return -1;
+
+	prvfset = Map_Paraver_files (fset, &num_of_events, numtasks, taskid, records_per_task);
+	error = ((taskid == 0) && (prvfset == NULL));
+
+#if defined(PARALLEL_MERGE)
+	res = MPI_Bcast (&error, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Bcast, "Error! Failed to propagate status");
+#endif
+	if (error)
+		return -1;
+
+#if defined(PARALLEL_MERGE)
+	if (0 != taskid)
+	{
+		/* Server-side. Slaves will merge their translated files into a 
+		   single strem and will provide it to the master */
+		Paraver_JoinFiles_Slave (prvfset, prv_fd, taskid);
+	}
+	else
+#endif
+	{
+		/* Master-size. Will merge its own files and ask for files on the 
+		   slaves (if needed) */
+		Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
+
+		FDZ_CLOSE (prv_fd);
+	}
+
+	Free_FS (fset);
+
+#if defined(IS_BG_MACHINE)
+#if defined(DEAD_CODE)
+	/* FIXME must be implemented in parallel */
+	if (option_XYZT)
+	{
+		strcpy (envName, outName);
+
+#ifdef HAVE_ZLIB
+		if (strlen (outName) >= 7 &&
+			strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
+			tmpName = &(envName[strlen (envName) - 7]);
+		else
+			tmpName = &(envName[strlen (envName) - 4]);
+#else
+		tmpName = &(envName[strlen (envName) - 4]);
+#endif
+
+		strcpy (tmpName, ".crd");
+		if ((crd_fd = fopen (envName, "w")) == NULL)
+		{
+			fprintf (stderr, "mpi2prv ERROR: Creating coordinates file : %s\n", tmp);
+			return 0;
+		}
+
+		for (i = 0; i < nfiles; i++)
+			fprintf (crd_fd, "%d %d %d %d\n", coords[i].X, coords[i].Y, coords[i].Z,
+			coords[i].T);
+		fclose (crd_fd);
+		free (coords);
+		fprintf (stdout, "\nCoordinate file generated\n");
+	}
+#endif /* FIXME */
+#endif
+
+	if (0 == taskid)
+		if (error)
+			unlink (outName);
+	return 0;
+}

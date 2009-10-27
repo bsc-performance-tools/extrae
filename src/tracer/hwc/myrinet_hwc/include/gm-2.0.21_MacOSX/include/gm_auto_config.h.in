@@ -1,0 +1,376 @@
+/* include/gm_auto_config.h.in.  Generated from configure.in by autoheader.  */
+/******************************************************************-*-c-*-
+ * Myricom GM networking software and documentation			 *
+ * Copyright (c) 1999 by Myricom, Inc.					 *
+ * All rights reserved.	 See the file `COPYING' for copyright notice.	 *
+ *************************************************************************/
+
+#ifndef _gm_auto_config_h_
+#define _gm_auto_config_h_
+
+/* Enforce a condition to ensure that the Makefile
+   include/gm_config.h.h:include/gm_auto_config.h.h dependency is
+   sufficient to detect when this machine generate file changes. */
+#ifndef GM_BUILDING_GM
+#define GM_BUILDING_GM 0
+#endif
+
+#if GM_BUILDING_GM && !defined (GM_MAY_INCLUDE_AUTO_CONFIG_H)
+#error This file may only be included by gm_config.h
+#endif
+
+
+/* Define to 1 if you have the <asm/rmap.h> header file. */
+#undef HAVE_ASM_RMAP_H
+
+/* Define to 1 if you have the `atexit' function. */
+#undef HAVE_ATEXIT
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `getpagesize' function. */
+#undef HAVE_GETPAGESIZE
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `gcc' library (-lgcc). */
+#undef HAVE_LIBGCC
+
+/* Define to 1 if you have the <linux/compile.h> header file. */
+#undef HAVE_LINUX_COMPILE_H
+
+/* Define to 1 if you have the <linux/slab.h> header file. */
+#undef HAVE_LINUX_SLAB_H
+
+/* Define to 1 if you have the `memalign' function. */
+#undef HAVE_MEMALIGN
+
+/* Define to 1 if you have the `memcpy' function. */
+#undef HAVE_MEMCPY
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have a working `mmap' system call. */
+#undef HAVE_MMAP
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the `on_exit' function. */
+#undef HAVE_ON_EXIT
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/errno.h> header file. */
+#undef HAVE_SYS_ERRNO_H
+
+/* Define to 1 if you have the <sys/file.h> header file. */
+#undef HAVE_SYS_FILE_H
+
+/* Define to 1 if you have the <sys/kmem.h> header file. */
+#undef HAVE_SYS_KMEM_H
+
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#undef HAVE_SYS_MMAN_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <windows.h> header file. */
+#undef HAVE_WINDOWS_H
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define as the return type of signal handlers (`int' or `void'). */
+#undef RETSIGTYPE
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef gid_t
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef off_t
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef uid_t
+/*****
+ * Begin BOTTOM section of acconfig.h
+ *****/
+
+/* Turn on O(1)-time debugging features? */
+
+#define GM_DEBUG 0
+
+/* What is the target OS for the software */
+
+#define	GM_OS_SOLARIS 0
+#define	GM_OS_LINUX 0
+#define	GM_OS_WIN2K 0
+#define	GM_OS_IRIX 0
+#define	GM_OS_VXWORKS 0
+#define	GM_OS_OSF1 0
+#define	GM_OS_FREEBSD 0
+#define	GM_OS_HPUX 0
+#define	GM_OS_AIX 0
+#define	GM_OS_MACOSX 0
+
+/* What host CPU are we compiling for? */
+
+#if GM_BUILDING_FIRMWARE
+#define GM_CPU_alpha 0
+#define GM_CPU_lanai 0
+#define GM_CPU_mips 0
+#define GM_CPU_powerpc 0
+#define GM_CPU_powerpc64 0
+#define GM_CPU_sparc 0
+#define GM_CPU_sparc64 0
+#define GM_CPU_x86 0
+#define GM_CPU_x86_64 0
+#define GM_CPU_hppa 0
+#define GM_CPU_ia64 0
+#endif /* GM_BUILDING_FIRMWARE */
+
+/* What types of LANai interfaces should be supported */
+
+#define GM_SUPPORT_L4 0
+#define GM_SUPPORT_L5 0
+#define GM_SUPPORT_L6 0
+#define GM_SUPPORT_L7 0
+#define GM_SUPPORT_L8 0
+#define GM_SUPPORT_L9 0
+#define GM_SUPPORT_LX 0
+
+/* What I/O busses should be supported */
+
+#define GM_SUPPORT_PCI_REV_1 0
+#define GM_SUPPORT_PCI_REV_2 0
+#define GM_SUPPORT_PCI_REV_3 0
+#define GM_SUPPORT_PCI_REV_4 0
+#define GM_SUPPORT_PCI_REV_5 0
+#define GM_SUPPORT_PCI_REV_6 0
+#define GM_SUPPORT_SBUS 0
+
+/* What size pages should be supported */
+
+#define GM_SUPPORT_0K_PAGES 0
+#define GM_SUPPORT_4K_PAGES 0
+#define GM_SUPPORT_8K_PAGES 0
+#define GM_SUPPORT_16K_PAGES 0
+#define GM_SUPPORT_64K_PAGES 0
+
+/* What sizes of user pointers are supported */
+
+#define GM_SUPPORT_32_BIT_USER_PTRS 0
+#define GM_SUPPORT_64_BIT_USER_PTRS 0
+
+/* What size cache lines should be supported */
+
+#define GM_SUPPORT_32B_CACHE_LINES 0
+#define GM_SUPPORT_64B_CACHE_LINES 0
+#define GM_SUPPORT_128B_CACHE_LINES 0
+
+/* Does this architecture have virtual memory support?  The MCP handles
+   GM_ENABLE_VM based on a -DGM_ENABLE_VM=x command when it is compiled,
+   so we don't want this definition included in mcp files. */
+
+#if !GM_MCP
+#define GM_ENABLE_VM 0
+#endif
+
+/* Should we use the default interrupt handler, or an architecture-specific
+   one? */
+
+#define GM_USE_DEFAULT_INTERRUPT_HANDLER 0
+
+
+/* Does this architecture require byte flipping eventhough it is big endian? */
+
+#define GM_BYTE_FLIP_NEEDED 0
+
+/* Does this architecture support mapping dma memory registration? */
+
+#define GM_CAN_REGISTER_MEMORY 0
+
+/* Does this architecture need memset and memcpy functions for Gnu
+   code to run in the kernel? */
+
+#define	GM_NEED_MEMCPY 0
+#define	GM_NEED_MEMSET 0
+
+/* Determine the size of DMAs required into the receive queue to ensure
+   that the cache is flushed.
+
+   NOTE: this autoconfig variable is deprecated.  The symbol
+         GM_RDMA_GRANULARITY is hard-coded in gm.h, the same for all
+         platforms.  We keep this here, and in configure.in, as a place-
+         holder in case platform-dependent definitions are ever needed.
+         Both making this value platform-dependent and making it anything
+         larger than its current 64 would be significant challenges.
+ */
+#if 0
+#define GM_RDMA_GRANULARITY 0
+#endif
+
+/* Indicate the amount of debugging output to generate. */
+
+#define GM_PRINT_LEVEL 0
+
+/* define if we want to do batch structures writes instead of writing
+   individual byte/or word wth PIO to the send queue or receive-token
+   queues */
+
+#define GM_STRUCT_WRITE_COMBINING 0
+
+/* define on machines that require readbacks to flush PCI writes. */
+#define GM_NEED_READBACK_TO_FLUSH_WRITES 0
+
+/* define to enable the directcopy feature */
+#define GM_ENABLE_DIRECTCOPY 0
+
+/* Do we need to compile for cards with small amount of memory? */
+#ifndef GM_MIN_SUPPORTED_SRAM
+#define GM_MIN_SUPPORTED_SRAM 1024
+#endif
+
+/* Shall we enable new features found in LANai7 and up */
+/* This includes crc32, a larger page cache and jumbo Ethernet frames */
+#ifndef GM_ENABLE_NEW_FEATURES
+#define GM_ENABLE_NEW_FEATURES 0
+#endif
+
+/* set if partword PIO accesses are not allowed. */
+#define GM_NO_PARTWORD_PIO_READ 0
+#define GM_NO_PARTWORD_PIO_WRITE 0
+
+/* define to be the size of the largest DMA pointer the driver
+   needs to support _ON THIS TARGET PLATFORM_. */
+#undef GM_SIZEOF_DP_T
+
+/* define this on Linux if function/macro pte_offset_map exists (highpte support) */
+#undef HAVE_PTE_OFFSET_MAP
+
+/* define this on Linux if function/macro pte_offset_map_nested exists
+   (highpte 2.5 variant vs redhat advanced server) */
+#undef HAVE_PTE_OFFSET_MAP_NESTED
+
+/* define this on Linux if pte_kunmap exists
+   (SUSe 8.0 highpte support) */
+#undef HAVE_PTE_KUNMAP
+
+/* define this if remap_pfn_range exists */
+#undef HAVE_REMAP_PFN_RANGE
+
+/* define this if remap_page_range take a vma argument first (2.5 or
+   redhat advanced server) */
+#undef HAVE_REMAP_PAGE_RANGE_5ARGS
+
+/* another redhat annoyance.  They changed the number of arguments to
+   get_unmapped_area, then changed it back.  Now we have to check for it. */
+#undef HAVE_GET_UNMAPPED_AREA_6ARGS
+
+/* define this if mmap_up_write/down_write exist (prerelease redhat advanced
+   server) */
+#undef HAVE_MMAP_UP_WRITE
+
+/* define this if pci_set_drvdata is defined */
+#undef HAVE_PCI_SET_DRVDATA
+
+/* define this if set_page_dirty exists and is exported */
+#undef HAVE_SET_PAGE_DIRTY
+
+/*
+   Do we want to look for lanai commands while polling
+   the send queue?  Doing so increases latency by
+   roughly 1us, and decreases b/w by roughly 2MB at the worst,
+   but it also cuts deregistration time down to less that
+   30us per page.
+*/
+
+#define GM_ENABLE_POLL_COMMANDS	0
+
+
+/* Do we want to poll for PERRs on systems whose PERR
+   detection hardware does not work? */
+
+#define GM_PERR_POLLING 0
+
+/* Is maintainer mode enabled? */
+
+#define GM_ENABLE_MAINTAINER_MODE 0
+
+/* Do we want to enable the sparc streaming code for this build? 
+   Note that because the MCP uses this define conditionally on
+   GM_CPU_sparcXX, enabling this on a non-SPARC host will not 
+   actually enable the sparc streaming code in the MCP.  
+   See mcp/gm_bootstrap.h
+*/
+
+#define GM_ENABLE_SPARC_STREAMING 0
+
+/* Define this to see if we're running a version of MacOSX which
+   supports IOMMUs */
+#define HAVE_IOMAPPER_H 0
+
+#endif /* _gm_auto_config_h_ */

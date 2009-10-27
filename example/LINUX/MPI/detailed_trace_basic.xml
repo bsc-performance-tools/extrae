@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="@sed_MYPREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="@sed_XMLID@"
+>
+
+  <mpi enabled="yes">
+    <counters enabled="yes" />
+  </mpi>
+
+  <openmp enabled="yes">
+    <locks enabled="no" />
+    <counters enabled="yes" />
+  </openmp>
+
+  <callers enabled="yes">
+    <mpi enabled="yes">1-3</mpi>
+    <sampling enabled="yes">1-5</sampling>
+  </callers>
+
+  <counters enabled="yes">
+    <cpu enabled="yes" starting-set-distribution="1">
+      <set enabled="yes" domain="all">
+        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM
+      </set>
+    </cpu>
+
+    <network enabled="no" />
+
+    <resource-usage enabled="no" />
+  </counters>
+
+</trace>
