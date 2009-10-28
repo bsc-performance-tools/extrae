@@ -798,14 +798,28 @@ int main (int argc, char *argv[], const char *envp[])
  		   initialize and finalize the instrumentation */
 		if (!appType->get_isMPI())
 		{
-			string xlfexit = "_xlfExit";
-
+			/* Typical main entry & exit */
 			wrapRoutine (appImage, appProcess, "main", "MPItrace_init", "MPItrace_fini");
 
-			/* Fortran applications compiled with XLF may exit using the _xlfExit symbol */
+			/* Special cases (e.g., fortran stop call) */
+			string xlfexit = "_xlfExit";
+			string gnuexit = "_gfortran_stop_numeric";
+			string ifortexit = "for_stop_core";
+
+			/* Fortran applications compiled with XLF may exit using the _xlfExit (stop call) symbol */
 			BPatch_function *_xlf_exit = getRoutine (xlfexit, appImage);
 			if (NULL != _xlf_exit)
 				wrapRoutine (appImage, appProcess, "_xlfExit", "MPItrace_fini", "");
+
+			/* Fortran applications compiled with XLF may exit using the _gfortran_stop_numeric (stop call) symbol */
+			BPatch_function *_gnu_exit = getRoutine (gnuexit, appImage);
+			if (NULL != _gnu_exit)
+				wrapRoutine (appImage, appProcess, "_gfortran_stop_numeric", "MPItrace_fini", "");
+
+			/* Fortran applications compiled with XLF may exit using the _gfortran_stop_numeric (stop call) symbol */
+			BPatch_function *_ifort_exit = getRoutine (ifortexit, appImage);
+			if (NULL != _ifort_exit)
+				wrapRoutine (appImage, appProcess, "for_stop_core", "MPItrace_fini", "");
 		}
 
 		GenerateSymFile (ParallelFunctions, UserFunctions, appImage, appProcess);
