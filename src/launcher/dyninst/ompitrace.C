@@ -802,24 +802,22 @@ int main (int argc, char *argv[], const char *envp[])
 			wrapRoutine (appImage, appProcess, "main", "MPItrace_init", "MPItrace_fini");
 
 			/* Special cases (e.g., fortran stop call) */
-			string xlfexit = "_xlfExit";
-			string gnuexit = "_gfortran_stop_numeric";
-			string ifortexit = "for_stop_core";
+			string exit_calls[] =
+			  {
+				  "_xlfExit",
+				  "_gfortran_stop_numeric",
+				  "for_stop_core",
+				  ""
+				};
 
-			/* Fortran applications compiled with XLF may exit using the _xlfExit (stop call) symbol */
-			BPatch_function *_xlf_exit = getRoutine (xlfexit, appImage);
-			if (NULL != _xlf_exit)
-				wrapRoutine (appImage, appProcess, "_xlfExit", "MPItrace_fini", "");
-
-			/* Fortran applications compiled with XLF may exit using the _gfortran_stop_numeric (stop call) symbol */
-			BPatch_function *_gnu_exit = getRoutine (gnuexit, appImage);
-			if (NULL != _gnu_exit)
-				wrapRoutine (appImage, appProcess, "_gfortran_stop_numeric", "MPItrace_fini", "");
-
-			/* Fortran applications compiled with XLF may exit using the _gfortran_stop_numeric (stop call) symbol */
-			BPatch_function *_ifort_exit = getRoutine (ifortexit, appImage);
-			if (NULL != _ifort_exit)
-				wrapRoutine (appImage, appProcess, "for_stop_core", "MPItrace_fini", "");
+			int i = 0;
+			while (exit_calls[i].length() > 0)
+			{
+				BPatch_function *special_exit = getRoutine (exit_calls[i], appImage);
+				if (NULL != special_exit)
+					wrapRoutine (appImage, appProcess, exit_calls[i], "MPItrace_fini", "");
+				i++;
+			}
 		}
 
 		GenerateSymFile (ParallelFunctions, UserFunctions, appImage, appProcess);
