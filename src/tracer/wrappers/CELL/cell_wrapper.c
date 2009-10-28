@@ -191,7 +191,17 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 		return 0;
 
 	spu_buffer[THREAD] = (unsigned int**) malloc (spus*sizeof(unsigned int*));
+	if (spu_buffer[THREAD] == NULL)
+	{
+		fprintf (stderr, "CELLtrace: Unable to allocate spu_buffer[%d]. Exiting!\n", THREAD);
+		exit (-1);
+	}
 	spu_counter[THREAD] = (unsigned int**) malloc (spus*sizeof(unsigned int*));
+	if (spu_counter[THREAD] == NULL)
+	{
+		fprintf (stderr, "CELLtrace: Unable to allocate spu_counter[%d]. Exiting!\n", THREAD);
+		exit (-1);
+	}
 	TB = proc_timebase();
 	TB_high = TB >> 32;
 	TB_low  = TB;
@@ -211,10 +221,20 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 
 		/* Create buffer and touch it */
 		spu_buffer[THREAD][i] = (unsigned int*) valloc (spu_file_size);
+		if (spu_buffer[THREAD][i] == NULL)
+		{
+			fprintf (stderr, "CELLtrace: Unable to allocate spu_buffer[%d][%d]. Exiting!\n", THREAD, i);
+			exit (-1);
+		}
 		memset (spu_buffer[THREAD][i], 0, spu_file_size);
 
 		/* Create buffer and touch it */
 		spu_counter[THREAD][i] = (unsigned int*) valloc (16);
+		if (spu_counter[THREAD][i] == NULL)
+		{
+			fprintf (stderr, "CELLtrace: Unable to allocate spu_counter[%d][%d]. Exiting!\n", THREAD, i);
+			exit (-1);
+		}
 		memset (spu_buffer[THREAD][i], 0, 16);
 
 		send_mail (spe_id[i], (unsigned int) i);
