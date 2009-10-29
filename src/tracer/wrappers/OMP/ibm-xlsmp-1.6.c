@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/wrappers/OMP/ibm-xlsmp-1.6.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/07/06 09:20:22 $
- | @version:     $Revision: 1.6 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: ibm-xlsmp-1.6.c,v 1.6 2009/07/06 09:20:22 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if !defined(DYNINST_MODULE)
 

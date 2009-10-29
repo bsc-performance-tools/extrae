@@ -20,10 +20,10 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/trace_to_prv.h,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/10/24 08:11:22 $
- | @version:     $Revision: 1.7 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */

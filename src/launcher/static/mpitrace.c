@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/launcher/static/mpitrace.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/01/26 11:18:22 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char rcsid[] = "$Id: mpitrace.c,v 1.2 2008/01/26 11:18:22 harald Exp $" UNUSED;
+static char rcsid[] = "$Id$" UNUSED;
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

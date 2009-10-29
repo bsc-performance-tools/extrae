@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/HardwareCounters.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/01/12 16:16:36 $
- | @version:     $Revision: 1.13 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: HardwareCounters.c,v 1.13 2009/01/12 16:16:36 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 

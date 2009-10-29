@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/interfaces/MPI/mpi_interface.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/09/23 16:56:11 $
- | @version:     $Revision: 1.31 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mpi_interface.c,v 1.31 2009/09/23 16:56:11 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/probes/TRT/trt_probe.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/07/17 07:46:26 $
- | @version:     $Revision: 1.1 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: trt_probe.c,v 1.1 2008/07/17 07:46:26 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "threadid.h"
 #include "wrapper.h"

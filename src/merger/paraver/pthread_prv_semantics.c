@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/pthread_prv_semantics.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/05/28 14:40:44 $
- | @version:     $Revision: 1.6 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: pthread_prv_semantics.c,v 1.6 2009/05/28 14:40:44 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>

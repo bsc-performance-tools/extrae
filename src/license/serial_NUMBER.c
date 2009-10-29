@@ -20,17 +20,17 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/license/serial_NUMBER.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/10/01 13:09:26 $
- | @version:     $Revision: 1.4 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
 #if 0
-static char rcsid[] = "$Id: serial_NUMBER.c,v 1.4 2008/10/01 13:09:26 harald Exp $";
+static char rcsid[] = "$Id$";
 #endif
 
 #if defined(linux)

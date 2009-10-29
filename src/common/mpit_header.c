@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/common/mpit_header.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/04/29 15:44:53 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mpit_header.c,v 1.2 2009/04/29 15:44:53 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>

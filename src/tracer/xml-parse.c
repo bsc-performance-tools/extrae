@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/xml-parse.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/06/10 17:41:56 $
- | @version:     $Revision: 1.29 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: xml-parse.c,v 1.29 2009/06/10 17:41:56 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if defined(HAVE_XML2)
 

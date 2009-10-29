@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/mpi_comunicadors.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/07/21 13:39:18 $
- | @version:     $Revision: 1.5 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mpi_comunicadors.c,v 1.5 2008/07/21 13:39:18 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STRING_H
 # include <string.h>

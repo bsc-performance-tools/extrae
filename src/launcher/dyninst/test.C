@@ -22,14 +22,14 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/launcher/dyninst/test.C,v $
  | 
- | @last_commit: $Date: 2008/12/12 16:43:55 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: test.C,v 1.2 2008/12/12 16:43:55 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>

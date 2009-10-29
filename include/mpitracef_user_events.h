@@ -21,10 +21,10 @@ C*                      Barcelona Supercomputing Center                      *
 C*****************************************************************************
 C
 C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-C| @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/include/mpitracef_user_events.h,v $
+C| @file: $HeadURL$
 C| 
-C| @last_commit: $Date: 2009/05/25 10:31:02 $
-C| @version:     $Revision: 1.4 $
+C| @last_commit: $Date$
+C| @version:     $Revision$
 C| 
 C| History:
 C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 

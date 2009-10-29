@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/signals.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/04/21 10:40:40 $
- | @version:     $Revision: 1.7 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: signals.c,v 1.7 2009/04/21 10:40:40 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include <config.h>
 

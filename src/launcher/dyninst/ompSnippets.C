@@ -22,14 +22,14 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/launcher/dyninst/ompSnippets.C,v $
  | 
- | @last_commit: $Date: 2009/03/12 15:11:13 $
- | @version:     $Revision: 1.9 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: ompSnippets.C,v 1.9 2009/03/12 15:11:13 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>

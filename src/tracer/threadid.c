@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/threadid.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/10/31 14:52:46 $
- | @version:     $Revision: 1.9 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: threadid.c,v 1.9 2008/10/31 14:52:46 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "threadid.h"
 

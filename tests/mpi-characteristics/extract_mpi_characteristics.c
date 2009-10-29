@@ -20,14 +20,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/tests/mpi-characteristics/extract_mpi_characteristics.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/05/19 13:55:11 $
- | @version:     $Revision: 1.3 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-static char rcsid[] = "$Id: extract_mpi_characteristics.c,v 1.3 2008/05/19 13:55:11 harald Exp $";
+static char rcsid[] = "$Id$";
 
 #include <config.h>
 

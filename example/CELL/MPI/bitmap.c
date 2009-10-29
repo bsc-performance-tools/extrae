@@ -20,14 +20,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/example/CELL/MPI/bitmap.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/01/26 11:18:22 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-static char rcsid[] = "$Id: bitmap.c,v 1.2 2008/01/26 11:18:22 harald Exp $";
+static char rcsid[] = "$Id$";
 
 #include <stdlib.h>
 #include <stdio.h>

@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/common/events.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/05/28 13:38:53 $
- | @version:     $Revision: 1.12 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: events.c,v 1.12 2009/05/28 13:38:53 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "events.h"
 

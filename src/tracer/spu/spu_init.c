@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/spu/spu_init.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/08/17 15:37:57 $
- | @version:     $Revision: 1.7 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: spu_init.c,v 1.7 2009/08/17 15:37:57 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include <stdlib.h>
 #include <sys/types.h>

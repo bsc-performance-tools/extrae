@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/misc_prv_semantics.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/10/29 10:10:19 $
- | @version:     $Revision: 1.16 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: misc_prv_semantics.c,v 1.16 2009/10/29 10:10:19 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include <config.h>
 

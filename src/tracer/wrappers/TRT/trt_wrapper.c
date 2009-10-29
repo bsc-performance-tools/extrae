@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/wrappers/TRT/trt_wrapper.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/07/29 13:13:23 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: trt_wrapper.c,v 1.2 2008/07/29 13:13:23 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>

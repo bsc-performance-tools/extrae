@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/wrappers/CELL/cell_wrapper.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/08/17 15:37:57 $
- | @version:     $Revision: 1.17 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: cell_wrapper.c,v 1.17 2009/08/17 15:37:57 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "cell_wrapper.h"
 #include "wrapper.h"

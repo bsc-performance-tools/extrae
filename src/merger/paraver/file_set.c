@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/file_set.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/06/10 13:19:14 $
- | @version:     $Revision: 1.32 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: file_set.c,v 1.32 2009/06/10 13:19:14 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>

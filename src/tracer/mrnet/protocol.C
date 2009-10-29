@@ -22,14 +22,14 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/mrnet/protocol.C,v $
  | 
- | @last_commit: $Date: 2009/04/21 10:40:40 $
- | @version:     $Revision: 1.4 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: protocol.C,v 1.4 2009/04/21 10:40:40 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include <mrnet/MRNet.h>
 #include "mrnet_commands.h"

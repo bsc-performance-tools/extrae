@@ -22,15 +22,15 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/mrnet/clusterize.C,v $
  | 
- | @last_commit: $Date: 2009/07/10 10:27:12 $
- | @version:     $Revision: 1.4 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: clusterize.C,v 1.4 2009/07/10 10:27:12 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/common/semantics.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/05/28 13:06:55 $
- | @version:     $Revision: 1.5 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: semantics.c,v 1.5 2009/05/28 13:06:55 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

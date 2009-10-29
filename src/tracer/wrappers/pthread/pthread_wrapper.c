@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/wrappers/pthread/pthread_wrapper.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/10/29 13:43:50 $
- | @version:     $Revision: 1.6 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: pthread_wrapper.c,v 1.6 2008/10/29 13:43:50 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>

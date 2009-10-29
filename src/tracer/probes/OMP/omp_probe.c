@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/probes/OMP/omp_probe.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/06/27 07:59:57 $
- | @version:     $Revision: 1.8 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: omp_probe.c,v 1.8 2008/06/27 07:59:57 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "threadid.h"
 #include "wrapper.h"

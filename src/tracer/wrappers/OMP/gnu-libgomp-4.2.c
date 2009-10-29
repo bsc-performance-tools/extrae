@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/wrappers/OMP/gnu-libgomp-4.2.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/03/04 13:58:23 $
- | @version:     $Revision: 1.10 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: gnu-libgomp-4.2.c,v 1.10 2009/03/04 13:58:23 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if !defined(DYNINST_MODULE)
 

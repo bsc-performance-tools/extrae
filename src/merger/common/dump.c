@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/common/dump.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/12/01 10:39:14 $
- | @version:     $Revision: 1.8 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: dump.c,v 1.8 2008/12/01 10:39:14 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

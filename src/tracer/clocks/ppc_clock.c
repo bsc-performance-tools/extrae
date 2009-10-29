@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/clocks/ppc_clock.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/10/24 13:15:46 $
- | @version:     $Revision: 1.5 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: ppc_clock.c,v 1.5 2008/10/24 13:15:46 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if defined(OS_LINUX) && defined(ARCH_PPC)
 

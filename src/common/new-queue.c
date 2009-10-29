@@ -20,17 +20,17 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/common/new-queue.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/05/25 10:31:02 $
- | @version:     $Revision: 1.1 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: new-queue.c,v 1.1 2009/05/25 10:31:02 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>

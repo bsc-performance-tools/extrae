@@ -20,14 +20,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/example/CELL/SEQ/master.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/03/04 14:04:31 $
- | @version:     $Revision: 1.4 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-static char rcsid[] = "$Id: master.c,v 1.4 2009/03/04 14:04:31 harald Exp $";
+static char rcsid[] = "$Id$";
 
 #include <stdlib.h>
 #include <pthread.h>

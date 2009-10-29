@@ -22,15 +22,15 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/mrnet/mrnet_filters.C,v $
  | 
- | @last_commit: $Date: 2009/06/10 17:41:56 $
- | @version:     $Revision: 1.5 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mrnet_filters.C,v 1.5 2009/06/10 17:41:56 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "mrnet/MRNet.h"
 #include "mrnet_commands.h"

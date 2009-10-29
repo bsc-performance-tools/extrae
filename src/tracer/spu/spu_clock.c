@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/spu/spu_clock.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/05/19 09:59:33 $
- | @version:     $Revision: 1.3 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: spu_clock.c,v 1.3 2008/05/19 09:59:33 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include <spu_intrinsics.h>
 #include <spu_internals.h>

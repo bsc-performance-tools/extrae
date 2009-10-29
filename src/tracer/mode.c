@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/mode.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/12/01 10:39:14 $
- | @version:     $Revision: 1.13 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mode.c,v 1.13 2008/12/01 10:39:14 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if defined(HAVE_STDLIB_H)
 # include <stdlib.h>

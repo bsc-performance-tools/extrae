@@ -20,14 +20,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/tests/event/event.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/12/01 10:39:14 $
- | @version:     $Revision: 1.4 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-static char rcsid[] = "$Id: event.c,v 1.4 2008/12/01 10:39:14 gllort Exp $";
+static char rcsid[] = "$Id$";
 
 #include <stdio.h>
 

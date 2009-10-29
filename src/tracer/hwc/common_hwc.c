@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/hwc/common_hwc.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/10/29 10:10:19 $
- | @version:     $Revision: 1.7 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: common_hwc.c,v 1.7 2009/10/29 10:10:19 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>

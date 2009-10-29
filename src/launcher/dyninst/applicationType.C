@@ -22,15 +22,15 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/launcher/dyninst/applicationType.C,v $
  | 
- | @last_commit: $Date: 2009/01/09 14:27:33 $
- | @version:     $Revision: 1.8 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: applicationType.C,v 1.8 2009/01/09 14:27:33 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "applicationType.h"
 

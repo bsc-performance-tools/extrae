@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/clocks/bgp_clock.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/02/09 15:12:16 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: bgp_clock.c,v 1.2 2009/02/09 15:12:16 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if defined(IS_BGP_MACHINE)
 

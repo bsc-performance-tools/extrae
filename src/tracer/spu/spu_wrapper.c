@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/spu/spu_wrapper.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/01/12 16:13:21 $
- | @version:     $Revision: 1.10 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: spu_wrapper.c,v 1.10 2009/01/12 16:13:21 gllort Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/calltrace.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/05/28 13:38:53 $
- | @version:     $Revision: 1.13 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: calltrace.c,v 1.13 2009/05/28 13:38:53 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "calltrace.h"
 #include "record.h"

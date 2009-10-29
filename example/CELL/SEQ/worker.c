@@ -20,14 +20,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/example/CELL/SEQ/worker.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/01/26 11:18:22 $
- | @version:     $Revision: 1.3 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-static char rcsid[] = "$Id: worker.c,v 1.3 2008/01/26 11:18:22 harald Exp $";
+static char rcsid[] = "$Id$";
 
 #include <spu_intrinsics.h>
 #include <spu_internals.h>

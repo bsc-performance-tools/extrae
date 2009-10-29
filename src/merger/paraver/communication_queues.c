@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/communication_queues.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/05/28 14:40:44 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: communication_queues.c,v 1.2 2009/05/28 14:40:44 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "communication_queues.h"
 #include "file_set.h"

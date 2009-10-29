@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/clocks/ia64_clock.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/02/14 14:12:37 $
- | @version:     $Revision: 1.4 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: ia64_clock.c,v 1.4 2008/02/14 14:12:37 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if defined(OS_LINUX) && defined(ARCH_IA64)
 

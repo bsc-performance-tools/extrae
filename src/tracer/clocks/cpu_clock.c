@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/clocks/cpu_clock.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/01/26 11:18:22 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: cpu_clock.c,v 1.2 2008/01/26 11:18:22 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_SYS_RESOURCE_H
 # include <sys/resource.h>

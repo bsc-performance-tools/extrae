@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/clocks/clock.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/05/28 13:38:53 $
- | @version:     $Revision: 1.7 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: clock.c,v 1.7 2009/05/28 13:38:53 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>

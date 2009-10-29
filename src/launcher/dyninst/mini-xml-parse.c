@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/launcher/dyninst/mini-xml-parse.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2009/01/09 15:43:06 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mini-xml-parse.c,v 1.2 2009/01/09 15:43:06 harald Exp $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if !defined(HAVE_XML2)
 

@@ -20,17 +20,17 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/license/license.c,v $
+ | @file: $HeadURL$
  | 
- | @last_commit: $Date: 2008/02/14 14:22:49 $
- | @version:     $Revision: 1.3 $
+ | @last_commit: $Date$
+ | @version:     $Revision$
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
 #if 0
-static char rcsid[] = "$Id: license.c,v 1.3 2008/02/14 14:22:49 harald Exp $" UNUSED;
+static char rcsid[] = "$Id$" UNUSED;
 #endif
 
 #include "license.h"
