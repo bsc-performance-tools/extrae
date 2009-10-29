@@ -22,14 +22,14 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/trace_to_prv.c,v $
  | 
- | @last_commit: $Date: 2009/05/28 14:40:44 $
- | @version:     $Revision: 1.37 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.38 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: trace_to_prv.c,v 1.37 2009/05/28 14:40:44 harald Exp $";
+static char UNUSED rcsid[] = "$Id: trace_to_prv.c,v 1.38 2009/10/29 10:10:19 gllort Exp $";
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -202,6 +202,12 @@ static void InitializeObjectTable (int num_appl, struct input_t * files,
 				obj_table[ptask].tasks[task].threads[thread].First_Event = TRUE;
 				obj_table[ptask].tasks[task].threads[thread].First_HWCChange = TRUE;
 				obj_table[ptask].tasks[task].threads[thread].MatchingComms = TRUE;
+
+#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
+			    obj_table[ptask].tasks[task].threads[thread].HWCSets = NULL;
+			    obj_table[ptask].tasks[task].threads[thread].num_HWCSets = 0;
+			    obj_table[ptask].tasks[task].threads[thread].current_HWCSet = 0;
+#endif
 			}
 		}
 	}
@@ -437,18 +443,24 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-				if (Get_EvHWCRead (current_event))
-				{
-					int i;
-					unsigned int hwctype[MAX_HWC];
-					unsigned long long hwcvalue[MAX_HWC];
+                if (Get_EvHWCRead (current_event))
+                {
+                    int i;
+                    unsigned int hwctype[MAX_HWC];
+                    unsigned long long hwcvalue[MAX_HWC];
+
+					if (Get_EvHWCSet(current_event) != HardwareCounters_GetCurrentSet(ptask, task, thread))
+					{
+						/* The HWC_CHANGE_EV was missing (probably due to a circular buffer) */
+						HWC_Change_Ev (Get_EvHWCSet(current_event), current_time, cpu, ptask, task, thread);
+					}
 
 #warning "Aixo es horrible, caldra retocar-ho"
-					HardwareCounters_Emit (cpu, ptask, task, thread, current_time, current_event, hwctype, hwcvalue);
-					for (i = 0; i < MAX_HWC; i++)
-						if (NO_COUNTER != hwctype[i])
-							trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-				}
+                    HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue);
+                    for (i = 0; i < MAX_HWC; i++)
+                        if (NO_COUNTER != hwctype[i])
+                            trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+                }
 #endif
 			}
 			else if (Type == COMM_ALIAS_TYPE)

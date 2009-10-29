@@ -22,8 +22,8 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/misc_prv_semantics.h,v $
  | 
- | @last_commit: $Date: 2008/01/21 08:49:07 $
- | @version:     $Revision: 1.2 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.3 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
@@ -44,5 +44,12 @@ extern int *Sample_Caller_Labels_Used;
 extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
 extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];
 
+int HWC_Change_Ev (
+   int newSet,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread);
 
 #endif /* __MISC_PRV_SEMANTICS_H__ */

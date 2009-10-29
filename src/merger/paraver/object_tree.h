@@ -22,8 +22,8 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/object_tree.h,v $
  | 
- | @last_commit: $Date: 2009/04/21 10:40:40 $
- | @version:     $Revision: 1.7 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.8 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
@@ -73,8 +73,10 @@ typedef struct thread_t
 	off_t incomplete_state_offset;
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-	long long counters[MAX_HWC];  /* hardware counter values */
-	int counterEvents[MAX_HWC];   /* hardware counter events */
+	int **HWCSets;
+	int num_HWCSets;
+	int current_HWCSet;
+	long long counters[MAX_HWC];  /* HWC values */
 #endif
 
 	event_t *Send_Rec;  /* Store send records */

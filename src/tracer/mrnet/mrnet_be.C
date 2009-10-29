@@ -22,15 +22,15 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/mrnet/mrnet_be.C,v $
  | 
- | @last_commit: $Date: 2009/07/10 10:27:12 $
- | @version:     $Revision: 1.13 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.14 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mrnet_be.C,v 1.13 2009/07/10 10:27:12 gllort Exp $";
+static char UNUSED rcsid[] = "$Id: mrnet_be.C,v 1.14 2009/10/29 10:10:19 gllort Exp $";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -123,7 +123,7 @@ void Config_Startup_BE()
 		MRN_STREAM_SEND(p2pStream, MRN_CONFIG, "%d", max_sets);
 		for (set=0; set<max_sets; set++)
 		{
-			num_hwc = HWC_Get_Set_Counters_Ids(set, &hwc_ids);
+			num_hwc = HWC_Get_Set_Counters_ParaverIds(set, &hwc_ids);
 			MRN_STREAM_SEND(p2pStream, MRN_CONFIG, "%ad", hwc_ids, num_hwc);
 		}
 

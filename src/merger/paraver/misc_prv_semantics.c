@@ -22,14 +22,14 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/merger/paraver/misc_prv_semantics.c,v $
  | 
- | @last_commit: $Date: 2009/06/03 12:41:30 $
- | @version:     $Revision: 1.15 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.16 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: misc_prv_semantics.c,v 1.15 2009/06/03 12:41:30 harald Exp $";
+static char UNUSED rcsid[] = "$Id: misc_prv_semantics.c,v 1.16 2009/10/29 10:10:19 gllort Exp $";
 
 #include <config.h>
 
@@ -425,6 +425,22 @@ static int Tracing_Mode_Event (event_t * current_event,
 }
 
 #if USE_HARDWARE_COUNTERS
+
+static int Evt_CountersDefinition (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	int newSet = Get_EvValue(current_event);
+	long long *HWCIds = Get_EvHWCVal(current_event);
+	
+	HardwareCounters_NewSetDefinition(ptask, task, thread, newSet, HWCIds);
+}
+
 /******************************************************************************
  **      Function name : ResetCounters
  **      Description :
@@ -446,8 +462,59 @@ static void ResetCounters (int ptask, int task)
  **      Description :
  ******************************************************************************/
 
+int HWC_Change_Ev (
+   int newSet,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread)
+{
+    int i;
+    unsigned int hwctype[MAX_HWC+1];
+    unsigned long long hwcvalue[MAX_HWC+1];
+    unsigned int prev_hwctype[MAX_HWC];
+    struct thread_t * Sthread;
+    Sthread = GET_THREAD_INFO(ptask, task, thread);
+
+    int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
+    int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+    /* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
+    for (i=0; i<MAX_HWC; i++)
+        prev_hwctype[i] = HWC_COUNTER_TYPE(oldIds[i]);
+
+    ResetCounters (ptask-1, task-1);
+    HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
+
+    for (i = 0; i < MAX_HWC+1; i++)
+    {
+        if (NO_COUNTER != hwctype[i])
+        {
+            int found = FALSE, k = 0;
+
+            /* Check the current counter (hwctype[i]) did not appear on the previous set. We don't want
+             * it to appear twice in the same timestamp. This may happen because the HWC_CHANGE_EV is traced
+             * right after the last valid emission of counters with the previous set, at the same timestamp.
+             */
+
+            while ((!found) && (k < MAX_HWC))
+            {
+                if (hwctype[i] == prev_hwctype[k]) found = TRUE;
+                k ++;
+            }
+
+            if (!found)
+                trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+        }
+    }
+    return 0;
+}
+
 static int Evt_SetCounters (
-   event_t * current,
+   event_t * current_event,
    unsigned long long current_time,
    unsigned int cpu,
    unsigned int ptask,
@@ -455,47 +522,12 @@ static int Evt_SetCounters (
    unsigned int thread,
    FileSet_t *fset )
 {
-	int i;
-	unsigned int hwctype[MAX_HWC+1];
-	unsigned long long hwcvalue[MAX_HWC+1];
-	unsigned int prev_hwctype[MAX_HWC];
-	struct thread_t * Sthread;
-	UNREFERENCED_PARAMETER(fset);
-	Sthread = GET_THREAD_INFO(ptask, task, thread);
+    UNREFERENCED_PARAMETER(fset);
+    unsigned int newSet = Get_EvValue (current_event);
 
-	/* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
-	for (i=0; i<MAX_HWC; i++)
-		prev_hwctype[i] = HWC_COUNTER_TYPE(Sthread->counterEvents[i]);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-
-	ResetCounters (ptask-1, task-1);
-	HardwareCounters_Change (cpu, ptask, task, thread, current, current_time, hwctype, hwcvalue);
-
-	for (i = 0; i < MAX_HWC+1; i++)
-	{
-		if (NO_COUNTER != hwctype[i])
-		{
-			int found = FALSE, k = 0;
-
-			/* Check the current counter (hwctype[i]) did not appear on the previous set. We don't want 
-			 * it to appear twice in the same timestamp. This may happen because the HWC_CHANGE_EV is traced
-			 * right after the last valid emission of counters with the previous set, at the same timestamp. 
-			 */
-
-			while ((!found) && (k < MAX_HWC))
-			{
-				if (hwctype[i] == prev_hwctype[k]) found = TRUE;
-				k ++;
-			}
-
-			if (!found) 
-				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-		}
-	}
-
-  return 0;
+	return HWC_Change_Ev (newSet, current_time, cpu, ptask, task, thread);
 }
+
 #endif /* HARDWARE_COUNTERS */
 
 static int CPU_Burst_Event (
@@ -621,6 +653,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ USER_EV, User_Event },
 	{ HWC_EV, traceCounters },
 #if USE_HARDWARE_COUNTERS
+	{ HWC_DEF_EV, Evt_CountersDefinition },
 	{ HWC_CHANGE_EV, Evt_SetCounters },
 	{ HWC_SET_OVERFLOW_EV, Set_Overflow_Event },
 #else

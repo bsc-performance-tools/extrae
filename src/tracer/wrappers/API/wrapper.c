@@ -1074,6 +1074,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	char *new_num_css_threads_clause;
 	int numProcessors;
 #endif
+#if USE_HARDWARE_COUNTERS
+	int set;
+#endif
 
 #if defined(PTHREAD_SUPPORT)
 	Backend_CreatepThreadIdentifier ();
@@ -1206,6 +1209,15 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
     TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
 
 #if USE_HARDWARE_COUNTERS
+	/* Write hardware counters definitions */
+	for (set=0; set<HWC_Get_Num_Sets(); set++)
+	{
+		int num_hwc, *HWCid;
+
+		num_hwc = HWC_Get_Set_Counters_Ids (set, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
+		TRACE_EVENT_AND_GIVEN_COUNTERS (ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
+	}
+
 	/* Start reading counters */
 	HWC_Start_Counters (maximum_NumOfThreads);
 #endif

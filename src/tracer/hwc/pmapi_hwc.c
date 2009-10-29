@@ -22,14 +22,14 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/hwc/pmapi_hwc.c,v $
  | 
- | @last_commit: $Date: 2009/05/25 16:12:54 $
- | @version:     $Revision: 1.5 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.6 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: pmapi_hwc.c,v 1.5 2009/05/25 16:12:54 gllort Exp $";
+static char UNUSED rcsid[] = "$Id: pmapi_hwc.c,v 1.6 2009/10/29 10:10:19 gllort Exp $";
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -272,11 +272,14 @@ int HWCBE_PMAPI_Start_Set (UINT64 time, int numset, int threadid)
 	}
 	else
 	{
+#if defined(DEAD_CODE)
 		long long requested_values[MAX_HWC];
 
 		HARDWARE_COUNTERS_REQUESTED(HWC_sets[numset].num_counters, HWC_sets[numset].counters, requested_values);
 
 		TRACE_EVENT_AND_GIVEN_COUNTERS (time, HWC_CHANGE_EV, numset, MAX_HWC, requested_values);
+#endif /* DEAD_CODE */
+		TRACE_EVENT (time, HWC_CHANGE_EV, numset);
 	}
 
 	rc = pm_start_mythread ();

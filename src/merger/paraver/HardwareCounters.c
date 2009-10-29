@@ -59,6 +59,7 @@ static char UNUSED rcsid[] = "$Id: HardwareCounters.c,v 1.13 2009/01/12 16:16:36
 #include "trace_to_prv.h"
 #include "paraver_generator.h"
 #include "dimemas_generator.h"
+#include "utils.h"
 
 /*
  * FreeListItems  : Free CntQueue queue items list.
@@ -75,13 +76,14 @@ CntQueue CountersTraced;
  **      Description : 
  ******************************************************************************/
 
-void HardwareCounters_Emit (int cpu, int ptask, int task, int thread,
+void HardwareCounters_Emit (int ptask, int task, int thread,
 	long long time, event_t * Event, unsigned int *outtype,
 	unsigned long long *outvalue)
 {
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
   int cnt;
   struct thread_t *Sthread;
+  int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
 
   Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
 
@@ -91,10 +93,10 @@ void HardwareCounters_Emit (int cpu, int ptask, int task, int thread,
     depending if sampling was activated or not */
 #if defined(PAPI_COUNTERS)
 # if defined(SAMPLING_SUPPORT)
-    if (Sthread->counterEvents[cnt] != NO_COUNTER &&
-		    Sthread->counterEvents[cnt] != SAMPLE_COUNTER)
+    if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
+		    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
 # else
-    if (Sthread->counterEvents[cnt] != NO_COUNTER)
+    if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER)
 # endif
     {
       /*
@@ -107,7 +109,7 @@ void HardwareCounters_Emit (int cpu, int ptask, int task, int thread,
 			if (Event->HWCValues[cnt] >= Sthread->counters[cnt])
 			{
 				outvalue[cnt] = Event->HWCValues[cnt] - Sthread->counters[cnt];
-				outtype[cnt] = HWC_COUNTER_TYPE (Sthread->counterEvents[cnt]);
+				outtype[cnt] = HWC_COUNTER_TYPE (Sthread->HWCSets[set_id][cnt]);
 			}
 			else
 			{
@@ -115,7 +117,7 @@ void HardwareCounters_Emit (int cpu, int ptask, int task, int thread,
 			}
 # else
       outvalue[cnt] = Event->HWCValues[cnt];
-      outtype[cnt] = HWC_COUNTER_TYPE (Sthread->counterEvents[cnt]);
+      outtype[cnt] = HWC_COUNTER_TYPE (Sthread->HWCSets[set_id][cnt]);
 # endif
 
       Sthread->counters[cnt] = Event->HWCValues[cnt];
@@ -125,10 +127,10 @@ void HardwareCounters_Emit (int cpu, int ptask, int task, int thread,
 
 #elif defined(PMAPI_COUNTERS)
 
-		if (Sthread->counterEvents[cnt] != NO_COUNTER)
+		if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER)
 		{
 			outvalue[cnt]= Event->HWCValues[cnt] - Sthread->counters[cnt];
-			outtype[cnt] = HWC_COUNTER_TYPE (cnt, Sthread->counterEvents[cnt]);
+			outtype[cnt] = HWC_COUNTER_TYPE (cnt, Sthread->HWCSets[set_id][cnt]);
 			Sthread->counters[cnt] = Event->HWCValues[cnt];
 		}
 		else
@@ -178,14 +180,45 @@ void HardwareCounters_Get (event_t *Event, unsigned long long *buffer)
 		buffer[cnt] = Event->HWCValues[cnt];
 }
 
+void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds)
+{
+	struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+
+	if (newSet <= Sthread->num_HWCSets)
+	{
+		int i;
+
+		xrealloc(Sthread->HWCSets, Sthread->HWCSets, (newSet+1)*sizeof(int *));
+		xmalloc(Sthread->HWCSets[newSet], MAX_HWC*sizeof(int));
+
+		for (i=0; i<MAX_HWC; i++)
+		{
+			Sthread->HWCSets[newSet][i] = (int)HWCIds[i];
+		}
+		Sthread->num_HWCSets ++;
+	}
+}
+
+int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id)
+{
+	struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+	return Sthread->HWCSets[set_id];
+}
+
+int HardwareCounters_GetCurrentSet(int ptask, int task, int thread)
+{
+    struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+	return Sthread->current_HWCSet;
+}
+
 /******************************************************************************
  **      Function name : HardwareCounters_Change
  **      
  **      Description : 
  ******************************************************************************/
 
-void HardwareCounters_Change (int cpu, int ptask, int task, int thread,
-	event_t *current, unsigned long long time, unsigned int *outtypes,
+void HardwareCounters_Change (int ptask, int task, int thread,
+	int newSet, unsigned int *outtypes,
 	unsigned long long *outvalues)
 {
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
@@ -194,16 +227,20 @@ void HardwareCounters_Change (int cpu, int ptask, int task, int thread,
 	struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
 	int counters_used[MAX_HWC];
 
+	int *newIds = HardwareCounters_GetSetIds (ptask, task, thread, newSet);
+
 	for (cnt = 0; cnt < MAX_HWC; cnt++)
-		counters_used[cnt] = (current->HWCValues[cnt] != NO_COUNTER);
+	{
+		counters_used[cnt] = (newIds[cnt] != NO_COUNTER);
+	}
 
-	outtypes[0] = HWC_GROUP_ID; outvalues[0] = 1+Get_EvValue (current);
+	outtypes[0] = HWC_GROUP_ID; outvalues[0] = 1+newSet;
 
+	Sthread->current_HWCSet = newSet;
 	if (Sthread->First_HWCChange)
 	{
 		for (cnt = 0; cnt < MAX_HWC; cnt++)
 		{
-			Sthread->counterEvents[cnt] = current->HWCValues[cnt];
 			Sthread->counters[cnt] = 0;
 			outtypes[cnt+1] = NO_COUNTER;
 		}
@@ -213,16 +250,15 @@ void HardwareCounters_Change (int cpu, int ptask, int task, int thread,
 	{
 		for (cnt = 0; cnt < MAX_HWC; cnt++)
 		{
-			Sthread->counterEvents[cnt] = current->HWCValues[cnt];
 			Sthread->counters[cnt] = 0;
 
 			/* Emit counters with value 0 at the very beginning*/
 			if (counters_used[cnt])
 			{
 #if defined(PMAPI_COUNTERS)
-				outtypes[cnt+1] = HWC_COUNTER_TYPE(cnt, Sthread->counterEvents[cnt]);
+				outtypes[cnt+1] = HWC_COUNTER_TYPE(cnt, Sthread->HWCSets[newSet][cnt]);
 #else
-				outtypes[cnt+1] = HWC_COUNTER_TYPE(Sthread->counterEvents[cnt]);
+				outtypes[cnt+1] = HWC_COUNTER_TYPE(Sthread->HWCSets[newSet][cnt]);
 #endif
 				outvalues[cnt+1] = 0;
 			}
@@ -232,14 +268,14 @@ void HardwareCounters_Change (int cpu, int ptask, int task, int thread,
 	}
 
 	/* Add this counters (if didn't exist) to a queue in order to put them into the PCF */
-	if (HardwareCounters_Exist (current->HWCValues, counters_used))
+	if (HardwareCounters_Exist (newIds, counters_used))
 		return;
 
 	ALLOC_NEW_ITEM (FreeListItems, sizeof (CntQueue), cItem, "CntQueue");
 	for (cnt = 0; cnt < MAX_HWC; cnt++)
 	{
-		cItem->Events[cnt] = current->HWCValues[cnt];
-		cItem->Traced[cnt] = (current->HWCValues[cnt] != NO_COUNTER);
+		cItem->Events[cnt] = newIds[cnt];
+		cItem->Traced[cnt] = (newIds[cnt] != NO_COUNTER);
 	}
   ENQUEUE_ITEM (&CountersTraced, cItem);
 }
@@ -248,10 +284,11 @@ void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Eve
 {
   int cnt;
   struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+  int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
 
   for (cnt = 0; cnt < MAX_HWC; cnt++)
 		if (Event->HWCValues[cnt] == SAMPLE_COUNTER)
-			Sthread->counterEvents[cnt] = SAMPLE_COUNTER;
+			Sthread->HWCSets[set_id][cnt] = SAMPLE_COUNTER;
 }
 
 #if defined(PARALLEL_MERGE)

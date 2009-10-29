@@ -84,14 +84,15 @@ CntQueue;
 
 extern CntQueue CountersTraced;
 
-void HardwareCounters_Emit (int cpu, int ptask, int task, int thread,
+void HardwareCounters_Emit (int ptask, int task, int thread,
   long long time, event_t * Event, unsigned int *outtype,
   unsigned long long *outvalue);
 void HardwareCounters_Show (event_t * Event);
 void HardwareCounters_Get (event_t *Event, unsigned long long *buffer);
-void HardwareCounters_Change (int cpu, int ptask, int task, int thread,
-	event_t *current, unsigned long long time, unsigned int *outtypes,
-	unsigned long long *outvalues);
+void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds);
+int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id);
+int HardwareCounters_GetCurrentSet(int ptask, int task, int thread);
+void HardwareCounters_Change (int ptask, int task, int thread, int newSet, unsigned int *outtypes, unsigned long long *outvalues);
 void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Event);
 
 #if defined(PARALLEL_MERGE)

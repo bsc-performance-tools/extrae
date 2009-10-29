@@ -22,8 +22,8 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/hwc/hwc.h,v $
  | 
- | @last_commit: $Date: 2009/05/25 16:12:54 $
- | @version:     $Revision: 1.6 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.7 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
@@ -65,8 +65,8 @@ int HWC_Add_Set (int pretended_set, int rank, int ncounters, char **counters, ch
 
 int HWC_Get_Current_Set ();
 int HWC_Get_Num_Sets ();
-int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCParaverIds);
-
+int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds);
+int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds);
 int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer);
 int HWC_Reset (unsigned int tid);
 int HWC_Resetting ();

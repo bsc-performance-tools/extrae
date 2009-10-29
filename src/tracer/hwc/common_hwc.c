@@ -22,14 +22,14 @@
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
  | @file: $Source: /home/paraver/cvs-tools/mpitrace/fusion/src/tracer/hwc/common_hwc.c,v $
  | 
- | @last_commit: $Date: 2009/05/25 16:12:54 $
- | @version:     $Revision: 1.6 $
+ | @last_commit: $Date: 2009/10/29 10:10:19 $
+ | @version:     $Revision: 1.7 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: common_hwc.c,v 1.6 2009/05/25 16:12:54 gllort Exp $";
+static char UNUSED rcsid[] = "$Id: common_hwc.c,v 1.7 2009/10/29 10:10:19 gllort Exp $";
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -118,26 +118,45 @@ int HWC_Get_Num_Sets ()
  * \return The number of counters in the given set. 
  */
 
-#include "../../merger/paraver/HardwareCounters.h" /* XXX: Include should be moved to common files */
-int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCParaverIds)
+int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds)
 {
-	int i = 0, num_counters = 0;
-	int *HWCIds;
+	int i=0, num_counters=0;
+	int *HWCIds=NULL;
 
 	num_counters = HWC_sets[set_id].num_counters;
     
-	xmalloc(HWCIds, num_counters * sizeof(int));
+	xmalloc(HWCIds, MAX_HWC * sizeof(int));
 
 	for (i=0; i<num_counters; i++)
-#if defined(PMAPI_COUNTERS)
-		HWCIds[i] = HWC_COUNTER_TYPE(i, HWC_sets[set_id].counters[i]);
-#else
-		HWCIds[i] = HWC_COUNTER_TYPE(HWC_sets[set_id].counters[i]);
-#endif
+		HWCIds[i] = HWC_sets[set_id].counters[i];
 
-	*io_HWCParaverIds = HWCIds;
+	for (i=num_counters; i<MAX_HWC; i++)
+		HWCIds[i] = NO_COUNTER;
+
+	*io_HWCIds = HWCIds;
 	return num_counters;
 }
+
+#include "../../merger/paraver/HardwareCounters.h" /* XXX: Include should be moved to common files */
+int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds)
+{
+	int i=0, num_counters=0;
+	int *HWCIds=NULL;
+
+	num_counters = HWC_Get_Set_Counters_Ids (set_id, &HWCIds);
+	
+	/* Convert PAPI/PMAPI Ids to Paraver Ids */
+	for (i=0; i<num_counters; i++)
+#if defined(PMAPI_COUNTERS)
+        HWCIds[i] = HWC_COUNTER_TYPE(i, HWCIds[i]);
+#else
+        HWCIds[i] = HWC_COUNTER_TYPE(HWCIds[i]);
+#endif
+
+    *io_HWCParaverIds = HWCIds;
+    return num_counters;
+}
+
 
 /**
  * Stops the current set and starts reading the next one.

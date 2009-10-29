@@ -81,6 +81,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define READ_EV                  40000004
 #define WRITE_EV                 40000005
 #define USER_EV                  40000006
+#define HWC_DEF_EV				 40000007
 #define HWC_CHANGE_EV            40000008
 #define HWC_EV                   40000009
 #define IOSIZE_EV                40000011
