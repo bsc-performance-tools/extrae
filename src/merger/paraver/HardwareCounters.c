@@ -186,23 +186,53 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 
 	if (newSet <= Sthread->num_HWCSets)
 	{
-		int i;
+		int i, j;
 
 		xrealloc(Sthread->HWCSets, Sthread->HWCSets, (newSet+1)*sizeof(int *));
 		xmalloc(Sthread->HWCSets[newSet], MAX_HWC*sizeof(int));
 
+		for (i=Sthread->num_HWCSets; i<newSet; i++)
+		{
+		/* New set definitions should appear ordered. If there's any gap, 
+		 * this initializes the missing definition with NO_COUNTER's 
+		 */
+			for (j=0; j<MAX_HWC; j++)
+			{
+				Sthread->HWCSets[i][j] = NO_COUNTER;
+			}
+		}
+
 		for (i=0; i<MAX_HWC; i++)
 		{
-			Sthread->HWCSets[newSet][i] = (int)HWCIds[i];
+			if (HWCIds == NULL)
+				Sthread->HWCSets[newSet][i] = NO_COUNTER;
+			else
+				Sthread->HWCSets[newSet][i] = (int)HWCIds[i];
 		}
-		Sthread->num_HWCSets ++;
+		Sthread->num_HWCSets = newSet + 1;
 	}
 }
 
 int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id)
 {
+	static int warn_count = 0;
+
 	struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
-	return Sthread->HWCSets[set_id];
+	if ((set_id+1 > Sthread->num_HWCSets) || (set_id < 0))
+	{
+		warn_count ++;
+		if (warn_count <= 10)
+		{
+			fprintf(stderr, "\nmpi2prv: WARNING! Definitions for HWC set '%d' were not found!\n"
+			"You're probably using an old version of the tracing library, please upgrade it!\n", set_id);
+		}
+		else if (warn_count == 10)
+		{
+			fprintf(stderr, "(Future warnings will be omitted...)\n");
+		}
+		HardwareCounters_NewSetDefinition(ptask, task, thread, set_id, NULL);
+	}
+ 	return Sthread->HWCSets[set_id];
 }
 
 int HardwareCounters_GetCurrentSet(int ptask, int task, int thread)
