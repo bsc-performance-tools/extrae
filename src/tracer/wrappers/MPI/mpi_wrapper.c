@@ -4370,7 +4370,7 @@ int MPI_Irecv_C_Wrapper (void *buf, int count, MPI_Datatype datatype,
    *   target : request                     size  : ---
    *   tag : ---
    */
-	TRACE_MPIEVENT (TIME, IRECV_EV, EVT_END, src_world, size, tag, comm, hash_req.key);
+	TRACE_MPIEVENT (TIME, IRECV_EV, EVT_END, src_world, count * size, tag, comm, hash_req.key);
 
   return ierror;
 }
