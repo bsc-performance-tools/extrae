@@ -42,8 +42,10 @@ void trace_paraver_event (unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, unsigned long long time, 
 	unsigned int type, UINT64 value);
 
-void trace_paraver_unmatched_communication (unsigned ptask_s,
-	unsigned task_s, unsigned thread_s);
+void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int ptask_s,
+	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,
+	unsigned long long phy_s, unsigned int cpu_r, unsigned int ptask_r,
+	unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag);
 
 void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,

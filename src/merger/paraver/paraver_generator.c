@@ -218,8 +218,10 @@ void trace_paraver_event (
 /******************************************************************************
  ***  trace_paraver_unmatched_communication
  ******************************************************************************/
-void trace_paraver_unmatched_communication (unsigned ptask_s, unsigned task_s,
-	unsigned thread_s)
+void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int ptask_s,
+	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,
+	unsigned long long phy_s, unsigned int cpu_r, unsigned int ptask_r,
+	unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag)
 {
 	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
 	paraver_rec_t record;
@@ -228,6 +230,18 @@ void trace_paraver_unmatched_communication (unsigned ptask_s, unsigned task_s,
 		return;
 
 	record.type = UNMATCHED_COMMUNICATION;
+	record.cpu = cpu_s;
+	record.ptask = ptask_s;
+	record.task = task_s;
+	record.thread = thread_s;
+	record.time = log_s;
+	record.end_time = phy_s;
+	record.event = size;
+	record.value = tag;
+	record.cpu_r = cpu_r;
+	record.ptask_r = ptask_r;
+	record.task_r = task_r;
+	record.thread_r = thread_r;
 
 	trace_paraver_record (wfb, &record);
 }
@@ -716,6 +730,15 @@ static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 }
 #endif
 
+#if defined(DEBUG)
+static void DumpUnmatchedCommunication (paraver_rec_t *r)
+{
+	fprintf (stdout, "UNMATCHED COMUNICATION:\n"
+	                 "SENDER: %d.%d RECEIVER: %d.%d TIME/TIMESTAMP %lld/%lld SIZE %d TAG %d\n",
+	                 r->task, r->thread, r->task_r, r->thread_r, r->time, r->end_time, r->event, r->value);
+}
+#endif
+
 static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	struct fdz_fitxer prv_fd, unsigned long long num_of_events)
 {
@@ -725,7 +748,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	unsigned long long actual_events, tmp;
 	int error;
 	int num_incomplete_state = 0;
-	int num_incomplete_comm = 0;
+	int num_unmatched_comm = 0;
 	int num_pending_comm = 0;
 	
 	fprintf (stdout, "mpi2prv: Generating tracefile (intermediate buffers of %llu events)\n", prvfset->records_per_block);
@@ -767,9 +790,12 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			break;
 
 			case UNMATCHED_COMMUNICATION:
-			if (num_incomplete_comm == 0)
+			if (num_unmatched_comm == 0)
 				fprintf (stderr, "mpi2prv: Error! Found unmatched communication! Continuing...\n");
-			num_incomplete_comm++;
+			num_unmatched_comm++;
+#if defined(DEBUG)
+			DumpUnmatchedCommunication (current);
+#endif
 			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
 			actual_events++;
 			break;
@@ -830,8 +856,8 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 
 	if (num_incomplete_state > 0)
 		fprintf (stderr, "mpi2prv: Error! Found %d incomplete states. Resulting tracefile may be inconsistent.\n", num_incomplete_state);
-	if (num_incomplete_comm > 0)
-		fprintf (stderr, "mpi2prv: Error! Found %d incomplete communications. Resulting tracefile may be inconsistent.\n", num_incomplete_comm);
+	if (num_unmatched_comm > 0)
+		fprintf (stderr, "mpi2prv: Error! Found %d incomplete communications. Resulting tracefile may be inconsistent.\n", num_unmatched_comm);
 	if (num_pending_comm > 0)
 		fprintf (stderr, "mpi2prv: Error! Found %d pending communications. Resulting tracefile may be inconsistent.\n", num_pending_comm);
 }

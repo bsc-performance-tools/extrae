@@ -51,9 +51,13 @@ static void show_current (event_t * c)
 	fprintf (stdout, "EV: %d VAL: %llu TIME: %llu", c->event, c->value, c->time);
 #endif
 
-	if (c->event == IRECV_EV || c->event == IRECVED_EV ||
+	if (c->event == IRECV_EV || c->event == IRECVED_EV || c->event == RECV_EV ||
 	    c->event == SENDRECV_EV || c->event == SENDRECV_REPLACE_EV ||
-	    c->event == PERSIST_REQ_EV)
+	    c->event == PERSIST_REQ_EV ||
+	    c->event == SEND_EV || c->event == ISEND_EV ||
+	    c->event == SSEND_EV || c->event == ISSEND_EV ||
+	    c->event == BSEND_EV || c->event == IBSEND_EV ||
+	    c->event == RSEND_EV || c->event == IRSEND_EV)
 	{
 		fprintf (stdout, " TARGET:%u SIZE:%d TAG:%d COMM:%d AUX:%d\n",
 		  c->param.mpi_param.target,
