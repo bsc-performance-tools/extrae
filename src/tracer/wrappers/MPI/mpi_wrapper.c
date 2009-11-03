@@ -1299,6 +1299,7 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, 
 	MPI_Fint *ierror)
 {
+	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
   int size, src_world, sender_src, ret, recved_count, sended_tag;
 
@@ -1319,28 +1320,21 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    */
   TRACE_MPIEVENT (TIME, RECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
 
-  CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, status,
+	ptr_status = (status == MPI_F_STATUS_IGNORE)?my_status:status;
+
+  CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, ptr_status,
                       ierror);
 
-	if (MPI_F_STATUS_IGNORE != status)
-	{
-		CtoF77 (pmpi_get_count) (status, datatype, &recved_count, &ret);
-		MPI_CHECK(ret, pmpi_get_count);
+	CtoF77 (pmpi_get_count) (ptr_status, datatype, &recved_count, &ret);
+	MPI_CHECK(ret, pmpi_get_count);
 
-		if (recved_count != MPI_UNDEFINED)
-			size *= recved_count;
-		else
-			size = 0;
-
-		sender_src = status[MPI_SOURCE_OFFSET];
-		sended_tag = status[MPI_TAG_OFFSET];
-	}
+	if (recved_count != MPI_UNDEFINED)
+		size *= recved_count;
 	else
-	{
-		sender_src = *source;
-		sended_tag = *tag;
-		size = *count * size;
-	}
+		size = 0;
+
+	sender_src = ptr_status[MPI_SOURCE_OFFSET];
+	sended_tag = ptr_status[MPI_TAG_OFFSET];
 
 	/* MPI Stats */
 	P2P_Communications ++;
@@ -1751,6 +1745,7 @@ static int get_Irank_obj (hash_data_t * hash_req, int *src_world, int *size,
   MPI_Fint tbyte = MPI_Type_c2f(MPI_BYTE);
 	int recved_count, dest;
 
+#if defined(DEAD_CODE)
 	if (MPI_F_STATUS_IGNORE != status)
 	{
 		CtoF77 (pmpi_get_count) (status, &tbyte, &recved_count, &ret);
@@ -1770,6 +1765,18 @@ static int get_Irank_obj (hash_data_t * hash_req, int *src_world, int *size,
 		*size = hash_req->size;
 		dest = hash_req->partner;
 	}
+#endif
+
+	CtoF77 (pmpi_get_count) (status, &tbyte, &recved_count, &ret);
+	MPI_CHECK(ret, pmpi_get_count);
+
+	if (recved_count != MPI_UNDEFINED)
+		*size = recved_count;
+	else
+		*size = 0;
+
+	*tag = status[MPI_TAG_OFFSET];
+	dest = status[MPI_SOURCE_OFFSET];
 
 	if (MPI_GROUP_NULL != hash_req->group)
 	{
@@ -1917,13 +1924,17 @@ void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
     MPI_Fint *ierror)
 {
+	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
+
+	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
+
    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
    {
-      Bursts_PMPI_Test_Wrapper(request, flag, status, ierror);
+      Bursts_PMPI_Test_Wrapper(request, flag, ptr_status, ierror);
    }
    else
    {
-      Normal_PMPI_Test_Wrapper(request, flag, status, ierror);
+      Normal_PMPI_Test_Wrapper(request, flag, ptr_status, ierror);
    }
 }
 
@@ -1933,6 +1944,7 @@ void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 
 void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 {
+	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
   hash_data_t *hash_req;
   iotimer_t temps_final;
   int src_world, size, tag, ret;
@@ -1945,13 +1957,15 @@ void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
    */
   TRACE_MPIEVENT (TIME, WAIT_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  CtoF77 (pmpi_wait) (request, status, ierror);
+	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
+
+  CtoF77 (pmpi_wait) (request, ptr_status, ierror);
 
   temps_final = TIME;
 
   if (*ierror == MPI_SUCCESS && ((hash_req = hash_search (&requests, req)) != NULL))
   {
-		if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
+		if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 		{
 			*ierror = ret;
 			return;
@@ -1992,6 +2006,7 @@ void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
 	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror)
 {
+	MPI_Fint my_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS], *ptr_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
   hash_data_t *hash_req;
   int src_world, size, tag, ret, ireq;
@@ -2015,16 +2030,18 @@ void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
 		for (i = 0; i < *count; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
 
-  CtoF77 (pmpi_waitall) (count, array_of_requests, array_of_statuses, ierror);
+	ptr_statuses = (MPI_F_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+
+  CtoF77 (pmpi_waitall) (count, array_of_requests, ptr_statuses, ierror);
 
   temps_final = TIME;
-  if (*ierror == MPI_SUCCESS && MPI_F_STATUSES_IGNORE != array_of_statuses)
+  if (*ierror == MPI_SUCCESS)
   {
     for (ireq = 0; ireq < *count; ireq++)
     {
       if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
       {
-				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, array_of_statuses[ireq])) != MPI_SUCCESS)
+				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_statuses[ireq])) != MPI_SUCCESS)
 				{
 					*ierror = ret;
 					return;
@@ -2069,6 +2086,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
 void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierror)
 {
+	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
   hash_data_t *hash_req;
 	int src_world, size, tag, ret, i;
@@ -2083,7 +2101,9 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 		for (i = 0; i < *count; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
 
-  CtoF77 (pmpi_waitany) (count, array_of_requests, index, status, ierror);
+	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
+
+  CtoF77 (pmpi_waitany) (count, array_of_requests, index, ptr_status, ierror);
 
   temps_final = TIME;
 
@@ -2093,7 +2113,7 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 
     if ((hash_req = hash_search (&requests, req)) != NULL)
     {
-			if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
+			if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 			{
 				*ierror = ret;
 				return;
@@ -2135,6 +2155,7 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Fint *outcount, MPI_Fint array_of_indices[],
 	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
 {
+	MPI_Fint my_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS], *ptr_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
   hash_data_t *hash_req;
   int src_world, size, tag, ret, i;
@@ -2156,19 +2177,21 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 		for (i = 0; i < *incount; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
 
+	ptr_statuses = (MPI_F_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+
 	CtoF77(pmpi_waitsome) (incount, array_of_requests, outcount, array_of_indices,
-	  array_of_statuses, ierror);
+	  ptr_statuses, ierror);
 
   temps_final = TIME;
 
-  if (*ierror == MPI_SUCCESS && MPI_F_STATUSES_IGNORE != array_of_statuses)
+  if (*ierror == MPI_SUCCESS)
   {
     for (i = 1; i <= *outcount; i++)
     {
 			MPI_Request req = save_reqs[array_of_indices[i-1]];
       if ((hash_req = hash_search (&requests, req)) != NULL)
       {
-				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, array_of_statuses[i-1])) != MPI_SUCCESS)
+				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_statuses[i-1])) != MPI_SUCCESS)
 				{
 					*ierror = ret;
 					return;
@@ -3461,6 +3484,7 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) 
 {
+	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 	int DataSendSize, DataRecvSize, DataSend, DataSize, ret;
 	int sender_src, SourceRank, RecvRank, Count, sender_tag;
@@ -3478,33 +3502,25 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 
 	TRACE_MPIEVENT (TIME, SENDRECV_EV, EVT_BEGIN, RecvRank, DataSend, *sendtag, c, EMPTY);
 
+	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
+
 	CtoF77(pmpi_sendrecv) (sendbuf, sendcount, sendtype, dest, sendtag,
-	  recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr);
+	  recvbuf, recvcount, recvtype, source, recvtag, comm, ptr_status, ierr);
 
-	if (MPI_F_STATUS_IGNORE != status)
-	{
-		CtoF77(pmpi_get_count) (status, recvtype, &Count, &ret);
-		MPI_CHECK(ret, pmpi_get_count);
+	CtoF77(pmpi_get_count) (status, recvtype, &Count, &ret);
+	MPI_CHECK(ret, pmpi_get_count);
 
-		if (Count != MPI_UNDEFINED)
-			DataSize = DataRecvSize * Count;
-		else
-			DataSize = 0;
-
-		sender_src = status[MPI_SOURCE_OFFSET];
-		sender_tag = status[MPI_TAG_OFFSET];
-	}
+	if (Count != MPI_UNDEFINED)
+		DataSize = DataRecvSize * Count;
 	else
-	{
-		sender_src = *source;
-		sender_tag = *recvtag;
-		DataSize = *recvcount * DataRecvSize;
-	}
+		DataSize = 0;
+
+	sender_src = ptr_status[MPI_SOURCE_OFFSET];
+	sender_tag = ptr_status[MPI_TAG_OFFSET];
 
 	/* MPI Stats */
 	P2P_Bytes_Sent += DataSend;
 	P2P_Bytes_Recv += DataSize;
-
 
 	if ((ret = get_rank_obj (comm, &sender_src, &SourceRank)) != MPI_SUCCESS)
 		return; 
@@ -3516,6 +3532,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) 
 {
+	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 	int DataSendSize, DataRecvSize, DataSend, DataSize, ret;
 	int sender_src, SourceRank, RecvRank, Count, sender_tag;
@@ -3530,27 +3547,20 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 
 	TRACE_MPIEVENT (TIME, SENDRECV_REPLACE_EV, EVT_BEGIN, RecvRank, DataSend, *sendtag, c, EMPTY);
 
-	CtoF77(pmpi_sendrecv_replace) (buf, count, type, dest, sendtag, source, recvtag, comm, status, ierr);
+	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
 
-	if (MPI_F_STATUS_IGNORE != status)
-	{
-		CtoF77(pmpi_get_count) (status, type, &Count, &ret);
-		MPI_CHECK(ret, pmpi_get_count);
+	CtoF77(pmpi_sendrecv_replace) (buf, count, type, dest, sendtag, source, recvtag, comm, ptr_status, ierr);
 
-		if (Count != MPI_UNDEFINED)
-			DataSize = DataRecvSize * Count;
-		else
-			DataSize = 0;
+	CtoF77(pmpi_get_count) (status, type, &Count, &ret);
+	MPI_CHECK(ret, pmpi_get_count);
 
-		sender_src = status[MPI_SOURCE_OFFSET];
-		sender_tag = status[MPI_TAG_OFFSET];
-	}
+	if (Count != MPI_UNDEFINED)
+		DataSize = DataRecvSize * Count;
 	else
-	{
-		sender_src = *source;
-		sender_tag = *recvtag;
-		DataSize = *count * DataRecvSize;
-	}
+		DataSize = 0;
+
+	sender_src = ptr_status[MPI_SOURCE_OFFSET];
+	sender_tag = ptr_status[MPI_TAG_OFFSET];
 
 	/* MPI Stats */
 	P2P_Bytes_Sent += DataSend;
@@ -3660,6 +3670,7 @@ static int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
 {
 	int ret, dest, recved_count;
 
+#if defined(DEAD_CODE)
 	if (MPI_STATUS_IGNORE != status)
 	{
 		ret = PMPI_Get_count (status, MPI_BYTE, &recved_count);
@@ -3679,6 +3690,18 @@ static int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
 		*size = hash_req->size;
 		dest = hash_req->partner;
 	}
+#endif
+
+	ret = PMPI_Get_count (status, MPI_BYTE, &recved_count);
+	MPI_CHECK(ret, PMPI_Get_count);
+
+	if (recved_count != MPI_UNDEFINED)
+		*size = recved_count;
+	else
+		*size = 0;
+
+	*tag = status->MPI_TAG;
+	dest = status->MPI_SOURCE;
 
 	if (MPI_GROUP_NULL != hash_req->group)
 	{
@@ -4251,6 +4274,7 @@ int MPI_Irsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
                         int tag, MPI_Comm comm, MPI_Status *status)
 {
+	MPI_Status my_status, *ptr_status;
   int size, src_world, sender_src, ret, recved_count, sended_tag, ierror;
 
   ret = PMPI_Type_size (datatype, &size);
@@ -4267,28 +4291,21 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
    */
   TRACE_MPIEVENT (TIME, RECV_EV, EVT_BEGIN, src_world, count * size, tag,
                   comm, EMPTY);
-  
-  ierror = PMPI_Recv (buf, count, datatype, source, tag, comm, status);
 
-	if (MPI_STATUS_IGNORE != status)
-	{
-		ret = PMPI_Get_count (status, datatype, &recved_count);
-		MPI_CHECK(ret, PMPI_Get_count);
+	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status; 
+ 
+  ierror = PMPI_Recv (buf, count, datatype, source, tag, comm, ptr_status);
 
-		if (recved_count != MPI_UNDEFINED)
-			size *= recved_count;
-		else
-			size = 0;
+	ret = PMPI_Get_count (ptr_status, datatype, &recved_count);
+	MPI_CHECK(ret, PMPI_Get_count);
 
-		sender_src = status[0].MPI_SOURCE;
-		sended_tag = status[0].MPI_TAG;
-	}
+	if (recved_count != MPI_UNDEFINED)
+		size *= recved_count;
 	else
-	{
-		sender_src = source;
-		sended_tag = tag;
-		size *= count;
-	}
+		size = 0;
+
+	sender_src = ptr_status->MPI_SOURCE;
+	sended_tag = ptr_status->MPI_TAG;
 
 	/* MPI Stats */
 	P2P_Communications ++;
@@ -4809,15 +4826,18 @@ int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 
 int MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
 {
+	MPI_Status my_status, *ptr_status;
    int ret;
+
+	ptr_status = (status == MPI_STATUS_IGNORE)?&my_status:status;
    
    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
    {
-      ret = Bursts_MPI_Test_C_Wrapper (request, flag, status);
+      ret = Bursts_MPI_Test_C_Wrapper (request, flag, ptr_status);
    }
    else
    {
-      ret = Normal_MPI_Test_C_Wrapper (request, flag, status);
+      ret = Normal_MPI_Test_C_Wrapper (request, flag, ptr_status);
    }
    return ret;
 }
@@ -4828,6 +4848,7 @@ int MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
 
 int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 {
+	MPI_Status my_status, *ptr_status;
 	MPI_Request req;
   hash_data_t *hash_req;
   int src_world, size, tag, ret, ierror;
@@ -4842,13 +4863,15 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 
 	req = *request;
 
-  ierror = PMPI_Wait (request, status);
+	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status;
+
+  ierror = PMPI_Wait (request, ptr_status);
 
   temps_final = TIME;
 
   if (ierror == MPI_SUCCESS && ((hash_req = hash_search (&requests, req)) != NULL))
   {
-		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
+		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 			return ret;
     if (hash_req->group != MPI_GROUP_NULL)
     {
@@ -4891,6 +4914,7 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
                            MPI_Status *array_of_statuses)
 {
+  MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
   MPI_Request save_reqs[MAX_WAIT_REQUESTS];
   hash_data_t *hash_req;
   int src_world, size, tag, ret, ireq, ierror;
@@ -4925,17 +4949,19 @@ int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
 # endif
 #endif
 
-  ierror = PMPI_Waitall (count, array_of_requests, array_of_statuses);
+  ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+
+  ierror = PMPI_Waitall (count, array_of_requests, ptr_array_of_statuses);
 
   temps_final = TIME;
 
-  if (ierror == MPI_SUCCESS && MPI_STATUSES_IGNORE != array_of_statuses)
+  if (ierror == MPI_SUCCESS)
   {
     for (ireq = 0; ireq < count; ireq++)
     {
       if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
       {
-				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(array_of_statuses[ireq]))) != MPI_SUCCESS)
+				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ireq]))) != MPI_SUCCESS)
 					return ret;
 
         if (hash_req->group != MPI_GROUP_NULL)
@@ -4980,6 +5006,7 @@ int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
 int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
                            int *index, MPI_Status *status)
 {
+	MPI_Status my_status, *ptr_status;
   MPI_Request save_reqs[MAX_WAIT_REQUESTS];
   hash_data_t *hash_req;
   int src_world, size, tag, ret, ierror;
@@ -5005,7 +5032,9 @@ int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
 # endif
 #endif
 
-  ierror = PMPI_Waitany (count, array_of_requests, index, status);
+	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status;
+
+  ierror = PMPI_Waitany (count, array_of_requests, index, ptr_status);
 
   temps_final = TIME;
 
@@ -5013,7 +5042,7 @@ int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
   {
     if ((hash_req = hash_search (&requests, save_reqs[*index])) != NULL)
     {
-			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
+			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 				return ret;
 
       if (hash_req->group != MPI_GROUP_NULL)
@@ -5052,6 +5081,7 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
                             int *outcount, int *array_of_indices,
                             MPI_Status *array_of_statuses)
 {
+  MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
   MPI_Request save_reqs[MAX_WAIT_REQUESTS];
 	UINT64 iireq;
   hash_data_t *hash_req;
@@ -5078,21 +5108,23 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
   memcpy (save_reqs, array_of_requests, incount * sizeof (MPI_Request));
 
 #if defined(DEBUG_MPITRACE)
-	fprintf (stderr, "%d: WAITSOME summary\n", TASKID);
+	fprintf (stderr, "MPITRACE %d: WAITSOME summary\n", TASKID);
 	for (index = 0; index < incount; index++)
 # if SIZEOF_LONG == 8
-		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, index, (UINT64)array_of_requests[index]);
+		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, index, (UINT64) array_of_requests[index]);
 # elif SIZEOF_LONG == 4
-		fprintf (stderr, "%d: position %d -> request %llu\n", TASKID, index, (UINT64)array_of_requests[index]);
+		fprintf (stderr, "%d: position %d -> request %llu\n", TASKID, index, (UINT64) array_of_requests[index]);
 # endif
 #endif
 
+  ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+
   ierror = PMPI_Waitsome (incount, array_of_requests, outcount, 
-    array_of_indices, array_of_statuses);
+    array_of_indices, ptr_array_of_statuses);
 
   temps_final = TIME;
 
-  if (ierror == MPI_SUCCESS && MPI_STATUSES_IGNORE != array_of_statuses)
+  if (ierror == MPI_SUCCESS)
   {
     for (ii = 0; ii < (*outcount); ii++)
     {
@@ -5100,7 +5132,7 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 
       if ((hash_req = hash_search (&requests, save_reqs[array_of_indices[ii]])) != NULL)
       {
-				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(array_of_statuses[ii]))) != MPI_SUCCESS)
+				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
 					return ret;
         if (hash_req->group != MPI_GROUP_NULL)
         {
@@ -6370,6 +6402,7 @@ int MPI_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	int source, int recvtag, MPI_Comm comm, MPI_Status * status) 
 {
+	MPI_Status my_status, *ptr_status;
 	MPI_Datatype DataSendType = sendtype, DataRecvType = recvtype;
 	int ierror, ret;
 	int DataSendSize, DataRecvSize, DataSend, DataSize;
@@ -6389,28 +6422,21 @@ int MPI_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	TRACE_MPIEVENT (TIME, SENDRECV_EV, EVT_BEGIN, RecvRank, DataSend, sendtag,
 		comm, EMPTY);
 
+	ptr_status = (status == MPI_STATUS_IGNORE)?&my_status:status;
+
 	ierror = PMPI_Sendrecv (sendbuf, sendcount, sendtype, dest, sendtag,
-		recvbuf, recvcount, recvtype, source, recvtag, comm, status);
+		recvbuf, recvcount, recvtype, source, recvtag, comm, ptr_status);
 
-	if (MPI_STATUS_IGNORE != status)
-	{
-		ret = PMPI_Get_count (status, DataRecvType, &Count);
-		MPI_CHECK(ret, PMPI_Get_count);
+	ret = PMPI_Get_count (ptr_status, DataRecvType, &Count);
+	MPI_CHECK(ret, PMPI_Get_count);
 
-		if (Count != MPI_UNDEFINED)
-			DataSize = DataRecvSize * Count;
-		else
-			DataSize = 0;
-
-		SendRank = status->MPI_SOURCE;
-		Tag = status->MPI_TAG;
-	}
+	if (Count != MPI_UNDEFINED)
+		DataSize = DataRecvSize * Count;
 	else
-	{
-		Tag = recvtag;
-		SendRank = source;
-		DataSize = recvcount * DataRecvSize;
-	}
+		DataSize = 0;
+
+	SendRank = ptr_status->MPI_SOURCE;
+	Tag = ptr_status->MPI_TAG;
 
 	/* MPI Stats */
 	P2P_Bytes_Sent += DataSend;
@@ -6429,6 +6455,7 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
   int dest, int sendtag, int source, int recvtag, MPI_Comm comm,
   MPI_Status * status) 
 {
+	MPI_Status my_status, *ptr_status;
 	MPI_Datatype DataSendType = type, DataRecvType = type;
 	int ierror, ret;
 	int DataSendSize, DataRecvSize, DataSend, DataSize;
@@ -6447,28 +6474,21 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
 	TRACE_MPIEVENT (TIME, SENDRECV_REPLACE_EV, EVT_BEGIN, RecvRank, DataSend,
 	  sendtag, comm, EMPTY);
 
+	ptr_status = (status == MPI_STATUS_IGNORE)?&my_status:status;
+
 	ierror = PMPI_Sendrecv_replace (buf, count, type, dest, sendtag, source,
-	  recvtag, comm, status);
+	  recvtag, comm, ptr_status);
 
-	if (MPI_STATUS_IGNORE != status)
-	{
-		ret = PMPI_Get_count (status, DataRecvType, &Count);
-		MPI_CHECK(ret, PMPI_Get_count);
+	ret = PMPI_Get_count (status, DataRecvType, &Count);
+	MPI_CHECK(ret, PMPI_Get_count);
 
-		if (Count != MPI_UNDEFINED)
-			DataSize = DataRecvSize * Count;
-		else
-			DataSize = 0;
-
-		SendRank = status->MPI_SOURCE;
-		Tag = status->MPI_TAG;
-	}
+	if (Count != MPI_UNDEFINED)
+		DataSize = DataRecvSize * Count;
 	else
-	{
-		Tag = recvtag;
-		SendRank = source;
-		DataSize = count * DataRecvSize;
-	}
+		DataSize = 0;
+
+	SendRank = ptr_status->MPI_SOURCE;
+	Tag = ptr_status->MPI_TAG;
 
 	/* MPI Stats */
 	P2P_Bytes_Sent += DataSend;
