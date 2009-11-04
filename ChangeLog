@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   + (04/Nov/2009) Added DLB support for MPI & SMPss applications.
    * (03/Nov/2009) Support of using MPI_STATUS_IGNORE in MPI_Status parameters (MPI_Wait, MPI_Recv, ...)
    * (03/Sep/2009) Fixed matching communications in mpi2prv that made mpi_sendrecv fail.
    * (17/Aug/2009) Fixed MPItrace_nevents to put all events to the same timestamp

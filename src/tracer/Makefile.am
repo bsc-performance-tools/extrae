@@ -47,6 +47,9 @@ if HAVE_MPI
 if WANT_OPENMP
   lib_LTLIBRARIES += libompitrace-lb.la
 endif
+if WANT_SMPSS
+  lib_LTLIBRARIES += libsmpssmpitrace-lb.la libsmpssmpitracef-lb.la
+endif
 endif
 endif
 
@@ -132,6 +135,8 @@ libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT)
 libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libompitrace_lb_la_SOURCES = $(libompitrace_la_SOURCES)
+libsmpssmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
+libsmpssmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 
 # For DynInst instrumentation
 lib_dyn_mpitrace_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
@@ -170,6 +175,9 @@ libtrttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
 libmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la
 libmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la
 libompitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la
+
+libsmpssmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la
+libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la
 
 lib_dyn_mpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpi.la
 lib_dyn_omptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
@@ -262,6 +270,9 @@ libmpitrace_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITR
 libmpitracef_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT
 libompitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DOMP_SUPPORT -DMPI_SUPPORT
 
+libsmpssmpitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DSMPSS_SUPPORT -DMPI_SUPPORT
+libsmpssmpitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DSMPSS_SUPPORT -DMPI_SUPPORT
+
 lib_dyn_mpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DC_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE
 lib_dyn_omptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DDYNINST_MODULE -DOMP_SUPPORT
 
@@ -291,8 +302,10 @@ libtrttrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS
 
 libmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) -static
-
 libompitrace_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
+
+libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) -static
 
 lib_dyn_mpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 lib_dyn_omptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
