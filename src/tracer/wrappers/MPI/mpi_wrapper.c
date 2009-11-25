@@ -2041,7 +2041,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
     {
       if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
       {
-				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_statuses[ireq])) != MPI_SUCCESS)
+				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, &ptr_statuses[ireq*SIZEOF_MPI_STATUS])) != MPI_SUCCESS)
 				{
 					*ierror = ret;
 					return;
@@ -2191,7 +2191,7 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 			MPI_Request req = save_reqs[array_of_indices[i-1]];
       if ((hash_req = hash_search (&requests, req)) != NULL)
       {
-				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_statuses[i-1])) != MPI_SUCCESS)
+				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, &ptr_statuses[(i-1)*SIZEOF_MPI_STATUS])) != MPI_SUCCESS)
 				{
 					*ierror = ret;
 					return;
