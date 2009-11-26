@@ -46,9 +46,9 @@ static char UNUSED rcsid[] = "$Id$";
 static void show_current (event_t * c)
 {
 #if SIZEOF_LONG == 8
-	fprintf (stdout, "EV: %d VAL: %lu TIME: %lu", c->event, c->value, c->time);
+	fprintf (stdout, "EV: %d VAL: %lu [0x%lx] TIME: %lu", c->event, c->value, c->value, c->time);
 #else
-	fprintf (stdout, "EV: %d VAL: %llu TIME: %llu", c->event, c->value, c->time);
+	fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu", c->event, c->value, c->value, c->time);
 #endif
 
 	if (c->event == IRECV_EV || c->event == IRECVED_EV || c->event == RECV_EV ||
