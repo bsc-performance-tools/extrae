@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (26/Nov/2009) Fixed conversion of caller lines (sampling or MPI)
    * (25/Nov/2009) Fixed access to ptr_statuses which caused to segfault when calling mpi_waitall/mpi_waitsome
    + (04/Nov/2009) Added DLB support for MPI & SMPss applications.
    * (03/Nov/2009) Support of using MPI_STATUS_IGNORE in MPI_Status parameters (MPI_Wait, MPI_Recv, ...)

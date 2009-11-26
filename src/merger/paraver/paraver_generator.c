@@ -500,15 +500,15 @@ static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
 {
 	if (eventtype == USRFUNC_EV)
 		return Address2Info_Translate (eventvalue, ADDR2UF_FUNCTION, option_UniqueCallerID);
-	else if (eventtype >= MPI_CALLER_EV && eventtype <= MPI_CALLER_EV + MAX_CALLERS)
+	else if (eventtype >= MPI_CALLER_EV && eventtype < MPI_CALLER_EV + MAX_CALLERS)
 		return Address2Info_Translate (eventvalue, ADDR2MPI_FUNCTION, option_UniqueCallerID);
-	else if (eventtype >= MPI_CALLER_LINE_EV && eventtype <= MPI_CALLER_LINE_EV + MAX_CALLERS)
+	else if (eventtype >= MPI_CALLER_LINE_EV && eventtype < MPI_CALLER_LINE_EV + MAX_CALLERS)
 		return Address2Info_Translate (eventvalue, ADDR2MPI_LINE, option_UniqueCallerID);
 	else if (eventtype == USRFUNC_LINE_EV)
 		return Address2Info_Translate (eventvalue, ADDR2UF_LINE, option_UniqueCallerID);
-	else if (eventtype >= SAMPLING_EV && eventtype <= SAMPLING_EV + MAX_CALLERS)
+	else if (eventtype >= SAMPLING_EV && eventtype < SAMPLING_EV + MAX_CALLERS)
 		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_FUNCTION, option_UniqueCallerID);
-	else if (eventtype >= SAMPLING_LINE_EV && eventtype <= SAMPLING_LINE_EV + MAX_CALLERS)
+	else if (eventtype >= SAMPLING_LINE_EV && eventtype < SAMPLING_LINE_EV + MAX_CALLERS)
 		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_LINE, option_UniqueCallerID);
 	else if (eventtype == OMPFUNC_EV)
 		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, option_UniqueCallerID);
