@@ -664,7 +664,7 @@ static int IRecv_Event (event_t * current_event,
 					if (isTaskInMyGroup (fset, Get_EvTarget(receive)))
 					{
 #if defined(DEBUG)
-						fprintf (stdout, "IRECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+						fprintf (stdout, "IRECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(receive), Get_EvTag(receive));
 #endif
 						thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(receive)].threads[0]);
 

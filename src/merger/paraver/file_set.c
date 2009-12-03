@@ -879,7 +879,7 @@ event_t * GetNextEvent_FS (
  ***  SearchIRECVED
  ******************************************************************************/
 
-event_t *SearchIRECVED (event_t * current, int request, FileItem_t * freceive)
+event_t *SearchIRECVED (event_t * current, long long request, FileItem_t * freceive)
 {
 	event_t *irecved = current;
 
@@ -887,12 +887,12 @@ event_t *SearchIRECVED (event_t * current, int request, FileItem_t * freceive)
 	/* freceive->tmp = freceive->first; */
 
 	if (Get_EvEvent (irecved) == IRECVED_EV)
-		if (Get_EvValue (irecved) == request)
+		if (Get_EvAux (irecved) == request)
 			return irecved;
 
 	while ((irecved = NextRecvG_FS (freceive)) != NULL)
 		if (Get_EvEvent (irecved) == IRECVED_EV)
-			if (Get_EvValue (irecved) == request)
+			if (Get_EvAux (irecved) == request)
 				return irecved;
 	return NULL;
 }
