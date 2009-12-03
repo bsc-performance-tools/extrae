@@ -234,13 +234,14 @@ int main(int argc, char **argv)
     {
 		bool ok;
 
-		C->InitClustering("./cl.I.IPC.xml", OutPrefix, true);
+		C->InitClustering("./cl.I.IPC.xml", true, false);
 	
 		/* Convert input and feed clustering tool */
 		FeedWithData (C, NumBackends, bi_list, Max_Representatives, Pct_Bursts);
 
 		/* Execute the analysis */
-		ok = C->ExecuteClustering (true);
+		ok = C->ExecuteClustering (true, OutPrefix);
+		C->PrintGNUPlot (OutPrefix);
 
         fprintf(stderr, "%s: Clustering tool returned %s.\n", basename(argv[0]), (ok ? "successfully" : "with errors"));
 

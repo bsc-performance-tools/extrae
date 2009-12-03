@@ -307,13 +307,27 @@ using namespace std;
 extern Network *globnet;
 #include "StreamPublisher.h"
 
+#define CLUSTERING_BASENAME "CLUSTERING_STEP_"
+#define MAX_BASENAME_LENGTH 256
+int CurrentClusteringStep = 0;
+
+char * Get_Clustering_BaseName(char *prefix, int step, char *suffix)
+{
+	char *basename = NULL;
+
+	basename = (char *)malloc(MAX_BASENAME_LENGTH);
+	snprintf(basename, MAX_BASENAME_LENGTH, "%s%d%s", prefix, step, suffix);
+
+	return basename;
+}
+
 void Clusters_SendConfig (MRNetClustering *C, Stream *stream)
 {
     /* Broadcast the duration filter */
     MRN_STREAM_SEND(stream, MRN_CLUSTERS, "%uld", C->GetDurationFilter());
 }
 
-int Clusters_FetchInput (Stream *stream, char *OutPrefix, BurstInfo_t ***bi_list_io, double *mb_per_min_io, int *bytes_io, unsigned long long *ns_io)
+int Clusters_FetchInput (Stream *stream, int step, BurstInfo_t ***bi_list_io, double *mb_per_min_io, int *bytes_io, unsigned long long *ns_io)
 {
 	int num_be = stream->size();
     BurstInfo_t **bi_list = NULL;
@@ -328,7 +342,9 @@ int Clusters_FetchInput (Stream *stream, char *OutPrefix, BurstInfo_t ***bi_list
    	/* Store input in disk */
     if ((DUMP_CLUSTERS_DATA) && (got_data))
 	{
-        BurstInfo_DumpArray (bi_list, num_be, OutPrefix, ConfigHWCSet);
+		char *dumpFile = Get_Clustering_BaseName(CLUSTERING_BASENAME, step, "");
+        BurstInfo_DumpArray (bi_list, num_be, dumpFile, ConfigHWCSet);
+		free (dumpFile);
 	}
 	*bi_list_io = bi_list;
 	*bytes_io = bytes;
@@ -453,19 +469,82 @@ void Clusters_ExecuteAnalysis (MRNetClustering *C)
     timerclear(&entry_time);
     timerclear(&exit_time);
     gettimeofday(&entry_time, 0);
-    ok = C->ExecuteClustering (true);
+
+	char *basename = Get_Clustering_BaseName(CLUSTERING_BASENAME, CurrentClusteringStep, "");
+    ok = C->ExecuteClustering (true, basename);
+    C->PrintGNUPlot (basename);
+
     gettimeofday(&exit_time, 0);
     fprintf(stderr, "[FE] do_Clusters: Clustering tool returns %s after %ld seconds.\n", (ok ? "successfully" : "with errors"), diff_time(entry_time, exit_time));
 
     /* Compute CPI Stack statistics */
-    snprintf(cmd, sizeof(cmd), "%s/bin/cpistack_stats.pl %s.clusters_info.csv", getenv("MPITRACE_HOME"), C->GetClusteringBaseName().c_str());
+    snprintf(cmd, sizeof(cmd), "%s/bin/cpistack_stats.pl %s.clusters_info.csv", getenv("MPITRACE_HOME"), basename);
     fprintf(stderr, "[FE] Computing CPI Stack statistics: %s\n", cmd);
     system (cmd);
+	free(basename);
 }
 
 #include "extern.h" /* PARAVER_OFFSET ... GetClusterId & ClassifyPoint -> wrappers to encapsulate this offset */
 
-void Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, int num_be, BurstInfo_t **bi_list)
+typedef std::map< std::pair< int, int >, std::vector< int > > ClusterIDs_t;
+
+void Classify_All_Bursts (MRNetClustering *C, int num_be, BurstInfo_t **bi_list, ClusterIDs_t & cids)
+{
+    struct timeval entry_time;
+    struct timeval exit_time;
+
+    timerclear(&entry_time);
+    timerclear(&exit_time);
+
+    gettimeofday(&entry_time, 0);
+
+    /* Classify all points */
+    for (int i=0; i<num_be; i++)
+    {
+        BurstInfo_t *bi = bi_list[i];
+
+        std::pair< int, int > key = std::make_pair(bi->TaskID, bi->ThreadID);
+        for (int j=0; j<bi->num_Bursts; j++)
+        {
+            INT32  TaskId, ThreadId;
+            UINT64 BeginTime, Duration;
+            vector<INT64> HWCValues;
+
+            Convert (bi, j, &TaskId, &ThreadId, &BeginTime, &Duration, &HWCValues);
+
+            C->SetHWCountersGroup(ConfigHWCSet[bi->HWCSet[j]]);
+            cids[key].push_back( C->ClassifyPoint( TaskId, ThreadId, BeginTime, Duration, HWCValues ) + PARAVER_OFFSET );
+        }
+    }
+    gettimeofday(&exit_time, 0);
+    fprintf(stderr, "[FE] do_Clusters: Classification lasted %ld seconds.\n", diff_time(entry_time, exit_time));
+
+    char *basename = Get_Clustering_BaseName(CLUSTERING_BASENAME, CurrentClusteringStep, ".classify");
+    C->PrintGNUPlot (basename);
+    free(basename);
+}
+
+void Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, ClusterIDs_t & cids)
+{
+    StreamPublisher sp(globnet, stream);
+    std::vector<Stream *> *stream_list = NULL;
+    std::vector<Stream *>::iterator it;
+
+    stream_list = sp.AnnounceP2P(stream);
+    for ( it = stream_list->begin(); it != stream_list->end(); it ++ )
+    {
+        Stream *p2p = *it;
+        std::set<Rank> ep = p2p->get_EndPoints();
+        int r = BE_RANK(*(ep.begin()));
+
+        std::pair< int, int > key = std::make_pair(r, 0);
+        fprintf(stderr, "[FE] Sending %d CIDS to %d\n", cids[key].size(), r);
+        MRN_STREAM_SEND(p2p, MRN_CLUSTERS, "%ad", &cids[key][0], cids[key].size());
+    }
+    delete stream_list;
+}
+
+void OLD_Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, int num_be, BurstInfo_t **bi_list)
 {
     MRNetClusteringResults *CR = NULL;
     std::map< std::pair< int, int >, std::vector< int > > cids;
@@ -473,7 +552,6 @@ void Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, int num_be, Burs
 	fprintf(stderr, "[FE] Clusters_TransferCIDS\n");
 
 	/* XXX Both Clustering & Classification results should be gathered right after the analysis has finished and just transfer here */
-
 #if !defined(BOTH_REPRESENTATIVES_AND_RANDOM) && !defined(CLUSTERING_FED_RANDOMLY)
 	/* Get the results of the clustering */
     C->InitResultsWalk();
@@ -520,6 +598,10 @@ void Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, int num_be, Burs
 	}
     gettimeofday(&exit_time, 0);
     fprintf(stderr, "[FE] do_Clusters: Classification lasted %ld seconds.\n", diff_time(entry_time, exit_time));
+
+	char *basename = Get_Clustering_BaseName(CLUSTERING_BASENAME, CurrentClusteringStep, ".classify");
+	C->PrintGNUPlot (basename);
+	free(basename);
 #endif
 
     StreamPublisher sp(globnet, stream);
@@ -541,12 +623,10 @@ void Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, int num_be, Burs
 	delete CR;
 }
 
-MRNetClustering * SingleClusterAnalysis (Stream *stream, double *mb_per_min_io, int *bytes_io, unsigned long long *ns_io, int *num_be_io, BurstInfo_t ***bi_list_io)
+MRNetClustering * SingleClusterAnalysis (Stream *stream, double *mb_per_min_io, int *bytes_io, unsigned long long *ns_io, int *num_be_io, BurstInfo_t ***bi_list_io, ClusterIDs_t & cids_io)
 {
-	static int NumClustersExecuted = 0;
 	MRNetClustering *C = new MRNetClustering();
 	BurstInfo_t **bi_list = NULL;
-	char OutPrefix[256];
     int num_be = stream->size();
 	double mb_per_min;
 	int bytes;
@@ -556,13 +636,12 @@ MRNetClustering * SingleClusterAnalysis (Stream *stream, double *mb_per_min_io, 
 	fprintf(stderr, "[FE] Sending ACK for SingleClusterAnalysis\n");
 	MRN_STREAM_SEND(stream, MRN_ACK, "");
 
-    NumClustersExecuted ++;
-    snprintf(OutPrefix, sizeof(OutPrefix), "%s%d", "CLUSTERING_STEP_", NumClustersExecuted);
+    CurrentClusteringStep ++;
 
-    C->InitClustering("./cl.I.IPC.xml", OutPrefix, true);
+    C->InitClustering("./cl.I.IPC.xml", true, true);
     Clusters_SendConfig(C, stream);
 
-    got_data = Clusters_FetchInput(stream, OutPrefix, &bi_list, &mb_per_min, &bytes, &ns);
+    got_data = Clusters_FetchInput(stream, CurrentClusteringStep, &bi_list, &mb_per_min, &bytes, &ns);
 	if (!got_data)
 	{
 		/* The app did not produce data (probably ended) */
@@ -573,6 +652,7 @@ MRNetClustering * SingleClusterAnalysis (Stream *stream, double *mb_per_min_io, 
 	{
 		Clusters_FeedWithData(C, num_be, bi_list);
 	    Clusters_ExecuteAnalysis(C);
+		Classify_All_Bursts(C, num_be, bi_list, cids_io);
 	}
 	*mb_per_min_io = mb_per_min;
     *bytes_io = bytes;
@@ -595,11 +675,17 @@ bool ClusterStable(MRNetClustering *c1, MRNetClustering *c2)
 	static int tries_so_far = 0;
 	int min_tries_before_lower;
 	
+	char *curBaseName, *prevBaseName;
 
     if ((c1 == NULL) || (c2 == NULL)) return false;
 
     /* Compute CPI Stack statistics */
-    snprintf(cmd, sizeof(cmd), "%s/bin/compare_clusters.pl %s %s", getenv("MPITRACE_HOME"), c1->GetClusteringBaseName().c_str(), c2->GetClusteringBaseName().c_str());
+	curBaseName = Get_Clustering_BaseName(CLUSTERING_BASENAME, CurrentClusteringStep, "");
+	prevBaseName = Get_Clustering_BaseName(CLUSTERING_BASENAME, CurrentClusteringStep - 1, "");
+    snprintf(cmd, sizeof(cmd), "%s/bin/compare_clusters.pl %s %s", getenv("MPITRACE_HOME"), curBaseName, prevBaseName);
+	free(curBaseName);
+	free(prevBaseName);
+
     rc = system (cmd);
 	rc = rc >> 8; /* Perl exit code */
     fprintf(stderr, "[FE] Comparing clusters ... PctEqual=%d%\n", rc);
@@ -632,7 +718,7 @@ bool ClusterStable(MRNetClustering *c1, MRNetClustering *c2)
 
 bool Appl_Ended = false;
 
-MRNetClustering * MultiClusterAnalysis(Stream *stream, int *num_be_io, BurstInfo_t ***bi_list_io)
+MRNetClustering * MultiClusterAnalysis(Stream *stream, int *num_be_io, BurstInfo_t ***bi_list_io, ClusterIDs_t & cids_io)
 {
 	int freq = -1;
 	MRNetClustering *prevC = NULL, *currC = NULL; 
@@ -659,7 +745,7 @@ MRNetClustering * MultiClusterAnalysis(Stream *stream, int *num_be_io, BurstInfo
 	{
 		if (prevC != NULL) delete prevC;
 		prevC = currC;
-		currC = SingleClusterAnalysis(stream, &mb_per_min, &bytes, &ns, &num_be, &bi_list);
+		currC = SingleClusterAnalysis(stream, &mb_per_min, &bytes, &ns, &num_be, &bi_list, cids_io);
 		if (currC == NULL)
 		{
 			/* The app did not produce data (probably ended) */
@@ -680,7 +766,7 @@ MRNetClustering * MultiClusterAnalysis(Stream *stream, int *num_be_io, BurstInfo
 				b_per_ns = (double)bytes / (double)ns;
 
 				freq_ns = ((max_size * 1024 * 1024 * SIZE_RATIO_MPIT_PRV) / b_per_ns);
-				freq_ns = MIN(freq_ns, (long long)60 * (long long)1000000000);
+				freq_ns = MIN(freq_ns, (long long)150 * (long long)1000000000);
 				change_hwc_freq = (unsigned long long)((unsigned long long)(ns) / (unsigned long long)(10 * 2)); /* freq / num_hwc_sets * num_rotations_of_hwc */
 
 				fprintf(stderr, "[FE] max_size=%f mb_per_min=%f b_per_ns=%f freq=%d ns=%llu bytes=%d freq_ns=%llu change_hwc_freq=%llu\n", 
@@ -693,6 +779,8 @@ MRNetClustering * MultiClusterAnalysis(Stream *stream, int *num_be_io, BurstInfo
 		if (!stability) 
 		{
 			BurstInfo_FreeArray(bi_list, num_be);
+
+			cids_io.clear();
 
 			while (freq_ns > 0)
 			{
@@ -720,15 +808,16 @@ int do_Clusters (Stream *stream)
 	BurstInfo_t **bi_list;
 	int bytes;
 	unsigned long long ns;
+	ClusterIDs_t cids;
 
-//    MRNetClustering *C = SingleClusterAnalysis(stream, &mb_per_min, &bytes, &ns, &num_be, &bi_list);
-    MRNetClustering *C = MultiClusterAnalysis(stream, &num_be, &bi_list);
+//    MRNetClustering *C = SingleClusterAnalysis(stream, &mb_per_min, &bytes, &ns, &num_be, &bi_list, cids);
+    MRNetClustering *C = MultiClusterAnalysis(stream, &num_be, &bi_list, cids);
 
 	if (C != NULL)
 	{
 		char cmd[2048];
 
-		Clusters_TransferCIDS(C, stream, num_be, bi_list);
+		Clusters_TransferCIDS(C, stream, cids);
 		BurstInfo_FreeArray(bi_list, num_be);
 		delete C;
 
@@ -767,7 +856,7 @@ int do_Clusters (Stream *stream)
 	bool ok;
 	int num_be = stream->size();
 	BurstInfo_t **bi_list = NULL;
-	static int NumClustersExecuted = 0;
+	static int CurrentClusteringStep = 0;
 	char OutputFileName[256];
 	ClusteringBurstsInfo_t *ClusterInput = NULL;
 	int numClusterSets = 0;
@@ -797,8 +886,8 @@ int do_Clusters (Stream *stream)
     bi_list = Receive_Bursts_Info (num_be, stream);
 
 	/* Store input in disk */
-    NumClustersExecuted ++;
-    snprintf(OutputFileName, sizeof(OutputFileName), "%s%d", "CLUSTER", NumClustersExecuted);
+    CurrentClusteringStep ++;
+    snprintf(OutputFileName, sizeof(OutputFileName), "%s%d", "CLUSTER", CurrentClusteringStep);
     if (DUMP_CLUSTERS_DATA)
     {
 		BurstInfo_DumpArray (bi_list, num_be, OutputFileName);
@@ -1336,7 +1425,7 @@ int do_Clustering (Stream *stream)
 	pthread_t worker;
 	ClusterInput_t *InputData;
 	int i, slot_open, rc, num_be = stream->size();
-	static int NumClustersExecuted = 0;
+	static int CurrentClusteringStep = 0;
 	static int ClusterInitialized = FALSE;
 	BurstsInfo_t *BurstsInfo = NULL;
 
@@ -1402,8 +1491,8 @@ int do_Clustering (Stream *stream)
 		InputData = (ClusterInput_t *)malloc(sizeof(ClusterInput_t));
 		InputData->NumBackends = num_be;
 		InputData->BurstsInfo = BurstsInfo;
-		snprintf(InputData->OutputFileName, sizeof(InputData->OutputFileName), "%s%d", "CLUSTER", NumClustersExecuted); 
-        NumClustersExecuted ++;
+		snprintf(InputData->OutputFileName, sizeof(InputData->OutputFileName), "%s%d", "CLUSTER", CurrentClusteringStep); 
+        CurrentClusteringStep ++;
 
 		fprintf(stderr, "WRITE_CLUSTERING_DATA_TO_DISK = %d\n", WRITE_CLUSTERING_DATA_TO_DISK);
 		if (WRITE_CLUSTERING_DATA_TO_DISK)
