@@ -3,6 +3,7 @@ ChangeLog
    [ + added, - removed, * changed ]
 
    * (03/Dec/2009) Fixed a bug in 64bit systems where MPI_Request is a pointer. May produce mismatching communications.
+                   Added MPItrace_user_function (int) into the headers.
    * (26/Nov/2009) Fixed conversion of caller lines (sampling or MPI)
    * (25/Nov/2009) Fixed access to ptr_statuses which caused to segfault when calling mpi_waitall/mpi_waitsome
    + (04/Nov/2009) Added DLB support for MPI & SMPss applications.

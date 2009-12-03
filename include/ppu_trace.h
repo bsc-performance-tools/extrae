@@ -31,16 +31,32 @@
 #ifndef PPU_INCLUDED_H
 #define PPU_INCLUDED_H
 
+#include "mpitrace_user_events.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void MPItrace_init(void);
-void MPItrace_fini(void);
-
+/* Special Cell tracing from the PPU side - initialization and finalization */
 int CELLtrace_init (int spus, speid_t * spe_id);
 void CELLtrace_fini (void);
-void CELLtrace_event (unsigned int type, unsigned int value);
+
+/* Additional symbols for PPU side - synonims for the MPI_* standard calls */
+void PPUtrace_init (void);
+void PPUtrace_fini (void);
+void PPUtrace_user_function (unsigned enter);
+void PPUtrace_event (unsigned int type, unsigned int value);
+void PPUtrace_Nevent (unsigned int count, unsigned int *types,
+	unsigned int *values);
+void PPUtrace_shutdown (void);
+void PPUtrace_restart (void);
+void PPUtrace_counters (void);
+void PPUtrace_previous_hwc_set (void);
+void PPUtrace_next_hwc_set (void);
+void PPUtrace_eventandcounters (int type, int value);
+void PPUItrace_Neventandcounters (unsigned int count, unsigned int *types,
+	unsigned int *values);
+void PPUtrace_set_options (int options);
 
 #ifdef __cplusplus
 }
