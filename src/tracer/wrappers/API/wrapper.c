@@ -226,17 +226,6 @@ unsigned get_current_NumOfThreads (void)
 }
 
 /******************************************************************************
- **      Function name : file_exists (char*)
- **      Author : HSG
- **      Description : Checks whether a file exists
- ******************************************************************************/
-int file_exists (char *fitxer)
-{
-	struct stat buffer;
-	return (stat (fitxer, &buffer) == 0);
-}
-
-/******************************************************************************
  **      Function name : VerifyLicenseExecution (void)
  **      Author : HSG
  **      Description : Checks whether the license is ok on this node

@@ -59,6 +59,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <ctype.h>
 #endif
 
+#include "utils.h"
 #include "semantics.h"
 #include "dump.h"
 #include "file_set.h"
@@ -79,6 +80,7 @@ static char UNUSED rcsid[] = "$Id$";
 #define DEFAULT_PRV_OUTPUT_NAME "MPITRACE_Paraver_Trace.prv"
 #define DEFAULT_DIM_OUTPUT_NAME "MPITRACE_Dimemas_Trace.dim"
 
+typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
 typedef enum {Block, Cyclic, Size, ConsecutiveSize} WorkDistribution_t;
 
 char OutTrace[PATH_MAX];
@@ -276,7 +278,7 @@ static char *strip (char *buffer)
  ***  Insertis into trace tables the contents of a ascii file!
  ******************************************************************************/
 
-void Read_MPITS_file (const char *file, int *cptask, int *cfiles, int relative)
+void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype)
 {
 	int info;
 	FILE *fd = fopen (file, "r");
@@ -295,11 +297,28 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, int relative)
 		fgets (mybuffer, sizeof(mybuffer), fd);
 		if (!feof(fd))
 		{
+			char *stripped;
+
 			info = sscanf (mybuffer, "%s on %s", path, host);
-			if (relative)
-				Process_MPIT_File (basename(strip (path)), (info==2)?host:NULL, cptask, cfiles);
-			else
-				Process_MPIT_File (strip (path), (info==2)?host:NULL, cptask, cfiles);
+			stripped = strip (path);
+
+			/* If mode is not forced, check first if the absolute path exists,
+			   if not, try to open in the curren directory */
+			if (opentype == FileOpen_Default)
+			{
+				if (!file_exists(stripped))
+					Process_MPIT_File (basename(stripped), (info==2)?host:NULL, cptask, cfiles);
+				else
+					Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles);
+			}
+			else if (opentype == FileOpen_Absolute)
+			{
+				Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles);
+			}
+			else if (opentype == FileOpen_Relative)
+			{
+				Process_MPIT_File (basename(stripped), (info==2)?host:NULL, cptask, cfiles);
+			}
 		}
 	}
 	while (!feof(fd));
@@ -376,18 +395,25 @@ void ProcessArgs (int rank, int argc, char *argv[], int *traceformat,
 				strcpy (symbol_file, argv[CurArg]);
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-f") || !strcmp (argv[CurArg], "-f-relative"))
+		if (!strcmp (argv[CurArg], "-f"))
 		{
 			CurArg++;
 			if (CurArg < argc)
-				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, 1);
+				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Default);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-f-relative"))
+		{
+			CurArg++;
+			if (CurArg < argc)
+				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Relative);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-f-absolute"))
 		{
 		  CurArg++;
 		  if (CurArg < argc)
-		    Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, 0);
+		    Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Absolute);
 		  continue;
 		}
 #if defined(IS_BG_MACHINE)

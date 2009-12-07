@@ -349,6 +349,22 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
 		return atoll (tmp_buff) * MinTimeFactor;
 }
 
+/******************************************************************************
+ **      Function name : file_exists (char*)
+ **      Author : HSG
+ **      Description : Checks whether a file exists
+ ******************************************************************************/
+int file_exists (char *file)
+{
+	struct stat buffer;
+	return stat(file, &buffer)== 0;
+}
+
+/******************************************************************************
+ **      Function name : mkdir_recursive (char*)
+ **      Author : HSG
+ **      Description : make a recursive recursively
+ ******************************************************************************/
 int mkdir_recursive (char *path)
 {
 	struct stat sb;
