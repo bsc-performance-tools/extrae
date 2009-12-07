@@ -85,7 +85,9 @@ static char UNUSED rcsid[] = "$Id$";
 
 /* Some global (but local in the module) variables */
 static char *temporal_d = NULL, *final_d = NULL;
+#if defined(DEAD_CODE)
 static int temporal_d_mkdir = TRUE, final_d_mkdir = TRUE;
+#endif
 static int TracePrefixFound = FALSE;
 
 static const xmlChar *xmlYES = (xmlChar*) "yes";
@@ -468,8 +470,10 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 				temporal_d = (char*) xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
+#if defined(DEAD_CODE)
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 				temporal_d_mkdir = !xmlStrcmp (xmlGetProp (tag, TRACE_MKDIR), xmlYES);
+#endif
 			XML_FREE(enabled);
 		}
 		/* Where must we store the final intermediate files?  DON'T FREE it's used below */
@@ -478,8 +482,10 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 				final_d = (char*) xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
+#if defined(DEAD_CODE)
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 				final_d_mkdir = !xmlStrcmp (xmlGetProp (tag, TRACE_MKDIR), xmlYES);
+#endif
 			XML_FREE(enabled);
 		}
 #if defined(MPI_SUPPORT)
@@ -1315,8 +1321,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 			if ((temporal_d = res_cwd) == NULL)
 				temporal_d = ".";
 		strcpy (tmp_dir, temporal_d);
+		/* Force mkdir */
+#if defined(DEAD_CODE)
 		if (temporal_d_mkdir)
-			mkdir_recursive (tmp_dir);
+#endif
+		mkdir_recursive (tmp_dir);
 
 		/* Final directory must be checked against the configuration of the XML, 
   	    the temporal_directory and, finally, the current directory */
@@ -1333,8 +1342,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 		else
 			strcpy (final_dir, final_d);
 
+		/* Force mkdir */
+#if defined(DEAD_CODE)
 		if (final_d_mkdir)
-			mkdir_recursive (final_dir);
+#endif
+		mkdir_recursive (final_dir);
 
 		if (strcmp (final_dir, tmp_dir) != 0)
 		{

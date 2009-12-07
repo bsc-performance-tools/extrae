@@ -2,6 +2,8 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (07/Dec/2009) Force mkdir of the storage directory. So make-dir are no longer needed in the XML files.
+                   Improve -f on merger. First try on absolute path, then in relative.
    * (03/Dec/2009) Fixed a bug in 64bit systems where MPI_Request is a pointer. May produce mismatching communications.
                    Added MPItrace_user_function (int) into the headers.
    * (26/Nov/2009) Fixed conversion of caller lines (sampling or MPI)

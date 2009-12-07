@@ -104,12 +104,10 @@
     <trace-prefix enabled="yes">TRACE</trace-prefix>
     <!-- Stop the tracing when the intermediate file reaches this amount of MBs -->
     <size enabled="no">5</size>
-    <!-- Where must we store the MPIT files while the app runs?
-         Set make-dir to yes if you want to make this directory before running -->
-    <temporal-directory enabled="yes" make-dir="no">/scratch</temporal-directory>
-    <!-- Where must we store the MPIT files once the app ends?
-         Set make-dir to yes if you want to make this directory before running -->
-    <final-directory enabled="yes" make-dir="no">/gpfs/scratch/bsc41/bsc41273</final-directory>
+    <!-- Where must we store the MPIT files while the app runs? -->
+    <temporal-directory enabled="yes">/scratch</temporal-directory>
+    <!-- Where must we store the MPIT files once the app ends? -->
+    <final-directory enabled="yes">/gpfs/scratch/bsc41/bsc41273</final-directory>
     <!-- Must the MPITs be gathered once the app ends into a single node? -->
     <gather-mpits enabled="no" />
   </storage>
