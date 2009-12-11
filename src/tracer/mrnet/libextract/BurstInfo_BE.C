@@ -39,7 +39,7 @@ int Extract_BurstInfo (int task_id, int thread_id, unsigned long long min_time, 
 		skip_events ++;
 		BIT_Next (it2);
 	}
-	fprintf(stderr, "[EXTRACTOR %d] skip_events=%d (remaining=%d)\n", task_id, skip_events, total_events-skip_events);
+	/* fprintf(stderr, "[EXTRACTOR %d] skip_events=%d (remaining=%d)\n", task_id, skip_events, total_events-skip_events); */
 
 	if (!BIT_OutOfBounds(it))
 	{
@@ -70,8 +70,8 @@ int Extract_BurstInfo (int task_id, int thread_id, unsigned long long min_time, 
 				{
 					if (set != Get_EvHWCSet(last_begin))
 					{
-						fprintf(stderr, "[EXTRACTOR %d] Burst Begins with set %d and ends with set %d\n", 
-							task_id, Get_EvHWCSet(last_begin), set);
+						/* fprintf(stderr, "[EXTRACTOR %d] Burst Begins with set %d and ends with set %d\n", 
+							task_id, Get_EvHWCSet(last_begin), set); */
 					}
 					else 
 					{
@@ -110,7 +110,7 @@ int Extract_BurstInfo (int task_id, int thread_id, unsigned long long min_time, 
 	}
 
 	*bi_io = bi;
-	fprintf(stderr, "[EXTRACTOR %d] count_events=%d mb=%d\n", task_id, count_events, Mb);
+	/* fprintf(stderr, "[EXTRACTOR %d] count_events=%d mb=%d\n", task_id, count_events, Mb); */
 	return Mb;
 }
 

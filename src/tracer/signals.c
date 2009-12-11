@@ -43,7 +43,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "utils.h"
 #include "wrapper.h"
 
-#define DBG_SIGNALS
+/* #define DBG_SIGNALS */
 
 /* -----------------------------------------------------------------------
  * SigHandler_FlushAndTerminate

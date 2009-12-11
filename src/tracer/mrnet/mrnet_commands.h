@@ -74,7 +74,7 @@ enum
 	MRN_ALL_COMMANDS
 };
 
-#define MRN_DEBUG
+/* #define MRN_DEBUG */
 #define MRN_RANK(rank) (Rank)(rank+1000000)
 #define BE_RANK(rank) (rank-1000000)
 

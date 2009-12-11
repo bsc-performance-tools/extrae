@@ -421,7 +421,7 @@ void * Listen_Backends (void *stream_ptr)
 	Stream *stream = (Stream *)stream_ptr;
 	int rc;
 
-	fprintf(stderr, "[FE-BE] Listening for back-ends at stream %d\n", stream->get_Id());
+	fprintf(stderr, "[FE] Listening for back-ends at stream %d\n", stream->get_Id());
 	do 
 	{
 		int task, thread;
@@ -445,7 +445,7 @@ void * Listen_Backends (void *stream_ptr)
     Stream *stream = (Stream *)stream_ptr;
     int rc;
 
-    fprintf(stderr, "[FE-BE] Listening for back-ends at stream %d\n", stream->get_Id());
+    fprintf(stderr, "[FE] Listening for back-ends at stream %d\n", stream->get_Id());
     do
     {
         int task, thread;
@@ -588,7 +588,7 @@ void Start_Commands_Dispatcher (Stream *s, MRN::Network *net)
 //	BEMask *mask = new BEMask(net);
 
 	be_mask = (int *)malloc(num_be * sizeof(int));
-	fprintf(stderr, "[FE] num_be=%d, be_mask_size=%d\n", num_be, num_be * sizeof(int));
+//	fprintf(stderr, "[FE] num_be=%d, be_mask_size=%d\n", num_be, num_be * sizeof(int));
 
 #if 1 /* GENERIC FILTER */
     int filter_id;
@@ -701,7 +701,10 @@ void Config_Startup_FE ()
 	data->unpack("%d %d %d", &TargetTraceSize, &Analysis, &StartAfter);
 	MRNCfg_SetTargetTraceSize (TargetTraceSize);
 	MRNCfg_SetAnalysisType (Analysis, StartAfter);
-	fprintf(stderr, "[FE] MRNConfig target=%d analysis=%d after=%d\n", TargetTraceSize, Analysis, StartAfter);
+	fprintf(stderr, "[FE] Starting %s analysis in %d seconds. Requested trace size: %d Mb.\n", 
+		(Analysis == MRN_ANALYSIS_CLUSTER) ? "CLUSTERING" : "SPECTRAL",
+		StartAfter,
+		TargetTraceSize);
 
 	if (Analysis == MRN_ANALYSIS_CLUSTER) CmdQueue_Insert (MRN_CLUSTERS);
 	else if (Analysis == MRN_ANALYSIS_SPECTRAL) CmdQueue_Insert (MRN_SPECTRAL);
@@ -714,33 +717,27 @@ int Start_MRNet(int num_be, char *topology, char *hostfile, char *be_connect_fil
 	MRN::Network *net = NULL;
 	char *topology_file = NULL;
 
-	fprintf(stderr, "[SEGFAULT_DBG] Before build_Topology\n");
 	/* Build the topology file */
 //	num_be = build_Topology(topology, hostfile, &topology_file);
 	topology_file = build_Topology(topology, hostfile);
 
-	fprintf(stderr, "[SEGFAULT_DBG] Before Create_MRNet\n");
 	/* Start the network */
 	net = Create_MRNet (num_be, topology_file, be_connect_file);
 globnet = net;
 
-	fprintf(stderr, "[SEGFAULT_DBG] Before Create_Streams\n");
 	/* Initialize the streams */
 	Create_Streams(net);
 
-	fprintf(stderr, "[SEGFAULT_DBG] Before CmdQueue_Initialize\n");
 	/* Initialize the commands queue */
 	CmdQueue_Initialize ();
 
 	Config_Startup_FE();
 
-	fprintf(stderr, "[SEGFAULT_DBG] Before pthread_create's\n");
 	/* Create threads listening for the different sources of commands */
 //	pthread_create(&ListenMonitor_thread, NULL, Listen_Monitor, NULL);
 	pthread_create(&ListenBackends_thread, NULL, Listen_Backends, (void *)upStream);
 //	pthread_create(&ListenTimer_thread, NULL, Listen_Timer, NULL);
 
-	fprintf(stderr, "[SEGFAULT_DBG] Before Start_Commands_Dispatcher\n");
 	/* Run the commands dispatcher */
 
 #if ! defined(NEW_DYNAMIC_STREAMS)

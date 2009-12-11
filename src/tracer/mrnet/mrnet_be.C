@@ -393,7 +393,7 @@ void * Commands_Handler (void * rank_ptr)
             /* Retrieve the specific command */
 			MRN_STREAM_RECV(new_stream, &tag, data, MRN_ANY);
 
-			fprintf(stderr, "BE %d processes command %d\n", rank, tag);
+			/* fprintf(stderr, "BE %d processes command %d\n", rank, tag); */
 			
 
             /* Run the back-end side protocol for this command */
@@ -406,7 +406,7 @@ void * Commands_Handler (void * rank_ptr)
 #endif
 			delete new_stream;
 		}
-		else fprintf(stderr, "BE %d ignores command\n", rank);
+		else fprintf(stderr, "[BE %d] Ignoring unexpected command (new_stream=NULL)\n", rank);
 
 	} while (tag != MRN_TERMINATE);
 

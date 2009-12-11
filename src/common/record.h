@@ -56,10 +56,7 @@ typedef struct mpi_param_t
   int size;
   int tag;
   int comm;
-  int aux;
-#if defined(HETEROGENEOUS_SUPPORT)
-  int padding[1];
-#endif
+  long long aux;
 } mpi_param_t;
 
 

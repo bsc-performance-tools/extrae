@@ -227,7 +227,7 @@ int Receive_Bursts_Info (int num_be, Stream *stream, BurstInfo_t ***bi_list_io, 
 
 	MRN_STREAM_SEND(stream, MRN_ACK, "");
 
-	fprintf(stderr, "[FE] Receive_Burst_Info: Reducing MB's analyzed\n");
+	/* fprintf(stderr, "[FE] Receive_Burst_Info: Reducing MB's analyzed\n"); */
 	MRN_STREAM_RECV(stream, &tag, data, REDUCE_INT_ADD);
 	data->unpack("%d", &bytes);
 	mb = bytes / (1024*1024);
@@ -282,13 +282,12 @@ int Receive_Bursts_Info (int num_be, Stream *stream, BurstInfo_t ***bi_list_io, 
 	}
 	else 
 	{
-		fprintf(stderr, "[FE] REDUCE_LL_MIN_POSITIVE=%lld REDUCE_LL_MAX_POSITIVE=%lld\n", min_time, max_time);
 		ns = max_time - min_time;
 		secs = ns / 1000000000;
 		mins = secs / 60;
 		mb_per_min = mb / mins;
 		got_data = TRUE;
-		fprintf(stderr, "[FE] (REDUCTION) Analyzing %.2f Mb of data (%.2f seconds of trace, Avg %.2f Mb/min).\n", mb, secs, mb_per_min);
+		fprintf(stderr, "[FE] Analyzing %.2f Mb of data (%.2f seconds of trace, Avg %.2f Mb/min) TimeInterval=(%lld, %lld).\n", mb, secs, mb_per_min, min_time, max_time);
 	}
 
     *io_bytes = bytes;
@@ -389,7 +388,7 @@ void Clusters_FeedWithData (MRNetClustering *C, int num_be, BurstInfo_t **bi_lis
 	/* Select a few tasks to clusterize */
 
 	representatives = MIN(num_be, MAX_REPRESENTATIVES);
-	fprintf(stderr, "[FE] REPRESENTATIVES: ");
+	fprintf(stderr, "[FE] Selecting as representatives: ");
     for (i=0; i<representatives; i++)
     {
         BurstInfo_t *bi = bi_list[i];
@@ -422,9 +421,11 @@ void Clusters_FeedWithData (MRNetClustering *C, int num_be, BurstInfo_t **bi_lis
 
 	    double range = total_bursts / num_samples;
 
-
-	    fprintf(stderr, "total_bursts=%d num_samples=%d range=%d abs_total_bursts=%d task_contribution_pct=%f\n", total_bursts, num_samples, range, abs_total_bursts, task_contribution_pct);
-		fprintf(stderr, "[FE] RANDOM SAMPLES FROM: ");
+		fprintf(stderr, "[FE] Task %d: Selecting %d samples out of %d bursts (range=%d, abs_total_bursts=%d, task_contribution_pct=%f)\n",
+			bi->TaskID,
+			num_samples,
+			total_bursts,
+			range, abs_total_bursts, task_contribution_pct);
 
 	    srand(getpid());
 
@@ -450,8 +451,6 @@ void Clusters_FeedWithData (MRNetClustering *C, int num_be, BurstInfo_t **bi_lis
 	            fprintf(stderr, "BAD_SAMPLE!!\n");
 	        }
 	    }
-		fprintf(stderr, "%d ", bi->TaskID);
-	    fprintf(stderr, "\n");
 	}
 #endif
 }
@@ -530,6 +529,8 @@ void Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, ClusterIDs_t & c
     std::vector<Stream *> *stream_list = NULL;
     std::vector<Stream *>::iterator it;
 
+	fprintf(stderr, "[FE] Transferring Cluster ID's\n");
+
     stream_list = sp.AnnounceP2P(stream);
     for ( it = stream_list->begin(); it != stream_list->end(); it ++ )
     {
@@ -538,7 +539,7 @@ void Clusters_TransferCIDS (MRNetClustering *C, Stream *stream, ClusterIDs_t & c
         int r = BE_RANK(*(ep.begin()));
 
         std::pair< int, int > key = std::make_pair(r, 0);
-        fprintf(stderr, "[FE] Sending %d CIDS to %d\n", cids[key].size(), r);
+        /* fprintf(stderr, "[FE] Sending %d CIDS to %d\n", cids[key].size(), r); */
         MRN_STREAM_SEND(p2p, MRN_CLUSTERS, "%ad", &cids[key][0], cids[key].size());
     }
     delete stream_list;
@@ -769,12 +770,15 @@ MRNetClustering * MultiClusterAnalysis(Stream *stream, int *num_be_io, BurstInfo
 				freq_ns = MIN(freq_ns, (long long)150 * (long long)1000000000);
 				change_hwc_freq = (unsigned long long)((unsigned long long)(ns) / (unsigned long long)(10 * 2)); /* freq / num_hwc_sets * num_rotations_of_hwc */
 
-				fprintf(stderr, "[FE] max_size=%f mb_per_min=%f b_per_ns=%f freq=%d ns=%llu bytes=%d freq_ns=%llu change_hwc_freq=%llu\n", 
-					max_size, mb_per_min, b_per_ns, freq, ns, bytes, freq_ns, change_hwc_freq);
+				/* fprintf(stderr, "[FE] max_size=%f mb_per_min=%f b_per_ns=%f freq=%d ns=%llu bytes=%d freq_ns=%llu change_hwc_freq=%llu\n", 
+					max_size, mb_per_min, b_per_ns, freq, ns, bytes, freq_ns, change_hwc_freq); */
+				fprintf(stderr, "[FE] Next analysis step will be computed in %llu ns (%d seconds).\n", freq_ns, freq);
+				fprintf(stderr, "[FE] HWC change frequency set at %llu ns.\n", change_hwc_freq);
+
 	//		}
 		}
+		fprintf(stderr, "[FE] Broadcasting STABILITY status: %d\n", stability);
 		MRN_STREAM_SEND(stream, MRN_CLUSTERS, "%d %uld", stability, change_hwc_freq);
-		fprintf(stderr, "[FE] Broadcasted STABILITY %d\n", stability);
 
 		if (!stability) 
 		{

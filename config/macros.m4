@@ -1857,138 +1857,141 @@ AC_DEFUN([AX_PROG_MRNET],
 	AC_LANG_SAVE()
 	AC_LANG([C++])
 
-	AC_ARG_WITH(mrnet,
-		AC_HELP_STRING(
-			[--with-mrnet@<:@=DIR@:>@],
-			[specify where to find MRNet libraries and includes]
-		),
-		[mrnet_paths="$withval"],
-		[mrnet_paths="/home/bsc41/bsc41127/mrnet_last"] dnl List of possible default paths
-	)
+	if test -d "src/tracer/mrnet" ; then
 
-	dnl Search for MRNet installation
-	AX_FIND_INSTALLATION([MRNET], [$mrnet_paths])
-
-	if test "$MRNET_INSTALLED" = "yes" ; then
-
-		dnl Begin hack
-		MRNET_CXXFLAGS="${MRNET_CXXFLAGS} -I${MRNET_HOME}/src/src -Dos_linux -I/gpfs/apps/BOOST/boost_1_33_1-64/include/boost-1_33_1"
-		AC_SUBST(MRNET_CXXFLAGS)
-		dnl End hack
-
-		dnl Check for MRNet header files.
-		CXXFLAGS="${CXXFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
-		CPPFLAGS="${CPPFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
-		AC_CHECK_HEADERS([MRNet.h], [], [MRNET_INSTALLED="no"])
-
-		dnl Check for libraries.
-		AC_MSG_CHECKING([for libmrnet and libxplat])
-
-		if test -f ${MRNET_LIBSDIR}/libmrnet.a -a -f ${MRNET_LIBSDIR}/libxplat.a ; then
-			MRNET_LIBS="-lmrnet -lxplat -lpthread -ldl"
-			AC_SUBST(MRNET_LIBS)
-			AC_MSG_RESULT([yes])
-		else
-			MRNET_INSTALLED="no"
-			AC_MSG_RESULT([no])
-		fi
-	fi
-
-	if test "${MRNET_INSTALLED}" = "no" ; then
-		AC_MSG_WARN([MRNet support has been disabled])
-	else
-		AC_DEFINE([HAVE_MRNET], 1, [Define to 1 if MRNET is installed in the system])
-	
-		AX_FLAGS_RESTORE()
-		dnl Check for clustering and spectral support
-		AC_ARG_WITH(clustering,
+		AC_ARG_WITH(mrnet,
 			AC_HELP_STRING(
-				[--with-clustering@<:@=DIR@:>@],
-				[specify where to find clustering libraries and includes]
+				[--with-mrnet@<:@=DIR@:>@],
+				[specify where to find MRNet libraries and includes]
 			),
-			[clustering_paths="$withval"],
-			[clustering_paths="/gpfs/apps/CEPBATOOLS/burst-clusterizer-devel"] dnl List of possible default paths
+			[mrnet_paths="$withval"],
+			[mrnet_paths="/home/bsc41/bsc41127/mrnet_last"] dnl List of possible default paths
 		)
-		dnl Search for Clustering installation
-		AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths])
 
-		if test "${CLUSTERING_INSTALLED}" = "yes" ; then
+		dnl Search for MRNet installation
+		AX_FIND_INSTALLATION([MRNET], [$mrnet_paths])
 
-	        CLUSTERING_LIBS="-lMRNetClustering"
+		if test "$MRNET_INSTALLED" = "yes" ; then
 
-	        dnl FIXME: Can't do these checks because MRNetClustering includes types.h, which includes config.h, which is not distributed!
-	        dnl AC_MSG_CHECKING([whether a program can be linked with libMRNetClustering])
-	        dnl AC_TRY_LINK(
-	        dnl [ /* #include <MRNetClustering.h> */ ],
-	        dnl [ MRNetClustering *c = new MRNetClustering(); ],
-	        dnl [ clustering_links="yes" ]
-	        dnl )
+			dnl Begin hack
+			MRNET_CXXFLAGS="${MRNET_CXXFLAGS} -I${MRNET_HOME}/src/src -Dos_linux -I/gpfs/apps/BOOST/boost_1_33_1-64/include/boost-1_33_1"
+			AC_SUBST(MRNET_CXXFLAGS)
+			dnl End hack
 
-	        AC_SUBST(CLUSTERING_LIBS)
-			AC_DEFINE([HAVE_CLUSTERING], 1, [Define to 1 if CLUSTERING is installed in the system])
-	    fi
+			dnl Check for MRNet header files.
+			CXXFLAGS="${CXXFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
+			CPPFLAGS="${CPPFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
+			AC_CHECK_HEADERS([MRNet.h], [], [MRNET_INSTALLED="no"])
 
-		AX_FLAGS_RESTORE()
-		AC_ARG_WITH(spectral,
-			AC_HELP_STRING(
-				[--with-spectral@<:@=DIR@:>@],
-				[specify where to find spectral analysis libraries and includes]
-			),
-			[spectral_paths="$withval"],
-			[spectral_paths="/home/bsc41/bsc41127/apps/spectral_last"] dnl List of possible default paths
-		)
-		dnl Search for Spectral Analysis installation
-		AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths])
+			dnl Check for libraries.
+			AC_MSG_CHECKING([for libmrnet and libxplat])
 
-		if test "${SPECTRAL_HOME}" != "" ; then
-
-	        LIBS="-L${SPECTRAL_HOME} -lspectral" dnl No need once the installation follows the standard (-L)
-	        CXXFLAGS="${CXXFLAGS} -I${SPECTRAL_HOME}"        dnl No need once the installation follows the standard
-
-	        AC_MSG_CHECKING([whether libspectral has unresolved dependencies with libfft])
-	        AC_TRY_LINK(
-	            [ #include <stdio.h>
-	              #include <signal_interface.h> ],
-	            [ destroySignal(NULL); ],
-	            [ spectral_links="yes" ]
-	        )
-
-	        if test "${spectral_links}" = "yes" ; then
-	            AC_MSG_RESULT([no])
-	        else
-	            dnl There are unresolved dependencies with fftw3
-	            AC_MSG_RESULT([yes])
-	            AC_ARG_WITH(fft,
-	                AC_HELP_STRING(
-	                    [--with-fft@<:@=DIR@:>@],
-	                    [specify where to find FFT libraries and includes]
-	                ),
-	                [fft_paths="$withval"],
-	                [fft_paths="/gpfs/apps/FFTW/3.1.1"] dnl List of possible default paths
-	            )
-	            dnl Search for FFT installation
-	            AX_FIND_INSTALLATION([FFT], [$fft_paths])
-	
-	            LIBS="${LIBS} ${FFT_LDFLAGS} -lfftw3 -lm"
-	
-	            AC_TRY_LINK(
-	                [ #include <stdio.h>
-	                  #include <signal_interface.h> ],
-	                [ destroySignal(NULL); ],
-	                [ spectral_links="yes" ]
-	            )
-	        fi
-	
-	        AC_MSG_CHECKING([whether a program can be linked with libspectral])
-			if test "${spectral_links}" = "yes" ; then
-				SPECTRAL_LIBS="${LIBS}"
-				SPECTRAL_CXXFLAGS="-I${SPECTRAL_HOME}" dnl No need once the installation follows the standard
-				AC_SUBST(SPECTRAL_LIBS)
-				AC_SUBST(SPECTRAL_CXXFLAGS)   dnl No need once the installation follows the standard
+			if test -f ${MRNET_LIBSDIR}/libmrnet.a -a -f ${MRNET_LIBSDIR}/libxplat.a ; then
+				MRNET_LIBS="-lmrnet -lxplat -lpthread -ldl"
+				AC_SUBST(MRNET_LIBS)
 				AC_MSG_RESULT([yes])
-				AC_DEFINE([HAVE_SPECTRAL], 1, [Define to 1 if SPECTRAL ANALYSIS is installed in the system])
 			else
+				MRNET_INSTALLED="no"
 				AC_MSG_RESULT([no])
+			fi
+		fi
+
+		if test "${MRNET_INSTALLED}" = "no" ; then
+			AC_MSG_WARN([MRNet support has been disabled])
+		else
+			AC_DEFINE([HAVE_MRNET], 1, [Define to 1 if MRNET is installed in the system])
+	
+			AX_FLAGS_RESTORE()
+			dnl Check for clustering and spectral support
+			AC_ARG_WITH(clustering,
+				AC_HELP_STRING(
+					[--with-clustering@<:@=DIR@:>@],
+					[specify where to find clustering libraries and includes]
+				),
+				[clustering_paths="$withval"],
+				[clustering_paths="/gpfs/apps/CEPBATOOLS/burst-clusterizer-devel"] dnl List of possible default paths
+			)
+			dnl Search for Clustering installation
+			AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths])
+
+			if test "${CLUSTERING_INSTALLED}" = "yes" ; then
+
+		        CLUSTERING_LIBS="-lMRNetClustering"
+
+		        dnl FIXME: Can't do these checks because MRNetClustering includes types.h, which includes config.h, which is not distributed!
+		        dnl AC_MSG_CHECKING([whether a program can be linked with libMRNetClustering])
+		        dnl AC_TRY_LINK(
+		        dnl [ /* #include <MRNetClustering.h> */ ],
+		        dnl [ MRNetClustering *c = new MRNetClustering(); ],
+		        dnl [ clustering_links="yes" ]
+		        dnl )
+
+		        AC_SUBST(CLUSTERING_LIBS)
+				AC_DEFINE([HAVE_CLUSTERING], 1, [Define to 1 if CLUSTERING is installed in the system])
+		    fi
+
+			AX_FLAGS_RESTORE()
+			AC_ARG_WITH(spectral,
+				AC_HELP_STRING(
+					[--with-spectral@<:@=DIR@:>@],
+					[specify where to find spectral analysis libraries and includes]
+				),
+				[spectral_paths="$withval"],
+				[spectral_paths="/home/bsc41/bsc41127/apps/spectral_last"] dnl List of possible default paths
+			)
+			dnl Search for Spectral Analysis installation
+			AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths])
+
+			if test "${SPECTRAL_HOME}" != "" ; then
+
+		        LIBS="-L${SPECTRAL_HOME} -lspectral" dnl No need once the installation follows the standard (-L)
+		        CXXFLAGS="${CXXFLAGS} -I${SPECTRAL_HOME}"        dnl No need once the installation follows the standard
+
+		        AC_MSG_CHECKING([whether libspectral has unresolved dependencies with libfft])
+		        AC_TRY_LINK(
+		            [ #include <stdio.h>
+		              #include <signal_interface.h> ],
+		            [ destroySignal(NULL); ],
+		            [ spectral_links="yes" ]
+		        )
+
+		        if test "${spectral_links}" = "yes" ; then
+		            AC_MSG_RESULT([no])
+		        else
+		            dnl There are unresolved dependencies with fftw3
+		            AC_MSG_RESULT([yes])
+		            AC_ARG_WITH(fft,
+		                AC_HELP_STRING(
+		                    [--with-fft@<:@=DIR@:>@],
+		                    [specify where to find FFT libraries and includes]
+		                ),
+		                [fft_paths="$withval"],
+		                [fft_paths="/gpfs/apps/FFTW/3.1.1"] dnl List of possible default paths
+		            )
+		            dnl Search for FFT installation
+		            AX_FIND_INSTALLATION([FFT], [$fft_paths])
+	
+		            LIBS="${LIBS} ${FFT_LDFLAGS} -lfftw3 -lm"
+	
+		            AC_TRY_LINK(
+		                [ #include <stdio.h>
+		                  #include <signal_interface.h> ],
+		                [ destroySignal(NULL); ],
+		                [ spectral_links="yes" ]
+		            )
+		        fi
+	
+		        AC_MSG_CHECKING([whether a program can be linked with libspectral])
+				if test "${spectral_links}" = "yes" ; then
+					SPECTRAL_LIBS="${LIBS}"
+					SPECTRAL_CXXFLAGS="-I${SPECTRAL_HOME}" dnl No need once the installation follows the standard
+					AC_SUBST(SPECTRAL_LIBS)
+					AC_SUBST(SPECTRAL_CXXFLAGS)   dnl No need once the installation follows the standard
+					AC_MSG_RESULT([yes])
+					AC_DEFINE([HAVE_SPECTRAL], 1, [Define to 1 if SPECTRAL ANALYSIS is installed in the system])
+				else
+					AC_MSG_RESULT([no])
+				fi
 			fi
 		fi
 	fi

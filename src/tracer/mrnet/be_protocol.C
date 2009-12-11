@@ -62,7 +62,7 @@ int Send_Bursts_Info (Stream *stream, BurstInfo_t *bi, int bytes)
 	BurstInfo_Serialize (bi, &TaskID, &ThreadID, &num_Bursts, &num_HWCperBurst, 
 		&Timestamp, &Durations, &HWCValues, &HWCSet);
 
-	fprintf(stderr, "[BE %d] Sending BurstsInfo to FE (num_Bursts=%d)\n", TaskID, num_Bursts);
+	/* fprintf(stderr, "[BE %d] Sending BurstsInfo to FE (num_Bursts=%d)\n", TaskID, num_Bursts); */
 	/* Send data to front-end */
 	MRN_STREAM_SEND(stream, MRN_BURSTS_INFO, "%d %d %d %d %ald %ald %ald %ad",
 		TaskID, ThreadID, num_Bursts, num_HWCperBurst, 
@@ -102,7 +102,7 @@ fprintf(stderr, "[BE %d] xxxx MINTIME %lld MAXTIME %lld\n", TaskID, min_time, ma
 		min_time = Timestamp[0];
 		max_time = Timestamp[num_Bursts-1] + Durations[num_Bursts-1];
 	}
-	fprintf(stderr, "[BE %d] LOCAL_TIME_MIN %lld LOCAL_TIME_MAX %lld\n", TaskID, min_time, max_time);
+	/* fprintf(stderr, "[BE %d] LOCAL_TIME_MIN %lld LOCAL_TIME_MAX %lld\n", TaskID, min_time, max_time); */
 	MRN_STREAM_SEND(stream, REDUCE_LL_MIN_POSITIVE, "%ld", min_time);
 	MRN_STREAM_SEND(stream, REDUCE_LL_MAX_POSITIVE, "%ld", max_time);
 
@@ -171,7 +171,7 @@ void Clusters_TraceCIDS(Stream *stream, BurstInfo_t *bi)
         MRN_STREAM_RECV(p2p, &tag, data, MRN_CLUSTERS);
 
         data->unpack("%ad", &cids, &len);
-        fprintf(stderr, "[BE %d] Received %d CIDS\n", TASKID, len);
+        fprintf(stderr, "[BE %d] Received %d Cluster ID's\n", TASKID, len);
 
         for (int i=0; i<len; i++)
         {
@@ -231,7 +231,7 @@ int Clusters_ExtractData (int thread, unsigned long long min_duration, BurstInfo
 	int MbDataAnalyzed;
 
     MbDataAnalyzed = Extract_BurstInfo (TASKID, 0, lastClusteringStartedAt, TIME, min_duration, bi);
-	fprintf(stderr, "[BE %d] Clusters_ExtractData NULL? %d\n", TASKID, (bi == NULL));
+	/* fprintf(stderr, "[BE %d] Clusters_ExtractData NULL? %d\n", TASKID, (bi == NULL)); */
 
 	return MbDataAnalyzed;
 }
@@ -245,9 +245,9 @@ int SingleClusterAnalysis(Stream *stream, BurstInfo_t **io_bi)
 	PacketPtr data;
 	int interrupted = FALSE;
 
-	fprintf(stderr, "[BE %d]BEFORE ACK RECEIVE SingleClusterAnalysis\n", TASKID);
+	/* fprintf(stderr, "[BE %d]BEFORE ACK RECEIVE SingleClusterAnalysis\n", TASKID); */
 	MRN_STREAM_RECV(stream, &tag, data, MRN_ANY);
-	fprintf(stderr, "[BE %d]SingleClusterAnalysis ACK received\n", TASKID);
+	/* fprintf(stderr, "[BE %d]SingleClusterAnalysis ACK received\n", TASKID); */
 	if (tag == MRN_ACK)
 	{
 	    /* Read the duration filter */
@@ -302,7 +302,7 @@ int MultiClusterAnalysis(Stream *stream, BurstInfo_t **io_bi)
 
 		MRN_STREAM_RECV(stream, &tag, data, MRN_CLUSTERS);
 		data->unpack("%d %uld", &stability, &change_hwc_freq);
-		fprintf(stderr, "[BE %d] Stability? %d\n", TASKID, stability);
+		/* fprintf(stderr, "[BE %d] Stability? %d\n", TASKID, stability); */
 		if (!stability) 
 		{
 			Buffer_DiscardAll(TRACING_BUFFER(0));
@@ -311,7 +311,7 @@ int MultiClusterAnalysis(Stream *stream, BurstInfo_t **io_bi)
 			{
 				HWC_Set_ChangeAtTime_Frequency(i, change_hwc_freq);
 			}
-			fprintf(stderr, "[BE %d] CHANGE_HWC (new_freq=%llu, num_sets=%d)\n", TASKID, change_hwc_freq, HWC_Get_Num_Sets());
+			/* fprintf(stderr, "[BE %d] CHANGE_HWC (new_freq=%llu, num_sets=%d)\n", TASKID, change_hwc_freq, HWC_Get_Num_Sets()); */
 		}
 	}
 	*io_bi = bi;

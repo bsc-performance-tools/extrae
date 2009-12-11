@@ -1,7 +1,17 @@
 #!/bin/sh
 
+if ! test -d src/tracer/mrnet ; then
+	mkdir -p src/tracer/mrnet
+	touch src/tracer/mrnet/Makefile.am
+	clean="yes"
+fi
+
 libtoolize --automake --force --copy \
 && aclocal -I config \
 && autoheader \
 && automake --gnu --add-missing --copy \
 && autoconf
+
+if test "${clean}" = "yes" ; then 
+	rm -rf src/tracer/mrnet
+fi

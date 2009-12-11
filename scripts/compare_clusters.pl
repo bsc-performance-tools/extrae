@@ -130,10 +130,10 @@ sub LoadRanges
 	foreach $dim (keys %EdgesVariations)
 	{
 		$EdgesVariations{$dim}{$RANGE_VAR} = ((($EdgesVariations{$dim}{$RANGE_MAX} - $EdgesVariations{$dim}{$RANGE_MIN}) * $MAX_VAR_PCT) / 100);
-		print "DIM: $dim\n";
-		print "__ RANGE_MIN: $EdgesVariations{$dim}{$RANGE_MIN}\n";
-		print "__ RANGE_MAX: $EdgesVariations{$dim}{$RANGE_MAX}\n";
-		print "__ RANGE_VAR: $EdgesVariations{$dim}{$RANGE_VAR}\n";
+		#print "DIM: $dim\n";
+		#print "__ RANGE_MIN: $EdgesVariations{$dim}{$RANGE_MIN}\n";
+		#print "__ RANGE_MAX: $EdgesVariations{$dim}{$RANGE_MAX}\n";
+		#print "__ RANGE_VAR: $EdgesVariations{$dim}{$RANGE_VAR}\n";
 	}
 
 	close CSV or die "Error closing file '$CSVFile'\n$!\n";
@@ -189,7 +189,7 @@ sub Matches
 		my $min2 = $Dims2{$dim}{$RANGE_MIN};
 		my $max2 = $Dims2{$dim}{$RANGE_MAX};
 
-		print "Checking match in $dim (fits $min2 in (".($min1 - $variation).", ".($min1 + $variation).") and $max2 in (".($max1 - $variation).", ".($max1 + $variation).")) ?? "; 
+		#print "Checking match in $dim (fits $min2 in (".($min1 - $variation).", ".($min1 + $variation).") and $max2 in (".($max1 - $variation).", ".($max1 + $variation).")) ?? "; 
 
 		$variation = $EdgesVariations{$dim}{$RANGE_VAR};
 		
@@ -198,10 +198,10 @@ sub Matches
             ($max2 < ($max1 - $variation)) || 
             ($max2 > ($max1 + $variation)))
 		{
-			print "NO\nDiscard Reason: Extremes didn't match ($dim)\n";
+			#print "NO\nDiscard Reason: Extremes didn't match ($dim)\n";
 			return $FALSE;
 		}
-		else { print "YES\n"; }
+		#else { print "YES\n"; }
 
 #		foreach $OtherEdge (keys %{$Dims1{$dim}{$OTHER_EDGES}})
 #		{
@@ -262,15 +262,15 @@ sub CompareRanges
 	{
 		foreach $CID2 (@MatchPending2)
 		{
-			print "Matches $CID1 with $CID2 ?\n";
+			#print "Matches $CID1 with $CID2 ?\n";
 			if (Matches($Ranges1{$CID1}, $Ranges2{$CID2}))
 			{
-				print ("Answer: YES\n");
+				#print ("Answer: YES\n");
 				$AlreadyMatched{$CID1} = $CID2;
 				@MatchPending2 = grep { $_ ne $CID2 } @MatchPending2; 
 				last;
 			}
-			print ("Answer: NO\n");
+			#print ("Answer: NO\n");
 		}
 	}
 
@@ -314,16 +314,12 @@ my $MetricsFile2 = $ARGV[1].".clusters_info.csv";
 my %ClusterRanges1 = LoadRanges ($CSVFile1);
 my %ClusterRanges2 = LoadRanges ($CSVFile2);
 
-PrintRanges (\%ClusterRanges1);
-print "=========================\n";
-PrintRanges (\%ClusterRanges2);
-
-#$equal = CompareRanges (\%ClusterRanges1, $MetricsFile1, \%ClusterRanges2, $MetricsFile2);
-#print "Equal? $equal\n";
-#exit $equal;
+#PrintRanges (\%ClusterRanges1);
+#print "=========================\n";
+#PrintRanges (\%ClusterRanges2);
 
 $PctEqual = CompareRanges (\%ClusterRanges1, $MetricsFile1, \%ClusterRanges2, $MetricsFile2);
-print "Equal? $PctEqual\n";
+print "Equal? $PctEqual %\n";
 
 #######################
 ### Generate graphs ###
