@@ -355,7 +355,14 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 /**************************************************************************************/
 
+	if (0 == taskid)
+	{
+		fprintf (stdout, "Searching synchronization points... ");
+		fflush (stdout);
+	}
 	total_tasks = Search_Synchronization_Times(fset, &StartingTimes, &SynchronizationTimes);
+	if (0 == taskid)
+		fprintf (stdout, " done\n");
 
 	TimeSync_Initialize (total_tasks);
 	for (i=0; i<total_tasks; i++)
