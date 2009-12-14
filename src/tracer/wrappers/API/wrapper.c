@@ -293,14 +293,37 @@ static int read_environment_variables (int me)
 	/* Initial Tracing Mode? */
 	if ((str = getenv("MPITRACE_INITIAL_MODE")) != NULL)
 	{
-		if (strcmp(str, "detail") == 0)
+		if (strcasecmp(str, "detail") == 0)
 		{
 			TMODE_setInitial (TRACE_MODE_DETAIL);
 		}
-		else if (strcmp(str, "bursts") == 0)
+		else if (strcasecmp(str, "bursts") == 0)
 		{
 			TMODE_setInitial (TRACE_MODE_BURSTS);
 		}
+	}
+
+	/* Whether we have to generate PARAVER or DIMEMAS traces */
+	if ((str = getenv ("MPITRACE_TRACE_TYPE")) != NULL)
+	{
+		if (strcasecmp (str, "DIMEMAS") == 0)
+		{
+			Clock_setType (USER_CLOCK);
+			if (me == 0)
+				fprintf (stdout, "mpitrace: Generating intermediate files for Dimemas traces.\n");
+		}
+		else
+		{
+			Clock_setType (REAL_CLOCK);
+			if (me == 0)
+				fprintf (stdout, "mpitrace: Generating intermediate files for Paraver traces.\n");
+		}
+	}
+	else
+	{
+		Clock_setType (REAL_CLOCK);
+		if (me == 0)
+			fprintf (stdout, "mpitrace: Generating intermediate files for Paraver traces.\n");
 	}
 
 	/* Minimum CPU Burst duration? */
