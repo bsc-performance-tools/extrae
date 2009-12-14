@@ -94,6 +94,15 @@ int HWC_num_sets = 0;
 int HWC_current_set = 0;
 
 /**
+ * Checks whether the module has been started and the HWC are counting
+ * \return 1 if HWC's are enabled, 0 otherwise.
+ */
+int HWC_IsEnabled()
+{
+	return HWCEnabled;
+}
+
+/**
  * Returns the active counters set (0 .. n-1). 
  * \return The active counters set (0 .. n-1).
  */

@@ -37,18 +37,18 @@
 
 # include "hwc.h"
 
-# define MARK_SET_READ(evt, filter)                                \
-{                                                                  \
-	evt.HWCReadSet = ((filter) ? (HWC_Get_Current_Set() + 1) : 0); \
+# define MARK_SET_READ(evt, filter)                                                   \
+{                                                                                     \
+	evt.HWCReadSet = ((filter && HWC_IsEnabled()) ? (HWC_Get_Current_Set() + 1) : 0); \
 }
 
 /* Store counters values in the event and mark them as read */
-# define HARDWARE_COUNTERS_READ(tid, evt, filter)                    \
-{                                                                    \
+# define HARDWARE_COUNTERS_READ(tid, evt, filter)                      \
+{                                                                      \
 	int read_ok = FALSE;                                               \
-	if (filter)                                                        \
+	if (filter && HWC_IsEnabled())                                     \
 	{                                                                  \
-		read_ok = HWC_Read (tid, evt.time, evt.HWCValues);               \
+		read_ok = HWC_Read (tid, evt.time, evt.HWCValues);             \
 	}                                                                  \
 	/* We write the counters even if there are errors while reading */ \
 	MARK_SET_READ(evt, filter);                                        \
@@ -56,7 +56,7 @@
 
 # define HARDWARE_COUNTERS_ACCUMULATE(tid, evt, filter)                \
 {                                                                      \
-    if (filter)                                                        \
+    if (filter && HWC_IsEnabled())                                     \
     {                                                                  \
         HWC_Accum (tid, evt.time);                                     \
 		/* XXX: Reset ACCUMULATED counters here? Very likely!!! */     \
