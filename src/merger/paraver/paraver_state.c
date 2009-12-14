@@ -71,7 +71,7 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 	struct thread_t * thread_info;
 
 #if defined(DEBUG_STATES)
-	fprintf(stderr, "mpi2prv: DEBUG [T:%d] PUSH_STATE %d\n", task, new_state);
+	fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] PUSH_STATE %d\n", ptask, task, thread, new_state);
 #endif
 
 	/* First event removes the STATE_NOT_TRACING */
@@ -84,7 +84,7 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	if (thread_info->nStates + 1 >= MAX_STATES)
 	{
-		fprintf(stderr, "mpi2rpv: Error! MAX states stack reached (%d)\n", thread-1);
+		fprintf(stderr, "mpi2rpv: Error! MAX states stack reached (%d:%d:%d)\n", ptask, task, thread);
 		exit(-1);
 	}
 	thread_info->State_Stack[thread_info->nStates++] = new_state;
@@ -98,7 +98,7 @@ unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int
    struct thread_t * thread_info;
 
 #if defined(DEBUG_STATES)
-   fprintf(stderr, "mpi2prv: DEBUG [T:%d] POP_STATE\n", task);
+   fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] POP_STATE\n", ptask, task, thread);
 #endif
 
    top_state = Top_State(ptask, task, thread);
@@ -172,7 +172,7 @@ void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigne
    struct thread_t * thread_info; 
 
 #if defined(DEBUG_STATES)
-   fprintf(stderr, "[T:%d] WIPE STATES STACK\n", task);
+   fprintf(stderr, "[%d:%d:%d] WIPE STATES STACK\n", ptask, task, thread);
 #endif
 
    /* Clear the states stack */
