@@ -64,6 +64,10 @@ static void show_current (event_t * c)
 		  c->param.mpi_param.size, c->param.mpi_param.tag,
 		  c->param.mpi_param.comm, c->param.mpi_param.aux);
 	}
+	else if (c->event == MPIINIT_EV && c->value == EVT_END)
+	{
+		fprintf (stdout, " OPTIONS: 0x%08x\n", c->param.mpi_param.aux);
+	}
 #if USE_HARDWARE_COUNTERS
 #if defined(DEAD_CODE)
 	else if (c->event == HWC_CHANGE_EV || c->event == HWC_SET_OVERFLOW_EV)
