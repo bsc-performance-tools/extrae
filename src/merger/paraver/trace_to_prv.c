@@ -289,13 +289,14 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	unsigned int cpu, ptask, task, thread, error;
 	event_t * current_event;
 	char envName[PATH_MAX], *tmp;
-	unsigned int Type, EvType, options;
+	unsigned int Type, EvType;
 	unsigned long long current_time = 0;
 	unsigned long long num_of_events, parsed_events, tmp_nevents;
 	unsigned long long records_per_task;
 	double pct, last_pct;
 	UINT64 *StartingTimes, *SynchronizationTimes;
 	int i, total_tasks;
+	long long options;
 
 	records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
 	records_per_task *= (MBytesPerAllSegments - 8);      /* let's use this memory less 8 Mbytes */

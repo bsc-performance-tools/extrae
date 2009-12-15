@@ -189,7 +189,7 @@ int SearchSendEvent_FS (FileSet_t *fset, unsigned int ptask,
 	event_t ** send_begin, event_t ** send_end);
 event_t *SearchIRECVED (event_t * current, long long request, FileItem_t * freceive);
 
-unsigned int GetTraceOptions (FileSet_t * fset, int numtasks, int taskid);
+long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid);
 int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes);
 void CheckCircularBufferWhenTracing (FileSet_t * fset, int numtasks, int taskid);
 int CheckBursts (FileSet_t *fset, int numtasks, int idtask);

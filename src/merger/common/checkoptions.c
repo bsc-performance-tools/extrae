@@ -41,7 +41,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "semantics.h"
 
-void CheckHWCcontrol (int taskid, int options)
+void CheckHWCcontrol (int taskid, long long options)
 {
 	int canproceed = FALSE;
 # if defined(PARALLEL_MERGE)
@@ -96,7 +96,7 @@ void CheckHWCcontrol (int taskid, int options)
 	}
 }
 
-void CheckClockType (int taskid, int options, int traceformat, int force)
+void CheckClockType (int taskid, long long options, int traceformat, int force)
 {
 # if defined(PARALLEL_MERGE)
 	int res;

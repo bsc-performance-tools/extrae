@@ -1483,21 +1483,28 @@ void EndianCorrection (FileSet_t *fset, int numtasks, int taskid)
 /******************************************************************************
  ***  GetTraceOptions
  ******************************************************************************/
-unsigned int GetTraceOptions (FileSet_t * fset, int numtasks, int taskid)
+long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid)
 {
+	long long options = TRACEOPTION_NONE;
 	event_t *current;
 
 	/* All tasks share the same initialization, so check once only! */
 	current = Current_FS (&(fset->files[0]));
-	while ((current != NULL) &&
-	((Get_EvEvent (current) != MPIINIT_EV) || (Get_EvValue (current) != EVT_END)))
+
+	while (current != NULL)
 	{
+		if (Get_EvEvent (current) == MPIINIT_EV &&
+		    Get_EvValue (current) == EVT_END)
+		{
+			options = Get_EvAux(current);
+			break;
+		}
 		StepOne_FS (&(fset->files[0]));
 		current = Current_FS (&(fset->files[0]));
 	}
 	Rewind_FS (fset);
 
-	return (current!=NULL)?Get_EvAux(current):0;
+	return options;
 }
 
 

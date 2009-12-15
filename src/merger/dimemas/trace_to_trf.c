@@ -339,11 +339,12 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	event_t * current_event;
 	char envName[PATH_MAX], *tmp;
 	unsigned int cpu, ptask, task, thread, error;
-	unsigned int Type, EvType, options, current_file, count;
+	unsigned int Type, EvType, current_file, count;
 	unsigned long long current_time = 0;
 	unsigned long long num_of_events, parsed_events, tmp_nevents;
 	unsigned long long trace_size;
 	unsigned long long *offsets;
+	long long options;
 	double pct, last_pct;
 
 	InitializeObjectTable (num_appl, files, nfiles);

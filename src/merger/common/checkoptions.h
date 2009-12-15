@@ -31,7 +31,7 @@
 #ifndef CHECKOPTIONS_H
 #define CHECKOPTIONS_H
 
-void CheckHWCcontrol (int taskid, int options);
-void CheckClockType (int taskid, int options, int traceformat, int force);
+void CheckHWCcontrol (int taskid, long long options);
+void CheckClockType (int taskid, long long options, int traceformat, int force);
 
 #endif
