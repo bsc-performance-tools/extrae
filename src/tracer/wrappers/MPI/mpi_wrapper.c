@@ -3509,6 +3509,7 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	sender_tag = ptr_status[MPI_TAG_OFFSET];
 
 	/* MPI Stats */
+	P2P_Communications += 2;
 	P2P_Bytes_Sent += DataSend;
 	P2P_Bytes_Recv += DataSize;
 
@@ -3553,6 +3554,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	sender_tag = ptr_status[MPI_TAG_OFFSET];
 
 	/* MPI Stats */
+	P2P_Communications += 2;
 	P2P_Bytes_Sent += DataSend;
 	P2P_Bytes_Recv += DataSize;
 
@@ -6423,6 +6425,7 @@ int MPI_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	Tag = ptr_status->MPI_TAG;
 
 	/* MPI Stats */
+	P2P_Communications += 2;
 	P2P_Bytes_Sent += DataSend;
 	P2P_Bytes_Recv += DataSize;
 
@@ -6475,6 +6478,7 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
 	Tag = ptr_status->MPI_TAG;
 
 	/* MPI Stats */
+	P2P_Communications += 2;
 	P2P_Bytes_Sent += DataSend;
 	P2P_Bytes_Recv += DataSize;
 
