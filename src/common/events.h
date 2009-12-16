@@ -68,6 +68,11 @@ unsigned IsMPICollective (unsigned EvType);
 #define TRACEOPTION_PARAVER         (1<<4)
 #define TRACEOPTION_DIMEMAS         (1<<5)
 
+/* These trace options are intended to 'catch' special architectures */
+#define TRACEOPTION_UNK_ARCH        (1<<10) /* Unknown */
+#define TRACEOPTION_MN_ARCH         (1<<11) /* MareNostrum */
+#define TRACEOPTION_BG_ARCH         (1<<12) /* BlueGene / {PL} */
+
 #define SYNCHRONIZATION_POINT_EV     1000
 #define OPTIONS_EV                   1001
 
@@ -231,22 +236,17 @@ enum {
 /******************************************************************************
  *   User events for BG PERSONALITY
  ******************************************************************************/
-#if defined(IS_BG_MACHINE)
-#define BGL_PERSONALITY_TORUS_X  6000
-#define BGL_PERSONALITY_TORUS_Y  6001
-#define BGL_PERSONALITY_TORUS_Z  6002
-#define BGL_PERSONALITY_PROCESSOR_ID 6003
-#endif
+#define BG_PERSONALITY_TORUS_X      6000
+#define BG_PERSONALITY_TORUS_Y      6001
+#define BG_PERSONALITY_TORUS_Z      6002
+#define BG_PERSONALITY_PROCESSOR_ID 6003
 
 /******************************************************************************
  *   User events to trace MN topology (grodrigu)
  ******************************************************************************/
-
-#if defined(IS_MN_MACHINE)
-# define LINEAR_HOST_EVENT       3000
-# define LINECARD_EVENT          3001
-# define HOST_EVENT              3002
-#endif
+#define MN_LINEAR_HOST_EVENT         3000
+#define MN_LINECARD_EVENT            3001
+#define MN_HOST_EVENT                3002
 
 /******************************************************************************
  *   User events to trace OMP parallel execution.

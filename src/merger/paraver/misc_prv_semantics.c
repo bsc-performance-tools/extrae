@@ -214,13 +214,6 @@ static int User_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
-#if defined(IS_MN_MACHINE)
-	if (EvType  == LINEAR_HOST_EVENT || EvType == LINECARD_EVENT || EvType == HOST_EVENT)
-	{
-		Enable_Topology();
-	}
-#endif
-
 	return 0;
 }
 

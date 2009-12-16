@@ -282,14 +282,14 @@ void MISC_events_group1 (FILE * fd)
 #if defined(DEAD_CODE)
 #if defined(IS_BG_MACHINE)
   fprintf (fd, "%s\n", TYPE_LABEL);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BGL_PERSONALITY_TORUS_X,
+  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_X,
            BGL_TORUS_X);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BGL_PERSONALITY_TORUS_Y,
+  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Y,
            BGL_TORUS_Y);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BGL_PERSONALITY_TORUS_Z,
+  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Z,
            BGL_TORUS_Z);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT,
-           BGL_PERSONALITY_PROCESSOR_ID, BGL_PROCESSOR_ID);
+  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_PROCESSOR_ID,
+	  BGL_PROCESSOR_ID);
   LET_SPACES (fd);
 #endif
 #endif /* DEAD_CODE */
@@ -304,7 +304,6 @@ void MISC_events_group1 (FILE * fd)
   fprintf (fd, "%d    %d    %s\n", MPI_GRADIENT, MPI_GLOBAL_OP_COMM,
            MPI_GLOBAL_OP_COMM_LBL);
   LET_SPACES (fd);
-
 }
 
 /******************************************************************************
@@ -634,7 +633,7 @@ void loadSYMfile (char *name)
  *** generatePCFfile
  ******************************************************************************/
 
-int generatePCFfile (char *name)
+int GeneratePCFfile (char *name, long long options)
 {
 	FILE *fd;
 
@@ -653,7 +652,7 @@ int generatePCFfile (char *name)
 	MPISoftCountersEvent_WriteEnabledOperations (fd);
 	OMPEvent_WriteEnabledOperations (fd);
 	pthreadEvent_WriteEnabledOperations (fd);
-	MISCEvent_WriteEnabledOperations (fd);
+	MISCEvent_WriteEnabledOperations (fd, options);
 
 	Concat_User_Labels (fd);
 

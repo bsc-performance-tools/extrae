@@ -50,6 +50,6 @@ extern int **EnabledTasks;
 extern unsigned long long **EnabledTasks_time;
 #endif
 
-void AnotaBGLPersonality (unsigned int event, unsigned long long valor, int task);
+void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task);
 
 #endif /* __TRACE_TO_PRV_H__ */

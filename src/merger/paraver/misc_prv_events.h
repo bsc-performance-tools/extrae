@@ -31,14 +31,20 @@
 #ifndef MISC_PRV_EVENTS_H
 #define MISC_PRV_EVENTS_H
 
-#include <stdio.h>
+#if HAVE_STDIO_H
+# include <stdio.h>
+#endif
 
-void Enable_Topology ();
-void MISCEvent_WriteEnabledOperations (FILE * fd);
+void MISCEvent_WriteEnabledOperations (FILE * fd, long long options);
 
-#define LINEAR_HOST_LABEL "Linear host number"
-#define LINECARD_LABEL    "Linecard"
-#define HOST_LABEL        "Node inside linecard"
+#define MN_LINEAR_HOST_LABEL  "Linear host number"
+#define MN_LINECARD_LABEL     "Linecard"
+#define MN_HOST_LABEL         "Node inside linecard"
+
+#define BG_TORUS_X            "BG X Coordinate in Torus"
+#define BG_TORUS_Y            "BG Y Coordinate in Torus"
+#define BG_TORUS_Z            "BG Z Coordinate in Torus"
+#define BG_PROCESSOR_ID       "BG Processor ID"
 
 #if defined(PARALLEL_MERGE)
 void Share_MISC_Operations (void);

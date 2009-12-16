@@ -1320,6 +1320,14 @@ static int GetTraceOptions (void)
 
 	options |= (Clock_getType() == REAL_CLOCK)?TRACEOPTION_PARAVER:TRACEOPTION_DIMEMAS;
 
+#if defined(IS_BG_MACHINE)
+	options |= TRACEOPTION_BG_ARCH;
+#elif defined(IS_MN_MACHINE)
+	options |= TRACEOPTION_MN_ARCH;
+#else
+	options |= TRACEOPTION_UNK_ARCH;
+#endif
+
 	return options;
 }
 

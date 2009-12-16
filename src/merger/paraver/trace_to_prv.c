@@ -116,20 +116,20 @@ struct QuadCoord
 };
 static struct QuadCoord *coords = NULL;
 
-void AnotaBGLPersonality (unsigned int event, unsigned long long valor, int task)
+void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task)
 {
   switch (event)
   {
-    case BGL_PERSONALITY_TORUS_X:
+    case BG_PERSONALITY_TORUS_X:
       coords[task - 1].X = valor;
       break;
-    case BGL_PERSONALITY_TORUS_Y:
+    case BG_PERSONALITY_TORUS_Y:
       coords[task - 1].Y = valor;
       break;
-    case BGL_PERSONALITY_TORUS_Z:
+    case BG_PERSONALITY_TORUS_Z:
       coords[task - 1].Z = valor;
       break;
-    case BGL_PERSONALITY_PROCESSOR_ID:
+    case BG_PERSONALITY_PROCESSOR_ID:
       coords[task - 1].T = valor;
       break;
     default:
@@ -358,7 +358,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	if (0 == taskid)
 	{
-		fprintf (stdout, "Searching synchronization points... ");
+		fprintf (stdout, "mpi2prv: Searching synchronization points... ");
 		fflush (stdout);
 	}
 	total_tasks = Search_Synchronization_Times(fset, &StartingTimes, &SynchronizationTimes);
@@ -579,7 +579,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	if (0 == taskid)
 	{
 		strcpy (tmp, ".pcf");
-		if (generatePCFfile (envName) == -1)
+		if (GeneratePCFfile (envName, options) == -1)
 			fprintf (stderr, "mpi2prv: WARNING! Unable to create PCF file!\n");
 
 		strcpy (tmp, ".row");

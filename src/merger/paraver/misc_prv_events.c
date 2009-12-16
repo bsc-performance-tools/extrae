@@ -40,25 +40,25 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_prv_events.h"
 #include "labels.h"
 
-static int TOPOLOGY_in_use = FALSE;	/* PARALLEL constructs */
-
-void Enable_Topology ()
+void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 {
-	TOPOLOGY_in_use = TRUE;
-}
-
-void MISCEvent_WriteEnabledOperations (FILE * fd)
-{
-#if defined(IS_MN_MACHINE)
-	if (TOPOLOGY_in_use)
+	if (options & TRACEOPTION_MN_ARCH)
 	{
-    fprintf (fd, "EVENT_TYPE\n");
-    fprintf (fd, "%d   %d   %s\n", 0, LINEAR_HOST_EVENT, LINEAR_HOST_LABEL);
-    fprintf (fd, "%d   %d   %s\n", 0, LINECARD_EVENT, LINECARD_LABEL);
-    fprintf (fd, "%d   %d   %s\n", 0, HOST_EVENT, HOST_LABEL);
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d   %d   %s\n", 0, MN_LINEAR_HOST_EVENT, MN_LINEAR_HOST_LABEL);
+		fprintf (fd, "%d   %d   %s\n", 0, MN_LINECARD_EVENT, MN_LINECARD_LABEL);
+		fprintf (fd, "%d   %d   %s\n", 0, MN_HOST_EVENT, MN_HOST_LABEL);
 		LET_SPACES(fd);
 	}
-#endif
+	else if (options & TRACEOPTION_BG_ARCH)
+	{
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_X, BG_TORUS_X);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Y, BG_TORUS_Y);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Z, BG_TORUS_Z);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_PROCESSOR_ID, BG_PROCESSOR_ID);
+		LET_SPACES (fd);
+	}
 }
 
 #if defined(PARALLEL_MERGE)
@@ -70,16 +70,15 @@ void MISCEvent_WriteEnabledOperations (FILE * fd)
 void Share_MISC_Operations (void)
 {
 	int res, i, max;
-	int tmp2[3], tmp[3] = { TOPOLOGY_in_use, Rusage_Events_Found, MPIStats_Events_Found };
+	int tmp2[2], tmp[2] = { Rusage_Events_Found, MPIStats_Events_Found };
 	int tmp_in[RUSAGE_EVENTS_COUNT], tmp_out[RUSAGE_EVENTS_COUNT];
 	int tmp2_in[MPI_STATS_EVENTS_COUNT], tmp2_out[MPI_STATS_EVENTS_COUNT];
 
-	res = MPI_Reduce (tmp, tmp2, 3, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
+	res = MPI_Reduce (tmp, tmp2, 2, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #1");
 
-	TOPOLOGY_in_use = tmp2[0];
-	Rusage_Events_Found = tmp2[1];
-	MPIStats_Events_Found = tmp2[2];
+	Rusage_Events_Found = tmp2[0];
+	MPIStats_Events_Found = tmp2[1];
 
 	for (i = 0; i < RUSAGE_EVENTS_COUNT; i++)
 		tmp_in[i] = GetRusage_Labels_Used[i];

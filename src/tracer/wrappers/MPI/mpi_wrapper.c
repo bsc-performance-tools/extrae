@@ -163,10 +163,10 @@ static void BG_gettopology (void)
 
 	rts_get_personality (&personality, personality_size);
 	t1 = TIME;
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_TORUS_X, personality.xCoord);
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_TORUS_Y, personality.yCoord);
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_TORUS_Z, personality.zCoord);
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_PROCESSOR_ID, rts_get_processor_id ());
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_X, personality.xCoord);
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Y, personality.yCoord);
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Z, personality.zCoord);
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_PROCESSOR_ID, rts_get_processor_id ());
 #endif
 
 #if defined(IS_BGP_MACHINE)
@@ -176,17 +176,17 @@ static void BG_gettopology (void)
 	
 	Kernel_GetPersonality (&personality, personality_size);
 	t1 = TIME;
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_TORUS_X, BGP_Personality_xCoord(&personality));
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_TORUS_Y, BGP_Personality_yCoord(&personality));
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_TORUS_Z, BGP_Personality_zCoord(&personality));
-	TRACE_MISCEVENT (t1, USER_EV, BGL_PERSONALITY_PROCESSOR_ID, BGP_Personality_rankInPset (&personality));
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_X, BGP_Personality_xCoord(&personality));
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Y, BGP_Personality_yCoord(&personality));
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Z, BGP_Personality_zCoord(&personality));
+	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_PROCESSOR_ID, BGP_Personality_rankInPset (&personality));
 #endif
 
 	t2 = TIME;
-	TRACE_MISCEVENT (t2, USER_EV, BGL_PERSONALITY_TORUS_X, 0);
-	TRACE_MISCEVENT (t2, USER_EV, BGL_PERSONALITY_TORUS_Y, 0);
-	TRACE_MISCEVENT (t2, USER_EV, BGL_PERSONALITY_TORUS_Z, 0);
-	TRACE_MISCEVENT (t2, USER_EV, BGL_PERSONALITY_PROCESSOR_ID, 0);
+	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_TORUS_X, 0);
+	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_TORUS_Y, 0);
+	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_TORUS_Z, 0);
+	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_PROCESSOR_ID, 0);
 }
 #endif
 
@@ -210,9 +210,9 @@ static void MN_gettopology (void)
 		linecard = linear_host / 16;
 		host = linear_host % 16;
 
-		TRACE_MISCEVENT(temps, USER_EV, LINEAR_HOST_EVENT, linear_host);
-		TRACE_MISCEVENT(temps, USER_EV, LINECARD_EVENT, linecard);
-		TRACE_MISCEVENT(temps, USER_EV, HOST_EVENT, host);
+		TRACE_MISCEVENT(temps, USER_EV, MN_LINEAR_HOST_EVENT, linear_host);
+		TRACE_MISCEVENT(temps, USER_EV, MN_LINECARD_EVENT, linecard);
+		TRACE_MISCEVENT(temps, USER_EV, MN_HOST_EVENT, host);
 	}
 	else
 		fprintf(stderr, "mpitrace: could not get hostname, is it longer than %d bytes?\n", (MAX_BUFFER-1));
@@ -222,10 +222,9 @@ static void MN_gettopology (void)
 static void GetTopology (void)
 {
 #if defined(IS_MN_MACHINE)
-  MN_gettopology();
-#endif
-#if defined(IS_BG_MACHINE)
-  BG_gettopology();
+	MN_gettopology();
+#elif defined(IS_BG_MACHINE)
+	BG_gettopology();
 #endif
 }
 

@@ -550,11 +550,11 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 	* localitzacions del torus a la trasa 
 	*/
 		if (cur->type == 2 && option_XYZT
-		&& (cur->event == BGL_PERSONALITY_TORUS_X
-		|| cur->event == BGL_PERSONALITY_TORUS_Y
-		|| cur->event == BGL_PERSONALITY_TORUS_Z
-		|| cur->event == BGL_PERSONALITY_PROCESSOR_ID))
-		AnotaBGLPersonality (cur->event, cur->value, cur->task);
+		&& (cur->event == BG_PERSONALITY_TORUS_X
+		|| cur->event == BG_PERSONALITY_TORUS_Y
+		|| cur->event == BG_PERSONALITY_TORUS_Z
+		|| cur->event == BG_PERSONALITY_PROCESSOR_ID))
+		AnotaBGPersonality (cur->event, cur->value, cur->task);
 #endif
 
 

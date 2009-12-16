@@ -106,13 +106,6 @@ value_t;
 
 #define IOSIZE_LBL             "I/O Size"
 
-#if defined(IS_BG_MACHINE)
-# define BGL_TORUS_X           "BG/L X Coordinate in Torus"
-# define BGL_TORUS_Y           "BG/L Y Coordinate in Torus"
-# define BGL_TORUS_Z           "BG/L Z Coordinate in Torus"
-# define BGL_PROCESSOR_ID      "BG/L Processor ID"
-#endif
-
 #define MPI_GLOBAL_OP_ROOT_LBL 			"Root in MPI Global OP"
 #define MPI_GLOBAL_OP_SENDSIZE_LBL	"Send Size in MPI Global OP"
 #define MPI_GLOBAL_OP_RECVSIZE_LBL	"Recv Size in MPI Global OP"
@@ -354,7 +347,7 @@ extern int MaxClusterId;
 
 void set_counter_used (long long);
 void Address2Info_Write_Labels (FILE *);
-int generatePCFfile (char *name);
+int GeneratePCFfile (char *name, long long options);
 void loadSYMfile (char *name);
 
 #endif

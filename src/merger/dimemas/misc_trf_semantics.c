@@ -79,11 +79,6 @@ static int User_Event (event_t * current_event, unsigned long long current_time,
 
 	Dimemas_User_Event (fset->output_file, task-1, thread-1, EvType, EvValue);
 
-#if defined(IS_MN_MACHINE)
-	if (EvType  == LINEAR_HOST_EVENT || EvType == LINECARD_EVENT || EvType == HOST_EVENT)
-		Enable_Topology();
-#endif
-
   return 0;
 }
 
