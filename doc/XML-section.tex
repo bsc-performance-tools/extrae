@@ -10,6 +10,8 @@
 
 Please note that most of the nodes present in the XML file have an {\tt enabled} attribute that allows turning on and off some parts of the instrumentation mechanism. For example, {\tt <mpi enabled="yes">} means MPI instrumentation is enabled and process all the contained XML subnodes, if any; whether {\tt <mpi enabled="no">} means to skip gathering MPI information and do not process XML subnodes.
 
+Each section points which environment variables could be used if the tracing package lacks XML support. See appendix \ref{cha:EnvVar} for the entire list.
+
 \section{XML Section: Trace configuration}\label{sec:XMLSectionTraceConfiguration}
 
 The basic trace behavior is determined in the first part of the XML and {\bf contains} all of the remaining options. It looks like:
@@ -33,6 +35,8 @@ The {\tt <?xml version='1.0'?>} is mandatory for all XML files. Don't touch this
  \item {\tt xml-parser-id} This is used to check whether the XML parsing scheme and the file scheme match or not.
 \end{itemize}
 
+\graybox{See {\bf MPITRACE\_ON}, {\bf MPITRACE\_HOME}, {\bf MPITRACE\_INITIAL\_MODE} and {\bf MPITRACE\_TRACE\_TYPE} environment variables in appendix \ref{cha:EnvVar}.}
+
 \section{XML Section: MPI}\label{sec:XMLSectionMPI}
 
 The MPI configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
@@ -41,6 +45,8 @@ The MPI configuration part is nested in the config file (see section \ref{sec:XM
 
 MPI calls can gather performance information at the begin and end of MPI calls. To activate this behavior, just set to yes the attribute of the nested {\tt <counters>} node.
 
+\graybox{See {\bf MPITRACE\_DISABLE\_MPI} and {\bf MPITRACE\_MPI\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+
 \section{XML Section: OpenMP}\label{sec:XMLSectionOpenMP}
 
 The OpenMP configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
@@ -48,6 +54,8 @@ The OpenMP configuration part is nested in the config file (see section \ref{sec
 \input{XML/openmp.xml}
 
 The tracing package allows to gather information of some OpenMP runtimes and outlined routines. In addition to that, the user can also enable gathering information of locks and also gathering performance counters in all of these routines. This is achieved by modifying the enabled attribute of the {\tt <locks>} and {\tt <counters>}, respectively.
+
+\graybox{See {\bf MPITRACE\_DISABLE\_OMP}, {\bf MPTRACE\_OMP\_LOCKS} and {\bf MPITRACE\_OMP\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: CELL}\label{sec:XMLcell}
 
@@ -60,6 +68,8 @@ The Cell configuration part is only parsed for tracing packages suited for the C
  \item {\tt spu-buffer-size} Specifies the number of events contained in the buffer on the SPE side. Remember that memory is very scarce on the SPE, so setting a high value can exhaust all memory.
  \item {\tt spu-dma-channel} Chooses which {DMA} channel will be used to perform the intermediate trace files transfers to the PPE side.
 \end{itemize}
+
+\graybox{See {\bf MPITRACE\_SPU\_FILE\_SIZE}, {\bf MPITRACE\_SPU\_BUFFER\_SIZE} and {\bf MPITRACE\_SPU\_DMA\_CHANNEL} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Callers}\label{sec:XMLSectionCallers}
 
@@ -95,6 +105,8 @@ The instrumentation library can be compiled with support for collecting performa
 Here is an example of the counters section in the XML configuration file:
 
 \input{XML/counters.xml}
+
+\graybox{See {\bf MPTRACE\_COUNTERS}, {\bf MPITRACE\_NETWORK\_COUNTERS} and {\bf MPTRACE\_RUSAGE} environment variables in appendix \ref{cha:EnvVar}.}
 
 \subsection{Processor performance counters}\label{subsec:ProcessorPerformanceCounters}
 
@@ -149,6 +161,8 @@ Such options refer to:
  \item {\tt gather-mpits} If the system does not provide a global filesystem the resulting trace files will be distributed among the computation nodes. Turning on this option will use the underlying communication mechanism ({MPI}) to gather all the intermediate trace files into the root node.
 \end{itemize}
 
+\graybox{See {\bf MPTRACE\_PROGRAM\_NAME}, {\bf MPTRACE\_FILE\_SIZE}, {\bf MPTRACE\_DIR}, {\bf MPTRACE\_FINAL\_DIR} and {\bf MPTRACE\_GATHER\_MPITS} environment variables in appendix \ref{cha:EnvVar}.}
+
 \section{XML Section: Buffer management}\label{sec:XMLSectionBuffer}
 
 Modify the buffer management entry to tune the tracing buffer behavior.
@@ -156,6 +170,8 @@ Modify the buffer management entry to tune the tracing buffer behavior.
 \input{XML/buffer.xml}
 
 By, default (even if the enabled attribute is "no") the tracing buffer is set to 150k events (see section \ref{sec:XMLcell} for further information of buffer in the CELL). If {\tt <size>} is enabled the tracing buffer will be set to the number of events indicated by this node. If the circular option is enabled, the buffer will be created as a circular buffer and the buffer will be dumped only once with the last events generated by the tracing package.
+
+\graybox{See {\bf MPTRACE\_BUFFER\_SIZE} environment variable in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Trace control}\label{sec:XMLSectionTraceControl}
 
@@ -168,6 +184,8 @@ To be written.
 If the user enables this option, the instrumentation library will just emit information of computation bursts ({\em i.e.}, not does not trace {MPI} calls, {OpenMP} runtime, and so on). The library will discard all those computation bursts that last less than the selected threshold\footnote{The threshold understands the following postfixes: n for nanoseconds, u for microseconds, m for milliseconds, s for seconds, M for minutes, H for hours and D for days.}. 
 
 In addition to that, when the tracing library is running in burst mode, it computes some statistics of MPI activity. Such statistics can be dumped in the tracefile by enabling {\tt mpi-statistics}.
+
+\graybox{See {\bf MPITRACE\_INITIAL\_MODE}, {\bf MPITRACE\_BURST\_THRESHOLD} and {MPITRACE\_MPI\_STATISTICS} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Others}\label{sec:XMLSectionOthers}
 

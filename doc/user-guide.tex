@@ -10,7 +10,19 @@
 \usepackage{a4wide}
 \usepackage{fullpage}
 \usepackage{verbatim}
+\usepackage{color,calc}
+\definecolor{lightgray}{rgb}{0.75,0.75,0.75}
 
+\def\graybox#1{
+  \medskip
+  \colorbox{lightgray}{
+    \begin{minipage}[t]{1.0\textwidth}
+    #1
+    \end{minipage}
+   }
+}
+
+  
 \usepackage{draftcopy}
 
 \urlstyle{leostyle}
