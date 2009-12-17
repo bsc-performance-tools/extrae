@@ -214,36 +214,40 @@
 
 #define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue)      \
 {                                                                     \
-	event_t evt;                                                      \
-	evt.time = evttime;                                               \
-	evt.event = CPU_BURST_EV;                                         \
-	evt.value = evtvalue;                                             \
+	event_t evt_entry, evt_exit;                                        \
+	evt_entry.time = last_mpi_exit_time;                                \
+	evt_entry.event = CPU_BURST_EV;                                      \
+	evt_entry.value = evtvalue;                                          \
+	evt_exit.time = evttime;                                            \
+	evt_exit.event = CPU_BURST_EV;                                      \
+	evt_exit.value = 0;                                          \
 	if (evtvalue == EVT_BEGIN)                                        \
 	{                                                                 \
-		if ((evt.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION)  \
+		if ((evt_exit.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION)  \
 		{                                                             \
 			if (ACCUMULATED_COUNTERS_INITIALIZED(thread_id))          \
 			{                                                         \
-				COPY_ACCUMULATED_COUNTERS_HERE(thread_id, evt);       \
+				COPY_ACCUMULATED_COUNTERS_HERE(thread_id, evt_entry);       \
 				ACCUMULATED_COUNTERS_RESET(thread_id);                \
 			}                                                         \
 			else                                                      \
 			{                                                         \
 				/* This happens once when the tracing mode changes */ \
 				/* from Normal to CPU Bursts, and after MPIINIT_EV */ \
-				HARDWARE_COUNTERS_READ (thread_id, evt, FALSE);       \
+				HARDWARE_COUNTERS_READ (thread_id, evt_entry, FALSE);       \
 			}                                                         \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_entry); \
 			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time);         \
-			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_exit); \
 		}                                                             \
 		else                                                          \
 		{                                                             \
-			HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt, 1);               \
+			HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1);               \
 		}                                                             \
 	}                                                                 \
 	else                                                              \
 	{                                                                 \
-		HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt, 1);                   \
+		HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1);                   \
 	}                                                                 \
 }
 
