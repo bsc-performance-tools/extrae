@@ -1,0 +1,10 @@
+
+Configuration & Installation of the package at several machines:
+
+
+Jugene (Bluegene/P)
+--
+
+./configure --prefix=/homec/jzam11/jzam1128/foreign-packages/mpitrace-27november.4 --with-papi=/bgsys/local/papi/papi-c-3.9.0 --without-libz --with-bfd=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-bgp-linux
+make
+make install
