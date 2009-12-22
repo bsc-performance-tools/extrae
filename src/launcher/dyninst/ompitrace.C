@@ -93,7 +93,7 @@ int expectError = DYNINST_NO_ERROR;
  **      Author : HSG
  **      Description : Checks whether a file exists
  ******************************************************************************/
-int file_exists (char *fitxer)
+static int file_exists (char *fitxer)
 {
   struct stat buffer;
   return stat(fitxer, &buffer)== 0;
@@ -146,7 +146,7 @@ static BPatch_function * getFunction (BPatch_image *appImage, string &name)
 	return found_funcs[0];
 }
 
-static void GenerateSymFile (list<string> ParFunc, list<string> UserFunc, BPatch_image *appImage, BPatch_process *appProces)
+static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPatch_image *appImage, BPatch_process *appProces)
 {
   ofstream symfile;
 	string symname = string(::XML_GetFinalDirectory())+string("/")+string(::XML_GetTracePrefix())+".sym";
@@ -209,7 +209,7 @@ static void GenerateSymFile (list<string> ParFunc, list<string> UserFunc, BPatch
   symfile.close();
 }
 
-int processParams (int argc, char *argv[])
+static int processParams (int argc, char *argv[])
 {
 	bool sortir = false;
 	int i = 1;
@@ -285,7 +285,7 @@ int processParams (int argc, char *argv[])
 	return i;
 }
 
-void ReadFileIntoList (char *fitxer, list<string>& container)
+static void ReadFileIntoList (char *fitxer, list<string>& container)
 {
   char str[2048];
 
@@ -312,7 +312,7 @@ void ReadFileIntoList (char *fitxer, list<string>& container)
 	file_op.close();
 }
 
-void ShowFunctions (BPatch_image *appImage)
+static void ShowFunctions (BPatch_image *appImage)
 {
 	BPatch_Vector<BPatch_function *> *vfunctions = appImage->getProcedures (false);
 	cout << PACKAGE_NAME << ": " << vfunctions->size() << " functions found in binary " << endl;
@@ -332,7 +332,7 @@ void ShowFunctions (BPatch_image *appImage)
 			f->getTypedName (tname, 1024);
 			f->getModuleName (modname, 1024);
 
-			cout << " * Name: " << name << endl
+			cout << " * " << i+1 << " of " << vfunctions->size() << ", Name: " << name << endl
 			     << "    Mangled Name: " << mname << endl
 			     << "    Typed Name  : " << tname << endl
 			     << "    Module name : " << modname << endl
@@ -360,12 +360,12 @@ void ShowFunctions (BPatch_image *appImage)
 	} 
 }
 
-void printCallingSites (char *name, BPatch_Vector<BPatch_point *> *vpoints)
+static void printCallingSites (int id, int total, char *name, BPatch_Vector<BPatch_point *> *vpoints)
 {
 	if (vpoints->size() > 0)
 	{
 		unsigned j = 0;
-		cout << "Calling sites for " << name << " (num = " << vpoints->size() << "):" << endl;
+		cout << id << "of " << total << " - Calling sites for " << name << " (num = " << vpoints->size() << "):" << endl;
 		while (j < vpoints->size())
 		{
 			BPatch_function *called = ((*vpoints)[j])->getCalledFunction();
@@ -394,7 +394,7 @@ void printCallingSites (char *name, BPatch_Vector<BPatch_point *> *vpoints)
 	}
 }
 
-void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
+static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	ApplicationType *appType, list<string> &OMPList, list<string> &UserList,
 	bool instrumentMPI, bool instrumentOMP, bool instrumentUF)
 {
@@ -486,7 +486,7 @@ void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 				break;
 
 			if (VerboseLevel >= 2)
-				printCallingSites (name, vpoints);
+				printCallingSites (i, vfunctions->size(), name, vpoints);
 
 			unsigned j = 0;
 			while (j < vpoints->size())
@@ -530,7 +530,7 @@ void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 				break;
 
 			if (VerboseLevel >= 2)
-				printCallingSites (name, vpoints);
+				printCallingSites (i, vfunctions->size(), name, vpoints);
 
 			unsigned j = 0;
 			while (j < vpoints->size())
