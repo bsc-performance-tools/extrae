@@ -21,7 +21,7 @@ endif
 libmrn_la_LIBADD = libextract_be.la
 
 bin_PROGRAMS = tracemon mrnet_root clusterize spectralize
-mrnet_root_SOURCES  = protocol.C root_protocol.C mrnet_root.C commands_queue.C BEMask.C StreamPublisher.C mrn_config.cpp SpectralTool.cpp FE_ProtScope.cpp
+mrnet_root_SOURCES  = protocol.C root_protocol.C mrnet_root.C commands_queue.C BEMask.C StreamPublisher.C mrn_config.cpp SpectralTool.cpp FE_ProtScope.cpp ClusterTool.C
 mrnet_root_CXXFLAGS = -g -I$(COMMON_DIR) -Ilibextract @MRNET_CXXFLAGS@ @CLUSTERING_CXXFLAGS@ @SPECTRAL_CXXFLAGS@ -DFE
 mrnet_root_LDFLAGS  = -L@MRNET_LIBSDIR@ -R @MRNET_LIBSDIR@ @MRNET_LIBS@ @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@ @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@ -Wl,-E 
 mrnet_root_LDADD    = $(COMMON_DIR)/libcommon.la libextract_fe.la
@@ -30,7 +30,7 @@ tracemon_SOURCES = tracemon.c tracemon.h
 tracemon_CFLAGS = -I$(COMMON_DIR)
 tracemon_LDFLAGS = -lpthread
 
-clusterize_SOURCES = clusterize.C 
+clusterize_SOURCES = clusterize.C ClusterTool.C
 clusterize_CXXFLAGS = -I$(COMMON_DIR) -Ilibextract @CLUSTERING_CXXFLAGS@
 clusterize_LDFLAGS = @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
 clusterize_LDADD = $(COMMON_DIR)/libcommon.la libextract_fe.la

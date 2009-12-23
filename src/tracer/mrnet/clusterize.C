@@ -32,6 +32,7 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#if 0
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -209,7 +210,7 @@ void Dump_CIDS(MRNetClustering *C, int num_be, BurstInfo_t **bi_list, char *OutP
 }
 
 
-int main(int argc, char **argv)
+int old_main(int argc, char **argv)
 {
 	MRNetClustering *C = new MRNetClustering();
 	char *OutPrefix, *InFile;
@@ -256,3 +257,58 @@ int main(int argc, char **argv)
 	BurstInfo_FreeArray (bi_list, NumBackends);
 	return 0;
 }
+#endif
+
+#include "ClusterTool.h"
+#include <stdio.h>
+
+int main(int argc, char **argv)
+{
+	ClusterTool *CT;
+	char *OutPrefix, *InFile;
+    BurstInfo_t **bi_list = NULL;
+    int NumBackends = 0;
+	HWCSetIds_m HWC_Set_Ids;
+	ClusterIDs_m CIDs;
+    int Max_Representatives = 0;
+    int Pct_Bursts = 0;
+
+    if (argc != 5) 
+    {
+        fprintf(stderr, "Syntax error: %s <input_data_file.bbi> <output_file_name> <Max_Representatives> <Pct_Bursts>\n", basename(argv[0]));
+        exit(1);
+    }
+    InFile = argv[1];
+    OutPrefix = argv[2];
+    Max_Representatives =  atoi(argv[3]);
+    Pct_Bursts = atoi(argv[4]);
+
+	NumBackends = BurstInfo_LoadArray(InFile, &bi_list, &HWC_Set_Ids);
+
+	CT = new ClusterTool( OutPrefix, &HWC_Set_Ids );
+
+    if ((NumBackends > 0) && (bi_list != NULL))
+    {
+		bool ok;
+
+		/* Convert input and feed clustering tool */
+		CT->feed(NumBackends, bi_list, Max_Representatives, Pct_Bursts);
+
+        /* Execute the analysis */
+		ok = CT->cluster();
+		CT->print_plots("");
+        fprintf(stderr, "%s: Clustering tool returned %s.\n", basename(argv[0]), (ok ? "successfully" : "with errors"));
+
+		/* Classify all points */
+		CT->classify(NumBackends, bi_list, CIDs);
+		CT->print_plots(".classify");
+    }
+    else
+    {
+        fprintf(stderr, "%s: Invalid data in file '%s'.\n", basename(argv[0]), argv[1]);
+    }
+
+    BurstInfo_FreeArray (bi_list, NumBackends);
+    return 0;
+}
+

@@ -20,7 +20,7 @@ static void BurstInfo_Dump (BurstInfo_t *bi, int fd)
     write (fd, bi->HWCSet, bi->num_Bursts * sizeof(int));
 }   
 
-void BurstInfo_DumpArray (BurstInfo_t **bi_list, int count, char *out_suffix, std::map< int, std::vector<int> > & HWC_Sets_Ids)
+void BurstInfo_DumpArray (BurstInfo_t **bi_list, int count, const char *out_suffix, std::map< int, std::vector<int> > & HWC_Sets_Ids)
 {
     int i, fd;
     char DumpFile[256];
