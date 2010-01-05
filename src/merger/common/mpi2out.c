@@ -726,7 +726,7 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 	/* Show information of sizes */
 	if (processor_id == 0)
 	{
-		fprintf (stdout, "mpi2prv: Assigned size per task <");
+		fprintf (stdout, "mpi2prv: Assigned size per processor <");
 		for (index = 0; index < num_processors; index++)
 		{
 			unsigned file;
