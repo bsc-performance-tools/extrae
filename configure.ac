@@ -366,26 +366,6 @@ else
 fi
 AM_CONDITIONAL(HAVE_XML2, test "${XML_enabled}" = "yes" )
 
-AC_ARG_ENABLE(license,
-   AC_HELP_STRING(
-      [--enable-license],
-      [Enable license management in the mpi2prv application (enabled by default)]
-   ),
-   [enable_license="${enableval}"],
-   [enable_license="yes"]
-)
-if test "${enable_license}" = "yes" ; then
-   if test "${OperatingSystem}" = "freebsd" ; then
-      AC_MSG_WARN([We don't support license system on FreeBSD systems])
-   elif test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
-      AC_MSG_WARN([We don't support license system on BG/L and BG/P systems])
-   else
-      AC_DEFINE([LICENSE], [1], [Defined if license management must be activated])
-      AC_DEFINE([LICENSE_IN_MERGE], [1], [Defined if license management must be activated])
-      AC_DEFINE([MPITRACE_LICENSE], [1], [Defined if license management must be activated])
-   fi
-fi
-
 AC_ARG_ENABLE(doc,
    AC_HELP_STRING(
       [--enable-doc],

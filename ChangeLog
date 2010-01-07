@@ -3,6 +3,7 @@ ChangeLog
    [ + added, - removed, * changed ]
 
    + (07/Jan/2010) Initial tracing of PACX
+                   Removed license code.
    * (07/Dec/2009) Force mkdir of the storage directory. So make-dir are no longer needed in the XML files.
                    Improve -f on merger. First try on absolute path, then in relative.
    * (03/Dec/2009) Fixed a bug in 64bit systems where MPI_Request is a pointer. May produce mismatching communications.
