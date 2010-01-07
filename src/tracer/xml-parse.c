@@ -56,8 +56,11 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #if defined(MPI_SUPPORT)
 # ifdef HAVE_MPI_H
-# include <mpi.h>
+#  include <mpi.h>
 # endif
+#endif
+#if defined(PACX_SUPPORT)
+# include <pacx.h>
 #endif
 
 #include "utils.h"
@@ -139,6 +142,43 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 }
 #endif
 
+#if defined(PACX_SUPPORT)
+/* Configure PACX related parameters */
+static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	/* Parse all TAGs, and annotate them to use them later */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
+		{
+		}
+		/* Shall we gather counters in the PACX calls? */
+		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
+#if USE_HARDWARE_COUNTERS
+			mfprintf (stdout, "mpitrace: PACX routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
+#else
+			mfprintf (stdout, "mpitrace: <%s> tag at <PACX> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			tracejant_hwc_mpi = FALSE;
+#endif
+			XML_FREE(enabled);
+		}
+		else
+		{
+			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <PACX> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
+
 /* Configure Callers related parameters */
 static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
@@ -152,7 +192,7 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
-		/* Must the tracing facility obtain information about MPI callers? */
+		/* Must the tracing facility obtain information about MPI/PACX callers? */
 		else if (!xmlStrcmp (tag->name, TRACE_MPI))
 		{
 #if defined(MPI_SUPPORT)
@@ -169,7 +209,23 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			mfprintf (stdout, "mpitrace: <%s> tag at <Callers> level will be ignored. This library does not support MPI.\n", TRACE_MPI);
 #endif
 		}
-		/* Must the tracing facility obtain information about MPI callers? */
+		else if (!xmlStrcmp (tag->name, TRACE_PACX))
+		{
+#if defined(PACX_SUPPORT)
+			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			{
+				char *callers = (char*) xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
+				if (callers != NULL)
+					Parse_Callers (rank, callers, CALLER_MPI);
+				XML_FREE(callers);
+			}
+			XML_FREE(enabled);
+#else
+			mfprintf (stdout, "mpitrace: <%s> tag at <Callers> level will be ignored. This library does not support PACX.\n", TRACE_PACX);
+#endif
+		}
+		/* Must the tracing facility obtain information about callers at sample points? */
 		else if (!xmlStrcmp (tag->name, TRACE_SAMPLING))
 		{
 #if defined(SAMPLING_SUPPORT)
@@ -188,7 +244,7 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <MPI> level\n", tag->name);
+			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <callers> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -275,7 +331,7 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <MPI> level\n", tag->name);
+			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <CELL> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -313,6 +369,11 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 			XML_FREE(enabled);
 		}
 		else if (!xmlStrcmp (tag->name, TRACE_MPI_STATISTICS))
+		{
+			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+		}
+		else if (!xmlStrcmp (tag->name, TRACE_PACX_STATISTICS))
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
@@ -726,11 +787,8 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 				HWC_Initialize (0);
 
 				Parse_XML_Counters_CPU (rank, xmldoc, tag);
-#if defined(MPI_SUPPORT)
 				if (hwc_startset != NULL)
 					HWC_Parse_XML_Config (rank, world_size, hwc_startset);
-#endif
-#else
 				mfprintf (stdout, "mpitrace: <%s> tag at <%s> level will be ignored. This library does not support CPU HW.\n", TRACE_CPU, TRACE_COUNTERS);
 #endif
 			}
@@ -1188,6 +1246,24 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							Parse_XML_MPI (rank, xmldoc, current_tag);
 #else
 							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support MPI.\n", TRACE_MPI);
+							tracejant_mpi = FALSE;
+#endif
+						}
+						else
+							tracejant_mpi = FALSE;
+						XML_FREE(enabled);
+					}
+					/* PACX related configuration */
+					else if (!xmlStrcmp (current_tag->name, TRACE_PACX))
+					{
+						xmlChar *enabled = xmlGetProp (current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						{
+#if defined(PACX_SUPPORT)
+							tracejant_mpi = TRUE;
+							Parse_XML_PACX (rank, xmldoc, current_tag);
+#else
+							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support PACX.\n", TRACE_PACX);
 							tracejant_mpi = FALSE;
 #endif
 						}

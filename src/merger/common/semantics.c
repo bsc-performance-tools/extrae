@@ -41,6 +41,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "misc_prv_semantics.h"
 #include "mpi_prv_semantics.h"
+#include "pacx_prv_semantics.h"
 #include "omp_prv_semantics.h"
 #include "pthread_prv_semantics.h"
 #include "trt_prv_semantics.h"
@@ -82,6 +83,7 @@ void Semantics_Initialize (int output_format)
 			Register_Event_Handlers (PRV_MISC_Event_Handlers);
 			Register_Range_Handlers (PRV_MISC_Range_Handlers);
 			Register_Event_Handlers (PRV_MPI_Event_Handlers);
+			Register_Event_Handlers (PRV_PACX_Event_Handlers);
 			Register_Event_Handlers (PRV_OMP_Event_Handlers);
 			Register_Event_Handlers (PRV_pthread_Event_Handlers);
 			Register_Event_Handlers (PRV_TRT_Event_Handlers);

@@ -20,53 +20,18 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/src/tracer/interfaces/MPI/mpi_interface.h $
  | 
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @last_commit: $Date: 2009-10-29 13:06:27 +0100 (dj, 29 oct 2009) $
+ | @version:     $Revision: 15 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _CALLTRACE_H_INCLUDED_
-#define _CALLTRACE_H_INCLUDED_
+#ifndef __PACX_INTERFACE_H__
+#define __PACX_INTERFACE_H__
 
-#ifdef HAVE_STDIO_H
-# include <stdio.h>
-#endif
-#ifdef HAVE_ERRNO_H
-# include <errno.h>
-#endif
-#ifdef HAVE_LIMITS_H
-# include <limits.h>
-#endif
+extern unsigned int PACX_NumOpsGlobals;
+extern unsigned int PACX_CurrentOpGlobal;
 
-#include "common.h"
-#include "clock.h"
-
-/*
-#define MAX_CALLERS            100
-*/
-#define FOUR_CALLS_AGO           4
-#define FIVE_CALLS_AGO           5
-#define MAX_USER_FUNCTION_OFFSET FIVE_CALLS_AGO
-#define MAX_STACK_DEEPNESS       (MAX_CALLERS + MAX_USER_FUNCTION_OFFSET)
-   
-#define MPI_CALLER_EVENT_TYPE(deepness) (Caller_Count[CALLER_MPI] > 1 ? CALLER_EV+deepness : CALLER_EV)
-
-enum 
-{
-	CALLER_MPI = 0,
-	CALLER_SAMPLING,
-	COUNT_CALLER_TYPES
-};
-
-extern int Trace_Caller_Enabled[COUNT_CALLER_TYPES];
-extern int *Trace_Caller[COUNT_CALLER_TYPES];
-extern int Caller_Deepness[COUNT_CALLER_TYPES];
-extern int Caller_Count[COUNT_CALLER_TYPES];
-
-void trace_callers (iotimer_t temps, int deep, int type);
-UINT64 get_caller (int deep);
-
-#endif
+#endif /* __MPI_INTERFACE_H__ */

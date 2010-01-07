@@ -35,18 +35,22 @@ static char UNUSED rcsid[] = "$Id$";
 
 #define MPI_EVENTS 61
 static unsigned mpi_events[] = {
-  BSEND_EV, SSEND_EV, BARRIER_EV, BCAST_EV, SEND_EV, RECV_EV, SENDRECV_EV,
-  SENDRECV_REPLACE_EV, IBSEND_EV, ISSEND_EV, ISEND_EV, IRECV_EV,
-  TEST_EV, WAIT_EV, CANCEL_EV, RSEND_EV, IRSEND_EV, ALLTOALL_EV, ALLTOALLV_EV,
-  ALLREDUCE_EV, REDUCE_EV, WAITALL_EV, PROBE_EV, IPROBE_EV, GATHER_EV,
-  GATHERV_EV, SCATTER_EV, SCATTERV_EV, REDUCESCAT_EV, SCAN_EV, WAITANY_EV,
-  WAITSOME_EV, FINALIZE_EV, MPIINIT_EV, ALLGATHER_EV, ALLGATHERV_EV,
-  PERSIST_REQ_EV, START_EV, STARTALL_EV, REQUEST_FREE_EV, RECV_INIT_EV,
-  SEND_INIT_EV, BSEND_INIT_EV, RSEND_INIT_EV, SSEND_INIT_EV, COMM_RANK_EV,
-  COMM_SIZE_EV, IPROBE_COUNTER_EV, TIME_OUTSIDE_IPROBES_EV, TEST_COUNTER_EV,
-  FILE_OPEN_EV, FILE_CLOSE_EV, FILE_READ_EV, FILE_READ_ALL_EV, FILE_WRITE_EV,
-  FILE_WRITE_ALL_EV, FILE_READ_AT_EV, FILE_READ_AT_ALL_EV, FILE_WRITE_AT_EV,
-  FILE_WRITE_AT_ALL_EV, IRECVED_EV };
+	MPI_BSEND_EV, MPI_SSEND_EV, MPI_BARRIER_EV, MPI_BCAST_EV, MPI_SEND_EV,
+	MPI_RECV_EV, MPI_SENDRECV_EV, MPI_SENDRECV_REPLACE_EV, MPI_IBSEND_EV,
+	MPI_ISSEND_EV, MPI_ISEND_EV, MPI_IRECV_EV, MPI_TEST_EV, MPI_WAIT_EV,
+	MPI_CANCEL_EV, MPI_RSEND_EV, MPI_IRSEND_EV, MPI_ALLTOALL_EV,
+	MPI_ALLTOALLV_EV, MPI_ALLREDUCE_EV, MPI_REDUCE_EV, MPI_WAITALL_EV,
+	MPI_PROBE_EV, MPI_IPROBE_EV, MPI_GATHER_EV, MPI_GATHERV_EV,
+	MPI_SCATTER_EV, MPI_SCATTERV_EV, MPI_REDUCESCAT_EV, MPI_SCAN_EV,
+	MPI_WAITANY_EV, MPI_WAITSOME_EV, MPI_FINALIZE_EV, MPI_INIT_EV,
+	MPI_ALLGATHER_EV, MPI_ALLGATHERV_EV, MPI_PERSIST_REQ_EV, MPI_START_EV,
+	MPI_STARTALL_EV, MPI_REQUEST_FREE_EV, MPI_RECV_INIT_EV, MPI_SEND_INIT_EV,
+	MPI_BSEND_INIT_EV, MPI_RSEND_INIT_EV, MPI_SSEND_INIT_EV, MPI_COMM_RANK_EV,
+	MPI_COMM_SIZE_EV, MPI_IPROBE_COUNTER_EV, MPI_TIME_OUTSIDE_IPROBES_EV,
+	MPI_TEST_COUNTER_EV, MPI_FILE_OPEN_EV, MPI_FILE_CLOSE_EV, MPI_FILE_READ_EV,
+	MPI_FILE_READ_ALL_EV, MPI_FILE_WRITE_EV, MPI_FILE_WRITE_ALL_EV, 
+	MPI_FILE_READ_AT_EV, MPI_FILE_READ_AT_ALL_EV, MPI_FILE_WRITE_AT_EV,
+	MPI_FILE_WRITE_AT_ALL_EV, MPI_IRECVED_EV };
 
 /******************************************************************************
  ***  IsMPI
@@ -62,9 +66,43 @@ unsigned IsMPI (unsigned EvType)
   return FALSE;
 }
 
+#define PACX_EVENTS 61
+static unsigned pacx_events[] = {
+	PACX_BSEND_EV, PACX_SSEND_EV, PACX_BARRIER_EV, PACX_BCAST_EV, PACX_SEND_EV,
+	PACX_RECV_EV, PACX_SENDRECV_EV, PACX_SENDRECV_REPLACE_EV, PACX_IBSEND_EV,
+	PACX_ISSEND_EV, PACX_ISEND_EV, PACX_IRECV_EV, PACX_TEST_EV, PACX_WAIT_EV,
+	PACX_CANCEL_EV, PACX_RSEND_EV, PACX_IRSEND_EV, PACX_ALLTOALL_EV,
+	PACX_ALLTOALLV_EV, PACX_ALLREDUCE_EV, PACX_REDUCE_EV, PACX_WAITALL_EV,
+	PACX_PROBE_EV, PACX_IPROBE_EV, PACX_GATHER_EV, PACX_GATHERV_EV,
+	PACX_SCATTER_EV, PACX_SCATTERV_EV, PACX_REDUCESCAT_EV, PACX_SCAN_EV,
+	PACX_WAITANY_EV, PACX_WAITSOME_EV, PACX_FINALIZE_EV, PACX_INIT_EV,
+	PACX_ALLGATHER_EV, PACX_ALLGATHERV_EV, PACX_PERSIST_REQ_EV, PACX_START_EV,
+	PACX_STARTALL_EV, PACX_REQUEST_FREE_EV, PACX_RECV_INIT_EV, PACX_SEND_INIT_EV,
+	PACX_BSEND_INIT_EV, PACX_RSEND_INIT_EV, PACX_SSEND_INIT_EV, PACX_COMM_RANK_EV,
+	PACX_COMM_SIZE_EV, PACX_IPROBE_COUNTER_EV, PACX_TIME_OUTSIDE_IPROBES_EV,
+	PACX_TEST_COUNTER_EV, PACX_FILE_OPEN_EV, PACX_FILE_CLOSE_EV, PACX_FILE_READ_EV,
+	PACX_FILE_READ_ALL_EV, PACX_FILE_WRITE_EV, PACX_FILE_WRITE_ALL_EV, 
+	PACX_FILE_READ_AT_EV, PACX_FILE_READ_AT_ALL_EV, PACX_FILE_WRITE_AT_EV,
+	PACX_FILE_WRITE_AT_ALL_EV, PACX_IRECVED_EV };
+
+/******************************************************************************
+ ***  IsMPI
+ ******************************************************************************/
+
+unsigned IsPACX (unsigned EvType)
+{
+  unsigned evt;
+
+  for (evt = 0; evt < PACX_EVENTS; evt++)
+    if (pacx_events[evt] == EvType)
+      return TRUE;
+  return FALSE;
+}
+
+
 #define MISC_EVENTS 20
 static unsigned misc_events[] = {FLUSH_EV, READ_EV, WRITE_EV, APPL_EV, USER_EV,
-  HWC_DEF_EV, HWC_CHANGE_EV, HWC_EV, TRACING_EV, SET_TRACE_EV, MPI_CALLER_EV,
+  HWC_DEF_EV, HWC_CHANGE_EV, HWC_EV, TRACING_EV, SET_TRACE_EV, CALLER_EV,
 	CPU_BURST_EV, RUSAGE_EV, MPI_STATS_EV, USRFUNC_EV, SAMPLING_EV,
 	HWC_SET_OVERFLOW_EV, TRACING_MODE_EV, MRNET_EV, CLUSTER_ID_EV };
 
@@ -76,7 +114,7 @@ unsigned IsMISC (unsigned EvType)
 {
     unsigned evt;
 
-    if (EvType>=MPI_CALLER_EV && EvType<=MPI_CALLER_EV+MAX_CALLERS)
+    if (EvType>=CALLER_EV && EvType<=CALLER_EV+MAX_CALLERS)
         return TRUE;
     if (EvType>=SAMPLING_EV && EvType<=SAMPLING_EV+MAX_CALLERS)
         return TRUE;
@@ -156,32 +194,61 @@ unsigned IsHwcChange(unsigned EvType)
 }
 
 /******************************************************************************
- ***  IsCollective
+ ***  IsMPICollective
  ******************************************************************************/
 unsigned IsMPICollective(unsigned EvType)
 {
    switch (EvType)
    {
-      case BARRIER_EV:
-      case BCAST_EV:
-      case ALLTOALL_EV:
-      case ALLTOALLV_EV:
-      case REDUCE_EV:
-      case ALLREDUCE_EV:
-      case GATHER_EV:
-      case GATHERV_EV:
-      case ALLGATHER_EV:
-      case ALLGATHERV_EV:
-      case SCATTER_EV:
-      case SCATTERV_EV:
-      case REDUCESCAT_EV:
-      case SCAN_EV:
+      case MPI_BARRIER_EV:
+      case MPI_BCAST_EV:
+      case MPI_ALLTOALL_EV:
+      case MPI_ALLTOALLV_EV:
+      case MPI_REDUCE_EV:
+      case MPI_ALLREDUCE_EV:
+      case MPI_GATHER_EV:
+      case MPI_GATHERV_EV:
+      case MPI_ALLGATHER_EV:
+      case MPI_ALLGATHERV_EV:
+      case MPI_SCATTER_EV:
+      case MPI_SCATTERV_EV:
+      case MPI_REDUCESCAT_EV:
+      case MPI_SCAN_EV:
          return TRUE;
       default:
          return FALSE;
    }
    return FALSE;
 }
+
+/******************************************************************************
+ ***  IsPACXCollective
+ ******************************************************************************/
+unsigned IsPACXCollective(unsigned EvType)
+{
+   switch (EvType)
+   {
+      case PACX_BARRIER_EV:
+      case PACX_BCAST_EV:
+      case PACX_ALLTOALL_EV:
+      case PACX_ALLTOALLV_EV:
+      case PACX_REDUCE_EV:
+      case PACX_ALLREDUCE_EV:
+      case PACX_GATHER_EV:
+      case PACX_GATHERV_EV:
+      case PACX_ALLGATHER_EV:
+      case PACX_ALLGATHERV_EV:
+      case PACX_SCATTER_EV:
+      case PACX_SCATTERV_EV:
+      case PACX_REDUCESCAT_EV:
+      case PACX_SCAN_EV:
+         return TRUE;
+      default:
+         return FALSE;
+   }
+   return FALSE;
+}
+
 
 
 /******************************************************************************
@@ -215,11 +282,23 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 		*Type = TRT_TYPE;
 		return TRUE;
 	}
-	else if ((EvType == COMM_CREATE_EV) || (EvType == COMM_DUP_EV) ||
-	(EvType == COMM_SPLIT_EV) || (EvType == MPI_CART_CREATE_EV) ||
-	(EvType == MPI_CART_SUB_EV))
+	else if (IsPACX(EvType))
 	{
-		*Type = COMM_ALIAS_TYPE;
+		*Type = PACX_TYPE;
+		return TRUE;
+	}
+	else if (EvType == MPI_COMM_CREATE_EV || EvType == MPI_COMM_DUP_EV ||
+	EvType == MPI_COMM_SPLIT_EV || EvType == MPI_CART_CREATE_EV ||
+	EvType == MPI_CART_SUB_EV)
+	{
+		*Type = MPI_COMM_ALIAS_TYPE;
+		return TRUE;
+	}
+	else if (EvType == PACX_COMM_CREATE_EV ||
+	EvType == PACX_COMM_DUP_EV || EvType == PACX_COMM_SPLIT_EV ||
+	EvType == PACX_CART_CREATE_EV || EvType == PACX_CART_SUB_EV)
+	{
+		*Type = PACX_COMM_ALIAS_TYPE;
 		return TRUE;
 	}
 	return FALSE;

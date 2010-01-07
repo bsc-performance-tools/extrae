@@ -31,7 +31,7 @@
 #ifndef __MPI_INTERFACE_H__
 #define __MPI_INTERFACE_H__
 
-extern unsigned int NumOpsGlobals;
-extern unsigned int CurrentOpGlobal;
+extern unsigned int MPI_NumOpsGlobals;
+extern unsigned int MPI_CurrentOpGlobal;
 
 #endif /* __MPI_INTERFACE_H__ */

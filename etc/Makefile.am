@@ -7,6 +7,7 @@ mkdirSHscripts:
 SHscripts:
 # Configure the shell scripts (SH)
 	echo "export MPI_HOME=${MPI_HOME}" >> $(sysconfdir)/ompitrace-vars.sh
+	echo "export PACX_HOME=${PACX_HOME}" >> $(sysconfdir)/ompitrace-vars.sh
 	echo "export PAPI_HOME=${PAPI_HOME}" >> $(sysconfdir)/ompitrace-vars.sh
 	echo "export LIBXML2_HOME=${XML2_HOME}" >> $(sysconfdir)/ompitrace-vars.sh
 	echo "export DYNINST_HOME=${DYNINST_HOME}" >> $(sysconfdir)/ompitrace-vars.sh
@@ -17,6 +18,7 @@ SHscripts:
 CSHscripts:
 # Configure the shell scripts (CSH)
 	echo "setenv MPI_HOME ${MPI_HOME}" >> $(sysconfdir)/ompitrace-vars.csh
+	echo "setenv PACX_HOME ${PACX_HOME}" >> $(sysconfdir)/ompitrace-vars.csh
 	echo "setenv PAPI_HOME ${PAPI_HOME}" >> $(sysconfdir)/ompitrace-vars.csh
 	echo "setenv LIBXML2_HOME ${XML2_HOME}" >> $(sysconfdir)/ompitrace-vars.csh
 	echo "setenv DYNINST_HOME ${DYNINST_HOME}" >> $(sysconfdir)/ompitrace-vars.csh

@@ -15,6 +15,9 @@ SRCDIR=@srcdir@
 # Create ETC directory and create an empty license file there
 #
 
+PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \
+ example/LINUX/PACX/Makefile
+
 if IS_CELL_MACHINE
 SEQ_EXAMPLE_FILES=example/CELL/SEQ/worker.c \
  example/CELL/SEQ/spu.h \
@@ -127,6 +130,10 @@ endif
 
 install-data-hook:
 	$(mkdir_p) $(datadir)/example
+if HAVE_PACX
+	$(mkdir_p) $(datadir)/example/PACX
+	cp -f $(PACX_EXAMPLE_FILES) $(datadir)/example/PACX
+endif
 if HAVE_MPI
 	$(mkdir_p) $(datadir)/example/MPI
 	cp -f $(MPI_EXAMPLE_FILES) $(datadir)/example/MPI

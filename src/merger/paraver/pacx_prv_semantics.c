@@ -20,16 +20,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/src/merger/paraver/mpi_prv_semantics.c $
  | 
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @last_commit: $Date: 2009-12-03 16:41:33 +0100 (dj, 03 des 2009) $
+ | @version:     $Revision: 71 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+static char UNUSED rcsid[] = "$Id: mpi_prv_semantics.c 71 2009-12-03 15:41:33Z harald $";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
@@ -56,11 +56,11 @@ static char UNUSED rcsid[] = "$Id$";
 # include "parallel_merge_aux.h"
 #endif
 
-#ifndef HAVE_MPI_H
-# define MPI_PROC_NULL (-1)
-#else
-# include <mpi.h>
+#if 0
+# include <pacx.h>
 #endif
+
+#define MPI_PROC_NULL (-1)
 
 /******************************************************************************
  ***  trace_communication
@@ -147,67 +147,67 @@ static int Get_State (unsigned int EvType)
 	
 	switch (EvType)
 	{
-		case MPI_INIT_EV:
-		case MPI_FINALIZE_EV:
+		case PACX_INIT_EV:
+		case PACX_FINALIZE_EV:
 			state = STATE_INITFINI;
 		break;
-		case MPI_FILE_OPEN_EV:
-		case MPI_FILE_CLOSE_EV:
-		case MPI_FILE_READ_EV:
-		case MPI_FILE_READ_ALL_EV:
-		case MPI_FILE_WRITE_EV:
-		case MPI_FILE_WRITE_ALL_EV:
-		case MPI_FILE_READ_AT_EV:
-		case MPI_FILE_READ_AT_ALL_EV:
-		case MPI_FILE_WRITE_AT_EV:
-		case MPI_FILE_WRITE_AT_ALL_EV:
+		case PACX_FILE_OPEN_EV:
+		case PACX_FILE_CLOSE_EV:
+		case PACX_FILE_READ_EV:
+		case PACX_FILE_READ_ALL_EV:
+		case PACX_FILE_WRITE_EV:
+		case PACX_FILE_WRITE_ALL_EV:
+		case PACX_FILE_READ_AT_EV:
+		case PACX_FILE_READ_AT_ALL_EV:
+		case PACX_FILE_WRITE_AT_EV:
+		case PACX_FILE_WRITE_AT_ALL_EV:
 			state = STATE_IO;
 		break;
-		case MPI_REQUEST_FREE_EV:
-		case MPI_COMM_RANK_EV:
-		case MPI_COMM_SIZE_EV:
-		case MPI_CANCEL_EV:
+		case PACX_REQUEST_FREE_EV:
+		case PACX_COMM_RANK_EV:
+		case PACX_COMM_SIZE_EV:
+		case PACX_CANCEL_EV:
 			state = STATE_MIXED;
 		break;
-		case MPI_PROBE_EV:
-		case MPI_IPROBE_EV:
+		case PACX_PROBE_EV:
+		case PACX_IPROBE_EV:
 			state = STATE_PROBE;
 		break;
-		case MPI_TEST_EV:
-		case MPI_WAIT_EV:
-		case MPI_WAITALL_EV:
-		case MPI_WAITSOME_EV:
-		case MPI_WAITANY_EV:
+		case PACX_TEST_EV:
+		case PACX_WAIT_EV:
+		case PACX_WAITALL_EV:
+		case PACX_WAITSOME_EV:
+		case PACX_WAITANY_EV:
 			state = STATE_TWRECV;
 		break;
-		case MPI_SEND_EV:
-		case MPI_RSEND_EV:
-		case MPI_SSEND_EV:
-		case MPI_BSEND_EV:
+		case PACX_SEND_EV:
+		case PACX_RSEND_EV:
+		case PACX_SSEND_EV:
+		case PACX_BSEND_EV:
 			state = STATE_SEND;
 		break;
-		case MPI_ISEND_EV:
-		case MPI_IRSEND_EV:
-		case MPI_ISSEND_EV:
-		case MPI_IBSEND_EV:
+		case PACX_ISEND_EV:
+		case PACX_IRSEND_EV:
+		case PACX_ISSEND_EV:
+		case PACX_IBSEND_EV:
 			state = STATE_ISEND;
 		break;
-		case MPI_BARRIER_EV:
+		case PACX_BARRIER_EV:
 			state = STATE_BARRIER;
 		break;
-		case MPI_REDUCE_EV:
-		case MPI_ALLREDUCE_EV:
-		case MPI_BCAST_EV:
-		case MPI_ALLTOALL_EV:
-		case MPI_ALLTOALLV_EV:
-		case MPI_ALLGATHER_EV:
-		case MPI_ALLGATHERV_EV:
-		case MPI_GATHER_EV:
-		case MPI_GATHERV_EV:
-		case MPI_SCATTER_EV:
-		case MPI_SCATTERV_EV:
-		case MPI_REDUCESCAT_EV:
-		case MPI_SCAN_EV:
+		case PACX_REDUCE_EV:
+		case PACX_ALLREDUCE_EV:
+		case PACX_BCAST_EV:
+		case PACX_ALLTOALL_EV:
+		case PACX_ALLTOALLV_EV:
+		case PACX_ALLGATHER_EV:
+		case PACX_ALLGATHERV_EV:
+		case PACX_GATHER_EV:
+		case PACX_GATHERV_EV:
+		case PACX_SCATTER_EV:
+		case PACX_SCATTERV_EV:
+		case PACX_REDUCESCAT_EV:
+		case PACX_SCAN_EV:
 			state = STATE_BCAST;
 		break;
 		default:
@@ -419,16 +419,16 @@ static unsigned int Get_GlobalOP_isRoot (event_t *current, int task)
 	unsigned int res = FALSE;
 	switch (Get_EvEvent(current))
 	{
-		case MPI_REDUCE_EV:
+		case PACX_REDUCE_EV:
 			res = Get_EvAux(current) == Get_EvTag(current);
 		break;
-		case MPI_BCAST_EV:
+		case PACX_BCAST_EV:
 			res = Get_EvTarget(current) == Get_EvTag(current);
 		break;
-		case MPI_GATHER_EV:
-		case MPI_GATHERV_EV:
-		case MPI_SCATTER_EV:
-		case MPI_SCATTERV_EV:
+		case PACX_GATHER_EV:
+		case PACX_GATHERV_EV:
+		case PACX_SCATTER_EV:
+		case PACX_SCATTERV_EV:
 			res = Get_EvTarget(current) == task-1;
 		break;
 	}
@@ -440,13 +440,13 @@ static unsigned int Get_GlobalOP_SendSize (event_t *current, int is_root)
 	unsigned int res = 0;
 	switch (Get_EvEvent(current))
 	{
-		case MPI_BARRIER_EV:
+		case PACX_BARRIER_EV:
 			res = 0;
 		break;
-		case MPI_REDUCE_EV:
+		case PACX_REDUCE_EV:
 			res = (is_root)?0:Get_EvSize(current);
 		break;
-		case MPI_BCAST_EV:
+		case PACX_BCAST_EV:
 			res = (!is_root)?0:Get_EvSize(current);
 		break;
 		default:
@@ -461,18 +461,18 @@ static unsigned int Get_GlobalOP_RecvSize (event_t *current, int is_root)
 	unsigned int res = 0;
 	switch (Get_EvEvent(current))
 	{
-		case MPI_BARRIER_EV:
+		case PACX_BARRIER_EV:
 			res = 0;
 		break;
-		case MPI_REDUCE_EV:
+		case PACX_REDUCE_EV:
 			res = (!is_root)?0:Get_EvSize(current);
 		break;
-		case MPI_BCAST_EV:
+		case PACX_BCAST_EV:
 			res = (is_root)?0:Get_EvSize(current);
 		break;
-		case MPI_REDUCESCAT_EV:
-		case MPI_SCAN_EV:
-		case MPI_ALLREDUCE_EV:
+		case PACX_REDUCESCAT_EV:
+		case PACX_SCAN_EV:
+		case PACX_ALLREDUCE_EV:
 			res = Get_EvSize(current);
 		break;
 		default:
@@ -515,17 +515,17 @@ static int GlobalOP_event (event_t * current_event,
 		send_size = Get_GlobalOP_SendSize (current_event, is_root);
 		receive_size = Get_GlobalOP_RecvSize (current_event, is_root);
 		trace_enter_global_op (cpu, ptask, task, thread, current_time, comm_id,
-		  send_size, receive_size, is_root?1:0, TRUE);
+		  send_size, receive_size, is_root?1:0, FALSE);
 	}
 
 	return 0;
 }
 
 /******************************************************************************
- ***  Other_MPI_Event:
+ ***  Other_PACX_Event:
  ******************************************************************************/
 
-static int Other_MPI_Event (event_t * current_event, 
+static int Other_PACX_Event (event_t * current_event, 
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask, 
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -537,14 +537,14 @@ static int Other_MPI_Event (event_t * current_event,
 
 	Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
 
-	/* XXX: Workaround to set the state to NOT_TRACING after the MPI_Init when using circular buffer.
+	/* XXX: Workaround to set the state to NOT_TRACING after the PACX_Init when using circular buffer.
      * We should definitely do this another way round. 
 	 */ 
-	if ((EvType == MPI_INIT_EV) && (EvValue == EVT_END))
+	if ((EvType == PACX_INIT_EV) && (EvValue == EVT_END))
 	{
 		if ((tracingCircularBuffer()) && (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_MATCHES))
 		{
-			/* The first event beyond the MPI_Init will remove the STATE_NOT_TRACING (see Push_State) */
+			/* The first event beyond the PACX_Init will remove the STATE_NOT_TRACING (see Push_State) */
 			Push_State (STATE_NOT_TRACING, ptask, task, thread);
 		}
 	}
@@ -656,7 +656,7 @@ static int IRecv_Event (event_t * current_event,
 	{
 		if (MatchComms_Enabled(ptask, task, thread))
 		{
-			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
+			event_t *receive = Search_PACX_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
 			if (NULL != receive)
 			{
 				if (MPI_PROC_NULL != Get_EvTarget(receive))
@@ -710,10 +710,10 @@ static int IRecv_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  MPI_PersistentRequest_Init_Event
+ ***  PACX_PersistentRequest_Init_Event
  ******************************************************************************/
 
-int MPI_PersistentRequest_Init_Event (event_t * current_event,
+int PACX_PersistentRequest_Init_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -723,7 +723,7 @@ int MPI_PersistentRequest_Init_Event (event_t * current_event,
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	Switch_State (((EvType == MPI_RECV_INIT_EV) ? STATE_IRECV : STATE_ISEND), (EvValue == EVT_BEGIN), ptask, task, thread);
+	Switch_State (((EvType == PACX_RECV_INIT_EV) ? STATE_IRECV : STATE_ISEND), (EvValue == EVT_BEGIN), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
@@ -733,10 +733,10 @@ int MPI_PersistentRequest_Init_Event (event_t * current_event,
 
 
 /******************************************************************************
- ***  MPI_PersistentRequest_Event
+ ***  PACX_PersistentRequest_Event
  ******************************************************************************/
 
-int MPI_PersistentRequest_Event (event_t * current_event,
+int PACX_PersistentRequest_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -750,7 +750,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	/* If this is a send, look for the receive */
-	if (Get_EvValue (current_event) == MPI_ISEND_EV)
+	if (Get_EvValue (current_event) == PACX_ISEND_EV)
 	{
 		if (MatchComms_Enabled(ptask, task, thread))
 		{
@@ -784,11 +784,11 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	}
 
 	/* If this is a receive, look for the send */
-	if (Get_EvValue(current_event) == MPI_IRECV_EV)
+	if (Get_EvValue(current_event) == PACX_IRECV_EV)
 	{
 		if (MatchComms_Enabled(ptask, task, thread))
 		{
-			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
+			event_t *receive = Search_PACX_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
 			if (MPI_PROC_NULL != Get_EvTarget(receive))
 			{
 				if (NULL != receive)
@@ -829,10 +829,10 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  MPI_PersistentRequest_Free_Event
+ ***  PACX_PersistentRequest_Free_Event
  ******************************************************************************/
 
-int MPI_PersistentRequest_Free_Event (event_t * current_event,
+int PACX_PersistentRequest_Free_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -852,10 +852,10 @@ int MPI_PersistentRequest_Free_Event (event_t * current_event,
 
 
 /******************************************************************************
- ***  MPI_Start_Event
+ ***  PACX_Start_Event
  ******************************************************************************/
 
-int MPI_Start_Event (event_t * current_event, unsigned long long current_time,
+int PACX_Start_Event (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset)
 {
@@ -875,7 +875,7 @@ int MPI_Start_Event (event_t * current_event, unsigned long long current_time,
 	switch (EvValue)
 	{
 		/* We don't know if the start will issue a send or recv, so we store both.
-		   This will be solved in MPI_PersistentRequest_Event */
+		   This will be solved in PACX_PersistentRequest_Event */
 		case EVT_BEGIN:
 			thread_info->Send_Rec = current_event;
 			thread_info->Recv_Rec = current_event;
@@ -888,10 +888,10 @@ int MPI_Start_Event (event_t * current_event, unsigned long long current_time,
 
 
 /******************************************************************************
- ***  MPI_IProbeSoftwareCounter_Event
+ ***  PACX_IProbeSoftwareCounter_Event
  ******************************************************************************/
 
-int MPI_IProbeSoftwareCounter_Event (event_t * current_event,
+int PACX_IProbeSoftwareCounter_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -904,17 +904,17 @@ int MPI_IProbeSoftwareCounter_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
-	Enable_MPI_Soft_Counter (EvType);
+	Enable_PACX_Soft_Counter (EvType);
 
 	return 0;
 }
 
 
 /******************************************************************************
- ***  MPI_ElapsedTimeOutsideIProbes_Event
+ ***  PACX_ElapsedTimeOutsideIProbes_Event
  ******************************************************************************/
 
-int MPI_ElapsedTimeOutsideIProbes_Event (event_t * current_event,
+int PACX_ElapsedTimeOutsideIProbes_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -930,17 +930,17 @@ int MPI_ElapsedTimeOutsideIProbes_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
-	Enable_MPI_Soft_Counter (EvType);
+	Enable_PACX_Soft_Counter (EvType);
 
 	return 0;
 }
 
 
 /******************************************************************************
- ***  MPI_TestSoftwareCounter_Event
+ ***  PACX_TestSoftwareCounter_Event
  ******************************************************************************/
 
-int MPI_TestSoftwareCounter_Event (event_t * current_event,
+int PACX_TestSoftwareCounter_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -953,77 +953,77 @@ int MPI_TestSoftwareCounter_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
-	Enable_MPI_Soft_Counter (EvType);
+	Enable_PACX_Soft_Counter (EvType);
 
 	return 0;
 }
 
 
 /******************************************************************************
- ***  MPI_GenerateParaverTraces
+ ***  PACX_GenerateParaverTraces
  ******************************************************************************/
 
-SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
-	{ MPI_SEND_EV, Any_Send_Event },
-	{ MPI_BSEND_EV, Any_Send_Event },
-	{ MPI_SSEND_EV, Any_Send_Event },
-	{ MPI_RSEND_EV, Any_Send_Event },
-	{ MPI_IBSEND_EV, Any_Send_Event },
-	{ MPI_ISSEND_EV, Any_Send_Event },
-	{ MPI_IRSEND_EV, Any_Send_Event },
-	{ MPI_ISEND_EV, Any_Send_Event },
-	{ MPI_SENDRECV_EV, SendRecv_Event },
-	{ MPI_SENDRECV_REPLACE_EV, SendRecv_Event },
-	{ MPI_RECV_EV, Recv_Event },
-	{ MPI_IRECV_EV, IRecv_Event },
-	{ MPI_REDUCE_EV, GlobalOP_event },
-	{ MPI_ALLREDUCE_EV, GlobalOP_event },
-	{ MPI_PROBE_EV, Other_MPI_Event },
-	{ MPI_IPROBE_EV, Other_MPI_Event },
-	{ MPI_BARRIER_EV, GlobalOP_event },
-	{ MPI_CANCEL_EV, Other_MPI_Event },
-	{ MPI_TEST_EV, Other_MPI_Event },
-	{ MPI_WAIT_EV, Other_MPI_Event },
-	{ MPI_WAITALL_EV, Other_MPI_Event },
-	{ MPI_WAITANY_EV, Other_MPI_Event },
-	{ MPI_WAITSOME_EV, Other_MPI_Event },
-	{ MPI_IRECVED_EV, SkipHandler },
-	{ MPI_BCAST_EV, GlobalOP_event },
-	{ MPI_ALLTOALL_EV, GlobalOP_event },
-	{ MPI_ALLTOALLV_EV, GlobalOP_event },
-	{ MPI_ALLGATHER_EV, GlobalOP_event },
-	{ MPI_ALLGATHERV_EV, GlobalOP_event },
-	{ MPI_GATHER_EV, GlobalOP_event },
-	{ MPI_GATHERV_EV, GlobalOP_event },
-	{ MPI_SCATTER_EV, GlobalOP_event },
-	{ MPI_SCATTERV_EV, GlobalOP_event },
-	{ MPI_REDUCESCAT_EV, GlobalOP_event },
-	{ MPI_SCAN_EV, GlobalOP_event },
-	{ MPI_INIT_EV, Other_MPI_Event },
-	{ MPI_FINALIZE_EV, Other_MPI_Event },
-	{ MPI_RECV_INIT_EV, MPI_PersistentRequest_Init_Event },
-	{ MPI_SEND_INIT_EV, MPI_PersistentRequest_Init_Event },
-	{ MPI_BSEND_INIT_EV, MPI_PersistentRequest_Init_Event },
-	{ MPI_RSEND_INIT_EV, MPI_PersistentRequest_Init_Event },
-	{ MPI_SSEND_INIT_EV, MPI_PersistentRequest_Init_Event },
-	{ MPI_PERSIST_REQ_EV, MPI_PersistentRequest_Event },
-	{ MPI_START_EV, MPI_Start_Event },
-	{ MPI_STARTALL_EV, MPI_Start_Event },
-	{ MPI_REQUEST_FREE_EV, MPI_PersistentRequest_Free_Event },
-	{ MPI_COMM_RANK_EV, Other_MPI_Event },
-	{ MPI_COMM_SIZE_EV, Other_MPI_Event },
-	{ MPI_IPROBE_COUNTER_EV, MPI_IProbeSoftwareCounter_Event },
-	{ MPI_TIME_OUTSIDE_IPROBES_EV, MPI_ElapsedTimeOutsideIProbes_Event },
-	{ MPI_TEST_COUNTER_EV, MPI_TestSoftwareCounter_Event },
-	{ MPI_FILE_OPEN_EV, Other_MPI_Event },
-	{ MPI_FILE_CLOSE_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_ALL_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_ALL_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_AT_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_AT_ALL_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_AT_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_AT_ALL_EV, Other_MPI_Event },
+SingleEv_Handler_t PRV_PACX_Event_Handlers[] = {
+	{ PACX_SEND_EV, Any_Send_Event },
+	{ PACX_BSEND_EV, Any_Send_Event },
+	{ PACX_SSEND_EV, Any_Send_Event },
+	{ PACX_RSEND_EV, Any_Send_Event },
+	{ PACX_IBSEND_EV, Any_Send_Event },
+	{ PACX_ISSEND_EV, Any_Send_Event },
+	{ PACX_IRSEND_EV, Any_Send_Event },
+	{ PACX_ISEND_EV, Any_Send_Event },
+	{ PACX_SENDRECV_EV, SendRecv_Event },
+	{ PACX_SENDRECV_REPLACE_EV, SendRecv_Event },
+	{ PACX_RECV_EV, Recv_Event },
+	{ PACX_IRECV_EV, IRecv_Event },
+	{ PACX_REDUCE_EV, GlobalOP_event },
+	{ PACX_ALLREDUCE_EV, GlobalOP_event },
+	{ PACX_PROBE_EV, Other_PACX_Event },
+	{ PACX_IPROBE_EV, Other_PACX_Event },
+	{ PACX_BARRIER_EV, GlobalOP_event },
+	{ PACX_CANCEL_EV, Other_PACX_Event },
+	{ PACX_TEST_EV, Other_PACX_Event },
+	{ PACX_WAIT_EV, Other_PACX_Event },
+	{ PACX_WAITALL_EV, Other_PACX_Event },
+	{ PACX_WAITANY_EV, Other_PACX_Event },
+	{ PACX_WAITSOME_EV, Other_PACX_Event },
+	{ PACX_IRECVED_EV, SkipHandler },
+	{ PACX_BCAST_EV, GlobalOP_event },
+	{ PACX_ALLTOALL_EV, GlobalOP_event },
+	{ PACX_ALLTOALLV_EV, GlobalOP_event },
+	{ PACX_ALLGATHER_EV, GlobalOP_event },
+	{ PACX_ALLGATHERV_EV, GlobalOP_event },
+	{ PACX_GATHER_EV, GlobalOP_event },
+	{ PACX_GATHERV_EV, GlobalOP_event },
+	{ PACX_SCATTER_EV, GlobalOP_event },
+	{ PACX_SCATTERV_EV, GlobalOP_event },
+	{ PACX_REDUCESCAT_EV, GlobalOP_event },
+	{ PACX_SCAN_EV, GlobalOP_event },
+	{ PACX_INIT_EV, Other_PACX_Event },
+	{ PACX_FINALIZE_EV, Other_PACX_Event },
+	{ PACX_RECV_INIT_EV, PACX_PersistentRequest_Init_Event },
+	{ PACX_SEND_INIT_EV, PACX_PersistentRequest_Init_Event },
+	{ PACX_BSEND_INIT_EV, PACX_PersistentRequest_Init_Event },
+	{ PACX_RSEND_INIT_EV, PACX_PersistentRequest_Init_Event },
+	{ PACX_SSEND_INIT_EV, PACX_PersistentRequest_Init_Event },
+	{ PACX_PERSIST_REQ_EV, PACX_PersistentRequest_Event },
+	{ PACX_START_EV, PACX_Start_Event },
+	{ PACX_STARTALL_EV, PACX_Start_Event },
+	{ PACX_REQUEST_FREE_EV, PACX_PersistentRequest_Free_Event },
+	{ PACX_COMM_RANK_EV, Other_PACX_Event },
+	{ PACX_COMM_SIZE_EV, Other_PACX_Event },
+	{ PACX_IPROBE_COUNTER_EV, PACX_IProbeSoftwareCounter_Event },
+	{ PACX_TIME_OUTSIDE_IPROBES_EV, PACX_ElapsedTimeOutsideIProbes_Event },
+	{ PACX_TEST_COUNTER_EV, PACX_TestSoftwareCounter_Event },
+	{ PACX_FILE_OPEN_EV, Other_PACX_Event },
+	{ PACX_FILE_CLOSE_EV, Other_PACX_Event },
+	{ PACX_FILE_READ_EV, Other_PACX_Event },
+	{ PACX_FILE_READ_ALL_EV, Other_PACX_Event },
+	{ PACX_FILE_WRITE_EV, Other_PACX_Event },
+	{ PACX_FILE_WRITE_ALL_EV, Other_PACX_Event },
+	{ PACX_FILE_READ_AT_EV, Other_PACX_Event },
+	{ PACX_FILE_READ_AT_ALL_EV, Other_PACX_Event },
+	{ PACX_FILE_WRITE_AT_EV, Other_PACX_Event },
+	{ PACX_FILE_WRITE_AT_ALL_EV, Other_PACX_Event },
 	{ NULL_EV, NULL }
 };

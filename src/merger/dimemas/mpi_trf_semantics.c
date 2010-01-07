@@ -64,10 +64,10 @@ static int ANY_Send_Event (event_t * current, unsigned long long current_time,
 	UINT64 valor;
 	double temps;
 
-	if (IBSEND_EV == Get_EvEvent(current) 
-	    || ISSEND_EV == Get_EvEvent(current)
-	    || IRSEND_EV == Get_EvEvent(current)
-	    || ISEND_EV == Get_EvEvent(current))
+	if (MPI_IBSEND_EV == Get_EvEvent(current) 
+	    || MPI_ISSEND_EV == Get_EvEvent(current)
+	    || MPI_IRSEND_EV == Get_EvEvent(current)
+	    || MPI_ISEND_EV == Get_EvEvent(current))
 	   	isimmediate = TRUE;
 	else
 		isimmediate = FALSE;
@@ -121,26 +121,26 @@ static int Get_GlobalOP_RootRank (event_t *current)
 
 	switch (Get_EvEvent(current))
 	{
-		case REDUCE_EV:
-		case REDUCESCAT_EV:
-		case SCAN_EV:
+		case MPI_REDUCE_EV:
+		case MPI_REDUCESCAT_EV:
+		case MPI_SCAN_EV:
 			res = Get_EvAux(current);
 		break;
 
-		case BARRIER_EV:
-		case BCAST_EV:
-		case ALLGATHER_EV:
-		case ALLGATHERV_EV:
-		case GATHER_EV:
-		case GATHERV_EV:
-		case SCATTER_EV:
-		case SCATTERV_EV:
+		case MPI_BARRIER_EV:
+		case MPI_BCAST_EV:
+		case MPI_ALLGATHER_EV:
+		case MPI_ALLGATHERV_EV:
+		case MPI_GATHER_EV:
+		case MPI_GATHERV_EV:
+		case MPI_SCATTER_EV:
+		case MPI_SCATTERV_EV:
 			res = Get_EvTarget(current);
 		break;
 
-		case ALLREDUCE_EV:
-		case ALLTOALL_EV:
-		case ALLTOALLV_EV:
+		case MPI_ALLREDUCE_EV:
+		case MPI_ALLTOALL_EV:
+		case MPI_ALLTOALLV_EV:
 		default:
 			res = 0;
 		break;
@@ -159,35 +159,35 @@ static UINT64 Get_GlobalOP_SendSize (event_t *current)
 
 	switch (Get_EvEvent(current))
 	{
-		case REDUCE_EV:
+		case MPI_REDUCE_EV:
 			if (Get_EvTag(current) != Get_EvAux(current))
 				res = Get_EvSize(current);
 			else
 				res = 0;
 		break;
 
-		case BCAST_EV:
+		case MPI_BCAST_EV:
 			if (Get_EvTag(current) == Get_EvTarget(current))
 				res = Get_EvSize(current);
 			else
 				res = 0;
 		break;
 
-		case REDUCESCAT_EV:
-		case SCAN_EV:
-		case ALLGATHER_EV:
-		case ALLGATHERV_EV:
-		case GATHER_EV:
-		case GATHERV_EV:
-		case SCATTER_EV:
-		case SCATTERV_EV:
-		case ALLREDUCE_EV:
-		case ALLTOALL_EV:
-		case ALLTOALLV_EV:
+		case MPI_REDUCESCAT_EV:
+		case MPI_SCAN_EV:
+		case MPI_ALLGATHER_EV:
+		case MPI_ALLGATHERV_EV:
+		case MPI_GATHER_EV:
+		case MPI_GATHERV_EV:
+		case MPI_SCATTER_EV:
+		case MPI_SCATTERV_EV:
+		case MPI_ALLREDUCE_EV:
+		case MPI_ALLTOALL_EV:
+		case MPI_ALLTOALLV_EV:
 			res = Get_EvSize(current);
 		break;
 
-		case BARRIER_EV:
+		case MPI_BARRIER_EV:
 		default:
 			res = 0;
 		break;
@@ -201,41 +201,41 @@ static UINT64 Get_GlobalOP_RecvSize (event_t *current)
 
 	switch (Get_EvEvent(current))
 	{
-		case REDUCE_EV:
+		case MPI_REDUCE_EV:
 			if (Get_EvTag(current) == Get_EvAux(current))
 				res = Get_EvSize(current);
 			else
 				res = 0;
 		break;
 
-		case BCAST_EV:
+		case MPI_BCAST_EV:
 			if (Get_EvTag(current) != Get_EvTarget(current))
 				res = Get_EvSize(current);
 			else
 				res = 0;
 		break;
 
-		case REDUCESCAT_EV:
-		case SCAN_EV:
-		case ALLREDUCE_EV:
+		case MPI_REDUCESCAT_EV:
+		case MPI_SCAN_EV:
+		case MPI_ALLREDUCE_EV:
 			res = Get_EvSize(current);
 		break;
 
-		case ALLGATHER_EV:
-		case ALLGATHERV_EV:
-		case GATHER_EV:
-		case GATHERV_EV:
-		case SCATTER_EV:
-		case SCATTERV_EV:
+		case MPI_ALLGATHER_EV:
+		case MPI_ALLGATHERV_EV:
+		case MPI_GATHER_EV:
+		case MPI_GATHERV_EV:
+		case MPI_SCATTER_EV:
+		case MPI_SCATTERV_EV:
 			res = Get_EvAux(current);
 		break;
 
-		case ALLTOALL_EV:
-		case ALLTOALLV_EV:
+		case MPI_ALLTOALL_EV:
+		case MPI_ALLTOALLV_EV:
 			res = Get_EvTarget(current);
 		break;
 
-		case BARRIER_EV:
+		case MPI_BARRIER_EV:
 		default:
 			res = 0;
 		break;
@@ -247,33 +247,33 @@ static int Get_GlobalOP_ID (int type)
 {
 	int res = 0;
 
-	if (REDUCE_EV == type)
+	if (MPI_REDUCE_EV == type)
 		res = GLOP_ID_MPI_Reduce;
-	else if (ALLREDUCE_EV == type)
+	else if (MPI_ALLREDUCE_EV == type)
 		res = GLOP_ID_MPI_Allreduce;
-	else if (BARRIER_EV == type)
+	else if (MPI_BARRIER_EV == type)
 		res = GLOP_ID_MPI_Barrier;
-	else if (BCAST_EV == type)
+	else if (MPI_BCAST_EV == type)
 		res = GLOP_ID_MPI_Bcast;
-	else if (ALLTOALL_EV == type)
+	else if (MPI_ALLTOALL_EV == type)
 		res = GLOP_ID_MPI_Alltoall;
-	else if (ALLTOALLV_EV == type)
+	else if (MPI_ALLTOALLV_EV == type)
 		res = GLOP_ID_MPI_Alltoallv;
-	else if (ALLGATHER_EV == type)
+	else if (MPI_ALLGATHER_EV == type)
 		res = GLOP_ID_MPI_Allgather;
-	else if (ALLGATHERV_EV == type)
+	else if (MPI_ALLGATHERV_EV == type)
 		res = GLOP_ID_MPI_Allgatherv;
-	else if (GATHER_EV == type)
+	else if (MPI_GATHER_EV == type)
 		res = GLOP_ID_MPI_Gather;
-	else if (GATHERV_EV == type)
+	else if (MPI_GATHERV_EV == type)
 		res = GLOP_ID_MPI_Gatherv;
-	else if (SCAN_EV == type)
+	else if (MPI_SCAN_EV == type)
 		res = GLOP_ID_MPI_Scan;
-	else if (REDUCESCAT_EV == type)
+	else if (MPI_REDUCESCAT_EV == type)
 		res = GLOP_ID_MPI_Reduce_scatter;
-	else if (SCATTER_EV == type)
+	else if (MPI_SCATTER_EV == type)
 		res = GLOP_ID_MPI_Scatter;
-	else if (SCATTERV_EV == type)
+	else if (MPI_SCATTERV_EV == type)
 		res = GLOP_ID_MPI_Scatterv;
 
 	return res;
@@ -324,7 +324,7 @@ static int Receive_Event (event_t * current, unsigned long long current_time,
 {
 	struct thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UINT64 valor;
-	int isimmediate = (IRECV_EV == Get_EvEvent(current));
+	int isimmediate = (MPI_IRECV_EV == Get_EvEvent(current));
 	int tipus;
 	int comunicador;
 	double temps;
@@ -550,14 +550,14 @@ static int PersistentRequest_Event (event_t * current,
 
 	switch (Get_EvValue(current))
 	{ 
-		case IRECV_EV:
+		case MPI_IRECV_EV:
 			Dimemas_NX_Irecv (fset->output_file, task-1, thread-1, Get_EvTarget(current), comunicador, Get_EvSize(current), Get_EvTag(current) );
 		break;
 
-		case ISEND_EV:
-		case IBSEND_EV:
-		case IRSEND_EV:
-		case ISSEND_EV:
+		case MPI_ISEND_EV:
+		case MPI_IBSEND_EV:
+		case MPI_IRSEND_EV:
+		case MPI_ISSEND_EV:
 			if (MPI_PROC_NULL != Get_EvTarget(current))
 			{
 #ifdef CPUZERO
@@ -575,67 +575,67 @@ static int PersistentRequest_Event (event_t * current,
 }
 
 SingleEv_Handler_t TRF_MPI_Event_Handlers[] = {
-	{ SEND_EV, ANY_Send_Event },
-	{ BSEND_EV, ANY_Send_Event },
-	{ SSEND_EV, ANY_Send_Event },
-	{ RSEND_EV, ANY_Send_Event },
-	{ SENDRECV_EV, SendRecv_Event },
-	{ SENDRECV_REPLACE_EV, SendRecv_Event },
-	{ RECV_EV, Receive_Event },
-	{ IRECV_EV, Receive_Event },
-	{ REDUCE_EV, GlobalOP_Event },
-	{ ALLREDUCE_EV, GlobalOP_Event },
-	{ PROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
-	{ IPROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
-	{ IBSEND_EV, ANY_Send_Event },
-	{ ISSEND_EV, ANY_Send_Event },
-	{ IRSEND_EV, ANY_Send_Event },
-	{ ISEND_EV, ANY_Send_Event },
-	{ BARRIER_EV, GlobalOP_Event },
-	{ CANCEL_EV, MPI_Common_Event },
-	{ TEST_EV, MPI_Common_Event },
-	{ WAIT_EV, MPI_Common_Event },
-	{ WAITALL_EV, MPI_Common_Event },
-	{ WAITANY_EV, MPI_Common_Event },
-	{ WAITSOME_EV, MPI_Common_Event },
-	{ IRECVED_EV, Irecved_Event },
-	{ BCAST_EV, GlobalOP_Event },
-	{ ALLTOALL_EV, GlobalOP_Event },
-	{ ALLTOALLV_EV, GlobalOP_Event },
-	{ ALLGATHER_EV, GlobalOP_Event },
-	{ ALLGATHERV_EV, GlobalOP_Event },
-	{ GATHER_EV, GlobalOP_Event },
-	{ GATHERV_EV, GlobalOP_Event },
-	{ SCATTER_EV, GlobalOP_Event },
-	{ SCATTERV_EV, GlobalOP_Event },
-	{ REDUCESCAT_EV, GlobalOP_Event },
-	{ SCAN_EV, GlobalOP_Event },
-	{ MPIINIT_EV, SkipHandler },   /* Skip MPI_INIT */
-	{ FINALIZE_EV, MPI_Common_Event },
-	{ RECV_INIT_EV, MPI_Persistent_req_use_Event },
-	{ SEND_INIT_EV, MPI_Persistent_req_use_Event },
-	{ BSEND_INIT_EV, MPI_Persistent_req_use_Event },
-	{ RSEND_INIT_EV, MPI_Persistent_req_use_Event },
-	{ SSEND_INIT_EV, MPI_Persistent_req_use_Event },
-	{ PERSIST_REQ_EV, PersistentRequest_Event },
-	{ START_EV, MPI_Persistent_req_use_Event },
-	{ STARTALL_EV, MPI_Persistent_req_use_Event },
-	{ REQUEST_FREE_EV, MPI_Persistent_req_use_Event },
-	{ COMM_RANK_EV, MPI_Common_Event },
-	{ COMM_SIZE_EV, MPI_Common_Event },
-	{ IPROBE_COUNTER_EV, NULL }, /* Software counters are unimplemented in TRF */
-	{ TIME_OUTSIDE_IPROBES_EV, NULL },
-	{ TEST_COUNTER_EV, NULL },
-	{ FILE_OPEN_EV, NULL }, /* IO is unimplemented in TRF */
-	{ FILE_CLOSE_EV, NULL },
-	{ FILE_READ_EV, NULL },
-	{ FILE_READ_ALL_EV, NULL },
-	{ FILE_WRITE_EV, NULL },
-	{ FILE_WRITE_ALL_EV, NULL },
-	{ FILE_READ_AT_EV, NULL },
-	{ FILE_READ_AT_ALL_EV, NULL },
-	{ FILE_WRITE_AT_EV, NULL },
-	{ FILE_WRITE_AT_ALL_EV, NULL },
+	{ MPI_SEND_EV, ANY_Send_Event },
+	{ MPI_BSEND_EV, ANY_Send_Event },
+	{ MPI_SSEND_EV, ANY_Send_Event },
+	{ MPI_RSEND_EV, ANY_Send_Event },
+	{ MPI_SENDRECV_EV, SendRecv_Event },
+	{ MPI_SENDRECV_REPLACE_EV, SendRecv_Event },
+	{ MPI_RECV_EV, Receive_Event },
+	{ MPI_IRECV_EV, Receive_Event },
+	{ MPI_REDUCE_EV, GlobalOP_Event },
+	{ MPI_ALLREDUCE_EV, GlobalOP_Event },
+	{ MPI_PROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
+	{ MPI_IPROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
+	{ MPI_IBSEND_EV, ANY_Send_Event },
+	{ MPI_ISSEND_EV, ANY_Send_Event },
+	{ MPI_IRSEND_EV, ANY_Send_Event },
+	{ MPI_ISEND_EV, ANY_Send_Event },
+	{ MPI_BARRIER_EV, GlobalOP_Event },
+	{ MPI_CANCEL_EV, MPI_Common_Event },
+	{ MPI_TEST_EV, MPI_Common_Event },
+	{ MPI_WAIT_EV, MPI_Common_Event },
+	{ MPI_WAITALL_EV, MPI_Common_Event },
+	{ MPI_WAITANY_EV, MPI_Common_Event },
+	{ MPI_WAITSOME_EV, MPI_Common_Event },
+	{ MPI_IRECVED_EV, Irecved_Event },
+	{ MPI_BCAST_EV, GlobalOP_Event },
+	{ MPI_ALLTOALL_EV, GlobalOP_Event },
+	{ MPI_ALLTOALLV_EV, GlobalOP_Event },
+	{ MPI_ALLGATHER_EV, GlobalOP_Event },
+	{ MPI_ALLGATHERV_EV, GlobalOP_Event },
+	{ MPI_GATHER_EV, GlobalOP_Event },
+	{ MPI_GATHERV_EV, GlobalOP_Event },
+	{ MPI_SCATTER_EV, GlobalOP_Event },
+	{ MPI_SCATTERV_EV, GlobalOP_Event },
+	{ MPI_REDUCESCAT_EV, GlobalOP_Event },
+	{ MPI_SCAN_EV, GlobalOP_Event },
+	{ MPI_INIT_EV, SkipHandler },   /* Skip MPI_INIT */
+	{ MPI_FINALIZE_EV, MPI_Common_Event },
+	{ MPI_RECV_INIT_EV, MPI_Persistent_req_use_Event },
+	{ MPI_SEND_INIT_EV, MPI_Persistent_req_use_Event },
+	{ MPI_BSEND_INIT_EV, MPI_Persistent_req_use_Event },
+	{ MPI_RSEND_INIT_EV, MPI_Persistent_req_use_Event },
+	{ MPI_SSEND_INIT_EV, MPI_Persistent_req_use_Event },
+	{ MPI_PERSIST_REQ_EV, PersistentRequest_Event },
+	{ MPI_START_EV, MPI_Persistent_req_use_Event },
+	{ MPI_STARTALL_EV, MPI_Persistent_req_use_Event },
+	{ MPI_REQUEST_FREE_EV, MPI_Persistent_req_use_Event },
+	{ MPI_COMM_RANK_EV, MPI_Common_Event },
+	{ MPI_COMM_SIZE_EV, MPI_Common_Event },
+	{ MPI_IPROBE_COUNTER_EV, NULL }, /* Software counters are unimplemented in TRF */
+	{ MPI_TIME_OUTSIDE_IPROBES_EV, NULL },
+	{ MPI_TEST_COUNTER_EV, NULL },
+	{ MPI_FILE_OPEN_EV, NULL }, /* IO is unimplemented in TRF */
+	{ MPI_FILE_CLOSE_EV, NULL },
+	{ MPI_FILE_READ_EV, NULL },
+	{ MPI_FILE_READ_ALL_EV, NULL },
+	{ MPI_FILE_WRITE_EV, NULL },
+	{ MPI_FILE_WRITE_ALL_EV, NULL },
+	{ MPI_FILE_READ_AT_EV, NULL },
+	{ MPI_FILE_READ_AT_ALL_EV, NULL },
+	{ MPI_FILE_WRITE_AT_EV, NULL },
+	{ MPI_FILE_WRITE_AT_ALL_EV, NULL },
 	{ NULL_EV, NULL }
 };
 

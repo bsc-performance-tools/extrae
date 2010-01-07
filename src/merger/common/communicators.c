@@ -82,9 +82,9 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 		EvType = Get_EvEvent (current_event);
 
 	while (i < nou_com.num_tasks && current_event != NULL && 
-        (EvType == RANK_CREACIO_COMM_EV || EvType == FLUSH_EV))
+        (EvType == MPI_RANK_CREACIO_COMM_EV || EvType == FLUSH_EV))
 	{
-		if (EvType == RANK_CREACIO_COMM_EV)
+		if (EvType == MPI_RANK_CREACIO_COMM_EV)
 		{
 			/* Save this task as member of the communicator */
 			nou_com.tasks[i] = Get_EvValue (current_event);

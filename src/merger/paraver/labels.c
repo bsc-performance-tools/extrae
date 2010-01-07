@@ -65,6 +65,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "omp_prv_events.h"
 #include "pthread_prv_events.h"
 #include "misc_prv_events.h"
+#include "misc_prv_semantics.h"
 #include "trace_mode.h"
 #include "addr2info.h" 
 #include "mpi2out.h"
@@ -167,7 +168,7 @@ struct rusage_evt_t rusage_evt_labels[RUSAGE_EVENTS_COUNT] = {
    { RUSAGE_NIVCSW_EV,   RUSAGE_NIVCSW_LBL }
 };
 
-struct mpistats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT] = {
+struct mpi_stats_evt_t mpi_stats_evt_labels[MPI_STATS_EVENTS_COUNT] = {
    { MPI_STATS_P2P_COMMS_EV, MPI_STATS_P2P_COMMS_LBL },
    { MPI_STATS_P2P_BYTES_SENT_EV, MPI_STATS_P2P_BYTES_SENT_LBL },
    { MPI_STATS_P2P_BYTES_RECV_EV, MPI_STATS_P2P_BYTES_RECV_LBL },
@@ -175,6 +176,16 @@ struct mpistats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT] = {
    { MPI_STATS_GLOBAL_BYTES_SENT_EV, MPI_STATS_GLOBAL_BYTES_SENT_LBL },
    { MPI_STATS_GLOBAL_BYTES_RECV_EV, MPI_STATS_GLOBAL_BYTES_RECV_LBL },
    { MPI_STATS_TIME_IN_MPI_EV, MPI_STATS_TIME_IN_MPI_LBL }
+};
+
+struct pacx_stats_evt_t pacx_stats_evt_labels[PACX_STATS_EVENTS_COUNT] = {
+   { PACX_STATS_P2P_COMMS_EV, PACX_STATS_P2P_COMMS_LBL },
+   { PACX_STATS_P2P_BYTES_SENT_EV, PACX_STATS_P2P_BYTES_SENT_LBL },
+   { PACX_STATS_P2P_BYTES_RECV_EV, PACX_STATS_P2P_BYTES_RECV_LBL },
+   { PACX_STATS_GLOBAL_COMMS_EV, PACX_STATS_GLOBAL_COMMS_LBL },
+   { PACX_STATS_GLOBAL_BYTES_SENT_EV, PACX_STATS_GLOBAL_BYTES_SENT_LBL },
+   { PACX_STATS_GLOBAL_BYTES_RECV_EV, PACX_STATS_GLOBAL_BYTES_RECV_LBL },
+   { PACX_STATS_TIME_IN_PACX_EV, PACX_STATS_TIME_IN_PACX_LBL }
 };
 
 /******************************************************************************
@@ -247,8 +258,7 @@ static void Paraver_gradient_names (FILE * fd)
 /******************************************************************************
  ***  MISC_events_group1
  ******************************************************************************/
-
-void MISC_events_group1 (FILE * fd)
+static void MISC_events_group1 (FILE * fd)
 {
   unsigned int event, value;
 
@@ -304,12 +314,23 @@ void MISC_events_group1 (FILE * fd)
   fprintf (fd, "%d    %d    %s\n", MPI_GRADIENT, MPI_GLOBAL_OP_COMM,
            MPI_GLOBAL_OP_COMM_LBL);
   LET_SPACES (fd);
+
+  fprintf (fd, "%s\n", TYPE_LABEL);
+  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_SENDSIZE,
+           PACX_GLOBAL_OP_SENDSIZE_LBL);
+  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_RECVSIZE,
+           PACX_GLOBAL_OP_RECVSIZE_LBL);
+  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_ROOT,
+           PACX_GLOBAL_OP_ROOT_LBL);
+  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_COMM,
+           PACX_GLOBAL_OP_COMM_LBL);
+  LET_SPACES (fd);
 }
 
 /******************************************************************************
  *** concat_user_labels
  ******************************************************************************/
-void Concat_User_Labels (FILE * fd)
+static void Concat_User_Labels (FILE * fd)
 {
   char *str;
   char line[1024];
@@ -361,7 +382,7 @@ static void Paraver_default_options (FILE * fd)
 }
 
 #if USE_HARDWARE_COUNTERS
-int Exist_contador (fcounter_t *fcounter, long long EvCnt) 
+static int Exist_Counter (fcounter_t *fcounter, long long EvCnt) 
 {
   struct fcounter_t *aux_fc = fcounter;
 
@@ -380,7 +401,7 @@ int Exist_contador (fcounter_t *fcounter, long long EvCnt)
  *** HWC_PARAVER_Labels
 ******************************************************************************/
 
-void HWC_PARAVER_Labels (FILE * pcfFD)
+static void HWC_PARAVER_Labels (FILE * pcfFD)
 {
 #if defined(PAPI_COUNTERS)
   struct fcounter_t *fcounter=NULL;
@@ -439,7 +460,7 @@ void HWC_PARAVER_Labels (FILE * pcfFD)
 				if (PAPI_query_event_verbose (EvCnt, &Myinfo) == PAPI_OK)
 # endif
 				{
-					if (!(Exist_contador(fcounter,EvCnt)))
+					if (!(Exist_Counter(fcounter,EvCnt)))
 					{
 						if (AddedCounters == 0)
 							fprintf (pcfFD, "%s\n", TYPE_LABEL);
@@ -485,7 +506,7 @@ void HWC_PARAVER_Labels (FILE * pcfFD)
 }
 #endif
 
-char * Rusage_Event_Label (int rusage_evt) {
+static char * Rusage_Event_Label (int rusage_evt) {
    int i;
 
    for (i=0; i<RUSAGE_EVENTS_COUNT; i++) {
@@ -496,7 +517,7 @@ char * Rusage_Event_Label (int rusage_evt) {
    return "Unknown getrusage event";
 }
 
-void Write_rusage_Labels (FILE * pcf_fd)
+static void Write_rusage_Labels (FILE * pcf_fd)
 {
    int i;
 
@@ -512,37 +533,67 @@ void Write_rusage_Labels (FILE * pcf_fd)
    }
 }
 
-char * MPIStats_Event_Label (int mpistats_evt)
+static char * MPI_Stats_Event_Label (int mpi_stats_evt)
 {
    int i;
 
    for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
    {
-      if (mpistats_evt_labels[i].evt_type == mpistats_evt) {
-         return mpistats_evt_labels[i].label;
+      if (mpi_stats_evt_labels[i].evt_type == mpi_stats_evt) {
+         return mpi_stats_evt_labels[i].label;
       }
    }
    return "Unknown MPI stats event";
 }
 
-void Write_MPIStats_Labels (FILE * pcf_fd)
+static void Write_MPI_Stats_Labels (FILE * pcf_fd)
 {
    int i;
 
-   if (MPIStats_Events_Found)
+   if (MPI_Stats_Events_Found)
    {
       fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 
       for (i=0; i<MPI_STATS_EVENTS_COUNT; i++) {
-         if (MPIStats_Labels_Used[i]) {
-            fprintf(pcf_fd, "0    %d    %s\n", MPI_STATS_BASE+i, MPIStats_Event_Label(i));
+         if (MPI_Stats_Labels_Used[i]) {
+            fprintf(pcf_fd, "0    %d    %s\n", MPI_STATS_BASE+i, MPI_Stats_Event_Label(i));
          }
       }
       LET_SPACES (pcf_fd);
    }
 }
 
-void Write_Trace_Mode_Labels (FILE * pcf_fd)
+static char * PACX_Stats_Event_Label (int pacx_stats_evt)
+{
+   int i;
+
+   for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
+   {
+      if (pacx_stats_evt_labels[i].evt_type == pacx_stats_evt) {
+         return pacx_stats_evt_labels[i].label;
+      }
+   }
+   return "Unknown PACX stats event";
+}
+
+static void Write_PACX_Stats_Labels (FILE * pcf_fd)
+{
+   int i;
+
+   if (PACX_Stats_Events_Found)
+   {
+      fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+
+      for (i=0; i<PACX_STATS_EVENTS_COUNT; i++) {
+         if (PACX_Stats_Labels_Used[i]) {
+            fprintf(pcf_fd, "0    %d    %s\n", PACX_STATS_BASE+i, PACX_Stats_Event_Label(i));
+         }
+      }
+      LET_SPACES (pcf_fd);
+   }
+}
+
+static void Write_Trace_Mode_Labels (FILE * pcf_fd)
 {
 	fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 	fprintf (pcf_fd, "9    %d    %s\n", TRACING_MODE_EV, "Tracing mode:");
@@ -552,7 +603,7 @@ void Write_Trace_Mode_Labels (FILE * pcf_fd)
 	LET_SPACES (pcf_fd);
 }
 
-void Write_Clustering_Labels (FILE * pcf_fd)
+static void Write_Clustering_Labels (FILE * pcf_fd)
 {
 	int i;
 
@@ -648,8 +699,10 @@ int GeneratePCFfile (char *name, long long options)
 
 	MISC_events_group1 (fd);
 
-	MPITEvent_WriteEnabledOperations (fd);
-	MPISoftCountersEvent_WriteEnabledOperations (fd);
+	MPITEvent_WriteEnabled_MPI_Operations (fd);
+	MPITEvent_WriteEnabled_PACX_Operations (fd);
+	SoftCountersEvent_WriteEnabled_MPI_Operations (fd);
+	SoftCountersEvent_WriteEnabled_PACX_Operations (fd);
 	OMPEvent_WriteEnabledOperations (fd);
 	pthreadEvent_WriteEnabledOperations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
@@ -668,8 +721,10 @@ int GeneratePCFfile (char *name, long long options)
 	Address2Info_Write_UF_Labels (fd, option_UniqueCallerID);
 	Address2Info_Write_Sample_Labels (fd, option_UniqueCallerID);
 #endif
+
 	Write_rusage_Labels (fd);
-	Write_MPIStats_Labels (fd);
+	Write_MPI_Stats_Labels (fd);
+	Write_PACX_Stats_Labels (fd);
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
 

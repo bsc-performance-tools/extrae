@@ -31,27 +31,6 @@
 #ifndef _MPI_EVENTENCODING_H
 #define _MPI_EVENTENCODING_H
 
-#if defined(DEAD_CODE)
-
-/* ==========================================================================
-   ==== User Function/Calls
-   ========================================================================== */
-#define USER_FUNCTION                 60000019
-#define USER_CALL                     60000020
-#define USER_BLOCK                    60000021
-
-#define USER_FUNCTION_LABEL           "User functions"
-#define USER_CALL_LABEL               "User calls"
-#define USER_BLOCK_LABEL              "User Block"
-
-#define BASE_USERFUNCTION                  200
-#define BASE_USERCALL                    10000
-#define BASE_USERBLOCK                   20000
-
-typedef int MPIType;
-
-#endif
-
 /* ==========================================================================
    ==== MPI Event Types
    ========================================================================== */
@@ -83,7 +62,7 @@ typedef int MPIType;
    ========================================================================== */
 typedef enum
 {
-  MPIEND_VAL, /* 0 */
+  MPI_END_VAL, /* 0 */
   MPI_SEND_VAL,
   MPI_RECV_VAL,
   MPI_ISEND_VAL,

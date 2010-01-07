@@ -20,57 +20,65 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/src/merger/paraver/mpi_prv_events.h $
  | 
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @last_commit: $Date: 2009-10-29 13:06:27 +0100 (dj, 29 oct 2009) $
+ | @version:     $Revision: 15 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _SEND_QUEUE_H
-#define _SEND_QUEUE_H
+#ifndef PACX_PRV_EVENTS_H
+#define PACX_PRV_EVENTS_H
 
 #include <config.h>
 
-#if HAVE_UNISTD_H
-# include <unistd.h>
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
 #endif
 
-#include "queue.h"
-#include "record.h"
+#include "common.h"
 
-typedef struct SendQ_type
-{
-  struct SendQ_type *next;
-  struct SendQ_type *prev;
+/*************************************************************************
+ * S'utilitza el format nou dels .prv, que genera diferents tipus i estan
+ * definits en un fitxer de constants.
+ *************************************************************************/
 
-#define SEND_BEGIN_RECORD 0
-#define SEND_END_RECORD 1
-  event_t *Send[2];             /* Receive record file pointers :
-                                 * Recv[0] points to SEND_EV  - EVT_BEGIN
-                                 * Recv[1] points to SEND_EV  - EVT_END
-                                 */
-	off_t position;
-}
-SendQ_t;
+void Enable_PACX_Soft_Counter (unsigned int EvType);
 
-#define GetSend_RecordQ(item,type)      ( (item)->Send[(type)] )
-#define GetSend_PositionQ(item)         ( (item)->position )
-#define SetSend_RecordQ(item,nou,type)  ( (item)->Send[(type)] = (nou) )
-#define SetSend_PositionQ(item,npos)    ( (item)->position = (npos) )
+/* S'afegeix el fitxer on hi ha totes les constants */
+#include "PACX_EventEncoding.h"
 
-#define SENDQ_SIZE  sizeof(RecvQ_t)
+#define PACXTYPE_FLAG_COLOR 9
 
-void Init_SendQ (SendQ_t * SendQ);
+#define NUM_PACX_BLOCK_GROUPS  8     /* Dels 12, de moment nomes 8 son diferents */
 
-void Queue_SendQ (SendQ_t * queue, SendQ_t * new);
+#define NUM_PACX_PRV_ELEMENTS 150    /* 127 */
 
-void Remove_SendQ (SendQ_t * new);
+#if 0
+extern struct t_event_mpit2prv event_mpit2prv[];
+extern struct t_prv_type_info prv_block_groups[];
+#endif
 
-SendQ_t *Alloc_SendQ_Item (void);
+void SoftCountersEvent_WriteEnabled_PACX_Operations (FILE *fd);
+void MPITEvent_WriteEnabled_PACX_Operations (FILE * fd);
+void Enable_PACX_Operation (int tmpit);
 
-SendQ_t *SendQueueSearch (void *freceive, SendQ_t * queue, unsigned int tag,
-	unsigned int sender);
+#if defined(PARALLEL_MERGE)
+void Share_PACX_Softcounter_Operations (void);
+void Share_PACX_Operations (void);
+#endif
+
+void Translate_PACX_MPIT2PRV (int typempit, UINT64 valuempit, int *typeprv, UINT64 *valueprv);
+
+#if 0
+/* MACRO per obtenir facilment un tipus de block (i=[0..NUM_BLOCK_GROUPS-1])*/
+#define PRV_BLOCK_TYPE(i)  prv_block_groups[i].type
+/* MACRO per obtenir facilment una etiqueta de block (i=[0..NUM_BLOCK_GROUPS-1])*/
+#define PRV_BLOCK_LABEL(i) prv_block_groups[i].label
+/* MACRO per obtenir facilment el color d'un block (i=[0..NUM_BLOCK_GROUPS-1])*/
+#define PRV_BLOCK_COLOR(i) prv_block_groups[i].flag_color
+#endif
+
 
 #endif

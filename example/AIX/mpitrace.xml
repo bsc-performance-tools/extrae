@@ -10,6 +10,10 @@
     <counters enabled="yes" />
   </mpi>
 
+  <pacx enabled="no">
+    <counters enabled="yes" />
+  </pacx>
+
   <openmp enabled="yes">
     <locks enabled="no" />
     <counters enabled="yes" />
@@ -17,6 +21,7 @@
 
   <callers enabled="yes">
     <mpi enabled="yes">1-3</mpi>
+    <pacx enabled="no">1-3</pacx>
     <sampling enabled="no">1-5</sampling>
   </callers>
 
@@ -68,6 +73,7 @@
   <bursts enabled="no">
     <threshold enabled="yes">500u</threshold>
     <mpi-statistics enabled="yes" />
+    <pacx-statistics enabled="no" />
   </bursts>
 
 </trace>

@@ -51,20 +51,20 @@ static void show_current (event_t * c)
 	fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu", c->event, c->value, c->value, c->time);
 #endif
 
-	if (c->event == IRECV_EV || c->event == IRECVED_EV || c->event == RECV_EV ||
-	    c->event == SENDRECV_EV || c->event == SENDRECV_REPLACE_EV ||
-	    c->event == PERSIST_REQ_EV ||
-	    c->event == SEND_EV || c->event == ISEND_EV ||
-	    c->event == SSEND_EV || c->event == ISSEND_EV ||
-	    c->event == BSEND_EV || c->event == IBSEND_EV ||
-	    c->event == RSEND_EV || c->event == IRSEND_EV)
+	if (c->event == MPI_IRECV_EV || c->event == MPI_IRECVED_EV || c->event == MPI_RECV_EV ||
+	    c->event == MPI_SENDRECV_EV || c->event == MPI_SENDRECV_REPLACE_EV ||
+	    c->event == MPI_PERSIST_REQ_EV ||
+	    c->event == MPI_SEND_EV || c->event == MPI_ISEND_EV ||
+	    c->event == MPI_SSEND_EV || c->event == MPI_ISSEND_EV ||
+	    c->event == MPI_BSEND_EV || c->event == MPI_IBSEND_EV ||
+	    c->event == MPI_RSEND_EV || c->event == MPI_IRSEND_EV)
 	{
 		fprintf (stdout, " TARGET:%u SIZE:%d TAG:%d COMM:%d AUX:%d\n",
 		  c->param.mpi_param.target,
 		  c->param.mpi_param.size, c->param.mpi_param.tag,
 		  c->param.mpi_param.comm, c->param.mpi_param.aux);
 	}
-	else if (c->event == MPIINIT_EV && c->value == EVT_END)
+	else if (c->event == MPI_INIT_EV && c->value == EVT_END)
 	{
 		fprintf (stdout, " OPTIONS: 0x%08x\n", c->param.mpi_param.aux);
 	}

@@ -28,6 +28,14 @@ if (${?MPITRACE_HOME}) then
 		endif
 	endif
 
+	if (${?PACX_HOME}) then
+		if (! -d ${PACX_HOME}/lib ) then
+			echo "Unable to find libpacx library directory!"
+		else
+			setenv LD_LIBRARY_PATH ${PACX_HOME}/lib:${LD_LIBRARY_PATH}
+		endif
+	endif
+
 	if (${?LIBXML2_HOME}) then
 		if (! -d ${LIBXML2_HOME}/lib ) then
 			echo "Unable to find libxml2 library directory!"

@@ -57,6 +57,7 @@ extern int BurstsMode_MPI_Stats;
 
 #define MINIMUM_BURST_DURATION (BurstsMode_Threshold)
 #define TRACING_MPI_STATISTICS (BurstsMode_MPI_Stats)
+#define TRACING_PACX_STATISTICS (BurstsMode_MPI_Stats)
 
 void TMODE_setBurstsThreshold  (unsigned long long threshold);
 void TMODE_setBurstsStatistics (int status);

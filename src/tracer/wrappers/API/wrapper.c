@@ -54,6 +54,9 @@ static char UNUSED rcsid[] = "$Id$";
 #  include <mpi.h>
 # endif
 #endif
+#if defined(PACX_SUPPORT)
+# include <pacx.h>
+#endif
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -90,6 +93,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #if defined(MPI_SUPPORT)
 # include "mpi_wrapper.h"
+#endif
+#if defined(PACX_SUPPORT)
+# include "pacx_wrapper.h"
 #endif
 #include "misc_wrapper.h"
 #include "clock.h"
@@ -332,6 +338,7 @@ static int read_environment_variables (int me)
 		TMODE_setBurstsThreshold (getTimeFromStr (str, "MPITRACE_BURST_THRESHOLD", me));
 	}
 
+#if defined(MPI_SUPPORT)
 	/* Collect MPI statistics in the library? */
 	if ((str = getenv ("MPITRACE_MPI_STATISTICS")) != NULL)
 	{
@@ -344,6 +351,20 @@ static int read_environment_variables (int me)
 			TMODE_setBurstsStatistics (DISABLED);
 		}
 	}
+#elif defined(PACX_SUPPORT)
+	/* Collect MPI statistics in the library? */
+	if ((str = getenv ("MPITRACE_PACX_STATISTICS")) != NULL)
+	{
+		if (strcmp(str, "1") == 0)
+		{
+			TMODE_setBurstsStatistics (ENABLED);
+		}
+		else
+		{
+			TMODE_setBurstsStatistics (DISABLED);
+		}
+	}
+#endif
 
 	/*
 	* MPTRACE_DIR : Output directory for traces.
@@ -452,9 +473,15 @@ static int read_environment_variables (int me)
 			fprintf (stdout, "mpitrace: Control file will be checked every %llu nanoseconds\n", WantedCheckControlPeriod);
 	}
 
+#if defined(MPI_SUPPORT)
 	/* Control if the user wants to add information about MPI caller routines */
 	mpi_callers = getenv ("MPITRACE_MPI_CALLER");
 	if (mpi_callers != NULL) Parse_Callers (me, mpi_callers, CALLER_MPI);
+#elif defined(PACX_SUPPORT)
+	/* Control if the user wants to add information about MPI caller routines */
+	mpi_callers = getenv ("MPITRACE_PACX_CALLER");
+	if (mpi_callers != NULL) Parse_Callers (me, mpi_callers, CALLER_MPI);
+#endif
 
 #if defined(MPI_SUPPORT)
 	/* Check if we must gather all the MPIT files into one target (MASTER) node */
@@ -484,6 +511,7 @@ static int read_environment_variables (int me)
 		strncpy (PROGRAM_NAME, str, sizeof(PROGRAM_NAME));
 	PROGRAM_NAME[255] = '\0';
 
+#if defined(MPI_SUPPORT)
 	/* Check if the MPI must be disabled */
 	str = getenv ("MPITRACE_DISABLE_MPI");
 	if (str != NULL && (strcmp (str, "1") == 0))
@@ -492,7 +520,18 @@ static int read_environment_variables (int me)
 			fprintf (stdout, "mpitrace: MPI calls are NOT traced.\n");
   	tracejant_mpi = FALSE;
 	}
+#elif defined(PACX_SUPPORT)
+	/* Check if the PACX must be disabled */
+	str = getenv ("MPITRACE_DISABLE_PACX");
+	if (str != NULL && (strcmp (str, "1") == 0))
+	{
+		if (me == 0)
+			fprintf (stdout, "mpitrace: PACX calls are NOT traced.\n");
+  	tracejant_mpi = FALSE;
+	}
+#endif
 
+#if defined(MPI_SUPPORT)
 	/* HWC must be gathered at MPI? */
 	str = getenv ("MPITRACE_MPI_COUNTERS_ON");
 	if (str != NULL && (strcmp (str, "1") == 0))
@@ -503,6 +542,16 @@ static int read_environment_variables (int me)
 	}
 	else
 		tracejant_hwc_mpi = FALSE;
+#elif defined(PACX_SUPPORT)
+	/* HWC must be gathered at PACX? */
+	str = getenv ("MPITRACE_PACX_COUNTERS_ON");
+	if (str != NULL && (strcmp (str, "1") == 0))
+	{
+		if (me == 0)
+			fprintf (stdout, "mpitrace: HWC reported in the PACX calls.\n");
+		tracejant_hwc_mpi = TRUE;
+	}
+#endif
 
 	/* Enable rusage information? */
 	str = getenv ("MPITRACE_RUSAGE");
@@ -1371,26 +1420,26 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 	xfree(SynchronizationTimes);
 
 #if defined(HAVE_MRNET)
-    if (MRNet_isEnabled())
-    {
-        int rc = Join_MRNet(rank);
+	if (MRNet_isEnabled())
+	{
+		int rc = Join_MRNet(rank);
 
-        if (rc)
+		if (rc)
 		{
-            fprintf (stdout, "mpitrace: MRNet successfully set up.\n");
+			fprintf (stdout, "mpitrace: MRNet successfully set up.\n");
 		}
-        else
+		else
 		{
-            fprintf (stderr, "mpitrace: Error while setting up the MRNet.\n");
+			fprintf (stderr, "mpitrace: Error while setting up the MRNet.\n");
 			exit(1);
 		}
-    }
+	}
 #endif
 
 	/* Add MPI_init begin and end events */
-	TRACE_MPIINITEV (SynchroInitTime, MPIINIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIINITEV (SynchroInitTime, MPI_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	TRACE_MPIINITEV (SynchroEndTime, MPIINIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
+	TRACE_MPIINITEV (SynchroEndTime, MPI_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
 
 	/* HSG force a write to disk! */
 	Buffer_Flush(TracingBuffer[THREADID]);

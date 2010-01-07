@@ -20,48 +20,20 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/src/merger/paraver/mpi_prv_semantics.h $
  | 
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @last_commit: $Date: 2009-10-29 13:06:27 +0100 (dj, 29 oct 2009) $
+ | @version:     $Revision: 15 $
  | 
  | History:
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _RECV_QUEUE_H
-#define _RECV_QUEUE_H
+#ifndef PACX_PRV_SEMANTICS_H
+#define PACX_PRV_SEMANTICS_H
 
-#include "queue.h"
-#include "record.h"
+#include "semantics.h"
+#include "file_set.h"
 
-typedef struct RecvQ_type
-{
-#define RECV_BEGIN_RECORD 0
-#define RECV_END_RECORD 1
-  event_t *Recv[2];             /* Receive record file pointers :
-                                 * Recv[0] points to RECV_EV  - EVT_BEGIN
-                                 * Recv[1] points to RECV_EV  - EVT_END
-                                 */
-  struct RecvQ_type *next;
-  struct RecvQ_type *prev;
-}
-RecvQ_t;
+extern SingleEv_Handler_t PRV_PACX_Event_Handlers[]; 
 
-#define GetRecv_RecordQ(item,type)      ( (item)->Recv[(type)] )
-#define SetRecv_RecordQ(item,nou,type)  ( (item)->Recv[(type)] = (nou) )
-
-#define RECVQ_SIZE  sizeof(RecvQ_t)
-
-void Init_RecvQ (RecvQ_t * RecvQ);
-
-void Queue_RecvQ (RecvQ_t * queue, RecvQ_t * new);
-
-void Remove_RecvQ (RecvQ_t * new);
-
-
-RecvQ_t *Alloc_RecvQ_Item ();
-
-RecvQ_t *RecvQueueSearch (void *freceive, RecvQ_t * queue, unsigned int tag,
-	unsigned int sender);
-
-#endif
+#endif /* PACX_PRV_SEMANTICS_H */

@@ -36,4 +36,4 @@
 
 extern SingleEv_Handler_t PRV_MPI_Event_Handlers[]; 
 
-#endif /* __MPI_PRV_SEMANTICS_H__ */
+#endif /* MPI_PRV_SEMANTICS_H */

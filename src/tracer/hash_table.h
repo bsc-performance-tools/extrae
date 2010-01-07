@@ -33,8 +33,8 @@
 #ifndef _HASH_TABLE_H
 #define _HASH_TABLE_H
 
-#if !defined(MPI_SUPPORT) /* This shouldn't be included if MPI is not used */
-# error "This should not be included"
+#if !defined(MPI_SUPPORT) && !defined(PACX_SUPPORT) /* This shouldn't be compiled if MPI or PACX are not used */
+# error "This should not be compiled outside MPI/PACX bounds"
 #endif
 
 #include "common.h"

@@ -28,11 +28,13 @@ paraver_FILES = \
  paraver/paraver_state.c paraver/paraver_state.h \
  paraver/trace_to_prv.c paraver/trace_to_prv.h \
  paraver/mpi_prv_semantics.c paraver/mpi_prv_semantics.h \
+ paraver/pacx_prv_semantics.c paraver/pacx_prv_semantics.h \
  paraver/omp_prv_semantics.c paraver/omp_prv_semantics.h \
  paraver/misc_prv_semantics.c paraver/misc_prv_semantics.h \
  paraver/pthread_prv_semantics.c paraver/pthread_prv_semantics.h \
  paraver/trt_prv_semantics.c paraver/trt_prv_semantics.h \
  paraver/mpi_prv_events.c paraver/mpi_prv_events.h \
+ paraver/pacx_prv_events.c paraver/pacx_prv_events.h \
  paraver/omp_prv_events.c paraver/omp_prv_events.h \
  paraver/misc_prv_events.c paraver/misc_prv_events.h \
  paraver/pthread_prv_events.c paraver/pthread_prv_events.h \

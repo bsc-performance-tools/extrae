@@ -92,6 +92,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "dimemas_generator.h"
 
 #include "mpi_prv_events.h"
+#include "pacx_prv_events.h"
 #include "pthread_prv_events.h"
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
@@ -358,7 +359,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	if (0 == taskid)
 	{
-		fprintf (stdout, "mpi2prv: Searching synchronization points... ");
+		fprintf (stdout, "mpi2prv: Searching synchronization points...");
 		fflush (stdout);
 	}
 	total_tasks = Search_Synchronization_Times(fset, &StartingTimes, &SynchronizationTimes);
@@ -429,8 +430,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		{
 			current_time = TIMESYNC(task-1, Get_EvTime (current_event));
 
-			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE ||
-			    Type == MISC_TYPE || Type == MPI_TYPE)
+			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
+			    Type == MPI_TYPE || Type == PACX_TYPE)
 			{
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
 				if (handler != NULL)
@@ -444,6 +445,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_OMP_Operation (EvType);
 					else if (MPI_TYPE == Type)
 						Enable_MPI_Operation (EvType);
+					else if (PACX_TYPE == Type)
+						Enable_PACX_Operation (EvType);
 					else if (TRT_TYPE == Type)
 						Enable_TRT_Operation (EvType);
 				}
@@ -451,11 +454,11 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-                if (Get_EvHWCRead (current_event))
-                {
-                    int i;
-                    unsigned int hwctype[MAX_HWC];
-                    unsigned long long hwcvalue[MAX_HWC];
+				if (Get_EvHWCRead (current_event))
+				{
+					int i;
+					unsigned int hwctype[MAX_HWC];
+					unsigned long long hwcvalue[MAX_HWC];
 
 					if (Get_EvHWCSet(current_event) != HardwareCounters_GetCurrentSet(ptask, task, thread))
 					{
@@ -464,17 +467,22 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					}
 
 #warning "Aixo es horrible, caldra retocar-ho"
-                    HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue);
-                    for (i = 0; i < MAX_HWC; i++)
-                        if (NO_COUNTER != hwctype[i])
-                            trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-                }
+					HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue);
+					for (i = 0; i < MAX_HWC; i++)
+						if (NO_COUNTER != hwctype[i])
+							trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+				}
 #endif
 			}
-			else if (Type == COMM_ALIAS_TYPE)
+			else if (Type == MPI_COMM_ALIAS_TYPE)
 			{
 				error = GenerateAliesComunicator (current_event, current_time, cpu, ptask, task, thread, fset, &tmp_nevents, PRV_SEMANTICS);
 				Enable_MPI_Operation (EvType);
+			}
+			else if (Type == PACX_COMM_ALIAS_TYPE)
+			{
+				error = GenerateAliesComunicator (current_event, current_time, cpu, ptask, task, thread, fset, &tmp_nevents, PRV_SEMANTICS);
+				Enable_PACX_Operation (EvType);
 			}
 		}
 		else

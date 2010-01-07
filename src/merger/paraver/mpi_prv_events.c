@@ -38,35 +38,56 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpi_prv_events.h"
 #include "events.h"
 
-struct t_event_mpit2prv event_mpit2prv[NUM_PRV_ELEMENTS] = {
-	{ALLGATHER_EV, MPITYPE_COLLECTIVE, MPI_ALLGATHER_VAL, FALSE}, /*   1 */
-	{ALLGATHERV_EV, MPITYPE_COLLECTIVE, MPI_ALLGATHERV_VAL, FALSE},       /*   2 */
-	{ALLREDUCE_EV, MPITYPE_COLLECTIVE, MPI_ALLREDUCE_VAL, FALSE}, /*   3 */
-	{ALLTOALL_EV, MPITYPE_COLLECTIVE, MPI_ALLTOALL_VAL, FALSE},   /*   4 */
-	{ALLTOALLV_EV, MPITYPE_COLLECTIVE, MPI_ALLTOALLV_VAL, FALSE}, /*   5 */
-	{BARRIER_EV, MPITYPE_COLLECTIVE, MPI_BARRIER_VAL, FALSE},     /*   6 */
-	{BCAST_EV, MPITYPE_COLLECTIVE, MPI_BCAST_VAL, FALSE}, /*   7 */
-	{GATHER_EV, MPITYPE_COLLECTIVE, MPI_GATHER_VAL, FALSE},       /*   8 */
-	{GATHERV_EV, MPITYPE_COLLECTIVE, MPI_GATHERV_VAL, FALSE},     /*   9 */
+struct t_event_mpit2prv
+{
+  int tipus_mpit;
+  int tipus_prv;
+  int valor_prv;
+  int utilitzada;               /* Boolea que indica si apareix a la trac,a */
+};
+
+struct t_prv_type_info
+{
+  int type;
+  char *label;
+  int flag_color;
+};
+
+struct t_prv_val_label
+{
+  int value;
+  char *label;
+};
+
+static struct t_event_mpit2prv event_mpit2prv[NUM_MPI_PRV_ELEMENTS] = {
+	{MPI_ALLGATHER_EV, MPITYPE_COLLECTIVE, MPI_ALLGATHER_VAL, FALSE}, /*   1 */
+	{MPI_ALLGATHERV_EV, MPITYPE_COLLECTIVE, MPI_ALLGATHERV_VAL, FALSE},       /*   2 */
+	{MPI_ALLREDUCE_EV, MPITYPE_COLLECTIVE, MPI_ALLREDUCE_VAL, FALSE}, /*   3 */
+	{MPI_ALLTOALL_EV, MPITYPE_COLLECTIVE, MPI_ALLTOALL_VAL, FALSE},   /*   4 */
+	{MPI_ALLTOALLV_EV, MPITYPE_COLLECTIVE, MPI_ALLTOALLV_VAL, FALSE}, /*   5 */
+	{MPI_BARRIER_EV, MPITYPE_COLLECTIVE, MPI_BARRIER_VAL, FALSE},     /*   6 */
+	{MPI_BCAST_EV, MPITYPE_COLLECTIVE, MPI_BCAST_VAL, FALSE}, /*   7 */
+	{MPI_GATHER_EV, MPITYPE_COLLECTIVE, MPI_GATHER_VAL, FALSE},       /*   8 */
+	{MPI_GATHERV_EV, MPITYPE_COLLECTIVE, MPI_GATHERV_VAL, FALSE},     /*   9 */
 	{-1, MPITYPE_OTHER, MPI_OP_CREATE_VAL, FALSE},        /*  10 */
 	{-1, MPITYPE_OTHER, MPI_OP_FREE_VAL, FALSE},  /*  11 */
-	{REDUCESCAT_EV, MPITYPE_COLLECTIVE, MPI_REDUCE_SCATTER_VAL, FALSE},   /*  12 */
-	{REDUCE_EV, MPITYPE_COLLECTIVE, MPI_REDUCE_VAL, FALSE},       /*  13 */
-	{SCAN_EV, MPITYPE_COLLECTIVE, MPI_SCAN_VAL, FALSE},   /*  14 */
-	{SCATTER_EV, MPITYPE_COLLECTIVE, MPI_SCATTER_VAL, FALSE},     /*  15 */
-	{SCATTERV_EV, MPITYPE_COLLECTIVE, MPI_SCATTERV_VAL, FALSE},   /*  16 */
+	{MPI_REDUCESCAT_EV, MPITYPE_COLLECTIVE, MPI_REDUCE_SCATTER_VAL, FALSE},   /*  12 */
+	{MPI_REDUCE_EV, MPITYPE_COLLECTIVE, MPI_REDUCE_VAL, FALSE},       /*  13 */
+	{MPI_SCAN_EV, MPITYPE_COLLECTIVE, MPI_SCAN_VAL, FALSE},   /*  14 */
+	{MPI_SCATTER_EV, MPITYPE_COLLECTIVE, MPI_SCATTER_VAL, FALSE},     /*  15 */
+	{MPI_SCATTERV_EV, MPITYPE_COLLECTIVE, MPI_SCATTERV_VAL, FALSE},   /*  16 */
 	{-1, MPITYPE_OTHER, MPI_ATTR_DELETE_VAL, FALSE},      /*  17 */
 	{-1, MPITYPE_OTHER, MPI_ATTR_GET_VAL, FALSE}, /*  18 */
 	{-1, MPITYPE_OTHER, MPI_ATTR_PUT_VAL, FALSE}, /*  19 */
-	{COMM_CREATE_EV, MPITYPE_COMM, MPI_COMM_CREATE_VAL, FALSE},   /*  20 */
-	{COMM_DUP_EV, MPITYPE_COMM, MPI_COMM_DUP_VAL, FALSE}, /*  21 */
+	{MPI_COMM_CREATE_EV, MPITYPE_COMM, MPI_COMM_CREATE_VAL, FALSE},   /*  20 */
+	{MPI_COMM_DUP_EV, MPITYPE_COMM, MPI_COMM_DUP_VAL, FALSE}, /*  21 */
 	{-1, MPITYPE_COMM, MPI_COMM_FREE_VAL, FALSE}, /*  22 */
 	{-1, MPITYPE_COMM, MPI_COMM_GROUP_VAL, FALSE},        /*  23 */
-	{COMM_RANK_EV, MPITYPE_COMM, MPI_COMM_RANK_VAL, FALSE},       /*  24 */
+	{MPI_COMM_RANK_EV, MPITYPE_COMM, MPI_COMM_RANK_VAL, FALSE},       /*  24 */
 	{-1, MPITYPE_COMM, MPI_COMM_REMOTE_GROUP_VAL, FALSE}, /*  25 */
 	{-1, MPITYPE_COMM, MPI_COMM_REMOTE_SIZE_VAL, FALSE},  /*  26 */
-	{COMM_SIZE_EV, MPITYPE_COMM, MPI_COMM_SIZE_VAL, FALSE},       /*  27 */
-	{COMM_SPLIT_EV, MPITYPE_COMM, MPI_COMM_SPLIT_VAL, FALSE},     /*  28 */
+	{MPI_COMM_SIZE_EV, MPITYPE_COMM, MPI_COMM_SIZE_VAL, FALSE},       /*  27 */
+	{MPI_COMM_SPLIT_EV, MPITYPE_COMM, MPI_COMM_SPLIT_VAL, FALSE},     /*  28 */
 	{-1, MPITYPE_COMM, MPI_COMM_TEST_INTER_VAL, FALSE},   /*  29 */
 	{-1, MPITYPE_COMM, MPI_COMM_COMPARE_VAL, FALSE},      /*  30 */
 	{-1, MPITYPE_GROUP, MPI_GROUP_DIFFERENCE_VAL, FALSE}, /*  31 */
@@ -92,43 +113,43 @@ struct t_event_mpit2prv event_mpit2prv[NUM_PRV_ELEMENTS] = {
 	{-1, MPITYPE_OTHER, MPI_ERRHANDLER_GET_VAL, FALSE},   /*  51 */
 	{-1, MPITYPE_OTHER, MPI_ERROR_STRING_VAL, FALSE},     /*  52 */
 	{-1, MPITYPE_OTHER, MPI_ERRHANDLER_SET_VAL, FALSE},   /*  53 */
-	{FINALIZE_EV, MPITYPE_OTHER, MPI_FINALIZE_VAL, FALSE},        /*  54 */
+	{MPI_FINALIZE_EV, MPITYPE_OTHER, MPI_FINALIZE_VAL, FALSE},        /*  54 */
 	{-1, MPITYPE_OTHER, MPI_GET_PROCESSOR_NAME_VAL, FALSE},       /*  55 */
-	{MPIINIT_EV, MPITYPE_OTHER, MPI_INIT_VAL, FALSE},     /*  56 */
+	{MPI_INIT_EV, MPITYPE_OTHER, MPI_INIT_VAL, FALSE},     /*  56 */
 	{-1, MPITYPE_OTHER, MPI_INITIALIZED_VAL, FALSE},      /*  57 */
 	{-1, MPITYPE_OTHER, MPI_WTICK_VAL, FALSE},    /*  58 */
 	{-1, MPITYPE_OTHER, MPI_WTIME_VAL, FALSE},    /*  59 */
 	{-1, MPITYPE_OTHER, MPI_ADDRESS_VAL, FALSE},  /*  60 */
-	{BSEND_EV, MPITYPE_PTOP, MPI_BSEND_VAL, FALSE},       /*  61 */
-	{BSEND_INIT_EV, MPITYPE_PTOP, MPI_BSEND_INIT_VAL, FALSE},     /*  62 */
+	{MPI_BSEND_EV, MPITYPE_PTOP, MPI_BSEND_VAL, FALSE},       /*  61 */
+	{MPI_BSEND_INIT_EV, MPITYPE_PTOP, MPI_BSEND_INIT_VAL, FALSE},     /*  62 */
 	{-1, MPITYPE_OTHER, MPI_BUFFER_ATTACH_VAL, FALSE},    /*  63 */
 	{-1, MPITYPE_OTHER, MPI_BUFFER_DETACH_VAL, FALSE},    /*  64 */
-	{CANCEL_EV, MPITYPE_PTOP, MPI_CANCEL_VAL, FALSE},     /*  65 */
-	{REQUEST_FREE_EV, MPITYPE_OTHER, MPI_REQUEST_FREE_VAL, FALSE},        /*  66 */
-	{RECV_INIT_EV, MPITYPE_PTOP, MPI_RECV_INIT_VAL, FALSE},       /*  67 */
-	{SEND_INIT_EV, MPITYPE_PTOP, MPI_SEND_INIT_VAL, FALSE},       /*  68 */
+	{MPI_CANCEL_EV, MPITYPE_PTOP, MPI_CANCEL_VAL, FALSE},     /*  65 */
+	{MPI_REQUEST_FREE_EV, MPITYPE_OTHER, MPI_REQUEST_FREE_VAL, FALSE},        /*  66 */
+	{MPI_RECV_INIT_EV, MPITYPE_PTOP, MPI_RECV_INIT_VAL, FALSE},       /*  67 */
+	{MPI_SEND_INIT_EV, MPITYPE_PTOP, MPI_SEND_INIT_VAL, FALSE},       /*  68 */
 	{-1, MPITYPE_OTHER, MPI_GET_COUNT_VAL, FALSE},        /*  69 */
 	{-1, MPITYPE_OTHER, MPI_GET_ELEMENTS_VAL, FALSE},     /*  70 */
-	{IBSEND_EV, MPITYPE_PTOP, MPI_IBSEND_VAL, FALSE},     /*  71 */
-	{IPROBE_EV, MPITYPE_PTOP, MPI_IPROBE_VAL, FALSE},     /*  72 */
-	{IRECV_EV, MPITYPE_PTOP, MPI_IRECV_VAL, FALSE},       /*  73 */
-	{IRSEND_EV, MPITYPE_PTOP, MPI_IRSEND_VAL, FALSE},     /*  74 */
-	{ISEND_EV, MPITYPE_PTOP, MPI_ISEND_VAL, FALSE},       /*  75 */
-	{ISSEND_EV, MPITYPE_PTOP, MPI_ISSEND_VAL, FALSE},     /*  76 */
+	{MPI_IBSEND_EV, MPITYPE_PTOP, MPI_IBSEND_VAL, FALSE},     /*  71 */
+	{MPI_IPROBE_EV, MPITYPE_PTOP, MPI_IPROBE_VAL, FALSE},     /*  72 */
+	{MPI_IRECV_EV, MPITYPE_PTOP, MPI_IRECV_VAL, FALSE},       /*  73 */
+	{MPI_IRSEND_EV, MPITYPE_PTOP, MPI_IRSEND_VAL, FALSE},     /*  74 */
+	{MPI_ISEND_EV, MPITYPE_PTOP, MPI_ISEND_VAL, FALSE},       /*  75 */
+	{MPI_ISSEND_EV, MPITYPE_PTOP, MPI_ISSEND_VAL, FALSE},     /*  76 */
 	{-1, MPITYPE_OTHER, MPI_PACK_VAL, FALSE},     /*  77 */
 	{-1, MPITYPE_OTHER, MPI_PACK_SIZE_VAL, FALSE},        /*  78 */
-	{PROBE_EV, MPITYPE_PTOP, MPI_PROBE_VAL, FALSE},       /*  79 */
-	{RECV_EV, MPITYPE_PTOP, MPI_RECV_VAL, FALSE}, /*  80 */
-	{RSEND_EV, MPITYPE_PTOP, MPI_RSEND_VAL, FALSE},       /*  81 */
-	{RSEND_INIT_EV, MPITYPE_PTOP, MPI_RSEND_INIT_VAL, FALSE},     /*  82 */
-	{SEND_EV, MPITYPE_PTOP, MPI_SEND_VAL, FALSE}, /*  83 */
-	{SENDRECV_EV, MPITYPE_PTOP, MPI_SENDRECV_VAL, FALSE},  /*  84 */
-	{SENDRECV_REPLACE_EV, MPITYPE_PTOP, MPI_SENDRECV_REPLACE_VAL, FALSE},  /*  85 */
-	{SSEND_EV, MPITYPE_PTOP, MPI_SSEND_VAL, FALSE},       /*  86 */
-	{SSEND_INIT_EV, MPITYPE_PTOP, MPI_SSEND_INIT_VAL, FALSE},     /*  87 */
-	{START_EV, MPITYPE_OTHER, MPI_START_VAL, FALSE},      /*  88 */
-	{STARTALL_EV, MPITYPE_OTHER, MPI_STARTALL_VAL, FALSE},        /*  89 */
-	{TEST_EV, MPITYPE_OTHER, MPI_TEST_VAL, FALSE},        /*  90 */
+	{MPI_PROBE_EV, MPITYPE_PTOP, MPI_PROBE_VAL, FALSE},       /*  79 */
+	{MPI_RECV_EV, MPITYPE_PTOP, MPI_RECV_VAL, FALSE}, /*  80 */
+	{MPI_RSEND_EV, MPITYPE_PTOP, MPI_RSEND_VAL, FALSE},       /*  81 */
+	{MPI_RSEND_INIT_EV, MPITYPE_PTOP, MPI_RSEND_INIT_VAL, FALSE},     /*  82 */
+	{MPI_SEND_EV, MPITYPE_PTOP, MPI_SEND_VAL, FALSE}, /*  83 */
+	{MPI_SENDRECV_EV, MPITYPE_PTOP, MPI_SENDRECV_VAL, FALSE},  /*  84 */
+	{MPI_SENDRECV_REPLACE_EV, MPITYPE_PTOP, MPI_SENDRECV_REPLACE_VAL, FALSE},  /*  85 */
+	{MPI_SSEND_EV, MPITYPE_PTOP, MPI_SSEND_VAL, FALSE},       /*  86 */
+	{MPI_SSEND_INIT_EV, MPITYPE_PTOP, MPI_SSEND_INIT_VAL, FALSE},     /*  87 */
+	{MPI_START_EV, MPITYPE_OTHER, MPI_START_VAL, FALSE},      /*  88 */
+	{MPI_STARTALL_EV, MPITYPE_OTHER, MPI_STARTALL_VAL, FALSE},        /*  89 */
+	{MPI_TEST_EV, MPITYPE_OTHER, MPI_TEST_VAL, FALSE},        /*  90 */
 	{-1, MPITYPE_OTHER, MPI_TESTALL_VAL, FALSE},  /*  91 */
 	{-1, MPITYPE_OTHER, MPI_TESTANY_VAL, FALSE},  /*  92 */
 	{-1, MPITYPE_OTHER, MPI_TEST_CANCELLED_VAL, FALSE},   /*  93 */
@@ -146,10 +167,10 @@ struct t_event_mpit2prv event_mpit2prv[NUM_PRV_ELEMENTS] = {
 	{-1, MPITYPE_TYPE, MPI_TYPE_UB_VAL, FALSE},   /* 105 */
 	{-1, MPITYPE_TYPE, MPI_TYPE_VECTOR_VAL, FALSE},       /* 106 */
 	{-1, MPITYPE_OTHER, MPI_UNPACK_VAL, FALSE},   /* 107 */
-	{WAIT_EV, MPITYPE_PTOP, MPI_WAIT_VAL, FALSE}, /* 108 */
-	{WAITALL_EV, MPITYPE_PTOP, MPI_WAITALL_VAL, FALSE},   /* 109 */
-	{WAITANY_EV, MPITYPE_PTOP, MPI_WAITANY_VAL, FALSE},   /* 110 */
-	{WAITSOME_EV, MPITYPE_PTOP, MPI_WAITSOME_VAL, FALSE}, /* 111 */
+	{MPI_WAIT_EV, MPITYPE_PTOP, MPI_WAIT_VAL, FALSE}, /* 108 */
+	{MPI_WAITALL_EV, MPITYPE_PTOP, MPI_WAITALL_VAL, FALSE},   /* 109 */
+	{MPI_WAITANY_EV, MPITYPE_PTOP, MPI_WAITANY_VAL, FALSE},   /* 110 */
+	{MPI_WAITSOME_EV, MPITYPE_PTOP, MPI_WAITSOME_VAL, FALSE}, /* 111 */
 	{MPI_CART_COORDS_EV, MPITYPE_TOPOLOGIES, MPI_CART_COORDS_VAL, FALSE}, /* 112 */
 	{MPI_CART_CREATE_EV, MPITYPE_TOPOLOGIES, MPI_CART_CREATE_VAL, FALSE}, /* 113 */
 	{-1, MPITYPE_TOPOLOGIES, MPI_CART_GET_VAL, FALSE},    /* 114 */
@@ -179,22 +200,22 @@ struct t_event_mpit2prv event_mpit2prv[NUM_PRV_ELEMENTS] = {
 	{-1, MPITYPE_RMA, MPI_WIN_TEST_VAL, FALSE},   /* 138 */
 	{-1, MPITYPE_RMA, MPI_WIN_LOCK_VAL, FALSE},   /* 139 */
 	{-1, MPITYPE_RMA, MPI_WIN_UNLOCK_VAL, FALSE},  /* 140 */
-	{FILE_OPEN_EV, MPITYPE_IO, MPI_FILE_OPEN_VAL, FALSE}, /* 141 */
-	{FILE_CLOSE_EV, MPITYPE_IO, MPI_FILE_CLOSE_VAL, FALSE}, /* 142 */
-	{FILE_READ_EV, MPITYPE_IO, MPI_FILE_READ_VAL, FALSE}, /* 143 */
-	{FILE_READ_ALL_EV, MPITYPE_IO, MPI_FILE_READ_ALL_VAL, FALSE}, /* 144 */
-	{FILE_WRITE_EV, MPITYPE_IO, MPI_FILE_WRITE_VAL, FALSE}, /* 145 */
-	{FILE_WRITE_ALL_EV, MPITYPE_IO, MPI_FILE_WRITE_ALL_VAL, FALSE}, /* 146 */
-	{FILE_READ_AT_EV, MPITYPE_IO, MPI_FILE_READ_AT_VAL, FALSE}, /* 147 */
-	{FILE_READ_AT_ALL_EV, MPITYPE_IO, MPI_FILE_READ_AT_ALL_VAL, FALSE}, /* 148 */
-	{FILE_WRITE_AT_EV, MPITYPE_IO, MPI_FILE_WRITE_AT_VAL, FALSE}, /* 149 */
-	{FILE_WRITE_AT_ALL_EV, MPITYPE_IO, MPI_FILE_WRITE_AT_ALL_VAL, FALSE} /* 150 */
+	{MPI_FILE_OPEN_EV, MPITYPE_IO, MPI_FILE_OPEN_VAL, FALSE}, /* 141 */
+	{MPI_FILE_CLOSE_EV, MPITYPE_IO, MPI_FILE_CLOSE_VAL, FALSE}, /* 142 */
+	{MPI_FILE_READ_EV, MPITYPE_IO, MPI_FILE_READ_VAL, FALSE}, /* 143 */
+	{MPI_FILE_READ_ALL_EV, MPITYPE_IO, MPI_FILE_READ_ALL_VAL, FALSE}, /* 144 */
+	{MPI_FILE_WRITE_EV, MPITYPE_IO, MPI_FILE_WRITE_VAL, FALSE}, /* 145 */
+	{MPI_FILE_WRITE_ALL_EV, MPITYPE_IO, MPI_FILE_WRITE_ALL_VAL, FALSE}, /* 146 */
+	{MPI_FILE_READ_AT_EV, MPITYPE_IO, MPI_FILE_READ_AT_VAL, FALSE}, /* 147 */
+	{MPI_FILE_READ_AT_ALL_EV, MPITYPE_IO, MPI_FILE_READ_AT_ALL_VAL, FALSE}, /* 148 */
+	{MPI_FILE_WRITE_AT_EV, MPITYPE_IO, MPI_FILE_WRITE_AT_VAL, FALSE}, /* 149 */
+	{MPI_FILE_WRITE_AT_ALL_EV, MPITYPE_IO, MPI_FILE_WRITE_AT_ALL_VAL, FALSE} /* 150 */
 };
 
 
 
 /* Dels 12, de moment nomes 8 son diferents */
-struct t_prv_type_info prv_block_groups[NUM_BLOCK_GROUPS] = {
+static struct t_prv_type_info prv_block_groups[NUM_MPI_BLOCK_GROUPS] = {
 	{MPITYPE_PTOP, MPITYPE_PTOP_LABEL, MPITYPE_FLAG_COLOR},
 	{MPITYPE_COLLECTIVE, MPITYPE_COLLECTIVE_LABEL, MPITYPE_FLAG_COLOR},
 	{MPITYPE_OTHER, MPITYPE_OTHER_LABEL, MPITYPE_FLAG_COLOR},
@@ -213,7 +234,7 @@ struct t_prv_type_info prv_block_groups[NUM_BLOCK_GROUPS] = {
 
 
 
-struct t_prv_val_label prv_val_label[NUM_PRV_ELEMENTS] = {
+static struct t_prv_val_label mpi_prv_val_label[NUM_MPI_PRV_ELEMENTS] = {
 	{MPI_SEND_VAL, MPI_SEND_LABEL},
 	{MPI_RECV_VAL, MPI_RECV_LABEL},
 	{MPI_ISEND_VAL, MPI_ISEND_LABEL},
@@ -375,13 +396,13 @@ struct t_prv_val_label prv_val_label[NUM_PRV_ELEMENTS] = {
 
 int MPI_SoftCounters_used[MAX_SOFTCNT] = { FALSE, FALSE, FALSE };
 
-void Enable_Soft_Counter (unsigned int EvType)
+void Enable_MPI_Soft_Counter (unsigned int EvType)
 {
-	if (EvType == IPROBE_COUNTER_EV)
+	if (EvType == MPI_IPROBE_COUNTER_EV)
 		MPI_SoftCounters_used[IPROBE_CNT_INDEX] = TRUE;
-	else if (EvType == TIME_OUTSIDE_IPROBES_EV)
+	else if (EvType == MPI_TIME_OUTSIDE_IPROBES_EV)
 		MPI_SoftCounters_used[TIME_OUTSIDE_IPROBES_INDEX] = TRUE;
-	else if (EvType == TEST_COUNTER_EV)
+	else if (EvType == MPI_TEST_COUNTER_EV)
 		MPI_SoftCounters_used[TEST_CNT_INDEX] = TRUE;
 }
 
@@ -392,14 +413,14 @@ void Enable_Soft_Counter (unsigned int EvType)
  **      Description : 
  ******************************************************************************/
 
-int busca_event_mpit (int tmpit)
+static int busca_event_mpit (int tmpit)
 {
   int i;
 
-  for (i = 0; i < NUM_PRV_ELEMENTS; i++)
+  for (i = 0; i < NUM_MPI_PRV_ELEMENTS; i++)
     if (event_mpit2prv[i].tipus_mpit == tmpit)
       break;
-  if (i < NUM_PRV_ELEMENTS)
+  if (i < NUM_MPI_PRV_ELEMENTS)
     return i;
   return -1;
 }
@@ -425,23 +446,23 @@ void Enable_MPI_Operation (int Op)
 
 
 /******************************************************************************
- **      Function name : get_prv_val_label
+ **      Function name : get_mpi_prv_val_label
  **      
  **      Description : 
  ******************************************************************************/
 
-char *get_prv_val_label (int val)
+static char *get_mpi_prv_val_label (int val)
 {
   int i;
 
   /*
    * Cal buscar aquest valor 
    */
-  for (i = 0; i < NUM_PRV_ELEMENTS; i++)
-    if (prv_val_label[i].value == val)
+  for (i = 0; i < NUM_MPI_PRV_ELEMENTS; i++)
+    if (mpi_prv_val_label[i].value == val)
       break;
-  if (i < NUM_PRV_ELEMENTS)
-    return (prv_val_label[i].label);
+  if (i < NUM_MPI_PRV_ELEMENTS)
+    return mpi_prv_val_label[i].label;
   return NULL;
 }
 
@@ -467,15 +488,15 @@ void Share_MPI_Softcounter_Operations (void)
 void Share_MPI_Operations (void)
 {
 	int res;
-	int i, tmp_in[NUM_PRV_ELEMENTS], tmp_out[NUM_PRV_ELEMENTS];
+	int i, tmp_in[NUM_MPI_PRV_ELEMENTS], tmp_out[NUM_MPI_PRV_ELEMENTS];
 
-	for (i = 0; i < NUM_PRV_ELEMENTS; i++)
+	for (i = 0; i < NUM_MPI_PRV_ELEMENTS; i++)
 		tmp_in[i] = event_mpit2prv[i].utilitzada;
 
-	res = MPI_Reduce (tmp_in, tmp_out, NUM_PRV_ELEMENTS, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
+	res = MPI_Reduce (tmp_in, tmp_out, NUM_MPI_PRV_ELEMENTS, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "While sharing MPI enabled operations");
 
-	for (i = 0; i < NUM_PRV_ELEMENTS; i++)
+	for (i = 0; i < NUM_MPI_PRV_ELEMENTS; i++)
 		event_mpit2prv[i].utilitzada = tmp_out[i];
 }
 #endif /* PARALLEL_MERGE */
@@ -488,14 +509,14 @@ void Share_MPI_Operations (void)
  **      Description : 
  ******************************************************************************/
 
-void MPITEvent_WriteEnabledOperations (FILE * fd)
+void MPITEvent_WriteEnabled_MPI_Operations (FILE * fd)
 {
 	int ii, jj;
 	int cnt;
 	int Type;
 	char *etiqueta;
 
-	for (ii = 0; ii < NUM_BLOCK_GROUPS; ii++)
+	for (ii = 0; ii < NUM_MPI_BLOCK_GROUPS; ii++)
 	{
 		Type = prv_block_groups[ii].type;
 
@@ -503,7 +524,7 @@ void MPITEvent_WriteEnabledOperations (FILE * fd)
 		 * Primer comptem si hi ha alguna operacio MPI del grup actual 
 		 */
 		cnt = 0;
-		for (jj = 0; jj < NUM_PRV_ELEMENTS; jj++)
+		for (jj = 0; jj < NUM_MPI_PRV_ELEMENTS; jj++)
 		{
 			if ((Type == event_mpit2prv[jj].tipus_prv) &&
 			    (event_mpit2prv[jj].utilitzada))
@@ -517,12 +538,12 @@ void MPITEvent_WriteEnabledOperations (FILE * fd)
 		           prv_block_groups[ii].type, prv_block_groups[ii].label);
 
 		  fprintf (fd, "%s\n", "VALUES");
-		  for (jj = 0; jj < NUM_PRV_ELEMENTS; jj++)
+		  for (jj = 0; jj < NUM_MPI_PRV_ELEMENTS; jj++)
 		  {
 		  	  if ((Type == event_mpit2prv[jj].tipus_prv) &&
 		  	      (event_mpit2prv[jj].utilitzada))
 		  	  {
-		  	  	  etiqueta = get_prv_val_label (event_mpit2prv[jj].valor_prv);
+		  	  	  etiqueta = get_mpi_prv_val_label (event_mpit2prv[jj].valor_prv);
 		  	  	  fprintf (fd, "%d   %s\n", event_mpit2prv[jj].valor_prv, etiqueta);
 		  	  }
 		  }
@@ -536,29 +557,29 @@ void MPITEvent_WriteEnabledOperations (FILE * fd)
  *   Software counters labels
  ******************************************************************************/
 
-#define IPROBE_COUNTER_LBL       "Iprobe misses"
+#define IPROBE_COUNTER_LBL       "MPI_Iprobe misses"
 #define TIME_OUTSIDE_IPROBES_LBL "Elapsed time outside MPI_Iprobe"
-#define TEST_COUNTER_LBL         "Test misses"
+#define TEST_COUNTER_LBL         "MPI_Test misses"
 
-void MPISoftCountersEvent_WriteEnabledOperations (FILE * fd)
+void SoftCountersEvent_WriteEnabled_MPI_Operations (FILE * fd)
 {
 	if (MPI_SoftCounters_used[IPROBE_CNT_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
-			IPROBE_COUNTER_EV, IPROBE_COUNTER_LBL);
+			MPI_IPROBE_COUNTER_EV, IPROBE_COUNTER_LBL);
 	}
 	if (MPI_SoftCounters_used[TIME_OUTSIDE_IPROBES_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
-			TIME_OUTSIDE_IPROBES_EV, TIME_OUTSIDE_IPROBES_LBL);
+			MPI_TIME_OUTSIDE_IPROBES_EV, TIME_OUTSIDE_IPROBES_LBL);
 	}
 	if (MPI_SoftCounters_used[TEST_CNT_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
-			TEST_COUNTER_EV, TEST_COUNTER_LBL);
+			MPI_TEST_COUNTER_EV, TEST_COUNTER_LBL);
 	}
 }
 

@@ -24,6 +24,14 @@ if test "${MPITRACE_HOME}" != "" ; then
 		fi
 	fi
 
+	if test "${PACX_HOME}" != "" ; then
+		if ! test -d ${PACX_HOME}/lib ; then
+			echo "Unable to find libpacx library directory!"
+		else
+			export LD_LIBRARY_PATH=${PACX_HOME}/lib:${LD_LIBRARY_PATH}
+		fi
+	fi
+
 	if test "${LIBXML2_HOME}" != "" ; then
 		if ! test -d ${LIBXML2_HOME}/lib ; then
 			echo "Unable to find libxml2 library directory!"

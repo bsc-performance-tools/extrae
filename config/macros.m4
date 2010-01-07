@@ -574,7 +574,7 @@ AC_DEFUN([AX_PROG_MPI],
       else
          MPI_LIBS="not found"
       fi
-      AC_MSG_RESULT([${MPI_LIBSDIR}])
+      AC_MSG_RESULT([${MPI_LIBSDIR}, ${MPI_LIBS}])
 
 			AC_MSG_CHECKING([for shared MPI library])
       if test -f "${MPI_LIBSDIR}/libmpi.so" -o -f "${MPI_LIBSDIR}/libmpich.so" -o \
@@ -848,10 +848,10 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
 [
    AC_REQUIRE([AX_PROG_MPI])
 
-   AC_ARG_WITH(name-mangling,
+   AC_ARG_WITH(mpi-name-mangling,
       AC_HELP_STRING(
-         [--with-name-mangling@<:@=ARG@:>@], 
-         [choose the name decoration scheme for external Fortran symbols from: 0u, 1u, 2u, upcase, auto @<:@default=auto@:>@]
+         [--with-mpi-name-mangling@<:@=ARG@:>@], 
+         [choose the name decoration scheme for external Fortran symbols in MPI library from: 0u, 1u, 2u, upcase, auto @<:@default=auto@:>@]
       ),
       [name_mangling="$withval"],
       [name_mangling="auto"]
@@ -945,8 +945,8 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
          FORTRAN_DECORATION="0 underscores"
       else
          FORTRAN_DECORATION="[unknown]"
-         AC_MSG_NOTICE([Can not determine the name decoration scheme for external Fortran symbols])
-         AC_MSG_ERROR([Please use '--with-name-mangling' to select an appropriate decoration scheme.])
+         AC_MSG_NOTICE([Can not determine the name decoration scheme for external Fortran symbols in MPI library])
+         AC_MSG_ERROR([Please use '--with-mpi-name-mangling' to select an appropriate decoration scheme.])
       fi
       AC_MSG_RESULT([${FORTRAN_DECORATION}])
    fi
@@ -1456,6 +1456,9 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo " + peruse? ${PERUSE_AVAILABILITY}"
 		echo " + mixed C/Fortran? ${mpi_lib_contains_c_and_fortran}"
     echo " + shared libraries? ${MPI_SHARED_LIB_FOUND}"
+	fi
+	if test "${PACX_INSTALLED}" = "yes" ; then
+		echo "PACX               : ${PACX_HOME}"
 	fi
 	echo "pThread            : ${enable_pthread}"
 	if test "${PMAPI_ENABLED}" = "yes" ; then

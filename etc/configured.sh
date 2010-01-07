@@ -43,6 +43,16 @@ if test "${MPITRACE_HOME}" != "" ; then
 		echo "MPI support seems to be disabled"
 	fi
 
+	if test "${PACX_HOME}" != "" ; then
+		if test -d ${MPI_HOME} ; then
+			echo "PACX_HOME points to ${PACX_HOME} and the directory exists .. OK"
+		else
+			echo "PACX_HOME points to ${PACX_HOME} and the directory does NOT exist .. FAILED"
+		fi
+	else
+		echo "PACX support seems to be disabled"
+	fi
+
 	if test "${LIBXML2_HOME}" != "" ; then
 		if test -d ${LIBXML2_HOME} ; then
 			echo "LIBXML2_HOME points to ${LIBXML2_HOME} and the directory exists .. OK"

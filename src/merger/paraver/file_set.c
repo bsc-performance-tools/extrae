@@ -119,7 +119,6 @@ unsigned long long bswap64 (unsigned long long value)
 #endif
 
 #include "file_set.h"
-#include "recv_queue.h"
 #include "mpi2out.h"
 #include "events.h"
 #include "object_tree.h"
@@ -127,8 +126,8 @@ unsigned long long bswap64 (unsigned long long value)
 #include "trace_to_prv.h"
 
 #define EVENTS_FOR_NUM_GLOBAL_OPS(x) \
-	((x) == BARRIER_EV || (x) == BCAST_EV || (x) == ALLREDUCE_EV ||  \
-	 (x) == ALLTOALL_EV || (x) == ALLTOALLV_EV || (x) == SCAN_EV)
+	((x) == MPI_BARRIER_EV || (x) == MPI_BCAST_EV || (x) == MPI_ALLREDUCE_EV ||  \
+	 (x) == MPI_ALLTOALL_EV || (x) == MPI_ALLTOALLV_EV || (x) == MPI_SCAN_EV)
 
 static int Is_FS_Rewound = TRUE;
 static int LimitOfEvents = 0;
@@ -220,7 +219,9 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 	long long mrn_file_size;
 	int fd_mrn;
 #endif
+#if defined(SAMPLING_SUPPORT) || defined(HAVE_MRNET)
 	int sort_needed = FALSE;
+#endif
 	event_t *ptr_last = NULL;
 
 	if (getenv ("MPI2PRV_TMP_DIR") == NULL)
@@ -876,22 +877,42 @@ event_t * GetNextEvent_FS (
 }
 
 /******************************************************************************
- ***  SearchIRECVED
+ ***  Search_MPI_IRECVED
  ******************************************************************************/
-
-event_t *SearchIRECVED (event_t * current, long long request, FileItem_t * freceive)
+event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * freceive)
 {
 	event_t *irecved = current;
 
 	freceive->tmp = irecved;
 	/* freceive->tmp = freceive->first; */
 
-	if (Get_EvEvent (irecved) == IRECVED_EV)
+	if (Get_EvEvent (irecved) == MPI_IRECVED_EV)
 		if (Get_EvAux (irecved) == request)
 			return irecved;
 
 	while ((irecved = NextRecvG_FS (freceive)) != NULL)
-		if (Get_EvEvent (irecved) == IRECVED_EV)
+		if (Get_EvEvent (irecved) == MPI_IRECVED_EV)
+			if (Get_EvAux (irecved) == request)
+				return irecved;
+	return NULL;
+}
+
+/******************************************************************************
+ ***  Search_PACX_IRECVED
+ ******************************************************************************/
+event_t *Search_PACX_IRECVED (event_t * current, long long request, FileItem_t * freceive)
+{
+	event_t *irecved = current;
+
+	freceive->tmp = irecved;
+	/* freceive->tmp = freceive->first; */
+
+	if (Get_EvEvent (irecved) == PACX_IRECVED_EV)
+		if (Get_EvAux (irecved) == request)
+			return irecved;
+
+	while ((irecved = NextRecvG_FS (freceive)) != NULL)
+		if (Get_EvEvent (irecved) == PACX_IRECVED_EV)
 			if (Get_EvAux (irecved) == request)
 				return irecved;
 	return NULL;
@@ -1217,7 +1238,7 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 				StartingTimes[mpit_taskid] = current->time;
 
 				/* Locate the MPI_Init end event */
-				while ((current != NULL) && ((Get_EvEvent(current) != MPIINIT_EV) || (Get_EvValue(current) != EVT_END)))
+				while ((current != NULL) && ((Get_EvEvent(current) != MPI_INIT_EV) || (Get_EvValue(current) != EVT_END)))
 				{
 					StepOne_FS (&(fset->files[i]));
 					current = Current_FS (&(fset->files[i]));
@@ -1493,7 +1514,7 @@ long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid)
 
 	while (current != NULL)
 	{
-		if (Get_EvEvent (current) == MPIINIT_EV &&
+		if (Get_EvEvent (current) == MPI_INIT_EV &&
 		    Get_EvValue (current) == EVT_END)
 		{
 			options = Get_EvAux(current);
@@ -1532,7 +1553,7 @@ int CheckBursts (FileSet_t * fset, int numtasks, int taskid)
 		/* All tasks share the same initialization, so check once only! */
 		current = Current_FS (&(fset->files[file]));
 		while ((current != NULL) &&
-		((Get_EvEvent (current) != MPIINIT_EV) || (Get_EvValue (current) != EVT_END)))
+		((Get_EvEvent (current) != MPI_INIT_EV) || (Get_EvValue (current) != EVT_END)))
 		{
 			StepOne_FS (&(fset->files[file]));
 			current = Current_FS (&(fset->files[file]));
@@ -1718,7 +1739,7 @@ void CheckCircularBufferWhenTracing (FileSet_t * fset, int numtasks, int taskid)
 
 		current = Current_FS (&(fset->files[file]));
 		while ((current != NULL) &&
-		((Get_EvEvent (current) != MPIINIT_EV) || (Get_EvValue (current) != EVT_END)))
+		((Get_EvEvent (current) != MPI_INIT_EV) || (Get_EvValue (current) != EVT_END)))
 		{
 			StepOne_FS (&(fset->files[file]));
 			current = Current_FS (&(fset->files[file]));

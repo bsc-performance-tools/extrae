@@ -35,6 +35,7 @@
 extern "C" {
 #endif
 unsigned IsMPI (unsigned EvType);
+unsigned IsPACX (unsigned EvType);
 unsigned IsOpenMP (unsigned EvType);
 unsigned IsMISC (unsigned EvType);
 unsigned IsTRT (unsigned EvType);
@@ -96,6 +97,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define RUSAGE_EV                40000016
 #define MPI_STATS_EV             40000017
 #define TRACING_MODE_EV          40000018
+#define PACX_STATS_EV            40000019
 
 #define RUSAGE_BASE              45000000
 enum {
@@ -130,6 +132,18 @@ enum {
    MPI_STATS_EVENTS_COUNT /* Total number of MPI statistics */
 };
 
+#define PACX_STATS_BASE           55000000
+enum {
+   PACX_STATS_P2P_COMMS_EV = 0,
+   PACX_STATS_P2P_BYTES_SENT_EV,
+   PACX_STATS_P2P_BYTES_RECV_EV,
+   PACX_STATS_GLOBAL_COMMS_EV,
+   PACX_STATS_GLOBAL_BYTES_SENT_EV,
+   PACX_STATS_GLOBAL_BYTES_RECV_EV,
+   PACX_STATS_TIME_IN_PACX_EV, 
+   PACX_STATS_EVENTS_COUNT /* Total number of PACX statistics */
+};
+
 #define FUNCT_BASE               41000000
 #define FUNCT_MAX                    1000
 
@@ -142,96 +156,174 @@ enum {
 
 /******************************************************************************
  *   User events to trace several MPI functions.
- *   MUST be between 50000001 - 59999999
+ *   MUST be between 50000001 - 50999999
  ******************************************************************************/
-#define MPI_MIN_EV               MPIINIT_EV
-#define MPI_MAX_EV               59999999
+#define MPI_MIN_EV                   MPI_INIT_EV
+#define MPI_MAX_EV                   50999999
 
-#define MPIINIT_EV               50000001
-#define BSEND_EV                 50000002
-#define SSEND_EV                 50000003
-#define BARRIER_EV               50000004
-#define BCAST_EV                 50000005
-#define SEND_EV                  50000018
-#define SENDRECV_EV              50000017
-#define SENDRECV_REPLACE_EV      50000081
-#define RECV_EV                  50000019
-#define IBSEND_EV                50000020
-#define ISSEND_EV                50000021
-#define ISEND_EV                 50000022
-#define IRECV_EV                 50000023
-#define ISND_EV                  50000024       /* Not used */
-#define IRCV_EV                  50000025
-#define TEST_EV                  50000026
-#define TEST_COUNTER_EV          50000080
-#define WAIT_EV                  50000027
-#define TESTFOR_EV               50000028       /* Not used */
-#define ENDICOMM_EV              50000029       /* Not used */
-#define CANCEL_EV                50000030
-#define RSEND_EV                 50000031
-#define IRSEND_EV                50000032
-#define ALLTOALL_EV              50000033
-#define ALLTOALLV_EV             50000034
-#define ALLREDUCE_EV             50000035
-#define REDUCE_EV                50000038
-#define WAITALL_EV               50000039
-#define WAITANY_EV               50000068
-#define WAITSOME_EV              50000069
-#define IRECVED_EV               50000040
-#define GATHER_EV                50000041
-#define GATHERV_EV               50000042
-#define SCATTER_EV               50000043
-#define SCATTERV_EV              50000044
-#define FINALIZE_EV              50000045
-#define COMM_RANK_EV             50000046
-#define COMM_SIZE_EV             50000047
-#define COMM_CREATE_EV           50000048
-#define COMM_DUP_EV              50000049
-#define COMM_SPLIT_EV            50000050
-#define RANK_CREACIO_COMM_EV     50000051      /* Used to define communicators */
-#define ALLGATHER_EV             50000052
-#define ALLGATHERV_EV            50000053
-#define MPI_CART_CREATE_EV       50000058
-#define MPI_CART_SUB_EV          50000059
-#define MPI_CART_COORDS_EV       50000060
-#define REDUCESCAT_EV            50000062
-#define SCAN_EV                  50000063
-#define PROBE_EV                 50000065
-#define IPROBE_EV                50000066
+#define MPI_INIT_EV                  50000001
+#define MPI_BSEND_EV                 50000002
+#define MPI_SSEND_EV                 50000003
+#define MPI_BARRIER_EV               50000004
+#define MPI_BCAST_EV                 50000005
+#define MPI_SEND_EV                  50000018
+#define MPI_SENDRECV_EV              50000017
+#define MPI_SENDRECV_REPLACE_EV      50000081
+#define MPI_RECV_EV                  50000019
+#define MPI_IBSEND_EV                50000020
+#define MPI_ISSEND_EV                50000021
+#define MPI_ISEND_EV                 50000022
+#define MPI_IRECV_EV                 50000023
+#define MPI_IRCV_EV                  50000025
+#define MPI_TEST_EV                  50000026
+#define MPI_TEST_COUNTER_EV          50000080
+#define MPI_WAIT_EV                  50000027
+#define MPI_CANCEL_EV                50000030
+#define MPI_RSEND_EV                 50000031
+#define MPI_IRSEND_EV                50000032
+#define MPI_ALLTOALL_EV              50000033
+#define MPI_ALLTOALLV_EV             50000034
+#define MPI_ALLREDUCE_EV             50000035
+#define MPI_REDUCE_EV                50000038
+#define MPI_WAITALL_EV               50000039
+#define MPI_WAITANY_EV               50000068
+#define MPI_WAITSOME_EV              50000069
+#define MPI_IRECVED_EV               50000040
+#define MPI_GATHER_EV                50000041
+#define MPI_GATHERV_EV               50000042
+#define MPI_SCATTER_EV               50000043
+#define MPI_SCATTERV_EV              50000044
+#define MPI_FINALIZE_EV              50000045
+#define MPI_COMM_RANK_EV             50000046
+#define MPI_COMM_SIZE_EV             50000047
+#define MPI_COMM_CREATE_EV           50000048
+#define MPI_COMM_DUP_EV              50000049
+#define MPI_COMM_SPLIT_EV            50000050
+#define MPI_RANK_CREACIO_COMM_EV     50000051      /* Used to define communicators */
+#define MPI_ALLGATHER_EV             50000052
+#define MPI_ALLGATHERV_EV            50000053
+#define MPI_CART_CREATE_EV           50000058
+#define MPI_CART_SUB_EV              50000059
+#define MPI_CART_COORDS_EV           50000060
+#define MPI_REDUCESCAT_EV            50000062
+#define MPI_SCAN_EV                  50000063
+#define MPI_PROBE_EV                 50000065
+#define MPI_IPROBE_EV                50000066
 
-#define PERSIST_REQ_EV           50000070
-#define START_EV                 50000071
-#define STARTALL_EV              50000072
-#define REQUEST_FREE_EV          50000073
-#define RECV_INIT_EV             50000074
-#define SEND_INIT_EV             50000075
-#define BSEND_INIT_EV            50000076
-#define RSEND_INIT_EV            50000077
-#define SSEND_INIT_EV            50000078
+#define MPI_PERSIST_REQ_EV           50000070
+#define MPI_START_EV                 50000071
+#define MPI_STARTALL_EV              50000072
+#define MPI_REQUEST_FREE_EV          50000073
+#define MPI_RECV_INIT_EV             50000074
+#define MPI_SEND_INIT_EV             50000075
+#define MPI_BSEND_INIT_EV            50000076
+#define MPI_RSEND_INIT_EV            50000077
+#define MPI_SSEND_INIT_EV            50000078
 
-#define DIMEMAS_DEF_EV           50000054      /* Definicio d'un evant d'usuari */
-#define DIMEMAS_EVENT_EV         50000055      /* Event d'usuari */
-#define DIMEMAS_STRING_EV        50000056      /* Un string (o una part) en forma d'event */
-#define DIMEMAS_TRACE_EV         50000057      /* Inici/Fi del traceig */
+#define MPI_IPROBE_COUNTER_EV        50000200
+#define MPI_TIME_OUTSIDE_IPROBES_EV  50000201
 
-#define IPROBE_COUNTER_EV        53000000
-#define TIME_OUTSIDE_IPROBES_EV  53000001
+#define MPI_GLOBAL_OP_SENDSIZE       (MPI_INIT_EV+100000)
+#define MPI_GLOBAL_OP_RECVSIZE       (MPI_INIT_EV+100001)
+#define MPI_GLOBAL_OP_ROOT           (MPI_INIT_EV+100002)
+#define MPI_GLOBAL_OP_COMM           (MPI_INIT_EV+100003)
 
-#define MPI_GLOBAL_OP_SENDSIZE   (MPIINIT_EV+1000000)
-#define MPI_GLOBAL_OP_RECVSIZE   (MPIINIT_EV+1000001)
-#define MPI_GLOBAL_OP_ROOT       (MPIINIT_EV+1000002)
-#define MPI_GLOBAL_OP_COMM       (MPIINIT_EV+1000003)
+#define MPI_FILE_OPEN_EV             50000100
+#define MPI_FILE_CLOSE_EV            50000101
+#define MPI_FILE_READ_EV             50000102
+#define MPI_FILE_READ_ALL_EV         50000103
+#define MPI_FILE_WRITE_EV            50000104
+#define MPI_FILE_WRITE_ALL_EV        50000105
+#define MPI_FILE_READ_AT_EV          50000106
+#define MPI_FILE_READ_AT_ALL_EV      50000107
+#define MPI_FILE_WRITE_AT_EV         50000108
+#define MPI_FILE_WRITE_AT_ALL_EV     50000109
 
-#define FILE_OPEN_EV             50000100
-#define FILE_CLOSE_EV            50000101
-#define FILE_READ_EV             50000102
-#define FILE_READ_ALL_EV         50000103
-#define FILE_WRITE_EV            50000104 
-#define FILE_WRITE_ALL_EV        50000105
-#define FILE_READ_AT_EV          50000106
-#define FILE_READ_AT_ALL_EV      50000107
-#define FILE_WRITE_AT_EV         50000108
-#define FILE_WRITE_AT_ALL_EV     50000109
+/******************************************************************************
+ *   User events to trace several MPI functions.
+ *   MUST be between 50000001 - 50999999
+ ******************************************************************************/
+#define PACX_MIN_EV                   PACX_INIT_EV
+#define PACX_MAX_EV                   51999999
+
+#define PACX_INIT_EV                  51000001
+#define PACX_BSEND_EV                 51000002
+#define PACX_SSEND_EV                 51000003
+#define PACX_BARRIER_EV               51000004
+#define PACX_BCAST_EV                 51000005
+#define PACX_SEND_EV                  51000018
+#define PACX_SENDRECV_EV              51000017
+#define PACX_SENDRECV_REPLACE_EV      51000081
+#define PACX_RECV_EV                  51000019
+#define PACX_IBSEND_EV                51000020
+#define PACX_ISSEND_EV                51000021
+#define PACX_ISEND_EV                 51000022
+#define PACX_IRECV_EV                 51000023
+#define PACX_IRCV_EV                  51000025
+#define PACX_TEST_EV                  51000026
+#define PACX_TEST_COUNTER_EV          51000080
+#define PACX_WAIT_EV                  51000027
+#define PACX_CANCEL_EV                51000030
+#define PACX_RSEND_EV                 51000031
+#define PACX_IRSEND_EV                51000032
+#define PACX_ALLTOALL_EV              51000033
+#define PACX_ALLTOALLV_EV             51000034
+#define PACX_ALLREDUCE_EV             51000035
+#define PACX_REDUCE_EV                51000038
+#define PACX_WAITALL_EV               51000039
+#define PACX_WAITANY_EV               51000068
+#define PACX_WAITSOME_EV              51000069
+#define PACX_IRECVED_EV               51000040
+#define PACX_GATHER_EV                51000041
+#define PACX_GATHERV_EV               51000042
+#define PACX_SCATTER_EV               51000043
+#define PACX_SCATTERV_EV              51000044
+#define PACX_FINALIZE_EV              51000045
+#define PACX_COMM_RANK_EV             51000046
+#define PACX_COMM_SIZE_EV             51000047
+#define PACX_COMM_CREATE_EV           51000048
+#define PACX_COMM_DUP_EV              51000049
+#define PACX_COMM_SPLIT_EV            51000050
+#define PACX_RANK_CREACIO_COMM_EV     51000051      /* Used to define communicators */
+#define PACX_ALLGATHER_EV             51000052
+#define PACX_ALLGATHERV_EV            51000053
+#define PACX_CART_CREATE_EV           51000058
+#define PACX_CART_SUB_EV              51000059
+#define PACX_CART_COORDS_EV           51000060
+#define PACX_REDUCESCAT_EV            51000062
+#define PACX_SCAN_EV                  51000063
+#define PACX_PROBE_EV                 51000065
+#define PACX_IPROBE_EV                51000066
+
+#define PACX_PERSIST_REQ_EV           51000070
+#define PACX_START_EV                 51000071
+#define PACX_STARTALL_EV              51000072
+#define PACX_REQUEST_FREE_EV          51000073
+#define PACX_RECV_INIT_EV             51000074
+#define PACX_SEND_INIT_EV             51000075
+#define PACX_BSEND_INIT_EV            51000076
+#define PACX_RSEND_INIT_EV            51000077
+#define PACX_SSEND_INIT_EV            51000078
+
+#define PACX_IPROBE_COUNTER_EV        51000200
+#define PACX_TIME_OUTSIDE_IPROBES_EV  51000201
+
+#define PACX_GLOBAL_OP_SENDSIZE       (PACX_INIT_EV+100000)
+#define PACX_GLOBAL_OP_RECVSIZE       (PACX_INIT_EV+100001)
+#define PACX_GLOBAL_OP_ROOT           (PACX_INIT_EV+100002)
+#define PACX_GLOBAL_OP_COMM           (PACX_INIT_EV+100003)
+
+#define PACX_FILE_OPEN_EV             51000100
+#define PACX_FILE_CLOSE_EV            51000101
+#define PACX_FILE_READ_EV             51000102
+#define PACX_FILE_READ_ALL_EV         51000103
+#define PACX_FILE_WRITE_EV            51000104
+#define PACX_FILE_WRITE_ALL_EV        51000105
+#define PACX_FILE_READ_AT_EV          51000106
+#define PACX_FILE_READ_AT_ALL_EV      51000107
+#define PACX_FILE_WRITE_AT_EV         51000108
+#define PACX_FILE_WRITE_AT_ALL_EV     51000109
+
 
 /******************************************************************************
  *   User events for BG PERSONALITY
@@ -287,8 +379,8 @@ enum {
 #define TRT_USRFUNC_EV           62000003
 #define TRT_USRFUNC_LINE_EV      62000003
 
-#define MPI_CALLER_EV            70000000
-#define MPI_CALLER_LINE_EV       80000000
+#define CALLER_EV                70000000
+#define CALLER_LINE_EV           80000000
 
 #define MRNET_EV                 50000
 #define CLUSTER_ID_EV            90000001
@@ -601,11 +693,13 @@ typedef enum
 typedef enum
 {
 	MPI_TYPE = 1,
+	MPI_COMM_ALIAS_TYPE,
 	MISC_TYPE,
-	COMM_ALIAS_TYPE,
 	OPENMP_TYPE,
 	PTHREAD_TYPE,
-	TRT_TYPE
+	TRT_TYPE,
+	PACX_TYPE,
+	PACX_COMM_ALIAS_TYPE
 } EventType_t;
 
 EventType_t getEventType (unsigned EvType, unsigned *Type);

@@ -31,6 +31,8 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
   \hline
   MPITRACE\_DISABLE\_OMP & Disable OpenMP instrumentation\\
   \hline
+  MPITRACE\_DISABLE\_PACX & Disable PACX instrumentation\\
+  \hline
   MPTRACE\_FILE\_SIZE & Set the maximum size (in Mbytes) for the intermediate trace file\\
   \hline
   MPTRACE\_FUNCTIONS & \\
@@ -69,6 +71,13 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
   MPTRACE\_OMP\_LOCKS & Set to 1 if locks have to be instrumented\\
   \hline 
   MPITRACE\_ON & Enables instrumentation\\
+  \hline
+  MPITRACE\_PACX\_CALLER & Choose which PACX calling routines should be dumped into the\\
+                        & tracefile\\
+  \hline
+  MPITRACE\_PACX\_COUNTERS\_ON & Set to 1 if PACX must report performace counter values\\
+  \hline 
+  MPITRACE\_PACX\_STATISTICS & Set to 1 if basic PACX statistics must be collected in burst mode\\
   \hline
   MPITRACE\_PROGRAM\_NAME & Specify the prefix of the resulting intermediate trace files\\ 
   \hline

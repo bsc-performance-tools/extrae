@@ -106,10 +106,15 @@ value_t;
 
 #define IOSIZE_LBL             "I/O Size"
 
-#define MPI_GLOBAL_OP_ROOT_LBL 			"Root in MPI Global OP"
-#define MPI_GLOBAL_OP_SENDSIZE_LBL	"Send Size in MPI Global OP"
-#define MPI_GLOBAL_OP_RECVSIZE_LBL	"Recv Size in MPI Global OP"
-#define MPI_GLOBAL_OP_COMM_LBL			"Communicator in MPI Global OP"
+#define MPI_GLOBAL_OP_ROOT_LBL      "Root in MPI Global OP"
+#define MPI_GLOBAL_OP_SENDSIZE_LBL  "Send Size in MPI Global OP"
+#define MPI_GLOBAL_OP_RECVSIZE_LBL  "Recv Size in MPI Global OP"
+#define MPI_GLOBAL_OP_COMM_LBL      "Communicator in MPI Global OP"
+
+#define PACX_GLOBAL_OP_ROOT_LBL     "Root in PACX Global OP"
+#define PACX_GLOBAL_OP_SENDSIZE_LBL "Send Size in PACX Global OP"
+#define PACX_GLOBAL_OP_RECVSIZE_LBL "Recv Size in PACX Global OP"
+#define PACX_GLOBAL_OP_COMM_LBL     "Communicator in PACX Global OP"
 
 #define MISC_GRADIENT   6
 #define MISC            4
@@ -118,15 +123,16 @@ extern struct evttype_t MISC_events[MISC];
 extern struct value_t MISC_values[MISC_VALUES];
 
 /******************************************************************************
- *   MPI Caller labels
+ *   MPI / PACX Caller labels
  ******************************************************************************/
 
-#define MPI_CALLER_LBL          "MPI caller"
-#define MPI_CALLER_LINE_LBL     "MPI caller line"
-#define MPI_CALLER_LVL_LBL      "MPI caller at level" 
-#define MPI_CALLER_LINE_LVL_LBL "MPI caller line at level" 
+#define CALLER_LBL          "Caller"
+#define CALLER_LINE_LBL     "Caller line"
+#define CALLER_LVL_LBL      "Caller at level" 
+#define CALLER_LINE_LVL_LBL "Caller line at level" 
 
 #define MPI_GRADIENT   1
+#define PACX_GRADIENT  1
 
 /******************************************************************************
  *   Code Colors.
@@ -298,25 +304,36 @@ typedef struct rusage_evt_t {
 #define RUSAGE_NVCSW_LBL    "Voluntary context switches"
 #define RUSAGE_NIVCSW_LBL   "Involuntary context switches"
 extern struct rusage_evt_t rusage_evt_labels[RUSAGE_EVENTS_COUNT];
-extern int Rusage_Events_Found;
-extern int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
 
-typedef struct mpistats_evt_t
+typedef struct mpi_stats_evt_t
 {
 	int evt_type;
 	char * label;
-} mpistats_evt_t;
+} mpi_stats_evt_t;
 
-#define MPI_STATS_P2P_COMMS_LBL         "Number of Point-to-Point communications"
-#define MPI_STATS_P2P_BYTES_SENT_LBL    "Point-to-Point bytes sent"
-#define MPI_STATS_P2P_BYTES_RECV_LBL    "Point-to-Point bytes received"
-#define MPI_STATS_GLOBAL_COMMS_LBL      "Number of global operations"
-#define MPI_STATS_GLOBAL_BYTES_SENT_LBL "Global operations bytes sent"
-#define MPI_STATS_GLOBAL_BYTES_RECV_LBL "Global operations bytes received"
+#define MPI_STATS_P2P_COMMS_LBL         "Number of Point-to-Point communications through MPI"
+#define MPI_STATS_P2P_BYTES_SENT_LBL    "Point-to-Point bytes sent through MPI"
+#define MPI_STATS_P2P_BYTES_RECV_LBL    "Point-to-Point bytes received through MPI"
+#define MPI_STATS_GLOBAL_COMMS_LBL      "Number of global operations through MPI"
+#define MPI_STATS_GLOBAL_BYTES_SENT_LBL "Global operations bytes sent through MPI"
+#define MPI_STATS_GLOBAL_BYTES_RECV_LBL "Global operations bytes received through MPI"
 #define MPI_STATS_TIME_IN_MPI_LBL       "Elapsed time in MPI"
-extern struct mpistats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT];
-extern int MPIStats_Events_Found;
-extern int MPIStats_Labels_Used[MPI_STATS_EVENTS_COUNT];
+extern struct mpi_stats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT];
+
+typedef struct pacx_stats_evt_t
+{
+	int evt_type;
+	char * label;
+} pacx_stats_evt_t;
+
+#define PACX_STATS_P2P_COMMS_LBL         "Number of Point-to-Point communications through PACX"
+#define PACX_STATS_P2P_BYTES_SENT_LBL    "Point-to-Point bytes sent through PACX"
+#define PACX_STATS_P2P_BYTES_RECV_LBL    "Point-to-Point bytes received through PACX"
+#define PACX_STATS_GLOBAL_COMMS_LBL      "Number of global operations through PACX"
+#define PACX_STATS_GLOBAL_BYTES_SENT_LBL "Global operations bytes sent through PACX"
+#define PACX_STATS_GLOBAL_BYTES_RECV_LBL "Global operations bytes received through PACX"
+#define PACX_STATS_TIME_IN_PACX_LBL      "Elapsed time in PACX"
+extern struct pacx_stats_evt_t pacx_stats_evt_labels[PACX_STATS_EVENTS_COUNT];
 
 /* Clustering events labels */
 #define CLUSTER_ID_LABEL "Cluster ID"

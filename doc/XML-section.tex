@@ -47,6 +47,16 @@ MPI calls can gather performance information at the begin and end of MPI calls. 
 
 \graybox{See {\bf MPITRACE\_DISABLE\_MPI} and {\bf MPITRACE\_MPI\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
 
+\section{XML Section: PACX}\label{sec:XMLSectionPACX}
+
+The PACX configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
+
+\input{XML/pacx.xml}
+
+PACX calls can gather performance information at the begin and end of PACX calls. To activate this behavior, just set to yes the attribute of the nested {\tt <counters>} node.
+
+\graybox{See {\bf MPITRACE\_DISABLE\_PACX} and {\bf MPITRACE\_PACX\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+
 \section{XML Section: OpenMP}\label{sec:XMLSectionOpenMP}
 
 The OpenMP configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
@@ -79,14 +89,17 @@ Callers are the routine addresses present in the process stack at any given mome
 
 The instrumentation library can collect a partial view of those addresses during the instrumentation. Such collected addresses are translated by the merging process if the correspondent parameter is given and the application has been compiled and linked with debug information.
 
-There are two points where the instrumentation can gather this information:
+There are three points where the instrumentation can gather this information:
 
 \begin{itemize}
  \item Entry of MPI calls
+ \item Entry of PACX calls
  \item Sampling points {\em (if sampling is available in the tracing package)}
 \end{itemize}
 
 The user can choose which addresses to save in the trace (starting from 1, which is the closest point to the MPI call or sampling point) specifying several stack levels by separating them by commas or using the hyphen symbol.
+
+\graybox{See {\bf MPITRACE\_MPI\_CALLER} and {\bf MPITRACE\_PACX\_CALLER} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: User functions}\label{sec:XMLSectionUF}
 
@@ -183,9 +196,9 @@ To be written.
 
 If the user enables this option, the instrumentation library will just emit information of computation bursts ({\em i.e.}, not does not trace {MPI} calls, {OpenMP} runtime, and so on). The library will discard all those computation bursts that last less than the selected threshold\footnote{The threshold understands the following postfixes: n for nanoseconds, u for microseconds, m for milliseconds, s for seconds, M for minutes, H for hours and D for days.}. 
 
-In addition to that, when the tracing library is running in burst mode, it computes some statistics of MPI activity. Such statistics can be dumped in the tracefile by enabling {\tt mpi-statistics}.
+In addition to that, when the tracing library is running in burst mode, it computes some statistics of MPI and PACX activity. Such statistics can be dumped in the tracefile by enabling {\tt mpi-statistics} and {\tt pacx-statistics} respectively.
 
-\graybox{See {\bf MPITRACE\_INITIAL\_MODE}, {\bf MPITRACE\_BURST\_THRESHOLD} and {MPITRACE\_MPI\_STATISTICS} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf MPITRACE\_INITIAL\_MODE}, {\bf MPITRACE\_BURST\_THRESHOLD}, {\bf MPITRACE\_MPI\_STATISTICS} and {\bf MPITRACE\_PACX\_STATISTICS} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Others}\label{sec:XMLSectionOthers}
 

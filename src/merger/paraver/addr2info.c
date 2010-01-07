@@ -734,7 +734,7 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 			{
 				for(i=1; i<=MAX_CALLERS; i++) 
 				{
-					fprintf(pcf_fd, "0    %d    %s %d\n", MPI_CALLER_EV+i, MPI_CALLER_LVL_LBL, i);
+					fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_EV+i, CALLER_LVL_LBL, i);
 				}
 			}
 			else 
@@ -743,14 +743,14 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 				{
 					if (MPI_Caller_Labels_Used[i-1] == TRUE) 
 					{
-						fprintf(pcf_fd, "0    %d    %s %d\n", MPI_CALLER_EV+i, MPI_CALLER_LVL_LBL, i);
+						fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_EV+i, CALLER_LVL_LBL, i);
 					}
 				}
 			}
 		}
 		else 
 		{
-			fprintf(pcf_fd, "0    %d    %s\n", MPI_CALLER_EV, MPI_CALLER_LBL);
+			fprintf(pcf_fd, "0    %d    %s\n", CALLER_EV, CALLER_LBL);
 		}
 		fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
@@ -767,7 +767,7 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 			{
 				for(i=1; i<=MAX_CALLERS; i++) 
 				{
-					fprintf(pcf_fd, "0    %d    %s %d\n", MPI_CALLER_LINE_EV+i, MPI_CALLER_LINE_LVL_LBL, i);
+					fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_LINE_EV+i, CALLER_LINE_LVL_LBL, i);
 				}
 			}
 			else 
@@ -776,14 +776,14 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 				{
 					if (MPI_Caller_Labels_Used[i-1] == TRUE) 
 					{
-						fprintf(pcf_fd, "0    %d    %s %d\n", MPI_CALLER_LINE_EV+i, MPI_CALLER_LINE_LVL_LBL, i);
+						fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_LINE_EV+i, CALLER_LINE_LVL_LBL, i);
 					}
 				}
 			}
 		}
 		else 
 		{
-			fprintf(pcf_fd, "0    %d    %s\n", MPI_CALLER_LINE_EV, MPI_CALLER_LINE_LBL);
+			fprintf(pcf_fd, "0    %d    %s\n", CALLER_LINE_EV, CALLER_LINE_LBL);
 		}
 		fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 

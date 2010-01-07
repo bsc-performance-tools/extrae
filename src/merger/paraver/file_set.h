@@ -37,11 +37,10 @@
 # include <stdio.h>
 #endif
 
+#include "record.h"
 #include "common.h"
 #include "queue.h"
 #include "new-queue.h"
-#include "send_queue.h"
-#include "recv_queue.h"
 #include "mpi2out.h"
 #include "write_file_buffer.h"
 
@@ -187,7 +186,8 @@ int SearchRecvEvent_FS (FileSet_t *fset, unsigned int ptask,
 int SearchSendEvent_FS (FileSet_t *fset, unsigned int ptask,
 	unsigned int sender, unsigned int receiver, unsigned int tag,
 	event_t ** send_begin, event_t ** send_end);
-event_t *SearchIRECVED (event_t * current, long long request, FileItem_t * freceive);
+event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * freceive);
+event_t *Search_PACX_IRECVED (event_t * current, long long request, FileItem_t * freceive);
 
 long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid);
 int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes);

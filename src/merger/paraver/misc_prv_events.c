@@ -38,6 +38,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "misc_prv_events.h"
+#include "misc_prv_semantics.h"
 #include "labels.h"
 
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
@@ -70,34 +71,40 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 void Share_MISC_Operations (void)
 {
 	int res, i, max;
-	int tmp2[2], tmp[2] = { Rusage_Events_Found, MPIStats_Events_Found };
+	int tmp2[3], tmp[3] = { Rusage_Events_Found, MPI_Stats_Events_Found, PACX_Stats_Events_Found };
 	int tmp_in[RUSAGE_EVENTS_COUNT], tmp_out[RUSAGE_EVENTS_COUNT];
 	int tmp2_in[MPI_STATS_EVENTS_COUNT], tmp2_out[MPI_STATS_EVENTS_COUNT];
+	int tmp3_in[PACX_STATS_EVENTS_COUNT], tmp3_out[PACX_STATS_EVENTS_COUNT];
 
-	res = MPI_Reduce (tmp, tmp2, 2, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
+	res = MPI_Reduce (tmp, tmp2, 3, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #1");
-
 	Rusage_Events_Found = tmp2[0];
-	MPIStats_Events_Found = tmp2[1];
+	MPI_Stats_Events_Found = tmp2[1];
+	PACX_Stats_Events_Found = tmp2[2];
 
 	for (i = 0; i < RUSAGE_EVENTS_COUNT; i++)
 		tmp_in[i] = GetRusage_Labels_Used[i];
-
 	res = MPI_Reduce (tmp_in, tmp_out, RUSAGE_EVENTS_COUNT, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #2");
 	for (i = 0; i < RUSAGE_EVENTS_COUNT; i++)
 		GetRusage_Labels_Used[i] = tmp_out[i];
 
 	for (i = 0; i < MPI_STATS_EVENTS_COUNT; i++)
-		tmp2_in[i] = MPIStats_Labels_Used[i];
-
+		tmp2_in[i] = MPI_Stats_Labels_Used[i];
 	res = MPI_Reduce (tmp2_in, tmp2_out, MPI_STATS_EVENTS_COUNT, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #3");
 	for (i = 0; i < MPI_STATS_EVENTS_COUNT; i++)
-		MPIStats_Labels_Used[i] = tmp2_out[i];
+		MPI_Stats_Labels_Used[i] = tmp2_out[i];
+
+	for (i = 0; i < PACX_STATS_EVENTS_COUNT; i++)
+		tmp3_in[i] = PACX_Stats_Labels_Used[i];
+	res = MPI_Reduce (tmp3_in, tmp3_out, PACX_STATS_EVENTS_COUNT, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #4");
+	for (i = 0; i < PACX_STATS_EVENTS_COUNT; i++)
+		PACX_Stats_Labels_Used[i] = tmp3_out[i];
 
 	res = MPI_Reduce (&MaxClusterId, &max, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
-	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #4");
+	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #5");
 	MaxClusterId = max;
 }
 

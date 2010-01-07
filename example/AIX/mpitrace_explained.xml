@@ -19,10 +19,18 @@
     <counters enabled="yes" />
   </mpi>
 
+  <!-- Configuration of some PACX dependant values -->
+  <pacx enabled="no">
+    <!-- Gather counters in the PACX routines? -->
+    <counters enabled="yes" />
+  </pacx>
+
   <!-- Emit information of the callstack -->
   <callers enabled="yes">
     <!-- At MPI calls, select depth level -->
     <mpi enabled="yes">1-3</mpi>
+    <!-- At PACX calls, select depth level -->
+    <pacx enabled="no">1-3</pacx>
     <!-- At sampling points, select depth level -->
     <sampling enabled="yes">1-5</sampling>
   </callers>
@@ -155,6 +163,8 @@
     <threshold enabled="yes">500u</threshold>
     <!-- Report MPI statistics? -->
     <mpi-statistics enabled="yes" />
+    <!-- Report PACX statistics? -->
+    <pacx-statistics enabled="yes" />
   </bursts>
 
 </trace>

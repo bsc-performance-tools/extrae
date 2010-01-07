@@ -67,8 +67,10 @@ int *Sample_Caller_Labels_Used = NULL;
 
 int Rusage_Events_Found = FALSE;
 int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
-int MPIStats_Events_Found = FALSE;
-int MPIStats_Labels_Used[MPI_STATS_EVENTS_COUNT];
+int MPI_Stats_Events_Found = FALSE;
+int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
+int PACX_Stats_Events_Found = FALSE;
+int PACX_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 
 int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
 
@@ -238,7 +240,7 @@ static int MPI_Caller_Event (event_t * current_event,
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
-	deepness = Get_EvEvent(current_event) - MPI_CALLER_EV;
+	deepness = Get_EvEvent(current_event) - CALLER_EV;
 	if (deepness > 0) 
 	{
 		MPI_Caller_Multiple_Levels_Traced = TRUE;	
@@ -256,8 +258,8 @@ static int MPI_Caller_Event (event_t * current_event,
 		}
 	}
 
-	trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_CALLER_EV+deepness, mpi_caller_func);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_CALLER_LINE_EV+deepness, mpi_caller_line);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_EV+deepness, mpi_caller_func);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_LINE_EV+deepness, mpi_caller_line);
 
 	return 0;
 }
@@ -299,10 +301,9 @@ static int GetRusage_Event (
 }
 
 /******************************************************************************
- ***  MPIStats_Event
+ ***  MPI_Stats_Event
  ******************************************************************************/
-
-static int MPIStats_Event (
+static int MPI_Stats_Event (
    event_t * current_event,
    unsigned long long current_time,
    unsigned int cpu,
@@ -321,19 +322,59 @@ static int MPIStats_Event (
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_STATS_BASE+EvType, EvValue);
 
-	if (!MPIStats_Events_Found)
+	if (!MPI_Stats_Events_Found)
 	{
-		MPIStats_Events_Found = TRUE;
+		MPI_Stats_Events_Found = TRUE;
 		for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
 		{
-			MPIStats_Labels_Used[i] = FALSE;
+			MPI_Stats_Labels_Used[i] = FALSE;
 		}
 	}
-	MPIStats_Labels_Used[EvType] = TRUE;
+	MPI_Stats_Labels_Used[EvType] = TRUE;
 
 	return 0;
 }
 
+
+/******************************************************************************
+ ***  PACX_Stats_Event
+ ******************************************************************************/
+static int PACX_Stats_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	int i;
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
+	EvValue = Get_EvMiscParam (current_event); /* Param is the event value. */
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, PACX_STATS_BASE+EvType, EvValue);
+
+	if (!PACX_Stats_Events_Found)
+	{
+		PACX_Stats_Events_Found = TRUE;
+		for (i=0; i<PACX_STATS_EVENTS_COUNT; i++)
+		{
+			PACX_Stats_Labels_Used[i] = FALSE;
+		}
+	}
+	PACX_Stats_Labels_Used[EvType] = TRUE;
+
+	return 0;
+}
+
+
+/******************************************************************************
+ ***  USRFunction_Event
+ ******************************************************************************/
 static int USRFunction_Event (event_t * current,
   unsigned long long current_time, unsigned int cpu, unsigned int ptask,
   unsigned int task, unsigned int thread, FileSet_t *fset )
@@ -354,6 +395,9 @@ static int USRFunction_Event (event_t * current,
 	return 0;
 }
 
+/******************************************************************************
+ ***  Sampling_Caller_Event
+ ******************************************************************************/
 static int Sampling_Caller_Event (event_t * current,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
@@ -657,7 +701,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SET_TRACE_EV, SetTracing_Event },
 	{ CPU_BURST_EV, CPU_Burst_Event },
 	{ RUSAGE_EV, GetRusage_Event },
-	{ MPI_STATS_EV, MPIStats_Event },
+	{ MPI_STATS_EV, MPI_Stats_Event },
+	{ PACX_STATS_EV, PACX_Stats_Event },
 	{ USRFUNC_EV, USRFunction_Event },
 	{ TRACING_MODE_EV, Tracing_Mode_Event },
 	{ MRNET_EV, MRNet_Event },
@@ -666,7 +711,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 };
 
 RangeEv_Handler_t PRV_MISC_Range_Handlers[] = {
-	{ MPI_CALLER_EV, MPI_CALLER_EV + MAX_CALLERS, MPI_Caller_Event },
+	{ CALLER_EV, CALLER_EV + MAX_CALLERS, MPI_Caller_Event },
 	{ SAMPLING_EV, SAMPLING_EV + MAX_CALLERS, Sampling_Caller_Event },
 	{ NULL_EV, NULL_EV, NULL }
 };

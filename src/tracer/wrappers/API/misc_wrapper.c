@@ -74,11 +74,12 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpitrace_user_events.h"
 #include "misc_wrapper.h"
 
+#if 0
 #if defined(MPI_SUPPORT)
 # include "mpi_wrapper.h"
 # include "myrinet_hwc.h"
 #endif
-
+#endif
 
 void MPItrace_shutdown_Wrapper (void)
 {

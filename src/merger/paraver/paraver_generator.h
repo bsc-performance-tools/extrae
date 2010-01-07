@@ -64,7 +64,7 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, unsigned long long time, 
 	unsigned int com_id, unsigned int send_size, unsigned int recv_size,
-	unsigned int is_root);
+	unsigned int is_root, unsigned isMPI);
 
 #if defined(DEAD_CODE)
 void trace_leave_global_op (unsigned int cpu, unsigned int ptask,

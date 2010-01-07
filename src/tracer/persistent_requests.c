@@ -37,8 +37,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "persistent_requests.h"
 #include "wrapper.h"
 
-#if !defined(MPI_SUPPORT) /* This shouldn't be compiled if MPI is not used */
-# error "This should not be compiled outside MPI bounds"
+#if !defined(MPI_SUPPORT) && !defined(PACX_SUPPORT) /* This shouldn't be compiled if MPI or PACX are not used */
+# error "This should not be compiled outside MPI/PACX bounds"
 #endif
 
 void PR_queue_init (PR_Queue_t * cua)

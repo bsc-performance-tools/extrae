@@ -447,7 +447,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		EvType = Get_EvEvent (current_event);
 		
 		if (getEventType (EvType, &Type))
-			if (COMM_ALIAS_TYPE == Type)
+			if (MPI_COMM_ALIAS_TYPE == Type)
 			{
 				error = GenerateAliesComunicator (current_event, current_time, cpu, ptask, task, thread, fset, &tmp_nevents, TRF_SEMANTICS);
 				Enable_MPI_Operation (EvType);

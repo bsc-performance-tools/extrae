@@ -21,6 +21,10 @@ if WANT_TRT
   lib_LTLIBRARIES += libtrttrace.la
 endif
 
+if HAVE_PACX
+  lib_LTLIBRARIES += libpacxtrace.la libpacxtracef.la
+endif
+
 if HAVE_MPI
   lib_LTLIBRARIES += libmpitrace.la libmpitracef.la
 if WANT_OPENMP
@@ -70,6 +74,9 @@ WRAPPERS_CORE = \
 # Wrappers for MPI instrumentation
 WRAPPERS_MPI = wrappers/MPI/mpi_wrapper.c
 
+# Wrappers for PACX instrumentation
+WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c
+
 # Probes for OpenMP instrumentation
 WRAPPERS_OMP = probes/OMP/omp_probe.c \
   wrappers/OMP/omp_wrapper.c \
@@ -97,6 +104,8 @@ core_MPI_SRCS = \
  hash_table.c hash_table.h                   \
  persistent_requests.c persistent_requests.h
 
+core_PACX_SRCS = $(core_MPI_SRCS)
+
 core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
@@ -114,9 +123,13 @@ core_SRCS = \
  $(WRAPPERS_CORE)
 
 # MPItrace & Sequential trace
-libmpitrace_la_SOURCES  = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) mpif.h
+libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) mpif.h
 libmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
-libseqtrace_la_SOURCES  = $(core_SRCS)
+libseqtrace_la_SOURCES = $(core_SRCS)
+
+# PACXtrace 
+libpacxtrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PACX) $(core_PACX_SRCS)
+libpacxtracef_la_SOURCES = $(libpacxtrace_la_SOURCES)
 
 # OpenMP & OpenMP + MPI
 libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES) $(WRAPPERS_OMP)
@@ -162,6 +175,9 @@ libseqtrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API)
 libmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la
 libmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la
 
+libpacxtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX/libiface_pacx.la
+libpacxtracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX/libiface_pacxf.la
+
 libompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la
 libomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
 
@@ -186,8 +202,9 @@ lib_dyn_omptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
 # Compilation flags
 #
 core_INCLUDES = \
- -I. -I$(HWC_DIR) -I$(CLOCKS_DIR) -I$(INTERFACES_DIR)/API -I$(INTERFACES_DIR)/MPI \
- -I$(WRAPPERS_DIR)/API -I$(WRAPPERS_DIR)/MPI -I$(WRAPPERS_DIR)/OMP -I$(WRAPPERS_DIR)/pthread \
+ -I. -I$(HWC_DIR) -I$(CLOCKS_DIR) -I$(INTERFACES_DIR)/API -I$(INTERFACES_DIR)/MPI -I$(INTERFACES_DIR)/PACX \
+ -I$(WRAPPERS_DIR)/API -I$(WRAPPERS_DIR)/MPI -I$(WRAPPERS_DIR)/PACX \
+ -I$(WRAPPERS_DIR)/OMP -I$(WRAPPERS_DIR)/pthread \
  -I$(LICENSE_DIR) -I$(top_srcdir)/include -I$(COMMON_DIR)
 if IS_CELL_MACHINE
   core_INCLUDES += -I$(WRAPPERS_DIR)/CELL -I$(TRACER_DIR)/spu
@@ -256,6 +273,9 @@ endif
 libmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT
 libmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT
 
+libpacxtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @PACX_CFLAGS@ $(MPITRACE_SYMBOLS) -DPACX_SUPPORT
+libpacxtracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @PACX_CFLAGS@ -DFORTRAN_SYMBOLS -DPACX_SUPPORT
+
 libompitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DOMP_SUPPORT -DMPI_SUPPORT
 libomptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT
 
@@ -289,6 +309,9 @@ libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -static
+
+libpacxtrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libpacxtracef_la_LDFLAGS = $(libpacxtrace_la_LDFLAGS) -static
 
 libompitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libomptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)

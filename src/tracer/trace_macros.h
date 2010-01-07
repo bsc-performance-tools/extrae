@@ -46,15 +46,21 @@
 #include "trace_hwc.h"
 
 #if defined(MPI_SUPPORT)
-# define TRACING_BITMAP_VALID_EVTYPE(evttype)                                  \
-   ((evttype) == BSEND_EV || (evttype) == SSEND_EV || (evttype) == RSEND_EV || \
-    (evttype) == SEND_EV  || (evttype) == IRECVED_EV || (evttype) == RECV_EV)
+# define TRACING_BITMAP_VALID_EVTYPE(evttype) \
+   ((evttype) == MPI_BSEND_EV || (evttype) == MPI_SSEND_EV || (evttype) == MPI_RSEND_EV || \
+    (evttype) == MPI_SEND_EV  || (evttype) == MPI_IRECVED_EV || (evttype) == MPI_RECV_EV)
+# define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
+    (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
+#elif defined(PACX_SUPPORT)
+# define TRACING_BITMAP_VALID_EVTYPE(evttype) \
+   ((evttype) == PACX_BSEND_EV || (evttype) == PACX_SSEND_EV || (evttype) == PACX_RSEND_EV || \
+    (evttype) == PACX_SEND_EV  || (evttype) == PACX_IRECVED_EV || (evttype) == PACX_RECV_EV)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
     (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
 #else
 # define TRACING_BITMAP_VALID_EVTYPE(evttype)     (TRUE)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget) (TRUE)
-#endif /* MPI_SUPPORT */
+#endif /* MPI_SUPPORT, PACX_SUPPORT */
 
 #define TRACE_MPI_CALLER_IS_ENABLED	(Trace_Caller_Enabled[CALLER_MPI])
 
