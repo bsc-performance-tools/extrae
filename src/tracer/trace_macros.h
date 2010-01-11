@@ -139,7 +139,7 @@
                                                                                          \
 	if (CURRENT_TRACE_MODE(thread_id) == TRACE_MODE_BURSTS)                              \
 	{                                                                                    \
-		BURSTS_MODE_TRACE_MPIEVENT(thread_id, current_time, evtvalue);                   \
+		BURSTS_MODE_TRACE_MPIEVENT(thread_id, current_time, evtvalue, FOUR_CALLS_AGO);     \
 	}                                                                                    \
 	else                                                                                 \
 	{                                                                                    \
@@ -218,7 +218,7 @@
 	}                                                                 \
 }
 
-#define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue)      \
+#define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
 {                                                                     \
 	event_t evt_entry, evt_exit;                                        \
 	evt_entry.time = last_mpi_exit_time;                                \
@@ -245,6 +245,7 @@
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_entry); \
 			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time);         \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_exit); \
+			TRACE_MPI_CALLER (evt_exit.time,evtvalue,offset)            \
 		}                                                             \
 		else                                                          \
 		{                                                             \

@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   + (10/Jan/2010) Instrumentation library in bursts mode can gather MPI calls.
    + (07/Jan/2010) Initial tracing of PACX
                    Removed license code.
    * (07/Dec/2009) Force mkdir of the storage directory. So make-dir are no longer needed in the XML files.
