@@ -107,6 +107,7 @@ OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/Makefile \
  example/LINUX/OMP/merge.sh \
  example/LINUX/OMP/pi.c     \
+ example/LINUX/OMP/pi.f     \
  example/LINUX/OMP/run.sh
 OMP_EXAMPLE_FILE_XML1=example/LINUX/OMP/mpitrace.xml
 

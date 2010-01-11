@@ -39,8 +39,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include <iostream>
 
-#define INTEL_PARLOOP_RTNS     ".*_[0-9]+__par_loop[0-9]+"
-#define INTEL_PARRGN_RTNS      ".*_[0-9]+__par_region[0-9]+"
+#define INTEL_PARLOOP_RTNS     ".*_[0-9]+__par_loop[0-9]+.*"
+#define INTEL_PARRGN_RTNS      ".*_[0-9]+__par_region[0-9]+.*"
 
 string ApplicationType::TranslatePFToUF (string PF, OMP_rte_t type)
 {
