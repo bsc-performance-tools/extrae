@@ -51,7 +51,7 @@
 		read_ok = HWC_Read (tid, evt.time, evt.HWCValues);             \
 	}                                                                  \
 	/* We write the counters even if there are errors while reading */ \
-	MARK_SET_READ(evt, filter);                                        \
+	MARK_SET_READ(evt, read_ok);                                       \
 } 
 
 # define HARDWARE_COUNTERS_ACCUMULATE(tid, evt, filter)                \
@@ -61,6 +61,8 @@
         HWC_Accum (tid, evt.time);                                     \
 		/* XXX: Reset ACCUMULATED counters here? Very likely!!! */     \
     }                                                                  \
+	/* We write the counters even if there are errors while reading */ \
+	MARK_SET_READ(evt, filter);                                       \
 }
 
 # define ACCUMULATED_COUNTERS_RESET(tid) HWC_Accum_Reset(tid)
