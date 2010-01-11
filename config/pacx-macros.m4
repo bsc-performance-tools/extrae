@@ -92,10 +92,6 @@ AC_DEFUN([AX_PROG_PACX],
 [
    AC_REQUIRE([AX_PROG_MPI])
 
-	 if test ${MPI_INSTALLED} != "yes" ; then
-      AC_MSG_ERROR([PACX instrumentation requires MPI instrumentation. Add MPI instrumentation by using --with-mpi= parameter])
-   fi
-
    AX_FLAGS_SAVE()
 
    AC_ARG_WITH(pacx,
@@ -111,6 +107,11 @@ AC_DEFUN([AX_PROG_PACX],
    AX_FIND_INSTALLATION([PACX], [${pacx_paths}])
 
    if test "${PACX_INSTALLED}" = "yes" ; then
+
+      dnl Check whether MPI is given at configure step
+	    if test ${MPI_INSTALLED} != "yes" ; then
+         AC_MSG_ERROR([PACX instrumentation requires MPI instrumentation. Add MPI instrumentation by using --with-mpi= parameter])
+      fi
 
       dnl Check for the PACX header files.
       AC_CHECK_HEADERS([pacx.h], [], [PACX_INSTALLED="no"])
