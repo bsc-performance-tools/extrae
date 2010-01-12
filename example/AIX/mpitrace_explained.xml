@@ -82,7 +82,7 @@
            changeat-globalops=num -> choose the next set after num
                        MPI_COMM_WORLD operations
            changeat-time=numTime -> choose the next set after num Time
-                       (for example 5s, 15m,..)
+                       (for example 5s, 15m (for ms), 10M (for minutes),..)
       -->
       <set enabled="yes" domain="all" changeat-globalops="5">
         145
