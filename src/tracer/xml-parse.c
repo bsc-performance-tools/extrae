@@ -789,6 +789,7 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 				Parse_XML_Counters_CPU (rank, xmldoc, tag);
 				if (hwc_startset != NULL)
 					HWC_Parse_XML_Config (rank, world_size, hwc_startset);
+#else
 				mfprintf (stdout, "mpitrace: <%s> tag at <%s> level will be ignored. This library does not support CPU HW.\n", TRACE_CPU, TRACE_COUNTERS);
 #endif
 			}
