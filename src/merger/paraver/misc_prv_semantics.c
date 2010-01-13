@@ -472,10 +472,20 @@ static int Evt_CountersDefinition (
    unsigned int thread,
    FileSet_t *fset )
 {
+	int nthreads;
+	int i;
 	int newSet = Get_EvValue(current_event);
 	long long *HWCIds = Get_EvHWCVal(current_event);
-	
-	HardwareCounters_NewSetDefinition(ptask, task, thread, newSet, HWCIds);
+	UNREFERENCED_PARAMETER(fset);
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(thread);
+	UNREFERENCED_PARAMETER(cpu);
+
+	/* The hardware counter set definition exists only on the master thread.
+	   We replicate them to all the threads as they appear */
+	nthreads = obj_table[ptask-1].tasks[task-1].nthreads;
+	for (i = 0; i < nthreads; i++)
+		HardwareCounters_NewSetDefinition(ptask, task, i, newSet, HWCIds);
 }
 
 /******************************************************************************
@@ -694,6 +704,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ HWC_CHANGE_EV, Evt_SetCounters },
 	{ HWC_SET_OVERFLOW_EV, Set_Overflow_Event },
 #else
+	{ HWC_DEF_EV, SkipHandler },
 	{ HWC_CHANGE_EV, SkipHandler },
 	{ HWC_SET_OVERFLOW_EV, SkipHandler },
 #endif
