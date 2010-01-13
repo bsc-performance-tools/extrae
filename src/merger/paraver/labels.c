@@ -661,13 +661,16 @@ void loadSYMfile (char *name)
 
 		sscanf (LINE, "%c %llx %s %s %d", &Type, &address, fname, modname, &line);
 
-    switch (Type)
-    {
-      case 'U':
-      case 'P':
-        Address2Info_AddSymbol (address, (Type=='U')?USER_FUNCTION_TYPE:OUTLINED_OPENMP_TYPE, fname, modname, line);
+		switch (Type)
+		{
+			case 'U':
+			case 'P':
+				if (option_UniqueCallerID)
+					Address2Info_AddSymbol (address, UNIQUE_TYPE, fname, modname, line);
+				else
+					Address2Info_AddSymbol (address, (Type=='U')?USER_FUNCTION_TYPE:OUTLINED_OPENMP_TYPE, fname, modname, line);
 				count++;
-        break;
+				break;
 			default:
 				fprintf (stderr, "Error! Unexpected line in symbol file\n%s\n", LINE);
 				break;
