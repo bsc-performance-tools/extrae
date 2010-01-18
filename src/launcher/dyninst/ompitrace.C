@@ -786,13 +786,11 @@ int main (int argc, char *argv[], const char *envp[])
 
 		InstrumentCalls (appImage, appProcess, appType, ParallelFunctions, UserFunctions, ::XML_GetTraceMPI(), ::XML_GetTraceOMP(), true);
 
-#if 0
 		if (appType->get_isOpenMP())
 		{
 			cout << PACKAGE_NAME << ": Instrumenting OpenMP runtime" << endl;
 			InstrumentOMPruntime (::XML_GetTraceOMP_locks(), appType, appImage, appProcess);
 		}
-#endif
 
 		/* If the application is NOT MPI, instrument the MAIN symbol in order to
  		   initialize and finalize the instrumentation */

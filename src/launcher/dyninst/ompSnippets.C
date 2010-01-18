@@ -144,6 +144,10 @@ void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appIma
 			  "Probe_OpenMP_Unnamed_Lock_Entry", "Probe_OpenMP_Unnamed_Lock_Exit");
 			wrapRoutine (appImage, appProcess, "__kmpc_unset_lock",
 			  "Probe_OpenMP_Unnamed_Unlock_Entry", "Probe_OpenMP_Unnamed_Unlock_Exit");
+			wrapRoutine (appImage, appProcess, "__kmpc_critical",
+			  "Probe_OpenMP_Named_Lock_Entry", "Probe_OpenMP_Named_Lock_Exit");
+			wrapRoutine (appImage, appProcess, "__kmpc_end_critical",
+			  "Probe_OpenMP_Named_Unlock_Entry", "Probe_OpenMP_Named_Unlock_Exit");
 		}
 	}
 

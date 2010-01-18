@@ -1167,7 +1167,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 
 #if defined(OMP_SUPPORT)
 
+#if !defined(DYNINST_MODULE)
 	openmp_tracing_init();
+#endif
 
 	numProcessors = getnumProcessors();
 
