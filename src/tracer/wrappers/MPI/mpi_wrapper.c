@@ -685,9 +685,8 @@ int generate_spu_file_list (int number_of_spus)
 	 module CANNOT be loaded if mpi_init is not found. The top #if def..
 	 is a workaround for this situation
 */
-/*#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
-     !defined(COMBINED_SYMBOLS) && defined(FORTRAN_SYMBOLS))
-*/
+#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     !defined(COMBINED_SYMBOLS))
 /******************************************************************************
  ***  PMPI_Init_Wrapper
  ******************************************************************************/
@@ -766,13 +765,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD);
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF);
 }
-/*
-#endif
-*/
-/*
-#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
-     !defined(COMBINED_SYMBOLS) && defined(FORTRAN_SYMBOLS))
-*/
 
 #if defined(MPI_HAS_INIT_THREAD)
 /******************************************************************************
@@ -860,6 +852,10 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 }
 #endif /* MPI_HAS_INIT_THREAD */
 
+#endif /* 
+     (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     !defined(COMBINED_SYMBOLS))
+     */
 
 /******************************************************************************
  ***  PMPI_Finalize_Wrapper

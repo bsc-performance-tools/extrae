@@ -132,9 +132,8 @@ unsigned int MPI_CurrentOpGlobal = 0;
 
 #if defined(FORTRAN_SYMBOLS)
 
-/*#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
-     !defined(COMBINED_SYMBOLS) && defined(FORTRAN_SYMBOLS))
-*/
+#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     !defined(COMBINED_SYMBOLS))
 /******************************************************************************
  ***  MPI_Init
  ******************************************************************************/
@@ -159,14 +158,6 @@ void NAME_ROUTINE_C2F(mpi_init) (MPI_Fint *ierror)
 	DLB_mpi_init_leave ();
 #endif
 }
-
-/*
-#endif  
-*/
-/*
-#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
-     !defined(COMBINED_SYMBOLS) && defined(FORTRAN_SYMBOLS))
-*/
 
 #if defined(MPI_HAS_INIT_THREAD)
 /******************************************************************************
@@ -197,6 +188,10 @@ void NAME_ROUTINE_C2F(mpi_init_thread) (MPI_Fint *required, MPI_Fint *provided,
 }
 #endif /* MPI_HAS_INIT_THREAD */
 
+#endif /* 
+     (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     !defined(COMBINED_SYMBOLS))
+     */
 
 /******************************************************************************
  ***  MPI_Finalize

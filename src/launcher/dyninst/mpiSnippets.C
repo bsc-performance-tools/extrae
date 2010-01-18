@@ -137,13 +137,10 @@ static struct MPIroutines_t MPIroutines[] =
 		MPIROUTINE_C_T(PMPI_File_write_at),
 		MPIROUTINE_C_T(PMPI_File_write_at_all),
 #endif /* MPI_SUPPORTS_MPI_IO */
-#if defined(MPI_COMBINED_C_FORTRAN)
-#if defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT)
 		MPIROUTINE_F_T(pmpi_init, PMPI_INIT),
 #if defined(MPI_HAS_INIT_THREAD)
 		MPIROUTINE_F_T(pmpi_init_thread, PMPI_INIT_THREAD),
 #endif /* MPI_HAS_INIT_THREAD */
-#endif /* MPI_C_CONTAINS_FORTRAN_MPI_INIT */
 		MPIROUTINE_F_T(pmpi_finalize, PMPI_FINALIZE),
 		MPIROUTINE_F_T(pmpi_bsend, PMPI_BSEND),
 		MPIROUTINE_F_T(pmpi_ssend, PMPI_SSEND),
@@ -204,7 +201,6 @@ static struct MPIroutines_t MPIroutines[] =
 		MPIROUTINE_F_T(pmpi_file_write_at, PMPI_FILE_WRITE_AT),
 		MPIROUTINE_F_T(pmpi_file_write_at_all, PMPI_FILE_WRITE_AT_ALL),
 #endif /* MPI_SUPPORTS_MPI_IO */
-#endif /* MPI_COMBINED_C_FORTRAN */
 		MPIROUTINE_C_T_END
 	};
 
@@ -256,6 +252,7 @@ BPatch_function * getMPIPatch (char *routine)
 	BPatch_function *res = NULL;
 	int i;
 
+	/* Look for MPI calls using PMPI_ symbols */
 	i = 0;
 	while (MPIroutines[i].name != NULL)
 	{
@@ -266,6 +263,21 @@ BPatch_function * getMPIPatch (char *routine)
 		}
 		i++;
 	}
-	return res;
+
+	/* If we haven't find it, check against MPI calls.
+	   On some systems, MPI calls are done directly through PMPI symbols
+	   and others are done through MPI symbols.
+	   Even worse, on MN, one can find both in the same binary
+	   This could be a dyninst naming issue on aliased symbols.
+	*/
+	if (res == NULL && !(routine[0] == 'P' || routine[0] == 'p'))
+	{
+		string new_name_lo = string("p")+routine;
+		string new_name_up = string("P")+routine;
+		BPatch_function *f_lo = getMPIPatch ((char*) new_name_lo.c_str());
+		return (f_lo != NULL)?f_lo:getMPIPatch ((char*) new_name_up.c_str());
+	}
+	else
+		return res;
 }
 

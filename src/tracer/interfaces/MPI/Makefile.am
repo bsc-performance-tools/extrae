@@ -35,7 +35,7 @@ libiface_mpif_la_CFLAGS  = $(iface_MPI_INCLUDES) -DFORTRAN_SYMBOLS -DMPI_SUPPORT
 ## DynInst modules
 
 lib_dyn_iface_mpi_la_SOURCES = $(iface_MPI_SRCS)
-lib_dyn_iface_mpi_la_CFLAGS  = $(iface_MPI_INCLUDES) $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE
+lib_dyn_iface_mpi_la_CFLAGS  = $(iface_MPI_INCLUDES) $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE -DFORTRAN_SYMBOLS -DC_SYMBOLS
 
 ## LoadBalancing Libraries
 

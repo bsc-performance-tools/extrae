@@ -297,7 +297,10 @@ static void ReadFileIntoList (char *fitxer, list<string>& container)
 		return;
 	}
 
-  while (file_op >> str)
+	if (VerboseLevel >= 2)
+		cout << PACKAGE_NAME << ": Read";
+
+	while (file_op >> str)
 	{
 		/* Add element into list if it didn't exist */
 		list<string>::iterator iter = find (container.begin(), container.end(), str);
@@ -305,10 +308,14 @@ static void ReadFileIntoList (char *fitxer, list<string>& container)
 		if (iter == container.end())
 		{
 			if (VerboseLevel >= 2)
-				cout << PACKAGE_NAME << ": Read " << str << endl;
+				cout << " " << str;
 			container.push_back (str);
 		}
 	}
+
+	if (VerboseLevel >= 2)
+		cout << endl;
+
 	file_op.close();
 }
 
@@ -360,12 +367,12 @@ static void ShowFunctions (BPatch_image *appImage)
 	} 
 }
 
-static void printCallingSites (int id, int total, char *name, BPatch_Vector<BPatch_point *> *vpoints)
+static void printCallingSites (int id, int total, char *name, string sharedlibname, BPatch_Vector<BPatch_point *> *vpoints)
 {
 	if (vpoints->size() > 0)
 	{
 		unsigned j = 0;
-		cout << id << "of " << total << " - Calling sites for " << name << " (num = " << vpoints->size() << "):" << endl;
+		cout << id << " of " << total << " - Calling sites for " << name << " within " << sharedlibname << " (num = " << vpoints->size() << "):" << endl;
 		while (j < vpoints->size())
 		{
 			BPatch_function *called = ((*vpoints)[j])->getCalledFunction();
@@ -383,7 +390,6 @@ static void printCallingSites (int id, int total, char *name, BPatch_Vector<BPat
 					cout << " (subroutine)" << endl;
 				else
 					cout << " (unknown point type)" << endl;
-				cout << endl;
 			}
 			else
 			{
@@ -391,6 +397,7 @@ static void printCallingSites (int id, int total, char *name, BPatch_Vector<BPat
 			}
 			j++;
 		}
+		cout << endl;
 	}
 }
 
@@ -403,13 +410,14 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	unsigned MPIinsertion = 0;
 	unsigned APIinsertion = 0;
 	unsigned UFinsertion = 0;
-	char *MPI_C_prefix = "PMPI_";
-	char *MPI_F_prefix = "pmpi_";
-	char *MPI_Fu_prefix = "PMPI_";
+	char *PMPI_C_prefix = "PMPI_";
+	char *PMPI_F_prefix = "pmpi_";
+	char *MPI_C_prefix = "MPI_";
+	char *MPI_F_prefix = "mpi_";
 
-	BPatch_Vector<BPatch_function *> *vfunctions = appImage->getProcedures (true);
+	BPatch_Vector<BPatch_function *> *vfunctions = appImage->getProcedures (false);
 
-	cout << PACKAGE_NAME << ": Parsing executable looking for instrumentation points ";
+	cout << PACKAGE_NAME << ": Parsing executable looking for instrumentation points (" << vfunctions->size() << ") ";
 	if (VerboseLevel)
 		cout << endl;
 	else
@@ -422,6 +430,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	  c) instrument mpi calls
 	  d) instrument api calls
 	*/
+
 	while (i < vfunctions->size())
 	{
 		char name[1024], sharedlibname_c[1024];
@@ -432,6 +441,24 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 
 		string sharedlibname = sharedlibname_c;
 
+		string sharedlibname_ext;
+		if (sharedlibname.rfind('.') != string::npos)
+			sharedlibname_ext = sharedlibname.substr (sharedlibname.rfind('.'));
+		else
+			sharedlibname_ext = "";
+
+#if defined(IS_MN_MACHINE) /* Can be this removed? */
+# if !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT)
+		/*
+		   This exception / workaround applies to MPI installed in MN.
+		   Could be applied to others machines.
+		*/
+		bool exception = 
+		  (sharedlibname == "DEFAULT_MODULE");
+# endif
+#endif
+
+#if 0
 		if (instrumentOMP && appType->get_isOpenMP() && loadedModule != sharedlibname)
 		{
 			/* OpenMP instrumentation (just for OpenMP apps) */
@@ -469,56 +496,18 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 				OMPinsertion++;
 			}
 		}
-		else if (instrumentMPI && appType->get_isMPI() &&
-		    loadedModule != sharedlibname &&
-		    sharedlibname.find("/libmpi") == string::npos &&
-		    sharedlibname.find("/libpmpi") == string::npos)
-		{
-			/* MPI instrumentation (just for MPI apps)
-
-			  If the application is MPI, skip calls from my own module,
-			  and calls inside MPI libraries ... other libs? before instrumenting.
-			  ( -- Or maybe, check for file extension? like the old OMPItrace? -- )
-			*/
-			BPatch_Vector<BPatch_point *> *vpoints = f->findPoint (BPatch_subroutine);
-
-			if (vpoints == NULL)
-				break;
-
-			if (VerboseLevel >= 2)
-				printCallingSites (i, vfunctions->size(), name, vpoints);
-
-			unsigned j = 0;
-			while (j < vpoints->size())
-			{
-				BPatch_function *called = ((*vpoints)[j])->getCalledFunction();
-				if (NULL != called)
-				{
-					char calledname[1024];
-					called->getName (calledname, 1024);
-
-					if (strncmp (calledname, MPI_C_prefix, 5) == 0 ||
-					    strncmp (calledname, MPI_F_prefix, 5) == 0 ||
-					    strncmp (calledname, MPI_Fu_prefix, 5) == 0)
-					{
-						BPatch_function *patch_mpi = getMPIPatch (calledname);
-						if (patch_mpi != NULL)
-						{
-							if (appProcess->replaceFunctionCall (*((*vpoints)[j]), *patch_mpi))
-							{
-								MPIinsertion++;
-								if (VerboseLevel)
-									cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << sharedlibname << ")" << endl;
-							}
-							else
-								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
-						}
-					}
-				}
-				j++;
-			}
-		}
-		else if (loadedModule != sharedlibname)
+#endif
+		if (sharedlibname_ext == ".f" || sharedlibname_ext == ".F" ||
+		  sharedlibname_ext == ".for" || sharedlibname_ext == ".FOR" ||
+		  sharedlibname_ext == ".f90" || sharedlibname_ext == ".F90" ||
+		  sharedlibname_ext == ".c" || sharedlibname_ext == ".C" ||
+		  sharedlibname_ext == ".cxx" || sharedlibname_ext == ".cpp" ||
+		  sharedlibname_ext == ".c++" ||
+		  sharedlibname_ext == ".i" /* some compilers generate this extension in intermediate files */
+#if defined(IS_MN_MACHINE)
+		  || exception
+#endif
+	  )
 		{
 			/* API instrumentation (for any kind of apps)
 	
@@ -530,7 +519,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 				break;
 
 			if (VerboseLevel >= 2)
-				printCallingSites (i, vfunctions->size(), name, vpoints);
+				printCallingSites (i, vfunctions->size(), name, sharedlibname, vpoints);
 
 			unsigned j = 0;
 			while (j < vpoints->size())
@@ -541,6 +530,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 					char calledname[1024];
 					called->getName (calledname, 1024);
 
+					/* Check API calls */
 					BPatch_function *patch_api = getAPIPatch (calledname);
 					if (patch_api != NULL)
 					{
@@ -552,6 +542,26 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 						}
 						else
 							cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
+					}
+
+					/* Check MPI calls */
+					if (instrumentMPI && appType->get_isMPI() &&
+					    strncmp (calledname, PMPI_C_prefix, 5) == 0 || strncmp (calledname, MPI_C_prefix, 4) == 0 ||
+					    strncmp (calledname, PMPI_F_prefix, 5) == 0 || strncmp (calledname, MPI_F_prefix, 4) == 0)
+					{
+						BPatch_function *patch_mpi = getMPIPatch (calledname);
+						if (patch_mpi != NULL)
+						{
+							cout << "About to replace " << calledname << endl;
+							if (appProcess->replaceFunctionCall (*((*vpoints)[j]), *patch_mpi))
+							{
+								MPIinsertion++;
+								if (VerboseLevel)
+									cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << sharedlibname << ")" << endl;
+							}
+							else
+								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
+						}
 					}
 				}
 				j++;
@@ -723,6 +733,7 @@ int main (int argc, char *argv[], const char *envp[])
 	if (ListFunctions)
 	{
 		ShowFunctions (appImage);
+		appProcess->terminateExecution();
 		exit (-1);
 	}
 
