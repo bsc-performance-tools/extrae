@@ -552,7 +552,6 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 						BPatch_function *patch_mpi = getMPIPatch (calledname);
 						if (patch_mpi != NULL)
 						{
-							cout << "About to replace " << calledname << endl;
 							if (appProcess->replaceFunctionCall (*((*vpoints)[j]), *patch_mpi))
 							{
 								MPIinsertion++;
