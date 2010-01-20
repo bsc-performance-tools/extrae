@@ -1,0 +1,10 @@
+Read file INSTALL for general installation instructions.
+Read file INSTALL-examples for examples of specific instructions.
+
+Package dependencies:
+--
+* libxml2 2.5.0 : parse XML configuration files (optional)
+* PAPI : access to HW counters (optional)
+* DynInst : support dynamic instrumentation (optional)
+* liberty and libbfd : access debugging binary information (optional)
+
