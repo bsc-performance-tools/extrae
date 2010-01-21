@@ -1,5 +1,5 @@
 Read file INSTALL for general installation instructions.
-Read file INSTALL-examples for examples of specific instructions.
+Read file INSTALL-examples for examples of specific installation instructions.
 
 Package dependencies:
 --
@@ -7,4 +7,6 @@ Package dependencies:
 * PAPI : access to HW counters (optional)
 * DynInst : support dynamic instrumentation (optional)
 * liberty and libbfd : access debugging binary information (optional)
+* MPI : execute MPI jobs (optional)
+* OpenMP runtime (gcc, ibm or icc) : execute OpenMP jobs (optional)
 
