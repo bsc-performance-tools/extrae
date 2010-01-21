@@ -447,17 +447,6 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		else
 			sharedlibname_ext = "";
 
-#if defined(IS_MN_MACHINE) /* Can be this removed? */
-# if !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT)
-		/*
-		   This exception / workaround applies to MPI installed in MN.
-		   Could be applied to others machines.
-		*/
-		bool exception = 
-		  (sharedlibname == "DEFAULT_MODULE");
-# endif
-#endif
-
 #if 0
 		if (instrumentOMP && appType->get_isOpenMP() && loadedModule != sharedlibname)
 		{
@@ -497,16 +486,15 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 			}
 		}
 #endif
-		if (sharedlibname_ext == ".f" || sharedlibname_ext == ".F" ||
-		  sharedlibname_ext == ".for" || sharedlibname_ext == ".FOR" ||
-		  sharedlibname_ext == ".f90" || sharedlibname_ext == ".F90" ||
-		  sharedlibname_ext == ".c" || sharedlibname_ext == ".C" ||
-		  sharedlibname_ext == ".cxx" || sharedlibname_ext == ".cpp" ||
-		  sharedlibname_ext == ".c++" ||
-		  sharedlibname_ext == ".i" /* some compilers generate this extension in intermediate files */
-#if defined(IS_MN_MACHINE)
-		  || exception
-#endif
+		if (sharedlibname_ext == ".f" || sharedlibname_ext == ".F" || /* fortran */
+		  sharedlibname_ext == ".for" || sharedlibname_ext == ".FOR" || /* fortran */
+		  sharedlibname_ext == ".f90" || sharedlibname_ext == ".F90" || /* fortran 90 */
+		  sharedlibname_ext == ".f77" || sharedlibname_ext == ".F77" || /* fortran 77 */
+		  sharedlibname_ext == ".c" || sharedlibname_ext == ".C" || /* C */
+		  sharedlibname_ext == ".cxx" || sharedlibname_ext == ".cpp" || /* c++ */
+		  sharedlibname_ext == ".c++" || /* c++ */
+		  sharedlibname_ext == ".i" || /* some compilers generate this extension in intermediate files */ 
+		  sharedlibname == "DEFAULT_MODULE" /* Dyninst specific container that represents the executable */
 	  )
 		{
 			/* API instrumentation (for any kind of apps)
