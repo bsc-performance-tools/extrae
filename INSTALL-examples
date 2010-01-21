@@ -18,15 +18,18 @@ Linux x86
 make
 make install
 
+2.- MPICH, OpenMP and PAPI
+./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp
 
-Linux PPC 32 bit
+
+Linux PPC 32 bit  (using MPI and PAPI)
 --
 ./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=32
 make
 make install
 
 
-Linux PPC 64 bit
+Linux PPC 64 bit (using MPI and PAPI)
 --
 ./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64
 make
