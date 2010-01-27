@@ -245,7 +245,15 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 			}
 		} /* for (counter = 0; ... */
 			
-		fprintf (stdout, ">\n");
+		fprintf (stdout, ">");
+
+		if (HWC_sets[num_set].change_type == CHANGE_TIME)
+			fprintf (stdout, " - changing every %lld nanoseconds\n", HWC_sets[num_set].change_at);
+		else if (HWC_sets[num_set].change_type == CHANGE_GLOPS)
+			fprintf (stdout, " - changing every %lld global operations\n", HWC_sets[num_set].change_at);
+		else
+			fprintf (stdout, " - never changes\n");
+
 		fflush (stdout);
 	}
 
