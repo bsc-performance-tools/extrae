@@ -241,7 +241,7 @@ fi
 AC_ARG_ENABLE(parallel-merge,
    AC_HELP_STRING(
       [--enable-parallel-merge],
-      [Build the parallel mergers (mpimpi2prv/mpimpi2dim) based on MPI]
+      [Build the parallel mergers (mpimpi2prv/mpimpi2dim) based on MPI (enabled by default)]
    ),
    [enable_parallel_merge="${enableval}"],
    [enable_parallel_merge="yes"]
@@ -270,10 +270,10 @@ AX_CHECK_LOAD_BALANCING
 AC_ARG_ENABLE(openmp,
    AC_HELP_STRING(
       [--enable-openmp],
-      [Enable support for tracing OpenMP -IBM runtime- (disabled by default)]
+      [Enable support for tracing OpenMP -IBM and GNU runtimes- (enabled by default, IBM only on PPC)]
    ),
    [enable_openmp="${enableval}"],
-   [enable_openmp="no"]
+   [enable_openmp="yes"]
 )
 if test "${enable_openmp}" = "yes" ; then
 #   if test "${GenerarLlibreriaOMP}" = "no" ; then
@@ -298,10 +298,10 @@ AM_CONDITIONAL(PTHREAD_SUPPORT_IN_ALL_LIBS, test "${enable_pthread_in_all_libs}"
 AC_ARG_ENABLE(smpss,
    AC_HELP_STRING(
       [--enable-smpss],
-      [Enable support for tracing SMP-superscalar (disabled by default)]
+      [Enable support for tracing SMP-superscalar (enabled by default)]
    ),
    [enable_smpss="${enableval}"],
-   [enable_smpss="no"]
+   [enable_smpss="yes"]
 )
 AM_CONDITIONAL(WANT_SMPSS, test "${enable_smpss}" = "yes" )
 
