@@ -123,7 +123,7 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
-			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
+			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* PACX may have initialized it */
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, "mpitrace: MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
@@ -160,7 +160,7 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
-			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
+			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* MPI may have initialized it */
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, "mpitrace: PACX routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
@@ -1247,11 +1247,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							Parse_XML_MPI (rank, xmldoc, current_tag);
 #else
 							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support MPI.\n", TRACE_MPI);
-							tracejant_mpi = FALSE;
+							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at PACX */
 #endif
 						}
 						else
-							tracejant_mpi = FALSE;
+							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at PACX */
 						XML_FREE(enabled);
 					}
 					/* PACX related configuration */
@@ -1265,11 +1265,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							Parse_XML_PACX (rank, xmldoc, current_tag);
 #else
 							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support PACX.\n", TRACE_PACX);
-							tracejant_mpi = FALSE;
+							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at MPI */
 #endif
 						}
 						else
-							tracejant_mpi = FALSE;
+							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at MPI */
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */
