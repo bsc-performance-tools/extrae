@@ -138,7 +138,7 @@
          choose at which frequency this check must be done. If not supplied,
          it will be checked every 100 global operations on MPI_COMM_WORLD.
     -->
-    <file enabled="no" frequency="5m">/gpfs/scratch/bsc41/bsc41273/control</file>
+    <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
     <!-- 
     -->
     <global-ops enabled="no"></global-ops>
@@ -154,7 +154,7 @@
   <others enabled="yes">
     <!-- Want to force a minimum amount of time of tracing? Here we force 10
          minutes -->
-    <minimum-time enabled="no">10m</minimum-time>
+    <minimum-time enabled="no">10M</minimum-time>
   </others>
 
   <!-- Bursts library enabled? This requires an special library! -->

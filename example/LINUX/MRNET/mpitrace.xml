@@ -91,7 +91,7 @@ PM_DATA_FROM_L2, PM_INST_CMPL, PM_DATA_FROM_MEM, PM_LD_MISS_L1_LSU0, PM_1PLUS_PP
   </buffer>
 
   <trace-control enabled="yes">
-    <file enabled="no" frequency="5m">/gpfs/scratch/bsc41/bsc41273/control</file>
+    <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
     <global-ops enabled="no"></global-ops>
     <remote-control enabled="yes">
 		<!-- target: final size of the trace (Mb); analysis: choose between clustering/spectral; start-after: idle time before starting -->
@@ -101,7 +101,7 @@ PM_DATA_FROM_L2, PM_INST_CMPL, PM_DATA_FROM_MEM, PM_LD_MISS_L1_LSU0, PM_1PLUS_PP
   </trace-control>
 
   <others enabled="no">
-    <minimum-time enabled="no">10m</minimum-time>
+    <minimum-time enabled="no">10M</minimum-time>
   </others>
 
   <bursts enabled="no">

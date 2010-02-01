@@ -37,7 +37,7 @@
   </buffer>
 
   <trace-control enabled="yes">
-    <file enabled="no" frequency="5m">/gpfs/scratch/bsc41/bsc41273/control</file>
+    <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
     <global-ops enabled="no"></global-ops>
     <remote-control enabled="no">
       <signal enabled="no" which="USR1"/>
@@ -45,7 +45,7 @@
   </trace-control>
 
   <others enabled="yes">
-    <minimum-time enabled="no">10m</minimum-time>
+    <minimum-time enabled="no">10M</minimum-time>
   </others>
 
 </trace>
