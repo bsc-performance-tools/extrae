@@ -318,7 +318,7 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 #endif
 
 		send_mail (spe_id[i], (unsigned int) i);
-		send_mail (spe_id[i], spu_file_size);
+		send_mail (spe_id[i], spu_file_size * 1024 * 1024);
 		send_mail (spe_id[i], descriptor);
 
 		addr_buffer = (unsigned long)spu_buffer[THREAD][i];
