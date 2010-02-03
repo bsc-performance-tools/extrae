@@ -52,6 +52,7 @@ int SPUtrace_init (void) {
 	unsigned int prvout_high, prvout_low, countout_high, countout_low;
 	unsigned int TB_high, TB_low, spu_creation_time_high, spu_creation_time_low, spu_buffer_size, spu_file_size, dma_channel;
 	int ret, me;
+	int prv_fd;
 
 	/* Is the tracing enabled? If not, just leave!*/
 	mpitrace_on = spu_read_in_mbox();
@@ -71,6 +72,8 @@ int SPUtrace_init (void) {
 	me = spu_read_in_mbox();
 	spu_file_size = spu_read_in_mbox();
 
+	prv_fd = spu_read_in_mbox ();
+
 	prvout_high = spu_read_in_mbox();
 	prvout_low = spu_read_in_mbox();
 	prvout = ((unsigned long long)prvout_high << 32) | prvout_low;
@@ -80,15 +83,19 @@ int SPUtrace_init (void) {
 	countout = ((unsigned long long)countout_high << 32) | countout_low;
 
 	dma_channel = spu_read_in_mbox();
+
 	spu_buffer_size = spu_read_in_mbox();
 
 #ifdef SPU_DYNAMIC_BUFFER
 	EVENT_BUFFER_SIZE = spu_buffer_size;
 #endif
 
-	ret = spu_init_backend (me, prvout, countout, spu_file_size);
+	ret = spu_init_backend (me, prvout, countout, spu_file_size, prv_fd);
 
+#ifdef SPU_USES_WRITE
+#else
 	Touch_PPU_Buffer();
+#endif
 
 	/* Tell the PPU how the init performed */
 	spu_write_out_mbox (ret);

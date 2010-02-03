@@ -58,6 +58,7 @@ unsigned int spu_file_size        = DEFAULT_SPU_FILE_SIZE;
 static unsigned int *** spu_buffer;
 static unsigned int *** spu_counter;
 static unsigned int * number_of_spus;
+static unsigned int * threads_prepared;
 static int CELLtrace_init_prepared = FALSE;
 
 /*
@@ -95,11 +96,18 @@ int prepare_CELLTrace_init (int nthreads)
 		fprintf (stderr, "CELLtrace: Could not allocate number_of_spus\n");
 		return FALSE;
 	}
+
+	threads_prepared = (unsigned int *) malloc (nthreads*sizeof(unsigned int));
+	if (NULL == threads_prepared)
+	{
+		fprintf (stderr, "CELLtrace: Could not allocate memory for threads_prepared\n");
+		return FALSE;
+	}
 	else
 		CELLtrace_init_prepared = TRUE;
 
 	for (i = 0; i < nthreads; i++)
-		number_of_spus[i] = 0;
+		number_of_spus[i] = threads_prepared[i] = 0;
 
 	return CELLtrace_init_prepared;
 }
@@ -134,6 +142,32 @@ static inline int read_mail (spe_context_ptr_t id)
 
 static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuffer, unsigned int **prvcount)
 {
+#ifdef SPU_USES_WRITE
+
+	char trace_tmp[TRACE_FILE];
+	char trace[TRACE_FILE];
+	int linear_thread = get_maximum_NumOfThreads();
+	int i;
+	
+	/*
+	   linear_thread allows converting SPU thread id into simple threads in
+	   the Paraver trace.  It is based on:
+		   the total number of threads existing + the other created SPU threads
+	*/
+	for (i = 0; i < THREAD; i++)
+		linear_thread += number_of_spus[i];
+
+	for (i = 0; i < nthreads; i++)
+	{
+		FileName_PTT (trace_tmp, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_TMP_MPIT);
+		FileName_PTT (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
+
+		rename_or_copy (trace_tmp, trace);
+
+		fprintf (stdout, "CELLtrace: Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
+	}
+
+#else
 	char trace[TRACE_FILE];
 	int fd, res, i;
 	int linear_thread = get_maximum_NumOfThreads();
@@ -149,7 +183,6 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 	fprintf (stdout, "\n");
 	for (i = 0; i < nthreads; i++)
 	{
-		/* Tracefile_Name (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread); */
 		FileName_PTT (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
 		fprintf (stdout, "CELLtrace: Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
 
@@ -162,6 +195,7 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 		res = close (fd);
 		CHECK_ERROR (res, close);
 	}
+#endif
 }
 
 /* HSG this shouldn't be here! */
@@ -173,9 +207,23 @@ int CELLtrace_init (int spus, speid_t * spe_id)
 int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 #endif
 {
+#ifdef SPU_USES_WRITE
+	unsigned int linear_thread;
+	static int warning_message_shown = FALSE;
+#endif
 	unsigned int i, TB_high, TB_low, all_spus_ok;
 	unsigned long long TB, spu_creation_time[spus];
 	unsigned THREAD = get_trace_thread_number();
+
+#ifdef SPU_USES_WRITE
+	if (!warning_message_shown)
+	{
+		fprintf (stdout, "CELLtrace: WARNING!\n"
+		                 "CELLtrace: WARNING! The SPUs will write directly their buffers into disk!\n"
+		                 "CELLtrace: WARNING! Such behavior makes flushes very costly!\n"
+		                 "CELLtrace: WARNNIG!\n");
+	}
+#endif
 
 	if (!CELLtrace_init_prepared)
 	{
@@ -207,9 +255,24 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 	TB_low  = TB;
 	number_of_spus[THREAD] = spus;
 
+#ifdef SPU_USES_WRITE
+	linear_thread = get_maximum_NumOfThreads();
+	for (i = 0; i < THREAD; i++)
+	{
+		if (!threads_prepared[i])
+		{
+			fprintf (stderr, "Error! CELLtrace requires that threads are initialized in order\n");
+			exit (-1);
+		}
+		linear_thread += number_of_spus[i];
+	}
+#endif
+
 	/* Initialize the tracing on the SPU side */
 	for (i = 0; i < spus; i++)
 	{
+		char trace[TRACE_FILE];
+		int descriptor;
 		unsigned long long addr_buffer = 0, addr_counter = 0;
 
 		send_mail (spe_id[i], (unsigned int) TB_high);
@@ -218,6 +281,18 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 		spu_creation_time[i] = TIME;
 		send_mail (spe_id[i], (unsigned int) (spu_creation_time[i] >> 32));
 		send_mail (spe_id[i], (unsigned int) spu_creation_time[i]);
+
+#ifdef SPU_USES_WRITE
+
+		/* Create a temporal file for the SPU */
+		FileName_PTT (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_TMP_MPIT);
+		descriptor = open (trace, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+
+		/* If using 'write', just can ignore buffer limits */
+		spu_buffer[THREAD][i] = 0xdeadbeef; /* Useless pointer! */
+		spu_counter[THREAD][i] = 0xdeadbeef; /* Useless pointer! */
+
+#else
 
 		/* Create buffer and touch it */
 		spu_buffer[THREAD][i] = (unsigned int*) valloc (spu_file_size);
@@ -237,8 +312,14 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 		}
 		memset (spu_buffer[THREAD][i], 0, 16);
 
+		/* If not using 'write', just ignore descriptor */
+		descriptor = -1; /* Useless descriptor */
+
+#endif
+
 		send_mail (spe_id[i], (unsigned int) i);
 		send_mail (spe_id[i], spu_file_size);
+		send_mail (spe_id[i], descriptor);
 
 		addr_buffer = (unsigned long)spu_buffer[THREAD][i];
 		send_mail (spe_id[i], (unsigned int) (addr_buffer >> 32));
@@ -279,6 +360,8 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 			fprintf (stderr, "CELLtrace: Some of the SPUs failed in the initialization. Check the messages given. Exiting!\n");
 		exit (-1);
 	}
+
+	threads_prepared[THREAD] = TRUE;
 
 	return 1;	
 }

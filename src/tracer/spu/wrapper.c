@@ -35,9 +35,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <fcntl.h>
 
 #include <spu_intrinsics.h>
 #include <spu_internals.h>
@@ -74,8 +74,9 @@ static unsigned int max_file_size;
 
 void advance_current(int thread)
 {
-   CUREVT(thread)++;
-   if (CUREVT(thread) >= LASTEVT(thread)) flush_buffer(1, thread);
+	CUREVT(thread)++;
+	if (CUREVT(thread) >= LASTEVT(thread))
+		flush_buffer(1, thread);
 }
 
 /******************************************************************************
@@ -92,16 +93,11 @@ static event_t * vector_events;
 
 int allocate_buffers (int rank)
 {
-  vector_events = (event_t *)malloc(EVENT_BUFFER_SIZE * sizeof(event_t));
-  if (vector_events == NULL)
-  {
-#if 0
-    printf ("CELLtrace: <SPU %d> Not enough memory for the SPU tracing buffer (size: %d events)\n", rank, EVENT_BUFFER_SIZE);
-#endif
-    return 1;
-  }
-  buffers[0] = vector_events;
-  return 0;
+	vector_events = (event_t *)malloc(EVENT_BUFFER_SIZE * sizeof(event_t));
+	if (vector_events == NULL)
+		return 0;
+	buffers[0] = vector_events;
+	return 1;
 }
 #else
 #define EVENT_BUFFER_SIZE DEFAULT_SPU_BUFFER_SIZE
@@ -110,37 +106,37 @@ static event_t vector_events[EVENT_BUFFER_SIZE] __attribute ((aligned(128)));
 
 int allocate_buffers ()
 {
-  buffers[0] = vector_events;
-  return 1;
+	buffers[0] = vector_events;
+	return 1;
 }
 #endif
 
 
-int spu_init_backend (int me, unsigned long long trace_ptr, unsigned long long count_trace_ptr, unsigned int file_size)
+int spu_init_backend (int me, unsigned long long trace_ptr, unsigned long long count_trace_ptr, unsigned int file_size, int fd)
 {
 	max_file_size = file_size;
 	out_trace = trace_ptr;
 	out_count = count_trace_ptr;
 
 #if defined(SPU_DYNAMIC_BUFFER)
-  if (!allocate_buffers (me))
-    return 0;
+	if (!allocate_buffers (me))
+		return 0;
 #else
-  if (!allocate_buffers ())
-    return 0;
+	if (!allocate_buffers ())
+		return 0;
 #endif
 
-  PRDAUSR = &estructura;
+	PRDAUSR = &estructura;
 
  	FIRSTEVT(0) = CUREVT(0) = (event_t *) buffers[0];
  	LASTEVT(0) = FIRSTEVT(0) + EVENT_BUFFER_SIZE - 1;
- 	FD(0) = 0;
+ 	FD(0) = fd;
  	FLUSHED(0) = 0;
  	PRDAVPID(0) = 0;
 
-  CELLTRACE_EVENT (TIME, APPL_EV, EVT_BEGIN);
+	CELLTRACE_EVENT (TIME, APPL_EV, EVT_BEGIN);
 
-  return 1;
+	return 1;
 }
 
 /******************************************************************************
@@ -149,77 +145,102 @@ int spu_init_backend (int me, unsigned long long trace_ptr, unsigned long long c
 
 static void __inline__ mpitrace_cell_asynch_put (void *ls, unsigned long long ea, int size, int tag)
 {
-   /* DMA transfers must be x16 bytes */
-   if ((size & 0x0f) != 0x00)
-      return;
+	/* DMA transfers must be x16 bytes */
+	if ((size & 0x0f) != 0x00)
+		return;
 
-   while (spu_readchcnt (MFC_Cmd) < 1);
-   mfc_put (ls, ea, size, tag, 0x0, 0x0);
+	while (spu_readchcnt (MFC_Cmd) < 1);
+	mfc_put (ls, ea, size, tag, 0x0, 0x0);
 }
 
 static void mpitrace_cell_wait (int tag)
 {
-   spu_writech (MFC_WrTagMask, 1 << tag);
-   spu_mfcstat (2);
+	spu_writech (MFC_WrTagMask, 1 << tag);
+	spu_mfcstat (2);
 }
 
 unsigned int dma_channel = DEFAULT_DMA_CHANNEL;
 
 void flush_buffer (int mark_on_trace, int thread)
 {
-	unsigned int tamany[4] __attribute ((aligned(128)));
-	unsigned long long temps_inicial, temps_final;
+	unsigned long long init_time, fini_time;
+	static unsigned int previous = 0;
 
-	static unsigned int previ = 0;
+#ifdef SPU_USES_WRITE
+	unsigned int size;
 
-	temps_inicial = TIME;
-	
-	tamany[0] = (CUREVT(0) - FIRSTEVT(0))*sizeof(event_t) + previ;
-	
-	if (tamany[0] >= max_file_size)
+	init_time = TIME;
+
+	size = (CUREVT(0) - FIRSTEVT(0))*sizeof(event_t);
+
+	if (size + previous >= max_file_size)
 	{
-#if 0
-		printf ("CELLtrace: SPU has reached the maximum space for its temporal file. Increase MPTRACE_SPU_FILE_SIZE!\n");
-#endif
 		tracejant = 0;
 	}
 	else
 	{
-		mpitrace_cell_asynch_put (vector_events, out_trace+previ,
+		write (FD(0), vector_events, size);
+		previous += size;
+
+		fini_time = TIME;
+
+		CUREVT(0) = FIRSTEVT(0);
+	}
+
+#else
+	unsigned int size[4] __attribute ((aligned(128)));
+
+
+	init_time = TIME;
+	
+	size[0] = (CUREVT(0) - FIRSTEVT(0))*sizeof(event_t) + previous;
+	
+	if (size[0] >= max_file_size)
+	{
+		tracejant = 0;
+	}
+	else
+	{
+		mpitrace_cell_asynch_put (vector_events, out_trace+previous,
 			EVENT_BUFFER_SIZE*sizeof(event_t), dma_channel);
 		mpitrace_cell_wait (dma_channel);
-		mpitrace_cell_asynch_put (tamany, out_count, 16, dma_channel);
+		mpitrace_cell_asynch_put (size, out_count, 16, dma_channel);
 		mpitrace_cell_wait (dma_channel);
 
-		previ = tamany[0];
+		previous = size[0];
 		CUREVT(0) = FIRSTEVT(0);
 
-		temps_final = TIME;
+		fini_time = TIME;
+	}
+#endif
 
-		/* Buffer must hold > 2 events!! */ 
-		CELLTRACE_EVENT (temps_inicial, FLUSH_EV, EVT_BEGIN);
-		CELLTRACE_EVENT (temps_final, FLUSH_EV, EVT_END);
+	if (mark_on_trace)
+	{
+		CELLTRACE_EVENT (init_time, FLUSH_EV, EVT_BEGIN);
+		CELLTRACE_EVENT (fini_time, FLUSH_EV, EVT_END);
 	}
 }
 
+#ifndef SPU_USES_WRITE
 void Touch_PPU_Buffer (void)
 {
-	unsigned int tamany[4] __attribute ((aligned(128)));
+	unsigned int size[4] __attribute ((aligned(128)));
 	unsigned i;
 
 	for (i = 0; i < 4; i++)
-		tamany[i] = 0;
+		size[i] = 0;
 
 	mpitrace_cell_asynch_put (vector_events, out_trace, EVENT_BUFFER_SIZE*sizeof(event_t), dma_channel);
 	mpitrace_cell_wait (dma_channel);
-	mpitrace_cell_asynch_put (tamany, out_count, 16, dma_channel);
+	mpitrace_cell_asynch_put (size, out_count, 16, dma_channel);
 	mpitrace_cell_wait (dma_channel);
 }
+#endif
 
 
 void Thread_Finalization ()
 {
-  CELLTRACE_EVENT (TIME, APPL_EV, EVT_END);
-	flush_buffer (0,0);
+	CELLTRACE_EVENT (TIME, APPL_EV, EVT_END);
+	flush_buffer (0,0); /* This flush won't make the FLUSH_EV into the final buffer */
 }
 

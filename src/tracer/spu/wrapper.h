@@ -62,10 +62,12 @@ struct trace_prda
 /************ Function prototypes **************/
 
 void flush_buffer (int mark_on_trace, int thread);
-int spu_init_backend (int me, unsigned long long trace_ptr, unsigned long long count_trace_ptr, unsigned int file_size);
+int spu_init_backend (int me, unsigned long long trace_ptr, unsigned long long count_trace_ptr, unsigned int file_size, int fd);
 void Thread_Finalization ();
 void advance_current(int thread);
+#ifndef SPU_USES_WRITE
 void Touch_PPU_Buffer (void);
+#endif
 
 /************ Global variables that control whether tracing is enabled **************/
 
