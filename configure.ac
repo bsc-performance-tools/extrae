@@ -325,6 +325,16 @@ AC_ARG_ENABLE(smpss,
 )
 AM_CONDITIONAL(WANT_SMPSS, test "${enable_smpss}" = "yes" )
 
+AC_ARG_ENABLE(nanos, 
+   AC_HELP_STRING(
+      [--enable-nanos],
+      [Enable support for tracing Nanos run-time (enabled by default)]
+   ),
+   [enable_nanos="${enableval}"],
+   [enable_nanos="yes"]
+)
+AM_CONDITIONAL(WANT_NANOS, test "${enable_nanos}" = "yes" )
+
 AC_ARG_ENABLE(trt,
    AC_HELP_STRING(
       [--enable-trt],

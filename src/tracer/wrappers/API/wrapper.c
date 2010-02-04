@@ -1233,6 +1233,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	extern int css_get_max_threads(void);
 
 	current_NumOfThreads = maximum_NumOfThreads = css_get_max_threads();
+#elif defined(NANOS_SUPPORT)
+	extern unsigned int nanos_ompitrace_get_max_threads(void);
+
+	current_NumOfThreads = maximum_NumOfThreads = nanos_ompitrace_get_max_threads();
 #else
 	/* If we don't support OpenMP we still have this running thread :) */
 	current_NumOfThreads = maximum_NumOfThreads = 1;

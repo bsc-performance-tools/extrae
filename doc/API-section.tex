@@ -48,7 +48,7 @@ The following routines are defined in the {\tt \$\{MPITRACE\_HOME\}/include/mpit
    \item Identify any point in the application using a unique combination of type and value.
   \end{itemize}
 
- \item {\tt void OMPItrace\_Nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
+ \item {\tt void OMPItrace\_nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
   Allows the user to place {\em count} events with the same timestamp at the given position.
 
  \item {\tt void OMPItrace\_counters (void)}\\
@@ -57,7 +57,7 @@ The following routines are defined in the {\tt \$\{MPITRACE\_HOME\}/include/mpit
  \item {\tt void OMPItrace\_eventandcounters (int event, int value)}\\
   This routine lets the user add an event and obtain the performance counters with one call and a single timestamp.
 
- \item {\tt void OMPItrace\_Neventandcounters (int event, int value)}\\
+ \item {\tt void OMPItrace\_neventandcounters (int event, int value)}\\
   This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
 
  \item {\tt void OMPItrace\_shutdown (void)}\\
@@ -139,8 +139,8 @@ Due to the lack of parallel paradigms and hardware counters inside the SPE eleme
  \item {\tt void SPUtrace\_event (int event, int value)}\\
  Has the same semantics as {\tt OMPItrace\_event}.
 
- \item {\tt void SPUtrace\_Nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
- Has the same semantics as {\tt OMPItrace\_Nevent}.
+ \item {\tt void SPUtrace\_nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
+ Has the same semantics as {\tt OMPItrace\_nevent}.
 
 \end{itemize}
 

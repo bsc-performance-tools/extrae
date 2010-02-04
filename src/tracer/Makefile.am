@@ -33,6 +33,8 @@ endif
 if WANT_SMPSS
   lib_LTLIBRARIES += libsmpssmpitrace.la libsmpssmpitracef.la
 endif
+if WANT_NANOS
+endif
 endif
 
 if WANT_OPENMP
@@ -40,6 +42,9 @@ if WANT_OPENMP
 endif
 if WANT_SMPSS
   lib_LTLIBRARIES += libsmpsstrace.la
+endif
+if WANT_NANOS
+  lib_LTLIBRARIES += libnanostrace.la
 endif
 if WANT_PTHREAD
   lib_LTLIBRARIES += libpttrace.la
@@ -53,6 +58,8 @@ if WANT_OPENMP
 endif
 if WANT_SMPSS
   lib_LTLIBRARIES += libsmpssmpitrace-lb.la libsmpssmpitracef-lb.la
+endif
+if WANT_NANOS
 endif
 endif
 endif
@@ -140,6 +147,9 @@ libsmpssmpitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
 libsmpssmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libsmpsstrace_la_SOURCES = $(core_SRCS)
 
+# Nanos
+libnanostrace_la_SOURCES = $(core_SRCS)
+
 # pthreads & TRT
 libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD)
 libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT)
@@ -184,6 +194,8 @@ libomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
 libsmpssmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la
 libsmpssmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la
 libsmpsstrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
+
+libnanostrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
 
 libpttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD)
 libtrttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
@@ -283,6 +295,8 @@ libsmpssmpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPIT
 libsmpssmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DSMPSS_SUPPORT -DMPI_SUPPORT
 libsmpsstrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DSMPSS_SUPPORT
 
+libnanostrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DNANOS_SUPPORT
+
 libpttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DPTHREAD_SUPPORT
 libtrttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DTRT_SUPPORT
 
@@ -319,6 +333,8 @@ libomptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS
 libsmpssmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libsmpssmpitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) -static
 libsmpsstrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+
+libnanostrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 
 libpttrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS) -lpthread
 libtrttrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)

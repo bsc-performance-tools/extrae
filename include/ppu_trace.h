@@ -46,7 +46,7 @@ void PPUtrace_init (void);
 void PPUtrace_fini (void);
 void PPUtrace_user_function (unsigned enter);
 void PPUtrace_event (unsigned int type, unsigned int value);
-void PPUtrace_Nevent (unsigned int count, unsigned int *types,
+void PPUtrace_nevent (unsigned int count, unsigned int *types,
 	unsigned int *values);
 void PPUtrace_shutdown (void);
 void PPUtrace_restart (void);
@@ -54,7 +54,7 @@ void PPUtrace_counters (void);
 void PPUtrace_previous_hwc_set (void);
 void PPUtrace_next_hwc_set (void);
 void PPUtrace_eventandcounters (int type, int value);
-void PPUItrace_Neventandcounters (unsigned int count, unsigned int *types,
+void PPUtrace_neventandcounters (unsigned int count, unsigned int *types,
 	unsigned int *values);
 void PPUtrace_set_options (int options);
 
