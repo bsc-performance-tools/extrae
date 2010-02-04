@@ -50,7 +50,6 @@ static char UNUSED rcsid[] = "$Id: pacx_interface.c 15 2009-10-29 12:06:27Z hara
 #include "pacx_interface.h"
 #include "pacx_wrapper.h"
 #include "wrapper.h"
-#include "trace_hwc.h"
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -475,10 +474,6 @@ void NAME_ROUTINE_C2F(pacx_reduce) (void *sendbuf, void *recvbuf, PACX_Fint *cou
 	if (sizeofcomm == NumOfTasks)
 	{
 		PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -519,12 +514,7 @@ void NAME_ROUTINE_C2F(pacx_reduce_scatter) (void *sendbuf, void *recvbuf,
 	PPACX_Comm_size (c, &sizeofcomm);
 	if (sizeofcomm == NumOfTasks)
 	{
-			PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
+		PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -567,11 +557,6 @@ void NAME_ROUTINE_C2F(pacx_allreduce) (void *sendbuf, void *recvbuf,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -658,11 +643,6 @@ void NAME_ROUTINE_C2F(pacx_barrier) (PACX_Fint *comm, PACX_Fint *ierror)
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -849,11 +829,6 @@ void NAME_ROUTINE_C2F(pacx_bcast) (void *buffer, PACX_Fint *count,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -895,11 +870,6 @@ void NAME_ROUTINE_C2F(pacx_alltoall) (void *sendbuf, PACX_Fint *sendcount,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-	
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -942,11 +912,6 @@ void NAME_ROUTINE_C2F(pacx_alltoallv) (void *sendbuf, PACX_Fint *sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -991,11 +956,6 @@ void NAME_ROUTINE_C2F(pacx_allgather) (void *sendbuf, PACX_Fint *sendcount,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1038,11 +998,6 @@ void NAME_ROUTINE_C2F(pacx_allgatherv) (void *sendbuf, PACX_Fint *sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -1087,11 +1042,6 @@ void NAME_ROUTINE_C2F(pacx_gather) (void *sendbuf, PACX_Fint *sendcount,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1133,11 +1083,6 @@ void NAME_ROUTINE_C2F(pacx_gatherv) (void *sendbuf, PACX_Fint *sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -1181,11 +1126,6 @@ void NAME_ROUTINE_C2F(pacx_scatter) (void *sendbuf, PACX_Fint *sendcount,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1227,11 +1167,6 @@ void NAME_ROUTINE_C2F(pacx_scatterv) (void *sendbuf, PACX_Fint *sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -1638,11 +1573,6 @@ void NAME_ROUTINE_C2F(pacx_scan) (void *sendbuf, void *recvbuf, PACX_Fint *count
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2239,11 +2169,6 @@ int NAME_ROUTINE_C(PACX_Reduce) (void *sendbuf, void *recvbuf, int count,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -2277,11 +2202,6 @@ int NAME_ROUTINE_C(PACX_Reduce_scatter) (void *sendbuf, void *recvbuf,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2317,11 +2237,6 @@ int NAME_ROUTINE_C(PACX_Allreduce) (void *sendbuf, void *recvbuf, int count,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2390,11 +2305,6 @@ int NAME_ROUTINE_C(PACX_Barrier) (PACX_Comm comm)
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2543,11 +2453,6 @@ int NAME_ROUTINE_C(PACX_Bcast) (void *buffer, int count, PACX_Datatype datatype,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -2581,11 +2486,6 @@ int NAME_ROUTINE_C(PACX_Alltoall) (void *sendbuf, int sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2622,11 +2522,6 @@ int NAME_ROUTINE_C(PACX_Alltoallv) (void *sendbuf, int *sendcounts, int *sdispls
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2666,11 +2561,6 @@ int NAME_ROUTINE_C(PACX_Allgather) (void *sendbuf, int sendcount,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -2708,11 +2598,6 @@ int NAME_ROUTINE_C(PACX_Allgatherv) (void *sendbuf, int sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2752,11 +2637,6 @@ int NAME_ROUTINE_C(PACX_Gather) (void *sendbuf, int sendcount,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -2794,11 +2674,6 @@ int NAME_ROUTINE_C(PACX_Gatherv) (void *sendbuf, int sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2838,11 +2713,6 @@ int NAME_ROUTINE_C(PACX_Scatter) (void *sendbuf, int sendcount,
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -2880,11 +2750,6 @@ int NAME_ROUTINE_C(PACX_Scatterv) (void *sendbuf, int *sendcounts, int *displs,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -3196,11 +3061,6 @@ int NAME_ROUTINE_C(PACX_Scan) (void *sendbuf, void *recvbuf, int count,
 	if (sizeofcomm == NumOfTasks)
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();

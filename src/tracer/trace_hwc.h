@@ -80,7 +80,9 @@
    is because there has been a previous read so they're already marked as read. */
 # define ADD_ACCUMULATED_COUNTERS_HERE(tid, evt) HWC_Accum_Add_Here(tid, evt.HWCValues)
 
-# define HARDWARE_COUNTERS_CHANGE(time, type, tid) HWC_Check_Pending_Set_Change(time, type, tid);
+
+# define HARDWARE_COUNTERS_CHANGE(time, tid) HWC_Check_Pending_Set_Change(time, tid);
+
 
 #else /* ! USE_HARDWARE_COUNTERS */
 
@@ -90,7 +92,7 @@
 # define ACCUMULATED_COUNTERS_INITIALIZED(tid) 0
 # define COPY_ACCUMULATED_COUNTERS_HERE(tid, evt)
 # define ADD_ACCUMULATED_COUNTERS_HERE(tid, evt)
-# define HARDWARE_COUNTERS_CHANGE(time, type, tid)
+# define HARDWARE_COUNTERS_CHANGE(time, tid)
 
 #endif
 

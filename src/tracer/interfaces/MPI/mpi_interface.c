@@ -49,7 +49,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include <mpi.h>
 #include "wrapper.h"
 #include "mpi_wrapper.h"
-#include "trace_hwc.h"
 
 #if defined(ENABLE_LOAD_BALANCING)
 # include "LB_MPI/MPI_interface.h"
@@ -581,10 +580,6 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 	if (sizeofcomm == NumOfTasks)
 	{
 		MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -633,12 +628,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 	PMPI_Comm_size (c, &sizeofcomm);
 	if (sizeofcomm == NumOfTasks)
 	{
-			MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
+		MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -689,11 +679,6 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -787,11 +772,6 @@ void NAME_ROUTINE_C2F(mpi_barrier) (MPI_Fint *comm, MPI_Fint *ierror)
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -1010,11 +990,6 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1063,11 +1038,6 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-	
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1118,11 +1088,6 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1171,11 +1136,6 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -1226,11 +1186,6 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1280,11 +1235,6 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1332,11 +1282,6 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -1386,11 +1331,6 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -1438,11 +1378,6 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -1855,11 +1790,6 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2585,11 +2515,6 @@ int NAME_ROUTINE_C(MPI_Reduce) (void *sendbuf, void *recvbuf, int count,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -2631,11 +2556,6 @@ int NAME_ROUTINE_C(MPI_Reduce_scatter) (void *sendbuf, void *recvbuf,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2679,11 +2599,6 @@ int NAME_ROUTINE_C(MPI_Allreduce) (void *sendbuf, void *recvbuf, int count,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2760,11 +2675,6 @@ int NAME_ROUTINE_C(MPI_Barrier) (MPI_Comm comm)
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -2952,11 +2862,6 @@ int NAME_ROUTINE_C(MPI_Bcast) (void *buffer, int count, MPI_Datatype datatype,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -2998,11 +2903,6 @@ int NAME_ROUTINE_C(MPI_Alltoall) (void *sendbuf, int sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -3047,11 +2947,6 @@ int NAME_ROUTINE_C(MPI_Alltoallv) (void *sendbuf, int *sendcounts, int *sdispls,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -3099,11 +2994,6 @@ int NAME_ROUTINE_C(MPI_Allgather) (void *sendbuf, int sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -3149,11 +3039,6 @@ int NAME_ROUTINE_C(MPI_Allgatherv) (void *sendbuf, int sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -3201,11 +3086,6 @@ int NAME_ROUTINE_C(MPI_Gather) (void *sendbuf, int sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -3251,11 +3131,6 @@ int NAME_ROUTINE_C(MPI_Gatherv) (void *sendbuf, int sendcount,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -3303,11 +3178,6 @@ int NAME_ROUTINE_C(MPI_Scatter) (void *sendbuf, int sendcount,
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
 
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
-
 		if (CheckForControlFile)
 			CheckControlFile();
 		if (CheckForGlobalOpsTracingIntervals)
@@ -3353,11 +3223,6 @@ int NAME_ROUTINE_C(MPI_Scatterv) (void *sendbuf, int *sendcounts, int *displs,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();
@@ -3677,11 +3542,6 @@ int NAME_ROUTINE_C(MPI_Scan) (void *sendbuf, void *recvbuf, int count,
 	if (sizeofcomm == NumOfTasks)
 	{
         MPI_CurrentOpGlobal = (++MPI_NumOpsGlobals);
-
-#if USE_HARDWARE_COUNTERS
-		if (mpitrace_on && tracejant)
-			HARDWARE_COUNTERS_CHANGE (TIME,  CHANGE_GLOPS, THREADID );
-#endif
 
 		if (CheckForControlFile)
 			CheckControlFile();

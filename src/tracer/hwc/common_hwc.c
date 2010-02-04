@@ -244,16 +244,14 @@ static inline int CheckForHWCSetChange_TIME (UINT64 time, int threadid)
  * \param thread_id The thread identifier.
  * \return 1 if the set is changed, 0 otherwise.
  */
-int HWC_Check_Pending_Set_Change (UINT64 time, enum ChangeType_t type, int thread_id)
+int HWC_Check_Pending_Set_Change (UINT64 time, int thread_id)
 {
-	if (HWC_current_changetype == type)
-	{
-		if (HWC_current_changetype == CHANGE_GLOPS)
-			return CheckForHWCSetChange_GLOPS(time, thread_id);
-		else if (HWC_current_changetype == CHANGE_TIME)
-			return CheckForHWCSetChange_TIME(time, thread_id);
-	}
-	return 0;
+	if (HWC_current_changetype == CHANGE_GLOPS)
+		return CheckForHWCSetChange_GLOPS(time, thread_id);
+	else if (HWC_current_changetype == CHANGE_TIME)
+		return CheckForHWCSetChange_TIME(time, thread_id);
+	else
+		return 0;
 }
 
 /** 
