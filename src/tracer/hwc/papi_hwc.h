@@ -74,7 +74,7 @@ int HWCBE_PAPI_Accum (unsigned int tid, long long *store_buffer);
 /**
  * Returns the EventSet of the given thread for the current set.
  */
-#define HWCEVTSET(tid) (HWC_sets[HWC_Get_Current_Set()].eventsets[tid])
+#define HWCEVTSET(tid) (HWC_sets[HWC_Get_Current_Set(tid)].eventsets[tid])
 
 #endif /* __PAPI_HWC_H__ */
 

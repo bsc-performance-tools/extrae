@@ -343,19 +343,21 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 	BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 }
 
-#define TRACE_MISCEVENT(evttime,evttype,evtvalue,evtparam)            \
-{                                                                     \
-	event_t evt;                                                      \
-	int thread_id = THREADID;                                         \
-	if (tracejant && TracingBitmap[TASKID])                           \
-	{                                                                 \
-		evt.time = evttime;                                           \
-		evt.event = evttype;                                          \
-		evt.value = evtvalue;                                         \
-		evt.param.misc_param.param = (unsigned long long) (evtparam); \
-		HARDWARE_COUNTERS_READ (thread_id, evt, FALSE);               \
-		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);     \
-	}                                                                 \
+#define TRACE_MISCEVENT(evttime,evttype,evtvalue,evtparam)              \
+{                                                                       \
+	event_t evt;                                                        \
+	int thread_id = THREADID;                                           \
+	if (tracejant && TracingBitmap[TASKID])                             \
+	{                                                                   \
+		evt.time = evttime;                                             \
+		evt.event = evttype;                                            \
+		evt.value = evtvalue;                                           \
+		evt.param.misc_param.param = (unsigned long long) (evtparam);   \
+		HARDWARE_COUNTERS_READ (thread_id, evt, FALSE);                 \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);       \
+                                                                        \
+		HARDWARE_COUNTERS_CHANGE(evt.time, CHANGE_TIME, thread_id);     \
+	}                                                                   \
 }
 
 #if USE_HARDWARE_COUNTERS
@@ -371,6 +373,8 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
         evt.param.misc_param.param = (unsigned long long) (evtparam); \
 		HARDWARE_COUNTERS_READ (thread_id, evt, TRUE);                \
         BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);     \
+                                                                      \
+		HARDWARE_COUNTERS_CHANGE(evt.time, CHANGE_TIME, thread_id);   \
 	}                                                                 \
 }
 #else
@@ -458,19 +462,21 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 #define TRACE_EVENTANDCOUNTERS(evttime,evttype,evtvalue,hwc_filter) TRACE_EVENT(evttime,evttype,evtvalue)
 #endif
 
-#define TRACE_OMPEVENT(evttime,evttype,evtvalue,evtparam)         \
-{                                                                 \
-	int thread_id = THREADID;                                     \
-	event_t evt;                                                  \
-	if (tracejant && TracingBitmap[TASKID] && tracejant_omp)      \
-	{                                                             \
-		evt.time = evttime;                                       \
-		evt.event = evttype;                                      \
-		evt.value = evtvalue;                                     \
-		evt.param.omp_param.param = evtparam;                     \
-		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);            \
-		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
-	}                                                             \
+#define TRACE_OMPEVENT(evttime,evttype,evtvalue,evtparam)           \
+{                                                                   \
+	int thread_id = THREADID;                                       \
+	event_t evt;                                                    \
+	if (tracejant && TracingBitmap[TASKID] && tracejant_omp)        \
+	{                                                               \
+		evt.time = evttime;                                         \
+		evt.event = evttype;                                        \
+		evt.value = evtvalue;                                       \
+		evt.param.omp_param.param = evtparam;                       \
+		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);              \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);   \
+		                                                            \
+		HARDWARE_COUNTERS_CHANGE(evt.time, CHANGE_TIME, thread_id); \
+	}                                                               \
 }
 
 #if USE_HARDWARE_COUNTERS
@@ -486,6 +492,8 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 		evt.param.omp_param.param = (evtparam);                      \
 		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_OMP);     \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);    \
+		                                                             \
+		HARDWARE_COUNTERS_CHANGE(evt.time, CHANGE_TIME, thread_id);  \
 	}                                                                \
 }
 #else
@@ -534,7 +542,7 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
         evt.value = evtvalue;                                                   \
         for (i=0; i<nc; i++)                                                    \
             evt.HWCValues[i] = counters[i];                                     \
-        MARK_SET_READ(evt, FALSE);                                              \
+        MARK_SET_READ(thread_id, evt, FALSE);                                              \
         BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);               \
     }                                                                           \
 }

@@ -64,7 +64,7 @@ int HWC_Add_Set (int pretended_set, int rank, int ncounters, char **counters, ch
                  char *change_at_globalops, char *change_at_time, int num_overflows, 
                  char **overflow_counters, unsigned long long *overflow_values);
 
-int HWC_Get_Current_Set ();
+int HWC_Get_Current_Set (int threadid);
 int HWC_Get_Num_Sets ();
 int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds);
 int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds);

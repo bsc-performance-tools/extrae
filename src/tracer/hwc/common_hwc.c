@@ -88,10 +88,10 @@ int *Accumulated_HWC_Valid; /* Marks whether Accumulated_HWC has valid values */
 
 struct HWC_Set_t *HWC_sets = NULL;
 unsigned long long HWC_current_changeat = 0;
-unsigned long long HWC_current_timebegin = 0;
+unsigned long long * HWC_current_timebegin;
 enum ChangeType_t HWC_current_changetype = CHANGE_NEVER;
 int HWC_num_sets = 0;
-int HWC_current_set = 0;
+int * HWC_current_set;
 
 /**
  * Checks whether the module has been started and the HWC are counting
@@ -106,9 +106,9 @@ int HWC_IsEnabled()
  * Returns the active counters set (0 .. n-1). 
  * \return The active counters set (0 .. n-1).
  */
-int HWC_Get_Current_Set ()
+int HWC_Get_Current_Set (int threadid)
 {
-	return HWC_current_set;
+	return HWC_current_set[threadid];
 }
 
 /*
@@ -176,12 +176,12 @@ void HWC_Start_Next_Set (UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
 	{
-		HWCBE_STOP_SET (time, HWC_current_set, thread_id);
+		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
 
 		/* Move to the next set */
-		HWC_current_set = (HWC_current_set + 1) % HWC_num_sets;
+		HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
 
-		HWCBE_START_SET (time, HWC_current_set, thread_id);
+		HWCBE_START_SET (time, HWC_current_set[thread_id], thread_id);
 	}
 }
 
@@ -194,12 +194,12 @@ void HWC_Start_Previous_Set (UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
 	{
-		HWCBE_STOP_SET (time, HWC_current_set, thread_id);
+		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
 
 		/* Move to the previous set */
-		HWC_current_set = ((HWC_current_set - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set - 1) ;
+		HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
 
-		HWCBE_START_SET (time, HWC_current_set, thread_id);
+		HWCBE_START_SET (time, HWC_current_set[thread_id], thread_id);
 	}
 }
 
@@ -230,7 +230,7 @@ static inline int CheckForHWCSetChange_GLOPS (UINT64 time, int thread_id)
 static inline int CheckForHWCSetChange_TIME (UINT64 time, int threadid)
 {
 	int ret = 0;
-	if (HWC_current_timebegin + HWC_current_changeat < time)
+	if (HWC_current_timebegin[threadid] + HWC_current_changeat < time)
 	{
 		HWC_Start_Next_Set (time, threadid);
 		ret = 1;
@@ -262,6 +262,28 @@ int HWC_Check_Pending_Set_Change (UINT64 time, enum ChangeType_t type, int threa
  */
 void HWC_Initialize (int options)
 {
+	int i, num_threads = get_maximum_NumOfThreads();
+
+        HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
+        if (NULL == HWC_current_set)
+        {
+                fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for HWC_current_set\n");
+                return;
+        }
+
+        HWC_current_timebegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
+        if (NULL == HWC_current_timebegin)
+        {
+                fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for HWC_current_timebegin\n");
+                return;
+        }
+
+        for (i = 0; i < num_threads; i++)
+        {
+                HWC_current_set[i] = 0;
+                HWC_current_timebegin[i] = 0;
+        }
+
 	HWCBE_INITIALIZE(options);
 }
 
@@ -279,9 +301,12 @@ void HWC_Start_Counters (int num_threads)
 		fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for HWC_Thread_Initialized!\n");
 		return;
 	}
+
 	/* Mark all the threads as uninitialized */
 	for (i = 0; i < num_threads; i++)
+	{
 		HWC_Thread_Initialized[i] = FALSE;
+	}
 
 	Accumulated_HWC_Valid = (int *)malloc(sizeof(int) * num_threads);
 	if (NULL == Accumulated_HWC_Valid)
@@ -376,15 +401,17 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
  */
 void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 {
+	int threadid = 0;
+
 	/* Do this if we have more than 1 counter set */
 	if (HWC_num_sets > 1)
 	{
 		if (strncasecmp (distribution, "cyclic", 6) == 0)
 		{
-			/* Sets are distributed among tasks in a 
-			0 1 2 3 .. n-1 0 1 2 3 .. n-1  0 1 2 3 ...
-			fashion */
-			HWC_current_set = task_id % HWC_num_sets;
+			/* Sets are distributed among tasks like:
+			0 1 2 3 .. n-1 0 1 2 3 .. n-1  0 1 2 3 ... */
+			for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++) 
+				HWC_current_set[threadid] = task_id % HWC_num_sets;
 
 			if (task_id == 0)
 				fprintf (stdout, "mpitrace: Starting distribution hardware counters set is established to 'cyclic'\n");
@@ -397,10 +424,13 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 
 			/* a/b rounded to highest is (a+b-1)/b */
 			int BlockDivisor = (num_tasks+HWC_num_sets-1) / HWC_num_sets;
-			if (BlockDivisor > 0)
-				HWC_current_set = task_id / BlockDivisor;
-			else
-				HWC_current_set = 0;
+			for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++) 
+			{
+				if (BlockDivisor > 0)
+					HWC_current_set[threadid] = task_id / BlockDivisor;
+				else
+					HWC_current_set[threadid] = 0;
+			}
 
 			if (task_id == 0)
 				fprintf (stdout, "mpitrace: Starting distribution hardware counters set is established to 'block'\n");
@@ -413,10 +443,12 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			{
 				if (task_id == 0)
 					fprintf (stderr, "mpitrace: Warning! Cannot identify '%s' as a valid starting distribution set on the CPU counters. Setting to the first one.\n", distribution);
-				HWC_current_set = 0;
+				for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++)
+					HWC_current_set[threadid] = 0;
 			}
 			else
-				HWC_current_set = (HWC_num_sets<value-1)?HWC_num_sets:value-1;
+				for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++)
+					HWC_current_set[threadid] = (HWC_num_sets<value-1)?HWC_num_sets:value-1;
 		}
 	}
 }

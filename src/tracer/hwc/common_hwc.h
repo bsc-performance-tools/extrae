@@ -65,9 +65,9 @@ extern int *HWC_Thread_Initialized;
 extern struct HWC_Set_t *HWC_sets;
 extern int HWC_num_sets;
 extern unsigned long long HWC_current_changeat;
-extern unsigned long long HWC_current_timebegin;
+extern unsigned long long * HWC_current_timebegin;
 extern enum ChangeType_t HWC_current_changetype;
-extern int HWC_current_set;
+extern int * HWC_current_set;
 
 /*------------------------------------------------ Useful macros ------------*/
 

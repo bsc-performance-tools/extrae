@@ -447,7 +447,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		else
 			sharedlibname_ext = "";
 
-#if 0
+#if 1
 		if (instrumentOMP && appType->get_isOpenMP() && loadedModule != sharedlibname)
 		{
 			/* OpenMP instrumentation (just for OpenMP apps) */

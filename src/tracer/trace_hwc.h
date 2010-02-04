@@ -37,9 +37,9 @@
 
 # include "hwc.h"
 
-# define MARK_SET_READ(evt, filter)                                                   \
+# define MARK_SET_READ(tid, evt, filter)                                                   \
 {                                                                                     \
-	evt.HWCReadSet = ((filter && HWC_IsEnabled()) ? (HWC_Get_Current_Set() + 1) : 0); \
+	evt.HWCReadSet = ((filter && HWC_IsEnabled()) ? (HWC_Get_Current_Set(tid) + 1) : 0); \
 }
 
 /* Store counters values in the event and mark them as read */
@@ -51,7 +51,7 @@
 		read_ok = HWC_Read (tid, evt.time, evt.HWCValues);             \
 	}                                                                  \
 	/* We write the counters even if there are errors while reading */ \
-	MARK_SET_READ(evt, read_ok);                                       \
+	MARK_SET_READ(tid, evt, read_ok);                                       \
 } 
 
 # define HARDWARE_COUNTERS_ACCUMULATE(tid, evt, filter)                \
@@ -62,7 +62,7 @@
 		/* XXX: Reset ACCUMULATED counters here? Very likely!!! */     \
     }                                                                  \
 	/* We write the counters even if there are errors while reading */ \
-	MARK_SET_READ(evt, filter);                                       \
+	MARK_SET_READ(tid, evt, filter);                                       \
 }
 
 # define ACCUMULATED_COUNTERS_RESET(tid) HWC_Accum_Reset(tid)
@@ -73,7 +73,7 @@
 # define COPY_ACCUMULATED_COUNTERS_HERE(tid, evt) \
 {                                                 \
 	HWC_Accum_Copy_Here(tid, evt.HWCValues);      \
-	MARK_SET_READ(evt, TRUE);                     \
+	MARK_SET_READ(tid, evt, TRUE);                     \
 }
 
 /* Add accumulated counters to the event, but DON'T mark them as read. If we're adding

@@ -367,7 +367,7 @@ int HWCBE_PAPI_Start_Set (UINT64 time, int numset, int threadid)
 
 	HWC_current_changeat = HWC_sets[numset].change_at;
 	HWC_current_changetype = HWC_sets[numset].change_type;
-	HWC_current_timebegin = time;
+	HWC_current_timebegin[threadid] = time;
 
 	/* Mark this counter set as the current set */
 	HWCEVTSET(threadid) = HWC_sets[numset].eventsets[threadid];
@@ -548,20 +548,23 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid)
 		/* Add the selected counters */
 		for (j = 0; j < HWC_sets[i].num_counters; j++)
 		{
-			rc = PAPI_add_event (HWC_sets[i].eventsets[threadid], HWC_sets[i].counters[j]);
-			if (rc != PAPI_OK)
+			if (HWC_sets[i].counters[j] != NO_COUNTER)
 			{
-				char EventName[PAPI_MAX_STR_LEN];
+				rc = PAPI_add_event (HWC_sets[i].eventsets[threadid], HWC_sets[i].counters[j]);
+				if (rc != PAPI_OK)
+				{
+					char EventName[PAPI_MAX_STR_LEN];
 
-				PAPI_event_code_to_name (HWC_sets[i].counters[j], EventName);
-				fprintf (stderr, "mpitrace: Error! Hardware counter %s (0x%08x) cannot be added in set %d (thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, threadid);
-				HWC_sets[i].counters[j] = NO_COUNTER;
-				/* break; */
+					PAPI_event_code_to_name (HWC_sets[i].counters[j], EventName);
+					fprintf (stderr, "mpitrace: Error! Hardware counter %s (0x%08x) cannot be added in set %d (thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, threadid);
+					HWC_sets[i].counters[j] = NO_COUNTER;
+					/* break; */
+				}
 			}
 		}
 	}
 
-	HWC_Thread_Initialized[threadid] = HWCBE_PAPI_Start_Set (time, HWC_current_set, threadid);
+	HWC_Thread_Initialized[threadid] = HWCBE_PAPI_Start_Set (time, HWC_current_set[threadid], threadid);
 
 	return HWC_Thread_Initialized[threadid];
 }
