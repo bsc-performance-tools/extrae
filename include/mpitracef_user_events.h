@@ -1,34 +1,31 @@
-C
 C*****************************************************************************
 C*                        ANALYSIS PERFORMANCE TOOLS                         *
 C*                                  MPItrace                                 *
 C*              Instrumentation package for parallel applications            *
 C*****************************************************************************
-C*                                                             ___           *
-C*   +---------+     http:// www.cepba.upc.edu/tools_i.htm    /  __          *
-C*   |    o//o |     http:// www.bsc.es                      /  /  _____     *
-C*   |   o//o  |                                            /  /  /     \    *
-C*   |  o//o   |     E-mail: cepbatools@cepba.upc.edu      (  (  ( B S C )   *
-C*   | o//o    |     Phone:          +34-93-401 71 78       \  \  \_____/    *
-C*   +---------+     Fax:            +34-93-401 25 77        \  \__          *
-C*    C E P B A                                               \___           *
+C*     ___     This library is free software; you can redistribute it and/or *
+C*    /  __         modify it under the terms of the GNU LGPL as published   *
+C*   /  /  _____    by the Free Software Foundation; either version 2.1      *
+C*  /  /  /     \   of the License, or (at your option) any later version.   *
+C* (  (  ( B S C )                                                           *
+C*  \  \  \_____/   This library is distributed in hope that it will be      *
+C*   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
+C*    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
+C*                  PARTICULAR PURPOSE. See the GNU LGPL for more details.   *
 C*                                                                           *
-C* This software is subject to the terms of the CEPBA/BSC license agreement. *
-C*      You must accept the terms of this license to use this software.      *
+C* You should have received a copy of the GNU Lesser General Public License  *
+C* along with this library; if not, write to the Free Software Foundation,   *
+C* Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA          *
+C* The GNU LEsser General Public License is contained in the file COPYING.   *
 C*                                 ---------                                 *
-C*                European Center for Parallelism of Barcelona               *
-C*                      Barcelona Supercomputing Center                      *
+C*   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 C*****************************************************************************
-C
+
 C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
 C| @file: $HeadURL$
-C| 
 C| @last_commit: $Date$
 C| @version:     $Revision$
-C| 
-C| History:
 C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-C
 
 	INTEGER MPITRACE_DISABLE_ALL_OPTIONS 
 	PARAMETER (MPITRACE_DISABLE_ALL_OPTIONS=0)
