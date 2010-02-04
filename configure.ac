@@ -126,13 +126,13 @@ if test "${IS_CELL_MACHINE}" = "yes" ; then
     )
 fi
 
-if test "${enable_spu_write}" = "yes" ; then
+if test "${IS_CELL_MACHINE}" = "yes" -a "${enable_spu_write}" = "yes" ; then
    AC_DEFINE([SPU_USES_WRITE], 1, [Defined if direct write operations to disk from SPUs are enabled])
    AC_MSG_NOTICE([SPUs will use write operations to flush the buffers])
 else
    AC_MSG_NOTICE([SPUs will not use write operations to flush the buffers])
 fi
-AM_CONDITIONAL(SPU_USES_WRITE, test "${enable_spu_write}" = "yes")
+AM_CONDITIONAL(SPU_USES_WRITE, test "${IS_CELL_MACHINE}" = "yes" -a "${enable_spu_write}" = "yes")
 
 
 # Search for available compilers and preprocessor
