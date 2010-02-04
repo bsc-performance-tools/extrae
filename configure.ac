@@ -129,7 +129,7 @@ fi
 if test "${IS_CELL_MACHINE}" = "yes" -a "${enable_spu_write}" = "yes" ; then
    AC_DEFINE([SPU_USES_WRITE], 1, [Defined if direct write operations to disk from SPUs are enabled])
    AC_MSG_NOTICE([SPUs will use write operations to flush the buffers])
-else
+elif test "${IS_CELL_MACHINE}" = "yes" -a "${enable_spu_write}" = "no" ; then
    AC_MSG_NOTICE([SPUs will not use write operations to flush the buffers])
 fi
 AM_CONDITIONAL(SPU_USES_WRITE, test "${IS_CELL_MACHINE}" = "yes" -a "${enable_spu_write}" = "yes")
