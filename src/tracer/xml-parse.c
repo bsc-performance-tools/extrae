@@ -313,7 +313,6 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		/* SPU hosted file size limit */
 		else if (!xmlStrcmp (tag->name, TRACE_SPU_FILESIZE))
 		{
-#ifndef SPU_USES_WRITE
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 			{
@@ -328,13 +327,9 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 				{
 					mfprintf (stdout, "CELLtrace: SPU tracing file size limit is %d mbytes.\n", spu_file_size);
 				}
-				spu_file_size *= 1024*1024;
 				XML_FREE(str);
 			}
 			XML_FREE(enabled); 
-#else
-			mfprintf (stdout, "CELLtrace: SPUs will write directly to disk. Ignoring tag %s\n", TRACE_SPU_DMATAG);
-#endif
 		}
 		else
 		{

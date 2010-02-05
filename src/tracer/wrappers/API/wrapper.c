@@ -695,7 +695,6 @@ static int read_environment_variables (int me)
 			fprintf (stdout, "CELLtrace: SPU tracing buffer size is %d events.\n", spu_buffer_size);
 	}
 
-# ifndef SPU_USES_WRITE
 	/* Limit the total size of tracing of each spu */
 	str = getenv ("MPTRACE_SPU_FILE_SIZE");
 	if (str == (char *)NULL) {
@@ -715,12 +714,6 @@ static int read_environment_variables (int me)
 		if (TASKID == 0)
 			fprintf (stdout, "CELLtrace: SPU tracing file size limit is %d mbytes.\n", spu_file_size);
 	}
-	spu_file_size *= 1024*1024;
-# else
-	if (getenv("MPTRACE_SPU_DMA_CHANNEL") != NULL)
-		if (TASKID == 0)
-			fprintf (stdout, "CELLtrace: SPUs will write directly to disk. Ignoring MPTRACE_SPU_DMA_CHANNEL\n");
-# endif /* SPU_USES_WRITE */
 
 #endif /* IS_CELL_MACHINE */
 
