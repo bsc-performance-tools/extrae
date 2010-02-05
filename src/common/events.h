@@ -97,6 +97,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define MPI_STATS_EV             40000017
 #define TRACING_MODE_EV          40000018
 #define PACX_STATS_EV            40000019
+#define MEMUSAGE_EV              40000020
 
 #define RUSAGE_BASE              45000000
 enum {
@@ -117,6 +118,16 @@ enum {
    RUSAGE_NVCSW_EV,
    RUSAGE_NIVCSW_EV,
    RUSAGE_EVENTS_COUNT /* Total number of getrusage events */
+};
+
+#define MEMUSAGE_BASE			 46000000
+enum {
+   MEMUSAGE_ARENA_EV = 0,
+   MEMUSAGE_HBLKHD_EV,
+   MEMUSAGE_UORDBLKS_EV,
+   MEMUSAGE_FORDBLKS_EV,
+   MEMUSAGE_INUSE_EV,
+   MEMUSAGE_EVENTS_COUNT /* Total number of memusage events */
 };
 
 #define MPI_STATS_BASE           54000000

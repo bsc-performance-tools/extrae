@@ -75,6 +75,8 @@ PM_DATA_FROM_L2, PM_INST_CMPL, PM_DATA_FROM_MEM, PM_LD_MISS_L1_LSU0, PM_1PLUS_PP
     <network enabled="no" />
 
     <resource-usage enabled="no" />
+
+	<memory-usage enabled="no" />
   </counters>
 
   <storage enabled="no">

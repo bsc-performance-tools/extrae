@@ -73,6 +73,7 @@
 #define TRACE_MPI_STATISTICS            ((xmlChar*) "mpi-statistics")
 #define TRACE_PACX_STATISTICS           ((xmlChar*) "pacx-statistics")
 #define TRACE_RUSAGE                    ((xmlChar*) "resource-usage")
+#define TRACE_MEMUSAGE                  ((xmlChar*) "memory-usage")
 #define TRACE_CELL                      ((xmlChar*) "cell")
 #define TRACE_SPU_DMATAG                ((xmlChar*) "spu-dma-channel")
 #define TRACE_SPU_FILESIZE              ((xmlChar*) "spu-file-size")

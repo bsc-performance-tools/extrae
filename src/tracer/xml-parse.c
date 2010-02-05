@@ -812,6 +812,13 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 			mfprintf (stdout, "mpitrace: Resource usage is %s at flush buffer.\n", tracejant_rusage?"enabled":"disabled");
 			XML_FREE(enabled);
 		}
+		else if (!xmlStrcmp (tag->name, TRACE_MEMUSAGE))
+		{
+            xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+            tracejant_memusage = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+            mfprintf (stdout, "mpitrace: Memory usage is %s at flush buffer.\n", tracejant_memusage?"enabled":"disabled");
+            XML_FREE(enabled);
+		}
 		else
 		{
 			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <Counters> level\n", tag->name);

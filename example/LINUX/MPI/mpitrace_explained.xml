@@ -101,6 +101,9 @@
 
     <!-- Obtain resource usage information -->
     <resource-usage enabled="no" />
+
+	<!-- Obtain malloc statistics -->
+	<memory-usage enabled="no" />
   </counters>
 
   <!-- Define the characteristics of the tracing storage. If not defined,

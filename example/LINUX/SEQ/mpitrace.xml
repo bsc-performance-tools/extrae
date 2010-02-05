@@ -21,6 +21,8 @@
     <network enabled="no" />
 
     <resource-usage enabled="no" />
+
+	<memory-usage enabled="no" />
   </counters>
 
   <storage enabled="no">

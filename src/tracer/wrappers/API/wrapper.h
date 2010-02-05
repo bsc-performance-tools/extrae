@@ -196,6 +196,10 @@ extern int tracejant_network_hwc;
 extern int tracejant_rusage;
 #define TRACING_RUSAGE (tracejant_rusage)
 
+/* Obtain information about MALLOC ? */
+extern int tracejant_memusage;
+#define TRACING_MEMUSAGE (tracejant_memusage)
+
 extern unsigned long long MinimumTracingTime;
 extern int hasMinimumTracingTime;
 

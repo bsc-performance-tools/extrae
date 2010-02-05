@@ -66,6 +66,8 @@ int *Sample_Caller_Labels_Used = NULL;
 
 int Rusage_Events_Found = FALSE;
 int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
+int Memusage_Events_Found = FALSE;
+int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
 int MPI_Stats_Events_Found = FALSE;
 int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 int PACX_Stats_Events_Found = FALSE;
@@ -297,6 +299,42 @@ static int GetRusage_Event (
 	GetRusage_Labels_Used[EvType] = TRUE;
 
 	return 0;
+}
+
+/******************************************************************************
+ ***  Memusage_Event
+ ******************************************************************************/
+
+static int Memusage_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+    int i;
+    unsigned int EvType, EvValue;
+    UNREFERENCED_PARAMETER(fset);
+
+    EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
+    EvValue = Get_EvMiscParam (current_event);   /* Param is the user event value. */
+
+    trace_paraver_state (cpu, ptask, task, thread, current_time);
+    trace_paraver_event (cpu, ptask, task, thread, current_time, MEMUSAGE_BASE+EvType, EvValue);
+
+    if (!Memusage_Events_Found)
+    {
+        Memusage_Events_Found = TRUE;
+        for (i=0; i<MEMUSAGE_EVENTS_COUNT; i++)
+        {
+            Memusage_Labels_Used[i] = FALSE;
+        }
+    }
+    Memusage_Labels_Used[EvType] = TRUE;
+
+    return 0;
 }
 
 /******************************************************************************
@@ -711,6 +749,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SET_TRACE_EV, SetTracing_Event },
 	{ CPU_BURST_EV, CPU_Burst_Event },
 	{ RUSAGE_EV, GetRusage_Event },
+	{ MEMUSAGE_EV, Memusage_Event },
 	{ MPI_STATS_EV, MPI_Stats_Event },
 	{ PACX_STATS_EV, PACX_Stats_Event },
 	{ USRFUNC_EV, USRFunction_Event },

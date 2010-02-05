@@ -167,6 +167,14 @@ struct rusage_evt_t rusage_evt_labels[RUSAGE_EVENTS_COUNT] = {
    { RUSAGE_NIVCSW_EV,   RUSAGE_NIVCSW_LBL }
 };
 
+struct memusage_evt_t memusage_evt_labels[MEMUSAGE_EVENTS_COUNT] = {
+   { MEMUSAGE_ARENA_EV, MEMUSAGE_ARENA_LBL },
+   { MEMUSAGE_HBLKHD_EV, MEMUSAGE_HBLKHD_LBL },
+   { MEMUSAGE_UORDBLKS_EV, MEMUSAGE_UORDBLKS_LBL },
+   { MEMUSAGE_FORDBLKS_EV, MEMUSAGE_FORDBLKS_LBL },
+   { MEMUSAGE_INUSE_EV, MEMUSAGE_INUSE_LBL }
+};
+
 struct mpi_stats_evt_t mpi_stats_evt_labels[MPI_STATS_EVENTS_COUNT] = {
    { MPI_STATS_P2P_COMMS_EV, MPI_STATS_P2P_COMMS_LBL },
    { MPI_STATS_P2P_BYTES_SENT_EV, MPI_STATS_P2P_BYTES_SENT_LBL },
@@ -532,6 +540,33 @@ static void Write_rusage_Labels (FILE * pcf_fd)
    }
 }
 
+static char * Memusage_Event_Label (int memusage_evt) {
+	int i;
+	
+	for (i=0; i<MEMUSAGE_EVENTS_COUNT; i++) {
+		if (memusage_evt_labels[i].evt_type == memusage_evt) {
+			return memusage_evt_labels[i].label;
+		}
+	}
+	return "Unknown memusage event";
+}
+
+static void Write_memusage_Labels (FILE * pcf_fd)
+{
+   int i;
+
+   if (Memusage_Events_Found) {
+      fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+
+      for (i=0; i<MEMUSAGE_EVENTS_COUNT; i++) {
+         if (Memusage_Labels_Used[i]) {
+            fprintf(pcf_fd, "0    %d    %s\n", MEMUSAGE_BASE+i, Memusage_Event_Label(i));
+         }
+      }
+      LET_SPACES (pcf_fd);
+   }
+}
+
 static char * MPI_Stats_Event_Label (int mpi_stats_evt)
 {
    int i;
@@ -725,6 +760,7 @@ int GeneratePCFfile (char *name, long long options)
 #endif
 
 	Write_rusage_Labels (fd);
+	Write_memusage_Labels (fd);
 	Write_MPI_Stats_Labels (fd);
 	Write_PACX_Stats_Labels (fd);
 	Write_Trace_Mode_Labels (fd);

@@ -151,6 +151,7 @@ SingleEv_Handler_t TRF_MISC_Event_Handlers[] = {
 	{ SET_TRACE_EV, SkipHandler },
 	{ CPU_BURST_EV, SkipHandler },
 	{ RUSAGE_EV, SkipHandler },
+	{ MEMUSAGE_EV, SkipHandler },
 	{ MPI_STATS_EV, SkipHandler },
 	{ USRFUNC_EV, SkipHandler },
 	{ SAMPLING_EV, SkipHandler },

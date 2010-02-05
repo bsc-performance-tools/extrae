@@ -304,6 +304,18 @@ typedef struct rusage_evt_t {
 #define RUSAGE_NIVCSW_LBL   "Involuntary context switches"
 extern struct rusage_evt_t rusage_evt_labels[RUSAGE_EVENTS_COUNT];
 
+typedef struct memusage_evt_t {
+	int evt_type;
+	char * label;
+} memusage_evt_t;
+
+#define MEMUSAGE_ARENA_LBL		"Total bytes allocated with brk/sbrk"
+#define MEMUSAGE_HBLKHD_LBL		"Total bytes allocated with mmap"
+#define MEMUSAGE_UORDBLKS_LBL	"Total sbrk memory in use"
+#define MEMUSAGE_FORDBLKS_LBL	"Total sbrk memory free"
+#define MEMUSAGE_INUSE_LBL		"Total memory in use"
+extern struct memusage_evt_t memusage_evt_labels[MEMUSAGE_EVENTS_COUNT];
+
 typedef struct mpi_stats_evt_t
 {
 	int evt_type;

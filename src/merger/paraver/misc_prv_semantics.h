@@ -43,6 +43,9 @@ int *Sample_Caller_Labels_Used;
 int Rusage_Events_Found;
 int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
 
+int Memusage_Events_Found;
+int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
+
 int MPI_Stats_Events_Found;
 int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 

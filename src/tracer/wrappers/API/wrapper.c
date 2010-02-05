@@ -142,8 +142,11 @@ int tracejant_hwc_uf = FALSE;
 /*** Variable global per saber si hem d'obtenir comptador de la xarxa ****/
 int tracejant_network_hwc = FALSE;
 
-/** Volem guardar informacio sobre rusage?                              **/
+/** Store information about rusage?                                     **/
 int tracejant_rusage = FALSE;
+
+/** Store information about malloc?                                     **/
+int tracejant_memusage = FALSE;
 
 /**** Variable global que controla quin subset de les tasks generen o ****/
 /**** no generen trasa ***************************************************/
@@ -562,6 +565,17 @@ static int read_environment_variables (int me)
 	}
 	else
 		tracejant_rusage = FALSE;
+
+	/* Enable memusage information? */
+	str = getevn ("MPITRACE_MEMUSAGE");
+	if (str != NULL && (strcmp (str, "1") == 0))
+	{
+		if (me == 0)
+			fprintf (stdout, "mpitrace: Memory usage is enabled at flush buffer.\n");
+		tracejant_memusage = TRUE;
+	}
+	else
+		tracejant_memusage = FALSE;
 
 	/* Enable network counters? */
 	str = getenv ("MPITRACE_NETWORK_COUNTERS");
@@ -1604,7 +1618,9 @@ void Thread_Finalization (void)
 	}
 	if (THREADID == 0) 
 	{
-		MPItrace_getrusage_Wrapper (TIME);
+		iotimer_t tmp_time = TIME;
+		MPItrace_getrusage_Wrapper (tmp_time);
+		MPItrace_memusage_Wrapper (tmp_time);
 	}
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 	{

@@ -73,6 +73,10 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpitrace_user_events.h"
 #include "misc_wrapper.h"
 
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
 #if 0
 #if defined(MPI_SUPPORT)
 # include "mpi_wrapper.h"
@@ -214,6 +218,22 @@ void MPItrace_getrusage_Wrapper (iotimer_t timestamp)
 		accum_usage.ru_nivcsw = current_usage.ru_nivcsw;
   
 		getrusage_running = FALSE;
+	}
+}
+
+void MPItrace_memusage_Wrapper (iotimer_t timestamp)
+{
+	if (TRACING_MEMUSAGE)
+	{
+        struct mallinfo mi = mallinfo();
+
+        int inuse = mi.arena + mi.hblkhd - mi.fordblks;
+
+		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    mi.arena);
+		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   mi.hblkhd);
+		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, mi.uordblks);
+		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, mi.fordblks);
+		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    inuse);
 	}
 }
 
