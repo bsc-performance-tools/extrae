@@ -567,7 +567,7 @@ static int read_environment_variables (int me)
 		tracejant_rusage = FALSE;
 
 	/* Enable memusage information? */
-	str = getevn ("MPITRACE_MEMUSAGE");
+	str = getenv ("MPITRACE_MEMUSAGE");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
