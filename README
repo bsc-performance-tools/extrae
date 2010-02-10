@@ -3,10 +3,10 @@ Read file INSTALL-examples for examples of specific installation instructions.
 
 Package dependencies:
 --
-* libxml2 2.5.0 : parse XML configuration files (optional)
-* PAPI : access to HW counters (optional)
-* DynInst : support dynamic instrumentation (optional)
-* liberty and libbfd : access debugging binary information (optional)
-* MPI : execute MPI jobs (optional)
+* libxml2 2.5.0 : parse XML configuration files (optional) - look for libxml2-devel packages for your OS
+* PAPI : access to HW counters (optional) - downloadable from http://icl.cs.utk.edu/papi/
+* DynInst : support dynamic instrumentation (optional) - downloadable from http://www.dyninst.org/
+* liberty and libbfd : access debugging binary information (optional) 
+* MPI : execute MPI jobs (optional) - tested with MPICH, MPICH2 and OpenMPI. Others may work.
 * OpenMP runtime (gcc, ibm or icc) : execute OpenMP jobs (optional)
 
