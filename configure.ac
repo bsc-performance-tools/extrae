@@ -282,7 +282,17 @@ AX_PROG_PMAPI
 AX_PROG_COUNTERS
 AX_PROG_MRNET
 
-AX_CHECK_LOAD_BALANCING
+# AX_CHECK_LOAD_BALANCING
+
+AC_ARG_ENABLE(load-balancing,
+   AC_HELP_STRING(
+      [--enable-load-balancing],
+      [Enable experimental support for Dynamic Load Balancing (disabled by default)]
+   ),
+   [enable_load_balancing="${enableval}"],
+   [enable_load_balancing="no"]
+)
+AM_CONDITIONAL(GENERATE_LOAD_BALANCING, test "${enable_load_balancing}" = "yes" )
 
 #######################################
 # Enable/Disable some tracing options #
