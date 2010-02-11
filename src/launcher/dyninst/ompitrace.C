@@ -85,7 +85,6 @@ string loadedModule;
 int errorPrint = 0; // external "dyninst" tracing (via errorFunc)
 
 #define DYNINST_NO_ERROR -1
-int expectError = DYNINST_NO_ERROR;
 
 /******************************************************************************
  **      Function name : file_exists (char*)
@@ -109,11 +108,11 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 			if (level == BPatchInfo)
 			{
 				if (errorPrint > 1)
-					printf("%s\n", params[0]);
+					fprintf (stderr, "%s\n", params[0]);
 			}
-  			else
+			else
 			{
-				printf("%s", params[0]);
+				fprintf (stderr, "%s", params[0]);
 			}
 		}
 		else
@@ -123,10 +122,10 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 			const char *msg = bpatch->getEnglishErrorString(num);
 			bpatch->formatErrorString(line, sizeof(line), msg, params);
 	
-			if (num != expectError)
+			if (num != DYNINST_NO_ERROR)
 			{
 				if (num != 112)
-					printf ("Error #%d (level %d): %s\n", num, level, line);
+					fprintf (stderr, "Error #%d (level %d): %s\n", num, level, line);
 			}
 		}
 	}
@@ -596,7 +595,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 			else
 			{
 				if (VerboseLevel)
-					cout << ": Unable to instrument user function : " << *iter << endl;
+					cout << PACKAGE_NAME << ": Unable to instrument user function : " << *iter << endl;
 			}
 			iter++;
 		}
