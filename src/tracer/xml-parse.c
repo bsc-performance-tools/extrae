@@ -447,7 +447,7 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	}
 }
 
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 /* Configure OpenMP related parameters */
 static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
@@ -464,9 +464,11 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		/* Shall we instrument openmp lock routines? */
 		else if (!xmlStrcmp (tag->name, TRACE_OMP_LOCKS))
 		{
+#if defined(OMP_SUPPORT)
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			setTrace_OMPLocks ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
 			XML_FREE(enabled);
+#endif
 		}
 		/* Shall we gather counters in the UF calls? */
 		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
@@ -1297,7 +1299,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						xmlChar *enabled = xmlGetProp (current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 						{
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 							tracejant_omp = TRUE;
 							Parse_XML_OMP (rank, xmldoc, current_tag);
 #else
