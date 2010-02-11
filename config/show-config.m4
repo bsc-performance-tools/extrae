@@ -19,7 +19,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo
 	echo Package configuration :
 	echo -----------------------
-	echo Installation prefix: ${exec_prefix}
+	echo Installation prefix: ${prefix}
 	echo Cross compilation:   ${CROSSC}
 	echo CC:                  ${CC}
 	echo CXX:                 ${CXX}
