@@ -1937,6 +1937,12 @@ AC_DEFUN([AX_PROG_MRNET],
 	AM_CONDITIONAL(HAVE_MRNET, test "${MRNET_INSTALLED}" = "yes")
 	AM_CONDITIONAL(HAVE_CLUSTERING, test "${CLUSTERING_INSTALLED}" = "yes")
 	AM_CONDITIONAL(HAVE_SPECTRAL, test "${spectral_links}" = "yes")
+	
+dnl	MRNET_SRCDIR=""
+dnl	if test "${MRNET_INSTALLED}" = "yes" ; then
+dnl		MRNET_SRCDIR="mrnet"
+dnl	fi
+dnl	AC_SUBST([MRNET_SRCDIR])
 
 	AX_FLAGS_RESTORE()
 	AC_LANG_RESTORE()
