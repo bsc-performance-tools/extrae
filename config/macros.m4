@@ -1795,7 +1795,7 @@ AC_DEFUN([AX_PROG_MRNET],
 	AC_LANG_SAVE()
 	AC_LANG([C++])
 
-	if test -d "src/tracer/mrnet" ; then
+	if test -f "src/tracer/mrnet/mrnet_root.C" ; then
 
 		AC_ARG_WITH(mrnet,
 			AC_HELP_STRING(
