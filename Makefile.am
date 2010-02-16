@@ -119,12 +119,14 @@ SEQ_EXAMPLE_FILES=\
 SEQ_EXAMPLE_FILE_XML1=example/LINUX/SEQ/mpitrace.xml
 
 MRNET_EXAMPLE_FILES=\
- example/LINUX/MRNET/Makefile       \
- example/LINUX/MRNET/mpi2prv.sh     \
- example/LINUX/MRNET/mpi_ping.f     \
- example/LINUX/MRNET/mpitrace.xml   \
- example/LINUX/MRNET/slurm_trace.sh \
- example/LINUX/MRNET/trace.sh
+ example/LINUX/MRNET/Makefile     \
+ example/LINUX/MRNET/merge.sh     \
+ example/LINUX/MRNET/test.c       \
+ example/LINUX/MRNET/mpitrace.xml \
+ example/LINUX/MRNET/cl.I.IPC.xml \
+ example/LINUX/MRNET/run.cmd      \
+ example/LINUX/MRNET/trace.sh     \
+ example/LINUX/MRNET/README
 endif
 endif
 endif
@@ -167,6 +169,7 @@ if HAVE_MRNET
 		$(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g"  \
 		> $$installed_file ; \
 	done
+	chmod u+x $(datadir)/example/MRNET/trace.sh $(datadir)/example/MRNET/merge.sh
 endif
 
 uninstall-local:

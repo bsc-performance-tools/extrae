@@ -1,0 +1,38 @@
+This tracing setup is tailored towards big executions that are producing large traces. The application is repeatedly analyzed using clustering techniques until a representative period is found. Then, a trace of that small region is produced along with several performance reports (clusters structure, extrapolated hwc lists, CPIstack). These are reported periodically, and the latest corresponds to the traced region. Please note the trace does not represent the whole execution, but the automatically selected period only.
+
+This system should not be used for very small executions, as results might not be accurate.
+
+Compilation of the test program
+===============================
+Simply issue:
+> gmake
+
+Submit the job
+==============
+> mnsubmit ./run.cmd
+
+Generate a Paraver trace
+========================
+Merge the intermediate files (*.mpit, *.mrn) obtained from the execution with:
+> ./merge.sh
+
+Adapt the example to your own application
+=========================================
+These are the basic steps you have to follow in order to use your own application:
+
+1. Edit run.cmd
+
+   1.1. Change the application binary (APPL_NAME) and number of tasks to run with (APPL_NPROCS). 
+        If your binary takes parameters, you can add them next to the binary name. 
+
+   1.2. Request more resources than those used by the application itself, with the #@total_tasks directive.
+        At least, 1 extra task is required. The more tasks used by the application, the more extra tasks you should set.
+        For guidance, with applications using:
+		- >=128 tasks, set >=4 extra tasks. 
+		- >=512 tasks, set >=8 extra tasks. 
+
+2. Advanced users might want to tune the tracing and clustering configuration, editing mpitrace.xml and cl.I.IPC.xml respectively. 
+   Some important parameters that can be set in mpitrace.xml, section 'trace-control > remote-control > mrnet':
+   - target: Allows to specify the final trace size (250Mb by default)
+   - start-after: Idle seconds before the analysis starts. This is meant to skip the initialization phase (30secs by default).
+

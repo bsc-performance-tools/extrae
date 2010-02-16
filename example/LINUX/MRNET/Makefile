@@ -1,12 +1,12 @@
 
-F77     = mpif77 
-FFLAGS  = -O2
+CC     = mpicc
+CFLAGS = -O2
 
-all: mpi_ping
+all: test
 
-mpi_ping: mpi_ping.f
-	$(F77) $(FFLAGS) mpi_ping.f $(FLIBS) -o mpi_ping
+test: test.c
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -f mpi_ping *.o pingtmp? TRACE.*
+	rm -f test *.o 
 

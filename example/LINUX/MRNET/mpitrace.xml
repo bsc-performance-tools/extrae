@@ -1,10 +1,10 @@
 <?xml version='1.0'?>
 
 <trace enabled="yes"
- home="@sed_MYPREFIXDIR@"
+ home="/home/bsc41/bsc41127/Tools/mpitrace_mrnet2.0/mpitrace_svn20100211/Package/64"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="@sed_XMLID@"
+ xml-parser-id="Id: xml-parse.c 172 2010-02-11 14:03:21Z harald $"
 >
   <mpi enabled="yes">
     <counters enabled="yes" />
@@ -96,8 +96,8 @@ PM_DATA_FROM_L2, PM_INST_CMPL, PM_DATA_FROM_MEM, PM_LD_MISS_L1_LSU0, PM_1PLUS_PP
     <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
     <global-ops enabled="no"></global-ops>
     <remote-control enabled="yes">
-		<!-- target: final size of the trace (Mb); analysis: choose between clustering/spectral; start-after: idle time before starting -->
-        <mrnet enabled="yes" target="100" analysis="clustering" start-after="15"/>
+		<!-- target: final size of the trace (Mb); analysis: choose between clustering/spectral; start-after: idle seconds before starting -->
+        <mrnet enabled="yes" target="250" analysis="clustering" start-after="30"/>
 		<signal enabled="no" which="USR1"/>
     </remote-control>
   </trace-control>
