@@ -28,7 +28,7 @@ endif
 if HAVE_MPI
   lib_LTLIBRARIES += libmpitrace.la libmpitracef.la
 if WANT_OPENMP
-  lib_LTLIBRARIES += libompitrace.la
+  lib_LTLIBRARIES += libompitrace.la libompitracef.la
 endif
 if WANT_SMPSS
   lib_LTLIBRARIES += libsmpssmpitrace.la libsmpssmpitracef.la
@@ -54,7 +54,7 @@ if GENERATE_LOAD_BALANCING
 if HAVE_MPI
   lib_LTLIBRARIES += libmpitrace-lb.la libmpitracef-lb.la
 if WANT_OPENMP
-  lib_LTLIBRARIES += libompitrace-lb.la
+  lib_LTLIBRARIES += libompitrace-lb.la libompitracef-lb.la
 endif
 if WANT_SMPSS
   lib_LTLIBRARIES += libsmpssmpitrace-lb.la libsmpssmpitracef-lb.la
@@ -140,6 +140,7 @@ libpacxtracef_la_SOURCES = $(libpacxtrace_la_SOURCES)
 
 # OpenMP & OpenMP + MPI
 libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES) $(WRAPPERS_OMP)
+libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES) $(WRAPPERS_OMP) mpif.h
 libomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OMP)
 
 # SMPSS & SMPSS + MPI
@@ -158,6 +159,7 @@ libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT)
 libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libompitrace_lb_la_SOURCES = $(libompitrace_la_SOURCES)
+libompitracef_lb_la_SOURCES = $(libompitrace_la_SOURCES) mpif.h
 libsmpssmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
 libsmpssmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 
@@ -189,6 +191,7 @@ libpacxtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX
 libpacxtracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX/libiface_pacxf.la
 
 libompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la
+libompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la
 libomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
 
 libsmpssmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la
@@ -203,6 +206,7 @@ libtrttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API)
 libmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la
 libmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la
 libompitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la
+libompitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la
 
 libsmpssmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la
 libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la
@@ -289,6 +293,7 @@ libpacxtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @PACX_CFLAGS@ $(MPITRA
 libpacxtracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @PACX_CFLAGS@ -DFORTRAN_SYMBOLS -DPACX_SUPPORT
 
 libompitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DOMP_SUPPORT -DMPI_SUPPORT
+libompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DOMP_SUPPORT -DMPI_SUPPORT
 libomptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT
 
 libsmpssmpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DSMPSS_SUPPORT -DMPI_SUPPORT
@@ -303,6 +308,7 @@ libtrttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DTRT_SUPPORT
 libmpitrace_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT
 libmpitracef_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT
 libompitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DOMP_SUPPORT -DMPI_SUPPORT
+libompitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DOMP_SUPPORT -DMPI_SUPPORT
 
 libsmpssmpitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DSMPSS_SUPPORT -DMPI_SUPPORT
 libsmpssmpitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DSMPSS_SUPPORT -DMPI_SUPPORT
@@ -322,16 +328,17 @@ endif
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
-libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -static
+libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) # -static
 
 libpacxtrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
-libpacxtracef_la_LDFLAGS = $(libpacxtrace_la_LDFLAGS) -static
+libpacxtracef_la_LDFLAGS = $(libpacxtrace_la_LDFLAGS) # -static
 
 libompitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
+libompitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libomptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 
 libsmpssmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
-libsmpssmpitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) -static
+libsmpssmpitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) # -static
 libsmpsstrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 
 libnanostrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
@@ -340,11 +347,12 @@ libpttrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 libtrttrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 
 libmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) -static
+libmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 libompitrace_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
+libompitracef_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
 
 libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) -static
+libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
 lib_dyn_mpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 lib_dyn_omptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
