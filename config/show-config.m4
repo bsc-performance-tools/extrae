@@ -47,7 +47,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo pThread instrumentation: ${enable_pthread}
 
 	echo
-	if test "${PMAPI_ENABLED}" = "yes" -a "${PAPI_ENABLED}" = "yes" ; then
+	if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" ; then
 		echo Performance counters at instrumentation: yes
 		if test "${PMAPI_ENABLED}" = "yes" ; then
 			echo -e \\\tPerformance API:  PMAPI
