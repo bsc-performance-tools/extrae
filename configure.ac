@@ -505,14 +505,14 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   src/tracer/interfaces/Makefile src/tracer/interfaces/API/Makefile \
   src/tracer/interfaces/MPI/Makefile src/tracer/interfaces/PACX/Makefile \
   src/tracer/hwc/Makefile \
-  src/tracer/hwc/myrinet_hwc/Makefile \
-  src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile\
   src/tracer/spu/Makefile \
   src/merger/Makefile src/merger/parallel/Makefile src/others/Makefile  \
   doc/Makefile etc/Makefile])
 #if test "${MRNET_INSTALLED}" = "yes" ; then
 AC_CONFIG_FILES([src/tracer/mrnet/Makefile])
 #fi
+### TEMPORARILY_DISABLED
+### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])
 AC_OUTPUT
 
 AX_SHOW_CONFIGURATION

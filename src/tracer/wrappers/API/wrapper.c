@@ -577,6 +577,7 @@ static int read_environment_variables (int me)
 	else
 		tracejant_memusage = FALSE;
 
+#if defined(TEMPORARILY_DISABLED)
 	/* Enable network counters? */
 	str = getenv ("MPITRACE_NETWORK_COUNTERS");
 	if (str != NULL && (strcmp (str, "1") == 0))
@@ -586,6 +587,7 @@ static int read_environment_variables (int me)
 		tracejant_network_hwc = TRUE;
 	}
 	else
+#endif
 		tracejant_network_hwc = FALSE;
 	
 	/* Add UF routines to instrument under GCC -finstrument-function callback
@@ -1317,7 +1319,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	else if (!HWCEnabled)
 		fprintf (stdout, "mpitrace: Tracing enabled for process %d.\n", getpid ());
 
-#if !defined(IS_BG_MACHINE)
+#if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
 #endif
 

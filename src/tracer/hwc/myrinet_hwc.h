@@ -53,6 +53,7 @@ extern int (*Myrinet_read_routes)   (int, int, uint32_t *);
 
 void Myrinet_HWC_Initialize(void);
 
+#if defined(TEMPORARILY_DISABLED)
 #define TRACE_MYRINET_HWC()                                         \
 {                                                                   \
    if (Myrinet_Counters_Enabled)                                    \
@@ -97,5 +98,10 @@ void Myrinet_HWC_Initialize(void);
                         types, values, params);                       \
 	}                                                                 \
 }
+#else 
+#define TRACE_MYRINET_HWC()
+#define TRACE_MYRINET_ROUTES(mpi_rank)
+#endif
+
 
 #endif /* __MYRINET_HWC_H__ */

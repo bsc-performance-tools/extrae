@@ -802,10 +802,12 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 		}
 		else if (!xmlStrcmp (tag->name, TRACE_NETWORK))
 		{
+#if defined(TEMPORARILY_DISABLED)
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_network_hwc = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
 			mfprintf (stdout, "mpitrace: Network counters are %s.\n", tracejant_network_hwc?"enabled":"disabled");
 			XML_FREE(enabled);
+#endif
 		}
 		else if (!xmlStrcmp (tag->name, TRACE_RUSAGE))
 		{

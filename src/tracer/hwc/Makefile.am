@@ -1,8 +1,10 @@
 include $(top_srcdir)/PATHS
 
-SUBDIRS = myrinet_hwc
-
-HWC = myrinet_hwc.c
+### TEMPORARILY_DISABLED
+#SUBDIRS = myrinet_hwc
+#
+#HWC = myrinet_hwc.c
+HWC =
 
 if HAVE_PAPI
 HWC += common_hwc.c papi_hwc.c
