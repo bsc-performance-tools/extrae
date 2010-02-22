@@ -13,7 +13,7 @@ libsputrace_la_SOURCES = spu_clock.c spu_clock.h \
   spu_init.c \
   spu_interface.c \
   spu_wrapper.c \
-  wrapper.c \
+  wrapper.c wrapper.h \
   defaults.h
 
 libsputrace_la_CFLAGS  = -I. -I.. -I../../common -I../clocks -I../hwc

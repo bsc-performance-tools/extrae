@@ -58,7 +58,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "clock.h"
 #include "hash_table.h"
 #include "signals.h"
-#include "myrinet_hwc.h"
+#if defined(DEAD_CODE)
+# include "myrinet_hwc.h"
+#endif
 #include "misc_wrapper.h"
 #include "mpi_interface.h"
 #include "mode.h"
@@ -870,7 +872,9 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
+#if defined(DEAD_CODE)
 	TRACE_MYRINET_HWC();
+#endif
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -3879,7 +3883,9 @@ int MPI_Finalize_C_Wrapper (void)
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
+#if defined(DEAD_CODE)
 	TRACE_MYRINET_HWC();
+#endif
 
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -6890,12 +6896,16 @@ static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp)
 
 void OMPItrace_network_counters_Wrapper (void)
 {
+#if defined(DEAD_CODE)
 	TRACE_MYRINET_HWC();
+#endif
 }
 
 void OMPItrace_network_routes_Wrapper (int mpi_rank)
 {
+#if defined(DEAD_CODE)
 	TRACE_MYRINET_ROUTES(mpi_rank);
+#endif
 }
 
 /******************************************************************************

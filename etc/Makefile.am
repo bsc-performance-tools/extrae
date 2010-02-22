@@ -1,4 +1,6 @@
 
+EXTRA_DIST = ompitrace.csh ompitrace.sh configured.sh
+
 mkdirSHscripts:
 	$(mkdir_p) $(sysconfdir)
 	touch $(sysconfdir)/license.dat

@@ -4,7 +4,11 @@ common_SRCS = \
  utils.c utils.h \
  events.c events.h \
  timesync.c timesync.h \
- new-queue.c new-queue.h
+ new-queue.c new-queue.h \
+ debug.h \
+ common.h \
+ num_hwc.h \
+ types.h
 
 common_INCLUDES = \
         -I$(COMMON_DIR)

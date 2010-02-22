@@ -103,7 +103,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "utils.h"
 #include "calltrace.h"
 #include "xml-parse.h"
-#include "myrinet_hwc.h"
+#if defined(DEAD_CODE)
+# include "myrinet_hwc.h"
+#endif
 #include "UF_gcc_instrument.h"
 #include "mode.h"
 #include "events.h"

@@ -1,5 +1,27 @@
 
-manual_ug=user-guide
+
+EXTRA_DIST = API-section.tex \
+ common-macros.tex \
+ environmentvariables-section.tex \
+ FAQ-section.tex \
+ instrumented-routines-section.tex \
+ merge-section.tex quick-guide-section.tex \
+ user-guide.tex \
+ wholeXML-section.tex \
+ XML-section.tex \
+ XML/buffer.xml.tex \
+ XML/bursts.xml.tex \
+ XML/callers.xml.tex \
+ XML/cell.xml.tex \
+ XML/config.xml.tex \
+ XML/counters.xml.tex \
+ XML/mpitrace.xml.tex \
+ XML/mpi.xml.tex \
+ XML/openmp.xml.tex \
+ XML/pacx.xml.tex \
+ XML/storage.xml.tex
+
+manual_ug = user-guide
 
 #
 # Aquesta combinacio de params pot ser interessant per a generar un single HTML

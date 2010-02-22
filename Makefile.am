@@ -4,11 +4,15 @@ if GENERATE_DOCUMENTATION
 SUBDIRS += doc
 endif
 
+EXTRA_DIST = example
 
 VPATH=@srcdir@
 SRCDIR=@srcdir@
 
 @SET_MAKE@
+
+dist-hook:
+	rm -rf `find $(distdir)/example -name .svn`
 
 #
 # Create EXAMPLE directory and copy there the example

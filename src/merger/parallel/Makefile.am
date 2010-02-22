@@ -36,7 +36,9 @@ paraver_FILES = \
  ../paraver/pthread_prv_events.c ../paraver/pthread_prv_events.h \
  ../paraver/misc_prv_events.c ../paraver/misc_prv_events.h \
  ../paraver/trt_prv_events.c ../paraver/trt_prv_events.h \
- ../paraver/write_file_buffer.c ../paraver/write_file_buffer.h
+ ../paraver/write_file_buffer.c ../paraver/write_file_buffer.h \
+ ../paraver/MPI_EventEncoding.h \
+ ../paraver/PACX_EventEncoding.h
 
 parallel_FILES = \
  mpi-aux.h mpi-tags.h \
@@ -56,7 +58,6 @@ mpimpi2prv_SOURCES = \
  $(paraver_FILES) \
  $(common_FILES) \
  $(top_srcdir)/src/common/events.h \
- $(top_srcdir)/src/common/uint64.h \
  $(top_srcdir)/src/common/queue.h \
  $(top_srcdir)/src/common/record.h
 

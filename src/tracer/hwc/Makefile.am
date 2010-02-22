@@ -4,7 +4,7 @@ include $(top_srcdir)/PATHS
 #SUBDIRS = myrinet_hwc
 #
 #HWC = myrinet_hwc.c
-HWC =
+HWC = hwc.h
 
 if HAVE_PAPI
 HWC += common_hwc.c papi_hwc.c

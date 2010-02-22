@@ -74,34 +74,37 @@ endif
 endif
 
 WRAPPERS_CORE = \
-	wrappers/API/buffers.c \
-	wrappers/API/wrapper.c \
-	wrappers/API/misc_wrapper.c
+	wrappers/API/buffers.c wrappers/API/buffers.h \
+	wrappers/API/wrapper.c wrappers/API/wrapper.h \
+	wrappers/API/misc_wrapper.c wrappers/API/misc_wrapper.h \
+	wrappers/API/trace_buffers.h \
+	trace_macros.h \
+	trace_hwc.h
 
 # Wrappers for MPI instrumentation
-WRAPPERS_MPI = wrappers/MPI/mpi_wrapper.c
+WRAPPERS_MPI = mpif.h wrappers/MPI/mpi_wrapper.c wrappers/MPI/mpi_wrapper.h
 
 # Wrappers for PACX instrumentation
-WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c
+WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
 
 # Probes for OpenMP instrumentation
-WRAPPERS_OMP = probes/OMP/omp_probe.c \
-  wrappers/OMP/omp_wrapper.c \
-  wrappers/OMP/gnu-libgomp-4.2.c
+WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
+  wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h \
+  wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h
 
 if ARCH_POWERPC
 if OS_LINUX
-  WRAPPERS_OMP += wrappers/OMP/ibm-xlsmp-1.6.c
+  WRAPPERS_OMP += wrappers/OMP/ibm-xlsmp-1.6.c wrappers/OMP/ibm-xlsmp-1.6.h
 endif
 endif
 
 # Wrappers for TRT instrumentation (experimental)
-WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c \
-	probes/TRT/trt_probe.c
+WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c wrappers/TRT/trt_wrapper.h \
+	probes/TRT/trt_probe.c probes/TRT/trt_probe.h
 
 # Wrappers for pthreads instrumentation
-WRAPPERS_PTHREAD = wrappers/pthread/pthread_wrapper.c \
-  probes/pthread/pthread_probe.c
+WRAPPERS_PTHREAD = wrappers/pthread/pthread_wrapper.c wrappers/pthread/pthread_wrapper.h \
+  probes/pthread/pthread_probe.c probes/pthread/pthread_probe.h
 
 if IS_CELL_MACHINE
   WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c
@@ -117,14 +120,13 @@ core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
  xml-parse.c xml-parse.h                     \
- UF_gcc_instrument.c UFF_gcc_instruments.h   \
+ UF_gcc_instrument.c UF_gcc_instrument.h     \
  mode.c mode.h                               \
  threadid.h threadid.c                       \
  taskid.h taskid.c                           \
- uint64.h defines.h                          \
+ defines.h                                   \
  $(COMMON_DIR)/events.h                      \
  $(COMMON_DIR)/record.h                      \
- $(COMMON_DIR)/trace_macros.h                \
  $(COMMON_DIR)/queue.h                       \
  $(COMMON_DIR)/trace_mode.h                  \
  $(WRAPPERS_CORE)

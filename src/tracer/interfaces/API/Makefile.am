@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-iface_API_SRCS     = misc_interface.c
+iface_API_SRCS     = misc_interface.c misc_interface.h
 iface_API_INCLUDES = \
    -I$(COMMON_DIR)   \
    -I$(CLOCKS_DIR)   \
