@@ -1898,9 +1898,9 @@ AC_DEFUN([AX_PROG_MRNET],
 		        else
 		            dnl There are unresolved dependencies with fftw3
 		            AC_MSG_RESULT([yes])
-		            AC_ARG_WITH(fft,
+		            AC_ARG_WITH(spectral-fft,
 		                AC_HELP_STRING(
-		                    [--with-fft@<:@=DIR@:>@],
+		                    [--with-spectral-fft@<:@=DIR@:>@],
 		                    [specify where to find FFT libraries and includes]
 		                ),
 		                [fft_paths="$withval"],
