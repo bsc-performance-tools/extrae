@@ -1,11 +1,7 @@
 #!/bin/bash
-# @ class = debug
 # @ initialdir = .
-# @ output = trace%j.out
-# @ error =  trace%j.err
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!! REQUEST AT LEAST 1 EXTRA TASK !!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# @ output = job%j.out
+# @ error =  job%j.err
 # @ total_tasks = 33
 # @ cpus_per_task = 1
 # @ tasks_per_node = 4
