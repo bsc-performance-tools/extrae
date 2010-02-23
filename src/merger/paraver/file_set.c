@@ -716,42 +716,42 @@ static event_t * Search_CPU_Burst (
 	unsigned int *task, 
 	unsigned int *thread )
 {
-   event_t * minimum = NULL, * current = NULL;
-   unsigned int fminimum = 0;
-   unsigned int file;
-   FileItem_t * sfile;
+	event_t * minimum = NULL, * current = NULL;
+	unsigned int fminimum = 0;
+	unsigned int file;
+	FileItem_t * sfile;
 
-   for (file = 0; file < fset->nfiles; file++)
-   {  
-      current = fset->files[file].next_cpu_burst;
-      /* Look forward until you find the next CPU burst (or end of file) */
-      while ((current < (fset->files[file].last)) && (current->event != CPU_BURST_EV) && (current->event != MPI_STATS_EV))
-      {
-         current = ++(fset->files[file].next_cpu_burst);
-      }
-      if (current < (fset->files[file].last)) 
-      {
-         if (minimum == NULL)
-         {
-            minimum = current;
-            fminimum = file;
-         }
-         else 
-         { 
-			if (TIMESYNC(fset->files[fminimum].task - 1, minimum->time) > TIMESYNC(fset->files[file].task - 1, current->time))
+	for (file = 0; file < fset->nfiles; file++)
+	{  
+		current = fset->files[file].next_cpu_burst;
+		/* Look forward until you find the next CPU burst (or end of file) */
+		while ((current < (fset->files[file].last)) && (current->event != CPU_BURST_EV) && (current->event != MPI_STATS_EV))
+		{
+			current = ++(fset->files[file].next_cpu_burst);
+		}
+		if (current < (fset->files[file].last)) 
+		{
+			if (minimum == NULL)
 			{
 				minimum = current;
 				fminimum = file;
 			}
-         }
-      }
-   }
+			else 
+			{ 
+				if (TIMESYNC(fset->files[fminimum].task - 1, minimum->time) > TIMESYNC(fset->files[file].task - 1, current->time))
+				{
+					minimum = current;
+					fminimum = file;
+				}
+			}
+		}
+	}
 
-   sfile = &(fset->files[fminimum]);
-   CurrentObj_FS (sfile, *cpu, *ptask, *task, *thread);
-   sfile->next_cpu_burst ++; /* StepOne */
+	sfile = &(fset->files[fminimum]);
+	CurrentObj_FS (sfile, *cpu, *ptask, *task, *thread);
+	sfile->next_cpu_burst ++; /* StepOne */
 
-   return minimum;
+	return minimum;
 }
 
 /******************************************************************************
@@ -761,37 +761,37 @@ static event_t * Search_CPU_Burst (
 static event_t *GetNextEvent_FS_prv (FileSet_t * fset, unsigned int *cpu,
   unsigned int *ptask, unsigned int *task, unsigned int *thread)
 {
-  event_t *minimum = NULL, *current = NULL;
-  unsigned int fminimum = 0, file;
-  FileItem_t *sfile;
+	event_t *minimum = NULL, *current = NULL;
+	unsigned int fminimum = 0, file;
+	FileItem_t *sfile;
 
-  for (file = 0; file < fset->nfiles; file++)
-  {
-    current = Current_FS (&(fset->files[file]));
-    while ((current != NULL) && ((current->event == CPU_BURST_EV) || (current->event == MPI_STATS_EV)))
-    {
-       StepOne_FS (&(fset->files[file]));
-       current = Current_FS (&(fset->files[file]));
-    }
-    if (minimum == NULL && current != NULL)
-    {
-      minimum = current;
-      fminimum = file;
-    }
-    else if (minimum != NULL && current != NULL)
-    {
-		if (TIMESYNC(fset->files[fminimum].task - 1, minimum->time) > TIMESYNC(fset->files[file].task - 1, current->time))
+	for (file = 0; file < fset->nfiles; file++)
+	{
+		current = Current_FS (&(fset->files[file]));
+		while ((current != NULL) && ((current->event == CPU_BURST_EV) || (current->event == MPI_STATS_EV)))
+		{
+			StepOne_FS (&(fset->files[file]));
+			current = Current_FS (&(fset->files[file]));
+		}
+		if (minimum == NULL && current != NULL)
 		{
 			minimum = current;
 			fminimum = file;
 		}
-    }
-  }
-  sfile = &(fset->files[fminimum]);
-  CurrentObj_FS (sfile, *cpu, *ptask, *task, *thread);
-  StepOne_FS (sfile);
+		else if (minimum != NULL && current != NULL)
+		{
+			if (TIMESYNC(fset->files[fminimum].task - 1, minimum->time) > TIMESYNC(fset->files[file].task - 1, current->time))
+			{
+				minimum = current;
+				fminimum = file;
+			}
+		}
+	}
+	sfile = &(fset->files[fminimum]);
+	CurrentObj_FS (sfile, *cpu, *ptask, *task, *thread);
+	StepOne_FS (sfile);
 
-  return minimum;
+	return minimum;
 }
 
 static event_t *GetNextEvent_FS_trf (FileSet_t * fset, unsigned int *cpu,
@@ -821,58 +821,58 @@ event_t * GetNextEvent_FS (
 	unsigned int *task, 
 	unsigned int *thread)
 {
-    event_t * ret = NULL;
-    static event_t * min_event = NULL, * min_burst = NULL;
-    static unsigned int min_event_ptask = 0, min_event_task = 0, min_event_thread = 0, min_event_cpu = 0;
-    static unsigned int min_burst_ptask = 0, min_burst_task = 0, min_burst_thread = 0, min_burst_cpu = 0;
+	event_t * ret = NULL;
+	static event_t * min_event = NULL, * min_burst = NULL;
+	static unsigned int min_event_ptask = 0, min_event_task = 0, min_event_thread = 0, min_event_cpu = 0;
+	static unsigned int min_burst_ptask = 0, min_burst_task = 0, min_burst_thread = 0, min_burst_cpu = 0;
 
-    if (PRV_SEMANTICS == fset->traceformat)
-    {
-       if (Is_FS_Rewound)
-       {
-          /* Select the first CPU burst event and the first normal event */
-          min_event = GetNextEvent_FS_prv (fset, &min_event_cpu, &min_event_ptask, &min_event_task, &min_event_thread);
-          min_burst = Search_CPU_Burst (fset, &min_burst_cpu, &min_burst_ptask, &min_burst_task, &min_burst_thread);
-          Is_FS_Rewound = FALSE;
-       }
-       if ((min_event == NULL) && (min_burst == NULL))
-       {
-          /* No more events to parse */
-          ret = NULL;
-       }
-       else if ((min_event == NULL) || (min_burst != NULL && TIMESYNC(min_burst_task, min_burst->time) < TIMESYNC(min_event_task, min_event->time)))
-       {
-          /* Return the minimum CPU burst event */
-          ret = min_burst;
-          *cpu    = min_burst_cpu;
-          *ptask  = min_burst_ptask;
-          *task   = min_burst_task;
-          *thread = min_burst_thread;
-          /* Select the following CPU burst event */
-          min_burst = Search_CPU_Burst (fset, &min_burst_cpu, &min_burst_ptask, &min_burst_task, &min_burst_thread);
-       }
-       else if ((min_burst == NULL) || (min_event != NULL && TIMESYNC(min_event_task, min_event->time) <= TIMESYNC(min_burst_task, min_burst->time)))
-       {
-          /* Return the minimum normal event */
-          ret = min_event;
-          *cpu    = min_event_cpu;
-          *ptask  = min_event_ptask;
-          *task   = min_event_task;
-          *thread = min_event_thread;
-          /* Select the following normal event */
-          min_event = GetNextEvent_FS_prv (fset, &min_event_cpu, &min_event_ptask, &min_event_task, &min_event_thread);
-       }
-       else
-       {
-          /* Should not happen */
-          ret = NULL;
-       }
-    }
-    else if (TRF_SEMANTICS == fset->traceformat)
-    {
-			ret = GetNextEvent_FS_trf (fset, cpu, ptask, task, thread);
-    }
-    return ret;
+	if (PRV_SEMANTICS == fset->traceformat)
+	{
+		if (Is_FS_Rewound)
+		{
+			/* Select the first CPU burst event and the first normal event */
+			min_event = GetNextEvent_FS_prv (fset, &min_event_cpu, &min_event_ptask, &min_event_task, &min_event_thread);
+			min_burst = Search_CPU_Burst (fset, &min_burst_cpu, &min_burst_ptask, &min_burst_task, &min_burst_thread);
+			Is_FS_Rewound = FALSE;
+		}
+		if ((min_event == NULL) && (min_burst == NULL))
+		{
+			/* No more events to parse */
+			ret = NULL;
+		}
+		else if ((min_event == NULL) || (min_burst != NULL && TIMESYNC(min_burst_task-1, min_burst->time) < TIMESYNC(min_event_task-1, min_event->time)))
+		{
+			/* Return the minimum CPU burst event */
+			ret = min_burst;
+			*cpu    = min_burst_cpu;
+			*ptask  = min_burst_ptask;
+			*task   = min_burst_task;
+			*thread = min_burst_thread;
+			/* Select the following CPU burst event */
+			min_burst = Search_CPU_Burst (fset, &min_burst_cpu, &min_burst_ptask, &min_burst_task, &min_burst_thread);
+		}
+		else if ((min_burst == NULL) || (min_event != NULL && TIMESYNC(min_event_task-1, min_event->time) <= TIMESYNC(min_burst_task-1, min_burst->time)))
+		{
+			/* Return the minimum normal event */
+			ret = min_event;
+			*cpu    = min_event_cpu;
+			*ptask  = min_event_ptask;
+			*task   = min_event_task;
+			*thread = min_event_thread;
+			/* Select the following normal event */
+			min_event = GetNextEvent_FS_prv (fset, &min_event_cpu, &min_event_ptask, &min_event_task, &min_event_thread);
+		}
+		else
+		{
+			/* Should not happen */
+			ret = NULL;
+		}
+	}
+	else if (TRF_SEMANTICS == fset->traceformat)
+	{
+		ret = GetNextEvent_FS_trf (fset, cpu, ptask, task, thread);
+	}
+	return ret;
 }
 
 /******************************************************************************
