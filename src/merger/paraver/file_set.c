@@ -33,8 +33,11 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
+#ifdef HAVE_STDIO_H
+# ifdef HAVE_FOPEN64
+#  define __USE_LARGEFILE64
+# endif
+# include <stdio.h>
 #endif
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -202,7 +205,8 @@ int inWhichGroup (int task, FileSet_t *fset)
 
 static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 {
-	int fd_trace;
+	int ret;
+	FILE *fd_trace;
 	ssize_t res;
 	char *tmp;
 	char paraver_tmp[PATH_MAX];
@@ -211,7 +215,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 #if defined(SAMPLING_SUPPORT)
 	char sample_file_name[PATH_MAX];
 	long long sample_file_size;
-	int fd_sample;
+	FILE *fd_sample;
 #endif
 #if defined(HAVE_MRNET)
 	char mrn_file_name[PATH_MAX];
@@ -234,10 +238,10 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 		sprintf (paraver_tmp, "%s/TmpFileXXXXXX", getenv ("MPI2PRV_TMP_DIR"));
 
 	strcpy (trace_file_name, IFile->name);
-	fd_trace = open (trace_file_name, O_RDONLY);
-	if (fd_trace == -1)
+	fd_trace = fopen (trace_file_name, "r");
+	if (NULL == fd_trace)
 	{
-		perror ("open");
+		perror ("fopen");
 		fprintf (stderr, "mpi2prv Error: Opening trace file %s\n", trace_file_name);
 		return (-1);
 	}
@@ -246,7 +250,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 	sample_file_name[strlen(sample_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
 	strcat (sample_file_name, EXT_SAMPLE);
 
-	fd_sample = open (sample_file_name, O_RDONLY);
+	fd_sample = fopen (sample_file_name, "r");
 #endif
 #if defined(HAVE_MRNET)
 	strcpy (mrn_file_name, IFile->name);
@@ -256,10 +260,29 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 	fd_mrn = open (mrn_file_name, O_RDONLY);
 #endif
 
-	trace_file_size  = lseek (fd_trace, 0, SEEK_END);
+	ret = fseeko (fd_trace, 0, SEEK_END);
+	if (0 != ret)
+	{
+		fprintf (stderr, "mpi2prv: `fseeko` failed to set file pointer of file %s\n", trace_file_name);
+		exit (1);
+	}
+	trace_file_size = ftello (fd_trace);
+
 #if defined(SAMPLING_SUPPORT)
-	sample_file_size = (fd_sample != -1)?lseek (fd_sample, 0, SEEK_END):0;
+	if (NULL != fd_sample)
+	{
+		ret = fseeko (fd_sample, 0, SEEK_END);
+		if (0 != ret)
+		{
+			fprintf (stderr, "mpi2prv: `fseeko` failed to set file pointer of file %s\n", sample_file_name);
+			exit (1);
+		}
+		sample_file_size = ftello (fd_sample);
+	}
+	else
+		sample_file_size = 0;
 #endif
+
 #if defined(HAVE_MRNET)
 	mrn_file_size = (fd_mrn != -1)?lseek (fd_mrn, 0, SEEK_END):0;
 #endif
@@ -278,9 +301,10 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 #endif
 	fitem->num_of_events = (fitem->size>0)?fitem->size/sizeof(event_t):0;
 
-	lseek (fd_trace, 0, SEEK_SET);
+	rewind (fd_trace);
 #if defined(SAMPLING_SUPPORT)
-	if (fd_sample != -1) lseek (fd_sample, 0, SEEK_SET);
+	if (NULL != fd_sample)
+		rewind (fd_sample);
 #endif
 #if defined(HAVE_MRNET)
 	if (fd_mrn != -1) lseek (fd_mrn, 0, SEEK_SET);
@@ -312,27 +336,27 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 	}
 
 	/* Read files */
-	res = read (fd_trace, fitem->first, trace_file_size);
+	res = fread (fitem->first, 1, trace_file_size, fd_trace);
 	if (res != trace_file_size)
 	{
-		fprintf (stderr, "mpi2prv: `read` failed to read from file %s\n", trace_file_name);
+		fprintf (stderr, "mpi2prv: `fread` failed to read from file %s\n", trace_file_name);
 		fprintf (stderr, "mpi2prv:        returned %d (instead of %d)\n", res, trace_file_size);
 		exit (1);
 	}
 	ptr_last = fitem->first + (trace_file_size/sizeof(event_t));
 
 #if defined(SAMPLING_SUPPORT)
-	if (fd_sample != -1)
+	if (NULL != fd_sample)
 	{
-		res = read (fd_sample, ptr_last, sample_file_size);
+		res = fread (ptr_last, 1, sample_file_size, fd_sample);
 		if (res != sample_file_size)
 		{
-			fprintf (stderr, "mpi2prv: `read` failed to read from file %s\n", sample_file_name);
+			fprintf (stderr, "mpi2prv: `fread` failed to read from file %s\n", sample_file_name);
 			fprintf (stderr, "mpi2prv:        returned %d (instead of %d)\n", res, sample_file_size);
 			exit (1);
 		}
 	}
-	if (sample_file_size > 0) sort_needed = TRUE;
+	sort_needed = sample_file_size > 0;
 	ptr_last += (sample_file_size/sizeof(event_t));
 #endif
 #if defined(HAVE_MRNET)
@@ -356,9 +380,10 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 #endif
 
 	/* We no longer need this/these descriptor/s */
-	close (fd_trace);
+	fclose (fd_trace);
 #if defined(SAMPLING_SUPPORT)
-	close (fd_sample);
+	if (NULL != fd_sample)
+		fclose (fd_sample);
 #endif
 #if defined(HAVE_MRNET)
 	close (fd_mrn);
