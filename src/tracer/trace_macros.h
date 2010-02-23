@@ -73,46 +73,46 @@
 	}                                                \
 }
 
-#define SAMPLE_EVENT_HWC(evttime,evttype,evtvalue)                     \
-{                                                                      \
-	event_t evt;                                                       \
-	int thread_id = THREADID;                                          \
-	if (EnabledSampling)                                               \
-	{                                                                  \
-		if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
-		{                                                              \
+#define SAMPLE_EVENT_HWC(evttime,evttype,evtvalue)               \
+{                                                                \
+	event_t evt;                                                   \
+	int thread_id = THREADID;                                      \
+	if (EnabledSampling)                                           \
+	{                                                              \
+		if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))             \
+		{                                                            \
 			evt.time = (evttime);                                      \
 			evt.event = (evttype);                                     \
 			evt.value = (evtvalue);                                    \
 			/* We don't read counters right now */                     \
 			HARDWARE_COUNTERS_READ(thread_id, evt, TRUE);              \
 			BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt); \
-		}                                                              \
-	}                                                                  \
+		}                                                            \
+	}                                                              \
 }
 
-#define SAMPLE_EVENT_NOHWC(evttime,evttype,evtvalue)                   \
-{                                                                      \
-	event_t evt;                                                       \
-	int thread_id = THREADID;                                          \
-	if (EnabledSampling)                                               \
-	{                                                                  \
-        if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
-		{                                                              \
+#define SAMPLE_EVENT_NOHWC(evttime,evttype,evtvalue)             \
+{                                                                \
+	event_t evt;                                                   \
+	int thread_id = THREADID;                                      \
+	if (EnabledSampling)                                           \
+	{                                                              \
+        if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))         \
+		{                                                            \
 			evt.time = (evttime);                                      \
 			evt.event = (evttype);                                     \
 			evt.value = (evtvalue);                                    \
 			HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);             \
 			BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt); \
-		}                                                              \
-	}                                                                  \
+		}                                                            \
+	}                                                              \
 }
 
 #define TRACE_MPIINITEV(evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux) \
-{                                                             \
+{                                                           \
 	event_t evt;                                              \
 	int thread_id = THREADID;                                 \
-                                                              \
+                                                            \
 	evt.time = (evttime);                                     \
 	evt.event = (evttype);                                    \
 	evt.value = (evtvalue);                                   \
@@ -127,21 +127,21 @@
 	BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 	if (evtvalue == EVT_END)                                  \
 	{                                                         \
-		last_mpi_exit_time = evt.time;                        \
+		last_mpi_exit_time = evt.time;                          \
 	}                                                         \
 }
 
 #define TRACE_MPIEVENT(evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux) \
-{                                                                                        \
-	int thread_id = THREADID;                                                            \
-	unsigned long long current_time = evttime;                                           \
-                                                                                         \
-	if (CURRENT_TRACE_MODE(thread_id) == TRACE_MODE_BURSTS)                              \
-	{                                                                                    \
-		BURSTS_MODE_TRACE_MPIEVENT(thread_id, current_time, evtvalue, FOUR_CALLS_AGO);     \
-	}                                                                                    \
-	else                                                                                 \
-	{                                                                                    \
+{                                                                                    \
+	int thread_id = THREADID;                                                          \
+	unsigned long long current_time = evttime;                                         \
+                                                                                     \
+	if (CURRENT_TRACE_MODE(thread_id) == TRACE_MODE_BURSTS)                            \
+	{                                                                                  \
+		BURSTS_MODE_TRACE_MPIEVENT(thread_id, current_time, evtvalue, FOUR_CALLS_AGO);   \
+	}                                                                                  \
+	else                                                                               \
+	{                                                                                  \
 		NORMAL_MODE_TRACE_MPIEVENT(thread_id,                                            \
 		                           current_time,                                         \
 		                           evttype,                                              \
@@ -152,51 +152,51 @@
 		                           evtcomm,                                              \
 		                           evtaux,                                               \
 		                           FOUR_CALLS_AGO);                                      \
-	}                                                                                    \
-	/* Check for pending changes */                                                      \
-	if (evtvalue == EVT_BEGIN)                                                           \
-	{                                                                                    \
+	}                                                                                  \
+	/* Check for pending changes */                                                    \
+	if (evtvalue == EVT_BEGIN)                                                         \
+	{                                                                                  \
 		INCREASE_MPI_DEEPNESS(thread_id);                                                \
 		last_mpi_begin_time = current_time;                                              \
-                                                                                         \
-        HARDWARE_COUNTERS_CHANGE(current_time, thread_id);                               \
-                                                                                         \
-	}                                                                                    \
-	else if (evtvalue == EVT_END)                                                        \
-	{                                                                                    \
+                                                                                     \
+        HARDWARE_COUNTERS_CHANGE(current_time, thread_id);                           \
+                                                                                     \
+	}                                                                                  \
+	else if (evtvalue == EVT_END)                                                      \
+	{                                                                                  \
 		DECREASE_MPI_DEEPNESS(thread_id);                                                \
-                                                                                         \
+                                                                                     \
 		/* Trace mode won't change if this MPI is stacked */                             \
 		if (PENDING_TRACE_MODE_CHANGE(thread_id) && MPI_IS_NOT_STACKED(thread_id))       \
 		{                                                                                \
-			Trace_Mode_Change(thread_id, current_time);                                  \
+			Trace_Mode_Change(thread_id, current_time);                                    \
 		}                                                                                \
-                                                                                         \
+                                                                                     \
 		/* Update last parallel region time */                                           \
 		last_mpi_exit_time = current_time;                                               \
 		Elapsed_Time_In_MPI += last_mpi_exit_time - last_mpi_begin_time;                 \
-	}                                                                                    \
+	}                                                                                  \
 }
 
 #define NORMAL_MODE_TRACE_MPIEVENT(thread_id,evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux,offset) \
-{                                                                     \
-	event_t evt;                                                      \
-	int traceja_event = 0;                                            \
-                                                                      \
-	if (tracejant && tracejant_mpi)                                   \
-	{                                                                 \
-        /* We don't want the compiler to reorganize ops */            \
-        /* The "if" prevents that */                                  \
-		traceja_event = TracingBitmap[TASKID];                        \
-		if ((TRACING_BITMAP_VALID_EVTYPE(evttype)) &&                 \
-		    (TRACING_BITMAP_VALID_EVTARGET(evttarget)))               \
-		{                                                             \
+{                                                               \
+	event_t evt;                                                  \
+	int traceja_event = 0;                                        \
+                                                                \
+	if (tracejant && tracejant_mpi)                               \
+	{                                                             \
+        /* We don't want the compiler to reorganize ops */      \
+        /* The "if" prevents that */                            \
+		traceja_event = TracingBitmap[TASKID];                      \
+		if ((TRACING_BITMAP_VALID_EVTYPE(evttype)) &&               \
+		    (TRACING_BITMAP_VALID_EVTARGET(evttarget)))             \
+		{                                                           \
 			traceja_event |= TracingBitmap[((long)evttarget)];        \
-		}                                                             \
-		if (traceja_event)                                            \
-		{                                                             \
+		}                                                           \
+		if (traceja_event)                                          \
+		{                                                           \
 			evt.time = (evttime);                                     \
-			TRACE_MPI_CALLER (evt.time,evtvalue,offset)                \
+			TRACE_MPI_CALLER (evt.time,evtvalue,offset)               \
 			evt.event = (evttype);                                    \
 			evt.value = (evtvalue);                                   \
 			evt.param.mpi_param.target = (long) (evttarget);          \
@@ -207,54 +207,55 @@
             HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_MPI);  \
 			if (ACCUMULATED_COUNTERS_INITIALIZED(thread_id))          \
 			{                                                         \
-				/* This happens once when the tracing mode changes */ \
-				/* from CPU Bursts to Normal */                       \
-				ADD_ACCUMULATED_COUNTERS_HERE(thread_id, evt);        \
-				ACCUMULATED_COUNTERS_RESET(thread_id);                \
+				/* This happens once when the tracing mode changes */   \
+				/* from CPU Bursts to Normal */                         \
+				ADD_ACCUMULATED_COUNTERS_HERE(thread_id, evt);          \
+				ACCUMULATED_COUNTERS_RESET(thread_id);                  \
 			}                                                         \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
-		}                                                             \
-	}                                                                 \
+		}                                                           \
+	}                                                             \
 }
 
 #define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
-{                                                                     \
-	event_t evt_entry, evt_exit;                                        \
-	evt_entry.time = last_mpi_exit_time;                                \
-	evt_entry.event = CPU_BURST_EV;                                      \
-	evt_entry.value = evtvalue;                                          \
-	evt_exit.time = evttime;                                            \
-	evt_exit.event = CPU_BURST_EV;                                      \
-	evt_exit.value = 0;                                          \
-	if (evtvalue == EVT_BEGIN)                                        \
+{                                           \
+	event_t evt_entry, evt_exit;              \
+	evt_entry.time = last_mpi_exit_time;      \
+	evt_entry.event = CPU_BURST_EV;           \
+	evt_entry.value = evtvalue;               \
+	evt_exit.time = evttime;                  \
+	evt_exit.event = CPU_BURST_EV;            \
+	evt_exit.value = 0;                       \
+	if (evtvalue == EVT_BEGIN)                \
 	{                                                                 \
 		if ((evt_exit.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION)  \
-		{                                                             \
+		{                                       \
 			if (ACCUMULATED_COUNTERS_INITIALIZED(thread_id))          \
-			{                                                         \
+			{                                     \
 				COPY_ACCUMULATED_COUNTERS_HERE(thread_id, evt_entry);       \
 				ACCUMULATED_COUNTERS_RESET(thread_id);                \
-			}                                                         \
-			else                                                      \
-			{                                                         \
+			}                                     \
+			else                                  \
+			{                                     \
 				/* This happens once when the tracing mode changes */ \
 				/* from Normal to CPU Bursts, and after MPIINIT_EV */ \
-				HARDWARE_COUNTERS_READ (thread_id, evt_entry, FALSE);       \
-			}                                                         \
+				HARDWARE_COUNTERS_READ (thread_id, evt_entry, FALSE); \
+			}                                     \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_entry); \
-			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time);         \
+			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time); \
+      MARK_SET_READ(thread_id, evt_exit, FALSE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_exit); \
-			TRACE_MPI_CALLER (evt_exit.time,evtvalue,offset)            \
-		}                                                             \
-		else                                                          \
-		{                                                             \
-			HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1);               \
-		}                                                             \
-	}                                                                 \
-	else                                                              \
-	{                                                                 \
-		HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1);                   \
-	}                                                                 \
+			TRACE_MPI_CALLER (evt_exit.time,evtvalue,offset) \
+		}                                       \
+		else                                    \
+		{                                       \
+			HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1); \
+		}                                       \
+	}                                         \
+	else                                      \
+	{                                         \
+		HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1); \
+	}                                         \
 }
 
 /***
