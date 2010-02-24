@@ -8,7 +8,8 @@ common_SRCS = \
  debug.h \
  common.h \
  num_hwc.h \
- types.h
+ types.h \
+ hwc_version.h
 
 common_INCLUDES = \
         -I$(COMMON_DIR)
