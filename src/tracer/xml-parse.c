@@ -374,11 +374,13 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			XML_FREE(enabled);
 		}
 		else if (!xmlStrcmp (tag->name, TRACE_PACX_STATISTICS))
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			XML_FREE(enabled);
 		}
 		else
 		{
@@ -399,6 +401,8 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		return;
 
 	InstrumentUFroutines (rank, list);
+
+	XML_FREE(list);
 
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
@@ -437,6 +441,7 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 				else
 					mfprintf (stdout, "mpitrace: Warning! Invalid max-depth value\n");
 			}
+			XML_FREE(enabled);
 		}
 		else
 		{
@@ -665,6 +670,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 				if (atoll ((char*) xmlGetProp (set_tag, TRACE_FREQUENCY)) > 0)
 					num_sampling_hwc++;
+			XML_FREE(enabled);
 		}
 		set_tag = set_tag->next;
 	}
@@ -699,6 +705,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 					else
 						i++;
 				}
+				XML_FREE(enabled);
 			}
 			set_tag = set_tag->next;
 		}
@@ -818,10 +825,10 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 		}
 		else if (!xmlStrcmp (tag->name, TRACE_MEMUSAGE))
 		{
-            xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
-            tracejant_memusage = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
-            mfprintf (stdout, "mpitrace: Memory usage is %s at flush buffer.\n", tracejant_memusage?"enabled":"disabled");
-            XML_FREE(enabled);
+			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			tracejant_memusage = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			mfprintf (stdout, "mpitrace: Memory usage is %s at flush buffer.\n", tracejant_memusage?"enabled":"disabled");
+			XML_FREE(enabled);
 		}
 		else
 		{
@@ -839,18 +846,18 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 	int countRemotesEnabled = 0;
 
 	/* Parse all TAGs, and annotate them to use them later */
-    tag = current_tag->xmlChildrenNode;
-    while (tag != NULL)
-    {
-        /* Skip coments */
-        if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
-        {
-        }
-        else if (!xmlStrcmp (tag->name, REMOTE_CONTROL_METHOD_MRNET))
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
-            xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
-            if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
-            {
+		}
+		else if (!xmlStrcmp (tag->name, REMOTE_CONTROL_METHOD_MRNET))
+		{
+			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			{
 				xmlChar *target = xmlGetProp (tag, RC_MRNET_TARGET);
 				xmlChar *analysis = xmlGetProp (tag, RC_MRNET_ANALYSIS);
 				xmlChar *start_after = xmlGetProp (tag, RC_MRNET_START_AFTER);
@@ -900,11 +907,11 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 			}
 			XML_FREE(enabled);
 		}
-        else if (!xmlStrcmp (tag->name, REMOTE_CONTROL_METHOD_SIGNAL))
+		else if (!xmlStrcmp (tag->name, REMOTE_CONTROL_METHOD_SIGNAL))
 		{
-            xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
-            if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
-            {
+			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			{
 				fprintf(stderr, "Parsing SIGNAL XML SUBSEC\n");
 				countRemotesEnabled++;
 
