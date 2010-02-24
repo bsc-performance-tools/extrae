@@ -4,7 +4,8 @@ if GENERATE_DOCUMENTATION
 SUBDIRS += doc
 endif
 
-EXTRA_DIST = example
+EXTRA_DIST = example \
+  INSTALL-examples
 
 VPATH=@srcdir@
 SRCDIR=@srcdir@
