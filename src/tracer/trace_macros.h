@@ -243,7 +243,7 @@
 			}                                     \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_entry); \
 			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time); \
-      MARK_SET_READ(thread_id, evt_exit, FALSE); \
+			MARK_SET_READ(thread_id, evt_exit, TRUE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_exit); \
 			TRACE_MPI_CALLER (evt_exit.time,evtvalue,offset) \
 		}                                       \
