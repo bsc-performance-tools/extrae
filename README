@@ -1,3 +1,4 @@
+
 Read file INSTALL for general installation instructions.
 Read file INSTALL-examples for examples of specific installation instructions.
 
@@ -7,6 +8,7 @@ Package dependencies:
 * PAPI : access to HW counters (optional) - downloadable from http://icl.cs.utk.edu/papi/
 * DynInst : support dynamic instrumentation (optional) - downloadable from http://www.dyninst.org/
 * liberty and libbfd : access debugging binary information (optional) 
+* libz : liberty and libbfd may need libz (optional). Also libz may be used to generate .prv.gz files directly (optional).
 * MPI : execute MPI jobs (optional) - tested with MPICH, MPICH2 and OpenMPI. Others may work.
 * OpenMP runtime (gcc, ibm or icc) : execute OpenMP jobs (optional)
 
