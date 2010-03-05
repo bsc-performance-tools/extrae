@@ -408,7 +408,7 @@ AC_DEFUN([AX_PROG_BFD],
          AC_MSG_CHECKING([if libbfd and libiberty works])
 	 
          AX_FLAGS_SAVE()
-         LIBS="-L${bfd_home_dir}/lib -lbfd -L${liberty_home_dir}/lib -liberty"
+         LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
          CFLAGS="-I${bfd_home_dir}/include ${CFLAGS}"
          AC_TRY_LINK(
             [ #include <bfd.h> ], 
