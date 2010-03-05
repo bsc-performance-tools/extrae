@@ -177,8 +177,13 @@ void InstrumentUFroutines (int rank, char *filename)
 		fclose (f);
 
 		if (rank == 0)
-			fprintf (stdout, "mpitrace: Number of user functions traced: %u (collisions: %u, avg distance = %u)\n",
-      UF_count, UF_collisions, UF_distance/UF_collisions);
+		{
+			if (UF_collisions > 0)
+				fprintf (stdout, "mpitrace: Number of user functions traced: %u (collisions: %u, avg distance = %u)\n",
+    	    UF_count, UF_collisions, UF_distance/UF_collisions);
+			else
+				fprintf (stdout, "mpitrace: Number of user functions traced: %u\n", UF_count);
+		}
 	}
 	else
 	{
