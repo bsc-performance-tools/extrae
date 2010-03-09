@@ -48,8 +48,17 @@ void spu_clock_init(unsigned long long timebase, unsigned long long temps) {
 }
 
 unsigned long long get_spu_time(void) {
-	unsigned long long temps = ~(spu_readch(MFC_RD_DECR_COUNT));
-	unsigned long long result = ((temps * 1000) / timebase_MHz) + timeInit;
+	static unsigned long long last_read = 0;
+	unsigned long long current_read = ~(spu_readch(MFC_RD_DECR_COUNT));
+
+	/* If the time counter has overflown, add time counter maximum to timeInit */
+	if (last_read > current_read)
+		timeInit += 0x100000000LL;
+
+	last_read = current_read;
+
+	unsigned long long result = ((current_read * 1000) / timebase_MHz) + timeInit;
+
 	return result;
 }
 
