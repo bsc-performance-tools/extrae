@@ -84,5 +84,13 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
  	echo Optional features:
 	echo ------------------
  	echo Heterogeneous support: ${enable_hetero}
-	echo Parallel merge: ${enable_parallel_merge}
+	if test "${MPI_INSTALLED}" = "yes" -a "${enable_parallel_merge}" = "yes" ; then
+		echo Parallel merge: yes
+	else
+		if test "${MPI_INSTALLED}" != "yes" ; then
+			echo Parallel merge: not available as MPI is not given
+		else
+			echo Parallel merge: disabled
+		fi
+	fi
 ])
