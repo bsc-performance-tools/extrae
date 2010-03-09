@@ -294,7 +294,7 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 #else
 
 		/* Create buffer and touch it */
-		spu_buffer[THREAD][i] = (unsigned int*) valloc (spu_file_size);
+		spu_buffer[THREAD][i] = (unsigned int*) valloc (spu_file_size * 1024 * 1024);
 		if (spu_buffer[THREAD][i] == NULL)
 		{
 			fprintf (stderr, "CELLtrace: Unable to allocate spu_buffer[%d][%d]. Exiting!\n", THREAD, i);
