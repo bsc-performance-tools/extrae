@@ -521,7 +521,14 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 			HWCBE_START_COUNTERS_THREAD(time, tid);
 		TOUCH_LASTFIELD( Accumulated_HWC[tid] );
 
+#if defined(SAMPLING_SUPPORT)
+		/* If sampling is enabled, the counters are always in "accumulate" mode
+		   because PAPI_reset is not called */
+		accum_ok = HWCBE_READ (tid, Accumulated_HWC[tid]);
+#else
 		accum_ok = HWCBE_ACCUM (tid, Accumulated_HWC[tid]);
+#endif
+
 		Accumulated_HWC_Valid[tid] = TRUE;
 	}
 	return (HWCEnabled && accum_ok);

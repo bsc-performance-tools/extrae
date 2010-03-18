@@ -217,7 +217,40 @@
 	}                                                             \
 }
 
-#define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
+#if defined(SAMPLING_SUPPORT)
+
+# define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
+{                                           \
+	event_t burst_begin, burst_end;           \
+	burst_begin.time = last_mpi_exit_time;    \
+	burst_begin.event = CPU_BURST_EV;         \
+	burst_begin.value = evtvalue;             \
+	burst_end.time = evttime;                 \
+	burst_end.event = CPU_BURST_EV;           \
+	burst_end.value = 0;                      \
+	if (evtvalue == EVT_BEGIN)                \
+	{                                         \
+		if ((burst_end.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION) \
+		{                                       \
+			COPY_ACCUMULATED_COUNTERS_HERE(thread_id, burst_begin); \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
+			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time); \
+			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
+			TRACE_MPI_CALLER (burst_end.time,evtvalue,offset) \
+      ACCUMULATED_COUNTERS_RESET(thread_id); \
+		}                                       \
+	}                                         \
+	else                                      \
+	{ \
+		if (!ACCUMULATED_COUNTERS_INITIALIZED(thread_id)) \
+			HARDWARE_COUNTERS_ACCUMULATE(thread_id, burst_end, TRUE); \
+	}                                         \
+}
+
+#else /* SAMPLING_SUPPORT */
+
+# define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
 {                                           \
 	event_t evt_entry, evt_exit;              \
 	evt_entry.time = last_mpi_exit_time;      \
@@ -257,6 +290,7 @@
 		HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1); \
 	}                                         \
 }
+#endif /* SAMPLING_SUPPORT */
 
 /***
 Macro TRACE_MPIEVENT_NOHWC is used to trace: IRECVED_EV, PERSISTENT_REQ_EV.
