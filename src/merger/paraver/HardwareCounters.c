@@ -163,11 +163,11 @@ static int HardwareCounters_Exist (long long *HWC, int *used)
 	return FALSE;
 }
 
-void HardwareCounters_Show (event_t * Event)
+void HardwareCounters_Show (event_t * Event, int ncounters)
 {
   int cnt;
   fprintf (stdout, "COUNTERS: ");
-  for (cnt = 0; cnt < MAX_HWC; cnt++)
+  for (cnt = 0; cnt < ncounters; cnt++)
     fprintf (stdout, "[%llu] ", Event->HWCValues[cnt]);
   fprintf (stdout, "\n");
 }

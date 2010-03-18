@@ -86,7 +86,7 @@ extern CntQueue CountersTraced;
 void HardwareCounters_Emit (int ptask, int task, int thread,
   long long time, event_t * Event, unsigned int *outtype,
   unsigned long long *outvalue);
-void HardwareCounters_Show (event_t * Event);
+void HardwareCounters_Show (event_t * Event, int ncounters);
 void HardwareCounters_Get (event_t *Event, unsigned long long *buffer);
 void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds);
 int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id);

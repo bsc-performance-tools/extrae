@@ -42,6 +42,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "file_set.h"
 #include "HardwareCounters.h"
 
+static int num_counters = 0;
+
 static void show_current (event_t * c)
 {
 #if SIZEOF_LONG == 8
@@ -81,12 +83,19 @@ static void show_current (event_t * c)
 #endif /* DEAD_CODE */
 	else if (c->event == HWC_DEF_EV)
 	{
+		int def_num_counters = 0;
 		int i;
 
 		fprintf (stdout, " HWC definition { ");
-        for (i = 0; i < MAX_HWC; i++)
-            fprintf (stdout, "0x%llx ", c->HWCValues[i]);
+		for (i = 0; i < MAX_HWC; i++)
+		{
+			fprintf (stdout, "0x%llx ", c->HWCValues[i]);
+			if (c->HWCValues[i] != NO_COUNTER)
+				def_num_counters++;
+		}
 		fprintf (stdout, "}\n");
+
+		num_counters = MAX (def_num_counters, num_counters);
 	}
 #endif
   else
@@ -94,7 +103,7 @@ static void show_current (event_t * c)
 
 #if USE_HARDWARE_COUNTERS
   if (Get_EvHWCRead (c))
-		HardwareCounters_Show (c);
+		HardwareCounters_Show (c, num_counters);
 #endif
 }
 
