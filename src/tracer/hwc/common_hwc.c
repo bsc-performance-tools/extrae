@@ -389,14 +389,14 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 		HWC_Accum_Reset(i);
 	}
 
-	HWC_current_set = (int *) realloc (HWC_current_set, sizeof(int) * num_threads);
+	HWC_current_set = (int *) realloc (HWC_current_set, sizeof(int) * new_num_threads);
 	if (NULL == HWC_current_set)
 	{
 		fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for HWC_current_set\n");
 		return;
 	}
 
-	HWC_current_timebegin = (unsigned long long *) realloc (HWC_current_timebegin, sizeof(unsigned long long) * num_threads);
+	HWC_current_timebegin = (unsigned long long *) realloc (HWC_current_timebegin, sizeof(unsigned long long) * new_num_threads);
 	if (NULL == HWC_current_timebegin)
 	{
 		fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for HWC_current_timebegin\n");
