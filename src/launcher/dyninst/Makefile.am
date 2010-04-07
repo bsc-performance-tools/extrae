@@ -5,12 +5,12 @@ bin_PROGRAMS = ompitrace
 noinst_PROGRAMS = load-module
 
 ompitrace_SOURCES = ompitrace.C \
- ompSnippets.C \
- apiSnippets.C \
- mpiSnippets.C \
- commonSnippets.C \
- applicationType.C \
- mini-xml-parse.c
+ ompSnippets.C ompSnippets.h \
+ apiSnippets.C apiSnippets.h \
+ mpiSnippets.C mpiSnippets.h \
+ commonSnippets.C commonSnippets.h \
+ applicationType.C applicationType.h \
+ mini-xml-parse.c mini-xml-parse.h
 
 ompitrace_CXXFLAGS = -I@DYNINST_INCLUDES@ -I$(COMMON_DIR)
 ompitrace_CFLAGS = -I@DYNINST_INCLUDES@ -I$(COMMON_DIR) @XML2_CFLAGS@
