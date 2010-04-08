@@ -220,7 +220,7 @@
 #if defined(SAMPLING_SUPPORT)
 
 # define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
-{                                           \
+{ \
 	event_t burst_begin, burst_end;           \
 	burst_begin.time = last_mpi_exit_time;    \
 	burst_begin.event = CPU_BURST_EV;         \
@@ -229,66 +229,67 @@
 	burst_end.event = CPU_BURST_EV;           \
 	burst_end.value = 0;                      \
 	if (evtvalue == EVT_BEGIN)                \
-	{                                         \
+	{ \
 		if ((burst_end.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION) \
-		{                                       \
+		{ \
 			COPY_ACCUMULATED_COUNTERS_HERE(thread_id, burst_begin); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
 			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time); \
 			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
 			TRACE_MPI_CALLER (burst_end.time,evtvalue,offset) \
-      ACCUMULATED_COUNTERS_RESET(thread_id); \
-		}                                       \
-	}                                         \
-	else                                      \
+			ACCUMULATED_COUNTERS_RESET(thread_id); \
+		} \
+	} \
+	else \
 	{ \
+		/* Accumulate counters from last MPI that was above the burst threshold */ \
 		if (!ACCUMULATED_COUNTERS_INITIALIZED(thread_id)) \
 			HARDWARE_COUNTERS_ACCUMULATE(thread_id, burst_end, TRUE); \
-	}                                         \
+	} \
 }
 
 #else /* SAMPLING_SUPPORT */
 
 # define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
-{                                           \
-	event_t evt_entry, evt_exit;              \
-	evt_entry.time = last_mpi_exit_time;      \
-	evt_entry.event = CPU_BURST_EV;           \
-	evt_entry.value = evtvalue;               \
-	evt_exit.time = evttime;                  \
-	evt_exit.event = CPU_BURST_EV;            \
-	evt_exit.value = 0;                       \
+{ \
+	event_t burst_begin, burst_end;           \
+	burst_begin.time = last_mpi_exit_time;    \
+	burst_begin.event = CPU_BURST_EV;         \
+	burst_begin.value = evtvalue;             \
+	burst_end.time = evttime;                 \
+	burst_end.event = CPU_BURST_EV;           \
+	burst_end.value = 0;                      \
 	if (evtvalue == EVT_BEGIN)                \
-	{                                                                 \
-		if ((evt_exit.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION)  \
-		{                                       \
-			if (ACCUMULATED_COUNTERS_INITIALIZED(thread_id))          \
-			{                                     \
-				COPY_ACCUMULATED_COUNTERS_HERE(thread_id, evt_entry);       \
-				ACCUMULATED_COUNTERS_RESET(thread_id);                \
-			}                                     \
+	{ \
+		if ((burst_end.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION) \
+		{ \
+			if (ACCUMULATED_COUNTERS_INITIALIZED(thread_id)) \
+			{ \
+				COPY_ACCUMULATED_COUNTERS_HERE(thread_id, burst_begin); \
+				ACCUMULATED_COUNTERS_RESET(thread_id); \
+			} \
 			else                                  \
-			{                                     \
+			{ \
 				/* This happens once when the tracing mode changes */ \
 				/* from Normal to CPU Bursts, and after MPIINIT_EV */ \
-				HARDWARE_COUNTERS_READ (thread_id, evt_entry, FALSE); \
-			}                                     \
-			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_entry); \
+				HARDWARE_COUNTERS_READ (thread_id, burst_begin, FALSE); \
+			} \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
 			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time); \
-			MARK_SET_READ(thread_id, evt_exit, TRUE); \
-			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt_exit); \
-			TRACE_MPI_CALLER (evt_exit.time,evtvalue,offset) \
-		}                                       \
-		else                                    \
-		{                                       \
-			HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1); \
-		}                                       \
-	}                                         \
-	else                                      \
-	{                                         \
-		HARDWARE_COUNTERS_ACCUMULATE(thread_id, evt_exit, 1); \
-	}                                         \
+			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
+			TRACE_MPI_CALLER (burst_end.time,evtvalue,offset) \
+		} \
+		else \
+		{ \
+			HARDWARE_COUNTERS_ACCUMULATE(thread_id, burst_end, TRUE); \
+		} \
+	} \
+	else \
+	{ \
+		HARDWARE_COUNTERS_ACCUMULATE(thread_id, burst_end, TRUE); \
+	} \
 }
 #endif /* SAMPLING_SUPPORT */
 
