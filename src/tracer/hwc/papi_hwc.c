@@ -503,7 +503,9 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 #  error "Unknown method to gather if the system supports HW overflows"
 # endif
 
+#if 0
 	fprintf (stdout, "mpitrace: HW Sampling is %sallowed by the PAPI substrate.\n", SamplingSupport?"":"not ");
+#endif
 #endif
 
 	thread_identifier_function = get_trace_thread_number_function();

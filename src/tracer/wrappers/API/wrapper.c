@@ -1313,10 +1313,12 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Initialize Tracing Mode related variables */
 	Trace_Mode_Initialize (maximum_NumOfThreads);
 
+#if 0
 	if (HWCEnabled)
 		fprintf (stdout, "mpitrace: Tracing enabled for process %d (counters enabled).\n", getpid ());
 	else if (!HWCEnabled)
 		fprintf (stdout, "mpitrace: Tracing enabled for process %d.\n", getpid ());
+#endif
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
