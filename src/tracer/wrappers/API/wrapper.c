@@ -1516,7 +1516,7 @@ char *Get_FinalDir (int task)
 static char _get_temporaldir[TMP_DIR];
 char *Get_TemporalDir (int task)
 {
-  sprintf (_get_temporaldir, "%s/set-%d", temporal_dir, task/128);
+  sprintf (_get_temporaldir, "%s/set-%d", tmp_dir, task/128);
   return _get_temporaldir;
 }
 
