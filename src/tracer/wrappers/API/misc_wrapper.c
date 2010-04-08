@@ -272,8 +272,7 @@ static void Generate_Task_File_List (void)
 
 	for (thid = 0; thid < Backend_getNumberOfThreads(); thid++)
 	{
-		/* Tracefile_Name (tmpname, final_dir, appl_name, getpid(), 0, thid); */
-		FileName_PTT(tmpname, final_dir, appl_name, getpid(), 0, thid, EXT_MPIT);
+		FileName_PTT(tmpname, Get_FinalDir(0), appl_name, getpid(), 0, thid, EXT_MPIT);
 
 		sprintf (tmp_line, "%s on %s\n", tmpname, hostname);
 		ret = write (filedes, tmp_line, strlen (tmp_line));

@@ -568,8 +568,7 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 
             for (thid = 0; thid < buffer_threads[i]; thid++)
             {
-                //Tracefile_Name (tmpname, final_dir, appl_name, buffer_pids[i], i, thid);
-				FileName_PTT(tmpname, final_dir, appl_name, buffer_pids[i], i, thid, EXT_MPIT);
+								FileName_PTT(tmpname, Get_FinalDir(i), appl_name, buffer_pids[i], i, thid, EXT_MPIT);
 
                 sprintf (tmp_line, "%s on %s\n", tmpname, node_list[i]);
                 ret = write (filedes, tmp_line, strlen (tmp_line));

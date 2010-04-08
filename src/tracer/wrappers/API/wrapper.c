@@ -938,13 +938,11 @@ int remove_temporal_files(void)
 
   for (thread = 0; thread < maximum_NumOfThreads; thread++)
   {
-    /* Temporal_Trace_Name (tmpname, tmp_dir, appl_name, getpid(), TASKID, thread); */
-		FileName_PTT(tmpname, tmp_dir, appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
+		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
     if (unlink(tmpname) == -1)
       fprintf (stderr, "mpitrace: Error removing a temporal tracing file\n");
 
-    /* Temporal_Sample_Name (tmpname, tmp_dir, appl_name, getpid(), TASKID, thread); */
-		FileName_PTT(tmpname, tmp_dir, appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
+		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
     if (unlink(tmpname) == -1)
       fprintf (stderr, "mpitrace: Error removing a temporal sampling file\n");
   }
@@ -960,10 +958,10 @@ static int Allocate_buffer_and_file (int thread_id)
 {
 	char tmp_file[TMP_NAME_LENGTH];
 
-	//Temporal_Trace_Name (tmp_file, tmp_dir, appl_name, getpid(), TASKID, thread_id);
-	FileName_PTT(tmp_file, tmp_dir, appl_name, getpid(), TASKID, thread_id, EXT_TMP_MPIT);
+	mkdir_recursive (Get_TemporalDir(TASKID));
 
-	/*fprintf(stderr, "mpitrace: Allocating tracing buffer for process %d:%d (size: %d events)\n", TASKID, thread_id, buffer_size);*/
+	FileName_PTT(tmp_file, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread_id, EXT_TMP_MPIT);
+
 	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
 	if (TracingBuffer[thread_id] == NULL)
 	{
@@ -976,8 +974,7 @@ static int Allocate_buffer_and_file (int thread_id)
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], MPItrace_Flush_Wrapper);
 
 #if defined(SAMPLING_SUPPORT)
-	//Temporal_Sample_Name (tmp_file, tmp_dir, appl_name, getpid(), TASKID, thread_id);	
-	FileName_PTT(tmp_file, tmp_dir, appl_name, getpid(), TASKID, thread_id, EXT_TMP_SAMPLE);
+	FileName_PTT(tmp_file, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread_id, EXT_TMP_SAMPLE);
 	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
 	if (SamplingBuffer[thread_id] == NULL)
 	{
@@ -1499,6 +1496,30 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 }
 
 
+/* HSG
+
+ MN GPFS optimal files per directories is 512.
+ 
+ Why blocking in 128 sets? Because each task may produce 2 files (mpit and
+ sample), and also the final directory and the temporal directory may be the
+ same. So on the worst case, there are 512 files in the directory at a time.
+
+*/
+
+static char _get_finaldir[TMP_DIR];
+char *Get_FinalDir (int task)
+{
+  sprintf (_get_finaldir, "%s/set-%d", final_dir, task/128);
+  return _get_finaldir;
+}
+
+static char _get_temporaldir[TMP_DIR];
+char *Get_TemporalDir (int task)
+{
+  sprintf (_get_temporaldir, "%s/set-%d", temporal_dir, task/128);
+  return _get_temporaldir;
+}
+
 /******************************************************************************
  ***  Thread_Finalization
  ******************************************************************************/
@@ -1510,15 +1531,12 @@ void close_mpits (int thread)
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread))) return;
 
-	/* fprintf (stderr, "[T: %d] close_mpits\n", TASKID); */
+  mkdir_recursive (Get_FinalDir(TASKID));
 
 	Buffer_Close(TRACING_BUFFER(thread));
 
-	/* Tracefile_Name (trace, final_dir, appl_name, getpid(), TASKID, thread); */
-	/* Temporal_Trace_Name (tmp_name, tmp_dir, appl_name, getpid(), TASKID, thread); */
-
-	FileName_PTT(tmp_name, tmp_dir, appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
-	FileName_PTT(trace, final_dir, appl_name, getpid(), TASKID, thread, EXT_MPIT);
+	FileName_PTT(tmp_name, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
+  FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_MPIT);
 
 	rename_or_copy (tmp_name, trace);
 	fprintf (stdout, "mpitrace: Intermediate raw trace file created : %s\n", trace);
@@ -1526,17 +1544,14 @@ void close_mpits (int thread)
 #if defined(SAMPLING_SUPPORT)
 	if (EnabledSampling)
 	{
-		FileName_PTT(tmp_name, tmp_dir, appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
+		FileName_PTT(tmp_name, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
 
 		if (Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
 		{
 			Buffer_Flush(SAMPLING_BUFFER(thread));
 			Buffer_Close(SAMPLING_BUFFER(thread));
 
-			/* Samplefile_Name (trace, final_dir, appl_name, getpid(), TASKID, thread); */
-			/* Temporal_Sample_Name (tmp_name, tmp_dir, appl_name, getpid(), TASKID, thread); */
-
-			FileName_PTT(trace, final_dir, appl_name, getpid(), TASKID, thread, EXT_SAMPLE);
+			FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SAMPLE);
 
 			rename_or_copy (tmp_name, trace);
 			fprintf (stdout, "mpitrace: Intermediate raw sample file created : %s\n", trace);
@@ -1544,7 +1559,6 @@ void close_mpits (int thread)
 		else
 		{
 			/* Remove file if empty! */
-			/* Temporal_Sample_Name (tmp_name, tmp_dir, appl_name, getpid(), TASKID, thread); */
 			unlink (tmp_name);
 
 			fprintf (stdout, "mpitrace: Intermediate raw sample file NOT created (%d) due to lack of information gathered.\n", TASKID);
