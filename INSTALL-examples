@@ -6,7 +6,6 @@ All commands given here are given as an example to configure and install the pac
 These examples assume that you are using a sh/bash shell, you must adequate them if you use other shells.
 
 
-
 Jugene (Bluegene/P)
 --
 NOTES:
@@ -38,6 +37,11 @@ make install
 
 Example 4 - Forcing 64bit package in a 32/64bit mixed environment.
 ./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64
+make
+make install
+
+Example 5 - MPICH2 (+ Slurm/MOAB) in a 32/64bi mixed environment
+export MP_IMPL=anl2 ./configure --prefix=PREFIX --with-mpi=/gpfs/apps/MPICH2/mx/1.0.8p1..3/32 --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64
 make
 make install
 
