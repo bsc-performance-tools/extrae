@@ -4,15 +4,15 @@
 #
 # SYNOPSIS
 #
-#   AC_CHECK_DEFINE([symbol], [ACTION-IF-FOUND], [ACTION-IF-NOT])
-#   AX_CHECK_DEFINE([includes],[symbol], [ACTION-IF-FOUND], [ACTION-IF-NOT])
+#   AC_CHECK_DEFINED([symbol], [ACTION-IF-FOUND], [ACTION-IF-NOT])
+#   AX_CHECK_DEFINED([includes],[symbol], [ACTION-IF-FOUND], [ACTION-IF-NOT])
 #
 # DESCRIPTION
 #
 #   Complements AC_CHECK_FUNC but it does not check for a function but for a
 #   define to exist. Consider a usage like:
 #
-#    AC_CHECK_DEFINE(__STRICT_ANSI__, CFLAGS="$CFLAGS -D_XOPEN_SOURCE=500")
+#    AC_CHECK_DEFINED(__STRICT_ANSI__, CFLAGS="$CFLAGS -D_XOPEN_SOURCE=500")
 #
 # LICENSE
 #
@@ -48,29 +48,29 @@
 
 AC_DEFUN([AC_CHECK_DEFINED],[
 AS_VAR_PUSHDEF([ac_var],[ac_cv_defined_$1])dnl
-AC_CACHE_CHECK([for $1 defined], ac_var,
-AC_TRY_COMPILE(,[
+AC_CACHE_CHECK([for $2 defined], ac_var,
+AC_TRY_COMPILE([],[
   #ifdef $1
   int ok;
   #else
   choke me
   #endif
 ],AS_VAR_SET(ac_var, yes),AS_VAR_SET(ac_var, no)))
-AS_IF([test AS_VAR_GET(ac_var) != "no"], [$2], [$3])dnl
+AS_IF([test "AS_VAR_GET(ac_var)" != "no"], [$2], [$3])dnl
 AS_VAR_POPDEF([ac_var])dnl
 ])
 
 AC_DEFUN([AX_CHECK_DEFINED],[
 AS_VAR_PUSHDEF([ac_var],[ac_cv_defined_$2])dnl
-AC_CACHE_CHECK([for $1 defined], ac_var,
-AC_TRY_COMPILE($1,[
-  #ifndef $2
+AC_CACHE_CHECK([for $2 defined], ac_var,
+AC_TRY_COMPILE([#include <$1>],[
+  #ifdef $2
   int ok;
   #else
   choke me
   #endif
 ],AS_VAR_SET(ac_var, yes),AS_VAR_SET(ac_var, no)))
-AS_IF([test AS_VAR_GET(ac_var) != "no"], [$3], [$4])dnl
+AS_IF([test "AS_VAR_GET(ac_var)" != "no"], [$3], [$4])dnl
 AS_VAR_POPDEF([ac_var])dnl
 ])
 
@@ -85,7 +85,7 @@ dnl AC_LANG_FUNC_LINK_TRY
                 return f != $2; ])],
                 [AS_VAR_SET(ac_var, yes)],
                 [AS_VAR_SET(ac_var, no)])])
-AS_IF([test AS_VAR_GET(ac_var) = yes], [$3], [$4])dnl
+AS_IF([test "AS_VAR_GET(ac_var)" != "no"], [$3], [$4])dnl
 AS_VAR_POPDEF([ac_var])dnl
 ])# AC_CHECK_FUNC
 

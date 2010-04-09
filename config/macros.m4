@@ -558,7 +558,13 @@ AC_DEFUN([AX_PROG_MPI],
       dnl Check for the MPI header files.
       AC_CHECK_HEADERS([mpi.h], [], [MPI_INSTALLED="no"])
 
-      AX_CHECK_DEFINED([mpi.h], [MPICH2], [], [])
+      dnl In MN, MPICH2 requires special libraries when building mpimpi2prv
+      AX_CHECK_DEFINED([mpi.h], [MPICH2], [MPI_IS_MPICH2="yes"], [MPI_IS_MPICH2="no"])
+
+      if test "${MPI_IS_MPICH2}" = "yes" -a  "${IS_MN_MACHINE}" = "yes" ; then
+        MPIMPI2PRV_EXTRA_LIBS="-lpmi"
+        AC_SUBST(MPIMPI2PRV_EXTRA_LIBS)
+      fi
 
       dnl Check for the MPI library.
       dnl We won't use neither AC_CHECK_LIB nor AC_TRY_LINK because this library may have unresolved references to other libs (i.e: libgm).
@@ -1544,8 +1550,10 @@ AC_DEFUN([AX_IS_MN_MACHINE],
    if test "${enable_check_mn}" = "yes" -a "${GREP_RESULT}" = "0" ; then
       AC_MSG_RESULT([yes])
       AC_DEFINE([IS_MN_MACHINE], 1, [Defined if this machine is MN])
+      IS_MN_MACHINE="yes"
    else
       AC_MSG_RESULT([no])
+      IS_MN_MACHINE="no"
    fi
 ])
 
