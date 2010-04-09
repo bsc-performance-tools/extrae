@@ -558,6 +558,8 @@ AC_DEFUN([AX_PROG_MPI],
       dnl Check for the MPI header files.
       AC_CHECK_HEADERS([mpi.h], [], [MPI_INSTALLED="no"])
 
+      AX_CHECK_DEFINED([mpi.h], [MPICH2], [], [])
+
       dnl Check for the MPI library.
       dnl We won't use neither AC_CHECK_LIB nor AC_TRY_LINK because this library may have unresolved references to other libs (i.e: libgm).
       AC_MSG_CHECKING([for MPI library])
