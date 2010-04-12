@@ -45,6 +45,17 @@ export MP_IMPL=anl2 ./configure --prefix=PREFIX --with-mpi=/gpfs/apps/MPICH2/mx/
 make
 make install
 
+Example 6 - Linux with Power Processor in a environment with IBM compilers & GNU compilers
+ a) Using IBM compilers
+ CC=xlc CXX=xlC ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe
+ make
+ make install
+
+ b) Using GNU compilers (and forcing when using MPCC in parallel merge)
+ ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe
+ MP_COMPILER=gcc make
+ make install
+
 
 AIX
 --

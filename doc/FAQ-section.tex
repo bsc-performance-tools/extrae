@@ -60,6 +60,12 @@
 \item {\bf Question:} {NOT!} {\tt gmake} command fails when compiling the instrumentation package in a machine running AIX operating system, using 64 bit mode and IBM XL compilers complaining about Profile MPI (PMPI) symbols.\\
       {\bf Answer:  } {NOT!} Use the reentrant version of IBM compilers ({\tt xlc\_r} and {\tt xlC\_r}). Non reentrant versions of MPI library does not include 64 bit MPI symbols, whereas reentrant versions do. To use these compilers, set the CC (C compiler) and CXX (C++ compiler) environment variables before running the {\tt configure} script.
 
+\item {\bf Question:} The compiler fails complaining that some parameters can not be understand when compiling the parallel merge.
+      {\bf Answer:  } If the environment has more than one compiler (for example, IBM and GNU compilers), is it possible that the parallel merge compiler is not the same as the rest of the package. There are two ways to solve this:
+      \begin{itemize}
+      \item Force the package compilation with the same backend as the parallel compiler. For example, for IBM compiler, set {\tt CC=xlc} and {\tt CXX=xlC} at the configure step.
+      \item Tell the parallel compiler to use the same compiler as the rest of the package. For example, for IBM compiler mpcc, set {\tt MP\_COMPILER=gcc} when issuing the make command.
+      \end{itemize}
 \end{itemize}
 
 \section{Execution FAQ}
