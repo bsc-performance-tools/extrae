@@ -51,7 +51,7 @@ AIX
 NOTES:
 Some extensions of MPItrace do not work properly (nanos, SMPss and OpenMP).
 In addition, if using IBM MPI (aka POE) the make will complain when generating the parallel merge if the main compiler is not xlc/xlC. So, you can change the compiler or disable the parallel merge at compile step.
-Command ar can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT_MODE=32_64 set to avoid this.
+Command ar can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT_MODE=64 set to avoid this.
 
 COMMAND:
 Example 1 - Compiling the 32bit package using the IBM compilers
