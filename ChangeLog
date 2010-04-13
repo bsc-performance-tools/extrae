@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   + (13/Apr/2010) Added support for IBM POE on Linux.
    + (08/Apr/2010) Intermediate files are stored in separated directories instead of a single one.
    + (10/Jan/2010) Instrumentation library in bursts mode can gather MPI calls.
    + (07/Jan/2010) Initial tracing of PACX
