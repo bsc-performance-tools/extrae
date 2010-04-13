@@ -555,6 +555,17 @@ AC_DEFUN([AX_PROG_MPI],
          CFLAGS="$MPI_CFLAGS $CFLAGS"
       fi
 
+      dnl This check is for POE over linux -- libraries are installed in /opt/ibmhpc/ppe.poe/lib/libmpi{64}/libmpi_ibm.so
+      if test -d "${MPI_LIBSDIR}/libmpi${BITS}" ; then
+         if test -f "${MPI_LIBSDIR}/libmpi${BITS}/libmpi_ibm.so" ; then
+            MPI_LIBSDIR=${MPI_LIBSDIR}/libmpi${BITS}
+         fi
+      elif test -d "${MPI_LIBSDIR}/libmpi" ; then
+         if test -f "${MPI_LIBSDIR}/libmpi/libmpi_ibm.so" ; then
+            MPI_LIBSDIR=${MPI_LIBSDIR}/libmpi
+         fi
+      fi
+
       dnl Check for the MPI header files.
       AC_CHECK_HEADERS([mpi.h], [], [MPI_INSTALLED="no"])
 
@@ -579,6 +590,8 @@ AC_DEFUN([AX_PROG_MPI],
          MPI_LIBS="-lmpi"
       elif test -f "${MPI_LIBSDIR}/libmpich.a" -o -f "${MPI_LIBSDIR}/libmpich.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" ; then
          MPI_LIBS="-lmpich"
+      elif test -f "${MPI_LIBSDIR}/libmpi_ibm.so" ; then
+         MPI_LIBS="-lmpi_ibm"
       else
          MPI_LIBS="not found"
       fi
@@ -586,7 +599,8 @@ AC_DEFUN([AX_PROG_MPI],
 
 			AC_MSG_CHECKING([for shared MPI library])
       if test -f "${MPI_LIBSDIR}/libmpi.so" -o -f "${MPI_LIBSDIR}/libmpich.so" -o \
-         -f "${MPI_LIBSDIR}/shared/libmpi.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" ; then
+         -f "${MPI_LIBSDIR}/shared/libmpi.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" -o \
+         -f "${MPI_LIBSDIR}/libmpi_ibm.so" ; then
          MPI_SHARED_LIB_FOUND="yes"
       else
          MPI_SHARED_LIB_FOUND="not found"
