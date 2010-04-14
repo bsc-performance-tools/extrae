@@ -273,7 +273,7 @@ AC_DEFUN([AX_CHECK_PGI],
    AC_TRY_COMPILE(
       [],
       [
-         #if !defined (__PGI__)
+         #if !defined (__PGI__) && !defined(__PGI)
          # error "This is for PGI compilers only"
          #endif
          return 0;
