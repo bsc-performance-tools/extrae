@@ -956,9 +956,22 @@ int remove_temporal_files(void)
  */
 static int Allocate_buffer_and_file (int thread_id)
 {
+	int ret;
+	int attempts = 100;
 	char tmp_file[TMP_NAME_LENGTH];
 
-	mkdir_recursive (Get_TemporalDir(TASKID));
+	/* Some FS looks quite lazy and "needs time" to create directories?
+	   This loop fixes this issue (seen in BGP) */
+	ret = mkdir_recursive (Get_TemporalDir(TASKID));
+	while (!ret && attempts > 0)
+	{
+		ret = mkdir_recursive (Get_TemporalDir(TASKID));
+		attempts --;
+	}
+	if (!ret && attempts == 0)
+	{
+		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create temporal directory %s\n", TASKID, Get_TemporalDir(TASKID));
+	}
 
 	FileName_PTT(tmp_file, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread_id, EXT_TMP_MPIT);
 
@@ -1528,12 +1541,25 @@ char *Get_TemporalDir (int task)
 
 void close_mpits (int thread)
 {
+	int attempts = 100;
+	int ret;
 	char trace[TRACE_FILE];
 	char tmp_name[TRACE_FILE];
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread))) return;
 
-  mkdir_recursive (Get_FinalDir(TASKID));
+	/* Some FS looks quite lazy and "needs time" to create directories?
+	   This loop fixes this issue (seen in BGP) */
+	ret = mkdir_recursive (Get_TemporalDir(TASKID));
+	while (!ret && attempts > 0)
+	{
+		ret = mkdir_recursive (Get_TemporalDir(TASKID));
+		attempts --;
+	}
+	if (!ret && attempts == 0)
+	{
+		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", TASKID, Get_TemporalDir(TASKID));
+	}
 
 	Buffer_Close(TRACING_BUFFER(thread));
 
