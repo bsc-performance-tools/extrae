@@ -43,7 +43,7 @@
 # elif defined (ARCH_PPC)
 #  define MAX_HWC 8
 # else
-#  define MAX_HWC 2
+#  define MAX_HWC 8
 # endif
 #endif
 
