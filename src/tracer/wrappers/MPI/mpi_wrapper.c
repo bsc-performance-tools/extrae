@@ -7106,12 +7106,21 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm)
 	*/
 
 	int i, num_tasks, ierror;
+	int result, is_comm_world, is_comm_self;
 	MPI_Group group;
 	iotimer_t temps;
 
 	temps = TIME;
 
-	if (newcomm != MPI_COMM_WORLD && newcomm != MPI_COMM_SELF)
+	/* First check if the communicators are duplicates of comm_world or
+	   comm_self */
+	ierror = MPI_Comm_compare (MPI_COMM_WORLD, newcomm, &result);
+	is_comm_world = result == MPI_IDENT;
+
+	ierror = MPI_Comm_compare (MPI_COMM_SELF, newcomm, &result);
+	is_comm_self = result == MPI_IDENT;
+
+	if (!is_comm_world && !is_comm_self)
 	{
 		/* Obtain the group of the communicator */
 		ierror = PMPI_Comm_group (newcomm, &group);
@@ -7139,12 +7148,12 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm)
 			MPI_CHECK(ierror, PMPI_Group_free);
 		}
 	}
-	else if (newcomm == MPI_COMM_WORLD)
+	else if (is_comm_world)
 	{
 		FORCE_TRACE_MPIEVENT (temps, tipus_event, EVT_BEGIN, MPI_COMM_WORLD_ALIAS,
 			NumOfTasks, EMPTY, newcomm, EMPTY);
 	}
-	else if (newcomm == MPI_COMM_SELF)
+	else if (is_comm_self)
 	{
 		FORCE_TRACE_MPIEVENT (temps, tipus_event, EVT_BEGIN, MPI_COMM_SELF_ALIAS,
 			1, EMPTY, newcomm, EMPTY);
