@@ -331,8 +331,8 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
  ***  ProcessArgs
  ******************************************************************************/
 
-void ProcessArgs (int rank, int argc, char *argv[], int *traceformat,
-	int *forceformat)
+void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
+	int *traceformat,  int *forceformat)
 {
 	char *BinaryName;
 	int CurArg;
@@ -509,6 +509,8 @@ void ProcessArgs (int rank, int argc, char *argv[], int *traceformat,
 		}
 		if (!strcmp (argv[CurArg], "-maxmem"))
 		{
+			unsigned long long records_per_task;
+
 			CurArg++;
 			if (CurArg < argc)
 			{
@@ -526,6 +528,18 @@ void ProcessArgs (int rank, int argc, char *argv[], int *traceformat,
 					MBytesPerAllSegments = 16;
 				}
 			}
+
+			records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
+			records_per_task *= MBytesPerAllSegments;            /* let's use this memory */
+			records_per_task /= numtasks;                        /* divide by all the tasks */
+
+			if (0 == records_per_task)
+			{
+				if (0 == rank)
+					fprintf (stderr, "mpi2prv: Error! Assigned memory by -maxmem is insufficient for this number of tasks\n");
+				exit (-1);
+			}
+
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-dimemas"))
@@ -801,7 +815,7 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 	  exit (1);
 	}
 
-	ProcessArgs (idtask, argc, argv, &traceformat, &forceformat);
+	ProcessArgs (numtasks, idtask, argc, argv, &traceformat, &forceformat);
 
 	if (0 == nTraces)
 	{

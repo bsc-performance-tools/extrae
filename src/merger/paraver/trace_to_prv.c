@@ -299,7 +299,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	long long options;
 
 	records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
-	records_per_task *= (MBytesPerAllSegments - 8);      /* let's use this memory less 8 Mbytes */
+	records_per_task *= MBytesPerAllSegments;            /* let's use this memory */
 	records_per_task /= numtasks;                        /* divide by all the tasks */
 
 	InitializeObjectTable (num_appl, files, nfiles);
