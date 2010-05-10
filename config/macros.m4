@@ -45,39 +45,74 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 	if test "$$1_HOME" = "not found" ; then
 		$1_HOME=""
 	else
+
+		dnl Did the user passed a headers directory to check first?
+		AC_ARG_WITH([$3-headers],
+			AC_HELP_STRING(
+				[--with-$3-headers@<:@=ARG@:>@],
+				[Specify location of include files for package $3]
+			),
+			[ForcedHeaders="$withval"],
+			[ForcedHeaders=""]
+		)
+
 		dnl Search for includes directory
 		AC_MSG_CHECKING([for $1 includes directory])
-		for incs_dir in [$$1_HOME/include$BITS $$1_HOME/include "not found"] ; do
-			if test -d "$incs_dir" ; then
-				break
-			fi
-		done
+
+		if test "${ForcedHeaders}" = "" ; then
+			for incs_dir in [$$1_HOME/include$BITS $$1_HOME/include "not found"] ; do
+				if test -d "$incs_dir" ; then
+					break
+				fi
+			done
+		else
+			for incs_dir in [${ForcedHeaders} "not found"] ; do
+				if test -d "$incs_dir" ; then
+					break
+				fi
+			done
+		fi
+
 		AC_MSG_RESULT([$incs_dir])
 		$1_INCLUDES="$incs_dir"
 		if test "$$1_INCLUDES" = "not found" ; then
-       $1_INCLUDES=""
-       $1_CFLAGS=""
-       $1_CXXFLAGS=""
-       $1_CPPFLAGS=""
+			AC_MSG_ERROR([Unable to find header directory for package $3. Check option --with-$3-headers.])
 		else
-       $1_CFLAGS="-I$$1_INCLUDES"
-       $1_CXXFLAGS="-I$$1_INCLUDES"
-       $1_CPPFLAGS="-I$$1_INCLUDES"
+			$1_CFLAGS="-I$$1_INCLUDES"
+			$1_CXXFLAGS="-I$$1_INCLUDES"
+			$1_CPPFLAGS="-I$$1_INCLUDES"
 		fi
+
+		dnl Did the user passed a headers directory to check first?
+		AC_ARG_WITH([$3-libs],
+			AC_HELP_STRING(
+				[--with-$3-libs@<:@=ARG@:>@],
+				[Specify location of library files for package $3]
+			),
+			[ForcedLibs="$withval"],
+			[ForcedLibs=""]
+		)
 
 		dnl Search for libs directory
 		AC_MSG_CHECKING([for $1 libraries directory])
-		for libs_dir in [$$1_HOME/lib$BITS $$1_HOME/lib "not found"] ; do
-			if test -d "$libs_dir" ; then
-				break
-			fi
-		done
+		if test "${ForcedLibs}" = "" ; then
+			for libs_dir in [$$1_HOME/lib$BITS $$1_HOME/lib "not found"] ; do
+				if test -d "$libs_dir" ; then
+					break
+				fi
+			done
+		else
+			for libs_dir in [${ForcedLibs} "not found"] ; do
+				if test -d "$libs_dir" ; then
+					break
+				fi
+			done
+		fi
+
 		AC_MSG_RESULT([$libs_dir])
 		$1_LIBSDIR="$libs_dir"
 		if test "$$1_LIBSDIR" = "not found" ; then
-       $1_LIBSDIR=""
-       $1_LDFLAGS=""
-       $1_SHAREDLIBSDIR=""
+			AC_MSG_ERROR([Unable to find library directory for package $3. Check option --with-$3-libs.])
 		else
        $1_LDFLAGS="-L$$1_LIBSDIR"
        if test -d "$$1_LIBSDIR/shared" ; then
@@ -545,7 +580,7 @@ AC_DEFUN([AX_PROG_MPI],
    )
 
    dnl Search for MPI installation
-   AX_FIND_INSTALLATION([MPI], [$mpi_paths])
+   AX_FIND_INSTALLATION([MPI], [$mpi_paths], [mpi])
 
    if test "${MPI_INSTALLED}" = "yes" ; then
 
@@ -1182,7 +1217,7 @@ AC_DEFUN([AX_PROG_GM],
    )
 
    dnl Search for GM installation
-   AX_FIND_INSTALLATION([GM], [${gm_paths}])
+   AX_FIND_INSTALLATION([GM], [${gm_paths}], [gm])
 
    if test "$GM_INSTALLED" = "yes" ; then
       dnl Check for GM header files.
@@ -1225,7 +1260,7 @@ AC_DEFUN([AX_PROG_MX],
    )
 
    dnl Search for MX installation
-   AX_FIND_INSTALLATION([MX], [$mx_paths])
+   AX_FIND_INSTALLATION([MX], [$mx_paths], [mx])
 
    if test "$MX_INSTALLED" = "yes" ; then
       AC_CHECK_HEADERS([myriexpress.h], [], [MX_INSTALLED="no"])
@@ -1339,7 +1374,7 @@ AC_DEFUN([AX_PROG_PAPI],
    PAPI_SAMPLING_ENABLED="no"
 
    dnl Search for PAPI installation
-   AX_FIND_INSTALLATION([PAPI], [$papi_paths])
+   AX_FIND_INSTALLATION([PAPI], [$papi_paths], [papi])
 
    PAPI_ENABLED="${PAPI_INSTALLED}"
    if test "${PAPI_ENABLED}" = "yes" ; then
@@ -1784,7 +1819,7 @@ AC_DEFUN([AX_PROG_DYNINST],
    )
 
    dnl Search for Dyninst installation
-   AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}])
+   AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
 
    if test "${DYNINST_INSTALLED}" = "yes" ; then
       AC_LANG_SAVE()
@@ -1831,7 +1866,7 @@ AC_DEFUN([AX_PROG_MRNET],
 		)
 
 		dnl Search for MRNet installation
-		AX_FIND_INSTALLATION([MRNET], [$mrnet_paths])
+		AX_FIND_INSTALLATION([MRNET], [$mrnet_paths], [mrnet])
 
 		if test "$MRNET_INSTALLED" = "yes" ; then
 
@@ -1874,7 +1909,7 @@ AC_DEFUN([AX_PROG_MRNET],
 				[clustering_paths="/gpfs/apps/CEPBATOOLS/burst-clusterizer-devel"] dnl List of possible default paths
 			)
 			dnl Search for Clustering installation
-			AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths])
+			AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [clustering])
 
 			if test "${CLUSTERING_INSTALLED}" = "yes" ; then
 
@@ -1902,7 +1937,7 @@ AC_DEFUN([AX_PROG_MRNET],
 				[spectral_paths="/home/bsc41/bsc41127/apps/spectral_last"] dnl List of possible default paths
 			)
 			dnl Search for Spectral Analysis installation
-			AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths])
+			AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths], [spectral])
 
 			if test "${SPECTRAL_HOME}" != "" ; then
 
@@ -1931,7 +1966,7 @@ AC_DEFUN([AX_PROG_MRNET],
 		                [fft_paths="/gpfs/apps/FFTW/3.1.1"] dnl List of possible default paths
 		            )
 		            dnl Search for FFT installation
-		            AX_FIND_INSTALLATION([FFT], [$fft_paths])
+		            AX_FIND_INSTALLATION([FFT], [$fft_paths], [spectral-fft])
 	
 		            LIBS="${LIBS} ${FFT_LDFLAGS} -lfftw3 -lm"
 	

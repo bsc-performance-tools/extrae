@@ -104,7 +104,7 @@ AC_DEFUN([AX_PROG_PACX],
    )
 
    dnl Search for PACX installation
-   AX_FIND_INSTALLATION([PACX], [${pacx_paths}])
+   AX_FIND_INSTALLATION([PACX], [${pacx_paths}], [pacx])
 
    if test "${PACX_INSTALLED}" = "yes" ; then
 
