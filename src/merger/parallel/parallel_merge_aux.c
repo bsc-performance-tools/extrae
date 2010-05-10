@@ -171,6 +171,8 @@ void InitForeignRecvs (int numtasks)
 	}
 }
 
+#if defined(DEAD_CODE)
+
 #if defined(OLD_DISTRIBUTION)
 static void DistributeMyRecvs (int numtasks, int taskid)
 {
@@ -232,6 +234,8 @@ static int DistributeMyRecvsTo (int taskid, int to, MPI_Request *r)
 }
 #endif
 
+#endif /* DEAD_CODE */
+
 static void MatchRecv (int fd, off_t offset, UINT64 physic_time, UINT64 logic_time)
 {
 #if defined(DEAD_CODE)
@@ -270,7 +274,7 @@ static void MatchRecv (int fd, off_t offset, UINT64 physic_time, UINT64 logic_ti
 		fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to write (fd = %d, size = %d, written = %d)\n", fd, sizeof(r), size);
 		exit (-2);
 	}
-#else
+#else /* DEAD_CODE */
 	paraver_rec_t r;
 	ssize_t size;
 	off_t ret;
@@ -304,8 +308,9 @@ static void MatchRecv (int fd, off_t offset, UINT64 physic_time, UINT64 logic_ti
     fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to write (fd = %d, size = %d, written = %d)\n", fd, sizeof(r), size);
     exit (-2);
   }
-#endif
+#endif /* DEAD_CODE */
 }
+
 
 static int MatchRecvs (struct ForeignRecv_t *data, int count)
 {
@@ -330,6 +335,7 @@ static int MatchRecvs (struct ForeignRecv_t *data, int count)
 	return result;
 }
 
+
 struct ForeignRecv_t* SearchForeignRecv (int group, int sender, int recver, int tag)
 {
 	int i;
@@ -351,6 +357,8 @@ struct ForeignRecv_t* SearchForeignRecv (int group, int sender, int recver, int 
 	}
 	return NULL;
 }
+
+#if defined (DEAD_CODE)
 
 static int ReceiveAndMatchRecvs (int taskid, int numtasks, int source, int *total)
 {
@@ -454,7 +462,9 @@ void DistributePendingComms (int numtasks, int taskid)
 	/* Free pending communication info */
 	if (PendingComms.count > 0)
 		free (PendingComms.data);
-}
+} 
+
+#endif /* DEAD_CODE */
 
 static int RecvMine (int taskid, int from, int match, int *out_count, struct ForeignRecv_t **out, char **used)
 {
@@ -505,10 +515,13 @@ static int RecvMine (int taskid, int from, int match, int *out_count, struct For
 
 	if (match)
 	{
-		if (count > 0)
-			fprintf (stdout, "mpi2prv: Processor %d matched %d of %d communications from processor %d\n", taskid, num_match, count, from);
-		else
-			fprintf (stdout, "mpi2prv: Processor %d did not receive communications from processor %d\n", taskid, from);
+		if (option_VerboseLevel >= 1)
+		{
+			if (count > 0)
+				fprintf (stdout, "mpi2prv: Processor %d matched %d of %d communications from processor %d\n", taskid, num_match, count, from);
+			else
+				fprintf (stdout, "mpi2prv: Processor %d did not receive communications from processor %d\n", taskid, from);
+		}
 	}
 	
 	fflush (stdout);
@@ -526,17 +539,22 @@ static void SendMine (int taskid, int to, MPI_Request *req1, MPI_Request *req2)
 
 	if (ForeignRecvs[to].count > 0)
 	{
-		fprintf (stdout, "mpi2prv: Processor %d distributes %d foreign receives to processor %d\n", taskid, ForeignRecvs[to].count, to);
-		fflush (stdout);
+		if (option_VerboseLevel >= 1)
+		{
+			fprintf (stdout, "mpi2prv: Processor %d distributes %d foreign receives to processor %d\n", taskid, ForeignRecvs[to].count, to);
+			fflush (stdout);
+		}
 
 		/* Send data */
 		res = MPI_Isend (ForeignRecvs[to].data, ForeignRecvs[to].count*sizeof(struct ForeignRecv_t), MPI_BYTE, to, BUFFER_FOREIGN_RECVS_TAG, MPI_COMM_WORLD, req2);
 		MPI_CHECK(res, MPI_Isend, "Failed to send foreign receives");
 	}
 	else
-		fprintf(stdout, "mpi2prv: Processor %d does not have foreign receives for processor %d\n", taskid, to);
+	{
+		if (option_VerboseLevel >= 1)
+			fprintf(stdout, "mpi2prv: Processor %d does not have foreign receives for processor %d\n", taskid, to);
+	}
 }
-
 
 void NewDistributePendingComms (int numtasks, int taskid, int match)
 {

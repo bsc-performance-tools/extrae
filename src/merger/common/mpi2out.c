@@ -98,6 +98,7 @@ int MBytesPerAllSegments = 512;
 int option_UseDiskForComms = FALSE;
 int option_SkipSendRecvComms = FALSE;
 int option_UniqueCallerID = TRUE;
+int option_VerboseLevel = 0;
 
 #if defined(IS_BG_MACHINE)
 int option_XYZT = 0;
@@ -113,6 +114,7 @@ void Help (const char *ProgName)
           "       %s -h\n"
           "Options:\n"
           "    -h        Get this help.\n"
+          "    -v        Increase verbosity.\n"
           "    -o file   Output trace file name.\n"
           "    -e file   Uses the executable file to obtain some information.\n"
           "    -f file   MpitFILE File with the names of the \".mpit\" input files.\n"
@@ -379,6 +381,11 @@ void ProcessArgs (int rank, int argc, char *argv[], int *traceformat,
 		{
 			Help (argv[0]);
 			exit (0);
+		}
+		if (!strcmp (argv[CurArg], "-v"))
+		{
+			option_VerboseLevel++;
+			continue;
 		}
 		if (!strcmp (argv[CurArg], "-o"))
 		{

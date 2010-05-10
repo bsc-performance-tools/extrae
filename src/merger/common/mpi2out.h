@@ -76,6 +76,7 @@ extern int Joint_States;
 extern int option_UseDiskForComms;
 extern int option_SkipSendRecvComms;
 extern int option_UniqueCallerID;
+extern int option_VerboseLevel;
 
 int merger (int numtasks, int idtask, int argc, char *argv[]);
 

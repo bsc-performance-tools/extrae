@@ -289,7 +289,8 @@ static int read_environment_variables (int me)
 	}
 	else
 	{
-		fprintf (stdout, "mpitrace: Warning! MPITRACE_HOME has not been defined!.\n");
+		if (me == 0)
+			fprintf (stdout, "mpitrace: Warning! MPITRACE_HOME has not been defined!.\n");
 	}
 
 #if USE_HARDWARE_COUNTERS
@@ -1326,7 +1327,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Initialize Tracing Mode related variables */
 	Trace_Mode_Initialize (maximum_NumOfThreads);
 
-#if 0
+#if defined(DEAD_CODE)
 	if (HWCEnabled)
 		fprintf (stdout, "mpitrace: Tracing enabled for process %d (counters enabled).\n", getpid ());
 	else if (!HWCEnabled)
