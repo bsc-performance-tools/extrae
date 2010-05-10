@@ -2,6 +2,9 @@ include $(top_srcdir)/PATHS
 
 SUBDIRS = clocks hwc interfaces
 
+# Include this files/directories for the package generation
+EXTRA_DIST = external
+
 if HAVE_MRNET
   SUBDIRS += mrnet
 endif
@@ -35,6 +38,10 @@ if WANT_SMPSS
 endif
 if WANT_NANOS
 endif
+endif
+
+if WANT_UPC
+  lib_LTLIBRARIES += libupctrace.la
 endif
 
 if WANT_OPENMP
@@ -136,6 +143,9 @@ libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) mpif.h
 libmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libseqtrace_la_SOURCES = $(core_SRCS)
 
+# UPC (only C?)
+libupctrace_la_SOURCES = $(core_SRCS)
+
 # PACXtrace 
 libpacxtrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PACX) $(core_PACX_SRCS)
 libpacxtracef_la_SOURCES = $(libpacxtrace_la_SOURCES)
@@ -188,6 +198,8 @@ endif
 libseqtrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API)
 libmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la
 libmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la
+
+libupctrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API)
 
 libpacxtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX/libiface_pacx.la
 libpacxtracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX/libiface_pacxf.la
@@ -283,6 +295,8 @@ COMMON_LINKER_FLAGS = $(HWC_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(MRNET_LI
 
 libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS)
 
+libupctrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DUPC_SUPPORT
+
 if SINGLE_MPI_LIBRARY
 MPITRACE_SYMBOLS= -DC_SYMBOLS -DFORTRAN_SYMBOLS
 else
@@ -328,6 +342,8 @@ NEW_MPI_LIBS = -L@MPI_LIBSDIR@ @MPI_LIBS@ -static
 endif
 
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+
+libupctrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) # -static

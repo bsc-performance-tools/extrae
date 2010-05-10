@@ -49,6 +49,8 @@ extern unsigned int nanos_ompitrace_get_thread_num(void);
 #elif defined(TRT_SUPPORT)
 # include <pthread.h>
 extern int threadGetID(void);
+#elif defined(UPC_SUPPORT)
+# include <external/upc.h>
 #endif
 
 unsigned get_trace_thread_number (void)
@@ -63,6 +65,8 @@ unsigned get_trace_thread_number (void)
 	return Backend_GetpThreadIdentifier();
 #elif defined(TRT_SUPPORT)
 	return threadGetID();
+#elif defined(UPC_SUPPORT)
+	return GetUPCthreadID();
 #else
 	return 0;
 #endif
@@ -81,6 +85,8 @@ void * get_trace_thread_number_function (void)
 #elif defined(TRT_SUPPORT)
 	/* TRT is based on pthreads */
 	return (void*) pthread_self; 
+#elif defined(UPC_SUPPORT)
+	return (void*) GetUPCthreadID;
 #else
 	return NULL;
 #endif

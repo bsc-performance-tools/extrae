@@ -335,6 +335,16 @@ AC_ARG_ENABLE(smpss,
 )
 AM_CONDITIONAL(WANT_SMPSS, test "${enable_smpss}" = "yes" )
 
+AC_ARG_ENABLE(upc, 
+   AC_HELP_STRING(
+      [--enable-upc],
+      [Enable support for tracing UPC run-time (enabled by default)]
+   ),
+   [enable_upc="${enableval}"],
+   [enable_upc="yes"]
+)
+AM_CONDITIONAL(WANT_UPC, test "${enable_upc}" = "yes" )
+
 AC_ARG_ENABLE(nanos, 
    AC_HELP_STRING(
       [--enable-nanos],

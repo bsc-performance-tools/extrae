@@ -119,6 +119,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include "mrnet_be.h"
 #endif
 
+#if defined(UPC_SUPPORT)
+# include <external/upc.h>
+#endif
+
 int MPItrace_Flush_Wrapper (Buffer_t *buffer);
 
 #warning "Control variables below (tracejant, tracejant_mpi, tracejant_hwc_mpi...) should be moved to mode.c and indexed per mode"
@@ -1258,6 +1262,13 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	extern unsigned int nanos_ompitrace_get_max_threads(void);
 
 	current_NumOfThreads = maximum_NumOfThreads = nanos_ompitrace_get_max_threads();
+#elif defined(UPC_SUPPORT)
+	/* Set the current number of threads that is the UPC app running - THREADS! */
+	current_NumOfThreads = maximum_NumOfThreads = GetNumUPCthreads ();
+
+	/* Set the actual task identifier for this process -- in a full
+	   shared/distributed PGAS - UPC system --. */
+	TaskID_Setup (GetUPCprocID());
 #else
 	/* If we don't support OpenMP we still have this running thread :) */
 	current_NumOfThreads = maximum_NumOfThreads = 1;
