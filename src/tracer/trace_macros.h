@@ -185,8 +185,8 @@
                                                                 \
 	if (tracejant && tracejant_mpi)                               \
 	{                                                             \
-        /* We don't want the compiler to reorganize ops */      \
-        /* The "if" prevents that */                            \
+		/* We don't want the compiler to reorganize ops */          \
+		/* The "if" prevents that */                                \
 		traceja_event = TracingBitmap[TASKID];                      \
 		if ((TRACING_BITMAP_VALID_EVTYPE(evttype)) &&               \
 		    (TRACING_BITMAP_VALID_EVTARGET(evttarget)))             \
@@ -204,7 +204,7 @@
 			evt.param.mpi_param.tag = (evttag);                       \
 			evt.param.mpi_param.comm = (long) (evtcomm);              \
 			evt.param.mpi_param.aux = (long) (evtaux);                \
-            HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_MPI);  \
+			HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_MPI);  \
 			if (ACCUMULATED_COUNTERS_INITIALIZED(thread_id))          \
 			{                                                         \
 				/* This happens once when the tracing mode changes */   \
@@ -243,9 +243,8 @@
 	} \
 	else \
 	{ \
-		/* Accumulate counters from last MPI that was above the burst threshold */ \
-		if (!ACCUMULATED_COUNTERS_INITIALIZED(thread_id)) \
-			HARDWARE_COUNTERS_ACCUMULATE(thread_id, burst_end, TRUE); \
+		/* Accumulate counters from every MPI - in sampling mode it performs a simple read */ \
+		HARDWARE_COUNTERS_ACCUMULATE(thread_id, burst_end, TRUE); \
 	} \
 }
 
