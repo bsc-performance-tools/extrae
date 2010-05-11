@@ -114,7 +114,7 @@ WRAPPERS_PTHREAD = wrappers/pthread/pthread_wrapper.c wrappers/pthread/pthread_w
   probes/pthread/pthread_probe.c probes/pthread/pthread_probe.h
 
 if IS_CELL_MACHINE
-  WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c
+  WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c wrappers/CELL/cell_wrapper.h
 endif
 
 core_MPI_SRCS = \
