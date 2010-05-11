@@ -12,7 +12,7 @@ libsputrace_la_SOURCES = spu_clock.c spu_clock.h \
   ../clocks/clock.c ../clocks/clock.h \
   spu_init.c \
   spu_interface.c \
-  spu_wrapper.c \
+  spu_wrapper.c spu_wrapper.h \
   wrapper.c wrapper.h \
   defaults.h
 
