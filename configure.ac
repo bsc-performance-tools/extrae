@@ -230,6 +230,12 @@ AC_CHECK_HEADERS(
 AC_CHECK_HEADERS(
   [netinet/in.h]
 )
+saved_CFLAGS=${CFLAGS}
+CFLAGS="-I/usr/src/linux"
+AC_CHECK_HEADERS(
+  [arch/powerpc/include/asm/atomic.h]
+)
+CFLAGS=${saved_CFLAGS}
 
 ##
 ## Check for MPI things

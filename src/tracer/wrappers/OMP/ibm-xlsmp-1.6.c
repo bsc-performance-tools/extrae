@@ -176,20 +176,24 @@ static void callme_single(void)
 */
 
 #if defined(OS_LINUX) && defined(ARCH_PPC)
-# if SIZEOF_VOIDP == 8
-#  ifdef HAVE_ASM_PPC64_ATOMIC_H
-#   define __KERNEL__  /* patch to workaround an #ifdef inside atomic.h */
-#   include <asm-ppc64/atomic.h>
-#   undef  __KERNEL__
-#  endif
-# elif SIZEOF_VOIDP == 4
-#  ifdef HAVE_ASM_PPC_ATOMIC_H
-#   define __KERNEL__  /* patch to workaround an #ifdef inside atomic.h */
-#   include <asm-ppc/atomic.h>
-#   undef  __KERNEL__
-#  endif
+# ifdef HAVE_ARCH_POWERPC_INCLUDE_ASM_ATOMIC_H
+#  include <arch/powerpc/include/asm/atomic.h>
 # else
-#  error "Unknown memory model!"
+#  if SIZEOF_VOIDP == 8
+#   ifdef HAVE_ASM_PPC64_ATOMIC_H
+#    define __KERNEL__  /* patch to workaround an #ifdef inside atomic.h */
+#    include <asm-ppc64/atomic.h>
+#    undef  __KERNEL__
+#   endif
+#  elif SIZEOF_VOIDP == 4
+#   ifdef HAVE_ASM_PPC_ATOMIC_H
+#    define __KERNEL__  /* patch to workaround an #ifdef inside atomic.h */
+#    include <asm-ppc/atomic.h>
+#    undef  __KERNEL__
+#   endif
+#  else
+#   error "Unknown memory model!"
+#  endif
 # endif
 #else
 # error "This file can only be compiled at linux/ppc nowadays!"
