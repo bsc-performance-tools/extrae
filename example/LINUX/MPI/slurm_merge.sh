@@ -7,7 +7,7 @@
 # @ tasks_per_node = 4
 # @ wall_clock_limit = 01:00:00
 
-MPITRACE_HOME=/gpfs/apps/CEPBATOOLS/64.hwc
+export MPITRACE_HOME=@sub_PREFIXDIR@
 
 ${MPITRACE_HOME}/bin/mpi2prv -syn -f TRACE.mpits -o trace.prv
 

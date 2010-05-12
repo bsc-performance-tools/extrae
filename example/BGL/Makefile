@@ -1,13 +1,12 @@
 
 BGL_HOME	= /bgl/BlueLight/ppcfloor
-PAPI_HOME	= /bgl/local/packages/papi-3.5.0
-MPITRACE_HOME	= ../..
-XML2_LIBS       = -L/bgl/local/packages/libxml2-2.6.20/lib -lxml2 -L/bgl/BlueLight/ppcfloor/blrts-gnu/powerpc-bgl-blrts-gnu/lib -lc -lnss_dns -lnss_files -lresolv
+PAPI_HOME	= @sub_PAPI_HOME@
+MPITRACE_HOME	= @sub_PREFIXDIR@
+XML2_LIBS = -L/bgl/local/packages/libxml2-2.6.20/lib -lxml2 -L/bgl/BlueLight/ppcfloor/blrts-gnu/powerpc-bgl-blrts-gnu/lib -lc -lnss_dns -lnss_files -lresolv
 
-F77		= blrts_f77
-FLIBS		= -L$(MPITRACE_HOME)/lib -lmpitracef -L$(PAPI_HOME)/lib -lpapi -L$(BGL_HOME)/bglsys/lib -lbgl_perfctr.rts -lmpich.rts -lmsglayer.rts -ldevices.rts -lrts.rts $(XML2_LIBS)
-FFLAGS		= -O2 -I$(BGL_HOME)/bglsys/include
-
+F77 = blrts_f77
+FLIBS = -L$(MPITRACE_HOME)/lib -lmpitracef -L$(PAPI_HOME)/lib -L$(BGL_HOME)/bglsys/lib -lmpich.rts -lmsglayer.rts @sub_PAPI_LIBS@ $(XML2_LIBS)
+FFLAGS = -O2 -I$(BGL_HOME)/bglsys/include
 
 all: mpi_ping
 

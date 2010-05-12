@@ -1,7 +1,9 @@
 
+MPITRACE_HOME=@sub_PREFIXDIR@
+
 CC = gcc
 CFLAGS = -O -g
-LFLAGS = -L ../../../lib -lseqtrace -lxml2 -ldl
+LFLAGS = -L $(MPITRACE_HOME)/lib -lseqtrace -lxml2 -ldl
 
 pi:	pi.c
 	$(CC) $(CFLAGS) pi.c -o pi $(LFLAGS)

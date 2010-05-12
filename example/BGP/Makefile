@@ -1,13 +1,13 @@
 
-BG_HOME	= /bgsys/drivers/ppcfloor
-PAPI_HOME	= /bgsys/local/papi/papi-c-3.9.0
-MPITRACE_HOME	= ../../..
-XML2_LIBS       = 
+BG_HOME = /bgsys/drivers/ppcfloor
+PAPI_HOME = @sub_PAPI_HOME@
+MPI_HOME = @sub_MPI_HOME@
+MPITRACE_HOME = @sub_PREFIXDIR@
+XML2_LIBS = 
 
-F77		= $(BG_HOME)/comm/bin/mpif77
-FLIBS		= -L$(MPITRACE_HOME)/lib -lmpitracef -L$(PAPI_HOME)/lib -lpapi
-FFLAGS		= -O2
-
+F77 = $(MPI_HOME)/bin/mpif77
+FLIBS = -L$(MPITRACE_HOME)/lib -lmpitracef -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@
+FFLAGS = -O2 -g
 
 all: mpi_ping
 

@@ -1,5 +1,5 @@
 
-MPITRACE_HOME = ../../..
+MPITRACE_HOME = @sub_PREFIXDIR@
 
 PPU_LIB = $(MPITRACE_HOME)/lib/libpputrace.a
 SPU_LIB = $(MPITRACE_HOME)/lib/libsputrace.a

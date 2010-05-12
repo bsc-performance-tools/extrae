@@ -1,15 +1,10 @@
+MPI_HOME = @sub_MPI_HOME@
+MPITRACE_HOME = @sub_PREFIXDIR@
+PAPI_HOME = @sub_PAPI_HOME@
 
-#
-# To compile this example, set the following 4 variables.
-#
-
-MPICH_HOME	  = /opt/osshpc/mpich-gm/64
-MPITRACE_HOME = /gpfs/apps/CEPBATOOLS/64.hwc
-PAPI_HOME	  = /gpfs/apps/PAPI/papi-3.2.1/64
-PERFCTR_HOME  = /gpfs/apps/PAPI/papi-3.2.1/64
-
-F77     = $(MPICH_HOME)/bin/mpif77 
-FFLAGS  = -O2
+F77 = $(MPI_HOME)/bin/mpif77 
+FFLAGS = -O2
+FLIBS = -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@
 
 all: mpi_ping
 

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ $# -ne 4 ] ; then
+  echo "Invalid parameters. Pass SED location, KEY, VALUE and PATH"
+	exit 0
+fi
+
+SED=$1
+KEY=$2
+VALUE=$3
+PATH=$4
+
+if [ ! -d ${PATH} ] ; then
+	echo "Given path seems no to be a valid directory"
+	exit 0
+fi
+
+echo "Applying modification in ${PATH} - Key = ${KEY} for value = ${VALUE}"
+
+/usr/bin/find ${PATH} -type f -exec ${PWD}/substitute "${SED}" "${KEY}" "${VALUE}" {} \;
+

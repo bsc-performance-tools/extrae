@@ -5,7 +5,9 @@ SUBDIRS += doc
 endif
 
 EXTRA_DIST = example \
-  INSTALL-examples
+  INSTALL-examples \
+	substitute \
+	substitute-all
 
 VPATH=@srcdir@
 SRCDIR=@srcdir@
@@ -83,45 +85,45 @@ if OS_AIX
 MPI_EXAMPLE_FILES=example/AIX/Makefile \
  example/AIX/merge.sh \
  example/AIX/script.ll \
- example/AIX/mpi_ping.f
-MPI_EXAMPLE_FILE_XML1=example/AIX/mpitrace_explained.xml
-MPI_EXAMPLE_FILE_XML2=example/AIX/mpitrace.xml
-MPI_EXAMPLE_FILE_XML3=example/AIX/detailed_trace_basic.xml
-MPI_EXAMPLE_FILE_XML4=example/AIX/summarized_trace_basic.xml
+ example/AIX/mpi_ping.f \
+ example/AIX/mpitrace_explained.xml \
+ example/AIX/mpitrace.xml \
+ example/AIX/detailed_trace_basic.xml \
+ example/AIX/summarized_trace_basic.xml
 
 OMP_EXAMPLE_FILES=/dev/null
 
 SEQ_EXAMPLE_FILES=/dev/null
 else
 MPI_EXAMPLE_FILES=\
- example/LINUX/MPI/run.sh         \
+ example/LINUX/MPI/run.sh \
  example/LINUX/MPI/run-dynamic.sh \
- example/LINUX/MPI/trace.sh       \
- example/LINUX/MPI/mpi_ping.f     \
- example/LINUX/MPI/mpi2prv.sh     \
- example/LINUX/MPI/Makefile       \
+ example/LINUX/MPI/trace.sh \
+ example/LINUX/MPI/mpi_ping.f \
+ example/LINUX/MPI/mpi2prv.sh \
+ example/LINUX/MPI/Makefile \
  example/LINUX/MPI/slurm_trace.sh \
  example/LINUX/MPI/slurm_merge.sh \
- example/LINUX/MPI/slurm_parallel_merge.sh
-MPI_EXAMPLE_FILE_XML1=example/LINUX/MPI/mpitrace_explained.xml
-MPI_EXAMPLE_FILE_XML2=example/LINUX/MPI/mpitrace.xml
-MPI_EXAMPLE_FILE_XML3=example/LINUX/MPI/detailed_trace_basic.xml
-MPI_EXAMPLE_FILE_XML4=example/LINUX/MPI/summarized_trace_basic.xml
+ example/LINUX/MPI/slurm_parallel_merge.sh \
+ example/LINUX/MPI/mpitrace_explained.xml \
+ example/LINUX/MPI/mpitrace.xml \
+ example/LINUX/MPI/detailed_trace_basic.xml \
+ example/LINUX/MPI/summarized_trace_basic.xml 
 
 OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/Makefile \
  example/LINUX/OMP/merge.sh \
- example/LINUX/OMP/pi.c     \
- example/LINUX/OMP/pi.f     \
- example/LINUX/OMP/run.sh
-OMP_EXAMPLE_FILE_XML1=example/LINUX/OMP/mpitrace.xml
+ example/LINUX/OMP/pi.c \
+ example/LINUX/OMP/pi.f \
+ example/LINUX/OMP/run.sh \
+ example/LINUX/OMP/mpitrace.xml
 
 SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/Makefile \
  example/LINUX/SEQ/merge.sh \
- example/LINUX/SEQ/pi.c     \
- example/LINUX/SEQ/run.sh
-SEQ_EXAMPLE_FILE_XML1=example/LINUX/SEQ/mpitrace.xml
+ example/LINUX/SEQ/pi.c \
+ example/LINUX/SEQ/run.sh \
+ example/LINUX/SEQ/mpitrace.xml
 
 MRNET_EXAMPLE_FILES=\
  example/LINUX/MRNET/Makefile     \
@@ -138,43 +140,45 @@ endif
 
 install-data-hook:
 	$(mkdir_p) $(datadir)/example
+	$(mkdir_p) $(datadir)/example/SEQ
+	cp -f $(SEQ_EXAMPLE_FILES) $(datadir)/example/SEQ
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/SEQ
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/SEQ
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/SEQ
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/SEQ
 if HAVE_PACX
 	$(mkdir_p) $(datadir)/example/PACX
 	cp -f $(PACX_EXAMPLE_FILES) $(datadir)/example/PACX
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/PACX
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/PACX
+	./substitute-all $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(datadir)/example/PACX
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/PACX
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/PACX
 endif
 if HAVE_MPI
 	$(mkdir_p) $(datadir)/example/MPI
 	cp -f $(MPI_EXAMPLE_FILES) $(datadir)/example/MPI
-# Temporary hack while there are no XML's in the Cell examples
-if ! IS_CELL_MACHINE
-if ! IS_BG_MACHINE
-# Substitute ID and PREFIX fields in XML files
-	$(SED) "s|@sed_MYPREFIXDIR@|${prefix}|g" < $(MPI_EXAMPLE_FILE_XML1) | $(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g" > $(datadir)/example/MPI/`basename $(MPI_EXAMPLE_FILE_XML1)`
-	$(SED) "s|@sed_MYPREFIXDIR@|${prefix}|g" < $(MPI_EXAMPLE_FILE_XML2) | $(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g" > $(datadir)/example/MPI/`basename $(MPI_EXAMPLE_FILE_XML2)`
-	$(SED) "s|@sed_MYPREFIXDIR@|${prefix}|g" < $(MPI_EXAMPLE_FILE_XML3) | $(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g" > $(datadir)/example/MPI/`basename $(MPI_EXAMPLE_FILE_XML3)`
-	$(SED) "s|@sed_MYPREFIXDIR@|${prefix}|g" < $(MPI_EXAMPLE_FILE_XML4) | $(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g" > $(datadir)/example/MPI/`basename $(MPI_EXAMPLE_FILE_XML4)`
-endif
-endif
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/MPI
 endif
 if WANT_OPENMP
 	$(mkdir_p) $(datadir)/example/OMP
 	cp -f $(OMP_EXAMPLE_FILES) $(datadir)/example/OMP
-# Substitute ID and PREFIX fields in XML file
-	$(SED) "s|@sed_MYPREFIXDIR@|${prefix}|g" < $(OMP_EXAMPLE_FILE_XML1) | $(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g" > $(datadir)/example/OMP/`basename $(OMP_EXAMPLE_FILE_XML1)`
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/OMP
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/OMP
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/OMP
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/OMP
 endif
-	$(mkdir_p) $(datadir)/example/SEQ
-	cp -f $(SEQ_EXAMPLE_FILES) $(datadir)/example/SEQ
-# Substitute ID and PREFIX fields in XML file
-	$(SED) "s|@sed_MYPREFIXDIR@|${prefix}|g" < $(SEQ_EXAMPLE_FILE_XML1) | $(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g" > $(datadir)/example/SEQ/`basename $(SEQ_EXAMPLE_FILE_XML1)`
 if HAVE_MRNET
 	$(mkdir_p) $(datadir)/example/MRNET
-	for file in $(MRNET_EXAMPLE_FILES) ; do \
-		installed_file=$(datadir)/example/MRNET/`basename $$file` ; \
-		$(SED) "s|@sed_MYPREFIXDIR@|${prefix}|g" < $$file                                                     | \
-		$(SED) "s|@sed_XMLID@|`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`|g"  \
-		> $$installed_file ; \
-	done
 	chmod u+x $(datadir)/example/MRNET/trace.sh $(datadir)/example/MRNET/merge.sh
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/MRNET
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/MRNET
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/MRNET
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/MRNET
 endif
 
 uninstall-local:

@@ -3,8 +3,8 @@
 #@ wall_clock_limit = 00:10:00
 #@ account_no = b12-upc
 #@ tasks = 1
-#@ arguments = -exe /home/b12/harald/paquete/bin/mpi2prv \
-         -cwd /home/b12/harald/paquete/share/example \
+#@ arguments = -exe @sub_PREFIXDIR@/bin/mpi2prv \
+         -cwd @sub_PREFIXDIR@/share/example \
          -mode VN \
          -np $(tasks) \
          -args "-f TRACE.mpits -syn"

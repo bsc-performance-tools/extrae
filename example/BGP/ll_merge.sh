@@ -8,6 +8,7 @@
 # @ bg_size = 32
 # @ queue
 
-export MPITRACE_HOME=../../..
+export MPITRACE_HOME=@sub_PREFIXDIR@
+
 /usr/local/bin/mpirun -np 1 ${MPITRACE_HOME}/bin/mpi2prv -f TRACE.mpits
 

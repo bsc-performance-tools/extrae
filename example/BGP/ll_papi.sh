@@ -8,7 +8,7 @@
 # @ bg_size = 32
 # @ queue
 
-export PAPI_HOME=/bgsys/local/papi/papi-c-3.9.0
+export PAPI_HOME=@sub_PAPI_HOME@
 
 /usr/local/bin/mpirun -np 1 ${PAPI_HOME}/bin/papi_avail > papi_bgp_avail.txt
 /usr/local/bin/mpirun -np 1 ${PAPI_HOME}/bin/papi_native_avail > papi_bgp_native_avail.txt

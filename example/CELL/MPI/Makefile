@@ -1,11 +1,12 @@
 
-MPITRACE_HOME = ../../..
+MPITRACE_HOME = @sub_PREFIXDIR@
+MPI_HOME = @sub_MPI_HOME@
 
 PPU_LIB = $(MPITRACE_HOME)/lib/libmpitrace.a
 SPU_LIB = $(MPITRACE_HOME)/lib/libsputrace.a
 
 SPU_CC = spu-cc
-PPU_CC = /usr/local/share/mpich-1.2.7p1/bin/mpicc
+PPU_CC = $(MPI_HOME)/bin/mpicc
 PPU_CFLAGS = -O2 -Wall -I$(MPITRACE_HOME)/include
 SPU_CFLAGS = -O2 -Wall -I$(MPITRACE_HOME)/include
 EXTRA = -lxml2

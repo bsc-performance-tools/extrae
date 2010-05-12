@@ -28,7 +28,7 @@
 #@ queue
 #####################################################################
 
-MPITRACE_HOME=/gpfs/apps/CEPBATOOLS/64.hwc
+MPITRACE_HOME=@sub_PREFIXDIR@
 MLIST=~/machine_list.$$
 /opt/ibmll/LoadL/full/bin/ll_get_machine_list > ${MLIST}
 NP=`cat ${MLIST} | wc -l`

@@ -1405,8 +1405,8 @@ AC_DEFUN([AX_PROG_PAPI],
 
       AC_CHECK_LIB([papi], [PAPI_start],
          [ 
-			PAPI_LIBS="${LIBS}"
-			AC_SUBST(PAPI_LIBS)
+            PAPI_LIBS="${LIBS}"
+            AC_SUBST(PAPI_LIBS)
          ],
          [PAPI_ENABLED="no"]
       )

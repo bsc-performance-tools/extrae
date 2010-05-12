@@ -1,10 +1,10 @@
 <?xml version='1.0'?>
 
 <trace enabled="yes"
- home="@sed_MYPREFIXDIR@"
+ home="@sub_PREFIXDIR@"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="@sed_XMLID@"
+ xml-parser-id="@sub_XMLID@"
 >
 
   <mpi enabled="yes">

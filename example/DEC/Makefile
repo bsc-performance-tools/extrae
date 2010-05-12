@@ -1,9 +1,9 @@
-MPITRACE_HOME	= /cepba/des/gllort/mpitrace/DEC-LINUX-BGL
+MPITRACE_HOME	= @sub_PREFIXDIR@ 
+MPI_HOME = @sub_MPI_HOME@
 
-FLIBS		= -L$(MPITRACE_HOME)/lib -lmpitracef -lpthread -lrt -lmach -lpmpi -lmpi -lexc
-F77		= f77
-FFLAGS		= -O2 -g
-
+FLIBS = -L$(MPITRACE_HOME)/lib -lmpitracef -lpthread -lrt -lmach -lpmpi -lmpi -lexc
+F77	= $(MPI_HOME)/bin/mpif77
+FFLAGS = -O2 -g
 
 all: mpi_ping
 

@@ -1,4 +1,4 @@
-MPITRACE_HOME=../../..
+MPITRACE_HOME=@sub_PREFIXDIR@
 
 CC= gcc
 CFLAGS= -O -g -pthread
