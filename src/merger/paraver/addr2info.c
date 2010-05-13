@@ -920,7 +920,7 @@ void Share_Callers_Usage (void)
 	res = MPI_Reduce (MPI_Caller_Labels_Used, MPI_used, MAX_CALLERS, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "Sharing information about MPI address<->info");
 	for (i = 0; i < MAX_CALLERS; i++)
-		Address2Info_Labels[i] = MPI_used[i];
+		MPI_Caller_Labels_Used[i] = MPI_used[i];
 
 	if (Sample_Caller_Labels_Used == NULL)
 	{
