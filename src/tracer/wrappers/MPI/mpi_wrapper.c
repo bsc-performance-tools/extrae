@@ -1348,7 +1348,7 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    *   target : sender                      size  : received message size    
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag, c, EMPTY);
+  TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1837,7 +1837,7 @@ void Bursts_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
     hash_remove (&requests, req);
   }
   /*
@@ -1896,7 +1896,7 @@ void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
     hash_remove (&requests, req);
 
     /*
@@ -1981,7 +1981,7 @@ void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req); /* NOHWC */
+    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req); /* NOHWC */
     hash_remove (&requests, req);
   }
   /*
@@ -2056,7 +2056,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
          *   tag : message tag                  commid: communicator identifier
          *   aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, save_reqs[ireq]);
+        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[ireq]);
         hash_remove (&requests, save_reqs[ireq]);
       }
     }
@@ -2127,7 +2127,7 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
        *   tag : message tag                  commid: communicator identifier
        *   aux : request
        */
-      TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+      TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
 
       hash_remove (&requests, req);
     }
@@ -2202,7 +2202,7 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
          *   tag : message tag                  commid: communicator identifier
          *   aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
         hash_remove (&requests, req);
       }
     }
@@ -4310,7 +4310,7 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
    *   target : sender                      size  : received message size    
    *   tag : message tag
    */
-	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag, comm,
+	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, tag, comm,
 		EMPTY);
 
   return ierror;
@@ -4738,7 +4738,7 @@ int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
     hash_remove (&requests, req);
   }
   /*
@@ -4794,7 +4794,7 @@ int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
     hash_remove (&requests, req);
   
     /*
@@ -4879,7 +4879,7 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
     hash_remove (&requests, req);
   }
 
@@ -4968,7 +4968,7 @@ int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
          *   tag : message tag                  commid: communicator identifier
          *   aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
         hash_remove (&requests, save_reqs[ireq]);
       }
     }
@@ -5047,7 +5047,7 @@ int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
        *   tag : message tag                  commid: communicator identifier
        *   aux : request
        */
-      TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+      TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
       hash_remove (&requests, save_reqs[*index]);
     }
   }
@@ -5135,7 +5135,7 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
          * tag : message tag                  commid: communicator identifier
          * aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
+        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
         hash_remove (&requests, save_reqs[array_of_indices[ii]]);
       }
     }
