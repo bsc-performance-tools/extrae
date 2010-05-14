@@ -839,6 +839,40 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 	}
 }
 
+#if defined(HAVE_MRNET)
+static void Parse_XML_MRNet (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+    xmlNodePtr tag;
+    tag = current_tag->xmlChildrenNode;
+    while (tag != NULL)
+    {
+        /* Skip coments */
+        if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+        {
+        }
+        else if (!xmlStrcmp (tag->name, RC_MRNET_SPECTRAL))
+        {
+			/* Spectral analysis options */
+			xmlChar *min_seen = xmlGetProp (tag, SPECTRAL_MIN_SEEN);
+			xmlChar *max_periods = xmlGetProp (tag, SPECTRAL_MAX_PERIODS);
+			xmlChar *num_iters = xmlGetProp (tag, SPECTRAL_NUM_ITERS);
+
+			MRNCfg_SetupSpectral ( atoi(min_seen), atoi(max_periods), atoi(num_iters) );
+		}
+		else if (!xmlStrcmp (tag->name, RC_MRNET_CLUSTERING))
+		{
+			/* Clustering analysis options */
+			xmlChar *max_tasks = xmlGetProp (tag, CLUSTERING_MAX_TASKS);
+			xmlChar *max_points = xmlGetProp (tag, CLUSTERING_MAX_POINTS);
+
+			MRNCfg_SetupClustering ( atoi(max_tasks), atoi(max_points) );
+		}
+
+        tag = tag->next;
+    }
+}
+#endif
+
 /* Configure <remote-control> related parameters */
 static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
@@ -896,6 +930,9 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 				}
 				/* Setup signals to pause/resume the application */
 				Signals_SetupPauseAndResume (SIGUSR1, SIGUSR2);
+
+				Parse_XML_MRNet(rank, xmldoc, tag);
+
 				/* Activate the MRNet */
 				Enable_MRNet();
 #else

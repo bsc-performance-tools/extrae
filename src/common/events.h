@@ -394,6 +394,7 @@ enum {
 
 #define MRNET_EV                 50000
 #define CLUSTER_ID_EV            90000001
+#define SPECTRAL_PERIOD_EV       91000001
 
 /* 
  * Values.

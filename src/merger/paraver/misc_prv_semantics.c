@@ -729,6 +729,22 @@ static int Clustering_Event (event_t * current_event,
 	return 0;
 }
 
+static int Spectral_Event (event_t * current_event,
+    unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+    unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+    unsigned int EvType, EvValue;
+    UNREFERENCED_PARAMETER(fset);
+
+    EvType  = Get_EvEvent (current_event);
+    EvValue = Get_EvValue (current_event);
+
+    trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+    return 0;
+}
+
+
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
 	{ READ_EV, ReadWrite_Event },
@@ -756,6 +772,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ TRACING_MODE_EV, Tracing_Mode_Event },
 	{ MRNET_EV, MRNet_Event },
 	{ CLUSTER_ID_EV, Clustering_Event },
+	{ SPECTRAL_PERIOD_EV, Spectral_Event },
 	{ NULL_EV, NULL }
 };
 

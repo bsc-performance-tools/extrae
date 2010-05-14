@@ -67,6 +67,7 @@ int HWC_Get_Current_Set (int threadid);
 int HWC_Get_Num_Sets ();
 int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds);
 int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds);
+int HWC_Get_Position_In_Set (int set_id, int hwc_id);
 int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer);
 int HWC_Reset (unsigned int tid);
 int HWC_Resetting ();

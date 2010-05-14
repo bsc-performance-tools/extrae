@@ -1017,6 +1017,8 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
 #if !defined(HAVE_MRNET)
 	UNREFERENCED_PARAMETER(world_size);
 #else
+#if 0
+	/* FIXME: Temporarily disabled. new_buffer_size overflows when target_mbs > 1000 */
 	if (MRNet_isEnabled())
 	{
 		int new_buffer_size = 0;
@@ -1030,6 +1032,7 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
 
 		buffer_size = new_buffer_size;
 	}
+#endif
 #endif
 
 	xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));

@@ -90,10 +90,17 @@
 #define TRACE_REMOTE_CONTROL            ((xmlChar*) "remote-control")
 #define REMOTE_CONTROL_METHOD_MRNET     ((xmlChar*) "mrnet")
 #define REMOTE_CONTROL_METHOD_SIGNAL    ((xmlChar*) "signal")
-#define RC_MRNET_TARGET                 ((xmlChar *) "target")
-#define RC_MRNET_ANALYSIS               ((xmlChar *) "analysis")
-#define RC_MRNET_START_AFTER            ((xmlChar *) "start-after")
+#define RC_MRNET_TARGET                 ((xmlChar*) "target")
+#define RC_MRNET_ANALYSIS               ((xmlChar*) "analysis")
+#define RC_MRNET_START_AFTER            ((xmlChar*) "start-after")
 #define RC_SIGNAL_WHICH                 ((xmlChar*) "which")
+#define RC_MRNET_SPECTRAL				((xmlChar*) "spectral")
+#define RC_MRNET_CLUSTERING				((xmlChar*) "clustering")
+#define SPECTRAL_MIN_SEEN				((xmlChar*) "min_seen")
+#define SPECTRAL_MAX_PERIODS			((xmlChar*) "max_periods")
+#define SPECTRAL_NUM_ITERS				((xmlChar*) "num_iters")
+#define CLUSTERING_MAX_TASKS			((xmlChar*) "max_tasks")
+#define CLUSTERING_MAX_POINTS			((xmlChar*) "max_points")
 
 
 

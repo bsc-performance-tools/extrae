@@ -1912,7 +1912,6 @@ AC_DEFUN([AX_PROG_MRNET],
 			AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [clustering])
 
 			if test "${CLUSTERING_INSTALLED}" = "yes" ; then
-
 		        CLUSTERING_LIBS="-lMRNetClustering"
 
 		        dnl FIXME: Can't do these checks because MRNetClustering includes types.h, which includes config.h, which is not distributed!
@@ -1926,8 +1925,25 @@ AC_DEFUN([AX_PROG_MRNET],
 		        AC_SUBST(CLUSTERING_LIBS)
 				AC_DEFINE([HAVE_CLUSTERING], 1, [Define to 1 if CLUSTERING is installed in the system])
 		    fi
-
 			AX_FLAGS_RESTORE()
+
+			AC_ARG_WITH(clustering-ann,
+				AC_HELP_STRING(
+					[--with-clustering-ann@<:@=DIR@:>@],
+					[specify where to find ANN libraries and includes]
+				),
+				[clustering_ann_paths="$withval"],
+				[clustering_ann_paths="/gpfs/apps/CEPBATOOLS/libMRNetANN"] dnl List of possible default paths
+			)
+			dnl Search for libANN installation
+			AX_FIND_INSTALLATION([ANN], [$clustering_ann_paths])
+			if test "${ANN_INSTALLED}" = "yes" ; then
+				ANN_LIBS="-lMRNetANN"
+				AC_SUBST(ANN_LIBS)
+				AC_DEFINE([HAVE_ANN], 1, [Define to 1 if libANN is installed in the system])
+			fi
+			AX_FLAGS_RESTORE()
+
 			AC_ARG_WITH(spectral,
 				AC_HELP_STRING(
 					[--with-spectral@<:@=DIR@:>@],

@@ -165,6 +165,25 @@ int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds)
     return num_counters;
 }
 
+/* Returns the index in which is stored the given counter in a set */
+int HWC_Get_Position_In_Set (int set_id, int hwc_id)
+{
+	int i = 0, num_counters = 0;
+
+    num_counters = HWC_sets[set_id].num_counters;
+
+	for (i=0; i<num_counters; i++)
+	{
+		int cur_hwc_id;
+#if defined(PMAPI_COUNTERS)
+		cur_hwc_id = HWC_COUNTER_TYPE(i, HWC_sets[set_id].counters[i]);
+#else
+		cur_hwc_id = HWC_COUNTER_TYPE(HWC_sets[set_id].counters[i]);
+#endif
+		if (cur_hwc_id == hwc_id) return i;
+	}
+	return -1;
+}
 
 /**
  * Stops the current set and starts reading the next one.
