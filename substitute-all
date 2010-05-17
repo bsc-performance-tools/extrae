@@ -8,14 +8,14 @@ fi
 SED=$1
 KEY=$2
 VALUE=$3
-PATH=$4
+PATHTOCHANGE=$4
 
-if [ ! -d ${PATH} ] ; then
+if [ ! -d ${PATHTOCHANGE} ] ; then
 	echo "Given path seems no to be a valid directory"
 	exit 0
 fi
 
-echo "Applying modification in ${PATH} - Key = ${KEY} for value = ${VALUE}"
+echo "Applying modification in ${PATHTOCHANGE} - Key = ${KEY} for value = ${VALUE}"
 
-/usr/bin/find ${PATH} -type f -exec ${PWD}/substitute "${SED}" "${KEY}" "${VALUE}" {} \;
+/usr/bin/find ${PATHTOCHANGE} -type f -exec ${PWD}/substitute "${SED}" "${KEY}" "${VALUE}" {} \;
 
