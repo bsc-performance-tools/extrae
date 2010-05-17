@@ -49,10 +49,7 @@ int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0 };
 
 
 #if defined(OS_LINUX) || defined(OS_FREEBSD)
- #if defined(ARCH_IA64)
-  /* En arquitecturas IA64 las rutinas de backtrace estan en la libunwind */
-  extern int backtrace (void *, int);
- #else
+ #if !defined(ARCH_IA64) && !defined(ARCH_IA32_x64)
   /* En arquitecturas IA32, se encuentran en la GLIBC y declaradas en <execinfo.h> */
   #ifdef HAVE_EXECINFO_H
   # include <execinfo.h>
@@ -61,7 +58,7 @@ int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0 };
 #endif
 
 /* LINUX IA32/PPC o BGL*/
-#if (defined(OS_LINUX) && !defined(ARCH_IA64)) || defined(OS_FREEBSD) || defined(IS_BG_MACHINE)
+#if (defined(OS_LINUX) && !defined(ARCH_IA64) && !defined(ARCH_IA32_x64)) || defined(OS_FREEBSD) || defined(IS_BG_MACHINE)
 
 void trace_callers (iotimer_t time, int offset, int type) {
    void * callstack[MAX_STACK_DEEPNESS];
@@ -138,7 +135,7 @@ UINT64 get_caller (int offset)
 #endif /* LINUX IA32 */
 
 /* LINUX IA64 */
-#if defined(OS_LINUX) && defined(ARCH_IA64)
+#if defined(OS_LINUX) && (defined(ARCH_IA64) || defined(ARCH_IA32_x64))
 
 #if defined(UNWIND_SUPPORT)
 # define UNW_LOCAL_ONLY
