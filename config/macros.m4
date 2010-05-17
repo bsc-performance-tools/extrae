@@ -1936,7 +1936,7 @@ AC_DEFUN([AX_PROG_MRNET],
 				[clustering_ann_paths="/gpfs/apps/CEPBATOOLS/libMRNetANN"] dnl List of possible default paths
 			)
 			dnl Search for libANN installation
-			AX_FIND_INSTALLATION([ANN], [$clustering_ann_paths], [ann])
+			AX_FIND_INSTALLATION([ANN], [$clustering_ann_paths], [clustering-ann])
 			if test "${ANN_INSTALLED}" = "yes" ; then
 				ANN_LIBS="-lMRNetANN"
 				AC_SUBST(ANN_LIBS)
