@@ -385,7 +385,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 	else 
 	{
-		if (0 == taskid) fprintf(stderr, "mpi2prv: Time Synchronization disabled.\n");
+		if (0 == taskid)
+			fprintf(stdout, "mpi2prv: Time Synchronization disabled.\n");
 		TimeSync_CalculateLatencies (TS_NOSYNC);
 	}
 	
