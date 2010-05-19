@@ -7115,10 +7115,10 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm)
 	/* First check if the communicators are duplicates of comm_world or
 	   comm_self */
 	ierror = MPI_Comm_compare (MPI_COMM_WORLD, newcomm, &result);
-	is_comm_world = result == MPI_IDENT;
+	is_comm_world = result == MPI_IDENT || result == MPI_CONGRUENT;
 
 	ierror = MPI_Comm_compare (MPI_COMM_SELF, newcomm, &result);
-	is_comm_self = result == MPI_IDENT;
+	is_comm_self = result == MPI_IDENT || result == MPI_CONGRUENT;
 
 	if (!is_comm_world && !is_comm_self)
 	{
