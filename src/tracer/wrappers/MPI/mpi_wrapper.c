@@ -3441,12 +3441,12 @@ void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
 {
 	MPI_Fint comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
 
-  CtoF77 (pmpi_cart_sub) (comm, remain_dims, comm_new, ierror);
+	CtoF77 (pmpi_cart_sub) (comm, remain_dims, comm_new, ierror);
 
-  if (*ierror == MPI_SUCCESS && *comm_new != comm_null)
+	if (*ierror == MPI_SUCCESS && *comm_new != comm_null)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*comm_new);
-    Trace_MPI_Communicator (MPI_CART_SUB_EV, comm_id);
+		Trace_MPI_Communicator (MPI_CART_SUB_EV, comm_id);
 	}
 }
 
@@ -3456,13 +3456,13 @@ void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 {
 	MPI_Fint comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
 
-  CtoF77 (pmpi_cart_create) (comm_old, ndims, dims, periods, reorder,
-                             comm_cart, ierror);
+	CtoF77 (pmpi_cart_create) (comm_old, ndims, dims, periods, reorder,
+	  comm_cart, ierror);
 
-  if (*ierror == MPI_SUCCESS && *comm_cart != comm_null)
+	if (*ierror == MPI_SUCCESS && *comm_cart != comm_null)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*comm_cart);
-    Trace_MPI_Communicator (MPI_CART_CREATE_EV, comm_id);
+		Trace_MPI_Communicator (MPI_CART_CREATE_EV, comm_id);
 	}
 }
 
