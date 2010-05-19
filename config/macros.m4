@@ -1644,65 +1644,25 @@ AC_DEFUN([AX_OPENMP],
 # ------------
 AC_DEFUN([AX_CHECK_UNWIND],
 [
-   AX_FLAGS_SAVE()
-
-   AC_MSG_CHECKING([if libunwind works])
-
-   AC_ARG_WITH(libunwind,
+   AC_ARG_WITH(unwind,
       AC_HELP_STRING(
-         [--with-libunwind@<:@=DIR@:>@],
-         [specify where to find libunwind libraries and includes]
+         [--with-unwind@<:@=DIR@:>@],
+         [specify where to find Unwind libraries and includes]
       ),
-      [libunwind_paths="$withval"],
-      [libunwind_paths="/usr/local /usr"] dnl List of possible default paths
+      [unwind_paths=${withval}],
+      [unwind_paths="/usr/local /usr"] dnl List of possible default paths
    )
 
-   for home_dir in [${libunwind_paths} "not found"]; do
-      if test -f "${home_dir}/${BITS}/include/libunwind.h" -a \
-              -f "${home_dir}/${BITS}/lib/libunwind.a" -a \
-              -f "${home_dir}/${BITS}/lib/libunwind-ia64.a" ; then
-         UNWIND_HOME="${home_dir}/${BITS}"
-         UNWIND_LIBSDIR="${home_dir}/${BITS}/lib"
-         break
-      elif test -f "${home_dir}/include/libunwind.h" -a \
-                -f "${home_dir}/lib${BITS}/libunwind.a" -a \
-                -f "${home_dir}/lib${BITS}/libunwind-ia64.a" ; then
-         UNWIND_HOME="${home_dir}"
-         UNWIND_LIBSDIR="${home_dir}/lib${BITS}"
-      elif test -f "${home_dir}/include/libunwind.h" -a \
-                -f "${home_dir}/lib/libunwind.a" -a \
-                -f "${home_dir}/lib/libunwind-ia64.a" ; then
-         UNWIND_HOME="${home_dir}"
-         UNWIND_LIBSDIR="${home_dir}/lib"
-         break
-      fi
-    done
+   AX_FIND_INSTALLATION([UNWIND], [$unwind_paths], [unwind])
 
-   UNWIND_INCLUDES="${UNWIND_HOME}/include"
-   UNWIND_CFLAGS="-I${UNWIND_INCLUDES}"
-   UNWIND_CPPFLAGS=${UNWIND_CFLAGS}
-   UNWIND_CXXFLAGS=${UNWIND_CFLAGS}
-   UNWIND_LIBS="-lunwind -lunwind-ia64"
-   UNWIND_LDFLAGS="-L${UNWIND_LIBSDIR}"
-   if test -d ${UNWIND_LIBSDIR}/shared ; then 
-      UNWIND_SHAREDLIBSDIR="${UNWIND_LIBSDIR}/shared"
-   else
-      UNWIND_SHAREDLIBSDIR=${UNWIND_LIBSDIR}
-   fi
-
-   AC_SUBST(UNWIND_HOME)
-   AC_SUBST(UNWIND_CFLAGS)
-   AC_SUBST(UNWIND_CPPFLAGS)
-   AC_SUBST(UNWIND_CXXFLAGS)
-   AC_SUBST(UNWIND_INCLUDES)
-   AC_SUBST(UNWIND_LIBSDIR)
-   AC_SUBST(UNWIND_SHAREDLIBSDIR)
+   UNWIND_LIBS="-lunwind"
    AC_SUBST(UNWIND_LIBS)
-   AC_SUBST(UNWIND_LDFLAGS)
 
    CFLAGS="${CFLAGS} ${UNWIND_CFLAGS}"
-   LIBS="${LIBS} ${UNWIND_LIBS}"
+   LIBS="${LIBS} -lunwind"
    LDFLAGS="${LDFLAGS} ${UNWIND_LDFLAGS}"
+
+   AC_MSG_CHECKING([if libunwind works])
 
    AC_TRY_LINK(
       [ #define UNW_LOCAL_ONLY
@@ -1721,7 +1681,7 @@ AC_DEFUN([AX_CHECK_UNWIND],
    )
 
    if test "${libunwind_works}" = "yes"; then
-      AC_DEFINE([UNWIND_SUPPORT], [1], [Unwinding support enabled for IA64])
+      AC_DEFINE([UNWIND_SUPPORT], [1], [Unwinding support enabled for IA64/x86-64])
       AC_DEFINE([HAVE_LIBUNWIND_H], [1], [Define to 1 if you have <libunwind.h> header file])
    fi
 

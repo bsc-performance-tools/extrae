@@ -274,9 +274,12 @@ AC_ARG_ENABLE(parallel-merge,
 )
 AM_CONDITIONAL(WANT_PARALLEL_MERGE, test "${enable_parallel_merge}" = "yes" )
 
-if test "${Architecture}" = "ia64" -a "${OperatingSystem}" = "linux" ; then
-   AX_CHECK_UNWIND
+if test "${OperatingSystem}" = "linux" ; then
+  if test "${Architecture}" = "ia64" -o "${target_cpu}" = "amd64" -o "${target_cpu}" = "x86_64" ; then
+    AX_CHECK_UNWIND
+  fi
 fi
+AM_CONDITIONAL(HAVE_UNWIND, test "${libunwind_works}" = "yes" )
 
 AX_CHECK_LIBZ
 
