@@ -55,14 +55,14 @@ static char UNUSED rcsid[] = "$Id$";
 /*** FORTRAN BINDINGS + non alias routine duplication ****/
 
 #define apifTRACE_INIT(x) \
-	void CtoF77(x##trace_init) (void) \
+	void CtoF77(x##_init) (void) \
 	{ \
 		MPItrace_init_Wrapper ();\
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_INIT)
 
 #define apifTRACE_FINI(x) \
-	void CtoF77(x##trace_fini) (void) \
+	void CtoF77(x##_fini) (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_fini_Wrapper ();\
@@ -70,7 +70,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_INIT)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 
 #define apifTRACE_EVENT(x) \
-	void CtoF77(x##trace_event) (unsigned int *tipus, unsigned int *valor) \
+	void CtoF77(x##_event) (unsigned int *tipus, unsigned int *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_Event_Wrapper (tipus, valor); \
@@ -78,7 +78,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENT)
 
 #define apifTRACE_NEVENT(x) \
-	void CtoF77(x##trace_nevent) (unsigned int *count, unsigned int *tipus, unsigned int *valor) \
+	void CtoF77(x##_nevent) (unsigned int *count, unsigned int *tipus, unsigned int *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_N_Event_Wrapper (count, tipus, valor); \
@@ -86,7 +86,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENT)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENT)
 
 #define apifTRACE_SHUTDOWN(x) \
-	void CtoF77(x##trace_shutdown) (void) \
+	void CtoF77(x##_shutdown) (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_shutdown_Wrapper (); \
@@ -94,7 +94,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENT)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 
 #define apifTRACE_EVENTANDCOUNTERS(x) \
-	void CtoF77(x##trace_eventandcounters) (unsigned int *tipus, unsigned int *valor) \
+	void CtoF77(x##_eventandcounters) (unsigned int *tipus, unsigned int *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_Eventandcounters_Wrapper (tipus, valor); \
@@ -102,7 +102,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENTANDCOUNTERS)
 
 #define apifTRACE_NEVENTANDCOUNTERS(x) \
-	void CtoF77(x##trace_neventandcounters) (unsigned int *count, unsigned int *tipus, unsigned *valor) \
+	void CtoF77(x##_neventandcounters) (unsigned int *count, unsigned int *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_N_Eventsandcounters_Wrapper (count, tipus, valor); \
@@ -110,7 +110,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENTANDCOUNTERS)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENTANDCOUNTERS)
 
 #define apifTRACE_RESTART(x) \
-	void CtoF77(x##trace_restart) (void) \
+	void CtoF77(x##_restart) (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_restart_Wrapper (); \
@@ -118,7 +118,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENTANDCOUNTERS)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_RESTART)
 
 #define apifTRACE_COUNTERS(x) \
-	void CtoF77(x##trace_counters) (void) \
+	void CtoF77(x##_counters) (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_counters_Wrapper (); \
@@ -126,7 +126,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_RESTART)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_COUNTERS)
 
 #define apifTRACE_PREVIOUS_HWC_SET(x) \
-	void CtoF77(x##trace_previous_hwc_set) (void) \
+	void CtoF77(x##_previous_hwc_set) (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_previous_hwc_set_Wrapper (); \
@@ -134,7 +134,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_COUNTERS)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_PREVIOUS_HWC_SET)
 
 #define apifTRACE_NEXT_HWC_SET(x) \
-	void CtoF77(x##trace_next_hwc_set) (void) \
+	void CtoF77(x##_next_hwc_set) (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_next_hwc_set_Wrapper (); \
@@ -142,7 +142,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_PREVIOUS_HWC_SET)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEXT_HWC_SET)
 
 #define apifTRACE_SETOPTIONS(x) \
-	void CtoF77(x##trace_set_options) (int *options) \
+	void CtoF77(x##_set_options) (int *options) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_set_options_Wrapper (*options); \
@@ -150,7 +150,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEXT_HWC_SET)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 
 #define apifTRACE_USER_FUNCTION(x) \
-	void CtoF77(x##trace_user_function) (int *enter) \
+	void CtoF77(x##_user_function) (int *enter) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_user_function_Wrapper (*enter); \
@@ -158,7 +158,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION);
 
 #define apifTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
-	void CtoF77(x##trace_function_from_address) (int *type, void *address) \
+	void CtoF77(x##_function_from_address) (int *type, void *address) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_function_from_address_Wrapper (*type, address); \
@@ -168,7 +168,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_FROM_ADDRESS);
 #if defined(PTHREAD_SUPPORT)
 
 # define apifTRACE_NOTIFY_NEW_PTHREAD(x) \
-	void x##trace_notify_new_pthread (void) \
+	void x##_notify_new_pthread (void) \
 	{ \
 		if (mpitrace_on) \
 			Backend_NotifyNewPthread (); \
@@ -176,7 +176,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_FROM_ADDRESS);
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NOTIFY_NEW_PTHREAD);
 
 # define apifTRACE_SET_NUM_TENTATIVE_THREADS(x) \
-	void x##trace_set_num_tentative_threads (int *numthreads) \
+	void x##_set_num_tentative_threads (int *numthreads) \
 	{ \
 		if (mpitrace_on) \
 			Backend_setNumTentativeThreads (*numthreads); \
@@ -188,14 +188,14 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 /*** C BINDINGS + non alias routine duplication ****/
 
 #define apiTRACE_INIT(x) \
-	void CtoF77(x##trace_init) (void) \
+	void CtoF77(x##_init) (void) \
 	{ \
 		MPItrace_init_Wrapper ();\
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT)
 
 #define apiTRACE_FINI(x) \
-	void CtoF77(x##trace_fini) (void) \
+	void CtoF77(x##_fini) (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_fini_Wrapper ();\
@@ -203,7 +203,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 
 #define apiTRACE_EVENT(x) \
-	void x##trace_event (unsigned int tipus, unsigned int valor) \
+	void x##_event (unsigned int tipus, unsigned int valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_Event_Wrapper (&tipus, &valor); \
@@ -211,7 +211,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 
 #define apiTRACE_NEVENT(x) \
-	void x##trace_nevent (unsigned int count, unsigned int *tipus, unsigned int *valors) \
+	void x##_nevent (unsigned int count, unsigned int *tipus, unsigned int *valors) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_N_Event_Wrapper (&count, tipus, valors); \
@@ -219,7 +219,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENT)
 
 #define apiTRACE_EVENTANDCOUNTERS(x) \
-	void x##trace_eventandcounters (unsigned int tipus, unsigned int valor) \
+	void x##_eventandcounters (unsigned int tipus, unsigned int valor) \
 	{ \
   		if (mpitrace_on) \
     			MPItrace_Eventandcounters_Wrapper (&tipus, &valor); \
@@ -227,7 +227,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENT)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENTANDCOUNTERS)
 
 #define apiTRACE_NEVENTANDCOUNTERS(x) \
-	void x##trace_neventandcounters (unsigned int count, unsigned int *tipus, unsigned int *valors) \
+	void x##_neventandcounters (unsigned int count, unsigned int *tipus, unsigned int *valors) \
 	{ \
   		if (mpitrace_on) \
     			MPItrace_N_Eventsandcounters_Wrapper (&count, tipus, valors); \
@@ -235,7 +235,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENTANDCOUNTERS)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENTANDCOUNTERS)
 
 #define apiTRACE_SHUTDOWN(x) \
-	void x##trace_shutdown (void) \
+	void x##_shutdown (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_shutdown_Wrapper(); \
@@ -243,7 +243,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENTANDCOUNTERS)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SHUTDOWN)
 
 #define apiTRACE_RESTART(x) \
-	void x##trace_restart (void) \
+	void x##_restart (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_restart_Wrapper(); \
@@ -251,7 +251,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SHUTDOWN)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESTART);
 
 #define apiTRACE_COUNTERS(x) \
-	void x##trace_counters(void) \
+	void x##_counters(void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_counters_Wrapper(); \
@@ -259,7 +259,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESTART);
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_COUNTERS);
 
 #define apiTRACE_PREVIOUS_HWC_SET(x) \
-	void x##trace_previous_hwc_set (void) \
+	void x##_previous_hwc_set (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_previous_hwc_set_Wrapper (); \
@@ -267,7 +267,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_COUNTERS);
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_PREVIOUS_HWC_SET)
 
 #define apiTRACE_NEXT_HWC_SET(x) \
-	void x##trace_next_hwc_set (void) \
+	void x##_next_hwc_set (void) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_next_hwc_set_Wrapper (); \
@@ -275,7 +275,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_PREVIOUS_HWC_SET)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEXT_HWC_SET)
 
 #define apiTRACE_SETOPTIONS(x) \
-	void x##trace_set_options (int options) \
+	void x##_set_options (int options) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_set_options_Wrapper (options); \
@@ -283,7 +283,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEXT_HWC_SET)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 
 #define apiTRACE_USER_FUNCTION(x) \
-	void x##trace_user_function (int enter) \
+	void x##_user_function (int enter) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_user_function_Wrapper (enter); \
@@ -291,7 +291,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 
 #define apiTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
-	void x##trace_function_from_address (int type, void *address) \
+	void x##_function_from_address (int type, void *address) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_function_from_address_Wrapper (type, address); \
@@ -300,7 +300,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 
 #if defined(PTHREAD_SUPPORT)
 # define apiTRACE_NOTIFY_NEW_PTHREAD(x) \
-	void x##trace_notify_new_pthread (void) \
+	void x##_notify_new_pthread (void) \
 	{ \
 		if (mpitrace_on) \
 			Backend_NotifyNewPthread (); \
@@ -308,7 +308,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
  EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NOTIFY_NEW_PTHREAD);
 
 # define apiTRACE_SET_NUM_TENTATIVE_THREADS(x) \
-	void x##trace_set_num_tentative_threads (int numthreads) \
+	void x##_set_num_tentative_threads (int numthreads) \
 	{ \
 		if (mpitrace_on) \
 			Backend_setNumTentativeThreads (numthreads); \
@@ -320,113 +320,113 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 
 /** C BINDINGS **/
 
-INTERFACE_ALIASES_C(trace_init,MPItrace_init,(void))
-void MPItrace_init (void)
+INTERFACE_ALIASES_C(_init,Extrae_init,(void))
+void Extrae_init (void)
 {
 	MPItrace_init_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(trace_fini,MPItrace_fini,(void))
-void MPItrace_fini (void)
+INTERFACE_ALIASES_C(_fini,Extrae_fini,(void))
+void Extrae_fini (void)
 {
 	if (mpitrace_on)
 		MPItrace_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(trace_event, MPItrace_event, (unsigned int tipus, unsigned int valors))
-void MPItrace_event (unsigned int tipus, unsigned int valors)
+INTERFACE_ALIASES_C(_event, Extrae_event, (unsigned int tipus, unsigned int valors))
+void Extrae_event (unsigned int tipus, unsigned int valors)
 {
 	if (mpitrace_on)
 		MPItrace_Event_Wrapper (&tipus, &valors);
 }
 
-INTERFACE_ALIASES_C(trace_nevent, MPItrace_nevent, (unsigned int count, unsigned int *tipus, unsigned int *valors))
-void MPItrace_nevent (unsigned int count, unsigned int *tipus, unsigned int *valors)
+INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned int count, unsigned int *tipus, unsigned int *valors))
+void Extrae_nevent (unsigned int count, unsigned int *tipus, unsigned int *valors)
 {
 	if (mpitrace_on)
 		MPItrace_N_Event_Wrapper (&count, tipus, valors);
 }
 
-INTERFACE_ALIASES_C(trace_eventandcounters, MPItrace_eventandcounters, (unsigned int tipus, unsigned int valor))
-void MPItrace_eventandcounters (unsigned int tipus, unsigned int valor)
+INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (unsigned int tipus, unsigned int valor))
+void Extrae_eventandcounters (unsigned int tipus, unsigned int valor)
 {
 	if (mpitrace_on)
 		MPItrace_Eventandcounters_Wrapper (&tipus, &valor);
 }
 
-INTERFACE_ALIASES_C(trace_neventandcounters, MPItrace_neventandcounters, (unsigned int count, unsigned int *tipus, unsigned int *valors))
-void MPItrace_neventandcounters (unsigned int count, unsigned int *tipus, unsigned int *valors)
+INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned int count, unsigned int *tipus, unsigned int *valors))
+void Extrae_neventandcounters (unsigned int count, unsigned int *tipus, unsigned int *valors)
 {
  	if (mpitrace_on)
 		MPItrace_N_Eventsandcounters_Wrapper (&count, tipus, valors);
 }
 
-INTERFACE_ALIASES_C(trace_shutdown, MPItrace_shutdown, (void))
-void MPItrace_shutdown (void)
+INTERFACE_ALIASES_C(_shutdown, Extrae_shutdown, (void))
+void Extrae_shutdown (void)
 {
 	if (mpitrace_on)
 		MPItrace_shutdown_Wrapper();
 }
 
-INTERFACE_ALIASES_C(trace_restart, MPItrace_restart, (void))
-void MPItrace_restart (void)
+INTERFACE_ALIASES_C(_restart, Extrae_restart, (void))
+void Extrae_restart (void)
 {
 	if (mpitrace_on)
 		MPItrace_restart_Wrapper();
 }
 
-INTERFACE_ALIASES_C(trace_counters, MPItrace_counters, (void))
-void MPItrace_counters(void)
+INTERFACE_ALIASES_C(_counters, Extrae_counters, (void))
+void Extrae_counters(void)
 {
 	if (mpitrace_on)
 		MPItrace_counters_Wrapper();
 }
 
-INTERFACE_ALIASES_C(trace_next_hwc_set, MPItrace_next_hwc_set, (void))
-void MPItrace_next_hwc_set (void)
+INTERFACE_ALIASES_C(_next_hwc_set, Extrae_next_hwc_set, (void))
+void Extrae_next_hwc_set (void)
 {
 	if (mpitrace_on)
 		MPItrace_next_hwc_set_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(trace_previous_hwc_set, MPItrace_previous_hwc_set, (void))
-void MPItrace_previous_hwc_set (void)
+INTERFACE_ALIASES_C(_previous_hwc_set, Extrae_previous_hwc_set, (void))
+void Extrae_previous_hwc_set (void)
 {
 	if (mpitrace_on)
 		MPItrace_previous_hwc_set_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(trace_set_options, MPItrace_set_options, (int options))
-void MPItrace_set_options (int options)
+INTERFACE_ALIASES_C(_set_options, Extrae_set_options, (int options))
+void Extrae_set_options (int options)
 {
 	if (mpitrace_on)
 		MPItrace_set_options_Wrapper (options);
 }
 
-INTERFACE_ALIASES_C(trace_user_function, MPItrace_user_function, (int enter))
-void MPItrace_user_function (int enter)
+INTERFACE_ALIASES_C(_user_function, Extrae_user_function, (int enter))
+void Extrae_user_function (int enter)
 {
 	if (mpitrace_on)
 		MPItrace_user_function_Wrapper (enter);
 }
 
-INTERFACE_ALIASES_C(trace_function_from_address, MPItrace_function_from_address, (int type, void *address))
-void MPItrace_function_from_address (int type, void *address)
+INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address, (int type, void *address))
+void Extrae_function_from_address (int type, void *address)
 {
 	if (mpitrace_on)
 		MPItrace_function_from_address_Wrapper (type, address);
 }
 
 #if defined(PTHREAD_SUPPORT)
-INTERFACE_ALIASES_C(trace_notify_new_pthread,MPItrace_notify_new_pthread, (void))
-void MPItrace_notify_new_pthread (void)
+INTERFACE_ALIASES_C(_notify_new_pthread,Extrae_notify_new_pthread, (void))
+void Extrae_notify_new_pthread (void)
 {
 	if (mpitrace_on)
 		Backend_NotifyNewPthread ();
 }
 
-INTERFACE_ALIASES_C(trace_set_num_tentative_threads,MPItrace_set_num_tentative_threads, (int numthreads))
-void MPItrace_set_num_tentative_threads (int numthreads)
+INTERFACE_ALIASES_C(_set_num_tentative_threads,Extrae_set_num_tentative_threads, (int numthreads))
+void Extrae_set_num_tentative_threads (int numthreads)
 {
 	if (mpitrace_on)
 		Backend_setNumTentativeThreads (numthreads);
@@ -435,113 +435,113 @@ void MPItrace_set_num_tentative_threads (int numthreads)
 
 /** FORTRAN BINDINGS **/
 
-INTERFACE_ALIASES_F(trace_init,TRACE_INIT,mpitrace_init,(void))
-void mpitrace_init (void)
+INTERFACE_ALIASES_F(_init,_INIT,extrae_init,(void))
+void extrae_init (void)
 {
 	MPItrace_init_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(trace_fini,TRACE_FINI,mpitrace_fini,(void))
-void mpitrace_fini (void)
+INTERFACE_ALIASES_F(_fini,_FINI,extrae_fini,(void))
+void extrae_fini (void)
 {
 	if (mpitrace_on)
 		MPItrace_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(trace_event,TRACE_EVENT,mpitrace_event,(unsigned int *tipus, unsigned int *valor))
-void mpitrace_event (unsigned int *tipus, unsigned int *valor)
+INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(unsigned int *tipus, unsigned int *valor))
+void extrae_event (unsigned int *tipus, unsigned int *valor)
 {
 	if (mpitrace_on)
 		MPItrace_Event_Wrapper (tipus, valor);
 }
 
-INTERFACE_ALIASES_F(trace_nevent,TRACE_NEVENT,mpitrace_nevent,(unsigned int *count, unsigned int *tipus, unsigned int *valor))
-void mpitrace_nevent (unsigned int *count, unsigned int *tipus, unsigned int *valor)
+INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned int *count, unsigned int *tipus, unsigned int *valor))
+void extrae_nevent (unsigned int *count, unsigned int *tipus, unsigned int *valor)
 {
 	if (mpitrace_on)
 		MPItrace_N_Event_Wrapper (count, tipus, valor);
 }
 
-INTERFACE_ALIASES_F(trace_shutdown,TRACE_SHUTDOWN,mpitrace_shutdown,(void))
-void mpitrace_shutdown (void)
+INTERFACE_ALIASES_F(_shutdown,_SHUTDOWN,extrae_shutdown,(void))
+void extrae_shutdown (void)
 {
 	if (mpitrace_on)
 		MPItrace_shutdown_Wrapper();
 }
 
-INTERFACE_ALIASES_F(trace_restart,TRACE_RESTART,mpitrace_restart,(void))
-void mpitrace_restart (void)
+INTERFACE_ALIASES_F(_restart,_RESTART,extrae_restart,(void))
+void extrae_restart (void)
 {
 	if (mpitrace_on)
 		MPItrace_restart_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(trace_eventandcounters,TRACE_EVENTANDCOUNTERS,mpitrace_eventandcounters, (unsigned int *tipus, unsigned int *valor))
-void mpitrace_eventandcounters (unsigned int *tipus, unsigned int *valor)
+INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (unsigned int *tipus, unsigned int *valor))
+void extrae_eventandcounters (unsigned int *tipus, unsigned int *valor)
 {
 	if (mpitrace_on)
 		MPItrace_Eventandcounters_Wrapper (tipus, valor);
 }
 
-INTERFACE_ALIASES_F(trace_neventandcounters,TRACE_NEVENTANDCOUNTERS,mpitrace_neventandcounters, (unsigned int *count, unsigned int *tipus, unsigned *valor))
-void mpitrace_neventandcounters (unsigned int *count, unsigned int *tipus, unsigned *valor)
+INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned int *count, unsigned int *tipus, unsigned *valor))
+void extrae_neventandcounters (unsigned int *count, unsigned int *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
 		MPItrace_N_Eventsandcounters_Wrapper (count, tipus, valor);
 }
 
-INTERFACE_ALIASES_F(trace_counters,TRACE_COUNTERS,mpitrace_counters, (void))
-void mpitrace_counters (void)
+INTERFACE_ALIASES_F(_counters,_COUNTERS,extrae_counters, (void))
+void extrae_counters (void)
 {
 	if (mpitrace_on)
 		MPItrace_counters_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(trace_next_hwc_set, TRACE_NEXT_HWC_SET, mpitrace_next_hwc_set, (void))
-void mpitrace_next_hwc_set (void)
+INTERFACE_ALIASES_F(_next_hwc_set,_NEXT_HWC_SET,extrae_next_hwc_set,(void))
+void extrae_next_hwc_set (void)
 {
 	if (mpitrace_on)
 		MPItrace_next_hwc_set_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(trace_previous_hwc_set, TRACE_PREVIOUS_HWC_SET, mpitrace_previous_hwc_set, (void))
-void mpitrace_previous_hwc_set (void)
+INTERFACE_ALIASES_F(_previous_hwc_set,_PREVIOUS_HWC_SET,extrae_previous_hwc_set,(void))
+void extrae_previous_hwc_set (void)
 {
 	if (mpitrace_on)
 		MPItrace_previous_hwc_set_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(trace_set_options,TRACE_SET_OPTIONS,mpitrace_set_options, (int *options))
-void mpitrace_set_options (int *options)
+INTERFACE_ALIASES_F(_set_options,_SET_OPTIONS,extrae_set_options,(int *options))
+void extrae_set_options (int *options)
 {
 	if (mpitrace_on)
 		MPItrace_set_options_Wrapper (*options);
 }
 
-INTERFACE_ALIASES_F(trace_user_function,TRACE_USER_FUNCTION,mpitrace_user_function, (int *enter))
-void mpitrace_user_function (int *enter)
+INTERFACE_ALIASES_F(_user_function,_USER_FUNCTION,extrae_user_function,(int *enter))
+void extrae_user_function (int *enter)
 {
 	if (mpitrace_on)
 		MPItrace_user_function_Wrapper (*enter);
 }
 
-INTERFACE_ALIASES_F(trace_function_from_address,TRACE_USER_FUNCTION_FROM_ADDRESS,mpitrace_function_from_address, (int *type, void *address))
-void mpitrace_function_from_address (int *type, void *address)
+INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_function_from_address, (int *type, void *address))
+void extrae_function_from_address (int *type, void *address)
 {
 	if (mpitrace_on)
 		MPItrace_function_from_address_Wrapper (type, address);
 }
 
 #if defined(PTHREAD_SUPPORT)
-INTERFACE_ALIASES_F(trace_notify_new_pthread,TRACE_NOTIFY_NEW_PTHREAD,mpitrace_notify_new_pthread, (void))
-void mpitrace_notify_new_pthread (void)
+INTERFACE_ALIASES_F(_notify_new_pthread,_NOTIFY_NEW_PTHREAD,extrae_notify_new_pthread, (void))
+void extrae_notify_new_pthread (void)
 {
 	if (mpitrace_on)
 		Backend_NotifyNewPthread ();
 }
 
-INTERFACE_ALIASES_F(trace_set_num_tentative_threads,TRACE_SET_NUM_TENTATIVE_THREADS,mpitrace_set_num_tentative_threads, (int *numthreads))
-void mpitrace_set_num_tentative_threads (int *numthreads)
+INTERFACE_ALIASES_F(_set_num_tentative_threads,_SET_NUM_TENTATIVE_THREADS,extrae_set_num_tentative_threads, (int *numthreads))
+void extrae_set_num_tentative_threads (int *numthreads)
 {
 	if (mpitrace_on)
 		Backend_setNumTentativeThreads (*numthreads);

@@ -1,14 +1,14 @@
 
-MPITRACE_HOME = @sub_PREFIXDIR@
+EXTRAE_HOME = @sub_PREFIXDIR@
 MPI_HOME = @sub_MPI_HOME@
 
-PPU_LIB = $(MPITRACE_HOME)/lib/libmpitrace.a
-SPU_LIB = $(MPITRACE_HOME)/lib/libsputrace.a
+PPU_LIB = $(EXTRAE_HOME)/lib/libmpitrace.a
+SPU_LIB = $(EXTRAE_HOME)/lib/libsputrace.a
 
 SPU_CC = spu-cc
 PPU_CC = $(MPI_HOME)/bin/mpicc
-PPU_CFLAGS = -O2 -Wall -I$(MPITRACE_HOME)/include
-SPU_CFLAGS = -O2 -Wall -I$(MPITRACE_HOME)/include
+PPU_CFLAGS = -O2 -Wall -I$(EXTRAE_HOME)/include
+SPU_CFLAGS = -O2 -Wall -I$(EXTRAE_HOME)/include
 EXTRA = -lxml2
 
 all: master worker

@@ -114,24 +114,24 @@ void ia64_Initialize (void)
 
   if ((fd = open("/dev/mmtimer", O_RDONLY)) == -1)
 	{
-    fprintf (stderr, "mpitrace: ERROR! Failed to open MM timer");
+    fprintf (stderr, PACKAGE_NAME": ERROR! Failed to open MM timer");
     return;
   }
   if ((offset = ioctl(fd, MMTIMER_GETOFFSET, 0)) != 0)
 	{
-    fprintf (stderr, "mpitrace: ERROR! Failed to get offset of MM timer");
+    fprintf (stderr, PACKAGE_NAME": ERROR! Failed to get offset of MM timer");
     return;
   }
   if ((mmdev_timer_addr = mmap(0, getpagesize(), PROT_READ, MAP_SHARED, fd, 0)) == NULL)
 	{
-    fprintf (stderr, "mpitrace: ERROR! Failed to mmap MM timer");
+    fprintf (stderr, PACKAGE_NAME": ERROR! Failed to mmap MM timer");
     return;
   }
 
   mmdev_timer_addr += offset;
   ioctl(fd, MMTIMER_GETRES, &femtosecs_per_tick);
 
-  fprintf (stdout, "mpitrace: MMDEV clock resolution is %llu ns\n", femtosecs_per_tick/1000000);
+  fprintf (stdout, PACKAGE_NAME": MMDEV clock resolution is %llu ns\n", femtosecs_per_tick/1000000);
 
 	proc_timebase_MHz = proc_timebase();
 

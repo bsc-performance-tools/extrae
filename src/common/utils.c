@@ -170,7 +170,7 @@ void rename_or_copy (char *origen, char *desti)
       fd_o = open (origen, O_RDONLY);
       if (fd_o == -1)
       {
-        fprintf (stderr, "mpitrace: Error while trying to open %s \n", origen);
+        fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", origen);
         fflush (stderr);
         return;
       }
@@ -178,7 +178,7 @@ void rename_or_copy (char *origen, char *desti)
       if (fd_d == -1)
       {
         close (fd_d);
-        fprintf (stderr, "mpitrace: Error while trying to open %s \n", desti);
+        fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", desti);
         fflush (stderr);
         return;
       }
@@ -199,7 +199,7 @@ void rename_or_copy (char *origen, char *desti)
         close (fd_d);
         close (fd_o);
         unlink (desti);
-        fprintf (stderr, "mpitrace: Error while trying to move files %s to %s\n", origen, desti);
+        fprintf (stderr, PACKAGE_NAME": Error while trying to move files %s to %s\n", origen, desti);
         fflush (stderr);
         return;
       }
@@ -214,7 +214,7 @@ void rename_or_copy (char *origen, char *desti)
     else
     {
       perror("rename");
-      fprintf (stderr, "mpitrace: Error while trying to move %s to %s\n", origen, desti);
+      fprintf (stderr, PACKAGE_NAME": Error while trying to move %s to %s\n", origen, desti);
       fflush (stderr);
     }
   }
@@ -268,7 +268,7 @@ unsigned long long getFactorValue (char *value, char *ref, int rank)
 			if (!(tmp_buff[strlen(tmp_buff)-1] >= '0' && tmp_buff[strlen(tmp_buff)-1] <= '9'))
 			{
 				if (rank == 0)
-					fprintf (stdout, "mpitrace: Warning! %s time units unkown! Using seconds\n", ref);
+					fprintf (stdout, PACKAGE_NAME": Warning! %s time units unkown! Using seconds\n", ref);
 			}
 			break;
 		}
@@ -336,11 +336,11 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
 			&& tmp_buff[strlen(tmp_buff)-1] <= '9'
 			&& rank == 0)
 				fprintf (stdout,
-					"mpitrace: Warning! %s time units not specified. Using seconds\n", envvar);
+					PACKAGE_NAME": Warning! %s time units not specified. Using seconds\n", envvar);
 			else
 			{
 				if (rank == 0)
-					fprintf (stdout, "mpitrace: Warning! %s time units unkown! Using seconds\n", envvar);
+					fprintf (stdout, PACKAGE_NAME": Warning! %s time units unkown! Using seconds\n", envvar);
 			}
 			break;
 		}

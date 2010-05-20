@@ -33,13 +33,22 @@
 extern "C" {
 #endif
 
+void Extrae_init(void);
 void MPItrace_init(void);
+void Extrae_fini(void);
 void MPItrace_fini(void);
 
+int  Extrae_CELL_init (int spus, speid_t * spe_id);
 int  CELLtrace_init (int spus, speid_t * spe_id);
+
+void Extrae_CELL_fini (void);
 void CELLtrace_fini (void);
+
+void Extrae_event (unsigned int type, unsigned int value);
 void MPItrace_event (unsigned int type, unsigned int value);
 void PPUtrace_event (unsigned int type, unsigned int value);
+
+void Extrae_nevent (unsigned int count, unsigned int *types, unsigned int *values);
 void MPItrace_nevent (unsigned int count, unsigned int *types, unsigned int *values);
 void PPUtrace_nevent (unsigned int count, unsigned int *types, unsigned int *values);
 

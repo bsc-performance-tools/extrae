@@ -169,7 +169,7 @@ void process_mpitrace_arguments (int argc, char *argv[])
 		no_options += parsed_parameter;
 	}
 
-	printf ("no_options = %d\n", no_options);
+	printf ("number of options = %d\n", no_options);
 
 	shargs = &argv[no_options];
 
@@ -183,20 +183,20 @@ void process_mpitrace_arguments (int argc, char *argv[])
 void setup_environment ()
 {
   // S'indica que cal tracejar
-  putenv ("MPITRACE_ON=1");
+  putenv ("EXTRAE_ON=1");
 
-  sprintf (variable_entorn, "MPITRACE_PROGRAM_NAME=%s", nom_aplicacio);
+  sprintf (variable_entorn, "EXTRAE_PROGRAM_NAME=%s", nom_aplicacio);
   // Es dona el nom de l'aplicacio
   putenv (variable_entorn);
 
   // S'indica si cal generar comptadors a les rutines mpi
   if (mpi_counters_on)
-    putenv ("MPITRACE_MPI_COUNTERS_ON=1");
+    putenv ("EXTRAE_MPI_COUNTERS_ON=1");
 
 	if (strcmp(mpi_flush_signal, "") != 0)
 	{
 		char *duplicat = malloc ((strlen(mpi_flush_signal)+32+1)*sizeof(char));
-		sprintf (duplicat, "MPITRACE_SIGNAL_FLUSH_TERMINATE=%s", mpi_flush_signal);
+		sprintf (duplicat, "EXTRAE_SIGNAL_FLUSH_TERMINATE=%s", mpi_flush_signal);
 		printf ("%s\n", duplicat);
 		putenv (duplicat);
 	}
@@ -210,7 +210,7 @@ void launch (char **shargs)
   if (!vfork ())
   {
     execvp (shargs[0], shargs);
-    perror ("mpitrace");
+    perror (PACKAGE_NAME);
     exit (1);
   }
   wait (&status);
@@ -233,7 +233,7 @@ int main (int argc, char *argv[])
   else
   {
     // Cal mostrar l'ajuda i sortir
-    fprintf (stderr, "Arguments needed!\n");
+    fprintf (stderr, PACKAGE_NAME": Arguments needed!\n");
     shargs = NULL;
     exit (1);
   }

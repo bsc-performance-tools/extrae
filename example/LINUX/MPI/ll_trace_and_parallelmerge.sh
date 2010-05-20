@@ -30,7 +30,8 @@
 #@ queue
 #####################################################################
 
-MPITRACE_HOME=@sub_PREFIXDIR@
+export EXTRAE_HOME=@sub_PREFIXDIR@
+
 MLIST=~/machine_list.$$.${LOADL_STEP_NAME}
 /opt/ibmll/LoadL/full/bin/ll_get_machine_list > ${MLIST}
 NP=`cat ${MLIST} | wc -l`
@@ -40,7 +41,7 @@ case ${LOADL_STEP_NAME} in
     mpirun -np ${NP} -machinefile ${MLIST} ./trace.sh ./mpi_ping
     ;;
 	merge_step)
-    mpirun -np ${NP} -machinefile ${MLIST} ${MPITRACE_HOME}/bin/mpimpi2prv -f TRACE.mpits -maxmem 1024 -syn -o trace.prv
+    mpirun -np ${NP} -machinefile ${MLIST} ${EXTRAE_HOME}/bin/mpimpi2prv -f TRACE.mpits -maxmem 1024 -syn -o trace.prv
     ;;
 	*)
     echo "Uknown step ${LOADL_STEP_NAME}"

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-export MPITRACE_HOME=@sub_PREFIXDIR@
-${MPITRACE_HOME}/bin/mpi2prv -e pi *.mpit 
+export EXTRAE_HOME=@sub_PREFIXDIR@
+${EXTRAE_HOME}/bin/mpi2prv -e pi *.mpit 

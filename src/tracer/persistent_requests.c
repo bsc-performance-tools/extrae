@@ -90,7 +90,7 @@ void PR_NewRequest (int tipus, void *buf, int count, MPI_Datatype datatype, int 
 
 	if (nova_pr == NULL)
 	{
-		fprintf (stderr, "mpitrace: ERROR! Cannot allocate memory for a new persistent request!\n");
+		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot allocate memory for a new persistent request!\n");
 		return;
 	}
 
@@ -111,7 +111,7 @@ void PR_NewRequest (int tipus, void *buf, int count, MPI_Datatype datatype, int 
 	nou_element_cua = (PR_Queue_t *) malloc (sizeof (PR_Queue_t));
 	if (nou_element_cua == NULL)
 	{
-		fprintf (stderr, "mpitrace: ERROR! Cannot add a new persistent request to the queue of requests!\n");
+		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot add a new persistent request to the queue of requests!\n");
 		return;
 	}
   nou_element_cua->request = nova_pr;

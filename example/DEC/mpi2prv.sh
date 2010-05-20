@@ -1,5 +1,5 @@
 #!/bin/tcsh
 
-setenv MPITRACE_HOME @sub_PREFIXDIR@
-$MPITRACE_HOME/bin/mpi2prv -f *.mpits -o mpi_ping.prv -e $name
+setenv EXTRAE_HOME @sub_PREFIXDIR@
+${EXTRAE_HOME}/bin/mpi2prv -f *.mpits -o mpi_ping.prv -e $name
 

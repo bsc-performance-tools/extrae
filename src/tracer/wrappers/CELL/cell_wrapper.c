@@ -74,7 +74,7 @@ int prepare_CELLTrace_init (int nthreads)
 	spu_buffer = (unsigned int ***) malloc (nthreads*sizeof(unsigned int**));
 	if (NULL == spu_buffer)
 	{
-		fprintf (stderr, "CELLtrace: Could not allocate spu_buffer\n");
+		fprintf (stderr, PACKAGE_NAME": Could not allocate spu_buffer\n");
 		return FALSE;
 	}
 	for (i = 0; i < nthreads; i++)
@@ -83,7 +83,7 @@ int prepare_CELLTrace_init (int nthreads)
 	spu_counter = (unsigned int ***) malloc (nthreads*sizeof(unsigned int**));
 	if (NULL == spu_counter)
 	{
-		fprintf (stderr, "CELLtrace: Could not allocate spu_counter\n");
+		fprintf (stderr, PACKAGE_NAME": Could not allocate spu_counter\n");
 		return FALSE;
 	}
 	for (i = 0; i < nthreads; i++)
@@ -92,14 +92,14 @@ int prepare_CELLTrace_init (int nthreads)
 	number_of_spus = (unsigned int *) malloc (nthreads*sizeof(unsigned int));
 	if (NULL == number_of_spus)
 	{
-		fprintf (stderr, "CELLtrace: Could not allocate number_of_spus\n");
+		fprintf (stderr, PACKAGE_NAME": Could not allocate number_of_spus\n");
 		return FALSE;
 	}
 
 	threads_prepared = (unsigned int *) malloc (nthreads*sizeof(unsigned int));
 	if (NULL == threads_prepared)
 	{
-		fprintf (stderr, "CELLtrace: Could not allocate memory for threads_prepared\n");
+		fprintf (stderr, PACKAGE_NAME": Could not allocate memory for threads_prepared\n");
 		return FALSE;
 	}
 	else
@@ -163,7 +163,7 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 
 		rename_or_copy (trace_tmp, trace);
 
-		fprintf (stdout, "CELLtrace: Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
+		fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
 	}
 
 #else
@@ -183,7 +183,7 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 	for (i = 0; i < nthreads; i++)
 	{
 		FileName_PTT (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
-		fprintf (stdout, "CELLtrace: Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
+		fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
 
 		fd = open (trace, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 		CHECK_ERROR (fd, open);
@@ -201,9 +201,11 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 extern unsigned long long proc_timebase();
 
 #if CELL_SDK == 1
-int CELLtrace_init (int spus, speid_t * spe_id)
+int CELLtrace_init (int spus, speid_t * spe_id) __attribute__ ((alias ("Extrae_CELL_init")));
+int Extrae_CELL_init (int spus, speid_t * spe_id)
 #elif CELL_SDK == 2
-int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
+int CELLtrace_init (int spus, spe_context_ptr_t * spe_id) __attribute__ ((alias ("Extrae_CELL_init")));
+int Extrae_CELL_init (int spus, spe_context_ptr_t * spe_id)
 #endif
 {
 #ifdef SPU_USES_WRITE
@@ -217,16 +219,16 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 #ifdef SPU_USES_WRITE
 	if (!warning_message_shown)
 	{
-		fprintf (stdout, "CELLtrace: WARNING!\n"
-		                 "CELLtrace: WARNING! The SPUs will write directly their buffers into disk!\n"
-		                 "CELLtrace: WARNING! Such behavior makes flushes very costly!\n"
-		                 "CELLtrace: WARNNIG!\n");
+		fprintf (stdout, PACKAGE_NAME": WARNING!\n"
+		                 PACKAGE_NAME": WARNING! The SPUs will write directly their buffers into disk!\n"
+		                 PACKAGE_NAME": WARNING! Such behavior makes flushes very costly!\n"
+		                 PACKAGE_NAME": WARNNIG!\n");
 	}
 #endif
 
 	if (!CELLtrace_init_prepared)
 	{
-		fprintf (stderr, "CELLtrace: CELLtrace_init was called but never prepared!\n");
+		fprintf (stderr, PACKAGE_NAME": CELLtrace_init was called but never prepared!\n");
 		exit (-1);
 	}
 
@@ -240,13 +242,13 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 	spu_buffer[THREAD] = (unsigned int**) malloc (spus*sizeof(unsigned int*));
 	if (spu_buffer[THREAD] == NULL)
 	{
-		fprintf (stderr, "CELLtrace: Unable to allocate spu_buffer[%d]. Exiting!\n", THREAD);
+		fprintf (stderr, PACKAGE_NAME": Unable to allocate spu_buffer[%d]. Exiting!\n", THREAD);
 		exit (-1);
 	}
 	spu_counter[THREAD] = (unsigned int**) malloc (spus*sizeof(unsigned int*));
 	if (spu_counter[THREAD] == NULL)
 	{
-		fprintf (stderr, "CELLtrace: Unable to allocate spu_counter[%d]. Exiting!\n", THREAD);
+		fprintf (stderr, PACKAGE_NAME": Unable to allocate spu_counter[%d]. Exiting!\n", THREAD);
 		exit (-1);
 	}
 	TB = proc_timebase();
@@ -260,7 +262,7 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 	{
 		if (!threads_prepared[i])
 		{
-			fprintf (stderr, "Error! CELLtrace requires that threads are initialized in order\n");
+			fprintf (stderr, PACKAGE_NAME": Error! Requires that threads are initialized in order\n");
 			exit (-1);
 		}
 		linear_thread += number_of_spus[i];
@@ -297,7 +299,7 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 		spu_buffer[THREAD][i] = (unsigned int*) valloc (spu_file_size * 1024 * 1024);
 		if (spu_buffer[THREAD][i] == NULL)
 		{
-			fprintf (stderr, "CELLtrace: Unable to allocate spu_buffer[%d][%d]. Exiting!\n", THREAD, i);
+			fprintf (stderr, PACKAGE_NAME": Unable to allocate spu_buffer[%d][%d]. Exiting!\n", THREAD, i);
 			exit (-1);
 		}
 		memset (spu_buffer[THREAD][i], 0, spu_file_size * 1024 * 1024);
@@ -306,7 +308,7 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 		spu_counter[THREAD][i] = (unsigned int*) valloc (16);
 		if (spu_counter[THREAD][i] == NULL)
 		{
-			fprintf (stderr, "CELLtrace: Unable to allocate spu_counter[%d][%d]. Exiting!\n", THREAD, i);
+			fprintf (stderr, PACKAGE_NAME": Unable to allocate spu_counter[%d][%d]. Exiting!\n", THREAD, i);
 			exit (-1);
 		}
 		memset (spu_buffer[THREAD][i], 0, 16);
@@ -331,11 +333,11 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 		send_mail (spe_id[i], (unsigned int) spu_buffer_size);
 	}
 	if (TASKID == 0)
-		fprintf (stdout, "CELLtrace: PPU initialized\n");
+		fprintf (stdout, PACKAGE_NAME": PPU initialized\n");
 
 	if (TASKID == 0)
 	{
-		fprintf (stdout, "CELLtrace: SPU initialized { ");
+		fprintf (stdout, PACKAGE_NAME": SPU initialized { ");
 		fflush (stdout);
 	}
 	all_spus_ok = TRUE;
@@ -356,7 +358,7 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 	if (!all_spus_ok)
 	{
 		if (TASKID == 0)
-			fprintf (stderr, "CELLtrace: Some of the SPUs failed in the initialization. Check the messages given. Exiting!\n");
+			fprintf (stderr, PACKAGE_NAME": Some of the SPUs failed in the initialization. Check the messages given. Exiting!\n");
 		exit (-1);
 	}
 
@@ -365,7 +367,8 @@ int CELLtrace_init (int spus, spe_context_ptr_t * spe_id)
 	return 1;	
 }
 
-int CELLtrace_fini (void)
+int CELLtrace_fini (void) __attribute__ ((alias ("Extrae_CELL_fini")));
+int Extrae_CELL_fini (void)
 {
 	unsigned THREAD = get_trace_thread_number();
 
@@ -378,7 +381,7 @@ int CELLtrace_fini (void)
 #endif
 
 		if (TASKID == 0)
-			fprintf (stdout, "CELLtrace: Application has ended. Tracing has been terminated.\n");
+			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 	}
 
   return 0;

@@ -101,8 +101,8 @@ static void callme_pardo (char *ptr, long lbnd, long ubnd, unsigned thid)
 	void *p = *((void**) pardo_uf);
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: callme_pardo: ptr=%p lbnd=%ld ubnd=%ld thid=%u\n", ptr, lbnd, ubnd, thid);
-	fprintf (stderr, "mpitrace: callme_pardo: pardo_uf=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME": callme_pardo: ptr=%p lbnd=%ld ubnd=%ld thid=%u\n", ptr, lbnd, ubnd, thid);
+	fprintf (stderr, PACKAGE_NAME": callme_pardo: pardo_uf=%p\n", p);
 #endif
 
 	Probe_OpenMP_UF ((UINT64) p);
@@ -121,8 +121,8 @@ static void callme_do (char *ptr, long lbnd, long ubnd)
 	void *p = *((void**) do_uf[THREADID]);
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: callme_do: ptr=%p lbnd=%ld ubnd=%ld\n", ptr, lbnd, ubnd);
-	fprintf (stderr, "mpitrace: callme_do: do_uf=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME": callme_do: ptr=%p lbnd=%ld ubnd=%ld\n", ptr, lbnd, ubnd);
+	fprintf (stderr, PACKAGE_NAME": callme_do: do_uf=%p\n", p);
 #endif
 
 	Probe_OpenMP_UF ((UINT64) p);
@@ -140,8 +140,8 @@ static void callme_par (char *ptr)
 	void *p = *((void**) par_uf);
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: callme_par: ptr=%p\n", ptr);
-	fprintf (stderr, "mpitrace: callme_par: par_uf=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME": callme_par: ptr=%p\n", ptr);
+	fprintf (stderr, PACKAGE_NAME": callme_par: par_uf=%p\n", p);
 #endif
 
 	Probe_OpenMP_UF ((UINT64) p);
@@ -160,7 +160,7 @@ static void callme_single(void)
 	void *p = *((void**) par_single);
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: callme_single: par_single=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME": callme_single: par_single=%p\n", p);
 #endif
 
 	Probe_OpenMP_UF ((UINT64) p);
@@ -206,7 +206,7 @@ static void callme_section(void)
 	int index = atomic_inc_return (&atomic_index)-1;
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: callme_section: par_sections[%d]=%p\n", index, par_sections[index-1]);
+	fprintf (stderr, PACKAGE_NAME": callme_section: par_sections[%d]=%p\n", index, par_sections[index-1]);
 #endif
 
 	Probe_OpenMP_UF ((UINT64) par_sections[index]);
@@ -236,7 +236,7 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 		(void(*)(int,void**,long,long,long,long,void**,void**,void**,long,long,void**,long))
 		dlsym (RTLD_NEXT, "_xlsmpParallelDoSetup_TPO");
 	if (_xlsmpParallelDoSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpParallelDoSetup_TPO in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpParallelDoSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpParallelDoSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpParRegionSetup_TPO */
@@ -244,7 +244,7 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 		(void(*)(int,void*,int,void*,void*,void**,long,long))
 		dlsym (RTLD_NEXT, "_xlsmpParRegionSetup_TPO");
 	if (_xlsmpParRegionSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpParRegionSetup_TPO in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpParRegionSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpParRegionSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpWSDoSetup_TPO */
@@ -252,7 +252,7 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 		(void(*)(int,void*,long,long,long,long,void*,void*,void**,long))
 		dlsym (RTLD_NEXT, "_xlsmpWSDoSetup_TPO");
 	if (_xlsmpWSDoSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpWSDoSetup_TPO in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpWSDoSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpWSDoSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpWSSectSetup_TPO */
@@ -260,49 +260,49 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 		(void(*)(int,void*,long,void*,void*,void**,long,long))
 		dlsym (RTLD_NEXT, "_xlsmpWSSectSetup_TPO");
 	if (_xlsmpWSSectSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpWSSectSetup_TPO in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpWSSectSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpWSSectSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpSingleSetup_TPO */
 	_xlsmpSingleSetup_TPO_real =
 		(void(*)(int,void*,int,void*,void*,int)) dlsym (RTLD_NEXT, "_xlsmpSingleSetup_TPO");
 	if (_xlsmpSingleSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpSingleSetup_TPO in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpSingleSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpSingleSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpBarrier_TPO */
 	_xlsmpBarrier_TPO_real =
 		(void(*)(int,int*)) dlsym (RTLD_NEXT, "_xlsmpBarrier_TPO");
 	if (_xlsmpBarrier_TPO_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpBarrier_TPO in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpBarrier_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpBarrier_TPO_real,count);
 
 	/* Obtain @ for _xlsmpGetDefaultSLock */
 	_xlsmpGetDefaultSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpGetDefaultSLock");
 	if (_xlsmpGetDefaultSLock_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpGetDefaultSLock in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpGetDefaultSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpGetDefaultSLock_real,count);
 
 	/* Obtain @ for _xlsmpRelDefaultSLock */
 	_xlsmpRelDefaultSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpRelDefaultSLock");
 	if (_xlsmpRelDefaultSLock_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpRelDefaultSLock in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpRelDefaultSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpRelDefaultSLock_real,count);
 
 	/* Obtain @ for _xlsmpGetSLock */
 	_xlsmpGetSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpGetSLock");
 	if (_xlsmpGetSLock_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpGetSLock in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpGetSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpGetSLock_real,count);
 
 	/* Obtain @ for _xlsmpRelSLock */
 	_xlsmpRelSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpRelSLock");
 	if (_xlsmpRelSLock_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find _xlsmpRelSLock in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpRelSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpRelSLock_real,count);
 
 
@@ -318,20 +318,20 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 void _xlsmpParallelDoSetup_TPO(int p1, void *p2, long p3, long p4, long p5, long p6, void *p7, void *p8, void **p9, long p10, long p11, void *p12, long p13)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpParallelDoSetup_TPO is at %p\n", _xlsmpParallelDoSetup_TPO_real);
-	fprintf (stderr, "mpitrace: p01 = %d\n", p1);
-	fprintf (stderr, "mpitrace: p02 = %p (%p)\n", p2, (p2!=NULL)?*p2:NULL);
-	fprintf (stderr, "mpitrace: p03 = %ld\n", p3);
-	fprintf (stderr, "mpitrace: p04 = %ld\n", p4);
-	fprintf (stderr, "mpitrace: p05 = %ld\n", p5);
-	fprintf (stderr, "mpitrace: p06 = %ld\n", p6);
-	fprintf (stderr, "mpitrace: p07 = %p (%p)\n", p7, (p7!=NULL)?*p7:NULL);
-	fprintf (stderr, "mpitrace: p08 = %p (%p)\n", p8, (p8!=NULL)?*p8:NULL);
-	fprintf (stderr, "mpitrace: p09 = %p (%p)\n", p9, (p9!=NULL)?*p9:NULL);
-	fprintf (stderr, "mpitrace: p10 = %ld\n", p10);
-	fprintf (stderr, "mpitrace: p11 = %ld\n", p11);
-	fprintf (stderr, "mpitrace: p12 = %p (%p)\n", p12, (p12!=NULL)?*p12:NULL);
-	fprintf (stderr, "mpitrace: p13 = %ld\n", p13);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpParallelDoSetup_TPO is at %p\n", _xlsmpParallelDoSetup_TPO_real);
+	fprintf (stderr, PACKAGE_NAME": p01 = %d\n", p1);
+	fprintf (stderr, PACKAGE_NAME": p02 = %p (%p)\n", p2, (p2!=NULL)?*p2:NULL);
+	fprintf (stderr, PACKAGE_NAME": p03 = %ld\n", p3);
+	fprintf (stderr, PACKAGE_NAME": p04 = %ld\n", p4);
+	fprintf (stderr, PACKAGE_NAME": p05 = %ld\n", p5);
+	fprintf (stderr, PACKAGE_NAME": p06 = %ld\n", p6);
+	fprintf (stderr, PACKAGE_NAME": p07 = %p (%p)\n", p7, (p7!=NULL)?*p7:NULL);
+	fprintf (stderr, PACKAGE_NAME": p08 = %p (%p)\n", p8, (p8!=NULL)?*p8:NULL);
+	fprintf (stderr, PACKAGE_NAME": p09 = %p (%p)\n", p9, (p9!=NULL)?*p9:NULL);
+	fprintf (stderr, PACKAGE_NAME": p10 = %ld\n", p10);
+	fprintf (stderr, PACKAGE_NAME": p11 = %ld\n", p11);
+	fprintf (stderr, PACKAGE_NAME": p12 = %p (%p)\n", p12, (p12!=NULL)?*p12:NULL);
+	fprintf (stderr, PACKAGE_NAME": p13 = %ld\n", p13);
 #endif
 
 	if (_xlsmpParallelDoSetup_TPO_real != NULL)
@@ -345,7 +345,7 @@ void _xlsmpParallelDoSetup_TPO(int p1, void *p2, long p3, long p4, long p5, long
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpParallelDoSetup_TPO is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpParallelDoSetup_TPO is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -353,8 +353,8 @@ void _xlsmpParallelDoSetup_TPO(int p1, void *p2, long p3, long p4, long p5, long
 void _xlsmpParRegionSetup_TPO (int p1, void *p2, int p3, void* p4, void* p5, void** p6, long p7, long p8)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpParRegionSetup_TPO is at %p\n", _xlsmpParRegionSetup_TPO_real);
-	fprintf (stderr, "mpitrace: _xlsmpParRegionSetup_TPO params %d %p %d %p %p %p %ld %ld\n", p1, p2, p3, p4, p5, p6, p7, p8);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpParRegionSetup_TPO is at %p\n", _xlsmpParRegionSetup_TPO_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpParRegionSetup_TPO params %d %p %d %p %p %p %ld %ld\n", p1, p2, p3, p4, p5, p6, p7, p8);
 #endif
 
 	if (_xlsmpParRegionSetup_TPO_real != NULL)
@@ -368,7 +368,7 @@ void _xlsmpParRegionSetup_TPO (int p1, void *p2, int p3, void* p4, void* p5, voi
   }
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpParRegionSetup_TPO is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpParRegionSetup_TPO is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -376,8 +376,8 @@ void _xlsmpParRegionSetup_TPO (int p1, void *p2, int p3, void* p4, void* p5, voi
 void _xlsmpWSDoSetup_TPO (int p1, void *p2, long p3, long p4, long p5, long p6, void* p7, void* p8, void** p9, long p10)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpWSDoSetup_TPO is at %p\n", _xlsmpWSDoSetup_TPO_real);
-	fprintf (stderr, "mpitrace: _xlsmpWSDoSetup_TPO params %d %p %ld %ld %ld %ld %p %p %p %ld\n", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpWSDoSetup_TPO is at %p\n", _xlsmpWSDoSetup_TPO_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpWSDoSetup_TPO params %d %p %ld %ld %ld %ld %p %p %p %ld\n", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
 #endif
 
 	if (_xlsmpWSDoSetup_TPO_real != NULL)
@@ -392,7 +392,7 @@ void _xlsmpWSDoSetup_TPO (int p1, void *p2, long p3, long p4, long p5, long p6, 
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpWSDoSetup_TPO is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpWSDoSetup_TPO is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -400,8 +400,8 @@ void _xlsmpWSDoSetup_TPO (int p1, void *p2, long p3, long p4, long p5, long p6, 
 void _xlsmpBarrier_TPO (int p1, int *p2)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpBarrier_TPO is at %p\n", _xlsmpBarrier_TPO_real);
-	fprintf (stderr, "mpitrace: _xlsmpBarrier_TPO params %d %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpBarrier_TPO is at %p\n", _xlsmpBarrier_TPO_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpBarrier_TPO params %d %p\n", p1, p2);
 #endif
 
 	if (_xlsmpBarrier_TPO_real != NULL)
@@ -412,7 +412,7 @@ void _xlsmpBarrier_TPO (int p1, int *p2)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpBarrier_TPO is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpBarrier_TPO is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -420,8 +420,8 @@ void _xlsmpBarrier_TPO (int p1, int *p2)
 void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4, void *p5, int p6)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpSingleSetup_TPO is at %p\n", _xlsmpBarrier_TPO_real);
-	fprintf (stderr, "mpitrace: _xlsmpSingleSetup_TPO params %d %p %d %p %p %d\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO is at %p\n", _xlsmpBarrier_TPO_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO params %d %p %d %p %p %d\n", p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (_xlsmpSingleSetup_TPO_real != NULL)
@@ -435,7 +435,7 @@ void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4, void *p5, int p6
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpSingleSetup_TPO is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -445,8 +445,8 @@ void _xlsmpWSSectSetup_TPO (int p1, void *p2, long p3, void *p4, void *p5, void*
 	ull index = 0;
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpWSSectSetup_TPO is at %p\n", _xlsmpWSSectSetup_TPO_real);
-	fprintf (stderr, "mpitrace: _xlsmpWSSectSetup_TPO params %d %p %ld %p %p %p %ld %ld\n", p1, p2, p3, p4, p5, p6, p7, p8);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpWSSectSetup_TPO is at %p\n", _xlsmpWSSectSetup_TPO_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpWSSectSetup_TPO params %d %p %ld %p %p %p %ld %ld\n", p1, p2, p3, p4, p5, p6, p7, p8);
 #endif
 
 	if (_xlsmpWSSectSetup_TPO_real != NULL)
@@ -466,7 +466,7 @@ void _xlsmpWSSectSetup_TPO (int p1, void *p2, long p3, void *p4, void *p5, void*
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpWSSectSetup_TPO is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpWSSectSetup_TPO is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -474,7 +474,7 @@ void _xlsmpWSSectSetup_TPO (int p1, void *p2, long p3, void *p4, void *p5, void*
 void _xlsmpRelDefaultSLock (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpRelDefaultSLock is at %p\n", _xlsmpRelDefaultSLock_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpRelDefaultSLock is at %p\n", _xlsmpRelDefaultSLock_real);
 #endif
 
 	if (_xlsmpRelDefaultSLock_real != NULL)
@@ -485,7 +485,7 @@ void _xlsmpRelDefaultSLock (void *p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpRelDefaultSLock is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpRelDefaultSLock is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -493,7 +493,7 @@ void _xlsmpRelDefaultSLock (void *p1)
 void _xlsmpRelSLock (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpRelSLock is at %p\n", _xlsmpRelSLock_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpRelSLock is at %p\n", _xlsmpRelSLock_real);
 #endif
 
 	if (_xlsmpRelSLock_real != NULL)
@@ -504,7 +504,7 @@ void _xlsmpRelSLock (void *p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpRelSLock is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpRelSLock is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -512,7 +512,7 @@ void _xlsmpRelSLock (void *p1)
 void _xlsmpGetDefaultSLock (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpGetDefaultSLock is at %p\n", _xlsmpGetDefaultSLock_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpGetDefaultSLock is at %p\n", _xlsmpGetDefaultSLock_real);
 #endif
 
 	if (_xlsmpGetDefaultSLock_real != NULL)
@@ -523,7 +523,7 @@ void _xlsmpGetDefaultSLock (void *p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpGetDefaultSLock is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpGetDefaultSLock is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -531,7 +531,7 @@ void _xlsmpGetDefaultSLock (void *p1)
 void _xlsmpGetSLock (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: _xlsmpGetSLock is at %p\n", _xlsmpGetSLock_real);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpGetSLock is at %p\n", _xlsmpGetSLock_real);
 #endif
 
 	if (_xlsmpGetSLock_real != NULL)
@@ -542,7 +542,7 @@ void _xlsmpGetSLock (void *p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: _xlsmpGetSLock is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": _xlsmpGetSLock is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -564,7 +564,7 @@ int ibm_xlsmp_1_6_hook_points (int ntask)
 		/* Has this happened? */
 		/* a) Increase MAX_THD to be higher than omp_get_max_threads() */
 		/* b) Decrease OMP_NUM_THREADS in order to decrease omp_get_max_threads() */
-		fprintf (stderr, "mpitrace: omp_get_max_threads() > MAX_THD. Aborting...\nRecompile MPItrace increasing MAX_THD or decrease OMP_NUM_THREADS\n");
+		fprintf (stderr, PACKAGE_NAME": omp_get_max_threads() > MAX_THD. Aborting...\nRecompile MPItrace increasing MAX_THD or decrease OMP_NUM_THREADS\n");
 		exit (1);
 	}
 

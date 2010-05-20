@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" groff -man -Tascii mpi2prv.1
 .\"
-.TH MPI2PRV 1 "DECEMBER 2009"
+.TH MPI2PRV 1 "MAY 2010"
 .SH NAME
 mpi2prv \- MPI merge facility for the Paraver visualizer tool
 
@@ -30,7 +30,7 @@ mpimpi2dim \- Parallel MPI merge facility for the Dimemas simulation tool
 .B mpi2prv
 and
 .B mpi2dim
-are two different utilities to generate traces from the intermediate files written by the MPItrace instrumentation tool.
+are two different utilities to generate traces from the intermediate files written by the Extrae instrumentation tool.
 .B mpi2prv
 is responsible of the creation of Paraver traces whereas
 .B mpi2dim
@@ -121,7 +121,7 @@ On the BG/L system each task can be mapped in different points of a torus networ
 .\"
 .SH ENVIRONMENT
 This section describes all the environment variables related to the merging process.
-.IP "MPTRACE_LABELS"
+.IP "EXTRAE_LABELS"
 This environment variable lets the user add custom information to the generated Paraver Configuration File (.pcf). Just set this variable to point to a file containing labels for the unknown (user) events.
 The format for the file is:
 
@@ -172,7 +172,7 @@ mpi2prv -syn -extended-glop-info -e ./program -syn -o out.prv.gz
 .\" Informacio d'autor
 .\"
 .SH AUTHOR
-Tool was developed at the CEPBA (European Center for Parallelism of Barcelona) by the "tools team".
+Tool was developed at the CEPBA (European Center for Parallelism of Barcelona) and at the BSC (Barcelona Supercomputing Center) by the "tools team".
 
 This online documentation was written by Harald Servat Gelabert
 .\"
@@ -181,24 +181,24 @@ This online documentation was written by Harald Servat Gelabert
 .SH "REPORTING BUGS"
 If you find any bug on the documentation or in the software, please send a descriptive mail to
 
-.B cepbatools@cepba.upc.edu
+.B tools@bsc.es
 .\"
 .\" D'on treure mes informacio
 .\"
 .SH "ONLINE DOCUMENTATION"
 More information and detailed examples can be found at
 
-.B http://www.cepba.upc.edu/paraver/
+.B http://www.bsc.es/paraver
 .\"
 .\" Altres
 .\"
 .SH "SEE ALSO"
-.BR mpi2prv (1)
+.BR extrae (1)
 
-.BR mpitrace_event (3)
-.BR mpitrace_counters (3)
-.BR mpitrace_eventandcounters (3)
-.BR mpitrace_shutdown (3)
-.BR mpitrace_restart (3)
-.BR mpitrace_set_tracing_tasks (3)
-.BR mpitrace_set_options (3)
+.BR extrae_event (3)
+.BR extrae_counters (3)
+.BR extrae_eventandcounters (3)
+.BR extrae_shutdown (3)
+.BR extrae_restart (3)
+.BR extrae_set_tracing_tasks (3)
+.BR extrae_set_options (3)

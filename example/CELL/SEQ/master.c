@@ -162,7 +162,7 @@ int main (int argc, char *argv[])
 	pthread_t *pthreads;
 	spe_context_ptr_t *contexts;
 
-  MPItrace_init ();
+  Extrae_init ();
 
 	if (argc != 5)
 	{
@@ -184,10 +184,10 @@ int main (int argc, char *argv[])
 
 	fprintf (stdout, "Using %d threads -- hopefully 1thread-2-1spu\n", numthreads);
 
-	PPUtrace_event (1000, 1);
+	Extrae_event (1000, 1);
 	load_image (argv[1], &w1, &h1, &image1);
 	load_image (argv[2], &w2, &h2, &image2);
-	PPUtrace_event (1000, 0);
+	Extrae_event (1000, 0);
 
 	if (w1 == w2 && h1 == h2)
 	{
@@ -198,19 +198,19 @@ int main (int argc, char *argv[])
 		create_threads (numthreads, "./worker", &contexts, &pthreads, works,
 			image1, image2, out, w1, h1);
 
-		CELLtrace_init (numthreads, contexts);
+		Extrae_CELL_init (numthreads, contexts);
 
-		PPUtrace_event (1000, 2);
+		Extrae_event (1000, 2);
 		wait_threads (numthreads, pthreads);
 		for (i = 0; i < numthreads; i++)
 			spe_context_destroy(contexts[i]);
-		PPUtrace_event (1000, 0);
+		Extrae_event (1000, 0);
 
-		PPUtrace_event (1000, 3);
+		Extrae_event (1000, 3);
 		save_image (argv[3], w1, h1, out);
-		PPUtrace_event (1000, 0);
+		Extrae_event (1000, 0);
 
-		CELLtrace_fini ();
+		Extrae_CELL_fini ();
 	}
 	else
 	{

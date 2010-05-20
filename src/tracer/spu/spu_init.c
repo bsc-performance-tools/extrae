@@ -45,7 +45,9 @@ extern int EVENT_BUFFER_SIZE;
 
 extern int mpitrace_on;
 
-int SPUtrace_init (void) {
+int SPUtrace_init (void) __attribute__ ((alias ("Extrae_init"))); 
+int Extrae_init (void)
+{
 	unsigned long long timebase, timeinit;
 	unsigned long long prvout, countout;
 	unsigned int prvout_high, prvout_low, countout_high, countout_low;
@@ -104,18 +106,15 @@ int SPUtrace_init (void) {
 
 	return 1;
 }
-int MPItrace_init (void) __attribute__ ((alias ("SPUtrace_init")));
-int MPItrace_init (void) __attribute__ ((deprecated));
 
 
 /******************************************************************************
  ***  MPI_Finalize_C_Wrapper
  ******************************************************************************/
-int SPUtrace_fini (void)
+int SPUtrace_fini (void) __attribute__ ((alias ("Extrae_fini"))); 
+int Extrae_fini (void)
 {
 	if (mpitrace_on)
 		Thread_Finalization ();
 	return 0;
 }
-int MPItrace_fini (void) __attribute__ ((alias ("SPUtrace_fini")));
-int MPItrace_fini (void) __attribute__ ((deprecated));

@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area, x, start, end;
 
-	OMPtrace_init();
+	Extrae_init();
 
 	start = omp_get_wtime();
 	h = 1.0 / (double) n;
@@ -54,5 +54,5 @@ int main(int argc, char **argv)
 	printf("pi is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
 	printf("Ran in %0.5f seconds with %d threads\n",end-start,omp_get_max_threads());
 
-	OMPtrace_fini();
+	Extrae_fini();
 }

@@ -39,43 +39,39 @@ static char UNUSED rcsid[] = "$Id$";
 
 extern int mpitrace_on;
 
-void SPUtrace_event (unsigned int tipus, unsigned int valor)
+void Extrae_event (unsigned int tipus, unsigned int valor)
 {
   if (mpitrace_on)
     Trace_Event_C_Wrapper (tipus, valor);
 }
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-void MPItrace_event (unsigned int tipus, unsigned int valor) __attribute__ ((alias ("SPUtrace_event")));
-void MPItrace_event (unsigned int tipus, unsigned int valor) __attribute__ ((deprecated));
+void SPUtrace_event (unsigned int tipus, unsigned int valor) __attribute__ ((alias ("Extrae_event")));
 #endif
 
-void SPUtrace_Nevent (int count, unsigned int *tipus, unsigned int *valors)
+void Extrae_Nevent (int count, unsigned int *tipus, unsigned int *valors)
 {
 	if (mpitrace_on)
 		Trace_MultipleEvent_C_Wrapper (count, tipus, valors);
 }
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-void MPItrace_Nevent (int count, unsigned int *tipus, unsigned int *valors) __attribute__ ((alias ("SPUtrace_Nevent")));
-void MPItrace_Nevent (int count, unsigned int *tipus, unsigned int *valors) __attribute__ ((deprecated));
+void SPUtrace_Nevent (int count, unsigned int *tipus, unsigned int *valors) __attribute__ ((alias ("Extrae_Nevent")));
 #endif
 
-void SPUtrace_shutdown (void)
+void Extrae_shutdown (void)
 {
   if (mpitrace_on)
     mpitrace_shutdown_Wrapper ();
 }
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-void MPItrace_shutdown (void) __attribute__ ((alias ("SPUtrace_shutdown")));
-void MPItrace_shutdown (void) __attribute__ ((deprecated));
+void SPUtrace_shutdown (void) __attribute__ ((alias ("Extrae_shutdown")));
 #endif
 
-void SPUtrace_restart (void)
+void Extrae_restart (void)
 {
   if (mpitrace_on)
     mpitrace_restart_Wrapper ();
 }
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-void MPItrace_restart (void) __attribute__ ((alias ("SPUtrace_restart")));
-void MPItrace_restart (void) __attribute__ ((deprecated));
+void SPUtrace_restart (void) __attribute__ ((alias ("Extrae_restart")));
 #endif
 

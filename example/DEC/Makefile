@@ -1,7 +1,7 @@
-MPITRACE_HOME	= @sub_PREFIXDIR@ 
+EXTRAE_HOME = @sub_PREFIXDIR@ 
 MPI_HOME = @sub_MPI_HOME@
 
-FLIBS = -L$(MPITRACE_HOME)/lib -lmpitracef -lpthread -lrt -lmach -lpmpi -lmpi -lexc
+FLIBS = -L$(EXTRAE_HOME)/lib -lmpitracef -lpthread -lrt -lmach -lpmpi -lmpi -lexc
 F77	= $(MPI_HOME)/bin/mpif77
 FFLAGS = -O2 -g
 

@@ -283,14 +283,14 @@ void HWC_Initialize (int options)
 	HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
 	if (NULL == HWC_current_set)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for HWC_current_set\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_set\n");
 		return;
 	}
 
 	HWC_current_timebegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
 	if (NULL == HWC_current_timebegin)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for HWC_current_timebegin\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_timebegin\n");
 		return;
 	}
 
@@ -314,7 +314,7 @@ void HWC_Start_Counters (int num_threads)
 	HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
 	if (NULL == HWC_Thread_Initialized)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for HWC_Thread_Initialized!\n");
+		fprintf (stderr, PACKAGE_NAME ": Error! Cannot allocate memory for HWC_Thread_Initialized!\n");
 		return;
 	}
 
@@ -327,14 +327,14 @@ void HWC_Start_Counters (int num_threads)
 	Accumulated_HWC_Valid = (int *)malloc(sizeof(int) * num_threads);
 	if (NULL == Accumulated_HWC_Valid)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for Accumulated_HWC_Valid\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for Accumulated_HWC_Valid\n");
 		return;
 	}
 
 	Accumulated_HWC = (long long **)malloc(sizeof(long long *) * num_threads);
 	if (NULL == Accumulated_HWC)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for Accumulated_HWC\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for Accumulated_HWC\n");
 		return;
 	}
 
@@ -343,7 +343,7 @@ void HWC_Start_Counters (int num_threads)
 		Accumulated_HWC[i] = (long long *)malloc(sizeof(long long) * MAX_HWC);
 		if (NULL == Accumulated_HWC[i])
 		{
-			fprintf (stderr, "mpitrace ERROR: Cannot allocate memory for Accumulated_HWC[%d]\n", i);
+			fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for Accumulated_HWC[%d]\n", i);
 			return;
 		}
 		HWC_Accum_Reset(i);
@@ -375,7 +375,7 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 	HWC_Thread_Initialized = (int *) realloc (HWC_Thread_Initialized, sizeof(int) * new_num_threads);
 	if (NULL == HWC_Thread_Initialized)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for HWC_Thread_Initialized!\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_Thread_Initialized!\n");
 		return;
 	}
 
@@ -386,14 +386,14 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 	Accumulated_HWC_Valid = (int *) realloc (Accumulated_HWC_Valid, sizeof(int) * new_num_threads);
 	if (NULL == Accumulated_HWC_Valid)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for Accumulated_HWC_Valid\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for Accumulated_HWC_Valid\n");
 		return;
 	}
 
 	Accumulated_HWC = (long long **) realloc (Accumulated_HWC, sizeof(long long *) * new_num_threads);
 	if (NULL == Accumulated_HWC)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for Accumulated_HWC\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for Accumulated_HWC\n");
 		return;
 	}
 
@@ -402,7 +402,7 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 		Accumulated_HWC[i] = (long long *)malloc(sizeof(long long) * MAX_HWC);
 		if (NULL == Accumulated_HWC[i])
 		{
-			fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for Accumulated_HWC[%d]\n", i);
+			fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for Accumulated_HWC[%d]\n", i);
 			return;
 		}
 		HWC_Accum_Reset(i);
@@ -411,14 +411,14 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 	HWC_current_set = (int *) realloc (HWC_current_set, sizeof(int) * new_num_threads);
 	if (NULL == HWC_current_set)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for HWC_current_set\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_current_set\n");
 		return;
 	}
 
 	HWC_current_timebegin = (unsigned long long *) realloc (HWC_current_timebegin, sizeof(unsigned long long) * new_num_threads);
 	if (NULL == HWC_current_timebegin)
 	{
-		fprintf (stderr, "mpitrace ERROR: Cannot reallocate memory for HWC_current_timebegin\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_current_timebegin\n");
 		return;
 	}
 
@@ -450,7 +450,7 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 				HWC_current_set[threadid] = task_id % HWC_num_sets;
 
 			if (task_id == 0)
-				fprintf (stdout, "mpitrace: Starting distribution hardware counters set is established to 'cyclic'\n");
+				fprintf (stdout, PACKAGE_NAME": Starting distribution hardware counters set is established to 'cyclic'\n");
 		}
 		else if (strncasecmp (distribution, "block", 5) == 0)
 		{
@@ -469,7 +469,7 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			}
 
 			if (task_id == 0)
-				fprintf (stdout, "mpitrace: Starting distribution hardware counters set is established to 'block'\n");
+				fprintf (stdout, PACKAGE_NAME": Starting distribution hardware counters set is established to 'block'\n");
 		}
 		else
 		{
@@ -478,7 +478,7 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			if (value == 0)
 			{
 				if (task_id == 0)
-					fprintf (stderr, "mpitrace: Warning! Cannot identify '%s' as a valid starting distribution set on the CPU counters. Setting to the first one.\n", distribution);
+					fprintf (stderr, PACKAGE_NAME": Warning! Cannot identify '%s' as a valid starting distribution set on the CPU counters. Setting to the first one.\n", distribution);
 				for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++)
 					HWC_current_set[threadid] = 0;
 			}

@@ -4,9 +4,10 @@
 #
 
 XMLHOME = $(HOME)/libxml2/2.6.31/32
+EXTRAE_HOME = @sub_PREFIXDIR@
 MPI_HOME= @sub_MPI_HOME@
 FFLAGS  = -O2
-FLIBS   = -L../../../lib -lmpitracef -lpmapi -L$(XMLHOME)/lib -lxml2
+FLIBS   = -L$(EXTRAE_HOME)/lib -lmpitracef -lpmapi -L$(XMLHOME)/lib -lxml2
 F77     = $(MPI_HOME)/mpxlf
 
 all: mpi_ping

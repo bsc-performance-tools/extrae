@@ -7,7 +7,7 @@
 # @ tasks_per_node = 4
 # @ wall_clock_limit = 01:00:00
 
-export MPITRACE_HOME=@sub_PREFIXDIR@
+export EXTRAE_HOME=@sub_PREFIXDIR@
 
-srun ${MPITRACE_HOME}/bin/mpimpi2prv -syn -f TRACE.mpits -o trace.prv
+srun ${EXTRAE_HOME}/bin/mpimpi2prv -syn -f TRACE.mpits -o trace.prv
 

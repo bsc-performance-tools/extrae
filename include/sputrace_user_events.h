@@ -37,7 +37,6 @@ extern "C" {
 int SPUtrace_init (void);
 int SPUtrace_fini (void);
 
-
 void SPUtrace_event(unsigned int tipus, unsigned int valor);
 void SPUtrace_Nevent(int count, unsigned int *tipus, unsigned int *valors);
 

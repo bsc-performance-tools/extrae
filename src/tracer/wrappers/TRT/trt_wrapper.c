@@ -56,12 +56,12 @@ static void GetTRTHookPoints (int rank)
 	/* Obtain @ for pthread_create */
 	threadSpawn_real = (void*(*)(void*, void*)) dlsym (RTLD_NEXT, "threadSpawn");
 	if (threadSpawn_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find threadSpawn in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find threadSpawn in DSOs!!\n");
 
 	/* Obtain @ for pthread_join */
 	threadRead_real = (void*(*)(void*)) dlsym (RTLD_NEXT, "threadRead");
 	if (threadRead_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find threadRead in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find threadRead in DSOs!!\n");
 }
 
 /*
@@ -87,7 +87,7 @@ static void * threadSpawn_hook (void *p1)
 	void *res;
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: DEBUG threadSpawn_hook (p1=%p)\n", p1);
+	fprintf (stderr, PACKAGE_NAME": DEBUG threadSpawn_hook (p1=%p)\n", p1);
 #endif
 
 	/* Notify the calling thread */
@@ -110,8 +110,8 @@ void * threadSpawn (void *p1, void *p2)
 	struct thread_create_info i;
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: DEBUG threadSpawn (p1=%p, p2=%p)\n", p1, p2);
-	fprintf (stderr, "mpitrace: DEBUG active threads in the backend = %d\n", Backend_getNumberOfThreads()+1);
+	fprintf (stderr, PACKAGE_NAME": DEBUG threadSpawn (p1=%p, p2=%p)\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": DEBUG active threads in the backend = %d\n", Backend_getNumberOfThreads()+1);
 #endif
 
 	Probe_threadSpawn_Entry (p1);
@@ -145,7 +145,7 @@ void * threadRead (void *p1)
 	void *res;
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: DEBUG threadRead (p1=%p)\n", p1);
+	fprintf (stderr, PACKAGE_NAME": DEBUG threadRead (p1=%p)\n", p1);
 #endif
 
 	Probe_threadRead_Entry ();

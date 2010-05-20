@@ -1,7 +1,5 @@
 #!/bin/tcsh
 
-setenv MPITRACE_HOME @sub_PREFIXDIR@
+setenv EXTRAE_HOME @sub_PREFIXDIR@
 
-${MPITRACE_HOME}/bin/mpitrace /bin/dmpirun -np 2 /cepba/des/gllort/mpitrace/DEC-LINUX-BGL/example/DEC/mpi_ping
-
-
+${EXTRAE_HOME}/bin/mpitrace /bin/dmpirun -np 2 /cepba/des/gllort/mpitrace/DEC-LINUX-BGL/example/DEC/mpi_ping

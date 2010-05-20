@@ -1,6 +1,6 @@
 \chapter{\TRACE XML configuration file}\label{cha:XML}
 
-\TRACE is configured through a XML file that is set through the {\tt MPTRACE\_CONFIG\_FILE} environment variable. The included examples provide several XML files to serve as a basis for the end user. There are four XML files:
+\TRACE is configured through a XML file that is set through the {\tt EXTRAE\_CONFIG\_FILE} environment variable. The included examples provide several XML files to serve as a basis for the end user. There are four XML files:
 \begin{itemize}
  \item {\tt mpitrace.xml} Exemplifies all the options available to set up in the configuration file. We will discuss below all the sections and options available. It is also available on this document on appendix \ref{cha:wholeXML}.
  \item {\tt mpitrace\_explained.xml} The same as the above with some comments on each section.
@@ -21,7 +21,7 @@ The basic trace behavior is determined in the first part of the XML and {\bf con
 The {\tt <?xml version='1.0'?>} is mandatory for all XML files. Don't touch this. The available tunable options are under the {\tt <trace>} node:
 \begin{itemize}
  \item {\tt enabled} Set to {\tt "yes"} if you want to generate tracefiles.
- \item {\tt home} Set to where your instrumentation package is installed. Usually it points to the same location that {\tt MPITRACE\_HOME} environment variable.
+ \item {\tt home} Set to where your instrumentation package is installed. Usually it points to the same location that {\tt EXTRAE\_HOME} environment variable.
  \item {\tt initial-mode} Available options
   \begin{itemize}
    \item {\tt detail} Provides detailed information of the tracing.
@@ -35,7 +35,7 @@ The {\tt <?xml version='1.0'?>} is mandatory for all XML files. Don't touch this
  \item {\tt xml-parser-id} This is used to check whether the XML parsing scheme and the file scheme match or not.
 \end{itemize}
 
-\graybox{See {\bf MPITRACE\_ON}, {\bf MPITRACE\_HOME}, {\bf MPITRACE\_INITIAL\_MODE} and {\bf MPITRACE\_TRACE\_TYPE} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_ON}, {\bf EXTRAE\_HOME}, {\bf EXTRAE\_INITIAL\_MODE} and {\bf EXTRAE\_TRACE\_TYPE} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: MPI}\label{sec:XMLSectionMPI}
 
@@ -45,7 +45,7 @@ The MPI configuration part is nested in the config file (see section \ref{sec:XM
 
 MPI calls can gather performance information at the begin and end of MPI calls. To activate this behavior, just set to yes the attribute of the nested {\tt <counters>} node.
 
-\graybox{See {\bf MPITRACE\_DISABLE\_MPI} and {\bf MPITRACE\_MPI\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_DISABLE\_MPI} and {\bf EXTRAE\_MPI\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: PACX}\label{sec:XMLSectionPACX}
 
@@ -55,7 +55,7 @@ The PACX configuration part is nested in the config file (see section \ref{sec:X
 
 PACX calls can gather performance information at the begin and end of PACX calls. To activate this behavior, just set to yes the attribute of the nested {\tt <counters>} node.
 
-\graybox{See {\bf MPITRACE\_DISABLE\_PACX} and {\bf MPITRACE\_PACX\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_DISABLE\_PACX} and {\bf EXTRAE\_PACX\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: OpenMP}\label{sec:XMLSectionOpenMP}
 
@@ -65,7 +65,7 @@ The OpenMP configuration part is nested in the config file (see section \ref{sec
 
 The tracing package allows to gather information of some OpenMP runtimes and outlined routines. In addition to that, the user can also enable gathering information of locks and also gathering performance counters in all of these routines. This is achieved by modifying the enabled attribute of the {\tt <locks>} and {\tt <counters>}, respectively.
 
-\graybox{See {\bf MPITRACE\_DISABLE\_OMP}, {\bf MPTRACE\_OMP\_LOCKS} and {\bf MPITRACE\_OMP\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_DISABLE\_OMP}, {\bf EXTRAE\_OMP\_LOCKS} and {\bf EXTRAE\_OMP\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: CELL}\label{sec:XMLcell}
 
@@ -79,7 +79,7 @@ The Cell configuration part is only parsed for tracing packages suited for the C
  \item {\tt spu-dma-channel} Chooses which {DMA} channel will be used to perform the intermediate trace files transfers to the PPE side.
 \end{itemize}
 
-\graybox{See {\bf MPITRACE\_SPU\_FILE\_SIZE}, {\bf MPITRACE\_SPU\_BUFFER\_SIZE} and {\bf MPITRACE\_SPU\_DMA\_CHANNEL} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_SPU\_FILE\_SIZE}, {\bf EXTRAE\_SPU\_BUFFER\_SIZE} and {\bf EXTRAE\_SPU\_DMA\_CHANNEL} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Callers}\label{sec:XMLSectionCallers}
 
@@ -99,7 +99,7 @@ There are three points where the instrumentation can gather this information:
 
 The user can choose which addresses to save in the trace (starting from 1, which is the closest point to the MPI call or sampling point) specifying several stack levels by separating them by commas or using the hyphen symbol.
 
-\graybox{See {\bf MPITRACE\_MPI\_CALLER} and {\bf MPITRACE\_PACX\_CALLER} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_MPI\_CALLER} and {\bf EXTRAE\_PACX\_CALLER} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: User functions}\label{sec:XMLSectionUF}
 
@@ -119,7 +119,7 @@ Here is an example of the counters section in the XML configuration file:
 
 \input{XML/counters.xml}
 
-\graybox{See {\bf MPTRACE\_COUNTERS}, {\bf MPITRACE\_NETWORK\_COUNTERS} and {\bf MPTRACE\_RUSAGE} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_COUNTERS}, {\bf EXTRAE\_NETWORK\_COUNTERS} and {\bf EXTRAE\_RUSAGE} environment variables in appendix \ref{cha:EnvVar}.}
 
 \subsection{Processor performance counters}\label{subsec:ProcessorPerformanceCounters}
 
@@ -174,7 +174,7 @@ Such options refer to:
  \item {\tt gather-mpits} If the system does not provide a global filesystem the resulting trace files will be distributed among the computation nodes. Turning on this option will use the underlying communication mechanism ({MPI}) to gather all the intermediate trace files into the root node.
 \end{itemize}
 
-\graybox{See {\bf MPTRACE\_PROGRAM\_NAME}, {\bf MPTRACE\_FILE\_SIZE}, {\bf MPTRACE\_DIR}, {\bf MPTRACE\_FINAL\_DIR} and {\bf MPTRACE\_GATHER\_MPITS} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_PROGRAM\_NAME}, {\bf EXTRAE\_FILE\_SIZE}, {\bf EXTRAE\_DIR}, {\bf EXTRAE\_FINAL\_DIR} and {\bf EXTRAE\_GATHER\_MPITS} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Buffer management}\label{sec:XMLSectionBuffer}
 
@@ -184,7 +184,7 @@ Modify the buffer management entry to tune the tracing buffer behavior.
 
 By, default (even if the enabled attribute is "no") the tracing buffer is set to 150k events (see section \ref{sec:XMLcell} for further information of buffer in the CELL). If {\tt <size>} is enabled the tracing buffer will be set to the number of events indicated by this node. If the circular option is enabled, the buffer will be created as a circular buffer and the buffer will be dumped only once with the last events generated by the tracing package.
 
-\graybox{See {\bf MPTRACE\_BUFFER\_SIZE} environment variable in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_BUFFER\_SIZE} environment variable in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Trace control}\label{sec:XMLSectionTraceControl}
 
@@ -198,7 +198,7 @@ If the user enables this option, the instrumentation library will just emit info
 
 In addition to that, when the tracing library is running in burst mode, it computes some statistics of MPI and PACX activity. Such statistics can be dumped in the tracefile by enabling {\tt mpi-statistics} and {\tt pacx-statistics} respectively.
 
-\graybox{See {\bf MPITRACE\_INITIAL\_MODE}, {\bf MPITRACE\_BURST\_THRESHOLD}, {\bf MPITRACE\_MPI\_STATISTICS} and {\bf MPITRACE\_PACX\_STATISTICS} environment variables in appendix \ref{cha:EnvVar}.}
+\graybox{See {\bf EXTRAE\_INITIAL\_MODE}, {\bf EXTRAE\_BURST\_THRESHOLD}, {\bf EXTRAE\_MPI\_STATISTICS} and {\bf EXTRAE\_PACX\_STATISTICS} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Others}\label{sec:XMLSectionOthers}
 

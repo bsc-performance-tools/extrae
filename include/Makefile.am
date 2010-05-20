@@ -1,4 +1,4 @@
-include_HEADERS = mpitracef_user_events.h mpitrace_user_events.h 
+include_HEADERS = extrae_user_events.h extraef_user_events.h 
 
 if IS_CELL_MACHINE
 include_HEADERS += spu_trace.h ppu_trace_sdk1.h ppu_trace_sdk2.h
@@ -10,6 +10,8 @@ endif
 #
 
 install-data-hook:
+	cd $(includedir); $(LN_S) -f extrae_user_events.h mpitrace_user_events.h
+	cd $(includedir); $(LN_S) -f extraef_user_events.h mpitracef_user_events.h
 if CELL_SDK_1
 	cd $(includedir); $(LN_S) -f ppu_trace_sdk1.h ppu_trace.h
 else

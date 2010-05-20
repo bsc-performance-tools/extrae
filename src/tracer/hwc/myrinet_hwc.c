@@ -75,12 +75,12 @@ void Myrinet_HWC_Initialize(void)
 		env_mpich_type = getenv("GMPI_ID");
 		if (env_mpich_type != NULL)
 		{
-			fprintf(stdout, "mpitrace: Initializing Myrinet (GM) counters.\n");
+			fprintf(stdout, PACKAGE_NAME": Initializing Myrinet (GM) counters.\n");
 			sprintf(libmyrinet_counters, "%s/lib/libgm_counters.so", trace_home);
 			handle = dlopen (libmyrinet_counters, RTLD_LAZY);
 			if (!handle)
 			{
-				fprintf (stderr, "mpitrace: Error! %s\n", dlerror());
+				fprintf (stderr, PACKAGE_NAME": Error! %s\n", dlerror());
 				return;
 			}
 			Myrinet_Driver = GM;
@@ -90,7 +90,7 @@ void Myrinet_HWC_Initialize(void)
 		env_mpich_type = getenv("MXMPI_ID");
 		if (env_mpich_type != NULL) 
 		{
-			fprintf (stdout, "mpitrace: Initializing Myrinet (MX) counters.\n");
+			fprintf (stdout, PACKAGE_NAME": Initializing Myrinet (MX) counters.\n");
 			sprintf (libmyrinet_counters, "%s/lib/libmx_counters.so", trace_home);
 			handle = dlopen (libmyrinet_counters, RTLD_LAZY); 
 			if (!handle) 
@@ -98,7 +98,7 @@ void Myrinet_HWC_Initialize(void)
 				error = dlerror();
 				if (strstr(error, "mxmpi") != NULL)
 				{
-					fprintf (stderr, "mpitrace: Error! Did you link the application with the flag -rdynamic or --export-dynamic?\n");
+					fprintf (stderr, PACKAGE_NAME": Error! Did you link the application with the flag -rdynamic or --export-dynamic?\n");
 				}
 				return;
 			}
@@ -107,33 +107,33 @@ void Myrinet_HWC_Initialize(void)
 		}
       if (num_loaded_libraries > 1)
       {
-         fprintf(stderr, "mpitrace: Only one of GMMPI_ID or MXMPI_ID variables should be defined.\n");
-         fprintf(stderr, "mpitrace: If you want GM counters unset MXMPI_ID, and vice-versa.\n");         return;
+         fprintf(stderr, PACKAGE_NAME": Only one of GMMPI_ID or MXMPI_ID variables should be defined.\n");
+         fprintf(stderr, PACKAGE_NAME": If you want GM counters unset MXMPI_ID, and vice-versa.\n");         return;
       }
 
 		if (!handle) 
 		{
 			/* Neither MX or GM detected, disable counters */
-			fprintf(stdout, "mpitrace: Unknown network. Network counters disabled.\n");
+			fprintf(stdout, PACKAGE_NAME": Unknown network. Network counters disabled.\n");
 			return;
 		}
 
 		Myrinet_start_counters = (void(*)()) dlsym(handle, "MYRINET_start_counters");
 		if ((error = dlerror()) != NULL)  
 		{
-            fprintf (stderr, "mpitrace: Error! %s\n", error);
+            fprintf (stderr, PACKAGE_NAME": Error! %s\n", error);
             exit(1);
 		}
 		Myrinet_num_counters = (int(*)()) dlsym(handle, "MYRINET_num_counters");
 		if ((error = dlerror()) != NULL)
 		{
-            fprintf (stderr, "mpitrace: Error! %s\n", error);
+            fprintf (stderr, PACKAGE_NAME": Error! %s\n", error);
             exit(1);
 		}
 		Myrinet_reset_counters = (void(*)()) dlsym(handle, "MYRINET_reset_counters");
 		if ((error = dlerror()) != NULL)  
 		{
-			fprintf (stderr, "mpitrace: Error! %s\n", error);
+			fprintf (stderr, PACKAGE_NAME": Error! %s\n", error);
 			exit(1);
 		}
 		Myrinet_read_counters = (int(*)(int,uint32_t *)) dlsym(handle, "MYRINET_read_counters");
@@ -145,7 +145,7 @@ void Myrinet_HWC_Initialize(void)
 		Myrinet_counters_labels = (int(*)(char ***)) dlsym(handle, "MYRINET_counters_labels");
 		if ((error = dlerror()) != NULL)
 		{
-            fprintf (stderr, "mpitrace: Error! %s\n", error);
+            fprintf (stderr, PACKAGE_NAME": Error! %s\n", error);
             exit(1);
 		}
 
@@ -197,7 +197,7 @@ static void Generate_Myrinet_HWC_Labels(driver_t driver)
 	file = fopen (FileName, "w");
 	if (file == NULL) 	
 	{
-		fprintf(stderr, "mpitrace: Error! Could not generate labels file for Myrinet counters.\n");
+		fprintf(stderr, PACKAGE_NAME": Error! Could not generate labels file for Myrinet counters.\n");
 		return;
 	}
 	fprintf(file, "EVENT_TYPE\n");

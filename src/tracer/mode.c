@@ -71,28 +71,28 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 	MPI_Deepness = (int *)realloc(MPI_Deepness, size);
 	if (MPI_Deepness == NULL)
 	{
-		fprintf (stderr, "mpitrace: Cannot allocate memory for 'MPI_Deepness'\n");
+		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'MPI_Deepness'\n");
 		return FALSE; 
 	}
 
 	Current_Trace_Mode = (int *)realloc(Current_Trace_Mode, size);
 	if (Current_Trace_Mode == NULL)
 	{
-		fprintf (stderr, "mpitrace: Cannot allocate memory for 'Current_Trace_Mode'\n");
+		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'Current_Trace_Mode'\n");
 		return FALSE;
 	}
 
 	Future_Trace_Mode = (int *)realloc(Future_Trace_Mode,size);
 	if (Future_Trace_Mode == NULL)
 	{
-		fprintf (stderr, "mpitrace: Cannot allocate memory for 'Future_Trace_Mode'\n");
+		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'Future_Trace_Mode'\n");
 		return FALSE;
 	}
 
 	Pending_Trace_Mode_Change = (int *)realloc(Pending_Trace_Mode_Change, size);
 	if (Pending_Trace_Mode_Change == NULL)
 	{
-		fprintf (stderr, "mpitrace: Cannot allocate memory for 'Pending_Trace_Mode_Change'\n");
+		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'Pending_Trace_Mode_Change'\n");
 		return FALSE;
 	}
 
@@ -115,7 +115,7 @@ int Trace_Mode_Initialize (int num_threads)
 	/* Show configuration */
 	if (res && TASKID == 0)
 	{
-		fprintf(stdout, "mpitrace: Tracing mode is set to: ");
+		fprintf(stdout, PACKAGE_NAME": Tracing mode is set to: ");
 		switch(Starting_Trace_Mode)
 		{
 			case TRACE_MODE_DETAIL:
@@ -123,8 +123,8 @@ int Trace_Mode_Initialize (int num_threads)
 				break;
 			case TRACE_MODE_BURSTS:
 				fprintf(stdout, "CPU Bursts.\n");
-				fprintf(stdout, "mpitrace: Minimum burst threshold is %llu ns.\n", BurstsMode_Threshold);
-				fprintf(stdout, "mpitrace: MPI statistics are %s.\n", (BurstsMode_MPI_Stats ? "enabled" : "disabled"));
+				fprintf(stdout, PACKAGE_NAME": Minimum burst threshold is %llu ns.\n", BurstsMode_Threshold);
+				fprintf(stdout, PACKAGE_NAME": MPI statistics are %s.\n", (BurstsMode_MPI_Stats ? "enabled" : "disabled"));
 				break;
 			default:
 				fprintf(stdout, "Unknown.\n");
@@ -179,7 +179,7 @@ void TMODE_setInitial (int mode)
 	}
 	else
 	{
-		fprintf(stderr, "mpitrace: TMODE_setInitial: Invalid mode '%d'.\n", mode);
+		fprintf(stderr, PACKAGE_NAME": TMODE_setInitial: Invalid mode '%d'.\n", mode);
 	}
 }
 
@@ -193,7 +193,7 @@ void TMODE_setBurstsThreshold (unsigned long long threshold)
 	}
 	else
 	{
-		fprintf(stderr, "mpitrace: TMODE_setBurstsThreshold: Invalid minimum threshold '%llu'.\n", threshold);
+		fprintf(stderr, PACKAGE_NAME": TMODE_setBurstsThreshold: Invalid minimum threshold '%llu'.\n", threshold);
 	}
 }
 
@@ -205,7 +205,7 @@ void TMODE_setBurstsStatistics (int status)
 	}
 	else
 	{
-		fprintf(stderr, "mpitrace: TMODE_setBurstsStatistics: Invalid argument '%d'.\n", status);
+		fprintf(stderr, PACKAGE_NAME": TMODE_setBurstsStatistics: Invalid argument '%d'.\n", status);
 	}
 }
 

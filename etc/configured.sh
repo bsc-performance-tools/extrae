@@ -4,28 +4,28 @@
 # DO NOT EDIT!
 #
 
-if test "${MPITRACE_HOME}" != "" ; then
-	if test -d ${MPITRACE_HOME} ; then
-		echo "MPITRACE_HOME points to ${MPITRACE_HOME} and the directory exists .. OK"
+if test "${EXTRAE_HOME}" != "" ; then
+	if test -d ${EXTRAE_HOME} ; then
+		echo "EXTRAE_HOME points to ${EXTRAE_HOME} and the directory exists .. OK"
 	else
-		echo "MPITRACE_HOME points to ${MPITRACE_HOME} and the directory does NOT exist .. FAILED"
+		echo "EXTRAE_HOME points to ${EXTRAE_HOME} and the directory does NOT exist .. FAILED"
 	fi
 else
-	echo "MPITRACE_HOME is undefined... Cannot proceed much more!"
-	echo "Please, define MPITRACE_HOME environment variable to a MPItrace package installation"
+	echo "EXTRAE_HOME is undefined... Cannot proceed much more!"
+	echo "Please, define EXTRAE_HOME environment variable to a MPItrace package installation"
 fi
 
-if test "${MPITRACE_HOME}" != "" ; then
+if test "${EXTRAE_HOME}" != "" ; then
 
 	# Read configuration variables if available!
-	if ! test -f ${MPITRACE_HOME}/etc/ompitrace-vars.sh ; then
-		echo "Error! Unable to locate ${MPITRACE_HOME}/etc/ompitrace-vars.sh"
+	if ! test -f ${EXTRAE_HOME}/etc/extrae-vars.sh ; then
+		echo "Error! Unable to locate ${EXTRAE_HOME}/etc/extrae-vars.sh"
 		echo "Dying..."
 		exit 
 	else
 		echo
-		source ${MPITRACE_HOME}/etc/ompitrace-vars.sh
-		echo "Loaded specs for ${PACKAGE_NAME:-MPItrace} from ${MPITRACE_HOME}/etc/ompitrace-vars.sh"
+		source ${EXTRAE_HOME}/etc/extrae-vars.sh
+		echo "Loaded specs for ${PACKAGE_NAME:-MPItrace} from ${EXTRAE_HOME}/etc/extrae-vars.sh"
 	fi
 
 	echo

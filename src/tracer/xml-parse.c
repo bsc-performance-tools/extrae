@@ -124,16 +124,16 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* PACX may have initialized it */
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, "mpitrace: MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
+			mfprintf (stdout, PACKAGE_NAME": MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
-			mfprintf (stdout, "mpitrace: <%s> tag at <MPI> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <MPI> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
 			tracejant_hwc_mpi = FALSE;
 #endif
 			XML_FREE(enabled);
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <MPI> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <MPI> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -161,16 +161,16 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* MPI may have initialized it */
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, "mpitrace: PACX routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
+			mfprintf (stdout, PACKAGE_NAME": PACX routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
-			mfprintf (stdout, "mpitrace: <%s> tag at <PACX> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <PACX> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
 			tracejant_hwc_mpi = FALSE;
 #endif
 			XML_FREE(enabled);
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <PACX> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <PACX> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -205,7 +205,7 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			}
 			XML_FREE(enabled);
 #else
-			mfprintf (stdout, "mpitrace: <%s> tag at <Callers> level will be ignored. This library does not support MPI.\n", TRACE_MPI);
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support MPI.\n", TRACE_MPI);
 #endif
 		}
 		else if (!xmlStrcmp (tag->name, TRACE_PACX))
@@ -221,7 +221,7 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			}
 			XML_FREE(enabled);
 #else
-			mfprintf (stdout, "mpitrace: <%s> tag at <Callers> level will be ignored. This library does not support PACX.\n", TRACE_PACX);
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support PACX.\n", TRACE_PACX);
 #endif
 		}
 		/* Must the tracing facility obtain information about callers at sample points? */
@@ -238,12 +238,12 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			}
 			XML_FREE(enabled);
 #else
-			mfprintf (stdout, "mpitrace: <%s> tag at <Callers> level will be ignored. This library does not support SAMPLING.\n", TRACE_SAMPLING);
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support SAMPLING.\n", TRACE_SAMPLING);
 #endif
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <callers> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <callers> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -274,12 +274,12 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 				spu_buffer_size = (str!=NULL)?atoi (str):-1;
 				if (spu_buffer_size < 10)
 				{
-					mfprintf (stderr, "CELLtrace: SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_buffer_size, DEFAULT_SPU_BUFFER_SIZE);
+					mfprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_buffer_size, DEFAULT_SPU_BUFFER_SIZE);
 					spu_buffer_size = DEFAULT_SPU_BUFFER_SIZE;
 				}
 				else
 				{
-					mfprintf (stdout, "CELLtrace: SPU tracing buffer size is %d events.\n", spu_buffer_size);
+					mfprintf (stdout, PACKAGE_NAME": SPU tracing buffer size is %d events.\n", spu_buffer_size);
 				}
 				XML_FREE(str);
 			}
@@ -296,18 +296,18 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 				spu_dma_channel = (str!=NULL)?atoi (str):-1;
 				if ((spu_dma_channel < 0) || (spu_dma_channel > 31))
 				{
-					mfprintf (stderr, "CELLtrace: Invalid DMA channel '%s'. Using default channel.\n", str);
+					mfprintf (stderr, PACKAGE_NAME": Invalid DMA channel '%s'. Using default channel.\n", str);
 					spu_dma_channel = DEFAULT_DMA_CHANNEL;
 				}
 				else
 				{
-					mfprintf (stdout, "CELLtrace: Using DMA channel %d for memory transferences.\n", spu_dma_channel);
+					mfprintf (stdout, PACKAGE_NAME": Using DMA channel %d for memory transferences.\n", spu_dma_channel);
 				}
 				XML_FREE(str);
 			}
 			XML_FREE(enabled); 
 #else
-			mfprintf (stdout, "CELLtrace: SPUs will write directly to disk. Ignoring tag %s\n", TRACE_SPU_DMATAG);
+			mfprintf (stdout, PACKAGE_NAME": SPUs will write directly to disk. Ignoring tag %s\n", TRACE_SPU_DMATAG);
 #endif
 		}
 		/* SPU hosted file size limit */
@@ -320,12 +320,12 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 				spu_file_size = (str!=NULL)?atoi (str):-1;
 				if (spu_file_size < 1)
 				{
-					mfprintf (stderr, "CELLtrace: SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d' mbytes.\n", spu_file_size, DEFAULT_SPU_FILE_SIZE); 
+					mfprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d' mbytes.\n", spu_file_size, DEFAULT_SPU_FILE_SIZE); 
 					spu_file_size = DEFAULT_SPU_FILE_SIZE;
 				}
 				else
 				{
-					mfprintf (stdout, "CELLtrace: SPU tracing file size limit is %d mbytes.\n", spu_file_size);
+					mfprintf (stdout, PACKAGE_NAME": SPU tracing file size limit is %d mbytes.\n", spu_file_size);
 				}
 				XML_FREE(str);
 			}
@@ -333,7 +333,7 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <CELL> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <CELL> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -384,7 +384,7 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <Bursts> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <Bursts> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -418,9 +418,9 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_hwc_uf = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, "mpitrace: User Function routines will %scollect HW counters information.\n", tracejant_hwc_uf?"":"NOT ");
+			mfprintf (stdout, PACKAGE_NAME": User Function routines will %scollect HW counters information.\n", tracejant_hwc_uf?"":"NOT ");
 #else
-			mfprintf (stdout, "mpitrace: <%s> tag at <user-functions> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <user-functions> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
 			tracejant_hwc_uf = FALSE;
 #endif
 			XML_FREE(enabled);
@@ -435,17 +435,17 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 				int depth = (str != NULL)? atoi (str): 0;
 				if (depth > 0)
 				{
-					mfprintf (stdout, "mpitrace: Limit depth for the user functions tracing set to %u\n", depth);
+					mfprintf (stdout, PACKAGE_NAME": Limit depth for the user functions tracing set to %u\n", depth);
 					setUFMaxDepth ((unsigned int)depth);
 				}
 				else
-					mfprintf (stdout, "mpitrace: Warning! Invalid max-depth value\n");
+					mfprintf (stdout, PACKAGE_NAME": Warning! Invalid max-depth value\n");
 			}
 			XML_FREE(enabled);
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <UserFunctions> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <UserFunctions> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -481,16 +481,16 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_hwc_omp = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, "mpitrace: OpenMP routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT");
+			mfprintf (stdout, PACKAGE_NAME": OpenMP routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT");
 #else
-			mfprintf (stdout, "mpitrace: <%s> tag at <OpenMP> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <OpenMP> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
 			tracejant_hwc_omp = FALSE;
 #endif
 			XML_FREE(enabled);
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <OpenMP> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <OpenMP> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -523,11 +523,11 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 					file_size = atoi(fsize);
 					if (file_size <= 0)
 					{
-						mfprintf (stderr, "mpitrace: Invalid file size value.\n");
+						mfprintf (stderr, PACKAGE_NAME": Invalid file size value.\n");
 					}
 					else if (file_size > 0)
 					{
-						mfprintf (stdout, "mpitrace: Intermediate file size set to %d Mbytes.\n", file_size);
+						mfprintf (stdout, PACKAGE_NAME": Intermediate file size set to %d Mbytes.\n", file_size);
 					}
 				}
 				XML_FREE(fsize);
@@ -564,7 +564,7 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			mpit_gathering_enabled = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
-			mfprintf (stdout, "mpitrace: All MPIT files will %s be gathered at the end of the execution!\n", mpit_gathering_enabled?"":"NOT");
+			mfprintf (stdout, PACKAGE_NAME": All MPIT files will %s be gathered at the end of the execution!\n", mpit_gathering_enabled?"":"NOT");
 			XML_FREE(enabled);
 		}
 #endif
@@ -589,7 +589,7 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <Storage> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <Storage> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -620,7 +620,7 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 				{
 					int size = atoi(bsize);
 					buffer_size = (size<=0)?EVT_NUM:size;
-					mfprintf (stdout, "mpitrace: Tracing buffer can hold %d events\n", buffer_size);
+					mfprintf (stdout, PACKAGE_NAME": Tracing buffer can hold %d events\n", buffer_size);
 				}
 				XML_FREE(bsize);
 			}
@@ -632,14 +632,14 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 			{
-				mfprintf (stdout, "mpitrace: Circular buffer %s.\n", circular_buffering?"enabled":"disabled");
+				mfprintf (stdout, PACKAGE_NAME": Circular buffer %s.\n", circular_buffering?"enabled":"disabled");
 				circular_buffering = 1;
 			}
 			XML_FREE(enabled);
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <Buffer> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <Buffer> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -700,7 +700,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 
 					if (t_frequencies[i] <= 0)
 					{
-						mfprintf (stderr, "mpitrace: Error invalid sampling frequency (%s) for counter %s\n", (char*) xmlGetProp (set_tag, TRACE_FREQUENCY), t_counters[i]);
+						mfprintf (stderr, PACKAGE_NAME": Error invalid sampling frequency (%s) for counter %s\n", (char*) xmlGetProp (set_tag, TRACE_FREQUENCY), t_counters[i]);
 					}
 					else
 						i++;
@@ -801,7 +801,7 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 				if (hwc_startset != NULL)
 					HWC_Parse_XML_Config (rank, world_size, hwc_startset);
 #else
-				mfprintf (stdout, "mpitrace: <%s> tag at <%s> level will be ignored. This library does not support CPU HW.\n", TRACE_CPU, TRACE_COUNTERS);
+				mfprintf (stdout, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support CPU HW.\n", TRACE_CPU, TRACE_COUNTERS);
 #endif
 			}
 			XML_FREE(hwc_startset);
@@ -812,7 +812,7 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 #if defined(TEMPORARILY_DISABLED)
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_network_hwc = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
-			mfprintf (stdout, "mpitrace: Network counters are %s.\n", tracejant_network_hwc?"enabled":"disabled");
+			mfprintf (stdout, PACKAGE_NAME": Network counters are %s.\n", tracejant_network_hwc?"enabled":"disabled");
 			XML_FREE(enabled);
 #endif
 		}
@@ -820,19 +820,19 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_rusage = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
-			mfprintf (stdout, "mpitrace: Resource usage is %s at flush buffer.\n", tracejant_rusage?"enabled":"disabled");
+			mfprintf (stdout, PACKAGE_NAME": Resource usage is %s at flush buffer.\n", tracejant_rusage?"enabled":"disabled");
 			XML_FREE(enabled);
 		}
 		else if (!xmlStrcmp (tag->name, TRACE_MEMUSAGE))
 		{
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			tracejant_memusage = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
-			mfprintf (stdout, "mpitrace: Memory usage is %s at flush buffer.\n", tracejant_memusage?"enabled":"disabled");
+			mfprintf (stdout, PACKAGE_NAME": Memory usage is %s at flush buffer.\n", tracejant_memusage?"enabled":"disabled");
 			XML_FREE(enabled);
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <Counters> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <Counters> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -917,14 +917,14 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 					}
 					else
 					{
-						mfprintf(stderr, "mpitrace: XML Error: Value '%s' is not valid for property '<%s>%s'\n",
+						mfprintf(stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>%s'\n",
 							analysis, REMOTE_CONTROL_METHOD_MRNET, RC_MRNET_ANALYSIS);
 						exit(-1);
 					}
 				}
 				else
 				{
-					mfprintf(stderr, "mpitrace: XML error: Properties %s and %s are required for tag <%s>\n",
+					mfprintf(stderr, PACKAGE_NAME": XML error: Properties %s and %s are required for tag <%s>\n",
 						RC_MRNET_ANALYSIS, RC_MRNET_START_AFTER, REMOTE_CONTROL_METHOD_MRNET);
 					exit(-1);
 				}
@@ -936,7 +936,7 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 				/* Activate the MRNet */
 				Enable_MRNet();
 #else
-				mfprintf(stdout, "mpitrace: XML Warning: Remote control mechanism set to \"MRNet\" but this library does not support it.\n");
+				mfprintf(stdout, PACKAGE_NAME": XML Warning: Remote control mechanism set to \"MRNet\" but this library does not support it.\n");
 #endif 
 				XML_FREE(target);
 				XML_FREE(analysis);
@@ -958,17 +958,17 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 				{
 					if ((xmlStrcmp (which, (xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (xmlChar*) "") == 0))
 					{
-						mfprintf (stdout, "mpitrace: Signal USR1 will flush buffers to disk and stop further tracing\n");
+						mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush buffers to disk and stop further tracing\n");
 						Signals_SetupFlushAndTerminate (SIGUSR1);
 					}
 					else if (xmlStrcmp (which, (xmlChar *) "USR2") == 0)
 					{
-						mfprintf (stdout, "mpitrace: Signal USR2 will flush buffers to disk and stop further tracing\n");
+						mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush buffers to disk and stop further tracing\n");
 						Signals_SetupFlushAndTerminate (SIGUSR2);
 					}
 					else
 					{
-						mfprintf (stderr, "mpitrace: XML Error: Value '%s' is not valid for property '<%s>%s'\n", 
+						mfprintf (stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>%s'\n", 
 							which, REMOTE_CONTROL_METHOD_SIGNAL, RC_SIGNAL_WHICH);
 					}
 				}
@@ -980,7 +980,7 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 	}
 	if (countRemotesEnabled > 1)
 	{
-		mfprintf (stderr, "mpitrace: XML error: Only 1 remote control mechanism can be active at a time at <%s>\n", TRACE_REMOTE_CONTROL);
+		mfprintf (stderr, PACKAGE_NAME": XML error: Only 1 remote control mechanism can be active at a time at <%s>\n", TRACE_REMOTE_CONTROL);
 		exit(-1);
 	}
 }
@@ -1011,7 +1011,7 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 
 					CheckForControlFile = TRUE;
 					strcpy (ControlFileName, c_file);
-					mfprintf (stdout, "mpitrace: Control file is '%s'. Tracing will be disabled until the file exists.\n", c_file);
+					mfprintf (stdout, PACKAGE_NAME": Control file is '%s'. Tracing will be disabled until the file exists.\n", c_file);
 
 					/* Let the user tune how often will be checked the existence of the control file */
 					tmp = (char*) xmlGetProp (tag, TRACE_FREQUENCY);
@@ -1020,11 +1020,11 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 						WantedCheckControlPeriod = getTimeFromStr (tmp, TRACE_FREQUENCY, rank);
 						if (WantedCheckControlPeriod >= 1000000000)
 						{
-							mfprintf (stdout, "mpitrace: Control file will be checked every %llu seconds\n", WantedCheckControlPeriod / 1000000000);
+							mfprintf (stdout, PACKAGE_NAME": Control file will be checked every %llu seconds\n", WantedCheckControlPeriod / 1000000000);
 						}
 						else if (WantedCheckControlPeriod < 1000000000 && WantedCheckControlPeriod > 0)
 						{
-							mfprintf (stdout, "mpitrace: Control file will be checked every %llu nanoseconds\n", WantedCheckControlPeriod);
+							mfprintf (stdout, PACKAGE_NAME": Control file will be checked every %llu nanoseconds\n", WantedCheckControlPeriod);
 						}
 					}
 					XML_FREE(tmp);
@@ -1048,7 +1048,7 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 					XML_FREE(trace_intervals);
 				}
 #else
-				mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support MPI.\n", TRACE_CONTROL_GLOPS);
+				mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support MPI.\n", TRACE_CONTROL_GLOPS);
 #endif
 			}
 			XML_FREE(enabled);
@@ -1068,7 +1068,7 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 					Signals_SetupPauseAndResume (SIGUSR1, SIGUSR2);
 					Enable_MRNet();
 #else
-					mfprintf(stdout, "mpitrace: Remote control set to \"mrnet\" but MRNet is not supported.\n");
+					mfprintf(stdout, PACKAGE_NAME": Remote control set to \"mrnet\" but MRNet is not supported.\n");
 #endif 
 				}
 				else if (method != NULL && !xmlStrcmp (method, TRACE_REMOTE_CONTROL_SIGNAL))
@@ -1079,17 +1079,17 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 					{
 						if ((xmlStrcmp (str, (xmlChar*) "USR1") == 0) || (xmlStrcmp (str, (xmlChar*) "") == 0))
 						{
-							mfprintf (stdout, "mpitrace: Signal USR1 will flush the buffers to the disk and stop further tracing\n");
+							mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush the buffers to the disk and stop further tracing\n");
 							Signals_SetupFlushAndTerminate (SIGUSR1);
 						}
 						else if (xmlStrcmp (str, (xmlChar *) "USR2") == 0)
 						{
-							mfprintf (stdout, "mpitrace: Signal USR2 will flush the buffers to the disk and stop further tracing\n");
+							mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush the buffers to the disk and stop further tracing\n");
 							Signals_SetupFlushAndTerminate (SIGUSR2);
 						}
 						else
 						{
-							mfprintf (stderr, "mpitrace: Error value '%s' is not a valid one for %s tag\n", str, TRACE_REMOTE_CONTROL);
+							mfprintf (stderr, PACKAGE_NAME": Error value '%s' is not a valid one for %s tag\n", str, TRACE_REMOTE_CONTROL);
 						}
 					}
 					XML_FREE(str);
@@ -1101,7 +1101,7 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <%s> level\n", tag->name, TRACE_CONTROL);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <%s> level\n", tag->name, TRACE_CONTROL);
 		}
 
 		tag = tag->next;
@@ -1134,11 +1134,11 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 					hasMinimumTracingTime = ( MinimumTracingTime != 0);
 					if (MinimumTracingTime >= 1000000000)
 					{
-						mfprintf (stdout, "mpitrace: Minimum tracing time will be %llu seconds\n", MinimumTracingTime / 1000000000);
+						mfprintf (stdout, PACKAGE_NAME": Minimum tracing time will be %llu seconds\n", MinimumTracingTime / 1000000000);
 					}
 					else if (MinimumTracingTime < 1000000000 && MinimumTracingTime > 0)
 					{
-						mfprintf (stdout, "mpitrace: Minimum tracing time will be %llu nanoseconds\n", MinimumTracingTime);
+						mfprintf (stdout, PACKAGE_NAME": Minimum tracing time will be %llu nanoseconds\n", MinimumTracingTime);
 					}
 				}
 				XML_FREE(str);
@@ -1147,7 +1147,7 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: XML unknown tag '%s' at <Others> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <Others> level\n", tag->name);
 		}
 
 		tag = tag->next;
@@ -1176,7 +1176,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 		{
 			if (xmlStrcmp(root_tag->name, TRACE_TAG))
 			{	
-				mfprintf (stderr, "mpitrace: Invalid configuration file\n");
+				mfprintf (stderr, PACKAGE_NAME": Invalid configuration file\n");
 			}
 			else
 			{
@@ -1196,26 +1196,26 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 
 				if (!mpitrace_on)
 				{
-					mfprintf (stdout, "mpitrace: Application has been linked or preloaded with mpitrace, BUT tracing is NOT set!\n");
+					mfprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with mpitrace, BUT tracing is NOT set!\n");
 				}
 				else
 				{
 					/* Where is the tracing located? If defined, copy to the correct buffer! */
 					if (xmlStrcmp (&rcsid[1], xmlparserid)) /* Skip first $ char */
 					{
-						mfprintf (stderr, "mpitrace: WARNING!\n");
-						mfprintf (stderr, "mpitrace: WARNING! XML parser version and property '%s' do not match. Check the XML file. Trying to proceed...\n", TRACE_PARSER_ID);
-						mfprintf (stderr, "mpitrace: WARNING!\n");
+						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
+						mfprintf (stderr, PACKAGE_NAME": WARNING! XML parser version and property '%s' do not match. Check the XML file. Trying to proceed...\n", TRACE_PARSER_ID);
+						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
 					}
 
 					if (tracehome != NULL)
 					{
 						strncpy (trace_home, tracehome, TMP_DIR);
-						mfprintf (stdout, "mpitrace: Tracing package is located on %s\n", trace_home);
+						mfprintf (stdout, PACKAGE_NAME": Tracing package is located on %s\n", trace_home);
 					}
 					else
 					{
-						mfprintf (stdout, "mpitrace: Warning! <%s> tag has no <%s> property defined.\n", TRACE_TAG, TRACE_HOME);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag has no <%s> property defined.\n", TRACE_TAG, TRACE_HOME);
 					}
 
 					if (traceinitialmode != NULL)
@@ -1230,13 +1230,13 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						}
 						else
 						{
-							mfprintf (stdout, "mpitrace: Warning! Invalid value '%s' for property <%s> in tag <%s>.\n", traceinitialmode, TRACE_INITIAL_MODE, TRACE_TAG);
+							mfprintf (stdout, PACKAGE_NAME": Warning! Invalid value '%s' for property <%s> in tag <%s>.\n", traceinitialmode, TRACE_INITIAL_MODE, TRACE_TAG);
 							TMODE_setInitial (TRACE_MODE_DETAIL);
 						}
 					}
 					else
 					{
-						mfprintf (stdout, "mpitrace: Warning! Not given value for property <%s> in tag <%s>.\n", TRACE_INITIAL_MODE, TRACE_TAG);
+						mfprintf (stdout, PACKAGE_NAME": Warning! Not given value for property <%s> in tag <%s>.\n", TRACE_INITIAL_MODE, TRACE_TAG);
 						TMODE_setInitial (TRACE_MODE_DETAIL);
 					}
 
@@ -1244,23 +1244,23 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 					{
 						if (!xmlStrcmp (tracetype, TRACE_TYPE_PARAVER))
 						{
-							mfprintf (stdout, "mpitrace: Generating intermediate files for Paraver traces.\n");
+							mfprintf (stdout, PACKAGE_NAME": Generating intermediate files for Paraver traces.\n");
 							Clock_setType (REAL_CLOCK);
 						}
 						else if (!xmlStrcmp (tracetype, TRACE_TYPE_DIMEMAS))
 						{
-							mfprintf (stdout, "mpitrace: Generating intermediate files for Dimemas traces.\n");
+							mfprintf (stdout, PACKAGE_NAME": Generating intermediate files for Dimemas traces.\n");
 							Clock_setType (USER_CLOCK);
 						}
 						else
 						{
-							mfprintf (stdout, "mpitrace: Warning! Invalid value '%s' for property <%s> in tag <%s>.\n", tracetype, TRACE_TYPE, TRACE_TAG);
+							mfprintf (stdout, PACKAGE_NAME": Warning! Invalid value '%s' for property <%s> in tag <%s>.\n", tracetype, TRACE_TYPE, TRACE_TAG);
 							Clock_setType (REAL_CLOCK);
 						}
 					}
 					else
 					{
-						mfprintf (stdout, "mpitrace: Warning! Not given value for property <%s> in tag <%s>.\n", TRACE_TYPE, TRACE_TAG);
+						mfprintf (stdout, PACKAGE_NAME": Warning! Not given value for property <%s> in tag <%s>.\n", TRACE_TYPE, TRACE_TAG);
 						Clock_setType (REAL_CLOCK);
 					}
 				}
@@ -1303,7 +1303,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							tracejant_mpi = TRUE;
 							Parse_XML_MPI (rank, xmldoc, current_tag);
 #else
-							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support MPI.\n", TRACE_MPI);
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support MPI.\n", TRACE_MPI);
 							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at PACX */
 #endif
 						}
@@ -1321,7 +1321,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							tracejant_mpi = TRUE;
 							Parse_XML_PACX (rank, xmldoc, current_tag);
 #else
-							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support PACX.\n", TRACE_PACX);
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support PACX.\n", TRACE_PACX);
 							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at MPI */
 #endif
 						}
@@ -1349,7 +1349,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							tracejant_omp = TRUE;
 							Parse_XML_OMP (rank, xmldoc, current_tag);
 #else
-							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support OpenMP.\n", TRACE_OMP);
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OpenMP.\n", TRACE_OMP);
 							tracejant_omp = FALSE;
 #endif
 						}
@@ -1369,7 +1369,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							Parse_XML_SPU (rank, xmldoc, current_tag);
 #endif
 #else
-							mfprintf (stdout, "mpitrace: Warning! <%s> tag will be ignored. This library does not support Cell BE processors.\n", TRACE_CELL);
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support Cell BE processors.\n", TRACE_CELL);
 #endif
 						}
 #if defined(IS_CELL_MACHINE)
@@ -1420,7 +1420,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 					}
 					else
 					{
-						mfprintf (stderr, "mpitrace: Warning! XML unknown tag '%s'\n", current_tag->name);
+						mfprintf (stderr, PACKAGE_NAME": Warning! XML unknown tag '%s'\n", current_tag->name);
 					}
 
 					current_tag = current_tag->next;
@@ -1429,7 +1429,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 		}
 		else
 		{
-			mfprintf (stderr, "mpitrace: Error! Empty mpitrace configuration file\n");
+			mfprintf (stderr, PACKAGE_NAME": Error! Empty mpitrace configuration file\n");
 		}
 
 		xmlFreeDoc (xmldoc);
@@ -1484,12 +1484,12 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 
 		if (strcmp (final_dir, tmp_dir) != 0)
 		{
-			mfprintf (stdout, "mpitrace: Temporal directory for the intermediate traces is %s\n", tmp_dir);
-			mfprintf (stdout, "mpitrace: Final directory for the intermediate traces is %s\n", final_dir);
+			mfprintf (stdout, PACKAGE_NAME": Temporal directory for the intermediate traces is %s\n", tmp_dir);
+			mfprintf (stdout, PACKAGE_NAME": Final directory for the intermediate traces is %s\n", final_dir);
 		}
 		else
 		{
-			mfprintf (stdout, "mpitrace: Intermediate traces will be stored in %s\n", tmp_dir);
+			mfprintf (stdout, PACKAGE_NAME": Intermediate traces will be stored in %s\n", tmp_dir);
 		}
 	}
 }

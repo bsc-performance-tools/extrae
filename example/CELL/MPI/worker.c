@@ -122,11 +122,12 @@ int main (int argc, char *argv[])
 
 	get_arguments (&ID, &image1, &image2, &count, &global_out);
 
-	SPUtrace_init ();
+	Extrae_init ();
 
 	while (count > 0)
 	{
-		SPUtrace_event (1000, count);
+		Extre_event (1000, count);
+
 		/* GET nLINES FROM DMA */
 		cell_get_pixels (image1, chroma, MAX_PIXELS);
 		cell_get_pixels (image2, image, MAX_PIXELS);
@@ -143,7 +144,7 @@ int main (int argc, char *argv[])
 		count      -= MAX_PIXELS;
 	}
 
-	SPUtrace_fini ();
+	Extrae_fini ();
 
 	return 0;
 }

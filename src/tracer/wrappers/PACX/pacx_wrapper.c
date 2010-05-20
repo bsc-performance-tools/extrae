@@ -214,7 +214,7 @@ static void MN_gettopology (void)
 		TRACE_MISCEVENT(temps, USER_EV, MN_HOST_EVENT, host);
 	}
 	else
-		fprintf(stderr, "mpitrace: could not get hostname, is it longer than %d bytes?\n", (MAX_BUFFER-1));
+		fprintf(stderr, PACKAGE_NAME": could not get hostname, is it longer than %d bytes?\n", (MAX_BUFFER-1));
 }
 #endif
 
@@ -400,7 +400,7 @@ void CheckControlFile(void)
 			wannatrace = file_exists (ControlFileName);
 			if (wannatrace != prevtracejant)
 			{
-				fprintf (stdout, "mpitrace: Tracing is %s via control file\n", (wannatrace)?"activated":"deactivated");
+				fprintf (stdout, PACKAGE_NAME": Tracing is %s via control file\n", (wannatrace)?"activated":"deactivated");
 				if (wannatrace)
 					mpitrace_on = TRUE;
 			}
@@ -408,7 +408,7 @@ void CheckControlFile(void)
 			if (WantedCheckControlPeriod != 0)
 			{
 				NumOpsGlobalsCheckControlFile_backup = CalculateNumOpsForPeriod (WantedCheckControlPeriod, NumOpsGlobalsCheckControlFile_backup, TIME - initTracingTime);
-				fprintf (stderr, "mpitrace: Control file check change, now every %u global ops (%llu s)\n", NumOpsGlobalsCheckControlFile_backup, WantedCheckControlPeriod / 1000000000);
+				fprintf (stderr, PACKAGE_NAME": Control file check change, now every %u global ops (%llu s)\n", NumOpsGlobalsCheckControlFile_backup, WantedCheckControlPeriod / 1000000000);
 			}
 		}
 
@@ -455,13 +455,13 @@ static void InitPACXCommunicators (void)
 	ranks_global = malloc (sizeof(int)*NumOfTasks);
 	if (ranks_global == NULL)
 	{
-		fprintf (stderr, "mpitrace: Error! Unable to get memory for 'ranks_global'");
+		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_global'");
 		exit (0);
 	}
 	ranks_aux = malloc (sizeof(int)*NumOfTasks);
 	if (ranks_aux == NULL)
 	{
-		fprintf (stderr, "mpitrace: Error! Unable to get memory for 'ranks_aux'");
+		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_aux'");
 		exit (0);
 	}
 
@@ -793,7 +793,7 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	PR_queue_init (&PR_queue);
 
 	if (*required == PACX_THREAD_MULTIPLE || *required == PACX_THREAD_SERIALIZED)
-		fprintf (stderr, "mpitrace: WARNING! Instrumentation library does not support PACX_THREAD_MULTIPLE and PACX_THREAD_SERIALIZED modes\n");
+		fprintf (stderr, PACKAGE_NAME": WARNING! Instrumentation library does not support PACX_THREAD_MULTIPLE and PACX_THREAD_SERIALIZED modes\n");
 
 	CtoF77 (ppacx_init_thread) (required, provided, ierror);
 
@@ -3803,7 +3803,7 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	PR_queue_init (&PR_queue);
 
 	if (required == PACX_THREAD_MULTIPLE || required == PACX_THREAD_SERIALIZED)
-		fprintf (stderr, "mpitrace: WARNING! Instrumentation library does not support PACX_THREAD_MULTIPLE and PACX_THREAD_SERIALIZED modes\n");
+		fprintf (stderr, PACKAGE_NAME": WARNING! Instrumentation library does not support PACX_THREAD_MULTIPLE and PACX_THREAD_SERIALIZED modes\n");
 
 	val = PPACX_Init_thread (argc, argv, required, provided);
 
@@ -4923,11 +4923,11 @@ int PACX_Waitall_C_Wrapper (int count, PACX_Request *array_of_requests,
    * Arreglar-ho millor de cara a OMP
    */
   if (count > MAX_WAIT_REQUESTS)
-    fprintf (stderr, "PANIC: too many requests in pacx_waitall\n");
+    fprintf (stderr, PACKAGE_NAME ": PANIC! too many requests in pacx_waitall\n");
   memcpy (save_reqs, array_of_requests, count * sizeof (PACX_Request));
 
 #if defined(DEBUG_MPITRACE)
-	fprintf (stderr, "MPITRACE %d: WAITALL summary\n", TASKID);
+	fprintf (stderr, PACKAGE_NAME " %d: WAITALL summary\n", TASKID);
 	for (index = 0; index < count; index++)
 # if SIZEOF_LONG == 8
 		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, index, (UINT64) array_of_requests[index]);
@@ -5004,11 +5004,11 @@ int PACX_Waitany_C_Wrapper (int count, PACX_Request *array_of_requests,
                   EMPTY);
 
   if (count > MAX_WAIT_REQUESTS)
-    fprintf (stderr, "PANIC: too many requests in pacx_waitany\n");
+    fprintf (stderr, PACKAGE_NAME ": PANIC! too many requests in pacx_waitany\n");
   memcpy (save_reqs, array_of_requests, count * sizeof (PACX_Request));
 
 #if defined(DEBUG_MPITRACE)
-	fprintf (stderr, "MPITRACE %d: WAITANY summary\n", TASKID);
+	fprintf (stderr, PACKAGE_NAME" %d: WAITANY summary\n", TASKID);
 	for (i = 0; i < count; i++)
 # if SIZEOF_LONG == 8
 		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, i, (UINT64) array_of_requests[i]);
@@ -5087,12 +5087,12 @@ int PACX_Waitsome_C_Wrapper (int incount, PACX_Request *array_of_requests,
    * Arreglar-ho millor de cara a OMP
    */
   if (incount > MAX_WAIT_REQUESTS)
-    fprintf (stderr, "PANIC: too many requests in pacx_waitsome\n");
+    fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in pacx_waitsome\n");
 
   memcpy (save_reqs, array_of_requests, incount * sizeof (PACX_Request));
 
 #if defined(DEBUG_MPITRACE)
-	fprintf (stderr, "MPITRACE %d: WAITSOME summary\n", TASKID);
+	fprintf (stderr, PACKAGE_NAME" %d: WAITSOME summary\n", TASKID);
 	for (index = 0; index < incount; index++)
 # if SIZEOF_LONG == 8
 		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, index, (UINT64) array_of_requests[index]);
@@ -6654,7 +6654,7 @@ static void Gather_MPITS(void)
 	{
 		int slave;
 
-		fprintf (stdout, "mpitrace: Gathering mpits in master node %s (%s)\n", hostname, final_dir);
+		fprintf (stdout, PACKAGE_NAME": Gathering mpits in master node %s (%s)\n", hostname, final_dir);
 		
 		wake_up = 1;
 		for (slave = 1; slave < NumOfTasks; slave ++)
@@ -6672,7 +6672,7 @@ static void Gather_MPITS(void)
 			mpit_name = (char *)malloc((mpit_name_len+1)*sizeof(char));
 			if (mpit_name == NULL)
 			{
-				fprintf (stderr, "mpitrace: Error while allocating memory for mpit_name (requested: %u bytes)\n", (mpit_name_len+1)*sizeof(char));
+				fprintf (stderr, PACKAGE_NAME": Error while allocating memory for mpit_name (requested: %u bytes)\n", (mpit_name_len+1)*sizeof(char));
 				exit(-1);
 			}
 			pacx_err = PPACX_Recv(mpit_name, mpit_name_len, PACX_CHAR, slave, MPIT_NAME_TAG, PACX_COMM_WORLD, &sts);
@@ -6682,7 +6682,7 @@ static void Gather_MPITS(void)
 			pacx_err = PPACX_Recv(&mpit_size, 1, PACX_INT, slave, MPIT_SIZE_TAG, PACX_COMM_WORLD, &sts);
 			PACX_CHECK(pacx_err, PPACX_Recv);
 
-			fprintf (stdout, "mpitrace: Asking task %d for %s (%d bytes)\n", slave, mpit_name, mpit_size);
+			fprintf (stdout, PACKAGE_NAME": Asking task %d for %s (%d bytes)\n", slave, mpit_name, mpit_size);
 
 			/* Check whether this mpit is already at the master node */
 			mpit_fd = open(mpit_name, O_RDONLY);
@@ -6690,7 +6690,7 @@ static void Gather_MPITS(void)
 			{
 				/* The mpit is already at the master node (FS is GPFS or slave was running in the same node as master) */
 				start_sending = 0;
-				fprintf (stdout, "mpitrace: This MPIT is already at the master node and doesn't need to be moved.\n");
+				fprintf (stdout, PACKAGE_NAME": This MPIT is already at the master node and doesn't need to be moved.\n");
 			}
 			else
 			{
@@ -6699,12 +6699,12 @@ static void Gather_MPITS(void)
 				{
 					if (close(mpit_fd) == -1)
 					{
-						fprintf(stderr, "mpitrace: Error while closing MPIT %s\n", mpit_name);
+						fprintf(stderr, PACKAGE_NAME": Error while closing MPIT %s\n", mpit_name);
 						/* Since we don't need to open this file again, try to continue */
 					}
 				}
 				start_sending = 1;
-				fprintf(stdout, "mpitrace: Transferring MPIT... ");
+				fprintf(stdout, PACKAGE_NAME": Transferring MPIT... ");
 				fflush (stdout);
 			}
 
@@ -6732,7 +6732,7 @@ static void Gather_MPITS(void)
 						written_bytes = write(mpit_fd, mpit_content, recv_bytes);
 						if ((written_bytes == -1) || (written_bytes != recv_bytes))
 						{
-							fprintf(stderr, "mpitrace: Error while writing %d bytes in MPIT %s (%d written)\n", 
+							fprintf(stderr, PACKAGE_NAME": Error while writing %d bytes in MPIT %s (%d written)\n", 
 								recv_bytes, mpit_name, written_bytes);
 							exit(-1);
 						}
@@ -6749,12 +6749,12 @@ static void Gather_MPITS(void)
 					 */
 					if (fsync(mpit_fd) == -1)
 					{
-						fprintf(stderr, "mpitrace: Error while flushing MPIT %s data into disk (fsync failed)\n", mpit_name);
+						fprintf(stderr, PACKAGE_NAME": Error while flushing MPIT %s data into disk (fsync failed)\n", mpit_name);
 						confirm_delete = 0;
 					}
 					if (close(mpit_fd) == -1) 
 					{
-						fprintf(stderr, "mpitrace: Error while closing MPIT %s\n", mpit_name);
+						fprintf(stderr, PACKAGE_NAME": Error while closing MPIT %s\n", mpit_name);
 						confirm_delete = 0;
 					}
 
@@ -6764,7 +6764,7 @@ static void Gather_MPITS(void)
 				}
 				else
 				{
-					fprintf(stderr, "mpitrace: Error while opening MPIT %s for writing\n", mpit_name);
+					fprintf(stderr, PACKAGE_NAME": Error while opening MPIT %s for writing\n", mpit_name);
 					exit(-1);
 				}
 			}
@@ -6790,19 +6790,19 @@ static void Gather_MPITS(void)
 			mpit_fd = open(mpit_name, O_RDONLY);
 			if (mpit_fd == -1) 
 			{
-				fprintf(stderr, "mpitrace: Task %d: Error while opening MPIT %s for reading.\n", TASKID, mpit_name);
+				fprintf(stderr, PACKAGE_NAME": Task %d: Error while opening MPIT %s for reading.\n", TASKID, mpit_name);
 				exit(-1);
 			}
 			mpit_size = lseek(mpit_fd, 0, SEEK_END);
 			if (mpit_size == -1) 
 			{
-				fprintf(stderr, "mpitrace: Task %d: Error while checking MPIT %s file size (lseek failed)\n", 
+				fprintf(stderr, PACKAGE_NAME": Task %d: Error while checking MPIT %s file size (lseek failed)\n", 
 					TASKID, mpit_name);
 				exit(-1);
 			}
 			if (lseek(mpit_fd, 0, SEEK_SET) == -1) 
 			{
-				fprintf(stderr, "mpitrace: Task %d: Error while rewinding MPIT %s file descriptor (lseek failed)\n", 
+				fprintf(stderr, PACKAGE_NAME": Task %d: Error while rewinding MPIT %s file descriptor (lseek failed)\n", 
 					TASKID, mpit_name);
 				exit(-1);
 			}
@@ -6829,7 +6829,7 @@ static void Gather_MPITS(void)
 					read_bytes = read(mpit_fd, mpit_content, send_bytes);
 					if ((read_bytes == -1) || (read_bytes != send_bytes))
 					{
-						fprintf(stderr, "mpitrace: Task %d: Error while reading %d bytes from MPIT %s (%d read)\n",
+						fprintf(stderr, PACKAGE_NAME": Task %d: Error while reading %d bytes from MPIT %s (%d read)\n",
 							TASKID, send_bytes, mpit_name, read_bytes);
 						exit(-1);
 					}
@@ -6840,7 +6840,7 @@ static void Gather_MPITS(void)
 				/* MPIT has been successfuly sent to the master task */
 				if (close (mpit_fd) == -1)
 				{
-					fprintf(stderr, "mpitrace: Task %d: Error while closing MPIT %s\n", TASKID, mpit_name);
+					fprintf(stderr, PACKAGE_NAME": Task %d: Error while closing MPIT %s\n", TASKID, mpit_name);
 					/* Anyway, try to continue */
 				}
 				
@@ -6851,13 +6851,13 @@ static void Gather_MPITS(void)
 					/* Everything went OK in the master side, delete the mpit in the slave node */
 					if (unlink(mpit_name) == -1) 
 					{
-						fprintf(stderr, "mpitrace: Task %d, Error deleting MPIT %s in node %s\n", 
+						fprintf(stderr, PACKAGE_NAME": Task %d, Error deleting MPIT %s in node %s\n", 
 							TASKID, mpit_name, hostname);
 					}
 				}
 				else
 				{
-					fprintf(stderr, "mpitrace: Warning: MPIT %s in node %s will not be deleted due to previous errors.\n", mpit_name, hostname);
+					fprintf(stderr, PACKAGE_NAME": Warning: MPIT %s in node %s will not be deleted due to previous errors.\n", mpit_name, hostname);
 				}
 			}
 		}
@@ -6971,7 +6971,7 @@ static char * PACX_Distribute_XML_File (int rank, int world_size, char *origen)
 		result_file = strdup (origen);
 		if (result_file == NULL)
 		{
-			fprintf (stderr, "mpitrace: Cannot obtain memory for the XML file!\n");
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML file!\n");
 			exit (0);
 		}
 		return result_file;
@@ -6983,7 +6983,7 @@ static char * PACX_Distribute_XML_File (int rank, int world_size, char *origen)
 		result_file = (char*) malloc ((strlen(origen)+1)*sizeof(char));
 		if (result_file == NULL)
 		{
-			fprintf (stderr, "mpitrace: Cannot obtain memory for the XML file!\n");
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML file!\n");
 			exit (0);
 		}
 		memset (result_file, 0, (strlen(origen)+1)*sizeof(char));
@@ -6995,7 +6995,7 @@ static char * PACX_Distribute_XML_File (int rank, int world_size, char *origen)
 		/* If open fails, just return the same fail... XML parsing will fail too! */
 		if (fd < 0)
 		{
-			fprintf (stderr, "mpitrace: Cannot open XML configuration file (%s)!\n", result_file);
+			fprintf (stderr, PACKAGE_NAME": Cannot open XML configuration file (%s)!\n", result_file);
 			exit (0);
 		}
 
@@ -7009,12 +7009,12 @@ static char * PACX_Distribute_XML_File (int rank, int world_size, char *origen)
 		storage = (char*) malloc ((file_size)*sizeof(char));
 		if (storage == NULL)
 		{
-			fprintf (stderr, "mpitrace: Cannot obtain memory for the XML distribution!\n");
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML distribution!\n");
 			exit (0);
 		}
 		if (file_size != read (fd, storage, file_size))
 		{
-			fprintf (stderr, "mpitrace: Unable to read XML file for its distribution on host %s\n", has_hostname?hostname:"unknown");
+			fprintf (stderr, PACKAGE_NAME": Unable to read XML file for its distribution on host %s\n", has_hostname?hostname:"unknown");
 			exit (0);
 		}
 
@@ -7034,7 +7034,7 @@ static char * PACX_Distribute_XML_File (int rank, int world_size, char *origen)
 		storage = (char*) malloc ((file_size)*sizeof(char));
 		if (storage == NULL)
 		{
-			fprintf (stderr, "mpitrace: Cannot obtain memory for the XML distribution!\n");
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML distribution!\n");
 			exit (0);
 		}
 
@@ -7060,7 +7060,7 @@ static char * PACX_Distribute_XML_File (int rank, int world_size, char *origen)
 
 		if (file_size != write (fd, storage, file_size))
 		{
-			fprintf (stderr, "mpitrace: Unable to write XML file for its distribution (%s) - host %s\n", result_file, has_hostname?hostname:"unknown");
+			fprintf (stderr, PACKAGE_NAME": Unable to write XML file for its distribution (%s) - host %s\n", result_file, has_hostname?hostname:"unknown");
 			perror("write");
 			exit (0);
 		}

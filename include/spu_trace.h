@@ -35,16 +35,22 @@ extern "C" {
 #endif
 
 int SPUtrace_init (void);
-void SPUtrace_fini (void);
-void SPUtrace_event (unsigned int type, unsigned int value);
-void SPUtrace_shutdown (void);
-void SPUtrace_restart (void);
+int Extrae_init (void);
 
-int MPItrace_init (void) __attribute__ ((deprecated));
-void MPItrace_fini (void) __attribute__ ((deprecated));
-void MPItrace_event (unsigned int type, unsigned int value) __attribute__ ((deprecated));
-void MPItrace_shutdown (void) __attribute__ ((deprecated));
-void MPItrace_restart (void) __attribute__ ((deprecated));
+void SPUtrace_fini (void);
+void Extrae_fini (void);
+
+void SPUtrace_event (unsigned int type, unsigned int value);
+void Extrae_event (unsigned int type, unsigned int value);
+
+void SPUtrace_Nevent(int count, unsigned int *tipus, unsigned int *valors);
+void Extrae_Nevent(int count, unsigned int *tipus, unsigned int *valors);
+
+void SPUtrace_shutdown (void);
+void Extrae_shutdown (void);
+
+void SPUtrace_restart (void);
+void Extrae_restart (void);
 
 #ifdef __cplusplus
 }

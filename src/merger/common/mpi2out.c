@@ -595,14 +595,14 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 				strcpy(executable_file, argv[CurArg]);
 #if !defined(HAVE_BFD)
 				if (0 == rank)
-					fprintf (stdout, "mpitrace: WARNING! This mpi2prv does not support -e flag!\n");
+					fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
 #endif
 				continue;
 			}
 			else 
 			{
 				if (0 == rank)
-					fprintf (stderr, "mpitrace: Option -e: You must specify the path of the executable file.\n");
+					fprintf (stderr, PACKAGE_NAME": Option -e: You must specify the path of the executable file.\n");
 				Help(argv[0]);
 				exit(0);
 			}

@@ -128,7 +128,7 @@ static void AddUFtoInstrument (void *address)
 			UF_distance += count;
 		}
 		else
-			fprintf (stderr, "mpitrace: Cannot add UF %p\n", address);
+			fprintf (stderr, PACKAGE_NAME": Cannot add UF %p\n", address);
 	}
 
 	UF_tracing_enabled = TRUE;
@@ -179,16 +179,16 @@ void InstrumentUFroutines (int rank, char *filename)
 		if (rank == 0)
 		{
 			if (UF_collisions > 0)
-				fprintf (stdout, "mpitrace: Number of user functions traced: %u (collisions: %u, avg distance = %u)\n",
+				fprintf (stdout, PACKAGE_NAME": Number of user functions traced: %u (collisions: %u, avg distance = %u)\n",
     	    UF_count, UF_collisions, UF_distance/UF_collisions);
 			else
-				fprintf (stdout, "mpitrace: Number of user functions traced: %u\n", UF_count);
+				fprintf (stdout, PACKAGE_NAME": Number of user functions traced: %u\n", UF_count);
 		}
 	}
 	else
 	{
 		if (strlen(filename) > 0)
-			fprintf (stderr, "mpitrace: Warning! Cannot open %s file\n", filename);
+			fprintf (stderr, PACKAGE_NAME": Warning! Cannot open %s file\n", filename);
 	}
 
 	if (UF_count > 0)

@@ -3828,22 +3828,22 @@ int NAME_ROUTINE_C(MPI_File_write_at_all) (MPI_File fh, MPI_Offset offset,
 
 # if defined(HAVE_ALIAS_ATTRIBUTE)
 
-INTERFACE_ALIASES_C(trace_network_counters, MPItrace_network_counters, (void))
-void MPItrace_network_counters (void)
+INTERFACE_ALIASES_C(_network_counters, Extrae_network_counters, (void))
+void Extrae_network_counters (void)
 {
 	if (mpitrace_on)
 		OMPItrace_network_counters_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(trace_network_routes, MPItrace_network_routes, (int mpi_rank))
-void MPItrace_network_routes (int mpi_rank)
+INTERFACE_ALIASES_C(_network_routes, Extrae_network_routes, (int mpi_rank))
+void Extrae_network_routes (int mpi_rank)
 {
 	if (mpitrace_on)
 		OMPItrace_network_routes_Wrapper (mpi_rank);
 }
 
-INTERFACE_ALIASES_C(trace_set_tracing_tasks, MPItrace_set_tracing_tasks, (int from, int to))
-void MPItrace_set_tracing_tasks (int from, int to)
+INTERFACE_ALIASES_C(_set_tracing_tasks, Extrae_set_tracing_tasks, (int from, int to))
+void Extrae_set_tracing_tasks (int from, int to)
 {
 	if (mpitrace_on)
 		OMPItrace_tracing_tasks_Wrapper (from, to);
@@ -3854,7 +3854,7 @@ void MPItrace_set_tracing_tasks (int from, int to)
 /*** FORTRAN BINDINGS + non alias routine duplication ****/
  
 # define apiTRACE_NETWORK_ROUTES(x) \
-    void x##trace_network_routes (int mpi_rank) \
+    void x##_network_routes (int mpi_rank) \
    { \
     if (mpitrace_on) \
         OMPItrace_network_routes_Wrapper (mpi_rank); \
@@ -3862,7 +3862,7 @@ void MPItrace_set_tracing_tasks (int from, int to)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NETWORK_ROUTES);
 
 # define apiTRACE_USER_FUNCTION(x) \
-	void x##trace_user_function (int enter) \
+	void x##_user_function (int enter) \
 	{ \
 		if (mpitrace_on) \
 			OMPItrace_user_function_Wrapper (enter); \
@@ -3870,7 +3870,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NETWORK_ROUTES);
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 
 #define apiTRACE_SETTRACINGTASKS(x) \
-	void x##trace_set_tracing_tasks (int from, int to) \
+	void x##_set_tracing_tasks (int from, int to) \
    { \
    	if (mpitrace_on) \
       	OMPItrace_tracing_tasks_Wrapper (from, to); \
@@ -3886,22 +3886,22 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETTRACINGTASKS);
 
 # if defined(HAVE_ALIAS_ATTRIBUTE)
 
-INTERFACE_ALIASES_F(trace_network_counters,TRACE_NETWORK_COUNTERS,mpitrace_network_counters, (void))
-void mpitrace_network_counters (void)
+INTERFACE_ALIASES_F(_network_counters,_NETWORK_COUNTERS,extrae_network_counters, (void))
+void extrae_network_counters (void)
 {
 	if (mpitrace_on)
 		OMPItrace_network_counters_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(trace_network_routes,TRACE_NETWORK_ROUTES,mpitrace_network_routes, (int *mpi_rank))
-void mpitrace_network_routes (int *mpi_rank)
+INTERFACE_ALIASES_F(_network_routes,_NETWORK_ROUTES,extrae_network_routes, (int *mpi_rank))
+void extrae_network_routes (int *mpi_rank)
 {
 	if (mpitrace_on)
 		OMPItrace_network_routes_Wrapper (*mpi_rank);
 }
 
-INTERFACE_ALIASES_F(trace_set_tracing_tasks,TRACE_SET_TRACING_TASKS,mpitrace_set_tracing_tasks, (int *from, int *to))
-void mpitrace_set_tracing_tasks (int *from, int *to)
+INTERFACE_ALIASES_F(_set_tracing_tasks,_SET_TRACING_TASKS,extrae_set_tracing_tasks, (int *from, int *to))
+void extrae_set_tracing_tasks (int *from, int *to)
 {
 	if (mpitrace_on)
 		OMPItrace_tracing_tasks_Wrapper (*from, *to);
@@ -3910,7 +3910,7 @@ void mpitrace_set_tracing_tasks (int *from, int *to)
 # else /* HAVE_ALIAS_ATTRIBUTE */
 
 #  define apifTRACE_NETWORK_COUNTERS(x) \
-	void CtoF77(x##trace_network_counters) () \
+	void CtoF77(x##_network_counters) () \
 	{ \
 		if (mpitrace_on) \
 			OMPItrace_network_counters_Wrapper (); \
@@ -3918,7 +3918,7 @@ void mpitrace_set_tracing_tasks (int *from, int *to)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_COUNTERS);
 
 #  define apifTRACE_NETWORK_ROUTES(x) \
-	void CtoF77(x##trace_network_routes) (int *mpi_rank) \
+	void CtoF77(x##_network_routes) (int *mpi_rank) \
 	{ \
 		if (mpitrace_on) \
 			OMPItrace_network_routes_Wrapper (*mpi_rank); \
@@ -3926,7 +3926,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_COUNTERS);
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_ROUTES);
 
 #define apifTRACE_SETTRACINGTASKS(x) \
-	void CtoF77(x##trace_set_tracing_tasks) (int *from, int *to) \
+	void CtoF77(x##_set_tracing_tasks) (int *from, int *to) \
 	{ \
 		if (mpitrace_on) \
 			OMPItrace_tracing_tasks_Wrapper (*from, *to); \

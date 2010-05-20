@@ -567,7 +567,7 @@ void Action_When_Buffer_Is_Full (Buffer_t *buffer)
 #endif
             break;
         default:
-            fprintf(stderr, "mpitrace: Buffer is full and no action specified!\n");
+            fprintf(stderr, PACKAGE_NAME": Buffer is full and no action specified!\n");
             exit(1);
     }
 #if defined(HAVE_MRNET)

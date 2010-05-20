@@ -60,13 +60,13 @@ static void common_GetOpenMPHookPoints (int rank)
 	omp_set_lock_real =
 		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_set_lock");
 	if (omp_set_lock_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find omp_set_lock in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find omp_set_lock in DSOs!!\n");
 
 	/* Obtain @ for omp_unset_lock */
 	omp_unset_lock_real =
 		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_unset_lock");
 	if (omp_unset_lock_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find omp_unset_lock in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find omp_unset_lock in DSOs!!\n");
 }
 
 /*
@@ -79,8 +79,8 @@ static void common_GetOpenMPHookPoints (int rank)
 void omp_set_lock (int *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: omp_set_lock is at %p\n", omp_set_lock);
-	fprintf (stderr, "mpitrace: omp_set_lock params %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": omp_set_lock is at %p\n", omp_set_lock);
+	fprintf (stderr, PACKAGE_NAME": omp_set_lock params %p\n", p1);
 #endif
 
 	if (omp_set_lock_real != NULL)
@@ -91,7 +91,7 @@ void omp_set_lock (int *p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: omp_set_lock is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": omp_set_lock is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -99,8 +99,8 @@ void omp_set_lock (int *p1)
 void omp_unset_lock (int *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: omp_unset_lock is at %p\n", omp_unset_lock_real);
-	fprintf (stderr, "mpitrace: omp_unset_lock params %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": omp_unset_lock is at %p\n", omp_unset_lock_real);
+	fprintf (stderr, PACKAGE_NAME": omp_unset_lock params %p\n", p1);
 #endif
 
 	if (omp_unset_lock_real != NULL)
@@ -111,7 +111,7 @@ void omp_unset_lock (int *p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: omp_unset_lock is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": omp_unset_lock is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -136,7 +136,7 @@ void openmp_tracing_init (void)
 	hooked = ibm_xlsmp_1_6_hook_points(0);
 	if (!hooked)
 	{
-		fprintf (stdout, "mpitrace: ATTENTION! Application seems not to be linked with IBM XL OpenMP runtime!\n");
+		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with IBM XL OpenMP runtime!\n");
 		hooked = gnu_libgomp_4_2_hook_points(0);
 	}
 #else
@@ -144,7 +144,7 @@ void openmp_tracing_init (void)
 #endif
 
 	if (!hooked)
-		fprintf (stdout, "mpitrace: ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");
+		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");
 
 	/* If we hooked any compiler-specific routines, just hook for the 
 	   common OpenMP routines */

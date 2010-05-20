@@ -44,10 +44,13 @@
 
 #if CELL_SDK == 1
 int CELLtrace_init (int spus, speid_t * spe_id);
+int Extrae_CELL_init (int spus, speid_t * spe_id);
 #elif CELL_SDK == 2
 int CELLtrace_init (int spus, spe_context_ptr_t * spe_id);
+int Extrae_CELL_init (int spus, spe_context_ptr_t * spe_id);
 #endif
 int CELLtrace_fini (void);
+int Extrae_CELL_fini (void);
 
 int prepare_CELLTrace_init (int nthreads);
 

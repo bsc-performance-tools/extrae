@@ -89,7 +89,7 @@ int hash_add (hash_t * hash, const hash_data_t * data)
      */
     if ((free = hash->ovf_free) == HASH_NULL)
     {
-      fprintf (stderr, "mpitrace: hash_add: No space left in hash table. Size is %d+%d\n", HASH_TABLE_SIZE, HASH_OVERFLOW_SIZE);
+      fprintf (stderr, PACKAGE_NAME": hash_add: No space left in hash table. Size is %d+%d\n", HASH_TABLE_SIZE, HASH_OVERFLOW_SIZE);
       return TRUE;
     }
     hash->ovf_free = hash->overflow[free].next;
@@ -150,9 +150,9 @@ int hash_remove (hash_t * hash, MPI_Request key)
   if (hash->table[cell].ovf_link == HASH_FREE)
   {
 #if SIZEOF_LONG == 8
-		fprintf (stderr, "mpitrace: hash_remove: Key %08lx not in hash table\n", (long) key);
+		fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
 #elif SIZEOF_LONG == 4
-		fprintf (stderr, "mpitrace: hash_remove: Key %04x not in hash table\n", (long) key);
+		fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
 #endif
 
     return TRUE;
@@ -195,9 +195,9 @@ int hash_remove (hash_t * hash, MPI_Request key)
     if (ovf == HASH_NULL)       /* Not found */
     {
 #if SIZEOF_LONG == 8
-			fprintf (stderr, "mpitrace: hash_remove: Key %08lx not in hash table\n", (long) key);
+			fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
 #elif SIZEOF_LONG == 4
-			fprintf (stderr, "mpitrace: hash_remove: Key %04x not in hash table\n", (long) key);
+			fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
 #endif
       return TRUE;
     }

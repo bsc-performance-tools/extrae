@@ -257,7 +257,7 @@ static void VerifyLicenseExecution (void)
 	lvalida = verify_execution ();
 	if (!lvalida)
 	{
-		fprintf (stderr, "mpitrace: Error! Invalid license!?\n");
+		fprintf (stderr, PACKAGE_NAME": Error! Invalid license!?\n");
 		exit (-1);
 	}
 #endif
@@ -277,16 +277,16 @@ static int read_environment_variables (int me)
 	char cwd[TMP_DIR];
 
 	/* Check if the tracing is enabled. If not, just exit from here */
-	str = getenv ("MPITRACE_ON");
+	str = getenv ("EXTRAE_ON");
 	mpitrace_on = (str != NULL && (strcmp (str, "1") == 0));
 	if (me == 0 && !mpitrace_on)
 	{
-		fprintf (stdout, "mpitrace: Application has been linked or preloaded with mpitrace, BUT MPITRACE_ON is NOT set!\n");
+		fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with mpitrace, BUT EXTRAE_ON is NOT set!\n");
 		return 0;
 	}
 
 	/* Define the tracing home */
-	str = getenv ("MPITRACE_HOME");
+	str = getenv ("EXTRAE_HOME");
 	if (str != NULL)
 	{
 		strncpy (trace_home, str, TMP_DIR);
@@ -294,11 +294,11 @@ static int read_environment_variables (int me)
 	else
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: Warning! MPITRACE_HOME has not been defined!.\n");
+			fprintf (stdout, PACKAGE_NAME": Warning! EXTRAE_HOME has not been defined!.\n");
 	}
 
 #if USE_HARDWARE_COUNTERS
-	if (getenv("MPTRACE_COUNTERS") != NULL)
+	if (getenv("EXTRAE_COUNTERS") != NULL)
 	{
 		HWC_Initialize (0);
 		HWC_Parse_Env_Config (me);
@@ -306,7 +306,7 @@ static int read_environment_variables (int me)
 #endif
 
 	/* Initial Tracing Mode? */
-	if ((str = getenv("MPITRACE_INITIAL_MODE")) != NULL)
+	if ((str = getenv("EXTAE_INITIAL_MODE")) != NULL)
 	{
 		if (strcasecmp(str, "detail") == 0)
 		{
@@ -319,37 +319,37 @@ static int read_environment_variables (int me)
 	}
 
 	/* Whether we have to generate PARAVER or DIMEMAS traces */
-	if ((str = getenv ("MPITRACE_TRACE_TYPE")) != NULL)
+	if ((str = getenv ("EXTRAE_TRACE_TYPE")) != NULL)
 	{
 		if (strcasecmp (str, "DIMEMAS") == 0)
 		{
 			Clock_setType (USER_CLOCK);
 			if (me == 0)
-				fprintf (stdout, "mpitrace: Generating intermediate files for Dimemas traces.\n");
+				fprintf (stdout, PACKAGE_NAME": Generating intermediate files for Dimemas traces.\n");
 		}
 		else
 		{
 			Clock_setType (REAL_CLOCK);
 			if (me == 0)
-				fprintf (stdout, "mpitrace: Generating intermediate files for Paraver traces.\n");
+				fprintf (stdout, PACKAGE_NAME": Generating intermediate files for Paraver traces.\n");
 		}
 	}
 	else
 	{
 		Clock_setType (REAL_CLOCK);
 		if (me == 0)
-			fprintf (stdout, "mpitrace: Generating intermediate files for Paraver traces.\n");
+			fprintf (stdout, PACKAGE_NAME": Generating intermediate files for Paraver traces.\n");
 	}
 
 	/* Minimum CPU Burst duration? */
-	if ((str = getenv("MPITRACE_BURST_THRESHOLD")) != NULL) 
+	if ((str = getenv("EXTRAE_BURST_THRESHOLD")) != NULL) 
 	{
-		TMODE_setBurstsThreshold (getTimeFromStr (str, "MPITRACE_BURST_THRESHOLD", me));
+		TMODE_setBurstsThreshold (getTimeFromStr (str, "EXTRAE_BURST_THRESHOLD", me));
 	}
 
 #if defined(MPI_SUPPORT)
 	/* Collect MPI statistics in the library? */
-	if ((str = getenv ("MPITRACE_MPI_STATISTICS")) != NULL)
+	if ((str = getenv ("EXTRAE_MPI_STATISTICS")) != NULL)
 	{
 		if (strcmp(str, "1") == 0)
 		{
@@ -362,7 +362,7 @@ static int read_environment_variables (int me)
 	}
 #elif defined(PACX_SUPPORT)
 	/* Collect MPI statistics in the library? */
-	if ((str = getenv ("MPITRACE_PACX_STATISTICS")) != NULL)
+	if ((str = getenv ("EXTRAE_PACX_STATISTICS")) != NULL)
 	{
 		if (strcmp(str, "1") == 0)
 		{
@@ -376,12 +376,12 @@ static int read_environment_variables (int me)
 #endif
 
 	/*
-	* MPTRACE_DIR : Output directory for traces.
+	* EXTRAEDIR : Output directory for traces.
 	*/
 	res_cwd = getcwd (cwd, sizeof(cwd));
 
-	if ( (dir = getenv ("MPTRACE_FINAL_DIR")) == NULL )
-		if ( (dir = getenv ("MPTRACE_DIR")) == NULL )
+	if ( (dir = getenv ("EXTRAE_FINAL_DIR")) == NULL )
+		if ( (dir = getenv ("EXTRAE_DIR")) == NULL )
 			if ( (dir = res_cwd) == NULL )
  				dir = ".";
 
@@ -395,7 +395,7 @@ static int read_environment_variables (int me)
 	else
 		strcpy (final_dir, dir);
 
-	if ( (dir = getenv ("MPTRACE_DIR")) == NULL )
+	if ( (dir = getenv ("EXTRAE_DIR")) == NULL )
 		if ( (dir = res_cwd) == NULL )
 			dir = ".";
 	strcpy (tmp_dir, dir);
@@ -404,37 +404,37 @@ static int read_environment_variables (int me)
 	{
 		if (strcmp (tmp_dir, final_dir) != 0)
 		{
-			fprintf (stdout, "mpitrace: Temporal directory for the intermediate traces is %s\n", tmp_dir);
-			fprintf (stdout, "mpitrace: Final directory for the intermediate traces is %s\n", final_dir);
+			fprintf (stdout, PACKAGE_NAME": Temporal directory for the intermediate traces is %s\n", tmp_dir);
+			fprintf (stdout, PACKAGE_NAME": Final directory for the intermediate traces is %s\n", final_dir);
 		}
 		else
 		{
-			fprintf (stdout, "mpitrace: Intermediate files will be stored in %s\n", final_dir);
+			fprintf (stdout, PACKAGE_NAME": Intermediate files will be stored in %s\n", final_dir);
 		}
 	}
 
-	/* MPTRACE_CONTROL_FILE, activates the tracing when this file is created */
-	if ((file = getenv ("MPTRACE_CONTROL_FILE")) != NULL)
+	/* EXTRAE_CONTROL_FILE, activates the tracing when this file is created */
+	if ((file = getenv ("EXTRAE_CONTROL_FILE")) != NULL)
 	{
 		CheckForControlFile = TRUE;
 		strcpy (ControlFileName, file);
 		if (me == 0)
-			fprintf (stdout, "mpitrace: Control file is %s.\n          Tracing will be disabled until the file exists\n", ControlFileName);
+			fprintf (stdout, PACKAGE_NAME": Control file is %s.\n          Tracing will be disabled until the file exists\n", ControlFileName);
 	}
 	else
 		CheckForControlFile = FALSE;
 
-	/* MPTRACE_CONTROL_GLOPS, activates the tracing on a global op series */
-	if ((str = getenv ("MPTRACE_CONTROL_GLOPS")) != NULL)
+	/* EXTRAE_CONTROL_GLOPS, activates the tracing on a global op series */
+	if ((str = getenv ("EXTRAE_CONTROL_GLOPS")) != NULL)
 	{
 		CheckForGlobalOpsTracingIntervals = TRUE;
 		Parse_GlobalOps_Tracing_Intervals (str);
 	}
 
 	/*
-	 * MPTRACE_BUFFER_SIZE : Tells the buffer size for each thread.
+	 * EXTRAE_BUFFER_SIZE : Tells the buffer size for each thread.
 	 */
-	if ((str = getenv ("MPTRACE_BUFFER_SIZE")) != NULL)
+	if ((str = getenv ("EXTRAE_BUFFER_SIZE")) != NULL)
 	{
 		buffer_size = atoi (str);
 		if (buffer_size <= 0)
@@ -443,77 +443,77 @@ static int read_environment_variables (int me)
 	else
 		buffer_size = EVT_NUM;
 	if (me == 0)
-		fprintf (stdout, "mpitrace: Tracing buffer can hold %d events\n", buffer_size);
+		fprintf (stdout, PACKAGE_NAME": Tracing buffer can hold %d events\n", buffer_size);
 
 	/*
-	 * MPTRACE_FILE_SIZE: Limits the intermediate file size for each thread.
+	 * EXTRAE_FILE_SIZE: Limits the intermediate file size for each thread.
 	 */
-	if ((str = getenv ("MPTRACE_FILE_SIZE")) != NULL)
+	if ((str = getenv ("EXTRAE_FILE_SIZE")) != NULL)
 	{
 		file_size = atoi (str);
 		if (file_size <= 0 && me == 0)
-			fprintf (stderr, "mpitrace: Invalid MPTRACE_FILE_SIZE environment variable value.\n");
+			fprintf (stderr, PACKAGE_NAME": Invalid EXTRAE_FILE_SIZE environment variable value.\n");
 		else if (file_size > 0 && me == 0)
-			fprintf (stderr, "mpitrace: MPTRACE_FILE_SIZE set to %d Mbytes.\n", file_size);
+			fprintf (stderr, PACKAGE_NAME": EXTRAE_FILE_SIZE set to %d Mbytes.\n", file_size);
 	}
 
 	/* 
-	 * MPTRACE_MINIMUM_TIME : Set the minimum tracing time...
+	 * EXTRAE_MINIMUM_TIME : Set the minimum tracing time...
 	 */
-	MinimumTracingTime = getTimeFromStr (getenv("MPTRACE_MINIMUM_TIME"), "MPTRACE_MINIMUM_TIME", me);
+	MinimumTracingTime = getTimeFromStr (getenv("EXTRAE_MINIMUM_TIME"), "EXTRAE_MINIMUM_TIME", me);
 	hasMinimumTracingTime = (MinimumTracingTime != 0);
 	if (me == 0 && hasMinimumTracingTime)
 	{
 		if (MinimumTracingTime >= 1000000000)
-			fprintf (stdout, "mpitrace: Minimum tracing time will be %llu seconds\n", MinimumTracingTime / 1000000000);
+			fprintf (stdout, PACKAGE_NAME": Minimum tracing time will be %llu seconds\n", MinimumTracingTime / 1000000000);
 		else
-			fprintf (stdout, "mpitrace: Minimum tracing time will be %llu nanoseconds\n", MinimumTracingTime);
+			fprintf (stdout, PACKAGE_NAME": Minimum tracing time will be %llu nanoseconds\n", MinimumTracingTime);
 	}
 
 	/* 
-	 * MPTRACE_CONTROL_TIME : Set the control tracing time...
+	 * EXTRAE_CONTROL_TIME : Set the control tracing time...
 	 */
-	WantedCheckControlPeriod = getTimeFromStr (getenv("MPTRACE_CONTROL_TIME"), "MPTRACE_CONTROL_TIME", me);
+	WantedCheckControlPeriod = getTimeFromStr (getenv("EXTRAE_CONTROL_TIME"), "EXTRAE_CONTROL_TIME", me);
 	if (me == 0 && WantedCheckControlPeriod != 0)
 	{
 		if (WantedCheckControlPeriod >= 1000000000)
-			fprintf (stdout, "mpitrace: Control file will be checked every %llu seconds\n", WantedCheckControlPeriod / 1000000000);
+			fprintf (stdout, PACKAGE_NAME": Control file will be checked every %llu seconds\n", WantedCheckControlPeriod / 1000000000);
 		else
-			fprintf (stdout, "mpitrace: Control file will be checked every %llu nanoseconds\n", WantedCheckControlPeriod);
+			fprintf (stdout, PACKAGE_NAME": Control file will be checked every %llu nanoseconds\n", WantedCheckControlPeriod);
 	}
 
 #if defined(MPI_SUPPORT)
 	/* Control if the user wants to add information about MPI caller routines */
-	mpi_callers = getenv ("MPITRACE_MPI_CALLER");
+	mpi_callers = getenv ("EXTRAE_MPI_CALLER");
 	if (mpi_callers != NULL) Parse_Callers (me, mpi_callers, CALLER_MPI);
 #elif defined(PACX_SUPPORT)
 	/* Control if the user wants to add information about MPI caller routines */
-	mpi_callers = getenv ("MPITRACE_PACX_CALLER");
+	mpi_callers = getenv ("EXTRAE_PACX_CALLER");
 	if (mpi_callers != NULL) Parse_Callers (me, mpi_callers, CALLER_MPI);
 #endif
 
 #if defined(MPI_SUPPORT)
 	/* Check if we must gather all the MPIT files into one target (MASTER) node */
-	str = getenv("MPTRACE_GATHER_MPITS");
+	str = getenv("EXTRAE_GATHER_MPITS");
 	if ((str != NULL) && (strcmp(str, "1") == 0))
 	{
 		mpit_gathering_enabled = TRUE;
 		if (me == 0)
-			fprintf (stdout, "mpitrace: All MPIT files will be gathered at the end of the execution.\n");
+			fprintf (stdout, PACKAGE_NAME": All MPIT files will be gathered at the end of the execution.\n");
 	}
 #endif
 
 	/* Check if the buffer must be treated as a circular buffer instead a linear buffer with many flushes */
-	str = getenv ("MPTRACE_CIRCULAR_BUFFER");
+	str = getenv ("EXTRAE_CIRCULAR_BUFFER");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		circular_buffering = TRUE;
 		if (me == 0)
-			fprintf (stdout, "mpitrace: Circular buffer enabled!\n");
+			fprintf (stdout, PACKAGE_NAME": Circular buffer enabled!\n");
 	}
 
 	/* Get the program name if available. It will be used to form the MPIT filenames */
-	str = getenv ("MPITRACE_PROGRAM_NAME");
+	str = getenv ("EXTRAE_PROGRAM_NAME");
 	if (!str)
 		strncpy (PROGRAM_NAME, "TRACE", strlen("TRACE")+1);
 	else
@@ -522,63 +522,63 @@ static int read_environment_variables (int me)
 
 #if defined(MPI_SUPPORT)
 	/* Check if the MPI must be disabled */
-	str = getenv ("MPITRACE_DISABLE_MPI");
+	str = getenv ("EXTRAE_DISABLE_MPI");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: MPI calls are NOT traced.\n");
+			fprintf (stdout, PACKAGE_NAME": MPI calls are NOT traced.\n");
   	tracejant_mpi = FALSE;
 	}
 #elif defined(PACX_SUPPORT)
 	/* Check if the PACX must be disabled */
-	str = getenv ("MPITRACE_DISABLE_PACX");
+	str = getenv ("EXTRAE_DISABLE_PACX");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: PACX calls are NOT traced.\n");
+			fprintf (stdout, PACKAGE_NAME": PACX calls are NOT traced.\n");
   	tracejant_mpi = FALSE;
 	}
 #endif
 
 #if defined(MPI_SUPPORT)
 	/* HWC must be gathered at MPI? */
-	str = getenv ("MPITRACE_MPI_COUNTERS_ON");
+	str = getenv ("EXTRAE_MPI_COUNTERS_ON");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: HWC reported in the MPI calls.\n");
+			fprintf (stdout, PACKAGE_NAME": HWC reported in the MPI calls.\n");
 		tracejant_hwc_mpi = TRUE;
 	}
 	else
 		tracejant_hwc_mpi = FALSE;
 #elif defined(PACX_SUPPORT)
 	/* HWC must be gathered at PACX? */
-	str = getenv ("MPITRACE_PACX_COUNTERS_ON");
+	str = getenv ("EXTRAE_PACX_COUNTERS_ON");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: HWC reported in the PACX calls.\n");
+			fprintf (stdout, PACKAGE_NAME": HWC reported in the PACX calls.\n");
 		tracejant_hwc_mpi = TRUE;
 	}
 #endif
 
 	/* Enable rusage information? */
-	str = getenv ("MPITRACE_RUSAGE");
+	str = getenv ("EXTRAE_RUSAGE");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: Resource usage is enabled at flush buffer.\n");
+			fprintf (stdout, PACKAGE_NAME": Resource usage is enabled at flush buffer.\n");
 		tracejant_rusage = TRUE;
 	}
 	else
 		tracejant_rusage = FALSE;
 
 	/* Enable memusage information? */
-	str = getenv ("MPITRACE_MEMUSAGE");
+	str = getenv ("EXTRAE_MEMUSAGE");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: Memory usage is enabled at flush buffer.\n");
+			fprintf (stdout, PACKAGE_NAME": Memory usage is enabled at flush buffer.\n");
 		tracejant_memusage = TRUE;
 	}
 	else
@@ -586,11 +586,11 @@ static int read_environment_variables (int me)
 
 #if defined(TEMPORARILY_DISABLED)
 	/* Enable network counters? */
-	str = getenv ("MPITRACE_NETWORK_COUNTERS");
+	str = getenv ("EXTRAE_NETWORK_COUNTERS");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: Network counters are enabled.\n");
+			fprintf (stdout, PACKAGE_NAME": Network counters are enabled.\n");
 		tracejant_network_hwc = TRUE;
 	}
 	else
@@ -599,28 +599,28 @@ static int read_environment_variables (int me)
 	
 	/* Add UF routines to instrument under GCC -finstrument-function callback
 	   routines */
-	str = getenv ("MPTRACE_FUNCTIONS");
+	str = getenv ("EXTRAE_FUNCTIONS");
 	if (str != NULL)
 		InstrumentUFroutines (me, str);
 
 	/* Limit the depth of the callgraph */
-	str = getenv ("MPTRACE_FUNCTIONS_MAX_DEPTH");
+	str = getenv ("EXTRAE_FUNCTIONS_MAX_DEPTH");
 	if (str != NULL)
 	{
 		int value = atoi (str);
 		if (value > 0)
 		{
 			setUFMaxDepth ((unsigned int)value);
-			fprintf (stdout, "mpitrace: Limit depth for the user functions tracing set to %d\n", value);
+			fprintf (stdout, PACKAGE_NAME": Limit depth for the user functions tracing set to %d\n", value);
 		}
 	}
 
 	/* HWC must be gathered at UF? */
-	str = getenv ("MPTRACE_FUNCTIONS_COUNTERS_ON");
+	str = getenv ("EXTRAE_FUNCTIONS_COUNTERS_ON");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: User Function routines will collect HW counters information.\n");
+			fprintf (stdout, PACKAGE_NAME": User Function routines will collect HW counters information.\n");
 		tracejant_hwc_uf = TRUE;
 	}
 	else
@@ -628,50 +628,50 @@ static int read_environment_variables (int me)
 
 #if defined(OMP_SUPPORT)
 	/* Check if the OpenMP tracing must be disabled */
-	str = getenv ("MPITRACE_DISABLE_OMP");
+	str = getenv ("EXTRAE_DISABLE_OMP");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: OpenMP runtime calls are NOT traced.\n");
+			fprintf (stdout, PACKAGE_NAME": OpenMP runtime calls are NOT traced.\n");
   	tracejant_omp = FALSE;
 	}
 
 	/* HWC must be gathered at OpenMP? */
-	str = getenv ("MPITRACE_OMP_COUNTERS_ON");
+	str = getenv ("EXTRAE_OMP_COUNTERS_ON");
 	if (str != NULL && (strcmp (str, "1") == 0))
 	{
 		if (me == 0)
-			fprintf (stdout, "mpitrace: HWC reported in the OpenMP calls.\n");
+			fprintf (stdout, PACKAGE_NAME": HWC reported in the OpenMP calls.\n");
 		tracejant_hwc_omp = TRUE;
 	}
 	else
 		tracejant_hwc_omp = FALSE;
 
 	/* Will we trace openmp-locks ? */
-	str = getenv ("MPTRACE_OMP_LOCKS");
+	str = getenv ("EXTRAE_OMP_LOCKS");
 	setTrace_OMPLocks ((str != NULL && (strcmp (str, "1"))));
 #endif
 
 	/* Should we configure a signal handler ? */
-	str = getenv ("MPITRACE_SIGNAL_FLUSH_TERMINATE");
+	str = getenv ("EXTRAE_SIGNAL_FLUSH_TERMINATE");
 	if (str != NULL)
 	{
 		if (strcasecmp (str, "USR1") == 0)
 		{
 			if (me == 0)
-				fprintf (stderr,"\nmpitrace: Signal USR1 will flush the buffers to the disk and stop further tracing\n");
+				fprintf (stderr,"\n"PACKAGE_NAME": Signal USR1 will flush the buffers to the disk and stop further tracing\n");
 			Signals_SetupFlushAndTerminate (SIGUSR1);
 		}
 		else if (strcasecmp (str, "USR2") == 0)
 		{
 			if (me == 0)
-				fprintf (stderr,"\nmpitrace: Signal USR2 will flush the buffers to the disk and stop further tracing\n");
+				fprintf (stderr,"\n"PACKAGE_NAME": Signal USR2 will flush the buffers to the disk and stop further tracing\n");
 			Signals_SetupFlushAndTerminate (SIGUSR2);
 		}
 		else
 		{
 			if (me == 0)
-				fprintf (stderr,"\nWARNING: Value '%s' for MPITRACE_SIGNAL_FLUSH is unrecognized\n", str);
+				fprintf (stderr,"\nWARNING: Value '%s' for EXTRAE_SIGNAL_FLUSH is unrecognized\n", str);
 		}
 	}
 
@@ -679,7 +679,7 @@ static int read_environment_variables (int me)
 
 # ifndef SPU_USES_WRITE
 	/* Configure DMA channel for the transferences */
-	str = getenv("MPTRACE_SPU_DMA_CHANNEL");
+	str = getenv("EXTRAE_SPU_DMA_CHANNEL");
 	if (str == (char *)NULL) {
 		spu_dma_channel = DEFAULT_DMA_CHANNEL;
 	}
@@ -689,17 +689,17 @@ static int read_environment_variables (int me)
 	if ((spu_dma_channel < 0) || (spu_dma_channel > 31))
 	{
 		if (TASKID == 0)
-			fprintf (stderr, "CELLtrace: Invalid DMA channel '%d'. Using default channel '%d'.\n", spu_dma_channel, DEFAULT_DMA_CHANNEL);
+			fprintf (stderr, PACKAGE_NAME": Invalid DMA channel '%d'. Using default channel '%d'.\n", spu_dma_channel, DEFAULT_DMA_CHANNEL);
 		spu_dma_channel = DEFAULT_DMA_CHANNEL;
 	}
 # else
-	if (getenv("MPTRACE_SPU_DMA_CHANNEL") != NULL)
+	if (getenv("EXTRAE_SPU_DMA_CHANNEL") != NULL)
 		if (TASKID == 0)
-			fprintf (stdout, "CELLtrace: SPUs will write directly to disk. Ignoring MPTRACE_SPU_DMA_CHANNEL\n");
+			fprintf (stdout, PACKAGE_NAME": SPUs will write directly to disk. Ignoring EXTRAE_SPU_DMA_CHANNEL\n");
 # endif /* SPU_USES_WRITE */
 
 	/* Configure the buffer size for each SPU */
-	str = getenv("MPTRACE_SPU_BUFFER_SIZE");
+	str = getenv("EXTRAE_SPU_BUFFER_SIZE");
 	if (str == (char *)NULL) {
 		spu_buffer_size = DEFAULT_SPU_BUFFER_SIZE;
 	}
@@ -709,17 +709,17 @@ static int read_environment_variables (int me)
 	if (spu_buffer_size < 10)
 	{
 		if (TASKID == 0)
-			fprintf (stderr, "CELLtrace: SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_buffer_size, DEFAULT_SPU_BUFFER_SIZE);
+			fprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_buffer_size, DEFAULT_SPU_BUFFER_SIZE);
 		spu_buffer_size = DEFAULT_SPU_BUFFER_SIZE;
 	}
 	else
 	{
 		if (TASKID == 0)
-			fprintf (stdout, "CELLtrace: SPU tracing buffer size is %d events.\n", spu_buffer_size);
+			fprintf (stdout, PACKAGE_NAME": SPU tracing buffer size is %d events.\n", spu_buffer_size);
 	}
 
 	/* Limit the total size of tracing of each spu */
-	str = getenv ("MPTRACE_SPU_FILE_SIZE");
+	str = getenv ("EXTRAE_SPU_FILE_SIZE");
 	if (str == (char *)NULL) {
 		spu_file_size = DEFAULT_SPU_FILE_SIZE;
 	}
@@ -729,13 +729,13 @@ static int read_environment_variables (int me)
 	if (spu_file_size < 1)
 	{
 		if (TASKID == 0)
-			fprintf (stderr, "CELLtrace: SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_file_size, DEFAULT_SPU_FILE_SIZE);
+			fprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_file_size, DEFAULT_SPU_FILE_SIZE);
 		spu_file_size = DEFAULT_SPU_FILE_SIZE;
 	}
 	else
 	{
 		if (TASKID == 0)
-			fprintf (stdout, "CELLtrace: SPU tracing file size limit is %d mbytes.\n", spu_file_size);
+			fprintf (stdout, PACKAGE_NAME": SPU tracing file size limit is %d mbytes.\n", spu_file_size);
 	}
 
 #endif /* IS_CELL_MACHINE */
@@ -746,11 +746,11 @@ static int read_environment_variables (int me)
 /*
  * Inicializa el valor de las variables globales Trace_MPI_Caller, 
  * MPI_Caller_Deepness y MPI_Caller_Count en funcion de los parametros
- * seteados en la variable de entorno MPITRACE_MPI_CALLER
+ * seteados en la variable de entorno EXTRAE_MPI_CALLER
  * El formato de esta variable es una cadena separada por comas, donde
  * cada parametro se refiere a la profundidad en la pila de llamadas
  * de un MPI caller que queremos tracear. La cadena puede contener rangos:
- *            MPITRACE_MPI_CALLER = 1,2,3...7-9...
+ *            EXTRAE_MPI_CALLER = 1,2,3...7-9...
  */
 void Parse_Callers (int me, char * mpi_callers, int type)
 {
@@ -774,7 +774,7 @@ void Parse_Callers (int me, char * mpi_callers, int type)
             (((to == (int)LONG_MIN) || (to == (int)LONG_MAX)) && (errno == ERANGE)))
          {
 					 if (me == 0)
-            fprintf(stderr, "mpitrace: WARNING! Ignoring value '%s' in MPITRACE_MPI_CALLER"
+            fprintf(stderr, PACKAGE_NAME": WARNING! Ignoring value '%s' in EXTRAE_MPI_CALLER"
 								" environment variable.\n", caller);
             continue;
          }
@@ -789,16 +789,15 @@ void Parse_Callers (int me, char * mpi_callers, int type)
       /* Comprobamos que estamos en un rango valido */
       if ((from < 1) || (to < 1) || (from > MAX_CALLERS)) {
          if (me == 0)
-            fprintf(stderr, "mpitrace: WARNING! Value(s) '%s' in MPITRACE_*_CALLER "
+            fprintf(stderr, PACKAGE_NAME": WARNING! Value(s) '%s' in EXTRAE_*_CALLER "
                             "out of bounds (Min 1, Max %d)\n", caller, MAX_CALLERS);
          continue;
       }
       if (to > MAX_CALLERS) {
          to = MAX_CALLERS;
          if (me == 0)
-            fprintf(stderr, "mpitrace: WARNING! Value(s) '%s' in MPITRACE_*_CALLER "
-                            "out of bounds (Min 1, Max %d)\n"
-                            "mpitrace: Reducing MPI callers range from %d to MAX value %d\n", caller, MAX_CALLERS, from, to);
+            fprintf(stderr, PACKAGE_NAME": WARNING! Value(s) '%s' in EXTRAE_*_CALLER out of bounds (Min 1, Max %d)\n"
+                            PACKAGE_NAME": Reducing MPI callers range from %d to MAX value %d\n", caller, MAX_CALLERS, from, to);
       }
       fflush(stderr);
       fflush(stdout);
@@ -822,7 +821,7 @@ void Parse_Callers (int me, char * mpi_callers, int type)
       }                                                                           
    }                                                                              
    if (Caller_Count[type] > 0 && me == 0) {
-      fprintf(stdout, "mpitrace: Tracing %d level(s) of %s callers: [ ",
+      fprintf(stdout, PACKAGE_NAME": Tracing %d level(s) of %s callers: [ ",
 				 	Caller_Count[type], (CALLER_MPI==type)?"MPI":"Sampling");
       for (i=0; i<Caller_Deepness[type]; i++) {
          if (Trace_Caller[type][i]) fprintf(stdout, "%d ", i+1);
@@ -867,11 +866,11 @@ void Parse_GlobalOps_Tracing_Intervals(char * sequence) {
       match = sscanf(tmp[i], "%d-%d", &start, &stop);
       if (match == 2) {
          if (start >= stop) {
-            fprintf(stderr, "mpitrace: WARNING! Ignoring invalid pair '%s' (stopping before starting)\n", tmp[i]);
+            fprintf(stderr, PACKAGE_NAME": WARNING! Ignoring invalid pair '%s' (stopping before starting)\n", tmp[i]);
             continue;
          }
          if (start <= last_stop) {
-            fprintf(stderr, "mpitrace: WARNING! Ignoring overlapped pair '%s' (starting at %d but previous interval stops at %d)\n", tmp[i], start, last_stop);
+            fprintf(stderr, PACKAGE_NAME": WARNING! Ignoring overlapped pair '%s' (starting at %d but previous interval stops at %d)\n", tmp[i], start, last_stop);
             continue;
          }
          Add_GlOp_Interval(start, RESTART);
@@ -880,11 +879,11 @@ void Parse_GlobalOps_Tracing_Intervals(char * sequence) {
       else {
          start = atoi(tmp[i]);
          if (start == 0) {
-            fprintf(stderr, "mpitrace: WARNING! Ignoring '%s'\n", tmp[i]);
+            fprintf(stderr, PACKAGE_NAME": WARNING! Ignoring '%s'\n", tmp[i]);
             continue;
          }
          if (start <= last_stop) {
-            fprintf(stderr, "mpitrace: WARNING! Ignoring '%s' (starting at %d but previous interval stops at %d)\n", tmp[i], start, last_stop);
+            fprintf(stderr, PACKAGE_NAME": WARNING! Ignoring '%s' (starting at %d but previous interval stops at %d)\n", tmp[i], start, last_stop);
             continue;
          }
          fprintf(stderr, "... started at global op #%d and won't stop until the application finishes\n", start);
@@ -945,11 +944,11 @@ int remove_temporal_files(void)
   {
 		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
     if (unlink(tmpname) == -1)
-      fprintf (stderr, "mpitrace: Error removing a temporal tracing file\n");
+      fprintf (stderr, PACKAGE_NAME": Error removing a temporal tracing file\n");
 
 		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
     if (unlink(tmpname) == -1)
-      fprintf (stderr, "mpitrace: Error removing a temporal sampling file\n");
+      fprintf (stderr, PACKAGE_NAME": Error removing a temporal sampling file\n");
   }
   return 0;
 }
@@ -983,7 +982,7 @@ static int Allocate_buffer_and_file (int thread_id)
 	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
 	if (TracingBuffer[thread_id] == NULL)
 	{
-		fprintf (stderr, "mpitrace: Error allocating tracing buffer for thread %d\n", thread_id);
+		fprintf (stderr, PACKAGE_NAME": Error allocating tracing buffer for thread %d\n", thread_id);
 		return 0;
 	}
 	if (circular_buffering)
@@ -996,7 +995,7 @@ static int Allocate_buffer_and_file (int thread_id)
 	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
 	if (SamplingBuffer[thread_id] == NULL)
 	{
-		fprintf (stderr, "mpitrace: Error allocating sampling buffer for thread %d\n", thread_id);
+		fprintf (stderr, PACKAGE_NAME": Error allocating sampling buffer for thread %d\n", thread_id);
 		return 0;
 	}
 	Buffer_SetFlushCallback (SamplingBuffer[thread_id], NULL);
@@ -1027,7 +1026,7 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
 		/* Override buffer_size depending on target trace size */
 		new_buffer_size = ((target_mbs * 1024 * 1024 * 2) / (world_size * sizeof(event_t)));
 
-		fprintf(stdout, "mpitrace: Overriding buffer size with MRNet configuration (target=%dMb, buffer_size=%d events)\n",
+		fprintf(stdout, PACKAGE_NAME": Overriding buffer size with MRNet configuration (target=%dMb, buffer_size=%d events)\n",
 			target_mbs, new_buffer_size);
 
 		buffer_size = new_buffer_size;
@@ -1079,7 +1078,7 @@ static int Allocate_Task_Bitmap (int size)
 	TracingBitmap = (int *) malloc (size * sizeof (int));
 	if (TracingBitmap == NULL)
 	{
-		fprintf (stderr, "mpitrace: ERROR! Cannot obtain memory for tasks bitmap\n");
+		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot obtain memory for tasks bitmap\n");
 		exit (-1);
 	}
 
@@ -1098,7 +1097,7 @@ static int getnumProcessors (void)
 	numProcessors = (int) sysconf (_SC_NPROCESSORS_CONF);
 	if (-1 == numProcessors)
 	{
-		fprintf (stderr, "mpitrace: Cannot determine number of configured processors using sysconf\n");
+		fprintf (stderr, PACKAGE_NAME": Cannot determine number of configured processors using sysconf\n");
 		exit (-1);
 	}
 #else
@@ -1186,7 +1185,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 #endif
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: DEBUG: THID=%d Backend_preInitialize (rank=%d, size=%d, config_file=\n", THREADID, me, world_size, config_file);
+	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_preInitialize (rank=%d, size=%d, config_file=\n", THREADID, me, world_size, config_file);
 #endif
 
 	/* Allocate a bitmap to know which tasks are tracing */
@@ -1218,12 +1217,12 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
 	if (NULL == new_num_omp_threads_clause)
 	{
-		fprintf (stderr, "mpitrace: Unable to allocate memory for tentative OMP_NUM_THREADS\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to allocate memory for tentative OMP_NUM_THREADS\n");
 		exit (-1);
 	}
 	if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
 	{
-		fprintf (stderr, "mpitrace: Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
+		fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
 		exit (-1);
 	}
 
@@ -1236,14 +1235,14 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 		{
 			current_NumOfThreads = maximum_NumOfThreads = num_of_threads;
 			if (me == 0)
-				fprintf (stdout, "mpitrace: OMP_NUM_THREADS set to %d\n", num_of_threads);
+				fprintf (stdout, PACKAGE_NAME": OMP_NUM_THREADS set to %d\n", num_of_threads);
 		}
 		else
 		{
 			if (me == 0)
 				fprintf (stderr,
-					"mpitrace: OMP_NUM_THREADS is mandatory for this tracing library!\n"\
-					"mpitrace: Setting OMP_NUM_THREADS to %d\n", numProcessors);
+					PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
+					PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
 			putenv (new_num_omp_threads_clause);
 			current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 		}
@@ -1252,8 +1251,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	{
 		if (me == 0)
 			fprintf (stderr,
-				"mpitrace: OMP_NUM_THREADS is mandatory for this tracing library!\n"\
-				"mpitrace: Setting OMP_NUM_THREADS to %d\n", numProcessors);
+				PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
+				PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
 		putenv (new_num_omp_threads_clause);
 		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 	}
@@ -1279,7 +1278,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	{
 		if (me == 0)
 			fprintf (stderr,
-				"mpitrace: Warning! OMP_NUM_THREADS is set but OpenMP is not supported!\n");
+				PACKAGE_NAME": Warning! OMP_NUM_THREADS is set but OpenMP is not supported!\n");
 	}
 #endif
 
@@ -1296,7 +1295,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	PRDAUSR = (struct trace_prda*) malloc (sizeof(struct trace_prda)*NumOfThreads);
 	if (NULL == PRDAUSR)
 	{
-		fprintf (stderr, "mpitrace: Error! Cannot allocate structure to trace %d threads\n", NumOfThreads);
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate structure to trace %d threads\n", NumOfThreads);
 		exit (-1);
 	}
 #endif
@@ -1343,9 +1342,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 
 #if defined(DEAD_CODE)
 	if (HWCEnabled)
-		fprintf (stdout, "mpitrace: Tracing enabled for process %d (counters enabled).\n", getpid ());
+		fprintf (stdout, PACKAGE_NAME": Tracing enabled for process %d (counters enabled).\n", getpid ());
 	else if (!HWCEnabled)
-		fprintf (stdout, "mpitrace: Tracing enabled for process %d.\n", getpid ());
+		fprintf (stdout, PACKAGE_NAME": Tracing enabled for process %d.\n", getpid ());
 #endif
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
@@ -1385,7 +1384,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		PRDAUSR = (struct trace_prda*) realloc (PRDAUSR, sizeof(struct trace_prda)*new_num_threads);
 		if (PRDAUSR == NULL)
 		{
-			fprintf (stderr, "mpitrace: Error! Can't reallocate memory for %d threads\n", new_num_threads);
+			fprintf (stderr, PACKAGE_NAME": Error! Can't reallocate memory for %d threads\n", new_num_threads);
 			exit (-1);
 		}
 #endif
@@ -1447,7 +1446,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 #endif
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, SynchroInitTime, SynchroEndTime);
+	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, SynchroInitTime, SynchroEndTime);
 #endif
 
 	TimeSync_Initialize (world_size);
@@ -1483,11 +1482,11 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 
 		if (rc)
 		{
-			fprintf (stdout, "mpitrace: MRNet successfully set up.\n");
+			fprintf (stdout, PACKAGE_NAME": MRNet successfully set up.\n");
 		}
 		else
 		{
-			fprintf (stderr, "mpitrace: Error while setting up the MRNet.\n");
+			fprintf (stderr, PACKAGE_NAME": Error while setting up the MRNet.\n");
 			exit(1);
 		}
 	}
@@ -1504,12 +1503,12 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 	if (mpitrace_on && !CheckForControlFile && !CheckForGlobalOpsTracingIntervals)
 	{
 		if (rank == 0)
-			fprintf (stdout, "mpitrace: Successfully initiated with %d tasks\n\n", world_size);
+			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks\n\n", world_size);
 	}
 	else if (mpitrace_on && CheckForControlFile && !CheckForGlobalOpsTracingIntervals)
 	{
 		if (rank == 0)
-			fprintf (stdout, "mpitrace: Successfully initiated with %d tasks BUT disabled by MPTRACE_CONTROL_FILE\n\n", world_size);
+			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks BUT disabled by EXTRAE_CONTROL_FILE\n\n", world_size);
 
 		/* Just disable the tracing until the control file is created */
 		MPItrace_shutdown_Wrapper(); 	/* Shutdown tracing */
@@ -1518,7 +1517,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 	else if (mpitrace_on && !CheckForControlFile && CheckForGlobalOpsTracingIntervals)
 	{
 		if (rank == 0)
-			fprintf (stdout, "mpitrace: Successfully initiated with %d tasks BUT disabled by MPTRACE_CONTROL_GLOPS\n\n", world_size);
+			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size);
 		MPItrace_shutdown_Wrapper(); 	/* Shutdown tracing */
 	}
 
@@ -1582,7 +1581,7 @@ void close_mpits (int thread)
   FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_MPIT);
 
 	rename_or_copy (tmp_name, trace);
-	fprintf (stdout, "mpitrace: Intermediate raw trace file created : %s\n", trace);
+	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
 
 #if defined(SAMPLING_SUPPORT)
 	if (EnabledSampling)
@@ -1597,14 +1596,14 @@ void close_mpits (int thread)
 			FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SAMPLE);
 
 			rename_or_copy (tmp_name, trace);
-			fprintf (stdout, "mpitrace: Intermediate raw sample file created : %s\n", trace);
+			fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
 		}
 		else
 		{
 			/* Remove file if empty! */
 			unlink (tmp_name);
 
-			fprintf (stdout, "mpitrace: Intermediate raw sample file NOT created (%d) due to lack of information gathered.\n", TASKID);
+			fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file NOT created (%d) due to lack of information gathered.\n", TASKID);
 		}
 	}
 #endif
@@ -1658,7 +1657,7 @@ int MPItrace_Flush_Wrapper (Buffer_t *buffer)
 			{
 				if (THREADID == 0)
 				{
-					fprintf (stdout, "mpitrace: File size limit reached. File occupies %llu bytes.\n", current_size);
+					fprintf (stdout, PACKAGE_NAME": File size limit reached. File occupies %llu bytes.\n", current_size);
 					fprintf (stdout, "Further tracing is disabled.\n");
 				}
 				close_mpits(THREADID);
@@ -1692,6 +1691,6 @@ void Thread_Finalization (void)
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 		close_mpits (thread);
 	if (TASKID == 0)
-		fprintf (stdout, "mpitrace: Application has ended. Tracing has been terminated.\n");
+		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 }
 

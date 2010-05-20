@@ -1,8 +1,8 @@
-MPITRACE_HOME=@sub_PREFIXDIR@
+EXTRAE_HOME=@sub_PREFIXDIR@
 
 CC= gcc
 CFLAGS= -O -g -pthread
-LDFLAGS= -O -g -pthread -L$(MPITRACE_HOME)/lib -lpttrace
+LDFLAGS= -O -g -pthread -L$(EXTRAE_HOME)/lib -lpttrace
 
 example: example.o
 	$(CC) $< $(LDFLAGS) -o $@ 

@@ -89,7 +89,7 @@ static void (*par_uf)(void*);
 static void callme_pardo (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: callme_pardo: p1 = %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": callme_pardo: p1 = %p\n", p1);
 #endif
 
 	Probe_OpenMP_UF ((UINT64) par_uf);
@@ -106,8 +106,8 @@ static void callme_pardo (void *p1)
 static void callme_par (void *ptr)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: callme_par: ptr=%p\n", ptr);
-	fprintf (stderr, "mpitrace: callme_par: par_uf=%p\n", par_uf);
+	fprintf (stderr, PACKAGE_NAME": callme_par: ptr=%p\n", ptr);
+	fprintf (stderr, PACKAGE_NAME": callme_par: par_uf=%p\n", par_uf);
 #endif
 
 	Probe_OpenMP_UF ((UINT64) par_uf);
@@ -154,196 +154,196 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 	GOMP_parallel_start_real =
 		(void(*)(void*,void*,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_start");
 	if (GOMP_parallel_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_parallel_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_end */
 	GOMP_parallel_end_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_parallel_end");
 	if (GOMP_parallel_end_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_parallel_end in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_end in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_end_real,count);
 
 	/* Obtain @ for GOMP_barrier */
 	GOMP_barrier_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_barrier");
 	if (GOMP_barrier_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_barrier in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_barrier in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_barrier_real,count);
 
 	/* Obtain @ for GOMP_atomic_start */
 	GOMP_atomic_start_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_start");
 	if (GOMP_atomic_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_atomic_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_atomic_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_atomic_start_real,count);
 
 	/* Obtain @ for GOMP_atomic_end */
 	GOMP_atomic_end_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_end");
 	if (GOMP_atomic_end_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_atomic_end in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_atomic_end in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_atomic_end_real,count);
 
 	/* Obtain @ for GOMP_critical_enter */
 	GOMP_critical_start_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_critical_start");
 	if (GOMP_critical_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_critical_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_critical_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_critical_start_real,count);
 
 	/* Obtain @ for GOMP_critical_end */
 	GOMP_critical_end_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_critical_end");
 	if (GOMP_critical_end_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_critical_end in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_critical_end in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_critical_end_real,count);
 
 	/* Obtain @ for GOMP_critical_name_start */
 	GOMP_critical_name_start_real =
 		(void(*)(void**)) dlsym (RTLD_NEXT, "GOMP_critical_name_start");
 	if (GOMP_critical_name_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_critical_name_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_critical_name_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_critical_name_start_real,count);
 
 	/* Obtain @ for GOMP_critical_name_end */
 	GOMP_critical_name_end_real =
 		(void(*)(void**)) dlsym (RTLD_NEXT, "GOMP_critical_name_end");
 	if (GOMP_critical_name_end_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_critical_name_end in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_critical_name_end in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_critical_name_end_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_static_start */
 	GOMP_parallel_loop_static_start_real =
 		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_static_start");
 	if (GOMP_parallel_loop_static_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_parallel_loop_static_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_loop_static_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_static_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_runtime_start */
 	GOMP_parallel_loop_runtime_start_real =
 		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_runtime_start");
 	if (GOMP_parallel_loop_runtime_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_parallel_loop_runtime_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_loop_runtime_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_runtime_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_guided_start */
 	GOMP_parallel_loop_guided_start_real =
 		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_guided_start");
 	if (GOMP_parallel_loop_guided_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_parallel_loop_guided_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_loop_guided_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_guided_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_dynamic_start */
 	GOMP_parallel_loop_dynamic_start_real =
 		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_dynamic_start");
 	if (GOMP_parallel_loop_dynamic_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_parallel_loop_dynamic_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_loop_dynamic_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_dynamic_start_real,count);
 
 	/* Obtain @ for GOMP_loop_static_next */
 	GOMP_loop_static_next_real =
 		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_static_next");
 	if (GOMP_loop_static_next_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_static_next in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_static_next in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_static_next_real,count);
 
 	/* Obtain @ for GOMP_loop_runtime_next */
 	GOMP_loop_runtime_next_real =
 		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_next");
 	if (GOMP_loop_runtime_next_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_runtime_next in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_runtime_next in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_runtime_next_real,count);
 
 	/* Obtain @ for GOMP_loop_guided_next */
 	GOMP_loop_guided_next_real =
 		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_guided_next");
 	if (GOMP_loop_guided_next_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_guided_next in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_guided_next in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_guided_next_real,count);
 
 	/* Obtain @ for GOMP_loop_dynamic_next */
 	GOMP_loop_dynamic_next_real =
 		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_next");
 	if (GOMP_loop_dynamic_next_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_dynamic_next in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_dynamic_next in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_dynamic_next_real,count);
 
 	/* Obtain @ for GOMP_loop_static_start */
 	GOMP_loop_static_start_real =
 		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_static_start");
 	if (GOMP_loop_static_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_static_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_static_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_static_start_real,count);
 
 	/* Obtain @ for GOMP_loop_runtime_start */
 	GOMP_loop_runtime_start_real =
 		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_start");
 	if (GOMP_loop_runtime_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_runtime_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_runtime_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_runtime_start_real,count);
 
 	/* Obtain @ for GOMP_loop_guided_start */
 	GOMP_loop_guided_start_real =
 		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_guided_start");
 	if (GOMP_loop_guided_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_guided_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_guided_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_guided_start_real,count);
 
 	/* Obtain @ for GOMP_loop_dynamic_start */
 	GOMP_loop_dynamic_start_real =
 		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_start");
 	if (GOMP_loop_dynamic_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_dynamic_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_dynamic_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_dynamic_start_real,count);
 
 	/* Obtain @ for GOMP_loop_end */
 	GOMP_loop_end_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_loop_end");
 	if (GOMP_loop_end_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_end in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_end in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_end_real,count);
 
 	/* Obtain @ for GOMP_loop_end_nowait */
 	GOMP_loop_end_nowait_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_loop_end_nowait");
 	if (GOMP_loop_end_nowait_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_loop_end_nowait in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_loop_end_nowait in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_loop_end_nowait_real,count);
 
 	/* Obtain @ for GOMP_sections_end */
 	GOMP_sections_end_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end");
 	if (GOMP_sections_end_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_sections_end in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_sections_end in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_sections_end_real,count);
 
 	/* Obtain @ for GOMP_sections_end_nowait */
 	GOMP_sections_end_nowait_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end_nowait");
 	if (GOMP_sections_end_nowait_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_sections_end_nowait in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_sections_end_nowait in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_sections_end_nowait_real,count);
 
 	/* Obtain @ for GOMP_sections_start */
 	GOMP_sections_start_real =
 		(unsigned(*)(unsigned)) dlsym (RTLD_NEXT, "GOMP_sections_start");
 	if (GOMP_sections_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_sections_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_sections_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_sections_start_real,count);
 
 	/* Obtain @ for GOMP_sections_next */
 	GOMP_sections_next_real =
 		(unsigned(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_next");
 	if (GOMP_sections_next_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_sections_next in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_sections_next in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_sections_next_real,count);
 
 	/* Obtain @ for GOMP_parallel_sections_start */
 	GOMP_parallel_sections_start_real = 
 		(void(*)(void*,void*,unsigned,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_sections_start");
 	if (GOMP_parallel_sections_start_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find GOMP_parallel_sections_start in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_sections_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_sections_start_real,count);
 
 	/* Any hook point? */
@@ -358,8 +358,8 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_parallel_sections_start is at %p\n", GOMP_sections_start_real);
-	fprintf (stderr, "mpitrace: GOMP_parallel_sections params %p %p %u %u \n", p1, p2, p3, p4);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_sections_start is at %p\n", GOMP_sections_start_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_sections params %p %p %u %u \n", p1, p2, p3, p4);
 #endif
 
 	if (GOMP_parallel_sections_start_real != NULL)
@@ -369,7 +369,7 @@ void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_parallel_sections_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_sections_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -378,8 +378,8 @@ unsigned GOMP_sections_start (unsigned p1)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_sections_start is at %p\n", GOMP_sections_start_real);
-	fprintf (stderr, "mpitrace: GOMP_sections params %u\n", p1);
+	fprintf (stderr, PACKAGE_NAME": GOMP_sections_start is at %p\n", GOMP_sections_start_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_sections params %u\n", p1);
 #endif
 
 	if (GOMP_sections_start_real != NULL)
@@ -390,7 +390,7 @@ unsigned GOMP_sections_start (unsigned p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_sections_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_sections_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -400,7 +400,7 @@ unsigned GOMP_sections_next (void)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_sections_next is at %p\n", GOMP_sections_next_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_sections_next is at %p\n", GOMP_sections_next_real);
 #endif
 
 	if (GOMP_sections_next_real != NULL)
@@ -411,7 +411,7 @@ unsigned GOMP_sections_next (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_sections_next is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_sections_next is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -420,7 +420,7 @@ unsigned GOMP_sections_next (void)
 void GOMP_sections_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_sections_end is at %p\n", GOMP_sections_end_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_sections_end is at %p\n", GOMP_sections_end_real);
 #endif
 
 	if (GOMP_sections_end_real != NULL)
@@ -431,7 +431,7 @@ void GOMP_sections_end (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_sections_end is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_sections_end is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -439,7 +439,7 @@ void GOMP_sections_end (void)
 void GOMP_sections_end_nowait (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_sections_end_nowait is at %p\n", GOMP_sections_end_nowait_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_sections_end_nowait is at %p\n", GOMP_sections_end_nowait_real);
 #endif
 
 	if (GOMP_sections_end_nowait_real != NULL)
@@ -450,7 +450,7 @@ void GOMP_sections_end_nowait (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_sections_end_nowait is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_sections_end_nowait is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -458,7 +458,7 @@ void GOMP_sections_end_nowait (void)
 void GOMP_loop_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_end is at %p\n", GOMP_loop_end_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_end is at %p\n", GOMP_loop_end_real);
 #endif
 
 	if (GOMP_loop_end_real != NULL)
@@ -469,7 +469,7 @@ void GOMP_loop_end (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_end is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_end is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -477,7 +477,7 @@ void GOMP_loop_end (void)
 void GOMP_loop_end_nowait (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_end_nowait is at %p\n", GOMP_loop_end_nowait_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_end_nowait is at %p\n", GOMP_loop_end_nowait_real);
 #endif
 
 	if (GOMP_loop_end_nowait_real != NULL)
@@ -488,7 +488,7 @@ void GOMP_loop_end_nowait (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_end_nowait is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_end_nowait is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -498,8 +498,8 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 	int res = 0;
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_static_start is at %p\n", GOMP_loop_static_start_real);
-	fprintf (stderr, "mpitrace: params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_start is at %p\n", GOMP_loop_static_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_static_start_real != NULL)
@@ -510,7 +510,7 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_static_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -520,8 +520,8 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_runtime_start is at %p\n", GOMP_loop_runtime_start_real);
-	fprintf (stderr, "mpitrace: params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_start is at %p\n", GOMP_loop_runtime_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_runtime_start_real != NULL)
@@ -532,7 +532,7 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_runtime_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -542,8 +542,8 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_static_start is at %p\n", GOMP_loop_guided_start_real);
-	fprintf (stderr, "mpitrace: params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_start is at %p\n", GOMP_loop_guided_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_guided_start_real != NULL)
@@ -554,7 +554,7 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_guided_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_guided_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -564,8 +564,8 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_dynamic_start is at %p\n", GOMP_loop_dynamic_start_real);
-	fprintf (stderr, "mpitrace: params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_start is at %p\n", GOMP_loop_dynamic_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_dynamic_start_real != NULL)
@@ -576,7 +576,7 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_dynamic_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -585,8 +585,8 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_parallel_loop_static_start is at %p\n", GOMP_parallel_loop_static_start_real);
-	fprintf (stderr, "mpitrace: params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_static_start is at %p\n", GOMP_parallel_loop_static_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_static_start_real != NULL)
@@ -600,7 +600,7 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_static_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -608,8 +608,8 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_parallel_loop_runtime_start is at %p\n", GOMP_parallel_loop_runtime_start_real);
-	fprintf (stderr, "mpitrace: params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_runtime_start is at %p\n", GOMP_parallel_loop_runtime_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_runtime_start_real != NULL)
@@ -623,7 +623,7 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_runtime_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -631,8 +631,8 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_parallel_loop_guided_start is at %p\n", GOMP_parallel_loop_guided_start_real);
-	fprintf (stderr, "mpitrace: params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_guided_start is at %p\n", GOMP_parallel_loop_guided_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_static_start_real != NULL)
@@ -646,7 +646,7 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_guided_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_guided_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -654,8 +654,8 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_parallel_loop_dynamic_start is at %p\n", GOMP_parallel_loop_dynamic_start_real);
-	fprintf (stderr, "mpitrace: params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_dynamic_start is at %p\n", GOMP_parallel_loop_dynamic_start_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_dynamic_start_real != NULL)
@@ -669,7 +669,7 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_dynamic_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -678,8 +678,8 @@ int GOMP_loop_static_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_static_next is at %p\n", GOMP_loop_static_next_real);
-	fprintf (stderr, "mpitrace: params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_next is at %p\n", GOMP_loop_static_next_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
 #endif
 
 	if (GOMP_loop_static_next_real != NULL)
@@ -690,7 +690,7 @@ int GOMP_loop_static_next (long *p1, long *p2)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_static_next is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_next is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -700,8 +700,8 @@ int GOMP_loop_runtime_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_runtime_next is at %p\n", GOMP_loop_runtime_next_real);
-	fprintf (stderr, "mpitrace: params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_next is at %p\n", GOMP_loop_runtime_next_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
 #endif
 
 	if (GOMP_loop_runtime_next_real != NULL)
@@ -712,7 +712,7 @@ int GOMP_loop_runtime_next (long *p1, long *p2)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_runtime_next is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_next is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -722,8 +722,8 @@ int GOMP_loop_guided_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_guided_next is at %p\n", GOMP_loop_guided_next_real);
-	fprintf (stderr, "mpitrace: params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_guided_next is at %p\n", GOMP_loop_guided_next_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
 #endif
 
 	if (GOMP_loop_guided_next_real != NULL)
@@ -734,7 +734,7 @@ int GOMP_loop_guided_next (long *p1, long *p2)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_guided_next is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_guided_next is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -744,8 +744,8 @@ int GOMP_loop_dynamic_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_loop_dynamic_next is at %p\n", GOMP_loop_dynamic_next_real);
-	fprintf (stderr, "mpitrace: params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_next is at %p\n", GOMP_loop_dynamic_next_real);
+	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
 #endif
 
 	if (GOMP_loop_dynamic_next_real != NULL)
@@ -756,7 +756,7 @@ int GOMP_loop_dynamic_next (long *p1, long *p2)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_loop_dynamic_next is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_next is not hooked! exiting!!\n");
 		exit (0);
 	}
 	return res;
@@ -767,8 +767,8 @@ extern int omp_get_thread_num();
 void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_parallel_start is at %p\n", GOMP_parallel_start_real);
-	fprintf (stderr, "mpitrace: GOMP_parallel_start params %p %p %u\n", p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_start is at %p\n", GOMP_parallel_start_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_start params %p %p %u\n", p1, p2, p3);
 #endif
 
 	if (GOMP_parallel_start_real != NULL)
@@ -785,7 +785,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_parallel_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -793,7 +793,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 void GOMP_parallel_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_parallel_end is at %p\n", GOMP_parallel_end_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_end is at %p\n", GOMP_parallel_end_real);
 #endif
 
 	if (GOMP_parallel_start_real != NULL)
@@ -804,7 +804,7 @@ void GOMP_parallel_end (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_parallel_end is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_end is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -812,7 +812,7 @@ void GOMP_parallel_end (void)
 void GOMP_barrier (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_barrier is at %p\n", GOMP_barrier_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_barrier is at %p\n", GOMP_barrier_real);
 #endif
 
 	if (GOMP_barrier_real != NULL)
@@ -823,7 +823,7 @@ void GOMP_barrier (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_barrier is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_barrier is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -831,8 +831,8 @@ void GOMP_barrier (void)
 void GOMP_critical_name_start (void **p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_critical_name_start is at %p\n", GOMP_critical_name_start_real);
-	fprintf (stderr, "mpitrace: GOMP_critical_name_start params %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_start is at %p\n", GOMP_critical_name_start_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_start params %p\n", p1);
 #endif
 
 	if (GOMP_critical_name_start_real != NULL)
@@ -843,7 +843,7 @@ void GOMP_critical_name_start (void **p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_critical_name_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -851,8 +851,8 @@ void GOMP_critical_name_start (void **p1)
 void GOMP_critical_name_end (void **p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_critical_name_end is at %p\n", GOMP_critical_name_end_real);
-	fprintf (stderr, "mpitrace: GOMP_critical_name_end params %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_end is at %p\n", GOMP_critical_name_end_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_end params %p\n", p1);
 #endif
 
 	if (GOMP_critical_name_end_real != NULL)
@@ -863,7 +863,7 @@ void GOMP_critical_name_end (void **p1)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_critical_name_end is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_end is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -872,7 +872,7 @@ void GOMP_critical_name_end (void **p1)
 void GOMP_critical_start (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_critical_start is at %p\n", GOMP_critical_start_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_critical_start is at %p\n", GOMP_critical_start_real);
 #endif
 
 	if (GOMP_critical_start_real != NULL)
@@ -883,7 +883,7 @@ void GOMP_critical_start (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_critical_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_critical_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -891,7 +891,7 @@ void GOMP_critical_start (void)
 void GOMP_critical_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_critical_end is at %p\n", GOMP_critical_end_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_critical_end is at %p\n", GOMP_critical_end_real);
 #endif
 
 	if (GOMP_critical_end_real != NULL)
@@ -902,7 +902,7 @@ void GOMP_critical_end (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_critical_end is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_critical_end is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -910,7 +910,7 @@ void GOMP_critical_end (void)
 void GOMP_atomic_start (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_atomic_start is at %p\n", GOMP_atomic_start_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_atomic_start is at %p\n", GOMP_atomic_start_real);
 #endif
 
 	if (GOMP_atomic_start_real != NULL)
@@ -921,7 +921,7 @@ void GOMP_atomic_start (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_atomic_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_atomic_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -929,7 +929,7 @@ void GOMP_atomic_start (void)
 void GOMP_atomic_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, "mpitrace: GOMP_atomic_end is at %p\n", GOMP_atomic_end_real);
+	fprintf (stderr, PACKAGE_NAME": GOMP_atomic_end is at %p\n", GOMP_atomic_end_real);
 #endif
 
 	if (GOMP_atomic_end_real != NULL)
@@ -940,7 +940,7 @@ void GOMP_atomic_end (void)
 	}
 	else
 	{
-		fprintf (stderr, "mpitrace: GOMP_atomic_end is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_atomic_end is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -960,7 +960,7 @@ int gnu_libgomp_4_2_hook_points (int ntask)
 		/* Has this happened? */
 		/* a) Increase MAX_THD to be higher than omp_get_max_threads() */
 		/* b) Decrease OMP_NUM_THREADS in order to decrease omp_get_max_threads() */
-		fprintf (stderr, "mpitrace: omp_get_max_threads() > MAX_THD. Aborting...\nRecompile MPItrace increasing MAX_THD or decrease OMP_NUM_THREADS\n");
+		fprintf (stderr, PACKAGE_NAME": omp_get_max_threads() > MAX_THD. Aborting...\nRecompile MPItrace increasing MAX_THD or decrease OMP_NUM_THREADS\n");
 		exit (1);
 	}
 

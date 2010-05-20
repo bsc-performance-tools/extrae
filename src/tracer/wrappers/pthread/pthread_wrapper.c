@@ -57,18 +57,18 @@ static void GetpthreadHookPoints (int rank)
 		(int(*)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*))
 		dlsym (RTLD_NEXT, "pthread_create");
 	if (pthread_create_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find pthread_create in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_create in DSOs!!\n");
 
 	/* Obtain @ for pthread_join */
 	pthread_join_real =
 		(int(*)(pthread_t,void**)) dlsym (RTLD_NEXT, "pthread_join");
 	if (pthread_join_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find pthread_join in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_join in DSOs!!\n");
 
 	/* Obtain @ for pthread_detach */
 	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
 	if (pthread_detach_real == NULL && rank == 0)
-		fprintf (stderr, "mpitrace: Unable to find pthread_detach in DSOs!!\n");
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_detach in DSOs!!\n");
 }
 
 /*

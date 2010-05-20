@@ -33,16 +33,16 @@
 
 void *routine1 (void *parameters)
 {
-        SEQtrace_event (1, 1);
+        Extrae_event (1, 1);
         printf ("routine1 : (thread=%08x, param %p)\n", pthread_self(), parameters);
-        SEQtrace_event (1, 0);
+        Extrae_event (1, 0);
 }
 
 void *routine2 (void *parameters)
 {
-        SEQtrace_event (2, 1);
+        Extrae_event (2, 1);
         printf ("routine 2 : (thread=%08x, param %p)\n", pthread_self(), parameters);
-        SEQtrace_event (2, 0);
+        Extrae_event (2, 0);
 }
 
 
@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
         pthread_t t[MAX_THREADS];
         int i;
 
-        MPItrace_init ();
+        Extrae_init ();
 
         for (i = 0; i < MAX_THREADS; i++)
                 pthread_create (&t[i], NULL, routine1, (void*) ((long) i));
@@ -65,7 +65,7 @@ int main (int argc, char *argv[])
         for (i = 0; i < MAX_THREADS; i++)
                 pthread_join (t[i], NULL);
 
-        MPItrace_fini();
+        Extrae_fini();
 }
 
 

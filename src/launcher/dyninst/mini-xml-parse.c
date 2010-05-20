@@ -209,7 +209,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 		{
 			if (xmlStrcmp(root_tag->name, TRACE_TAG))
 			{	
-				fprintf (stderr, "mpitrace: Invalid configuration file\n");
+				fprintf (stderr, PACKAGE_NAME": Invalid configuration file\n");
 			}
 			else
 			{
@@ -277,7 +277,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 		}
 		else
 		{
-			fprintf (stderr, "mpitrace: Error! Empty mpitrace configuration file\n");
+			fprintf (stderr, PACKAGE_NAME": Error! Empty mpitrace configuration file\n");
 		}
 
 		xmlFreeDoc (xmldoc);

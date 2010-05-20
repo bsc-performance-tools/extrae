@@ -77,13 +77,13 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 
 	if (ncounters != 1)
 	{
-		fprintf (stderr, "mpitrace: PMAPI layer just supports 1 HWC group per set (see set %d)\n", pretended_set);
+		fprintf (stderr, PACKAGE_NAME": PMAPI layer just supports 1 HWC group per set (see set %d)\n", pretended_set);
 	}
 	
 	HWC_sets = (struct HWC_Set_t *) realloc (HWC_sets, sizeof(struct HWC_Set_t)* (HWC_num_sets+1));
 	if (HWC_sets == NULL)
 	{
-		fprintf (stderr, "mpitrace: Cannot allocate memory for HWC_set (rank %d)\n", rank);
+		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for HWC_set (rank %d)\n", rank);
 		return 0;
 	}
 
@@ -115,7 +115,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 		}
 		if (!found)
 		{
-			fprintf (stderr, "mpitrace: Cannot parse HWC %s in set %d, skipping\n", counters[0], pretended_set);
+			fprintf (stderr, PACKAGE_NAME": Cannot parse HWC %s in set %d, skipping\n", counters[0], pretended_set);
 			return 0;
 		}
 	}
@@ -123,14 +123,14 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 	if (HWC_sets[num_set].num_counters == 0)
 	{
 		if (rank == 0)
-			fprintf (stderr, "mpitrace: Set %d of counters seems to be empty/invalid, skipping\n", pretended_set);
+			fprintf (stderr, PACKAGE_NAME": Set %d of counters seems to be empty/invalid, skipping\n", pretended_set);
 		return 0;
 	}
 
 	if (GROUP >= HWCGroup_Info.maxgroups)
 	{
 		if (rank == 0)
-			fprintf (stderr, "mpitrace: Error! Group %d is beyond the maximum number of groups available (0 to %d). Check set %d.\n", GROUP, HWCGroup_Info.maxgroups-1, pretended_set);
+			fprintf (stderr, PACKAGE_NAME": Error! Group %d is beyond the maximum number of groups available (0 to %d). Check set %d.\n", GROUP, HWCGroup_Info.maxgroups-1, pretended_set);
 		return 0;
 	}
 
@@ -161,7 +161,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 		if (!strcasecmp(domain, "all"))
 		{
 			if (rank == 0)
-				fprintf (stdout, "mpitrace: PMAPI domain set to ALL for HWC set %d\n",
+				fprintf (stdout, PACKAGE_NAME": PMAPI domain set to ALL for HWC set %d\n",
 					pretended_set);
 			HWC_sets[num_set].pmprog.mode.b.kernel = 1;
 			HWC_sets[num_set].pmprog.mode.b.user = 1;
@@ -171,7 +171,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 		else if (!strcasecmp(domain, "kernel"))
 		{
 			if (rank == 0)
-				fprintf (stdout, "mpitrace: PMAPI domain set to KERNEL for HWC set %d\n",
+				fprintf (stdout, PACKAGE_NAME": PMAPI domain set to KERNEL for HWC set %d\n",
 					pretended_set);
 			HWC_sets[num_set].pmprog.mode.b.kernel = 1;
 			HWC_sets[num_set].pmprog.mode.b.user = 0;
@@ -181,7 +181,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 		else if (!strcasecmp(domain, "user"))
 		{
 			if (rank == 0)
-				fprintf (stdout, "mpitrace: PMAPI domain set to USER for HWC set %d\n",
+				fprintf (stdout, PACKAGE_NAME": PMAPI domain set to USER for HWC set %d\n",
 					pretended_set);
 			HWC_sets[num_set].pmprog.mode.b.kernel = 0;
 			HWC_sets[num_set].pmprog.mode.b.user = 1;
@@ -191,7 +191,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 		else if (!strcasecmp(domain, "other"))
 		{
 			if (rank == 0)
-				fprintf (stdout, "mpitrace: PMAPI domain set to OTHER for HWC set %d\n",
+				fprintf (stdout, PACKAGE_NAME": PMAPI domain set to OTHER for HWC set %d\n",
 					pretended_set);
 			HWC_sets[num_set].pmprog.mode.b.kernel = 0;
 			HWC_sets[num_set].pmprog.mode.b.user = 0;
@@ -201,7 +201,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 		else
 		{
 			if (rank == 0)
-				fprintf (stdout, "mpitrace: PMAPI domain set to USER for HWC set %d\n",
+				fprintf (stdout, PACKAGE_NAME": PMAPI domain set to USER for HWC set %d\n",
 					pretended_set);
 			HWC_sets[num_set].pmprog.mode.b.kernel = 0;
 			HWC_sets[num_set].pmprog.mode.b.user = 1;
@@ -212,7 +212,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 	else
 	{
 		if (rank == 0)
-			fprintf (stdout, "mpitrace: PMAPI domain set to USER for HWC set %d\n",
+			fprintf (stdout, PACKAGE_NAME": PMAPI domain set to USER for HWC set %d\n",
 				pretended_set);
 		HWC_sets[num_set].pmprog.mode.b.kernel = 0;
 		HWC_sets[num_set].pmprog.mode.b.user = 1;
@@ -225,7 +225,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 
 	if (rank == 0)
 	{
-		fprintf (stdout, "mpitrace: HWC set %d refers to group %s (%d) which contains following counters < ", pretended_set, HWCGroup_Info.event_groups[GROUP].short_name, GROUP);
+		fprintf (stdout, PACKAGE_NAME": HWC set %d refers to group %s (%d) which contains following counters < ", pretended_set, HWCGroup_Info.event_groups[GROUP].short_name, GROUP);
 		for (i = 0; i < HWC_sets[num_set].num_counters; i++)
 		{
 			pm_events2_t *evp = NULL;
@@ -339,7 +339,7 @@ void HWCBE_PMAPI_Initialize (int TRCOptions)
 
 	MAX_HWC_reported_by_PMAPI = ProcessorMetric_Info.maxpmcs;
 
-	fprintf (stdout, "mpitrace: PMAPI successfully initialized for %s processor with %d available PMCs.\n", ProcessorMetric_Info.proc_name, ProcessorMetric_Info.maxpmcs);
+	fprintf (stdout, PACKAGE_NAME": PMAPI successfully initialized for %s processor with %d available PMCs.\n", ProcessorMetric_Info.proc_name, ProcessorMetric_Info.maxpmcs);
 }
 
 int HWCBE_PMAPI_Init_Thread (UINT64 time, int threadid)
@@ -357,7 +357,7 @@ int HWCBE_PMAPI_Read (unsigned int tid, long long *store_buffer)
 	rc = pm_get_data_mythread (&counters);
 	if (rc != 0)
 	{
-		fprintf (stderr, "mpitrace: pm_get_data_mythread failed for thread %d (%s:%d)\n",
+		fprintf (stderr, PACKAGE_NAME": pm_get_data_mythread failed for thread %d (%s:%d)\n",
 			tid, __FILE__, __LINE__);
 	}
 	for (i = 0; i < num_hwc; i++)

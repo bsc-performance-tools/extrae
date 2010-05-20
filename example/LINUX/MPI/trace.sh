@@ -1,8 +1,8 @@
 #!/bin/sh
 
-export MPITRACE_HOME=@sub_PREFIXDIR@
-export MPTRACE_CONFIG_FILE=mpitrace.xml
-export LD_PRELOAD=${MPITRACE_HOME}/lib/libmpitrace.so
+export EXTRAE_HOME=@sub_PREFIXDIR@
+export EXTRAE_CONFIG_FILE=mpitrace.xml
+export LD_PRELOAD=${EXTRAE_HOME}/lib/libmpitrace.so
 
 ## Run the desired program
 $*

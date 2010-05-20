@@ -46,7 +46,7 @@ These are the basic steps you have to follow in order to use your own applicatio
    - target: Allows to specify the final trace size (250 Mb by default)
    - start-after: Idle seconds before the analysis starts. This is meant to skip the initialization phase (30 secs by default).
 
-3. The path in the variable MPITRACE_HOME, that points to the installation of the tracing package, might need to be updated in the different scripts (run.cmd, trace.sh and merge.sh) to select between the 32/64-bit version of the package.
+3. The path in the variable EXTRAE_HOME, that points to the installation of the tracing package, might need to be updated in the different scripts (run.cmd, trace.sh and merge.sh) to select between the 32/64-bit version of the package.
 
 Results
 =======
