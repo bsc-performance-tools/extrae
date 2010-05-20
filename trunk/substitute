@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $# -ne 4 ] ; then
+  echo "Invalid parameters. Pass SED location, KEY, VALUE and FILE"
+	exit 0
+fi
+
+SED=$1
+KEY=$2
+VALUE=$3
+FILE=$4
+TMPFILE=`/bin/mktemp substitute-XXXXXX`
+
+${SED} "s|${KEY}|${VALUE}|g" < ${FILE} >${TMPFILE}
+/bin/mv -f ${TMPFILE} ${FILE}
+

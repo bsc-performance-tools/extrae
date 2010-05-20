@@ -1,0 +1,99 @@
+\chapter{Environment variables}\label{cha:EnvVar}
+
+Although \TRACE is configured through an XML file (which is pointed by the {\tt MPTRACE\_CONFIG\_FILE}), it also supports minimal configuration to be done via environment variables for those systems that do not have the library responsible for parsing the XML files ({\em i.e.,} libxml2).
+
+This appendix presents the environment variables the \TRACE package uses if {\tt MPTRACE\_CONFIG\_FILE} is not set and a description. For those environment variable that refer to XML 'enabled' attributes ({\em i.e.}, that can be set to "yes" or "no") are considered to be enabled if their value are defined to 1.
+ 
+\begin{table}[!ht]
+\centerline {
+\begin{tabular}{| l | l |}
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+  \hline
+  MPTRACE\_BUFFER\_SIZE & Set the number of records that the instrumentation buffer can\\
+                        &  hold before flushing them\\
+  \hline
+  MPTRACE\_CIRCULAR\_BUFFER & \\
+  \hline
+  MPTRACE\_COUNTERS & See section \ref{subsec:ProcessorPerformanceCounters}. Just one set can be defined. Counters (in PAPI)\\
+                    & groups (in PMAPI) are given separated by commas.\\
+  \hline
+  MPTRACE\_CONTROL\_FILE & \\
+  \hline
+  MPTRACE\_CONTROL\_GLOPS & \\
+  \hline
+  MPTRACE\_CONTROL\_TIME & \\
+  \hline
+  MPTRACE\_DIR & Specifies where temporal files will be created during\\
+               & instrumentation\\
+  \hline
+  MPITRACE\_DISABLE\_MPI & Disable MPI instrumentation\\
+  \hline
+  MPITRACE\_DISABLE\_OMP & Disable OpenMP instrumentation\\
+  \hline
+  MPITRACE\_DISABLE\_PACX & Disable PACX instrumentation\\
+  \hline
+  MPTRACE\_FILE\_SIZE & Set the maximum size (in Mbytes) for the intermediate trace file\\
+  \hline
+  MPTRACE\_FUNCTIONS & \\
+  \hline
+  MPTRACE\_FUNCTIONS\_MAX\_DEPTH & {\em (deprecated)} \\
+  \hline
+  MPTRACE\_FUNCTIONS\_COUNTERS\_ON & Specify if the performance counters should be collected when a\\
+                                   & user function event is emitted\\
+  \hline
+  MPTRACE\_FINAL\_DIR & Specifies where files will be stored when the application ends\\
+  \hline
+  MPTRACE\_GATHER\_MPITS & Gather intermediate trace files into a single directory\\
+  & (\em{this is only available when instrumenting MPI applications})\\
+  \hline
+  MPITRACE\_HOME & Points where the \TRACE is installed.\\
+  \hline
+  MPITRACE\_INITIAL\_MODE & Choose whether the instrumentation runs in in {\tt detail} or\\
+                          & in {\tt bursts} mode\\
+  \hline
+  MPITRACE\_BURST\_THRESHOLD & Specify the threshold time to filter running bursts\\
+  \hline
+  MPTRACE\_MINIMUM\_TIME & Specify the minimum amount of instrumentation time\\
+  \hline
+  MPITRACE\_MPI\_CALLER & Choose which MPI calling routines should be dumped into the\\
+                        & tracefile\\
+  \hline
+  MPITRACE\_MPI\_COUNTERS\_ON & Set to 1 if MPI must report performace counter values\\
+  \hline 
+  MPITRACE\_MPI\_STATISTICS & Set to 1 if basic MPI statistics must be collected in burst mode\\
+  \hline
+  MPITRACE\_NETWORK\_COUNTERS & Set to 1 to dump network performance counters at flush points\\
+                              & {\em (Only available in systems with Myrinet GM/MX networks)}\\
+  \hline
+  MPITRACE\_OMP\_COUNTERS\_ON & Set to 1 if OpenMP must report performance counters values. \\
+  \hline
+  MPTRACE\_OMP\_LOCKS & Set to 1 if locks have to be instrumented\\
+  \hline 
+  MPITRACE\_ON & Enables instrumentation\\
+  \hline
+  MPITRACE\_PACX\_CALLER & Choose which PACX calling routines should be dumped into the\\
+                        & tracefile\\
+  \hline
+  MPITRACE\_PACX\_COUNTERS\_ON & Set to 1 if PACX must report performace counter values\\
+  \hline 
+  MPITRACE\_PACX\_STATISTICS & Set to 1 if basic PACX statistics must be collected in burst mode\\
+  \hline
+  MPITRACE\_PROGRAM\_NAME & Specify the prefix of the resulting intermediate trace files\\ 
+  \hline
+  MPITRACE\_RUSAGE & Instrumentation emits resource usage at flush points if set to 1\\
+  \hline
+  MPTRACE\_SPU\_DMA\_CHANNEL & Choose the SPU-PPU dma communication channel\\
+  \hline
+  MPTRACE\_SPU\_BUFFER\_SIZE & Set the buffer size of the SPU side\\
+  \hline 
+  MPTRACE\_SPU\_FILE\_SIZE & Set the maximum size for the SPU side (default: 5Mbytes)\\
+  \hline
+  MPITRACE\_TRACE\_TYPE & Choose whether the resulting tracefiles are intended for Paraver or Dimemas\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure \TRACE}
+\label{tab:EnvironmentVariables}
+\end{table}
+

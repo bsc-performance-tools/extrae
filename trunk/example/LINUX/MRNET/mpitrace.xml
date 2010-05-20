@@ -1,0 +1,120 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="/home/bsc41/bsc41127/Tools/mpitrace_mrnet2.0/mpitrace_svn20100211/Package/64"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="Id: xml-parse.c 172 2010-02-11 14:03:21Z harald $"
+>
+  <mpi enabled="yes">
+    <counters enabled="yes" />
+  </mpi>
+
+  <openmp enabled="no">
+    <locks enabled="no" />
+    <counters enabled="yes" />
+  </openmp>
+
+  <callers enabled="yes">
+    <mpi enabled="yes">1-3</mpi>
+    <sampling enabled="no">1-5</sampling>
+  </callers>
+
+  <user-functions enabled="no" list="/home/bsc41/bsc41273/user-functions.dat">
+    <max-depth enabled="no">3</max-depth>
+    <counters enabled="yes" />
+  </user-functions>
+
+  <counters enabled="yes">
+    <cpu enabled="yes" starting-set-distribution="1">
+
+      <set enabled="yes" changeat-time="500u" >
+PM_GCT_EMPTY_CYC,PM_LSU_LMQ_SRQ_EMPTY_CYC,PM_HV_CYC,PM_CYC,PM_1PLUS_PPC_CMPL,PM_INST_CMPL,PM_GRP_CMPL,PM_TB_BIT_TRANS
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_GCT_EMPTY_CYC,PM_INST_CMPL,PM_FLUSH_BR_MPRED,PM_BR_MPRED_TA,PM_GCT_EMPTY_IC_MISS,PM_CYC,PM_GCT_EMPTY_BR_MPRED,PM_L1_WRITE_CYC
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_LSU0_BUSY,PM_LSU1_BUSY,PM_LSU_FLUSH,PM_FLUSH_LSU_BR_MPRED,PM_CMPLU_STALL_LSU,PM_INST_CMPL,PM_CMPLU_STALL_ERAT_MISS,PM_CYC
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_CMPLU_STALL_OTHER,PM_INST_CMPL,PM_LD_MISS_L1,PM_CYC,PM_CMPLU_STALL_DCACHE_MISS,PM_LSU_DERAT_MISS,PM_CMPLU_STALL_REJECT,PM_LD_REF_L1
+
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_INST_CMPL,PM_GCT_EMPTY_SRQ_FULL,PM_FXU_FIN,PM_FPU_FIN,PM_CMPLU_STALL_FXU,PM_FXU_BUSY,PM_CMPLU_STALL_DIV,PM_CYC
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_FPU_FDIV,PM_FPU_FMA,PM_INST_CMPL,PM_IOPS_CMPL,PM_CMPLU_STALL_FDIV,PM_FPU_FSQRT,PM_CMPLU_STALL_FPU,PM_CYC
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_INST_DISP, PM_DATA_FROM_MEM, PM_LD_MISS_L1, PM_CYC, PM_GCT_FULL_CYC, PM_INST_CMPL, PM_ST_REF_L1, PM_LD_REF_L1
+      </set>
+
+      <!-- Extended statistics sets -->
+      <set enabled="yes" changeat-time="500u" >
+PM_DTLB_MISS, PM_ITLB_MISS, PM_LD_MISS_L1, PM_ST_MISS_L1, PM_CYC, PM_INST_CMPL, PM_ST_REF_L1, PM_LD_REF_L1
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_FPU_FDIV, PM_FPU_FMA, PM_FPU0_FIN, PM_FPU1_FIN, PM_CYC, PM_FPU_STF, PM_INST_CMPL, PM_LSU_LDF
+      </set>
+
+      <set enabled="yes" changeat-time="500u" >
+PM_DATA_FROM_L2, PM_INST_CMPL, PM_DATA_FROM_MEM, PM_LD_MISS_L1_LSU0, PM_1PLUS_PPC_CMPL, PM_CYC, PM_LD_MISS_L1_LSU1, PM_LD_REF_L1
+      </set>
+
+    </cpu>
+
+    <network enabled="no" />
+
+    <resource-usage enabled="no" />
+
+	<memory-usage enabled="no" />
+  </counters>
+
+  <storage enabled="no">
+    <trace-prefix enabled="yes">TRACE</trace-prefix>
+    <size enabled="no">5</size>
+    <temporal-directory enabled="yes">/scratch</temporal-directory>
+    <final-directory enabled="yes">/gpfs/scratch/bsc41/bsc41273</final-directory>
+    <gather-mpits enabled="no" />
+  </storage>
+
+  <buffer enabled="yes">
+    <size enabled="yes">150000</size>
+    <circular enabled="yes" />
+  </buffer>
+
+  <trace-control enabled="yes">
+    <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
+    <global-ops enabled="no"></global-ops>
+    <remote-control enabled="yes">
+		<!-- target: final size of the trace (Mb); analysis: choose between clustering/spectral; start-after: idle seconds before starting -->
+        <mrnet enabled="yes" target="250" analysis="clustering" start-after="30"/>
+		<signal enabled="no" which="USR1"/>
+    </remote-control>
+  </trace-control>
+
+  <others enabled="no">
+    <minimum-time enabled="no">10M</minimum-time>
+  </others>
+
+  <bursts enabled="no">
+    <threshold enabled="yes">500u</threshold>
+    <mpi-statistics enabled="yes" />
+  </bursts>
+
+  <cell enabled="no">
+    <spu-file-size enabled="yes">5</spu-file-size>
+    <spu-buffer-size enabled="yes">64</spu-buffer-size>
+    <spu-dma-channel enabled="yes">2</spu-dma-channel>
+  </cell>
+
+</trace>

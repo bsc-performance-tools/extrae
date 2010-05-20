@@ -1,0 +1,198 @@
+.\" Process this file with
+.\" groff -man -Tascii $FILE
+.\"
+.TH MPI2PRV 3 "JANUARY 2005"
+.SH NAME
+mpitrace_event, mpitrace_counters, mpitrace_eventandcounters, mpitrace_shutdown, mpitrace_restart, mpitrace_set_tracing_tasks
+
+ - API calls for the MPItrace instrumentation facility
+.\"
+.\" Com va?
+.\" 
+.SH SYNOPSIS
+C/C++ API:
+
+.I #include <mpitrace_user_events.h>
+
+void
+.B MPItrace_event
+(unsigned int type, unsigned int value);
+
+void
+.B MPItrace_counters
+(void);
+
+void
+.B MPItrace_eventandcounters
+(unsigned int type, unsigned int value);
+
+void 
+.B MPItrace_shutdown
+(void);
+
+void
+.B MPItrace_restart
+(void);
+
+void
+.B MPItrace_set_tracing_tasks
+(unsigned int from, usigned int to);
+
+void 
+.B MPItrace_set_options
+(int options);
+
+.B MPItrace_previous_hwc_set 
+()
+
+.B MPItrace_next_hwc_set
+()
+Fortran API:
+
+.I include <mpitrace_user_eventsf.h>
+
+.B mpitrace_event
+(INTEGER type, INTEGER value)
+
+.B mpitrace_counters
+()
+
+.B mpitrace_eventandcounters
+(INTEGER type, INTEGER value)
+
+.B mpitrace_shutdown
+()
+
+.B mpitrace_restart
+()
+
+.B mpitrace_set_tracing_tasks
+(INTEGER from, INTEGER to)
+
+.B mpitrace_set_options
+(INTEGER options)
+
+.B mpitrace_previous_hwc_set 
+()
+
+.B mpitrace_next_hwc_set
+()
+.\"
+.\" Descripcio
+.\"
+.SH DESCRIPTION
+MPItrace instruments MPI routines by default, but it also allows manual instrumentation on the user code. This section shows and describes all the calls provided by MPItrace to whoever wants instrument manually any application.
+
+The 
+.B mpitrace_event 
+adds a single timestamped event into the tracefile. The event has two arguments: type and value.
+
+Some common use of events are:
+
+* Identify loop iterations (or any code block): Given a loop, the user can set a unique type for the loop and a value related to the iterator value of the loop. For example:
+
+  for (i = 1; i <= MAX_LOOP; i++)
+  {
+    MPItrace_event (1000, i);
+    [original loop code]
+  }
+  MPItrace_event (1000, 0);
+
+The last added call to OMPItrace\_event marks the end of the loop setting the event value to 0, which facilitates the analysis with Paraver.
+
+* Identify user routines: Choosing a constant type (6000019 is usual in other tracing tools) and different values for different routines (set to 0 to mark a "leave" event) 
+
+  void routine1 (void)
+  {
+    MPItrace_event (6000019, 1);
+    [routine 1 code]
+    MPItrace_event (6000019, 0);
+  }
+
+  void routine2 (void)
+  {
+    MPItrace_event (6000019, 2);
+    [routine 2 code]
+    MPItrace_event (6000019, 0);
+  }
+
+* Identify any point in the application using a unique combination of type and value.
+
+
+.B MPItrace_counters
+obtains information of the processor performance counters when it is invoked. The counters are those pointed by MPTRACE_COUNTERS (see on man 1 mpitrace).
+
+
+.B MPItrace_eventandcounters
+lets the user add an event and obtain the performance counters with one call. All the information will have exactly the same timestamp.
+
+.B MPItrace_shutdown
+stops further tracing. The tracing can be restarted invoking 
+.B MPItrace_restart
+
+
+.B MPItrace_set_tracing_tasks
+changes which tasks emit information to the intermediate tracefiles. By default, all tasks are traced by default and this call lets the user choose which subrange of the tasks will be allowed to perform the tracing and which will be disallowed. Note that the only way to let all the tasks trace is calling 
+.B MPItrace_set_tracing_tasks
+with parameters 0 and number of tasks.
+
+Calling 
+.B MPItrace_shutdown
+and then
+.B MPItrace_restart
+will not change which tasks emit information to the intermediate trace file.
+
+.B MPItrace_set_options
+can change the internal behaviour of the tracing facility. Just use one of the following constants combined with a bitwise or (| operator in C, IOR in Fortran) to enable or disable some components of the tracing facility.
+
+.IP MPITRACE_DISABLE_ALL_OPTIONS
+Disables EVERYTHING but the user events inserted manually on the source code.
+
+.IP MPITRACE_CALLER_OPTION
+If present and if the related environment variable is also present, every MPI call will emit information of the routine that invoked that MPI call.
+
+.IP MPITRACE_HWC_OPTION
+If activated, it will emit information about the hardware counters available (if the related environment variable is also defined).
+
+.IP MPITRACE_MPI_HWC_OPTION
+If it is activated and the tracing facility is configured to obtain hardware counters information, it will emit this kind of information every time a MPI call is invoked.
+
+.IP MPITRACE_MPI_OPTION
+If it is activated, the tracing facility will emit to the tracefile information of every MPI call.
+
+.IP MPITRACE_ENABLE_ALL_OPTIONS
+Enables EVERYTHING (default value). Requires some environment variables to be setup on the execution of the instrumented code.
+
+.PP
+.B MPItrace_next_hwc_set
+and
+.B MPItrace_previous_hwc_set
+let the user change the hardware counters set if there are several specified in the XML file.
+
+.\"
+.\" Opcions
+.\"
+.SH AUTHOR
+Tool was developed at the CEPBA (European Center for Parallelism of Barcelona) by the "tools team".
+
+Documentation was written by Harald Servat Gelabert
+.\"
+.\" Com reportar bugs
+.\"
+.SH "REPORTING BUGS"
+If you find any bug on the documentation or in the software, please send a descriptive mail to
+
+.B cepbatools@cepba.upc.edu
+.\"
+.\" D'on treure mes informacio
+.\"
+.SH "ONLINE DOCUMENTATION"
+More information and detailed examples can be found at
+
+.B http://www.cepba.upc.edu/paraver/
+.\"
+.\" Altres
+.\"
+.SH "SEE ALSO"
+.BR mpi2prv (1)
+.BR mpitrace (1)
