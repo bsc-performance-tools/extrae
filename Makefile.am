@@ -48,6 +48,7 @@ MPI_EXAMPLE_FILES=example/CELL/MPI/worker.c \
  example/CELL/MPI/bitmap.c \
  example/CELL/MPI/bitmap.h \
  example/CELL/MPI/README \
+ example/CELL/MPI/trace-xml.sh \
  example/CELL/MPI/Makefile
 
 OMP_EXAMPLE_FILES=/dev/null
