@@ -1565,10 +1565,10 @@ void close_mpits (int thread)
 
 	/* Some FS looks quite lazy and "needs time" to create directories?
 	   This loop fixes this issue (seen in BGP) */
-	ret = mkdir_recursive (Get_TemporalDir(TASKID));
+	ret = mkdir_recursive (Get_FinalDir(TASKID));
 	while (!ret && attempts > 0)
 	{
-		ret = mkdir_recursive (Get_TemporalDir(TASKID));
+		ret = mkdir_recursive (Get_FinalDir(TASKID));
 		attempts --;
 	}
 	if (!ret && attempts == 0)
