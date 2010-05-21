@@ -48,6 +48,7 @@ mpimpi2prv_SOURCES = \
  ../merger.c \
  ../paraver/object_tree.h \
  ../paraver/addr2info.c ../paraver/addr2info.h \
+ ../paraver/addr2info_hashcache.c ../paraver/addr2info_hashcache.h \
  ../paraver/file_set.c ../paraver/file_set.h \
  ../paraver/communication_queues.c ../paraver/communication_queues.h \
  ../paraver/mpi_comunicadors.c ../paraver/mpi_comunicadors.h \

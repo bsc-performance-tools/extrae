@@ -80,6 +80,7 @@ int *__errno_location(void)
 #include "addr2info.h"
 #include "labels.h"
 #include "misc_prv_semantics.h"
+#include "addr2info_hashcache.h"
 
 static void Read_SymTab (void);
 static void AddressTable_Initialize (void);
@@ -179,8 +180,6 @@ void Address2Info_Initialize (char * binary) {
 		exit(1);
 	}
 
-/*	fprintf(stderr, "Number of sections: %d\n", abfd->section_count); */
-
 	/* Load the Symbol Table */
 	Read_SymTab();
 
@@ -192,6 +191,9 @@ void Address2Info_Initialize (char * binary) {
 		fprintf(stderr, "Section %s cannot be found: %s\n", CODE_SECTION, errmsg);
 		exit(1);
 	}
+
+	/* Initialize the hash cache */
+	Addr2Info_HashCache_Initialize();
 
 	/* The addresses translation module has been successfully initialized */
 	Translate_Addresses = TRUE;
@@ -284,6 +286,7 @@ int Address2Info_Translate(UINT64 address, int query, int uniqueID)
 	int line_id = 0;
 	int function_id = 0;
 	int result;
+	int found;
 
 	if (!Tables_Initialized || address == 0)
 	{
@@ -360,18 +363,25 @@ int Address2Info_Translate(UINT64 address, int query, int uniqueID)
  * por la diversidad de tamanyo de instrucciones en las distintas maquinas
  */
 
-	/* Search if address has been translated (search [1]) */
-	already_translated = FALSE;
-	for (i = 0; i < AddressTable[addr_type]->num_addresses; i++)
+	found = Addr2Info_HashCache_Search (address, &line_id, &function_id);
+
+	if (!found)
 	{
-		if (AddressTable[addr_type]->address[i].address == address)
+		/* Search if address has been translated (search [1]) */
+		already_translated = FALSE;
+		for (i = 0; i < AddressTable[addr_type]->num_addresses; i++)
 		{
-			already_translated = TRUE;
-			function_id = AddressTable[addr_type]->address[i].function_id;
-			line_id = i;
-			break;
+			if (AddressTable[addr_type]->address[i].address == address)
+			{
+				already_translated = TRUE;
+				function_id = AddressTable[addr_type]->address[i].function_id;
+				line_id = i;
+				break;
+			}
 		}
 	}
+	else
+		already_translated = TRUE;
 
 	if (!already_translated) 
 	{
@@ -417,6 +427,9 @@ int Address2Info_Translate(UINT64 address, int query, int uniqueID)
 			function_id = AddressTable[addr_type]->address[line_id].function_id;
 		}
 	}
+
+	if (!found)
+		Addr2Info_HashCache_Insert (address, line_id, function_id);
 
 	result = 0;
 	switch(query)

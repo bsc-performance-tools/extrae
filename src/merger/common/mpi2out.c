@@ -67,6 +67,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_to_prv.h"
 #include "trace_to_trf.h"
 #include "labels.h"
+#include "addr2info_hashcache.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -875,6 +876,11 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 
 	if (error)
 		fprintf (stderr, "mpi2prv: An error has been encountered when generating the tracefile. Dying...\n");
+
+#ifdef HAVE_BFD
+	if (option_VerboseLevel > 0)
+		Addr2Info_HashCache_ShowStatistics();
+#endif
 
 	return 0;
 }
