@@ -56,18 +56,21 @@ Example 6 - Linux with Power Processor in a environment with IBM compilers & GNU
  MP_COMPILER=gcc make
  make install
 
-Example 7 - Linux on CRAY XT5 for 64bit package and adding sampling. Notice the "--disable-xmltest". As the backends programs cannot be run in the frontent, we skip running the XML test.
+Example 7 - Linux on CRAY XT5 for 64bit package and adding sampling. Notice the "--disable-xmltest". As the backends programs cannot be run in the frontent, we skip running the XML test. Also using a local installation of libunwind.
 
-CC=cc CXX=CC F77=ftn CFLAGS='fast -tp barcelona-64' LDFLAGS='-fast -tp barcelona-64' \
-   ./configure --with-mpi=/opt/mpt/default/xt/mpich2-pgi  \
-  --with-binary-type=64  \
-  --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1_gnu4.1.2  \
+./configure \
+  --with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu
+  --with-binary-type=64 \
+  --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1_gnu4.1.2
   --disable-xmltest \
-  --with-bfd=/opt/cray/cce/7.1.1/cray-binutils \
-  --with-liberty=/opt/cray/cce/7.1.1/cray-binutils \
+  --with-bfd=/opt/cray/cce/7.1.5/cray-binutils \
+  --with-liberty=/opt/cray/cce/7.1.5/cray-binutils \
   --enable-sampling \
+  --enable-shared=no \
   --prefix=PREFIX \
-  --with-papi=/opt/xt-tools/papi/3.6.2.2 
+  --with-papi=/opt/xt-tools/papi/3.7.2/v23 \
+  --with-unwind=/ccs/home/khuck/lib \
+  CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' F77=ftn FFLAGS='-O3 -g'
 
 
 AIX

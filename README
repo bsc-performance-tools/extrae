@@ -11,6 +11,7 @@ Package dependencies:
 * libz : liberty and libbfd may need libz (optional). Also libz may be used to generate .prv.gz files directly (optional).
 * MPI : execute MPI jobs (optional) - tested with MPICH, MPICH2 and OpenMPI. Others may work.
 * OpenMP runtime (gcc, ibm or icc) : execute OpenMP jobs (optional)
+* libunwind : access to callstack (intel ia64 and intel x86 64 bits) - downloadable from http://www.nongnu.org/libunwind/.
 
 Please, make sure to install the development versions of these packages (-dev, -devel) when available.
 
