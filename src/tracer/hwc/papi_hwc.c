@@ -489,6 +489,7 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 		return;
 	}
 
+#if defined(DEAD_CODE)
 #if defined(SAMPLING_SUPPORT)
 	/* Be careful since PAPI 3.5.0 use HAVE_HARDWARE_INTR_SIG */
 # if defined(HAVE_HARDWARE_INTR_SIG)
@@ -506,6 +507,12 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 #if 0
 	fprintf (stdout, PACKAGE_NAME": HW Sampling is %sallowed by the PAPI substrate.\n", SamplingSupport?"":"not ");
 #endif
+#endif
+#endif /* DEAD_CODE */
+
+#if defined(SAMPLING_SUPPORT)
+	/* Use any kind of sampling -- software or hardware */
+	SamplingSupport = TRUE;
 #endif
 
 	thread_identifier_function = get_trace_thread_number_function();
