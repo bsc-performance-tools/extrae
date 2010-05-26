@@ -146,10 +146,10 @@ UINT64 get_caller (int offset)
 
 void trace_callers (iotimer_t time, int offset, int type) {
 #if defined(UNWIND_SUPPORT)
-  int actual_deep = 1;
-  unw_cursor_t cursor;
-  unw_context_t uc;
-  unw_word_t ip;
+	int current_deep = 1;
+	unw_cursor_t cursor;
+	unw_context_t uc;
+	unw_word_t ip;
 #if defined(MPICALLER_DEBUG)
 	unw_word_t sp;
 #endif
@@ -157,48 +157,48 @@ void trace_callers (iotimer_t time, int offset, int type) {
 	if (type != CALLER_MPI && type != CALLER_SAMPLING)
 		return;
   
-  unw_getcontext(&uc);
-  unw_init_local(&cursor, &uc);
+	unw_getcontext(&uc);
+	unw_init_local(&cursor, &uc);
 
-  offset --; /* No computa la llamada a unw_getcontext */
-  while ((unw_step(&cursor) > 0) && (actual_deep < Caller_Deepness[type]+offset)) {
-    unw_get_reg(&cursor, UNW_REG_IP, &ip);
+	offset --; /* No computa la llamada a unw_getcontext */
+	while ((unw_step(&cursor) > 0) && (current_deep < Caller_Deepness[type]+offset)) {
+	unw_get_reg(&cursor, UNW_REG_IP, &ip);
 #if defined(MPICALLER_DEBUG)
-		if (actual_deep >= offset)
+		if (current_deep >= offset)
 		{
 			unw_get_reg(&cursor, UNW_REG_SP, &sp);
-			fprintf (stderr, "(%d) ip = %lx, sp = %lx\n", actual_deep, (long) ip, (long) sp);
+			fprintf (stderr, "(%d) ip = %lx, sp = %lx\n", current_deep, (long) ip, (long) sp);
 		}
 #endif
     
-		if (actual_deep >= offset)
+		if (current_deep >= offset)
 		{
 			if (type == CALLER_MPI)
 			{
-				if (Trace_Caller[CALLER_MPI][actual_deep-offset])
+				if (Trace_Caller[CALLER_MPI][current_deep-offset])
 				{
-					TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(actual_deep-offset+1), (UINT64)ip);
+					TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(current_deep-offset+1), (UINT64)ip);
 				}
 			}
 #if defined(SAMPLING_SUPPORT)
 			else if (type == CALLER_SAMPLING)
 			{
-				if (Trace_Caller[CALLER_SAMPLING][actual_deep-offset])
+				if (Trace_Caller[CALLER_SAMPLING][current_deep-offset])
 				{
-					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+actual_deep-offset+1, (UINT64) ip);
+					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_deep-offset+1, (UINT64) ip);
 				}
-      } 
+			} 
 #endif
-    }    
-    actual_deep ++;
-  }
+		}
+		current_deep ++;
+	}
 #endif /* UNWIND_SUPPORT */
 }
 
 UINT64 get_caller (int offset)
 {
 #if defined(UNWIND_SUPPORT)
-	int actual_deep = 0;
+	int current_deep = 0;
 	unw_cursor_t cursor;
 	unw_context_t uc;
 	unw_word_t ip;
@@ -206,15 +206,15 @@ UINT64 get_caller (int offset)
 	unw_getcontext(&uc);
 	unw_init_local(&cursor, &uc);
 
-	while (actual_deep < offset)
+	while (current_deep < offset)
 	{
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
 #if defined(DEBUG)
-		fprintf (stderr, "DEBUG: depth %d address %08llx %c\n", actual_deep, ip, (offset-1 == actual_deep)?'*':' ');
+		fprintf (stderr, "DEBUG: depth %d address %08llx %c\n", current_deep, ip, (offset-1 == current_deep)?'*':' ');
 #endif
 		if (unw_step (&cursor) <= 0)
 			return 0;
-		actual_deep ++;
+		current_deep ++;
 	}
 
 	return (UINT64) ip;
