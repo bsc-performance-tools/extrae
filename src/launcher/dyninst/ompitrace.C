@@ -413,7 +413,9 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	char *MPI_C_prefix = "MPI_";
 	char *MPI_F_prefix = "mpi_";
 
+	cout << PACKAGE_NAME << ": Obtaining functions from application image (this may take a while)..." << flush;
 	BPatch_Vector<BPatch_function *> *vfunctions = appImage->getProcedures (false);
+	cout << "Done" << endl;
 
 	cout << PACKAGE_NAME << ": Parsing executable looking for instrumentation points (" << vfunctions->size() << ") ";
 	if (VerboseLevel)
