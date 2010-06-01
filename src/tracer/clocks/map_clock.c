@@ -54,7 +54,6 @@ unsigned int map_clock (void)
 {
   return 0;
 }
-#endif
 
 iotimer_t get_hr_timer (void)
 {
@@ -73,7 +72,6 @@ iotimer_t get_hr_timer (void)
 #endif
 }
 
-#if defined(DEAD_CODE)
 double hr_to_secs (iotimer_t hr)
 {
   return (((double) hr) / 1000000);
