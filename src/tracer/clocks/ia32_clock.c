@@ -59,10 +59,6 @@ static char UNUSED rcsid[] = "$Id$";
 
 static unsigned long long proc_timebase_MHz;
 
-iotimer_t ia32_getTime (void);
-void ia32_Initialize (void);
-void ia32_Initialize_thread (void);
-
 #if defined(OS_FREEBSD) || defined (OS_LINUX)
 static __inline unsigned long long ia32_cputime (void)
 {
