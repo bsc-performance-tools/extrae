@@ -35,7 +35,6 @@
 extern int HWCEnabled;
 #if defined(SAMPLING_SUPPORT)
 extern int SamplingSupport;
-extern int EnabledSampling;
 #endif
 
 /*------------------------------------------------ Structures ---------------*/

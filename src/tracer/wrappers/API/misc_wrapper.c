@@ -77,13 +77,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include <malloc.h>
 #endif
 
-#if 0
-#if defined(MPI_SUPPORT)
-# include "mpi_wrapper.h"
-# include "myrinet_hwc.h"
-#endif
-#endif
-
 void MPItrace_shutdown_Wrapper (void)
 {
 	TRACE_MISCEVENTANDCOUNTERS (TIME, TRACING_EV, EVT_END, EMPTY);
@@ -173,6 +166,7 @@ void MPItrace_set_options_Wrapper (int options)
 	tracejant_omp     = (options & EXTRAE_OMP_OPTION);   
 	tracejant_hwc_omp = (options & EXTRAE_OMP_HWC_OPTION);   
 	tracejant_hwc_uf  = (options & EXTRAE_UF_HWC_OPTION);
+	setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
 }
 
 void MPItrace_getrusage_Wrapper (iotimer_t timestamp)
@@ -225,9 +219,8 @@ void MPItrace_memusage_Wrapper (iotimer_t timestamp)
 {
 	if (TRACING_MEMUSAGE)
 	{
-        struct mallinfo mi = mallinfo();
-
-        int inuse = mi.arena + mi.hblkhd - mi.fordblks;
+		struct mallinfo mi = mallinfo();
+		int inuse = mi.arena + mi.hblkhd - mi.fordblks;
 
 		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    mi.arena);
 		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   mi.hblkhd);

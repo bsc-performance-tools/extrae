@@ -345,11 +345,12 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 #if defined(SAMPLING_SUPPORT)
 void sampling_handler (int EventSet, void *address, long_long overflow_vector, void *context)
 {
-	iotimer_t temps = TIME;
-
-	SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
-
-	trace_callers (temps, 7, CALLER_SAMPLING);
+	if (isSamplingEnabled())
+	{
+		iotimer_t temps = TIME;
+		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
+		trace_callers (temps, 7, CALLER_SAMPLING);
+	}
 }
 #endif
 
@@ -379,11 +380,11 @@ int HWCBE_PAPI_Start_Set (UINT64 time, int numset, int threadid)
 			rc = PAPI_overflow (HWCEVTSET(threadid), HWC_sets[numset].OverflowCounter[i], HWC_sets[numset].OverflowValue[i], 0, sampling_handler);
 			if (rc < 0)
 			{
-				EnabledSampling = FALSE;
+				setSamplingEnabled (FALSE);
 				fprintf (stderr, PACKAGE_NAME": PAPI_overflow failed for thread %d - counter %x!\n", threadid, HWC_sets[numset].OverflowCounter[i]);
 			}
 			else
-				EnabledSampling = TRUE;
+				setSamplingEnabled (TRUE);
 		}
 	}
 #endif

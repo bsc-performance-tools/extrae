@@ -159,5 +159,10 @@ extern int * HWC_current_set;
 
 #endif
 
+#if defined(SAMPLING_SUPPORT)
+int isSamplingEnabled(void);
+void setSamplingEnabled (int enabled);
+#endif /* SAMPLING_SUPPORT */
+
 #endif /* __COMMON_HWC_H__ */
 

@@ -137,6 +137,8 @@ void OMPItrace_set_tracing_tasks (int from, int to);
 #define MPITRACE_OMP_HWC_OPTION         EXTRAE_OMP_HWC_OPTION
 #define EXTRAE_UF_HWC_OPTION            64
 #define MPITRACE_UF_HWC_OPTION          EXTRAE_UF_HWC_OPTION
+#define EXTRAE_SAMPLING_OPTION          128
+#define MPITRACE_SAMPLING_OPTION        EXTRAE_UF_HWC_OPTION
 
 #define EXTRAE_ENABLE_ALL_OPTIONS \
   (EXTRAE_CALLER_OPTION | \
@@ -145,7 +147,8 @@ void OMPItrace_set_tracing_tasks (int from, int to);
    EXTRAE_MPI_OPTION | \
    EXTRAE_OMP_OPTION | \
    EXTRAE_OMP_HWC_OPTION | \
-   EXTRAEUF_HWC_OPTION)
+   EXTRAE_UF_HWC_OPTION | \
+   EXTRAE_SAMPLING_OPTION)
 #define MPITRACE_ENABLE_ALL_OPTIONS EXTRAE_ENABLE_ALL_OPTIONS
 
 void Extrae_set_options (int options);
