@@ -281,7 +281,7 @@ static int read_environment_variables (int me)
 	mpitrace_on = (str != NULL && (strcmp (str, "1") == 0));
 	if (me == 0 && !mpitrace_on)
 	{
-		fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with mpitrace, BUT EXTRAE_ON is NOT set!\n");
+		fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT EXTRAE_ON is NOT set!\n");
 		return 0;
 	}
 
