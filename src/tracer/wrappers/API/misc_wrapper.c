@@ -289,7 +289,7 @@ void MPItrace_init_Wrapper (void)
 	NumOfTasks = 1;
 
 	/* Initialize the backend */
-	if (!Backend_preInitialize (TASKID, NumOfTasks, getenv("MPTRACE_CONFIG_FILE")))
+	if (!Backend_preInitialize (TASKID, NumOfTasks, getenv("EXTRAE_CONFIG_FILE")))
 		return;
 
 	Generate_Task_File_List();
