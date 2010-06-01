@@ -238,6 +238,11 @@ AC_CHECK_HEADERS(
 CFLAGS=${saved_CFLAGS}
 
 ##
+## Check for clock routines
+##
+AX_CHECK_POSIX_CLOCK
+
+##
 ## Check for MPI things
 ##
 

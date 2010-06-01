@@ -39,7 +39,12 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "clock.h"
 
-#if defined(IS_BGL_MACHINE)
+#if defined(USE_POSIX_CLOCK)
+# include <posix_clock.h>
+# define  GET_CLOCK    posix_getTime()
+# define  INIT_CLOCK   posix_Initialize()
+# define  INIT_CLOCK_T posix_Initialize_thread()
+#elif defined(IS_BGL_MACHINE)
 # include <bgl_clock.h>
 # define  GET_CLOCK    bgl_getTime()
 # define  INIT_CLOCK   bgl_Initialize()
@@ -105,7 +110,9 @@ iotimer_t Clock_getTime (void)
 
 		if (getrusage(RUSAGE_SELF,&aux) >= 0)
 		{
+			/* Get user time */
 			temps =  aux.ru_utime.tv_sec*1000000 + aux.ru_utime.tv_usec;
+			/* Accumulate system time */
 			temps += aux.ru_stime.tv_sec*1000000 + aux.ru_stime.tv_usec;
 		}
 		else

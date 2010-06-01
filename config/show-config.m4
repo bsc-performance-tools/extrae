@@ -83,6 +83,11 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo
  	echo Optional features:
 	echo ------------------
+  if test "${USE_POSIX_CLOCK}" = "yes" ; then
+    echo Clock routine: POSIX / clock_gettime
+  else
+    echo Clock routine: low-level / architecture dependant
+  fi
  	echo Heterogeneous support: ${enable_hetero}
 	if test "${MPI_INSTALLED}" = "yes" -a "${enable_parallel_merge}" = "yes" ; then
 		echo Parallel merge: yes

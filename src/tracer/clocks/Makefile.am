@@ -1,6 +1,9 @@
 include $(top_srcdir)/PATHS
 
 CLOCKS = clock.c clock.h
+if USE_POSIX_CLOCK
+  CLOCKS += posix_clock.c posix_clock.h
+else
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
   CLOCKS += bgl_clock.c bgl_clock.h
@@ -17,6 +20,7 @@ if ARCH_IA64
 endif
 if ARCH_POWERPC
   CLOCKS += ppc_clock.c ppc_clock.h
+endif
 endif
 endif
 
