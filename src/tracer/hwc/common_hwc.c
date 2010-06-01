@@ -654,17 +654,19 @@ void HWC_Set_ChangeAtTime_Frequency (int set, unsigned long long ns)
 	HWC_current_changetype = CHANGE_TIME;
 }
 
-#if defined(SAMPLING_SUPPORT)
-
 int isSamplingEnabled(void)
 {
+#if defined(SAMPLING_SUPPORT)
 	return EnabledSampling;
+#else
+	return FALSE;
+#endif
 }
 
 void setSamplingEnabled (int enabled)
 {
+#if defined(SAMPLING_SUPPORT)
 	EnabledSampling = (enabled != FALSE);
-}
-
 #endif
+}
 

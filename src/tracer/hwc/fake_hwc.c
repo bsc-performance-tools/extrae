@@ -33,3 +33,13 @@ static char UNUSED rcsid[] = "$Id$";
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
 int Trace_HWC_Enabled = TRUE;     /* Global variable that allows the gathering of HWC information */
+
+int isSamplingEnabled(void)
+{
+	return FALSE;
+}
+
+void setSamplingEnabled (int enabled)
+{
+}
+
