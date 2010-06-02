@@ -726,9 +726,9 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	CtoF77 (pmpi_barrier) (&comm, &res);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 
@@ -811,9 +811,9 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	CtoF77 (pmpi_barrier) (&comm, &res);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 
@@ -3748,9 +3748,9 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	PMPI_Barrier (MPI_COMM_WORLD);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 
@@ -3823,9 +3823,9 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	PMPI_Barrier (MPI_COMM_WORLD);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 

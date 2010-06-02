@@ -726,9 +726,9 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 	CtoF77 (ppacx_barrier) (&comm, &res);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 
@@ -818,9 +818,9 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	CtoF77 (ppacx_barrier) (&comm, &res);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 
@@ -3749,9 +3749,9 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 	PPACX_Barrier (PACX_COMM_WORLD);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 
@@ -3824,9 +3824,9 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	PPACX_Barrier (PACX_COMM_WORLD);
 #endif
 
-	if (getenv ("MPTRACE_CONFIG_FILE") != NULL)
+	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("MPTRACE_CONFIG_FILE"));
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
 	else
 		config_file = NULL;
 
