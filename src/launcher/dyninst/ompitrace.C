@@ -627,9 +627,9 @@ int main (int argc, char *argv[], const char *envp[])
 
 	int index;
 
-	if (getenv("MPITRACE_HOME") == NULL)
+	if (getenv("EXTRAE_HOME") == NULL)
 	{
-		cerr << PACKAGE_NAME << ": Environment variable MPITRACE_HOME is undefined" << endl;
+		cerr << PACKAGE_NAME << ": Environment variable EXTRAE_HOME is undefined" << endl;
 		exit (-1);
 	}
 
@@ -637,10 +637,10 @@ int main (int argc, char *argv[], const char *envp[])
 	if (getenv("DYNINSTAPI_RT_LIB") == NULL)
 	{
 		/* DYNINSTAPI_RT_LIB=%s/lib/libdyninstAPI_RT.so.1 is +/- 50 chars */
-		char *env = (char*) malloc((strlen(getenv("OMPITRACE_HOME"))+50)*sizeof(char));
-		sprintf (env, "DYNINSTAPI_RT_LIB=%s/lib/libdyninstAPI_RT.so.1",  getenv("OMPITRACE_HOME"));
+		char *env = (char*) malloc((strlen(getenv("EXTRAE_HOME"))+50)*sizeof(char));
+		sprintf (env, "DYNINSTAPI_RT_LIB=%s/lib/libdyninstAPI_RT.so.1",  getenv("EXTRAE_HOME"));
 		putenv (env);
-		fprintf (stderr, "Environment variable DYNINSTAPI_RT_LIB is undefined.\nUsing ${OMPITRACE_HOME}/lib/libdyninstAPI_RT.so.1 instead\n");
+		fprintf (stderr, "Environment variable DYNINSTAPI_RT_LIB is undefined.\nUsing ${EXTRAE_HOME}/lib/libdyninstAPI_RT.so.1 instead\n");
 	}
 #endif
 
@@ -742,20 +742,20 @@ int main (int argc, char *argv[], const char *envp[])
 		if (appType->get_isMPI())
 		{
 			if (appType->get_isOpenMP())
-				sprintf (buffer, "%s/lib/lib_dyn_ompitrace.so", getenv("MPITRACE_HOME"));
+				sprintf (buffer, "%s/lib/lib_dyn_ompitrace.so", getenv("EXTRAE_HOME"));
 			else
 #if defined(MPI_COMBINED_C_FORTRAN)
-				sprintf (buffer, "%s/lib/lib_dyn_mpitrace.so", getenv("MPITRACE_HOME"));
+				sprintf (buffer, "%s/lib/lib_dyn_mpitrace.so", getenv("EXTRAE_HOME"));
 #else
-				sprintf (buffer, "%s/lib/lib_dyn_mpitracec.so", getenv("MPITRACE_HOME"));
+				sprintf (buffer, "%s/lib/lib_dyn_mpitracec.so", getenv("EXTRAE_HOME"));
 #endif
 		}
 		else
 		{
 			if (appType->get_isOpenMP())
-				sprintf (buffer, "%s/lib/lib_dyn_omptrace.so", getenv("MPITRACE_HOME"));
+				sprintf (buffer, "%s/lib/lib_dyn_omptrace.so", getenv("EXTRAE_HOME"));
 			else
-				sprintf (buffer, "%s/lib/libseqtrace.so", getenv("MPITRACE_HOME"));
+				sprintf (buffer, "%s/lib/libseqtrace.so", getenv("EXTRAE_HOME"));
 		}
 		loadedModule = buffer;
 
@@ -765,7 +765,7 @@ int main (int argc, char *argv[], const char *envp[])
 		if (!file_exists (buffer))
 		{
 			/* If the library does not exist, terminate the mutatee and exit */
-			cerr << PACKAGE_NAME << ": Cannot find the module. It must be under $MPITRACE_HOME/lib" << endl;
+			cerr << PACKAGE_NAME << ": Cannot find the module. It must be under $EXTRAE_HOME/lib" << endl;
 			appProcess->terminateExecution();
 			exit (-1);
 		}

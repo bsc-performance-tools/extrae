@@ -89,9 +89,9 @@ void error_function (BPatchErrorLevel level, int num, const char* const* params)
 
 int main (int argc, char *argv[], const char *envp[])
 {
-	if (getenv("MPITRACE_HOME") == NULL)
+	if (getenv("EXTRAE_HOME") == NULL)
 	{
-		cerr << PACKAGE_NAME << ": Environment variable MPITRACE_HOME is undefined" << endl;
+		cerr << PACKAGE_NAME << ": Environment variable EXTRAE_HOME is undefined" << endl;
 		exit (-1);
 	}
 
