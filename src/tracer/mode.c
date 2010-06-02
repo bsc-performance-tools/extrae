@@ -160,7 +160,7 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 
 void MPItrace_switch_mode(void)
 {   
-    int i;
+    unsigned i;
 
     for (i=0; i<Backend_getNumberOfThreads(); i++)
     {

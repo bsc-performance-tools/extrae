@@ -437,7 +437,7 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
  */
 void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 {
-	int threadid = 0;
+	unsigned threadid = 0;
 
 	/* Do this if we have more than 1 counter set */
 	if (HWC_num_sets > 1)

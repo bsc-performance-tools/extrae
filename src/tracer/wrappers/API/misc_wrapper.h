@@ -47,6 +47,7 @@ void MPItrace_counters_Wrapper ();
 void MPItrace_setcounters_Wrapper (int *evc1, int *evc2);
 void MPItrace_set_options_Wrapper (int options);
 void MPItrace_getrusage_Wrapper (iotimer_t timestamp);
+void MPItrace_memusage_Wrapper (iotimer_t timestamp);
 void MPItrace_user_function_Wrapper (int enter);
 void MPItrace_function_from_address_Wrapper (int type, void *address);
 

@@ -45,7 +45,7 @@
 #define TRACE_STARTSET                  ((xmlChar*) "starting-set-distribution")
 #define TRACE_HWCSET                    ((xmlChar*) "set")
 #define TRACE_HWCSET_CHANGEAT_GLOBALOPS ((xmlChar*) "changeat-globalops")
-#define TRACE_HWCSET_CHANGEAT_TIME      "changeat-time"
+#define TRACE_HWCSET_CHANGEAT_TIME      ((xmlChar*) "changeat-time")
 #define TRACE_HWCSET_DOMAIN             ((xmlChar*) "domain")
 #define TRACE_HWCSET_OVERFLOW_COUNTER   ((xmlChar*) "overflow-counter")
 #define TRACE_HWCSET_OVERFLOW_VALUE     ((xmlChar*) "overflow-value")
@@ -94,15 +94,13 @@
 #define RC_MRNET_ANALYSIS               ((xmlChar*) "analysis")
 #define RC_MRNET_START_AFTER            ((xmlChar*) "start-after")
 #define RC_SIGNAL_WHICH                 ((xmlChar*) "which")
-#define RC_MRNET_SPECTRAL				((xmlChar*) "spectral")
-#define RC_MRNET_CLUSTERING				((xmlChar*) "clustering")
-#define SPECTRAL_MIN_SEEN				((xmlChar*) "min_seen")
-#define SPECTRAL_MAX_PERIODS			((xmlChar*) "max_periods")
-#define SPECTRAL_NUM_ITERS				((xmlChar*) "num_iters")
-#define CLUSTERING_MAX_TASKS			((xmlChar*) "max_tasks")
-#define CLUSTERING_MAX_POINTS			((xmlChar*) "max_points")
-
-
+#define RC_MRNET_SPECTRAL               ((xmlChar*) "spectral")
+#define RC_MRNET_CLUSTERING             ((xmlChar*) "clustering")
+#define SPECTRAL_MIN_SEEN               ((xmlChar*) "min_seen")
+#define SPECTRAL_MAX_PERIODS            ((xmlChar*) "max_periods")
+#define SPECTRAL_NUM_ITERS              ((xmlChar*) "num_iters")
+#define CLUSTERING_MAX_TASKS            ((xmlChar*) "max_tasks")
+#define CLUSTERING_MAX_POINTS           ((xmlChar*) "max_points")
 
 void Parse_XML_File (int rank, int world_size, char *filename);
 

@@ -244,7 +244,7 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 	if (change_at_time != NULL)
 	{
 		HWC_sets[num_set].change_at = getTimeFromStr (change_at_time, 
-			TRACE_HWCSET_CHANGEAT_TIME, rank);
+			"change-at-time", rank);
 		HWC_sets[num_set].change_type = 
 				(HWC_sets[num_set].change_at == 0)?CHANGE_NEVER:CHANGE_TIME;
 	}
@@ -345,6 +345,10 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 #if defined(SAMPLING_SUPPORT)
 void sampling_handler (int EventSet, void *address, long_long overflow_vector, void *context)
 {
+	UNREFERENCED_PARAMETER(overflow_vector);
+	UNREFERENCED_PARAMETER(context);
+	UNREFERENCED_PARAMETER(EventSet);
+
 	if (isSamplingEnabled())
 	{
 		iotimer_t temps = TIME;
@@ -434,6 +438,8 @@ int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 	long long values[MAX_HWC];
 	int rc;
 
+	UNREFERENCED_PARAMETER(time);
+
 	if (numset < 0 || numset >= HWC_num_sets)
 		return FALSE;
 
@@ -459,9 +465,14 @@ int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 
 void HWCBE_PAPI_Initialize (int TRCOptions)
 {
+#if defined(DEAD_CODE)
 #if defined(SAMPLING_SUPPORT)
 	PAPI_option_t options;
 #endif
+#endif
+
+	UNREFERENCED_PARAMETER(TRCOptions);
+
 	int rc;
 	void *thread_identifier_function;
 

@@ -1,8 +1,7 @@
-#!/bin/tcsh
+#!/bin/sh
 
-setenv MPI_HOME @sub_MPI_HOME@
-setenv EXTRAE_HOME @sub_PREFIXDIR@
-setenv EXTRAE_COUNTERS 0x80000007,0x80000032
+export MPI_HOME=@sub_MPI_HOME@
+export EXTRAE_CONFIG_FILE=@sub_PREFIXDIR@
 
 ${MPI_HOME}/bin/mpirun -np 2 ./mpi_ping
 

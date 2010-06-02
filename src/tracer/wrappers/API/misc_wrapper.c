@@ -72,6 +72,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "hwc.h"
 #include "extrae_user_events.h"
 #include "misc_wrapper.h"
+#include "common_hwc.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -98,7 +99,7 @@ void MPItrace_Event_Wrapper (unsigned int *tipus, unsigned int *valor)
 void MPItrace_N_Event_Wrapper (unsigned int *count, unsigned int *types, unsigned int *values)
 {
 	iotimer_t temps;
-	int i;
+	unsigned i;
 	int events_id[MAX_MULTIPLE_EVENTS];
 
 	if (*count > 0)
@@ -124,7 +125,7 @@ void MPItrace_Eventandcounters_Wrapper (int *tipus, int *valor)
 void MPItrace_N_Eventsandcounters_Wrapper (unsigned int *count, unsigned int *types, unsigned int *values)
 {
 	iotimer_t temps;
-	int i;
+	unsigned i;
 	int events_id[MAX_MULTIPLE_EVENTS];
 
 	if (*count > 0)
@@ -248,8 +249,8 @@ void MPItrace_function_from_address_Wrapper (int type, void *address)
 static void Generate_Task_File_List (void)
 {
 	int filedes;
-	int thid;
-	int ret;
+	unsigned thid;
+	ssize_t ret;
 	char tmpname[1024];
 	char hostname[1024];
 	char tmp_line[1024];
@@ -269,7 +270,7 @@ static void Generate_Task_File_List (void)
 
 		sprintf (tmp_line, "%s on %s\n", tmpname, hostname);
 		ret = write (filedes, tmp_line, strlen (tmp_line));
-		if (ret != strlen (tmp_line))
+		if (ret != (ssize_t) strlen (tmp_line))
 		{
 			close (filedes);
 			return;

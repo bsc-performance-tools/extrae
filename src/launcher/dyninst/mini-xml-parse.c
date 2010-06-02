@@ -114,6 +114,9 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
 
+	UNREFERENCED_PARAMETER(rank);
+	UNREFERENCED_PARAMETER(xmldoc);
+
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
 	while (tag != NULL)
@@ -138,6 +141,8 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
+
+	UNREFERENCED_PARAMETER(rank);
 
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
@@ -193,6 +198,8 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 	xmlDocPtr  xmldoc;
 	xmlNodePtr root_tag;
 	char cwd[1024];
+
+	UNREFERENCED_PARAMETER(world_size);
 
   /*
   * This initialize the library and check potential ABI mismatches

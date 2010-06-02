@@ -224,8 +224,8 @@ void advance_current(int);
 extern int circular_buffering, circular_OVERFLOW;
 event_t *circular_HEAD;
 
-extern unsigned int buffer_size;
-extern int file_size;
+unsigned buffer_size;
+unsigned file_size;
 
 void Parse_Callers (int, char *, int);
 

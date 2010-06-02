@@ -118,10 +118,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include "mrn_config.h"
 # include "mrnet_be.h"
 #endif
-
 #if defined(UPC_SUPPORT)
 # include <external/upc.h>
 #endif
+#include "common_hwc.h"
 
 int MPItrace_Flush_Wrapper (Buffer_t *buffer);
 
@@ -201,7 +201,7 @@ unsigned int min_BufferSize = EVT_NUM;
 
 //event_t **buffers;
 unsigned int buffer_size = EVT_NUM;
-int file_size = 0;
+unsigned file_size = 0;
 
 #define MBytes							*1024*1024
 
@@ -272,7 +272,10 @@ static void VerifyLicenseExecution (void)
 
 static int read_environment_variables (int me)
 {
-  char *dir, *str, *mpi_callers, *res_cwd;
+#if defined(MPI_SUPPORT) || defined(PACX_SUPPORT)
+	char *mpi_callers;
+#endif
+  char *dir, *str, *res_cwd;
 	char *file;
 	char cwd[TMP_DIR];
 
@@ -1584,7 +1587,7 @@ void close_mpits (int thread)
 	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
 
 #if defined(SAMPLING_SUPPORT)
-	if (EnabledSampling)
+	if (isSamplingEnabled())
 	{
 		FileName_PTT(tmp_name, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
 
@@ -1670,7 +1673,7 @@ int MPItrace_Flush_Wrapper (Buffer_t *buffer)
 
 void Thread_Finalization (void)
 {
-	int thread;
+	unsigned thread;
 
 	for (thread = 0; thread < maximum_NumOfThreads; thread++) 
 	{

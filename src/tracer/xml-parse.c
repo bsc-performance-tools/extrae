@@ -562,7 +562,7 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 			{
-				char *p_name = xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
+				char *p_name = (char*) xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
 				strncpy (PROGRAM_NAME, p_name, sizeof(PROGRAM_NAME));
 				TracePrefixFound = TRUE;
 				XML_FREE(p_name);
@@ -764,6 +764,10 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 {
 	xmlNodePtr tag;
 
+#if !USE_HARDWARE_COUNTERS
+	UNREFERENCED_PARAMETER(world_size);
+#endif
+
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
 	while (tag != NULL)
@@ -866,6 +870,10 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 {
 	xmlNodePtr tag;
 	int countRemotesEnabled = 0;
+
+#if !defined(HAVE_MRNET)
+	UNREFERENCED_PARAMETER(xmldoc);
+#endif
 
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
@@ -977,6 +985,8 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
+
+	UNREFERENCED_PARAMETER(world_size);
 
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;

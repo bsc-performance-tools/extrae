@@ -34,6 +34,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "record.h"
 #include "trace_macros.h"
 #include "wrapper.h"
+#include "common_hwc.h"
 
 /* -- El usuario ha desactivado el traceo de MPI callers? -------- */
 int Trace_Caller_Enabled[COUNT_CALLER_TYPES] = { 1, 1 };
