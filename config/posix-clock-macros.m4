@@ -52,6 +52,7 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
 
       dnl Check for existance of clock_gettime / CLOCK_MONOTONIC
       AC_MSG_CHECKING([for clock_gettime and CLOCK_MONOTONIC in libraries])
+      LIBS_old=${LIBS}
       for ac_cv_clock_gettime_lib in "" "-lrt" "NO" ;
       do
          LIBS="${ac_cv_clock_gettime_lib}"
@@ -65,6 +66,7 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
             []
          )
       done
+      LIBS=${LIBS_old}
       if test "${ac_cv_clock_gettime_lib}" = "NO" ; then
          AC_MSG_ERROR([Unable to find a library that contains clock_gettime (typically found in -lc or -lrt)])
       fi
