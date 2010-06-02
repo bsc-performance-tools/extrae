@@ -1587,27 +1587,24 @@ void close_mpits (int thread)
 	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
 
 #if defined(SAMPLING_SUPPORT)
-	if (isSamplingEnabled())
+	FileName_PTT(tmp_name, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
+
+	if (Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
 	{
-		FileName_PTT(tmp_name, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
+		Buffer_Flush(SAMPLING_BUFFER(thread));
+		Buffer_Close(SAMPLING_BUFFER(thread));
 
-		if (Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
-		{
-			Buffer_Flush(SAMPLING_BUFFER(thread));
-			Buffer_Close(SAMPLING_BUFFER(thread));
+		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SAMPLE);
 
-			FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SAMPLE);
+		rename_or_copy (tmp_name, trace);
+		fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
+	}
+	else
+	{
+		/* Remove file if empty! */
+		unlink (tmp_name);
 
-			rename_or_copy (tmp_name, trace);
-			fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
-		}
-		else
-		{
-			/* Remove file if empty! */
-			unlink (tmp_name);
-
-			fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file NOT created (%d) due to lack of information gathered.\n", TASKID);
-		}
+		fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file NOT created (%d) due to lack of information gathered.\n", TASKID);
 	}
 #endif
 
