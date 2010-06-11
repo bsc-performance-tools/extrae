@@ -131,7 +131,9 @@ void ia64_Initialize (void)
   mmdev_timer_addr += offset;
   ioctl(fd, MMTIMER_GETRES, &femtosecs_per_tick);
 
+#if defined(DEAD_CODE)
   fprintf (stdout, PACKAGE_NAME": MMDEV clock resolution is %llu ns\n", femtosecs_per_tick/1000000);
+#endif
 
 	proc_timebase_MHz = proc_timebase();
 
