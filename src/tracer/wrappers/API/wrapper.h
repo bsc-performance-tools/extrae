@@ -166,8 +166,16 @@ extern char final_dir[TMP_DIR];
 extern char appl_name[512];
 extern char trace_home[TMP_DIR];
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 char *Get_FinalDir (int task);
 char *Get_TemporalDir (int task);
+
+#ifdef __cplusplus
+}
+#endif
 
 // Know if the run is controlled by a creation of a file 
 extern char ControlFileName[TMP_DIR];

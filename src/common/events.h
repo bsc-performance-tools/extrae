@@ -470,11 +470,12 @@ enum {
  * process in a NONROOT.
  */
 #define BASE_OP_VALUE            50000000
-#endif /* DEAD_CODE */
 
 /* Root/Nonroot process in a Reduce opration */
 #define ROOT                     1
 #define NONROOT                  0
+
+#endif /* DEAD_CODE */
 
 #define STATE_ANY				-1
 #define STATE_IDLE               0

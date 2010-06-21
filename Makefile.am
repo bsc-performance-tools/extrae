@@ -175,6 +175,7 @@ if WANT_OPENMP
 endif
 if HAVE_MRNET
 	$(mkdir_p) $(datadir)/example/MRNET
+	cp -f $(MRNET_EXAMPLE_FILES) $(datadir)/example/MRNET
 	chmod u+x $(datadir)/example/MRNET/trace.sh $(datadir)/example/MRNET/merge.sh
 	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/MRNET
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/MRNET
