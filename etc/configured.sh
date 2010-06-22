@@ -17,7 +17,7 @@ fi
 
 if test "${EXTRAE_HOME}" != "" ; then
 
-	echo Extrae SVN revision: $Rev$
+	echo Extrae SVN revision: \$ Rev $Rev$
 	echo
 
 	# Read configuration variables if available!
