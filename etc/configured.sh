@@ -17,6 +17,9 @@ fi
 
 if test "${EXTRAE_HOME}" != "" ; then
 
+	echo Extrae SVN revision: $Rev$
+	echo
+
 	# Read configuration variables if available!
 	if ! test -f ${EXTRAE_HOME}/etc/extrae-vars.sh ; then
 		echo "Error! Unable to locate ${EXTRAE_HOME}/etc/extrae-vars.sh"
