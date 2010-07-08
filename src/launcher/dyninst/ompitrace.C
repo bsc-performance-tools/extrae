@@ -651,23 +651,23 @@ int main (int argc, char *argv[], const char *envp[])
 	{
 		if (configXML != NULL)
 		{
-			char * envvar = (char *) malloc ((strlen(configXML)+strlen("MPTRACE_CONFIG_FILE=")+1)*sizeof (char));
+			char * envvar = (char *) malloc ((strlen(configXML)+strlen("EXTRAE_CONFIG_FILE=")+1)*sizeof (char));
 			if (NULL == envvar)
 			{
-				cerr << PACKAGE_NAME << ": Error! Unable to allocate memory for MPTRACE_CONFIG_FILE environment variable" << endl;
+				cerr << PACKAGE_NAME << ": Error! Unable to allocate memory for EXTRAE_CONFIG_FILE environment variable" << endl;
 				exit (-1);
 			}
-			sprintf (envvar, "MPTRACE_CONFIG_FILE=%s", configXML);
+			sprintf (envvar, "EXTRAE_CONFIG_FILE=%s", configXML);
 			putenv (envvar);
 		}
 		else
 		{
-			if (getenv ("MPTRACE_CONFIG_FILE") == NULL)
+			if (getenv ("EXTRAE_CONFIG_FILE") == NULL)
 			{
-				cerr << PACKAGE_NAME << ": Error! You have to provide a configuration file using the -config parameter or set the MPTRACE_CONFIG_FILE" << endl;
+				cerr << PACKAGE_NAME << ": Error! You have to provide a configuration file using the -config parameter or set the EXTRAE_CONFIG_FILE" << endl;
 				exit (-1);
 			}
-			configXML = getenv ("MPTRACE_CONFIG_FILE");
+			configXML = getenv ("EXTRAE_CONFIG_FILE");
 		}
 
 		if (!file_exists(configXML))
