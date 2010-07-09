@@ -11,9 +11,9 @@ iface_API_INCLUDES = \
 noinst_LTLIBRARIES      = libiface_api.la libiface_api_pthread.la
 
 libiface_api_la_SOURCES = $(iface_API_SRCS)
-libiface_api_la_CFLAGS  = $(iface_API_INCLUDES)
+libiface_api_la_CFLAGS  = $(iface_API_INCLUDES) -I$(top_srcdir)/include
 
 if WANT_PTHREAD
 libiface_api_pthread_la_SOURCES = $(iface_API_SRCS)
-libiface_api_pthread_la_CFLAGS  = $(iface_API_INCLUDES) -DPTHREAD_SUPPORT
+libiface_api_pthread_la_CFLAGS  = $(iface_API_INCLUDES) -I$(top_srcdir)/include -DPTHREAD_SUPPORT
 endif

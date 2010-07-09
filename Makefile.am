@@ -22,8 +22,6 @@ dist-hook:
 # Create ETC directory and create an empty license file there
 #
 
-PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \
- example/LINUX/PACX/Makefile
 
 if IS_CELL_MACHINE
 SEQ_EXAMPLE_FILES=example/CELL/SEQ/worker.c \
@@ -51,7 +49,10 @@ MPI_EXAMPLE_FILES=example/CELL/MPI/worker.c \
  example/CELL/MPI/trace-xml.sh \
  example/CELL/MPI/Makefile
 
+PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
+PACX_EXAMPLE_FILES=/dev/null
+MRNET_EXAMPLE_FILES=/dev/null
 else
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
@@ -62,9 +63,11 @@ MPI_EXAMPLE_FILES= example/BGL/mpi_ping.f \
  example/BGL/papi_bgl_counters.txt \
  example/BGL/papi_native_bgl_counters.txt
 
+PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
-
 SEQ_EXAMPLE_FILES=/dev/null
+PACX_EXAMPLE_FILES=/dev/null
+MRNET_EXAMPLE_FILES=/dev/null
 else
 if IS_BGP_MACHINE
 MPI_EXAMPLE_FILES= example/BGP/ll_merge.sh \
@@ -76,9 +79,11 @@ MPI_EXAMPLE_FILES= example/BGP/ll_merge.sh \
  example/BGP/mpi_ping.f \
  example/BGP/papi_bgp_native_avail.txt
 
+PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
-
 SEQ_EXAMPLE_FILES=/dev/null
+PACX_EXAMPLE_FILES=/dev/null
+MRNET_EXAMPLE_FILES=/dev/null
 endif
 endif
 else
@@ -92,9 +97,11 @@ MPI_EXAMPLE_FILES=example/AIX/Makefile \
  example/AIX/detailed_trace_basic.xml \
  example/AIX/summarized_trace_basic.xml
 
+PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
-
 SEQ_EXAMPLE_FILES=/dev/null
+PACX_EXAMPLE_FILES=/dev/null
+MRNET_EXAMPLE_FILES=/dev/null
 else
 MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/run.sh \
@@ -127,14 +134,23 @@ SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/mpitrace.xml
 
 MRNET_EXAMPLE_FILES=\
- example/LINUX/MRNET/Makefile     \
- example/LINUX/MRNET/merge.sh     \
- example/LINUX/MRNET/test.c       \
+ example/LINUX/MRNET/Makefile \
+ example/LINUX/MRNET/merge.sh \
+ example/LINUX/MRNET/test.c \
  example/LINUX/MRNET/mpitrace.xml \
  example/LINUX/MRNET/cl.I.IPC.xml \
- example/LINUX/MRNET/run.cmd      \
- example/LINUX/MRNET/trace.sh     \
+ example/LINUX/MRNET/run.cmd \
+ example/LINUX/MRNET/trace.sh \
  example/LINUX/MRNET/README
+
+PTHREAD_EXAMPLE_FILES=\
+ example/LINUX/PTHREAD/Makefile \
+ example/LINUX/PTHREAD/pthread-example.c \
+ example/LINUX/PTHREAD/user-comms.c \
+ example/LINUX/PTHREAD/README
+
+PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \
+ example/LINUX/PACX/Makefile
 endif
 endif
 endif
@@ -181,6 +197,14 @@ if HAVE_MRNET
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/MRNET
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/MRNET
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/MRNET
+endif
+if WANT_PTHREAD
+	$(mkdir_p) $(datadir)/example/PTHREAD
+	cp -f $(PTHREAD_EXAMPLE_FILES) $(datadir)/example/PTHREAD
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/PTHREAD
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/PTHREAD
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/PTHREAD
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/PTHREAD
 endif
 
 uninstall-local:

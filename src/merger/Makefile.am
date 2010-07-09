@@ -24,6 +24,7 @@ dimemas_FILES = \
  dimemas/trace_to_trf.c dimemas/trace_to_trf.h
 
 paraver_FILES = \
+ paraver/trace_communication.c paraver/trace_communication.h \
  paraver/paraver_generator.c paraver/paraver_generator.h \
  paraver/paraver_state.c paraver/paraver_state.h \
  paraver/trace_to_prv.c paraver/trace_to_prv.h \
