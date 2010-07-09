@@ -22,50 +22,72 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: file:///mysql/svn/repos/ptools/extrae/trunk/example/LINUX/PTHREAD/example.c $
+ | @last_commit: $Date: 2010-05-20 18:37:17 +0200 (Thu, 20 May 2010) $
+ | @version:     $Revision: 280 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-#include <stdio.h>
+
+#include <unistd.h>
 #include <pthread.h>
+#include <extrae_user_events.h>
 
-#define MAX_THREADS 32
-
-void *routine1 (void *parameters)
+void * Task1(void *param)
 {
-        Extrae_event (1, 1);
-        printf ("routine1 : (thread=%08x, param %p)\n", pthread_self(), parameters);
-        Extrae_event (1, 0);
+	struct extrae_CombinedEvents events;
+	struct extrae_UserCommunication comm;
+	unsigned types[2] = { 123456, 123457 } ;
+	unsigned values[2] = { 1, 2 };
+
+	Extrae_init_UserCommunication (&comm);
+	comm.type = EXTRAE_USER_RECV;
+	comm.tag  = 1234;
+	comm.size = 1024;
+	comm.id = 0xdeadbeef;
+
+	Extrae_init_CombinedEvents (&events);
+	events.nCommunications = 1;
+	events.Communications = &comm;
+	events.nEvents = 2;
+	events.Types = types;
+	events.Values = values;
+
+	Extrae_emit_CombinedEvents (&events);
 }
 
-void *routine2 (void *parameters)
+void * Task0(void *param)
 {
-        Extrae_event (2, 1);
-        printf ("routine 2 : (thread=%08x, param %p)\n", pthread_self(), parameters);
-        Extrae_event (2, 0);
-}
+	struct extrae_CombinedEvents events;
+	struct extrae_UserCommunication comm;
+	unsigned types[2] = { 123456, 123457 } ;
+	unsigned values[2] = { 1, 2 };
 
+	Extrae_init_UserCommunication (&comm);
+	comm.type = EXTRAE_USER_SEND;
+	comm.tag  = 1234;
+	comm.size = 1024;
+	comm.id = 0xdeadbeef;
+
+	Extrae_init_CombinedEvents (&events);
+	events.nCommunications = 1;
+	events.Communications = &comm;
+	events.nEvents = 2;
+	events.Types = types;
+	events.Values = values;
+
+	Extrae_emit_CombinedEvents (&events);
+}
 
 int main (int argc, char *argv[])
 {
-        pthread_t t[MAX_THREADS];
-        int i;
+	pthread_t t[2];
 
-        Extrae_init ();
+	Extrae_init();
+	pthread_create (&t[0], NULL, Task0, NULL);
+	pthread_create (&t[1], NULL, Task1, NULL);
+	pthread_join (t[0], NULL);
+	pthread_join (t[1], NULL);
+	Extrae_fini();
 
-        for (i = 0; i < MAX_THREADS; i++)
-                pthread_create (&t[i], NULL, routine1, (void*) ((long) i));
-        for (i = 0; i < MAX_THREADS; i++)
-                pthread_join (t[i], NULL);
-
-        sleep (1);
-
-        for (i = 0; i < MAX_THREADS; i++)
-                pthread_create (&t[i], NULL, routine2, NULL);
-        for (i = 0; i < MAX_THREADS; i++)
-                pthread_join (t[i], NULL);
-
-        Extrae_fini();
+	return 0;
 }
-
 

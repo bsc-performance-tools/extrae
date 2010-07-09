@@ -31,6 +31,7 @@
 #define MISC_WRAPPER_DEFINED
 
 #include "clock.h"
+#include "extrae_types.h"
 
 void MPItrace_init_Wrapper(void);
 void MPItrace_fini_Wrapper(void);
@@ -55,5 +56,9 @@ void MPItrace_next_hwc_set_Wrapper (void);
 void MPItrace_previous_hwc_set_Wrapper (void);
 
 void MPItrace_notify_new_pthread (void);
+
+void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr);
+void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
+void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
 
 #endif

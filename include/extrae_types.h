@@ -22,30 +22,57 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/include/mpitrace_user_events.h $
+ | @last_commit: $Date: 2010-02-04 18:22:43 +0100 (dj, 04 feb 2010) $
+ | @version:     $Revision: 160 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _COMMUNICATION_QUEUES_H_
-#define _COMMUNICATION_QUEUES_H_
+#ifndef EXTRAE_TYPES_INCLUDED
+#define EXTRAE_TYPES_INCLUDED
 
-#include <config.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "file_set.h"
+enum extrae_USER_COMMUNICATION_TYPES
+{
+	EXTRAE_USER_SEND = 0,
+	EXTRAE_USER_RECV
+};
 
-void CommunicationQueues_Init (NewQueue_t **fsend, NewQueue_t **freceive);
+enum extrae_USER_FUNCTION
+{
+	EXTRAE_USER_FUNCTION_NONE = -1,
+	EXTRAE_USER_FUNCTION_LEAVE = 0,
+	EXTRAE_USER_FUNCTION_ENTER
+};
 
-void CommunicationQueues_QueueSend (FileItem_t *fsend, event_t *send_begin,
-	event_t *send_end, off_t send_position, unsigned thread, long long key);
-void CommunicationQueues_QueueRecv (FileItem_t *freceive, event_t *recv_begin,
-	event_t *recv_end, unsigned thread, long long key);
+struct extrae_UserCommunication
+{
+	enum extrae_USER_COMMUNICATION_TYPES type;
+	unsigned tag;
+	unsigned size;
+	unsigned partner;
+	long long id;
+};
 
-void CommunicationQueues_ExtractRecv (FileItem_t *freceive, int sender,
-	int tag, event_t **recv_begin, event_t **recv_end, unsigned *thread,
-	long long key);
-void CommunicationQueues_ExtractSend (FileItem_t *fsend, int receiver,
-	int tag, event_t **send_begin, event_t **send_end,
-	off_t *send_position, unsigned *thread, long long key);
+struct extrae_CombinedEvents
+{
+	/* These are used as boolean values */
+	int HardwareCounters;
+	int Callers;
+	int UserFunction;
+	/* These are intended for N events */
+	int nEvents;
+	unsigned *Types;
+	unsigned *Values;
+	/* These are intended for user communication records */
+	int nCommunications;
+	struct extrae_UserCommunication *Communications;
+};
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

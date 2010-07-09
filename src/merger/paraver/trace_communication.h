@@ -22,30 +22,22 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: file:///mysql/svn/repos/ptools/extrae/trunk/src/merger/paraver/addr2info.h $
+ | @last_commit: $Date: 2010-02-04 18:22:43 +0100 (Thu, 04 Feb 2010) $
+ | @version:     $Revision: 160 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _COMMUNICATION_QUEUES_H_
-#define _COMMUNICATION_QUEUES_H_
+#ifndef TRACE_COMMUNICATION_H_INCLUDED
+#define TRACE_COMMUNICATION_H_INCLUDED
 
-#include <config.h>
+void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s,
+	unsigned task_r, unsigned thread_r, event_t *send_begin,
+	event_t *send_end, event_t *recv_begin, event_t *recv_end, 
+	int atposition, off_t position);
 
-#include "file_set.h"
+#if defined(PARALLEL_MERGE)
+int trace_pending_communication (unsigned int ptask, unsigned int task,
+	unsigned int thread, event_t * begin_s, event_t * end_s, unsigned int recvr);
+#endif /* PARALLEL_MERGE */
 
-void CommunicationQueues_Init (NewQueue_t **fsend, NewQueue_t **freceive);
-
-void CommunicationQueues_QueueSend (FileItem_t *fsend, event_t *send_begin,
-	event_t *send_end, off_t send_position, unsigned thread, long long key);
-void CommunicationQueues_QueueRecv (FileItem_t *freceive, event_t *recv_begin,
-	event_t *recv_end, unsigned thread, long long key);
-
-void CommunicationQueues_ExtractRecv (FileItem_t *freceive, int sender,
-	int tag, event_t **recv_begin, event_t **recv_end, unsigned *thread,
-	long long key);
-void CommunicationQueues_ExtractSend (FileItem_t *fsend, int receiver,
-	int tag, event_t **send_begin, event_t **send_end,
-	off_t *send_position, unsigned *thread, long long key);
-
-#endif
+#endif 

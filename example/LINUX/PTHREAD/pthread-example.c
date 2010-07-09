@@ -22,30 +22,52 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: file:///mysql/svn/repos/ptools/extrae/trunk/example/LINUX/PTHREAD/example.c $
+ | @last_commit: $Date: 2010-05-20 18:37:17 +0200 (Thu, 20 May 2010) $
+ | @version:     $Revision: 280 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include <stdio.h>
+#include <pthread.h>
 
-#ifndef _COMMUNICATION_QUEUES_H_
-#define _COMMUNICATION_QUEUES_H_
+#define MAX_THREADS 32
 
-#include <config.h>
+void *routine1 (void *parameters)
+{
+	Extrae_event (1, 1);
+	printf ("routine1 : (thread=%08x, param %p)\n", pthread_self(), parameters);
+	Extrae_event (1, 0);
+}
 
-#include "file_set.h"
+void *routine2 (void *parameters)
+{
+	Extrae_event (2, 1);
+	printf ("routine 2 : (thread=%08x, param %p)\n", pthread_self(), parameters);
+Extrae_event (2, 0);
+}
 
-void CommunicationQueues_Init (NewQueue_t **fsend, NewQueue_t **freceive);
 
-void CommunicationQueues_QueueSend (FileItem_t *fsend, event_t *send_begin,
-	event_t *send_end, off_t send_position, unsigned thread, long long key);
-void CommunicationQueues_QueueRecv (FileItem_t *freceive, event_t *recv_begin,
-	event_t *recv_end, unsigned thread, long long key);
+int main (int argc, char *argv[])
+{
+	pthread_t t[MAX_THREADS];
+	int i;
 
-void CommunicationQueues_ExtractRecv (FileItem_t *freceive, int sender,
-	int tag, event_t **recv_begin, event_t **recv_end, unsigned *thread,
-	long long key);
-void CommunicationQueues_ExtractSend (FileItem_t *fsend, int receiver,
-	int tag, event_t **send_begin, event_t **send_end,
-	off_t *send_position, unsigned *thread, long long key);
+	Extrae_init ();
 
-#endif
+	for (i = 0; i < MAX_THREADS; i++)
+		pthread_create (&t[i], NULL, routine1, (void*) ((long) i));
+	for (i = 0; i < MAX_THREADS; i++)
+		pthread_join (t[i], NULL);
+
+	sleep (1);
+
+	for (i = 0; i < MAX_THREADS; i++)
+		pthread_create (&t[i], NULL, routine2, NULL);
+	for (i = 0; i < MAX_THREADS; i++)
+		pthread_join (t[i], NULL);
+
+	Extrae_fini();
+
+	return 0;
+}
+
+

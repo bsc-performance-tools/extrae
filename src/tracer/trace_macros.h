@@ -217,6 +217,23 @@
 	}                                                             \
 }
 
+#define TRACE_USER_COMMUNICATION_EVENT(evttime,evttype,evtpartner,evtsize,evttag,id) \
+{ \
+	event_t evt; \
+	int thread_id = THREADID; \
+	if (tracejant) \
+	{ \
+		evt.time = (evttime); \
+		evt.event = (evttype); \
+		evt.value = 0; \
+		evt.param.mpi_param.target = (long) (evtpartner); \
+		evt.param.mpi_param.size = (evtsize); \
+		evt.param.mpi_param.tag = (evttag); \
+		evt.param.mpi_param.aux = (id); \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+	} \
+}
+
 #if defined(SAMPLING_SUPPORT)
 
 # define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \

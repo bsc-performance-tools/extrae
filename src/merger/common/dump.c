@@ -65,6 +65,12 @@ static void show_current (event_t * c)
 		  c->param.mpi_param.size, c->param.mpi_param.tag,
 		  c->param.mpi_param.comm, c->param.mpi_param.aux);
 	}
+	else if (c->event == USER_SEND_EV || c->event == USER_RECV_EV)
+	{
+		fprintf (stdout, " TARGET:%u SIZE:%d TAG:%d AUX:%d\n",
+		  c->param.mpi_param.target, c->param.mpi_param.size,
+			c->param.mpi_param.tag, c->param.mpi_param.aux);
+	}
 	else if (c->event == MPI_INIT_EV && c->value == EVT_END)
 	{
 		fprintf (stdout, " OPTIONS: 0x%08x\n", c->param.mpi_param.aux);

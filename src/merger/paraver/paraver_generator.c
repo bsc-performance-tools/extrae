@@ -850,7 +850,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			break;
 
 			default:
-			fprintf(stderr, "\nmpi2prv: ERROR! Invalid paraver_rec_t (type=%d)\n", current->type);
+			fprintf(stderr, "\nmpi2prv: Error! Invalid paraver_rec_t (type=%d)\n", current->type);
 			exit(-1);
 			break;
 		}
@@ -872,7 +872,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	if (num_incomplete_state > 0)
 		fprintf (stderr, "mpi2prv: Error! Found %d incomplete states. Resulting tracefile may be inconsistent.\n", num_incomplete_state);
 	if (num_unmatched_comm > 0)
-		fprintf (stderr, "mpi2prv: Error! Found %d incomplete communications. Resulting tracefile may be inconsistent.\n", num_unmatched_comm);
+		fprintf (stderr, "mpi2prv: Error! Found %d unmatched communications. Resulting tracefile may be inconsistent.\n", num_unmatched_comm);
 	if (num_pending_comm > 0)
 		fprintf (stderr, "mpi2prv: Error! Found %d pending communications. Resulting tracefile may be inconsistent.\n", num_pending_comm);
 }

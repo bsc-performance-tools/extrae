@@ -68,6 +68,14 @@ void trace_callers (iotimer_t time, int offset, int type) {
    char **strings; 
 #endif
 
+	/* Check for valid CALLER types */
+	if (type != CALLER_MPI && type != CALLER_SAMPLING)
+		return;
+
+	/* Leave if they aren't initialized (asked by user!) */
+	if (Trace_Caller[type] == NULL)
+		return;
+
 #if defined(OS_FREEBSD)
 	callstack[0] = (void*) trace_callers;
 	size = backtrace (&callstack[1], Caller_Deepness[type]+offset-1);
@@ -155,7 +163,12 @@ void trace_callers (iotimer_t time, int offset, int type) {
 	unw_word_t sp;
 #endif
 
+	/* Check for valid CALLER types */
 	if (type != CALLER_MPI && type != CALLER_SAMPLING)
+		return;
+
+	/* Leave if they aren't initialized (asked by user!) */
+	if (Trace_Caller[type] == NULL)
 		return;
   
 	unw_getcontext(&uc);
@@ -194,6 +207,10 @@ void trace_callers (iotimer_t time, int offset, int type) {
 		}
 		current_deep ++;
 	}
+#else /* UNWIND_SUPPORT */
+	UNREFERENCED_PARAMETER(time);
+	UNREFERENCED_PARAMETER(offset);
+	UNREFERENCED_PARAMETER(type);
 #endif /* UNWIND_SUPPORT */
 }
 
@@ -219,8 +236,9 @@ UINT64 get_caller (int offset)
 			return 0;
 		current_deep ++;
 	}
-
 	return (UINT64) ip;
+#else /* UNWIND_SUPPORT */
+	UNREFERENCED_PARAMETER(offset);
 #endif /* UNWIND_SUPPORT */
 	return 0;
 }
@@ -239,6 +257,10 @@ UINT64 get_caller (int offset)
 void trace_mpi_callers(iotimer_t time, int offset) {
    CONTEXT contexto;
    int rc = 0, actual_deep = 1;
+
+	/* Leave if they aren't initialized (asked by user!) */
+	if (Trace_Caller[CALLER_MPI] == NULL)
+		return;
   
    exc_capture_context (&contexto);
    /* Unwind de la pila*/
@@ -273,6 +295,14 @@ void trace_callers(iotimer_t time, int offset, int type) {
 	void *  InstructionPointer;
 	void ** StackFrame;
 	int Frame = 1;
+
+	/* Check for valid CALLER types */
+	if (type != CALLER_MPI && type != CALLER_SAMPLING)
+		return;
+
+	/* Leave if they aren't initialized (asked by user!) */
+	if (Trace_Caller[type] == NULL)
+		return;
 
 	if (getcontext (&Contexto) < 0) {
 		fprintf(stderr, "backtrace: Error retrieving process context.\n");

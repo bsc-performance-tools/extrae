@@ -50,6 +50,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "paraver_generator.h"
 #include "timesync.h"
 #include "communication_queues.h"
+#include "trace_communication.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -59,85 +60,6 @@ static char UNUSED rcsid[] = "$Id$";
 # define MPI_PROC_NULL (-1)
 #else
 # include <mpi.h>
-#endif
-
-/******************************************************************************
- ***  trace_communication
- ******************************************************************************/
-
-static void trace_communicationAt (unsigned ptask, event_t *send_begin,
-	event_t *send_end, event_t *recv_begin, event_t *recv_end, 
-	int atposition, off_t position)
-{
-	struct thread_t *thread_r_info, *thread_s_info;
-	unsigned long long log_s, log_r, phy_s, phy_r;
-	unsigned cpu_r, cpu_s, task_r, task_s, thread_r, thread_s;
-
-	/* Look for the receive partner ... in the sender events */
-	task_r = Get_EvTarget (send_begin)+1;
-	thread_r = 1;
-	thread_r_info = GET_THREAD_INFO(ptask, task_r, thread_r);
-	cpu_r = thread_r_info->cpu;
-
-	/* Look for the sender partner ... in the receiver events */
-	task_s = Get_EvTarget (recv_end)+1;
-	thread_s = 1;
-	thread_s_info = GET_THREAD_INFO(ptask, task_s, thread_s);
-	cpu_s = thread_s_info->cpu;
-
-	/* Synchronize event times */
-	log_s = TIMESYNC(task_s-1, Get_EvTime (send_begin));
-	phy_s = TIMESYNC(task_s-1, Get_EvTime (send_end));
-	log_r = TIMESYNC(task_r-1, Get_EvTime (recv_begin));
-	phy_r = TIMESYNC(task_r-1, Get_EvTime (recv_end));
-	
-	trace_paraver_communication (cpu_s, ptask, task_s, thread_s, log_s, phy_s,
-	  cpu_r, ptask, task_r, thread_r, log_r, phy_r, Get_EvSize (recv_end),
-		Get_EvTag (recv_end), atposition, position);
-}
-
-#if defined(PARALLEL_MERGE)
-static int trace_pending_communication (unsigned int ptask, unsigned int task,
-	unsigned int thread, event_t * begin_s, event_t * end_s, unsigned int recvr)
-{
-	unsigned long long log_s, phy_s;
-
-	/* Synchronize event times */
-	log_s = TIMESYNC (task-1, Get_EvTime (begin_s));
-	phy_s = TIMESYNC (task-1, Get_EvTime (end_s));
-
-	trace_paraver_pending_communication (task, ptask, task, thread, log_s,
-		phy_s, recvr + 1, ptask, recvr + 1, thread, 0ULL, 0ULL, Get_EvSize (begin_s), Get_EvTag (begin_s));
-  return 0;
-}
-#endif
-
-#if defined(DEAD_CODE)
-static void MatchComms (
-	FileSet_t *fset,
-	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
-	unsigned int receiver, unsigned int tag,
-	event_t *send_begin, event_t *send_end)
-{
-	int pending = 0;
-	unsigned int sender = task - 1;
-	event_t *recv_begin = NULL, *recv_end = NULL;
-
-	if (MatchComms_Enabled(ptask, task, thread))
-	{
-		pending = SearchRecvEvent_FS (fset, ptask, receiver, sender, tag, &recv_begin, &recv_end);
-		if (!pending)
-		{
-			trace_communication (cpu, ptask, task, thread, send_begin, send_end, recv_begin, recv_end);
-		}
-#if defined(PARALLEL_MERGE)
-		else
-		{
-			trace_pending_communication (ptask, task, thread, send_begin, send_end, receiver);
-		}
-#endif
-	}
-}
 #endif
 
 static int Get_State (unsigned int EvType)
@@ -223,8 +145,8 @@ static int Get_State (unsigned int EvType)
  ***  Any_Send_Event
  ******************************************************************************/
 
-static int Any_Send_Event (event_t * current_event, 
-	unsigned long long current_time, unsigned int cpu, unsigned int ptask, 
+static int Any_Send_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned recv_thread, EvType, EvValue;
@@ -256,7 +178,7 @@ static int Any_Send_Event (event_t * current_event,
 #endif
 						thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
 
-						CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread);
+						CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, 0);
 
 						if (recv_begin == NULL || recv_end == NULL)
 						{
@@ -266,7 +188,7 @@ static int Any_Send_Event (event_t * current_event,
 							fprintf (stdout, "SEND_CMD(%u) DID NOT find receiver\n", EvType);
 #endif
 							position = WriteFileBuffer_getPosition (obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb);
-							CommunicationQueues_QueueSend (thread_info->file, thread_info->Send_Rec, current_event, position, thread);
+							CommunicationQueues_QueueSend (thread_info->file, thread_info->Send_Rec, current_event, position, thread, 0);
 							trace_paraver_unmatched_communication (1, ptask, task, thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 						}
 						else
@@ -274,7 +196,7 @@ static int Any_Send_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "SEND_CMD(%u) find receiver\n", EvType);
 #endif
-							trace_communicationAt (ptask, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
+							trace_communicationAt (ptask, task, thread, 1+Get_EvTarget(current_event), recv_thread, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
 						}
 					}
 #if defined(PARALLEL_MERGE)
@@ -330,7 +252,7 @@ static int SendRecv_Event (event_t * current_event,
 #endif
 						thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(thread_info->Send_Rec)].threads[0]);
 
-						CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (thread_info->Send_Rec), &recv_begin, &recv_end, &recv_thread);
+						CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (thread_info->Send_Rec), &recv_begin, &recv_end, &recv_thread, 0);
 
 						if (recv_begin == NULL || recv_end == NULL)
 						{
@@ -340,7 +262,7 @@ static int SendRecv_Event (event_t * current_event,
 							fprintf (stdout, "SENDRECV/SEND DID NOT find partner\n");
 #endif
 							position = WriteFileBuffer_getPosition (obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb);
-							CommunicationQueues_QueueSend (thread_info->file, thread_info->Send_Rec, current_event, position, thread);
+							CommunicationQueues_QueueSend (thread_info->file, thread_info->Send_Rec, current_event, position, thread, 0);
 							trace_paraver_unmatched_communication (1, ptask, task, thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 						}
 						else if (recv_begin != NULL && recv_end != NULL)
@@ -348,7 +270,7 @@ static int SendRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/SEND find partner\n");
 #endif
-							trace_communicationAt (ptask, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
+							trace_communicationAt (ptask, task, thread, 1+Get_EvTarget(thread_info->Send_Rec), recv_thread, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractRecv returned recv_begin = %p and recv_end = %p\n", recv_begin, recv_end);
@@ -371,21 +293,21 @@ static int SendRecv_Event (event_t * current_event,
 
 						thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
 
-						CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread);
+						CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, 0);
 
 						if (NULL == send_begin && NULL == send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/RECV DID NOT find partner\n");
 #endif
-							CommunicationQueues_QueueRecv (thread_info->file, thread_info->Recv_Rec, current_event, thread);
+							CommunicationQueues_QueueRecv (thread_info->file, thread_info->Recv_Rec, current_event, thread, 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/RECV find partner\n");
 #endif
-							trace_communicationAt (ptask, send_begin, send_end, thread_info->Recv_Rec, current_event, TRUE, send_position);
+							trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, task, thread, send_begin, send_end, thread_info->Recv_Rec, current_event, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -591,21 +513,21 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 #endif
 					thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
 
-					CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread);
+					CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, 0);
 
 					if (NULL == send_begin || NULL == send_end)
 					{
 #if defined(DEBUG)
 						fprintf (stdout, "RECV_CMD DID NOT find partner\n");
 #endif
-						CommunicationQueues_QueueRecv (thread_info->file, thread_info->Recv_Rec, current_event, thread);
+						CommunicationQueues_QueueRecv (thread_info->file, thread_info->Recv_Rec, current_event, thread, 0);
 					}
 					else if (NULL != send_begin && NULL != send_end)
 					{
 #if defined(DEBUG)
 						fprintf (stdout, "RECV_CMD find partner\n");
 #endif
-						trace_communicationAt (ptask, send_begin, send_end, thread_info->Recv_Rec, current_event, TRUE, send_position);
+						trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, task, thread, send_begin, send_end, thread_info->Recv_Rec, current_event, TRUE, send_position);
 					}
 					else
 						fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -667,21 +589,21 @@ static int IRecv_Event (event_t * current_event,
 #endif
 						thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(receive)].threads[0]);
 
-						CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread);
+						CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread, 0);
 
 						if (NULL == send_begin || NULL == send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "IRECV_CMD DID NOT find COMM\n");
 #endif
-							CommunicationQueues_QueueRecv (thread_info->file, current_event, receive, thread);
+							CommunicationQueues_QueueRecv (thread_info->file, current_event, receive, thread, 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "IRECV_CMD find COMM (partner times = %lld/%lld)\n", Get_EvTime(send_begin), Get_EvTime(send_end));
 #endif
-							trace_communicationAt (ptask, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (ptask, 1+Get_EvTarget(receive), send_thread, task, thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -762,17 +684,18 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 #endif
 					thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
 
-					CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread);
+					CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, 0);
 
 					if (recv_begin == NULL || recv_end == NULL)
 					{
 						off_t position;
 						position = WriteFileBuffer_getPosition (obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb);
-						CommunicationQueues_QueueSend (thread_info->file, current_event, current_event, position, thread);
+						CommunicationQueues_QueueSend (thread_info->file, current_event, current_event, position, thread, 0);
 						trace_paraver_unmatched_communication (1, ptask, task, thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 					}
 					else
-						trace_communicationAt (ptask, current_event, current_event, recv_begin, recv_end, FALSE, 0);
+						trace_communicationAt (ptask, task, thread, 1+Get_EvTarget(current_event), recv_thread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
+
 				}
 #if defined(PARALLEL_MERGE)
 				else
@@ -799,14 +722,14 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 #endif
 						thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(receive)].threads[0]);
 
-						CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread);
+						CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread, 0);
 
 						if (NULL == send_begin || NULL == send_end)
-							CommunicationQueues_QueueRecv (thread_info->file, current_event, receive, thread);
+							CommunicationQueues_QueueRecv (thread_info->file, current_event, receive, thread, 0);
 						else if (NULL != send_begin && NULL != send_end)
-							trace_communicationAt (ptask, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (ptask, 1+Get_EvTarget(receive), send_thread, task, thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						else
-							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
+							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end, 0);
 					}
 #if defined(PARALLEL_MERGE)
 					else

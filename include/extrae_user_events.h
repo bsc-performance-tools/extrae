@@ -30,6 +30,8 @@
 #ifndef MPITRACE_USER_EVENTS
 #define MPITRACE_USER_EVENTS
 
+#include "extrae_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -168,6 +170,24 @@ void OMPItrace_network_routes (int mpi_rank);
 void MPItrace_network_routes (int mpi_rank);
 void OMPtrace_network_routes (int mpi_rank);
 void SEQtrace_network_routes (int mpi_rank);
+
+void Extrae_init_UserCommunication (struct extrae_UserCommunication *);
+void OMPItrace_init_UserCommunication (struct extrae_UserCommunication *);
+void MPItrace_init_UserCommunication (struct extrae_UserCommunication *);
+void OMPtrace_init_UserCommunication (struct extrae_UserCommunication *);
+void SEQtrace_init_UserCommunication (struct extrae_UserCommunication *);
+
+void Extrae_init_CombinedEvents (struct extrae_CombinedEvents *);
+void OMPItrace_init_CombinedEvents (struct extrae_CombinedEvents *);
+void MPItrace_init_CombinedEvents (struct extrae_CombinedEvents *);
+void OMPtrace_init_CombinedEvents (struct extrae_CombinedEvents *);
+void SEQtrace_init_CombinedEvents (struct extrae_CombinedEvents *);
+
+void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *);
+void OMPItrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
+void MPItrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
+void OMPtrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
+void SEQtrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
 
 #ifdef __cplusplus
 }

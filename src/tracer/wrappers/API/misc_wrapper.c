@@ -313,3 +313,62 @@ void MPItrace_fini_Wrapper (void)
 	Thread_Finalization ();
 }
 
+void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr)
+{
+	memset (ptr, 0, sizeof(struct extrae_UserCommunication));
+}
+
+void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
+{
+	memset (ptr, 0, sizeof(struct extrae_CombinedEvents));
+	ptr->UserFunction = EXTRAE_USER_FUNCTION_NONE;
+}
+
+void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
+{
+	iotimer_t myTime;
+	unsigned i;
+	int events_id[MAX_MULTIPLE_EVENTS];
+
+	myTime = TIME;
+
+	/* Emit events first */
+	if (ptr->nEvents > 0)
+	{
+		for (i = 0; i < ptr->nEvents; i++)
+			events_id[i] = USER_EV;
+		if (ptr->HardwareCounters)
+		{
+			TRACE_N_MISCEVENTANDCOUNTERS(myTime, ptr->nEvents, events_id, ptr->Types, ptr->Values);
+		}
+		else
+		{
+			TRACE_N_MISCEVENT(myTime, ptr->nEvents, events_id, ptr->Types, ptr->Values);
+		}
+	}
+
+	/* Emit user function. If hwc were emitted before, don't emit now because they
+	   will share the same timestamp and Paraver won't handle that well. Otherwise,
+	   honor tracejant_hwc_uf
+	*/
+	if (ptr->UserFunction != EXTRAE_USER_FUNCTION_NONE)
+	{
+		UINT64 ip = (ptr->UserFunction == EXTRAE_USER_FUNCTION_ENTER)?get_caller(4):EMPTY;
+		TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, ip, (!ptr->HardwareCounters && tracejant_hwc_uf));
+	}
+
+	/* Now emit the callers */
+	if (ptr->Callers)
+	{
+		trace_callers (myTime, 4, CALLER_MPI);
+	}
+
+	/* Finally emit user communications */
+	for (i = 0; i < ptr->nCommunications ; i++)
+	{
+		TRACE_USER_COMMUNICATION_EVENT(myTime,
+		  (ptr->Communications[i].type==EXTRAE_USER_SEND)?USER_SEND_EV:USER_RECV_EV,
+		  ptr->Communications[i].partner, ptr->Communications[i].size,
+		  ptr->Communications[i].tag, ptr->Communications[i].id) 
+	}
+}
