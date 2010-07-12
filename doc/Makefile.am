@@ -40,7 +40,7 @@ if BUILD_HTML_DOCS
 	$(latex2html) -split 0 -show_section_numbers -nonumbered_footnotes  $(manual_ug)
 endif
 
-install-exec-hook:
+install-exec-hook: all
 	$(mkdir_p) $(datadir)/doc
 if BUILD_DOCS_PS
 	cp $(manual_ug).ps $(datadir)/doc
