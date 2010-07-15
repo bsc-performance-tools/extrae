@@ -44,7 +44,7 @@ extern unsigned int num_ptasks;
 int Paraver_ProcessTraceFiles (char *prvName, unsigned long nfiles,
 	struct input_t *files, unsigned int num_appl, char *sym_file,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int idtask,
-	int MBytesPerAllSegments, int forceformat);
+	int MBytesPerAllSegments, int forceformat, int tree_fan_out);
 
 extern int **EnabledTasks;
 extern unsigned long long **EnabledTasks_time;

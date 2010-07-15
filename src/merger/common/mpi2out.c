@@ -100,6 +100,7 @@ int option_UseDiskForComms = FALSE;
 int option_SkipSendRecvComms = FALSE;
 int option_UniqueCallerID = TRUE;
 int option_VerboseLevel = 0;
+int option_TreeFanOut = 0;
 
 #if defined(IS_BG_MACHINE)
 int option_XYZT = 0;
@@ -129,6 +130,7 @@ void Help (const char *ProgName)
           "    -xyzt     Generates additional output file with BG/L torus coordinates.\n"
 #endif
 #if defined(PARALLEL_MERGE)
+					"    -tree-fan-out N   Orders the parallel merge to distribute its work in a N-order tree.\n"
           "    -cyclic   Distributes MPIT files cyclically among tasks.\n"
           "    -block    Distributes MPIT files in a block fashion among tasks.\n"
           "    -size     Distributes MPIT trying to build groups of equal size.\n"
@@ -217,18 +219,6 @@ void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles)
 		tmp_name++;
 	}
 	InputTraces[nTraces].task = task;
-
-#if defined(DEAD_CODE) 
-	if (task == 0)
-	{
-		strcpy (callback_file, InputTraces[nTraces].name);
-		base_name = &(callback_file[name_length - EXT_SIZE - RANK_DIGITS - VPID_DIGITS]);
-		strcpy (base_name, ".cbk");
-		strcpy (symbol_file, InputTraces[nTraces].name);
-		base_name = &(symbol_file[name_length - EXT_SIZE - RANK_DIGITS - VPID_DIGITS]);
-		strcpy (base_name, ".sym");
-	}
-#endif
 
 	thread = 0;
 	for (i = 0; i < DIGITS_THREAD; i++)
@@ -474,6 +464,23 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 		if (!strcmp (argv[CurArg], "-size"))
 		{
 			WorkDistribution = Size;
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-tree-fan-out"))
+		{
+			CurArg++;
+			if (CurArg < argc)
+			{
+				if (atoi(argv[CurArg]) > 0)
+				{
+					option_TreeFanOut = atoi(argv[CurArg]);
+				}
+				else
+				{
+					if (0 == rank)
+						fprintf (stderr, "mpi2prv: WARNING: Invalid value for -tree-fan-out parameter\n");
+				}
+			}
 			continue;
 		}
 #endif
@@ -808,6 +815,14 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 	int forceformat;
 	struct Pair_NodeCPU *NodeCPUinfo;
 
+#if defined(PARALLEL_MERGE)
+	if (numtasks <= 1)
+	{
+		fprintf (stderr, "mpi2prv: The parallel version of the mpi2prv is not suited for 1 processor! Dying...\n");
+		exit (1);
+	}
+#endif
+
 	InputTraces = (struct input_t *) malloc (sizeof(struct input_t)*MAX_FILES);
 	if (InputTraces == NULL)
 	{
@@ -817,6 +832,26 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 	}
 
 	ProcessArgs (numtasks, idtask, argc, argv, &traceformat, &forceformat);
+
+#if defined(PARALLEL_MERGE)
+	if (option_TreeFanOut == 0)
+	{
+		if (idtask == 0)
+			fprintf (stdout, "mpi2prv: Tree order is not set. Setting automatically to %d\n", numtasks);
+		option_TreeFanOut = numtasks;
+	}
+	else if (option_TreeFanOut > numtasks)
+	{
+		if (idtask == 0)
+			fprintf (stdout, "mpi2prv: Tree order is set to %d but is larger that numtasks. Setting to tree order to %d\n", option_TreeFanOut, numtasks);
+		option_TreeFanOut = numtasks;
+	}
+	else if (option_TreeFanOut <= numtasks)
+	{
+		if (idtask == 0)
+			fprintf (stdout, "mpi2prv: Tree order is set to %d\n", option_TreeFanOut);
+	}
+#endif
 
 	if (0 == nTraces)
 	{
@@ -866,7 +901,7 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 	if (PRV_SEMANTICS == traceformat)
 		error = Paraver_ProcessTraceFiles (OutTrace, nTraces, InputTraces,
 		  num_applications, callback_file, NodeCPUinfo, numtasks, idtask,
-		  MBytesPerAllSegments, forceformat);
+		  MBytesPerAllSegments, forceformat, option_TreeFanOut);
 	else if (TRF_SEMANTICS == traceformat)
 		error = Dimemas_ProcessTraceFiles (OutTrace, nTraces, InputTraces,
 		  num_applications, callback_file, NodeCPUinfo, numtasks, idtask,

@@ -125,6 +125,7 @@ FileItemType;
 typedef struct
 {
 	paraver_rec_t *current_p, *first_mapped_p, *last_mapped_p;
+	WriteFileBuffer_t *destination;
 	long long remaining_records;
 	long long mapped_records;
 	unsigned source;
@@ -138,6 +139,7 @@ typedef struct
 	unsigned long long records_per_block;
 	unsigned int nfiles;
 	FileSet_t *fset;
+	int SkipAsMasterOfSubtree;
 }
 PRVFileSet_t;
 
@@ -210,9 +212,27 @@ void EndianCorrection (FileSet_t *fset, int numtasks, int taskid);
 int isTaskInMyGroup (FileSet_t *fset, int task);
 int inWhichGroup (int task, FileSet_t *fset);
 
+#if defined(PARALLEL_MERGE)
+
+PRVFileSet_t * Map_Paraver_files (FileSet_t * fset, 
+	unsigned long long *num_of_events, int numtasks, int taskid, 
+	unsigned long long records_per_block, int fan_out);
+PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * fset, 
+	unsigned long long *num_of_events, int numtasks, int taskid, 
+	unsigned long long records_per_block, int depth, int fan_out);
+
+void Free_Map_Paraver_Files (PRVFileSet_t * infset);
+
+void Flush_Paraver_Files_binary (PRVFileSet_t *prvfset, int taskid, int depth,
+	int tree_fan_out);
+
+#else
+
 PRVFileSet_t * Map_Paraver_files (FileSet_t * fset, 
 	unsigned long long *num_of_events, int numtasks, int taskid, 
 	unsigned long long events_per_block);
+
+#endif /* PARALLEL_MERGE */
 
 paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset, int taskid);
 

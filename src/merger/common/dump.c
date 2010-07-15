@@ -76,17 +76,6 @@ static void show_current (event_t * c)
 		fprintf (stdout, " OPTIONS: 0x%08x\n", c->param.mpi_param.aux);
 	}
 #if USE_HARDWARE_COUNTERS
-#if defined(DEAD_CODE)
-	else if (c->event == HWC_CHANGE_EV || c->event == HWC_SET_OVERFLOW_EV)
-	{
-		int i;
-
-		fprintf (stdout, " %s HWC { ", (c->event == HWC_CHANGE_EV)?"new":"sample");
-		for (i = 0; i < MAX_HWC; i++)
-			fprintf (stdout, "0x%llx ", c->HWCValues[i]);
-		fprintf (stdout, "}\n");
-	}
-#endif /* DEAD_CODE */
 	else if (c->event == HWC_DEF_EV)
 	{
 		int def_num_counters = 0;

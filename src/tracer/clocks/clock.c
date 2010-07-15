@@ -96,7 +96,7 @@ iotimer_t Clock_getTime (void)
 	{
 		return GET_CLOCK;
 
-/*  DEAD_CODE, if no "nanosecond" clock is available 
+/*  if no "nanosecond" clock is available 
 		struct timeval aux;
 		gettimeofday (&aux, NULL);
 		return (((iotimer_t) aux.tv_sec) * 1000000 + aux.tv_usec);

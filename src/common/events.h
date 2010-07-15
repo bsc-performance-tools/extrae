@@ -433,53 +433,20 @@ enum {
 #define UNLOCK_VAL               5 /* Inside a release lock function. */
 #define LOCKED_VAL               6 /* Locked Status. Mutex is locked. */
 
+#if defined(DEAD_CODE)
 /* 
  * Some Ordered Values.
  */
 #define IT_MARK_VAL             2
 #define WAIT_BEGIN_VAL          3
 #define WAIT_END_VAL            4
-
-#if defined(DEAD_CODE)
-
-/*************************************************************************
- * Base identifier for locks and functions.
- *************************************************************************/
-#define CRTLOCK_BASE   61000000 /* Critical sections lock base type. */
-#   define CRTLOCK_MAX     1000 /* Maximum number of locks. */
-
-/* Adress lock used by omp_init_lock, omp_set_lock, omp_unset_lock */
-#define OMPLOCK_BASE   62000000 /* OMP lock base type. */
-#   define OMPLOCK_MAX     1000 /* Maximum number of locks. */
-
-#define OMPFUNC_BASE          1 /* OMP functions base type. */
-#   define OMPFUNC_MAX     1000 /* Maximum number of functions. */
-
-#endif /* DEAD_CODE */
-
+#endif
 
 /* Values */
 #define EVT_BEGIN                1
 #define EVT_END                  0
 
-#if defined(DEAD_CODE)
-# define EVT_REND                2
-#endif /* DEAD_CODE */
-
-#if defined(DEAD_CODE)
-/* 
- * Base value for reduce operation event value where
- * process in a NONROOT.
- */
-#define BASE_OP_VALUE            50000000
-
-/* Root/Nonroot process in a Reduce opration */
-#define ROOT                     1
-#define NONROOT                  0
-
-#endif /* DEAD_CODE */
-
-#define STATE_ANY				-1
+#define STATE_ANY                -1
 #define STATE_IDLE               0
 #define STATE_RUNNING            1
 #define STATE_STOPPED            2

@@ -22,56 +22,46 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/file_set.c $
+ | @last_commit: $Date: 2010-02-23 16:03:47 +0100 (dt, 23 feb 2010) $
+ | @version:     $Revision: 192 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+static char UNUSED rcsid[] = "$Id: file_set.c 192 2010-02-23 15:03:47Z harald $";
 
-#include "config.h"
+#if defined(OS_AIX) || defined (OS_SOLARIS)
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
+unsigned bswap32(unsigned value)
 {
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
-
-	int InputForWorker;           /* Which task is responsible for this file */
-
-	int fd;
-	char *name;
-	char *node;
+  unsigned newValue;
+  char* pnewValue = (char*) &newValue;
+  char* poldValue = (char*) &value;
+ 
+  pnewValue[0] = poldValue[3];
+  pnewValue[1] = poldValue[2];
+  pnewValue[2] = poldValue[1];
+  pnewValue[3] = poldValue[0];
+ 
+  return newValue;
 }
-input_t;
 
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-#if defined(IS_BG_MACHINE)    /* BlueGene coordinates are kept in traces */
-extern int option_XYZT;
-#endif
-
-extern int SincronitzaTasks;
-extern int SincronitzaTasks_byNode;
-extern int dump;
-extern int Joint_States;
-extern int option_UseDiskForComms;
-extern int option_SkipSendRecvComms;
-extern int option_UniqueCallerID;
-extern int option_VerboseLevel;
-
-int merger (int numtasks, int idtask, int argc, char *argv[]);
+unsigned long long bswap64 (unsigned long long value)
+{
+  unsigned long long newValue;
+  char* pnewValue = (char*) &newValue;
+  char* poldValue = (char*) &value;
+ 
+  pnewValue[0] = poldValue[7];
+  pnewValue[1] = poldValue[6];
+  pnewValue[2] = poldValue[5];
+  pnewValue[3] = poldValue[4];
+  pnewValue[4] = poldValue[3];
+  pnewValue[5] = poldValue[2];
+  pnewValue[6] = poldValue[1];
+  pnewValue[7] = poldValue[0];
+ 
+  return newValue;
+}
 
 #endif

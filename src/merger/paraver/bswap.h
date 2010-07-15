@@ -22,56 +22,27 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/file_set.c $
+ | @last_commit: $Date: 2010-02-23 16:03:47 +0100 (dt, 23 feb 2010) $
+ | @version:     $Revision: 192 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+#if defined(OS_LINUX)
+# ifdef HAVE_BYTESWAP_H
+#  include <byteswap.h>
+# endif
+# define bswap16(x) bswap_16(x)
+# define bswap32(x) bswap_32(x)
+# define bswap64(x) bswap_64(x)
+#elif defined(OS_FREEBSD)
+# ifdef HAVE_SYS_ENDIAN_H
+#  include <sys/endian.h>
+# endif
+#elif defined(OS_AIX) || defined (OS_SOLARIS)
 
-#include "config.h"
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
-{
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
-
-	int InputForWorker;           /* Which task is responsible for this file */
-
-	int fd;
-	char *name;
-	char *node;
-}
-input_t;
-
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-#if defined(IS_BG_MACHINE)    /* BlueGene coordinates are kept in traces */
-extern int option_XYZT;
-#endif
-
-extern int SincronitzaTasks;
-extern int SincronitzaTasks_byNode;
-extern int dump;
-extern int Joint_States;
-extern int option_UseDiskForComms;
-extern int option_SkipSendRecvComms;
-extern int option_UniqueCallerID;
-extern int option_VerboseLevel;
-
-int merger (int numtasks, int idtask, int argc, char *argv[]);
+unsigned bswap32 (unsigned);
+unsigned long long bswap64 (unsigned long long);
 
 #endif
+

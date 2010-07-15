@@ -60,6 +60,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 #if defined (PARALLEL_MERGE)
 # include "mpi.h"
 # include "mpi-tags.h"
@@ -94,6 +97,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
+# include "tree-logistics.h"
 #endif
 
 /******************************************************************************
@@ -760,7 +764,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	/* Master-side. Master will ask all slaves for their parts as needed */
 	paraver_rec_t *current;
 	double pct, last_pct;
-	unsigned long long actual_events, tmp;
+	unsigned long long current_event, tmp;
 	int error;
 	int num_incomplete_state = 0;
 	int num_unmatched_comm = 0;
@@ -775,7 +779,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	fflush (stdout);
 
 	current = GetNextParaver_Rec (prvfset, 0);
-	actual_events = 0;
+	current_event = 0;
 	last_pct = 0.0f;
 
 	do
@@ -787,7 +791,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 				fprintf (stderr, "mpi2prv: Error! Found an unfinished state! Continuing...\n");
 			num_incomplete_state++;
 			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
-			actual_events++;
+			current_event++;
 			break;
 
 			case STATE:
@@ -796,12 +800,12 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 				current->time, current->end_time,
 				current->value);
 			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
-			actual_events++;
+			current_event++;
 			break;
 		
 			case EVENT:
 			error = build_multi_event (prv_fd, &current, prvfset, &tmp);
-			actual_events += tmp;
+			current_event += tmp;
 			break;
 
 			case UNMATCHED_COMMUNICATION:
@@ -812,7 +816,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			DumpUnmatchedCommunication (current);
 #endif
 			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
-			actual_events++;
+			current_event++;
 			break;
 			
 			case PENDING_COMMUNICATION:
@@ -832,7 +836,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 				num_pending_comm++;
 
 			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
-			actual_events++;
+			current_event++;
 			break;
 
 			case COMMUNICATION:
@@ -846,7 +850,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 				current->receive[PHYSICAL_COMMUNICATION],
 				current->event, current->value);
 			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
-			actual_events++;
+			current_event++;
 			break;
 
 			default:
@@ -855,7 +859,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			break;
 		}
 
-		pct = ((double) actual_events)/((double) num_of_events)*100.0f;
+		pct = ((double) current_event)/((double) num_of_events)*100.0f;
 
 		if (pct > last_pct + 5.0 && pct <= 100.0)
 		{
@@ -864,7 +868,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			last_pct += 5.0;
 		}
 	}
-	while ((current != NULL) && !(error));
+	while (current != NULL && !error);
 
 	fprintf (stdout, "done\n");
 	fflush (stdout);
@@ -878,7 +882,38 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 }
 
 #if defined(PARALLEL_MERGE)
-static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer prv_fd, int taskid)
+static void Paraver_JoinFiles_Master_Subtree (int numtasks, int taskid, PRVFileSet_t *prvfset,
+	struct fdz_fitxer prv_fd, unsigned long long num_of_events)
+{
+	/* Master-side. Master will ask all slaves for their parts as needed.
+	   This part is ran inside the tree (i.e., non on the root) to generate
+	   intermediate binary paraver trace files that the root will transform
+	   ASCII regular Paraver files
+	 */
+	paraver_rec_t *current;
+
+	if (prvfset->SkipAsMasterOfSubtree)
+		return;
+
+	current = GetNextParaver_Rec (prvfset, taskid);
+	do
+	{
+		if (current->type == PENDING_COMMUNICATION)
+		{
+			FixPendingCommunication (current, prvfset->fset);
+			trace_paraver_record (prvfset->files[0].destination, current);
+		}
+		else
+		{
+			trace_paraver_record (prvfset->files[0].destination, current);
+		}
+
+		current = GetNextParaver_Rec (prvfset, taskid);
+	}
+	while (current != NULL);
+}
+
+static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer prv_fd, int taskid, int tree_fan_out, int current_depth)
 {
 	/* Slave-side. Master will ask all slaves for their parts as needed */
 	paraver_rec_t *current;
@@ -886,6 +921,7 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer pr
 	MPI_Status s;
 	int res;
 	unsigned tmp, nevents;
+	int my_master = tree_myMaster (taskid, tree_fan_out, current_depth);
 
 	buffer = malloc (sizeof(paraver_rec_t)*prvfset->records_per_block);
 	if (buffer == NULL)
@@ -910,13 +946,13 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer pr
 		
 		if (nevents == prvfset->records_per_block)
 		{
-			res = MPI_Recv (&tmp, 1, MPI_INT, 0, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
+			res = MPI_Recv (&tmp, 1, MPI_INT, my_master, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
 			MPI_CHECK(res, MPI_Recv, "Failed to receive remote request!");
 
-			res = MPI_Send (&nevents, 1, MPI_UNSIGNED, 0, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+			res = MPI_Send (&nevents, 1, MPI_UNSIGNED, my_master, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
 			MPI_CHECK(res, MPI_Send, "Failed to send the number of events to the MASTER");
 
-			res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, 0, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+			res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, my_master, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
 			MPI_CHECK(res, MPI_Send, "Failed to send the buffer of events to the MASTER");
 
 			nevents = 0;
@@ -925,17 +961,19 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer pr
 	}
 	while (current != NULL);
 	
-	res = MPI_Recv (&tmp, 1, MPI_INT, 0, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
+	res = MPI_Recv (&tmp, 1, MPI_INT, my_master, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
 	MPI_CHECK(res, MPI_Recv, "Failed to receive remote request!");
 
-	res = MPI_Send (&nevents, 1, MPI_UNSIGNED, 0, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+	res = MPI_Send (&nevents, 1, MPI_UNSIGNED, my_master, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
 	MPI_CHECK(res, MPI_Send, "Failed to send the number of events to the MASTER");
 
 	if (nevents != 0)
 	{
-		res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, 0, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
+		res = MPI_Send (buffer, nevents*sizeof(paraver_rec_t), MPI_BYTE, my_master, BUFFER_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
 		MPI_CHECK(res, MPI_Send, "Failed to send the buffer of events to the MASTER");
 	}
+
+	free (buffer);
 }
 #endif
 
@@ -945,10 +983,13 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer pr
 
 int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime,
   int nfiles,  struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
-  unsigned long long records_per_task)
+  unsigned long long records_per_task, int tree_fan_out)
 {
+	struct timeval time_begin, time_end;
+	int current_depth;
 #if defined(PARALLEL_MERGE)
 	int res;
+	int tree_max_depth;
 #endif
 	PRVFileSet_t *prvfset;
 	unsigned long long num_of_events;
@@ -1040,32 +1081,81 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 	if (error)
 		return -1;
 
+#if defined(PARALLEL_MERGE)
+	tree_max_depth = tree_MaxDepth (numtasks, tree_fan_out);
+	if (taskid == 0)
+		fprintf (stdout, "mpi2prv: Merge tree depth is %d levels\n", tree_max_depth);
+
+	current_depth = 0;
+	while (current_depth < tree_max_depth)
+	{
+		MPI_Barrier (MPI_COMM_WORLD);
+		if (taskid == 0 && current_depth < tree_max_depth-1)
+		{
+			gettimeofday (&time_begin, NULL);
+			fprintf (stdout, "mpi2prv: Executing merge tree step %d of %d. ", current_depth+1, tree_max_depth);
+			fflush (stdout);
+		}
+		else if (taskid == 0 && current_depth == tree_max_depth-1)
+		{
+			fprintf (stdout, "mpi2prv: Executing merge tree step %d of %d.\n", current_depth+1, tree_max_depth);
+			fflush (stdout);
+		}
+
+		if (tree_TaskHaveWork (taskid, tree_fan_out, current_depth))
+		{
+			if (current_depth == 0)
+				prvfset = Map_Paraver_files (fset, &num_of_events, numtasks, taskid, records_per_task, tree_fan_out);
+			else
+				prvfset = ReMap_Paraver_files_binary (prvfset, &num_of_events, numtasks, taskid, records_per_task, current_depth, tree_fan_out);
+
+			if (!tree_MasterOfSubtree (taskid, tree_fan_out, current_depth))
+			{
+				/* Server-side. Slaves will merge their translated files into a 
+				   single strem and will provide it to the master */
+				Paraver_JoinFiles_Slave (prvfset, prv_fd, taskid, tree_fan_out, current_depth);
+			}
+			else
+			{
+				/* If this is not the root level, only generate binary intermediate files */
+				if (current_depth < tree_max_depth-1)
+					Paraver_JoinFiles_Master_Subtree (numtasks, taskid, prvfset, prv_fd, num_of_events);
+				else
+					Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
+			}
+
+			Free_Map_Paraver_Files (prvfset);
+		}
+		else
+		{
+			/* Do nothing */
+		}
+
+		MPI_Barrier (MPI_COMM_WORLD);
+		if (taskid == 0 && current_depth < tree_max_depth-1)
+		{
+			gettimeofday (&time_end, NULL);
+
+			if (time_end.tv_sec - time_begin.tv_sec < 300)
+				fprintf (stdout, "Elapsed time: %d seconds\n", time_end.tv_sec - time_begin.tv_sec);
+			else
+				fprintf (stdout, "Elapsed time: %d minutes\n", (time_end.tv_sec - time_begin.tv_sec)/60);
+		}
+
+		Flush_Paraver_Files_binary (prvfset, taskid, current_depth, tree_fan_out);
+		current_depth++;
+	}
+
+#else /* PARALLEL_MERGE */
+
 	prvfset = Map_Paraver_files (fset, &num_of_events, numtasks, taskid, records_per_task);
-	error = ((taskid == 0) && (prvfset == NULL));
 
-#if defined(PARALLEL_MERGE)
-	res = MPI_Bcast (&error, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_CHECK(res, MPI_Bcast, "Error! Failed to propagate status");
-#endif
-	if (error)
-		return -1;
+	Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
 
-#if defined(PARALLEL_MERGE)
-	if (0 != taskid)
-	{
-		/* Server-side. Slaves will merge their translated files into a 
-		   single strem and will provide it to the master */
-		Paraver_JoinFiles_Slave (prvfset, prv_fd, taskid);
-	}
-	else
-#endif
-	{
-		/* Master-size. Will merge its own files and ask for files on the 
-		   slaves (if needed) */
-		Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
+#endif /* PARALLEL_MERGE */
 
+	if (taskid == 0)
 		FDZ_CLOSE (prv_fd);
-	}
 
 	Free_FS (fset);
 

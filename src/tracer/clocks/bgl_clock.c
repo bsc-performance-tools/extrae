@@ -45,37 +45,6 @@ static char UNUSED rcsid[] = "$Id$";
 
 static unsigned long long factor;
 
-#if defined(DEAD_CODE)
-static inline unsigned long long timebase (void)
-{
-#define SPRN_TBRL 0x10C     /* Time Base Read Lower Register (user & sup R/O) */
-#define SPRN_TBRU 0x10D     /* Time Base Read Upper Register (user & sup R/O) */
-	unsigned volatile u1, u2, lo;
-	union
-	{
-		struct
-		{
-			unsigned hi, lo;
-		}
-		w;
-		unsigned long long d;
-	}
-	result;
-
-	do
-	{
-		asm volatile ("mfspr %0,%1":"=r" (u1):"i" (SPRN_TBRU));
-		asm volatile ("mfspr %0,%1":"=r" (lo):"i" (SPRN_TBRL));
-		asm volatile ("mfspr %0,%1":"=r" (u2):"i" (SPRN_TBRU));
-	}
-	while (u1 != u2);
-
-	result.w.lo = lo;
-	result.w.hi = u2;
-	return result.d;
-}
-#endif
-
 void bgl_Initialize (void)
 {
 	BGLPersonality personality;

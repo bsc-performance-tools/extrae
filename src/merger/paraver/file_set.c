@@ -67,59 +67,13 @@ static char UNUSED rcsid[] = "$Id$";
 # include <mpi.h>
 # include "mpi-tags.h"
 # include "mpi-aux.h"
+# include "tree-logistics.h"
 #endif
 #include "utils.h"
 #include "semantics.h"
 #include "cpunode.h"
 #include "timesync.h"
-
-#if defined(OS_LINUX)
-# ifdef HAVE_BYTESWAP_H
-#  include <byteswap.h>
-# endif
-# define bswap16(x) bswap_16(x)
-# define bswap32(x) bswap_32(x)
-# define bswap64(x) bswap_64(x)
-#elif defined(OS_FREEBSD)
-# ifdef HAVE_SYS_ENDIAN_H
-#  include <sys/endian.h>
-# endif
-#elif defined(OS_AIX) || defined (OS_SOLARIS)
-
-unsigned bswap32(unsigned value)
-{
-  unsigned newValue;
-  char* pnewValue = (char*) &newValue;
-  char* poldValue = (char*) &value;
- 
-  pnewValue[0] = poldValue[3];
-  pnewValue[1] = poldValue[2];
-  pnewValue[2] = poldValue[1];
-  pnewValue[3] = poldValue[0];
- 
-  return newValue;
-}
-
-unsigned long long bswap64 (unsigned long long value)
-{
-  unsigned long long newValue;
-  char* pnewValue = (char*) &newValue;
-  char* poldValue = (char*) &value;
- 
-  pnewValue[0] = poldValue[7];
-  pnewValue[1] = poldValue[6];
-  pnewValue[2] = poldValue[5];
-  pnewValue[3] = poldValue[4];
-  pnewValue[4] = poldValue[3];
-  pnewValue[5] = poldValue[2];
-  pnewValue[6] = poldValue[1];
-  pnewValue[7] = poldValue[0];
- 
-  return newValue;
-}
-
-#endif
-
+#include "bswap.h"
 #include "file_set.h"
 #include "mpi2out.h"
 #include "events.h"
@@ -198,12 +152,49 @@ int inWhichGroup (int task, FileSet_t *fset)
 	return -1;
 }
 
+void newTemporalFile (int taskid, int initial, int depth, char *filename)
+{
+	if (initial)
+	{
+		if (getenv ("MPI2PRV_TMP_DIR") == NULL)
+		{
+			if (getenv ("TMPDIR") == NULL)
+				sprintf (filename, "TmpFile-taskid%d-initial-XXXXXX", taskid);
+			else
+				sprintf (filename, "%s/TmpFile-taskid%d-initial-XXXXXX", getenv ("TMPDIR"), taskid);
+		}
+		else
+			sprintf (filename, "%s/TmpFile-taskid%d-initial-XXXXXX", getenv ("MPI2PRV_TMP_DIR"), taskid);
+	}
+	else
+	{
+		if (getenv ("MPI2PRV_TMP_DIR") == NULL)
+		{
+			if (getenv ("TMPDIR") == NULL)
+				sprintf (filename, "TmpFile-taskid%d-depth%d-XXXXXX", taskid, depth);
+			else
+				sprintf (filename, "%s/TmpFile-taskid%d-depth%d-XXXXXX", getenv ("TMPDIR"), taskid, depth);
+		}
+		else
+			sprintf (filename, "%s/TmpFile-taskid%d-depth%d-XXXXXX", getenv ("MPI2PRV_TMP_DIR"), taskid, depth);
+	}
+
+	/* Make a temporal name for a file */	
+	if (mkstemp (filename) == -1)
+	{
+		perror ("mkstemp");
+		fprintf (stderr, "mpi2prv: Error! Unable to create temporal file using mkstemp");
+		fflush (stderr);
+		exit (-1);
+	}
+}
+
 
 /******************************************************************************
  ***  AddFile_FS
  ******************************************************************************/
 
-static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
+static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 {
 	int ret;
 	FILE *fd_trace;
@@ -226,16 +217,6 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 	int sort_needed = FALSE;
 #endif
 	event_t *ptr_last = NULL;
-
-	if (getenv ("MPI2PRV_TMP_DIR") == NULL)
-	{
-		if (getenv ("TMPDIR") == NULL)
-			sprintf (paraver_tmp, "TmpFileXXXXXX");
-		else
-			sprintf (paraver_tmp, "%s/TmpFileXXXXXX", getenv ("TMPDIR"));
-	}
-	else
-		sprintf (paraver_tmp, "%s/TmpFileXXXXXX", getenv ("MPI2PRV_TMP_DIR"));
 
 	strcpy (trace_file_name, IFile->name);
 	fd_trace = fopen (trace_file_name, "r");
@@ -405,14 +386,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile/*, int nfile*/)
 
 	CommunicationQueues_Init (&(fitem->send_queue), &(fitem->recv_queue));
 
-	/* Make a temporal name for a file */	
-	if (mkstemp (paraver_tmp) == -1)
-	{
-		perror ("mkstemp");
-		fprintf (stderr, "mpi2prv: Unable to create temporal file using mkstemp");
-		fflush (stderr);
-		exit (-1);
-	}
+	/* Create a temporal file */
+	newTemporalFile (taskid, TRUE, 0, paraver_tmp);
 
 	/* Create a buffered file with 512 entries of paraver_rec_t */
 	fitem->wfb = WriteFileBuffer_new (paraver_tmp, 512, sizeof(paraver_rec_t));
@@ -448,7 +423,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 		if (IFiles[file].InputForWorker == idtask)
 		{
 			fitem = &(fset->files[fset->nfiles]);
-			if (AddFile_FS (fitem, &(IFiles[file])/*, fset->nfiles + 1*/) != 0)
+			if (AddFile_FS (fitem, &(IFiles[file]), idtask) != 0)
 			{
 				perror ("AddFile_FS");
 				fprintf (stderr, "mpi2prv: Error creating file set\n");
@@ -492,13 +467,245 @@ void Free_FS (FileSet_t *fset)
 	}
 }
 
+#if defined(PARALLEL_MERGE)
+PRVFileSet_t * Map_Paraver_files (FileSet_t * fset, 
+	unsigned long long *num_of_events, int numtasks, int taskid, 
+	unsigned long long records_per_block, int tree_fan_out)
+{
+	int i;
+	int res;
+	unsigned long long total = 0;
+	PRVFileSet_t *prvfset = NULL;
+
+	*num_of_events = total;
+
+
+	if ((prvfset = malloc (sizeof (PRVFileSet_t))) == NULL)
+	{
+		perror ("malloc");
+		fprintf (stderr, "mpi2prv: Error creating PRV file set\n");
+		return 0;
+	}
+
+	prvfset->fset = fset;
+	prvfset->nfiles = fset->nfiles;
+	prvfset->records_per_block = records_per_block / (fset->nfiles + tree_fan_out);
+
+	/* Set local files first */
+	for (i = 0; i < fset->nfiles; i++)
+	{
+		if (i == 0 && tree_MasterOfSubtree (taskid, tree_fan_out, 0))
+		{
+			char paraver_tmp[PATH_MAX];
+
+			/* Create a temporal file */
+			newTemporalFile (taskid, FALSE, 0, paraver_tmp);
+			prvfset->files[i].destination = WriteFileBuffer_new (paraver_tmp, 512, sizeof(paraver_rec_t));
+			unlink (paraver_tmp);
+		}
+		else
+			prvfset->files[i].destination = 0xbeefdead;
+
+		prvfset->files[i].source = WriteFileBuffer_getFD(fset->files[i].wfb);
+		prvfset->files[i].type = LOCAL;
+		prvfset->files[i].mapped_records = 0;
+		prvfset->files[i].current_p =
+			prvfset->files[i].last_mapped_p =
+			prvfset->files[i].first_mapped_p = NULL;
+		prvfset->files[i].remaining_records = lseek (prvfset->files[i].source, 0, SEEK_END);
+		lseek (prvfset->files[i].source, 0, SEEK_SET);
+		if (-1 == prvfset->files[i].remaining_records)
+		{
+			fprintf (stderr, "mpi2prv: Failed to seek the end of a temporal file\n");
+			fflush (stderr);
+			exit (0);
+		}
+		else
+			prvfset->files[i].remaining_records /= sizeof(paraver_rec_t);
+
+		total += prvfset->files[i].remaining_records;
+	}
+
+	/* Set remote files now (if exist), receive how many events they have */
+ 	if (tree_MasterOfSubtree (taskid, tree_fan_out, 0))
+	{
+		int i = 1;
+		while (taskid+i*tree_pow(tree_fan_out,0) < numtasks && i < tree_fan_out)
+		{
+			MPI_Status s;
+
+			prvfset->files[fset->nfiles+i-1].source = taskid + i*tree_pow(tree_fan_out, 0);
+			prvfset->files[fset->nfiles+i-1].type = REMOTE;
+			prvfset->files[fset->nfiles+i-1].mapped_records = 0;
+			prvfset->files[fset->nfiles+i-1].current_p =
+			prvfset->files[fset->nfiles+i-1].last_mapped_p =
+				prvfset->files[fset->nfiles+i-1].first_mapped_p = NULL;
+
+			res = MPI_Recv (&(prvfset->files[fset->nfiles+i-1].remaining_records), 1, MPI_LONG_LONG, prvfset->files[fset->nfiles+i-1].source, REMAINING_TAG, MPI_COMM_WORLD, &s);
+			MPI_CHECK(res, MPI_Recv, "Cannot receive information of remaining records");
+
+			total += prvfset->files[fset->nfiles+i-1].remaining_records;
+
+			prvfset->nfiles++;
+			i++;
+		}
+	}
+	else
+	{
+		/* NON ROOT WORK,
+		   send how many events are on this slave */
+		int my_master = tree_myMaster (taskid, tree_fan_out, 0);
+
+		res = MPI_Send (&total, 1, MPI_LONG_LONG, my_master, REMAINING_TAG, MPI_COMM_WORLD);
+		MPI_CHECK(res, MPI_Send, "Cannot send information of remaining records");
+	}
+
+	*num_of_events = total;
+
+	return prvfset;
+}
+
+PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * infset, 
+	unsigned long long *num_of_events, int numtasks, int taskid, 
+	unsigned long long records_per_block, int depth, int tree_fan_out)
+{
+	int i;
+	int res;
+	unsigned long long total = 0;
+
+	*num_of_events = total;
+
+	infset->records_per_block = records_per_block / tree_fan_out;
+
+	/* Master process will have its own files plus references to a single file of every other
+	   task (which represents a its set of assigned files) */
+
+	if (tree_MasterOfSubtree (taskid, tree_fan_out, depth))
+	{
+		char paraver_tmp[PATH_MAX];
+
+		if (infset->nfiles > 1)
+		{
+			infset->files[0].source = WriteFileBuffer_getFD(infset->files[0].destination);
+
+			/* Create a temporal file */
+			newTemporalFile (taskid, FALSE, 0, paraver_tmp);
+			infset->files[0].destination = WriteFileBuffer_new (paraver_tmp, 512, sizeof(paraver_rec_t));
+			unlink (paraver_tmp);
+
+			/* Set local file first */
+			infset->nfiles = 1;
+			infset->files[0].type = LOCAL;
+			infset->files[0].mapped_records = 0;
+			infset->files[0].current_p =
+				infset->files[0].last_mapped_p =
+				infset->files[0].first_mapped_p = NULL;
+			infset->files[0].remaining_records = lseek (infset->files[0].source, 0, SEEK_END);
+			lseek (infset->files[0].source, 0, SEEK_SET);
+			if (-1 == infset->files[0].remaining_records)
+			{
+				fprintf (stderr, "mpi2prv: Failed to seek the end of a temporal file\n");
+				fflush (stderr);
+				exit (0);
+			}
+			else
+				infset->files[0].remaining_records /= sizeof(paraver_rec_t);
+		
+			total += infset->files[0].remaining_records;
+
+			i = 1;
+			while (taskid+i*tree_pow(tree_fan_out,depth) < numtasks && i < tree_fan_out)
+			{
+				MPI_Status s;
+
+				infset->files[i].source = taskid + i*tree_pow(tree_fan_out, depth);
+				infset->files[i].type = REMOTE;
+				infset->files[i].mapped_records = 0;
+				infset->files[i].current_p =
+					infset->files[i].last_mapped_p =
+					infset->files[i].first_mapped_p = NULL;
+
+				res = MPI_Recv (&(infset->files[i].remaining_records), 1, MPI_LONG_LONG, infset->files[i].source, REMAINING_TAG, MPI_COMM_WORLD, &s);
+				MPI_CHECK(res, MPI_Recv, "Cannot receive information of remaining records");
+
+				total += infset->files[i].remaining_records;
+
+				infset->nfiles++;
+				i++;
+			}
+
+				infset->SkipAsMasterOfSubtree = FALSE;
+		} /* if infset->nfiles > 1 */
+		else
+		{
+			infset->SkipAsMasterOfSubtree = TRUE;
+		}
+	}
+	else
+	{
+		/* NON ROOT WORK,
+	   send how many events are on this slave */
+		int my_master = tree_myMaster (taskid, tree_fan_out, depth);
+
+		infset->nfiles = 1;
+		infset->files[0].source = WriteFileBuffer_getFD(infset->files[0].destination);
+		infset->files[0].destination = 0xdeadbeef;
+		infset->files[0].type = LOCAL;
+
+		/* Set local file first */
+		infset->files[0].mapped_records = 0;
+		infset->files[0].current_p =
+			infset->files[0].last_mapped_p =
+			infset->files[0].first_mapped_p = NULL;
+
+		infset->files[0].remaining_records = lseek (infset->files[0].source, 0, SEEK_END);
+		lseek (infset->files[0].source, 0, SEEK_SET);
+
+		if (-1 == infset->files[0].remaining_records)
+		{
+			fprintf (stderr, "mpi2prv: Failed to seek the end of a temporal file\n");
+			fflush (stderr);
+			exit (0);
+		}
+		else
+			infset->files[0].remaining_records /= sizeof(paraver_rec_t);
+
+		total = infset->files[0].remaining_records;
+
+		res = MPI_Send (&total, 1, MPI_LONG_LONG, my_master, REMAINING_TAG, MPI_COMM_WORLD);
+		MPI_CHECK(res, MPI_Send, "Cannot send information of remaining records");
+	}	
+
+	*num_of_events = total;
+
+	return infset;
+}
+
+void Free_Map_Paraver_Files (PRVFileSet_t * infset)
+{
+	int i;
+
+	/* Frees memory allocated by Read_PRV_LocalFile and Read_PRV_RemoteFile */
+	for (i = 0; i < infset->nfiles; i++)
+		{
+			xfree (infset->files[i].first_mapped_p)
+			infset->files[i].first_mapped_p = NULL;
+		}
+}
+
+void Flush_Paraver_Files_binary (PRVFileSet_t *prvfset, int taskid, int depth,
+	int tree_fan_out)
+{
+	if (tree_MasterOfSubtree (taskid, tree_fan_out, depth))
+		WriteFileBuffer_flush ( prvfset->files[0].destination );
+}
+
+#else /* PARALLEL_MERGE */
+
 PRVFileSet_t * Map_Paraver_files (FileSet_t * fset, 
 	unsigned long long *num_of_events, int numtasks, int taskid, 
 	unsigned long long records_per_block)
 {
-#if defined(PARALLEL_MERGE)
-	int res;
-#endif
 	unsigned long long total = 0;
 	PRVFileSet_t *prvfset = NULL;
 	int i;
@@ -524,11 +731,6 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 	else
 		prvfset->nfiles = fset->nfiles;
 
-#if defined(PARALLEL_MERGE)
-	res = MPI_Bcast (&(prvfset->records_per_block), 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
-	MPI_CHECK(res, MPI_Bcast, "Failed to share number of records per block and task!");
-#endif
-
 	/* Set local files first */
 	for (i = 0; i < fset->nfiles; i++)
 	{
@@ -539,6 +741,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 			prvfset->files[i].last_mapped_p =
 			prvfset->files[i].first_mapped_p = NULL;
 		prvfset->files[i].remaining_records = lseek (prvfset->files[i].source, 0, SEEK_END);
+		lseek (prvfset->files[i].source, 0, SEEK_SET);
 		if (-1 == prvfset->files[i].remaining_records)
 		{
 			fprintf (stderr, "mpi2prv: Failed to seek the end of a temporal file\n");
@@ -549,43 +752,14 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 			prvfset->files[i].remaining_records /= sizeof(paraver_rec_t);
 			
 		total += prvfset->files[i].remaining_records;
-		lseek (prvfset->files[i].source, 0, SEEK_SET);
 	}
-
-#if defined(PARALLEL_MERGE)
-	if (0 == taskid)
-	{
-		/* Set remote files now (if exist), receive how many events they have */
-		for (i = 0; i < numtasks-1; i++)
-		{
-			MPI_Status s;
-
-			prvfset->files[fset->nfiles+i].mapped_records = 0;
-			prvfset->files[fset->nfiles+i].source = i+1;
-			prvfset->files[fset->nfiles+i].type = REMOTE;
-			prvfset->files[fset->nfiles+i].current_p =
-				prvfset->files[fset->nfiles+i].last_mapped_p =
-				prvfset->files[fset->nfiles+i].first_mapped_p = NULL;
-
-			res = MPI_Recv (&(prvfset->files[fset->nfiles+i].remaining_records), 1, MPI_LONG_LONG, i+1, REMAINING_TAG, MPI_COMM_WORLD, &s);
-			MPI_CHECK(res, MPI_Recv, "Cannot receive information of remaining records");
-
-			total += prvfset->files[fset->nfiles+i].remaining_records;
-		}
-	}
-	else
-	{
-		/* NON ROOT WORK,
-		   send how many events are on this slave */
-		res = MPI_Send (&total, 1, MPI_LONG_LONG, 0, REMAINING_TAG, MPI_COMM_WORLD);
-		MPI_CHECK(res, MPI_Send, "Cannot send information of remaining records");
-	}
-#endif /* PARALLEL_MERGE */
 
 	*num_of_events = total;
 
 	return prvfset;
 }
+
+#endif /* PARALLEL_MERGE */
 
 static void Read_PRV_LocalFile (PRVFileItem_t *file, unsigned records_per_block)
 {
@@ -605,7 +779,7 @@ static void Read_PRV_LocalFile (PRVFileItem_t *file, unsigned records_per_block)
 		file->first_mapped_p = (paraver_rec_t*) malloc (want_to_read);
 		file->mapped_records = nrecords;
 	}
-	
+
 	if (file->first_mapped_p == NULL)
 	{
 		perror ("malloc");
@@ -622,18 +796,18 @@ static void Read_PRV_LocalFile (PRVFileItem_t *file, unsigned records_per_block)
 		fflush (stderr);
 		exit (0);
 	}
-	
+
 	file->current_p = file->first_mapped_p;
 	tmp = (char *) file->first_mapped_p;
 	tmp = tmp + want_to_read;
 	file->last_mapped_p = (paraver_rec_t *) tmp;
-	
+
 	file->remaining_records -= nrecords;
 }
 
 #if defined(PARALLEL_MERGE)
 /* This is called by the master/root process */
-static void Read_PRV_RemoteFile (PRVFileItem_t *file, unsigned records_per_block, int taskid)
+static void Read_PRV_RemoteFile (PRVFileItem_t *file)
 {
 	int res;
 	unsigned int howmany;
@@ -642,7 +816,7 @@ static void Read_PRV_RemoteFile (PRVFileItem_t *file, unsigned records_per_block
 
 	res = MPI_Send (&res, 1, MPI_INT, file->source, ASK_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD); 
 	MPI_CHECK(res, MPI_Send, "Failed to ask to a remote task a block of merged events!");
-	
+
 	res = MPI_Recv (&howmany, 1, MPI_UNSIGNED, file->source, HOWMANY_MERGE_REMOTE_BLOCK_TAG, MPI_COMM_WORLD, &s);
 	MPI_CHECK(res, MPI_Recv, "Failed to receive how many events are on the incoming buffer!");
 
@@ -687,7 +861,7 @@ paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset, int taskid)
 #if defined(PARALLEL_MERGE)
 				/* This can only happen for task = 0 and parallel merger */
 				if (fset->files[i].type == REMOTE)
-					Read_PRV_RemoteFile (&(fset->files[i]), fset->records_per_block, fset->files[i].source);
+					Read_PRV_RemoteFile (&(fset->files[i]));
 				else
 #endif
 					Read_PRV_LocalFile (&(fset->files[i]), fset->records_per_block);
@@ -941,180 +1115,6 @@ event_t *Search_PACX_IRECVED (event_t * current, long long request, FileItem_t *
 				return irecved;
 	return NULL;
 }
-
-#if defined(DEAD_CODE)
-/******************************************************************************
- ***  SearchRecvEvent_FS
- ******************************************************************************/
-
-int SearchRecvEvent_FS (FileSet_t *fset, unsigned int ptask, unsigned int receiver,
-	unsigned int sender, unsigned int tag, event_t ** recv_begin, event_t ** recv_end)
-{
-  RecvQ_t *recv_queue;
-  RecvQ_t *recv_rec;
-  FileItem_t *freceive;
-  event_t *current, *tmp_recv_begin = NULL, *tmp_sendrecv_begin = NULL, *recved;
-
-  *recv_begin = NULL;
-  *recv_end = NULL;
-
-	if (!isTaskInMyGroup (fset, receiver))
-		return 1;
-
-  /*
-   * Compte amb aquest acces, en aquest cas va perque receiver es mou
-   * entre [0..n-1] i perque el fitxer "i" es del receiver "i". En un
-   * cas general potser no coincideix.
-   */
-  freceive = obj_table[ptask - 1].tasks[receiver].threads[0].file;
-
-  recv_queue = Queue_FS (freceive);
-
-  recv_rec = QueueSearch ((void *) freceive, recv_queue, tag, sender);
-
-  if (recv_rec != NULL)
-  {
-    *recv_begin = GetRecv_RecordQ (recv_rec, RECV_BEGIN_RECORD);
-    *recv_end = GetRecv_RecordQ (recv_rec, RECV_END_RECORD);
-    Remove_RecvQ (recv_rec);
-  }
-  else
-  {
-    current = NextRecv_FS (freceive);
-    while (current != NULL)
-    {
-      if ((Get_EvEvent (current) == RECV_EV) &&
-          (Get_EvValue (current) == EVT_BEGIN))
-      {
-        tmp_recv_begin = current;
-      }
-			else if ((Get_EvEvent (current) == SENDRECV_EV) &&
-               (Get_EvValue (current) == EVT_BEGIN))
-			{
-				tmp_sendrecv_begin = current;
-			}
-			else if ((Get_EvEvent (current) == SENDRECV_REPLACE_EV) &&
-               (Get_EvValue (current) == EVT_BEGIN))
-			{
-				tmp_sendrecv_begin = current;
-			}
-      else if (((Get_EvEvent (current) == IRECV_EV) &&
-                (Get_EvValue (current) == EVT_END)) ||
-               ((Get_EvEvent (current) == PERSIST_REQ_EV)
-                && (Get_EvValue (current) == IRECV_EV)))
-      {
-        recved = SearchIRECVED (current, Get_EvAux(current), freceive);
-        if (recved == NULL)
-				{
-          printf ("No IRECVED!!!: ");
-		  		break;
-				}
-        if ((Get_EvTarget (recved) == sender) && (Get_EvTag (recved) == tag))
-        {
-          /*
-           * We have already encountered the receive records
-           */
-          *recv_begin = current;
-          *recv_end = recved;
-          break;
-        }
-        else
-        {
-          /*
-           * Those receive records don't match with the sent.
-           * We will store it in the queue.
-           */
-          recv_rec = Alloc_RecvQ_Item ();
-/*		     recv_rec = (RecvQ_t *)malloc(sizeof(RecvQ_t));*/
-          SetRecv_RecordQ (recv_rec, current, RECV_BEGIN_RECORD);
-          SetRecv_RecordQ (recv_rec, recved, RECV_END_RECORD);
-
-          Queue_RecvQ (recv_queue, recv_rec);
-        }
-      }
-      else if ((Get_EvEvent (current) == RECV_EV) &&
-               (Get_EvValue (current) == EVT_END))
-      {
-        if ((Get_EvTarget (current) == sender) &&
-            (Get_EvTag (current) == tag))
-        {
-          /*
-           * We have already encountered the receive records
-           */
-          *recv_begin = tmp_recv_begin;
-          *recv_end = current;
-          break;
-        }
-        else
-        {
-          /*
-           * Those receive records don't match with the sent.
-           * We will store it in the queue.
-           */
-          recv_rec = Alloc_RecvQ_Item ();
-          SetRecv_RecordQ (recv_rec, tmp_recv_begin, RECV_BEGIN_RECORD);
-          SetRecv_RecordQ (recv_rec, current, RECV_END_RECORD);
-          Queue_RecvQ (recv_queue, recv_rec);
-        }
-      }
-#if !defined(AVOID_SENDRECV)
-      else if ((Get_EvEvent (current) == SENDRECV_EV) &&
-               (Get_EvValue (current) == EVT_END))
-      {
-        if ((Get_EvTarget (current) == sender) &&
-            (Get_EvTag (current) == tag))
-        {
-          /*
-           * We have already encountered the receive records
-           */
-          *recv_begin = tmp_sendrecv_begin;
-          *recv_end = current;
-          break;
-        }
-        else
-        {
-          /*
-           * Those receive records don't match with the sent.
-           * We will store it in the queue.
-           */
-          recv_rec = Alloc_RecvQ_Item ();
-          SetRecv_RecordQ (recv_rec, tmp_sendrecv_begin, RECV_BEGIN_RECORD);
-          SetRecv_RecordQ (recv_rec, current, RECV_END_RECORD);
-          Queue_RecvQ (recv_queue, recv_rec);
-        }
-			}
-      else if ((Get_EvEvent (current) == SENDRECV_REPLACE_EV) &&
-               (Get_EvValue (current) == EVT_END))
-      {
-        if ((Get_EvTarget (current) == sender) &&
-            (Get_EvTag (current) == tag))
-        {
-          /*
-           * We have already encountered the receive records
-           */
-          *recv_begin = tmp_sendrecv_begin;
-          *recv_end = current;
-          break;
-        }
-        else
-        {
-          /*
-           * Those receive records don't match with the sent.
-           * We will store it in the queue.
-           */
-          recv_rec = Alloc_RecvQ_Item ();
-          SetRecv_RecordQ (recv_rec, tmp_sendrecv_begin, RECV_BEGIN_RECORD);
-          SetRecv_RecordQ (recv_rec, current, RECV_END_RECORD);
-          Queue_RecvQ (recv_queue, recv_rec);
-        }
-     }
-#endif
-      current = NextRecv_FS (freceive);
-    }
-  }
-	return 0;
-}
-#endif
 
 void Rewind_FS (FileSet_t * fs)
 {
@@ -1552,77 +1552,6 @@ long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid)
 	return options;
 }
 
-
-#if defined(DEAD_CODE)
-/******************************************************************************
- ***  CheckBursts
- ******************************************************************************/
-
-int CheckBursts (FileSet_t * fset, int numtasks, int taskid)
-{
-#if defined(PARALLEL_MERGE)
-	int res;
-#endif
-	unsigned int file = 0, lookahead = 100;
-	int result = FALSE;
-	event_t *current;
-
-	/* This is just informational! */
-
-	if (taskid == 0)
-	{
-		fprintf (stdout, "mpi2prv: Bursts library ... ");
-		fflush (stdout);
-
-		/* All tasks share the same initialization, so check once only! */
-		current = Current_FS (&(fset->files[file]));
-		while ((current != NULL) &&
-		((Get_EvEvent (current) != MPI_INIT_EV) || (Get_EvValue (current) != EVT_END)))
-		{
-			StepOne_FS (&(fset->files[file]));
-			current = Current_FS (&(fset->files[file]));
-		}
-
-		if (current != NULL)
-			if (Get_EvAux(current) & TRACEOPTION_BURSTS)
-			{
-				fprintf (stdout, " yes! (by header-info)\n");
-				Rewind_FS (fset);
-				return TRUE;
-			}
-
-		/* If we're here, then we didn't found the header, or the header didn't
-		   know about the BURSTS! ... Just to have backward compatibility, check
-		   for some records inside the MPITs */
-		while (current != NULL && lookahead > 0)
-		{
-			if (Get_EvEvent(current) == CPU_BURST_EV)
-			{
-				fprintf (stdout, " yes! (by content)\n");
-				Rewind_FS (fset);
-				result = TRUE;
-			}
-			StepOne_FS (&(fset->files[file]));
-			current = Current_FS (&(fset->files[file]));
-			lookahead--;
-		}
-
-		fprintf (stdout, " NO\n");
-		fflush (stdout);
-
-		Rewind_FS (fset);
-	}
-
-#if defined(PARALLEL_MERGE)
-	res = MPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_CHECK(res, MPI_Bcast, "Failed to share CheckBursts result!");
-#endif
-
-	return result;
-}
-#endif
-
-
 void FSet_Forward_To_First_GlobalOp (FileSet_t *fset, int numtasks, int taskid)
 {
 	event_t *current = NULL;
@@ -1807,236 +1736,3 @@ unsigned int GetActiveFile (FileSet_t *fset)
 	return fset->active_file;
 }
 
-#ifdef MPI_PHYSICAL_COMM
-#include "MPI_Physical.h"
-/*****************************************************************************
- **  Function name: BuscaComunicacionsFisiques ( RecTraceSet ) 
- **  Description:   Busca informacio de les comunicacions fisiques presents
- **                 a la trasa. Generara dues taules (una amb els sends
- **                 fisics i l'altre amb els receives fisics.
- *****************************************************************************/
-
-int *num_phys_Sends, *num_phys_Receives, *num_log2phys_tag;
-InformacioFisica **phys_Sends, **phys_Receives;
-
-void BuscaComunicacionsFisiques (FileSet_t * TraceSet)
-{
-  int ptask, task, thread, cpu, ii;
-  int SkipEvent, filter;
-  int sum_phys_sends, sum_phys_recvs, max_send_value;
-  int numTraces = num_Files_FS (TraceSet);
-  event_t *current = NULL;
-  event_t **prevEvent;
-
-  /************************************************************************
-   ** Primer mirem quants events hi ha!
-   ***********************************************************************/
-
-  num_phys_Sends = (int *) malloc (sizeof (int) * numTraces);
-  num_phys_Receives = (int *) malloc (sizeof (int) * numTraces);
-  num_log2phys_tag = (int *) malloc (sizeof (int) * numTraces);
-  if (num_phys_Sends == NULL ||
-      num_phys_Receives == NULL || num_log2phys_tag == NULL)
-  {
-    fprintf (stderr,
-             "Error while allocating num_phys_Sends/num_phys_Receives/num_log2phys_tag\n");
-    exit (0);
-  }
-  bzero (num_phys_Sends, sizeof (int) * numTraces);
-  bzero (num_phys_Receives, sizeof (int) * numTraces);
-  bzero (num_log2phys_tag, sizeof (int) * numTraces);
-
-  fprintf (stderr, "Analyzing physical communications...\n");
-  fflush (stderr);
-
-  Rewind_FS (TraceSet);
-
-  for (ii = 0; ii < numTraces; ii++)
-  {
-    current = Current_FS (&(TraceSet->files[ii]));
-    do
-    {
-      int Type = Get_EvEvent (current);
-      int Value = Get_EvValue (current);
-      int subValue = Get_EvMiscParam (current);
-      int task = TraceSet->files[ii].task;
-
-      if (IsMISC (Type, &filter))
-      {
-        if (Value == TAG_SND_FISIC)
-          if (subValue > num_phys_Sends[task - 1])
-            num_phys_Sends[task - 1] = subValue;
-
-        if (Value == TAG_RCV_FISIC)
-          if (subValue > num_phys_Receives[task - 1])
-            num_phys_Receives[task - 1] = subValue;
-
-        if (Value == TAG_RCV_F_L)
-          if (subValue > num_log2phys_tag[task - 1])
-            num_log2phys_tag[task - 1] = subValue;
-      }
-
-      StepOne_FS (&(TraceSet->files[ii]));
-      current = Current_FS (&(TraceSet->files[ii]));
-    }
-    while (current);
-  }
-
-  fprintf (stderr, "Physical&Logical communications briefing:\n");
-  for (ii = 0; ii < numTraces; ii++)
-    fprintf (stderr,
-             "task %02d => { #send = %d / #precv = %d / #lrecv = %d }\n",
-             ii + 1, num_phys_Sends[ii], num_phys_Receives[ii],
-             num_log2phys_tag[ii]);
-  fprintf (stderr, "\n");
-  fflush (stderr);
-
-  sum_phys_sends = sum_phys_recvs = 0;
-  for (ii = 0; ii < numTraces; ii++)
-  {
-    sum_phys_sends += num_phys_Sends[ii];
-    sum_phys_recvs += num_log2phys_tag[ii];
-  }
-
-  if (sum_phys_sends != sum_phys_recvs)
-  {
-    fprintf (stderr,
-             "Error: Sum(logical Sends) differs from Sum(logical Recvs)\n");
-    fflush (stderr);
-  }
-
-  Rewind_FS (TraceSet);
-
-  fprintf (stderr, "Reordering physical communications\n");
-  fflush (stderr);
-
-  /************************************************************************
-   ** Ara els agafem i els assignem a una taula
-   ***********************************************************************/
-  phys_Sends =
-    (InformacioFisica **) malloc (sizeof (InformacioFisica) * numTraces);
-  phys_Receives =
-    (InformacioFisica **) malloc (sizeof (InformacioFisica *) * numTraces);
-  if (phys_Sends == NULL || phys_Receives == NULL)
-  {
-    fprintf (stderr, "Error while allocating phys_Sends/phys_Receives\n");
-    exit (0);
-  }
-  for (ii = 0; ii < numTraces; ii++)
-  {
-    phys_Sends[ii] =
-      (InformacioFisica *) malloc (sizeof (InformacioFisica) *
-                                   (num_phys_Sends[ii] + 1));
-    phys_Receives[ii] =
-      (InformacioFisica *) malloc (sizeof (InformacioFisica) *
-                                   (num_phys_Receives[ii] + 1));
-
-    if (phys_Sends[ii] == NULL || phys_Receives[ii] == NULL)
-    {
-      fprintf (stderr,
-               "Error while allocating phys_Sends[%d]/phys_Receives[%d]n", ii,
-               ii);
-      exit (0);
-    }
-    else
-    {
-      bzero (phys_Sends[ii],
-             sizeof (InformacioFisica) * (num_phys_Sends[ii] + 1));
-      bzero (phys_Receives[ii],
-             sizeof (InformacioFisica) * (num_phys_Receives[ii] + 1));
-    }
-  }
-
-  prevEvent = (event_t **) malloc (sizeof (event_t *) * numTraces);
-  if (prevEvent == NULL)
-  {
-    fprintf (stderr,
-             "Error while allocating prevEvent/matchFound_s/matchFound_r\n");
-    exit (0);
-  }
-  bzero (prevEvent, sizeof (event_t *) * numTraces);
-
-  /*
-   * Que fa aquest bucle.
-   * 
-   * Necessitem omplir les taules que relacionen
-   * #send/receive -> temps fisic / temps entrada rutina.
-   * 
-   * En els sends, el send fisic sempre esta entre l'entrada i la sortida.
-   * Per tant, cal guardar l'event anterior de cada tasca i marcar d'alguna
-   * forma que el seguent event tambe servira per omplir la taula.
-   * 
-   * Pels receives, es diferent. Primer tenim un event que indica quan es
-   * reb el receive fisic -- pot ser a qualsevol lloc de la trasa. Tambe
-   * hi ha un event que indica si aquell receive correspon a una P2P. En
-   * cas de trobar-lo, cal desar els punts d'entrada d'aquesta  funcio!
-   * 
-   */
-  current = GetNextEvent_FS (TraceSet, &cpu, &ptask, &task, &thread);
-
-  do
-  {
-    int Type = Get_EvEvent (current);
-    int Value = Get_EvValue (current);
-    int subValue = Get_EvMiscParam (current);
-    UINT64 temps = Get_EvTime (current);
-
-    SkipEvent = FALSE;
-
-    if (IsMISC (Type, &filter))
-    {
-      if (Value == TAG_SND_FISIC && Type == USER_EV
-          && prevEvent[task - 1] != NULL)
-      {
-        phys_Sends[task - 1][subValue].Temps = temps;
-        phys_Sends[task - 1][subValue].Temps_entrada =
-          Get_EvTime (prevEvent[task - 1]);
-        phys_Sends[task - 1][subValue].Valid = TRUE;
-
-#if defined (DEBUG_MPI_PHYSICAL)
-        printf ("task %d: TAG_SND_FISIC #%d at time %lld\n", task, subValue,
-                temps);
-#endif
-      }
-
-      if (Value == TAG_RCV_FISIC && Type == USER_EV)
-      {
-        phys_Receives[task - 1][subValue].Temps = temps;
-#if defined (DEBUG_MPI_PHYSICAL)
-        printf ("task %d: TAG_RCV_FISIC #%d at time %lld\n", task, subValue,
-                temps);
-#endif
-      }
-
-      if (Value == TAG_RCV_F_L && Type == USER_EV
-          && prevEvent[task - 1] != NULL)
-      {
-        phys_Receives[task - 1][subValue].Valid = TRUE;
-        phys_Receives[task - 1][subValue].Temps_entrada =
-          Get_EvTime (prevEvent[task - 1]);
-
-#if defined (DEBUG_MPI_PHYSICAL)
-        printf ("task %d: TAG_RCV_F_L #%d at time %lld\n", task, subValue,
-                temps);
-#endif
-      }
-    }
-
-    /*
-     * Hem d'ignorar els events que identifiquen la comunicacio fisica
-     * a l'hora de coneixer l'event precedent de la task. 
-     */
-
-    SkipEvent = !(IsMPI (Type, &filter));
-
-    if (!SkipEvent)
-      prevEvent[task - 1] = current;
-
-    current = GetNextEvent_FS (TraceSet, &cpu, &ptask, &task, &thread);
-  }
-  while (current);
-
-  Rewind_FS (TraceSet);
-}
-
-#endif

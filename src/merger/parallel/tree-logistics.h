@@ -22,56 +22,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/file_set.c $
+ | @last_commit: $Date: 2010-02-23 16:03:47 +0100 (dt, 23 feb 2010) $
+ | @version:     $Revision: 192 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+int tree_pow (int base, int exp);
+int tree_TaskHaveWork (int taskid, int tree_fanout, int tree_depth);
+int tree_MasterOfSubtree (int taskid, int tree_fanout, int tree_depth);
+int tree_MaxDepth (int ntasks, int tree_fanout);
+int tree_myMaster (int taskid, int tree_fanout, int tree_depth);
 
-#include "config.h"
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
-{
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
-
-	int InputForWorker;           /* Which task is responsible for this file */
-
-	int fd;
-	char *name;
-	char *node;
-}
-input_t;
-
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-#if defined(IS_BG_MACHINE)    /* BlueGene coordinates are kept in traces */
-extern int option_XYZT;
-#endif
-
-extern int SincronitzaTasks;
-extern int SincronitzaTasks_byNode;
-extern int dump;
-extern int Joint_States;
-extern int option_UseDiskForComms;
-extern int option_SkipSendRecvComms;
-extern int option_UniqueCallerID;
-extern int option_VerboseLevel;
-
-int merger (int numtasks, int idtask, int argc, char *argv[]);
-
-#endif

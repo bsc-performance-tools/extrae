@@ -396,13 +396,6 @@ int HWCBE_PAPI_Start_Set (UINT64 time, int numset, int threadid)
 	rc = PAPI_start (HWCEVTSET(threadid));
  	if (rc == PAPI_OK)
 	{
-#if defined(DEAD_CODE)
-		long long requested_values[MAX_HWC];
-
-		HARDWARE_COUNTERS_REQUESTED(HWC_sets[numset].num_counters, HWC_sets[numset].counters, requested_values);
-
-		TRACE_EVENT_AND_GIVEN_COUNTERS (time, HWC_CHANGE_EV, numset, MAX_HWC, requested_values);
-#endif /* DEAD_CODE */
 		TRACE_EVENT (time, HWC_CHANGE_EV, numset);
 
 #if defined(SAMPLING_SUPPORT)
@@ -465,12 +458,6 @@ int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 
 void HWCBE_PAPI_Initialize (int TRCOptions)
 {
-#if defined(DEAD_CODE)
-#if defined(SAMPLING_SUPPORT)
-	PAPI_option_t options;
-#endif
-#endif
-
 	UNREFERENCED_PARAMETER(TRCOptions);
 
 	int rc;
@@ -500,27 +487,6 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 
 		return;
 	}
-
-#if defined(DEAD_CODE)
-#if defined(SAMPLING_SUPPORT)
-	/* Be careful since PAPI 3.5.0 use HAVE_HARDWARE_INTR_SIG */
-# if defined(HAVE_HARDWARE_INTR_SIG)
-	rc = PAPI_get_opt (PAPI_SUBSTRATEINFO, &options);
-	if (rc >= 0)
-		SamplingSupport = options.sub_info->hardware_intr;
-# elif defined(HAVE_SUPPORT_HW_OVERFLOW)
-  rc = PAPI_get_opt (PAPI_SUBSTRATE_SUPPORT, &options);
-  if (rc >= 0)
-    SamplingSupport = options.sub_info.supports_hw_overflow;
-# else
-#  error "Unknown method to gather if the system supports HW overflows"
-# endif
-
-#if 0
-	fprintf (stdout, PACKAGE_NAME": HW Sampling is %sallowed by the PAPI substrate.\n", SamplingSupport?"":"not ");
-#endif
-#endif
-#endif /* DEAD_CODE */
 
 #if defined(SAMPLING_SUPPORT)
 	/* Use any kind of sampling -- software or hardware */

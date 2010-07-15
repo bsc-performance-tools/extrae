@@ -283,7 +283,7 @@ void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	struct input_t *files, unsigned int num_appl, char *sym_file,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
-	int MBytesPerAllSegments, int forceformat)
+	int MBytesPerAllSegments, int forceformat, int tree_fan_out)
 {
 	FileSet_t * fset;
 	unsigned int cpu, ptask, task, thread, error;
@@ -300,7 +300,9 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
 	records_per_task *= MBytesPerAllSegments;            /* let's use this memory */
-	records_per_task /= numtasks;                        /* divide by all the tasks */
+#if defined(PARALLEL_MERGE)
+	records_per_task /= tree_fan_out;                    /* divide by the tree fan out */
+#endif
 
 	InitializeObjectTable (num_appl, files, nfiles);
 #if defined(PARALLEL_MERGE)
@@ -351,7 +353,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	options = GetTraceOptions (fset, numtasks, taskid);
 
-	CheckHWCcontrol (taskid, options);
+//	CheckHWCcontrol (taskid, options);
 	CheckClockType (taskid, options, PRV_SEMANTICS, forceformat);
 
 /**************************************************************************************/
@@ -568,7 +570,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 #endif
 
-	Paraver_JoinFiles (outName, fset, current_time, nfiles, NodeCPUinfo, numtasks, taskid, records_per_task);
+	Paraver_JoinFiles (outName, fset, current_time, nfiles, NodeCPUinfo, numtasks, taskid, records_per_task, tree_fan_out);
 
 	strcpy (envName, outName);
 #ifdef HAVE_ZLIB

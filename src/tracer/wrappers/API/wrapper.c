@@ -1292,17 +1292,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Initialize the clock */
 	CLOCK_INIT;
 
-#if 0 
-	This is DEAD_CODE
-	/* Allocate space for trace structures */
-	PRDAUSR = (struct trace_prda*) malloc (sizeof(struct trace_prda)*NumOfThreads);
-	if (NULL == PRDAUSR)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate structure to trace %d threads\n", NumOfThreads);
-		exit (-1);
-	}
-#endif
-
 	/* Configure the tracing subsystem */
 #if defined(HAVE_XML2)
 	if (config_file != NULL)
@@ -1343,13 +1332,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Initialize Tracing Mode related variables */
 	Trace_Mode_Initialize (maximum_NumOfThreads);
 
-#if defined(DEAD_CODE)
-	if (HWCEnabled)
-		fprintf (stdout, PACKAGE_NAME": Tracing enabled for process %d (counters enabled).\n", getpid ());
-	else if (!HWCEnabled)
-		fprintf (stdout, PACKAGE_NAME": Tracing enabled for process %d.\n", getpid ());
-#endif
-
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
 #endif
@@ -1381,16 +1363,6 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 	/* Just modify things if there are more threads */
 	if (new_num_threads > maximum_NumOfThreads)
 	{
-#if 0 
-	This is DEAD_CODE
-		/* Allocate space for trace structures */
-		PRDAUSR = (struct trace_prda*) realloc (PRDAUSR, sizeof(struct trace_prda)*new_num_threads);
-		if (PRDAUSR == NULL)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! Can't reallocate memory for %d threads\n", new_num_threads);
-			exit (-1);
-		}
-#endif
 		/* Reallocate the buffers and trace files */
 		Reallocate_buffers_and_files (new_num_threads);
 
@@ -1643,12 +1615,6 @@ int MPItrace_Flush_Wrapper (Buffer_t *buffer)
 
 		BUFFER_INSERT (THREADID, buffer, FlushEv_Begin);
 		BUFFER_INSERT (THREADID, buffer, FlushEv_End);
-
-#if defined(DEAD_CODE)
-		/* Collides with Buffer_ExecuteFlushCallback -> called from Thread_Finalization*/
-		if (THREADID == 0)
-			MPItrace_getrusage_Wrapper (TIME);
-#endif
 
 		check_size = !hasMinimumTracingTime || (hasMinimumTracingTime && (TIME > MinimumTracingTime+initTracingTime));
 		if (file_size > 0 && check_size)

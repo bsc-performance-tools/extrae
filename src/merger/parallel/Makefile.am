@@ -21,6 +21,7 @@ dimemas_FILES = \
  ../dimemas/trace_to_trf.c ../dimemas/trace_to_trf.h
 
 paraver_FILES = \
+ ../paraver/bswap.c ../paraver/bswap.h \
  ../paraver/trace_communication.c ../paraver/trace_communication.h \
  ../paraver/paraver_generator.c ../paraver/paraver_generator.h \
  ../paraver/paraver_state.c ../paraver/paraver_state.h \
@@ -43,7 +44,8 @@ paraver_FILES = \
 
 parallel_FILES = \
  mpi-aux.h mpi-tags.h \
- parallel_merge_aux.h parallel_merge_aux.c
+ parallel_merge_aux.h parallel_merge_aux.c \
+ tree-logistics.c tree-logistics.h
 
 mpimpi2prv_SOURCES = \
  ../merger.c \

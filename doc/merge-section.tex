@@ -35,7 +35,7 @@ mpimpi2dim   & Parallel version of the Dimemas merger.\\
 
 \section{Paraver merger}
 
-As stated before, there are two Paraver mergers: {\tt mpi2prv} and {\tt mpimpi2prv}. The former is for use in a single processor mode while the latter is meant to be used with multiple processors using MPI.
+As stated before, there are two Paraver mergers: {\tt mpi2prv} and {\tt mpimpi2prv}. The former is for use in a single processor mode while the latter is meant to be used with multiple processors using MPI (and cannot be run using one MPI task).
 
 Paraver merger receives a set of intermediate trace files and generates three files with the same name (which is set with the {\tt -o} option) but differ in the extension. The Paraver trace itself (.prv file) that contains timestamped records that represent the  information gathered during the execution of the instrumented application. It also generates the Paraver Configuration File (.pcf file), which is responsible for translating values contained in the Paraver trace into a more human readable values. Finally, it also generates a file containing the distribution of the application across the cluster computation resources (.row file).
 
@@ -98,6 +98,9 @@ These options are specific to the parallel version of the Paraver merger:
 	Intermediate trace files will be distributed consecutively to processors but trying to distribute the overall size equally among processors.
  \item {\tt -use-disk-for-comms}\\
  Use this option if your memory resources are limited. This option uses an alternative matching communication algorithm that saves memory but uses intensively the disk.
+ \item{\tt -tree-fan-out N}\\
+  Use this option to instruct the merger to generate the tracefile in a N-width tree fashion. Depending on the combination of processes and the width of the tree, the merger will need to run several stages to generate the final tracefile.\\
+  The number of processes used in the merge process must be equal or greater than the {\em N} parameter. If it is not, the merger itself will automatically set the width of the tree to the number of processes used.
 \end{itemize}
 
 \section{Dimemas merger}

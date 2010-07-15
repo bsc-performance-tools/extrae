@@ -33,11 +33,6 @@
 #include "common.h"
 #include "num_hwc.h"
 
-#if defined(DEAD_CODE)
-# include "clock.h"
-# include "hard_counters.h"
-#endif
-
 typedef struct omp_param_t
 {
   unsigned long long param;
@@ -80,11 +75,11 @@ typedef struct
   u_param param;                 /* Parameters of this event              */
   UINT64 value;                  /* Value of this event                   */
   UINT64 time;                   /* Timestamp of this event               */
-#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
+#if 1 || USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
   long long HWCValues[MAX_HWC];  /* Hardware counters read for this event */
 #endif
   int event;                     /* Type of this event                    */
-#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
+#if 1 || USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
   int HWCReadSet;                /* Marks which set of counters was read, if any */
 #endif
 } event_t;

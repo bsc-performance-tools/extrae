@@ -65,12 +65,6 @@ void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
 	unsigned int com_id, unsigned int send_size, unsigned int recv_size,
 	unsigned int is_root, unsigned isMPI);
 
-#if defined(DEAD_CODE)
-void trace_leave_global_op (unsigned int cpu, unsigned int ptask,
-	unsigned int task, unsigned int thread, unsigned long long time,
-	int trace_size);
-#endif
-
 int paraver_state (struct fdz_fitxer fdz, unsigned int cpu,
 	unsigned int ptask, unsigned int task, unsigned int thread,
 	unsigned long long ini_time, unsigned long long end_time,
@@ -99,7 +93,7 @@ int paraver_global_op (struct fdz_fitxer fdz, unsigned int cpu,
 
 int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime,
   int nfiles,  struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
-  unsigned long long records_per_task);
+  unsigned long long records_per_task, int tree_fan_out);
 
 
 #endif /* __PARAVER_GENERATOR_H__ */

@@ -279,13 +279,6 @@ int HWCBE_PMAPI_Start_Set (UINT64 time, int numset, int threadid)
 	}
 	else
 	{
-#if defined(DEAD_CODE)
-		long long requested_values[MAX_HWC];
-
-		HARDWARE_COUNTERS_REQUESTED(HWC_sets[numset].num_counters, HWC_sets[numset].counters, requested_values);
-
-		TRACE_EVENT_AND_GIVEN_COUNTERS (time, HWC_CHANGE_EV, numset, MAX_HWC, requested_values);
-#endif /* DEAD_CODE */
 		TRACE_EVENT (time, HWC_CHANGE_EV, numset);
 	}
 

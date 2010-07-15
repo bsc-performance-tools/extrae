@@ -22,56 +22,57 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/file_set.c $
+ | @last_commit: $Date: 2010-02-23 16:03:47 +0100 (dt, 23 feb 2010) $
+ | @version:     $Revision: 192 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+static char UNUSED rcsid[] = "$Id: file_set.c 192 2010-02-23 15:03:47Z harald $";
 
-#include "config.h"
+#include "tree-logistics.h"
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
+int tree_pow (int base, int exp)
 {
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
+	int i;
+	int res;
+	
+	for (res = 1, i = 0; i < exp; i++)
+		res = res * base;
 
-	int InputForWorker;           /* Which task is responsible for this file */
-
-	int fd;
-	char *name;
-	char *node;
+	return res;
 }
-input_t;
 
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
+/*
+  tree_TaskHaveWork returns TRUE if the taskid has to work on the current
+  depth (tree_depth) of a tree with tree_fanout wide.
+*/
+int tree_TaskHaveWork (int taskid, int tree_fanout, int tree_depth)
+{
+	return (taskid % tree_pow (tree_fanout, tree_depth)) == 0;
+}
 
-#if defined(IS_BG_MACHINE)    /* BlueGene coordinates are kept in traces */
-extern int option_XYZT;
-#endif
+/*
+  tree_MasterOfSubtree returns TRUE if the taskid is the master (root) of the
+  tree on the current depth (tree_depth) of a tree with tree_fanout wide.
+*/
+int tree_MasterOfSubtree (int taskid, int tree_fanout, int tree_depth)
+{
+	return (taskid % tree_pow (tree_fanout, tree_depth+1)) == 0;
+}
 
-extern int SincronitzaTasks;
-extern int SincronitzaTasks_byNode;
-extern int dump;
-extern int Joint_States;
-extern int option_UseDiskForComms;
-extern int option_SkipSendRecvComms;
-extern int option_UniqueCallerID;
-extern int option_VerboseLevel;
+int tree_myMaster (int taskid, int tree_fanout, int tree_depth)
+{
+	return (taskid / tree_pow (tree_fanout, 1+tree_depth)) * tree_pow (tree_fanout, 1+tree_depth);
+}
 
-int merger (int numtasks, int idtask, int argc, char *argv[]);
+int tree_MaxDepth (int ntasks, int tree_fanout)
+{
+	int max_depth = 0;
 
-#endif
+	while (ntasks > tree_pow(tree_fanout, max_depth))
+		max_depth++;
+
+	return max_depth;
+}
+
