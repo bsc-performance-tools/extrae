@@ -1,8 +1,3 @@
-
-Novembre 2008
-
-* En Xavier P vol una rutina com mpitrace_eventandcallers
-
 Juny 2008
 
 * Sembla que el merger paralel falla (en els casos que vam analitzar del Dimitri -> recv_init + start) usant tants processadors al traceig com al merge (usaven 32 pels dos casos).
@@ -34,14 +29,10 @@ April 2008
 - libompitrace per a fortran?
 - libomptrace per a c/fortran (i.e., seq+openmp)
 - (judit) Events duals en un mateix timestamp (reutilitzant un mateix event_t)
-- Afegir BG/L de epcc a la buildfarm
 - Hi ha uns MAX_FILEs corrent pel codi que alocaten vectors del tamany directament -> canviar-ho a malloc/realloc.
-- Comparar MPITs generats per MPItrace/fusion i mpidtrace
-  -> mirar de reduir la quantitat d'events generats per mpidtrace. nhi ha forsa que sobren.
 
 03 Jan 2008
 
-- posar al dia el resum que apareix al acabar el configure
 - igual que es guarda el MPI_COMM_SELF/MPI_COMM_WORLD, s'hauria de guardar el MPI_PROC_NULL (nomes caldria en una sola task)
 - mirar de posar la task (i el node on corre) en els missatges de l'estil:
 mpi2prv ERROR: Failed to write to disk the trace file.
@@ -54,10 +45,6 @@ mpi2prv ERROR: No space left on device
 - Fer "--disable-sequential / --enable-sequential"?
 - Analitzar Rice/Valgrind?
 
-22 Jun 2007
-
-- Fer un exemple millor.
-
 20 Apr 2007
 - Revisar si cal posar el PAPI_reset a cada consulta de PAPI.
 
@@ -65,24 +52,14 @@ mpi2prv ERROR: No space left on device
 - Afegir "transaccions" per poder capturar les entrades i les sortides com una unica unitat
     --> Sobre el mateix buffer de traceig gestionar punters CURRENT i COMMITTED_CURRENT. Les macros de traceig avançan el primer i operació commit que avança el segon.
 
-28 Feb 2007
-
-- Poner desde el merger en la zona de Iprobes un evento adicional al "Elapsed time outside Iprobe" que sea el tiempo fuera de Iprobes y de cualquier otra MPI en esa zona (osea, el tiempo de running real)
-
 10 Jan 2007
 
 - Flush en els shutdowns derivats del control de fitxer
 	--> rebobinar al principi a cadascun d'aquests shutdowns?
 - Instrumentacio de read/write -> mirar si es fan per shared library
 
-27 Nov 2006
-
-- Integrar funcionalitats del Rainer Keller.
-	PACX, PerUSE, SX counters
-
 22 Nov 2006
 
-- Cell: Medir / reducir overhead.
 - MN: que passa amb les lectures de comptadors (PAPI_TOT_CYC)
 - Poner contadores RUsage y MPIstats con TRACE_N_MISCEVENT.
 - Modificar el flush para poder tracear eventos despues del flush sin provocar un bucle infinito. Revisar que el traceo de MPI stats, RUsage y contadores Myrinet no de problemas.
