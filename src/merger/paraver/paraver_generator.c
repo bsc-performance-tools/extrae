@@ -1143,7 +1143,7 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 			gettimeofday (&time_end, NULL);
 
 			delta = time_end.tv_sec - time_begin.tv_sec;
-			fprintf (stdout, "Elapsed time: %d hours % minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+			fprintf (stdout, "Elapsed time: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 		}
 
 		Flush_Paraver_Files_binary (prvfset, taskid, current_depth, tree_fan_out);
