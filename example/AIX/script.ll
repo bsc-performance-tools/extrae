@@ -12,6 +12,6 @@
 # @ total_tasks = 2
 # @ queue
 
-export EXTRAE_CONFIG_FILE=mpitrace.xml
+export EXTRAE_CONFIG_FILE=extrae.xml
 poe ./mpi_ping
 

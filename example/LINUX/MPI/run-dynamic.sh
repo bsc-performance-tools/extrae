@@ -19,7 +19,7 @@
 ###########################################################################
 
 export LD_PRELOAD=@sub_PREFIXDIR@/lib/libmpitrace.so
-export EXTRAE_CONFIG_FILE=mpitrace.xml
+export EXTRAE_CONFIG_FILE=extrae.xml
 
 ./mpi_ping
 
