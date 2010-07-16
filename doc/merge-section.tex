@@ -99,7 +99,7 @@ These options are specific to the parallel version of the Paraver merger:
  \item {\tt -use-disk-for-comms}\\
  Use this option if your memory resources are limited. This option uses an alternative matching communication algorithm that saves memory but uses intensively the disk.
  \item{\tt -tree-fan-out N}\\
-  Use this option to instruct the merger to generate the tracefile in a N-width tree fashion. Depending on the combination of processes and the width of the tree, the merger will need to run several stages to generate the final tracefile.\\
+  Use this option to instruct the merger to generate the tracefile using a tree-based topology. This should improve the performance when using a large number of processes at the merge step. Depending on the combination of processes and the width of the tree, the merger will need to run several stages to generate the final tracefile.\\
   The number of processes used in the merge process must be equal or greater than the {\em N} parameter. If it is not, the merger itself will automatically set the width of the tree to the number of processes used.
 \end{itemize}
 
