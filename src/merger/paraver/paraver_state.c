@@ -168,37 +168,39 @@ int State_Excluded (unsigned int state)
 
 void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread, int mode)
 {
-   struct thread_t * thread_info; 
+	struct thread_t * thread_info; 
+
+	UNREFERENCED_PARAMETER(cpu);
 
 #if defined(DEBUG_STATES)
-   fprintf(stderr, "[%d:%d:%d] WIPE STATES STACK\n", ptask, task, thread);
+	fprintf(stderr, "[%d:%d:%d] WIPE STATES STACK\n", ptask, task, thread);
 #endif
 
-   /* Clear the states stack */
-   thread_info = GET_THREAD_INFO (ptask, task, thread);
-   thread_info->nStates = 0;
+	/* Clear the states stack */
+	thread_info = GET_THREAD_INFO (ptask, task, thread);
+	thread_info->nStates = 0;
 
-   /* Push STATE_STOPPED to find it on top of the stack at the APPL_EV EVT_END */
-   /* Push_State (STATE_STOPPED, ptask, task, thread); Firstly set at Initialize_States */
+	/* Push STATE_STOPPED to find it on top of the stack at the APPL_EV EVT_END */
+	/* Push_State (STATE_STOPPED, ptask, task, thread); Firstly set at Initialize_States */
 
-   if (mode == TRACE_MODE_BURSTS)
-   {
-      /* We want the state to appear as IDLE Outside CPU Bursts */
-      Push_State (STATE_IDLE, ptask, task, thread);
-   }
-   else 
-   {
-      if (thread > 1) 
-      {
-         /* OpenMP threads will push STATE_RUNNING when executing parallel functions */
-         Push_State (STATE_IDLE, ptask, task, thread);
-      }
-      else 
-      {
-         /* Tasks appear as RUNNING when not executing parallel code */
-         Push_State (STATE_RUNNING, ptask, task, thread);
-      }
-   }
+	if (mode == TRACE_MODE_BURSTS)
+	{
+		/* We want the state to appear as IDLE Outside CPU Bursts */
+		Push_State (STATE_IDLE, ptask, task, thread);
+	}
+	else 
+	{
+		if (thread > 1) 
+		{
+			/* OpenMP threads will push STATE_RUNNING when executing parallel functions */
+			Push_State (STATE_IDLE, ptask, task, thread);
+		}
+		else 
+		{
+			/* Tasks appear as RUNNING when not executing parallel code */
+			Push_State (STATE_RUNNING, ptask, task, thread);
+		}
+	}
 }
 
 #if defined(DEAD_CODE)

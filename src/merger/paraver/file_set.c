@@ -847,7 +847,7 @@ static void Read_PRV_RemoteFile (PRVFileItem_t *file)
 #endif /* PARALLEL_MERGE */
 
 
-paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset, int taskid)
+paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset)
 {
 	paraver_rec_t *minimum = NULL, *current = NULL;
 	PRVFileItem_t *sfile;
@@ -1533,6 +1533,9 @@ long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid)
 	long long options = TRACEOPTION_NONE;
 	event_t *current;
 
+	UNREFERENCED_PARAMETER(numtasks);
+	UNREFERENCED_PARAMETER(taskid);
+
 	/* All tasks share the same initialization, so check once only! */
 	current = Current_FS (&(fset->files[0]));
 
@@ -1556,6 +1559,10 @@ void FSet_Forward_To_First_GlobalOp (FileSet_t *fset, int numtasks, int taskid)
 {
 	event_t *current = NULL;
 	unsigned int file = 0;
+
+#if !defined(PARALLEL_MERGE)
+	UNREFERENCED_PARAMETER(numtasks);
+#endif
 
 	/* Es calcula el temps minim i es guarda el minim de cada fitxer */
 	for (file = 0; file < fset->nfiles; file++)

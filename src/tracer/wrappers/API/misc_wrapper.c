@@ -241,8 +241,12 @@ void MPItrace_function_from_address_Wrapper (int type, void *address)
 {
 	if (type == USRFUNC_EV || type == OMPFUNC_EV)
 	{
+#if USE_HARDWARE_COUNTERS
 		int filter = (type==USRFUNC_EV)?tracejant_hwc_uf:tracejant_hwc_omp;
 		TRACE_EVENTANDCOUNTERS (TIME, type, (UINT64) address, filter);
+#else
+		TRACE_EVENT(TIME, type, (UINT64) address);
+#endif
 	}
 }
 
@@ -354,7 +358,12 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 	if (ptr->UserFunction != EXTRAE_USER_FUNCTION_NONE)
 	{
 		UINT64 ip = (ptr->UserFunction == EXTRAE_USER_FUNCTION_ENTER)?get_caller(4):EMPTY;
-		TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, ip, (!ptr->HardwareCounters && tracejant_hwc_uf));
+#if USE_HARDWARE_COUNTERS
+		int EmitHWC = (!ptr->HardwareCounters && tracejant_hwc_uf);
+		TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, ip, EmitHWC);
+#else
+		TRACE_EVENT (TIME, USRFUNC_EV, ip);
+#endif
 	}
 
 	/* Now emit the callers */

@@ -107,6 +107,8 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
 
+	UNREFERENCED_PARAMETER(xmldoc);
+
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
 	while (tag != NULL)
@@ -179,6 +181,8 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
+
+	UNREFERENCED_PARAMETER(xmldoc);
 
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
@@ -453,6 +457,7 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
+	UNREFERENCED_PARAMETER(xmldoc);
 
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
@@ -764,6 +769,7 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 {
 	xmlNodePtr tag;
 
+	UNREFERENCED_PARAMETER(xmldoc);
 #if !USE_HARDWARE_COUNTERS
 	UNREFERENCED_PARAMETER(world_size);
 #endif

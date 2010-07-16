@@ -234,6 +234,6 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 
 #endif /* PARALLEL_MERGE */
 
-paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset, int taskid);
+paraver_rec_t *GetNextParaver_Rec (PRVFileSet_t * fset);
 
 #endif

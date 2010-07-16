@@ -691,11 +691,14 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
  *
  * @return No return value.
  */
-static void Find_Address_In_Section (bfd * abfd, asection * section, PTR data) {
+static void Find_Address_In_Section (bfd * abfd, asection * section, PTR data)
+{
 	bfd_vma       vma;
 #if defined(HAVE_BFD_GET_SECTION_SIZE) || defined(HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC)
 	bfd_size_type size;
 #endif
+
+	UNREFERENCED_PARAMETER(data);
 
 	if (address_found) return;
 

@@ -80,6 +80,8 @@ int Dimemas_WriteHeader (FILE *trf_fd, struct Pair_NodeCPU *info,
 	int i, final;
 	unsigned int num_tasks;
 #endif
+
+	UNREFERENCED_PARAMETER(info);
 	                                /*  -- 18 0's --  */
 	fprintf (trf_fd, "#DIMEMAS:%s:1,000000000000000000:",outName);
 

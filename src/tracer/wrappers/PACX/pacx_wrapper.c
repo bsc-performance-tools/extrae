@@ -3246,7 +3246,7 @@ void PPACX_Recv_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = PACX_Request_f2c (*request);
-	PR_NewRequest (PACX_IRECV_EV, buf, *count, type, *source, *tag, c, req, &PR_queue);
+	PR_NewRequest (PACX_IRECV_EV, *count, type, *source, *tag, c, req, &PR_queue);
 
   /*
    *   type : RECV_INIT_EV                 value : EVT_END
@@ -3291,7 +3291,7 @@ void PPACX_Send_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = PACX_Request_f2c (*request);
-	PR_NewRequest (PACX_ISEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (PACX_ISEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : SEND_INIT_EV                 value : EVT_END
@@ -3337,7 +3337,7 @@ void PPACX_Bsend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = PACX_Request_f2c (*request);
-	PR_NewRequest (PACX_IBSEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (PACX_IBSEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : BSEND_INIT_EV                value : EVT_END
@@ -3381,7 +3381,7 @@ void PPACX_Rsend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = PACX_Request_f2c (*request);
-	PR_NewRequest (PACX_IRSEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (PACX_IRSEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : RSEND_INIT_EV                value : EVT_END
@@ -3425,7 +3425,7 @@ void PPACX_Ssend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = PACX_Request_f2c (*request);
-	PR_NewRequest (PACX_ISSEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (PACX_ISSEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : SSEND_INIT_EV                value : EVT_END
@@ -6198,7 +6198,7 @@ int PACX_Recv_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int 
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (PACX_IRECV_EV, buf, count, datatype, source, tag, comm, *request,
+	PR_NewRequest (PACX_IRECV_EV, count, datatype, source, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6240,7 +6240,7 @@ int PACX_Send_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int 
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (PACX_ISEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (PACX_ISEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6282,7 +6282,7 @@ int PACX_Bsend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (PACX_IBSEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (PACX_IBSEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6324,7 +6324,7 @@ int PACX_Rsend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (PACX_IRSEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (PACX_IRSEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6366,7 +6366,7 @@ int PACX_Ssend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
 	/*
 	 * Es guarda aquesta request 
 	 */
-	PR_NewRequest (PACX_ISSEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (PACX_ISSEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
 	/*

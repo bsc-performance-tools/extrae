@@ -304,6 +304,9 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	paraver_rec_t record;
 	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
 
+	UNREFERENCED_PARAMETER(log_r);
+	UNREFERENCED_PARAMETER(phy_r);
+
 	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
 		return 0;
 
@@ -599,7 +602,7 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 			break;
 
 		/* Keep searching ... */
-		cur = GetNextParaver_Rec (fset, 0);
+		cur = GetNextParaver_Rec (fset);
 	}
 
 	paraver_multi_event (fdz, prev_cpu, prev_ptask, prev_task, prev_thread,
@@ -728,7 +731,6 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
 #if defined(PARALLEL_MERGE)
 static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 {
-	int rank;
 	/* Fix parallel pending communication */
 	struct ForeignRecv_t* tmp;
 	int group;
@@ -778,7 +780,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 		fprintf (stdout, "mpi2prv: Progress 2 of 2 ... ");
 	fflush (stdout);
 
-	current = GetNextParaver_Rec (prvfset, 0);
+	current = GetNextParaver_Rec (prvfset);
 	current_event = 0;
 	last_pct = 0.0f;
 
@@ -790,7 +792,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			if (num_incomplete_state == 0)
 				fprintf (stderr, "mpi2prv: Error! Found an unfinished state! Continuing...\n");
 			num_incomplete_state++;
-			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			current = GetNextParaver_Rec (prvfset);
 			current_event++;
 			break;
 
@@ -799,7 +801,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 				current->task, current->thread,
 				current->time, current->end_time,
 				current->value);
-			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			current = GetNextParaver_Rec (prvfset);
 			current_event++;
 			break;
 		
@@ -815,7 +817,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 #if defined(DEBUG)
 			DumpUnmatchedCommunication (current);
 #endif
-			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			current = GetNextParaver_Rec (prvfset);
 			current_event++;
 			break;
 			
@@ -835,7 +837,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 #endif
 				num_pending_comm++;
 
-			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			current = GetNextParaver_Rec (prvfset);
 			current_event++;
 			break;
 
@@ -849,7 +851,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 				current->receive[LOGICAL_COMMUNICATION],
 				current->receive[PHYSICAL_COMMUNICATION],
 				current->event, current->value);
-			current = GetNextParaver_Rec (prvfset, 0 /*taskid*/);
+			current = GetNextParaver_Rec (prvfset);
 			current_event++;
 			break;
 
@@ -882,8 +884,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 }
 
 #if defined(PARALLEL_MERGE)
-static void Paraver_JoinFiles_Master_Subtree (int numtasks, int taskid, PRVFileSet_t *prvfset,
-	struct fdz_fitxer prv_fd, unsigned long long num_of_events)
+static void Paraver_JoinFiles_Master_Subtree (PRVFileSet_t *prvfset)
 {
 	/* Master-side. Master will ask all slaves for their parts as needed.
 	   This part is ran inside the tree (i.e., non on the root) to generate
@@ -895,7 +896,7 @@ static void Paraver_JoinFiles_Master_Subtree (int numtasks, int taskid, PRVFileS
 	if (prvfset->SkipAsMasterOfSubtree)
 		return;
 
-	current = GetNextParaver_Rec (prvfset, taskid);
+	current = GetNextParaver_Rec (prvfset);
 	do
 	{
 		if (current->type == PENDING_COMMUNICATION)
@@ -908,12 +909,12 @@ static void Paraver_JoinFiles_Master_Subtree (int numtasks, int taskid, PRVFileS
 			trace_paraver_record (prvfset->files[0].destination, current);
 		}
 
-		current = GetNextParaver_Rec (prvfset, taskid);
+		current = GetNextParaver_Rec (prvfset);
 	}
 	while (current != NULL);
 }
 
-static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer prv_fd, int taskid, int tree_fan_out, int current_depth)
+static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, int taskid, int tree_fan_out, int current_depth)
 {
 	/* Slave-side. Master will ask all slaves for their parts as needed */
 	paraver_rec_t *current;
@@ -936,7 +937,7 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer pr
 	   to partially sort all the events*/
 
 	nevents = 0;
-	current = GetNextParaver_Rec (prvfset, taskid);
+	current = GetNextParaver_Rec (prvfset);
 	do
 	{
 		if (current->type == PENDING_COMMUNICATION)
@@ -957,7 +958,7 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer pr
 
 			nevents = 0;
 		}
-		current = GetNextParaver_Rec (prvfset, taskid);
+		current = GetNextParaver_Rec (prvfset);
 	}
 	while (current != NULL);
 	
@@ -982,14 +983,14 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, struct fdz_fitxer pr
  ******************************************************************************/
 
 int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime,
-  int nfiles,  struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
+  struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
   unsigned long long records_per_task, int tree_fan_out)
 {
-	struct timeval time_begin, time_end;
-	int current_depth;
 #if defined(PARALLEL_MERGE)
+	struct timeval time_begin, time_end;
 	int res;
 	int tree_max_depth;
+	int current_depth;
 #endif
 	PRVFileSet_t *prvfset;
 	unsigned long long num_of_events;
@@ -999,6 +1000,10 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 	FILE *crd_fd;
 	int i;
 	char envName[PATH_MAX], *tmpName;
+#endif
+
+#if !defined(PARALLEL_MERGE)
+	UNREFERENCED_PARAMETER(tree_fan_out);
 #endif
 
 	if (0 == taskid)
@@ -1113,13 +1118,13 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 			{
 				/* Server-side. Slaves will merge their translated files into a 
 				   single strem and will provide it to the master */
-				Paraver_JoinFiles_Slave (prvfset, prv_fd, taskid, tree_fan_out, current_depth);
+				Paraver_JoinFiles_Slave (prvfset, taskid, tree_fan_out, current_depth);
 			}
 			else
 			{
 				/* If this is not the root level, only generate binary intermediate files */
 				if (current_depth < tree_max_depth-1)
-					Paraver_JoinFiles_Master_Subtree (numtasks, taskid, prvfset, prv_fd, num_of_events);
+					Paraver_JoinFiles_Master_Subtree (prvfset);
 				else
 					Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
 			}

@@ -63,6 +63,8 @@ static int ANY_Send_Event (event_t * current, unsigned long long current_time,
 	UINT64 valor;
 	double temps;
 
+	UNREFERENCED_PARAMETER(cpu);
+
 	if (MPI_IBSEND_EV == Get_EvEvent(current) 
 	    || MPI_ISSEND_EV == Get_EvEvent(current)
 	    || MPI_IRSEND_EV == Get_EvEvent(current)
@@ -149,6 +151,7 @@ static int Get_GlobalOP_RootRank (event_t *current)
 
 static int Get_GlobalOP_RootThd (event_t *current)
 {
+	UNREFERENCED_PARAMETER(current);
 	return 0;
 }
 
@@ -287,6 +290,8 @@ static int GlobalOP_Event (event_t * current, unsigned long long current_time,
 	int tipus;
 	double temps;
 
+	UNREFERENCED_PARAMETER(cpu);
+
 	temps = current_time-thread_info->Previous_Event_Time;
 	temps /= 1000000000.0f;
 
@@ -327,6 +332,8 @@ static int Receive_Event (event_t * current, unsigned long long current_time,
 	int tipus;
 	int comunicador;
 	double temps;
+
+	UNREFERENCED_PARAMETER(cpu);
 
 	comunicador = alies_comunicador (Get_EvComm(current), 1, task);
 
@@ -375,6 +382,8 @@ static int MPI_Common_Event (event_t * current, unsigned long long current_time,
 	int tipus;
 	double temps;
 
+	UNREFERENCED_PARAMETER(cpu);
+
 	temps = current_time-thread_info->Previous_Event_Time;
 	temps /= 1000000000.0f;
 	
@@ -403,6 +412,10 @@ static int Irecved_Event (event_t * current, unsigned long long current_time,
 	FileSet_t *fset)
 {
 	int comunicador;
+
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(current_time);
 
 	comunicador = alies_comunicador (Get_EvComm(current), 1, task);
 
@@ -435,6 +448,8 @@ static int SendRecv_Event (event_t * current, unsigned long long current_time,
 	int tipus;
 	int comunicador;
 	double temps;
+
+	UNREFERENCED_PARAMETER(cpu);
 
 	temps = current_time-thread_info->Previous_Event_Time;
 	temps /= 1000000000.0f;
@@ -506,6 +521,8 @@ static int MPI_Persistent_req_use_Event (event_t * current,
 	int tipus;
 	double temps;
 
+	UNREFERENCED_PARAMETER(cpu);
+
 	temps = current_time-thread_info->Previous_Event_Time;
 	temps /= 1000000000.0f;
 	
@@ -537,6 +554,10 @@ static int PersistentRequest_Event (event_t * current,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	int comunicador;
+
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
 
 	comunicador = alies_comunicador (Get_EvComm(current), 1, task);
 

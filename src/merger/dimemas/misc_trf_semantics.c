@@ -57,6 +57,10 @@ static int Appl_Event (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset)
 {
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(current_time);
+
 	Dimemas_CPU_Burst (fset->output_file, task-1, thread-1, 0);
 	Dimemas_User_Event (fset->output_file, task-1, thread-1,
 		Get_EvEvent (current_event), Get_EvValue (current_event));
@@ -72,6 +76,10 @@ static int User_Event (event_t * current_event, unsigned long long current_time,
 	FileSet_t *fset)
 {
 	unsigned int EvType, EvValue;
+
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(current_time);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the user event type.  */
 	EvValue = Get_EvMiscParam (current_event); /* Param is the user event value. */
@@ -89,8 +97,17 @@ static int Set_Overflow_Event (event_t * current,
   unsigned long long current_time, unsigned int cpu, unsigned int ptask,
   unsigned int task, unsigned int thread, FileSet_t *fset )
 {
+	UNREFERENCED_PARAMETER(fset);
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(current_time);
+
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 	HardwareCounters_SetOverflow (ptask, task, thread, current);
+#else
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(thread);
+	UNREFERENCED_PARAMETER(current);
 #endif
 
 	return 0;
@@ -134,6 +151,14 @@ static int Evt_SetCounters ( event_t * current_event, unsigned long long current
 	for (i = 0; i < MAX_HWC+1; i++)
 		if (NO_COUNTER != hwctype[i])
 			Dimemas_User_Event (fset->output_file, task-1, thread-1, hwctype[i], hwcvalue[i]);
+#else
+	UNREFERENCED_PARAMETER(current_event);
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(thread);
+	UNREFERENCED_PARAMETER(fset);
 #endif
 
 	return 0;

@@ -330,7 +330,7 @@ static void Dimemas_GenerateOffsets (struct ptask_t *table,
  ******************************************************************************/
 
 int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
-	struct input_t *files, unsigned int num_appl, char *callback_file,
+	struct input_t *files, unsigned int num_appl,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
 	int MBytesPerAllSegments, int forceformat)
 {
@@ -345,6 +345,10 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	unsigned long long *offsets;
 	long long options;
 	double pct, last_pct;
+
+#if !defined(PARALLEL_MERGE)
+	UNREFERENCED_PARAMETER(MBytesPerAllSegments);
+#endif
 
 	InitializeObjectTable (num_appl, files, nfiles);
 #if defined(PARALLEL_MERGE)

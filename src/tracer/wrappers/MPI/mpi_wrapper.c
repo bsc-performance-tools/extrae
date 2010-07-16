@@ -562,7 +562,7 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
         if (filedes < 0)
             return -1;
 
-        for (i = 0; i < NumOfTasks; i++)
+        for (i = 0; i < n_tasks; i++)
         {
             char tmp_line[2048];
 
@@ -3245,7 +3245,7 @@ void PMPI_Recv_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = MPI_Request_f2c (*request);
-	PR_NewRequest (MPI_IRECV_EV, buf, *count, type, *source, *tag, c, req, &PR_queue);
+	PR_NewRequest (MPI_IRECV_EV, *count, type, *source, *tag, c, req, &PR_queue);
 
   /*
    *   type : RECV_INIT_EV                 value : EVT_END
@@ -3290,7 +3290,7 @@ void PMPI_Send_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = MPI_Request_f2c (*request);
-	PR_NewRequest (MPI_ISEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (MPI_ISEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : SEND_INIT_EV                 value : EVT_END
@@ -3336,7 +3336,7 @@ void PMPI_Bsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = MPI_Request_f2c (*request);
-	PR_NewRequest (MPI_IBSEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (MPI_IBSEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : BSEND_INIT_EV                value : EVT_END
@@ -3380,7 +3380,7 @@ void PMPI_Rsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = MPI_Request_f2c (*request);
-	PR_NewRequest (MPI_IRSEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (MPI_IRSEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : RSEND_INIT_EV                value : EVT_END
@@ -3424,7 +3424,7 @@ void PMPI_Ssend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    * Es guarda aquesta request 
    */
 	req = MPI_Request_f2c (*request);
-	PR_NewRequest (MPI_ISSEND_EV, buf, *count, type, *dest, *tag, c, req, &PR_queue);
+	PR_NewRequest (MPI_ISSEND_EV, *count, type, *dest, *tag, c, req, &PR_queue);
 
   /*
    *   type : SSEND_INIT_EV                value : EVT_END
@@ -6199,7 +6199,7 @@ int MPI_Recv_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int so
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (MPI_IRECV_EV, buf, count, datatype, source, tag, comm, *request,
+	PR_NewRequest (MPI_IRECV_EV, count, datatype, source, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6241,7 +6241,7 @@ int MPI_Send_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int de
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (MPI_ISEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (MPI_ISEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6283,7 +6283,7 @@ int MPI_Bsend_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int d
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (MPI_IBSEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (MPI_IBSEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6325,7 +6325,7 @@ int MPI_Rsend_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int d
   /*
    * Es guarda aquesta request 
    */
-	PR_NewRequest (MPI_IRSEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (MPI_IRSEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
   /*
@@ -6367,7 +6367,7 @@ int MPI_Ssend_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int d
 	/*
 	 * Es guarda aquesta request 
 	 */
-	PR_NewRequest (MPI_ISSEND_EV, buf, count, datatype, dest, tag, comm, *request,
+	PR_NewRequest (MPI_ISSEND_EV, count, datatype, dest, tag, comm, *request,
                  &PR_queue);
 
 	/*
@@ -6902,6 +6902,8 @@ void OMPItrace_network_counters_Wrapper (void)
 
 void OMPItrace_network_routes_Wrapper (int mpi_rank)
 {
+	UNREFERENCED_PARAMETER(mpi_rank);
+
 #if defined(DEAD_CODE)
 	TRACE_MYRINET_ROUTES(mpi_rank);
 #endif

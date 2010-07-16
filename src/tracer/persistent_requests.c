@@ -77,7 +77,7 @@ void PR_Elimina_request (PR_Queue_t * cua, MPI_Request* reqid)
   free (element_cua);
 }
 
-void PR_NewRequest (int tipus, void *buf, int count, MPI_Datatype datatype, int task,
+void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
 	int tag, MPI_Comm comm, MPI_Request req, PR_Queue_t* cua)
 {
   persistent_req_t *nova_pr;

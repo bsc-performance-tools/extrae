@@ -281,7 +281,7 @@ void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
  ******************************************************************************/
 
 int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
-	struct input_t *files, unsigned int num_appl, char *sym_file,
+	struct input_t *files, unsigned int num_appl,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
 	int MBytesPerAllSegments, int forceformat, int tree_fan_out)
 {
@@ -570,7 +570,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 #endif
 
-	Paraver_JoinFiles (outName, fset, current_time, nfiles, NodeCPUinfo, numtasks, taskid, records_per_task, tree_fan_out);
+	Paraver_JoinFiles (outName, fset, current_time, NodeCPUinfo, numtasks, taskid, records_per_task, tree_fan_out);
 
 	strcpy (envName, outName);
 #ifdef HAVE_ZLIB

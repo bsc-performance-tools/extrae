@@ -471,7 +471,10 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 	}                                                                                \
 }
 #else
-#define TRACE_N_MISCEVENTANDCOUNTERS(evttime,count,evttypes,evtvalues,evtparams) TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams)
+#define TRACE_N_MISCEVENTANDCOUNTERS(evttime,count,evttypes,evtvalues,evtparams) \
+	{ \
+		TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams) \
+	}
 #endif
 
 #define TRACE_EVENT(evttime,evttype,evtvalue)                 \
@@ -505,7 +508,10 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 	}                                                                 \
 }
 #else
-#define TRACE_EVENTANDCOUNTERS(evttime,evttype,evtvalue,hwc_filter) TRACE_EVENT(evttime,evttype,evtvalue)
+#define TRACE_EVENTANDCOUNTERS(evttime,evttype,evtvalue,hwc_filter) \
+	{ \
+		TRACE_EVENT(evttime,evttype,evtvalue); \
+	}
 #endif
 
 #define TRACE_OMPEVENT(evttime,evttype,evtvalue,evtparam)     \

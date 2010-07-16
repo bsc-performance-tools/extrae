@@ -41,5 +41,6 @@ int isSamplingEnabled(void)
 
 void setSamplingEnabled (int enabled)
 {
+	UNREFERENCED_PARAMETER(enabled);
 }
 

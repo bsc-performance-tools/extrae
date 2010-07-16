@@ -900,11 +900,11 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 
 	if (PRV_SEMANTICS == traceformat)
 		error = Paraver_ProcessTraceFiles (OutTrace, nTraces, InputTraces,
-		  num_applications, callback_file, NodeCPUinfo, numtasks, idtask,
+		  num_applications, NodeCPUinfo, numtasks, idtask,
 		  MBytesPerAllSegments, forceformat, option_TreeFanOut);
 	else if (TRF_SEMANTICS == traceformat)
 		error = Dimemas_ProcessTraceFiles (OutTrace, nTraces, InputTraces,
-		  num_applications, callback_file, NodeCPUinfo, numtasks, idtask,
+		  num_applications, NodeCPUinfo, numtasks, idtask,
 		  MBytesPerAllSegments, forceformat);
 	else
 		error = FALSE;

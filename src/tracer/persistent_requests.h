@@ -64,7 +64,7 @@ persistent_req_t *PR_Busca_request (PR_Queue_t * cua, MPI_Request* reqid);
 
 void PR_Elimina_request (PR_Queue_t * cua, MPI_Request* reqid);
 
-void PR_NewRequest (int tipus, void *buf, int count, MPI_Datatype datatype,
+void PR_NewRequest (int tipus, int count, MPI_Datatype datatype,
   int task, int tag, MPI_Comm comm, MPI_Request req, PR_Queue_t * cua);
 
 void PR_queue_init (PR_Queue_t * cua);

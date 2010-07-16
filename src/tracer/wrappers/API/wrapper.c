@@ -1174,10 +1174,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	char *omp_value;
 	char *new_num_omp_threads_clause;
 	int numProcessors;
-#elif defined(SMPSS_SUPPORT)
-	char *css_value;
-	char *new_num_css_threads_clause;
-	int numProcessors;
 #endif
 #if USE_HARDWARE_COUNTERS
 	int set;
