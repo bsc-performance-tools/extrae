@@ -92,8 +92,8 @@ MPI_EXAMPLE_FILES=example/AIX/Makefile \
  example/AIX/merge.sh \
  example/AIX/script.ll \
  example/AIX/mpi_ping.f \
- example/AIX/mpitrace_explained.xml \
- example/AIX/mpitrace.xml \
+ example/AIX/extrae_explained.xml \
+ example/AIX/extrae.xml \
  example/AIX/detailed_trace_basic.xml \
  example/AIX/summarized_trace_basic.xml
 
@@ -113,8 +113,8 @@ MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/slurm_trace.sh \
  example/LINUX/MPI/slurm_merge.sh \
  example/LINUX/MPI/slurm_parallel_merge.sh \
- example/LINUX/MPI/mpitrace_explained.xml \
- example/LINUX/MPI/mpitrace.xml \
+ example/LINUX/MPI/extrae_explained.xml \
+ example/LINUX/MPI/extrae.xml \
  example/LINUX/MPI/detailed_trace_basic.xml \
  example/LINUX/MPI/summarized_trace_basic.xml 
 
@@ -124,20 +124,20 @@ OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/pi.c \
  example/LINUX/OMP/pi.f \
  example/LINUX/OMP/run.sh \
- example/LINUX/OMP/mpitrace.xml
+ example/LINUX/OMP/extrae.xml
 
 SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/Makefile \
  example/LINUX/SEQ/merge.sh \
  example/LINUX/SEQ/pi.c \
  example/LINUX/SEQ/run.sh \
- example/LINUX/SEQ/mpitrace.xml
+ example/LINUX/SEQ/extrae.xml
 
 MRNET_EXAMPLE_FILES=\
  example/LINUX/MRNET/Makefile \
  example/LINUX/MRNET/merge.sh \
  example/LINUX/MRNET/test.c \
- example/LINUX/MRNET/mpitrace.xml \
+ example/LINUX/MRNET/extrae.xml \
  example/LINUX/MRNET/cl.I.IPC.xml \
  example/LINUX/MRNET/run.cmd \
  example/LINUX/MRNET/trace.sh \
