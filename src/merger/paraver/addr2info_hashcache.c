@@ -80,7 +80,7 @@ int Addr2Info_HashCache_Search (UINT64 address, int *line, int *function)
 	}
 }
 
-int Addr2Info_HashCache_Insert (UINT64 address, int line, int function)
+void Addr2Info_HashCache_Insert (UINT64 address, int line, int function)
 {
 	int index;
 
@@ -94,7 +94,7 @@ int Addr2Info_HashCache_Insert (UINT64 address, int line, int function)
 	}
 }
 
-int Addr2Info_HashCache_ShowStatistics (void)
+void Addr2Info_HashCache_ShowStatistics (void)
 {
 	fprintf (stdout, "mpi2prv: Addr2Info Hash Cache statistics:\n"
 	                 "mpi2prv: Number of searches : %d\n"
