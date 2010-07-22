@@ -60,6 +60,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 #if defined (PARALLEL_MERGE)
 # include <mpi.h>
 # include "mpi-tags.h"
@@ -285,6 +288,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
 	int MBytesPerAllSegments, int forceformat, int tree_fan_out)
 {
+	struct timeval time_begin, time_end;
 	FileSet_t * fset;
 	unsigned int cpu, ptask, task, thread, error;
 	event_t * current_event;
@@ -422,6 +426,11 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	current_event = GetNextEvent_FS (fset, &cpu, &ptask, &task, &thread);
 
+	if (taskid == 0)
+	{
+		gettimeofday (&time_begin, NULL);
+	}
+
 	do
 	{
 		tmp_nevents = 0;
@@ -541,6 +550,14 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 #endif
 
+	if (taskid == 0)
+	{
+		time_t delta;
+		gettimeofday (&time_end, NULL);
+		delta = time_end.tv_sec - time_begin.tv_sec;
+		fprintf (stdout, "mpi2prv: Elapsed time translating files: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+	}
+
 	if (error)
 	{
 		if (0 == taskid)
@@ -560,6 +577,11 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 
 #if defined(PARALLEL_MERGE)
+	if (taskid == 0)
+	{
+		gettimeofday (&time_begin, NULL);
+	}
+
 	BuildCommunicators (numtasks, taskid);
 
 	/* In the parallel merge we have to */
@@ -567,6 +589,14 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	{
 		NewDistributePendingComms (numtasks, taskid, option_UseDiskForComms);
 		ShareTraceInformation (numtasks, taskid);
+	}
+
+	if (taskid == 0)
+	{
+		time_t delta;
+		gettimeofday (&time_end, NULL);
+		delta = time_end.tv_sec - time_begin.tv_sec;
+		fprintf (stdout, "mpi2prv: Elapsed time sharing communications: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 	}
 #endif
 

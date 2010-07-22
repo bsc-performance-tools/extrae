@@ -1094,17 +1094,10 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 	current_depth = 0;
 	while (current_depth < tree_max_depth)
 	{
-		MPI_Barrier (MPI_COMM_WORLD);
-		if (taskid == 0 && current_depth < tree_max_depth-1)
+		if (taskid == 0)
 		{
 			gettimeofday (&time_begin, NULL);
-			fprintf (stdout, "mpi2prv: Executing merge tree step %d of %d. ", current_depth+1, tree_max_depth);
-			fflush (stdout);
-		}
-		else if (taskid == 0 && current_depth == tree_max_depth-1)
-		{
 			fprintf (stdout, "mpi2prv: Executing merge tree step %d of %d.\n", current_depth+1, tree_max_depth);
-			fflush (stdout);
 		}
 
 		if (tree_TaskHaveWork (taskid, tree_fan_out, current_depth))
@@ -1137,13 +1130,13 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 		}
 
 		MPI_Barrier (MPI_COMM_WORLD);
-		if (taskid == 0 && current_depth < tree_max_depth-1)
+		if (taskid == 0)
 		{
 			time_t delta;
 			gettimeofday (&time_end, NULL);
 
 			delta = time_end.tv_sec - time_begin.tv_sec;
-			fprintf (stdout, "Elapsed time: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+			fprintf (stdout, "mpi2prv: Elapsed time on tree step %d: %d hours %d minutes %d seconds\n", current_depth+1, delta / 3600, (delta % 3600)/60, (delta % 60));
 		}
 
 		Flush_Paraver_Files_binary (prvfset, taskid, current_depth, tree_fan_out);
