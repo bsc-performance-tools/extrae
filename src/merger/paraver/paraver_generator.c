@@ -357,11 +357,62 @@ void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
 	}
 }
 
+#if defined(NEW_PRINTF)
+
+static unsigned nprintf_ull (char *buffer, unsigned start, unsigned long long value)
+{
+  unsigned index, index2;
+  char lbuffer[1024];
+
+  index2 = index = 0;
+  while (value >= 10)
+  {
+    lbuffer[index] = (value%10)+(char) '0';
+    value = value / 10;
+    index++;
+  }
+  lbuffer[index] = value + (char) '0';
+  index++;
+
+  for (; index2 < index; index2++)
+      buffer[start+index2] = lbuffer[index-index2-1];
+
+  buffer[start+index2] = '\0';
+
+  return start+index2;
+}
+
+static unsigned nprintf_record_head (char *buffer, unsigned record,
+	unsigned cpu, unsigned ptask, unsigned task, unsigned thread)
+{
+  unsigned u;
+
+  u = nprintf_ull (buffer, 0, record);
+  buffer[u] = ':';
+  u = nprintf_ull (buffer, u+1, cpu);
+  buffer[u] = ':';
+  u = nprintf_ull (buffer, u+1, ptask);
+  buffer[u] = ':';
+  u = nprintf_ull (buffer, u+1, task);
+  buffer[u] = ':';
+  u = nprintf_ull (buffer, u+1, thread);
+  buffer[u] = ':';
+  buffer[u+1] = '\0';
+
+	return u;
+}
+
+#endif /* defined(NEW_PRINTF) */
+
+
 /******************************************************************************
  ***  paraver_state
  ******************************************************************************/
 static int paraver_state (struct fdz_fitxer fdz, paraver_rec_t *current)
 {
+#if defined(NEW_PRINTF)
+	unsigned length;
+#endif
 	char buffer[1024];
 	int ret;
 
@@ -377,13 +428,24 @@ static int paraver_state (struct fdz_fitxer fdz, paraver_rec_t *current)
 	 * Format state line is :
 	 *      1:cpu:ptask:task:thread:ini_time:end_time:state
 	 */
-#if SIZEOF_LONG == 8
+#if !defined(NEW_PRINTF)
+# if SIZEOF_LONG == 8
 	sprintf (buffer, "1:%d:%d:%d:%d:%lu:%lu:%d\n",
 	  cpu, ptask, task, thread, ini_time, end_time, state);
-#elif SIZEOF_LONG == 4
+# elif SIZEOF_LONG == 4
 	sprintf (buffer, "1:%d:%d:%d:%d:%llu:%llu:%d\n",
 	  cpu, ptask, task, thread, ini_time, end_time, state);
-#endif
+# endif
+#else /* NEW_PRINTF */
+	length = nprintf_record_head (buffer, 1, cpu, ptask, task,thread);
+	length = nprintf_ull (buffer, length+1, ini_time);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, end_time);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, state);
+	buffer[length] = '\n';
+	buffer[length+1] = '\0';
+#endif /* NEW_PRINTF */
 
 	/* Filter the states with negative or 0 duration */
 	if (ini_time < end_time)
@@ -402,42 +464,6 @@ static int paraver_state (struct fdz_fitxer fdz, paraver_rec_t *current)
 	return 0;
 }
 
-
-#if defined(DEAD_CODE)
-/******************************************************************************
- ***  paraver_event
- ******************************************************************************/
-int paraver_event (struct fdz_fitxer fdz, unsigned int cpu,
-                   unsigned int ptask, unsigned int task, unsigned int thread,
-                   unsigned long long time, unsigned int type,
-                   UINT64 value)
-{
-  char buffer[1024];
-  int ret;
-
-  /*
-   * Format event line is :
-   *      2:cpu:ptask:task:thread:time:type:value
-   */
-#if SIZEOF_LONG == 8
-  sprintf (buffer, "2:%d:%d:%d:%d:%lu:%d:%lu\n",
-           cpu, ptask, task, thread, time, type, value);
-#elif SIZEOF_LONG == 4
-  sprintf (buffer, "2:%d:%d:%d:%d:%llu:%d:%llu\n",
-           cpu, ptask, task, thread, time, type, value);
-#endif
-
-  ret = FDZ_WRITE (fdz, buffer);
-
-  if (ret < 0)
-  {
-    fprintf (stderr, "mpi2prv ERROR: Writing to disk the tracefile\n");
-    return -1;
-  }
-  return 0;
-}
-#endif /* DEAD_CODE */
-
 /******************************************************************************
  ***  paraver_multi_event
  ******************************************************************************/
@@ -446,6 +472,9 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
   unsigned long long time, unsigned int count, unsigned int *type,
   UINT64 *value)
 {
+#if defined(NEW_PRINTF)
+	unsigned length;
+#endif
   char buffer[1024];
   int i, ret;
 
@@ -457,19 +486,33 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
   if (count == 0)
     return 0;
 
-#if SIZEOF_LONG == 8
+#if !defined(NEW_PRINTF)
+# if SIZEOF_LONG == 8
   sprintf (buffer, "2:%d:%d:%d:%d:%lu", cpu, ptask, task, thread, time);
-#elif SIZEOF_LONG == 4
+# elif SIZEOF_LONG == 4
   sprintf (buffer, "2:%d:%d:%d:%d:%llu", cpu, ptask, task, thread, time);
-#endif
+# endif
+#else /* NEW_PRINTF */
+	length = nprintf_record_head (buffer, 1, cpu, ptask, task,thread);
+	length = nprintf_ull (buffer, length+1, time);
+#endif /* NEW_PRINTF */
+
   ret = FDZ_WRITE (fdz, buffer);
   for (i = 0; i < count; i++)
   {
-#if SIZEOF_LONG == 8
+#if !defined(NEW_PRINTF)
+# if SIZEOF_LONG == 8
     sprintf (buffer, ":%d:%lu", type[i], value[i]);
-#elif SIZEOF_LONG == 4
+# elif SIZEOF_LONG == 4
     sprintf (buffer, ":%d:%llu", type[i], value[i]);
-#endif
+# endif
+#else /* NEW_PRINTF */
+		buffer[0] = ':';
+		length = nprintf_ull (buffer, 1, type[i]);
+		buffer[length] = ':';
+		length = nprintf_ull (buffer, length+1, value[i]);
+#endif /* NEW_PRINTF */
+
     ret = FDZ_WRITE (fdz, buffer);
   }
 
@@ -489,6 +532,9 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
  ******************************************************************************/
 static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
 {
+#if defined(NEW_PRINTF)
+	unsigned length;
+#endif
   char buffer[1024];
   int ret;
 
@@ -512,15 +558,40 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
    *   3:cpu_s:ptask_s:task_s:thread_s:log_s:phy_s:cpu_r:ptask_r:task_r:
    thread_r:log_r:phy_r:size:tag
    */
-#if SIZEOF_LONG == 8
+#if !defined(NEW_PRINTF)
+# if SIZEOF_LONG == 8
   sprintf (buffer, "3:%d:%d:%d:%d:%lu:%lu:%d:%d:%d:%d:%lu:%lu:%d:%d\n",
            cpu_s, ptask_s, task_s, thread_s, log_s, phy_s,
            cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
-#elif SIZEOF_LONG == 4
+# elif SIZEOF_LONG == 4
   sprintf (buffer, "3:%d:%d:%d:%d:%llu:%llu:%d:%d:%d:%d:%llu:%llu:%d:%d\n",
            cpu_s, ptask_s, task_s, thread_s, log_s, phy_s,
            cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
-#endif
+# endif
+#else /* NEW_PRINTF */
+	length = nprintf_record_head (buffer, 1, cpu_s, ptask_s, task_s, thread_s);
+	length = nprintf_ull (buffer, length+1, log_s);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, phy_s);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, cpu_r);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, ptask_r);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, task_r);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, thread_r);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, log_r);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, phy_r);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, size);
+	buffer[length] = ':';
+	length = nprintf_ull (buffer, length+1, tag);
+	buffer[length] = '\n';
+	buffer[length+1] = '\0';
+#endif /* NEW_PRINTF */
 
   ret = FDZ_WRITE (fdz, buffer);
 
