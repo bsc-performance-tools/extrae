@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/src/tracer/xml-parse.c $
- | @last_commit: $Date: 2009-10-29 13:06:27 +0100 (dj, 29 oct 2009) $
- | @version:     $Revision: 15 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: mpi_prv_semantics.c 71 2009-12-03 15:41:33Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
