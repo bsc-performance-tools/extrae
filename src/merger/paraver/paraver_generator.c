@@ -360,46 +360,50 @@ void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
 /******************************************************************************
  ***  paraver_state
  ******************************************************************************/
-int paraver_state (struct fdz_fitxer fdz, unsigned int cpu,
-                   unsigned int ptask, unsigned int task, unsigned int thread,
-                   unsigned long long ini_time, unsigned long long end_time,
-                   unsigned int state)
+static int paraver_state (struct fdz_fitxer fdz, paraver_rec_t *current)
 {
-   char buffer[1024];
-   int ret;
+	char buffer[1024];
+	int ret;
 
-   /*
-    * Format state line is :
-    *      1:cpu:ptask:task:thread:ini_time:end_time:state
-    */
+	unsigned cpu = current->cpu;
+	unsigned ptask = current->ptask;
+	unsigned task = current->task;
+	unsigned thread = current->thread;
+	unsigned long long ini_time = current->time;
+	unsigned long long end_time = current->end_time;
+	unsigned state = current->value;
+
+	/*
+	 * Format state line is :
+	 *      1:cpu:ptask:task:thread:ini_time:end_time:state
+	 */
 #if SIZEOF_LONG == 8
-   sprintf (buffer, "1:%d:%d:%d:%d:%lu:%lu:%d\n",
-      cpu, ptask, task, thread, ini_time, end_time, state);
+	sprintf (buffer, "1:%d:%d:%d:%d:%lu:%lu:%d\n",
+	  cpu, ptask, task, thread, ini_time, end_time, state);
 #elif SIZEOF_LONG == 4
-   sprintf (buffer, "1:%d:%d:%d:%d:%llu:%llu:%d\n",
-      cpu, ptask, task, thread, ini_time, end_time, state);
+	sprintf (buffer, "1:%d:%d:%d:%d:%llu:%llu:%d\n",
+	  cpu, ptask, task, thread, ini_time, end_time, state);
 #endif
 
-   /* Filter the states with negative or 0 duration */
-   if (ini_time < end_time)
-   {
-      ret = FDZ_WRITE (fdz, buffer);
-
-      if (ret < 0)
-      {
-         fprintf (stderr, "mpi2prv ERROR : Writing to disk the tracefile\n");
-         return -1;
-      }
-   }
-   else if ((int)(end_time - ini_time) < 0)
-   {
-      fprintf(stderr, "mpi2prv WARNING: Skipping state with negative duration: %s", buffer);
-   }
-   return 0;
+	/* Filter the states with negative or 0 duration */
+	if (ini_time < end_time)
+	{
+		ret = FDZ_WRITE (fdz, buffer);
+		if (ret < 0)
+		{
+			fprintf (stderr, "mpi2prv ERROR : Writing to disk the tracefile\n");
+			return -1;
+		}
+	}
+	else if ((int)(end_time - ini_time) < 0)
+	{
+		fprintf(stderr, "mpi2prv WARNING: Skipping state with negative duration: %s", buffer);
+	}
+	return 0;
 }
 
 
-
+#if defined(DEAD_CODE)
 /******************************************************************************
  ***  paraver_event
  ******************************************************************************/
@@ -432,11 +436,12 @@ int paraver_event (struct fdz_fitxer fdz, unsigned int cpu,
   }
   return 0;
 }
+#endif /* DEAD_CODE */
 
 /******************************************************************************
  ***  paraver_multi_event
  ******************************************************************************/
-int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
+static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
   unsigned int ptask, unsigned int task, unsigned int thread,
   unsigned long long time, unsigned int count, unsigned int *type,
   UINT64 *value)
@@ -482,15 +487,25 @@ int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
 /******************************************************************************
  ***  paraver_communication
  ******************************************************************************/
-int paraver_communication (struct fdz_fitxer fdz, unsigned int cpu_s,
-  unsigned int ptask_s, unsigned int task_s, unsigned int thread_s,
-  unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
-  unsigned int ptask_r, unsigned int task_r, unsigned int thread_r,
-  unsigned long long log_r, unsigned long long phy_r, unsigned int size,
-  unsigned int tag)
+static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
 {
-  int ret;
   char buffer[1024];
+  int ret;
+
+	unsigned cpu_s = current->cpu;
+	unsigned ptask_s = current->ptask;
+	unsigned task_s = current->task;
+	unsigned thread_s = current->thread;
+	unsigned long long log_s = current->time;
+	unsigned long long phy_s = current->end_time;
+	unsigned cpu_r = current->cpu_r;
+	unsigned ptask_r = current->ptask_r;
+	unsigned task_r = current->task_r;
+	unsigned thread_r = current->thread_r;
+	unsigned long long log_r = current->receive[LOGICAL_COMMUNICATION];
+	unsigned long long phy_r = current->receive[PHYSICAL_COMMUNICATION];
+	unsigned size = current->event;
+	unsigned tag = current->value;
 
   /*
    * Format event line is :
@@ -606,7 +621,7 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 	}
 
 	paraver_multi_event (fdz, prev_cpu, prev_ptask, prev_task, prev_thread,
-                       prev_time, i, events, values);
+	  prev_time, i, events, values);
 
 	*current = cur;
 	if (num_events != NULL)
@@ -797,10 +812,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			break;
 
 			case STATE:
-			error = paraver_state (prv_fd, current->cpu, current->ptask,
-				current->task, current->thread,
-				current->time, current->end_time,
-				current->value);
+			error = paraver_state (prv_fd, current);
 			current = GetNextParaver_Rec (prvfset);
 			current_event++;
 			break;
@@ -824,15 +836,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			case PENDING_COMMUNICATION:
 #if defined(PARALLEL_MERGE)
 			if (FixPendingCommunication (current, prvfset->fset))
-				error = paraver_communication (prv_fd, current->cpu,
-					current->ptask, current->task,
-					current->thread, current->time,
-					current->end_time, current->cpu_r,
-					current->ptask_r, current->task_r,
-					current->thread_r,
-					current->receive[LOGICAL_COMMUNICATION],
-					current->receive[PHYSICAL_COMMUNICATION],
-					current->event, current->value);
+				error = paraver_communication (prv_fd, current);
 			else
 #endif
 				num_pending_comm++;
@@ -842,15 +846,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			break;
 
 			case COMMUNICATION:
-			error = paraver_communication (prv_fd, current->cpu,
-				current->ptask, current->task,
-				current->thread, current->time,
-				current->end_time, current->cpu_r,
-				current->ptask_r, current->task_r,
-				current->thread_r,
-				current->receive[LOGICAL_COMMUNICATION],
-				current->receive[PHYSICAL_COMMUNICATION],
-				current->event, current->value);
+			error = paraver_communication (prv_fd, current);
 			current = GetNextParaver_Rec (prvfset);
 			current_event++;
 			break;
