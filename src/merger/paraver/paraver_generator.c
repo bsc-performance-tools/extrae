@@ -493,7 +493,7 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
   sprintf (buffer, "2:%d:%d:%d:%d:%llu", cpu, ptask, task, thread, time);
 # endif
 #else /* NEW_PRINTF */
-	length = nprintf_record_head (buffer, 1, cpu, ptask, task,thread);
+	length = nprintf_record_head (buffer, 2, cpu, ptask, task,thread);
 	length = nprintf_ull (buffer, length+1, time);
 #endif /* NEW_PRINTF */
 
@@ -569,7 +569,7 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
            cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
 # endif
 #else /* NEW_PRINTF */
-	length = nprintf_record_head (buffer, 1, cpu_s, ptask_s, task_s, thread_s);
+	length = nprintf_record_head (buffer, 3, cpu_s, ptask_s, task_s, thread_s);
 	length = nprintf_ull (buffer, length+1, log_s);
 	buffer[length] = ':';
 	length = nprintf_ull (buffer, length+1, phy_s);
