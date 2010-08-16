@@ -230,6 +230,7 @@
 		evt.param.mpi_param.size = (evtsize); \
 		evt.param.mpi_param.tag = (evttag); \
 		evt.param.mpi_param.aux = (id); \
+		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);  \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 	} \
 }
