@@ -112,7 +112,8 @@ int option_XYZT = 0;
 
 void Help (const char *ProgName)
 {
-  printf ("Usage: %s [-h] inputfile1 ... [--] inputfileN [ -o <OutputFile>]\n"
+  printf ("Usage: %s inputfile1 ... [--] inputfileN [-o <OutputFile>] [otheroptions]\n"
+          "       %s -f file.mpits [-o <OutputFile>] [otheroptions]\n"
           "       %s -h\n"
           "Options:\n"
           "    -h        Get this help.\n"
@@ -149,7 +150,7 @@ void Help (const char *ProgName)
           "              Choose whether use a unique value identifier for different callers.\n"  
           "    --        Take the next trace files as a diferent parallel task.\n"
           "\n",
-          ProgName, ProgName);
+          ProgName, ProgName, ProgName);
 }
 
 /******************************************************************************
