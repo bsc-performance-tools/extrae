@@ -100,6 +100,24 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
  \item {\tt void Extrae\_network\_routes (int task)}\\
   Emits the network routes for an specific {\tt task}. {\em (Only available for systems with Myrinet GM/MX networks).}
 
+ \item {\tt void Extrae\_user\_function (int enter)}\\
+  Emits an event into the tracefile which references the source code (data includes: source line number, file name and function name). If {\tt enter} is 0 it marks an end (i.e., leaving the function), otherwise it marks the beginning of the routine. The user must be careful to place the call of this routine in places where the code is always executed, being careful not to place them inside {\tt if} and {\tt return} statements.
+    \begin{verbatim}
+     void routine1 (void)
+     {
+      Extrae_user_function (1);
+      [routine 1 code]
+      Extrae_user_function (0);
+     }
+
+     void routine2 (void)
+     {
+      Extrae_user_function (1);
+      [routine 2 code]
+      Extrae_user_function (0);
+     }
+   \end{verbatim}
+
 \end{itemize}
 
 \section{Special considerations for Cell Broadband Engine tracing package}
