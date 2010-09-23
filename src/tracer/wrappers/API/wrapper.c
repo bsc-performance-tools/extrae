@@ -284,7 +284,7 @@ static int read_environment_variables (int me)
 	mpitrace_on = (str != NULL && (strcmp (str, "1") == 0));
 	if (me == 0 && !mpitrace_on)
 	{
-		fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT EXTRAE_ON is NOT set!\n");
+		fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT EXTRAE_ON is NOT enabled!\n");
 		return 0;
 	}
 
@@ -1291,11 +1291,21 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Configure the tracing subsystem */
 #if defined(HAVE_XML2)
 	if (config_file != NULL)
+	{
 		Parse_XML_File  (me, world_size, config_file);
+	}
 	else
-		read_environment_variables (me);
+	{
+		if (getenv ("EXTRAE_ON") != NULL)
+			read_environment_variables (me);
+		else
+			fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT neither EXTRAE_ON nor EXTRAE_CONFIG_FILE are NOT set!\n");
+	}
 #else
-	read_environment_variables (me);
+	if (getenv("EXTRAE_ON") != NULL)
+		read_environment_variables (me);
+	else
+		fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT EXTRAE_ON is NOT set!\n");
 #endif
 
 	/* If we aren't tracing, just skip everything! */
