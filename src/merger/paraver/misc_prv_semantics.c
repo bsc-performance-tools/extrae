@@ -554,47 +554,51 @@ int HWC_Change_Ev (
    unsigned int task,
    unsigned int thread)
 {
-    int i;
-    unsigned int hwctype[MAX_HWC+1];
-    unsigned long long hwcvalue[MAX_HWC+1];
-    unsigned int prev_hwctype[MAX_HWC];
-    struct thread_t * Sthread;
-    Sthread = GET_THREAD_INFO(ptask, task, thread);
+	int i;
+	unsigned int hwctype[MAX_HWC+1];
+	unsigned long long hwcvalue[MAX_HWC+1];
+	unsigned int prev_hwctype[MAX_HWC];
+	struct thread_t * Sthread;
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
-    int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
-    int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
+	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
+	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
-    /* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
-    for (i=0; i<MAX_HWC; i++)
-        prev_hwctype[i] = HWC_COUNTER_TYPE(oldIds[i]);
+	/* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
+	for (i=0; i<MAX_HWC; i++)
+#if defined(PMAPI_COUNTERS)
+		prev_hwctype[i] = HWC_COUNTER_TYPE(i, oldsIds[i]);
+#else
+		prev_hwctype[i] = HWC_COUNTER_TYPE(oldIds[i]);
+#endif
 
-    ResetCounters (ptask-1, task-1);
-    HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
+	ResetCounters (ptask-1, task-1);
+	HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
 
-    for (i = 0; i < MAX_HWC+1; i++)
-    {
-        if (NO_COUNTER != hwctype[i])
-        {
-            int found = FALSE, k = 0;
+	for (i = 0; i < MAX_HWC+1; i++)
+	{
+		if (NO_COUNTER != hwctype[i])
+		{
+			int found = FALSE, k = 0;
 
-            /* Check the current counter (hwctype[i]) did not appear on the previous set. We don't want
-             * it to appear twice in the same timestamp. This may happen because the HWC_CHANGE_EV is traced
-             * right after the last valid emission of counters with the previous set, at the same timestamp.
-             */
+			/* Check the current counter (hwctype[i]) did not appear on the previous set. We don't want
+			 * it to appear twice in the same timestamp. This may happen because the HWC_CHANGE_EV is traced
+			 * right after the last valid emission of counters with the previous set, at the same timestamp.
+			 */
 
-            while ((!found) && (k < MAX_HWC))
-            {
-                if (hwctype[i] == prev_hwctype[k]) found = TRUE;
-                k ++;
-            }
+			while ((!found) && (k < MAX_HWC))
+			{
+				if (hwctype[i] == prev_hwctype[k]) found = TRUE;
+				k ++;
+			}
 
-            if (!found)
-                trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-        }
-    }
-    return 0;
+			if (!found)
+				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+		}
+	}
+	return 0;
 }
 
 static int Evt_SetCounters (
