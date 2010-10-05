@@ -90,13 +90,12 @@ void MPItrace_restart_Wrapper (void)
 	TRACE_MISCEVENTANDCOUNTERS (TIME, TRACING_EV, EVT_BEGIN, EMPTY);
 }
 
-void MPItrace_Event_Wrapper (unsigned int *tipus, unsigned int *valor)
+void MPItrace_Event_Wrapper (unsigned *tipus, unsigned *valor)
 {
 	TRACE_MISCEVENT (TIME, USER_EV, *tipus, *valor);
 }
 
-
-void MPItrace_N_Event_Wrapper (unsigned int *count, unsigned int *types, unsigned int *values)
+void MPItrace_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 {
 	iotimer_t temps;
 	unsigned i;
@@ -111,7 +110,7 @@ void MPItrace_N_Event_Wrapper (unsigned int *count, unsigned int *types, unsigne
 	}
 }
 
-void MPItrace_Eventandcounters_Wrapper (int *tipus, int *valor)
+void MPItrace_Eventandcounters_Wrapper (unsigned *tipus, unsigned *valor)
 {
 #if USE_HARDWARE_COUNTERS
 	if (tracejant)
@@ -122,7 +121,7 @@ void MPItrace_Eventandcounters_Wrapper (int *tipus, int *valor)
 }
 
 
-void MPItrace_N_Eventsandcounters_Wrapper (unsigned int *count, unsigned int *types, unsigned int *values)
+void MPItrace_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 {
 	iotimer_t temps;
 	unsigned i;

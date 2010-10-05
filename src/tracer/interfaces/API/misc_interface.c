@@ -70,7 +70,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_INIT)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 
 #define apifTRACE_EVENT(x) \
-	void CtoF77(x##_event) (unsigned int *tipus, unsigned int *valor) \
+	void CtoF77(x##_event) (unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_Event_Wrapper (tipus, valor); \
@@ -78,7 +78,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENT)
 
 #define apifTRACE_NEVENT(x) \
-	void CtoF77(x##_nevent) (unsigned int *count, unsigned int *tipus, unsigned int *valor) \
+	void CtoF77(x##_nevent) (unsigned *count, unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_N_Event_Wrapper (count, tipus, valor); \
@@ -94,7 +94,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENT)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 
 #define apifTRACE_EVENTANDCOUNTERS(x) \
-	void CtoF77(x##_eventandcounters) (unsigned int *tipus, unsigned int *valor) \
+	void CtoF77(x##_eventandcounters) (unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_Eventandcounters_Wrapper (tipus, valor); \
@@ -102,7 +102,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENTANDCOUNTERS)
 
 #define apifTRACE_NEVENTANDCOUNTERS(x) \
-	void CtoF77(x##_neventandcounters) (unsigned int *count, unsigned int *tipus, unsigned *valor) \
+	void CtoF77(x##_neventandcounters) (unsigned *count, unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_N_Eventsandcounters_Wrapper (count, tipus, valor); \
@@ -203,7 +203,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 
 #define apiTRACE_EVENT(x) \
-	void x##_event (unsigned int tipus, unsigned int valor) \
+	void x##_event (unsigned tipus, unsigned valor) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_Event_Wrapper (&tipus, &valor); \
@@ -211,7 +211,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 
 #define apiTRACE_NEVENT(x) \
-	void x##_nevent (unsigned int count, unsigned int *tipus, unsigned int *valors) \
+	void x##_nevent (unsigned count, unsigned *tipus, unsigned *valors) \
 	{ \
 		if (mpitrace_on) \
 			MPItrace_N_Event_Wrapper (&count, tipus, valors); \
@@ -219,7 +219,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENT)
 
 #define apiTRACE_EVENTANDCOUNTERS(x) \
-	void x##_eventandcounters (unsigned int tipus, unsigned int valor) \
+	void x##_eventandcounters (unsigned tipus, unsigned valor) \
 	{ \
   		if (mpitrace_on) \
     			MPItrace_Eventandcounters_Wrapper (&tipus, &valor); \
@@ -227,7 +227,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENT)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENTANDCOUNTERS)
 
 #define apiTRACE_NEVENTANDCOUNTERS(x) \
-	void x##_neventandcounters (unsigned int count, unsigned int *tipus, unsigned int *valors) \
+	void x##_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors) \
 	{ \
   		if (mpitrace_on) \
     			MPItrace_N_Eventsandcounters_Wrapper (&count, tipus, valors); \
@@ -333,29 +333,29 @@ void Extrae_fini (void)
 		MPItrace_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(_event, Extrae_event, (unsigned int tipus, unsigned int valors))
-void Extrae_event (unsigned int tipus, unsigned int valors)
+INTERFACE_ALIASES_C(_event, Extrae_event, (unsigned tipus, unsigned valors))
+void Extrae_event (unsigned tipus, unsigned valors)
 {
 	if (mpitrace_on)
 		MPItrace_Event_Wrapper (&tipus, &valors);
 }
 
-INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned int count, unsigned int *tipus, unsigned int *valors))
-void Extrae_nevent (unsigned int count, unsigned int *tipus, unsigned int *valors)
+INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned count, unsigned *tipus, unsigned *valors))
+void Extrae_nevent (unsigned count, unsigned *tipus, unsigned *valors)
 {
 	if (mpitrace_on)
 		MPItrace_N_Event_Wrapper (&count, tipus, valors);
 }
 
-INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (unsigned int tipus, unsigned int valor))
-void Extrae_eventandcounters (unsigned int tipus, unsigned int valor)
+INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (unsigned tipus, unsigned valor))
+void Extrae_eventandcounters (unsigned tipus, unsigned valor)
 {
 	if (mpitrace_on)
 		MPItrace_Eventandcounters_Wrapper (&tipus, &valor);
 }
 
-INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned int count, unsigned int *tipus, unsigned int *valors))
-void Extrae_neventandcounters (unsigned int count, unsigned int *tipus, unsigned int *valors)
+INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned count, unsigned *tipus, unsigned *valors))
+void Extrae_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors)
 {
  	if (mpitrace_on)
 		MPItrace_N_Eventsandcounters_Wrapper (&count, tipus, valors);
@@ -448,15 +448,15 @@ void extrae_fini (void)
 		MPItrace_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(unsigned int *tipus, unsigned int *valor))
-void extrae_event (unsigned int *tipus, unsigned int *valor)
+INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(unsigned *tipus, unsigned *valor))
+void extrae_event (unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
 		MPItrace_Event_Wrapper (tipus, valor);
 }
 
-INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned int *count, unsigned int *tipus, unsigned int *valor))
-void extrae_nevent (unsigned int *count, unsigned int *tipus, unsigned int *valor)
+INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned *count, unsigned *tipus, unsigned *valor))
+void extrae_nevent (unsigned *count, unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
 		MPItrace_N_Event_Wrapper (count, tipus, valor);
@@ -476,15 +476,15 @@ void extrae_restart (void)
 		MPItrace_restart_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (unsigned int *tipus, unsigned int *valor))
-void extrae_eventandcounters (unsigned int *tipus, unsigned int *valor)
+INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (unsigned *tipus, unsigned *valor))
+void extrae_eventandcounters (unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
 		MPItrace_Eventandcounters_Wrapper (tipus, valor);
 }
 
-INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned int *count, unsigned int *tipus, unsigned *valor))
-void extrae_neventandcounters (unsigned int *count, unsigned int *tipus, unsigned *valor)
+INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned *count, unsigned *tipus, unsigned *valor))
+void extrae_neventandcounters (unsigned *count, unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
 		MPItrace_N_Eventsandcounters_Wrapper (count, tipus, valor);

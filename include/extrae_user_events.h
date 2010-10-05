@@ -54,22 +54,17 @@ void MPItrace_user_function (unsigned enter);
 void OMPtrace_user_function (unsigned enter);
 void SEQtrace_user_function (unsigned enter);
 
-void Extrae_event (unsigned int type, unsigned int value);
-void OMPItrace_event (unsigned int type, unsigned int value);
-void MPItrace_event (unsigned int type, unsigned int value);
-void OMPtrace_event (unsigned int type, unsigned int value);
-void SEQtrace_event (unsigned int type, unsigned int value);
+void Extrae_event (unsigned type, unsigned value);
+void OMPItrace_event (unsigned type, unsigned value);
+void MPItrace_event (unsigned type, unsigned value);
+void OMPtrace_event (unsigned type, unsigned value);
+void SEQtrace_event (unsigned type, unsigned value);
 
-void Extrae_nevent (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void OMPItrace_nevent (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void MPItrace_nevent (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void OMPtrace_nevent (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void SEQtrace_nevent (unsigned int count, unsigned int *types,
-	unsigned int *values);
+void Extrae_nevent (unsigned count, unsigned *types, unsigned *values);
+void OMPItrace_nevent (unsigned count, unsigned *types, unsigned *values);
+void MPItrace_nevent (unsigned count, unsigned *types, unsigned *values);
+void OMPtrace_nevent (unsigned count, unsigned *types, unsigned *values);
+void SEQtrace_nevent (unsigned count, unsigned *types, unsigned *values);
 
 void Extrae_shutdown (void);
 void MPItrace_shutdown (void);
@@ -101,22 +96,17 @@ void OMPItrace_next_hwc_set (void);
 void OMPtrace_next_hwc_set (void);
 void SEQtrace_next_hwc_set (void);
 
-void Extrae_eventandcounters (int type, int value);
-void MPItrace_eventandcounters (int type, int value);
-void OMPItrace_eventandcounters (int type, int value);
-void OMPtrace_eventandcounters (int type, int value);
-void SEQtrace_eventandcounters (int type, int value);
+void Extrae_eventandcounters (unsigned type, unsigned value);
+void MPItrace_eventandcounters (unsigned type, unsigned value);
+void OMPItrace_eventandcounters (unsigned type, unsigned value);
+void OMPtrace_eventandcounters (unsigned type, unsigned value);
+void SEQtrace_eventandcounters (unsigned type, unsigned value);
 
-void Extrae_neventandcounters (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void OMPItrace_neventandcounters (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void MPItrace_neventandcounters (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void OMPtrace_neventandcounters (unsigned int count, unsigned int *types,
-	unsigned int *values);
-void SEQtrace_neventandcounters (unsigned int count, unsigned int *types,
-	unsigned int *values);
+void Extrae_neventandcounters (unsigned count, unsigned *types, unsigned *values);
+void OMPItrace_neventandcounters (unsigned count, unsigned *types, unsigned *values);
+void MPItrace_neventandcounters (unsigned count, unsigned *types, unsigned *values);
+void OMPtrace_neventandcounters (unsigned count, unsigned *types, unsigned *values);
+void SEQtrace_neventandcounters (unsigned count, unsigned *types, unsigned *values);
 
 void Extrae_set_tracing_tasks (int from, int to);
 void OMPtrace_set_tracing_tasks (int from, int to);
