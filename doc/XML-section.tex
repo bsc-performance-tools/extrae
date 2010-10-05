@@ -143,7 +143,7 @@ Each set contain a list of performance counters to be gathered at different inst
 
 In the given example (which refers to PAPI support in the tracing library) two sets are defined. First set will read {PAPI\_TOT\_INS} (total instructions), {PAPI\_TOT\_CYC} (total cycles) and {PAPI\_L1\_DCM} (1st level cache misses). Second set is configured to obtain {PAPI\_TOT\_INS} (total instructions), {PAPI\_TOT\_CYC} (total cycles) and {PAPI\_FP\_INS} (floating point instructions).
 
-Additionally, if the underlying performance library supports sampling mechanisms, each set can be configured to gather information (see section \ref{sec:XMLSectionCallers}) each time the specified counter reaches a specific value. In the given example, the first set is enabled to gather sampling information every 100M cycles. {\bf explicar que el comptador ha d'estar al set}
+Additionally, if the underlying performance library supports sampling mechanisms, each set can be configured to gather information (see section \ref{sec:XMLSectionCallers}) each time the specified counter reaches a specific value. The counter that is used for sampling must be present in the set. In the given example, the first set is enabled to gather sampling information every 100M cycles.
 
 Furthermore, performance counters can be configured to report accounting on different basis depending on the {\tt domain} attribute specified on each set. Available options are
 \begin{itemize}
