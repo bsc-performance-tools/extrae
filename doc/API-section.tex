@@ -14,7 +14,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
  Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
  {\bf NOTE:} This routine is called automatically by {\tt MPI\_Finalize} and when the tracing is performed by the DynInst launcher.
 
- \item {\tt void Extrae\_event (int event, int value)}\\
+ \item {\tt void Extrae\_event (unsigned event, unsigned value)}\\
  The Extrae\_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
 
  Some common use of events are:
@@ -48,7 +48,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
    \item Identify any point in the application using a unique combination of type and value.
   \end{itemize}
 
- \item {\tt void Extrae\_nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
+ \item {\tt void Extrae\_nevent (unsigned count, unsigned *types, unsigned *values)}\\
   Allows the user to place {\em count} events with the same timestamp at the given position.
 
  \item {\tt void Extrae\_counters (void)}\\
@@ -57,7 +57,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
  \item {\tt void Extrae\_eventandcounters (int event, int value)}\\
   This routine lets the user add an event and obtain the performance counters with one call and a single timestamp.
 
- \item {\tt void Extrae\_neventandcounters (int event, int value)}\\
+ \item {\tt void Extrae\_neventandcounters (unsigned count, unsigned *types, unsigned *values)}\\
   This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
 
  \item {\tt void Extrae\_shutdown (void)}\\
@@ -117,6 +117,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
       Extrae_user_function (0);
      }
    \end{verbatim}
+   In order to gather performance counters during the execution of these calls, the {\tt user-functions} tag in the XML configuration and its {\tt counters} have to be both enabled.
 
 \end{itemize}
 
@@ -154,10 +155,10 @@ Due to the lack of parallel paradigms and hardware counters inside the SPE eleme
  \item {\tt void SPUtrace\_fini (void)}\\
  Notifies the finalization of the work performed in the SPE thread and transfers the tracing buffer to the PPE element.
 
- \item {\tt void SPUtrace\_event (int event, int value)}\\
+ \item {\tt void SPUtrace\_event (unsigned event, unsigned value)}\\
  Has the same semantics as {\tt Extrae\_event}.
 
- \item {\tt void SPUtrace\_nevent (unsigned int count, unsigned int *types, unsigned int *values)}\\
+ \item {\tt void SPUtrace\_nevent (unsigned count, unsigned *types, unsigned *values)}\\
  Has the same semantics as {\tt Extrae\_nevent}.
 
 \end{itemize}

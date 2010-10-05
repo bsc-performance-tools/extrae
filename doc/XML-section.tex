@@ -103,7 +103,15 @@ The user can choose which addresses to save in the trace (starting from 1, which
 
 \section{XML Section: User functions}\label{sec:XMLSectionUF}
 
-To be written.
+\input{XML/userfunctions.xml.tex}
+
+There are two different mechanisms to instrument user functions.  If your installation supports DynInst, then the pointed list in the {\tt list} attribute within the tag is just a name list of the functions to be traced. If your installation does not support DynInst, then you need to compile every file and link your application with GNU C compiler using the {\tt -finstrument-functions} flag, and then, the list attribute must point a file with a list of entries like:
+
+{\tt function\_name \# address}
+
+You can generate this list by using the nm command applied to your binary. For example, {\tt nm | grep FUNCTION} will show you the function name, followed by the type of FUNCTION (should be T or t) and then followed by the address of the symbol.
+
+In order to gather performance counters in these functions and also in those instrumented using the {\tt extrae\_user\_function} API call, the node {\tt counters} has to be enabled.
 
 \section{XML Section: Performance counters}\label{sec:XMLSectionPerformanceCounters}
 
