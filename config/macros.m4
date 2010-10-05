@@ -441,7 +441,7 @@ AC_DEFUN([AX_PROG_BFD],
       
       if test "${liberty_home_dir}" != "not found" ; then
          AC_MSG_CHECKING([if libbfd and libiberty works])
-	 
+
          AX_FLAGS_SAVE()
          LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
          CFLAGS="-I${bfd_home_dir}/include ${CFLAGS}"
@@ -1704,21 +1704,28 @@ AC_DEFUN([AX_CHECK_LIBZ],
       [libz_paths="/usr/local /usr"] dnl List of possible default paths
    )
 
-   for home_dir in [${libz_paths} "not found"]; do
-      if test -f "${home_dir}/${BITS}/include/zlib.h" -a \
-              -f "${home_dir}/${BITS}/lib/libz.a" ; then
-         LIBZ_HOME="${home_dir}/${BITS}"
-         LIBZ_LIBSDIR="${home_dir}/${BITS}/lib"
-         break
-      elif test -f "${home_dir}/include/zlib.h" -a \
-                -f "${home_dir}/lib${BITS}/libz.a" ; then
-         LIBZ_HOME="${home_dir}"
-         LIBZ_LIBSDIR="${home_dir}/lib${BITS}"
-      elif test -f "${home_dir}/include/zlib.h" -a \
-                -f "${home_dir}/lib/libz.a" ; then
-         LIBZ_HOME="${home_dir}"
-         LIBZ_LIBSDIR="${home_dir}/lib"
-         break
+   for zhome_dir in [${libz_paths} "not found"]; do
+      if test -f "${zhome_dir}/${BITS}/include/zlib.h" ; then 
+         if test -f "${zhome_dir}/${BITS}/lib/libz.a" -o \
+                 -f "${zhome_dir}/${BITS}/lib/libz.so" ; then
+            LIBZ_HOME="${zhome_dir}/${BITS}"
+            LIBZ_LIBSDIR="${zhome_dir}/${BITS}/lib"
+            break
+         fi
+      elif test -f "${zhome_dir}/include/zlib.h" ; then
+         if test -f "${zhome_dir}/lib${BITS}/libz.a" -o \
+                 -f "${zhome_dir}/lib${BITS}/libz.so" ; then
+            LIBZ_HOME="${zhome_dir}"
+            LIBZ_LIBSDIR="${zhome_dir}/lib${BITS}"
+            break
+         fi
+      elif test -f "${zhome_dir}/include/zlib.h" ; then
+         if test -f "${zhome_dir}/lib/libz.a" -o \
+                 -f "${zhome_dir}/lib/libz.so" ; then
+            LIBZ_HOME="${zhome_dir}"
+            LIBZ_LIBSDIR="${zhome_dir}/lib"
+            break
+         fi
       fi
     done
 
