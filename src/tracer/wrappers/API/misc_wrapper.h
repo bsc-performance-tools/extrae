@@ -38,12 +38,10 @@ void MPItrace_fini_Wrapper(void);
 void MPItrace_shutdown_Wrapper (void);
 void MPItrace_restart_Wrapper (void);
 
-void MPItrace_Event_Wrapper (unsigned int *tipus, unsigned int *valor);
-void MPItrace_N_Event_Wrapper (unsigned int *count, unsigned int *tipus,
-  unsigned int *valors);
-void MPItrace_Eventandcounters_Wrapper (int *Type, int *Value);
-void MPItrace_N_Eventsandcounters_Wrapper (unsigned int *count, 
-  unsigned int *tipus, unsigned int *valors);
+void MPItrace_Event_Wrapper (unsigned *tipus, unsigned *valor);
+void MPItrace_N_Event_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
+void MPItrace_Eventandcounters_Wrapper (unsigned *Type, unsigned *Value);
+void MPItrace_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
 void MPItrace_counters_Wrapper ();
 void MPItrace_setcounters_Wrapper (int *evc1, int *evc2);
 void MPItrace_set_options_Wrapper (int options);
