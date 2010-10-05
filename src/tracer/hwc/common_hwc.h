@@ -141,7 +141,7 @@ extern int * HWC_current_set;
     HWCBE_PMAPI_Start_Set(time, current_set, thread_id);
 
 # define HWCBE_STOP_SET(time, current_set, thread_id) \
-    HWCBE_PMAPI_Stop_Set(time, current_set, thread_id)
+    HWCBE_PMAPI_Stop_Set(time, current_set, thread_id);
 
 # define HWCBE_ADD_SET(pretended_set, rank, ncounters, counters, domain,    \
                        change_at_globalops, change_at_time, num_overflows,  \
