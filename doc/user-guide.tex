@@ -17,12 +17,11 @@
 \def\graybox#1{
   \medskip
   \colorbox{lightgray}{
-    \begin{minipage}[t]{1.0\textwidth}
+    \begin{minipage}[t]{0.95\textwidth}
     #1
     \end{minipage}
    }
 }
-
   
 \usepackage{draftcopy}
 
@@ -80,8 +79,6 @@ tools@bsc.es
 
 \TRACE is currently available on different platforms and operating systems: IBM PowerPC running Linux or AIX, x86 and x86-64 running Linux, OpenSolaris, FreeBSD.
 
-{\bf \TRACE relies on ... blah blah blah ...}
-
 The combined use of \TRACE and \PARAVER offers an enormous analysis potential, both qualitative and quantitative. With these tools the actual performance bottlenecks of parallel applications can be identified. The microscopic view of the program behavior that the tools provide is very useful to optimize the parallel program performance.
 
 This document tries to give the basic knowledge to use the \TRACE tool. Chapter \ref{cha:Configuration} explains how the package can be configured and installed. Chapter \ref{cha:Examples} explains how to monitor an application to obtain its trace file. At the end of this document there are appendices that include: a Frequent Asked Questions appendix and a list of routines instrumented in the package.
@@ -121,7 +118,7 @@ In the Documentation Tool section of the aforementioned URL you can find the {\e
 
 \TRACE and \PARAVER tools e-mail support is {\bf tools@bsc.es}.
 
-\chapter{Configuration and installation}\label{cha:Configuration}
+\input{configure-installation}
 
 \input{XML-section}
 
