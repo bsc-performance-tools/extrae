@@ -30,14 +30,20 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif
 
 /* To ensure certain conditions at any point in the code */
 #define ASSERT(condition, message) {                               \
    if (!(condition)) {                                             \
-      fprintf (stderr, "ASSERTION FAILED on %s [%s:%d]\n%s\n%s\n", \
+      fprintf (stderr, PACKAGE_NAME ": ASSERTION FAILED on %s [%s:%d]\n%s\n%s\n", \
                __FUNCTION__,                                       \
                __FILE__,                                           \
                __LINE__,                                           \
@@ -49,7 +55,7 @@
                   
 #define PRINT_PRETTY_ERROR(severity, message)                      \
 {                                                                  \
-   fprintf (stderr, "%s on %s [%s:%d]\n%s\n",                      \
+   fprintf (stderr, PACKAGE_NAME ": %s on %s [%s:%d]\n%s\n",         \
             severity,                                              \
             __FUNCTION__,                                          \
             __FILE__,                                              \
@@ -83,7 +89,7 @@
 
 #define WARNING(message)                       \
 {                                              \
-   fprintf(stderr, "WARNING: %s\n", message);  \
+   PRINT_PRETTY_ERROR("WARNING", message);     \
 }         
 
 #endif /* __DEBUG_H__ */
