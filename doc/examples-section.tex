@@ -1,0 +1,66 @@
+\chapter{Examples}
+
+We present here three different examples of generating a Paraver tracefile. First example requires the package to be compiled with DynInst libraries. Second example uses the {\tt LD\_PRELOAD} mechanism to interpose code in the application. Such mechanism is available in Linux and FreeBSD operating systems and only works when the application uses dynamic libraries. Finally, there is an example using the static library of the instrumentation package.
+
+\section{DynInst based examples}
+
+\subsection{Generating the intermediate files}
+
+\subsection{Generating the final tracefile}
+
+\section{LD\_PRELOAD based examples}
+
+LD\_PRELOAD interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux and FreeBSD operating systems, although it may be available on other operating systems (even using different names\footnote{Look at \url{http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html} for further information.}) they are not tested.
+
+\subsection{Generating the intermediate files}
+
+The following script preloads the libmpitrace library to instrument MPI calls of the application passed as an argument (tune {\tt EXTRAE\_HOME} according to your installation).
+
+\begin{Verbatim}[frame=single,numbers=left,labelposition=topline,label=trace.sh]
+#!/bin/sh
+
+export EXTRAE_HOME=WRITE-HERE-THE-PACKAGE-LOCATION
+export EXTRAE_CONFIG_FILE=extrae.xml
+export LD_PRELOAD=${EXTRAE_HOME}/lib/libmpitrace.so
+
+## Run the desired program
+$*
+\end{Verbatim}
+
+Save the previous script as {\tt trace.sh} and give it execution permissos (i.e., execute {\tt chmod u+x trace.sh}). Copy the extrae.xml file from the instrumentation package share/example/MPI/extrae.xml to the current directory.
+
+If you run MPI applications from the command-line, you can issue the typical mpirun command as:
+
+\graybox{\tt \$\{MPI\_HOME\}/bin/mpirun -np N ./trace.sh mpi-app}
+
+where, {\tt \$\{MPI\_HOME\}} is the directory for your MPI installation, {\tt N} is the number of MPI tasks you want to run and {\tt mpi-app} is the binary of the MPI application you want to run.
+
+However, if you execute your MPI applications through a queue system you may need to write a submission script. The following script is an example of a submission script for MOAB/Slurm queuing system using the aforementioned trace.sh script for an execution of the {\tt mpi-app} on two processors.
+
+\begin{Verbatim}[frame=single,numbers=left,labelposition=topline,label=slurm-moab.sh]
+#! /bin/bash
+#@ job_name         = trace_run
+#@ output           = trace_run%j.out
+#@ error            = trace_run%j.out
+#@ initialdir       = .
+#@ class            = bsc_cs
+#@ total_tasks      = 2
+#@ wall_clock_limit = 00:30:00
+
+srun ./trace.sh mpi_app 
+\end{Verbatim}
+
+\subsection{Generating the final tracefile}
+
+To generate the final Paraver tracefile issue the following command:
+
+\graybox{\tt \$\{EXTRAE\_HOME\}/bin/mpi2prv -f TRACE.mpits -e mpi-app -o trace.prv}
+
+This command will convert the intermediate files generated in the previous step into a single Paraver tracefile. The {\tt TRACE.mpits} is a file generated automatically by the instrumentation and contains a reference to all the intermediate files generated during the execution run. The {\tt -e} parameter receives the application binary {\tt mpi-app} in order to perform translations from addresses to source code. To use this feature, the binary must have been compiled with debugging information. Finally, the {\tt -o} flag tells the merger how the Paraver tracefile will be named (trace.prv in this case).
+
+\section{Statically linked based examples}
+
+\subsection{Generating the intermediate files}
+
+\subsection{Generating the final tracefile}
+
