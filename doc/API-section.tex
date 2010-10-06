@@ -1,5 +1,7 @@
 \chapter{\TRACE API}\label{cha:API}
 
+There are two levels of the API in the \TRACE instrumentation package. Basic API refers to the basic functionality provided and includes emitting events, source code tracking, changing instrumentation mode and so. Extended API is an {\em experimental} addition to provide several of the basic API within single and powerful calls using specific data structures.
+
 \section{Basic API}\label{sec:BasicAPI}
 
 The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae\_user\_events.h}.
@@ -119,6 +121,93 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
    \end{verbatim}
    In order to gather performance counters during the execution of these calls, the {\tt user-functions} tag in the XML configuration and its {\tt counters} have to be both enabled.
 
+\end{itemize}
+
+\section{Extended API}\label{sec:ExtendedAPI}
+
+{\em {\bf NOTE:} This API is in experimental stage. Use it at your own risk!}
+
+The extended API makes use of two special structures located in {\tt \$\{PREFIX\}/include/extrae\_types.h}. The structures are {\tt extrae\_UserCommunication} and {\tt extrae\_CombinedEvents}. The former is intended to encode an event that will be converted into a Paraver communication when its partner equivalent event has found. The latter is used to generate events containing multiple kinds of information at the same time.
+
+\begin{verbatim}
+struct extrae_UserCommunication
+{
+  enum extrae_USER_COMMUNICATION_TYPES type;
+  unsigned tag;
+  unsigned size;
+  unsigned partner;
+  long long id;
+};
+\end{verbatim}
+
+The structure {\tt extrae\_UserCommunication} contains the following fields:
+\begin{itemize}
+	\item {\tt type}\\
+	Available options are:
+	\begin{itemize}
+		\item {\tt EXTRAE\_USER\_SEND}, if this event represents a send point.
+		\item {\tt EXTRAE\_USER\_RECV}, if this event represents a receive point.
+	\end{itemize}
+	\item {\tt tag}\\
+	The tag information in the communication record. 
+	\item {\tt size}\\
+	The size information in the communication record.
+	\item {\tt partner}\\
+	The partner of this communication (receive if this is a send or send if this is a receive).
+	\item {\tt id}\\
+	An identifier that is used to match communications between partners.
+\end{itemize}
+
+\begin{verbatim}
+struct extrae_CombinedEvents
+{
+  /* These are used as boolean values */
+  int HardwareCounters;
+  int Callers;
+  int UserFunction;
+  /* These are intended for N events */
+  int nEvents;
+  unsigned *Types;
+  unsigned *Values;
+  /* These are intended for user communication records */
+  int nCommunications;
+  struct extrae_UserCommunication *Communications;
+};
+\end{verbatim}
+
+The structure {\tt extrae\_CombinedEvents} contains the following fields:
+\begin{itemize}
+	\item {\tt HardwareCounters}\\
+	Set to non-zero if this event has to gather hardware performance counters.
+	\item {\tt Callers}\\
+	Set to non-zero if this event has to emit callstack information.
+	\item {\tt UserFunction}\\
+	Available options are:
+	\begin{itemize}
+		\item {\tt EXTRAE\_USER\_FUNCTION\_NONE}, if this event should not provide information about user routines.
+		\item {\tt EXTRAE\_USER\_FUNCTION\_ENTER}, if this event represents the starting point of a user routine.
+		\item {\tt EXTRAE\_USER\_FUNCTION\_LEAVE}, if this event represents the ending point of a user routine.
+	\end{itemize}
+	\item {\tt nEvents}\\
+	Set the number of events given in the {\tt Types} and {\tt Values} fields.
+	\item {\tt Types}\\
+	A pointer containing {\tt nEvents} type that will be stored in the trace.
+	\item {\tt Values}\\
+	A pointer containing {\tt nEvents} values that will be stored in the trace.
+	\item {\tt nCommunications}\\
+	Set the number of communications given in the {\tt Communications} field.
+	\item {\tt Communications}\\
+	A pointer to {\tt extrae\_UserCommunication} structures containing {\tt nCommunications} elements that represent the involved communications.
+\end{itemize}
+
+The extended API contains the following routines:
+\begin{itemize}
+	\item {\tt void Extrae\_init\_UserCommunication (struct extrae\_UserCommunication *);}\\
+	Use this routine to initialize an extrae\_UserCommunication structure.
+	\item {\tt void Extrae\_init\_CombinedEvents (struct extrae\_CombinedEvents *);}\\
+	Use this routine to initialize an extrae\_CombinedEvents structure.
+	\item {\tt void Extrae\_emit\_CombinedEvents (struct extrae\_CombinedEvents *);}\\
+	Use this routine to emit to the tracefile the events set in the extrae\_CombinedEvents given.
 \end{itemize}
 
 \section{Special considerations for Cell Broadband Engine tracing package}
