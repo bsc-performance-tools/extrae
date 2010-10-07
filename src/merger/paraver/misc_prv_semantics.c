@@ -57,6 +57,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include "addr2info.h" 
 #endif
 
+#if defined(PARALLEL_MERGE)
+# include "timesync.h"
+#endif
+
 #include "events.h"
 #include "paraver_state.h"
 
