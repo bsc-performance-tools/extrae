@@ -427,7 +427,8 @@ static int USRFunction_Event (event_t * current,
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, USRFUNC_EV, EvValue);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, USRFUNC_LINE_EV, EvValue);
+	if (EvValue != 0)
+		trace_paraver_event (cpu, ptask, task, thread, current_time, USRFUNC_LINE_EV, EvValue);
 
 	return 0;
 }
