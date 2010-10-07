@@ -40,7 +40,8 @@ void * Task1(void *param)
 
 	Extrae_init_UserCommunication (&comm);
 	comm.type = EXTRAE_USER_RECV;
-	comm.tag  = 1234;
+	comm.partner = 0;
+	comm.tag = 1234;
 	comm.size = 1024;
 	comm.id = 0xdeadbeef;
 
@@ -63,7 +64,8 @@ void * Task0(void *param)
 
 	Extrae_init_UserCommunication (&comm);
 	comm.type = EXTRAE_USER_SEND;
-	comm.tag  = 1234;
+	comm.partner = 0;
+	comm.tag = 1234;
 	comm.size = 1024;
 	comm.id = 0xdeadbeef;
 

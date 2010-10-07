@@ -104,19 +104,13 @@ PACX_EXAMPLE_FILES=/dev/null
 MRNET_EXAMPLE_FILES=/dev/null
 else
 MPI_EXAMPLE_FILES=\
- example/LINUX/MPI/run.sh \
- example/LINUX/MPI/run-dynamic.sh \
- example/LINUX/MPI/trace.sh \
- example/LINUX/MPI/mpi_ping.f \
- example/LINUX/MPI/mpi2prv.sh \
- example/LINUX/MPI/Makefile \
- example/LINUX/MPI/slurm_trace.sh \
- example/LINUX/MPI/slurm_merge.sh \
- example/LINUX/MPI/slurm_parallel_merge.sh \
- example/LINUX/MPI/extrae_explained.xml \
+ example/LINUX/MPI/README \
  example/LINUX/MPI/extrae.xml \
  example/LINUX/MPI/detailed_trace_basic.xml \
- example/LINUX/MPI/summarized_trace_basic.xml 
+ example/LINUX/MPI/summarized_trace_basic.xml \
+ example/LINUX/MPI/extrae_explained.xml \
+ example/LINUX/MPI/static \
+ example/LINUX/MPI/ld-preload
 
 OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/Makefile \
@@ -174,7 +168,7 @@ if HAVE_PACX
 endif
 if HAVE_MPI
 	$(mkdir_p) $(datadir)/example/MPI
-	cp -f $(MPI_EXAMPLE_FILES) $(datadir)/example/MPI
+	cp -fr $(MPI_EXAMPLE_FILES) $(datadir)/example/MPI
 	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/MPI
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/MPI
 	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(datadir)/example/MPI

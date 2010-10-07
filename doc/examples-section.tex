@@ -27,7 +27,7 @@ export LD_PRELOAD=${EXTRAE_HOME}/lib/libmpitrace.so
 $*
 \end{Verbatim}
 
-The the previous script can be found in the share/example/MPI directory in your tracing package directory. Also copy the extrae.xml file from the share/example/MPI directory instrumentation package to the current directory. This file is used to configure the behavior of the instrumentation package (there is more information about the XML file on chapter \ref{cha:XML}). The $\$\ast$ executes the arguments given to the script, so as you can run the instrumentation by simply adding the script in between your execution command.
+The previous script can be found in the share/example/MPI directory in your tracing package directory. Copy the script to one of your directories, tune the {\tt EXTRAE\_HOME} environment variable and make the script executable (using {\tt chmod u+x}). Also copy the XML configuration extrae.xml file from the share/example/MPI directory instrumentation package to the current directory. This file is used to configure the whole behavior of the instrumentation package (there is more information about the XML file on chapter \ref{cha:XML}). The last line in the script, $\$\ast$, executes the arguments given to the script, so as you can run the instrumentation by simply adding the script in between your execution command.
 
 Regarding the execution, if you run MPI applications from the command-line, you can issue the typical mpirun command as:
 
@@ -50,7 +50,7 @@ However, if you execute your MPI applications through a queue system you may nee
 srun ./trace.sh mpi_app 
 \end{Verbatim}
 
-If your system uses LoadLeveler your job script may look something like:
+If your system uses LoadLeveler your job script may look like:
 
 \begin{Verbatim}[frame=single,numbers=left,labelposition=topline,label=ll.sh]
 #! /bin/bash

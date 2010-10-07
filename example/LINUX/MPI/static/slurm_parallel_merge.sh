@@ -1,13 +1,13 @@
 #!/bin/bash
 # @ initialdir = .
-# @ output = seq_merge.out
-# @ error =  seq_merge.err
-# @ total_tasks = 1
+# @ output = par_merge.out
+# @ error =  par_merge.err
+# @ total_tasks = 5
 # @ cpus_per_task = 1
 # @ tasks_per_node = 4
 # @ wall_clock_limit = 01:00:00
 
 export EXTRAE_HOME=@sub_PREFIXDIR@
 
-${EXTRAE_HOME}/bin/mpi2prv -syn -f TRACE.mpits -o trace.prv
+srun ${EXTRAE_HOME}/bin/mpimpi2prv -syn -f TRACE.mpits -o trace.prv
 
