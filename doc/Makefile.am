@@ -50,7 +50,7 @@ endif
 endif
 if BUILD_HTML_DOCS
 	$(mkdir_p) $(datadir)/doc/html
-	cp user-guide/user-guide.html user-guide/user-guide.css *.png $(datadir)/doc/html
+	cp user-guide/user-guide.html user-guide/user-guide.css user-guide/*.png $(datadir)/doc/html
 	ln -f $(datadir)/doc/html/user-guide.html $(datadir)/doc/html/index.html
 endif
 
