@@ -333,19 +333,19 @@ int Address2Info_Translate(UINT64 address, int query, int uniqueID)
 		case ADDR2OMP_FUNCTION:
 		case ADDR2OMP_LINE:
 			Address2Info_Labels[A2I_OMP] = TRUE;
-			caller_address = address;
+			caller_address = address-1;
 			addr_type = uniqueID?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE;
 			break;
 		case ADDR2UF_FUNCTION:
 		case ADDR2UF_LINE:
 			Address2Info_Labels[A2I_UF] = TRUE;
-			caller_address = address;
+			caller_address = address-1;
 			addr_type = uniqueID?UNIQUE_TYPE:USER_FUNCTION_TYPE;
 			break;
 		case ADDR2SAMPLE_FUNCTION:
 		case ADDR2SAMPLE_LINE:
 			Address2Info_Labels[A2I_SAMPLE] = TRUE;
-			caller_address = address;
+			caller_address = address-1;
 			addr_type = uniqueID?UNIQUE_TYPE:SAMPLE_TYPE;
 			break;
 		default:
