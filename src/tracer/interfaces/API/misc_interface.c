@@ -316,6 +316,28 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SET_NUM_TENTATIVE_THREADS);
 #endif /* PTHREAD_SUPPORT */
 
+#define apiTRACE_INIT_USERCOMMUNICATION(x) \
+	void x##_init_UserCommunication (struct extrae_UserCommunication *ptr) \
+	{ \
+		Extrae_init_UserCommunication_Wrapper (ptr); \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT_USERCOMMUNICATION);
+
+#define apiTRACE_INIT_COMBINEDEVENTS(x) \
+	void x##_init_CombinedEvents (struct extrae_UserCommunication *ptr) \
+	{ \
+		Extrae_init_CombinedEvents_Wrapper (ptr); \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT_COMBINEDEVENTS);
+
+#define apiTRACE_INIT_USERCOMMUNICATION(x) \
+	void x##_emit_CombinedEvents (struct extrae_UserCommunication *ptr) \
+	{ \
+		if (mpitrace_on) \
+			Extrae_emit_CombinedEvents_Wrapper (ptr); \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EMIT_COMBINEDEVENTS);
+
 #else /* HAVE_WEAK_ALIAS_ATTRIBUTE */
 
 /** C BINDINGS **/
@@ -431,7 +453,27 @@ void Extrae_set_num_tentative_threads (int numthreads)
 	if (mpitrace_on)
 		Backend_setNumTentativeThreads (numthreads);
 }
-#endif
+#endif /* PTHREAD_SUPPORT */
+
+INTERFACE_ALIASES_C(_init_UserCommunication,Extrae_init_UserCommunication, (struct extrae_UserCommunication *ptr))
+void Extrae_init_UserCommunication (struct extrae_UserCommunication *ptr)
+{
+	Extrae_init_UserCommunication_Wrapper (ptr);
+}
+
+INTERFACE_ALIASES_C(_init_CombinedEvents,Extrae_init_CombinedEvents, (struct extrae_UserCommunication *ptr))
+void Extrae_init_CombinedEvents (struct extrae_CombinedEvents *ptr)
+{
+	Extrae_init_CombinedEvents_Wrapper (ptr);
+}
+
+INTERFACE_ALIASES_C(_emit_CombinedEvents,Extrae_emit_CombinedEvents, (struct extrae_UserCommunication *ptr))
+void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *ptr)
+{
+	if (mpitrace_on)
+		Extrae_emit_CombinedEvents_Wrapper (ptr);
+}
+
 
 /** FORTRAN BINDINGS **/
 
@@ -546,6 +588,6 @@ void extrae_set_num_tentative_threads (int *numthreads)
 	if (mpitrace_on)
 		Backend_setNumTentativeThreads (*numthreads);
 }
-#endif
+#endif /* PTHREAD_SUPPORT */
 
 #endif

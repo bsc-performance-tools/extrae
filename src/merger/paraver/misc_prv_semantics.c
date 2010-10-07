@@ -46,6 +46,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_prv_events.h"
 #include "semantics.h"
 #include "paraver_generator.h"
+#include "communication_queues.h"
+#include "trace_communication.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -749,6 +751,103 @@ static int Spectral_Event (event_t * current_event,
     return 0;
 }
 
+/******************************************************************************
+ ***  User_Send_Event
+ ******************************************************************************/
+
+static int User_Send_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned recv_thread;
+	struct thread_t *thread_info, *thread_info_partner;
+	event_t * recv_begin, * recv_end;
+	UNREFERENCED_PARAMETER(cpu);
+
+	thread_info = GET_THREAD_INFO(ptask, task, 1);
+
+	if (MatchComms_Enabled(ptask, task, thread))
+	{
+		if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+		{
+			thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
+
+			CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, Get_EvAux(current_event));
+
+			if (recv_begin == NULL || recv_end == NULL)
+			{
+				off_t position;
+
+				position = WriteFileBuffer_getPosition (obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb);
+				CommunicationQueues_QueueSend (thread_info->file, current_event, current_event, position, thread, Get_EvAux(current_event));
+				trace_paraver_unmatched_communication (1, ptask, task, thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, recv_thread, Get_EvSize(current_event), Get_EvTag(current_event));
+			}
+			else
+			{
+				trace_communicationAt (ptask, task, thread, 1+Get_EvTarget(current_event), recv_thread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
+			}
+		}
+#if defined(PARALLEL_MERGE)
+		else
+			trace_pending_communication (ptask, task, thread, current_event, current_event, Get_EvTarget (current_event));
+#endif
+	}
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  Recv_Event
+ ******************************************************************************/
+
+static int User_Recv_Event (event_t * current_event, unsigned long long current_time,
+	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+	FileSet_t *fset)
+{
+	event_t *send_begin, *send_end;
+	off_t send_position;
+	unsigned send_thread;
+	struct thread_t *thread_info, *thread_info_partner;
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(current_time);
+
+	thread_info = GET_THREAD_INFO(ptask, task, 1);
+
+	if (MatchComms_Enabled(ptask, task, thread))
+	{
+		if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+		{
+			thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
+
+			CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, Get_EvAux(current_event));
+
+			if (NULL == send_begin || NULL == send_end)
+			{
+				CommunicationQueues_QueueRecv (thread_info->file, current_event, current_event, thread, Get_EvAux(current_event));
+			}
+			else if (NULL != send_begin && NULL != send_end)
+			{
+				trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, task, thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
+			}
+			else
+				fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
+		}
+#if defined(PARALLEL_MERGE)
+		else
+		{
+			UINT64 log_r, phy_r;
+
+			log_r = TIMESYNC (task-1, Get_EvTime(current_event));
+			phy_r = TIMESYNC (task-1, Get_EvTime(current_event));
+			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1,
+			  Get_EvTarget(current_event), fset);
+		}
+#endif
+	}
+
+	return 0;
+}
+
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
@@ -778,6 +877,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ MRNET_EV, MRNet_Event },
 	{ CLUSTER_ID_EV, Clustering_Event },
 	{ SPECTRAL_PERIOD_EV, Spectral_Event },
+	{ USER_SEND_EV, User_Send_Event},
+	{ USER_RECV_EV, User_Recv_Event},
 	{ NULL_EV, NULL }
 };
 
