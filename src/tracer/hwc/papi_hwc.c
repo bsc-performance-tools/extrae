@@ -160,6 +160,12 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 {
 	int i, rc, num_set = HWC_num_sets;
 	PAPI_event_info_t info;
+
+#if !defined(SAMPLING_SUPPORT)
+	UNREFERENCED_PARAMETER(num_overflows);
+	UNREFERENCED_PARAMETER(overflow_counters);
+	UNREFERENCED_PARAMETER(overflow_values);
+#endif
 	
 	if (ncounters == 0 || counters == NULL)
 		return 0;

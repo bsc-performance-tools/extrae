@@ -665,7 +665,9 @@ int isSamplingEnabled(void)
 
 void setSamplingEnabled (int enabled)
 {
-#if defined(SAMPLING_SUPPORT)
+#if !defined(SAMPLING_SUPPORT)
+	UNREFERENCED_PARAMETER(enabled);
+#else
 	EnabledSampling = (enabled != FALSE);
 #endif
 }
