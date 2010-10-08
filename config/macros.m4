@@ -2116,28 +2116,30 @@ AC_DEFUN([AX_CHECK_UNUSED_ATTRIBUTE],
   ])
 ])
 
-dnl AC_DEFUN([AX_CHECK_LOAD_BALANCING],
-dnl [
-dnl 	AC_MSG_CHECKING([for load-balancing installation])
-dnl 	AC_ARG_WITH(load-balancing,
-dnl 		AC_HELP_STRING(
-dnl 			[--with-load-balancing@<:@=DIR@:>@],
-dnl 			[specify where to find "load balancing" libraries and includes]
-dnl 		),
-dnl 		[lb_path="$withval"],
-dnl 		[lb_path="none"] dnl List of possible default paths
-dnl 	)
-dnl 	if test -r "${lb_path}/LB_MPI/MPI_interface.h" ; then
-dnl 		AC_MSG_RESULT([$lb_path])
-dnl 		LOAD_BALANCING_HOME=${lb_path}
-dnl 		AC_SUBST([LOAD_BALANCING_HOME])
-dnl 		lb_found="yes"
-dnl 	else
-dnl 		AC_MSG_RESULT([not found])
-dnl 		lb_found="no"
-dnl 	fi
-dnl 	AM_CONDITIONAL(GENERATE_LOAD_BALANCING, test "${lb_found}" = "yes" )
-dnl ])
+AC_DEFUN([AX_CHECK_LOAD_BALANCING],
+[
+   AC_MSG_CHECKING([for load-balancing installation])
+   AC_ARG_WITH(load-balancing,
+   AC_HELP_STRING(
+      [--with-load-balancing@<:@=DIR@:>@],
+      [specify where to find "load balancing" libraries and includes]
+      ),
+      [lb_path="$withval"],
+      [lb_path="none"] dnl List of possible default paths
+   )
+   if test "${lb_path}" != "none" ; then
+      if test -r "${lb_path}/include/MPI_interface.h" ; then
+         AC_MSG_RESULT([$lb_path])
+         LOAD_BALANCING_HOME=${lb_path}
+         AC_SUBST([LOAD_BALANCING_HOME])
+         lb_found="yes"
+      else
+         AC_MSG_ERROR([load balancing headers not found])
+         lb_found="no"
+      fi
+   fi
+   AM_CONDITIONAL(GENERATE_LOAD_BALANCING, test "${lb_found}" = "yes" )
+])
 
 AC_DEFUN([AX_OFF_T_64BIT],
 [

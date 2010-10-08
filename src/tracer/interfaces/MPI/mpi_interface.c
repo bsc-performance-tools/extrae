@@ -50,7 +50,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpi_wrapper.h"
 
 #if defined(ENABLE_LOAD_BALANCING)
-# include "LB_MPI/MPI_interface.h"
+# include "MPI_interface.h"
 #endif
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
