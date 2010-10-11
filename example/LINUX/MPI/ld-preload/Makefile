@@ -2,7 +2,7 @@ MPI_HOME = @sub_MPI_HOME@
 EXTRAE_HOME = @sub_PREFIXDIR@
 
 F77 = $(MPI_HOME)/bin/mpif77 
-FFLAGS = -O2
+FFLAGS = -O2 -g
 
 all: mpi_ping
 

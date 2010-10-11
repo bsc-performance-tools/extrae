@@ -1,6 +1,6 @@
 
 CC     = mpicc
-CFLAGS = -O2
+CFLAGS = -O2 -g
 
 all: test
 
