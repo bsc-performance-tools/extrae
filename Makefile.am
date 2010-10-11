@@ -174,6 +174,8 @@ if HAVE_MPI
 	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(datadir)/example/MPI
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/MPI
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(datadir)/example/MPI
 endif
 if WANT_OPENMP
 	$(mkdir_p) $(datadir)/example/OMP

@@ -1,10 +1,12 @@
 MPI_HOME = @sub_MPI_HOME@
 EXTRAE_HOME = @sub_PREFIXDIR@
 PAPI_HOME = @sub_PAPI_HOME@
+XML2_LDFLAGS = @sub_XML2_LDFLAGS@
+XML2_LIBS = @sub_XML2_LIBS@
 
 F77 = $(MPI_HOME)/bin/mpif77 
 FFLAGS = -O2
-FLIBS = -L$(EXTRAE_HOME)/lib -lmpitracef -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ 
+FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ $(XML2_LDFLAGS) $(XML2_LIBS)
 
 all: mpi_ping
 
