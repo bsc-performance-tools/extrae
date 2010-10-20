@@ -11,6 +11,8 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 			CROSSC="${host} with BG/P system support"
 		elif test "${IS_CELL_MACHINE}" = "yes" ; then
 			CROSSC="${host} with Cell Broadband Engine support - SDK ${CELL_SDK}.x"
+    elif test "${IS_CRAY_XT}" = "yes" ; then
+      CROSSC="${host} with Cray XT system support"
 		else
 			CROSSC="no"
 		fi
@@ -66,10 +68,13 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo -e \\\tBFD home:  ${BFD_HOME}
 	fi
 
-	echo
 	echo liberty availability: ${LIBERTY_INSTALLED}
 	if test "${LIBERTY_INSTALLED}" = "yes" ; then
 		echo -e \\\tliberty home:  ${LIBERTY_HOME}
+	fi
+	echo unwind availability: ${libunwind_works}
+	if test "${libunwind_works}" = "yes" ; then
+		echo -e \\\tunwind home: ${UNWIND_HOME}
 	fi
 
 	echo

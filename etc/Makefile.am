@@ -13,6 +13,12 @@ SHscripts:
 	echo "export PAPI_HOME=${PAPI_HOME}" >> $(sysconfdir)/extrae-vars.sh
 	echo "export LIBXML2_HOME=${XML2_HOME}" >> $(sysconfdir)/extrae-vars.sh
 	echo "export DYNINST_HOME=${DYNINST_HOME}" >> $(sysconfdir)/extrae-vars.sh
+	echo "export DWARF_HOME=${DWARF_HOME}" >> $(sysconfdir)/extrae-vars.sh
+	echo "export EXTRAE_CC=${CC}" >> $(sysconfdir)/extrae-vars.sh
+	echo "export EXTRAE_CFLAGS=${CFLAGS}" >> $(sysconfdir)/extrae-vars.sh
+	echo "export EXTRAE_CXX=${CXX}" >> $(sysconfdir)/extrae-vars.sh
+	echo "export EXTRAE_CXXFLAGS=${CXXFLAGS}" >> $(sysconfdir)/extrae-vars.sh
+	echo "export UNWIND_HOME=${UNWIND_HOME}" >> $(sysconfdir)/extrae-vars.sh
 	chmod 0644 $(sysconfdir)/extrae-vars.sh
 	cp extrae.sh $(sysconfdir)
 	chmod 0644 $(sysconfdir)/extrae.sh
@@ -24,6 +30,12 @@ CSHscripts:
 	echo "setenv PAPI_HOME ${PAPI_HOME}" >> $(sysconfdir)/extrae-vars.csh
 	echo "setenv LIBXML2_HOME ${XML2_HOME}" >> $(sysconfdir)/extrae-vars.csh
 	echo "setenv DYNINST_HOME ${DYNINST_HOME}" >> $(sysconfdir)/extrae-vars.csh
+	echo "setenv DWARF_HOME ${DWARF_HOME}" >> $(sysconfdir)/extrae-vars.csh
+	echo "setenv EXTRAE_CC ${CC}" >> $(sysconfdir)/extrae-vars.sh
+	echo "setenv EXTRAE_CFLAGS ${CFLAGS}" >> $(sysconfdir)/extrae-vars.sh
+	echo "setenv EXTRAE_CXX ${CXX}" >> $(sysconfdir)/extrae-vars.sh
+	echo "setenv EXTRAE_CXXFLAGS ${CXXFLAGS}" >> $(sysconfdir)/extrae-vars.sh
+	echo "setenv UNWIND_HOME ${UNWIND_HOME}" >> $(sysconfdir)/extrae-vars.sh
 	chmod 0644 $(sysconfdir)/extrae-vars.csh
 	cp extrae.csh $(sysconfdir)
 	chmod 0644 $(sysconfdir)/extrae.csh

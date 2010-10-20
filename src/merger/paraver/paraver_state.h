@@ -41,7 +41,6 @@ void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigne
 void Initialize_States (FileSet_t * fset);
 void Finalize_States (FileSet_t * fset, unsigned long long current_time);
 
-int Get_Joint_States (void);
 int Get_Last_State (void);
 
 #endif

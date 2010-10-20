@@ -326,6 +326,7 @@ libsmpssmpitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -D
 lib_dyn_mpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DC_SYMBOLS -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE
 lib_dyn_omptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS) -DDYNINST_MODULE -DOMP_SUPPORT
 
+
 #
 # Link flags
 #
@@ -368,6 +369,85 @@ libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
 lib_dyn_mpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 lib_dyn_omptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+
+#
+# Do we have to embed the merging library into the tracing library?
+#
+if IS_BG_MACHINE
+
+# BG machines do not support MERGE in TRACE
+
+else
+
+if WANT_MERGE_IN_TRACE
+
+SEQUENTIAL_MERGE_LIB = $(MERGER_DIR)/libmpi2prv.la
+PARALLEL_MERGE_LIB = $(MERGER_DIR)/parallel/libmpimpi2prv.la
+
+libseqtrace_la_LIBADD += $(SEQUENTIAL_MERGE_LIB)
+libseqtrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+
+libupctrace_la_LIBADD +=
+
+if WANT_PARALLEL_MERGE 
+libmpitrace_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libmpitrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+libmpitracef_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libmpitracef_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+endif
+
+libpacxtrace_la_LIBADD += 
+libpacxtracef_la_LIBADD +=
+
+if WANT_PARALLEL_MERGE
+libompitrace_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libompitrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+libompitracef_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libompitracef_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+endif
+
+libomptrace_la_LIBADD += $(SEQUENTIAL_MERGE_LIB)
+libomptrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+
+if WANT_PARALLEL_MERGE
+libsmpssmpitrace_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libsmpssmpitrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+libsmpssmpitracef_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libsmpssmpitracef_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+endif
+
+libsmpsstrace_la_LIBADD += $(SEQUENTIAL_MERGE_LIB)
+libsmpsstrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+
+libnanostrace_la_LIBADD += $(SEQUENTIAL_MERGE_LIB)
+libnanostrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+
+libpttrace_la_LIBADD += $(SEQUENTIAL_MERGE_LIB)
+libpttrace_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+
+libtrttrace_la_LIBADD +=
+
+if WANT_PARALLEL_MERGE 
+libmpitrace_lb_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libmpitrace_lb_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+libmpitracef_lb_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libmpitracef_lb_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+libompitrace_lb_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libompitrace_lb_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+libompitracef_lb_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libompitracef_lb_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+
+libsmpssmpitrace_lb_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libsmpssmpitrace_lb_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+libsmpssmpitracef_lb_la_LIBADD += $(PARALLEL_MERGE_LIB)
+libsmpssmpitracef_lb_la_CFLAGS += -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+endif
+
+lib_dyn_mpitrace_la_LIBADD +=
+lib_dyn_omptrace_la_LIBADD +=
+endif
+
+endif
 
 ## -static tells libtool to generate ONLY the static library (we don't want
 ##   the libmpitracef.so because it don't preloads fine with programs)

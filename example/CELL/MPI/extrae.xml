@@ -61,4 +61,15 @@
     <spu-dma-channel enabled="yes">2</spu-dma-channel>
   </cell>
 
+  <merge enabled="yes" 
+    synchronization="default"
+    binary="mpi_ping"
+    tree-fan-out="16"
+    max-memory="512"
+    joint-states="yes"
+    keep-mpits="yes"
+  >
+    cell_example.prv
+  </merge>
+
 </trace>

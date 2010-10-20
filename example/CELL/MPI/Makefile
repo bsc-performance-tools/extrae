@@ -9,7 +9,7 @@ SPU_CC = spu-cc
 PPU_CC = $(MPI_HOME)/bin/mpicc
 PPU_CFLAGS = -O2 -Wall -I$(EXTRAE_HOME)/include
 SPU_CFLAGS = -O2 -Wall -I$(EXTRAE_HOME)/include
-EXTRA = -lxml2
+EXTRA = -lxml2 @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@
 
 all: master worker
 

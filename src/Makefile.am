@@ -1,3 +1,3 @@
 
-SUBDIRS = launcher common tracer merger others
+SUBDIRS = launcher common merger tracer others
 

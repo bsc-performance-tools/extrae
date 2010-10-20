@@ -59,19 +59,13 @@ input_t;
 #define GetInput_name(item)   ((item)->name)
 #define GetInput_fd(item)     ((item)->fd)
 
-#if defined(IS_BG_MACHINE)    /* BlueGene coordinates are kept in traces */
-extern int option_XYZT;
-#endif
+typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
 
-extern int SincronitzaTasks;
-extern int SincronitzaTasks_byNode;
-extern int dump;
-extern int Joint_States;
-extern int option_UseDiskForComms;
-extern int option_SkipSendRecvComms;
-extern int option_UniqueCallerID;
-extern int option_VerboseLevel;
+void merger_pre (int numtasks);
+void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
+	int *PRVFormat);
+int merger_post (int numtasks, int idtask, int PRVFormat);
 
-int merger (int numtasks, int idtask, int argc, char *argv[]);
+void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype);
 
 #endif

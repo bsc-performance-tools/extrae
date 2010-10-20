@@ -40,6 +40,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "events.h"
 #include "trt_prv_events.h"
 #include "mpi2out.h"
+#include "options.h"
 
 #define TRT_SPAWN_INDEX       0  /* threadSpawn index */
 #define TRT_READ_INDEX        1  /* threadRead index */
@@ -95,6 +96,6 @@ void TRTEvent_WriteEnabledOperations (FILE * fd)
 #if defined(HAVE_BFD)
 	/* Hey, pthread & OpenMP share the same labels? */
 	if (inuse[TRT_USR_FUNC_INDEX])
-		Address2Info_Write_OMP_Labels (fd, PTHREADFUNC_EV, PTHREADFUNC_LINE_EV, option_UniqueCallerID);
+		Address2Info_Write_OMP_Labels (fd, PTHREADFUNC_EV, PTHREADFUNC_LINE_EV, get_option_merge_UniqueCallerID());
 #endif
 }

@@ -42,7 +42,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "file_set.h"
 #include "HardwareCounters.h"
 
+#if USE_HARDWARE_COUNTERS
 static int num_counters = 0;
+#endif
 
 static void show_current (event_t * c)
 {

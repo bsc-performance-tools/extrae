@@ -58,6 +58,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #if defined(PARALLEL_MERGE)
+# include "parallel_merge_aux.h"
 # include "timesync.h"
 #endif
 

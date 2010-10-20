@@ -6,8 +6,6 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 \subsection{Generating the intermediate files}\label{subsec:Examples_DynInst_Intermediate}
 
-\subsection{Generating the final tracefile}\label{subsec:Examples_DynInst_Final}
-
 \section{LD\_PRELOAD based examples}\label{sec:Examples_LDPRELOAD}
 
 LD\_PRELOAD interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux and FreeBSD operating systems, although it may be available on other operating systems (even using different names\footnote{Look at \url{http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html} for further information.}) they are not tested.
@@ -76,14 +74,6 @@ rm ${MLIST}
 
 Besides the job specification given in lines 1-11, there are commands of particular interest. Lines 13-15 are used to know which and how many nodes are involved in the computation. Such information information is given to the {\tt mpirun} command to proceed with the execution. Once the execution finished, the temporal file created on line 14 is removed on line 19.
 
-\subsection{Generating the final tracefile}\label{subsec:Examples_LDPRELOAD_Final}
-
-To generate the final Paraver tracefile issue the following command:
-
-\graybox{\tt \$\{EXTRAE\_HOME\}/bin/mpi2prv -f TRACE.mpits -e mpi-app -o trace.prv}
-
-This command will convert the intermediate files generated in the previous step into a single Paraver tracefile. The {\tt TRACE.mpits} is a file generated automatically by the instrumentation and contains a reference to all the intermediate files generated during the execution run. The {\tt -e} parameter receives the application binary {\tt mpi-app} in order to perform translations from addresses to source code. To use this feature, the binary must have been compiled with debugging information. Finally, the {\tt -o} flag tells the merger how the Paraver tracefile will be named (trace.prv in this case).
-
 \section{Statically linked based examples}\label{sec:Examples_static}
 
 This is the basic instrumentation method suited for those installations that neither support DynInst nor LD\_PRELOAD, or require adding some manual calls to the \TRACE API.
@@ -137,6 +127,13 @@ $*
 
 See section \ref{subsec:Examples_LDPRELOAD_Intermediate} to know how to run this script either through command line or queue systems.
 
-\subsection{Generating the final tracefile}\label{subsec:Examples_static_Final}
+\section{Generating the final tracefile}\label{subsec:Examples_LDPRELOAD_Final}
 
-See section \ref{subsec:Examples_LDPRELOAD_Final}.
+Independently from the tracing method chosen, it is necessary to translate the intermediate tracefiles into a Paraver tracefile. The Paraver tracefile can be generated automatically (if the tracing package and the XML configuration file were set up accordingly, see chapters \ref{cha:Configuration} and \ref{cha:XML}) or manually. In case of using the automatic merging process, it will use all the resources allocated for the application to perform the merge once the application ends.
+
+To manually generate the final Paraver tracefile issue the following command:
+
+\graybox{\tt \$\{EXTRAE\_HOME\}/bin/mpi2prv -f TRACE.mpits -e mpi-app -o trace.prv}
+
+This command will convert the intermediate files generated in the previous step into a single Paraver tracefile. The {\tt TRACE.mpits} is a file generated automatically by the instrumentation and contains a reference to all the intermediate files generated during the execution run. The {\tt -e} parameter receives the application binary {\tt mpi-app} in order to perform translations from addresses to source code. To use this feature, the binary must have been compiled with debugging information. Finally, the {\tt -o} flag tells the merger how the Paraver tracefile will be named (trace.prv in this case).
+

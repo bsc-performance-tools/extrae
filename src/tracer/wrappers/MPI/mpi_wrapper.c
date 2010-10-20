@@ -117,7 +117,9 @@ static char UNUSED rcsid[] = "$Id$";
 	}
 
 static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen);
+#if defined(DEAD_CODE) /* This is outdated */
 static void Gather_MPITS(void);
+#endif
 static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm);
 
 /* int mpit_gathering_enabled = FALSE; */
@@ -495,7 +497,7 @@ void remove_file_list (void)
 
 char **TasksNodes = NULL;
 
-void Share_Nodes_Info (void)
+static void Gather_Nodes_Info (void)
 {
 	int i, rc;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
@@ -539,7 +541,7 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
     pid_t *buffer_pids = NULL;
     char tmpname[1024];
     int *buffer_threads = NULL;
-    int nthreads = Backend_getNumberOfThreads();
+    int nthreads = Backend_getMaximumOfThreads();
 
     if (TASKID == 0)
     {
@@ -603,7 +605,7 @@ int generate_spu_file_list (int number_of_spus)
 	int *buffer_numspus, *buffer_threads, *buffer_pids, *buffer_names;
 	char tmpname[1024];
 	char hostname[MPI_MAX_PROCESSOR_NAME];
-	int nthreads = Backend_getNumberOfThreads();
+	int nthreads = Backend_getMaximumOfThreads();
 
 	if (TASKID == 0)
 	{
@@ -743,7 +745,9 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	if (!res)
 		return;
 
-	Share_Nodes_Info ();
+	Gather_Nodes_Info ();
+
+	/* Generate a tentative file list */
 	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
@@ -828,7 +832,9 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	if (!res)
 		return;
 
-	Share_Nodes_Info ();
+	Gather_Nodes_Info ();
+
+	/* Generate a tentative file list */
 	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
@@ -888,13 +894,17 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	}
 #endif
 
-	/* fprintf(stderr, "[T: %d] Invoking Thread_Finalization\n", TASKID); */
+	/* Generate the final file list */
+	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
+	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
 	/* Es tanca la llibreria de traceig */
-	Thread_Finalization ();
+	Backend_Finalize ();
 
+#if defined(DEAD_CODE) /* This is outdated! */
 	if (mpit_gathering_enabled)
 		Gather_MPITS();
+#endif
 
 	CtoF77(pmpi_finalize) (ierror);
 }
@@ -1348,7 +1358,10 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    *   target : sender                      size  : received message size    
    *   tag : message tag
    */
+  TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag, c, EMPTY);
+/*
   TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, *tag, c, EMPTY);
+*/
 }
 
 /******************************************************************************
@@ -3763,7 +3776,9 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		unlink (config_file);
 	free (config_file);
 
-	Share_Nodes_Info ();
+	Gather_Nodes_Info ();
+
+	/* Generate a tentative file list */
 	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
@@ -3838,7 +3853,9 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		unlink (config_file);
 	free (config_file);
 
-	Share_Nodes_Info ();
+	Gather_Nodes_Info ();
+
+	/* Generate a tentative file list */
 	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
@@ -3899,13 +3916,17 @@ int MPI_Finalize_C_Wrapper (void)
 	}
 #endif
 
-   /* fprintf(stderr, "[T: %d] Invoking Thread_Finalization\n", TASKID); */
+	/* Generate the final file list */
+	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
+	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
 	/* Es tanca la llibreria de traceig */
-	Thread_Finalization ();
+	Backend_Finalize ();
 
+#if defined(DEAD_CODE) /* This is outdated! */
 	if (mpit_gathering_enabled)
 		Gather_MPITS();
+#endif
 
 	ierror = PMPI_Finalize ();
 
@@ -4310,8 +4331,12 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
    *   target : sender                      size  : received message size    
    *   tag : message tag
    */
+	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag,
+		comm, EMPTY);
+/*
 	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, tag, comm,
 		EMPTY);
+*/
 
   return ierror;
 }
@@ -6610,6 +6635,9 @@ int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf,
 
 #endif /* defined(C_SYMBOLS) */
 
+
+#if defined(DEAD_CODE) /* This is outdated */
+
 /****************************************************************************
  *** Gather_MPITS
  ****************************************************************************/
@@ -6864,6 +6892,8 @@ static void Gather_MPITS(void)
 		}
 	}
 }
+
+#endif /* DEAD_CODE */
 
 static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp)
 {

@@ -6,7 +6,7 @@
 #########################
 
 # Initialize autoconf & define package name, version and bug-report address 
-AC_INIT(Extrae, 2.0, tools@bsc.es)
+AC_INIT(Extrae, 2.1, tools@bsc.es)
 
 # Safety check to ensure that the directory told with `--srcdir` contains the source code
 #AC_CONFIG_SRCDIR(src/mpitrace.c)
@@ -65,16 +65,6 @@ AM_CONDITIONAL(OS_IRIX,      test "${OperatingSystem}" = "irix"    )
 AM_CONDITIONAL(OS_FREEBSD,   test "${OperatingSystem}" = "freebsd" )
 AM_CONDITIONAL(OS_SOLARIS,   test "${OperatingSystem}" = "solaris" )
 
-if test "${OperatingSystem}" = "linux" ; then
-	if test "${Architecture}" = "ia64" ; then
-		GenerarLlibreriaOMP="yes"
-	elif test "${Architecture}" = "powerpc" ; then
-		GenerarLlibreriaOMP="yes"
-	else
-		GenerarLlibreriaOMP="no"
-	fi
-fi
-
 if test "${OperatingSystem}" = "freebsd" ; then
 	CFLAGS="${CFLAGS} -I/usr/local/include"
 fi
@@ -105,6 +95,7 @@ if test "${enable_check_altix}" = "yes" ; then
    AX_HAVE_MMTIMER_DEVICE
 fi
 
+AX_IS_CRAY_XT
 AX_IS_BGL_MACHINE
 AX_IS_BGP_MACHINE
 if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
@@ -148,7 +139,7 @@ if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
    else
       if test "${IS_BGL_MACHINE}" = "yes" ; then
          CC="${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-gcc"
-    	 CXX="${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-g++"
+         CXX="${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-g++"
       elif test "${IS_BGP_MACHINE}" = "yes" ; then
          CC="${BG_HOME}/gnu-linux/bin/powerpc-bgp-linux-gcc"
          CXX="${BG_HOME}/gnu-linux/bin/powerpc-bgp-linux-g++"
@@ -279,6 +270,16 @@ AC_ARG_ENABLE(parallel-merge,
 )
 AM_CONDITIONAL(WANT_PARALLEL_MERGE, test "${enable_parallel_merge}" = "yes" )
 
+AC_ARG_ENABLE(merge-in-trace,
+   AC_HELP_STRING(
+      [--enable-merge-in-trace],
+      [Embed the merging functionality (mpi2prv) into the tracing library itself (disabled by default)]
+   ),
+   [enable_merge_in_trace="${enableval}"],
+   [enable_merge_in_trace="no"]
+)
+AM_CONDITIONAL(WANT_MERGE_IN_TRACE, test "${enable_merge_in_trace=}" = "yes" )
+
 if test "${OperatingSystem}" = "linux" ; then
   if test "${Architecture}" = "ia64" -o "${target_cpu}" = "amd64" -o "${target_cpu}" = "x86_64" ; then
     AX_CHECK_UNWIND
@@ -290,6 +291,7 @@ AX_CHECK_LIBZ
 
 AX_PROG_GM
 AX_PROG_MX
+AX_PROG_LIBDWARG
 AX_PROG_DYNINST
 AX_PROG_PAPI
 AX_PROG_PMAPI
@@ -320,11 +322,6 @@ AC_ARG_ENABLE(openmp,
    [enable_openmp="yes"]
 )
 if test "${enable_openmp}" = "yes" ; then
-#   if test "${GenerarLlibreriaOMP}" = "no" ; then
-#      AC_MSG_WARN([OpenMP tracing is not supported on this system])
-#      enable_openmp="no"
-#   fi
-#   AX_OPENMP([AC_DEFINE([OMP_SUPPORT], [1], [Defined if tracing must support OpenMP])])
    AX_OPENMP([])
 fi
 AM_CONDITIONAL(WANT_OPENMP, test "${enable_openmp}" = "yes" )

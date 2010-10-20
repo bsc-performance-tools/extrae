@@ -5,16 +5,16 @@
 There are many options to be applied at configuration time for the instrumentation package. We point out here some of the relevant options, sorted alphabetically. To get the whole list run {\tt configure --help}. Options can be enabled or disabled. To enable them use --enable-X or --with-X= (depending on which option is available), to disable them use --disable-X or --without-X.
 
 \begin{itemize}
-	\item {\tt --enable-spu-write} \\
-	Enable direct write operations to disk from SPUs in CELL machines.
-	\item {\tt ----enable-posix-clock} \\
+	\item {\tt --enable-merge-in-trace} \\
+	Embed the merging process in the tracing library so the final tracefile can be generated automatically from the application run.
+	\item {\tt --enable-parallel-merge} \\
+	Build the parallel mergers (mpimpi2prv/mpimpi2dim) based on MPI.
+	\item {\tt --enable-posix-clock} \\
 	Use POSIX clock (clock\_gettime call) instead of low level timing routines. Use this option if the system where you install the instrumentation package modifies the frequency of its processors at runtime.
 	\item {\tt --enable-single-mpi-lib} \\
 	Produces a single instrumentation library for MPI that contains both Fortran and C wrappers. Applications that call the MPI library from both C and Fortran languages need this flag to be enabled.
 	\item {\tt --enable-spu-write} \\
 	Enable direct write operations to disk from SPUs in CELL machines avoiding the usage of DMA transfers. The write mechanism is very slow compared with the original behavior.
-	\item {\tt --enable-parallel-merge} \\
-	Build the parallel mergers (mpimpi2prv/mpimpi2dim) based on MPI.
 	\item {\tt --enable-sampling} \\
 	Enable PAPI sampling support.
 	\item {\tt --enable-pmapi} \\
@@ -197,3 +197,10 @@ Build and installation commands:
 \graybox{{\tt MP\_COMPILER=gcc make\\
 make install}}
 
+\section{Knowing how a package was configured}
+
+If you are interested on knowing how an \TRACE package was configured execute the following command after setting {\tt EXTRAE\_HOME} to the base location of an installation
+
+\graybox{{\tt \$\{EXTRAE\_HOME\}/etc/configured.sh}}
+
+this command will show the configure command itself and the location of some dependencies of the instrumentation package.

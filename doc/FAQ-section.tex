@@ -83,7 +83,7 @@
       {\bf Answer 1:} Check that you place the appropriate parameter to indicate the number of tasks (typically -np).\\
       {\bf Answer 2:} Some MPI implementation require the application to receive special MPI parameters to run correctly. For example, MPICH based on CH-P4 device require the binary to receive som paramters. The following example is an sh-script that solves this issue:\\
       {\tt \#!/bin/sh\\
-           EXTRAE\_CONFIG\_FILE=mpitrace.xml ./mpi\_program \$@ real\_params}\\
+           EXTRAE\_CONFIG\_FILE=extrae.xml ./mpi\_program \$@ real\_params}\\
 
 \item {\bf Question:} The application blocks at the beginning?\\
       {\bf Answer:  } The application may be waiting for all tasks to startup but only some of them are running. Check for the previous question.

@@ -46,6 +46,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 int main (int argc, char *argv[])
 {
+	int PRVFormat;
 	int res;
 	int ntasks;
 	int idtask;
@@ -59,7 +60,9 @@ int main (int argc, char *argv[])
 	res = MPI_Comm_rank (MPI_COMM_WORLD, &idtask);
 	MPI_CHECK (res, MPI_Comm_size, "Failed to call MPI_Comm_rank");
 
-	merger (ntasks, idtask, argc, argv);
+	merger_pre (ntasks);
+	ProcessArgs (ntasks, idtask, argc, argv, &PRVFormat);
+	merger_post (ntasks, idtask, PRVFormat);
 
 	res = MPI_Finalize ();
 	MPI_CHECK (res, MPI_Finalize, "Failed to uninitialize MPI");
@@ -69,7 +72,13 @@ int main (int argc, char *argv[])
 #else
 int main (int argc, char *argv[])
 {
-	return merger (1, 0, argc, argv);
+	int PRVFormat;
+
+	merger_pre (1);
+	ProcessArgs (1, 0, argc, argv, &PRVFormat);
+	merger_post (1, 0, PRVFormat);
+
+	return 0;
 }
 #endif
 

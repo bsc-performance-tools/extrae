@@ -85,6 +85,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "communicators.h"
 #include "cpunode.h"
 #include "checkoptions.h"
+#include "options.h"
 
 #include "paraver_state.h"
 #include "paraver_generator.h"
@@ -331,8 +332,7 @@ static void Dimemas_GenerateOffsets (struct ptask_t *table,
 
 int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	struct input_t *files, unsigned int num_appl,
-	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
-	int MBytesPerAllSegments, int forceformat)
+	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid)
 {
 	FileSet_t * fset;
 	event_t * current_event;
@@ -345,10 +345,6 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	unsigned long long *offsets;
 	long long options;
 	double pct, last_pct;
-
-#if !defined(PARALLEL_MERGE)
-	UNREFERENCED_PARAMETER(MBytesPerAllSegments);
-#endif
 
 	InitializeObjectTable (num_appl, files, nfiles);
 #if defined(PARALLEL_MERGE)
@@ -382,7 +378,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		return -1;
 	}
 
-	if (dump)
+	if (get_option_merge_dump())
 		make_dump (fset);
 
 #if defined(HETEROGENEOUS_SUPPORT)
@@ -398,7 +394,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	options = GetTraceOptions (fset, numtasks, taskid);
 
 	CheckHWCcontrol (taskid, options);
-	CheckClockType (taskid, options, TRF_SEMANTICS, forceformat);
+	CheckClockType (taskid, options, TRF_SEMANTICS, get_option_merge_ForceFormat());
 
 	CheckCircularBufferWhenTracing (fset, numtasks, taskid);
 
@@ -649,7 +645,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 #if defined(PARALLEL_MERGE)
 	if (numtasks > 1)
 	{
-		Gather_Dimemas_Traces (numtasks, taskid, fset->output_file, 1024*1024*MBytesPerAllSegments);
+		Gather_Dimemas_Traces (numtasks, taskid, fset->output_file, 1024*1024*get_option_merge_MaxMem());
 		Gather_Dimemas_Offsets (numtasks, taskid, count, offsets, &offsets, trace_size, fset);
 
 		if (0 == taskid)

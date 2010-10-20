@@ -111,6 +111,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "events.h"
 #if defined(OMP_SUPPORT)
 # include "omp_probe.h"
+# include "omp_wrapper.h"
 #endif
 #include "trace_buffers.h"
 #include "timesync.h"
@@ -122,6 +123,11 @@ static char UNUSED rcsid[] = "$Id$";
 # include <external/upc.h>
 #endif
 #include "common_hwc.h"
+
+#if defined(EMBED_MERGE_IN_TRACE)
+# include "mpi2out.h"
+# include "options.h"
+#endif
 
 int MPItrace_Flush_Wrapper (Buffer_t *buffer);
 
@@ -229,12 +235,12 @@ int CheckForGlobalOpsTracingIntervals = FALSE;
 
 int circular_buffering = 0;
 
-unsigned get_maximum_NumOfThreads (void)
+static unsigned get_maximum_NumOfThreads (void)
 {
 	return maximum_NumOfThreads;
 }
 
-unsigned get_current_NumOfThreads (void)
+static unsigned get_current_NumOfThreads (void)
 {
 	return current_NumOfThreads;
 }
@@ -943,7 +949,7 @@ int remove_temporal_files(void)
   unsigned int thread;
   char tmpname[TMP_NAME_LENGTH];
 
-  for (thread = 0; thread < maximum_NumOfThreads; thread++)
+  for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
   {
 		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
     if (unlink(tmpname) == -1)
@@ -1062,7 +1068,7 @@ int Reallocate_buffers_and_files (int new_num_threads)
 	xrealloc(SamplingBuffer, SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
 #endif
 
-	for (i = maximum_NumOfThreads; i < new_num_threads; i++)
+	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)
 		Allocate_buffer_and_file (i);
 
 	return TRUE;
@@ -1153,7 +1159,7 @@ void Backend_NotifyNewPthread (void)
 
 void Backend_setNumTentativeThreads (int numofthreads)
 {
-	int numthreads = current_NumOfThreads;
+	int numthreads = get_current_NumOfThreads();
 
 	/* These calls just allocate memory and files for the given num threads, but does not
 	   modify the current number of threads */
@@ -1352,7 +1358,15 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
  ******************************************************************************/
 unsigned Backend_getNumberOfThreads (void)
 {
-	return current_NumOfThreads;
+	return get_current_NumOfThreads();
+}
+
+/******************************************************************************
+ * unsigned Backend_getMaximumOfThreads (void)
+ ******************************************************************************/
+unsigned Backend_getMaximumOfThreads (void)
+{
+	return get_maximum_NumOfThreads();
 }
 
 /******************************************************************************
@@ -1531,10 +1545,9 @@ char *Get_TemporalDir (int task)
 }
 
 /******************************************************************************
- ***  Thread_Finalization
+ ***  Backend_Finalize_close_mpits
  ******************************************************************************/
-
-void close_mpits (int thread)
+static void Backend_Finalize_close_mpits (int thread)
 {
 	int attempts = 100;
 	int ret;
@@ -1632,7 +1645,7 @@ int MPItrace_Flush_Wrapper (Buffer_t *buffer)
 					fprintf (stdout, PACKAGE_NAME": File size limit reached. File occupies %llu bytes.\n", current_size);
 					fprintf (stdout, "Further tracing is disabled.\n");
 				}
-				close_mpits(THREADID);
+				Backend_Finalize_close_mpits (THREADID);
 				mpitrace_on = FALSE;
 			}
 		}
@@ -1640,7 +1653,7 @@ int MPItrace_Flush_Wrapper (Buffer_t *buffer)
 	return 1;
 }
 
-void Thread_Finalization (void)
+void Backend_Finalize (void)
 {
 	unsigned thread;
 
@@ -1659,10 +1672,26 @@ void Thread_Finalization (void)
 		TRACE_EVENT (TIME, APPL_EV, EVT_END);
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
 	}
-	/* fprintf(stderr, "[T: %d] Before calling close_mpits (NumOfThreads=%d)\n", TASKID, maximum_NumOfThreads); */
+	/* fprintf(stderr, "[T: %d] Before calling Backend_Finalize_close_mpits (NumOfThreads=%d)\n", TASKID, maximum_NumOfThreads); */
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
-		close_mpits (thread);
+		Backend_Finalize_close_mpits (thread);
+
 	if (TASKID == 0)
 		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
+
+#if defined(EMBED_MERGE_IN_TRACE)
+	/* Launch the merger */
+	if (TRUE)
+	{
+		int ptask = 1, cfile = 1;
+		char tmp[1024];
+		mpitrace_on = FALSE; /* Turn off tracing now */
+
+		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
+		merger_pre (NumOfTasks);
+		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default);
+		merger_post (NumOfTasks, TaskID_Get(), TRUE);
+	}
+#endif /* EMBED_MERGE_IN_TRACE */
 }
 

@@ -267,7 +267,7 @@ static void Generate_Task_File_List (void)
 	if (gethostname (hostname, 1024 - 1) != 0)
 		sprintf (tmpname, "localhost");
 
-	for (thid = 0; thid < Backend_getNumberOfThreads(); thid++)
+	for (thid = 0; thid < Backend_getMaximumOfThreads(); thid++)
 	{
 		FileName_PTT(tmpname, Get_FinalDir(0), appl_name, getpid(), 0, thid, EXT_MPIT);
 
@@ -296,6 +296,7 @@ void MPItrace_init_Wrapper (void)
 	if (!Backend_preInitialize (TASKID, NumOfTasks, getenv("EXTRAE_CONFIG_FILE")))
 		return;
 
+	/* Generate a tentative file list */
 	Generate_Task_File_List();
 
 	/* Take the time */
@@ -312,8 +313,11 @@ void MPItrace_fini_Wrapper (void)
 	if (!mpitrace_on)
 		return;
 
+	/* Generate the definitive file list */
+	Generate_Task_File_List();
+
 	/* Es tanca la llibreria de traceig */
-	Thread_Finalization ();
+	Backend_Finalize ();
 }
 
 void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr)

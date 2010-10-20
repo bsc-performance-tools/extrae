@@ -6,6 +6,8 @@ SUBDIRS = parallel
 endif
 endif
 
+noinst_LTLIBRARIES = libmpi2prv.la
+
 bin_PROGRAMS = mpi2prv
 
 common_FILES = \
@@ -15,6 +17,7 @@ common_FILES = \
  common/communicators.c common/communicators.h \
  common/cpunode.c common/cpunode.h \
  common/mpi2out.c common/mpi2out.h \
+ common/options.c common/options.h \
  common/semantics.c common/semantics.h
 
 dimemas_FILES = \
@@ -42,11 +45,11 @@ paraver_FILES = \
  paraver/pthread_prv_events.c paraver/pthread_prv_events.h \
  paraver/trt_prv_events.c paraver/trt_prv_events.h \
  paraver/write_file_buffer.c paraver/write_file_buffer.h \
+ paraver/paraver_nprintf.c paraver/paraver_nprintf.h \
  paraver/MPI_EventEncoding.h \
  paraver/PACX_EventEncoding.h
 
-mpi2prv_SOURCES = \
- merger.c \
+libmpi2prv_la_SOURCES = \
  paraver/object_tree.h \
  paraver/addr2info.c paraver/addr2info.h \
  paraver/addr2info_hashcache.c paraver/addr2info_hashcache.h \
@@ -63,19 +66,30 @@ mpi2prv_SOURCES = \
  $(top_srcdir)/src/common/record.h \
  $(top_srcdir)/src/common/trace_mode.h
 
+mpi2prv_SOURCES = \
+ merger.c
+
+libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+
 mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpi2prv_LDADD = $(COMMON_DIR)/libcommon.la
-mpi2prv_LDFLAGS  = @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
+mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_DIR)/libcommon.la @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
+mpi2prv_DEPENDENCIES = libmpi2prv.la
+
 if HAVE_ZLIB
-  mpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_LIBS@
+  libmpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpi2prv_CFLAGS += @LIBZ_CFLAGS@
+  mpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_LIBS@
 endif
+
 if HAVE_PAPI
+  libmpi2prv_la_CFLAGS += @PAPI_CFLAGS@
   mpi2prv_CFLAGS += @PAPI_CFLAGS@
-if IS_BG_MACHINE
-  mpi2prv_LDFLAGS += -all-static @PAPI_LDFLAGS@ @PAPI_LIBS@
-else
   mpi2prv_LDFLAGS += @PAPI_LDFLAGS@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+if IS_BG_MACHINE
+  mpi2prv_LDFLAGS += -all-static
+endif
+if IS_CRAY_XT_MACHINE
+  mpi2prv_LDFLAGS += -all-static
 endif
 endif
 

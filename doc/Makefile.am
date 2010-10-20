@@ -1,5 +1,4 @@
 
-
 EXTRA_DIST = API-section.tex \
  common-macros.tex \
  environmentvariables-section.tex \
@@ -8,18 +7,21 @@ EXTRA_DIST = API-section.tex \
  merge-section.tex quick-guide-section.tex \
  user-guide.tex \
  wholeXML-section.tex \
- XML-section.tex \
  XML/buffer.xml.tex \
  XML/bursts.xml.tex \
  XML/callers.xml.tex \
  XML/cell.xml.tex \
  XML/config.xml.tex \
  XML/counters.xml.tex \
- XML/mpitrace.xml.tex \
+ XML/extrae.xml.tex \
+ XML/merge.xml.tex \
  XML/mpi.xml.tex \
  XML/openmp.xml.tex \
+ XML/others.xml.tex \
  XML/pacx.xml.tex \
- XML/storage.xml.tex
+ XML/storage.xml.tex \
+ XML/trace-control.xml.tex \
+ XML/userfunctions.xml.tex
 
 manual_ug = user-guide
 
@@ -29,6 +31,7 @@ manual_ug = user-guide
 
 all: $(manual_ug).tex
 if BUILD_DOCS_PS
+	echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
 	$(latex) $(manual_ug)
 	$(latex) $(manual_ug)
 	$(dvips) $(manual_ug).dvi -o $(manual_ug).ps
@@ -37,7 +40,7 @@ if BUILD_DOCS_PDF
 endif
 endif
 if BUILD_HTML_DOCS
-	$(latex2html) -split 0 -show_section_numbers -nonumbered_footnotes  $(manual_ug)
+	$(latex2html) -split 0 -show_section_numbers -nonumbered_footnotes $(manual_ug)
 endif
 
 install-exec-hook: all

@@ -51,6 +51,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
 #include "addr2info.h"
+#include "options.h"
 
 static struct ForeignRecv_t **myForeignRecvs;
 static int *myForeignRecvs_count;
@@ -304,7 +305,7 @@ static int RecvMine (int taskid, int from, int match, int *out_count, struct For
 
 	if (match)
 	{
-		if (option_VerboseLevel >= 1)
+		if (get_option_merge_VerboseLevel() >= 1)
 		{
 			if (count > 0)
 				fprintf (stdout, "mpi2prv: Processor %d matched %d of %d communications from processor %d\n", taskid, num_match, count, from);
@@ -328,7 +329,7 @@ static void SendMine (int taskid, int to, MPI_Request *req1, MPI_Request *req2)
 
 	if (ForeignRecvs[to].count > 0)
 	{
-		if (option_VerboseLevel >= 1)
+		if (get_option_merge_VerboseLevel() >= 1)
 		{
 			fprintf (stdout, "mpi2prv: Processor %d distributes %d foreign receives to processor %d\n", taskid, ForeignRecvs[to].count, to);
 			fflush (stdout);
@@ -340,7 +341,7 @@ static void SendMine (int taskid, int to, MPI_Request *req1, MPI_Request *req2)
 	}
 	else
 	{
-		if (option_VerboseLevel >= 1)
+		if (get_option_merge_VerboseLevel() >= 1)
 			fprintf(stdout, "mpi2prv: Processor %d does not have foreign receives for processor %d\n", taskid, to);
 	}
 }

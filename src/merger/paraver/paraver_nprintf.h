@@ -22,32 +22,30 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/paraver_generator.c $
+ | @last_commit: $Date: 2010-07-23 17:52:35 +0200 (dv, 23 jul 2010) $
+ | @version:     $Revision: 392 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef TRACE_TO_TRF_H
-#define TRACE_TO_TRF_H
+unsigned nprintf_paraver_comm (char *buffer, 
+	unsigned long long cpu_s, unsigned long long ptask_s,
+	unsigned long long task_s, unsigned long long thread_s,
+	unsigned long long log_s, unsigned long long phy_s,
+	unsigned long long cpu_r, unsigned long long ptask_r,
+	unsigned long long task_r, unsigned long long thread_r,
+	unsigned long long log_r, unsigned long long phy_r,
+	unsigned long long size, unsigned long long tag);
 
-#include "mpi2out.h"
-#include "cpunode.h"
-#include "fdz.h"
+unsigned nprintf_paraver_event_type_value (char *buffer,
+	unsigned long long type, unsigned long long value);
 
-extern struct ptask_t *obj_table;
-extern unsigned int num_ptasks;
+unsigned nprintf_paraver_event_head (char *buffer,
+	unsigned long long cpu, unsigned long long ptask,
+	unsigned long long task, unsigned long long thread,
+	unsigned long long time);
 
-int Dimemas_ProcessTraceFiles (char *prvName, unsigned long nfiles,
-	struct input_t *files, unsigned int num_appl,
-	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int idtask);
-
-unsigned long long Dimemas_hr_to_relative (UINT64 iotimer);
-
-#if defined(DEAD_CODE)
-extern int **EnabledTasks;
-extern unsigned long long **EnabledTasks_time;
-#endif
-
-void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task);
-
-#endif /* __TRACE_TO_PRV_H__ */
+unsigned nprintf_paraver_state (char *buffer,
+	unsigned long long cpu, unsigned long long ptask,
+	unsigned long long task, unsigned long long thread,
+	unsigned long long ini_time, unsigned long long end_time,
+	unsigned long long state);

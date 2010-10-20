@@ -80,6 +80,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "object_tree.h"
 #include "HardwareCounters.h"
 #include "trace_to_prv.h"
+#include "communication_queues.h"
 
 #define EVENTS_FOR_NUM_GLOBAL_OPS(x) \
 	((x) == MPI_BARRIER_EV || (x) == MPI_BCAST_EV || (x) == MPI_ALLREDUCE_EV ||  \

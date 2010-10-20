@@ -51,6 +51,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "timesync.h"
 #include "communication_queues.h"
 #include "trace_communication.h"
+#include "options.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -232,7 +233,7 @@ static int SendRecv_Event (event_t * current_event,
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 
-	if (!option_SkipSendRecvComms)
+	if (!get_option_merge_SkipSendRecvComms())
 	{
 		if (Get_EvValue (current_event) == EVT_BEGIN)
 		{

@@ -218,15 +218,16 @@ extern unsigned long long WantedCheckControlPeriod;
 
 int Backend_preInitialize (int rank, int world_size, char *config_file);
 int Backend_postInitialize (int rank, int world_size, unsigned long long SynchroInitTime, unsigned long long SynchroEndTime, char **node_list);
+
 unsigned Backend_getNumberOfThreads (void);
+unsigned Backend_getMaximumOfThreads (void);
+
 int Backend_ChangeNumberOfThreads (unsigned numberofthreads);
 void Backend_SetpThreadIdentifier (int ID);
 int Backend_GetpThreadIdentifier (void);
 void Backend_NotifyNewPthread (void);
+void Backend_CreatepThreadIdentifier (void);
 void Backend_setNumTentativeThreads (int numofthreads);
-
-unsigned get_current_NumOfThreads (void);
-unsigned get_maximum_NumOfThreads (void);
 
 void advance_current(int);
 extern int circular_buffering, circular_OVERFLOW;
@@ -239,7 +240,7 @@ void Parse_Callers (int, char *, int);
 
 int file_exists (char *fitxer);
 
-void Thread_Finalization (void);
+void Backend_Finalize (void);
 
 enum {
    KEEP,

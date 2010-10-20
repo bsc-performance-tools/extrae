@@ -88,6 +88,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "communicators.h"
 #include "cpunode.h"
 #include "checkoptions.h"
+#include "options.h"
 
 #include "paraver_state.h"
 #include "paraver_generator.h"
@@ -230,7 +231,7 @@ static void InitializeObjectTable (int num_appl, struct input_t * files,
 }
 
 
-void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
+static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 {
   int i, j;
 
@@ -285,8 +286,7 @@ void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 
 int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	struct input_t *files, unsigned int num_appl,
-	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
-	int MBytesPerAllSegments, int forceformat, int tree_fan_out)
+	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid)
 {
 	struct timeval time_begin, time_end;
 	FileSet_t * fset;
@@ -302,10 +302,10 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	int i, total_tasks;
 	long long options;
 
-	records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
-	records_per_task *= MBytesPerAllSegments;            /* let's use this memory */
+	records_per_task = 1024*1024/sizeof(paraver_rec_t); /* num of events in 1 Mbytes */
+	records_per_task *= get_option_merge_MaxMem();            /* let's use this memory */
 #if defined(PARALLEL_MERGE)
-	records_per_task /= tree_fan_out;                    /* divide by the tree fan out */
+	records_per_task /= get_option_merge_TreeFanOut();        /* divide by the tree fan out */
 #endif
 
 	InitializeObjectTable (num_appl, files, nfiles);
@@ -342,7 +342,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		return -1;
 	}
 
-	if (dump)
+	if (get_option_merge_dump())
 		make_dump (fset);
 
 #if defined(HETEROGENEOUS_SUPPORT)
@@ -358,7 +358,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	options = GetTraceOptions (fset, numtasks, taskid);
 
 //	CheckHWCcontrol (taskid, options);
-	CheckClockType (taskid, options, PRV_SEMANTICS, forceformat);
+	CheckClockType (taskid, options, PRV_SEMANTICS, get_option_merge_ForceFormat());
 
 /**************************************************************************************/
 
@@ -377,13 +377,13 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		TimeSync_SetInitialTime (i, StartingTimes[i], SynchronizationTimes[i], files[i].node);
 	}
 
-	if (SincronitzaTasks_byNode)
+	if (get_option_merge_SincronitzaTasks_byNode())
 	{
 		if (0 == taskid)
 			fprintf (stdout, "mpi2prv: Enabling Time Synchronization (Node).\n");
 		TimeSync_CalculateLatencies (TS_NODE);
 	}
-	else if (SincronitzaTasks)
+	else if (get_option_merge_SincronitzaTasks())
 	{
 		if (0 == taskid)
 			fprintf (stdout, "mpi2prv: Enabling Time Synchronization (Task).\n");
@@ -587,7 +587,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	/* In the parallel merge we have to */
 	if (numtasks > 1)
 	{
-		NewDistributePendingComms (numtasks, taskid, option_UseDiskForComms);
+		NewDistributePendingComms (numtasks, taskid, get_option_merge_UseDiskForComms());
 		ShareTraceInformation (numtasks, taskid);
 	}
 
@@ -600,7 +600,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 #endif
 
-	Paraver_JoinFiles (outName, fset, current_time, NodeCPUinfo, numtasks, taskid, records_per_task, tree_fan_out);
+	Paraver_JoinFiles (outName, fset, current_time, NodeCPUinfo, numtasks,
+		taskid, records_per_task, get_option_merge_TreeFanOut());
 
 	strcpy (envName, outName);
 #ifdef HAVE_ZLIB

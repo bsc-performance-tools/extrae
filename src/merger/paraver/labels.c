@@ -61,6 +61,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "events.h"
 #include "labels.h"
 #include "mpi_prv_events.h"
+#include "pacx_prv_events.h"
 #include "omp_prv_events.h"
 #include "pthread_prv_events.h"
 #include "misc_prv_events.h"
@@ -68,6 +69,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_mode.h"
 #include "addr2info.h" 
 #include "mpi2out.h"
+#include "options.h"
 
 #include "HardwareCounters.h"
 #include "queue.h"
@@ -680,7 +682,7 @@ void loadSYMfile (char *name)
 	FD = (FILE *) fopen (name, "r");
 	if (FD == NULL)
 	{
-		fprintf (stderr, "WARNING: Can\'t find file %s\n", name);
+		fprintf (stderr, "mpi2prv: WARNING: Can\'t find file %s\n", name);
 		return;
 	}
 
@@ -699,14 +701,14 @@ void loadSYMfile (char *name)
 		{
 			case 'U':
 			case 'P':
-				if (option_UniqueCallerID)
+				if (get_option_merge_UniqueCallerID())
 					Address2Info_AddSymbol (address, UNIQUE_TYPE, fname, modname, line);
 				else
 					Address2Info_AddSymbol (address, (Type=='U')?USER_FUNCTION_TYPE:OUTLINED_OPENMP_TYPE, fname, modname, line);
 				count++;
 				break;
 			default:
-				fprintf (stderr, "Error! Unexpected line in symbol file\n%s\n", LINE);
+				fprintf (stderr, "mpi2prv: Error! Unexpected line in symbol file\n%s\n", LINE);
 				break;
 		}
 	}
@@ -754,9 +756,9 @@ int GeneratePCFfile (char *name, long long options)
 	Paraver_gradient_names (fd);
 
 #ifdef HAVE_BFD
-	Address2Info_Write_MPI_Labels (fd, option_UniqueCallerID);
-	Address2Info_Write_UF_Labels (fd, option_UniqueCallerID);
-	Address2Info_Write_Sample_Labels (fd, option_UniqueCallerID);
+	Address2Info_Write_MPI_Labels (fd, get_option_merge_UniqueCallerID());
+	Address2Info_Write_UF_Labels (fd, get_option_merge_UniqueCallerID());
+	Address2Info_Write_Sample_Labels (fd, get_option_merge_UniqueCallerID());
 #endif
 
 	Write_rusage_Labels (fd);

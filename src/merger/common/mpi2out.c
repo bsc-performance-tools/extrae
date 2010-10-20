@@ -68,6 +68,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_to_trf.h"
 #include "labels.h"
 #include "addr2info_hashcache.h"
+#include "paraver_state.h"
+#include "options.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -77,34 +79,12 @@ static char UNUSED rcsid[] = "$Id$";
 # include "addr2info.h" 
 #endif
 
-#define DEFAULT_PRV_OUTPUT_NAME "MPITRACE_Paraver_Trace.prv"
-#define DEFAULT_DIM_OUTPUT_NAME "MPITRACE_Dimemas_Trace.dim"
-
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
 typedef enum {Block, Cyclic, Size, ConsecutiveSize} WorkDistribution_t;
 
-char OutTrace[PATH_MAX];
-char callback_file[PATH_MAX] = "";
-char symbol_file[PATH_MAX] = "";
-char executable_file[PATH_MAX] = ""; 
-struct input_t *InputTraces;
-unsigned nTraces = 0;
-unsigned num_applications;
-int dump = FALSE;
-int SincronitzaTasks = FALSE;
-int SincronitzaTasks_byNode = FALSE;
+static struct input_t *InputTraces;
+static unsigned nTraces = 0;
 static int AutoSincronitzaTasks = TRUE;
 static WorkDistribution_t WorkDistribution= Block;
-int MBytesPerAllSegments = 512;
-int option_UseDiskForComms = FALSE;
-int option_SkipSendRecvComms = FALSE;
-int option_UniqueCallerID = TRUE;
-int option_VerboseLevel = 0;
-int option_TreeFanOut = 0;
-
-#if defined(IS_BG_MACHINE)
-int option_XYZT = 0;
-#endif
 
 /******************************************************************************
  ***  Help
@@ -138,10 +118,8 @@ void Help (const char *ProgName)
           "    -consecutive-size Distributes MPIT files in a block fashion considering file size.\n"
           "    -use-disk-for-comms Uses the disk instead of memory to match foreign communications.\n"
 #endif
-          "    -s file   Indicates the symbol file attached to the *.mpit files.\n"
+          "    -s file   Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
           "    -d        Sequentially dumps the contents of every *.mpit file.\n"
-          "    -extended-glop-info\n"
-          "              Each global operation adds additional information records.\n"
           "    -split-states\n"
           "              Do not merge consecutives states that are the same.\n"
           "    -skip-sendrecv\n"
@@ -155,10 +133,10 @@ void Help (const char *ProgName)
 
 /******************************************************************************
  ***  Process_MPIT_File
- ***  Adds an MPIT file into the required strctures.
+ ***  Adds an MPIT file into the required structures.
  ******************************************************************************/
 
-void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles)
+static void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles)
 {
 	int fd;
 	int name_length;
@@ -268,8 +246,10 @@ static char *strip (char *buffer)
 
 /******************************************************************************
  ***  Read_MPITS_file
- ***  Insertis into trace tables the contents of a ascii file!
+ ***  Inserts into trace tables the contents of a ascii file!
  ******************************************************************************/
+
+static char *last_mpits_file = NULL;
 
 void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype)
 {
@@ -284,6 +264,8 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 		fprintf (stderr, "mpi2prv: Unable to open %s file.\n", file);
 		return;
 	}
+
+	last_mpits_file = (char*) file;
 
 	do
 	{
@@ -324,7 +306,7 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
  ******************************************************************************/
 
 void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
-	int *traceformat,  int *forceformat)
+	int *PRVFormat)
 {
 	char *BinaryName;
 	int CurArg;
@@ -349,22 +331,22 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 	if ((strncmp (BinaryName, "mpi2prv", 7) == 0)
 	    || (strncmp (BinaryName, "mpimpi2prv", 10) == 0))
 	{
-		*traceformat = PRV_SEMANTICS;
-		*forceformat = FALSE;
-		strcpy (OutTrace, DEFAULT_PRV_OUTPUT_NAME);
+		set_option_merge_ParaverFormat (TRUE);
+		set_option_merge_ForceFormat (FALSE);
+		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
 	else if ((strncmp (BinaryName, "mpi2dim", 7) == 0)
 	    || (strncmp (BinaryName, "mpimpi2dim", 10) == 0))
 	{
-		*traceformat = TRF_SEMANTICS;
-		*forceformat = FALSE;
-		strcpy (OutTrace, DEFAULT_DIM_OUTPUT_NAME);
+		set_option_merge_ParaverFormat (FALSE);
+		set_option_merge_ForceFormat (FALSE);
+		set_merge_OutputTraceName (DEFAULT_DIM_OUTPUT_NAME);
 	}
 	else
 	{
-		*traceformat = PRV_SEMANTICS;
-		*forceformat = FALSE;
-		strcpy (OutTrace, DEFAULT_PRV_OUTPUT_NAME);
+		set_option_merge_ParaverFormat (TRUE);
+		set_option_merge_ForceFormat (FALSE);
+		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
 
 	for (CurArg = 1; CurArg < argc; CurArg++)
@@ -376,74 +358,161 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 		}
 		if (!strcmp (argv[CurArg], "-v"))
 		{
-			option_VerboseLevel++;
+			set_option_merge_VerboseLevel (get_option_merge_VerboseLevel()+1);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-o"))
 		{
 			CurArg++;
 			if (CurArg < argc)
-				strcpy (OutTrace, argv[CurArg]);
+			{
+				set_merge_OutputTraceName (argv[CurArg]);
+			}
+			else 
+			{
+				if (0 == rank)
+					fprintf (stderr, PACKAGE_NAME": Option -o: You must specify the output trace name.\n");
+				Help(argv[0]);
+				exit(0);
+			}
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-s"))
 		{
 			CurArg++;
 			if (CurArg < argc)
-				strcpy (symbol_file, argv[CurArg]);
+			{
+				set_merge_SymbolFileName (argv[CurArg]);
+			}
+			else 
+			{
+				if (0 == rank)
+					fprintf (stderr, PACKAGE_NAME": Option -s: You must specify the path of the symbol file.\n");
+				Help(argv[0]);
+				exit(0);
+			}
 			continue;
+		}
+		if (!strcmp (argv[CurArg], "-c"))
+		{
+			CurArg++;
+			if (CurArg < argc)
+			{
+				set_merge_CallbackFileName (argv[CurArg]);
+			}
+			else 
+			{
+				if (0 == rank)
+					fprintf (stderr, PACKAGE_NAME": Option -c: You must specify the path of the callback file.\n");
+				Help(argv[0]);
+				exit(0);
+			}
+			continue;
+		}
+		if (!strcmp(argv[CurArg], "-e"))
+		{
+			CurArg++;
+			if (CurArg < argc)
+			{
+				set_merge_ExecutableFileName (argv[CurArg]);
+				continue;
+			}
+			else 
+			{
+				if (0 == rank)
+					fprintf (stderr, PACKAGE_NAME": Option -e: You must specify the path of the executable file.\n");
+				Help(argv[0]);
+				exit(0);
+			}
 		}
 		if (!strcmp (argv[CurArg], "-f"))
 		{
 			CurArg++;
 			if (CurArg < argc)
+			{
 				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Default);
+			}
+			else 
+			{
+				if (0 == rank)
+					fprintf (stderr, PACKAGE_NAME": Option -f: You must specify the path of the list file.\n");
+				Help(argv[0]);
+				exit(0);
+			}
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-f-relative"))
 		{
 			CurArg++;
 			if (CurArg < argc)
+			{
 				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Relative);
+			}
+			else 
+			{
+				if (0 == rank)
+					fprintf (stderr, PACKAGE_NAME": Option -f-relative: You must specify the path of the list file.\n");
+				Help(argv[0]);
+				exit(0);
+			}
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-f-absolute"))
 		{
-		  CurArg++;
-		  if (CurArg < argc)
-		    Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Absolute);
+			CurArg++;
+			if (CurArg < argc)
+			{
+				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Absolute);
+			}
+			else 
+			{
+				if (0 == rank)
+					fprintf (stderr, PACKAGE_NAME": Option -f-absolute: You must specify the path of the list file.\n");
+				Help(argv[0]);
+				exit(0);
+			}
 		  continue;
 		}
 #if defined(IS_BG_MACHINE)
 		if (!strcmp (argv[CurArg], "-xyzt"))
 		{
-			option_XYZT = TRUE;
+			set_option_merge_BG_XYZT (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-no-xyzt"))
 		{
-			option_XYZT = FALSE;
+			set_option_merge_BG_XYZT (FALSE);
 			continue;
 		}
 #endif
 		if (!strcmp (argv[CurArg], "-unique-caller-id"))
 		{
-			option_UniqueCallerID = TRUE;
+			set_option_merge_UniqueCallerID (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-no-unique-caller-id"))
 		{
-			option_UniqueCallerID = FALSE;
+			set_option_merge_UniqueCallerID (FALSE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-split-states"))
 		{
-			Joint_States = FALSE;
+			set_option_merge_JointStates (FALSE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-split-states"))
+		{
+			set_option_merge_JointStates (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-use-disk-for-comms"))
 		{
-			option_UseDiskForComms = TRUE;
+			set_option_merge_UseDiskForComms (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-use-disk-for-comms"))
+		{
+			set_option_merge_UseDiskForComms (FALSE);
 			continue;
 		}
 #if defined(PARALLEL_MERGE)
@@ -474,7 +543,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 			{
 				if (atoi(argv[CurArg]) > 0)
 				{
-					option_TreeFanOut = atoi(argv[CurArg]);
+					set_option_merge_TreeFanOut (atoi(argv[CurArg]));
 				}
 				else
 				{
@@ -504,86 +573,79 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 			}
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-c"))
-		{
-			CurArg++;
-			if (CurArg < argc)
-				strcpy (callback_file, argv[CurArg]);
-			continue;
-		}
 		if (!strcmp (argv[CurArg], "-d"))
 		{
-			dump = TRUE;
+			set_option_merge_dump (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-maxmem"))
 		{
-			unsigned long long records_per_task;
 
 			CurArg++;
 			if (CurArg < argc)
 			{
-				MBytesPerAllSegments = atoi(argv[CurArg]);
-				if (MBytesPerAllSegments == 0)
+				int tmp = atoi(argv[CurArg]);
+				if (tmp == 0)
 				{
 					if (0 == rank)
 						fprintf (stderr, "mpi2prv: Error! Invalid parameter for -maxmem option. Using 512 Mbytes\n");
-					MBytesPerAllSegments = 512;
+					tmp = 512;
 				}
-				else if (MBytesPerAllSegments < 16)
+				else if (tmp < 16)
 				{
 					if (0 == rank)
 						fprintf (stderr, "mpi2prv: Error! Cannot use less than 16 MBytes for the merge step\n");
-					MBytesPerAllSegments = 16;
+					tmp = 16;
 				}
+				set_option_merge_MaxMem (tmp);
 			}
-
-			records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
-			records_per_task *= MBytesPerAllSegments;            /* let's use this memory */
-			records_per_task /= numtasks;                        /* divide by all the tasks */
-
-			if (0 == records_per_task)
-			{
+			else
+			{	
 				if (0 == rank)
-					fprintf (stderr, "mpi2prv: Error! Assigned memory by -maxmem is insufficient for this number of tasks\n");
-				exit (-1);
+					fprintf (stderr, "mpi2prv: WARNING: Invalid value for -maxmem parameter\n");
 			}
-
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-dimemas"))
 		{
-			*forceformat = TRUE;
-			*traceformat = TRF_SEMANTICS;
+			set_option_merge_ForceFormat (TRUE);
+			set_option_merge_ParaverFormat (FALSE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-paraver"))
 		{
-			*forceformat = TRUE;
-			*traceformat = PRV_SEMANTICS;
+			set_option_merge_ForceFormat (TRUE);
+			set_option_merge_ParaverFormat (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-skip-sendrecv"))
 		{
-			option_SkipSendRecvComms = TRUE;
+			set_option_merge_SkipSendRecvComms (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-skip-sendrecv"))
+		{
+			set_option_merge_SkipSendRecvComms (FALSE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-syn"))
 		{
-			SincronitzaTasks = TRUE;
+			set_option_merge_SincronitzaTasks (TRUE);
+			set_option_merge_SincronitzaTasks_byNode (FALSE);
 			AutoSincronitzaTasks = FALSE;
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-syn-node"))
 		{
-			SincronitzaTasks = TRUE;
-			SincronitzaTasks_byNode = TRUE;
+			set_option_merge_SincronitzaTasks (TRUE);
+			set_option_merge_SincronitzaTasks_byNode (TRUE);
 			AutoSincronitzaTasks = FALSE;
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-no-syn"))
 		{
-			SincronitzaTasks = FALSE;
+			set_option_merge_SincronitzaTasks (FALSE);
+			set_option_merge_SincronitzaTasks_byNode (FALSE);
 			AutoSincronitzaTasks = FALSE;
 			continue;
 		}
@@ -596,39 +658,19 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 			}
 			continue;
 		}
-		if (!strcmp(argv[CurArg], "-e"))
-		{
-			CurArg++;
-			if (CurArg < argc)
-			{
-				strcpy(executable_file, argv[CurArg]);
-#if !defined(HAVE_BFD)
-				if (0 == rank)
-					fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
-#endif
-				continue;
-			}
-			else 
-			{
-				if (0 == rank)
-					fprintf (stderr, PACKAGE_NAME": Option -e: You must specify the path of the executable file.\n");
-				Help(argv[0]);
-				exit(0);
-			}
-		}
 		else
 			Process_MPIT_File ((char *) (argv[CurArg]), NULL, &cur_ptask, &cur_files);
 	}
-	num_applications = cur_ptask;
+	set_option_merge_NumApplications (cur_ptask);
 
 	/* Specific things to be applied per format */
 	if (rank == 0)
 	{
-		if (TRF_SEMANTICS == *traceformat)
+		if (!(*PRVFormat))
 		{
 			/* Dimemas traces doesn't know about synchronization */
-			SincronitzaTasks = FALSE;
-			SincronitzaTasks_byNode = FALSE;
+			set_option_merge_SincronitzaTasks (FALSE);
+			set_option_merge_SincronitzaTasks_byNode (FALSE);
 			AutoSincronitzaTasks = FALSE;
 
 			fprintf (stdout, "merger: Output trace format is: Dimemas\n");
@@ -642,7 +684,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 #endif
 
 		}
-		else if (PRV_SEMANTICS == *traceformat)
+		else
 		{
 			fprintf (stdout, "merger: Output trace format is: Paraver\n");
 		}
@@ -799,22 +841,13 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
  ***  main entry point
  ******************************************************************************/
 
-#if defined (LICENSE) && defined (LICENSE_IN_MERGE)
-# include "license.c"
-#endif
+/* To be called before ProcessArgs */
 
-int merger (int numtasks, int idtask, int argc, char *argv[])
+void merger_pre (int numtasks)
 {
-#if defined(PARALLEL_MERGE)
-	char **nodenames;
-#else
-	char nodename[1024];
-	char *nodenames[1];
+#if !defined(PARALLEL_MERGE)
+	UNREFERENCED_PARAMETER(numtasks);
 #endif
-	int error;
-	int traceformat;
-	int forceformat;
-	struct Pair_NodeCPU *NodeCPUinfo;
 
 #if defined(PARALLEL_MERGE)
 	if (numtasks <= 1)
@@ -831,33 +864,57 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 	  fprintf (stderr, "mpi2prv: Cannot allocate InputTraces memory. Dying...\n");
 	  exit (1);
 	}
+}
 
-	ProcessArgs (numtasks, idtask, argc, argv, &traceformat, &forceformat);
+
+/* To be called after ProcessArgs */
+
+int merger_post (int numtasks, int idtask, int PRVFormat)
+{
+	unsigned long long records_per_task;
+#if defined(PARALLEL_MERGE)
+	char **nodenames;
+#else
+	char nodename[1024];
+	char *nodenames[1];
+#endif
+	int error;
+	struct Pair_NodeCPU *NodeCPUinfo;
 
 #if defined(PARALLEL_MERGE)
-	if (option_TreeFanOut == 0)
+	if (get_option_merge_TreeFanOut() == 0)
 	{
 		if (idtask == 0)
 			fprintf (stdout, "mpi2prv: Tree order is not set. Setting automatically to %d\n", numtasks);
-		option_TreeFanOut = numtasks;
+		set_option_merge_TreeFanOut (numtasks);
 	}
-	else if (option_TreeFanOut > numtasks)
+	else if (get_option_merge_TreeFanOut() > numtasks)
 	{
 		if (idtask == 0)
-			fprintf (stdout, "mpi2prv: Tree order is set to %d but is larger that numtasks. Setting to tree order to %d\n", option_TreeFanOut, numtasks);
-		option_TreeFanOut = numtasks;
+			fprintf (stdout, "mpi2prv: Tree order is set to %d but is larger that numtasks. Setting to tree order to %d\n", get_option_merge_TreeFanOut(), numtasks);
+		set_option_merge_TreeFanOut (numtasks);
 	}
-	else if (option_TreeFanOut <= numtasks)
+	else if (get_option_merge_TreeFanOut() <= numtasks)
 	{
 		if (idtask == 0)
-			fprintf (stdout, "mpi2prv: Tree order is set to %d\n", option_TreeFanOut);
+			fprintf (stdout, "mpi2prv: Tree order is set to %d\n", get_option_merge_TreeFanOut());
 	}
 #endif
+
+	records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
+	records_per_task *= get_option_merge_MaxMem();              /* let's use this memory */
+	records_per_task /= numtasks;                         /* divide by all the tasks */
+
+	if (0 == records_per_task)
+	{
+		if (0 == idtask)
+			fprintf (stderr, "mpi2prv: Error! Assigned memory by -maxmem is insufficient for this number of tasks\n");
+		exit (-1);
+	}
 
 	if (0 == nTraces)
 	{
 	  fprintf (stderr, "mpi2prv: No intermediate trace files given.\n");
-		fflush (stderr);
 	  return 0;
 	}
 
@@ -879,42 +936,51 @@ int merger (int numtasks, int idtask, int argc, char *argv[])
 		unsigned first_node = InputTraces[0].nodeid;
 		for (i = 1; i < nTraces && all_nodes_are_equal; i++)
 			all_nodes_are_equal = (first_node == InputTraces[i].nodeid);
-		SincronitzaTasks = !all_nodes_are_equal;
+    set_option_merge_SincronitzaTasks (!all_nodes_are_equal);
 
 		if (0 == idtask)
 		{
-			fprintf (stdout, "mpi2prv: Time synchronization has been turned %s\n", SincronitzaTasks?"on":"off");
+			fprintf (stdout, "mpi2prv: Time synchronization has been turned %s\n", get_option_merge_SincronitzaTasks()?"on":"off");
 			fflush (stdout);
 		}
 	}
 
-#if defined (LICENSE) && defined (LICENSE_IN_MERGE)
-	if (0 == idtask)
-		if (!verify_execution())
-			exit (0);
-#endif
-
 #ifdef HAVE_BFD
-	Address2Info_Initialize (executable_file);
-	loadSYMfile (symbol_file);
+	Address2Info_Initialize (get_merge_ExecutableFileName());
+	if (strlen(get_merge_SymbolFileName()) == 0 && last_mpits_file != NULL)
+	{
+		char tmp[1024];
+		strncpy (tmp, last_mpits_file, 1024);
+
+		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
+		{
+			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
+			if (file_exists(tmp))
+				loadSYMfile (tmp);
+		}
+	}
+	else
+		loadSYMfile (get_merge_SymbolFileName());
+#if !defined(HAVE_BFD)
+				if (0 == rank)
+					fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
+#endif
 #endif
 
-	if (PRV_SEMANTICS == traceformat)
-		error = Paraver_ProcessTraceFiles (OutTrace, nTraces, InputTraces,
-		  num_applications, NodeCPUinfo, numtasks, idtask,
-		  MBytesPerAllSegments, forceformat, option_TreeFanOut);
-	else if (TRF_SEMANTICS == traceformat)
-		error = Dimemas_ProcessTraceFiles (OutTrace, nTraces, InputTraces,
-		  num_applications, NodeCPUinfo, numtasks, idtask,
-		  MBytesPerAllSegments, forceformat);
+	if (PRVFormat)
+		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
+			nTraces, InputTraces, get_option_merge_NumApplications(),
+			NodeCPUinfo, numtasks, idtask);
 	else
-		error = FALSE;
+		error = Dimemas_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
+			nTraces, InputTraces, get_option_merge_NumApplications(),
+			NodeCPUinfo, numtasks, idtask);
 
 	if (error)
 		fprintf (stderr, "mpi2prv: An error has been encountered when generating the tracefile. Dying...\n");
 
 #ifdef HAVE_BFD
-	if (option_VerboseLevel > 0)
+	if (get_option_merge_VerboseLevel() > 0)
 		Addr2Info_HashCache_ShowStatistics();
 #endif
 

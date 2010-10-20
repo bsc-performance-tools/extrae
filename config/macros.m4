@@ -1525,6 +1525,32 @@ AC_DEFUN([AX_IS_CELL_MACHINE],
    fi
 ])
 
+# AX_IS_CRAY_XT
+# ---------------------
+AC_DEFUN([AX_IS_CRAY_XT],
+[
+   AC_MSG_CHECKING([if this is a Cray XT machine])
+   AC_ARG_ENABLE(check-cray-xt,
+      AC_HELP_STRING(
+         [--enable-check-cray-xt],
+         [Enable check to known if this is a frontend to a Cray XT machine (enabled by default)]
+      ),
+      [enable_check_cxt="${enableval}"],
+      [enable_check_cxt="yes"]
+   )
+
+   IS_CXT_MACHINE="no"
+   if test "${enable_check_cxt}" = "yes" ; then
+      if test -d /opt/cray ; then
+         if test `which cc | grep xt-asyncpe | wc -l` != "0" ; then
+           IS_CXT_MACHINE="yes"
+         fi
+      fi
+   fi
+   AC_MSG_RESULT([$IS_CRAY_XT_MACHINE])
+   AM_CONDITIONAL(IS_CRAY_XT_MACHINE, test "${IS_CXT_MACHINE}" = "yes")
+])
+
 # AX_IS_BGP_MACHINE
 # ---------------------
 AC_DEFUN([AX_IS_BGP_MACHINE],
@@ -1650,7 +1676,7 @@ AC_DEFUN([AX_CHECK_UNWIND],
          [specify where to find Unwind libraries and includes]
       ),
       [unwind_paths=${withval}],
-      [unwind_paths="/usr/local /usr"] dnl List of possible default paths
+      [unwind_paths="/usr"] dnl List of possible default paths
    )
 
    AX_FIND_INSTALLATION([UNWIND], [$unwind_paths], [unwind])
@@ -1770,6 +1796,42 @@ AC_DEFUN([AX_CHECK_LIBZ],
    AX_FLAGS_RESTORE()
 ])
 
+# AX_PROG_LIBDWARF
+# -------------
+AC_DEFUN([AX_PROG_LIBDWARG],
+[
+   libdwarf_found="no"
+   AX_FLAGS_SAVE()
+
+   AC_ARG_WITH(dwarf,
+      AC_HELP_STRING(
+         [--with-dwarf=@<:@=DIR@:>@],
+         [specify where to find dwarf libraries and includes]
+      ),
+      [dwarf_paths="${withval}"],
+      [dwarf_paths="no"]
+   )
+
+   if test "${dwarf_paths}" != "no" ; then
+      AX_FIND_INSTALLATION([DWARF], [${dwarf_paths}], [dwarf])
+      if test "${DWARF_INSTALLED}" = "yes" ; then
+        if test -f ${DWARF_HOME}/lib/libdwarf.a -o \
+                -f ${DWARF_HOME}/lib/libdwarf.so ; then
+           if test -f ${DWARF_HOME}/include/libdwarf.h -a \
+                   -f ${DWARF_HOME}/include/dwarf.h ; then
+              libdwarf_found="yes"
+           else
+              AC_MSG_ERROR([Cannot find DWARF header files in ${DWARF_HOME}/include])
+           fi
+        else
+           AC_MSG_ERROR([Cannot find DWARF library files in ${DWARF_HOME}/lib])
+        fi
+      fi
+   fi
+
+   AX_FLAGS_RESTORE()
+])
+
 # AX_PROG_DYNINST
 # -------------
 AC_DEFUN([AX_PROG_DYNINST],
@@ -1781,9 +1843,13 @@ AC_DEFUN([AX_PROG_DYNINST],
          [--with-dyninst@<:@=DIR@:>@],
          [specify where to find DynInst libraries and includes]
       ),
-      [dyninst_paths="$withval"],
-      [dyninst_paths="no"] dnl List of possible default paths
+      [dyninst_paths="${withval}"],
+      [dyninst_paths="no"]
    )
+
+   if test "${libdwarf_found}" != "yes" -a "${dyninst_paths}" != "no" ; then
+      AC_MSG_ERROR([Cannot add DynInst support without libdwarf. Check for --with-dwarf option])
+   fi
 
    dnl Search for Dyninst installation
    AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
@@ -2118,7 +2184,6 @@ AC_DEFUN([AX_CHECK_UNUSED_ATTRIBUTE],
 
 AC_DEFUN([AX_CHECK_LOAD_BALANCING],
 [
-   AC_MSG_CHECKING([for load-balancing installation])
    AC_ARG_WITH(load-balancing,
    AC_HELP_STRING(
       [--with-load-balancing@<:@=DIR@:>@],
@@ -2128,6 +2193,7 @@ AC_DEFUN([AX_CHECK_LOAD_BALANCING],
       [lb_path="none"] dnl List of possible default paths
    )
    if test "${lb_path}" != "none" ; then
+      AC_MSG_CHECKING([for load-balancing installation])
       if test -r "${lb_path}/include/MPI_interface.h" ; then
          AC_MSG_RESULT([$lb_path])
          LOAD_BALANCING_HOME=${lb_path}

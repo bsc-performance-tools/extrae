@@ -42,4 +42,3 @@ unsigned int TaskID_Get (void)
 {
 	return TaskID;
 }
-

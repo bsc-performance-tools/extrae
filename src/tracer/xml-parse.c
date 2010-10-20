@@ -90,6 +90,7 @@ static char *temporal_d = NULL, *final_d = NULL;
 static int TracePrefixFound = FALSE;
 
 static const xmlChar *xmlYES = (xmlChar*) "yes";
+static const xmlChar *xmlNO = (xmlChar*) "no";
 static const xmlChar *xmlCOMMENT = (xmlChar*) "COMMENT";
 static const xmlChar *xmlTEXT = (xmlChar*) "text";
 
@@ -1112,6 +1113,124 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 	}
 }
 
+#if defined(EMBED_MERGE_IN_TRACE)
+
+#include "options.h" /* for merger options */
+
+/* Configure <merge> related parameters */
+static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
+	xmlChar *tracetype)
+{
+	xmlChar *synchronization;
+	xmlChar *binary;
+#if defined(MPI_SUPPORT)
+	xmlChar *treefanout;
+#endif
+	xmlChar *maxmemory;
+	xmlChar *jointstates;
+	xmlChar *keepmpits; /* This is ignored currently! */
+	char *filename;
+
+	if (tracetype != NULL && !xmlStrcmp (tracetype, TRACE_TYPE_DIMEMAS))
+		set_option_merge_ParaverFormat (FALSE);
+	else
+		set_option_merge_ParaverFormat (TRUE);
+
+	synchronization = xmlGetProp (current_tag, TRACE_MERGE_SYNCHRONIZATION);
+	if (synchronization != NULL && !xmlStrcmp (synchronization, TRACE_MERGE_SYN_DEFAULT))
+	{
+		set_option_merge_SincronitzaTasks (TRUE);
+		set_option_merge_SincronitzaTasks_byNode (TRUE);
+	}
+	else if (synchronization != NULL && !xmlStrcmp (synchronization, TRACE_MERGE_SYN_NODE))
+	{
+		set_option_merge_SincronitzaTasks (TRUE);
+		set_option_merge_SincronitzaTasks_byNode (TRUE);
+	}
+	else if (synchronization != NULL && !xmlStrcmp (synchronization, TRACE_MERGE_SYN_TASK))
+	{
+		set_option_merge_SincronitzaTasks (TRUE);
+		set_option_merge_SincronitzaTasks_byNode (FALSE);
+	}
+	else if (synchronization != NULL && !xmlStrcmp (synchronization, xmlNO))
+	{
+		set_option_merge_SincronitzaTasks (FALSE);
+		set_option_merge_SincronitzaTasks_byNode (FALSE);
+	}
+
+	maxmemory = xmlGetProp (current_tag, TRACE_MERGE_MAX_MEMORY);
+	if (maxmemory != NULL)
+	{
+		if (atoi(maxmemory) <= 0)
+		{
+			mfprintf (stderr, PACKAGE_NAME": Warning! Invalid value '%s' for property <%s> in tag <%s>. Setting to 512Mbytes.\n",
+				maxmemory, TRACE_MERGE, TRACE_MERGE_MAX_MEMORY);
+			set_option_merge_MaxMem (16);
+		}
+		else if (atoi(maxmemory) <= 16)
+		{
+			mfprintf (stderr, PACKAGE_NAME": Warning! Low value '%s' for property <%s> in tag <%s>. Setting to 16Mbytes.\n",
+				maxmemory, TRACE_MERGE, TRACE_MERGE_MAX_MEMORY);
+			set_option_merge_MaxMem (16);
+		}
+		else
+		{
+			set_option_merge_MaxMem (atoi(maxmemory));
+		}
+	}
+
+#if defined(MPI_SUPPORT)
+	treefanout = xmlGetProp (current_tag, TRACE_MERGE_TREE_FAN_OUT);
+	if (treefanout != NULL)
+	{
+		if (atoi(treefanout) > 1)
+		{
+			set_option_merge_TreeFanOut (atoi(treefanout));
+		}
+		else
+		{
+			mfprintf (stderr, PACKAGE_NAME": Warning! Invalid value '%s' for property <%s> in tag <%s>.\n",
+				treefanout, TRACE_MERGE, TRACE_MERGE_TREE_FAN_OUT);
+		}
+	}
+#endif
+
+	binary = xmlGetProp (current_tag, TRACE_MERGE_BINARY);
+	if (binary != NULL)	
+		set_merge_ExecutableFileName (binary);
+
+	jointstates = xmlGetProp (current_tag, TRACE_MERGE_JOINT_STATES);
+	if (jointstates != NULL && !xmlStrcmp (jointstates, xmlNO))
+		set_option_merge_JointStates (FALSE);
+	else
+		set_option_merge_JointStates (TRUE);
+
+	keepmpits = xmlGetProp (current_tag, TRACE_MERGE_KEEP_MPITS);
+
+	filename = xmlNodeListGetString (xmldoc, current_tag->xmlChildrenNode, 1);
+	if (filename == NULL || strlen(filename) == 0)
+	{
+		if (get_option_merge_ParaverFormat())
+			set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
+		else
+			set_merge_OutputTraceName (DEFAULT_DIM_OUTPUT_NAME);
+	}
+	else
+	{
+		set_merge_OutputTraceName (filename);
+	}
+
+	XML_FREE (synchronization);
+	XML_FREE (binary);
+#if defined(MPI_SUPPORT)
+	XML_FREE (treefanout);
+#endif
+	XML_FREE (maxmemory);
+	XML_FREE (jointstates);
+	XML_FREE (keepmpits); /* This is ignored currently! */
+}
+#endif
+
 /* Configure <others> related parameters */
 static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
@@ -1421,6 +1540,20 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 							Parse_XML_TraceControl (rank, world_size, xmldoc, current_tag);
 						XML_FREE(enabled);
+					}
+					/* Check for merging control */
+					else if (!xmlStrcmp (current_tag->name, TRACE_MERGE))
+					{
+#if defined(EMBED_MERGE_IN_TRACE)
+						xmlChar *enabled = xmlGetProp (current_tag, TRACE_ENABLED);
+						xmlChar *tracetype = xmlGetProp (root_tag, TRACE_TYPE);
+						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+							Parse_XML_Merge (rank, xmldoc, current_tag, tracetype);
+						XML_FREE(tracetype);
+						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not have merging process embedded.\n", TRACE_MERGE);
+#endif
 					}
 					else
 					{

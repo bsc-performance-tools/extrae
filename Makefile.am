@@ -157,6 +157,13 @@ install-data-hook:
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/SEQ
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/SEQ
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/SEQ
+if WANT_MERGE_IN_TRACE
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/SEQ
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/SEQ
+else
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/SEQ
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/SEQ
+endif
 if HAVE_PACX
 	$(mkdir_p) $(datadir)/example/PACX
 	cp -f $(PACX_EXAMPLE_FILES) $(datadir)/example/PACX
@@ -165,6 +172,13 @@ if HAVE_PACX
 	./substitute-all $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(datadir)/example/PACX
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/PACX
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/PACX
+if WANT_MERGE_IN_TRACE
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/PACX
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/PACX
+else
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/PACX
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/PACX
+endif
 endif
 if HAVE_MPI
 	$(mkdir_p) $(datadir)/example/MPI
@@ -176,6 +190,13 @@ if HAVE_MPI
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/MPI
 	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(datadir)/example/MPI
 	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(datadir)/example/MPI
+if WANT_MERGE_IN_TRACE
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/MPI
+else
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/MPI
+endif
 endif
 if WANT_OPENMP
 	$(mkdir_p) $(datadir)/example/OMP
@@ -184,6 +205,13 @@ if WANT_OPENMP
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/OMP
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/OMP
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/OMP
+if WANT_MERGE_IN_TRACE
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/OMP
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/OMP
+else
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/OMP
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/OMP
+endif
 endif
 if HAVE_MRNET
 	$(mkdir_p) $(datadir)/example/MRNET
@@ -201,6 +229,13 @@ if WANT_PTHREAD
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/PTHREAD
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/PTHREAD
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/PTHREAD
+if WANT_MERGE_IN_TRACE
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/PTHREAD
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/PTHREAD
+else
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/PTHREAD
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/PTHREAD
+endif
 endif
 
 uninstall-local:

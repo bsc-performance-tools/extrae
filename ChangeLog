@@ -2,6 +2,12 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (20/Oct/2010) added -with-dwarf for dyninst
+                   support for upcoming dyninst (post 6.1)
+   + (18/Oct/2010) .sym file is automatically loaded based on the .mpits files given through -f at merge step
+   + (15/Oct/2010) Added automatic merge in the tracing libraries (see --enable-merge-in-trace in configure)
+                   Improved documentation: examples, XML, FAQ
+   + (16/Jul/2010) Now parallel merge works in a tree-based topology (must be run with NP >= 2)
    + (13/Apr/2010) Added support for IBM POE on Linux.
    + (08/Apr/2010) Intermediate files are stored in separated directories instead of a single one.
    + (10/Jan/2010) Instrumentation library in bursts mode can gather MPI calls.

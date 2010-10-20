@@ -40,6 +40,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "events.h"
 #include "omp_prv_events.h"
 #include "mpi2out.h"
+#include "options.h"
 
 #define PTHD_CREATE_INDEX       0  /* pthread_create index */
 #define PTHD_JOIN_INDEX         1  /* pthread_join index */
@@ -104,6 +105,6 @@ void pthreadEvent_WriteEnabledOperations (FILE * fd)
 #if defined(HAVE_BFD)
 	/* Hey, pthread & OpenMP share the same labels? */
 	if (inuse[PTHD_USRF_INDEX])
-		Address2Info_Write_OMP_Labels (fd, PTHREADFUNC_EV, PTHREADFUNC_LINE_EV, option_UniqueCallerID);
+		Address2Info_Write_OMP_Labels (fd, PTHREADFUNC_EV, PTHREADFUNC_LINE_EV, get_option_merge_UniqueCallerID());
 #endif
 }

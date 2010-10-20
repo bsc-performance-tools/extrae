@@ -31,10 +31,13 @@ if test "${EXTRAE_HOME}" != "" ; then
 		echo "Loaded specs for ${PACKAGE_NAME:-MPItrace} from ${EXTRAE_HOME}/etc/extrae-vars.sh"
 	fi
 
-	echo
 	echo ${PACKAGE_NAME} was configured with:
 	echo ${CONFIGURE_LINE}
 	echo
+	echo CC       was ${EXTRAE_CC} 
+	echo CFLAGS   was ${EXTRAE_CFLAGS} 
+	echo CXX      was ${EXTRAE_CXX}
+  echo CXXFLAGS was ${EXTRAE_CXXFLAGS}
 
 	if test "${MPI_HOME}" != "" ; then
 		if test -d ${MPI_HOME} ; then
@@ -82,9 +85,26 @@ if test "${EXTRAE_HOME}" != "" ; then
 		else
 			echo "DYNINST_HOME points to ${DYNINST_HOME} and the directory does NOT exist .. FAILED"
 		fi
+    # Dwarf is required by dyninst
+    if test -d ${DWARF_HOME} ; then
+      echo "DWARF_HOME points to ${DWARF_HOME} and the directory exists .. OK"
+    else
+      echo "DWARF_HOME points to ${DWARF_HOME} and the directory does NOT exist .. FAILED"
+    fi
 	else
 		echo "DYNINST support seems to be disabled"
 	fi
+
+  if test "${UNWIND_HOME}" != "" ; then
+    if test -d ${UNWIND_HOME} ; then
+      echo "UNWIND_HOME points to ${UNWIND_HOME} and the directory exists .. OK"
+    else
+      echo "UNWIND_HOME points to ${UNWIND_HOME} and the directory does NOT exist .. FAILED"
+    fi
+  else
+    echo "UNWINDing support seems to be disabled (or not needed)"
+  fi
+
 fi
 
 echo 

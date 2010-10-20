@@ -68,13 +68,13 @@ on a sh-based shell, or
 on a csh-based shell will do the work. Then copy the default XML configuration file\footnote{See section \ref{cha:XML} for further details regarding this file} into the working directory by executing
 
 \begin{verbatim}
-               cp ${EXTRAE_HOME}/share/example/MPI/mpitrace.xml .
+               cp ${EXTRAE_HOME}/share/example/MPI/extrae.xml .
 \end{verbatim}
 
 If needed, set the application environment variables as usual (like {\tt OMP\_NUM\_THREADS}, for example), and finally launch the application using the {\tt \$\{EXTRAE\_HOME\}/bin/ompitrace} instrumenter like:
 
 \begin{verbatim}
-               ${EXTRAE_HOME}/bin/ompitrace -config mpitrace.xml <program>
+               ${EXTRAE_HOME}/bin/ompitrace -config extrae.xml <program>
 \end{verbatim}
 
 where {\tt <program>} is the application binary.
@@ -96,13 +96,13 @@ on a sh-based shell, or
 on a csh-based shell will do the work. Then copy the default XML configuration file\footnotemark[1] into the working directory by executing
 
 \begin{verbatim}
-               cp ${EXTRAE_HOME}/share/example/MPI/mpitrace.xml .
+               cp ${EXTRAE_HOME}/share/example/MPI/extrae.xml .
 \end{verbatim}
 
 and export the {EXTRAE\_CONFIG\_FILE} as
 
 \begin{verbatim}
-               export EXTRAE_CONFIG_FILE=mpitrace.xml
+               export EXTRAE_CONFIG_FILE=extrae.xml
 \end{verbatim}
 
 If needed, set the application environment variables as usual (like {\tt OMP\_NUM\_THREADS}, for example). Just before executing the target application, issue the following command:

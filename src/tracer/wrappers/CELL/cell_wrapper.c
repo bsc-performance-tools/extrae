@@ -145,7 +145,7 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 
 	char trace_tmp[TRACE_FILE];
 	char trace[TRACE_FILE];
-	int linear_thread = get_maximum_NumOfThreads();
+	int linear_thread = Backend_getMaximumOfThreads();
 	int i;
 	
 	/*
@@ -169,7 +169,7 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 #else
 	char trace[TRACE_FILE];
 	int fd, res, i;
-	int linear_thread = get_maximum_NumOfThreads();
+	int linear_thread = Backend_getMaximumOfThreads();
 
 	/*
 	   linear_thread allows converting SPU thread id into simple threads in
@@ -257,7 +257,7 @@ int Extrae_CELL_init (int spus, spe_context_ptr_t * spe_id)
 	number_of_spus[THREAD] = spus;
 
 #ifdef SPU_USES_WRITE
-	linear_thread = get_maximum_NumOfThreads();
+	linear_thread = Backend_getMaximumOfThreads();
 	for (i = 0; i < THREAD; i++)
 	{
 		if (!threads_prepared[i])

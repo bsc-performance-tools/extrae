@@ -86,6 +86,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "dump.h"
 #include "paraver_generator.h"
 #include "paraver_state.h"
+#include "options.h"
 
 #include "mpi_prv_events.h"
 #include "pacx_prv_events.h"
@@ -144,7 +145,7 @@ void trace_paraver_state (
 	if (thread_info->incomplete_state_offset != (off_t)-1) /* This isn't the first state */
 	{
 		/* Do not split states whether appropriate */
-		if (Get_Joint_States() && !Get_Last_State())
+		if (get_option_merge_JointStates() && !Get_Last_State())
 			if (thread_info->incomplete_state_record.value == current_state)
 				return;
 		/* Write the record into the *.tmp file if the state isn't excluded */
@@ -359,48 +360,7 @@ void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
 
 #if defined(NEW_PRINTF)
 
-static unsigned nprintf_ull (char *buffer, unsigned start, unsigned long long value)
-{
-  unsigned index, index2;
-  char lbuffer[1024];
-
-  index2 = index = 0;
-  while (value >= 10)
-  {
-    lbuffer[index] = (value%10)+(char) '0';
-    value = value / 10;
-    index++;
-  }
-  lbuffer[index] = value + (char) '0';
-  index++;
-
-  for (; index2 < index; index2++)
-      buffer[start+index2] = lbuffer[index-index2-1];
-
-  buffer[start+index2] = '\0';
-
-  return start+index2;
-}
-
-static unsigned nprintf_record_head (char *buffer, unsigned record,
-	unsigned cpu, unsigned ptask, unsigned task, unsigned thread)
-{
-  unsigned u;
-
-  u = nprintf_ull (buffer, 0, record);
-  buffer[u] = ':';
-  u = nprintf_ull (buffer, u+1, cpu);
-  buffer[u] = ':';
-  u = nprintf_ull (buffer, u+1, ptask);
-  buffer[u] = ':';
-  u = nprintf_ull (buffer, u+1, task);
-  buffer[u] = ':';
-  u = nprintf_ull (buffer, u+1, thread);
-  buffer[u] = ':';
-  buffer[u+1] = '\0';
-
-	return u;
-}
+# include <paraver_nprintf.h>
 
 #endif /* defined(NEW_PRINTF) */
 
@@ -410,9 +370,6 @@ static unsigned nprintf_record_head (char *buffer, unsigned record,
  ******************************************************************************/
 static int paraver_state (struct fdz_fitxer fdz, paraver_rec_t *current)
 {
-#if defined(NEW_PRINTF)
-	unsigned length;
-#endif
 	char buffer[1024];
 	int ret;
 
@@ -437,14 +394,7 @@ static int paraver_state (struct fdz_fitxer fdz, paraver_rec_t *current)
 	  cpu, ptask, task, thread, ini_time, end_time, state);
 # endif
 #else /* NEW_PRINTF */
-	length = nprintf_record_head (buffer, 1, cpu, ptask, task,thread);
-	length = nprintf_ull (buffer, length+1, ini_time);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, end_time);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, state);
-	buffer[length] = '\n';
-	buffer[length+1] = '\0';
+	nprintf_paraver_state (buffer, cpu, ptask, task, thread, ini_time, end_time, state);
 #endif /* NEW_PRINTF */
 
 	/* Filter the states with negative or 0 duration */
@@ -493,8 +443,7 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
   sprintf (buffer, "2:%d:%d:%d:%d:%llu", cpu, ptask, task, thread, time);
 # endif
 #else /* NEW_PRINTF */
-	length = nprintf_record_head (buffer, 2, cpu, ptask, task,thread);
-	length = nprintf_ull (buffer, length+1, time);
+	length = nprintf_paraver_event_head (buffer, cpu, ptask, task, thread, time);
 #endif /* NEW_PRINTF */
 
   ret = FDZ_WRITE (fdz, buffer);
@@ -507,10 +456,7 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
     sprintf (buffer, ":%d:%llu", type[i], value[i]);
 # endif
 #else /* NEW_PRINTF */
-		buffer[0] = ':';
-		length = nprintf_ull (buffer, 1, type[i]);
-		buffer[length] = ':';
-		length = nprintf_ull (buffer, length+1, value[i]);
+		length = nprintf_paraver_event_type_value (buffer, type[i], value[i]);
 #endif /* NEW_PRINTF */
 
     ret = FDZ_WRITE (fdz, buffer);
@@ -532,9 +478,6 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
  ******************************************************************************/
 static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
 {
-#if defined(NEW_PRINTF)
-	unsigned length;
-#endif
   char buffer[1024];
   int ret;
 
@@ -569,28 +512,12 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
            cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
 # endif
 #else /* NEW_PRINTF */
-	length = nprintf_record_head (buffer, 3, cpu_s, ptask_s, task_s, thread_s);
-	length = nprintf_ull (buffer, length+1, log_s);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, phy_s);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, cpu_r);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, ptask_r);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, task_r);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, thread_r);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, log_r);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, phy_r);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, size);
-	buffer[length] = ':';
-	length = nprintf_ull (buffer, length+1, tag);
-	buffer[length] = '\n';
-	buffer[length+1] = '\0';
+
+	nprintf_paraver_comm (buffer,
+		cpu_s, ptask_s, task_s, thread_s, log_s, phy_s,
+		cpu_r, ptask_r, task_r, thread_r, log_r, phy_r,
+		size, tag);
+
 #endif /* NEW_PRINTF */
 
   ret = FDZ_WRITE (fdz, buffer);
@@ -607,27 +534,27 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
 static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
 {
 	if (eventtype == USRFUNC_EV)
-		return Address2Info_Translate (eventvalue, ADDR2UF_FUNCTION, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2UF_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype >= CALLER_EV && eventtype < CALLER_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2MPI_FUNCTION, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2MPI_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype >= CALLER_LINE_EV && eventtype < CALLER_LINE_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2MPI_LINE, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2MPI_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == USRFUNC_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2UF_LINE, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2UF_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype >= SAMPLING_EV && eventtype < SAMPLING_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_FUNCTION, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype >= SAMPLING_LINE_EV && eventtype < SAMPLING_LINE_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_LINE, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == OMPFUNC_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == OMPFUNC_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == PTHREADFUNC_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, option_UniqueCallerID);
+		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == PTHREADFUNC_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, option_UniqueCallerID);
-	else
-		return eventvalue;
+		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
+
+	return eventvalue;
 }
 #endif /* HAVE_BFD */
 
@@ -657,7 +584,7 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 	* Per cadascun dels events, hem de comprovar si cal anotar les
 	* localitzacions del torus a la trasa 
 	*/
-		if (cur->type == 2 && option_XYZT
+		if (cur->type == 2 && option_merge_XYZT
 		&& (cur->event == BG_PERSONALITY_TORUS_X
 		|| cur->event == BG_PERSONALITY_TORUS_Y
 		|| cur->event == BG_PERSONALITY_TORUS_Z
@@ -1053,8 +980,9 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
   struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
   unsigned long long records_per_task, int tree_fan_out)
 {
-#if defined(PARALLEL_MERGE)
+	time_t delta;
 	struct timeval time_begin, time_end;
+#if defined(PARALLEL_MERGE)
 	int res;
 	int tree_max_depth;
 	int current_depth;
@@ -1130,7 +1058,7 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 #if defined(IS_BG_MACHINE)
 #if defined(DEAD_CODE)
 	/* FIXME must be implemented in parallel */
-	if (option_XYZT)
+	if (option_merge_XYZT)
 	{
 		coords = (struct QuadCoord *) malloc (nfiles * sizeof (struct QuadCoord));
 		if (coords == NULL)
@@ -1156,7 +1084,7 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 #if defined(PARALLEL_MERGE)
 	tree_max_depth = tree_MaxDepth (numtasks, tree_fan_out);
 	if (taskid == 0)
-		fprintf (stdout, "mpi2prv: Merge tree depth is %d levels\n", tree_max_depth);
+		fprintf (stdout, "mpi2prv: Merge tree depth for %d tasks is %d levels using a fan-out of %d leaves\n", numtasks, tree_max_depth, tree_fan_out);
 
 	current_depth = 0;
 	while (current_depth < tree_max_depth)
@@ -1199,7 +1127,6 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 		MPI_Barrier (MPI_COMM_WORLD);
 		if (taskid == 0)
 		{
-			time_t delta;
 			gettimeofday (&time_end, NULL);
 
 			delta = time_end.tv_sec - time_begin.tv_sec;
@@ -1212,9 +1139,15 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 
 #else /* PARALLEL_MERGE */
 
+	gettimeofday (&time_begin, NULL);
+
 	prvfset = Map_Paraver_files (fset, &num_of_events, numtasks, taskid, records_per_task);
 
 	Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
+
+	gettimeofday (&time_end, NULL);
+	delta = time_end.tv_sec - time_begin.tv_sec;
+	fprintf (stdout, "mpi2prv: Elapsed time merge step: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 
 #endif /* PARALLEL_MERGE */
 
@@ -1226,9 +1159,9 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 #if defined(IS_BG_MACHINE)
 #if defined(DEAD_CODE)
 	/* FIXME must be implemented in parallel */
-	if (option_XYZT)
+	if (get_option_merge_XYZT())
 	{
-		strcpy (envName, outName);
+		strcpy (envName, get_OutputTraceName());
 
 #ifdef HAVE_ZLIB
 		if (strlen (outName) >= 7 &&

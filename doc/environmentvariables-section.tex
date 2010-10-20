@@ -60,14 +60,6 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
   \hline
   EXTRAE\_MINIMUM\_TIME & Specify the minimum amount of instrumentation time.\\
   \hline
-  EXTRAE\_MPI\_CALLER  & Choose which MPI calling routines should be dumped into the\\
-                       & tracefile.\\
-  \hline
-  EXTRAE\_MPI\_COUNTERS\_ON & Set to 1 if MPI must report performace counter values.\\
-  \hline 
-  EXTRAE\_MPI\_STATISTICS & Set to 1 if basic MPI statistics must be collected in burst mode\\
-                              & {\em (Only available in systems with Myrinet GM/MX networks)}.\\
-  \hline
 \end{tabular}
 }
 \caption{Set of environment variables available to configure \TRACE}
@@ -84,6 +76,14 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
   \hline
   {\bf Environment variable} & {\bf Description}\\
 	\hline
+  EXTRAE\_MPI\_CALLER  & Choose which MPI calling routines should be dumped into the\\
+                       & tracefile.\\
+  \hline
+  EXTRAE\_MPI\_COUNTERS\_ON & Set to 1 if MPI must report performace counter values.\\
+  \hline 
+  EXTRAE\_MPI\_STATISTICS & Set to 1 if basic MPI statistics must be collected in burst mode\\
+                              & {\em (Only available in systems with Myrinet GM/MX networks)}.\\
+  \hline
   EXTRAE\_NETWORK\_COUNTERS & Set to 1 to dump network performance counters at flush points.\\
   \hline
   EXTRAE\_OMP\_COUNTERS\_ON & Set to 1 if OpenMP must report performance counters values. \\

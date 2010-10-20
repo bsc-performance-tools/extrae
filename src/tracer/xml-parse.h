@@ -102,6 +102,17 @@
 #define CLUSTERING_MAX_TASKS            ((xmlChar*) "max_tasks")
 #define CLUSTERING_MAX_POINTS           ((xmlChar*) "max_points")
 
+#define TRACE_MERGE                     ((xmlChar*) "merge")
+#define TRACE_MERGE_SYNCHRONIZATION     ((xmlChar*) "synchronization")
+#define TRACE_MERGE_BINARY              ((xmlChar*) "binary")
+#define TRACE_MERGE_TREE_FAN_OUT        ((xmlChar*) "tree-fan-out")
+#define TRACE_MERGE_MAX_MEMORY          ((xmlChar*) "max-memory")
+#define TRACE_MERGE_JOINT_STATES        ((xmlChar*) "joint-states")
+#define TRACE_MERGE_KEEP_MPITS          ((xmlChar*) "keep-mpits")
+#define TRACE_MERGE_SYN_NODE            ((xmlChar*) "node")
+#define TRACE_MERGE_SYN_TASK            ((xmlChar*) "task")
+#define TRACE_MERGE_SYN_DEFAULT         ((xmlChar*) "default")
+
 void Parse_XML_File (int rank, int world_size, char *filename);
 
 #endif

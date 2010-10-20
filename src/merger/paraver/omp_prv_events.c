@@ -40,6 +40,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "events.h"
 #include "omp_prv_events.h"
 #include "mpi2out.h"
+#include "options.h"
 
 #define PAR_OMP_INDEX           0  /* PARALLEL constructs */
 #define WSH_OMP_INDEX           1  /* WORKSHARING constructs */
@@ -135,7 +136,7 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 	}
 #if defined(HAVE_BFD)
 	if (inuse[FNC_OMP_INDEX])
-		Address2Info_Write_OMP_Labels (fd, OMPFUNC_EV, OMPFUNC_LINE_EV, option_UniqueCallerID);
+		Address2Info_Write_OMP_Labels (fd, OMPFUNC_EV, OMPFUNC_LINE_EV, get_option_merge_UniqueCallerID());
 #endif
 	if (inuse[LCK_OMP_INDEX])
 	{

@@ -2,8 +2,8 @@
 
 \TRACE is configured through a XML file that is set through the {\tt EXTRAE\_CONFIG\_FILE} environment variable. The included examples provide several XML files to serve as a basis for the end user. There are four XML files:
 \begin{itemize}
- \item {\tt mpitrace.xml} Exemplifies all the options available to set up in the configuration file. We will discuss below all the sections and options available. It is also available on this document on appendix \ref{cha:wholeXML}.
- \item {\tt mpitrace\_explained.xml} The same as the above with some comments on each section.
+ \item {\tt extrae.xml} Exemplifies all the options available to set up in the configuration file. We will discuss below all the sections and options available. It is also available on this document on appendix \ref{cha:wholeXML}.
+ \item {\tt extrae\_explained.xml} The same as the above with some comments on each section.
  \item {\tt summarized\_trace\_basic.xml} A small example for gathering information of MPI and OpenMP information with some performace counters and calling information at each MPI call.
  \item {\tt detailed\_trace\_basic.xml} A small example for gathering a summarized information of MPI and OpenMP parallel paradigms.
 \end{itemize}
@@ -257,4 +257,23 @@ In addition to that, when the tracing library is running in burst mode, it compu
 \input{XML/others.xml}
 
 This section contains other configuration details that do not fit in the previous sections. Right now, there is only one option available and it is devoted to tell the instrumentation package the minimum instrumentation time. To enable it, set {\tt enabled} to "yes" and set the minimum time within the {\tt minimum-time} tag.
+
+\section{XML Section: Merge}\label{sec:XMLSectionMerge}
+
+\input{XML/merge.xml}
+
+If this section is enabled and the instrumentation packaged is configured to support this, the merge process will be automatically invoked after the application run. The merge process will use all the resources devoted to run the application.
+
+The leaf of this node will be used as the tracefile name ({\tt mpi\_ping.prv} in this example). Current available options for the merge process are given as attribute of the {\tt <merge>} node and they are:
+
+\begin{itemize}
+ \item {\tt synchronization}: which can be set to {\tt default}, {\tt node}, {\tt task}, {\tt no}. This determines how task clocks will be synchronized ({\em default is node}).
+ \item {\tt binary}: points to the binary that is being executed. It will be used to translate gathered addresses (MPI callers, sampling points and user functions) into source code references.
+ \item {\tt tree-fan-out}: {\em only for MPI executions} sets the tree-based topology to run the merger in a parallel fashion.
+ \item {\tt max-memory}: limits the intermediate merging process to run up to the specified limit (in MBytes).
+ \item {\tt joint-states}: which can be set to {\tt yes}, {\tt no}. Determines if the resulting Paraver tracefile will split or join equal consecutive states ({\em default is yes}).
+ \item {\tt keep-mpits}: whether to keep the intermediate tracefiles after performing the merge ({\em currently unimplemented}).
+\end{itemize}
+
+\graybox{For further references, see chapter \ref{cha:Merging}.}
 

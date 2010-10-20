@@ -102,8 +102,8 @@
     <!-- Obtain resource usage information -->
     <resource-usage enabled="no" />
 
-	<!-- Obtain malloc statistics -->
-	<memory-usage enabled="no" />
+    <!-- Obtain malloc statistics -->
+    <memory-usage enabled="no" />
   </counters>
 
   <!-- Define the characteristics of the tracing storage. If not defined,
@@ -181,5 +181,24 @@
     <!-- Which DMA tag to use for the tracing flushes? -->
     <spu-dma-channel enabled="yes">2</spu-dma-channel>
   </cell>
+
+  <!-- Do merge the intermediate tracefiles into the final tracefile?
+       options: 
+       synchronization = { default, task, node, no } (default is node)
+       binary = binary file to translate addresses into source code references
+       max-memory = Number (in Mbytes) max memory used in merge step
+       joint-states = { yes, no } generate joint states?
+       keep-mpits = { yes, no } keep mpit files after merge?
+  -->
+  <merge enabled="yes" 
+    synchronization="default"
+    binary="mpi_ping"
+    tree-fan-out="16"
+    max-memory="512"
+    joint-states="yes"
+    keep-mpits="yes"
+  >
+    mpi_ping.prv 
+  </merge>
 
 </trace>

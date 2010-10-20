@@ -67,7 +67,7 @@ Buffer_t * new_Buffer (int n_events, char *file)
 {
 	Buffer_t *buffer = NULL;
 #if defined(HAVE_MRNET)
-    pthread_mutexattr_t attr;
+	pthread_mutexattr_t attr;
 	int rc;
 #endif
 
@@ -92,18 +92,18 @@ Buffer_t * new_Buffer (int n_events, char *file)
 	}
 
 #if defined(HAVE_MRNET) 
-    pthread_mutexattr_init( &attr );
-    pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE_NP );
+	pthread_mutexattr_init( &attr );
+	pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE_NP );
 
-    rc = pthread_mutex_init( &(buffer->Lock), &attr );
-    if ( rc != 0 )
-    {
-        perror("pthread_mutex_init");
-        fprintf(stderr, "new_Buffer: Failed to initialize mutex.\n");
-        pthread_mutexattr_destroy( &attr );
-        exit(1);
-    }
-    pthread_mutexattr_destroy( &attr );
+	rc = pthread_mutex_init( &(buffer->Lock), &attr );
+	if ( rc != 0 )
+	{
+		perror("pthread_mutex_init");
+		fprintf(stderr, "new_Buffer: Failed to initialize mutex.\n");
+		pthread_mutexattr_destroy( &attr );
+		exit(1);
+	}
+	pthread_mutexattr_destroy( &attr );
 #endif
 
 #if defined(MASKS_DEAD_CODE)

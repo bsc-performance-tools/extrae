@@ -278,7 +278,7 @@ int HWC_Check_Pending_Set_Change (UINT64 time, int thread_id)
  */
 void HWC_Initialize (int options)
 {
-	int i, num_threads = get_maximum_NumOfThreads();
+	int i, num_threads = Backend_getMaximumOfThreads();
 
 	HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
 	if (NULL == HWC_current_set)
@@ -446,7 +446,7 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 		{
 			/* Sets are distributed among tasks like:
 			0 1 2 3 .. n-1 0 1 2 3 .. n-1  0 1 2 3 ... */
-			for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++) 
+			for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++) 
 				HWC_current_set[threadid] = task_id % HWC_num_sets;
 
 			if (task_id == 0)
@@ -460,7 +460,7 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 
 			/* a/b rounded to highest is (a+b-1)/b */
 			int BlockDivisor = (num_tasks+HWC_num_sets-1) / HWC_num_sets;
-			for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++) 
+			for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++) 
 			{
 				if (BlockDivisor > 0)
 					HWC_current_set[threadid] = task_id / BlockDivisor;
@@ -479,11 +479,11 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 			{
 				if (task_id == 0)
 					fprintf (stderr, PACKAGE_NAME": Warning! Cannot identify '%s' as a valid starting distribution set on the CPU counters. Setting to the first one.\n", distribution);
-				for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++)
+				for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++)
 					HWC_current_set[threadid] = 0;
 			}
 			else
-				for(threadid=0; threadid<get_maximum_NumOfThreads(); threadid++)
+				for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++)
 					HWC_current_set[threadid] = (HWC_num_sets<value-1)?HWC_num_sets:value-1;
 		}
 	}

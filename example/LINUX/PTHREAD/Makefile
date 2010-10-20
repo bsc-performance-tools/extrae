@@ -1,7 +1,7 @@
 PAPI_HOME = @sub_PAPI_HOME@
 EXTRAE_HOME = @sub_PREFIXDIR@
 
-LIBS = -L$(EXTRAE_HOME)/lib -lpttrace -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@
+LIBS = -L$(EXTRAE_HOME)/lib -lpttrace -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@
 CFLAGS = -O -g -I$(EXTRAE_HOME)/include
 
 targets: user-comms pthread-example

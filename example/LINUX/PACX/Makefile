@@ -1,8 +1,9 @@
 PACX_HOME=@sub_PACX_HOME@
 EXTRAE_HOME=@sub_PREFIXDIR@
+LIBS=-L $(EXTRAE_HOME)/lib -lpacxtrace -lppacx @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@
 
 example:
-	$(PACX_HOME)/bin/pacxcc -O -g example.c -L $(EXTRAE_HOME)/lib -lpacxtrace -lppacx -o example
+	$(PACX_HOME)/bin/pacxcc -O -g example.c -o example $(LIBS)
 
 clean:
 	rm pacx_example

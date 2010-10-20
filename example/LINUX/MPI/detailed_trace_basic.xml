@@ -32,7 +32,18 @@
 
     <resource-usage enabled="no" />
 
-	<memory-usage enabled="no" />
+    <memory-usage enabled="no" />
   </counters>
+
+  <merge enabled="yes" 
+    synchronization="default"
+    binary="mpi_ping"
+    tree-fan-out="16"
+    max-memory="512"
+    joint-states="yes"
+    keep-mpits="yes"
+  >
+    mpi_ping_detailed.prv
+  </merge>
 
 </trace>

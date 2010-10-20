@@ -1,7 +1,9 @@
 
 \chapter{Merging process}\label{cha:Merging}
 
-The inserted probes in the instrumented binary are responsible for gathering performance metrics of each task/thread. Once the application has finished, several new files appear where the XML configuration file specified (see section \ref{sec:XMLSectionStorage}). Such files are:
+Once the application has finished, and if the automatic merge process is not setup, the merge must be executed manually. Here we detail how to run the merge process manually.
+
+he inserted probes in the instrumented binary are responsible for gathering performance metrics of each task/thread and for each of them several files are created where the XML configuration file specified (see section \ref{sec:XMLSectionStorage}). Such files are:
 
 \begin{itemize}
  \item As many {\tt .mpit} files as tasks and threads where running the target application. Each file contains information gathered by the specified task/thread in raw binary format.
@@ -64,7 +66,7 @@ These are the available options for the sequential Paraver merger:
  \item {\tt -maxmem M}\\
  The last step of the merging process will be limited to use {\em M} megabytes of memory. By default, M is 512.
  \item {\tt -s FILE.sym} {\em (where {\tt FILE.sym} file is generated with the DynInst instrumentator)}\\
- Passes information regarding instrumented symbols into the merger to aid the Paraver analysis.
+ Passes information regarding instrumented symbols into the merger to aid the Paraver analysis. If {\tt -f}, {\tt -f-relative} or {\tt -f-absolute} paramters are given, the merge process will try to automatically load the symbol file associated to that FILE.mpits file.
  \item {\tt -no-syn}\\
  If set, the merger will not attempt to synchronize the different tasks. This is useful when merging intermediate files obtained from a single node (and thus, share a single clock).
  \item {\tt -o FILE.prv}\\

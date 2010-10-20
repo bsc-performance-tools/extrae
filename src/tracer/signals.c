@@ -77,7 +77,7 @@ void SigHandler_FlushAndTerminate (int signum)
 		/* Flush buffer to disk */
 		fprintf (stderr, "SIGNAL %d received: Flushing buffer to disk\n", signum);
 
-		Thread_Finalization();
+		Backend_Finalize ();
 
 		/* Disable further tracing */
 		fprintf (stderr, "TASK %d has flushed the buffer.\n", TASKID);
@@ -150,7 +150,7 @@ void Signals_SetupPauseAndResume (int signum1, int signum2)
 	struct sigaction sigact_pause, sigact_resume;
 
 #if defined(DBG_SIGNALS)
-    fprintf(stderr, "[Signals_SetupPauseAndResume] Setting up Pause/Resume signals\n");
+	fprintf(stderr, "[Signals_SetupPauseAndResume] Setting up Pause/Resume signals\n");
 #endif
 
 	signum_pause  = signum1;
@@ -165,12 +165,12 @@ void Signals_SetupPauseAndResume (int signum1, int signum2)
 	sigfillset( &pause_set );
 	sigdelset( &pause_set, signum_pause );
 
-    sigemptyset( &sigact_resume.sa_mask );
-    sigact_resume.sa_flags = 0;
-    sigact_resume.sa_handler = SigHandler_ResumeApplication;
-    sigaction (signum_resume, &sigact_resume, NULL);
-    sigfillset( &resume_set );
-    sigdelset( &resume_set, signum_resume );
+	sigemptyset( &sigact_resume.sa_mask );
+	sigact_resume.sa_flags = 0;
+	sigact_resume.sa_handler = SigHandler_ResumeApplication;
+	sigaction (signum_resume, &sigact_resume, NULL);
+	sigfillset( &resume_set );
+	sigdelset( &resume_set, signum_resume );
 }
 
 /* -----------------------------------------------------------------------
@@ -182,20 +182,20 @@ void Signals_SetupPauseAndResume (int signum1, int signum2)
 
 void Signals_PauseApplication ()
 {
-    pthread_kill(MainApplThread, signum_pause);
+	pthread_kill(MainApplThread, signum_pause);
 }
 
 void Signals_ResumeApplication ()
 {
-    pthread_kill(MainApplThread, signum_resume);
+	pthread_kill(MainApplThread, signum_resume);
 }
 
 void Signals_WaitForPause ()
 {
-    sigsuspend (&pause_set);
+	sigsuspend (&pause_set);
 }
 
-#if 0
+#if defined(DEAD_CODE)
 int             WaitingForCondition;
 pthread_cond_t  WaitCondition;
 pthread_mutex_t ConditionMutex;
@@ -224,7 +224,7 @@ void Signals_CondWakeUp ()
 
 void Signals_CondInit (Condition_t *cond)
 {
-  	pthread_mutex_init(&(cond->ConditionMutex), NULL);
+	pthread_mutex_init(&(cond->ConditionMutex), NULL);
 	pthread_cond_init(&(cond->WaitCondition), NULL);
 	cond->WaitingForCondition = TRUE;
 }

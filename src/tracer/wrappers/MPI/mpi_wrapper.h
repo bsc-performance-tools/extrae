@@ -61,9 +61,8 @@ void OMPItrace_tracing_tasks_Wrapper (int from, int to);
 
 #if defined(FORTRAN_SYMBOLS)
 
-#if defined(DYNINST_MODULE) && \
-    defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) && \
-    defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
+#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     !defined(COMBINED_SYMBOLS))
 void PMPI_Init_Wrapper (MPI_Fint *ierror);
 #endif
 

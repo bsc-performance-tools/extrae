@@ -57,6 +57,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "object_tree.h"
 #include "trace_to_prv.h"
 #include "mpi_comunicadors.h"
+#include "options.h"
 
 /* ---------------------------------------------------- Constants -----------*/
 

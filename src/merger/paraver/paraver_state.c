@@ -49,15 +49,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "paraver_state.h"
 #include "paraver_generator.h"
 
-int Joint_States = TRUE;
 static int Last_State = FALSE;
 static int *excluded_states = NULL;
 static int num_excluded_states = 0;
-
-int Get_Joint_States (void)
-{
-	return Joint_States;
-}
 
 int Get_Last_State (void)
 {

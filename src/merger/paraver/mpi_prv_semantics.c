@@ -51,6 +51,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "timesync.h"
 #include "communication_queues.h"
 #include "trace_communication.h"
+#include "options.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -232,7 +233,7 @@ static int SendRecv_Event (event_t * current_event,
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 
-	if (!option_SkipSendRecvComms)
+	if (!get_option_merge_SkipSendRecvComms())
 	{
 		if (Get_EvValue (current_event) == EVT_BEGIN)
 		{
@@ -729,7 +730,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 						else if (NULL != send_begin && NULL != send_end)
 							trace_communicationAt (ptask, 1+Get_EvTarget(receive), send_thread, task, thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						else
-							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end, 0);
+							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
 					}
 #if defined(PARALLEL_MERGE)
 					else

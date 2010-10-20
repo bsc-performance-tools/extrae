@@ -1,7 +1,9 @@
 include $(top_srcdir)/PATHS
 
 CC = $(MPICC)
-LINK = $(LIBTOOL) --tag=CC --mode=link $(MPICC)
+LINK = $(LIBTOOL) --tag=CC --mode=link $(CC)
+
+noinst_LTLIBRARIES = libmpimpi2prv.la
 
 bin_PROGRAMS = mpimpi2prv
 
@@ -12,6 +14,7 @@ common_FILES = \
  ../common/checkoptions.h ../common/checkoptions.c \
  ../common/cpunode.c ../common/cpunode.h \
  ../common/mpi2out.c ../common/mpi2out.h \
+ ../common/options.c ../common/options.h \
  ../common/semantics.c ../common/semantics.h
 
 dimemas_FILES = \
@@ -39,6 +42,7 @@ paraver_FILES = \
  ../paraver/misc_prv_events.c ../paraver/misc_prv_events.h \
  ../paraver/trt_prv_events.c ../paraver/trt_prv_events.h \
  ../paraver/write_file_buffer.c ../paraver/write_file_buffer.h \
+ ../paraver/paraver_nprintf.c ../paraver/paraver_nprintf.h \
  ../paraver/MPI_EventEncoding.h \
  ../paraver/PACX_EventEncoding.h
 
@@ -47,8 +51,7 @@ parallel_FILES = \
  parallel_merge_aux.h parallel_merge_aux.c \
  tree-logistics.c tree-logistics.h
 
-mpimpi2prv_SOURCES = \
- ../merger.c \
+libmpimpi2prv_la_SOURCES = \
  ../paraver/object_tree.h \
  ../paraver/addr2info.c ../paraver/addr2info.h \
  ../paraver/addr2info_hashcache.c ../paraver/addr2info_hashcache.h \
@@ -65,26 +68,36 @@ mpimpi2prv_SOURCES = \
  $(top_srcdir)/src/common/queue.h \
  $(top_srcdir)/src/common/record.h
 
+mpimpi2prv_SOURCES = \
+ ../merger.c
+
+libmpimpi2prv_la_CFLAGS = -DPARALLEL_MERGE -I.. -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+
 mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I.. -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpimpi2prv_LDADD = $(COMMON_DIR)/libcommon.la
-mpimpi2prv_LDFLAGS = -o mpimpi2prv @MPIMPI2PRV_EXTRA_LIBS@ @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@ @MPI_LDFLAGS@
+mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_DIR)/libcommon.la -o mpimpi2prv @MPIMPI2PRV_EXTRA_LIBS@ @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@ @MPI_LDFLAGS@ 
+mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la
 
 if NEED_MPI_LIB_INCLUDE
+  libmpimpi2prv_la_CFLAGS += @MPI_CFLAGS@
   mpimpi2prv_CFLAGS += @MPI_CFLAGS@
   mpimpi2prv_LDFLAGS += @MPI_LDFLAGS@ @MPI_LIBS@
 endif
 
 if HAVE_ZLIB
-  mpimpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_LIBS@
+  libmpimpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpimpi2prv_CFLAGS += @LIBZ_CFLAGS@
+  mpimpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_LIBS@
 endif
 
 if HAVE_PAPI
+  libmpimpi2prv_la_CFLAGS += @PAPI_CFLAGS@
   mpimpi2prv_CFLAGS += @PAPI_CFLAGS@
-if IS_BG_MACHINE
-  mpimpi2prv_LDFLAGS += -all-static @PAPI_LDFLAGS@ @PAPI_LIBS@
-else
   mpimpi2prv_LDFLAGS += @PAPI_LDFLAGS@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+if IS_BG_MACHINE
+  mpimpi2prv_LDFLAGS += -all-static
+endif
+if IS_CRAY_XT_MACHINE
+  mpimpi2prv_LDFLAGS += -all-static
 endif
 endif
 
