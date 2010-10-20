@@ -728,11 +728,13 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 	CtoF77 (ppacx_barrier) (&comm, &res);
 #endif
 
-	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
+	config_file = getenv ("EXTRAE_CONFIG_FILE");
+	if (config_file == NULL)
+		config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
-	else
-		config_file = NULL;
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, config_file);
 
 	/* Initialize the backend */
 	res = Backend_preInitialize (TASKID, NumOfTasks, config_file);
@@ -822,11 +824,13 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	CtoF77 (ppacx_barrier) (&comm, &res);
 #endif
 
-	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
+	config_file = getenv ("EXTRAE_CONFIG_FILE");
+	if (config_file == NULL)
+		config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
-	else
-		config_file = NULL;
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, config_file);
 
 	/* Initialize the backend */
 	res = Backend_preInitialize (TASKID, NumOfTasks, config_file);
@@ -3759,11 +3763,13 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 	PPACX_Barrier (PACX_COMM_WORLD);
 #endif
 
-	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
+	config_file = getenv ("EXTRAE_CONFIG_FILE");
+	if (config_file == NULL)
+		config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
-	else
-		config_file = NULL;
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, config_file);
 
 	/* Initialize the backend (first step) */
 	if (!Backend_preInitialize (TASKID, NumOfTasks, config_file))
@@ -3836,11 +3842,13 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	PPACX_Barrier (PACX_COMM_WORLD);
 #endif
 
-	if (getenv ("EXTRAE_CONFIG_FILE") != NULL)
+	config_file = getenv ("EXTRAE_CONFIG_FILE");
+	if (config_file == NULL)
+		config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, getenv ("EXTRAE_CONFIG_FILE"));
-	else
-		config_file = NULL;
+		config_file = PACX_Distribute_XML_File (TASKID, NumOfTasks, config_file);
 
 	/* Initialize the backend (first step) */
 	if (!Backend_preInitialize (TASKID, NumOfTasks, config_file))

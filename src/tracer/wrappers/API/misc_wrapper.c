@@ -287,13 +287,18 @@ static void Generate_Task_File_List (void)
 
 void MPItrace_init_Wrapper (void)
 {
+	char *config_file;
 	iotimer_t temps;
 
 	mptrace_IsMPI = FALSE;
 	NumOfTasks = 1;
 
+	config_file = getenv ("EXTRAE_CONFIG_FILE");
+	if (config_file == NULL)
+		config_file = getenv ("MPTRACE_CONFIG_FILE");
+
 	/* Initialize the backend */
-	if (!Backend_preInitialize (TASKID, NumOfTasks, getenv("EXTRAE_CONFIG_FILE")))
+	if (!Backend_preInitialize (TASKID, NumOfTasks, config_file))
 		return;
 
 	/* Generate a tentative file list */
