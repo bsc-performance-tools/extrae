@@ -1670,48 +1670,61 @@ AC_DEFUN([AX_OPENMP],
 # ------------
 AC_DEFUN([AX_CHECK_UNWIND],
 [
+   AX_FLAGS_SAVE()
+
+   libunwind_works="no"
+
    AC_ARG_WITH(unwind,
       AC_HELP_STRING(
          [--with-unwind@<:@=DIR@:>@],
          [specify where to find Unwind libraries and includes]
       ),
       [unwind_paths=${withval}],
-      [unwind_paths="/usr"] dnl List of possible default paths
+      [unwind_paths="no"] dnl List of possible default paths
    )
 
-   AX_FIND_INSTALLATION([UNWIND], [$unwind_paths], [unwind])
+   if test "${unwind_paths}" != "no" ; then
 
-   UNWIND_LIBS="-lunwind"
-   AC_SUBST(UNWIND_LIBS)
+      AX_FIND_INSTALLATION([UNWIND], [$unwind_paths], [unwind])
 
-   CFLAGS="${CFLAGS} ${UNWIND_CFLAGS}"
-   LIBS="${LIBS} -lunwind"
-   LDFLAGS="${LDFLAGS} ${UNWIND_LDFLAGS}"
+      if test "${UNWIND_INSTALLED}" = "yes" ; then 
 
-   AC_MSG_CHECKING([if libunwind works])
+         UNWIND_LIBS="-lunwind"
+         AC_SUBST(UNWIND_LIBS)
 
-   AC_TRY_LINK(
-      [ #define UNW_LOCAL_ONLY
-        #include <libunwind.h> ], 
-      [ unw_cursor_t cursor;
-        unw_context_t uc;
-        unw_word_t ip;
+         CFLAGS="${CFLAGS} ${UNWIND_CFLAGS}"
+         LIBS="${LIBS} -lunwind"
+         LDFLAGS="${LDFLAGS} ${UNWIND_LDFLAGS}"
 
-        unw_getcontext(&uc);
-        unw_init_local(&cursor, &uc);
-        unw_step(&cursor);
-        unw_get_reg(&cursor, UNW_REG_IP, &ip);
-      ],
-      [ libunwind_works="yes" ],
-      [ libunwind_works="no" ]
-   )
+         AC_MSG_CHECKING([if libunwind works])
 
-   if test "${libunwind_works}" = "yes"; then
-      AC_DEFINE([UNWIND_SUPPORT], [1], [Unwinding support enabled for IA64/x86-64])
-      AC_DEFINE([HAVE_LIBUNWIND_H], [1], [Define to 1 if you have <libunwind.h> header file])
+         AC_TRY_LINK(
+            [ #define UNW_LOCAL_ONLY
+              #include <libunwind.h> ], 
+            [ unw_cursor_t cursor;
+              unw_context_t uc;
+              unw_word_t ip;
+
+              unw_getcontext(&uc);
+              unw_init_local(&cursor, &uc);
+              unw_step(&cursor);
+              unw_get_reg(&cursor, UNW_REG_IP, &ip);
+            ],
+            [ libunwind_works="yes" ],
+            [ libunwind_works="no" ]
+         )
+
+         AC_MSG_RESULT([${libunwind_works}])
+
+      fi
+
+      if test "${libunwind_works}" = "yes"; then
+         AC_DEFINE([UNWIND_SUPPORT], [1], [Unwinding support enabled for IA64/x86-64])
+         AC_DEFINE([HAVE_LIBUNWIND_H], [1], [Define to 1 if you have <libunwind.h> header file])
+      else
+         AC_MSG_ERROR([Cannot link libunwind example. Check that --with-unwind points to the appropriate libunwind directory.])
+      fi
    fi
-
-   AC_MSG_RESULT([${libunwind_works}])
    AX_FLAGS_RESTORE()
 ])
 
