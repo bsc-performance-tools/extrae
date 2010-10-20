@@ -584,7 +584,7 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 	* Per cadascun dels events, hem de comprovar si cal anotar les
 	* localitzacions del torus a la trasa 
 	*/
-		if (cur->type == 2 && option_merge_XYZT
+		if (cur->type == 2 && get_option_merge_BG_XYZT()
 		&& (cur->event == BG_PERSONALITY_TORUS_X
 		|| cur->event == BG_PERSONALITY_TORUS_Y
 		|| cur->event == BG_PERSONALITY_TORUS_Z

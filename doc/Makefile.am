@@ -1,12 +1,17 @@
 
-EXTRA_DIST = API-section.tex \
+EXTRA_DIST = \
+ API-section.tex \
  common-macros.tex \
+ configure-installation.tex \
  environmentvariables-section.tex \
+ examples-section.tex \
  FAQ-section.tex \
  instrumented-routines-section.tex \
- merge-section.tex quick-guide-section.tex \
- user-guide.tex \
+ merge-section.tex \
+ quick-guide-section.tex \
+ user-guide.tex version.tex \
  wholeXML-section.tex \
+ XML-section.tex \
  XML/buffer.xml.tex \
  XML/bursts.xml.tex \
  XML/callers.xml.tex \
