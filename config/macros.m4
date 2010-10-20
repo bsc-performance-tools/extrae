@@ -1547,7 +1547,7 @@ AC_DEFUN([AX_IS_CRAY_XT],
          fi
       fi
    fi
-   AC_MSG_RESULT([$IS_CRAY_XT_MACHINE])
+   AC_MSG_RESULT([$IS_CXT_MACHINE])
    AM_CONDITIONAL(IS_CRAY_XT_MACHINE, test "${IS_CXT_MACHINE}" = "yes")
 ])
 
