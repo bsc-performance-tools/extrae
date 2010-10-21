@@ -75,7 +75,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 
 	if test "${zhome_dir}" != "not found" ; then
 		echo zlib availability: yes
-		echo zlib home: ${ZLIB_HOME}
+		echo -e \\\tzlib home: ${LIBZ_HOME}
 	else
 		echo zlib availability: no
 	fi

@@ -255,4 +255,8 @@ void Parse_GlobalOps_Tracing_Intervals(char * sequence);
 void clustering_filter (int thread, int *out_CountBursts, int **out_HWCIds, int *out_CountHWC, long long **out_Timestamp, int *len_Timestamp, long long **out_Durations, int *len_Durations, long long **out_HWCValues, int *len_HWCValues);
 #endif /* HAVE_MRNET */
 
+#if defined(EMBED_MERGE_IN_TRACE)
+extern int MergeAfterTracing;
+#endif
+
 #endif /* __WRAPPER_H__ */

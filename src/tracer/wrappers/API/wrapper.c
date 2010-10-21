@@ -235,6 +235,10 @@ int CheckForGlobalOpsTracingIntervals = FALSE;
 
 int circular_buffering = 0;
 
+#if defined(EMBED_MERGE_IN_TRACE)
+int MergeAfterTracing = FALSE;
+#endif
+
 static unsigned get_maximum_NumOfThreads (void)
 {
 	return maximum_NumOfThreads;
@@ -1681,7 +1685,7 @@ void Backend_Finalize (void)
 
 #if defined(EMBED_MERGE_IN_TRACE)
 	/* Launch the merger */
-	if (TRUE)
+	if (MergeAfterTracing)
 	{
 		int ptask = 1, cfile = 1;
 		char tmp[1024];
@@ -1690,7 +1694,7 @@ void Backend_Finalize (void)
 		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 		merger_pre (NumOfTasks);
 		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default);
-		merger_post (NumOfTasks, TaskID_Get(), TRUE);
+		merger_post (NumOfTasks, TaskID_Get(), get_option_merge_ParaverFormat());
 	}
 #endif /* EMBED_MERGE_IN_TRACE */
 }

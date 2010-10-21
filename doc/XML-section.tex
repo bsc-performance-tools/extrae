@@ -277,3 +277,9 @@ The leaf of this node will be used as the tracefile name ({\tt mpi\_ping.prv} in
 
 \graybox{For further references, see chapter \ref{cha:Merging}.}
 
+\section{Using environment variables within the XML file}\label{sec:EnvVars_in_XML}
+
+XML tags and attributes can refer to environment variables that are defined in the environment during the application run. If you want to refer to an environment variable within the XML file, just enclose the name of the variable using the dollar symbol ({\tt \$}), for example: {\tt \$FOO\$}.
+
+Note that the user has to put an specific value or a reference to an environment variable which means that expanding environment variables in text is not allowed as in a regular shell (i.e., the instrumentation package will not convert the follwing text {\tt bar\$FOO\$bar}).
+

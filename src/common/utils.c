@@ -60,7 +60,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "utils.h"
 
-static int is_Whitespace(char c)
+int is_Whitespace(char c)
 {
   /* Avoid using isspace() and iscntrl() to remove internal dependency with ctype_b/ctype_b_loc.
    * This symbol name depends on the glibc version; newer versions define ctype_b_loc and compat 
