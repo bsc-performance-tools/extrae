@@ -67,8 +67,8 @@
       \item Tell the parallel compiler to use the same compiler as the rest of the package. For example, for IBM compiler mpcc, set {\tt MP\_COMPILER=gcc} when issuing the make command.
       \end{itemize}
 
-\item {\bf Question:} The instrumentation package does not generate the shared instrumentation libraries but generates the satatic instrumentation libraries.
-      {\bf Answer 1:} Check that the configure step was compiled without {\tt --disable-shared} or force it to be enabled through {\tt --enable-shared}.
+\item {\bf Question:} The instrumentation package does not generate the shared instrumentation libraries but generates the satatic instrumentation libraries.\\
+      {\bf Answer 1:} Check that the configure step was compiled without {\tt --disable-shared} or force it to be enabled through {\tt --enable-shared}.\\
       {\bf Answer 2:} Some MPI libraries (like MPICH 1.2.x) do not generate the shared libraries by default. The instrumentation package rely on them to generate its shared libraries, so make sure that the shared libraries of the MPI library are generated.
 
 \end{itemize}
