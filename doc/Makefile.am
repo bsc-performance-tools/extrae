@@ -9,7 +9,7 @@ EXTRA_DIST = \
  instrumented-routines-section.tex \
  merge-section.tex \
  quick-guide-section.tex \
- user-guide.tex version.tex \
+ user-guide.tex \
  wholeXML-section.tex \
  XML-section.tex \
  XML/buffer.xml.tex \
