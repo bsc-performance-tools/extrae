@@ -106,7 +106,7 @@ clean:
 	rm -f mpi_ping *.o pingtmp? TRACE.*
 \end{Verbatim}
 
-Lines 2-5 are definitions of some Makefile variables to set up the location of different packages needed by the instrumentation. In particular, {\tt EXTRAE\_HOME} sets where the \TRACE package directory is located. In order to link your application with \TRACE you have to add its libraries in the link stage (see lines 9-11 and 16). Besides {\tt libmpitracef.a} we also add some PAPI libraries ({\tt -lpapi}, and its dependency (which you may or not need {\tt -lperfctr}), and the libxml2 parsing library ({\tt -lxml2}).
+Lines 2-5 are definitions of some Makefile variables to set up the location of different packages needed by the instrumentation. In particular, {\tt EXTRAE\_HOME} sets where the \TRACE package directory is located. In order to link your application with \TRACE you have to add its libraries in the link stage (see lines 9-11 and 16). Besides {\tt libmpitracef.a} we also add some PAPI libraries ({\tt -lpapi}, and its dependency (which you may or not need {\tt -lperfctr}), the libxml2 parsing library ({\tt -lxml2}), and finally, the bfd and liberty libraries ({\tt -lbfd} and {\tt -liberty}), if the instrumentation package was compiled to support merge after trace (see chapter \ref{cha:Configuration} for further information).
 
 \subsection{Generating the intermediate files}\label{subsec:Examples_static_Intermediate}
 
