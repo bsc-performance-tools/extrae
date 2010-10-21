@@ -20,3 +20,9 @@ fi
 ${SED} "s|${KEY}|${VALUE}|g" < ${FILE} >${TMPFILE}
 /bin/mv -f ${TMPFILE} ${FILE}
 
+chmod a+r ${FILE}
+
+# Check if the resulting file is a script
+if [ "${FILE##*.}" = "sh" ] ; then
+	chmod a+x ${FILE}
+fi
