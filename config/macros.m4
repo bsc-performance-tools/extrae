@@ -1758,7 +1758,6 @@ AC_DEFUN([AX_CHECK_LIBZ],
             LIBZ_LIBSDIR="${zhome_dir}/lib${BITS}"
             break
          fi
-      elif test -f "${zhome_dir}/include/zlib.h" ; then
          if test -f "${zhome_dir}/lib/libz.a" -o \
                  -f "${zhome_dir}/lib/libz.so" ; then
             LIBZ_HOME="${zhome_dir}"

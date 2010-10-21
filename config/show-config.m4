@@ -72,6 +72,14 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	if test "${LIBERTY_INSTALLED}" = "yes" ; then
 		echo -e \\\tliberty home:  ${LIBERTY_HOME}
 	fi
+
+	if test "${zhome_dir}" != "not found" ; then
+		echo zlib availability: yes
+		echo zlib home: ${ZLIB_HOME}
+	else
+		echo zlib availability: no
+	fi
+
 	echo unwind availability: ${libunwind_works}
 	if test "${libunwind_works}" = "yes" ; then
 		echo -e \\\tunwind home: ${UNWIND_HOME}
