@@ -1694,6 +1694,9 @@ void Backend_Finalize (void)
 		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 		merger_pre (NumOfTasks);
 		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default);
+
+		fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s)\n", tmp);
+
 		merger_post (NumOfTasks, TaskID_Get(), get_option_merge_ParaverFormat());
 	}
 #endif /* EMBED_MERGE_IN_TRACE */

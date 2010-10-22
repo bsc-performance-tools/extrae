@@ -168,7 +168,7 @@ void Address2Info_Initialize (char * binary) {
 	if (abfd == NULL)
 	{
 		const char *errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "Error opening binary file '%s': %s\n", binary, errmsg);
+		fprintf(stderr, "mpi2prv: Error opening binary file '%s': %s\n", binary, errmsg);
 		exit(1);
 	}
 
@@ -176,7 +176,7 @@ void Address2Info_Initialize (char * binary) {
 	if (!bfd_check_format_matches (abfd, bfd_object, &matching))
 	{
 		const char * errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "Binary file format doesn't match: %s\n", errmsg);
+		fprintf(stderr, "mpi2prv: Binary file format doesn't match: %s\n", errmsg);
 		exit(1);
 	}
 
@@ -188,7 +188,7 @@ void Address2Info_Initialize (char * binary) {
 	if (section == NULL) 
 	{
 		const char * errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "Section %s cannot be found: %s\n", CODE_SECTION, errmsg);
+		fprintf(stderr, "mpi2prv: Section %s cannot be found: %s\n", CODE_SECTION, errmsg);
 		exit(1);
 	}
 

@@ -895,7 +895,7 @@ void PPACX_Finalize_Wrapper (PACX_Fint *ierror)
 #if HAVE_MRNET
 	if (MRNet_isEnabled())
 	{
-	    Quit_MRNet(TASKID);
+		Quit_MRNet(TASKID);
 	}
 #endif
 
@@ -903,7 +903,6 @@ void PPACX_Finalize_Wrapper (PACX_Fint *ierror)
 	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
 	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
-	/* Es tanca la llibreria de traceig */
 	Backend_Finalize ();
 
 #if defined(DEAD_CODE) /* This is outdated */
@@ -3914,9 +3913,9 @@ int PACX_Finalize_C_Wrapper (void)
 #endif
 
 #if HAVE_MRNET
-    if (MRNet_isEnabled())
-    {
-	    Quit_MRNet(TASKID);
+	if (MRNet_isEnabled())
+	{
+		Quit_MRNet(TASKID);
 	}
 #endif
 
@@ -3924,7 +3923,6 @@ int PACX_Finalize_C_Wrapper (void)
 	Generate_Task_File_List (NumOfTasks, TasksNodes);
 
 	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
-	/* Es tanca la llibreria de traceig */
 	Backend_Finalize ();
 
 #if defined(DEAD_CODE) /* This is outdated */

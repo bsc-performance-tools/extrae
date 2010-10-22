@@ -946,7 +946,9 @@ int merger_post (int numtasks, int idtask, int PRVFormat)
 	}
 
 #ifdef HAVE_BFD
-	Address2Info_Initialize (get_merge_ExecutableFileName());
+	if (strlen(get_merge_ExecutableFileName()) > 0)
+		Address2Info_Initialize (get_merge_ExecutableFileName());
+
 	if (strlen(get_merge_SymbolFileName()) == 0 && last_mpits_file != NULL)
 	{
 		char tmp[1024];
