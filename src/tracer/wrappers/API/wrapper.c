@@ -1694,12 +1694,14 @@ void Backend_Finalize (void)
 		if (TaskID_Get() == 0)
 			fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");
 
+#if defined(MPI_SUPPORT)
 		/* Synchronize all tasks at this point so none overtakes the master and
 		   gets and invalid/blank trace file list (.mpits file) */
 		if (TaskID_Get() == 0)
 			fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
 
 		MPI_Barrier (MPI_COMM_WORLD);
+#endif
 
 		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 		merger_pre (NumOfTasks);
