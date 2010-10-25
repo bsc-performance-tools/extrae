@@ -33,4 +33,6 @@
 extern unsigned int MPI_NumOpsGlobals;
 extern unsigned int MPI_CurrentOpGlobal;
 
+unsigned int get_MPI_NumOpsGlobals();
+
 #endif /* __MPI_INTERFACE_H__ */

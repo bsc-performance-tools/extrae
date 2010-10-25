@@ -223,17 +223,23 @@ void HWC_Start_Previous_Set (UINT64 time, int thread_id)
 
 /** 
  * Changes the current set for the given thread, depending on the number of global operations.
+ * \param count_glops Counts how many global operations have been executed so far 
+ * \param time Timestamp where the set change is checked
  * \param thread_id The thread identifier.
  * \return 1 if the set is changed, 0 otherwise.
  */
-static inline int CheckForHWCSetChange_GLOPS (UINT64 time, int thread_id)
+
+static inline int CheckForHWCSetChange_GLOPS (unsigned int count_glops, UINT64 time, int thread_id)
 {
 	if (HWC_current_changeat != 0)
 	{
-		HWC_current_changeat--;
-		if (HWC_current_changeat == 0)
+		if (HWC_current_changeat <= count_glops)
 		{
 			HWC_Start_Next_Set (time, thread_id);
+			/* Start_Next_Set initializes HWC_current_changeat to the value set in the XML,
+			   so the next change will take place after that number of glops starting from
+			   the current number of glops. */
+			HWC_current_changeat += count_glops;
 			return 1;
 		}
 	}
@@ -242,6 +248,7 @@ static inline int CheckForHWCSetChange_GLOPS (UINT64 time, int thread_id)
 
 /** 
  * Changes the current set for the given thread, depending on the time that has passed. 
+ * \param time Timestamp where the set change is checked
  * \param thread_id The thread identifier.
  * \return 1 if the set is changed, 0 otherwise.
  */
@@ -258,14 +265,15 @@ static inline int CheckForHWCSetChange_TIME (UINT64 time, int threadid)
 
 /**
  * Checks for pending set changes of the given thread.
- * \param type The criterion to change sets (glops/time).
+ * \param count_glops Counts how many global operations have been executed so far 
+ * \param time Timestamp where the set change is checked
  * \param thread_id The thread identifier.
  * \return 1 if the set is changed, 0 otherwise.
  */
-int HWC_Check_Pending_Set_Change (UINT64 time, int thread_id)
+int HWC_Check_Pending_Set_Change (unsigned int count_glops, UINT64 time, int thread_id)
 {
 	if (HWC_current_changetype == CHANGE_GLOPS)
-		return CheckForHWCSetChange_GLOPS(time, thread_id);
+		return CheckForHWCSetChange_GLOPS(count_glops, time, thread_id);
 	else if (HWC_current_changetype == CHANGE_TIME)
 		return CheckForHWCSetChange_TIME(time, thread_id);
 	else

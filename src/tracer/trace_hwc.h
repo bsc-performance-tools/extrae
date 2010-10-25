@@ -35,6 +35,9 @@
 #if USE_HARDWARE_COUNTERS
 
 # include "hwc.h"
+#if defined(MPI_SUPPORT)
+# include "mpi_interface.h"
+#endif
 
 # define MARK_SET_READ(tid, evt, filter)                                                   \
 {                                                                                     \
@@ -72,7 +75,7 @@
 # define COPY_ACCUMULATED_COUNTERS_HERE(tid, evt) \
 {                                                 \
 	HWC_Accum_Copy_Here(tid, evt.HWCValues);      \
-	MARK_SET_READ(tid, evt, TRUE);                     \
+	MARK_SET_READ(tid, evt, TRUE);                \
 }
 
 /* Add accumulated counters to the event, but DON'T mark them as read. If we're adding
@@ -80,8 +83,13 @@
 # define ADD_ACCUMULATED_COUNTERS_HERE(tid, evt) HWC_Accum_Add_Here(tid, evt.HWCValues)
 
 
-# define HARDWARE_COUNTERS_CHANGE(time, tid) HWC_Check_Pending_Set_Change(time, tid);
+#if defined(MPI_SUPPORT)
+# define COUNT_GLOBAL_OPS get_MPI_NumOpsGlobals()
+#else
+# define COUNT_GLOBAL_OPS 0
+#endif
 
+# define HARDWARE_COUNTERS_CHANGE(time, tid) HWC_Check_Pending_Set_Change(COUNT_GLOBAL_OPS, time, tid);
 
 #else /* ! USE_HARDWARE_COUNTERS */
 

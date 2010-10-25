@@ -1309,7 +1309,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 		if (getenv ("EXTRAE_ON") != NULL)
 			read_environment_variables (me);
 		else
-			fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT neither EXTRAE_ON nor EXTRAE_CONFIG_FILE are NOT set!\n");
+			fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT neither EXTRAE_ON nor EXTRAE_CONFIG_FILE are set!\n");
 	}
 #else
 	if (getenv("EXTRAE_ON") != NULL)

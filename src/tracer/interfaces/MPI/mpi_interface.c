@@ -94,6 +94,11 @@ static char UNUSED rcsid[] = "$Id$";
 unsigned int MPI_NumOpsGlobals = 0;
 unsigned int MPI_CurrentOpGlobal = 0;
 
+unsigned int get_MPI_NumOpsGlobals()
+{
+	return MPI_NumOpsGlobals;
+}
+
 #if defined(FORTRAN_SYMBOLS)
 # include "mpif.h"
 #endif
