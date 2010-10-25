@@ -135,7 +135,7 @@
   </buffer>
 
   <!-- Control tracing -->
-  <trace-control enabled="yes">
+  <trace-control enabled="no">
     <!-- We can start the application with a "latent tracing" and wake it up
          once a control file is created. Use the property 'frequency' to
          choose at which frequency this check must be done. If not supplied,
@@ -154,7 +154,7 @@
   </trace-control>
 
   <!-- Other options -->
-  <others enabled="yes">
+  <others enabled="no">
     <!-- Want to force a minimum amount of time of tracing? Here we force 10
          minutes -->
     <minimum-time enabled="no">10M</minimum-time>
