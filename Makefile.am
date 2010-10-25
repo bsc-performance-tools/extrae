@@ -15,7 +15,7 @@ SRCDIR=@srcdir@
 @SET_MAKE@
 
 dist-hook:
-	rm -rf `find $(distdir)/example -name .svn`
+	rm -fr `find $(distdir) -name .svn`
 
 #
 # Create EXAMPLE directory and copy there the example
