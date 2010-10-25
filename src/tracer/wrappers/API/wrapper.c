@@ -1691,11 +1691,22 @@ void Backend_Finalize (void)
 		char tmp[1024];
 		mpitrace_on = FALSE; /* Turn off tracing now */
 
+		if (TaskID_Get() == 0)
+			fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");
+
+		/* Synchronize all tasks at this point so none overtakes the master and
+		   gets and invalid/blank trace file list (.mpits file) */
+		if (TaskID_Get() == 0)
+			fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
+
+		MPI_Barrier (MPI_COMM_WORLD);
+
 		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 		merger_pre (NumOfTasks);
 		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default);
 
-		fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s)\n", tmp);
+		if (TaskID_Get() == 0)
+			fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);
 
 		merger_post (NumOfTasks, TaskID_Get(), get_option_merge_ParaverFormat());
 	}

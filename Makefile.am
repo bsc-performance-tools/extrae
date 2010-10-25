@@ -149,6 +149,8 @@ endif
 endif
 endif
 
+UNICORE_EXAMPLE_FILES= example/UNICORE/*
+
 install-data-hook:
 	$(mkdir_p) $(datadir)/example
 	$(mkdir_p) $(datadir)/example/SEQ
@@ -237,6 +239,10 @@ else
 	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/PTHREAD
 endif
 endif
+	$(mkdir_p) $(datadir)/example/UNICORE
+	cp -fr $(UNICORE_EXAMPLE_FILES) $(datadir)/example/UNICORE
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/UNICORE
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/UNICORE
 
 uninstall-local:
 	rm -f $(sysconfdir)/license.dat

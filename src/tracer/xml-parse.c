@@ -135,14 +135,34 @@ static xmlChar * deal_xmlChar_env (xmlChar *str)
 
 	tmp = xmlStrsub (str, initial, sublen);
 
-	/* If the string is wrapped by XML_ENVVAR_CHARACTER, perform a getenv and
-	   return its result */
-	if (tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
+	if (xmlStrlen(tmp) > 0)
 	{
-		char tmp2[sublen];
-		memset (tmp2, 0, sublen);
-		strncpy (tmp2, &tmp[1], sublen-2);
-		return xmlCharStrdup (getenv(tmp2));
+		/* If the string is wrapped by XML_ENVVAR_CHARACTER, perform a getenv and
+		   return its result */
+		if (tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
+		{
+			char tmp2[sublen];
+			memset (tmp2, 0, sublen);
+			strncpy (tmp2, &tmp[1], sublen-2);
+
+			if (getenv (tmp2) == NULL)
+			{
+				mfprintf (stderr, PACKAGE_NAME": Environment variable %s is not defined!\n", tmp2);
+				return NULL;
+			}
+			else
+			{
+				if (strlen(getenv(tmp2)) == 0)
+				{
+					mfprintf (stderr, PACKAGE_NAME": Environment variable %s is set but empty!\n", tmp2);
+					return NULL;
+				}
+				else
+					return xmlCharStrdup (getenv(tmp2));
+			}
+		}
+		else
+			return tmp;
 	}
 	else
 		return tmp;
@@ -1369,7 +1389,8 @@ void Parse_XML_File (int rank, int world_size, char *filename)
   * library used.
   */
 	LIBXML_TEST_VERSION;
-   
+
+	mfprintf (stdout, PACKAGE_NAME": Parsing the configuration file (%s) begins\n", filename);   
 	xmldoc = xmlParseFile (filename);
 	if (xmldoc != NULL)
 	{
@@ -1655,6 +1676,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 
 		xmlFreeDoc (xmldoc);
 	}
+	else
+	{
+		mfprintf (stderr, PACKAGE_NAME": Error! xmlParseFile routine failed!\n");
+	}
+	mfprintf (stdout, PACKAGE_NAME": Parsing the configuration file (%s) has ended\n", filename);   
 
 	/* If the tracing has been enabled, continue with the configuration */
 	if (mpitrace_on)
