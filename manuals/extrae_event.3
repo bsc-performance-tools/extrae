@@ -5,7 +5,7 @@
 .SH NAME
 extrae_event, extrae_counters, extrae_eventandcounters, extrae_shutdown, extrae_restart, extrae_set_tracing_tasks
 
- - API calls for the MPItrace instrumentation facility
+ - API calls for the Extrae instrumentation facility
 .\"
 .\" Com va?
 .\" 
@@ -81,7 +81,7 @@ Fortran API:
 .\" Descripcio
 .\"
 .SH DESCRIPTION
-MPItrace instruments MPI routines by default, but it also allows manual instrumentation on the user code. This section shows and describes all the calls provided by MPItrace to whoever wants instrument manually any application.
+Extrae instruments MPI routines by default, but it also allows manual instrumentation on the user code. This section shows and describes all the calls provided by Extrae to whoever wants instrument manually any application.
 
 The 
 .B extrae_event 
@@ -98,7 +98,7 @@ Some common use of events are:
   }
   Extrae_event (1000, 0);
 
-The last added call to OMPItrace\_event marks the end of the loop setting the event value to 0, which facilitates the analysis with Paraver.
+The last added call to Extrae\_event marks the end of the loop setting the event value to 0, which facilitates the analysis with Paraver.
 
 * Identify user routines: Choosing a constant type (6000019 is usual in other tracing tools) and different values for different routines (set to 0 to mark a "leave" event) 
 

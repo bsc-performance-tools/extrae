@@ -22,7 +22,7 @@ c      call MPI_Pcontrol(0)
          stop
       end if
       
-      call MPItrace_counters()
+      call Extrae_counters()
 
       call MPI_Buffer_attach(buff, buffsize, error)
       dest=rank+1
@@ -51,7 +51,7 @@ C  Rank 0 sends first
 
       call MPI_Buffer_detach(foo, retsize, error)
 
-      call MPItrace_counters()
+      call Extrae_counters()
 
       call MPI_Finalize(error)
       stop

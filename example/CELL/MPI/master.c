@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -38,7 +38,6 @@ static char rcsid[] = "$Id$";
 #include "ppu_trace.h"
 
 #include "bitmap.h"
-#include "spu.h"
 
 #define CHECK_NULL(val, call) { \
 	if (val == 0) { \

@@ -20,18 +20,18 @@ or,
 .\"
 .SH DESCRIPTION
 The 
-.B MPItrace
+.B Extrae
 tool instruments parallel codes based on the message passing (MPI) programming model. This tool generates intermediate files which must be merged by mpi2prv tool to obtain a final Paraver tracefile. In this tracefile, all the MPI activity plus other added manually at the source code of the target application. On the Linux/PPC with XL compilers, some OpenMP activity will be recorded.
 
 There are two kinds of use of the tracing tool.
 
-For a basic use of the tracing tool, just link your MPI application with the MPItrace library (use -L... and -l at the link stage). When the application is linked with this library then the application is ready to generate all the information required to generate a Paraver tracefile. If you link with a tracing library that is capable to obtain information from PAPI library, then you're required to link the application with -L${PAPI_HOME}/lib -lpapi. Furthermore, latest tracing libraries can read the configuration from an XML file. To be able to link with this library just add libxml2 to your link stage using -lxml2 flag (because libxml2 is usually installed on the default library path).
+For a basic use of the tracing tool, just link your MPI application with the Extrae library (use -L... and -l at the link stage). When the application is linked with this library then the application is ready to generate all the information required to generate a Paraver tracefile. If you link with a tracing library that is capable to obtain information from PAPI library, then you're required to link the application with -L${PAPI_HOME}/lib -lpapi. Furthermore, latest tracing libraries can read the configuration from an XML file. To be able to link with this library just add libxml2 to your link stage using -lxml2 flag (because libxml2 is usually installed on the default library path).
 
   In brief, link your application in this way
 
   $(LINKER) -o appName *.o -L${EXTRAE_HOME}/lib -lmpitrace -L${PAPI_HOME}/lib -lpapi -lxml2
 
-However, if your machine does support LD_PRELOAD (ELF binaries) dynamic load, just define this variable to point the shared tracing library (libmpitrace.so, i.e.) before running the application, instead of linking your application with the MPItrace library. In this way, you must setup LD_LIBRARY_PATH in a such way that PAPI libraries can be found if the tracing library uses them. 
+However, if your machine does support LD_PRELOAD (ELF binaries) dynamic load, just define this variable to point the shared tracing library (libmpitrace.so, i.e.) before running the application, instead of linking your application with the Extrae library. In this way, you must setup LD_LIBRARY_PATH in a such way that PAPI libraries can be found if the tracing library uses them. 
 
 To enable the tracing, take a look on the environment variables.
 
@@ -85,7 +85,7 @@ Defines where the mpitrace tracing facility is installed. Under ${EXTRAE_HOME} t
 
 This environment variable must be set *ALWAYS*.
 .IP "EXTRAE_MPI_CALLER"
-MPItrace can obtain the routine that executed each MPI call. The binary 
+Extrae can obtain the routine that executed each MPI call. The binary 
 .B must be compiled with debug information
 (usually -g flag at 
 .B compile and link

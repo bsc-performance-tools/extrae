@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -37,7 +37,6 @@ static char rcsid[] = "$Id$";
 #include "ppu_trace.h"
 
 #include "bitmap.h"
-#include "spu.h"
 
 #define CHECK_NULL(val, call) { \
 	if (val == 0) { \
@@ -217,7 +216,7 @@ int main (int argc, char *argv[])
 		printf ("Both images must be equally sized\nExiting\n");
 	}
 
-	MPItrace_fini();
+	Extrae_fini();
 
 	return 0;
 }

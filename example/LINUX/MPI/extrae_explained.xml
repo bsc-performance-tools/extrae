@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<!-- Here comes the MPItrace configuration.
+<!-- Here comes the Extrae configuration.
      As a general rule, "enabled" means that the feature is enabled :)  If
      it's not enabled, then the value can be set to some default.
 -->

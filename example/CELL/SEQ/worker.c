@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -31,7 +31,6 @@ static char rcsid[] = "$Id$";
 #include <spu_intrinsics.h>
 #include <spu_internals.h>
 
-#include "spu.h"
 #include "bitmap.h"
 #include "spu_trace.h"
 #include <spu_mfcio.h>

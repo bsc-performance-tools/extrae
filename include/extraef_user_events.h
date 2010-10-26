@@ -1,6 +1,6 @@
 C*****************************************************************************
 C*                        ANALYSIS PERFORMANCE TOOLS                         *
-C*                                  MPItrace                                 *
+C*                                   Extrae                                  *
 C*              Instrumentation package for parallel applications            *
 C*****************************************************************************
 C*     ___     This library is free software; you can redistribute it and/or *
