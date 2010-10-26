@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -50,15 +50,20 @@
     (evttype) == MPI_SEND_EV  || (evttype) == MPI_IRECVED_EV || (evttype) == MPI_RECV_EV)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
     (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
+# define COMM_STATS_WRAPPER(x) \
+    MPI_stats_Wrapper (last_mpi_exit_time);
 #elif defined(PACX_SUPPORT)
 # define TRACING_BITMAP_VALID_EVTYPE(evttype) \
    ((evttype) == PACX_BSEND_EV || (evttype) == PACX_SSEND_EV || (evttype) == PACX_RSEND_EV || \
     (evttype) == PACX_SEND_EV  || (evttype) == PACX_IRECVED_EV || (evttype) == PACX_RECV_EV)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
     (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
+# define COMM_STATS_WRAPPER(x) \
+    PACX_stats_Wrapper (last_mpi_exit_time);
 #else
 # define TRACING_BITMAP_VALID_EVTYPE(evttype)     (TRUE)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget) (TRUE)
+# define COMM_STATS_WRAPPER(x)
 #endif /* MPI_SUPPORT, PACX_SUPPORT */
 
 #define TRACE_MPI_CALLER_IS_ENABLED	(Trace_Caller_Enabled[CALLER_MPI])
@@ -252,7 +257,7 @@
 		{ \
 			COPY_ACCUMULATED_COUNTERS_HERE(thread_id, burst_begin); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
-			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time); \
+			COMM_STATS_WRAPPER(last_mpi_exit_time); \
 			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
 			TRACE_MPI_CALLER (burst_end.time,evtvalue,offset) \
@@ -293,7 +298,7 @@
 				HARDWARE_COUNTERS_READ (thread_id, burst_begin, FALSE); \
 			} \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
-			OMPItrace_MPI_stats_Wrapper (last_mpi_exit_time); \
+			COMM_STATS_WRAPPER(last_mpi_exit_time); \
 			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
 			TRACE_MPI_CALLER (burst_end.time,evtvalue,offset) \

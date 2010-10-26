@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -68,7 +68,7 @@ int Reset_After_Read = TRUE;
 int Reset_After_Read = FALSE;
 #endif
 
-/* XXX: This variable should be defined at the MPItrace core level */
+/* XXX: This variable should be defined at the Extrae core level */
 int Trace_HWC_Enabled = TRUE;     /* Global variable that allows the gathering of HWC information */
 
 int *HWC_Thread_Initialized;

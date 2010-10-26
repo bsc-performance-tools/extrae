@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -35,7 +35,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "trt_probe.h"
 
-#if 1
+#if 0
 # define DEBUG fprintf (stdout, "THREAD %d: %s\n", THREADID, __FUNCTION__);
 #else
 # define DEBUG

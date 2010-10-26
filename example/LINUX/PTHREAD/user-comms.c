@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: file:///mysql/svn/repos/ptools/extrae/trunk/example/LINUX/PTHREAD/example.c $
- | @last_commit: $Date: 2010-05-20 18:37:17 +0200 (Thu, 20 May 2010) $
- | @version:     $Revision: 280 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #include <unistd.h>

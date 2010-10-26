@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -3837,21 +3837,21 @@ INTERFACE_ALIASES_C(_network_counters, Extrae_network_counters, (void))
 void Extrae_network_counters (void)
 {
 	if (mpitrace_on)
-		OMPItrace_network_counters_Wrapper ();
+		Extrae_network_counters_Wrapper ();
 }
 
 INTERFACE_ALIASES_C(_network_routes, Extrae_network_routes, (int mpi_rank))
 void Extrae_network_routes (int mpi_rank)
 {
 	if (mpitrace_on)
-		OMPItrace_network_routes_Wrapper (mpi_rank);
+		Extrae_network_routes_Wrapper (mpi_rank);
 }
 
 INTERFACE_ALIASES_C(_set_tracing_tasks, Extrae_set_tracing_tasks, (int from, int to))
 void Extrae_set_tracing_tasks (int from, int to)
 {
 	if (mpitrace_on)
-		OMPItrace_tracing_tasks_Wrapper (from, to);
+		Extrae_tracing_tasks_Wrapper (from, to);
 }
 
 # else /* HAVE_ALIAS_ATTRIBUTE */
@@ -3862,7 +3862,7 @@ void Extrae_set_tracing_tasks (int from, int to)
     void x##_network_routes (int mpi_rank) \
    { \
     if (mpitrace_on) \
-        OMPItrace_network_routes_Wrapper (mpi_rank); \
+        Extrae_network_routes_Wrapper (mpi_rank); \
    }
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NETWORK_ROUTES);
 
@@ -3870,7 +3870,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NETWORK_ROUTES);
 	void x##_user_function (int enter) \
 	{ \
 		if (mpitrace_on) \
-			OMPItrace_user_function_Wrapper (enter); \
+			Extrae_user_function_Wrapper (enter); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 
@@ -3878,7 +3878,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 	void x##_set_tracing_tasks (int from, int to) \
    { \
    	if (mpitrace_on) \
-      	OMPItrace_tracing_tasks_Wrapper (from, to); \
+      	Extrae_tracing_tasks_Wrapper (from, to); \
    }
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETTRACINGTASKS);
 
@@ -3895,21 +3895,21 @@ INTERFACE_ALIASES_F(_network_counters,_NETWORK_COUNTERS,extrae_network_counters,
 void extrae_network_counters (void)
 {
 	if (mpitrace_on)
-		OMPItrace_network_counters_Wrapper ();
+		Extrae_network_counters_Wrapper ();
 }
 
 INTERFACE_ALIASES_F(_network_routes,_NETWORK_ROUTES,extrae_network_routes, (int *mpi_rank))
 void extrae_network_routes (int *mpi_rank)
 {
 	if (mpitrace_on)
-		OMPItrace_network_routes_Wrapper (*mpi_rank);
+		Extrae_network_routes_Wrapper (*mpi_rank);
 }
 
 INTERFACE_ALIASES_F(_set_tracing_tasks,_SET_TRACING_TASKS,extrae_set_tracing_tasks, (int *from, int *to))
 void extrae_set_tracing_tasks (int *from, int *to)
 {
 	if (mpitrace_on)
-		OMPItrace_tracing_tasks_Wrapper (*from, *to);
+		Extrae_tracing_tasks_Wrapper (*from, *to);
 }
 
 # else /* HAVE_ALIAS_ATTRIBUTE */
@@ -3918,7 +3918,7 @@ void extrae_set_tracing_tasks (int *from, int *to)
 	void CtoF77(x##_network_counters) () \
 	{ \
 		if (mpitrace_on) \
-			OMPItrace_network_counters_Wrapper (); \
+			Extrae_network_counters_Wrapper (); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_COUNTERS);
 
@@ -3926,7 +3926,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_COUNTERS);
 	void CtoF77(x##_network_routes) (int *mpi_rank) \
 	{ \
 		if (mpitrace_on) \
-			OMPItrace_network_routes_Wrapper (*mpi_rank); \
+			Extrae_network_routes_Wrapper (*mpi_rank); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_ROUTES);
 
@@ -3934,7 +3934,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_ROUTES);
 	void CtoF77(x##_set_tracing_tasks) (int *from, int *to) \
 	{ \
 		if (mpitrace_on) \
-			OMPItrace_tracing_tasks_Wrapper (*from, *to); \
+			Extrae_tracing_tasks_Wrapper (*from, *to); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETTRACINGTASKS)
 

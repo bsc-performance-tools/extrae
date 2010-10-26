@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -78,24 +78,24 @@ static char UNUSED rcsid[] = "$Id$";
 #include <malloc.h>
 #endif
 
-void MPItrace_shutdown_Wrapper (void)
+void Extrae_shutdown_Wrapper (void)
 {
 	TRACE_MISCEVENTANDCOUNTERS (TIME, TRACING_EV, EVT_END, EMPTY);
 	tracejant = FALSE;
 }
 
-void MPItrace_restart_Wrapper (void)
+void Extrae_restart_Wrapper (void)
 {
 	tracejant = TRUE;
 	TRACE_MISCEVENTANDCOUNTERS (TIME, TRACING_EV, EVT_BEGIN, EMPTY);
 }
 
-void MPItrace_Event_Wrapper (unsigned *tipus, unsigned *valor)
+void Extrae_Event_Wrapper (unsigned *tipus, unsigned *valor)
 {
 	TRACE_MISCEVENT (TIME, USER_EV, *tipus, *valor);
 }
 
-void MPItrace_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
+void Extrae_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 {
 	iotimer_t temps;
 	unsigned i;
@@ -110,18 +110,18 @@ void MPItrace_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *value
 	}
 }
 
-void MPItrace_Eventandcounters_Wrapper (unsigned *tipus, unsigned *valor)
+void Extrae_Eventandcounters_Wrapper (unsigned *tipus, unsigned *valor)
 {
 #if USE_HARDWARE_COUNTERS
 	if (tracejant)
 		TRACE_MISCEVENTANDCOUNTERS (TIME, USER_EV, *tipus, *valor);
 #else
-	MPItrace_Event_Wrapper (tipus, valor);
+	Extrae_Event_Wrapper (tipus, valor);
 #endif
 }
 
 
-void MPItrace_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsigned *values)
+void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 {
 	iotimer_t temps;
 	unsigned i;
@@ -136,28 +136,28 @@ void MPItrace_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, uns
 	}
 }
 
-void MPItrace_counters_Wrapper (void)
+void Extrae_counters_Wrapper (void)
 {
 #if USE_HARDWARE_COUNTERS
 	TRACE_EVENTANDCOUNTERS (TIME, HWC_EV, 0, TRUE);
 #endif
 }
 
-void MPItrace_next_hwc_set_Wrapper (void)
+void Extrae_next_hwc_set_Wrapper (void)
 {
 #if USE_HARDWARE_COUNTERS
 	HWC_Start_Next_Set (TIME, THREADID);
 #endif
 }
 
-void MPItrace_previous_hwc_set_Wrapper (void)
+void Extrae_previous_hwc_set_Wrapper (void)
 {
 #if USE_HARDWARE_COUNTERS
 	HWC_Start_Previous_Set (TIME, THREADID);
 #endif
 }
 
-void MPItrace_set_options_Wrapper (int options)
+void Extrae_set_options_Wrapper (int options)
 {
 	Trace_Caller_Enabled[CALLER_MPI] = (options & EXTRAE_CALLER_OPTION);
 	Trace_HWC_Enabled = (options & EXTRAE_HWC_OPTION);
@@ -169,7 +169,7 @@ void MPItrace_set_options_Wrapper (int options)
 	setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
 }
 
-void MPItrace_getrusage_Wrapper (iotimer_t timestamp)
+void Extrae_getrusage_Wrapper (iotimer_t timestamp)
 {
 	int err;
 	struct rusage current_usage;
@@ -215,7 +215,7 @@ void MPItrace_getrusage_Wrapper (iotimer_t timestamp)
 	}
 }
 
-void MPItrace_memusage_Wrapper (iotimer_t timestamp)
+void Extrae_memusage_Wrapper (iotimer_t timestamp)
 {
 	if (TRACING_MEMUSAGE)
 	{
@@ -230,13 +230,13 @@ void MPItrace_memusage_Wrapper (iotimer_t timestamp)
 	}
 }
 
-void MPItrace_user_function_Wrapper (int enter)
+void Extrae_user_function_Wrapper (int enter)
 {
 	UINT64 ip = (enter)?get_caller(4):EMPTY;
 	TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
 }
 
-void MPItrace_function_from_address_Wrapper (int type, void *address)
+void Extrae_function_from_address_Wrapper (int type, void *address)
 {
 	if (type == USRFUNC_EV || type == OMPFUNC_EV)
 	{
@@ -285,7 +285,7 @@ static void Generate_Task_File_List (void)
 }
 
 
-void MPItrace_init_Wrapper (void)
+void Extrae_init_Wrapper (void)
 {
 	char *config_file;
 	iotimer_t temps;
@@ -313,7 +313,7 @@ void MPItrace_init_Wrapper (void)
 
 }
 
-void MPItrace_fini_Wrapper (void)
+void Extrae_fini_Wrapper (void)
 {
 	if (!mpitrace_on)
 		return;

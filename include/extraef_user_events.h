@@ -22,9 +22,9 @@ C*   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 C*****************************************************************************
 
 C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-C| @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/include/mpitracef_user_events.h $
-C| @last_commit: $Date: 2010-02-04 18:22:43 +0100 (dj, 04 feb 2010) $
-C| @version:     $Revision: 160 $
+C| @file: $HeadURL$
+C| @last_commit: $Date$
+C| @version:     $Revision$
 C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
 
 	INTEGER EXTRAE_DISABLE_ALL_OPTIONS 

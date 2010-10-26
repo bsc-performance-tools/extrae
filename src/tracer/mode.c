@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -158,15 +158,15 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 	}
 }
 
-void MPItrace_switch_mode(void)
+void Extrae_switch_mode(void)
 {   
-    unsigned i;
+	unsigned i;
 
-    for (i=0; i<Backend_getNumberOfThreads(); i++)
-    {
-        Pending_Trace_Mode_Change[i] = TRUE;
-        Future_Trace_Mode[i] = (Current_Trace_Mode[i] == TRACE_MODE_DETAIL)?TRACE_MODE_BURSTS:TRACE_MODE_DETAIL;
-    }
+	for (i=0; i<Backend_getNumberOfThreads(); i++)
+	{
+		Pending_Trace_Mode_Change[i] = TRUE;
+		Future_Trace_Mode[i] = (Current_Trace_Mode[i] == TRACE_MODE_DETAIL)?TRACE_MODE_BURSTS:TRACE_MODE_DETAIL;
+	}
 }
 
 /* Configure options */

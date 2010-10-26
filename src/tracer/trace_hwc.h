@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -30,7 +30,7 @@
 #ifndef __TRACE_HWC_H__
 #define __TRACE_HWC_H__
 
-/* Interface to communicate the MPItrace core with the HWC module */
+/* Interface to communicate the Extrae core with the HWC module */
 
 #if USE_HARDWARE_COUNTERS
 

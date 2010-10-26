@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -57,7 +57,7 @@ static char UNUSED rcsid[] = "$Id$";
 #define apifTRACE_INIT(x) \
 	void CtoF77(x##_init) (void) \
 	{ \
-		MPItrace_init_Wrapper ();\
+		Extrae_init_Wrapper ();\
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_INIT)
 
@@ -65,7 +65,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_INIT)
 	void CtoF77(x##_fini) (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_fini_Wrapper ();\
+			Extrae_fini_Wrapper ();\
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 
@@ -73,7 +73,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 	void CtoF77(x##_event) (unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_Event_Wrapper (tipus, valor); \
+			Extrae_Event_Wrapper (tipus, valor); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENT)
 
@@ -81,7 +81,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENT)
 	void CtoF77(x##_nevent) (unsigned *count, unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_N_Event_Wrapper (count, tipus, valor); \
+			Extrae_N_Event_Wrapper (count, tipus, valor); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENT)
 
@@ -89,7 +89,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENT)
 	void CtoF77(x##_shutdown) (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_shutdown_Wrapper (); \
+			Extrae_shutdown_Wrapper (); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 
@@ -97,7 +97,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 	void CtoF77(x##_eventandcounters) (unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_Eventandcounters_Wrapper (tipus, valor); \
+			Extrae_Eventandcounters_Wrapper (tipus, valor); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENTANDCOUNTERS)
 
@@ -105,7 +105,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENTANDCOUNTERS)
 	void CtoF77(x##_neventandcounters) (unsigned *count, unsigned *tipus, unsigned *valor) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_N_Eventsandcounters_Wrapper (count, tipus, valor); \
+			Extrae_N_Eventsandcounters_Wrapper (count, tipus, valor); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENTANDCOUNTERS)
 
@@ -113,7 +113,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENTANDCOUNTERS)
 	void CtoF77(x##_restart) (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_restart_Wrapper (); \
+			Extrae_restart_Wrapper (); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_RESTART)
 
@@ -121,7 +121,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_RESTART)
 	void CtoF77(x##_counters) (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_counters_Wrapper (); \
+			Extrae_counters_Wrapper (); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_COUNTERS)
 
@@ -129,7 +129,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_COUNTERS)
 	void CtoF77(x##_previous_hwc_set) (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_previous_hwc_set_Wrapper (); \
+			Extrae_previous_hwc_set_Wrapper (); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_PREVIOUS_HWC_SET)
 
@@ -137,7 +137,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_PREVIOUS_HWC_SET)
 	void CtoF77(x##_next_hwc_set) (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_next_hwc_set_Wrapper (); \
+			Extrae_next_hwc_set_Wrapper (); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEXT_HWC_SET)
 
@@ -145,7 +145,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEXT_HWC_SET)
 	void CtoF77(x##_set_options) (int *options) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_set_options_Wrapper (*options); \
+			Extrae_set_options_Wrapper (*options); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 
@@ -153,7 +153,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 	void CtoF77(x##_user_function) (int *enter) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_user_function_Wrapper (*enter); \
+			Extrae_user_function_Wrapper (*enter); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION);
 
@@ -161,7 +161,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION);
 	void CtoF77(x##_function_from_address) (int *type, void *address) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_function_from_address_Wrapper (*type, address); \
+			Extrae_function_from_address_Wrapper (*type, address); \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_FROM_ADDRESS);
 
@@ -190,7 +190,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 #define apiTRACE_INIT(x) \
 	void CtoF77(x##_init) (void) \
 	{ \
-		MPItrace_init_Wrapper ();\
+		Extrae_init_Wrapper ();\
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT)
 
@@ -198,7 +198,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT)
 	void CtoF77(x##_fini) (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_fini_Wrapper ();\
+			Extrae_fini_Wrapper ();\
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 
@@ -206,7 +206,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 	void x##_event (unsigned tipus, unsigned valor) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_Event_Wrapper (&tipus, &valor); \
+			Extrae_Event_Wrapper (&tipus, &valor); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 
@@ -214,23 +214,23 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 	void x##_nevent (unsigned count, unsigned *tipus, unsigned *valors) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_N_Event_Wrapper (&count, tipus, valors); \
+			Extrae_N_Event_Wrapper (&count, tipus, valors); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENT)
 
 #define apiTRACE_EVENTANDCOUNTERS(x) \
 	void x##_eventandcounters (unsigned tipus, unsigned valor) \
 	{ \
-  		if (mpitrace_on) \
-    			MPItrace_Eventandcounters_Wrapper (&tipus, &valor); \
+		if (mpitrace_on) \
+			Extrae_Eventandcounters_Wrapper (&tipus, &valor); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENTANDCOUNTERS)
 
 #define apiTRACE_NEVENTANDCOUNTERS(x) \
 	void x##_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors) \
 	{ \
-  		if (mpitrace_on) \
-    			MPItrace_N_Eventsandcounters_Wrapper (&count, tipus, valors); \
+		if (mpitrace_on) \
+			Extrae_N_Eventsandcounters_Wrapper (&count, tipus, valors); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENTANDCOUNTERS)
 
@@ -238,7 +238,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENTANDCOUNTERS)
 	void x##_shutdown (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_shutdown_Wrapper(); \
+			Extrae_shutdown_Wrapper(); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SHUTDOWN)
 
@@ -246,7 +246,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SHUTDOWN)
 	void x##_restart (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_restart_Wrapper(); \
+			Extrae_restart_Wrapper(); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESTART);
 
@@ -254,7 +254,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESTART);
 	void x##_counters(void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_counters_Wrapper(); \
+			Extrae_counters_Wrapper(); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_COUNTERS);
 
@@ -262,7 +262,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_COUNTERS);
 	void x##_previous_hwc_set (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_previous_hwc_set_Wrapper (); \
+			Extrae_previous_hwc_set_Wrapper (); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_PREVIOUS_HWC_SET)
 
@@ -270,7 +270,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_PREVIOUS_HWC_SET)
 	void x##_next_hwc_set (void) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_next_hwc_set_Wrapper (); \
+			Extrae_next_hwc_set_Wrapper (); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEXT_HWC_SET)
 
@@ -278,7 +278,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEXT_HWC_SET)
 	void x##_set_options (int options) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_set_options_Wrapper (options); \
+			Extrae_set_options_Wrapper (options); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 
@@ -286,7 +286,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 	void x##_user_function (int enter) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_user_function_Wrapper (enter); \
+			Extrae_user_function_Wrapper (enter); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 
@@ -294,7 +294,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 	void x##_function_from_address (int type, void *address) \
 	{ \
 		if (mpitrace_on) \
-			MPItrace_function_from_address_Wrapper (type, address); \
+			Extrae_function_from_address_Wrapper (type, address); \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 
@@ -345,98 +345,98 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 INTERFACE_ALIASES_C(_init,Extrae_init,(void))
 void Extrae_init (void)
 {
-	MPItrace_init_Wrapper ();
+	Extrae_init_Wrapper ();
 }
 
 INTERFACE_ALIASES_C(_fini,Extrae_fini,(void))
 void Extrae_fini (void)
 {
 	if (mpitrace_on)
-		MPItrace_fini_Wrapper ();
+		Extrae_fini_Wrapper ();
 }
 
 INTERFACE_ALIASES_C(_event, Extrae_event, (unsigned tipus, unsigned valors))
 void Extrae_event (unsigned tipus, unsigned valors)
 {
 	if (mpitrace_on)
-		MPItrace_Event_Wrapper (&tipus, &valors);
+		Extrae_Event_Wrapper (&tipus, &valors);
 }
 
 INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned count, unsigned *tipus, unsigned *valors))
 void Extrae_nevent (unsigned count, unsigned *tipus, unsigned *valors)
 {
 	if (mpitrace_on)
-		MPItrace_N_Event_Wrapper (&count, tipus, valors);
+		Extrae_N_Event_Wrapper (&count, tipus, valors);
 }
 
 INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (unsigned tipus, unsigned valor))
 void Extrae_eventandcounters (unsigned tipus, unsigned valor)
 {
 	if (mpitrace_on)
-		MPItrace_Eventandcounters_Wrapper (&tipus, &valor);
+		Extrae_Eventandcounters_Wrapper (&tipus, &valor);
 }
 
 INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned count, unsigned *tipus, unsigned *valors))
 void Extrae_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors)
 {
  	if (mpitrace_on)
-		MPItrace_N_Eventsandcounters_Wrapper (&count, tipus, valors);
+		Extrae_N_Eventsandcounters_Wrapper (&count, tipus, valors);
 }
 
 INTERFACE_ALIASES_C(_shutdown, Extrae_shutdown, (void))
 void Extrae_shutdown (void)
 {
 	if (mpitrace_on)
-		MPItrace_shutdown_Wrapper();
+		Extrae_shutdown_Wrapper();
 }
 
 INTERFACE_ALIASES_C(_restart, Extrae_restart, (void))
 void Extrae_restart (void)
 {
 	if (mpitrace_on)
-		MPItrace_restart_Wrapper();
+		Extrae_restart_Wrapper();
 }
 
 INTERFACE_ALIASES_C(_counters, Extrae_counters, (void))
 void Extrae_counters(void)
 {
 	if (mpitrace_on)
-		MPItrace_counters_Wrapper();
+		Extrae_counters_Wrapper();
 }
 
 INTERFACE_ALIASES_C(_next_hwc_set, Extrae_next_hwc_set, (void))
 void Extrae_next_hwc_set (void)
 {
 	if (mpitrace_on)
-		MPItrace_next_hwc_set_Wrapper ();
+		Extrae_next_hwc_set_Wrapper ();
 }
 
 INTERFACE_ALIASES_C(_previous_hwc_set, Extrae_previous_hwc_set, (void))
 void Extrae_previous_hwc_set (void)
 {
 	if (mpitrace_on)
-		MPItrace_previous_hwc_set_Wrapper ();
+		Extrae_previous_hwc_set_Wrapper ();
 }
 
 INTERFACE_ALIASES_C(_set_options, Extrae_set_options, (int options))
 void Extrae_set_options (int options)
 {
 	if (mpitrace_on)
-		MPItrace_set_options_Wrapper (options);
+		Extrae_set_options_Wrapper (options);
 }
 
 INTERFACE_ALIASES_C(_user_function, Extrae_user_function, (int enter))
 void Extrae_user_function (int enter)
 {
 	if (mpitrace_on)
-		MPItrace_user_function_Wrapper (enter);
+		Extrae_user_function_Wrapper (enter);
 }
 
 INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address, (int type, void *address))
 void Extrae_function_from_address (int type, void *address)
 {
 	if (mpitrace_on)
-		MPItrace_function_from_address_Wrapper (type, address);
+		Extrae_function_from_address_Wrapper (type, address);
 }
 
 #if defined(PTHREAD_SUPPORT)
@@ -480,98 +480,98 @@ void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *ptr)
 INTERFACE_ALIASES_F(_init,_INIT,extrae_init,(void))
 void extrae_init (void)
 {
-	MPItrace_init_Wrapper ();
+	Extrae_init_Wrapper ();
 }
 
 INTERFACE_ALIASES_F(_fini,_FINI,extrae_fini,(void))
 void extrae_fini (void)
 {
 	if (mpitrace_on)
-		MPItrace_fini_Wrapper ();
+		Extrae_fini_Wrapper ();
 }
 
 INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(unsigned *tipus, unsigned *valor))
 void extrae_event (unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
-		MPItrace_Event_Wrapper (tipus, valor);
+		Extrae_Event_Wrapper (tipus, valor);
 }
 
 INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned *count, unsigned *tipus, unsigned *valor))
 void extrae_nevent (unsigned *count, unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
-		MPItrace_N_Event_Wrapper (count, tipus, valor);
+		Extrae_N_Event_Wrapper (count, tipus, valor);
 }
 
 INTERFACE_ALIASES_F(_shutdown,_SHUTDOWN,extrae_shutdown,(void))
 void extrae_shutdown (void)
 {
 	if (mpitrace_on)
-		MPItrace_shutdown_Wrapper();
+		Extrae_shutdown_Wrapper();
 }
 
 INTERFACE_ALIASES_F(_restart,_RESTART,extrae_restart,(void))
 void extrae_restart (void)
 {
 	if (mpitrace_on)
-		MPItrace_restart_Wrapper ();
+		Extrae_restart_Wrapper ();
 }
 
 INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (unsigned *tipus, unsigned *valor))
 void extrae_eventandcounters (unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
-		MPItrace_Eventandcounters_Wrapper (tipus, valor);
+		Extrae_Eventandcounters_Wrapper (tipus, valor);
 }
 
 INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned *count, unsigned *tipus, unsigned *valor))
 void extrae_neventandcounters (unsigned *count, unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
-		MPItrace_N_Eventsandcounters_Wrapper (count, tipus, valor);
+		Extrae_N_Eventsandcounters_Wrapper (count, tipus, valor);
 }
 
 INTERFACE_ALIASES_F(_counters,_COUNTERS,extrae_counters, (void))
 void extrae_counters (void)
 {
 	if (mpitrace_on)
-		MPItrace_counters_Wrapper ();
+		Extrae_counters_Wrapper ();
 }
 
 INTERFACE_ALIASES_F(_next_hwc_set,_NEXT_HWC_SET,extrae_next_hwc_set,(void))
 void extrae_next_hwc_set (void)
 {
 	if (mpitrace_on)
-		MPItrace_next_hwc_set_Wrapper ();
+		Extrae_next_hwc_set_Wrapper ();
 }
 
 INTERFACE_ALIASES_F(_previous_hwc_set,_PREVIOUS_HWC_SET,extrae_previous_hwc_set,(void))
 void extrae_previous_hwc_set (void)
 {
 	if (mpitrace_on)
-		MPItrace_previous_hwc_set_Wrapper ();
+		Extrae_previous_hwc_set_Wrapper ();
 }
 
 INTERFACE_ALIASES_F(_set_options,_SET_OPTIONS,extrae_set_options,(int *options))
 void extrae_set_options (int *options)
 {
 	if (mpitrace_on)
-		MPItrace_set_options_Wrapper (*options);
+		Extrae_set_options_Wrapper (*options);
 }
 
 INTERFACE_ALIASES_F(_user_function,_USER_FUNCTION,extrae_user_function,(int *enter))
 void extrae_user_function (int *enter)
 {
 	if (mpitrace_on)
-		MPItrace_user_function_Wrapper (*enter);
+		Extrae_user_function_Wrapper (*enter);
 }
 
 INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_function_from_address, (int *type, void *address))
 void extrae_function_from_address (int *type, void *address)
 {
 	if (mpitrace_on)
-		MPItrace_function_from_address_Wrapper (type, address);
+		Extrae_function_from_address_Wrapper (type, address);
 }
 
 #if defined(PTHREAD_SUPPORT)

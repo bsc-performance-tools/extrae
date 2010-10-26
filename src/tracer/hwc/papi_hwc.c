@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -477,7 +477,7 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 		{
 			fprintf (stderr,
 				PACKAGE_NAME": PAPI library version mismatch!\n"
-				"          MPItrace is compiled against PAPI v%d.%d , and \n"
+				"          "PACKAGE_NAME" is compiled against PAPI v%d.%d , and \n"
 				"          PAPI_library_init reported v%d.%d ,\n"
 				"          Check that LD_LIBRARY_PATH points to the correct PAPI library.\n",
 				PAPI_VERSION_MAJOR(PAPI_VER_CURRENT),

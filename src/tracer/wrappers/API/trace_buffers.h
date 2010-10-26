@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -40,7 +40,7 @@ extern Buffer_t **SamplingBuffer;
 #if defined(__cplusplus)
 extern "C" {
 #endif
-int MPItrace_Flush_Wrapper(Buffer_t *buffer);
+int Extrae_Flush_Wrapper (Buffer_t *buffer);
 #if defined(__cplusplus)
 }
 #endif

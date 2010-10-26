@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -795,7 +795,7 @@ int main (int argc, char *argv[], const char *envp[])
 		if (!appType->get_isMPI())
 		{
 			/* Typical main entry & exit */
-			wrapRoutine (appImage, appProcess, "main", "MPItrace_init", "MPItrace_fini");
+			wrapRoutine (appImage, appProcess, "main", "Extrae_init", "Extrae_fini");
 
 			/* Special cases (e.g., fortran stop call) */
 			string exit_calls[] =
@@ -811,7 +811,7 @@ int main (int argc, char *argv[], const char *envp[])
 			{
 				BPatch_function *special_exit = getRoutine (exit_calls[i], appImage);
 				if (NULL != special_exit)
-					wrapRoutine (appImage, appProcess, exit_calls[i], "MPItrace_fini", "");
+					wrapRoutine (appImage, appProcess, exit_calls[i], "EXtrae_fini", "");
 				i++;
 			}
 		}

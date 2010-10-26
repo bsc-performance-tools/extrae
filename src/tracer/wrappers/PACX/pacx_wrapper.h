@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/src/tracer/xml-parse.c $
- | @last_commit: $Date: 2009-10-29 13:06:27 +0100 (dj, 29 oct 2009) $
- | @version:     $Revision: 15 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #ifndef PACX_WRAPPER_DEFINED
@@ -53,9 +53,9 @@ void CtoF77 (mptrace_set_mlp_rank) (int *rank, int *size);
 void remove_file_list (void);
 extern int mpit_gathering_enabled;
 
-void OMPItrace_network_counters_Wrapper (void);
-void OMPItrace_network_routes_Wrapper (int pacx_rank);
-void OMPItrace_tracing_tasks_Wrapper (int from, int to);
+void Extrae_network_counters_Wrapper (void);
+void Extrae_network_routes_Wrapper (int pacx_rank);
+void Extrae_tracing_tasks_Wrapper (int from, int to);
 
 /* Fortran Wrappers */
 

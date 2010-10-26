@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/mpitrace/fusion/trunk/src/tracer/xml-parse.c $
- | @last_commit: $Date: 2009-10-29 13:06:27 +0100 (dj, 29 oct 2009) $
- | @version:     $Revision: 15 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: pacx_wrapper.c 89 2009-12-16 11:59:18Z gllort $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -126,7 +126,7 @@ static void Trace_PACX_Communicator (int tipus_event, PACX_Comm newcomm);
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
 
-static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp);
+static void PACX_stats_Wrapper (iotimer_t timestamp);
 
 #define MAX_WAIT_REQUESTS 16384
 
@@ -238,9 +238,9 @@ void CheckGlobalOpsTracingIntervals (void)
 
 	result = GlobalOp_Changes_Trace_Status (PACX_NumOpsGlobals);
 	if (result == SHUTDOWN)
-		MPItrace_shutdown_Wrapper();
+		Extrae_shutdown_Wrapper();
 	else if (result == RESTART)
-		MPItrace_restart_Wrapper();
+		Extrae_restart_Wrapper();
 }
 
 /******************************************************************************
@@ -429,9 +429,9 @@ void CheckControlFile(void)
 			{
 				/* Turn on if it was off, and turn off it it was on */
 				if (wannatrace && !prevtracejant)
-					MPItrace_restart_Wrapper();
+					Extrae_restart_Wrapper();
 				else if (!wannatrace && prevtracejant)
-					MPItrace_shutdown_Wrapper();
+					Extrae_shutdown_Wrapper();
 			}
 		}
 
@@ -6892,11 +6892,7 @@ static void Gather_MPITS(void)
 
 #endif /* DEAD_CODE */
 
-/* HSG
-   This should be called _PACX_stats_ ... but it's hardcoded in some macros
-   in trace_macros.h -- should be solved in the future
-*/
-static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp)
+static void PACX_stats_Wrapper (iotimer_t timestamp)
 {
 	unsigned int vec_types[7] =
 		{ PACX_STATS_EV, PACX_STATS_EV, PACX_STATS_EV, PACX_STATS_EV, PACX_STATS_EV,
@@ -6924,22 +6920,22 @@ static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp)
 	Elapsed_Time_In_MPI = 0;
 }
 
-void OMPItrace_network_counters_Wrapper (void)
+void Extrae_network_counters_Wrapper (void)
 {
 	TRACE_MYRINET_HWC();
 }
 
-void OMPItrace_network_routes_Wrapper (int pacx_rank)
+void Extrae_network_routes_Wrapper (int pacx_rank)
 {
 	TRACE_MYRINET_ROUTES(pacx_rank);
 }
 
 /******************************************************************************
- **      Function name : OMPItrace_tracing_tasks_Wrapper
+ **      Function name : Extrae_tracing_tasks_Wrapper
  **      Author: HSG
  **      Description : Let the user choose which tasks must be traced
  ******************************************************************************/
-void OMPItrace_tracing_tasks_Wrapper (int from, int to)
+void Extrae_tracing_tasks_Wrapper (int from, int to)
 {
 	int i, tmp;
 

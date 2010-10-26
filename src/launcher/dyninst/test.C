@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -213,10 +213,10 @@ int main (int argc, char *argv[], const char *envp[])
 	bpatch->setTrampRecursive(true);
 
 	BPatch_process *appProcess = bpatch->processCreate ((const char*) argv[index], (const char**) &argv[index], &envp[0]);
-	fprintf (stdout, "* %s: Stopping execution...\n", "");
+	fprintf (stdout, "* "PACKAGE_NAME": Stopping execution...\n");
 	if (!appProcess->stopExecution())
 	{
-		fprintf (stderr, "* %s: Cannot stop execution of the target application\n", "");
+		fprintf (stderr, "* "PACKAGE_NAME": Cannot stop execution of the target application\n");
 		exit (-1);
 	}
 
@@ -228,7 +228,7 @@ int main (int argc, char *argv[], const char *envp[])
 	fprintf (stdout,"* Starting program execution\n");
 	if (!appProcess->continueExecution())
 	{
-		fprintf (stderr, "* OMPItrace: cannot continue execution of the target application\n");
+		fprintf (stderr, "* "PACKAGE_NAME": cannot continue execution of the target application\n");
 		exit (-1);
 	}
 

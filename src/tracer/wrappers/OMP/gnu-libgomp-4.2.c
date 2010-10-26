@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -960,7 +960,7 @@ int gnu_libgomp_4_2_hook_points (int ntask)
 		/* Has this happened? */
 		/* a) Increase MAX_THD to be higher than omp_get_max_threads() */
 		/* b) Decrease OMP_NUM_THREADS in order to decrease omp_get_max_threads() */
-		fprintf (stderr, PACKAGE_NAME": omp_get_max_threads() > MAX_THD. Aborting...\nRecompile MPItrace increasing MAX_THD or decrease OMP_NUM_THREADS\n");
+		fprintf (stderr, PACKAGE_NAME": omp_get_max_threads() > MAX_THD. Aborting...\nRecompile "PACKAGE_NAME" increasing MAX_THD or decrease OMP_NUM_THREADS\n");
 		exit (1);
 	}
 

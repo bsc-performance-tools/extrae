@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -29,7 +29,12 @@
 
 #include "clock.h"
 
+#ifndef POSIX_CLOCK_H
+#define POSIX_CLOCK_H
+
 iotimer_t posix_getTime (void);
 void posix_Initialize (void);
 void posix_Initialize_thread (void);
+
+#endif
 

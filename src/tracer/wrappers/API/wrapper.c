@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -129,7 +129,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "options.h"
 #endif
 
-int MPItrace_Flush_Wrapper (Buffer_t *buffer);
+int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
 #warning "Control variables below (tracejant, tracejant_mpi, tracejant_hwc_mpi...) should be moved to mode.c and indexed per mode"
 
@@ -1001,7 +1001,7 @@ static int Allocate_buffer_and_file (int thread_id)
 	if (circular_buffering)
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], Buffer_DiscardOldest);
 	else
-		Buffer_SetFlushCallback (TracingBuffer[thread_id], MPItrace_Flush_Wrapper);
+		Buffer_SetFlushCallback (TracingBuffer[thread_id], Extrae_Flush_Wrapper);
 
 #if defined(SAMPLING_SUPPORT)
 	FileName_PTT(tmp_file, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread_id, EXT_TMP_SAMPLE);
@@ -1510,14 +1510,14 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks BUT disabled by EXTRAE_CONTROL_FILE\n\n", world_size);
 
 		/* Just disable the tracing until the control file is created */
-		MPItrace_shutdown_Wrapper(); 	/* Shutdown tracing */
+		Extrae_shutdown_Wrapper();
 		mpitrace_on = 0;		/* Disable full tracing. It will allow us to know if files must be deleted or kept */
 	}
 	else if (mpitrace_on && !CheckForControlFile && CheckForGlobalOpsTracingIntervals)
 	{
 		if (rank == 0)
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size);
-		MPItrace_shutdown_Wrapper(); 	/* Shutdown tracing */
+		Extrae_shutdown_Wrapper();
 	}
 
 	return TRUE;
@@ -1616,7 +1616,7 @@ static void Backend_Finalize_close_mpits (int thread)
  * \param buffer The buffer to be flushed.
  * \return 1 on success, 0 otherwise.
  */ 
-int MPItrace_Flush_Wrapper (Buffer_t *buffer)
+int Extrae_Flush_Wrapper (Buffer_t *buffer)
 {
 	event_t FlushEv_Begin, FlushEv_End;
 	int check_size;
@@ -1668,8 +1668,8 @@ void Backend_Finalize (void)
 	if (THREADID == 0) 
 	{
 		iotimer_t tmp_time = TIME;
-		MPItrace_getrusage_Wrapper (tmp_time);
-		MPItrace_memusage_Wrapper (tmp_time);
+		Extrae_getrusage_Wrapper (tmp_time);
+		Extrae_memusage_Wrapper (tmp_time);
 	}
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 	{

@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -53,9 +53,9 @@ void CtoF77 (mptrace_set_mlp_rank) (int *rank, int *size);
 void remove_file_list (void);
 extern int mpit_gathering_enabled;
 
-void OMPItrace_network_counters_Wrapper (void);
-void OMPItrace_network_routes_Wrapper (int mpi_rank);
-void OMPItrace_tracing_tasks_Wrapper (int from, int to);
+void Extrae_network_counters_Wrapper (void);
+void Extrae_network_routes_Wrapper (int mpi_rank);
+void Extrae_tracing_tasks_Wrapper (int from, int to);
 
 /* Fortran Wrappers */
 

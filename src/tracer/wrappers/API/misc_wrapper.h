@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -33,27 +33,27 @@
 #include "clock.h"
 #include "extrae_types.h"
 
-void MPItrace_init_Wrapper(void);
-void MPItrace_fini_Wrapper(void);
-void MPItrace_shutdown_Wrapper (void);
-void MPItrace_restart_Wrapper (void);
+void Extrae_init_Wrapper(void);
+void Extrae_fini_Wrapper(void);
+void Extrae_shutdown_Wrapper (void);
+void Extrae_restart_Wrapper (void);
 
-void MPItrace_Event_Wrapper (unsigned *tipus, unsigned *valor);
-void MPItrace_N_Event_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
-void MPItrace_Eventandcounters_Wrapper (unsigned *Type, unsigned *Value);
-void MPItrace_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
-void MPItrace_counters_Wrapper ();
-void MPItrace_setcounters_Wrapper (int *evc1, int *evc2);
-void MPItrace_set_options_Wrapper (int options);
-void MPItrace_getrusage_Wrapper (iotimer_t timestamp);
-void MPItrace_memusage_Wrapper (iotimer_t timestamp);
-void MPItrace_user_function_Wrapper (int enter);
-void MPItrace_function_from_address_Wrapper (int type, void *address);
+void Extrae_Event_Wrapper (unsigned *tipus, unsigned *valor);
+void Extrae_N_Event_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
+void Extrae_Eventandcounters_Wrapper (unsigned *Type, unsigned *Value);
+void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
+void Extrae_counters_Wrapper ();
+void Extrae_setcounters_Wrapper (int *evc1, int *evc2);
+void Extrae_set_options_Wrapper (int options);
+void Extrae_getrusage_Wrapper (iotimer_t timestamp);
+void Extrae_memusage_Wrapper (iotimer_t timestamp);
+void Extrae_user_function_Wrapper (int enter);
+void Extrae_function_from_address_Wrapper (int type, void *address);
 
-void MPItrace_next_hwc_set_Wrapper (void);
-void MPItrace_previous_hwc_set_Wrapper (void);
+void Extrae_next_hwc_set_Wrapper (void);
+void Extrae_previous_hwc_set_Wrapper (void);
 
-void MPItrace_notify_new_pthread (void);
+void Extrae_notify_new_pthread (void);
 
 void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr);
 void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);

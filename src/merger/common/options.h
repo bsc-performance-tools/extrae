@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -22,16 +22,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/common/mpi2out.h $
- | @last_commit: $Date: 2010-07-15 19:04:08 +0200 (dj, 15 jul 2010) $
- | @version:     $Revision: 379 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #ifndef _OPTIONS_H_INCLUDED_
 #define _OPTIONS_H_INCLUDED_
 
-#define DEFAULT_PRV_OUTPUT_NAME "MPITRACE_Paraver_Trace.prv"
-#define DEFAULT_DIM_OUTPUT_NAME "MPITRACE_Dimemas_Trace.dim"
+#define DEFAULT_PRV_OUTPUT_NAME "EXTRAE_Paraver_trace.prv"
+#define DEFAULT_DIM_OUTPUT_NAME "EXTRAE_Dimemas_Trace.dim"
 
 int get_option_merge_dump (void);
 void set_option_merge_dump (int b);

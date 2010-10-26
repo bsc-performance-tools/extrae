@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -128,7 +128,7 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm);
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
 
-static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp);
+static void MPI_stats_Wrapper (iotimer_t timestamp);
 
 #define MAX_WAIT_REQUESTS 16384
 
@@ -240,9 +240,9 @@ void CheckGlobalOpsTracingIntervals (void)
 
 	result = GlobalOp_Changes_Trace_Status (MPI_NumOpsGlobals);
 	if (result == SHUTDOWN)
-		MPItrace_shutdown_Wrapper();
+		Extrae_shutdown_Wrapper();
 	else if (result == RESTART)
-		MPItrace_restart_Wrapper();
+		Extrae_restart_Wrapper();
 }
 
 /******************************************************************************
@@ -431,9 +431,9 @@ void CheckControlFile(void)
 			{
 				/* Turn on if it was off, and turn off it it was on */
 				if (wannatrace && !prevtracejant)
-					MPItrace_restart_Wrapper();
+					Extrae_restart_Wrapper();
 				else if (!wannatrace && prevtracejant)
-					MPItrace_shutdown_Wrapper();
+					Extrae_shutdown_Wrapper();
 			}
 		}
 
@@ -6901,7 +6901,7 @@ static void Gather_MPITS(void)
 
 #endif /* DEAD_CODE */
 
-static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp)
+static void MPI_stats_Wrapper (iotimer_t timestamp)
 {
 	unsigned int vec_types[7] =
 		{ MPI_STATS_EV, MPI_STATS_EV, MPI_STATS_EV, MPI_STATS_EV, MPI_STATS_EV,
@@ -6929,14 +6929,14 @@ static void OMPItrace_MPI_stats_Wrapper (iotimer_t timestamp)
 	Elapsed_Time_In_MPI = 0;
 }
 
-void OMPItrace_network_counters_Wrapper (void)
+void Extrae_network_counters_Wrapper (void)
 {
 #if defined(DEAD_CODE)
 	TRACE_MYRINET_HWC();
 #endif
 }
 
-void OMPItrace_network_routes_Wrapper (int mpi_rank)
+void Extrae_network_routes_Wrapper (int mpi_rank)
 {
 	UNREFERENCED_PARAMETER(mpi_rank);
 
@@ -6946,11 +6946,11 @@ void OMPItrace_network_routes_Wrapper (int mpi_rank)
 }
 
 /******************************************************************************
- **      Function name : OMPItrace_tracing_tasks_Wrapper
+ **      Function name : Extrae_tracing_tasks_Wrapper
  **      Author: HSG
  **      Description : Let the user choose which tasks must be traced
  ******************************************************************************/
-void OMPItrace_tracing_tasks_Wrapper (int from, int to)
+void Extrae_tracing_tasks_Wrapper (int from, int to)
 {
 	int i, tmp;
 

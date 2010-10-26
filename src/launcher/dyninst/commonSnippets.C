@@ -1,6 +1,6 @@
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
- *                                  MPItrace                                 *
+ *                                   Extrae                                  *
  *              Instrumentation package for parallel applications            *
  *****************************************************************************
  *     ___     This library is free software; you can redistribute it and/or *
@@ -142,7 +142,7 @@ void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
 void wrapTypeRoutine (BPatch_function *function, string routine, int type,
 	BPatch_image *appImage, BPatch_process *appProcess)
 {
-	string snippet_name = "MPItrace_function_from_address";
+	string snippet_name = "Extrae_function_from_address";
 
   BPatch_Vector<BPatch_point *> *entry_point = function->findPoint(BPatch_entry);
 	if (!entry_point || (entry_point->size() == 0))
