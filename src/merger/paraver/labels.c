@@ -345,7 +345,7 @@ static void Concat_User_Labels (FILE * fd)
   char line[1024];
   FILE *labels;
 
-  if ((str = getenv ("MPTRACE_LABELS")) != NULL)
+  if ((str = getenv ("EXTRAE_LABELS")) != NULL)
   {
     labels = fopen (str, "r");
     if (labels == NULL)
