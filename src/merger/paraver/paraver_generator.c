@@ -1152,7 +1152,10 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 #endif /* PARALLEL_MERGE */
 
 	if (taskid == 0)
+	{
+		fprintf (stdout, "mpi2prv: Resulting tracefile occupies %lld bytes\n", (long long) FDZ_TELL(prv_fd));
 		FDZ_CLOSE (prv_fd);
+	}
 
 	Free_FS (fset);
 
