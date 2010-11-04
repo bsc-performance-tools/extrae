@@ -91,14 +91,18 @@
            EXTRAE\_CONFIG\_FILE=extrae.xml ./mpi\_program \$@ real\_params}\\
 
 \item {\bf Question:} The application blocks at the beginning?\\
-      {\bf Answer:  } The application may be waiting for all tasks to startup but only some of them are running. Check for the previous question.
+      {\bf Answer  :} The application may be waiting for all tasks to startup but only some of them are running. Check for the previous question.
 
 \item {\bf Question:} The resulting traces does not contain the routines that have been instrumented.\\
       {\bf Answer 1:} Check that the routines have been actually executed.\\
       {\bf Answer 2:} Some compilers do automatic inlining of functions at some optimization levels (e.g., Intel Compiler at -O2). When functions are inlined, they do not have entry and exit blocks and cannot be instrumented. Turn off inlining or decrease the optimization level.
 
 \item {\bf Question:} Number of threads = 1?\\
-      {\bf Answer:} Some MPI launchers ({\it i.e.} mpirun, poe, mprun...) do not export all the environment variables to all tasks. Look at chapter \ref{cha:Examples} to workaround this and/or contact your support staff to know how to do it.
+      {\bf Answer  :} Some MPI launchers ({\it i.e.} mpirun, poe, mprun...) do not export all the environment variables to all tasks. Look at chapter \ref{cha:Examples} to workaround this and/or contact your support staff to know how to do it.
+
+\item {\bf Question:} When running the instrumented application, the loader complains about:\\
+              {\tt undefined symbol: clock\_gettime}\\
+      {\bf Answer  :} The instrumentation package was configured using {\tt --enable-posix-clock} and on many systems this implies the inclusion of additional libraries (namely, {\tt -lrt}).
 
 \end{itemize}
 
