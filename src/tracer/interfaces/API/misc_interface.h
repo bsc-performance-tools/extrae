@@ -79,10 +79,12 @@
 
 #if !defined(IS_CELL_MACHINE)
 # define INTERFACE_ALIASES_F(base_lo,base_up,orig,params) \
+  void extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
   void mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
   void omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
   void ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
   void seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+  void extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
   void mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
   void omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
   void ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
@@ -91,17 +93,20 @@
   void omptrace##base_lo params  __attribute__ ((alias (#orig))); \
   void ompitrace##base_lo params __attribute__ ((alias (#orig))); \
   void seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
+  void EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
   void MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
   void OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
   void OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
   void SEQTRACE##base_up params  __attribute__ ((alias (#orig)));
 #else
 # define INTERFACE_ALIASES_F(base_lo,base_up,orig,params) \
+  void extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
   void mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
   void omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
   void ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
   void seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
   void pputrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+  void extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
   void mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
   void omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
   void ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
@@ -112,6 +117,7 @@
   void ompitrace##base_lo params __attribute__ ((alias (#orig))); \
   void seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
   void pputrace##base_lo params  __attribute__ ((alias (#orig))); \
+  void EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
   void MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
   void OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
   void OMPITRACE##base_up params __attribute__ ((alias (#orig))); \

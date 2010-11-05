@@ -571,7 +571,7 @@ INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_fu
 void extrae_function_from_address (int *type, void *address)
 {
 	if (mpitrace_on)
-		Extrae_function_from_address_Wrapper (type, address);
+		Extrae_function_from_address_Wrapper (*type, address);
 }
 
 #if defined(PTHREAD_SUPPORT)
