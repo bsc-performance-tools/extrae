@@ -3,6 +3,7 @@
  1.a) Make sure that all files have:
       - License text on top
       - SVN keywords (command svn propset svn:keywords "Date Revision Author HeadURL Id" [-R] [directories/files])
+ 1.b) Keep ChangeLog file up-to-date
 
 2) Change the version in the configure.ac (see AC_INIT)
 
