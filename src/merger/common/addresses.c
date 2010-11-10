@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/common/communicators.c $
- | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
- | @version:     $Revision: 476 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #include <common.h>
@@ -43,7 +43,7 @@
 
 #define AC_ALLOC_CHUNK 256
 
-static char UNUSED rcsid[] = "$Id: communicators.c 476 2010-10-26 12:58:30Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 void AddressCollector_Initialize (struct address_collector_t *ac)
 {
