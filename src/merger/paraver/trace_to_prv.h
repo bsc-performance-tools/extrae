@@ -35,6 +35,7 @@
 # include "zlib.h"
 #endif
 
+#include "addresses.h"
 #include "cpunode.h"
 #include "fdz.h"
 
@@ -47,6 +48,7 @@ int Paraver_ProcessTraceFiles (char *prvName, unsigned long nfiles,
 
 extern int **EnabledTasks;
 extern unsigned long long **EnabledTasks_time;
+extern struct address_collector_t CollectedAddresses;
 
 void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task);
 

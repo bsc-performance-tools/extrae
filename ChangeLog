@@ -2,6 +2,21 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (09/Nov/2010) Bugfix, mpi2prv triead *always* to generate dimemas traces.
+                   New -sort-addresses functionality in merger, to sort addresses of
+                     MPI callers, user functions and so.
+                   Improved XML parsing (env vars & case insensitive)
+                   Added aliases to Extrae_* API/fortran
+                   Added -fno-optimize-sibling call to avoid unexpected
+                     optimizations (we found that sometimes some routines were
+                     called directly skipping routines: for example,
+                     misc_interface calls did not appear)
+                   Simplified behavior with/without -e and with/without BFD
+                     support:
+                     * no bfd support / no -e / -e and invalid binary,
+                       addresses are left unchanged in the trace
+                     * -e binary translates addresses to source code through
+                       dictionary
    * (20/Oct/2010) added -with-dwarf for dyninst
                    support for upcoming dyninst (post 6.1)
    + (18/Oct/2010) .sym file is automatically loaded based on the .mpits files given through -f at merge step

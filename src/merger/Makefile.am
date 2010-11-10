@@ -18,7 +18,8 @@ common_FILES = \
  common/cpunode.c common/cpunode.h \
  common/mpi2out.c common/mpi2out.h \
  common/options.c common/options.h \
- common/semantics.c common/semantics.h
+ common/semantics.c common/semantics.h \
+ common/addresses.c common/addresses.h
 
 dimemas_FILES = \
  dimemas/dimemas_generator.c dimemas/dimemas_generator.h \

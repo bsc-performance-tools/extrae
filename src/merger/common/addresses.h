@@ -22,49 +22,30 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/common/communicators.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+#ifndef _ADDRESSES_H_
+#define _ADDRESSES_H_
 
-#include "config.h"
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
+struct address_collector_t
 {
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
+	UINT64 *addresses;
+	int *types;
+	unsigned count;
+	unsigned allocated;
+};
 
-	int InputForWorker;           /* Which task is responsible for this file */
+void AddressCollector_Initialize (struct address_collector_t *ac);
+void AddressCollector_Add (struct address_collector_t *ac, UINT64 address, int type);
+unsigned AddressCollector_Count (struct address_collector_t *ac);
+UINT64* AddressCollector_GetAllAddresses (struct address_collector_t *ac);
+int* AddressCollector_GetAllTypes (struct address_collector_t *ac);
 
-	int fd;
-	char *name;
-	char *node;
-}
-input_t;
-
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
-
-void merger_pre (int numtasks);
-void ProcessArgs (int numtasks, int rank, int argc, char *argv[]);
-int merger_post (int numtasks, int idtask);
-
-void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype);
-
+#if defined(PARALLEL_MERGE)
+void AddressCollector_GatherAddresses (int numtasks, int taskid, struct address_collector_t *ac);
 #endif
+#endif
+

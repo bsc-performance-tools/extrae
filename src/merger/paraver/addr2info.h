@@ -56,13 +56,15 @@
 
 /* Public routines */
 void Address2Info_Initialize (char * binary);
-int  Address2Info_Translate (UINT64 address, int event_type, int uniqueID);
+int Address2Info_Initialized (void);
+UINT64  Address2Info_Translate (UINT64 address, int event_type, int uniqueID);
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_line, int uniqueid);
 void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid);
 int Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
   char * filename, int line);
+void Address2Info_Sort (int unique_ids);
 
 enum
 {

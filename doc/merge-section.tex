@@ -75,12 +75,16 @@ These are the available options for the sequential Paraver merger:
  Choose the name of the target Paraver tracefile compressed using the libz library.
  \item {\tt -skip-sendrecv}\\
  Do not match point to point communications issued by {\tt MPI\_Sendrecv} or {\tt MPI\_Sendrecv\_replace}.
+ \item {\tt -sort-addresses}\\
+ Sort event values that reference source code locations so as the values are sorted by file name first and then line number.
  \item {\tt -split-states}\\
  Do not join consecutive states that are the same into a single one.
  \item {\tt -syn}\\
  If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI\_Init call. This will usually lead to "synchronized" tasks, but it will depend on how the clocks advance in time.
  \item {\tt -syn-node}\\
  If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI\_Init call and the node where they ran. This will usually lead to better synchronized tasks than using -syn, but, again, it will depend on how the clocks advance in time.
+ \item {\tt -unique-caller-id}\\
+ Choose whether use a unique value identifier for different callers locations (MPI calling routines, user routines, OpenMP outlined routines andpthread routines).
  \item {\tt -xyzt} {\em (Only available on BG/L and BG/P systems)}\\
  Generates an additional output file containing the coordinates of each task in the network.
 \end{itemize}

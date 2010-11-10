@@ -62,6 +62,7 @@
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
+    sort-addresses="no"
   >
     pi_omp.prv
   </merge>

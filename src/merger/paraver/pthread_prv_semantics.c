@@ -92,6 +92,12 @@ static int pthread_Function_Event (event_t * current_event,
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 
+	if (get_option_merge_SortAddresses())
+	{
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_LINE);
+	}
+
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREADFUNC_EV, EvValue);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREADFUNC_LINE_EV, EvValue);

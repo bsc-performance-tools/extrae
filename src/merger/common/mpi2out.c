@@ -70,6 +70,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "addr2info_hashcache.h"
 #include "paraver_state.h"
 #include "options.h"
+#include "addresses.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -124,8 +125,10 @@ void Help (const char *ProgName)
           "              Do not merge consecutives states that are the same.\n"
           "    -skip-sendrecv\n"
           "              Do not emit communication for SendReceive operations.\n"
-          "    -[no-]unique-caller-id\n"
+          "    -unique-caller-id\n"
           "              Choose whether use a unique value identifier for different callers.\n"  
+          "    -sort-addresses\n"
+					"              Sort file name, line events in information linked with source code.\n"
           "    --        Take the next trace files as a diferent parallel task.\n"
           "\n",
           ProgName, ProgName, ProgName);
@@ -305,8 +308,7 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
  ***  ProcessArgs
  ******************************************************************************/
 
-void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
-	int *PRVFormat)
+void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 {
 	char *BinaryName;
 	int CurArg;
@@ -515,6 +517,16 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 			set_option_merge_UseDiskForComms (FALSE);
 			continue;
 		}
+		if (!strcmp (argv[CurArg], "-sort-addresses"))
+		{
+			set_option_merge_SortAddresses (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-sort-addresses"))
+		{
+			set_option_merge_SortAddresses (FALSE);
+			continue;
+		}
 #if defined(PARALLEL_MERGE)
 		if (!strcmp (argv[CurArg], "-cyclic"))
 		{
@@ -666,7 +678,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[],
 	/* Specific things to be applied per format */
 	if (rank == 0)
 	{
-		if (!(*PRVFormat))
+		if (!get_option_merge_ParaverFormat())
 		{
 			/* Dimemas traces doesn't know about synchronization */
 			set_option_merge_SincronitzaTasks (FALSE);
@@ -869,7 +881,7 @@ void merger_pre (int numtasks)
 
 /* To be called after ProcessArgs */
 
-int merger_post (int numtasks, int idtask, int PRVFormat)
+int merger_post (int numtasks, int taskid)
 {
 	unsigned long long records_per_task;
 #if defined(PARALLEL_MERGE)
@@ -884,19 +896,19 @@ int merger_post (int numtasks, int idtask, int PRVFormat)
 #if defined(PARALLEL_MERGE)
 	if (get_option_merge_TreeFanOut() == 0)
 	{
-		if (idtask == 0)
+		if (taskid == 0)
 			fprintf (stdout, "mpi2prv: Tree order is not set. Setting automatically to %d\n", numtasks);
 		set_option_merge_TreeFanOut (numtasks);
 	}
 	else if (get_option_merge_TreeFanOut() > numtasks)
 	{
-		if (idtask == 0)
+		if (taskid == 0)
 			fprintf (stdout, "mpi2prv: Tree order is set to %d but is larger that numtasks. Setting to tree order to %d\n", get_option_merge_TreeFanOut(), numtasks);
 		set_option_merge_TreeFanOut (numtasks);
 	}
 	else if (get_option_merge_TreeFanOut() <= numtasks)
 	{
-		if (idtask == 0)
+		if (taskid == 0)
 			fprintf (stdout, "mpi2prv: Tree order is set to %d\n", get_option_merge_TreeFanOut());
 	}
 #endif
@@ -907,7 +919,7 @@ int merger_post (int numtasks, int idtask, int PRVFormat)
 
 	if (0 == records_per_task)
 	{
-		if (0 == idtask)
+		if (0 == taskid)
 			fprintf (stderr, "mpi2prv: Error! Assigned memory by -maxmem is insufficient for this number of tasks\n");
 		exit (-1);
 	}
@@ -925,8 +937,8 @@ int merger_post (int numtasks, int idtask, int PRVFormat)
 	nodenames[0] = nodename;
 #endif
 
-	PrintNodeNames (numtasks, idtask, nodenames);
-	DistributeWork (numtasks, idtask);
+	PrintNodeNames (numtasks, taskid, nodenames);
+	DistributeWork (numtasks, taskid);
 	NodeCPUinfo = AssignCPUNode (nTraces, InputTraces);
 
 	if (AutoSincronitzaTasks)
@@ -938,7 +950,7 @@ int merger_post (int numtasks, int idtask, int PRVFormat)
 			all_nodes_are_equal = (first_node == InputTraces[i].nodeid);
     set_option_merge_SincronitzaTasks (!all_nodes_are_equal);
 
-		if (0 == idtask)
+		if (0 == taskid)
 		{
 			fprintf (stdout, "mpi2prv: Time synchronization has been turned %s\n", get_option_merge_SincronitzaTasks()?"on":"off");
 			fflush (stdout);
@@ -969,14 +981,24 @@ int merger_post (int numtasks, int idtask, int PRVFormat)
 #endif
 #endif
 
-	if (PRVFormat)
+	if (get_option_merge_SortAddresses() && !Address2Info_Initialized())
+	{
+		if (taskid == 0)
+		{
+			fprintf (stderr, "mpi2prv: WARNING! Ignoring '-sort-addresses' because addresses can't be translated.\n");
+			fprintf (stderr, "mpi2prv:          Check for -e parameter, and if it's given, check for the package configuration.\n");
+		}	
+		set_option_merge_SortAddresses (FALSE);
+	}
+
+	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
 			nTraces, InputTraces, get_option_merge_NumApplications(),
-			NodeCPUinfo, numtasks, idtask);
+			NodeCPUinfo, numtasks, taskid);
 	else
 		error = Dimemas_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
 			nTraces, InputTraces, get_option_merge_NumApplications(),
-			NodeCPUinfo, numtasks, idtask);
+			NodeCPUinfo, numtasks, taskid);
 
 	if (error)
 		fprintf (stderr, "mpi2prv: An error has been encountered when generating the tracefile. Dying...\n");

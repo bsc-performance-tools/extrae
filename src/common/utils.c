@@ -425,6 +425,7 @@ static char * concat(char **prefix_ptr, char *suffix)
    return ret;
 }
 
+#if defined(DEAD_CODE)
 /* Replaces the text between start and end delimiters for the return value of the callback 'function' */
 static char * expand(char *input, const char *start_delim, const char *end_delim, char *(*function)(const char *))
 {
@@ -496,4 +497,5 @@ static char * expand(char *input, const char *start_delim, const char *end_delim
    xfree(str);
    return expanded_str;
 }
+#endif
 

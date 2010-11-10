@@ -61,8 +61,8 @@ int main (int argc, char *argv[])
 	MPI_CHECK (res, MPI_Comm_size, "Failed to call MPI_Comm_rank");
 
 	merger_pre (ntasks);
-	ProcessArgs (ntasks, idtask, argc, argv, &PRVFormat);
-	merger_post (ntasks, idtask, PRVFormat);
+	ProcessArgs (ntasks, idtask, argc, argv);
+	merger_post (ntasks, idtask);
 
 	res = MPI_Finalize ();
 	MPI_CHECK (res, MPI_Finalize, "Failed to uninitialize MPI");
@@ -75,8 +75,8 @@ int main (int argc, char *argv[])
 	int PRVFormat;
 
 	merger_pre (1);
-	ProcessArgs (1, 0, argc, argv, &PRVFormat);
-	merger_post (1, 0, PRVFormat);
+	ProcessArgs (1, 0, argc, argv);
+	merger_post (1, 0);
 
 	return 0;
 }

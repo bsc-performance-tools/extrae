@@ -121,17 +121,18 @@ static xmlChar * deal_xmlChar_env (int rank, xmlChar *str)
 	int initial = 0;
 	int sublen = 0;
 	int length = xmlStrlen (str);
+	int final = length;
 
 	/* First get rid of the leading and trailing white spaces */
 	for (i = 0; i < length; i++)
 		if (!is_Whitespace (str[i]))
 			break;
 	initial = i;
-	for (; i < length; i++)
-		if (!is_Whitespace (str[i]))
-			sublen++;
-		else
+	for (; final >= i; final++)
+		if (!is_Whitespace (str[final]))
 			break;
+
+	sublen = final - initial;
 
 	tmp = xmlStrsub (str, initial, sublen);
 
@@ -214,14 +215,14 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
+		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
 		{
 		}
 		/* Shall we gather counters in the MPI calls? */
-		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* PACX may have initialized it */
+			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* PACX may have initialized it */
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
@@ -251,14 +252,14 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
+		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
 		{
 		}
 		/* Shall we gather counters in the PACX calls? */
-		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* MPI may have initialized it */
+			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* MPI may have initialized it */
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": PACX routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
@@ -289,15 +290,15 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Must the tracing facility obtain information about MPI/PACX callers? */
-		else if (!xmlStrcmp (tag->name, TRACE_MPI))
+		else if (!xmlStrcasecmp (tag->name, TRACE_MPI))
 		{
 #if defined(MPI_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *callers = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (callers != NULL)
@@ -309,11 +310,11 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support MPI.\n", TRACE_MPI);
 #endif
 		}
-		else if (!xmlStrcmp (tag->name, TRACE_PACX))
+		else if (!xmlStrcasecmp (tag->name, TRACE_PACX))
 		{
 #if defined(PACX_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *callers = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (callers != NULL)
@@ -326,11 +327,11 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 #endif
 		}
 		/* Must the tracing facility obtain information about callers at sample points? */
-		else if (!xmlStrcmp (tag->name, TRACE_SAMPLING))
+		else if (!xmlStrcasecmp (tag->name, TRACE_SAMPLING))
 		{
 #if defined(SAMPLING_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *callers = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (callers != NULL)
@@ -362,14 +363,14 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Buffer size of the SPU tracing unit  */
-		else if (!xmlStrcmp (tag->name, TRACE_SPU_BUFFERSIZE))
+		else if (!xmlStrcasecmp (tag->name, TRACE_SPU_BUFFERSIZE))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				spu_buffer_size = (str!=NULL)?atoi (str):-1;
@@ -387,11 +388,11 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			XML_FREE(enabled); 
 		}
 		/* DMA tag configuration for bulk transferences */
-		else if (!xmlStrcmp (tag->name, TRACE_SPU_DMATAG))
+		else if (!xmlStrcasecmp (tag->name, TRACE_SPU_DMATAG))
 		{
 #ifndef SPU_USES_WRITE
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				spu_dma_channel = (str!=NULL)?atoi (str):-1;
@@ -412,10 +413,10 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #endif
 		}
 		/* SPU hosted file size limit */
-		else if (!xmlStrcmp (tag->name, TRACE_SPU_FILESIZE))
+		else if (!xmlStrcasecmp (tag->name, TRACE_SPU_FILESIZE))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				spu_file_size = (str!=NULL)?atoi (str):-1;
@@ -452,14 +453,14 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Which is the threshold for the Bursts? */
-		else if (!xmlStrcmp (tag->name, TRACE_THRESHOLD))
+		else if (!xmlStrcasecmp (tag->name, TRACE_THRESHOLD))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (str != NULL)
@@ -470,16 +471,16 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 			}
 			XML_FREE(enabled);
 		}
-		else if (!xmlStrcmp (tag->name, TRACE_MPI_STATISTICS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_MPI_STATISTICS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
 			XML_FREE(enabled);
 		}
-		else if (!xmlStrcmp (tag->name, TRACE_PACX_STATISTICS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_PACX_STATISTICS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
 			XML_FREE(enabled);
 		}
 		else
@@ -509,14 +510,14 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Shall we gather counters in the UF calls? */
-		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_uf = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
+			tracejant_hwc_uf = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": User Function routines will %scollect HW counters information.\n", tracejant_hwc_uf?"":"NOT ");
 #else
@@ -526,10 +527,10 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			XML_FREE(enabled);
 		}
 		/* Will we limit the depth of the UF calls? */
-		else if (!xmlStrcmp (tag->name, TRACE_MAX_DEPTH))
+		else if (!xmlStrcasecmp (tag->name, TRACE_MAX_DEPTH))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)))
+			if ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)))
 			{
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				int depth = (str != NULL)? atoi (str): 0;
@@ -564,23 +565,23 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Shall we instrument openmp lock routines? */
-		else if (!xmlStrcmp (tag->name, TRACE_OMP_LOCKS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_OMP_LOCKS))
 		{
 #if defined(OMP_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			setTrace_OMPLocks ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
+			setTrace_OMPLocks ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 			XML_FREE(enabled);
 #endif
 		}
 		/* Shall we gather counters in the UF calls? */
-		else if (!xmlStrcmp (tag->name, TRACE_COUNTERS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_omp = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
+			tracejant_hwc_omp = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": OpenMP routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT");
 #else
@@ -609,14 +610,14 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Does the user want to change the file size? */
-		else if (!xmlStrcmp (tag->name, TRACE_SIZE))
+		else if (!xmlStrcasecmp (tag->name, TRACE_SIZE))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *fsize = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (fsize != NULL)
@@ -636,36 +637,36 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			XML_FREE(enabled);
 		}
 		/* Where must we store the intermediate files? DON'T FREE it's used below */
-		else if (!xmlStrcmp (tag->name, TRACE_DIR))
+		else if (!xmlStrcasecmp (tag->name, TRACE_DIR))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 				temporal_d = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 			XML_FREE(enabled);
 		}
 		/* Where must we store the final intermediate files?  DON'T FREE it's used below */
-		else if (!xmlStrcmp (tag->name, TRACE_FINAL_DIR))
+		else if (!xmlStrcasecmp (tag->name, TRACE_FINAL_DIR))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 				final_d = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 			XML_FREE(enabled);
 		}
 #if defined(MPI_SUPPORT)
 		/* Must the tracing gather the MPITs into one process? */
-		else if (!xmlStrcmp (tag->name, TRACE_GATHER_MPITS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_GATHER_MPITS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			mpit_gathering_enabled = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
+			mpit_gathering_enabled = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 			mfprintf (stdout, PACKAGE_NAME": All MPIT files will %s be gathered at the end of the execution!\n", mpit_gathering_enabled?"":"NOT");
 			XML_FREE(enabled);
 		}
 #endif
 		/* Obtain the MPIT prefix */
-		else if (!xmlStrcmp (tag->name, TRACE_PREFIX))
+		else if (!xmlStrcasecmp (tag->name, TRACE_PREFIX))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *p_name = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				strncpy (PROGRAM_NAME, p_name, sizeof(PROGRAM_NAME));
@@ -699,14 +700,14 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Must we limit the buffer size? */
-		else if (!xmlStrcmp (tag->name, TRACE_SIZE))
+		else if (!xmlStrcasecmp (tag->name, TRACE_SIZE))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *bsize = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (bsize != NULL)
@@ -720,10 +721,10 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 			XML_FREE(enabled);
 		}
 		/* Do we activate the circular buffering ? */
-		else if (!xmlStrcmp (tag->name, TRACE_CIRCULAR))
+		else if (!xmlStrcasecmp (tag->name, TRACE_CIRCULAR))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				mfprintf (stdout, PACKAGE_NAME": Circular buffer %s.\n", circular_buffering?"enabled":"disabled");
 				circular_buffering = 1;
@@ -754,13 +755,13 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 	while (set_tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
 		{
 		}
-		else if (!xmlStrcmp (set_tag->name, TRACE_SAMPLING))
+		else if (!xmlStrcasecmp (set_tag->name, TRACE_SAMPLING))
 		{
 			enabled = xmlGetProp_env (rank, set_tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 				if (atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)) > 0)
 					num_sampling_hwc++;
 			XML_FREE(enabled);
@@ -779,13 +780,13 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 		while (set_tag != NULL && i < num_sampling_hwc)
 		{
 			/* Skip coments */
-			if (!xmlStrcmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
+			if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
 			{
 			}
-			else if (!xmlStrcmp (set_tag->name, TRACE_SAMPLING))
+			else if (!xmlStrcasecmp (set_tag->name, TRACE_SAMPLING))
 			{
 				enabled = xmlGetProp_env (rank, set_tag, TRACE_ENABLED);
-				if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+				if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 				{
 					t_counters[i] = (char*) xmlNodeListGetString_env (rank, xmldoc, set_tag->xmlChildrenNode, 1);
 					/* t_frequencies[i] = atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)); */
@@ -823,17 +824,17 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 	while (set_tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
 		{
 		}
-		else if (!xmlStrcmp (set_tag->name, TRACE_HWCSET))
+		else if (!xmlStrcasecmp (set_tag->name, TRACE_HWCSET))
 		{
 			/* This 'numofsets' is the pretended number of set in the XML line. 
 			It will help debugging the XML when multiple sets are defined */
 			numofsets++;
 
 			enabled = xmlGetProp_env (rank, set_tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				int OvfNum;
 				char **OvfCounters;
@@ -881,16 +882,16 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 		/* Here we will check all the options for <counters tag>. Nowadays the only
 		   available subtag is <cpu> which depends on the availability of PAPI. */
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Check if the HWC are being configured at the XML. If so, init them
 	   and gather all the sets so as to usem them later. */
-		else if (!xmlStrcmp (tag->name, TRACE_CPU))
+		else if (!xmlStrcasecmp (tag->name, TRACE_CPU))
 		{
 			xmlChar *hwc_enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			char *hwc_startset = (char*) xmlGetProp_env (rank, tag, TRACE_STARTSET);
-			if (hwc_enabled != NULL && !xmlStrcmp(hwc_enabled, xmlYES))
+			if (hwc_enabled != NULL && !xmlStrcasecmp(hwc_enabled, xmlYES))
 			{
 #if USE_HARDWARE_COUNTERS
 				HWC_Initialize (0);
@@ -905,26 +906,26 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 			XML_FREE(hwc_startset);
 			XML_FREE(hwc_enabled);
 		}
-		else if (!xmlStrcmp (tag->name, TRACE_NETWORK))
+		else if (!xmlStrcasecmp (tag->name, TRACE_NETWORK))
 		{
 #if defined(TEMPORARILY_DISABLED)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_network_hwc = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			tracejant_network_hwc = (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
 			mfprintf (stdout, PACKAGE_NAME": Network counters are %s.\n", tracejant_network_hwc?"enabled":"disabled");
 			XML_FREE(enabled);
 #endif
 		}
-		else if (!xmlStrcmp (tag->name, TRACE_RUSAGE))
+		else if (!xmlStrcasecmp (tag->name, TRACE_RUSAGE))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_rusage = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			tracejant_rusage = (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
 			mfprintf (stdout, PACKAGE_NAME": Resource usage is %s at flush buffer.\n", tracejant_rusage?"enabled":"disabled");
 			XML_FREE(enabled);
 		}
-		else if (!xmlStrcmp (tag->name, TRACE_MEMUSAGE))
+		else if (!xmlStrcasecmp (tag->name, TRACE_MEMUSAGE))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_memusage = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
+			tracejant_memusage = (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
 			mfprintf (stdout, PACKAGE_NAME": Memory usage is %s at flush buffer.\n", tracejant_memusage?"enabled":"disabled");
 			XML_FREE(enabled);
 		}
@@ -945,10 +946,10 @@ static void Parse_XML_MRNet (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
     while (tag != NULL)
     {
         /* Skip coments */
-        if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+        if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
         {
         }
-        else if (!xmlStrcmp (tag->name, RC_MRNET_SPECTRAL))
+        else if (!xmlStrcasecmp (tag->name, RC_MRNET_SPECTRAL))
         {
 			/* Spectral analysis options */
 			xmlChar *min_seen = xmlGetProp_env (rank, tag, SPECTRAL_MIN_SEEN);
@@ -957,7 +958,7 @@ static void Parse_XML_MRNet (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 
 			MRNCfg_SetupSpectral ( atoi(min_seen), atoi(max_periods), atoi(num_iters) );
 		}
-		else if (!xmlStrcmp (tag->name, RC_MRNET_CLUSTERING))
+		else if (!xmlStrcasecmp (tag->name, RC_MRNET_CLUSTERING))
 		{
 			/* Clustering analysis options */
 			xmlChar *max_tasks = xmlGetProp_env (rank, tag, CLUSTERING_MAX_TASKS);
@@ -986,13 +987,13 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
-		else if (!xmlStrcmp (tag->name, REMOTE_CONTROL_METHOD_MRNET))
+		else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_MRNET))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				xmlChar *target = xmlGetProp_env (rank, tag, RC_MRNET_TARGET);
 				xmlChar *analysis = xmlGetProp_env (rank, tag, RC_MRNET_ANALYSIS);
@@ -1009,11 +1010,11 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 				/* Configure the analysis type */
 				if ((analysis != NULL) && (start_after != NULL))
 				{
-					if (xmlStrcmp (analysis, (xmlChar*) "clustering") == 0)
+					if (xmlStrcasecmp (analysis, (xmlChar*) "clustering") == 0)
 					{
 						MRNCfg_SetAnalysisType(MRN_ANALYSIS_CLUSTER, atoi(start_after));
 					}
-					else if (xmlStrcmp (analysis, (xmlChar*) "spectral") == 0)
+					else if (xmlStrcasecmp (analysis, (xmlChar*) "spectral") == 0)
 					{
 						MRNCfg_SetAnalysisType(MRN_ANALYSIS_SPECTRAL, atoi(start_after));
 					}
@@ -1046,10 +1047,10 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 			}
 			XML_FREE(enabled);
 		}
-		else if (!xmlStrcmp (tag->name, REMOTE_CONTROL_METHOD_SIGNAL))
+		else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_SIGNAL))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				fprintf(stderr, "Parsing SIGNAL XML SUBSEC\n");
 				countRemotesEnabled++;
@@ -1058,12 +1059,12 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 				xmlChar *which = xmlGetProp_env (rank, tag,  RC_SIGNAL_WHICH);
 				if (which != NULL)
 				{
-					if ((xmlStrcmp (which, (xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (xmlChar*) "") == 0))
+					if ((xmlStrcasecmp (which, (xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (xmlChar*) "") == 0))
 					{
 						mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush buffers to disk and stop further tracing\n");
 						Signals_SetupFlushAndTerminate (SIGUSR1);
 					}
-					else if (xmlStrcmp (which, (xmlChar *) "USR2") == 0)
+					else if (xmlStrcasecmp (which, (xmlChar *) "USR2") == 0)
 					{
 						mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush buffers to disk and stop further tracing\n");
 						Signals_SetupFlushAndTerminate (SIGUSR2);
@@ -1099,14 +1100,14 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Must we check for a control file? */
-		else if (!xmlStrcmp (tag->name, TRACE_CONTROL_FILE))
+		else if (!xmlStrcasecmp (tag->name, TRACE_CONTROL_FILE))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *c_file = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (c_file != NULL)
@@ -1138,10 +1139,10 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 			XML_FREE(enabled);
 		}
 		/* Must we check for global-ops counters? */
-		else if (!xmlStrcmp (tag->name, TRACE_CONTROL_GLOPS))
+		else if (!xmlStrcasecmp (tag->name, TRACE_CONTROL_GLOPS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 #if defined(MPI_SUPPORT)
 				char *trace_intervals = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
@@ -1157,16 +1158,16 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 			}
 			XML_FREE(enabled);
 		}
-		else if (!xmlStrcmp (tag->name, TRACE_REMOTE_CONTROL))
+		else if (!xmlStrcasecmp (tag->name, TRACE_REMOTE_CONTROL))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				Parse_XML_RemoteControl (rank, xmldoc, tag);
 
 #if defined(DEAD_CODE)
 				xmlChar *method = xmlGetProp_env (rank, tag, TRACE_REMOTE_CONTROL_METHOD);
-				if (method != NULL && !xmlStrcmp (method, TRACE_REMOTE_CONTROL_MRNET))
+				if (method != NULL && !xmlStrcasecmp (method, TRACE_REMOTE_CONTROL_MRNET))
 				{
 #if defined(HAVE_MRNET)
 					Signals_SetupPauseAndResume (SIGUSR1, SIGUSR2);
@@ -1175,18 +1176,18 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 					mfprintf(stdout, PACKAGE_NAME": Remote control set to \"mrnet\" but MRNet is not supported.\n");
 #endif 
 				}
-				else if (method != NULL && !xmlStrcmp (method, TRACE_REMOTE_CONTROL_SIGNAL))
+				else if (method != NULL && !xmlStrcasecmp (method, TRACE_REMOTE_CONTROL_SIGNAL))
 				{
 					/* Which SIGNAL will we use to interrupt the tracing */
 					xmlChar *str = xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 					if (str != NULL)
 					{
-						if ((xmlStrcmp (str, (xmlChar*) "USR1") == 0) || (xmlStrcmp (str, (xmlChar*) "") == 0))
+						if ((xmlStrcasecmp (str, (xmlChar*) "USR1") == 0) || (xmlStrcmp (str, (xmlChar*) "") == 0))
 						{
 							mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush the buffers to the disk and stop further tracing\n");
 							Signals_SetupFlushAndTerminate (SIGUSR1);
 						}
-						else if (xmlStrcmp (str, (xmlChar *) "USR2") == 0)
+						else if (xmlStrcasecmp (str, (xmlChar *) "USR2") == 0)
 						{
 							mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush the buffers to the disk and stop further tracing\n");
 							Signals_SetupFlushAndTerminate (SIGUSR2);
@@ -1227,31 +1228,38 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 #endif
 	xmlChar *maxmemory;
 	xmlChar *jointstates;
+	xmlChar *sortaddresses;
 	xmlChar *keepmpits; /* This is ignored currently! */
 	char *filename;
 
-	if (tracetype != NULL && !xmlStrcmp (tracetype, TRACE_TYPE_DIMEMAS))
+	if (tracetype != NULL && !xmlStrcasecmp (tracetype, TRACE_TYPE_DIMEMAS))
 		set_option_merge_ParaverFormat (FALSE);
 	else
 		set_option_merge_ParaverFormat (TRUE);
 
+	sortaddresses = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SORTADDRESSES);
+	if (sortaddresses != NULL)
+		set_option_merge_SortAddresses (!xmlStrcasecmp (sortaddresses, xmlYES));
+	else
+		set_option_merge_SortAddresses (FALSE);
+
 	synchronization = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SYNCHRONIZATION);
-	if (synchronization != NULL && !xmlStrcmp (synchronization, TRACE_MERGE_SYN_DEFAULT))
+	if (synchronization != NULL && !xmlStrcasecmp (synchronization, TRACE_MERGE_SYN_DEFAULT))
 	{
 		set_option_merge_SincronitzaTasks (TRUE);
 		set_option_merge_SincronitzaTasks_byNode (TRUE);
 	}
-	else if (synchronization != NULL && !xmlStrcmp (synchronization, TRACE_MERGE_SYN_NODE))
+	else if (synchronization != NULL && !xmlStrcasecmp (synchronization, TRACE_MERGE_SYN_NODE))
 	{
 		set_option_merge_SincronitzaTasks (TRUE);
 		set_option_merge_SincronitzaTasks_byNode (TRUE);
 	}
-	else if (synchronization != NULL && !xmlStrcmp (synchronization, TRACE_MERGE_SYN_TASK))
+	else if (synchronization != NULL && !xmlStrcasecmp (synchronization, TRACE_MERGE_SYN_TASK))
 	{
 		set_option_merge_SincronitzaTasks (TRUE);
 		set_option_merge_SincronitzaTasks_byNode (FALSE);
 	}
-	else if (synchronization != NULL && !xmlStrcmp (synchronization, xmlNO))
+	else if (synchronization != NULL && !xmlStrcasecmp (synchronization, xmlNO))
 	{
 		set_option_merge_SincronitzaTasks (FALSE);
 		set_option_merge_SincronitzaTasks_byNode (FALSE);
@@ -1299,7 +1307,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		set_merge_ExecutableFileName (binary);
 
 	jointstates = xmlGetProp_env (rank, current_tag, TRACE_MERGE_JOINT_STATES);
-	if (jointstates != NULL && !xmlStrcmp (jointstates, xmlNO))
+	if (jointstates != NULL && !xmlStrcasecmp (jointstates, xmlNO))
 		set_option_merge_JointStates (FALSE);
 	else
 		set_option_merge_JointStates (TRUE);
@@ -1320,6 +1328,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	}
 
 	XML_FREE (synchronization);
+	XML_FREE (sortaddresses);
 	XML_FREE (binary);
 #if defined(MPI_SUPPORT)
 	XML_FREE (treefanout);
@@ -1340,14 +1349,14 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Must the trace run for at least some time? */
-		else if (!xmlStrcmp (tag->name, TRACE_MINIMUM_TIME))
+		else if (!xmlStrcasecmp (tag->name, TRACE_MINIMUM_TIME))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (str != NULL)
@@ -1397,7 +1406,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 		root_tag = xmlDocGetRootElement (xmldoc);
 		if (root_tag != NULL)
 		{
-			if (xmlStrcmp(root_tag->name, TRACE_TAG))
+			if (xmlStrcasecmp(root_tag->name, TRACE_TAG))
 			{	
 				mfprintf (stderr, PACKAGE_NAME": Invalid configuration file\n");
 			}
@@ -1411,11 +1420,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 
 				/* Full tracing control */
 				char *tracehome = (char*) xmlGetProp_env (rank, root_tag, TRACE_HOME);
-				xmlChar *xmlparserid = xmlGetProp_env (rank, root_tag, TRACE_PARSER_ID);
+				xmlChar *xmlparserid = xmlGetProp_env (rank,root_tag, TRACE_PARSER_ID);
 				xmlChar *traceenabled = xmlGetProp_env (rank, root_tag, TRACE_ENABLED);
 				xmlChar *traceinitialmode = xmlGetProp_env (rank, root_tag, TRACE_INITIAL_MODE);
 				xmlChar *tracetype = xmlGetProp_env (rank, root_tag, TRACE_TYPE);
-				mpitrace_on = (traceenabled != NULL) && !xmlStrcmp (traceenabled, xmlYES);
+				mpitrace_on = (traceenabled != NULL) && !xmlStrcasecmp (traceenabled, xmlYES);
 
 				if (!mpitrace_on)
 				{
@@ -1424,11 +1433,14 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 				else
 				{
 					/* Where is the tracing located? If defined, copy to the correct buffer! */
-					if (xmlStrcmp (&rcsid[1], xmlparserid)) /* Skip first $ char */
+					if (xmlStrcasecmp (&rcsid[1], xmlparserid)) /* Skip first $ char */
 					{
 						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
 						mfprintf (stderr, PACKAGE_NAME": WARNING! XML parser version and property '%s' do not match. Check the XML file. Trying to proceed...\n", TRACE_PARSER_ID);
 						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
+
+            mfprintf (stderr, "&rcsid[1] => %s  xmlparserid = %s\n", &rcsid[1], xmlparserid);
+
 					}
 
 					if (tracehome != NULL)
@@ -1443,11 +1455,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 
 					if (traceinitialmode != NULL)
 					{
-						if (!xmlStrcmp (traceinitialmode, TRACE_INITIAL_MODE_DETAIL))
+						if (!xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_DETAIL))
 						{
 							TMODE_setInitial (TRACE_MODE_DETAIL);
 						}
-						else if (!xmlStrcmp (traceinitialmode, TRACE_INITIAL_MODE_BURSTS))
+						else if (!xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURSTS))
 						{
 							TMODE_setInitial (TRACE_MODE_BURSTS);
 						}
@@ -1465,12 +1477,12 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 
 					if (tracetype != NULL)
 					{
-						if (!xmlStrcmp (tracetype, TRACE_TYPE_PARAVER))
+						if (!xmlStrcasecmp (tracetype, TRACE_TYPE_PARAVER))
 						{
 							mfprintf (stdout, PACKAGE_NAME": Generating intermediate files for Paraver traces.\n");
 							Clock_setType (REAL_CLOCK);
 						}
-						else if (!xmlStrcmp (tracetype, TRACE_TYPE_DIMEMAS))
+						else if (!xmlStrcasecmp (tracetype, TRACE_TYPE_DIMEMAS))
 						{
 							mfprintf (stdout, PACKAGE_NAME": Generating intermediate files for Dimemas traces.\n");
 							Clock_setType (USER_CLOCK);
@@ -1497,30 +1509,30 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 				while (current_tag != NULL && mpitrace_on)
 				{
 					/* Skip coments */
-					if (!xmlStrcmp (current_tag->name, xmlTEXT) || !xmlStrcmp (current_tag->name, xmlCOMMENT))
+					if (!xmlStrcasecmp (current_tag->name, xmlTEXT) || !xmlStrcmp (current_tag->name, xmlCOMMENT))
 					{
 					}
 					/* UF related information instrumentation */
-					else if (!xmlStrcmp (current_tag->name, TRACE_USERFUNCTION))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_USERFUNCTION))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_UF (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Callers related information instrumentation */
-					else if (!xmlStrcmp (current_tag->name, TRACE_CALLERS))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_CALLERS))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_Callers (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* MPI related configuration */
-					else if (!xmlStrcmp (current_tag->name, TRACE_MPI))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_MPI))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(MPI_SUPPORT)
 							tracejant_mpi = TRUE;
@@ -1535,10 +1547,10 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						XML_FREE(enabled);
 					}
 					/* PACX related configuration */
-					else if (!xmlStrcmp (current_tag->name, TRACE_PACX))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_PACX))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(PACX_SUPPORT)
 							tracejant_mpi = TRUE;
@@ -1553,20 +1565,20 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */
-					else if (!xmlStrcmp (current_tag->name, TRACE_BURSTS))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_BURSTS))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 							Parse_XML_Bursts (rank, xmldoc, current_tag);
 						}
 						XML_FREE(enabled);
 					}
 					/* OpenMP related configuration */
-					else if (!xmlStrcmp (current_tag->name, TRACE_OMP))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_OMP))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 							tracejant_omp = TRUE;
@@ -1581,10 +1593,10 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						XML_FREE(enabled);
 					}
 					/* SPU related configuration*/
-					else if (!xmlStrcmp (current_tag->name, TRACE_CELL))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_CELL))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(IS_CELL_MACHINE)
 							cell_tracing_enabled = TRUE;
@@ -1602,52 +1614,52 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						XML_FREE(enabled);
 					}
 					/* Storage related configuration */
-					else if (!xmlStrcmp (current_tag->name, TRACE_STORAGE))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_STORAGE))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_Storage (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Buffering related configuration */
-					else if (!xmlStrcmp (current_tag->name, TRACE_BUFFER))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_BUFFER))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_Buffer (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Check if some other configuration info must be gathered */
-					else if (!xmlStrcmp (current_tag->name, TRACE_OTHERS))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_OTHERS))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_Others (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Check if some kind of counters must be gathered */
-					else if (!xmlStrcmp (current_tag->name, TRACE_COUNTERS))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_COUNTERS))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_Counters (rank, world_size, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Check for tracing control */
-					else if (!xmlStrcmp (current_tag->name, TRACE_CONTROL))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_CONTROL))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_TraceControl (rank, world_size, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Check for merging control */
-					else if (!xmlStrcmp (current_tag->name, TRACE_MERGE))
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_MERGE))
 					{
 #if defined(EMBED_MERGE_IN_TRACE)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						xmlChar *tracetype = xmlGetProp_env (rank, root_tag, TRACE_TYPE);
-						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 							Parse_XML_Merge (rank, xmldoc, current_tag, tracetype);
 							MergeAfterTracing = TRUE;

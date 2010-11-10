@@ -126,7 +126,7 @@ void make_dump (FileSet_t *fset)
 		while (e != NULL)
 		{
 			if (Get_EvTime(e) < last_time)
-				fprintf (stdout, "** WARNING clock went backwards?\n");
+				fprintf (stderr, "** WARNING clock went backwards?\n");
 			show_current (e);
 #if USE_HARDWARE_COUNTERS
 			if (Get_EvHWCRead(e))
@@ -134,7 +134,7 @@ void make_dump (FileSet_t *fset)
 				HardwareCounters_Get (e, current_counters);
 				for (j = 0; j < MAX_HWC; j++)
 					if (current_counters[j] < last_counters[j])
-						fprintf (stdout, "** WARNING counter %d went backwards?\n", j);
+						fprintf (stderr, "** WARNING counter %d went backwards?\n", j);
 				for (j = 0; j < MAX_HWC; j++)
 					last_counters[j] = current_counters[j];
 			}

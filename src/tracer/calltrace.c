@@ -226,11 +226,11 @@ UINT64 get_caller (int offset)
 	unw_init_local(&cursor, &uc);
 
 	offset --; /* Don't compute call to unw_getcontext */
-	while (current_deep < offset)
+	while (current_deep <= offset)
 	{
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
 #if defined(DEBUG)
-		fprintf (stderr, "DEBUG: depth %d address %08llx %c\n", current_deep, ip, (offset-1 == current_deep)?'*':' ');
+		fprintf (stderr, "DEBUG: depth %d address %08llx %c\n", current_deep, ip, (offset == current_deep)?'*':' ');
 #endif
 		if (unw_step (&cursor) <= 0)
 			return 0;

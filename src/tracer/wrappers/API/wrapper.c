@@ -1710,7 +1710,7 @@ void Backend_Finalize (void)
 		if (TaskID_Get() == 0)
 			fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);
 
-		merger_post (NumOfTasks, TaskID_Get(), get_option_merge_ParaverFormat());
+		merger_post (NumOfTasks, TaskID_Get());
 	}
 #endif /* EMBED_MERGE_IN_TRACE */
 }

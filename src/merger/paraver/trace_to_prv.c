@@ -112,6 +112,7 @@ unsigned int num_ptasks;
 
 int **EnabledTasks = NULL;
 unsigned long long **EnabledTasks_time = NULL;
+struct address_collector_t CollectedAddresses;
 
 #if defined(IS_BG_MACHINE)
 struct QuadCoord
@@ -409,6 +410,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	error = FALSE;
 
 	Initialize_States (fset);
+	AddressCollector_Initialize (&CollectedAddresses);
 
 	if (0 == taskid)
 	{
@@ -575,12 +577,42 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	   paraver_rec_t for a new state, remove it (so TRUE in 2nd param) */
 	Flush_FS (fset, FALSE);
 
+	if (get_option_merge_SortAddresses())
+	{
+		gettimeofday (&time_begin, NULL);
+
+#if defined(PARALLEL_MERGE)
+		AddressCollector_GatherAddresses (numtasks, taskid, &CollectedAddresses);
+#endif
+
+		/* Address translation and address sorting is only done by the master */
+		if (taskid == 0)
+		{
+			UINT64 *buffer_addresses = AddressCollector_GetAllAddresses (&CollectedAddresses);
+			int *buffer_types = AddressCollector_GetAllTypes (&CollectedAddresses);
+
+			for (i = 0; i < AddressCollector_Count(&CollectedAddresses); i++)
+				Address2Info_Translate (buffer_addresses[i], buffer_types[i], get_option_merge_UniqueCallerID());
+
+			Address2Info_Sort (get_option_merge_UniqueCallerID());
+		}
+
+		if (taskid == 0)
+		{
+			time_t delta;
+			gettimeofday (&time_end, NULL);
+			delta = time_end.tv_sec - time_begin.tv_sec;
+#if !defined(PARALLEL_MERGE)
+			fprintf (stdout, "mpi2prv: Elapsed time sorting addresses: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+#else
+			fprintf (stdout, "mpi2prv: Elapsed time broadcasting and sorting addresses: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+#endif
+		}
+	}
 
 #if defined(PARALLEL_MERGE)
 	if (taskid == 0)
-	{
 		gettimeofday (&time_begin, NULL);
-	}
 
 	BuildCommunicators (numtasks, taskid);
 

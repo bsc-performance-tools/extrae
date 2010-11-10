@@ -240,11 +240,8 @@ static int MPI_Caller_Event (event_t * current_event,
                              FileSet_t *fset)
 {
 	int i, deepness;	
-	UINT64 mpi_caller_func, mpi_caller_line;
 	UINT64 EvValue = Get_EvValue(current_event);
 	UNREFERENCED_PARAMETER(fset);
-
-	mpi_caller_func = mpi_caller_line = EvValue;
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
@@ -266,8 +263,14 @@ static int MPI_Caller_Event (event_t * current_event,
 		}
 	}
 
-	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_EV+deepness, mpi_caller_func);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_LINE_EV+deepness, mpi_caller_line);
+	if (get_option_merge_SortAddresses())
+	{
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2MPI_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2MPI_LINE);
+	}
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_EV+deepness, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_LINE_EV+deepness, EvValue);
 
 	return 0;
 }
@@ -432,6 +435,12 @@ static int USRFunction_Event (event_t * current,
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 
+	if (get_option_merge_SortAddresses() && EvValue != 0)
+	{
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2UF_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2UF_LINE);
+	}
+
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, USRFUNC_EV, EvValue);
 	if (EvValue != 0)
@@ -465,6 +474,12 @@ static int Sampling_Caller_Event (event_t * current,
 	  
 	if (Get_EvValue (current) != 0)
 	{
+		if (get_option_merge_SortAddresses())
+		{
+			AddressCollector_Add (&CollectedAddresses, Get_EvValue (current), ADDR2SAMPLE_FUNCTION);
+			AddressCollector_Add (&CollectedAddresses, Get_EvValue (current), ADDR2SAMPLE_LINE);
+		}
+
 		trace_paraver_state (cpu, ptask, task, thread, current_time);
 		trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent (current), Get_EvValue (current));
 		trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent (current)+LINE_EV_DELTA, Get_EvValue (current));

@@ -102,6 +102,10 @@ static int option_merge_ParaverFormat = TRUE;
 int get_option_merge_ParaverFormat (void) { return option_merge_ParaverFormat; }
 void set_option_merge_ParaverFormat (int b) { option_merge_ParaverFormat = b; }
 
+static int option_merge_SortAddresses = FALSE;
+int get_option_merge_SortAddresses (void) { return option_merge_SortAddresses; }
+void set_option_merge_SortAddresses (int b) { option_merge_SortAddresses = b; }
+
 #if defined(IS_BG_MACHINE)
 static int option_merge_BG_XYZT = FALSE;
 int get_option_merge_BG_XYZT (void) { return option_merge_BG_XYZT; }

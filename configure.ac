@@ -156,6 +156,10 @@ AC_PROG_INSTALL
 AC_PROG_SED
 AC_PROG_AWK
 
+if test "${GCC}" = "yes" ; then
+  CFLAGS="${CFLAGS} -fno-optimize-sibling-calls"
+fi
+
 # Automake 1.10 reports a problem if this is not defined
 AM_PROG_CC_C_O
 

@@ -112,6 +112,7 @@
 #define TRACE_MERGE_SYN_NODE            ((xmlChar*) "node")
 #define TRACE_MERGE_SYN_TASK            ((xmlChar*) "task")
 #define TRACE_MERGE_SYN_DEFAULT         ((xmlChar*) "default")
+#define TRACE_MERGE_SORTADDRESSES       ((xmlChar*) "sort-address")
 
 void Parse_XML_File (int rank, int world_size, char *filename);
 

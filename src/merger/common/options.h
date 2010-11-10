@@ -84,6 +84,9 @@ void set_option_merge_JointStates (int b);
 int get_option_merge_ParaverFormat (void);
 void set_option_merge_ParaverFormat (int b);
 
+int get_option_merge_SortAddresses (void);
+void set_option_merge_SortAddresses (int b);
+
 #if defined(IS_BG_MACHINE)
 int get_option_merge_BG_XYZT (void);
 void set_option_merge_BG_XYZT (int b);

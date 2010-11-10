@@ -47,5 +47,10 @@
 #define DIMEMAS_CHUNK_FILE_SIZE_TAG    5000 /* Size of the partial translated TRF */
 #define DIMEMAS_CHUNK_DATA_TAG         5001 /* Data of the partial translated TRF */
 
+#define ADDRESSCOLLECTOR_ASK_TAG       6000 /* Ask for address collector info */
+#define ADDRESSCOLLECTOR_NUM_TAG       6001 /* Number of addresses collected */
+#define ADDRESSCOLLECTOR_ADDRESSES_TAG 6002 /* Addresses collected */
+#define ADDRESSCOLLECTOR_TYPES_TAG     6003 /* Types collected */
+
 #endif
 

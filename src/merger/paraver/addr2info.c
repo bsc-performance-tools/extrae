@@ -121,6 +121,69 @@ int Address2Info_Labels[A2I_LAST];
 #define UNRESOLVED_ID 0
 #define NOT_FOUND_ID 1
 
+static int Address2Info_Sort_routine(const void *p1, const void *p2)
+{
+	struct address_info *a1 = (struct address_info*) p1;
+	struct address_info *a2 = (struct address_info*) p2;
+
+	/* Sort by filename, line and address */
+	if (strcmp (a1->file_name, a2->file_name) == 0)
+	{
+		if (a1->line == a2->line)
+		{
+			if (a1->address == a2->address)
+				return 0;
+			else if (a1->address < a2->address)
+				return -1;
+			else
+				return 1;
+		}
+		else if (a1->line < a2->line)
+			return -1;
+		else
+			return 1;
+	}
+	else 
+		return strcmp (a1->file_name, a2->file_name);
+}
+
+void Address2Info_Sort (int unique_ids)
+{
+	/* Sort identifiers and also skip UNRESOLVED and NOT_FOUND */
+	if (unique_ids)
+	{
+		void *base = (void*) &(AddressTable[UNIQUE_TYPE]->address[2]);
+
+		qsort (base, AddressTable[UNIQUE_TYPE]->num_addresses-2,
+			sizeof(struct address_info), Address2Info_Sort_routine);
+	}
+	else
+	{
+		void *base = (void*) &(AddressTable[OUTLINED_OPENMP_TYPE]->address[2]);
+		qsort (base, AddressTable[OUTLINED_OPENMP_TYPE]->num_addresses-2,
+			sizeof(struct address_info), Address2Info_Sort_routine);
+		base = (void*) &(AddressTable[MPI_CALLER_TYPE]->address[2]);
+		qsort (base, AddressTable[MPI_CALLER_TYPE]->num_addresses-2,
+			sizeof(struct address_info), Address2Info_Sort_routine);
+		base = (void*) &(AddressTable[USER_FUNCTION_TYPE]->address[2]);
+		qsort (base, AddressTable[SAMPLE_TYPE]->num_addresses-2,
+			sizeof(struct address_info), Address2Info_Sort_routine);
+	}
+}
+
+/** Address2Info_Initialized
+ *
+ * Check if the translation system is correctly initialized.
+ * 
+ * @param None
+ *
+ * @return Returns if Address2Info_Initialize has been succesfully called.
+ */
+int Address2Info_Initialized (void)
+{
+	return Translate_Addresses;
+}
+
 /** Address2Info_Initialize
  *
  * Initialize the memory addresses translation module.
@@ -129,9 +192,12 @@ int Address2Info_Labels[A2I_LAST];
  *
  * @return No return value.
  */
-void Address2Info_Initialize (char * binary) {
+void Address2Info_Initialize (char * binary)
+{
 	int type;
 	char ** matching;
+
+	Translate_Addresses = FALSE;
 
 	/* Initialize the memory addresses translation table */
 	AddressTable_Initialize();
@@ -141,24 +207,26 @@ void Address2Info_Initialize (char * binary) {
 	for (type = 0; type < COUNT_ADDRESS_TYPES; type++)
 	{
 		/* Add fake address 0x0 to link "Unresolved" functions */
-		AddressTable_Insert (0x0, type, ADDR_UNRESOLVED, ADDR_UNRESOLVED, 0);
+		AddressTable_Insert (UNRESOLVED_ID, type, ADDR_UNRESOLVED, ADDR_UNRESOLVED, 0);
 
 		/* Add fake address 0x1 to link "Address not found" functions */
-		AddressTable_Insert (0x1, type, ADDR_NOT_FOUND, ADDR_NOT_FOUND, 0);
+		AddressTable_Insert (NOT_FOUND_ID, type, ADDR_NOT_FOUND, ADDR_NOT_FOUND, 0);
 	}
 
 #if defined(USE_SYSTEM_CALL)
 	/* Save the name of the application binary to pass it to the addr2line command */
 	BinaryName = (char *)malloc((strlen(binary) + 1) * sizeof(char));
+	if (BinaryName == NULL)
+	{
+		fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for binary name when doing a syscall!\n");
+		exit (-1);
+	}
 	strcpy(BinaryName, binary);
 #endif
 
 	/* If no binary has been specified addresses won't be translated */
 	if ((binary == (char *)NULL) || (strlen(binary) == 0)) 
-	{
-		Translate_Addresses = FALSE;
 		return;
-	}
 
 	/* Initialize BFD libraries */
 	bfd_init();
@@ -168,8 +236,10 @@ void Address2Info_Initialize (char * binary) {
 	if (abfd == NULL)
 	{
 		const char *errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "mpi2prv: Error opening binary file '%s': %s\n", binary, errmsg);
-		exit(1);
+		fprintf(stderr, "mpi2prv: WARNING! Cannot open binary file '%s': %s.\n"
+		                "         Addresses will not be translated into source code references\n"
+		                , binary, errmsg);
+		return;
 	}
 
 	/* Check the binary file format */
@@ -205,7 +275,8 @@ void Address2Info_Initialize (char * binary) {
  *
  * @return No return value.
  */
-static void Read_SymTab () {
+static void Read_SymTab (void)
+{
 	long         symcount;
 	unsigned int size;
 
@@ -234,16 +305,27 @@ static void Read_SymTab () {
  *
  * @return No return value.
  */
-static void AddressTable_Initialize () {
+static void AddressTable_Initialize (void)
+{
 	int type;
 
-	for (type=0; type<COUNT_ADDRESS_TYPES; type++)
+	for (type=0; type < COUNT_ADDRESS_TYPES; type++)
 	{
 		AddressTable[type] = (struct address_table *)malloc(sizeof(struct address_table));
+		if (AddressTable[type] == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for AddressTable[type=%d]\n", type);
+			exit (-1);
+		}
 		AddressTable[type]->address = NULL;
 		AddressTable[type]->num_addresses = 0;
 
 		FunctionTable[type] = (struct function_table *)malloc(sizeof(struct function_table));
+		if (FunctionTable[type] == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for FunctionTable[type=%d]\n", type);
+			exit (-1);
+		}
 		FunctionTable[type]->function = NULL;
 		FunctionTable[type]->address_id = NULL;
 		FunctionTable[type]->num_functions = 0;
@@ -274,7 +356,7 @@ int Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
  *
  * @return
  */
-int Address2Info_Translate(UINT64 address, int query, int uniqueID)
+UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 {
 	UINT64 caller_address;
 	int addr_type;
@@ -285,13 +367,9 @@ int Address2Info_Translate(UINT64 address, int query, int uniqueID)
 	char * filename;
 	int line_id = 0;
 	int function_id = 0;
-	int result;
+	UINT64 result;
 	int found;
 
-	if (!Tables_Initialized || address == 0)
-	{
-		return 0;
-	}
 
 /* address es la direccion de retorno por donde continuara ejecutandose el
  * codigo despues de cada CALL a una rutina MPI. En arquitecturas x86, despues
@@ -322,6 +400,7 @@ int Address2Info_Translate(UINT64 address, int query, int uniqueID)
  *
  */
 
+	/* Enable vars to generate labels in the PCF */
 	switch (query)
 	{
 		case ADDR2MPI_FUNCTION:
@@ -350,6 +429,12 @@ int Address2Info_Translate(UINT64 address, int query, int uniqueID)
 			break;
 		default:
 			return address;
+	}
+
+	/* If subsystem is not enabled or address is 0, return */
+	if (!Translate_Addresses || address == 0)
+	{
+		return address;
 	}
 
 /* Traduciremos caller_address para obtener la linea exacta del codigo, pero
@@ -553,7 +638,7 @@ int system_call_to_addr2line(char *binary, char *address)
 
 			/* Redirect stderr to /dev/null */
 			null_fd = open("/dev/null", O_WRONLY);
-			if (null_fd != NULL)
+			if (null_fd > 0)
 			{
 				close(2); /* close stderr */
 				dup(null_fd);
@@ -767,13 +852,15 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 		{
 			fprintf(pcf_fd, "0    %d    %s\n", CALLER_EV, CALLER_LBL);
 		}
-		fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
-
-		for (i=0; i<FuncTab->num_functions; i++) 
+		if (Address2Info_Initialized())
 		{
-			fprintf(pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i=0; i<FuncTab->num_functions; i++) 
+			{
+				fprintf(pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			}
+			LET_SPACES(pcf_fd);
 		}
-		LET_SPACES(pcf_fd);
 
 		fprintf(pcf_fd, "%s\n", TYPE_LABEL);
 		if (MPI_Caller_Multiple_Levels_Traced) 
@@ -800,12 +887,14 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 		{
 			fprintf(pcf_fd, "0    %d    %s\n", CALLER_LINE_EV, CALLER_LINE_LBL);
 		}
-		fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
-
-		for (i = 0; i < AddrTab->num_addresses; i ++) 
-			fprintf(pcf_fd, "%d   %d (%s)\n", 
-				i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-		LET_SPACES(pcf_fd);
+		if (Address2Info_Initialized())
+		{
+			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < AddrTab->num_addresses; i ++) 
+				fprintf(pcf_fd, "%d   %d (%s)\n", 
+					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			LET_SPACES(pcf_fd);
+		}
 	}
 }
 
@@ -822,21 +911,27 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_
 	{
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf (pcf_fd, "0    %d    %s\n", eventtype, "Parallel function");
-		fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
-		for (i = 0; i < FuncTab->num_functions; i ++)
-			fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
-		LET_SPACES(pcf_fd);
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < FuncTab->num_functions; i ++)
+				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			LET_SPACES(pcf_fd);
+		}
 
 		/* Then dump line-functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf (pcf_fd, "0    %d    %s\n", eventtype_line, "Parallel function line");
-		fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
-		for (i = 0; i < AddrTab->num_addresses; i ++)
-			fprintf(pcf_fd, "%d   %d (%s)\n", 
-				i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-		LET_SPACES(pcf_fd);
+			for (i = 0; i < AddrTab->num_addresses; i ++)
+				fprintf(pcf_fd, "%d   %d (%s)\n", 
+					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			LET_SPACES(pcf_fd);
+		}
 	}
 }
 
@@ -854,21 +949,27 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 		/* First dump functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf (pcf_fd, "0    %d    %s\n", USRFUNC_EV, "User function");
-		fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
-		for (i = 0; i < FuncTab->num_functions; i ++)
-			fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
-		LET_SPACES(pcf_fd);
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < FuncTab->num_functions; i ++)
+				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			LET_SPACES(pcf_fd);
+		}
 
 		/* Then dump line-functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf (pcf_fd, "0    %d    %s\n", USRFUNC_LINE_EV, "User function line");
-		fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
-		for (i = 0; i < AddrTab->num_addresses; i ++)
-			fprintf(pcf_fd, "%d   %d (%s)\n", 
-				i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-		LET_SPACES(pcf_fd);
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < AddrTab->num_addresses; i ++)
+				fprintf(pcf_fd, "%d   %d (%s)\n", 
+					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			LET_SPACES(pcf_fd);
+		}
 	}
 }
 
@@ -890,11 +991,14 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 			for (i = 1; i <= MAX_CALLERS; i++)
 				if (Sample_Caller_Labels_Used[i-1])
 					fprintf (pcf_fd, "0    %d    Sampled functions (depth %d)\n", SAMPLING_EV+i, i);
-		fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
-		for (i = 0; i < FuncTab->num_functions; i ++)
-			fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
-		LET_SPACES(pcf_fd);
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < FuncTab->num_functions; i ++)
+				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			LET_SPACES(pcf_fd);
+		}
 
 		/* Then dump line-functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
@@ -903,11 +1007,15 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 			for (i = 1; i <= MAX_CALLERS; i++)
 				if (Sample_Caller_Labels_Used[i-1])
 					fprintf (pcf_fd, "0    %d    Sampled lines functions (depth %d)\n", SAMPLING_LINE_EV+i, i);
-		fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
-		for (i = 0; i < AddrTab->num_addresses; i ++)
-			fprintf(pcf_fd, "%d   %d (%s)\n", 
-				i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-		LET_SPACES(pcf_fd);
+
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < AddrTab->num_addresses; i ++)
+				fprintf(pcf_fd, "%d   %d (%s)\n", 
+					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			LET_SPACES(pcf_fd);
+		}
 	}
 }
 
@@ -930,6 +1038,11 @@ void Share_Callers_Usage (void)
 	if (MPI_Caller_Labels_Used == NULL)
 	{
 		MPI_Caller_Labels_Used = malloc(sizeof(int)*MAX_CALLERS);
+		if (MPI_Caller_Labels_Used == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for used MPI Caller labels\n");
+			exit (-1);
+		}
 		for (i = 0; i < MAX_CALLERS; i++)
 			MPI_Caller_Labels_Used[i] = FALSE;
 	}
@@ -941,6 +1054,11 @@ void Share_Callers_Usage (void)
 	if (Sample_Caller_Labels_Used == NULL)
 	{
 		Sample_Caller_Labels_Used = malloc(sizeof(int)*MAX_CALLERS);
+		if (Sample_Caller_Labels_Used == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for used sample Caller labels\n");
+			exit (-1);
+		}
 		for (i = 0; i < MAX_CALLERS; i++)
 			Sample_Caller_Labels_Used[i] = FALSE;
 	}
