@@ -2,6 +2,10 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (12/Nov/2010) Fixes compilation when struct mallinfo is not available.
+                   Fixes compilation if BFD&liberty are not available in the system.
+                   Put the EXTRAE_LABELS content at the end of the PCF file.
+   * (09/Nov/2010) Tagged Extrae 2.1.1
    * (09/Nov/2010) Bugfix, mpi2prv triead *always* to generate dimemas traces.
                    New -sort-addresses functionality in merger, to sort addresses of
                      MPI callers, user functions and so.
