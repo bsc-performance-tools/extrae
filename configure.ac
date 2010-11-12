@@ -492,6 +492,11 @@ AC_CHECK_SIZEOF(ssize_t,${size_t_size})
 AC_CHECK_SIZEOF(size_t,${size_t_size})
 AC_CHECK_SIZEOF(void*,${voidp_size})
 
+AC_CHECK_MEMBER(struct mallinfo.arena,
+   [AC_DEFINE([HAVE_MALLINFO], [1], [Whether the system supports mallinfo structure])],
+   [],
+   [#include <malloc.h>])
+
 if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
    cross_compiling="no"
 fi

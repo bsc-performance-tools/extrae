@@ -975,11 +975,6 @@ int merger_post (int numtasks, int taskid)
 	}
 	else
 		loadSYMfile (get_merge_SymbolFileName());
-#if !defined(HAVE_BFD)
-				if (0 == rank)
-					fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
-#endif
-#endif
 
 	if (get_option_merge_SortAddresses() && !Address2Info_Initialized())
 	{
@@ -990,6 +985,10 @@ int merger_post (int numtasks, int taskid)
 		}	
 		set_option_merge_SortAddresses (FALSE);
 	}
+#else
+	if (taskid == 0)
+		fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
+#endif
 
 	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),

@@ -72,8 +72,6 @@ int main (int argc, char *argv[])
 #else
 int main (int argc, char *argv[])
 {
-	int PRVFormat;
-
 	merger_pre (1);
 	ProcessArgs (1, 0, argc, argv);
 	merger_post (1, 0);

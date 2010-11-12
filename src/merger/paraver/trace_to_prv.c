@@ -577,6 +577,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	   paraver_rec_t for a new state, remove it (so TRUE in 2nd param) */
 	Flush_FS (fset, FALSE);
 
+#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
 		gettimeofday (&time_begin, NULL);
@@ -609,6 +610,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 #endif
 		}
 	}
+#endif
 
 #if defined(PARALLEL_MERGE)
 	if (taskid == 0)

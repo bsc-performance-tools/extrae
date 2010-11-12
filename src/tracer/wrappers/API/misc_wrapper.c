@@ -217,6 +217,7 @@ void Extrae_getrusage_Wrapper (iotimer_t timestamp)
 
 void Extrae_memusage_Wrapper (iotimer_t timestamp)
 {
+#if defined(HAVE_MALLINFO)
 	if (TRACING_MEMUSAGE)
 	{
 		struct mallinfo mi = mallinfo();
@@ -228,6 +229,7 @@ void Extrae_memusage_Wrapper (iotimer_t timestamp)
 		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, mi.fordblks);
 		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    inuse);
 	}
+#endif
 }
 
 void Extrae_user_function_Wrapper (int enter)

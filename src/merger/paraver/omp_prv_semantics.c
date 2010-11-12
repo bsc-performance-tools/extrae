@@ -45,6 +45,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "semantics.h"
 #include "paraver_state.h"
 #include "paraver_generator.h"
+#include "addresses.h"
 
 #if USE_HARDWARE_COUNTERS
 #include "HardwareCounters.h"
@@ -171,11 +172,13 @@ static int OpenMP_Function_Event (
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 
+#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_FUNCTION);
 		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_LINE);
 	}
+#endif
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_EV, EvValue);

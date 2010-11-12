@@ -48,6 +48,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "paraver_generator.h"
 #include "communication_queues.h"
 #include "trace_communication.h"
+#include "addresses.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -263,11 +264,13 @@ static int MPI_Caller_Event (event_t * current_event,
 		}
 	}
 
+#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2MPI_FUNCTION);
 		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2MPI_LINE);
 	}
+#endif
 
 	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_EV+deepness, EvValue);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_LINE_EV+deepness, EvValue);
@@ -435,11 +438,13 @@ static int USRFunction_Event (event_t * current,
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 
+#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses() && EvValue != 0)
 	{
 		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2UF_FUNCTION);
 		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2UF_LINE);
 	}
+#endif
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, USRFUNC_EV, EvValue);
@@ -474,11 +479,14 @@ static int Sampling_Caller_Event (event_t * current,
 	  
 	if (Get_EvValue (current) != 0)
 	{
+
+#if defined(HAVE_BFD)
 		if (get_option_merge_SortAddresses())
 		{
 			AddressCollector_Add (&CollectedAddresses, Get_EvValue (current), ADDR2SAMPLE_FUNCTION);
 			AddressCollector_Add (&CollectedAddresses, Get_EvValue (current), ADDR2SAMPLE_LINE);
 		}
+#endif
 
 		trace_paraver_state (cpu, ptask, task, thread, current_time);
 		trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent (current), Get_EvValue (current));

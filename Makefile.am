@@ -243,6 +243,8 @@ endif
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(datadir)/example/UNICORE
 	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/UNICORE
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/UNICORE
+# SVN installations may have some subversion control files
+	rm -fr `find $(datadir)/example -name .svn`
 
 uninstall-local:
 	rm -f $(sysconfdir)/license.dat
