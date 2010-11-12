@@ -746,8 +746,6 @@ int GeneratePCFfile (char *name, long long options)
 	pthreadEvent_WriteEnabledOperations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
 
-	Concat_User_Labels (fd);
-
 #if USE_HARDWARE_COUNTERS
 	HWC_PARAVER_Labels (fd);
 #endif
@@ -767,6 +765,8 @@ int GeneratePCFfile (char *name, long long options)
 	Write_PACX_Stats_Labels (fd);
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
+
+	Concat_User_Labels (fd);
 
 	fclose(fd);
     
