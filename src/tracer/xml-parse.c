@@ -128,19 +128,19 @@ static xmlChar * deal_xmlChar_env (int rank, xmlChar *str)
 		if (!is_Whitespace (str[i]))
 			break;
 	initial = i;
-	for (; final >= i; final++)
-		if (!is_Whitespace (str[final]))
+	for (; final-1 >= i; final--)
+		if (!is_Whitespace (str[final-1]))
 			break;
 
 	sublen = final - initial;
 
 	tmp = xmlStrsub (str, initial, sublen);
 
-	if (xmlStrlen(tmp) > 0)
+	if (sublen > 0)
 	{
 		/* If the string is wrapped by XML_ENVVAR_CHARACTER, perform a getenv and
 		   return its result */
-		if (tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
+		if (sublen > 1 && tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
 		{
 			char tmp2[sublen];
 			memset (tmp2, 0, sublen);
