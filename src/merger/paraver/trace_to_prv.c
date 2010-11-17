@@ -358,7 +358,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	options = GetTraceOptions (fset, numtasks, taskid);
 
-//	CheckHWCcontrol (taskid, options);
+	/* CheckHWCcontrol (taskid, options); */
 	CheckClockType (taskid, options, PRV_SEMANTICS, get_option_merge_ForceFormat());
 
 /**************************************************************************************/
