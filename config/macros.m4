@@ -1393,11 +1393,19 @@ AC_DEFUN([AX_PROG_PAPI],
             LIBS="-lpapi -lpmc"
          elif test "${OperatingSystem}" = "linux" -a "${Architecture}" = "powerpc" ; then
             LIBS="-lpapi -lperfctr"
-			if test -d "${PAPI_HOME}/perfctr/lib" ; then
-				LIBS="-L${PAPI_HOME}/perfctr/lib ${LIBS}"
-			fi
+            if test -d "${PAPI_HOME}/perfctr/lib" ; then
+               LIBS="-L${PAPI_HOME}/perfctr/lib ${LIBS}"
+            fi
          elif test "${OperatingSystem}" = "aix" -a "${Architecture}" = "powerpc" ; then
-            LIBS="-lpapi -lpmapi"
+            if test "${BITS}" = "64" ; then
+               if test -f "${PAPI_LIBSDIR}/libpapi64.a" -o -f "${PAPI_LIBSDIR}/libpapi64.so" ; then
+                  LIBS="-lpapi64 -lpmapi"
+               else
+                  LIBS="-lpapi -lpmapi"
+               fi 
+            else
+               LIBS="-lpapi -lpmapi"
+            fi
          else
             LIBS="-lpapi"
          fi
