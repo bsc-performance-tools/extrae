@@ -31,6 +31,7 @@
 #define ADDR2INFO_HASHCACHE_INCLUDED
 
 void Addr2Info_HashCache_Initialize (void);
+void Addr2Info_HashCache_Clean (void);
 int Addr2Info_HashCache_Search (UINT64 address, int *line, int *function);
 void Addr2Info_HashCache_Insert (UINT64 address, int line, int function);
 void Addr2Info_HashCache_ShowStatistics (void);

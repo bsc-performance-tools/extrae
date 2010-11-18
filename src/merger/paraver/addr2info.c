@@ -169,6 +169,9 @@ void Address2Info_Sort (int unique_ids)
 		qsort (base, AddressTable[SAMPLE_TYPE]->num_addresses-2,
 			sizeof(struct address_info), Address2Info_Sort_routine);
 	}
+
+	/* Cached entries are now invalid as everything gets resorted */
+	Addr2Info_HashCache_Clean();
 }
 
 /** Address2Info_Initialized

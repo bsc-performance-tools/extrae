@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (18/Nov/2010) Fix: when sorting addresses wipe the address2info cache.
    * (12/Nov/2010) Fixes compilation when struct mallinfo is not available.
                    Fixes compilation if BFD&liberty are not available in the system.
                    Put the EXTRAE_LABELS content at the end of the PCF file.

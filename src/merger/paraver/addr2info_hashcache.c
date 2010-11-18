@@ -61,6 +61,14 @@ void Addr2Info_HashCache_Initialize (void)
 	  Addr2Info_HashCache_Replacements = 0;
 }
 
+void Addr2Info_HashCache_Clean (void)
+{
+	int i;
+
+	for (i = 0; i < CACHE_SIZE; i++)
+		Addr2Info_HashCache[i].address = 0;
+}
+
 int Addr2Info_HashCache_Search (UINT64 address, int *line, int *function)
 {
 	int index;
