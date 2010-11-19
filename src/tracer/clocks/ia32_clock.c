@@ -122,7 +122,7 @@ void ia32_Initialize (void)
 #elif defined(OS_FREEBSD)
 	int mib[3];
 	int result;
-	unsigned len = 3;
+	size_t len = 2;
 	unsigned long long tsc_value;
 
   result = sysctlnametomib ("machdep.tsc_freq", mib, &len);

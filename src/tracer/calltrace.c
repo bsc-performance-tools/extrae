@@ -76,7 +76,7 @@ void trace_callers (iotimer_t time, int offset, int type) {
 	if (Trace_Caller[type] == NULL)
 		return;
 
-#if defined(OS_FREEBSD)
+#if defined(OS_FREEBSD) && defined (HAVE_EXECINFO_H)
 	callstack[0] = (void*) trace_callers;
 	size = backtrace (&callstack[1], Caller_Deepness[type]+offset-1);
 	size++;
@@ -125,7 +125,7 @@ UINT64 get_caller (int offset)
 	int i;
 #endif
 
-#if defined(OS_FREEBSD)
+#if defined(OS_FREEBSD) && defined(HAVE_EXECINFO_H)
 	callstack[0] = (void*) get_caller;
 	size = backtrace (&callstack[1], offset-1);
 	size++;

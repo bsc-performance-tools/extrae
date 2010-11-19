@@ -2,6 +2,9 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   + (19/Nov/2010) FreeBSD support (examples & --with-libexecinfo)
+                   Simplification of example install rules in Makefile.am
+                   Change bash  to sh in substitute/substitute-all
    * (18/Nov/2010) Fix: when sorting addresses wipe the address2info cache.
    * (12/Nov/2010) Fixes compilation when struct mallinfo is not available.
                    Fixes compilation if BFD&liberty are not available in the system.

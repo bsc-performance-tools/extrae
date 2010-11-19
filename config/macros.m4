@@ -1816,9 +1816,54 @@ AC_DEFUN([AX_CHECK_LIBZ],
    AX_FLAGS_RESTORE()
 ])
 
+# AX_PROG_LIBEXECINFO
+# -------------
+AC_DEFUN([AX_PROG_LIBEXECINFO],
+[
+   AX_FLAGS_SAVE()
+
+   AC_ARG_WITH(libexecinfo,
+      AC_HELP_STRING(
+         [--with-libexecinfo=@<:@=DIR@:>@],
+         [specify where to find libexecinfo libraries and includes (FreeBSD specific?)]
+      ),
+      [libexecinfo_paths="${withval}"],
+      [libexecinfo_paths="no"]
+   )
+
+   if test "${libexecinfo_paths}" != "no" ; then
+      AX_FIND_INSTALLATION([libexecinfo], [${libexecinfo_paths}], [libexecinfo])
+      if test "${LIBEXECINFO_INSTALLED}" = "yes" ; then
+        if test -f ${LIBEXECINFO_HOME}/lib/libexecinfo.a -o \
+                -f ${LIBEXECINFO_HOME}/lib/libexecinfo.so ; then
+           if test -f ${LIBEXECINFO_HOME}/include/execinfo.h ; then
+              CFLAGS="-I ${LIBEXECINFO_HOME}/include"
+              LIBS="-L ${LIBEXECINFO_HOME}/lib -lexecinfo"
+		          AC_TRY_LINK(
+		              [ #include <execinfo.h> ],
+		              [ backtrace ((void*)0, 0); ],
+		              [ libexecinfo_links="yes" ]
+		            )
+              if test "${libexecinfo_links}" = "yes" ; then
+                 AC_DEFINE([HAVE_EXECINFO_H], 1, [Define to 1 if you have the <execinfo.h> header file.])
+              else
+                 AC_MSG_ERROR([Cannot link using libexecinfo... See config.log for further details])
+              fi
+           else
+              AC_MSG_ERROR([Cannot find libexecinfo header files in ${libexecinfo_paths}/include, maybe you can install it from /usr/ports/devel/libexecinfo])
+           fi
+        else
+           AC_MSG_ERROR([Cannot find libexecinfo library files in ${libexecinfo_paths}/lib, maybe you can install it from /usr/ports/devel/libexecinfo])
+        fi
+      fi
+   fi
+
+   AX_FLAGS_RESTORE()
+])
+
 # AX_PROG_LIBDWARF
 # -------------
-AC_DEFUN([AX_PROG_LIBDWARG],
+AC_DEFUN([AX_PROG_LIBDWARF],
 [
    libdwarf_found="no"
    AX_FLAGS_SAVE()
@@ -1841,10 +1886,10 @@ AC_DEFUN([AX_PROG_LIBDWARG],
                    -f ${DWARF_HOME}/include/dwarf.h ; then
               libdwarf_found="yes"
            else
-              AC_MSG_ERROR([Cannot find DWARF header files in ${DWARF_HOME}/include])
+              AC_MSG_ERROR([Cannot find DWARF header files in ${dwarf_paths}/include])
            fi
         else
-           AC_MSG_ERROR([Cannot find DWARF library files in ${DWARF_HOME}/lib])
+           AC_MSG_ERROR([Cannot find DWARF library files in ${dwarf_paths}/lib])
         fi
       fi
    fi
