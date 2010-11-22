@@ -396,6 +396,7 @@ int mkdir_recursive (char *path)
 		return S_ISDIR(sb.st_mode);
 }
 
+#if defined(DEAD_CODE)
 /* Concatenates two strings, reallocating the size of the first string as required */
 static char * concat(char **prefix_ptr, char *suffix)
 {
@@ -425,7 +426,6 @@ static char * concat(char **prefix_ptr, char *suffix)
    return ret;
 }
 
-#if defined(DEAD_CODE)
 /* Replaces the text between start and end delimiters for the return value of the callback 'function' */
 static char * expand(char *input, const char *start_delim, const char *end_delim, char *(*function)(const char *))
 {
