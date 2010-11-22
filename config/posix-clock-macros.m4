@@ -76,8 +76,10 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
          AC_MSG_RESULT([found in ${ac_cv_clock_gettime_lib}])
       fi
       USE_POSIX_CLOCK="yes"
+			POSIX_CLOCK_LIB=${ac_cv_clock_gettime_lib}
    fi
 
+  AC_SUBST(POSIX_CLOCK_LIB)
 	AM_CONDITIONAL(USE_POSIX_CLOCK, test "${USE_POSIX_CLOCK}" = "yes")
 	if test "${USE_POSIX_CLOCK}" = "yes" ; then
 		AC_DEFINE([USE_POSIX_CLOCK], 1, [Defined if using posix clock routines / clock_gettime])

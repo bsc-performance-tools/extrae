@@ -103,6 +103,41 @@ SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 MRNET_EXAMPLE_FILES=/dev/null
 else
+
+if OS_FREEBSD
+
+MPI_EXAMPLE_FILES=\
+ example/FREEBSD/MPI/README \
+ example/FREEBSD/MPI/extrae.xml \
+ example/FREEBSD/MPI/detailed_trace_basic.xml \
+ example/FREEBSD/MPI/summarized_trace_basic.xml \
+ example/FREEBSD/MPI/extrae_explained.xml \
+ example/FREEBSD/MPI/static \
+ example/FREEBSD/MPI/ld-preload
+
+OMP_EXAMPLE_FILES=\
+ example/FREEBSD/OMP/Makefile \
+ example/FREEBSD/OMP/merge.sh \
+ example/FREEBSD/OMP/pi.c \
+ example/FREEBSD/OMP/pi.f \
+ example/FREEBSD/OMP/run.sh \
+ example/FREEBSD/OMP/extrae.xml
+
+SEQ_EXAMPLE_FILES=\
+ example/FREEBSD/SEQ/Makefile \
+ example/FREEBSD/SEQ/merge.sh \
+ example/FREEBSD/SEQ/pi.c \
+ example/FREEBSD/SEQ/run.sh \
+ example/FREEBSD/SEQ/extrae.xml
+
+PTHREAD_EXAMPLE_FILES=\
+ example/FREEBSD/PTHREAD/Makefile \
+ example/FREEBSD/PTHREAD/pthread-example.c \
+ example/FREEBSD/PTHREAD/user-comms.c \
+ example/FREEBSD/PTHREAD/README
+
+else
+
 MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/README \
  example/LINUX/MPI/extrae.xml \
@@ -145,6 +180,9 @@ PTHREAD_EXAMPLE_FILES=\
 
 PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \
  example/LINUX/PACX/Makefile
+
+endif
+
 endif
 endif
 endif
@@ -152,97 +190,50 @@ endif
 UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 install-data-hook:
+	echo $(PWD)
+	pwd
 	$(mkdir_p) $(datadir)/example
 	$(mkdir_p) $(datadir)/example/SEQ
 	cp -f $(SEQ_EXAMPLE_FILES) $(datadir)/example/SEQ
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/SEQ
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/SEQ
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/SEQ
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/SEQ
-if WANT_MERGE_IN_TRACE
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/SEQ
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/SEQ
-else
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/SEQ
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/SEQ
-endif
 if HAVE_PACX
 	$(mkdir_p) $(datadir)/example/PACX
 	cp -f $(PACX_EXAMPLE_FILES) $(datadir)/example/PACX
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/PACX
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/PACX
-	./substitute-all $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(datadir)/example/PACX
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/PACX
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/PACX
-if WANT_MERGE_IN_TRACE
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/PACX
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/PACX
-else
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/PACX
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/PACX
-endif
 endif
 if HAVE_MPI
 	$(mkdir_p) $(datadir)/example/MPI
 	cp -fr $(MPI_EXAMPLE_FILES) $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(datadir)/example/MPI
-if WANT_MERGE_IN_TRACE
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/MPI
-else
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/MPI
-endif
 endif
 if WANT_OPENMP
 	$(mkdir_p) $(datadir)/example/OMP
 	cp -f $(OMP_EXAMPLE_FILES) $(datadir)/example/OMP
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/OMP
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/OMP
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/OMP
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/OMP
-if WANT_MERGE_IN_TRACE
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/OMP
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/OMP
-else
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/OMP
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/OMP
-endif
 endif
 if HAVE_MRNET
 	$(mkdir_p) $(datadir)/example/MRNET
 	cp -f $(MRNET_EXAMPLE_FILES) $(datadir)/example/MRNET
-	chmod u+x $(datadir)/example/MRNET/trace.sh $(datadir)/example/MRNET/merge.sh
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/MRNET
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/MRNET
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/MRNET
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/MRNET
 endif
 if WANT_PTHREAD
 	$(mkdir_p) $(datadir)/example/PTHREAD
 	cp -f $(PTHREAD_EXAMPLE_FILES) $(datadir)/example/PTHREAD
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/PTHREAD
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/PTHREAD
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example/PTHREAD
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example/PTHREAD
-if WANT_MERGE_IN_TRACE
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example/PTHREAD
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example/PTHREAD
-else
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example/PTHREAD
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example/PTHREAD
-endif
 endif
 	$(mkdir_p) $(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(datadir)/example/UNICORE
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example/UNICORE
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example/UNICORE
+# Apply post-installation modifications
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example
+	./substitute-all $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(datadir)/example
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example
+if WANT_MERGE_IN_TRACE
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example
+else
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example
+endif
+# Apply post-installation modifications (FreeBSD specific)
+if OS_FREEBSD
+	./substitute-all $(SED) "@sub_libexecinfo_libs@" "${libexecinfo_LDFLAGS} -lexecinfo" $(datadir)/example
+endif
 # SVN installations may have some subversion control files
 	rm -fr `find $(datadir)/example -name .svn`
 

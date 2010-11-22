@@ -6,7 +6,7 @@ XML2_LIBS = @sub_XML2_LIBS@
 
 F77 = $(MPI_HOME)/bin/mpif77 
 FFLAGS = -O2 -g
-FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ $(XML2_LDFLAGS) $(XML2_LIBS)  @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@
+FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ $(XML2_LDFLAGS) $(XML2_LIBS)  @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_POSIX_CLOCK@
 
 all: mpi_ping
 

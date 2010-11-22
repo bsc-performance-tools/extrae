@@ -1,7 +1,7 @@
 PAPI_HOME = @sub_PAPI_HOME@
 EXTRAE_HOME = @sub_PREFIXDIR@
 
-LIBS = -L$(EXTRAE_HOME)/lib -lpttrace -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_libexecinfo_libs@
+LIBS = -L$(EXTRAE_HOME)/lib -lpttrace -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_libexecinfo_libs@ @sub_POSIX_CLOCK@
 
 CFLAGS = -O -g -I$(EXTRAE_HOME)/include
 
