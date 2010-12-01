@@ -893,6 +893,12 @@ int merger_post (int numtasks, int taskid)
 	int error;
 	struct Pair_NodeCPU *NodeCPUinfo;
 
+	if (0 == nTraces)
+	{
+	  fprintf (stderr, "mpi2prv: No intermediate trace files given.\n");
+	  return 0;
+	}
+
 #if defined(PARALLEL_MERGE)
 	if (get_option_merge_TreeFanOut() == 0)
 	{
@@ -911,24 +917,27 @@ int merger_post (int numtasks, int taskid)
 		if (taskid == 0)
 			fprintf (stdout, "mpi2prv: Tree order is set to %d\n", get_option_merge_TreeFanOut());
 	}
+
+	if (numtasks > nTraces)
+	{
+		if (taskid == 0)
+			fprintf (stderr, "mpi2prv: FATAL ERROR! The tree fan out (%d) is larger than the number of MPITs (%d)\n", numtasks, nTraces);
+		exit (0);
+	}
 #endif
 
 	records_per_task = 1024*1024/sizeof(paraver_rec_t);  /* num of events in 1 Mbytes */
-	records_per_task *= get_option_merge_MaxMem();              /* let's use this memory */
-	records_per_task /= numtasks;                         /* divide by all the tasks */
+	records_per_task *= get_option_merge_MaxMem();       /* let's use this memory */
+#if defined(PARALLEL_MERGE)
+	records_per_task /= get_option_merge_TreeFanOut();   /* divide by the tree fan out */
 
 	if (0 == records_per_task)
 	{
 		if (0 == taskid)
-			fprintf (stderr, "mpi2prv: Error! Assigned memory by -maxmem is insufficient for this number of tasks\n");
+			fprintf (stderr, "mpi2prv: Error! Assigned memory by -maxmem is insufficient for this tree fan out\n");
 		exit (-1);
 	}
-
-	if (0 == nTraces)
-	{
-	  fprintf (stderr, "mpi2prv: No intermediate trace files given.\n");
-	  return 0;
-	}
+#endif
 
 #if defined(PARALLEL_MERGE)
 	ShareNodeNames (numtasks, &nodenames);
