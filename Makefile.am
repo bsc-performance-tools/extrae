@@ -220,6 +220,9 @@ endif
 # Apply post-installation modifications
 	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example
+	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(datadir)/example
+	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(datadir)/example
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example
 	./substitute-all $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(datadir)/example
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example
