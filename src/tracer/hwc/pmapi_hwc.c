@@ -143,7 +143,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 	if (change_at_time != NULL)
 	{
 		HWC_sets[num_set].change_at = getTimeFromStr (change_at_time, 
-			TRACE_HWCSET_CHANGEAT_TIME, rank);
+			"change-at-time", rank);
 		HWC_sets[num_set].change_type = 
 				(HWC_sets[num_set].change_at == 0)?CHANGE_NEVER:CHANGE_TIME;
 	}
