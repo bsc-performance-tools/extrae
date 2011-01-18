@@ -80,9 +80,18 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo zlib availability: no
 	fi
 
-	echo unwind availability: ${libunwind_works}
-	if test "${libunwind_works}" = "yes" ; then
-		echo -e \\\tunwind home: ${UNWIND_HOME}
+	if test "${OperatingSystem}" = "linux" ; then
+		if test "${Architecture}" = "ia64" -o "${target_cpu}" = "amd64" -o "${target_cpu}" = "x86_64" ; then
+			echo callstack access: through libunwind
+			echo libunwind availability: ${libunwind_works}
+			if test "${libunwind_works}" = "yes" ; then
+				echo -e \\\tlibunwind home: ${UNWIND_HOME}
+			fi
+		else
+			echo callstack access: backtrace
+		fi
+	else
+		echo callstack access: none
 	fi
 
 	echo
