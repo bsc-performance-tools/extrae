@@ -909,7 +909,7 @@ int merger_post (int numtasks, int taskid)
 	else if (get_option_merge_TreeFanOut() > numtasks)
 	{
 		if (taskid == 0)
-			fprintf (stdout, "mpi2prv: Tree order is set to %d but is larger that numtasks. Setting to tree order to %d\n", get_option_merge_TreeFanOut(), numtasks);
+			fprintf (stdout, "mpi2prv: Tree order is set to %d but is larger that numtasks. Setting tree order to %d\n", get_option_merge_TreeFanOut(), numtasks);
 		set_option_merge_TreeFanOut (numtasks);
 	}
 	else if (get_option_merge_TreeFanOut() <= numtasks)
