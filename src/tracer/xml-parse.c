@@ -1439,7 +1439,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						mfprintf (stderr, PACKAGE_NAME": WARNING! XML parser version and property '%s' do not match. Check the XML file. Trying to proceed...\n", TRACE_PARSER_ID);
 						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
 
-            mfprintf (stderr, "&rcsid[1] => %s  xmlparserid = %s\n", &rcsid[1], xmlparserid);
+            mfprintf (stderr, PACKAGE_NAME": %s found '%s' when expecting '%s'.\n", TRACE_PARSER_ID, xmlparserid, &rcsid[1]);
 
 					}
 
