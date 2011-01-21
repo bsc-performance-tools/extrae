@@ -73,6 +73,7 @@ mpimpi2prv_SOURCES = \
  ../merger.c
 
 libmpimpi2prv_la_CFLAGS = -DPARALLEL_MERGE -I.. -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+libmpimpi2prv_la_LDFLAGS = -o libmpimpi2prv.la $(CFLAGS) 
 
 mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I.. -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
 mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_DIR)/libcommon.la -o mpimpi2prv @MPIMPI2PRV_EXTRA_LIBS@ @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@ @MPI_LDFLAGS@ 
