@@ -2,6 +2,8 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (21/Jan/2011) AIX support to generate libmpitrace.so without libtool
+                   (libtool in AIX does not allow generating shared libraries)
    + (19/Nov/2010) FreeBSD support (examples & --with-libexecinfo)
                    Simplification of example install rules in Makefile.am
                    Change bash  to sh in substitute/substitute-all

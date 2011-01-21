@@ -443,7 +443,11 @@ AC_DEFUN([AX_PROG_BFD],
          AC_MSG_CHECKING([if libbfd and libiberty works])
 
          AX_FLAGS_SAVE()
-         LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
+         if test "${OperatingSystem}" != "aix" ; then
+            LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
+         else
+            LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS} -lintl"
+         fi
          CFLAGS="-I${bfd_home_dir}/include ${CFLAGS}"
          AC_TRY_LINK(
             [ #include <bfd.h> ], 
@@ -495,7 +499,11 @@ AC_DEFUN([AX_PROG_BFD],
             LIBERTY_CFLAGS="-I${LIBERTY_INCLUDES}"
             LIBERTY_CXXFLAGS=${LIBERTY_CFLAGS}
             LIBERTY_CPPFLAGS=${LIBERTY_CFLAGS}
-            LIBERTY_LIBS="-liberty"
+            if test "${OperatingSystem}" != "aix" ; then
+               LIBERTY_LIBS="-liberty"
+            else
+               LIBERTY_LIBS="-liberty -lintl"
+            fi
             LIBERTY_LDFLAGS="-L${LIBERTY_LIBSDIR}"
             AC_SUBST(LIBERTY_HOME)
             AC_SUBST(LIBERTY_INCLUDES)
