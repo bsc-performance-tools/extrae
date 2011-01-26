@@ -190,8 +190,6 @@ endif
 UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 install-data-hook:
-	echo $(PWD)
-	pwd
 	$(mkdir_p) $(datadir)/example
 	$(mkdir_p) $(datadir)/example/SEQ
 	cp -f $(SEQ_EXAMPLE_FILES) $(datadir)/example/SEQ
