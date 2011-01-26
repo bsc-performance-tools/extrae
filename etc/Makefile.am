@@ -1,52 +1,57 @@
 
 EXTRA_DIST = configured.sh extrae.csh extrae.sh
 
+SH_SCRIPT = $(sysconfdir)/extrae-vars.sh
+CSH_SCRIPT= $(sysconfdir)/extrae-vars.csh
+
 mkdirSHscripts:
 	$(mkdir_p) $(sysconfdir)
 	touch $(sysconfdir)/license.dat
 	rm -fr $(sysconfdir)/extrae-vars.sh $(sysconfdir)/extrae-vars.csh
 
 SHscripts:
-# Configure the shell scripts (SH)
-	echo "export MPI_HOME=${MPI_HOME}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export PACX_HOME=${PACX_HOME}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export PAPI_HOME=${PAPI_HOME}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export LIBXML2_HOME=${XML2_HOME}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export DYNINST_HOME=${DYNINST_HOME}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export DWARF_HOME=${DWARF_HOME}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export EXTRAE_CC=${CC}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export EXTRAE_CFLAGS=${CFLAGS}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export EXTRAE_CXX=${CXX}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export EXTRAE_CXXFLAGS=${CXXFLAGS}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export UNWIND_HOME=${UNWIND_HOME}" >> $(sysconfdir)/extrae-vars.sh
+	echo "Configure the shell scripts (SH)"
+	echo "export MPI_HOME=${MPI_HOME}" >> $(SH_SCRIPT)
+	echo "export PACX_HOME=${PACX_HOME}" >> $(SH_SCRIPT)
+	echo "export PAPI_HOME=${PAPI_HOME}" >> $(SH_SCRIPT) 
+	echo "export LIBXML2_HOME=${XML2_HOME}" >> $(SH_SCRIPT)
+	echo "export DYNINST_HOME=${DYNINST_HOME}" >> $(SH_SCRIPT)
+	echo "export DWARF_HOME=${DWARF_HOME}" >> $(SH_SCRIPT)
+	echo "export EXTRAE_CC=${CC}" >> $(SH_SCRIPT)
+	echo "export EXTRAE_CFLAGS=\"${CFLAGS}\"" >> $(SH_SCRIPT)
+	echo "export EXTRAE_CXX=${CXX}" >> $(SH_SCRIPT)
+	echo "export EXTRAE_CXXFLAGS=\"${CXXFLAGS}\"" >> $(SH_SCRIPT)
+	echo "export UNWIND_HOME=${UNWIND_HOME}" >> $(SH_SCRIPT)
 	chmod 0644 $(sysconfdir)/extrae-vars.sh
 	cp extrae.sh $(sysconfdir)
 	chmod 0644 $(sysconfdir)/extrae.sh
 
 CSHscripts:
-# Configure the shell scripts (CSH)
-	echo "setenv MPI_HOME ${MPI_HOME}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv PACX_HOME ${PACX_HOME}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv PAPI_HOME ${PAPI_HOME}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv LIBXML2_HOME ${XML2_HOME}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv DYNINST_HOME ${DYNINST_HOME}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv DWARF_HOME ${DWARF_HOME}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv EXTRAE_CC ${CC}" >> $(sysconfdir)/extrae-vars.sh
-	echo "setenv EXTRAE_CFLAGS ${CFLAGS}" >> $(sysconfdir)/extrae-vars.sh
-	echo "setenv EXTRAE_CXX ${CXX}" >> $(sysconfdir)/extrae-vars.sh
-	echo "setenv EXTRAE_CXXFLAGS ${CXXFLAGS}" >> $(sysconfdir)/extrae-vars.sh
-	echo "setenv UNWIND_HOME ${UNWIND_HOME}" >> $(sysconfdir)/extrae-vars.sh
+	echo "Configure the shell scripts (CSH)"
+	echo "setenv MPI_HOME ${MPI_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv PACX_HOME ${PACX_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv PAPI_HOME ${PAPI_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv LIBXML2_HOME ${XML2_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv DYNINST_HOME ${DYNINST_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv DWARF_HOME ${DWARF_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv EXTRAE_CC ${CC}" >> $(CSH_SCRIPT)
+	echo "setenv EXTRAE_CFLAGS \"${CFLAGS}\"" >> $(CSH_SCRIPT)
+	echo "setenv EXTRAE_CXX ${CXX}" >> $(CSH_SCRIPT)
+	echo "setenv EXTRAE_CXXFLAGS \"${CXXFLAGS}\"" >> $(CSH_SCRIPT)
+	echo "setenv UNWIND_HOME ${UNWIND_HOME}" >> $(CSH_SCRIPT)
 	chmod 0644 $(sysconfdir)/extrae-vars.csh
 	cp extrae.csh $(sysconfdir)
 	chmod 0644 $(sysconfdir)/extrae.csh
 
 CONFIGUREDscript:
-	echo "setenv PACKAGE_NAME ${PACKAGE_NAME}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv PACKAGE_BUGREPORT ${PACKAGE_BUGREPORT}" >> $(sysconfdir)/extrae-vars.csh
-	echo "setenv CONFIGURE_LINE \"`head -7 ${top_srcdir}/config.log | tail -1`\"" >> $(sysconfdir)/extrae-vars.csh
-	echo "export PACKAGE_NAME=${PACKAGE_NAME}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export PACKAGE_BUGREPORT=${PACKAGE_BUGREPORT}" >> $(sysconfdir)/extrae-vars.sh
-	echo "export CONFIGURE_LINE=\"`head -7 ${top_srcdir}/config.log | tail -1`\"" >> $(sysconfdir)/extrae-vars.sh
+	echo "Preparing configured script for SH"
+	echo "export PACKAGE_NAME=${PACKAGE_NAME}" >> $(SH_SCRIPT)
+	echo "export PACKAGE_BUGREPORT=${PACKAGE_BUGREPORT}" >> $(SH_SCRIPT)
+	echo "export CONFIGURE_LINE=\"`head -7 ${top_srcdir}/config.log | tail -1`\"" >> $(SH_SCRIPT)
+	echo "Preparing configured script for CSH"
+	echo "setenv PACKAGE_NAME ${PACKAGE_NAME}" >> $(CSH_SCRIPT)
+	echo "setenv PACKAGE_BUGREPORT ${PACKAGE_BUGREPORT}" >> $(CSH_SCRIPT)
+	echo "setenv CONFIGURE_LINE \"`head -7 ${top_srcdir}/config.log | tail -1`\"" >> $(CSH_SCRIPT)
 	cp configured.sh $(sysconfdir)
 	chmod 0755 $(sysconfdir)/configured.sh
 

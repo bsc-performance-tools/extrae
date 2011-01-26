@@ -37,7 +37,7 @@ if test "${EXTRAE_HOME}" != "" ; then
 	echo CC       was ${EXTRAE_CC} 
 	echo CFLAGS   was ${EXTRAE_CFLAGS} 
 	echo CXX      was ${EXTRAE_CXX}
-  echo CXXFLAGS was ${EXTRAE_CXXFLAGS}
+	echo CXXFLAGS was ${EXTRAE_CXXFLAGS}
 	echo
 
 	if test "${MPI_HOME}" != "" ; then
