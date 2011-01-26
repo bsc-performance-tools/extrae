@@ -411,7 +411,7 @@ core_AIX_SRCS = \
 if OS_AIX
 if HAVE_MPI
 libmpitrace.so: $(core_AIX_SRCS)
-	xlc -G -I ../.. $(core_INCLUDES) $(core_CFLAGS) -I/usr/lpp/ppe.poe//include $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) \
+	xlc -G -I ../.. $(core_INCLUDES) $(core_CFLAGS) -I/usr/lpp/ppe.poe/include $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) \
 	$(core_AIX_SRCS) \
 	$(PARALLEL_MERGE_LIB_AIX) \
 	../common/.libs/libcommon.a \
