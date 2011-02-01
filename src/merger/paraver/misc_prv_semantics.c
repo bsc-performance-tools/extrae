@@ -49,6 +49,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "communication_queues.h"
 #include "trace_communication.h"
 #include "addresses.h"
+#include "options.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -461,11 +462,16 @@ static int Sampling_Caller_Event (event_t * current,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
+	unsigned EvType;
 	unsigned LINE_EV_DELTA;
 	unsigned int EvTypeDelta, i;
+	UINT64  EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvTypeDelta = Get_EvEvent (current) - SAMPLING_EV;
+	EvType = Get_EvEvent(current);
+	EvValue = Get_EvValue (current);
+
+	EvTypeDelta = EvType - SAMPLING_EV;
 	LINE_EV_DELTA = SAMPLING_LINE_EV - SAMPLING_EV;
 
 	if (Sample_Caller_Labels_Used == NULL) 
@@ -477,20 +483,45 @@ static int Sampling_Caller_Event (event_t * current,
 	if (Sample_Caller_Labels_Used != NULL) 
 		Sample_Caller_Labels_Used [EvTypeDelta] = TRUE; 
 	  
-	if (Get_EvValue (current) != 0)
+	if (EvValue != 0)
 	{
 
 #if defined(HAVE_BFD)
 		if (get_option_merge_SortAddresses())
 		{
-			AddressCollector_Add (&CollectedAddresses, Get_EvValue (current), ADDR2SAMPLE_FUNCTION);
-			AddressCollector_Add (&CollectedAddresses, Get_EvValue (current), ADDR2SAMPLE_LINE);
+			if (EvTypeDelta == 0)
+			{
+				/* If depth == 0 (in EvTypeDelta) addresses are taken from the overflow
+				   routine which points to the "originating" address */
+				AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2SAMPLE_FUNCTION);
+				AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2SAMPLE_LINE);
+			}
+			else
+			{
+				/* If depth != 0 (in EvTypeDelta), addresses are taken from the callstack
+				   and point to the next instruction, so substract 1 */
+				AddressCollector_Add (&CollectedAddresses, EvValue-1, ADDR2SAMPLE_FUNCTION);
+				AddressCollector_Add (&CollectedAddresses, EvValue-1, ADDR2SAMPLE_LINE);
+			}
 		}
 #endif
 
 		trace_paraver_state (cpu, ptask, task, thread, current_time);
-		trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent (current), Get_EvValue (current));
-		trace_paraver_event (cpu, ptask, task, thread, current_time, Get_EvEvent (current)+LINE_EV_DELTA, Get_EvValue (current));
+
+		if (EvTypeDelta == 0)
+		{
+			/* If depth == 0 (in EvTypeDelta) addresses are taken from the overflow
+			   routine which points to the "originating" address */
+			trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+			trace_paraver_event (cpu, ptask, task, thread, current_time, EvType+LINE_EV_DELTA, EvValue);
+		}
+		else
+		{
+			/* If depth != 0 (in EvTypeDelta), addresses are taken from the callstack and
+			   point to the next instruction, so substract 1 */
+			trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue-1);
+			trace_paraver_event (cpu, ptask, task, thread, current_time, EvType+LINE_EV_DELTA, EvValue-1);
+		}
 	}
 
 	return 0;
@@ -554,6 +585,8 @@ static int Evt_CountersDefinition (
 	nthreads = obj_table[ptask-1].tasks[task-1].nthreads;
 	for (i = 1; i <= nthreads; i++)
 		HardwareCounters_NewSetDefinition(ptask, task, i, newSet, HWCIds);
+
+	return 0;
 }
 
 /******************************************************************************

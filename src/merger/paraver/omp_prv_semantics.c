@@ -46,6 +46,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "paraver_state.h"
 #include "paraver_generator.h"
 #include "addresses.h"
+#include "options.h"
 
 #if USE_HARDWARE_COUNTERS
 #include "HardwareCounters.h"
