@@ -285,7 +285,29 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 			if (opentype == FileOpen_Default)
 			{
 				if (!file_exists(stripped))
-					Process_MPIT_File (basename(stripped), (info==2)?host:NULL, cptask, cfiles);
+				{
+					/* Look for /set- in string, and then use set- (thus +1) */
+					char * stripped_basename = strstr (stripped, "/set-");
+					if (stripped_basename != NULL)
+					{
+						/* Look in current directory, if not use list file directory */
+						if (!file_exists(&stripped_basename[1]))
+						{
+							char dir_file[2048];
+							char *duplicate = strdup (file);
+							char *directory = dirname (duplicate);
+
+							sprintf (dir_file, "%s%s", directory, stripped_basename);
+							Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles);
+
+							free (duplicate);
+						}
+						else
+							Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles);
+					}
+					else
+						fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
+				}
 				else
 					Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles);
 			}
@@ -295,7 +317,27 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 			}
 			else if (opentype == FileOpen_Relative)
 			{
-				Process_MPIT_File (basename(stripped), (info==2)?host:NULL, cptask, cfiles);
+				/* Look for /set- in string, and then use set- (thus +1) */
+				char * stripped_basename = strstr (stripped, "/set-");
+				if (stripped_basename != NULL)
+				{
+					/* Look in current directory, if not use list file directory */
+					if (!file_exists(&stripped_basename[1]))
+					{
+						char dir_file[2048];
+						char *duplicate = strdup (file);
+						char *directory = dirname (file);
+
+						sprintf (dir_file, "%s%s", directory, stripped_basename);
+						Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles);
+
+						free (duplicate);
+					}
+					else
+						Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles);
+				}
+				else
+					fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
 			}
 		}
 	}
