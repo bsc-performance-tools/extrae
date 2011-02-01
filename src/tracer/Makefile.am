@@ -421,7 +421,7 @@ libmpitrace.so: $(core_AIX_SRCS)
 	interfaces/MPI/.libs/libiface_mpi.a \
 	$(MPI_LDFLAGS) $(MPI_LIBS) \
 	$(PAPI_LDFLAGS) $(PAPI_LIBS) \
-	$(XML_LIBS) \
+	$(XML_LIBS) -lz \
 	-o libmpitrace.so
 endif
 endif
