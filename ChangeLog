@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   + (02/Feb/2011) Added example of dynamic load instrumentation in AIX
    * (01/Feb/2011) Bug solved: looking for hw signals in PAPI 4.x
                    Change at global operations now uses MPI_Comm_compare
                    Honor -f/-f-relative with the new MPIT file distribution in set-* directories

@@ -2,6 +2,15 @@
 Read file INSTALL for general installation instructions.
 Read file INSTALL-examples for examples of specific installation instructions.
 
+On-line documentation:
+--
+An on-line manual in PDF format is available for download at:
+	http://www.bsc.es
+
+Then look for
+	Home > Computer Sciences > Performance Tools > Documentation
+on the left navigation frame.
+
 Package dependencies:
 --
 * libxml2 2.5.0 : parse XML configuration files (optional) - look for libxml2-devel packages for your OS

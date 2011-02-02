@@ -1,6 +1,6 @@
 \chapter{Examples}\label{cha:Examples}
 
-We present here three different examples of generating a Paraver tracefile. First example requires the package to be compiled with DynInst libraries. Second example uses the {\tt LD\_PRELOAD} mechanism to interpose code in the application. Such mechanism is available in Linux and FreeBSD operating systems and only works when the application uses dynamic libraries. Finally, there is an example using the static library of the instrumentation package.
+We present here three different examples of generating a Paraver tracefile. First example requires the package to be compiled with DynInst libraries. Second example uses the {\tt LD\_PRELOAD} or {\tt LDR\_PRELOAD[64]} mechanism to interpose code in the application. Such mechanism is available in Linux and FreeBSD operating systems and only works when the application uses dynamic libraries. Finally, there is an example using the static library of the instrumentation package.
 
 \section{DynInst based examples}\label{sec:Examples_DynInst}
 
@@ -8,9 +8,13 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 \section{LD\_PRELOAD based examples}\label{sec:Examples_LDPRELOAD}
 
-LD\_PRELOAD interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux and FreeBSD operating systems, although it may be available on other operating systems (even using different names\footnote{Look at \url{http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html} for further information.}) they are not tested.
+LD\_PRELOAD (or LDR\_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names\footnote{Look at \url{http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html} for further information.}) they are not tested.
 
-\subsection{Generating the intermediate files}\label{subsec:Examples_LDPRELOAD_Intermediate}
+We show how this mechanism works on Linux (or similar environments) in subsection \ref{subsec:Examples_Linux} and on AIX in subsection \ref{subsec:Examples_AIX}.
+
+\subsection{Linux}\label{subsec:Examples_Linux}
+
+%\subsubsection{Generating the intermediate files}\label{subsubsec:Examples_LDPRELOAD_Intermediate}
 
 The following script preloads the libmpitrace library to instrument MPI calls of the application passed as an argument (tune {\tt EXTRAE\_HOME} according to your installation).
 
@@ -73,6 +77,29 @@ rm ${MLIST}
 \end{Verbatim}
 
 Besides the job specification given in lines 1-11, there are commands of particular interest. Lines 13-15 are used to know which and how many nodes are involved in the computation. Such information information is given to the {\tt mpirun} command to proceed with the execution. Once the execution finished, the temporal file created on line 14 is removed on line 19.
+
+\subsection{AIX}\label{subsec:Examples_AIX}
+
+AIX typically ships with POE and LoadLeveler as MPI implementation and queue system respectively. An example for a system with these software packages is given below. Please, note that the example is intended for 64 bit applications, if using 32 bit applications then {\tt LDR\_PRELOAD64} needs to be changed in favour of {\tt LDR\_PRELOAD}.
+
+\begin{Verbatim}[frame=single,numbers=left,labelposition=topline,label=ll-aix64.sh]
+#@ job_name = basic_test
+#@ output = basic_stdout
+#@ error = basic_stderr
+#@ shell = /bin/bash
+#@ job_type = parallel
+#@ total_tasks = 8
+#@ wall_clock_limit = 00:15:00
+#@ queue
+
+export EXTRAE_HOME=WRITE-HERE-THE-PACKAGE-LOCATION
+export EXTRAE_CONFIG_FILE=extrae.xml
+export LDR_PRELOAD64=${EXTRAE_HOME}/lib/libmpitrace.so
+
+./mpi-app
+\end{Verbatim}
+
+Lines 1-8 contain a basic LoadLeveler job definition. Line 10 sets the \TRACE package directory in EXTRAE\_HOME environment variable. Follows setting the XML configuration file that will be used to set up the tracing. Then follows setting {\tt LDR\_PRELOAD64} which is responsible for instrumentation using the shared library {\tt libmpitrace.so}. Finally, line 14 executes the application binary.
 
 \section{Statically linked based examples}\label{sec:Examples_static}
 
