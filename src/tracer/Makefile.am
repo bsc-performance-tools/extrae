@@ -410,6 +410,7 @@ core_AIX_SRCS = \
 
 if OS_AIX
 if HAVE_MPI
+if HAVE_PAPI
 libmpitrace.so: $(core_AIX_SRCS)
 	xlc -G -I ../.. $(core_INCLUDES) $(core_CFLAGS) -I/usr/lpp/ppe.poe/include $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) \
 	$(core_AIX_SRCS) \
@@ -423,6 +424,20 @@ libmpitrace.so: $(core_AIX_SRCS)
 	$(PAPI_LDFLAGS) $(PAPI_LIBS) \
 	$(XML_LIBS) -lz \
 	-o libmpitrace.so
+else
+libmpitrace.so: $(core_AIX_SRCS)
+	xlc -G -I ../.. $(core_INCLUDES) $(core_CFLAGS) -I/usr/lpp/ppe.poe/include $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) \
+	$(core_AIX_SRCS) \
+	$(PARALLEL_MERGE_LIB_AIX) \
+	../common/.libs/libcommon.a \
+	clocks/.libs/libclock.a \
+	hwc/.libs/libhwc.a \
+	interfaces/API/.libs/libiface_api.a \
+	interfaces/MPI/.libs/libiface_mpi.a \
+	$(MPI_LDFLAGS) $(MPI_LIBS) \
+	$(XML_LIBS) -lz \
+	-o libmpitrace.so
+endif
 endif
 endif
 
