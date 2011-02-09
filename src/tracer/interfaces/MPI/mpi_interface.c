@@ -1060,7 +1060,7 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
     CtoF77 (pmpi_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
                             recvtype, comm, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_lltoall_leave ();
+	DLB_mpi_alltoall_leave ();
 #endif
 }
 
