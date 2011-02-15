@@ -415,7 +415,7 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 		case ADDR2OMP_FUNCTION:
 		case ADDR2OMP_LINE:
 			Address2Info_Labels[A2I_OMP] = TRUE;
-			caller_address = address-1;
+			caller_address = address;
 			addr_type = uniqueID?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE;
 			break;
 		case ADDR2UF_FUNCTION:
