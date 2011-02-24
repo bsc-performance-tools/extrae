@@ -811,7 +811,7 @@ int main (int argc, char *argv[], const char *envp[])
 			{
 				BPatch_function *special_exit = getRoutine (exit_calls[i], appImage);
 				if (NULL != special_exit)
-					wrapRoutine (appImage, appProcess, exit_calls[i], "EXtrae_fini", "");
+					wrapRoutine (appImage, appProcess, exit_calls[i], "Extrae_fini", "");
 				i++;
 			}
 		}
