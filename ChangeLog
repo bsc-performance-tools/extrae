@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (24/Feb/2011) Fix typo in Extrae_fini that prevented tracing applications in fortran
    + (02/Feb/2011) Added example of dynamic load instrumentation in AIX
    * (01/Feb/2011) Bug solved: looking for hw signals in PAPI 4.x
                    Change at global operations now uses MPI_Comm_compare
