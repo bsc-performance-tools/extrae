@@ -290,10 +290,15 @@ static void Generate_Task_File_List (void)
 void Extrae_init_Wrapper (void)
 {
 	char *config_file;
-	iotimer_t temps;
+	iotimer_t temps_init, temps_fini;
 
 	mptrace_IsMPI = FALSE;
+#if !defined(NANOS_SUPPORT)
 	NumOfTasks = 1;
+#else
+	NumOfTasks = nanos_extrae_num_nodes();
+	TaskID_Setup (nanos_extrae_node_id());
+#endif
 
 	config_file = getenv ("EXTRAE_CONFIG_FILE");
 	if (config_file == NULL)
@@ -306,11 +311,17 @@ void Extrae_init_Wrapper (void)
 	/* Generate a tentative file list */
 	Generate_Task_File_List();
 
+	temps_init = TIME;
+
+#if defined(NANOS_SUPPORT)
+	nanos_extrae_instrumentation_barrier();
+#endif
+
 	/* Take the time */
-	temps = TIME;
+	temps_fini = TIME;
 
 	/* End initialization of the backend */
-	if (!Backend_postInitialize (TASKID, NumOfTasks, temps, temps, NULL))
+	if (!Backend_postInitialize (TASKID, NumOfTasks, temps_init, temps_fini, NULL))
 		return;
 
 }

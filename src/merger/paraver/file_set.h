@@ -39,7 +39,6 @@
 #include "record.h"
 #include "common.h"
 #include "queue.h"
-#include "new-queue.h"
 #include "mpi2out.h"
 #include "write_file_buffer.h"
 
@@ -98,8 +97,6 @@ typedef struct
 	event_t *first, *last, *first_glop;
 	event_t *last_recv;
 	event_t *tmp;
-	NewQueue_t *recv_queue;
-	NewQueue_t *send_queue;
 }
 FileItem_t;
 

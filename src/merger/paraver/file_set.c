@@ -385,8 +385,6 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 
 	obj_table[fitem->ptask-1].tasks[IFile->task-1].threads[IFile->thread-1].file = fitem;
 
-	CommunicationQueues_Init (&(fitem->send_queue), &(fitem->recv_queue));
-
 	/* Create a temporal file */
 	newTemporalFile (taskid, TRUE, 0, paraver_tmp);
 

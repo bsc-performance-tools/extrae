@@ -162,7 +162,7 @@ void NAME_ROUTINE_C2F(mpi_init) (MPI_Fint *ierror)
 #endif
 }
 
-#if defined(MPI_HAS_INIT_THREAD)
+#if defined(MPI_HAS_INIT_THREAD_F)
 /******************************************************************************
  ***  MPI_Init_thread
  ******************************************************************************/
@@ -189,7 +189,7 @@ void NAME_ROUTINE_C2F(mpi_init_thread) (MPI_Fint *required, MPI_Fint *provided,
 	DLB_mpi_init_leave ();
 #endif
 }
-#endif /* MPI_HAS_INIT_THREAD */
+#endif /* MPI_HAS_INIT_THREAD_F */
 
 #endif /* 
      (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
@@ -2165,7 +2165,7 @@ int NAME_ROUTINE_C(MPI_Init) (int *argc, char ***argv)
 	return res;
 }
 
-#if defined(MPI_HAS_INIT_THREAD)
+#if defined(MPI_HAS_INIT_THREAD_C)
 /******************************************************************************
  ***  MPI_Init_thread
  ******************************************************************************/
@@ -2188,7 +2188,7 @@ int NAME_ROUTINE_C(MPI_Init_thread) (int *argc, char ***argv, int required, int 
 
 	return res;
 }
-#endif /* MPI_HAS_INIT_THREAD */
+#endif /* MPI_HAS_INIT_THREAD_C */
 
 /******************************************************************************
  ***  MPI_Finalize

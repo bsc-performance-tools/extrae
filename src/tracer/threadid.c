@@ -41,7 +41,7 @@ extern int omp_get_thread_num(void);
 #elif defined(SMPSS_SUPPORT)
 extern int css_get_thread_num(void);
 #elif defined(NANOS_SUPPORT)
-extern unsigned int nanos_ompitrace_get_thread_num(void); 
+extern unsigned int nanos_extrae_get_thread_num(void); 
 #elif defined(PTHREAD_SUPPORT)
 # include <pthread.h>
 # include "pthread_wrapper.h"
@@ -60,7 +60,7 @@ unsigned get_trace_thread_number (void)
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num();
 #elif defined(NANOS_SUPPORT)
-	return nanos_ompitrace_get_thread_num();
+	return nanos_extrae_get_thread_num();
 #elif defined(PTHREAD_SUPPORT)
 	return Backend_GetpThreadIdentifier();
 #elif defined(TRT_SUPPORT)
@@ -79,7 +79,7 @@ void * get_trace_thread_number_function (void)
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num;
 #elif defined(NANOS_SUPPORT)
-	return nanos_ompitrace_get_thread_num;
+	return nanos_extrae_get_thread_num;
 #elif defined(PTHREAD_SUPPORT)
 	return (void*) pthread_self;
 #elif defined(TRT_SUPPORT)

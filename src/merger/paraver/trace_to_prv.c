@@ -171,6 +171,7 @@ static void InitializeObjectTable (int num_appl, struct input_t * files,
 	}
 	for (i = 0; i < num_ptasks; i++)
 	{
+		/* Allocate per task information within each ptask */
 		obj_table[i].tasks = (struct task_t*) malloc (sizeof(struct task_t)*maxtasks);
 		if (NULL == obj_table[i].tasks)
 		{
@@ -180,6 +181,11 @@ static void InitializeObjectTable (int num_appl, struct input_t * files,
 		}
 		for (j = 0; j < maxtasks; j++)
 		{
+			/* Initialize pending communication queues for each task */
+			CommunicationQueues_Init (&(obj_table[i].tasks[j].send_queue),
+			  &(obj_table[i].tasks[j].recv_queue));
+
+			/* Allocate per thread information within each task */
 			obj_table[i].tasks[j].threads = (struct thread_t*) malloc (sizeof(struct thread_t)*maxthreads);
 			if (NULL == obj_table[i].tasks[j].threads)
 			{

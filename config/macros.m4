@@ -1093,9 +1093,9 @@ AC_DEFUN([AX_CHECK_MPI_C_HAS_FORTRAN_MPI_INIT],
 	AC_LANG_RESTORE()
 ])
 
-# AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD
+# AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_C
 # ---------
-AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD],
+AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_C],
 [
 	AC_LANG_SAVE()
 	AC_LANG([C])
@@ -1110,7 +1110,7 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD],
 	fi
 	CC="${MPICC}"
 
-	AC_MSG_CHECKING([if MPI library supports threads using MPI_Init_thread])
+	AC_MSG_CHECKING([if MPI library supports threads using MPI_Init_thread (C)])
 	AC_TRY_LINK(
 		[#include <mpi.h>], 
 		[
@@ -1125,19 +1125,70 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD],
 				#endif
 				int ierror;
 				ierror = MPI_Init_thread (0, 0, MPI_THREAD_FUNNELED, 0);
-				MY_ROUTINE (0, 0, MPI_THREAD_FUNNELED, 0, ierror);
 		],
-		[mpi_lib_contains_mpi_init_thread="yes" ],
-		[mpi_lib_contains_mpi_init_thread="no" ]
+		[mpi_clib_contains_mpi_init_thread="yes" ],
+		[mpi_clib_contains_mpi_init_thread="no" ]
 	)
-	AC_MSG_RESULT([${mpi_lib_contains_mpi_init_thread}])
+	AC_MSG_RESULT([${mpi_clib_contains_mpi_init_thread}])
 
-	if test "${mpi_lib_contains_mpi_init_thread}" = "yes" ; then
-		AC_DEFINE([MPI_HAS_INIT_THREAD], 1, [Defined if MPI library supports MPI_Init_thread])
+	if test "${mpi_clib_contains_mpi_init_thread}" = "yes" ; then
+		AC_DEFINE([MPI_HAS_INIT_THREAD_C], 1, [Defined if MPI library supports MPI_Init_thread / C])
 	fi
 
 	AX_FLAGS_RESTORE()
 	AC_LANG_RESTORE()
+])
+
+# AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_F
+# ---------
+AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_F],
+[
+	AC_LANG_SAVE()
+	AC_LANG([C])
+	AX_FLAGS_SAVE()
+
+	if test "${MPI_F_LIB_FOUND}" = "yes" ; then
+		if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+			CFLAGS="${MPI_CFLAGS}"
+			LIBS="${MPI_LIBS} ${MPI_F_LIB}"
+			LDFLAGS="${MPI_LDFLAGS}"
+		fi
+		CC="${MPICC}"
+
+		AC_MSG_CHECKING([if MPI library supports threads using MPI_Init_thread (Fortran)])
+		AC_TRY_LINK(
+			[#include <mpi.h>], 
+			[
+					#if defined(PMPI_NO_UNDERSCORES)
+					# define MY_ROUTINE mpi_init_thread
+					#elif defined(PMPI_UPPERCASE)
+					# define MY_ROUTINE MPI_INIT_THREAD
+					#elif defined(PMPI_SINGLE_UNDERSCORE)
+					# define MY_ROUTINE mpi_init_thread_
+					#elif defined(PMPI_DOUBLE_UNDERSCORE)
+					# define MY_ROUTINE mpi_init_thread__
+					#endif
+					int required, provided, ierror;
+					MY_ROUTINE (&required, &provided, &ierror);
+			],
+			[mpi_flib_contains_mpi_init_thread="yes" ],
+			[mpi_flib_contains_mpi_init_thread="no" ]
+		)
+		AC_MSG_RESULT([${mpi_flib_contains_mpi_init_thread}])
+
+		if test "${mpi_flib_contains_mpi_init_thread}" = "yes" ; then
+			AC_DEFINE([MPI_HAS_INIT_THREAD_F], 1, [Defined if MPI library supports MPI_Init_thread / Fortran])
+		fi
+	fi
+
+	AX_FLAGS_RESTORE()
+	AC_LANG_RESTORE()
+])
+
+AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD],
+[
+  AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_C
+  AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_F
 ])
 
 

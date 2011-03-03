@@ -225,8 +225,10 @@ unsigned int mptrace_tracing_is_suspended = FALSE;
 char appl_name[APPL_NAME_LENGTH];
 char final_dir[TMP_DIR];
 char tmp_dir[TMP_DIR];
+#if defined(DEAD_CODE)
 char base_dir[TMP_DIR];
 char symbol[TRACE_FILE];
+#endif
 
 /* Know if the run is controlled by a creation of a file  */
 char ControlFileName[TMP_DIR];
@@ -1270,9 +1272,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 
 	current_NumOfThreads = maximum_NumOfThreads = css_get_max_threads();
 #elif defined(NANOS_SUPPORT)
-	extern unsigned int nanos_ompitrace_get_max_threads(void);
+	extern unsigned int nanos_extrae_get_max_threads(void);
 
-	current_NumOfThreads = maximum_NumOfThreads = nanos_ompitrace_get_max_threads();
+	current_NumOfThreads = maximum_NumOfThreads = nanos_extrae_get_max_threads();
+
 #elif defined(UPC_SUPPORT)
 	/* Set the current number of threads that is the UPC app running - THREADS! */
 	current_NumOfThreads = maximum_NumOfThreads = GetNumUPCthreads ();

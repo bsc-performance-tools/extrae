@@ -31,20 +31,20 @@
 #define _COMMUNICATION_QUEUES_H_
 
 #include <config.h>
-
-#include "file_set.h"
+#include "new-queue.h"
+#include "record.h"
 
 void CommunicationQueues_Init (NewQueue_t **fsend, NewQueue_t **freceive);
 
-void CommunicationQueues_QueueSend (FileItem_t *fsend, event_t *send_begin,
+void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
 	event_t *send_end, off_t send_position, unsigned thread, long long key);
-void CommunicationQueues_QueueRecv (FileItem_t *freceive, event_t *recv_begin,
+void CommunicationQueues_QueueRecv (NewQueue_t *qreceive, event_t *recv_begin,
 	event_t *recv_end, unsigned thread, long long key);
 
-void CommunicationQueues_ExtractRecv (FileItem_t *freceive, int sender,
+void CommunicationQueues_ExtractRecv (NewQueue_t *qreceive, int sender,
 	int tag, event_t **recv_begin, event_t **recv_end, unsigned *thread,
 	long long key);
-void CommunicationQueues_ExtractSend (FileItem_t *fsend, int receiver,
+void CommunicationQueues_ExtractSend (NewQueue_t *qsend, int receiver,
 	int tag, event_t **send_begin, event_t **send_end,
 	off_t *send_position, unsigned *thread, long long key);
 

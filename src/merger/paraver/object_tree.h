@@ -36,6 +36,7 @@
 # include <unistd.h>
 #endif
 #include "file_set.h"
+#include "new-queue.h"
 #include "HardwareCounters.h"
 
 #define MAX_STATES 16
@@ -91,6 +92,8 @@ typedef struct task_t
 	unsigned int nodeid;
   unsigned int nthreads;
   unsigned int tracing_disabled;
+  NewQueue_t *recv_queue;
+  NewQueue_t *send_queue;
   struct thread_t *threads;
 } task_t;
 

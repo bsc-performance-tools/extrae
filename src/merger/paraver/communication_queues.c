@@ -31,7 +31,6 @@
 static char UNUSED rcsid[] = "$Id$";
 
 #include "communication_queues.h"
-#include "file_set.h"
 
 /**************************************************************************
 *** SEND PART
@@ -55,7 +54,7 @@ typedef struct
 }
 SendDataReference_t;
 
-void CommunicationQueues_QueueSend (FileItem_t *fsend, event_t *send_begin,
+void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
 	event_t *send_end, off_t send_position, unsigned thread, long long key)
 {
 	SendData_t tmp;
@@ -66,7 +65,7 @@ void CommunicationQueues_QueueSend (FileItem_t *fsend, event_t *send_begin,
 	tmp.thread = thread;
 	tmp.key = key;
 
-	NewQueue_add (fsend->send_queue, &tmp);
+	NewQueue_add (qsend, &tmp);
 }
 
 static int CompareSend_cbk (void *reference, void *data)
@@ -79,7 +78,7 @@ static int CompareSend_cbk (void *reference, void *data)
 		ref->key == d->key;
 }
 
-void CommunicationQueues_ExtractSend (FileItem_t *fsend, int receiver,
+void CommunicationQueues_ExtractSend (NewQueue_t *qsend, int receiver,
 	int tag, event_t **send_begin, event_t **send_end,
 	off_t *send_position, unsigned *thread, long long key)
 {
@@ -89,7 +88,7 @@ void CommunicationQueues_ExtractSend (FileItem_t *fsend, int receiver,
 	reference.target = receiver;
 	reference.key = key;
 
-	res = (SendData_t*) NewQueue_search (fsend->send_queue, &reference, CompareSend_cbk);
+	res = (SendData_t*) NewQueue_search (qsend, &reference, CompareSend_cbk);
 
 	if (NULL != res)
 	{
@@ -97,7 +96,7 @@ void CommunicationQueues_ExtractSend (FileItem_t *fsend, int receiver,
 		*send_end = res->send_end;
 		*send_position = res->send_position;
 		*thread = res->thread;
-		NewQueue_delete (fsend->send_queue, res);
+		NewQueue_delete (qsend, res);
 	}
 	else
 	{
@@ -128,7 +127,7 @@ typedef struct
 }
 RecvDataReference_t;
 
-void CommunicationQueues_QueueRecv (FileItem_t *freceive, event_t *recv_begin,
+void CommunicationQueues_QueueRecv (NewQueue_t *qreceive, event_t *recv_begin,
 	event_t *recv_end, unsigned thread, long long key)
 {
 	RecvData_t tmp;
@@ -138,7 +137,7 @@ void CommunicationQueues_QueueRecv (FileItem_t *freceive, event_t *recv_begin,
 	tmp.thread = thread;
 	tmp.key = key;
 
-	NewQueue_add (freceive->recv_queue, &tmp);
+	NewQueue_add (qreceive, &tmp);
 }
 
 static int CompareRecv_cbk (void *reference, void *data)
@@ -151,7 +150,7 @@ static int CompareRecv_cbk (void *reference, void *data)
 		ref->key == d->key;
 }
 
-void CommunicationQueues_ExtractRecv (FileItem_t *freceive, int sender,
+void CommunicationQueues_ExtractRecv (NewQueue_t *qreceive, int sender,
 	int tag, event_t **recv_begin, event_t **recv_end, unsigned *thread,
 	long long key)
 {
@@ -161,14 +160,14 @@ void CommunicationQueues_ExtractRecv (FileItem_t *freceive, int sender,
 	reference.target = sender;
 	reference.key = key;
 
-	res = (RecvData_t*) NewQueue_search (freceive->recv_queue, &reference, CompareRecv_cbk);
+	res = (RecvData_t*) NewQueue_search (qreceive, &reference, CompareRecv_cbk);
 
 	if (NULL != res)
 	{
 		*recv_begin = res->recv_begin;
 		*recv_end = res->recv_end;
 		*thread = res->thread;
-		NewQueue_delete (freceive->recv_queue, res);
+		NewQueue_delete (qreceive, res);
 	}
 	else
 	{
@@ -181,9 +180,9 @@ void CommunicationQueues_ExtractRecv (FileItem_t *freceive, int sender,
 *** INITIALIZATION 
 **********************************************************************/
 
-void CommunicationQueues_Init (NewQueue_t **fsend, NewQueue_t **freceive)
+void CommunicationQueues_Init (NewQueue_t **send, NewQueue_t **receive)
 {
 	/* Initialize queues. Allocate 1024 entries by default. */
-	*fsend = NewQueue_create (sizeof(SendData_t), 1024);
-	*freceive = NewQueue_create (sizeof(RecvData_t), 1024);
+	*send = NewQueue_create (sizeof(SendData_t), 1024);
+	*receive = NewQueue_create (sizeof(RecvData_t), 1024);
 }

@@ -772,7 +772,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF);
 }
 
-#if defined(MPI_HAS_INIT_THREAD)
+#if defined(MPI_HAS_INIT_THREAD_F)
 /******************************************************************************
  ***  PMPI_Init_thread_Wrapper
  ******************************************************************************/
@@ -860,7 +860,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD);
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF);
 }
-#endif /* MPI_HAS_INIT_THREAD */
+#endif /* MPI_HAS_INIT_THREAD_F */
 
 #endif /* 
      (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
@@ -3808,7 +3808,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	return val;
 }
 
-#if defined(MPI_HAS_INIT_THREAD)
+#if defined(MPI_HAS_INIT_THREAD_C)
 int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
 {
 	int val = 0, me, ret;
@@ -3886,7 +3886,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 	return val;
 }
-#endif /* MPI_HAS_INIT_THREAD */
+#endif /* MPI_HAS_INIT_THREAD_C */
 
 
 /******************************************************************************
