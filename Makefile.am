@@ -25,7 +25,6 @@ dist-hook:
 
 if IS_CELL_MACHINE
 SEQ_EXAMPLE_FILES=example/CELL/SEQ/worker.c \
- example/CELL/SEQ/spu.h \
  example/CELL/SEQ/run.sh \
  example/CELL/SEQ/merge.sh \
  example/CELL/SEQ/master.c \
@@ -37,7 +36,6 @@ SEQ_EXAMPLE_FILES=example/CELL/SEQ/worker.c \
  example/CELL/SEQ/Makefile
 
 MPI_EXAMPLE_FILES=example/CELL/MPI/worker.c \
- example/CELL/MPI/spu.h \
  example/CELL/MPI/run.sh \
  example/CELL/MPI/merge.sh \
  example/CELL/MPI/master.c \
