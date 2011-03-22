@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (22/Mar/2011) Increase buffer size to 500k elements
    * (03/Mar/2011) Fix communication between threads (i.e. task != 1 is sending
                      or receiving)
                    Differentiate MPI_Init_thread per C/Fortran (Fortran

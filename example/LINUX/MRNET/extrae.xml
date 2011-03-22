@@ -88,7 +88,7 @@ PM_DATA_FROM_L2, PM_INST_CMPL, PM_DATA_FROM_MEM, PM_LD_MISS_L1_LSU0, PM_1PLUS_PP
   </storage>
 
   <buffer enabled="yes">
-    <size enabled="yes">150000</size>
+    <size enabled="yes">500000</size>
     <circular enabled="yes" />
   </buffer>
 

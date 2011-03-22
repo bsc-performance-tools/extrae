@@ -31,7 +31,7 @@
   </counters>
 
   <buffer enabled="yes">
-    <size enabled="yes">150000</size>
+    <size enabled="yes">500000</size>
     <circular enabled="no" />
   </buffer>
 

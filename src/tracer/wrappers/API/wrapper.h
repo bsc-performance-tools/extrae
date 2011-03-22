@@ -42,7 +42,7 @@
 #include "buffers.h"
 #include "calltrace.h" 
 
-#define EVT_NUM 100000
+#define EVT_NUM 500000
 #define CACHE_LINE 128
 
 #if !defined(TRUE)
