@@ -142,20 +142,20 @@ int spu_init_backend (int me, unsigned long long trace_ptr, unsigned long long c
  * flush_buffer
  ******************************************************************************/
 
-static void __inline__ mpitrace_cell_asynch_put (void *ls, unsigned long long ea, int size, int tag)
+static void mpitrace_cell_asynch_put (void *ls, unsigned long long ea, int size, int tag)
 {
 	/* DMA transfers must be x16 bytes */
-	if ((size & 0x0f) != 0x00)
+	if ((size & 0x0f) != 0)
 		return;
 
 	while (spu_readchcnt (MFC_Cmd) < 1);
-	mfc_put (ls, ea, size, tag, 0x0, 0x0);
+	mfc_put (ls, ea, size, tag, 0, 0);
 }
 
 static void mpitrace_cell_wait (int tag)
 {
-	spu_writech (MFC_WrTagMask, 1 << tag);
-	spu_mfcstat (2);
+	mfc_write_tag_mask (1<<tag);
+	mfc_read_tag_status_all();
 }
 
 unsigned int dma_channel = DEFAULT_DMA_CHANNEL;

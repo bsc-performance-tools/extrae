@@ -67,6 +67,43 @@ static int CELLtrace_init_prepared = FALSE;
 	multiple SPU threads.
 */
 
+#if !defined(MPI_SUPPORT)
+static generate_spu_file_list (int nspus)
+{
+	char tmp_line[2048];
+	char hostname[1024];
+	char tmpname[1024];
+	int filedes;
+	int i;
+	int thid;
+	int ret;
+
+	sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+
+	filedes = open (tmpname, O_WRONLY | O_APPEND , 0644);
+	if (filedes < 0)
+		return -1;
+
+        if (gethostname (hostname, 1024 - 1) != 0)
+                sprintf (hostname, "localhost");
+
+	for (thid = 1; thid <= nspus; thid++)
+	{
+		FileName_PTT(tmpname, Get_FinalDir(0), appl_name, getpid(), 0, thid, EXT_MPIT);
+
+		sprintf (tmp_line, "%s on %s-SPU%d\n", tmpname, hostname, thid);
+
+		ret = write (filedes, tmp_line, strlen (tmp_line));
+		if (ret != strlen (tmp_line))
+		{
+			close (filedes);
+			return -1;
+		}
+	}
+	close (filedes);
+}
+#endif
+
 int prepare_CELLTrace_init (int nthreads)
 {
 	int i;
@@ -158,8 +195,8 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 
 	for (i = 0; i < nthreads; i++)
 	{
-		FileName_PTT (trace_tmp, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_TMP_MPIT);
-		FileName_PTT (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
+		FileName_PTT (trace_tmp, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, i+linear_thread, EXT_TMP_MPIT);
+		FileName_PTT (trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
 
 		rename_or_copy (trace_tmp, trace);
 
@@ -182,7 +219,7 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 	fprintf (stdout, "\n");
 	for (i = 0; i < nthreads; i++)
 	{
-		FileName_PTT (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
+		FileName_PTT (trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
 		fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
 
 		fd = open (trace, O_WRONLY|O_CREAT|O_TRUNC, 0644);
@@ -322,11 +359,19 @@ int Extrae_CELL_init (int spus, spe_context_ptr_t * spe_id)
 		send_mail (spe_id[i], spu_file_size * 1024 * 1024);
 		send_mail (spe_id[i], descriptor);
 
-		addr_buffer = (unsigned long)spu_buffer[THREAD][i];
+	  	addr_buffer = (unsigned long long)spu_buffer[THREAD][i];
+#if defined(__powerpc64__)
 		send_mail (spe_id[i], (unsigned int) (addr_buffer >> 32));
+#else
+		send_mail (spe_id[i], 0);
+#endif
 		send_mail (spe_id[i], (unsigned int) addr_buffer);
-		addr_counter = (unsigned long)spu_counter[THREAD][i];
+		addr_counter = (unsigned long long)spu_counter[THREAD][i];
+#if defined(__powerpc64__)
 		send_mail (spe_id[i], (unsigned int) (addr_counter >> 32));
+#else
+		send_mail (spe_id[i], 0);
+#endif
 		send_mail (spe_id[i], (unsigned int) addr_counter);
 
 		send_mail (spe_id[i], (unsigned int) spu_dma_channel);

@@ -653,7 +653,7 @@ int generate_spu_file_list (int number_of_spus)
 			for (thid = 0; thid < buffer_numspus[i]; thid++)
 			{
 				/* Tracefile_Name (tmpname, final_dir, appl_name, buffer_pids[i], i, thid+buffer_threads[i]); */
-				FileName_PTT(tmpname, final_dir, appl_name, buffer_pids[i], i, thid+buffer_threads[i], EXT_MPIT);
+				FileName_PTT(tmpname, Get_FinalDir(i), appl_name, buffer_pids[i], i, thid+buffer_threads[i], EXT_MPIT);
 
 				sprintf (tmp_line, "%s on %s-SPU%d\n", tmpname, &buffer_names[i*MPI_MAX_PROCESSOR_NAME], thid);
 
@@ -6810,7 +6810,7 @@ static void Gather_MPITS(void)
 
 			/* Send the mpit name and size to the master */
 			//Tracefile_Name (mpit_name, final_dir, appl_name, master_pid, TASKID, 0);
-			FileName_PTT(mpit_name, final_dir, appl_name, master_pid, TASKID, 0, EXT_MPIT);
+			FileName_PTT(mpit_name, Get_FinalDir(TASKID), appl_name, master_pid, TASKID, 0, EXT_MPIT);
 
 			mpit_name_len = strlen(mpit_name);
 			mpit_fd = open(mpit_name, O_RDONLY);

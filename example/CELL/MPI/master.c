@@ -78,7 +78,7 @@ void create_threads (int numthreads, const char *program, spe_context_ptr_t **co
 	spe_program_handle_t *handle;
 	spe_context_ptr_t *conts;
 	pthread_t *thids;
-	unsigned int args[6];
+	unsigned int args[8];
 
 	thids = (pthread_t*) malloc (numthreads * sizeof(pthread_t));
 	conts = (spe_context_ptr_t*) malloc (numthreads * sizeof(spe_context_ptr_t));
@@ -87,24 +87,33 @@ void create_threads (int numthreads, const char *program, spe_context_ptr_t **co
 	CHECK_NULL (handle, spe_open_image);
 
 	/* Prepare some params! */
-	args[1] = (unsigned int) image1; /* @ of image 1 */
-	args[2] = (unsigned int) image2; /* @ of image 2 */
-	args[4] = (unsigned int) out;   /* @ of image 3 */
+
+#if defined(__powerpc64__)
+	args[2] = (unsigned int) (((unsigned long long) image1) >> 32); /* hi bits of @ of image 1 */
+	args[4] = (unsigned int) (((unsigned long long) image2) >> 32); /* hi bits of @ of image 2 */
+	args[6] = (unsigned int) (((unsigned long long) out) >> 32); /* hi bits of @ of out */
+#else
+	args[2] = 0; /* hi bits of @ of image 1 */
+	args[4] = 0; /* hi bits of @ of image 2 */
+	args[6] = 0; /* hi bits of @ of out */
+#endif
+	args[3] = (unsigned int) (((unsigned long long) image1) & 0xFFFFFFFF); /* lo bits of @ of image 1 */
+	args[5] = (unsigned int) (((unsigned long long) image2) & 0xFFFFFFFF); /* lo bits of @ of image 2 */
+	args[7] = (unsigned int) (((unsigned long long) out) & 0xFFFFFFFF); /* lo bits of @ of out */
 
 	for (i = 0; i < numthreads; i++)
 	{
 		/* Configure params! */
 		args[0] = i; /* ID */
-		args[3] = works[i] * width;  /* Number of PIXELS */
+		args[1] = works[i] * width;  /* Number of PIXELS */
 
 		/* PARAMS ARE:
 			--
 			param(0) = ID of the thread
-			param(1) = @ of the first image (chroma)
-			param(2) = @ of the second image (normal)
-			param(3) = number of pixels of this chunk of work
-			param(4) = @ of the output image
-			param(5) = retrocallback of the child thread
+		        param(1) = number of pixels of this chunk of work
+			param(2)+param(3) = @ of the first image (chroma)
+			param(4)+param(5) = @ of the second image (normal)
+			param(6)+param(7) = @ of the output image
 			-- */
 
 		conts[i] = spe_context_create (0, NULL);
@@ -112,13 +121,13 @@ void create_threads (int numthreads, const char *program, spe_context_ptr_t **co
 		pthread_create (&thids[i], NULL, ppu_pthread_function, &conts[i]);
 		CHECK_NULL (thids[i], pthread_create);
 
-		for (j = 0; j < 5; j++)
+		for (j = 0; j < 8; j++)
 			send_mail (conts[i], args[j]);
 
 		/* Set the next params */
-		args[1] += (works[i]*width)*sizeof(struct rgb_t); 
-		args[2] += (works[i]*width)*sizeof(struct rgb_t); 
-		args[4] += (works[i]*width)*sizeof(struct rgb_t); 
+		args[3] += (works[i]*width)*sizeof(struct rgb_t); 
+		args[5] += (works[i]*width)*sizeof(struct rgb_t); 
+		args[7] += (works[i]*width)*sizeof(struct rgb_t); 
 	}
 	*pthreads = thids;
 	*contexts = conts;
@@ -139,8 +148,8 @@ void distribute_work (int numthreads, int work, int **distributed)
 
   /* Search for an equitative work distribution */ 	
 	for (i = 0, remain_threads = numthreads;
-    remain_threads > 0;
-    remain_threads--, i++)
+		remain_threads > 0;
+		remain_threads--, i++)
 	{
 		int thread_work = remain_work / remain_threads;
 		remain_work = remain_work - thread_work;
@@ -163,7 +172,7 @@ int main (int argc, char *argv[])
 	pthread_t *pthreads;
 	spe_context_ptr_t *contexts;
 
-  MPI_Init (&argc, &argv);
+	MPI_Init (&argc, &argv);
 
 	if (argc != 5)
 	{
@@ -211,7 +220,7 @@ int main (int argc, char *argv[])
 		save_image (argv[3], w1, h1, out);
 		Extrae_event (1000, 0);
 
-		Extre_CELL_fini ();
+		Extrae_CELL_fini ();
 	}
 	else
 	{

@@ -267,7 +267,7 @@ static void Generate_Task_File_List (void)
 		return;
 
 	if (gethostname (hostname, 1024 - 1) != 0)
-		sprintf (tmpname, "localhost");
+		sprintf (hostname, "localhost");
 
 	for (thid = 0; thid < Backend_getMaximumOfThreads(); thid++)
 	{
@@ -331,8 +331,11 @@ void Extrae_fini_Wrapper (void)
 	if (!mpitrace_on)
 		return;
 
-	/* Generate the definitive file list */
+#if !defined(IS_CELL_MACHINE)
+	/* Generate the definitive file list. Cell machines touch the list
+ 	   as the execution runs... don't touch on that case */
 	Generate_Task_File_List();
+#endif
 
 	/* Es tanca la llibreria de traceig */
 	Backend_Finalize ();

@@ -35,24 +35,24 @@ static char rcsid[] = "$Id$";
 #include "spu_trace.h"
 #include <spu_mfcio.h>
 
-void __inline__ cell_asynch_get (void *ls, void *ea, int size, int tag)
+void __inline__ cell_asynch_get (void *ls, unsigned long long ea, int size, int tag)
 {
 	/* DMA transfers must be x16 bytes */
-	if ((size & 0x0f) != 0x00)
+	if ((size & 0x0f) != 0)
 		return;
 
 	while (spu_readchcnt (MFC_Cmd) < 1);
-	spu_mfcdma32 (ls, (unsigned int) ea, size, tag, 0x0 | 0x40);
+	mfc_get (ls, ea, size, tag, 0, 0);
 }
 
-void __inline__ cell_asynch_put (void *ls, void *ea, int size, int tag)
+void __inline__ cell_asynch_put (void *ls, unsigned long long ea, int size, int tag)
 {
 	/* DMA transfers must be x16 bytes */
-	if ((size & 0x0f) != 0x00)
+	if ((size & 0x0f) != 0)
 		return;
 
 	while (spu_readchcnt (MFC_Cmd) < 1);
-	spu_mfcdma32 (ls, (unsigned int) ea, size, tag, 0x0 | 0x20);
+	mfc_put (ls, ea, size, tag, 0, 0);
 }
 
 static void cell_wait (int tag)
@@ -67,14 +67,22 @@ static unsigned int get_mail (void)
 	return spu_read_in_mbox();
 }
 
-static void get_arguments (unsigned int *ID, struct rgb_t **image1,
-	struct rgb_t **image2, unsigned int *count, struct rgb_t **out)
+static void get_arguments (unsigned int *ID, unsigned long long *image1,
+	unsigned long long *image2, unsigned int *count, unsigned long long *out)
 {
+	unsigned long long tmp;
+
 	*ID = get_mail ();
-	*image1 = (struct rgb_t*) get_mail ();
-	*image2 = (struct rgb_t*) get_mail ();
 	*count = get_mail ();
-	*out = (struct rgb_t*) get_mail ();
+
+	tmp = (unsigned long long) get_mail ();
+	*image1 = tmp << 32 | (unsigned long long) get_mail();
+
+	tmp = (unsigned long long) get_mail ();
+	*image2 = tmp << 32 | (unsigned long long) get_mail();
+
+	tmp = (unsigned long long) get_mail ();
+	*out = tmp << 32 | (unsigned long long) get_mail();
 }
 
 static void cell_work (struct rgb_t *chroma, struct rgb_t *image, unsigned int count,
@@ -95,14 +103,14 @@ static void cell_work (struct rgb_t *chroma, struct rgb_t *image, unsigned int c
 	}
 }
 
-static void cell_get_pixels (struct rgb_t *PUimage, struct rgb_t *SPUimage,
+static void cell_get_pixels (unsigned long long PUimage, struct rgb_t *SPUimage,
 	unsigned int npixels)
 {
 	cell_asynch_get (SPUimage, PUimage, npixels*sizeof(struct rgb_t), 0);
 	cell_wait (0);
 }
 
-static void cell_put_pixels (struct rgb_t *PUimage, struct rgb_t *SPUimage,
+static void cell_put_pixels (unsigned long long PUimage, struct rgb_t *SPUimage,
 	unsigned int npixels)
 {
 	cell_asynch_put (SPUimage, PUimage, npixels*sizeof(struct rgb_t), 2);
@@ -116,7 +124,7 @@ struct 	rgb_t chroma[MAX_PIXELS] __attribute ((aligned(128))),
 
 int main (int argc, char *argv[])
 {
-	struct rgb_t *image1, *image2, *global_out;
+	unsigned long long image1, image2, global_out;
 	unsigned int count, ID;
 
 	get_arguments (&ID, &image1, &image2, &count, &global_out);

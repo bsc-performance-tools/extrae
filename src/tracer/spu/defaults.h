@@ -31,7 +31,7 @@
 #define __SPU_DEFAULTS_H_INCLUDED__
 
 #define DEFAULT_DMA_CHANNEL     31
-#define DEFAULT_SPU_BUFFER_SIZE 256 /* extended from 64 by jplanas request */
+#define DEFAULT_SPU_BUFFER_SIZE 128 /* extended from 64 by jplanas request */
 #define DEFAULT_SPU_FILE_SIZE    5
 
 #endif
