@@ -489,7 +489,7 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 		fprintf (stderr, PACKAGE_NAME": PAPI library error: %s\n", PAPI_strerror (rc));
 
 		if (rc == PAPI_ESYS)
-			perror (" mpitrace: PAPI system error is ");
+			perror (PACKAGE_NAME": PAPI system error is ");
 
 		return;
 	}
