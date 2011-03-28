@@ -616,8 +616,12 @@ static int read_environment_variables (int me)
 	   routines */
 	str = getenv ("EXTRAE_FUNCTIONS");
 	if (str != NULL)
-		InstrumentUFroutines (me, str);
+	{
+		InstrumentUFroutines_XL (me, str);
+		InstrumentUFroutines_GCC (me, str);
+	}
 
+#if 0
 	/* Limit the depth of the callgraph */
 	str = getenv ("EXTRAE_FUNCTIONS_MAX_DEPTH");
 	if (str != NULL)
@@ -629,6 +633,7 @@ static int read_environment_variables (int me)
 			fprintf (stdout, PACKAGE_NAME": Limit depth for the user functions tracing set to %d\n", value);
 		}
 	}
+#endif
 
 	/* HWC must be gathered at UF? */
 	str = getenv ("EXTRAE_FUNCTIONS_COUNTERS_ON");

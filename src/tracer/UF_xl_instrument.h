@@ -22,60 +22,15 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/UF_gcc_instrument.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-#include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+#if !defined(UF_XL_INSTRUMENT_H_INCLUDED)
+#define UF_XL_INSTRUMENT_H_INCLUDED
 
-#include "mpi2out.h"
+void InstrumentUFroutines_XL (int rank, char *filename);
 
-#if defined(PARALLEL_MERGE)
-
-#ifdef HAVE_STDIO_H
-# include <stdio.h>
-#endif
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-
-#include <mpi.h>
-#include "mpi-aux.h"
-
-int main (int argc, char *argv[])
-{
-	int res;
-	int ntasks;
-	int idtask;
-
-	res = MPI_Init (&argc, &argv);
-	MPI_CHECK (res, MPI_Init, "Failed to initialize MPI");
-
-	res = MPI_Comm_size (MPI_COMM_WORLD, &ntasks);
-	MPI_CHECK (res, MPI_Comm_size, "Failed to call MPI_Comm_size");
-
-	res = MPI_Comm_rank (MPI_COMM_WORLD, &idtask);
-	MPI_CHECK (res, MPI_Comm_size, "Failed to call MPI_Comm_rank");
-
-	merger_pre (ntasks);
-	ProcessArgs (ntasks, idtask, argc, argv);
-	merger_post (ntasks, idtask);
-
-	res = MPI_Finalize ();
-	MPI_CHECK (res, MPI_Finalize, "Failed to uninitialize MPI");
-
-	return 0;
-}
-#else
-int main (int argc, char *argv[])
-{
-	merger_pre (1);
-	ProcessArgs (1, 0, argc, argv);
-	merger_post (1, 0);
-
-	return 0;
-}
 #endif
 

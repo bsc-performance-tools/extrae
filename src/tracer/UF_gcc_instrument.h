@@ -30,8 +30,7 @@
 #if !defined(UF_GCC_INSTRUMENT_H_INCLUDED)
 #define UF_GCC_INSTRUMENT_H_INCLUDED
 
-void InstrumentUFroutines (int rank, char *filename);
-void setUFMaxDepth (unsigned int depth);
+void InstrumentUFroutines_GCC (int rank, char *filename);
 
 #endif
 

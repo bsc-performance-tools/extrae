@@ -129,6 +129,7 @@ core_SRCS = \
  signals.c signals.h                         \
  xml-parse.c xml-parse.h                     \
  UF_gcc_instrument.c UF_gcc_instrument.h     \
+ UF_xl_instrument.c UF_xl_instrument.h       \
  mode.c mode.h                               \
  threadid.h threadid.c                       \
  taskid.h taskid.c                           \

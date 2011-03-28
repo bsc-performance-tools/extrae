@@ -107,12 +107,14 @@ The user can choose which addresses to save in the trace (starting from 1, which
 
 \input{XML/userfunctions.xml.tex}
 
-There are two different mechanisms to instrument user functions. One is using DynInst support, the other is using the {\tt -finstrument-functions} when compiling and linking the application using the GNU C compiler.
+There are two different mechanisms to instrument user functions. One is using DynInst support, the other relies on compiling and linking the application using additional options. 
 
 \begin{itemize}
  \item If you use DynInst support in the instrumentation package, then the pointed list in the {\tt list} attribute within the tag is just a name list of the functions to be traced.
 
- \item If you use the GNU C compiler with the option {\tt -finstrument-functions} at compile and link stages, the  list attribute must point a file with a list of entries like:
+ \item If you use the IBM XL compilers, specify the option {\tt -qdebug=function\_trace} at compile and link stages. The {\tt list} attribute, as in DynInst, points to a name list of functions to be traced.
+
+ \item If you use the GNU C compiler with the option {\tt -finstrument-functions} at compile and link stages, the {\tt list} attribute must point a file with a list of entries like:
 
 {\tt function\_name \# address}
 

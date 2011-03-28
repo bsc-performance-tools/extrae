@@ -501,7 +501,8 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	if (list == NULL)
 		return;
 
-	InstrumentUFroutines (rank, list);
+	InstrumentUFroutines_XL (rank, list);
+	InstrumentUFroutines_GCC (rank, list);
 
 	XML_FREE(list);
 
@@ -526,6 +527,7 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #endif
 			XML_FREE(enabled);
 		}
+#if 0
 		/* Will we limit the depth of the UF calls? */
 		else if (!xmlStrcasecmp (tag->name, TRACE_MAX_DEPTH))
 		{
@@ -544,6 +546,7 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			}
 			XML_FREE(enabled);
 		}
+#endif
 		else
 		{
 			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <UserFunctions> level\n", tag->name);

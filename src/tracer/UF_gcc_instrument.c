@@ -64,8 +64,6 @@ static unsigned int UF_collisions, UF_count, UF_distance;
 # define HASH(address) ((address>>2) & MAX_UFs_mask)
 #endif
 
-static unsigned int UFMaxDepth = (1 << 31);
-static unsigned int UFDepth = 0;
 static int UF_tracing_enabled = FALSE;
 static int LookForUFaddress (void *address);
 
@@ -79,24 +77,20 @@ void __cyg_profile_func_enter (void *this_fn, void *call_site)
 {
 	UNREFERENCED_PARAMETER (call_site);
 
-	if (mpitrace_on && UF_tracing_enabled && UFDepth < UFMaxDepth)
+	if (mpitrace_on && UF_tracing_enabled)
 	{
 		if (LookForUFaddress (this_fn))
 		{
 			TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, (uintptr_t) this_fn, TRACING_HWC_UF);
 		}
 	}
-
-	UFDepth++;
 }
 
 void __cyg_profile_func_exit (void *this_fn, void *call_site)
 {
 	UNREFERENCED_PARAMETER (call_site);
 
-	UFDepth--;
-
-	if (mpitrace_on && UF_tracing_enabled && UFDepth < UFMaxDepth)
+	if (mpitrace_on && UF_tracing_enabled)
 	{
 		if (LookForUFaddress (this_fn))
 		{
@@ -130,8 +124,6 @@ static void AddUFtoInstrument (void *address)
 		else
 			fprintf (stderr, PACKAGE_NAME": Cannot add UF %p\n", address);
 	}
-
-	UF_tracing_enabled = TRUE;
 }
 
 static int LookForUFaddress (void *address)
@@ -157,7 +149,7 @@ static void ResetUFtoInstrument (void)
 	UF_distance = UF_count = UF_collisions = 0;
 }
 
-void InstrumentUFroutines (int rank, char *filename)
+void InstrumentUFroutines_GCC (int rank, char *filename)
 {
 	FILE *f = fopen (filename, "r");
 	if (f != NULL)
@@ -167,22 +159,23 @@ void InstrumentUFroutines (int rank, char *filename)
 
 		ResetUFtoInstrument ();
 
-		fgets (buffer, sizeof(buffer), f);
-		while (!feof(f))
-		{
-			sscanf (buffer, "%lx # %s", &address, fname);
-			AddUFtoInstrument ((void*) address);
-			fgets (buffer, sizeof(buffer), f);
-		}
+		if (fgets (buffer, sizeof(buffer), f) != NULL)
+			while (!feof(f))
+			{
+				if (sscanf (buffer, "%lx # %s", &address, fname) == 2)
+					AddUFtoInstrument ((void*) address);
+				if (fgets (buffer, sizeof(buffer), f) == NULL)
+					break;
+			}
 		fclose (f);
 
 		if (rank == 0)
 		{
 			if (UF_collisions > 0)
-				fprintf (stdout, PACKAGE_NAME": Number of user functions traced: %u (collisions: %u, avg distance = %u)\n",
+				fprintf (stdout, PACKAGE_NAME": Number of user functions traced (GCC runtime): %u (collisions: %u, avg distance = %u)\n",
     	    UF_count, UF_collisions, UF_distance/UF_collisions);
 			else
-				fprintf (stdout, PACKAGE_NAME": Number of user functions traced: %u\n", UF_count);
+				fprintf (stdout, PACKAGE_NAME": Number of user functions traced (GCC runtime): %u\n", UF_count);
 		}
 	}
 	else
@@ -193,10 +186,5 @@ void InstrumentUFroutines (int rank, char *filename)
 
 	if (UF_count > 0)
 		UF_tracing_enabled = TRUE;
-}
-
-void setUFMaxDepth (unsigned int depth)
-{
-	UFMaxDepth = depth;
 }
 
