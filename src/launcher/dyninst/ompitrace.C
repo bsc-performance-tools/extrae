@@ -533,9 +533,9 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 					}
 
 					/* Check MPI calls */
-					if (instrumentMPI && appType->get_isMPI() &&
+					if (instrumentMPI && appType->get_isMPI() && (
 					    strncmp (calledname, PMPI_C_prefix, 5) == 0 || strncmp (calledname, MPI_C_prefix, 4) == 0 ||
-					    strncmp (calledname, PMPI_F_prefix, 5) == 0 || strncmp (calledname, MPI_F_prefix, 4) == 0)
+					    strncmp (calledname, PMPI_F_prefix, 5) == 0 || strncmp (calledname, MPI_F_prefix, 4) == 0))
 					{
 						BPatch_function *patch_mpi = getMPIPatch (calledname);
 						if (patch_mpi != NULL)

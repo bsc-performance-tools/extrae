@@ -1944,10 +1944,13 @@ AC_DEFUN([AX_PROG_LIBDWARF],
    if test "${dwarf_paths}" != "no" ; then
       AX_FIND_INSTALLATION([DWARF], [${dwarf_paths}], [dwarf])
       if test "${DWARF_INSTALLED}" = "yes" ; then
-        if test -f ${DWARF_HOME}/lib/libdwarf.a -o \
-                -f ${DWARF_HOME}/lib/libdwarf.so ; then
+        if test -f ${DWARF_LIBSDIR}/libdwarf.a -o \
+                -f ${DWARF_LIBSDIR}/libdwarf.so ; then
            if test -f ${DWARF_HOME}/include/libdwarf.h -a \
                    -f ${DWARF_HOME}/include/dwarf.h ; then
+              libdwarf_found="yes"
+           elif test -f ${DWARF_HOME}/include/libdwarf/libdwarf.h -a \
+                     -f ${DWARF_HOME}/include/libdwarf/dwarf.h ; then
               libdwarf_found="yes"
            else
               AC_MSG_ERROR([Cannot find DWARF header files in ${dwarf_paths}/include])

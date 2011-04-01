@@ -56,11 +56,11 @@ if (${?EXTRAE_HOME}) then
 		if (! -d ${DYNINST_HOME}/lib ) then
 			echo "Unable to find DynInst library directory!"
 		else
-			if (! -f ${DYNINST_HOME}/lib/libdyninstAPI_RT.so.1 ) then
-				echo "Unable to find libdyninstAPI_RT.so.1 in the Dyninst library directory!"
+			if (! -f ${DYNINST_HOME}/lib/libdyninstAPI_RT.so ) then
+				echo "Unable to find libdyninstAPI_RT.so in the Dyninst library directory!"
 			else
 				setenv LD_LIBRARY_PATH ${DYNINST_HOME}/lib:${LD_LIBRARY_PATH}
-				setenv DYNINSTAPI_RT_LIB ${DYNINST_HOME}/lib/libdyninstAPI_RT.so.1
+				setenv DYNINSTAPI_RT_LIB ${DYNINST_HOME}/lib/libdyninstAPI_RT.so
 			endif
 		endif
 	endif
