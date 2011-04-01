@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (31/Mar/2011) Fix for matching user communications in merger.
    * (28/Mar/2011) Support for XL -qdebug=function_trace
    * (23/Mar/2011) Several fixes to revive CBEA support
    * (22/Mar/2011) Increase buffer size to 500k elements

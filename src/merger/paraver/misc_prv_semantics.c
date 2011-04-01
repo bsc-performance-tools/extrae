@@ -821,26 +821,29 @@ static int User_Send_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned recv_thread;
-	struct thread_t *thread_info, *thread_info_partner;
+	struct thread_t *thread_info;
+	struct task_t *task_info, *task_info_partner;
 	event_t * recv_begin, * recv_end;
 	UNREFERENCED_PARAMETER(cpu);
 
 	thread_info = GET_THREAD_INFO(ptask, task, 1);
+	task_info = GET_TASK_INFO(ptask, task);
+
 
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
 		if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
 		{
-			thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
+			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
 
-			CommunicationQueues_ExtractRecv (thread_info_partner->file, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, Get_EvAux(current_event));
+			CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, Get_EvAux(current_event));
 
 			if (recv_begin == NULL || recv_end == NULL)
 			{
 				off_t position;
 
 				position = WriteFileBuffer_getPosition (obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb);
-				CommunicationQueues_QueueSend (thread_info->file, current_event, current_event, position, thread, Get_EvAux(current_event));
+				CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, Get_EvAux(current_event));
 				trace_paraver_unmatched_communication (1, ptask, task, thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, recv_thread, Get_EvSize(current_event), Get_EvTag(current_event));
 			}
 			else
@@ -868,23 +871,25 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned send_thread;
-	struct thread_t *thread_info, *thread_info_partner;
+	struct thread_t *thread_info;
+	struct task_t *task_info, *task_info_partner;
 	UNREFERENCED_PARAMETER(cpu);
 	UNREFERENCED_PARAMETER(current_time);
 
 	thread_info = GET_THREAD_INFO(ptask, task, 1);
+	task_info = GET_TASK_INFO(ptask, task);
 
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
 		if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
 		{
-			thread_info_partner = &(obj_table[ptask-1].tasks[Get_EvTarget(current_event)].threads[0]);
+			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
 
-			CommunicationQueues_ExtractSend (thread_info_partner->file, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, Get_EvAux(current_event));
+			CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, Get_EvAux(current_event));
 
 			if (NULL == send_begin || NULL == send_end)
 			{
-				CommunicationQueues_QueueRecv (thread_info->file, current_event, current_event, thread, Get_EvAux(current_event));
+				CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, current_event, thread, Get_EvAux(current_event));
 			}
 			else if (NULL != send_begin && NULL != send_end)
 			{
