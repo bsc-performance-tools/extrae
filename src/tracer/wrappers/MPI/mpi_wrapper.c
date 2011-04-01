@@ -1343,8 +1343,15 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	else
 		size = 0;
 
-	sender_src = ptr_status[MPI_SOURCE_OFFSET];
-	sended_tag = ptr_status[MPI_TAG_OFFSET];
+	if (*source == MPI_ANY_SOURCE)
+		sender_src = ptr_status[MPI_SOURCE_OFFSET];
+	else
+		sender_src = *source;
+
+	if (*tag == MPI_ANY_TAG)
+		sended_tag = ptr_status[MPI_TAG_OFFSET];
+	else
+		sended_tag = *tag;
 
 	/* MPI Stats */
 	P2P_Communications ++;
@@ -1362,9 +1369,6 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    *   tag : message tag
    */
   TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag, c, EMPTY);
-/*
-  TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, *tag, c, EMPTY);
-*/
 }
 
 /******************************************************************************
@@ -4322,8 +4326,15 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
 	else
 		size = 0;
 
-	sender_src = ptr_status->MPI_SOURCE;
-	sended_tag = ptr_status->MPI_TAG;
+	if (source == MPI_ANY_SOURCE)
+		sender_src = ptr_status->MPI_SOURCE;
+	else
+		sender_src = source;
+
+	if (tag == MPI_ANY_TAG)
+		sended_tag = ptr_status->MPI_TAG;
+	else
+		sended_tag = tag;
 
 	/* MPI Stats */
 	P2P_Communications ++;
@@ -4339,10 +4350,6 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
    */
 	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag,
 		comm, EMPTY);
-/*
-	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, tag, comm,
-		EMPTY);
-*/
 
   return ierror;
 }
