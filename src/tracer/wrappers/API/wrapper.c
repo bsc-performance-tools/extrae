@@ -1669,6 +1669,9 @@ void Backend_Finalize (void)
 {
 	unsigned thread;
 
+	/* Stop sampling right now */
+	setSamplingEnabled (FALSE);
+
 	for (thread = 0; thread < maximum_NumOfThreads; thread++) 
 	{
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
