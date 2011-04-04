@@ -3522,8 +3522,15 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	else
 		DataSize = 0;
 
-	sender_src = ptr_status[MPI_SOURCE_OFFSET];
-	sender_tag = ptr_status[MPI_TAG_OFFSET];
+	if (*source == MPI_ANY_SOURCE)
+		sender_src = ptr_status[MPI_SOURCE_OFFSET];
+	else
+		sender_src = *source;
+
+	if (*recvtag == MPI_ANY_TAG)
+		sender_tag = ptr_status[MPI_TAG_OFFSET];
+	else
+		sender_tag = *recvtag;
 
 	/* MPI Stats */
 	P2P_Communications ++;
@@ -3567,8 +3574,15 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	else
 		DataSize = 0;
 
-	sender_src = ptr_status[MPI_SOURCE_OFFSET];
-	sender_tag = ptr_status[MPI_TAG_OFFSET];
+	if (*source == MPI_ANY_SOURCE)
+		sender_src = ptr_status[MPI_SOURCE_OFFSET];
+	else
+		sender_src = *source;
+
+	if (*recvtag == MPI_ANY_TAG)
+		sender_tag = ptr_status[MPI_TAG_OFFSET];
+	else
+		sender_tag = *recvtag;
 
 	/* MPI Stats */
 	P2P_Communications ++;
@@ -6458,8 +6472,15 @@ int MPI_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	else
 		DataSize = 0;
 
-	SendRank = ptr_status->MPI_SOURCE;
-	Tag = ptr_status->MPI_TAG;
+	if (source == MPI_ANY_SOURCE)
+		SendRank = ptr_status->MPI_SOURCE;
+	else
+		SendRank = source;
+
+	if (recvtag == MPI_ANY_TAG)
+		Tag = ptr_status->MPI_TAG;
+	else
+		Tag = recvtag;
 
 	/* MPI Stats */
 	P2P_Communications ++;
@@ -6511,8 +6532,15 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
 	else
 		DataSize = 0;
 
-	SendRank = ptr_status->MPI_SOURCE;
-	Tag = ptr_status->MPI_TAG;
+	if (source == MPI_ANY_SOURCE)
+		SendRank = ptr_status->MPI_SOURCE;
+	else
+		SendRank = source;
+
+	if (recvtag == MPI_ANY_TAG)
+		Tag = ptr_status->MPI_TAG;
+	else
+		Tag = recvtag;
 
 	/* MPI Stats */
 	P2P_Communications ++;
