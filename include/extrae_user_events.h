@@ -113,23 +113,27 @@ void OMPtrace_set_tracing_tasks (int from, int to);
 void MPItrace_set_tracing_tasks (int from, int to);
 void OMPItrace_set_tracing_tasks (int from, int to);
 
-#define EXTRAE_DISABLE_ALL_OPTIONS      0
+#define EXTRAE_DISABLE_ALL_OPTIONS      (0)
 #define MPITRACE_DISABLE_ALL_OPTIONS	  EXTRAE_DISABLE_ALL_OPTIONS
-#define EXTRAE_CALLER_OPTION            1
+#define EXTRAE_CALLER_OPTION            (1<<0)
 #define MPITRACE_CALLER_OPTION          EXTRAE_CALLER_OPTION
-#define EXTRAE_HWC_OPTION               2
+#define EXTRAE_HWC_OPTION               (1<<1)
 #define MPITRACE_HWC_OPTION             EXTRAE_HWC_OPTION
-#define EXTRAE_MPI_HWC_OPTION           4
+#define EXTRAE_MPI_HWC_OPTION           (1<<2)
 #define MPITRACE_MPI_HWC_OPTION         EXTRAE_MPI_HWC_OPTION
-#define EXTRAE_MPI_OPTION               8 
+#define EXTRAE_MPI_OPTION               (1<<3)
 #define MPITRACE_MPI_OPTION             EXTRAE_MPI_OPTION
-#define EXTRAE_OMP_OPTION               16
+#define EXTRAE_OMP_OPTION               (1<<4)
 #define MPITRACE_OMP_OPTION             EXTRAE_OMP_OPTION
-#define EXTRAE_OMP_HWC_OPTION           32 
+#define EXTRAE_OMP_HWC_OPTION           (1<<5)
 #define MPITRACE_OMP_HWC_OPTION         EXTRAE_OMP_HWC_OPTION
-#define EXTRAE_UF_HWC_OPTION            64
+#define EXTRAE_UF_HWC_OPTION            (1<<6)
 #define MPITRACE_UF_HWC_OPTION          EXTRAE_UF_HWC_OPTION
-#define EXTRAE_SAMPLING_OPTION          128
+#define EXTRAE_PTHREAD_OPTION           (1<<7)
+#define MPITRACE_PTHREAD_OPTION         EXTRAE_PTHREAD_OPTION
+#define EXTRAE_PTHREAD_HWC_OPTION       (1<<8)
+#define MPITRACE_PTHREAD_HWC_OPTION     EXTRAE_PTHREAD_HWC_OPTION
+#define EXTRAE_SAMPLING_OPTION          (1<<9)
 #define MPITRACE_SAMPLING_OPTION        EXTRAE_SAMPLING_HWC_OPTION
 
 #define EXTRAE_ENABLE_ALL_OPTIONS \
@@ -140,6 +144,8 @@ void OMPItrace_set_tracing_tasks (int from, int to);
    EXTRAE_OMP_OPTION | \
    EXTRAE_OMP_HWC_OPTION | \
    EXTRAE_UF_HWC_OPTION | \
+   EXTRAE_PTHREAD_OPTION | \
+   EXTRAE_PTHREAD_HWC_OPTION | \
    EXTRAE_SAMPLING_OPTION)
 #define MPITRACE_ENABLE_ALL_OPTIONS EXTRAE_ENABLE_ALL_OPTIONS
 

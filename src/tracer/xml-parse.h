@@ -62,6 +62,8 @@
 #define TRACE_PREFIX                    ((xmlChar*) "trace-prefix")
 #define TRACE_MPI                       ((xmlChar*) "mpi")
 #define TRACE_PACX                      ((xmlChar*) "pacx")
+#define TRACE_PTHREAD_LOCKS             ((xmlChar*) "locks")
+#define TRACE_PTHREAD                   ((xmlChar*) "pthread")
 #define TRACE_OMP_LOCKS                 ((xmlChar*) "locks")
 #define TRACE_OMP                       ((xmlChar*) "openmp")
 #define TRACE_STORAGE                   ((xmlChar*) "storage")
@@ -80,7 +82,6 @@
 #define TRACE_SPU_BUFFERSIZE            ((xmlChar*) "spu-buffer-size")
 #define TRACE_LIST                      ((xmlChar*) "list")
 #define TRACE_USERFUNCTION              ((xmlChar*) "user-functions")
-#define TRACE_MAX_DEPTH                 ((xmlChar*) "max-depth")
 #define TRACE_SAMPLING                  ((xmlChar*) "sampling")
 #define TRACE_FREQUENCY                 ((xmlChar*) "frequency")
 

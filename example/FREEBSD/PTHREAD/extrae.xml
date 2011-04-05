@@ -7,12 +7,12 @@
  xml-parser-id="@sub_XMLID@"
 >
 
-  <openmp enabled="yes">
+  <openmp enabled="no">
     <locks enabled="no" />
     <counters enabled="yes" />
   </openmp>
 
-  <pthread enabled="no">
+  <pthread enabled="yes">
     <locks enabled="no" />
     <counters enabled="yes" />
   </pthread>

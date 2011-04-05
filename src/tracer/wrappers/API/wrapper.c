@@ -107,6 +107,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "myrinet_hwc.h"
 #endif
 #include "UF_gcc_instrument.h"
+#include "UF_xl_instrument.h"
 #include "mode.h"
 #include "events.h"
 #if defined(OMP_SUPPORT)
@@ -147,6 +148,12 @@ int tracejant_omp = TRUE;
 
 /***** Variable global per saber si OpenMP s'ha de tracejar amb hwc ******/
 int tracejant_hwc_omp = FALSE;
+
+/***** Variable global per saber si pthread s'ha de tracejar **************/
+int tracejant_pthread = TRUE;
+
+/***** Variable global per saber si pthread s'ha de tracejar amb hwc ******/
+int tracejant_hwc_pthread = FALSE;
 
 /***** Variable global per saber si UFs s'han de tracejar amb hwc ********/
 int tracejant_hwc_uf = FALSE;
@@ -621,20 +628,6 @@ static int read_environment_variables (int me)
 		InstrumentUFroutines_GCC (me, str);
 	}
 
-#if 0
-	/* Limit the depth of the callgraph */
-	str = getenv ("EXTRAE_FUNCTIONS_MAX_DEPTH");
-	if (str != NULL)
-	{
-		int value = atoi (str);
-		if (value > 0)
-		{
-			setUFMaxDepth ((unsigned int)value);
-			fprintf (stdout, PACKAGE_NAME": Limit depth for the user functions tracing set to %d\n", value);
-		}
-	}
-#endif
-
 	/* HWC must be gathered at UF? */
 	str = getenv ("EXTRAE_FUNCTIONS_COUNTERS_ON");
 	if (str != NULL && (strcmp (str, "1") == 0))
@@ -670,6 +663,32 @@ static int read_environment_variables (int me)
 	/* Will we trace openmp-locks ? */
 	str = getenv ("EXTRAE_OMP_LOCKS");
 	setTrace_OMPLocks ((str != NULL && (strcmp (str, "1"))));
+#endif
+
+#if defined(PTHREAD_SUPPORT)
+	/* Check if the pthread tracing must be disabled */
+	str = getenv ("EXTRAE_DISABLE_PTHREAD");
+	if (str != NULL && (strcmp (str, "1") == 0))
+	{
+		if (me == 0)
+			fprintf (stdout, PACKAGE_NAME": pthread runtime calls are NOT traced.\n");
+  	tracejant_omp = FALSE;
+	}
+
+	/* HWC must be gathered at OpenMP? */
+	str = getenv ("EXTRAE_PTHREAD_COUNTERS_ON");
+	if (str != NULL && (strcmp (str, "1") == 0))
+	{
+		if (me == 0)
+			fprintf (stdout, PACKAGE_NAME": HWC reported in the pthread calls.\n");
+		tracejant_hwc_pthread = TRUE;
+	}
+	else
+		tracejant_hwc_pthread = FALSE;
+
+	/* Will we trace openmp-locks ? */
+	str = getenv ("EXTRAE_PTHREAD_LOCKS");
+	setTrace_PTHREADLocks ((str != NULL && (strcmp (str, "1"))));
 #endif
 
 	/* Should we configure a signal handler ? */
@@ -1336,8 +1355,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	Allocate_buffers_and_files (world_size, maximum_NumOfThreads);
 
 	/* This has been moved a few lines above to make sure the APPL_EV is the first in the trace */
-    ApplBegin_Time = TIME;
-    TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
+	ApplBegin_Time = TIME;
+	TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
 
 #if USE_HARDWARE_COUNTERS
 	/* Write hardware counters definitions */
@@ -1687,7 +1706,7 @@ void Backend_Finalize (void)
 		TRACE_EVENT (TIME, APPL_EV, EVT_END);
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
 	}
-	/* fprintf(stderr, "[T: %d] Before calling Backend_Finalize_close_mpits (NumOfThreads=%d)\n", TASKID, maximum_NumOfThreads); */
+
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 		Backend_Finalize_close_mpits (thread);
 

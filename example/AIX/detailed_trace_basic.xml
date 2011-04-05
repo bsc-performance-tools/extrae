@@ -16,6 +16,11 @@
     <counters enabled="yes" />
   </openmp>
 
+  <pthread enabled="no">
+    <locks enabled="no" />
+    <counters enabled="yes" />
+  </pthread>
+
   <callers enabled="yes">
     <mpi enabled="yes">1-3</mpi>
     <sampling enabled="yes">1-5</sampling>

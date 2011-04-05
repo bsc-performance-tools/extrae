@@ -11,16 +11,29 @@ Then look for
 	Home > Computer Sciences > Performance Tools > Documentation
 on the left navigation frame.
 
-Package dependencies:
+Package dependencies (and comments)
 --
 * libxml2 2.5.0 : parse XML configuration files (optional) - look for libxml2-devel packages for your OS
+libxml2 is used to parse the configuration of the instrumentation package. It is highly recommendable because the XML configuration file is more flexible than using environment variables.
+
 * PAPI : access to HW counters (optional) - downloadable from http://icl.cs.utk.edu/papi/
+The HW counters within the microprocessor increases the richness of the gathered traces. It is highly recommendable to install and use PAPI with extrae, although on some old kernels may require kernel patching.
+
 * DynInst : support dynamic instrumentation (optional) - downloadable from http://www.dyninst.org/
-* liberty and libbfd : access debugging binary information (optional) 
-* libz : liberty and libbfd may need libz (optional). Also libz may be used to generate .prv.gz files directly (optional).
-* MPI : execute MPI jobs (optional) - tested with MPICH, MPICH2 and OpenMPI. Others may work.
-* OpenMP runtime (gcc, ibm or icc) : execute OpenMP jobs (optional)
+This is in experimental status. It is known to work on linux PPC32/64 systems and some minor testing has been done in linux x86/x86-64 systems.
+
 * libunwind : access to callstack (intel ia64 and intel x86 64 bits) - downloadable from http://www.nongnu.org/libunwind/.
+This library is used to access the callstack within extrae. Accessing the callstack lets the analyst gather MPI call-sites and emit information on manually added events. It is required for intel x86-64 and ia64 architectures.
+
+* liberty and libbfd : access debugging binary information (optional).
+These two libraries are required to translate gathered application addresses into source code information (like file name, address line and function name). It is highly recommendable.
+
+* libz : liberty and libbfd may need libz (optional). Also libz may be used to generate .prv.gz files directly (optional).
+
+* MPI : execute MPI jobs (optional) - tested with MPICH, MPICH2 and OpenMPI. Others may work.
+
+* OpenMP runtime (gcc, ibm or icc) : execute OpenMP jobs (optional).
+
 
 Please, make sure to install the development versions of these packages (-dev, -devel) when available.
 

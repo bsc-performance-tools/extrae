@@ -55,6 +55,9 @@ if WANT_NANOS
 endif
 if WANT_PTHREAD
   lib_LTLIBRARIES += libpttrace.la
+if HAVE_MPI
+  lib_LTLIBRARIES += libptmpitrace.la libptmpitracef.la
+endif
 endif
 
 if GENERATE_LOAD_BALANCING
@@ -141,9 +144,12 @@ core_SRCS = \
  $(WRAPPERS_CORE)
 
 # MPItrace & Sequential trace
-libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) mpif.h
+libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
 libmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libseqtrace_la_SOURCES = $(core_SRCS)
+
+libptmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(WRAPPERS_PTHREAD)
+libptmpitracef_la_SOURCES = $(libptmpitrace_la_SOURCES) mpif.h
 
 # UPC (only C?)
 libupctrace_la_SOURCES = $(core_SRCS)
@@ -213,6 +219,8 @@ endif
 libseqtrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 libmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB)
 libmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB)
+libptmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB)
+libptmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB)
 
 libupctrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API)
 
@@ -314,6 +322,9 @@ endif
 libmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 libmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 
+libptmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DPTHREAD_SUPPORT
+libptmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DPTHREAD_SUPPORT
+
 libpacxtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @PACX_CFLAGS@ $(MPITRACE_SYMBOLS) -DPACX_SUPPORT
 libpacxtracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @PACX_CFLAGS@ -DFORTRAN_SYMBOLS -DPACX_SUPPORT
 
@@ -358,6 +369,9 @@ libupctrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) # -static 
 
+libptmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) -lpthread
+libptmpitracef_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) # -static 
+
 libpacxtrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 libpacxtracef_la_LDFLAGS = $(libpacxtrace_la_LDFLAGS) # -static
 
@@ -401,6 +415,7 @@ core_AIX_SRCS = \
  signals.c \
  xml-parse.c \
  UF_gcc_instrument.c \
+ UF_xl_instrument.c \
  mode.c \
  threadid.c \
  taskid.c \

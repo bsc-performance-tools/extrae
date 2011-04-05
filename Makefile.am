@@ -132,6 +132,7 @@ PTHREAD_EXAMPLE_FILES=\
  example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/pthread-example.c \
  example/FREEBSD/PTHREAD/user-comms.c \
+ example/FREEBSD/PTHREAD/extrae.xml \
  example/FREEBSD/PTHREAD/README
 
 else
@@ -174,6 +175,7 @@ PTHREAD_EXAMPLE_FILES=\
  example/LINUX/PTHREAD/Makefile \
  example/LINUX/PTHREAD/pthread-example.c \
  example/LINUX/PTHREAD/user-comms.c \
+ example/LINUX/PTHREAD/extrae.xml \
  example/LINUX/PTHREAD/README
 
 PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \

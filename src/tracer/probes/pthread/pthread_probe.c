@@ -41,44 +41,170 @@ static char UNUSED rcsid[] = "$Id$";
 # define DEBUG
 #endif
 
+static int TracePthreadLocks = FALSE;
+
+void setTrace_PTHREADLocks (int value)
+{
+	TracePthreadLocks = value;
+}
+
 void Probe_pthread_Create_Entry (void *p)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADCREATE_EV, (UINT64) p, EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADCREATE_EV, (UINT64) p, EMPTY);
 }
 
 void Probe_pthread_Create_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADCREATE_EV, EVT_END, EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADCREATE_EV, EVT_END, EMPTY);
 }
 
 void Probe_pthread_Join_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADJOIN_EV, EVT_BEGIN, EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADJOIN_EV, EVT_BEGIN, EMPTY);
 }
 
 void Probe_pthread_Join_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADJOIN_EV, EVT_END, EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADJOIN_EV, EVT_END, EMPTY);
 }
 
 void Probe_pthread_Detach_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADDETACH_EV, EVT_BEGIN, EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADDETACH_EV, EVT_BEGIN, EMPTY);
 }
 
 void Probe_pthread_Detach_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADDETACH_EV, EVT_END, EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADDETACH_EV, EVT_END, EMPTY);
 }
+
+/* RW locks */
+
+void Probe_pthread_rwlock_lockwr_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_WR_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_rwlock_lockwr_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_WR_EV, EMPTY, EMPTY);
+}
+
+void Probe_pthread_rwlock_lockrd_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_RD_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_rwlock_lockrd_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_RD_EV, EMPTY, EMPTY);
+}
+
+void Probe_pthread_rwlock_unlock_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_UNLOCK_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_rwlock_unlock_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_UNLOCK_EV, EMPTY, EMPTY);
+}
+
+/* Mutex locks */
+
+void Probe_pthread_mutex_lock_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_MUTEX_LOCK_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_mutex_lock_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_MUTEX_LOCK_EV, EMPTY, EMPTY);
+}
+
+void Probe_pthread_mutex_unlock_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_MUTEX_UNLOCK_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_mutex_unlock_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_MUTEX_UNLOCK_EV, EMPTY, EMPTY);
+}
+
+/* CONDs */
+
+void Probe_pthread_cond_signal_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_SIGNAL_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_cond_signal_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_SIGNAL_EV, EMPTY, EMPTY);
+}
+
+void Probe_pthread_cond_broadcast_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_BROADCAST_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_cond_broadcast_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_BROADCAST_EV, EMPTY, EMPTY);
+}
+
+void Probe_pthread_cond_wait_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_WAIT_EV, (UINT64) p, EMPTY);
+}
+
+void Probe_pthread_cond_wait_Exit (void *p)
+{
+	DEBUG
+	if (mpitrace_on && TracePthreadLocks)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_WAIT_EV, EMPTY, EMPTY);
+}
+

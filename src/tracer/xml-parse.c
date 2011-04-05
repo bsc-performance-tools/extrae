@@ -527,26 +527,6 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #endif
 			XML_FREE(enabled);
 		}
-#if 0
-		/* Will we limit the depth of the UF calls? */
-		else if (!xmlStrcasecmp (tag->name, TRACE_MAX_DEPTH))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)))
-			{
-				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
-				int depth = (str != NULL)? atoi (str): 0;
-				if (depth > 0)
-				{
-					mfprintf (stdout, PACKAGE_NAME": Limit depth for the user functions tracing set to %u\n", depth);
-					setUFMaxDepth ((unsigned int)depth);
-				}
-				else
-					mfprintf (stdout, PACKAGE_NAME": Warning! Invalid max-depth value\n");
-			}
-			XML_FREE(enabled);
-		}
-#endif
 		else
 		{
 			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <UserFunctions> level\n", tag->name);
@@ -602,6 +582,52 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	}
 }
 #endif
+
+#if defined(PTHREAD_SUPPORT)
+/* Configure OpenMP related parameters */
+static void Parse_XML_PTHREAD (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+	UNREFERENCED_PARAMETER(xmldoc);
+
+	/* Parse all TAGs, and annotate them to use them later */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		{
+		}
+		/* Shall we instrument openmp lock routines? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_PTHREAD_LOCKS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			setTrace_PTHREADLocks ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+			XML_FREE(enabled);
+		}
+		/* Shall we gather counters in the UF calls? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			tracejant_hwc_pthread = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+#if USE_HARDWARE_COUNTERS
+			mfprintf (stdout, PACKAGE_NAME": pthread routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT");
+#else
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <pthread> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			tracejant_hwc_omp = FALSE;
+#endif
+			XML_FREE(enabled);
+		}
+		else
+		{
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <pthread> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
+
 
 /* Configure storage related parameters */
 static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
@@ -1593,6 +1619,24 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						}
 						else
 							tracejant_omp = FALSE;
+						XML_FREE(enabled);
+					}
+					/* pthread related configuration */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_PTHREAD))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
+#if defined(PTHREAD_SUPPORT)
+							tracejant_pthread = TRUE;
+							Parse_XML_PTHREAD (rank, xmldoc, current_tag);
+#else
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support pthread.\n", TRACE_OMP);
+							tracejant_pthread = FALSE;
+#endif
+						}
+						else
+							tracejant_pthread = FALSE;
 						XML_FREE(enabled);
 					}
 					/* SPU related configuration*/

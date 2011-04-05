@@ -34,14 +34,15 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
   \hline
   EXTRAE\_DISABLE\_OMP & Disable OpenMP instrumentation.\\
   \hline
+  EXTRAE\_DISABLE\_PTHREAD & Disable pthread instrumentation.\\
+  \hline
   EXTRAE\_DISABLE\_PACX & Disable PACX instrumentation.\\
   \hline
   EXTRAE\_FILE\_SIZE & Set the maximum size (in Mbytes) for the intermediate trace file.\\
   \hline
   EXTRAE\_FUNCTIONS & List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
-                    & GNU C {\tt -finstrument-functions} option at compiled and link time.\\
-  \hline
-  EXTRAE\_FUNCTIONS\_MAX\_DEPTH & {\em (deprecated)} \\
+                    & GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
+                    & option at compile and link time. \\
   \hline
   EXTRAE\_FUNCTIONS\_COUNTERS\_ON & Specify if the performance counters should be collected when a\\
                                    & user function event is emitted.\\
@@ -86,9 +87,13 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
   \hline
   EXTRAE\_NETWORK\_COUNTERS & Set to 1 to dump network performance counters at flush points.\\
   \hline
+  EXTRAE\_PTHREAD\_COUNTERS\_ON & Set to 1 if pthread must report performance counters values. \\
+  \hline
   EXTRAE\_OMP\_COUNTERS\_ON & Set to 1 if OpenMP must report performance counters values. \\
   \hline
-  EXTRAE\_OMP\_LOCKS & Set to 1 if locks have to be instrumented.\\
+  EXTRAE\_PTHREAD\_LOCKS & Set to 1 if pthread locks have to be instrumented.\\
+  \hline
+  EXTRAE\_OMP\_LOCKS & Set to 1 if OpenMP locks have to be instrumented.\\
   \hline 
   EXTRAE\_ON & Enables instrumentation\\
   \hline

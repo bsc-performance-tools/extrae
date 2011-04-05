@@ -19,6 +19,11 @@
     <counters enabled="yes" />
   </openmp>
 
+  <pthread enabled="no">
+    <locks enabled="no" />
+    <counters enabled="yes" />
+  </pthread>
+
   <callers enabled="yes">
     <mpi enabled="yes">1-3</mpi>
     <pacx enabled="no">1-3</pacx>

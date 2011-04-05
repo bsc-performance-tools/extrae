@@ -557,6 +557,43 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
   TRACE_OMPEVENT(evttime,evttype,evtvalue,evtparam)
 #endif
 
+#define TRACE_PTHEVENT(evttime,evttype,evtvalue,evtparam)     \
+{                                                             \
+	int thread_id = THREADID;                                   \
+	event_t evt;                                                \
+	if (tracejant && TracingBitmap[TASKID] && tracejant_pthread)\
+	{                                                           \
+		evt.time = evttime;                                       \
+		evt.event = evttype;                                      \
+		evt.value = evtvalue;                                     \
+		evt.param.omp_param.param = evtparam;                     \
+		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);            \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+	}                                                           \
+}
+
+#if USE_HARDWARE_COUNTERS
+#define TRACE_PTHEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam) \
+{                                                             \
+	int thread_id = THREADID;                                   \
+	event_t evt;                                                \
+	if (tracejant && TracingBitmap[TASKID] && tracejant_pthread)\
+	{                                                           \
+		evt.time = (evttime);                                     \
+		evt.event = (evttype);                                    \
+		evt.value = (evtvalue);                                   \
+		evt.param.omp_param.param = (evtparam);                   \
+		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_OMP);  \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+		                                                          \
+		HARDWARE_COUNTERS_CHANGE(evt.time, thread_id);            \
+	}                                                           \
+}
+#else
+#define TRACE_PTHEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam) \
+  TRACE_PTHEVENT(evttime,evttype,evtvalue,evtparam)
+#endif
+
 #define TRACE_COUNTER(evttime,evttype)                        \
 {                                                             \
 	int thread_id = THREADID;                                   \

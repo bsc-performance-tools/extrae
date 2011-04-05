@@ -59,6 +59,16 @@ PACX calls can gather performance information at the begin and end of PACX calls
 
 \graybox{See {\bf EXTRAE\_DISABLE\_PACX} and {\bf EXTRAE\_PACX\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
 
+\section{XML Section: pthread}\label{sec:XMLSectionOpenMP}
+
+The pthread configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
+
+\input{XML/pthread.xml}
+
+The tracing package allows to gather information of some pthread routines. In addition to that, the user can also enable gathering information of locks and also gathering performance counters in all of these routines. This is achieved by modifying the enabled attribute of the {\tt <locks>} and {\tt <counters>}, respectively.
+
+\graybox{See {\bf EXTRAE\_DISABLE\_PTHREAD}, {\bf EXTRAE\_PTHREAD\_LOCKS} and {\bf EXTRAE\_PTHREAD\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+
 \section{XML Section: OpenMP}\label{sec:XMLSectionOpenMP}
 
 The OpenMP configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:

@@ -42,7 +42,7 @@ void *routine2 (void *parameters)
 {
 	Extrae_event (2, 1);
 	printf ("routine 2 : (thread=%08x, param %p)\n", pthread_self(), parameters);
-Extrae_event (2, 0);
+	Extrae_event (2, 0);
 }
 
 

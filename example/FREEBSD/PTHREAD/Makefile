@@ -14,13 +14,13 @@ pthread-example: pthread-example.c
 	gcc $< $(CFLAGS) $(LIBS) -o $@ 
 
 run-user-comms:
-	LD_LIBRARY_PATH=$(EXTRAE_HOME)/lib:$(PAPI_HOME)/lib EXTRAE_ON=1 ./user-comms
+	LD_LIBRARY_PATH=$(EXTRAE_HOME)/lib:$(PAPI_HOME)/lib EXTRAE_CONFIG_FILE=extrae.xml ./user-comms
 
 merge-user-comms:
 	$(EXTRAE_HOME)/bin/mpi2prv set-0/*.mpit -e ./user-comms
 
 run-pthread-example:
-	LD_LIBRARY_PATH=$(EXTRAE_HOME)/lib:$(PAPI_HOME)/lib EXTRAE_ON=1 ./pthread-example
+	LD_LIBRARY_PATH=$(EXTRAE_HOME)/lib:$(PAPI_HOME)/lib EXTRAE_CONFIG_FILE=extrae.xml ./pthread-example
 
 merge-pthread-example:
 	$(EXTRAE_HOME)/bin/mpi2prv set-0/*.mpit -e ./pthread-example

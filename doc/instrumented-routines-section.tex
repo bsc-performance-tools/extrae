@@ -1,6 +1,6 @@
 \chapter{Instrumented routines}\label{cha:InstrumentedRoutines}
 
-\section{MPI instrumented routines}\label{sec:MPIinstrumentedroutines}
+\section{Instrumented MPI routines}\label{sec:MPIinstrumentedroutines}
 
 These are the instrumented MPI routines in the \TRACE package:
 
@@ -70,7 +70,7 @@ These are the instrumented MPI routines in the \TRACE package:
 \footnotetext[1]{The MPI library must support this routine}
 \footnotetext[2]{The MPI library must support these MPI/IO routines}
 
-\section{OpenMP runtimes instrumented}\label{sec:OpenMPruntimesinstrumented}
+\section{Instrumented OpenMP runtimes}\label{sec:OpenMPruntimesinstrumented}
 
 \subsection{Intel compilers - icc, iCC, ifort}
 
@@ -144,3 +144,28 @@ These are the instrumented routines of the IBM OpenMP runtime:
 \item GOMP\_atomic\_exit\footnotemark[3]
 \end{itemize}
 
+\section{Instrumented pthread runtimes}\label{sec:OpenMPruntimesinstrumented}
+
+These are the instrumented routines of the pthread runtime:
+
+\begin{itemize}
+\item pthread\_create
+\item pthread\_detach
+\item pthread\_join
+\item pthread\_mutex\_lock
+\item pthread\_mutex\_trylock
+\item pthread\_mutex\_timedlock
+\item pthread\_mutex\_unlock
+% pthread_cond_* routines seem to be not instrumentable. the application hangs when instrumenting them
+%\item pthread\_cond\_signal
+%\item pthread\_cond\_broadcast
+%\item pthread\_cond\_wait
+%\item pthread\_cond\_timedwait
+\item pthread\_rwlock\_rdlock
+\item pthread\_rwlock\_tryrdlock
+\item pthread\_rwlock\_timedrdlock
+\item pthread\_rwlock\_wrlock
+\item pthread\_rwlock\_trywrlock
+\item pthread\_rwlock\_timedwrlock
+\item pthread\_rwlock\_unlock
+\end{itemize}

@@ -46,10 +46,13 @@ static char UNUSED rcsid[] = "$Id$";
 #define PTHD_JOIN_INDEX         1  /* pthread_join index */
 #define PTHD_DETACH_INDEX       2  /* pthread_detach index */
 #define PTHD_USRF_INDEX         3  /* pthread_create @ target address index */
+#define PTHD_WRRD_LOCK_INDEX    4  /* pthread_rwlock* functions */
+#define PTHD_MUTEX_LOCK_INDEX   5  /* pthread_mutex* functions */
+#define PTHD_COND_INDEX         6  /* pthread_cond* functions */
 
-#define MAX_PTHD_INDEX		4
+#define MAX_PTHD_INDEX		7
 
-static int inuse[MAX_PTHD_INDEX] = { FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_PTHD_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_pthread_Operation (int tipus)
 {
@@ -61,6 +64,14 @@ void Enable_pthread_Operation (int tipus)
 		inuse[PTHD_DETACH_INDEX] = TRUE;
 	else if (tipus == PTHREADFUNC_EV)
 		inuse[PTHD_USRF_INDEX] = TRUE;
+	else if (tipus == PTHREAD_RWLOCK_WR_EV || tipus == PTHREAD_RWLOCK_RD_EV ||
+	  tipus == PTHREAD_RWLOCK_UNLOCK_EV)
+		inuse[PTHD_WRRD_LOCK_INDEX] = TRUE;
+	else if (tipus == PTHREAD_MUTEX_UNLOCK_EV || tipus == PTHREAD_MUTEX_LOCK_EV)
+		inuse[PTHD_MUTEX_LOCK_INDEX] = TRUE;
+	else if (tipus == PTHREAD_COND_SIGNAL_EV || tipus == PTHREAD_COND_WAIT_EV ||
+	  tipus == PTHREAD_COND_BROADCAST_EV)
+		inuse[PTHD_COND_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -102,6 +113,35 @@ void pthreadEvent_WriteEnabledOperations (FILE * fd)
 		             "%d   %d    pthread_detach\n", 0, PTHREADDETACH_EV);
 		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
+	if (inuse[PTHD_WRRD_LOCK_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    pthread_rw_lock_wr\n"
+		             "%d   %d    pthread_rw_lock_rd\n"
+		             "%d   %d    pthread_rw_unlock\n",
+		         0, PTHREAD_RWLOCK_WR_EV,
+		         0, PTHREAD_RWLOCK_RD_EV,
+		         0, PTHREAD_RWLOCK_UNLOCK_EV);
+	}
+	if (inuse[PTHD_MUTEX_LOCK_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    pthread_mutex_lock\n"
+		             "%d   %d    pthread_mutex_unlock\n",
+		         0, PTHREAD_MUTEX_LOCK_EV,
+		         0, PTHREAD_MUTEX_UNLOCK_EV);
+	}
+	if (inuse[PTHD_COND_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    pthread_cond_wait\n"
+		             "%d   %d    pthread_cond_signal\n"
+		             "%d   %d    pthread_cond_broadcast\n",
+		         0, PTHREAD_COND_WAIT_EV,
+		         0, PTHREAD_COND_SIGNAL_EV,
+		         0, PTHREAD_COND_BROADCAST_EV);
+	}
+
 #if defined(HAVE_BFD)
 	/* Hey, pthread & OpenMP share the same labels? */
 	if (inuse[PTHD_USRF_INDEX])

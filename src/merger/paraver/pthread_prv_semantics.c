@@ -109,11 +109,35 @@ static int pthread_Function_Event (event_t * current_event,
 	return 0;
 }
 
+static int pthread_Lock (event_t * current_event, 
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset )
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	Switch_State (STATE_SYNC, (Get_EvValue (current_event) != EVT_END),
+	  ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	  Get_EvEvent (current_event), Get_EvValue (current_event));
+
+	return 0;
+}
+
 SingleEv_Handler_t PRV_pthread_Event_Handlers[] = {
 	{ PTHREADCREATE_EV, pthread_Call },
 	{ PTHREADJOIN_EV, pthread_Call },
 	{ PTHREADDETACH_EV, pthread_Call },
 	{ PTHREADFUNC_EV, pthread_Function_Event },
+	{ PTHREAD_RWLOCK_WR_EV, pthread_Lock },
+	{ PTHREAD_RWLOCK_RD_EV, pthread_Lock },
+	{ PTHREAD_RWLOCK_UNLOCK_EV, pthread_Lock },
+	{ PTHREAD_MUTEX_LOCK_EV, pthread_Lock },
+	{ PTHREAD_MUTEX_UNLOCK_EV, pthread_Lock },
+	{ PTHREAD_COND_SIGNAL_EV, pthread_Lock },
+	{ PTHREAD_COND_BROADCAST_EV, pthread_Lock },
+	{ PTHREAD_COND_WAIT_EV, pthread_Lock },
 	{ NULL_EV, NULL }
 };
 

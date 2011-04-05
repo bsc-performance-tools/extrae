@@ -30,11 +30,32 @@
 #ifndef PTHREAD_PROBE_H_INCLUDED
 #define PTHREAD_PROBE_H_INCLUDED
 
+void setTrace_PTHREADLocks (int value);
+
 void Probe_pthread_Create_Entry (void *p);
 void Probe_pthread_Create_Exit (void);
 void Probe_pthread_Join_Entry (void);
 void Probe_pthread_Join_Exit (void);
 void Probe_pthread_Detach_Entry (void);
 void Probe_pthread_Detach_Exit (void);
+
+void Probe_pthread_rwlock_lockwr_Entry (void *p);
+void Probe_pthread_rwlock_lockwr_Exit (void *p);
+void Probe_pthread_rwlock_lockrd_Entry (void *p);
+void Probe_pthread_rwlock_lockrd_Exit (void *p);
+void Probe_pthread_rwlock_unlock_Entry (void *p);
+void Probe_pthread_rwlock_unlock_Exit (void *p);
+
+void Probe_pthread_mutex_lock_Entry (void *p);
+void Probe_pthread_mutex_lock_Exit (void *p);
+void Probe_pthread_mutex_unlock_Entry (void *p);
+void Probe_pthread_mutex_unlock_Exit (void *p);
+
+void Probe_pthread_cond_signal_Entry (void *p);
+void Probe_pthread_cond_signal_Exit (void *p);
+void Probe_pthread_cond_broadcast_Entry (void *p);
+void Probe_pthread_cond_broadcast_Exit (void *p);
+void Probe_pthread_cond_wait_Entry (void *p);
+void Probe_pthread_cond_wait_Exit (void *p);
 
 #endif

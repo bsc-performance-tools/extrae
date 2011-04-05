@@ -45,6 +45,17 @@
     <counters enabled="yes" />
   </openmp>
 
+  <!-- Configuration of some pthread dependant values -->
+  <pthread enabled="no">
+    <!-- If the library instruments pthread, shall we gather info about locks,
+	       mutexs and conds?
+         Obtaining such information can make the final trace quite large.
+    -->
+    <locks enabled="no" />
+    <!-- Gather counters in the pthread routines? -->
+    <counters enabled="yes" />
+  </pthread>
+
   <!-- Configuration of User Functions -->
   <user-functions enabled="yes" list="/home/bsc41/bsc41273/user-functions.dat">
     <!-- Set a depth limit for the UF routines -->

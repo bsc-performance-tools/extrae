@@ -142,9 +142,11 @@ unsigned IsOpenMP (unsigned EvType)
   return FALSE;
 }
 
-#define PTHREAD_EVENTS 4
+#define PTHREAD_EVENTS 12
 static unsigned pthread_events[] = { PTHREADCREATE_EV, PTHREADJOIN_EV,
-  PTHREADDETACH_EV, PTHREADFUNC_EV };
+  PTHREADDETACH_EV, PTHREADFUNC_EV, PTHREAD_RWLOCK_WR_EV, PTHREAD_RWLOCK_RD_EV,
+	PTHREAD_RWLOCK_UNLOCK_EV, PTHREAD_MUTEX_LOCK_EV, PTHREAD_MUTEX_UNLOCK_EV,
+	PTHREAD_COND_SIGNAL_EV, PTHREAD_COND_BROADCAST_EV, PTHREAD_COND_WAIT_EV };
 
 /******************************************************************************
  ***  IsPthread

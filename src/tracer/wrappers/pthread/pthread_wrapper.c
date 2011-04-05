@@ -41,6 +41,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
 
 #include "wrapper.h"
 #include "trace_macros.h"
@@ -49,6 +52,29 @@ static char UNUSED rcsid[] = "$Id$";
 static int (*pthread_create_real)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*) = NULL;
 static int (*pthread_join_real)(pthread_t,void**) = NULL;
 static int (*pthread_detach_real)(pthread_t) = NULL;
+
+static int (*pthread_mutex_lock_real)(pthread_mutex_t*) = NULL;
+static int (*pthread_mutex_trylock_real)(pthread_mutex_t*) = NULL;
+static int (*pthread_mutex_timedlock_real)(pthread_mutex_t*,const struct timespec *) = NULL;
+static int (*pthread_mutex_unlock_real)(pthread_mutex_t*) = NULL;
+
+#if 0
+/* HSG
+   instrumenting these routines makes the included examples deadlock when running... 
+*/
+static int (*pthread_cond_signal_real)(pthread_cond_t*) = NULL;
+static int (*pthread_cond_broadcast_real)(pthread_cond_t*) = NULL;
+static int (*pthread_cond_wait_real)(pthread_cond_t*,pthread_mutex_t*) = NULL;
+static int (*pthread_cond_timedwait_real)(pthread_cond_t*,pthread_mutex_t*,const struct timespec *) = NULL;
+#endif
+
+static int (*pthread_rwlock_rdlock_real)(pthread_rwlock_t *) = NULL;
+static int (*pthread_rwlock_tryrdlock_real)(pthread_rwlock_t *) = NULL;
+static int (*pthread_rwlock_timedrdlock_real)(pthread_rwlock_t *, const struct timespec *) = NULL;
+static int (*pthread_rwlock_wrlock_real)(pthread_rwlock_t *) = NULL;
+static int (*pthread_rwlock_trywrlock_real)(pthread_rwlock_t *) = NULL;
+static int (*pthread_rwlock_timedwrlock_real)(pthread_rwlock_t *, const struct timespec *) = NULL;
+static int (*pthread_rwlock_unlock_real)(pthread_rwlock_t *) = NULL;
 
 static void GetpthreadHookPoints (int rank)
 {
@@ -69,6 +95,83 @@ static void GetpthreadHookPoints (int rank)
 	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
 	if (pthread_detach_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_detach in DSOs!!\n");
+
+	/* Obtain @ for pthread_mutex_lock */
+	pthread_mutex_lock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_lock");
+	if (pthread_mutex_lock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_lock in DSOs!!\n");
+	
+	/* Obtain @ for pthread_mutex_unlock */
+	pthread_mutex_unlock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_unlock");
+	if (pthread_mutex_unlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_unlock in DSOs!!\n");
+	
+	/* Obtain @ for pthread_mutex_trylock */
+	pthread_mutex_trylock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_trylock");
+	if (pthread_mutex_trylock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_trylock in DSOs!!\n");
+
+	/* Obtain @ for pthread_mutex_timedlock */
+	pthread_mutex_timedlock_real = (int(*)(pthread_mutex_t*,const struct timespec*)) dlsym (RTLD_NEXT, "pthread_mutex_timedlock");
+	if (pthread_mutex_timedlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_mutex_timedlock in DSOs!!\n");
+
+#if 0
+	/* Obtain @ for pthread_cond_signal */
+	pthread_cond_signal_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_signal");
+	if (pthread_cond_signal_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_signal in DSOs!!\n");
+	
+	/* Obtain @ for pthread_cond_broadcast */
+	pthread_cond_broadcast_real = (int(*)(pthread_cond_t*)) dlsym (RTLD_NEXT, "pthread_cond_broadcast");
+	if (pthread_cond_broadcast_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_broadcast in DSOs!!\n");
+	
+	/* Obtain @ for pthread_cond_wait */
+	pthread_cond_wait_real = (int(*)(pthread_cond_t*,pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_cond_wait");
+	if (pthread_cond_wait_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_wait in DSOs!!\n");
+	
+	/* Obtain @ for pthread_cond_timedwait */
+	pthread_cond_timedwait_real = (int(*)(pthread_cond_t*,pthread_mutex_t*,const struct timespec*)) dlsym (RTLD_NEXT, "pthread_cond_timedwait");
+	if (pthread_cond_timedwait_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_cond_timedwait in DSOs!!\n");
+#endif
+	
+	/* Obtain @ for pthread_rwlock_rdlock */
+	pthread_rwlock_rdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_rdlock");
+	if (pthread_rwlock_rdlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_rdlock in DSOs!!\n");
+	
+	/* Obtain @ for pthread_rwlock_tryrdlock */
+	pthread_rwlock_tryrdlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_tryrdlock");
+	if (pthread_rwlock_tryrdlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_tryrdlock in DSOs!!\n");
+	
+	/* Obtain @ for pthread_rwlock_timedrdlock */
+	pthread_rwlock_timedrdlock_real = (int(*)(pthread_rwlock_t *, const struct timespec *)) dlsym (RTLD_NEXT, "pthread_rwlock_timedrdlock");
+	if (pthread_rwlock_timedrdlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_timedrdlock in DSOs!!\n");
+	
+	/* Obtain @ for pthread_rwlock_rwlock */
+	pthread_rwlock_wrlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_wrlock");
+	if (pthread_rwlock_wrlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_wrlock in DSOs!!\n");
+	
+	/* Obtain @ for pthread_rwlock_tryrwlock */
+	pthread_rwlock_trywrlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_trywrlock");
+	if (pthread_rwlock_trywrlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_trywrlock in DSOs!!\n");
+	
+	/* Obtain @ for pthread_rwlock_timedrwlock */
+	pthread_rwlock_timedwrlock_real = (int(*)(pthread_rwlock_t *, const struct timespec *)) dlsym (RTLD_NEXT, "pthread_rwlock_timedwrlock");
+	if (pthread_rwlock_timedwrlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_timedwrlock in DSOs!!\n");
+
+	/* Obtain @ for pthread_rwlock_unlock */
+	pthread_rwlock_unlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_unlock");
+	if (pthread_rwlock_unlock_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_unlock in DSOs!!\n");
 }
 
 /*
@@ -99,15 +202,15 @@ static void * pthread_create_hook (void *p1)
 	/* incialitzar hwc, mode (detail/burst), primers events (tempsinit?) */
 
 	/* Notify the calling thread */
-	pthread_mutex_lock (&(i->lock));
+	pthread_mutex_lock_real (&(i->lock));
 	pthread_cond_signal (&(i->wait));
-	pthread_mutex_unlock (&(i->lock));
+	pthread_mutex_unlock_real (&(i->lock));
 
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADFUNC_EV, (UINT64) routine, EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADFUNC_EV, (UINT64) routine, EMPTY);
 	res = routine (arg);
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADFUNC_EV, EVT_END ,EMPTY);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADFUNC_EV, EVT_END ,EMPTY);
 
 	return res;
 }
@@ -127,6 +230,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 	   So, pthread_library_depth > 0 controls this situation
 	*/
 
+
 	if (0 == pthread_library_depth)
 	{
 		pthread_library_depth++;
@@ -135,7 +239,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 		
 		pthread_cond_init (&(i.wait), NULL);
 		pthread_mutex_init (&(i.lock), NULL);
-		pthread_mutex_lock (&(i.lock));
+		pthread_mutex_lock_real (&(i.lock));
 
 		i.arg = p4;
 		i.routine = p3;
@@ -149,7 +253,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 			/* if succeded, wait for a completion on copy the info */
 			pthread_cond_wait (&(i.wait), &(i.lock));
 
-		pthread_mutex_unlock (&(i.lock));
+		pthread_mutex_unlock_real (&(i.lock));
 		pthread_mutex_destroy (&(i.lock));
 		pthread_cond_destroy (&(i.wait));
 
@@ -178,6 +282,145 @@ int pthread_detach (pthread_t p1)
 	Probe_pthread_Detach_Entry ();
 	res = pthread_detach_real (p1);
 	Probe_pthread_Detach_Exit ();
+	return res;
+}
+
+int pthread_mutex_lock (pthread_mutex_t *m)
+{
+	int res;
+	Probe_pthread_mutex_lock_Entry (m);
+	res = pthread_mutex_lock_real (m);
+	Probe_pthread_mutex_lock_Exit (m);
+	return res;
+}
+
+int pthread_mutex_trylock (pthread_mutex_t *m)
+{
+	int res;
+	Probe_pthread_mutex_lock_Entry (m);
+	res = pthread_mutex_trylock_real (m);
+	Probe_pthread_mutex_lock_Exit (m);
+	return res;
+}
+
+int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *t)
+{
+	int res;
+	Probe_pthread_mutex_lock_Entry (m);
+	res = pthread_mutex_timedlock_real (m, t);
+	Probe_pthread_mutex_lock_Exit (m);
+	return res;
+}
+
+int pthread_mutex_unlock (pthread_mutex_t *m)
+{
+	int res;
+	Probe_pthread_mutex_unlock_Entry (m);
+	res = pthread_mutex_unlock_real (m);
+	Probe_pthread_mutex_unlock_Exit (m);
+	return res;
+}
+
+
+#if 0
+int pthread_cond_signal (pthread_cond_t *c)
+{
+	int res;
+	Probe_pthread_cond_signal_Entry (c);
+	res = pthread_cond_signal_real (c);
+	Probe_pthread_cond_signal_Exit (c);
+	return res;
+}
+
+int pthread_cond_broadcast (pthread_cond_t *c)
+{
+	int res;
+	Probe_pthread_cond_broadcast_Entry (c);
+	res = pthread_cond_broadcast_real (c);
+	Probe_pthread_cond_broadcast_Exit (c);
+	return res;
+}
+
+int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m)
+{
+	int res;
+	Probe_pthread_cond_wait_Entry (c);
+	res = pthread_cond_wait_real (c, m);
+	Probe_pthread_cond_wait_Exit (c);
+	return res;
+}
+
+int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct timespec *t)
+{
+	int res;
+	Probe_pthread_cond_wait_Entry (c);
+	res = pthread_cond_timedwait_real (c,m,t);
+	Probe_pthread_cond_wait_Exit (c);
+	return res;
+}
+#endif
+
+int pthread_rwlock_rdlock (pthread_rwlock_t *l)
+{
+	int res;
+	Probe_pthread_rwlock_lockrd_Entry (l);
+	res = pthread_rwlock_rdlock_real (l);
+	Probe_pthread_rwlock_lockrd_Exit (l);
+	return res;
+}
+
+int pthread_rwlock_tryrdlock(pthread_rwlock_t *l)
+{
+	int res;
+	Probe_pthread_rwlock_lockrd_Entry (l);
+	res = pthread_rwlock_tryrdlock_real (l);
+	Probe_pthread_rwlock_lockrd_Exit (l);
+	return res;
+}
+
+int pthread_rwlock_timedrdlock(pthread_rwlock_t *l, const struct timespec *t)
+{
+	int res;
+	Probe_pthread_rwlock_lockrd_Entry (l);
+	res = pthread_rwlock_timedrdlock_real (l, t);
+	Probe_pthread_rwlock_lockrd_Exit (l);
+	return res;
+}
+
+int pthread_rwlock_wrlock(pthread_rwlock_t *l)
+{
+	int res;
+
+	Probe_pthread_rwlock_lockwr_Entry (l);
+	res = pthread_rwlock_wrlock_real (l);
+	Probe_pthread_rwlock_lockwr_Exit (l);
+	return res;
+}
+
+int pthread_rwlock_trywrlock(pthread_rwlock_t *l)
+{
+	int res;
+	Probe_pthread_rwlock_lockwr_Entry (l);
+	res = pthread_rwlock_trywrlock_real (l);
+	Probe_pthread_rwlock_lockwr_Exit (l);
+	return res;
+}
+
+int pthread_rwlock_timedwrlock(pthread_rwlock_t *l, const struct timespec *t)
+{
+	int res;
+	Probe_pthread_rwlock_lockwr_Entry (l);
+	res = pthread_rwlock_timedwrlock_real (l, t);
+	Probe_pthread_rwlock_lockwr_Exit (l);
+	return res;
+}
+
+int pthread_rwlock_unlock(pthread_rwlock_t *l)
+{
+	int res;
+	Probe_pthread_rwlock_unlock_Entry (l);
+	res = pthread_rwlock_unlock_real (l);
+	Probe_pthread_rwlock_unlock_Exit (l);
 	return res;
 }
 
