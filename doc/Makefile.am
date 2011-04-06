@@ -23,6 +23,7 @@ EXTRA_DIST = \
  XML/mpi.xml.tex \
  XML/openmp.xml.tex \
  XML/others.xml.tex \
+ XML/pthread.xml.tex \
  XML/pacx.xml.tex \
  XML/storage.xml.tex \
  XML/trace-control.xml.tex \
