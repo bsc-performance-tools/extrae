@@ -437,7 +437,10 @@ static int USRFunction_Event (event_t * current,
 	EvType  = Get_EvEvent (current);
 	EvValue = Get_EvValue (current);
 
+	/* HSG, I think this is not true... we should only maintain the previous
+	   state
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
+	*/
 
 #if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses() && EvValue != 0)

@@ -3840,8 +3840,8 @@ void Extrae_network_routes (int mpi_rank)
 		Extrae_network_routes_Wrapper (mpi_rank);
 }
 
-INTERFACE_ALIASES_C(_set_tracing_tasks, Extrae_set_tracing_tasks, (int from, int to))
-void Extrae_set_tracing_tasks (int from, int to)
+INTERFACE_ALIASES_C(_set_tracing_tasks, Extrae_set_tracing_tasks, (unsigned from, unsigned to))
+void Extrae_set_tracing_tasks (unsigned from, unsigned to)
 {
 	if (mpitrace_on)
 		Extrae_tracing_tasks_Wrapper (from, to);
@@ -3868,7 +3868,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NETWORK_ROUTES);
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 
 #define apiTRACE_SETTRACINGTASKS(x) \
-	void x##_set_tracing_tasks (int from, int to) \
+	void x##_set_tracing_tasks (unsigned from, unsigned to) \
    { \
    	if (mpitrace_on) \
       	Extrae_tracing_tasks_Wrapper (from, to); \
@@ -3898,8 +3898,8 @@ void extrae_network_routes (int *mpi_rank)
 		Extrae_network_routes_Wrapper (*mpi_rank);
 }
 
-INTERFACE_ALIASES_F(_set_tracing_tasks,_SET_TRACING_TASKS,extrae_set_tracing_tasks, (int *from, int *to))
-void extrae_set_tracing_tasks (int *from, int *to)
+INTERFACE_ALIASES_F(_set_tracing_tasks,_SET_TRACING_TASKS,extrae_set_tracing_tasks, (unsigned *from, unsigned *to))
+void extrae_set_tracing_tasks (unsigned *from, unsigned *to)
 {
 	if (mpitrace_on)
 		Extrae_tracing_tasks_Wrapper (*from, *to);
@@ -3924,7 +3924,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_COUNTERS);
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NETWORK_ROUTES);
 
 #define apifTRACE_SETTRACINGTASKS(x) \
-	void CtoF77(x##_set_tracing_tasks) (int *from, int *to) \
+	void CtoF77(x##_set_tracing_tasks) (unsigned *from, unsigned *to) \
 	{ \
 		if (mpitrace_on) \
 			Extrae_tracing_tasks_Wrapper (*from, *to); \

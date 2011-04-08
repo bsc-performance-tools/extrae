@@ -292,17 +292,17 @@ static int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver)
 
 static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 {
-  persistent_req_t *p_request;
-  hash_data_t hash_req;
-  int inter;
-  int size, src_world, ret;
+	persistent_req_t *p_request;
+	hash_data_t hash_req;
+	int inter;
+	int size, src_world, ret;
 
-  /*
-   * S'intenta recuperar la informacio d'aquesta request per tracejar-la 
-   */
-  p_request = PR_Busca_request (&PR_queue, reqid);
-  if (p_request == NULL)
-    return;
+	/*
+	* S'intenta recuperar la informacio d'aquesta request per tracejar-la 
+	*/
+	p_request = PR_Busca_request (&PR_queue, reqid);
+	if (p_request == NULL)
+		return;
 
 	/* 
 	  HSG, aixo es pot emmagatzemar a la taula de hash! A mes,
@@ -310,7 +310,7 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 	  pq ignora la quantitat de dades enviada
 	*/
 #warning "Aixo es pot millorar"
-  ret = PMPI_Type_size (p_request->datatype, &size);
+	ret = PMPI_Type_size (p_request->datatype, &size);
 	MPI_CHECK(ret, PMPI_Type_size);
 
 	if (get_rank_obj_C (p_request->comm, p_request->task, &src_world) != MPI_SUCCESS)
@@ -346,30 +346,30 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 				ret = PMPI_Comm_group (p_request->comm, &hash_req.group);	
 				MPI_CHECK (ret, PMPI_Comm_group);
 			}
-     }
+		}
 
-     hash_add (&requests, &hash_req);
-  }
+		hash_add (&requests, &hash_req);
+	}
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  if (p_request->tipus == MPI_IRECV_EV)
-  {
-     /* Bytes received are computed at MPI_Wait or MPI_Test */
-  }
-  else if (p_request->tipus == MPI_ISEND_EV)
-  {
-     P2P_Bytes_Sent += size;
-  }
+	/* MPI Stats */
+	P2P_Communications ++;
+	if (p_request->tipus == MPI_IRECV_EV)
+	{
+		/* Bytes received are computed at MPI_Wait or MPI_Test */
+	}
+	else if (p_request->tipus == MPI_ISEND_EV)
+	{
+		P2P_Bytes_Sent += size;
+	}
 
-  /*
-   *   event : PERSIST_REQ_EV                        value : Request type
-   *   target : MPI_ANY_SOURCE or sender/receiver    size  : buffer size
-   *   tag : message tag or MPI_ANY_TAG              commid: Communicator id
-   *   aux: request id
-   */
-  TRACE_MPIEVENT_NOHWC (temps, MPI_PERSIST_REQ_EV, p_request->tipus, src_world,
-                        size, p_request->tag, p_request->comm, p_request->req);
+	/*
+	*   event : PERSIST_REQ_EV                        value : Request type
+	*   target : MPI_ANY_SOURCE or sender/receiver    size  : buffer size
+	*   tag : message tag or MPI_ANY_TAG              commid: Communicator id
+	*   aux: request id
+	*/
+	TRACE_MPIEVENT_NOHWC (temps, MPI_PERSIST_REQ_EV, p_request->tipus,
+	  src_world, size, p_request->tag, p_request->comm, p_request->req);
 }
 
 
@@ -537,7 +537,8 @@ static void Gather_Nodes_Info (void)
 static int Generate_Task_File_List (int n_tasks, char **node_list)
 {
     int ierror, val = getpid ();
-    int i, filedes, ret, thid;
+    int i, filedes, thid;
+    unsigned ret;
     pid_t *buffer_pids = NULL;
     char tmpname[1024];
     int *buffer_threads = NULL;
@@ -570,7 +571,7 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 
             for (thid = 0; thid < buffer_threads[i]; thid++)
             {
-								FileName_PTT(tmpname, Get_FinalDir(i), appl_name, buffer_pids[i], i, thid, EXT_MPIT);
+		FileName_PTT(tmpname, Get_FinalDir(i), appl_name, buffer_pids[i], i, thid, EXT_MPIT);
 
                 sprintf (tmp_line, "%s on %s\n", tmpname, node_list[i]);
                 ret = write (filedes, tmp_line, strlen (tmp_line));
@@ -964,38 +965,42 @@ static int get_rank_obj (int *comm, int *dest, int *receiver)
 void PMPI_BSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : BSEND_EV                      value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_bsend) (buf, count, datatype, dest, tag, comm, ierror);
+	/*
+	*   event : BSEND_EV                      value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
-  /*
-   *   event : BSEND_EV                      value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	CtoF77 (pmpi_bsend) (buf, count, datatype, dest, tag, comm, ierror);
+
+	/*
+	*   event : BSEND_EV                      value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1005,38 +1010,42 @@ void PMPI_BSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 void PMPI_SSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : SSEND_EV                      value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_ssend) (buf, count, datatype, dest, tag, comm, ierror);
+	/*
+	*   event : SSEND_EV                      value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
-  /*
-   *   event : SSEND_EV                      value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	CtoF77 (pmpi_ssend) (buf, count, datatype, dest, tag, comm, ierror);
+
+	/*
+	*   event : SSEND_EV                      value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1046,38 +1055,42 @@ void PMPI_SSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 void PMPI_RSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : RSEND_EV                      value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_rsend) (buf, count, datatype, dest, tag, comm, ierror);
+	/*
+	*   event : RSEND_EV                      value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
-  /*
-   *   event : RSEND_EV                      value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	CtoF77 (pmpi_rsend) (buf, count, datatype, dest, tag, comm, ierror);
+
+	/*
+	*   event : RSEND_EV                      value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1087,38 +1100,42 @@ void PMPI_RSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 void PMPI_Send_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : SEND_EV                       value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_send) (buf, count, datatype, dest, tag, comm, ierror);
+	/*
+	*   event : SEND_EV                       value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
-  /*
-   *   event : SEND_EV                       value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	CtoF77 (pmpi_send) (buf, count, datatype, dest, tag, comm, ierror);
+
+	/*
+	*   event : SEND_EV                       value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 
@@ -1130,41 +1147,45 @@ void PMPI_IBSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : IBSEND_EV                     value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_ibsend) (buf, count, datatype, dest, tag, comm, request,
-                        ierror);
+	/*
+	*   event : IBSEND_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
-  /*
-   *   event : IBSEND_EV                     value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	CtoF77 (pmpi_ibsend) (buf, count, datatype, dest, tag, comm, request,
+	  ierror);
+
+	/*
+	*   event : IBSEND_EV                     value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1175,40 +1196,44 @@ void PMPI_ISend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  } 
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	} 
 
-  /*
-   *   event : ISEND_EV                      value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_isend) (buf, count, datatype, dest, tag, comm, request,
-                       ierror);
-  /*
-   *   event : ISEND_EV                      value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	/*
+	*   event : ISEND_EV                      value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+
+	CtoF77 (pmpi_isend) (buf, count, datatype, dest, tag, comm, request,
+	  ierror);
+	/*
+	*   event : ISEND_EV                      value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1219,41 +1244,45 @@ void PMPI_ISSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : ISSEND_EV                     value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_issend) (buf, count, datatype, dest, tag, comm, request,
-                        ierror);
+	/*
+	*   event : ISSEND_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
-  /*
-   *   event : ISSEND_EV                     value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	CtoF77 (pmpi_issend) (buf, count, datatype, dest, tag, comm, request,
+	  ierror);
+
+	/*
+	*   event : ISSEND_EV                     value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1264,41 +1293,45 @@ void PMPI_IRSend_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
-  size *= (*count);
+	size *= (*count);
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	if ((ret = get_rank_obj (comm, dest, &receiver)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : IRSEND_EV                     value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  CtoF77 (pmpi_irsend) (buf, count, datatype, dest, tag, comm, request,
-                        ierror);
+	/*
+	*   event : IRSEND_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
-  /*
-   *   event : IRSEND_EV                     value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+	CtoF77 (pmpi_irsend) (buf, count, datatype, dest, tag, comm, request,
+	  ierror);
+
+	/*
+	*   event : IRSEND_EV                     value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1311,10 +1344,15 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 {
 	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
-  int size, src_world, sender_src, ret, recved_count, sended_tag;
+	int size, src_world, sender_src, ret, recved_count, sended_tag;
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		size = 0;
 
 	if ((ret = get_rank_obj (comm, source, &src_world)) != MPI_SUCCESS)
 	{
@@ -1322,18 +1360,18 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 		return;
 	}
 
-  /*
-   *   event : RECV_EV                      value : EVT_BEGIN    
-   *   target : MPI_ANY_SOURCE or sender    size  : receive buffer size    
-   *   tag : message tag or MPI_ANY_TAG     commid: Communicator identifier
-   *   aux: ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
+	/*
+	*   event : RECV_EV                      value : EVT_BEGIN    
+	*   target : MPI_ANY_SOURCE or sender    size  : receive buffer size    
+	*   tag : message tag or MPI_ANY_TAG     commid: Communicator identifier
+	*   aux: ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
 
 	ptr_status = (status == MPI_F_STATUS_IGNORE)?my_status:status;
 
-  CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, ptr_status,
-                      ierror);
+	CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, ptr_status,
+	  ierror);
 
 	CtoF77 (pmpi_get_count) (ptr_status, datatype, &recved_count, &ret);
 	MPI_CHECK(ret, pmpi_get_count);
@@ -1357,18 +1395,18 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	P2P_Communications ++;
 	P2P_Bytes_Recv += size;
 
-  if ((ret = get_rank_obj (comm, &sender_src, &src_world)) != MPI_SUCCESS)
-  {
-    *ierror = ret;
-    return;
-  }
+	if ((ret = get_rank_obj (comm, &sender_src, &src_world)) != MPI_SUCCESS)
+	{
+		*ierror = ret;
+		return;
+	}
 
-  /*
-   *   event : RECV_EV                      value : EVT_END
-   *   target : sender                      size  : received message size    
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag, c, EMPTY);
+	/*
+	*   event : RECV_EV                      value : EVT_END
+	*   target : sender                      size  : received message size    
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1387,12 +1425,17 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 {
-  hash_data_t hash_req;
-  unsigned int inter, ret, size, src_world;
+	hash_data_t hash_req;
+	MPI_Fint inter, ret, size, src_world;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		size = 0;
 
 	if ((ret = get_rank_obj (comm, source, &src_world)) != MPI_SUCCESS)
 	{
@@ -1400,53 +1443,51 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 		return;
 	}
 
-  /*
-   *   event : IRECV_EV                     value : EVT_BEGIN
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
+	/*
+	*   event : IRECV_EV                     value : EVT_BEGIN
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
 
-  CtoF77 (pmpi_irecv) (buf, count, datatype, source, tag, comm, request,
-                       ierror);
+	CtoF77 (pmpi_irecv) (buf, count, datatype, source, tag, comm, request,
+	  ierror);
 
-  hash_req.key = MPI_Request_f2c(*request);
-  hash_req.commid = c;
+	hash_req.key = MPI_Request_f2c(*request);
+	hash_req.commid = c;
 	hash_req.partner = *source;
 	hash_req.tag = *tag;
 	hash_req.size = *count * size;
 	
-  if (c == MPI_COMM_WORLD)
+	if (c != MPI_COMM_WORLD)
 	{
-    hash_req.group = MPI_GROUP_NULL;
-	}
-  else
-  {
 		MPI_Fint group;
-    CtoF77 (pmpi_comm_test_inter) (comm, &inter, &ret);
+		CtoF77 (pmpi_comm_test_inter) (comm, &inter, &ret);
 		MPI_CHECK(ret, pmpi_comm_test_inter);
 
-    if (inter)
+		if (inter)
 		{
-      CtoF77 (pmpi_comm_remote_group) (comm, &group, &ret);
+			CtoF77 (pmpi_comm_remote_group) (comm, &group, &ret);
 			MPI_CHECK(ret, pmpi_comm_remote_group);
 		}
-    else
+		else
 		{
-      CtoF77 (pmpi_comm_group) (comm, &group, &ret);
+			CtoF77 (pmpi_comm_group) (comm, &group, &ret);
 			MPI_CHECK(ret, pmpi_comm_group);
 		}
 		hash_req.group = MPI_Group_f2c(group);
-  }
+	}
+	else
+		hash_req.group = MPI_GROUP_NULL;
 
-  hash_add (&requests, &hash_req);
+	hash_add (&requests, &hash_req);
 
-  /*
-   *   event : IRECV_EV                     value : EVT_END
-   *   target : request                     size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_END, src_world, (*count) * size, *tag, c, hash_req.key);
+	/*
+	*   event : IRECV_EV                     value : EVT_END
+	*   target : request                     size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_END, src_world, (*count) * size, *tag, c, hash_req.key);
 }
 
 
@@ -1458,45 +1499,48 @@ void PMPI_Reduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *ierror)
 {
-  int me, ret, size;
+	int me, ret, size;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  size *= *count;
+	size *= *count;
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == *root)
-  {
-     GLOBAL_Bytes_Recv += size;
-  }
-  else
-  {
-     GLOBAL_Bytes_Sent += size;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == *root)
+	{
+		GLOBAL_Bytes_Recv += size;
+	}
+	else
+	{
+		GLOBAL_Bytes_Sent += size;
+	}
 
-  /*
-   *   event : REDUCE_EV                    value : EVT_BEGIN
-   *   target: reduce operation ident.      size : bytes send (non root) /received (root)
-   *   tag : rank                           commid: communicator Id
-   *   aux : root rank
-   */
-  TRACE_MPIEVENT (TIME, MPI_REDUCE_EV, EVT_BEGIN, *op, size, me, c, *root);
+	/*
+	*   event : REDUCE_EV                    value : EVT_BEGIN
+	*   target: reduce operation ident.      size : bytes send (non root) /received (root)
+	*   tag : rank                           commid: communicator Id
+	*   aux : root rank
+	*/
+	TRACE_MPIEVENT (TIME, MPI_REDUCE_EV, EVT_BEGIN, *op, size, me, c, *root);
 
-  CtoF77 (pmpi_reduce) (sendbuf, recvbuf, count, datatype, op, root, comm,
-                        ierror);
+	CtoF77 (pmpi_reduce) (sendbuf, recvbuf, count, datatype, op, root, comm,
+	  ierror);
 
-  /*
-   *   event : REDUCE_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_REDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : REDUCE_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_REDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -1507,40 +1551,43 @@ void PMPI_Reduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 void PMPI_AllReduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int me, ret, size;
+	int me, ret, size;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  size *= *count;
+	size *= *count;
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += size;
-  GLOBAL_Bytes_Recv += size;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += size;
+	GLOBAL_Bytes_Recv += size;
 
-  /*
-   *   event : ALLREDUCE_EV                 value : EVT_BEGIN
-   *   target: reduce operation ident.      size : bytes send and received
-   *   tag : rank                           commid: communicator Id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_BEGIN, *op, size, me, c, MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLREDUCE_EV                 value : EVT_BEGIN
+	*   target: reduce operation ident.      size : bytes send and received
+	*   tag : rank                           commid: communicator Id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_BEGIN, *op, size, me, c, MPI_CurrentOpGlobal);
 
-  CtoF77 (pmpi_allreduce) (sendbuf, recvbuf, count, datatype, op, comm,
-                           ierror);
+	CtoF77 (pmpi_allreduce) (sendbuf, recvbuf, count, datatype, op, comm,
+	  ierror);
 
-  /*
-   *   event : ALLREDUCE_EV                 value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
-		MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLREDUCE_EV                 value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+	  MPI_CurrentOpGlobal);
 }
 
 
@@ -1758,8 +1805,8 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 static int get_Irank_obj (hash_data_t * hash_req, int *src_world, int *size,
 	int *tag, int *status)
 {
-  int ret, one = 1;
-  MPI_Fint tbyte = MPI_Type_c2f(MPI_BYTE);
+	int ret, one = 1;
+	MPI_Fint tbyte = MPI_Type_c2f(MPI_BYTE);
 	int recved_count, dest;
 
 #if defined(DEAD_CODE)
@@ -1775,7 +1822,7 @@ static int get_Irank_obj (hash_data_t * hash_req, int *src_world, int *size,
 
 		*tag = status[MPI_TAG_OFFSET];
 		dest = status[MPI_SOURCE_OFFSET];
-  }
+	}
 	else
 	{
 		*tag = hash_req->tag;
@@ -2021,9 +2068,9 @@ void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
 {
 	MPI_Fint my_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS], *ptr_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret, ireq;
-  iotimer_t temps_final;
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ireq;
+	iotimer_t temps_final;
 	int i;
 
   /*
@@ -2043,7 +2090,7 @@ void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
 		for (i = 0; i < *count; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
 
-	ptr_statuses = (MPI_F_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+	ptr_statuses = (MPI_F_STATUSES_IGNORE == (MPI_Fint*)array_of_statuses)?my_statuses:array_of_statuses;
 
   CtoF77 (pmpi_waitall) (count, array_of_requests, ptr_statuses, ierror);
 
@@ -2186,7 +2233,7 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 		for (i = 0; i < *incount; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
 
-	ptr_statuses = (MPI_F_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+	ptr_statuses = (MPI_F_STATUSES_IGNORE == (MPI_Fint*) array_of_statuses)?my_statuses:array_of_statuses;
 
 	CtoF77(pmpi_waitsome) (incount, array_of_requests, outcount, array_of_indices,
 	  ptr_statuses, ierror);
@@ -2242,54 +2289,57 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 void PMPI_BCast_Wrapper (void *buffer, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int me, ret, size;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int me, ret, size;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  size *= *count;
+	size *= *count;
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == *root)
-  {
-     GLOBAL_Bytes_Sent += size;
-  }
-  else
-  {
-     GLOBAL_Bytes_Recv += size;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == *root)
+	{
+		GLOBAL_Bytes_Sent += size;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += size;
+	}
 
-  /*
-   *   event : BCAST_EV                     value : EVT_BEGIN
-   *   target : root_rank                   size  : message size
-   *   tag : rank                           commid: communicator identifier
-   *   aux : ---
-   */
+	/*
+	*   event : BCAST_EV                     value : EVT_BEGIN
+	*   target : root_rank                   size  : message size
+	*   tag : rank                           commid: communicator identifier
+	*   aux : ---
+	*/
 
 #if defined(IS_BGL_MACHINE)
-  BGL_disable_barrier_inside = 1;
+	BGL_disable_barrier_inside = 1;
 #endif
 
-  TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_BEGIN, *root, size, me, c, 
-  	MPI_CurrentOpGlobal);
+	TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_BEGIN, *root, size, me, c, 
+	  MPI_CurrentOpGlobal);
 
-  CtoF77 (pmpi_bcast) (buffer, count, datatype, root, comm, ierror);
+	CtoF77 (pmpi_bcast) (buffer, count, datatype, root, comm, ierror);
 
-  /*
-   *   event : BCAST_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
-  	MPI_CurrentOpGlobal);
+	/*
+	*   event : BCAST_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+	  MPI_CurrentOpGlobal);
 
 #if defined(IS_BGL_MACHINE)
-  BGL_disable_barrier_inside = 0;
+	BGL_disable_barrier_inside = 0;
 #endif
 }
 
@@ -2315,45 +2365,55 @@ void PMPI_AllToAll_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int me, ret, sendsize, recvsize, nprocs;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int me, ret, sendsize, recvsize, nprocs;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*sendcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*recvcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		recvsize = 0;
 
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += *sendcount * sendsize;
-  GLOBAL_Bytes_Recv += *recvcount * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += *sendcount * sendsize;
+	GLOBAL_Bytes_Recv += *recvcount * recvsize;
 
-  /*
-   *   event : ALLTOALL_EV                  value : EVT_BEGIN
-   *   target : received size               size  : sent size
-   *   tag : rank                           commid: communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_BEGIN, *recvcount * recvsize,
-                  *sendcount * sendsize, me, c, MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALL_EV                  value : EVT_BEGIN
+	*   target : received size               size  : sent size
+	*   tag : rank                           commid: communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_BEGIN, *recvcount * recvsize,
+	  *sendcount * sendsize, me, c, MPI_CurrentOpGlobal);
 
-  CtoF77 (pmpi_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-                          recvtype, comm, ierror);
+	CtoF77 (pmpi_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+	  recvtype, comm, ierror);
 
-  /*
-   *   event : ALLTOALL_EV                  value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
-                  MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALL_EV                  value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+	  MPI_CurrentOpGlobal);
 }
 
 
@@ -2379,55 +2439,64 @@ void PMPI_AllToAllV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int me, ret, sendsize, recvsize, nprocs;
-  int proc, sendc = 0, recvc = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int me, ret, sendsize, recvsize, nprocs;
+	int proc, sendc = 0, recvc = 0;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (sendcount != NULL)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
-
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	if (recvcount != NULL)
+	{
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		recvsize = 0;
+		
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  for (proc = 0; proc < nprocs; proc++)
-  {
+	for (proc = 0; proc < nprocs; proc++)
+	{
 		if (sendcount != NULL)
-  	  sendc += sendcount[proc];
+			sendc += sendcount[proc];
 		if (recvcount != NULL)
-  	  recvc += recvcount[proc];
-  }
+			recvc += recvcount[proc];
+	}
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += sendc * sendsize;
-  GLOBAL_Bytes_Recv += recvc * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += sendc * sendsize;
+	GLOBAL_Bytes_Recv += recvc * recvsize;
 
-  /*
-   *   event : ALLTOALLV_EV                  value : EVT_BEGIN
-   *   target : received size               size  : sent size
-   *   tag : rank                           commid: communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
-                  sendsize * sendc, me, c, MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALLV_EV                  value : EVT_BEGIN
+	*   target : received size               size  : sent size
+	*   tag : rank                           commid: communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
+	  sendsize * sendc, me, c, MPI_CurrentOpGlobal);
 
-  CtoF77 (pmpi_alltoallv) (sendbuf, sendcount, sdispls, sendtype,
-                           recvbuf, recvcount, rdispls, recvtype,
-                           comm, ierror);
+	CtoF77 (pmpi_alltoallv) (sendbuf, sendcount, sdispls, sendtype,
+	  recvbuf, recvcount, rdispls, recvtype, comm, ierror);
 
-  /*
-   *   event : ALLTOALLV_EV                  value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
-                  MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALLV_EV                  value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+	  MPI_CurrentOpGlobal);
 }
 
 
@@ -2454,44 +2523,54 @@ void PMPI_Allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int ret, sendsize, recvsize, me, nprocs;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int ret, sendsize, recvsize, me, nprocs;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*sendcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*recvcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		recvsize = 0;
 
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += *sendcount * sendsize;
-  GLOBAL_Bytes_Recv += *recvcount * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += *sendcount * sendsize;
+	GLOBAL_Bytes_Recv += *recvcount * recvsize;
 
-  /*
-   *   event : ALLGATHER_EV                 value : EVT_BEGIN
-   *   target : ---                         size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
-                  me, c, *recvcount * recvsize * nprocs);
+	/*
+	*   event : ALLGATHER_EV                 value : EVT_BEGIN
+	*   target : ---                         size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+	  me, c, *recvcount * recvsize * nprocs);
 
-  CtoF77 (pmpi_allgather) (sendbuf, sendcount, sendtype,
-                           recvbuf, recvcount, recvtype, comm, ierror);
+	CtoF77 (pmpi_allgather) (sendbuf, sendcount, sendtype, recvbuf,
+	  recvcount, recvtype, comm, ierror);
 
-  /*
-   *   event : ALLGATHER_EV                 value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : ALLGATHER_EV                 value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2517,50 +2596,60 @@ void PMPI_Allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int ret, sendsize, me, nprocs;
-  int proc, recvsize, recvc = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int ret, sendsize, me, nprocs;
+	int proc, recvsize, recvc = 0;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
-	
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (sendcount != NULL)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	if (recvcount != NULL)
+	{	
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		recvsize = 0;
+
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
 	if (recvcount != NULL)
 		for (proc = 0; proc < nprocs; proc++)
 			recvc += recvcount[proc];
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += *sendcount * sendsize;
-  GLOBAL_Bytes_Recv += recvc * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += *sendcount * sendsize;
+	GLOBAL_Bytes_Recv += recvc * recvsize;
 
-  /*
-   *   event : GATHER_EV                    value : EVT_BEGIN
-   *   target : ---                         size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_BEGIN, EMPTY,
-                  *sendcount * sendsize, me, c, recvsize * recvc);
+	/*
+	*   event : GATHER_EV                    value : EVT_BEGIN
+	*   target : ---                         size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_BEGIN, EMPTY,
+	  *sendcount * sendsize, me, c, recvsize * recvc);
 
-  CtoF77 (pmpi_allgatherv) (sendbuf, sendcount, sendtype,
-                            recvbuf, recvcount, displs, recvtype,
-                            comm, ierror);
+	CtoF77 (pmpi_allgatherv) (sendbuf, sendcount, sendtype,
+	  recvbuf, recvcount, displs, recvtype, comm, ierror);
 
-  /*
-   *   event : GATHER_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : GATHER_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY,
+	  c, EMPTY);
 }
 
 
@@ -2586,59 +2675,69 @@ void PMPI_Gather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int ret, sendsize, recvsize, me, nprocs;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int ret, sendsize, recvsize, me, nprocs;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*sendcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*recvcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		recvsize = 0;
 
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == *root)
-  {
-    GLOBAL_Bytes_Recv += *recvcount * recvsize;
-  }
-  else 
-  {
-    GLOBAL_Bytes_Sent += *sendcount * sendsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == *root)
+	{
+		GLOBAL_Bytes_Recv += *recvcount * recvsize;
+	}
+	else 
+	{
+		GLOBAL_Bytes_Sent += *sendcount * sendsize;
+	}
 
 
-  /*
-   *   event : GATHER_EV                    value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == *root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
-                    me, c, *recvcount * recvsize * nprocs);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
-                    me, c, 0);
-  }
+	/*
+	*   event : GATHER_EV                    value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == *root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+		  me, c, *recvcount * recvsize * nprocs);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+		  me, c, 0);
+	}
 
-  CtoF77 (pmpi_gather) (sendbuf, sendcount, sendtype,
-                        recvbuf, recvcount, recvtype, root, comm, ierror);
+	CtoF77 (pmpi_gather) (sendbuf, sendcount, sendtype, recvbuf,
+	  recvcount, recvtype, root, comm, ierror);
 
-  /*
-   *   event : GATHER_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : GATHER_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2665,64 +2764,71 @@ void PMPI_GatherV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int ret, sendsize, me, nprocs;
-  int proc, recvsize, recvc = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int ret, sendsize, me, nprocs;
+	int proc, recvsize, recvc = 0;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*sendcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (recvcount != NULL)
+	{
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
 
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
 	if (recvcount != NULL)
 		for (proc = 0; proc < nprocs; proc++)
 			recvc += recvcount[proc];
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == *root)
-  {
-    GLOBAL_Bytes_Recv += recvc * recvsize;
-  }
-  else
-  {
-    GLOBAL_Bytes_Sent += *sendcount * sendsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == *root)
+	{
+		GLOBAL_Bytes_Recv += recvc * recvsize;
+	}
+	else
+	{
+		GLOBAL_Bytes_Sent += *sendcount * sendsize;
+	}
 
-  /*
-   *   event : GATHERV_EV                   value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == *root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
-                    me, c, recvsize * recvc);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
-                    me, c, 0);
-  }
+	/*
+	*   event : GATHERV_EV                   value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == *root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+		  me, c, recvsize * recvc);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+		  me, c, 0);
+	}
 
-  CtoF77 (pmpi_gatherv) (sendbuf, sendcount, sendtype,
-                         recvbuf, recvcount, displs, recvtype,
-                         root, comm, ierror);
+	CtoF77 (pmpi_gatherv) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+	  displs, recvtype, root, comm, ierror);
 
-  /*
-   *   event : GATHERV_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : GATHERV_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2749,59 +2855,69 @@ void PMPI_Scatter_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int ret, sendsize, recvsize, me, nprocs;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int ret, sendsize, recvsize, me, nprocs;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*sendcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*recvcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		recvsize = 0;
 
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == *root)
-  {
-    GLOBAL_Bytes_Sent += *sendcount * sendsize;
-  }
-  else
-  {
-    GLOBAL_Bytes_Recv += *recvcount * recvsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == *root)
+	{
+		GLOBAL_Bytes_Sent += *sendcount * sendsize;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += *recvcount * recvsize;
+	}
 
-  /*
-   *   event : SCATTER_EV                   value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == *root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, *root,
-                    *sendcount * sendsize * nprocs, me, c,
-                    *recvcount * recvsize);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, *root, 0, me, c,
-                    *recvcount * recvsize);
-  }
+  	/*
+   	*   event : SCATTER_EV                   value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == *root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, *root,
+		  *sendcount * sendsize * nprocs, me, c,
+		  *recvcount * recvsize);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, *root, 0, me, c,
+		  *recvcount * recvsize);
+	}
 
-  CtoF77 (pmpi_scatter) (sendbuf, sendcount, sendtype,
-                         recvbuf, recvcount, recvtype, root, comm, ierror);
+	CtoF77 (pmpi_scatter) (sendbuf, sendcount, sendtype,
+	  recvbuf, recvcount, recvtype, root, comm, ierror);
 
-  /*
-   *   event : SCATTER_EV                   value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : SCATTER_EV                   value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 /******************************************************************************
@@ -2826,63 +2942,73 @@ void PMPI_ScatterV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int ret, recvsize, me, nprocs;
-  int proc, sendsize, sendc = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+	int ret, recvsize, me, nprocs;
+	int proc, sendsize, sendc = 0;
+	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-  CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (sendcount != NULL)
+	{
+		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		sendsize = 0;
 
-  CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*recvcount != 0)
+	{
+		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		recvsize = 0;
 
-  CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
+	CtoF77 (pmpi_comm_size) (comm, &nprocs, &ret);
 	MPI_CHECK(ret, pmpi_comm_size);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
+	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
 	if (sendcount != NULL)
 		for (proc = 0; proc < nprocs; proc++)
 			sendc += sendcount[proc];
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == *root)
-  {
-    GLOBAL_Bytes_Sent += sendc * sendsize;
-  }
-  else
-  {
-    GLOBAL_Bytes_Recv += *recvcount * recvsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == *root)
+	{
+		GLOBAL_Bytes_Sent += sendc * sendsize;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += *recvcount * recvsize;
+	}
 
-  /*
-   *   event :  SCATTERV_EV                 value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == *root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, *root, sendsize * sendc, me,
-                    c, *recvcount * recvsize);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, *root, 0, me, c,
-                    *recvcount * recvsize);
-  }
+	/*
+	*   event :  SCATTERV_EV                 value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == *root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, *root, sendsize * sendc, me,
+		  c, *recvcount * recvsize);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, *root, 0, me, c,
+		  *recvcount * recvsize);
+	}
 
-  CtoF77 (pmpi_scatterv) (sendbuf, sendcount, displs, sendtype,
-                          recvbuf, recvcount, recvtype, root, comm, ierror);
+	CtoF77 (pmpi_scatterv) (sendbuf, sendcount, displs, sendtype,
+	  recvbuf, recvcount, recvtype, root, comm, ierror);
 
-  /*
-   *   event : SCATTERV_EV                  value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : SCATTERV_EV                  value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2893,11 +3019,11 @@ void PMPI_ScatterV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 
 void PMPI_Comm_Rank_Wrapper (MPI_Fint *comm, MPI_Fint *rank, MPI_Fint *ierror)
 {
-  TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
-  CtoF77 (pmpi_comm_rank) (comm, rank, ierror);
-  TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
+	CtoF77 (pmpi_comm_rank) (comm, rank, ierror);
+	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 }
 
 
@@ -2909,11 +3035,11 @@ void PMPI_Comm_Rank_Wrapper (MPI_Fint *comm, MPI_Fint *rank, MPI_Fint *ierror)
 
 void PMPI_Comm_Size_Wrapper (MPI_Fint *comm, MPI_Fint *size, MPI_Fint *ierror)
 {
-  TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
-  CtoF77 (pmpi_comm_size) (comm, size, ierror);
-  TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
+	CtoF77 (pmpi_comm_size) (comm, size, ierror);
+	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 }
 
 /******************************************************************************
@@ -2996,56 +3122,61 @@ void PMPI_Reduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
 	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
 
-	CtoF77 (pmpi_type_size) (datatype, &size, ierror);
-	MPI_CHECK(*ierror, pmpi_type_size);
+	if (recvcounts != NULL)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, ierror);
+		MPI_CHECK(*ierror, pmpi_type_size);
+	}
+	else
+		size = 0;
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
 
-  CtoF77 (pmpi_comm_size) (comm, &csize, ierror);
+	CtoF77 (pmpi_comm_size) (comm, &csize, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_size);
 
 	if (recvcounts != NULL)
 		for (i = 0; i < csize; i++)
 			sendcount += recvcounts[i];
 
-  /* Reduce */  
-  if (me == 0) 
-  {
-     GLOBAL_Bytes_Recv += sendcount * size;
-  }
-  else
-  {
-     GLOBAL_Bytes_Sent += sendcount * size;
-  }
+	/* Reduce */  
+	if (me == 0) 
+	{
+		GLOBAL_Bytes_Recv += sendcount * size;
+	}
+	else
+	{
+		GLOBAL_Bytes_Sent += sendcount * size;
+	}
 
-  /* Scatter */
-  if (me == 0)
-  {
-     GLOBAL_Bytes_Sent += sendcount * size;
-  }
-  else
-  {
-     GLOBAL_Bytes_Recv += recvcounts[me] * size;
-  }
+	/* Scatter */
+	if (me == 0)
+	{
+		GLOBAL_Bytes_Sent += sendcount * size;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += recvcounts[me] * size;
+	}
 
-  /*
-   *   type : REDUCESCAT_EV                    value : EVT_BEGIN
-   *   target : reduce operation ident.    size  : data size
-   *   tag : whoami (comm rank)            comm : communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_BEGIN, *op, size, me, c, EMPTY);
+	/*
+	*   type : REDUCESCAT_EV                    value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : data size
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_BEGIN, *op, size, me, c, EMPTY);
 
-  CtoF77 (pmpi_reduce_scatter) (sendbuf, recvbuf, recvcounts, datatype,
-                                op, comm, ierror);
+	CtoF77 (pmpi_reduce_scatter) (sendbuf, recvbuf, recvcounts, datatype,
+		op, comm, ierror);
 
-  /*
-   *   event : REDUCESCAT_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	/*
+	*   event : REDUCESCAT_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -3062,46 +3193,53 @@ void PMPI_Reduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
 void PMPI_Scan_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 {
-  int me, size, csize;
+	int me, size, csize;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-  CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
+	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
 
-  CtoF77 (pmpi_type_size) (datatype, &size, ierror);
-	MPI_CHECK(*ierror, pmpi_type_size);
+	if (*count != 0)
+	{
+		CtoF77 (pmpi_type_size) (datatype, &size, ierror);
+		MPI_CHECK(*ierror, pmpi_type_size);
+	}
+	else
+		size = 0;
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
 
-  CtoF77 (pmpi_comm_size) (comm, &csize, ierror);
+	CtoF77 (pmpi_comm_size) (comm, &csize, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_size);
 
-  if (me != csize - 1)
-  {
-    GLOBAL_Bytes_Sent = *count * size; 
-  }
-  if (me != 0)
-  {
-    GLOBAL_Bytes_Recv = *count * size;
-  }
+	if (me != csize - 1)
+	{
+		GLOBAL_Bytes_Sent = *count * size; 
+	}
+	if (me != 0)
+	{
+		GLOBAL_Bytes_Recv = *count * size;
+	}
 
-  /*
-   *   type : SCAN_EV                    value : EVT_BEGIN
-   *   target : reduce operation ident.    size  : data size
-   *   tag : whoami (comm rank)            comm : communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_BEGIN, *op, *count * size, me, c, MPI_CurrentOpGlobal);
+	/*
+	*   type : SCAN_EV                    value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : data size
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_BEGIN, *op, *count * size, me, c,
+	  MPI_CurrentOpGlobal);
 
-  CtoF77 (pmpi_scan) (sendbuf, recvbuf, count, datatype, op, comm, ierror);
+	CtoF77 (pmpi_scan) (sendbuf, recvbuf, count, datatype, op, comm, ierror);
 
-  /*
-   *   event : SCAN_EV                      value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, MPI_CurrentOpGlobal);
+	/*
+	*   event : SCAN_EV                      value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+	  MPI_CurrentOpGlobal);
 }
 
 /******************************************************************************
@@ -3499,11 +3637,21 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	if ((ret = get_rank_obj (comm, dest, &RecvRank)) != MPI_SUCCESS)
 		return; 
 
-	CtoF77(pmpi_type_size) (sendtype, &DataSendSize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*sendcount != 0)
+	{
+		CtoF77(pmpi_type_size) (sendtype, &DataSendSize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		DataSendSize = 0;
 
-	CtoF77(pmpi_type_size) (recvtype, &DataRecvSize, &ret);
-	MPI_CHECK(ret, pmpi_type_size);
+	if (*recvcount != 0)
+	{
+		CtoF77(pmpi_type_size) (recvtype, &DataRecvSize, &ret);
+		MPI_CHECK(ret, pmpi_type_size);
+	}
+	else
+		DataRecvSize = 0;
 
 	DataSend = *sendcount * DataSendSize;
 
@@ -3555,8 +3703,13 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	if ((ret = get_rank_obj (comm, dest, &RecvRank)) != MPI_SUCCESS)
 		return;
 
-	CtoF77(pmpi_type_size) (type, &DataSendSize, &ret);
-	DataRecvSize = DataSendSize;
+	if (*count != 0)
+	{
+		CtoF77(pmpi_type_size) (type, &DataSendSize, &ret);
+		DataRecvSize = DataSendSize;
+	}
+	else
+		DataRecvSize = DataSendSize = 0;
 
 	DataSend = *count * DataSendSize;
 
@@ -3964,38 +4117,43 @@ int MPI_Finalize_C_Wrapper (void)
 int MPI_Bsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                          int tag, MPI_Comm comm)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : BSEND_EV                      value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
-                  EMPTY);
+	/*
+	*   event : BSEND_EV                      value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
+	  EMPTY);
 
-  ret = PMPI_Bsend (buf, count, datatype, dest, tag, comm);
+	ret = PMPI_Bsend (buf, count, datatype, dest, tag, comm);
 
-  /*
-   *   event : BSEND_EV                      value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : BSEND_EV                      value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_BSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4006,38 +4164,42 @@ int MPI_Bsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Ssend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                          int tag, MPI_Comm comm)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : SSEND_EV                      value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
-                  EMPTY);
+	/*
+	*   event : SSEND_EV                      value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
+	  EMPTY);
 
-  ret = PMPI_Ssend (buf, count, datatype, dest, tag, comm);
+	ret = PMPI_Ssend (buf, count, datatype, dest, tag, comm);
 
-  /*
-   *   event : SSEND_EV                      value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : SSEND_EV                      value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SSEND_EV, EVT_END, receiver, size, tag, comm,
+	  EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4049,38 +4211,43 @@ int MPI_Ssend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Rsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                          int tag, MPI_Comm comm)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : RSEND_EV                      value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
-                  EMPTY);
+	/*
+	*   event : RSEND_EV                      value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
+	  EMPTY);
 
-  ret = PMPI_Rsend (buf, count, datatype, dest, tag, comm);
+	ret = PMPI_Rsend (buf, count, datatype, dest, tag, comm);
 
-  /*
-   *   event : RSEND_EV                      value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : RSEND_EV                      value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_RSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4092,37 +4259,42 @@ int MPI_Rsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Send_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                         int tag, MPI_Comm comm)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : SEND_EV                       value : EVT_BEGIN
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : SEND_EV                       value : EVT_BEGIN
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
-  ret = PMPI_Send (buf, count, datatype, dest, tag, comm);
+	ret = PMPI_Send (buf, count, datatype, dest, tag, comm);
   
-  /*
-   *   event : SEND_EV                       value : EVT_END
-   *   target : receiver                     size  : send message size
-   *   tag : message tag
-   */
-  TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : SEND_EV                       value : EVT_END
+	*   target : receiver                     size  : send message size
+	*   tag : message tag
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4134,39 +4306,44 @@ int MPI_Send_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Ibsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                           int tag, MPI_Comm comm, MPI_Request *request)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : IBSEND_EV                     value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : IBSEND_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
-  ret = PMPI_Ibsend (buf, count, datatype, dest, tag, comm, request);
+	ret = PMPI_Ibsend (buf, count, datatype, dest, tag, comm, request);
 
-  /*
-   *   event : IBSEND_EV                     value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : IBSEND_EV                     value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IBSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4178,39 +4355,44 @@ int MPI_Ibsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Isend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                          int tag, MPI_Comm comm, MPI_Request *request)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : ISEND_EV                      value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : ISEND_EV                      value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
-  ret = PMPI_Isend (buf, count, datatype, dest, tag, comm, request);
+	ret = PMPI_Isend (buf, count, datatype, dest, tag, comm, request);
 
-  /*
-   *   event : ISEND_EV                      value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : ISEND_EV                      value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4222,39 +4404,44 @@ int MPI_Isend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Issend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                           int tag, MPI_Comm comm, MPI_Request *request)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : ISSEND_EV                     value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : ISSEND_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
-  ret = PMPI_Issend (buf, count, datatype, dest, tag, comm, request);
+	ret = PMPI_Issend (buf, count, datatype, dest, tag, comm, request);
 
-  /*
-   *   event : ISSEND_EV                     value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : ISSEND_EV                     value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ISSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4266,39 +4453,44 @@ int MPI_Issend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 int MPI_Irsend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
                           int tag, MPI_Comm comm, MPI_Request *request)
 {
-  int size, receiver, ret;
+	int size, receiver, ret;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
-  if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
-    return ret;
+	if ((ret = get_rank_obj_C (comm, dest, &receiver)) != MPI_SUCCESS)
+		return ret;
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  P2P_Communications ++;
-  P2P_Bytes_Sent += size;
+	/* MPI Stats */
+	P2P_Communications ++;
+	P2P_Bytes_Sent += size;
 
-  /*
-   *   event : IRSEND_EV                     value : EVT_BEGIN
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : IRSEND_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
-  ret = PMPI_Irsend (buf, count, datatype, dest, tag, comm, request);
+	ret = PMPI_Irsend (buf, count, datatype, dest, tag, comm, request);
 
-  /*
-   *   event : IRSEND_EV                     value : EVT_END
-   *   target : ---                          size  : ---
-   *   tag : ---                             commid: ---
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+	/*
+	*   event : IRSEND_EV                     value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---                             commid: ---
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4311,26 +4503,31 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
                         int tag, MPI_Comm comm, MPI_Status *status)
 {
 	MPI_Status my_status, *ptr_status;
-  int size, src_world, sender_src, ret, recved_count, sended_tag, ierror;
+	int size, src_world, sender_src, ret, recved_count, sended_tag, ierror;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
 	if ((ret = get_rank_obj_C (comm, source, &src_world)) != MPI_SUCCESS)
 		return ret;
 
-  /*
-   *   event : RECV_EV                      value : EVT_BEGIN    
-   *   target : MPI_ANY_SOURCE or sender    size  : receive buffer size    
-   *   tag : message tag or MPI_ANY_TAG     commid: Communicator identifier
-   *   aux: ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_BEGIN, src_world, count * size, tag,
-                  comm, EMPTY);
+	/*
+	*   event : RECV_EV                      value : EVT_BEGIN    
+	*   target : MPI_ANY_SOURCE or sender    size  : receive buffer size    
+	*   tag : message tag or MPI_ANY_TAG     commid: Communicator identifier
+	*   aux: ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_BEGIN, src_world, count * size, tag,
+	  comm, EMPTY);
 
 	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status; 
  
-  ierror = PMPI_Recv (buf, count, datatype, source, tag, comm, ptr_status);
+	ierror = PMPI_Recv (buf, count, datatype, source, tag, comm, ptr_status);
 
 	ret = PMPI_Get_count (ptr_status, datatype, &recved_count);
 	MPI_CHECK(ret, PMPI_Get_count);
@@ -4357,15 +4554,15 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
 	if ((ret = get_rank_obj_C (comm, sender_src, &src_world)) != MPI_SUCCESS)
 		return ret;
 
-  /*
-   *   event : RECV_EV                      value : EVT_END
-   *   target : sender                      size  : received message size    
-   *   tag : message tag
-   */
+	/*
+	*   event : RECV_EV                      value : EVT_END
+	*   target : sender                      size  : received message size    
+	*   tag : message tag
+	*/
 	TRACE_MPIEVENT (TIME, MPI_RECV_EV, EVT_END, src_world, size, sended_tag,
-		comm, EMPTY);
+	  comm, EMPTY);
 
-  return ierror;
+	return ierror;
 }
 
 
@@ -4377,27 +4574,32 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int source,
 int MPI_Irecv_C_Wrapper (void *buf, int count, MPI_Datatype datatype,
 	int source, int tag, MPI_Comm comm, MPI_Request *request)
 {
-  hash_data_t hash_req;
-  int inter, ret, ierror, size, src_world;
+	hash_data_t hash_req;
+	int inter, ret, ierror, size, src_world;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+	else
+		size = 0;
 
 	if ((ret = get_rank_obj_C (comm, source, &src_world)) != MPI_SUCCESS)
 		return ret;
 
-  /*
-   *   event : IRECV_EV                     value : EVT_BEGIN
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_BEGIN, src_world, count * size, tag,
-                  comm, EMPTY);
+	/*
+	*   event : IRECV_EV                     value : EVT_BEGIN
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_BEGIN, src_world, count * size, tag,
+	  comm, EMPTY);
 
-  ierror = PMPI_Irecv (buf, count, datatype, source, tag, comm, request);
+	ierror = PMPI_Irecv (buf, count, datatype, source, tag, comm, request);
 
-  hash_req.key = *request;
-  hash_req.commid = comm;
+	hash_req.key = *request;
+	hash_req.commid = comm;
 	hash_req.partner = source;
 	hash_req.tag = tag;
 	hash_req.size = count * size;
@@ -4423,17 +4625,18 @@ int MPI_Irecv_C_Wrapper (void *buf, int count, MPI_Datatype datatype,
 		}
 	}
 
-  hash_add (&requests, &hash_req);
+	hash_add (&requests, &hash_req);
 
-  /*
-   *   event : IRECV_EV                     value : EVT_END
-   *   target : partner                     size  : ---
-   *   tag : ---                            comm  : communicator
-   *   aux: request
-   */
-	TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_END, src_world, count * size, tag, comm, hash_req.key);
+	/*
+	*   event : IRECV_EV                     value : EVT_END
+	*   target : partner                     size  : ---
+	*   tag : ---                            comm  : communicator
+	*   aux: request
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IRECV_EV, EVT_END, src_world, count * size, tag, comm,
+	  hash_req.key);
 
-  return ierror;
+	return ierror;
 }
 
 
@@ -4449,9 +4652,13 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 
 	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
+		
 
-	ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
 	size *= count;
 
@@ -4462,21 +4669,21 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	else
 		GLOBAL_Bytes_Sent += size;
 
-  /*
-   *   event : REDUCE_EV                    value : EVT_BEGIN
-   *   target: reduce operation ident.      size : bytes send (non root) /received (root)
-   *   tag : rank                           commid: communicator Id
-   *   aux : root rank
-   */
+	/*
+	*   event : REDUCE_EV                    value : EVT_BEGIN
+	*   target: reduce operation ident.      size : bytes send (non root) /received (root)
+	*   tag : rank                           commid: communicator Id
+	*   aux : root rank
+	*/
 	TRACE_MPIEVENT (TIME, MPI_REDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
 
 	ret = PMPI_Reduce (sendbuf, recvbuf, count, datatype, op, root, comm);
 
-  /*
-   *   event : REDUCE_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
+	/*
+	*   event : REDUCE_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
 	TRACE_MPIEVENT (TIME, MPI_REDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
 	return ret;
@@ -4491,41 +4698,44 @@ int MPI_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
                              MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {
-  int me, ret, size;
+	int me, ret, size;
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  size *= count;
+	size *= count;
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += size;
-  GLOBAL_Bytes_Recv += size;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += size;
+	GLOBAL_Bytes_Recv += size;
 
-  /*
-   *   event : ALLREDUCE_EV                 value : EVT_BEGIN
-   *   target: reduce operation ident.      size : bytes send and received
-   *   tag : rank                           commid: communicator Id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm,
-  	MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLREDUCE_EV                 value : EVT_BEGIN
+	*   target: reduce operation ident.      size : bytes send and received
+	*   tag : rank                           commid: communicator Id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm,
+	  MPI_CurrentOpGlobal);
 
-  ret = PMPI_Allreduce (sendbuf, recvbuf, count, datatype, op, comm);
+	ret = PMPI_Allreduce (sendbuf, recvbuf, count, datatype, op, comm);
 
-  /*
-   *   event : ALLREDUCE_EV                 value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
-		MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLREDUCE_EV                 value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
+	  MPI_CurrentOpGlobal);
 
-  return ret;
+	return ret;
 }
 
 
@@ -4568,20 +4778,20 @@ int Bursts_MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int * flag,
 {
 	int ierror;
 
-     /*
-      *   event : IPROBE_EV                     value : EVT_BEGIN
-      *   target : ---                          size  : ---
-      *   tag : ---
-      */
+	/*
+	*   event : IPROBE_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---
+	*/
 	TRACE_MPIEVENT (TIME, MPI_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
 	ierror = PMPI_Iprobe (source, tag, comm, flag, status);
 
-     /*
-      *   event : IPROBE_EV                    value : EVT_END
-      *   target : ---                         size  : ---
-      *   tag : ---
-      */
+	/*
+	*   event : IPROBE_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
 	TRACE_MPIEVENT (TIME, MPI_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
 	return ierror;
@@ -4590,58 +4800,53 @@ int Bursts_MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int * flag,
 int Normal_MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int *flag,
                           MPI_Status *status)
 {
-  static int IProbe_C_Software_Counter = 0;
-  iotimer_t begin_time, end_time;
-  static iotimer_t elapsed_time_outside_iprobes_C = 0, last_iprobe_C_exit_time = 0; 
-  int ierror;
+	static int IProbe_C_Software_Counter = 0;
+	iotimer_t begin_time, end_time;
+	static iotimer_t elapsed_time_outside_iprobes_C = 0, last_iprobe_C_exit_time = 0; 
+	int ierror;
 
-  begin_time = TIME;
+	begin_time = TIME;
 
-  if (IProbe_C_Software_Counter == 0) {
-    /* Primer Iprobe */
-	elapsed_time_outside_iprobes_C = 0;
-  }
-  else {
-	elapsed_time_outside_iprobes_C += (begin_time - last_iprobe_C_exit_time);
-  }
-  ierror = PMPI_Iprobe (source, tag, comm, flag, status);
-  end_time = TIME;
-  last_iprobe_C_exit_time = end_time;
+	if (IProbe_C_Software_Counter == 0)
+	{
+		/* Primer Iprobe */
+		elapsed_time_outside_iprobes_C = 0;
+	}
+	else
+	{
+		elapsed_time_outside_iprobes_C += (begin_time - last_iprobe_C_exit_time);
+	}
+
+	ierror = PMPI_Iprobe (source, tag, comm, flag, status);
+	end_time = TIME;
+	last_iprobe_C_exit_time = end_time;
 
 	if (tracejant_mpi)
 	{
-    if (*flag)
-    {
-       /*
-        *   event : IPROBE_EV                     value : EVT_BEGIN
-        *   target : ---                          size  : ---
-        *   tag : ---
-        */
-      if (IProbe_C_Software_Counter != 0) {
-        TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_IPROBES_EV, elapsed_time_outside_iprobes_C);
-        TRACE_EVENT (begin_time, MPI_IPROBE_COUNTER_EV, IProbe_C_Software_Counter);
-      }
+		if (*flag)
+		{
+			if (IProbe_C_Software_Counter != 0)
+			{
+				TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_IPROBES_EV, elapsed_time_outside_iprobes_C);
+				TRACE_EVENT (begin_time, MPI_IPROBE_COUNTER_EV, IProbe_C_Software_Counter);
+			}
 
-      TRACE_MPIEVENT (begin_time, MPI_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+			TRACE_MPIEVENT (begin_time, MPI_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm, EMPTY);
     
-      /*
-       *   event : IPROBE_EV                    value : EVT_END
-       *   target : ---                         size  : ---
-       *   tag : ---
-       */
-      TRACE_MPIEVENT (end_time, MPI_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
-      IProbe_C_Software_Counter = 0;
-    } 
-    else
-    {
-      if (IProbe_C_Software_Counter == 0) {
-        /* El primer iprobe que falla */
-        TRACE_EVENTANDCOUNTERS (begin_time, MPI_IPROBE_COUNTER_EV, 0, TRUE);
-      }
-      IProbe_C_Software_Counter ++;
-    }
-  }
-  return ierror;
+			TRACE_MPIEVENT (end_time, MPI_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+			IProbe_C_Software_Counter = 0;
+		} 
+		else
+		{
+			if (IProbe_C_Software_Counter == 0)
+			{
+				/* El primer iprobe que falla */
+				TRACE_EVENTANDCOUNTERS (begin_time, MPI_IPROBE_COUNTER_EV, 0, TRUE);
+			}
+			IProbe_C_Software_Counter ++;
+		}
+	}
+	return ierror;
 }
 
 int MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int * flag, MPI_Status *status)
@@ -5211,56 +5416,58 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 int MPI_BCast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int root,
                          MPI_Comm comm)
 {
-  int me, ret, size;
+	int me, ret, size;
 
-  ret = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
+		
+	size *= count;
 
-  size *= count;
-
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == root)
-  {
-     GLOBAL_Bytes_Sent += size;
-  }
-  else
-  {
-     GLOBAL_Bytes_Recv += size;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == root)
+	{
+		GLOBAL_Bytes_Sent += size;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += size;
+	}
 
-  /*
-   *   event : BCAST_EV                     value : EVT_BEGIN
-   *   target : root_rank                   size  : message size
-   *   tag : rank                           commid: communicator identifier
-   *   aux : ---
-   */
-
+	/*
+	*   event : BCAST_EV                     value : EVT_BEGIN
+	*   target : root_rank                   size  : message size
+	*   tag : rank                           commid: communicator identifier
+	*   aux : ---
+	*/
 #if defined(IS_BGL_MACHINE)
-  BGL_disable_barrier_inside = 1;
+	BGL_disable_barrier_inside = 1;
 #endif
 
-  TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_BEGIN, root, size, me, comm, 
-  	MPI_CurrentOpGlobal);
+	TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_BEGIN, root, size, me, comm, 
+	  MPI_CurrentOpGlobal);
 
-  ret = PMPI_Bcast (buffer, count, datatype, root, comm);
+	ret = PMPI_Bcast (buffer, count, datatype, root, comm);
 
-  /*
-   *   event : BCAST_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
-  	MPI_CurrentOpGlobal);
+	/*
+	*   event : BCAST_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
+	  MPI_CurrentOpGlobal);
 
 #if defined(IS_BGL_MACHINE)
-  BGL_disable_barrier_inside = 0;
+	BGL_disable_barrier_inside = 0;
 #endif
 
-  return ret;
+	return ret;
 }
 
 
@@ -5286,46 +5493,52 @@ int MPI_BCast_C_Wrapper (void *buffer, int count, MPI_Datatype datatype, int roo
 int MPI_Alltoall_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
   void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)
 {
-  int me, ret, sendsize, recvsize, nprocs;
+	int me, ret, sendsize, recvsize, nprocs;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcount != 0)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcount != 0)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += sendcount * sendsize;
-  GLOBAL_Bytes_Recv += recvcount * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += sendcount * sendsize;
+	GLOBAL_Bytes_Recv += recvcount * recvsize;
 
-  /*
-   *   event : ALLTOALL_EV                  value : EVT_BEGIN
-   *   target : received size               size  : sent size
-   *   tag : rank                           commid: communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_BEGIN, recvcount * recvsize,
-                  sendcount * sendsize, me, comm, MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALL_EV                  value : EVT_BEGIN
+	*   target : received size               size  : sent size
+	*   tag : rank                           commid: communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_BEGIN, recvcount * recvsize,
+	  sendcount * sendsize, me, comm, MPI_CurrentOpGlobal);
 
-  ret = PMPI_Alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-                       recvtype, comm);
+	ret = PMPI_Alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+	  recvtype, comm);
 
-  /*
-   *   event : ALLTOALL_EV                  value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
-                  MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALL_EV                  value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
+	  MPI_CurrentOpGlobal);
 
-  return ret;
+	return ret;
 }
 
 
@@ -5352,19 +5565,25 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
   MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *rdispls,
   MPI_Datatype recvtype, MPI_Comm comm)
 {
-  int me, ret, sendsize, recvsize, nprocs;
-  int proc, sendc = 0, recvc = 0;
+	int me, ret, sendsize, recvsize, nprocs;
+	int proc, sendc = 0, recvc = 0;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcounts != NULL)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcounts != NULL)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
 	for (proc = 0; proc < nprocs; proc++)
@@ -5375,33 +5594,32 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 			recvc += recvcounts[proc];
 	}
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += sendc * sendsize;
-  GLOBAL_Bytes_Recv += recvc * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += sendc * sendsize;
+	GLOBAL_Bytes_Recv += recvc * recvsize;
 
-  /*
-   *   event : ALLTOALLV_EV                  value : EVT_BEGIN
-   *   target : received size               size  : sent size
-   *   tag : rank                           commid: communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
-                  sendsize * sendc, me, comm, MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALLV_EV                  value : EVT_BEGIN
+	*   target : received size               size  : sent size
+	*   tag : rank                           commid: communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
+	  sendsize * sendc, me, comm, MPI_CurrentOpGlobal);
 
-  ret = PMPI_Alltoallv (sendbuf, sendcounts, sdispls, sendtype,
-                        recvbuf, recvcounts, rdispls, recvtype, comm);
+	ret = PMPI_Alltoallv (sendbuf, sendcounts, sdispls, sendtype,
+	  recvbuf, recvcounts, rdispls, recvtype, comm);
 
-  /*
-   *   event : ALLTOALLV_EV                  value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
-                  MPI_CurrentOpGlobal);
+	/*
+	*   event : ALLTOALLV_EV                  value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
+	  MPI_CurrentOpGlobal);
 
-
-  return ret;
+	return ret;
 }
 
 
@@ -5427,48 +5645,53 @@ int MPI_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
 int MPI_Allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
   void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)
 {
-  int ret, sendsize, recvsize, me, nprocs;
+	int ret, sendsize, recvsize, me, nprocs;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcount != 0)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcount != 0)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += sendcount * sendsize;
-  GLOBAL_Bytes_Recv += recvcount * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += sendcount * sendsize;
+	GLOBAL_Bytes_Recv += recvcount * recvsize;
 
-  /*
-   *   event : GATHER_EV                    value : EVT_BEGIN
-   *   target : ---                         size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
-                  me, comm, recvcount * recvsize * nprocs);
+	/*
+	*   event : GATHER_EV                    value : EVT_BEGIN
+	*   target : ---                         size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+	  me, comm, recvcount * recvsize * nprocs);
 
-  ret = PMPI_Allgather (sendbuf, sendcount, sendtype,
-                        recvbuf, recvcount, recvtype, comm);
+	ret = PMPI_Allgather (sendbuf, sendcount, sendtype,
+	  recvbuf, recvcount, recvtype, comm);
 
-  /*
-   *   event : GATHER_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	/*
+	*   event : GATHER_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  return ret;
+	return ret;
 }
-
 
 
 /******************************************************************************
@@ -5492,50 +5715,56 @@ int MPI_Allgather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype
 int MPI_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
   void *recvbuf, int *recvcounts, int *displs, MPI_Datatype recvtype, MPI_Comm comm)
 {
-  int ret, sendsize, me, nprocs;
-  int proc, recvsize, recvc = 0;
+	int ret, sendsize, me, nprocs;
+	int proc, recvsize, recvc = 0;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcount != 0)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcounts != NULL)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
 	if (recvcounts != NULL)
 		for (proc = 0; proc < nprocs; proc++)
 			recvc += recvcounts[proc];
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  GLOBAL_Bytes_Sent += sendcount * sendsize;
-  GLOBAL_Bytes_Recv += recvc * recvsize;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	GLOBAL_Bytes_Sent += sendcount * sendsize;
+	GLOBAL_Bytes_Recv += recvc * recvsize;
 
-  /*
-   *   event : GATHER_EV                    value : EVT_BEGIN
-   *   target : ---                         size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
-                  me, comm, recvsize * recvc);
+	/*
+	*   event : GATHER_EV                    value : EVT_BEGIN
+	*   target : ---                         size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+	  me, comm, recvsize * recvc);
 
-  ret = PMPI_Allgatherv (sendbuf, sendcount, sendtype,
-                         recvbuf, recvcounts, displs, recvtype, comm);
+	ret = PMPI_Allgatherv (sendbuf, sendcount, sendtype,
+	  recvbuf, recvcounts, displs, recvtype, comm);
 
-  /*
-   *   event : GATHER_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	/*
+	*   event : GATHER_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -5561,59 +5790,65 @@ int MPI_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtyp
 int MPI_Gather_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
   void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
 {
-  int ret, sendsize, recvsize, me, nprocs;
+	int ret, sendsize, recvsize, me, nprocs;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcount != 0)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcount != 0)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == root)
-  {
-    GLOBAL_Bytes_Recv += recvcount * recvsize;
-  }
-  else
-  {
-    GLOBAL_Bytes_Sent += sendcount * sendsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == root)
+	{
+		GLOBAL_Bytes_Recv += recvcount * recvsize;
+	}
+	else
+	{
+	GLOBAL_Bytes_Sent += sendcount * sendsize;
+	}
 
-  /*
-   *   event : GATHER_EV                    value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
-                    me, comm, recvcount * recvsize * nprocs);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
-                    me, comm, 0);
-  }
+	/*
+	*   event : GATHER_EV                    value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+		  me, comm, recvcount * recvsize * nprocs);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+		  me, comm, 0);
+	}
 
-  ret = PMPI_Gather (sendbuf, sendcount, sendtype,
-                     recvbuf, recvcount, recvtype, root, comm);
+	ret = PMPI_Gather (sendbuf, sendcount, sendtype,
+	  recvbuf, recvcount, recvtype, root, comm);
 
-  /*
-   *   event : GATHER_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	/*
+	*   event : GATHER_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -5640,64 +5875,70 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
   void *recvbuf, int *recvcounts, int *displs, MPI_Datatype recvtype, int root,
   MPI_Comm comm)
 {
-  int ret, sendsize, me, nprocs;
-  int proc, recvsize, recvc = 0;
+	int ret, sendsize, me, nprocs;
+	int proc, recvsize, recvc = 0;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcount != 0)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcounts != NULL)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
 	if (recvcounts != NULL)
 		for (proc = 0; proc < nprocs; proc++)
 			recvc += recvcounts[proc];
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == root)
-  {
-    GLOBAL_Bytes_Recv += recvc * recvsize;
-  }
-  else
-  {
-    GLOBAL_Bytes_Sent += sendcount * sendsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == root)
+	{
+		GLOBAL_Bytes_Recv += recvc * recvsize;
+	}
+	else
+	{
+		GLOBAL_Bytes_Sent += sendcount * sendsize;
+	}
 
-  /*
-   *   event : GATHERV_EV                   value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
-                    me, comm, recvsize * recvc);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
-                    me, comm, 0);
-  }
+	/*
+	*   event : GATHERV_EV                   value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+		  me, comm, recvsize * recvc);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+		  me, comm, 0);
+	}
 
-  ret = PMPI_Gatherv (sendbuf, sendcount, sendtype,
-                      recvbuf, recvcounts, displs, recvtype, root, comm);
+	ret = PMPI_Gatherv (sendbuf, sendcount, sendtype,
+	  recvbuf, recvcounts, displs, recvtype, root, comm);
 
-  /*
-   *   event : GATHERV_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	/*
+	*   event : GATHERV_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -5723,60 +5964,65 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 int MPI_Scatter_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
   void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)
 {
-  int ret, sendsize, recvsize, me, nprocs;
+	int ret, sendsize, recvsize, me, nprocs;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcount != 0)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcount != 0)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == root)
-  {
-    GLOBAL_Bytes_Sent += sendcount * sendsize;
-  }
-  else
-  {
-    GLOBAL_Bytes_Recv += recvcount * recvsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == root)
+	{
+		GLOBAL_Bytes_Sent += sendcount * sendsize;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += recvcount * recvsize;
+	}
 
-  /*
-   *   event : SCATTER_EV                   value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, root,
-                    sendcount * sendsize * nprocs, me, comm,
-                    recvcount * recvsize);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, root, 0, me, comm,
-                    recvcount * recvsize);
-  }
+	/*
+	*   event : SCATTER_EV                   value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, root,
+		  sendcount * sendsize * nprocs, me, comm, recvcount * recvsize);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_BEGIN, root, 0, me, comm,
+		  recvcount * recvsize);
+	}
 
-  ret = PMPI_Scatter (sendbuf, sendcount, sendtype,
-                      recvbuf, recvcount, recvtype, root, comm);
+	ret = PMPI_Scatter (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+	  recvtype, root, comm);
 
-  /*
-   *   event : SCATTER_EV                   value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	/*
+	*   event : SCATTER_EV                   value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -5803,64 +6049,69 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
   MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
   int root, MPI_Comm comm)
 {
-  int ret, recvsize, me, nprocs;
-  int proc, sendsize, sendc = 0;
+	int ret, recvsize, me, nprocs;
+	int proc, sendsize, sendc = 0;
 
-  ret = PMPI_Type_size (sendtype, &sendsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcounts != NULL)
+	{
+		ret = PMPI_Type_size (sendtype, &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Type_size (recvtype, &recvsize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcount != 0)
+	{
+		ret = PMPI_Type_size (recvtype, &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-  ret = PMPI_Comm_size (comm, &nprocs);
+	ret = PMPI_Comm_size (comm, &nprocs);
 	MPI_CHECK(ret, PMPI_Comm_size);
 
-  ret = PMPI_Comm_rank (comm, &me);
+	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
 	if (sendcounts != NULL)
 		for (proc = 0; proc < nprocs; proc++)
 			sendc += sendcounts[proc];
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
-  if (me == root)
-  {
-    GLOBAL_Bytes_Sent += sendc * sendsize;
-  }
-  else
-  {
-    GLOBAL_Bytes_Recv += recvcount * recvsize;
-  }
+	/* MPI Stats */
+	GLOBAL_Communications ++;
+	if (me == root)
+	{
+		GLOBAL_Bytes_Sent += sendc * sendsize;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += recvcount * recvsize;
+	}
 
-  /*
-   *   event :  SCATTERV_EV                 value : EVT_BEGIN
-   *   target : root rank                   size  : bytes sent
-   *   tag : rank                           commid: communicator identifier
-   *   aux : bytes received
-   */
-  if (me == root)
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, root, sendsize * sendc, me,
-                    comm, recvcount * recvsize);
-  }
-  else
-  {
-    TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
-                    recvcount * recvsize);
-  }
+	/*
+	*   event :  SCATTERV_EV                 value : EVT_BEGIN
+	*   target : root rank                   size  : bytes sent
+	*   tag : rank                           commid: communicator identifier
+	*   aux : bytes received
+	*/
+	if (me == root)
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, root, sendsize * sendc,
+		  me, comm, recvcount * recvsize);
+	}
+	else
+	{
+		TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
+		  recvcount * recvsize);
+	}
 
-  ret = PMPI_Scatterv (sendbuf, sendcounts, displs, sendtype,
-                       recvbuf, recvcount, recvtype, root, comm);
+	ret = PMPI_Scatterv (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
 
-  /*
-   *   event : SCATTERV_EV                  value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	/*
+	*   event : SCATTERV_EV                  value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
-  return ret;
+	return ret;
 }
 
 
@@ -5870,15 +6121,15 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 
 int MPI_Comm_rank_C_Wrapper (MPI_Comm comm, int *rank)
 {
-  int ierror;
+	int ierror;
 
-  TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
-  ierror = PMPI_Comm_rank (comm, rank);
-  TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
+	ierror = PMPI_Comm_rank (comm, rank);
+	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  return ierror;
+	return ierror;
 }
 
 
@@ -5889,15 +6140,15 @@ int MPI_Comm_rank_C_Wrapper (MPI_Comm comm, int *rank)
 
 int MPI_Comm_size_C_Wrapper (MPI_Comm comm, int *size)
 {
-  int ierror;
+	int ierror;
 
-  TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
-  ierror = PMPI_Comm_size (comm, size);
-  TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
+	ierror = PMPI_Comm_size (comm, size);
+	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  return ierror;
+	return ierror;
 }
 
 
@@ -5961,65 +6212,68 @@ int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newco
 int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 	int *recvcounts, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {
-  int me, size, ierror;
-  int i;
-  int sendcount = 0;
-  int csize;
+	int me, size, ierror;
+	int i;
+	int sendcount = 0;
+	int csize;
 
-  ierror = PMPI_Comm_rank (comm, &me);
+	ierror = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ierror, PMPI_Comm_rank);
 
-  ierror = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ierror, PMPI_Type_size);
+	if (recvcounts != NULL)
+	{
+		ierror = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ierror, PMPI_Type_size);
+	}
 
-  ierror = PMPI_Comm_size (comm, &csize);
+	ierror = PMPI_Comm_size (comm, &csize);
 	MPI_CHECK(ierror, PMPI_Comm_size);
 
 	if (recvcounts != NULL)
 		for (i=0; i<csize; i++)
 			sendcount += recvcounts[i];
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
 
-  /* Reduce */
-  if (me == 0)
-  {
-     GLOBAL_Bytes_Recv += sendcount * size;
-  }
-  else
-  {
-     GLOBAL_Bytes_Sent += sendcount * size;
-  }
+	/* Reduce */
+	if (me == 0)
+	{
+		GLOBAL_Bytes_Recv += sendcount * size;
+	}
+	else
+	{
+		GLOBAL_Bytes_Sent += sendcount * size;
+	}
 
-  /* Scatter */
-  if (me == 0)
-  {
-     GLOBAL_Bytes_Sent += sendcount * size;
-  }
-  else
-  {
-     GLOBAL_Bytes_Recv += recvcounts[me] * size;
-  }
+	/* Scatter */
+	if (me == 0)
+	{
+		GLOBAL_Bytes_Sent += sendcount * size;
+	}
+	else
+	{
+		GLOBAL_Bytes_Recv += recvcounts[me] * size;
+	}
 
-  /*
-   *   type : REDUCESCAT_EV                    value : EVT_BEGIN
-   *   target : reduce operation ident.    size  : data size
-   *   tag : whoami (comm rank)            comm : communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
+	/*
+	*   type : REDUCESCAT_EV                    value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : data size
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
 
-  ierror = PMPI_Reduce_scatter (sendbuf, recvbuf, recvcounts, datatype,
-                                op, comm);
+	ierror = PMPI_Reduce_scatter (sendbuf, recvbuf, recvcounts, datatype,
+	  op, comm);
 
-  /*
-   *   event : REDUCESCAT_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
-  return ierror;
+	/*
+	*   event : REDUCESCAT_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	return ierror;
 }
 
 
@@ -6035,50 +6289,53 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
 int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
                         MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {
-  int me, ierror, size;
-  int csize;
+	int me, ierror, size;
+	int csize;
 
-  ierror = MPI_Comm_rank (comm, &me);
+	ierror = MPI_Comm_rank (comm, &me);
 	MPI_CHECK(ierror, MPI_Comm_rank);
 
-  ierror = PMPI_Type_size (datatype, &size);
-	MPI_CHECK(ierror, PMPI_Type_size);
+	if (count != 0)
+	{
+		ierror = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ierror, PMPI_Type_size);
+	}
 
-  /* MPI Stats */
-  GLOBAL_Communications ++;
+	/* MPI Stats */
+	GLOBAL_Communications ++;
 
-  ierror = PMPI_Comm_size (comm, &csize);
+	ierror = PMPI_Comm_size (comm, &csize);
 	MPI_CHECK(ierror, PMPI_Comm_size);
 
-  if (me != csize - 1)
-  {
-    GLOBAL_Bytes_Sent = count * size;
-  }
-  if (me != 0)
-  {
-    GLOBAL_Bytes_Recv = count * size;
-  }
+	if (me != csize - 1)
+	{
+		GLOBAL_Bytes_Sent = count * size;
+	}
+	if (me != 0)
+	{
+		GLOBAL_Bytes_Recv = count * size;
+	}
 
-  /*
-   *   type : SCAN_EV                    value : EVT_BEGIN
-   *   target : reduce operation ident.    size  : data size
-   *   tag : whoami (comm rank)            comm : communicator id
-   *   aux : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
-                  MPI_CurrentOpGlobal);
+	/*
+	*   type : SCAN_EV                    value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : data size
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
+	  MPI_CurrentOpGlobal);
 
-  ierror = PMPI_Scan (sendbuf, recvbuf, count, datatype, op, comm);
+	ierror = PMPI_Scan (sendbuf, recvbuf, count, datatype, op, comm);
 
-  /*
-   *   event : REDUCESCAT_EV                    value : EVT_END
-   *   target : ---                         size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
-  	MPI_CurrentOpGlobal);
+	/*
+	*   event : REDUCESCAT_EV                    value : EVT_END
+	*   target : ---                         size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (TIME, MPI_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
+	  MPI_CurrentOpGlobal);
 
-  return ierror;
+	return ierror;
 }
 
 /******************************************************************************
@@ -6087,13 +6344,13 @@ int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
                                int *periods, int reorder, MPI_Comm *comm_cart)
 {
-  int ierror = PMPI_Cart_create (comm_old, ndims, dims, periods, reorder,
-                                 comm_cart);
+	int ierror = PMPI_Cart_create (comm_old, ndims, dims, periods, reorder,
+	  comm_cart);
 
-  if (ierror == MPI_SUCCESS && *comm_cart != MPI_COMM_NULL)
-    Trace_MPI_Communicator (MPI_CART_CREATE_EV, *comm_cart);
+	if (ierror == MPI_SUCCESS && *comm_cart != MPI_COMM_NULL)
+		Trace_MPI_Communicator (MPI_CART_CREATE_EV, *comm_cart);
 
-  return ierror;
+	return ierror;
 }
 
 /* -------------------------------------------------------------------------
@@ -6101,12 +6358,12 @@ int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
    ------------------------------------------------------------------------- */
 int MPI_Cart_sub_C_Wrapper (MPI_Comm comm, int *remain_dims, MPI_Comm *comm_new)
 {
-  int ierror = PMPI_Cart_sub (comm, remain_dims, comm_new);
+	int ierror = PMPI_Cart_sub (comm, remain_dims, comm_new);
 
-  if (ierror == MPI_SUCCESS && *comm_new != MPI_COMM_NULL)
-    Trace_MPI_Communicator (MPI_CART_SUB_EV, *comm_new);
+	if (ierror == MPI_SUCCESS && *comm_new != MPI_COMM_NULL)
+		Trace_MPI_Communicator (MPI_CART_SUB_EV, *comm_new);
 
-  return ierror;
+	return ierror;
 }
 
 
@@ -6440,7 +6697,6 @@ int MPI_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	int source, int recvtag, MPI_Comm comm, MPI_Status * status) 
 {
 	MPI_Status my_status, *ptr_status;
-	MPI_Datatype DataSendType = sendtype, DataRecvType = recvtype;
 	int ierror, ret;
 	int DataSendSize, DataRecvSize, DataSend, DataSize;
 	int SendRank, SourceRank, RecvRank, Count, Tag;
@@ -6448,11 +6704,17 @@ int MPI_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	if ((ret = get_rank_obj_C (comm, dest, &RecvRank)) != MPI_SUCCESS)
 		return ret;
 
-	ret = PMPI_Type_size (DataSendType, (int *) &DataSendSize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (sendcount != 0)
+	{
+		ret = PMPI_Type_size (sendtype, &DataSendSize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
-	ret = PMPI_Type_size (DataRecvType, (int *) &DataRecvSize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (recvcount != 0)
+	{
+		ret = PMPI_Type_size (recvtype, &DataRecvSize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
 	DataSend = sendcount * DataSendSize;
 
@@ -6464,7 +6726,7 @@ int MPI_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	ierror = PMPI_Sendrecv (sendbuf, sendcount, sendtype, dest, sendtag,
 		recvbuf, recvcount, recvtype, source, recvtag, comm, ptr_status);
 
-	ret = PMPI_Get_count (ptr_status, DataRecvType, &Count);
+	ret = PMPI_Get_count (ptr_status, recvtype, &Count);
 	MPI_CHECK(ret, PMPI_Get_count);
 
 	if (Count != MPI_UNDEFINED)
@@ -6501,7 +6763,6 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
   MPI_Status * status) 
 {
 	MPI_Status my_status, *ptr_status;
-	MPI_Datatype DataSendType = type, DataRecvType = type;
 	int ierror, ret;
 	int DataSendSize, DataRecvSize, DataSend, DataSize;
 	int SendRank, SourceRank, RecvRank, Count, Tag;
@@ -6509,8 +6770,11 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
 	if ((ret = get_rank_obj_C (comm, dest, &RecvRank)) != MPI_SUCCESS)
 		return ret;
 
-	ret = PMPI_Type_size (DataSendType, (int *) &DataSendSize);
-	MPI_CHECK(ret, PMPI_Type_size);
+	if (count != 0)
+	{
+		ret = PMPI_Type_size (type, &DataSendSize);
+		MPI_CHECK(ret, PMPI_Type_size);
+	}
 
 	DataRecvSize = DataSendSize;
 
@@ -6524,7 +6788,7 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
 	ierror = PMPI_Sendrecv_replace (buf, count, type, dest, sendtag, source,
 	  recvtag, comm, ptr_status);
 
-	ret = PMPI_Get_count (status, DataRecvType, &Count);
+	ret = PMPI_Get_count (status, type, &Count);
 	MPI_CHECK(ret, PMPI_Get_count);
 
 	if (Count != MPI_UNDEFINED)
@@ -6985,7 +7249,7 @@ void Extrae_network_routes_Wrapper (int mpi_rank)
  **      Author: HSG
  **      Description : Let the user choose which tasks must be traced
  ******************************************************************************/
-void Extrae_tracing_tasks_Wrapper (int from, int to)
+void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to)
 {
 	int i, tmp;
 
@@ -6994,7 +7258,7 @@ void Extrae_tracing_tasks_Wrapper (int from, int to)
 		if (tracejant && TracingBitmap != NULL)
 		{
 			/*
-			 * Interchange them if limits are bad given 
+			 * Interchange them if limits are badly given 
 			 */
 			if (from > to)
 			{
@@ -7003,12 +7267,8 @@ void Extrae_tracing_tasks_Wrapper (int from, int to)
 				to = tmp;
 			}
 
-			if (from < 0)
-				from = 0;
 			if (to >= NumOfTasks)
 				to = NumOfTasks - 1;
-
-			TracingBitmap[TASKID] = TRUE;
 
 			/*
 			 * If I'm not in the bitmask, disallow me tracing! 
@@ -7234,4 +7494,3 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm)
 
 	FORCE_TRACE_MPIEVENT (temps, tipus_event, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, EMPTY);
 }
-

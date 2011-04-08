@@ -108,10 +108,10 @@ void MPItrace_neventandcounters (unsigned count, unsigned *types, unsigned *valu
 void OMPtrace_neventandcounters (unsigned count, unsigned *types, unsigned *values);
 void SEQtrace_neventandcounters (unsigned count, unsigned *types, unsigned *values);
 
-void Extrae_set_tracing_tasks (int from, int to);
-void OMPtrace_set_tracing_tasks (int from, int to);
-void MPItrace_set_tracing_tasks (int from, int to);
-void OMPItrace_set_tracing_tasks (int from, int to);
+void Extrae_set_tracing_tasks (unsigned from, unsigned to);
+void OMPtrace_set_tracing_tasks (unsigned from, unsigned to);
+void MPItrace_set_tracing_tasks (unsigned from, unsigned to);
+void OMPItrace_set_tracing_tasks (unsigned from, unsigned to);
 
 #define EXTRAE_DISABLE_ALL_OPTIONS      (0)
 #define MPITRACE_DISABLE_ALL_OPTIONS	  EXTRAE_DISABLE_ALL_OPTIONS

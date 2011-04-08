@@ -55,7 +55,7 @@ extern int mpit_gathering_enabled;
 
 void Extrae_network_counters_Wrapper (void);
 void Extrae_network_routes_Wrapper (int mpi_rank);
-void Extrae_tracing_tasks_Wrapper (int from, int to);
+void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to);
 
 /* Fortran Wrappers */
 

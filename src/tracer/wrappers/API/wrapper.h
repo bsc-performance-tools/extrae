@@ -138,7 +138,7 @@ extern unsigned int mptrace_IsMPI;
 #include "taskid.h"
 //#define TASKID TaskID
 //extern unsigned int TaskID;
-extern int NumOfTasks;
+extern unsigned NumOfTasks;
 
 /************ Variable global per saber si cal tracejar **************/
 // Serveix per deixar de tracejar un troc, de l'aplicacio

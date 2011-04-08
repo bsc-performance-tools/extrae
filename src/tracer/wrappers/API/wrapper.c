@@ -220,7 +220,7 @@ unsigned file_size = 0;
 
 unsigned int mptrace_IsMPI = FALSE;
 //unsigned int TaskID = 0;
-int NumOfTasks = 0;
+unsigned NumOfTasks = 0;
 static unsigned current_NumOfThreads = 0;
 static unsigned maximum_NumOfThreads = 0;
 

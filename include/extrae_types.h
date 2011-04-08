@@ -63,11 +63,11 @@ struct extrae_CombinedEvents
 	int Callers;
 	int UserFunction;
 	/* These are intended for N events */
-	int nEvents;
+	unsigned nEvents;
 	unsigned *Types;
-	unsigned *Values;
+	unsigned long long *Values;
 	/* These are intended for user communication records */
-	int nCommunications;
+	unsigned nCommunications;
 	struct extrae_UserCommunication *Communications;
 };
 

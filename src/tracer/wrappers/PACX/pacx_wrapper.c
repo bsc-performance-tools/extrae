@@ -6935,7 +6935,7 @@ void Extrae_network_routes_Wrapper (int pacx_rank)
  **      Author: HSG
  **      Description : Let the user choose which tasks must be traced
  ******************************************************************************/
-void Extrae_tracing_tasks_Wrapper (int from, int to)
+void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to)
 {
 	int i, tmp;
 
@@ -6953,12 +6953,8 @@ void Extrae_tracing_tasks_Wrapper (int from, int to)
 				to = tmp;
 			}
 
-			if (from < 0)
-				from = 0;
 			if (to >= NumOfTasks)
 				to = NumOfTasks - 1;
-
-			TracingBitmap[TASKID] = TRUE;
 
 			/*
 			 * If I'm not in the bitmask, disallow me tracing! 
@@ -7175,4 +7171,3 @@ static void Trace_PACX_Communicator (int tipus_event, PACX_Comm newcomm)
 
 	FORCE_TRACE_MPIEVENT (temps, tipus_event, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, EMPTY);
 }
-
