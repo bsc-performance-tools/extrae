@@ -328,7 +328,7 @@ static int read_environment_variables (int me)
 #endif
 
 	/* Initial Tracing Mode? */
-	if ((str = getenv("EXTAE_INITIAL_MODE")) != NULL)
+	if ((str = getenv("EXTRAE_INITIAL_MODE")) != NULL)
 	{
 		if (strcasecmp(str, "detail") == 0)
 		{
