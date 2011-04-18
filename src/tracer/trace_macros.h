@@ -82,17 +82,14 @@
 {                                                                \
 	event_t evt;                                                   \
 	int thread_id = THREADID;                                      \
-	if (isSamplingEnabled())                                       \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
 	{                                                              \
-		if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))             \
-		{                                                            \
-			evt.time = (evttime);                                      \
-			evt.event = (evttype);                                     \
-			evt.value = (evtvalue);                                    \
-			/* We don't read counters right now */                     \
-			HARDWARE_COUNTERS_READ(thread_id, evt, TRUE);              \
-			BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt); \
-		}                                                            \
+		evt.time = (evttime);                                        \
+		evt.event = (evttype);                                       \
+		evt.value = (evtvalue);                                      \
+		/* We don't read counters right now */                       \
+		HARDWARE_COUNTERS_READ(thread_id, evt, TRUE);                \
+		BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt);   \
 	}                                                              \
 }
 
@@ -100,16 +97,13 @@
 {                                                                \
 	event_t evt;                                                   \
 	int thread_id = THREADID;                                      \
-	if (isSamplingEnabled())                                       \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
 	{                                                              \
-		if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))             \
-		{                                                            \
-			evt.time = (evttime);                                      \
-			evt.event = (evttype);                                     \
-			evt.value = (evtvalue);                                    \
-			HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);             \
-			BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt); \
-		}                                                            \
+		evt.time = (evttime);                                        \
+		evt.event = (evttype);                                       \
+		evt.value = (evtvalue);                                      \
+		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);               \
+		BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt);   \
 	}                                                              \
 }
 

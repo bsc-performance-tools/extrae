@@ -130,6 +130,7 @@ core_PACX_SRCS = $(core_MPI_SRCS)
 core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
+ sampling.c sampling.h                       \
  xml-parse.c xml-parse.h                     \
  UF_gcc_instrument.c UF_gcc_instrument.h     \
  UF_xl_instrument.c UF_xl_instrument.h       \

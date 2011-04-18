@@ -130,6 +130,8 @@ static char UNUSED rcsid[] = "$Id$";
 # include "options.h"
 #endif
 
+#include "sampling.h"
+
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
 #warning "Control variables below (tracejant, tracejant_mpi, tracejant_hwc_mpi...) should be moved to mode.c and indexed per mode"
@@ -713,6 +715,27 @@ static int read_environment_variables (int me)
 				fprintf (stderr,"\nWARNING: Value '%s' for EXTRAE_SIGNAL_FLUSH is unrecognized\n", str);
 		}
 	}
+
+	/* Add sampling capabilities */
+#if defined(SAMPLING_SUPPORT)
+	str = getenv ("EXTRAE_SAMPLING_PERIOD");
+	if (str != NULL)
+	{
+		unsigned long long sampling_period = getTimeFromStr (
+		  getenv("EXTRAE_SAMPLING_PERIOD"), "EXTRAE_SAMPLING_PERIOD", me);
+
+		if (sampling_period != 0)
+		{
+			fprintf (stdout, "Extrae: Sampling enabled with period of %lld microseconds.\n", sampling_period/1000);
+			setTimeSampling  (sampling_period);
+		}
+		else
+		{
+			if (me == 0)
+				fprintf (stderr, "Extrae: Warning! Value '%s' for EXTRAE_SAMPLING_PERIOD is unrecognized\n", str);
+		}
+	}
+#endif
 
 #if defined(IS_CELL_MACHINE)
 
@@ -1546,6 +1569,9 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size);
 		Extrae_shutdown_Wrapper();
 	}
+
+	/* Enable sampling capabilities */
+	setSamplingEnabled (TRUE);
 
 	return TRUE;
 }

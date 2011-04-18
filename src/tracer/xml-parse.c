@@ -770,13 +770,19 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 }
 
 #if USE_HARDWARE_COUNTERS
-static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr current, int *num, char ***counters, unsigned long long **frequencies)
+static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr current, int *num, char ***counters, unsigned long long **periods)
 {
 	xmlNodePtr set_tag;
 	xmlChar *enabled;
 	int num_sampling_hwc, i;
-	unsigned long long *t_frequencies = NULL;
+	unsigned long long *t_periods = NULL;
 	char **t_counters = NULL;
+
+	/* HSG ATTENTION!
+	   Originally, the XML tag for period was 'frequency!". For now, we check for
+	   both period (first) and frequency (second), just to be compatible with old
+	   XMLs!
+	*/
 
 	/* Parse all HWC sets, and annotate them to use them later */
 	set_tag = current->xmlChildrenNode;
@@ -791,7 +797,9 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 		{
 			enabled = xmlGetProp_env (rank, set_tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-				if (atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)) > 0)
+				if (atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_PERIOD)) > 0)
+					num_sampling_hwc++;
+				else if (atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)) > 0)
 					num_sampling_hwc++;
 			XML_FREE(enabled);
 		}
@@ -801,7 +809,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 	if (num_sampling_hwc > 0)
 	{
 		t_counters = (char **) malloc (sizeof(char*) * num_sampling_hwc);
-		t_frequencies = (unsigned long long *) malloc (sizeof(unsigned long long) * num_sampling_hwc);
+		t_periods = (unsigned long long *) malloc (sizeof(unsigned long long) * num_sampling_hwc);
 	
 		/* Parse all HWC sets, and annotate them to use them later */
 		set_tag = current->xmlChildrenNode;
@@ -818,12 +826,14 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 				if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 				{
 					t_counters[i] = (char*) xmlNodeListGetString_env (rank, xmldoc, set_tag->xmlChildrenNode, 1);
-					/* t_frequencies[i] = atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)); */
-					t_frequencies[i] = getFactorValue (((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)), "XML:: sampling frequency property>", rank);
 
-					if (t_frequencies[i] <= 0)
+					t_periods[i] = getFactorValue (((char*) xmlGetProp_env (rank, set_tag, TRACE_PERIOD)), "XML:: sampling <period property>", rank);
+					if (t_periods[i] <= 0)
+						t_periods[i] = getFactorValue (((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)), "XML:: sampling <frequency property>", rank);
+
+					if (t_periods[i] <= 0)
 					{
-						mfprintf (stderr, PACKAGE_NAME": Error invalid sampling frequency (%s) for counter %s\n", (char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY), t_counters[i]);
+						mfprintf (stderr, PACKAGE_NAME": Error invalid sampling period for counter %s\n", t_counters[i]);
 					}
 					else
 						i++;
@@ -835,7 +845,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 	}
 	
 	*num = num_sampling_hwc;
-	*frequencies = t_frequencies;
+	*periods = t_periods;
 	*counters = t_counters;
 }
 
@@ -867,7 +877,7 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 			{
 				int OvfNum;
 				char **OvfCounters;
-				unsigned long long *OvfFrequencies;
+				unsigned long long *OvfPeriods;
 
 				char *counters, *domain, *changeat_glops, *changeat_time;
 				
@@ -878,9 +888,9 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 
 				numofcounters = explode (counters, ",", &setofcounters);
 
-				Parse_XML_Counters_CPU_Sampling (rank, xmldoc, set_tag, &OvfNum, &OvfCounters, &OvfFrequencies);
+				Parse_XML_Counters_CPU_Sampling (rank, xmldoc, set_tag, &OvfNum, &OvfCounters, &OvfPeriods);
 
-				res = HWC_Add_Set (numofsets, rank, numofcounters, setofcounters, domain, changeat_glops, changeat_time, OvfNum, OvfCounters, OvfFrequencies);
+				res = HWC_Add_Set (numofsets, rank, numofcounters, setofcounters, domain, changeat_glops, changeat_time, OvfNum, OvfCounters, OvfPeriods);
 
 				XML_FREE(counters);
 				XML_FREE(changeat_glops);

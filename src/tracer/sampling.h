@@ -22,15 +22,18 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/xml-parse.h $
+ | @last_commit: $Date: 2011-04-05 11:15:50 +0200 (dt, 05 abr 2011) $
+ | @version:     $Revision: 588 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-#include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+#ifndef _SAMPLING_H_INCLUDED_
+#define _SAMPLING_H_INCLUDED_
 
-/*------------------------------------------------ Global Variables ---------*/
-int HWCEnabled = FALSE;           /* Have the HWC been started? */
-int Trace_HWC_Enabled = TRUE;     /* Global variable that allows the gathering of HWC information */
+void setTimeSampling (unsigned long long period);
+void Extrae_SamplingHandler (void* address);
 
+int isSamplingEnabled(void);
+void setSamplingEnabled (int enabled);
+
+#endif

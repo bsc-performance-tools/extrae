@@ -31,6 +31,7 @@
 #define __COMMON_HWC_H__
 
 #include <config.h>
+#include "sampling.h"
 #include "num_hwc.h"
 #include "hwc_version.h"
 #include "hwc.h"
@@ -158,9 +159,6 @@ extern int * HWC_current_set;
 # define HWCBE_ACCUM(thread_id, store_buffer) 1
 
 #endif
-
-int isSamplingEnabled(void);
-void setSamplingEnabled (int enabled);
 
 #endif /* __COMMON_HWC_H__ */
 

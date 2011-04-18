@@ -57,6 +57,7 @@
 #define TRACE_MKDIR                     ((xmlChar*) "make-dir")
 #define TRACE_MINIMUM_TIME              ((xmlChar*) "minimum-time")
 #define TRACE_FREQUENCY                 ((xmlChar*) "frequency")
+#define TRACE_PERIOD                    ((xmlChar*) "period")
 #define TRACE_GATHER_MPITS              ((xmlChar*) "gather-mpits")
 #define TRACE_CIRCULAR                  ((xmlChar*) "circular")
 #define TRACE_PREFIX                    ((xmlChar*) "trace-prefix")
@@ -83,7 +84,6 @@
 #define TRACE_LIST                      ((xmlChar*) "list")
 #define TRACE_USERFUNCTION              ((xmlChar*) "user-functions")
 #define TRACE_SAMPLING                  ((xmlChar*) "sampling")
-#define TRACE_FREQUENCY                 ((xmlChar*) "frequency")
 
 #define TRACE_CONTROL                   ((xmlChar*) "trace-control")
 #define TRACE_CONTROL_FILE              ((xmlChar*) "file")

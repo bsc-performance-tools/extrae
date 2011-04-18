@@ -57,11 +57,6 @@ static char UNUSED rcsid[] = "$Id$";
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
 
-#if defined(SAMPLING_SUPPORT)
-int SamplingSupport = FALSE;
-int EnabledSampling = TRUE;
-#endif
-
 #if !defined(SAMPLING_SUPPORT)
 int Reset_After_Read = TRUE;
 #else
@@ -661,22 +656,3 @@ void HWC_Set_ChangeAtTime_Frequency (int set, unsigned long long ns)
 	}
 	HWC_current_changetype = CHANGE_TIME;
 }
-
-int isSamplingEnabled(void)
-{
-#if defined(SAMPLING_SUPPORT)
-	return EnabledSampling;
-#else
-	return FALSE;
-#endif
-}
-
-void setSamplingEnabled (int enabled)
-{
-#if !defined(SAMPLING_SUPPORT)
-	UNREFERENCED_PARAMETER(enabled);
-#else
-	EnabledSampling = (enabled != FALSE);
-#endif
-}
-
