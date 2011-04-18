@@ -735,6 +735,8 @@ static int read_environment_variables (int me)
 				fprintf (stderr, "Extrae: Warning! Value '%s' for EXTRAE_SAMPLING_PERIOD is unrecognized\n", str);
 		}
 	}
+	if (getenv ("EXTRAE_SAMPLING_CALLER") != NULL)
+		Parse_Callers (me, getenv("EXTRAE_SAMPLING_CALLER"), CALLER_SAMPLING);
 #endif
 
 #if defined(IS_CELL_MACHINE)
