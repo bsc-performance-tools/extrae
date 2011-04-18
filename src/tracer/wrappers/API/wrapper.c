@@ -726,7 +726,8 @@ static int read_environment_variables (int me)
 
 		if (sampling_period != 0)
 		{
-			fprintf (stdout, "Extrae: Sampling enabled with period of %lld microseconds.\n", sampling_period/1000);
+			if (me == 0)
+				fprintf (stdout, "Extrae: Sampling enabled with period of %lld microseconds.\n", sampling_period/1000);
 			setTimeSampling  (sampling_period);
 		}
 		else
