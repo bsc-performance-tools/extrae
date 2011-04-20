@@ -53,14 +53,18 @@ if (${?EXTRAE_HOME}) then
 	endif
 
 	if (${?DYNINST_HOME}) then
-		if (! -d ${DYNINST_HOME}/lib ) then
-			echo "Unable to find DynInst library directory!"
+		if (! ${?DWARF_HOME}) then
+			echo "DynInst was enabled with the instrumentation package, but DWARF package was not set? Exitting!"
 		else
-			if (! -f ${DYNINST_HOME}/lib/libdyninstAPI_RT.so ) then
-				echo "Unable to find libdyninstAPI_RT.so in the Dyninst library directory!"
+			if (! -d ${DYNINST_HOME}/lib ) then
+				echo "Unable to find DynInst library directory!"
 			else
-				setenv LD_LIBRARY_PATH ${DYNINST_HOME}/lib:${LD_LIBRARY_PATH}
-				setenv DYNINSTAPI_RT_LIB ${DYNINST_HOME}/lib/libdyninstAPI_RT.so
+				if (! -f ${DYNINST_HOME}/lib/libdyninstAPI_RT.so ) then
+					echo "Unable to find libdyninstAPI_RT.so in the Dyninst library directory!"
+				else
+					setenv LD_LIBRARY_PATH ${DYNINST_HOME}/lib:${DWARF_HOME}/lib:${LD_LIBRARY_PATH}
+					setenv DYNINSTAPI_RT_LIB ${DYNINST_HOME}/lib/libdyninstAPI_RT.so
+				endif
 			endif
 		endif
 	endif
