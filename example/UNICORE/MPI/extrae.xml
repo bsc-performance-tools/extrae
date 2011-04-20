@@ -22,7 +22,6 @@
   </callers>
 
   <user-functions enabled="yes" list="">
-    <max-depth enabled="no">3</max-depth>
     <counters enabled="yes" />
   </user-functions>
 

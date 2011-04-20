@@ -58,8 +58,6 @@
 
   <!-- Configuration of User Functions -->
   <user-functions enabled="yes" list="/home/bsc41/bsc41273/user-functions.dat">
-    <!-- Set a depth limit for the UF routines -->
-    <max-depth enabled="no">3</max-depth>
     <!-- Gather counters on the UF routines? -->
     <counters enabled="yes" />
   </user-functions>

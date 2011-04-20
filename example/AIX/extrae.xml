@@ -31,7 +31,6 @@
   </callers>
 
   <user-functions enabled="no" list="/home/bsc41/bsc41273/user-functions.dat">
-    <max-depth enabled="no">3</max-depth>
     <counters enabled="yes" />
   </user-functions>
 

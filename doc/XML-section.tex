@@ -23,7 +23,7 @@ The basic trace behavior is determined in the first part of the XML and {\bf con
 The {\tt <?xml version='1.0'?>} is mandatory for all XML files. Don't touch this. The available tunable options are under the {\tt <trace>} node:
 \begin{itemize}
  \item {\tt enabled} Set to {\tt "yes"} if you want to generate tracefiles.
- \item {\tt home} Set to where your instrumentation package is installed. Usually it points to the same location that {\tt EXTRAE\_HOME} environment variable.
+ \item {\tt home} Set to where the instrumentation package is installed. Usually it points to the same location that {\tt EXTRAE\_HOME} environment variable.
  \item {\tt initial-mode} Available options
   \begin{itemize}
    \item {\tt detail} Provides detailed information of the tracing.
@@ -128,7 +128,7 @@ There are two different mechanisms to instrument user functions. One is using Dy
 
 {\tt function\_name \# address}
 
-You can generate this list by using the nm command applied to your binary. For example, {\tt nm | grep FUNCTION} will show you the function name, followed by the type of FUNCTION (should be T or t) and then followed by the address of the symbol.
+You can generate this list by using the nm command applied to the binary. For example, {\tt nm | grep FUNCTION} will show you the function name, followed by the type of FUNCTION (should be T or t) and then followed by the address of the symbol.
 \end{itemize}
 
 Finally, in order to gather performance counters in these functions and also in those instrumented using the {\tt extrae\_user\_function} API call, the node {\tt counters} has to be enabled.
