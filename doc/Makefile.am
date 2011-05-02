@@ -50,17 +50,17 @@ if BUILD_HTML_DOCS
 endif
 
 install-exec-hook: all
-	$(mkdir_p) $(datadir)/doc
+	$(mkdir_p) $(DESTDIR)$(datadir)/doc
 if BUILD_DOCS_PS
-	cp $(manual_ug).ps $(datadir)/doc
+	cp $(manual_ug).ps $(DESTDIR)$(datadir)/doc
 if BUILD_DOCS_PDF
-	cp $(manual_ug).pdf $(datadir)/doc
+	cp $(manual_ug).pdf $(DESTDIR)$(datadir)/doc
 endif
 endif
 if BUILD_HTML_DOCS
-	$(mkdir_p) $(datadir)/doc/html
-	cp user-guide/user-guide.html user-guide/user-guide.css user-guide/*.png $(datadir)/doc/html
-	ln -f $(datadir)/doc/html/user-guide.html $(datadir)/doc/html/index.html
+	$(mkdir_p) $(DESTDIR)$(datadir)/doc/html
+	cp user-guide/user-guide.html user-guide/user-guide.css user-guide/*.png $(DESTDIR)$(datadir)/doc/html
+	ln -f $(DESTDIR)$(datadir)/doc/html/user-guide.html $(DESTDIR)$(datadir)/doc/html/index.html
 endif
 
 clean:

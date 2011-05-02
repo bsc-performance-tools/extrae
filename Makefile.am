@@ -190,53 +190,53 @@ endif
 UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 install-data-hook:
-	$(mkdir_p) $(datadir)/example
-	$(mkdir_p) $(datadir)/example/SEQ
-	cp -f $(SEQ_EXAMPLE_FILES) $(datadir)/example/SEQ
+	$(mkdir_p) $(DESTDIR)$(datadir)/example
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/SEQ
+	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
 if HAVE_PACX
-	$(mkdir_p) $(datadir)/example/PACX
-	cp -f $(PACX_EXAMPLE_FILES) $(datadir)/example/PACX
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/PACX
+	cp -f $(PACX_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PACX
 endif
 if HAVE_MPI
-	$(mkdir_p) $(datadir)/example/MPI
-	cp -fr $(MPI_EXAMPLE_FILES) $(datadir)/example/MPI
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI
+	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
 endif
 if WANT_OPENMP
-	$(mkdir_p) $(datadir)/example/OMP
-	cp -f $(OMP_EXAMPLE_FILES) $(datadir)/example/OMP
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMP
+	cp -f $(OMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
 endif
 if HAVE_MRNET
-	$(mkdir_p) $(datadir)/example/MRNET
-	cp -f $(MRNET_EXAMPLE_FILES) $(datadir)/example/MRNET
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/MRNET
+	cp -f $(MRNET_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MRNET
 endif
 if WANT_PTHREAD
-	$(mkdir_p) $(datadir)/example/PTHREAD
-	cp -f $(PTHREAD_EXAMPLE_FILES) $(datadir)/example/PTHREAD
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/PTHREAD
+	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
 endif
-	$(mkdir_p) $(datadir)/example/UNICORE
-	cp -fr $(UNICORE_EXAMPLE_FILES) $(datadir)/example/UNICORE
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
+	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
 # Apply post-installation modifications
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(datadir)/example
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(datadir)/example
-	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(datadir)/example/MPI
-	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(datadir)/example
-	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(datadir)/example
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(datadir)/example
-	./substitute-all $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(datadir)/example
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(datadir)/example
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(DESTDIR)$(datadir)/example
 if WANT_MERGE_IN_TRACE
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(datadir)/example
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(datadir)/example
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(DESTDIR)$(datadir)/example
 else
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(datadir)/example
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(datadir)/example
+	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(DESTDIR)$(datadir)/example
 endif
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD
-	./substitute-all $(SED) "@sub_libexecinfo_libs@" "${libexecinfo_LDFLAGS} -lexecinfo" $(datadir)/example
+	./substitute-all $(SED) "@sub_libexecinfo_libs@" "${libexecinfo_LDFLAGS} -lexecinfo" $(DESTDIR)$(datadir)/example
 endif
 # SVN installations may have some subversion control files
-	rm -fr `find $(datadir)/example -name .svn`
+	rm -fr `find $(DESTDIR)$(datadir)/example -name .svn`
 
 uninstall-local:
-	rm -f $(sysconfdir)/license.dat
+	rm -f $(DESTDIR)$(sysconfdir)/license.dat

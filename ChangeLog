@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (02/May/2011) Honor $DESTDIR in make install
    + (15/Apr/2011) Import initial sampling support based on alarm (2).
    + (05/Apr/2011) Additional support for pthread library
    * (31/Mar/2011) Fix for matching user communications in merger.

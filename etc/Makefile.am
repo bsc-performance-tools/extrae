@@ -1,13 +1,13 @@
 
 EXTRA_DIST = configured.sh extrae.csh extrae.sh
 
-SH_SCRIPT = $(sysconfdir)/extrae-vars.sh
-CSH_SCRIPT= $(sysconfdir)/extrae-vars.csh
+SH_SCRIPT = $(DESTDIR)$(sysconfdir)/extrae-vars.sh
+CSH_SCRIPT= $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 
 mkdirSHscripts:
-	$(mkdir_p) $(sysconfdir)
-	touch $(sysconfdir)/license.dat
-	rm -fr $(sysconfdir)/extrae-vars.sh $(sysconfdir)/extrae-vars.csh
+	$(mkdir_p) $(DESTDIR)$(sysconfdir)
+	touch $(DESTDIR)$(sysconfdir)/license.dat
+	rm -fr $(DESTDIR)$(sysconfdir)/extrae-vars.sh $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 
 SHscripts:
 	echo "Configure the shell scripts (SH)"
@@ -22,9 +22,9 @@ SHscripts:
 	echo "export EXTRAE_CXX=${CXX}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CXXFLAGS=\"${CXXFLAGS}\"" >> $(SH_SCRIPT)
 	echo "export UNWIND_HOME=${UNWIND_HOME}" >> $(SH_SCRIPT)
-	chmod 0644 $(sysconfdir)/extrae-vars.sh
-	cp extrae.sh $(sysconfdir)
-	chmod 0644 $(sysconfdir)/extrae.sh
+	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.sh
+	cp extrae.sh $(DESTDIR)$(sysconfdir)
+	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.sh
 
 CSHscripts:
 	echo "Configure the shell scripts (CSH)"
@@ -39,9 +39,9 @@ CSHscripts:
 	echo "setenv EXTRAE_CXX ${CXX}" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_CXXFLAGS \"${CXXFLAGS}\"" >> $(CSH_SCRIPT)
 	echo "setenv UNWIND_HOME ${UNWIND_HOME}" >> $(CSH_SCRIPT)
-	chmod 0644 $(sysconfdir)/extrae-vars.csh
-	cp extrae.csh $(sysconfdir)
-	chmod 0644 $(sysconfdir)/extrae.csh
+	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.csh
+	cp extrae.csh $(DESTDIR)$(sysconfdir)
+	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.csh
 
 CONFIGUREDscript:
 	echo "Preparing configured script for SH"
@@ -52,11 +52,11 @@ CONFIGUREDscript:
 	echo "setenv PACKAGE_NAME ${PACKAGE_NAME}" >> $(CSH_SCRIPT)
 	echo "setenv PACKAGE_BUGREPORT ${PACKAGE_BUGREPORT}" >> $(CSH_SCRIPT)
 	echo "setenv CONFIGURE_LINE \"`head -7 ${top_srcdir}/config.log | tail -1`\"" >> $(CSH_SCRIPT)
-	cp configured.sh $(sysconfdir)
-	chmod 0755 $(sysconfdir)/configured.sh
+	cp configured.sh $(DESTDIR)$(sysconfdir)
+	chmod 0755 $(DESTDIR)$(sysconfdir)/configured.sh
 
 install-data-hook: mkdirSHscripts SHscripts CSHscripts CONFIGUREDscript
 
 uninstall-local:
-	rm -f $(sysconfdir)/license.dat
+	rm -f $(DESTDIR)$(sysconfdir)/license.dat
 
