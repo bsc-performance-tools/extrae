@@ -10,11 +10,11 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
 
  \item {\tt void Extrae\_init (void)}\\
  Initializes the tracing library.\\
- {\bf NOTE:} This routine is called automatically by {\tt MPI\_Init} and when tracing is performed by the DynInst launcher.
+ {\bf NOTE:} This routine is called automatically by either {\tt MPI\_Init} or when tracing is performed by the DynInst launcher.
 
  \item {\tt void Extrae\_fini (void)}\\
  Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
- {\bf NOTE:} This routine is called automatically by {\tt MPI\_Finalize} and when the tracing is performed by the DynInst launcher.
+ {\bf NOTE:} This routine is called automatically by either {\tt MPI\_Finalize} or when the tracing is performed by the DynInst launcher.
 
  \item {\tt void Extrae\_event (unsigned event, unsigned value)}\\
  The Extrae\_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
