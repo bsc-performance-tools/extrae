@@ -797,10 +797,14 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 		{
 			enabled = xmlGetProp_env (rank, set_tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-				if (atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_PERIOD)) > 0)
+			{
+				char *tmp = (char*) xmlGetProp_env (rank, set_tag, TRACE_PERIOD);
+				if (tmp == NULL)
+					tmp = (char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY);
+
+				if (atoll (tmp) > 0)
 					num_sampling_hwc++;
-				else if (atoll ((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)) > 0)
-					num_sampling_hwc++;
+			}
 			XML_FREE(enabled);
 		}
 		set_tag = set_tag->next;
@@ -825,11 +829,12 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 				enabled = xmlGetProp_env (rank, set_tag, TRACE_ENABLED);
 				if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 				{
-					t_counters[i] = (char*) xmlNodeListGetString_env (rank, xmldoc, set_tag->xmlChildrenNode, 1);
+					char *tmp = (char*) xmlGetProp_env (rank, set_tag, TRACE_PERIOD);
+					if (tmp == NULL)
+						tmp = (char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY);
 
-					t_periods[i] = getFactorValue (((char*) xmlGetProp_env (rank, set_tag, TRACE_PERIOD)), "XML:: sampling <period property>", rank);
-					if (t_periods[i] <= 0)
-						t_periods[i] = getFactorValue (((char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY)), "XML:: sampling <frequency property>", rank);
+					t_counters[i] = (char*) xmlNodeListGetString_env (rank, xmldoc, set_tag->xmlChildrenNode, 1);
+					t_periods[i] = getFactorValue (tmp, "XML:: sampling <period property> (or <frequency>)", rank);
 
 					if (t_periods[i] <= 0)
 					{
