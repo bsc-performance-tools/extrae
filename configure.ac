@@ -217,7 +217,7 @@ AC_CHECK_HEADERS(
    sys/file.h sys/endian.h sys/systeminfo.h sys/uio.h]
 )
 AC_CHECK_HEADERS(
-  [asm-ppc/atomic.h asm-ppc64/atomic.h asm/msr.h]
+  [asm-ppc/atomic.h asm-ppc64/atomic.h]
 )
 AC_CHECK_HEADERS(
   [linux/limits.h linux/mmtimer.h]
