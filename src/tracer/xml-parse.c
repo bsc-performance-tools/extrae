@@ -84,6 +84,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(OMP_SUPPORT)
 # include "omp_probe.h"
 #endif
+#if defined(SAMPLING_SUPPORT)
+# include "sampling.h"
+#endif
 
 /* Some global (but local in the module) variables */
 static char *temporal_d = NULL, *final_d = NULL;
@@ -277,6 +280,46 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	}
 }
 #endif
+
+
+#if defined(SAMPLING_SUPPORT)
+static void Parse_XML_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlChar *period = xmlGetProp_env (rank, current_tag, TRACE_PERIOD);
+	xmlChar *clocktype = xmlGetProp_env (rank, current_tag, TRACE_TYPE);
+
+	if (period != NULL)
+	{
+		unsigned long long sampling_period = getTimeFromStr (period,
+			"<sampling period=\"..\" />", rank);
+
+		if (sampling_period != 0)
+		{
+			if (clocktype != NULL)
+			{
+				if (!xmlStrcasecmp(clocktype, "DEFAULT"))
+					setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+				else if (!xmlStrcasecmp (clocktype, "REAL"))
+					setTimeSampling (sampling_period, SAMPLING_TIMING_REAL);
+				else if (!xmlStrcasecmp (clocktype, "VIRTUAL"))
+					setTimeSampling (sampling_period, SAMPLING_TIMING_VIRTUAL);
+				else if (!xmlStrcasecmp (clocktype, "PROF"))
+					setTimeSampling (sampling_period, SAMPLING_TIMING_PROF);
+				else 
+					mfprintf (stderr, "Extrae: Warning! Value '%s' <sampling type=\"..\" /> is unrecognized. Using default clock.\n", clocktype);					
+			}
+			else	
+				setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+
+			mfprintf (stdout, "Extrae: Sampling enabled with period of %lld microseconds.\n", sampling_period/1000);
+		}
+		else
+		{
+			mfprintf (stderr, "Extrae: Warning! Value '%s' for <sampling period=\"..\" /> is unrecognized\n", period);
+		}
+	}
+}
+#endif /* SAMPLING_SUPPORT */
 
 /* Configure Callers related parameters */
 static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
@@ -1652,6 +1695,20 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						}
 						else
 							tracejant_pthread = FALSE;
+						XML_FREE(enabled);
+					}
+					/* time-based sampling configuration */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_SAMPLING))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
+#if defined(SAMPLING_SUPPORT)
+							Parse_XML_Sampling (rank, xmldoc, current_tag);
+#else
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support sampling.\n", TRACE_SAMPLING);
+#endif
+						}
 						XML_FREE(enabled);
 					}
 					/* SPU related configuration*/

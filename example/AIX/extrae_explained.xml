@@ -179,6 +179,12 @@
     <pacx-statistics enabled="yes" />
   </bursts>
 
+	<!-- Enable sampling capabilities using system clock.
+       Type may refer to: default, real, prof and virtual.
+       Period stands for the sampling period (50ms here)
+  -->
+  <sampling enabled="no" type="default" period="50m" />
+
   <!-- Do merge the intermediate tracefiles into the final tracefile?
        options: 
        synchronization = { default, task, node, no } (default is node)

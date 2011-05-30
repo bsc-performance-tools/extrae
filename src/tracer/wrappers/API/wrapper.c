@@ -726,9 +726,28 @@ static int read_environment_variables (int me)
 
 		if (sampling_period != 0)
 		{
+			char str2;
+			if ((str2 = getenv ("EXTRAE_SAMPLING_CLOCKTYPE")) != NULL)
+			{
+				if (strcmp (str2, "DEFAULT") == 0)
+					setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+				else if (strcmp (str2, "REAL") == 0)
+					setTimeSampling (sampling_period, SAMPLING_TIMING_REAL);
+				else if (strcmp (str2, "VIRTUAL") == 0)
+					setTimeSampling (sampling_period, SAMPLING_TIMING_VIRTUAL);
+				else if (strcmp (str2, "PROF") == 0)
+					setTimeSampling (sampling_period, SAMPLING_TIMING_PROF);
+				else
+				{
+					if (me == 0)
+						fprintf (stderr, "Extrae: Warning! Value '%s' <sampling type=\"..\" /> is unrecognized. Using default.\n", str2);
+				}
+			}
+			else	
+				setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+
 			if (me == 0)
 				fprintf (stdout, "Extrae: Sampling enabled with period of %lld microseconds.\n", sampling_period/1000);
-			setTimeSampling  (sampling_period);
 		}
 		else
 		{

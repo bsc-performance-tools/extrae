@@ -41,6 +41,8 @@
     <circular enabled="no" />
   </buffer>
 
+  <sampling enabled="no" type="default" period="50m" />
+
   <merge enabled="yes" 
     synchronization="default"
     binary="$UNICORE_BINARY$"

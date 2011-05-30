@@ -82,6 +82,8 @@
     <pacx-statistics enabled="no" />
   </bursts>
 
+  <sampling enabled="no" type="default" period="50m" />
+
   <merge enabled="yes" 
     synchronization="default"
     binary="mpi_ping"

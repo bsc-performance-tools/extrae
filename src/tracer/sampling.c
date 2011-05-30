@@ -43,6 +43,7 @@ static char UNUSED rcsid[] = "$Id: xml-parse.c 588 2011-04-05 09:15:50Z harald $
 # include <ucontext.h>
 #endif
 
+#include "sampling.h"
 #include "trace_macros.h"
 #include "threadid.h"
 
@@ -93,12 +94,16 @@ void Extrae_SamplingHandler (void* address)
 #endif
 
 static struct itimerval SamplingPeriod;
+static int SamplingClockType;
 
 static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 {
 	caddr_t pc;
 	struct ucontext *uc = (struct ucontext *) context;
 	struct sigcontext *sc = (struct sigcontext *) &uc->uc_mcontext;
+
+	UNREFERENCED_PARAMETER(sig);
+	UNREFERENCED_PARAMETER(siginfo);
 
 #if defined(IS_BGP_MACHINE)
 	pc = (caddr_t)UCONTEXT_REG(uc, PPC_REG_PC);
@@ -121,11 +126,11 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	Extrae_SamplingHandler ((void*) pc);
 
 	/* Set next timer! */
-	setitimer (ITIMER_REAL ,&SamplingPeriod, NULL);
+	setitimer (SamplingClockType ,&SamplingPeriod, NULL);
 }
 
 
-void setTimeSampling (unsigned long long period)
+void setTimeSampling (unsigned long long period, int sampling_type)
 {
 	int ret;
 	struct sigaction act;
@@ -136,13 +141,13 @@ void setTimeSampling (unsigned long long period)
 	if (ret != 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
-		return -1;
+		return;
 	}
 	ret = sigaddset(&act.sa_mask, SIGALRM);
 	if (ret != 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
-		return -1;
+		return;
 	}
 
 	act.sa_sigaction = TimeSamplingHandler;
@@ -152,7 +157,7 @@ void setTimeSampling (unsigned long long period)
 	if (ret != 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
-		return -1;
+		return;
 	}
 
 	if (sigaction(SIGALRM, &act, NULL) < 0)
@@ -169,6 +174,13 @@ void setTimeSampling (unsigned long long period)
 	SamplingPeriod.it_value.tv_sec = period / 1000000;
 	SamplingPeriod.it_value.tv_usec = period % 1000000;
 
-	setitimer (ITIMER_REAL, &SamplingPeriod, NULL);
+	if (sampling_type == SAMPLING_TIMING_VIRTUAL)
+		SamplingClockType = ITIMER_VIRTUAL;
+	else if (sampling_type == SAMPLING_TIMING_PROF)
+		SamplingClockType = ITIMER_PROF;
+	else
+		SamplingClockType = ITIMER_REAL;
+
+	setitimer (SamplingClockType, &SamplingPeriod, NULL);
 }
 

@@ -30,7 +30,15 @@
 #ifndef _SAMPLING_H_INCLUDED_
 #define _SAMPLING_H_INCLUDED_
 
-void setTimeSampling (unsigned long long period);
+enum
+{
+	SAMPLING_TIMING_REAL,
+	SAMPLING_TIMING_VIRTUAL,
+	SAMPLING_TIMING_PROF,
+	SAMPLING_TIMING_DEFAULT = SAMPLING_TIMING_REAL
+};
+
+void setTimeSampling (unsigned long long period, int sampling_type);
 void Extrae_SamplingHandler (void* address);
 
 int isSamplingEnabled(void);
