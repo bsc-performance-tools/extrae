@@ -25,6 +25,7 @@ EXTRA_DIST = \
  XML/others.xml.tex \
  XML/pthread.xml.tex \
  XML/pacx.xml.tex \
+ XML/sampling.xml.tex \
  XML/storage.xml.tex \
  XML/trace-control.xml.tex \
  XML/userfunctions.xml.tex
