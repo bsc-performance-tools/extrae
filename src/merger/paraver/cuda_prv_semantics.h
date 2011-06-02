@@ -22,16 +22,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/trt_prv_semantics.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _TRT_PRV_SEMANTICS_H_
-#define _TRT_PRV_SEMANTICS_H_
+#ifndef _CUDA_PRV_SEMANTICS_H_
+#define _CUDA_PRV_SEMANTICS_H_
 
 #include "semantics.h"
 
-extern SingleEv_Handler_t PRV_TRT_Event_Handlers[]; 
+extern SingleEv_Handler_t PRV_CUDA_Event_Handlers[]; 
 
-#endif /* _TRT_PRV_SEMANTICS_H_ */
+#endif /* _CUDA_PRV_SEMANTICS_H_ */

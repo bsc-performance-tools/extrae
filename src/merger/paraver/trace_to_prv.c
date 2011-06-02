@@ -100,6 +100,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
 #include "trt_prv_events.h"
+#include "cuda_prv_events.h"
 #include "addr2info.h"
 #include "timesync.h"
 
@@ -450,7 +451,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			current_time = TIMESYNC(task-1, Get_EvTime (current_event));
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
-			    Type == MPI_TYPE || Type == PACX_TYPE)
+			    Type == MPI_TYPE || Type == PACX_TYPE || Type == TRT_TYPE ||
+			    Type == CUDA_TYPE)
 			{
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
 				if (handler != NULL)
@@ -468,6 +470,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_PACX_Operation (EvType);
 					else if (TRT_TYPE == Type)
 						Enable_TRT_Operation (EvType);
+					else if (CUDA_TYPE == Type)
+						Enable_CUDA_Operation (EvType);
 				}
 				else
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);

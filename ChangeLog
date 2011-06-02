@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   + (02/Jun/2011) Added initial (& very limited) CUDA instrumentation (through --enable-cuda)
    * (30/May/2011) Added time sampling capabilities (doc, xml, and source changes)
    * (02/May/2011) Honor $DESTDIR in make install
    + (15/Apr/2011) Import initial sampling support based on alarm (2).

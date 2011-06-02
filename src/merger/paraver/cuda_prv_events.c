@@ -22,16 +22,80 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/trt_prv_events.c $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef _TRT_PRV_SEMANTICS_H_
-#define _TRT_PRV_SEMANTICS_H_
+static char UNUSED rcsid[] = "$Id: trt_prv_events.c 476 2010-10-26 12:58:30Z harald $";
 
-#include "semantics.h"
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_BFD
+# include "addr2info.h"
+#endif
 
-extern SingleEv_Handler_t PRV_TRT_Event_Handlers[]; 
+#include "events.h"
+#include "trt_prv_events.h"
+#include "mpi2out.h"
+#include "options.h"
 
-#endif /* _TRT_PRV_SEMANTICS_H_ */
+#define CUDALAUNCH_INDEX      0
+#define CUDABARRIER_INDEX     1
+#define CUDAMEMCPY_INDEX      2
+
+#define MAX_CUDA_INDEX         3
+
+static int inuse[MAX_CUDA_INDEX] = { FALSE, FALSE, FALSE };
+
+void Enable_CUDA_Operation (int tipus)
+{
+	if (tipus == CUDALAUNCH_EV)
+		inuse[CUDALAUNCH_INDEX] = TRUE;
+	else if (tipus == CUDABARRIER_EV)
+		inuse[CUDABARRIER_INDEX] = TRUE;
+	else if (tipus == CUDAMEMCPY_EV)
+		inuse[CUDAMEMCPY_INDEX] = TRUE;
+}
+
+#if defined(PARALLEL_MERGE)
+
+#include <mpi.h>
+#include "mpi-aux.h"
+
+void Share_CUDA_Operations (void)
+{
+	int res, i, tmp[MAX_CUDA_INDEX];
+
+	res = MPI_Reduce (inuse, tmp, MAX_CUDA_INDEX, MPI_INT, MPI_BOR, 0,
+		MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Reduce, "While sharing CUDA enabled operations");
+
+	for (i = 0; i < MAX_CUDA_INDEX; i++)
+		inuse[i] = tmp[i];
+}
+
+#endif
+
+void CUDAEvent_WriteEnabledOperations (FILE * fd)
+{
+	if (inuse[CUDALAUNCH_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    cudaLaunch\n", 0, CUDALAUNCH_EV);
+		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
+	}
+	if (inuse[CUDABARRIER_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    cudaThreadSynchronize\n", 0, CUDABARRIER_EV);
+		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
+	}
+	if (inuse[CUDAMEMCPY_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    cudaMemcpy\n\n", 0, CUDAMEMCPY_EV);
+	}
+}

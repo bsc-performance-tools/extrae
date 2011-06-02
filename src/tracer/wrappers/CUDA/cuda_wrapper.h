@@ -22,16 +22,15 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/OMP/omp_wrapper.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _TRT_PRV_SEMANTICS_H_
-#define _TRT_PRV_SEMANTICS_H_
+#ifndef OMP_WRAPPER_H_
+#define OMP_WRAPPER_H_
 
-#include "semantics.h"
+void cuda_tracing_init (void);
 
-extern SingleEv_Handler_t PRV_TRT_Event_Handlers[]; 
+#endif
 
-#endif /* _TRT_PRV_SEMANTICS_H_ */

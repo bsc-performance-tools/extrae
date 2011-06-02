@@ -22,16 +22,19 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/probes/OMP/omp_probe.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _TRT_PRV_SEMANTICS_H_
-#define _TRT_PRV_SEMANTICS_H_
+#ifndef CUDA_PROBE_H_INCLUDED
+#define CUDA_PROBE_H_INCLUDED
 
-#include "semantics.h"
+void Probe_Cuda_Launch_Entry (void);
+void Probe_Cuda_Launch_Exit (void);
+void Probe_Cuda_Barrier_Entry (void);
+void Probe_Cuda_Barrier_Exit (void);
+void Probe_Cuda_Memcpy_Entry (size_t size);
+void Probe_Cuda_Memcpy_Exit (void);
 
-extern SingleEv_Handler_t PRV_TRT_Event_Handlers[]; 
-
-#endif /* _TRT_PRV_SEMANTICS_H_ */
+#endif

@@ -123,6 +123,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(UPC_SUPPORT)
 # include <external/upc.h>
 #endif
+#if defined(CUDA_SUPPORT)
+# include "cuda_wrapper.h"
+#endif
 #include "common_hwc.h"
 
 #if defined(EMBED_MERGE_IN_TRACE)
@@ -1282,10 +1285,13 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	if (shell_name != NULL && !(strcmp (PROGRAM_NAME, shell_name)))
 		return FALSE;
 
+#if defined(CUDA_SUPPORT)
+	cuda_tracing_init();
+#endif
+
 	/* Obtain the number of runnable threads in this execution.
 	   Just check for OMP_NUM_THREADS env var (if this compilation
 	   allows instrumenting OpenMP */
-
 #if defined(OMP_SUPPORT)
 
 #if !defined(DYNINST_MODULE)

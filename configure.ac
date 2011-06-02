@@ -331,6 +331,17 @@ if test "${enable_openmp}" = "yes" ; then
 fi
 AM_CONDITIONAL(WANT_OPENMP, test "${enable_openmp}" = "yes" )
 
+AC_ARG_ENABLE(cuda,
+   AC_HELP_STRING(
+      [--enable-cuda],
+      [Enable support for tracing CUDA (disabled by default)]
+   ),
+   [enable_cuda="${enableval}"],
+   [enable_cuda="no"]
+)
+AM_CONDITIONAL(WANT_CUDA, test "${enable_cuda}" = "yes" )
+
+
 AC_ARG_ENABLE(pthread-support-in-all-libs,
    AC_HELP_STRING(
       [--enable-pthread-support-in-all-libs],

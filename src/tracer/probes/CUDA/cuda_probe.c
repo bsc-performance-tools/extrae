@@ -22,16 +22,64 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/probes/OMP/omp_probe.c $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef _TRT_PRV_SEMANTICS_H_
-#define _TRT_PRV_SEMANTICS_H_
+static char UNUSED rcsid[] = "$Id: omp_probe.c 476 2010-10-26 12:58:30Z harald $";
 
-#include "semantics.h"
+#include "threadid.h"
+#include "wrapper.h"
+#include "trace_macros.h"
+#include "cuda_probe.h"
 
-extern SingleEv_Handler_t PRV_TRT_Event_Handlers[]; 
+#if 0
+# define DEBUG fprintf (stdout, "THREAD %d: %s\n", THREADID, __FUNCTION__);
+#else
+# define DEBUG
+#endif
 
-#endif /* _TRT_PRV_SEMANTICS_H_ */
+void Probe_Cuda_Launch_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDALAUNCH_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_Cuda_Launch_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDALAUNCH_EV, EVT_END, EMPTY);
+}
+
+void Probe_Cuda_Barrier_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDABARRIER_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_Cuda_Barrier_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDABARRIER_EV, EVT_END, EMPTY); 
+}
+
+void Probe_Cuda_Memcpy_Entry (size_t size)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDAMEMCPY_EV, size, EMPTY);
+}
+
+void Probe_Cuda_Memcpy_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDAMEMCPY_EV, EVT_END, EMPTY); 
+}
+

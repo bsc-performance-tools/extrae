@@ -179,6 +179,23 @@ unsigned IsTRT (unsigned EvType)
   return FALSE;
 }
 
+#define CUDA_EVENTS 3
+static unsigned cuda_events[] = { CUDALAUNCH_EV, CUDABARRIER_EV, CUDAMEMCPY_EV };
+
+/******************************************************************************
+ ***  IsTRT
+ ******************************************************************************/
+
+unsigned IsCUDA (unsigned EvType)
+{
+  unsigned evt;
+
+  for (evt = 0; evt < CUDA_EVENTS; evt++)
+    if (cuda_events[evt] == EvType)
+      return TRUE;
+  return FALSE;
+}
+
 /******************************************************************************
  ***  IsBurst
  ******************************************************************************/
@@ -287,6 +304,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (IsPACX(EvType))
 	{
 		*Type = PACX_TYPE;
+		return TRUE;
+	}
+	else if (IsCUDA(EvType))
+	{
+		*Type = CUDA_TYPE;
 		return TRUE;
 	}
 	else if (EvType == MPI_COMM_CREATE_EV || EvType == MPI_COMM_DUP_EV ||

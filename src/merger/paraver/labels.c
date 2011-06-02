@@ -745,6 +745,8 @@ int GeneratePCFfile (char *name, long long options)
 	OMPEvent_WriteEnabledOperations (fd);
 	pthreadEvent_WriteEnabledOperations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
+	TRTEvent_WriteEnabledOperations (fd);
+	CUDAEvent_WriteEnabledOperations (fd);
 
 #if USE_HARDWARE_COUNTERS
 	HWC_PARAVER_Labels (fd);

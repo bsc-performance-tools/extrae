@@ -580,6 +580,16 @@ void ShareTraceInformation (int numtasks, int taskid)
 	fflush (stdout);
 	Share_pthread_Operations ();
 
+	if (0 == taskid)
+		fprintf (stdout, " TRT");
+	fflush (stdout);
+	Share_TRT_Operations ();
+
+	if (0 == taskid)
+		fprintf (stdout, " CUDA");
+	fflush (stdout);
+	Share_CUDA_Operations ();
+
 #if USE_HARDWARE_COUNTERS
 	if (0 == taskid)
 		fprintf (stdout, " HWC");

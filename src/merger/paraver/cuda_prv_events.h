@@ -22,16 +22,25 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/trt_prv_events.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _TRT_PRV_SEMANTICS_H_
-#define _TRT_PRV_SEMANTICS_H_
+#ifndef CUDA_PRV_EVENTS_H
+#define CUDA_PRV_EVENTS_H
 
-#include "semantics.h"
+#include <config.h>
 
-extern SingleEv_Handler_t PRV_TRT_Event_Handlers[]; 
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
 
-#endif /* _TRT_PRV_SEMANTICS_H_ */
+void Enable_CUDA_Operation (int tipus);
+void CUDAEvent_WriteEnabledOperations (FILE * fd);
+
+#if defined(PARALLEL_MERGE)
+void Share_CUDA_Operations (void);
+#endif
+
+#endif

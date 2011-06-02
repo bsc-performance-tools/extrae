@@ -24,6 +24,10 @@ if WANT_TRT
   lib_LTLIBRARIES += libtrttrace.la
 endif
 
+if WANT_CUDA
+  lib_LTLIBRARIES += libcudatrace.la
+endif
+
 if HAVE_PACX
   lib_LTLIBRARIES += libpacxtrace.la libpacxtracef.la
 endif
@@ -91,6 +95,10 @@ WRAPPERS_CORE = \
 	trace_macros.h \
 	trace_hwc.h
 
+# Wrappers for CUDA instrumentation
+WRAPPERS_CUDA = wrappers/CUDA/cuda_wrapper.c wrappers/CUDA/cuda_wrapper.h \
+	probes/CUDA/cuda_probe.c probes/CUDA/cuda_probe.h
+
 # Wrappers for MPI instrumentation
 WRAPPERS_MPI = mpif.h wrappers/MPI/mpi_wrapper.c wrappers/MPI/mpi_wrapper.h
 
@@ -143,6 +151,9 @@ core_SRCS = \
  $(COMMON_DIR)/queue.h                       \
  $(COMMON_DIR)/trace_mode.h                  \
  $(WRAPPERS_CORE)
+
+# CUDA trace
+libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
 
 # MPItrace & Sequential trace
 libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
@@ -217,6 +228,8 @@ endif
 endif
 endif
 
+libcudatrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
+
 libseqtrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 libmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB)
 libmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB)
@@ -258,7 +271,7 @@ lib_dyn_omptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE
 core_INCLUDES = \
  -I. -I$(HWC_DIR) -I$(CLOCKS_DIR) -I$(INTERFACES_DIR)/API -I$(INTERFACES_DIR)/MPI -I$(INTERFACES_DIR)/PACX \
  -I$(WRAPPERS_DIR)/API -I$(WRAPPERS_DIR)/MPI -I$(WRAPPERS_DIR)/PACX \
- -I$(WRAPPERS_DIR)/OMP -I$(WRAPPERS_DIR)/pthread \
+ -I$(WRAPPERS_DIR)/OMP -I$(WRAPPERS_DIR)/pthread -I$(WRAPPERS_DIR)/CUDA \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_DIR) $(UNWIND_CFLAGS)
 if IS_CELL_MACHINE
   core_INCLUDES += -I$(WRAPPERS_DIR)/CELL -I$(TRACER_DIR)/spu
@@ -309,6 +322,8 @@ core_CFLAGS += -DPTHREAD_SUPPORT
 endif
 
 COMMON_LINKER_FLAGS = $(HWC_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(UNWIND_LINKER_FLAGS) $(MRNET_LINKER_FLAGS)
+
+libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
 
 libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
@@ -362,6 +377,8 @@ NEW_MPI_LIBS = -L@MPI_SHAREDLIBSDIR@ -R @MPI_SHAREDLIBSDIR@ @MPI_LIBS@
 else
 NEW_MPI_LIBS = -L@MPI_LIBSDIR@ @MPI_LIBS@ -static
 endif
+
+libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 

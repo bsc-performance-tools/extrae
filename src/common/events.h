@@ -401,6 +401,10 @@ enum {
 #define TRT_USRFUNC_EV           62000003
 #define TRT_USRFUNC_LINE_EV      62000003
 
+#define CUDALAUNCH_EV            63000001
+#define CUDABARRIER_EV           63000002
+#define CUDAMEMCPY_EV            63000003
+
 #define CALLER_EV                70000000
 #define CALLER_LINE_EV           80000000
 
@@ -690,7 +694,8 @@ typedef enum
 	PTHREAD_TYPE,
 	TRT_TYPE,
 	PACX_TYPE,
-	PACX_COMM_ALIAS_TYPE
+	PACX_COMM_ALIAS_TYPE,
+	CUDA_TYPE
 } EventType_t;
 
 EventType_t getEventType (unsigned EvType, unsigned *Type);
