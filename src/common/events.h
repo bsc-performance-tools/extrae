@@ -401,9 +401,12 @@ enum {
 #define TRT_USRFUNC_EV           62000003
 #define TRT_USRFUNC_LINE_EV      62000003
 
-#define CUDALAUNCH_EV            63000001
-#define CUDABARRIER_EV           63000002
-#define CUDAMEMCPY_EV            63000003
+#define CUDACALL_EV              63000001
+#define CUDAMEMCPY_SIZE_EV       63000002
+#define CUDABASE_EV              63100000
+#define CUDALAUNCH_EV            63100001
+#define CUDABARRIER_EV           63100002
+#define CUDAMEMCPY_EV            63100003
 
 #define CALLER_EV                70000000
 #define CALLER_LINE_EV           80000000

@@ -46,7 +46,7 @@ static char UNUSED rcsid[] = "$Id: trt_prv_events.c 476 2010-10-26 12:58:30Z har
 #define CUDABARRIER_INDEX     1
 #define CUDAMEMCPY_INDEX      2
 
-#define MAX_CUDA_INDEX         3
+#define MAX_CUDA_INDEX        3
 
 static int inuse[MAX_CUDA_INDEX] = { FALSE, FALSE, FALSE };
 
@@ -81,21 +81,24 @@ void Share_CUDA_Operations (void)
 
 void CUDAEvent_WriteEnabledOperations (FILE * fd)
 {
-	if (inuse[CUDALAUNCH_INDEX])
+	if (inuse[CUDALAUNCH_INDEX] || inuse[CUDABARRIER_INDEX] || inuse[CUDAMEMCPY_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    cudaLaunch\n", 0, CUDALAUNCH_EV);
-		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
-	}
-	if (inuse[CUDABARRIER_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    cudaThreadSynchronize\n", 0, CUDABARRIER_EV);
-		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
-	}
-	if (inuse[CUDAMEMCPY_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    cudaMemcpy\n\n", 0, CUDAMEMCPY_EV);
+		             "%d   %d    CUDA library call\n", 0, CUDACALL_EV);
+		fprintf (fd, "VALUES\n"
+		             "0 End\n"
+		             "%d cudaLaunch\n"
+		             "%d cudaThreadSynchronize\n"
+		             "%d cudaMemcpy\n"
+		             "\n",
+		             CUDALAUNCH_EV - CUDABASE_EV,
+		             CUDABARRIER_EV - CUDABASE_EV,
+		             CUDAMEMCPY_EV - CUDABASE_EV);
+
+		if (inuse[CUDAMEMCPY_INDEX])
+			fprintf (fd, "EVENT_TYPE\n"
+			              "%d   %d    cudaMemcpy size\n"
+			              "\n",
+			              0, CUDAMEMCPY_SIZE_EV);
 	}
 }

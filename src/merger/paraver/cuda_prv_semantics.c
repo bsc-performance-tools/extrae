@@ -61,32 +61,29 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	if (EvType == CUDALAUNCH_EV)
-		state = STATE_OVHD;
-	else if (EvType == CUDABARRIER_EV)
-		state = STATE_BARRIER;
+	switch (EvType)
+	{
+		case CUDALAUNCH_EV:
+			state = STATE_OVHD;
+			break;
+		case CUDABARRIER_EV:
+			state = STATE_BARRIER;
+			break;
+		case CUDAMEMCPY_EV:
+			state = STATE_OVHD;
+			break;
+	}
 
 	Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+	if (EvValue != EVT_END)
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EvType - CUDABASE_EV);
+	else
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EVT_END);
 
-	return 0;
-}
-
-static int CUDA_Memcpy (event_t * current_event, 
-	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
-	unsigned int task, unsigned int thread, FileSet_t *fset )
-{
-	unsigned int EvType, EvValue;
-	UNREFERENCED_PARAMETER(fset);
-
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
-
-	Switch_State (STATE_OVHD, (EvValue != 0), ptask, task, thread);
-
-	trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_EV, EvValue);
+	if (EvType == CUDAMEMCPY_EV && EvValue > 0)
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
 
 	return 0;
 }
@@ -94,7 +91,7 @@ static int CUDA_Memcpy (event_t * current_event,
 SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	{ CUDALAUNCH_EV, CUDA_Call },
 	{ CUDABARRIER_EV, CUDA_Call },
-	{ CUDAMEMCPY_EV, CUDA_Memcpy },
+	{ CUDAMEMCPY_EV, CUDA_Call },
 	{ NULL_EV, NULL }
 };
 
