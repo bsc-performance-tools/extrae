@@ -48,18 +48,108 @@ int Caller_Deepness[COUNT_CALLER_TYPES] = { 0, 0 };
 /* -- Cuantos MPI callers traceamos? ----------------------------- */
 int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0 }; 
 
+#if defined(UNWIND_SUPPORT)
+# define UNW_LOCAL_ONLY
+# ifdef HAVE_LIBUNWIND_H
+#  include <libunwind.h>
+# endif
 
-#if defined(OS_LINUX) || defined(OS_FREEBSD)
- #if !defined(ARCH_IA64) && !defined(ARCH_IA32_x64)
-  /* En arquitecturas IA32, se encuentran en la GLIBC y declaradas en <execinfo.h> */
-  #ifdef HAVE_EXECINFO_H
-  # include <execinfo.h>
-  #endif
- #endif
+void trace_callers (iotimer_t time, int offset, int type) {
+	int current_deep = 1;
+	unw_cursor_t cursor;
+	unw_context_t uc;
+	unw_word_t ip;
+#if defined(MPICALLER_DEBUG)
+	unw_word_t sp;
 #endif
 
+	/* Check for valid CALLER types */
+	if (type != CALLER_MPI && type != CALLER_SAMPLING)
+		return;
+
+	/* Leave if they aren't initialized (asked by user!) */
+	if (Trace_Caller[type] == NULL)
+		return;
+  
+	unw_getcontext(&uc);
+	unw_init_local(&cursor, &uc);
+
+	offset --; /* Don't compute call to unw_getcontext */
+	while ((unw_step(&cursor) > 0) && (current_deep < Caller_Deepness[type]+offset))
+	{
+		unw_get_reg(&cursor, UNW_REG_IP, &ip);
+#if defined(MPICALLER_DEBUG)
+		if (current_deep >= offset)
+		{
+			unw_get_reg(&cursor, UNW_REG_SP, &sp);
+			fprintf (stderr, "(%d) ip = %lx, sp = %lx\n", current_deep, (long) ip, (long) sp);
+		}
+#endif
+    
+		if (current_deep >= offset)
+		{
+			if (type == CALLER_MPI)
+			{
+				if (Trace_Caller[CALLER_MPI][current_deep-offset])
+				{
+					TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(current_deep-offset+1), (UINT64)ip);
+				}
+			}
+#if defined(SAMPLING_SUPPORT)
+			else if (type == CALLER_SAMPLING)
+			{
+				if (Trace_Caller[CALLER_SAMPLING][current_deep-offset])
+				{
+					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_deep-offset+1, (UINT64) ip);
+				}
+			} 
+#endif
+		}
+		current_deep ++;
+	}
+	UNREFERENCED_PARAMETER(time);
+	UNREFERENCED_PARAMETER(offset);
+	UNREFERENCED_PARAMETER(type);
+}
+
+UINT64 get_caller (int offset)
+{
+	int current_deep = 0;
+	unw_cursor_t cursor;
+	unw_context_t uc;
+	unw_word_t ip;
+
+	unw_getcontext(&uc);
+	unw_init_local(&cursor, &uc);
+
+	offset --; /* Don't compute call to unw_getcontext */
+	while (current_deep <= offset)
+	{
+		unw_get_reg(&cursor, UNW_REG_IP, &ip);
+#if defined(DEBUG)
+		fprintf (stderr, "DEBUG: depth %d address %08llx %c\n", current_deep, ip, (offset == current_deep)?'*':' ');
+#endif
+		if (unw_step (&cursor) <= 0)
+			return 0;
+		current_deep ++;
+	}
+	return (UINT64) ip;
+	return 0;
+}
+
+#else /* UNWIND_SUPPORT */
+
+# if defined(OS_LINUX) || defined(OS_FREEBSD)
+#  if !defined(ARCH_IA64)
+  /* En arquitecturas IA32, se encuentran en la GLIBC y declaradas en <execinfo.h> */
+#   ifdef HAVE_EXECINFO_H
+#    include <execinfo.h>
+#   endif
+#  endif
+# endif
+
 /* LINUX IA32/PPC o BGL*/
-#if (defined(OS_LINUX) && !defined(ARCH_IA64) && !defined(ARCH_IA32_x64)) || defined(OS_FREEBSD) || defined(IS_BG_MACHINE)
+# if (defined(OS_LINUX) && !defined(ARCH_IA64)) || defined(OS_FREEBSD) || defined(IS_BG_MACHINE)
 
 void trace_callers (iotimer_t time, int offset, int type) {
    void * callstack[MAX_STACK_DEEPNESS];
@@ -141,109 +231,8 @@ UINT64 get_caller (int offset)
 	return (UINT64) ((offset-1 >= size)?0:callstack[offset-1]);
 }
 
-#endif /* LINUX IA32 */
+# endif /* LINUX IA32 */
 
-/* LINUX IA64 */
-#if defined(OS_LINUX) && (defined(ARCH_IA64) || defined(ARCH_IA32_x64))
-
-#if defined(UNWIND_SUPPORT)
-# define UNW_LOCAL_ONLY
-# ifdef HAVE_LIBUNWIND_H
-#  include <libunwind.h>
-# endif
-#endif
-
-void trace_callers (iotimer_t time, int offset, int type) {
-#if defined(UNWIND_SUPPORT)
-	int current_deep = 1;
-	unw_cursor_t cursor;
-	unw_context_t uc;
-	unw_word_t ip;
-#if defined(MPICALLER_DEBUG)
-	unw_word_t sp;
-#endif
-
-	/* Check for valid CALLER types */
-	if (type != CALLER_MPI && type != CALLER_SAMPLING)
-		return;
-
-	/* Leave if they aren't initialized (asked by user!) */
-	if (Trace_Caller[type] == NULL)
-		return;
-  
-	unw_getcontext(&uc);
-	unw_init_local(&cursor, &uc);
-
-	offset --; /* Don't compute call to unw_getcontext */
-	while ((unw_step(&cursor) > 0) && (current_deep < Caller_Deepness[type]+offset))
-	{
-		unw_get_reg(&cursor, UNW_REG_IP, &ip);
-#if defined(MPICALLER_DEBUG)
-		if (current_deep >= offset)
-		{
-			unw_get_reg(&cursor, UNW_REG_SP, &sp);
-			fprintf (stderr, "(%d) ip = %lx, sp = %lx\n", current_deep, (long) ip, (long) sp);
-		}
-#endif
-    
-		if (current_deep >= offset)
-		{
-			if (type == CALLER_MPI)
-			{
-				if (Trace_Caller[CALLER_MPI][current_deep-offset])
-				{
-					TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(current_deep-offset+1), (UINT64)ip);
-				}
-			}
-#if defined(SAMPLING_SUPPORT)
-			else if (type == CALLER_SAMPLING)
-			{
-				if (Trace_Caller[CALLER_SAMPLING][current_deep-offset])
-				{
-					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_deep-offset+1, (UINT64) ip);
-				}
-			} 
-#endif
-		}
-		current_deep ++;
-	}
-#else /* UNWIND_SUPPORT */
-	UNREFERENCED_PARAMETER(time);
-	UNREFERENCED_PARAMETER(offset);
-	UNREFERENCED_PARAMETER(type);
-#endif /* UNWIND_SUPPORT */
-}
-
-UINT64 get_caller (int offset)
-{
-#if defined(UNWIND_SUPPORT)
-	int current_deep = 0;
-	unw_cursor_t cursor;
-	unw_context_t uc;
-	unw_word_t ip;
-
-	unw_getcontext(&uc);
-	unw_init_local(&cursor, &uc);
-
-	offset --; /* Don't compute call to unw_getcontext */
-	while (current_deep <= offset)
-	{
-		unw_get_reg(&cursor, UNW_REG_IP, &ip);
-#if defined(DEBUG)
-		fprintf (stderr, "DEBUG: depth %d address %08llx %c\n", current_deep, ip, (offset == current_deep)?'*':' ');
-#endif
-		if (unw_step (&cursor) <= 0)
-			return 0;
-		current_deep ++;
-	}
-	return (UINT64) ip;
-#else /* UNWIND_SUPPORT */
-	UNREFERENCED_PARAMETER(offset);
-#endif /* UNWIND_SUPPORT */
-	return 0;
-}
-
-#endif /* LINUX IA64 */
 
 #if defined(OS_DEC) 
 
@@ -372,4 +361,6 @@ UINT64 get_caller (int offset)
 	return 0;
 }
 #endif
+
+#endif /* UNWIND_SUPPORT */
 
