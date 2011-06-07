@@ -6,6 +6,7 @@
  1.b) Keep ChangeLog file up-to-date
 
 2) Change the version in the configure.ac (see AC_INIT)
+ 2.a) Add entry in ChangeLog
 
 3) Generate binary packages using the buildfarm script
   - this makes sure that the package will compile at least on our environment -
@@ -16,4 +17,8 @@
    svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
 
 6) Email & celebrate
+  6.a) Addresses
+         tools@bsc.es
+         support@bsc.es
+         pm-tools@bsc.es
 
