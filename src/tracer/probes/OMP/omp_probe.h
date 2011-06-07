@@ -30,7 +30,8 @@
 #ifndef OMP_PROBE_H_INCLUDED
 #define OMP_PROBE_H_INCLUDED
 
-void Probe_OpenMP_UF (UINT64 uf);
+void Probe_OpenMP_UF_Entry (UINT64 uf);
+void Probe_OpenMP_UF_Exit (void);
 void Probe_OpenMP_Work_Entry (void);
 void Probe_OpenMP_Work_Exit (void);
 

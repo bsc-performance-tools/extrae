@@ -1751,9 +1751,8 @@ void Backend_Finalize (void)
 	}
 	if (THREADID == 0) 
 	{
-		iotimer_t tmp_time = TIME;
-		Extrae_getrusage_Wrapper (tmp_time);
-		Extrae_memusage_Wrapper (tmp_time);
+		Extrae_getrusage_Wrapper ();
+		Extrae_memusage_Wrapper ();
 	}
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 	{
@@ -1797,5 +1796,33 @@ void Backend_Finalize (void)
 		merger_post (NumOfTasks, TaskID_Get());
 	}
 #endif /* EMBED_MERGE_IN_TRACE */
+}
+
+
+/* */
+
+void Backend_Enter_Instrumentation (unsigned Nevents)
+{
+	unsigned thread = THREADID;
+	UINT64 current_time;
+
+	/* Check whether we will fill the buffer soon (or now) */
+	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= Nevents)
+		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
+
+	/* Record the time when this is happening */
+	current_time = TIME;
+
+	/* Must change counters? */
+	HARDWARE_COUNTERS_CHANGE(current_time, thread);
+}
+
+void Backend_Leave_Instrumentation (void)
+{
+	unsigned thread = THREADID;
+
+	/* Change trace mode? (issue from API) */
+	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
+		Trace_Mode_Change(thread, LAST_READ_TIME);
 }
 

@@ -80,19 +80,19 @@ static char UNUSED rcsid[] = "$Id$";
 
 void Extrae_shutdown_Wrapper (void)
 {
-	TRACE_MISCEVENTANDCOUNTERS (TIME, TRACING_EV, EVT_END, EMPTY);
+	TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, TRACING_EV, EVT_END, EMPTY);
 	tracejant = FALSE;
 }
 
 void Extrae_restart_Wrapper (void)
 {
 	tracejant = TRUE;
-	TRACE_MISCEVENTANDCOUNTERS (TIME, TRACING_EV, EVT_BEGIN, EMPTY);
+	TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, TRACING_EV, EVT_BEGIN, EMPTY);
 }
 
 void Extrae_Event_Wrapper (unsigned *tipus, unsigned *valor)
 {
-	TRACE_MISCEVENT (TIME, USER_EV, *tipus, *valor);
+	TRACE_MISCEVENT (LAST_READ_TIME, USER_EV, *tipus, *valor);
 }
 
 void Extrae_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
@@ -105,8 +105,7 @@ void Extrae_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 	{
 		for (i = 0; i < *count; i++)
 			events_id[i] = USER_EV;
-		temps = TIME;
-		TRACE_N_MISCEVENT(temps, *count, events_id, types, values);
+		TRACE_N_MISCEVENT(LAST_READ_TIME, *count, events_id, types, values);
 	}
 }
 
@@ -114,7 +113,7 @@ void Extrae_Eventandcounters_Wrapper (unsigned *tipus, unsigned *valor)
 {
 #if USE_HARDWARE_COUNTERS
 	if (tracejant)
-		TRACE_MISCEVENTANDCOUNTERS (TIME, USER_EV, *tipus, *valor);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, USER_EV, *tipus, *valor);
 #else
 	Extrae_Event_Wrapper (tipus, valor);
 #endif
@@ -139,21 +138,21 @@ void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsig
 void Extrae_counters_Wrapper (void)
 {
 #if USE_HARDWARE_COUNTERS
-	TRACE_EVENTANDCOUNTERS (TIME, HWC_EV, 0, TRUE);
+	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, HWC_EV, 0, TRUE);
 #endif
 }
 
 void Extrae_next_hwc_set_Wrapper (void)
 {
 #if USE_HARDWARE_COUNTERS
-	HWC_Start_Next_Set (TIME, THREADID);
+	HWC_Start_Next_Set (COUNT_GLOBAL_OPS, LAST_READ_TIME, THREADID);
 #endif
 }
 
 void Extrae_previous_hwc_set_Wrapper (void)
 {
 #if USE_HARDWARE_COUNTERS
-	HWC_Start_Previous_Set (TIME, THREADID);
+	HWC_Start_Previous_Set (COUNT_GLOBAL_OPS, LAST_READ_TIME, THREADID);
 #endif
 }
 
@@ -171,7 +170,7 @@ void Extrae_set_options_Wrapper (int options)
 	setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
 }
 
-void Extrae_getrusage_Wrapper (iotimer_t timestamp)
+void Extrae_getrusage_Wrapper (void)
 {
 	int err;
 	struct rusage current_usage;
@@ -196,12 +195,12 @@ void Extrae_getrusage_Wrapper (iotimer_t timestamp)
 
 		if (!err) 
 		{
-			TRACE_MISCEVENT(timestamp, RUSAGE_EV, RUSAGE_UTIME_EV, ((current_usage.ru_utime.tv_sec * 1000000) + current_usage.ru_utime.tv_usec) - ((accum_usage.ru_utime.tv_sec * 1000000) + accum_usage.ru_utime.tv_usec))
-			TRACE_MISCEVENT(timestamp, RUSAGE_EV, RUSAGE_STIME_EV, ((current_usage.ru_stime.tv_sec * 1000000) + current_usage.ru_stime.tv_usec) - ((accum_usage.ru_stime.tv_sec * 1000000) + accum_usage.ru_stime.tv_usec))
-			TRACE_MISCEVENT(timestamp, RUSAGE_EV, RUSAGE_MINFLT_EV, current_usage.ru_minflt - accum_usage.ru_minflt);
-			TRACE_MISCEVENT(timestamp, RUSAGE_EV, RUSAGE_MAJFLT_EV, current_usage.ru_majflt - accum_usage.ru_majflt);
-			TRACE_MISCEVENT(timestamp, RUSAGE_EV, RUSAGE_NVCSW_EV,  current_usage.ru_nvcsw - accum_usage.ru_nvcsw);
-			TRACE_MISCEVENT(timestamp, RUSAGE_EV, RUSAGE_NIVCSW_EV, current_usage.ru_nivcsw - accum_usage.ru_nivcsw);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_UTIME_EV, ((current_usage.ru_utime.tv_sec * 1000000) + current_usage.ru_utime.tv_usec) - ((accum_usage.ru_utime.tv_sec * 1000000) + accum_usage.ru_utime.tv_usec))
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_STIME_EV, ((current_usage.ru_stime.tv_sec * 1000000) + current_usage.ru_stime.tv_usec) - ((accum_usage.ru_stime.tv_sec * 1000000) + accum_usage.ru_stime.tv_usec))
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_MINFLT_EV, current_usage.ru_minflt - accum_usage.ru_minflt);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_MAJFLT_EV, current_usage.ru_majflt - accum_usage.ru_majflt);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_NVCSW_EV,  current_usage.ru_nvcsw - accum_usage.ru_nvcsw);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_NIVCSW_EV, current_usage.ru_nivcsw - accum_usage.ru_nivcsw);
 		}
 
 		accum_usage.ru_utime.tv_sec = current_usage.ru_utime.tv_sec;
@@ -217,7 +216,7 @@ void Extrae_getrusage_Wrapper (iotimer_t timestamp)
 	}
 }
 
-void Extrae_memusage_Wrapper (iotimer_t timestamp)
+void Extrae_memusage_Wrapper (void)
 {
 #if defined(HAVE_MALLINFO)
 	if (TRACING_MEMUSAGE)
@@ -225,11 +224,11 @@ void Extrae_memusage_Wrapper (iotimer_t timestamp)
 		struct mallinfo mi = mallinfo();
 		int inuse = mi.arena + mi.hblkhd - mi.fordblks;
 
-		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    mi.arena);
-		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   mi.hblkhd);
-		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, mi.uordblks);
-		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, mi.fordblks);
-		TRACE_MISCEVENT(timestamp, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    inuse);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    mi.arena);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   mi.hblkhd);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, mi.uordblks);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, mi.fordblks);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    inuse);
 	}
 #endif
 }
@@ -237,7 +236,7 @@ void Extrae_memusage_Wrapper (iotimer_t timestamp)
 void Extrae_user_function_Wrapper (int enter)
 {
 	UINT64 ip = (enter)?get_caller(4):EMPTY;
-	TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
+	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
 }
 
 void Extrae_function_from_address_Wrapper (int type, void *address)
@@ -246,9 +245,9 @@ void Extrae_function_from_address_Wrapper (int type, void *address)
 	{
 #if USE_HARDWARE_COUNTERS
 		int filter = (type==USRFUNC_EV)?tracejant_hwc_uf:tracejant_hwc_omp;
-		TRACE_EVENTANDCOUNTERS (TIME, type, (UINT64) address, filter);
+		TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, type, (UINT64) address, filter);
 #else
-		TRACE_EVENT(TIME, type, (UINT64) address);
+		TRACE_EVENT(LAST_READ_TIME, type, (UINT64) address);
 #endif
 	}
 }
@@ -356,11 +355,8 @@ void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 
 void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 {
-	iotimer_t myTime;
 	unsigned i;
 	int events_id[MAX_MULTIPLE_EVENTS];
-
-	myTime = TIME;
 
 	/* Emit events first */
 	if (ptr->nEvents > 0)
@@ -369,11 +365,11 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 			events_id[i] = USER_EV;
 		if (ptr->HardwareCounters)
 		{
-			TRACE_N_MISCEVENTANDCOUNTERS(myTime, ptr->nEvents, events_id, ptr->Types, ptr->Values);
+			TRACE_N_MISCEVENTANDCOUNTERS(LAST_READ_TIME, ptr->nEvents, events_id, ptr->Types, ptr->Values);
 		}
 		else
 		{
-			TRACE_N_MISCEVENT(myTime, ptr->nEvents, events_id, ptr->Types, ptr->Values);
+			TRACE_N_MISCEVENT(LAST_READ_TIME, ptr->nEvents, events_id, ptr->Types, ptr->Values);
 		}
 	}
 
@@ -386,22 +382,22 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 		UINT64 ip = (ptr->UserFunction == EXTRAE_USER_FUNCTION_ENTER)?get_caller(4):EMPTY;
 #if USE_HARDWARE_COUNTERS
 		int EmitHWC = (!ptr->HardwareCounters && tracejant_hwc_uf);
-		TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, ip, EmitHWC);
+		TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, EmitHWC);
 #else
-		TRACE_EVENT (TIME, USRFUNC_EV, ip);
+		TRACE_EVENT (LAST_READ_TIME, USRFUNC_EV, ip);
 #endif
 	}
 
 	/* Now emit the callers */
 	if (ptr->Callers)
 	{
-		trace_callers (myTime, 4, CALLER_MPI);
+		trace_callers (LAST_READ_TIME, 4, CALLER_MPI);
 	}
 
 	/* Finally emit user communications */
 	for (i = 0; i < ptr->nCommunications ; i++)
 	{
-		TRACE_USER_COMMUNICATION_EVENT(myTime,
+		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
 		  (ptr->Communications[i].type==EXTRAE_USER_SEND)?USER_SEND_EV:USER_RECV_EV,
 		  ptr->Communications[i].partner, ptr->Communications[i].size,
 		  ptr->Communications[i].tag, ptr->Communications[i].id) 

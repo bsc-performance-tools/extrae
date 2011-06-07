@@ -106,10 +106,6 @@ static void show_current (event_t * c)
 
 void make_dump (FileSet_t *fset)
 {
-#if USE_HARDWARE_COUNTERS
-	UINT64 last_counters[MAX_HWC], current_counters[MAX_HWC];
-	int j;
-#endif
 	UINT64 last_time;
 	int i = 0;
 	event_t *e;
@@ -117,28 +113,14 @@ void make_dump (FileSet_t *fset)
 	while (i < fset->nfiles)
 	{
 		last_time = 0;
-#if USE_HARDWARE_COUNTERS
-		for (j = 0; j < MAX_HWC; j++)
-			last_counters[j] = 0;
-#endif
 		fprintf (stdout, "File %d\n", i);
 		e = Current_FS (&fset->files[i]);
 		while (e != NULL)
 		{
 			if (Get_EvTime(e) < last_time)
-				fprintf (stderr, "** WARNING clock went backwards?\n");
+				fprintf (stdout, "** WARNING clock went backwards?\n");
 			show_current (e);
-#if USE_HARDWARE_COUNTERS
-			if (Get_EvHWCRead(e))
-			{
-				HardwareCounters_Get (e, current_counters);
-				for (j = 0; j < MAX_HWC; j++)
-					if (current_counters[j] < last_counters[j])
-						fprintf (stderr, "** WARNING counter %d went backwards?\n", j);
-				for (j = 0; j < MAX_HWC; j++)
-					last_counters[j] = current_counters[j];
-			}
-#endif
+
 			StepOne_FS (&fset->files[i]);
 			last_time = Get_EvTime(e);
 			e = Current_FS (&fset->files[i]);

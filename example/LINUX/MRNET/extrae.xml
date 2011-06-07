@@ -130,7 +130,7 @@ PM_DATA_FROM_L2, PM_INST_CMPL, PM_DATA_FROM_MEM, PM_LD_MISS_L1_LSU0, PM_1PLUS_PP
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
-    sort-addresses="no"
+    sort-addresses="yes"
   >
     mpi_ping.prv
   </merge>

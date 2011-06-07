@@ -158,19 +158,11 @@
 		INCREASE_MPI_DEEPNESS(thread_id);                                                \
 		last_mpi_begin_time = current_time;                                              \
                                                                                      \
-		HARDWARE_COUNTERS_CHANGE(current_time, thread_id);                               \
-                                                                                     \
 	}                                                                                  \
 	else if (evtvalue == EVT_END)                                                      \
 	{                                                                                  \
 		DECREASE_MPI_DEEPNESS(thread_id);                                                \
-                                                                                     \
-		/* Trace mode won't change if this MPI is stacked */                             \
-		if (PENDING_TRACE_MODE_CHANGE(thread_id) && MPI_IS_NOT_STACKED(thread_id))       \
-		{                                                                                \
-			Trace_Mode_Change(thread_id, current_time);                                    \
-		}                                                                                \
-                                                                                     \
+	                                                                                   \
 		/* Update last parallel region time */                                           \
 		last_mpi_exit_time = current_time;                                               \
 		Elapsed_Time_In_MPI += last_mpi_exit_time - last_mpi_begin_time;                 \
@@ -422,8 +414,6 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 		evt.param.misc_param.param = (unsigned long long) (evtparam); \
 		HARDWARE_COUNTERS_READ (thread_id, evt, TRUE);                \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);     \
-                                                                  \
-		HARDWARE_COUNTERS_CHANGE(evt.time, thread_id);                \
 	}                                                               \
 }
 #else
@@ -466,8 +456,6 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 			HARDWARE_COUNTERS_READ(thread_id, events_list[i], i==0);                     \
 		}                                                                              \
 		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), events_list, count);     \
-                                                                                   \
-		HARDWARE_COUNTERS_CHANGE(events_list[0].time, thread_id);                      \
 	}                                                                                \
 }
 #else
@@ -503,8 +491,6 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 		evt.value = evtvalue;                                           \
 		HARDWARE_COUNTERS_READ (thread_id, evt, hwc_filter);            \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);       \
-		                                                                \
-		HARDWARE_COUNTERS_CHANGE(evt.time, thread_id);                  \
 	}                                                                 \
 }
 #else
@@ -542,8 +528,6 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 		evt.param.omp_param.param = (evtparam);                   \
 		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_OMP);  \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
-		                                                          \
-		HARDWARE_COUNTERS_CHANGE(evt.time, thread_id);            \
 	}                                                           \
 }
 #else
@@ -579,8 +563,6 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 		evt.param.omp_param.param = (evtparam);                   \
 		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_OMP);  \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
-		                                                          \
-		HARDWARE_COUNTERS_CHANGE(evt.time, thread_id);            \
 	}                                                           \
 }
 #else

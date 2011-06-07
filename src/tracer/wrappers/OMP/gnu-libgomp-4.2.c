@@ -92,9 +92,11 @@ static void callme_pardo (void *p1)
 	fprintf (stderr, PACKAGE_NAME": callme_pardo: p1 = %p\n", p1);
 #endif
 
-	Probe_OpenMP_UF ((UINT64) par_uf);
+	Backend_Enter_Instrumentation (1);
+	Probe_OpenMP_UF_Entry ((UINT64) par_uf);
 	pardo_uf (p1);
-	Probe_OpenMP_UF (EVT_END);
+	Probe_OpenMP_UF_Exit ();
+	Backend_Leave_Instrumentation ();
 }
 
 /*
@@ -110,9 +112,11 @@ static void callme_par (void *ptr)
 	fprintf (stderr, PACKAGE_NAME": callme_par: par_uf=%p\n", par_uf);
 #endif
 
-	Probe_OpenMP_UF ((UINT64) par_uf);
+	Backend_Enter_Instrumentation (1);
+	Probe_OpenMP_UF_Entry ((UINT64) par_uf);
 	par_uf (ptr);
-	Probe_OpenMP_UF (EVT_END);
+	Probe_OpenMP_UF ();
+	Backend_Leave_Instrumentation ();
 }
 
 static void (*GOMP_parallel_start_real)(void*,void*,unsigned) = NULL;
@@ -364,8 +368,11 @@ void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 
 	if (GOMP_parallel_sections_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParSections_Entry();
 		GOMP_parallel_sections_start_real (p1, p2, p3, p4);
+		Probe_OpenMP_ParSections_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -384,9 +391,11 @@ unsigned GOMP_sections_start (unsigned p1)
 
 	if (GOMP_sections_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Section_Entry();
 		res = GOMP_sections_start_real (p1);
 		Probe_OpenMP_Section_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -405,9 +414,11 @@ unsigned GOMP_sections_next (void)
 
 	if (GOMP_sections_next_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Work_Entry();
 		res = GOMP_sections_next_real();
 		Probe_OpenMP_Work_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -425,9 +436,11 @@ void GOMP_sections_end (void)
 
 	if (GOMP_sections_end_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Join_Wait_Entry();
 		GOMP_sections_end_real();
 		Probe_OpenMP_Join_Wait_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -444,9 +457,11 @@ void GOMP_sections_end_nowait (void)
 
 	if (GOMP_sections_end_nowait_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_sections_end_nowait_real();
 		Probe_OpenMP_Join_NoWait_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -463,9 +478,11 @@ void GOMP_loop_end (void)
 
 	if (GOMP_loop_end_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Join_Wait_Entry();
 		GOMP_loop_end_real();
 		Probe_OpenMP_Join_Wait_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -482,9 +499,11 @@ void GOMP_loop_end_nowait (void)
 
 	if (GOMP_loop_end_nowait_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_loop_end_nowait_real();
 		Probe_OpenMP_Join_NoWait_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -504,9 +523,11 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 
 	if (GOMP_loop_static_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
 		Probe_OpenMP_DO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -526,9 +547,11 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 
 	if (GOMP_loop_runtime_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
 		Probe_OpenMP_DO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -548,9 +571,11 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 
 	if (GOMP_loop_guided_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
 		Probe_OpenMP_DO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -570,9 +595,11 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 
 	if (GOMP_loop_dynamic_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
 		Probe_OpenMP_DO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -594,9 +621,11 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
 
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParDO_Entry ();
 		GOMP_parallel_loop_static_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -617,9 +646,11 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
 
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParDO_Entry ();
 		GOMP_parallel_loop_runtime_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -640,9 +671,11 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
 
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParDO_Entry ();
 		GOMP_parallel_loop_guided_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -663,9 +696,11 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
 
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParDO_Entry ();
 		GOMP_parallel_loop_dynamic_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -684,9 +719,11 @@ int GOMP_loop_static_next (long *p1, long *p2)
 
 	if (GOMP_loop_static_next_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_static_next_real (p1, p2);
 		Probe_OpenMP_Work_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -706,9 +743,11 @@ int GOMP_loop_runtime_next (long *p1, long *p2)
 
 	if (GOMP_loop_runtime_next_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_runtime_next_real (p1, p2);
 		Probe_OpenMP_Work_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -728,9 +767,11 @@ int GOMP_loop_guided_next (long *p1, long *p2)
 
 	if (GOMP_loop_guided_next_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_guided_next_real (p1, p2);
 		Probe_OpenMP_Work_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -750,9 +791,11 @@ int GOMP_loop_dynamic_next (long *p1, long *p2)
 
 	if (GOMP_loop_dynamic_next_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Work_Entry();
 		res = GOMP_loop_dynamic_next_real (p1, p2);
 		Probe_OpenMP_Work_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -776,12 +819,14 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 		/* Set the pointer to the correct PARALLEL user function */
 		par_uf = (void(*)(void*))p1;
 
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParRegion_Entry();
 
 		/* GCC/libgomp does not execute callme_par per root thread, emit
 		   the required event here */
-		Probe_OpenMP_UF ((UINT64) p1);
+		Probe_OpenMP_UF_entry ((UINT64) p1);
 		GOMP_parallel_start_real (callme_par, p2, p3);
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -798,9 +843,11 @@ void GOMP_parallel_end (void)
 
 	if (GOMP_parallel_start_real != NULL)
 	{
-		Probe_OpenMP_UF (EVT_END);
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Exit ();
 		GOMP_parallel_end_real ();
 		Probe_OpenMP_ParRegion_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -817,9 +864,11 @@ void GOMP_barrier (void)
 
 	if (GOMP_barrier_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Barrier_Entry ();
 		GOMP_barrier_real ();
 		Probe_OpenMP_Barrier_Exit ();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -837,9 +886,11 @@ void GOMP_critical_name_start (void **p1)
 
 	if (GOMP_critical_name_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Named_Lock_Entry();
 		GOMP_critical_name_start_real (p1);
 		Probe_OpenMP_Named_Lock_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -857,9 +908,11 @@ void GOMP_critical_name_end (void **p1)
 
 	if (GOMP_critical_name_end_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Named_Unlock_Entry();
 		GOMP_critical_name_end_real (p1);
 		Probe_OpenMP_Named_Unlock_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -877,9 +930,11 @@ void GOMP_critical_start (void)
 
 	if (GOMP_critical_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Unnamed_Lock_Entry();
 		GOMP_critical_start_real();
 		Probe_OpenMP_Unnamed_Lock_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -896,9 +951,11 @@ void GOMP_critical_end (void)
 
 	if (GOMP_critical_end_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Unnamed_Unlock_Entry();
 		GOMP_critical_end_real ();
 		Probe_OpenMP_Unnamed_Unlock_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -915,9 +972,11 @@ void GOMP_atomic_start (void)
 
 	if (GOMP_atomic_start_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Unnamed_Lock_Entry();
 		GOMP_atomic_start_real();
 		Probe_OpenMP_Unnamed_Lock_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -934,9 +993,11 @@ void GOMP_atomic_end (void)
 
 	if (GOMP_atomic_end_real != NULL)
 	{
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Unnamed_Unlock_Entry();
 		GOMP_atomic_end_real ();
 		Probe_OpenMP_Unnamed_Unlock_Exit();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{

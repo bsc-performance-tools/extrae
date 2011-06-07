@@ -2,6 +2,15 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (09/Jun/2011) --sort-addresses is enabled by default
+   * (09/Jun/2011) Fixed emitting flush events in between multiple events
+                   through routines Backend_Enter_Instrumentation and
+                   Backend_Leave_Instrumentation. This should avoid most
+                   Skipping state with negative duration messages at mpi2prv.
+   * (09/Jun/2011) Fixed hwc set change when mixing changeat-time and
+                   changeat-globalops within the XML config file
+   * (09/Jun/2011) Linux/amd64 can rely on libc to call backtrace instead of
+                   requiring libunwind
    + (02/Jun/2011) Added initial (& very limited) CUDA instrumentation (through --enable-cuda)
    * (30/May/2011) Added time sampling capabilities (doc, xml, and source changes)
    * (02/May/2011) Honor $DESTDIR in make install

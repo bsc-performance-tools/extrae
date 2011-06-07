@@ -35,7 +35,7 @@
 void HWCBE_PMAPI_Initialize (int TRCOptions);
 int HWCBE_PMAPI_Init_Thread (UINT64 time, int threadid);
 
-int HWCBE_PMAPI_Start_Set (UINT64 time, int numset, int threadid);
+int HWCBE_PMAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int threadid);
 int HWCBE_PMAPI_Stop_Set (UINT64 time, int numset, int threadid);
 int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **counters, char *domain, 
                        char *change_at_globalops, char *change_at_time, int num_overflows, 

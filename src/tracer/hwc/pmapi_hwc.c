@@ -259,7 +259,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 	return HWC_sets[num_set].num_counters;
 }
 
-int HWCBE_PMAPI_Start_Set (UINT64 time, int numset, int threadid)
+int HWCBE_PMAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int threadid)
 {
 	int rc;
 
@@ -270,6 +270,7 @@ int HWCBE_PMAPI_Start_Set (UINT64 time, int numset, int threadid)
 	HWC_current_changeat = HWC_sets[numset].change_at;
 	HWC_current_changetype = HWC_sets[numset].change_type;
 	HWC_current_timebegin[threadid] = time;
+	HWC_current_glopsbegin[threadid] = countglops;
 
 	rc = pm_set_program_mythread (&(HWC_sets[numset].pmprog));
 	if (rc != 0)
@@ -337,7 +338,7 @@ void HWCBE_PMAPI_Initialize (int TRCOptions)
 
 int HWCBE_PMAPI_Init_Thread (UINT64 time, int threadid)
 {
-	HWC_Thread_Initialized[threadid] = HWCBE_PMAPI_Start_Set (time, HWC_current_set[threadid], threadid);
+	HWC_Thread_Initialized[threadid] = HWCBE_PMAPI_Start_Set (0, time, HWC_current_set[threadid], threadid);
 	return HWC_Thread_Initialized[threadid];
 }
 

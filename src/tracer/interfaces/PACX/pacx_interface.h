@@ -33,4 +33,6 @@
 extern unsigned int PACX_NumOpsGlobals;
 extern unsigned int PACX_CurrentOpGlobal;
 
+unsigned int get_PACX_NumOpsGlobals();
+
 #endif /* __MPI_INTERFACE_H__ */

@@ -66,6 +66,7 @@ extern struct HWC_Set_t *HWC_sets;
 extern int HWC_num_sets;
 extern unsigned long long HWC_current_changeat;
 extern unsigned long long * HWC_current_timebegin;
+extern unsigned long long * HWC_current_glopsbegin;
 extern enum ChangeType_t HWC_current_changetype;
 extern int * HWC_current_set;
 
@@ -106,8 +107,8 @@ extern int * HWC_current_set;
 # define HWCBE_START_COUNTERS_THREAD(time, tid)    \
     HWCBE_PAPI_Init_Thread(time, tid)
 
-# define HWCBE_START_SET(time, current_set, thread_id) \
-    HWCBE_PAPI_Start_Set(time, current_set, thread_id)
+# define HWCBE_START_SET(glops, time, current_set, thread_id) \
+    HWCBE_PAPI_Start_Set(glops, time, current_set, thread_id)
 
 # define HWCBE_STOP_SET(time, current_set, thread_id)  \
     HWCBE_PAPI_Stop_Set(time, current_set, thread_id)
@@ -138,8 +139,8 @@ extern int * HWC_current_set;
 # define HWCBE_START_COUNTERS_THREAD(time, tid) \
     HWCBE_PMAPI_Init_Thread(time, tid)
 
-# define HWCBE_START_SET(time, current_set, thread_id) \
-    HWCBE_PMAPI_Start_Set(time, current_set, thread_id);
+# define HWCBE_START_SET(glops, time, current_set, thread_id) \
+    HWCBE_PMAPI_Start_Set(glops, time, current_set, thread_id);
 
 # define HWCBE_STOP_SET(time, current_set, thread_id) \
     HWCBE_PMAPI_Stop_Set(time, current_set, thread_id);

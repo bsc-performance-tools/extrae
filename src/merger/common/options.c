@@ -102,7 +102,7 @@ static int option_merge_ParaverFormat = TRUE;
 int get_option_merge_ParaverFormat (void) { return option_merge_ParaverFormat; }
 void set_option_merge_ParaverFormat (int b) { option_merge_ParaverFormat = b; }
 
-static int option_merge_SortAddresses = FALSE;
+static int option_merge_SortAddresses = TRUE;
 int get_option_merge_SortAddresses (void) { return option_merge_SortAddresses; }
 void set_option_merge_SortAddresses (int b) { option_merge_SortAddresses = b; }
 

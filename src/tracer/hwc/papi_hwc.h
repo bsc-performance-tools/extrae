@@ -38,7 +38,7 @@ void HWCBE_PAPI_Initialize (int TRCOptions);
 int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid);
 int HWCBE_PAPI_Allocate_eventsets_per_thread (int num_set, int old_thread_num, int new_thread_num);
 
-int HWCBE_PAPI_Start_Set (UINT64 time, int numset, int threadid);
+int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int threadid);
 int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid);
 int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **counters, char *domain, 
                       char *change_at_globalops, char *change_at_time, int num_overflows, 

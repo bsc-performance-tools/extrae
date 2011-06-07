@@ -84,6 +84,10 @@ static char UNUSED rcsid[] = "$Id$";
 unsigned int PACX_NumOpsGlobals = 0;
 unsigned int PACX_CurrentOpGlobal = 0;
 
+unsigned int get_PACX_NumOpsGlobals()
+{
+	return PACX_NumOpsGlobals;
+
 /*
 #if defined(FORTRAN_SYMBOLS)
 # include "mpif.h"
@@ -173,6 +177,7 @@ void NAME_ROUTINE_C2F(pacx_finalize) (PACX_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_Finalize_Wrapper (ierror);
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -208,7 +213,9 @@ void NAME_ROUTINE_C2F(pacx_bsend) (void *buf, PACX_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_BSend_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -231,7 +238,9 @@ void NAME_ROUTINE_C2F(pacx_ssend) (void *buf, PACX_Fint *count, PACX_Fint *datat
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_SSend_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -256,7 +265,9 @@ void NAME_ROUTINE_C2F(pacx_rsend) (void *buf, PACX_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_RSend_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -280,7 +291,9 @@ void NAME_ROUTINE_C2F(pacx_send) (void *buf, PACX_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_Send_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -306,8 +319,10 @@ void NAME_ROUTINE_C2F(pacx_ibsend) (void *buf, PACX_Fint *count, PACX_Fint *data
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_IBSend_Wrapper (buf, count, datatype, dest, tag, comm, request,
                          ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -333,8 +348,10 @@ void NAME_ROUTINE_C2F(pacx_isend) (void *buf, PACX_Fint *count, PACX_Fint *datat
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_ISend_Wrapper (buf, count, datatype, dest, tag, comm, request,
 			ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -360,8 +377,10 @@ void NAME_ROUTINE_C2F(pacx_issend) (void *buf, PACX_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_ISSend_Wrapper (buf, count, datatype, dest, tag, comm, request,
 			ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -387,8 +406,10 @@ void NAME_ROUTINE_C2F(pacx_irsend) (void *buf, PACX_Fint *count, PACX_Fint *data
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_IRSend_Wrapper (buf, count, datatype, dest, tag, comm, request,
 			ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -414,8 +435,10 @@ void NAME_ROUTINE_C2F(pacx_recv) (void *buf, PACX_Fint *count, PACX_Fint *dataty
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_Recv_Wrapper (buf, count, datatype, source, tag, comm, status,
                        ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -441,8 +464,10 @@ void NAME_ROUTINE_C2F(pacx_irecv) (void *buf, PACX_Fint *count, PACX_Fint *datat
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_IRecv_Wrapper (buf, count, datatype, source, tag, comm, request,
                         ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -484,8 +509,10 @@ void NAME_ROUTINE_C2F(pacx_reduce) (void *sendbuf, void *recvbuf, PACX_Fint *cou
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_Reduce_Wrapper (sendbuf, recvbuf, count, datatype, op, root, comm,
                          ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -525,8 +552,10 @@ void NAME_ROUTINE_C2F(pacx_reduce_scatter) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_Reduce_Scatter_Wrapper (sendbuf, recvbuf, recvcounts, datatype, op,
 			comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -567,8 +596,10 @@ void NAME_ROUTINE_C2F(pacx_allreduce) (void *sendbuf, void *recvbuf,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_AllReduce_Wrapper (sendbuf, recvbuf, count, datatype, op, comm,
                             ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -592,7 +623,9 @@ void NAME_ROUTINE_C2F(pacx_probe) (PACX_Fint *source, PACX_Fint *tag,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Probe_Wrapper (source, tag, comm, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -616,7 +649,9 @@ void NAME_ROUTINE_C2F(pacx_iprobe) (PACX_Fint *source, PACX_Fint *tag,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
     PPACX_IProbe_Wrapper (source, tag, comm, flag, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -653,7 +688,9 @@ void NAME_ROUTINE_C2F(pacx_barrier) (PACX_Fint *comm, PACX_Fint *ierror)
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Barrier_Wrapper (comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -675,7 +712,9 @@ void NAME_ROUTINE_C2F(pacx_cancel) (PACX_Fint *request, PACX_Fint *ierror)
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Cancel_Wrapper (request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -698,7 +737,9 @@ void NAME_ROUTINE_C2F(pacx_test) (PACX_Fint *request, PACX_Fint *flag,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (5+Caller_Count[CALLER_MPI]);
     PPACX_Test_Wrapper (request, flag, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -721,7 +762,9 @@ void NAME_ROUTINE_C2F(pacx_wait) (PACX_Fint *request, PACX_Fint *status,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
     PPACX_Wait_Wrapper (request, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -746,8 +789,10 @@ void NAME_ROUTINE_C2F(pacx_waitall) (PACX_Fint * count,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+*count+Caller_Count[CALLER_MPI]);
     PPACX_WaitAll_Wrapper (count, array_of_requests, array_of_statuses,
                           ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -772,7 +817,9 @@ void NAME_ROUTINE_C2F(pacx_waitany) (PACX_Fint *count, PACX_Fint array_of_reques
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
     PPACX_WaitAny_Wrapper (count, array_of_requests, index, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -798,8 +845,10 @@ void NAME_ROUTINE_C2F(pacx_waitsome) (PACX_Fint *incount, PACX_Fint array_of_req
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+*incount+Caller_Count[CALLER_MPI]);
 		PPACX_WaitSome_Wrapper (incount, array_of_requests, outcount,
                            array_of_indices, array_of_statuses, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -838,7 +887,9 @@ void NAME_ROUTINE_C2F(pacx_bcast) (void *buffer, PACX_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_BCast_Wrapper (buffer, count, datatype, root, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -879,8 +930,10 @@ void NAME_ROUTINE_C2F(pacx_alltoall) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_AllToAll_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
                            recvtype, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -922,8 +975,10 @@ void NAME_ROUTINE_C2F(pacx_alltoallv) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_AllToAllV_Wrapper (sendbuf, sendcount, sdispls, sendtype, recvbuf,
                             recvcount, rdispls, recvtype, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -965,8 +1020,10 @@ void NAME_ROUTINE_C2F(pacx_allgather) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Allgather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
                             recvtype, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1008,8 +1065,10 @@ void NAME_ROUTINE_C2F(pacx_allgatherv) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Allgatherv_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
                              displs, recvtype, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1051,8 +1110,10 @@ void NAME_ROUTINE_C2F(pacx_gather) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Gather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
                          recvtype, root, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1093,8 +1154,10 @@ void NAME_ROUTINE_C2F(pacx_gatherv) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_GatherV_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
                           displs, recvtype, root, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1135,8 +1198,10 @@ void NAME_ROUTINE_C2F(pacx_scatter) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Scatter_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
                           recvtype, root, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1177,8 +1242,10 @@ void NAME_ROUTINE_C2F(pacx_scatterv) (void *sendbuf, PACX_Fint *sendcount,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_ScatterV_Wrapper (sendbuf, sendcount, displs, sendtype, recvbuf,
                            recvcount, recvtype, root, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1202,7 +1269,9 @@ void NAME_ROUTINE_C2F(pacx_comm_rank) (PACX_Fint *comm, PACX_Fint *rank,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Rank_Wrapper (comm, rank, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1225,7 +1294,9 @@ void NAME_ROUTINE_C2F(pacx_comm_size) (PACX_Fint *comm, PACX_Fint *size,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Size_Wrapper (comm, size, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1248,7 +1319,9 @@ void NAME_ROUTINE_C2F(pacx_comm_create) (PACX_Fint *comm, PACX_Fint *group,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Create_Wrapper (comm, group, newcomm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1271,7 +1344,9 @@ void NAME_ROUTINE_C2F(pacx_comm_dup) (PACX_Fint *comm, PACX_Fint *newcomm,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Dup_Wrapper (comm, newcomm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1295,7 +1370,9 @@ void NAME_ROUTINE_C2F(pacx_comm_split) (PACX_Fint *comm, PACX_Fint *color,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Split_Wrapper (comm, color, key, newcomm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1320,8 +1397,10 @@ void NAME_ROUTINE_C2F(pacx_cart_create) (PACX_Fint *comm_old, PACX_Fint *ndims,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PPACX_Cart_create_Wrapper (comm_old, ndims, dims, periods, reorder,
                               comm_cart, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1345,7 +1424,9 @@ void NAME_ROUTINE_C2F(pacx_cart_sub) (PACX_Fint *comm, PACX_Fint *remain_dims,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PPACX_Cart_sub_Wrapper (comm, remain_dims, comm_new, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1366,7 +1447,9 @@ void NAME_ROUTINE_C2F(pacx_start) (PACX_Fint *request, PACX_Fint *ierror)
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
     PPACX_Start_Wrapper (request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1389,7 +1472,9 @@ void NAME_ROUTINE_C2F(pacx_startall) (PACX_Fint *count,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+*count+Caller_Count[CALLER_MPI]);
     PPACX_Startall_Wrapper (count, array_of_requests, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1410,7 +1495,9 @@ void NAME_ROUTINE_C2F(pacx_request_free) (PACX_Fint *request, PACX_Fint *ierror)
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Request_free_Wrapper (request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1435,8 +1522,10 @@ void NAME_ROUTINE_C2F(pacx_recv_init) (void *buf, PACX_Fint *count,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Recv_init_Wrapper (buf, count, datatype, source, tag,
                             comm, request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1462,8 +1551,10 @@ void NAME_ROUTINE_C2F(pacx_send_init) (void *buf, PACX_Fint *count,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Send_init_Wrapper (buf, count, datatype, dest, tag,
                             comm, request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1489,8 +1580,10 @@ void NAME_ROUTINE_C2F(pacx_bsend_init) (void *buf, PACX_Fint *count,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Bsend_init_Wrapper (buf, count, datatype, dest, tag,
                              comm, request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1516,8 +1609,10 @@ void NAME_ROUTINE_C2F(pacx_rsend_init) (void *buf, PACX_Fint *count,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Rsend_init_Wrapper (buf, count, datatype, dest, tag,
                              comm, request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1543,8 +1638,10 @@ void NAME_ROUTINE_C2F(pacx_ssend_init) (void *buf, PACX_Fint *count, PACX_Fint *
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Ssend_init_Wrapper (buf, count, datatype, dest, tag,
                              comm, request, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1583,7 +1680,9 @@ void NAME_ROUTINE_C2F(pacx_scan) (void *sendbuf, void *recvbuf, PACX_Fint *count
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
     PPACX_Scan_Wrapper (sendbuf, recvbuf, count, datatype, op, comm, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1610,8 +1709,10 @@ void NAME_ROUTINE_C2F(pacx_sendrecv) (void *sendbuf, PACX_Fint *sendcount,
 	if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
   	PACX_Sendrecv_Fortran_Wrapper (sendbuf, sendcount, sendtype, dest, sendtag,
     	recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1637,7 +1738,9 @@ void NAME_ROUTINE_C2F(pacx_sendrecv_replace) (void *buf, PACX_Fint *count,
 	if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
   	PACX_Sendrecv_replace_Fortran_Wrapper (buf, count, type, dest, sendtag, source, recvtag, comm, status, ierr);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
@@ -1666,7 +1769,9 @@ void NAME_ROUTINE_C2F(pacx_file_open) (PACX_Fint *comm, char *filename,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_open_Fortran_Wrapper (comm, filename, amode, info, fh, len);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1687,7 +1792,9 @@ void NAME_ROUTINE_C2F(pacx_file_close) (PACX_File *fh, PACX_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_close_Fortran_Wrapper (fh, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1710,7 +1817,9 @@ void NAME_ROUTINE_C2F(pacx_file_read) (PACX_File *fh, void *buf, PACX_Fint *coun
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_read_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1733,7 +1842,9 @@ void NAME_ROUTINE_C2F(pacx_file_read_all) (PACX_File *fh, void *buf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_read_all_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1756,7 +1867,9 @@ void NAME_ROUTINE_C2F(pacx_file_write) (PACX_File *fh, void *buf, PACX_Fint *cou
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_write_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1779,7 +1892,9 @@ void NAME_ROUTINE_C2F(pacx_file_write_all) (PACX_File *fh, void *buf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_write_all_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1804,7 +1919,9 @@ void NAME_ROUTINE_C2F(pacx_file_read_at) (PACX_File *fh, PACX_Offset *offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_read_at_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1829,7 +1946,9 @@ void NAME_ROUTINE_C2F(pacx_file_read_at_all) (PACX_File *fh, PACX_Offset *offset
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_read_at_all_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1854,7 +1973,9 @@ void NAME_ROUTINE_C2F(pacx_file_write_at) (PACX_File *fh, PACX_Offset *offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_write_at_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1879,7 +2000,9 @@ void NAME_ROUTINE_C2F(pacx_file_write_at_all) (PACX_File *fh, PACX_Offset *offse
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		PPACX_File_write_at_all_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1934,6 +2057,7 @@ int NAME_ROUTINE_C(PACX_Finalize) (void)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Finalize_C_Wrapper ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -1965,7 +2089,9 @@ int NAME_ROUTINE_C(PACX_Bsend) (void* buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Bsend_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -1985,7 +2111,9 @@ int NAME_ROUTINE_C(PACX_Ssend) (void *buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Ssend_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2005,7 +2133,9 @@ int NAME_ROUTINE_C(PACX_Rsend) (void *buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Rsend_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2025,7 +2155,9 @@ int NAME_ROUTINE_C(PACX_Send) (void *buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Send_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2045,7 +2177,9 @@ int NAME_ROUTINE_C(PACX_Ibsend) (void *buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Ibsend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2065,7 +2199,9 @@ int NAME_ROUTINE_C(PACX_Isend) (void *buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Isend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2085,7 +2221,9 @@ int NAME_ROUTINE_C(PACX_Issend) (void *buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Issend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2105,7 +2243,9 @@ int NAME_ROUTINE_C(PACX_Irsend) (void *buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Irsend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2125,7 +2265,9 @@ int NAME_ROUTINE_C(PACX_Recv) (void* buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Recv_C_Wrapper (buf, count, datatype, source, tag, comm, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2145,7 +2287,9 @@ int NAME_ROUTINE_C(PACX_Irecv) (void* buf, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Irecv_C_Wrapper (buf, count, datatype, source, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2178,8 +2322,10 @@ int NAME_ROUTINE_C(PACX_Reduce) (void *sendbuf, void *recvbuf, int count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Reduce_C_Wrapper 
 			(sendbuf, recvbuf, count, datatype, op, root, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
   else
@@ -2212,8 +2358,10 @@ int NAME_ROUTINE_C(PACX_Reduce_scatter) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Reduce_Scatter_C_Wrapper (sendbuf, recvbuf, recvcounts, datatype,
 			op, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2247,7 +2395,9 @@ int NAME_ROUTINE_C(PACX_Allreduce) (void *sendbuf, void *recvbuf, int count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Allreduce_C_Wrapper (sendbuf, recvbuf, count, datatype, op, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2266,7 +2416,9 @@ int NAME_ROUTINE_C(PACX_Probe) (int source, int tag, PACX_Comm comm,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Probe_C_Wrapper (source, tag, comm, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2284,7 +2436,9 @@ int NAME_ROUTINE_C(PACX_Iprobe) (int source, int tag, PACX_Comm comm, int *flag,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
 		res = PACX_Iprobe_C_Wrapper (source, tag, comm, flag, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2315,7 +2469,9 @@ int NAME_ROUTINE_C(PACX_Barrier) (PACX_Comm comm)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  PACX_Barrier_C_Wrapper (comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2333,7 +2489,9 @@ int NAME_ROUTINE_C(PACX_Cancel) (PACX_Request *request)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Cancel_C_Wrapper (request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2350,7 +2508,9 @@ int NAME_ROUTINE_C(PACX_Test) (PACX_Request *request, int *flag, PACX_Status *st
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (5+Caller_Count[CALLER_MPI]);
 		res = PACX_Test_C_Wrapper (request, flag, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2368,7 +2528,9 @@ int NAME_ROUTINE_C(PACX_Wait) (PACX_Request *request, PACX_Status *status)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
 		res = PACX_Wait_C_Wrapper (request, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2388,7 +2550,9 @@ int NAME_ROUTINE_C(PACX_Waitall) (int count, PACX_Request *requests,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
 		res = PACX_Waitall_C_Wrapper (count, requests, statuses);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2408,7 +2572,9 @@ int NAME_ROUTINE_C(PACX_Waitany) (int count, PACX_Request *requests, int *index,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
 		res = PACX_Waitany_C_Wrapper (count, requests, index, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2428,8 +2594,10 @@ int NAME_ROUTINE_C(PACX_Waitsome) (int incount, PACX_Request * requests,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+incount+Caller_Count[CALLER_MPI]);
 		res = PACX_Waitsome_C_Wrapper (incount,requests, outcount, indices,
 			statuses);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2462,7 +2630,9 @@ int NAME_ROUTINE_C(PACX_Bcast) (void *buffer, int count, PACX_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_BCast_C_Wrapper (buffer, count, datatype, root, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2496,8 +2666,10 @@ int NAME_ROUTINE_C(PACX_Alltoall) (void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Alltoall_C_Wrapper
 		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2532,9 +2704,11 @@ int NAME_ROUTINE_C(PACX_Alltoallv) (void *sendbuf, int *sendcounts, int *sdispls
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Alltoallv_C_Wrapper
 		  (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts,
 		  rdispls, recvtype, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2570,9 +2744,11 @@ int NAME_ROUTINE_C(PACX_Allgather) (void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Allgather_C_Wrapper
 		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype,
 		  comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2608,9 +2784,11 @@ int NAME_ROUTINE_C(PACX_Allgatherv) (void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  PACX_Allgatherv_C_Wrapper
 		  (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs,
 		  recvtype, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2646,9 +2824,11 @@ int NAME_ROUTINE_C(PACX_Gather) (void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  PACX_Gather_C_Wrapper
 		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root,
 		  comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2684,9 +2864,11 @@ int NAME_ROUTINE_C(PACX_Gatherv) (void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  PACX_Gatherv_C_Wrapper
             (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs,
              recvtype, root, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2722,9 +2904,11 @@ int NAME_ROUTINE_C(PACX_Scatter) (void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  PACX_Scatter_C_Wrapper
 		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root,
 		  comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2760,9 +2944,11 @@ int NAME_ROUTINE_C(PACX_Scatterv) (void *sendbuf, int *sendcounts, int *displs,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Scatterv_C_Wrapper
             (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount,
              recvtype, root, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -2782,7 +2968,9 @@ int NAME_ROUTINE_C(PACX_Comm_rank) (PACX_Comm comm, int *rank)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Comm_rank_C_Wrapper (comm, rank);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2799,7 +2987,9 @@ int NAME_ROUTINE_C(PACX_Comm_size) (PACX_Comm comm, int *size)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Comm_size_C_Wrapper (comm, size);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2817,7 +3007,9 @@ int NAME_ROUTINE_C(PACX_Comm_create) (PACX_Comm comm, PACX_Group group,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
 		res = PACX_Comm_create_C_Wrapper (comm, group, newcomm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2834,7 +3026,9 @@ int NAME_ROUTINE_C(PACX_Comm_dup) (PACX_Comm comm, PACX_Comm *newcomm)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     res = PACX_Comm_dup_C_Wrapper (comm, newcomm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2852,7 +3046,9 @@ int NAME_ROUTINE_C(PACX_Comm_split) (PACX_Comm comm, int color, int key,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
 		res = PACX_Comm_split_C_Wrapper (comm, color, key, newcomm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2871,8 +3067,10 @@ int NAME_ROUTINE_C(PACX_Cart_create) (PACX_Comm comm_old, int ndims, int *dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
 		res = PACX_Cart_create_C_Wrapper (comm_old, ndims, dims, periods, reorder,
                                       comm_cart);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2891,7 +3089,9 @@ int NAME_ROUTINE_C(PACX_Cart_sub) (PACX_Comm comm, int *remain_dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
 		res =  PACX_Cart_sub_C_Wrapper (comm, remain_dims, comm_new);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2908,7 +3108,9 @@ int NAME_ROUTINE_C(PACX_Start) (PACX_Request *request)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
 		res =  PACX_Start_C_Wrapper (request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2925,7 +3127,9 @@ int NAME_ROUTINE_C(PACX_Startall) (int count, PACX_Request *requests)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
     res = PACX_Startall_C_Wrapper (count, requests);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2942,7 +3146,9 @@ int NAME_ROUTINE_C(PACX_Request_free) (PACX_Request *request)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
 		res =  PACX_Request_free_C_Wrapper (request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2960,8 +3166,10 @@ int NAME_ROUTINE_C(PACX_Recv_init) (void *buf, int count, PACX_Datatype datatype
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Recv_init_C_Wrapper
 		  (buf, count, datatype, source, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2980,8 +3188,10 @@ int NAME_ROUTINE_C(PACX_Send_init) (void *buf, int count, PACX_Datatype datatype
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Send_init_C_Wrapper
 		  (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -2999,8 +3209,10 @@ int NAME_ROUTINE_C(PACX_Bsend_init) (void *buf, int count, PACX_Datatype datatyp
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Bsend_init_C_Wrapper
 		  (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3019,8 +3231,10 @@ int NAME_ROUTINE_C(PACX_Rsend_init) (void *buf, int count, PACX_Datatype datatyp
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Rsend_init_C_Wrapper
 		  (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3038,8 +3252,10 @@ int NAME_ROUTINE_C(PACX_Ssend_init) (void *buf, int count, PACX_Datatype datatyp
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Ssend_init_C_Wrapper
 		  (buf, count, datatype, dest, tag, comm, request);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3071,7 +3287,9 @@ int NAME_ROUTINE_C(PACX_Scan) (void *sendbuf, void *recvbuf, int count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Scan_C_Wrapper (sendbuf, recvbuf, count, datatype, op, comm);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -3093,8 +3311,10 @@ int NAME_ROUTINE_C(PACX_Sendrecv) (void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Sendrecv_C_Wrapper (sendbuf, sendcount, sendtype, dest, sendtag,
 		  recvbuf, recvcount, recvtype, source, recvtag, comm, status); 
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -3116,8 +3336,10 @@ int NAME_ROUTINE_C(PACX_Sendrecv_replace) (void *buf, int count, PACX_Datatype t
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_Sendrecv_replace_C_Wrapper (buf, count, type, dest, sendtag,
 		  source, recvtag, comm, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
@@ -3139,7 +3361,9 @@ int NAME_ROUTINE_C(PACX_File_open) (PACX_Comm comm, char * filename, int amode,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_open_C_Wrapper (comm, filename, amode, info, fh);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3156,7 +3380,9 @@ int NAME_ROUTINE_C(PACX_File_close) (PACX_File* fh)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_close_C_Wrapper (fh);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3174,7 +3400,9 @@ int NAME_ROUTINE_C(PACX_File_read) (PACX_File fh, void* buf, int count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  PACX_File_read_C_Wrapper (fh, buf, count, datatype, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3192,7 +3420,9 @@ int NAME_ROUTINE_C(PACX_File_read_all) (PACX_File fh, void* buf, int count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_read_all_C_Wrapper (fh, buf, count, datatype, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3210,7 +3440,9 @@ int NAME_ROUTINE_C(PACX_File_write) (PACX_File fh, void * buf, int count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_write_C_Wrapper (fh, buf, count, datatype, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3228,7 +3460,9 @@ int NAME_ROUTINE_C(PACX_File_write_all) (PACX_File fh, void* buf, int count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_write_all_C_Wrapper (fh, buf, count, datatype, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3246,7 +3480,9 @@ int NAME_ROUTINE_C(PACX_File_read_at) (PACX_File fh, PACX_Offset offset, void* b
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_read_at_C_Wrapper (fh, offset, buf, count, datatype, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3264,7 +3500,9 @@ int NAME_ROUTINE_C(PACX_File_read_at_all) (PACX_File fh, PACX_Offset offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_read_at_all_C_Wrapper (fh, offset, buf, count, datatype, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3282,7 +3520,9 @@ int NAME_ROUTINE_C(PACX_File_write_at) (PACX_File fh, PACX_Offset offset, void *
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_write_at_C_Wrapper (fh, offset, buf, count, datatype, status);
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}
@@ -3301,7 +3541,9 @@ int NAME_ROUTINE_C(PACX_File_write_at_all) (PACX_File fh, PACX_Offset offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = PACX_File_write_at_all_C_Wrapper (fh, offset, buf, count, datatype, status);	
+		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
 	}

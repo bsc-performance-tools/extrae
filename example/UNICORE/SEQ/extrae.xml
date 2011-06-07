@@ -43,7 +43,7 @@
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
-    sort-addresses="no"
+    sort-addresses="yes"
   >
     $UNICORE_PRV$
   </merge>

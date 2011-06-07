@@ -83,9 +83,11 @@ cudaError_t cudaLaunch (char *p1)
 		exit (0);
 	}
 
+	Backend_Enter_Instrumentation (1);
 	Probe_Cuda_Launch_Entry ();
 	res = real_cudaLaunch (p1);
 	Probe_Cuda_Launch_Exit ();
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -117,9 +119,11 @@ cudaError_t cudaThreadSynchronize (void)
 		exit (0);
 	}
 
+	Backend_Enter_Instrumentation (1);
 	Probe_Cuda_Barrier_Entry ();
 	res = real_cudaThreadSynchronize ();
 	Probe_Cuda_Barrier_Exit ();
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -134,9 +138,11 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 		exit (0);
 	}
 
+	Backend_Enter_Instrumentation (1);
 	Probe_Cuda_Memcpy_Entry (p3);
 	res = real_cudaMemcpy (p1, p2, p3, p4);
 	Probe_Cuda_Memcpy_Exit ();
+	Backend_Leave_Instrumentation ();
 
 	return res;
 }

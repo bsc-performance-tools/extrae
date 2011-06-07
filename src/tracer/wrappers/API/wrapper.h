@@ -236,6 +236,11 @@ void Backend_NotifyNewPthread (void);
 void Backend_CreatepThreadIdentifier (void);
 void Backend_setNumTentativeThreads (int numofthreads);
 
+iotimer_t Backend_Get_Last_Enter_Time (void);
+iotimer_t Backend_Get_Last_Leave_Time (void);
+void Backend_Enter_Instrumentation (unsigned Nevents);
+void Backend_Leave_Instrumentation (void);
+
 void advance_current(int);
 extern int circular_buffering, circular_OVERFLOW;
 event_t *circular_HEAD;
@@ -267,3 +272,4 @@ extern int MergeAfterTracing;
 #endif
 
 #endif /* __WRAPPER_H__ */
+

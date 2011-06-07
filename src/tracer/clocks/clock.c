@@ -78,6 +78,7 @@ static char UNUSED rcsid[] = "$Id$";
 # error "Unhandled clock type"
 #endif
 
+static UINT64 _extrae_last_read_clock = 0;
 static unsigned ClockType = REAL_CLOCK;
 
 void Clock_setType (unsigned type)
@@ -90,11 +91,18 @@ unsigned Clock_getType (void)
 	return ClockType;
 }
 
-iotimer_t Clock_getTime (void)
+UINT64 Clock_getLastReadTime (void)
 {
+	return _extrae_last_read_clock;
+}
+
+iotimer_t Clock_getCurrentTime (void)
+{
+	UINT64 tmp;
+
 	if (ClockType == REAL_CLOCK)
 	{
-		return GET_CLOCK;
+		tmp = GET_CLOCK;
 
 /*  if no "nanosecond" clock is available 
 		struct timeval aux;
@@ -106,23 +114,26 @@ iotimer_t Clock_getTime (void)
 	{
 #if !defined(__SPU__)
 		struct rusage aux;
-		iotimer_t temps;
 
 		if (getrusage(RUSAGE_SELF,&aux) >= 0)
 		{
 			/* Get user time */
-			temps =  aux.ru_utime.tv_sec*1000000 + aux.ru_utime.tv_usec;
+			tmp =  aux.ru_utime.tv_sec*1000000 + aux.ru_utime.tv_usec;
 			/* Accumulate system time */
-			temps += aux.ru_stime.tv_sec*1000000 + aux.ru_stime.tv_usec;
+			tmp += aux.ru_stime.tv_sec*1000000 + aux.ru_stime.tv_usec;
 		}
 		else
-			temps = 0;
+			tmp = 0;
 
-		return temps * 1000;
+		tmp = tmp * 1000;
 #else
-		return GET_CLOCK;
+		tmp = GET_CLOCK;
 #endif
 	}
+
+	_extrae_last_read_clock = tmp;
+
+	return tmp;
 }
 
 void Clock_Initialize (void)

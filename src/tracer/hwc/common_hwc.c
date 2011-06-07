@@ -83,6 +83,7 @@ int *Accumulated_HWC_Valid; /* Marks whether Accumulated_HWC has valid values */
 struct HWC_Set_t *HWC_sets = NULL;
 unsigned long long HWC_current_changeat = 0;
 unsigned long long * HWC_current_timebegin;
+unsigned long long * HWC_current_glopsbegin;
 enum ChangeType_t HWC_current_changetype = CHANGE_NEVER;
 int HWC_num_sets = 0;
 int * HWC_current_set;
@@ -184,7 +185,7 @@ int HWC_Get_Position_In_Set (int set_id, int hwc_id)
  * Stops the current set and starts reading the next one.
  * \param thread_id The thread that changes the set. 
  */
-void HWC_Start_Next_Set (UINT64 time, int thread_id)
+void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 {
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
@@ -194,7 +195,7 @@ void HWC_Start_Next_Set (UINT64 time, int thread_id)
 		/* Move to the next set */
 		HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
 
-		HWCBE_START_SET (time, HWC_current_set[thread_id], thread_id);
+		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
 	}
 }
 
@@ -202,7 +203,7 @@ void HWC_Start_Next_Set (UINT64 time, int thread_id)
  * Stops the current set and starts reading the previous one.
  * \param thread_id The thread that changes the set.
  */
-void HWC_Start_Previous_Set (UINT64 time, int thread_id)
+void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 {
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
@@ -212,7 +213,7 @@ void HWC_Start_Previous_Set (UINT64 time, int thread_id)
 		/* Move to the previous set */
 		HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
 
-		HWCBE_START_SET (time, HWC_current_set[thread_id], thread_id);
+		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
 	}
 }
 
@@ -224,21 +225,19 @@ void HWC_Start_Previous_Set (UINT64 time, int thread_id)
  * \return 1 if the set is changed, 0 otherwise.
  */
 
-static inline int CheckForHWCSetChange_GLOPS (unsigned int count_glops, UINT64 time, int thread_id)
+static inline int CheckForHWCSetChange_GLOPS (UINT64 countglops, UINT64 time, int threadid)
 {
+	int ret = 0;
+
 	if (HWC_current_changeat != 0)
 	{
-		if (HWC_current_changeat <= count_glops)
+		if (HWC_current_glopsbegin[threadid] + HWC_current_changeat <= countglops)
 		{
-			HWC_Start_Next_Set (time, thread_id);
-			/* Start_Next_Set initializes HWC_current_changeat to the value set in the XML,
-			   so the next change will take place after that number of glops starting from
-			   the current number of glops. */
-			HWC_current_changeat += count_glops;
-			return 1;
+			HWC_Start_Next_Set (countglops, time, threadid);
+			ret = 1;
 		}
 	}
-	return 0;
+	return ret;
 }
 
 /** 
@@ -247,12 +246,13 @@ static inline int CheckForHWCSetChange_GLOPS (unsigned int count_glops, UINT64 t
  * \param thread_id The thread identifier.
  * \return 1 if the set is changed, 0 otherwise.
  */
-static inline int CheckForHWCSetChange_TIME (UINT64 time, int threadid)
+static inline int CheckForHWCSetChange_TIME (UINT64 countglops, UINT64 time, int threadid)
 {
 	int ret = 0;
+
 	if (HWC_current_timebegin[threadid] + HWC_current_changeat < time)
 	{
-		HWC_Start_Next_Set (time, threadid);
+		HWC_Start_Next_Set (countglops, time, threadid);
 		ret = 1;
 	}
 	return ret;
@@ -265,12 +265,12 @@ static inline int CheckForHWCSetChange_TIME (UINT64 time, int threadid)
  * \param thread_id The thread identifier.
  * \return 1 if the set is changed, 0 otherwise.
  */
-int HWC_Check_Pending_Set_Change (unsigned int count_glops, UINT64 time, int thread_id)
+int HWC_Check_Pending_Set_Change (UINT64 countglops, UINT64 time, int thread_id)
 {
 	if (HWC_current_changetype == CHANGE_GLOPS)
-		return CheckForHWCSetChange_GLOPS(count_glops, time, thread_id);
+		return CheckForHWCSetChange_GLOPS(countglops, time, thread_id);
 	else if (HWC_current_changetype == CHANGE_TIME)
-		return CheckForHWCSetChange_TIME(time, thread_id);
+		return CheckForHWCSetChange_TIME(countglops, time, thread_id);
 	else
 		return 0;
 }
@@ -296,11 +296,18 @@ void HWC_Initialize (int options)
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_timebegin\n");
 		return;
 	}
+	HWC_current_glopsbegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
+	if (NULL == HWC_current_glopsbegin)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_glopsbegin\n");
+		return;
+	}
 
 	for (i = 0; i < num_threads; i++)
 	{
 		HWC_current_set[i] = 0;
 		HWC_current_timebegin[i] = 0;
+		HWC_current_glopsbegin[i] = 0;
 	}
 
 	HWCBE_INITIALIZE(options);
@@ -425,10 +432,18 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 		return;
 	}
 
+	HWC_current_glopsbegin = (unsigned long long *) realloc (HWC_current_glopsbegin, sizeof(unsigned long long) * new_num_threads);
+	if (NULL == HWC_current_glopsbegin)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_current_glopsbegin\n");
+		return;
+	}
+
 	for (i = old_num_threads; i < new_num_threads; i++)
 	{
 		HWC_current_set[i] = 0;
 		HWC_current_timebegin[i] = 0;
+		HWC_current_glopsbegin[i] = 0;
 	}
 }
 
@@ -651,7 +666,7 @@ void HWC_Set_ChangeAtTime_Frequency (int set, unsigned long long ns)
 {
 	if ((set >= 0) && (set < HWC_Get_Num_Sets()) && (ns > 0))
 	{
-        HWC_sets[set].change_type = CHANGE_TIME;
+		HWC_sets[set].change_type = CHANGE_TIME;
 		HWC_sets[set].change_at = ns;
 	}
 	HWC_current_changetype = CHANGE_TIME;
