@@ -414,7 +414,7 @@ libompitracef_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
 libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
-lib_dyn_mpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+lib_dyn_mpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 lib_dyn_omptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 
 ## -static tells libtool to generate ONLY the static library (we don't want

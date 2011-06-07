@@ -561,10 +561,14 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid)
 	return HWC_Thread_Initialized[threadid];
 }
 
+#if defined(IS_BG_MACHINE)
+int __in_PAPI_read_BG = FALSE;
+#endif
 int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 {
 	int EventSet = HWCEVTSET(tid);
 
+#if !defined(IS_BG_MACHINE)
 	if (PAPI_read(EventSet, store_buffer) != PAPI_OK)
 	{
 		fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
@@ -572,6 +576,22 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer)
 		return 0;
 	}
 	return 1;
+#else
+	if (!__in_PAPI_read_BG)
+	{
+		__in_PAPI_read_BG = TRUE;
+		if (PAPI_read(EventSet, store_buffer) != PAPI_OK)
+		{
+			fprintf (stderr, PACKAGE_NAME": PAPI_read failed for thread %d evtset %d (%s:%d)\n",
+				tid, EventSet, __FILE__, __LINE__);
+			return 0;
+		}
+		__in_PAPI_read_BG = FALSE;
+		return 1;
+	}
+	else
+		return 0;
+#endif
 }
 
 int HWCBE_PAPI_Reset (unsigned int tid)
