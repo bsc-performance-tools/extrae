@@ -3,7 +3,7 @@ ChangeLog
    [ + added, - removed, * changed ]
 
    * (07/Jun/2011) BG/P fails to execute PAPI_read in PAPI_read when using time
-                   sampling.
+                   sampling (fixed by additional logic & avoiding read inside).
    * (07/Jun/2011) --sort-addresses is enabled by default
    * (07/Jun/2011) Fixed emitting flush events in between multiple events
                    through routines Backend_Enter_Instrumentation and
