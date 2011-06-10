@@ -45,7 +45,7 @@ void Probe_Cuda_Launch_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDALAUNCH_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDALAUNCH_EV, EVT_BEGIN, EMPTY);
 }
 
 void Probe_Cuda_Launch_Exit (void)
@@ -55,25 +55,25 @@ void Probe_Cuda_Launch_Exit (void)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDALAUNCH_EV, EVT_END, EMPTY);
 }
 
-void Probe_Cuda_Barrier_Entry (void)
+void Probe_Cuda_ConfigureCall_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDABARRIER_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACONFIGCALL_EV, EVT_BEGIN, EMPTY);
 }
 
-void Probe_Cuda_Barrier_Exit (void)
+void Probe_Cuda_ConfigureCall_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDABARRIER_EV, EVT_END, EMPTY); 
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACONFIGCALL_EV, EVT_END, EMPTY);
 }
 
 void Probe_Cuda_Memcpy_Entry (size_t size)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDAMEMCPY_EV, size, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPY_EV, size, EMPTY);
 }
 
 void Probe_Cuda_Memcpy_Exit (void)
@@ -81,5 +81,34 @@ void Probe_Cuda_Memcpy_Exit (void)
 	DEBUG
 	if (mpitrace_on)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDAMEMCPY_EV, EVT_END, EMPTY); 
+}
+
+
+void Probe_Cuda_ThreadBarrier_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDATHREADBARRIER_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_Cuda_ThreadBarrier_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDATHREADBARRIER_EV, EVT_END, EMPTY); 
+}
+
+void Probe_Cuda_StreamBarrier_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDASTREAMBARRIER_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_Cuda_StreamBarrier_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMBARRIER_EV, EVT_END, EMPTY); 
 }
 

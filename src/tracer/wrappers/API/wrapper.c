@@ -1806,6 +1806,9 @@ void Backend_Enter_Instrumentation (unsigned Nevents)
 	unsigned thread = THREADID;
 	UINT64 current_time;
 
+	if (!mpitrace_on)
+		return;
+
 	/* Check whether we will fill the buffer soon (or now) */
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= Nevents)
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
@@ -1820,6 +1823,9 @@ void Backend_Enter_Instrumentation (unsigned Nevents)
 void Backend_Leave_Instrumentation (void)
 {
 	unsigned thread = THREADID;
+
+	if (!mpitrace_on)
+		return;
 
 	/* Change trace mode? (issue from API) */
 	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)

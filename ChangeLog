@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (10/Jun/2011) Improved CUDA support
    * (07/Jun/2011) BG/P fails to execute PAPI_read in PAPI_read when using time
                    sampling (fixed by additional logic & avoiding read inside).
    * (07/Jun/2011) --sort-addresses is enabled by default

@@ -32,9 +32,13 @@
 
 void Probe_Cuda_Launch_Entry (void);
 void Probe_Cuda_Launch_Exit (void);
-void Probe_Cuda_Barrier_Entry (void);
-void Probe_Cuda_Barrier_Exit (void);
+void Probe_Cuda_ConfigureCall_Entry (void);
+void Probe_Cuda_ConfigureCall_Exit (void);
 void Probe_Cuda_Memcpy_Entry (size_t size);
 void Probe_Cuda_Memcpy_Exit (void);
+void Probe_Cuda_ThreadBarrier_Entry (void);
+void Probe_Cuda_ThreadBarrier_Exit (void);
+void Probe_Cuda_StreamBarrier_Entry (void);
+void Probe_Cuda_StreamBarrier_Exit (void);
 
 #endif

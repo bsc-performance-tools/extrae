@@ -42,22 +42,28 @@ static char UNUSED rcsid[] = "$Id: trt_prv_events.c 476 2010-10-26 12:58:30Z har
 #include "mpi2out.h"
 #include "options.h"
 
-#define CUDALAUNCH_INDEX      0
-#define CUDABARRIER_INDEX     1
-#define CUDAMEMCPY_INDEX      2
+#define CUDALAUNCH_INDEX           0
+#define CUDACONFIGCALL_INDEX       1
+#define CUDAMEMCPY_INDEX           2
+#define CUDATHREADBARRIER_INDEX    3
+#define CUDASTREAMBARRIER_INDEX    4
 
-#define MAX_CUDA_INDEX        3
+#define MAX_CUDA_INDEX             5
 
-static int inuse[MAX_CUDA_INDEX] = { FALSE, FALSE, FALSE };
+static int inuse[MAX_CUDA_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_CUDA_Operation (int tipus)
 {
 	if (tipus == CUDALAUNCH_EV)
 		inuse[CUDALAUNCH_INDEX] = TRUE;
-	else if (tipus == CUDABARRIER_EV)
-		inuse[CUDABARRIER_INDEX] = TRUE;
 	else if (tipus == CUDAMEMCPY_EV)
 		inuse[CUDAMEMCPY_INDEX] = TRUE;
+	else if (tipus == CUDASTREAMBARRIER_EV)
+		inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
+	else if (tipus == CUDATHREADBARRIER_EV)
+		inuse[CUDATHREADBARRIER_INDEX] = TRUE;
+	else if (tipus == CUDACONFIGCALL_EV)
+		inuse[CUDACONFIGCALL_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -81,19 +87,29 @@ void Share_CUDA_Operations (void)
 
 void CUDAEvent_WriteEnabledOperations (FILE * fd)
 {
-	if (inuse[CUDALAUNCH_INDEX] || inuse[CUDABARRIER_INDEX] || inuse[CUDAMEMCPY_INDEX])
+	int anyused = FALSE;
+	int i;
+
+	for (i = 0; i < MAX_CUDA_INDEX; i++)
+		anyused = anyused || inuse[i];
+
+	if (anyused)
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d   %d    CUDA library call\n", 0, CUDACALL_EV);
 		fprintf (fd, "VALUES\n"
 		             "0 End\n"
 		             "%d cudaLaunch\n"
-		             "%d cudaThreadSynchronize\n"
+		             "%d cudaConfigureCall\n"
 		             "%d cudaMemcpy\n"
+		             "%d cudaThreadSynchronize\n"
+		             "%d cudaStreamSynchronize\n"
 		             "\n",
 		             CUDALAUNCH_EV - CUDABASE_EV,
-		             CUDABARRIER_EV - CUDABASE_EV,
-		             CUDAMEMCPY_EV - CUDABASE_EV);
+		             CUDACONFIGCALL_EV - CUDABASE_EV,
+		             CUDAMEMCPY_EV - CUDABASE_EV,
+		             CUDATHREADBARRIER_EV - CUDABASE_EV,
+		             CUDASTREAMBARRIER_EV - CUDABASE_EV);
 
 		if (inuse[CUDAMEMCPY_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"

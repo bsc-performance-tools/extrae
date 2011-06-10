@@ -205,10 +205,14 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define STATE16_LBL          "Send Receive"
 #define STATE16_COLOR        {66,66,66}
 
+#define STATE_17             17
+#define STATE17_LBL          "Memory transfer"
+#define STATE17_COLOR        {0xff, 0x0, 0x60}
+
 #define STATES_LBL           "STATES"
 #define STATES_COLOR_LBL     "STATES_COLOR"
 
-#define STATES_NUMBER        17
+#define STATES_NUMBER        18
 extern struct color_t states_inf[STATES_NUMBER];
 
 /******************************************************************************

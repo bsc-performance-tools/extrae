@@ -54,8 +54,8 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset )
 {
-	unsigned int state;
-	unsigned int EvType, EvValue;
+	unsigned state;
+	unsigned EvType, EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -63,14 +63,16 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 
 	switch (EvType)
 	{
+		case CUDACONFIGCALL_EV:
 		case CUDALAUNCH_EV:
 			state = STATE_OVHD;
 			break;
-		case CUDABARRIER_EV:
+		case CUDASTREAMBARRIER_EV:
+		case CUDATHREADBARRIER_EV:
 			state = STATE_BARRIER;
 			break;
 		case CUDAMEMCPY_EV:
-			state = STATE_OVHD;
+			state = STATE_MEMORY_XFER;
 			break;
 	}
 
@@ -88,10 +90,45 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	return 0;
 }
 
+static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_time,
+	unsigned int cpu, unsigned int ptask, unsigned int task,
+	unsigned int thread, FileSet_t *fset)
+{
+	unsigned EvType, EvValue, state;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	switch (EvType)
+	{
+		case CUDAKERNEL_GPU_EV:
+			state = STATE_RUNNING;
+			break;
+		case CUDAMEMCPY_GPU_EV:
+			state = STATE_MEMORY_XFER;
+			break;
+		case CUDACONFIGKERNEL_GPU_EV:
+			state = STATE_OVHD;
+			break;
+	}
+
+	Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	return 0;
+}
+
 SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
+	{ CUDACONFIGCALL_EV, CUDA_Call },
 	{ CUDALAUNCH_EV, CUDA_Call },
-	{ CUDABARRIER_EV, CUDA_Call },
 	{ CUDAMEMCPY_EV, CUDA_Call },
+	{ CUDATHREADBARRIER_EV, CUDA_Call },
+	{ CUDASTREAMBARRIER_EV, CUDA_Call },
+	{ CUDAKERNEL_GPU_EV, CUDA_GPU_Call },
+	{ CUDACONFIGKERNEL_GPU_EV, CUDA_GPU_Call },
+	{ CUDAMEMCPY_GPU_EV, CUDA_GPU_Call },
 	{ NULL_EV, NULL }
 };
 

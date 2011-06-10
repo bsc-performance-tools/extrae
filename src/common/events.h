@@ -405,8 +405,14 @@ enum {
 #define CUDAMEMCPY_SIZE_EV       63000002
 #define CUDABASE_EV              63100000
 #define CUDALAUNCH_EV            63100001
-#define CUDABARRIER_EV           63100002
+#define CUDACONFIGCALL_EV        63100002
 #define CUDAMEMCPY_EV            63100003
+#define CUDATHREADBARRIER_EV     63100004
+#define CUDASTREAMBARRIER_EV     63100005
+#define CUDASTREAMCREATE_EV      63100006
+#define CUDAKERNEL_GPU_EV        63200001
+#define CUDACONFIGKERNEL_GPU_EV  63200002
+#define CUDAMEMCPY_GPU_EV        63200003
 
 #define CALLER_EV                70000000
 #define CALLER_LINE_EV           80000000
@@ -491,6 +497,7 @@ enum {
 #define STATE_INITFINI           15
 #define STATE_MIXED              15
 #define STATE_SENDRECVOP         16
+#define STATE_MEMORY_XFER        17
 
 #if defined(DEAD_CODE)
 /* ==========================================================================

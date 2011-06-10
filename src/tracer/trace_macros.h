@@ -600,6 +600,37 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 	}                                                             \
 }
 
+#define THREAD_TRACE_MISCEVENT(thread,evttime,evttype,evtvalue,evtparam) \
+{                                                               \
+	event_t evt;                                                  \
+	if (tracejant && TracingBitmap[TASKID])                       \
+	{                                                             \
+		evt.time = evttime;                                   \
+		evt.event = evttype;                                  \
+		evt.value = evtvalue;                                 \
+		evt.param.misc_param.param = (unsigned long long) (evtparam); \
+		HARDWARE_COUNTERS_READ(thread, evt, FALSE);           \
+		BUFFER_INSERT(thread, TRACING_BUFFER(thread), evt);\
+	}                                                             \
+}
+
+#define THREAD_TRACE_USER_COMMUNICATION_EVENT(thread,evttime,evttype,evtpartner,evtsize,evttag,id) \
+{ \
+	event_t evt; \
+	if (tracejant) \
+	{ \
+		evt.time = (evttime); \
+		evt.event = (evttype); \
+		evt.value = 0; \
+		evt.param.mpi_param.target = (long) (evtpartner); \
+		evt.param.mpi_param.size = (evtsize); \
+		evt.param.mpi_param.tag = (evttag); \
+		evt.param.mpi_param.aux = (id); \
+		HARDWARE_COUNTERS_READ(thread, evt, FALSE);  \
+		BUFFER_INSERT(thread, TRACING_BUFFER(thread), evt); \
+	} \
+}
+
 #define TRACE_EVENT_AND_GIVEN_COUNTERS(evttime, evttype, evtvalue, nc, counters)\
 {                                                             \
 	event_t evt;                                                \

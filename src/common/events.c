@@ -179,8 +179,11 @@ unsigned IsTRT (unsigned EvType)
   return FALSE;
 }
 
-#define CUDA_EVENTS 3
-static unsigned cuda_events[] = { CUDALAUNCH_EV, CUDABARRIER_EV, CUDAMEMCPY_EV };
+#define CUDA_EVENTS 9
+static unsigned cuda_events[] = { CUDALAUNCH_EV, CUDACONFIGCALL_EV,
+	CUDAMEMCPY_EV, CUDATHREADBARRIER_EV, CUDASTREAMBARRIER_EV,
+	CUDASTREAMCREATE_EV, CUDAKERNEL_GPU_EV, CUDACONFIGKERNEL_GPU_EV,
+	CUDAMEMCPY_GPU_EV };
 
 /******************************************************************************
  ***  IsTRT
