@@ -233,6 +233,27 @@ UINT64 get_caller (int offset)
 
 # endif /* LINUX IA32 */
 
+# if (defined(OS_LINUX) && defined(ARCH_IA64))
+void trace_callers (iotimer_t time, int offset, int type)
+{
+	UNREFERENCED_PARAMETER(time);
+	UNREFERENCED_PARAMETER(offset);
+	UNREFERENCED_PARAMETER(type);
+
+	/* IA64 requires unwind! */
+
+	return;
+}
+
+UINT64 get_caller (int offset)
+{
+	UNREFERENCED_PARAMETER(offset);
+
+	/* IA64 requires unwind! */
+
+	return 0;
+}
+# endif /* LINUX IA64 */
 
 #if defined(OS_DEC) 
 
