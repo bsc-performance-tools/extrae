@@ -84,7 +84,7 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	else
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EVT_END);
 
-	if (EvType == CUDAMEMCPY_EV && EvValue > 0)
+	if (EvType == CUDAMEMCPY_EV)
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
 
 	return 0;
@@ -116,6 +116,9 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 	Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	if (EvType == CUDAMEMCPY_GPU_EV)
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
 
 	return 0;
 }

@@ -445,9 +445,9 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 	if (!CUDAInitialized)
 		InitializeCUDA();
 
-	if (real_cudaMemcpy == NULL)
+	if (real_cudaMemcpyAsync == NULL)
 	{
-		fprintf (stderr, "Unable to find cudaMemcpy in DSOs!! Dying...\n");
+		fprintf (stderr, "Unable to find cudaMemcpyAsync in DSOs!! Dying...\n");
 		exit (0);
 	}
 
@@ -456,7 +456,7 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 
 	tag = CUDA_tag_generator();
 
-	if (p4 == cudaMemcpyHostToDevice)
+	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
 		  0, p3, tag, tag);
@@ -471,21 +471,21 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 		exit (-1);
 	}
 
-	if (p4 == cudaMemcpyHostToDevice)
-		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_BEGIN, 0, 0);
-	else if (p4 == cudaMemcpyDeviceToHost)
-		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_BEGIN, tag, p3);
+	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
+		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, p3, 0, 0);
+	else
+		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, p3, tag, p3);
 
 	res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
 
-	if (p4 == cudaMemcpyHostToDevice)
+	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyDeviceToDevice)
 		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_END, tag, p3);
-	else if (p4 == cudaMemcpyDeviceToHost)
+	else
 		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
 
 	Probe_Cuda_Memcpy_Exit ();
 
-	if (p4 == cudaMemcpyDeviceToHost)
+	if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
 		  0, p3, tag, tag);
@@ -516,7 +516,7 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 
 	tag = CUDA_tag_generator();
 
-	if (p4 == cudaMemcpyHostToDevice)
+	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
 		  0, p3, tag, tag);
@@ -524,16 +524,16 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 
 	cudaGetDevice (&devid);
 
-	if (p4 == cudaMemcpyHostToDevice)
-		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_BEGIN, 0, 0);
-	else if (p4 == cudaMemcpyDeviceToHost)
-		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_BEGIN, tag, p3);
+	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
+		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, p3, 0, 0);
+	else
+		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, p3, tag, p3);
 
 	res = real_cudaMemcpy (p1, p2, p3, p4);
 
-	if (p4 == cudaMemcpyHostToDevice)
+	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyDeviceToDevice)
 		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_END, tag, p3);
-	else if (p4 == cudaMemcpyDeviceToHost)
+	else
 		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
 
 	for (i = 0; i < devices[devid].nstreams; i++)
@@ -544,7 +544,7 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 
 	Probe_Cuda_Memcpy_Exit ();
 
-	if (p4 == cudaMemcpyDeviceToHost)
+	if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
 		  0, p3, tag, tag);
