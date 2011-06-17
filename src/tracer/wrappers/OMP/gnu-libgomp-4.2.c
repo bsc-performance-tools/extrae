@@ -115,7 +115,7 @@ static void callme_par (void *ptr)
 	Backend_Enter_Instrumentation (1);
 	Probe_OpenMP_UF_Entry ((UINT64) par_uf);
 	par_uf (ptr);
-	Probe_OpenMP_UF ();
+	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 
@@ -824,7 +824,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 
 		/* GCC/libgomp does not execute callme_par per root thread, emit
 		   the required event here */
-		Probe_OpenMP_UF_entry ((UINT64) p1);
+		Probe_OpenMP_UF_Entry ((UINT64) p1);
 		GOMP_parallel_start_real (callme_par, p2, p3);
 		Backend_Leave_Instrumentation ();
 	}

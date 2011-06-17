@@ -106,9 +106,9 @@ static void callme_pardo (char *ptr, long lbnd, long ubnd, unsigned thid)
 #endif
 
 	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_entry ((UINT64) p);
+	Probe_OpenMP_UF_Entry ((UINT64) p);
 	pardo_uf (ptr, lbnd, ubnd, thid);
-	Probe_OpenMP_UF_exit ();
+	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 
@@ -128,9 +128,9 @@ static void callme_do (char *ptr, long lbnd, long ubnd)
 #endif
 
 	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_entry ((UINT64) p);
+	Probe_OpenMP_UF_Entry ((UINT64) p);
 	do_uf[THREADID] (ptr, lbnd, ubnd);
-	Probe_OpenMP_UF_exit ();
+	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 /*
@@ -149,9 +149,9 @@ static void callme_par (char *ptr)
 #endif
 
 	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_entry ((UINT64) p);
+	Probe_OpenMP_UF_Entry ((UINT64) p);
 	par_uf (ptr);
-	Probe_OpenMP_UF_exit ();
+	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 
@@ -170,9 +170,9 @@ static void callme_single(void)
 #endif
 
 	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_entry ((UINT64) p);
+	Probe_OpenMP_UF_Entry ((UINT64) p);
 	par_single ();
-	Probe_OpenMP_UF_exit ();
+	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 
@@ -218,9 +218,9 @@ static void callme_section(void)
 #endif
 
 	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_entry ((UINT64) par_sections[index]);
+	Probe_OpenMP_UF_Entry ((UINT64) par_sections[index]);
 	par_sections[index]();
-	Probe_OpenMP_UF_exit ();
+	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 
