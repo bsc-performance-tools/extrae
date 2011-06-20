@@ -1763,7 +1763,7 @@ void Backend_Finalize (void)
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 		Backend_Finalize_close_mpits (thread);
 
-	if (TASKID == 0)
+	if (TaskID_Get() == 0)
 		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
 #if defined(EMBED_MERGE_IN_TRACE)
@@ -1788,7 +1788,7 @@ void Backend_Finalize (void)
 
 		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 		merger_pre (NumOfTasks);
-		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default);
+		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default, TaskID_Get());
 
 		if (TaskID_Get() == 0)
 			fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);

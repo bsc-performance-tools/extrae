@@ -74,6 +74,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
+# include "mpi-aux.h"
+# include <mpi.h>
 #endif
 
 #ifdef HAVE_BFD
@@ -139,9 +141,9 @@ void Help (const char *ProgName)
  ***  Adds an MPIT file into the required structures.
  ******************************************************************************/
 
-static void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles)
+static void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles,
+	int taskid)
 {
-	int fd;
 	int name_length;
 	int task;
 	int thread;
@@ -184,11 +186,16 @@ static void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles)
 	}
 
 	InputTraces[nTraces].filesize = 0;
-	fd = open (InputTraces[nTraces].name, O_RDONLY);
-	if (-1 != fd)
+
+	/* this will be shared afterwards at merger_post_share_file_sizes */
+	if (taskid == 0) 
 	{
-		InputTraces[nTraces].filesize = lseek (fd, 0, SEEK_END);
-		close (fd);
+		int fd = open (InputTraces[nTraces].name, O_RDONLY);
+		if (-1 != fd)
+		{
+			InputTraces[nTraces].filesize = lseek (fd, 0, SEEK_END);
+			close (fd);
+		}
 	}
 
 	tmp_name = InputTraces[nTraces].name;
@@ -254,7 +261,8 @@ static char *strip (char *buffer)
 
 static char *last_mpits_file = NULL;
 
-void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype)
+void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype,
+	int taskid)
 {
 	int info;
 	FILE *fd = fopen (file, "r");
@@ -298,22 +306,22 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 							char *directory = dirname (duplicate);
 
 							sprintf (dir_file, "%s%s", directory, stripped_basename);
-							Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles);
+							Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles, taskid);
 
 							free (duplicate);
 						}
 						else
-							Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles);
+							Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles, taskid);
 					}
 					else
 						fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
 				}
 				else
-					Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles);
+					Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles, taskid);
 			}
 			else if (opentype == FileOpen_Absolute)
 			{
-				Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles);
+				Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles, taskid);
 			}
 			else if (opentype == FileOpen_Relative)
 			{
@@ -329,12 +337,12 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 						char *directory = dirname (file);
 
 						sprintf (dir_file, "%s%s", directory, stripped_basename);
-						Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles);
+						Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles, taskid);
 
 						free (duplicate);
 					}
 					else
-						Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles);
+						Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles, taskid);
 				}
 				else
 					fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
@@ -474,7 +482,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Default);
+				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Default, rank);
 			}
 			else 
 			{
@@ -490,7 +498,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Relative);
+				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Relative, rank);
 			}
 			else 
 			{
@@ -506,7 +514,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Absolute);
+				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Absolute, rank);
 			}
 			else 
 			{
@@ -713,7 +721,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			continue;
 		}
 		else
-			Process_MPIT_File ((char *) (argv[CurArg]), NULL, &cur_ptask, &cur_files);
+			Process_MPIT_File ((char *) (argv[CurArg]), NULL, &cur_ptask, &cur_files, rank);
 	}
 	set_option_merge_NumApplications (cur_ptask);
 
@@ -923,6 +931,36 @@ void merger_pre (int numtasks)
 
 /* To be called after ProcessArgs */
 
+#if defined(PARALLEL_MERGE)
+static void merger_post_share_file_sizes (int taskid)
+{
+	int res;
+	int i;
+	unsigned long long *sizes;
+
+	sizes = malloc (sizeof(unsigned long long)*nTraces);
+	if (sizes == NULL)
+	{
+		fprintf (stderr, "mpi2prv: Cannot allocate memory to share trace file sizes\n");
+		perror ("malloc");
+		exit (1);
+	}
+
+	if (taskid == 0)
+		for (i = 0; i < nTraces; i++)
+			sizes[i] = InputTraces[i].filesize; 
+
+	res = MPI_Bcast (sizes, nTraces, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Bcast, "Cannot share trace file sizes");
+
+	if (taskid != 0)
+		for (i = 0; i < nTraces; i++)
+			InputTraces[i].filesize = sizes[i]; 
+
+	free (sizes);
+}
+#endif
+
 int merger_post (int numtasks, int taskid)
 {
 	unsigned long long records_per_task;
@@ -942,6 +980,8 @@ int merger_post (int numtasks, int taskid)
 	}
 
 #if defined(PARALLEL_MERGE)
+	merger_post_share_file_sizes (taskid);
+
 	if (get_option_merge_TreeFanOut() == 0)
 	{
 		if (taskid == 0)

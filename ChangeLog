@@ -2,6 +2,8 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (20/Jun/2011) Optimized initialization of mpimpi2prv when loading a large
+                   number of files using a large number of processes.
    * (10/Jun/2011) Improved CUDA support
    * (07/Jun/2011) BG/P fails to execute PAPI_read in PAPI_read when using time
                    sampling (fixed by additional logic & avoiding read inside).

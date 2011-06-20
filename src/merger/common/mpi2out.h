@@ -65,6 +65,6 @@ void merger_pre (int numtasks);
 void ProcessArgs (int numtasks, int rank, int argc, char *argv[]);
 int merger_post (int numtasks, int idtask);
 
-void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype);
+void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype, int taskid);
 
 #endif
