@@ -2,6 +2,7 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (23/Jun/2011) mpi_ping examples now accept > 2 processes 
    * (20/Jun/2011) Optimized initialization of mpimpi2prv when loading a large
                    number of files using a large number of processes.
    * (10/Jun/2011) Improved CUDA support
