@@ -2,7 +2,7 @@ C  Ping-pong with MPI + I/O
 
       include 'mpif.h'
 
-      integer BUFFSIZE, MSGSIZE, error, rank, size, dest, source, i
+      integer BUFFSIZE, MSGSIZE, error, rank, size, dest, i
       integer status(MPI_STATUS_SIZE), NITERS, retsize
       parameter (BUFFSIZE=100000, MSGSIZE=10000, NITERS=1000)
       integer*1 buff, foo, sndmsg, rcvmsg
@@ -16,42 +16,40 @@ c      call MPI_Pcontrol(0)
       if (error .ne. MPI_SUCCESS) stop
       call MPI_Comm_rank(MPI_COMM_WORLD, rank, error)
       call MPI_Comm_size(MPI_COMM_WORLD, size, error)
-      if (size .ne. 2) then
-         print *, 'Wrong number of processes'
+
+      if (MOD(size,2) .ne. 0) then
+         print *, 'Wrong number of processes, must be multiple of 2'
          call MPI_Finalize(error)
          stop
       end if
-      
-      call Extrae_counters()
 
       call MPI_Buffer_attach(buff, buffsize, error)
-      dest=rank+1
-      if (dest .ge. size) dest=dest-size
 
-C  Rank 0 sends first
-      if (rank .eq. 0) then
+      if (MOD(rank,2) .eq. 0) then
+
          do 101 i=1, NITERS
             call MakeIO(IOSIZE, rank)
-            call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, dest, rank,
+            call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, rank+1, rank,
      1           MPI_COMM_WORLD, error)
             call MakeIO(IOSIZE, rank)
             call MPI_Recv(rcvmsg, MSGSIZE, MPI_INTEGER1, MPI_ANY_SOURCE,
      1           MPI_ANY_TAG, MPI_COMM_WORLD, status, error)
  101     continue
+
       else
+
          do 102 i=1, NITERS
             call MakeIO(IOSIZE, rank)
             call MPI_Recv(rcvmsg, MSGSIZE, MPI_INTEGER1, MPI_ANY_SOURCE,
      1           MPI_ANY_TAG, MPI_COMM_WORLD, status, error)
             call MakeIO(IOSIZE, rank)
-            call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, dest, rank,
+            call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, rank-1, rank,
      1           MPI_COMM_WORLD, error)
  102     continue
+
       end if
 
       call MPI_Buffer_detach(foo, retsize, error)
-
-      call Extrae_counters()
 
       call MPI_Finalize(error)
       stop
