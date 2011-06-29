@@ -29,7 +29,8 @@
 
 #include <unistd.h>
 #include <pthread.h>
-#include <extrae_user_events.h>
+
+#include "extrae_user_events.h"
 
 void * Task1(void *param)
 {

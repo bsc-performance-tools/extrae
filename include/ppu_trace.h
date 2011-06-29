@@ -31,6 +31,7 @@
 #define PPU_INCLUDED_H
 
 #include "mpitrace_user_events.h"
+#include "extrae_version.h"
 
 #ifdef __cplusplus
 extern "C" {

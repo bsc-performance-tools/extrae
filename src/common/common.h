@@ -32,6 +32,8 @@
 
 #include <config.h>
 
+#include "extrae_version.h"
+
 #include "types.h"
 
 #ifdef HAVE_UNUSED_ATTRIBUTE

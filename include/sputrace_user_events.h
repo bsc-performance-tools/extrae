@@ -30,6 +30,8 @@
 #ifndef SPUTRACE_USER_EVENTS
 #define SPUTRACE_USER_EVENTS
 
+#include "extrae_version.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

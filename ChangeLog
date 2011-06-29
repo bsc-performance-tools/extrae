@@ -2,6 +2,8 @@
 ChangeLog
    [ + added, - removed, * changed ]
 
+   * (29/Jun/2011) Added extrae_version.h to track in extrae_user_events.h the
+                   current version of the instrumentation package
    * (23/Jun/2011) mpi_ping examples now accept > 2 processes 
    * (20/Jun/2011) Optimized initialization of mpimpi2prv when loading a large
                    number of files using a large number of processes.

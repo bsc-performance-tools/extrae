@@ -1,6 +1,6 @@
 EXTRAE_HOME=@sub_PREFIXDIR@
 CC = gcc
-CFLAGS = -O -g
+CFLAGS = -O -g -I $(EXTRAE_HOME)/include
 LFLAGS = -L $(EXTRAE_HOME)/lib -lseqtrace `xml2-config --libs` @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_libexecinfo_libs@ @sub_POSIX_CLOCK@
 
 pi:	pi.c

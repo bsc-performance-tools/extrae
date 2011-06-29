@@ -22,75 +22,30 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: file:///mysql/svn/repos/ptools/extrae/trunk/example/LINUX/PTHREAD/user-comms.c $
- | @last_commit: $Date: 2010-10-26 15:50:03 +0200 (Tue, 26 Oct 2010) $
- | @version:     $Revision: 477 $
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/common/common.h $
+ | @last_commit: $Date: 2011-03-28 18:22:50 +0200 (dl, 28 mar 2011) $
+ | @version:     $Revision: 568 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#include <unistd.h>
-#include <pthread.h>
+#ifndef COMMON_H_INCLUDED
+#define EXTRAE_VERSION_H_INCLUDED
 
-#include "extrae_user_events.h"
+#define EXTRAE_VERSION_NUMBER(maj,min,rev) (((maj)<<16) | ((min)<<8) | (rev))
+#define EXTRAE_VERSION_MAJOR(x)            (((x)>>16) & 0xff)
+#define EXTRAE_VERSION_MINOR(x)            (((x)>>8) & 0xff)
+#define EXTRAE_VERSION_REVISION(x)         ((x) & 0xff)
 
-void * Task1(void *param)
-{
-	struct extrae_CombinedEvents events;
-	struct extrae_UserCommunication comm;
-	unsigned types[2] = { 123456, 123457 } ;
-	unsigned values[2] = { 1, 2 };
+#define EXTRAE_VERSION                     EXTRAE_VERSION_NUMBER(2,2,0)
 
-	Extrae_init_UserCommunication (&comm);
-	comm.type = EXTRAE_USER_RECV;
-	comm.partner = 0;
-	comm.tag = 1234;
-	comm.size = 1024;
-	comm.id = 0xdeadbeef;
+/* These macros can be used as:
 
-	Extrae_init_CombinedEvents (&events);
-	events.nCommunications = 1;
-	events.Communications = &comm;
-	events.nEvents = 2;
-	events.Types = types;
-	events.Values = values;
+#if EXTRAE_VERSION_MAJOR(EXTRAE_VERSION) == 2
+ # do something specific for Extrae 2.x.y
+ #if EXTRAE_VERSION_MINOR(EXTRAE_VERSION) == 4
+  # do something specfic for Extrae 2.4.y
+ #endif
+#endif
 
-	Extrae_emit_CombinedEvents (&events);
-}
+*/
 
-void * Task0(void *param)
-{
-	struct extrae_CombinedEvents events;
-	struct extrae_UserCommunication comm;
-	unsigned types[2] = { 123456, 123457 } ;
-	unsigned values[2] = { 1, 2 };
-
-	Extrae_init_UserCommunication (&comm);
-	comm.type = EXTRAE_USER_SEND;
-	comm.partner = 0;
-	comm.tag = 1234;
-	comm.size = 1024;
-	comm.id = 0xdeadbeef;
-
-	Extrae_init_CombinedEvents (&events);
-	events.nCommunications = 1;
-	events.Communications = &comm;
-	events.nEvents = 2;
-	events.Types = types;
-	events.Values = values;
-
-	Extrae_emit_CombinedEvents (&events);
-}
-
-int main (int argc, char *argv[])
-{
-	pthread_t t[2];
-
-	Extrae_init();
-	pthread_create (&t[0], NULL, Task0, NULL);
-	pthread_create (&t[1], NULL, Task1, NULL);
-	pthread_join (t[0], NULL);
-	pthread_join (t[1], NULL);
-	Extrae_fini();
-
-	return 0;
-}
-
+#endif /* EXTRAE_VERSION_H_INCLUDED */

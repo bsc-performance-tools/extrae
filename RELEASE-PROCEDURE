@@ -5,8 +5,10 @@
       - SVN keywords (command svn propset svn:keywords "Date Revision Author HeadURL Id" [-R] [directories/files])
  1.b) Keep ChangeLog file up-to-date
 
-2) Change the version in the configure.ac (see AC_INIT)
- 2.a) Add entry in ChangeLog
+2) Change the version
+ 2.a) in the configure.ac (see AC_INIT)
+ 2.b) in src/common/extrae_version.h
+ 2.c) add entry in ChangeLog
 
 3) Generate binary packages using the buildfarm script
   - this makes sure that the package will compile at least on our environment -

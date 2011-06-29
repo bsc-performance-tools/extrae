@@ -6,7 +6,8 @@
 #########################
 
 # Initialize autoconf & define package name, version and bug-report address 
-AC_INIT(Extrae, 2.1.1-p2, tools@bsc.es)
+#  -- keep version in sync with src/common/extrae_version.h
+AC_INIT(Extrae, 2.2.0, tools@bsc.es)
 
 # Safety check to ensure that the directory told with `--srcdir` contains the source code
 #AC_CONFIG_SRCDIR(src/mpitrace.c)

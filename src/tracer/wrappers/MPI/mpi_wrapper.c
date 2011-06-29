@@ -536,25 +536,23 @@ static void Gather_Nodes_Info (void)
  ******************************************************************************/
 static int Generate_Task_File_List (int n_tasks, char **node_list)
 {
-	int ierror, val = getpid ();
+	int ierror;
 	int i, filedes, thid;
 	unsigned ret;
-	pid_t *buffer_pids = NULL;
 	char tmpname[1024];
-	int *buffer_threads = NULL;
-	int nthreads = Backend_getMaximumOfThreads();
+	unsigned *buffer = NULL;
+	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
 
 	if (TASKID == 0)
-	{
-		buffer_pids = (pid_t *) malloc (sizeof(pid_t) * NumOfTasks);
-		buffer_threads = (int*) malloc (sizeof(int) * NumOfTasks);
-	}
+		buffer = (unsigned *) malloc (sizeof(unsigned) * NumOfTasks * 3);
+		/* we store pid, nthreads and taskid on each position */
+
+	tmp[0] = TASKID; 
+	tmp[1] = getpid();
+	tmp[2] = Backend_getMaximumOfThreads();
 
 	/* Share PID and number of threads of each MPI task */
-	ierror = PMPI_Gather (&val, 1, MPI_INT, buffer_pids, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_CHECK(ierror, PMPI_Gather);
-
-	ierror = PMPI_Gather (&nthreads, 1, MPI_INT, buffer_threads, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	ierror = PMPI_Gather (&tmp, 3, MPI_UNSIGNED, buffer, 3, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 	MPI_CHECK(ierror, PMPI_Gather);
 
 	if (TASKID == 0)
@@ -565,17 +563,19 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 		if (filedes < 0)
 			return -1;
 
-		for (i = 0; i < n_tasks; i++)
+		for (i = 0; i < NumOfTasks; i++)
 		{
-			char tmp_line[2048];
+			char tmpline[2048];
+			unsigned TID = buffer[i*3+0];
+			unsigned PID = buffer[i*3+1];
+			unsigned NTHREADS = buffer[i*3+2];
 
-			for (thid = 0; thid < buffer_threads[i]; thid++)
+			for (thid = 0; thid < NTHREADS; thid++)
 			{
-				FileName_PTT(tmpname, Get_FinalDir(i), appl_name, buffer_pids[i], i, thid, EXT_MPIT);
-
-				sprintf (tmp_line, "%s on %s\n", tmpname, node_list[i]);
-				ret = write (filedes, tmp_line, strlen (tmp_line));
-				if (ret != strlen (tmp_line))
+				FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
+				sprintf (tmpline, "%s on %s\n", tmpname, node_list[i]);
+				ret = write (filedes, tmpline, strlen (tmpline));
+				if (ret != strlen (tmpline))
 				{
 					close (filedes);
 					return -1;
@@ -586,10 +586,7 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 	}
 
 	if (TASKID == 0)
-	{
-		free (buffer_threads);
-		free (buffer_pids);
-	}
+		free (buffer);
 
 	return 0;
 }

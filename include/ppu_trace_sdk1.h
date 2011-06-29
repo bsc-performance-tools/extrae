@@ -29,6 +29,8 @@
 #ifndef PPU_INCLUDED_H
 #define PPU_INCLUDED_H
 
+#include "extrae_version.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

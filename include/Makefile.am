@@ -10,6 +10,7 @@ endif
 #
 
 install-data-hook:
+	cp ../src/common/extrae_version.h $(includedir)
 	cd $(includedir); $(LN_S) -f extrae_user_events.h mpitrace_user_events.h
 	cd $(includedir); $(LN_S) -f extraef_user_events.h mpitracef_user_events.h
 if CELL_SDK_1

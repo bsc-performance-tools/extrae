@@ -31,6 +31,7 @@
 #define MPITRACE_USER_EVENTS
 
 #include "extrae_types.h"
+#include "extrae_version.h"
 
 #ifdef __cplusplus
 extern "C" {

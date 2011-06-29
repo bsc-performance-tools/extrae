@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <pthread.h>
 
+#include "extrae_user_events.h"
+
 #define MAX_THREADS 32
 
 void *routine1 (void *parameters)
