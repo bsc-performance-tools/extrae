@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/xml-parse.c $
- | @last_commit: $Date: 2011-04-05 11:15:50 +0200 (dt, 05 abr 2011) $
- | @version:     $Revision: 588 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: xml-parse.c 588 2011-04-05 09:15:50Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
