@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/probes/OMP/omp_probe.c $
- | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
- | @version:     $Revision: 476 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: omp_probe.c 476 2010-10-26 12:58:30Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "threadid.h"
 #include "wrapper.h"
