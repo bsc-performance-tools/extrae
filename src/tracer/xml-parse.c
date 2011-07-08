@@ -1619,6 +1619,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_MPI))
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(MPI_SUPPORT)
@@ -1629,8 +1630,8 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at PACX */
 #endif
 						}
-						else
-							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at PACX */
+						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
+							tracejant_mpi = FALSE;
 						XML_FREE(enabled);
 					}
 					/* PACX related configuration */
@@ -1647,8 +1648,8 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at MPI */
 #endif
 						}
-						else
-							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at MPI */
+						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
+							tracejant_mpi = FALSE;
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */
