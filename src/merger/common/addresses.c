@@ -113,6 +113,7 @@ int* AddressCollector_GetAllTypes (struct address_collector_t *ac)
 void AddressCollector_GatherAddresses (int numtasks, int taskid,
 	struct address_collector_t *ac)
 {
+	MPI_Status s;
 	int res;
 	if (numtasks > 1)
 	{
@@ -131,7 +132,7 @@ void AddressCollector_GatherAddresses (int numtasks, int taskid,
 					MPI_COMM_WORLD);
 				MPI_CHECK(res, MPI_Send, "Failed ask for collected addresses");
 				res = MPI_Recv (&num_addresses, 1, MPI_UNSIGNED, task,
-					ADDRESSCOLLECTOR_NUM_TAG, MPI_COMM_WORLD, NULL);
+					ADDRESSCOLLECTOR_NUM_TAG, MPI_COMM_WORLD, &s);
 				MPI_CHECK(res, MPI_Recv, "Failed receiving number of collected addresses");
 				if (num_addresses > 0)
 				{
@@ -140,10 +141,10 @@ void AddressCollector_GatherAddresses (int numtasks, int taskid,
 					int buffer_types[num_addresses];
 
 					res = MPI_Recv (&buffer_addresses, num_addresses, MPI_LONG_LONG, task,
-						ADDRESSCOLLECTOR_ADDRESSES_TAG, MPI_COMM_WORLD, NULL);
+						ADDRESSCOLLECTOR_ADDRESSES_TAG, MPI_COMM_WORLD, &s);
 					MPI_CHECK(res, MPI_Recv, "Failed receiving collected addresses");
 					res = MPI_Recv (&buffer_types, num_addresses, MPI_LONG_LONG, task,
-						ADDRESSCOLLECTOR_TYPES_TAG, MPI_COMM_WORLD, NULL);
+						ADDRESSCOLLECTOR_TYPES_TAG, MPI_COMM_WORLD, &s);
 					MPI_CHECK(res, MPI_Recv, "Failed receiving collected addresses");
 
 					for (i = 0; i < num_addresses; i++)
@@ -160,7 +161,7 @@ void AddressCollector_GatherAddresses (int numtasks, int taskid,
 			char tmp;
 
 			res = MPI_Recv (&tmp, 1, MPI_CHAR, 0, ADDRESSCOLLECTOR_ASK_TAG,
-				MPI_COMM_WORLD, NULL);
+				MPI_COMM_WORLD, &s);
 			MPI_CHECK(res, MPI_Recv, "Failed waiting for master to ask for collected addresses");
 			res = MPI_Send (&num_addresses, 1, MPI_UNSIGNED, 0, ADDRESSCOLLECTOR_NUM_TAG,
 				MPI_COMM_WORLD);

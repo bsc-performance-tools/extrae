@@ -973,6 +973,12 @@ int merger_post (int numtasks, int taskid)
 	int error;
 	struct Pair_NodeCPU *NodeCPUinfo;
 
+	if (taskid == 0)
+		fprintf (stdout, "merger: "PACKAGE_NAME" %d.%d.%d\n",
+		  EXTRAE_VERSION_MAJOR(EXTRAE_VERSION),
+		  EXTRAE_VERSION_MINOR(EXTRAE_VERSION),
+		  EXTRAE_VERSION_REVISION(EXTRAE_VERSION));
+
 	if (0 == nTraces)
 	{
 	  fprintf (stderr, "mpi2prv: No intermediate trace files given.\n");
@@ -1050,22 +1056,28 @@ int merger_post (int numtasks, int taskid)
 
 #ifdef HAVE_BFD
 	if (strlen(get_merge_ExecutableFileName()) > 0)
+	{
 		Address2Info_Initialize (get_merge_ExecutableFileName());
 
-	if (strlen(get_merge_SymbolFileName()) == 0 && last_mpits_file != NULL)
-	{
-		char tmp[1024];
-		strncpy (tmp, last_mpits_file, 1024);
-
-		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
+		if (strlen(get_merge_SymbolFileName()) == 0 && last_mpits_file != NULL)
 		{
-			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
-			if (file_exists(tmp))
-				loadSYMfile (tmp);
+			char tmp[1024];
+			strncpy (tmp, last_mpits_file, 1024);
+
+			if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
+			{
+				strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
+				if (file_exists(tmp))
+					loadSYMfile (tmp);
+			}
 		}
+		else
+			loadSYMfile (get_merge_SymbolFileName());
 	}
-	else
-		loadSYMfile (get_merge_SymbolFileName());
+#else
+	if (taskid == 0)
+		fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
+#endif
 
 	if (get_option_merge_SortAddresses() && !Address2Info_Initialized())
 	{
@@ -1076,10 +1088,6 @@ int merger_post (int numtasks, int taskid)
 		}	
 		set_option_merge_SortAddresses (FALSE);
 	}
-#else
-	if (taskid == 0)
-		fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
-#endif
 
 	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
