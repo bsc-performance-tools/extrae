@@ -1742,7 +1742,7 @@ void PMPI_Barrier_Wrapper (MPI_Fint *comm, MPI_Fint *ierror)
                     MPI_CurrentOpGlobal);
   }
 #else
-  TRACE_MPIEVENT (TIME, MPI_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, c,
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, c,
                   MPI_CurrentOpGlobal);
 #endif
 
