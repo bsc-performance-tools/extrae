@@ -27,7 +27,7 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef COMMON_H_INCLUDED
+#ifndef EXTRAE_VERSION_H_INCLUDED
 #define EXTRAE_VERSION_H_INCLUDED
 
 #define EXTRAE_VERSION_NUMBER(maj,min,rev) (((maj)<<16) | ((min)<<8) | (rev))
