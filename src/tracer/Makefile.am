@@ -37,6 +37,9 @@ if HAVE_MPI
 if WANT_OPENMP
   lib_LTLIBRARIES += libompitrace.la libompitracef.la
 endif
+if WANT_CUDA
+  lib_LTLIBRARIES += libcudampitrace.la libcudampitracef.la
+endif
 if WANT_SMPSS
   lib_LTLIBRARIES += libsmpssmpitrace.la libsmpssmpitracef.la
 endif
@@ -154,6 +157,8 @@ core_SRCS = \
 
 # CUDA trace
 libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
+libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(WRAPPERS_MPI) $(core_MPI_SRCS)
+libcudampitracef_la_SOURCES = $(libcudampitrace_la_SOURCES) mpif.h
 
 # MPItrace & Sequential trace
 libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
@@ -229,6 +234,8 @@ endif
 endif
 
 libcudatrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
+libcudampitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB)
+libcudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) 
 
 libseqtrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 libmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB)
@@ -324,19 +331,21 @@ if PTHREAD_SUPPORT_IN_ALL_LIBS
 core_CFLAGS += -DPTHREAD_SUPPORT
 endif
 
-COMMON_LINKER_FLAGS = $(HWC_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(UNWIND_LINKER_FLAGS) $(MRNET_LINKER_FLAGS)
-
-libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
-
-libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
-
-libupctrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DUPC_SUPPORT
-
 if SINGLE_MPI_LIBRARY
 MPITRACE_SYMBOLS= -DC_SYMBOLS -DFORTRAN_SYMBOLS
 else
 MPITRACE_SYMBOLS= -DC_SYMBOLS
 endif
+
+COMMON_LINKER_FLAGS = $(HWC_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(UNWIND_LINKER_FLAGS) $(MRNET_LINKER_FLAGS)
+
+libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
+libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
+libcudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT 
+
+libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
+
+libupctrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DUPC_SUPPORT
 
 libmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 libmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
@@ -382,6 +391,8 @@ NEW_MPI_LIBS = -L@MPI_LIBSDIR@ @MPI_LIBS@ -static
 endif
 
 libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libcudampitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libcudampitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
