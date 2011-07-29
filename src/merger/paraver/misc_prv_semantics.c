@@ -509,7 +509,9 @@ static int Sampling_Caller_Event (event_t * current,
 		}
 #endif
 
+		/* HSG, samples should not break states?
 		trace_paraver_state (cpu, ptask, task, thread, current_time);
+		*/
 
 		if (EvTypeDelta == 0)
 		{
@@ -677,8 +679,8 @@ static int Evt_SetCounters (
    unsigned int thread,
    FileSet_t *fset )
 {
-    UNREFERENCED_PARAMETER(fset);
-    unsigned int newSet = Get_EvValue (current_event);
+	UNREFERENCED_PARAMETER(fset);
+	unsigned int newSet = Get_EvValue (current_event);
 
 	return HWC_Change_Ev (newSet, current_time, cpu, ptask, task, thread);
 }
