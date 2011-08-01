@@ -78,7 +78,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <mpi.h>
 #endif
 
-#ifdef HAVE_BFD
+#if defined(HAVE_BFD)
 # include "addr2info.h" 
 #endif
 
@@ -1054,7 +1054,7 @@ int merger_post (int numtasks, int taskid)
 		}
 	}
 
-#ifdef HAVE_BFD
+#if defined(HAVE_BFD)
 	if (strlen(get_merge_ExecutableFileName()) > 0)
 	{
 		Address2Info_Initialize (get_merge_ExecutableFileName());
@@ -1079,6 +1079,7 @@ int merger_post (int numtasks, int taskid)
 		fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
 #endif
 
+#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses() && !Address2Info_Initialized())
 	{
 		if (taskid == 0)
@@ -1088,6 +1089,9 @@ int merger_post (int numtasks, int taskid)
 		}	
 		set_option_merge_SortAddresses (FALSE);
 	}
+#else
+	set_option_merge_SortAddresses (FALSE);
+#endif
 
 	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
@@ -1101,7 +1105,7 @@ int merger_post (int numtasks, int taskid)
 	if (error)
 		fprintf (stderr, "mpi2prv: An error has been encountered when generating the tracefile. Dying...\n");
 
-#ifdef HAVE_BFD
+#if defined(HAVE_BFD)
 	if (get_option_merge_VerboseLevel() > 0)
 		Addr2Info_HashCache_ShowStatistics();
 #endif
