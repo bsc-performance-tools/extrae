@@ -3748,7 +3748,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	TRACE_MPIEVENT (TIME, MPI_SENDRECV_REPLACE_EV, EVT_END, SourceRank, DataSize, sender_tag, c, EMPTY);
 }
 
-#if defined (MPI_SUPPORTS_MPI_IO)
+#if MPI_SUPPORTS_MPI_IO
 /*************************************************************
  **********************      MPIIO      **********************
  *************************************************************/
@@ -3832,6 +3832,30 @@ void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, v
 }
 
 #endif /* MPI_SUPPORTS_MPI_IO */
+
+#if MPI_SUPPORTS_MPI_1SIDED
+
+void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
+  MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
+	MPI_Fint* win, MPI_Fint* ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	CtoF77(pmpi_get) (origin_addr, origin_count, origin_datatype, target_rank,
+		target_disp, target_count, target_datatype, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+}
+
+void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
+  MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
+	MPI_Fint* win, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	CtoF77(pmpi_put) (origin_addr, origin_count, origin_datatype, target_rank,
+		target_disp, target_count, target_datatype, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+}
+
+#endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* defined(FORTRAN_SYMBOLS) */
 
@@ -6823,7 +6847,7 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
 	return ierror;
 }
 
-#if defined(MPI_SUPPORTS_MPI_IO)
+#if MPI_SUPPORTS_MPI_IO
 
 /*************************************************************
  **********************      MPIIO      **********************
@@ -6941,8 +6965,35 @@ int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf,
 
 #endif /* MPI_SUPPORTS_MPI_IO */
 
-#endif /* defined(C_SYMBOLS) */
+#if MPI_SUPPORTS_MPI_1SIDED
 
+int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+  int target_rank, MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype,
+	MPI_Win win)
+{
+	int ierror;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	ierror = PMPI_Get (origin_addr, origin_count, origin_datatype, target_rank,
+		target_disp, target_count, target_datatype, win);
+	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	return ierror;
+}
+
+int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+  int target_rank, MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype,
+	MPI_Win win)
+{
+	int ierror;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	ierror = PMPI_Put (origin_addr, origin_count, origin_datatype, target_rank,
+		target_disp, target_count, target_datatype, win);
+	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	return ierror;
+}
+
+#endif /* MPI_SUPPORTS_MPI_1SIDED */
+
+#endif /* defined(C_SYMBOLS) */
 
 #if defined(DEAD_CODE) /* This is outdated */
 

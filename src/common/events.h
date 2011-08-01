@@ -251,6 +251,9 @@ enum {
 #define MPI_FILE_WRITE_AT_EV         50000108
 #define MPI_FILE_WRITE_AT_ALL_EV     50000109
 
+#define MPI_GET_EV                   50000200
+#define MPI_PUT_EV                   50000201
+
 /******************************************************************************
  *   User events to trace several MPI functions.
  *   MUST be between 50000001 - 50999999

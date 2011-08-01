@@ -1997,7 +1997,7 @@ void NAME_ROUTINE_C2F(mpi_sendrecv_replace) (void *buf, MPI_Fint *count,
  **********************      MPIIO      **********************
  *************************************************************/
 
-#if defined(MPI_SUPPORTS_MPI_IO)
+#if MPI_SUPPORTS_MPI_IO
 
 /******************************************************************************
  ***  MPI_File_open
@@ -2256,6 +2256,62 @@ void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
 }
 
 #endif /* MPI_SUPPORTS_MPI_IO */
+
+#if MPI_SUPPORTS_MPI_1SIDED
+
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_get__,mpi_get_,MPI_GET,mpi_get,(MPI_Fint *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_get)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
+	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
+	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_get)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
+	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
+	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		MPI_Get_Fortran_Wrapper (origin_addr, origin_count, origin_datatype,
+			target_rank, target_disp, target_count, target_datatype, win, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77(pmpi_get)(origin_addr, origin_count, origin_datatype, target_rank,
+			target_disp, target_count, target_datatype, win, ierror);
+}
+
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_put__,mpi_put_,MPI_PUT,mpi_put,(MPI_Fint *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_put)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
+	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
+	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_put)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
+	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
+	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		MPI_Put_Fortran_Wrapper (origin_addr, origin_count, origin_datatype,
+			target_rank, target_disp, target_count, target_datatype, win, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77(pmpi_put)(origin_addr, origin_count, origin_datatype, target_rank,
+			target_disp, target_count, target_datatype, win, ierror);
+}
+
+#endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* defined(FORTRAN_SYMBOLS) */
 
@@ -3846,7 +3902,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv_replace) (void *buf, int count, MPI_Datatype typ
 	return res;
 }
 
-#if defined(MPI_SUPPORTS_MPI_IO)
+#if MPI_SUPPORTS_MPI_IO
 
 /******************************************************************************
  ***  MPI_File_open
@@ -4049,6 +4105,50 @@ int NAME_ROUTINE_C(MPI_File_write_at_all) (MPI_File fh, MPI_Offset offset,
 }
 
 #endif /* MPI_SUPPORTS_MPI_IO */
+
+#if MPI_SUPPORTS_MPI_1SIDED
+
+int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+	int target_rank, MPI_Aint target_disp, int target_count,
+	MPI_Datatype target_datatype, MPI_Win win)
+{
+	int res;
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Get_C_Wrapper (origin_addr, origin_count, origin_datatype,
+			target_rank, target_disp, target_count, target_datatype, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+		return res;
+	}
+	else
+		return PMPI_Get (origin_addr, origin_count, origin_datatype, target_rank,
+			target_disp, target_count, target_datatype, win);
+}
+
+int MPI_Put (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+	int target_rank, MPI_Aint target_disp, int target_count,
+	MPI_Datatype target_datatype, MPI_Win win)
+{
+	int res;
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Put_C_Wrapper (origin_addr, origin_count, origin_datatype,
+			target_rank, target_disp, target_count, target_datatype, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+		return res;
+	}
+	else
+		return PMPI_Put (origin_addr, origin_count, origin_datatype, target_rank,
+			target_disp, target_count, target_datatype, win);
+}
+
+#endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* defined(C_SYMBOLS) */
 

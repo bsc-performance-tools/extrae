@@ -65,10 +65,13 @@ These are the instrumented MPI routines in the \TRACE package:
 \item MPI\_File\_read\_at\_all\footnotemark[2]
 \item MPI\_File\_write\_at\footnotemark[2]
 \item MPI\_File\_write\_at\_all\footnotemark[2]
+\item MPI\_Get\footnotemark[3]
+\item MPI\_Put\footnotemark[3]
 \end{itemize}
 
 \footnotetext[1]{The MPI library must support this routine}
-\footnotetext[2]{The MPI library must support these MPI/IO routines}
+\footnotetext[2]{The MPI library must support MPI/IO routines}
+\footnotetext[3]{The MPI library must support 1-sided (or RMA -remote memory address-) routines}
 
 \section{Instrumented OpenMP runtimes}\label{sec:OpenMPruntimesinstrumented}
 
@@ -84,11 +87,11 @@ These are the instrument routines of the Intel OpenMP runtimes:
 \item \_\_kmpc\_fork\_call
 \item \_\_kmpc\_barrier
 \item \_\_kmpc\_invoke\_task\_func
-\item \_\_kmpc\_set\_lock\footnotemark[3]
-\item \_\_kmpc\_unset\_lock\footnotemark[3]
+\item \_\_kmpc\_set\_lock\footnotemark[4]
+\item \_\_kmpc\_unset\_lock\footnotemark[4]
 \end{itemize}
 
-\footnotetext[3]{The instrumentation of OpenMP locks can be enabled/disabled}
+\footnotetext[4]{The instrumentation of OpenMP locks can be enabled/disabled}
 
 \subsection{IBM compilers - xlc, xlC, xlf}
 
@@ -103,8 +106,8 @@ These are the instrumented routines of the IBM OpenMP runtime:
 \item \_xlsmpBarrier\_TPO
 \item \_xlsmpSingleSetup\_TPO
 \item \_xlsmpWSSectSetup\_TPO
-\item \_xlsmpRelDefaultSLock\footnotemark[3]
-\item \_xlsmpGetDefaultSLock\footnotemark[3]
+\item \_xlsmpRelDefaultSLock\footnotemark[4]
+\item \_xlsmpGetDefaultSLock\footnotemark[4]
 \end{itemize}
 
 \subsection{GNU compilers - gcc, g++, gfortran}
@@ -136,12 +139,12 @@ These are the instrumented routines of the IBM OpenMP runtime:
 \item GOMP\_loop\_guided\_next
 \item GOMP\_loop\_runtime\_next
 \item GOMP\_barrier
-\item GOMP\_critical\_name\_enter\footnotemark[3]
-\item GOMP\_critical\_name\_exit\footnotemark[3]
-\item GOMP\_critical\_enter\footnotemark[3]
-\item GOMP\_critical\_exit\footnotemark[3]
-\item GOMP\_atomic\_enter\footnotemark[3]
-\item GOMP\_atomic\_exit\footnotemark[3]
+\item GOMP\_critical\_name\_enter\footnotemark[4]
+\item GOMP\_critical\_name\_exit\footnotemark[4]
+\item GOMP\_critical\_enter\footnotemark[4]
+\item GOMP\_critical\_exit\footnotemark[4]
+\item GOMP\_atomic\_enter\footnotemark[4]
+\item GOMP\_atomic\_exit\footnotemark[4]
 \end{itemize}
 
 \section{Instrumented pthread runtimes}\label{sec:OpenMPruntimesinstrumented}

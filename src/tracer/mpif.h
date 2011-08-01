@@ -464,7 +464,7 @@ void CtoF77 (pmpi_sendrecv_replace) (void *buf, MPI_Fint *count, MPI_Fint *type,
 	MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
 
-#if defined(MPI_SUPPORTS_MPI_IO)
+#if (MPI_SUPPORTS_MPI_IO)
 void CtoF77 (pmpi_file_open) (MPI_Fint *comm, char *filename, MPI_Fint *amode,
 	MPI_Fint *info, MPI_File *fh, MPI_Fint *len);
 
@@ -494,6 +494,18 @@ void CtoF77 (pmpi_file_write_at) (MPI_File *fh, MPI_Offset *offset, void* buf,
 void CtoF77 (pmpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 #endif /* defined(MPI_SUPPORTS_MPI_IO) */
+
+#if MPI_SUPPORTS_MPI_1SIDED
+
+void CtoF77(pmpi_get) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
+  MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
+	MPI_Fint* win, MPI_Fint* ierror);
+
+void CtoF77(pmpi_put) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
+  MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
+	MPI_Fint* win, MPI_Fint* ierror);
+
+#endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* defined(FORTRAN_SYMBOLS) */
 

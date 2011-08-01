@@ -35,6 +35,8 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo -e \\\tperuse available?    ${PERUSE_AVAILABILITY}
 		echo -e \\\tmixed C/Fortran libraries? ${mpi_lib_contains_c_and_fortran}
     echo -e \\\tshared libraries?    ${MPI_SHARED_LIB_FOUND}
+		echo -e \\\t1-sided operations?  ${mpi_lib_supports_mpi_1sided}
+		echo -e \\\tMPI I/O operations?  ${mpi_lib_supports_mpi_io}
 	fi
 	echo
 	echo PACX instrumentation: ${PACX_INSTALLED}

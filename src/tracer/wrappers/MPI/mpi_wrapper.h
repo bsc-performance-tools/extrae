@@ -236,7 +236,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 	MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
 
-#if defined(MPI_SUPPORTS_MPI_IO)
+#if MPI_SUPPORTS_MPI_IO
 
 void PMPI_File_open_Fortran_Wrapper (MPI_Fint *comm, char *filename,
 	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len);
@@ -272,6 +272,18 @@ void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset,
 	MPI_Fint *ierror);
 
 #endif /* MPI_SUPPORTS_MPI_IO */
+
+#if MPI_SUPPORTS_MPI_1SIDED
+
+void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
+  MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
+	MPI_Fint* win, MPI_Fint* ierror);
+
+void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
+  MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
+	MPI_Fint* win, MPI_Fint* ierror);
+
+#endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* defined(FORTRAN_SYMBOLS) */
 
@@ -421,7 +433,7 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
   int dest, int sendtag, int source, int recvtag, MPI_Comm comm,
   MPI_Status * status);
 
-#if defined(MPI_SUPPORTS_MPI_IO)
+#if MPI_SUPPORTS_MPI_IO
 
 int MPI_File_open_C_Wrapper (MPI_Comm comm, char *filename, int amode,
   MPI_Info info, MPI_File *fh);
@@ -453,6 +465,18 @@ int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
   int count, MPI_Datatype datatype, MPI_Status *status);
 
 #endif /* MPI_SUPPORTS_MPI_IO */
+
+#if MPI_SUPPORTS_MPI_1SIDED
+
+int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+  int target_rank, MPI_Aint target_disp, int target_count,
+  MPI_Datatype target_datatype, MPI_Win win);
+
+int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+  int target_rank, MPI_Aint target_disp, int target_count,
+  MPI_Datatype target_datatype, MPI_Win win);
+
+#endif
 
 int MPI_Type_size (MPI_Datatype datatype, int *size);
 

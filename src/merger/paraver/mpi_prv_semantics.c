@@ -132,6 +132,10 @@ static int Get_State (unsigned int EvType)
 		case MPI_SCAN_EV:
 			state = STATE_BCAST;
 		break;
+		case MPI_GET_EV:
+		case MPI_PUT_EV:
+			state = STATE_MEMORY_XFER;
+		break;
 		default:
 			fprintf (stderr, "mpi2prv: Error! Unknown MPI event %d parsed at %s (%s:%d)\n",
 			  EvType, __func__, __FILE__, __LINE__);
@@ -893,6 +897,25 @@ int MPI_TestSoftwareCounter_Event (event_t * current_event,
 	return 0;
 }
 
+/******************************************************************************
+ *** MPI_RMA_Event (Remote Memory Address)
+ ******************************************************************************/
+int MPI_RMA_Event (event_t * current_event, unsigned long long current_time,
+	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+	FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	Switch_State (Get_State(Get_EvEvent(current_event)),
+		Get_EvValue(current_event) == EVT_BEGIN, ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+		Get_EvEvent(current_event), Get_EvValue (current_event));
+
+	return 0;
+}
+
 
 /******************************************************************************
  ***  MPI_GenerateParaverTraces
@@ -960,5 +983,7 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_FILE_READ_AT_ALL_EV, Other_MPI_Event },
 	{ MPI_FILE_WRITE_AT_EV, Other_MPI_Event },
 	{ MPI_FILE_WRITE_AT_ALL_EV, Other_MPI_Event },
+	{ MPI_PUT_EV, MPI_RMA_Event},
+	{ MPI_GET_EV, MPI_RMA_Event},
 	{ NULL_EV, NULL }
 };
