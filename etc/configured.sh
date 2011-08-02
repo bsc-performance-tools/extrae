@@ -26,7 +26,6 @@ if test "${EXTRAE_HOME}" != "" ; then
 		echo "Dying..."
 		exit 
 	else
-		echo
 		source ${EXTRAE_HOME}/etc/extrae-vars.sh
 		echo "Loaded specs for ${PACKAGE_NAME:-Extrae} from ${EXTRAE_HOME}/etc/extrae-vars.sh"
 	fi
