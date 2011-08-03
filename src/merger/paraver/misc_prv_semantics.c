@@ -611,7 +611,7 @@ static void ResetCounters (int ptask, int task)
 }
 
 /******************************************************************************
- **      Function name : Evt_SetCounters
+ **      Function name : HWC_Change_Ev
  **      Description :
  ******************************************************************************/
 
@@ -633,7 +633,8 @@ int HWC_Change_Ev (
 	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
 	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
 
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	/* HSG changing the HWC set do not should change the application state */
+	/* trace_paraver_state (cpu, ptask, task, thread, current_time); */
 
 	/* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
 	for (i=0; i<MAX_HWC; i++)
