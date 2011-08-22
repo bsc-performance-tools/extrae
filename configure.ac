@@ -367,10 +367,10 @@ AM_CONDITIONAL(WANT_SMPSS, test "${enable_smpss}" = "yes" )
 AC_ARG_ENABLE(upc, 
    AC_HELP_STRING(
       [--enable-upc],
-      [Enable support for tracing UPC run-time (enabled by default)]
+      [Enable support for tracing UPC run-time (disabled by default)]
    ),
    [enable_upc="${enableval}"],
-   [enable_upc="yes"]
+   [enable_upc="no"]
 )
 AM_CONDITIONAL(WANT_UPC, test "${enable_upc}" = "yes" )
 
