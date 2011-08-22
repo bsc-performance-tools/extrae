@@ -187,7 +187,6 @@
 		if (traceja_event)                                          \
 		{                                                           \
 			evt.time = (evttime);                                     \
-			TRACE_MPI_CALLER (evt.time,evtvalue,offset)               \
 			evt.event = (evttype);                                    \
 			evt.value = (evtvalue);                                   \
 			evt.param.mpi_param.target = (long) (evttarget);          \
@@ -204,6 +203,7 @@
 				ACCUMULATED_COUNTERS_RESET(thread_id);                  \
 			}                                                         \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+			TRACE_MPI_CALLER (evt.time,evtvalue,offset)               \
 		}                                                           \
 	}                                                             \
 }
