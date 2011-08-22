@@ -34,6 +34,7 @@ c      call MPI_Pcontrol(0)
             call MakeIO(IOSIZE, rank)
             call MPI_Recv(rcvmsg, MSGSIZE, MPI_INTEGER1, MPI_ANY_SOURCE,
      1           MPI_ANY_TAG, MPI_COMM_WORLD, status, error)
+            call MPI_Barrier(MPI_COMM_WORLD, error)
  101     continue
 
       else
@@ -45,6 +46,7 @@ c      call MPI_Pcontrol(0)
             call MakeIO(IOSIZE, rank)
             call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, rank-1, rank,
      1           MPI_COMM_WORLD, error)
+            call MPI_Barrier(MPI_COMM_WORLD, error)
  102     continue
 
       end if
