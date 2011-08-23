@@ -1,9 +1,9 @@
-PAPI_HOME = 
-EXTRAE_HOME = /home/harald/T
+PAPI_HOME = @sub_PAPI_HOME@
+EXTRAE_HOME = @sub_PREFIXDIR@
 
 CC = gcc
 CFLAGS = -O -fopenmp -g -I$(EXTRAE_HOME)/include
-CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 -L $(PAPI_HOME)/lib     
+CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 -L $(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@  @sub_POSIX_CLOCK@
 
 all: pi pi_instrumented
 
