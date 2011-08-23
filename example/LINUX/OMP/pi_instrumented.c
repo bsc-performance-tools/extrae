@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/example/LINUX/OMP/pi.c $
+ | @last_commit: $Date: 2011-06-29 10:44:44 +0200 (dc, 29 jun 2011) $
+ | @version:     $Revision: 687 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include <stdio.h>
 #include <omp.h>
@@ -38,6 +38,9 @@ int main(int argc, char **argv)
 	int n = 1000000;
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area, x, start, end;
+
+	/* Extrae_init() must be called before any #pragma omp or OMP call */
+	Extrae_init();
 
 	start = omp_get_wtime();
 	h = 1.0 / (double) n;
@@ -53,4 +56,7 @@ int main(int argc, char **argv)
 
 	printf("pi is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
 	printf("Ran in %0.5f seconds with %d threads\n",end-start,omp_get_max_threads());
+
+	/* Extre_fini() must be the last call */
+	Extrae_fini();
 }

@@ -1,10 +1,10 @@
 <?xml version='1.0'?>
 
 <trace enabled="yes"
- home="@sub_PREFIXDIR@"
+ home="/home/harald/T"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="@sub_XMLID@"
+ xml-parser-id="Id: xml-parse.c 697 2011-07-08 15:14:05Z harald $"
 >
 
   <openmp enabled="yes">
