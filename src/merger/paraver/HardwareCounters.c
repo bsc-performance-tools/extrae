@@ -75,7 +75,7 @@ CntQueue CountersTraced;
  **      Description : 
  ******************************************************************************/
 
-void HardwareCounters_Emit (int ptask, int task, int thread,
+int HardwareCounters_Emit (int ptask, int task, int thread,
 	long long time, event_t * Event, unsigned int *outtype,
 	unsigned long long *outvalue)
 {
@@ -84,7 +84,20 @@ void HardwareCounters_Emit (int ptask, int task, int thread,
   struct thread_t *Sthread;
   int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
 
-  Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
+
+	/* Don't emit hwc that coincide in time  with a hardware counter group change.
+	   However, we must track the value of counters if SAMPLING_SUPPORT */
+	if (Sthread->last_hw_group_change == time)
+	{
+#if defined(PAPI_COUNTERS) && defined (SAMPLING_SUPPORT)
+		for (cnt = 0; cnt < MAX_HWC; cnt++)
+			if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
+			    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
+				Sthread->counters[cnt] = Event->HWCValues[cnt];
+#endif
+		return FALSE;
+	}
 
   for (cnt = 0; cnt < MAX_HWC; cnt++)
   {
@@ -98,11 +111,10 @@ void HardwareCounters_Emit (int ptask, int task, int thread,
     if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER)
 # endif
     {
-      /*
-       * Si els comptadors acumulen cal aixo:
-       * *   value = Event->HWCValues[ cnt ]-Sthread->counters[cnt];
-       * * pero com que faig un reset a cada read: 
-       */
+			/* If sampling is enabled PAPI_reset is not called, so we must substract
+			   the previous read value from the current PAPI_read because it's always
+			   adding */
+
 # if defined(SAMPLING_SUPPORT)
 			/* Protect when counters are incorrect (major timestamp, lower counter value) */
 			if (Event->HWCValues[cnt] >= Sthread->counters[cnt])
@@ -138,6 +150,7 @@ void HardwareCounters_Emit (int ptask, int task, int thread,
 #endif
 
   }
+	return TRUE;
 }
 
 static int HardwareCounters_Compare (long long *HWC1, int *used1, long long *HWC2, int *used2)
@@ -181,7 +194,9 @@ void HardwareCounters_Get (event_t *Event, unsigned long long *buffer)
 
 void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds)
 {
-	struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+	struct thread_t *Sthread;
+
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
 	if (newSet <= Sthread->num_HWCSets)
 	{
@@ -214,9 +229,11 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 
 int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id)
 {
+	struct thread_t *Sthread;
 	static int warn_count = 0;
 
-	struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
+
 	if ((set_id+1 > Sthread->num_HWCSets) || (set_id < 0))
 	{
 		warn_count ++;
@@ -236,7 +253,9 @@ int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id)
 
 int HardwareCounters_GetCurrentSet(int ptask, int task, int thread)
 {
-    struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+	struct thread_t *Sthread;
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
+
 	return Sthread->current_HWCSet;
 }
 
@@ -253,10 +272,11 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
 	int cnt;
 	CntQueue *cItem;
-	struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+	struct thread_t *Sthread;
 	int counters_used[MAX_HWC];
 
 	int *newIds = HardwareCounters_GetSetIds (ptask, task, thread, newSet);
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
 	for (cnt = 0; cnt < MAX_HWC; cnt++)
 	{
@@ -312,8 +332,10 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Event)
 {
   int cnt;
-  struct thread_t *Sthread = &(obj_table[ptask-1].tasks[task-1].threads[thread-1]);
+  struct thread_t *Sthread;
   int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
+
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
   for (cnt = 0; cnt < MAX_HWC; cnt++)
 		if (Event->HWCValues[cnt] == SAMPLE_COUNTER)

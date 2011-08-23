@@ -73,6 +73,7 @@ typedef struct thread_t
 	off_t incomplete_state_offset;
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
+	unsigned long long last_hw_group_change;
 	int **HWCSets;
 	int num_HWCSets;
 	int current_HWCSet;

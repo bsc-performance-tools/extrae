@@ -124,7 +124,7 @@ void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsig
 {
 	iotimer_t temps;
 	unsigned i;
-	int events_id[MAX_MULTIPLE_EVENTS];
+	int events_id[*count];
 
 	if (*count > 0)
 	{

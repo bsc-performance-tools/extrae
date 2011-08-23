@@ -628,10 +628,11 @@ int HWC_Change_Ev (
 	unsigned long long hwcvalue[MAX_HWC+1];
 	unsigned int prev_hwctype[MAX_HWC];
 	struct thread_t * Sthread;
-	Sthread = GET_THREAD_INFO(ptask, task, thread);
-
 	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
 	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
+
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
+	Sthread->last_hw_group_change = current_time;
 
 	/* HSG changing the HWC set do not should change the application state */
 	/* trace_paraver_state (cpu, ptask, task, thread, current_time); */
@@ -647,6 +648,8 @@ int HWC_Change_Ev (
 	ResetCounters (ptask-1, task-1);
 	HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
 
+	/* This loop starts at 0 and goes to MAX_HWC+1 because HardwareCounters_Change
+	   reports in hwctype[0] the counter group identifier */
 	for (i = 0; i < MAX_HWC+1; i++)
 	{
 		if (NO_COUNTER != hwctype[i])
@@ -713,7 +716,7 @@ static int CPU_Burst_Event (
 	return 0;
 }
 
-
+#if 0
 /******************************************************************************
  **      Function name : traceCounters
  **      Description :
@@ -735,6 +738,7 @@ static int traceCounters (
 
 	return 0;
 }
+#endif
 
 static int SetTracing_Event (
    event_t * current_event,
@@ -827,14 +831,11 @@ static int User_Send_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned recv_thread;
-	struct thread_t *thread_info;
 	struct task_t *task_info, *task_info_partner;
 	event_t * recv_begin, * recv_end;
 	UNREFERENCED_PARAMETER(cpu);
 
-	thread_info = GET_THREAD_INFO(ptask, task, 1);
 	task_info = GET_TASK_INFO(ptask, task);
-
 
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
@@ -877,12 +878,10 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned send_thread;
-	struct thread_t *thread_info;
 	struct task_t *task_info, *task_info_partner;
 	UNREFERENCED_PARAMETER(cpu);
 	UNREFERENCED_PARAMETER(current_time);
 
-	thread_info = GET_THREAD_INFO(ptask, task, 1);
 	task_info = GET_TASK_INFO(ptask, task);
 
 	if (MatchComms_Enabled(ptask, task, thread))
@@ -927,7 +926,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ WRITE_EV, ReadWrite_Event },
 	{ APPL_EV, Appl_Event },
 	{ USER_EV, User_Event },
-	{ HWC_EV, traceCounters },
+	{ HWC_EV, SkipHandler /* traceCounters */ },
 #if USE_HARDWARE_COUNTERS
 	{ HWC_DEF_EV, Evt_CountersDefinition },
 	{ HWC_CHANGE_EV, Evt_SetCounters },

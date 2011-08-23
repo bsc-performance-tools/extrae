@@ -83,7 +83,7 @@ CntQueue;
 
 extern CntQueue CountersTraced;
 
-void HardwareCounters_Emit (int ptask, int task, int thread,
+int HardwareCounters_Emit (int ptask, int task, int thread,
   long long time, event_t * Event, unsigned int *outtype,
   unsigned long long *outvalue);
 void HardwareCounters_Show (event_t * Event, int ncounters);

@@ -190,6 +190,9 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
 	{
+		/* make sure we don't loose the current counter values */
+		Extrae_counters_Wrapper();
+
 		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
 
 		/* Move to the next set */
@@ -208,6 +211,9 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
 	{
+		/* make sure we don't loose the current counter values */
+		Extrae_counters_Wrapper();
+
 		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
 
 		/* Move to the previous set */

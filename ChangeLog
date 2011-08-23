@@ -2,6 +2,9 @@
 ChangeLog
  [ + added, - removed, * changed ]
 
+ * 23Aug2011 Fixed emitting HWC when HWC_CHANGE_EV also occurs. HWC values
+             are 0 for the new set and also the HWC counters are not emitted
+             at the same timestamp.
  * 23Aug2011 Added example for CUDA instrumentation
  * 01Aug2011 Added instrumentation of MPI_Get and MPI_Put
  * 29Jun2011 Modified SVN propset using
