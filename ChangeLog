@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
 
+ * 23Aug2011 Added example for CUDA instrumentation
  * 01Aug2011 Added instrumentation of MPI_Get and MPI_Put
  * 29Jun2011 Modified SVN propset using
               svn propset svn:keywords "Date Revision Author HeadURL Id"

@@ -181,6 +181,9 @@ PTHREAD_EXAMPLE_FILES=\
 PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \
  example/LINUX/PACX/Makefile
 
+CUDA_EXAMPLE_FILES=example/LINUX/CUDA/hello.cu \
+ example/LINUX/CUDA/Makefile
+
 endif
 
 endif
@@ -212,6 +215,10 @@ endif
 if WANT_PTHREAD
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/PTHREAD
 	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
+endif
+if WANT_CUDA
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/CUDA
+	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
 endif
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
