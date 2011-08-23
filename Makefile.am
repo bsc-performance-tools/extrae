@@ -182,6 +182,9 @@ PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \
  example/LINUX/PACX/Makefile
 
 CUDA_EXAMPLE_FILES=example/LINUX/CUDA/hello.cu \
+ example/LINUX/CUDA/README \
+ example/LINUX/CUDA/run.sh \
+ example/LINUX/CUDA/extrae.xml \
  example/LINUX/CUDA/Makefile
 
 endif
