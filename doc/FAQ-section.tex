@@ -115,12 +115,11 @@
       {\bf Answer 2:} If using PMAPI (on AIX systems), check for the {\tt pmlist} command. Specifically, check for the available groups running {\tt pmlist -g -1}.
 
 \item {\bf Question:} How do I know how many performance counters can I use?\\
-      {\bf Answer 1:} If using PAPI, check the header of the {\tt papi\_avail} header.\\
-      {\bf Answer 2:} {\bf PMAPI}?
+      {\bf Answer:  } The \TRACE package can gather up to eight (8) performance counters at the same time. This also depends on the underlying library used to gather them.
 
-\item {\bf Question:} I cannot use as many counters as {\tt papi\_avail} specifies.\\
-      {\bf Answer 1:} {\bf derived}\\
-			{\bf Answer 2:} {\bf groups}
+\item {\bf Question:} When using PAPI, I cannot read eight performance counters or the specified in {\tt papi\_avail} output.\\
+      {\bf Answer 1:} There are some performance counters (those listed in {\tt papi\_avail}) that are classified as derived. Such performance counters depend on more than one counter increasing the number of real performance counters used. Check for the derived column within the list to check whether a performance counter is derived or not.\\
+			{\bf Answer 2:} On some architectures, like the PowerPC, the performance counters are grouped in a such way that choosing a performance counter precludes others from being elected in the same set. A feasible work-around is to create as many sets in the XML file to gather all the required hardware counters and make sure that the sets change from time to time.
 
 
 \end{itemize}

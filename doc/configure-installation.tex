@@ -82,7 +82,7 @@ make install}}
 
 \subsection{AIX}
 
-Some extensions of \TRACE do not work properly (nanos, SMPss and OpenMP) on AIX. In addition, if using IBM MPI (aka POE) the make will complain when generating the parallel merge if the main compiler is not xlc/xlC. So, you can change the compiler or disable the parallel merge at compile step. Also, command {\tt ar} can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT\_MODE=64 set to avoid this.
+Some extensions of \TRACE do not work properly (nanos, SMPss and OpenMP) on AIX. In addition, if using IBM MPI (aka POE) the make will complain when generating the parallel merge if the main compiler is not xlc/xlC. So, you can either change the compiler or disable the parallel merge at compile step. Also, command {\tt ar} can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT\_MODE=64 set to avoid this.
 
 \subsubsection{Compiling the 32bit package using the IBM compilers}
 

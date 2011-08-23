@@ -208,6 +208,10 @@ The extended API contains the following routines:
 	Use this routine to initialize an extrae\_CombinedEvents structure.
 	\item {\tt void Extrae\_emit\_CombinedEvents (struct extrae\_CombinedEvents *);}\\
 	Use this routine to emit to the tracefile the events set in the extrae\_CombinedEvents given.
+	\item {\tt void Extrae\_resume\_virtual\_thread (unsigned vthread);}\\
+	This routine changes the thread identifier so as to be vthread in the final tracefile. {\em Improper use of this routine may result in corrupt tracefiles.}
+	\item {\tt void Extrae\_suspend\_virtual\_thread (void);}\\
+	This routine recovers the original thread identifier (given by routines like pthread\_self or omp\_get\_thread\_num, for instance).
 \end{itemize}
 
 \section{Special considerations for Cell Broadband Engine tracing package}
