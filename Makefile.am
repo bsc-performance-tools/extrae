@@ -147,19 +147,23 @@ MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/ld-preload
 
 OMP_EXAMPLE_FILES=\
+ example/LINUX/OMP/extrae.xml \
+ example/LINUX/OMP/README \
  example/LINUX/OMP/Makefile \
- example/LINUX/OMP/merge.sh \
  example/LINUX/OMP/pi.c \
- example/LINUX/OMP/pi.f \
- example/LINUX/OMP/run.sh \
- example/LINUX/OMP/extrae.xml
+ example/LINUX/OMP/pi_instrumented.c \
+ example/LINUX/OMP/run_dyninst.sh \
+ example/LINUX/OMP/run_ldpreload.sh
 
 SEQ_EXAMPLE_FILES=\
+ example/LINUX/SEQ/extrae.xml \
+ example/LINUX/SEQ/function-list \
  example/LINUX/SEQ/Makefile \
- example/LINUX/SEQ/merge.sh \
  example/LINUX/SEQ/pi.c \
- example/LINUX/SEQ/run.sh \
- example/LINUX/SEQ/extrae.xml
+ example/LINUX/SEQ/pi_instrumented.c \
+ example/LINUX/SEQ/run_dyninst.sh \
+ example/LINUX/SEQ/run_static.sh \
+ example/LINUX/SEQ/README
 
 MRNET_EXAMPLE_FILES=\
  example/LINUX/MRNET/Makefile \

@@ -47,14 +47,25 @@ enum extrae_USER_FUNCTION
 	EXTRAE_USER_FUNCTION_ENTER
 };
 
+typedef enum extrae_USER_FUNCTION  extrae_user_function_t;
+typedef enum extrae_USER_COMMUNICATION_TYPES  extrae_user_communication_types_t;
+
+typedef unsigned extrae_comm_tag_t;
+typedef unsigned extrae_comm_partner_t;
+typedef long long extrae_comm_id_t;
+typedef unsigned extrae_type_t;
+typedef unsigned long long extrae_value_t;
+
 struct extrae_UserCommunication
 {
-	enum extrae_USER_COMMUNICATION_TYPES type;
-	unsigned tag;
-	unsigned size;
-	unsigned partner;
-	long long id;
+	extrae_user_communication_types_t type;
+	extrae_comm_tag_t tag;
+	unsigned size; /* size_t? */
+  extrae_comm_partner_t partner;
+	extrae_comm_id_t id;
 };
+
+typedef struct extrae_UserCommunication  extrae_user_communication_t;
 
 struct extrae_CombinedEvents
 {
@@ -64,12 +75,14 @@ struct extrae_CombinedEvents
 	int UserFunction;
 	/* These are intended for N events */
 	unsigned nEvents;
-	unsigned *Types;
-	unsigned long long *Values;
+	extrae_type_t  *Types;
+	extrae_value_t *Values;
 	/* These are intended for user communication records */
 	unsigned nCommunications;
-	struct extrae_UserCommunication *Communications;
+	extrae_user_communication_t *Communications;
 };
+
+typedef struct extrae_CombinedEvents  extrae_combined_events_t;
 
 #ifdef __cplusplus
 }

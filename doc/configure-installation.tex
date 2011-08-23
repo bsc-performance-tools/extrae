@@ -55,6 +55,8 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify where to find the Binary File Descriptor package. In conjunction with libiberty, it is used to translate addresses into source code locations.
 	\item {\tt --with-liberty=DIR} \\
 	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
+  \item {\tt --with-dyninst=DIR} \\
+  Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst.
 \end{itemize}
 
 \section{Build}
@@ -147,6 +149,15 @@ make install}}
 Configuration command:
 
 \graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-pacx=/home/harald/aplic/pacx/07.2009-openmpi}}
+
+Build and installation commands:
+
+\graybox{{\tt make\\
+make install}}
+
+\subsubsection{Compiling using default binary type, using OpenMPI and DynInst}
+
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-dyninst=/home/harald/dyninst/7.0.1 --with-dwarf=/usr}}
 
 Build and installation commands:
 

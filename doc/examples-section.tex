@@ -4,7 +4,26 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 \section{DynInst based examples}\label{sec:Examples_DynInst}
 
+DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures\footnote{The IA-64 architecture support was dropped by DynInst 7.0} (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+
 \subsection{Generating the intermediate files}\label{subsec:Examples_DynInst_Intermediate}
+
+\begin{Verbatim}[frame=single,numbers=left,labelposition=topline,label=run\_dyninst.sh]
+#!/bin/sh
+
+export EXTRAE_HOME=WRITE-HERE-THE-PACKAGE-LOCATION
+export LD_LIBRARY_PATH=${EXTRAE_HOME}/lib
+source ${EXTRAE_HOME}/etc/extrae.sh
+
+## Run the desired program
+${EXTRAE_HOME}/bin/ompitrace -config extrae.xml $*
+\end{Verbatim}
+
+A similar script can be found in the share/example/SEQ directory in your tracing package directory. Just tune the {\tt EXTRAE\_HOME} environment variable and make the script executable (using {\tt chmod u+x}). You can either pass the XML configuration file through the {\tt EXTRAE\_CONFIG\_FILE} if you prefer instead. Line no. 5 is responsible for loading all the environment variables needed for the DynInst launcher (called ompitrace) that is invoked in line 8.
+
+In fact, there are two examples provided in share/example/SEQ, one for static (or manual) instrumentation and another for the DynInst-based instrumentation. When using the DynInst instrumentation, the user may add new routines to instrument using the existing {\tt function-list} file that is already pointed by the {\tt extrae.xml} configuration file. The way to specify the routines to instrument is add as many lines with the name of every routine to be instrumented.
+
+Running OpenMP applications using DynInst is rather similar to serial codes. Just compile the application with the appropiate OpenMP flags and run as before. You can find an example in the share/example/OMP directory.
 
 \section{LD\_PRELOAD based examples}\label{sec:Examples_LDPRELOAD}
 
