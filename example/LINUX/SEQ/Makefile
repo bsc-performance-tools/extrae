@@ -1,11 +1,16 @@
 EXTRAE_HOME=@sub_PREFIXDIR@
 CC = gcc
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include
-LFLAGS = -L $(EXTRAE_HOME)/lib -lseqtrace -lxml2 @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_POSIX_CLOCK@
+LFLAGS = -L $(EXTRAE_HOME)/lib -lseqtrace -lxml2   
+
+targets: pi pi_instrumented
 
 pi:	pi.c
-	$(CC) $(CFLAGS) pi.c -o pi $(LFLAGS)
+	$(CC) $(CFLAGS) pi.c -o pi
+
+pi_instrumented:	pi_instrumented.c
+	$(CC) $(CFLAGS) pi_instrumented.c -o pi_instrumented $(LFLAGS)
 
 clean:
-	rm -fr TRACE*.mpit* pi set-0
+	rm -fr TRACE*.mpit* TRACE.sym pi pi_instrumented set-0
 

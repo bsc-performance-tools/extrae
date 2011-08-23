@@ -7,4 +7,4 @@ source ${EXTRAE_HOME}/etc/extrae.sh
 
 ${EXTRAE_HOME}/bin/ompitrace -v ./pi
 
-${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -sym TRACE.sym -e ./pi -o pi.prv
+${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -s TRACE.sym -e ./pi -o pi.prv

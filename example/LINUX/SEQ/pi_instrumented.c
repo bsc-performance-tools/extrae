@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/example/LINUX/SEQ/pi.c $
+ | @last_commit: $Date: 2011-06-29 10:44:44 +0200 (dc, 29 jun 2011) $
+ | @version:     $Revision: 687 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include <stdio.h>
 #include <math.h>
@@ -52,9 +52,16 @@ int main(int argc, char **argv)
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area, x;
 
+	Extrae_init();
+
 	h = 1.0 / (double) n;
+
+	Extrae_event (1000, 1);
 	area = pi_kernel (n, h);
+	Extrae_event (1000, 0);
 	pi = h * area;
 
 	printf("pi is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
+
+	Extrae_fini();
 }

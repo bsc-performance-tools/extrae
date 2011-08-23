@@ -1,11 +1,15 @@
 <?xml version='1.0'?>
 
 <trace enabled="yes"
- home="@sub_PREFIXDIR@"
+ home="/home/harald/T"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="@sub_XMLID@"
+ xml-parser-id="Id: xml-parse.c 697 2011-07-08 15:14:05Z harald $"
 >
+
+  <user-functions enabled="yes" list="function-list">
+    <counters enabled="yes" />
+  </user-functions>
 
   <counters enabled="yes">
     <cpu enabled="yes" starting-set-distribution="1">
