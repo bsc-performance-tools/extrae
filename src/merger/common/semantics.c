@@ -75,8 +75,9 @@ void Semantics_Initialize (int output_format)
 	switch (output_format)
 	{
 		case TRF_SEMANTICS:
-			Register_Event_Handlers (TRF_MPI_Event_Handlers);
 			Register_Event_Handlers (TRF_MISC_Event_Handlers);
+			Register_Range_Handlers (TRF_MISC_Range_Handlers);
+			Register_Event_Handlers (TRF_MPI_Event_Handlers);
 			break;
 		case PRV_SEMANTICS:
 		default:

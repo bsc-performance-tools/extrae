@@ -431,7 +431,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	{
 		fprintf (stdout, "mpi2prv: Parsing intermediate files. Generating communicators.\n");
 		if (1 == numtasks)
-			fprintf (stdout, "mpi2prv: Progress... ");
+			fprintf (stdout, "mpi2prv: Progress 1 of 2 ... ");
 		fflush (stdout);
 	}
 	Rewind_FS (fset);
@@ -483,8 +483,10 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	if (0 == taskid)
 	{
 		fprintf (stdout, "mpi2prv: Parsing intermediate files. Generating trace.\n");
-		if (1 == numtasks)
-			fprintf (stdout, "mpi2prv: Progress... ");
+		if (numtasks > 1)
+			fprintf (stdout, "mpi2prv: Progress ... ");
+		else
+			fprintf (stdout, "mpi2prv: Progress 2 of 2 ... ");
 		fflush (stdout);
 	}
 	Rewind_FS (fset);
@@ -584,7 +586,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_MPI_Operation (EvType);
 				}
 				else
-					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);
+					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s+%d\n", EvType, __func__, __LINE__);
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				if (Get_EvHWCRead (current_event))

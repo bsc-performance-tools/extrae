@@ -35,5 +35,6 @@
 #include "file_set.h"
 
 extern SingleEv_Handler_t TRF_MISC_Event_Handlers[];
+extern RangeEv_Handler_t TRF_MISC_Range_Handlers[];
 
 #endif /* __MISC_TRF_SEMANTICS_H__ */

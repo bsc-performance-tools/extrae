@@ -185,3 +185,9 @@ SingleEv_Handler_t TRF_MISC_Event_Handlers[] = {
 	{ NULL_EV, NULL }
 };
 
+RangeEv_Handler_t TRF_MISC_Range_Handlers[] = {
+	{ CALLER_EV, CALLER_EV + MAX_CALLERS, SkipHandler },
+	{ SAMPLING_EV, SAMPLING_EV + MAX_CALLERS, SkipHandler },
+	{ NULL_EV, NULL_EV, NULL }
+};
+
