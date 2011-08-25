@@ -144,7 +144,8 @@ MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/summarized_trace_basic.xml \
  example/LINUX/MPI/extrae_explained.xml \
  example/LINUX/MPI/static \
- example/LINUX/MPI/ld-preload
+ example/LINUX/MPI/ld-preload \
+ example/LINUX/MPI/dyninst
 
 OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/extrae.xml \
