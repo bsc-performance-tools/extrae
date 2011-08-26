@@ -832,10 +832,12 @@ static int User_Send_Event (event_t * current_event,
 {
 	unsigned recv_thread, recv_vthread;
 	struct task_t *task_info, *task_info_partner;
+	struct thread_t *thread_info;
 	event_t * recv_begin, * recv_end;
 	UNREFERENCED_PARAMETER(cpu);
 
 	task_info = GET_TASK_INFO(ptask, task);
+	thread_info = GET_THREAD_INFO(ptask, task, thread);
 
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
@@ -879,10 +881,12 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 	off_t send_position;
 	unsigned send_thread, send_vthread;
 	struct task_t *task_info, *task_info_partner;
+	struct thread_t *thread_info;
 	UNREFERENCED_PARAMETER(cpu);
 	UNREFERENCED_PARAMETER(current_time);
 
 	task_info = GET_TASK_INFO(ptask, task);
+	thread_info = GET_THREAD_INFO(ptask, task, thread);
 
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
