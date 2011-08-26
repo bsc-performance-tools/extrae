@@ -43,6 +43,7 @@ typedef struct
 	off_t send_position;
 	long long key;
 	unsigned thread;
+	unsigned vthread;
 } 
 SendData_t;
 
@@ -55,7 +56,8 @@ typedef struct
 SendDataReference_t;
 
 void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
-	event_t *send_end, off_t send_position, unsigned thread, long long key)
+	event_t *send_end, off_t send_position, unsigned thread, unsigned vthread,
+	long long key)
 {
 	SendData_t tmp;
 
@@ -63,6 +65,7 @@ void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
 	tmp.send_end = send_end;
 	tmp.send_position = send_position;
 	tmp.thread = thread;
+	tmp.vthread = vthread;
 	tmp.key = key;
 
 	NewQueue_add (qsend, &tmp);
@@ -80,7 +83,7 @@ static int CompareSend_cbk (void *reference, void *data)
 
 void CommunicationQueues_ExtractSend (NewQueue_t *qsend, int receiver,
 	int tag, event_t **send_begin, event_t **send_end,
-	off_t *send_position, unsigned *thread, long long key)
+	off_t *send_position, unsigned *thread, unsigned *vthread, long long key)
 {
 	SendData_t *res;
 	SendDataReference_t reference;
@@ -96,6 +99,7 @@ void CommunicationQueues_ExtractSend (NewQueue_t *qsend, int receiver,
 		*send_end = res->send_end;
 		*send_position = res->send_position;
 		*thread = res->thread;
+		*vthread = res->vthread;
 		NewQueue_delete (qsend, res);
 	}
 	else
@@ -116,6 +120,7 @@ typedef struct
 	event_t *recv_end;
 	long long key;
 	unsigned thread;
+	unsigned vthread;
 } 
 RecvData_t;
 
@@ -128,13 +133,14 @@ typedef struct
 RecvDataReference_t;
 
 void CommunicationQueues_QueueRecv (NewQueue_t *qreceive, event_t *recv_begin,
-	event_t *recv_end, unsigned thread, long long key)
+	event_t *recv_end, unsigned thread, unsigned vthread, long long key)
 {
 	RecvData_t tmp;
 
 	tmp.recv_begin = recv_begin;
 	tmp.recv_end = recv_end;
 	tmp.thread = thread;
+	tmp.vthread = vthread;
 	tmp.key = key;
 
 	NewQueue_add (qreceive, &tmp);
@@ -152,7 +158,7 @@ static int CompareRecv_cbk (void *reference, void *data)
 
 void CommunicationQueues_ExtractRecv (NewQueue_t *qreceive, int sender,
 	int tag, event_t **recv_begin, event_t **recv_end, unsigned *thread,
-	long long key)
+	unsigned *vthread, long long key)
 {
 	RecvData_t *res;
 	RecvDataReference_t reference;
@@ -167,6 +173,7 @@ void CommunicationQueues_ExtractRecv (NewQueue_t *qreceive, int sender,
 		*recv_begin = res->recv_begin;
 		*recv_end = res->recv_end;
 		*thread = res->thread;
+		*vthread = res->vthread;
 		NewQueue_delete (qreceive, res);
 	}
 	else

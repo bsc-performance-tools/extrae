@@ -131,7 +131,7 @@ void InitPendingCommunication (void)
 }
 
 void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int task_r, 
-	int task_s, FileSet_t *fset)
+	unsigned thread_r, unsigned vthread_r, int task_s, FileSet_t *fset)
 {
 	int count;
 	int group = inWhichGroup (task_s, fset);
@@ -156,6 +156,8 @@ void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int task_r,
 	ForeignRecvs[group].data[count].tag = tag;
 	ForeignRecvs[group].data[count].physic = physic;
 	ForeignRecvs[group].data[count].logic = logic;
+	ForeignRecvs[group].data[count].thread = thread_r;
+	ForeignRecvs[group].data[count].vthread = vthread_r;
 	ForeignRecvs[group].count++;
 }
 

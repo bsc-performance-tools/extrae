@@ -1271,6 +1271,11 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_preInitialize (rank=%d, size=%d, config_file=\n", THREADID, me, world_size, config_file);
 #endif
 
+	if (me == 0)
+		fprintf (stdout, PACKAGE_NAME" %d.%d.%d\n", EXTRAE_VERSION_MAJOR(EXTRAE_VERSION),
+		  EXTRAE_VERSION_MINOR(EXTRAE_VERSION),
+		  EXTRAE_VERSION_REVISION(EXTRAE_VERSION));
+
 	/* Allocate a bitmap to know which tasks are tracing */
 	Allocate_Task_Bitmap (world_size);
 

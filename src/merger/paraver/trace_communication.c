@@ -51,8 +51,8 @@ static char UNUSED rcsid[] = "$Id$";
  ***  trace_communication
  ******************************************************************************/
 
-void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s,
-	unsigned task_r, unsigned thread_r, event_t *send_begin,
+void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s, unsigned vthread_s,
+	unsigned task_r, unsigned thread_r, unsigned vthread_r, event_t *send_begin,
 	event_t *send_end, event_t *recv_begin, event_t *recv_end, 
 	int atposition, off_t position)
 {
@@ -74,14 +74,14 @@ void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s,
 	log_r = TIMESYNC(task_r-1, Get_EvTime (recv_begin));
 	phy_r = TIMESYNC(task_r-1, Get_EvTime (recv_end));
 
-	trace_paraver_communication (cpu_s, ptask, task_s, thread_s, log_s, phy_s,
-	  cpu_r, ptask, task_r, thread_r, log_r, phy_r, Get_EvSize (recv_end),
+	trace_paraver_communication (cpu_s, ptask, task_s, thread_s, vthread_s, log_s, phy_s,
+	  cpu_r, ptask, task_r, thread_r, vthread_r, log_r, phy_r, Get_EvSize (recv_end),
 		Get_EvTag (recv_end), atposition, position);
 }
 
 #if defined(PARALLEL_MERGE)
 int trace_pending_communication (unsigned int ptask, unsigned int task,
-	unsigned int thread, event_t * begin_s, event_t * end_s, unsigned int recvr)
+	unsigned int thread, unsigned vthread, event_t * begin_s, event_t * end_s, unsigned int recvr)
 {
 	unsigned long long log_s, phy_s;
 
@@ -89,8 +89,9 @@ int trace_pending_communication (unsigned int ptask, unsigned int task,
 	log_s = TIMESYNC (task-1, Get_EvTime (begin_s));
 	phy_s = TIMESYNC (task-1, Get_EvTime (end_s));
 
-	trace_paraver_pending_communication (task, ptask, task, thread, log_s,
-		phy_s, recvr + 1, ptask, recvr + 1, thread, 0ULL, 0ULL, Get_EvSize (begin_s), Get_EvTag (begin_s));
+	trace_paraver_pending_communication (task, ptask, task, thread, vthread, log_s,
+		phy_s, recvr + 1, ptask, recvr + 1, thread /* 1? */ , thread /*vthread_r?*/,
+		0ULL, 0ULL, Get_EvSize (begin_s), Get_EvTag (begin_s));
   return 0;
 }
 #endif

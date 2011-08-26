@@ -438,6 +438,20 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EMIT_COMBINEDEVENTS);
 
+#define apiTRACE_RESUME_VIRTUAL_THREAD(x) \
+	void x##_resume_virtual_thread (unsigned u) \
+	{ \
+		Extrae_Resume_virtual_thread_Wrapper (u); \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESUME_VIRTUAL_THREAD);
+
+#define apiTRACE_SUSPEND_VIRTUAL_THREAD(x) \
+	void x##_suspend_virtual_thread (void) \
+	{ \
+		Extrae_suspend_virtual_thread_Wrapper (); \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SUSPEND_VIRTUAL_THREAD);
+
 #else /* HAVE_WEAK_ALIAS_ATTRIBUTE */
 
 /** C BINDINGS **/
@@ -632,6 +646,21 @@ void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *ptr)
 	}
 }
 
+INTERFACE_ALIASES_C(_resume_virtual_thread,Extrae_resume_virtual_thread, (unsigned u))
+void Extrae_resume_virtual_thread (unsigned u)
+{
+	Backend_Enter_Instrumentation (1);
+	Extrae_Resume_virtual_thread_Wrapper (u);
+	Backend_Leave_Instrumentation ();
+}
+
+INTERFACE_ALIASES_C(_suspend_virtual_thread,Extrae_suspend_virtual_thread, (void))
+void Extrae_suspend_virtual_thread (void)
+{
+	Backend_Enter_Instrumentation (1);
+	Extrae_Suspend_virtual_thread_Wrapper ();
+	Backend_Leave_Instrumentation ();
+}
 
 /** FORTRAN BINDINGS **/
 

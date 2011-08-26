@@ -186,6 +186,9 @@ void MPItrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
 void OMPtrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
 void SEQtrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
 
+void Extrae_resume_virtual_thread (unsigned vthread);
+void Extrae_suspend_virtual_thread (void);
+
 #ifdef __cplusplus
 }
 #endif

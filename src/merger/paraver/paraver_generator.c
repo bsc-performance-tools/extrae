@@ -165,7 +165,7 @@ void trace_paraver_state (
 	thread_info->incomplete_state_record.cpu    = cpu;
 	thread_info->incomplete_state_record.ptask  = ptask;
 	thread_info->incomplete_state_record.task   = task;
-	thread_info->incomplete_state_record.thread = thread;
+	thread_info->incomplete_state_record.thread = thread_info->virtual_thread;
 	thread_info->incomplete_state_record.time   = current_time;
 	thread_info->incomplete_state_record.value  = current_state;
 	/* Save a slot in the *.tmp file for this record if this state isn't excluded */
@@ -190,10 +190,12 @@ void trace_paraver_event (
    unsigned long long time, 
    unsigned int type, UINT64 value)
 {
+	struct thread_t * thread_info;
 	paraver_rec_t record;
 	int tipus;
 	UINT64 valor;
 	WriteFileBuffer_t *wfb = obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb;
+	thread_info = GET_THREAD_INFO (ptask, task, thread);
 
 	if (!EnabledTasks[ptask - 1][task - 1])
 		return;
@@ -216,7 +218,7 @@ void trace_paraver_event (
 	record.cpu = cpu;
 	record.ptask = ptask;
 	record.task = task;
-	record.thread = thread;
+	record.thread = thread_info->virtual_thread;
 	record.time = time;
 	record.event = tipus;
 	record.value = valor;
@@ -228,12 +230,17 @@ void trace_paraver_event (
  ***  trace_paraver_unmatched_communication
  ******************************************************************************/
 void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int ptask_s,
-	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,
-	unsigned long long phy_s, unsigned int cpu_r, unsigned int ptask_r,
-	unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag)
+	unsigned int task_s, unsigned int thread_s, unsigned int vthread_s,
+	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
+	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag)
 {
+	struct thread_t * thread_info_s;
+	struct thread_t * thread_info_r;
 	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
 	paraver_rec_t record;
+
+	thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 
 	if (!EnabledTasks[ptask_s-1][task_s-1])
 		return;
@@ -242,7 +249,7 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	record.cpu = cpu_s;
 	record.ptask = ptask_s;
 	record.task = task_s;
-	record.thread = thread_s;
+	record.thread = vthread_s;
 	record.time = log_s;
 	record.end_time = phy_s;
 	record.event = size;
@@ -250,7 +257,7 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	record.cpu_r = cpu_r;
 	record.ptask_r = ptask_r;
 	record.task_r = task_r;
-	record.thread_r = thread_r;
+	/* record.thread_r = thread_info_r->virtual_thread; */
 
 	trace_paraver_record (wfb, &record);
 }
@@ -259,14 +266,19 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
  ***  trace_paraver_communication
  ******************************************************************************/
 void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
-	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,
+	unsigned int task_s, unsigned int thread_s, unsigned vthread_s, unsigned long long log_s,
 	unsigned long long phy_s, unsigned int cpu_r, unsigned int ptask_r,
-	unsigned int task_r, unsigned int thread_r, unsigned long long log_r,
+	unsigned int task_r, unsigned int thread_r, unsigned vthread_r, unsigned long long log_r,
 	unsigned long long phy_r, unsigned int size, unsigned int tag,
 	int giveOffset, off_t position)
 {
+	struct thread_t * thread_info_r;
+	struct thread_t * thread_info_s;
 	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
 	paraver_rec_t record;
+
+	thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 
 	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
 		return;
@@ -275,7 +287,7 @@ void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 	record.cpu = cpu_s;
 	record.ptask = ptask_s;
 	record.task = task_s;
-	record.thread = thread_s;
+	record.thread = vthread_s;
 	record.time = log_s;
 	record.end_time = phy_s;
 	record.event = size;
@@ -283,7 +295,7 @@ void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 	record.cpu_r = cpu_r;
 	record.ptask_r = ptask_r;
 	record.task_r = task_r;
-	record.thread_r = thread_r;
+	record.thread_r = vthread_r;
 	record.receive[LOGICAL_COMMUNICATION] = log_r;
 	record.receive[PHYSICAL_COMMUNICATION] = phy_r;
 
@@ -295,18 +307,23 @@ void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 
 #if defined(PARALLEL_MERGE)
 int trace_paraver_pending_communication (unsigned int cpu_s, 
-	unsigned int ptask_s, unsigned int task_s, unsigned int thread_s,
+	unsigned int ptask_s, unsigned int task_s, unsigned int thread_s, unsigned vthread_s,
 	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r, 
-	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r,
+	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned vthread_r,
 	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
 	unsigned int tag)
 {
+	struct thread_t * thread_info_r;
+	struct thread_t * thread_info_s;
 	off_t where;
 	paraver_rec_t record;
 	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
 
 	UNREFERENCED_PARAMETER(log_r);
 	UNREFERENCED_PARAMETER(phy_r);
+
+	thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 
 	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
 		return 0;
@@ -315,7 +332,7 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	record.cpu = cpu_s;
 	record.ptask = ptask_s;
 	record.task = task_s;
-	record.thread = thread_s;
+	record.thread = vthread_s;
 	record.time = log_s;
 	record.end_time = phy_s;
 	record.event = size;
@@ -323,7 +340,7 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	record.cpu_r = cpu_r;
 	record.ptask_r = ptask_r;
 	record.task_r = task_r;
-	record.thread_r = thread_r;
+	record.thread_r = vthread_r; /* may need fixing? thread_r instead? */
   record.receive[LOGICAL_COMMUNICATION] = 0;
   record.receive[PHYSICAL_COMMUNICATION] = 0;
 
@@ -637,27 +654,27 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
   struct fdz_fitxer prv_fd, struct Pair_NodeCPU *info)
 {
 	int NumNodes;
-  time_t h;
-  char Date[80];
-  char Header[1024];
-  unsigned int threads, task, ptask, node, num_cpus = 1;
+	time_t h;
+	char Date[80];
+	char Header[1024];
+	unsigned threads, task, ptask, node, num_cpus = 1;
 #if defined(HAVE_MPI)  /* Sequential tracing does not use comunicators */
-  TipusComunicador com;
-  int i, final;
-  unsigned int num_tasks;
+	TipusComunicador com;
+	int i, final;
+	unsigned int num_tasks;
 #endif
 
-  time (&h);
-  strftime (Date, 80, "%d/%m/%Y at %H:%M", localtime (&h));
+	time (&h);
+	strftime (Date, 80, "%d/%m/%Y at %H:%M", localtime (&h));
 
-  for (ptask = 0; ptask < num_ptasks; ptask++)
-    num_cpus = MAX (num_cpus, obj_table[ptask].ntasks);
+	for (ptask = 0; ptask < num_ptasks; ptask++)
+		num_cpus = MAX (num_cpus, obj_table[ptask].ntasks);
 
-  /* Write the Paraver header */
+	/* Write the Paraver header */
 #if SIZEOF_LONG == 8
-  sprintf (Header, "#Paraver (%s):%lu_ns:", Date, Ftime);
+	sprintf (Header, "#Paraver (%s):%lu_ns:", Date, Ftime);
 #elif SIZEOF_LONG == 4
-  sprintf (Header, "#Paraver (%s):%llu_ns:", Date, Ftime);
+	sprintf (Header, "#Paraver (%s):%llu_ns:", Date, Ftime);
 #endif
 	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
@@ -685,57 +702,57 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
 	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 	/* For every application, write down its resources */
-  for (ptask = 0; ptask < num_ptasks; ptask++)
-  {
-    sprintf (Header, "%d(", obj_table[ptask].ntasks);
+	for (ptask = 0; ptask < num_ptasks; ptask++)
+	{
+		sprintf (Header, "%d(", obj_table[ptask].ntasks);
 		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
-    for (task = 0; task < obj_table[ptask].ntasks - 1; task++)
-    {
-      threads = obj_table[ptask].tasks[task].nthreads;
-      node = obj_table[ptask].tasks[task].nodeid;
+		for (task = 0; task < obj_table[ptask].ntasks - 1; task++)
+		{
+			threads = obj_table[ptask].tasks[task].virtual_threads;
+			node = obj_table[ptask].tasks[task].nodeid;
 
-      sprintf (Header, "%d:%d,", threads, node);
+			sprintf (Header, "%d:%d,", threads, node);
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-    }
-    threads = obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nthreads;
-    node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
+		}
+		threads = obj_table[ptask].tasks[obj_table[ptask].ntasks-1].virtual_threads;
+		node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
 
 #if defined(HAVE_MPI)
-    sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
+		sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
 #else
-    sprintf (Header, "%d:%d),0", threads, node);
+		sprintf (Header, "%d:%d),0", threads, node);
 #endif
 		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-  }
-  sprintf (Header, "\n");
-  PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+	}
+	sprintf (Header, "\n");
+	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 
 #if defined(HAVE_MPI)
 	/* Write the communicator definition for every application */
-  for (ptask = 1; ptask <= num_ptasks; ptask++)
-  {
-    num_tasks = obj_table[ptask - 1].ntasks;
+	for (ptask = 1; ptask <= num_ptasks; ptask++)
+	{
+		num_tasks = obj_table[ptask - 1].ntasks;
 
 		/* Write the communicators created manually by the application */
-    final = (primer_comunicador (&com) < 0);
-    while (!final)
-    {
-      /* Write this communicator */
-      sprintf (Header, "c:%d:%d:%d", ptask, com.id, com.num_tasks);
-      PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-      for (i = 0; i < com.num_tasks; i++)
-      {
-        sprintf (Header, ":%d", com.tasks[i] + 1);
-        PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-      }
-      PRVWRITECNTL (FDZ_WRITE (prv_fd, "\n"));
+		final = (primer_comunicador (&com) < 0);
+		while (!final)
+		{
+			/* Write this communicator */
+			sprintf (Header, "c:%d:%d:%d", ptask, com.id, com.num_tasks);
+			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+			for (i = 0; i < com.num_tasks; i++)
+			{
+				sprintf (Header, ":%d", com.tasks[i] + 1);
+				PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+			}
+			PRVWRITECNTL (FDZ_WRITE (prv_fd, "\n"));
 
-      /* Get the next communicator */
-      final = (seguent_comunicador (&com) < 0);
-    }
-  }
+		/* Get the next communicator */
+		final = (seguent_comunicador (&com) < 0);
+		}
+	}
 #endif
 
   return 0;
@@ -756,6 +773,7 @@ static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 	{
 		current->receive[LOGICAL_COMMUNICATION] = tmp->logic;
 		current->receive[PHYSICAL_COMMUNICATION] = tmp->physic;
+		current->thread_r = tmp->vthread;
 		current->type = COMMUNICATION;
 		tmp->logic = tmp->physic = 0;
 		return TRUE;

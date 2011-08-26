@@ -53,10 +53,10 @@ typedef struct thread_t
 	unsigned int cpu;
 
 	/* Did we passed the first event? */
-	unsigned int First_Event;
+	unsigned int First_Event:1;
 
 	/* Did we processed the firt HWC change event? */
-	unsigned int First_HWCChange;
+	unsigned int First_HWCChange:1;
 
 	/* Information of the stack */
 	int State_Stack[MAX_STATES];
@@ -86,6 +86,7 @@ typedef struct thread_t
 
 	unsigned long long dimemas_size; /* Store dimemas translation size */
 
+	unsigned virtual_thread; /* if so, which virtual thread is? */
 } thread_t;
 
 typedef struct task_t
@@ -96,6 +97,7 @@ typedef struct task_t
   NewQueue_t *recv_queue;
   NewQueue_t *send_queue;
   struct thread_t *threads;
+	unsigned virtual_threads;
 } task_t;
 
 typedef struct ptask_t

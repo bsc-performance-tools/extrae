@@ -71,6 +71,7 @@ struct ForeignRecv_t
 {
 	UINT64 physic, logic;
 	int sender, recver, tag;
+	unsigned thread, vthread;
 };
 struct ForeignRecvs_t
 {
@@ -80,8 +81,8 @@ struct ForeignRecvs_t
 struct ForeignRecvs_t *ForeignRecvs;
 
 void InitForeignRecvs (int numtasks);
-void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int task_r, 
-	int task_s, FileSet_t *fset);
+void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int task_r,
+	unsigned thread_r, unsigned vthread_r, int task_s, FileSet_t *fset);
 
 void DistributePendingComms (int numtasks, int taskid);
 void NewDistributePendingComms (int numtasks, int taskid, int match);

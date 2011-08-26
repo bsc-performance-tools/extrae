@@ -80,9 +80,9 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	unsigned long long *outvalue)
 {
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
-  int cnt;
-  struct thread_t *Sthread;
-  int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
+	int cnt;
+	struct thread_t *Sthread;
+	int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
@@ -99,19 +99,19 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 		return FALSE;
 	}
 
-  for (cnt = 0; cnt < MAX_HWC; cnt++)
-  {
-    /* If using PAPI, they can be stored in absolute or relative manner,
-    depending if sampling was activated or not */
+	for (cnt = 0; cnt < MAX_HWC; cnt++)
+	{
+		/* If using PAPI, they can be stored in absolute or relative manner,
+		   depending whether sampling was activated or not */
 #if defined(PAPI_COUNTERS)
 # if defined(SAMPLING_SUPPORT)
-    if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
+		if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
 		    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
 # else
-    if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER)
+		if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER)
 # endif
-    {
-			/* If sampling is enabled PAPI_reset is not called, so we must substract
+		{
+			/* If sampling is enabled PAPI_reset is not called and we must substract
 			   the previous read value from the current PAPI_read because it's always
 			   adding */
 
@@ -127,12 +127,12 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 				outtype[cnt] = NO_COUNTER;
 			}
 # else
-      outvalue[cnt] = Event->HWCValues[cnt];
-      outtype[cnt] = HWC_COUNTER_TYPE (Sthread->HWCSets[set_id][cnt]);
+			outvalue[cnt] = Event->HWCValues[cnt];
+			outtype[cnt] = HWC_COUNTER_TYPE (Sthread->HWCSets[set_id][cnt]);
 # endif
 
-      Sthread->counters[cnt] = Event->HWCValues[cnt];
-    }
+			Sthread->counters[cnt] = Event->HWCValues[cnt];
+		}
 		else
 			outtype[cnt] = NO_COUNTER;
 
@@ -149,7 +149,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 
 #endif
 
-  }
+	}
 	return TRUE;
 }
 

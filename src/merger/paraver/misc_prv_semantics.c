@@ -830,7 +830,7 @@ static int User_Send_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned recv_thread;
+	unsigned recv_thread, recv_vthread;
 	struct task_t *task_info, *task_info_partner;
 	event_t * recv_begin, * recv_end;
 	UNREFERENCED_PARAMETER(cpu);
@@ -843,24 +843,24 @@ static int User_Send_Event (event_t * current_event,
 		{
 			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
 
-			CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, Get_EvAux(current_event));
+			CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, &recv_vthread, Get_EvAux(current_event));
 
 			if (recv_begin == NULL || recv_end == NULL)
 			{
 				off_t position;
 
 				position = WriteFileBuffer_getPosition (obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb);
-				CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, Get_EvAux(current_event));
-				trace_paraver_unmatched_communication (1, ptask, task, thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, recv_thread, Get_EvSize(current_event), Get_EvTag(current_event));
+				CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, Get_EvAux(current_event));
+				trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, recv_thread, Get_EvSize(current_event), Get_EvTag(current_event));
 			}
 			else
 			{
-				trace_communicationAt (ptask, task, thread, 1+Get_EvTarget(current_event), recv_thread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
+				trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, 1+Get_EvTarget(current_event), recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
 			}
 		}
 #if defined(PARALLEL_MERGE)
 		else
-			trace_pending_communication (ptask, task, thread, current_event, current_event, Get_EvTarget (current_event));
+			trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, current_event, current_event, Get_EvTarget (current_event));
 #endif
 	}
 
@@ -877,7 +877,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 {
 	event_t *send_begin, *send_end;
 	off_t send_position;
-	unsigned send_thread;
+	unsigned send_thread, send_vthread;
 	struct task_t *task_info, *task_info_partner;
 	UNREFERENCED_PARAMETER(cpu);
 	UNREFERENCED_PARAMETER(current_time);
@@ -890,15 +890,15 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 		{
 			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
 
-			CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, Get_EvAux(current_event));
+			CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, Get_EvAux(current_event));
 
 			if (NULL == send_begin || NULL == send_end)
 			{
-				CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, current_event, thread, Get_EvAux(current_event));
+				CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, current_event, thread, thread_info->virtual_thread, Get_EvAux(current_event));
 			}
 			else if (NULL != send_begin && NULL != send_end)
 			{
-				trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, task, thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
+				trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
 			}
 			else
 				fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -910,7 +910,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 
 			log_r = TIMESYNC (task-1, Get_EvTime(current_event));
 			phy_r = TIMESYNC (task-1, Get_EvTime(current_event));
-			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1,
+			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1, thread_info->virtual_thread-1,
 			  Get_EvTarget(current_event), fset);
 		}
 #endif
@@ -919,6 +919,40 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 	return 0;
 }
 
+/******************************************************************************
+ ***  Resume_Virtual_Thread_Event
+ ******************************************************************************/
+
+static int Resume_Virtual_Thread_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned new_virtual_thread;
+	struct thread_t *thread_info;
+	struct task_t *task_info;
+
+	thread_info = GET_THREAD_INFO(ptask, task, thread);
+	task_info = GET_TASK_INFO(ptask, task);
+
+	/* new_virtual_thread = 1+Get_EvValue(current_event); */
+	new_virtual_thread = Get_EvValue(current_event);
+
+	task_info->virtual_threads = MAX(task_info->virtual_threads, new_virtual_thread);
+	thread_info->virtual_thread = new_virtual_thread;
+}
+
+/******************************************************************************
+ ***  Suspend_Virtual_Thread_Event
+ ******************************************************************************/
+
+static int Suspend_Virtual_Thread_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	struct thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+
+	/* thread_info->virtual_thread = thread; */
+}
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
@@ -948,8 +982,10 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ MRNET_EV, MRNet_Event },
 	{ CLUSTER_ID_EV, Clustering_Event },
 	{ SPECTRAL_PERIOD_EV, Spectral_Event },
-	{ USER_SEND_EV, User_Send_Event},
-	{ USER_RECV_EV, User_Recv_Event},
+	{ USER_SEND_EV, User_Send_Event },
+	{ USER_RECV_EV, User_Recv_Event },
+	{ RESUME_VIRTUAL_THREAD_EV, Resume_Virtual_Thread_Event },
+	{ SUSPEND_VIRTUAL_THREAD_EV, SkipHandler },
 	{ NULL_EV, NULL }
 };
 

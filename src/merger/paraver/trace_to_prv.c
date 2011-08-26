@@ -210,15 +210,17 @@ static void InitializeObjectTable (int num_appl, struct input_t * files,
 			obj_table[ptask].tasks[task].nthreads = 0;
 			for (thread = 0; thread < maxthreads; thread++)
 			{
+				obj_table[ptask].tasks[task].threads[thread].virtual_thread = thread+1;
+
 				obj_table[ptask].tasks[task].threads[thread].nStates = 0;
 				obj_table[ptask].tasks[task].threads[thread].First_Event = TRUE;
 				obj_table[ptask].tasks[task].threads[thread].First_HWCChange = TRUE;
 				obj_table[ptask].tasks[task].threads[thread].MatchingComms = TRUE;
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-			    obj_table[ptask].tasks[task].threads[thread].HWCSets = NULL;
-			    obj_table[ptask].tasks[task].threads[thread].num_HWCSets = 0;
-			    obj_table[ptask].tasks[task].threads[thread].current_HWCSet = 0;
+				obj_table[ptask].tasks[task].threads[thread].HWCSets = NULL;
+				obj_table[ptask].tasks[task].threads[thread].num_HWCSets = 0;
+				obj_table[ptask].tasks[task].threads[thread].current_HWCSet = 0;
 #endif
 			}
 		}
@@ -234,7 +236,9 @@ static void InitializeObjectTable (int num_appl, struct input_t * files,
 		obj_table[ptask-1].tasks[task-1].threads[thread-1].cpu = files[i].cpu;
 		obj_table[ptask-1].tasks[task-1].threads[thread-1].dimemas_size = 0;
 		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, task);
-		obj_table[ptask-1].tasks[task-1].nthreads = MAX (obj_table[ptask-1].tasks[task-1].nthreads, thread);
+		obj_table[ptask-1].tasks[task-1].virtual_threads =
+			obj_table[ptask-1].tasks[task-1].nthreads =
+				MAX (obj_table[ptask-1].tasks[task-1].nthreads, thread);
 	}
 }
 

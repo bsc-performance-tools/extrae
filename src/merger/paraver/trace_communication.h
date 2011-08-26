@@ -30,14 +30,14 @@
 #ifndef TRACE_COMMUNICATION_H_INCLUDED
 #define TRACE_COMMUNICATION_H_INCLUDED
 
-void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s,
-	unsigned task_r, unsigned thread_r, event_t *send_begin,
+void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s, unsigned vthread_s,
+	unsigned task_r, unsigned thread_r, unsigned vthread_r, event_t *send_begin,
 	event_t *send_end, event_t *recv_begin, event_t *recv_end, 
 	int atposition, off_t position);
 
 #if defined(PARALLEL_MERGE)
 int trace_pending_communication (unsigned int ptask, unsigned int task,
-	unsigned int thread, event_t * begin_s, event_t * end_s, unsigned int recvr);
+	unsigned int thread, unsigned vthread, event_t * begin_s, event_t * end_s, unsigned int recvr);
 #endif /* PARALLEL_MERGE */
 
 #endif 

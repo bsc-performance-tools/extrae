@@ -59,4 +59,7 @@ void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr
 void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
 void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
 
+void Extrae_Resume_virtual_thread_Wrapper (unsigned u);
+void Extrae_Suspend_virtual_thread_Wrapper (void);
+
 #endif

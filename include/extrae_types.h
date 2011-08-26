@@ -60,8 +60,8 @@ struct extrae_UserCommunication
 {
 	extrae_user_communication_types_t type;
 	extrae_comm_tag_t tag;
-	unsigned size; /* size_t? */
-  extrae_comm_partner_t partner;
+	unsigned size;
+	extrae_comm_partner_t partner;
 	extrae_comm_id_t id;
 };
 

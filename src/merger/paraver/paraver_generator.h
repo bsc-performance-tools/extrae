@@ -42,21 +42,21 @@ void trace_paraver_event (unsigned int cpu, unsigned int ptask,
 	unsigned int type, UINT64 value);
 
 void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int ptask_s,
-	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,
-	unsigned long long phy_s, unsigned int cpu_r, unsigned int ptask_r,
-	unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag);
+	unsigned int task_s, unsigned int thread_s, unsigned int vthread_s,
+	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
+	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag);
 
 void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
-	unsigned int task_s, unsigned int thread_s, unsigned long long log_s,
+	unsigned int task_s, unsigned int thread_s, unsigned vthread_s, unsigned long long log_s,
 	unsigned long long phy_s, unsigned int cpu_r, unsigned int ptask_r,
-	unsigned int task_r, unsigned int thread_r, unsigned long long log_r,
+	unsigned int task_r, unsigned int thread_r, unsigned vthread_r, unsigned long long log_r,
 	unsigned long long phy_r, unsigned int size, unsigned int tag,
 	int givenOffset, off_t position);
 
 int trace_paraver_pending_communication (unsigned int cpu_s, 
-	unsigned int ptask_s, unsigned int task_s, unsigned int thread_s,
+	unsigned int ptask_s, unsigned int task_s, unsigned int thread_s, unsigned vthread_s,
 	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r, 
-	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r,
+	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned vthread_r,
 	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
 	unsigned int tag);
 

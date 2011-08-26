@@ -37,15 +37,16 @@
 void CommunicationQueues_Init (NewQueue_t **fsend, NewQueue_t **freceive);
 
 void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
-	event_t *send_end, off_t send_position, unsigned thread, long long key);
+	event_t *send_end, off_t send_position, unsigned thread, unsigned vthread,
+	long long key);
 void CommunicationQueues_QueueRecv (NewQueue_t *qreceive, event_t *recv_begin,
-	event_t *recv_end, unsigned thread, long long key);
+	event_t *recv_end, unsigned thread, unsigned vthread, long long key);
 
 void CommunicationQueues_ExtractRecv (NewQueue_t *qreceive, int sender,
 	int tag, event_t **recv_begin, event_t **recv_end, unsigned *thread,
-	long long key);
+	unsigned *vthread, long long key);
 void CommunicationQueues_ExtractSend (NewQueue_t *qsend, int receiver,
 	int tag, event_t **send_begin, event_t **send_end,
-	off_t *send_position, unsigned *thread, long long key);
+	off_t *send_position, unsigned *thread, unsigned *vthread, long long key);
 
 #endif
