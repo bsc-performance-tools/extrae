@@ -48,9 +48,9 @@ class ApplicationType
 	bool isMangledOpenMProutine (string name);
 	string demangleOpenMProutine (string name);
 
-	inline const bool get_isMPI (void) const;
-	inline const bool get_isOpenMP (void) const;
-	inline const OMP_rte_t get_OpenMP_rte (void) const;
+	inline bool get_isMPI (void) const;
+	inline bool get_isOpenMP (void) const;
+	inline OMP_rte_t get_OpenMP_rte (void) const;
 
 	private:
 	bool isMPI;
@@ -62,17 +62,17 @@ class ApplicationType
 	OMP_rte_t checkIntelOpenMPRuntime (BPatch_image *appImage);
 };
 
-inline const bool ApplicationType::get_isMPI (void) const
+inline bool ApplicationType::get_isMPI (void) const
 {
 	return isMPI;
 }
 
-inline const bool ApplicationType::get_isOpenMP (void) const
+inline bool ApplicationType::get_isOpenMP (void) const
 {
 	return isOpenMP;
 }
 
-inline const ApplicationType::OMP_rte_t ApplicationType::get_OpenMP_rte (void) const
+inline ApplicationType::OMP_rte_t ApplicationType::get_OpenMP_rte (void) const
 {
 	return OpenMP_runtime;
 }

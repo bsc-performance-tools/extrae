@@ -56,7 +56,7 @@ using namespace std;
 
 struct APIroutines_t
 {
-	char *name;
+	const char *name;
 	BPatch_function *patch;
 };
 

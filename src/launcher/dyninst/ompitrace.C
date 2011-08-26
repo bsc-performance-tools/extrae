@@ -408,10 +408,10 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	unsigned MPIinsertion = 0;
 	unsigned APIinsertion = 0;
 	unsigned UFinsertion = 0;
-	char *PMPI_C_prefix = "PMPI_";
-	char *PMPI_F_prefix = "pmpi_";
-	char *MPI_C_prefix = "MPI_";
-	char *MPI_F_prefix = "mpi_";
+	const char *PMPI_C_prefix = "PMPI_";
+	const char *PMPI_F_prefix = "pmpi_";
+	const char *MPI_C_prefix = "MPI_";
+	const char *MPI_F_prefix= "mpi_";
 
 	cout << PACKAGE_NAME << ": Obtaining functions from application image (this may take a while)..." << flush;
 	BPatch_Vector<BPatch_function *> *vfunctions = appImage->getProcedures (false);
@@ -616,7 +616,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		cout << PACKAGE_NAME << ": " << UFinsertion << " user function" << ((UFinsertion!=1)?"s":"") << " instrumented" << endl;
 }
 
-int main (int argc, char *argv[], const char *envp[])
+int main (int argc, char *argv[])
 {
 	list<string> UserFunctions;
 	list<string> ParallelFunctions;

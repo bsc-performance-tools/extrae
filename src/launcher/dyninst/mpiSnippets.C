@@ -54,8 +54,8 @@ using namespace std;
 
 struct MPIroutines_t
 {
-	char *name;
-	char language;
+	const char *name;
+	const char language;
 	BPatch_function *patch;
 };
 
