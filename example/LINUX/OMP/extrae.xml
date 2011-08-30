@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <trace enabled="yes"
- home="/home/harald/T"
+ home="@sub_PREFIXDIR@"
  initial-mode="detail"
  type="paraver"
  xml-parser-id="Id: xml-parse.c 697 2011-07-08 15:14:05Z harald $"
