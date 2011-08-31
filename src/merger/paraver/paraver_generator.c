@@ -773,7 +773,7 @@ static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 	{
 		current->receive[LOGICAL_COMMUNICATION] = tmp->logic;
 		current->receive[PHYSICAL_COMMUNICATION] = tmp->physic;
-		current->thread_r = tmp->vthread;
+		current->thread_r = tmp->vthread+1; /* AddForeignRecv is called with (vthread-1) */
 		current->type = COMMUNICATION;
 		tmp->logic = tmp->physic = 0;
 		return TRUE;
