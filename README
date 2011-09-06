@@ -13,7 +13,7 @@ on the left navigation frame.
 
 Package dependencies (and comments)
 --
-* libxml2 2.5.0 : parse XML configuration files (optional) - look for libxml2-devel packages for your OS
+* libxml2 (>=2.5.0) : parse XML configuration files (optional) - look for libxml2-devel packages for your OS
 libxml2 is used to parse the configuration of the instrumentation package. It is highly recommendable because the XML configuration file is more flexible than using environment variables.
 
 * PAPI : access to HW counters (optional) - downloadable from http://icl.cs.utk.edu/papi/
@@ -22,7 +22,7 @@ The HW counters within the microprocessor increases the richness of the gathered
 * DynInst : support dynamic instrumentation (optional) - downloadable from http://www.dyninst.org/
 This is in experimental status. It is known to work on linux PPC32/64 systems and some minor testing has been done in linux x86/x86-64 systems.
 
-* libunwind : access to callstack (intel ia64 and intel x86 64 bits) - downloadable from http://www.nongnu.org/libunwind/.
+* libunwind (>=1.0): access to callstack (intel ia64 and intel x86 64 bits) - downloadable from http://www.nongnu.org/libunwind/.
 This library is used to access the callstack within extrae. Accessing the callstack lets the analyst gather MPI call-sites and emit information on manually added events. It is required for intel x86-64 and ia64 architectures.
 
 * liberty and libbfd : access debugging binary information (optional).
