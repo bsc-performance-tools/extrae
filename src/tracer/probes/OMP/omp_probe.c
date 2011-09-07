@@ -249,7 +249,7 @@ void Probe_OpenMP_Unnamed_Lock_Exit (void)
 {
 	DEBUG
 	if (TraceOMPLocks && mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, UNNAMEDCRIT_EV, LOCK_VAL, EMPTY);
+		TRACE_OMPEVENTANDCOUNTERS(TIME, UNNAMEDCRIT_EV, LOCKED_VAL, EMPTY);
 }
 
 void Probe_OpenMP_Unnamed_Unlock_Entry (void)
