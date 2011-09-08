@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
 
+ * 08Sep2011 Several OpenMP bugfixes
  * 26Aug2011 Modified code to support virtual_thread (from nanos) to view
              nanos tasks as threads in paraver.
  * 23Aug2011 Updated examples and added DynInst examples to the user-guide.

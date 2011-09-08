@@ -118,13 +118,14 @@ static int Join_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType, EvValue, EvParam;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
+	EvParam = Get_EvParam (current_event);
 
-	Switch_State ((EvValue==JOIN_WAIT_VAL)?STATE_BARRIER:STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+	Switch_State ((EvParam==JOIN_WAIT_VAL)?STATE_BARRIER:STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
