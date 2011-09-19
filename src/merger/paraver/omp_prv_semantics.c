@@ -78,7 +78,7 @@ static int WorkSharing_Event (
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+	// Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread); /* HSG not appropiate here for gnu runtime? */
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);

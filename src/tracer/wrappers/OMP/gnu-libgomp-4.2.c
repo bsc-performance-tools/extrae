@@ -460,7 +460,7 @@ void GOMP_sections_end_nowait (void)
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_sections_end_nowait_real();
-		Probe_OpenMP_Join_NoWait_Exit();
+ 		Probe_OpenMP_Join_NoWait_Exit();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -482,6 +482,7 @@ void GOMP_loop_end (void)
 		Probe_OpenMP_Join_Wait_Entry();
 		GOMP_loop_end_real();
 		Probe_OpenMP_Join_Wait_Exit();
+		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -503,6 +504,7 @@ void GOMP_loop_end_nowait (void)
 		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_loop_end_nowait_real();
 		Probe_OpenMP_Join_NoWait_Exit();
+		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -526,7 +528,6 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
-		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -550,7 +551,6 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
-		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -574,7 +574,6 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
-		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -598,7 +597,6 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
-		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
 	else
