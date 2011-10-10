@@ -73,11 +73,11 @@ function pointers?  All of them, maybe?
 
 /* Pointer to the user function called by a PARALLEL DO REGION */
 /* FIXME: Array of function pointers indexed by thread? (nowait issue) */
-static void (*pardo_uf)(void*);
+static void (*pardo_uf)(void*) = NULL;
 
 /* Pointer to the user function called by a PARALLEL REGION */
 /* FIXME: Array of function pointers indexed by thread? (nowait issue) */
-static void (*par_uf)(void*);
+static void (*par_uf)(void*) = NULL;
 
 
 /*
@@ -89,11 +89,16 @@ static void (*par_uf)(void*);
 static void callme_pardo (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": callme_pardo: p1 = %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d callme_pardo: pardo_uf() = %p p1 = %p\n", THREADID, pardo_uf, p1);
 #endif
 
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) par_uf);
+	if (pardo_uf == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Invalid initialization of 'pardo_uf'\n");
+		exit (0);
+	}
+
+	Probe_OpenMP_UF ((UINT64) pardo_uf);
 	pardo_uf (p1);
 	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
@@ -105,16 +110,21 @@ static void callme_pardo (void *p1)
 	acts as a trampoline to this call. Each thread runs the very same routine
 	with different params.
 */
-static void callme_par (void *ptr)
+static void callme_par (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": callme_par: ptr=%p\n", ptr);
-	fprintf (stderr, PACKAGE_NAME": callme_par: par_uf=%p\n", par_uf);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d callme_par: par_uf()=%p p1=%p\n", THREADID, par_uf, p1);
 #endif
+
+	if (par_uf == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Invalid initialization of 'par_uf'\n");
+		exit (0);
+	}
 
 	Backend_Enter_Instrumentation (1);
 	Probe_OpenMP_UF_Entry ((UINT64) par_uf);
-	par_uf (ptr);
+	par_uf (p1);
 	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
 }
@@ -362,8 +372,8 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_sections_start is at %p\n", GOMP_sections_start_real);
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_sections params %p %p %u %u \n", p1, p2, p3, p4);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_sections_start is at %p\n", THREADID, GOMP_sections_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_sections params %p %p %u %u \n", THREADID, p1, p2, p3, p4);
 #endif
 
 	if (GOMP_parallel_sections_start_real != NULL)
@@ -385,8 +395,8 @@ unsigned GOMP_sections_start (unsigned p1)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_sections_start is at %p\n", GOMP_sections_start_real);
-	fprintf (stderr, PACKAGE_NAME": GOMP_sections params %u\n", p1);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections_start is at %p\n", THREADID, GOMP_sections_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections params %u\n", THREADID, p1);
 #endif
 
 	if (GOMP_sections_start_real != NULL)
@@ -409,7 +419,7 @@ unsigned GOMP_sections_next (void)
 {
 	unsigned res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_sections_next is at %p\n", GOMP_sections_next_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections_next is at %p\n", THREADID, GOMP_sections_next_real);
 #endif
 
 	if (GOMP_sections_next_real != NULL)
@@ -431,7 +441,7 @@ unsigned GOMP_sections_next (void)
 void GOMP_sections_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_sections_end is at %p\n", GOMP_sections_end_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections_end is at %p\n", THREADID, GOMP_sections_end_real);
 #endif
 
 	if (GOMP_sections_end_real != NULL)
@@ -452,7 +462,7 @@ void GOMP_sections_end (void)
 void GOMP_sections_end_nowait (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_sections_end_nowait is at %p\n", GOMP_sections_end_nowait_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections_end_nowait is at %p\n", THREADID, GOMP_sections_end_nowait_real);
 #endif
 
 	if (GOMP_sections_end_nowait_real != NULL)
@@ -473,7 +483,7 @@ void GOMP_sections_end_nowait (void)
 void GOMP_loop_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_end is at %p\n", GOMP_loop_end_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_end is at %p\n", THREADID, GOMP_loop_end_real);
 #endif
 
 	if (GOMP_loop_end_real != NULL)
@@ -495,7 +505,7 @@ void GOMP_loop_end (void)
 void GOMP_loop_end_nowait (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_end_nowait is at %p\n", GOMP_loop_end_nowait_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_end_nowait is at %p\n", THREADID, GOMP_loop_end_nowait_real);
 #endif
 
 	if (GOMP_loop_end_nowait_real != NULL)
@@ -519,8 +529,8 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 	int res = 0;
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_start is at %p\n", GOMP_loop_static_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_static_start is at %p\n", THREADID, GOMP_loop_static_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_static_start_real != NULL)
@@ -528,6 +538,7 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
+		Probe_OpenMP_DO_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -542,8 +553,8 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_start is at %p\n", GOMP_loop_runtime_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_runtime_start is at %p\n", THREADID, GOMP_loop_runtime_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_runtime_start_real != NULL)
@@ -551,6 +562,7 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
+		Probe_OpenMP_DO_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -565,8 +577,8 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_start is at %p\n", GOMP_loop_guided_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_static_start is at %p\n", THREADID, GOMP_loop_guided_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_guided_start_real != NULL)
@@ -574,6 +586,7 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
+		Probe_OpenMP_DO_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -588,8 +601,8 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_start is at %p\n", GOMP_loop_dynamic_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %ld %ld %ld %ld %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_dynamic_start is at %p\n", THREADID, GOMP_loop_dynamic_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_dynamic_start_real != NULL)
@@ -597,6 +610,7 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
+		Probe_OpenMP_DO_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -610,8 +624,8 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_static_start is at %p\n", GOMP_parallel_loop_static_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_loop_static_start is at %p\n", THREADID, GOMP_parallel_loop_static_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_static_start_real != NULL)
@@ -624,6 +638,10 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 		GOMP_parallel_loop_static_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
 		Backend_Leave_Instrumentation ();
+
+		/* The master thread continues the execution and then calls pardo_uf */
+		if (THREADID == 0)
+			Probe_OpenMP_UF ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -635,8 +653,8 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_runtime_start is at %p\n", GOMP_parallel_loop_runtime_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_loop_runtime_start is at %p\n", THREADID, GOMP_parallel_loop_runtime_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_runtime_start_real != NULL)
@@ -649,6 +667,10 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 		GOMP_parallel_loop_runtime_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
 		Backend_Leave_Instrumentation ();
+
+		/* The master thread continues the execution and then calls pardo_uf */
+		if (THREADID == 0)
+			Probe_OpenMP_UF ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -660,8 +682,8 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_guided_start is at %p\n", GOMP_parallel_loop_guided_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_loop_guided_start is at %p\n", THREADID, GOMP_parallel_loop_guided_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_static_start_real != NULL)
@@ -674,6 +696,10 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 		GOMP_parallel_loop_guided_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
 		Backend_Leave_Instrumentation ();
+
+		/* The master thread continues the execution and then calls pardo_uf */
+		if (THREADID == 0)
+			Probe_OpenMP_UF ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -685,8 +711,8 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4, long p5, long p6, long p7)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_dynamic_start is at %p\n", GOMP_parallel_loop_dynamic_start_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p %u %ld %ld %ld %ld\n", p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_loop_dynamic_start is at %p\n", THREADID, GOMP_parallel_loop_dynamic_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_parallel_loop_dynamic_start_real != NULL)
@@ -699,6 +725,10 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 		GOMP_parallel_loop_dynamic_start_real (callme_pardo, p2, p3, p4, p5, p6, p7);
 		Probe_OpenMP_ParDO_Exit ();	
 		Backend_Leave_Instrumentation ();
+
+		/* The master thread continues the execution and then calls pardo_uf */
+		if (THREADID == 0)
+			Probe_OpenMP_UF ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -711,8 +741,8 @@ int GOMP_loop_static_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_next is at %p\n", GOMP_loop_static_next_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_static_next is at %p\n", THREADID, GOMP_loop_static_next_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
 	if (GOMP_loop_static_next_real != NULL)
@@ -735,8 +765,8 @@ int GOMP_loop_runtime_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_next is at %p\n", GOMP_loop_runtime_next_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_runtime_next is at %p\n", THREADID, GOMP_loop_runtime_next_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
 	if (GOMP_loop_runtime_next_real != NULL)
@@ -759,8 +789,8 @@ int GOMP_loop_guided_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_guided_next is at %p\n", GOMP_loop_guided_next_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_guided_next is at %p\n", THREADID, GOMP_loop_guided_next_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
 	if (GOMP_loop_guided_next_real != NULL)
@@ -783,8 +813,8 @@ int GOMP_loop_dynamic_next (long *p1, long *p2)
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_next is at %p\n", GOMP_loop_dynamic_next_real);
-	fprintf (stderr, PACKAGE_NAME": params %p %p\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_dynamic_next is at %p\n", THREADID, GOMP_loop_dynamic_next_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
 	if (GOMP_loop_dynamic_next_real != NULL)
@@ -808,8 +838,8 @@ extern int omp_get_thread_num();
 void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_start is at %p\n", GOMP_parallel_start_real);
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_start params %p %p %u\n", p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_start is at %p\n", THREADID, GOMP_parallel_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_start params %p %p %u\n", THREADID, p1, p2, p3);
 #endif
 
 	if (GOMP_parallel_start_real != NULL)
@@ -822,9 +852,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 
 		/* GCC/libgomp does not execute callme_par per root thread, emit
 		   the required event here */
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_UF_Entry ((UINT64) p1);
-
+		Probe_OpenMP_UF ((UINT64) p1);
 		GOMP_parallel_start_real (callme_par, p2, p3);
 		Backend_Leave_Instrumentation ();
 	}
@@ -838,7 +866,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 void GOMP_parallel_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_parallel_end is at %p\n", GOMP_parallel_end_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_end is at %p\n", THREADID, GOMP_parallel_end_real);
 #endif
 
 	if (GOMP_parallel_start_real != NULL)
@@ -859,7 +887,7 @@ void GOMP_parallel_end (void)
 void GOMP_barrier (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_barrier is at %p\n", GOMP_barrier_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_barrier is at %p\n", THREADID, GOMP_barrier_real);
 #endif
 
 	if (GOMP_barrier_real != NULL)
@@ -880,8 +908,8 @@ void GOMP_barrier (void)
 void GOMP_critical_name_start (void **p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_start is at %p\n", GOMP_critical_name_start_real);
-	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_start params %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_name_start is at %p\n", THREADID, GOMP_critical_name_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_name_start params %p\n", THREADID, p1);
 #endif
 
 	if (GOMP_critical_name_start_real != NULL)
@@ -902,8 +930,8 @@ void GOMP_critical_name_start (void **p1)
 void GOMP_critical_name_end (void **p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_end is at %p\n", GOMP_critical_name_end_real);
-	fprintf (stderr, PACKAGE_NAME": GOMP_critical_name_end params %p\n", p1);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_name_end is at %p\n", THREADID, GOMP_critical_name_end_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_name_end params %p\n", THREADID, p1);
 #endif
 
 	if (GOMP_critical_name_end_real != NULL)
@@ -925,7 +953,7 @@ void GOMP_critical_name_end (void **p1)
 void GOMP_critical_start (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_critical_start is at %p\n", GOMP_critical_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_start is at %p\n", THREADID, GOMP_critical_start_real);
 #endif
 
 	if (GOMP_critical_start_real != NULL)
@@ -946,7 +974,7 @@ void GOMP_critical_start (void)
 void GOMP_critical_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_critical_end is at %p\n", GOMP_critical_end_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_end is at %p\n", THREADID, GOMP_critical_end_real);
 #endif
 
 	if (GOMP_critical_end_real != NULL)
@@ -967,7 +995,7 @@ void GOMP_critical_end (void)
 void GOMP_atomic_start (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_atomic_start is at %p\n", GOMP_atomic_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_atomic_start is at %p\n", THREADID, GOMP_atomic_start_real);
 #endif
 
 	if (GOMP_atomic_start_real != NULL)
@@ -988,7 +1016,7 @@ void GOMP_atomic_start (void)
 void GOMP_atomic_end (void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": GOMP_atomic_end is at %p\n", GOMP_atomic_end_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_atomic_end is at %p\n", THREADID, GOMP_atomic_end_real);
 #endif
 
 	if (GOMP_atomic_end_real != NULL)
