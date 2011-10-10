@@ -98,7 +98,7 @@ static void callme_pardo (void *p1)
 		exit (0);
 	}
 
-	Probe_OpenMP_UF ((UINT64) pardo_uf);
+	Probe_OpenMP_UF_Entry ((UINT64) pardo_uf);
 	pardo_uf (p1);
 	Probe_OpenMP_UF_Exit ();
 	Backend_Leave_Instrumentation ();
