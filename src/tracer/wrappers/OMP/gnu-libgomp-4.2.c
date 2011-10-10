@@ -641,7 +641,7 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Probe_OpenMP_UF ((UINT64) pardo_uf);
+			Probe_OpenMP_UF_Entry ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -670,7 +670,7 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Probe_OpenMP_UF ((UINT64) pardo_uf);
+			Probe_OpenMP_UF_Entry ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -699,7 +699,7 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Probe_OpenMP_UF ((UINT64) pardo_uf);
+			Probe_OpenMP_UF_Entry ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -728,7 +728,7 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Probe_OpenMP_UF ((UINT64) pardo_uf);
+			Probe_OpenMP_UF_Entry ((UINT64) pardo_uf);
 	}
 	else
 	{
@@ -852,7 +852,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 
 		/* GCC/libgomp does not execute callme_par per root thread, emit
 		   the required event here */
-		Probe_OpenMP_UF ((UINT64) p1);
+		Probe_OpenMP_UF_Entry ((UINT64) p1);
 		GOMP_parallel_start_real (callme_par, p2, p3);
 		Backend_Leave_Instrumentation ();
 	}
