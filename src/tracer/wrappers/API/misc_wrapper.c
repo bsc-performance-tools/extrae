@@ -130,7 +130,7 @@ void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsig
 	{
 		for (i = 0; i < *count; i++)
 			events_id[i] = USER_EV;
-		temps = TIME;
+		temps = LAST_READ_TIME;
 		TRACE_N_MISCEVENTANDCOUNTERS(temps, *count, events_id, types, values);
 	}
 }

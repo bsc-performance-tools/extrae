@@ -737,7 +737,7 @@ void extrae_neventandcounters (unsigned *count, unsigned *tipus, unsigned *valor
 {
 	if (mpitrace_on)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (*count);
 		Extrae_N_Eventsandcounters_Wrapper (count, tipus, valor);
 		Backend_Leave_Instrumentation ();
 	}
