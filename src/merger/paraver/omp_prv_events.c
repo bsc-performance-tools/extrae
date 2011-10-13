@@ -50,10 +50,11 @@ static char UNUSED rcsid[] = "$Id$";
 #define WRK_OMP_INDEX           5  /* Work delivery */
 #define JOIN_OMP_INDEX          6  /* Joins */
 #define BARRIER_OMP_INDEX       7  /* Barriers */
+#define GETSETNUMTHREADS_INDEX  8  /* Set or Get num threads */
 
-#define MAX_OMP_INDEX		8
+#define MAX_OMP_INDEX		9
 
-static int inuse[MAX_OMP_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_OMP_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_OMP_Operation (int tipus)
 {
@@ -73,6 +74,8 @@ void Enable_OMP_Operation (int tipus)
 		inuse[JOIN_OMP_INDEX] = TRUE;
 	else if (tipus == BARRIEROMP_EV)
 		inuse[BARRIER_OMP_INDEX] = TRUE;
+	else if (tipus == OMPGETNUMTHREADS_EV || tipus == OMPSETNUMTHREADS_EV)
+		inuse[GETSETNUMTHREADS_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -164,6 +167,15 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d   %d OpenMP barrier\n", 0, BARRIEROMP_EV);
+		fprintf (fd, "VALUES\n"
+		             "0 End\n"
+		             "1 Begin\n");
+	}
+	if (inuse[GETSETNUMTHREADS_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d   %d OpenMP set num threads\n", 0, OMPSETNUMTHREADS_EV);
+		fprintf (fd, "%d   %d OpenMP get num threads\n", 0, OMPGETNUMTHREADS_EV);
 		fprintf (fd, "VALUES\n"
 		             "0 End\n"
 		             "1 Begin\n");

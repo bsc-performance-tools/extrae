@@ -1379,7 +1379,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 #endif
 
 	/* Initialize the clock */
-	CLOCK_INIT;
+	CLOCK_INIT (maximum_NumOfThreads);
 
 	/* Configure the tracing subsystem */
 #if defined(HAVE_XML2)
@@ -1470,6 +1470,9 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 	/* Just modify things if there are more threads */
 	if (new_num_threads > maximum_NumOfThreads)
 	{
+		/* Reallocate clock structures */
+		Clock_AllocateThreads (new_num_threads);
+
 		/* Reallocate the buffers and trace files */
 		Reallocate_buffers_and_files (new_num_threads);
 

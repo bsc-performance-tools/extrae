@@ -47,7 +47,7 @@
 enum
 {
     CIRCULAR_SKIP_EVENTS,
-    CIRCULAR_SKIP_MATCHES,
+    CIRCULAR_SKIP_MATCHES
 };
 
 typedef enum

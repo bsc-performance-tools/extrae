@@ -30,6 +30,9 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -78,7 +81,7 @@ static char UNUSED rcsid[] = "$Id$";
 # error "Unhandled clock type"
 #endif
 
-static UINT64 _extrae_last_read_clock = 0;
+static UINT64 *_extrae_last_read_clock = NULL;
 static unsigned ClockType = REAL_CLOCK;
 
 void Clock_setType (unsigned type)
@@ -91,12 +94,12 @@ unsigned Clock_getType (void)
 	return ClockType;
 }
 
-UINT64 Clock_getLastReadTime (void)
+UINT64 Clock_getLastReadTime (unsigned thread)
 {
-	return _extrae_last_read_clock;
+	return _extrae_last_read_clock[thread];
 }
 
-iotimer_t Clock_getCurrentTime (void)
+iotimer_t Clock_getCurrentTime (unsigned thread)
 {
 	UINT64 tmp;
 
@@ -131,15 +134,23 @@ iotimer_t Clock_getCurrentTime (void)
 #endif
 	}
 
-	_extrae_last_read_clock = tmp;
+	_extrae_last_read_clock[thread] = tmp;
 
 	return tmp;
 }
 
-void Clock_Initialize (void)
+void Clock_AllocateThreads (unsigned numthreads)
 {
+	_extrae_last_read_clock = (UINT64*) realloc (_extrae_last_read_clock, sizeof(UINT64)*numthreads);
+}
+
+void Clock_Initialize (unsigned numthreads)
+{
+	Clock_AllocateThreads (numthreads);
+
 	INIT_CLOCK;
 }
+
 
 void Clock_Initialize_thread (void)
 {

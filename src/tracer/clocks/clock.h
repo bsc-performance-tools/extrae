@@ -33,7 +33,7 @@
 enum
 {
   REAL_CLOCK = 0,
-  USER_CLOCK,
+  USER_CLOCK
 };
 
 /* 
@@ -46,9 +46,9 @@ typedef unsigned long long iotimer_t;
 typedef unsigned long iotimer_t;
 #endif
 
-#define TIME (Clock_getCurrentTime())
-#define LAST_READ_TIME (Clock_getLastReadTime())
-#define CLOCK_INIT (Clock_Initialize())
+#define TIME (Clock_getCurrentTime(THREADID))
+#define LAST_READ_TIME (Clock_getLastReadTime(THREADID))
+#define CLOCK_INIT(x) (Clock_Initialize(x))
 #define CLOCK_INIT_THREAD (Clock_Initialize())
 
 #if defined(__cplusplus)
@@ -57,9 +57,10 @@ extern "C" {
 void Clock_setType (unsigned type);
 unsigned Clock_getType (void);
 
-iotimer_t Clock_getCurrentTime (void);
-UINT64 Clock_getLastReadTime (void);
-void Clock_Initialize (void);
+iotimer_t Clock_getCurrentTime (unsigned thread);
+UINT64 Clock_getLastReadTime (unsigned thread);
+void Clock_AllocateThreads (unsigned numthreads);
+void Clock_Initialize (unsigned numthreads);
 void Clock_Initialize_thread (void);
 #if defined(__cplusplus)
 }

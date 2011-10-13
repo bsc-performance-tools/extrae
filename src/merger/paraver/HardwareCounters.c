@@ -326,18 +326,18 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 		cItem->Events[cnt] = newIds[cnt];
 		cItem->Traced[cnt] = (newIds[cnt] != NO_COUNTER);
 	}
-  ENQUEUE_ITEM (&CountersTraced, cItem);
+	ENQUEUE_ITEM (&CountersTraced, cItem);
 }
 
 void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Event)
 {
-  int cnt;
-  struct thread_t *Sthread;
-  int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
+	int cnt;
+	struct thread_t *Sthread;
+	int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
-  for (cnt = 0; cnt < MAX_HWC; cnt++)
+	for (cnt = 0; cnt < MAX_HWC; cnt++)
 		if (Event->HWCValues[cnt] == SAMPLE_COUNTER)
 			Sthread->HWCSets[set_id][cnt] = SAMPLE_COUNTER;
 }

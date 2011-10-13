@@ -53,6 +53,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 static void (*omp_set_lock_real)(int *) = NULL;
 static void (*omp_unset_lock_real)(int *) = NULL;
+static void (*omp_set_num_threads_real)(int) = NULL;
+static int (*omp_get_num_threads_real)(void) = NULL;
 
 static void common_GetOpenMPHookPoints (int rank)
 {
@@ -67,6 +69,18 @@ static void common_GetOpenMPHookPoints (int rank)
 		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_unset_lock");
 	if (omp_unset_lock_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find omp_unset_lock in DSOs!!\n");
+
+	/* Obtain @ for omp_set_num_threads */
+	omp_set_num_threads_real =
+		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads");
+	if (omp_set_num_threads_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find omp_set_num_threads in DSOs!!\n");
+
+	/* Obtain @ for omp_get_num_threads */
+	omp_get_num_threads_real =
+		(int(*)(void)) dlsym (RTLD_NEXT, "omp_get_num_threads");
+	if (omp_get_num_threads_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find omp_get_num_threads in DSOs!!\n");
 }
 
 /*
@@ -85,7 +99,7 @@ void omp_set_lock (int *p1)
 
 	if (omp_set_lock_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Lock_Entry();
 		omp_set_lock_real(p1);
 		Probe_OpenMP_Named_Lock_Exit();
@@ -107,7 +121,7 @@ void omp_unset_lock (int *p1)
 
 	if (omp_unset_lock_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Lock_Entry();
 		omp_unset_lock_real (p1);
 		Probe_OpenMP_Named_Lock_Exit();
@@ -119,6 +133,57 @@ void omp_unset_lock (int *p1)
 		exit (0);
 	}
 }
+
+void omp_set_num_threads (int p1)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": omp_set_num_threads is at %p\n", omp_set_num_threads_real);
+	fprintf (stderr, PACKAGE_NAME": omp_set_num_threads params %d\n", p1);
+#endif
+
+	if (omp_set_num_threads_real != NULL)
+	{
+		Backend_ChangeNumberOfThreads (p1);
+
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_SetNumThreads_Entry (p1);
+		omp_set_num_threads_real (p1);
+		Probe_OpenMP_SetNumThreads_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": omp_set_num_threads is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+int omp_get_num_threads (int p1)
+{
+	int res;
+
+#if defined(DEBUG)
+  fprintf (stderr, PACKAGE_NAME": omp_get_num_threads is at %p\n", omp_get_num_threads_real);
+  fprintf (stderr, PACKAGE_NAME": omp_get_num_threads params %d\n", p1);
+#endif
+
+  if (omp_get_num_threads_real != NULL)
+  {
+    Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_GetNumThreads_Entry ();
+    res = omp_get_num_threads_real ();
+		Probe_OpenMP_GetNumThreads_Exit ();
+    Backend_Leave_Instrumentation ();
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": omp_set_num_threads is not hooked! exiting!!\n");
+    exit (0);
+  }
+
+	return res;
+}
+
 
 extern int omp_get_max_threads();
 

@@ -265,3 +265,32 @@ void Probe_OpenMP_Unnamed_Unlock_Exit (void)
 	if (TraceOMPLocks && mpitrace_on)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, UNNAMEDCRIT_EV, UNLOCKED_VAL, EMPTY);
 }
+
+void Probe_OpenMP_GetNumThreads_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPGETNUMTHREADS_EV, EVT_BEGIN, EMPTY); 
+}
+
+void Probe_OpenMP_GetNumThreads_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPGETNUMTHREADS_EV, EVT_END, EMPTY); 
+}
+
+void Probe_OpenMP_SetNumThreads_Entry (int p1)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPSETNUMTHREADS_EV, EVT_BEGIN, p1); 
+}
+
+void Probe_OpenMP_SetNumThreads_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPSETNUMTHREADS_EV, EVT_END, EMPTY); 
+}
+

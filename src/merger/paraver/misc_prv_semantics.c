@@ -599,15 +599,16 @@ static int Evt_CountersDefinition (
  **      Description :
  ******************************************************************************/
 
-static void ResetCounters (int ptask, int task)
+static void ResetCounters (unsigned ptask, unsigned task, unsigned thread)
 {
-	int thread, cnt;
+	unsigned cnt;
+	struct thread_t * Sthread = GET_THREAD_INFO(ptask, task, thread); 
+	struct task_t *Stask = GET_TASK_INFO(ptask, task);
 
-	obj_table[ptask].tasks[task].tracing_disabled = FALSE;
+	Stask->tracing_disabled = FALSE;
 
-	for (thread = 0; thread < obj_table[ptask].tasks[task].nthreads; thread++)
-		for (cnt = 0; cnt < MAX_HWC; cnt++)
-			obj_table[ptask].tasks[task].threads[thread].counters[cnt] = 0LL;
+	for (cnt = 0; cnt < MAX_HWC; cnt++)
+		Sthread->counters[cnt] = 0;
 }
 
 /******************************************************************************
@@ -645,7 +646,7 @@ int HWC_Change_Ev (
 		prev_hwctype[i] = HWC_COUNTER_TYPE(oldIds[i]);
 #endif
 
-	ResetCounters (ptask-1, task-1);
+	ResetCounters (ptask, task, thread);
 	HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
 
 	/* This loop starts at 0 and goes to MAX_HWC+1 because HardwareCounters_Change

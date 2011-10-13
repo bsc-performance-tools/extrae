@@ -53,6 +53,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "stdio.h"
 #include "xml-parse.h"
 #include "common_hwc.h"
+#include "misc_wrapper.h"
 
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
@@ -256,6 +257,8 @@ static inline int CheckForHWCSetChange_TIME (UINT64 countglops, UINT64 time, int
 {
 	int ret = 0;
 
+//	fprintf (stderr, "HWC_current_timebegin[%d]=%llu HWC_current_changeat=%llu time = %llu\n", THREADID, HWC_current_timebegin[threadid], HWC_current_changeat, time);
+
 	if (HWC_current_timebegin[threadid] + HWC_current_changeat < time)
 	{
 		HWC_Start_Next_Set (countglops, time, threadid);
@@ -287,7 +290,7 @@ int HWC_Check_Pending_Set_Change (UINT64 countglops, UINT64 time, int thread_id)
  */
 void HWC_Initialize (int options)
 {
-	int i, num_threads = Backend_getMaximumOfThreads();
+	int num_threads = Backend_getMaximumOfThreads();
 
 	HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
 	if (NULL == HWC_current_set)
@@ -307,13 +310,6 @@ void HWC_Initialize (int options)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_glopsbegin\n");
 		return;
-	}
-
-	for (i = 0; i < num_threads; i++)
-	{
-		HWC_current_set[i] = 0;
-		HWC_current_timebegin[i] = 0;
-		HWC_current_glopsbegin[i] = 0;
 	}
 
 	HWCBE_INITIALIZE(options);
@@ -372,6 +368,14 @@ void HWC_Start_Counters (int num_threads)
 
 	/* Init counters for thread 0 */
 	HWCEnabled = HWCBE_START_COUNTERS_THREAD (TIME, 0);
+
+	/* Inherit hwc set change values from thread 0 */
+	for (i = 1; i < num_threads; i++)
+	{
+		HWC_current_set[i] = HWC_current_set[0];
+		HWC_current_timebegin[i] = HWC_current_timebegin[0];
+		HWC_current_glopsbegin[i] = HWC_current_glopsbegin[0];
+	}
 }
 
 /** 

@@ -381,6 +381,8 @@ enum {
 #define OMPFUNC_LINE_EV          60000118
 #define USRFUNC_EV               60000019
 #define USRFUNC_LINE_EV          60000119
+#define OMPSETNUMTHREADS_EV      60000030
+#define OMPGETNUMTHREADS_EV      60000031
 
 /******************************************************************************
  *   User events to trace Pthread/TRT parallel execution.

@@ -68,6 +68,11 @@ void Probe_OpenMP_Unnamed_Lock_Exit (void);
 void Probe_OpenMP_Unnamed_Unlock_Entry (void);
 void Probe_OpenMP_Unnamed_Unlock_Exit (void);
 
+void Probe_OpenMP_GetNumThreads_Entry (void);
+void Probe_OpenMP_GetNumThreads_Exit (void);
+void Probe_OpenMP_SetNumThreads_Entry (int);
+void Probe_OpenMP_SetNumThreads_Exit (void);
+
 void setTrace_OMPLocks (int value);
 
 #endif
