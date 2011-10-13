@@ -54,7 +54,11 @@ static char UNUSED rcsid[] = "$Id$";
 static void (*omp_set_lock_real)(int *) = NULL;
 static void (*omp_unset_lock_real)(int *) = NULL;
 static void (*omp_set_num_threads_real)(int) = NULL;
+#if 0 /* Don't instrument omp_get_num_threads
+         it is automatically called on #pragma omp for on gnu runtime (and possibly others?)
+         and will increase trace size */
 static int (*omp_get_num_threads_real)(void) = NULL;
+#endif
 
 static void common_GetOpenMPHookPoints (int rank)
 {
@@ -76,11 +80,13 @@ static void common_GetOpenMPHookPoints (int rank)
 	if (omp_set_num_threads_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find omp_set_num_threads in DSOs!!\n");
 
+#if 0 /* Don't instrument omp_get_num_threads */
 	/* Obtain @ for omp_get_num_threads */
 	omp_get_num_threads_real =
 		(int(*)(void)) dlsym (RTLD_NEXT, "omp_get_num_threads");
 	if (omp_get_num_threads_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find omp_get_num_threads in DSOs!!\n");
+#endif
 }
 
 /*
@@ -158,6 +164,7 @@ void omp_set_num_threads (int p1)
 	}
 }
 
+#if 0 /* Don't instrument omp_get_num_threads */
 int omp_get_num_threads (int p1)
 {
 	int res;
@@ -183,7 +190,7 @@ int omp_get_num_threads (int p1)
 
 	return res;
 }
-
+#endif
 
 extern int omp_get_max_threads();
 
