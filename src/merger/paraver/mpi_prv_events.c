@@ -546,7 +546,7 @@ void MPITEvent_WriteEnabled_MPI_Operations (FILE * fd)
 		  	  	  fprintf (fd, "%d   %s\n", event_mpit2prv[jj].valor_prv, etiqueta);
 		  	  }
 		  }
-		  fprintf (fd, "%d   %s\n", 0, "End");
+		  fprintf (fd, "%d   %s\n", 0, "Outside MPI");
 		  fprintf (fd, "\n\n");
 		}
 	}
