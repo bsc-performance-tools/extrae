@@ -87,6 +87,7 @@ unsigned int PACX_CurrentOpGlobal = 0;
 unsigned int get_PACX_NumOpsGlobals()
 {
 	return PACX_NumOpsGlobals;
+}
 
 /*
 #if defined(FORTRAN_SYMBOLS)
@@ -3146,7 +3147,7 @@ int NAME_ROUTINE_C(PACX_Request_free) (PACX_Request *request)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  PACX_Request_free_C_Wrapper (request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3349,7 +3350,7 @@ int NAME_ROUTINE_C(PACX_Sendrecv_replace) (void *buf, int count, PACX_Datatype t
 	return res;
 }
 
-#if 0 /* defined(PACX_SUPPORTS_PACX_IO) */
+#if defined(PACX_SUPPORTS_PACX_IO)
 
 /******************************************************************************
  ***  PACX_File_open

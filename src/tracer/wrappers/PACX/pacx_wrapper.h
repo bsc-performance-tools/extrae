@@ -422,7 +422,7 @@ int PACX_Sendrecv_replace_C_Wrapper (void *buf, int count, PACX_Datatype type,
   int dest, int sendtag, int source, int recvtag, PACX_Comm comm,
   PACX_Status * status);
 
-#if 0 /* defined(PACX_SUPPORTS_PACX_IO) */
+#if defined(PACX_SUPPORTS_PACX_IO)
 
 int PACX_File_open_C_Wrapper (PACX_Comm comm, char *filename, int amode,
   PACX_Info info, PACX_File *fh);

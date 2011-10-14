@@ -43,76 +43,20 @@
 #include "calltrace.h" 
 
 #define EVT_NUM 500000
-#define CACHE_LINE 128
 
-#if !defined(TRUE)
-# define TRUE  (1==1)
-#endif
-
-#if !defined(FALSE)
-# define FALSE (1!=1)
-#endif
-
-#define TRACE_FILE 500
-
-#define u_llong     unsigned long long
+#define u_llong unsigned long long
 #define LONG_PID 10
 #define MASTER_ID 0
 
 #define MAX_FUNCTION_NAME 450
 #define MAX_FUNCTIONS 300
 
+extern unsigned long long last_pacx_exit_time;
+extern unsigned long long last_pacx_begin_time;
 extern unsigned long long last_mpi_exit_time;
 extern unsigned long long last_mpi_begin_time;
 extern unsigned long long CPU_Burst_Threshold;
 extern unsigned long long initTracingTime;
-
-#if 0
-#define Tracefile_Name(name,tmpdir,appl,pid,rank,vpid) \
-	sprintf((name),TRACE_FILE_NAME_LINE,(tmpdir),(appl),(pid),(rank),(vpid))
-
-#define Samplefile_Name(name,tmpdir,appl,pid,rank,vpid) \
-	sprintf((name),SAMPLE_FILE_NAME_LINE,(tmpdir),(appl),(pid),(rank),(vpid))
-
-/*
- * Tracefile PRV format is :  applicationnamePPPPPPPPPP.prv
- *
- * where  PPPPPPPPPP is the parent pid (10 digits)
- */
-
-#define BASE_TRACE_PRVNAME_LINE     "%s.%.10d.prv"
-#define TRACEFILE_PRVNAME_LINE   "%s/%s.%.10d.prv"
-
-#define Tracefile_PrvName(name,tmpdir,appl,pid) \
-	sprintf((name),TRACEFILE_PRVNAME_LINE,(tmpdir),(appl),(pid))
-
-/* 
- * Temporal file format is :  application_namePPPPPPPPPPRRRRRRVVVVVV.tmp
- *
- * where VVV is the virtual processor identifier 
- *       PPPPPPPPPP  pid  (10 digits) thread pid which creates 
- *                   the temporal files
- */
-
-#define TEMPORAL_TRACE_NAME_LINE   "%s/%s.%.10d%.6d%.6u.ttmp"
-#define TEMPORAL_SAMPLE_NAME_LINE  "%s/%s.%.10d%.6d%.6u.stmp"
-
-#define Temporal_Trace_Name(name,tmpdir,appl,pid,rank,vpid) \
-	   sprintf((name),TEMPORAL_TRACE_NAME_LINE,(tmpdir),(appl),(pid),(rank),(vpid))
-
-#define Temporal_Sample_Name(name,tmpdir,appl,pid,rank,vpid) \
-	   sprintf((name),TEMPORAL_SAMPLE_NAME_LINE,(tmpdir),(appl),(pid),(rank),(vpid))
-
-#define CALLBACK_FILE        "%s/%s.%.10d.cbk"
-
-#define Callback_Name(name,tmpdir,appl,pid) \
-	   sprintf((name),CALLBACK_FILE,(tmpdir),(appl),(pid))
-
-#define SYMBOL_FILE        "%s/%s.%.10d.sym"
-
-#define Symbol_Name(name,tmpdir,appl,pid) \
-	   sprintf((name),SYMBOL_FILE,(tmpdir),(appl),(pid))
-#endif
 
 /*******************************************************************************
  *     
@@ -136,8 +80,7 @@ extern unsigned int mptrace_tracing_is_suspended;
 extern unsigned int mptrace_IsMPI;
 
 #include "taskid.h"
-//#define TASKID TaskID
-//extern unsigned int TaskID;
+
 extern unsigned NumOfTasks;
 
 /************ Variable global per saber si cal tracejar **************/
@@ -146,6 +89,9 @@ extern int tracejant;
 
 // Serveix per tracejar una aplicacio sense contar res de MPI
 extern int tracejant_mpi;
+
+// Serveix per tracejar una aplicacio sense contar res de PACX
+extern int tracejant_pacx;
 
 // Serveix per tracejar una aplicacio sense contar res de OpenMP
 extern int tracejant_omp;
@@ -193,6 +139,10 @@ extern int Trace_HWC_Enabled;
 /* Must we collect HWC on the MPI calls */
 extern int tracejant_hwc_mpi;
 #define TRACING_HWC_MPI (tracejant_hwc_mpi)
+
+/* Must we collect HWC on the PACX calls */
+extern int tracejant_hwc_pacx;
+#define TRACING_HWC_PACX (tracejant_hwc_pacx)
 
 /* Must we collect HWC on the OpenMP runtime calls */
 extern int tracejant_hwc_omp;

@@ -225,7 +225,7 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* PACX may have initialized it */
+			tracejant_hwc_mpi = enabled != NULL && !xmlStrcasecmp (enabled, xmlYES);
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
@@ -262,12 +262,12 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_mpi = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))) || tracejant_hwc_mpi; /* MPI may have initialized it */
+			tracejant_hwc_pacx = enabled != NULL && !xmlStrcasecmp (enabled, xmlYES);
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, PACKAGE_NAME": PACX routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
+			mfprintf (stdout, PACKAGE_NAME": PACX routines will %scollect HW counters information.\n", tracejant_hwc_pacx?"":"NOT ");
 #else
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <PACX> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
-			tracejant_hwc_mpi = FALSE;
+			tracejant_hwc_pacx = FALSE;
 #endif
 			XML_FREE(enabled);
 		}
@@ -336,7 +336,7 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
 		{
 		}
-		/* Must the tracing facility obtain information about MPI/PACX callers? */
+		/* Must the tracing facility obtain information about PACX callers? */
 		else if (!xmlStrcasecmp (tag->name, TRACE_MPI))
 		{
 #if defined(MPI_SUPPORT)
@@ -516,19 +516,27 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_MPI_STATISTICS))
 		{
+#if defined(MPI_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
 			XML_FREE(enabled);
+#else
+			mfprintf (stderr, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support MPI.\n", TRACE_MPI_STATISTICS, TRACE_BURSTS);
+#endif
 		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_PACX_STATISTICS))
 		{
+#if defined(PACX_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
 			XML_FREE(enabled);
+#else
+			mfprintf (stderr, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support PACX.\n", TRACE_PACX_STATISTICS, TRACE_BURSTS);
+#endif
 		}
 		else
 		{
-			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <Bursts> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <%s> level\n", tag->name, TRACE_BURSTS);
 		}
 
 		tag = tag->next;
@@ -1627,7 +1635,6 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							Parse_XML_MPI (rank, xmldoc, current_tag);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support MPI.\n", TRACE_MPI);
-							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at PACX */
 #endif
 						}
 						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
@@ -1641,15 +1648,14 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(PACX_SUPPORT)
-							tracejant_mpi = TRUE;
+							tracejant_pacx = TRUE;
 							Parse_XML_PACX (rank, xmldoc, current_tag);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support PACX.\n", TRACE_PACX);
-							tracejant_mpi = FALSE || tracejant_mpi; /* May be initialized at MPI */
 #endif
 						}
 						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
-							tracejant_mpi = FALSE;
+							tracejant_pacx = FALSE;
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */

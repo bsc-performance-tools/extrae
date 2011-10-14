@@ -140,7 +140,7 @@ static int GLOBAL_Bytes_Sent     = 0;      /* Sent "bytes" by PACX global operat
 static int GLOBAL_Bytes_Recv     = 0;      /* Recv "bytes" by PACX global operations */
 static int P2P_Communications    = 0;  /* Number of point to point communications */
 static int GLOBAL_Communications = 0;  /* Number of global operations */
-static int Elapsed_Time_In_MPI   = 0;  /* Time inside MPI/PACX calls */
+static int Elapsed_Time_In_PACX  = 0;  /* Time inside MPI/PACX calls */
 
 /****************************************************************************
  *** Variables de tamany necessari per accedir a camps de resulstats Fortran
@@ -358,7 +358,7 @@ static void Traceja_Persistent_Request (PACX_Request* reqid, iotimer_t temps)
    *   tag : message tag or PACX_ANY_TAG              commid: Communicator id
    *   aux: request id
    */
-  TRACE_MPIEVENT_NOHWC (temps, PACX_PERSIST_REQ_EV, p_request->tipus, src_world,
+  TRACE_PACXEVENT_NOHWC (temps, PACX_PERSIST_REQ_EV, p_request->tipus, src_world,
                         size, p_request->tag, p_request->comm, p_request->req);
 }
 
@@ -526,62 +526,61 @@ void Gather_Nodes_Info (void)
  ******************************************************************************/
 static int Generate_Task_File_List (int n_tasks, char **node_list)
 {
-    int ierror, val = getpid ();
-    int i, filedes, ret, thid;
-    pid_t *buffer_pids = NULL;
-    char tmpname[1024];
-    int *buffer_threads = NULL;
-    int nthreads = Backend_getMaximumOfThreads();
+	int ierror, val = getpid ();
+	int i, filedes, ret, thid;
+	pid_t *buffer_pids = NULL;
+	char tmpname[1024];
+	int *buffer_threads = NULL;
+	int nthreads = Backend_getMaximumOfThreads();
 
-    if (TASKID == 0)
-    {
-        buffer_pids = (pid_t *) malloc (sizeof(pid_t) * NumOfTasks);
-        buffer_threads = (int*) malloc (sizeof(int) * NumOfTasks);
-    }
+	if (TASKID == 0)
+	{
+		buffer_pids = (pid_t *) malloc (sizeof(pid_t) * NumOfTasks);
+		buffer_threads = (int*) malloc (sizeof(int) * NumOfTasks);
+	}
 
-    /* Share PID and number of threads of each PACX task */
-    ierror = PPACX_Gather (&val, 1, PACX_INT, buffer_pids, 1, PACX_INT, 0, PACX_COMM_WORLD);
-    PACX_CHECK(ierror, PPACX_Gather);
+	/* Share PID and number of threads of each PACX task */
+	ierror = PPACX_Gather (&val, 1, PACX_INT, buffer_pids, 1, PACX_INT, 0, PACX_COMM_WORLD);
+	PACX_CHECK(ierror, PPACX_Gather);
 
-    ierror = PPACX_Gather (&nthreads, 1, PACX_INT, buffer_threads, 1, PACX_INT, 0, PACX_COMM_WORLD);
-    PACX_CHECK(ierror, PPACX_Gather);
+	ierror = PPACX_Gather (&nthreads, 1, PACX_INT, buffer_threads, 1, PACX_INT, 0, PACX_COMM_WORLD);
+	PACX_CHECK(ierror, PPACX_Gather);
 
-    if (TASKID == 0)
-    {
-        sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+	if (TASKID == 0)
+	{
+		sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
 
-        filedes = open (tmpname, O_RDWR | O_CREAT | O_TRUNC, 0644);
-        if (filedes < 0)
-            return -1;
+		filedes = open (tmpname, O_RDWR | O_CREAT | O_TRUNC, 0644);
+		if (filedes < 0)
+			return -1;
 
-        for (i = 0; i < NumOfTasks; i++)
-        {
-            char tmp_line[2048];
+		for (i = 0; i < NumOfTasks; i++)
+		{
+			char tmp_line[2048];
 
-            for (thid = 0; thid < buffer_threads[i]; thid++)
-            {
-                //Tracefile_Name (tmpname, final_dir, appl_name, buffer_pids[i], i, thid);
-				FileName_PTT(tmpname, final_dir, appl_name, buffer_pids[i], i, thid, EXT_MPIT);
+			for (thid = 0; thid < buffer_threads[i]; thid++)
+			{
+				FileName_PTT(tmpname, Get_FinalDir(thid), appl_name, buffer_pids[i], i, thid, EXT_MPIT);
 
-                sprintf (tmp_line, "%s on %s\n", tmpname, node_list[i]);
-                ret = write (filedes, tmp_line, strlen (tmp_line));
-                if (ret != strlen (tmp_line))
-                {
-                    close (filedes);
-                    return -1;
-                }
-            }
-        }
-        close (filedes);
-    }
+				sprintf (tmp_line, "%s on %s\n", tmpname, node_list[i]);
+				ret = write (filedes, tmp_line, strlen (tmp_line));
+				if (ret != strlen (tmp_line))
+				{
+					close (filedes);
+					return -1;
+				}
+			}
+		}
+		close (filedes);
+	}
 
-    if (TASKID == 0)
-    {
-      free (buffer_threads);
-      free (buffer_pids);
-    }
+	if (TASKID == 0)
+	{
+		free (buffer_threads);
+		free (buffer_pids);
+	}
 
-    return 0;
+	return 0;
 }
 
 #if defined(IS_CELL_MACHINE)
@@ -870,11 +869,11 @@ void PPACX_Finalize_Wrapper (PACX_Fint *ierror)
 	if (!mpitrace_on)
 		return;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	TRACE_MYRINET_HWC();
 
-	TRACE_MPIEVENT (TIME, PACX_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 #if HAVE_MRNET
 	if (MRNet_isEnabled())
@@ -966,7 +965,7 @@ void PPACX_BSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_bsend) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -975,7 +974,7 @@ void PPACX_BSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_BSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_BSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1007,7 +1006,7 @@ void PPACX_SSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_ssend) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -1016,7 +1015,7 @@ void PPACX_SSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_SSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1048,7 +1047,7 @@ void PPACX_RSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_rsend) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -1057,7 +1056,7 @@ void PPACX_RSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_RSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_RSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1089,7 +1088,7 @@ void PPACX_Send_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_send) (buf, count, datatype, dest, tag, comm, ierror);
 
@@ -1098,7 +1097,7 @@ void PPACX_Send_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_SEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 
@@ -1133,7 +1132,7 @@ void PPACX_IBSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_IBSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_IBSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_ibsend) (buf, count, datatype, dest, tag, comm, request,
                         ierror);
@@ -1144,7 +1143,7 @@ void PPACX_IBSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_IBSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_IBSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1178,7 +1177,7 @@ void PPACX_ISend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ISEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ISEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_isend) (buf, count, datatype, dest, tag, comm, request,
                        ierror);
@@ -1188,7 +1187,7 @@ void PPACX_ISend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ISEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_ISEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1222,7 +1221,7 @@ void PPACX_ISSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ISSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ISSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_issend) (buf, count, datatype, dest, tag, comm, request,
                         ierror);
@@ -1233,7 +1232,7 @@ void PPACX_ISSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ISSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_ISSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1267,7 +1266,7 @@ void PPACX_IRSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_IRSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_IRSEND_EV, EVT_BEGIN, receiver, size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_irsend) (buf, count, datatype, dest, tag, comm, request,
                         ierror);
@@ -1278,7 +1277,7 @@ void PPACX_IRSend_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_IRSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_IRSEND_EV, EVT_END, receiver, size, *tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1308,7 +1307,7 @@ void PPACX_Recv_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : message tag or PACX_ANY_TAG     commid: Communicator identifier
    *   aux: ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
 
 	ptr_status = (status == MPI_F_STATUS_IGNORE)?my_status:status;
 
@@ -1341,7 +1340,7 @@ void PPACX_Recv_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : sender                      size  : received message size    
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_RECV_EV, EVT_END, src_world, size, sended_tag, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_RECV_EV, EVT_END, src_world, size, sended_tag, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1378,7 +1377,7 @@ void PPACX_IRecv_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_IRECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_IRECV_EV, EVT_BEGIN, src_world, (*count) * size, *tag, c, EMPTY);
 
   CtoF77 (ppacx_irecv) (buf, count, datatype, source, tag, comm, request,
                        ierror);
@@ -1419,7 +1418,7 @@ void PPACX_IRecv_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   target : request                     size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_IRECV_EV, EVT_END, src_world, (*count) * size, *tag, c, hash_req.key);
+  TRACE_PACXEVENT (TIME, PACX_IRECV_EV, EVT_END, src_world, (*count) * size, *tag, c, hash_req.key);
 }
 
 
@@ -1459,7 +1458,7 @@ void PPACX_Reduce_Wrapper (void *sendbuf, void *recvbuf, PACX_Fint *count,
    *   tag : rank                           commid: communicator Id
    *   aux : root rank
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_REDUCE_EV, EVT_BEGIN, *op, size, me, c, *root);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_REDUCE_EV, EVT_BEGIN, *op, size, me, c, *root);
 
   CtoF77 (ppacx_reduce) (sendbuf, recvbuf, count, datatype, op, root, comm,
                         ierror);
@@ -1469,7 +1468,7 @@ void PPACX_Reduce_Wrapper (void *sendbuf, void *recvbuf, PACX_Fint *count,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_REDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_REDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -1502,7 +1501,7 @@ void PPACX_AllReduce_Wrapper (void *sendbuf, void *recvbuf, PACX_Fint *count,
    *   tag : rank                           commid: communicator Id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLREDUCE_EV, EVT_BEGIN, *op, size, me, c, PACX_CurrentOpGlobal);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLREDUCE_EV, EVT_BEGIN, *op, size, me, c, PACX_CurrentOpGlobal);
 
   CtoF77 (ppacx_allreduce) (sendbuf, recvbuf, count, datatype, op, comm,
                            ierror);
@@ -1512,7 +1511,7 @@ void PPACX_AllReduce_Wrapper (void *sendbuf, void *recvbuf, PACX_Fint *count,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+  TRACE_PACXEVENT (TIME, PACX_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
 		PACX_CurrentOpGlobal);
 }
 
@@ -1532,7 +1531,7 @@ void PPACX_Probe_Wrapper (PACX_Fint *source, PACX_Fint *tag, PACX_Fint *comm,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_PROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_PROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, c, EMPTY);
 
   CtoF77 (ppacx_probe) (source, tag, comm, status, ierror);
 
@@ -1541,7 +1540,7 @@ void PPACX_Probe_Wrapper (PACX_Fint *source, PACX_Fint *tag, PACX_Fint *comm,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_PROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_PROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 /******************************************************************************
@@ -1558,7 +1557,7 @@ void Bursts_PPACX_IProbe_Wrapper (PACX_Fint *source, PACX_Fint *tag, PACX_Fint *
       *   target : ---                          size  : ---
       *   tag : ---
       */
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, c, EMPTY);
 
 	CtoF77 (ppacx_iprobe) (source, tag, comm, flag, status, ierror);
 
@@ -1567,7 +1566,7 @@ void Bursts_PPACX_IProbe_Wrapper (PACX_Fint *source, PACX_Fint *tag, PACX_Fint *
       *   target : ---                         size  : ---
       *   tag : ---
       */
-	TRACE_MPIEVENT (TIME, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 void Normal_PPACX_IProbe_Wrapper (PACX_Fint *source, PACX_Fint *tag, PACX_Fint *comm,
@@ -1606,14 +1605,14 @@ void Normal_PPACX_IProbe_Wrapper (PACX_Fint *source, PACX_Fint *tag, PACX_Fint *
         TRACE_EVENT (begin_time, PACX_TIME_OUTSIDE_IPROBES_EV, elapsed_time_outside_iprobes);
         TRACE_EVENT (begin_time, PACX_IPROBE_COUNTER_EV, IProbe_Software_Counter);
       }
-      TRACE_MPIEVENT (begin_time, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, c, EMPTY);
+      TRACE_PACXEVENT (begin_time, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, c, EMPTY);
 
      /*
       *   event : IPROBE_EV                    value : EVT_END
       *   target : ---                         size  : ---
       *   tag : ---
       */
-      TRACE_MPIEVENT (end_time, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+      TRACE_PACXEVENT (end_time, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
       IProbe_Software_Counter = 0;
     }
     else
@@ -1663,7 +1662,7 @@ void PPACX_Barrier_Wrapper (PACX_Fint *comm, PACX_Fint *ierror)
    *   aux : ---
    */
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, c,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, c,
                   PACX_CurrentOpGlobal);
 
   CtoF77 (ppacx_barrier) (comm, ierror);
@@ -1674,7 +1673,7 @@ void PPACX_Barrier_Wrapper (PACX_Fint *comm, PACX_Fint *ierror)
    *   tag : ---
    */
 
-  TRACE_MPIEVENT (TIME, PACX_BARRIER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+  TRACE_PACXEVENT (TIME, PACX_BARRIER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
                   PACX_CurrentOpGlobal);
 }
 
@@ -1691,7 +1690,7 @@ void PPACX_Cancel_Wrapper (PACX_Fint *request, PACX_Fint *ierror)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_CANCEL_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_CANCEL_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
 	if (hash_search (&requests, req) != NULL)
@@ -1704,7 +1703,7 @@ void PPACX_Cancel_Wrapper (PACX_Fint *request, PACX_Fint *ierror)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_CANCEL_EV, EVT_END, req, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_CANCEL_EV, EVT_END, req, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 /******************************************************************************
@@ -1781,7 +1780,7 @@ void Bursts_PPACX_Test_Wrapper (PACX_Fint *request, PACX_Fint *flag, PACX_Fint *
    *   target : request to test             size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   req = PACX_Request_f2c (*request);
@@ -1813,7 +1812,7 @@ void Bursts_PPACX_Test_Wrapper (PACX_Fint *request, PACX_Fint *flag, PACX_Fint *
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+    TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
     hash_remove (&requests, req);
   }
   /*
@@ -1821,7 +1820,7 @@ void Bursts_PPACX_Test_Wrapper (PACX_Fint *request, PACX_Fint *flag, PACX_Fint *
    *   target : ---                       size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void Normal_PPACX_Test_Wrapper (PACX_Fint *request, PACX_Fint *flag, PACX_Fint *status,
@@ -1851,7 +1850,7 @@ void Normal_PPACX_Test_Wrapper (PACX_Fint *request, PACX_Fint *flag, PACX_Fint *
     if (Test_Software_Counter != 0) {
 			TRACE_EVENT (temps_inicial, PACX_TEST_COUNTER_EV, Test_Software_Counter);
     }
-    TRACE_MPIEVENT (temps_inicial, PACX_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (temps_inicial, PACX_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
     Test_Software_Counter = 0;
 
 		if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
@@ -1872,7 +1871,7 @@ void Normal_PPACX_Test_Wrapper (PACX_Fint *request, PACX_Fint *flag, PACX_Fint *
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+    TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
     hash_remove (&requests, req);
 
     /*
@@ -1880,7 +1879,7 @@ void Normal_PPACX_Test_Wrapper (PACX_Fint *request, PACX_Fint *flag, PACX_Fint *
      *   target : ---                       size  : ---
      *   tag : ---
      */
-    TRACE_MPIEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
   }
   else {
     if (Test_Software_Counter == 0) {
@@ -1925,7 +1924,7 @@ void PPACX_Wait_Wrapper (PACX_Fint *request, PACX_Fint *status, PACX_Fint *ierro
    *   target : request to test             size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAIT_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAIT_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
 
@@ -1957,7 +1956,7 @@ void PPACX_Wait_Wrapper (PACX_Fint *request, PACX_Fint *status, PACX_Fint *ierro
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req); /* NOHWC */
+    TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req); /* NOHWC */
     hash_remove (&requests, req);
   }
   /*
@@ -1965,7 +1964,7 @@ void PPACX_Wait_Wrapper (PACX_Fint *request, PACX_Fint *status, PACX_Fint *ierro
    *   target : ---                       size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 /******************************************************************************
@@ -1987,7 +1986,7 @@ void PPACX_WaitAll_Wrapper (PACX_Fint * count, PACX_Fint array_of_requests[],
    *   target : ---                            size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -2032,7 +2031,7 @@ void PPACX_WaitAll_Wrapper (PACX_Fint * count, PACX_Fint array_of_requests[],
          *   tag : message tag                  commid: communicator identifier
          *   aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, save_reqs[ireq]);
+        TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, save_reqs[ireq]);
         hash_remove (&requests, save_reqs[ireq]);
       }
     }
@@ -2042,7 +2041,7 @@ void PPACX_WaitAll_Wrapper (PACX_Fint * count, PACX_Fint array_of_requests[],
    *   target : ---                       size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 
@@ -2059,7 +2058,7 @@ void PPACX_WaitAny_Wrapper (PACX_Fint *count, PACX_Fint array_of_requests[],
 	int src_world, size, tag, ret, i;
   iotimer_t temps_final;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   if (*count > MAX_WAIT_REQUESTS)
@@ -2103,13 +2102,13 @@ void PPACX_WaitAny_Wrapper (PACX_Fint *count, PACX_Fint array_of_requests[],
        *   tag : message tag                  commid: communicator identifier
        *   aux : request
        */
-      TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+      TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
 
       hash_remove (&requests, req);
     }
 
   }
-  TRACE_MPIEVENT (temps_final, PACX_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 /*****************************************************************************
@@ -2131,7 +2130,7 @@ void PPACX_WaitSome_Wrapper (PACX_Fint *incount, PACX_Fint array_of_requests[],
    *   target : ---                            size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   /*
    * Arreglar-ho millor de cara a OMP
@@ -2178,7 +2177,7 @@ void PPACX_WaitSome_Wrapper (PACX_Fint *incount, PACX_Fint array_of_requests[],
          *   tag : message tag                  commid: communicator identifier
          *   aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+        TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
         hash_remove (&requests, req);
       }
     }
@@ -2188,7 +2187,7 @@ void PPACX_WaitSome_Wrapper (PACX_Fint *incount, PACX_Fint array_of_requests[],
    *   target : ---                       size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 /******************************************************************************
@@ -2227,7 +2226,7 @@ void PPACX_BCast_Wrapper (void *buffer, PACX_Fint *count, PACX_Fint *datatype,
    *   aux : ---
    */
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BCAST_EV, EVT_BEGIN, *root, size, me, c, 
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BCAST_EV, EVT_BEGIN, *root, size, me, c, 
   	PACX_CurrentOpGlobal);
 
   CtoF77 (ppacx_bcast) (buffer, count, datatype, root, comm, ierror);
@@ -2237,7 +2236,7 @@ void PPACX_BCast_Wrapper (void *buffer, PACX_Fint *count, PACX_Fint *datatype,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+  TRACE_PACXEVENT (TIME, PACX_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
   	PACX_CurrentOpGlobal);
 }
 
@@ -2289,7 +2288,7 @@ void PPACX_AllToAll_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   tag : rank                           commid: communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLTOALL_EV, EVT_BEGIN, *recvcount * recvsize,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLTOALL_EV, EVT_BEGIN, *recvcount * recvsize,
                   *sendcount * sendsize, me, c, PACX_CurrentOpGlobal);
 
   CtoF77 (ppacx_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
@@ -2300,7 +2299,7 @@ void PPACX_AllToAll_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+  TRACE_PACXEVENT (TIME, PACX_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
                   PACX_CurrentOpGlobal);
 }
 
@@ -2362,7 +2361,7 @@ void PPACX_AllToAllV_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   tag : rank                           commid: communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
                   sendsize * sendc, me, c, PACX_CurrentOpGlobal);
 
   CtoF77 (ppacx_alltoallv) (sendbuf, sendcount, sdispls, sendtype,
@@ -2374,7 +2373,7 @@ void PPACX_AllToAllV_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
+  TRACE_PACXEVENT (TIME, PACX_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c,
                   PACX_CurrentOpGlobal);
 }
 
@@ -2428,7 +2427,7 @@ void PPACX_Allgather_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   tag : rank                           commid: communicator identifier
    *   aux : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLGATHER_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLGATHER_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
                   me, c, *recvcount * recvsize * nprocs);
 
   CtoF77 (ppacx_allgather) (sendbuf, sendcount, sendtype,
@@ -2439,7 +2438,7 @@ void PPACX_Allgather_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2496,7 +2495,7 @@ void PPACX_Allgatherv_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   tag : rank                           commid: communicator identifier
    *   aux : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLGATHERV_EV, EVT_BEGIN, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLGATHERV_EV, EVT_BEGIN, EMPTY,
                   *sendcount * sendsize, me, c, recvsize * recvc);
 
   CtoF77 (ppacx_allgatherv) (sendbuf, sendcount, sendtype,
@@ -2508,7 +2507,7 @@ void PPACX_Allgatherv_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2569,12 +2568,12 @@ void PPACX_Gather_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    */
   if (me == *root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
                     me, c, *recvcount * recvsize * nprocs);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, *root, *sendcount * sendsize,
                     me, c, 0);
   }
 
@@ -2586,7 +2585,7 @@ void PPACX_Gather_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2652,12 +2651,12 @@ void PPACX_GatherV_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    */
   if (me == *root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
                     me, c, recvsize * recvc);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, *root, *sendcount * sendsize,
                     me, c, 0);
   }
 
@@ -2670,7 +2669,7 @@ void PPACX_GatherV_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2731,13 +2730,13 @@ void PPACX_Scatter_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    */
   if (me == *root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, *root,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, *root,
                     *sendcount * sendsize * nprocs, me, c,
                     *recvcount * recvsize);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, *root, 0, me, c,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, *root, 0, me, c,
                     *recvcount * recvsize);
   }
 
@@ -2749,7 +2748,7 @@ void PPACX_Scatter_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 /******************************************************************************
@@ -2813,12 +2812,12 @@ void PPACX_ScatterV_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    */
   if (me == *root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, *root, sendsize * sendc, me,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, *root, sendsize * sendc, me,
                     c, *recvcount * recvsize);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, *root, 0, me, c,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, *root, 0, me, c,
                     *recvcount * recvsize);
   }
 
@@ -2830,7 +2829,7 @@ void PPACX_ScatterV_Wrapper (void *sendbuf, PACX_Fint *sendcount,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -2841,10 +2840,10 @@ void PPACX_ScatterV_Wrapper (void *sendbuf, PACX_Fint *sendcount,
 
 void PPACX_Comm_Rank_Wrapper (PACX_Fint *comm, PACX_Fint *rank, PACX_Fint *ierror)
 {
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   CtoF77 (ppacx_comm_rank) (comm, rank, ierror);
-  TRACE_MPIEVENT (TIME, PACX_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -2857,10 +2856,10 @@ void PPACX_Comm_Rank_Wrapper (PACX_Fint *comm, PACX_Fint *rank, PACX_Fint *ierro
 
 void PPACX_Comm_Size_Wrapper (PACX_Fint *comm, PACX_Fint *size, PACX_Fint *ierror)
 {
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   CtoF77 (ppacx_comm_size) (comm, size, ierror);
-  TRACE_MPIEVENT (TIME, PACX_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -2986,7 +2985,7 @@ void PPACX_Reduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
    *   tag : whoami (comm rank)            comm : communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_REDUCESCAT_EV, EVT_BEGIN, *op, size, me, c, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_REDUCESCAT_EV, EVT_BEGIN, *op, size, me, c, EMPTY);
 
   CtoF77 (ppacx_reduce_scatter) (sendbuf, recvbuf, recvcounts, datatype,
                                 op, comm, ierror);
@@ -2996,7 +2995,7 @@ void PPACX_Reduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
 }
 
 
@@ -3043,7 +3042,7 @@ void PPACX_Scan_Wrapper (void *sendbuf, void *recvbuf, PACX_Fint *count,
    *   tag : whoami (comm rank)            comm : communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCAN_EV, EVT_BEGIN, *op, *count * size, me, c, PACX_CurrentOpGlobal);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCAN_EV, EVT_BEGIN, *op, *count * size, me, c, PACX_CurrentOpGlobal);
 
   CtoF77 (ppacx_scan) (sendbuf, recvbuf, count, datatype, op, comm, ierror);
 
@@ -3052,7 +3051,7 @@ void PPACX_Scan_Wrapper (void *sendbuf, void *recvbuf, PACX_Fint *count,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, PACX_CurrentOpGlobal);
+  TRACE_PACXEVENT (TIME, PACX_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, PACX_CurrentOpGlobal);
 }
 
 /******************************************************************************
@@ -3069,7 +3068,7 @@ void PPACX_Start_Wrapper (PACX_Fint *request, PACX_Fint *ierror)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_START_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_START_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Execute the real function */
 	CtoF77 (ppacx_start) (request, ierror);
@@ -3084,7 +3083,7 @@ void PPACX_Start_Wrapper (PACX_Fint *request, PACX_Fint *ierror)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-	TRACE_MPIEVENT (TIME, PACX_START_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_START_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 
@@ -3104,7 +3103,7 @@ void PPACX_Startall_Wrapper (PACX_Fint *count, PACX_Fint array_of_requests[],
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -3133,7 +3132,7 @@ void PPACX_Startall_Wrapper (PACX_Fint *count, PACX_Fint array_of_requests[],
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -3153,7 +3152,7 @@ void PPACX_Request_free_Wrapper (PACX_Fint *request, PACX_Fint *ierror)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY,
                   EMPTY, EMPTY);
 
   /*
@@ -3177,7 +3176,7 @@ void PPACX_Request_free_Wrapper (PACX_Fint *request, PACX_Fint *ierror)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -3201,7 +3200,7 @@ void PPACX_Recv_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RECV_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RECV_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -3222,7 +3221,7 @@ void PPACX_Recv_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_RECV_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_RECV_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -3246,7 +3245,7 @@ void PPACX_Send_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -3268,7 +3267,7 @@ void PPACX_Send_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   aux : ---
    */
 
-  TRACE_MPIEVENT (TIME, PACX_SEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_SEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -3292,7 +3291,7 @@ void PPACX_Bsend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -3313,7 +3312,7 @@ void PPACX_Bsend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_BSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_BSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -3336,7 +3335,7 @@ void PPACX_Rsend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -3357,7 +3356,7 @@ void PPACX_Rsend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_RSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_RSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -3380,7 +3379,7 @@ void PPACX_Ssend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -3401,7 +3400,7 @@ void PPACX_Ssend_init_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *datatype,
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_SSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 }
 
@@ -3458,7 +3457,7 @@ void PACX_Sendrecv_Fortran_Wrapper (void *sendbuf, PACX_Fint *sendcount,
 
 	DataSend = *sendcount * DataSendSize;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_SENDRECV_EV, EVT_BEGIN, RecvRank, DataSend, *sendtag, c, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_SENDRECV_EV, EVT_BEGIN, RecvRank, DataSend, *sendtag, c, EMPTY);
 
 	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
 
@@ -3484,7 +3483,7 @@ void PACX_Sendrecv_Fortran_Wrapper (void *sendbuf, PACX_Fint *sendcount,
 	if ((ret = get_rank_obj (comm, &sender_src, &SourceRank)) != MPI_SUCCESS)
 		return; 
 
-	TRACE_MPIEVENT (TIME, PACX_SENDRECV_EV, EVT_END, SourceRank, DataSize, sender_tag, c, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_SENDRECV_EV, EVT_END, SourceRank, DataSize, sender_tag, c, EMPTY);
 }
 
 void PACX_Sendrecv_replace_Fortran_Wrapper (void *buf, PACX_Fint *count, PACX_Fint *type,
@@ -3504,7 +3503,7 @@ void PACX_Sendrecv_replace_Fortran_Wrapper (void *buf, PACX_Fint *count, PACX_Fi
 
 	DataSend = *count * DataSendSize;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_SENDRECV_REPLACE_EV, EVT_BEGIN, RecvRank, DataSend, *sendtag, c, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_SENDRECV_REPLACE_EV, EVT_BEGIN, RecvRank, DataSend, *sendtag, c, EMPTY);
 
 	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
 
@@ -3529,7 +3528,7 @@ void PACX_Sendrecv_replace_Fortran_Wrapper (void *buf, PACX_Fint *count, PACX_Fi
 	if ((ret = get_rank_obj (comm, &sender_src, &SourceRank)) != MPI_SUCCESS)
 		return;
 
-	TRACE_MPIEVENT (TIME, PACX_SENDRECV_REPLACE_EV, EVT_END, SourceRank, DataSize, sender_tag, c, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_SENDRECV_REPLACE_EV, EVT_END, SourceRank, DataSize, sender_tag, c, EMPTY);
 }
 
 #if defined (PACX_SUPPORTS_PACX_IO)
@@ -3539,80 +3538,80 @@ void PACX_Sendrecv_replace_Fortran_Wrapper (void *buf, PACX_Fint *count, PACX_Fi
 void PPACX_File_open_Fortran_Wrapper (PACX_Fint *comm, char *filename, PACX_Fint *amode,
 	PACX_Fint *info, PACX_File *fh, PACX_Fint *len)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_OPEN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_OPEN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_open) (comm, filename, amode, info, fh, len);
-    TRACE_MPIEVENT (TIME, PACX_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_close_Fortran_Wrapper (PACX_File *fh, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_CLOSE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_CLOSE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_close) (fh, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_CLOSE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_CLOSE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_read_Fortran_Wrapper (PACX_File *fh, void *buf, PACX_Fint *count,
 	PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_read) (fh, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_READ_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_READ_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_read_all_Fortran_Wrapper (PACX_File *fh, void *buf, PACX_Fint *count,
 	PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_read_all) (fh, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_READ_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_READ_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_write_Fortran_Wrapper (PACX_File *fh, void *buf, PACX_Fint *count,
 	PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_write) (fh, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_write_all_Fortran_Wrapper (PACX_File *fh, void *buf, PACX_Fint *count,
 	PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_write_all) (fh, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_read_at_Fortran_Wrapper (PACX_File *fh, PACX_Offset *offset, void* buf,
 	PACX_Fint *count, PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_read_at) (fh, offset, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_READ_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_READ_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_read_at_all_Fortran_Wrapper (PACX_File *fh, PACX_Offset *offset, void* buf,
 	PACX_Fint *count, PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_read_at_all) (fh, offset, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_write_at_Fortran_Wrapper (PACX_File *fh, PACX_Offset *offset, void* buf,
 	PACX_Fint *count, PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_write_at) (fh, offset, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void PPACX_File_write_at_all_Fortran_Wrapper (PACX_File *fh, PACX_Offset *offset, void* buf,
 	PACX_Fint *count, PACX_Fint *datatype, PACX_Status *status, PACX_Fint *ierror)
 {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (ppacx_file_write_at_all) (fh, offset, buf, count, datatype, status, ierror);
-    TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 #endif /* PACX_SUPPORTS_PACX_IO */
@@ -3855,11 +3854,11 @@ int PACX_Finalize_C_Wrapper (void)
 	if (!mpitrace_on)
 		return 0;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	TRACE_MYRINET_HWC();
 
-	TRACE_MPIEVENT (TIME, PACX_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 #if HAVE_MRNET
 	if (MRNet_isEnabled())
@@ -3905,7 +3904,7 @@ int PACX_Bsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
                   EMPTY);
 
   ret = PPACX_Bsend (buf, count, datatype, dest, tag, comm);
@@ -3915,7 +3914,7 @@ int PACX_Bsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_BSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_BSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -3947,7 +3946,7 @@ int PACX_Ssend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
                   EMPTY);
 
   ret = PPACX_Ssend (buf, count, datatype, dest, tag, comm);
@@ -3957,7 +3956,7 @@ int PACX_Ssend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_SSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -3990,7 +3989,7 @@ int PACX_Rsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RSEND_EV, EVT_BEGIN, receiver, size, tag, comm,
                   EMPTY);
 
   ret = PPACX_Rsend (buf, count, datatype, dest, tag, comm);
@@ -4000,7 +3999,7 @@ int PACX_Rsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_RSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_RSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -4033,7 +4032,7 @@ int PACX_Send_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
   ret = PPACX_Send (buf, count, datatype, dest, tag, comm);
   
@@ -4042,7 +4041,7 @@ int PACX_Send_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest,
    *   target : receiver                     size  : send message size
    *   tag : message tag
    */
-  TRACE_MPIEVENT (TIME, PACX_SEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -4076,7 +4075,7 @@ int PACX_Ibsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int des
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_IBSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_IBSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
   ret = PPACX_Ibsend (buf, count, datatype, dest, tag, comm, request);
 
@@ -4086,7 +4085,7 @@ int PACX_Ibsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int des
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_IBSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_IBSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -4120,7 +4119,7 @@ int PACX_Isend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ISEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ISEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
   ret = PPACX_Isend (buf, count, datatype, dest, tag, comm, request);
 
@@ -4130,7 +4129,7 @@ int PACX_Isend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int dest
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ISEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_ISEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -4164,7 +4163,7 @@ int PACX_Issend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int des
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ISSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ISSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
   ret = PPACX_Issend (buf, count, datatype, dest, tag, comm, request);
 
@@ -4174,7 +4173,7 @@ int PACX_Issend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int des
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ISSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_ISSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -4208,7 +4207,7 @@ int PACX_Irsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int des
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_IRSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_IRSEND_EV, EVT_BEGIN, receiver, size, tag, comm, EMPTY);
 
   ret = PPACX_Irsend (buf, count, datatype, dest, tag, comm, request);
 
@@ -4218,7 +4217,7 @@ int PACX_Irsend_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int des
    *   tag : ---                             commid: ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_IRSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_IRSEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
   return ret;
 }
@@ -4247,7 +4246,7 @@ int PACX_Recv_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int sourc
    *   tag : message tag or PACX_ANY_TAG     commid: Communicator identifier
    *   aux: ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RECV_EV, EVT_BEGIN, src_world, count * size, tag,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RECV_EV, EVT_BEGIN, src_world, count * size, tag,
                   comm, EMPTY);
 
 	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status; 
@@ -4277,7 +4276,7 @@ int PACX_Recv_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int sourc
    *   target : sender                      size  : received message size    
    *   tag : message tag
    */
-	TRACE_MPIEVENT (TIME, PACX_RECV_EV, EVT_END, src_world, size, sended_tag, comm,
+	TRACE_PACXEVENT (TIME, PACX_RECV_EV, EVT_END, src_world, size, sended_tag, comm,
 		EMPTY);
 
   return ierror;
@@ -4306,7 +4305,7 @@ int PACX_Irecv_C_Wrapper (void *buf, int count, PACX_Datatype datatype,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_IRECV_EV, EVT_BEGIN, src_world, count * size, tag,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_IRECV_EV, EVT_BEGIN, src_world, count * size, tag,
                   comm, EMPTY);
 
   ierror = PPACX_Irecv (buf, count, datatype, source, tag, comm, request);
@@ -4346,7 +4345,7 @@ int PACX_Irecv_C_Wrapper (void *buf, int count, PACX_Datatype datatype,
    *   tag : ---                            comm  : communicator
    *   aux: request
    */
-	TRACE_MPIEVENT (TIME, PACX_IRECV_EV, EVT_END, src_world, count * size, tag, comm, hash_req.key);
+	TRACE_PACXEVENT (TIME, PACX_IRECV_EV, EVT_END, src_world, count * size, tag, comm, hash_req.key);
 
   return ierror;
 }
@@ -4383,7 +4382,7 @@ int PACX_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
    *   tag : rank                           commid: communicator Id
    *   aux : root rank
    */
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_REDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_REDUCE_EV, EVT_BEGIN, op, size, me, comm, root);
 
 	ret = PPACX_Reduce (sendbuf, recvbuf, count, datatype, op, root, comm);
 
@@ -4392,7 +4391,7 @@ int PACX_Reduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-	TRACE_MPIEVENT (TIME, PACX_REDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_REDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
 	return ret;
 }
@@ -4427,7 +4426,7 @@ int PACX_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
    *   tag : rank                           commid: communicator Id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLREDUCE_EV, EVT_BEGIN, op, size, me, comm,
   	PACX_CurrentOpGlobal);
 
   ret = PPACX_Allreduce (sendbuf, recvbuf, count, datatype, op, comm);
@@ -4437,7 +4436,7 @@ int PACX_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
+  TRACE_PACXEVENT (TIME, PACX_ALLREDUCE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
 		PACX_CurrentOpGlobal);
 
   return ret;
@@ -4458,7 +4457,7 @@ int PACX_Probe_C_Wrapper (int source, int tag, PACX_Comm comm, PACX_Status *stat
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_PROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_PROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm,
                   EMPTY);
 
   ierror = PPACX_Probe (source, tag, comm, status);
@@ -4468,7 +4467,7 @@ int PACX_Probe_C_Wrapper (int source, int tag, PACX_Comm comm, PACX_Status *stat
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_PROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_PROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
   return ierror;
 }
@@ -4488,7 +4487,7 @@ int Bursts_PACX_Iprobe_C_Wrapper (int source, int tag, PACX_Comm comm, int * fla
       *   target : ---                          size  : ---
       *   tag : ---
       */
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
 	ierror = PPACX_Iprobe (source, tag, comm, flag, status);
 
@@ -4497,7 +4496,7 @@ int Bursts_PACX_Iprobe_C_Wrapper (int source, int tag, PACX_Comm comm, int * fla
       *   target : ---                         size  : ---
       *   tag : ---
       */
-	TRACE_MPIEVENT (TIME, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
 	return ierror;
 }
@@ -4537,14 +4536,14 @@ int Normal_PACX_Iprobe_C_Wrapper (int source, int tag, PACX_Comm comm, int *flag
         TRACE_EVENT (begin_time, PACX_IPROBE_COUNTER_EV, IProbe_C_Software_Counter);
       }
 
-      TRACE_MPIEVENT (begin_time, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+      TRACE_PACXEVENT (begin_time, PACX_IPROBE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, comm, EMPTY);
     
       /*
        *   event : IPROBE_EV                    value : EVT_END
        *   target : ---                         size  : ---
        *   tag : ---
        */
-      TRACE_MPIEVENT (end_time, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+      TRACE_PACXEVENT (end_time, PACX_IPROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
       IProbe_C_Software_Counter = 0;
     } 
     else
@@ -4595,7 +4594,7 @@ int PACX_Barrier_C_Wrapper (PACX_Comm comm)
    *   aux : ---
    */
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, 
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BARRIER_EV, EVT_BEGIN, EMPTY, EMPTY, me, comm, 
   	PACX_CurrentOpGlobal);
 
   ret = PPACX_Barrier (comm);
@@ -4606,7 +4605,7 @@ int PACX_Barrier_C_Wrapper (PACX_Comm comm)
    *   tag : ---
    */
 
-  TRACE_MPIEVENT (TIME, PACX_BARRIER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
+  TRACE_PACXEVENT (TIME, PACX_BARRIER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
                   PACX_CurrentOpGlobal);
 
   return ret;
@@ -4627,7 +4626,7 @@ int PACX_Cancel_C_Wrapper (PACX_Request *request)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_CANCEL_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_CANCEL_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	if (hash_search (&requests, *request) != NULL)
 		hash_remove (&requests, *request);
@@ -4639,7 +4638,7 @@ int PACX_Cancel_C_Wrapper (PACX_Request *request)
    *   target : request to cancel           size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_CANCEL_EV, EVT_END, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_CANCEL_EV, EVT_END, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
   return ierror;
 }
@@ -4661,7 +4660,7 @@ int Bursts_PACX_Test_C_Wrapper (PACX_Request *request, int *flag, PACX_Status *s
    *   target : request to test             size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
 	req = *request;
@@ -4689,7 +4688,7 @@ int Bursts_PACX_Test_C_Wrapper (PACX_Request *request, int *flag, PACX_Status *s
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
+    TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, req);
     hash_remove (&requests, req);
   }
   /*
@@ -4697,7 +4696,7 @@ int Bursts_PACX_Test_C_Wrapper (PACX_Request *request, int *flag, PACX_Status *s
    *   target : ---                       size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   return ierror;
 }
@@ -4728,7 +4727,7 @@ int Normal_PACX_Test_C_Wrapper (PACX_Request *request, int *flag, PACX_Status *s
     if (Test_C_Software_Counter != 0) {
        TRACE_EVENT    (temps_inicial, PACX_TEST_COUNTER_EV, Test_C_Software_Counter);
     }
-    TRACE_MPIEVENT (temps_inicial, PACX_TEST_EV, EVT_BEGIN, hash_req->key, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (temps_inicial, PACX_TEST_EV, EVT_BEGIN, hash_req->key, EMPTY, EMPTY, EMPTY, EMPTY);
     Test_C_Software_Counter = 0;
 
 		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
@@ -4745,7 +4744,7 @@ int Normal_PACX_Test_C_Wrapper (PACX_Request *request, int *flag, PACX_Status *s
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+    TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
     hash_remove (&requests, req);
   
     /*
@@ -4753,7 +4752,7 @@ int Normal_PACX_Test_C_Wrapper (PACX_Request *request, int *flag, PACX_Status *s
      *   target : ---                       size  : ---
      *   tag : ---
      */
-    TRACE_MPIEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    TRACE_PACXEVENT (temps_final, PACX_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
   }
   else {
     if (Test_C_Software_Counter == 0) {
@@ -4800,7 +4799,7 @@ int PACX_Wait_C_Wrapper (PACX_Request *request, PACX_Status *status)
    *   target : request to test             size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	req = *request;
 
@@ -4830,7 +4829,7 @@ int PACX_Wait_C_Wrapper (PACX_Request *request, PACX_Status *status)
      *   tag : message tag                  commid: communicator identifier
      *   aux : request
      */
-    TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+    TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
     hash_remove (&requests, req);
   }
 
@@ -4839,7 +4838,7 @@ int PACX_Wait_C_Wrapper (PACX_Request *request, PACX_Status *status)
    *   target : ---                       size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   return ierror;
 }
@@ -4868,7 +4867,7 @@ int PACX_Waitall_C_Wrapper (int count, PACX_Request *array_of_requests,
    *   tag : ---
    */
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -4919,7 +4918,7 @@ int PACX_Waitall_C_Wrapper (int count, PACX_Request *array_of_requests,
          *   tag : message tag                  commid: communicator identifier
          *   aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+        TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
         hash_remove (&requests, save_reqs[ireq]);
       }
     }
@@ -4929,7 +4928,7 @@ int PACX_Waitall_C_Wrapper (int count, PACX_Request *array_of_requests,
    *   target : ---                       size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   return ierror;
 }
@@ -4952,7 +4951,7 @@ int PACX_Waitany_C_Wrapper (int count, PACX_Request *array_of_requests,
 #endif
   iotimer_t temps_final;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   if (count > MAX_WAIT_REQUESTS)
@@ -4998,12 +4997,12 @@ int PACX_Waitany_C_Wrapper (int count, PACX_Request *array_of_requests,
        *   tag : message tag                  commid: communicator identifier
        *   aux : request
        */
-      TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
+      TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, hash_req->key);
       hash_remove (&requests, save_reqs[*index]);
     }
   }
 
-  TRACE_MPIEVENT (temps_final, PACX_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   return ierror;
 }
@@ -5032,7 +5031,7 @@ int PACX_Waitsome_C_Wrapper (int incount, PACX_Request *array_of_requests,
    * target : ---                            size  : ---
    * tag : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -5086,7 +5085,7 @@ int PACX_Waitsome_C_Wrapper (int incount, PACX_Request *array_of_requests,
          * tag : message tag                  commid: communicator identifier
          * aux : request
          */
-        TRACE_MPIEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
+        TRACE_PACXEVENT_NOHWC (temps_final, PACX_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
         hash_remove (&requests, save_reqs[array_of_indices[ii]]);
       }
     }
@@ -5096,7 +5095,7 @@ int PACX_Waitsome_C_Wrapper (int incount, PACX_Request *array_of_requests,
    * target : ---                       size  : ---
    * tag : ---
    */
-  TRACE_MPIEVENT (temps_final, PACX_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (temps_final, PACX_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
   return ierror;
 }
@@ -5138,7 +5137,7 @@ int PACX_BCast_C_Wrapper (void *buffer, int count, PACX_Datatype datatype, int r
    *   aux : ---
    */
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BCAST_EV, EVT_BEGIN, root, size, me, comm, 
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BCAST_EV, EVT_BEGIN, root, size, me, comm, 
   	PACX_CurrentOpGlobal);
 
   ret = PPACX_Bcast (buffer, count, datatype, root, comm);
@@ -5148,7 +5147,7 @@ int PACX_BCast_C_Wrapper (void *buffer, int count, PACX_Datatype datatype, int r
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
+  TRACE_PACXEVENT (TIME, PACX_BCAST_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
   	PACX_CurrentOpGlobal);
 
   return ret;
@@ -5202,7 +5201,7 @@ int PACX_Alltoall_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtyp
    *   tag : rank                           commid: communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLTOALL_EV, EVT_BEGIN, recvcount * recvsize,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLTOALL_EV, EVT_BEGIN, recvcount * recvsize,
                   sendcount * sendsize, me, comm, PACX_CurrentOpGlobal);
 
   ret = PPACX_Alltoall (sendbuf, sendcount, sendtype, recvbuf, recvcount,
@@ -5213,7 +5212,7 @@ int PACX_Alltoall_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtyp
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
+  TRACE_PACXEVENT (TIME, PACX_ALLTOALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
                   PACX_CurrentOpGlobal);
 
   return ret;
@@ -5277,7 +5276,7 @@ int PACX_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
    *   tag : rank                           commid: communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
                   sendsize * sendc, me, comm, PACX_CurrentOpGlobal);
 
   ret = PPACX_Alltoallv (sendbuf, sendcounts, sdispls, sendtype,
@@ -5288,7 +5287,7 @@ int PACX_Alltoallv_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
+  TRACE_PACXEVENT (TIME, PACX_ALLTOALLV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm,
                   PACX_CurrentOpGlobal);
 
 
@@ -5343,7 +5342,7 @@ int PACX_Allgather_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendty
    *   tag : rank                           commid: communicator identifier
    *   aux : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLGATHER_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
                   me, comm, recvcount * recvsize * nprocs);
 
   ret = PPACX_Allgather (sendbuf, sendcount, sendtype,
@@ -5354,7 +5353,7 @@ int PACX_Allgather_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendty
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_ALLGATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   return ret;
@@ -5413,7 +5412,7 @@ int PACX_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendt
    *   tag : rank                           commid: communicator identifier
    *   aux : bytes received
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_ALLGATHERV_EV, EVT_BEGIN, EMPTY, sendcount * sendsize,
                   me, comm, recvsize * recvc);
 
   ret = PPACX_Allgatherv (sendbuf, sendcount, sendtype,
@@ -5424,7 +5423,7 @@ int PACX_Allgatherv_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendt
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_ALLGATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
   return ret;
 }
@@ -5485,12 +5484,12 @@ int PACX_Gather_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtype,
    */
   if (me == root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
                     me, comm, recvcount * recvsize * nprocs);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHER_EV, EVT_BEGIN, root, sendcount * sendsize,
                     me, comm, 0);
   }
 
@@ -5502,7 +5501,7 @@ int PACX_Gather_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtype,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_GATHER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
   return ret;
 }
@@ -5569,12 +5568,12 @@ int PACX_Gatherv_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtype
    */
   if (me == root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
                     me, comm, recvsize * recvc);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_GATHERV_EV, EVT_BEGIN, root, sendcount * sendsize,
                     me, comm, 0);
   }
 
@@ -5586,7 +5585,7 @@ int PACX_Gatherv_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtype
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_GATHERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
   return ret;
 }
@@ -5647,13 +5646,13 @@ int PACX_Scatter_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtype
    */
   if (me == root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, root,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, root,
                     sendcount * sendsize * nprocs, me, comm,
                     recvcount * recvsize);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, root, 0, me, comm,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTER_EV, EVT_BEGIN, root, 0, me, comm,
                     recvcount * recvsize);
   }
 
@@ -5665,7 +5664,7 @@ int PACX_Scatter_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtype
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SCATTER_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
   return ret;
 }
@@ -5732,12 +5731,12 @@ int PACX_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
    */
   if (me == root)
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, root, sendsize * sendc, me,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, root, sendsize * sendc, me,
                     comm, recvcount * recvsize);
   }
   else
   {
-    TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
+    TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCATTERV_EV, EVT_BEGIN, root, 0, me, comm,
                     recvcount * recvsize);
   }
 
@@ -5749,7 +5748,7 @@ int PACX_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_SCATTERV_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
   return ret;
 }
@@ -5763,10 +5762,10 @@ int PACX_Comm_rank_C_Wrapper (PACX_Comm comm, int *rank)
 {
   int ierror;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_COMM_RANK_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   ierror = PPACX_Comm_rank (comm, rank);
-  TRACE_MPIEVENT (TIME, PACX_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   return ierror;
@@ -5782,10 +5781,10 @@ int PACX_Comm_size_C_Wrapper (PACX_Comm comm, int *size)
 {
   int ierror;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_COMM_SIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   ierror = PPACX_Comm_size (comm, size);
-  TRACE_MPIEVENT (TIME, PACX_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   return ierror;
@@ -5902,7 +5901,7 @@ int PACX_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
    *   tag : whoami (comm rank)            comm : communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_REDUCESCAT_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_REDUCESCAT_EV, EVT_BEGIN, op, size, me, comm, EMPTY);
 
   ierror = PPACX_Reduce_scatter (sendbuf, recvbuf, recvcounts, datatype,
                                 op, comm);
@@ -5912,7 +5911,7 @@ int PACX_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_REDUCESCAT_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
   return ierror;
 }
 
@@ -5959,7 +5958,7 @@ int PACX_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
    *   tag : whoami (comm rank)            comm : communicator id
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SCAN_EV, EVT_BEGIN, op, count * size, me, comm,
                   PACX_CurrentOpGlobal);
 
   ierror = PPACX_Scan (sendbuf, recvbuf, count, datatype, op, comm);
@@ -5969,7 +5968,7 @@ int PACX_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
    *   target : ---                         size  : ---
    *   tag : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
+  TRACE_PACXEVENT (TIME, PACX_SCAN_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, 
   	PACX_CurrentOpGlobal);
 
   return ierror;
@@ -6021,7 +6020,7 @@ int PACX_Start_C_Wrapper (PACX_Request *request)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_START_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_START_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /* Primer cal fer la crida real */
@@ -6036,7 +6035,7 @@ int PACX_Start_C_Wrapper (PACX_Request *request)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_START_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+  TRACE_PACXEVENT (TIME, PACX_START_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
   return ierror;
 }
 
@@ -6056,7 +6055,7 @@ int PACX_Startall_C_Wrapper (int count, PACX_Request *array_of_requests)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_STARTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -6078,7 +6077,7 @@ int PACX_Startall_C_Wrapper (int count, PACX_Request *array_of_requests)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_STARTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   return ierror;
 }
@@ -6097,7 +6096,7 @@ int PACX_Request_free_C_Wrapper (PACX_Request *request)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_REQUEST_FREE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY,
                   EMPTY, EMPTY);
 
   /* Free from our structures */
@@ -6112,7 +6111,7 @@ int PACX_Request_free_C_Wrapper (PACX_Request *request)
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   return ierror;
 }
@@ -6133,7 +6132,7 @@ int PACX_Recv_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int 
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RECV_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RECV_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -6154,7 +6153,7 @@ int PACX_Recv_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int 
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_RECV_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_RECV_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   return ierror;
 }
@@ -6175,7 +6174,7 @@ int PACX_Send_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int 
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_SEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_SEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -6196,7 +6195,7 @@ int PACX_Send_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int 
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_SEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_SEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   return ierror;
 }
@@ -6217,7 +6216,7 @@ int PACX_Bsend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_BSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_BSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -6238,7 +6237,7 @@ int PACX_Bsend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_BSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_BSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   return ierror;
 }
@@ -6259,7 +6258,7 @@ int PACX_Rsend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (LAST_READ_TIME, PACX_RSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (LAST_READ_TIME, PACX_RSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
   /*
@@ -6280,7 +6279,7 @@ int PACX_Rsend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
    *   tag : ---                           comm : ---
    *   aux : ---
    */
-  TRACE_MPIEVENT (TIME, PACX_RSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+  TRACE_PACXEVENT (TIME, PACX_RSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
   return ierror;
 }
@@ -6301,7 +6300,7 @@ int PACX_Ssend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
 	*   tag : ---                           comm : ---
 	*   aux : ---
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_SSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_SSEND_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
 	/*
@@ -6322,7 +6321,7 @@ int PACX_Ssend_init_C_Wrapper (void *buf, int count, PACX_Datatype datatype, int
 	 *   tag : ---                           comm : ---
 	 *   aux : ---
 	 */
-	TRACE_MPIEVENT (TIME, PACX_SSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	TRACE_PACXEVENT (TIME, PACX_SSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
 	return ierror;
@@ -6350,7 +6349,7 @@ int PACX_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtyp
 
 	DataSend = sendcount * DataSendSize;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_SENDRECV_EV, EVT_BEGIN, RecvRank, DataSend, sendtag,
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_SENDRECV_EV, EVT_BEGIN, RecvRank, DataSend, sendtag,
 		comm, EMPTY);
 
 	ptr_status = (status == MPI_STATUS_IGNORE)?&my_status:status;
@@ -6377,7 +6376,7 @@ int PACX_Sendrecv_C_Wrapper (void *sendbuf, int sendcount, PACX_Datatype sendtyp
 	if ((ret = get_rank_obj_C (comm, SendRank, &SourceRank)) != MPI_SUCCESS)
 		return ret;
 
-	TRACE_MPIEVENT (TIME, PACX_SENDRECV_EV, EVT_END, SourceRank, DataSize, Tag, comm,
+	TRACE_PACXEVENT (TIME, PACX_SENDRECV_EV, EVT_END, SourceRank, DataSize, Tag, comm,
 	  EMPTY);
 
 	return ierror;
@@ -6403,7 +6402,7 @@ int PACX_Sendrecv_replace_C_Wrapper (void *buf, int count, PACX_Datatype type,
 
 	DataSend = count * DataSendSize;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_SENDRECV_REPLACE_EV, EVT_BEGIN, RecvRank, DataSend,
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_SENDRECV_REPLACE_EV, EVT_BEGIN, RecvRank, DataSend,
 	  sendtag, comm, EMPTY);
 
 	ptr_status = (status == MPI_STATUS_IGNORE)?&my_status:status;
@@ -6430,7 +6429,7 @@ int PACX_Sendrecv_replace_C_Wrapper (void *buf, int count, PACX_Datatype type,
 	if ((ret = get_rank_obj_C (comm, SendRank, &SourceRank)) != MPI_SUCCESS)
 		return ret;
 
-	TRACE_MPIEVENT (TIME, PACX_SENDRECV_REPLACE_EV, EVT_END, SourceRank, DataSize,
+	TRACE_PACXEVENT (TIME, PACX_SENDRECV_REPLACE_EV, EVT_END, SourceRank, DataSize,
 	  Tag, comm, EMPTY);
 
 	return ierror;
@@ -6446,9 +6445,9 @@ int PACX_File_open_C_Wrapper (PACX_Comm comm, char * filename, int amode, PACX_I
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_OPEN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); 
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_OPEN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); 
 	ierror = PPACX_File_open (comm, filename, amode, info, fh);
-	TRACE_MPIEVENT (TIME, PACX_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6457,9 +6456,9 @@ int PACX_File_close_C_Wrapper (PACX_File *fh)
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_CLOSE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_CLOSE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_close (fh);
-	TRACE_MPIEVENT (TIME, PACX_FILE_CLOSE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_CLOSE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6468,9 +6467,9 @@ int PACX_File_read_C_Wrapper (PACX_File fh, void * buf, int count, PACX_Datatype
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_read (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_READ_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_READ_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6479,9 +6478,9 @@ int PACX_File_read_all_C_Wrapper (PACX_File fh, void * buf, int count, PACX_Data
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_read_all (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_READ_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_READ_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6490,9 +6489,9 @@ int PACX_File_write_C_Wrapper (PACX_File fh, void * buf, int count, PACX_Datatyp
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_write (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6501,9 +6500,9 @@ int PACX_File_write_all_C_Wrapper (PACX_File fh, void * buf, int count, PACX_Dat
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_write_all (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6512,9 +6511,9 @@ int PACX_File_read_at_C_Wrapper (PACX_File fh, PACX_Offset offset, void * buf, i
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_read_at (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_READ_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_READ_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6523,9 +6522,9 @@ int PACX_File_read_at_all_C_Wrapper (PACX_File fh, PACX_Offset offset, void * bu
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_read_at_all (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6534,9 +6533,9 @@ int PACX_File_write_at_C_Wrapper (PACX_File fh, PACX_Offset offset, void * buf, 
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_write_at (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6545,9 +6544,9 @@ int PACX_File_write_at_all_C_Wrapper (PACX_File fh, PACX_Offset offset, void * b
 {
 	int ierror;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (LAST_READ_TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PPACX_File_write_at_all (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_PACXEVENT (TIME, PACX_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	return ierror;
 }
@@ -6569,7 +6568,7 @@ static void PACX_stats_Wrapper (iotimer_t timestamp)
 	unsigned int vec_params[7] = 
 		{ P2P_Communications, P2P_Bytes_Sent, P2P_Bytes_Recv, 
 		GLOBAL_Communications, GLOBAL_Bytes_Sent, GLOBAL_Bytes_Recv,
-		Elapsed_Time_In_MPI };
+		Elapsed_Time_In_PACX };
 
 	if (TRACING_PACX_STATISTICS)
 		TRACE_N_MISCEVENT (timestamp, 7, vec_types, vec_values, vec_params);
@@ -6581,7 +6580,7 @@ static void PACX_stats_Wrapper (iotimer_t timestamp)
 	GLOBAL_Communications = 0;
 	GLOBAL_Bytes_Sent = 0;
 	GLOBAL_Bytes_Recv = 0;
-	Elapsed_Time_In_MPI = 0;
+	Elapsed_Time_In_PACX = 0;
 }
 
 void Extrae_network_counters_Wrapper (void)
@@ -6785,11 +6784,11 @@ static void Trace_PACX_Communicator (int tipus_event, PACX_Comm newcomm,
 		ierror = PPACX_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
 		PACX_CHECK(ierror, PPACX_Group_translate_ranks);
 
-		FORCE_TRACE_MPIEVENT (entry_time, tipus_event, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, EMPTY);
+		FORCE_TRACE_PACXEVENT (entry_time, tipus_event, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, EMPTY);
 
 		/* Dump each of the task ids */
 		for (i = 0; i < num_tasks; i++)
-			FORCE_TRACE_MPIEVENT (entry_time, PACX_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
+			FORCE_TRACE_PACXEVENT (entry_time, PACX_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
 				EMPTY, EMPTY, EMPTY, EMPTY);
 
 		/* Free the group */
@@ -6801,14 +6800,14 @@ static void Trace_PACX_Communicator (int tipus_event, PACX_Comm newcomm,
 	}
 	else if (newcomm == PACX_COMM_WORLD)
 	{
-		FORCE_TRACE_MPIEVENT (entry_time, tipus_event, EVT_BEGIN, PACX_COMM_WORLD_ALIAS,
+		FORCE_TRACE_PACXEVENT (entry_time, tipus_event, EVT_BEGIN, PACX_COMM_WORLD_ALIAS,
 			NumOfTasks, EMPTY, newcomm, EMPTY);
 	}
 	else if (newcomm == PACX_COMM_SELF)
 	{
-		FORCE_TRACE_MPIEVENT (entry_time, tipus_event, EVT_BEGIN, PACX_COMM_SELF_ALIAS,
+		FORCE_TRACE_PACXEVENT (entry_time, tipus_event, EVT_BEGIN, PACX_COMM_SELF_ALIAS,
 			1, EMPTY, newcomm, EMPTY);
 	}
 
-	FORCE_TRACE_MPIEVENT (leave_time, tipus_event, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, EMPTY);
+	FORCE_TRACE_PACXEVENT (leave_time, tipus_event, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, EMPTY);
 }

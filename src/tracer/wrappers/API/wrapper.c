@@ -148,6 +148,12 @@ int tracejant_mpi = TRUE;
 /***** Variable global per saber si MPI s'ha de tracejar amb hwc *********/
 int tracejant_hwc_mpi = FALSE;
 
+/***** Global variable to control whether PACX must be instrumented ******/
+int tracejant_pacx = TRUE;
+
+/***** Global variable to control whether HWC must be gathered at PACX ***/
+int tracejant_hwc_pacx = FALSE;
+
 /***** Variable global per saber si OpenMP s'ha de tracejar **************/
 int tracejant_omp = TRUE;
 
@@ -196,6 +202,8 @@ char PROGRAM_NAME[256];
 
 unsigned long long last_mpi_exit_time = 0;
 unsigned long long last_mpi_begin_time = 0;
+unsigned long long last_pacx_exit_time = 0;
+unsigned long long last_pacx_begin_time = 0;
 
 /* Control del temps de traceig */
 unsigned long long initTracingTime = 0;
@@ -1644,8 +1652,8 @@ static void Backend_Finalize_close_mpits (int thread)
 {
 	int attempts = 100;
 	int ret;
-	char trace[TRACE_FILE];
-	char tmp_name[TRACE_FILE];
+	char trace[TMP_DIR];
+	char tmp_name[TMP_DIR];
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread))) return;
 
