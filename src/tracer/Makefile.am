@@ -95,7 +95,7 @@ WRAPPERS_CORE = \
 	wrappers/API/wrapper.c wrappers/API/wrapper.h \
 	wrappers/API/misc_wrapper.c wrappers/API/misc_wrapper.h \
 	wrappers/API/trace_buffers.h \
-	trace_macros.h \
+	trace_macros.h trace_macros_mpi.h trace_macros_omp.h trace_macros_pacx.h \
 	trace_hwc.h
 
 # Wrappers for CUDA instrumentation
