@@ -982,8 +982,6 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 				unsigned count = 0;
 				char *ptr;
 
-				printf ("FuncTab->function[%d] = %s\n", i, FuncTab->function[i]);
-
 				if ((ptr = strstr (FuncTab->function[i], "__device_stub__Z")) != NULL)
 				{
 					ptr += strlen ("__device_stub__Z");
