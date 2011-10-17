@@ -63,7 +63,9 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 
 	switch (EvType)
 	{
-		case CUDACONFIGCALL_EV:
+		case CUDACONFIGCALL_EV:	
+			state = STATE_OTHERS;
+			break;
 		case CUDALAUNCH_EV:
 			state = STATE_OVHD;
 			break;
@@ -87,6 +89,12 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	if (EvType == CUDAMEMCPY_EV)
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
 
+	if (EvType == CUDALAUNCH_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
+	}
+
 	return 0;
 }
 
@@ -109,7 +117,7 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 			state = STATE_MEMORY_XFER;
 			break;
 		case CUDACONFIGKERNEL_GPU_EV:
-			state = STATE_OVHD;
+			state = STATE_OTHERS;
 			break;
 	}
 
@@ -119,6 +127,12 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 
 	if (EvType == CUDAMEMCPY_GPU_EV)
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
+
+	if (EvType == CUDAKERNEL_GPU_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
+	}
 
 	return 0;
 }

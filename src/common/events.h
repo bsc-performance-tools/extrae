@@ -410,6 +410,8 @@ enum {
 
 #define CUDACALL_EV              63000001
 #define CUDAMEMCPY_SIZE_EV       63000002
+#define CUDAFUNC_EV              63000019
+#define CUDAFUNC_LINE_EV         63000119
 #define CUDABASE_EV              63100000
 #define CUDALAUNCH_EV            63100001
 #define CUDACONFIGCALL_EV        63100002
@@ -502,6 +504,7 @@ enum {
 #define STATE_BCAST              13
 #define STATE_NOT_TRACING        14
 #define STATE_INITFINI           15
+#define STATE_OTHERS             15
 #define STATE_MIXED              15
 #define STATE_SENDRECVOP         16
 #define STATE_MEMORY_XFER        17

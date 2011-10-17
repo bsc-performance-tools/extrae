@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
 
+ * 17Oct2011 Translation of @ of CUDA kernels into kernel names
  * 14Oct2011 Updating PACX instrumentation
  * 13Oct2011 Several OpenMP bugfixes. Added instrumentation for set/get num
              threads. Fixed hwc counts at openmp when counter set changes.

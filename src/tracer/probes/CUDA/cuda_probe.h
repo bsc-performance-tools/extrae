@@ -30,7 +30,7 @@
 #ifndef CUDA_PROBE_H_INCLUDED
 #define CUDA_PROBE_H_INCLUDED
 
-void Probe_Cuda_Launch_Entry (void);
+void Probe_Cuda_Launch_Entry (UINT64 p1);
 void Probe_Cuda_Launch_Exit (void);
 void Probe_Cuda_ConfigureCall_Entry (void);
 void Probe_Cuda_ConfigureCall_Exit (void);

@@ -79,7 +79,7 @@ struct RegisteredStreams_t
 	int nevents;
 	cudaEvent_t ts_events[MAX_CUDA_EVENTS];
 	unsigned events[MAX_CUDA_EVENTS];
-	unsigned types[MAX_CUDA_EVENTS];
+	unsigned long long types[MAX_CUDA_EVENTS];
 	unsigned tag[MAX_CUDA_EVENTS];
 	unsigned size[MAX_CUDA_EVENTS];
 };
@@ -236,7 +236,7 @@ static void RegisterCUDAStream (cudaStream_t stream)
 	}
 }
 
-static void AddEventToStream (int devid, int streamid, unsigned event, unsigned type,
+static void AddEventToStream (int devid, int streamid, unsigned event, unsigned long long type,
 	unsigned tag, unsigned size)
 {
 	int evt_index;
@@ -267,7 +267,12 @@ static void AddEventToStream (int devid, int streamid, unsigned event, unsigned 
 
 static void FlushStream (int devid, int streamid)
 {
+	int threadid = devices[devid].Stream[streamid].threadid;
 	int i;
+
+	/* Check whether we will fill the buffer soon (or now) */
+	if (Buffer_RemainingEvents(TracingBuffer[threadid]) <= 2*devices[devid].Stream[streamid].nevents)
+		Buffer_ExecuteFlushCallback (TracingBuffer[threadid]);
 
 	/* Flush events into thread buffer */
 	for (i = 0; i < devices[devid].Stream[streamid].nevents; i++)
@@ -286,15 +291,13 @@ static void FlushStream (int devid, int streamid)
 		  devices[devid].Stream[streamid].ts_events[i]);
 		ftmp *= 1000000;
 		utmp = devices[devid].Stream[streamid].host_reference_time + (UINT64) (ftmp);
-		THREAD_TRACE_MISCEVENT (devices[devid].Stream[streamid].threadid, utmp,
-			devices[devid].Stream[streamid].events[i],
-			devices[devid].Stream[streamid].types[i],
-			0);
+		THREAD_TRACE_MISCEVENT (threadid, utmp,
+		  devices[devid].Stream[streamid].events[i],
+		  devices[devid].Stream[streamid].types[i], 0);
 
 		if (devices[devid].Stream[streamid].events[i] == CUDAMEMCPY_GPU_EV)
 			if (devices[devid].Stream[streamid].tag[i] > 0)
-				THREAD_TRACE_USER_COMMUNICATION_EVENT(devices[devid].Stream[streamid].threadid,
-				 utmp,
+				THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,
 				 (devices[devid].Stream[streamid].types[i]==EVT_END)?USER_RECV_EV:USER_SEND_EV,
 				 0,
 				 devices[devid].Stream[streamid].size[i],
@@ -364,9 +367,9 @@ cudaError_t cudaLaunch (char *p1)
 	}
 
 	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_Launch_Entry ();
+	Probe_Cuda_Launch_Entry ((UINT64) p1);
 
-	AddEventToStream (_cudaLaunch_device, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, EVT_BEGIN, 0, 0);
+	AddEventToStream (_cudaLaunch_device, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, (UINT64) p1, 0, 0);
 
 	res = real_cudaLaunch (p1);
 

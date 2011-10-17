@@ -41,11 +41,11 @@ static char UNUSED rcsid[] = "$Id$";
 # define DEBUG
 #endif
 
-void Probe_Cuda_Launch_Entry (void)
+void Probe_Cuda_Launch_Entry (UINT64 p1)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDALAUNCH_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDALAUNCH_EV, p1, EMPTY);
 }
 
 void Probe_Cuda_Launch_Exit (void)

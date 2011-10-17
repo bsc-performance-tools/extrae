@@ -58,6 +58,7 @@
 void Address2Info_Initialize (char * binary);
 int Address2Info_Initialized (void);
 UINT64  Address2Info_Translate (UINT64 address, int event_type, int uniqueID);
+void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_line, int uniqueid);
 void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid);
@@ -76,6 +77,8 @@ enum
 	ADDR2UF_LINE,
 	ADDR2SAMPLE_FUNCTION,
 	ADDR2SAMPLE_LINE,
+	ADDR2CUDA_FUNCTION,
+	ADDR2CUDA_LINE,
 	ADDR2_FUNCTION_UNIQUE,
 	ADDR2_LINE_UNIQUE
 };
@@ -86,6 +89,7 @@ enum
 	MPI_CALLER_TYPE,
 	USER_FUNCTION_TYPE,
 	SAMPLE_TYPE,
+	CUDAKERNEL_TYPE,
 	UNIQUE_TYPE,
 	COUNT_ADDRESS_TYPES /* Must be the very last entry */
 };

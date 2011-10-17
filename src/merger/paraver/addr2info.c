@@ -115,7 +115,8 @@ static int address_found;
 #define A2I_OMP      1
 #define A2I_UF       2
 #define A2I_SAMPLE   3
-#define A2I_LAST     4
+#define A2I_CUDA     4
+#define A2I_LAST     5
 int Address2Info_Labels[A2I_LAST];
 
 #define UNRESOLVED_ID 0
@@ -162,11 +163,21 @@ void Address2Info_Sort (int unique_ids)
 		void *base = (void*) &(AddressTable[OUTLINED_OPENMP_TYPE]->address[2]);
 		qsort (base, AddressTable[OUTLINED_OPENMP_TYPE]->num_addresses-2,
 			sizeof(struct address_info), Address2Info_Sort_routine);
+
 		base = (void*) &(AddressTable[MPI_CALLER_TYPE]->address[2]);
 		qsort (base, AddressTable[MPI_CALLER_TYPE]->num_addresses-2,
 			sizeof(struct address_info), Address2Info_Sort_routine);
-		base = (void*) &(AddressTable[USER_FUNCTION_TYPE]->address[2]);
+
+		base = (void*) &(AddressTable[SAMPLE_TYPE]->address[2]);
 		qsort (base, AddressTable[SAMPLE_TYPE]->num_addresses-2,
+			sizeof(struct address_info), Address2Info_Sort_routine);
+
+		base = (void*) &(AddressTable[USER_FUNCTION_TYPE]->address[2]);
+		qsort (base, AddressTable[USER_FUNCTION_TYPE]->num_addresses-2,
+			sizeof(struct address_info), Address2Info_Sort_routine);
+
+		base = (void*) &(AddressTable[CUDAKERNEL_TYPE]->address[2]);
+		qsort (base, AddressTable[CUDAKERNEL_TYPE]->num_addresses-2,
 			sizeof(struct address_info), Address2Info_Sort_routine);
 	}
 
@@ -418,6 +429,12 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 			caller_address = address;
 			addr_type = uniqueID?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE;
 			break;
+		case ADDR2CUDA_FUNCTION:
+		case ADDR2CUDA_LINE:
+			Address2Info_Labels[A2I_CUDA] = TRUE;
+			caller_address = address-1;
+			addr_type = uniqueID?UNIQUE_TYPE:CUDAKERNEL_TYPE;
+			break;
 		case ADDR2UF_FUNCTION:
 		case ADDR2UF_LINE:
 			Address2Info_Labels[A2I_UF] = TRUE;
@@ -522,12 +539,14 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 	result = 0;
 	switch(query)
 	{
+		case ADDR2CUDA_FUNCTION:
 		case ADDR2SAMPLE_FUNCTION:
 		case ADDR2MPI_FUNCTION:
 		case ADDR2UF_FUNCTION:
 		case ADDR2OMP_FUNCTION:
 			result = function_id + 1;
 			break;
+		case ADDR2CUDA_LINE:
 		case ADDR2UF_LINE:
 		case ADDR2SAMPLE_LINE:
 		case ADDR2OMP_LINE:
@@ -821,12 +840,12 @@ static void Find_Address_In_Section (bfd * abfd, asection * section, PTR data)
 
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 {
-  struct address_table  * AddrTab;
-  struct function_table * FuncTab;
+	struct address_table  * AddrTab;
+	struct function_table * FuncTab;
 	int i;
 
-  AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:MPI_CALLER_TYPE];
-  FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:MPI_CALLER_TYPE];
+	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:MPI_CALLER_TYPE];
+	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:MPI_CALLER_TYPE];
 
 	if (Address2Info_Labels[A2I_MPI] /*Address2Info_Need_MPI_Labels*/) 
 	{
@@ -903,12 +922,12 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 
 void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_line, int uniqueid)
 {
-  struct address_table  * AddrTab;
-  struct function_table * FuncTab;
+	struct address_table  * AddrTab;
+	struct function_table * FuncTab;
 	int i;
 
-  AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE];
-  FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE];
+	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE];
+	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE];
 
 	if (Address2Info_Labels[A2I_OMP] /*Address2Info_Need_OMP_Labels*/) 
 	{
@@ -938,14 +957,74 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_
 	}
 }
 
-void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
+void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 {
-  struct address_table  * AddrTab;
-  struct function_table * FuncTab;
+	struct address_table  * AddrTab;
+	struct function_table * FuncTab;
 	int i;
 
-  AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:USER_FUNCTION_TYPE];
-  FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:USER_FUNCTION_TYPE];
+	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:CUDAKERNEL_TYPE];
+	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:CUDAKERNEL_TYPE];
+
+	printf ("Address2Info_Labels[A2I_CUDA] = %d\n", Address2Info_Labels[A2I_CUDA]);
+
+	if (Address2Info_Labels[A2I_CUDA]) 
+	{
+		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+		fprintf (pcf_fd, "0    %d    %s\n", CUDAFUNC_EV, "CUDA kernel");
+
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < FuncTab->num_functions; i ++)
+			{
+				char buffer[1024];
+				unsigned count = 0;
+				char *ptr;
+
+				printf ("FuncTab->function[%d] = %s\n", i, FuncTab->function[i]);
+
+				if ((ptr = strstr (FuncTab->function[i], "__device_stub__Z")) != NULL)
+				{
+					ptr += strlen ("__device_stub__Z");
+					while (ptr[0]>='0' && ptr[0]<='9')
+					{
+						count = count * 10 + (ptr[0] - '0');
+						ptr++;
+					}
+					/* Add +1 in the demangled name for additional \0 in C */
+					snprintf (buffer, MIN(count+1,sizeof(buffer)), ptr);
+					fprintf (pcf_fd, "%d   %s\n", i + 1, buffer);
+				}
+				else
+					fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			}
+			LET_SPACES(pcf_fd);
+		}
+
+		/* Then dump line-functions */
+		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+		fprintf (pcf_fd, "0    %d    %s\n", CUDAFUNC_LINE_EV, "CUDA kernel source code line");
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+
+			for (i = 0; i < AddrTab->num_addresses; i ++)
+				fprintf(pcf_fd, "%d   %d (%s)\n", 
+					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			LET_SPACES(pcf_fd);
+		}
+	}
+}
+
+void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
+{
+	struct address_table  * AddrTab;
+	struct function_table * FuncTab;
+	int i;
+
+	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:USER_FUNCTION_TYPE];
+	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:USER_FUNCTION_TYPE];
 
 	if (Address2Info_Labels[A2I_UF] /*Address2Info_Need_UF_Labels*/) 
 	{
@@ -978,12 +1057,12 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 
 void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 {
-  struct address_table  * AddrTab;
-  struct function_table * FuncTab;
+	struct address_table  * AddrTab;
+	struct function_table * FuncTab;
 	int i;
 
-  AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:SAMPLE_TYPE];
-  FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:SAMPLE_TYPE];
+	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:SAMPLE_TYPE];
+	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:SAMPLE_TYPE];
 
 	if (Address2Info_Labels[A2I_SAMPLE] /*Address2Info_Need_Sample_Labels*/) 
 	{

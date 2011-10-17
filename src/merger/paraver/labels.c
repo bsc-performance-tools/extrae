@@ -760,6 +760,7 @@ int GeneratePCFfile (char *name, long long options)
 	Address2Info_Write_MPI_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_UF_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_Sample_Labels (fd, get_option_merge_UniqueCallerID());
+	Address2Info_Write_CUDA_Labels (fd, get_option_merge_UniqueCallerID());
 #endif
 
 	Write_rusage_Labels (fd);
