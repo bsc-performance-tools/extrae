@@ -966,8 +966,6 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:CUDAKERNEL_TYPE];
 	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:CUDAKERNEL_TYPE];
 
-	printf ("Address2Info_Labels[A2I_CUDA] = %d\n", Address2Info_Labels[A2I_CUDA]);
-
 	if (Address2Info_Labels[A2I_CUDA]) 
 	{
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);

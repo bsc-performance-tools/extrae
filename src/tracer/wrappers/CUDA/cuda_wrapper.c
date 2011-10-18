@@ -151,13 +151,27 @@ static void InitializeCUDA (void)
 			exit (-1);
 		}
 
-		/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
-		Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
+#ifdef SINGLE_CUDA_DEVICE
+		if (j == 0)
+		{
+#endif
+			/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
+			Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
 
-		/* default device stream */
-		devices[j].Stream[0].threadid = Backend_getNumberOfThreads()-1;
-		devices[j].Stream[0].stream = NULL;
-		devices[j].Stream[0].nevents = 0;
+			/* default device stream */
+			devices[j].Stream[0].threadid = Backend_getNumberOfThreads()-1;
+			devices[j].Stream[0].stream = NULL;
+			devices[j].Stream[0].nevents = 0;
+#ifdef SINGLE_CUDA_DEVICE
+		}
+		else
+		{
+			devices[j].Stream[0].threadid = devices[0].Stream[0].threadid;
+			devices[j].Stream[0].stream = NULL;
+			devices[j].Stream[0].nevents = 0;
+			
+		}
+#endif
 
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
