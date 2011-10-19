@@ -88,6 +88,11 @@ endif
 if WANT_OPENMP
   lib_LTLIBRARIES += lib_dyn_omptrace.la
 endif
+if HAVE_MPI
+if WANT_OPENMP
+  lib_LTLIBRARIES += lib_dyn_ompitrace.la
+endif
+endif
 endif
 
 WRAPPERS_CORE = \
@@ -203,6 +208,7 @@ libsmpssmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 # For DynInst instrumentation
 lib_dyn_mpitrace_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 lib_dyn_omptrace_la_SOURCES = $(libomptrace_la_SOURCES)
+lib_dyn_ompitrace_la_SOURCES = $(libompitrace_la_SOURCES) mpif.h
 
 core_MODULES = \
    $(COMMON_DIR)/libcommon.la \
@@ -271,6 +277,7 @@ libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_D
 
 lib_dyn_mpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpi.la $(PARALLEL_MERGE_LIB)
 lib_dyn_omptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
+lib_dyn_ompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpi.la $(PARALLEL_MERGE_LIB) $(SEQUENTIAL_MERGE_LIB)
 
 #
 # Compilation flags
@@ -379,6 +386,7 @@ libsmpssmpitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -D
 
 lib_dyn_mpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DC_SYMBOLS -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE $(PARALLEL_CFLAGS_MERGE_LIB)
 lib_dyn_omptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS) -DDYNINST_MODULE -DOMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
+lib_dyn_ompitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) -DC_SYMBOLS -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE -DOMP_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
 
 #
@@ -430,6 +438,7 @@ libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
 lib_dyn_mpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 lib_dyn_omptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+lib_dyn_ompitrace_la_LDFLAGS = $(lib_dyn_mpitrace_la_LDFLAGS) $(lib_dyn_omptrace_la_LDFLAGS)
 
 ## -static tells libtool to generate ONLY the static library (we don't want
 ##   the libmpitracef.so because it don't preloads fine with programs)
