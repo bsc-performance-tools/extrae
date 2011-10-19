@@ -52,7 +52,7 @@ export EXTRAE_HOME=@sub_PREFIXDIR@
 source ${EXTRAE_HOME}/etc/extrae.sh
 
 # Only show output for task 0, others task send output to /dev/null
-if test "${MXMPI_ID}" == "0" ; then
+if test "${SLURM_PROCID}" == "0" ; then
   ${EXTRAE_HOME}/bin/ompitrace -config ../extrae.xml $@ > job.out 2> job.err
 else
   ${EXTRAE_HOME}/bin/ompitrace -config ../extrae.xml $@ > /dev/null 2> /dev/null
@@ -61,7 +61,7 @@ fi
 
 This is the script responsible for instrumenting a single MPI task. In line number 4 we set-up the instrumentation environment by executing the commands from {\tt extrae.sh}. Then we execute the binary passed to the {\tt run.sh} script in lines 8 and 10. Both lines are executing the same command except that line 8 sends all the output to two different files (one for standard output and another for standard error) and line 10 sends all the output to {\tt /dev/null}.
 
-Please note, this script is particularly adapted to the MOAB/Slurm queue systems. You may need to adapt the script to other systems by using the appropiate environment variables. Particularly, {\tt MXMPI\_ID} identifies the MPI task id (i.e., the task rank) and may be changed to the proper environemnt variable (PMI\_RANK in ParaStation/Torque/MOAB system, for example).
+Please note, this script is particularly adapted to the MOAB/Slurm queue systems. You may need to adapt the script to other systems by using the appropiate environment variables. Particularly, {\tt SLURM\_PROCID} identifies the MPI task id (i.e., the task rank) and may be changed to the proper environemnt variable (PMI\_RANK in ParaStation/Torque/MOAB system or MXMPI\_ID in systems having Myrinet MX devices, for example).
 
 \section{LD\_PRELOAD based examples}\label{sec:Examples_LDPRELOAD}
 
