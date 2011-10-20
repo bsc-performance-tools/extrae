@@ -754,7 +754,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	temps_inici_MPI_Init = TIME;
 	
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END.
-           Three consecutive barriers for a better synchronization (J suggested) */
+	   Three consecutive barriers for a better synchronization (J suggested) */
 	CtoF77 (pmpi_barrier) (&comm, &res);
 	CtoF77 (pmpi_barrier) (&comm, &res);
 	CtoF77 (pmpi_barrier) (&comm, &res);
@@ -3988,10 +3988,10 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	temps_inici_MPI_Init = TIME;
 
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END
-           Three consecutive barriers for a better synchronization (J suggested) */
-	ret = PMPI_Barrier (MPI_COMM_WORLD);
-	ret = PMPI_Barrier (MPI_COMM_WORLD);
-	ret = PMPI_Barrier (MPI_COMM_WORLD);
+	   Three consecutive barriers for a better synchronization (J suggested) */
+	PMPI_Barrier (MPI_COMM_WORLD);
+	PMPI_Barrier (MPI_COMM_WORLD);
+	PMPI_Barrier (MPI_COMM_WORLD);
 
 	initTracingTime = temps_final_MPI_Init = TIME;
 
