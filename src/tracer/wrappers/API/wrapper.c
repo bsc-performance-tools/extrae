@@ -1695,8 +1695,6 @@ static void Backend_Finalize_close_mpits (int thread)
 	{
 		/* Remove file if empty! */
 		unlink (tmp_name);
-
-		fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file NOT created (%d) due to lack of information gathered.\n", TASKID);
 	}
 #endif
 
