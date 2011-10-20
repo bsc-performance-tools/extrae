@@ -88,6 +88,7 @@ struct CUDAdevices_t
 {
 	struct RegisteredStreams_t *Stream;
 	int nstreams;
+	int initialized;
 };
 
 static unsigned __last_tag = 0;
@@ -96,9 +97,8 @@ static unsigned CUDA_tag_generator (void)
 	return ++__last_tag;
 }
 
-static struct CUDAdevices_t *devices;
+static struct CUDAdevices_t *devices = NULL;
 static int CUDAdevices = 0;
-static int CUDAInitialized = FALSE;
 
 static void CUDASynchronizeStream (int devid, int streamid)
 {
@@ -122,76 +122,71 @@ static void CUDASynchronizeStream (int devid, int streamid)
 	devices[devid].Stream[streamid].host_reference_time = TIME;
 }
 
-static void InitializeCUDA (void)
+static void InitializeCUDA (int devid)
 {
-	int i,j;
+	int i;
 
-	if (cudaGetDeviceCount (&CUDAdevices) != 0)
-	{
-		fprintf (stderr, "Error! Querying number of CUDA device count!\n");
-		exit (-1);
-	}
-
-	devices = (struct CUDAdevices_t*) malloc (sizeof(struct CUDAdevices_t)*CUDAdevices);
+	/* If devices table is not initialized, create it first */
 	if (devices == NULL)
 	{
-		fprintf (stderr, "Error! Cannot allocate information for CUDA devices!\n");
-		exit (-1);
-	}
 
-	for (j = 0; j < CUDAdevices; j++)
-	{
-		devices[j].nstreams = 1;
-
-		devices[j].Stream = (struct RegisteredStreams_t*) malloc (
-		  devices[j].nstreams*sizeof(struct RegisteredStreams_t));
-		if (devices[j].Stream == NULL)
+		if (cudaGetDeviceCount (&CUDAdevices) != 0)
 		{
-			fprintf (stderr, "Error! Cannot allocate information for CUDA default stream in device %d!\n", j);
+			fprintf (stderr, "Error! Querying number of CUDA device count!\n");
 			exit (-1);
 		}
 
-#ifdef SINGLE_CUDA_DEVICE
-		if (j == 0)
+		devices = (struct CUDAdevices_t*) malloc (sizeof(struct CUDAdevices_t)*CUDAdevices);
+		if (devices == NULL)
 		{
-#endif
-			/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
-			Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
+			fprintf (stderr, "Error! Cannot allocate information for CUDA devices!\n");
+			exit (-1);
+		}
 
-			/* default device stream */
-			devices[j].Stream[0].threadid = Backend_getNumberOfThreads()-1;
-			devices[j].Stream[0].stream = NULL;
-			devices[j].Stream[0].nevents = 0;
-#ifdef SINGLE_CUDA_DEVICE
-		}
-		else
+		for (i = 0; i < CUDAdevices; i++)
+			devices[i].initialized = FALSE;
+	}
+
+	/* If the device we're using is not initialized, create its structures */
+	if (!devices[devid].initialized)
+	{
+		devices[devid].nstreams = 1;
+
+		devices[devid].Stream = (struct RegisteredStreams_t*) malloc (
+		  devices[devid].nstreams*sizeof(struct RegisteredStreams_t));
+		if (devices[devid].Stream == NULL)
 		{
-			devices[j].Stream[0].threadid = devices[0].Stream[0].threadid;
-			devices[j].Stream[0].stream = NULL;
-			devices[j].Stream[0].nevents = 0;
-			
+			fprintf (stderr, "Error! Cannot allocate information for CUDA default stream in device %d!\n", devid);
+			exit (-1);
 		}
-#endif
+
+		/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
+		Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
+
+		/* default device stream */
+		devices[devid].Stream[0].threadid = Backend_getNumberOfThreads()-1;
+		devices[devid].Stream[0].stream = NULL;
+		devices[devid].Stream[0].nevents = 0;
 
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-		if (cudaEventCreateWithFlags (&(devices[j].Stream[0].device_reference_time), CU_EVENT_BLOCKING_SYNC) != 0)
+		if (cudaEventCreateWithFlags (&(devices[devid].Stream[0].device_reference_time), CU_EVENT_BLOCKING_SYNC) != 0)
 		{
 			fprintf (stderr, "Error! Cannot create CUDA reference time\n");
 			exit (-1);
 		}
-		CUDASynchronizeStream (j, 0);
+		CUDASynchronizeStream (devid, 0);
 
 		for (i = 0; i < MAX_CUDA_EVENTS; i++)
 			/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-			if (cudaEventCreateWithFlags (&(devices[j].Stream[0].ts_events[i]), CU_EVENT_BLOCKING_SYNC) != 0)
+			if (cudaEventCreateWithFlags (&(devices[devid].Stream[0].ts_events[i]), CU_EVENT_BLOCKING_SYNC) != 0)
 			{
 				fprintf (stderr, "Error! Cannot create CUDA time events\n");
 				exit (-1);
 			}
-	}
 
-	CUDAInitialized = TRUE;
+		devices[devid].initialized = TRUE;
+	}
 }
 
 static int SearchCUDAStream (int devid, cudaStream_t stream)
@@ -371,8 +366,7 @@ cudaError_t cudaLaunch (char *p1)
 {
 	cudaError_t res;
 
-	if (!CUDAInitialized)
-		InitializeCUDA();
+	InitializeCUDA(_cudaLaunch_device);
 
 	if (real_cudaLaunch == NULL)
 	{
@@ -400,8 +394,9 @@ cudaError_t cudaConfigureCall (struct dim3 p1, struct dim3 p2, size_t p3, cudaSt
 	int strid, devid;
 	cudaError_t res;
 
-	if (!CUDAInitialized)
-		InitializeCUDA();
+	cudaGetDevice (&devid);
+
+	InitializeCUDA (devid);
 
 	if (real_cudaConfigureCall == NULL)
 	{
@@ -412,14 +407,15 @@ cudaError_t cudaConfigureCall (struct dim3 p1, struct dim3 p2, size_t p3, cudaSt
 	Backend_Enter_Instrumentation (2);
 	Probe_Cuda_ConfigureCall_Entry ();
 
-	cudaGetDevice (&devid);
-
 	strid = SearchCUDAStream (devid, p4);
 	if (strid == -1)
 	{
 		fprintf (stderr, "Error! Cannot determine stream index in cudaConfigureCall (p4=%p)\n", p4);
 		exit (-1);
 	}
+
+	_cudaLaunch_device = devid;
+	_cudaLaunch_stream = strid;
 
 	AddEventToStream (devid, strid, CUDACONFIGKERNEL_GPU_EV, EVT_BEGIN, 0, 0);
 
@@ -436,9 +432,11 @@ cudaError_t cudaConfigureCall (struct dim3 p1, struct dim3 p2, size_t p3, cudaSt
 cudaError_t cudaStreamCreate (cudaStream_t *p1)
 {
 	cudaError_t res;
+	int devid;
 
-	if (!CUDAInitialized)
-		InitializeCUDA();
+	cudaGetDevice (&devid);
+
+	InitializeCUDA (devid);
 
 	if (real_cudaStreamCreate == NULL)
 	{
@@ -459,8 +457,9 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 	cudaError_t res;
 	unsigned tag;
 
-	if (!CUDAInitialized)
-		InitializeCUDA();
+	cudaGetDevice (&devid);
+
+	InitializeCUDA (devid);
 
 	if (real_cudaMemcpyAsync == NULL)
 	{
@@ -478,8 +477,6 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
 		  0, p3, tag, tag);
 	}
-
-	cudaGetDevice (&devid);
 
 	strid = SearchCUDAStream (devid, p5);
 	if (strid == -1)
@@ -519,8 +516,9 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 	cudaError_t res;
 	unsigned tag;
 
-	if (!CUDAInitialized)
-		InitializeCUDA();
+	cudaGetDevice (&devid);
+
+	InitializeCUDA(devid);
 
 	if (real_cudaMemcpy == NULL)
 	{
@@ -538,8 +536,6 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
 		  0, p3, tag, tag);
 	}
-
-	cudaGetDevice (&devid);
 
 	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, p3, 0, 0);
@@ -577,8 +573,9 @@ cudaError_t cudaThreadSynchronize (void)
 	int i, devid;
 	cudaError_t res;
 
-	if (!CUDAInitialized)
-		InitializeCUDA();
+	cudaGetDevice (&devid);
+
+	InitializeCUDA (devid);
 
 	if (real_cudaThreadSynchronize == NULL)
 	{
@@ -590,8 +587,6 @@ cudaError_t cudaThreadSynchronize (void)
 	Probe_Cuda_ThreadBarrier_Entry ();
 
 	res = real_cudaThreadSynchronize ();
-
-	cudaGetDevice (&devid);
 
 	for (i = 0; i < devices[devid].nstreams; i++)
 	{
@@ -610,16 +605,15 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 	int strid, devid;
 	cudaError_t res;
 
-	if (!CUDAInitialized)
-		InitializeCUDA();
+	cudaGetDevice (&devid);
+
+	InitializeCUDA (devid);
 
 	if (real_cudaStreamSynchronize == NULL)
 	{
 		fprintf (stderr, "Unable to find cudaStreamSynchronize in DSOs!! Dying...\n");
 		exit (0);
 	}
-
-	cudaGetDevice (&devid);
 
 	strid = SearchCUDAStream (devid, p1);
 	if (strid == -1)
@@ -642,20 +636,3 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 	return res;
 }
 
-#if 0
-void Extrae_event_CUDA (cudaStream_t stream, unsigned type, unsigned value)
-{
-	unsigned thread;
-	int i, devid;
-
-	cudaGetDevice (&devid);
-
-	if ((i = SearchCUDAStream (devid, stream)) != -1)
-	{
-		Backend_Enter_Instrumentation (2);
-  	thread = devices[devid].Stream[i].threadid;
-		THREADS_TRACE_MISCEVENT(thread-1,thread,TIME,USER_EV,type,value);
-		Backend_Leave_Instrumentation ();
-  }
-}
-#endif
