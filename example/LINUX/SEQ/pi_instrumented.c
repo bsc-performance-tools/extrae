@@ -37,11 +37,15 @@ double pi_kernel (int n, double h)
 	double x;
 	int i;
 
+	Extrae_user_function (1);
+
 	for (i = 1; i <= n; i++)
 	{
 		x = h * ((double)i - 0.5);
 		tmp += (4.0 / (1.0 + x*x));
 	}
+
+	Extrae_user_function (0);
 
 	return tmp;
 }
