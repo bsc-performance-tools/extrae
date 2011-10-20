@@ -549,13 +549,13 @@ static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
 	char *list = (char*) xmlGetProp_env (rank, current_tag, TRACE_LIST);
-	if (list == NULL)
-		return;
+	if (list != NULL)
+	{
+		InstrumentUFroutines_XL (rank, list);
+		InstrumentUFroutines_GCC (rank, list);
 
-	InstrumentUFroutines_XL (rank, list);
-	InstrumentUFroutines_GCC (rank, list);
-
-	XML_FREE(list);
+		XML_FREE(list);
+	}
 
 	/* Parse all TAGs, and annotate them to use them later */
 	tag = current_tag->xmlChildrenNode;
