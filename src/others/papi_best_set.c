@@ -378,8 +378,8 @@ int main (int argc, char *argv[])
 	{
 		fprintf (stdout, "\n");
 		fprintf (stdout, "Sorry, no hardware counters were given\n");
-		fprintf (stdout, "Check %s/share/papi/utils/papi_avail or \n", PAPI_HOME);
-		fprintf (stdout, "      %s/share/papi/utils/papi_native_avail \n", PAPI_HOME);
+		fprintf (stdout, "Check %s/bin/papi_avail or \n", PAPI_HOME);
+		fprintf (stdout, "      %s/bin/papi_native_avail \n", PAPI_HOME);
 		fprintf (stdout, "to get a list from the available counters\n");
 		return -4;
 	}
