@@ -12,8 +12,4 @@ reducempit_CFLAGS = -I../.. -I../common
 
 papi_best_set_SOURCES = papi_best_set.c
 papi_best_set_CFLAGS  = -I. -I../common -DPAPI_HOME='"$(PAPI_HOME)"' @PAPI_CFLAGS@
-if IS_BG_MACHINE
-  papi_best_set_LDFLAGS = -all-static @PAPI_LDFLAGS@ @PAPI_LIBS@
-else
-  papi_best_set_LDFLAGS = @PAPI_LDFLAGS@ @PAPI_LIBS@
-endif
+papi_best_set_LDFLAGS = -all-static @PAPI_LDFLAGS@ @PAPI_LIBS@

@@ -318,6 +318,8 @@ int main (int argc, char *argv[])
 		return -3;
 	}
 
+	fprintf (stdout, "This binary was built using PAPI found in %s\n", PAPI_HOME);
+
 #if 0
 	fprintf (stdout, "\nNumber Hardware Counters : %d\n", PAPI_get_opt(PAPI_MAX_HWCTRS, NULL));
 	fprintf (stdout, "Max Multiplex Counters   : %d\n", PAPI_get_opt(PAPI_MAX_MPX_CTRS, NULL));
