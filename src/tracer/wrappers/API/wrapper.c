@@ -272,31 +272,6 @@ static unsigned get_current_NumOfThreads (void)
 }
 
 /******************************************************************************
- **      Function name : VerifyLicenseExecution (void)
- **      Author : HSG
- **      Description : Checks whether the license is ok on this node
- ******************************************************************************/
-/* Include license management */
-#if defined (LICENSE) && !defined (LICENSE_IN_MERGE)
-# include "license.c"
-#endif
-
-static void VerifyLicenseExecution (void)
-{
-#if defined(LICENSE) && !defined(LICENSE_IN_MERGE)
-	int res = verify_execution ();
-
-	lvalida = verify_execution ();
-	if (!lvalida)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Invalid license!?\n");
-		exit (-1);
-	}
-#endif
-}
-
-
-/******************************************************************************
  ***  read_environment_variables
  ***  Reads some environment variables. Returns 0 if the tracing was disabled,
  ***  otherwise, 1.
@@ -1287,9 +1262,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Allocate a bitmap to know which tasks are tracing */
 	Allocate_Task_Bitmap (world_size);
 
-	/* Check if the license is correct or not for this node/process */
-	VerifyLicenseExecution();
-
 	/* Just check we aren't running mpirun nor a shell! */
 	if (!(strcmp (PROGRAM_NAME, "mpirun")))
 		return FALSE;
@@ -1299,7 +1271,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 		return FALSE;
 
 #if defined(CUDA_SUPPORT)
-	cuda_tracing_init();
+	cuda_tracing_init(me);
 #endif
 
 	/* Obtain the number of runnable threads in this execution.

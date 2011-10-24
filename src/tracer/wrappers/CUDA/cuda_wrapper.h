@@ -30,7 +30,7 @@
 #ifndef OMP_WRAPPER_H_
 #define OMP_WRAPPER_H_
 
-void cuda_tracing_init (void);
+void cuda_tracing_init (int rank);
 
 #endif
 

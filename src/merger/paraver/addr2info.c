@@ -46,9 +46,6 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
-#ifdef HAVE_LIBGEN_H
-# include <libgen.h>
-#endif
 #if defined(USE_SYSTEM_CALL)
 # ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
@@ -512,7 +509,13 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 			}
 		}
 
-		if (strcmp (ADDR_UNRESOLVED, funcname) == 0 || strcmp (ADDR_UNRESOLVED, filename) == 0)
+		if (funcname == NULL || filename == NULL)
+		{
+			function_id = UNRESOLVED_ID;
+			line_id = UNRESOLVED_ID;
+			already_translated = TRUE;
+		}
+		else if (strcmp (ADDR_UNRESOLVED, funcname) == 0 || strcmp (ADDR_UNRESOLVED, filename) == 0)
 		{
 			function_id = UNRESOLVED_ID;
 			line_id = UNRESOLVED_ID;
@@ -771,8 +774,31 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 		}
 		else 
 		{
+			char buffer[1024];
+			unsigned count = 0;
+			char *ptr;
+			char *demangled = bfd_demangle (abfd, translated_funcname, 0);
+
+			if (demangled == NULL) /* If cannot demangle return original */
+				demangled = translated_funcname;
+
+			/* Remove CUDA prefixes */
+			if ((ptr = strstr (demangled, "__device_stub__Z")) != NULL)
+			{
+				ptr += strlen ("__device_stub__Z");
+				while (ptr[0]>='0' && ptr[0]<='9')
+				{
+					count = count * 10 + (ptr[0] - '0');
+					ptr++;
+				}
+				/* Add +1 in the demangled name for additional \0 in C */
+				snprintf (buffer, MIN(count+1,sizeof(buffer)), ptr);
+			}
+			else
+				sprintf (buffer, demangled);
+
 			resolved_function = TRUE;
-			COPY_STRING(translated_funcname, *funcname);
+			COPY_STRING(buffer, *funcname);
 		}
 
 		if (translated_filename == (char *)NULL) 
@@ -974,27 +1000,10 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 		if (Address2Info_Initialized())
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
-			for (i = 0; i < FuncTab->num_functions; i ++)
-			{
-				char buffer[1024];
-				unsigned count = 0;
-				char *ptr;
 
-				if ((ptr = strstr (FuncTab->function[i], "__device_stub__Z")) != NULL)
-				{
-					ptr += strlen ("__device_stub__Z");
-					while (ptr[0]>='0' && ptr[0]<='9')
-					{
-						count = count * 10 + (ptr[0] - '0');
-						ptr++;
-					}
-					/* Add +1 in the demangled name for additional \0 in C */
-					snprintf (buffer, MIN(count+1,sizeof(buffer)), ptr);
-					fprintf (pcf_fd, "%d   %s\n", i + 1, buffer);
-				}
-				else
-					fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
-			}
+			for (i = 0; i < FuncTab->num_functions; i ++)
+				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+
 			LET_SPACES(pcf_fd);
 		}
 

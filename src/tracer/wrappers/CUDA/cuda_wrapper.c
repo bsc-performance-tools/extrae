@@ -366,25 +366,31 @@ cudaError_t cudaLaunch (char *p1)
 {
 	cudaError_t res;
 
-	InitializeCUDA(_cudaLaunch_device);
+	if (real_cudaLaunch != NULL && mpitrace_on)
+	{
+		InitializeCUDA(_cudaLaunch_device);
 
-	if (real_cudaLaunch == NULL)
+		Backend_Enter_Instrumentation (2);
+		Probe_Cuda_Launch_Entry ((UINT64) p1);
+
+		AddEventToStream (_cudaLaunch_device, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, (UINT64) p1, 0, 0);
+
+		res = real_cudaLaunch (p1);
+
+		AddEventToStream (_cudaLaunch_device, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, EVT_END, 0, 0);
+
+		Probe_Cuda_Launch_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_cudaLaunch != NULL && !mpitrace_on)
+	{
+		res = real_cudaLaunch (p1);
+	}
+	else
 	{
 		fprintf (stderr, "Unable to find cudaLaunch in DSOs! Dying...\n");
 		exit (0);
 	}
-
-	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_Launch_Entry ((UINT64) p1);
-
-	AddEventToStream (_cudaLaunch_device, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, (UINT64) p1, 0, 0);
-
-	res = real_cudaLaunch (p1);
-
-	AddEventToStream (_cudaLaunch_device, _cudaLaunch_stream, CUDAKERNEL_GPU_EV, EVT_END, 0, 0);
-
-	Probe_Cuda_Launch_Exit ();
-	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -394,37 +400,43 @@ cudaError_t cudaConfigureCall (struct dim3 p1, struct dim3 p2, size_t p3, cudaSt
 	int strid, devid;
 	cudaError_t res;
 
-	cudaGetDevice (&devid);
+	if (real_cudaConfigureCall != NULL && mpitrace_on)
+	{
+		cudaGetDevice (&devid);
 
-	InitializeCUDA (devid);
+		InitializeCUDA (devid);
 
-	if (real_cudaConfigureCall == NULL)
+		Backend_Enter_Instrumentation (2);
+		Probe_Cuda_ConfigureCall_Entry ();
+
+		strid = SearchCUDAStream (devid, p4);
+		if (strid == -1)
+		{
+			fprintf (stderr, "Error! Cannot determine stream index in cudaConfigureCall (p4=%p)\n", p4);
+			exit (-1);
+		}
+
+		_cudaLaunch_device = devid;
+		_cudaLaunch_stream = strid;
+
+		AddEventToStream (devid, strid, CUDACONFIGKERNEL_GPU_EV, EVT_BEGIN, 0, 0);
+
+		res = real_cudaConfigureCall (p1, p2, p3, p4);
+
+		AddEventToStream (devid, strid, CUDACONFIGKERNEL_GPU_EV, EVT_END, 0, 0);
+
+		Probe_Cuda_ConfigureCall_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_cudaConfigureCall != NULL && !mpitrace_on)
+	{
+		res = real_cudaConfigureCall (p1, p2, p3, p4);
+	}
+	else
 	{
 		fprintf (stderr, "Unable to find cudaConfigureCall in DSOs!! Dying...\n");
 		exit (0);
 	}
-
-	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_ConfigureCall_Entry ();
-
-	strid = SearchCUDAStream (devid, p4);
-	if (strid == -1)
-	{
-		fprintf (stderr, "Error! Cannot determine stream index in cudaConfigureCall (p4=%p)\n", p4);
-		exit (-1);
-	}
-
-	_cudaLaunch_device = devid;
-	_cudaLaunch_stream = strid;
-
-	AddEventToStream (devid, strid, CUDACONFIGKERNEL_GPU_EV, EVT_BEGIN, 0, 0);
-
-	res = real_cudaConfigureCall (p1, p2, p3, p4);
-
-	AddEventToStream (devid, strid, CUDACONFIGKERNEL_GPU_EV, EVT_END, 0, 0);
-
-	Probe_Cuda_ConfigureCall_Exit ();
-	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -434,19 +446,25 @@ cudaError_t cudaStreamCreate (cudaStream_t *p1)
 	cudaError_t res;
 	int devid;
 
-	cudaGetDevice (&devid);
+	if (real_cudaStreamCreate != NULL && mpitrace_on)
+	{
+		cudaGetDevice (&devid);
 
-	InitializeCUDA (devid);
+		InitializeCUDA (devid);
 
-	if (real_cudaStreamCreate == NULL)
+		res = real_cudaStreamCreate (p1);
+
+		RegisterCUDAStream (*p1);
+	}
+	else if (real_cudaStreamCreate != NULL && !mpitrace_on)
+	{
+		res = real_cudaStreamCreate (p1);
+	}
+	else
 	{
 		fprintf (stderr, "Unable to find cudaStreamCreate in DSOs!! Dying...\n");
 		exit (0);
 	}
-
-	res = real_cudaStreamCreate (p1);
-
-	RegisterCUDAStream (*p1);
 
 	return res;
 }
@@ -457,55 +475,61 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 	cudaError_t res;
 	unsigned tag;
 
-	cudaGetDevice (&devid);
+	if (real_cudaMemcpyAsync != NULL && mpitrace_on)
+	{
+		cudaGetDevice (&devid);
 
-	InitializeCUDA (devid);
+		InitializeCUDA (devid);
 
-	if (real_cudaMemcpyAsync == NULL)
+		Backend_Enter_Instrumentation (2);
+		Probe_Cuda_Memcpy_Entry (p3);
+
+		tag = CUDA_tag_generator();
+
+		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
+		{
+			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
+			  0, p3, tag, tag);
+		}
+
+		strid = SearchCUDAStream (devid, p5);
+		if (strid == -1)
+		{
+			fprintf (stderr, "Error! Cannot determine stream index in cudaConfigureCall (p5=%p)\n", p5);
+			exit (-1);
+		}
+
+		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
+			AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, p3, 0, 0);
+		else
+			AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, p3, tag, p3);
+
+		res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
+
+		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyDeviceToDevice)
+			AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_END, tag, p3);
+		else
+			AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
+
+		Probe_Cuda_Memcpy_Exit ();
+
+		if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
+		{
+			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
+			  0, p3, tag, tag);
+		}
+
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_cudaMemcpyAsync != NULL && !mpitrace_on)
+	{
+		res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
+	}
+	else
 	{
 		fprintf (stderr, "Unable to find cudaMemcpyAsync in DSOs!! Dying...\n");
 		exit (0);
 	}
-
-	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_Memcpy_Entry (p3);
-
-	tag = CUDA_tag_generator();
-
-	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
-	{
-		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
-		  0, p3, tag, tag);
-	}
-
-	strid = SearchCUDAStream (devid, p5);
-	if (strid == -1)
-	{
-		fprintf (stderr, "Error! Cannot determine stream index in cudaConfigureCall (p5=%p)\n", p5);
-		exit (-1);
-	}
-
-	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
-		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, p3, 0, 0);
-	else
-		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, p3, tag, p3);
-
-	res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
-
-	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyDeviceToDevice)
-		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_END, tag, p3);
-	else
-		AddEventToStream (devid, strid, CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
-
-	Probe_Cuda_Memcpy_Exit ();
-
-	if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
-	{
-		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-		  0, p3, tag, tag);
-	}
-
-	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -516,55 +540,60 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 	cudaError_t res;
 	unsigned tag;
 
-	cudaGetDevice (&devid);
+	if (real_cudaMemcpy != NULL && mpitrace_on)
+	{
+		cudaGetDevice (&devid);
 
-	InitializeCUDA(devid);
+		InitializeCUDA(devid);
 
-	if (real_cudaMemcpy == NULL)
+		Backend_Enter_Instrumentation (2);
+		Probe_Cuda_Memcpy_Entry (p3);
+
+		tag = CUDA_tag_generator();
+
+		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
+		{
+			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
+			  0, p3, tag, tag);
+		}
+
+		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
+			AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, p3, 0, 0);
+		else
+			AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, p3, tag, p3);
+
+		res = real_cudaMemcpy (p1, p2, p3, p4);
+
+		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyDeviceToDevice)
+			AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_END, tag, p3);
+		else
+			AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
+
+		for (i = 0; i < devices[devid].nstreams; i++)
+		{
+			FlushStream (devid, i);
+			CUDASynchronizeStream (devid, i);
+		}
+
+		Probe_Cuda_Memcpy_Exit ();
+
+		if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
+		{
+			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
+			  0, p3, tag, tag);
+		}
+
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_cudaMemcpy != NULL && !mpitrace_on)
+	{
+		res = real_cudaMemcpy (p1, p2, p3, p4);
+	}
+	else
 	{
 		fprintf (stderr, "Unable to find cudaMemcpy in DSOs!! Dying...\n");
 		exit (0);
 	}
-
-	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_Memcpy_Entry (p3);
-
-	tag = CUDA_tag_generator();
-
-	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
-	{
-		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
-		  0, p3, tag, tag);
-	}
-
-	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
-		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, p3, 0, 0);
-	else
-		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, p3, tag, p3);
-
-	res = real_cudaMemcpy (p1, p2, p3, p4);
-
-	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyDeviceToDevice)
-		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_END, tag, p3);
-	else
-		AddEventToStream (devid, 0, CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
-
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		FlushStream (devid, i);
-		CUDASynchronizeStream (devid, i);
-	}
-
-	Probe_Cuda_Memcpy_Exit ();
-
-	if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
-	{
-		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-		  0, p3, tag, tag);
-	}
-
-	Backend_Leave_Instrumentation ();
-
 	return res;
 }
 
@@ -573,29 +602,35 @@ cudaError_t cudaThreadSynchronize (void)
 	int i, devid;
 	cudaError_t res;
 
-	cudaGetDevice (&devid);
+	if (real_cudaThreadSynchronize != NULL && mpitrace_on)
+	{
+		cudaGetDevice (&devid);
 
-	InitializeCUDA (devid);
+		InitializeCUDA (devid);
 
-	if (real_cudaThreadSynchronize == NULL)
+		Backend_Enter_Instrumentation (2);
+		Probe_Cuda_ThreadBarrier_Entry ();
+
+		res = real_cudaThreadSynchronize ();
+
+		for (i = 0; i < devices[devid].nstreams; i++)
+		{
+			FlushStream (devid, i);
+			CUDASynchronizeStream (devid, i);
+		}
+
+		Probe_Cuda_ThreadBarrier_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_cudaThreadSynchronize != NULL && !mpitrace_on)
+	{
+		res = real_cudaThreadSynchronize ();
+	}
+	else
 	{
 		fprintf (stderr, "Unable to find cudaThreadSynchronize in DSOs!! Dying...\n");
 		exit (0);
 	}
-
-	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_ThreadBarrier_Entry ();
-
-	res = real_cudaThreadSynchronize ();
-
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		FlushStream (devid, i);
-		CUDASynchronizeStream (devid, i);
-	}
-
-	Probe_Cuda_ThreadBarrier_Exit ();
-	Backend_Leave_Instrumentation ();
 
 	return res;
 }
@@ -605,33 +640,39 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 	int strid, devid;
 	cudaError_t res;
 
-	cudaGetDevice (&devid);
+	if (real_cudaStreamSynchronize != NULL && mpitrace_on)
+	{
+		cudaGetDevice (&devid);
 
-	InitializeCUDA (devid);
+		InitializeCUDA (devid);
 
-	if (real_cudaStreamSynchronize == NULL)
+		strid = SearchCUDAStream (devid, p1);
+		if (strid == -1)
+		{
+			fprintf (stderr, "Error! Cannot determine stream index in cudaStreamSynchronize (p1=%p)\n", p1);
+			exit (-1);
+		}
+
+		Backend_Enter_Instrumentation (2);
+		Probe_Cuda_StreamBarrier_Entry ();
+
+		res = real_cudaStreamSynchronize (p1);
+
+		FlushStream (devid, strid);
+		CUDASynchronizeStream (devid, strid);
+
+		Probe_Cuda_StreamBarrier_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_cudaStreamSynchronize != NULL && !mpitrace_on)
+	{
+		res = real_cudaStreamSynchronize (p1);
+	}
+	else
 	{
 		fprintf (stderr, "Unable to find cudaStreamSynchronize in DSOs!! Dying...\n");
 		exit (0);
 	}
-
-	strid = SearchCUDAStream (devid, p1);
-	if (strid == -1)
-	{
-		fprintf (stderr, "Error! Cannot determine stream index in cudaStreamSynchronize (p1=%p)\n", p1);
-		exit (-1);
-	}
-
-	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_StreamBarrier_Entry ();
-
-	res = real_cudaStreamSynchronize (p1);
-
-	FlushStream (devid, strid);
-	CUDASynchronizeStream (devid, strid);
-
-	Probe_Cuda_StreamBarrier_Exit ();
-	Backend_Leave_Instrumentation ();
 
 	return res;
 }
