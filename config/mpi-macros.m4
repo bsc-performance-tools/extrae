@@ -18,8 +18,12 @@ AC_DEFUN([AX_PROG_MPI],
          [specify where to find MPI libraries and includes]
       ),
       [mpi_paths=${withval}],
-      [mpi_paths=${mpi_default_paths}] dnl List of possible default paths
+      [mpi_paths="not_set"]
    )
+
+   if test "${mpi_paths}" = "not_set" ; then
+      AC_MSG_ERROR([You have not passed the location of the MPI library through --with-mpi option. Please, use --with-mpi to specify the location of the MPI installation on your system, or if you don't want that Extrae supports MPI instrumentation use --without-mpi instead.])
+   fi
 
    dnl Search for MPI installation
    AX_FIND_INSTALLATION([MPI], [$mpi_paths], [mpi])
