@@ -9,8 +9,17 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
          [Use POSIX clock (clock_gettime call) instead of low level timing routines (disabled by default)]
       ),
       [enable_posix_clock="${enableval}"],
-      [enable_posix_clock="no"]
+      [enable_posix_clock="not_set"]
    )
+
+   if test "${enable_posix_clock}" = "not_set" ; then
+      if test "${OperatingSystem}" = "linux" ; then
+         acpi_cpufreq=`/bin/lsmod | grep  ^acpi_cpufreq | wc -l`
+         if test "${acpi_cpufreq}" -ge 1 ; then
+            AC_MSG_ERROR([Error! It seems that your processor frequency changes on the fly through 'acpi_cpufreq' module. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+         fi
+      fi
+   fi
 
    if test "${enable_posix_clock}" = "yes"; then
 
