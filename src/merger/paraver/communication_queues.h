@@ -31,6 +31,9 @@
 #define _COMMUNICATION_QUEUES_H_
 
 #include <config.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #include "new-queue.h"
 #include "record.h"
 

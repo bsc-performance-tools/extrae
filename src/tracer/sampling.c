@@ -99,8 +99,13 @@ static int SamplingClockType;
 static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 {
 	caddr_t pc;
+#if defined(OS_FREEBSD)
+	ucontext_t *uc = (ucontext_t *) context;
+	mcontext_t *ucm = (mcontext_t *) &uc->uc_mcontext;
+#else
 	struct ucontext *uc = (struct ucontext *) context;
 	struct sigcontext *sc = (struct sigcontext *) &uc->uc_mcontext;
+#endif
 
 	UNREFERENCED_PARAMETER(sig);
 	UNREFERENCED_PARAMETER(siginfo);
@@ -117,7 +122,15 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 # elif defined(ARCH_PPC)
 	pc = (caddr_t)sc->regs->nip;
 # else
-#  error "Don't know how to get the PC for this architecutre in Linux!"
+#  error "Don't know how to get the PC for this architecture in Linux!"
+# endif
+#elif defined(OS_FREEBSD)
+# if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)
+	pc = (caddr_t)ucm->mc_eip;
+# elif defined (ARCH_IA32) && defined(ARCH_IA32_x64)
+	pc = (caddr_t)ucm->mc_rip;
+# else
+#  error "Don't know how to get the PC for this architecture in FreeBSD!"
 # endif
 #else
 # error "Don't know how to get the PC for this OS!"
