@@ -22,12 +22,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/example/LINUX/SEQ/pi.c $
+ | @last_commit: $Date: 2011-06-29 10:44:44 +0200 (dc, 29 jun 2011) $
+ | @version:     $Revision: 687 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include <stdio.h>
 #include <math.h>
+
+#include "extrae_user_events.h"
 
 double pi_kernel (int n, double h)
 {
@@ -35,11 +37,15 @@ double pi_kernel (int n, double h)
 	double x;
 	int i;
 
+	Extrae_user_function (1);
+
 	for (i = 1; i <= n; i++)
 	{
 		x = h * ((double)i - 0.5);
 		tmp += (4.0 / (1.0 + x*x));
 	}
+
+	Extrae_user_function (0);
 
 	return tmp;
 }
@@ -50,9 +56,16 @@ int main(int argc, char **argv)
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area, x;
 
+	Extrae_init();
+
 	h = 1.0 / (double) n;
+
+	Extrae_event (1000, 1);
 	area = pi_kernel (n, h);
+	Extrae_event (1000, 0);
 	pi = h * area;
 
 	printf("pi is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
+
+	Extrae_fini();
 }
