@@ -30,8 +30,6 @@
 #include <omp.h>
 #include <math.h>
 
-#include "extrae_user_events.h"
-
 int main(int argc, char **argv)
 {
 	int i;

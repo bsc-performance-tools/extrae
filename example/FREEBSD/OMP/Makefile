@@ -6,14 +6,13 @@ CFLAGS = -O -fopenmp -g -I $(EXTRAE_HOME)/include
 CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace `xml2-config --libs` -L $(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_libexecinfo_libs@ @sub_POSIX_CLOCK@
 FFLAGS = -O -openmp -g3
 
-all: pi_c
+all: pi pi_instrumented
 
-pi_c:	pi.c
-	$(CC) $(CFLAGS) pi.c -o pi_c $(CLIBS)
+pi:	pi.c
+	$(CC) $(CFLAGS) pi.c -o pi 
 
-pi_f:	pi.f
-	$(FC) $(CFLAGS) pi.f -o pi_f $(LFLAGS)
+pi_instrumented:	pi_instrumented.c
+	$(CC) $(CFLAGS) pi_instrumented.c -o pi_instrumented $(CLIBS)
 
 clean:
-	rm -f TRACE*.mpit pi_c pi_f
-
+	rm -fr TRACE.sym TRACE.mpits set-0 pi pi_instrumented

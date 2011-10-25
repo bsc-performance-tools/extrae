@@ -29,8 +29,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "extrae_user_events.h"
-
 double pi_kernel (int n, double h)
 {
 	double tmp = 0;
