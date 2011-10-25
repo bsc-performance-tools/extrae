@@ -179,9 +179,9 @@ static void InitializeCUDA (int devid)
 			char _hostname[HOST_NAME_MAX];
 
 			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, _hostname);
+				sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, _hostname);
 			else
-				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, "unknown-host");
+				sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, "unknown-host");
 			Extrae_set_thread_name (devices[devid].Stream[0].threadid, _threadname);
 		}
 
