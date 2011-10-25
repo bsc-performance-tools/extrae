@@ -74,10 +74,10 @@ on a csh-based shell will do the work. Then copy the default XML configuration f
                cp ${EXTRAE_HOME}/share/example/MPI/extrae.xml .
 \end{verbatim}
 
-If needed, set the application environment variables as usual (like {\tt OMP\_NUM\_THREADS}, for example), and finally launch the application using the {\tt \$\{EXTRAE\_HOME\}/bin/ompitrace} instrumenter like:
+If needed, set the application environment variables as usual (like {\tt OMP\_NUM\_THREADS}, for example), and finally launch the application using the {\tt \$\{EXTRAE\_HOME\}/bin/extrae} instrumenter like:
 
 \begin{verbatim}
-               ${EXTRAE_HOME}/bin/ompitrace -config extrae.xml <program>
+               ${EXTRAE_HOME}/bin/extrae -config extrae.xml <program>
 \end{verbatim}
 
 where {\tt <program>} is the application binary.

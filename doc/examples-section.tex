@@ -16,10 +16,10 @@ export LD_LIBRARY_PATH=${EXTRAE_HOME}/lib
 source ${EXTRAE_HOME}/etc/extrae.sh
 
 ## Run the desired program
-${EXTRAE_HOME}/bin/ompitrace -config extrae.xml $*
+${EXTRAE_HOME}/bin/extrae -config extrae.xml $*
 \end{Verbatim}
 
-A similar script can be found in the share/example/SEQ directory in your tracing package directory. Just tune the {\tt EXTRAE\_HOME} environment variable and make the script executable (using {\tt chmod u+x}). You can either pass the XML configuration file through the {\tt EXTRAE\_CONFIG\_FILE} if you prefer instead. Line no. 5 is responsible for loading all the environment variables needed for the DynInst launcher (called ompitrace) that is invoked in line 8.
+A similar script can be found in the share/example/SEQ directory in your tracing package directory. Just tune the {\tt EXTRAE\_HOME} environment variable and make the script executable (using {\tt chmod u+x}). You can either pass the XML configuration file through the {\tt EXTRAE\_CONFIG\_FILE} if you prefer instead. Line no. 5 is responsible for loading all the environment variables needed for the DynInst launcher (called extrae) that is invoked in line 8.
 
 In fact, there are two examples provided in share/example/SEQ, one for static (or manual) instrumentation and another for the DynInst-based instrumentation. When using the DynInst instrumentation, the user may add new routines to instrument using the existing {\tt function-list} file that is already pointed by the {\tt extrae.xml} configuration file. The way to specify the routines to instrument is add as many lines with the name of every routine to be instrumented.
 
@@ -53,9 +53,9 @@ source ${EXTRAE_HOME}/etc/extrae.sh
 
 # Only show output for task 0, others task send output to /dev/null
 if test "${SLURM_PROCID}" == "0" ; then
-  ${EXTRAE_HOME}/bin/ompitrace -config ../extrae.xml $@ > job.out 2> job.err
+  ${EXTRAE_HOME}/bin/extrae -config ../extrae.xml $@ > job.out 2> job.err
 else
-  ${EXTRAE_HOME}/bin/ompitrace -config ../extrae.xml $@ > /dev/null 2> /dev/null
+  ${EXTRAE_HOME}/bin/extrae -config ../extrae.xml $@ > /dev/null 2> /dev/null
 fi
 \end{Verbatim}
 
