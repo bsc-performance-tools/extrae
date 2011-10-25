@@ -45,6 +45,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <unistd.h>
 #endif
 
+#include "taskid.h"
 #include "threadinfo.h"
 #include "wrapper.h"
 #include "trace_macros.h"
@@ -336,11 +337,10 @@ static void FlushStream (int devid, int streamid)
 			if (devices[devid].Stream[streamid].tag[i] > 0)
 				THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,
 				 (devices[devid].Stream[streamid].types[i]==EVT_END)?USER_RECV_EV:USER_SEND_EV,
-				 0,
+				 TaskID_Get(),
 				 devices[devid].Stream[streamid].size[i],
 				 devices[devid].Stream[streamid].tag[i],
 				 devices[devid].Stream[streamid].tag[i]);
-				/* FIX, unprepared for MPI apps! */
 	}
 	devices[devid].Stream[streamid].nevents = 0;
 }
@@ -517,7 +517,7 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 		{
 			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
-			  0, p3, tag, tag);
+			  TaskID_Get(), p3, tag, tag);
 		}
 
 		strid = SearchCUDAStream (devid, p5);
@@ -544,7 +544,7 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4
 		if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
 		{
 			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-			  0, p3, tag, tag);
+			  TaskID_Get(), p3, tag, tag);
 		}
 
 		Backend_Leave_Instrumentation ();
@@ -582,7 +582,7 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 		{
 			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
-			  0, p3, tag, tag);
+			  TaskID_Get(), p3, tag, tag);
 		}
 
 		if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
@@ -608,7 +608,7 @@ cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind_t p4)
 		if (p4 == cudaMemcpyDeviceToHost || p4 == cudaMemcpyHostToHost)
 		{
 			TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV,
-			  0, p3, tag, tag);
+			  TaskID_Get(), p3, tag, tag);
 		}
 
 		Backend_Leave_Instrumentation ();
