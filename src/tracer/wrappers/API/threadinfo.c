@@ -1,3 +1,4 @@
+
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
  *                                   Extrae                                  *
@@ -22,31 +23,58 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/API/wrapper.c $
+ | @last_commit: $Date: 2011-10-20 10:49:48 +0200 (dj, 20 oct 2011) $
+ | @version:     $Revision: 795 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef CPUNODE_H
-#define CPUNODE_H
+static char UNUSED rcsid[] = "$Id: wrapper.c 795 2011-10-20 08:49:48Z harald $";
 
-#include <config.h>
-
-#include "mpi2out.h" /* per input_t */
-
-struct Pair_NodeCPU
-{
-	struct input_t **files;
-	int CPUs;
-};
-
-struct Pair_NodeCPU *AssignCPUNode(int nfiles, struct input_t *files);
-int GenerateROWfile (char *name, struct Pair_NodeCPU *info);
-
-int ComparaTraces (struct input_t *t1, struct input_t *t2);
-int SortByHost (const void *t1, const void *t2);
-int SortByOrder (const void *t1, const void *t2);
-int SortBySize (const void *t1, const void *t2);
-
-
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+
+#include "threadinfo.h"
+
+static Extrae_thread_info_t *thread_info = NULL;
+
+void Extrae_allocate_thread_info (unsigned nthreads)
+{
+	unsigned u;
+
+	thread_info = (Extrae_thread_info_t*) realloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
+
+	for (u = 0; u < nthreads; u++)
+		Extrae_set_thread_name (u, "");
+}
+
+void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads)
+{
+	unsigned u;
+
+	thread_info = (Extrae_thread_info_t*) realloc (thread_info, nthreads*sizeof (Extrae_thread_info_t));
+
+	for (u = prevnthreads; u < nthreads; u++)
+		Extrae_set_thread_name (u, "");
+}
+
+void Extrae_set_thread_name (unsigned thread, char *name)
+{
+	/* Clear space */
+	memset (thread_info[thread].ThreadName, 0, THREAD_INFO_NAME_LEN);
+
+	/* Copy name */
+	snprintf (thread_info[thread].ThreadName, THREAD_INFO_NAME_LEN, name);
+
+	/* Set last char to empty */
+	thread_info[thread].ThreadName[THREAD_INFO_NAME_LEN-1] = (char) 0;
+}
+
+char *Extrae_get_thread_name (unsigned thread)
+{
+	return thread_info[thread].ThreadName;
+}

@@ -22,31 +22,26 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/API/wrapper.h $
+ | @last_commit: $Date: 2011-10-14 11:11:40 +0200 (dv, 14 oct 2011) $
+ | @version:     $Revision: 784 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef CPUNODE_H
-#define CPUNODE_H
+#ifndef __THREADINFO_H_INCLUDED_
+#define __THREADINFO_H_INCLUDED_
 
-#include <config.h>
+#define THREAD_INFO_NAME_LEN 256
 
-#include "mpi2out.h" /* per input_t */
-
-struct Pair_NodeCPU
+typedef struct Extrae_thread_info
 {
-	struct input_t **files;
-	int CPUs;
-};
+	char ThreadName[THREAD_INFO_NAME_LEN];
+} Extrae_thread_info_t;
 
-struct Pair_NodeCPU *AssignCPUNode(int nfiles, struct input_t *files);
-int GenerateROWfile (char *name, struct Pair_NodeCPU *info);
-
-int ComparaTraces (struct input_t *t1, struct input_t *t2);
-int SortByHost (const void *t1, const void *t2);
-int SortByOrder (const void *t1, const void *t2);
-int SortBySize (const void *t1, const void *t2);
+void Extrae_allocate_thread_info (unsigned nthreads);
+void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads);
+void Extrae_set_thread_name (unsigned thread, char *name);
+char *Extrae_get_thread_name (unsigned thread);
 
 
-#endif
+#endif /* __THREADINFO_H_INCLUDED_ */
+

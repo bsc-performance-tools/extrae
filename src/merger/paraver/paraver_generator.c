@@ -683,7 +683,7 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
 	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 	NumNodes = 0;
-	while (info[NumNodes].NodeName != NULL)
+	while (info[NumNodes].files != NULL)
 		NumNodes++;
 
 	sprintf (Header, "%d(", NumNodes);
@@ -695,7 +695,7 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
 		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 		NumNodes = 1;
-		while (info[NumNodes].NodeName != NULL)
+		while (info[NumNodes].files != NULL)
 		{
 			sprintf (Header,",%d", info[NumNodes].CPUs);
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));

@@ -62,6 +62,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_wrapper.h"
 #include "pacx_interface.h"
 #include "mode.h"
+#include "threadinfo.h"
 
 #include <mpi.h>
 #include "mpif.h"
@@ -526,24 +527,31 @@ void Gather_Nodes_Info (void)
  ******************************************************************************/
 static int Generate_Task_File_List (int n_tasks, char **node_list)
 {
-	int ierror, val = getpid ();
-	int i, filedes, ret, thid;
-	pid_t *buffer_pids = NULL;
+	int ierror;
+	int i, filedes, thid;
+	unsigned ret;
 	char tmpname[1024];
-	int *buffer_threads = NULL;
-	int nthreads = Backend_getMaximumOfThreads();
+	unsigned *buffer = NULL;
+	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
 
 	if (TASKID == 0)
 	{
-		buffer_pids = (pid_t *) malloc (sizeof(pid_t) * NumOfTasks);
-		buffer_threads = (int*) malloc (sizeof(int) * NumOfTasks);
+		buffer = (unsigned *) malloc (sizeof(unsigned) * NumOfTasks * 3);
+		/* we store pid, nthreads and taskid on each position */
+
+		if (buffer == NULL)
+		{
+			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer MPITS info\n");
+			exit (-1);
+		}
 	}
 
-	/* Share PID and number of threads of each PACX task */
-	ierror = PPACX_Gather (&val, 1, PACX_INT, buffer_pids, 1, PACX_INT, 0, PACX_COMM_WORLD);
-	PACX_CHECK(ierror, PPACX_Gather);
+	tmp[0] = TASKID; 
+	tmp[1] = getpid();
+	tmp[2] = Backend_getMaximumOfThreads();
 
-	ierror = PPACX_Gather (&nthreads, 1, PACX_INT, buffer_threads, 1, PACX_INT, 0, PACX_COMM_WORLD);
+	/* Share PID and number of threads of each PACX task */
+	ierror = PPACX_Gather (&tmp, 3, PACX_UNSIGNED, buffer, 3, PACX_UNSIGNED, 0, PACX_COMM_WORLD);
 	PACX_CHECK(ierror, PPACX_Gather);
 
 	if (TASKID == 0)
@@ -556,29 +564,88 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 
 		for (i = 0; i < NumOfTasks; i++)
 		{
-			char tmp_line[2048];
+			char tmpline[2048];
+			unsigned TID = buffer[i*3+0];
+			unsigned PID = buffer[i*3+1];
+			unsigned NTHREADS = buffer[i*3+2];
 
-			for (thid = 0; thid < buffer_threads[i]; thid++)
+			if (i == 0)
 			{
-				FileName_PTT(tmpname, Get_FinalDir(thid), appl_name, buffer_pids[i], i, thid, EXT_MPIT);
-
-				sprintf (tmp_line, "%s on %s\n", tmpname, node_list[i]);
-				ret = write (filedes, tmp_line, strlen (tmp_line));
-				if (ret != strlen (tmp_line))
+				/* If Im processing MASTER, I know my threads and their names */
+				for (thid = 0; thid < NTHREADS; thid++)
 				{
-					close (filedes);
-					return -1;
+					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
+					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], Extrae_get_thread_name(thid));
+					ret = write (filedes, tmpline, strlen (tmpline));
+					if (ret != strlen (tmpline))
+					{
+						close (filedes);
+						return -1;
+					}
 				}
+			}
+			else
+			{
+				/* If Im not processing MASTER, I have to ask for threads and their names */
+
+				int foo;
+				PACX_Status s;
+				char *tmp = (char*)malloc (NTHREADS*THREAD_INFO_NAME_LEN*sizeof(char));
+				if (tmp == NULL)
+				{
+					fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
+					exit (-1);
+				}
+
+				/* Ask to slave */
+				PPACX_Send (&foo, 1, PACX_INT, TID, 123456, PACX_COMM_WORLD);
+
+				/* Send master info */
+				PPACX_Recv (tmp, NTHREADS*THREAD_INFO_NAME_LEN, PACX_CHAR, TID, 123457,
+				  PACX_COMM_WORLD, &s);
+
+				for (thid = 0; thid < NTHREADS; thid++)
+				{
+					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
+					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], &tmp[thid*THREAD_INFO_NAME_LEN]);
+					ret = write (filedes, tmpline, strlen (tmpline));
+					if (ret != strlen (tmpline))
+					{
+						close (filedes);
+						return -1;
+					}
+				}
+				free (tmp);
 			}
 		}
 		close (filedes);
 	}
+	else
+	{
+		PACX_Status s;
+		int foo;
+
+		char *tmp = (char*)malloc (Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char));
+		if (tmp == NULL)
+		{
+			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
+			exit (-1);
+		}
+		for (i = 0; i < Backend_getMaximumOfThreads(); i++)
+			memcpy (&tmp[i*THREAD_INFO_NAME_LEN], Extrae_get_thread_name(i), THREAD_INFO_NAME_LEN);
+
+		/* Wait for master to ask */
+		PACX_Recv (&foo, 1, PACX_INT, 0, 123456, PACX_COMM_WORLD, &s);
+
+		/* Send master info */
+		PACX_Send (tmp, Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN,
+		  PACX_CHAR, 0, 123457, PACX_COMM_WORLD);
+
+		free (tmp);
+	}
 
 	if (TASKID == 0)
-	{
-		free (buffer_threads);
-		free (buffer_pids);
-	}
+		free (buffer);
 
 	return 0;
 }

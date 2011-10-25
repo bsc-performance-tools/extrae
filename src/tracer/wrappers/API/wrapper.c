@@ -1361,6 +1361,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Initialize the clock */
 	CLOCK_INIT (maximum_NumOfThreads);
 
+	/* Allocate thread info structure */
+	Extrae_allocate_thread_info (maximum_NumOfThreads);
+
 	/* Configure the tracing subsystem */
 #if defined(HAVE_XML2)
 	if (config_file != NULL)
@@ -1463,6 +1466,9 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		/* Reallocate and start reading counters for these threads */
 		HWC_Restart_Counters (maximum_NumOfThreads, new_num_threads);
 #endif
+
+		/* Allocate thread info structure */
+		Extrae_reallocate_thread_info (maximum_NumOfThreads, new_num_threads);
 
 		maximum_NumOfThreads = current_NumOfThreads = new_num_threads;
 	}

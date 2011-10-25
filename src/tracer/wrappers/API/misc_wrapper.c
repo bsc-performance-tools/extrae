@@ -73,6 +73,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "extrae_user_events.h"
 #include "misc_wrapper.h"
 #include "common_hwc.h"
+#include "threadinfo.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -274,7 +275,7 @@ static void Generate_Task_File_List (void)
 	{
 		FileName_PTT(tmpname, Get_FinalDir(0), appl_name, getpid(), 0, thid, EXT_MPIT);
 
-		sprintf (tmp_line, "%s on %s\n", tmpname, hostname);
+		sprintf (tmp_line, "%s on %s named %s\n", tmpname, hostname, Extrae_get_thread_name(thid));
 		ret = write (filedes, tmp_line, strlen (tmp_line));
 		if (ret != (ssize_t) strlen (tmp_line))
 		{

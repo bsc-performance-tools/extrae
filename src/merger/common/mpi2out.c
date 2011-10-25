@@ -141,8 +141,8 @@ void Help (const char *ProgName)
  ***  Adds an MPIT file into the required structures.
  ******************************************************************************/
 
-static void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles,
-	int taskid)
+static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptask,
+	int *cfiles, int taskid)
 {
 	int name_length;
 	int task;
@@ -163,15 +163,13 @@ static void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles,
 
 	if (node != NULL)
 	{
-		InputTraces[nTraces].node = (char *) malloc (strlen (node) + 1);
+		InputTraces[nTraces].node = strdup (node);
 		if (InputTraces[nTraces].node == NULL)
 		{
 			fprintf (stderr, "mpi2prv: Error cannot obtain memory for NODE information!\n");
 			fflush (stderr);
 			exit (1);
 		}
-		else
-			strcpy (InputTraces[nTraces].node, node);
 	}
 	else 
 		InputTraces[nTraces].node = "(unknown)";
@@ -216,11 +214,43 @@ static void Process_MPIT_File (char *file, char *node, int *cptask, int *cfiles,
 		tmp_name++;
 	}
 	InputTraces[nTraces].thread = thread;
-
 	InputTraces[nTraces].task++;
 	InputTraces[nTraces].thread++;
 	InputTraces[nTraces].ptask = cur_ptask;
 	InputTraces[nTraces].order = nTraces;
+
+	if (thdname != NULL)
+	{
+		InputTraces[nTraces].threadname = strdup (thdname);
+		if (InputTraces[nTraces].threadname == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Error cannot obtain memory for THREAD NAME information!\n");
+			fflush (stderr);
+			exit (1);
+		}
+	}
+	else
+	{
+		int res;
+
+		/* 7+4 for THREAD + (ptask + three dots) THREAD 1.1.1 */
+		InputTraces[nTraces].threadname = malloc (sizeof(char)*(10+DIGITS_TASK+DIGITS_THREAD+1));
+		if (InputTraces[nTraces].threadname == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Error cannot obtain memory for THREAD NAME information!\n");
+			fflush (stderr);
+			exit (1);
+		}
+		res = sprintf (InputTraces[nTraces].threadname, "THREAD %d.%d.%d",
+		  InputTraces[nTraces].ptask, InputTraces[nTraces].task,
+		  InputTraces[nTraces].thread);
+		if (res >= 10+DIGITS_TASK+DIGITS_THREAD+1)
+		{
+			fprintf (stderr, "mpi2prv: Error! Thread name exceeds buffer size!\n");
+			fflush (stderr);
+			exit (1);
+		}
+	}
 
 	nTraces++;
 	cur_files++;
@@ -268,6 +298,7 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 	FILE *fd = fopen (file, "r");
 	char mybuffer[4096];
 	char host[2048];
+	char thdname[2048];
 	char path[2048];
 
 	if (fd == NULL)
@@ -285,7 +316,9 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 		{
 			char *stripped;
 
-			info = sscanf (mybuffer, "%s on %s", path, host);
+			path[0] = host[0] = thdname[0] = (char) 0;
+
+			info = sscanf (mybuffer, "%s on %s named %s", path, host, thdname);
 			stripped = strip (path);
 
 			/* If mode is not forced, check first if the absolute path exists,
@@ -306,22 +339,22 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 							char *directory = dirname (duplicate);
 
 							sprintf (dir_file, "%s%s", directory, stripped_basename);
-							Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles, taskid);
+							Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
 
 							free (duplicate);
 						}
 						else
-							Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles, taskid);
+							Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
 					}
 					else
 						fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
 				}
 				else
-					Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles, taskid);
+					Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
 			}
 			else if (opentype == FileOpen_Absolute)
 			{
-				Process_MPIT_File (stripped, (info==2)?host:NULL, cptask, cfiles, taskid);
+				Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
 			}
 			else if (opentype == FileOpen_Relative)
 			{
@@ -337,12 +370,12 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 						char *directory = dirname (file);
 
 						sprintf (dir_file, "%s%s", directory, stripped_basename);
-						Process_MPIT_File (dir_file, (info==2)?host:NULL, cptask, cfiles, taskid);
+						Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
 
 						free (duplicate);
 					}
 					else
-						Process_MPIT_File (&stripped_basename[1], (info==2)?host:NULL, cptask, cfiles, taskid);
+						Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
 				}
 				else
 					fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
@@ -721,7 +754,7 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			continue;
 		}
 		else
-			Process_MPIT_File ((char *) (argv[CurArg]), NULL, &cur_ptask, &cur_files, rank);
+			Process_MPIT_File ((char *) (argv[CurArg]), NULL, NULL, &cur_ptask, &cur_files, rank);
 	}
 	set_option_merge_NumApplications (cur_ptask);
 

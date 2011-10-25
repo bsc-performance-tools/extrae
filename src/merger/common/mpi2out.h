@@ -51,6 +51,7 @@ typedef struct input_t
 	int fd;
 	char *name;
 	char *node;
+	char *threadname;
 }
 input_t;
 

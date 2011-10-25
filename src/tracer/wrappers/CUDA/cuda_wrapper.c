@@ -41,7 +41,11 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
+#include "threadinfo.h"
 #include "wrapper.h"
 #include "trace_macros.h"
 #include "cuda_probe.h"
@@ -168,6 +172,18 @@ static void InitializeCUDA (int devid)
 		devices[devid].Stream[0].stream = NULL;
 		devices[devid].Stream[0].nevents = 0;
 
+		/* Set thread name */
+		{
+			char _threadname[THREAD_INFO_NAME_LEN];
+			char _hostname[HOST_NAME_MAX];
+
+			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
+				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, _hostname);
+			else
+				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, "unknown-host");
+			Extrae_set_thread_name (devices[devid].Stream[0].threadid, _threadname);
+		}
+
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
 		if (cudaEventCreateWithFlags (&(devices[devid].Stream[0].device_reference_time), CU_EVENT_BLOCKING_SYNC) != 0)
@@ -220,6 +236,18 @@ static void RegisterCUDAStream (cudaStream_t stream)
 		devices[devid].Stream[i].threadid = Backend_getNumberOfThreads()-1;
 		devices[devid].Stream[i].stream = stream;
 		devices[devid].Stream[i].nevents = 0;
+
+		/* Set thread name */
+		{
+			char _threadname[THREAD_INFO_NAME_LEN];
+			char _hostname[HOST_NAME_MAX];
+
+			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
+				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, _hostname);
+			else
+				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, "unknown-host");
+			Extrae_set_thread_name (devices[devid].Stream[i].threadid, _threadname);
+		}
 
 		/* Create an event record and process it through the stream! */	
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */

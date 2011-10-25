@@ -162,30 +162,42 @@ struct Pair_NodeCPU *AssignCPUNode(int nfiles, struct input_t *files)
 	previousNode = "";
 	NodeID = 0;
 
+	/* Copy file information into Node information */
 	for (i = 0; i < nfiles; i++)
 	{	
 		if (strcmp (previousNode, files[i].node) != 0)
 		{
-			result[NodeID].NodeName = (char*) malloc ((strlen(files[i].node)+1)*sizeof(char));
-			if (result[NodeID].NodeName == NULL)
+			result[NodeID].CPUs = 1;
+			result[NodeID].files = (struct input_t**) malloc (1 * sizeof(struct input_t*));
+			if (result[NodeID].files == NULL)
 			{
-				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold Node-CPU information\n");
+				fprintf (stderr, "mpi2prv: Error! Cannot allocate memory to hold Node-CPU information\n");
 				exit (0);
 			}
-			strncpy (result[NodeID].NodeName, files[i].node, strlen(files[i].node));
-			result[NodeID].NodeName[strlen(files[i].node)] = (char) 0;
-			result[NodeID].CPUs = 1;
+			result[NodeID].files[0] = &files[i];
 
-			NodeID++;
 			previousNode = files[i].node;
+			NodeID++;
 		}
 		else
-			result[NodeID-1].CPUs++;
+		{
+			int prevNode = NodeID - 1;
+
+			result[prevNode].CPUs++;
+			result[prevNode].files = (struct input_t**) realloc (
+			  result[prevNode].files, result[prevNode].CPUs * sizeof(struct input_t*));
+			if (result[prevNode].files == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error cannot re-allocate memory to hold Node-CPU information\n");
+				exit (0);
+			}
+			result[prevNode].files[result[prevNode].CPUs-1] = &files[i];
+		}
 	}
 
 	/* The last node will have 0 CPUs and will be named 'null' */
 	result[NodeCount].CPUs = 0;
-	result[NodeCount].NodeName = NULL;
+	result[NodeCount].files = NULL;
 
 	/* ReSort MPIT files per "original" basis" */
 	qsort (files, nfiles, sizeof(input_t), SortByOrder);
@@ -207,7 +219,7 @@ int GenerateROWfile (char *name, struct Pair_NodeCPU *info)
 
 	/* Compute how many CPUs and NODEs */
 	numNodes = numCPUs = 0;
-	while (info[numNodes].NodeName != NULL)
+	while (info[numNodes].files != NULL)
 	{
 		numCPUs += info[numNodes].CPUs;
 		numNodes ++;
@@ -226,16 +238,25 @@ int GenerateROWfile (char *name, struct Pair_NodeCPU *info)
 	/* K will be our "Global CPU" counter */	
 	k = 1;
 	for (i = 0; i < numNodes; i++)
+	{
+		char *node = info[i].files[0]->node;
 		for (j = 0; j < info[i].CPUs; j++)
 		{
-			fprintf (fd, FORMAT, k, info[i].NodeName);
+			fprintf (fd, FORMAT, k, node);
 			fprintf (fd, "\n");
 			k++;
 		}
+	}
 
-	fprintf (fd, "\n\nLEVEL NODE SIZE %d\n", numNodes);
+	fprintf (fd, "\nLEVEL NODE SIZE %d\n", numNodes);
 	for (i = 0; i < numNodes; i++)
-		fprintf (fd, "%s\n", info[i].NodeName);
+		fprintf (fd, "%s\n", info[i].files[0]->node);
+
+	fprintf (fd, "\nLEVEL THREAD SIZE %d\n", numCPUs);
+	for (i = 0; i < numNodes; i++)
+		for (j = 0; j < info[i].CPUs; j++) 
+			fprintf (fd, "%s\n", info[i].files[j]->threadname);
+
 	fclose (fd);
 
 	return 0;

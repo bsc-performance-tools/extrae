@@ -64,6 +64,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_wrapper.h"
 #include "mpi_interface.h"
 #include "mode.h"
+#include "threadinfo.h"
 
 #include <mpi.h>
 #include "mpif.h"
@@ -544,8 +545,16 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
 
 	if (TASKID == 0)
+	{
 		buffer = (unsigned *) malloc (sizeof(unsigned) * NumOfTasks * 3);
 		/* we store pid, nthreads and taskid on each position */
+
+		if (buffer == NULL)
+		{
+			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer MPITS info\n");
+			exit (-1);
+		}
+	}
 
 	tmp[0] = TASKID; 
 	tmp[1] = getpid();
@@ -570,19 +579,79 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 			unsigned PID = buffer[i*3+1];
 			unsigned NTHREADS = buffer[i*3+2];
 
-			for (thid = 0; thid < NTHREADS; thid++)
+			if (i == 0)
 			{
-				FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
-				sprintf (tmpline, "%s on %s\n", tmpname, node_list[i]);
-				ret = write (filedes, tmpline, strlen (tmpline));
-				if (ret != strlen (tmpline))
+				/* If Im processing MASTER, I know my threads and their names */
+				for (thid = 0; thid < NTHREADS; thid++)
 				{
-					close (filedes);
-					return -1;
+					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
+					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], Extrae_get_thread_name(thid));
+					ret = write (filedes, tmpline, strlen (tmpline));
+					if (ret != strlen (tmpline))
+					{
+						close (filedes);
+						return -1;
+					}
 				}
+			}
+			else
+			{
+				/* If Im not processing MASTER, I have to ask for threads and their names */
+
+				int foo;
+				MPI_Status s;
+				char *tmp = (char*)malloc (NTHREADS*THREAD_INFO_NAME_LEN*sizeof(char));
+				if (tmp == NULL)
+				{
+					fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
+					exit (-1);
+				}
+
+				/* Ask to slave */
+				PMPI_Send (&foo, 1, MPI_INT, TID, 123456, MPI_COMM_WORLD);
+
+				/* Send master info */
+				PMPI_Recv (tmp, NTHREADS*THREAD_INFO_NAME_LEN, MPI_CHAR, TID, 123457,
+				  MPI_COMM_WORLD, &s);
+
+				for (thid = 0; thid < NTHREADS; thid++)
+				{
+					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
+					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], &tmp[thid*THREAD_INFO_NAME_LEN]);
+					ret = write (filedes, tmpline, strlen (tmpline));
+					if (ret != strlen (tmpline))
+					{
+						close (filedes);
+						return -1;
+					}
+				}
+				free (tmp);
 			}
 		}
 		close (filedes);
+	}
+	else
+	{
+		MPI_Status s;
+		int foo;
+
+		char *tmp = (char*)malloc (Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN*sizeof(char));
+		if (tmp == NULL)
+		{
+			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
+			exit (-1);
+		}
+		for (i = 0; i < Backend_getMaximumOfThreads(); i++)
+			memcpy (&tmp[i*THREAD_INFO_NAME_LEN], Extrae_get_thread_name(i), THREAD_INFO_NAME_LEN);
+
+		/* Wait for master to ask */
+		PMPI_Recv (&foo, 1, MPI_INT, 0, 123456, MPI_COMM_WORLD, &s);
+
+		/* Send master info */
+		PMPI_Send (tmp, Backend_getMaximumOfThreads()*THREAD_INFO_NAME_LEN,
+		  MPI_CHAR, 0, 123457, MPI_COMM_WORLD);
+
+		free (tmp);
 	}
 
 	if (TASKID == 0)

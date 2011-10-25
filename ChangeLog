@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 25Oct2011 Adding thread names, starting by CUDA
  + 19Oct2011 Support for MPI+OpenMP applications using Dyninst launcher
  * 17Oct2011 Translation of @ of CUDA kernels into kernel names
  * 14Oct2011 Updating PACX instrumentation
