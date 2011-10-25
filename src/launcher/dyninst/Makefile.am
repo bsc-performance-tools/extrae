@@ -4,7 +4,7 @@ bin_PROGRAMS = extrae
 
 noinst_PROGRAMS = load-module
 
-extrae_SOURCES = ompitrace.C \
+extrae_SOURCES = extrae.C \
  ompSnippets.C ompSnippets.h \
  apiSnippets.C apiSnippets.h \
  mpiSnippets.C mpiSnippets.h \
