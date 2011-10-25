@@ -41,7 +41,7 @@ class ApplicationType
 {
 	public:
 	enum MPI_type_t {MPI_C, MPI_Fortran_0u, MPI_Fortran_1u, MPI_Fortran_2u, MPI_Fortran_ucase};
-	enum OMP_rte_t  {Unknown, Intel_v81, Intel_v91, IBM_v16, GNU_v42};
+	enum OMP_rte_t  {Unknown, Intel_v8_1, Intel_v9_1, Intel_v11, IBM_v16, GNU_v42};
 
 	void detectApplicationType (BPatch_image *appImage);
 	void dumpApplicationType (void);

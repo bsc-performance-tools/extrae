@@ -37,22 +37,32 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include <iostream>
 
+/* For Intel 8.x - 9.x (maybe 10.x?) */
 #define INTEL_PARLOOP_RTNS     ".*_[0-9]+__par_loop[0-9]+.*"
 #define INTEL_PARRGN_RTNS      ".*_[0-9]+__par_region[0-9]+.*"
+
+/* For Intel 11.x - 12.x */
+#define INTEL_KMPV_RTNS        "___kmpv_zero.*_[0-9]+"
+                                
 
 string ApplicationType::TranslatePFToUF (string PF, OMP_rte_t type)
 {
 	string result;
 
-	if (type == Intel_v81 || type == Intel_v91)
+	if (type == Intel_v8_1 || type == Intel_v9_1)
 	{
 		string tmp1 = PF.substr (0, PF.rfind("__par_"));
 		string tmp2 = tmp1.substr (0, tmp1.rfind("_"));
 
-		if (type == Intel_v81)
+		if (type == Intel_v8_1)
 			result = tmp2.substr (1, tmp2.length()-1);
 		else 
 			result = tmp2.substr (2, tmp2.length()-1);
+	}
+	else if (type == Intel_v11)
+	{
+		string prefix = "___kmpv_zero";
+		result = PF.substr (prefix.length(), PF.rfind ("_"));
 	}
 	else if (type == IBM_v16)
 	{
@@ -84,16 +94,31 @@ ApplicationType::OMP_rte_t ApplicationType::checkIntelOpenMPRuntime (BPatch_imag
 	{
 		char functionName[1024];
 		found_funcs[0]->getName (functionName, 1024);
-		string routinev81 = TranslatePFToUF (functionName, Intel_v81);
-		string routinev91 = TranslatePFToUF (functionName, Intel_v91);
+		string routinev8_1 = TranslatePFToUF (functionName, Intel_v8_1);
+		string routinev9_1 = TranslatePFToUF (functionName, Intel_v9_1);
 
-		if (appImage->findFunction (routinev81.c_str(), found_funcs) != NULL)
+		if (appImage->findFunction (routinev8_1.c_str(), found_funcs) != NULL)
 			if (found_funcs.size() > 0)
-				return Intel_v81;
+				return Intel_v8_1;
 
-		if (appImage->findFunction (routinev91.c_str(), found_funcs) != NULL)
+		if (appImage->findFunction (routinev9_1.c_str(), found_funcs) != NULL)
 			if (found_funcs.size() > 0)
-				return Intel_v91;
+				return Intel_v9_1;
+
+	}
+
+	/* Check if there's any OpenMP parallel routine in the binary */
+	appImage->findFunction (INTEL_KMPV_RTNS, found_funcs);
+
+	if (found_funcs.size() > 0)
+	{
+		char functionName[1024];
+		found_funcs[0]->getName (functionName, 1024);
+		string routinev11 = TranslatePFToUF (functionName, Intel_v11);
+
+		if (appImage->findFunction (routinev11.c_str(), found_funcs) != NULL)
+			if (found_funcs.size() > 0)
+				return Intel_v11;
 	}
 
 	return Unknown;
@@ -159,10 +184,12 @@ void ApplicationType::dumpApplicationType (void)
 			cout << "(GNU >= 4.2) ";
 		else if (OpenMP_runtime == IBM_v16)
 			cout << "(IBM >= 1.6) ";
-		else if (OpenMP_runtime == Intel_v81)
-			cout << "(Intel 8.1) ";
-		else if (OpenMP_runtime == Intel_v91)
-			cout << "(Intel >= 9.1) ";
+		else if (OpenMP_runtime == Intel_v8_1)
+			cout << "(Intel 8.x) ";
+		else if (OpenMP_runtime == Intel_v9_1)
+			cout << "(Intel 9.x or 10.x) ";
+		else if (OpenMP_runtime == Intel_v11)
+			cout << "(Intel >= 11.x) ";
 		else
 			cout << "(Unknown) ";
 	}
@@ -189,11 +216,16 @@ bool ApplicationType::isMangledOpenMProutine (string name)
 {
 	bool result = false;
 
-	if (OpenMP_runtime == Intel_v81 || OpenMP_runtime == Intel_v91)
+	if (OpenMP_runtime == Intel_v8_1 || OpenMP_runtime == Intel_v9_1)
 	{
 		result = name.find ("__par_loop") != string::npos
 		         || 
 		         name.find ("__par_region") != string::npos;
+	}
+	else if (OpenMP_runtime == Intel_v11)
+	{
+		/* routines are prefixed with ___kmpv_zero */
+		result = name.find ("___kmpv_zero") == 0;
 	}
 	else if (OpenMP_runtime == IBM_v16)
 	{

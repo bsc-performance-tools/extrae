@@ -128,8 +128,9 @@ void InsertOMPSnippets (bool locks, BPatch_image *appImage, BPatch_process *appP
 void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appImage,
 	BPatch_process *appProcess)
 {
-	if (at->get_OpenMP_rte() == ApplicationType::Intel_v81 ||
-	    at->get_OpenMP_rte() == ApplicationType::Intel_v91)
+	if (at->get_OpenMP_rte() == ApplicationType::Intel_v8_1 ||
+	    at->get_OpenMP_rte() == ApplicationType::Intel_v9_1 ||
+	    at->get_OpenMP_rte() == ApplicationType::Intel_v11)
 	{
 		wrapRoutine (appImage, appProcess, "__kmpc_fork_call",
 		  "Probe_OpenMP_ParRegion_Entry", "Probe_OpenMP_ParRegion_Exit");
