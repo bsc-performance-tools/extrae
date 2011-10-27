@@ -1307,8 +1307,12 @@ AC_DEFUN([AX_PROG_DYNINST],
          [specify where to find DynInst libraries and includes]
       ),
       [dyninst_paths="${withval}"],
-      [dyninst_paths="no"]
+      [dyninst_paths="not_set"]
    )
+
+   if test "${dyninst_paths}" = "not_set" ; then
+      AC_MSG_ERROR([Attention! You haven't specified the location for DynInst, DynInst is a library for instrumenting binaries and allows Extrae to modify the application to analyze without having to modify the application sources. To use DynInst you have to pass --with-dyninst with the location of the DynInst installation and also --with-dwarf with the location of the libdwarf package. You can download Dyninst from http://www.dyninst.org. If you are not interested on DynInst, simply pass --without-dyninst to the configure parameters.])
+   fi
 
    if test "${libdwarf_found}" != "yes" -a "${dyninst_paths}" != "no" ; then
       AC_MSG_ERROR([Cannot add DynInst support without libdwarf. Check for --with-dwarf option])

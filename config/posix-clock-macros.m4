@@ -16,11 +16,11 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
       if test "${OperatingSystem}" = "linux" ; then
          acpi_cpufreq=`/bin/lsmod | grep  ^acpi_cpufreq | wc -l`
          if test "${acpi_cpufreq}" -ge 1 ; then
-            AC_MSG_ERROR([Error! It seems that your processor frequency changes on the fly through 'acpi_cpufreq' module. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            AC_MSG_ERROR([Attention! It seems that your processor frequency changes on the fly through 'acpi_cpufreq' module. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
          fi
          upowerd=`ps -efa | grep upowerd | grep -v grep | wc -l`
          if test "${upowerd}" -ge 1 ; then
-            AC_MSG_ERROR([Error! It seems that your processor frequency changes on the fly through 'upowerd'. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            AC_MSG_ERROR([Attention! It seems that your processor frequency changes on the fly through 'upowerd'. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
          fi
       fi
    fi
