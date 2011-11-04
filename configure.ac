@@ -20,6 +20,8 @@ AC_CANONICAL_SYSTEM
 
 # Write defines in the output header file for the architecture and operating system
 case "${target_cpu}" in
+  armv7l)    Architecture="arm"
+             AC_DEFINE([ARCH_ARM], [1], [Define if architecture is ARM]) ;;
   i*86|x86_64|amd64)
              Architecture="ia32"
              AC_DEFINE([ARCH_IA32], [1], [Define if architecture is IA32])
@@ -286,11 +288,12 @@ AC_ARG_ENABLE(merge-in-trace,
 )
 AM_CONDITIONAL(WANT_MERGE_IN_TRACE, test "${enable_merge_in_trace=}" = "yes" )
 
-if test "${OperatingSystem}" = "linux" ; then
-  if test "${Architecture}" = "ia64" -o "${target_cpu}" = "amd64" -o "${target_cpu}" = "x86_64" ; then
-    AX_CHECK_UNWIND
-  fi
-fi
+#if test "${OperatingSystem}" = "linux" ; then
+#  if test "${Architecture}" = "ia64" -o "${target_cpu}" = "amd64" -o "${target_cpu}" = "x86_64" ; then
+#    AX_CHECK_UNWIND
+#  fi
+#fi
+AX_CHECK_UNWIND
 AM_CONDITIONAL(HAVE_UNWIND, test "${libunwind_works}" = "yes" )
 
 AX_CHECK_LIBZ
@@ -300,9 +303,7 @@ AX_PROG_MX
 AX_PROG_LIBDWARF
 AX_PROG_LIBEXECINFO
 AX_PROG_DYNINST
-AX_PROG_PAPI
-AX_PROG_PMAPI
-AX_PROG_COUNTERS
+AX_PROG_COUNTERS # Check for PAPI and/or PMAPI
 AX_PROG_MRNET
 
 AX_CHECK_LOAD_BALANCING

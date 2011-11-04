@@ -687,6 +687,19 @@ AC_DEFUN([AX_PROG_MX],
 # ----------------
 AC_DEFUN([AX_PROG_COUNTERS],
 [
+   AC_REQUIRE([AX_PROG_PMAPI])
+   AC_REQUIRE([AX_PROG_PAPI])
+
+   if test "${papi_paths}" = "not_set" ; then
+      if test "${target_os}" = "aix" ; then
+         if test "${enable_pmapi}" = "not_set" ; then
+            AC_MSG_ERROR([Attention! You're not indicating where to locate PAPI and if you want to use PMAPI. PAPI and PMAPI (specifically in AIX) allows gathering hardware performance counters. These counters are very useful to increase the richness of the final analysis. Please, use either --with-papi=DIR where DIR is the base location of the PAPI package or use --without-papi if you don't want to use PAPI in this installation. If you want to use PMAPI, please use --enable-pmapi, otherwise use --disable-pmapi.])
+         fi
+      else
+         AC_MSG_ERROR([Attention! You're not indicating where to locate PAPI. PAPI allows gathering hardware performance counters. These counters are very useful to increase the richness of the final analysis. Please, use either --with-papi=DIR where DIR is the base location of the PAPI package or use --without-papi if you don't want to use PAPI in this installation.])
+      fi
+   fi
+
    if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" ; then
       AC_DEFINE([USE_HARDWARE_COUNTERS], 1, [Enable HWC support])
       use_hw_counters="1"
@@ -711,7 +724,7 @@ AC_DEFUN([AX_PROG_PMAPI],
          [Enable PMAPI library to gather CPU performance counters]
       ),
       [enable_pmapi="${enableval}"],
-      [enable_pmapi="no"]
+      [enable_pmapi="not_set"]
    )
    PMAPI_ENABLED="no"
 
@@ -742,16 +755,15 @@ AC_DEFUN([AX_PROG_PAPI],
 [
    AX_FLAGS_SAVE()
 
-   papi_default_paths="no"
-
    AC_ARG_WITH(papi,
       AC_HELP_STRING(
          [--with-papi@<:@=DIR@:>@],
          [specify where to find PAPI libraries and includes]
       ),
       [papi_paths="${withval}"],
-      [papi_paths=${papi_default_paths}] dnl List of possible default paths
+      [papi_paths="not_set"] dnl List of possible default paths
    )
+
    AC_ARG_ENABLE(sampling,
       AC_HELP_STRING(
          [--enable-sampling],
@@ -840,7 +852,7 @@ AC_DEFUN([AX_PROG_PAPI],
          fi
       fi
    else
-      if test "${papi_paths}" != "no" ; then
+      if test "${papi_paths}" != "no" -a "${papi_paths}" != "not_set"; then
          AC_MSG_ERROR([Error PAPI was not found and was enabled at configure time!])
       fi
    fi
