@@ -121,6 +121,8 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	pc = (caddr_t)sc->sc_ip;
 # elif defined(ARCH_PPC)
 	pc = (caddr_t)sc->regs->nip;
+# elif defined(ARCH_ARM)
+	pc = (caddr_t)sc->arm_pc;
 # else
 #  error "Don't know how to get the PC for this architecture in Linux!"
 # endif
