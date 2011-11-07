@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 07Nov2011 Extrae 2.2.0 is released!
  * 07Nov2011 Made --with-unwind, --with-papi, --with-mpi, --with-dyninst mandatory.
              Can be avoided through the respective --without.
  * 07Nov2011 Autodetect whether --enable-posix-clock is needed.
