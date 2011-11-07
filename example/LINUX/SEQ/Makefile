@@ -1,7 +1,9 @@
 EXTRAE_HOME=@sub_PREFIXDIR@
+UNWIND_HOME=@sub_UNWIND_HOME@
+
 CC = gcc
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include
-LFLAGS = -L $(EXTRAE_HOME)/lib -lseqtrace -lxml2   
+LFLAGS = -L $(EXTRAE_HOME)/lib -lseqtrace -lxml2 -L$(UNWIND_HOME)/lib @sub_UNWIND_LIBS@
 
 targets: pi pi_instrumented
 
