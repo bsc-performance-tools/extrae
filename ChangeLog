@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 07Nov2011 Made --with-unwind, --with-papi, --with-mpi, --with-dyninst mandatory.
+             Can be avoided through the respective --without.
+ * 07Nov2011 Autodetect whether --enable-posix-clock is needed.
  * 25Oct2011 Adding thread names, starting by CUDA
  + 19Oct2011 Support for MPI+OpenMP applications using Dyninst launcher
  * 17Oct2011 Translation of @ of CUDA kernels into kernel names
