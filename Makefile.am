@@ -239,6 +239,8 @@ endif
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_UNWIND_HOME@" "${UNWIND_HOME}" $(DESTDIR)$(datadir)/example
+	./substitute-all $(SED) "@sub_UNWIND_LIBS@" "${UNWIND_LIBS}" $(DESTDIR)$(datadir)/example
 if WANT_MERGE_IN_TRACE
 	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(DESTDIR)$(datadir)/example

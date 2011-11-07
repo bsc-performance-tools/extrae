@@ -562,6 +562,12 @@ AC_DEFUN([AX_PROG_BFD],
          AX_FLAGS_RESTORE()
       fi
    fi
+
+   if test "${unwind_paths}" != "no"; then
+      if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
+         AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind however either BFD or LIBERY are not found/installed. Please make sure that the binutils package is installed in its development form. The latest source can be downloaded from http://www.gnu.org/software/binutils])
+      fi
+   fi
 ])
 
 
@@ -1095,8 +1101,12 @@ AC_DEFUN([AX_CHECK_UNWIND],
          [specify where to find Unwind libraries and includes]
       ),
       [unwind_paths=${withval}],
-      [unwind_paths="no"] dnl List of possible default paths
+      [unwind_paths="not_set"]
    )
+
+   if test "${unwind_paths}" = "not_set" ; then
+      AC_MSG_ERROR([You haven't specified the location of the libunwind through the --with-unwind parameter. The libunwind library allows Extrae gathering information of call-site locations at OpenMP and MPI calls, at sample points or whenever the user wants to collect them through the Extrae API. This data is very useful to attribute to a certain region of code any performance issue. You can download libunwind from: https://savannah.nongnu.org/projects/libunwind - download version 1.0.1 or higher. If you don't want to use libunwind, you can pass --without-unwind.])
+   fi
 
    if test "${unwind_paths}" != "no" ; then
 
