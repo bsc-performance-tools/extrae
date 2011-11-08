@@ -1288,7 +1288,7 @@ AC_DEFUN([AX_PROG_LIBDWARF],
    AC_ARG_WITH(dwarf,
       AC_HELP_STRING(
          [--with-dwarf=@<:@=DIR@:>@],
-         [specify where to find dwarf libraries and includes]
+         [specify where to find libdwarf libraries and includes]
       ),
       [dwarf_paths="${withval}"],
       [dwarf_paths="no"]
@@ -1317,10 +1317,49 @@ AC_DEFUN([AX_PROG_LIBDWARF],
    AX_FLAGS_RESTORE()
 ])
 
+
+# AX_PROG_LIBELF
+# -------------
+AC_DEFUN([AX_PROG_LIBELF],
+[
+   libelf_found="no"
+   AX_FLAGS_SAVE()
+
+   AC_ARG_WITH(elf,
+      AC_HELP_STRING(
+         [--with-elf=@<:@=DIR@:>@],
+         [specify where to find libelf libraries and includes]
+      ),
+      [elf_paths="${withval}"],
+      [elf_paths="no"]
+   )
+
+   if test "${elf_paths}" != "no" ; then
+      AX_FIND_INSTALLATION([ELF], [${elf_paths}], [elf])
+      if test "${ELF_INSTALLED}" = "yes" ; then
+        if test -f ${ELF_LIBSDIR}/libelf.a -o \
+                -f ${ELF_LIBSDIR}/libelf.so ; then
+           if test -f ${ELF_HOME}/include/libelf.h ; then
+              libelf_found="yes"
+           else
+              AC_MSG_ERROR([Cannot find ELF header files in ${elf_paths}/include])
+           fi
+        else
+           AC_MSG_ERROR([Cannot find ELF library files in ${elf_paths}/lib])
+        fi
+      fi
+   fi
+
+   AX_FLAGS_RESTORE()
+])
+
 # AX_PROG_DYNINST
 # -------------
 AC_DEFUN([AX_PROG_DYNINST],
 [
+   AC_REQUIRE([AX_PROG_PMAPI])
+   AC_REQUIRE([AX_PROG_PAPI])
+
    AX_FLAGS_SAVE()
 
    AC_ARG_WITH(dyninst,
@@ -1333,7 +1372,7 @@ AC_DEFUN([AX_PROG_DYNINST],
    )
 
    if test "${dyninst_paths}" = "not_set" ; then
-      AC_MSG_ERROR([Attention! You haven't specified the location for DynInst, DynInst is a library for instrumenting binaries and allows Extrae to modify the application to analyze without having to modify the application sources. To use DynInst you have to pass --with-dyninst with the location of the DynInst installation and also --with-dwarf with the location of the libdwarf package. You can download Dyninst from http://www.dyninst.org. If you are not interested on DynInst, simply pass --without-dyninst to the configure parameters.])
+      AC_MSG_ERROR([Attention! You haven't specified the location for DynInst, DynInst is a library for instrumenting binaries and allows Extrae to modify the application to analyze without having to modify the application sources. To use DynInst you have to pass --with-dyninst with the location of the DynInst installation and also --with-dwarf with the location of the libdwarf package and --with-elf with the location of the libelf package. You can download Dyninst from http://www.dyninst.org. If you are not interested on DynInst, simply pass --without-dyninst to the configure parameters.])
    fi
 
    if test "${libdwarf_found}" != "yes" -a "${dyninst_paths}" != "no" ; then
