@@ -27,8 +27,8 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef OMP_WRAPPER_H_
-#define OMP_WRAPPER_H_
+#ifndef CUDA_WRAPPER_H_
+#define CUDA_WRAPPER_H_
 
 void cuda_tracing_init (int rank);
 
