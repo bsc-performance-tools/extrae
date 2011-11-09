@@ -180,8 +180,8 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 {
 #ifdef SPU_USES_WRITE
 
-	char trace_tmp[TRACE_FILE];
-	char trace[TRACE_FILE];
+	char trace_tmp[512];
+	char trace[512];
 	int linear_thread = Backend_getMaximumOfThreads();
 	int i;
 	
@@ -204,7 +204,7 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 	}
 
 #else
-	char trace[TRACE_FILE];
+	char trace[512];
 	int fd, res, i;
 	int linear_thread = Backend_getMaximumOfThreads();
 
@@ -309,7 +309,7 @@ int Extrae_CELL_init (int spus, spe_context_ptr_t * spe_id)
 	/* Initialize the tracing on the SPU side */
 	for (i = 0; i < spus; i++)
 	{
-		char trace[TRACE_FILE];
+		char trace[512];
 		int descriptor;
 		unsigned long long addr_buffer = 0, addr_counter = 0;
 
