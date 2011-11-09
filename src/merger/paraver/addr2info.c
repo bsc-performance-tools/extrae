@@ -777,7 +777,11 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 			char buffer[1024];
 			unsigned count = 0;
 			char *ptr;
+#if !defined(IS_BG_MACHINE)
 			char *demangled = bfd_demangle (abfd, translated_funcname, 0);
+#else
+			char *demangled = NULL;
+#endif
 
 			if (demangled == NULL) /* If cannot demangle return original */
 				demangled = translated_funcname;
