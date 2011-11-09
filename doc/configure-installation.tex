@@ -75,7 +75,8 @@ All commands given here are given as an example to configure and install the pac
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-papi=/bgsys/local/papi/papi-c-3.9.0 --without-libz\\--with-bfd=/bgsys/local/gcc/gnu-linux\_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux\_4.3.2/powerpc-bgp-linux}}
+\graybox{{\tt ./configure --prefix=/homec/jzam11/jzam1128/aplic/extrae/2.2.0 --with-papi=/homec/jzam11/jzam1128/aplic/papi/4.1.2.1 --with-bfd=/bgsys/local/gcc/gnu-linux\_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux\_4.3.2/powerpc-bgp-linux --with-mpi=/bgsys/drivers/ppcfloor/comm --without-unwind --without-dyninst}}
+
 
 Build and installation commands:
 
@@ -90,7 +91,7 @@ Some extensions of \TRACE do not work properly (nanos, SMPss and OpenMP) on AIX.
 
 Configuration command:
 
-\graybox{{\tt CC=xlc CXX=xlC ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --with-binary-type=32}}
+\graybox{{\tt CC=xlc CXX=xlC ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --with-binary-type=32 --without-unwind --enable-pmapi --without-dyninst}}
 
 Build and installation commands:
 
@@ -101,7 +102,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64}}
+\graybox{{\tt ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64 --without-unwind --enable-pmapi --without-dyninst}}
 
 Build and installation commands:
 
@@ -126,7 +127,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=32}}
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=32 --with-unwind=\$HOME/aplic/unwind/1.0.1/32 --with-elf=/usr --with-dwarf=/usr --with-dyninst=\$HOME/aplic/dyninst/7.0.1/32}}
 
 Build and installation commands:
 
@@ -137,7 +138,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64}}
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64  --with-unwind=\$HOME/aplic/unwind/1.0.1/64 --with-elf=/usr --with-dwarf=/usr --with-dyninst=\$HOME/aplic/dyninst/7.0.1/64}}
 
 Build and installation commands:
 
@@ -148,16 +149,16 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-pacx=/home/harald/aplic/pacx/07.2009-openmpi}}
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-pacx=/home/harald/aplic/pacx/07.2009-openmpi --without-papi --without-unwind --without-dyninst}}
 
 Build and installation commands:
 
 \graybox{{\tt make\\
 make install}}
 
-\subsubsection{Compiling using default binary type, using OpenMPI and DynInst}
+\subsubsection{Compiling using default binary type, using OpenMPI, DynInst and libunwind}
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-dyninst=/home/harald/dyninst/7.0.1 --with-dwarf=/usr}}
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-dyninst=/home/harald/dyninst/7.0.1 --with-dwarf=/usr --with-elf=/usr --with-unwind=/home/harald/aplic/unwind/1.0.1 --without-papi}}
 
 Build and installation commands:
 
@@ -171,6 +172,15 @@ Notice the "--disable-xmltest". As the backends programs cannot be run in the fr
 Configuration command:
 
 \graybox{{\tt CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' ./configure --with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu --with-binary-type=64 --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1\_gnu4.1.2 --disable-xmltest --with-bfd=/opt/cray/cce/7.1.5/cray-binutils --with-liberty=/opt/cray/cce/7.1.5/cray-binutils --enable-sampling --enable-shared=no --prefix=PREFIX --with-papi=/opt/xt-tools/papi/3.7.2/v23 --with-unwind=/ccs/home/user/lib}}
+
+Build and installation commands:
+
+\graybox{{\tt make\\
+make install}}
+
+\subsubsection{Compiling on a Power CELL processor using Linux}
+
+\graybox{{\tt ./configure --with-mpi=/opt/openmpi/ppc32 --without-unwind --without-dyninst --without-papi --prefix=/gpfs/data/apps/CEPBATOOLS/extrae/2.2.0/openmpi/32 --with-binary-type=32}}
 
 Build and installation commands:
 
