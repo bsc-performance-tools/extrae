@@ -96,10 +96,10 @@ struct CUDAdevices_t
 	int initialized;
 };
 
-static unsigned __last_tag = 0;
+static unsigned __last_tag = 0xC0DA; /* Fixed tag */
 static unsigned CUDA_tag_generator (void)
 {
-	return ++__last_tag;
+	return __last_tag;
 }
 
 static struct CUDAdevices_t *devices = NULL;
