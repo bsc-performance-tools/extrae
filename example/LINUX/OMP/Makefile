@@ -4,7 +4,7 @@ UNWIND_HOME = @sub_UNWIND_HOME@
 
 CC = gcc
 CFLAGS = -O -fopenmp -g -I$(EXTRAE_HOME)/include
-CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 -L $(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ -L$(UNWIND_HOME)/lib @sub_UNWIND_LIBS@ @sub_POSIX_CLOCK@
+CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ -L$(UNWIND_HOME)/lib @sub_UNWIND_LIBS@ @sub_POSIX_CLOCK@
 
 all: pi pi_instrumented
 
