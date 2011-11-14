@@ -30,7 +30,7 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
-#if (defined(OS_LINUX) || defined(OS_FREEBSD) || defined(OS_SOLARIS)) && defined(ARCH_IA32)
+#if (defined(OS_LINUX) || defined(OS_FREEBSD) || defined (OS_DARWIN) || defined(OS_SOLARIS)) && defined(ARCH_IA32)
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -39,7 +39,7 @@ static char UNUSED rcsid[] = "$Id$";
 # ifdef HAVE_STRING_H
 #  include <string.h>
 # endif
-#elif defined(OS_FREEBSD)
+#elif defined(OS_FREEBSD) || defined(OS_DARWIN)
 # ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 # endif
@@ -59,7 +59,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 static unsigned long long proc_timebase_MHz;
 
-#if defined(OS_FREEBSD) || defined (OS_LINUX)
+#if defined(OS_FREEBSD) || defined (OS_LINUX) || defined (OS_DARWIN)
 static __inline unsigned long long ia32_cputime (void)
 {
 #if defined(ARCH_IA32_x64)
@@ -68,7 +68,7 @@ static __inline unsigned long long ia32_cputime (void)
 	unsigned long long cycles;
 #endif
 
-#if defined(OS_FREEBSD)
+#if defined(OS_FREEBSD) || defined (OS_DARWIN)
 	/* 0x0f 0x31 is the bytecode of RDTSC instruction */
 # if defined (ARCH_IA32_x64)
   /* We cannot use "=A", since this would use %rax on x86_64 */
@@ -119,13 +119,17 @@ void ia32_Initialize (void)
   res = sscanf (match, "cpu MHz    : %lf", &temp );
 
   proc_timebase_MHz = (res == 1) ? temp : 0;
-#elif defined(OS_FREEBSD)
+#elif defined(OS_FREEBSD) || defined(OS_DARWIN)
 	int mib[3];
 	int result;
 	size_t len = 2;
 	unsigned long long tsc_value;
 
+#if defined(OS_FREEBSD)
   result = sysctlnametomib ("machdep.tsc_freq", mib, &len);
+#elif defined (OS_DARWIN)
+  result = sysctlnametomib ("hw.cpufrequency", mib, &len);
+#endif
   if (result == -1)
   {
     perror ("sysctlnametomib");
@@ -143,7 +147,7 @@ void ia32_Initialize (void)
   proc_timebase_MHz = (unsigned long long) (tsc_value / 1000000);
 #endif
 }
-#endif /* OS_FREEBSD || OS_LINUX */
+#endif /* OS_FREEBSD || OS_LINUX || OS_DARWIN */
 
 void ia32_Initialize_thread (void)
 {
@@ -152,7 +156,7 @@ void ia32_Initialize_thread (void)
 
 iotimer_t ia32_getTime (void)
 {
-#if defined(OS_FREEBSD) || defined(OS_LINUX)
+#if defined(OS_FREEBSD) || defined(OS_LINUX) || defined(OS_DARWIN)
   return (ia32_cputime() * 1000) / proc_timebase_MHz; 
 #elif defined (OS_SOLARIS)
   return gethrtime();

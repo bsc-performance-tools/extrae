@@ -108,9 +108,6 @@ static char UNUSED rcsid[] = "$Id$";
 # include "HardwareCounters.h"
 #endif
 
-struct ptask_t *obj_table;
-unsigned int num_ptasks;
-
 int **EnabledTasks = NULL;
 unsigned long long **EnabledTasks_time = NULL;
 struct address_collector_t CollectedAddresses;
@@ -143,105 +140,6 @@ void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task)
   }
 }
 #endif
-
-/******************************************************************************
- ***  InitializeObjectTable
- ******************************************************************************/
-static void InitializeObjectTable (int num_appl, struct input_t * files,
-	unsigned long nfiles)
-{
-	unsigned int ptask, task, thread, i, j;
-	unsigned int maxtasks = 0, maxthreads = 0;
-
-	/* This is not the perfect way to allocate everything, but it's
-	  good enough for runs where all the ptasks (usually 1), have the
-	  same number of threads */
-	num_ptasks = num_appl;
-	for (i = 0; i < nfiles; i++)
-	{
-		maxtasks = MAX(files[i].task, maxtasks);
-		maxthreads = MAX(files[i].thread, maxthreads);
-	}
-
-	obj_table = (struct ptask_t*) malloc (sizeof(struct ptask_t)*num_ptasks);
-	if (NULL == obj_table)
-	{
-		fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d ptasks!\n", num_ptasks);
-		fflush (stderr);
-		exit (-1);
-	}
-	for (i = 0; i < num_ptasks; i++)
-	{
-		/* Allocate per task information within each ptask */
-		obj_table[i].tasks = (struct task_t*) malloc (sizeof(struct task_t)*maxtasks);
-		if (NULL == obj_table[i].tasks)
-		{
-			fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d tasks (ptask = %d)\n", maxtasks, i+1);
-			fflush (stderr);
-			exit (-1);
-		}
-		for (j = 0; j < maxtasks; j++)
-		{
-			/* Initialize pending communication queues for each task */
-			CommunicationQueues_Init (&(obj_table[i].tasks[j].send_queue),
-			  &(obj_table[i].tasks[j].recv_queue));
-
-			/* Allocate per thread information within each task */
-			obj_table[i].tasks[j].threads = (struct thread_t*) malloc (sizeof(struct thread_t)*maxthreads);
-			if (NULL == obj_table[i].tasks[j].threads)
-			{
-				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", maxthreads, i+1, j+1);
-				fflush (stderr);
-				exit (-1);
-			}
-		}
-	}
-
-#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-	INIT_QUEUE (&CountersTraced);
-#endif
-
-	for (ptask = 0; ptask < num_ptasks; ptask++)
-	{
-		obj_table[ptask].ntasks = 0;
-		for (task = 0; task < maxtasks; task++)
-		{
-			obj_table[ptask].tasks[task].tracing_disabled = FALSE;
-			obj_table[ptask].tasks[task].nthreads = 0;
-			for (thread = 0; thread < maxthreads; thread++)
-			{
-				obj_table[ptask].tasks[task].threads[thread].virtual_thread = thread+1;
-
-				obj_table[ptask].tasks[task].threads[thread].nStates = 0;
-				obj_table[ptask].tasks[task].threads[thread].First_Event = TRUE;
-				obj_table[ptask].tasks[task].threads[thread].First_HWCChange = TRUE;
-				obj_table[ptask].tasks[task].threads[thread].MatchingComms = TRUE;
-
-#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-				obj_table[ptask].tasks[task].threads[thread].HWCSets = NULL;
-				obj_table[ptask].tasks[task].threads[thread].num_HWCSets = 0;
-				obj_table[ptask].tasks[task].threads[thread].current_HWCSet = 0;
-#endif
-			}
-		}
-	}
-
-	for (i = 0; i < nfiles; i++)
-	{
-		ptask = files[i].ptask;
-		task = files[i].task;
-		thread = files[i].thread;
-
-		obj_table[ptask-1].tasks[task-1].nodeid = files[i].nodeid;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].cpu = files[i].cpu;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].dimemas_size = 0;
-		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, task);
-		obj_table[ptask-1].tasks[task-1].virtual_threads =
-			obj_table[ptask-1].tasks[task-1].nthreads =
-				MAX (obj_table[ptask-1].tasks[task-1].nthreads, thread);
-	}
-}
-
 
 static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 {
@@ -321,6 +219,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 #endif
 
 	InitializeObjectTable (num_appl, files, nfiles);
+
 #if defined(PARALLEL_MERGE)
 	InitCommunicators();
 	InitPendingCommunication ();
@@ -365,7 +264,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	/*
 	 * Initialize the communicators management
 	 */
-	initialize_comunicadors (num_ptasks);
+	initialize_comunicadors (num_appl);
 
 	options = GetTraceOptions (fset, numtasks, taskid);
 
@@ -648,7 +547,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 #endif
 
-	Paraver_JoinFiles (outName, fset, current_time, NodeCPUinfo, numtasks,
+	Paraver_JoinFiles (num_appl, outName, fset, current_time, NodeCPUinfo, numtasks,
 		taskid, records_per_task, get_option_merge_TreeFanOut());
 
 	strcpy (envName, outName);

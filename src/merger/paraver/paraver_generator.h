@@ -93,9 +93,9 @@ int paraver_global_op (struct fdz_fitxer fdz, unsigned int cpu,
 	unsigned int receive_size, unsigned int glop_id, unsigned int root_rank);
 #endif
 
-int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime,
-  struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
-  unsigned long long records_per_task, int tree_fan_out);
+int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
+	unsigned long long Ftime, struct Pair_NodeCPU *NodeCPUinfo, int numtasks,
+	int taskid, unsigned long long records_per_task, int tree_fan_out);
 
 
 #endif /* __PARAVER_GENERATOR_H__ */

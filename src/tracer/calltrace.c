@@ -139,7 +139,7 @@ UINT64 get_caller (int offset)
 
 #else /* UNWIND_SUPPORT */
 
-# if defined(OS_LINUX) || defined(OS_FREEBSD)
+# if defined(OS_LINUX) || defined(OS_FREEBSD) || defined(OS_DARWIN)
 #  if !defined(ARCH_IA64)
   /* En arquitecturas IA32, se encuentran en la GLIBC y declaradas en <execinfo.h> */
 #   ifdef HAVE_EXECINFO_H
@@ -149,7 +149,7 @@ UINT64 get_caller (int offset)
 # endif
 
 /* LINUX IA32/PPC o BGL*/
-# if (defined(OS_LINUX) && !defined(ARCH_IA64)) || defined(OS_FREEBSD) || defined(IS_BG_MACHINE)
+# if (defined(OS_LINUX) && !defined(ARCH_IA64)) || defined(OS_FREEBSD) || defined(OS_DARWIN) || defined(IS_BG_MACHINE)
 
 void trace_callers (iotimer_t time, int offset, int type) {
    void * callstack[MAX_STACK_DEEPNESS];
@@ -166,7 +166,7 @@ void trace_callers (iotimer_t time, int offset, int type) {
 	if (Trace_Caller[type] == NULL)
 		return;
 
-#if defined(OS_FREEBSD) && defined (HAVE_EXECINFO_H)
+#if (defined(OS_DARWIN) || defined(OS_FREEBSD)) && defined (HAVE_EXECINFO_H)
 	callstack[0] = (void*) trace_callers;
 	size = backtrace (&callstack[1], Caller_Deepness[type]+offset-1);
 	size++;
@@ -215,7 +215,7 @@ UINT64 get_caller (int offset)
 	int i;
 #endif
 
-#if defined(OS_FREEBSD) && defined(HAVE_EXECINFO_H)
+#if (defined(OS_DARWIN) || defined(OS_FREEBSD)) && defined(HAVE_EXECINFO_H)
 	callstack[0] = (void*) get_caller;
 	size = backtrace (&callstack[1], offset-1);
 	size++;

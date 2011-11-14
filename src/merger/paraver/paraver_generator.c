@@ -654,7 +654,7 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 /******************************************************************************
  *** Paraver_WriteHeader
  ******************************************************************************/
-static int Paraver_WriteHeader (unsigned long long Ftime,
+static int Paraver_WriteHeader (unsigned num_appl, unsigned long long Ftime,
   struct fdz_fitxer prv_fd, struct Pair_NodeCPU *info)
 {
 	int NumNodes;
@@ -671,7 +671,7 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
 	time (&h);
 	strftime (Date, 80, "%d/%m/%Y at %H:%M", localtime (&h));
 
-	for (ptask = 0; ptask < num_ptasks; ptask++)
+	for (ptask = 0; ptask < num_appl; ptask++)
 		num_cpus = MAX (num_cpus, obj_table[ptask].ntasks);
 
 	/* Write the Paraver header */
@@ -702,11 +702,11 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
 			NumNodes++;
 		}
 	}
-	sprintf (Header, "):%d:", num_ptasks);
+	sprintf (Header, "):%d:", num_appl);
 	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 	/* For every application, write down its resources */
-	for (ptask = 0; ptask < num_ptasks; ptask++)
+	for (ptask = 0; ptask < num_appl; ptask++)
 	{
 		sprintf (Header, "%d(", obj_table[ptask].ntasks);
 		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
@@ -735,7 +735,7 @@ static int Paraver_WriteHeader (unsigned long long Ftime,
 
 #if defined(HAVE_MPI)
 	/* Write the communicator definition for every application */
-	for (ptask = 1; ptask <= num_ptasks; ptask++)
+	for (ptask = 1; ptask <= num_appl; ptask++)
 	{
 		num_tasks = obj_table[ptask - 1].ntasks;
 
@@ -998,9 +998,9 @@ static void Paraver_JoinFiles_Slave (PRVFileSet_t *prvfset, int taskid, int tree
  ***  Paraver_JoinFiles
  ******************************************************************************/
 
-int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime,
-  struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid,
-  unsigned long long records_per_task, int tree_fan_out)
+int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
+	unsigned long long Ftime, struct Pair_NodeCPU *NodeCPUinfo, int numtasks,
+	int taskid, unsigned long long records_per_task, int tree_fan_out)
 {
 	time_t delta;
 	struct timeval time_begin, time_end;
@@ -1094,7 +1094,7 @@ int Paraver_JoinFiles (char *outName, FileSet_t * fset, unsigned long long Ftime
 #endif
 
 	if (0 == taskid)
-		error = Paraver_WriteHeader (Ftime, prv_fd, NodeCPUinfo);
+		error = Paraver_WriteHeader (num_appl, Ftime, prv_fd, NodeCPUinfo);
 
 #if defined(PARALLEL_MERGE)
 	res = MPI_Bcast (&error, 1, MPI_INT, 0, MPI_COMM_WORLD);

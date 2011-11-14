@@ -15,6 +15,7 @@ common_FILES = \
  ../common/cpunode.c ../common/cpunode.h \
  ../common/mpi2out.c ../common/mpi2out.h \
  ../common/options.c ../common/options.h \
+ ../common/object_tree.h ../common/object_tree.c \
  ../common/semantics.c ../common/semantics.h \
  ../common/addresses.c ../common/addresses.h
 
@@ -55,7 +56,6 @@ parallel_FILES = \
  tree-logistics.c tree-logistics.h
 
 libmpimpi2prv_la_SOURCES = \
- ../paraver/object_tree.h \
  ../paraver/addr2info.c ../paraver/addr2info.h \
  ../paraver/addr2info_hashcache.c ../paraver/addr2info_hashcache.h \
  ../paraver/file_set.c ../paraver/file_set.h \

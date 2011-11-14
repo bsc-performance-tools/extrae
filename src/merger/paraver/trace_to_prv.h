@@ -39,9 +39,6 @@
 #include "cpunode.h"
 #include "fdz.h"
 
-extern struct ptask_t *obj_table;
-extern unsigned int num_ptasks;
-
 int Paraver_ProcessTraceFiles (char *prvName, unsigned long nfiles,
 	struct input_t *files, unsigned int num_appl,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int idtask);

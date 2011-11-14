@@ -73,6 +73,7 @@ extern unsigned long long initTracingTime;
 //extern event_t **buffers;
 extern int *fd;
 extern unsigned int buffer_size;
+extern unsigned file_size;
 extern unsigned int hw_counters, event0, event1;
 
 extern unsigned int mptrace_suspend_tracing;
@@ -193,10 +194,7 @@ void Backend_Leave_Instrumentation (void);
 
 void advance_current(int);
 extern int circular_buffering, circular_OVERFLOW;
-event_t *circular_HEAD;
-
-unsigned buffer_size;
-unsigned file_size;
+extern event_t *circular_HEAD;
 
 void Parse_Callers (int, char *, int);
 

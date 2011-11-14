@@ -72,8 +72,8 @@ static char UNUSED rcsid[] = "$Id$";
 /******************************************************************************
  ***  Dimemas_WriteHeader
  ******************************************************************************/
-int Dimemas_WriteHeader (FILE *trf_fd, struct Pair_NodeCPU *info,
-	char *outName)
+int Dimemas_WriteHeader (unsigned num_appl, FILE *trf_fd,
+	struct Pair_NodeCPU *info, char *outName)
 {
 	unsigned int threads, task, ptask;
 #if defined (HAVE_MPI)  /* Sequential tracing does not use comunicators */
@@ -87,7 +87,7 @@ int Dimemas_WriteHeader (FILE *trf_fd, struct Pair_NodeCPU *info,
 	fprintf (trf_fd, "#DIMEMAS:%s:1,000000000000000000:",outName);
 
 	/* DIMEMAS just supports 1 ptask */
-	for (ptask = 0; ptask < num_ptasks; ptask++)
+	for (ptask = 0; ptask < num_appl; ptask++)
 	{
 		fprintf (trf_fd, "%d(", obj_table[ptask].ntasks);
 
@@ -108,7 +108,7 @@ int Dimemas_WriteHeader (FILE *trf_fd, struct Pair_NodeCPU *info,
 
 #if defined(HAVE_MPI)
 	/* Write the communicator definition for every application */
-	for (ptask = 0; ptask < num_ptasks; ptask++)
+	for (ptask = 0; ptask < num_appl; ptask++)
 	{
 		num_tasks = obj_table[ptask].ntasks;
 
@@ -135,7 +135,7 @@ int Dimemas_WriteHeader (FILE *trf_fd, struct Pair_NodeCPU *info,
 /******************************************************************************
  ***  Dimemas_WriteHeader
  ******************************************************************************/
-int Dimemas_WriteOffsets (FILE *trf_fd, char *outName,
+int Dimemas_WriteOffsets (unsigned num_appl, FILE *trf_fd, char *outName,
 	unsigned long long offset_position, unsigned int numfiles,
 	unsigned long long *offsets)
 {
@@ -144,7 +144,7 @@ int Dimemas_WriteOffsets (FILE *trf_fd, char *outName,
 
 	fflush (trf_fd);
 
-	for (ptask = 0; ptask < num_ptasks; ptask++)
+	for (ptask = 0; ptask < num_appl; ptask++)
 	{
 		fprintf (trf_fd, "s");
 		for (i = 0; i < numfiles; i++)
@@ -158,50 +158,6 @@ int Dimemas_WriteOffsets (FILE *trf_fd, char *outName,
 
 	return 0;
 }
-
-#if defined(DEAD_CODE)
-int DimemasHeader_WriteHeader( FILE *fd )
-{
-#if defined(DEAD_CODE)
-  int ii;
- 
-  ASSERT( fd != NULL );
-  
-  if (fprintf( fd, "\n" ) < 0)
-    return -1;
-  
-  for (ii= 0; ii< DIMEMASSDDF_LINES; ii++)
-  {
-    if (fprintf( fd, "%s\n", DimemasSDDF[ ii ] ) < 0)
-      return -1;
-  }
- 
-  if (fprintf( fd, "\n" ) < 0)
-    return -1;
- 
-  for (ii= 0; ii< BLOCKDEF_LINES; ii++)
-  {
-    if (fprintf( fd, "%s\n", DimemasBlockDef[ ii ]) < 0)
-      return -1;
-  }
-
-  if (fprintf( fd, "\n" ) < 0)
-    return -1;
-
-  for (ii= 0; ii< COLLECTIVEDEF_LINES; ii++)
-  {
-    if (fprintf( fd, "%s\n", DimemasCollectiveDef[ ii ]) < 0)
-      return -1;
-  }
-
-  if (fprintf( fd, "\n" ) < 0)
-    return -1;
-  
-  return 1;
-#endif
-	return 1;
-}
-#endif /* 0 */
 
 /******************************************************************************
  **      Function name : Dimemas_NX_Generic_Send

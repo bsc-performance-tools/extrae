@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 14Nov2011 Added support to MAC OS X and improved support to FreeBSD
  * 07Nov2011 Extrae 2.2.0 is released!
  * 07Nov2011 Made --with-unwind, --with-papi, --with-mpi, --with-dyninst mandatory.
              Can be avoided through the respective --without.

@@ -57,7 +57,7 @@ static char UNUSED rcsid[] = "$Id$";
 # define  GET_CLOCK    bgp_getTime()
 # define  INIT_CLOCK   bgp_Initialize()
 # define  INIT_CLOCK_T bgp_Initialize_thread()
-#elif (defined (OS_LINUX) || defined(OS_FREEBSD) || defined(OS_SOLARIS)) && defined (ARCH_IA32)
+#elif (defined (OS_LINUX) || defined(OS_FREEBSD) || defined(OS_DARWIN) || defined(OS_SOLARIS)) && defined (ARCH_IA32)
 # include <ia32_clock.h>
 # define  GET_CLOCK    ia32_getTime()
 # define  INIT_CLOCK   ia32_Initialize()

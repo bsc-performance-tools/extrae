@@ -42,6 +42,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_UCONTEXT_H
 # include <ucontext.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
+#endif
 
 #include "sampling.h"
 #include "trace_macros.h"
@@ -99,12 +102,10 @@ static int SamplingClockType;
 static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 {
 	caddr_t pc;
-#if defined(OS_FREEBSD)
+#if defined(OS_FREEBSD) || defined(OS_DARWIN)
 	ucontext_t *uc = (ucontext_t *) context;
-	mcontext_t *ucm = (mcontext_t *) &uc->uc_mcontext;
 #else
 	struct ucontext *uc = (struct ucontext *) context;
-	struct sigcontext *sc = (struct sigcontext *) &uc->uc_mcontext;
 #endif
 
 	UNREFERENCED_PARAMETER(sig);
@@ -114,9 +115,9 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	pc = (caddr_t)UCONTEXT_REG(uc, PPC_REG_PC);
 #elif defined(OS_LINUX)
 # if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)
-  pc = (caddr_t)sc->eip;
+  pc = (caddr_t)sc->sc_eip;
 # elif defined(ARCH_IA32) && defined(ARCH_IA32_x64)
-	pc = (caddr_t)sc->rip;
+	pc = (caddr_t)sc->sc_rip;
 # elif defined(ARCH_IA64)
 	pc = (caddr_t)sc->sc_ip;
 # elif defined(ARCH_PPC)
@@ -128,11 +129,19 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 # endif
 #elif defined(OS_FREEBSD)
 # if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)
-	pc = (caddr_t)ucm->mc_eip;
+	pc = (caddr_t)(uc->uc_mcontext.mc_eip);
 # elif defined (ARCH_IA32) && defined(ARCH_IA32_x64)
-	pc = (caddr_t)ucm->mc_rip;
+	pc = (caddr_t)(uc->uc_mcontext.mc_rip);
 # else
 #  error "Don't know how to get the PC for this architecture in FreeBSD!"
+# endif
+#elif defined(OS_DARWIN)
+# if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)
+	pc = (caddr_t)((uc->uc_mcontext)->__ss.__eip);
+# elif defined (ARCH_IA32) && defined(ARCH_IA32_x64)
+	pc = (caddr_t)((uc->uc_mcontext)->__ss.__rip);
+# else
+#  error "Don't know how to get the PC for this architecture in Darwin!"
 # endif
 #else
 # error "Don't know how to get the PC for this OS!"

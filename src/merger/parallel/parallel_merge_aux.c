@@ -57,6 +57,10 @@ static struct ForeignRecv_t **myForeignRecvs;
 static int *myForeignRecvs_count;
 static char **myForeignRecvs_used;
 
+struct Communicators_t Communicators;
+struct PendingComms_t PendingComms;
+struct ForeignRecvs_t *ForeignRecvs;
+
 #define FOREIGN_RECV_RESIZE_STEP ((1024*1024)/sizeof(struct ForeignRecv_t))
 #define COMMUNICATORS_RESIZE_STEP ((1024*1024)/sizeof(struct Communicator_t))
 #define PENDING_COMM_RESIZE_STEP ((1024*1024)/sizeof(struct PendingCommunication_t))

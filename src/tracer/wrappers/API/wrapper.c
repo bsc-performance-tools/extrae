@@ -256,6 +256,7 @@ int CheckForControlFile = FALSE;
 int CheckForGlobalOpsTracingIntervals = FALSE;
 
 int circular_buffering = 0;
+event_t *circular_HEAD;
 
 #if defined(EMBED_MERGE_IN_TRACE)
 int MergeAfterTracing = FALSE;

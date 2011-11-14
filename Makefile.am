@@ -105,37 +105,106 @@ else
 if OS_FREEBSD
 
 MPI_EXAMPLE_FILES=\
- example/FREEBSD/MPI/README \
- example/FREEBSD/MPI/extrae.xml \
  example/FREEBSD/MPI/detailed_trace_basic.xml \
  example/FREEBSD/MPI/summarized_trace_basic.xml \
+ example/FREEBSD/MPI/static/slurm_parallel_merge.sh \
+ example/FREEBSD/MPI/static/slurm_merge.sh \
+ example/FREEBSD/MPI/static/mpi_ping.f \
+ example/FREEBSD/MPI/static/mpi2prv.sh \
+ example/FREEBSD/MPI/static/Makefile \
+ example/FREEBSD/MPI/static/trace.sh \
+ example/FREEBSD/MPI/static/slurm_trace.sh \
  example/FREEBSD/MPI/extrae_explained.xml \
- example/FREEBSD/MPI/static \
- example/FREEBSD/MPI/ld-preload
+ example/FREEBSD/MPI/README \
+ example/FREEBSD/MPI/extrae.xml \
+ example/FREEBSD/MPI/ld-preload/slurm_parallel_merge.sh \
+ example/FREEBSD/MPI/ld-preload/slurm_merge.sh \
+ example/FREEBSD/MPI/ld-preload/mpi_ping.f \
+ example/FREEBSD/MPI/ld-preload/mpi2prv.sh \
+ example/FREEBSD/MPI/ld-preload/Makefile \
+ example/FREEBSD/MPI/ld-preload/trace.sh \
+ example/FREEBSD/MPI/ld-preload/slurm_trace.sh 
 
 OMP_EXAMPLE_FILES=\
- example/FREEBSD/OMP/Makefile \
- example/FREEBSD/OMP/merge.sh \
  example/FREEBSD/OMP/pi.c \
- example/FREEBSD/OMP/pi.f \
- example/FREEBSD/OMP/run.sh \
- example/FREEBSD/OMP/extrae.xml
+ example/FREEBSD/OMP/pi_instrumented.c \
+ example/FREEBSD/OMP/README \
+ example/FREEBSD/OMP/Makefile \
+ example/FREEBSD/OMP/extrae.xml \
+ example/FREEBSD/OMP/run_ldpreload.sh \
+ example/FREEBSD/OMP/run_dyninst.sh \
+ example/FREEBSD/OMP/merge.sh
 
 SEQ_EXAMPLE_FILES=\
- example/FREEBSD/SEQ/Makefile \
- example/FREEBSD/SEQ/merge.sh \
  example/FREEBSD/SEQ/pi.c \
- example/FREEBSD/SEQ/run.sh \
- example/FREEBSD/SEQ/extrae.xml
+ example/FREEBSD/SEQ/pi_instrumented.c \
+ example/FREEBSD/SEQ/README \
+ example/FREEBSD/SEQ/Makefile \
+ example/FREEBSD/SEQ/extrae.xml \
+ example/FREEBSD/SEQ/run_static.sh \
+ example/FREEBSD/SEQ/function-list \
+ example/FREEBSD/SEQ/run_dyninst.sh
 
 PTHREAD_EXAMPLE_FILES=\
- example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/pthread-example.c \
- example/FREEBSD/PTHREAD/user-comms.c \
+ example/FREEBSD/PTHREAD/README \
+ example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/extrae.xml \
- example/FREEBSD/PTHREAD/README
+ example/FREEBSD/PTHREAD/user-comms.c
 
 else
+
+if OS_DARWIN
+
+MPI_EXAMPLE_FILES=\
+ example/FREEBSD/MPI/detailed_trace_basic.xml \
+ example/FREEBSD/MPI/summarized_trace_basic.xml \
+ example/FREEBSD/MPI/static/slurm_parallel_merge.sh \
+ example/FREEBSD/MPI/static/slurm_merge.sh \
+ example/FREEBSD/MPI/static/mpi_ping.f \
+ example/FREEBSD/MPI/static/mpi2prv.sh \
+ example/FREEBSD/MPI/static/Makefile \
+ example/FREEBSD/MPI/static/trace.sh \
+ example/FREEBSD/MPI/static/slurm_trace.sh \
+ example/FREEBSD/MPI/extrae_explained.xml \
+ example/FREEBSD/MPI/README \
+ example/FREEBSD/MPI/extrae.xml \
+ example/FREEBSD/MPI/ld-preload/slurm_parallel_merge.sh \
+ example/FREEBSD/MPI/ld-preload/slurm_merge.sh \
+ example/FREEBSD/MPI/ld-preload/mpi_ping.f \
+ example/FREEBSD/MPI/ld-preload/mpi2prv.sh \
+ example/FREEBSD/MPI/ld-preload/Makefile \
+ example/FREEBSD/MPI/ld-preload/trace.sh \
+ example/FREEBSD/MPI/ld-preload/slurm_trace.sh 
+
+OMP_EXAMPLE_FILES=\
+ example/FREEBSD/OMP/pi.c \
+ example/FREEBSD/OMP/pi_instrumented.c \
+ example/FREEBSD/OMP/README \
+ example/FREEBSD/OMP/Makefile \
+ example/FREEBSD/OMP/extrae.xml \
+ example/FREEBSD/OMP/run_ldpreload.sh \
+ example/FREEBSD/OMP/run_dyninst.sh \
+ example/FREEBSD/OMP/merge.sh
+
+SEQ_EXAMPLE_FILES=\
+ example/FREEBSD/SEQ/pi.c \
+ example/FREEBSD/SEQ/pi_instrumented.c \
+ example/FREEBSD/SEQ/README \
+ example/FREEBSD/SEQ/Makefile \
+ example/FREEBSD/SEQ/extrae.xml \
+ example/FREEBSD/SEQ/run_static.sh \
+ example/FREEBSD/SEQ/function-list \
+ example/FREEBSD/SEQ/run_dyninst.sh
+
+PTHREAD_EXAMPLE_FILES=\
+ example/FREEBSD/PTHREAD/pthread-example.c \
+ example/FREEBSD/PTHREAD/README \
+ example/FREEBSD/PTHREAD/Makefile \
+ example/FREEBSD/PTHREAD/extrae.xml \
+ example/FREEBSD/PTHREAD/user-comms.c
+
+else 
 
 MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/README \
@@ -192,6 +261,7 @@ CUDA_EXAMPLE_FILES=example/LINUX/CUDA/hello.cu \
  example/LINUX/CUDA/extrae.xml \
  example/LINUX/CUDA/Makefile
 
+endif
 endif
 
 endif

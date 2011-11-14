@@ -34,23 +34,23 @@
 #include "semantics.h"
 #include "file_set.h"
 
-int MPI_Caller_Multiple_Levels_Traced;
-int *MPI_Caller_Labels_Used;
+extern int MPI_Caller_Multiple_Levels_Traced;
+extern int *MPI_Caller_Labels_Used;
 
-int Sample_Caller_Multiple_Levels_Traced;
-int *Sample_Caller_Labels_Used;
+extern int Sample_Caller_Multiple_Levels_Traced;
+extern int *Sample_Caller_Labels_Used;
 
-int Rusage_Events_Found;
-int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
+extern int Rusage_Events_Found;
+extern int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
 
-int Memusage_Events_Found;
-int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
+extern int Memusage_Events_Found;
+extern int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
 
-int MPI_Stats_Events_Found;
-int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
+extern int MPI_Stats_Events_Found;
+extern int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 
-int PACX_Stats_Events_Found;
-int PACX_Stats_Labels_Used[PACX_STATS_EVENTS_COUNT];
+extern int PACX_Stats_Events_Found;
+extern int PACX_Stats_Labels_Used[PACX_STATS_EVENTS_COUNT];
 
 extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
 extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];

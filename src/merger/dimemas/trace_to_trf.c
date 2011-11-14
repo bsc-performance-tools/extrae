@@ -101,194 +101,16 @@ static char UNUSED rcsid[] = "$Id$";
 # include "HardwareCounters.h"
 #endif
 
-struct ptask_t *obj_table;
-unsigned int num_ptasks;
 UINT64 InitTracingTime;
 
 char dimemas_tmp[PATH_MAX];
-
-#if defined(DEAD_CODE)
-int **EnabledTasks = NULL;
-unsigned long long **EnabledTasks_time = NULL;
-#endif
-
-#if defined(DEAD_CODE)
-#if defined(IS_BG_MACHINE)
-struct QuadCoord
-{
-	int X, Y, Z, T;
-};
-static struct QuadCoord *coords = NULL;
-
-void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task)
-{
-  switch (event)
-  {
-    case BG_PERSONALITY_TORUS_X:
-      coords[task - 1].X = valor;
-      break;
-    case BG_PERSONALITY_TORUS_Y:
-      coords[task - 1].Y = valor;
-      break;
-    case BG_PERSONALITY_TORUS_Z:
-      coords[task - 1].Z = valor;
-      break;
-    case BG_PERSONALITY_PROCESSOR_ID:
-      coords[task - 1].T = valor;
-      break;
-    default:
-      break;
-  }
-}
-#endif
-#endif
-
-/******************************************************************************
- ***  InitializeObjectTable
- ******************************************************************************/
-static void InitializeObjectTable (int num_appl, struct input_t * files,
-	unsigned long nfiles)
-{
-	unsigned int ptask, task, thread, i, j;
-	unsigned int maxtasks = 0, maxthreads = 0;
-
-	/* This is not the perfect way to allocate everything, but it's
-	  good enough for runs where all the ptasks (usually 1), have the
-	  same number of threads */
-
-	num_ptasks = num_appl;
-
-	if (1 != num_ptasks)
-	{
-		fprintf (stderr, "mpi2trf: Error! This merger does not support merging more than 1 parallel application\n");
-		fflush (stderr);
-		exit (-1);
-	}
-
-	for (i = 0; i < nfiles; i++)
-	{
-		maxtasks = MAX(files[i].task, maxtasks);
-		maxthreads = MAX(files[i].thread, maxthreads);
-	}
-
-	obj_table = (struct ptask_t*) malloc (sizeof(struct ptask_t)*num_ptasks);
-	if (NULL == obj_table)
-	{
-		fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d ptasks!\n", num_ptasks);
-		fflush (stderr);
-		exit (-1);
-	}
-	for (i = 0; i < num_ptasks; i++)
-	{
-		obj_table[i].tasks = (struct task_t*) malloc (sizeof(struct task_t)*maxtasks);
-		if (NULL == obj_table[i].tasks)
-		{
-			fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d tasks (ptask = %d)\n", maxtasks, i+1);
-			fflush (stderr);
-			exit (-1);
-		}
-		for (j = 0; j < maxtasks; j++)
-		{
-			obj_table[i].tasks[j].threads = (struct thread_t*) malloc (sizeof(struct thread_t)*maxthreads);
-			if (NULL == obj_table[i].tasks[j].threads)
-			{
-				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", maxthreads, i+1, j+1);
-				fflush (stderr);
-				exit (-1);
-			}
-		}
-	}
-
-#if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-	INIT_QUEUE (&CountersTraced);
-#endif
-
-	for (ptask = 0; ptask < num_ptasks; ptask++)
-	{
-		obj_table[ptask].ntasks = 0;
-		for (task = 0; task < maxtasks; task++)
-		{
-			obj_table[ptask].tasks[task].tracing_disabled = FALSE;
-			obj_table[ptask].tasks[task].nthreads = 0;
-			for (thread = 0; thread < maxthreads; thread++)
-			{
-				obj_table[ptask].tasks[task].threads[thread].nStates = 0;
-				obj_table[ptask].tasks[task].threads[thread].First_Event = TRUE;
-			}
-		}
-	}
-
-	for (i = 0; i < nfiles; i++)
-	{
-		ptask = files[i].ptask;
-		task = files[i].task;
-		thread = files[i].thread;
-
-		obj_table[ptask-1].tasks[task-1].nodeid = files[i].nodeid;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].cpu = files[i].cpu;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].dimemas_size = 0;
-		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, task);
-		obj_table[ptask-1].tasks[task-1].nthreads = MAX (obj_table[ptask-1].tasks[task-1].nthreads, thread);
-	}
-}
 
 unsigned long long Dimemas_hr_to_relative (UINT64 iotimer)
 {
 	return iotimer - InitTracingTime;
 }
 
-#if defined(DEAD_CODE)
-void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
-{
-  int i, j;
-
-  EnabledTasks = (int **) malloc (sizeof (int *) * numberofapplications);
-  if (EnabledTasks == NULL)
-  {
-    fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks'\n");
-    fflush (stderr);
-    exit (-1);
-  }
-  for (i = 0; i < numberofapplications; i++)
-  {
-    EnabledTasks[i] = (int *) malloc (sizeof (int) * numberoftasks);
-    if (EnabledTasks[i] == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks[%d]'\n", i);
-      fflush (stderr);
-      exit (-1);
-    }
-    for (j = 0; j < numberoftasks; j++)
-      EnabledTasks[i][j] = TRUE;
-  }
-
-  EnabledTasks_time =
-    (unsigned long long **) malloc (sizeof (unsigned long long *) *
-                                    numberofapplications);
-  if (EnabledTasks_time == NULL)
-  {
-    fprintf (stderr, "mpi2prv: Error Unable to allocate memory for 'EnabledTasks_time'\n");
-    fflush (stderr);
-    exit (-1);
-  }
-  for (i = 0; i < numberofapplications; i++)
-  {
-    EnabledTasks_time[i] =
-      (unsigned long long *) malloc (sizeof (unsigned long long) *
-                                     numberoftasks);
-    if (EnabledTasks_time[i] == NULL)
-    {
-      fprintf (stderr, "mpi2prv: Error: Unable to allocate memory for 'EnabledTasks_time[%d]'\n", i);
-      fflush (stderr);
-      exit (-1);
-    }
-    for (j = 0; j < numberoftasks; j++)
-      EnabledTasks_time[i][j] = 0LL;
-  }
-}
-#endif
-
-static void Dimemas_GenerateOffsets (struct ptask_t *table,
+static void Dimemas_GenerateOffsets (unsigned num_appl, struct ptask_t *table,
 	unsigned long long **ptr, unsigned int *count)
 {
 	unsigned long long *offsets;
@@ -301,7 +123,7 @@ static void Dimemas_GenerateOffsets (struct ptask_t *table,
 	*count = 0;
 
 	/* Count total number of running threads of the application */
-	for (ptask = 0; ptask < num_ptasks; ptask++)
+	for (ptask = 0; ptask < num_appl; ptask++)
 		for (task = 0; task < table[ptask].ntasks; task++)
 			i += table[ptask].tasks[task].nthreads;
 
@@ -316,7 +138,7 @@ static void Dimemas_GenerateOffsets (struct ptask_t *table,
 
 	/* Put the dimemas_size field on the offsets */
 	i = 0;
-	for (ptask = 0; ptask < num_ptasks; ptask++)
+	for (ptask = 0; ptask < num_appl; ptask++)
 		for (task = 0; task < table[ptask].ntasks; task++)
 			for (thread = 0; thread < table[ptask].tasks[task].nthreads; thread++, i++)
 				offsets[i] = table[ptask].tasks[task].threads[thread].dimemas_size;
@@ -346,7 +168,15 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	long long options;
 	double pct, last_pct;
 
+	if (1 != num_appl)
+	{
+		fprintf (stderr, "mpi2trf: Error! This merger does not support merging more than 1 parallel application\n");
+		fflush (stderr);
+		exit (-1);
+	}
+
 	InitializeObjectTable (num_appl, files, nfiles);
+
 #if defined(PARALLEL_MERGE)
 	InitCommunicators();
 #endif
@@ -389,7 +219,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	/*
 	 * Initialize the communicators management
 	 */
-	initialize_comunicadors (num_ptasks);
+	initialize_comunicadors (num_appl);
 
 	options = GetTraceOptions (fset, numtasks, taskid);
 
@@ -416,10 +246,6 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 		InitTracingTime = temp;
 	}
-#endif
-
-#if defined(DEAD_CODE)
-	InitializeEnabledTasks (nfiles, num_appl);
 #endif
 
 	error = FALSE;
@@ -543,7 +369,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 
 	if (0 == taskid)
-		Dimemas_WriteHeader (fset->output_file, NodeCPUinfo, outName);
+		Dimemas_WriteHeader (num_appl, fset->output_file, NodeCPUinfo, outName);
 
 	current_file = -1;
 
@@ -642,7 +468,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	fprintf (stdout, "mpi2prv: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
 	fflush (stdout);
 
-	Dimemas_GenerateOffsets (obj_table, &offsets, &count);
+	Dimemas_GenerateOffsets (num_appl, obj_table, &offsets, &count);
 
 #if defined(PARALLEL_MERGE)
 	if (numtasks > 1)
@@ -679,7 +505,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	if (0 == taskid)
 	{
-		Dimemas_WriteOffsets (fset->output_file, outName, trace_size, count, offsets);
+		Dimemas_WriteOffsets (num_appl, fset->output_file, outName, trace_size, count, offsets);
 
 		fclose (fset->output_file);
 

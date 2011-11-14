@@ -33,7 +33,6 @@
 #include "file_set.h"
 #include "trace_to_prv.h"
 
-int DimemasHeader_WriteHeader( FILE *fd );
 int Dimemas_NX_Generic_Send( FILE *fd, int task, int thread, int task_r, int commid, int size, UINT64 tag, int synchronism );
 int Dimemas_NX_Send( FILE *fd, int task, int thread, int task_r, int commid, int size, UINT64 tag );
 int Dimemas_NX_ImmediateSend( FILE *fd, int task, int thread, int task_r, int commid, int size, UINT64 tag );
@@ -59,9 +58,9 @@ int Dimemas_User_EventType_Definition( FILE *fd, UINT64 type, char *Label, int c
 int Dimemas_User_EventValue_Definition( FILE *fd, UINT64 type, long64_t value, char *Label );
 #endif
 
-int Dimemas_WriteHeader (FILE *trf_fd, struct Pair_NodeCPU *info,
-	char *outName);
-int Dimemas_WriteOffsets (FILE *trf_fd, char *outName,
+int Dimemas_WriteHeader (unsigned num_appl, FILE *trf_fd,
+	struct Pair_NodeCPU *info, char *outName);
+int Dimemas_WriteOffsets (unsigned num_appl, FILE *trf_fd, char *outName,
 	unsigned long long offset_position, unsigned int numfiles,
 	unsigned long long *offsets);
 

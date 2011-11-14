@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/object_tree.h $
+ | @last_commit: $Date: 2011-08-26 16:43:13 +0200 (dv, 26 ago 2011) $
+ | @version:     $Revision: 736 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #ifndef _OBJECT_TREE_H
@@ -38,6 +38,7 @@
 #include "file_set.h"
 #include "new-queue.h"
 #include "HardwareCounters.h"
+#include "communication_queues.h"
 
 #define MAX_STATES 16
 
@@ -105,5 +106,16 @@ typedef struct ptask_t
   unsigned int ntasks;
   struct task_t *tasks;
 } ptask_t;
+
+typedef struct appl_t
+{
+	unsigned int nptasks;
+	struct ptask_t *ptasks;
+} appl_t;
+
+extern ptask_t *obj_table;
+
+void InitializeObjectTable (unsigned num_appl, struct input_t * files,
+	unsigned long nfiles);
 
 #endif

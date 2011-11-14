@@ -374,8 +374,8 @@ AC_DEFUN([AX_PROG_BFD],
       bfd_default_paths="${BG_HOME}/blrts-gnu"
       libiberty_default_paths="${BG_HOME}/blrts-gnu"
    else
-      bfd_default_paths="/usr /usr/local"
-      libiberty_default_paths="/usr /usr/local"
+      bfd_default_paths="/usr /usr/local /opt/local"
+      libiberty_default_paths="/usr /usr/local /opt/local"
    fi
 
    AC_MSG_CHECKING([for libbfd])
@@ -426,6 +426,9 @@ AC_DEFUN([AX_PROG_BFD],
             break
          elif test -r "${liberty_home_dir}/lib${BITS}/libiberty.a" ; then
             LIBERTY_LIBSDIR="${liberty_home_dir}/lib${BITS}"
+            break
+         elif test -r "${liberty_home_dir}/lib/x86_64/libiberty.a" ; then  # dnl Special handle for MacOSx
+            LIBERTY_LIBSDIR="${liberty_home_dir}/lib/x86_64"
             break
          elif test -r "${liberty_home_dir}/lib/libiberty.so" ; then
             LIBERTY_LIBSDIR="${liberty_home_dir}/lib"
@@ -1171,20 +1174,23 @@ AC_DEFUN([AX_CHECK_LIBZ],
    for zhome_dir in [${libz_paths} "not found"]; do
       if test -f "${zhome_dir}/${BITS}/include/zlib.h" ; then 
          if test -f "${zhome_dir}/${BITS}/lib/libz.a" -o \
-                 -f "${zhome_dir}/${BITS}/lib/libz.so" ; then
+                 -f "${zhome_dir}/${BITS}/lib/libz.so" -o \
+                 -f "${zhome_dir}/${BITS}/lib/libz.dylib" ; then
             LIBZ_HOME="${zhome_dir}/${BITS}"
             LIBZ_LIBSDIR="${zhome_dir}/${BITS}/lib"
             break
          fi
       elif test -f "${zhome_dir}/include/zlib.h" ; then
          if test -f "${zhome_dir}/lib${BITS}/libz.a" -o \
-                 -f "${zhome_dir}/lib${BITS}/libz.so" ; then
+                 -f "${zhome_dir}/lib${BITS}/libz.so" -o \
+                 -f "${zhome_dir}/lib${BITS}/libz.dylib" ; then
             LIBZ_HOME="${zhome_dir}"
             LIBZ_LIBSDIR="${zhome_dir}/lib${BITS}"
             break
          fi
          if test -f "${zhome_dir}/lib/libz.a" -o \
-                 -f "${zhome_dir}/lib/libz.so" ; then
+                 -f "${zhome_dir}/lib/libz.so" -o \
+                 -f "${zhome_dir}/lib/libz.dylib" ; then
             LIBZ_HOME="${zhome_dir}"
             LIBZ_LIBSDIR="${zhome_dir}/lib"
             break
@@ -1239,38 +1245,38 @@ AC_DEFUN([AX_PROG_LIBEXECINFO],
 [
    AX_FLAGS_SAVE()
 
-   AC_ARG_WITH(libexecinfo,
+   AC_ARG_WITH(execinfo,
       AC_HELP_STRING(
-         [--with-libexecinfo=@<:@=DIR@:>@],
-         [specify where to find libexecinfo libraries and includes (FreeBSD specific?)]
+         [--with-execinfo=@<:@=DIR@:>@],
+         [specify where to find execinfo libraries and includes (FreeBSD/Darwin specific?)]
       ),
-      [libexecinfo_paths="${withval}"],
-      [libexecinfo_paths="no"]
+      [execinfo_paths="${withval}"],
+      [execinfo_paths="no"]
    )
 
-   if test "${libexecinfo_paths}" != "no" ; then
-      AX_FIND_INSTALLATION([libexecinfo], [${libexecinfo_paths}], [libexecinfo])
-      if test "${LIBEXECINFO_INSTALLED}" = "yes" ; then
-        if test -f ${LIBEXECINFO_HOME}/lib/libexecinfo.a -o \
-                -f ${LIBEXECINFO_HOME}/lib/libexecinfo.so ; then
-           if test -f ${LIBEXECINFO_HOME}/include/execinfo.h ; then
-              CFLAGS="-I ${LIBEXECINFO_HOME}/include"
-              LIBS="-L ${LIBEXECINFO_HOME}/lib -lexecinfo"
+   if test "${execinfo_paths}" != "no" ; then
+      AX_FIND_INSTALLATION([execinfo], [${execinfo_paths}], [execinfo])
+      if test "${EXECINFO_INSTALLED}" = "yes" ; then
+        if test -f ${EXECINFO_HOME}/lib/execinfo.a -o \
+                -f ${EXECINFO_HOME}/lib/execinfo.so ; then
+           if test -f ${EXECINFO_HOME}/include/execinfo.h ; then
+              CFLAGS="-I ${XECINFO_HOME}/include"
+              LIBS="-L ${EXECINFO_HOME}/lib -lexecinfo"
 		          AC_TRY_LINK(
 		              [ #include <execinfo.h> ],
 		              [ backtrace ((void*)0, 0); ],
-		              [ libexecinfo_links="yes" ]
+		              [ execinfo_links="yes" ]
 		            )
-              if test "${libexecinfo_links}" = "yes" ; then
+              if test "${execinfo_links}" = "yes" ; then
                  AC_DEFINE([HAVE_EXECINFO_H], 1, [Define to 1 if you have the <execinfo.h> header file.])
               else
-                 AC_MSG_ERROR([Cannot link using libexecinfo... See config.log for further details])
+                 AC_MSG_ERROR([Cannot link using execinfo... See config.log for further details])
               fi
            else
-              AC_MSG_ERROR([Cannot find libexecinfo header files in ${libexecinfo_paths}/include, maybe you can install it from /usr/ports/devel/libexecinfo])
+              AC_MSG_ERROR([Cannot find execinfo header files in ${execinfo_paths}/include, maybe you can install it from /usr/ports/devel/libexecinfo])
            fi
         else
-           AC_MSG_ERROR([Cannot find libexecinfo library files in ${libexecinfo_paths}/lib, maybe you can install it from /usr/ports/devel/libexecinfo])
+           AC_MSG_ERROR([Cannot find execinfo library files in ${execinfo_paths}/lib, maybe you can install it from /usr/ports/devel/libexecinfo])
         fi
       fi
    fi

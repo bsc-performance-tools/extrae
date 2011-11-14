@@ -345,7 +345,7 @@ else
 MPITRACE_SYMBOLS= -DC_SYMBOLS
 endif
 
-COMMON_LINKER_FLAGS = $(HWC_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(UNWIND_LINKER_FLAGS) $(MRNET_LINKER_FLAGS)
+COMMON_LINKER_FLAGS = -release $(PACKAGE_VERSION) $(HWC_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(UNWIND_LINKER_FLAGS) $(MRNET_LINKER_FLAGS)
 
 libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
 libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
@@ -399,34 +399,34 @@ NEW_MPI_LIBS = -L@MPI_LIBSDIR@ @MPI_LIBS@ -static
 endif
 
 libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-libcudampitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
-libcudampitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libcudampitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libcudampitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libupctrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
-libmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
+libmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) # -static 
 
-libptmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) -lpthread
+libptmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) -lpthread
 libptmpitracef_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) # -static 
 
-libpacxtrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libpacxtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libpacxtracef_la_LDFLAGS = $(libpacxtrace_la_LDFLAGS) # -static
 
 libompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libompitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libomptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libsmpssmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpssmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libsmpsstrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libsmpsstrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
-libnanostrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libnanostrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
-libpttrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS) -lpthread
-libtrttrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -lpthread
+libtrttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
@@ -437,7 +437,7 @@ libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
 lib_dyn_mpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-lib_dyn_omptrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+lib_dyn_omptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 lib_dyn_ompitrace_la_LDFLAGS = $(lib_dyn_mpitrace_la_LDFLAGS)
 
 ## -static tells libtool to generate ONLY the static library (we don't want

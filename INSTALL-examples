@@ -96,3 +96,13 @@ Example 2 - Compiling the 64bit package without the parallel merge
 ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64
 OBJECT_MODE=64 make
 make install
+
+
+MAC OS X
+--
+NOTES:
+This platform is not supported
+
+./configure --prefix=/Users/bsccns/T --with-mpi=/Users/bsccns/aplic/openmpi/1.4.4 --without-dyninst --without-papi --without-unwind --with-execinfo=/usr --with-bfd=/opt/local --with-liberty=/opt/local
+make
+make install

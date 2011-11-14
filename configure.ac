@@ -52,6 +52,8 @@ case "${target_os}" in
              AC_DEFINE([OS_FREEBSD], [1], [Define if operating system is FreeBSD]) ;;
   solaris* ) OperatingSystem="solaris"
              AC_DEFINE([OS_SOLARIS], [1], [Define if operating system is Solaris]) ;;
+  darwin*  ) OperatingSystem="darwin"
+             AC_DEFINE([OS_DARWIN], [1], [Define if operating system is Darwin]) ;;
 esac
 
 # Publish these defines for conditional compilation 
@@ -66,6 +68,7 @@ AM_CONDITIONAL(OS_AIX,       test "${OperatingSystem}" = "aix"     )
 AM_CONDITIONAL(OS_DEC,       test "${OperatingSystem}" = "dec"     )
 AM_CONDITIONAL(OS_IRIX,      test "${OperatingSystem}" = "irix"    )
 AM_CONDITIONAL(OS_FREEBSD,   test "${OperatingSystem}" = "freebsd" )
+AM_CONDITIONAL(OS_DARWIN,    test "${OperatingSystem}" = "darwin" )
 AM_CONDITIONAL(OS_SOLARIS,   test "${OperatingSystem}" = "solaris" )
 
 if test "${OperatingSystem}" = "freebsd" ; then
