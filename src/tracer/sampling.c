@@ -116,9 +116,9 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	pc = (caddr_t)UCONTEXT_REG(uc, PPC_REG_PC);
 #elif defined(OS_LINUX)
 # if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)
-  pc = (caddr_t)sc->sc_eip;
+  pc = (caddr_t)sc->eip;
 # elif defined(ARCH_IA32) && defined(ARCH_IA32_x64)
-	pc = (caddr_t)sc->sc_rip;
+	pc = (caddr_t)sc->rip;
 # elif defined(ARCH_IA64)
 	pc = (caddr_t)sc->sc_ip;
 # elif defined(ARCH_PPC)
