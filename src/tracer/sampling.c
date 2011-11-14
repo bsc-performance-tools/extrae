@@ -106,6 +106,7 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	ucontext_t *uc = (ucontext_t *) context;
 #else
 	struct ucontext *uc = (struct ucontext *) context;
+	struct sigcontext *sc = (struct sigcontext *) &uc->uc_mcontext;
 #endif
 
 	UNREFERENCED_PARAMETER(sig);
