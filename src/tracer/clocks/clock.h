@@ -57,7 +57,8 @@ extern "C" {
 void Clock_setType (unsigned type);
 unsigned Clock_getType (void);
 
-iotimer_t Clock_getCurrentTime (unsigned thread);
+UINT64 Clock_getCurrentTime_nstore (); 
+UINT64 Clock_getCurrentTime (unsigned thread);
 UINT64 Clock_getLastReadTime (unsigned thread);
 void Clock_AllocateThreads (unsigned numthreads);
 void Clock_Initialize (unsigned numthreads);

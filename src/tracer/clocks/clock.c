@@ -99,7 +99,7 @@ UINT64 Clock_getLastReadTime (unsigned thread)
 	return _extrae_last_read_clock[thread];
 }
 
-iotimer_t Clock_getCurrentTime (unsigned thread)
+UINT64 Clock_getCurrentTime_nstore (void)
 {
 	UINT64 tmp;
 
@@ -110,7 +110,7 @@ iotimer_t Clock_getCurrentTime (unsigned thread)
 /*  if no "nanosecond" clock is available 
 		struct timeval aux;
 		gettimeofday (&aux, NULL);
-		return (((iotimer_t) aux.tv_sec) * 1000000 + aux.tv_usec);
+		return (((UINT64) aux.tv_sec) * 1000000 + aux.tv_usec);
 */
 	}
 	else
@@ -134,8 +134,14 @@ iotimer_t Clock_getCurrentTime (unsigned thread)
 #endif
 	}
 
-	_extrae_last_read_clock[thread] = tmp;
 
+	return tmp;
+}
+
+UINT64 Clock_getCurrentTime (unsigned thread)
+{
+	UINT64 tmp = Clock_getCurrentTime_nstore ();
+	_extrae_last_read_clock[thread] = tmp;
 	return tmp;
 }
 

@@ -78,7 +78,7 @@ void Extrae_SamplingHandler (void* address)
 {
 	if (isSamplingEnabled())
 	{
-		iotimer_t temps = TIME;
+		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
 		trace_callers (temps, 7, CALLER_SAMPLING);
 	}
