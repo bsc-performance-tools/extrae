@@ -60,8 +60,6 @@ static char UNUSED rcsid[] = "$Id$";
 #define ENTER	TRUE
 #define LEAVE	FALSE
 
-#define DEBUG_MPITRACE
-
 #if defined(DEBUG_MPITRACE)
 #	define DEBUG_INTERFACE(enter) \
 	{ fprintf (stderr, "Task %d %s %s\n", TASKID, (enter)?"enters":"leaves", __func__); }
