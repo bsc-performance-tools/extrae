@@ -1,5 +1,4 @@
 #!/bin/bash
-# @ class = debug
 # @ initialdir = .
 # @ output = trace.out
 # @ error =  trace.err
