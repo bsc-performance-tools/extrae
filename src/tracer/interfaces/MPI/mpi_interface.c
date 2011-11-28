@@ -60,6 +60,8 @@ static char UNUSED rcsid[] = "$Id$";
 #define ENTER	TRUE
 #define LEAVE	FALSE
 
+#define DEBUG_MPITRACE
+
 #if defined(DEBUG_MPITRACE)
 #	define DEBUG_INTERFACE(enter) \
 	{ fprintf (stderr, "Task %d %s %s\n", TASKID, (enter)?"enters":"leaves", __func__); }
@@ -90,6 +92,20 @@ static char UNUSED rcsid[] = "$Id$";
 # define NAME_ROUTINE_F(x) x
 # define NAME_ROUTINE_C2F(x) CtoF77(x)
 #endif
+
+/*
+  MPICH 1.2.6/7 (not 1.2.7p1) contains a silly bug where
+  MPI_Comm_create/split/dup also invoke MPI_Allreduce directly (not
+  PMPI_Allreduce) and gets instrumentend when it shouldn't. The following code
+  is to circumvent the problem
+*/
+#if defined(MPI_VERSION) && defined(MPI_SUBVERSION) && defined(MPICH_NAME)
+# if MPI_VERSION == 1 && MPI_SUBVERSION == 2 && MPICH_NAME == 1
+#  define MPICH_1_2_Comm_Allreduce_bugfix /* we can control the subsubversion */
+static int Extrae_MPICH12_COMM_inside = FALSE;
+# endif
+#endif
+
 
 unsigned int MPI_NumOpsGlobals = 0;
 unsigned int MPI_CurrentOpGlobal = 0;
@@ -697,6 +713,7 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	MPI_Fint *ierror)
 #endif
 {
+	int trace_it = mpitrace_on;
 	int result;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
@@ -716,7 +733,11 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	}
 	else MPI_CurrentOpGlobal = 0;
 
-  if (mpitrace_on)
+#if defined(MPICH_1_2_Comm_Allreduce_bugfix)
+	trace_it = trace_it && !Extrae_MPICH12_COMM_inside;
+#endif
+
+  if (trace_it)
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
@@ -1181,6 +1202,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
+	int check = mpitrace_on;
 	int result;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
@@ -1539,11 +1561,19 @@ void NAME_ROUTINE_C2F(mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
 {
   if (mpitrace_on)
   {
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = TRUE;
+#endif
+
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PMPI_Comm_Create_Wrapper (comm, group, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
+
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = FALSE;
+#endif
   }
   else
     CtoF77 (pmpi_comm_create) (comm, group, newcomm, ierror);
@@ -1564,11 +1594,19 @@ void NAME_ROUTINE_C2F(mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 {
   if (mpitrace_on)
   {
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = TRUE;
+#endif
+
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PMPI_Comm_Dup_Wrapper (comm, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
+
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = FALSE;
+#endif
   }
   else
     CtoF77 (pmpi_comm_dup) (comm, newcomm, ierror);
@@ -1590,11 +1628,19 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
 {
   if (mpitrace_on)
   {
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = TRUE;
+#endif
+
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     PMPI_Comm_Split_Wrapper (comm, color, key, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
+
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = FALSE;
+#endif
   }
   else
     CtoF77 (pmpi_comm_split) (comm, color, key, newcomm, ierror);
@@ -2797,6 +2843,7 @@ int NAME_ROUTINE_C(MPI_Reduce_scatter) (void *sendbuf, void *recvbuf,
 int NAME_ROUTINE_C(MPI_Allreduce) (void *sendbuf, void *recvbuf, int count,
 	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {
+	int trace_it = mpitrace_on;
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
@@ -2815,7 +2862,11 @@ int NAME_ROUTINE_C(MPI_Allreduce) (void *sendbuf, void *recvbuf, int count,
 	}
 	else MPI_CurrentOpGlobal = 0;
 
-	if (mpitrace_on)
+#if defined(MPICH_1_2_Comm_Allreduce_bugfix)
+	trace_it = trace_it && !Extrae_MPICH12_COMM_inside;
+#endif
+
+	if (trace_it)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
@@ -3534,11 +3585,19 @@ int NAME_ROUTINE_C(MPI_Comm_create) (MPI_Comm comm, MPI_Group group,
 	int res;
 	if (mpitrace_on)
 	{
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = TRUE;
+#endif
+
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
 		res = MPI_Comm_create_C_Wrapper (comm, group, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
+
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = FALSE;
+#endif
 		return res;
 	}
 	else
@@ -3553,11 +3612,19 @@ int NAME_ROUTINE_C(MPI_Comm_dup) (MPI_Comm comm, MPI_Comm *newcomm)
 	int res;
 	if (mpitrace_on)
 	{
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = TRUE;
+#endif
+
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
     res = MPI_Comm_dup_C_Wrapper (comm, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
+
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = FALSE;
+#endif
 		return res;
 	}
   else
@@ -3573,11 +3640,19 @@ int NAME_ROUTINE_C(MPI_Comm_split) (MPI_Comm comm, int color, int key,
 	int res;
 	if (mpitrace_on)
 	{
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = TRUE;
+#endif
+
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
 		res = MPI_Comm_split_C_Wrapper (comm, color, key, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
+
+#ifdef MPICH_1_2_Comm_Allreduce_bugfix
+		Extrae_MPICH12_COMM_inside = FALSE;
+#endif
 		return res;
 	}
 	else
