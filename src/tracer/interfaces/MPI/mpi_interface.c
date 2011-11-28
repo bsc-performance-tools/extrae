@@ -1200,7 +1200,6 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
-	int check = mpitrace_on;
 	int result;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
