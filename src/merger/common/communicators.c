@@ -54,7 +54,7 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
   unsigned long long current_time, unsigned int cpu, unsigned int ptask,
   unsigned int task, unsigned int thread, FileSet_t * fset)
 {
-	TipusComunicador nou_com;
+	TipusComunicador new_comm;
 	unsigned int i = 0;
 	unsigned int foo;
 	unsigned int EvType = Get_EvEvent (current_event);
@@ -62,17 +62,17 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 	UNREFERENCED_PARAMETER(cpu);
 
 	/* New communicator definition starts */
-	nou_com.id = Get_EvComm (current_event);
-	nou_com.num_tasks = Get_EvSize (current_event);
-	nou_com.tasks = (int*) malloc(sizeof(int)*nou_com.num_tasks);
-	if (NULL == nou_com.tasks)
+	new_comm.id = Get_EvComm (current_event);
+	new_comm.num_tasks = Get_EvSize (current_event);
+	new_comm.tasks = (int*) malloc(sizeof(int)*new_comm.num_tasks);
+	if (NULL == new_comm.tasks)
 	{
 		fprintf (stderr, "mpi2prv: Can't allocate memory for a COMM SELF alias\n");
 		fflush (stderr);
 		exit (-1);
 	}
 #if defined(DEBUG_COMMUNICATORS)
-	fprintf (stderr, "DEBUG: New comm: id=%d, num_tasks=%d\n", nou_com.id, nou_com.num_tasks);
+	fprintf (stderr, "DEBUG: New comm: id=%d, num_tasks=%d\n", new_comm.id, new_comm.num_tasks);
 #endif
 
 	/* Process each communicator member */
@@ -80,43 +80,46 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 	if (current_event != NULL)
 		EvType = Get_EvEvent (current_event);
 
-	while (i < nou_com.num_tasks && current_event != NULL && 
+	while (i < new_comm.num_tasks && current_event != NULL && 
         (EvType == MPI_RANK_CREACIO_COMM_EV || EvType == FLUSH_EV))
 	{
 		if (EvType == MPI_RANK_CREACIO_COMM_EV)
 		{
 			/* Save this task as member of the communicator */
-			nou_com.tasks[i] = Get_EvValue (current_event);
+			new_comm.tasks[i] = Get_EvValue (current_event);
 #if defined(DEBUG_COMMUNICATORS)
-			fprintf (stderr, "  -- task %d\n", nou_com.tasks[i]);
+			fprintf (stderr, "  -- task %d\n", new_comm.tasks[i]);
 #endif
 			i++;
 		}
-		current_event = GetNextEvent_FS (fset, &foo, &ptask, &task, &thread);
-		if (current_event != NULL)
-			EvType = Get_EvEvent (current_event);
+		if (i < new_comm.num_tasks)
+		{
+			current_event = GetNextEvent_FS (fset, &foo, &ptask, &task, &thread);
+			if (current_event != NULL)
+				EvType = Get_EvEvent (current_event);
+		}
 	}
 
 	/* End of communicator definition. Assign an alias for this communicator. */
-	if (i != nou_com.num_tasks)
+	if (i != new_comm.num_tasks)
 	{
 		unsigned long long tmp_time = 0;
 		if (current_event != NULL) tmp_time = Get_EvTime(current_event);
 		fprintf (stderr, "mpi2prv: Error: Incorrect communicator definition! (%d out of %d definitions)\n"
 			"EvType: %lld, Time: %lld, ptask: %d, task: %d, thread: %d\n",
-			i, nou_com.num_tasks, EvType, tmp_time, ptask, task, thread);
+			i, new_comm.num_tasks, EvType, tmp_time, ptask, task, thread);
 		exit (0);
 	}
 	else
 	{
 #if defined(PARALLEL_MERGE)
-		AddCommunicator (ptask, task, 0, nou_com.id, nou_com.num_tasks, nou_com.tasks);
+		AddCommunicator (ptask, task, 0, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
-		afegir_comunicador (&nou_com, ptask, task);
+		afegir_comunicador (&new_comm, ptask, task);
 #endif
 	}
 
-	free (nou_com.tasks);
+	free (new_comm.tasks);
 
 	return i;
 }
@@ -141,59 +144,66 @@ int GenerateAliesComunicator (
 			EvCommType);
 #endif
 
+		if (PRV_SEMANTICS == traceformat)
+			if (Get_EvAux (current_event)) /* Shall we emit this into tracefile? */ 
+			{
+				trace_paraver_state (cpu, ptask, task, thread, current_time);
+				trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EVT_BEGIN);
+			}
+
 		/* Build COMM WORLD communicator */
 		if (MPI_COMM_WORLD_ALIAS == EvCommType)
 		{
-			TipusComunicador nou_com;
+			TipusComunicador new_comm;
 			unsigned int i;
 
 #if defined(DEBUG_COMMUNICATORS)
 			fprintf (stderr, "DEBUG: defining MPI_COMM_WORLD (%d members)\n", Get_EvSize (current_event));
 #endif
 
-			nou_com.id = Get_EvComm (current_event);
-			nou_com.num_tasks = Get_EvSize (current_event);
-			nou_com.tasks = (int*) malloc(sizeof(int)*nou_com.num_tasks);
-			if (NULL == nou_com.tasks)
+			new_comm.id = Get_EvComm (current_event);
+			new_comm.num_tasks = Get_EvSize (current_event);
+			new_comm.tasks = (int*) malloc(sizeof(int)*new_comm.num_tasks);
+			if (NULL == new_comm.tasks)
 			{
 				fprintf (stderr, "mpi2prv: Can't allocate memory for a COMM WORLD alias\n");
 				fflush (stderr);
 				exit (-1);
 			}
-			for (i = 0; i < nou_com.num_tasks; i++)
-				nou_com.tasks[i] = i;
+			for (i = 0; i < new_comm.num_tasks; i++)
+				new_comm.tasks[i] = i;
 #if defined(PARALLEL_MERGE)
-			AddCommunicator (ptask, task, MPI_COMM_WORLD_ALIAS, nou_com.id, nou_com.num_tasks, nou_com.tasks);
+			AddCommunicator (ptask, task, MPI_COMM_WORLD_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
-			afegir_comunicador (&nou_com, ptask, task);
+			afegir_comunicador (&new_comm, ptask, task);
 #endif
-			free (nou_com.tasks);
+			free (new_comm.tasks);
 		}
 		/* Build COMM SELF communicator */
 		else if (MPI_COMM_SELF_ALIAS == EvCommType)
 		{
-			TipusComunicador nou_com;
+			TipusComunicador new_comm;
 
 #if defined(DEBUG_COMMUNICATORS)
 			fprintf (stderr, "DEBUG: defining MPI_COMM_SELF (%d members)\n", Get_EvSize (current_event));
 #endif
 
-			nou_com.id = Get_EvComm (current_event);
-			nou_com.num_tasks = 1;
-			nou_com.tasks = (int*) malloc(sizeof(int)*nou_com.num_tasks);
-			if (NULL == nou_com.tasks)
+			new_comm.id = Get_EvComm (current_event);
+			new_comm.num_tasks = 1;
+			new_comm.tasks = (int*) malloc(sizeof(int)*new_comm.num_tasks);
+			if (NULL == new_comm.tasks)
 			{
 				fprintf (stderr, "mpi2prv: Can't allocate memory for a COMM SELF alias\n");
 				fflush (stderr);
 				exit (-1);
 			}
-			nou_com.tasks[0] = task-1;
+			new_comm.tasks[0] = task-1;
 #if defined(PARALLEL_MERGE)
-			AddCommunicator (ptask, task, MPI_COMM_SELF_ALIAS, nou_com.id, nou_com.num_tasks, nou_com.tasks);
+			AddCommunicator (ptask, task, MPI_COMM_SELF_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
-			afegir_comunicador (&nou_com, ptask, task);
+			afegir_comunicador (&new_comm, ptask, task);
 #endif
-			free (nou_com.tasks);
+			free (new_comm.tasks);
 		}
 		else
 		{
@@ -201,18 +211,15 @@ int GenerateAliesComunicator (
 			fprintf (stderr, "DEBUG: defining new COMM (%d members id = %d)\n", Get_EvSize(current_event), Get_EvComm (current_event));
 #endif
 
-			if (PRV_SEMANTICS == traceformat)
-			{
-				trace_paraver_state (cpu, ptask, task, thread, current_time);
-				trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EVT_BEGIN);
-			}
-
 			i = BuildCommunicatorFromFile (current_event, current_time, cpu, ptask, task,
 				thread, fset);
-
-			if (PRV_SEMANTICS == traceformat)
-				trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EVT_END);
 		}
+	}
+	else if (EvValue == EVT_END)
+	{
+		if (PRV_SEMANTICS == traceformat)
+			if (Get_EvAux (current_event)) /* Shall we emit this into tracefile? */
+				trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EVT_END);
 	}
 
 	*num_events = i+1;

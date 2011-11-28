@@ -121,7 +121,8 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen);
 #if defined(DEAD_CODE) /* This is outdated */
 static void Gather_MPITS(void);
 #endif
-static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm, UINT64 init_time, UINT64 end_time);
+static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm,
+	UINT64 init_time, UINT64 end_time, int in_trace);
 
 /* int mpit_gathering_enabled = FALSE; */
 
@@ -149,54 +150,45 @@ static int P2P_Bytes_Sent        = 0;      /* Sent bytes by point to point MPI o
 static int P2P_Bytes_Recv        = 0;      /* Recv bytes by point to point MPI operations */
 static int GLOBAL_Bytes_Sent     = 0;      /* Sent "bytes" by MPI global operations */
 static int GLOBAL_Bytes_Recv     = 0;      /* Recv "bytes" by MPI global operations */
-static int P2P_Communications    = 0;  /* Number of point to point communications */
-static int GLOBAL_Communications = 0;  /* Number of global operations */
-static int Elapsed_Time_In_MPI   = 0;  /* Time inside MPI calls */
-
-/****************************************************************************
- *** Variables de tamany necessari per accedir a camps de resulstats Fortran
- ****************************************************************************/
+static int P2P_Communications    = 0;      /* Number of point to point communications */
+static int GLOBAL_Communications = 0;      /* Number of global operations */
+static int Elapsed_Time_In_MPI   = 0;      /* Time inside MPI calls */
 
 #if defined(IS_BG_MACHINE)
-static void BG_gettopology (void)
+static void BG_gettopology (UINT64 btimestamp, UINT64 etimestamp)
 {
 #if defined(IS_BGL_MACHINE)
 	BGLPersonality personality;
 	unsigned personality_size = sizeof (personality);
-	iotimer_t t1, t2;
 
 	rts_get_personality (&personality, personality_size);
-	t1 = TIME;
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_X, personality.xCoord);
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Y, personality.yCoord);
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Z, personality.zCoord);
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_PROCESSOR_ID, rts_get_processor_id ());
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_X, personality.xCoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Y, personality.yCoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Z, personality.zCoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, rts_get_processor_id ());
 #endif
 
 #if defined(IS_BGP_MACHINE)
 	_BGP_Personality_t personality;
 	unsigned personality_size = sizeof (personality);
-	iotimer_t t1, t2;
 	
 	Kernel_GetPersonality (&personality, personality_size);
-	t1 = TIME;
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_X, BGP_Personality_xCoord(&personality));
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Y, BGP_Personality_yCoord(&personality));
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_TORUS_Z, BGP_Personality_zCoord(&personality));
-	TRACE_MISCEVENT (t1, USER_EV, BG_PERSONALITY_PROCESSOR_ID, BGP_Personality_rankInPset (&personality));
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_X, BGP_Personality_xCoord(&personality));
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Y, BGP_Personality_yCoord(&personality));
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Z, BGP_Personality_zCoord(&personality));
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, BGP_Personality_rankInPset (&personality));
 #endif
 
-	t2 = TIME;
-	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_TORUS_X, 0);
-	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_TORUS_Y, 0);
-	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_TORUS_Z, 0);
-	TRACE_MISCEVENT (t2, USER_EV, BG_PERSONALITY_PROCESSOR_ID, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_X, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_Y, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_Z, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, 0);
 }
 #endif
 
 #if defined(IS_MN_MACHINE)
 #define MAX_BUFFER 1024
-static void MN_gettopology (void) 
+static void MN_gettopology (UINT64 btimestamp, UINT64 etimestamp) 
 {
 	char hostname[MAX_BUFFER];
 	int rc;
@@ -206,29 +198,31 @@ static void MN_gettopology (void)
 
 	if (gethostname(hostname, MAX_BUFFER - 1) == 0)
 	{
-		iotimer_t temps = TIME;
-
 		rc = sscanf(hostname, "s%dc%db%d", &server, &center, &blade);
 		if (rc != 3) return;
 		linear_host = server*(4*14) + (center - 1) * 14 + (blade - 1);
 		linecard = linear_host / 16;
 		host = linear_host % 16;
 
-		TRACE_MISCEVENT(temps, USER_EV, MN_LINEAR_HOST_EVENT, linear_host);
-		TRACE_MISCEVENT(temps, USER_EV, MN_LINECARD_EVENT, linecard);
-		TRACE_MISCEVENT(temps, USER_EV, MN_HOST_EVENT, host);
+		TRACE_MISCEVENT(btimestamp, USER_EV, MN_LINEAR_HOST_EVENT, linear_host);
+		TRACE_MISCEVENT(btimestamp, USER_EV, MN_LINECARD_EVENT, linecard);
+		TRACE_MISCEVENT(btimestamp, USER_EV, MN_HOST_EVENT, host);
+
+		TRACE_MISCEVENT(etimestamp, USER_EV, MN_LINEAR_HOST_EVENT, linear_host);
+		TRACE_MISCEVENT(etimestamp, USER_EV, MN_LINECARD_EVENT, linecard);
+		TRACE_MISCEVENT(etimestamp, USER_EV, MN_HOST_EVENT, host);
 	}
 	else
 		fprintf(stderr, PACKAGE_NAME": could not get hostname, is it longer than %d bytes?\n", (MAX_BUFFER-1));
 }
 #endif
 
-static void GetTopology (void)
+static void GetTopology (UINT64 btimestamp, UINT64 etimestamp)
 {
 #if defined(IS_MN_MACHINE)
-	MN_gettopology();
+	MN_gettopology(btimestamp, etimestamp);
 #elif defined(IS_BG_MACHINE)
-	BG_gettopology();
+	BG_gettopology(btimestamp, etimestamp);
 #endif
 }
 
@@ -835,11 +829,13 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 		return;
 
 	/* Annotate topologies (if available) */
-	GetTopology();
+	GetTopology(temps_inici_MPI_Init, temps_final_MPI_Init);
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, temps_inici_MPI_Init, temps_final_MPI_Init);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, temps_inici_MPI_Init, temps_final_MPI_Init);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
 }
 
 #if defined(MPI_HAS_INIT_THREAD_F)
@@ -924,11 +920,13 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 		return;
 
 	/* Annotate topologies (if available) */
-	GetTopology();
+	GetTopology(temps_inici_MPI_Init, temps_final_MPI_Init);
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD,temps_inici_MPI_Init, temps_final_MPI_Init);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF,temps_inici_MPI_Init, temps_final_MPI_Init);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD,temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF,temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
 }
 #endif /* MPI_HAS_INIT_THREAD_F */
 
@@ -3126,7 +3124,7 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{	
 		MPI_Comm comm_id = MPI_Comm_f2c(*newcomm);
-		Trace_MPI_Communicator (MPI_COMM_CREATE_EV, comm_id, entry_time, TIME);
+		Trace_MPI_Communicator (MPI_COMM_CREATE_EV, comm_id, entry_time, TIME, TRUE);
 	}
 }
 
@@ -3146,7 +3144,7 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*newcomm);
-		Trace_MPI_Communicator (MPI_COMM_DUP_EV, comm_id, entry_time, TIME);
+		Trace_MPI_Communicator (MPI_COMM_DUP_EV, comm_id, entry_time, TIME, TRUE);
 	}
 }
 
@@ -3167,7 +3165,7 @@ void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*newcomm);
-		Trace_MPI_Communicator (MPI_COMM_SPLIT_EV, comm_id, entry_time, TIME);
+		Trace_MPI_Communicator (MPI_COMM_SPLIT_EV, comm_id, entry_time, TIME, TRUE);
 	}
 }
 
@@ -3675,7 +3673,7 @@ void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
 	if (*ierror == MPI_SUCCESS && *comm_new != comm_null)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*comm_new);
-		Trace_MPI_Communicator (MPI_CART_SUB_EV, comm_id, entry_time, TIME);
+		Trace_MPI_Communicator (MPI_CART_SUB_EV, comm_id, entry_time, TIME, TRUE);
 	}
 }
 
@@ -3692,7 +3690,7 @@ void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 	if (*ierror == MPI_SUCCESS && *comm_cart != comm_null)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*comm_cart);
-		Trace_MPI_Communicator (MPI_CART_CREATE_EV, comm_id, entry_time, TIME);
+		Trace_MPI_Communicator (MPI_CART_CREATE_EV, comm_id, entry_time, TIME, TRUE);
 	}
 }
 
@@ -4069,11 +4067,13 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		return val;
 
 	/* Annotate topologies (if available) */
-	GetTopology();
+	GetTopology(temps_inici_MPI_Init, temps_final_MPI_Init);
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, temps_inici_MPI_Init, temps_final_MPI_Init);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, temps_inici_MPI_Init, temps_final_MPI_Init);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
 
 	return val;
 }
@@ -4148,11 +4148,13 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		return val;
 
 	/* Annotate topologies (if available) */
-	GetTopology();
+	GetTopology(temps_inici_MPI_Init, temps_final_MPI_Init);
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, temps_inici_MPI_Init, temps_final_MPI_Init);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, temps_inici_MPI_Init, temps_final_MPI_Init);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, temps_inici_MPI_Init,
+	  temps_final_MPI_Init, FALSE);
 
 	return val;
 }
@@ -6262,7 +6264,7 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 
   ierror = PMPI_Comm_create (comm, group, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (MPI_COMM_CREATE_EV, *newcomm, entry_time, TIME);
+    Trace_MPI_Communicator (MPI_COMM_CREATE_EV, *newcomm, entry_time, TIME, FALSE);
 
   return ierror;
 }
@@ -6279,7 +6281,7 @@ int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm)
 
   ierror = PMPI_Comm_dup (comm, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (MPI_COMM_DUP_EV, *newcomm, entry_time, TIME);
+    Trace_MPI_Communicator (MPI_COMM_DUP_EV, *newcomm, entry_time, TIME, FALSE);
 
   return ierror;
 }
@@ -6296,7 +6298,7 @@ int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newco
 
   ierror = PMPI_Comm_split (comm, color, key, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (MPI_COMM_SPLIT_EV, *newcomm, entry_time, TIME);
+    Trace_MPI_Communicator (MPI_COMM_SPLIT_EV, *newcomm, entry_time, TIME, FALSE);
 
   return ierror;
 }
@@ -6451,7 +6453,7 @@ int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
 	  comm_cart);
 
 	if (ierror == MPI_SUCCESS && *comm_cart != MPI_COMM_NULL)
-		Trace_MPI_Communicator (MPI_CART_CREATE_EV, *comm_cart, entry_time, TIME);
+		Trace_MPI_Communicator (MPI_CART_CREATE_EV, *comm_cart, entry_time, TIME, FALSE);
 
 	return ierror;
 }
@@ -6465,7 +6467,7 @@ int MPI_Cart_sub_C_Wrapper (MPI_Comm comm, int *remain_dims, MPI_Comm *comm_new)
 	int ierror = PMPI_Cart_sub (comm, remain_dims, comm_new);
 
 	if (ierror == MPI_SUCCESS && *comm_new != MPI_COMM_NULL)
-		Trace_MPI_Communicator (MPI_CART_SUB_EV, *comm_new, entry_time, TIME);
+		Trace_MPI_Communicator (MPI_CART_SUB_EV, *comm_new, entry_time, TIME, FALSE);
 
 	return ierror;
 }
@@ -7560,7 +7562,8 @@ int is_MPI_World_Comm (MPI_Comm comm)
 /******************************************************************************
  ***  Trace_MPI_Communicator
  ******************************************************************************/
-static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm, UINT64 init_time, UINT64 end_time)
+static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm,
+	UINT64 init_time, UINT64 end_time, int trace)
 {
 	/* Store in the tracefile the definition of the communicator.
 	   If the communicator is self/world, store an alias, otherwise store the
@@ -7593,7 +7596,7 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm, UINT64 in
 		ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
 		MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 
-		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, EMPTY);
+		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, trace);
 
 		/* Dump each of the task ids */
 		for (i = 0; i < num_tasks; i++)
@@ -7610,13 +7613,13 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm, UINT64 in
 	else if (is_comm_world)
 	{
 		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, MPI_COMM_WORLD_ALIAS,
-			NumOfTasks, EMPTY, newcomm, EMPTY);
+			NumOfTasks, EMPTY, newcomm, trace);
 	}
 	else if (is_comm_self)
 	{
 		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, MPI_COMM_SELF_ALIAS,
-			1, EMPTY, newcomm, EMPTY);
+			1, EMPTY, newcomm, trace);
 	}
 
-	FORCE_TRACE_MPIEVENT (end_time, tipus_event, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, EMPTY);
+	FORCE_TRACE_MPIEVENT (end_time, tipus_event, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, trace);
 }
