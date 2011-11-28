@@ -51,17 +51,17 @@ static void show_current (event_t * c, UINT64 max_time)
 	if (c->time < max_time) /* Check whether this event is back in time */
 	{
 #if SIZEOF_LONG == 8
-		fprintf (stdout, "EV: %d VAL: %lu [0x%lx] TIME: %lu (delta to max = %lu)", c->event, c->value, c->value, c->time, max_time-c->time);
+		fprintf (stdout, "EV: %d VAL: %lu [0x%lx] TIME: %lu (delta = %lu) ", c->event, c->value, c->value, c->time, max_time-c->time);
 #else
-		fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu (delta to max = %llu)", c->event, c->value, c->value, c->time, max_time-c->time);
+		fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu (delta = %llu) ", c->event, c->value, c->value, c->time, max_time-c->time);
 #endif
 	}
-	else
+	else 
 	{
 #if SIZEOF_LONG == 8
-		fprintf (stdout, "EV: %d VAL: %lu [0x%lx] TIME: %lu", c->event, c->value, c->value, c->time);
+		fprintf (stdout, "EV: %d VAL: %lu [0x%lx] TIME: %lu %s", c->event, c->value, c->value, c->time, (c->time==max_time)?"+ ":"");
 #else
-		fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu", c->event, c->value, c->value, c->time);
+		fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu %s", c->event, c->value, c->value, c->time, (c->time==max_time)?"+ ":"");
 #endif
 	}
 
@@ -73,20 +73,26 @@ static void show_current (event_t * c, UINT64 max_time)
 	    c->event == MPI_BSEND_EV || c->event == MPI_IBSEND_EV ||
 	    c->event == MPI_RSEND_EV || c->event == MPI_IRSEND_EV)
 	{
-		fprintf (stdout, " TARGET:%u SIZE:%d TAG:%d COMM:%d AUX:%lld\n",
+		fprintf (stdout, "TARGET:%u SIZE:%d TAG:%d COMM:%d AUX:%lld\n",
 		  c->param.mpi_param.target,
 		  c->param.mpi_param.size, c->param.mpi_param.tag,
 		  c->param.mpi_param.comm, c->param.mpi_param.aux);
 	}
 	else if (c->event == USER_SEND_EV || c->event == USER_RECV_EV)
 	{
-		fprintf (stdout, " TARGET:%u SIZE:%d TAG:%d AUX:%lld\n",
+		fprintf (stdout, "TARGET:%u SIZE:%d TAG:%d AUX:%lld\n",
 		  c->param.mpi_param.target, c->param.mpi_param.size,
 			c->param.mpi_param.tag, c->param.mpi_param.aux);
 	}
+	else if (c->event == MPI_COMM_SPLIT_EV || c->event == MPI_COMM_DUP_EV ||
+	         c->event == MPI_COMM_CREATE_EV || c->event == MPI_CART_CREATE_EV ||
+	         c->event == MPI_CART_SUB_EV)
+	{
+		fprintf (stdout, "COMM DEF SIZE: %d COMM: %d\n", c->param.mpi_param.size, c->param.mpi_param.comm);
+	}
 	else if (c->event == MPI_INIT_EV && c->value == EVT_END)
 	{
-		fprintf (stdout, " OPTIONS: 0x%08llx\n", c->param.mpi_param.aux);
+		fprintf (stdout, "OPTIONS: 0x%08llx\n", c->param.mpi_param.aux);
 	}
 #if USE_HARDWARE_COUNTERS
 	else if (c->event == HWC_DEF_EV)
@@ -94,7 +100,7 @@ static void show_current (event_t * c, UINT64 max_time)
 		int def_num_counters = 0;
 		int i;
 
-		fprintf (stdout, " HWC definition { ");
+		fprintf (stdout, "HWC definition { ");
 		for (i = 0; i < MAX_HWC; i++)
 		{
 			fprintf (stdout, "0x%llx ", c->HWCValues[i]);
@@ -131,11 +137,11 @@ void make_dump (FileSet_t *fset)
 		{
 			if (Get_EvTime(e) < last_time)
 				fprintf (stdout, "** WARNING clock went backwards?\n");
-			max_time = MAX(Get_EvTime(e), max_time);
 			show_current (e, max_time);
 
 			StepOne_FS (&fset->files[i]);
 			last_time = Get_EvTime(e);
+			max_time = MAX(Get_EvTime(e), max_time);
 			e = Current_FS (&fset->files[i]);
 		}
 		i++;
