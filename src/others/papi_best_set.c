@@ -217,7 +217,7 @@ void CheckMaxEventSet (int ncounters, unsigned *counters)
 	fprintf (stdout, "Combinations maximizing the number of compatible counters:\n");
 	for (k = 0; k < nmaxs; k++)
 	{
-		fprintf (stdout, "* Combination #%d: ", k+1);
+		fprintf (stdout, "* Combination #%d (set of %d): ", k+1, Bitmask_CountActiveBits (maxs[k], ncounters));
 		for (j = 0, i = 0; i < ncounters; i++)
 			if (maxs[k][i])
 			{
@@ -280,7 +280,7 @@ void CheckInOrder (int ncounters, unsigned *counters)
 	}
 
 	if (naddedcounters > 0)
-		fprintf (stdout, "\n\n");
+		fprintf (stdout, " (set of %d counters)\n\n", naddedcounters);
 	else
 		fprintf (stdout, "NONE!\n\n");
 
