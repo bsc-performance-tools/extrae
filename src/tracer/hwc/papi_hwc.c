@@ -496,7 +496,7 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 	SamplingSupport = TRUE;
 #endif
 
-	thread_identifier_function = get_trace_thread_number_function();
+	thread_identifier_function = Extrae_get_thread_number_function();
 
 	if (thread_identifier_function != NULL)
 	{

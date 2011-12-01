@@ -212,6 +212,16 @@ The extended API contains the following routines:
 	This routine changes the thread identifier so as to be vthread in the final tracefile. {\em Improper use of this routine may result in corrupt tracefiles.}
 	\item {\tt void Extrae\_suspend\_virtual\_thread (void);}\\
 	This routine recovers the original thread identifier (given by routines like pthread\_self or omp\_get\_thread\_num, for instance).
+	\item {\tt void Extrae\_set\_threadid\_function (unsigned (*threadid\_function)(void));}\\
+	Defines the routine that will be used as a thread identifier inside the tracing facility.
+	\item {\tt void Extrae\_set\_numthreads\_function (unsigned (*numthreads\_function)(void));}\\
+	Defines the routine that will count all the executing threads inside the tracing facility.
+	\item {\tt void Extrae\_set\_taskid\_function (unsigned (*taskid\_function)(void));}\\
+	Defines the routine that will be used as a task identifier inside the tracing facility.
+	\item {\tt void Extrae\_set\_numtasks\_function (unsigned (*numtasks\_function)(void));}\\
+	Defines the routine that will count all the executing tasks inside the tracing facility.
+	\item {\tt void Extrae\_set\_barrier\_tasks\_function (void (*barriertasks\_function)(void));}\\
+	Establishes the barrier routine among tasks. It is needed for synchronization purposes.
 \end{itemize}
 
 \section{Special considerations for Cell Broadband Engine tracing package}

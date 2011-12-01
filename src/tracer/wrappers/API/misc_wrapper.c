@@ -295,19 +295,13 @@ void Extrae_init_Wrapper (void)
 	iotimer_t temps_init, temps_fini;
 
 	mptrace_IsMPI = FALSE;
-#if !defined(NANOS_SUPPORT)
-	NumOfTasks = 1;
-#else
-	NumOfTasks = nanos_extrae_num_nodes();
-	TaskID_Setup (nanos_extrae_node_id());
-#endif
 
 	config_file = getenv ("EXTRAE_CONFIG_FILE");
 	if (config_file == NULL)
 		config_file = getenv ("MPTRACE_CONFIG_FILE");
 
 	/* Initialize the backend */
-	if (!Backend_preInitialize (TASKID, NumOfTasks, config_file))
+	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
 		return;
 
 	/* Generate a tentative file list */
@@ -316,16 +310,18 @@ void Extrae_init_Wrapper (void)
 	temps_init = TIME;
 
 #if defined(NANOS_SUPPORT)
+/* HSG
+	is this needed?
 	nanos_extrae_instrumentation_barrier();
+*/
 #endif
 
 	/* Take the time */
 	temps_fini = TIME;
 
 	/* End initialization of the backend */
-	if (!Backend_postInitialize (TASKID, NumOfTasks, temps_init, temps_fini, NULL))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_init, temps_fini, NULL))
 		return;
-
 }
 
 void Extrae_fini_Wrapper (void)
@@ -398,10 +394,14 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 	/* Finally emit user communications */
 	for (i = 0; i < ptr->nCommunications ; i++)
 	{
+		unsigned partner = ptr->Communications[i].partner;
+		if (partner == EXTRAE_COMM_PARTNER_MYSELF)
+			partner = Extrae_get_task_number();
+
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
 		  (ptr->Communications[i].type==EXTRAE_USER_SEND)?USER_SEND_EV:USER_RECV_EV,
-		  ptr->Communications[i].partner, ptr->Communications[i].size,
-		  ptr->Communications[i].tag, ptr->Communications[i].id) 
+		  partner, ptr->Communications[i].size, ptr->Communications[i].tag,
+		  ptr->Communications[i].id) 
 	}
 }
 

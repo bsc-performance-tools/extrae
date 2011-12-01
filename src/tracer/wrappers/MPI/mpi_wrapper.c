@@ -117,6 +117,39 @@ static char UNUSED rcsid[] = "$Id$";
 		exit (1); \
 	}
 
+static unsigned Extrae_MPI_NumTasks (void)
+{
+	static int run = FALSE;
+	static int mysize;
+
+	if (!run)
+	{
+		PMPI_Comm_size (MPI_COMM_WORLD, &mysize);
+		run = TRUE;
+	}
+
+	return (unsigned) mysize;
+}
+
+static unsigned Extrae_MPI_TaskID (void)
+{
+	static int run = FALSE;
+	static int myrank;
+
+	if (!run)
+	{
+		PMPI_Comm_rank (MPI_COMM_WORLD, &myrank);
+		run = TRUE;
+	}
+
+	return (unsigned) myrank;
+}
+
+static void Extrae_MPI_Barrier (void)
+{
+	PMPI_Barrier (MPI_COMM_WORLD);
+}
+
 static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen);
 #if defined(DEAD_CODE) /* This is outdated */
 static void Gather_MPITS(void);
@@ -451,20 +484,20 @@ static void InitMPICommunicators (void)
 	int i;
 
 	/** Inicialitzacio de les variables per la creacio de comunicadors **/
-	ranks_global = malloc (sizeof(int)*NumOfTasks);
+	ranks_global = malloc (sizeof(int)*Extrae_get_num_tasks());
 	if (ranks_global == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_global'");
 		exit (0);
 	}
-	ranks_aux = malloc (sizeof(int)*NumOfTasks);
+	ranks_aux = malloc (sizeof(int)*Extrae_get_num_tasks());
 	if (ranks_aux == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_aux'");
 		exit (0);
 	}
 
-	for (i = 0; i < NumOfTasks; i++)
+	for (i = 0; i < Extrae_get_num_tasks(); i++)
 		ranks_global[i] = i;
 
 	PMPI_Comm_group (MPI_COMM_WORLD, &grup_global);
@@ -509,13 +542,13 @@ static void Gather_Nodes_Info (void)
 			hostname[i] = '_';
 
 	/* Share information among all tasks */
-	buffer_names = (char*) malloc (sizeof(char) * NumOfTasks * MPI_MAX_PROCESSOR_NAME);
+	buffer_names = (char*) malloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);
 	rc = PMPI_Allgather (hostname, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, buffer_names, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD);
 	MPI_CHECK(rc, PMPI_Gather);
 
 	/* Store the information in a global array */
-	TasksNodes = (char **)malloc (NumOfTasks * sizeof(char *));
-	for (i=0; i<NumOfTasks; i++)
+	TasksNodes = (char **)malloc (Extrae_get_num_tasks() * sizeof(char *));
+	for (i=0; i<Extrae_get_num_tasks(); i++)
 	{
 		char *tmp = &buffer_names[i*MPI_MAX_PROCESSOR_NAME];
 		TasksNodes[i] = (char *)malloc((strlen(tmp)+1) * sizeof(char));
@@ -540,7 +573,7 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 
 	if (TASKID == 0)
 	{
-		buffer = (unsigned *) malloc (sizeof(unsigned) * NumOfTasks * 3);
+		buffer = (unsigned *) malloc (sizeof(unsigned) * Extrae_get_num_tasks() * 3);
 		/* we store pid, nthreads and taskid on each position */
 
 		if (buffer == NULL)
@@ -566,7 +599,7 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 		if (filedes < 0)
 			return -1;
 
-		for (i = 0; i < NumOfTasks; i++)
+		for (i = 0; i < Extrae_get_num_tasks(); i++)
 		{
 			char tmpline[2048];
 			unsigned TID = buffer[i*3+0];
@@ -670,10 +703,10 @@ int generate_spu_file_list (int number_of_spus)
 
 	if (TASKID == 0)
 	{
-		buffer_threads = (int*) malloc (sizeof(int) * NumOfTasks);
-		buffer_numspus = (int*) malloc (sizeof(int) * NumOfTasks);
-		buffer_pids    = (int*) malloc (sizeof(int) * NumOfTasks);
-		buffer_names   = (char*) malloc (sizeof(char) * NumOfTasks * MPI_MAX_PROCESSOR_NAME);
+		buffer_threads = (int*) malloc (sizeof(int) * Extrae_get_num_tasks());
+		buffer_numspus = (int*) malloc (sizeof(int) * Extrae_get_num_tasks());
+		buffer_pids    = (int*) malloc (sizeof(int) * Extrae_get_num_tasks());
+		buffer_names   = (char*) malloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);
 	}
 
 	/* Share CELL count threads of each MPI task */
@@ -707,7 +740,7 @@ int generate_spu_file_list (int number_of_spus)
 
 		/* For each task, provide the line for each SPU thread. If the application
 		has other threads, skip those identifiers. */
-		for (i = 0; i < NumOfTasks; i++)
+		for (i = 0; i < Extrae_get_num_tasks(); i++)
 		{
 			char tmp_line[2048];
 
@@ -757,7 +790,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
 	int res;
-	MPI_Fint me, ret, comm, tipus_enter;
+	MPI_Fint ret, comm, tipus_enter;
 	iotimer_t temps_inici_MPI_Init, temps_final_MPI_Init;
 	char *config_file;
 
@@ -768,25 +801,21 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 
 	CtoF77 (pmpi_init) (ierror);
 
+	/* Setup callbacks for TASK identification and barrier execution */
+	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
+	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
+
 	/* OpenMPI does not allow us to do this before the MPI_Init! */
 	comm = MPI_Comm_c2f (MPI_COMM_WORLD);
 	tipus_enter = MPI_Type_c2f (MPI_INT);
 
-	CtoF77 (pmpi_comm_rank) (&comm, &me, &ret);
-	MPI_CHECK(ret, pmpi_comm_rank);
-
-	CtoF77 (pmpi_comm_size) (&comm, &NumOfTasks, &ret);
-	MPI_CHECK(ret, pmpi_comm_size);
-
 	InitMPICommunicators();
-
-	/* We have to gather the task id */ 
-	TaskID_Setup (me);
 
 #if defined(SAMPLING_SUPPORT)
 	/* If sampling is enabled, just stop all the processes at the same point
 	   and continue */
-	CtoF77 (pmpi_barrier) (&comm, &res);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
 #endif
 
 	config_file = getenv ("EXTRAE_CONFIG_FILE");
@@ -795,13 +824,13 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 
 	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, config_file);
+		config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Initialize the backend */
-	res = Backend_preInitialize (TASKID, NumOfTasks, config_file);
+	res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
@@ -811,21 +840,21 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Gather_Nodes_Info ();
 
 	/* Generate a tentative file list */
-	Generate_Task_File_List (NumOfTasks, TasksNodes);
+	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	temps_inici_MPI_Init = TIME;
 	
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END.
 	   Three consecutive barriers for a better synchronization (J suggested) */
-	CtoF77 (pmpi_barrier) (&comm, &res);
-	CtoF77 (pmpi_barrier) (&comm, &res);
-	CtoF77 (pmpi_barrier) (&comm, &res);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
+	Extrae_barrier_tasks();
+	Extrae_barrier_tasks();
 
 	initTracingTime = temps_final_MPI_Init = TIME;
 
 	/* End initialization of the backend  (put MPIINIT_EV { BEGIN/END } ) */
-	if (!Backend_postInitialize (me, NumOfTasks, temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
 		return;
 
 	/* Annotate topologies (if available) */
@@ -845,7 +874,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
-	unsigned int me, ret;
+	unsigned int ret;
 	int res;
 	MPI_Fint comm;
 	MPI_Fint tipus_enter;
@@ -862,25 +891,21 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 	CtoF77 (pmpi_init_thread) (required, provided, ierror);
 
+	/* Setup callbacks for TASK identification and barrier execution */
+	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
+	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
+
 	/* OpenMPI does not allow us to do this before the MPI_Init! */
 	comm = MPI_Comm_c2f (MPI_COMM_WORLD);
 	tipus_enter = MPI_Type_c2f (MPI_INT);
 
-	CtoF77 (pmpi_comm_rank) (&comm, &me, &ret);
-	MPI_CHECK(ret, pmpi_comm_rank);
-
-	CtoF77 (pmpi_comm_size) (&comm, &NumOfTasks, &ret);
-	MPI_CHECK(ret, pmpi_comm_size);
-
 	InitMPICommunicators();
-
-	/* We have to gather the task id */ 
-	TaskID_Setup (me);
 
 #if defined(SAMPLING_SUPPORT)
 	/* If sampling is enabled, just stop all the processes at the same point
 	   and continue */
-	CtoF77 (pmpi_barrier) (&comm, &res);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
 #endif
 
 	config_file = getenv ("EXTRAE_CONFIG_FILE");
@@ -889,13 +914,13 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, config_file);
+		config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Initialize the backend */
-	res = Backend_preInitialize (TASKID, NumOfTasks, config_file);
+	res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
@@ -905,18 +930,20 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	Gather_Nodes_Info ();
 
 	/* Generate a tentative file list */
-	Generate_Task_File_List (NumOfTasks, TasksNodes);
+	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	temps_inici_MPI_Init = TIME;
 	
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
-	CtoF77 (pmpi_barrier) (&comm, &res);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
+	Extrae_barrier_tasks();
+	Extrae_barrier_tasks();
 
 	initTracingTime = temps_final_MPI_Init = TIME;
 
 	/* End initialization of the backend  (put MPIINIT_EV { BEGIN/END } ) */
-	if (!Backend_postInitialize (me, NumOfTasks, temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
 		return;
 
 	/* Annotate topologies (if available) */
@@ -967,7 +994,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 #endif
 
 	/* Generate the final file list */
-	Generate_Task_File_List (NumOfTasks, TasksNodes);
+	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
 	Backend_Finalize ();
@@ -4000,7 +4027,7 @@ static int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
 
 int MPI_Init_C_Wrapper (int *argc, char ***argv)
 {
-	int val = 0, me, ret;
+	int val = 0, ret;
 	iotimer_t temps_inici_MPI_Init, temps_final_MPI_Init;
 	MPI_Comm comm = MPI_COMM_WORLD;
 	char *config_file;
@@ -4012,21 +4039,17 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 	val = PMPI_Init (argc, argv);
 
-	ret = PMPI_Comm_rank (comm, &me);
-	MPI_CHECK(ret, PMPI_Comm_rank);
+	/* Setup callbacks for TASK identification and barrier execution */
+	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
+	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 
-	ret = PMPI_Comm_size (comm, &NumOfTasks);
-	MPI_CHECK(ret, PMPI_Comm_size);
-
-	InitMPICommunicators ();
-
-	/* We have to gather the task id */ 
-	TaskID_Setup (me);
+	InitMPICommunicators();
 
 #if defined(SAMPLING_SUPPORT)
 	/* If sampling is enabled, just stop all the processes at the same point
 	   and continue */
-	PMPI_Barrier (MPI_COMM_WORLD);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
 #endif
 
 	config_file = getenv ("EXTRAE_CONFIG_FILE");
@@ -4035,35 +4058,35 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, config_file);
+		config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Initialize the backend (first step) */
-	if (!Backend_preInitialize (TASKID, NumOfTasks, config_file))
+	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
 		return val;
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
 	Gather_Nodes_Info ();
 
 	/* Generate a tentative file list */
-	Generate_Task_File_List (NumOfTasks, TasksNodes);
+	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	temps_inici_MPI_Init = TIME;
 
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END
 	   Three consecutive barriers for a better synchronization (J suggested) */
-	PMPI_Barrier (MPI_COMM_WORLD);
-	PMPI_Barrier (MPI_COMM_WORLD);
-	PMPI_Barrier (MPI_COMM_WORLD);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
+	Extrae_barrier_tasks();
+	Extrae_barrier_tasks();
 
 	initTracingTime = temps_final_MPI_Init = TIME;
 
 	/* End initialization of the backend */
-	if (!Backend_postInitialize (me, NumOfTasks, temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
 		return val;
 
 	/* Annotate topologies (if available) */
@@ -4081,7 +4104,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 #if defined(MPI_HAS_INIT_THREAD_C)
 int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
 {
-	int val = 0, me, ret;
+	int val = 0, ret;
 	iotimer_t temps_inici_MPI_Init, temps_final_MPI_Init;
 	MPI_Comm comm = MPI_COMM_WORLD;
 	char *config_file;
@@ -4096,21 +4119,17 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 	val = PMPI_Init_thread (argc, argv, required, provided);
 
-	ret = PMPI_Comm_rank (comm, &me);
-	MPI_CHECK(ret, PMPI_Comm_rank);
+	/* Setup callbacks for TASK identification and barrier execution */
+	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
+	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 
-	ret = PMPI_Comm_size (comm, &NumOfTasks);
-	MPI_CHECK(ret, PMPI_Comm_size);
-
-	InitMPICommunicators ();
-
-	/* We have to gather the task id */ 
-	TaskID_Setup (me);
+	InitMPICommunicators();
 
 #if defined(SAMPLING_SUPPORT)
 	/* If sampling is enabled, just stop all the processes at the same point
 	   and continue */
-	PMPI_Barrier (MPI_COMM_WORLD);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
 #endif
 
 	config_file = getenv ("EXTRAE_CONFIG_FILE");
@@ -4119,32 +4138,34 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 	if (config_file != NULL)
 		/* Obtain a localized copy *except for the master process* */
-		config_file = MPI_Distribute_XML_File (TASKID, NumOfTasks, config_file);
+		config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Initialize the backend (first step) */
-	if (!Backend_preInitialize (TASKID, NumOfTasks, config_file))
+	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
 		return val;
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
 	Gather_Nodes_Info ();
 
 	/* Generate a tentative file list */
-	Generate_Task_File_List (NumOfTasks, TasksNodes);
+	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	temps_inici_MPI_Init = TIME;
 
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
-	ret = PMPI_Barrier (MPI_COMM_WORLD);
+	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
+	Extrae_barrier_tasks();
+	Extrae_barrier_tasks();
 
 	initTracingTime = temps_final_MPI_Init = TIME;
 
 	/* End initialization of the backend */
-	if (!Backend_postInitialize (me, NumOfTasks, temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_MPI_Init, temps_final_MPI_Init, TasksNodes))
 		return val;
 
 	/* Annotate topologies (if available) */
@@ -4196,7 +4217,7 @@ int MPI_Finalize_C_Wrapper (void)
 #endif
 
 	/* Generate the final file list */
-	Generate_Task_File_List (NumOfTasks, TasksNodes);
+	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
 	Backend_Finalize ();
@@ -7122,7 +7143,7 @@ static void Gather_MPITS(void)
 		fprintf (stdout, PACKAGE_NAME": Gathering mpits in master node %s (%s)\n", hostname, final_dir);
 		
 		wake_up = 1;
-		for (slave = 1; slave < NumOfTasks; slave ++)
+		for (slave = 1; slave < Extrae_get_num_tasks(); slave ++)
 		{
 			char * mpit_name;
 		
@@ -7384,7 +7405,7 @@ void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to)
 {
 	int i, tmp;
 
-	if (NumOfTasks > 1)
+	if (Extrae_get_num_tasks() > 1)
 	{
 		if (tracejant && TracingBitmap != NULL)
 		{
@@ -7398,15 +7419,15 @@ void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to)
 				to = tmp;
 			}
 
-			if (to >= NumOfTasks)
-				to = NumOfTasks - 1;
+			if (to >= Extrae_get_num_tasks())
+				to = Extrae_get_num_tasks() - 1;
 
 			/*
 			 * If I'm not in the bitmask, disallow me tracing! 
 			 */
 			TRACE_EVENT (TIME, SET_TRACE_EV, (from <= TASKID) && (TASKID <= to));
 
-			for (i = 0; i < NumOfTasks; i++)
+			for (i = 0; i < Extrae_get_num_tasks(); i++)
 				TracingBitmap[i] = FALSE;
 
 			/*
@@ -7613,7 +7634,7 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm,
 	else if (is_comm_world)
 	{
 		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, MPI_COMM_WORLD_ALIAS,
-			NumOfTasks, EMPTY, newcomm, trace);
+			Extrae_get_num_tasks(), EMPTY, newcomm, trace);
 	}
 	else if (is_comm_self)
 	{

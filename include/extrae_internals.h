@@ -22,33 +22,27 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/threadid.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __TASKID_H__
-#define __TASKID_H__
+#ifndef __EXTRAE_INTERNALS_H_INCLUDED__
+#define __EXTRAE_INTERNALS_H_INCLUDED__
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif
+
+void Extrae_set_threadid_function (unsigned (*threadid_function)(void));
+void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void));
 
 void Extrae_set_taskid_function (unsigned (*taskid_function)(void));
 void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void));
 void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void));
 
-/* Internal routines */
-
-unsigned Extrae_get_task_number (void);
-unsigned Extrae_get_num_tasks (void);
-void Extrae_barrier_tasks (void);
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#define TASKID Extrae_get_task_number()
-
-#endif /* __TASKID_H__ */
-
+#endif /* __EXTRAE_INTERNALS_H_INCLUDED__ */

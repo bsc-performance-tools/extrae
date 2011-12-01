@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 01Dec2011 Improved support for instrumenting NANOS+MPI
  * 30Nov2011 Increased verbosity of papi_best_set
  * 14Nov2011 Added support to MAC OS X and improved support to FreeBSD
  * 07Nov2011 Extrae 2.2.0 is released!

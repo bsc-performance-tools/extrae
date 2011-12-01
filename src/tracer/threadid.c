@@ -36,12 +36,41 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdlib.h>
 #endif
 
+/*
+   Default routines
+   1 thread in total, and thread id is always 0
+*/
+
+static unsigned Extrae_threadid_default_function (void)
+{ return 0; }
+
+static unsigned Extrae_num_threads_default_function (void)
+{ return 1; }
+
+/* Callback definitions and API */
+
+static unsigned (*get_thread_num) (void) = Extrae_threadid_default_function;
+static unsigned (*get_num_threads) (void) = Extrae_num_threads_default_function;
+
+void Extrae_set_threadid_function (unsigned (*threadid_function)(void))
+{
+	get_thread_num = threadid_function;
+}
+
+void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void))
+{
+	get_num_threads = numthreads_function;
+}
+
+/* Internal routines */
+
 #if defined(OMP_SUPPORT)
 extern int omp_get_thread_num(void);
 #elif defined(SMPSS_SUPPORT)
 extern int css_get_thread_num(void);
 #elif defined(NANOS_SUPPORT)
-extern unsigned int nanos_extrae_get_thread_num(void); 
+/* extern unsigned int nanos_extrae_get_thread_num(void); */ 
+/* NANOS uses Extrae_set_threadid_function/Extrae_set_numthreads_function */
 #elif defined(PTHREAD_SUPPORT)
 # include <pthread.h>
 # include "pthread_wrapper.h"
@@ -53,14 +82,15 @@ extern int threadGetID(void);
 # include <external/upc.h>
 #endif
 
-unsigned get_trace_thread_number (void)
+unsigned Extrae_get_thread_number (void)
 {
 #if defined(OMP_SUPPORT)
 	return omp_get_thread_num();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num();
 #elif defined(NANOS_SUPPORT)
-	return nanos_extrae_get_thread_num();
+	/* return nanos_extrae_get_thread_num(); */
+	return get_thread_num();
 #elif defined(PTHREAD_SUPPORT)
 	return Backend_GetpThreadIdentifier();
 #elif defined(TRT_SUPPORT)
@@ -72,14 +102,15 @@ unsigned get_trace_thread_number (void)
 #endif
 }
 
-void * get_trace_thread_number_function (void)
+void * Extrae_get_thread_number_function (void)
 {
 #if defined(OMP_SUPPORT)
 	return (void*) omp_get_thread_num;
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num;
 #elif defined(NANOS_SUPPORT)
-	return nanos_extrae_get_thread_num;
+	/* return nanos_extrae_get_thread_num; */
+	return (void*) get_thread_num;
 #elif defined(PTHREAD_SUPPORT)
 	return (void*) pthread_self;
 #elif defined(TRT_SUPPORT)
@@ -89,5 +120,23 @@ void * get_trace_thread_number_function (void)
 	return (void*) GetUPCthreadID;
 #else
 	return NULL;
+#endif
+}
+
+unsigned Extrae_get_num_threads (void)
+{
+#if defined(OMP_SUPPORT)
+#elif defined(SMPSS_SUPPORT)
+	return css_get_max_threads();
+#elif defined(NANOS_SUPPORT)
+	return get_num_threads();
+#elif defined(PTHREAD_SUPPORT)
+	return Backend_getNumberOfThreads();
+#elif defined(TRT_SUPPORT)
+	return 0;
+#elif defined(UPC_SUPPORT)
+	return GetNumUPCthreads();
+#else
+	return 0;
 #endif
 }

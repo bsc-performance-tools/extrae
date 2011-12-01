@@ -28,17 +28,54 @@
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "taskid.h"
 
-static unsigned int TaskID = 0;
+/*
+   Default routines
+   1 taskid in total, task id is always 0 and barrier does nothing
+*/
 
-void TaskID_Setup (int id)
+static unsigned Extrae_taskid_default_function (void)
+{ return 0; }
+
+static unsigned Extrae_num_tasks_default_function (void)
+{ return 1; }
+
+static void Extrae_barrier_tasks_default_function (void)
+{ return; }
+
+/* Callback definitions and API */
+
+static unsigned (*get_task_num) (void) = Extrae_taskid_default_function;
+static unsigned (*get_num_tasks) (void) = Extrae_num_tasks_default_function;
+static void (*barrier_tasks) (void) = Extrae_barrier_tasks_default_function;
+
+void Extrae_set_taskid_function (unsigned (*taskid_function)(void))
 {
-	if (id > 0)
-	{
-		TaskID = id;
-	}
+	get_task_num = taskid_function;
 }
 
-unsigned int TaskID_Get (void)
+void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void))
 {
-	return TaskID;
+	get_num_tasks = numtasks_function;
+}
+
+void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void))
+{
+	barrier_tasks = barriertasks_function;
+}
+
+/* Internal routines */
+
+unsigned Extrae_get_task_number (void)
+{
+	return get_task_num();
+}
+
+unsigned Extrae_get_num_tasks (void)
+{
+	return get_num_tasks();
+}
+
+void Extrae_barrier_tasks (void)
+{
+	barrier_tasks();
 }

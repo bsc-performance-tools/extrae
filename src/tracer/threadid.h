@@ -30,10 +30,12 @@
 #ifndef __THREADID_H_INCLUDED__
 #define __THREADID_H_INCLUDED__
 
-#define THREADID get_trace_thread_number()
+#define THREADID Extrae_get_thread_number()
 
-unsigned get_trace_thread_number (void);
-void * get_trace_thread_number_function (void);
+unsigned Extrae_get_thread_number (void);
+unsigned Extrae_get_num_threads (void);
+
+void * Extrae_get_thread_number_function (void);
 
 #endif /* __THREADID_H_INCLUDED__ */
 

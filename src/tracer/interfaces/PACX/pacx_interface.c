@@ -496,7 +496,7 @@ void NAME_ROUTINE_C2F(pacx_reduce) (void *sendbuf, void *recvbuf, PACX_Fint *cou
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
 		PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -539,7 +539,7 @@ void NAME_ROUTINE_C2F(pacx_reduce_scatter) (void *sendbuf, void *recvbuf,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
 		PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -583,7 +583,7 @@ void NAME_ROUTINE_C2F(pacx_allreduce) (void *sendbuf, void *recvbuf,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -675,7 +675,7 @@ void NAME_ROUTINE_C2F(pacx_barrier) (PACX_Fint *comm, PACX_Fint *ierror)
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -874,7 +874,7 @@ void NAME_ROUTINE_C2F(pacx_bcast) (void *buffer, PACX_Fint *count,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -917,7 +917,7 @@ void NAME_ROUTINE_C2F(pacx_alltoall) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -962,7 +962,7 @@ void NAME_ROUTINE_C2F(pacx_alltoallv) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -1007,7 +1007,7 @@ void NAME_ROUTINE_C2F(pacx_allgather) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -1052,7 +1052,7 @@ void NAME_ROUTINE_C2F(pacx_allgatherv) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -1097,7 +1097,7 @@ void NAME_ROUTINE_C2F(pacx_gather) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -1141,7 +1141,7 @@ void NAME_ROUTINE_C2F(pacx_gatherv) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -1185,7 +1185,7 @@ void NAME_ROUTINE_C2F(pacx_scatter) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -1229,7 +1229,7 @@ void NAME_ROUTINE_C2F(pacx_scatterv) (void *sendbuf, PACX_Fint *sendcount,
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -1320,7 +1320,7 @@ void NAME_ROUTINE_C2F(pacx_comm_create) (PACX_Fint *comm, PACX_Fint *group,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Create_Wrapper (comm, group, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1345,7 +1345,7 @@ void NAME_ROUTINE_C2F(pacx_comm_dup) (PACX_Fint *comm, PACX_Fint *newcomm,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Dup_Wrapper (comm, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1371,7 +1371,7 @@ void NAME_ROUTINE_C2F(pacx_comm_split) (PACX_Fint *comm, PACX_Fint *color,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PPACX_Comm_Split_Wrapper (comm, color, key, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1398,7 +1398,7 @@ void NAME_ROUTINE_C2F(pacx_cart_create) (PACX_Fint *comm_old, PACX_Fint *ndims,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PPACX_Cart_create_Wrapper (comm_old, ndims, dims, periods, reorder,
                               comm_cart, ierror);
 		Backend_Leave_Instrumentation ();
@@ -1425,7 +1425,7 @@ void NAME_ROUTINE_C2F(pacx_cart_sub) (PACX_Fint *comm, PACX_Fint *remain_dims,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PPACX_Cart_sub_Wrapper (comm, remain_dims, comm_new, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1667,7 +1667,7 @@ void NAME_ROUTINE_C2F(pacx_scan) (void *sendbuf, void *recvbuf, PACX_Fint *count
 	PACX_Comm c = PACX_Comm_f2c(*comm);
 
 	PPACX_Comm_size (c, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2309,7 +2309,7 @@ int NAME_ROUTINE_C(PACX_Reduce) (void *sendbuf, void *recvbuf, int count,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2345,7 +2345,7 @@ int NAME_ROUTINE_C(PACX_Reduce_scatter) (void *sendbuf, void *recvbuf,
 	int res;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2382,7 +2382,7 @@ int NAME_ROUTINE_C(PACX_Allreduce) (void *sendbuf, void *recvbuf, int count,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2456,7 +2456,7 @@ int NAME_ROUTINE_C(PACX_Barrier) (PACX_Comm comm)
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2617,7 +2617,7 @@ int NAME_ROUTINE_C(PACX_Bcast) (void *buffer, int count, PACX_Datatype datatype,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2653,7 +2653,7 @@ int NAME_ROUTINE_C(PACX_Alltoall) (void *sendbuf, int sendcount,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2691,7 +2691,7 @@ int NAME_ROUTINE_C(PACX_Alltoallv) (void *sendbuf, int *sendcounts, int *sdispls
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2731,7 +2731,7 @@ int NAME_ROUTINE_C(PACX_Allgather) (void *sendbuf, int sendcount,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2771,7 +2771,7 @@ int NAME_ROUTINE_C(PACX_Allgatherv) (void *sendbuf, int sendcount,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2811,7 +2811,7 @@ int NAME_ROUTINE_C(PACX_Gather) (void *sendbuf, int sendcount,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2851,7 +2851,7 @@ int NAME_ROUTINE_C(PACX_Gatherv) (void *sendbuf, int sendcount,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2891,7 +2891,7 @@ int NAME_ROUTINE_C(PACX_Scatter) (void *sendbuf, int sendcount,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -2931,7 +2931,7 @@ int NAME_ROUTINE_C(PACX_Scatterv) (void *sendbuf, int *sendcounts, int *displs,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 
@@ -3008,7 +3008,7 @@ int NAME_ROUTINE_C(PACX_Comm_create) (PACX_Comm comm, PACX_Group group,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res = PACX_Comm_create_C_Wrapper (comm, group, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3027,7 +3027,7 @@ int NAME_ROUTINE_C(PACX_Comm_dup) (PACX_Comm comm, PACX_Comm *newcomm)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     res = PACX_Comm_dup_C_Wrapper (comm, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3047,7 +3047,7 @@ int NAME_ROUTINE_C(PACX_Comm_split) (PACX_Comm comm, int color, int key,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res = PACX_Comm_split_C_Wrapper (comm, color, key, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3068,7 +3068,7 @@ int NAME_ROUTINE_C(PACX_Cart_create) (PACX_Comm comm_old, int ndims, int *dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res = PACX_Cart_create_C_Wrapper (comm_old, ndims, dims, periods, reorder,
                                       comm_cart);
 		Backend_Leave_Instrumentation ();
@@ -3090,7 +3090,7 @@ int NAME_ROUTINE_C(PACX_Cart_sub) (PACX_Comm comm, int *remain_dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res =  PACX_Cart_sub_C_Wrapper (comm, remain_dims, comm_new);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3274,7 +3274,7 @@ int NAME_ROUTINE_C(PACX_Scan) (void *sendbuf, void *recvbuf, int count,
 	int sizeofcomm;
 
 	PPACX_Comm_size (comm, &sizeofcomm);
-	if (sizeofcomm == NumOfTasks)
+	if (sizeofcomm == Extrae_get_num_tasks())
 	{
         PACX_CurrentOpGlobal = (++PACX_NumOpsGlobals);
 

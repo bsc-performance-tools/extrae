@@ -1563,7 +1563,7 @@ void NAME_ROUTINE_C2F(mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PMPI_Comm_Create_Wrapper (comm, group, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1596,7 +1596,7 @@ void NAME_ROUTINE_C2F(mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PMPI_Comm_Dup_Wrapper (comm, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1630,7 +1630,7 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PMPI_Comm_Split_Wrapper (comm, color, key, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1661,7 +1661,7 @@ void NAME_ROUTINE_C2F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PMPI_Cart_create_Wrapper (comm_old, ndims, dims, periods, reorder,
                               comm_cart, ierror);
 		Backend_Leave_Instrumentation ();
@@ -1688,7 +1688,7 @@ void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     PMPI_Cart_sub_Wrapper (comm, remain_dims, comm_new, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3587,7 +3587,7 @@ int NAME_ROUTINE_C(MPI_Comm_create) (MPI_Comm comm, MPI_Group group,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res = MPI_Comm_create_C_Wrapper (comm, group, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3614,7 +3614,7 @@ int NAME_ROUTINE_C(MPI_Comm_dup) (MPI_Comm comm, MPI_Comm *newcomm)
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
     res = MPI_Comm_dup_C_Wrapper (comm, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3642,7 +3642,7 @@ int NAME_ROUTINE_C(MPI_Comm_split) (MPI_Comm comm, int color, int key,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res = MPI_Comm_split_C_Wrapper (comm, color, key, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3667,7 +3667,7 @@ int NAME_ROUTINE_C(MPI_Cart_create) (MPI_Comm comm_old, int ndims, int *dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res = MPI_Cart_create_C_Wrapper (comm_old, ndims, dims, periods, reorder,
                                       comm_cart);
 		Backend_Leave_Instrumentation ();
@@ -3689,7 +3689,7 @@ int NAME_ROUTINE_C(MPI_Cart_sub) (MPI_Comm comm, int *remain_dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+NumOfTasks+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
 		res =  MPI_Cart_sub_C_Wrapper (comm, remain_dims, comm_new);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)

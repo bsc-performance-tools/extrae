@@ -232,8 +232,6 @@ unsigned file_size = 0;
 #define MBytes							*1024*1024
 
 unsigned int mptrace_IsMPI = FALSE;
-//unsigned int TaskID = 0;
-unsigned NumOfTasks = 0;
 static unsigned current_NumOfThreads = 0;
 static unsigned maximum_NumOfThreads = 0;
 
@@ -1328,22 +1326,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 		putenv (new_num_omp_threads_clause);
 		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 	}
-#elif defined(SMPSS_SUPPORT)
-	extern int css_get_max_threads(void);
-
-	current_NumOfThreads = maximum_NumOfThreads = css_get_max_threads();
-#elif defined(NANOS_SUPPORT)
-	extern unsigned int nanos_extrae_get_max_threads(void);
-
-	current_NumOfThreads = maximum_NumOfThreads = nanos_extrae_get_max_threads();
-
-#elif defined(UPC_SUPPORT)
-	/* Set the current number of threads that is the UPC app running - THREADS! */
-	current_NumOfThreads = maximum_NumOfThreads = GetNumUPCthreads ();
-
-	/* Set the actual task identifier for this process -- in a full
-	   shared/distributed PGAS - UPC system --. */
-	TaskID_Setup (GetUPCprocID());
+#elif defined(SMPSS_SUPPORT) || defined(NANOS_SUPPORT) || defined (UPC_SUPPORT)
+	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
 #else
 	/* If we don't support OpenMP we still have this running thread :) */
 	current_NumOfThreads = maximum_NumOfThreads = 1;
@@ -1756,7 +1740,7 @@ void Backend_Finalize (void)
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 		Backend_Finalize_close_mpits (thread);
 
-	if (TaskID_Get() == 0)
+	if (TASKID == 0)
 		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
 #if defined(EMBED_MERGE_IN_TRACE)
@@ -1767,26 +1751,26 @@ void Backend_Finalize (void)
 		char tmp[1024];
 		mpitrace_on = FALSE; /* Turn off tracing now */
 
-		if (TaskID_Get() == 0)
+		if (TASKID == 0)
 			fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");
 
 #if defined(MPI_SUPPORT)
 		/* Synchronize all tasks at this point so none overtakes the master and
 		   gets and invalid/blank trace file list (.mpits file) */
-		if (TaskID_Get() == 0)
+		if (TASKID == 0)
 			fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
 
 		MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
 		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
-		merger_pre (NumOfTasks);
-		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default, TaskID_Get());
+		merger_pre (Extrae_get_num_tasks());
+		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default, TASKID);
 
-		if (TaskID_Get() == 0)
+		if (TASKID == 0)
 			fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);
 
-		merger_post (NumOfTasks, TaskID_Get());
+		merger_post (Extrae_get_num_tasks(), TASKID);
 	}
 #endif /* EMBED_MERGE_IN_TRACE */
 }

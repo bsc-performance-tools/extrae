@@ -59,6 +59,9 @@ if WANT_SMPSS
 endif
 if WANT_NANOS
   lib_LTLIBRARIES += libnanostrace.la
+if HAVE_MPI
+    lib_LTLIBRARIES += libnanosmpitrace.la libnanosmpitracef.la
+endif
 endif
 if WANT_PTHREAD
   lib_LTLIBRARIES += libpttrace.la
@@ -193,6 +196,8 @@ libsmpsstrace_la_SOURCES = $(core_SRCS)
 
 # Nanos
 libnanostrace_la_SOURCES = $(core_SRCS)
+libnanosmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
+libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) mpif.h
 
 # pthreads & TRT
 libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD)
@@ -264,6 +269,8 @@ libsmpssmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)
 libsmpsstrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 
 libnanostrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
+libnanosmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) 
+libnanosmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB)
 
 libpttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(SEQUENTIAL_MERGE_LIB)
 libtrttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
@@ -373,6 +380,8 @@ libsmpssmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFOR
 libsmpsstrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DSMPSS_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
 libnanostrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DNANOS_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
+libnanosmpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DNANOS_SUPPORT -DMPI_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
+libnanosmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DNANOS_SUPPORT -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
 libpttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DPTHREAD_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 libtrttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DTRT_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
@@ -424,6 +433,8 @@ libsmpssmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpsstrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libnanostrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libnanosmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libnanosmpitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
 
 libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -lpthread
 libtrttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)

@@ -1,4 +1,4 @@
-include_HEADERS = extrae_user_events.h extrae_types.h extraef_user_events.h 
+include_HEADERS = extrae_user_events.h extrae_types.h extrae_internals.h extraef_user_events.h 
 
 if IS_CELL_MACHINE
 include_HEADERS += spu_trace.h ppu_trace_sdk1.h ppu_trace_sdk2.h
