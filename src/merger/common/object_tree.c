@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/trace_to_prv.c $
- | @last_commit: $Date: 2011-08-26 16:43:13 +0200 (dv, 26 ago 2011) $
- | @version:     $Revision: 736 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: trace_to_prv.c 736 2011-08-26 14:43:13Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include "object_tree.h"
 
