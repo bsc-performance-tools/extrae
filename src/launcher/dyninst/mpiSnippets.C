@@ -136,12 +136,8 @@ static struct MPIroutines_t MPIroutines[] =
 		MPIROUTINE_C_T(PMPI_File_write_at),
 		MPIROUTINE_C_T(PMPI_File_write_at_all),
 #endif /* MPI_SUPPORTS_MPI_IO */
-#if defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT)
 		MPIROUTINE_F_T(pmpi_init, PMPI_INIT),
-#if defined(MPI_HAS_INIT_THREAD)
 		MPIROUTINE_F_T(pmpi_init_thread, PMPI_INIT_THREAD),
-#endif /* MPI_HAS_INIT_THREAD */
-#endif /* MPI_C_CONTAINS_FORTRAN_MPI_INIT */
 		MPIROUTINE_F_T(pmpi_finalize, PMPI_FINALIZE),
 		MPIROUTINE_F_T(pmpi_bsend, PMPI_BSEND),
 		MPIROUTINE_F_T(pmpi_ssend, PMPI_SSEND),

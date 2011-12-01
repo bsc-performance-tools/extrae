@@ -780,8 +780,11 @@ int generate_spu_file_list (int number_of_spus)
 	 When compiling the combined (C+Fortran) dyninst module, the resulting
 	 module CANNOT be loaded if mpi_init is not found. The top #if def..
 	 is a workaround for this situation
+
+   NOTE: Some C libraries (mpich 1.2.x) use the C initialization and do not
+   offer mpi_init (fortran).
 */
-#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
      !defined(COMBINED_SYMBOLS))
 /******************************************************************************
  ***  PMPI_Init_Wrapper
@@ -958,7 +961,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 #endif /* MPI_HAS_INIT_THREAD_F */
 
 #endif /* 
-     (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
      !defined(COMBINED_SYMBOLS))
      */
 

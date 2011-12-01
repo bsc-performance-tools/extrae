@@ -145,11 +145,14 @@ unsigned int get_MPI_NumOpsGlobals()
 	 When compiling the combined (C+Fortran) dyninst module, the resulting
 	 module CANNOT be loaded if mpi_init is not found. The top #if def..
 	 is a workaround for this situation
+
+   NOTE: Some C libraries (mpich 1.2.x) use the C initialization and do not
+   offer mpi_init (fortran).
 */
 
 #if defined(FORTRAN_SYMBOLS)
 
-#if (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
      !defined(COMBINED_SYMBOLS))
 /******************************************************************************
  ***  MPI_Init
@@ -206,7 +209,7 @@ void NAME_ROUTINE_C2F(mpi_init_thread) (MPI_Fint *required, MPI_Fint *provided,
 #endif /* MPI_HAS_INIT_THREAD_F */
 
 #endif /* 
-     (defined(COMBINED_SYMBOLS) && defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
      !defined(COMBINED_SYMBOLS))
      */
 

@@ -742,20 +742,26 @@ int main (int argc, char *argv[])
 		if (appType->get_isMPI())
 		{
 			if (appType->get_isOpenMP())
-				sprintf (buffer, "%s/lib/lib_dyn_ompitrace.so", getenv("EXTRAE_HOME"));
+			{
+				if (appType->get_MPI_type() == ApplicationType::MPI_C)
+					sprintf (buffer, "%s/lib/lib_dyn_ompitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				else
+					sprintf (buffer, "%s/lib/lib_dyn_ompitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+			}
 			else
-#if defined(MPI_COMBINED_C_FORTRAN)
-				sprintf (buffer, "%s/lib/lib_dyn_mpitrace.so", getenv("EXTRAE_HOME"));
-#else
-				sprintf (buffer, "%s/lib/lib_dyn_mpitracec.so", getenv("EXTRAE_HOME"));
-#endif
+			{
+				if (appType->get_MPI_type() == ApplicationType::MPI_C)
+					sprintf (buffer, "%s/lib/lib_dyn_mpitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				else
+					sprintf (buffer, "%s/lib/lib_dyn_mpitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+			}
 		}
 		else
 		{
 			if (appType->get_isOpenMP())
-				sprintf (buffer, "%s/lib/lib_dyn_omptrace.so", getenv("EXTRAE_HOME"));
+				sprintf (buffer, "%s/lib/lib_dyn_omptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 			else
-				sprintf (buffer, "%s/lib/libseqtrace.so", getenv("EXTRAE_HOME"));
+				sprintf (buffer, "%s/lib/libseqtrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 		}
 		loadedModule = buffer;
 

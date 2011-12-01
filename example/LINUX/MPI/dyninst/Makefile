@@ -1,13 +1,8 @@
 MPI_HOME = @sub_MPI_HOME@
-EXTRAE_HOME = @sub_PREFIXDIR@
-PAPI_HOME = @sub_PAPI_HOME@
-XML2_LDFLAGS = @sub_XML2_LDFLAGS@
-XML2_LIBS = @sub_XML2_LIBS@
-UNWIND_HOME = @sub_UNWIND_HOME@
 
 F77 = $(MPI_HOME)/bin/mpif77 
 FFLAGS = -O2 -g
-FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ $(XML2_LDFLAGS) $(XML2_LIBS)  @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ -L$(UNWIND_HOME)/lib @sub_UNWIND_LIBS@ @sub_POSIX_CLOCK@
+FLIBS = 
 
 all: mpi_ping
 

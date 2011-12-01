@@ -161,15 +161,15 @@ void ApplicationType::detectApplicationType (BPatch_image *appImage)
 	    (appImage->findFunction ("MPI_INIT", found_funcs) != NULL))
 	{
 		isMPI = true;
-		if (appImage->findFunction ("MPI_INIT", found_funcs) != NULL)
-			MPI_type = MPI_Fortran_ucase;
+		if (appImage->findFunction ("mpi_init", found_funcs) != NULL)
+			MPI_type = MPI_Fortran_0u;
 		else if (appImage->findFunction ("mpi_init__", found_funcs) != NULL)
 			MPI_type = MPI_Fortran_2u;
 		else if (appImage->findFunction ("mpi_init_", found_funcs) != NULL)
 			MPI_type = MPI_Fortran_1u;
-		else if (appImage->findFunction ("mpi_init", found_funcs) != NULL)
-			MPI_type = MPI_Fortran_0u;
-		else if (appImage->findFunction ("mpi_init__", found_funcs) != NULL)
+		else if (appImage->findFunction ("MPI_INIT", found_funcs) != NULL)
+			MPI_type = MPI_Fortran_ucase;
+		else 
 			MPI_type = MPI_C;
 	}
 }

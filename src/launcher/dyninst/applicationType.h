@@ -49,6 +49,7 @@ class ApplicationType
 	string demangleOpenMProutine (string name);
 
 	inline bool get_isMPI (void) const;
+	inline MPI_type_t get_MPI_type (void) const;
 	inline bool get_isOpenMP (void) const;
 	inline OMP_rte_t get_OpenMP_rte (void) const;
 
@@ -63,19 +64,16 @@ class ApplicationType
 };
 
 inline bool ApplicationType::get_isMPI (void) const
-{
-	return isMPI;
-}
+{ return isMPI; }
 
 inline bool ApplicationType::get_isOpenMP (void) const
-{
-	return isOpenMP;
-}
+{ return isOpenMP; }
 
 inline ApplicationType::OMP_rte_t ApplicationType::get_OpenMP_rte (void) const
-{
-	return OpenMP_runtime;
-}
+{ return OpenMP_runtime; }
+
+inline ApplicationType::MPI_type_t ApplicationType::get_MPI_type (void) const
+{ return MPI_type; }
 
 #endif /* APPLICATIONTYPE_H */
 
