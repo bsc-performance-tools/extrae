@@ -801,8 +801,8 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 	CtoF77 (ppacx_init) (ierror);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_PACX_NumTasks);
-	Extrae_set_numtasks_function (Extrae_PACX_TaskID);
+	Extrae_set_taskid_function (Extrae_PACX_TaskID);
+	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
 
 	comm = PACX_Comm_c2f (PACX_COMM_WORLD);
@@ -900,8 +900,8 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	CtoF77 (ppacx_init_thread) (required, provided, ierror);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_PACX_NumTasks);
-	Extrae_set_numtasks_function (Extrae_PACX_TaskID);
+	Extrae_set_taskid_function (Extrae_PACX_TaskID);
+	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
 
 	/* OpenMPI does not allow us to do this before the PACX_Init! */
@@ -3811,8 +3811,8 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 	val = PPACX_Init (argc, argv);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_PACX_NumTasks);
-	Extrae_set_numtasks_function (Extrae_PACX_TaskID);
+	Extrae_set_taskid_function (Extrae_PACX_TaskID);
+	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
 
 	ret = PPACX_Comm_rank (comm, &me);
@@ -3894,8 +3894,8 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	val = PPACX_Init_thread (argc, argv, required, provided);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_PACX_NumTasks);
-	Extrae_set_numtasks_function (Extrae_PACX_TaskID);
+	Extrae_set_taskid_function (Extrae_PACX_TaskID);
+	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
 
 	ret = PPACX_Comm_rank (comm, &me);
