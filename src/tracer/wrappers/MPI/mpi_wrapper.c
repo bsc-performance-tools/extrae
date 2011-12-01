@@ -805,8 +805,8 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	CtoF77 (pmpi_init) (ierror);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
-	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_taskid_function (Extrae_MPI_TaskID);
+	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 
 	/* OpenMPI does not allow us to do this before the MPI_Init! */
@@ -895,8 +895,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	CtoF77 (pmpi_init_thread) (required, provided, ierror);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
-	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_taskid_function (Extrae_MPI_TaskID);
+	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 
 	/* OpenMPI does not allow us to do this before the MPI_Init! */
@@ -4043,8 +4043,8 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	val = PMPI_Init (argc, argv);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
-	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_taskid_function (Extrae_MPI_TaskID);
+	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 
 	InitMPICommunicators();
@@ -4123,8 +4123,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	val = PMPI_Init_thread (argc, argv, required, provided);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function (Extrae_MPI_NumTasks);
-	Extrae_set_numtasks_function (Extrae_MPI_TaskID);
+	Extrae_set_taskid_function (Extrae_MPI_TaskID);
+	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 
 	InitMPICommunicators();
