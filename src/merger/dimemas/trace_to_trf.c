@@ -378,11 +378,11 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		if (current_file != GetActiveFile(fset))
 		{
 #if !defined(HAVE_FTELL64) && !defined(HAVE_FTELLO64)
-			obj_table[ptask-1].tasks[task-1].threads[thread-1].dimemas_size = ftell (fset->output_file);
+			(GET_THREAD_INFO(ptask,task,thread))->dimemas_size = ftell (fset->output_file);
 #elif defined(HAVE_FTELL64)
-			obj_table[ptask-1].tasks[task-1].threads[thread-1].dimemas_size = ftell64 (fset->output_file);
+			(GET_THREAD_INFO(ptask,task,thread))->dimemas_size = ftell64 (fset->output_file);
 #elif defined(HAVE_FTELLO64)
-			obj_table[ptask-1].tasks[task-1].threads[thread-1].dimemas_size = ftello64 (fset->output_file);
+			(GET_THREAD_INFO(ptask,task,thread))->dimemas_size = ftello64 (fset->output_file);
 #endif
 			InitTracingTime = Get_EvTime (current_event);
 			current_file = GetActiveFile (fset);
@@ -431,8 +431,8 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			}
 		}
 
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].First_Event = FALSE;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].Previous_Event_Time = current_time;
+		(GET_THREAD_INFO(ptask,task,thread))->First_Event = FALSE;
+		(GET_THREAD_INFO(ptask,task,thread))->Previous_Event_Time = current_time;
 
 		/* Right now, progress bar is only shown when numtasks is 1 */
 		if (1 == numtasks)

@@ -134,11 +134,9 @@ void trace_paraver_state (
    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
    unsigned long long current_time)
 {
-	struct thread_t * thread_info;
 	unsigned int current_state;
-	WriteFileBuffer_t *wfb = obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb;
-
-	thread_info = GET_THREAD_INFO (ptask, task, thread);
+	struct thread_t * thread_info = GET_THREAD_INFO (ptask, task, thread);
+	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 	current_state = Top_State(ptask, task, thread);
 
 	/* Complete the previous state */
@@ -194,8 +192,8 @@ void trace_paraver_event (
 	paraver_rec_t record;
 	int tipus;
 	UINT64 valor;
-	WriteFileBuffer_t *wfb = obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb;
 	thread_info = GET_THREAD_INFO (ptask, task, thread);
+	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 
 	if (!EnabledTasks[ptask - 1][task - 1])
 		return;
@@ -234,13 +232,10 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
 	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag)
 {
-	struct thread_t * thread_info_s;
-	struct thread_t * thread_info_r;
-	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
+	struct thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	struct thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
+	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
-
-	thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
-	thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 
 	if (!EnabledTasks[ptask_s-1][task_s-1])
 		return;
@@ -272,13 +267,10 @@ void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 	unsigned long long phy_r, unsigned int size, unsigned int tag,
 	int giveOffset, off_t position)
 {
-	struct thread_t * thread_info_r;
-	struct thread_t * thread_info_s;
-	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
+	struct thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
+	struct thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
-
-	thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
-	thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 
 	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
 		return;
@@ -313,17 +305,14 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
 	unsigned int tag)
 {
-	struct thread_t * thread_info_r;
-	struct thread_t * thread_info_s;
+	struct thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
+	struct thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
 	off_t where;
 	paraver_rec_t record;
-	WriteFileBuffer_t *wfb = obj_table[ptask_s-1].tasks[task_s-1].threads[thread_s-1].file->wfb;
+	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 
 	UNREFERENCED_PARAMETER(log_r);
 	UNREFERENCED_PARAMETER(phy_r);
-
-	thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
-	thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 
 	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
 		return 0;

@@ -587,7 +587,7 @@ static int Evt_CountersDefinition (
 
 	/* The hardware counter set definition exists only on the master thread.
 	   We replicate them to all the threads as they appear */
-	nthreads = obj_table[ptask-1].tasks[task-1].nthreads;
+	nthreads = (GET_TASK_INFO(ptask,task))->nthreads;
 	for (i = 1; i <= nthreads; i++)
 		HardwareCounters_NewSetDefinition(ptask, task, i, newSet, HWCIds);
 
@@ -852,7 +852,7 @@ static int User_Send_Event (event_t * current_event,
 			{
 				off_t position;
 
-				position = WriteFileBuffer_getPosition (obj_table[ptask-1].tasks[task-1].threads[thread-1].file->wfb);
+				position = WriteFileBuffer_getPosition (thread_info->file->wfb);
 				CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, Get_EvAux(current_event));
 				trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, recv_thread, Get_EvSize(current_event), Get_EvTag(current_event));
 			}

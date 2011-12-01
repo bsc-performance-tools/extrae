@@ -358,7 +358,9 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 
 #if defined(SAMPLING_SUPPORT) || defined(HAVE_MRNET)
 	if (sort_needed)
+	{
 		qsort (fitem->first, fitem->num_of_events, sizeof(event_t), event_timing_sort);
+	}
 #endif
 
 	/* We no longer need this/these descriptor/s */
@@ -383,7 +385,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	fitem->thread = IFile->thread;
 	fitem->cpu = IFile->cpu;
 
-	obj_table[fitem->ptask-1].tasks[IFile->task-1].threads[IFile->thread-1].file = fitem;
+	(GET_THREAD_INFO(fitem->ptask,IFile->task,IFile->thread))->file = fitem;
 
 	/* Create a temporal file */
 	newTemporalFile (taskid, TRUE, 0, paraver_tmp);

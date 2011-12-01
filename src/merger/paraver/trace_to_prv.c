@@ -416,8 +416,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			tmp_nevents = 1;
 		}
 
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].First_Event = FALSE;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].Previous_Event_Time = current_time;
+		(GET_THREAD_INFO(ptask,task,thread))->First_Event = FALSE;
+		(GET_THREAD_INFO(ptask,task,thread))->Previous_Event_Time = current_time;
 
 		/* Right now, progress bar is only shown when numtasks is 1 */
 		if (1 == numtasks)
