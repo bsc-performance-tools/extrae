@@ -52,6 +52,14 @@ if (${?EXTRAE_HOME}) then
 		endif
 	endif
 
+	if (${?UNWIND_HOME}) then
+		if (! -d ${UNWIND_HOME}/lib ) then
+			echo "Unable to find UNWIND library directory!"
+		else
+			setenv LD_LIBRARY_PATH ${UNWIND_HOME}/lib:${LD_LIBRARY_PATH}
+		endif
+	endif
+
 	if (${?DYNINST_HOME}) then
 		if (! ${?DWARF_HOME}) then
 			echo "DynInst was enabled with the instrumentation package, but DWARF package was not set? Exitting!"

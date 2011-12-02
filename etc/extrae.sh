@@ -48,6 +48,14 @@ if test "${EXTRAE_HOME}" != "" ; then
 		fi
 	fi
 
+	if test "${UNWIND_HOME}" != "" ; then
+		if ! test -d ${UNWIND_HOME}/lib ; then
+			echo "Unable to find UNWIND library directory!"
+		else
+			export LD_LIBRARY_PATH=${UNWIND_HOME}/lib:${LD_LIBRARY_PATH}
+		fi
+	fi
+
 	if test "${DYNINST_HOME}" != "" ; then
 		if test "${DWARF_HOME}" == "" ; then
 			echo "DynInst was enabled with the instrumentation package, but DWARF package was not set? Exitting!"

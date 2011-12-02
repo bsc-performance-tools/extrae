@@ -24,15 +24,18 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
       if test "${OperatingSystem}" = "linux" ; then
          acpi_cpufreq=`${LSMOD} | grep  ^acpi_cpufreq | wc -l`
          if test "${acpi_cpufreq}" -ge 1 ; then
-            AC_MSG_ERROR([Attention! It seems that your processor frequency changes on the fly through 'acpi_cpufreq' module. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            AC_MSG_WARN([Attention! It seems that your processor frequency changes on the fly through 'acpi_cpufreq' module. We add --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            enable_posix_clock="yes"
          fi
          freqtable=`${LSMOD} | grep  ^freqtable | wc -l`
          if test "${freqtable}" -ge 1 ; then
-            AC_MSG_ERROR([Attention! It seems that your processor frequency changes on the fly through 'freqtable' module. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            AC_MSG_WARN([Attention! It seems that your processor frequency changes on the fly through 'freqtable' module. We add --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            enable_posix_clock="yes"
          fi
          upowerd=`ps -efa | grep upowerd | grep -v grep | wc -l`
          if test "${upowerd}" -ge 1 ; then
-            AC_MSG_ERROR([Attention! It seems that your processor frequency changes on the fly through 'upowerd'. We suggest you adding --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            AC_MSG_WARN([Attention! It seems that your processor frequency changes on the fly through 'upowerd'. We add --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+            enable_posix_clock="yes"
          fi
       fi
    fi
@@ -78,7 +81,8 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
       dnl Check for existance of clock_gettime / CLOCK_MONOTONIC
       AC_MSG_CHECKING([for clock_gettime and CLOCK_MONOTONIC in libraries])
       LIBS_old=${LIBS}
-      for ac_cv_clock_gettime_lib in "" "-lrt" "NO" ;
+      TRYING_RT_LIBS=`/sbin/ldconfig -p | grep librt | ${AWK} -F '=> ' '{ print $'2' }'`
+      for ac_cv_clock_gettime_lib in "" ${TRYING_RT_LIBS} "NO" ;
       do
          LIBS="${ac_cv_clock_gettime_lib}"
          AC_TRY_LINK(
@@ -97,14 +101,23 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
       fi
       if test "${ac_cv_clock_gettime_lib}" = "" ; then
          AC_MSG_RESULT([found])
+         USE_POSIX_CLOCK="yes"
       else
          AC_MSG_RESULT([found in ${ac_cv_clock_gettime_lib}])
+         USE_POSIX_CLOCK="yes"
+         POSIX_CLOCK_LIB=${ac_cv_clock_gettime_lib}
+         RT_LIBSDIR=`dirname ${POSIX_CLOCK_LIB}`
+         RT_LDFLAGS=-L${RT_LIBSDIR}
+         RT_SHAREDLIBSDIR=-L${RT_LIBSDIR}
+         RT_LIBS=-lrt
       fi
-      USE_POSIX_CLOCK="yes"
-			POSIX_CLOCK_LIB=${ac_cv_clock_gettime_lib}
    fi
 
   AC_SUBST(POSIX_CLOCK_LIB)
+  AC_SUBST(RT_LIBSDIR)
+  AC_SUBST(RT_LDFLAGS)
+  AC_SUBST(RT_SHAREDLIBSDIR)
+  AC_SUBST(RT_LIBS)
 	AM_CONDITIONAL(USE_POSIX_CLOCK, test "${USE_POSIX_CLOCK}" = "yes")
 	if test "${USE_POSIX_CLOCK}" = "yes" ; then
 		AC_DEFINE([USE_POSIX_CLOCK], 1, [Defined if using posix clock routines / clock_gettime])

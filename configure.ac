@@ -287,7 +287,7 @@ AC_ARG_ENABLE(merge-in-trace,
       [Embed the merging functionality (mpi2prv) into the tracing library itself (disabled by default)]
    ),
    [enable_merge_in_trace="${enableval}"],
-   [enable_merge_in_trace="no"]
+   [enable_merge_in_trace="${enable_parallel_merge}"] # the auto value for merge in trace depends whether if parallel merge was enabled
 )
 AM_CONDITIONAL(WANT_MERGE_IN_TRACE, test "${enable_merge_in_trace=}" = "yes" )
 
