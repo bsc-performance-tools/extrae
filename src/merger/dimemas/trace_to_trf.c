@@ -131,7 +131,7 @@ static void Dimemas_GenerateOffsets (unsigned num_appl, struct ptask_t *table,
 	offsets = (unsigned long long*) malloc (sizeof(unsigned long long)*i);
 	if (NULL == offsets)
 	{
-		fprintf (stderr, "mpi2trf: Unable to allocate memory for %d offsets\n", i);
+		fprintf (stderr, "mpi2dim: Unable to allocate memory for %d offsets\n", i);
 		fflush (stderr);
 		exit (-1);
 	}
@@ -170,7 +170,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	if (1 != num_appl)
 	{
-		fprintf (stderr, "mpi2trf: Error! This merger does not support merging more than 1 parallel application\n");
+		fprintf (stderr, "mpi2dim: Error! This merger does not support merging more than 1 parallel application\n");
 		fflush (stderr);
 		exit (-1);
 	}
@@ -202,7 +202,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	{
 		if (0 == taskid)
 		{
-			fprintf (stderr, "mpi2prv: Error! Some of the processors failed create trace descriptors\n");
+			fprintf (stderr, "mpi2dim: Error! Some of the processors failed create trace descriptors\n");
 			fflush (stderr);
 		}
 		return -1;
@@ -255,9 +255,9 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	*/
 	if (0 == taskid)
 	{
-		fprintf (stdout, "mpi2prv: Parsing intermediate files. Generating communicators.\n");
+		fprintf (stdout, "mpi2dim: Parsing intermediate files. Generating communicators.\n");
 		if (1 == numtasks)
-			fprintf (stdout, "mpi2prv: Progress 1 of 2 ... ");
+			fprintf (stdout, "mpi2dim: Progress 1 of 2 ... ");
 		fflush (stdout);
 	}
 	Rewind_FS (fset);
@@ -308,11 +308,11 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	*/
 	if (0 == taskid)
 	{
-		fprintf (stdout, "mpi2prv: Parsing intermediate files. Generating trace.\n");
+		fprintf (stdout, "mpi2dim: Parsing intermediate files. Generating trace.\n");
 		if (numtasks > 1)
-			fprintf (stdout, "mpi2prv: Progress ... ");
+			fprintf (stdout, "mpi2dim: Progress ... ");
 		else
-			fprintf (stdout, "mpi2prv: Progress 2 of 2 ... ");
+			fprintf (stdout, "mpi2dim: Progress 2 of 2 ... ");
 		fflush (stdout);
 	}
 	Rewind_FS (fset);
@@ -330,8 +330,8 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 #endif
 		if (NULL == fset->output_file)
 		{
-			fprintf (stderr, "mpi2prv ERROR: Creating Dimemas tracefile : %s on processor %d\n", outName, taskid);
-			return -1;
+			fprintf (stderr, "\nmpi2dim ERROR: Creating Dimemas tracefile : %s on processor %d\n", outName, taskid);
+			exit (-1);
 		}
 	} /* taskid == 0 */
 	else
@@ -348,7 +348,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		if (mkstemp (dimemas_tmp) == -1)
 		{
 			perror ("mkstemp");
-			fprintf (stderr, "mpi2trf: Unable to create temporal file using mkstemp\n");
+			fprintf (stderr, "mpi2dim: Unable to create temporal file using mkstemp\n");
 			fflush (stderr);
 			exit (-1);
 		}
@@ -361,8 +361,8 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 		if (NULL == fset->output_file)
 		{
-			fprintf (stderr, "mpi2prv ERROR: Creating Diememas temporal tracefile : %s on processor %d\n", outName, taskid);
-			return -1;
+			fprintf (stderr, "mpi2dim ERROR: Creating Dimemas temporal tracefile : %s on processor %d\n", outName, taskid);
+			exit (-1);
 		}
 
 		remove (dimemas_tmp);
@@ -412,7 +412,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_MPI_Operation (EvType);
 				}
 				else
-					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s+%d\n", EvType, __func__, __LINE__);
+					fprintf (stderr, "mpi2dim: Error! unregistered event type %d in %s+%d\n", EvType, __func__, __LINE__);
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				if (Get_EvHWCRead (current_event))
@@ -465,7 +465,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		fflush (stdout);
 	}
 
-	fprintf (stdout, "mpi2prv: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
+	fprintf (stdout, "mpi2dim: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
 	fflush (stdout);
 
 	Dimemas_GenerateOffsets (num_appl, obj_table, &offsets, &count);
@@ -505,6 +505,8 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	if (0 == taskid)
 	{
+		int somefailed = FALSE;
+
 		Dimemas_WriteOffsets (num_appl, fset->output_file, outName, trace_size, count, offsets);
 
 		fclose (fset->output_file);
@@ -514,13 +516,20 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 		strcpy (tmp, ".pcf");
 		if (GeneratePCFfile (envName, options) == -1)
-			fprintf (stderr, "mpi2prv: WARNING! Unable to create PCF file!\n");
+		{
+			fprintf (stderr, "mpi2dim: WARNING! Unable to create PCF file!\n");
+			somefailed = TRUE;
+		}
 
 		strcpy (tmp, ".row");
 		if (GenerateROWfile (envName, NodeCPUinfo) == -1)
-			fprintf (stderr, "mpi2prv: WARNING! Unable to create ROW file!\n");
+		{
+			fprintf (stderr, "mpi2dim: WARNING! Unable to create ROW file!\n");
+			somefailed = TRUE;
+		}
 
-		fprintf (stdout, "mpi2prv: Congratulations! %s has been generated.\n", outName);
+		fprintf (stdout, "mpi2dim: Congratulations! %s has been generated %s\n", outName,
+		  somefailed?" (although some files were not created).":".");
 		fflush (stdout);
 	}
 	return 0;
