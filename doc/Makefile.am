@@ -36,11 +36,13 @@ manual_ug = user-guide
 # Aquesta combinacio de params pot ser interessant per a generar un single HTML
 # -split 0 -show_section_numbers -nonumbered_footnotes -mkdir -dir single
 
-all: $(manual_ug).tex
+$(manual_ug).dvi: $(manual_ug).tex
+	$(latex) $(manual_ug)
+	$(latex) $(manual_ug)
+
+all: $(manual_ug).dvi
 if BUILD_DOCS_PS
 	echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
-	$(latex) $(manual_ug)
-	$(latex) $(manual_ug)
 	$(dvips) $(manual_ug).dvi -o $(manual_ug).ps
 if BUILD_DOCS_PDF
 	$(dvipdf) $(manual_ug)
@@ -50,7 +52,7 @@ if BUILD_HTML_DOCS
 	$(latex2html) -split 0 -show_section_numbers -nonumbered_footnotes $(manual_ug)
 endif
 
-install-exec-hook: all
+install-exec-hook: $(manual_ug).dvi
 	$(mkdir_p) $(DESTDIR)$(datadir)/doc
 if BUILD_DOCS_PS
 	cp $(manual_ug).ps $(DESTDIR)$(datadir)/doc
