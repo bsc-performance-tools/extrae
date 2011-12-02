@@ -1027,7 +1027,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 			{
 				fprintf (stderr, "mpi2prv ERROR: creating GZ paraver tracefile : %s\n",
 					outName);
-				return -1;
+				exit (-1);
 			}
 		}
 		else
@@ -1045,7 +1045,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 			{
 				fprintf (stderr, "mpi2prv ERROR: Creating Paraver tracefile : %s\n",
 					outName);
-				return -1;
+				exit (-1);
 			}
 		}
 #else
@@ -1061,7 +1061,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 		{
 			fprintf (stderr, "mpi2prv ERROR: Creating Paraver tracefile : %s\n",
 				outName);
-			return -1;
+			exit (-1);
 		}
 #endif
 	} /* taskid == 0 */
