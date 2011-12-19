@@ -442,8 +442,8 @@ libsmpssmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpsstrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libnanostrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-libnanosmpitrace_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
-libnanosmpitracef_la_LDFLAGS = -no-undefined -version-info 1:0:0 $(COMMON_LINKER_FLAGS)
+libnanosmpitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libnanosmpitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -lpthread
 libtrttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
