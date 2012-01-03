@@ -50,6 +50,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "ibm-xlsmp-1.6.h"
 #include "gnu-libgomp-4.2.h"
+#include "intel-kmpc-11.h"
 
 static void (*omp_set_lock_real)(int *) = NULL;
 static void (*omp_unset_lock_real)(int *) = NULL;
