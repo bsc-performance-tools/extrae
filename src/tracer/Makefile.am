@@ -120,7 +120,8 @@ WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
 # Probes for OpenMP instrumentation
 WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
   wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h \
-  wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h
+  wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h \
+  wrappers/OMP/intel_kmpc_11.c wrappers/OMP/intel_kmpc_11.h
 
 if ARCH_POWERPC
 if OS_LINUX
