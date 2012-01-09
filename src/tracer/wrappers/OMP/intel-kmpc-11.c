@@ -57,6 +57,8 @@ static void (*__kmpc_critical_real)(void*,int,void*) = NULL;
 static void (*__kmpc_end_critical_real)(void*,int,void*) = NULL;
 static int (*__kmpc_dispatch_next_4_real)(void*,int,int*,int*,int*,int*) = NULL;
 static int (*__kmpc_dispatch_next_8_real)(void*,int,int*,long long *,long long *, long long *) = NULL;
+static int (*__kmpc_single_real)(void*,int) = NULL;
+static void (*__kmpc_end_single_real)(void*,int) = NULL;
 
 int intel_kmpc_11_hook_points (int rank)
 {
@@ -109,6 +111,20 @@ int intel_kmpc_11_hook_points (int rank)
 	if (__kmpc_dispatch_next_8_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_next_8 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_next_8_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_next_8 */
+	__kmpc_single_real =
+		(int(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_single");
+	if (__kmpc_single_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_single in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_single_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_next_8 */
+	__kmpc_end_single_real =
+		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_end_single");
+	if (__kmpc_end_single_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_end_single in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_end_single_real,count);
 
 	/* Any hook point? */
 	return count > 0;
@@ -319,7 +335,7 @@ void __kmpc_critical (void *p1, int p2, void *p3)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": __kmpc_critical is at %p\n", __kmpc_critical_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_critical params %p %d\n", p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": __kmpc_critical params %p %d %p\n", p1, p2, p3);
 #endif
 
 	if (__kmpc_critical_real != NULL)
@@ -341,7 +357,7 @@ void __kmpc_end_critical (void *p1, int p2, void *p3)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": __kmpc_end_critical is at %p\n", __kmpc_end_critical_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_end_critical params %p %d\n", p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": __kmpc_end_critical params %p %d %p\n", p1, p2, p3);
 #endif
 
 	if (__kmpc_end_critical_real != NULL)
@@ -408,3 +424,46 @@ int __kmpc_dispatch_next_8 (void *p1, int p2, int *p3, long long *p4, long long 
 	return res;
 }
 
+int __kmpc_single (void *p1, int p2)
+{
+	int res = 0;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": __kmpc_single is at %p\n", __kmpc_single_real);
+	fprintf (stderr, PACKAGE_NAME": __kmpc_single params %p %d\n", p1, p2);
+#endif
+
+	if (__kmpc_single_real != NULL)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_Single_Entry ();
+		res = __kmpc_single_real (p1, p2);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": __kmpc_critical is not hooked! exiting!!\n");
+		exit (0);
+	}
+
+	return res;
+}
+
+void __kmpc_end_single (void *p1, int p2)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": __kmpc_end_single is at %p\n", __kmpc_single_real);
+	fprintf (stderr, PACKAGE_NAME": __kmpc_end_single params %p %d\n", p1, p2);
+#endif
+
+	if (__kmpc_single_real != NULL)
+	{
+		Backend_Enter_Instrumentation (1);
+		__kmpc_end_single_real (p1, p2);
+		Probe_OpenMP_Single_Exit ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": __kmpc_critical is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
