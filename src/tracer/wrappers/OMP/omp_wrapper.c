@@ -217,7 +217,12 @@ void openmp_tracing_init (void)
 		hooked = gnu_libgomp_4_2_hook_points(0);
 	}
 #else
-	hooked = gnu_libgomp_4_2_hook_points(0);
+	hooked = intel_kmpc_11_hook_points(0);
+	if (!hooked)
+	{
+		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with Intel KAP OpenMP runtime!\n");
+		hooked = gnu_libgomp_4_2_hook_points(0);
+	}
 #endif
 
 	if (!hooked)
