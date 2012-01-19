@@ -132,117 +132,11 @@ int intel_kmpc_11_hook_points (int rank)
 
 static void *par_func;
 
-static void __kmpc_parallel_func_8param (int *p1, int *p2, void *param1, void *param2, void *param3, void *param4, void *param5, void *param6, void *param7, void *param8)
-{
-	void *p = (void*) par_func;
-	void (*par_func_8param)(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*) =  (void(*)(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_8param (p1, p2, param1, param2, param3, param4, param5, param6, param7, param8);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_7param (int *p1, int *p2, void *param1, void *param2, void *param3, void *param4, void *param5, void *param6, void *param7)
-{
-	void *p = (void*) par_func;
-	void (*par_func_7param)(void*,void*,void*,void*,void*,void*,void*,void*,void*) =  (void(*)(void*,void*,void*,void*,void*,void*,void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_7param (p1, p2, param1, param2, param3, param4, param5, param6, param7);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_6param (int *p1, int *p2, void *param1, void *param2, void *param3, void *param4, void *param5, void *param6)
-{
-	void *p = (void*) par_func;
-	void (*par_func_6param)(void*,void*,void*,void*,void*,void*,void*,void*) =  (void(*)(void*,void*,void*,void*,void*,void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_6param (p1, p2, param1, param2, param3, param4, param5, param6);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_5param (int *p1, int *p2, void *param1, void *param2, void *param3, void *param4, void *param5)
-{
-	void *p = (void*) par_func;
-	void (*par_func_5param)(void*,void*,void*,void*,void*,void*,void*) =  (void(*)(void*,void*,void*,void*,void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_5param (p1, p2, param1, param2, param3, param4, param5);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_4param (int *p1, int *p2, void *param1, void *param2, void *param3, void *param4)
-{
-	void *p = (void*) par_func;
-	void (*par_func_4param)(void*,void*,void*,void*,void*,void*) =  (void(*)(void*,void*,void*,void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_4param (p1, p2, param1, param2, param3, param4);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_3param (int *p1, int *p2, void *param1, void *param2, void *param3)
-{
-	void *p = (void*) par_func;
-	void (*par_func_3param)(void*,void*,void*,void*,void*) =  (void(*)(void*,void*,void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_3param (p1, p2, param1, param2, param3);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_2param (int *p1, int *p2, void *param1, void *param2)
-{
-	void *p = (void*) par_func;
-	void (*par_func_2param)(void*,void*,void*,void*) =  (void(*)(void*,void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_2param (p1, p2, param1, param2);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_1param (int *p1, int *p2, void *param1)
-{
-	void *p = (void*) par_func;
-	void (*par_func_1param)(void*,void*,void*) =  (void(*)(void*,void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_1param (p1, p2, param1);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
-
-static void __kmpc_parallel_func_0param (int *p1, int *p2)
-{
-	void *p = (void*) par_func;
-	void (*par_func_0param)(void*,void*) =  (void(*)(void*,void*)) par_func;
-
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
-	par_func_0param (p1, p2);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
-}
+#include "intel-kmpc-11-intermediate.c"
 
 void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 {
-	void *params[8];
+	void *params[64];
 	va_list ap;
 	int i;
 
@@ -266,33 +160,9 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 
 		switch (p2)
 		{
-			case 8:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_8param, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
-				break;
-			case 7:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_7param, params[0], params[1], params[2], params[3], params[4], params[5], params[6]);
-				break;
-			case 6:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_6param, params[0], params[1], params[2], params[3], params[4], params[5]);
-				break;
-			case 5:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_5param, params[0], params[1], params[2], params[3], params[4]);
-				break;
-			case 4:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_4param, params[0], params[1], params[2], params[3]);
-				break;
-			case 3:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_3param, params[0], params[1], params[2]);
-				break;
-			case 2:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_2param, params[0], params[1]);
-				break;
-			case 1:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_1param, params[0]);
-				break;
-			case 0:
-				__kmpc_fork_call_real (p1, p2, __kmpc_parallel_func_0param);
-				break;
+			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
+#include "intel-kmpc-11-intermediate-switch.c"
+
 			default:
 				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n", p2);
 				exit (-1);

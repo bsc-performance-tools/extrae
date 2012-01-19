@@ -3,7 +3,9 @@ include $(top_srcdir)/PATHS
 SUBDIRS = clocks hwc interfaces
 
 # Include this files/directories for the package generation
-EXTRA_DIST = external
+EXTRA_DIST = external \
+ wrappers/OMP/intel-kmpc-11-intermediate-switch.c \
+ wrappers/OMP/intel-kmpc-11-intermediate.c
 
 if HAVE_MRNET
   SUBDIRS += mrnet
