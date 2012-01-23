@@ -695,7 +695,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 				if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
 				{
 #if defined(DEBUG)
-					fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", EvType, current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+					fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvValue (current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
 #endif
 
 					task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);

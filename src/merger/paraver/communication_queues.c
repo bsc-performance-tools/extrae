@@ -32,6 +32,12 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "communication_queues.h"
 
+#ifndef HAVE_MPI_H
+# define MPI_ANY_TAG (-1)
+#else
+# include <mpi.h>
+#endif
+
 /**************************************************************************
 *** SEND PART
 **************************************************************************/
@@ -76,7 +82,9 @@ static int CompareSend_cbk (void *reference, void *data)
 	SendData_t *d = (SendData_t*) data;
 	SendDataReference_t *ref = (SendDataReference_t*) reference;
 
-	return ref->tag == Get_EvTag(d->send_begin) && 
+	/* Return OK if the TAG, TARGET and KEY are the same */
+	/*   we look for senders, check whether the receiver is any tag */
+	return (ref->tag == Get_EvTag(d->send_begin) || ref->tag == MPI_ANY_TAG) &&
 	  ref->target == Get_EvTarget(d->send_begin) &&
 		ref->key == d->key;
 }
@@ -151,7 +159,9 @@ static int CompareRecv_cbk (void *reference, void *data)
 	RecvData_t *d = (RecvData_t*) data;
 	RecvDataReference_t *ref = (RecvDataReference_t*) reference;
 
-	return ref->tag == Get_EvTag(d->recv_end) && 
+	/* Return OK if the TAG, TARGET and KEY are the same */
+	/*   we look for recvs, check whether the receiver is any tag */
+	return (ref->tag == Get_EvTag(d->recv_end) || MPI_ANY_TAG == Get_EvTag(d->recv_end)) && 
 	  ref->target == Get_EvTarget(d->recv_end) &&
 		ref->key == d->key;
 }
