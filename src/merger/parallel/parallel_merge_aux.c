@@ -227,7 +227,7 @@ static int MatchRecvs (struct ForeignRecv_t *data, int count)
 		{
 			if (data[i].sender == PendingComms.data[j].sender &&
 			    data[i].recver == PendingComms.data[j].recver &&
-			    (data[i].tag == PendingComms.data[j].tag  || PendingComms.data[j].tag == MPI_ANY_TAG) &&
+			    (data[i].tag == PendingComms.data[j].tag  || data[i].tag == MPI_ANY_TAG) &&
 			    !PendingComms.data[j].match)
 			{
 				PendingComms.data[j].match = 1;
