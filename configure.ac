@@ -547,7 +547,8 @@ AM_CONDITIONAL(BUILD_HTML_DOCS, test "${latex}" != "no" -a "${latex2html}" != "n
 #########################################
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
-  src/launcher/Makefile src/launcher/dyninst/Makefile scripts/Makefile \
+  src/launcher/Makefile src/launcher/static/Makefile src/launcher/dyninst/Makefile \
+  scripts/Makefile \
   src/common/Makefile src/tracer/Makefile src/tracer/clocks/Makefile \
   src/tracer/interfaces/Makefile src/tracer/interfaces/API/Makefile \
   src/tracer/interfaces/MPI/Makefile src/tracer/interfaces/PACX/Makefile \
