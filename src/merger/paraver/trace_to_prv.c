@@ -209,7 +209,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	unsigned long long records_per_task;
 	double pct, last_pct;
 	UINT64 *StartingTimes, *SynchronizationTimes;
-	int i, total_tasks;
+	int i, j, total_tasks;
 	long long options;
 
 	records_per_task = 1024*1024/sizeof(paraver_rec_t); /* num of events in 1 Mbytes */
@@ -283,10 +283,22 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		fprintf (stdout, " done\n");
 
 	TimeSync_Initialize (total_tasks);
-	for (i=0; i<total_tasks; i++)
+	i = 0;
+	j = 0;
+	while (j < total_tasks && i < nfiles)
 	{
-		TimeSync_SetInitialTime (i, StartingTimes[i], SynchronizationTimes[i], files[i].node);
+		/* Only use master tasks, do not involve threads/accelerators */
+		if (files[i].thread - 1 == 0)
+		{
+			TimeSync_SetInitialTime (j, StartingTimes[j], SynchronizationTimes[j], files[i].node);
+			j++;
+		}
+		i++;
 	}
+
+	if (i == nfiles && j < total_tasks)
+		if (0 == taskid)
+			fprintf (stderr, "mpi2prv: Error! Didn't encounter all the tasks within all files when running time-synchronization\n");
 
 	if (get_option_merge_SincronitzaTasks_byNode())
 	{
