@@ -298,6 +298,7 @@ void HWC_Initialize (int options)
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_set\n");
 		return;
 	}
+	bzero(HWC_current_set, sizeof(int) * num_threads);
 
 	HWC_current_timebegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
 	if (NULL == HWC_current_timebegin)
