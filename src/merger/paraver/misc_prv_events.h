@@ -40,9 +40,12 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options);
 #define MN_LINECARD_LABEL     "Linecard"
 #define MN_HOST_LABEL         "Node inside linecard"
 
-#define BG_TORUS_X            "BG X Coordinate in Torus"
-#define BG_TORUS_Y            "BG Y Coordinate in Torus"
-#define BG_TORUS_Z            "BG Z Coordinate in Torus"
+#define BG_TORUS_A            "BG A Coordinate in Torus"
+#define BG_TORUS_B            "BG B Coordinate in Torus"
+#define BG_TORUS_C            "BG C Coordinate in Torus"
+#define BG_TORUS_D            "BG D Coordinate in Torus"
+#define BG_TORUS_E            "BG E Coordinate in Torus"
+
 #define BG_PROCESSOR_ID       "BG Processor ID"
 
 #if defined(PARALLEL_MERGE)

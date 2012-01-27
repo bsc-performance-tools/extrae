@@ -27,10 +27,21 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <strings.h>
+#include <config.h>
+
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif
+
 #include "common.h"
 #include "types.h"
 #include "timesync.h"
@@ -179,7 +190,7 @@ int TimeSync_CalculateLatencies (int sync_strategy)
 		UINT64 *max_sync_time_per_node;
 
 		max_sync_time_per_node = (UINT64 *)malloc(sizeof(UINT64) * TotalNodes);
-		bzero(max_sync_time_per_node, sizeof(UINT64) * TotalNodes);
+		memset(max_sync_time_per_node, 0,sizeof(UINT64) * TotalNodes);
 
 		/* Calculate the maximum synchronization time per node */
 		for (i=0; i<TotalTasksToSync; i++)

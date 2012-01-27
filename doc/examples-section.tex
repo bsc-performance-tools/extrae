@@ -135,6 +135,22 @@ rm ${MLIST}
 
 Besides the job specification given in lines 1-11, there are commands of particular interest. Lines 13-15 are used to know which and how many nodes are involved in the computation. Such information information is given to the {\tt mpirun} command to proceed with the execution. Once the execution finished, the temporal file created on line 14 is removed on line 19.
 
+\subsection{CUDA}\label{subsec:Examples_CUDA}
+
+There are two ways to instrument CUDA applications, depending on how the package was configured. If the package was configure with {\tt --enable-cuda} only interposition on binaries using shared libraries are available. If the package was configured with {\tt --with-cupti} any kind of binary can be instrumented because the instrumentation relies on the CUPTI library to instrument CUDA calls. The example shown below is intended for the former case.
+
+\begin{Verbatim}[frame=single,numbers=left,labelposition=topline,label=run.sh]
+#!/bin/bash
+
+export EXTRAE_HOME=/home/harald/extrae
+export PAPI_HOME=/home/harald/aplic/papi/4.1.4
+
+EXTRAE_CONFIG_FILE=extrae.xml LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:${PAPI_HOME}/lib:${LD_LIBRARY_PATH} ./hello
+${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -e ./hello
+\end{Verbatim}
+
+In this example, the hello application is compiled using the {\tt nvcc} compiler and linked against the {\tt -lcudatrace} library. The binary contains calls to {\tt Extrae\_init} and {\tt Extrae\_fini} and then executes a CUDA kernel. Line number 6 refers to the execution of the application itself. The \TRACE configuration file and the location of the shared libraries are set in this line. Line number 7 invokes the merge process to generate the final tracefile.
+
 \subsection{AIX}\label{subsec:Examples_AIX}
 
 AIX typically ships with POE and LoadLeveler as MPI implementation and queue system respectively. An example for a system with these software packages is given below. Please, note that the example is intended for 64 bit applications, if using 32 bit applications then {\tt LDR\_PRELOAD64} needs to be changed in favour of {\tt LDR\_PRELOAD}.

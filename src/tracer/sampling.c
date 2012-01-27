@@ -84,8 +84,8 @@ void Extrae_SamplingHandler (void* address)
 	}
 }
 
-#if defined(IS_BGP_MACHINE)
-/* BG/P */
+#if defined(IS_BGP_MACHINE) || defined(IS_BGQ_MACHINE)
+/* BG/P  & BG/Q */
 # if __WORDSIZE == 32
 #  define UCONTEXT_REG(uc, reg) ((uc)->uc_mcontext.uc_regs->gregs[reg])
 # else
@@ -112,7 +112,7 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	UNREFERENCED_PARAMETER(sig);
 	UNREFERENCED_PARAMETER(siginfo);
 
-#if defined(IS_BGP_MACHINE)
+#if defined(IS_BGP_MACHINE) || defined(IS_BGQ_MACHINE)
 	pc = (caddr_t)UCONTEXT_REG(uc, PPC_REG_PC);
 #elif defined(OS_LINUX)
 # if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)

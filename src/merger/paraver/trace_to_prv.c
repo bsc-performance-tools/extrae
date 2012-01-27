@@ -112,35 +112,6 @@ int **EnabledTasks = NULL;
 unsigned long long **EnabledTasks_time = NULL;
 struct address_collector_t CollectedAddresses;
 
-#if defined(IS_BG_MACHINE)
-struct QuadCoord
-{
-  int X, Y, Z, T;
-};
-static struct QuadCoord *coords = NULL;
-
-void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task)
-{
-  switch (event)
-  {
-    case BG_PERSONALITY_TORUS_X:
-      coords[task - 1].X = valor;
-      break;
-    case BG_PERSONALITY_TORUS_Y:
-      coords[task - 1].Y = valor;
-      break;
-    case BG_PERSONALITY_TORUS_Z:
-      coords[task - 1].Z = valor;
-      break;
-    case BG_PERSONALITY_PROCESSOR_ID:
-      coords[task - 1].T = valor;
-      break;
-    default:
-      break;
-  }
-}
-#endif
-
 static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 {
   int i, j;

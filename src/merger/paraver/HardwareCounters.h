@@ -52,7 +52,7 @@
 #  define HWC_COUNTER_TYPE(x) (HWC_BASE + (x & 0x000000FF))
 # elif defined(PAPIv3)
 #  define HWC_COUNTER_TYPE(x) \
-		(x&PAPI_NATIVE_MASK)?(HWC_BASE_NATIVE + (x & 0x000003FF)):(HWC_BASE + (x & 0x000003FF))
+		(x&PAPI_NATIVE_MASK)?(HWC_BASE_NATIVE + (x & 0x0000FFFF)):(HWC_BASE + (x & 0x0000FFFF))
 # endif
 #elif defined(PMAPI_COUNTERS)
 # define HWC_COUNTER_TYPE(cnt,x) (HWC_BASE + cnt*1000 + x)

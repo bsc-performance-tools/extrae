@@ -1508,9 +1508,9 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 	TimeSync_Initialize (world_size);
 
 	xmalloc(StartingTimes, world_size * sizeof(UINT64));
-	bzero(StartingTimes, world_size * sizeof(UINT64));
+	memset (StartingTimes, 0, world_size * sizeof(UINT64));
 	xmalloc(SynchronizationTimes, world_size * sizeof(UINT64));
-	bzero(SynchronizationTimes, world_size * sizeof(UINT64));
+	memset (SynchronizationTimes, 0, world_size * sizeof(UINT64));
 
 #if defined(MPI_SUPPORT)
 	rc = PMPI_Allgather (&ApplBegin_Time, 1, MPI_LONG_LONG, StartingTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);

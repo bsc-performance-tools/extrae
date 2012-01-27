@@ -20,7 +20,7 @@ There are many options to be applied at configuration time for the instrumentati
 	\item {\tt --enable-pmapi} \\
 	Enable PMAPI library to gather CPU performance counters. PMAPI is a base package installed in AIX systems since version 5.2.
 	\item {\tt --enable-cuda} \\
-	Enable support for tracing CUDA calls on nVidia hardware.
+	Enable support for tracing CUDA calls on nVidia hardware. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the {\tt LD\_PRELOAD} mechanism. It is superseded by {\tt --with-cupti} which also supports instrmentation for static binaries.
 	\item {\tt --enable-openmp} \\
 	Enable support for tracing OpenMP on IBM and GNU runtimes. The IBM runtime instrumentation is only available for PowerPC systems.
 	\item {\tt --enable-smpss} \\
@@ -32,7 +32,7 @@ There are many options to be applied at configuration time for the instrumentati
 	\item {\tt --enable-upc} \\
 	Enable support for tracing UPC run-time.
 	\item {\tt --enable-xml} \\
-	Enable support for XML configuration (not available on BG/L and BG/P systems).
+	Enable support for XML configuration (not available on BG/L, BG/P and BG/Q systems).
 	\item {\tt --enable-xmltest} \\
 	Do not try to compile and run a test LIBXML program.
 	\item {\tt --enable-doc} \\
@@ -57,6 +57,8 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
   \item {\tt --with-dyninst=DIR} \\
   Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst.
+  \item {\tt --with-cupti=DIR} \\
+  Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --enable-cuda}.
 \end{itemize}
 
 \section{Build}
@@ -77,6 +79,16 @@ Configuration command:
 
 \graybox{{\tt ./configure --prefix=/homec/jzam11/jzam1128/aplic/extrae/2.2.0 --with-papi=/homec/jzam11/jzam1128/aplic/papi/4.1.2.1 --with-bfd=/bgsys/local/gcc/gnu-linux\_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux\_4.3.2/powerpc-bgp-linux --with-mpi=/bgsys/drivers/ppcfloor/comm --without-unwind --without-dyninst}}
 
+Build and installation commands:
+
+\graybox{{\tt make\\
+make install}}
+
+\subsection{BlueGene/Q}
+
+Configuration command:
+
+\graybox{{\tt  ./configure --prefix=/bgsys/home/zrlrod/pub/release/bgq/gnu/extrae --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --without-papi --disable-openmp --disable-pthread --with-libz=no}}
 
 Build and installation commands:
 

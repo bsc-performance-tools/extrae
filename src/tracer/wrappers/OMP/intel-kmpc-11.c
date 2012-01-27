@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/OMP/ibm-xlsmp-1.6.c $
- | @last_commit: $Date: 2011-06-17 10:11:42 +0200 (dv, 17 jun 2011) $
- | @version:     $Revision: 659 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
@@ -47,7 +47,7 @@
 #include "trace_macros.h"
 #include "omp_probe.h"
 
-static char UNUSED rcsid[] = "$Id: ibm-xlsmp-1.6.c 659 2011-06-17 08:11:42Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 

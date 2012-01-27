@@ -85,8 +85,6 @@ These are the available options for the sequential Paraver merger:
  If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI\_Init call and the node where they ran. This will usually lead to better synchronized tasks than using -syn, but, again, it will depend on how the clocks advance in time.
  \item {\tt -unique-caller-id}\\
  Choose whether use a unique value identifier for different callers locations (MPI calling routines, user routines, OpenMP outlined routines andpthread routines).
- \item {\tt -xyzt} {\em (Only available on BG/L and BG/P systems)}\\
- Generates an additional output file containing the coordinates of each task in the network.
 \end{itemize}
 
 \subsection{Parallel Paraver merger}

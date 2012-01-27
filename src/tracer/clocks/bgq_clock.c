@@ -26,10 +26,70 @@
  | @last_commit: $Date$
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef INTEL_KMPC_11_WRAPPER_H_
-#define INTEL_KMPC_11_WRAPPER_H_
+static char UNUSED rcsid[] = "$Id$";
 
-int intel_kmpc_11_hook_points (int rank);
+#if defined(IS_BGQ_MACHINE)
 
+#include <firmware/include/personality.h>
+#include <spi/include/kernel/process.h>
+#include <spi/include/kernel/location.h>
+
+#ifdef __GNUC__
+#include <hwi/include/bqc/A2_inlines.h>
 #endif
+
+#ifdef HAVE_RTS_H
+# include <rts.h>
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#include "bgq_clock.h" 
+
+#define BITS_FOR_CYCLES_FACTOR 	14
+#define CYCLES_FACTOR          	(1ULL<<BITS_FOR_CYCLES_FACTOR)
+
+static unsigned long long factor;
+
+/* From bpcore/ppc450_inlines.h */
+
+unsigned long long  _bgq_GetTimeBase( void )
+{
+#if defined (__GNUC__)
+	return GetTimeBase();
+#elif defined (__IBMC__)
+	return __mftb();
+#else
+	#error "Cannot find GetTimeBase for BG/Q (unhandled compiler)"
+#endif
+}
+
+#define BGQ_DEFAULT_CPU_FREQ_MHZ 1600ULL
+void bgq_Initialize (void)
+{
+	unsigned long long freqMHz = BGQ_DEFAULT_CPU_FREQ_MHZ; /* use a correct default */
+
+#if defined (__GNUC__)
+	Personality_t personality;
+	unsigned personality_size = sizeof (personality);
+
+	Kernel_GetPersonality(&personality, personality_size);
+	freqMHz = personality.Kernel_Config.FreqMHz;
+#endif
+
+	factor = (1000ULL * CYCLES_FACTOR / freqMHz) + 1;
+}
+
+
+void bgq_Initialize_thread (void)
+{
+}
+
+iotimer_t bgq_getTime (void)
+{
+	return (_bgq_GetTimeBase() * factor) >> BITS_FOR_CYCLES_FACTOR;
+}
+
+#endif /* IS_BGQ_MACHINE */

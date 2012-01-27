@@ -35,22 +35,22 @@
 
 typedef struct omp_param_t
 {
-  unsigned long long param;
+  UINT64 param;
 } omp_param_t;
 
 typedef struct misc_param_t
 {
-  unsigned long long param;
+  UINT64 param;
 } misc_param_t;
 
 
 typedef struct mpi_param_t
 {
-  int target;                   /* receiver in send - sender in receive */
-  int size;
-  int tag;
-  int comm;
-  long long aux;
+  INT32 target;
+  INT32 size;
+  INT32 tag;
+  INT32 comm;
+  INT64 aux;
 } mpi_param_t;
 
 
@@ -76,11 +76,11 @@ typedef struct
   UINT64 value;                  /* Value of this event                   */
   UINT64 time;                   /* Timestamp of this event               */
 #if 1 || USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-  long long HWCValues[MAX_HWC];  /* Hardware counters read for this event */
+  INT64 HWCValues[MAX_HWC];      /* Hardware counters read for this event */
 #endif
-  int event;                     /* Type of this event                    */
+  INT32 event;                   /* Type of this event                    */
 #if 1 || USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-  int HWCReadSet;                /* Marks which set of counters was read, if any */
+  INT32 HWCReadSet;              /* Marks which set of counters was read, if any */
 #endif
 } event_t;
 

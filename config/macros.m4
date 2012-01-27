@@ -153,16 +153,26 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 # ---------------------
 AC_DEFUN([AX_CHECK_POINTER_SIZE],
 [
-   AC_TRY_RUN(
-      [
-         int main()
-         {
-            return sizeof(void *)*8;
-         }
-      ],
-      [ POINTER_SIZE="0" ],
-      [ POINTER_SIZE="$?"]
-   )
+   AC_REQUIRE([AX_IS_BGL_MACHINE])
+   AC_REQUIRE([AX_IS_BGP_MACHINE])
+   AC_REQUIRE([AX_IS_BGQ_MACHINE])
+
+   if test "${IS_BGQ_MACHINE}" = "yes" ; then
+      POINTER_SIZE=64
+   elif test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
+      POINTER_SIZE=32
+   else
+      AC_TRY_RUN(
+         [
+            int main()
+            {
+               return sizeof(void *)*8;
+            }
+         ],
+         [ POINTER_SIZE="0" ],
+         [ POINTER_SIZE="$?"]
+      )
+   fi
 ])
 
 
@@ -232,6 +242,7 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 					fi
 				fi
 			done
+
 		fi
 		AC_LANG_POP(language)
 	])
@@ -370,7 +381,7 @@ AC_DEFUN([AX_PROG_BFD],
    BFD_INSTALLED="no"
    LIBERTY_INSTALLED="no"
 
-   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
+   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
       bfd_default_paths="${BG_HOME}/blrts-gnu"
       libiberty_default_paths="${BG_HOME}/blrts-gnu"
    else
@@ -798,6 +809,8 @@ AC_DEFUN([AX_PROG_PAPI],
          LIBS="-static -lpapi -L${BG_HOME}/bglsys/lib -lbgl_perfctr.rts -ldevices.rts -lrts.rts"
       elif test "${IS_BGP_MACHINE}" = "yes" ; then
          LIBS="-static -lpapi -L${BG_HOME}/runtime/SPI -lSPI.cna"
+      elif test "${IS_BGQ_MACHINE}" = "yes" ; then
+         LIBS="-static -lpapi -L${BG_HOME}/spi/lib -lSPI -lSPI_cnk"
       else
          if test "${OperatingSystem}" = "freebsd" ; then
             LIBS="-lpapi -lpmc"
@@ -975,10 +988,41 @@ AC_DEFUN([AX_IS_CRAY_XT],
    AM_CONDITIONAL(IS_CRAY_XT_MACHINE, test "${IS_CXT_MACHINE}" = "yes")
 ])
 
+# AX_IS_BGQ_MACHINE
+# ---------------------
+AC_DEFUN([AX_IS_BGQ_MACHINE],
+[
+   IS_BGQ_MACHINE="no"
+
+   AC_MSG_CHECKING([if this is a BG/Q machine])
+   AC_ARG_ENABLE(check-bgq,
+      AC_HELP_STRING(
+         [--enable-check-bgq],
+         [Enable check to known if this is a frontend to a BG/Q BE machine (enabled by default)]
+      ),
+      [enable_check_bgq="${enableval}"],
+      [enable_check_bgq="yes"]
+   )
+
+   if test "${enable_check_bgq}" = "yes" -a -d /bgsys/drivers/ppcfloor ; then
+     if test -f /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-gcc  ; then
+       IS_BGQ_MACHINE="yes"
+       BG_HOME="/bgsys/drivers/ppcfloor"
+       CFLAGS="${CFLAGS} -I${BG_HOME}/bglsys/include -I${BG_HOME}/arch/include -I${BG_HOME}/blrts-gnu/include"
+       AC_SUBST(BG_HOME)
+       AC_DEFINE([IS_BGQ_MACHINE], 1, [Defined if this machine is a BG/Q machine])
+     fi
+   fi
+   AC_MSG_RESULT($IS_BGQ_MACHINE)
+   AM_CONDITIONAL(IS_BGQ_MACHINE, test "${IS_BGQ_MACHINE}" = "yes")
+])
+
 # AX_IS_BGP_MACHINE
 # ---------------------
 AC_DEFUN([AX_IS_BGP_MACHINE],
 [
+   IS_BGP_MACHINE="no"
+
    AC_MSG_CHECKING([if this is a BG/P machine])
    AC_ARG_ENABLE(check-bgp,
       AC_HELP_STRING(
@@ -990,16 +1034,15 @@ AC_DEFUN([AX_IS_BGP_MACHINE],
    )
 
    if test "${enable_check_bgp}" = "yes" -a -d /bgsys/drivers/ppcfloor ; then
-     IS_BGP_MACHINE="yes"
-     BG_HOME="/bgsys/drivers/ppcfloor"
-     CFLAGS="${CFLAGS} -I${BG_HOME}/bglsys/include -I${BG_HOME}/arch/include -I${BG_HOME}/blrts-gnu/include"
-     AC_SUBST(BG_HOME)
-     AC_MSG_RESULT([yes])
-     AC_DEFINE([IS_BGP_MACHINE], 1, [Defined if this machine is a BG/P machine])
-   else
-     IS_BGP_MACHINE="no"
-     AC_MSG_RESULT([no])
+     if test -f /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgp-linux-gcc ; then
+       IS_BGP_MACHINE="yes"
+       BG_HOME="/bgsys/drivers/ppcfloor"
+       CFLAGS="${CFLAGS} -I${BG_HOME}/bglsys/include -I${BG_HOME}/arch/include -I${BG_HOME}/blrts-gnu/include"
+       AC_SUBST(BG_HOME)
+       AC_DEFINE([IS_BGP_MACHINE], 1, [Defined if this machine is a BG/P machine])
+     fi
    fi
+   AC_MSG_RESULT($IS_BGP_MACHINE)
    AM_CONDITIONAL(IS_BGP_MACHINE, test "${IS_BGP_MACHINE}" = "yes")
 ])
 

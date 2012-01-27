@@ -345,10 +345,18 @@ enum {
 /******************************************************************************
  *   User events for BG PERSONALITY
  ******************************************************************************/
-#define BG_PERSONALITY_TORUS_X      6000
-#define BG_PERSONALITY_TORUS_Y      6001
-#define BG_PERSONALITY_TORUS_Z      6002
-#define BG_PERSONALITY_PROCESSOR_ID 6003
+#define BG_PERSONALITY_PROCESSOR_ID 6000
+
+#define BG_PERSONALITY_TORUS_A      6001 /* For BG/Q */
+#define BG_PERSONALITY_TORUS_B      6002 /* For BG/Q */
+#define BG_PERSONALITY_TORUS_C      6003 /* For BG/Q */
+#define BG_PERSONALITY_TORUS_D      6004 /* For BG/Q */
+#define BG_PERSONALITY_TORUS_E      6005 /* For BG/Q */
+
+#define BG_PERSONALITY_TORUS_X      6001 /* For BG/L & BG/P */
+#define BG_PERSONALITY_TORUS_Y      6002 /* For BG/L & BG/P */
+#define BG_PERSONALITY_TORUS_Z      6003 /* For BG/L & BG/P */
+
 
 /******************************************************************************
  *   User events to trace MN topology (grodrigu)

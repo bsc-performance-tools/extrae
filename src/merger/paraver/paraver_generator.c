@@ -589,20 +589,6 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 
 	while (cur != NULL)
 	{
-#if defined(IS_BG_MACHINE)
-	/*
-	* Per cadascun dels events, hem de comprovar si cal anotar les
-	* localitzacions del torus a la trasa 
-	*/
-		if (cur->type == 2 && get_option_merge_BG_XYZT()
-		&& (cur->event == BG_PERSONALITY_TORUS_X
-		|| cur->event == BG_PERSONALITY_TORUS_Y
-		|| cur->event == BG_PERSONALITY_TORUS_Z
-		|| cur->event == BG_PERSONALITY_PROCESSOR_ID))
-		AnotaBGPersonality (cur->event, cur->value, cur->task);
-#endif
-
-
 	/* Merge multiple events if they are in the same cpu, task, thread and time */
 		if (prev_cpu == cur->cpu && prev_ptask == cur->ptask &&
 		prev_task == cur->task && prev_thread == cur->thread &&
@@ -1065,22 +1051,6 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 		}
 #endif
 	} /* taskid == 0 */
-
-#if defined(IS_BG_MACHINE)
-#if defined(DEAD_CODE)
-	/* FIXME must be implemented in parallel */
-	if (option_merge_XYZT)
-	{
-		coords = (struct QuadCoord *) malloc (nfiles * sizeof (struct QuadCoord));
-		if (coords == NULL)
-		{
-			fprintf (stderr,
-			"mpi2prv: ERROR: Unable to allocate memory for coordinates file\n");
-			return -1;
-		}
-	}
-#endif /* FIXME */
-#endif
 
 	if (0 == taskid)
 		error = Paraver_WriteHeader (num_appl, Ftime, prv_fd, NodeCPUinfo);

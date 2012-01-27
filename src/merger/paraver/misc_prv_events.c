@@ -53,10 +53,12 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 	else if (options & TRACEOPTION_BG_ARCH)
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_X, BG_TORUS_X);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Y, BG_TORUS_Y);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Z, BG_TORUS_Z);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_PROCESSOR_ID, BG_PROCESSOR_ID);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_A, BG_TORUS_A);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_B, BG_TORUS_B);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_C, BG_TORUS_C);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_D, BG_TORUS_D);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_E, BG_TORUS_E);
 		LET_SPACES (fd);
 	}
 }

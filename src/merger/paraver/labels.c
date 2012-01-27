@@ -299,21 +299,6 @@ static void MISC_events_group1 (FILE * fd)
   fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOSIZE_EV, IOSIZE_LBL);
   LET_SPACES (fd);
 
-#if defined(DEAD_CODE)
-#if defined(IS_BG_MACHINE)
-  fprintf (fd, "%s\n", TYPE_LABEL);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_X,
-           BGL_TORUS_X);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Y,
-           BGL_TORUS_Y);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_Z,
-           BGL_TORUS_Z);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_PROCESSOR_ID,
-	  BGL_PROCESSOR_ID);
-  LET_SPACES (fd);
-#endif
-#endif /* DEAD_CODE */
-
   fprintf (fd, "%s\n", TYPE_LABEL);
   fprintf (fd, "%d    %d    %s\n", MPI_GRADIENT, MPI_GLOBAL_OP_SENDSIZE,
            MPI_GLOBAL_OP_SENDSIZE_LBL);

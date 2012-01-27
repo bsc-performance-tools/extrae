@@ -27,9 +27,12 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef INTEL_KMPC_11_WRAPPER_H_
-#define INTEL_KMPC_11_WRAPPER_H_
+#if defined(IS_BGQ_MACHINE)
 
-int intel_kmpc_11_hook_points (int rank);
+#include "clock.h"
+
+iotimer_t bgq_getTime (void);
+void bgq_Initialize (void);
+void bgq_Initialize_thread (void);
 
 #endif

@@ -1241,10 +1241,10 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 
 	/* Allocate space for the synchronization times of each task */
 	xmalloc(StartingTimes, total_mpits * sizeof(UINT64));
-	bzero(StartingTimes, total_mpits * sizeof(UINT64));
+	memset (StartingTimes, 0, total_mpits * sizeof(UINT64));
 
 	xmalloc(SynchronizationTimes, total_mpits * sizeof(UINT64));
-	bzero(SynchronizationTimes, total_mpits * sizeof(UINT64));
+	memset (SynchronizationTimes, 0, total_mpits * sizeof(UINT64));
 
 	for (i=0; i<fset->nfiles; i++)
 	{
@@ -1280,10 +1280,10 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 #if defined(PARALLEL_MERGE)
 	/* Share information among all tasks */
 	xmalloc(*io_StartingTimes, total_mpits * sizeof(UINT64));
-	bzero(*io_StartingTimes, total_mpits * sizeof(UINT64));
+	memset (*io_StartingTimes, 0, total_mpits * sizeof(UINT64));
 
 	xmalloc(*io_SynchronizationTimes, total_mpits * sizeof(UINT64));
-	bzero(*io_SynchronizationTimes, total_mpits * sizeof(UINT64));
+	memset (*io_SynchronizationTimes, 0, total_mpits * sizeof(UINT64));
 
 	rc = MPI_Allreduce(StartingTimes, *io_StartingTimes, total_mpits, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
 	MPI_CHECK(rc, MPI_Allreduce, "Failed to share starting times information!");

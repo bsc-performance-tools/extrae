@@ -8,6 +8,8 @@ AC_DEFUN([AX_PROG_MPI],
       mpi_default_paths="${BG_HOME}/bglsys"
    elif test "${IS_BGP_MACHINE}" = "yes" ; then
       mpi_default_paths="${BG_HOME}/comm"
+   elif test "${IS_BGQ_MACHINE}" = "yes" ; then
+      mpi_default_paths="${BG_HOME}/comm"
    else
       mpi_default_paths="none"
    fi

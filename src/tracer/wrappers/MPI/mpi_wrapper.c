@@ -94,15 +94,19 @@ static char UNUSED rcsid[] = "$Id$";
 /* Cal tenir requests persistents per algunes operacions */
 #include "persistent_requests.h"
 
-#if defined(IS_BGL_MACHINE)
-# include "rts.h"
-#endif
-
-#if defined(IS_BGP_MACHINE)
-# include "spi/kernel_interface.h"
-# include "common/bgp_personality.h"
-# include "common/bgp_personality_inlines.h"
-#endif
+#if defined(IS_BG_MACHINE)
+# if defined(IS_BGL_MACHINE)
+#  include <rts.h>
+# endif
+# if defined(IS_BGP_MACHINE)
+#  include <spi/kernel_interface.h>
+#  include <common/bgp_personality.h>
+#  include <common/bgp_personality_inlines.h>
+# endif
+# if defined(IS_BGQ_MACHINE)
+#  include <firmware/include/personality.h>
+# endif
+#endif /* IS_BG_MACHINE */
 
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
@@ -212,10 +216,32 @@ static void BG_gettopology (UINT64 btimestamp, UINT64 etimestamp)
 	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, BGP_Personality_rankInPset (&personality));
 #endif
 
+#if defined(IS_BGQ_MACHINE)
+	Personality_t personality;
+	unsigned personality_size = sizeof (personality);
+	Kernel_GetPersonality (&personality, personality_size);
+
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_A, personality.Network_Config.Acoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_B, personality.Network_Config.Bcoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_C, personality.Network_Config.Ccoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_D, personality.Network_Config.Dcoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_E, personality.Network_Config.Ecoord);
+	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, Kernel_PhysicalProcessorID());
+#endif
+
+#if defined(IS_BGL_MACHINE) || defined(IS_BGP_MACHINE)
 	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_X, 0);
 	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_Y, 0);
 	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_Z, 0);
 	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, 0);
+#elif defined(IS_BGQ_MACHINE)
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_A, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_B, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_C, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_D, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_E, 0);
+	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, 0);
+#endif
 }
 #endif
 

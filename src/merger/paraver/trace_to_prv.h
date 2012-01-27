@@ -47,6 +47,4 @@ extern int **EnabledTasks;
 extern unsigned long long **EnabledTasks_time;
 extern struct address_collector_t CollectedAddresses;
 
-void AnotaBGPersonality (unsigned int event, unsigned long long valor, int task);
-
 #endif /* __TRACE_TO_PRV_H__ */

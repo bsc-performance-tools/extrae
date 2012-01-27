@@ -341,6 +341,34 @@ void Buffer_Unlock (Buffer_t *buffer)
 #endif
 }
 
+/*
+	writev_wrapper
+	writev can be interrupted in BG systems. We build this wrapper to emulate the
+	writev operation based on regular writes.
+*/
+
+static ssize_t writev_wrapper (int fd, const struct iovec *iov, int iovcnt) 
+{
+	size_t tmp = 0;
+	ssize_t written = 0,total = 0;
+	int i;
+
+	for (i = 0; i < iovcnt; i++, iov++)
+	{
+		tmp = 0;
+		while (tmp < iov->iov_len)
+		{
+			written = write (fd, (iov->iov_base) + tmp, iov->iov_len - tmp);
+			if (written < 0)  
+				return written;
+			tmp += written;
+		}
+
+		total += tmp;
+	}
+	return total;
+}
+
 static void dump_buffer (int fd, int n_blocks, struct iovec *blocks)
 {
    int     idx = 0;
@@ -358,7 +386,7 @@ static void dump_buffer (int fd, int n_blocks, struct iovec *blocks)
       {
          written_blocks = MIN(IOV_MAX, remaining_blocks);
 
-         nbytes = writev (fd, (const struct iovec *)blocks + idx, written_blocks);
+         nbytes = writev_wrapper (fd, (const struct iovec *)blocks + idx, written_blocks);
          if (nbytes == -1)
          {
             fprintf(stderr, "dump_buffer: Error writing to disk.\n");

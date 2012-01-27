@@ -9,6 +9,8 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 			CROSSC="${host} with BG/L system support"
 		elif test "${IS_BGP_MACHINE}" = "yes" ; then
 			CROSSC="${host} with BG/P system support"
+		elif test "${IS_BGQ_MACHINE}" = "yes" ; then
+			CROSSC="${host} with BG/Q system support"
 		elif test "${IS_CELL_MACHINE}" = "yes" ; then
 			CROSSC="${host} with Cell Broadband Engine support - SDK ${CELL_SDK}.x"
     elif test "${IS_CRAY_XT}" = "yes" ; then

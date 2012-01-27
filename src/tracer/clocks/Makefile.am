@@ -11,6 +11,9 @@ endif
 if IS_BGP_MACHINE
   CLOCKS += bgp_clock.c bgp_clock.h
 endif
+if IS_BGQ_MACHINE
+  CLOCKS += bgq_clock.c bgq_clock.h
+endif
 else
 if ARCH_IA32
   CLOCKS += ia32_clock.c ia32_clock.h

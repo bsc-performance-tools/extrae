@@ -104,10 +104,12 @@ fi
 AX_IS_CRAY_XT
 AX_IS_BGL_MACHINE
 AX_IS_BGP_MACHINE
-if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
+AX_IS_BGQ_MACHINE
+if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
   AC_DEFINE([IS_BG_MACHINE], 1, [Defined if this machine is a BG machine])
+  IS_BG_MACHINE="yes"
 fi
-AM_CONDITIONAL(IS_BG_MACHINE, test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes")
+AM_CONDITIONAL(IS_BG_MACHINE, test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes")
 
 AX_IS_MN_MACHINE
 AX_IS_CELL_MACHINE
@@ -134,13 +136,11 @@ AM_CONDITIONAL(SPU_USES_WRITE, test "${IS_CELL_MACHINE}" = "yes" -a "${enable_sp
 
 # Search for available compilers and preprocessor
 # AC_PROG_CC does not let us give it a absolute path with the compiler
-if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
-#   wanted_C_Compilers="powerpc-bgl-blrts-gnu-gcc ${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-gcc blrts_xlc /usr/bin/blrts_xlc"
-#   wanted_CXX_Compilers="powerpc-bgl-blrts-gnu-g++ ${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-g++ blrts_xlC /usr/bin/blrts_xlC"
+if test "${IS_BG_MACHINE}" = "yes" ; then
 
    if test "${CC}" ; then
       AC_MSG_NOTICE([Attention!])
-      AC_MSG_NOTICE([Attention! CC is defined on a BG/L system. Use it with caution!])
+      AC_MSG_NOTICE([Attention! CC is defined on a BG/* system. Use it with caution!])
       AC_MSG_NOTICE([Attention!])
    else
       if test "${IS_BGL_MACHINE}" = "yes" ; then
@@ -149,6 +149,9 @@ if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
       elif test "${IS_BGP_MACHINE}" = "yes" ; then
          CC="${BG_HOME}/gnu-linux/bin/powerpc-bgp-linux-gcc"
          CXX="${BG_HOME}/gnu-linux/bin/powerpc-bgp-linux-g++"
+      elif test "${IS_BGQ_MACHINE}" = "yes" ; then
+         CC="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-gcc"
+         CXX="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-g++"
       fi
    fi
 else
@@ -237,6 +240,11 @@ AC_CHECK_HEADERS(
   [arch/powerpc/include/asm/atomic.h]
 )
 CFLAGS=${saved_CFLAGS}
+
+AC_CHECK_HEADERS(
+  [firmware/include/personality.h spi/include/kernel/process.h \
+   spi/include/kernel/location.h]
+)
 
 ##
 ## Check for clock routines
@@ -425,14 +433,14 @@ fi
 AC_ARG_ENABLE(xml,
    AC_HELP_STRING(
       [--enable-xml],
-      [Enable support for XML configuration (enabled by default - disabled on BG/L)]
+      [Enable support for XML configuration (enabled by default - disabled on BG/*)]
    ),
    [enable_xml="${enableval}"],
    [enable_xml="yes"]
 )
 if test "${enable_xml}" = "yes" ; then
    # BG/L does not have XML2
-   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
+   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
       XML_enabled="no"
    else
       XML_enabled="yes"
@@ -481,6 +489,17 @@ if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
    voidp_size=4
    short_size=2
    char_size=1
+elif test "${IS_BGQ_MACHINE}" = "yes" ; then
+   cross_compiling="yes" # Force AC_CHECK_SIZEOF use the following values
+   long_long_size=8
+   long_size=8
+   int_size=4
+   pid_t_size=4
+   ssize_t_size=8
+   size_t_size=8
+   voidp_size=8
+   short_size=2
+   char_size=1
 else
    cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
    long_long_size=0
@@ -514,7 +533,7 @@ AC_CHECK_MEMBER(struct mallinfo.arena,
    [],
    [#include <malloc.h>])
 
-if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
+if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
    cross_compiling="no"
 fi
 
