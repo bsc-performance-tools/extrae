@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/CUDA/cuda_wrapper.c $
- | @last_commit: $Date: 2011-11-09 09:46:59 +0100 (dc, 09 nov 2011) $
- | @version:     $Revision: 857 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 857 2011-11-09 08:46:59Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #ifdef HAVE_DLFCN_H
 # define __USE_GNU

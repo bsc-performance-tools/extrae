@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/CUDA/cuda_wrapper.c $
- | @last_commit: $Date: 2011-12-01 15:01:19 +0100 (dj, 01 des 2011) $
- | @version:     $Revision: 894 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
@@ -43,7 +43,7 @@
 #include "trace_macros.h"
 #include "cuda_probe.h"
 
-static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 894 2011-12-01 14:01:19Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 static unsigned __last_tag = 0xC0DA; /* Fixed tag */
 static unsigned Extrae_CUDA_tag_generator (void)
