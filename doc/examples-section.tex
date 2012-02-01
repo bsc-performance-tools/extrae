@@ -210,7 +210,7 @@ Lines 2-5 are definitions of some Makefile variables to set up the location of d
 
 \subsection{Generating the intermediate files}\label{subsec:Examples_static_Intermediate}
 
-Executing an application with the statically linked version of the instrumentation package is very similar as the method shown in subsection \ref{subsec:Examples_LDPRELOAD_Intermediate}. There is, however, a difference: do not set LD\_PRELOAD in {\tt trace.sh}.
+Executing an application with the statically linked version of the instrumentation package is very similar as the method shown in Section \ref{sec:Examples_LDPRELOAD}. There is, however, a difference: do not set LD\_PRELOAD in {\tt trace.sh}.
 
 \begin{Verbatim}[frame=single,numbers=left,labelposition=topline,label=trace.sh]
 #!/bin/sh
@@ -225,7 +225,7 @@ export LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:\
 $*
 \end{Verbatim}
 
-See section \ref{subsec:Examples_LDPRELOAD_Intermediate} to know how to run this script either through command line or queue systems.
+See section \ref{sec:Examples_LDPRELOAD} to know how to run this script either through command line or queue systems.
 
 \section{Generating the final tracefile}\label{subsec:Examples_LDPRELOAD_Final}
 

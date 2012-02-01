@@ -9,14 +9,17 @@ These examples assume that you are using a sh/bash shell, you must adequate them
 Jugene (Bluegene/P)
 --
 NOTES:
-Bluegene/{L,P} only support static libraries.
+Bluegene/{L,P,Q} only support static libraries.
 
-COMMAND:
-./configure --prefix=/homec/jzam11/jzam1128/aplic/extrae/2.2.0 --with-papi=/homec/jzam11/jzam1128/aplic/papi/4.1.2.1 --with-bfd=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-bgp-linux --with-mpi=/bgsys/drivers/ppcfloor/comm --without-unwind --without-dyninst
-
+COMMAND for BG/P:
+./configure --prefix=/homec/jzam11/jzam1128/aplic/extrae/2.2.0 --with-papi=/homec/jzam11/jzam1128/aplic/papi/4.1.2.1 --with-bfd=/bgsys/local/gcc/gnu-linux 4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux 4.3.2/powerpc-bgp-linux --with-mpi=/bgsys/drivers/ppcfloor/comm --without-unwind --without-dyninst
 make
 make install
 
+COMMAND for BG/Q:
+./configure --prefix=/bgsys/home/zrlrod/pub/release/bgq/gnu/extrae --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --without-papi --disable-openmp --disable-pthread --with-libz=no
+make
+make install
 
 Linux
 --
@@ -32,7 +35,7 @@ Example 2 - MPICH, OpenMP and PAPI
 ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp
 
 Example 3 - Forcing 32bit package in a 32/64bit mixed environment. Also DynInst and libunwind.
-./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=32 --with-unwind=$HOME/aplic/unwind/1.0.1/32 --with-elf=/usr --with-dwarf=/usr --with-dyninst=$HOME/aplic/dyninst/7.0.1/32
+./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp --without-dyninst --without-unwind
 make
 make install
 
@@ -48,7 +51,7 @@ make install
 
 Example 6 - Linux with Power Processor in a environment with IBM compilers & GNU compilers, using PMAPI instead of PAPI
  a) Using IBM compilers
- CC=xlc CXX=xlC ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe
+ CC=xlc CXX=xlC ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe --without-dyninst --without--unwind --without-papi
  make
  make install
 
@@ -86,14 +89,9 @@ Some extensions of Extrae do not work properly (nanos, SMPss and OpenMP).
 In addition, if using IBM MPI (aka POE) the make will complain when generating the parallel merge if the main compiler is not xlc/xlC. So, you can change the compiler or disable the parallel merge at compile step.
 Command ar can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT_MODE=64 set to avoid this.
 
-COMMAND:
-Example 1 - Compiling the 32bit package using the IBM compilers
-CC=xlc CXX=xlC ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --with-binary-type=32
-make
-make install
 
 Example 2 - Compiling the 64bit package without the parallel merge
-./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64
+./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64 --without-unwind --enable-pmapi --without-dyninst --with-mpi=/usr/lpp/ppe.poe
 OBJECT_MODE=64 make
 make install
 
