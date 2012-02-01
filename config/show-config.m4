@@ -32,25 +32,33 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 
 	echo MPI instrumentation: ${MPI_INSTALLED}
 	if test "${MPI_INSTALLED}" = "yes" ; then
-		echo -e \\\tFortran decoration:  ${FORTRAN_DECORATION}
 		echo -e \\\tMPI home:            ${MPI_HOME}
+		echo -e \\\tFortran decoration:  ${FORTRAN_DECORATION}
 		echo -e \\\tperuse available?    ${PERUSE_AVAILABILITY}
 		echo -e \\\tmixed C/Fortran libraries? ${mpi_lib_contains_c_and_fortran}
     echo -e \\\tshared libraries?    ${MPI_SHARED_LIB_FOUND}
 		echo -e \\\t1-sided operations?  ${mpi_lib_supports_mpi_1sided}
 		echo -e \\\tMPI I/O operations?  ${mpi_lib_supports_mpi_io}
 	fi
-	echo
 	echo PACX instrumentation: ${PACX_INSTALLED}
 	if test "${PACX_INSTALLED}" = "yes" ; then
 		echo -e \\\tPACX home:          ${PACX_HOME}
 	fi
 
-	echo
 	echo OpenMP instrumentation: ${enable_openmp}
 
-	echo
 	echo pThread instrumentation: ${enable_pthread}
+
+	if test "${enable_cupti}" = "yes" ; then
+		echo CUDA instrumentation: yes through CUPTI
+		echo -e \\\\tCUPTI home: ${cupti_path}
+	else
+		if test "${enable_cuda}" = "yes" ; then
+			echo CUDA instrumentation: yes through LD_PRELOAD
+		else
+			echo CUDA instrumentation: no
+		fi
+	fi
 
 	echo
 	if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" ; then
@@ -67,26 +75,24 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	fi
 
 	echo
-	echo BFD availability: ${BFD_INSTALLED}
 	if test "${BFD_INSTALLED}" = "yes" ; then
-		echo -e \\\tBFD home:  ${BFD_HOME}
+		echo BFD availability: yes \(${BFD_HOME}\)
 	fi
 
-	echo liberty availability: ${LIBERTY_INSTALLED}
 	if test "${LIBERTY_INSTALLED}" = "yes" ; then
-		echo -e \\\tliberty home:  ${LIBERTY_HOME}
+		echo liberty availability: yes \(${LIBERTY_HOME}\)
+	else
+		echo liberty availability: no
 	fi
 
 	if test "${zhome_dir}" != "not found" ; then
-		echo zlib availability: yes
-		echo -e \\\tzlib home: ${LIBZ_HOME}
+		echo zlib availability: yes \(${LIBZ_HOME}\)
 	else
 		echo zlib availability: no
 	fi
 
 	if test "${libunwind_works}" = "yes" ; then
-		echo -e callstack access: through libunwind
-		echo -e \\\tlibunwind home: ${UNWIND_HOME}
+		echo -e callstack access: through libunwind \(${UNWIND_HOME}\)
 	else
 		if test "${OperatingSystem}" = "linux" -a "${Architecture}" = "ia64" ; then
 			echo callstack access: libunwind required for Linux/ia64 !
@@ -99,8 +105,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 
 	echo
 	if test "${DYNINST_HOME}" != "" ; then
-		echo Dynamic instrumentation: yes
-		echo -e \\\tDynInst home: ${DYNINST_HOME}
+		echo Dynamic instrumentation: yes \(${DYNINST_HOME}\)
 	else
 		echo Dynamic instrumentation: no
 	fi
