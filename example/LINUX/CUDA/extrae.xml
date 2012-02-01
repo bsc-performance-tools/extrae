@@ -54,14 +54,14 @@
 
   <merge enabled="yes" 
     synchronization="default"
-    binary="pi"
+    binary="hello"
     tree-fan-out="16"
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
     sort-addresses="yes"
   >
-    pi.prv
+    hello.prv
   </merge>
 
 

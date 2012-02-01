@@ -294,7 +294,7 @@ if WANT_PTHREAD
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/PTHREAD
 	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
 endif
-if WANT_CUDA
+if WANT_CUDAorCUPTI
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/CUDA
 	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
 endif
@@ -317,6 +317,11 @@ if WANT_MERGE_IN_TRACE
 else
 	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(DESTDIR)$(datadir)/example
+endif
+if WANT_CUPTI
+	./substitute-all $(SED) "@sub_CUPTI_LIBS@" "-L${CUPTI_HOME}/lib -lcupti" $(DESTDIR)$(datadir)/example
+else
+	./substitute-all $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example
 endif
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD

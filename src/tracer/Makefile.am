@@ -26,7 +26,7 @@ if WANT_TRT
   lib_LTLIBRARIES += libtrttrace.la
 endif
 
-if WANT_CUDA
+if WANT_CUDAorCUPTI
   lib_LTLIBRARIES += libcudatrace.la
 endif
 
@@ -39,7 +39,7 @@ if HAVE_MPI
 if WANT_OPENMP
   lib_LTLIBRARIES += libompitrace.la libompitracef.la
 endif
-if WANT_CUDA
+if WANT_CUDAorCUPTI
   lib_LTLIBRARIES += libcudampitrace.la libcudampitracef.la
 endif
 if WANT_SMPSS
@@ -110,8 +110,15 @@ WRAPPERS_CORE = \
 	trace_hwc.h
 
 # Wrappers for CUDA instrumentation
-WRAPPERS_CUDA = wrappers/CUDA/cuda_wrapper.c wrappers/CUDA/cuda_wrapper.h \
-	probes/CUDA/cuda_probe.c probes/CUDA/cuda_probe.h
+WRAPPERS_CUDA = probes/CUDA/cuda_probe.c probes/CUDA/cuda_probe.h \
+  wrappers/CUDA/cuda_common.c wrappers/CUDA/cuda_common.h
+if WANT_CUDA
+WRAPPERS_CUDA += wrappers/CUDA/cuda_wrapper.c wrappers/CUDA/cuda_wrapper.h
+endif
+if WANT_CUPTI
+WRAPPERS_CUDA += wrappers/CUDA/cuda_wrapper_cupti.c wrappers/CUDA/cuda_wrapper_cupti.h
+WRAPPERS_CUDA_CUPTI_CFLAGS = -I$(CUPTI_HOME)/include -I/opt/cuda/4.0/include
+endif
 
 # Wrappers for MPI instrumentation
 WRAPPERS_MPI = mpif.h wrappers/MPI/mpi_wrapper.c wrappers/MPI/mpi_wrapper.h
@@ -323,8 +330,11 @@ endif
 if WANT_TRT
   core_INCLUDES += -I$(PROBES_DIR)/TRT
 endif
-if WANT_CUDA
+if WANT_CUDAorCUPTI
   core_INCLUDES += -I$(PROBES_DIR)/CUDA
+endif
+if WANT_CUPTI
+  core_INCLUDES += -I$(CUPTI_DIR)/include
 endif
 
 if HAVE_PAPI
@@ -364,9 +374,9 @@ endif
 
 COMMON_LINKER_FLAGS = -release $(PACKAGE_VERSION) $(HWC_LINKER_FLAGS) $(UNWIND_LINKER_FLAGS) $(POSIXCLOCK_LINKER_FLAGS) $(MRNET_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL)
 
-libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
-libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT
-libcudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT 
+libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CUPTI_CFLAGS)
+libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CUPTI_CFLAGS)
+libcudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CUPTI_CFLAGS)
 
 libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 

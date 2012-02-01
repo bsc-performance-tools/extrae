@@ -1,3 +1,4 @@
+
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
  *                                   Extrae                                  *
@@ -22,13 +23,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/CUDA/cuda_wrapper.h $
+ | @last_commit: $Date: 2011-11-09 10:23:08 +0100 (dc, 09 nov 2011) $
+ | @version:     $Revision: 859 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef CUDA_WRAPPER_H_
-#define CUDA_WRAPPER_H_
+#ifndef CUDA_WRAPPER_CUPTI_H_
+#define CUDA_WRAPPER_CUPTI_H_
 
 void Extrae_CUDA_init (int rank);
 

@@ -1270,7 +1270,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 		return FALSE;
 
 #if defined(CUDA_SUPPORT)
-	cuda_tracing_init(me);
+	Extrae_CUDA_init (me);
 #endif
 
 	/* Obtain the number of runnable threads in this execution.

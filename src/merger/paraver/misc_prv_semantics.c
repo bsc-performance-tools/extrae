@@ -846,11 +846,19 @@ static int User_Send_Event (event_t * current_event,
 		{
 			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
 
+#if defined(DEBUG)
+			fprintf (stdout, "USER SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+#endif
+
 			CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, &recv_vthread, Get_EvAux(current_event));
 
 			if (recv_begin == NULL || recv_end == NULL)
 			{
 				off_t position;
+
+#if defined(DEBUG)
+				fprintf (stdout, "USER SEND_CMD(%u) DID NOT find receiver\n", Get_EvEvent(current_event));
+#endif
 
 				position = WriteFileBuffer_getPosition (thread_info->file->wfb);
 				CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, Get_EvAux(current_event));
@@ -858,6 +866,10 @@ static int User_Send_Event (event_t * current_event,
 			}
 			else
 			{
+				
+#if defined(DEBUG)
+				fprintf (stdout, "USER SEND_CMD(%u) DID NOT find receiver\n", Get_EvEvent(current_event));
+#endif
 				trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, 1+Get_EvTarget(current_event), recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
 			}
 		}
@@ -895,14 +907,24 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 		{
 			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
 
+#if defined(DEBUG)
+			fprintf (stdout, "USER RECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+#endif
+
 			CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, Get_EvAux(current_event));
 
 			if (NULL == send_begin || NULL == send_end)
 			{
+#if defined(DEBUG)
+						fprintf (stdout, "USER RECV_CMD DID NOT find partner\n");
+#endif
 				CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, current_event, thread, thread_info->virtual_thread, Get_EvAux(current_event));
 			}
 			else if (NULL != send_begin && NULL != send_end)
 			{
+#if defined(DEBUG)
+						fprintf (stdout, "USER RECV_CMD find partner\n");
+#endif
 				trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
 			}
 			else
