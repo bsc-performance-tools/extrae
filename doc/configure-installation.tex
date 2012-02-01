@@ -40,7 +40,7 @@ There are many options to be applied at configuration time for the instrumentati
 	\item {\tt --prefix=DIR} \\
 	Location where the installation will be placed. After issuing {\tt make install} you will find under DIR the entries {\tt lib/}, {\tt include/}, {\tt share/} and {\tt bin/} containing everything needed to run the instrumentation package.
 	\item {\tt --with-mpi=DIR} \\
-	Specify the location of an MPI installation to be used for the instrumentation package.
+	Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
 	\item {\tt --with-binary-type=OPTION} \\
 	Available options are: 32, 64 and default. Specifies the type of memory address model when compiling (32bit or 64bit).
 	\item {\tt --with-mpi-name-mangling=OPTION} \\
@@ -48,15 +48,15 @@ There are many options to be applied at configuration time for the instrumentati
 	\item {\tt --with-pacx=DIR} \\
 	Specify where PACX communication library can be find.
 	\item {\tt --with-unwind=DIR} \\
-	Specify where to find Unwind libraries and includes. This library is used to get callstack information on IA64 and Intel x86-64 on Linux.
+	Specify where to find Unwind libraries and includes. This library is used to get callstack information on several architectures (including IA64 and Intel x86-64). This flag is mandatory.
 	\item {\tt --with-papi=DIR} \\
-	Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters.
+	Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters. This flag is mandatory.
 	\item {\tt --with-bfd=DIR} \\
 	Specify where to find the Binary File Descriptor package. In conjunction with libiberty, it is used to translate addresses into source code locations.
 	\item {\tt --with-liberty=DIR} \\
 	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
   \item {\tt --with-dyninst=DIR} \\
-  Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst.
+  Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst. This flag is mandatory.
   \item {\tt --with-cupti=DIR} \\
   Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --enable-cuda}.
 \end{itemize}
@@ -103,7 +103,7 @@ Some extensions of \TRACE do not work properly (nanos, SMPss and OpenMP) on AIX.
 
 Configuration command:
 
-\graybox{{\tt CC=xlc CXX=xlC ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --with-binary-type=32 --without-unwind --enable-pmapi --without-dyninst}}
+\graybox{{\tt CC=xlc CXX=xlC ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --with-binary-type=32 --without-unwind --enable-pmapi --without-dyninst --with-mpi=/usr/lpp/ppe.poe}}
 
 Build and installation commands:
 
@@ -114,7 +114,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64 --without-unwind --enable-pmapi --without-dyninst}}
+\graybox{{\tt ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64 --without-unwind --enable-pmapi --without-dyninst --with-mpi=/usr/lpp/ppe.poe}}
 
 Build and installation commands:
 
@@ -128,7 +128,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp}}
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp --without-dyninst --without-unwind}}
 
 Build and installation commands:
 
@@ -170,7 +170,9 @@ make install}}
 
 \subsubsection{Compiling using default binary type, using OpenMPI, DynInst and libunwind}
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-dyninst=/home/harald/dyninst/7.0.1 --with-dwarf=/usr --with-elf=/usr --with-unwind=/home/harald/aplic/unwind/1.0.1 --without-papi}}
+Configuration command:
+
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-dyninst=/home/harald/dyninst/7.0.1 --with-dwarf=/usr\\--with-elf=/usr --with-unwind=/home/harald/aplic/unwind/1.0.1\\--without-papi}}
 
 Build and installation commands:
 
@@ -179,11 +181,11 @@ make install}}
 
 \subsubsection{Compiling on CRAY XT5 for 64bit package and adding sampling}
 
-Notice the "--disable-xmltest". As the backends programs cannot be run in the frontent, we skip running the XML test. Also using a local installation of libunwind.
+Notice the "--disable-xmltest". As backends programs cannot be run in the frontend, we skip running the XML test. Also using a local installation of libunwind.
 
 Configuration command:
 
-\graybox{{\tt CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' ./configure --with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu --with-binary-type=64 --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1\_gnu4.1.2 --disable-xmltest --with-bfd=/opt/cray/cce/7.1.5/cray-binutils --with-liberty=/opt/cray/cce/7.1.5/cray-binutils --enable-sampling --enable-shared=no --prefix=PREFIX --with-papi=/opt/xt-tools/papi/3.7.2/v23 --with-unwind=/ccs/home/user/lib}}
+\graybox{{\tt CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' ./configure --with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu --with-binary-type=64 --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1\_gnu4.1.2 --disable-xmltest --with-bfd=/opt/cray/cce/7.1.5/cray-binutils --with-liberty=/opt/cray/cce/7.1.5/cray-binutils --enable-sampling --enable-shared=no --prefix=PREFIX --with-papi=/opt/xt-tools/papi/3.7.2/v23 --with-unwind=/ccs/home/user/lib --without-dyninst}}
 
 Build and installation commands:
 
@@ -191,6 +193,8 @@ Build and installation commands:
 make install}}
 
 \subsubsection{Compiling on a Power CELL processor using Linux}
+
+Configuration command:
 
 \graybox{{\tt ./configure --with-mpi=/opt/openmpi/ppc32 --without-unwind --without-dyninst --without-papi --prefix=/gpfs/data/apps/CEPBATOOLS/extrae/2.2.0/openmpi/32 --with-binary-type=32}}
 
@@ -203,7 +207,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt export MP\_IMPL=anl2 ./configure --prefix=PREFIX\\--with-mpi=/gpfs/apps/MPICH2/mx/1.0.8p1..3/32\\--with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64}}
+\graybox{{\tt export MP\_IMPL=anl2 ./configure --prefix=PREFIX\\--with-mpi=/gpfs/apps/MPICH2/mx/1.0.8p1..3/32\\--with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64 --without-dyninst --without-unwind}}
 
 Build and installation commands:
 
@@ -214,7 +218,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt CC=xlc CXX=xlC ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe}}
+\graybox{{\tt CC=xlc CXX=xlC ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe --without-dyninst --without--unwind --without-papi}}
 
 Build and installation commands:
 
@@ -225,7 +229,7 @@ make install}}
 
 Configuration command:
 
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe}}
+\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe --without-dyninst --without--unwind --without-papi}}
 
 Build and installation commands:
 
