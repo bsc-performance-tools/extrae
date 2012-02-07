@@ -152,6 +152,8 @@ if test "${IS_BG_MACHINE}" = "yes" ; then
       elif test "${IS_BGQ_MACHINE}" = "yes" ; then
          CC="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-gcc"
          CXX="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-g++"
+         AR="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-ar"
+         LD="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-ld"
       fi
    fi
 else
