@@ -777,14 +777,12 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 			char buffer[1024];
 			unsigned count = 0;
 			char *ptr;
-#if 0
-#if !defined(IS_BG_MACHINE)
+
+#if HAVE_BFD_DEMANGLE
 			char *demangled = bfd_demangle (abfd, translated_funcname, 0);
 #else
 			char *demangled = NULL;
 #endif
-#endif
-			char *demangled = NULL;
 
 			if (demangled == NULL) /* If cannot demangle return original */
 				demangled = translated_funcname;
@@ -834,7 +832,7 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 static void Find_Address_In_Section (bfd * abfd, asection * section, PTR data)
 {
 	bfd_vma       vma;
-#if defined(HAVE_BFD_GET_SECTION_SIZE) || defined(HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC)
+#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	bfd_size_type size;
 #endif
 
@@ -855,10 +853,10 @@ static void Find_Address_In_Section (bfd * abfd, asection * section, PTR data)
 	/* Comprovem que l'adreca estigui dins de la seccio */
 	if (pc < vma) return;
 
-#if defined(HAVE_BFD_GET_SECTION_SIZE)
+#if HAVE_BFD_GET_SECTION_SIZE
 	size = bfd_get_section_size (section);
 	if (pc >= vma + size) return;
-#elif defined(HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC)
+#elif HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	size = bfd_get_section_size_before_reloc (section);
 	if (pc >= vma + size) return;
 #else
