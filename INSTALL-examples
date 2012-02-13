@@ -81,6 +81,15 @@ Example 8 - Linux on a PowerCELL processor (using 32 bit ABI)
 make
 make install
 
+Example 9 - Compiling on a ARM based processor machine using Linux
+
+If using the GNU toolchain to compile the library, we suggest at least using version 4.6.2 because of its enhaced in this architecture.
+
+Configuration command:
+
+CC=/gpfs/APPS/BIN/GCC-4.6.2/bin/gcc-4.6.2 ./configure --prefix=/gpfs/CEPBATOOLS/extrae/2.2.0 --with-unwind=/gpfs/CEPBATOOLS/libunwind/1.0.1-git --with-papi=/gpfs/CEPBATOOLS/papi/4.2.0 --with-mpi=/usr --enable-posix-clock --without-dyninst
+make
+make install
 
 AIX
 --
