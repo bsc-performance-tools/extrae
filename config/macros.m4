@@ -1049,7 +1049,7 @@ AC_DEFUN([AX_IS_BGP_MACHINE],
    )
 
    if test "${enable_check_bgp}" = "yes" -a -d /bgsys/drivers/ppcfloor ; then
-     if test -f /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgp-linux-gcc ; then
+     if test -f /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-gcc ; then
        IS_BGP_MACHINE="yes"
        BG_HOME="/bgsys/drivers/ppcfloor"
        CFLAGS="${CFLAGS} -I${BG_HOME}/bglsys/include -I${BG_HOME}/arch/include -I${BG_HOME}/blrts-gnu/include"
