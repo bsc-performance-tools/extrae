@@ -77,11 +77,9 @@ These are the instrumented MPI routines in the \TRACE package:
 
 \subsection{Intel compilers - icc, iCC, ifort}
 
-The instrumentation of this OpenMP runtime is only available using the \TRACE pacakge based on DynInst library.
+The instrumentation of the Intel OpenMP runtime for versions 8.1 to 10.1 is only available using the \TRACE package based on DynInst library.
 
-\TRACE supports Intel OpenMP runtime 8.1, 9.1, 10.1 and 11.0.
-
-These are the instrument routines of the Intel OpenMP runtimes:
+These are the instrument routines of the Intel OpenMP runtime functions using DynInst:
 
 \begin{itemize}
 \item \_\_kmpc\_fork\_call
@@ -90,8 +88,22 @@ These are the instrument routines of the Intel OpenMP runtimes:
 \item \_\_kmpc\_set\_lock\footnotemark[4]
 \item \_\_kmpc\_unset\_lock\footnotemark[4]
 \end{itemize}
-
 \footnotetext[4]{The instrumentation of OpenMP locks can be enabled/disabled}
+
+The instrumentation of the Intel OpenMP runtime for version 11.0 to 12.0 is only available using the \TRACE package based on the {\tt LD\_PRELOAD} mechanism. The instrumented routines include:
+
+\begin{itemize}
+\item \_\_kmpc\_fork\_call
+\item \_\_kmpc\_barrier
+\item \_\_kmpc\_dispatch\_next\_4
+\item \_\_kmpc\_dispatch\_next\_8
+\item \_\_kmpc\_single
+\item \_\_kmpc\_end\_single
+\item \_\_kmpc\_critical\footnotemark[4]
+\item \_\_kmpc\_end\_critical\footnotemark[4]
+\item omp\_set\_lock\footnotemark[4]
+\item omp\_unset\_lock\footnotemark[4]
+\end{itemize}
 
 \subsection{IBM compilers - xlc, xlC, xlf}
 
