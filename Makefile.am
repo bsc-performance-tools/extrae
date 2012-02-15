@@ -131,7 +131,7 @@ OMP_EXAMPLE_FILES=\
  example/FREEBSD/OMP/README \
  example/FREEBSD/OMP/Makefile \
  example/FREEBSD/OMP/extrae.xml \
- example/FREEBSD/OMP/run_ldpreload.sh \
+ example/FREEBSD/OMP/run_instrumented.sh \
  example/FREEBSD/OMP/run_dyninst.sh \
  example/FREEBSD/OMP/merge.sh
 
@@ -183,7 +183,7 @@ OMP_EXAMPLE_FILES=\
  example/FREEBSD/OMP/README \
  example/FREEBSD/OMP/Makefile \
  example/FREEBSD/OMP/extrae.xml \
- example/FREEBSD/OMP/run_ldpreload.sh \
+ example/FREEBSD/OMP/run_instrumented.sh \
  example/FREEBSD/OMP/run_dyninst.sh \
  example/FREEBSD/OMP/merge.sh
 
@@ -223,7 +223,7 @@ OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/pi.c \
  example/LINUX/OMP/pi_instrumented.c \
  example/LINUX/OMP/run_dyninst.sh \
- example/LINUX/OMP/run_ldpreload.sh
+ example/LINUX/OMP/run_instrumented.sh
 
 SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/extrae.xml \
