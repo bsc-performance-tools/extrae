@@ -234,9 +234,6 @@ enum {
 #define MPI_RSEND_INIT_EV            50000077
 #define MPI_SSEND_INIT_EV            50000078
 
-#define MPI_IPROBE_COUNTER_EV        50000200
-#define MPI_TIME_OUTSIDE_IPROBES_EV  50000201
-
 #define MPI_GLOBAL_OP_SENDSIZE       (MPI_INIT_EV+100000)
 #define MPI_GLOBAL_OP_RECVSIZE       (MPI_INIT_EV+100001)
 #define MPI_GLOBAL_OP_ROOT           (MPI_INIT_EV+100002)
@@ -255,6 +252,9 @@ enum {
 
 #define MPI_GET_EV                   50000200
 #define MPI_PUT_EV                   50000201
+
+#define MPI_IPROBE_COUNTER_EV        50000300
+#define MPI_TIME_OUTSIDE_IPROBES_EV  50000301
 
 /******************************************************************************
  *   User events to trace several MPI functions.
@@ -322,9 +322,6 @@ enum {
 #define PACX_RSEND_INIT_EV            51000077
 #define PACX_SSEND_INIT_EV            51000078
 
-#define PACX_IPROBE_COUNTER_EV        51000200
-#define PACX_TIME_OUTSIDE_IPROBES_EV  51000201
-
 #define PACX_GLOBAL_OP_SENDSIZE       (PACX_INIT_EV+100000)
 #define PACX_GLOBAL_OP_RECVSIZE       (PACX_INIT_EV+100001)
 #define PACX_GLOBAL_OP_ROOT           (PACX_INIT_EV+100002)
@@ -341,6 +338,8 @@ enum {
 #define PACX_FILE_WRITE_AT_EV         51000108
 #define PACX_FILE_WRITE_AT_ALL_EV     51000109
 
+#define PACX_IPROBE_COUNTER_EV        51000300
+#define PACX_TIME_OUTSIDE_IPROBES_EV  51000301
 
 /******************************************************************************
  *   User events for BG PERSONALITY
