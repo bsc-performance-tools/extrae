@@ -48,7 +48,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "omp_probe.h"
 
-/* #define DEBUG */
+//#define DEBUG
 
 /*
 The nowait issue:
@@ -78,7 +78,6 @@ static void (*pardo_uf)(void*) = NULL;
 /* Pointer to the user function called by a PARALLEL REGION */
 /* FIXME: Array of function pointers indexed by thread? (nowait issue) */
 static void (*par_uf)(void*) = NULL;
-
 
 /*
 	callme_pardo (void *p1)
@@ -491,10 +490,12 @@ void GOMP_loop_end (void)
 
 	if (GOMP_loop_end_real != NULL)
 	{
-		Backend_Enter_Instrumentation (3);
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Join_Wait_Entry();
 		GOMP_loop_end_real();
+		Backend_Enter_Instrumentation (3);
 		Probe_OpenMP_Join_Wait_Exit();
+		Probe_OpenMP_UF_Exit ();
 		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
@@ -513,10 +514,12 @@ void GOMP_loop_end_nowait (void)
 
 	if (GOMP_loop_end_nowait_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_loop_end_nowait_real();
+		Backend_Enter_Instrumentation (3);
 		Probe_OpenMP_Join_NoWait_Exit();
+		Probe_OpenMP_UF_Exit ();
 		Probe_OpenMP_DO_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
@@ -538,10 +541,12 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 
 	if (GOMP_loop_static_start_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
 		/* Probe_OpenMP_DO_Exit (); */
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -562,10 +567,12 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 
 	if (GOMP_loop_runtime_start_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
 		/* Probe_OpenMP_DO_Exit (); */
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -580,16 +587,18 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 {
 	int res = 0;
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_static_start is at %p\n", THREADID, GOMP_loop_guided_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_guided_start is at %p\n", THREADID, GOMP_loop_guided_start_real);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (GOMP_loop_guided_start_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
 		/* Probe_OpenMP_DO_Exit (); */
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -610,10 +619,12 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 
 	if (GOMP_loop_dynamic_start_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
 		/* Probe_OpenMP_DO_Exit (); */
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -850,13 +861,15 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 		/* Set the pointer to the correct PARALLEL user function */
 		par_uf = (void(*)(void*))p1;
 
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParRegion_Entry();
 
-		/* GCC/libgomp does not execute callme_par per root thread, emit
-		   the required event here */
-		Probe_OpenMP_UF_Entry ((UINT64) p1);
 		GOMP_parallel_start_real (callme_par, p2, p3);
+
+		/* GCC/libgomp does not execute callme_par per root thread, emit
+		   the required event here - call Backend to get a new time! */
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry ((UINT64) p1);
 
 		Backend_Leave_Instrumentation ();
 	}

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 24Feb2012 Fixes in the instrumentation of GNU/OpenMP
  * 13Feb2012 Extrae 2.2.1 is released!
  * 01Feb2012 Added CUDA instrumentation through CUPTI
  + 27Jan2012 Support for BG/Q machines
