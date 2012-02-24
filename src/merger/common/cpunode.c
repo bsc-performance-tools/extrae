@@ -174,7 +174,8 @@ struct Pair_NodeCPU *AssignCPUNode(int nfiles, struct input_t *files)
 				fprintf (stderr, "mpi2prv: Error! Cannot allocate memory to hold Node-CPU information\n");
 				exit (0);
 			}
-			result[NodeID].files[0] = &files[i];
+			result[NodeID].files[0] = (struct input_t*) malloc(sizeof(struct input_t));
+			memcpy(result[NodeID].files[0], &files[i], sizeof(struct input_t));
 
 			previousNode = files[i].node;
 			NodeID++;
@@ -191,7 +192,9 @@ struct Pair_NodeCPU *AssignCPUNode(int nfiles, struct input_t *files)
 				fprintf (stderr, "mpi2prv: Error cannot re-allocate memory to hold Node-CPU information\n");
 				exit (0);
 			}
-			result[prevNode].files[result[prevNode].CPUs-1] = &files[i];
+			result[prevNode].files[result[prevNode].CPUs-1] = (struct input_t*) malloc(sizeof(struct input_t));
+			memcpy(result[prevNode].files[result[prevNode].CPUs-1], &files[i], sizeof(struct input_t));
+
 		}
 	}
 
