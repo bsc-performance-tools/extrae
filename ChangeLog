@@ -1,9 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 24Feb2012 Extrae 2.2.1 is released!
  * 24Feb2012 Fixed a bug in the name of the nodes in the row file
  * 24Feb2012 Fixes in the instrumentation of GNU/OpenMP
- * 13Feb2012 Extrae 2.2.1 is released!
  * 01Feb2012 Added CUDA instrumentation through CUPTI
  + 27Jan2012 Support for BG/Q machines
  * 23Jan2012 Fix when handling MPI_ANY_TAG in MPI calls (also for mpimpi2prv)
