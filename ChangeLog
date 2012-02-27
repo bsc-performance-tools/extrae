@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 27Feb2012 Fixes in the instrumentation of worksharings for Intel/OpenMP
  * 24Feb2012 Extrae 2.2.1 is released!
  * 24Feb2012 Fixed a bug in the name of the nodes in the row file
  * 24Feb2012 Fixes in the instrumentation of GNU/OpenMP

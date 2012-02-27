@@ -47,6 +47,8 @@
 #include "trace_macros.h"
 #include "omp_probe.h"
 
+//#define DEBUG
+
 static char UNUSED rcsid[] = "$Id$";
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
@@ -59,6 +61,13 @@ static int (*__kmpc_dispatch_next_4_real)(void*,int,int*,int*,int*,int*) = NULL;
 static int (*__kmpc_dispatch_next_8_real)(void*,int,int*,long long *,long long *, long long *) = NULL;
 static int (*__kmpc_single_real)(void*,int) = NULL;
 static void (*__kmpc_end_single_real)(void*,int) = NULL;
+static void (*__kmpc_for_static_init_4_real)(void*,int,int,int*,int*,int*,int*,int,int) = NULL;
+static void (*__kmpc_for_static_init_8_real)(void*,int,int,int*,long long*,long long*,long long*,long long,long long) = NULL;
+static void (*__kmpc_for_static_fini_real)(void*,int) = NULL;
+static void (*__kmpc_dispatch_init_4_real)(void*,int,int,int,int,int,int) = NULL;
+static void (*__kmpc_dispatch_init_8_real)(void*,int,int,long long,long long,long long,long long) = NULL;
+static void (*__kmpc_dispatch_fini_4_real)(void*,int) = NULL;
+static void (*__kmpc_dispatch_fini_8_real)(void*,long long) = NULL; /* Don't sure about this! */
 
 int intel_kmpc_11_hook_points (int rank)
 {
@@ -126,6 +135,55 @@ int intel_kmpc_11_hook_points (int rank)
 		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_end_single in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_end_single_real,count);
 
+	/* Obtain @ for __kmpc_for_static_init_4 */
+	__kmpc_for_static_init_4_real =
+		(void(*)(void*,int,int,int*,int*,int*,int*,int,int)) dlsym (RTLD_NEXT, "__kmpc_for_static_init_4");
+	if (__kmpc_for_static_init_4_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_for_static_init_4 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_for_static_init_4_real,count);
+
+	/* Obtain @ for __kmpc_for_static_init_8 */
+	__kmpc_for_static_init_8_real =
+		(void(*)(void*,int,int,int*,long long*,long long*,long long*,long long,long long)) dlsym (RTLD_NEXT, "__kmpc_for_static_init_8");
+	if (__kmpc_for_static_init_8_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_for_static_init_8 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_for_static_init_8_real,count);
+
+	/* Obtain @ for __kmpc_for_static_fini */
+	__kmpc_for_static_fini_real =
+		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_for_static_fini");
+	if (__kmpc_for_static_fini_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_for_static_fini in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_for_static_fini_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_init_4 */
+	__kmpc_dispatch_init_4_real =
+		(void(*)(void*,int,int,int,int,int,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_4");
+	if (__kmpc_dispatch_init_4_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_init_4 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_dispatch_init_4_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_init_8 */
+	__kmpc_dispatch_init_8_real =
+		(void(*)(void*,int,int,long long,long long,long long,long long)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_8");
+	if (__kmpc_dispatch_init_8_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_init_8 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_dispatch_init_8_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_fini_4 */
+	__kmpc_dispatch_fini_4_real =
+		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_4");
+	if (__kmpc_dispatch_fini_4_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_fini_4 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_dispatch_fini_4_real,count);
+
+	/* Obtain @ for __kmpc_dispatch_fini_8 */
+	__kmpc_dispatch_fini_8_real =
+		(void(*)(void*,long long)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_8");
+	if (__kmpc_dispatch_fini_8_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_fini_8 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_dispatch_fini_8_real,count);
+
 	/* Any hook point? */
 	return count > 0;
 }
@@ -141,14 +199,14 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 	int i;
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call is at %p\n", __kmpc_fork_call_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call params %p %d %p\n", p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call is at %p\n", THREADID, __kmpc_fork_call_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p\n", THREADID, p1, p2, p3);
 #endif
 
 	if (__kmpc_fork_call_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_ParDO_Entry ();
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_ParRegion_Entry ();
 
 		/* Grab parameters */
 		va_start (ap, p3);
@@ -169,7 +227,7 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 				break;
 		}
 
-		Probe_OpenMP_ParDO_Exit ();	
+		Probe_OpenMP_ParRegion_Exit ();	
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -182,13 +240,13 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 void __kmpc_barrier (void *p1, int p2)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_barrier is at %p\n", __kmpc_barrier_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_barrier params %p %d\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_barrier is at %p\n", THREADID, __kmpc_barrier_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_barrier params %p %d\n", THREADID, p1, p2);
 #endif
 
 	if (__kmpc_barrier_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Barrier_Entry ();
 		__kmpc_barrier_real (p1, p2);
 		Probe_OpenMP_Barrier_Exit ();
@@ -204,13 +262,13 @@ void __kmpc_barrier (void *p1, int p2)
 void __kmpc_critical (void *p1, int p2, void *p3)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_critical is at %p\n", __kmpc_critical_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_critical params %p %d %p\n", p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_critical is at %p\n", THREADID, __kmpc_critical_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_critical params %p %d %p\n", THREADID, p1, p2, p3);
 #endif
 
 	if (__kmpc_critical_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Lock_Entry ();
 		__kmpc_critical_real (p1, p2, p3);
 		Probe_OpenMP_Named_Lock_Exit ();
@@ -226,13 +284,13 @@ void __kmpc_critical (void *p1, int p2, void *p3)
 void __kmpc_end_critical (void *p1, int p2, void *p3)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_end_critical is at %p\n", __kmpc_end_critical_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_end_critical params %p %d %p\n", p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_end_critical is at %p\n", THREADID, __kmpc_end_critical_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_end_critical params %p %d %p\n", THREADID, p1, p2, p3);
 #endif
 
 	if (__kmpc_end_critical_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Unlock_Entry ();
 		__kmpc_end_critical_real (p1, p2, p3);
 		Probe_OpenMP_Named_Unlock_Exit ();
@@ -250,8 +308,8 @@ int __kmpc_dispatch_next_4 (void *p1, int p2, int *p3, int *p4, int *p5, int *p6
 	int res;
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_dispatch_next_4 is at %p\n", __kmpc_dispatch_next_4_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_dispatch_next_4 params %p %d %p %p %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_next_4 is at %p\n", THREADID, __kmpc_dispatch_next_4_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_next_4 params %p %d %p %p %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
 	if (__kmpc_dispatch_next_8_real != NULL)
@@ -261,6 +319,14 @@ int __kmpc_dispatch_next_4 (void *p1, int p2, int *p3, int *p4, int *p5, int *p6
 		res = __kmpc_dispatch_next_4_real (p1, p2, p3, p4, p5, p6);
 		Probe_OpenMP_Work_Exit();
 		Backend_Leave_Instrumentation ();
+
+		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_4 which seems not to be called ? */
+		{
+			Backend_Enter_Instrumentation (2);
+			Probe_OpenMP_UF_Exit ();
+			Probe_OpenMP_DO_Exit ();
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else
 	{
@@ -275,8 +341,8 @@ int __kmpc_dispatch_next_8 (void *p1, int p2, int *p3, long long *p4, long long 
 	int res;
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_dispatch_next_8 is at %p\n", __kmpc_dispatch_next_8_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_dispatch_next_8 params %p %d %p %p %p %p\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_next_8 is at %p\n", THREADID, __kmpc_dispatch_next_8_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_next_8 params %p %d %p %p %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 	if (__kmpc_dispatch_next_8_real != NULL)
 	{
@@ -285,6 +351,13 @@ int __kmpc_dispatch_next_8 (void *p1, int p2, int *p3, long long *p4, long long 
 		res = __kmpc_dispatch_next_8_real (p1, p2, p3, p4, p5, p6);
 		Probe_OpenMP_Work_Exit();
 		Backend_Leave_Instrumentation ();
+
+		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_8 which seems not to be called ? */
+		{
+			Probe_OpenMP_UF_Exit ();
+			Probe_OpenMP_DO_Exit ();
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else
 	{
@@ -299,8 +372,8 @@ int __kmpc_single (void *p1, int p2)
 	int res = 0;
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_single is at %p\n", __kmpc_single_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_single params %p %d\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_single is at %p\n", THREADID, __kmpc_single_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_single params %p %d\n", THREADID, p1, p2);
 #endif
 
 	if (__kmpc_single_real != NULL)
@@ -321,8 +394,8 @@ int __kmpc_single (void *p1, int p2)
 void __kmpc_end_single (void *p1, int p2)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": __kmpc_end_single is at %p\n", __kmpc_single_real);
-	fprintf (stderr, PACKAGE_NAME": __kmpc_end_single params %p %d\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_end_single is at %p\n", THREADID, __kmpc_single_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_end_single params %p %d\n", THREADID, p1, p2);
 #endif
 
 	if (__kmpc_single_real != NULL)
@@ -334,6 +407,168 @@ void __kmpc_end_single (void *p1, int p2)
 	else
 	{
 		fprintf (stderr, PACKAGE_NAME": __kmpc_critical is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+void  __kmpc_for_static_init_4 (void *p1, int p2, int p3, int *p4, int *p5,
+	int *p6, int *p7, int p8, int p9)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_4 is at %p\n", THREADID, __kmpc_for_static_init_4_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_4 params are %p %d %d %p %p %p %p %d %d\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+#endif
+
+	if (__kmpc_for_static_init_4_real != NULL)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+		__kmpc_for_static_init_4_real (p1, p2, p3, p4, p5, p6, p7, p8, p9);
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_DO_Entry ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME":__kmpc_for_static_init_4 is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+void  __kmpc_for_static_init_8 (void *p1, int p2, int p3, int *p4,
+	long long *p5, long long *p6, long long *p7, long long p8, long long p9)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_8 is at %p\n", THREADID, __kmpc_for_static_init_8_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_8 params are %p %d %d %p %p %p %p %lld %lld\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+#endif
+
+	if (__kmpc_for_static_init_8_real != NULL)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+		__kmpc_for_static_init_8_real (p1, p2, p3, p4, p5, p6, p7, p8, p9);
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_DO_Entry ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME":__kmpc_for_static_init_8 is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+void __kmpc_for_static_fini (void *p1, int p2)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_fini is at %p\n", THREADID, __kmpc_for_static_fini_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_fini params are %p %d\n", THREADID, p1, p2);
+#endif
+
+	if (__kmpc_for_static_fini_real != NULL)
+	{
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_DO_Exit ();
+		__kmpc_for_static_fini_real (p1, p2);
+		Probe_OpenMP_UF_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME":__kmpc_for_static_fini is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+void __kmpc_dispatch_init_4 (void *p1, int p2, int p3, int p4, int p5, int p6,
+	int p7)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_init_4 is at %p\n", THREADID, __kmpc_dispatch_init_4_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_init_4 params are %p %d %d %d %d %d %d\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
+#endif
+
+	if (__kmpc_dispatch_init_4_real != NULL)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_DO_Entry ();
+		__kmpc_dispatch_init_4_real (p1, p2, p3, p4, p5, p6, p7);
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME":__kmpc_dispatch_init_4 is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+void __kmpc_dispatch_init_8 (void *p1, int p2, int p3, long long p4,
+	long long p5, long long p6, long long p7)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_init_8 is at %p\n", THREADID, __kmpc_dispatch_init_8_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_init_8 params are %p %d %d %lld %lld %lld %lld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
+#endif
+
+	if (__kmpc_dispatch_init_8_real != NULL)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_DO_Entry ();
+		__kmpc_dispatch_init_8_real (p1, p2, p3, p4, p5, p6, p7);
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME":__kmpc_dispatch_init_8 is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+void __kmpc_dispatch_fini_4 (void *p1, int p2)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_4 is at %p\n", THREADID, __kmpc_dispatch_fini_4_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_4 params are %p %d\n", THREADID, p1, p2);
+#endif
+
+	if (__kmpc_dispatch_fini_4_real != NULL)
+	{
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_DO_Exit ();
+		__kmpc_dispatch_fini_4_real (p1, p2);
+		Probe_OpenMP_UF_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME":__kmpc_dispatch_fini_4 is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
+void __kmpc_dispatch_fini_8 (void *p1, long long p2)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_8 is at %p\n", THREADID, __kmpc_dispatch_fini_8_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_8 params are %p %lld\n", THREADID, p1, p2);
+#endif
+
+	if (__kmpc_dispatch_fini_8_real != NULL)
+	{
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_DO_Exit ();
+		__kmpc_dispatch_fini_8_real (p1, p2);
+		Probe_OpenMP_UF_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME":__kmpc_dispatch_fini_8 is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
