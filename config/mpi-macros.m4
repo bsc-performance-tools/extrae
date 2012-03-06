@@ -4,16 +4,6 @@ AC_DEFUN([AX_PROG_MPI],
 [
    AX_FLAGS_SAVE()
 
-   if test "${IS_BGL_MACHINE}" = "yes" ; then
-      mpi_default_paths="${BG_HOME}/bglsys"
-   elif test "${IS_BGP_MACHINE}" = "yes" ; then
-      mpi_default_paths="${BG_HOME}/comm"
-   elif test "${IS_BGQ_MACHINE}" = "yes" ; then
-      mpi_default_paths="${BG_HOME}/comm/gcc"
-   else
-      mpi_default_paths="none"
-   fi
-
    AC_ARG_WITH(mpi,
       AC_HELP_STRING(
          [--with-mpi@<:@=DIR@:>@],
@@ -25,6 +15,10 @@ AC_DEFUN([AX_PROG_MPI],
 
    if test "${mpi_paths}" = "not_set" ; then
       AC_MSG_ERROR([Attention! You have not passed the location of the MPI library through --with-mpi option. Please, use --with-mpi to specify the location of the MPI installation on your system, or if you don't want that Extrae supports MPI instrumentation use --without-mpi instead.])
+   fi
+
+   if test ! -d ${mpi_paths} ; then
+      AC_MSG_ERROR([Attention! You have passed an invalid MPI location.])
    fi
 
    dnl Search for MPI installation
