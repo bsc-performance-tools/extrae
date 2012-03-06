@@ -1,34 +1,8 @@
 
 EXTRA_DIST = \
- API-section.tex \
- common-macros.tex \
- configure-installation.tex \
- environmentvariables-section.tex \
- examples-section.tex \
- FAQ-section.tex \
- instrumented-routines-section.tex \
- merge-section.tex \
- quick-guide-section.tex \
- user-guide.tex \
- wholeXML-section.tex \
- XML-section.tex \
- XML/buffer.xml.tex \
- XML/bursts.xml.tex \
- XML/callers.xml.tex \
- XML/cell.xml.tex \
- XML/config.xml.tex \
- XML/counters.xml.tex \
- XML/extrae.xml.tex \
- XML/merge.xml.tex \
- XML/mpi.xml.tex \
- XML/openmp.xml.tex \
- XML/others.xml.tex \
- XML/pthread.xml.tex \
- XML/pacx.xml.tex \
- XML/sampling.xml.tex \
- XML/storage.xml.tex \
- XML/trace-control.xml.tex \
- XML/userfunctions.xml.tex
+ user-guide.ps \
+ user-guide.pdf \
+ user-guide
 
 manual_ug = user-guide
 
@@ -56,7 +30,7 @@ if BUILD_DOCS_PS
 	$(latex) $(manual_ug)
 endif
 
-install-exec-hook: $(manual_ug).dvi
+install-exec-hook: $(manual_ug).ps $(manual_ug).pdf
 	$(mkdir_p) $(DESTDIR)$(datadir)/doc
 if BUILD_DOCS_PS
 	cp $(manual_ug).ps $(DESTDIR)$(datadir)/doc
