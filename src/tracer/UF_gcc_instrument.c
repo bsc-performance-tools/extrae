@@ -149,6 +149,10 @@ static void ResetUFtoInstrument (void)
 	UF_distance = UF_count = UF_collisions = 0;
 }
 
+void InstrumentUFroutines_GCC_CleanUp (void)
+{
+}
+
 void InstrumentUFroutines_GCC (int rank, char *filename)
 {
 	FILE *f = fopen (filename, "r");

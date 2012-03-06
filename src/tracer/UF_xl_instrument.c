@@ -43,6 +43,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "wrapper.h"
+#include "utils.h"
 #include "UF_gcc_instrument.h"
 
 static int LookForUF (char *fname);
@@ -121,6 +122,15 @@ static int LookForUF (char *fname)
 			return TRUE;
 
 	return FALSE;
+}
+
+void InstrumentUFroutines_XL_CleanUp (void)
+{
+	int i;
+
+	for (i = 0; i < UF_names_count; i++)
+		xfree (UF_names[i]);
+	xfree (UF_names);
 }
 
 void InstrumentUFroutines_XL (int rank, char *filename)

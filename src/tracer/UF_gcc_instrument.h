@@ -31,6 +31,7 @@
 #define UF_GCC_INSTRUMENT_H_INCLUDED
 
 void InstrumentUFroutines_GCC (int rank, char *filename);
+void InstrumentUFroutines_GCC_CleanUp (void);
 
 #endif
 

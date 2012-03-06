@@ -1871,6 +1871,9 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 			mfprintf (stdout, PACKAGE_NAME": Intermediate traces will be stored in %s\n", tmp_dir);
 		}
 	}
+
+	/* Clean Up the memory allocated by LIBXML_TEST_VERSION */
+	xmlCleanupParser();
 }
 
 #endif /* HAVE_XML2 */

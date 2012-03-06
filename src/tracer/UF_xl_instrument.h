@@ -31,6 +31,7 @@
 #define UF_XL_INSTRUMENT_H_INCLUDED
 
 void InstrumentUFroutines_XL (int rank, char *filename);
+void InstrumentUFroutines_XL_CleanUp (void);
 
 #endif
 

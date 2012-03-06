@@ -38,9 +38,15 @@ static char UNUSED rcsid[] = "$Id$";
 # include <string.h>
 #endif
 
+#include "utils.h"
 #include "threadinfo.h"
 
 static Extrae_thread_info_t *thread_info = NULL;
+
+void Extrae_allocate_thread_CleanUp (void)
+{
+	xfree (thread_info);
+}
 
 void Extrae_allocate_thread_info (unsigned nthreads)
 {
@@ -78,3 +84,4 @@ char *Extrae_get_thread_name (unsigned thread)
 {
 	return thread_info[thread].ThreadName;
 }
+

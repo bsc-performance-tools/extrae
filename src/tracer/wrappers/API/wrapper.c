@@ -1757,9 +1757,12 @@ void Backend_Finalize (void)
 		xfree(SamplingBuffer);
 #endif
 		xfree (TracingBitmap);
+		Extrae_allocate_thread_CleanUp();
 		TimeSync_CleanUp();
 		Trace_Mode_CleanUp();
 		Clock_CleanUp();
+		InstrumentUFroutines_GCC_CleanUp();
+		InstrumentUFroutines_XL_CleanUp();
 #if USE_HARDWARE_COUNTERS
 		HWC_CleanUp (get_maximum_NumOfThreads());
 #endif
