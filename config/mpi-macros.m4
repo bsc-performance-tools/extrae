@@ -17,8 +17,10 @@ AC_DEFUN([AX_PROG_MPI],
       AC_MSG_ERROR([Attention! You have not passed the location of the MPI library through --with-mpi option. Please, use --with-mpi to specify the location of the MPI installation on your system, or if you don't want that Extrae supports MPI instrumentation use --without-mpi instead.])
    fi
 
-   if test ! -d ${mpi_paths} ; then
-      AC_MSG_ERROR([Attention! You have passed an invalid MPI location.])
+   if test ${mpi_paths} != "no"; then
+      if test ! -d ${mpi_paths} ; then
+         AC_MSG_ERROR([Attention! You have passed an invalid MPI location.])
+      fi
    fi
 
    dnl Search for MPI installation
