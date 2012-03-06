@@ -14,6 +14,7 @@
   - this makes sure that the package will compile at least on our environment -
 
 4) Generate the documentation (pdf format) and add it to the buildfarm output
+   Also, commit the pdf / ps / html files to the SVN
 
 5) Tag in SVN using
    svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
