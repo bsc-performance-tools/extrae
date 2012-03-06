@@ -56,8 +56,8 @@ typedef struct thread_t
 	/* Did we passed the first event? */
 	unsigned int First_Event:1;
 
-	/* Did we processed the firt HWC change event? */
-	unsigned int First_HWCChange:1;
+	/* Count the number of HWC changes */
+	unsigned int HWCChange_count;
 
 	/* Information of the stack */
 	int State_Stack[MAX_STATES];

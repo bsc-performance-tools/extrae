@@ -104,7 +104,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 
 				obj_table[ptask].tasks[task].threads[thread].nStates = 0;
 				obj_table[ptask].tasks[task].threads[thread].First_Event = TRUE;
-				obj_table[ptask].tasks[task].threads[thread].First_HWCChange = TRUE;
+				obj_table[ptask].tasks[task].threads[thread].HWCChange_count = 0;
 				obj_table[ptask].tasks[task].threads[thread].MatchingComms = TRUE;
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)

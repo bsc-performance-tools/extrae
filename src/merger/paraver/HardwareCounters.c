@@ -87,8 +87,10 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
 	/* Don't emit hwc that coincide in time  with a hardware counter group change.
+	   Special treatment for the first HWC change, which must be excluded in order
+	   to get the first counters.
 	   However, we must track the value of counters if SAMPLING_SUPPORT */
-	if (Sthread->last_hw_group_change == time)
+	if (Sthread->last_hw_group_change == time && Sthread->HWCChange_count > 1)
 	{
 #if defined(PAPI_COUNTERS) && defined (SAMPLING_SUPPORT)
 		for (cnt = 0; cnt < MAX_HWC; cnt++)
@@ -286,34 +288,22 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 	outtypes[0] = HWC_GROUP_ID; outvalues[0] = 1+newSet;
 
 	Sthread->current_HWCSet = newSet;
-	if (Sthread->First_HWCChange)
+	for (cnt = 0; cnt < MAX_HWC; cnt++)
 	{
-		for (cnt = 0; cnt < MAX_HWC; cnt++)
-		{
-			Sthread->counters[cnt] = 0;
-			outtypes[cnt+1] = NO_COUNTER;
-		}
-		Sthread->First_HWCChange = FALSE;
-	}
-	else
-	{
-		for (cnt = 0; cnt < MAX_HWC; cnt++)
-		{
-			Sthread->counters[cnt] = 0;
+		Sthread->counters[cnt] = 0;
 
-			/* Emit counters with value 0 at the very beginning*/
-			if (counters_used[cnt])
-			{
+		/* Emit counters with value 0 at the very beginning*/
+		if (counters_used[cnt])
+		{
 #if defined(PMAPI_COUNTERS)
-				outtypes[cnt+1] = HWC_COUNTER_TYPE(cnt, Sthread->HWCSets[newSet][cnt]);
+			outtypes[cnt+1] = HWC_COUNTER_TYPE(cnt, Sthread->HWCSets[newSet][cnt]);
 #else
-				outtypes[cnt+1] = HWC_COUNTER_TYPE(Sthread->HWCSets[newSet][cnt]);
+			outtypes[cnt+1] = HWC_COUNTER_TYPE(Sthread->HWCSets[newSet][cnt]);
 #endif
-				outvalues[cnt+1] = 0;
-			}
-			else
-				outtypes[cnt+1] = NO_COUNTER;
+			outvalues[cnt+1] = 0;
 		}
+		else
+			outtypes[cnt+1] = NO_COUNTER;
 	}
 
 	/* Add this counters (if didn't exist) to a queue in order to put them into the PCF */
