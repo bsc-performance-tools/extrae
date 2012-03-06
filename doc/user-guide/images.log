@@ -1,0 +1,433 @@
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/openSUSE) (format=latex 2011.12.11)  6 MAR 2012 16:51
+entering extended mode
+ %&-line parsing enabled.
+**./images.tex
+(./images.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, german-x-2009-06-19, ngerman-x-2009-06-19, ancientgreek, ibycus, ar
+abic, basque, bulgarian, catalan, pinyin, coptic, croatian, czech, danish, dutc
+h, esperanto, estonian, farsi, finnish, french, galician, german, ngerman, mono
+greek, greek, hungarian, icelandic, indonesian, interlingua, irish, italian, ku
+rmanji, latin, latvian, lithuanian, mongolian, mongolian2a, bokmal, nynorsk, po
+lish, portuguese, romanian, russian, sanskrit, serbian, slovak, slovenian, span
+ish, swedish, turkish, ukenglish, ukrainian, uppersorbian, welsh, loaded.
+
+(/usr/share/texmf/tex/latex/base/book.cls
+Document Class: book 2007/10/19 v1.4h Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/bk11.clo
+File: bk11.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+) (/usr/share/texmf/tex/latex/base/ifthen.sty
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+) (/usr/share/texmf/tex/latex/base/fontenc.sty
+Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
+) (/usr/share/texmf/tex/latex/base/inputenc.sty
+Package: inputenc 2008/03/30 v1.1d Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+(/usr/lib/texmf/tex/latex/html/latin9.def
+File: latin1.def 1998/03/05 v0.97 Input encoding file(test version: still liabl
+e to change)
+)) (/usr/share/texmf/tex/latex/ltxmisc/url.sty
+\Urlmuskip=\muskip10
+Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
+) (/usr/share/texmf/tex/latex/graphics/epsfig.sty
+Package: epsfig 1999/02/16 v1.7a (e)psfig emulation (SPQR)
+(/usr/share/texmf/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+(/usr/share/texmf/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks16
+) (/usr/share/texmf/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+(/usr/share/texmf/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+) (/usr/share/texmf/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: dvips.def on input line 91.
+(/usr/share/texmf/tex/latex/graphics/dvips.def
+File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+))
+\Gin@req@height=\dimen103
+\Gin@req@width=\dimen104
+)
+\epsfxsize=\dimen105
+\epsfysize=\dimen106
+) (/usr/share/texmf/tex/latex/subfigure/subfigure.sty
+Package: subfigure 2002/03/15 v2.1.5 subfigure package
+\subfigtopskip=\skip43
+\subfigcapskip=\skip44
+\subfigcaptopadj=\dimen107
+\subfigbottomskip=\skip45
+\subfigcapmargin=\dimen108
+\subfiglabelskip=\skip46
+\c@subfigure=\count88
+\c@lofdepth=\count89
+\c@subtable=\count90
+\c@lotdepth=\count91
+****************************************
+* Local config file subfigure.cfg used *
+****************************************
+(/usr/share/texmf/tex/latex/subfigure/subfigure.cfg)
+\subfig@top=\skip47
+\subfig@bottom=\skip48
+) (/usr/share/texmf/tex/latex/setspace/setspace.sty
+Package: setspace 2000/12/01 6.7 Contributed and Supported LaTeX2e package
+Package: `setspace' 6.7 <2000/12/01>
+) (/usr/share/texmf/tex/latex/tocbibind/tocbibind.sty
+Package: tocbibind 2009/09/04 v1.5i extra ToC listings
+
+Package tocbibind Note: The document has chapter divisions.
+
+
+Package tocbibind Note: Using chapter style headings, unless overridden.
+
+) (/usr/share/texmf/tex/latex/ltxmisc/a4wide.sty
+Package: a4wide 1994/08/30
+(/usr/share/texmf/tex/latex/ntgclass/a4.sty
+Package: a4 2004/04/15 v1.2g A4 based page layout
+)) (/usr/share/texmf/tex/latex/preprint/fullpage.sty
+Package: fullpage 1999/02/23 1.1 (PWD)
+\FP@margin=\skip49
+) (/usr/share/texmf/tex/latex/tools/verbatim.sty
+Package: verbatim 2003/08/22 v1.5q LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks17
+\verbatim@line=\toks18
+\verbatim@in@stream=\read1
+) (/usr/share/texmf/tex/latex/graphics/color.sty
+Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
+(/usr/share/texmf/tex/latex/latexconfig/color.cfg
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+)
+Package color Info: Driver file: dvips.def on input line 130.
+(/usr/share/texmf/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+)) (/usr/share/texmf/tex/latex/tools/calc.sty
+Package: calc 2007/08/22 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count92
+\calc@Bcount=\count93
+\calc@Adimen=\dimen109
+\calc@Bdimen=\dimen110
+\calc@Askip=\skip50
+\calc@Bskip=\skip51
+LaTeX Info: Redefining \setlength on input line 76.
+LaTeX Info: Redefining \addtolength on input line 77.
+\calc@Ccount=\count94
+\calc@Cskip=\skip52
+) (/usr/share/texmf/tex/latex/oberdiek/pdflscape.sty
+Package: pdflscape 2008/08/11 v0.10 Landscape pages in PDF (HO)
+(/usr/share/texmf/tex/latex/graphics/lscape.sty
+Package: lscape 2000/10/22 v3.01 Landscape Pages (DPC)
+) (/usr/share/texmf/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2009/04/10 v2.0 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in pdf mode not detected.
+) (/usr/share/texmf/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2009/01/23 v0.5 Provides ifxetex conditional
+)
+Package pdflscape Info: Auto-detected driver: dvips (dvips) on input line 119.
+(/usr/share/texmf/tex/generic/oberdiek/atbegshi.sty
+Package: atbegshi 2008/07/31 v1.9 At begin shipout hook (HO)
+(/usr/share/texmf/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2007/09/09 v1.2 Providing info/warning/message (HO)
+))) (/usr/share/texmf/tex/latex/fancyvrb/fancyvrb.sty
+Package: fancyvrb 2008/02/07
+
+Style option: `fancyvrb' v2.7a, with DG/SPQR fixes, and firstline=lastline fix 
+<2008/02/07> (tvz)
+\FV@CodeLineNo=\count95
+\FV@InFile=\read2
+\FV@TabBox=\box26
+\c@FancyVerbLine=\count96
+\FV@StepNumber=\count97
+\FV@OutFile=\write3
+) (/usr/share/texmf/tex/generic/babel/babel.sty
+Package: babel 2008/07/06 v3.8l The Babel package
+(/usr/share/texmf/tex/generic/babel/english.ldf
+Language: english 2005/03/30 v3.3o English support from the babel system
+(/usr/share/texmf/tex/generic/babel/babel.def
+File: babel.def 2008/07/06 v3.8l Babel common definitions
+\babel@savecnt=\count98
+\U@D=\dimen111
+)
+\l@canadian = a dialect from \language\l@american 
+\l@australian = a dialect from \language\l@british 
+\l@newzealand = a dialect from \language\l@british 
+))
+\sizebox=\box27
+\lthtmlwrite=\write4
+
+LaTeX Warning: Unused global option(s):
+    [a4].
+
+(./images.aux
+
+LaTeX Warning: Label `sec:XMLSectionOpenMP' multiply defined.
+
+
+LaTeX Warning: Label `sec:OpenMPruntimesinstrumented' multiply defined.
+
+)
+\openout1 = `images.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 150.
+LaTeX Font Info:    ... okay on input line 150.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 150.
+LaTeX Font Info:    ... okay on input line 150.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 150.
+LaTeX Font Info:    ... okay on input line 150.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 150.
+LaTeX Font Info:    ... okay on input line 150.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 150.
+LaTeX Font Info:    ... okay on input line 150.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 150.
+LaTeX Font Info:    ... okay on input line 150.
+\AtBeginShipoutBox=\box28
+(/home/harald/development/extrae-2.2.1-fix/doc/user-guide.aux
+
+LaTeX Warning: Label `cha:QuickStart' multiply defined.
+
+
+LaTeX Warning: Label `tab:PackageDescription' multiply defined.
+
+
+LaTeX Warning: Label `subsec:RunningTraceDynInst' multiply defined.
+
+
+LaTeX Warning: Label `subsec:RunningTraceNOTDynInst' multiply defined.
+
+
+LaTeX Warning: Label `cha:Introduction' multiply defined.
+
+
+LaTeX Warning: Label `cha:Configuration' multiply defined.
+
+
+LaTeX Warning: Label `cha:XML' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionTraceConfiguration' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionMPI' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionPACX' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionOpenMP' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionOpenMP' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLcell' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionCallers' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionUF' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionPerformanceCounters' multiply defined.
+
+
+LaTeX Warning: Label `subsec:ProcessorPerformanceCounters' multiply defined.
+
+
+LaTeX Warning: Label `subsec:NetworkPerformanceCounters' multiply defined.
+
+
+LaTeX Warning: Label `subsec:OperatingSystemAccounting' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionStorage' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionBuffer' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionTraceControl' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionBursts' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionOthers' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionSampling' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionMerge' multiply defined.
+
+
+LaTeX Warning: Label `sec:EnvVars_in_XML' multiply defined.
+
+
+LaTeX Warning: Label `cha:API' multiply defined.
+
+
+LaTeX Warning: Label `sec:BasicAPI' multiply defined.
+
+
+LaTeX Warning: Label `sec:ExtendedAPI' multiply defined.
+
+
+LaTeX Warning: Label `subsec:PPEside' multiply defined.
+
+
+LaTeX Warning: Label `subsec:SPEside' multiply defined.
+
+
+LaTeX Warning: Label `cha:Merging' multiply defined.
+
+
+LaTeX Warning: Label `tab:MergerDescription' multiply defined.
+
+
+LaTeX Warning: Label `cha:Examples' multiply defined.
+
+
+LaTeX Warning: Label `sec:Examples_DynInst' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_DynInst_Intermediate' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_DynInst_Intermediate_MPI' multiply define
+d.
+
+
+LaTeX Warning: Label `sec:Examples_LDPRELOAD' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_Linux' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_CUDA' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_AIX' multiply defined.
+
+
+LaTeX Warning: Label `sec:Examples_static' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_static_link' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_static_Intermediate' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_LDPRELOAD_Final' multiply defined.
+
+
+LaTeX Warning: Label `cha:wholeXML' multiply defined.
+
+
+LaTeX Warning: Label `cha:EnvVar' multiply defined.
+
+
+LaTeX Warning: Label `tab:EnvironmentVariables' multiply defined.
+
+
+LaTeX Warning: Label `tab:EnvironmentVariables_continued' multiply defined.
+
+
+LaTeX Warning: Label `sec:FAQ' multiply defined.
+
+
+LaTeX Warning: Label `cha:InstrumentedRoutines' multiply defined.
+
+
+LaTeX Warning: Label `sec:MPIinstrumentedroutines' multiply defined.
+
+
+LaTeX Warning: Label `sec:OpenMPruntimesinstrumented' multiply defined.
+
+
+LaTeX Warning: Label `sec:OpenMPruntimesinstrumented' multiply defined.
+
+)
+
+latex2htmlLength hsize=349.0pt
+
+latex2htmlLength vsize=650.43001pt
+
+latex2htmlLength hoffset=0.0pt
+
+latex2htmlLength voffset=0.0pt
+
+latex2htmlLength topmargin=0.0pt
+
+latex2htmlLength topskip=0.00003pt
+
+latex2htmlLength headheight=0.0pt
+
+latex2htmlLength headsep=0.0pt
+
+latex2htmlLength parskip=0.0pt plus 1.0pt
+
+latex2htmlLength oddsidemargin=0.0pt
+
+latex2htmlLength evensidemargin=0.0pt
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 248.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 248.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 248.
+l2hSize :tex2html_wrap_inline3181:8.7125pt::8.7125pt::11.49754pt.
+[1
+
+
+
+]
+Overfull \hbox (5.19447pt too wide) in paragraph at lines 322--322
+[]\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
+ []
+
+l2hSize :landscape3429:465.73293pt::0.0pt::650.43001pt.
+[2
+
+
+
+
+]
+l2hSize :landscape3450:412.94963pt::0.0pt::650.43001pt.
+[3
+
+
+
+
+] (./images.aux)
+
+LaTeX Warning: There were multiply-defined labels.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 2495 strings out of 493849
+ 33464 string characters out of 3155836
+ 101333 words of memory out of 3500000
+ 5731 multiletter control sequences out of 15000+200000
+ 7506 words of font info for 27 fonts, out of 3000000 for 9000
+ 714 hyphenation exceptions out of 8191
+ 32i,12n,24p,222b,322s stack positions out of 5000i,500n,10000p,200000b,50000s
+
+Output written on images.dvi (3 pages, 11444 bytes).
