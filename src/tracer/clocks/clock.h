@@ -63,6 +63,7 @@ UINT64 Clock_getLastReadTime (unsigned thread);
 void Clock_AllocateThreads (unsigned numthreads);
 void Clock_Initialize (unsigned numthreads);
 void Clock_Initialize_thread (void);
+void Clock_CleanUp (void);
 #if defined(__cplusplus)
 }
 #endif

@@ -317,6 +317,23 @@ void HWC_Initialize (int options)
 }
 
 /**
+ * Deallocates memory allocated by the routines in this module
+ */
+void HWC_CleanUp (int nthreads)
+{
+	int i;
+
+	xfree (HWC_current_set);
+	xfree (HWC_current_timebegin);
+	xfree (HWC_current_glopsbegin);
+	xfree (HWC_Thread_Initialized);
+	xfree (Accumulated_HWC_Valid);
+	for (i = 0; i < nthreads; i++)
+		xfree (Accumulated_HWC[i]);
+	xfree (Accumulated_HWC);
+}
+
+/**
  * Starts reading counters.
  * \param num_threads Total number of threads.
  */

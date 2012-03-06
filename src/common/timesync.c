@@ -45,6 +45,7 @@
 #include "common.h"
 #include "types.h"
 #include "timesync.h"
+#include "utils.h"
 
 /* Time synchronization module */
 
@@ -125,6 +126,21 @@ int TimeSync_Initialize (int num_tasks)
 		return 1;	
 	}
 	return 0;
+}
+
+/**
+ * Frees the allocated structures
+ */
+void TimeSync_CleanUp (void)
+{
+	int i;
+	
+	xfree (SyncInfo);
+	xfree (LatencyTable);
+
+	for (i = 0; i < TotalNodes; i++)
+		xfree (NodeList[i]);
+	xfree (NodeList);
 }
 
 /**

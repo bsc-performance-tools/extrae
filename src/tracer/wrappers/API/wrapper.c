@@ -1388,6 +1388,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 
 		num_hwc = HWC_Get_Set_Counters_Ids (set, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
 		TRACE_EVENT_AND_GIVEN_COUNTERS (ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
+		xfree (HWCid);
 	}
 
 	/* Start reading counters */
@@ -1720,9 +1721,10 @@ void Backend_Finalize (void)
 	/* Stop sampling right now */
 	setSamplingEnabled (FALSE);
 
+	/* Write files back to disk */
 	for (thread = 0; thread < maximum_NumOfThreads; thread++) 
 	{
-		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
+		Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 	}
 	if (THREADID == 0) 
 	{
@@ -1732,11 +1734,36 @@ void Backend_Finalize (void)
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
 	{
 		TRACE_EVENT (TIME, APPL_EV, EVT_END);
-		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
+		Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 	}
 
+	/* Rename the files */
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
+	{
 		Backend_Finalize_close_mpits (thread);
+	}
+
+	/* Free allocated memory */
+	{
+		for (thread = 0; thread < maximum_NumOfThreads; thread++)
+		{
+			Buffer_Free (TRACING_BUFFER(thread));
+#if defined(SAMPLING_SUPPORT)
+			Buffer_Free (SAMPLING_BUFFER(thread));
+#endif
+		}
+		xfree(TracingBuffer);
+#if defined(SAMPLING_SUPPORT)
+		xfree(SamplingBuffer);
+#endif
+		xfree (TracingBitmap);
+		TimeSync_CleanUp();
+		Trace_Mode_CleanUp();
+		Clock_CleanUp();
+#if USE_HARDWARE_COUNTERS
+		HWC_CleanUp (get_maximum_NumOfThreads());
+#endif
+	}
 
 	if (TASKID == 0)
 		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");

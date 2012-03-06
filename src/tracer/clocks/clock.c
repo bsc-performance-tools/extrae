@@ -40,6 +40,8 @@ static char UNUSED rcsid[] = "$Id$";
 # include <sys/resource.h>
 #endif
 
+#include "utils.h"
+
 #include "clock.h"
 
 #if defined(USE_POSIX_CLOCK)
@@ -155,13 +157,17 @@ void Clock_AllocateThreads (unsigned numthreads)
 	_extrae_last_read_clock = (UINT64*) realloc (_extrae_last_read_clock, sizeof(UINT64)*numthreads);
 }
 
+void Clock_CleanUp (void)
+{
+	xfree (_extrae_last_read_clock);
+}
+
 void Clock_Initialize (unsigned numthreads)
 {
 	Clock_AllocateThreads (numthreads);
 
 	INIT_CLOCK;
 }
-
 
 void Clock_Initialize_thread (void)
 {

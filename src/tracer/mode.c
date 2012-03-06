@@ -37,6 +37,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #include "hwc.h"
 #include "mode.h"
+#include "utils.h"
 
 int *MPI_Deepness              = NULL;
 int *Current_Trace_Mode        = NULL;
@@ -60,6 +61,14 @@ static int is_ValidMode (int mode)
 		default:
 			return FALSE;
 	}
+}
+
+void Trace_Mode_CleanUp (void)
+{
+	xfree (MPI_Deepness);
+	xfree (Current_Trace_Mode);
+	xfree (Future_Trace_Mode);
+	xfree (Pending_Trace_Mode_Change);
 }
 
 int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)

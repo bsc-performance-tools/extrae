@@ -52,6 +52,7 @@ enum
 extern "C" {
 #endif
 int TimeSync_Initialize (int num_tasks);
+void TimeSync_CleanUp (void);
 int TimeSync_SetInitialTime (int task, UINT64 init_time, UINT64 sync_time, char *node);
 int TimeSync_CalculateLatencies (int sync_strategy);
 UINT64 TimeSync (int task, UINT64 time);

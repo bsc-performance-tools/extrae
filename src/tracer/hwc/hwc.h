@@ -52,6 +52,7 @@ extern "C" {
 #endif
 int HWC_IsEnabled();
 void HWC_Initialize (int options);
+void HWC_CleanUp (int nthreads);
 void HWC_Start_Counters (int num_threads);
 void HWC_Restart_Counters (int old_num_threads, int new_num_threads);
 
