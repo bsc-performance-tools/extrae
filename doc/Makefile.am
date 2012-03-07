@@ -10,7 +10,11 @@ manual_ug = user-guide
 # Aquesta combinacio de params pot ser interessant per a generar un single HTML
 # -split 0 -show_section_numbers -nonumbered_footnotes -mkdir -dir single
 
-all: $(manual_ug).dvi
+all:
+	@echo Nothing to be done by default. If you want to build the documentation
+	@echo issue make build-documentation.
+
+build-documentation: $(manual_ug).dvi
 if BUILD_DOCS_PS
 	$(dvips) $(manual_ug).dvi -o $(manual_ug).ps
 if BUILD_DOCS_PDF
@@ -22,7 +26,7 @@ if BUILD_HTML_DOCS
 endif
 
 version.tex:
-	echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
+	@echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
 
 $(manual_ug).dvi: $(manual_ug).tex version.tex
 if BUILD_DOCS_PS
@@ -45,4 +49,8 @@ if BUILD_HTML_DOCS
 endif
 
 clean:
+	@echo Nothing to be done by default. If you want to clean the documentation
+	@echo issue make clean-documentation.
+
+clean-documentation:
 	rm -fr $(manual_ug).aux $(manual_ug).dvi $(manual_ug).lof $(manual_ug).log $(manual_ug).lot $(manual_ug).ps $(manual_ug).pdf $(manual_ug).toc $(manual_ug)
