@@ -317,6 +317,13 @@ int HWCBE_PMAPI_Stop_Set (UINT64 time, int numset, int threadid)
 	return TRUE;
 }
 
+void HWCBE_PMAPI_CleanUp (unsigned nthreads)
+{
+	UNREFERENCED_PARAMETER(nthreads);
+
+	xfree (HWC_sets);
+}
+
 /******************************************************************************
  **      Function name : PMAPI_Initialize
  **

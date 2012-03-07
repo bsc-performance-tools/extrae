@@ -319,9 +319,11 @@ void HWC_Initialize (int options)
 /**
  * Deallocates memory allocated by the routines in this module
  */
-void HWC_CleanUp (int nthreads)
+void HWC_CleanUp (unsigned nthreads)
 {
 	int i;
+
+	HWCBE_CLEANUP_COUNTERS_THREAD(nthreads);
 
 	xfree (HWC_current_set);
 	xfree (HWC_current_timebegin);

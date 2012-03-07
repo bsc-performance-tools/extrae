@@ -59,6 +59,7 @@
    {                                  \
       free(ptr);                      \
    }                                  \
+   ptr = NULL;                        \
 } 
 
 #if defined(__cplusplus)

@@ -1745,6 +1745,9 @@ void Backend_Finalize (void)
 
 	/* Free allocated memory */
 	{
+		if (TASKID == 0)
+			fprintf (stdout, PACKAGE_NAME": Deallocating memory.\n");
+
 		for (thread = 0; thread < maximum_NumOfThreads; thread++)
 		{
 			Buffer_Free (TRACING_BUFFER(thread));

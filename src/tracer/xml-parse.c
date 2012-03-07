@@ -318,6 +318,9 @@ static void Parse_XML_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr current_t
 			mfprintf (stderr, "Extrae: Warning! Value '%s' for <sampling period=\"..\" /> is unrecognized\n", period);
 		}
 	}
+
+	XML_FREE(period);
+	XML_FREE(clocktype);
 }
 #endif /* SAMPLING_SUPPORT */
 
@@ -913,6 +916,7 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 	xmlChar *enabled;
 	int numofcounters, res;
 	int numofsets = 0;
+	int i;
 
 	/* Parse all HWC sets, and annotate them to use them later */
 	set_tag = current->xmlChildrenNode;
@@ -947,6 +951,9 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 				Parse_XML_Counters_CPU_Sampling (rank, xmldoc, set_tag, &OvfNum, &OvfCounters, &OvfPeriods);
 
 				res = HWC_Add_Set (numofsets, rank, numofcounters, setofcounters, domain, changeat_glops, changeat_time, OvfNum, OvfCounters, OvfPeriods);
+
+				for (i = 0; i < numofcounters; i++)
+					xfree (setofcounters[i]);
 
 				XML_FREE(counters);
 				XML_FREE(changeat_glops);

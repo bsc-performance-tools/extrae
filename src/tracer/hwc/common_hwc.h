@@ -52,7 +52,7 @@ struct HWC_Set_t
     unsigned long long change_at;
     enum ChangeType_t change_type;
 
-#if defined(SAMPLING_SUPPORT)
+#if defined(PAPI_SAMPLING_SUPPORT)
     long long *OverflowValue;
     int *OverflowCounter;
     int NumOverflows;
@@ -129,6 +129,9 @@ extern int * HWC_current_set;
 # define HWCBE_ACCUM(thread_id, store_buffer) \
     HWCBE_PAPI_Accum(thread_id, store_buffer)
 
+# define HWCBE_CLEANUP_COUNTERS_THREAD(nthreads) \
+		HWCBE_PAPI_CleanUp(nthreads)
+
 #elif defined(PMAPI_COUNTERS) /* -------------------- PMAPI Backend ---------*/
 
 # include "pmapi_hwc.h" 
@@ -158,6 +161,9 @@ extern int * HWC_current_set;
 # define HWCBE_RESET(thread_id) 1
 
 # define HWCBE_ACCUM(thread_id, store_buffer) 1
+
+# define HWCBE_CLEANUP_COUNTERS_THREAD(nthreads) \
+		HWCBE_PMAPI_CleanUp(nthreads)
 
 #endif
 

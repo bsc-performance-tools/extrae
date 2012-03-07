@@ -453,6 +453,45 @@ int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 	return rc == PAPI_OK;
 }
 
+void HWCBE_PAPI_CleanUp (unsigned nthreads)
+{
+	int i;
+	unsigned t;
+
+	if (PAPI_is_initialized())
+	{
+		long long values[MAX_HWC];
+
+		for (t = 0; t < nthreads; t++)
+		{
+			PAPI_stop (HWC_sets[HWCEVTSET(t)].eventsets[t], values);
+
+			for (i = 0; i < HWC_num_sets; i++)
+			{
+				/* Remove all events in the eventset and destroy the eventset */
+				PAPI_cleanup_eventset(HWC_sets[i].eventsets[t]);
+				PAPI_destroy_eventset(&HWC_sets[i].eventsets[t]);
+				xfree (HWC_sets[i].eventsets);
+			}
+		}
+
+#if defined(PAPI_SAMPLING_SUPPORT)
+		for (i = 0; i < HWC_num_sets; i++)
+		{
+			/* Free extra allocated memory */
+			if (HWC_sets[i].NumOverflows > 0)
+			{
+				xfree (HWC_sets[i].OverflowValue);
+				xfree (HWC_sets[i].OverflowCounter);
+			}
+		}
+#endif
+		xfree (HWC_sets); 
+
+		PAPI_shutdown();
+	}
+}
+
 /******************************************************************************
  **      Function name : PAPI_Initialize
  **

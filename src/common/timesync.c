@@ -141,6 +141,8 @@ void TimeSync_CleanUp (void)
 	for (i = 0; i < TotalNodes; i++)
 		xfree (NodeList[i]);
 	xfree (NodeList);
+
+	TotalTasksToSync = TotalNodes = 0;
 }
 
 /**
