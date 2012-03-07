@@ -2,5 +2,5 @@ include $(top_srcdir)/PATHS
 
 bin_PROGRAMS = extrae_static
 
-extrae_SOURCES = extrae.c
-extrae_CFLAGS = -I$(COMMON_DIR)
+extrae_static_SOURCES = extrae.c
+extrae_static_CFLAGS = -I$(COMMON_DIR)
