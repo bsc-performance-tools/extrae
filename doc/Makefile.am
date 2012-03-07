@@ -11,8 +11,7 @@ manual_ug = user-guide
 # -split 0 -show_section_numbers -nonumbered_footnotes -mkdir -dir single
 
 all:
-	@echo Nothing to be done by default. If you want to build the documentation
-	@echo issue make build-documentation.
+	@echo Nothing to be done by default. If you want to build the documentation issue make build-documentation.
 
 build-documentation: $(manual_ug).dvi
 if BUILD_DOCS_PS
@@ -49,8 +48,7 @@ if BUILD_HTML_DOCS
 endif
 
 clean:
-	@echo Nothing to be done by default. If you want to clean the documentation
-	@echo issue make clean-documentation.
+	@echo Nothing to be done by default. If you want to clean the documentation issue make clean-documentation.
 
 clean-documentation:
 	rm -fr $(manual_ug).aux $(manual_ug).dvi $(manual_ug).lof $(manual_ug).log $(manual_ug).lot $(manual_ug).ps $(manual_ug).pdf $(manual_ug).toc $(manual_ug)
