@@ -1,7 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
- * 09Mar2012 Fixes in the #pragma omp parallel region constructs in icc/gcc.
+ * 09Mar2012 Fixes in the #pragma omp parallel sections constructs in icc/gcc.
  * 06Mar2012 First parallel event when thread > 1 was missing its HWC.
              XML parser was looking for sort-address instead of sort-addresses
              within <merge> block.
