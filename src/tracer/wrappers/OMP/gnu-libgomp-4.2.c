@@ -79,6 +79,34 @@ static void (*pardo_uf)(void*) = NULL;
 /* FIXME: Array of function pointers indexed by thread? (nowait issue) */
 static void (*par_uf)(void*) = NULL;
 
+/* Pointer to the user function called by a PARALLEL SECTION */
+/* FIXME: Array of function pointers indexed by thread? (nowait issue) */
+static void (*parsection_uf)(void*) = NULL;
+
+/*
+	callme_parsection (void *p1)
+	With the same header as the routine to be called by the SMP runtime, just
+	acts as a trampoline to this call. Invokes the required iterations of the
+	parallel do loop.
+*/
+static void callme_parsection (void *p1)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d callme_parsection: par_section() = %p p1 = %p\n", THREADID, parsection_uf, p1);
+#endif
+
+	if (parsection_uf == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Invalid initialization of 'par_section'\n");
+		exit (0);
+	}
+
+	Backend_Enter_Instrumentation (2);
+	Probe_OpenMP_UF_Entry ((UINT64) parsection_uf);
+	parsection_uf (p1);
+	Probe_OpenMP_UF_Exit ();
+	Backend_Leave_Instrumentation ();
+}
 /*
 	callme_pardo (void *p1)
 	With the same header as the routine to be called by the SMP runtime, just
@@ -378,9 +406,18 @@ void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 
 	if (GOMP_parallel_sections_start_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
+		parsection_uf = (void(*)(void*))p1;
+
+		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_ParSections_Entry();
-		GOMP_parallel_sections_start_real (p1, p2, p3, p4);
+		GOMP_parallel_sections_start_real (callme_parsection, p2, p3, p4);
+
+		Backend_Enter_Instrumentation (1);
+
+		/* The master thread continues the execution and then calls pardo_uf */
+		if (THREADID == 0)
+			Probe_OpenMP_UF_Entry ((UINT64) p1);
+
 		/* Probe_OpenMP_ParSections_Exit(); */
 		Backend_Leave_Instrumentation ();
 	}
@@ -450,7 +487,6 @@ void GOMP_sections_end (void)
 		Probe_OpenMP_Join_Wait_Entry();
 		GOMP_sections_end_real();
 		Probe_OpenMP_Join_Wait_Exit();
-		Probe_OpenMP_ParSections_Exit();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -472,7 +508,6 @@ void GOMP_sections_end_nowait (void)
 		Probe_OpenMP_Join_NoWait_Entry();
 		GOMP_sections_end_nowait_real();
 		Probe_OpenMP_Join_NoWait_Exit();
-		Probe_OpenMP_ParSections_Exit();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -544,7 +579,6 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
-		/* Probe_OpenMP_DO_Exit (); */
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();
@@ -570,7 +604,6 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
-		/* Probe_OpenMP_DO_Exit (); */
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();
@@ -596,7 +629,6 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
-		/* Probe_OpenMP_DO_Exit (); */
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();
@@ -622,7 +654,6 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
-		/* Probe_OpenMP_DO_Exit (); */
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_UF_Entry (par_uf);
 		Backend_Leave_Instrumentation ();

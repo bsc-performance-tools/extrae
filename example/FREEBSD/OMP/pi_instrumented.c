@@ -37,12 +37,11 @@ int main(int argc, char **argv)
 	int i;
 	int n = 1000000;
 	double PI25DT = 3.141592653589793238462643;
-	double pi, h, area, x, start, end;
+	double pi, h, area, x;
 
 	/* Extrae_init() must be called before any #pragma omp or OMP call */
 	Extrae_init();
 
-	start = omp_get_wtime();
 	h = 1.0 / (double) n;
 	area = 0.0;
 	#pragma omp parallel for private(x) reduction(+:area)
@@ -52,10 +51,29 @@ int main(int argc, char **argv)
 		area += (4.0 / (1.0 + x*x));
 	}
 	pi = h * area;
-	end = omp_get_wtime();
+	printf("pi (by using #pragma omp parallel for) is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
 
-	printf("pi is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
-	printf("Ran in %0.5f seconds with %d threads\n",end-start,omp_get_max_threads());
+	h = 1.0 / (double) n;
+	area = 0.0;
+	#pragma omp parallel sections private(i,x) reduction(+:area)
+	{
+		#pragma omp section
+		for (i = 1; i < n/2; i++)
+		{
+			x = h * ((double)i - 0.5);
+			area += (4.0 / (1.0 + x*x));
+		}
+
+		#pragma omp section
+		for (i = n/2; i <= n; i++)
+		{
+			x = h * ((double)i - 0.5);
+			area += (4.0 / (1.0 + x*x));
+		}
+	}
+	pi = h * area;
+	printf("pi (by using #pragma omp parallel sections) is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
+
 
 	/* Extre_fini() must be the last call */
 	Extrae_fini();

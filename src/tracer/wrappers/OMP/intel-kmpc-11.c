@@ -61,9 +61,11 @@ static int (*__kmpc_dispatch_next_4_real)(void*,int,int*,int*,int*,int*) = NULL;
 static int (*__kmpc_dispatch_next_8_real)(void*,int,int*,long long *,long long *, long long *) = NULL;
 static int (*__kmpc_single_real)(void*,int) = NULL;
 static void (*__kmpc_end_single_real)(void*,int) = NULL;
+#if 0 /* Do not provide information */
 static void (*__kmpc_for_static_init_4_real)(void*,int,int,int*,int*,int*,int*,int,int) = NULL;
 static void (*__kmpc_for_static_init_8_real)(void*,int,int,int*,long long*,long long*,long long*,long long,long long) = NULL;
 static void (*__kmpc_for_static_fini_real)(void*,int) = NULL;
+#endif
 static void (*__kmpc_dispatch_init_4_real)(void*,int,int,int,int,int,int) = NULL;
 static void (*__kmpc_dispatch_init_8_real)(void*,int,int,long long,long long,long long,long long) = NULL;
 static void (*__kmpc_dispatch_fini_4_real)(void*,int) = NULL;
@@ -135,6 +137,7 @@ int intel_kmpc_11_hook_points (int rank)
 		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_end_single in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_end_single_real,count);
 
+#if 0
 	/* Obtain @ for __kmpc_for_static_init_4 */
 	__kmpc_for_static_init_4_real =
 		(void(*)(void*,int,int,int*,int*,int*,int*,int,int)) dlsym (RTLD_NEXT, "__kmpc_for_static_init_4");
@@ -155,6 +158,7 @@ int intel_kmpc_11_hook_points (int rank)
 	if (__kmpc_for_static_fini_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_for_static_fini in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_for_static_fini_real,count);
+#endif
 
 	/* Obtain @ for __kmpc_dispatch_init_4 */
 	__kmpc_dispatch_init_4_real =
@@ -411,6 +415,7 @@ void __kmpc_end_single (void *p1, int p2)
 	}
 }
 
+#if 0
 void  __kmpc_for_static_init_4 (void *p1, int p2, int p3, int *p4, int *p5,
 	int *p6, int *p7, int p8, int p9)
 {
@@ -422,10 +427,10 @@ void  __kmpc_for_static_init_4 (void *p1, int p2, int p3, int *p4, int *p5,
 	if (__kmpc_for_static_init_4_real != NULL)
 	{
 		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+//		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
 		__kmpc_for_static_init_4_real (p1, p2, p3, p4, p5, p6, p7, p8, p9);
 		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_DO_Entry ();
+//		Probe_OpenMP_DO_Entry ();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -446,10 +451,10 @@ void  __kmpc_for_static_init_8 (void *p1, int p2, int p3, int *p4,
 	if (__kmpc_for_static_init_8_real != NULL)
 	{
 		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+//		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
 		__kmpc_for_static_init_8_real (p1, p2, p3, p4, p5, p6, p7, p8, p9);
 		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_DO_Entry ();
+//		Probe_OpenMP_DO_Entry ();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -469,9 +474,9 @@ void __kmpc_for_static_fini (void *p1, int p2)
 	if (__kmpc_for_static_fini_real != NULL)
 	{
 		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_DO_Exit ();
+//		Probe_OpenMP_DO_Exit ();
 		__kmpc_for_static_fini_real (p1, p2);
-		Probe_OpenMP_UF_Exit ();
+//		Probe_OpenMP_UF_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
 	else
@@ -480,6 +485,7 @@ void __kmpc_for_static_fini (void *p1, int p2)
 		exit (0);
 	}
 }
+#endif
 
 void __kmpc_dispatch_init_4 (void *p1, int p2, int p3, int p4, int p5, int p6,
 	int p7)
