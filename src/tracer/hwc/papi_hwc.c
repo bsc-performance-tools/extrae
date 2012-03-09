@@ -455,16 +455,19 @@ int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 
 void HWCBE_PAPI_CleanUp (unsigned nthreads)
 {
-	int i;
-	unsigned t;
-
 	if (PAPI_is_initialized())
 	{
-		long long values[MAX_HWC];
+		int state;
+		int i;
+		unsigned t;
 
-		for (t = 0; t < nthreads; t++)
+		if (PAPI_state (HWC_sets[HWCEVTSET(THREADID)].eventsets[THREADID], &state) == PAPI_OK)
 		{
-			PAPI_stop (HWC_sets[HWCEVTSET(t)].eventsets[t], values);
+			if (state & PAPI_RUNNING)
+			{
+				long long tmp[MAX_HWC];
+				PAPI_stop (HWC_sets[HWCEVTSET(THREADID)].eventsets[THREADID], tmp);
+			}
 
 			for (i = 0; i < HWC_num_sets; i++)
 			{
