@@ -50,11 +50,11 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo pThread instrumentation: ${enable_pthread}
 
 	if test "${enable_cupti}" = "yes" ; then
-		echo CUDA instrumentation: yes through CUPTI
-		echo -e \\\\tCUPTI home: ${cupti_path}
+		echo CUDA instrumentation: yes, through CUPTI
+		echo -e \\\tCUPTI home: ${cupti_path}
 	else
 		if test "${enable_cuda}" = "yes" ; then
-			echo CUDA instrumentation: yes through LD_PRELOAD
+			echo CUDA instrumentation: yes, through LD_PRELOAD
 		else
 			echo CUDA instrumentation: no
 		fi
