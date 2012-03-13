@@ -52,6 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 static int (*pthread_create_real)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*) = NULL;
 static int (*pthread_join_real)(pthread_t,void**) = NULL;
 static int (*pthread_detach_real)(pthread_t) = NULL;
+static void (*pthread_exit_real)(void*) = NULL;
 
 static int (*pthread_mutex_lock_real)(pthread_mutex_t*) = NULL;
 static int (*pthread_mutex_trylock_real)(pthread_mutex_t*) = NULL;
@@ -95,6 +96,11 @@ static void GetpthreadHookPoints (int rank)
 	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
 	if (pthread_detach_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_detach in DSOs!!\n");
+
+	/* Obtain @ for pthread_exit */
+	pthread_exit_real = (void(*)(void*)) dlsym (RTLD_NEXT, "pthread_exit");
+	if (pthread_exit_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_exit in DSOs!!\n");
 
 	/* Obtain @ for pthread_mutex_lock */
 	pthread_mutex_lock_real = (int(*)(pthread_mutex_t*)) dlsym (RTLD_NEXT, "pthread_mutex_lock");
@@ -283,6 +289,15 @@ int pthread_join (pthread_t p1, void **p2)
 	Probe_pthread_Join_Exit ();
 	Backend_Leave_Instrumentation ();
 	return res;
+}
+
+void pthread_exit (void *p1)
+{
+	Backend_Enter_Instrumentation (1);
+	if (mpitrace_on)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADFUNC_EV, EVT_END ,EMPTY);
+	Backend_Leave_Instrumentation ();
+	pthread_exit_real (p1);
 }
 
 int pthread_detach (pthread_t p1)
