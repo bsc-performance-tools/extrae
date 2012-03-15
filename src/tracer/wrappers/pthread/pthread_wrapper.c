@@ -77,8 +77,13 @@ static int (*pthread_rwlock_trywrlock_real)(pthread_rwlock_t *) = NULL;
 static int (*pthread_rwlock_timedwrlock_real)(pthread_rwlock_t *, const struct timespec *) = NULL;
 static int (*pthread_rwlock_unlock_real)(pthread_rwlock_t *) = NULL;
 
+static pthread_mutex_t extrae_pthread_create_mutex;
+
 static void GetpthreadHookPoints (int rank)
 {
+	/* Create mutex to protect pthread_create calls */
+	pthread_mutex_init (&extrae_pthread_create_mutex, NULL);
+
 	/* Obtain @ for pthread_create */
 	pthread_create_real =
 		(int(*)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*))
@@ -239,6 +244,8 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 	   So, pthread_library_depth > 0 controls this situation
 	*/
 
+	/* Protect creation, just one at a time */
+	pthread_mutex_lock_real (&extrae_pthread_create_mutex);
 
 	if (0 == pthread_library_depth)
 	{
@@ -275,6 +282,9 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 	}
 	else
 		res = pthread_create_real (p1, p2, p3, p4);
+
+	/* Stop protecting the region, more pthread creations can enter */
+	pthread_mutex_unlock_real (&extrae_pthread_create_mutex);
 
 	return res;
 }
