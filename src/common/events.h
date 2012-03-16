@@ -394,9 +394,10 @@ enum {
 /******************************************************************************
  *   User events to trace Pthread/TRT parallel execution.
  ******************************************************************************/
-#define PTHREADCREATE_EV         61000001
-#define PTHREADJOIN_EV           61000002
-#define PTHREADDETACH_EV         61000003
+#define PTHREAD_EXIT_EV          61000000
+#define PTHREAD_CREATE_EV        61000001
+#define PTHREAD_JOIN_EV          61000002
+#define PTHREAD_DETACH_EV        61000003
 
 #define PTHREAD_RWLOCK_WR_EV       61000004
 #define PTHREAD_RWLOCK_RD_EV       61000005
@@ -407,8 +408,8 @@ enum {
 #define PTHREAD_COND_BROADCAST_EV  61000010
 #define PTHREAD_COND_WAIT_EV       61000011
 
-#define PTHREADFUNC_EV           60000020
-#define PTHREADFUNC_LINE_EV      60000120
+#define PTHREAD_FUNC_EV          60000020
+#define PTHREAD_FUNC_LINE_EV     60000120
 
 #define TRT_SPAWN_EV             62000001
 #define TRT_READ_EV              62000002

@@ -103,8 +103,8 @@ static int pthread_Function_Event (event_t * current_event,
 #endif
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREADFUNC_EV, EvValue);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREADFUNC_LINE_EV, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREAD_FUNC_EV, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREAD_FUNC_LINE_EV, EvValue);
 
 	return 0;
 }
@@ -125,11 +125,28 @@ static int pthread_Lock (event_t * current_event,
 	return 0;
 }
 
+static int pthread_Exit (event_t * current_event, 
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset )
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	/* POP top state if the pthread_exit is entered */
+	Switch_State (STATE_RUNNING, (Get_EvValue (current_event) != EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	  Get_EvEvent (current_event), Get_EvValue (current_event));
+
+	return 0;
+}
+
 SingleEv_Handler_t PRV_pthread_Event_Handlers[] = {
-	{ PTHREADCREATE_EV, pthread_Call },
-	{ PTHREADJOIN_EV, pthread_Call },
-	{ PTHREADDETACH_EV, pthread_Call },
-	{ PTHREADFUNC_EV, pthread_Function_Event },
+	{ PTHREAD_CREATE_EV, pthread_Call },
+	{ PTHREAD_EXIT_EV, pthread_Exit },
+	{ PTHREAD_JOIN_EV, pthread_Call },
+	{ PTHREAD_DETACH_EV, pthread_Call },
+	{ PTHREAD_FUNC_EV, pthread_Function_Event },
 	{ PTHREAD_RWLOCK_WR_EV, pthread_Lock },
 	{ PTHREAD_RWLOCK_RD_EV, pthread_Lock },
 	{ PTHREAD_RWLOCK_UNLOCK_EV, pthread_Lock },

@@ -218,14 +218,16 @@ static void * pthread_create_hook (void *p1)
 	pthread_mutex_unlock_real (&(i->lock));
 
 	Backend_Enter_Instrumentation (1);
-
 	if (mpitrace_on)
-		TRACE_PTHEVENTANDCOUNTERS(LAST_READ_TIME, PTHREADFUNC_EV, (UINT64) routine, EMPTY);
-	res = routine (arg);
-	if (mpitrace_on)
-		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADFUNC_EV, EVT_END ,EMPTY);
-
+		TRACE_PTHEVENTANDCOUNTERS(LAST_READ_TIME, PTHREAD_FUNC_EV, (UINT64) routine, EMPTY);
 	Backend_Leave_Instrumentation ();
+
+	res = routine (arg);
+
+	if (mpitrace_on)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_FUNC_EV, EVT_END ,EMPTY);
+	Backend_Leave_Instrumentation ();
+
 	return res;
 }
 
@@ -304,8 +306,7 @@ int pthread_join (pthread_t p1, void **p2)
 void pthread_exit (void *p1)
 {
 	Backend_Enter_Instrumentation (1);
-	if (mpitrace_on)
-		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREADFUNC_EV, EVT_END ,EMPTY);
+	Probe_pthread_Exit_Entry();
 	Backend_Leave_Instrumentation ();
 	pthread_exit_real (p1);
 }

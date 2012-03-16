@@ -555,9 +555,9 @@ static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
 		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == OMPFUNC_LINE_EV)
 		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
-	else if (eventtype == PTHREADFUNC_EV)
+	else if (eventtype == PTHREAD_FUNC_EV)
 		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
-	else if (eventtype == PTHREADFUNC_LINE_EV)
+	else if (eventtype == PTHREAD_FUNC_LINE_EV)
 		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == CUDAFUNC_EV)
 		return Address2Info_Translate (eventvalue, ADDR2CUDA_FUNCTION, get_option_merge_UniqueCallerID());

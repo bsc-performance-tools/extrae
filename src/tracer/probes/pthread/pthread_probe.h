@@ -39,6 +39,8 @@ void Probe_pthread_Join_Exit (void);
 void Probe_pthread_Detach_Entry (void);
 void Probe_pthread_Detach_Exit (void);
 
+void Probe_pthread_Exit_Entry(void);
+
 void Probe_pthread_rwlock_lockwr_Entry (void *p);
 void Probe_pthread_rwlock_lockwr_Exit (void *p);
 void Probe_pthread_rwlock_lockrd_Entry (void *p);

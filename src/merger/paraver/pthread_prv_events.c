@@ -49,20 +49,21 @@ static char UNUSED rcsid[] = "$Id$";
 #define PTHD_WRRD_LOCK_INDEX    4  /* pthread_rwlock* functions */
 #define PTHD_MUTEX_LOCK_INDEX   5  /* pthread_mutex* functions */
 #define PTHD_COND_INDEX         6  /* pthread_cond* functions */
+#define PTHD_EXIT_INDEX         7  /* pthread_exit function */
 
-#define MAX_PTHD_INDEX		7
+#define MAX_PTHD_INDEX		8
 
-static int inuse[MAX_PTHD_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_PTHD_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_pthread_Operation (int tipus)
 {
-	if (tipus == PTHREADCREATE_EV)
+	if (tipus == PTHREAD_CREATE_EV)
 		inuse[PTHD_CREATE_INDEX] = TRUE;
-	else if (tipus == PTHREADJOIN_EV)
+	else if (tipus == PTHREAD_JOIN_EV)
 		inuse[PTHD_JOIN_INDEX] = TRUE;
-	else if (tipus == PTHREADDETACH_EV)
+	else if (tipus == PTHREAD_DETACH_EV)
 		inuse[PTHD_DETACH_INDEX] = TRUE;
-	else if (tipus == PTHREADFUNC_EV)
+	else if (tipus == PTHREAD_FUNC_EV)
 		inuse[PTHD_USRF_INDEX] = TRUE;
 	else if (tipus == PTHREAD_RWLOCK_WR_EV || tipus == PTHREAD_RWLOCK_RD_EV ||
 	  tipus == PTHREAD_RWLOCK_UNLOCK_EV)
@@ -72,6 +73,8 @@ void Enable_pthread_Operation (int tipus)
 	else if (tipus == PTHREAD_COND_SIGNAL_EV || tipus == PTHREAD_COND_WAIT_EV ||
 	  tipus == PTHREAD_COND_BROADCAST_EV)
 		inuse[PTHD_COND_INDEX] = TRUE;
+	else if (tipus == PTHREAD_EXIT_EV)
+		inuse[PTHD_EXIT_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -98,19 +101,25 @@ void pthreadEvent_WriteEnabledOperations (FILE * fd)
 	if (inuse[PTHD_CREATE_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_create\n", 0, PTHREADCREATE_EV);
+		             "%d   %d    pthread_create\n", 0, PTHREAD_CREATE_EV);
+		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
+	}
+	if (inuse[PTHD_EXIT_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    pthread_exit\n", 0, PTHREAD_EXIT_EV);
 		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
 	if (inuse[PTHD_JOIN_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_join\n", 0, PTHREADJOIN_EV);
+		             "%d   %d    pthread_join\n", 0, PTHREAD_JOIN_EV);
 		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
 	if (inuse[PTHD_DETACH_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_detach\n", 0, PTHREADDETACH_EV);
+		             "%d   %d    pthread_detach\n", 0, PTHREAD_DETACH_EV);
 		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
 	if (inuse[PTHD_WRRD_LOCK_INDEX])
@@ -145,6 +154,6 @@ void pthreadEvent_WriteEnabledOperations (FILE * fd)
 #if defined(HAVE_BFD)
 	/* Hey, pthread & OpenMP share the same labels? */
 	if (inuse[PTHD_USRF_INDEX])
-		Address2Info_Write_OMP_Labels (fd, PTHREADFUNC_EV, PTHREADFUNC_LINE_EV, get_option_merge_UniqueCallerID());
+		Address2Info_Write_OMP_Labels (fd, PTHREAD_FUNC_EV, PTHREAD_FUNC_LINE_EV, get_option_merge_UniqueCallerID());
 #endif
 }
