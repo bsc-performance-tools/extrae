@@ -48,6 +48,10 @@ AC_DEFUN([AX_PROG_MPI],
       dnl Check for the MPI header files.
       AC_CHECK_HEADERS([mpi.h], [], [MPI_INSTALLED="no"])
 
+      if test ${MPI_INSTALLED} = "no" ; then
+         AC_MSG_ERROR([Cannot find mpi.h file in the MPI specified path])
+      fi
+
       dnl In MN, MPICH2 requires special libraries when building mpimpi2prv
       AX_CHECK_DEFINED([mpi.h], [MPICH2], [MPI_IS_MPICH2="yes"], [MPI_IS_MPICH2="no"])
 
@@ -75,6 +79,10 @@ AC_DEFUN([AX_PROG_MPI],
          MPI_LIBS="not found"
       fi
       AC_MSG_RESULT([${MPI_LIBSDIR}, ${MPI_LIBS}])
+
+      if test "${MPI_LIBS}" = "not found" ; then
+         AC_MSG_ERROR([Cannot find MPI libraries file in the MPI specified path])
+      fi
 
 			AC_MSG_CHECKING([for shared MPI library])
       if test -f "${MPI_LIBSDIR}/libmpi.so" -o -f "${MPI_LIBSDIR}/libmpich.so" -o \
