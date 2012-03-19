@@ -1165,7 +1165,8 @@ AC_DEFUN([AX_CHECK_UNWIND],
       [unwind_paths="not_set"]
    )
 
-   if test "${unwind_paths}" = "not_set" ; then
+   dnl Check for unwind, except on ppc!
+   if test "${unwind_paths}" = "not_set" -a "${target_cpu}" != "powerpc" ; then
       AC_MSG_ERROR([You haven't specified the location of the libunwind through the --with-unwind parameter. The libunwind library allows Extrae gathering information of call-site locations at OpenMP and MPI calls, at sample points or whenever the user wants to collect them through the Extrae API. This data is very useful to attribute to a certain region of code any performance issue. You can download libunwind from: https://savannah.nongnu.org/projects/libunwind - download version 1.0.1 or higher. If you don't want to use libunwind, you can pass --without-unwind.])
    fi
 
