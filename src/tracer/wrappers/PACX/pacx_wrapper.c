@@ -183,102 +183,6 @@ static int P2P_Communications    = 0;  /* Number of point to point communication
 static int GLOBAL_Communications = 0;  /* Number of global operations */
 static int Elapsed_Time_In_PACX  = 0;  /* Time inside MPI/PACX calls */
 
-/****************************************************************************
- *** Variables de tamany necessari per accedir a camps de resulstats Fortran
- ****************************************************************************/
-
-#if defined(IS_BG_MACHINE)
-static void BG_gettopology (void)
-{
-#if defined(IS_BGL_MACHINE)
-	BGLPersonality personality;
-	unsigned personality_size = sizeof (personality);
-
-	rts_get_personality (&personality, personality_size);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_X, personality.xCoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Y, personality.yCoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Z, personality.zCoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, rts_get_processor_id ());
-#endif
-
-#if defined(IS_BGP_MACHINE)
-	_BGP_Personality_t personality;
-	unsigned personality_size = sizeof (personality);
-	
-	Kernel_GetPersonality (&personality, personality_size);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_X, BGP_Personality_xCoord(&personality));
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Y, BGP_Personality_yCoord(&personality));
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_Z, BGP_Personality_zCoord(&personality));
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, BGP_Personality_rankInPset (&personality));
-#endif
-
-#if defined(IS_BGQ_MACHINE)
-	Personality_t personality;
-	unsigned personality_size = sizeof (personality);
-	Kernel_GetPersonality (&personality, personality_size);
-
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_A, personality.Network_Config.Acoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_B, personality.Network_Config.Bcoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_C, personality.Network_Config.Ccoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_D, personality.Network_Config.Dcoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_TORUS_E, personality.Network_Config.Ecoord);
-	TRACE_MISCEVENT (btimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, Kernel_PhysicalProcessorID());
-#endif
-
-#if defined(IS_BGL_MACHINE) || defined(IS_BGP_MACHINE)
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_X, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_Y, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_Z, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, 0);
-#elif defined(IS_BGQ_MACHINE)
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_A, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_B, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_C, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_D, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_TORUS_E, 0);
-	TRACE_MISCEVENT (etimestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, 0);
-#endif
-}
-#endif
-
-#if defined(IS_MN_MACHINE)
-#define MAX_BUFFER 1024
-static void MN_gettopology (void) 
-{
-	char hostname[MAX_BUFFER];
-	int rc;
-	int server,center,blade;
-	int linear_host;
-	int linecard, host;
-
-	if (gethostname(hostname, MAX_BUFFER - 1) == 0)
-	{
-		iotimer_t temps = TIME;
-
-		rc = sscanf(hostname, "s%dc%db%d", &server, &center, &blade);
-		if (rc != 3) return;
-		linear_host = server*(4*14) + (center - 1) * 14 + (blade - 1);
-		linecard = linear_host / 16;
-		host = linear_host % 16;
-
-		TRACE_MISCEVENT(temps, USER_EV, MN_LINEAR_HOST_EVENT, linear_host);
-		TRACE_MISCEVENT(temps, USER_EV, MN_LINECARD_EVENT, linecard);
-		TRACE_MISCEVENT(temps, USER_EV, MN_HOST_EVENT, host);
-	}
-	else
-		fprintf(stderr, PACKAGE_NAME": could not get hostname, is it longer than %d bytes?\n", (MAX_BUFFER-1));
-}
-#endif
-
-static void GetTopology (void)
-{
-#if defined(IS_MN_MACHINE)
-	MN_gettopology();
-#elif defined(IS_BG_MACHINE)
-	BG_gettopology();
-#endif
-}
-
 /******************************************************************************
  *** CheckGlobalOpsTracingIntervals()
  ******************************************************************************/
@@ -812,7 +716,7 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per pacx_init de fortran */
 {
 	int res;
-	PACX_Fint me, ret, comm, tipus_enter;
+	PACX_Fint ret, comm, tipus_enter;
 	iotimer_t temps_inici_PACX_Init, temps_final_PACX_Init;
 	char *config_file;
 
@@ -830,12 +734,6 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 
 	comm = PACX_Comm_c2f (PACX_COMM_WORLD);
 	tipus_enter = PACX_Type_c2f (PACX_INT);
-
-	CtoF77 (ppacx_comm_rank) (&comm, &me, &ret);
-	PACX_CHECK(ret, ppacx_comm_rank);
-
-	CtoF77 (ppacx_comm_size) (&comm, &Extrae_get_num_tasks(), &ret);
-	PACX_CHECK(ret, ppacx_comm_size);
 
 	InitPACXCommunicators();
 
@@ -857,7 +755,7 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 	res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
@@ -880,11 +778,8 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 	initTracingTime = temps_final_PACX_Init = TIME;
 
 	/* End initialization of the backend  (put MPIINIT_EV { BEGIN/END } ) */
-	if (!Backend_postInitialize (me, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
 		return;
-
-	/* Annotate topologies (if available) */
-	GetTopology();
 
 	/* Annotate already built communicators */
 	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);
@@ -905,7 +800,7 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per pacx_init de fortran */
 {
-	unsigned int me, ret;
+	unsigned int ret;
 	int res;
 	PACX_Fint comm;
 	PACX_Fint tipus_enter;
@@ -931,12 +826,6 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	comm = PACX_Comm_c2f (PACX_COMM_WORLD);
 	tipus_enter = PACX_Type_c2f (PACX_INT);
 
-	CtoF77 (ppacx_comm_rank) (&comm, &me, &ret);
-	PACX_CHECK(ret, ppacx_comm_rank);
-
-	CtoF77 (ppacx_comm_size) (&comm, &Extrae_get_num_tasks(), &ret);
-	PACX_CHECK(ret, ppacx_comm_size);
-
 	InitPACXCommunicators();
 
 #if defined(SAMPLING_SUPPORT)
@@ -957,7 +846,7 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
@@ -980,11 +869,8 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	initTracingTime = temps_final_PACX_Init = TIME;
 
 	/* End initialization of the backend  (put MPIINIT_EV { BEGIN/END } ) */
-	if (!Backend_postInitialize (me, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
 		return;
-
-	/* Annotate topologies (if available) */
-	GetTopology();
 
 	/* Annotate already built communicators */
 	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);
@@ -3821,7 +3707,7 @@ static int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
 
 int PACX_Init_C_Wrapper (int *argc, char ***argv)
 {
-	int val = 0, me, ret;
+	int val = 0, ret;
 	iotimer_t temps_inici_PACX_Init, temps_final_PACX_Init;
 	PACX_Comm comm = PACX_COMM_WORLD;
 	char *config_file;
@@ -3837,12 +3723,6 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 	Extrae_set_taskid_function (Extrae_PACX_TaskID);
 	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
-
-	ret = PPACX_Comm_rank (comm, &me);
-	PACX_CHECK(ret, PPACX_Comm_rank);
-
-	ret = PPACX_Comm_size (comm, &Extrae_get_num_tasks());
-	PACX_CHECK(ret, PPACX_Comm_size);
 
 	InitPACXCommunicators();
 
@@ -3865,7 +3745,7 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 		return val;
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
@@ -3885,11 +3765,8 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 	initTracingTime = temps_final_PACX_Init = TIME;
 
 	/* End initialization of the backend */
-	if (!Backend_postInitialize (me, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
 		return val;
-
-	/* Annotate topologies (if available) */
-	GetTopology();
 
 	/* Annotate already built communicators */
 	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);
@@ -3901,7 +3778,7 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 #if defined(PACX_HAS_INIT_THREAD)
 int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
 {
-	int val = 0, me, ret;
+	int val = 0, ret;
 	iotimer_t temps_inici_PACX_Init, temps_final_PACX_Init;
 	PACX_Comm comm = PACX_COMM_WORLD;
 	char *config_file;
@@ -3921,12 +3798,6 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
 
-	ret = PPACX_Comm_rank (comm, &me);
-	PACX_CHECK(ret, PPACX_Comm_rank);
-
-	ret = PPACX_Comm_size (comm, &Extrae_get_num_tasks());
-	PACX_CHECK(ret, PPACX_Comm_size);
-
 	InitPACXCommunicators();
 
 #if defined(SAMPLING_SUPPORT)
@@ -3948,7 +3819,7 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 		return val;
 
 	/* Remove the local copy only if we're not the master */
-	if (me != 0)
+	if (TASKID != 0)
 		unlink (config_file);
 	free (config_file);
 
@@ -3968,11 +3839,8 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	initTracingTime = temps_final_PACX_Init = TIME;
 
 	/* End initialization of the backend */
-	if (!Backend_postInitialize (me, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
 		return val;
-
-	/* Annotate topologies (if available) */
-	GetTopology();
 
 	/* Annotate already built communicators */
 	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);

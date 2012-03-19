@@ -270,6 +270,83 @@ static unsigned get_current_NumOfThreads (void)
 	return current_NumOfThreads;
 }
 
+#if defined(IS_BG_MACHINE)
+static void Extrae_BG_gettopology (int enter, UINT64 timestamp)
+{
+#if defined(IS_BGL_MACHINE)
+	BGLPersonality personality;
+	unsigned personality_size = sizeof (personality);
+
+	rts_get_personality (&personality, personality_size);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_X, enter?personality.xCoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_Y, enter?personality.yCoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_Z, enter?personality.zCoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, enter?rts_get_processor_id():0);
+#endif
+
+#if defined(IS_BGP_MACHINE)
+	_BGP_Personality_t personality;
+	unsigned personality_size = sizeof (personality);
+	
+	Kernel_GetPersonality (&personality, personality_size);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_X, enter?BGP_Personality_xCoord(&personality):0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_Y, enter?BGP_Personality_yCoord(&personality):0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_Z, enter?BGP_Personality_zCoord(&personality):0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, enter?BGP_Personality_rankInPset (&personality):0);
+#endif
+
+#if defined(IS_BGQ_MACHINE)
+	Personality_t personality;
+	unsigned personality_size = sizeof (personality);
+	Kernel_GetPersonality (&personality, personality_size);
+
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_A, enter?personality.Network_Config.Acoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_B, enter?personality.Network_Config.Bcoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_C, enter?personality.Network_Config.Ccoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_D, enter?personality.Network_Config.Dcoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_TORUS_E, enter?personality.Network_Config.Ecoord:0);
+	TRACE_MISCEVENT (timestamp, USER_EV, BG_PERSONALITY_PROCESSOR_ID, enter?Kernel_PhysicalProcessorID():0);
+#endif
+}
+#endif
+
+#if defined(IS_MN_MACHINE)
+#define MAX_BUFFER 1024
+static void Extrae_MN_gettopology (int enter, UINT64 timestamp) 
+{
+	char hostname[MAX_BUFFER];
+	int rc;
+	int server,center,blade;
+	int linear_host;
+	int linecard, host;
+
+	if (gethostname(hostname, MAX_BUFFER - 1) == 0)
+	{
+		rc = sscanf(hostname, "s%dc%db%d", &server, &center, &blade);
+		if (rc != 3) return;
+		linear_host = server*(4*14) + (center - 1) * 14 + (blade - 1);
+		linecard = linear_host / 16;
+		host = linear_host % 16;
+
+		TRACE_MISCEVENT(timestamp, USER_EV, MN_LINEAR_HOST_EVENT, enter?linear_host:0);
+		TRACE_MISCEVENT(timestamp, USER_EV, MN_LINECARD_EVENT, enter?linecard:0);
+		TRACE_MISCEVENT(timestamp, USER_EV, MN_HOST_EVENT, enter?host:0);
+	}
+	else
+		fprintf(stderr, PACKAGE_NAME": could not get hostname, is it longer than %d bytes?\n", (MAX_BUFFER-1));
+}
+#endif
+
+static void Extrae_AnnotateTopology (int enter, UINT64 timestamp)
+{
+#if defined(IS_MN_MACHINE)
+	Extrae_MN_gettopology (enter, timestamp);
+#elif defined(IS_BG_MACHINE)
+	Extrae_BG_gettopology (enter, timestamp);
+#endif
+}
+
+
 /******************************************************************************
  ***  read_environment_variables
  ***  Reads some environment variables. Returns 0 if the tracing was disabled,
@@ -1549,8 +1626,10 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 
 	/* Add MPI_init begin and end events */
 	TRACE_MPIINITEV (SynchroInitTime, MPI_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	Extrae_AnnotateTopology (TRUE, SynchroInitTime);
 
 	TRACE_MPIINITEV (SynchroEndTime, MPI_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
+	Extrae_AnnotateTopology (FALSE, SynchroEndTime);
 
 	/* HSG force a write to disk! */
 	Buffer_Flush(TracingBuffer[THREADID]);
