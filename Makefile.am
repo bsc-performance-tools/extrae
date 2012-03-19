@@ -304,7 +304,9 @@ endif
 	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/MPI
+if HAVE_PACX
 	./substitute-all $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(DESTDIR)$(datadir)/example/PACX
+endif
 	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example
@@ -319,10 +321,12 @@ else
 	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(DESTDIR)$(datadir)/example
 endif
+if WANT_CUDAorCUPTI
 if WANT_CUPTI
 	./substitute-all $(SED) "@sub_CUPTI_LIBS@" "-L${CUPTI_HOME}/lib -lcupti" $(DESTDIR)$(datadir)/example/CUDA
 else
 	./substitute-all $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example/CUDA
+endif
 endif
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD
