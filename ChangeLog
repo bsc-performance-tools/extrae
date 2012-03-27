@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 27Mar2012 Instrumentation of Intel/GNU #pragma omp task
  * 15Mar2012 Fixed versioning number for lib MPI+OMP when using dyninst
              Fixed nesting creation of pthreads.
  + 13Mar2012 Instrumentation for pthread_exit

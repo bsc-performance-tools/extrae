@@ -42,6 +42,9 @@
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 
 #include "wrapper.h"
 #include "trace_macros.h"
@@ -53,6 +56,24 @@ static char UNUSED rcsid[] = "$Id$";
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 
+struct __kmpv_location_t
+{
+	int reserved_1;
+	int flags;
+	int reserved_2;
+	int reserved_3;
+	char *location;
+};
+
+struct __kmp_task_t
+{
+	void *shareds;
+	void *routine;
+	int part_id;
+};
+
+static pthread_mutex_t extrae_map_kmpc_mutex;
+
 static void (*__kmpc_fork_call_real)(void*,int,void*,...) = NULL;
 static void (*__kmpc_barrier_real)(void*,int) = NULL;
 static void (*__kmpc_critical_real)(void*,int,void*) = NULL;
@@ -61,19 +82,22 @@ static int (*__kmpc_dispatch_next_4_real)(void*,int,int*,int*,int*,int*) = NULL;
 static int (*__kmpc_dispatch_next_8_real)(void*,int,int*,long long *,long long *, long long *) = NULL;
 static int (*__kmpc_single_real)(void*,int) = NULL;
 static void (*__kmpc_end_single_real)(void*,int) = NULL;
-#if 0 /* Do not provide information */
-static void (*__kmpc_for_static_init_4_real)(void*,int,int,int*,int*,int*,int*,int,int) = NULL;
-static void (*__kmpc_for_static_init_8_real)(void*,int,int,int*,long long*,long long*,long long*,long long,long long) = NULL;
-static void (*__kmpc_for_static_fini_real)(void*,int) = NULL;
-#endif
 static void (*__kmpc_dispatch_init_4_real)(void*,int,int,int,int,int,int) = NULL;
 static void (*__kmpc_dispatch_init_8_real)(void*,int,int,long long,long long,long long,long long) = NULL;
 static void (*__kmpc_dispatch_fini_4_real)(void*,int) = NULL;
 static void (*__kmpc_dispatch_fini_8_real)(void*,long long) = NULL; /* Don't sure about this! */
 
+static void* (*__kmpc_omp_task_alloc_real)(void*,int,int,size_t,size_t,void*) = NULL;
+static void (*__kmpc_omp_task_begin_if0_real)(void*,int,void*) = NULL;
+static void (*__kmpc_omp_task_complete_if0_real)(void*,int,void*) = NULL;
+static int (*__kmpc_omp_taskwait_real)(void*,int) = NULL;
+
 int intel_kmpc_11_hook_points (int rank)
 {
 	int count = 0;
+
+	/* Create mutex to protect intel omp tasks allocation calls */
+        pthread_mutex_init (&extrae_map_kmpc_mutex, NULL);
 
 	/* Obtain @ for __kmpc_fork_call */
 	__kmpc_fork_call_real =
@@ -137,29 +161,6 @@ int intel_kmpc_11_hook_points (int rank)
 		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_end_single in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_end_single_real,count);
 
-#if 0
-	/* Obtain @ for __kmpc_for_static_init_4 */
-	__kmpc_for_static_init_4_real =
-		(void(*)(void*,int,int,int*,int*,int*,int*,int,int)) dlsym (RTLD_NEXT, "__kmpc_for_static_init_4");
-	if (__kmpc_for_static_init_4_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_for_static_init_4 in DSOs!!\n");
-	INC_IF_NOT_NULL(__kmpc_for_static_init_4_real,count);
-
-	/* Obtain @ for __kmpc_for_static_init_8 */
-	__kmpc_for_static_init_8_real =
-		(void(*)(void*,int,int,int*,long long*,long long*,long long*,long long,long long)) dlsym (RTLD_NEXT, "__kmpc_for_static_init_8");
-	if (__kmpc_for_static_init_8_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_for_static_init_8 in DSOs!!\n");
-	INC_IF_NOT_NULL(__kmpc_for_static_init_8_real,count);
-
-	/* Obtain @ for __kmpc_for_static_fini */
-	__kmpc_for_static_fini_real =
-		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_for_static_fini");
-	if (__kmpc_for_static_fini_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_for_static_fini in DSOs!!\n");
-	INC_IF_NOT_NULL(__kmpc_for_static_fini_real,count);
-#endif
-
 	/* Obtain @ for __kmpc_dispatch_init_4 */
 	__kmpc_dispatch_init_4_real =
 		(void(*)(void*,int,int,int,int,int,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_4");
@@ -188,6 +189,29 @@ int intel_kmpc_11_hook_points (int rank)
 		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_fini_8 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_fini_8_real,count);
 
+	/* Obtain @ for __kmpc_omp_task_alloc */
+	__kmpc_omp_task_alloc_real =
+		(void*(*)(void*,int,int,size_t,size_t,void*)) dlsym (RTLD_NEXT, "__kmpc_omp_task_alloc");
+	if (__kmpc_omp_task_alloc_real == NULL)
+		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_task_alloc in DSOs!!\n");
+
+	/* Obtain @ for __kmpc_omp_task_begin_if0 */
+	__kmpc_omp_task_begin_if0_real =
+		(void(*)(void*,int,void*)) dlsym (RTLD_NEXT, "__kmpc_omp_task_begin_if0");
+	if (__kmpc_omp_task_begin_if0_real == NULL)
+		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_task_begin_if0 in DSOs!!\n");
+
+	/* Obtain @ for __kmpc_omp_task_complete_if0 */
+	__kmpc_omp_task_complete_if0_real =
+		(void(*)(void*,int,void*)) dlsym (RTLD_NEXT, "__kmpc_omp_task_complete_if0");
+	if (__kmpc_omp_task_complete_if0_real == NULL)
+		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_task_complete_if0 in DSOs!!\n");
+
+	/* Obtain @ for __kmpc_omp_taskwait */
+	__kmpc_omp_taskwait_real = (int(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_omp_taskwait");
+	if (__kmpc_omp_taskwait_real == NULL)
+		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_taskwait in DSOs!!\n");
+
 	/* Any hook point? */
 	return count > 0;
 }
@@ -204,7 +228,7 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call is at %p\n", THREADID, __kmpc_fork_call_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p\n", THREADID, p1, p2, p3);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
 #endif
 
 	if (__kmpc_fork_call_real != NULL)
@@ -382,9 +406,24 @@ int __kmpc_single (void *p1, int p2)
 
 	if (__kmpc_single_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Single_Entry ();
+
 		res = __kmpc_single_real (p1, p2);
+
+		if (res) /* If the thread entered in the single region, track it */
+		{
+			struct __kmpv_location_t *loc = (struct __kmpv_location_t*) p1;
+
+			// printf ("loc->location = %s\n", loc->location);
+
+			Probe_OpenMP_UF_Entry ((UINT64) loc->location);
+		}
+		else
+		{
+			Probe_OpenMP_Single_Exit ();
+		}
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -404,9 +443,12 @@ void __kmpc_end_single (void *p1, int p2)
 
 	if (__kmpc_single_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
+		/* This is only executed by the thread that entered the single region */
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_UF_Exit ();
 		__kmpc_end_single_real (p1, p2);
 		Probe_OpenMP_Single_Exit ();
+		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -414,78 +456,6 @@ void __kmpc_end_single (void *p1, int p2)
 		exit (0);
 	}
 }
-
-#if 0
-void  __kmpc_for_static_init_4 (void *p1, int p2, int p3, int *p4, int *p5,
-	int *p6, int *p7, int p8, int p9)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_4 is at %p\n", THREADID, __kmpc_for_static_init_4_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_4 params are %p %d %d %p %p %p %p %d %d\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8, p9);
-#endif
-
-	if (__kmpc_for_static_init_4_real != NULL)
-	{
-		Backend_Enter_Instrumentation (1);
-//		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
-		__kmpc_for_static_init_4_real (p1, p2, p3, p4, p5, p6, p7, p8, p9);
-		Backend_Enter_Instrumentation (1);
-//		Probe_OpenMP_DO_Entry ();
-		Backend_Leave_Instrumentation ();
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME":__kmpc_for_static_init_4 is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void  __kmpc_for_static_init_8 (void *p1, int p2, int p3, int *p4,
-	long long *p5, long long *p6, long long *p7, long long p8, long long p9)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_8 is at %p\n", THREADID, __kmpc_for_static_init_8_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_init_8 params are %p %d %d %p %p %p %p %lld %lld\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8, p9);
-#endif
-
-	if (__kmpc_for_static_init_8_real != NULL)
-	{
-		Backend_Enter_Instrumentation (1);
-//		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
-		__kmpc_for_static_init_8_real (p1, p2, p3, p4, p5, p6, p7, p8, p9);
-		Backend_Enter_Instrumentation (1);
-//		Probe_OpenMP_DO_Entry ();
-		Backend_Leave_Instrumentation ();
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME":__kmpc_for_static_init_8 is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void __kmpc_for_static_fini (void *p1, int p2)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_fini is at %p\n", THREADID, __kmpc_for_static_fini_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_for_static_fini params are %p %d\n", THREADID, p1, p2);
-#endif
-
-	if (__kmpc_for_static_fini_real != NULL)
-	{
-		Backend_Enter_Instrumentation (2);
-//		Probe_OpenMP_DO_Exit ();
-		__kmpc_for_static_fini_real (p1, p2);
-//		Probe_OpenMP_UF_Exit ();
-		Backend_Leave_Instrumentation ();
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME":__kmpc_for_static_fini is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-#endif
 
 void __kmpc_dispatch_init_4 (void *p1, int p2, int p3, int p4, int p5, int p6,
 	int p7)
@@ -577,4 +547,191 @@ void __kmpc_dispatch_fini_8 (void *p1, long long p2)
 		fprintf (stderr, PACKAGE_NAME":__kmpc_dispatch_fini_8 is not hooked! exiting!!\n");
 		exit (0);
 	}
+}
+
+#define EXTRAE_MAP_KMPC_TASK_SIZE 1024*1024
+
+struct extrae_map_kmpc_task_function_st
+{
+	void *kmpc_task;
+	void *function;
+};
+
+static struct extrae_map_kmpc_task_function_st extrae_map_kmpc_task_function[EXTRAE_MAP_KMPC_TASK_SIZE];
+static unsigned extrae_map_kmpc_count = 0;
+
+static void __extrae_add_kmpc_task_function (void *kmpc_task, void *function)
+{
+	unsigned u = 0;
+
+	pthread_mutex_lock (&extrae_map_kmpc_mutex);
+	if (extrae_map_kmpc_count < EXTRAE_MAP_KMPC_TASK_SIZE)
+	{
+		/* Look for a free place in the table */
+		while (extrae_map_kmpc_task_function[u].kmpc_task != NULL)
+			u++;
+
+		/* Add the pair and aggregate to the count */
+		extrae_map_kmpc_task_function[u].function = function;
+		extrae_map_kmpc_task_function[u].kmpc_task = kmpc_task;
+		extrae_map_kmpc_count++;
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": THREAD %d Error number of on-the-fly allocated tasks is above EXTRAE_MAP_KMPC_TASK_SIZE (%s:%d)\n", THREADID,  __FILE__, __LINE__);
+		exit (0);
+	}
+	pthread_mutex_unlock (&extrae_map_kmpc_mutex);
+}
+
+static void * __extrae_remove_kmpc_task_function (void *kmpc_task)
+{
+	void *res = NULL;
+	unsigned u = 0;
+
+	pthread_mutex_lock (&extrae_map_kmpc_mutex);
+	if (extrae_map_kmpc_count > 0)
+	{
+		while (u < EXTRAE_MAP_KMPC_TASK_SIZE)
+		{
+			if (extrae_map_kmpc_task_function[u].kmpc_task == kmpc_task)
+			{
+				res = extrae_map_kmpc_task_function[u].function;
+				extrae_map_kmpc_task_function[u].kmpc_task = NULL;
+				extrae_map_kmpc_task_function[u].function = NULL;
+				break;
+			}
+			u++;
+		}
+	}
+	pthread_mutex_unlock (&extrae_map_kmpc_mutex);
+
+	return res;
+}
+
+static void __extrae_kmpc_task_substitute (int p1, void *p2)
+{
+	void (*__kmpc_task_substituted_func)(int,void*) = (void(*)(int,void*)) __extrae_remove_kmpc_task_function (p2);
+
+	if (__kmpc_task_substituted_func != NULL)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
+
+		__kmpc_task_substituted_func (p1, p2); /* Original code execution */
+
+		Probe_OpenMP_TaskUF_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": THREAD %d did not find task substitution (%s:%d)\n", THREADID,  __FILE__, __LINE__);
+		exit (0);
+	}
+}
+
+void * __kmpc_omp_task_alloc (void *p1, int p2, int p3, size_t p4, size_t p5, void *p6)
+{
+	void *res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_alloc_real is at %p\n", THREADID, __kmpc_omp_task_alloc_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_alloc params %p %d %d %d %d %p\n", THREADID, p1, p2, p3, p4, p5, p6);
+#endif
+
+	if (__kmpc_omp_task_alloc_real != NULL)
+	{
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_Task_Entry ((UINT64)p6);
+
+		res = __kmpc_omp_task_alloc_real (p1, p2, p3, p4, p5, __extrae_kmpc_task_substitute);
+		__extrae_add_kmpc_task_function (res, p6);
+
+		Probe_OpenMP_Task_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": THREAD %d __kmpc_omp_task_alloc was not hooked. Exiting!\n", THREADID);
+		exit (0);
+	}
+	
+	return res;
+}
+
+void __kmpc_omp_task_begin_if0 (void *p1, int p2, void *p3)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_begin_if0_real is at %p\n", THREADID, __kmpc_omp_task_begin_if0_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_begin_if0 params %p %d %p\n", THREADID, p1, p2, p3);
+#endif
+
+	void (*__kmpc_task_substituted_func)(int,void*) = (void(*)(int,void*)) __extrae_remove_kmpc_task_function (p3);
+
+	if (__kmpc_task_substituted_func != NULL)
+	{
+		if (__kmpc_omp_task_begin_if0_real != NULL)
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
+
+			__kmpc_omp_task_begin_if0_real (p1, p2, p3);
+		}
+		else
+		{
+			fprintf (stderr, PACKAGE_NAME": __kmpc_omp_task_begin_if0 is not hooked! Exiting!!\n");
+			exit (0);
+		}
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": THREAD %d did not find task substitution (%s:%d)\n", THREADID,  __FILE__, __LINE__);
+		exit (0);
+	}
+}
+
+void __kmpc_omp_task_complete_if0 (void *p1, int p2, void *p3)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_complete_if0_real is at %p\n", THREADID, __kmpc_omp_task_complete_if0_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_complete_if0 params %p %d %p\n", THREADID, p1, p2, p3);
+#endif
+
+	if (__kmpc_omp_task_complete_if0_real != NULL)
+	{
+		__kmpc_omp_task_complete_if0_real (p1, p2, p3);
+
+		Backend_Enter_Instrumentation (1);
+		Probe_OpenMP_TaskUF_Exit ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": __kmpc_omp_task_complete_if0 is not hooked! Exiting!!\n");
+		exit (0);
+	}
+}
+
+int __kmpc_omp_taskwait (void *p1, int p2)
+{
+	int res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_taskwait_real is at %p\n", THREADID, __kmpc_omp_taskwait_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_taskwait params %p %d\n", THREADID, p1, p2);
+#endif
+
+	if (__kmpc_omp_taskwait_real != NULL)
+	{
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_Taskwait_Entry();
+		res = __kmpc_omp_taskwait_real (p1, p2);
+		Probe_OpenMP_Taskwait_Exit();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": __kmpc_omp_taskwait is not hooked! Exiting!!\n");
+		exit (0);
+	}
+	return res;
 }

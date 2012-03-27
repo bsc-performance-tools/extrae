@@ -258,6 +258,66 @@ static int SetGetNumThreads_Event (
 	return 0;
 }
 
+static int Task_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask, 
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	/* Add the instantiated task to the list of known addresses, and emit its
+	   reference for matching in final tracefile */
+
+#if defined(HAVE_BFD)
+	if (get_option_merge_SortAddresses())
+	{
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_LINE);
+	}
+#endif
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_EV, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_LINE_EV, EvValue);
+
+	return 0;
+}
+
+static int Taskwait_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask, 
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
 SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ WSH_EV, WorkSharing_Event },
 	{ PAR_EV, Parallel_Event },
@@ -269,6 +329,9 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ JOIN_EV, Join_Event},
 	{ OMPSETNUMTHREADS_EV, SetGetNumThreads_Event },
 	{ OMPGETNUMTHREADS_EV, SetGetNumThreads_Event },
+	{ TASK_EV, Task_Event },
+	{ TASKWAIT_EV, Taskwait_Event },
+	{ TASKFUNC_EV, OpenMP_Function_Event },
 	{ NULL_EV, NULL }
 };
 

@@ -60,7 +60,9 @@ int Address2Info_Initialized (void);
 UINT64  Address2Info_Translate (UINT64 address, int event_type, int uniqueID);
 void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid);
-void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_line, int uniqueid);
+void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
+	char *eventtype_description, int eventtype_line,
+	char *eventtype_line_description, int uniqueid);
 void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid);
 int Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,

@@ -96,6 +96,8 @@ void TRTEvent_WriteEnabledOperations (FILE * fd)
 #if defined(HAVE_BFD)
 	/* Hey, pthread & OpenMP share the same labels? */
 	if (inuse[TRT_USR_FUNC_INDEX])
-		Address2Info_Write_OMP_Labels (fd, PTHREAD_FUNC_EV, PTHREAD_FUNC_LINE_EV, get_option_merge_UniqueCallerID());
+		Address2Info_Write_OMP_Labels (fd, PTHREAD_FUNC_EV, "Parallel function", 
+			PTHREAD_FUNC_LINE_EV, "Parallel function line and file",
+			get_option_merge_UniqueCallerID());
 #endif
 }

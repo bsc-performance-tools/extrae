@@ -270,7 +270,7 @@ void Probe_OpenMP_GetNumThreads_Entry (void)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPGETNUMTHREADS_EV, EVT_BEGIN, EMPTY); 
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPGETNUMTHREADS_EV, EVT_BEGIN, EMPTY); 
 }
 
 void Probe_OpenMP_GetNumThreads_Exit (void)
@@ -284,7 +284,7 @@ void Probe_OpenMP_SetNumThreads_Entry (int p1)
 {
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPSETNUMTHREADS_EV, EVT_BEGIN, p1); 
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPSETNUMTHREADS_EV, EVT_BEGIN, p1); 
 }
 
 void Probe_OpenMP_SetNumThreads_Exit (void)
@@ -292,5 +292,47 @@ void Probe_OpenMP_SetNumThreads_Exit (void)
 	DEBUG
 	if (mpitrace_on)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPSETNUMTHREADS_EV, EVT_END, EMPTY); 
+}
+
+void Probe_OpenMP_Task_Entry (UINT64 uf)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASK_EV, uf, EMPTY)
+}
+
+void Probe_OpenMP_Task_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, TASK_EV, EVT_END, EMPTY);
+}
+
+void Probe_OpenMP_TaskUF_Entry (UINT64 uf)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKFUNC_EV, uf, EMPTY)
+}
+
+void Probe_OpenMP_TaskUF_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKFUNC_EV, EVT_END, EMPTY);
+}
+
+void Probe_OpenMP_Taskwait_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKWAIT_EV, EVT_BEGIN, EMPTY)
+}
+
+void Probe_OpenMP_Taskwait_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKWAIT_EV, EVT_END, EMPTY);
 }
 

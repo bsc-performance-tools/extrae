@@ -48,6 +48,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "omp_probe.h"
 
+#define DEBUG
+
 /*
 The nowait issue:
 
@@ -227,13 +229,15 @@ static void callme_section(void)
 static void (*_xlsmpParallelDoSetup_TPO_real)(int,void**,long,long,long,long,void**,void**,void**,long,long,void**,long) = NULL;
 static void (*_xlsmpParRegionSetup_TPO_real)(int,void*,int,void*,void*,void**,long,long) = NULL;
 static void (*_xlsmpWSDoSetup_TPO_real)(int,void*,long,long,long,long,void*,void*,void**,long) = NULL;
-static void (*_xlsmpSingleSetup_TPO_real)(int,void*,int,void*,void*,int) = NULL;
+static void (*_xlsmpSingleSetup_TPO_real)(int,void*,int,void*) = NULL;
 static void (*_xlsmpWSSectSetup_TPO_real)(int,void*,long,void*,void*,void**,long,long) = NULL;
 static void (*_xlsmpBarrier_TPO_real)(int,int*) = NULL;
 static void (*_xlsmpGetDefaultSLock_real)(void*) = NULL;
 static void (*_xlsmpRelDefaultSLock_real)(void*) = NULL;
 static void (*_xlsmpGetSLock_real)(void*) = NULL;
 static void (*_xlsmpRelSLock_real)(void*) = NULL;
+
+extern int omp_get_max_threads();
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 
@@ -275,7 +279,7 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 
 	/* Obtain @ for _xlsmpSingleSetup_TPO */
 	_xlsmpSingleSetup_TPO_real =
-		(void(*)(int,void*,int,void*,void*,int)) dlsym (RTLD_NEXT, "_xlsmpSingleSetup_TPO");
+		(void(*)(int,void*,int,void*)) dlsym (RTLD_NEXT, "_xlsmpSingleSetup_TPO");
 	if (_xlsmpSingleSetup_TPO_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpSingleSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpSingleSetup_TPO_real,count);
@@ -315,7 +319,6 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpRelSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpRelSLock_real,count);
 
-
 	/* Any hook point? */
 	return count > 0;
 }
@@ -329,19 +332,7 @@ void _xlsmpParallelDoSetup_TPO(int p1, void *p2, long p3, long p4, long p5, long
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": _xlsmpParallelDoSetup_TPO is at %p\n", _xlsmpParallelDoSetup_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": p01 = %d\n", p1);
-	fprintf (stderr, PACKAGE_NAME": p02 = %p (%p)\n", p2, (p2!=NULL)?*p2:NULL);
-	fprintf (stderr, PACKAGE_NAME": p03 = %ld\n", p3);
-	fprintf (stderr, PACKAGE_NAME": p04 = %ld\n", p4);
-	fprintf (stderr, PACKAGE_NAME": p05 = %ld\n", p5);
-	fprintf (stderr, PACKAGE_NAME": p06 = %ld\n", p6);
-	fprintf (stderr, PACKAGE_NAME": p07 = %p (%p)\n", p7, (p7!=NULL)?*p7:NULL);
-	fprintf (stderr, PACKAGE_NAME": p08 = %p (%p)\n", p8, (p8!=NULL)?*p8:NULL);
-	fprintf (stderr, PACKAGE_NAME": p09 = %p (%p)\n", p9, (p9!=NULL)?*p9:NULL);
-	fprintf (stderr, PACKAGE_NAME": p10 = %ld\n", p10);
-	fprintf (stderr, PACKAGE_NAME": p11 = %ld\n", p11);
-	fprintf (stderr, PACKAGE_NAME": p12 = %p (%p)\n", p12, (p12!=NULL)?*p12:NULL);
-	fprintf (stderr, PACKAGE_NAME": p13 = %ld\n", p13);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpParallelDoSetup_TPO are %d %p %ld %ld %ld %ld %p %p %p %ld %ld %p %ld\n", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
 #endif
 
 	if (_xlsmpParallelDoSetup_TPO_real != NULL)
@@ -435,11 +426,11 @@ void _xlsmpBarrier_TPO (int p1, int *p2)
 	}
 }
  
-void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4, void *p5, int p6)
+void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO is at %p\n", _xlsmpBarrier_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO params %d %p %d %p %p %d\n", p1, p2, p3, p4, p5, p6);
+	fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO params %d %p %d %p\n", p1, p2, p3, p4);
 #endif
 
 	if (_xlsmpSingleSetup_TPO_real != NULL)
@@ -449,7 +440,7 @@ void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4, void *p5, int p6
 
 		Backend_Enter_Instrumentation (1);
 		Probe_OpenMP_Single_Entry();
-		_xlsmpSingleSetup_TPO_real (p1, callme_single, p3, p4, p5, p6);
+		_xlsmpSingleSetup_TPO_real (p1, callme_single, p3, p4);
 		Probe_OpenMP_Single_Exit();
 		Backend_Leave_Instrumentation ();
 	}
@@ -462,7 +453,7 @@ void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4, void *p5, int p6
 
 void _xlsmpWSSectSetup_TPO (int p1, void *p2, long p3, void *p4, void *p5, void** p6, long p7, long p8)
 {
-	ull index = 0;
+	long index = 0;
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": _xlsmpWSSectSetup_TPO is at %p\n", _xlsmpWSSectSetup_TPO_real);

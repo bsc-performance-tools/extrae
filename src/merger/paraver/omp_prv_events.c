@@ -51,10 +51,13 @@ static char UNUSED rcsid[] = "$Id$";
 #define JOIN_OMP_INDEX          6  /* Joins */
 #define BARRIER_OMP_INDEX       7  /* Barriers */
 #define GETSETNUMTHREADS_INDEX  8  /* Set or Get num threads */
+#define TASK_INDEX              9  /* Task event */
+#define TASKWAIT_INDEX         10  /* Taskwait event */
 
-#define MAX_OMP_INDEX		9
+#define MAX_OMP_INDEX		11
 
-static int inuse[MAX_OMP_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_OMP_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 
+	FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_OMP_Operation (int tipus)
 {
@@ -76,6 +79,10 @@ void Enable_OMP_Operation (int tipus)
 		inuse[BARRIER_OMP_INDEX] = TRUE;
 	else if (tipus == OMPGETNUMTHREADS_EV || tipus == OMPSETNUMTHREADS_EV)
 		inuse[GETSETNUMTHREADS_INDEX] = TRUE;
+	else if (tipus == TASK_EV)
+		inuse[TASK_INDEX] = TRUE;
+	else if (tipus == TASKWAIT_EV)
+		inuse[TASKWAIT_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -139,7 +146,14 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 	}
 #if defined(HAVE_BFD)
 	if (inuse[FNC_OMP_INDEX])
-		Address2Info_Write_OMP_Labels (fd, OMPFUNC_EV, OMPFUNC_LINE_EV, get_option_merge_UniqueCallerID());
+	{
+		Address2Info_Write_OMP_Labels (fd, OMPFUNC_EV, "Parallel function",
+			OMPFUNC_LINE_EV, "Parallel function line and file",
+			get_option_merge_UniqueCallerID());
+		Address2Info_Write_OMP_Labels (fd, TASKFUNC_INST_EV, "OMP Task function",
+			TASKFUNC_INST_LINE_EV, "OMP Task function line and file",
+			get_option_merge_UniqueCallerID());
+	}
 #endif
 	if (inuse[LCK_OMP_INDEX])
 	{
@@ -176,6 +190,22 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d   %d OpenMP set num threads\n", 0, OMPSETNUMTHREADS_EV);
 		fprintf (fd, "%d   %d OpenMP get num threads\n", 0, OMPGETNUMTHREADS_EV);
+		fprintf (fd, "VALUES\n"
+		             "0 End\n"
+		             "1 Begin\n");
+	}
+	if (inuse[TASK_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d   %d OMP task creation\n", 0, TASK_EV);
+		fprintf (fd, "VALUES\n"
+		             "0 End\n"
+		             "1 Begin\n");
+	}
+	if (inuse[TASKWAIT_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d   %d OMP task wait\n", 0, TASKWAIT_EV);
 		fprintf (fd, "VALUES\n"
 		             "0 End\n"
 		             "1 Begin\n");

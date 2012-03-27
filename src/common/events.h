@@ -388,6 +388,12 @@ enum {
 #define OMPFUNC_LINE_EV          60000118
 #define USRFUNC_EV               60000019
 #define USRFUNC_LINE_EV          60000119
+#define TASK_EV                  60000021
+#define TASKWAIT_EV              60000022
+#define TASKFUNC_EV              60000023
+#define TASKFUNC_LINE_EV         60000123
+#define TASKFUNC_INST_EV         60000024 /* Task func instantiation */
+#define TASKFUNC_INST_LINE_EV    60000124 /* at #pragma omp task */
 #define OMPSETNUMTHREADS_EV      60000030
 #define OMPGETNUMTHREADS_EV      60000031
 

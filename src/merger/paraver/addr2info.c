@@ -951,7 +951,9 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 	}
 }
 
-void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_line, int uniqueid)
+void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
+	char *eventtype_description, int eventtype_line,
+	char *eventtype_line_description, int uniqueid)
 {
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
@@ -963,7 +965,7 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_
 	if (Address2Info_Labels[A2I_OMP] /*Address2Info_Need_OMP_Labels*/) 
 	{
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-		fprintf (pcf_fd, "0    %d    %s\n", eventtype, "Parallel function");
+		fprintf (pcf_fd, "0    %d    %s\n", eventtype, eventtype_description);
 
 		if (Address2Info_Initialized())
 		{
@@ -975,7 +977,7 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype, int eventtype_
 
 		/* Then dump line-functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-		fprintf (pcf_fd, "0    %d    %s\n", eventtype_line, "Parallel function line");
+		fprintf (pcf_fd, "0    %d    %s\n", eventtype_line, eventtype_line_description);
 		if (Address2Info_Initialized())
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);

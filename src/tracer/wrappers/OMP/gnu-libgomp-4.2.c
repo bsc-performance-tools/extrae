@@ -50,6 +50,17 @@ static char UNUSED rcsid[] = "$Id$";
 
 //#define DEBUG
 
+struct openmp_task_st
+{
+	void *p1;
+	void *p2;
+	void *p3;
+	long p4;
+	long p5;
+	int p6;
+	unsigned p7;
+};
+
 /*
 The nowait issue:
 
@@ -101,7 +112,7 @@ static void callme_parsection (void *p1)
 		exit (0);
 	}
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation (1);
 	Probe_OpenMP_UF_Entry ((UINT64) parsection_uf);
 	parsection_uf (p1);
 	Probe_OpenMP_UF_Exit ();
@@ -185,6 +196,8 @@ static unsigned (*GOMP_sections_next_real)(void) = NULL;
 static void (*GOMP_sections_end_real)(void) = NULL;
 static void (*GOMP_sections_end_nowait_real)(void) = NULL;
 static void (*GOMP_parallel_sections_start_real)(void*,void*,unsigned,unsigned) = NULL;
+static void (*GOMP_task_real)(void*,void*,void*,long,long,int,unsigned) = NULL;
+static void (*GOMP_taskwait_real)(void) = NULL;
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 
@@ -388,6 +401,19 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_parallel_sections_start in DSOs!!\n");
 	INC_IF_NOT_NULL(GOMP_parallel_sections_start_real,count);
 
+	/* Obtain @ for GOMP_task */
+	GOMP_task_real =
+		(void(*)(void*,void*,void*,long,long,int,unsigned)) dlsym (RTLD_NEXT, "GOMP_task");
+	if (GOMP_task_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_task in DSOs!!\n");
+	INC_IF_NOT_NULL(GOMP_task_real,count);
+
+	/* Obtain @ for GOMP_taskwait */
+	GOMP_taskwait_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskwait");
+	if (GOMP_taskwait_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find GOMP_taskwait in DSOs!!\n");
+	INC_IF_NOT_NULL(GOMP_taskwait_real,count);
+		
 	/* Any hook point? */
 	return count > 0;
 }
@@ -396,6 +422,92 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
 	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
 */
+
+static void callme_task (void *p1)
+{
+	struct openmp_task_st *helper = (struct openmp_task_st*) p1;
+	void (*task_uf)(void*) = (void(*)(void*)) helper->p1;
+
+	Backend_Enter_Instrumentation (1);
+	Probe_OpenMP_TaskUF_Entry ((UINT64) helper->p1);
+
+	/* Extremely hack:
+
+	  Look at http://gcc.gnu.org/svn/gcc/branches/cilkplus/libgomp/task.c first 
+		It's very hard to pass the routine in the arguments (change of args_size and
+		copyfn).
+
+	  There are two ways of calling this:
+
+	  1) We call again GOMP_task BUT we do not let the GOMP runtime to execute
+	  in a deferred way.
+		2) Something like: helper->p1(helper->p2) may work.
+
+		As 2) seems less costly, we choose it for now except if the copyfn is given,
+	  then we rely on 1)
+	*/
+
+	if (helper->p3 != NULL)
+		GOMP_task_real (helper->p1, helper->p2, helper->p3, helper->p4, helper->p5,
+			FALSE, helper->p7);
+	else
+		task_uf (helper->p2);
+
+	Probe_OpenMP_TaskUF_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
+void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned p7)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task is at %p\n", THREADID, GOMP_task_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %d %u\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
+#endif
+
+	if (GOMP_task_real != NULL)
+	{
+		struct openmp_task_st helper;
+		helper.p1 = p1;
+		helper.p2 = p2;
+		helper.p3 = p3;
+		helper.p4 = p4;
+		helper.p5 = p5;
+		helper.p6 = p6;
+		helper.p7 = p7;
+
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_Task_Entry ((UINT64)p1);
+		GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7);
+		Probe_OpenMP_Task_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": GOMP_task is not hooked! Exiting!!\n");
+		exit (0);
+	}
+}
+
+void GOMP_taskwait (void)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_taskwait is at %p\n", THREADID, GOMP_taskwait_real);
+#endif
+
+	if (GOMP_taskwait_real != NULL)
+	{
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_Taskwait_Entry();
+		GOMP_taskwait_real ();
+		Probe_OpenMP_Taskwait_Exit();
+		Backend_Leave_Instrumentation ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": GOMP_taskwait is not hooked! Exiting!!\n");
+		exit (0);
+	}
+}
 
 void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 {
@@ -408,11 +520,11 @@ void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 	{
 		parsection_uf = (void(*)(void*))p1;
 
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (3);
 		Probe_OpenMP_ParSections_Entry();
 		GOMP_parallel_sections_start_real (callme_parsection, p2, p3, p4);
 
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)

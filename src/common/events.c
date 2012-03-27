@@ -124,10 +124,10 @@ unsigned IsMISC (unsigned EvType)
   return FALSE;
 }
 
-#define OMP_EVENTS 10
+#define OMP_EVENTS 14
 static unsigned omp_events[] = { OMPFUNC_EV, PAR_EV, WSH_EV, BARRIEROMP_EV,
 	UNNAMEDCRIT_EV, NAMEDCRIT_EV, WORK_EV, JOIN_EV, OMPSETNUMTHREADS_EV,
-	OMPGETNUMTHREADS_EV};
+	OMPGETNUMTHREADS_EV, TASK_EV, TASKWAIT_EV, TASKFUNC_EV, TASKFUNC_LINE_EV };
 
 /******************************************************************************
  ***  IsOpenMP
