@@ -61,6 +61,13 @@ static char UNUSED rcsid[] = "$Id$";
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_INIT)
 
+#define apifTRACE_IS_INITIALIZED(x) \
+	void CtoF77(x##_is_initialized) (unsigned *res) \
+	{ \
+		*res = Extrae_is_initialized_Wrapper ();\
+	}
+EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_IS_INITIALIZED)
+
 #define apifTRACE_FINI(x) \
 	void CtoF77(x##_fini) (void) \
 	{ \
@@ -236,14 +243,21 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 /*** C BINDINGS + non alias routine duplication ****/
 
 #define apiTRACE_INIT(x) \
-	void CtoF77(x##_init) (void) \
+	void x##_init (void) \
 	{ \
 		Extrae_init_Wrapper ();\
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT)
 
+#define apiTRACE_IS_INITIALIZED(x) \
+	extrae_init_type_t x##_is_initialized (void) \
+	{ \
+		return Extrae_is_initialized_Wrapper ();\
+	}
+EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_IS_INITIALIZED)
+
 #define apiTRACE_FINI(x) \
-	void CtoF77(x##_fini) (void) \
+	void x##_fini (void) \
 	{ \
 		if (mpitrace_on) \
 			Extrae_fini_Wrapper ();\
@@ -441,14 +455,20 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 #define apiTRACE_RESUME_VIRTUAL_THREAD(x) \
 	void x##_resume_virtual_thread (unsigned u) \
 	{ \
-		Extrae_Resume_virtual_thread_Wrapper (u); \
+		if (mpitrace_on) \
+		{ \
+			Extrae_Resume_virtual_thread_Wrapper (u); \
+		} \
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESUME_VIRTUAL_THREAD);
 
 #define apiTRACE_SUSPEND_VIRTUAL_THREAD(x) \
 	void x##_suspend_virtual_thread (void) \
 	{ \
-		Extrae_suspend_virtual_thread_Wrapper (); \
+		if (mpitrace_on) \
+		{ \
+			Extrae_suspend_virtual_thread_Wrapper (); \
+		} \
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SUSPEND_VIRTUAL_THREAD);
 
@@ -456,20 +476,26 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 
 /** C BINDINGS **/
 
-INTERFACE_ALIASES_C(_init,Extrae_init,(void))
+INTERFACE_ALIASES_C(_init,Extrae_init,(void),void)
 void Extrae_init (void)
 {
 	Extrae_init_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(_fini,Extrae_fini,(void))
+INTERFACE_ALIASES_C(_is_initialized,Extrae_is_initialized,(void),extrae_init_type_t)
+extrae_init_type_t Extrae_is_initialized (void)
+{
+	return Extrae_is_initialized_Wrapper();
+}
+
+INTERFACE_ALIASES_C(_fini,Extrae_fini,(void),void)
 void Extrae_fini (void)
 {
 	if (mpitrace_on)
 		Extrae_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(_event, Extrae_event, (unsigned tipus, unsigned valors))
+INTERFACE_ALIASES_C(_event, Extrae_event, (unsigned tipus, unsigned valors),void)
 void Extrae_event (unsigned tipus, unsigned valors)
 {
 	if (mpitrace_on)
@@ -480,7 +506,7 @@ void Extrae_event (unsigned tipus, unsigned valors)
 	}
 }
 
-INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned count, unsigned *tipus, unsigned *valors))
+INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned count, unsigned *tipus, unsigned *valors),void)
 void Extrae_nevent (unsigned count, unsigned *tipus, unsigned *valors)
 {
 	if (mpitrace_on)
@@ -491,7 +517,7 @@ void Extrae_nevent (unsigned count, unsigned *tipus, unsigned *valors)
 	}
 }
 
-INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (unsigned tipus, unsigned valor))
+INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (unsigned tipus, unsigned valor),void)
 void Extrae_eventandcounters (unsigned tipus, unsigned valor)
 {
 	if (mpitrace_on)
@@ -502,7 +528,7 @@ void Extrae_eventandcounters (unsigned tipus, unsigned valor)
 	}
 }
 
-INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned count, unsigned *tipus, unsigned *valors))
+INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned count, unsigned *tipus, unsigned *valors),void)
 void Extrae_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors)
 {
  	if (mpitrace_on)
@@ -513,7 +539,7 @@ void Extrae_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors
 	}
 }
 
-INTERFACE_ALIASES_C(_shutdown, Extrae_shutdown, (void))
+INTERFACE_ALIASES_C(_shutdown, Extrae_shutdown,(void),void)
 void Extrae_shutdown (void)
 {
 	if (mpitrace_on)
@@ -524,7 +550,7 @@ void Extrae_shutdown (void)
 	}
 }
 
-INTERFACE_ALIASES_C(_restart, Extrae_restart, (void))
+INTERFACE_ALIASES_C(_restart, Extrae_restart,(void),void)
 void Extrae_restart (void)
 {
 	if (mpitrace_on)
@@ -535,7 +561,7 @@ void Extrae_restart (void)
 	}
 }
 
-INTERFACE_ALIASES_C(_counters, Extrae_counters, (void))
+INTERFACE_ALIASES_C(_counters, Extrae_counters,(void),void)
 void Extrae_counters(void)
 {
 	if (mpitrace_on)
@@ -546,7 +572,7 @@ void Extrae_counters(void)
 	}
 }
 
-INTERFACE_ALIASES_C(_next_hwc_set, Extrae_next_hwc_set, (void))
+INTERFACE_ALIASES_C(_next_hwc_set, Extrae_next_hwc_set,(void),void)
 void Extrae_next_hwc_set (void)
 {
 	if (mpitrace_on)
@@ -557,7 +583,7 @@ void Extrae_next_hwc_set (void)
 	}
 }
 
-INTERFACE_ALIASES_C(_previous_hwc_set, Extrae_previous_hwc_set, (void))
+INTERFACE_ALIASES_C(_previous_hwc_set, Extrae_previous_hwc_set,(void),void)
 void Extrae_previous_hwc_set (void)
 {
 	if (mpitrace_on)
@@ -568,7 +594,7 @@ void Extrae_previous_hwc_set (void)
 	}
 }
 
-INTERFACE_ALIASES_C(_set_options, Extrae_set_options, (int options))
+INTERFACE_ALIASES_C(_set_options, Extrae_set_options,(int options),void)
 void Extrae_set_options (int options)
 {
 	if (mpitrace_on)
@@ -579,7 +605,7 @@ void Extrae_set_options (int options)
 	}
 }
 
-INTERFACE_ALIASES_C(_user_function, Extrae_user_function, (int enter))
+INTERFACE_ALIASES_C(_user_function, Extrae_user_function,(int enter),void)
 void Extrae_user_function (int enter)
 {
 	if (mpitrace_on)
@@ -590,7 +616,7 @@ void Extrae_user_function (int enter)
 	}
 }
 
-INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address, (int type, void *address))
+INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address,(int type, void *address),void)
 void Extrae_function_from_address (int type, void *address)
 {
 	if (mpitrace_on)
@@ -602,14 +628,14 @@ void Extrae_function_from_address (int type, void *address)
 }
 
 #if defined(PTHREAD_SUPPORT)
-INTERFACE_ALIASES_C(_notify_new_pthread,Extrae_notify_new_pthread, (void))
+INTERFACE_ALIASES_C(_notify_new_pthread,Extrae_notify_new_pthread,(void),void)
 void Extrae_notify_new_pthread (void)
 {
 	if (mpitrace_on)
 		Backend_NotifyNewPthread ();
 }
 
-INTERFACE_ALIASES_C(_set_num_tentative_threads,Extrae_set_num_tentative_threads, (int numthreads))
+INTERFACE_ALIASES_C(_set_num_tentative_threads,Extrae_set_num_tentative_threads,(int numthreads),void)
 void Extrae_set_num_tentative_threads (int numthreads)
 {
 	if (mpitrace_on)
@@ -617,19 +643,19 @@ void Extrae_set_num_tentative_threads (int numthreads)
 }
 #endif /* PTHREAD_SUPPORT */
 
-INTERFACE_ALIASES_C(_init_UserCommunication,Extrae_init_UserCommunication, (struct extrae_UserCommunication *ptr))
+INTERFACE_ALIASES_C(_init_UserCommunication,Extrae_init_UserCommunication,(struct extrae_UserCommunication *ptr),void)
 void Extrae_init_UserCommunication (struct extrae_UserCommunication *ptr)
 {
 	Extrae_init_UserCommunication_Wrapper (ptr);
 }
 
-INTERFACE_ALIASES_C(_init_CombinedEvents,Extrae_init_CombinedEvents, (struct extrae_UserCommunication *ptr))
+INTERFACE_ALIASES_C(_init_CombinedEvents,Extrae_init_CombinedEvents,(struct extrae_UserCommunication *ptr),void)
 void Extrae_init_CombinedEvents (struct extrae_CombinedEvents *ptr)
 {
 	Extrae_init_CombinedEvents_Wrapper (ptr);
 }
 
-INTERFACE_ALIASES_C(_emit_CombinedEvents,Extrae_emit_CombinedEvents, (struct extrae_UserCommunication *ptr))
+INTERFACE_ALIASES_C(_emit_CombinedEvents,Extrae_emit_CombinedEvents,(struct extrae_UserCommunication *ptr),void)
 void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *ptr)
 {
 	unsigned nevents;
@@ -646,38 +672,50 @@ void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *ptr)
 	}
 }
 
-INTERFACE_ALIASES_C(_resume_virtual_thread,Extrae_resume_virtual_thread, (unsigned u))
+INTERFACE_ALIASES_C(_resume_virtual_thread,Extrae_resume_virtual_thread,(unsigned u),void)
 void Extrae_resume_virtual_thread (unsigned u)
 {
-	Backend_Enter_Instrumentation (1);
-	Extrae_Resume_virtual_thread_Wrapper (u);
-	Backend_Leave_Instrumentation ();
+	if (mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Extrae_Resume_virtual_thread_Wrapper (u);
+		Backend_Leave_Instrumentation ();
+	}
 }
 
-INTERFACE_ALIASES_C(_suspend_virtual_thread,Extrae_suspend_virtual_thread, (void))
+INTERFACE_ALIASES_C(_suspend_virtual_thread,Extrae_suspend_virtual_thread,(void),void)
 void Extrae_suspend_virtual_thread (void)
 {
-	Backend_Enter_Instrumentation (1);
-	Extrae_Suspend_virtual_thread_Wrapper ();
-	Backend_Leave_Instrumentation ();
+	if (mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Extrae_Suspend_virtual_thread_Wrapper ();
+		Backend_Leave_Instrumentation ();
+	}
 }
 
 /** FORTRAN BINDINGS **/
 
-INTERFACE_ALIASES_F(_init,_INIT,extrae_init,(void))
+INTERFACE_ALIASES_F(_init,_INIT,extrae_init,(void),void)
 void extrae_init (void)
 {
 	Extrae_init_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(_fini,_FINI,extrae_fini,(void))
+INTERFACE_ALIASES_F(_is_initialized,_IS_INITIALIZE,extrae_is_initialized,(unsigned *res),void)
+void extrae_is_initialized (unsigned *res)
+{
+	*res = Extrae_is_initialized_Wrapper();
+}
+
+INTERFACE_ALIASES_F(_fini,_FINI,extrae_fini,(void),void)
 void extrae_fini (void)
 {
 	if (mpitrace_on)
 		Extrae_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(unsigned *tipus, unsigned *valor))
+INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(unsigned *tipus, unsigned *valor),void)
 void extrae_event (unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
@@ -688,7 +726,7 @@ void extrae_event (unsigned *tipus, unsigned *valor)
 	}
 }
 
-INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned *count, unsigned *tipus, unsigned *valor))
+INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned *count, unsigned *tipus, unsigned *valor),void)
 void extrae_nevent (unsigned *count, unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
@@ -699,7 +737,7 @@ void extrae_nevent (unsigned *count, unsigned *tipus, unsigned *valor)
 	}
 }
 
-INTERFACE_ALIASES_F(_shutdown,_SHUTDOWN,extrae_shutdown,(void))
+INTERFACE_ALIASES_F(_shutdown,_SHUTDOWN,extrae_shutdown,(void),void)
 void extrae_shutdown (void)
 {
 	if (mpitrace_on)
@@ -710,7 +748,7 @@ void extrae_shutdown (void)
 	}
 }
 
-INTERFACE_ALIASES_F(_restart,_RESTART,extrae_restart,(void))
+INTERFACE_ALIASES_F(_restart,_RESTART,extrae_restart,(void),void)
 void extrae_restart (void)
 {
 	if (mpitrace_on)
@@ -721,7 +759,7 @@ void extrae_restart (void)
 	}
 }
 
-INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (unsigned *tipus, unsigned *valor))
+INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (unsigned *tipus, unsigned *valor),void)
 void extrae_eventandcounters (unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
@@ -732,7 +770,7 @@ void extrae_eventandcounters (unsigned *tipus, unsigned *valor)
 	}
 }
 
-INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned *count, unsigned *tipus, unsigned *valor))
+INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned *count, unsigned *tipus, unsigned *valor),void)
 void extrae_neventandcounters (unsigned *count, unsigned *tipus, unsigned *valor)
 {
 	if (mpitrace_on)
@@ -743,7 +781,7 @@ void extrae_neventandcounters (unsigned *count, unsigned *tipus, unsigned *valor
 	}
 }
 
-INTERFACE_ALIASES_F(_counters,_COUNTERS,extrae_counters, (void))
+INTERFACE_ALIASES_F(_counters,_COUNTERS,extrae_counters, (void),void)
 void extrae_counters (void)
 {
 	if (mpitrace_on)
@@ -754,7 +792,7 @@ void extrae_counters (void)
 	}
 }
 
-INTERFACE_ALIASES_F(_next_hwc_set,_NEXT_HWC_SET,extrae_next_hwc_set,(void))
+INTERFACE_ALIASES_F(_next_hwc_set,_NEXT_HWC_SET,extrae_next_hwc_set,(void),void)
 void extrae_next_hwc_set (void)
 {
 	if (mpitrace_on)
@@ -765,7 +803,7 @@ void extrae_next_hwc_set (void)
 	}
 }
 
-INTERFACE_ALIASES_F(_previous_hwc_set,_PREVIOUS_HWC_SET,extrae_previous_hwc_set,(void))
+INTERFACE_ALIASES_F(_previous_hwc_set,_PREVIOUS_HWC_SET,extrae_previous_hwc_set,(void),void)
 void extrae_previous_hwc_set (void)
 {
 	if (mpitrace_on)
@@ -776,7 +814,7 @@ void extrae_previous_hwc_set (void)
 	}
 }
 
-INTERFACE_ALIASES_F(_set_options,_SET_OPTIONS,extrae_set_options,(int *options))
+INTERFACE_ALIASES_F(_set_options,_SET_OPTIONS,extrae_set_options,(int *options),void)
 void extrae_set_options (int *options)
 {
 	if (mpitrace_on)
@@ -787,7 +825,7 @@ void extrae_set_options (int *options)
 	}
 }
 
-INTERFACE_ALIASES_F(_user_function,_USER_FUNCTION,extrae_user_function,(int *enter))
+INTERFACE_ALIASES_F(_user_function,_USER_FUNCTION,extrae_user_function,(int *enter),void)
 void extrae_user_function (int *enter)
 {
 	if (mpitrace_on)
@@ -798,7 +836,7 @@ void extrae_user_function (int *enter)
 	}
 }
 
-INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_function_from_address, (int *type, void *address))
+INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_function_from_address,(int *type, void *address),void)
 void extrae_function_from_address (int *type, void *address)
 {
 	if (mpitrace_on)
@@ -810,14 +848,14 @@ void extrae_function_from_address (int *type, void *address)
 }
 
 #if defined(PTHREAD_SUPPORT)
-INTERFACE_ALIASES_F(_notify_new_pthread,_NOTIFY_NEW_PTHREAD,extrae_notify_new_pthread, (void))
+INTERFACE_ALIASES_F(_notify_new_pthread,_NOTIFY_NEW_PTHREAD,extrae_notify_new_pthread,(void), void)
 void extrae_notify_new_pthread (void)
 {
 	if (mpitrace_on)
 		Backend_NotifyNewPthread ();
 }
 
-INTERFACE_ALIASES_F(_set_num_tentative_threads,_SET_NUM_TENTATIVE_THREADS,extrae_set_num_tentative_threads, (int *numthreads))
+INTERFACE_ALIASES_F(_set_num_tentative_threads,_SET_NUM_TENTATIVE_THREADS,extrae_set_num_tentative_threads,(int *numthreads),void)
 void extrae_set_num_tentative_threads (int *numthreads)
 {
 	if (mpitrace_on)

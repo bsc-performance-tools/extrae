@@ -261,7 +261,7 @@ static void Generate_Task_File_List (void)
 	char tmpname[1024];
 	char hostname[1024];
 	char tmp_line[1024];
-	
+
 	sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
 
 	filedes = open (tmpname, O_RDWR | O_CREAT | O_TRUNC, 0644);
@@ -288,55 +288,74 @@ static void Generate_Task_File_List (void)
 	return;
 }
 
-
 void Extrae_init_Wrapper (void)
 {
-	char *config_file;
-	iotimer_t temps_init, temps_fini;
+	/* Do not initialize if it's already initialized */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		iotimer_t temps_init, temps_fini;
+		char * config_file = getenv ("EXTRAE_CONFIG_FILE");
+		if (config_file == NULL)
+			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
-	mptrace_IsMPI = FALSE;
+		/* Initialize the backend */
+		if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
+			return;
 
-	config_file = getenv ("EXTRAE_CONFIG_FILE");
-	if (config_file == NULL)
-		config_file = getenv ("MPTRACE_CONFIG_FILE");
+		/* Generate a tentative file list */
+		Generate_Task_File_List();
 
-	/* Initialize the backend */
-	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
-		return;
+		/* Take the time */
+		temps_init = TIME;
 
-	/* Generate a tentative file list */
-	Generate_Task_File_List();
+		/* Take the time (a newer one) */
+		temps_fini = TIME;
 
-	temps_init = TIME;
+		/* End initialization of the backend */
+		if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), TRACE_INIT_EV, temps_init, temps_fini, NULL))
+			return;
 
-#if defined(NANOS_SUPPORT)
-/* HSG
-	is this needed?
-	nanos_extrae_instrumentation_barrier();
-*/
-#endif
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_EXTRAE_INIT);
+	}
+	else
+	{
+		char *previous = "Unknown";
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+			previous = "API";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+			previous = "MPI";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
+			previous = "PACX";
 
-	/* Take the time */
-	temps_fini = TIME;
-
-	/* End initialization of the backend */
-	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_init, temps_fini, NULL))
-		return;
+		fprintf (stderr, PACKAGE_NAME": Warning! API tries to initialize more than once\n");
+		fprintf (stderr, PACKAGE_NAME":          Previous initialization was done by %s\n", previous);
+	}
 }
 
 void Extrae_fini_Wrapper (void)
 {
-	if (!mpitrace_on)
-		return;
-
+	/* Finalize only if its initialized by Extrae_init call */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+	{
 #if !defined(IS_CELL_MACHINE)
-	/* Generate the definitive file list. Cell machines touch the list
- 	   as the execution runs... don't touch on that case */
-	Generate_Task_File_List();
+		/* Generate the definitive file list. Cell machines touch the list
+	 	   as the execution runs... don't touch on that case */
+
+		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
+		   for gathering and generating the .MPITS file*/
+		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX())
+			Generate_Task_File_List();
 #endif
 
-	/* Es tanca la llibreria de traceig */
-	Backend_Finalize ();
+		/* Finalize tracing library */
+		Backend_Finalize ();
+
+		/* Call additional code to finalize the task including
+	     MPI_Finalize, PACX_Finalize,... */
+		Extrae_finalize_task();
+
+		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
+	}
 }
 
 void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr)

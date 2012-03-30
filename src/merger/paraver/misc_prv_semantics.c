@@ -986,6 +986,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ READ_EV, ReadWrite_Event },
 	{ WRITE_EV, ReadWrite_Event },
 	{ APPL_EV, Appl_Event },
+	{ TRACE_INIT_EV, SkipHandler },
 	{ USER_EV, User_Event },
 	{ HWC_EV, SkipHandler /* traceCounters */ },
 #if USE_HARDWARE_COUNTERS

@@ -1259,20 +1259,45 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 			current = Current_FS (&(fset->files[i]));
 			if (current != NULL)
 			{
+				UINT64 mpi_init_end_time, pacx_init_end_time, trace_init_end_time;
+				int found_mpi_init_end_time, found_pacx_init_end_time, found_trace_init_end_time;
+
+				found_mpi_init_end_time = found_pacx_init_end_time = found_trace_init_end_time = FALSE;
+				mpi_init_end_time = pacx_init_end_time = trace_init_end_time = 0;
+
 				/* Save the starting tracing time of this task */
 				StartingTimes[mpit_taskid] = current->time;
 
-				/* Locate the MPI_Init end event */
-				while ((current != NULL) && ((Get_EvEvent(current) != MPI_INIT_EV) || (Get_EvValue(current) != EVT_END)))
+				/* Locate MPI_INIT_EV, PACX_INIT_EV and/or TRACE_INIT_EV
+				   Be careful not to stop on TRACE_INIT_EV because a MPI_INIT_EV/PACX_INIT_EV may
+				   appear in future and they're always synchronized, not as TRACE_INIT_EV */
+				while (current != NULL && !found_mpi_init_end_time && !found_pacx_init_end_time)
 				{
+					if (Get_EvEvent(current) == MPI_INIT_EV && Get_EvValue(current) == EVT_END)
+					{
+						mpi_init_end_time = Get_EvTime(current);
+						found_mpi_init_end_time = TRUE;
+					}
+					else if (Get_EvEvent(current) == PACX_INIT_EV && Get_EvValue(current) == EVT_END)
+					{
+						pacx_init_end_time = Get_EvTime(current);
+						found_pacx_init_end_time = TRUE;
+					}
+					else if (Get_EvEvent(current) == TRACE_INIT_EV && Get_EvValue(current) == EVT_END)
+					{
+						trace_init_end_time = Get_EvTime(current);
+						found_trace_init_end_time = TRUE;
+					}
 					StepOne_FS (&(fset->files[i]));
 					current = Current_FS (&(fset->files[i]));
 				}
-				if (current != NULL)
-				{
-					/* Save the synchronization time (MPI_Init end) of this task */
-					SynchronizationTimes[mpit_taskid] = current->time;
-				}
+
+				if (found_mpi_init_end_time)
+					SynchronizationTimes[mpit_taskid] = mpi_init_end_time;
+				else if (found_pacx_init_end_time)
+					SynchronizationTimes[mpit_taskid] = pacx_init_end_time;
+				else if (found_trace_init_end_time)
+					SynchronizationTimes[mpit_taskid] = trace_init_end_time;
 			}
 		}
 	}
@@ -1542,8 +1567,9 @@ long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid)
 
 	while (current != NULL)
 	{
-		if (Get_EvEvent (current) == MPI_INIT_EV &&
-		    Get_EvValue (current) == EVT_END)
+		if ((Get_EvEvent (current) == MPI_INIT_EV && Get_EvValue (current) == EVT_END) ||
+		    (Get_EvEvent (current) == PACX_INIT_EV && Get_EvValue (current) == EVT_END) ||
+		    (Get_EvEvent (current) == TRACE_INIT_EV && Get_EvValue (current) == EVT_END))
 		{
 			options = Get_EvAux(current);
 			break;

@@ -154,6 +154,11 @@ static void Extrae_PACX_Barrier (void)
 	PPACX_Barrier (PACX_COMM_WORLD);
 }
 
+static void Extrae_PACX_Finalize (void)
+{
+	PPACX_Finalize ();
+}
+
 
 static char * PACX_Distribute_XML_File (int rank, int world_size, char *origen);
 static void Trace_PACX_Communicator (int tipus_event, PACX_Comm newcomm,
@@ -430,13 +435,13 @@ static void InitPACXCommunicators (void)
 
 
 /******************************************************************************
- ***  remove_file_list
+ ***  PACX_remove_file_list
  ******************************************************************************/
-void remove_file_list (void)
+void PACX_remove_file_list (int all)
 {
 	char tmpname[1024];
 
-	if (TASKID == 0)
+	if (all || (!all && TASKID == 0))
 	{
 		sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
 		unlink (tmpname);
@@ -486,7 +491,7 @@ void Gather_Nodes_Info (void)
 /******************************************************************************
  ***  Generate_Task_File_List
  ******************************************************************************/
-static int Generate_Task_File_List (int n_tasks, char **node_list)
+static int PACX_Generate_Task_File_List (int n_tasks, char **node_list)
 {
 	int ierror;
 	int i, filedes, thid;
@@ -613,10 +618,10 @@ static int Generate_Task_File_List (int n_tasks, char **node_list)
 
 #if defined(IS_CELL_MACHINE)
 /******************************************************************************
- ***  generate_spu_file_list
+ ***  PACX_generate_spu_file_list
  ******************************************************************************/
 
-int generate_spu_file_list (int number_of_spus)
+int PACX_generate_spu_file_list (int number_of_spus)
 {
 	int ierror, val = getpid ();
 	int i, filedes, ret, thid, hostname_length;
@@ -717,20 +722,22 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 {
 	int res;
 	PACX_Fint ret, comm, tipus_enter;
-	iotimer_t temps_inici_PACX_Init, temps_final_PACX_Init;
+	iotimer_t PACX_Init_start_time, PACX_Init_end_time;
 	char *config_file;
-
-	mptrace_IsMPI = TRUE;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
 	CtoF77 (ppacx_init) (ierror);
 
+	Extrae_set_ApplicationIsPACX (TRUE);
+	Extrae_Allocate_Task_Bitmap (Extrae_PACX_NumTasks());
+
 	/* Setup callbacks for TASK identification and barrier execution */
 	Extrae_set_taskid_function (Extrae_PACX_TaskID);
 	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
+	Extrae_set_finalize_task_function (Extrae_PACX_Finalize);
 
 	comm = PACX_Comm_c2f (PACX_COMM_WORLD);
 	tipus_enter = PACX_Type_c2f (PACX_INT);
@@ -743,47 +750,72 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 #endif
 
-	config_file = getenv ("EXTRAE_CONFIG_FILE");
-	if (config_file == NULL)
-		config_file = getenv ("MPTRACE_CONFIG_FILE");
+	/* Proceed with initialization if it's not already init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		int res;
+		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+		if (config_file == NULL)
+			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
-	if (config_file != NULL)
-		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
+		if (config_file != NULL)
+			/* Obtain a localized copy *except for the master process* */
+			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
-	/* Initialize the backend */
-	res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		/* Initialize the backend */
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		if (!res)
+			return;
 
-	/* Remove the local copy only if we're not the master */
-	if (TASKID != 0)
-		unlink (config_file);
-	free (config_file);
-
-	if (!res)
-		return;
+		/* Remove the local copy only if we're not the master */
+		if (TASKID != 0)
+			unlink (config_file);
+		free (config_file);
+	}
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list */
-	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	/* Generate a tentative file list, remove first if the list was generated
+	   by Extrae_init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+		PACX_remove_file_list (TRUE);
+	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
-	temps_inici_PACX_Init = TIME;
+	PACX_Init_start_time = TIME;
 	
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 
-	initTracingTime = temps_final_PACX_Init = TIME;
+	initTracingTime = PACX_Init_end_time = TIME;
 
-	/* End initialization of the backend  (put MPIINIT_EV { BEGIN/END } ) */
-	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), PACX_INIT_EV, PACX_Init_start_time, PACX_Init_end_time, TasksNodes))
 		return;
 
+	/* End initialization of the backend */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+	}
+	else
+	{
+		char *previous = "Unknown";
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+			previous = "API";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+			previous = "MPI";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
+			previous = "PACX";
+
+		if (TASKID == 0)
+			fprintf (stderr, PACKAGE_NAME": Warning! PACX tries to initialize more than once. Previous init was done by %s.\n", previous);
+	}
+
 	/* Annotate already built communicators */
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, temps_inici_PACX_Init, temps_final_PACX_Init);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, PACX_Init_start_time, PACX_Init_end_time);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, PACX_Init_start_time, PACX_Init_end_time);
 }
 /*
 #endif
@@ -804,10 +836,8 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	int res;
 	PACX_Fint comm;
 	PACX_Fint tipus_enter;
-	iotimer_t temps_inici_PACX_Init, temps_final_PACX_Init;
+	iotimer_t PACX_Init_start_time, PACX_Init_end_time;
 	char *config_file;
-
-	mptrace_IsMPI = TRUE;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
@@ -817,10 +847,14 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 
 	CtoF77 (ppacx_init_thread) (required, provided, ierror);
 
+	Extrae_set_ApplicationIsPACX (TRUE);
+	Extrae_Allocate_Task_Bitmap (Extrae_PACX_NumTasks());
+
 	/* Setup callbacks for TASK identification and barrier execution */
 	Extrae_set_taskid_function (Extrae_PACX_TaskID);
 	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
+	Extrae_set_finalize_task_function (Extrae_PACX_Finalize);
 
 	/* OpenMPI does not allow us to do this before the PACX_Init! */
 	comm = PACX_Comm_c2f (PACX_COMM_WORLD);
@@ -834,47 +868,72 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 #endif
 
-	config_file = getenv ("EXTRAE_CONFIG_FILE");
-	if (config_file == NULL)
-		config_file = getenv ("MPTRACE_CONFIG_FILE");
+	/* Proceed with initialization if it's not already init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		int res;
+		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+		if (config_file == NULL)
+			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
-	if (config_file != NULL)
-		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
+		if (config_file != NULL)
+			/* Obtain a localized copy *except for the master process* */
+			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
-	/* Initialize the backend */
-	res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		/* Initialize the backend */
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		if (!res)
+			return;
 
-	/* Remove the local copy only if we're not the master */
-	if (TASKID != 0)
-		unlink (config_file);
-	free (config_file);
-
-	if (!res)
-		return;
+		/* Remove the local copy only if we're not the master */
+		if (TASKID != 0)
+			unlink (config_file);
+		free (config_file);
+	}
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list */
-	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	/* Generate a tentative file list, remove first if the list was generated
+	   by Extrae_init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+		PACX_remove_file_list (TRUE);
+	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
-	temps_inici_PACX_Init = TIME;
+	PACX_Init_start_time = TIME;
 	
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 
-	initTracingTime = temps_final_PACX_Init = TIME;
+	initTracingTime = PACX_Init_end_time = TIME;
 
-	/* End initialization of the backend  (put MPIINIT_EV { BEGIN/END } ) */
-	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), PACX_INIT_EV, PACX_Init_start_time, PACX_Init_end_time, TasksNodes))
 		return;
 
+	/* End initialization of the backend */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+	}
+	else
+	{
+		char *previous = "Unknown";
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+			previous = "API";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+			previous = "MPI";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
+			previous = "PACX";
+
+		if (TASKID == 0)
+			fprintf (stderr, PACKAGE_NAME": Warning! PACX tries to initialize more than once. Previous init was done by %s.\n", previous);
+	}
+
 	/* Annotate already built communicators */
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, temps_inici_PACX_Init, temps_final_PACX_Init);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, PACX_Init_start_time, PACX_Init_end_time);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, PACX_Init_start_time, PACX_Init_end_time);
 }
 #endif /* PACX_HAS_INIT_THREAD */
 
@@ -901,12 +960,22 @@ void PPACX_Finalize_Wrapper (PACX_Fint *ierror)
 #endif
 
 	/* Generate the final file list */
-	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
-	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
-	Backend_Finalize ();
+  /* Finalize only if its initialized by PACX_INIT call */
+  if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
+	{
+		Backend_Finalize ();
 
-	CtoF77(ppacx_finalize) (ierror);
+#if defined(DEAD_CODE) /* This is outdated! */
+		if (mpit_gathering_enabled)
+			Gather_MPITS();
+#endif
+
+		CtoF77(ppacx_finalize) (ierror);
+	}
+	else
+		*ierror = MPI_SUCCESS;
 }
 
 
@@ -3708,21 +3777,23 @@ static int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
 int PACX_Init_C_Wrapper (int *argc, char ***argv)
 {
 	int val = 0, ret;
-	iotimer_t temps_inici_PACX_Init, temps_final_PACX_Init;
+	iotimer_t PACX_Init_start_time, PACX_Init_end_time;
 	PACX_Comm comm = PACX_COMM_WORLD;
 	char *config_file;
-
-	mptrace_IsMPI = TRUE;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
 	val = PPACX_Init (argc, argv);
 
+	Extrae_set_ApplicationIsPACX (TRUE);
+	Extrae_Allocate_Task_Bitmap (Extrae_PACX_NumTasks());
+
 	/* Setup callbacks for TASK identification and barrier execution */
 	Extrae_set_taskid_function (Extrae_PACX_TaskID);
 	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
+	Extrae_set_finalize_task_function (Extrae_PACX_Finalize);
 
 	InitPACXCommunicators();
 
@@ -3732,45 +3803,72 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 #endif
 
-	config_file = getenv ("EXTRAE_CONFIG_FILE");
-	if (config_file == NULL)
-		config_file = getenv ("MPTRACE_CONFIG_FILE");
+	/* Proceed with initialization if it's not already init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		int res;
+		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+		if (config_file == NULL)
+			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
-	if (config_file != NULL)
-		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
+		if (config_file != NULL)
+			/* Obtain a localized copy *except for the master process* */
+			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
-	/* Initialize the backend (first step) */
-	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
-		return val;
+		/* Initialize the backend */
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		if (!res)
+			return val;
 
-	/* Remove the local copy only if we're not the master */
-	if (TASKID != 0)
-		unlink (config_file);
-	free (config_file);
+		/* Remove the local copy only if we're not the master */
+		if (TASKID != 0)
+			unlink (config_file);
+		free (config_file);
+	}
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list */
-	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	/* Generate a tentative file list, remove first if the list was generated
+	   by Extrae_init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+		PACX_remove_file_list (TRUE);
+	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
-	temps_inici_PACX_Init = TIME;
+	PACX_Init_start_time = TIME;
 
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 
-	initTracingTime = temps_final_PACX_Init = TIME;
+	initTracingTime = PACX_Init_end_time = TIME;
 
-	/* End initialization of the backend */
-	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), PACX_INIT_EV, PACX_Init_start_time, PACX_Init_end_time, TasksNodes))
 		return val;
 
+	/* End initialization of the backend */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+	}
+	else
+	{
+		char *previous = "Unknown";
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+			previous = "API";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+			previous = "MPI";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
+			previous = "PACX";
+
+		if (TASKID == 0)
+			fprintf (stderr, PACKAGE_NAME": Warning! PACX tries to initialize more than once. Previous init was done by %s.\n", previous);
+	}
+
 	/* Annotate already built communicators */
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, temps_inici_PACX_Init, temps_final_PACX_Init);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, PACX_Init_start_time, PACX_Init_end_time);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, PACX_Init_start_time, PACX_Init_end_time);
 
 	return val;
 }
@@ -3779,11 +3877,9 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
 {
 	int val = 0, ret;
-	iotimer_t temps_inici_PACX_Init, temps_final_PACX_Init;
+	iotimer_t PACX_Init_start_time, PACX_Init_end_time;
 	PACX_Comm comm = PACX_COMM_WORLD;
 	char *config_file;
-
-	mptrace_IsMPI = TRUE;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
@@ -3793,10 +3889,14 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 
 	val = PPACX_Init_thread (argc, argv, required, provided);
 
+	Extrae_set_ApplicationIsPACX (TRUE);
+	Extrae_Allocate_Task_Bitmap (Extrae_PACX_NumTasks());
+
 	/* Setup callbacks for TASK identification and barrier execution */
 	Extrae_set_taskid_function (Extrae_PACX_TaskID);
 	Extrae_set_numtasks_function (Extrae_PACX_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_PACX_Barrier);
+	Extrae_set_finalize_task_function (Extrae_PACX_Finalize);
 
 	InitPACXCommunicators();
 
@@ -3806,45 +3906,72 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 #endif
 
-	config_file = getenv ("EXTRAE_CONFIG_FILE");
-	if (config_file == NULL)
-		config_file = getenv ("MPTRACE_CONFIG_FILE");
+	/* Proceed with initialization if it's not already init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		int res;
+		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+		if (config_file == NULL)
+			config_file = getenv ("MPTRACE_CONFIG_FILE");
 
-	if (config_file != NULL)
-		/* Obtain a localized copy *except for the master process* */
-		config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
+		if (config_file != NULL)
+			/* Obtain a localized copy *except for the master process* */
+			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
-	/* Initialize the backend (first step) */
-	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
-		return val;
+		/* Initialize the backend */
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		if (!res)
+			return val;
 
-	/* Remove the local copy only if we're not the master */
-	if (TASKID != 0)
-		unlink (config_file);
-	free (config_file);
+		/* Remove the local copy only if we're not the master */
+		if (TASKID != 0)
+			unlink (config_file);
+		free (config_file);
+	}
 
 	Gather_Nodes_Info ();
 
-	/* Generate a tentative file list */
-	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	/* Generate a tentative file list, remove first if the list was generated
+	   by Extrae_init */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+		PACX_remove_file_list (TRUE);
+	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
-	temps_inici_PACX_Init = TIME;
+	PACX_Init_start_time = TIME;
 
 	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 	Extrae_barrier_tasks();  /* will default to PPACX_BARRIER */
 
-	initTracingTime = temps_final_PACX_Init = TIME;
+	initTracingTime = PACX_Init_end_time = TIME;
 
-	/* End initialization of the backend */
-	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), temps_inici_PACX_Init, temps_final_PACX_Init, TasksNodes))
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), PACX_INIT_EV, PACX_Init_start_time, PACX_Init_end_time, TasksNodes))
 		return val;
 
+	/* End initialization of the backend */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
+	{
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+	}
+	else
+	{
+		char *previous = "Unknown";
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+			previous = "API";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+			previous = "MPI";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
+			previous = "PACX";
+
+		if (TASKID == 0)
+			fprintf (stderr, PACKAGE_NAME": Warning! PACX tries to initialize more than once. Previous init was done by %s.\n", previous);
+	}
+
 	/* Annotate already built communicators */
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, temps_inici_PACX_Init, temps_final_PACX_Init);
-	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, temps_inici_PACX_Init, temps_final_PACX_Init);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_WORLD, PACX_Init_start_time, PACX_Init_end_time);
+	Trace_PACX_Communicator (PACX_COMM_CREATE_EV, PACX_COMM_SELF, PACX_Init_start_time, PACX_Init_end_time);
 
 	return val;
 }
@@ -3876,12 +4003,22 @@ int PACX_Finalize_C_Wrapper (void)
 #endif
 
 	/* Generate the final file list */
-	Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
 
-	/* fprintf(stderr, "[T: %d] Invoking Backend_Finalize\n", TASKID); */
-	Backend_Finalize ();
+  /* Finalize only if its initialized by PACX_INIT call */
+  if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
+	{
+		Backend_Finalize ();
 
-	ierror = PPACX_Finalize ();
+#if defined(DEAD_CODE) /* This is outdated! */
+		if (mpit_gathering_enabled)
+			Gather_MPITS();
+#endif
+
+		ierror = PPACX_Finalize();
+	}
+	else
+		ierror = MPI_SUCCESS;
 
 	return ierror;
 }

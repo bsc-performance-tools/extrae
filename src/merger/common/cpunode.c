@@ -124,86 +124,109 @@ int SortBySize (const void *t1, const void *t2)
   AssignCPUNode
 ***/
 
-struct Pair_NodeCPU *AssignCPUNode(int nfiles, struct input_t *files)
+struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
 {
-	int i;
-	int NodeCount;
-	int NodeID;
 	struct Pair_NodeCPU *result;
-	char *previousNode = "";
+	unsigned **nodefiles = NULL;
+	unsigned *nodecount = NULL;
+	char **nodenames = NULL;
+	unsigned numnodes = 0;
+	unsigned i, j, found, found_pos, total_cpus;
 
-	/* Sort MPIT files per host basis */
-	qsort (files, nfiles, sizeof(input_t), SortByHost);
-
-	NodeCount = 0;
-
-	/* Assign CPU and a NodeID to each MPIT file */
 	for (i = 0; i < nfiles; i++)
 	{
-		files[i].cpu = i+1;
+		/* Has the node already appeared? */
+		for (found_pos = 0, found = FALSE, j = 0; j < numnodes && !found; j++)
+			if (found = (strcmp (nodenames[j], files[i].node) == 0))
+				found_pos = j;
 
-		if (strcmp (previousNode, files[i].node) != 0)
+		/* If didn't appear, allocate it */
+		if (!found)
 		{
-			previousNode = files[i].node;
-			files[i].nodeid = ++NodeCount;
+			nodenames = (char**) realloc (nodenames, (numnodes+1)*sizeof(char*));
+			if (nodenames == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodenames information\n");
+				exit (0);
+			}
+			nodenames[numnodes] = files[i].node;
+			nodecount = (unsigned*) realloc (nodecount, (numnodes+1)*sizeof(char*));
+			if (nodecount == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodecount information\n");
+				exit (0);
+			}
+			nodecount[numnodes] = 1;
+			nodefiles = (unsigned **) realloc (nodefiles, (numnodes+1)*sizeof(unsigned*));
+			if (nodefiles == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodefiles information\n");
+				exit (0);
+			}
+			nodefiles[numnodes] = (unsigned*) malloc (nodecount[numnodes]*sizeof(unsigned));
+			if (nodefiles[numnodes] == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodefiles[%d] information (1)\n", numnodes);
+				exit (0);
+			}
+			nodefiles[numnodes][nodecount[numnodes]-1] = i;
+			numnodes++;
 		}
 		else
-			files[i].nodeid = NodeCount;
+		{
+			/* Found node, stored in position found_pos: increase the node count usage,
+			   and allocate the referred file */
+			nodecount[found_pos]++;
+			nodefiles[found_pos] = (unsigned*) realloc (nodefiles[found_pos], nodecount[found_pos]*sizeof(unsigned));
+			if (nodefiles[found_pos] == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold nodefiles[%d] information (2)\n", numnodes);
+				exit (0);
+			}
+			nodefiles[found_pos][nodecount[found_pos]-1] = i;
+		}
 	}
 
 	/* Allocate output information */
-	result = (struct Pair_NodeCPU*) malloc ((NodeCount+1) * sizeof(struct Pair_NodeCPU));
+	result = (struct Pair_NodeCPU*) malloc ((numnodes+1) * sizeof(struct Pair_NodeCPU));
 	if (result == NULL)
 	{
 		fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold Node-CPU information\n");
 		exit (0);
 	}
 
-	previousNode = "";
-	NodeID = 0;
-
-	/* Copy file information into Node information */
-	for (i = 0; i < nfiles; i++)
-	{	
-		if (strcmp (previousNode, files[i].node) != 0)
+	/* Prepare the resulting output and modify file->cpu and file->nodeid */
+	for (total_cpus = 0, i = 0; i < numnodes; i++)
+	{
+		result[i].CPUs = nodecount[i];
+		result[i].files = (struct input_t **) malloc (result[i].CPUs*sizeof(struct input_t*));
+		if (result[i].files == NULL)
 		{
-			result[NodeID].CPUs = 1;
-			result[NodeID].files = (struct input_t**) malloc (1 * sizeof(struct input_t*));
-			if (result[NodeID].files == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error! Cannot allocate memory to hold Node-CPU information\n");
-				exit (0);
-			}
-			result[NodeID].files[0] = (struct input_t*) malloc(sizeof(struct input_t));
-			memcpy(result[NodeID].files[0], &files[i], sizeof(struct input_t));
-
-			previousNode = files[i].node;
-			NodeID++;
+			fprintf (stderr, "mpi2prv: Error cannot allocate memory to hold cpu node information\n");
+			exit (0);
 		}
-		else
+		
+		for (j = 0; j < nodecount[i]; j++)
 		{
-			int prevNode = NodeID - 1;
+			/* Fill CPU and NODEID within the file_t structure */
+			files[nodefiles[i][j]].cpu = ++total_cpus;
+			files[nodefiles[i][j]].nodeid = i;;
 
-			result[prevNode].CPUs++;
-			result[prevNode].files = (struct input_t**) realloc (
-			  result[prevNode].files, result[prevNode].CPUs * sizeof(struct input_t*));
-			if (result[prevNode].files == NULL)
-			{
-				fprintf (stderr, "mpi2prv: Error cannot re-allocate memory to hold Node-CPU information\n");
-				exit (0);
-			}
-			result[prevNode].files[result[prevNode].CPUs-1] = (struct input_t*) malloc(sizeof(struct input_t));
-			memcpy(result[prevNode].files[result[prevNode].CPUs-1], &files[i], sizeof(struct input_t));
-
+			/* Fill result */
+			result[i].files[j] = &files[nodefiles[i][j]];
 		}
 	}
+	result[numnodes].CPUs = 0;
 
-	/* The last node will have 0 CPUs and will be named 'null' */
-	result[NodeCount].CPUs = 0;
-	result[NodeCount].files = NULL;
-
-	/* ReSort MPIT files per "original" basis" */
-	qsort (files, nfiles, sizeof(input_t), SortByOrder);
+	/* Free memory */
+	if (numnodes > 0)
+	{
+		for (i = 0; i < numnodes; i++)
+			free (nodefiles[i]);
+		free (nodefiles);
+		free (nodenames);
+		free (nodecount);
+	}
 
 	return result;
 }
@@ -222,7 +245,7 @@ int GenerateROWfile (char *name, struct Pair_NodeCPU *info)
 
 	/* Compute how many CPUs and NODEs */
 	numNodes = numCPUs = 0;
-	while (info[numNodes].files != NULL)
+	while (info[numNodes].CPUs > 0)
 	{
 		numCPUs += info[numNodes].CPUs;
 		numNodes ++;

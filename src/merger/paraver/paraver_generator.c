@@ -674,7 +674,7 @@ static int Paraver_WriteHeader (unsigned num_appl, unsigned long long Ftime,
 		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 		NumNodes = 1;
-		while (info[NumNodes].files != NULL)
+		while (info[NumNodes].CPUs > 0)
 		{
 			sprintf (Header,",%d", info[NumNodes].CPUs);
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));

@@ -44,6 +44,12 @@ void MPItrace_init (void);
 void OMPtrace_init (void);
 void SEQtrace_init (void);
 
+extrae_init_type_t Extrae_is_initialized (void);
+extrae_init_type_t OMPItrace_is_initialized (void);
+extrae_init_type_t MPItrace_is_initialized (void);
+extrae_init_type_t OMPtrace_is_initialized (void);
+extrae_init_type_t SEQtrace_is_initialized (void);
+
 void Extrae_fini (void);
 void OMPItrace_fini (void);
 void MPItrace_fini (void);

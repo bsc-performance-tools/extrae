@@ -34,6 +34,16 @@
 extern "C" {
 #endif
 
+enum extrae_INIT_TYPE
+{
+	EXTRAE_NOT_INITIALIZED = 0,
+	EXTRAE_INITIALIZED_EXTRAE_INIT,
+	EXTRAE_INITIALIZED_MPI_INIT,
+	EXTRAE_INITIALIZED_PACX_INIT
+};
+
+typedef enum extrae_INIT_TYPE extrae_init_type_t;
+
 enum extrae_USER_COMMUNICATION_TYPES
 {
 	EXTRAE_USER_SEND = 0,

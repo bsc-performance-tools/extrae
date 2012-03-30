@@ -241,7 +241,7 @@ void NAME_ROUTINE_C2F(mpi_finalize) (MPI_Fint *ierror)
 			of the control file. Just remove the temporal files! */
 		DEBUG_INTERFACE(ENTER)
 		remove_temporal_files();
-		remove_file_list();
+		MPI_remove_file_list (FALSE);
 		DEBUG_INTERFACE(LEAVE)
 		CtoF77 (pmpi_finalize) (ierror);
 	}
@@ -2435,7 +2435,7 @@ int NAME_ROUTINE_C(MPI_Finalize) (void)
 			of the control file. Just remove the temporal files! */
 		DEBUG_INTERFACE(ENTER)
 		remove_temporal_files();
-		remove_file_list();
+		MPI_remove_file_list (FALSE);
 		DEBUG_INTERFACE(LEAVE)
 		res = PMPI_Finalize ();
 	}
@@ -4239,21 +4239,21 @@ int MPI_Put (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 
 # if defined(HAVE_ALIAS_ATTRIBUTE)
 
-INTERFACE_ALIASES_C(_network_counters, Extrae_network_counters, (void))
+INTERFACE_ALIASES_C(_network_counters, Extrae_network_counters,(void),void)
 void Extrae_network_counters (void)
 {
 	if (mpitrace_on)
 		Extrae_network_counters_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(_network_routes, Extrae_network_routes, (int mpi_rank))
+INTERFACE_ALIASES_C(_network_routes, Extrae_network_routes,(int mpi_rank),void)
 void Extrae_network_routes (int mpi_rank)
 {
 	if (mpitrace_on)
 		Extrae_network_routes_Wrapper (mpi_rank);
 }
 
-INTERFACE_ALIASES_C(_set_tracing_tasks, Extrae_set_tracing_tasks, (unsigned from, unsigned to))
+INTERFACE_ALIASES_C(_set_tracing_tasks, Extrae_set_tracing_tasks,(unsigned from, unsigned to),void)
 void Extrae_set_tracing_tasks (unsigned from, unsigned to)
 {
 	if (mpitrace_on)
@@ -4297,21 +4297,21 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETTRACINGTASKS);
 
 # if defined(HAVE_ALIAS_ATTRIBUTE)
 
-INTERFACE_ALIASES_F(_network_counters,_NETWORK_COUNTERS,extrae_network_counters, (void))
+INTERFACE_ALIASES_F(_network_counters,_NETWORK_COUNTERS,extrae_network_counters,(void),void)
 void extrae_network_counters (void)
 {
 	if (mpitrace_on)
 		Extrae_network_counters_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(_network_routes,_NETWORK_ROUTES,extrae_network_routes, (int *mpi_rank))
+INTERFACE_ALIASES_F(_network_routes,_NETWORK_ROUTES,extrae_network_routes,(int *mpi_rank),void)
 void extrae_network_routes (int *mpi_rank)
 {
 	if (mpitrace_on)
 		Extrae_network_routes_Wrapper (*mpi_rank);
 }
 
-INTERFACE_ALIASES_F(_set_tracing_tasks,_SET_TRACING_TASKS,extrae_set_tracing_tasks, (unsigned *from, unsigned *to))
+INTERFACE_ALIASES_F(_set_tracing_tasks,_SET_TRACING_TASKS,extrae_set_tracing_tasks,(unsigned *from, unsigned *to),void)
 void extrae_set_tracing_tasks (unsigned *from, unsigned *to)
 {
 	if (mpitrace_on)

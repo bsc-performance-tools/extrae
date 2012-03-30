@@ -67,66 +67,66 @@
 /**** Create synonims of the very same routine using 'alias' of the same routine (preferred) ****/
 
 #if !defined(IS_CELL_MACHINE)
-# define INTERFACE_ALIASES_C(base,orig,params) \
-	void MPItrace##base params  __attribute__ ((alias (#orig))); \
-	void OMPtrace##base params  __attribute__ ((alias (#orig))); \
-	void OMPItrace##base params __attribute__ ((alias (#orig))); \
-	void SEQtrace##base params  __attribute__ ((alias (#orig)));
+# define INTERFACE_ALIASES_C(base,orig,params,rettype) \
+	rettype MPItrace##base params  __attribute__ ((alias (#orig))); \
+	rettype OMPtrace##base params  __attribute__ ((alias (#orig))); \
+	rettype OMPItrace##base params __attribute__ ((alias (#orig))); \
+	rettype SEQtrace##base params  __attribute__ ((alias (#orig)));
 #else
-# define INTERFACE_ALIASES_C(base,orig,params) \
-	void MPItrace##base params  __attribute__ ((alias (#orig))); \
-	void OMPtrace##base params  __attribute__ ((alias (#orig))); \
-	void OMPItrace##base params __attribute__ ((alias (#orig))); \
-	void SEQtrace##base params  __attribute__ ((alias (#orig))); \
-	void PPUtrace##base params  __attribute__ ((alias (#orig))); 
+# define INTERFACE_ALIASES_C(base,orig,params,rettype) \
+	rettype MPItrace##base params  __attribute__ ((alias (#orig))); \
+	rettype OMPtrace##base params  __attribute__ ((alias (#orig))); \
+	rettype OMPItrace##base params __attribute__ ((alias (#orig))); \
+	rettype SEQtrace##base params  __attribute__ ((alias (#orig))); \
+	rettype PPUtrace##base params  __attribute__ ((alias (#orig))); 
 #endif
 
 #if !defined(IS_CELL_MACHINE)
-# define INTERFACE_ALIASES_F(base_lo,base_up,orig,params) \
-	void extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
-	void seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
-	void seqtrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void mpitrace##base_lo params  __attribute__ ((alias (#orig))); \
-	void omptrace##base_lo params  __attribute__ ((alias (#orig))); \
-	void ompitrace##base_lo params __attribute__ ((alias (#orig))); \
-	void seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
-	void EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
-	void MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
-	void OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	void OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
-	void SEQTRACE##base_up params  __attribute__ ((alias (#orig)));
+# define INTERFACE_ALIASES_F(base_lo,base_up,orig,params,rettype) \
+	rettype extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
+	rettype seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
+	rettype seqtrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype mpitrace##base_lo params  __attribute__ ((alias (#orig))); \
+	rettype omptrace##base_lo params  __attribute__ ((alias (#orig))); \
+	rettype ompitrace##base_lo params __attribute__ ((alias (#orig))); \
+	rettype seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
+	rettype EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
+	rettype MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
+	rettype OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
+	rettype OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
+	rettype SEQTRACE##base_up params  __attribute__ ((alias (#orig)));
 #else
-# define INTERFACE_ALIASES_F(base_lo,base_up,orig,params) \
-	void extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
-	void seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void pputrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	void extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
-	void seqtrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void pputrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	void mpitrace##base_lo params  __attribute__ ((alias (#orig))); \
-	void omptrace##base_lo params  __attribute__ ((alias (#orig))); \
-	void ompitrace##base_lo params __attribute__ ((alias (#orig))); \
-	void seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
-	void pputrace##base_lo params  __attribute__ ((alias (#orig))); \
-	void EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
-	void MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
-	void OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	void OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
-	void SEQTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	void PPUTRACE##base_up params  __attribute__ ((alias (#orig)));
+# define INTERFACE_ALIASES_F(base_lo,base_up,orig,params,rettype) \
+	rettype extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
+	rettype seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype pputrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
+	rettype extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
+	rettype seqtrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype pputrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
+	rettype mpitrace##base_lo params  __attribute__ ((alias (#orig))); \
+	rettype omptrace##base_lo params  __attribute__ ((alias (#orig))); \
+	rettype ompitrace##base_lo params __attribute__ ((alias (#orig))); \
+	rettype seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
+	rettype pputrace##base_lo params  __attribute__ ((alias (#orig))); \
+	rettype EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
+	rettype MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
+	rettype OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
+	rettype OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
+	rettype SEQTRACE##base_up params  __attribute__ ((alias (#orig))); \
+	rettype PPUTRACE##base_up params  __attribute__ ((alias (#orig)));
 #endif
 
 #endif /* MPI_INTERFACE_H_INCLUDED */

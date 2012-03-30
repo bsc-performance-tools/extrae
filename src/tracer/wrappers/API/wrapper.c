@@ -231,7 +231,6 @@ unsigned file_size = 0;
 
 #define MBytes							*1024*1024
 
-unsigned int mptrace_IsMPI = FALSE;
 static unsigned current_NumOfThreads = 0;
 static unsigned maximum_NumOfThreads = 0;
 
@@ -346,6 +345,47 @@ static void Extrae_AnnotateTopology (int enter, UINT64 timestamp)
 #endif
 }
 
+
+/******************************************************************************
+ *** Store whether the app is MPI and/or PACX
+ ******************************************************************************/
+static int Extrae_Application_isMPI = FALSE;
+static int Extrae_Application_isPACX = FALSE;
+
+int Extrae_get_ApplicationIsMPI (void)
+{
+	return Extrae_Application_isMPI;
+}
+
+int Extrae_get_ApplicationIsPACX (void)
+{
+	return Extrae_Application_isPACX;
+}
+
+void Extrae_set_ApplicationIsMPI (int b)
+{
+	Extrae_Application_isMPI = b;
+}
+
+void Extrae_set_ApplicationIsPACX (int b)
+{
+	Extrae_Application_isPACX = b;
+}
+
+/******************************************************************************
+ *** Store the first mechanism to initialize the tracing
+ ******************************************************************************/
+static extrae_init_type_t Extrae_Init_Type = EXTRAE_NOT_INITIALIZED;
+
+extrae_init_type_t Extrae_is_initialized_Wrapper (void)
+{
+	return Extrae_Init_Type;
+}
+
+void Extrae_set_is_initialized (extrae_init_type_t type)
+{
+	Extrae_Init_Type = type;
+}
 
 /******************************************************************************
  ***  read_environment_variables
@@ -1212,16 +1252,16 @@ int Reallocate_buffers_and_files (int new_num_threads)
 }
 
 /******************************************************************************
- **      Function name : Allocate_Task_Bitmap
+ **      Function name : Extrae_Allocate_Task_Bitmap
  **      Author : HSG
  **      Description : Creates a bitmap mask just to know which ranks must 
  **        collect information or not.
  *****************************************************************************/
-static int Allocate_Task_Bitmap (int size)
+int Extrae_Allocate_Task_Bitmap (int size)
 {
 	int i;
 
-	TracingBitmap = (int *) malloc (size * sizeof (int));
+	TracingBitmap = (int *) realloc (TracingBitmap, size*sizeof (int));
 	if (TracingBitmap == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot obtain memory for tasks bitmap\n");
@@ -1334,8 +1374,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 		fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
 
 	/* Allocate a bitmap to know which tasks are tracing */
-	Allocate_Task_Bitmap (world_size);
+	Extrae_Allocate_Task_Bitmap (world_size);
 
+#if defined(DEAD_CODE)
 	/* Just check we aren't running mpirun nor a shell! */
 	if (!(strcmp (PROGRAM_NAME, "mpirun")))
 		return FALSE;
@@ -1343,6 +1384,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	shell_name = getenv ("SHELL");
 	if (shell_name != NULL && !(strcmp (PROGRAM_NAME, shell_name)))
 		return FALSE;
+#endif
 
 #if defined(CUDA_SUPPORT)
 	Extrae_CUDA_init (me);
@@ -1568,7 +1610,7 @@ static int GetTraceOptions (void)
 	return options;
 }
 
-int Backend_postInitialize (int rank, int world_size, unsigned long long SynchroInitTime, unsigned long long SynchroEndTime, char **node_list)
+int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list)
 {
 #warning "Aixo caldria separar-ho en mes events (mpi_init no hi fa res aqui!!) -- synchro + options"
 	int i;
@@ -1578,7 +1620,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 #endif
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, SynchroInitTime, SynchroEndTime);
+	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, InitTime, EndTime);
 #endif
 
 	TimeSync_Initialize (world_size);
@@ -1589,11 +1631,19 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 	memset (SynchronizationTimes, 0, world_size * sizeof(UINT64));
 
 #if defined(MPI_SUPPORT)
-	rc = PMPI_Allgather (&ApplBegin_Time, 1, MPI_LONG_LONG, StartingTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
-	rc = PMPI_Allgather (&SynchroEndTime, 1, MPI_LONG_LONG, SynchronizationTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+	if (world_size > 1)
+	{
+		rc = PMPI_Allgather (&ApplBegin_Time, 1, MPI_LONG_LONG, StartingTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+		rc = PMPI_Allgather (&EndTime, 1, MPI_LONG_LONG, SynchronizationTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+	}
+	else
+	{
+		StartingTimes[0] = ApplBegin_Time;
+		SynchronizationTimes[0] = EndTime;
+	}
 #else
 	StartingTimes[0] = ApplBegin_Time;
-	SynchronizationTimes[0] = SynchroEndTime;
+	SynchronizationTimes[0] = EndTime;
 #endif
 	
 	for (i=0; i<world_size; i++)
@@ -1624,12 +1674,12 @@ int Backend_postInitialize (int rank, int world_size, unsigned long long Synchro
 	}
 #endif
 
-	/* Add MPI_init begin and end events */
-	TRACE_MPIINITEV (SynchroInitTime, MPI_INIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-	Extrae_AnnotateTopology (TRUE, SynchroInitTime);
+	/* Add initialization begin and end events */
+	TRACE_MPIINITEV (InitTime, init_event, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	Extrae_AnnotateTopology (TRUE, InitTime);
 
-	TRACE_MPIINITEV (SynchroEndTime, MPI_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
-	Extrae_AnnotateTopology (FALSE, SynchroEndTime);
+	TRACE_MPIINITEV (EndTime, init_event, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
+	Extrae_AnnotateTopology (FALSE, EndTime);
 
 	/* HSG force a write to disk! */
 	Buffer_Flush(TracingBuffer[THREADID]);
@@ -1691,12 +1741,17 @@ char *Get_TemporalDir (int task)
  ******************************************************************************/
 static void Backend_Finalize_close_mpits (int thread)
 {
+	unsigned initialTASKID;
 	int attempts = 100;
 	int ret;
 	char trace[TMP_DIR];
 	char tmp_name[TMP_DIR];
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread))) return;
+
+	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
+	   as that moment was 0, independently if MPI or PACX has run */
+	initialTASKID = (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)?0:TASKID;
 
 	/* Some FS looks quite lazy and "needs time" to create directories?
 	   This loop fixes this issue (seen in BGP) */
@@ -1708,20 +1763,19 @@ static void Backend_Finalize_close_mpits (int thread)
 	}
 	if (!ret && attempts == 0)
 	{
-		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", TASKID, Get_TemporalDir(TASKID));
+		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", TASKID, Get_FinalDir(TASKID));
 	}
 
 	Buffer_Close(TRACING_BUFFER(thread));
 
-	FileName_PTT(tmp_name, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
+	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
   FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_MPIT);
 
 	rename_or_copy (tmp_name, trace);
 	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
 
 #if defined(SAMPLING_SUPPORT)
-	FileName_PTT(tmp_name, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
-
+	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_SAMPLE);
 	if (Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
 	{
 		Buffer_Flush(SAMPLING_BUFFER(thread));

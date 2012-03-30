@@ -188,7 +188,7 @@ void NAME_ROUTINE_C2F(pacx_finalize) (PACX_Fint *ierror)
 			of the control file. Just remove the temporal files! */
 		DEBUG_INTERFACE(ENTER)
 		remove_temporal_files();
-		remove_file_list();
+		PACX_remove_file_list(FALSE);
 		DEBUG_INTERFACE(LEAVE)
 		CtoF77 (ppacx_finalize) (ierror);
 	}
@@ -2068,7 +2068,7 @@ int NAME_ROUTINE_C(PACX_Finalize) (void)
 			of the control file. Just remove the temporal files! */
 		DEBUG_INTERFACE(ENTER)
 		remove_temporal_files();
-		remove_file_list();
+		PACX_remove_file_list(FALSE);
 		DEBUG_INTERFACE(LEAVE)
 		res = PPACX_Finalize ();
 	}

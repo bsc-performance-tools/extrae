@@ -82,6 +82,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define HWC_SET_OVERFLOW_EV      31000000
 
 #define APPL_EV                  40000001
+#define TRACE_INIT_EV            40000002
 #define FLUSH_EV                 40000003
 #define READ_EV                  40000004
 #define WRITE_EV                 40000005

@@ -6,14 +6,15 @@ iface_API_INCLUDES = \
    -I$(CLOCKS_DIR)   \
    -I$(TRACER_DIR)   \
    -I$(HWC_DIR)      \
+   -I$(top_srcdir)/include \
    -I$(WRAPPERS_DIR)/API @PAPI_CFLAGS@
 
 noinst_LTLIBRARIES      = libiface_api.la libiface_api_pthread.la
 
 libiface_api_la_SOURCES = $(iface_API_SRCS)
-libiface_api_la_CFLAGS  = $(iface_API_INCLUDES) -I$(top_srcdir)/include
+libiface_api_la_CFLAGS  = $(iface_API_INCLUDES)
 
 if WANT_PTHREAD
 libiface_api_pthread_la_SOURCES = $(iface_API_SRCS)
-libiface_api_pthread_la_CFLAGS  = $(iface_API_INCLUDES) -I$(top_srcdir)/include -DPTHREAD_SUPPORT
+libiface_api_pthread_la_CFLAGS  = $(iface_API_INCLUDES) -DPTHREAD_SUPPORT
 endif

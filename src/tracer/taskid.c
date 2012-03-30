@@ -39,14 +39,15 @@ static unsigned Extrae_taskid_default_function (void)
 static unsigned Extrae_num_tasks_default_function (void)
 { return 1; }
 
-static void Extrae_barrier_tasks_default_function (void)
+static void Extrae_callback_routine_do_nothing (void)
 { return; }
 
 /* Callback definitions and API */
 
 static unsigned (*get_task_num) (void) = Extrae_taskid_default_function;
 static unsigned (*get_num_tasks) (void) = Extrae_num_tasks_default_function;
-static void (*barrier_tasks) (void) = Extrae_barrier_tasks_default_function;
+static void (*barrier_tasks) (void) = Extrae_callback_routine_do_nothing;
+static void (*finalize_task) (void) = Extrae_callback_routine_do_nothing;
 
 void Extrae_set_taskid_function (unsigned (*taskid_function)(void))
 {
@@ -61,6 +62,11 @@ void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void))
 void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void))
 {
 	barrier_tasks = barriertasks_function;
+}
+
+void Extrae_set_finalize_task_function (void (*finalizetask_function)(void))
+{
+	finalize_task = finalizetask_function;
 }
 
 /* Internal routines */
@@ -79,3 +85,9 @@ void Extrae_barrier_tasks (void)
 {
 	barrier_tasks();
 }
+
+void Extrae_finalize_task (void)
+{
+	finalize_task();
+}
+

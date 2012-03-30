@@ -49,8 +49,7 @@ void configure_MPI_vars (void);
 unsigned long long CalculateNumOpsForPeriod (unsigned long long wannaPeriod, unsigned long long NumOfGlobals, unsigned long long runnedPeriod);
 void CheckControlFile (void);
 void CheckGlobalOpsTracingIntervals (void);
-void CtoF77 (mptrace_set_mlp_rank) (int *rank, int *size);
-void remove_file_list (void);
+void MPI_remove_file_list (int all);
 extern int mpit_gathering_enabled;
 
 void Extrae_network_counters_Wrapper (void);

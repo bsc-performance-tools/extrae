@@ -42,6 +42,8 @@
 #include "buffers.h"
 #include "calltrace.h" 
 
+#include "extrae_types.h"
+
 #define EVT_NUM 500000
 
 #define u_llong unsigned long long
@@ -78,7 +80,6 @@ extern unsigned int hw_counters, event0, event1;
 
 extern unsigned int mptrace_suspend_tracing;
 extern unsigned int mptrace_tracing_is_suspended;
-extern unsigned int mptrace_IsMPI;
 
 #include "taskid.h"
 
@@ -172,8 +173,18 @@ extern int hasMinimumTracingTime;
 
 extern unsigned long long WantedCheckControlPeriod;
 
+extrae_init_type_t Extrae_is_initialized_Wrapper (void);
+void Extrae_set_is_initialized (extrae_init_type_t type);
+
+int Extrae_get_ApplicationIsMPI (void);
+int Extrae_get_ApplicationIsPACX (void);
+void Extrae_set_ApplicationIsMPI (int isMPI);
+void Extrae_set_ApplicationIsPACX (int isPACX);
+
+int Extrae_Allocate_Task_Bitmap (int size);
+
 int Backend_preInitialize (int rank, int world_size, char *config_file);
-int Backend_postInitialize (int rank, int world_size, unsigned long long SynchroInitTime, unsigned long long SynchroEndTime, char **node_list);
+int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);
 
 unsigned Backend_getNumberOfThreads (void);
 unsigned Backend_getMaximumOfThreads (void);

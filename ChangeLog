@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 30Mar2012 Support to do Extrae_init + MPI_Init (and also MPI_Finalize +
+               Extrae_fini)
  + 27Mar2012 Instrumentation of Intel/GNU #pragma omp task
  * 15Mar2012 Fixed versioning number for lib MPI+OMP when using dyninst
              Fixed nesting creation of pthreads.

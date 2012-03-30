@@ -84,8 +84,8 @@ static generate_spu_file_list (int nspus)
 	if (filedes < 0)
 		return -1;
 
-        if (gethostname (hostname, 1024 - 1) != 0)
-                sprintf (hostname, "localhost");
+	if (gethostname (hostname, 1024 - 1) != 0)
+ 		sprintf (hostname, "localhost");
 
 	for (thid = 1; thid <= nspus; thid++)
 	{
@@ -422,6 +422,10 @@ int Extrae_CELL_fini (void)
  		/* Dump SPU buffers */
 		flush_spu_buffers (THREAD, number_of_spus[THREAD], spu_buffer[THREAD], spu_counter[THREAD]);
 #if defined(MPI_SUPPORT)
+		MPI_generate_spu_file_list (number_of_spus[THREAD]);
+#elif defined(PACX_SUPPORT)
+		PACX_generate_spu_file_list (number_of_spus[THREAD]);
+#else
 		generate_spu_file_list (number_of_spus[THREAD]);
 #endif
 
