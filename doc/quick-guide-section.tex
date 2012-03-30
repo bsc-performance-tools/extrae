@@ -114,13 +114,46 @@ If needed, set the application environment variables as usual (like {\tt OMP\_NU
                export LD_PRELOAD=${EXTRAE_HOME}/lib/<lib>
 \end{verbatim}
 
-where {\tt <lib>} is
+where {\tt <lib>} is one of those listed in Table \ref{tab:AvailableExtraeLIBS}. 
 
-\begin{itemize}
- \item {\tt libmpitrace.so} If the application is just MPI.
- \item {\tt libomptrace.so} If the application is just OpenMP.
- \item {\tt libompitrace.so} If the application is MPI and OpenMP.
-\end{itemize}
+\begin{table}[!ht]
+\begin{tabular}{| l | c | c | c | c | c | c | c |}
+\hline
+{\bf Library}              & \multicolumn{7}{| c |}{{\bf Application type}} \\
+\hline
+                           & {\bf Serial} & {\bf MPI} & {\bf OpenMP} & {\bf pthread} & {\bf SMPss} & {\bf nanos/OMPss} & {\bf CUDA} \\
+\hline
+{\tt libseqtrace}          & Yes \checkmark & & & & & & \\
+\hline
+{\tt libmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & \\
+\hline
+{\tt libomptrace}          & & & Yes \checkmark & & & & \\
+\hline
+{\tt libpttrace}           & & & & Yes \checkmark & & & \\
+\hline
+{\tt libsmpsstrace}        & & & & & Yes \checkmark & & \\
+\hline
+{\tt libnanostrace}        & & & & & & Yes \checkmark & \\
+\hline
+{\tt libcudatrace}         & & & & & & & Yes \checkmark \\
+\hline
+{\tt libompitrace}\footnotemark[2] & & Yes \checkmark & Yes \checkmark & & & & \\
+\hline
+{\tt libptmpitrace}\footnotemark[2] & & Yes \checkmark & & Yes \checkmark & & & \\
+\hline
+{\tt libsmpssmpitrace}\footnotemark[2] & & Yes \checkmark & & & Yes \checkmark & & \\
+\hline
+{\tt libnanosmpitrace}\footnotemark[2] & & Yes \checkmark & & & & Yes \checkmark & \\
+\hline
+{\tt libcudampitrace}\footnotemark[2] & & Yes \checkmark & & & &  & Yes \checkmark \\
+\hline
+\end{tabular}
+\caption{Available libraries in Extrae. Their availability depends upon the configure process.}
+\label{tab:AvailableExtraeLIBS}
+\end{table}
+
+\footnotetext[2]{If the application is Fortran append an f to the library. For example, if you want to instrument a Fortran application that is using MPI, use {\tt libmpitracef} instead of {\tt libmpitrace}.}
+
 
 \section{Quick merging the intermediate traces}
 
@@ -131,3 +164,4 @@ Once the intermediate trace files (*.mpit files) have been created, they have to
 \end{verbatim}
 
 The result of the merge process is a \PARAVER tracefile called output.prv. If the -o option is not given, the resulting tracefile is called EXTRAE\_Paraver\_Trace.prv. 
+

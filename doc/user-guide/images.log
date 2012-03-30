@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/openSUSE) (format=latex 2011.12.11)  6 MAR 2012 16:51
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/openSUSE) (format=latex 2011.12.11)  30 MAR 2012 18:32
 entering extended mode
  %&-line parsing enabled.
 **./images.tex
@@ -154,6 +154,13 @@ Style option: `fancyvrb' v2.7a, with DG/SPQR fixes, and firstline=lastline fix
 \c@FancyVerbLine=\count96
 \FV@StepNumber=\count97
 \FV@OutFile=\write3
+) (/usr/share/texmf/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2009/06/22 v3.00 Basic AMSFonts support
+\@emptytoks=\toks19
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 96.
 ) (/usr/share/texmf/tex/generic/babel/babel.sty
 Package: babel 2008/07/06 v3.8l The Babel package
 (/usr/share/texmf/tex/generic/babel/english.ldf
@@ -183,20 +190,20 @@ LaTeX Warning: Label `sec:OpenMPruntimesinstrumented' multiply defined.
 )
 \openout1 = `images.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 150.
-LaTeX Font Info:    ... okay on input line 150.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
 \AtBeginShipoutBox=\box28
-(/home/harald/development/extrae-2.2.1-fix/doc/user-guide.aux
+(/home/harald/development/extrae-2.2.1-table-doc/doc/user-guide.aux
 
 LaTeX Warning: Label `cha:QuickStart' multiply defined.
 
@@ -208,6 +215,9 @@ LaTeX Warning: Label `subsec:RunningTraceDynInst' multiply defined.
 
 
 LaTeX Warning: Label `subsec:RunningTraceNOTDynInst' multiply defined.
+
+
+LaTeX Warning: Label `tab:AvailableExtraeLIBS' multiply defined.
 
 
 LaTeX Warning: Label `cha:Introduction' multiply defined.
@@ -387,31 +397,28 @@ latex2htmlLength oddsidemargin=0.0pt
 
 latex2htmlLength evensidemargin=0.0pt
 
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 248.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 248.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 248.
-l2hSize :tex2html_wrap_inline3181:8.7125pt::8.7125pt::11.49754pt.
+LaTeX Font Info:    Try loading font information for U+msa on input line 317.
+(/usr/share/texmf/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2009/06/22 v3.00 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 317.
+(/usr/share/texmf/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2009/06/22 v3.00 AMS symbols B
+)
+Overfull \hbox (5.19447pt too wide) in paragraph at lines 317--317
+[]\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
+ []
+
+l2hSize :landscape3514:465.73293pt::0.0pt::650.43001pt.
 [1
 
 
 
-]
-Overfull \hbox (5.19447pt too wide) in paragraph at lines 322--322
-[]\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
- []
 
-l2hSize :landscape3429:465.73293pt::0.0pt::650.43001pt.
+
+]
+l2hSize :landscape3535:412.94963pt::0.0pt::650.43001pt.
 [2
-
-
-
-
-]
-l2hSize :landscape3450:412.94963pt::0.0pt::650.43001pt.
-[3
 
 
 
@@ -422,12 +429,12 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 2495 strings out of 493849
- 33464 string characters out of 3155836
- 101333 words of memory out of 3500000
- 5731 multiletter control sequences out of 15000+200000
- 7506 words of font info for 27 fonts, out of 3000000 for 9000
+ 2578 strings out of 493849
+ 34575 string characters out of 3155836
+ 101773 words of memory out of 3500000
+ 5798 multiletter control sequences out of 15000+200000
+ 9415 words of font info for 36 fonts, out of 3000000 for 9000
  714 hyphenation exceptions out of 8191
  32i,12n,24p,222b,322s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on images.dvi (3 pages, 11444 bytes).
+Output written on images.dvi (2 pages, 11208 bytes).

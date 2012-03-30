@@ -118,6 +118,10 @@ $key = q/cha:API/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/tab:AvailableExtraeLIBS/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:Examples_LDPRELOAD_Final/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -335,6 +339,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/cha:API/;
 $external_latex_labels{$key} = q|5|; 
+$noresave{$key} = "$nosave";
+
+$key = q/tab:AvailableExtraeLIBS/;
+$external_latex_labels{$key} = q|1.2|; 
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:Examples_LDPRELOAD_Final/;

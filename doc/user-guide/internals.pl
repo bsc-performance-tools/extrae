@@ -118,6 +118,10 @@ $key = q/cha:API/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/tab:AvailableExtraeLIBS/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:Examples_LDPRELOAD_Final/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";

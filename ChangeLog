@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 30Mar2012 Documented new instrumentation of OpenMP tasks
+             Documented alternative libraries to use during instrumentation
+               at the quick guide.
  + 30Mar2012 Support to do Extrae_init + MPI_Init (and also MPI_Finalize +
                Extrae_fini)
  + 27Mar2012 Instrumentation of Intel/GNU #pragma omp task

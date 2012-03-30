@@ -103,6 +103,10 @@ The instrumentation of the Intel OpenMP runtime for version 11.0 to 12.0 is only
 \item \_\_kmpc\_end\_critical\footnotemark[4]
 \item omp\_set\_lock\footnotemark[4]
 \item omp\_unset\_lock\footnotemark[4]
+\item \_\_kmpc\_omp\_task\_alloc
+\item \_\_kmpc\_omp\_task\_begin\_if0
+\item \_\_kmpc\_omp\_task\_complete\_if0
+\item \_\_kmpc\_omp\_taskwait
 \end{itemize}
 
 \subsection{IBM compilers - xlc, xlC, xlf}
@@ -157,6 +161,8 @@ These are the instrumented routines of the IBM OpenMP runtime:
 \item GOMP\_critical\_exit\footnotemark[4]
 \item GOMP\_atomic\_enter\footnotemark[4]
 \item GOMP\_atomic\_exit\footnotemark[4]
+\item GOMP\_task
+\item GOMP\_taskwait
 \end{itemize}
 
 \section{Instrumented pthread runtimes}\label{sec:OpenMPruntimesinstrumented}
