@@ -63,6 +63,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpi_prv_events.h"
 #include "pacx_prv_events.h"
 #include "omp_prv_events.h"
+#include "trt_prv_events.h"
+#include "cuda_prv_events.h"
 #include "pthread_prv_events.h"
 #include "misc_prv_events.h"
 #include "misc_prv_semantics.h"
@@ -99,18 +101,6 @@ long call_num = 0;
 #define MAX_SYMBOLS 50000
 struct symbol_t sym_table[MAX_SYMBOLS];
 long sym_num = 0;
-
-struct evttype_t MISC_events[MISC] = {
-  {APPL_EV, APPL_LBL},
-  {FLUSH_EV, FLUSH_LBL},
-  {READ_EV, READ_LBL},
-  {WRITE_EV, WRITE_LBL}
-};
-
-struct value_t MISC_values[MISC_VALUES] = {
-  {EVT_BEGIN, EVT_BEGIN_LBL},
-  {EVT_END, EVT_END_LBL}
-};
 
 struct color_t states_inf[STATES_NUMBER] = {
   {STATE_0, STATE0_LBL, STATE0_COLOR},
@@ -266,92 +256,38 @@ static void Paraver_gradient_names (FILE * fd)
 }
 
 /******************************************************************************
- ***  MISC_events_group1
- ******************************************************************************/
-static void MISC_events_group1 (FILE * fd)
-{
-  unsigned int event, value;
-
-  fprintf (fd, "%s\n", TYPE_LABEL);
-  for (event = 0; event < MISC; event++)
-  {
-    fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, MISC_events[event].type,
-             MISC_events[event].label);
-  }
-
-  fprintf (fd, "%s\n", VALUES_LABEL);
-  for (value = 0; value < MISC_VALUES; value++)
-  {
-    fprintf (fd, "%d      %s\n", MISC_values[value].value,
-             MISC_values[value].label);
-  }
-  LET_SPACES (fd);
-
-  fprintf (fd, "%s\n", TYPE_LABEL);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, TRACING_EV, TRACING_LBL);
-
-  fprintf (fd, "%s\n", VALUES_LABEL);
-  fprintf (fd, "%d      %s\n", EVT_END, TRAC_DISABLED_LBL);
-  fprintf (fd, "%d      %s\n", EVT_BEGIN, TRAC_ENABLED_LBL);
-  LET_SPACES (fd);
-
-  fprintf (fd, "%s\n", TYPE_LABEL);
-  fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOSIZE_EV, IOSIZE_LBL);
-  LET_SPACES (fd);
-
-  fprintf (fd, "%s\n", TYPE_LABEL);
-  fprintf (fd, "%d    %d    %s\n", MPI_GRADIENT, MPI_GLOBAL_OP_SENDSIZE,
-           MPI_GLOBAL_OP_SENDSIZE_LBL);
-  fprintf (fd, "%d    %d    %s\n", MPI_GRADIENT, MPI_GLOBAL_OP_RECVSIZE,
-           MPI_GLOBAL_OP_RECVSIZE_LBL);
-  fprintf (fd, "%d    %d    %s\n", MPI_GRADIENT, MPI_GLOBAL_OP_ROOT,
-           MPI_GLOBAL_OP_ROOT_LBL);
-  fprintf (fd, "%d    %d    %s\n", MPI_GRADIENT, MPI_GLOBAL_OP_COMM,
-           MPI_GLOBAL_OP_COMM_LBL);
-  LET_SPACES (fd);
-
-  fprintf (fd, "%s\n", TYPE_LABEL);
-  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_SENDSIZE,
-           PACX_GLOBAL_OP_SENDSIZE_LBL);
-  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_RECVSIZE,
-           PACX_GLOBAL_OP_RECVSIZE_LBL);
-  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_ROOT,
-           PACX_GLOBAL_OP_ROOT_LBL);
-  fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_COMM,
-           PACX_GLOBAL_OP_COMM_LBL);
-  LET_SPACES (fd);
-}
-
-/******************************************************************************
  *** concat_user_labels
  ******************************************************************************/
 static void Concat_User_Labels (FILE * fd)
 {
-  char *str;
-  char line[1024];
-  FILE *labels;
+	char *str;
+	char line[1024];
+	FILE *labels;
 
-  if ((str = getenv ("EXTRAE_LABELS")) != NULL)
-  {
-    labels = fopen (str, "r");
-    if (labels == NULL)
+	if ((str = getenv ("EXTRAE_LABELS")) != NULL)
+	{
+		labels = fopen (str, "r");
+		if (labels == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Cannot open file %s (pointed by EXTRAE_LABELS)\n",
+			  labels);
       return;
+		}
 
-    fprintf (fd, "\n");
-    while (fscanf (labels, "%[^\n]\n", line) != EOF)
-    {
-      if (strlen (line) == 0)
-      {
-        line[0] = fgetc (labels);
-        fprintf (fd, "%s\n", line);
-        continue;
-      }
-      fprintf (fd, "%s\n", line);
-    }
-    fclose (labels);
-    fprintf (fd, "\n");
-
-  }
+		fprintf (fd, "\n");
+		while (fscanf (labels, "%[^\n]\n", line) != EOF)
+		{
+			if (strlen (line) == 0)
+			{
+				line[0] = fgetc (labels);
+				fprintf (fd, "%s\n", line);
+				continue;
+			}
+			fprintf (fd, "%s\n", line);
+		}
+		fclose (labels);
+		fprintf (fd, "\n");
+	}
 }
 
 /******************************************************************************
@@ -721,8 +657,6 @@ int GeneratePCFfile (char *name, long long options)
 
 	Paraver_state_labels (fd);
 	Paraver_state_colors (fd);
-
-	MISC_events_group1 (fd);
 
 	MPITEvent_WriteEnabled_MPI_Operations (fd);
 	MPITEvent_WriteEnabled_PACX_Operations (fd);

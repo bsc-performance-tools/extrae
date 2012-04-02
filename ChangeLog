@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 02Apr2012 Generation of the PCF file. Static entries now only appear if
+               they are present in the tracefile.
  + 30Mar2012 Documented new instrumentation of OpenMP tasks
              Documented alternative libraries to use during instrumentation
                at the quick guide.

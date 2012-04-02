@@ -34,6 +34,7 @@
 # include <stdio.h>
 #endif
 
+void Enable_MISC_Operation (int type);
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options);
 
 #define MN_LINEAR_HOST_LABEL  "Linear host number"

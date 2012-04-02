@@ -345,8 +345,10 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 				{
 					handler (current_event, current_time, cpu, ptask, task, thread, fset);
 					tmp_nevents = 1;
-					
-					if (PTHREAD_TYPE == Type)
+
+					if (MISC_TYPE == Type)
+						Enable_MISC_Operation (EvType);
+					else if (PTHREAD_TYPE == Type)
 						Enable_pthread_Operation (EvType);
 					else if (OPENMP_TYPE == Type)
 						Enable_OMP_Operation (EvType);

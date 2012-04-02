@@ -36,6 +36,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "pacx_prv_events.h"
 #include "events.h"
+#include "labels.h"
 
 struct t_event_mpit2prv
 {
@@ -390,10 +391,11 @@ static struct t_prv_val_label pacx_prv_val_label[NUM_PACX_PRV_ELEMENTS] = {
 #define IPROBE_CNT_INDEX							0
 #define TIME_OUTSIDE_IPROBES_INDEX		1
 #define TEST_CNT_INDEX								2
+#define COLLECTIVE_INDEX           3
 
-#define MAX_SOFTCNT										3
+#define MAX_SOFTCNT										4
 
-int PACX_SoftCounters_used[MAX_SOFTCNT] = { FALSE, FALSE, FALSE };
+int PACX_SoftCounters_used[MAX_SOFTCNT] = { FALSE, FALSE, FALSE, FALSE };
 
 void Enable_PACX_Soft_Counter (unsigned int EvType)
 {
@@ -403,6 +405,14 @@ void Enable_PACX_Soft_Counter (unsigned int EvType)
 		PACX_SoftCounters_used[TIME_OUTSIDE_IPROBES_INDEX] = TRUE;
 	else if (EvType == PACX_TEST_COUNTER_EV)
 		PACX_SoftCounters_used[TEST_CNT_INDEX] = TRUE;
+	else if (EvType == MPI_REDUCE_EV || EvType == MPI_ALLREDUCE_EV ||
+	         EvType == MPI_BARRIER_EV || EvType == MPI_BCAST_EV ||
+	         EvType == MPI_ALLTOALL_EV || EvType == MPI_ALLTOALLV_EV ||
+	         EvType == MPI_ALLGATHER_EV || EvType == MPI_ALLGATHERV_EV ||
+	         EvType == MPI_GATHER_EV || EvType == MPI_GATHERV_EV ||
+	         EvType == MPI_SCATTER_EV || EvType == MPI_SCATTERV_EV ||
+	         EvType == MPI_REDUCESCAT_EV || EvType == MPI_SCAN_EV)
+		PACX_SoftCounters_used[COLLECTIVE_INDEX] = TRUE;
 }
 
 
@@ -579,6 +589,19 @@ void SoftCountersEvent_WriteEnabled_PACX_Operations (FILE * fd)
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
 			MPI_TEST_COUNTER_EV, TEST_COUNTER_LBL);
+	}
+	if (PACX_SoftCounters_used[COLLECTIVE_INDEX])
+	{
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_SENDSIZE,
+		  PACX_GLOBAL_OP_SENDSIZE_LBL);
+		fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_RECVSIZE,
+		  PACX_GLOBAL_OP_RECVSIZE_LBL);
+		fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_ROOT,
+		  PACX_GLOBAL_OP_ROOT_LBL);
+		fprintf (fd, "%d    %d    %s\n", PACX_GRADIENT, PACX_GLOBAL_OP_COMM,
+		  PACX_GLOBAL_OP_COMM_LBL);
+		LET_SPACES (fd);
 	}
 }
 

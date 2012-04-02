@@ -444,6 +444,8 @@ static int GlobalOP_event (event_t * current_event,
 		receive_size = Get_GlobalOP_RecvSize (current_event, is_root);
 		trace_enter_global_op (cpu, ptask, task, thread, current_time, comm_id,
 		  send_size, receive_size, is_root?1:0, FALSE);
+
+		Enable_PACX_Soft_Counter (EvType);
 	}
 
 	return 0;
