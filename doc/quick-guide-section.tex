@@ -117,37 +117,40 @@ If needed, set the application environment variables as usual (like {\tt OMP\_NU
 where {\tt <lib>} is one of those listed in Table \ref{tab:AvailableExtraeLIBS}. 
 
 \begin{table}[!ht]
-\begin{tabular}{| l | c | c | c | c | c | c | c |}
-\hline
-{\bf Library}              & \multicolumn{7}{| c |}{{\bf Application type}} \\
-\hline
-                           & {\bf Serial} & {\bf MPI} & {\bf OpenMP} & {\bf pthread} & {\bf SMPss} & {\bf nanos/OMPss} & {\bf CUDA} \\
-\hline
-{\tt libseqtrace}          & Yes \checkmark & & & & & & \\
-\hline
-{\tt libmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & \\
-\hline
-{\tt libomptrace}          & & & Yes \checkmark & & & & \\
-\hline
-{\tt libpttrace}           & & & & Yes \checkmark & & & \\
-\hline
-{\tt libsmpsstrace}        & & & & & Yes \checkmark & & \\
-\hline
-{\tt libnanostrace}        & & & & & & Yes \checkmark & \\
-\hline
-{\tt libcudatrace}         & & & & & & & Yes \checkmark \\
-\hline
-{\tt libompitrace}\footnotemark[2] & & Yes \checkmark & Yes \checkmark & & & & \\
-\hline
-{\tt libptmpitrace}\footnotemark[2] & & Yes \checkmark & & Yes \checkmark & & & \\
-\hline
-{\tt libsmpssmpitrace}\footnotemark[2] & & Yes \checkmark & & & Yes \checkmark & & \\
-\hline
-{\tt libnanosmpitrace}\footnotemark[2] & & Yes \checkmark & & & & Yes \checkmark & \\
-\hline
-{\tt libcudampitrace}\footnotemark[2] & & Yes \checkmark & & & &  & Yes \checkmark \\
-\hline
-\end{tabular}
+ \centering
+  \scalebox{0.90}{
+  \begin{tabular}{| l | c | c | c | c | c | c | c |}
+  \hline
+  {\bf Library}              & \multicolumn{7}{| c |}{{\bf Application type}} \\
+  \hline
+                             & {\bf Serial} & {\bf MPI} & {\bf OpenMP} & {\bf pthread} & {\bf SMPss} & {\bf nanos/OMPss} & {\bf CUDA} \\
+  \hline
+  {\tt libseqtrace}          & Yes \checkmark & & & & & & \\
+  \hline
+  {\tt libmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & \\
+  \hline
+  {\tt libomptrace}          & & & Yes \checkmark & & & & \\
+  \hline
+  {\tt libpttrace}           & & & & Yes \checkmark & & & \\
+  \hline
+  {\tt libsmpsstrace}        & & & & & Yes \checkmark & & \\
+  \hline
+  {\tt libnanostrace}        & & & & & & Yes \checkmark & \\
+  \hline
+  {\tt libcudatrace}         & & & & & & & Yes \checkmark \\
+  \hline
+  {\tt libompitrace}\footnotemark[2] & & Yes \checkmark & Yes \checkmark & & & & \\
+  \hline
+  {\tt libptmpitrace}\footnotemark[2] & & Yes \checkmark & & Yes \checkmark & & & \\
+  \hline
+  {\tt libsmpssmpitrace}\footnotemark[2] & & Yes \checkmark & & & Yes \checkmark & & \\
+  \hline
+  {\tt libnanosmpitrace}\footnotemark[2] & & Yes \checkmark & & & & Yes \checkmark & \\
+  \hline
+  {\tt libcudampitrace}\footnotemark[2] & & Yes \checkmark & & & &  & Yes \checkmark \\
+  \hline
+  \end{tabular}
+} % scalebox
 \caption{Available libraries in Extrae. Their availability depends upon the configure process.}
 \label{tab:AvailableExtraeLIBS}
 \end{table}
