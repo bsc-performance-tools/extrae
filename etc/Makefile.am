@@ -6,7 +6,6 @@ CSH_SCRIPT= $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 
 mkdirSHscripts:
 	$(mkdir_p) $(DESTDIR)$(sysconfdir)
-	touch $(DESTDIR)$(sysconfdir)/license.dat
 	rm -fr $(DESTDIR)$(sysconfdir)/extrae-vars.sh $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 
 SHscripts:
@@ -58,7 +57,4 @@ CONFIGUREDscript:
 	chmod 0755 $(DESTDIR)$(sysconfdir)/configured.sh
 
 install-data-hook: mkdirSHscripts SHscripts CSHscripts CONFIGUREDscript
-
-uninstall-local:
-	rm -f $(DESTDIR)$(sysconfdir)/license.dat
 

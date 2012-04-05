@@ -50,6 +50,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_communication.h"
 #include "addresses.h"
 #include "options.h"
+#include "extrae_types.h"
+
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -831,7 +833,7 @@ static int User_Send_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned recv_thread, recv_vthread;
+	unsigned partner, recv_thread, recv_vthread;
 	struct task_t *task_info, *task_info_partner;
 	struct thread_t *thread_info;
 	event_t * recv_begin, * recv_end;
@@ -840,14 +842,20 @@ static int User_Send_Event (event_t * current_event,
 	task_info = GET_TASK_INFO(ptask, task);
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 
+
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
-		if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+		if (Get_EvTarget(current_event)==EXTRAE_COMM_PARTNER_MYSELF)
+			partner = task-1;
+		else
+			partner = Get_EvTarget(current_event);
+
+		if (isTaskInMyGroup (fset, partner))
 		{
-			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
+			task_info_partner = GET_TASK_INFO(ptask, partner+1);
 
 #if defined(DEBUG)
-			fprintf (stdout, "USER SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+			fprintf (stdout, "USER SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, partner, Get_EvTag(current_event));
 #endif
 
 			CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, &recv_vthread, Get_EvAux(current_event));
@@ -861,8 +869,8 @@ static int User_Send_Event (event_t * current_event,
 #endif
 
 				position = WriteFileBuffer_getPosition (thread_info->file->wfb);
-				CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, Get_EvAux(current_event));
-				trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, recv_thread, Get_EvSize(current_event), Get_EvTag(current_event));
+				CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, partner, Get_EvTag(current_event), Get_EvAux(current_event));
+				trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, partner+1, recv_thread, Get_EvSize(current_event), Get_EvTag(current_event));
 			}
 			else
 			{
@@ -870,12 +878,12 @@ static int User_Send_Event (event_t * current_event,
 #if defined(DEBUG)
 				fprintf (stdout, "USER SEND_CMD(%u) DID NOT find receiver\n", Get_EvEvent(current_event));
 #endif
-				trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, 1+Get_EvTarget(current_event), recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
+				trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, partner+1, recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
 			}
 		}
 #if defined(PARALLEL_MERGE)
 		else
-			trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, current_event, current_event, Get_EvTarget (current_event));
+			trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, current_event, current_event, partner);
 #endif
 	}
 
@@ -892,7 +900,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 {
 	event_t *send_begin, *send_end;
 	off_t send_position;
-	unsigned send_thread, send_vthread;
+	unsigned partner, send_thread, send_vthread;
 	struct task_t *task_info, *task_info_partner;
 	struct thread_t *thread_info;
 	UNREFERENCED_PARAMETER(cpu);
@@ -903,12 +911,17 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
-		if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+		if (Get_EvTarget(current_event)==EXTRAE_COMM_PARTNER_MYSELF)
+			partner = task-1;
+		else
+			partner = Get_EvTarget(current_event);
+
+		if (isTaskInMyGroup (fset, partner))
 		{
-			task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
+			task_info_partner = GET_TASK_INFO(ptask, partner+1);
 
 #if defined(DEBUG)
-			fprintf (stdout, "USER RECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+			fprintf (stdout, "USER RECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, partner, Get_EvTag(current_event));
 #endif
 
 			CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, Get_EvAux(current_event));
@@ -918,14 +931,14 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 #if defined(DEBUG)
 						fprintf (stdout, "USER RECV_CMD DID NOT find partner\n");
 #endif
-				CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, current_event, thread, thread_info->virtual_thread, Get_EvAux(current_event));
+				CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, current_event, thread, thread_info->virtual_thread, partner, Get_EvTag(current_event), Get_EvAux(current_event));
 			}
 			else if (NULL != send_begin && NULL != send_end)
 			{
 #if defined(DEBUG)
 						fprintf (stdout, "USER RECV_CMD find partner\n");
 #endif
-				trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
+				trace_communicationAt (ptask, partner+1, send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
 			}
 			else
 				fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -937,8 +950,8 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 
 			log_r = TIMESYNC (task-1, Get_EvTime(current_event));
 			phy_r = TIMESYNC (task-1, Get_EvTime(current_event));
-			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1, thread_info->virtual_thread-1,
-			  Get_EvTarget(current_event), fset);
+			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1,
+			  thread_info->virtual_thread-1, partner, fset);
 		}
 #endif
 	}

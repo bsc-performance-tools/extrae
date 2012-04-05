@@ -19,7 +19,6 @@ dist-hook:
 
 #
 # Create EXAMPLE directory and copy there the example
-# Create ETC directory and create an empty license file there
 #
 
 
@@ -334,6 +333,3 @@ if OS_FREEBSD
 endif
 # SVN installations may have some subversion control files
 	rm -fr `find $(DESTDIR)$(datadir)/example -name .svn`
-
-uninstall-local:
-	rm -f $(DESTDIR)$(sysconfdir)/license.dat

@@ -412,16 +412,10 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 
 	/* Finally emit user communications */
 	for (i = 0; i < ptr->nCommunications ; i++)
-	{
-		unsigned partner = ptr->Communications[i].partner;
-		if (partner == EXTRAE_COMM_PARTNER_MYSELF)
-			partner = Extrae_get_task_number();
-
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
 		  (ptr->Communications[i].type==EXTRAE_USER_SEND)?USER_SEND_EV:USER_RECV_EV,
-		  partner, ptr->Communications[i].size, ptr->Communications[i].tag,
-		  ptr->Communications[i].id) 
-	}
+		  ptr->Communications[i].partner, ptr->Communications[i].size,
+		  ptr->Communications[i].tag, ptr->Communications[i].id) 
 }
 
 void Extrae_Resume_virtual_thread_Wrapper (unsigned u)

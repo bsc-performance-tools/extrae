@@ -61,8 +61,6 @@ static char UNUSED rcsid[] = "$Id$";
 # include <pacx.h>
 #endif
 
-#define DEBUG
-
 #define MPI_PROC_NULL (-1)
 
 static int Get_State (unsigned int EvType)
@@ -193,7 +191,7 @@ static int Any_Send_Event (event_t * current_event,
 							fprintf (stdout, "SEND_CMD(%u) DID NOT find receiver\n", EvType);
 #endif
 							position = WriteFileBuffer_getPosition (thread_info->file->wfb);
-							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, 0);
+							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 							trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 						}
 						else
@@ -269,7 +267,7 @@ static int SendRecv_Event (event_t * current_event,
 							fprintf (stdout, "SENDRECV/SEND DID NOT find partner\n");
 #endif
 							position = WriteFileBuffer_getPosition (thread_info->file->wfb);
-							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, 0);
+							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 							trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 						}
 						else if (recv_begin != NULL && recv_end != NULL)
@@ -307,7 +305,7 @@ static int SendRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/RECV DID NOT find partner\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Recv_Rec, current_event, thread, thread_info->virtual_thread, 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Recv_Rec, current_event, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
@@ -531,7 +529,7 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 #if defined(DEBUG)
 						fprintf (stdout, "RECV_CMD DID NOT find partner\n");
 #endif
-						CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Recv_Rec, current_event, thread, thread_info->virtual_thread, 0);
+						CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Recv_Rec, current_event, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 					}
 					else if (NULL != send_begin && NULL != send_end)
 					{
@@ -609,7 +607,7 @@ static int IRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "IRECV_CMD DID NOT find COMM\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
@@ -705,7 +703,7 @@ int PACX_PersistentRequest_Event (event_t * current_event,
 					{
 						off_t position;
 						position = WriteFileBuffer_getPosition (thread_info->file->wfb);
-						CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, 0);
+						CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 						trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 					}
 					else
@@ -741,7 +739,7 @@ int PACX_PersistentRequest_Event (event_t * current_event,
 						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
 						if (NULL == send_begin || NULL == send_end)
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 						else if (NULL != send_begin && NULL != send_end)
 							trace_communicationAt (ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						else

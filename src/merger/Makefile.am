@@ -72,9 +72,9 @@ libmpi2prv_la_SOURCES = \
 mpi2prv_SOURCES = \
  merger.c
 
-libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
 
-mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/src/license -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
 mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_DIR)/libcommon.la @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
 mpi2prv_DEPENDENCIES = libmpi2prv.la
 
