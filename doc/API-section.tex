@@ -12,6 +12,9 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
  Initializes the tracing library.\\
  {\bf NOTE:} This routine is called automatically by either {\tt MPI\_Init} or when tracing is performed by the DynInst launcher.
 
+ \item {\tt extrae\_init\_type\_t Extrae\_is\_initialized (void);}\\
+ This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API, MPI or PACX initialization).
+
  \item {\tt void Extrae\_fini (void)}\\
  Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
  {\bf NOTE:} This routine is called automatically by either {\tt MPI\_Finalize} or when the tracing is performed by the DynInst launcher.
