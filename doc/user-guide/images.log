@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/openSUSE) (format=latex 2011.12.11)  2 APR 2012 12:39
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/openSUSE) (format=latex 2011.12.11)  13 APR 2012 15:46
 entering extended mode
  %&-line parsing enabled.
 **./images.tex
@@ -203,7 +203,7 @@ LaTeX Font Info:    ... okay on input line 151.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 151.
 LaTeX Font Info:    ... okay on input line 151.
 \AtBeginShipoutBox=\box28
-(/home/harald/development/extrae-2.2.1-table-doc/doc/user-guide.aux
+(/home/harald/development/2.2.1-cudadyninst/doc/user-guide.aux
 
 LaTeX Warning: Label `cha:QuickStart' multiply defined.
 
@@ -409,7 +409,7 @@ Overfull \hbox (5.19447pt too wide) in paragraph at lines 317--317
 []\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
  []
 
-l2hSize :landscape3518:465.73293pt::0.0pt::650.43001pt.
+l2hSize :landscape3541:465.73293pt::0.0pt::650.43001pt.
 [1
 
 
@@ -417,7 +417,7 @@ l2hSize :landscape3518:465.73293pt::0.0pt::650.43001pt.
 
 
 ]
-l2hSize :landscape3539:412.94963pt::0.0pt::650.43001pt.
+l2hSize :landscape3562:412.94963pt::0.0pt::650.43001pt.
 [2
 
 
@@ -430,7 +430,7 @@ LaTeX Warning: There were multiply-defined labels.
  ) 
 Here is how much of TeX's memory you used:
  2578 strings out of 493849
- 34575 string characters out of 3155836
+ 34560 string characters out of 3155836
  101773 words of memory out of 3500000
  5798 multiletter control sequences out of 15000+200000
  9415 words of font info for 36 fonts, out of 3000000 for 9000

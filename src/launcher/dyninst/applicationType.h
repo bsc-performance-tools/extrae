@@ -52,8 +52,10 @@ class ApplicationType
 	inline MPI_type_t get_MPI_type (void) const;
 	inline bool get_isOpenMP (void) const;
 	inline OMP_rte_t get_OpenMP_rte (void) const;
+	inline bool get_isCUDA (void) const;
 
 	private:
+	bool isCUDA;
 	bool isMPI;
 	bool isOpenMP;
 	MPI_type_t MPI_type;
@@ -68,6 +70,9 @@ inline bool ApplicationType::get_isMPI (void) const
 
 inline bool ApplicationType::get_isOpenMP (void) const
 { return isOpenMP; }
+
+inline bool ApplicationType::get_isCUDA (void) const
+{ return isCUDA; }
 
 inline ApplicationType::OMP_rte_t ApplicationType::get_OpenMP_rte (void) const
 { return OpenMP_runtime; }

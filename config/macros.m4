@@ -1404,7 +1404,7 @@ AC_DEFUN([AX_PROG_LIBELF],
       if test "${ELF_INSTALLED}" = "yes" ; then
         if test -f ${ELF_LIBSDIR}/libelf.a -o \
                 -f ${ELF_LIBSDIR}/libelf.so ; then
-           if test -f ${ELF_HOME}/include/libelf.h ; then
+           if test -f ${ELF_HOME}/include/libelf/libelf.h ; then
               libelf_found="yes"
            else
               AC_MSG_ERROR([Cannot find ELF header files in ${elf_paths}/include])
@@ -1459,6 +1459,9 @@ AC_DEFUN([AX_PROG_DYNINST],
 
       AC_LANG_RESTORE()
    fi
+
+   dnl Check for patchAPI within DynInst (is Dyninst > 7.0.1?)
+   AM_CONDITIONAL(DYNINST_HAVE_PATCHAPI, test -f ${DYNINST_LIBSDIR}/libpatchAPI.so)
 
    dnl Did the checks pass?
    AM_CONDITIONAL(HAVE_DYNINST, test "${DYNINST_INSTALLED}" = "yes")

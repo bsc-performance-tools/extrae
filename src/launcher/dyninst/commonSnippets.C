@@ -52,28 +52,38 @@ static char UNUSED rcsid[] = "$Id$";
 
 using namespace std; 
 
+#include <BPatch_point.h>
 #include "commonSnippets.h"
 
-BPatch_function * getRoutine (string &routine, BPatch_image *appImage)
+BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn)
 {
 	BPatch_Vector<BPatch_function *> found_funcs;
 
 	if (appImage->findFunction (routine.c_str(), found_funcs) == NULL)
 	{
-		string error = string("appImage->findFunction: Failed to find function ")+routine;
-		PRINT_PRETTY_ERROR("WARNING", error.c_str());
+		if (warn)
+		{
+			string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find function ")+routine;
+			PRINT_PRETTY_ERROR("WARNING", error.c_str());
+		}
 		return NULL;
 	}
 	if (found_funcs.size() < 1)
 	{
-		string error = string("appImage->findFunction: Failed to find function ")+routine;
-		PRINT_PRETTY_ERROR("WARNING", error.c_str());
+		if (warn)
+		{
+			string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find function ")+routine;
+			PRINT_PRETTY_ERROR("WARNING", error.c_str());
+		}
 		return NULL;
 	}
 	if (found_funcs[0] == NULL)
 	{
-		string error = string("appImage->findFunction: Failed to find function ")+routine;
-		PRINT_PRETTY_ERROR("WARNING", error.c_str());
+		if (warn)
+		{
+			string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find function ")+routine;
+			PRINT_PRETTY_ERROR("WARNING", error.c_str());
+		}
 		return NULL;
 	}
 
@@ -81,13 +91,13 @@ BPatch_function * getRoutine (string &routine, BPatch_image *appImage)
 }
 
 void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
-	string routine, string wrap_begin, string wrap_end)
+	string routine, string wrap_begin, string wrap_end, unsigned nparams)
 {
-	BPatch_function *function = getRoutine (routine, appImage);
+	BPatch_function *function = getRoutine (routine, appImage, false);
 
 	if (function == NULL)
 	{
-		string error = string("getRoutine: Failed to find function ")+routine;
+		string error = string(PACKAGE_NAME": getRoutine: Failed to find function ")+routine;
 		PRINT_PRETTY_ERROR("WARNING", error.c_str());
 		return;
 	}
@@ -95,27 +105,31 @@ void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
 	BPatch_Vector<BPatch_point *> *entry_point = function->findPoint(BPatch_entry);
 	if (!entry_point || (entry_point->size() == 0))
 	{
-		string error = string("appImage->findFunction: Failed to find entry point for function ")+routine;
+		string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find entry point for function ")+routine;
 		PRINT_PRETTY_ERROR("WARNING", error.c_str());
 	}
 
 	BPatch_Vector<BPatch_point *> *exit_point = function->findPoint(BPatch_exit);
 	if (!exit_point || (exit_point->size() == 0))
 	{
-		string error = string("appImage->findFunction: Failed to find exit point for function ")+routine;
+		string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find exit point for function ")+routine;
 		PRINT_PRETTY_ERROR("WARNING", error.c_str());
 	}
 
 	if (wrap_begin.length() > 0)
 	{
-		BPatch_function *snippet_begin = getRoutine (wrap_begin, appImage);
+		BPatch_function *snippet_begin = getRoutine (wrap_begin, appImage, true);
 		if (snippet_begin == NULL)
 		{
-			string error = string ("getRoutine: Failed to find wrap_begin ")+wrap_begin;
+			string error = string (PACKAGE_NAME": getRoutine: Failed to find wrap_begin ")+wrap_begin;
 			PRINT_PRETTY_ERROR("WARNING", error.c_str());
 			return;
 		}
+
 		BPatch_Vector<BPatch_snippet *> args_entry;
+		for (unsigned u = 0; u < nparams; u++)
+			args_entry.push_back (new BPatch_paramExpr (u));
+
 		BPatch_funcCallExpr callExpr_entry (*snippet_begin, args_entry);
 
 		if (appProcess->insertSnippet (callExpr_entry, *entry_point) == NULL)
@@ -124,10 +138,10 @@ void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
 
 	if (wrap_end.length() > 0)
 	{
-		BPatch_function *snippet_end = getRoutine (wrap_end, appImage);
+		BPatch_function *snippet_end = getRoutine (wrap_end, appImage, true);
 		if (snippet_end == NULL)
 		{
-			string error = string ("getRoutine: Failed to find wrap_end ")+wrap_begin;
+			string error = string (PACKAGE_NAME": getRoutine: Failed to find wrap_end ")+wrap_begin;
 			PRINT_PRETTY_ERROR("WARNING", error.c_str());
 			return;
 		}
@@ -144,49 +158,49 @@ void wrapTypeRoutine (BPatch_function *function, string routine, int type,
 {
 	string snippet_name = "Extrae_function_from_address";
 
-  BPatch_Vector<BPatch_point *> *entry_point = function->findPoint(BPatch_entry);
+	BPatch_Vector<BPatch_point *> *entry_point = function->findPoint(BPatch_entry);
 	if (!entry_point || (entry_point->size() == 0))
 	{
-		string error = string("appImage->findFunction: Failed to find entry point for function ")+routine;
+		string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find entry point for function ")+routine;
 		PRINT_PRETTY_ERROR("WARNING", error.c_str());
 		return;
 	}
 
-  BPatch_Vector<BPatch_point *> *exit_point = function->findPoint(BPatch_exit);
+	BPatch_Vector<BPatch_point *> *exit_point = function->findPoint(BPatch_exit);
 	if (!exit_point || (exit_point->size() == 0))
 	{
-		string error = string("appImage->findFunction: Failed to find exit point for function ")+routine;
+		string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find exit point for function ")+routine;
 		PRINT_PRETTY_ERROR("WARNING", error.c_str());
 		return;
 	}
 
-	BPatch_function *snippet = getRoutine (snippet_name, appImage);
+	BPatch_function *snippet = getRoutine (snippet_name, appImage, false);
 	if (snippet == NULL)
 	{
-		string error = string ("getRoutine: Failed to find wrap_end ")+snippet_name;
+		string error = string (PACKAGE_NAME": getRoutine: Failed to find wrap_end ")+snippet_name;
 		PRINT_PRETTY_ERROR("WARNING", error.c_str());
 		return;
 	}
 
-  BPatch_Vector<BPatch_snippet *> args_entry;
-  BPatch_constExpr entry_param0(type);
-  BPatch_constExpr entry_param1(function->getBaseAddr());
+	BPatch_Vector<BPatch_snippet *> args_entry;
+	BPatch_constExpr entry_param0(type);
+	BPatch_constExpr entry_param1(function->getBaseAddr());
 	args_entry.push_back(&entry_param0);
 	args_entry.push_back(&entry_param1);
 
-  BPatch_Vector<BPatch_snippet *> args_exit;
-  BPatch_constExpr exit_param0(type);
-  BPatch_constExpr exit_param1(0);
+	BPatch_Vector<BPatch_snippet *> args_exit;
+	BPatch_constExpr exit_param0(type);
+	BPatch_constExpr exit_param1(0);
 	args_exit.push_back(&exit_param0);
 	args_exit.push_back(&exit_param1);
 
-  BPatch_funcCallExpr callExpr_entry (*snippet, args_entry);
-  BPatch_funcCallExpr callExpr_exit (*snippet, args_exit);
+	BPatch_funcCallExpr callExpr_entry (*snippet, args_entry);
+	BPatch_funcCallExpr callExpr_exit (*snippet, args_exit);
 
-  if (appProcess->insertSnippet (callExpr_entry, *entry_point) == NULL)
+	if (appProcess->insertSnippet (callExpr_entry, *entry_point) == NULL)
 		cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at entry point" << endl;
 
-  if (appProcess->insertSnippet (callExpr_exit, *exit_point) == NULL)
+	if (appProcess->insertSnippet (callExpr_exit, *exit_point) == NULL)
 		cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at exit point" << endl;
 }
 

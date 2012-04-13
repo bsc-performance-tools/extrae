@@ -128,8 +128,7 @@ void ApplicationType::detectApplicationType (BPatch_image *appImage)
 {
 	BPatch_Vector<BPatch_function *> found_funcs;
 
-	isOpenMP = isMPI = false;
-
+	isOpenMP = isMPI = isCUDA = false;
 
 	/* Check for different implementations of OpenMP rte */
 	if ((appImage->findFunction ("__kmpc_fork_call", found_funcs) != NULL) ||
@@ -172,6 +171,11 @@ void ApplicationType::detectApplicationType (BPatch_image *appImage)
 		else 
 			MPI_type = MPI_C;
 	}
+
+	/* Check for two typical CUDA routines in CUDA apps */
+	if ((appImage->findFunction ("cudaLaunch", found_funcs) != NULL) &&
+	    (appImage->findFunction ("cudaConfigureCall", found_funcs) != NULL))
+		isCUDA = true;
 }
 
 void ApplicationType::dumpApplicationType (void)
@@ -208,7 +212,11 @@ void ApplicationType::dumpApplicationType (void)
 			cout << "(Fortran language in uppercase) ";
 	}
 	if (!isOpenMP && !isMPI)
-		cout << "Sequential";
+		cout << "Sequential ";
+
+	if (isCUDA)
+		cout << "CUDA-accelerated";
+
 	cout << endl;
 }
 

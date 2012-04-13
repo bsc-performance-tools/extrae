@@ -215,6 +215,10 @@ MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/ld-preload \
  example/LINUX/MPI/dyninst
 
+MPICUDA_EXAMPLE_FILES=\
+ example/LINUX/MPI+CUDA/ld-preload \
+ example/LINUX/MPI+CUDA/dyninst
+
 OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/extrae.xml \
  example/LINUX/OMP/README \
@@ -251,14 +255,18 @@ PTHREAD_EXAMPLE_FILES=\
  example/LINUX/PTHREAD/extrae.xml \
  example/LINUX/PTHREAD/README
 
-PACX_EXAMPLE_FILES=example/LINUX/PACX/example.c \
+PACX_EXAMPLE_FILES=\
+ example/LINUX/PACX/example.c \
  example/LINUX/PACX/Makefile
 
-CUDA_EXAMPLE_FILES=example/LINUX/CUDA/hello.cu \
- example/LINUX/CUDA/README \
- example/LINUX/CUDA/run.sh \
+CUDA_EXAMPLE_FILES=\
  example/LINUX/CUDA/extrae.xml \
- example/LINUX/CUDA/Makefile
+ example/LINUX/CUDA/hello.cu \
+ example/LINUX/CUDA/hello_instrumented.cu \
+ example/LINUX/CUDA/Makefile \
+ example/LINUX/CUDA/README \
+ example/LINUX/CUDA/run_dyninst.sh \
+ example/LINUX/CUDA/run_instrumented.sh
 
 endif
 endif
@@ -280,6 +288,10 @@ endif
 if HAVE_MPI
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI
 	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
+if WANT_CUDAorCUPTI
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+CUDA
+	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
+endif
 endif
 if WANT_OPENMP
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMP
@@ -302,7 +314,7 @@ endif
 # Apply post-installation modifications
 	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/MPI
+	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example
 if HAVE_PACX
 	./substitute-all $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(DESTDIR)$(datadir)/example/PACX
 endif

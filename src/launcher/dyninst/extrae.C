@@ -60,29 +60,27 @@ using namespace std;
 
 #include "commonSnippets.h"
 #include "applicationType.h"
+#include "cudaSnippets.h"
 #include "ompSnippets.h"
 #include "mpiSnippets.h"
 #include "apiSnippets.h"
 
 #include <BPatch_statement.h>
+#include <BPatch_point.h>
 
-unsigned int OMPNamingConvention = 0;
+static BPatch *bpatch;
 
-BPatch *bpatch;
+static char *excludeUF = NULL; /* Fitxer que indica quines User Functions s'exclouen */
+static char *includeUF = NULL; /* Fitxer que indica quines User Functions s'inclouen */
 
-char *excludeUF = NULL; /* Fitxer que indica quines User Functions s'exclouen */
-char *includeUF = NULL; /* Fitxer que indica quines User Functions s'inclouen */
-char *excludePF = NULL; /* Fitxer que indica quines Par Functions s'exclouen */
+static char *configXML = NULL; /* XML configuration file */
 
-char *configXML = NULL; /* XML configuration file */
-
-int VerboseLevel = 0;  /* Verbose Level */
-bool useHWC = false;
-bool ListFunctions = false;
+static int VerboseLevel = 0;  /* Verbose Level */
+static bool useHWC = false;
+static bool ListFunctions = false;
+static bool extrae_detecting_application_type = false;
 
 string loadedModule;
-
-int errorPrint = 0; // external "dyninst" tracing (via errorFunc)
 
 #define DYNINST_NO_ERROR -1
 
@@ -93,27 +91,20 @@ int errorPrint = 0; // external "dyninst" tracing (via errorFunc)
  ******************************************************************************/
 static int file_exists (char *fitxer)
 {
-  struct stat buffer;
-  return stat(fitxer, &buffer)== 0;
+	struct stat buffer;
+	return stat(fitxer, &buffer)== 0;
 }
 
-/*void errorFunc(BPatchErrorLevel level, int num, const char **params) */
 void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 {
-	if (VerboseLevel)
+	/* Do not print certain "detection" messages if verbose level is 1/2 only */
+	if ((VerboseLevel == 1 && !extrae_detecting_application_type) || VerboseLevel == 2)
 	{
 		if (num == 0)
 		{
 			// conditional reporting of warnings and informational messages
-			if (level == BPatchInfo)
-			{
-				if (errorPrint > 1)
-					fprintf (stderr, "%s\n", params[0]);
-			}
-			else
-			{
-				fprintf (stderr, "%s", params[0]);
-			}
+			if (level != BPatchInfo)
+				fprintf (stderr, PACKAGE_NAME": %s", params[0]);
 		}
 		else
 		{
@@ -125,7 +116,7 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 			if (num != DYNINST_NO_ERROR)
 			{
 				if (num != 112)
-					fprintf (stderr, "Error #%d (level %d): %s\n", num, level, line);
+					fprintf (stderr, PACKAGE_NAME":Error #%d (level %d): %s\n", num, level, line);
 			}
 		}
 	}
@@ -146,10 +137,10 @@ static BPatch_function * getFunction (BPatch_image *appImage, string &name)
 
 static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPatch_image *appImage, BPatch_process *appProces)
 {
-  ofstream symfile;
+	ofstream symfile;
 	string symname = string(::XML_GetFinalDirectory())+string("/")+string(::XML_GetTracePrefix())+".sym";
 
-  symfile.open (symname.c_str());
+	symfile.open (symname.c_str());
 	if (!symfile.good())
 	{
 		cerr << "Cannot create the symbolic file" << symname << endl;
@@ -204,7 +195,7 @@ static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPat
 		}
 	}
 
-  symfile.close();
+	symfile.close();
 }
 
 static int processParams (int argc, char *argv[])
@@ -285,10 +276,9 @@ static int processParams (int argc, char *argv[])
 
 static void ReadFileIntoList (char *fitxer, list<string>& container)
 {
-  char str[2048];
+	char str[2048];
 
-  fstream file_op (fitxer, ios::in);
-
+	fstream file_op (fitxer, ios::in);
 	if (!file_op.good())
 	{
 		cerr << PACKAGE_NAME << "Error: Cannot open file " << fitxer << endl;
@@ -447,7 +437,6 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		else
 			sharedlibname_ext = "";
 
-#if 1
 		if (instrumentOMP && appType->get_isOpenMP() && loadedModule != sharedlibname)
 		{
 			/* OpenMP instrumentation (just for OpenMP apps) */
@@ -485,7 +474,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 				OMPinsertion++;
 			}
 		}
-#endif
+
 		if (sharedlibname_ext == ".f" || sharedlibname_ext == ".F" || /* fortran */
 		  sharedlibname_ext == ".for" || sharedlibname_ext == ".FOR" || /* fortran */
 		  sharedlibname_ext == ".f90" || sharedlibname_ext == ".F90" || /* fortran 90 */
@@ -633,19 +622,17 @@ int main (int argc, char *argv[])
 		exit (-1);
 	}
 
-#if 0
-	if (getenv("DYNINSTAPI_RT_LIB") == NULL)
-	{
-		/* DYNINSTAPI_RT_LIB=%s/lib/libdyninstAPI_RT.so.1 is +/- 50 chars */
-		char *env = (char*) malloc((strlen(getenv("EXTRAE_HOME"))+50)*sizeof(char));
-		sprintf (env, "DYNINSTAPI_RT_LIB=%s/lib/libdyninstAPI_RT.so.1",  getenv("EXTRAE_HOME"));
-		putenv (env);
-		fprintf (stderr, "Environment variable DYNINSTAPI_RT_LIB is undefined.\nUsing ${EXTRAE_HOME}/lib/libdyninstAPI_RT.so.1 instead\n");
-	}
-#endif
-
 	/* Parse the params */
 	index = processParams (argc, argv);
+
+	char * envvar_dyn = (char *) malloc ((strlen("EXTRAE_DYNINST_RUN=yes")+1)*sizeof (char));
+	if (NULL == envvar_dyn)
+	{
+		cerr << PACKAGE_NAME << ": Error! Unable to allocate memory for EXTRAE_DYNINST_RUN environment variable" << endl;
+		exit (-1);
+	}
+	sprintf (envvar_dyn, "EXTRAE_DYNINST_RUN=yes");
+	putenv (envvar_dyn);
 
 	if (!ListFunctions)
 	{
@@ -695,7 +682,8 @@ int main (int argc, char *argv[])
 	/* Don't check recursion in snippets */
 	bpatch->setTrampRecursive (true);
 
-	cout << PACKAGE_NAME << ": Creating process for image binary " << argv[index] << endl;
+	cout << "Welcome to " << PACKAGE_STRING << " launcher based on DynInst" << endl
+	     << PACKAGE_NAME << ": Creating process for image binary " << argv[index] << endl;
 	int i = 1;
 	while (argv[index+i] != NULL)
 	{
@@ -735,7 +723,10 @@ int main (int argc, char *argv[])
 	if (::XML_CheckTraceEnabled())
 	{
 		ApplicationType *appType = new ApplicationType ();
+		extrae_detecting_application_type = true;
+		cout << PACKAGE_NAME << ": Detecting application type " << endl;
 		appType->detectApplicationType (appImage);
+		extrae_detecting_application_type = false;
 		appType->dumpApplicationType ();
 
 		/* Check for the correct library to be loaded */
@@ -748,6 +739,13 @@ int main (int argc, char *argv[])
 				else
 					sprintf (buffer, "%s/lib/lib_dyn_ompitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 			}
+			else if (appType->get_isCUDA())
+			{
+				if (appType->get_MPI_type() == ApplicationType::MPI_C)
+					sprintf (buffer, "%s/lib/lib_dyn_cudampitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				else
+					sprintf (buffer, "%s/lib/lib_dyn_cudampitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+			}
 			else
 			{
 				if (appType->get_MPI_type() == ApplicationType::MPI_C)
@@ -759,9 +757,16 @@ int main (int argc, char *argv[])
 		else
 		{
 			if (appType->get_isOpenMP())
-				sprintf (buffer, "%s/lib/lib_dyn_omptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+			{
+				sprintf (buffer, "%s/lib/libomptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+			}
 			else
-				sprintf (buffer, "%s/lib/libseqtrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+			{
+				if (appType->get_isCUDA())
+					sprintf (buffer, "%s/lib/libcudatrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				else
+					sprintf (buffer, "%s/lib/libseqtrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+			}
 		}
 		loadedModule = buffer;
 
@@ -796,6 +801,12 @@ int main (int argc, char *argv[])
 			InstrumentOMPruntime (::XML_GetTraceOMP_locks(), appType, appImage, appProcess);
 		}
 
+		if (appType->get_isCUDA())
+		{
+			cout << PACKAGE_NAME << ": Instrumenting CUDA runtime" << endl;
+			InstrumentCUDAruntime (appType, appImage, appProcess);
+		}
+
 		/* If the application is NOT MPI, instrument the MAIN symbol in order to
  		   initialize and finalize the instrumentation */
 		if (!appType->get_isMPI())
@@ -805,21 +816,24 @@ int main (int argc, char *argv[])
 
 			/* Special cases (e.g., fortran stop call) */
 			string exit_calls[] =
-			  {
+			{
 				  "_xlfExit",
 				  "_gfortran_stop_numeric",
 				  "for_stop_core",
 				  ""
-				};
+			};
 
+			/* bypass error messages given if these routines are not found */
 			int i = 0;
+			extrae_detecting_application_type = true;
 			while (exit_calls[i].length() > 0)
 			{
-				BPatch_function *special_exit = getRoutine (exit_calls[i], appImage);
+				BPatch_function *special_exit = getRoutine (exit_calls[i], appImage, false);
 				if (NULL != special_exit)
 					wrapRoutine (appImage, appProcess, exit_calls[i], "Extrae_fini", "");
 				i++;
 			}
+			extrae_detecting_application_type = false;
 		}
 
 		GenerateSymFile (ParallelFunctions, UserFunctions, appImage, appProcess);
@@ -837,11 +851,10 @@ int main (int argc, char *argv[])
 	while (!appProcess->isTerminated())
 		bpatch->waitForStatusChange();
 
-	int retVal;
 	if (appProcess->terminationStatus() == ExitedNormally)
-		retVal = appProcess->getExitCode();
+		appProcess->getExitCode();
 	else if(appProcess->terminationStatus() == ExitedViaSignal)
-		retVal = appProcess->getExitSignal();
+		appProcess->getExitSignal();
 
 	delete appProcess;
 

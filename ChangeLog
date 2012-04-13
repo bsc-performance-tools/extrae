@@ -1,6 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 13Apr2012 Instrumentation of CUDA runtime through DynInst
+               Also, support for CUDA+MPI using DynInst. Added an example.
+               Removed lib_dyn_omptrace. Using libomptrace instead.
+               Minor changes in documentation
  * 02Apr2012 Generation of the PCF file. Static entries now only appear if
                they are present in the tracefile.
  + 30Mar2012 Documented new instrumentation of OpenMP tasks

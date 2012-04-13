@@ -1,6 +1,8 @@
 #include <cuda.h>
 #include <stdio.h>
 
+#include "extrae_user_events.h"
+
 // Prototypes
 __global__ void helloWorld(char*);
 
@@ -11,6 +13,8 @@ int main(int argc, char** argv)
 
 	// desired output
 	char str[] = "Hello World!";
+
+	Extrae_init();
 
 	for(i = 0; i < 12; i++)
 		str[i] -= i;
@@ -41,6 +45,8 @@ int main(int argc, char** argv)
 
 	// everyone's favorite part
 	printf("%s\n", str);
+
+	Extrae_fini();
 
 	return 0;
 }

@@ -30,8 +30,6 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
-#if !defined(DYNINST_MODULE)
-
 #ifdef HAVE_DLFCN_H
 # define __USE_GNU
 # include <dlfcn.h>
@@ -48,7 +46,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "omp_probe.h"
 
-#define DEBUG
+//#define DEBUG
 
 /*
 The nowait issue:
@@ -589,5 +587,3 @@ int ibm_xlsmp_1_6_hook_points (int ntask)
 
 	return hooked;
 }
-
-#endif /* !defined(DYNINST_MODULE) */

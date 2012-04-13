@@ -36,10 +36,11 @@
 
 using namespace std;
 
-BPatch_function * getRoutine (string &routine, BPatch_image *appImage);
+BPatch_function * getRoutine (string &routine, BPatch_image *appImage,
+	bool warn = true);
 
 void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
-	string routine, string wrap_begin, string wrap_end);
+	string routine, string wrap_begin, string wrap_end, unsigned nparams = 0);
 
 void wrapTypeRoutine (BPatch_function *function, string routine, int type,
 	BPatch_image *appImage, BPatch_process *appProcess);

@@ -89,13 +89,11 @@ endif
 if HAVE_DYNINST
 if HAVE_MPI
   lib_LTLIBRARIES += lib_dyn_mpitracec.la lib_dyn_mpitracef.la
-endif
-if WANT_OPENMP
-  lib_LTLIBRARIES += lib_dyn_omptrace.la
-endif
-if HAVE_MPI
 if WANT_OPENMP
   lib_LTLIBRARIES += lib_dyn_ompitracec.la lib_dyn_ompitracef.la
+endif
+if WANT_CUDAorCUPTI
+  lib_LTLIBRARIES += lib_dyn_cudampitracec.la lib_dyn_cudampitracef.la
 endif
 endif
 endif
@@ -214,7 +212,7 @@ libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD)
 libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT)
 
 # LoadBalancing
-libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
+libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
 libmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 libompitrace_lb_la_SOURCES = $(libompitrace_la_SOURCES)
 libompitracef_lb_la_SOURCES = $(libompitrace_la_SOURCES) mpif.h
@@ -223,10 +221,11 @@ libsmpssmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 
 # For DynInst instrumentation
 lib_dyn_mpitracec_la_SOURCES = $(libmpitrace_la_SOURCES)
-lib_dyn_mpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
-lib_dyn_omptrace_la_SOURCES = $(libomptrace_la_SOURCES)
+lib_dyn_mpitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
 lib_dyn_ompitracec_la_SOURCES = $(libompitrace_la_SOURCES)
-lib_dyn_ompitracef_la_SOURCES = $(libompitrace_la_SOURCES) mpif.h
+lib_dyn_ompitracef_la_SOURCES = $(libompitracef_la_SOURCES)
+lib_dyn_cudampitracec_la_SOURCES = $(libcudampitrace_la_SOURCES)
+lib_dyn_cudampitracef_la_SOURCES = $(libcudampitracef_la_SOURCES)
 
 core_MODULES = \
    $(COMMON_DIR)/libcommon.la \
@@ -297,9 +296,10 @@ libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_D
 
 lib_dyn_mpitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB)
 lib_dyn_mpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB)
-lib_dyn_omptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 lib_dyn_ompitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB)
 lib_dyn_ompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB)
+lib_dyn_cudampitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB)
+lib_dyn_cudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB)
 
 #
 # Compilation flags
@@ -416,9 +416,10 @@ libsmpssmpitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -D
 
 lib_dyn_mpitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE $(PARALLEL_CFLAGS_MERGE_LIB)
 lib_dyn_mpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE $(PARALLEL_CFLAGS_MERGE_LIB)
-lib_dyn_omptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS) -DDYNINST_MODULE -DOMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 lib_dyn_ompitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE -DOMP_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 lib_dyn_ompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE -DOMP_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
+lib_dyn_cudampitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE -DCUDA_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
+lib_dyn_cudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE -DCUDA_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 
 #
 # Link flags
@@ -469,14 +470,17 @@ libompitracef_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
 libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
-lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-lib_dyn_omptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-lib_dyn_ompitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS)
-lib_dyn_ompitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS)
+lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared
+lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared
+lib_dyn_ompitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) # inherits -shared
+lib_dyn_ompitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) # inherits -shared
+lib_dyn_cudampitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) # inherits -shared
+lib_dyn_cudampitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) # inherits -shared
 
 ## -static tells libtool to generate ONLY the static library (we don't want
 ##   the libmpitracef.so because it don't preloads fine with programs)
+## -shared tells libtool to generate ONLY shared libraries (right now,
+##   only for dyninst modules)
 ## -R flag works like -Wl,-rpath
 ## -no-undefined could be interesting for AIX?
 ##   check http://www.andamooka.org/reader.pl?pgid=autobookautobook_89

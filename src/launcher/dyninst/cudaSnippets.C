@@ -22,14 +22,57 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/launcher/dyninst/ompSnippets.C $
+ | @last_commit: $Date: 2011-10-25 15:50:49 +0200 (dt, 25 oct 2011) $
+ | @version:     $Revision: 815 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef OMP_WRAPPER_H_
-#define OMP_WRAPPER_H_
+static char UNUSED rcsid[] = "$Id: ompSnippets.C 815 2011-10-25 13:50:49Z harald $";
 
-void Extrae_OpenMP_init (void);
-
+#if HAVE_STDLIB_H
+# include <stdlib.h>
 #endif
+#if HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#if HAVE_STRING_H
+# include <string.h>
+#endif
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+#include <list>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+using namespace std; 
+
+#include "commonSnippets.h"
+#include "ompSnippets.h"
+
+#include <BPatch_function.h>
+
+void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage,
+	BPatch_process *appProcess)
+{
+	UNREFERENCED_PARAMETER(at);
+
+	wrapRoutine (appImage, appProcess, "cudaLaunch",
+	  "Extrae_cudaLaunch_Enter", "Extrae_cudaLaunch_Exit", 1);
+	wrapRoutine (appImage, appProcess, "cudaConfigureCall",
+	  "Extrae_cudaConfigureCall_Enter", "Extrae_cudaConfigureCall_Exit", 4);
+	wrapRoutine (appImage, appProcess, "cudaStreamCreate",
+	  "Extrae_cudaStreamCreate_Enter", "Extrae_cudaStreamCreate_Exit", 1);
+	wrapRoutine (appImage, appProcess, "cudaMemcpyAsync",
+	  "Extrae_cudaMemcpyAsync_Enter", "Extrae_cudaMemcpyAsync_Exit", 5);
+	wrapRoutine (appImage, appProcess, "cudaMemcpy",
+	  "Extrae_cudaMemcpy_Enter", "Extrae_cudaMemcpy_Exit", 4);
+	wrapRoutine (appImage, appProcess, "cudaThreadSynchronize",
+	  "Extrae_cudaThreadSynchronize_Enter", "Extrae_cudaThreadSynchronize_Exit", 0);
+	wrapRoutine (appImage, appProcess, "cudaStreamSynchronize",
+	  "Extrae_cudaStreamSynchronize_Enter", "Extrae_cudaStreamSynchronize_Exit", 1);
+}
+

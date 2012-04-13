@@ -36,14 +36,14 @@
  **/
 
 typedef int cudaError_t;
-typedef enum
+enum cudaMemcpyKind
 {
   cudaMemcpyHostToHost = 0,
   cudaMemcpyHostToDevice = 1,
   cudaMemcpyDeviceToHost = 2,
   cudaMemcpyDeviceToDevice = 3,
   cudaMemcpyDefault = 4
-} cudaMemcpyKind;
+};
 typedef struct dim3_st { unsigned int x, y, z; } dim3;
 typedef void * cudaEvent_t;
 typedef void * cudaStream_t;
@@ -74,14 +74,14 @@ typedef struct cudaMemcpy_v3020_params_st {
 	void *dst;
 	const void *src;
 	size_t count;
-	cudaMemcpyKind kind;
+	enum cudaMemcpyKind kind;
 } cudaMemcpy_v3020_params;
 
 typedef struct cudaMemcpyAsync_v3020_params_st {
 	void *dst;
 	const void *src;
 	size_t count;
-	cudaMemcpyKind kind;
+	enum cudaMemcpyKind kind;
 	cudaStream_t stream;
 } cudaMemcpyAsync_v3020_params;
 
@@ -120,6 +120,7 @@ typedef enum {
 	EXTRAE_CUDA_PREVIOUS_TIME
 } Extrae_CUDA_Time_Type;
 
+/* Information per stream required during tracing */
 struct RegisteredStreams_t
 {
 	UINT64 host_reference_time;
@@ -141,7 +142,6 @@ struct CUDAdevices_t
 	struct RegisteredStreams_t *Stream;
 	int nstreams;
 	int initialized;
-
 #if 0
 	/* To perform sampling, CUPTI */
 	CUcontext context;
@@ -149,18 +149,20 @@ struct CUDAdevices_t
 #endif
 };
 
-void Extrae_cudaLaunch_Enter (int devid, cudaLaunch_v3020_params* p);
-void Extrae_cudaLaunch_Exit (int devid, cudaLaunch_v3020_params* p);
-void Extrae_cudaConfigureCall_Enter (int devid, cudaConfigureCall_v3020_params* p);
-void Extrae_cudaConfigureCall_Exit (int devid, cudaConfigureCall_v3020_params* p);
-void Extrae_cudaThreadSynchronize_Enter (int devid);
-void Extrae_cudaThreadSynchronize_Exit (int devid);
-void Extrae_cudaStreamCreate_Exit (int devid, cudaStreamCreate_v3020_params* p);
-void Extrae_cudaStreamSynchronize_Enter (int devid, cudaStreamSynchronize_v3020_params* p);
-void Extrae_cudaStreamSynchronize_Exit (int devid, cudaStreamSynchronize_v3020_params* p);
-void Extrae_cudaMemcpy_Enter (int devid, cudaMemcpy_v3020_params *p);
-void Extrae_cudaMemcpy_Exit (int devid, cudaMemcpy_v3020_params *p);
-void Extrae_cudaMemcpyAsync_Enter (int devid, cudaMemcpyAsync_v3020_params *p);
-void Extrae_cudaMemcpyAsync_Exit (int devid, cudaMemcpyAsync_v3020_params *p);
+void Extrae_cudaLaunch_Enter (const char*);
+void Extrae_cudaLaunch_Exit (void);
+void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);
+void Extrae_cudaConfigureCall_Exit (void);
+void Extrae_cudaThreadSynchronize_Enter (void);
+void Extrae_cudaThreadSynchronize_Exit (void);
+void Extrae_cudaStreamCreate_Enter (cudaStream_t*);
+void Extrae_cudaStreamCreate_Exit (void);
+void Extrae_cudaStreamSynchronize_Enter (cudaStream_t);
+void Extrae_cudaStreamSynchronize_Exit (void);
+void Extrae_cudaMemcpy_Enter (void*, const void*, size_t, enum cudaMemcpyKind);
+void Extrae_cudaMemcpy_Exit (void);
+void Extrae_cudaMemcpyAsync_Enter (void*, const void*, size_t, enum cudaMemcpyKind, cudaStream_t);
+void Extrae_cudaMemcpyAsync_Exit (void);
 
-void Extrae_CUDA_Initialize (int devid);
+void Extrae_reallocate_CUDA_info (unsigned nthreads);
+

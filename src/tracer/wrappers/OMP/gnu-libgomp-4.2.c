@@ -30,8 +30,6 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
-#if !defined(DYNINST_MODULE)
-
 #ifdef HAVE_DLFCN_H
 # define __USE_GNU
 # include <dlfcn.h>
@@ -1215,5 +1213,3 @@ int gnu_libgomp_4_2_hook_points (int ntask)
 
 	return hooked;
 }
-
-#endif /* !defined(DYNINST_MODULE) */

@@ -1371,7 +1371,15 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 #endif
 
 	if (me == 0)
-		fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
+	{
+		if (getenv("EXTRAE_DYNINST_RUN") != NULL)
+		{
+			if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") != 0)
+				fprintf (stdout, PACKAGE_NAME": Target application is being run.\n");
+		}
+		else
+			fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
+	}
 
 	/* Allocate a bitmap to know which tasks are tracing */
 	Extrae_Allocate_Task_Bitmap (world_size);
@@ -1387,18 +1395,31 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 #endif
 
 #if defined(CUDA_SUPPORT)
-	Extrae_CUDA_init (me);
+	/* If the application is not running under dyninst, initialize
+	   the CUDA runtime wrapping */
+	if (getenv("EXTRAE_DYNINST_RUN") != NULL)
+	{
+		if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") != 0)
+			Extrae_CUDA_init (me);
+	}
+	else
+		Extrae_CUDA_init (me);
 #endif
+
+#if defined(OMP_SUPPORT)
+	/* If the application is not running under dyninst, initialize
+	   the CUDA runtime wrapping */
+	if (getenv("EXTRAE_DYNINST_RUN") != NULL)
+	{
+		if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") != 0)
+			Extrae_OpenMP_init ();
+	}
+	else
+		Extrae_OpenMP_init();
 
 	/* Obtain the number of runnable threads in this execution.
 	   Just check for OMP_NUM_THREADS env var (if this compilation
 	   allows instrumenting OpenMP */
-#if defined(OMP_SUPPORT)
-
-#if !defined(DYNINST_MODULE)
-	openmp_tracing_init();
-#endif
-
 	numProcessors = getnumProcessors();
 
 	new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
@@ -1495,6 +1516,11 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Allocate the buffers and trace files */
 	Allocate_buffers_and_files (world_size, maximum_NumOfThreads);
 
+#if defined(CUDA_SUPPORT)
+	/* Allocate thread info for CUDA execs */
+	Extrae_reallocate_CUDA_info (maximum_NumOfThreads);
+#endif
+
 	/* This has been moved a few lines above to make sure the APPL_EV is the first in the trace */
 	ApplBegin_Time = TIME;
 	TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
@@ -1572,6 +1598,11 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 
 		/* Allocate thread info structure */
 		Extrae_reallocate_thread_info (maximum_NumOfThreads, new_num_threads);
+
+#if defined(CUDA_SUPPORT)
+		/* Allocate thread info for CUDA execs */
+		Extrae_reallocate_CUDA_info (new_num_threads);
+#endif
 
 		maximum_NumOfThreads = current_NumOfThreads = new_num_threads;
 	}

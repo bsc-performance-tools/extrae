@@ -154,7 +154,13 @@ UINT64 Clock_getCurrentTime (unsigned thread)
 
 void Clock_AllocateThreads (unsigned numthreads)
 {
-	_extrae_last_read_clock = (UINT64*) realloc (_extrae_last_read_clock, sizeof(UINT64)*numthreads);
+	_extrae_last_read_clock = (UINT64*) realloc (_extrae_last_read_clock,
+		sizeof(UINT64)*numthreads);
+	if (_extrae_last_read_clock == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": Cannot allocate timing memory for %u threads\n", numthreads);
+		exit (-1);
+	}
 }
 
 void Clock_CleanUp (void)

@@ -22,14 +22,19 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/launcher/dyninst/ompSnippets.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef OMP_WRAPPER_H_
-#define OMP_WRAPPER_H_
+#ifndef _CUDA_SNIPPETS_H_INCLUDED_
+#define _CUDA_SNIPPETS_H_INCLUDED_
 
-void Extrae_OpenMP_init (void);
+#include <BPatch.h>
+#include "applicationType.h"
+
+void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage,
+	BPatch_process *appProcess);
 
 #endif
+

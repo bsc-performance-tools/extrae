@@ -30,8 +30,6 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
-#if !defined(DYNINST_MODULE)
-
 #ifdef HAVE_DLFCN_H
 # define __USE_GNU
 # include <dlfcn.h>
@@ -51,6 +49,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "ibm-xlsmp-1.6.h"
 #include "gnu-libgomp-4.2.h"
 #include "intel-kmpc-11.h"
+
+//#define DEBUG
 
 static void (*omp_set_lock_real)(int *) = NULL;
 static void (*omp_unset_lock_real)(int *) = NULL;
@@ -195,15 +195,7 @@ int omp_get_num_threads (int p1)
 
 extern int omp_get_max_threads();
 
-/*
-  This __attribute__ tells the loader to run this routine when
-  the shared library is loaded 
-*/
-/* 
-	This is IGNORED in SARA ¿? Moved to Backend_preInitialize
-  void __attribute__ ((constructor)) openmp_tracing_init(void);
-*/
-void openmp_tracing_init (void)
+void Extrae_OpenMP_init(void)
 {
 	int hooked;
 
@@ -233,5 +225,3 @@ void openmp_tracing_init (void)
 	if (hooked)
 		common_GetOpenMPHookPoints(0);
 }
-
-#endif /* !defined(DYNINST_MODULE) */

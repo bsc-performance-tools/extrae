@@ -48,20 +48,22 @@ static char UNUSED rcsid[] = "$Id$";
 #include "cuda_common.h"
 #include "wrapper.h"
 
+//#define DEBUG
+
 /**
  ** Regular LD_PRELOAD instrumentation
  **/
-static cudaError_t (*real_cudaLaunch)(char*) = NULL;
+static cudaError_t (*real_cudaLaunch)(const char*) = NULL;
 static cudaError_t (*real_cudaConfigureCall)(dim3, dim3, size_t, cudaStream_t) = NULL;
 static cudaError_t (*real_cudaThreadSynchronize)(void) = NULL;
 static cudaError_t (*real_cudaStreamSynchronize)(cudaStream_t) = NULL;
-static cudaError_t (*real_cudaMemcpy)(void*,void*,size_t,cudaMemcpyKind) = NULL;
-static cudaError_t (*real_cudaMemcpyAsync)(void*,void*,size_t,cudaMemcpyKind,cudaStream_t) = NULL;
+static cudaError_t (*real_cudaMemcpy)(void*,const void*,size_t,enum cudaMemcpyKind) = NULL;
+static cudaError_t (*real_cudaMemcpyAsync)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t) = NULL;
 static cudaError_t (*real_cudaStreamCreate)(cudaStream_t*) = NULL;
 
 void Extrae_CUDA_init (int rank)
 {
-	real_cudaLaunch = (cudaError_t(*)(char*)) dlsym (RTLD_NEXT, "cudaLaunch");
+	real_cudaLaunch = (cudaError_t(*)(const char*)) dlsym (RTLD_NEXT, "cudaLaunch");
 	if (real_cudaLaunch == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find cudaLaunch in DSOs!!\n");
 
@@ -77,11 +79,11 @@ void Extrae_CUDA_init (int rank)
 	if (real_cudaStreamSynchronize == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find cudaStreamSynchronize in DSOs!!\n");
 
-	real_cudaMemcpy = (cudaError_t(*)(void*,void*,size_t,cudaMemcpyKind)) dlsym (RTLD_NEXT, "cudaMemcpy");
+	real_cudaMemcpy = (cudaError_t(*)(void*,const void*,size_t,enum cudaMemcpyKind)) dlsym (RTLD_NEXT, "cudaMemcpy");
 	if (real_cudaMemcpy == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find cudaMemcpy in DSOs!!\n");
 
-	real_cudaMemcpyAsync = (cudaError_t(*)(void*,void*,size_t,cudaMemcpyKind,cudaStream_t)) dlsym (RTLD_NEXT, "cudaMemcpyAsync");
+	real_cudaMemcpyAsync = (cudaError_t(*)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t)) dlsym (RTLD_NEXT, "cudaMemcpyAsync");
 	if (real_cudaMemcpyAsync == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find cudaMemcpyAsync in DSOs!!\n");
 
@@ -95,22 +97,20 @@ static int _cudaLaunch_device = 0;
 static int _cudaLaunch_stream = 0;
 #endif
 
-cudaError_t cudaLaunch (char *p1)
+cudaError_t cudaLaunch (const char *p1)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaLaunch is at %p\n", THREADID, real_cudaLaunch);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaLaunch params %p\n", THREADID, p1);
+#endif
+
 	if (real_cudaLaunch != NULL && mpitrace_on)
 	{
-		int devid;
-		cudaLaunch_v3020_params p;
-		p.entry = p1;
-
-		cudaGetDevice (&devid);
-		Extrae_CUDA_Initialize (devid);
-
-		Extrae_cudaLaunch_Enter (devid, &p);
+		Extrae_cudaLaunch_Enter (p1);
 		res = real_cudaLaunch (p1);
-		Extrae_cudaLaunch_Exit (devid, &p);
+		Extrae_cudaLaunch_Exit ();
 	}
 	else if (real_cudaLaunch != NULL && !mpitrace_on)
 	{
@@ -129,21 +129,16 @@ cudaError_t cudaConfigureCall (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaConfigureCall is at %p\n", THREADID, real_cudaConfigureCall);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaConfigureCall params p1 p2 %d %d\n", THREADID, p3, p4);
+#endif
+
 	if (real_cudaConfigureCall != NULL && mpitrace_on)
 	{
-		int devid;
-		cudaConfigureCall_v3020_params p;
-		p.gridDim = p1;
-		p.blockDim = p2;
-		p.sharedMem = p3;
-		p.stream = p4;
-
-		cudaGetDevice (&devid);
-		Extrae_CUDA_Initialize (devid);
-
-		Extrae_cudaConfigureCall_Enter (devid, &p);
+		Extrae_cudaConfigureCall_Enter (p1, p2, p3, p4);
 		res = real_cudaConfigureCall (p1, p2, p3, p4);
-		Extrae_cudaConfigureCall_Exit (devid, &p);
+		Extrae_cudaConfigureCall_Exit ();
 	}
 	else if (real_cudaConfigureCall != NULL && !mpitrace_on)
 	{
@@ -162,17 +157,15 @@ cudaError_t cudaStreamCreate (cudaStream_t *p1)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate is at %p\n", THREADID, real_cudaStreamCreate);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate params %p %p %d %d %d\n", THREADID, p1);
+#endif
+
 	if (real_cudaStreamCreate != NULL && mpitrace_on)
 	{
-		int devid;
-		cudaStreamCreate_v3020_params p;
-		p.pStream = p1;
-
-		cudaGetDevice (&devid);
-		Extrae_CUDA_Initialize (devid);
-
 		res = real_cudaStreamCreate (p1);
-		Extrae_cudaStreamCreate_Exit (devid, &p);
+		Extrae_cudaStreamCreate_Exit ();
 	}
 	else if (real_cudaStreamCreate != NULL && !mpitrace_on)
 	{
@@ -187,26 +180,20 @@ cudaError_t cudaStreamCreate (cudaStream_t *p1)
 	return res;
 }
 
-cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind p4, cudaStream_t p5)
+cudaError_t cudaMemcpyAsync (void *p1, const void *p2, size_t p3, enum cudaMemcpyKind p4, cudaStream_t p5)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpyAsync is at %p\n", THREADID, real_cudaMemcpyAsync);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpyAsync params %p %p %d %d %d\n", THREADID, p1, p2, p3, p4, p5);
+#endif
+
 	if (real_cudaMemcpyAsync != NULL && mpitrace_on)
 	{
-		int devid;
-		cudaMemcpyAsync_v3020_params p;
-		p.dst = p1;
-		p.src = p2;
-		p.count = p3;
-		p.kind = p4;
-		p.stream = p5;
-
-		cudaGetDevice (&devid);
-		Extrae_CUDA_Initialize (devid);
-
-		Extrae_cudaMemcpyAsync_Enter (devid, &p);
+		Extrae_cudaMemcpyAsync_Enter (p1, p2, p3, p4, p5);
 		res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
-		Extrae_cudaMemcpyAsync_Exit (devid, &p);
+		Extrae_cudaMemcpyAsync_Exit ();
 	}
 	else if (real_cudaMemcpyAsync != NULL && !mpitrace_on)
 	{
@@ -221,25 +208,20 @@ cudaError_t cudaMemcpyAsync (void *p1, void *p2 , size_t p3, cudaMemcpyKind p4, 
 	return res;
 }
 
-cudaError_t cudaMemcpy (void *p1, void *p2 , size_t p3, cudaMemcpyKind p4)
+cudaError_t cudaMemcpy (void *p1, const void *p2, size_t p3, enum cudaMemcpyKind p4)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpy is at %p\n", THREADID, real_cudaMemcpy);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpy params %p %p %d %d\n", THREADID, p1, p2, p3, p4);
+#endif
+
 	if (real_cudaMemcpy != NULL && mpitrace_on)
 	{
-		int devid;
-		cudaMemcpy_v3020_params p;
-		p.dst = p1;
-		p.src = p2;
-		p.count = p3;
-		p.kind = p4;
-
-		cudaGetDevice (&devid);
-		Extrae_CUDA_Initialize (devid);
-
-		Extrae_cudaMemcpy_Enter (devid, &p);
+		Extrae_cudaMemcpy_Enter (p1, p2, p3, p4);
 		res = real_cudaMemcpy (p1, p2, p3, p4);
-		Extrae_cudaMemcpy_Exit (devid, &p);
+		Extrae_cudaMemcpy_Exit ();
 	}
 	else if (real_cudaMemcpy != NULL && !mpitrace_on)
 	{
@@ -257,16 +239,15 @@ cudaError_t cudaThreadSynchronize (void)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize is at %p\n", THREADID, real_cudaThreadSynchronize);
+#endif
+
 	if (real_cudaThreadSynchronize != NULL && mpitrace_on)
 	{
-		int devid;
-
-		cudaGetDevice (&devid);
-		Extrae_CUDA_Initialize (devid);
-
-		Extrae_cudaThreadSynchronize_Enter (devid);
+		Extrae_cudaThreadSynchronize_Enter ();
 		res = real_cudaThreadSynchronize ();
-		Extrae_cudaThreadSynchronize_Exit (devid);
+		Extrae_cudaThreadSynchronize_Exit ();
 	}
 	else if (real_cudaThreadSynchronize != NULL && !mpitrace_on)
 	{
@@ -285,18 +266,16 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize is at %p\n", THREADID, real_cudaStreamSynchronize);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize params %d\n", THREADID, p1);
+#endif
+
 	if (real_cudaStreamSynchronize != NULL && mpitrace_on)
 	{
-		int devid;
-		cudaStreamSynchronize_v3020_params p;
-		p.stream = p1;
-
-		cudaGetDevice (&devid);
-		Extrae_CUDA_Initialize (devid);
-
-		Extrae_cudaStreamSynchronize_Enter (devid, &p);
+		Extrae_cudaStreamSynchronize_Enter (p1);
 		res = real_cudaStreamSynchronize (p1);
-		Extrae_cudaStreamSynchronize_Exit (devid, &p);
+		Extrae_cudaStreamSynchronize_Exit ();
 	}
 	else if (real_cudaStreamSynchronize != NULL && !mpitrace_on)
 	{

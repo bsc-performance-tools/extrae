@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include <cuda.h>
 #include <stdio.h>
 
@@ -7,10 +8,13 @@ __global__ void helloWorld(char*);
 // Host function
 int main(int argc, char** argv)
 {
+	int res;
 	int i;
 
 	// desired output
 	char str[] = "Hello World!";
+
+	res = MPI_Init (&argc, &argv);
 
 	for(i = 0; i < 12; i++)
 		str[i] -= i;
@@ -24,7 +28,7 @@ int main(int argc, char** argv)
 	cudaMemcpy(d_str, str, size, cudaMemcpyHostToDevice);
 
 	// set the grid and block sizes
-	dim3 dimGrid(2);   // one block per word
+	dim3 dimGrid(2);  // one block per word
 	dim3 dimBlock(6); // one thread per character
 
 	// invoke the kernel
@@ -36,11 +40,15 @@ int main(int argc, char** argv)
 	// Syn all threads (this is optional) HSG
 	cudaThreadSynchronize();
 
+	MPI_Barrier (MPI_COMM_WORLD);
+
 	// free up the allocated memory on the device
 	cudaFree(d_str);
 
 	// everyone's favorite part
 	printf("%s\n", str);
+
+	res = MPI_Finalize ();
 
 	return 0;
 }
