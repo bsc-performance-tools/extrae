@@ -140,7 +140,7 @@ SEQ_EXAMPLE_FILES=\
  example/FREEBSD/SEQ/README \
  example/FREEBSD/SEQ/Makefile \
  example/FREEBSD/SEQ/extrae.xml \
- example/FREEBSD/SEQ/run_static.sh \
+ example/FREEBSD/SEQ/run_instrumented.sh \
  example/FREEBSD/SEQ/function-list \
  example/FREEBSD/SEQ/run_dyninst.sh
 
@@ -192,7 +192,7 @@ SEQ_EXAMPLE_FILES=\
  example/FREEBSD/SEQ/README \
  example/FREEBSD/SEQ/Makefile \
  example/FREEBSD/SEQ/extrae.xml \
- example/FREEBSD/SEQ/run_static.sh \
+ example/FREEBSD/SEQ/run_instrumented.sh \
  example/FREEBSD/SEQ/function-list \
  example/FREEBSD/SEQ/run_dyninst.sh
 
@@ -235,7 +235,7 @@ SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/pi.c \
  example/LINUX/SEQ/pi_instrumented.c \
  example/LINUX/SEQ/run_dyninst.sh \
- example/LINUX/SEQ/run_static.sh \
+ example/LINUX/SEQ/run_instrumented.sh \
  example/LINUX/SEQ/README
 
 MRNET_EXAMPLE_FILES=\
