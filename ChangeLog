@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 18Apr2012 Build of shared libraries on BG/{P,Q}
  + 13Apr2012 Instrumentation of CUDA runtime through DynInst
                Also, support for CUDA+MPI using DynInst. Added an example.
                Removed lib_dyn_omptrace. Using libomptrace instead.

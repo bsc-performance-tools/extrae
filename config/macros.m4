@@ -824,9 +824,9 @@ AC_DEFUN([AX_PROG_PAPI],
       if test "${IS_BGL_MACHINE}" = "yes" ; then
          LIBS="-static -lpapi -L${BG_HOME}/bglsys/lib -lbgl_perfctr.rts -ldevices.rts -lrts.rts"
       elif test "${IS_BGP_MACHINE}" = "yes" ; then
-         LIBS="-static -lpapi -L${BG_HOME}/runtime/SPI -lSPI.cna"
+         LIBS="-lpapi -L${BG_HOME}/runtime/SPI -lSPI.cna"
       elif test "${IS_BGQ_MACHINE}" = "yes" ; then
-         LIBS="-static -lpapi -L${BG_HOME}/spi/lib -lSPI -lSPI_cnk"
+         LIBS="-lpapi -L${BG_HOME}/spi/lib -lSPI -lSPI_cnk"
       else
          if test "${OperatingSystem}" = "freebsd" ; then
             LIBS="-lpapi -lpmc"

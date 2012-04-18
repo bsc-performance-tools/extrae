@@ -92,22 +92,6 @@ static char UNUSED rcsid[] = "$Id$";
 /* Cal tenir requests persistents per algunes operacions */
 #include "persistent_requests.h"
 
-#if defined(IS_BG_MACHINE)
-# if defined(IS_BGL_MACHINE)
-#  include <rts.h>
-# endif
-# if defined(IS_BGP_MACHINE)
-#  include <spi/kernel_interface.h>
-#  include <common/bgp_personality.h>
-#  include <common/bgp_personality_inlines.h>
-# endif
-# if defined(IS_BGQ_MACHINE)
-#  include <firmware/include/personality.h>
-#  include <spi/include/kernel/process.h>
-#  include <spi/include/kernel/location.h>
-# endif
-#endif /* IS_BG_MACHINE */
-
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif

@@ -84,6 +84,20 @@ static char UNUSED rcsid[] = "$Id$";
 # include <pthread.h>
 #endif
 
+#if defined(IS_BG_MACHINE)
+# if defined(IS_BGL_MACHINE)
+#  include <rts.h>
+# endif
+# if defined(IS_BGP_MACHINE)
+#  include <spi/kernel_interface.h>
+#  include <common/bgp_personality.h>
+#  include <common/bgp_personality_inlines.h>
+# endif
+# if defined(IS_BGQ_MACHINE)
+#  include <firmware/include/personality.h>
+# endif
+#endif /* IS_BG_MACHINE */
+
 #if defined(IS_CELL_MACHINE)
 # include "defaults.h"
 # include "cell_wrapper.h"
