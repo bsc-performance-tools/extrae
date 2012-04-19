@@ -104,4 +104,7 @@ void Gather_Dimemas_Offsets (int numtasks, int taskid, int count,
 	unsigned long long *in_offsets, unsigned long long **out_offsets,
 	unsigned long long local_trace_size, FileSet_t *fset);
 
+unsigned * Gather_Paraver_VirtualThreads (unsigned numtasks, unsigned taskid,
+	unsigned ptask, FileSet_t *fset);
+
 #endif /* PARALLEL_MERGE_AUX_H */

@@ -1,3 +1,4 @@
+
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
  *                                   Extrae                                  *
@@ -26,44 +27,68 @@
  | @last_commit: $Date$
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef MISC_WRAPPER_DEFINED
-#define MISC_WRAPPER_DEFINED
+static char UNUSED rcsid[] = "$Id$";
 
-#include "clock.h"
-#include "extrae_types.h"
-
-void Extrae_init_Wrapper(void);
-void Extrae_fini_Wrapper(void);
-void Extrae_shutdown_Wrapper (void);
-void Extrae_restart_Wrapper (void);
-
-void Extrae_Event_Wrapper (unsigned *tipus, unsigned *valor);
-void Extrae_N_Event_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
-void Extrae_Eventandcounters_Wrapper (unsigned *Type, unsigned *Value);
-void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
-void Extrae_counters_Wrapper (void);
-void Extrae_setcounters_Wrapper (int *evc1, int *evc2);
-void Extrae_set_options_Wrapper (int options);
-void Extrae_getrusage_Wrapper (void);
-void Extrae_memusage_Wrapper (void);
-void Extrae_user_function_Wrapper (int enter);
-void Extrae_function_from_address_Wrapper (int type, void *address);
-
-void Extrae_next_hwc_set_Wrapper (void);
-void Extrae_previous_hwc_set_Wrapper (void);
-
-void Extrae_notify_new_pthread (void);
-
-void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr);
-void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
-void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
-
-void Extrae_Resume_virtual_thread_Wrapper (unsigned u);
-void Extrae_Suspend_virtual_thread_Wrapper (void);
-void Extrae_register_stacked_type_Wrapper (extrae_type_t type);
-
-void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
-  unsigned *revision);
-
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
 #endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+
+#include "vector.h"
+
+#define ALLOC_SIZE 32
+
+mpi2prv_vector_t * Vector_Init (void)
+{
+	mpi2prv_vector_t *tmp = (mpi2prv_vector_t*) malloc (sizeof(mpi2prv_vector_t));
+
+	if (tmp == NULL)
+	{
+		fprintf (stderr, "mpi2prv: Error! Cannot allocate memory for vector!\n");
+		exit (0);
+	}
+
+	tmp->count = tmp->allocated = 0;
+	tmp->data = NULL;
+
+	return tmp;
+}
+
+int Vector_Search (mpi2prv_vector_t *vec, unsigned long long v)
+{
+	unsigned u;
+
+	for (u = 0; u < vec->count; u++)
+		if (vec->data[u] == v)
+			return TRUE;
+
+	return FALSE;
+}
+
+void Vector_Add (mpi2prv_vector_t *vec, unsigned long long v)
+{
+	if (!Vector_Search(vec, v))
+	{
+		if (vec->data == NULL || vec->count+1 >= vec->allocated)
+		{
+			vec->data = realloc (vec->data, (vec->allocated + ALLOC_SIZE)*sizeof(unsigned long long));
+			if (vec->data == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for vector!\n");
+				exit (0);
+			}
+			vec->allocated += ALLOC_SIZE;
+		}
+		vec->data[vec->count] = v;
+		vec->count++;
+	}
+}
+
+unsigned Vector_Count (mpi2prv_vector_t *vec)
+{
+	return vec->count;
+}

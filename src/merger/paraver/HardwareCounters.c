@@ -81,7 +81,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 {
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
 	int cnt;
-	struct thread_t *Sthread;
+	thread_t *Sthread;
 	int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
@@ -196,7 +196,7 @@ void HardwareCounters_Get (event_t *Event, unsigned long long *buffer)
 
 void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds)
 {
-	struct thread_t *Sthread;
+	thread_t *Sthread;
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
@@ -231,7 +231,7 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 
 int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id)
 {
-	struct thread_t *Sthread;
+	thread_t *Sthread;
 	static int warn_count = 0;
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
@@ -255,7 +255,7 @@ int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id)
 
 int HardwareCounters_GetCurrentSet(int ptask, int task, int thread)
 {
-	struct thread_t *Sthread;
+	thread_t *Sthread;
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 
 	return Sthread->current_HWCSet;
@@ -274,7 +274,7 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
 	int cnt;
 	CntQueue *cItem;
-	struct thread_t *Sthread;
+	thread_t *Sthread;
 	int counters_used[MAX_HWC];
 
 	int *newIds = HardwareCounters_GetSetIds (ptask, task, thread, newSet);
@@ -322,7 +322,7 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Event)
 {
 	int cnt;
-	struct thread_t *Sthread;
+	thread_t *Sthread;
 	int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);

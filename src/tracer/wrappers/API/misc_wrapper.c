@@ -418,6 +418,14 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 		  ptr->Communications[i].tag, ptr->Communications[i].id) 
 }
 
+/* ***************************************************************************
+   These API calls are intended for NANOS instrumentation:
+   - Resume_virtual_thread: Used to mark a nanos task that is being executed
+   - Suspend_virtual_thread: Used to mark that the current nanos task is being
+      suspended. Also, dump stacked types using ->
+   - Extrae_register_stacked_type
+* ***************************************************************************/
+
 void Extrae_Resume_virtual_thread_Wrapper (unsigned u)
 {
 	TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, RESUME_VIRTUAL_THREAD_EV, u, TRUE);
@@ -428,3 +436,15 @@ void Extrae_Suspend_virtual_thread_Wrapper (void)
 	TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, SUSPEND_VIRTUAL_THREAD_EV, EMPTY, TRUE);
 }
 
+void Extrae_register_stacked_type_Wrapper (extrae_type_t type)
+{
+	TRACE_EVENT(LAST_READ_TIME,REGISTER_STACKED_TYPE_EV,type);
+}
+
+void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
+  unsigned *revision)
+{
+	*major    = EXTRAE_VERSION_MAJOR(EXTRAE_VERSION);
+	*minor    = EXTRAE_VERSION_MINOR(EXTRAE_VERSION);
+	*revision = EXTRAE_VERSION_REVISION(EXTRAE_VERSION);
+}

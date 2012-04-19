@@ -1193,21 +1193,21 @@ int getTagForCircularBuffer (void)
 
 void MatchComms_On(unsigned int ptask, unsigned int task, unsigned int thread)
 {   
-    struct thread_t * thread_info;
+    thread_t * thread_info;
     thread_info = GET_THREAD_INFO(ptask, task, thread);
     thread_info->MatchingComms = TRUE;
 }
 
 void MatchComms_Off(unsigned int ptask, unsigned int task, unsigned int thread)
 {   
-    struct thread_t * thread_info;
+    thread_t * thread_info;
     thread_info = GET_THREAD_INFO(ptask, task, thread);
     thread_info->MatchingComms = FALSE;
 }
 
 int MatchComms_Enabled(unsigned int ptask, unsigned int task, unsigned int thread)
 {   
-    struct thread_t * thread_info;
+    thread_t * thread_info;
     thread_info = GET_THREAD_INFO(ptask, task, thread);
     return thread_info->MatchingComms;
 }

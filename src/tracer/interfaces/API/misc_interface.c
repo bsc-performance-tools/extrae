@@ -240,6 +240,13 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 
 #endif /* PTHREAD_SUPPORT */
 
+#define apifTRACE_GET_VERSION(x) \
+	void x##_get_version (unsigned *M, unsigned *m, unsigned *r) \
+	{ \
+		Extrae_get_version_Wrapper (M, m, r); \
+	}
+  EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_GET_VERSION);
+
 /*** C BINDINGS + non alias routine duplication ****/
 
 #define apiTRACE_INIT(x) \
@@ -457,7 +464,9 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	{ \
 		if (mpitrace_on) \
 		{ \
+			Backend_Enter_Instrumentation (1);
 			Extrae_Resume_virtual_thread_Wrapper (u); \
+			Backend_Leave_Instrumentation ();
 		} \
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESUME_VIRTUAL_THREAD);
@@ -467,11 +476,32 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	{ \
 		if (mpitrace_on) \
 		{ \
+		Backend_Enter_Instrumentation (1); \
 			Extrae_suspend_virtual_thread_Wrapper (); \
+		Backend_Leave_Instrumentation (); \
 		} \
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SUSPEND_VIRTUAL_THREAD);
 
+#define apiTRACE_REGISTER_STACKED_TYPE(x) \
+	void x##register_stacked_type (extrae_type_t t) \
+	{ \
+		if (mpitrace_on) \
+		{ \
+			Backend_Enter_Instrumentation (1); \
+			Extrae_register_stacked_type_Wrapper (t); \
+			Backend_Leave_Instrumentation (); \
+		} \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_REGISTER_STACKED_TYPE);
+
+#define apiTRACE_GET_VERSION(x) \
+	void x##_get_version (unsigned *M, unsigned *m, unsigned *r) \
+	{ \
+		Extrae_get_version_Wrapper (M, m, r); \
+	}
+  EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_GET_VERSION);
+	
 #else /* HAVE_WEAK_ALIAS_ATTRIBUTE */
 
 /** C BINDINGS **/
@@ -694,6 +724,23 @@ void Extrae_suspend_virtual_thread (void)
 	}
 }
 
+INTERFACE_ALIASES_C(_register_stacked_type,Extrae_register_stacked_type,(extrae_type_t),void)
+void Extrae_register_stacked_type (extrae_type_t t)
+{
+	if (mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Extrae_register_stacked_type_Wrapper (t);
+		Backend_Leave_Instrumentation ();
+	}
+}
+
+INTERFACE_ALIASES_C(_get_version,Extrae_get_version,(unsigned*,unsigned*,unsigned*),void)
+void Extrae_get_version (unsigned *M, unsigned *m, unsigned *r)
+{
+	Extrae_get_version_Wrapper (M, m, r);
+}
+
 /** FORTRAN BINDINGS **/
 
 INTERFACE_ALIASES_F(_init,_INIT,extrae_init,(void),void)
@@ -862,5 +909,11 @@ void extrae_set_num_tentative_threads (int *numthreads)
 		Backend_setNumTentativeThreads (*numthreads);
 }
 #endif /* PTHREAD_SUPPORT */
+
+INTERFACE_ALIASES_F(_get_version,_GET_VERSION,extrae_get_version,(unsigned*,unsigned*,unsigned*),void)
+void extrae_get_version (unsigned *M, unsigned *m, unsigned *r)
+{
+	Extrae_get_version_Wrapper (M, m, r);
+}
 
 #endif

@@ -61,7 +61,7 @@ int Get_Last_State (void)
 unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned int task, unsigned int thread)
 {	
 	unsigned int top_state;
-	struct thread_t * thread_info;
+	thread_t * thread_info;
 
 #if defined(DEBUG_STATES)
 	fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] PUSH_STATE %d\n", ptask, task, thread, new_state);
@@ -88,7 +88,7 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int task, unsigned int thread)
 {
    unsigned int top_state;
-   struct thread_t * thread_info;
+   thread_t * thread_info;
 
 #if defined(DEBUG_STATES)
    fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] POP_STATE\n", ptask, task, thread);
@@ -129,7 +129,7 @@ unsigned int Switch_State (unsigned int state, int condition, unsigned int ptask
 
 unsigned int Top_State (unsigned int ptask, unsigned int task, unsigned int thread)
 {
-   struct thread_t * thread_info;
+   thread_t * thread_info;
   
    thread_info = GET_THREAD_INFO(ptask, task, thread);
    if (thread_info->nStates > 0)
@@ -162,7 +162,7 @@ int State_Excluded (unsigned int state)
 
 void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread, int mode)
 {
-	struct thread_t * thread_info; 
+	thread_t * thread_info; 
 
 	UNREFERENCED_PARAMETER(cpu);
 
@@ -202,7 +202,7 @@ void OLD_Initialize_States (FileSet_t * fset)
 {
    int obj;
    unsigned int ptask, task, thread, cpu;
-   struct thread_t * thread_info;
+   thread_t * thread_info;
 
    num_excluded_states = 1; 
    excluded_states = (int *)malloc(sizeof(int) * num_excluded_states);
@@ -249,7 +249,7 @@ void Initialize_States (FileSet_t * fset)
 {
    int obj;
    unsigned int ptask, task, thread, cpu;
-   struct thread_t * thread_info;
+   thread_t * thread_info;
 
    num_excluded_states = 1;
    excluded_states = (int *)malloc(sizeof(int) * num_excluded_states);

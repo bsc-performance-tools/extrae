@@ -135,7 +135,7 @@ void trace_paraver_state (
    unsigned long long current_time)
 {
 	unsigned int current_state;
-	struct thread_t * thread_info = GET_THREAD_INFO (ptask, task, thread);
+	thread_t * thread_info = GET_THREAD_INFO (ptask, task, thread);
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 	current_state = Top_State(ptask, task, thread);
 
@@ -188,7 +188,7 @@ void trace_paraver_event (
    unsigned long long time, 
    unsigned int type, UINT64 value)
 {
-	struct thread_t * thread_info;
+	thread_t * thread_info;
 	paraver_rec_t record;
 	int tipus;
 	UINT64 valor;
@@ -232,8 +232,8 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
 	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag)
 {
-	struct thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
-	struct thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
+	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
 
@@ -267,8 +267,8 @@ void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 	unsigned long long phy_r, unsigned int size, unsigned int tag,
 	int giveOffset, off_t position)
 {
-	struct thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
-	struct thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
+	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
 
@@ -305,8 +305,8 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
 	unsigned int tag)
 {
-	struct thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
-	struct thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
+	thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
+	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
 	off_t where;
 	paraver_rec_t record;
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
@@ -633,12 +633,11 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 /******************************************************************************
  *** Paraver_WriteHeader
  ******************************************************************************/
-static int Paraver_WriteHeader (unsigned num_appl, unsigned long long Ftime,
-  struct fdz_fitxer prv_fd, struct Pair_NodeCPU *info)
+static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
+	unsigned num_appl, unsigned long long Ftime, struct fdz_fitxer prv_fd,
+	struct Pair_NodeCPU *info)
 {
 	int NumNodes;
-	time_t h;
-	char Date[80];
 	char Header[1024];
 	unsigned threads, task, ptask, node, num_cpus = 1;
 #if defined(HAVE_MPI)  /* Sequential tracing does not use comunicators */
@@ -647,96 +646,125 @@ static int Paraver_WriteHeader (unsigned num_appl, unsigned long long Ftime,
 	unsigned int num_tasks;
 #endif
 
-	time (&h);
-	strftime (Date, 80, "%d/%m/%Y at %H:%M", localtime (&h));
-
-	for (ptask = 0; ptask < num_appl; ptask++)
-		num_cpus = MAX (num_cpus, obj_table[ptask].ntasks);
-
-	/* Write the Paraver header */
-#if SIZEOF_LONG == 8
-	sprintf (Header, "#Paraver (%s):%lu_ns:", Date, Ftime);
-#elif SIZEOF_LONG == 4
-	sprintf (Header, "#Paraver (%s):%llu_ns:", Date, Ftime);
-#endif
-	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-
-	NumNodes = 0;
-	while (info[NumNodes].files != NULL)
-		NumNodes++;
-
-	sprintf (Header, "%d(", NumNodes);
-	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-
-	if (NumNodes > 0)
+	if (taskid == 0)
 	{
-		sprintf (Header, "%d", info[0].CPUs);
+		char Date[80];
+		time_t h;
+
+		time (&h);
+		strftime (Date, 80, "%d/%m/%Y at %H:%M", localtime (&h));
+
+		for (ptask = 0; ptask < num_appl; ptask++)
+			num_cpus = MAX (num_cpus, obj_table[ptask].ntasks);
+
+		/* Write the Paraver header */
+#if SIZEOF_LONG == 8
+		sprintf (Header, "#Paraver (%s):%lu_ns:", Date, Ftime);
+#elif SIZEOF_LONG == 4
+		sprintf (Header, "#Paraver (%s):%llu_ns:", Date, Ftime);
+#endif
 		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
-		NumNodes = 1;
-		while (info[NumNodes].CPUs > 0)
-		{
-			sprintf (Header,",%d", info[NumNodes].CPUs);
-			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+		NumNodes = 0;
+		while (info[NumNodes].files != NULL)
 			NumNodes++;
+
+		sprintf (Header, "%d(", NumNodes);
+		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+		if (NumNodes > 0)
+		{
+			sprintf (Header, "%d", info[0].CPUs);
+			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+			NumNodes = 1;
+			while (info[NumNodes].CPUs > 0)
+			{
+				sprintf (Header,",%d", info[NumNodes].CPUs);
+				PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+				NumNodes++;
+			}
 		}
+		sprintf (Header, "):%d:", num_appl);
+		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 	}
-	sprintf (Header, "):%d:", num_appl);
-	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 	/* For every application, write down its resources */
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		sprintf (Header, "%d(", obj_table[ptask].ntasks);
-		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-
-		for (task = 0; task < obj_table[ptask].ntasks - 1; task++)
-		{
-			threads = obj_table[ptask].tasks[task].virtual_threads;
-			node = obj_table[ptask].tasks[task].nodeid;
-
-			sprintf (Header, "%d:%d,", threads, node);
-			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-		}
-		threads = obj_table[ptask].tasks[obj_table[ptask].ntasks-1].virtual_threads;
-		node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
-
-#if defined(HAVE_MPI)
-		sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
-#else
-		sprintf (Header, "%d:%d),0", threads, node);
+#if defined(PARALLEL_MERGE)
+		unsigned *vthreads_count = Gather_Paraver_VirtualThreads (numtasks, taskid,
+		  ptask, fset);
 #endif
-		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-	}
-	sprintf (Header, "\n");
-	PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
-
-#if defined(HAVE_MPI)
-	/* Write the communicator definition for every application */
-	for (ptask = 1; ptask <= num_appl; ptask++)
-	{
-		num_tasks = obj_table[ptask - 1].ntasks;
-
-		/* Write the communicators created manually by the application */
-		final = (primer_comunicador (&com) < 0);
-		while (!final)
+		if (taskid == 0)
 		{
-			/* Write this communicator */
-			sprintf (Header, "c:%d:%d:%d", ptask, com.id, com.num_tasks);
+			sprintf (Header, "%d(", obj_table[ptask].ntasks);
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-			for (i = 0; i < com.num_tasks; i++)
+
+			for (task = 0; task < obj_table[ptask].ntasks - 1; task++)
 			{
-				sprintf (Header, ":%d", com.tasks[i] + 1);
+#if defined(PARALLEL_MERGE)
+				threads = vthreads_count[task];
+#else
+				threads = obj_table[ptask].tasks[task].num_virtual_threads; /*nthreads;*/
+#endif
+				node = obj_table[ptask].tasks[task].nodeid;
+
+				sprintf (Header, "%d:%d,", threads, node);
 				PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 			}
-			PRVWRITECNTL (FDZ_WRITE (prv_fd, "\n"));
+#if defined(PARALLEL_MERGE)
+			threads = vthreads_count[obj_table[ptask].ntasks-1];
+#else
+			threads = obj_table[ptask].tasks[obj_table[ptask].ntasks-1].num_virtual_threads; /*nthreads;*/
+#endif
+			node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
 
-		/* Get the next communicator */
-		final = (seguent_comunicador (&com) < 0);
+#if defined(HAVE_MPI)
+			sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
+#else
+			sprintf (Header, "%d:%d),0", threads, node);
+#endif
+			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+#if defined(PARALLEL_MERGE)
+			free (vthreads_count);			
+#endif
 		}
 	}
+
+	if (taskid == 0)
+	{
+		sprintf (Header, "\n");
+		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+
+#if defined(HAVE_MPI)
+		/* Write the communicator definition for every application */
+		for (ptask = 1; ptask <= num_appl; ptask++)
+		{
+			num_tasks = obj_table[ptask - 1].ntasks;
+
+			/* Write the communicators created manually by the application */
+			final = (primer_comunicador (&com) < 0);
+			while (!final)
+			{
+				/* Write this communicator */
+				sprintf (Header, "c:%d:%d:%d", ptask, com.id, com.num_tasks);
+				PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+				for (i = 0; i < com.num_tasks; i++)
+				{
+					sprintf (Header, ":%d", com.tasks[i] + 1);
+					PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+				}
+				PRVWRITECNTL (FDZ_WRITE (prv_fd, "\n"));
+
+			/* Get the next communicator */
+			final = (seguent_comunicador (&com) < 0);
+			}
+		}
 #endif
+	}
 
   return 0;
 }
@@ -1056,8 +1084,8 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 #endif
 	} /* taskid == 0 */
 
-	if (0 == taskid)
-		error = Paraver_WriteHeader (num_appl, Ftime, prv_fd, NodeCPUinfo);
+	error = Paraver_WriteHeader (fset, numtasks, taskid, num_appl, Ftime, prv_fd,
+	  NodeCPUinfo);
 
 #if defined(PARALLEL_MERGE)
 	res = MPI_Bcast (&error, 1, MPI_INT, 0, MPI_COMM_WORLD);

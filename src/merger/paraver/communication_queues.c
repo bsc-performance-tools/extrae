@@ -38,7 +38,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <mpi.h>
 #endif
 
-//#define DEBUG
+/* #define DEBUG */
 
 /**************************************************************************
 *** SEND PART

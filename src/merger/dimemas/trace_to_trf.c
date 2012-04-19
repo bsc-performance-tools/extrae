@@ -110,7 +110,7 @@ unsigned long long Dimemas_hr_to_relative (UINT64 iotimer)
 	return iotimer - InitTracingTime;
 }
 
-static void Dimemas_GenerateOffsets (unsigned num_appl, struct ptask_t *table,
+static void Dimemas_GenerateOffsets (unsigned num_appl, ptask_t *table,
 	unsigned long long **ptr, unsigned int *count)
 {
 	unsigned long long *offsets;

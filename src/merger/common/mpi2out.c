@@ -131,6 +131,8 @@ void Help (const char *ProgName)
           "              Choose whether use a unique value identifier for different callers.\n"  
           "    -sort-addresses\n"
 					"              Sort file name, line events in information linked with source code.\n"
+          "    -task-view\n"
+					"              Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
           "    --        Take the next trace files as a diferent parallel task.\n"
           "\n",
           ProgName, ProgName, ProgName);
@@ -742,6 +744,16 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			set_option_merge_SincronitzaTasks (FALSE);
 			set_option_merge_SincronitzaTasks_byNode (FALSE);
 			AutoSincronitzaTasks = FALSE;
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-task-view"))
+		{
+			set_option_merge_NanosTaskView (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-task-view"))
+		{
+			set_option_merge_NanosTaskView (FALSE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "--"))

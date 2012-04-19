@@ -103,6 +103,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define USER_RECV_EV             40000022
 #define RESUME_VIRTUAL_THREAD_EV 40000023
 #define SUSPEND_VIRTUAL_THREAD_EV 40000024
+#define REGISTER_STACKED_TYPE_EV 40000025
 
 #define RUSAGE_BASE              45000000
 enum {

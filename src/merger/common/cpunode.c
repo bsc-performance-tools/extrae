@@ -140,6 +140,10 @@ struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
 			if (found = (strcmp (nodenames[j], files[i].node) == 0))
 				found_pos = j;
 
+#if defined(DEBUG)
+		fprintf (stdout, "Checking for node %s - found? %d - position? %d\n", files[i].node, found, found_pos);
+#endif
+
 		/* If didn't appear, allocate it */
 		if (!found)
 		{
@@ -171,6 +175,10 @@ struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
 			}
 			nodefiles[numnodes][nodecount[numnodes]-1] = i;
 			numnodes++;
+
+#if defined(DEBUG)
+		fprintf (stdout, "Node %s (in position %d) -> occurrences = %d\n", files[i].node, numnodes-1, nodecount[numnodes-1]);
+#endif
 		}
 		else
 		{
@@ -184,7 +192,12 @@ struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
 				exit (0);
 			}
 			nodefiles[found_pos][nodecount[found_pos]-1] = i;
+
+#if defined(DEBUG)
+		fprintf (stdout, "Node %s (in position %d) -> occurrences = %d\n", files[i].node, found_pos, nodecount[found_pos]);
+#endif
 		}
+
 	}
 
 	/* Allocate output information */
@@ -199,6 +212,9 @@ struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
 	for (total_cpus = 0, i = 0; i < numnodes; i++)
 	{
 		result[i].CPUs = nodecount[i];
+#if defined(DEBUG)
+		fprintf (stdout, "NodeInfo::result[%d].CPUs = %d\n", i, result[i].CPUs);
+#endif
 		result[i].files = (struct input_t **) malloc (result[i].CPUs*sizeof(struct input_t*));
 		if (result[i].files == NULL)
 		{
@@ -210,13 +226,16 @@ struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
 		{
 			/* Fill CPU and NODEID within the file_t structure */
 			files[nodefiles[i][j]].cpu = ++total_cpus;
-			files[nodefiles[i][j]].nodeid = i;;
+			files[nodefiles[i][j]].nodeid = i+1; /* Number of node starts at 1 */
 
 			/* Fill result */
 			result[i].files[j] = &files[nodefiles[i][j]];
 		}
 	}
+
+	/* Last entry should be 0,NULL */
 	result[numnodes].CPUs = 0;
+	result[numnodes].files = NULL;
 
 	/* Free memory */
 	if (numnodes > 0)
@@ -278,10 +297,18 @@ int GenerateROWfile (char *name, struct Pair_NodeCPU *info)
 	for (i = 0; i < numNodes; i++)
 		fprintf (fd, "%s\n", info[i].files[0]->node);
 
-	fprintf (fd, "\nLEVEL THREAD SIZE %d\n", numCPUs);
-	for (i = 0; i < numNodes; i++)
-		for (j = 0; j < info[i].CPUs; j++) 
-			fprintf (fd, "%s\n", info[i].files[j]->threadname);
+	if (!get_option_merge_NanosTaskView())
+	{
+		fprintf (fd, "\nLEVEL THREAD SIZE %d\n", numCPUs);
+		for (i = 0; i < numNodes; i++)
+			for (j = 0; j < info[i].CPUs; j++) 
+				fprintf (fd, "%s\n", info[i].files[j]->threadname);
+	}
+	else
+	{
+		/* What naming scheme should we follow in Nanos Task View?
+		   While undecided, keep this clear. Paraver will handle it. */
+	}
 
 	fclose (fd);
 

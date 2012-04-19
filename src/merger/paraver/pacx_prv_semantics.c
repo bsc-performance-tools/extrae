@@ -151,8 +151,8 @@ static int Any_Send_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned recv_thread, recv_vthread, EvType, EvValue;
-	struct thread_t *thread_info;
-	struct task_t *task_info, *task_info_partner;
+	thread_t *thread_info;
+	task_t *task_info, *task_info_partner;
 	event_t * recv_begin, * recv_end;
 
 	EvType  = Get_EvEvent (current_event);
@@ -221,8 +221,8 @@ static int SendRecv_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask, 
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	struct thread_t *thread_info;
-	struct task_t *task_info, *task_info_partner;
+	thread_t *thread_info;
+	task_t *task_info, *task_info_partner;
 #if !defined(AVOID_SENDRECV)
 	unsigned recv_thread, send_thread, recv_vthread, send_vthread;
 	event_t *recv_begin, *recv_end, *send_begin, *send_end;
@@ -494,8 +494,8 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned EvType, EvValue, send_thread, send_vthread;
-	struct thread_t *thread_info;
-	struct task_t *task_info, *task_info_partner;
+	thread_t *thread_info;
+	task_t *task_info, *task_info_partner;
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_info = GET_TASK_INFO(ptask, task);
@@ -573,8 +573,8 @@ static int IRecv_Event (event_t * current_event,
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned EvType, EvValue, send_thread, send_vthread;
-	struct thread_t *thread_info;
-	struct task_t *task_info, *task_info_partner;
+	thread_t *thread_info;
+	task_t *task_info, *task_info_partner;
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_info = GET_TASK_INFO(ptask, task);
@@ -672,8 +672,8 @@ int PACX_PersistentRequest_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	struct thread_t *thread_info;
-	struct task_t *task_info, *task_info_partner;
+	thread_t *thread_info;
+	task_t *task_info, *task_info_partner;
 	event_t *recv_begin, *recv_end;
 	event_t *send_begin, *send_end;
 	off_t send_position;
@@ -796,7 +796,7 @@ int PACX_Start_Event (event_t * current_event, unsigned long long current_time,
 	FileSet_t *fset)
 {
 	unsigned int EvType, EvValue;
-	struct thread_t * thread_info;
+	thread_t * thread_info;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);

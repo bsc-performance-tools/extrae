@@ -270,7 +270,7 @@ List of Tables</A>
 <LI>1.2. <A NAME="tex2html9"
   HREF="user-guide.html#174">Available libraries in Extrae. Their availability depends upon the configure process.</A>
 <LI>6.1. <A NAME="tex2html18"
-  HREF="user-guide.html#2856">Description of the available mergers in the <I>Extrae</I> package.</A></UL>
+  HREF="user-guide.html#2882">Description of the available mergers in the <I>Extrae</I> package.</A></UL>
 <P>
 
 <P>
@@ -2299,6 +2299,12 @@ The following routines are defined in the <TT>${EXTRAE_HOME}/include/extrae_user
 <P>
 
 <UL>
+<LI><TT>void Extrae_get_version (unsigned *major, unsigned *minor, unsigned *revision)</TT>
+<BR>
+Returns the version of the underlying <I>Extrae</I> package. Although an application may be compiled to a specific <I>Extrae</I> library, by using the appropriate shared library commands, the application may use a different <I>Extrae</I> library.
+
+<P>
+</LI>
 <LI><TT>void Extrae_init (void)</TT>
 <BR>
 Initializes the tracing library.
@@ -2306,7 +2312,7 @@ Initializes the tracing library.
 
 <P>
 </LI>
-<LI><TT>extrae_init_type_t Extrae_is_initialized (void);</TT>
+<LI><TT>extrae_init_type_t Extrae_is_initialized (void)</TT>
 <BR>
 This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API, MPI or PACX initialization).
 
@@ -2498,7 +2504,7 @@ Emits an event into the tracefile which references the source code (data include
 </H1>
 
 <P>
-<EM><B>NOTE:</B> This API is in experimental stage. Use it at your own risk!</EM>
+<EM><B>NOTE:</B> This API is in experimental stage and it is only available in C. Use it at your own risk!</EM>
 
 <P>
 The extended API makes use of two special structures located in <TT>${PREFIX}/include/extrae_types.h</TT>. The structures are <TT>extrae_UserCommunication</TT> and <TT>extrae_CombinedEvents</TT>. The former is intended to encode an event that will be converted into a Paraver communication when its partner equivalent event has found. The latter is used to generate events containing multiple kinds of information at the same time.
@@ -2619,43 +2625,47 @@ A pointer to <TT>extrae_UserCommunication</TT> structures containing <TT>nCommun
 The extended API contains the following routines:
 
 <UL>
-<LI><TT>void Extrae_init_UserCommunication (struct extrae_UserCommunication *);</TT>
+<LI><TT>void Extrae_init_UserCommunication (struct extrae_UserCommunication *)</TT>
 <BR>
 Use this routine to initialize an extrae_UserCommunication structure.
 </LI>
-<LI><TT>void Extrae_init_CombinedEvents (struct extrae_CombinedEvents *);</TT>
+<LI><TT>void Extrae_init_CombinedEvents (struct extrae_CombinedEvents *)</TT>
 <BR>
 Use this routine to initialize an extrae_CombinedEvents structure.
 </LI>
-<LI><TT>void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *);</TT>
+<LI><TT>void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *)</TT>
 <BR>
 Use this routine to emit to the tracefile the events set in the extrae_CombinedEvents given.
 </LI>
-<LI><TT>void Extrae_resume_virtual_thread (unsigned vthread);</TT>
+<LI><TT>void Extrae_resume_virtual_thread (unsigned vthread)</TT>
 <BR>
 This routine changes the thread identifier so as to be vthread in the final tracefile. <EM>Improper use of this routine may result in corrupt tracefiles.</EM>
 </LI>
-<LI><TT>void Extrae_suspend_virtual_thread (void);</TT>
+<LI><TT>void Extrae_suspend_virtual_thread (void)</TT>
 <BR>
 This routine recovers the original thread identifier (given by routines like pthread_self or omp_get_thread_num, for instance).
 </LI>
-<LI><TT>void Extrae_set_threadid_function (unsigned (*threadid_function)(void));</TT>
+<LI><TT>void Extrae_register_stacked_type (extrae_type_t type)</TT>
+<BR>
+Registers which event types are required to be managed in a stack way whenever <TT>void Extrae_resume_virtual_thread</TT> or <TT>void Extrae_suspend_virtual_thread</TT> are called.
+</LI>
+<LI><TT>void Extrae_set_threadid_function (unsigned (*threadid_function)(void))</TT>
 <BR>
 Defines the routine that will be used as a thread identifier inside the tracing facility.
 </LI>
-<LI><TT>void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void));</TT>
+<LI><TT>void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void))</TT>
 <BR>
 Defines the routine that will count all the executing threads inside the tracing facility.
 </LI>
-<LI><TT>void Extrae_set_taskid_function (unsigned (*taskid_function)(void));</TT>
+<LI><TT>void Extrae_set_taskid_function (unsigned (*taskid_function)(void))</TT>
 <BR>
 Defines the routine that will be used as a task identifier inside the tracing facility.
 </LI>
-<LI><TT>void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void));</TT>
+<LI><TT>void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void))</TT>
 <BR>
 Defines the routine that will count all the executing tasks inside the tracing facility.
 </LI>
-<LI><TT>void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void));</TT>
+<LI><TT>void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void))</TT>
 <BR>
 Establishes the barrier routine among tasks. It is needed for synchronization purposes.
 </LI>
@@ -2774,11 +2784,11 @@ In order to use Paraver, those intermediate files (<I>i.e.</I>, <TT>.mpit</TT> f
 
 <P>
 The target trace type is defined in the XML configuration file used at the instrumentation step (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters <TT>-paraver</TT> or <TT>-dimemas</TT><A NAME="tex2html17"
-  HREF="#foot2849"><SUP>6.1</SUP></A>.
+  HREF="#foot2875"><SUP>6.1</SUP></A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="2856"></A>
+<DIV ALIGN="CENTER"><A NAME="2882"></A>
 <TABLE>
 <CAPTION><STRONG>Table 6.1:</STRONG>
 Description of the available mergers in the <I>Extrae</I> package.</CAPTION>
@@ -3095,7 +3105,7 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 <P>
 DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures<A NAME="tex2html19"
-  HREF="#foot3174"><SUP>7.1</SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+  HREF="#foot3200"><SUP>7.1</SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
 
 <P>
 
@@ -3183,7 +3193,7 @@ Please note, this script is particularly adapted to the MOAB/Slurm queue systems
 
 <P>
 LD_PRELOAD (or LDR_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names<A NAME="tex2html20"
-  HREF="#foot3270"><SUP>7.2</SUP></A>) they are not tested.
+  HREF="#foot3296"><SUP>7.2</SUP></A>) they are not tested.
 
 <P>
 We show how this mechanism works on Linux (or similar environments) in subsection <A HREF="#subsec:Examples_Linux">7.2.1</A> and on AIX in subsection <A HREF="#subsec:Examples_AIX">7.2.3</A>.
@@ -3573,10 +3583,10 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
  WIDTH="990" HEIGHT="696" ALIGN="BOTTOM" BORDER="0"
  SRC="img2.png"
  ALT="\begin{landscape}
-% latex2html id marker 3541\begin{table}
+% latex2html id marker 3567\begin{table}
 \centerline{
 \begin...
-...riables available to configure {\sf {E}xtrae} }
+...riables available to configure {\sf {E}xtrae}\ }
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -3587,11 +3597,11 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
  WIDTH="990" HEIGHT="612" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="\begin{landscape}
-% latex2html id marker 3562\par
+% latex2html id marker 3588\par
 \begin{table}
 \centerline{
 \...
-... to configure {\sf {E}xtrae} ({\em continued})}
+... to configure {\sf {E}xtrae}\ ({\em continued})}
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -3834,7 +3844,7 @@ These are the instrumented MPI routines in the <I>Extrae</I> package:
 <LI>MPI_Init
 </LI>
 <LI>MPI_Init_thread<A NAME="tex2html22"
-  HREF="#foot3174"><SUP>D.1</SUP></A>
+  HREF="#foot3200"><SUP>D.1</SUP></A>
 </LI>
 <LI>MPI_Finalize
 </LI>
@@ -3933,34 +3943,34 @@ These are the instrumented MPI routines in the <I>Extrae</I> package:
 <LI>MPI_Sendrecv_replace
 </LI>
 <LI>MPI_File_open<A NAME="tex2html23"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_close<A NAME="tex2html24"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read<A NAME="tex2html25"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_all<A NAME="tex2html26"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write<A NAME="tex2html27"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_all<A NAME="tex2html28"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_at<A NAME="tex2html29"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_at_all<A NAME="tex2html30"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_at<A NAME="tex2html31"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_at_all<A NAME="tex2html32"
-  HREF="#foot3270"><SUP>D.2</SUP></A>
+  HREF="#foot3296"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_Get<A NAME="tex2html33"
   HREF="#foot1794"><SUP>D.3</SUP></A>
@@ -4233,7 +4243,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald on 2012-04-13
+The translation was initiated by Harald on 2012-04-19
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot199">... file</A><A
@@ -4271,17 +4281,17 @@ The translation was initiated by Harald on 2012-04-13
 <DD>This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section <A HREF="#sec:XMLSectionBuffer">4.11</A>).
 
 </DD>
-<DT><A NAME="foot2849">...<TT>-dimemas</TT></A><A
+<DT><A NAME="foot2875">...<TT>-dimemas</TT></A><A
  HREF="user-guide.html#tex2html17"><SUP>6.1</SUP></A></DT>
 <DD>The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.
 
 </DD>
-<DT><A NAME="foot3174">... architectures</A><A
+<DT><A NAME="foot3200">... architectures</A><A
  HREF="user-guide.html#tex2html19"><SUP>7.1</SUP></A></DT>
 <DD>The IA-64 architecture support was dropped by DynInst 7.0
 
 </DD>
-<DT><A NAME="foot3270">... names</A><A
+<DT><A NAME="foot3296">... names</A><A
  HREF="user-guide.html#tex2html20"><SUP>7.2</SUP></A></DT>
 <DD>Look at <TT><A NAME="tex2html21"
   HREF="http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html">http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html</A></TT> for further information.
@@ -4299,7 +4309,7 @@ The translation was initiated by Harald on 2012-04-13
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald
-2012-04-13
+2012-04-19
 </ADDRESS>
 </BODY>
 </HTML>

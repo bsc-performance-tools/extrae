@@ -157,7 +157,7 @@ static int Tracing_Event (event_t * current_event,
                           FileSet_t *fset)
 {
 	unsigned int EvType, EvValue, i;
-	struct task_t * task_info;
+	task_t * task_info;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -604,8 +604,8 @@ static int Evt_CountersDefinition (
 static void ResetCounters (unsigned ptask, unsigned task, unsigned thread)
 {
 	unsigned cnt;
-	struct thread_t * Sthread = GET_THREAD_INFO(ptask, task, thread); 
-	struct task_t *Stask = GET_TASK_INFO(ptask, task);
+	thread_t * Sthread = GET_THREAD_INFO(ptask, task, thread); 
+	task_t *Stask = GET_TASK_INFO(ptask, task);
 
 	Stask->tracing_disabled = FALSE;
 
@@ -630,7 +630,7 @@ int HWC_Change_Ev (
 	unsigned int hwctype[MAX_HWC+1];
 	unsigned long long hwcvalue[MAX_HWC+1];
 	unsigned int prev_hwctype[MAX_HWC];
-	struct thread_t * Sthread;
+	thread_t * Sthread;
 	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
 	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
 
@@ -834,8 +834,8 @@ static int User_Send_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned partner, recv_thread, recv_vthread;
-	struct task_t *task_info, *task_info_partner;
-	struct thread_t *thread_info;
+	task_t *task_info, *task_info_partner;
+	thread_t *thread_info;
 	event_t * recv_begin, * recv_end;
 	UNREFERENCED_PARAMETER(cpu);
 
@@ -901,8 +901,8 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned partner, send_thread, send_vthread;
-	struct task_t *task_info, *task_info_partner;
-	struct thread_t *thread_info;
+	task_t *task_info, *task_info_partner;
+	thread_t *thread_info;
 	UNREFERENCED_PARAMETER(cpu);
 	UNREFERENCED_PARAMETER(current_time);
 
@@ -967,18 +967,61 @@ static int Resume_Virtual_Thread_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned new_virtual_thread;
-	struct thread_t *thread_info;
-	struct task_t *task_info;
+	thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+	task_t *task_info = GET_TASK_INFO(ptask, task);
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
-	task_info = GET_TASK_INFO(ptask, task);
+	if (!get_option_merge_NanosTaskView())
+	{
+		unsigned i, u;
+		unsigned new_active_task_thread = Get_EvValue(current_event);
 
-	/* new_virtual_thread = 1+Get_EvValue(current_event); */
-	new_virtual_thread = Get_EvValue(current_event);
+		/* If this is a new virtual thread, allocate its information within the TASK */
+		if (task_info->num_active_task_threads < new_active_task_thread)
+		{
+			/* Allocate memory for the new coming threads */
+			task_info->active_task_threads = (active_task_thread_t*) realloc (task_info->active_task_threads,
+			  new_active_task_thread*sizeof(active_task_thread_t));
+			if (task_info->active_task_threads == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate information for active task threads\n");
+				exit (0);
+			}
 
-	task_info->virtual_threads = MAX(task_info->virtual_threads, new_virtual_thread);
-	thread_info->virtual_thread = new_virtual_thread;
+			/* Init their structures */
+			for (u = task_info->num_active_task_threads; u < new_active_task_thread; u++)
+			{
+				task_info->active_task_threads[u].stacked_type = NULL;
+				task_info->active_task_threads[u].num_stacks = 0;
+			}
+
+			task_info->num_active_task_threads = new_active_task_thread;
+			thread_info->active_task_thread = new_active_task_thread;
+		}
+		else
+		{
+			/* Write as many "PUSHEs" in tracefile according to the current
+			   stack, for each of the visited stacked types */
+			active_task_thread_t *att = &(task_info->active_task_threads[new_active_task_thread-1]);
+			for (u = 0; u < att->num_stacks; u++)
+				for (i = 0; i < Stack_Depth(att->stacked_type[u].stack); i++)
+					trace_paraver_event (cpu, ptask, task, thread, current_time,
+					  att->stacked_type[u].type,
+					  Stack_ValueAt(att->stacked_type[u].stack, i));
+
+			thread_info->active_task_thread = new_active_task_thread;
+		}
+	}
+	else
+	{
+		unsigned new_virtual_thread = Get_EvValue(current_event);
+
+		thread_info->virtual_thread = new_virtual_thread;
+		task_info->num_virtual_threads = MAX(new_virtual_thread, task_info->num_virtual_threads);
+	}
+
+//	trace_paraver_event (cpu, ptask, task, thread, current_time, 123456, Get_EvValue(current_event));
+
+	return 0;
 }
 
 /******************************************************************************
@@ -989,9 +1032,38 @@ static int Suspend_Virtual_Thread_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	struct thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+	/* If we don't want to see nanos tasks, we need to support emit the
+	   stacked values pops at suspend time */
+	if (!get_option_merge_NanosTaskView())
+	{
+		unsigned u, i;
+		thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+		task_t *task_info = GET_TASK_INFO(ptask, task);
+		active_task_thread_t *att = &(task_info->active_task_threads[thread_info->active_task_thread-1]);
 
-	/* thread_info->virtual_thread = thread; */
+		/* Write as many "POPs" (0s) in tracefile according to the current
+		   stack depth, for each of the visited stacked types */
+		for (u = 0; u < att->num_stacks; u++)
+			for (i = 0; i < Stack_Depth(att->stacked_type[u].stack); i++)
+				trace_paraver_event (cpu, ptask, task, thread, current_time,
+				  att->stacked_type[u].type, 0);
+
+//		trace_paraver_event (cpu, ptask, task, thread, current_time, 123456, 0);
+	}
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  Suspend_Virtual_Thread_Event
+ ******************************************************************************/
+
+static int Register_Stacked_Type_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	Vector_Add (RegisteredStackValues, Get_EvValue(current_event));
+	return 0;
 }
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
@@ -1026,7 +1098,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ USER_SEND_EV, User_Send_Event },
 	{ USER_RECV_EV, User_Recv_Event },
 	{ RESUME_VIRTUAL_THREAD_EV, Resume_Virtual_Thread_Event },
-	{ SUSPEND_VIRTUAL_THREAD_EV, SkipHandler },
+	{ SUSPEND_VIRTUAL_THREAD_EV, Suspend_Virtual_Thread_Event },
+	{ REGISTER_STACKED_TYPE_EV, Register_Stacked_Type_Event },
 	{ NULL_EV, NULL }
 };
 

@@ -1,6 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 19Apr2012 Add functionality -task-view -no-task-view in mpi2prv to generate
+               traces specially for OMPSs.
+             Add Extrae_get_version API call.
+             Updated documentation.
  + 18Apr2012 Build of shared libraries on BG/{P,Q}
  + 13Apr2012 Instrumentation of CUDA runtime through DynInst
                Also, support for CUDA+MPI using DynInst. Added an example.

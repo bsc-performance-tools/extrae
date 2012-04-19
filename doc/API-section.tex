@@ -8,11 +8,14 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
 
 \begin{itemize}
 
+ \item {\tt void Extrae\_get\_version (unsigned *major, unsigned *minor, unsigned *revision)}\\
+ Returns the version of the underlying \TRACE package. Although an application may be compiled to a specific \TRACE library, by using the appropriate shared library commands, the application may use a different \TRACE library.
+
  \item {\tt void Extrae\_init (void)}\\
  Initializes the tracing library.\\
  {\bf NOTE:} This routine is called automatically by either {\tt MPI\_Init} or when tracing is performed by the DynInst launcher.
 
- \item {\tt extrae\_init\_type\_t Extrae\_is\_initialized (void);}\\
+ \item {\tt extrae\_init\_type\_t Extrae\_is\_initialized (void)}\\
  This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API, MPI or PACX initialization).
 
  \item {\tt void Extrae\_fini (void)}\\
@@ -128,7 +131,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
 
 \section{Extended API}\label{sec:ExtendedAPI}
 
-{\em {\bf NOTE:} This API is in experimental stage. Use it at your own risk!}
+{\em {\bf NOTE:} This API is in experimental stage and it is only available in C. Use it at your own risk!}
 
 The extended API makes use of two special structures located in {\tt \$\{PREFIX\}/include/extrae\_types.h}. The structures are {\tt extrae\_UserCommunication} and {\tt extrae\_CombinedEvents}. The former is intended to encode an event that will be converted into a Paraver communication when its partner equivalent event has found. The latter is used to generate events containing multiple kinds of information at the same time.
 
@@ -205,25 +208,27 @@ The structure {\tt extrae\_CombinedEvents} contains the following fields:
 
 The extended API contains the following routines:
 \begin{itemize}
-	\item {\tt void Extrae\_init\_UserCommunication (struct extrae\_UserCommunication *);}\\
+	\item {\tt void Extrae\_init\_UserCommunication (struct extrae\_UserCommunication *)}\\
 	Use this routine to initialize an extrae\_UserCommunication structure.
-	\item {\tt void Extrae\_init\_CombinedEvents (struct extrae\_CombinedEvents *);}\\
+	\item {\tt void Extrae\_init\_CombinedEvents (struct extrae\_CombinedEvents *)}\\
 	Use this routine to initialize an extrae\_CombinedEvents structure.
-	\item {\tt void Extrae\_emit\_CombinedEvents (struct extrae\_CombinedEvents *);}\\
+	\item {\tt void Extrae\_emit\_CombinedEvents (struct extrae\_CombinedEvents *)}\\
 	Use this routine to emit to the tracefile the events set in the extrae\_CombinedEvents given.
-	\item {\tt void Extrae\_resume\_virtual\_thread (unsigned vthread);}\\
+	\item {\tt void Extrae\_resume\_virtual\_thread (unsigned vthread)}\\
 	This routine changes the thread identifier so as to be vthread in the final tracefile. {\em Improper use of this routine may result in corrupt tracefiles.}
-	\item {\tt void Extrae\_suspend\_virtual\_thread (void);}\\
+	\item {\tt void Extrae\_suspend\_virtual\_thread (void)}\\
 	This routine recovers the original thread identifier (given by routines like pthread\_self or omp\_get\_thread\_num, for instance).
-	\item {\tt void Extrae\_set\_threadid\_function (unsigned (*threadid\_function)(void));}\\
+	\item {\tt void Extrae\_register\_stacked\_type (extrae\_type\_t type)}\\
+	Registers which event types are required to be managed in a stack way whenever {\tt void Extrae\_resume\_virtual\_thread} or {\tt void Extrae\_suspend\_virtual\_thread} are called.
+	\item {\tt void Extrae\_set\_threadid\_function (unsigned (*threadid\_function)(void))}\\
 	Defines the routine that will be used as a thread identifier inside the tracing facility.
-	\item {\tt void Extrae\_set\_numthreads\_function (unsigned (*numthreads\_function)(void));}\\
+	\item {\tt void Extrae\_set\_numthreads\_function (unsigned (*numthreads\_function)(void))}\\
 	Defines the routine that will count all the executing threads inside the tracing facility.
-	\item {\tt void Extrae\_set\_taskid\_function (unsigned (*taskid\_function)(void));}\\
+	\item {\tt void Extrae\_set\_taskid\_function (unsigned (*taskid\_function)(void))}\\
 	Defines the routine that will be used as a task identifier inside the tracing facility.
-	\item {\tt void Extrae\_set\_numtasks\_function (unsigned (*numtasks\_function)(void));}\\
+	\item {\tt void Extrae\_set\_numtasks\_function (unsigned (*numtasks\_function)(void))}\\
 	Defines the routine that will count all the executing tasks inside the tracing facility.
-	\item {\tt void Extrae\_set\_barrier\_tasks\_function (void (*barriertasks\_function)(void));}\\
+	\item {\tt void Extrae\_set\_barrier\_tasks\_function (void (*barriertasks\_function)(void))}\\
 	Establishes the barrier routine among tasks. It is needed for synchronization purposes.
 \end{itemize}
 

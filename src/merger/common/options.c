@@ -106,6 +106,10 @@ static int option_merge_SortAddresses = TRUE;
 int get_option_merge_SortAddresses (void) { return option_merge_SortAddresses; }
 void set_option_merge_SortAddresses (int b) { option_merge_SortAddresses = b; }
 
+static int option_merge_NanosTaskView = FALSE;
+int get_option_merge_NanosTaskView (void) { return option_merge_NanosTaskView; }
+void set_option_merge_NanosTaskView (int b) {option_merge_NanosTaskView = b; }
+
 #if defined(IS_BG_MACHINE)
 static int option_merge_BG_XYZT = FALSE;
 int get_option_merge_BG_XYZT (void) { return option_merge_BG_XYZT; }

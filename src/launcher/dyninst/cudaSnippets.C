@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/launcher/dyninst/ompSnippets.C $
- | @last_commit: $Date: 2011-10-25 15:50:49 +0200 (dt, 25 oct 2011) $
- | @version:     $Revision: 815 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: ompSnippets.C 815 2011-10-25 13:50:49Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>

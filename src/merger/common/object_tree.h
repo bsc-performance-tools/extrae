@@ -39,6 +39,7 @@
 #include "new-queue.h"
 #include "HardwareCounters.h"
 #include "communication_queues.h"
+#include "stack.h"
 
 #define MAX_STATES 16
 
@@ -48,7 +49,7 @@
 #define GET_THREAD_INFO(ptask, task, thread) \
     &(obj_table[ptask - 1].tasks[task - 1].threads[thread - 1])
 
-typedef struct thread_t
+typedef struct thread_st
 {
 	/* Where is this thread running? */
 	unsigned int cpu;
@@ -78,39 +79,56 @@ typedef struct thread_t
 	int **HWCSets;
 	int num_HWCSets;
 	int current_HWCSet;
-	long long counters[MAX_HWC];  /* HWC values */
+	long long counters[MAX_HWC];     /* HWC values */
 #endif
 
-	event_t *Send_Rec;  /* Store send records */
-	event_t *Recv_Rec;  /* Store receive records */
+	event_t *Send_Rec;               /* Store send records */
+	event_t *Recv_Rec;               /* Store receive records */
 	FileItem_t *file;
 
 	unsigned long long dimemas_size; /* Store dimemas translation size */
 
-	unsigned virtual_thread; /* if so, which virtual thread is? */
+	unsigned virtual_thread;         /* if so, which virtual thread is? */
+	unsigned active_task_thread;     /* if so, which active task has been resumed? */
 } thread_t;
 
-typedef struct task_t
+typedef struct active_task_thread_stack_type_st
+{
+	mpi2prv_stack_t *stack;
+	unsigned type;
+} active_task_thread_stack_type_t;
+
+typedef struct active_task_thread_st
+{
+	active_task_thread_stack_type_t *stacked_type;
+	unsigned num_stacks;
+} active_task_thread_t;
+
+typedef struct task_st
 {
 	unsigned int nodeid;
-  unsigned int nthreads;
-  unsigned int tracing_disabled;
-  NewQueue_t *recv_queue;
-  NewQueue_t *send_queue;
-  struct thread_t *threads;
-	unsigned virtual_threads;
+	unsigned int nthreads;
+	thread_t *threads;
+	unsigned int tracing_disabled;
+	NewQueue_t *recv_queue;
+	NewQueue_t *send_queue;
+
+	unsigned num_virtual_threads;
+	unsigned num_active_task_threads;
+	active_task_thread_t *active_task_threads;
+
 } task_t;
 
-typedef struct ptask_t
+typedef struct ptask_st
 {
   unsigned int ntasks;
-  struct task_t *tasks;
+  task_t *tasks;
 } ptask_t;
 
-typedef struct appl_t
+typedef struct appl_st
 {
 	unsigned int nptasks;
-	struct ptask_t *ptasks;
+	ptask_t *ptasks;
 } appl_t;
 
 extern ptask_t *obj_table;

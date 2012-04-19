@@ -53,7 +53,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 		maxthreads = MAX(files[i].thread, maxthreads);
 	}
 
-	obj_table = (struct ptask_t*) malloc (sizeof(struct ptask_t)*num_appl);
+	obj_table = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
 	if (NULL == obj_table)
 	{
 		fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d ptasks!\n", num_appl);
@@ -63,7 +63,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	for (i = 0; i < num_appl; i++)
 	{
 		/* Allocate per task information within each ptask */
-		obj_table[i].tasks = (struct task_t*) malloc (sizeof(struct task_t)*maxtasks);
+		obj_table[i].tasks = (task_t*) malloc (sizeof(task_t)*maxtasks);
 		if (NULL == obj_table[i].tasks)
 		{
 			fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d tasks (ptask = %d)\n", maxtasks, i+1);
@@ -77,7 +77,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			  &(obj_table[i].tasks[j].recv_queue));
 
 			/* Allocate per thread information within each task */
-			obj_table[i].tasks[j].threads = (struct thread_t*) malloc (sizeof(struct thread_t)*maxthreads);
+			obj_table[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*maxthreads);
 			if (NULL == obj_table[i].tasks[j].threads)
 			{
 				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", maxthreads, i+1, j+1);
@@ -96,21 +96,27 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 		obj_table[ptask].ntasks = 0;
 		for (task = 0; task < maxtasks; task++)
 		{
-			obj_table[ptask].tasks[task].tracing_disabled = FALSE;
-			obj_table[ptask].tasks[task].nthreads = 0;
+			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			task_info->tracing_disabled = FALSE;
+			task_info->nthreads = 0;
+			task_info->num_virtual_threads = 0;
+
 			for (thread = 0; thread < maxthreads; thread++)
 			{
-				obj_table[ptask].tasks[task].threads[thread].virtual_thread = thread+1;
+				thread_t *thread_info = GET_THREAD_INFO(ptask+1,task+1,thread+1);
 
-				obj_table[ptask].tasks[task].threads[thread].nStates = 0;
-				obj_table[ptask].tasks[task].threads[thread].First_Event = TRUE;
-				obj_table[ptask].tasks[task].threads[thread].HWCChange_count = 0;
-				obj_table[ptask].tasks[task].threads[thread].MatchingComms = TRUE;
+				thread_info->virtual_thread = thread+1;
+				task_info->num_virtual_threads = MAX(thread_info->virtual_thread, task_info->num_virtual_threads);
+
+				thread_info->nStates = 0;
+				thread_info->First_Event = TRUE;
+				thread_info->HWCChange_count = 0;
+				thread_info->MatchingComms = TRUE;
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-				obj_table[ptask].tasks[task].threads[thread].HWCSets = NULL;
-				obj_table[ptask].tasks[task].threads[thread].num_HWCSets = 0;
-				obj_table[ptask].tasks[task].threads[thread].current_HWCSet = 0;
+				thread_info->HWCSets = NULL;
+				thread_info->num_HWCSets = 0;
+				thread_info->current_HWCSet = 0;
 #endif
 			}
 		}
@@ -118,16 +124,23 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 
 	for (i = 0; i < nfiles; i++)
 	{
-		ptask = files[i].ptask;
-		task = files[i].task;
-		thread = files[i].thread;
+		task_t *task_info = GET_TASK_INFO(files[i].ptask, files[i].task);
+		thread_t *thread_info = GET_THREAD_INFO(files[i].ptask, files[i].task, files[i].thread);
 
-		obj_table[ptask-1].tasks[task-1].nodeid = files[i].nodeid;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].cpu = files[i].cpu;
-		obj_table[ptask-1].tasks[task-1].threads[thread-1].dimemas_size = 0;
 		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, task);
-		obj_table[ptask-1].tasks[task-1].virtual_threads =
-			obj_table[ptask-1].tasks[task-1].nthreads =
-				MAX (obj_table[ptask-1].tasks[task-1].nthreads, thread);
+		task_info->nodeid = files[i].nodeid;
+		task_info->nthreads = MAX (task_info->nthreads, files[i].thread);
+		thread_info->cpu = files[i].cpu;
+		thread_info->dimemas_size = 0;
 	}
+
+	/* This is needed for get_option_merge_NanosTaskView() == FALSE */
+	for (ptask = 0; ptask < num_appl; ptask++)
+		for (task = 0; task < maxtasks; task++)
+		{
+			task_t *task_info = GET_TASK_INFO(ptask+1, task+1);
+			task_info->num_active_task_threads = 0;
+			task_info->active_task_threads = NULL;
+		}
 }
+

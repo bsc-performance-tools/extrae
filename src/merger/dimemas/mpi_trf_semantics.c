@@ -56,7 +56,7 @@ static int ANY_Send_Event (event_t * current, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset)
 {
-	struct thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	int tipus;
 	int isimmediate;
 	int comunicador;
@@ -285,7 +285,7 @@ static int GlobalOP_Event (event_t * current, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset)
 {
-	struct thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UINT64 valor;
 	int tipus;
 	double temps;
@@ -326,7 +326,7 @@ static int Receive_Event (event_t * current, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset)
 {
-	struct thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UINT64 valor;
 	int isimmediate = (MPI_IRECV_EV == Get_EvEvent(current));
 	int tipus;
@@ -377,7 +377,7 @@ static int MPI_Common_Event (event_t * current, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset)
 {
-	struct thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UINT64 valor;
 	int tipus;
 	double temps;
@@ -439,7 +439,7 @@ static int SendRecv_Event (event_t * current, unsigned long long current_time,
 {
 	static unsigned int receiver, send_tag;
 	static int send_size;
-	struct thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UINT64 valor;
 	unsigned int sender = 0;
 	unsigned int receive_tag = 0;
@@ -516,7 +516,7 @@ static int MPI_Persistent_req_use_Event (event_t * current,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	struct thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
+	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UINT64 valor;
 	int tipus;
 	double temps;

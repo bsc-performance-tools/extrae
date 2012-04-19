@@ -797,3 +797,54 @@ void ShareNodeNames (int numtasks, char ***nodenames)
 	*nodenames = TasksNodes;
 }
 
+unsigned * Gather_Paraver_VirtualThreads (unsigned numtasks, unsigned taskid,
+	unsigned ptask, FileSet_t *fset)
+{
+	int res;
+	unsigned *temp, *temp_out = NULL;
+	unsigned ntasks = obj_table[ptask].ntasks;
+	unsigned u;
+
+	if (0 == taskid)
+		fprintf (stdout, "mpi2prv: Sharing thread accounting information for ptask %d", ptask);
+	fflush (stdout);
+
+	temp = (unsigned*) malloc (ntasks*sizeof(unsigned));
+	if (NULL == temp)
+	{
+		fprintf (stderr, "mpi2prv: Error! Task %d unable to allocate memory to gather virtual threads!\n", taskid);
+		fflush (stderr);
+		exit (-1);
+	}
+
+	if (taskid == 0)
+	{
+		temp_out = (unsigned*) malloc (ntasks*sizeof(unsigned));
+		if (NULL == temp_out)
+		{
+			fprintf (stderr, "mpi2prv: Error! Task %d unable to allocate memory to gather virtual threads!\n", taskid);
+			fflush (stderr);
+			exit (-1);
+		}
+	}
+
+	for (u = 0; u < ntasks; u++)
+		if (isTaskInMyGroup(fset, u))
+			temp[u] = obj_table[ptask].tasks[u].num_virtual_threads;
+		else
+			temp[u] = 0;
+
+	/* Reduce information into root task */
+	res = MPI_Reduce (temp, temp_out, ntasks, MPI_UNSIGNED, MPI_SUM, 0,
+	  MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Reduce, "Failed to gather number of virtual threads");
+
+	if (0 == taskid)
+		fprintf (stdout, " done\n");
+	fflush (stdout);
+
+	free (temp);
+
+	return temp_out;
+}
+

@@ -20,7 +20,9 @@ common_FILES = \
  common/options.c common/options.h \
  common/object_tree.h common/object_tree.c \
  common/semantics.c common/semantics.h \
- common/addresses.c common/addresses.h
+ common/addresses.c common/addresses.h \
+ common/vector.c common/vector.h \
+ common/stack.c common/stack.h
 
 dimemas_FILES = \
  dimemas/dimemas_generator.c dimemas/dimemas_generator.h \

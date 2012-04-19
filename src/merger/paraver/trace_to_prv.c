@@ -103,6 +103,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "cuda_prv_events.h"
 #include "addr2info.h"
 #include "timesync.h"
+#include "vector.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -111,6 +112,8 @@ static char UNUSED rcsid[] = "$Id$";
 int **EnabledTasks = NULL;
 unsigned long long **EnabledTasks_time = NULL;
 struct address_collector_t CollectedAddresses;
+
+mpi2prv_vector_t *RegisteredStackValues;
 
 static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 {
@@ -305,6 +308,9 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	Initialize_States (fset);
 	AddressCollector_Initialize (&CollectedAddresses);
 
+	RegisteredStackValues = Vector_Init();
+	//Vector_Add (RegisteredStackValues, 9000000);
+
 	if (0 == taskid)
 	{
 		fprintf (stdout, "mpi2prv: Parsing intermediate files\n");
@@ -335,11 +341,16 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		if (getEventType (EvType, &Type))
 		{
 			current_time = TIMESYNC(task-1, Get_EvTime (current_event));
+#if defined(DEBUG)
+			fprintf (stderr, "mpi2prv: Parsing event %u:%u:%u <%u,%llu(%llu)> @%llu|%llu\n", ptask, task, thread, Get_EvEvent (current_event), Get_EvValue (current_event), Get_EvMiscParam(current_event, current_time, Get_EvTime(current_event)));
+#endif
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
 			    Type == MPI_TYPE || Type == PACX_TYPE || Type == TRT_TYPE ||
 			    Type == CUDA_TYPE)
 			{
+				task_t *task_info = GET_TASK_INFO(ptask, task);
+
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
 				if (handler != NULL)
 				{
@@ -363,6 +374,55 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 				}
 				else
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);
+
+				/* Deal with Nanos Task View if we have registered stacked values
+				   and if we have seen a resume/suspend thread */
+				if (!get_option_merge_NanosTaskView() &&
+				    Vector_Count(RegisteredStackValues) > 0 &&
+				    task_info->num_active_task_threads > 0)
+				{
+
+					if (Get_EvEvent(current_event) == USER_EV &&
+					    Vector_Search (RegisteredStackValues, Get_EvValue(current_event)))
+					{
+						thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+						active_task_thread_t *att = &(task_info->active_task_threads[thread_info->active_task_thread-1]);
+						unsigned u;
+						unsigned pos;
+						int found = FALSE;
+
+						/* Look for existing stacked_types for the current task/thread */
+						for (u = 0; u < att->num_stacks; u++)
+							if (att->stacked_type[u].type == Get_EvValue(current_event))
+							{
+								pos = u;
+								found = TRUE;
+								break;
+							}
+						if (!found)
+						{
+							/* If wasn't find, this is the first event for such type in
+							   this task/thread, create it */
+							pos = att->num_stacks;
+
+							att->stacked_type = (active_task_thread_stack_type_t*) realloc
+							  (att->stacked_type, sizeof(active_task_thread_stack_type_t)*(pos+1));
+							if (att->stacked_type == NULL)
+							{
+								fprintf (stderr, "mpi2prv: Fatal error! Cannot reallocate stacked_type for the task/thread\n");
+								exit (0);
+							}
+							att->stacked_type[pos].stack = Stack_Init();
+							att->stacked_type[pos].type = Get_EvValue(current_event);
+							att->num_stacks++;
+						}
+
+						if (Get_EvMiscParam(current_event) > 0)
+							Stack_Push (att->stacked_type[pos].stack, Get_EvMiscParam(current_event));
+						else if (Get_EvMiscParam (current_event) == 0)
+							Stack_Pop (att->stacked_type[pos].stack);
+					}
+				}
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				if (Get_EvHWCRead (current_event))

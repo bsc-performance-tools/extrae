@@ -56,7 +56,7 @@ void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s, 
 	event_t *send_end, event_t *recv_begin, event_t *recv_end, 
 	int atposition, off_t position)
 {
-	struct thread_t *thread_r_info, *thread_s_info;
+	thread_t *thread_r_info, *thread_s_info;
 	unsigned long long log_s, log_r, phy_s, phy_r;
 	unsigned cpu_r, cpu_s;
 

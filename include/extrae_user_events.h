@@ -195,6 +195,9 @@ void SEQtrace_emit_CombinedEvents (struct extrae_CombinedEvents *);
 
 void Extrae_resume_virtual_thread (unsigned vthread);
 void Extrae_suspend_virtual_thread (void);
+void Extrae_register_stacked_type (extrae_type_t type);
+
+void Extrae_get_version (unsigned *major, unsigned *minor, unsigned *revision);
 
 #ifdef __cplusplus
 }
