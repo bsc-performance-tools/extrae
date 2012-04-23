@@ -126,7 +126,7 @@ There are two different mechanisms to instrument user functions. One is using Dy
 
  \item If you use the GNU C compiler with the option {\tt -finstrument-functions} at compile and link stages, the {\tt list} attribute must point a file with a list of entries like:
 
-{\tt function\_name \# address}
+{\tt address \# function\_name}
 
 You can generate this list by using the nm command applied to the binary. For example, {\tt nm | grep FUNCTION} will show you the function name, followed by the type of FUNCTION (should be T or t) and then followed by the address of the symbol.
 \end{itemize}
