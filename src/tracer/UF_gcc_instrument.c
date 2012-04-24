@@ -42,6 +42,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #include "UF_gcc_instrument.h"
 
+/* #define DEBUG */
+
 /* Configure the hash so it uses up to 1 Mbyte */
 #if SIZEOF_VOIDP == 8
 # define MAX_UFs_l2  (17)
@@ -75,26 +77,52 @@ static int LookForUFaddress (void *address);
 
 void __cyg_profile_func_enter (void *this_fn, void *call_site)
 {
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": DEBUG TID %d __cyg_profile_func_enter (%p, %p)\n", THREADID, this_fn, call_site);
+#else
 	UNREFERENCED_PARAMETER (call_site);
+#endif
 
 	if (mpitrace_on && UF_tracing_enabled)
 	{
 		if (LookForUFaddress (this_fn))
 		{
+#if defined(DEBUG)
+			fprintf (stderr, PACKAGE_NAME": DEBUG TID %d LookForUFaddress (%p) == TRUE\n", THREADID, this_fn);
+#endif
 			TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, (uintptr_t) this_fn, TRACING_HWC_UF);
+		}
+		else
+		{
+#if defined(DEBUG)
+			fprintf (stderr, PACKAGE_NAME": DEBUG TID %d LookForUFaddress (%p) == FALSE\n", THREADID, this_fn);
+#endif
 		}
 	}
 }
 
 void __cyg_profile_func_exit (void *this_fn, void *call_site)
 {
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": DEBUG TID %d __cyg_profile_func_exit (%p, %p)\n", THREADID, this_fn, call_site);
+#else
 	UNREFERENCED_PARAMETER (call_site);
+#endif
 
 	if (mpitrace_on && UF_tracing_enabled)
 	{
 		if (LookForUFaddress (this_fn))
 		{
+#if defined(DEBUG)
+			fprintf (stderr, PACKAGE_NAME": DEBUG TID %d LookForUFaddress (%p) == TRUE\n", THREADID, this_fn);
+#endif
 			TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, EVT_END, TRACING_HWC_UF);
+		}
+		else
+		{
+#if defined(DEBUG)
+			fprintf (stderr, PACKAGE_NAME": DEBUG TID %d LookForUFaddress (%p) == FALSE\n", THREADID, this_fn);
+#endif
 		}
 	}
 }
