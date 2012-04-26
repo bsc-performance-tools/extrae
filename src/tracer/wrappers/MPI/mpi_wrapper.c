@@ -707,8 +707,8 @@ int MPI_generate_spu_file_list (int number_of_spus)
    NOTE: Some C libraries (mpich 1.2.x) use the C initialization and do not
    offer mpi_init (fortran).
 */
-#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
-     !defined(COMBINED_SYMBOLS))
+//HSG: I think that MPI_C_CONTAINS_FORTRAN_MPI_INIT is not the proper check to do here//#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+//     !defined(COMBINED_SYMBOLS))
 /******************************************************************************
  ***  PMPI_Init_Wrapper
  ******************************************************************************/

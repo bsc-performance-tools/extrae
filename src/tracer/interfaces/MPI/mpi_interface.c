@@ -152,8 +152,10 @@ unsigned int get_MPI_NumOpsGlobals()
 
 #if defined(FORTRAN_SYMBOLS)
 
-#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
-     !defined(COMBINED_SYMBOLS))
+//HSG: I think that MPI_C_CONTAINS_FORTRAN_MPI_INIT is not the proper check to do here
+//#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+//     !defined(COMBINED_SYMBOLS))
+
 /******************************************************************************
  ***  MPI_Init
  ******************************************************************************/
