@@ -10,13 +10,13 @@ endif
 #
 
 install-data-hook:
-	cp ../src/common/extrae_version.h $(includedir)
-	cd $(includedir); $(LN_S) -f extrae_user_events.h mpitrace_user_events.h
-	cd $(includedir); $(LN_S) -f extraef_user_events.h mpitracef_user_events.h
+	cp ../src/common/extrae_version.h $(DESTDIR)$(includedir)
+	cd $(DESTDIR)$(includedir); $(LN_S) -f extrae_user_events.h mpitrace_user_events.h
+	cd $(DESTDIR)$(includedir); $(LN_S) -f extraef_user_events.h mpitracef_user_events.h
 if CELL_SDK_1
-	cd $(includedir); $(LN_S) -f ppu_trace_sdk1.h ppu_trace.h
+	cd $(DESTDIR)$(includedir); $(LN_S) -f ppu_trace_sdk1.h ppu_trace.h
 else
 if CELL_SDK_2
-	cd $(includedir); $(LN_S) -f ppu_trace_sdk2.h ppu_trace.h
+	cd $(DESTDIR)$(includedir); $(LN_S) -f ppu_trace_sdk2.h ppu_trace.h
 endif
 endif
