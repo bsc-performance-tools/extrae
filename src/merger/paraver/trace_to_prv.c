@@ -342,7 +342,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		{
 			current_time = TIMESYNC(task-1, Get_EvTime (current_event));
 #if defined(DEBUG)
-			fprintf (stderr, "mpi2prv: Parsing event %u:%u:%u <%u,%llu(%llu)> @%llu|%llu\n", ptask, task, thread, Get_EvEvent (current_event), Get_EvValue (current_event), Get_EvMiscParam(current_event, current_time, Get_EvTime(current_event)));
+			fprintf (stderr, "mpi2prv: Parsing event %u:%u:%u <%u,%llu(%llu)> @%llu|%llu\n", ptask, task, thread, Get_EvEvent (current_event), Get_EvValue (current_event), Get_EvMiscParam(current_event), current_time, Get_EvTime(current_event));
 #endif
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
