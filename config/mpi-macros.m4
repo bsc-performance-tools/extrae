@@ -329,7 +329,7 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
 
       dnl If we've previously set MPICC to CC then we don't have MPICC
       dnl Add the default includes and libraries
-      if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+      if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
          CFLAGS="${MPI_CFLAGS}"
          LIBS="${MPI_LIBS} ${MPI_F_LIB}"
          LDFLAGS="${MPI_LDFLAGS}"
@@ -405,7 +405,7 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_1SIDED],
 
 	dnl If we've previously set MPICC to CC then we don't have MPICC
 	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
 		CFLAGS="${MPI_CFLAGS}"
 		LIBS="${MPI_LIBS}"
 		LDFLAGS="${MPI_LDFLAGS}"
@@ -443,7 +443,7 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_IO],
 
 	dnl If we've previously set MPICC to CC then we don't have MPICC
 	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o test "${MPICC}" = "gcc" ; then
 		CFLAGS="${MPI_CFLAGS}"
 		LIBS="${MPI_LIBS}"
 		LDFLAGS="${MPI_LDFLAGS}"
@@ -482,7 +482,7 @@ AC_DEFUN([AX_CHECK_MPI_C_HAS_FORTRAN_MPI_INIT],
 
 	dnl If we've previously set MPICC to CC then we don't have MPICC
 	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
 		CFLAGS="${MPI_CFLAGS}"
 		LIBS="${MPI_LIBS}"
 		LDFLAGS="${MPI_LDFLAGS}"
@@ -519,7 +519,7 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_C],
 
 	dnl If we've previously set MPICC to CC then we don't have MPICC
 	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
 		CFLAGS="${MPI_CFLAGS}"
 		LIBS="${MPI_LIBS}"
 		LDFLAGS="${MPI_LDFLAGS}"
@@ -564,7 +564,7 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_F],
 	AX_FLAGS_SAVE()
 
 	if test "${MPI_F_LIB_FOUND}" = "yes" ; then
-		if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+		if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
 			CFLAGS="${MPI_CFLAGS}"
 			LIBS="${MPI_LIBS} ${MPI_F_LIB}"
 			LDFLAGS="${MPI_LDFLAGS}"
@@ -618,7 +618,7 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_C_AND_FORTRAN_SYMBOLS],
 
 	dnl If we've previously set MPICC to CC then we don't have MPICC
 	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" ; then
+	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
 		CFLAGS="${MPI_CFLAGS}"
 		LIBS="${MPI_LIBS}"
 		LDFLAGS="${MPI_LDFLAGS}"

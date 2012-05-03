@@ -33,7 +33,7 @@
 #include <BPatch.h>
 
 void loadMPIPatches (BPatch_image *appImage);
-BPatch_function * getMPIPatch (char *routine);
+BPatch_function * getMPIPatch (char *routine, bool recursenames = true);
 
 #endif
 

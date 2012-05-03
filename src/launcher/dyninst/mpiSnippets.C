@@ -73,8 +73,8 @@ struct MPIroutines_t
 static struct MPIroutines_t MPIroutines[] =
 	{
 		MPIROUTINE_C_T(PMPI_Init),
-#if defined(MPI_HAS_INIT_THREAD)
-		MPIROUTINE_C_T(PMPI_Init),
+#if defined(MPI_HAS_INIT_THREAD_C)
+		MPIROUTINE_C_T(PMPI_Init_thread),
 #endif /* MPI_HAS_INIT_THREAD */
 		MPIROUTINE_C_T(PMPI_Finalize),
 		MPIROUTINE_C_T(PMPI_Bsend),
@@ -137,7 +137,9 @@ static struct MPIroutines_t MPIroutines[] =
 		MPIROUTINE_C_T(PMPI_File_write_at_all),
 #endif /* MPI_SUPPORTS_MPI_IO */
 		MPIROUTINE_F_T(pmpi_init, PMPI_INIT),
+#if defined(MPI_HAS_INIT_THREAD_F)
 		MPIROUTINE_F_T(pmpi_init_thread, PMPI_INIT_THREAD),
+#endif /* MPI_HAS_INIT_THREAD_F */
 		MPIROUTINE_F_T(pmpi_finalize, PMPI_FINALIZE),
 		MPIROUTINE_F_T(pmpi_bsend, PMPI_BSEND),
 		MPIROUTINE_F_T(pmpi_ssend, PMPI_SSEND),
@@ -240,7 +242,7 @@ void loadMPIPatches (BPatch_image *appImage)
 	cout << "Done" << endl;
 }
 
-BPatch_function * getMPIPatch (char *routine)
+BPatch_function * getMPIPatch (char *routine, bool recursenames)
 {
 	BPatch_function *res = NULL;
 	int i;
@@ -263,12 +265,25 @@ BPatch_function * getMPIPatch (char *routine)
 	   Even worse, on MN, one can find both in the same binary
 	   This could be a dyninst naming issue on aliased symbols.
 	*/
-	if (res == NULL && !(routine[0] == 'P' || routine[0] == 'p'))
+	if (res == NULL && recursenames)
 	{
+		BPatch_function *f;
 		string new_name_lo = string("p")+routine;
 		string new_name_up = string("P")+routine;
-		BPatch_function *f_lo = getMPIPatch ((char*) new_name_lo.c_str());
-		return (f_lo != NULL)?f_lo:getMPIPatch ((char*) new_name_up.c_str());
+		f = getMPIPatch ((char*) new_name_lo.c_str(), false);
+		if (f != NULL)
+			return f;
+		f = getMPIPatch ((char*) new_name_up.c_str(), false);
+		if (f != NULL)
+			return f;
+		string sroutine = routine;
+		if (sroutine[sroutine.length()-1] == 'f')
+		{
+			string tmp = sroutine.substr(0, sroutine.length()-1);
+			return getMPIPatch ((char*) tmp.c_str(), true);
+		}
+		else
+			return NULL;
 	}
 	else
 		return res;
