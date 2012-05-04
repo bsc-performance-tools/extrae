@@ -175,6 +175,8 @@ extern unsigned long long WantedCheckControlPeriod;
 
 extrae_init_type_t Extrae_is_initialized_Wrapper (void);
 void Extrae_set_is_initialized (extrae_init_type_t type);
+unsigned Extrae_get_initial_TASKID (void);
+void Extrae_set_initial_TASKID (unsigned u);
 
 int Extrae_get_ApplicationIsMPI (void);
 int Extrae_get_ApplicationIsPACX (void);

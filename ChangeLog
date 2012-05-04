@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 04May2012 Support for NANOS distributed
  + 19Apr2012 Add functionality -task-view -no-task-view in mpi2prv to generate
                traces specially for OMPSs.
              Add Extrae_get_version API call.

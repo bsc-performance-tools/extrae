@@ -273,7 +273,7 @@ static void Generate_Task_File_List (void)
 
 	for (thid = 0; thid < Backend_getMaximumOfThreads(); thid++)
 	{
-		FileName_PTT(tmpname, Get_FinalDir(0), appl_name, getpid(), 0, thid, EXT_MPIT);
+		FileName_PTT(tmpname, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thid, EXT_MPIT);
 
 		sprintf (tmp_line, "%s on %s named %s\n", tmpname, hostname, Extrae_get_thread_name(thid));
 		ret = write (filedes, tmp_line, strlen (tmp_line));
@@ -308,6 +308,9 @@ void Extrae_init_Wrapper (void)
 		/* Take the time */
 		temps_init = TIME;
 
+		/* Execute a barrier within tasks so they will be synchronized */
+		Extrae_barrier_tasks();
+
 		/* Take the time (a newer one) */
 		temps_fini = TIME;
 
@@ -316,6 +319,7 @@ void Extrae_init_Wrapper (void)
 			return;
 
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_EXTRAE_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{

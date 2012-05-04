@@ -387,7 +387,7 @@ void Extrae_set_ApplicationIsPACX (int b)
 }
 
 /******************************************************************************
- *** Store the first mechanism to initialize the tracing
+ *** Store the first mechanism to initialize the tracing 
  ******************************************************************************/
 static extrae_init_type_t Extrae_Init_Type = EXTRAE_NOT_INITIALIZED;
 
@@ -399,6 +399,21 @@ extrae_init_type_t Extrae_is_initialized_Wrapper (void)
 void Extrae_set_is_initialized (extrae_init_type_t type)
 {
 	Extrae_Init_Type = type;
+}
+
+/******************************************************************************
+ *** Store the first taskid 
+ ******************************************************************************/
+static unsigned Extrae_Initial_TASKID = 0;
+
+unsigned Extrae_get_initial_TASKID (void)
+{
+	return Extrae_Initial_TASKID;
+}
+
+void Extrae_set_initial_TASKID (unsigned u)
+{
+	Extrae_Initial_TASKID = u;
 }
 
 /******************************************************************************
@@ -1796,7 +1811,7 @@ static void Backend_Finalize_close_mpits (int thread)
 
 	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
 	   as that moment was 0, independently if MPI or PACX has run */
-	initialTASKID = (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)?0:TASKID;
+	initialTASKID = Extrae_get_initial_TASKID();
 
 	/* Some FS looks quite lazy and "needs time" to create directories?
 	   This loop fixes this issue (seen in BGP) */

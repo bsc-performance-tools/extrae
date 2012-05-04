@@ -707,7 +707,8 @@ int MPI_generate_spu_file_list (int number_of_spus)
    NOTE: Some C libraries (mpich 1.2.x) use the C initialization and do not
    offer mpi_init (fortran).
 */
-//HSG: I think that MPI_C_CONTAINS_FORTRAN_MPI_INIT is not the proper check to do here//#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+//HSG: I think that MPI_C_CONTAINS_FORTRAN_MPI_INIT is not the proper check to do here
+//#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
 //     !defined(COMBINED_SYMBOLS))
 /******************************************************************************
  ***  PMPI_Init_Wrapper
@@ -795,6 +796,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{
@@ -908,6 +910,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{
@@ -932,7 +935,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 #endif /* MPI_HAS_INIT_THREAD_F */
 
 //#endif
-/* 
+/* HSG 
      (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
      !defined(COMBINED_SYMBOLS))
      */
@@ -4082,6 +4085,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{
@@ -4187,6 +4191,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{

@@ -210,8 +210,8 @@ void NAME_ROUTINE_C2F(mpi_init_thread) (MPI_Fint *required, MPI_Fint *provided,
 }
 #endif /* MPI_HAS_INIT_THREAD_F */
 
-//#endif
 /* 
+//#endif
      (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
      !defined(COMBINED_SYMBOLS))
      */

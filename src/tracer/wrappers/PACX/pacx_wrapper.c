@@ -782,6 +782,7 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{
@@ -900,6 +901,7 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{
@@ -3835,6 +3837,7 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{
@@ -3938,6 +3941,7 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		Extrae_set_is_initialized (EXTRAE_INITIALIZED_PACX_INIT);
+		Extrae_set_initial_TASKID (TASKID);
 	}
 	else
 	{
