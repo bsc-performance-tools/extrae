@@ -7,6 +7,10 @@
  xml-parser-id="@sub_XMLID@"
 >
 
+  <user-functions enabled="yes" list="function-list">
+    <counters enabled="yes" />
+  </user-functions>
+
   <counters enabled="yes">
     <cpu enabled="yes" starting-set-distribution="1">
       <set enabled="yes" domain="all" changeat-globalops="5">

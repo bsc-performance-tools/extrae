@@ -1,3 +1,4 @@
+include ../Makefile.inc
 
 CC     = mpicc
 CFLAGS = -O2 -g

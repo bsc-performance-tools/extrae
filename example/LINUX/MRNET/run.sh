@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # @ initialdir = .
 # @ output = job%j.out
 # @ error =  job%j.err

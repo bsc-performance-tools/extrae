@@ -279,6 +279,7 @@ UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 install-data-hook:
 	$(mkdir_p) $(DESTDIR)$(datadir)/example
+	cp -f example/Makefile.inc $(DESTDIR)$(datadir)/example
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/SEQ
 	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
 if HAVE_PACX
@@ -312,36 +313,32 @@ endif
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
 # Apply post-installation modifications
-	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example
-if HAVE_PACX
-	./substitute-all $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(DESTDIR)$(datadir)/example/PACX
-endif
-	./substitute-all $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_UNWIND_HOME@" "${UNWIND_HOME}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_UNWIND_LIBS@" "${UNWIND_LIBS}" $(DESTDIR)$(datadir)/example
-if WANT_MERGE_IN_TRACE
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(DESTDIR)$(datadir)/example
-else
-	./substitute-all $(SED) "@sub_BFD_LIBS@" "" $(DESTDIR)$(datadir)/example
-	./substitute-all $(SED) "@sub_LIBERTY_LIBS@" "" $(DESTDIR)$(datadir)/example
-endif
-if WANT_CUDAorCUPTI
+	./substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_UNWIND_HOME@" "${UNWIND_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_UNWIND_LIBS@" "${UNWIND_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_XML2_HOME@" "${XML2_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_XML2_LDFLAGS@" "${XML2_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_XML2_LIBS@" "${XML2_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_BFD_HOME@" "${BFD_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_LIBERTY_HOME@" "${LIBERTY_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 if WANT_CUPTI
-	./substitute-all $(SED) "@sub_CUPTI_LIBS@" "-L${CUPTI_HOME}/lib -lcupti" $(DESTDIR)$(datadir)/example/CUDA
+	./substitute $(SED) "@sub_CUPTI_LIBS@" "-L${CUPTI_HOME}/lib -lcupti" $(DESTDIR)$(datadir)/example/Makefile.inc
 else
-	./substitute-all $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example/CUDA
+	./substitute $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
-endif
+	./substitute $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD
-	./substitute-all $(SED) "@sub_libexecinfo_libs@" "${libexecinfo_LDFLAGS} -lexecinfo" $(DESTDIR)$(datadir)/example
+	./substitute $(SED) "@sub_libexecinfo_libs@" "${libexecinfo_LDFLAGS} -lexecinfo" $(DESTDIR)$(datadir)/example/Makefile.inc
+else
+	./substitute $(SED) "@sub_libexecinfo_libs@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
 # SVN installations may have some subversion control files
 	rm -fr `find $(DESTDIR)$(datadir)/example -name .svn`

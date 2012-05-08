@@ -4,7 +4,7 @@
  home="@sub_PREFIXDIR@"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="Id: xml-parse.c 697 2011-07-08 15:14:05Z harald $"
+ xml-parser-id="@sub_XMLID@"
 >
 
   <openmp enabled="yes">

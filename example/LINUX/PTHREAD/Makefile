@@ -1,8 +1,6 @@
-PAPI_HOME = @sub_PAPI_HOME@
-EXTRAE_HOME = @sub_PREFIXDIR@
-UNWIND_HOME = @sub_UNWIND_HOME@
+include ../Makefile.inc
 
-LIBS = -L$(EXTRAE_HOME)/lib -lpttrace -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ -L$(UNWIND_HOME)/lib @sub_UNWIND_LIBS@ @sub_POSIX_CLOCK@
+LIBS = -L$(EXTRAE_HOME)/lib -lpttrace $(PAPI_LIBS) $(BFD_LIBS) $(UNWIND_LIBS) $(POSIX_CLOCK_LIBS)
 CFLAGS = -O -g -I$(EXTRAE_HOME)/include
 
 targets: user-comms pthread-example

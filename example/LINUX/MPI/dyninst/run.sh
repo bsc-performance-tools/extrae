@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 export EXTRAE_HOME=@sub_PREFIXDIR@
 source ${EXTRAE_HOME}/etc/extrae.sh

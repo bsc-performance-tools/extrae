@@ -1,12 +1,8 @@
-MPI_HOME = @sub_MPI_HOME@
-EXTRAE_HOME = @sub_PREFIXDIR@
-PAPI_HOME = @sub_PAPI_HOME@
-XML2_LDFLAGS = @sub_XML2_LDFLAGS@
-XML2_LIBS = @sub_XML2_LIBS@
+include ../../Makefile.inc
 
 F77 = $(MPI_HOME)/bin/mpif77 
 FFLAGS = -O2 -g
-FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ $(XML2_LDFLAGS) $(XML2_LIBS) @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_libexecinfo_libs@ @sub_POSIX_CLOCK@
+FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a $(PAPI_LIBS) $(XML2_LDFLAGS) $(XML2_LIBS) $(BFD_LIBS) $(UNWIND_LIBS) $(POSIX_CLOCK_LIBS) $(LIBEXECINFO_LIBS)
 
 all: mpi_ping
 

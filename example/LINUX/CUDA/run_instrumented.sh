@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 export EXTRAE_HOME=@sub_PREFIXDIR@
 export PAPI_HOME=@sub_PAPI_HOME@

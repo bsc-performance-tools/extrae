@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # @ initialdir = .
 # @ output = par_merge.out
 # @ error =  par_merge.err

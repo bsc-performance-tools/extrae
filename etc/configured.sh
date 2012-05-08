@@ -105,6 +105,21 @@ if test "${EXTRAE_HOME}" != "" ; then
     echo "UNWINDing support seems to be disabled (or not needed)"
   fi
 
+  if test "${LIBERTY_HOME}" != "" -a "${BFD_HOME}" != ""; then
+    if test -d ${LIBERTY_HOME} ; then
+      echo "LIBERTY_HOME points to ${LIBERTY_HOME} and the directory exists .. OK"
+    else
+      echo "LIBERTY_HOME points to ${LIBERTY_HOME} and the directory does NOT exist .. FAILED"
+    fi
+    if test -d ${BFD_HOME} ; then
+      echo "BFD_HOME points to ${BFD_HOME} and the directory exists .. OK"
+    else
+      echo "BFD_HOME points to ${BFD_HOME} and the directory does NOT exist .. FAILED"
+    fi
+  else
+    echo "Translating addresses into source code references seems to be disabled (or not needed)"
+  fi
+
 fi
 
 echo 

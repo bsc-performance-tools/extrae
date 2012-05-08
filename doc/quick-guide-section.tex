@@ -5,6 +5,8 @@
 
 \section{The instrumentation package}
 
+\subsection{Uncompressing the package}
+
 \TRACE is a dynamic instrumentation package to trace programs compiled and run with the shared memory model (like OpenMP and pthreads), the message passing (MPI) programming model or both programming models (different MPI processes using OpenMP or pthrads within each MPI process). \TRACE generates trace files that can be latter visualized with \PARAVER.
 
 The package is distributed in compressed tar format (e.g., extrae.tar.gz).  To unpack it, execute from the desired target directory the following command line :
@@ -40,9 +42,20 @@ share/example & Contains examples to illustrate the \TRACE instrumentation.\\
 \label{tab:PackageDescription}
 \end{table}
 
-\graybox{There are several included examples in the installation package. These examples are installed in {\tt \$\{EXTRAE\_HOME\}/share/example} and cover different application types (including serial/MPI/OpenMP/CUDA/{\em etc}). We suggest the user to look at them to get an idea on how to instrument their application.}\\
+
+\subsection{Post-configuring the package}
+
+There are some files within \TRACE that contain references to libraries given at configure time. Because of this, you need to adapt the installation to your system. In order to do that \TRACE provides an automatic mechanism that post-configures the package. Once you have installed \TRACE, just set {\tt EXTRAE\_HOME} environment variable to the directory where you have untarred it and execute {\tt \$\{EXTRAE\_HOME\}/bin/extrae-post-installation-upgrade.sh}. This script will guide you into some questions about the location of several libraries needed by \TRACE. The script shows the current value for the library directories and gives the user the chance to change them. In case the libraries were unused at configure time, thet current value will be an empty string.
+
+\begin{figure}
+\centering
+  \psfig{figure=images/extrae-post-installation.eps, width=12cm}
+\caption{An example of the {\tt extrae-post-installation-upgrade.sh} script execution}
+\end{figure}
 
 \section{Quick running}
+
+\graybox{There are several included examples in the installation package. These examples are installed in {\tt \$\{EXTRAE\_HOME\}/share/example} and cover different application types (including serial/MPI/OpenMP/CUDA/{\em etc}). We suggest the user to look at them to get an idea on how to instrument their application.}\\
 
  Once the package has been unpacked, set the {\tt EXTRAE\_HOME} environment variable to the directory where the package was installed. Use the {\tt export} or {\tt setenv} commands to set it up depending on the shell you use.  If you use sh-based shell (like sh, bash, ksh, zsh, ...), issue this command
 \begin{verbatim}

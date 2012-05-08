@@ -1,10 +1,8 @@
-PAPI_HOME = @sub_PAPI_HOME@
-EXTRAE_HOME = @sub_PREFIXDIR@
-UNWIND_HOME = @sub_UNWIND_HOME@
+include ../Makefile.inc
 
 CC = gcc
 CFLAGS = -O -fopenmp -g -I$(EXTRAE_HOME)/include
-CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ -L$(UNWIND_HOME)/lib @sub_UNWIND_LIBS@ @sub_POSIX_CLOCK@
+CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 $(PAPI_LIBS) $(BFD_LIBS) $(UNWIND_LIBS) $(POSIX_CLOCK_LIBS)
 
 all: pi pi_instrumented
 

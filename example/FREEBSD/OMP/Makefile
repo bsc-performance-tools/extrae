@@ -1,10 +1,8 @@
-PAPI_HOME = @sub_PAPI_HOME@
-EXTRAE_HOME = @sub_PREFIXDIR@
+include ../Makefile.inc
+
 CC = gcc
-FC = ifort
-CFLAGS = -O -fopenmp -g -I $(EXTRAE_HOME)/include
-CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace `xml2-config --libs` -L$(PAPI_HOME)/lib @sub_PAPI_LIBS@ @sub_BFD_LIBS@ @sub_LIBERTY_LIBS@ @sub_libexecinfo_libs@ @sub_POSIX_CLOCK@
-FFLAGS = -O -openmp -g3
+CFLAGS = -O -fopenmp -g -I$(EXTRAE_HOME)/include
+CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 $(PAPI_LIBS) $(BFD_LIBS) $(UNWIND_LIBS) $(POSIX_CLOCK_LIBS) $(LIBEXECINFO_LIBS)
 
 all: pi pi_instrumented
 

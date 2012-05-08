@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # @ initialdir = .
 # @ output = seq_merge.out
 # @ error =  seq_merge.err

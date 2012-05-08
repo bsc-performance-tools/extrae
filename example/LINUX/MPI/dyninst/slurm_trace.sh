@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # @ initialdir = .
 # @ output = trace.out
 # @ error =  trace.err

@@ -1,4 +1,4 @@
-MPI_HOME = @sub_MPI_HOME@
+include ../../Makefile.inc
 
 NVCC = nvcc
 CFLAGS = -O2 -g -I$(MPI_HOME)/include

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/openSUSE) (format=latex 2011.12.11)  19 APR 2012 10:25
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/openSUSE) (format=latex 2011.12.11)  8 MAY 2012 10:52
 entering extended mode
  %&-line parsing enabled.
 **./images.tex
@@ -203,7 +203,7 @@ LaTeX Font Info:    ... okay on input line 151.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 151.
 LaTeX Font Info:    ... okay on input line 151.
 \AtBeginShipoutBox=\box28
-(/home/harald/development/2.2.1-nanos-savestate/doc/user-guide.aux
+(/home/harald/development/2.2.1-new-examples/doc/user-guide.aux
 
 LaTeX Warning: Label `cha:QuickStart' multiply defined.
 
@@ -397,28 +397,35 @@ latex2htmlLength oddsidemargin=0.0pt
 
 latex2htmlLength evensidemargin=0.0pt
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 317.
+File: images/extrae-post-installation.eps Graphic file (type eps)
+<images/extrae-post-installation.eps>
+l2hSize :figure111:229.68721pt::0.0pt::349.0pt.
+[1
+
+
+
+]
+LaTeX Font Info:    Try loading font information for U+msa on input line 328.
 (/usr/share/texmf/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 317.
+LaTeX Font Info:    Try loading font information for U+msb on input line 328.
 (/usr/share/texmf/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 )
-Overfull \hbox (5.19447pt too wide) in paragraph at lines 317--317
+Overfull \hbox (5.19447pt too wide) in paragraph at lines 328--328
 []\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
  []
 
-l2hSize :landscape3567:465.73293pt::0.0pt::650.43001pt.
-[1
-
+l2hSize :landscape3612:465.73293pt::0.0pt::650.43001pt.
+[2
 
 
 
 
 ]
-l2hSize :landscape3588:412.94963pt::0.0pt::650.43001pt.
-[2
+l2hSize :landscape3633:412.94963pt::0.0pt::650.43001pt.
+[3
 
 
 
@@ -429,12 +436,12 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 2578 strings out of 493849
- 34572 string characters out of 3155836
+ 2582 strings out of 493849
+ 34637 string characters out of 3155836
  101773 words of memory out of 3500000
- 5798 multiletter control sequences out of 15000+200000
+ 5799 multiletter control sequences out of 15000+200000
  9415 words of font info for 36 fonts, out of 3000000 for 9000
  714 hyphenation exceptions out of 8191
  32i,12n,24p,222b,322s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on images.dvi (2 pages, 11208 bytes).
+Output written on images.dvi (3 pages, 11484 bytes).

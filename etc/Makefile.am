@@ -17,11 +17,13 @@ SHscripts:
 	echo "export DYNINST_HOME=${DYNINST_HOME}" >> $(SH_SCRIPT)
 	echo "export DWARF_HOME=${DWARF_HOME}" >> $(SH_SCRIPT)
 	echo "export ELF_HOME=${ELF_HOME}" >> $(SH_SCRIPT)
+	echo "export LIBERTY_HOME=${LIBERTY_HOME}" >> $(SH_SCRIPT)
+	echo "export BFD_HOME=${BFD_HOME}" >> $(SH_SCRIPT)
+	echo "export UNWIND_HOME=${UNWIND_HOME}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CC=${CC}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CFLAGS=\"${CFLAGS}\"" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CXX=${CXX}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CXXFLAGS=\"${CXXFLAGS}\"" >> $(SH_SCRIPT)
-	echo "export UNWIND_HOME=${UNWIND_HOME}" >> $(SH_SCRIPT)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.sh
 	cp extrae.sh $(DESTDIR)$(sysconfdir)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.sh
@@ -35,11 +37,13 @@ CSHscripts:
 	echo "setenv DYNINST_HOME ${DYNINST_HOME}" >> $(CSH_SCRIPT)
 	echo "setenv DWARF_HOME ${DWARF_HOME}" >> $(CSH_SCRIPT)
 	echo "setenv ELF_HOME ${ELF_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv LIBERTY_HOME ${LIBERTY_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv BFD_HOME ${BFD_HOME}" >> $(CSH_SCRIPT)
+	echo "setenv UNWIND_HOME ${UNWIND_HOME}" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_CC ${CC}" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_CFLAGS \"${CFLAGS}\"" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_CXX ${CXX}" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_CXXFLAGS \"${CXXFLAGS}\"" >> $(CSH_SCRIPT)
-	echo "setenv UNWIND_HOME ${UNWIND_HOME}" >> $(CSH_SCRIPT)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 	cp extrae.csh $(DESTDIR)$(sysconfdir)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.csh

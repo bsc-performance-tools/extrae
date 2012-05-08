@@ -1,5 +1,4 @@
-MPI_HOME = @sub_MPI_HOME@
-EXTRAE_HOME = @sub_PREFIXDIR@
+include ../../Makefile.inc
 
 F77 = $(MPI_HOME)/bin/mpif77 
 FFLAGS = -O2 -g

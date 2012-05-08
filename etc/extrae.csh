@@ -60,6 +60,22 @@ if (${?EXTRAE_HOME}) then
 		endif
 	endif
 
+	if (${?LIBERTY_HOME}) then
+		if (! -d ${LIBERTY_HOME}/lib ) then
+			echo "Unable to find LIBERTY library directory!"
+		else
+			setenv LD_LIBRARY_PATH ${LIBERTY_HOME}/lib:${LD_LIBRARY_PATH}
+		endif
+	endif
+
+	if (${?BFD_HOME}) then
+		if (! -d ${BFD_HOME}/lib ) then
+			echo "Unable to find BFD library directory!"
+		else
+			setenv LD_LIBRARY_PATH ${BFD_HOME}/lib:${LD_LIBRARY_PATH}
+		endif
+	endif
+
 	if (${?DYNINST_HOME}) then
 		if (! ${?DWARF_HOME}) then
 			echo "DynInst was enabled with the instrumentation package, but DWARF package was not set? Exitting!"
