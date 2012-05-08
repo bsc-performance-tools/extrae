@@ -101,6 +101,13 @@ static char UNUSED rcsid[] = "$Id$";
 # include "tree-logistics.h"
 #endif
 
+/* Variable will hold whether all times end with 000 even if the timing routine
+   is told to be generating nanoseconds! */
+static int TimeIn_MicroSecs = TRUE;
+
+#define CHECK_TIME_US(x) \
+	{ TimeIn_MicroSecs = TimeIn_MicroSecs && ((x%1000)==0); }
+
 /******************************************************************************
  ***  PRVWRITECNTL
  ***  Macro per controlar si hi ha un error d'escriptura al fitxer .prv
@@ -387,6 +394,9 @@ static int paraver_state (struct fdz_fitxer fdz, paraver_rec_t *current)
 	unsigned long long end_time = current->end_time;
 	unsigned state = current->value;
 
+	CHECK_TIME_US(ini_time);
+	CHECK_TIME_US(end_time);
+
 	/*
 	 * Format state line is :
 	 *      1:cpu:ptask:task:thread:ini_time:end_time:state
@@ -441,6 +451,8 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
 
   if (count == 0)
     return 0;
+
+	CHECK_TIME_US(time);
 
 #if !defined(NEW_PRINTF)
 # if SIZEOF_LONG == 8
@@ -501,6 +513,11 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
 	unsigned long long phy_r = current->receive[PHYSICAL_COMMUNICATION];
 	unsigned size = current->event;
 	unsigned tag = current->value;
+
+	CHECK_TIME_US(log_s);
+	CHECK_TIME_US(phy_s);
+	CHECK_TIME_US(log_r);
+	CHECK_TIME_US(phy_r);
 
   /*
    * Format event line is :
@@ -898,6 +915,8 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	fprintf (stdout, "done\n");
 	fflush (stdout);
 
+	if (TimeIn_MicroSecs)
+		fprintf (stderr, "mpi2prv: Warning! Clock accuracy seems to be in microseconds instead of nanoseconds.\n");
 	if (num_incomplete_state > 0)
 		fprintf (stderr, "mpi2prv: Error! Found %d incomplete states. Resulting tracefile may be inconsistent.\n", num_incomplete_state);
 	if (num_unmatched_comm > 0)

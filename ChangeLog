@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 08May2012 Refactored and simplified examples. Usage of Makefile.inc
              extrae-post-installation-upgrade.sh gets alive!
+             Check whether all timings are in us instead of ns.
  * 04May2012 Support for NANOS distributed
  + 19Apr2012 Add functionality -task-view -no-task-view in mpi2prv to generate
                traces specially for OMPSs.
