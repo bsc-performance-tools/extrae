@@ -212,7 +212,8 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 		)
 
 		if test "$Default_Binary_Type" != "32" -a "$Default_Binary_Type" != 64 ; then
-			AC_MSG_ERROR([Unknown default binary type (pointer size is $POINTER_SIZE!?)])
+			AC_MSG_NOTICE([Unknown default binary type (pointer size is $POINTER_SIZE!?)])
+                        AC_MSG_ERROR([[]_AC_LANG_PREFIX[] compiler '$_AC_LANG_PREFIX[]_compiler' might not be installed?])
 		fi
 
 		if test "$Selected_Binary_Type" = "default" ; then
