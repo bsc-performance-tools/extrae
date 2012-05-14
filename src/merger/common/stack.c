@@ -77,14 +77,17 @@ void Stack_Push (mpi2prv_stack_t *s, unsigned long long v)
 
 void Stack_Pop (mpi2prv_stack_t *s)
 {
-	s->count--;
-
-	/* If we pop the whole stack, free the allocated memory */
-	if (s->count == 0)
+	if (s->count > 0)
 	{
-		free (s->data);
-		s->data = NULL;
-		s->allocated = 0;
+		s->count--;
+
+		/* If we pop the whole stack, free the allocated memory */
+		if (s->count == 0)
+		{
+			free (s->data);
+			s->data = NULL;
+			s->allocated = 0;
+		}
 	}
 }
 
