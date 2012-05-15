@@ -98,9 +98,8 @@ void Extrae_Event_Wrapper (unsigned *tipus, unsigned *valor)
 
 void Extrae_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 {
-	iotimer_t temps;
 	unsigned i;
-	int events_id[MAX_MULTIPLE_EVENTS];
+	int events_id[*count];
 
 	if (*count > 0)
 	{
@@ -123,7 +122,6 @@ void Extrae_Eventandcounters_Wrapper (unsigned *tipus, unsigned *valor)
 
 void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 {
-	iotimer_t temps;
 	unsigned i;
 	int events_id[*count];
 
@@ -131,8 +129,7 @@ void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsig
 	{
 		for (i = 0; i < *count; i++)
 			events_id[i] = USER_EV;
-		temps = LAST_READ_TIME;
-		TRACE_N_MISCEVENTANDCOUNTERS(temps, *count, events_id, types, values);
+		TRACE_N_MISCEVENTANDCOUNTERS(LAST_READ_TIME, *count, events_id, types, values);
 	}
 }
 
@@ -376,7 +373,7 @@ void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 {
 	unsigned i;
-	int events_id[MAX_MULTIPLE_EVENTS];
+	int events_id[ptr->nEvents];
 
 	/* Emit events first */
 	if (ptr->nEvents > 0)

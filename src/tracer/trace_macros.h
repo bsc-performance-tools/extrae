@@ -139,7 +139,7 @@
 	if (tracejant && TracingBitmap[TASKID])                                          \
 	{                                                                                \
 		unsigned i, thread_id=THREADID;                                                \
-		event_t events_list[MAX_MULTIPLE_EVENTS];                                      \
+		event_t events_list[count];                                                    \
                                                                                    \
 		for (i=0; i<count; i++)                                                        \
 		{                                                                              \
@@ -159,7 +159,7 @@
 	if (tracejant && TracingBitmap[TASKID] && count > 0)                             \
 	{                                                                                \
 		unsigned i, thread_id=THREADID;                                                \
-		event_t events_list[MAX_MULTIPLE_EVENTS];                                      \
+		event_t events_list[count];                                                    \
                                                                                    \
 		for (i=0; i<count; i++)                                                        \
 		{                                                                              \
