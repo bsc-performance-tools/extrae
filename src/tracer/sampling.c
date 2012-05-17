@@ -185,12 +185,6 @@ void setTimeSampling (unsigned long long period, int sampling_type)
 		return;
 	}
 
-	if (sigaction(SIGALRM, &act, NULL) < 0)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! sigaction");
-		return;
-	}
-
 	/* The period is given in nanoseconds */
 	period = period / 1000;
 
