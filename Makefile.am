@@ -313,7 +313,6 @@ endif
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
 # Apply post-installation modifications
-	./substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
@@ -333,6 +332,7 @@ else
 	./substitute $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
 	./substitute $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD
