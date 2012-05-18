@@ -1100,7 +1100,7 @@ int merger_post (int numtasks, int taskid)
 	}
 
 #if defined(HAVE_BFD)
-	if (strlen(get_merge_ExecutableFileName()) > 0)
+	if (taskid == 0 && strlen(get_merge_ExecutableFileName()) > 0)
 	{
 		Address2Info_Initialize (get_merge_ExecutableFileName());
 
