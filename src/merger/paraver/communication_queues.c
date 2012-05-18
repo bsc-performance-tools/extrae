@@ -71,6 +71,10 @@ void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
 {
 	SendData_t tmp;
 
+#if defined(DEBUG)
+	printf ("CommunicationQueues_QueueSend (.. thread=%u, vthread=%u, partner=%d, tag=%u, key=%lld)\n", thread, vthread, partner, tag, key);
+#endif
+
 	tmp.send_begin = send_begin;
 	tmp.send_end = send_end;
 	tmp.send_position = send_position;
@@ -156,6 +160,10 @@ void CommunicationQueues_QueueRecv (NewQueue_t *qreceive, event_t *recv_begin,
 	unsigned partner, unsigned tag, long long key)
 {
 	RecvData_t tmp;
+
+#if defined(DEBUG)
+	printf ("CommunicationQueues_QueueRecv (.. thread=%u, vthread=%u, partner=%d, tag=%u, key=%lld)\n", thread, vthread, partner, tag, key);
+#endif
 
 	tmp.recv_begin = recv_begin;
 	tmp.recv_end = recv_end;

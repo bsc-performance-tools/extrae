@@ -611,7 +611,7 @@ static int IRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "IRECV_CMD DID NOT find COMM\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(receive), Get_EvTag(receive), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
@@ -736,7 +736,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 					if (isTaskInMyGroup (fset, Get_EvTarget(receive)))
 					{
 #if defined(DEBUG)
-						fprintf (stdout, "IRECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+						fprintf (stdout, "PERS_REQ_IRECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(receive), Get_EvTag(receive));
 #endif
 
 						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
