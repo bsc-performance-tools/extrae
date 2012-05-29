@@ -2864,14 +2864,15 @@ void PMPI_GatherV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-	if (recvcount != NULL)
-		for (proc = 0; proc < nprocs; proc++)
-			recvc += recvcount[proc];
 
 	/* MPI Stats */
 	GLOBAL_Communications ++;
 	if (me == *root)
 	{
+		if (recvcount != NULL)
+			for (proc = 0; proc < nprocs; proc++)
+				recvc += recvcount[proc];
+
 		GLOBAL_Bytes_Recv += recvc * recvsize;
 	}
 	else
@@ -3044,14 +3045,14 @@ void PMPI_ScatterV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-	if (sendcount != NULL)
-		for (proc = 0; proc < nprocs; proc++)
-			sendc += sendcount[proc];
-
 	/* MPI Stats */
 	GLOBAL_Communications ++;
 	if (me == *root)
 	{
+		if (sendcount != NULL)
+			for (proc = 0; proc < nprocs; proc++)
+				sendc += sendcount[proc];
+
 		GLOBAL_Bytes_Sent += sendc * sendsize;
 	}
 	else
@@ -6058,14 +6059,14 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-	if (recvcounts != NULL)
-		for (proc = 0; proc < nprocs; proc++)
-			recvc += recvcounts[proc];
-
 	/* MPI Stats */
 	GLOBAL_Communications ++;
 	if (me == root)
 	{
+		if (recvcounts != NULL)
+			for (proc = 0; proc < nprocs; proc++)
+				recvc += recvcounts[proc];
+
 		GLOBAL_Bytes_Recv += recvc * recvsize;
 	}
 	else
@@ -6232,14 +6233,14 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	ret = PMPI_Comm_rank (comm, &me);
 	MPI_CHECK(ret, PMPI_Comm_rank);
 
-	if (sendcounts != NULL)
-		for (proc = 0; proc < nprocs; proc++)
-			sendc += sendcounts[proc];
-
 	/* MPI Stats */
 	GLOBAL_Communications ++;
 	if (me == root)
 	{
+		if (sendcounts != NULL)
+			for (proc = 0; proc < nprocs; proc++)
+				sendc += sendcounts[proc];
+
 		GLOBAL_Bytes_Sent += sendc * sendsize;
 	}
 	else
