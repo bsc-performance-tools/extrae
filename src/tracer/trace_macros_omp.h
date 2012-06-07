@@ -91,7 +91,7 @@
 		evt.event = (evttype);                                    \
 		evt.value = (evtvalue);                                   \
 		evt.param.omp_param.param = (evtparam);                   \
-		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_OMP);  \
+		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_PTHREAD);  \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 	}                                                           \
 }
