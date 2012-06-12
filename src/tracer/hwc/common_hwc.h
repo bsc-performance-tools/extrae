@@ -59,6 +59,14 @@ struct HWC_Set_t
 #endif
 };
 
+#define MAX_HWC_DESCRIPTION_LENGTH  256
+
+typedef struct HWC_Definition_st
+{
+	unsigned event_code;
+	char description[MAX_HWC_DESCRIPTION_LENGTH];
+} HWC_Definition_t;
+
 /*------------------------------------------------ Global Variables  --------*/
 
 extern int *HWC_Thread_Initialized;
@@ -132,6 +140,9 @@ extern int * HWC_current_set;
 # define HWCBE_CLEANUP_COUNTERS_THREAD(nthreads) \
 		HWCBE_PAPI_CleanUp(nthreads)
 
+#define HWCBE_GET_COUNTER_DEFINITIONS(count) \
+    HWCBE_PAPI_GetCounterDefinitions(count)
+
 #elif defined(PMAPI_COUNTERS) /* -------------------- PMAPI Backend ---------*/
 
 # include "pmapi_hwc.h" 
@@ -164,6 +175,9 @@ extern int * HWC_current_set;
 
 # define HWCBE_CLEANUP_COUNTERS_THREAD(nthreads) \
 		HWCBE_PMAPI_CleanUp(nthreads)
+
+#define HWCBE_GET_COUNTER_DEFINITIONS(count) \
+    HWCBE_PMAPI_GetCounterDefinitions(count)
 
 #endif
 

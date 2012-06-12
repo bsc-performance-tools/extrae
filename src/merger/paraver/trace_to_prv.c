@@ -612,7 +612,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	if (0 == taskid)
 	{
 		strcpy (tmp, ".pcf");
-		if (GeneratePCFfile (envName, options) == -1)
+		if (Labels_GeneratePCFfile (envName, options) == -1)
 			fprintf (stderr, "mpi2prv: WARNING! Unable to create PCF file!\n");
 
 		strcpy (tmp, ".row");

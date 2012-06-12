@@ -515,7 +515,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		tmp = &(envName[strlen (envName) - 4]);
 
 		strcpy (tmp, ".pcf");
-		if (GeneratePCFfile (envName, options) == -1)
+		if (Labels_GeneratePCFfile (envName, options) == -1)
 		{
 			fprintf (stderr, "mpi2dim: WARNING! Unable to create PCF file!\n");
 			somefailed = TRUE;

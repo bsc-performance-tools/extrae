@@ -115,6 +115,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
+				thread_info->HWCSets_types = NULL;
 				thread_info->num_HWCSets = 0;
 				thread_info->current_HWCSet = 0;
 #endif

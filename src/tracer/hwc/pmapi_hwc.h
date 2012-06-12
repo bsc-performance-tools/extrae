@@ -44,4 +44,8 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 
 int HWCBE_PMAPI_Read (unsigned int tid, long long *store_buffer);
 
+void HWCBE_PMAPI_CleanUp (unsigned nthreads);
+
+HWC_Definition_t *HWCBE_PMAPI_GetCounterDefinitions(unsigned *count);
+
 #endif /* __PMAPI_HWC_H__ */

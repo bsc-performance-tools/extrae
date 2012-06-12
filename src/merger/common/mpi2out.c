@@ -1101,30 +1101,8 @@ int merger_post (int numtasks, int taskid)
 
 #if defined(HAVE_BFD)
 	if (taskid == 0 && strlen(get_merge_ExecutableFileName()) > 0)
-	{
 		Address2Info_Initialize (get_merge_ExecutableFileName());
 
-		if (strlen(get_merge_SymbolFileName()) == 0 && last_mpits_file != NULL)
-		{
-			char tmp[1024];
-			strncpy (tmp, last_mpits_file, 1024);
-
-			if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
-			{
-				strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
-				if (file_exists(tmp))
-					loadSYMfile (tmp);
-			}
-		}
-		else
-			loadSYMfile (get_merge_SymbolFileName());
-	}
-#else
-	if (taskid == 0)
-		fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
-#endif
-
-#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses() && !Address2Info_Initialized())
 	{
 		if (taskid == 0)
@@ -1135,8 +1113,43 @@ int merger_post (int numtasks, int taskid)
 		set_option_merge_SortAddresses (FALSE);
 	}
 #else
-	set_option_merge_SortAddresses (FALSE);
+	if (taskid == 0)
+	{
+		fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
+		set_option_merge_SortAddresses (FALSE);
+	}
 #endif
+
+#if defined(PARALLEL_MERGE)
+	if (taskid == 0)
+	{
+		int res, tmp = get_option_merge_SortAddresses();
+		res = MPI_Bcast (&tmp, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_CHECK(res, MPI_Bcast, "Cannot share whether option SortAddresses is turned on");
+	}
+	else
+	{
+		int res, tmp;
+		res = MPI_Bcast (&tmp, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_CHECK(res, MPI_Bcast, "Cannot share whether option SortAddresses is turned on");
+		set_option_merge_SortAddresses (tmp);
+	}
+#endif
+
+	if (strlen(get_merge_SymbolFileName()) == 0 && last_mpits_file != NULL)
+	{
+		char tmp[1024];
+		strncpy (tmp, last_mpits_file, 1024);
+
+		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
+		{
+			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
+			if (file_exists(tmp))
+				Labels_loadSYMfile (taskid, tmp);
+		}
+	}
+	else
+		Labels_loadSYMfile (taskid, get_merge_SymbolFileName());
 
 	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),

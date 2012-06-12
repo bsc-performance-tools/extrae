@@ -324,6 +324,13 @@ void HWCBE_PMAPI_CleanUp (unsigned nthreads)
 	xfree (HWC_sets);
 }
 
+HWC_Definition_t *HWCBE_PMAPI_GetCounterDefinitions(unsigned *count)
+{
+	/* This is currently unimplemented */
+	*count = 0;
+	return NULL;
+}
+
 /******************************************************************************
  **      Function name : PMAPI_Initialize
  **

@@ -163,12 +163,9 @@ enum {
 #define FUNCT_BASE               41000000
 #define FUNCT_MAX                    1000
 
-#define HWC_BASE                 42000000 /* Per als comptadors base de PAPI */
-#define HWC_BASE_NATIVE          42001000 /* Per als comptadors natius de PAPI 
-                                             Cal comprovar que poguem codificar
-                                             tots els comptadors en els 3 zeros
-                                             que hi ha disponible! */
-#define HWC_GROUP_ID             42009999 /* Per indicar l'identificador de grup */
+#define HWC_BASE                 42000000 /* Base for preset PAPI counters */
+#define HWC_BASE_NATIVE          42001000 /* Base for native PAPI counters */
+#define HWC_GROUP_ID             41999999 /* Identifier of the active hwc set */
 
 /******************************************************************************
  *   User events to trace several MPI functions.

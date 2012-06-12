@@ -1555,7 +1555,35 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
 
 #if USE_HARDWARE_COUNTERS
-	/* Write hardware counters definitions */
+
+	/* Write hardware counter definitions into the .sym file */
+	if (me == 0)
+	{
+		if (getenv("EXTRAE_DYNINST_RUN") == NULL)
+		{
+			/* If we trace, remove the .sym file only if we're not under dyninst 
+	 		  launcher (it will create its own .sym */
+			char trace_sym[TMP_DIR];
+			FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
+			unlink (trace_sym);
+		}
+
+		unsigned count;
+		HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
+		if (hwc_defs != NULL)
+		{
+			unsigned u;
+			while (u < count)
+			{
+				Extrae_AddTypeValuesEntryToSYM ('H', hwc_defs[u].event_code,
+					hwc_defs[u].description, 0, NULL, NULL);
+				u++;
+			}
+			free (hwc_defs);
+		}
+	}
+
+	/* Write hardware counters set definitions (i.e. those given at config time) into the .mpit files*/
 	for (set=0; set<HWC_Get_Num_Sets(); set++)
 	{
 		int num_hwc, *HWCid;
@@ -2033,3 +2061,26 @@ void Backend_Leave_Instrumentation (void)
 		Trace_Mode_Change(thread, LAST_READ_TIME);
 }
 
+void Extrae_AddTypeValuesEntryToSYM (char code, int type, char *description, unsigned nvalues, unsigned long long *values, char **description_values)
+{
+	char line[1024];
+	char trace_sym[TMP_DIR];
+	int fd;
+
+	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
+	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
+	{
+		snprintf (line, sizeof(line), "%c %d %s\n", code, type, description);
+		write (fd, line, strlen(line));
+		if (nvalues > 0)
+		{
+			unsigned i;
+			for (i = 0; i < nvalues; i++)
+			{
+				snprintf (line, sizeof(line), "%c %d,%d %s\n", code, type, values[i], description_values[i]);
+				write (fd, line, strlen(line));
+			}
+		}
+		close (fd);
+	}
+}

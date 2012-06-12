@@ -76,6 +76,7 @@ typedef struct thread_st
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 	unsigned long long last_hw_group_change;
+	int **HWCSets_types;
 	int **HWCSets;
 	int num_HWCSets;
 	int current_HWCSet;

@@ -68,6 +68,39 @@ static char UNUSED rcsid[] = "$Id$";
 
 /*------------------------------------------------ Static Variables ---------*/
 
+static HWC_Definition_t *hwc_used = NULL;
+static unsigned num_hwc_used = 0;
+
+static void HWCBE_PAPI_AddDefinition (unsigned event_code, char *code, char *description)
+{
+	int found = FALSE;
+	unsigned u;
+
+	for (u = 0; !found && (u < num_hwc_used); u++)
+		found = hwc_used[u].event_code == event_code;
+
+	if (!found)
+	{
+		hwc_used = (HWC_Definition_t*) realloc (hwc_used,
+			sizeof(HWC_Definition_t)*(num_hwc_used+1));
+		if (hwc_used == NULL)
+		{
+			fprintf (stderr, "ERROR! Cannot allocate memory to add definitions for hardware counters\n");
+			return;
+		}
+		hwc_used[num_hwc_used].event_code = event_code;
+		snprintf (hwc_used[num_hwc_used].description,
+			MAX_HWC_DESCRIPTION_LENGTH, "(%s) %s", code, description);
+		num_hwc_used++;
+	}
+}
+
+HWC_Definition_t *HWCBE_PAPI_GetCounterDefinitions(unsigned *count)
+{
+	*count = num_hwc_used;
+	return hwc_used;
+}
+
 #if !defined(PAPIv3)
 # error "-DNEW_HWC_SYSTEM requires PAPI v3 support"
 #endif
@@ -236,7 +269,13 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 			HWC_sets[num_set].counters[HWC_sets[num_set].num_counters] = NO_COUNTER;
 		}
 		else 
+		{
+			if (rank == 0)
+				HWCBE_PAPI_AddDefinition (info.event_code, info.symbol,
+					(info.event_code & PAPI_PRESET_MASK)?info.short_descr:info.long_descr);
+
 			HWC_sets[num_set].num_counters++;
+		}
 	}
 	
 	if (HWC_sets[num_set].num_counters == 0)
@@ -455,6 +494,8 @@ int HWCBE_PAPI_Stop_Set (UINT64 time, int numset, int threadid)
 
 void HWCBE_PAPI_CleanUp (unsigned nthreads)
 {
+	UNREFERENCED_PARAMETER(nthreads);
+
 	if (PAPI_is_initialized())
 	{
 		int state;
@@ -471,9 +512,12 @@ void HWCBE_PAPI_CleanUp (unsigned nthreads)
 
 			for (i = 0; i < HWC_num_sets; i++)
 			{
-				/* Remove all events in the eventset and destroy the eventset */
-				PAPI_cleanup_eventset(HWC_sets[i].eventsets[t]);
-				PAPI_destroy_eventset(&HWC_sets[i].eventsets[t]);
+				for (t = 0; t < nthreads; t++)
+				{
+					/* Remove all events in the eventset and destroy the eventset */
+					PAPI_cleanup_eventset(HWC_sets[i].eventsets[t]);
+					PAPI_destroy_eventset(&HWC_sets[i].eventsets[t]);
+				}
 				xfree (HWC_sets[i].eventsets);
 			}
 		}

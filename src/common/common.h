@@ -81,15 +81,15 @@
 #define DIGITS_THREAD 6
 
 #define TEMPLATE_PTT "%s/%s.%.10d%.6d%.6u%s"
-#define TEMPLATE_P   "%s/%s.%.10d%s"
+#define TEMPLATE_P   "%s/%s%s"
 
 /* Uses pid, task id and thread id to generate the name of the file */
 #define FileName_PTT(name, path, prefix, pid, task, thread, ext) \
 	snprintf(name, sizeof(name), TEMPLATE_PTT, path, prefix, pid, task, thread, ext);
 
 /* Uses pid to generate the name of the file */
-#define FileName_P(name, path, prefix, pid, ext) \
-	snprintf(name, sizeof(name), TEMPLATE_P, path, prefix, pid, ext);
+#define FileName_P(name, path, prefix, ext) \
+	snprintf(name, sizeof(name), TEMPLATE_P, path, prefix, ext);
 
 #define EXT_TMP_MPIT   ".ttmp"
 #define EXT_MPIT       ".mpit"

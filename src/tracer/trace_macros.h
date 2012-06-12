@@ -255,7 +255,7 @@
 		evt.event = evttype;                                      \
 		evt.value = evtvalue;                                     \
 		for (i=0; i<nc; i++)                                      \
-			evt.HWCValues[i] = counters[i];                         \
+			evt.HWCValues[i] = (counters[i]==NO_COUNTER)?NO_COUNTER:((INT64)counters[i])&0xFFFFFFFF; \
 		MARK_SET_READ(thread_id, evt, FALSE);                     \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 	}                                                           \

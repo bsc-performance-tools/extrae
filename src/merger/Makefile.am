@@ -89,13 +89,6 @@ endif
 if HAVE_PAPI
   libmpi2prv_la_CFLAGS += @PAPI_CFLAGS@
   mpi2prv_CFLAGS += @PAPI_CFLAGS@
-  mpi2prv_LDFLAGS += @PAPI_LDFLAGS@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
-if IS_BG_MACHINE
-  mpi2prv_LDFLAGS += -all-static
-endif
-if IS_CRAY_XT_MACHINE
-  mpi2prv_LDFLAGS += -all-static
-endif
 endif
 
 if HAVE_PMAPI

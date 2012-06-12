@@ -321,7 +321,7 @@ void HWC_Initialize (int options)
  */
 void HWC_CleanUp (unsigned nthreads)
 {
-	int i;
+	unsigned u;
 
 	HWCBE_CLEANUP_COUNTERS_THREAD(nthreads);
 
@@ -330,8 +330,8 @@ void HWC_CleanUp (unsigned nthreads)
 	xfree (HWC_current_glopsbegin);
 	xfree (HWC_Thread_Initialized);
 	xfree (Accumulated_HWC_Valid);
-	for (i = 0; i < nthreads; i++)
-		xfree (Accumulated_HWC[i]);
+	for (u = 0; u < nthreads; u++)
+		xfree (Accumulated_HWC[u]);
 	xfree (Accumulated_HWC);
 }
 

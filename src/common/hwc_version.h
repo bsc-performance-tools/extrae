@@ -37,12 +37,8 @@
 #else
 # if USE_HARDWARE_COUNTERS
 #  if defined(PAPI_COUNTERS)
-#   include <papi.h>
-#   if PAPI_VER_CURRENT == 2 /* PAPI 2.x */
-#    define PAPIv2
-#   elif PAPI_VERSION_MAJOR(PAPI_VERSION) >= 3 /* PAPI 3.x */
+#    include <papi.h>
 #    define PAPIv3
-#   endif
 #  elif defined(PMAPI_COUNTERS)
 #   include <pmapi.h>
 #  endif

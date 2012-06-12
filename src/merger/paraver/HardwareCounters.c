@@ -122,7 +122,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 			if (Event->HWCValues[cnt] >= Sthread->counters[cnt])
 			{
 				outvalue[cnt] = Event->HWCValues[cnt] - Sthread->counters[cnt];
-				outtype[cnt] = HWC_COUNTER_TYPE (Sthread->HWCSets[set_id][cnt]);
+				outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
 			}
 			else
 			{
@@ -130,7 +130,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 			}
 # else
 			outvalue[cnt] = Event->HWCValues[cnt];
-			outtype[cnt] = HWC_COUNTER_TYPE (Sthread->HWCSets[set_id][cnt]);
+			outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
 # endif
 
 			Sthread->counters[cnt] = Event->HWCValues[cnt];
@@ -206,6 +206,8 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 
 		xrealloc(Sthread->HWCSets, Sthread->HWCSets, (newSet+1)*sizeof(int *));
 		xmalloc(Sthread->HWCSets[newSet], MAX_HWC*sizeof(int));
+		xrealloc(Sthread->HWCSets_types, Sthread->HWCSets_types, (newSet+1)*sizeof(int *));
+		xmalloc(Sthread->HWCSets_types[newSet], MAX_HWC*sizeof(int));
 
 		for (i=Sthread->num_HWCSets; i<newSet; i++)
 		{
@@ -220,10 +222,18 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 
 		for (i=0; i<MAX_HWC; i++)
 		{
-			if (HWCIds == NULL)
-				Sthread->HWCSets[newSet][i] = NO_COUNTER;
-			else
+			if (HWCIds != NULL)
+			{
+				int position;
+
 				Sthread->HWCSets[newSet][i] = (int)HWCIds[i];
+				
+				//if (Labels_LookForHWCCounter (HWCIds[i], &position, NULL))
+				//Sthread->HWCSets_types[newSet][i] = HWC_COUNTER_TYPE(position);
+				Sthread->HWCSets_types[newSet][i] = HWC_COUNTER_TYPE(HWCIds[i]);
+			}
+			else
+				Sthread->HWCSets[newSet][i] = NO_COUNTER;
 		}
 		Sthread->num_HWCSets = newSet + 1;
 	}
@@ -297,8 +307,8 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 		{
 #if defined(PMAPI_COUNTERS)
 			outtypes[cnt+1] = HWC_COUNTER_TYPE(cnt, Sthread->HWCSets[newSet][cnt]);
-#else
-			outtypes[cnt+1] = HWC_COUNTER_TYPE(Sthread->HWCSets[newSet][cnt]);
+#elif defined(PAPI_COUNTERS)
+			outtypes[cnt+1] = Sthread->HWCSets_types[newSet][cnt];
 #endif
 			outvalues[cnt+1] = 0;
 		}

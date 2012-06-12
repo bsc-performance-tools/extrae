@@ -48,6 +48,10 @@ int HWCBE_PAPI_Read (unsigned int tid, long long *store_buffer);
 int HWCBE_PAPI_Reset (unsigned int tid);
 int HWCBE_PAPI_Accum (unsigned int tid, long long *store_buffer);
 
+void HWCBE_PAPI_CleanUp (unsigned nthreads);
+
+HWC_Definition_t *HWCBE_PAPI_GetCounterDefinitions(unsigned *count);
+
 /*------------------------------------------------ Useful Macros ------------*/
 
 /**

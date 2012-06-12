@@ -76,31 +76,49 @@ static char UNUSED rcsid[] = "$Id$";
 #include "HardwareCounters.h"
 #include "queue.h"
 
-#define MAX_SYMBOL_NAME 150
-
-typedef struct callback_t
+typedef struct label_hw_counter_st
 {
-  unsigned long long call_id;
-  char name[MAX_SYMBOL_NAME];
-  char module[MAX_SYMBOL_NAME];
-}
-callback_t;
+	int eventcode;
+	char *description;
+} label_hw_counter_t;
+static label_hw_counter_t *labels_hw_counters = NULL;
+static unsigned num_labels_hw_counters = 0;
 
-typedef struct symbol_t
+static void Labels_AddHWCounter_Code_Description (int eventcode, char *description)
 {
-  unsigned long long address;
-  char name[MAX_SYMBOL_NAME];
-  char module[MAX_SYMBOL_NAME];
+	labels_hw_counters = (label_hw_counter_t*) realloc (labels_hw_counters, (num_labels_hw_counters+1)*sizeof(label_hw_counter_t));
+	if (labels_hw_counters == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to add a hardware counter description\n");
+		exit (-1);
+	}
+
+	labels_hw_counters[num_labels_hw_counters].eventcode = eventcode;
+	labels_hw_counters[num_labels_hw_counters].description = strdup (description);
+	if (labels_hw_counters[num_labels_hw_counters].description == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to duplicate hardware counter description\n");
+		exit (-1);
+	}
+
+	num_labels_hw_counters++;
 }
-symbol_t;
 
-#define MAX_CALLBACKS  1000
-struct callback_t call_table[MAX_CALLBACKS];
-long call_num = 0;
+int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description)
+{
+	unsigned u;
 
-#define MAX_SYMBOLS 50000
-struct symbol_t sym_table[MAX_SYMBOLS];
-long sym_num = 0;
+	for (u = 0; u < num_labels_hw_counters; u++)
+		if (labels_hw_counters[u].eventcode == eventcode)
+		{
+			*position = u;
+			if (description != NULL)
+				*description = labels_hw_counters[u].description;
+			return TRUE;
+		}
+
+	return FALSE;
+}
 
 struct color_t states_inf[STATES_NUMBER] = {
   {STATE_0, STATE0_LBL, STATE0_COLOR},
@@ -336,39 +354,19 @@ static void HWC_PARAVER_Labels (FILE * pcfFD)
 {
 #if defined(PAPI_COUNTERS)
   struct fcounter_t *fcounter=NULL;
-# if defined (PAPIv3)
-	PAPI_event_info_t Myinfo;
-# elif defined (PAPIv2)
-	PAPI_preset_info_t Myinfo;
-# endif
 #elif defined(PMAPI_COUNTERS)
 	pm_info2_t ProcessorMetric_Info; /* On AIX pre 5.3 it was pm_info_t */
 	pm_groups_info_t HWCGroup_Info;
 	pm_events2_t *evp = NULL;
 	int j;
-#endif
-	int EvCnt;
-	int cnt = 0;
 	int rc;
+#endif
+	int cnt = 0;
 	int AddedCounters = 0;
 	CntQueue *queue;
 	CntQueue *ptmp;
 
-
-#if defined(PAPI_COUNTERS)
-	/* PAPI Initialization */
-	rc = PAPI_library_init (PAPI_VER_CURRENT);
-	if (rc != PAPI_VER_CURRENT)
-	{
-		if (rc > 0)
-			fprintf (stderr, "mpi2prv: ERROR PAPI library version mismatch!\n");
-		fprintf (stderr, "mpi2prv: Can't use hardware counters!\n");
-		fprintf (stderr, "mpi2prv: Papi library error: %s\n", PAPI_strerror (rc));
-		if (rc == PAPI_ESYS)
-			perror ("mpi2prv: The error is:");
-		return;
-	}
-#elif defined(PMAPI_COUNTERS)
+#if defined(PMAPI_COUNTERS)
 	rc = pm_initialize (PM_VERIFIED|PM_UNVERIFIED|PM_CAVEAT|PM_GET_GROUPS, &ProcessorMetric_Info, &HWCGroup_Info, PM_CURRENT);
 	if (rc != 0)
 		pm_error ("pm_initialize", rc);
@@ -382,31 +380,22 @@ static void HWC_PARAVER_Labels (FILE * pcfFD)
 		{
 			if (ptmp->Traced[cnt])
 			{
-				EvCnt = ptmp->Events[cnt];
-
 #if defined(PAPI_COUNTERS)
-# if defined (PAPIv3)
-				if (PAPI_get_event_info (EvCnt,&Myinfo) == PAPI_OK)
-# elif defined (PAPIv2)
-				if (PAPI_query_event_verbose (EvCnt, &Myinfo) == PAPI_OK)
-# endif
+				if (!Exist_Counter(fcounter,ptmp->Events[cnt]))
 				{
-					if (!(Exist_Counter(fcounter,EvCnt)))
+					unsigned position;
+					char *description;
+
+					INSERTAR_CONTADOR (fcounter, ptmp->Events[cnt]);
+
+					if (Labels_LookForHWCCounter (ptmp->Events[cnt], &position, &description))
 					{
 						if (AddedCounters == 0)
 							fprintf (pcfFD, "%s\n", TYPE_LABEL);
-
 						AddedCounters++;
 
-						INSERTAR_CONTADOR (fcounter, EvCnt);
-
-# if defined (PAPIv3)
-						fprintf (pcfFD, "%d  %d %s (%s)\n", 7, HWC_COUNTER_TYPE(EvCnt),
-							Myinfo.short_descr, Myinfo.symbol );
-# elif defined (PAPIv2)
-						fprintf (pcfFD, "%d  %d %s (%s)\n", 7, HWC_COUNTER_TYPE(EvCnt),
-							Myinfo.event_descr, Myinfo.event_label);
-# endif
+						/* fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(position), description); */
+						fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(ptmp->Events[cnt]), description);
 					}
 				}
 #elif defined(PMAPI_COUNTERS)
@@ -586,14 +575,13 @@ static void Write_Clustering_Labels (FILE * pcf_fd)
 
 #ifdef HAVE_BFD
 /******************************************************************************
- *** loadSYMfile
+ *** Labels_loadSYMfile
  ******************************************************************************/
-void loadSYMfile (char *name)
+void Labels_loadSYMfile (int taskid, char *name)
 {
 	FILE *FD;
-	char LINE[1024], fname[1024], modname[1024], Type;
-	UINT64 address;
-	int line, count = 0;
+	char LINE[1024], Type;
+	int function_count = 0, hwc_count = 0;
 
 	if (!name)
 		return;
@@ -604,38 +592,62 @@ void loadSYMfile (char *name)
 	FD = (FILE *) fopen (name, "r");
 	if (FD == NULL)
 	{
-		fprintf (stderr, "mpi2prv: WARNING: Can\'t find file %s\n", name);
+		fprintf (stderr, PACKAGE_NAME"mpi2prv: WARNING: Task %d Can\'t find file %s\n", taskid, name);
 		return;
 	}
 
 	while (!feof (FD))
 	{
+		int args_assigned;
+
 		if (fgets (LINE, 1024, FD) == NULL)
 			break;
 
-		/* Example of line: U 0x100016d4 fA mpi_test.c 0 */
+		args_assigned = sscanf (LINE, "%c %[^\n]", &Type, LINE);
 
-		sscanf (LINE, "%[^\n]\n", LINE);
-
-		sscanf (LINE, "%c %llx %s %s %d", &Type, &address, fname, modname, &line);
-
-		switch (Type)
+		if (args_assigned == 2)
 		{
-			case 'U':
-			case 'P':
-				if (get_option_merge_UniqueCallerID())
-					Address2Info_AddSymbol (address, UNIQUE_TYPE, fname, modname, line);
-				else
-					Address2Info_AddSymbol (address, (Type=='U')?USER_FUNCTION_TYPE:OUTLINED_OPENMP_TYPE, fname, modname, line);
-				count++;
-				break;
-			default:
-				fprintf (stderr, "mpi2prv: Error! Unexpected line in symbol file\n%s\n", LINE);
-				break;
+			switch (Type)
+			{
+				case 'U':
+				case 'P':
+					{
+						/* Example of line: U 0x100016d4 fA mpi_test.c 0 */
+						char fname[1024], modname[1024];
+						int line;
+						UINT64 address;
+
+						sscanf (LINE, "%llx %s %s %d", &address, fname, modname, &line);
+						if (get_option_merge_UniqueCallerID())
+							Address2Info_AddSymbol (address, UNIQUE_TYPE, fname, modname, line);
+						else
+							Address2Info_AddSymbol (address, (Type=='U')?USER_FUNCTION_TYPE:OUTLINED_OPENMP_TYPE, fname, modname, line);
+						function_count++;
+					}
+					break;
+
+				case 'H':
+						{
+						int eventcode;
+						char hwc_description[1024];
+
+						sscanf (LINE, "%d %[^\n]", &eventcode, hwc_description);
+						Labels_AddHWCounter_Code_Description (eventcode, hwc_description);
+						hwc_count++;
+					}
+					break;
+				default:
+					fprintf (stderr, PACKAGE_NAME" mpi2prv: Error! Task %d found unexpected line in symbol file '%s'\n", taskid, LINE);
+					break;
+			}
 		}
 	}
 
-	fprintf (stdout, "mpi2prv: %d symbols successfully imported from %s file\n", count, name);
+	if (taskid == 0)
+	{
+		fprintf (stdout, "mpi2prv: %d symbols successfully imported from %s file\n", function_count, name);
+		fprintf (stdout, "mpi2prv: %d HWC counter descriptions successfully imported from %s file\n", hwc_count, name);
+	}
 
 	fclose (FD);
 }
@@ -645,7 +657,7 @@ void loadSYMfile (char *name)
  *** generatePCFfile
  ******************************************************************************/
 
-int GeneratePCFfile (char *name, long long options)
+int Labels_GeneratePCFfile (char *name, long long options)
 {
 	FILE *fd;
 
