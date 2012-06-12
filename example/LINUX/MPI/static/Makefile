@@ -2,7 +2,7 @@ include ../../Makefile.inc
 
 F77 = $(MPI_HOME)/bin/mpif77 
 FFLAGS = -O2 -g
-FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a $(PAPI_LIBS) $(XML2_LDFLAGS) $(XML2_LIBS) $(BFD_LIBS) $(UNWIND_LIBS) $(POSIX_CLOCK_LIBS)
+FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a $(UNWIND_LIBS) $(PAPI_LIBS) $(XML2_LDFLAGS) $(XML2_LIBS) $(BFD_LIBS) $(POSIX_CLOCK_LIBS)
 
 all: mpi_ping
 

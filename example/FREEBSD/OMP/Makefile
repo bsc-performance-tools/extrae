@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 CC = gcc
 CFLAGS = -O -fopenmp -g -I$(EXTRAE_HOME)/include
-CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace -lxml2 $(PAPI_LIBS) $(BFD_LIBS) $(UNWIND_LIBS) $(POSIX_CLOCK_LIBS) $(LIBEXECINFO_LIBS)
+CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace  $(UNWIND_LIBS) $(PAPI_LIBS) $(BFD_LIBS) $(XML2_LIBS) $(POSIX_CLOCK_LIBS) $(LIBEXECINFO_LIBS)
 
 all: pi pi_instrumented
 
