@@ -1405,13 +1405,13 @@ AC_DEFUN([AX_PROG_LIBELF],
       if test "${ELF_INSTALLED}" = "yes" ; then
         if test -f ${ELF_LIBSDIR}/libelf.a -o \
                 -f ${ELF_LIBSDIR}/libelf.so ; then
-           if test -f ${ELF_HOME}/include/libelf/libelf.h ; then
+           if test -f ${ELF_INCLUDES}/libelf/libelf.h -o ${ELF_INCLUDES}/libelf.h  ; then
               libelf_found="yes"
            else
-              AC_MSG_ERROR([Cannot find ELF header files in ${elf_paths}/include])
+              AC_MSG_ERROR([Cannot find ELF header files neither in ${ELF_INCLUDES} nor in ${ELF_INCLUDES}/libelf])
            fi
         else
-           AC_MSG_ERROR([Cannot find ELF library files in ${elf_paths}/lib])
+           AC_MSG_ERROR([Cannot find ELF library files in ${ELF_LIBSDIR}])
         fi
       fi
    fi
