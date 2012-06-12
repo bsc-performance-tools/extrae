@@ -471,16 +471,32 @@ AC_DEFUN([AX_PROG_BFD],
          )
 
          if test "${bfd_liberty_works}" != "yes" ; then
-            dnl On some machines BFD/LIBERTY need an special symbol (e.g BGL)
+
+            dnl Newer systems require libdl to be linked with -lbfd
+            LIBS="${LIBS} -ldl"
             AC_TRY_LINK(
-               [ #include <bfd.h> 
-                 int *__errno_location(void) { return 0; }
-               ], 
+               [ #include <bfd.h> ], 
                [ bfd *abfd = bfd_openr ("", ""); ],
                [ bfd_liberty_works="yes" ]
             )
             if test "${bfd_liberty_works}" = "yes" ; then
-               AC_DEFINE([NEED_ERRNO_LOCATION_PATCH], 1, [Define to 1 if system requires __errno_location and does not provide it])
+
+               AC_DEFINE([BFD_NEEDS_LDL], 1, [Define to 1 if libbfd/liberty need -ldl to link])
+               libbfd_needs_ldl="yes"
+
+            else
+               dnl On some machines BFD/LIBERTY need an special symbol (e.g BGL)
+               AC_TRY_LINK(
+                  [ #include <bfd.h> 
+                    int *__errno_location(void) { return 0; }
+                  ], 
+                  [ bfd *abfd = bfd_openr ("", ""); ],
+                  [ bfd_liberty_works="yes" ]
+                )
+
+                if test "${bfd_liberty_works}" = "yes" ; then
+                   AC_DEFINE([NEED_ERRNO_LOCATION_PATCH], 1, [Define to 1 if system requires __errno_location and does not provide it])
+                fi
             fi
          fi
 
@@ -599,6 +615,8 @@ AC_DEFUN([AX_PROG_BFD],
          AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind however either BFD or LIBERY are not found/installed. Please make sure that the binutils package is installed in its development form. The latest source can be downloaded from http://www.gnu.org/software/binutils])
       fi
    fi
+
+   AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
 ])
 
 

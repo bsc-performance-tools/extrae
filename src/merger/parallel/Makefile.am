@@ -89,6 +89,10 @@ if NEED_MPI_LIB_INCLUDE
   mpimpi2prv_LDFLAGS += @MPI_LDFLAGS@ @MPI_LIBS@
 endif
 
+if BFD_NEEDS_LDL
+  mpimpi2prv_LDFLAGS += -ldl
+endif
+
 if HAVE_ZLIB
   libmpimpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpimpi2prv_CFLAGS += @LIBZ_CFLAGS@

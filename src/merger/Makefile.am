@@ -80,6 +80,10 @@ mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_D
 mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_DIR)/libcommon.la @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
 mpi2prv_DEPENDENCIES = libmpi2prv.la
 
+if BFD_NEEDS_LDL
+  mpi2prv_LDFLAGS += -ldl
+endif
+
 if HAVE_ZLIB
   libmpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpi2prv_CFLAGS += @LIBZ_CFLAGS@
