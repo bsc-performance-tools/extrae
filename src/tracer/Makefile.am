@@ -99,17 +99,17 @@ endif
 endif
 
 WRAPPERS_CORE = \
-	wrappers/API/buffers.c wrappers/API/buffers.h \
-	wrappers/API/wrapper.c wrappers/API/wrapper.h \
-	wrappers/API/misc_wrapper.c wrappers/API/misc_wrapper.h \
-  wrappers/API/threadinfo.c wrappers/API/threadinfo.h \
-	wrappers/API/trace_buffers.h \
-	trace_macros.h trace_macros_mpi.h trace_macros_omp.h trace_macros_pacx.h \
-	trace_hwc.h
+ wrappers/API/buffers.c wrappers/API/buffers.h \
+ wrappers/API/wrapper.c wrappers/API/wrapper.h \
+ wrappers/API/misc_wrapper.c wrappers/API/misc_wrapper.h \
+ wrappers/API/threadinfo.c wrappers/API/threadinfo.h \
+ wrappers/API/trace_buffers.h \
+ trace_macros.h trace_macros_mpi.h trace_macros_omp.h trace_macros_pacx.h \
+ trace_hwc.h
 
 # Wrappers for CUDA instrumentation
 WRAPPERS_CUDA = probes/CUDA/cuda_probe.c probes/CUDA/cuda_probe.h \
-  wrappers/CUDA/cuda_common.c wrappers/CUDA/cuda_common.h
+ wrappers/CUDA/cuda_common.c wrappers/CUDA/cuda_common.h
 if WANT_CUDA
 WRAPPERS_CUDA += wrappers/CUDA/cuda_wrapper.c wrappers/CUDA/cuda_wrapper.h
 endif
@@ -126,27 +126,27 @@ WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
 
 # Probes for OpenMP instrumentation
 WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
-  wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h \
-  wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h \
-  wrappers/OMP/intel-kmpc-11.c wrappers/OMP/intel-kmpc-11.h
+ wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h \
+ wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h \
+ wrappers/OMP/intel-kmpc-11.c wrappers/OMP/intel-kmpc-11.h
 
 if ARCH_POWERPC
 if OS_LINUX
-  WRAPPERS_OMP += wrappers/OMP/ibm-xlsmp-1.6.c wrappers/OMP/ibm-xlsmp-1.6.h
-  EXTRA_OMP_CFLAGS = -I/usr/src/linux
+ WRAPPERS_OMP += wrappers/OMP/ibm-xlsmp-1.6.c wrappers/OMP/ibm-xlsmp-1.6.h
+ EXTRA_OMP_CFLAGS = -I/usr/src/linux
 endif
 endif
 
 # Wrappers for TRT instrumentation (experimental)
 WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c wrappers/TRT/trt_wrapper.h \
-	probes/TRT/trt_probe.c probes/TRT/trt_probe.h
+ probes/TRT/trt_probe.c probes/TRT/trt_probe.h
 
 # Wrappers for pthreads instrumentation
 WRAPPERS_PTHREAD = wrappers/pthread/pthread_wrapper.c wrappers/pthread/pthread_wrapper.h \
-  probes/pthread/pthread_probe.c probes/pthread/pthread_probe.h
+ probes/pthread/pthread_probe.c probes/pthread/pthread_probe.h
 
 if IS_CELL_MACHINE
-  WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c wrappers/CELL/cell_wrapper.h
+WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c wrappers/CELL/cell_wrapper.h
 endif
 
 core_MPI_SRCS = \
@@ -172,21 +172,24 @@ core_SRCS = \
  $(COMMON_DIR)/trace_mode.h                  \
  $(WRAPPERS_CORE)
 
+# Auto instrumentation through constructor and destructors
+auto_instr_SRCS = auto_init_fini.c
+
 # CUDA trace
-libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
+libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(auto_instr_SRCS)
 libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(WRAPPERS_MPI) $(core_MPI_SRCS)
 libcudampitracef_la_SOURCES = $(libcudampitrace_la_SOURCES) mpif.h
 
 # MPItrace & Sequential trace
 libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
 libmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
-libseqtrace_la_SOURCES = $(core_SRCS)
+libseqtrace_la_SOURCES = $(core_SRCS) $(auto_instr_SRCS)
 
 libptmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(WRAPPERS_PTHREAD)
 libptmpitracef_la_SOURCES = $(libptmpitrace_la_SOURCES) mpif.h
 
 # UPC (only C?)
-libupctrace_la_SOURCES = $(core_SRCS)
+libupctrace_la_SOURCES = $(core_SRCS) $(auto_instr_SRCS)
 
 # PACXtrace 
 libpacxtrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PACX) $(core_PACX_SRCS)
@@ -195,7 +198,7 @@ libpacxtracef_la_SOURCES = $(libpacxtrace_la_SOURCES)
 # OpenMP & OpenMP + MPI
 libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES) $(WRAPPERS_OMP)
 libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES) $(WRAPPERS_OMP) mpif.h
-libomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OMP)
+libomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OMP) $(auto_instr_SRCS)
 
 # SMPSS & SMPSS + MPI
 libsmpssmpitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
@@ -208,8 +211,8 @@ libnanosmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
 libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) mpif.h
 
 # pthreads & TRT
-libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD)
-libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT)
+libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD) $(auto_instr_SRCS)
+libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT) $(auto_instr_SRCS)
 
 # LoadBalancing
 libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
@@ -228,19 +231,19 @@ lib_dyn_cudampitracec_la_SOURCES = $(libcudampitrace_la_SOURCES)
 lib_dyn_cudampitracef_la_SOURCES = $(libcudampitracef_la_SOURCES)
 
 core_MODULES = \
-   $(COMMON_DIR)/libcommon.la \
-   $(CLOCKS_DIR)/libclock.la \
-   $(HWC_DIR)/libhwc.la
+ $(COMMON_DIR)/libcommon.la \
+ $(CLOCKS_DIR)/libclock.la \
+ $(HWC_DIR)/libhwc.la
 
 INTERFACE_API_PTHREAD = $(INTERFACES_DIR)/API/libiface_api_pthread.la
 if PTHREAD_SUPPORT_IN_ALL_LIBS
-  INTERFACE_API = $(INTERFACE_API_PTHREAD)
+ INTERFACE_API = $(INTERFACE_API_PTHREAD)
 else
-  INTERFACE_API = $(INTERFACES_DIR)/API/libiface_api.la
+ INTERFACE_API = $(INTERFACES_DIR)/API/libiface_api.la
 endif
 
 if HAVE_MRNET
-  core_MODULES += $(MRNET_DIR)/libmrn.la
+ core_MODULES += $(MRNET_DIR)/libmrn.la
 endif
 
 if IS_BG_MACHINE

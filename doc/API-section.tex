@@ -13,14 +13,20 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
 
  \item {\tt void Extrae\_init (void)}\\
  Initializes the tracing library.\\
- {\bf NOTE:} This routine is called automatically by either {\tt MPI\_Init} or when tracing is performed by the DynInst launcher.
+ {\bf NOTE:} This routine is called automatically in different circumstances, which include:
+    \begin{itemize}
+      \item Call to MPI\_Init when the appropriate instrumentation library is linked or preload with the application.
+      \item Usage of the DynInst launcher.
+      \item If either the {\tt libseqtrace.so}, {\tt libomptrace.so} or {\tt libpttrace.so} are linked dynamically or preloaded with the application.
+    \end{itemize}
+  No major problems should occur if the library is initialized twice, only a warning appears in the terminal output noticing the intent of double initialization.
 
  \item {\tt extrae\_init\_type\_t Extrae\_is\_initialized (void)}\\
  This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API, MPI or PACX initialization).
 
  \item {\tt void Extrae\_fini (void)}\\
  Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
- {\bf NOTE:} This routine is called automatically by either {\tt MPI\_Finalize} or when the tracing is performed by the DynInst launcher.
+ {\bf NOTE:} As it happened by using {\tt Extrae\_init}, this routine is automatically called in the same circumstances (but on call to MPI\_Finalize in the first case).
 
  \item {\tt void Extrae\_event (unsigned event, unsigned value)}\\
  The Extrae\_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
