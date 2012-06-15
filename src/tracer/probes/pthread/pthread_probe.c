@@ -108,6 +108,8 @@ void Probe_pthread_rwlock_lockwr_Entry (void *p)
 
 void Probe_pthread_rwlock_lockwr_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_WR_EV, EMPTY, EMPTY);
@@ -122,6 +124,8 @@ void Probe_pthread_rwlock_lockrd_Entry (void *p)
 
 void Probe_pthread_rwlock_lockrd_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_RD_EV, EMPTY, EMPTY);
@@ -136,6 +140,8 @@ void Probe_pthread_rwlock_unlock_Entry (void *p)
 
 void Probe_pthread_rwlock_unlock_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_RWLOCK_UNLOCK_EV, EMPTY, EMPTY);
@@ -152,6 +158,8 @@ void Probe_pthread_mutex_lock_Entry (void *p)
 
 void Probe_pthread_mutex_lock_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_MUTEX_LOCK_EV, EMPTY, EMPTY);
@@ -166,6 +174,8 @@ void Probe_pthread_mutex_unlock_Entry (void *p)
 
 void Probe_pthread_mutex_unlock_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_MUTEX_UNLOCK_EV, EMPTY, EMPTY);
@@ -182,6 +192,8 @@ void Probe_pthread_cond_signal_Entry (void *p)
 
 void Probe_pthread_cond_signal_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_SIGNAL_EV, EMPTY, EMPTY);
@@ -196,6 +208,8 @@ void Probe_pthread_cond_broadcast_Entry (void *p)
 
 void Probe_pthread_cond_broadcast_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_BROADCAST_EV, EMPTY, EMPTY);
@@ -210,6 +224,8 @@ void Probe_pthread_cond_wait_Entry (void *p)
 
 void Probe_pthread_cond_wait_Exit (void *p)
 {
+	UNREFERENCED_PARAMETER(p);
+
 	DEBUG
 	if (mpitrace_on && TracePthreadLocks)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_WAIT_EV, EMPTY, EMPTY);
