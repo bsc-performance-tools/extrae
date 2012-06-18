@@ -1,12 +1,12 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 18Jun2012 Combined the configure options --with-bfd and --with-liberty into --with-binutils
  + 15Jun2012 Automatically load instrumentation with:
-              - libseqtrace
-	      - libomptrace
-	      - libpttrace
-	     when these libraries are LD_PRELOADed or linked
-	     dynamically with the application.
+     - libseqtrace
+     - libomptrace
+     - libpttrace
+   When these libraries are LD_PRELOADed or linked dynamically with the application.
  * 08May2012 Refactored and simplified examples. Usage of Makefile.inc
              extrae-post-installation-upgrade.sh gets alive!
              Check whether all timings are in us instead of ns.

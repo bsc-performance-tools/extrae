@@ -76,19 +76,19 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 
 	echo
 	if test "${BFD_INSTALLED}" = "yes" ; then
-		echo BFD availability: yes \(${BFD_HOME}\)
+		echo libbfd available: yes \(${BFD_HOME}\)
 	fi
 
 	if test "${LIBERTY_INSTALLED}" = "yes" ; then
-		echo liberty availability: yes \(${LIBERTY_HOME}\)
+		echo libiberty available: yes \(${LIBERTY_HOME}\)
 	else
-		echo liberty availability: no
+		echo libiberty available: no
 	fi
 
 	if test "${zhome_dir}" != "not found" ; then
-		echo zlib availability: yes \(${LIBZ_HOME}\)
+		echo zlib available: yes \(${LIBZ_HOME}\)
 	else
-		echo zlib availability: no
+		echo zlib available: no
 	fi
 
 	if test "${libunwind_works}" = "yes" ; then

@@ -375,248 +375,225 @@ AC_DEFUN([AX_PROG_XML2],
    AC_SUBST(XML2_LDFLAGS)
 ])
 
-# AX_PROG_BFD
-# -----------
-AC_DEFUN([AX_PROG_BFD],
+#
+# AX_PROG_BINUTILS
+# ----------------
+AC_DEFUN([AX_PROG_BINUTILS],
 [
    BFD_INSTALLED="no"
    LIBERTY_INSTALLED="no"
 
    if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
-      bfd_default_paths="${BG_HOME}/blrts-gnu"
-      libiberty_default_paths="${BG_HOME}/blrts-gnu"
+      binutils_default_paths="${BG_HOME}/blrts-gnu"
    else
-      bfd_default_paths="/usr /usr/local /opt/local"
-      libiberty_default_paths="/usr /usr/local /opt/local"
+      binutils_default_paths="/usr /usr/local /opt/local"
    fi
 
-   AC_MSG_CHECKING([for libbfd])
-   AC_ARG_WITH(bfd,
+   AC_ARG_WITH(binutils,
       AC_HELP_STRING(
-         [--with-bfd@<:@=DIR@:>@],
-         [specify where to find BFD libraries and includes]
+         [--with-binutils@<:@=DIR@:>@],
+         [specify where to find BFD and LIBERTY libraries and includes]
       ),
-      [bfd_paths="${withval}"],
-      [bfd_paths="${bfd_default_paths}"]
+      [binutils_paths="${withval}"],
+      [binutils_paths="${binutils_default_paths}"]
    )
-   for bfd_home_dir in [${bfd_paths} "not found"]; do
-      if test -r "${bfd_home_dir}/lib${BITS}/libbfd.so" ; then
-         BFD_LIBSDIR="${bfd_home_dir}/lib${BITS}"
-         break
-      elif test -r "${bfd_home_dir}/lib${BITS}/libbfd.a" ; then
-         BFD_LIBSDIR="${bfd_home_dir}/lib${BITS}"
-         break
-      elif test -r "${bfd_home_dir}/lib/libbfd.so" ; then
-         BFD_LIBSDIR="${bfd_home_dir}/lib"
-         break
-      elif test -r "${bfd_home_dir}/lib/libbfd.a" ; then
-         BFD_LIBSDIR="${bfd_home_dir}/lib"
-         break
+
+   AC_MSG_CHECKING([for binutils])
+   for binutils_home_dir in [${binutils_paths} "not found"]; do
+      BFD_LIBSDIR=""
+      LIBERTY_LIBSDIR=""
+
+      if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
+         BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+      elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" ; then
+         BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+      elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
+         BFD_LIBSDIR="${binutils_home_dir}/lib"
+      elif test -r "${binutils_home_dir}/lib/libbfd.a" ; then
+         BFD_LIBSDIR="${binutils_home_dir}/lib"
+      fi
+
+      if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" ; then
+         LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+      elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
+         LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+      elif test -r "${binutils_home_dir}/lib/x86_64/libiberty.a" ; then  # dnl Special handle for MacOSx
+         LIBERTY_LIBSDIR="${binutils_home_dir}/lib/x86_64"
+      elif test -r "${binutils_home_dir}/lib/libiberty.so" ; then
+         LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
+      elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
+         LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
+      fi
+
+      if test -n $BFD_LIBSDIR && test -n $LIBERTY_LIBSDIR ; then
+        # Both libraries are present
+        break
       fi
    done
-   AC_MSG_RESULT(${bfd_home_dir})
+   AC_MSG_RESULT(${binutils_home_dir})
 
    AX_FLAGS_SAVE()
-   CFLAGS="-I${bfd_home_dir}/include ${CFLAGS}"
+   CFLAGS="-I${binutils_home_dir}/include ${CFLAGS}"
    AC_CHECK_HEADERS([bfd.h], [BFD_INSTALLED="yes"], [BFD_INSTALLED="no"])
-   AX_FLAGS_RESTORE()
 
    if test "${BFD_INSTALLED}" = "yes" ; then
+      AC_MSG_CHECKING([whether libbfd and libiberty work])
 
-      AC_MSG_CHECKING([for libiberty])
-      AC_ARG_WITH(liberty,
-         AC_HELP_STRING(
-            [--with-liberty@<:@=DIR@:>@],
-            [specify where to find LIBERTY libraries and includes]
-         ),
-         [liberty_paths="${withval}"],
-         [liberty_paths="${libiberty_default_paths}"]
+      if test "${OperatingSystem}" != "aix" ; then
+         LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
+      else
+         LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS} -lintl"
+      fi
+      AC_TRY_LINK(
+         [ #include <bfd.h> ], 
+         [ bfd *abfd = bfd_openr ("", ""); ],
+         [ bfd_and_iberty_work="yes" ]
       )
-      for liberty_home_dir in [${liberty_paths} "not found"]; do
-         if test -r "${liberty_home_dir}/lib${BITS}/libiberty.so" ; then
-            LIBERTY_LIBSDIR="${liberty_home_dir}/lib${BITS}"
-            break
-         elif test -r "${liberty_home_dir}/lib${BITS}/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${liberty_home_dir}/lib${BITS}"
-            break
-         elif test -r "${liberty_home_dir}/lib/x86_64/libiberty.a" ; then  # dnl Special handle for MacOSx
-            LIBERTY_LIBSDIR="${liberty_home_dir}/lib/x86_64"
-            break
-         elif test -r "${liberty_home_dir}/lib/libiberty.so" ; then
-            LIBERTY_LIBSDIR="${liberty_home_dir}/lib"
-            break
-         elif test -r "${liberty_home_dir}/lib/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${liberty_home_dir}/lib"
-            break
-         fi
-      done
-      AC_MSG_RESULT(${liberty_home_dir})
-      
-      dnl Check if they work
-      
-      if test "${liberty_home_dir}" != "not found" ; then
-         AC_MSG_CHECKING([if libbfd and libiberty works])
+      if test "${bfd_and_iberty_work}" != "yes" ; then
 
-         AX_FLAGS_SAVE()
-         if test "${OperatingSystem}" != "aix" ; then
-            LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
-         else
-            LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS} -lintl"
-         fi
-         CFLAGS="-I${bfd_home_dir}/include ${CFLAGS}"
+         dnl Newer systems require libdl to be linked with -lbfd
+         LIBS="${LIBS} -ldl"
          AC_TRY_LINK(
             [ #include <bfd.h> ], 
             [ bfd *abfd = bfd_openr ("", ""); ],
-            [ bfd_liberty_works="yes" ]
+            [ bfd_and_iberty_work="yes" ]
          )
-
-         if test "${bfd_liberty_works}" != "yes" ; then
-
-            dnl Newer systems require libdl to be linked with -lbfd
-            LIBS="${LIBS} -ldl"
-            AC_TRY_LINK(
-               [ #include <bfd.h> ], 
-               [ bfd *abfd = bfd_openr ("", ""); ],
-               [ bfd_liberty_works="yes" ]
-            )
-            if test "${bfd_liberty_works}" = "yes" ; then
-
-               AC_DEFINE([BFD_NEEDS_LDL], 1, [Define to 1 if libbfd/liberty need -ldl to link])
-               libbfd_needs_ldl="yes"
-
-            else
-               dnl On some machines BFD/LIBERTY need an special symbol (e.g BGL)
-               AC_TRY_LINK(
-                  [ #include <bfd.h> 
-                    int *__errno_location(void) { return 0; }
-                  ], 
-                  [ bfd *abfd = bfd_openr ("", ""); ],
-                  [ bfd_liberty_works="yes" ]
-                )
-
-                if test "${bfd_liberty_works}" = "yes" ; then
-                   AC_DEFINE([NEED_ERRNO_LOCATION_PATCH], 1, [Define to 1 if system requires __errno_location and does not provide it])
-                fi
-            fi
-         fi
-
-         if test "${bfd_liberty_works}" = "yes" ; then
-            AC_MSG_RESULT([yes])
-
-            BFD_HOME="${bfd_home_dir}"
-            BFD_INCLUDES="${BFD_HOME}/include"
-            BFD_CFLAGS="-I${BFD_INCLUDES}"
-            BFD_CXXFLAGS=${BFD_CFLAGS}
-            BFD_CPPFLAGS=${BFD_CFLAGS}
-            BFD_LIBS="-lbfd"
-            BFD_LDFLAGS="-L${BFD_LIBSDIR}"
-            AC_SUBST(BFD_HOME)
-            AC_SUBST(BFD_INCLUDES)
-            AC_SUBST(BFD_CFLAGS)
-            AC_SUBST(BFD_CXXFLAGS)
-            AC_SUBST(BFD_CPPFLAGS)
-            AC_SUBST(BFD_LIBS)
-            AC_SUBST(BFD_LIBSDIR)
-            if test -d ${BFD_LIBSDIR}/shared ; then
-               BFD_SHAREDLIBSDIR="${BFD_LIBSDIR}/shared"
-            else
-               BFD_SHAREDLIBSDIR=${BFD_LIBSDIR}
-            fi
-            AC_SUBST(BFD_SHAREDLIBSDIR)
-            AC_SUBST(BFD_LDFLAGS)
-
-            LIBERTY_HOME="${liberty_home_dir}"
-            LIBERTY_INCLUDES="${LIBERTY_HOME}/include"
-            LIBERTY_CFLAGS="-I${LIBERTY_INCLUDES}"
-            LIBERTY_CXXFLAGS=${LIBERTY_CFLAGS}
-            LIBERTY_CPPFLAGS=${LIBERTY_CFLAGS}
-            if test "${OperatingSystem}" != "aix" ; then
-               LIBERTY_LIBS="-liberty"
-            else
-               LIBERTY_LIBS="-liberty -lintl"
-            fi
-            LIBERTY_LDFLAGS="-L${LIBERTY_LIBSDIR}"
-            AC_SUBST(LIBERTY_HOME)
-            AC_SUBST(LIBERTY_INCLUDES)
-            AC_SUBST(LIBERTY_CFLAGS)
-            AC_SUBST(LIBERTY_CXXFLAGS)
-            AC_SUBST(LIBERTY_CPPFLAGS)
-            AC_SUBST(LIBERTY_LIBS)
-            AC_SUBST(LIBERTY_LIBSDIR)
-            if test -d ${LIBERTY_LIBSDIR}/shared ; then
-               BFD_SHAREDLIBSDIR="${LIBERTY_LIBSDIR}/shared"
-            else
-               BFD_SHAREDLIBSDIR=${LIBERTY_LIBSDIR}
-            fi
-            AC_SUBST(LIBERTY_SHAREDLIBSDIR)
-            AC_SUBST(LIBERTY_LDFLAGS)
-
-            BFD_INSTALLED="yes"
-            LIBERTY_INSTALLED="yes"
-
-            AC_DEFINE([HAVE_BFD], 1, [Define to 1 if BFD is installed in the system])
-
-            AC_MSG_CHECKING([whether bfd_get_section_size is defined in bfd.h])
-            AC_TRY_LINK(
-              [ #include <bfd.h> ],
-              [ 
-                  asection *section;
-                  int result = bfd_get_section_size(section); 
-              ],
-              [ bfd_get_section_size_found="yes"]
-            )
-            if test "${bfd_get_section_size_found}" = "yes" ; then
-               AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE, [1], [Defined to 1 if bfd.h defines bfd_get_section_size])
-               AC_MSG_RESULT([yes])
-            else
-               AC_MSG_RESULT([no])
-            fi
-
-            AC_MSG_CHECKING([whether bfd_get_section_size_before_reloc is defined in bfd.h])
-            AC_TRY_LINK(
-              [ #include <bfd.h> ],
-              [ 
-                  asection *section;
-                  int result = bfd_get_section_size_before_reloc(section); 
-              ],
-              [ bfd_get_section_size_before_reloc_found="yes"]
-            )
-            if test "${bfd_get_section_size_before_reloc_found}" = "yes" ; then
-               AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC, [1], [Defined to 1 if bfd.h defines bfd_get_section_size_before_reloc])
-               AC_MSG_RESULT([yes])
-            else
-               AC_MSG_RESULT([no])
-            fi
-
-            AC_MSG_CHECKING([whether bfd_demangle is defined in bfd.h])
-            AC_TRY_LINK(
-              [ #include <bfd.h> ],
-              [
-                  char *res = bfd_demangle ((void*)0, "", 0);
-              ],
-              [ bfd_demangle_found="yes"]
-            )
-            if test "${bfd_demangle_found}" = "yes" ; then
-               AC_DEFINE(HAVE_BFD_DEMANGLE, [1], [Defined to 1 if bfd.h contains bfd_demangle])
-               AC_MSG_RESULT([yes])
-            else
-               AC_MSG_RESULT([no])
-            fi
-
+         if test "${bfd_and_iberty_work}" = "yes" ; then
+            AC_DEFINE([BFD_NEEDS_LDL], 1, [Define to 1 if libbfd/libiberty need -ldl to link])
+            libbfd_needs_ldl="yes"
          else
-            AC_MSG_RESULT([no, see config.log for further details])
+            dnl On some machines BFD/LIBERTY need an special symbol (e.g BGL)
+            AC_TRY_LINK(
+               [ #include <bfd.h> 
+                 int *__errno_location(void) { return 0; }
+               ], 
+               [ bfd *abfd = bfd_openr ("", ""); ],
+               [ bfd_and_iberty_work="yes" ]
+            )
+            if test "${bfd_and_iberty_works}" = "yes" ; then
+               AC_DEFINE([NEED_ERRNO_LOCATION_PATCH], 1, [Define to 1 if system requires __errno_location and does not provide it])
+            fi
          fi
-         AX_FLAGS_RESTORE()
+      fi
+      if test "${bfd_and_iberty_work}" = "yes" ; then
+         AC_MSG_RESULT([yes])
+
+         BFD_HOME="${binutils_home_dir}"
+         BFD_INCLUDES="${BFD_HOME}/include"
+         BFD_CFLAGS="-I${BFD_INCLUDES}"
+         BFD_CXXFLAGS=${BFD_CFLAGS}
+         BFD_CPPFLAGS=${BFD_CFLAGS}
+         BFD_LIBS="-lbfd"
+         BFD_LDFLAGS="-L${BFD_LIBSDIR}"
+         AC_SUBST(BFD_HOME)
+         AC_SUBST(BFD_INCLUDES)
+         AC_SUBST(BFD_CFLAGS)
+         AC_SUBST(BFD_CXXFLAGS)
+         AC_SUBST(BFD_CPPFLAGS)
+         AC_SUBST(BFD_LIBS)
+         AC_SUBST(BFD_LIBSDIR)
+         if test -d ${BFD_LIBSDIR}/shared ; then
+            BFD_SHAREDLIBSDIR="${BFD_LIBSDIR}/shared"
+         else
+            BFD_SHAREDLIBSDIR=${BFD_LIBSDIR}
+         fi
+         AC_SUBST(BFD_SHAREDLIBSDIR)
+         AC_SUBST(BFD_LDFLAGS)
+
+         LIBERTY_HOME="${binutils_home_dir}"
+         LIBERTY_INCLUDES="${LIBERTY_HOME}/include"
+         LIBERTY_CFLAGS="-I${LIBERTY_INCLUDES}"
+         LIBERTY_CXXFLAGS=${LIBERTY_CFLAGS}
+         LIBERTY_CPPFLAGS=${LIBERTY_CFLAGS}
+         if test "${OperatingSystem}" != "aix" ; then
+            LIBERTY_LIBS="-liberty"
+         else
+            LIBERTY_LIBS="-liberty -lintl"
+         fi
+         LIBERTY_LDFLAGS="-L${LIBERTY_LIBSDIR}"
+         AC_SUBST(LIBERTY_HOME)
+         AC_SUBST(LIBERTY_INCLUDES)
+         AC_SUBST(LIBERTY_CFLAGS)
+         AC_SUBST(LIBERTY_CXXFLAGS)
+         AC_SUBST(LIBERTY_CPPFLAGS)
+         AC_SUBST(LIBERTY_LIBS)
+         AC_SUBST(LIBERTY_LIBSDIR)
+         if test -d ${LIBERTY_LIBSDIR}/shared ; then
+            LIBERTY_SHAREDLIBSDIR="${LIBERTY_LIBSDIR}/shared"
+         else
+            LIBERTY_SHAREDLIBSDIR=${LIBERTY_LIBSDIR}
+         fi
+         AC_SUBST(LIBERTY_SHAREDLIBSDIR)
+         AC_SUBST(LIBERTY_LDFLAGS)
+
+         BFD_INSTALLED="yes"
+         LIBERTY_INSTALLED="yes"
+
+         AC_DEFINE([HAVE_BFD], 1, [Define to 1 if BFD is installed in the system])
+
+         AC_MSG_CHECKING([whether bfd_get_section_size is defined in bfd.h])
+         AC_TRY_LINK(
+           [ #include <bfd.h> ],
+           [ 
+               asection *section;
+               int result = bfd_get_section_size(section); 
+           ],
+           [ bfd_get_section_size_found="yes"]
+         )
+         if test "${bfd_get_section_size_found}" = "yes" ; then
+            AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE, [1], [Defined to 1 if bfd.h defines bfd_get_section_size])
+            AC_MSG_RESULT([yes])
+         else
+            AC_MSG_RESULT([no])
+         fi
+
+         AC_MSG_CHECKING([whether bfd_get_section_size_before_reloc is defined in bfd.h])
+         AC_TRY_LINK(
+           [ #include <bfd.h> ],
+           [ 
+               asection *section;
+               int result = bfd_get_section_size_before_reloc(section); 
+           ],
+           [ bfd_get_section_size_before_reloc_found="yes"]
+         )
+         if test "${bfd_get_section_size_before_reloc_found}" = "yes" ; then
+            AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC, [1], [Defined to 1 if bfd.h defines bfd_get_section_size_before_reloc])
+            AC_MSG_RESULT([yes])
+         else
+            AC_MSG_RESULT([no])
+         fi
+
+         AC_MSG_CHECKING([whether bfd_demangle is defined in bfd.h])
+         AC_TRY_LINK(
+           [ #include <bfd.h> ],
+           [
+               char *res = bfd_demangle ((void*)0, "", 0);
+           ],
+           [ bfd_demangle_found="yes"]
+         )
+         if test "${bfd_demangle_found}" = "yes" ; then
+            AC_DEFINE(HAVE_BFD_DEMANGLE, [1], [Defined to 1 if bfd.h contains bfd_demangle])
+            AC_MSG_RESULT([yes])
+         else
+            AC_MSG_RESULT([no])
+         fi
+
+      else
+         AC_MSG_RESULT([no, see config.log for further details])
       fi
    fi
 
+   AX_FLAGS_RESTORE()
+
    if test "${unwind_paths}" != "no"; then
       if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
-         AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind however either BFD or LIBERY are not found/installed. Please make sure that the binutils package is installed in its development form. The latest source can be downloaded from http://www.gnu.org/software/binutils])
+         AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
       fi
    fi
 
    AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
+
+
 ])
 
 

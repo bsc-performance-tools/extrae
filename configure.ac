@@ -508,7 +508,7 @@ AM_CONDITIONAL(GENERATE_DOCUMENTATION, test "${enable_doc}" = "yes" )
 #    External library checks    #
 #################################
 
-AX_PROG_BFD
+AX_PROG_BINUTILS
 
 ######################################################################
 #    Checks for typedefs, structures and compiler characteristics    #
