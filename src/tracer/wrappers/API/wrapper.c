@@ -1572,7 +1572,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 		HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
 		if (hwc_defs != NULL)
 		{
-			unsigned u;
+			unsigned u = 0;
 			while (u < count)
 			{
 				Extrae_AddTypeValuesEntryToSYM ('H', hwc_defs[u].event_code,
