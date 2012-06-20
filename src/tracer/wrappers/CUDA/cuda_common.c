@@ -103,6 +103,9 @@ static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
 		exit (-1);
 	}
 
+#ifdef DEBUG
+	fprintf (stderr, "Extrae_CUDA_SynchronizeStream (devid=%d, streamid=%d, stream=%p)\n", devid, streamid, devices[devid].Stream[streamid].stream);
+#endif
 	err = cudaEventRecord (devices[devid].Stream[streamid].device_reference_time,
 		devices[devid].Stream[streamid].stream);
 	CHECK_CU_ERROR(err, cudaEventRecord);
@@ -216,6 +219,10 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 		devices[devid].Stream[i].stream = stream;
 		devices[devid].Stream[i].nevents = 0;
 
+#ifdef DEBUG
+		fprintf (stderr, "Extrae_CUDA_RegisterStream (devid=%d, stream=%p assigned to streamid => %d\n", devid, stream, i);
+#endif
+
 		/* Set thread name */
 		{
 			char _threadname[THREAD_INFO_NAME_LEN];
@@ -261,6 +268,9 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype, int de
 
 	if (evt_index < MAX_CUDA_EVENTS)
 	{
+#ifdef DEBUG
+		fprintf (stderr, "Extrae_CUDA_AddEventToStream (.. devid=%d, streamid=%d, stream=%p .. )\n", devid, streamid, ptr->stream);
+#endif
 		err = cudaEventRecord (ptr->ts_events[evt_index], ptr->stream);
 		CHECK_CU_ERROR(err, cudaEventRecord);
 
@@ -429,7 +439,7 @@ void Extrae_cudaStreamCreate_Exit (void)
 	Extrae_CUDA_Initialize (devid);
 
 	Extrae_CUDA_RegisterStream (devid,
-	  Extrae_CUDA_saved_params[THREADID].csc.stream);
+	  *Extrae_CUDA_saved_params[THREADID].csc.stream);
 }
 
 void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)

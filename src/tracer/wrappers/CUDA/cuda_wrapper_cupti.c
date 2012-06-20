@@ -93,7 +93,9 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020:
 			{
 			cudaStreamCreate_v3020_params *p = (cudaStreamCreate_v3020_params*)cbinfo->functionParams;
-			if (cbinfo->callbackSite == CUPTI_API_EXIT)
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaStreamCreate_Enter (p->pStream);
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 				Extrae_cudaStreamCreate_Exit ();
 			}
 			break;
