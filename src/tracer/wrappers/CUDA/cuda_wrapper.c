@@ -164,6 +164,7 @@ cudaError_t cudaStreamCreate (cudaStream_t *p1)
 
 	if (real_cudaStreamCreate != NULL && mpitrace_on)
 	{
+		Extrae_cudaStreamCreate_Enter (p1);
 		res = real_cudaStreamCreate (p1);
 		Extrae_cudaStreamCreate_Exit ();
 	}
