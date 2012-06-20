@@ -271,13 +271,13 @@ int HWCBE_PAPI_Add_Set (int pretended_set, int rank, int ncounters, char **count
 		else 
 		{
 			if (rank == 0)
-				HWCBE_PAPI_AddDefinition (info.event_code, info.symbol,
-					(info.event_code & PAPI_PRESET_MASK)?info.short_descr:info.long_descr);
+				HWCBE_PAPI_AddDefinition (HWC_sets[num_set].counters[HWC_sets[num_set].num_counters],
+					info.symbol, (info.event_code & PAPI_PRESET_MASK)?info.short_descr:info.long_descr);
 
 			HWC_sets[num_set].num_counters++;
 		}
 	}
-	
+
 	if (HWC_sets[num_set].num_counters == 0)
 	{
 		if (rank == 0)
@@ -615,11 +615,6 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid)
 			continue;
 		}
 
-		/* Set the domain for these eventsets */
-		options.domain.eventset = HWC_sets[i].eventsets[threadid];
-		options.domain.domain = HWC_sets[i].domain;
-		PAPI_set_opt (PAPI_DOMAIN, &options);
-		
 		/* Add the selected counters */
 		for (j = 0; j < HWC_sets[i].num_counters; j++)
 		{
@@ -637,6 +632,14 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid)
 				}
 			}
 		}
+
+		/* Set the domain for these eventsets */
+		options.domain.eventset = HWC_sets[i].eventsets[threadid];
+		options.domain.domain = HWC_sets[i].domain;
+		rc = PAPI_set_opt (PAPI_DOMAIN, &options);
+		if (rc != PAPI_OK)
+			fprintf (stderr, PACKAGE_NAME": Error when setting domain for eventset %d\n", i+1);
+
 	}
 
 	HWC_Thread_Initialized[threadid] = HWCBE_PAPI_Start_Set (0, time, HWC_current_set[threadid], threadid);
