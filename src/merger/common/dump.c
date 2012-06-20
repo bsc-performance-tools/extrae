@@ -95,6 +95,10 @@ static void show_current (event_t * c, UINT64 max_time)
 	{
 		fprintf (stdout, "OPTIONS: 0x%08llx\n", c->param.mpi_param.aux);
 	}
+	else if (c->event == USER_EV)
+	{
+		fprintf (stdout, "USER_EV value: %llu\n", c->param.misc_param.param);
+	}
 #if USE_HARDWARE_COUNTERS
 	else if (c->event == HWC_DEF_EV)
 	{
