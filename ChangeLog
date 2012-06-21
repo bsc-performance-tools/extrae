@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 21Jun2012 Fixed instrumentation of cudaStreamCreate
  * 18Jun2012 Combined the configure options --with-bfd and --with-liberty into --with-binutils
  + 15Jun2012 Automatically load instrumentation with:
      - libseqtrace
