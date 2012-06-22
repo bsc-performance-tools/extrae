@@ -443,7 +443,7 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_IO],
 
 	dnl If we've previously set MPICC to CC then we don't have MPICC
 	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o test "${MPICC}" = "gcc" ; then
+	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
 		CFLAGS="${MPI_CFLAGS}"
 		LIBS="${MPI_LIBS}"
 		LDFLAGS="${MPI_LDFLAGS}"
