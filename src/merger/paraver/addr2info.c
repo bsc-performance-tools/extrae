@@ -435,7 +435,7 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 		case ADDR2UF_FUNCTION:
 		case ADDR2UF_LINE:
 			Address2Info_Labels[A2I_UF] = TRUE;
-			caller_address = address-1;
+			caller_address = address;
 			addr_type = uniqueID?UNIQUE_TYPE:USER_FUNCTION_TYPE;
 			break;
 		case ADDR2SAMPLE_FUNCTION:
