@@ -1328,6 +1328,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 #if defined(MPI_SUPPORT)
 	xmlChar *treefanout;
 #endif
+	xmlChar *removefiles;
 	xmlChar *maxmemory;
 	xmlChar *jointstates;
 	xmlChar *sortaddresses;
@@ -1338,6 +1339,12 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		set_option_merge_ParaverFormat (FALSE);
 	else
 		set_option_merge_ParaverFormat (TRUE);
+
+	removefiles = xmlGetProp_env (rank, current_tag, TRACE_MERGE_REMOVEFILES);
+	if (removefiles != NULL)
+		set_option_merge_RemoveFiles (!xmlStrcasecmp (removefiles, xmlYES));
+	else
+		set_option_merge_RemoveFiles (FALSE);
 
 	sortaddresses = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SORTADDRESSES);
 	if (sortaddresses != NULL)

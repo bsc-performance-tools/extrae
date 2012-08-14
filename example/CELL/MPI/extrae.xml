@@ -75,6 +75,7 @@
     joint-states="yes"
     keep-mpits="yes"
     sort-addresses="yes"
+		remove-files="no"
   >
     cell_example.prv
   </merge>

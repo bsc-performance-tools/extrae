@@ -57,6 +57,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_CTYPE_H
 # include <ctype.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 #include "utils.h"
 #include "semantics.h"
@@ -88,6 +91,8 @@ static struct input_t *InputTraces;
 static unsigned nTraces = 0;
 static int AutoSincronitzaTasks = TRUE;
 static WorkDistribution_t WorkDistribution= Block;
+static char **MPITS_Files = NULL;
+static unsigned Num_MPITS_Files = 0;
 
 /******************************************************************************
  ***  Help
@@ -123,6 +128,8 @@ void Help (const char *ProgName)
 #endif
           "    -s file   Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
           "    -d        Sequentially dumps the contents of every *.mpit file.\n"
+					"    -remove-files\n"
+					"              Remove intermediate files after processing them.\n"
           "    -split-states\n"
           "              Do not merge consecutives states that are the same.\n"
           "    -skip-sendrecv\n"
@@ -308,6 +315,15 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 		fprintf (stderr, "mpi2prv: Unable to open %s file.\n", file);
 		return;
 	}
+
+	MPITS_Files = (char**) realloc (MPITS_Files, sizeof(char*)*(Num_MPITS_Files+1));
+	if (MPITS_Files == NULL)
+	{
+		fprintf (stderr, "mpi2prv: Unable to allocate memory for MPITS file: %s\n", file);
+		exit (-1);
+	}
+	MPITS_Files[Num_MPITS_Files] = strdup (file);
+	Num_MPITS_Files++;
 
 	last_mpits_file = (char*) file;
 
@@ -756,6 +772,16 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			set_option_merge_NanosTaskView (FALSE);
 			continue;
 		}
+		if (!strcmp (argv[CurArg], "-remove-files"))
+		{
+			set_option_merge_RemoveFiles (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-remove-files"))
+		{
+			set_option_merge_RemoveFiles (FALSE);
+			continue;
+		}
 		if (!strcmp (argv[CurArg], "--"))
 		{
 			if (cur_files != 1)
@@ -1160,7 +1186,37 @@ int merger_post (int numtasks, int taskid)
 			nTraces, InputTraces, get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 
-	if (error)
+	if (!error)
+	{
+		if (get_option_merge_RemoveFiles())
+		{
+			unsigned u;
+
+			/* Remove MPITS and their SYM related files */
+			for (u = 0; u < Num_MPITS_Files; u++)
+			{
+				char tmp[1024];
+				strncpy (tmp, MPITS_Files[u], 1024);
+
+				if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
+				{
+					strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
+					unlink (tmp);
+				}
+				unlink (MPITS_Files[u]);
+			}
+
+			for (u = 0; u < nTraces; u++)
+			{
+				if (unlink (InputTraces[u].name) == 0)
+				{
+					/* If removal succeeded, try to remove the set-X directory */
+					rmdir (dirname (InputTraces[u].name));
+				}
+			}
+		}
+	}
+	else
 		fprintf (stderr, "mpi2prv: An error has been encountered when generating the tracefile. Dying...\n");
 
 #if defined(HAVE_BFD)
