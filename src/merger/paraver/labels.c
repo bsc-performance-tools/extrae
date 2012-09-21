@@ -597,7 +597,6 @@ static void Write_Clustering_Labels (FILE * pcf_fd)
 	}
 }
 
-#ifdef HAVE_BFD
 /******************************************************************************
  *** Labels_loadSYMfile
  ******************************************************************************/
@@ -636,6 +635,7 @@ void Labels_loadSYMfile (int taskid, char *name)
 				case 'U':
 				case 'P':
 					{
+#ifdef HAVE_BFD
 						/* Example of line: U 0x100016d4 fA mpi_test.c 0 */
 						char fname[1024], modname[1024];
 						int line;
@@ -647,6 +647,7 @@ void Labels_loadSYMfile (int taskid, char *name)
 						else
 							Address2Info_AddSymbol (address, (Type=='U')?USER_FUNCTION_TYPE:OUTLINED_OPENMP_TYPE, fname, modname, line);
 						function_count++;
+#endif /* HAVE_BFD */
 					}
 					break;
 
@@ -689,7 +690,6 @@ void Labels_loadSYMfile (int taskid, char *name)
 
 	fclose (FD);
 }
-#endif /* HAVE_BFD */
 
 /******************************************************************************
  *** generatePCFfile
