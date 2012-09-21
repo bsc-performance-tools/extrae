@@ -3,6 +3,9 @@ ChangeLog
  [ + added, - removed, * changed ]
  + 21Sep2012 Added instrumentation call
     void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char *s2)
+ + 14Aug2012 Added -remove-files to the mpi2prv (and to the xml) so as to
+     remove the related .mpit .mpits .sym file related to an execution. These
+		 files are removed if the .prv generations is satisfactory.
  * 21Jun2012 Fixed instrumentation of cudaStreamCreate
  * 18Jun2012 Combined the configure options --with-bfd and --with-liberty into --with-binutils
  + 15Jun2012 Automatically load instrumentation with:
