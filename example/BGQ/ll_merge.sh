@@ -9,6 +9,4 @@
 # @ queue
 
 export EXTRAE_HOME=@sub_PREFIXDIR@
-
-/usr/local/bin/mpirun -np 1 ${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits
-
+runjob -n 1 : ${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits

@@ -8,5 +8,6 @@
 # @ bg_size = 32
 # @ queue
 
-/usr/local/bin/mpirun -np 2 -exe `pwd`/mpi_ping -env "EXTRAE_ON=1 EXTRAE_MPI_COUNTERS_ON=1 EXTRAE_COUNTERS=PAPI_TOT_CYC,PAPI_TOT_INS,PAPI_FP_OPS"
+export EXTRAE_ON=1
+runjob -n 8 --exe ./mpi_ping --env-all --ranks-per-node 8
 

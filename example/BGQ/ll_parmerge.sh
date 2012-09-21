@@ -8,6 +8,5 @@
 # @ bg_size = 32
 # @ queue
 
-EXTRAE_HOME=@sub_PREFIXDIR@
-/usr/local/bin/mpirun -np 2 -exe ${EXTRAE_HOME}/bin/mpimpi2prv -args "-f TRACE.mpits"
-
+export EXTRAE_HOME=@sub_PREFIXDIR@
+runjob -n 2 : ${EXTRAE_HOME}/bin/mpimpi2prv -f TRACE.mpits
