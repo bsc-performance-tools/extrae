@@ -59,13 +59,7 @@ MPI_EXAMPLE_FILES= example/BGL/mpi_ping.f \
  example/BGL/ll_trace.sh \
  example/BGL/papi_bgl_counters.txt \
  example/BGL/papi_native_bgl_counters.txt
-
-PTHREAD_EXAMPLE_FILES=/dev/null
-OMP_EXAMPLE_FILES=/dev/null
-SEQ_EXAMPLE_FILES=/dev/null
-PACX_EXAMPLE_FILES=/dev/null
-MRNET_EXAMPLE_FILES=/dev/null
-else
+endif
 if IS_BGP_MACHINE
 MPI_EXAMPLE_FILES= example/BGP/ll_merge.sh \
  example/BGP/ll_parmerge.sh \
@@ -75,13 +69,20 @@ MPI_EXAMPLE_FILES= example/BGP/ll_merge.sh \
  example/BGP/ll_trace.sh \
  example/BGP/mpi_ping.f \
  example/BGP/papi_bgp_native_avail.txt
+endif
+if IS_BGQ_MACHINE
+MPI_EXAMPLE_FILES= example/BGQ/ll_merge.sh \
+ example/BGQ/ll_parmerge.sh \
+ example/BGQ/ll_trace.sh \
+ example/BGQ/Makefile example/BGQ/mpi_ping.f \
+ example/BGQ/papi_bgq_avail.txt \
+ example/BGQ/papi_bgq_native_avail.txt
 
 PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
 SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 MRNET_EXAMPLE_FILES=/dev/null
-endif
 endif
 else
 if OS_AIX

@@ -95,6 +95,8 @@ static char UNUSED rcsid[] = "$Id$";
 # endif
 # if defined(IS_BGQ_MACHINE)
 #  include <firmware/include/personality.h>
+#  include <spi/include/kernel/process.h>
+#  include <spi/include/kernel/location.h>
 # endif
 #endif /* IS_BG_MACHINE */
 
