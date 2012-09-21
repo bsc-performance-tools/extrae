@@ -772,7 +772,7 @@ AC_DEFUN([AX_PROG_PMAPI],
    AM_CONDITIONAL(HAVE_PMAPI, test "${PMAPI_ENABLED}" = "yes")
 
    if test "${PMAPI_ENABLED}" = "yes" ; then
-      AC_DEFINE([PMAPI_COUNTERS], [1], [PAPI is used as API to gain access to CPU hwc])
+      AC_DEFINE([PMAPI_COUNTERS], [1], [PMAPI is used as API to gain access to CPU hwc])
    else
       if test "${enable_pmapi}" = "yes" ; then
          AC_MSG_ERROR([Error PMAPI was not found and was enabled at configure time!])
@@ -822,7 +822,7 @@ AC_DEFUN([AX_PROG_PAPI],
       elif test "${IS_BGP_MACHINE}" = "yes" ; then
          LIBS="-lpapi -L${BG_HOME}/runtime/SPI -lSPI.cna"
       elif test "${IS_BGQ_MACHINE}" = "yes" ; then
-         LIBS="-lpapi -L${BG_HOME}/spi/lib -lSPI -lSPI_cnk"
+         LIBS="-lpapi -L${BG_HOME}/spi/lib -lSPI -lSPI_cnk -lstdc++ -lrt"
       else
          if test "${OperatingSystem}" = "freebsd" ; then
             LIBS="-lpapi -lpmc"
