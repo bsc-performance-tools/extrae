@@ -15,12 +15,12 @@ $cached_env_img{$key} = q|<IMG
  SRC="|."$dir".q|img2.png"
  ALT="$\$\ast$">|; 
 
-$key = q/{landscape}%latex2htmlidmarker3647{par{table{{centerline{tabular{{|p{7cm}|p{14cmoconfigure{sf{E}xtrae}({emcontinued})}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
+$key = q/{landscape}%latex2htmlidmarker3652{par{table{{centerline{tabular{{|p{7cm}|p{14cmoconfigure{sf{E}xtrae}({emcontinued})}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
 $cached_env_img{$key} = q|<IMG
  WIDTH="989" HEIGHT="613" ALIGN="BOTTOM" BORDER="0"
  SRC="|."$dir".q|img4.png"
  ALT="\begin{landscape}
-% latex2html id marker 3647\par
+% latex2html id marker 3652\par
 \begin{table}
 \centerline{
 \...
@@ -28,12 +28,12 @@ $cached_env_img{$key} = q|<IMG
 \end{table}\par
 \end{landscape}">|; 
 
-$key = q/{landscape}%latex2htmlidmarker3626table{{centerline{tabular{{|p{7cm}|p{14cm}|}hlablesavailabletoconfigure{sf{E}xtrae}}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
+$key = q/{landscape}%latex2htmlidmarker3631table{{centerline{tabular{{|p{7cm}|p{14cm}|}hlablesavailabletoconfigure{sf{E}xtrae}}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
 $cached_env_img{$key} = q|<IMG
  WIDTH="989" HEIGHT="697" ALIGN="BOTTOM" BORDER="0"
  SRC="|."$dir".q|img3.png"
  ALT="\begin{landscape}
-% latex2html id marker 3626\begin{table}
+% latex2html id marker 3631\begin{table}
 \centerline{
 \begin...
 ...riables available to configure {\sf {E}xtrae} }

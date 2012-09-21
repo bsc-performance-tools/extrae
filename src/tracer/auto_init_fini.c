@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/calltrace.c $
- | @last_commit: $Date: 2011-11-14 10:25:26 +0100 (dl, 14 nov 2011) $
- | @version:     $Revision: 870 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: calltrace.c 870 2011-11-14 09:25:26Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #include <misc_interface.h>
 

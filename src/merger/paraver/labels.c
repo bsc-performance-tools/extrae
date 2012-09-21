@@ -76,6 +76,30 @@ static char UNUSED rcsid[] = "$Id$";
 #include "HardwareCounters.h"
 #include "queue.h"
 
+static codelocation_label_t *labels_codelocation = NULL;
+static unsigned num_labels_codelocation = 0;
+
+static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t type, char *description)
+{
+	labels_codelocation = (codelocation_label_t*) realloc (labels_codelocation, (num_labels_codelocation+1)*sizeof(codelocation_label_t));
+	if (labels_codelocation == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to add a new code location label\n");
+		exit (-1);
+	}
+
+	labels_codelocation[num_labels_codelocation].eventcode = eventcode;
+	labels_codelocation[num_labels_codelocation].type = type;
+	labels_codelocation[num_labels_codelocation].description = strdup (description);
+	if (labels_codelocation[num_labels_codelocation].description == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to duplicate a code location label\n");
+		exit (-1);
+	}
+
+	num_labels_codelocation++;
+}
+
 typedef struct label_hw_counter_st
 {
 	int eventcode;
@@ -627,7 +651,7 @@ void Labels_loadSYMfile (int taskid, char *name)
 					break;
 
 				case 'H':
-						{
+					{
 						int eventcode;
 						char hwc_description[1024];
 
@@ -636,6 +660,20 @@ void Labels_loadSYMfile (int taskid, char *name)
 						hwc_count++;
 					}
 					break;
+
+				case 'c':
+				case 'C':
+					{
+						int eventcode;
+						char code_description[1024];
+
+						sscanf (LINE, "%d %[^\n]", &eventcode, code_description);
+						Labels_Add_CodeLocation_Label (eventcode,
+							Type=='C'?CODELOCATION_FUNCTION:CODELOCATION_FILELINE,
+							code_description);
+					}
+					break;
+
 				default:
 					fprintf (stderr, PACKAGE_NAME" mpi2prv: Error! Task %d found unexpected line in symbol file '%s'\n", taskid, LINE);
 					break;
@@ -692,6 +730,8 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Address2Info_Write_UF_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_Sample_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_CUDA_Labels (fd, get_option_merge_UniqueCallerID());
+	Address2Info_Write_OTHERS_Labels (fd, get_option_merge_UniqueCallerID(),
+		num_labels_codelocation, labels_codelocation);
 #endif
 
 	Write_rusage_Labels (fd);

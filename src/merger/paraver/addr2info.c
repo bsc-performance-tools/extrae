@@ -113,7 +113,8 @@ static int address_found;
 #define A2I_UF       2
 #define A2I_SAMPLE   3
 #define A2I_CUDA     4
-#define A2I_LAST     5
+#define A2I_OTHERS   5
+#define A2I_LAST     6
 int Address2Info_Labels[A2I_LAST];
 
 #define UNRESOLVED_ID 0
@@ -171,6 +172,10 @@ void Address2Info_Sort (int unique_ids)
 
 		base = (void*) &(AddressTable[USER_FUNCTION_TYPE]->address[2]);
 		qsort (base, AddressTable[USER_FUNCTION_TYPE]->num_addresses-2,
+			sizeof(struct address_info), Address2Info_Sort_routine);
+
+		base = (void*) &(AddressTable[OTHER_FUNCTION_TYPE]->address[2]);
+		qsort (base, AddressTable[OTHER_FUNCTION_TYPE]->num_addresses-2,
 			sizeof(struct address_info), Address2Info_Sort_routine);
 
 		base = (void*) &(AddressTable[CUDAKERNEL_TYPE]->address[2]);
@@ -444,6 +449,12 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 			caller_address = address;
 			addr_type = uniqueID?UNIQUE_TYPE:SAMPLE_TYPE;
 			break;
+		case ADDR2OTHERS_FUNCTION:
+		case ADDR2OTHERS_LINE:
+			Address2Info_Labels[A2I_OTHERS] = TRUE;
+			caller_address = address;
+			addr_type = uniqueID?UNIQUE_TYPE:OTHER_FUNCTION_TYPE;
+			break;
 		default:
 			return address;
 	}
@@ -546,11 +557,13 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 		case ADDR2SAMPLE_FUNCTION:
 		case ADDR2MPI_FUNCTION:
 		case ADDR2UF_FUNCTION:
+		case ADDR2OTHERS_FUNCTION:
 		case ADDR2OMP_FUNCTION:
 			result = function_id + 1;
 			break;
 		case ADDR2CUDA_LINE:
 		case ADDR2UF_LINE:
+		case ADDR2OTHERS_LINE:
 		case ADDR2SAMPLE_LINE:
 		case ADDR2OMP_LINE:
 		case ADDR2MPI_LINE:
@@ -1055,6 +1068,49 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 		/* Then dump line-functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf (pcf_fd, "0    %d    %s\n", USRFUNC_LINE_EV, "User function line");
+
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < AddrTab->num_addresses; i ++)
+				fprintf(pcf_fd, "%d   %d (%s)\n", 
+					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			LET_SPACES(pcf_fd);
+		}
+	}
+}
+
+void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
+	codelocation_label_t *labels)
+{
+	struct address_table  * AddrTab;
+	struct function_table * FuncTab;
+	int i;
+
+	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:OTHER_FUNCTION_TYPE];
+	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:OTHER_FUNCTION_TYPE];
+
+	if (Address2Info_Labels[A2I_OTHERS] && nlabels > 0)
+	{
+		/* First dump functions */
+		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+		for (i = 0; i < nlabels; i++)
+			if (labels[i].type == CODELOCATION_FUNCTION)
+				fprintf (pcf_fd, "0    %d    %s\n", labels[i].eventcode, labels[i].description);
+
+		if (Address2Info_Initialized())
+		{
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+			for (i = 0; i < FuncTab->num_functions; i ++)
+				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			LET_SPACES(pcf_fd);
+		}
+
+		/* Then dump line-functions */
+		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+		for (i = 0; i < nlabels; i++)
+			if (labels[i].type == CODELOCATION_FILELINE)
+				fprintf (pcf_fd, "0    %d    %s\n", labels[i].eventcode, labels[i].description);
 
 		if (Address2Info_Initialized())
 		{

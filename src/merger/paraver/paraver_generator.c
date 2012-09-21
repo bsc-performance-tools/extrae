@@ -584,6 +584,13 @@ static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
 		return Address2Info_Translate (eventvalue, ADDR2CUDA_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == CUDAFUNC_LINE_EV)
 		return Address2Info_Translate (eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
+	else
+	{
+		if (Vector_Search (RegisteredCodeLocationTypes, eventtype))
+			return Address2Info_Translate (eventvalue, ADDR2OTHERS_FUNCTION, get_option_merge_UniqueCallerID());
+		else if (Vector_Search (RegisteredCodeLocationTypes, eventtype-1))
+			return Address2Info_Translate (eventvalue, ADDR2OTHERS_FUNCTION, get_option_merge_UniqueCallerID());
+	}
 
 	return eventvalue;
 }

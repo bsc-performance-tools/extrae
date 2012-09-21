@@ -32,8 +32,19 @@
 
 #include "events.h"
 
-/* Codi del David Vicente / PFC */
+typedef enum {
+	CODELOCATION_FUNCTION,
+	CODELOCATION_FILELINE
+} codelocation_type_t;
 
+typedef struct codelocation_label_st
+{
+	int eventcode;
+	codelocation_type_t type;
+	char *description;
+} codelocation_label_t;
+
+/* Codi del David Vicente / PFC */
 typedef struct fcounter_t {
 	int counter;
 	struct fcounter_t *next; 

@@ -225,8 +225,27 @@ static int User_Event (event_t * current_event,
 	EvType  = Get_EvValue (current_event);     /* Value is the user event type.  */
 	EvValue = Get_EvMiscParam (current_event); /* Param is the user event value. */
 
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+	/* Check whether we have to translate the events because they're registered
+	   as callstack info */
+	if (Vector_Search (RegisteredCodeLocationTypes, Get_EvValue(current_event)))
+	{
+#if defined(HAVE_BFD)
+		if (get_option_merge_SortAddresses() && EvValue != 0)
+		{
+			AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OTHERS_FUNCTION);
+			AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OTHERS_LINE);
+		}
+#endif
+
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType+1, EvValue);
+	}
+	else
+	{
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+	}
 
 	return 0;
 }
@@ -1055,7 +1074,7 @@ static int Suspend_Virtual_Thread_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  Suspend_Virtual_Thread_Event
+ ***  Register_Stacked_Type_Event
  ******************************************************************************/
 
 static int Register_Stacked_Type_Event (event_t * current_event,
@@ -1063,8 +1082,26 @@ static int Register_Stacked_Type_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	Vector_Add (RegisteredStackValues, Get_EvValue(current_event));
+
 	return 0;
 }
+
+
+/******************************************************************************
+ ***  Register_CodeLocation_Type_Event
+ ******************************************************************************/
+
+static int Register_CodeLocation_Type_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	Vector_Add (RegisteredCodeLocationTypes, Get_EvValue(current_event));
+
+	return 0;
+}
+
+
+/*****************************************************************************/
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
@@ -1100,6 +1137,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ RESUME_VIRTUAL_THREAD_EV, Resume_Virtual_Thread_Event },
 	{ SUSPEND_VIRTUAL_THREAD_EV, Suspend_Virtual_Thread_Event },
 	{ REGISTER_STACKED_TYPE_EV, Register_Stacked_Type_Event },
+	{ REGISTER_CODELOCATION_TYPE_EV, Register_CodeLocation_Type_Event },
 	{ NULL_EV, NULL }
 };
 

@@ -501,6 +501,18 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 		Extrae_get_version_Wrapper (M, m, r); \
 	}
   EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_GET_VERSION);
+
+#define apiTRACE_REGISTER_CODELOCATION_TYPE(x) \
+	void x##register_codelocation_type (extrae_type_t t, char *s1, char *s2) \
+	{ \
+		if (mpitrace_on) \
+		{ \
+			Backend_Enter_Instrumentation (1); \
+			Extrae_register_codelocation_type_Wrapper (t, s1, s2); \
+			Backend_Leave_Instrumentation (); \
+		} \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_REGISTER_CODELOCATION_TYPE);
 	
 #else /* HAVE_WEAK_ALIAS_ATTRIBUTE */
 
@@ -739,6 +751,17 @@ INTERFACE_ALIASES_C(_get_version,Extrae_get_version,(unsigned*,unsigned*,unsigne
 void Extrae_get_version (unsigned *M, unsigned *m, unsigned *r)
 {
 	Extrae_get_version_Wrapper (M, m, r);
+}
+
+INTERFACE_ALIASES_C(_register_codelocation_type,Extrae_register_codelocation_type,(extrae_type_t,char*,char*),void)
+void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char *s2)
+{
+	if (mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Extrae_register_codelocation_type_Wrapper (t, s1, s2);
+		Backend_Leave_Instrumentation ();
+	}
 }
 
 /** FORTRAN BINDINGS **/

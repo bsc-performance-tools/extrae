@@ -113,7 +113,8 @@ int **EnabledTasks = NULL;
 unsigned long long **EnabledTasks_time = NULL;
 struct address_collector_t CollectedAddresses;
 
-mpi2prv_vector_t *RegisteredStackValues;
+mpi2prv_vector_t *RegisteredStackValues = NULL;
+mpi2prv_vector_t *RegisteredCodeLocationTypes = NULL;
 
 static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
 {
@@ -309,7 +310,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	AddressCollector_Initialize (&CollectedAddresses);
 
 	RegisteredStackValues = Vector_Init();
-	//Vector_Add (RegisteredStackValues, 9000000);
+	RegisteredCodeLocationTypes = Vector_Init();
 
 	if (0 == taskid)
 	{

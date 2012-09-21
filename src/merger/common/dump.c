@@ -97,7 +97,7 @@ static void show_current (event_t * c, UINT64 max_time)
 	}
 	else if (c->event == USER_EV)
 	{
-		fprintf (stdout, "USER_EV value: %llu\n", c->param.misc_param.param);
+		fprintf (stdout, "USER_EV value: %llu [0x%llx]\n", c->param.misc_param.param, c->param.misc_param.param);
 	}
 #if USE_HARDWARE_COUNTERS
 	else if (c->event == HWC_DEF_EV)

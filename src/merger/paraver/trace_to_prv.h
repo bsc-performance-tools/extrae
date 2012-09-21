@@ -47,6 +47,8 @@ int Paraver_ProcessTraceFiles (char *prvName, unsigned long nfiles,
 extern int **EnabledTasks;
 extern unsigned long long **EnabledTasks_time;
 extern struct address_collector_t CollectedAddresses;
+
 extern mpi2prv_vector_t *RegisteredStackValues;
+extern mpi2prv_vector_t *RegisteredCodeLocationTypes;
 
 #endif /* __TRACE_TO_PRV_H__ */

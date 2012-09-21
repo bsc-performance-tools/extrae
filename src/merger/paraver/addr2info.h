@@ -46,6 +46,7 @@
 #endif
 
 #include "common.h"
+#include "labels.h"
 
 #define TARGET          "default"
 #define CODE_SECTION    ".text"
@@ -64,6 +65,8 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 	char *eventtype_description, int eventtype_line,
 	char *eventtype_line_description, int uniqueid);
 void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid);
+void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
+	codelocation_label_t *labels);
 void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid);
 int Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
   char * filename, int line);
@@ -81,6 +84,8 @@ enum
 	ADDR2SAMPLE_LINE,
 	ADDR2CUDA_FUNCTION,
 	ADDR2CUDA_LINE,
+	ADDR2OTHERS_FUNCTION,
+	ADDR2OTHERS_LINE,
 	ADDR2_FUNCTION_UNIQUE,
 	ADDR2_LINE_UNIQUE
 };
@@ -92,6 +97,7 @@ enum
 	USER_FUNCTION_TYPE,
 	SAMPLE_TYPE,
 	CUDAKERNEL_TYPE,
+	OTHER_FUNCTION_TYPE,
 	UNIQUE_TYPE,
 	COUNT_ADDRESS_TYPES /* Must be the very last entry */
 };
