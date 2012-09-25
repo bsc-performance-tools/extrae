@@ -9,5 +9,7 @@
 # @ queue
 
 export EXTRAE_ON=1
+export EXTRAE_MPI_COUNTERS_ON=1
+export EXTRAE_COUNTERS=PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_LDM,PAPI_BR_MSP,PAPI_FP_INS,PAPI_TLB_DM
 runjob -n 8 --exe ./mpi_ping --env-all --ranks-per-node 8
 
