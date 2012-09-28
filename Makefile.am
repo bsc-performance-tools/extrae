@@ -1,5 +1,5 @@
 
-SUBDIRS = src include manuals scripts etc
+SUBDIRS = src include manuals scripts etc tests
 if GENERATE_DOCUMENTATION
 SUBDIRS += doc
 endif

@@ -612,7 +612,8 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/spu/Makefile \
   src/merger/Makefile src/merger/parallel/Makefile src/others/Makefile  \
-  doc/Makefile etc/Makefile])
+  doc/Makefile etc/Makefile \
+  tests/Makefile tests/src/Makefile tests/src/common/Makefile])
 #if test "${MRNET_INSTALLED}" = "yes" ; then
 AC_CONFIG_FILES([src/tracer/mrnet/Makefile])
 #fi
