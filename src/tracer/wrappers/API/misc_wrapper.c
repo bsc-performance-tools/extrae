@@ -464,7 +464,7 @@ void Extrae_register_codelocation_type_Wrapper (extrae_type_t type_function,
 	char *description_file_line)
 {
 	TRACE_MISCEVENT(LAST_READ_TIME,REGISTER_CODELOCATION_TYPE_EV, type_function, type_file_line);
-	Extrae_AddTypeValuesEntryToSYM ('C', type_function, description_function, 0, NULL, NULL);
-	Extrae_AddTypeValuesEntryToSYM ('c', type_file_line, description_file_line, 0, NULL, NULL);
+	Extrae_AddTypeValuesEntryToSYM ('C', type_function, description_function, (char)0,  0, NULL, NULL);
+	Extrae_AddTypeValuesEntryToSYM ('c', type_file_line, description_file_line, (char)0, 0, NULL, NULL);
 }
 

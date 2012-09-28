@@ -185,7 +185,9 @@ void Extrae_set_ApplicationIsPACX (int isPACX);
 
 int Extrae_Allocate_Task_Bitmap (int size);
 
-void Extrae_AddTypeValuesEntryToSYM (char code, int type, char *description, unsigned nvalues, unsigned long long *values, char **description_values);
+void Extrae_AddTypeValuesEntryToSYM (char code_type, int type, char *description,
+	char code_values, unsigned nvalues, unsigned long long *values,
+	char **description_values);
 
 int Backend_preInitialize (int rank, int world_size, char *config_file);
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);

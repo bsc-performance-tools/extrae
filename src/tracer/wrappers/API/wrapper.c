@@ -1578,7 +1578,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 			while (u < count)
 			{
 				Extrae_AddTypeValuesEntryToSYM ('H', hwc_defs[u].event_code,
-					hwc_defs[u].description, 0, NULL, NULL);
+					hwc_defs[u].description, (char)0, 0, NULL, NULL);
 				u++;
 			}
 			free (hwc_defs);
@@ -2063,7 +2063,9 @@ void Backend_Leave_Instrumentation (void)
 		Trace_Mode_Change(thread, LAST_READ_TIME);
 }
 
-void Extrae_AddTypeValuesEntryToSYM (char code, int type, char *description, unsigned nvalues, unsigned long long *values, char **description_values)
+void Extrae_AddTypeValuesEntryToSYM (char code_type, int type, char *description,
+	char code_values, unsigned nvalues, unsigned long long *values,
+	char **description_values)
 {
 	char line[1024];
 	char trace_sym[TMP_DIR];
@@ -2072,14 +2074,14 @@ void Extrae_AddTypeValuesEntryToSYM (char code, int type, char *description, uns
 	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
-		snprintf (line, sizeof(line), "%c %d %s\n", code, type, description);
+		snprintf (line, sizeof(line), "%c %d %s\n", code_type, type, description);
 		write (fd, line, strlen(line));
 		if (nvalues > 0)
 		{
 			unsigned i;
 			for (i = 0; i < nvalues; i++)
 			{
-				snprintf (line, sizeof(line), "%c %d,%d %s\n", code, type, values[i], description_values[i]);
+				snprintf (line, sizeof(line), "%c %d %s\n", code_values, values[i], description_values[i]);
 				write (fd, line, strlen(line));
 			}
 		}
