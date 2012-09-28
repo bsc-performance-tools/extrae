@@ -52,6 +52,8 @@ void Extrae_Vector_Destroy (Extrae_Vector_t *v)
 {
 	if (v->data != NULL)
 		free (v->data);
+	v->data = NULL;
+	v->count = v->allocated = 0;
 }
 
 void Extrae_Vector_Append (Extrae_Vector_t *v, void *element)
