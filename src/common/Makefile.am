@@ -5,6 +5,7 @@ common_SRCS = \
  events.c events.h \
  timesync.c timesync.h \
  new-queue.c new-queue.h \
+ extrae_vector.c extrea_vector.h \
  debug.h \
  common.h \
  num_hwc.h \
