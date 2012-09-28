@@ -64,7 +64,7 @@ void Extrae_Vector_Append (Extrae_Vector_t *v, void *element)
 		  v->data, (v->allocated+EXTRAE_VECTOR_ALLOC_SIZE)*sizeof(void*));
 		if (v->data == NULL)
 		{
-			fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory for Extrea_Vector_Append\n", __FILE__, __LINE__);
+			fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory for Extrae_Vector_Append\n", __FILE__, __LINE__);
 			exit (-1);
 		}
 		v->allocated += EXTRAE_VECTOR_ALLOC_SIZE;

@@ -2707,9 +2707,9 @@ This routine changes the thread identifier so as to be vthread in the final trac
 <BR>
 This routine recovers the original thread identifier (given by routines like pthread_self or omp_get_thread_num, for instance).
 </LI>
-<LI><TT>void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char *s2)</TT>
+<LI><TT>void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char* s1, char *s2)</TT>
 <BR>
-Registers type (and subsequent type+1) to reference user source code location (assigning to the event type, the user function and to the event type+1, the file name and line location).
+Registers type t1 to reference user source code location (assigning type t1 to the event type that references the user function and to the event t2 to the event that references the file name and line location).
 </LI>
 <LI><TT>void Extrae_register_stacked_type (extrae_type_t type)</TT>
 <BR>
@@ -4314,7 +4314,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2012-09-25
+The translation was initiated by Harald Servat on 2012-09-28
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot210">... file</A><A
@@ -4380,7 +4380,7 @@ The translation was initiated by Harald Servat on 2012-09-25
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2012-09-25
+2012-09-28
 </ADDRESS>
 </BODY>
 </HTML>

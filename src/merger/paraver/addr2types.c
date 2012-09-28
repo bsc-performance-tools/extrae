@@ -26,30 +26,35 @@
  | @last_commit: $Date$
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef TRACE_TO_PRV_H
-#define TRACE_TO_PRV_H
+static char UNUSED rcsid[] = "$Id$";
 
-#include "mpi2out.h"
-#ifdef HAVE_ZLIB
-# include "zlib.h"
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
 #endif
 
-#include "vector.h"
-#include "extrae_vector.h"
-#include "addresses.h"
-#include "cpunode.h"
-#include "fdz.h"
+#include "addr2types.h"
 
-int Paraver_ProcessTraceFiles (char *prvName, unsigned long nfiles,
-	struct input_t *files, unsigned int num_appl,
-	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int idtask);
+Extrae_Addr2Type_t * Extrae_Addr2Type_New (unsigned FunctionType,
+	unsigned FunctionType_lbl, unsigned LineType, unsigned LineType_lbl)
+{
+	Extrae_Addr2Type_t *r = (Extrae_Addr2Type_t*) malloc (sizeof(Extrae_Addr2Type_t));
 
-extern int **EnabledTasks;
-extern unsigned long long **EnabledTasks_time;
-extern struct address_collector_t CollectedAddresses;
+	if (r == NULL)
+	{
+		fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory for Extrae_Addr2Type_New\n", __FILE__, __LINE__);
+		exit (-1);
+	}
 
-extern mpi2prv_vector_t *RegisteredStackValues;
-extern Extrae_Vector_t RegisteredCodeLocationTypes;
+	r->FunctionType = FunctionType;
+	r->FunctionType_lbl = FunctionType_lbl;
+	r->LineType = LineType;
+	r->LineType_lbl = LineType_lbl;
 
-#endif /* __TRACE_TO_PRV_H__ */
+	return r;	
+}
+

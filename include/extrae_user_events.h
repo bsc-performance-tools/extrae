@@ -199,6 +199,8 @@ void Extrae_register_stacked_type (extrae_type_t type);
 
 void Extrae_get_version (unsigned *major, unsigned *minor, unsigned *revision);
 
+void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char* s1, char *s2);
+
 #ifdef __cplusplus
 }
 #endif

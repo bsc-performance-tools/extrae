@@ -225,8 +225,8 @@ The extended API contains the following routines:
 	This routine changes the thread identifier so as to be vthread in the final tracefile. {\em Improper use of this routine may result in corrupt tracefiles.}
 	\item {\tt void Extrae\_suspend\_virtual\_thread (void)}\\
 	This routine recovers the original thread identifier (given by routines like pthread\_self or omp\_get\_thread\_num, for instance).
-	\item {\tt void Extrae\_register\_codelocation\_type (extrae\_type\_t t, char* s1, char *s2)}\\
-	Registers type (and subsequent type+1) to reference user source code location (assigning to the event type, the user function and to the event type+1, the file name and line location).
+	\item {\tt void Extrae\_register\_codelocation\_type (extrae\_type\_t t1, extrae\_type\_t t2, char* s1, char *s2)}\\
+	Registers type t1 to reference user source code location (assigning type t1 to the event type that references the user function and to the event t2 to the event that references the file name and line location).
 	\item {\tt void Extrae\_register\_stacked\_type (extrae\_type\_t type)}\\
 	Registers which event types are required to be managed in a stack way whenever {\tt void Extrae\_resume\_virtual\_thread} or {\tt void Extrae\_suspend\_virtual\_thread} are called.
 	\item {\tt void Extrae\_set\_threadid\_function (unsigned (*threadid\_function)(void))}\\

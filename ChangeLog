@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 28set2012 Added make check capability into Extrae. Currently there is only
+    one check
  + 21Sep2012 Added instrumentation call
     void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char *s2)
  + 14Aug2012 Added -remove-files to the mpi2prv (and to the xml) so as to

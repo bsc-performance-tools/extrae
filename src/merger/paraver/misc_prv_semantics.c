@@ -227,19 +227,38 @@ static int User_Event (event_t * current_event,
 
 	/* Check whether we have to translate the events because they're registered
 	   as callstack info */
-	if (Vector_Search (RegisteredCodeLocationTypes, Get_EvValue(current_event)))
+
+	if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
 	{
-#if defined(HAVE_BFD)
-		if (get_option_merge_SortAddresses() && EvValue != 0)
+		unsigned u;
+		unsigned umax = Extrae_Vector_Count (&RegisteredCodeLocationTypes);
+		int found = FALSE;
+		Extrae_Addr2Type_t *addr2types = NULL;
+
+		for (u = 0; u < umax; u++)
 		{
-			AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OTHERS_FUNCTION);
-			AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OTHERS_LINE);
+			addr2types = Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
+			found = addr2types->FunctionType == EvType;
+			if (found)
+				break;
+		}
+
+#if defined(HAVE_BFD)
+		if (found && get_option_merge_SortAddresses() && EvValue != 0)
+		{
+			AddressCollector_Add (&CollectedAddresses, EvValue, addr2types->FunctionType_lbl);
+			AddressCollector_Add (&CollectedAddresses, EvValue, addr2types->LineType_lbl);
 		}
 #endif
 
 		trace_paraver_state (cpu, ptask, task, thread, current_time);
-		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType+1, EvValue);
+		if (found && addr2types != NULL)
+		{
+			trace_paraver_event (cpu, ptask, task, thread, current_time, addr2types->FunctionType, EvValue);
+			trace_paraver_event (cpu, ptask, task, thread, current_time, addr2types->LineType, EvValue);
+		}
+		else
+			trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 	}
 	else
 	{
@@ -1095,7 +1114,16 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	Vector_Add (RegisteredCodeLocationTypes, Get_EvValue(current_event));
+	unsigned int EvFunction, EvLine;
+	Extrae_Addr2Type_t *cl_types;
+
+	EvFunction = Get_EvValue (current_event); /* Value refers to the function type  */
+	EvLine = Get_EvMiscParam (current_event); /* Param refers to the file and line no */
+
+	cl_types = Extrae_Addr2Type_New (EvFunction, ADDR2OTHERS_FUNCTION,
+		EvLine, ADDR2OTHERS_LINE);
+
+	Extrae_Vector_Append (&RegisteredCodeLocationTypes, cl_types);
 
 	return 0;
 }

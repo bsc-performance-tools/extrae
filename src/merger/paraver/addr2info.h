@@ -47,6 +47,7 @@
 
 #include "common.h"
 #include "labels.h"
+#include "addr2types.h"
 
 #define TARGET          "default"
 #define CODE_SECTION    ".text"

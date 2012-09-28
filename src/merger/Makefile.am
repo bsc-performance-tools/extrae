@@ -56,6 +56,7 @@ paraver_FILES = \
  paraver/PACX_EventEncoding.h
 
 libmpi2prv_la_SOURCES = \
+ paraver/addr2types.c paraver/addr2types.h \
  paraver/addr2info.c paraver/addr2info.h \
  paraver/addr2info_hashcache.c paraver/addr2info_hashcache.h \
  paraver/file_set.c paraver/file_set.h \

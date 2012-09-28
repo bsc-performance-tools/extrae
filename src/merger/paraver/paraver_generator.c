@@ -586,10 +586,21 @@ static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
 		return Address2Info_Translate (eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
 	else
 	{
-		if (Vector_Search (RegisteredCodeLocationTypes, eventtype))
-			return Address2Info_Translate (eventvalue, ADDR2OTHERS_FUNCTION, get_option_merge_UniqueCallerID());
-		else if (Vector_Search (RegisteredCodeLocationTypes, eventtype-1))
-			return Address2Info_Translate (eventvalue, ADDR2OTHERS_FUNCTION, get_option_merge_UniqueCallerID());
+		if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
+		{
+			unsigned u;
+			unsigned umax = Extrae_Vector_Count (&RegisteredCodeLocationTypes);
+			for (u = 0; u < umax; u++)
+			{
+				Extrae_Addr2Type_t *element = 
+					Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
+
+				if (element->FunctionType == eventtype)
+					return Address2Info_Translate (eventvalue, element->FunctionType_lbl, get_option_merge_UniqueCallerID());
+				else if (element->LineType == eventtype)
+					return Address2Info_Translate (eventvalue, element->LineType_lbl, get_option_merge_UniqueCallerID());
+			}
+		}
 	}
 
 	return eventvalue;

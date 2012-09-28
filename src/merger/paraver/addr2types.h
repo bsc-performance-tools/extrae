@@ -27,29 +27,20 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef TRACE_TO_PRV_H
-#define TRACE_TO_PRV_H
+#ifndef __ADDR2TYPES_H__
+#define __ADDR2TYPES_H__
 
-#include "mpi2out.h"
-#ifdef HAVE_ZLIB
-# include "zlib.h"
+typedef struct 
+{
+	unsigned FunctionType;
+	unsigned FunctionType_lbl;
+	unsigned LineType;
+	unsigned LineType_lbl;
+} Extrae_Addr2Type_t;
+
+Extrae_Addr2Type_t * Extrae_Addr2Type_New (unsigned FunctionType,
+	unsigned FunctionType_lbl, unsigned LineType, unsigned LineType_lbl);
+
 #endif
 
-#include "vector.h"
-#include "extrae_vector.h"
-#include "addresses.h"
-#include "cpunode.h"
-#include "fdz.h"
 
-int Paraver_ProcessTraceFiles (char *prvName, unsigned long nfiles,
-	struct input_t *files, unsigned int num_appl,
-	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int idtask);
-
-extern int **EnabledTasks;
-extern unsigned long long **EnabledTasks_time;
-extern struct address_collector_t CollectedAddresses;
-
-extern mpi2prv_vector_t *RegisteredStackValues;
-extern Extrae_Vector_t RegisteredCodeLocationTypes;
-
-#endif /* __TRACE_TO_PRV_H__ */
