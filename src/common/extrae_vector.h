@@ -39,6 +39,7 @@ typedef struct
 } Extrae_Vector_t;
 
 void Extrae_Vector_Init (Extrae_Vector_t *v);
+void Extrae_Vector_Destroy (Extrae_Vector_t *v);
 void Extrae_Vector_Append (Extrae_Vector_t *v, void *element);
 unsigned Extrae_Vector_Count (Extrae_Vector_t *v);
 void * Extrae_Vector_Get (Extrae_Vector_t *v, unsigned position);
