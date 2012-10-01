@@ -51,8 +51,6 @@ static void show_current (event_t * c, UINT64 max_time)
 {
 	int dump_time = get_option_dump_Time();
 
-	printf ("dump_time = %d\n", dump_time);
-
 	if (c->time < max_time) /* Check whether this event is back in time */
 	{
 		if (dump_time)
