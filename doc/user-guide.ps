@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0
 %%Creator: dvips(k) 5.96.1 Copyright 2007 Radical Eye Software
 %%Title: user-guide.dvi
-%%CreationDate: Mon Oct  1 11:30:10 2012
+%%CreationDate: Mon Oct  1 17:30:17 2012
 %%Pages: 76
 %%PageOrder: Ascend
 %%BoundingBox: 0 0 595 842
@@ -12,7 +12,7 @@
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips user-guide.dvi -o user-guide.ps
 %DVIPSParameters: dpi=600
-%DVIPSSource:  TeX output 2012.10.01:1130
+%DVIPSSource:  TeX output 2012.10.01:1730
 %%BeginProcSet: tex.pro 0 0
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -4634,7 +4634,7 @@ h(.)g(.)f(.)h(.)g(.)f(.)p Black 85 w(33)p Black 345 2262
 a(5.3.2)106 b(SPE)30 b(side)90 b(.)46 b(.)g(.)f(.)h(.)g(.)g(.)f(.)h(.)g
 (.)f(.)h(.)g(.)f(.)h(.)g(.)g(.)f(.)h(.)g(.)f(.)h(.)g(.)g(.)f(.)h(.)g(.)
 f(.)h(.)g(.)g(.)f(.)h(.)g(.)f(.)h(.)g(.)f(.)p Black 85
-w(33)p Black 0 2470 a Fp(6)84 b(Merging)36 b(pro)s(cess)2910
+w(34)p Black 0 2470 a Fp(6)84 b(Merging)36 b(pro)s(cess)2910
 b(35)136 2585 y Fr(6.1)94 b(P)m(ara)m(v)m(er)33 b(merger)59
 b(.)45 b(.)h(.)g(.)f(.)h(.)g(.)g(.)f(.)h(.)g(.)f(.)h(.)g(.)f(.)h(.)g(.)
 g(.)f(.)h(.)g(.)f(.)h(.)g(.)g(.)f(.)h(.)g(.)f(.)h(.)g(.)g(.)f(.)h(.)g
@@ -9938,9 +9938,11 @@ Fn(Extrae)p 1928 317 V 33 w(init)p Fr(,)h(this)g(routine)g(is)g
 b(circumstances)g(\(but)f(on)g(call)i(to)f(MPI)p 1826
 430 28 4 v 33 w(Finalize)h(in)e(the)h(\014rst)e(case\).)p
 Black 136 629 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 629 29 4 v 33 w(event)f(\(unsigned)f(event,)h(unsigned)g(value\))
-227 742 y Fr(The)c(Extrae)p 697 742 28 4 v 33 w(ev)m(en)m(t)h(adds)e(a)
-i(single)f(timestamp)s(ed)g(ev)m(en)m(t)h(in)m(to)g(the)f(trace\014le.)
+760 629 29 4 v 33 w(event)f(\(extrae)p 1415 629 V 32
+w(type)p 1639 629 V 34 w(t)h(type,)g(extrae)p 2343 629
+V 32 w(value)p 2615 629 V 33 w(t)h(value\))227 742 y
+Fr(The)42 b(Extrae)p 697 742 28 4 v 33 w(ev)m(en)m(t)h(adds)e(a)i
+(single)f(timestamp)s(ed)g(ev)m(en)m(t)h(in)m(to)g(the)f(trace\014le.)
 76 b(The)42 b(ev)m(en)m(t)h(has)f(t)m(w)m(o)227 855 y(argumen)m(ts:)f
 (t)m(yp)s(e)31 b(and)f(v)-5 b(alue.)227 1011 y(Some)31
 b(common)f(use)g(of)h(ev)m(en)m(ts)h(are:)p Black 330
@@ -9973,370 +9975,376 @@ y([routine)g(2)j(code])714 4147 y(Extrae_event)c(\(6000019,)h(0\);)666
 b(an)m(y)f(p)s(oin)m(t)h(in)f(the)g(application)i(using)e(a)h(unique)e
 (com)m(bination)j(of)e(t)m(yp)s(e)h(and)f(v)-5 b(alue.)p
 Black 136 4747 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 4747 29 4 v 33 w(nevent)f(\(unsigned)f(count,)h(unsigned)g(*types,)
-f(unsigned)h(*values\))227 4860 y Fr(Allo)m(ws)32 b(the)e(user)g(to)h
-(place)g Fm(c)-5 b(ount)31 b Fr(ev)m(en)m(ts)h(with)e(the)h(same)g
-(timestamp)g(at)g(the)f(giv)m(en)i(p)s(osition.)p Black
-136 5059 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 5059 V 33 w(counters)e(\(void\))227 5172 y Fr(Emits)31
-b(the)f(v)-5 b(alue)31 b(of)g(the)f(activ)m(e)j(hardw)m(are)d(coun)m
-(ters)h(set.)41 b(See)31 b(c)m(hapter)g(4)f(for)g(further)g
-(information.)p Black 1905 5400 a(28)p Black eop end
+760 4747 29 4 v 33 w(nevent)f(\(unsigned)f(count,)h(extrae)p
+2226 4747 V 33 w(type)p 2451 4747 V 33 w(t)i(*types,)d(extrae)p
+3249 4747 V 33 w(value)p 3522 4747 V 33 w(t)j(*values\))227
+4860 y Fr(Allo)m(ws)32 b(the)e(user)g(to)h(place)g Fm(c)-5
+b(ount)31 b Fr(ev)m(en)m(ts)h(with)e(the)h(same)g(timestamp)g(at)g(the)
+f(giv)m(en)i(p)s(osition.)p Black 136 5059 a Fi(\017)p
+Black 46 w Fn(void)47 b(Extrae)p 760 5059 V 33 w(counters)e(\(void\))
+227 5172 y Fr(Emits)31 b(the)f(v)-5 b(alue)31 b(of)g(the)f(activ)m(e)j
+(hardw)m(are)d(coun)m(ters)h(set.)41 b(See)31 b(c)m(hapter)g(4)f(for)g
+(further)g(information.)p Black 1905 5400 a(28)p Black
+eop end
 %%Page: 29 39
 TeXDict begin 29 38 bop Black Black Black 136 91 a Fi(\017)p
 Black 46 w Fn(void)47 b(Extrae)p 760 91 29 4 v 33 w(eventandcounters)c
-(\(int)k(event,)f(int)h(value\))227 204 y Fr(This)35
-b(routine)h(lets)h(the)f(user)g(add)f(an)h(ev)m(en)m(t)h(and)e(obtain)i
-(the)f(p)s(erformance)f(coun)m(ters)i(with)e(one)i(call)227
-317 y(and)30 b(a)h(single)g(timestamp.)p Black 136 499
-a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p 760 499
-V 33 w(neventandcounters)c(\(unsigned)i(count,)h(unsigned)g(*types,)f
-(unsigned)h(*values\))227 612 y Fr(This)33 b(routine)g(lets)h(the)g
-(user)f(add)f(sev)m(eral)j(ev)m(en)m(ts)g(and)e(obtain)g(the)h(p)s
-(erformance)f(coun)m(ters)h(with)f(one)227 725 y(call)f(and)e(a)g
-(single)h(timestamp.)p Black 136 907 a Fi(\017)p Black
-46 w Fn(void)47 b(Extrae)p 760 907 V 33 w(shutdown)e(\(void\))227
-1020 y Fr(T)-8 b(urns)29 b(o\013)i(the)f(instrumen)m(tation.)p
-Black 136 1202 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 1202 V 33 w(restart)e(\(void\))227 1315 y Fr(T)-8
+(\(extrae)p 1940 91 V 32 w(type)p 2164 91 V 34 w(t)k(event,)f(extrae)p
+2915 91 V 33 w(value)p 3188 91 V 33 w(t)h(value\))227
+204 y Fr(This)35 b(routine)h(lets)h(the)f(user)g(add)f(an)h(ev)m(en)m
+(t)h(and)e(obtain)i(the)f(p)s(erformance)f(coun)m(ters)i(with)e(one)i
+(call)227 317 y(and)30 b(a)h(single)g(timestamp.)p Black
+136 523 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 523 V 33 w(neventandcounters)c(\(unsigned)i(count,)h(extrae)p
+2751 523 V 33 w(type)p 2976 523 V 33 w(t)i(*types,)d(extrae)p
+3774 523 V 33 w(value)p 4047 523 V 33 w(t)227 636 y(*values\))227
+749 y Fr(This)33 b(routine)g(lets)h(the)g(user)f(add)f(sev)m(eral)j(ev)
+m(en)m(ts)g(and)e(obtain)g(the)h(p)s(erformance)f(coun)m(ters)h(with)f
+(one)227 862 y(call)f(and)e(a)g(single)h(timestamp.)p
+Black 136 1068 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 1068 V 33 w(shutdown)e(\(void\))227 1181 y Fr(T)-8
+b(urns)29 b(o\013)i(the)f(instrumen)m(tation.)p Black
+136 1387 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 1387 V 33 w(restart)e(\(void\))227 1499 y Fr(T)-8
 b(urns)29 b(on)h(the)h(instrumen)m(tation.)p Black 136
-1498 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p 760
-1498 V 33 w(previous)p 1177 1498 V 32 w(hwc)p 1353 1498
-V 33 w(set)g(\(void\))227 1610 y Fr(Mak)m(es)38 b(the)f(previous)f
+1705 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p 760
+1705 V 33 w(previous)p 1177 1705 V 32 w(hwc)p 1353 1705
+V 33 w(set)g(\(void\))227 1818 y Fr(Mak)m(es)38 b(the)f(previous)f
 (hardw)m(are)g(coun)m(ter)i(set)f(de\014ned)e(in)h(the)h(XML)g(\014le)g
-(to)g(b)s(e)f(the)h(activ)m(e)i(set)e(\(see)227 1723
+(to)g(b)s(e)f(the)h(activ)m(e)i(set)e(\(see)227 1931
 y(section)32 b(4.2)f(for)f(further)f(information\).)p
-Black 136 1906 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 1906 V 33 w(next)p 985 1906 V 33 w(hwc)p 1162 1906
-V 33 w(set)g(\(void\))227 2018 y Fr(Mak)m(es)37 b(the)e(follo)m(wing)i
+Black 136 2137 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 2137 V 33 w(next)p 985 2137 V 33 w(hwc)p 1162 2137
+V 33 w(set)g(\(void\))227 2250 y Fr(Mak)m(es)37 b(the)e(follo)m(wing)i
 (hardw)m(are)e(coun)m(ter)h(set)g(de\014ned)e(in)g(the)i(XML)f(\014le)h
-(to)g(b)s(e)e(the)i(activ)m(e)h(set)f(\(see)227 2131
+(to)g(b)s(e)e(the)i(activ)m(e)h(set)f(\(see)227 2363
 y(section)c(4.2)f(for)f(further)f(information\).)p Black
-136 2314 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 2314 V 33 w(set)p 937 2314 V 33 w(tracing)p 1306
-2314 V 33 w(tasks)f(\(int)h(from,)f(int)h(to\))227 2426
+136 2569 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 2569 V 33 w(set)p 937 2569 V 33 w(tracing)p 1306
+2569 V 33 w(tasks)f(\(int)h(from,)f(int)h(to\))227 2682
 y Fr(Allo)m(ws)32 b(the)e(user)g(to)h(c)m(ho)s(ose)g(from)f(whic)m(h)g
 (tasks)h(\(not)g Fm(thr)-5 b(e)g(ads)p Fr(!\))44 b(store)31
-b(informartion)f(in)g(the)h(trace\014le)p Black 136 2609
-a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p 760 2609
-V 33 w(set)p 937 2609 V 33 w(options)f(\(int)h(options\))227
-2722 y Fr(P)m(ermits)33 b(con\014guring)e(sev)m(eral)i(tracing)g
+b(informartion)f(in)g(the)h(trace\014le)p Black 136 2888
+a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p 760 2888
+V 33 w(set)p 937 2888 V 33 w(options)f(\(int)h(options\))227
+3001 y Fr(P)m(ermits)33 b(con\014guring)e(sev)m(eral)i(tracing)g
 (options)g(at)f(run)m(time.)45 b(The)32 b Fn(options)e
-Fr(parameter)i(has)g(to)g(b)s(e)g(a)227 2834 y(bit)m(wise)f(or)g(com)m
+Fr(parameter)i(has)g(to)g(b)s(e)g(a)227 3114 y(bit)m(wise)f(or)g(com)m
 (bination)g(of)g(the)f(follo)m(wing)i(options,)f(dep)s(ending)e(on)h
-(the)h(user's)f(needs:)p Black 330 3017 a Fp({)p Black
-45 w Fn(EXTRAE)p 721 3017 V 33 w(CALLER)p 1042 3017 V
-33 w(OPTION)427 3130 y Fr(Dumps)g(caller)j(information)e(at)h(eac)m(h)g
+(the)h(user's)f(needs:)p Black 330 3319 a Fp({)p Black
+45 w Fn(EXTRAE)p 721 3319 V 33 w(CALLER)p 1042 3319 V
+33 w(OPTION)427 3432 y Fr(Dumps)g(caller)j(information)e(at)h(eac)m(h)g
 (en)m(try)f(or)g(exit)h(p)s(oin)m(t)f(of)g(the)g(MPI)g(routines.)43
-b(Caller)31 b(lev)m(els)427 3242 y(need)f(to)i(b)s(e)d(con\014gured)h
-(at)h(XML)g(\(see)g(c)m(hapter)g(4\).)p Black 330 3383
-a Fp({)p Black 45 w Fn(EXTRAE)p 721 3383 V 33 w(HWC)p
-898 3383 V 34 w(OPTION)427 3496 y Fr(Activ)-5 b(ates)33
-b(hardw)m(are)d(coun)m(ter)h(gathering.)p Black 330 3637
-a Fp({)p Black 45 w Fn(EXTRAE)p 721 3637 V 33 w(MPI)p
-898 3637 V 34 w(OPTION)427 3750 y Fr(Activ)-5 b(ates)33
-b(tracing)e(of)g(MPI)f(calls.)p Black 330 3890 a Fp({)p
-Black 45 w Fn(EXTRAE)p 721 3890 V 33 w(MPI)p 898 3890
-V 34 w(HWC)p 1076 3890 V 33 w(OPTION)427 4003 y Fr(Activ)-5
+b(Caller)31 b(lev)m(els)427 3545 y(need)f(to)i(b)s(e)d(con\014gured)h
+(at)h(XML)g(\(see)g(c)m(hapter)g(4\).)p Black 330 3701
+a Fp({)p Black 45 w Fn(EXTRAE)p 721 3701 V 33 w(HWC)p
+898 3701 V 34 w(OPTION)427 3813 y Fr(Activ)-5 b(ates)33
+b(hardw)m(are)d(coun)m(ter)h(gathering.)p Black 330 3969
+a Fp({)p Black 45 w Fn(EXTRAE)p 721 3969 V 33 w(MPI)p
+898 3969 V 34 w(OPTION)427 4082 y Fr(Activ)-5 b(ates)33
+b(tracing)e(of)g(MPI)f(calls.)p Black 330 4237 a Fp({)p
+Black 45 w Fn(EXTRAE)p 721 4237 V 33 w(MPI)p 898 4237
+V 34 w(HWC)p 1076 4237 V 33 w(OPTION)427 4350 y Fr(Activ)-5
 b(ates)33 b(hardw)m(are)d(coun)m(ter)h(gathering)g(in)f(MPI)g
-(routines.)p Black 330 4144 a Fp({)p Black 45 w Fn(EXTRAE)p
-721 4144 V 33 w(OMP)p 898 4144 V 34 w(OPTION)427 4257
+(routines.)p Black 330 4505 a Fp({)p Black 45 w Fn(EXTRAE)p
+721 4505 V 33 w(OMP)p 898 4505 V 34 w(OPTION)427 4618
 y Fr(Activ)-5 b(ates)33 b(tracing)e(of)g(Op)s(enMP)e(run)m(time)h(or)g
-(outlined)h(routines.)p Black 330 4397 a Fp({)p Black
-45 w Fn(EXTRAE)p 721 4397 V 33 w(OMP)p 898 4397 V 34
-w(HWC)p 1076 4397 V 33 w(OPTION)427 4510 y Fr(Activ)-5
+(outlined)h(routines.)p Black 330 4773 a Fp({)p Black
+45 w Fn(EXTRAE)p 721 4773 V 33 w(OMP)p 898 4773 V 34
+w(HWC)p 1076 4773 V 33 w(OPTION)427 4886 y Fr(Activ)-5
 b(ates)33 b(hardw)m(are)d(coun)m(ter)h(gathering)g(in)f(Op)s(enMP)f
-(run)m(time)h(or)h(outlined)f(routines.)p Black 330 4651
-a Fp({)p Black 45 w Fn(EXTRAE)p 721 4651 V 33 w(UF)p
-850 4651 V 34 w(HWC)p 1028 4651 V 33 w(OPTION)427 4764
+(run)m(time)h(or)h(outlined)f(routines.)p Black 330 5041
+a Fp({)p Black 45 w Fn(EXTRAE)p 721 5041 V 33 w(UF)p
+850 5041 V 34 w(HWC)p 1028 5041 V 33 w(OPTION)427 5154
 y Fr(Activ)-5 b(ates)33 b(hardw)m(are)d(coun)m(ter)h(gathering)g(in)f
-(the)h(user)e(functions.)p Black 136 4946 a Fi(\017)p
-Black 46 w Fn(void)47 b(Extrae)p 760 4946 V 33 w(network)p
-1129 4946 V 32 w(counters)f(\(void\))227 5059 y Fr(Emits)29
-b(the)g(v)-5 b(alue)30 b(of)f(the)g(net)m(w)m(ork)g(coun)m(ters)h(if)f
-(the)g(system)g(has)f(this)h(capabilit)m(y)-8 b(.)42
-b Fm(\(Only)32 b(available)g(for)227 5172 y(systems)i(with)f(Myrinet)g
-(GM/MX)f(networks\).)p Black 1905 5400 a Fr(29)p Black
+(the)h(user)e(functions.)p Black 1905 5400 a(29)p Black
 eop end
 %%Page: 30 40
 TeXDict begin 30 39 bop Black Black Black 136 91 a Fi(\017)p
 Black 46 w Fn(void)47 b(Extrae)p 760 91 29 4 v 33 w(network)p
-1129 91 V 32 w(routes)f(\(int)h(task\))227 204 y Fr(Emits)42
+1129 91 V 32 w(counters)f(\(void\))227 204 y Fr(Emits)29
+b(the)g(v)-5 b(alue)30 b(of)f(the)g(net)m(w)m(ork)g(coun)m(ters)h(if)f
+(the)g(system)g(has)f(this)h(capabilit)m(y)-8 b(.)42
+b Fm(\(Only)32 b(available)g(for)227 317 y(systems)i(with)f(Myrinet)g
+(GM/MX)f(networks\).)p Black 136 511 a Fi(\017)p Black
+46 w Fn(void)47 b(Extrae)p 760 511 V 33 w(network)p 1129
+511 V 32 w(routes)f(\(int)h(task\))227 624 y Fr(Emits)42
 b(the)h(net)m(w)m(ork)g(routes)f(for)g(an)g(sp)s(eci\014c)g
 Fn(task)p Fr(.)75 b Fm(\(Only)44 b(available)g(for)g(systems)h(with)f
-(Myrinet)227 317 y(GM/MX)32 b(networks\).)p Black 136
-507 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p 760
-507 V 33 w(user)p 985 507 V 33 w(function)e(\(int)i(enter\))227
-620 y Fr(Emits)42 b(an)g(ev)m(en)m(t)h(in)m(to)g(the)f(trace\014le)h
+(Myrinet)227 737 y(GM/MX)32 b(networks\).)p Black 136
+931 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p 760
+931 V 33 w(user)p 985 931 V 33 w(function)e(\(int)i(enter\))227
+1044 y Fr(Emits)42 b(an)g(ev)m(en)m(t)h(in)m(to)g(the)f(trace\014le)h
 (whic)m(h)f(references)g(the)g(source)g(co)s(de)g(\(data)h(includes:)63
-b(source)227 733 y(line)35 b(n)m(um)m(b)s(er,)g(\014le)f(name)h(and)f
+b(source)227 1157 y(line)35 b(n)m(um)m(b)s(er,)g(\014le)f(name)h(and)f
 (function)g(name\).)54 b(If)34 b Fn(enter)f Fr(is)i(0)g(it)g(marks)f
-(an)g(end)g(\(i.e.,)j(lea)m(ving)g(the)227 846 y(function\),)29
+(an)g(end)g(\(i.e.,)j(lea)m(ving)g(the)227 1270 y(function\),)29
 b(otherwise)g(it)g(marks)f(the)g(b)s(eginning)g(of)g(the)g(routine.)40
 b(The)28 b(user)g(m)m(ust)g(b)s(e)f(careful)i(to)g(place)227
-959 y(the)f(call)h(of)f(this)f(routine)h(in)f(places)h(where)f(the)h
+1383 y(the)f(call)h(of)f(this)f(routine)h(in)f(places)h(where)f(the)h
 (co)s(de)g(is)f(alw)m(a)m(ys)j(executed,)f(b)s(eing)e(careful)h(not)g
-(to)g(place)227 1071 y(them)j(inside)f Fn(if)f Fr(and)h
-Fn(return)f Fr(statemen)m(ts.)p Black Black 466 1299
-a Fn(void)47 b(routine1)e(\(void\))466 1412 y({)514 1525
-y(Extrae_user_function)d(\(1\);)514 1638 y([routine)j(1)j(code])514
-1751 y(Extrae_user_function)42 b(\(0\);)466 1864 y(})466
-2089 y(void)47 b(routine2)e(\(void\))466 2202 y({)514
-2315 y(Extrae_user_function)d(\(1\);)514 2428 y([routine)j(2)j(code])
-514 2541 y(Extrae_user_function)42 b(\(0\);)466 2654
-y(})227 2995 y Fr(In)20 b(order)g(to)h(gather)g(p)s(erformance)e(coun)m
+(to)g(place)227 1496 y(them)j(inside)f Fn(if)f Fr(and)h
+Fn(return)f Fr(statemen)m(ts.)p Black Black 466 1729
+a Fn(void)47 b(routine1)e(\(void\))466 1842 y({)514 1955
+y(Extrae_user_function)d(\(1\);)514 2068 y([routine)j(1)j(code])514
+2181 y(Extrae_user_function)42 b(\(0\);)466 2294 y(})466
+2519 y(void)47 b(routine2)e(\(void\))466 2632 y({)514
+2745 y(Extrae_user_function)d(\(1\);)514 2858 y([routine)j(2)j(code])
+514 2971 y(Extrae_user_function)42 b(\(0\);)466 3084
+y(})227 3430 y Fr(In)20 b(order)g(to)h(gather)g(p)s(erformance)e(coun)m
 (ters)i(during)e(the)h(execution)i(of)e(these)h(calls,)j(the)c
-Fn(user-functions)227 3107 y Fr(tag)32 b(in)e(the)g(XML)h
+Fn(user-functions)227 3543 y Fr(tag)32 b(in)e(the)g(XML)h
 (con\014guration)g(and)f(its)g Fn(counters)f Fr(ha)m(v)m(e)i(to)g(b)s
-(e)f(b)s(oth)g(enabled.)0 3397 y Fk(5.2)135 b(Extended)46
-b(API)0 3601 y Fp(NOTE:)31 b Fm(This)i(API)f(is)h(in)f(exp)-5
+(e)f(b)s(oth)g(enabled.)0 3839 y Fk(5.2)135 b(Extended)46
+b(API)0 4045 y Fp(NOTE:)31 b Fm(This)i(API)f(is)h(in)f(exp)-5
 b(erimental)35 b(stage)e(and)g(it)g(is)g(only)g(available)h(in)e(C.)h
-(Use)f(it)g(at)i(your)f(own)g(risk!)141 3714 y Fr(The)20
+(Use)f(it)g(at)i(your)f(own)g(risk!)141 4159 y Fr(The)20
 b(extended)g(API)g(mak)m(es)h(use)f(of)h(t)m(w)m(o)g(sp)s(ecial)g
 (structures)f(lo)s(cated)h(in)f Fn($)p Fi(f)p Fn(PREFIX)p
-Fi(g)p Fn(/include/extrae)p 3797 3714 V 30 w(types.h)p
-Fr(.)0 3827 y(The)36 b(structures)g(are)h Fn(extrae)p
-1077 3827 V 32 w(UserCommunication)32 b Fr(and)k Fn(extrae)p
-2428 3827 V 33 w(CombinedEvents)p Fr(.)55 b(The)35 b(former)h(is)h(in-)
-0 3940 y(tended)32 b(to)i(enco)s(de)e(an)h(ev)m(en)m(t)h(that)f(will)g
+Fi(g)p Fn(/include/extrae)p 3797 4159 V 30 w(types.h)p
+Fr(.)0 4272 y(The)36 b(structures)g(are)h Fn(extrae)p
+1077 4272 V 32 w(UserCommunication)32 b Fr(and)k Fn(extrae)p
+2428 4272 V 33 w(CombinedEvents)p Fr(.)55 b(The)35 b(former)h(is)h(in-)
+0 4385 y(tended)32 b(to)i(enco)s(de)e(an)h(ev)m(en)m(t)h(that)f(will)g
 (b)s(e)f(con)m(v)m(erted)i(in)m(to)g(a)f(P)m(ara)m(v)m(er)h(comm)m
-(unication)g(when)e(its)h(partner)0 4053 y(equiv)-5 b(alen)m(t)43
+(unication)g(when)e(its)h(partner)0 4498 y(equiv)-5 b(alen)m(t)43
 b(ev)m(en)m(t)g(has)f(found.)73 b(The)41 b(latter)i(is)e(used)g(to)i
 (generate)g(ev)m(en)m(ts)g(con)m(taining)g(m)m(ultiple)f(kinds)f(of)0
-4166 y(information)31 b(at)g(the)f(same)h(time.)p Black
-Black 0 4382 a Fn(struct)46 b(extrae_UserCommunication)0
-4495 y({)95 4607 y(extrae_user_communication_)o(type)o(s_t)41
-b(type;)95 4720 y(extrae_comm_tag_t)j(tag;)95 4833 y(unsigned)i(size;)g
-(/*)i(size_t?)d(*/)95 4946 y(extrae_comm_partner_t)d(partner;)95
-5059 y(extrae_comm_id_t)i(id;)0 5172 y(};)p Black 1905
+4611 y(information)31 b(at)g(the)f(same)h(time.)p Black
+Black 0 4833 a Fn(struct)46 b(extrae_UserCommunication)0
+4946 y({)95 5059 y(extrae_user_communication_)o(type)o(s_t)41
+b(type;)95 5172 y(extrae_comm_tag_t)j(tag;)p Black 1905
 5400 a Fr(30)p Black eop end
 %%Page: 31 41
-TeXDict begin 31 40 bop Black Black 141 91 a Fr(The)30
-b(structure)g Fn(extrae)p 1012 91 29 4 v 33 w(UserCommunication)25
-b Fr(con)m(tains)32 b(the)e(follo)m(wing)i(\014elds:)p
-Black 136 269 a Fi(\017)p Black 46 w Fn(type)227 382
-y Fr(Av)-5 b(ailable)32 b(options)f(are:)p Black 330
-566 a Fp({)p Black 45 w Fn(EXTRAE)p 721 566 V 33 w(USER)p
-946 566 V 33 w(SEND)p Fr(,)f(if)g(this)g(ev)m(en)m(t)i(represen)m(ts)f
-(a)f(send)g(p)s(oin)m(t.)p Black 330 708 a Fp({)p Black
-45 w Fn(EXTRAE)p 721 708 V 33 w(USER)p 946 708 V 33 w(RECV)p
-Fr(,)g(if)g(this)g(ev)m(en)m(t)i(represen)m(ts)f(a)f(receiv)m(e)j(p)s
-(oin)m(t.)p Black 136 892 a Fi(\017)p Black 46 w Fn(tag)227
-1005 y Fr(The)d(tag)i(information)e(in)g(the)h(comm)m(unication)h
-(record.)p Black 136 1189 a Fi(\017)p Black 46 w Fn(size)227
-1302 y Fr(The)e(size)h(information)g(in)f(the)h(comm)m(unication)h
-(record.)p Black 136 1486 a Fi(\017)p Black 46 w Fn(partner)227
-1598 y Fr(The)42 b(partner)g(of)g(this)h(comm)m(unication)g(\(receiv)m
-(e)i(if)d(this)g(is)h(a)f(send)g(or)g(send)g(if)g(this)g(is)h(a)f
-(receiv)m(e\).)227 1711 y(P)m(artners)g(\(ranging)g(from)f(0)g(to)h
-(N-1\))h(are)f(considered)f(across)h(tasks)g(whereas)f(all)h(threads)f
-(share)h(a)227 1824 y(single)31 b(comm)m(unication)h(queue.)p
-Black 136 2008 a Fi(\017)p Black 46 w Fn(id)227 2121
-y Fr(An)e(iden)m(ti\014er)h(that)g(is)f(used)g(to)h(matc)m(h)g(comm)m
-(unications)h(b)s(et)m(w)m(een)f(partners.)p Black Black
-0 2322 a Fn(struct)46 b(extrae_CombinedEvents)0 2435
-y({)95 2548 y(/*)i(These)e(are)h(used)g(as)g(boolean)f(values)g(*/)95
-2661 y(int)h(HardwareCounters;)95 2774 y(int)g(Callers;)95
-2887 y(int)g(UserFunction;)95 3000 y(/*)h(These)e(are)h(intended)e(for)
-i(N)h(events)e(*/)95 3112 y(unsigned)g(nEvents;)95 3225
-y(extrae_type_t)92 b(*Types;)95 3338 y(extrae_value_t)44
-b(*Values;)95 3451 y(/*)k(These)e(are)h(intended)e(for)i(user)g
-(communication)d(records)i(*/)95 3564 y(unsigned)g(nCommunications;)95
-3677 y(extrae_user_communication_)o(t)c(*Communications;)0
-3790 y(};)141 3991 y Fr(The)30 b(structure)g Fn(extrae)p
-1012 3991 V 33 w(CombinedEvents)c Fr(con)m(tains)32 b(the)e(follo)m
-(wing)i(\014elds:)p Black 136 4169 a Fi(\017)p Black
-46 w Fn(HardwareCounters)227 4282 y Fr(Set)f(to)g(non-zero)g(if)f(this)
+TeXDict begin 31 40 bop Black Black 95 91 a Fn(unsigned)46
+b(size;)g(/*)i(size_t?)d(*/)95 204 y(extrae_comm_partner_t)d(partner;)
+95 317 y(extrae_comm_id_t)i(id;)0 430 y(};)141 639 y
+Fr(The)30 b(structure)g Fn(extrae)p 1012 639 29 4 v 33
+w(UserCommunication)25 b Fr(con)m(tains)32 b(the)e(follo)m(wing)i
+(\014elds:)p Black 136 823 a Fi(\017)p Black 46 w Fn(type)227
+936 y Fr(Av)-5 b(ailable)32 b(options)f(are:)p Black
+330 1122 a Fp({)p Black 45 w Fn(EXTRAE)p 721 1122 V 33
+w(USER)p 946 1122 V 33 w(SEND)p Fr(,)f(if)g(this)g(ev)m(en)m(t)i
+(represen)m(ts)f(a)f(send)g(p)s(oin)m(t.)p Black 330
+1267 a Fp({)p Black 45 w Fn(EXTRAE)p 721 1267 V 33 w(USER)p
+946 1267 V 33 w(RECV)p Fr(,)g(if)g(this)g(ev)m(en)m(t)i(represen)m(ts)f
+(a)f(receiv)m(e)j(p)s(oin)m(t.)p Black 136 1454 a Fi(\017)p
+Black 46 w Fn(tag)227 1567 y Fr(The)d(tag)i(information)e(in)g(the)h
+(comm)m(unication)h(record.)p Black 136 1753 a Fi(\017)p
+Black 46 w Fn(size)227 1866 y Fr(The)e(size)h(information)g(in)f(the)h
+(comm)m(unication)h(record.)p Black 136 2052 a Fi(\017)p
+Black 46 w Fn(partner)227 2165 y Fr(The)42 b(partner)g(of)g(this)h
+(comm)m(unication)g(\(receiv)m(e)i(if)d(this)g(is)h(a)f(send)g(or)g
+(send)g(if)g(this)g(is)h(a)f(receiv)m(e\).)227 2278 y(P)m(artners)g
+(\(ranging)g(from)f(0)g(to)h(N-1\))h(are)f(considered)f(across)h(tasks)
+g(whereas)f(all)h(threads)f(share)h(a)227 2391 y(single)31
+b(comm)m(unication)h(queue.)p Black 136 2577 a Fi(\017)p
+Black 46 w Fn(id)227 2690 y Fr(An)e(iden)m(ti\014er)h(that)g(is)f(used)
+g(to)h(matc)m(h)g(comm)m(unications)h(b)s(et)m(w)m(een)f(partners.)p
+Black Black 0 2899 a Fn(struct)46 b(extrae_CombinedEvents)0
+3012 y({)95 3125 y(/*)i(These)e(are)h(used)g(as)g(boolean)f(values)g
+(*/)95 3238 y(int)h(HardwareCounters;)95 3350 y(int)g(Callers;)95
+3463 y(int)g(UserFunction;)95 3576 y(/*)h(These)e(are)h(intended)e(for)
+i(N)h(events)e(*/)95 3689 y(unsigned)g(nEvents;)95 3802
+y(extrae_type_t)92 b(*Types;)95 3915 y(extrae_value_t)44
+b(*Values;)95 4028 y(/*)k(These)e(are)h(intended)e(for)i(user)g
+(communication)d(records)i(*/)95 4141 y(unsigned)g(nCommunications;)95
+4254 y(extrae_user_communication_)o(t)c(*Communications;)0
+4367 y(};)141 4575 y Fr(The)30 b(structure)g Fn(extrae)p
+1012 4575 V 33 w(CombinedEvents)c Fr(con)m(tains)32 b(the)e(follo)m
+(wing)i(\014elds:)p Black 136 4760 a Fi(\017)p Black
+46 w Fn(HardwareCounters)227 4873 y Fr(Set)f(to)g(non-zero)g(if)f(this)
 g(ev)m(en)m(t)i(has)f(to)g(gather)g(hardw)m(are)f(p)s(erformance)f
-(coun)m(ters.)p Black 136 4466 a Fi(\017)p Black 46 w
-Fn(Callers)227 4579 y Fr(Set)i(to)g(non-zero)g(if)f(this)g(ev)m(en)m(t)
+(coun)m(ters.)p Black 136 5059 a Fi(\017)p Black 46 w
+Fn(Callers)227 5172 y Fr(Set)i(to)g(non-zero)g(if)f(this)g(ev)m(en)m(t)
 i(has)f(to)g(emit)g(callstac)m(k)i(information.)p Black
-136 4762 a Fi(\017)p Black 46 w Fn(UserFunction)227 4875
-y Fr(Av)-5 b(ailable)32 b(options)f(are:)p Black 330
-5059 a Fp({)p Black 45 w Fn(EXTRAE)p 721 5059 V 33 w(USER)p
-946 5059 V 33 w(FUNCTION)p 1363 5059 V 32 w(NONE)p Fr(,)38
-b(if)h(this)f(ev)m(en)m(t)j(should)c(not)i(pro)m(vide)g(information)g
-(ab)s(out)g(user)427 5172 y(routines.)p Black 1905 5400
-a(31)p Black eop end
+1905 5400 a(31)p Black eop end
 %%Page: 32 42
-TeXDict begin 32 41 bop Black Black Black 330 91 a Fp({)p
-Black 45 w Fn(EXTRAE)p 721 91 29 4 v 33 w(USER)p 946
-91 V 33 w(FUNCTION)p 1363 91 V 32 w(ENTER)p Fr(,)32 b(if)g(this)g(ev)m
-(en)m(t)i(represen)m(ts)e(the)g(starting)h(p)s(oin)m(t)g(of)f(a)h(user)
-e(rou-)427 204 y(tine.)p Black 330 347 a Fp({)p Black
-45 w Fn(EXTRAE)p 721 347 V 33 w(USER)p 946 347 V 33 w(FUNCTION)p
-1363 347 V 32 w(LEAVE)p Fr(,)22 b(if)h(this)h(ev)m(en)m(t)g(represen)m
-(ts)f(the)h(ending)e(p)s(oin)m(t)h(of)h(a)f(user)g(routine.)p
-Black 136 531 a Fi(\017)p Black 46 w Fn(nEvents)227 644
-y Fr(Set)31 b(the)f(n)m(um)m(b)s(er)f(of)i(ev)m(en)m(ts)h(giv)m(en)f
-(in)f(the)h Fn(Types)e Fr(and)g Fn(Values)g Fr(\014elds.)p
-Black 136 828 a Fi(\017)p Black 46 w Fn(Types)227 941
+TeXDict begin 32 41 bop Black Black Black 136 91 a Fi(\017)p
+Black 46 w Fn(UserFunction)227 204 y Fr(Av)-5 b(ailable)32
+b(options)f(are:)p Black 330 398 a Fp({)p Black 45 w
+Fn(EXTRAE)p 721 398 29 4 v 33 w(USER)p 946 398 V 33 w(FUNCTION)p
+1363 398 V 32 w(NONE)p Fr(,)38 b(if)h(this)f(ev)m(en)m(t)j(should)c
+(not)i(pro)m(vide)g(information)g(ab)s(out)g(user)427
+511 y(routines.)p Black 330 661 a Fp({)p Black 45 w Fn(EXTRAE)p
+721 661 V 33 w(USER)p 946 661 V 33 w(FUNCTION)p 1363
+661 V 32 w(ENTER)p Fr(,)32 b(if)g(this)g(ev)m(en)m(t)i(represen)m(ts)e
+(the)g(starting)h(p)s(oin)m(t)g(of)f(a)h(user)e(rou-)427
+774 y(tine.)p Black 330 923 a Fp({)p Black 45 w Fn(EXTRAE)p
+721 923 V 33 w(USER)p 946 923 V 33 w(FUNCTION)p 1363
+923 V 32 w(LEAVE)p Fr(,)22 b(if)h(this)h(ev)m(en)m(t)g(represen)m(ts)f
+(the)h(ending)e(p)s(oin)m(t)h(of)h(a)f(user)g(routine.)p
+Black 136 1117 a Fi(\017)p Black 46 w Fn(nEvents)227
+1230 y Fr(Set)31 b(the)f(n)m(um)m(b)s(er)f(of)i(ev)m(en)m(ts)h(giv)m
+(en)f(in)f(the)h Fn(Types)e Fr(and)g Fn(Values)g Fr(\014elds.)p
+Black 136 1424 a Fi(\017)p Black 46 w Fn(Types)227 1537
 y Fr(A)i(p)s(oin)m(ter)f(con)m(taining)i Fn(nEvents)c
 Fr(t)m(yp)s(e)j(that)g(will)g(b)s(e)e(stored)i(in)f(the)h(trace.)p
-Black 136 1125 a Fi(\017)p Black 46 w Fn(Values)227 1238
+Black 136 1731 a Fi(\017)p Black 46 w Fn(Values)227 1844
 y Fr(A)g(p)s(oin)m(ter)f(con)m(taining)i Fn(nEvents)c
 Fr(v)-5 b(alues)31 b(that)g(will)g(b)s(e)f(stored)g(in)g(the)h(trace.)p
-Black 136 1422 a Fi(\017)p Black 46 w Fn(nCommunications)227
-1535 y Fr(Set)g(the)f(n)m(um)m(b)s(er)f(of)i(comm)m(unications)h(giv)m
+Black 136 2038 a Fi(\017)p Black 46 w Fn(nCommunications)227
+2151 y Fr(Set)g(the)f(n)m(um)m(b)s(er)f(of)i(comm)m(unications)h(giv)m
 (en)f(in)f(the)h Fn(Communications)26 b Fr(\014eld.)p
-Black 136 1719 a Fi(\017)p Black 46 w Fn(Communications)227
-1832 y Fr(A)35 b(p)s(oin)m(ter)g(to)h Fn(extrae)p 1058
-1832 V 33 w(UserCommunication)30 b Fr(structures)k(con)m(taining)j
-Fn(nCommunications)31 b Fr(elemen)m(ts)227 1945 y(that)g(represen)m(t)g
-(the)f(in)m(v)m(olv)m(ed)i(comm)m(unications.)141 2124
+Black 136 2345 a Fi(\017)p Black 46 w Fn(Communications)227
+2458 y Fr(A)35 b(p)s(oin)m(ter)g(to)h Fn(extrae)p 1058
+2458 V 33 w(UserCommunication)30 b Fr(structures)k(con)m(taining)j
+Fn(nCommunications)31 b Fr(elemen)m(ts)227 2571 y(that)g(represen)m(t)g
+(the)f(in)m(v)m(olv)m(ed)i(comm)m(unications.)141 2765
 y(The)e(extended)g(API)h(con)m(tains)g(the)g(follo)m(wing)h(routines:)p
-Black 136 2302 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 2302 V 33 w(init)p 985 2302 V 33 w(UserCommunication)c(\(struct)j
-(extrae)p 2547 2302 V 33 w(UserCommunication)d(*\))227
-2415 y Fr(Use)31 b(this)f(routine)h(to)g(initialize)h(an)f(extrae)p
-1748 2415 28 4 v 34 w(UserComm)m(unication)g(structure.)p
-Black 136 2600 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 2600 29 4 v 33 w(init)p 985 2600 V 33 w(CombinedEvents)d(\(struct)i
-(extrae)p 2404 2600 V 32 w(CombinedEvents)e(*\))227 2712
+Black 136 2959 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 2959 V 33 w(init)p 985 2959 V 33 w(UserCommunication)c(\(struct)j
+(extrae)p 2547 2959 V 33 w(UserCommunication)d(*\))227
+3072 y Fr(Use)31 b(this)f(routine)h(to)g(initialize)h(an)f(extrae)p
+1748 3072 28 4 v 34 w(UserComm)m(unication)g(structure.)p
+Black 136 3266 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 3266 29 4 v 33 w(init)p 985 3266 V 33 w(CombinedEvents)d(\(struct)i
+(extrae)p 2404 3266 V 32 w(CombinedEvents)e(*\))227 3379
 y Fr(Use)31 b(this)f(routine)h(to)g(initialize)h(an)f(extrae)p
-1748 2712 28 4 v 34 w(Com)m(binedEv)m(en)m(ts)f(structure.)p
-Black 136 2897 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 2897 29 4 v 33 w(emit)p 985 2897 V 33 w(CombinedEvents)d(\(struct)i
-(extrae)p 2404 2897 V 32 w(CombinedEvents)e(*\))227 3009
+1748 3379 28 4 v 34 w(Com)m(binedEv)m(en)m(ts)f(structure.)p
+Black 136 3573 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 3573 29 4 v 33 w(emit)p 985 3573 V 33 w(CombinedEvents)d(\(struct)i
+(extrae)p 2404 3573 V 32 w(CombinedEvents)e(*\))227 3686
 y Fr(Use)31 b(this)f(routine)h(to)g(emit)g(to)g(the)g(trace\014le)g
 (the)g(ev)m(en)m(ts)h(set)e(in)h(the)f(extrae)p 2908
-3009 28 4 v 34 w(Com)m(binedEv)m(en)m(ts)h(giv)m(en.)p
-Black 136 3194 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 3194 29 4 v 33 w(resume)p 1081 3194 V 32 w(virtual)p
-1449 3194 V 33 w(thread)f(\(unsigned)f(vthread\))227
-3306 y Fr(This)29 b(routine)h(c)m(hanges)h(the)f(thread)g(iden)m
+3686 28 4 v 34 w(Com)m(binedEv)m(en)m(ts)h(giv)m(en.)p
+Black 136 3880 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 3880 29 4 v 33 w(resume)p 1081 3880 V 32 w(virtual)p
+1449 3880 V 33 w(thread)f(\(unsigned)f(vthread\))227
+3993 y Fr(This)29 b(routine)h(c)m(hanges)h(the)f(thread)g(iden)m
 (ti\014er)g(so)g(as)g(to)h(b)s(e)e(vthread)h(in)f(the)i(\014nal)e
-(trace\014le.)42 b Fm(Impr)-5 b(op)g(er)227 3419 y(use)33
+(trace\014le.)42 b Fm(Impr)-5 b(op)g(er)227 4106 y(use)33
 b(of)f(this)i(r)-5 b(outine)33 b(may)h(r)-5 b(esult)33
 b(in)g(c)-5 b(orrupt)34 b(tr)-5 b(ac)g(e\014les.)p Black
-136 3603 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 3603 V 33 w(suspend)p 1129 3603 V 32 w(virtual)p
-1497 3603 V 33 w(thread)f(\(void\))227 3716 y Fr(This)d(routine)g(reco)
+136 4300 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 4300 V 33 w(suspend)p 1129 4300 V 32 w(virtual)p
+1497 4300 V 33 w(thread)f(\(void\))227 4413 y Fr(This)d(routine)g(reco)
 m(v)m(ers)i(the)e(original)h(thread)f(iden)m(ti\014er)g(\(giv)m(en)i(b)
-m(y)e(routines)g(lik)m(e)i(pthread)p 3620 3716 28 4 v
-32 w(self)e(or)227 3829 y(omp)p 404 3829 V 33 w(get)p
-557 3829 V 34 w(thread)p 849 3829 V 32 w(n)m(um,)30 b(for)g
-(instance\).)p Black 136 4013 a Fi(\017)p Black 46 w
-Fn(void)47 b(Extrae)p 760 4013 29 4 v 33 w(register)p
-1177 4013 V 32 w(codelocation)p 1785 4013 V 31 w(type)g(\(extrae)p
-2391 4013 V 32 w(type)p 2615 4013 V 33 w(t)h(t1,)f(extrae)p
-3223 4013 V 32 w(type)p 3447 4013 V 34 w(t)g(t2,)g(char*)227
-4126 y(s1,)g(char)g(*s2\))227 4239 y Fr(Registers)33
+m(y)e(routines)g(lik)m(e)i(pthread)p 3620 4413 28 4 v
+32 w(self)e(or)227 4526 y(omp)p 404 4526 V 33 w(get)p
+557 4526 V 34 w(thread)p 849 4526 V 32 w(n)m(um,)30 b(for)g
+(instance\).)p Black 136 4720 a Fi(\017)p Black 46 w
+Fn(void)47 b(Extrae)p 760 4720 29 4 v 33 w(register)p
+1177 4720 V 32 w(codelocation)p 1785 4720 V 31 w(type)g(\(extrae)p
+2391 4720 V 32 w(type)p 2615 4720 V 33 w(t)h(t1,)f(extrae)p
+3223 4720 V 32 w(type)p 3447 4720 V 34 w(t)g(t2,)g(char*)227
+4833 y(s1,)g(char)g(*s2\))227 4946 y Fr(Registers)33
 b(t)m(yp)s(e)f(t1)h(to)g(reference)f(user)f(source)h(co)s(de)g(lo)s
 (cation)i(\(assigning)f(t)m(yp)s(e)f(t1)h(to)f(the)g(ev)m(en)m(t)i(t)m
-(yp)s(e)227 4352 y(that)27 b(references)f(the)f(user)g(function)h(and)f
+(yp)s(e)227 5059 y(that)27 b(references)f(the)f(user)g(function)h(and)f
 (to)h(the)g(ev)m(en)m(t)h(t2)g(to)f(the)g(ev)m(en)m(t)h(that)f
-(references)g(the)g(\014le)g(name)227 4465 y(and)k(line)h(lo)s
-(cation\).)p Black 136 4649 a Fi(\017)p Black 46 w Fn(void)47
-b(Extrae)p 760 4649 V 33 w(register)p 1177 4649 V 32
-w(stacked)p 1545 4649 V 32 w(type)g(\(extrae)p 2152 4649
-V 32 w(type)p 2376 4649 V 34 w(t)g(type\))227 4762 y
-Fr(Registers)h(whic)m(h)e(ev)m(en)m(t)i(t)m(yp)s(es)e(are)h(required)f
-(to)h(b)s(e)f(managed)h(in)f(a)h(stac)m(k)g(w)m(a)m(y)h(whenev)m(er)e
-Fn(void)227 4875 y(Extrae)p 521 4875 V 33 w(resume)p
-842 4875 V 33 w(virtual)p 1211 4875 V 32 w(thread)29
-b Fr(or)h Fn(void)47 b(Extrae)p 2198 4875 V 33 w(suspend)p
-2567 4875 V 32 w(virtual)p 2935 4875 V 32 w(thread)29
-b Fr(are)i(called.)p Black 136 5059 a Fi(\017)p Black
-46 w Fn(void)47 b(Extrae)p 760 5059 V 33 w(set)p 937
-5059 V 33 w(threadid)p 1354 5059 V 32 w(function)f(\(unsigned)f
-(\(*threadid)p 2773 5059 V 32 w(function\)\(void\)\))227
-5172 y Fr(De\014nes)31 b(the)f(routine)h(that)g(will)f(b)s(e)g(used)g
-(as)g(a)h(thread)f(iden)m(ti\014er)h(inside)f(the)g(tracing)i(facilit)m
-(y)-8 b(.)p Black 1905 5400 a(32)p Black eop end
+(references)g(the)g(\014le)g(name)227 5172 y(and)k(line)h(lo)s
+(cation\).)p Black 1905 5400 a(32)p Black eop end
 %%Page: 33 43
 TeXDict begin 33 42 bop Black Black Black 136 91 a Fi(\017)p
-Black 46 w Fn(void)47 b(Extrae)p 760 91 29 4 v 33 w(set)p
-937 91 V 33 w(numthreads)p 1450 91 V 32 w(function)e(\(unsigned)h
-(\(*numthreads)p 2965 91 V 31 w(function\)\(void\)\))227
-204 y Fr(De\014nes)31 b(the)f(routine)h(that)g(will)f(coun)m(t)h(all)h
-(the)e(executing)i(threads)e(inside)g(the)g(tracing)i(facilit)m(y)-8
-b(.)p Black 136 394 a Fi(\017)p Black 46 w Fn(void)47
-b(Extrae)p 760 394 V 33 w(set)p 937 394 V 33 w(taskid)p
-1258 394 V 33 w(function)e(\(unsigned)h(\(*taskid)p 2582
-394 V 32 w(function\)\(void\)\))227 507 y Fr(De\014nes)31
+Black 46 w Fn(void)47 b(Extrae)p 760 91 29 4 v 33 w(register)p
+1177 91 V 32 w(stacked)p 1545 91 V 32 w(type)g(\(extrae)p
+2152 91 V 32 w(type)p 2376 91 V 34 w(t)g(type\))227 204
+y Fr(Registers)h(whic)m(h)e(ev)m(en)m(t)i(t)m(yp)s(es)e(are)h(required)
+f(to)h(b)s(e)f(managed)h(in)f(a)h(stac)m(k)g(w)m(a)m(y)h(whenev)m(er)e
+Fn(void)227 317 y(Extrae)p 521 317 V 33 w(resume)p 842
+317 V 33 w(virtual)p 1211 317 V 32 w(thread)29 b Fr(or)h
+Fn(void)47 b(Extrae)p 2198 317 V 33 w(suspend)p 2567
+317 V 32 w(virtual)p 2935 317 V 32 w(thread)29 b Fr(are)i(called.)p
+Black 136 534 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 534 V 33 w(set)p 937 534 V 33 w(threadid)p 1354 534
+V 32 w(function)f(\(unsigned)f(\(*threadid)p 2773 534
+V 32 w(function\)\(void\)\))227 646 y Fr(De\014nes)31
+b(the)f(routine)h(that)g(will)f(b)s(e)g(used)g(as)g(a)h(thread)f(iden)m
+(ti\014er)h(inside)f(the)g(tracing)i(facilit)m(y)-8 b(.)p
+Black 136 863 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 863 V 33 w(set)p 937 863 V 33 w(numthreads)p 1450
+863 V 32 w(function)e(\(unsigned)h(\(*numthreads)p 2965
+863 V 31 w(function\)\(void\)\))227 976 y Fr(De\014nes)31
+b(the)f(routine)h(that)g(will)f(coun)m(t)h(all)h(the)e(executing)i
+(threads)e(inside)g(the)g(tracing)i(facilit)m(y)-8 b(.)p
+Black 136 1192 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 1192 V 33 w(set)p 937 1192 V 33 w(taskid)p 1258 1192
+V 33 w(function)e(\(unsigned)h(\(*taskid)p 2582 1192
+V 32 w(function\)\(void\)\))227 1305 y Fr(De\014nes)31
 b(the)f(routine)h(that)g(will)f(b)s(e)g(used)g(as)g(a)h(task)g(iden)m
 (ti\014er)g(inside)f(the)g(tracing)i(facilit)m(y)-8 b(.)p
-Black 136 696 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 696 V 33 w(set)p 937 696 V 33 w(numtasks)p 1354 696
-V 32 w(function)f(\(unsigned)f(\(*numtasks)p 2773 696
-V 32 w(function\)\(void\)\))227 809 y Fr(De\014nes)31
+Black 136 1521 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 1521 V 33 w(set)p 937 1521 V 33 w(numtasks)p 1354
+1521 V 32 w(function)f(\(unsigned)f(\(*numtasks)p 2773
+1521 V 32 w(function\)\(void\)\))227 1634 y Fr(De\014nes)31
 b(the)f(routine)h(that)g(will)f(coun)m(t)h(all)h(the)e(executing)i
 (tasks)f(inside)f(the)g(tracing)i(facilit)m(y)-8 b(.)p
-Black 136 999 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
-760 999 V 33 w(set)p 937 999 V 33 w(barrier)p 1306 999
-V 33 w(tasks)p 1579 999 V 33 w(function)e(\(void)i(\(*barriertasks)p
-3000 999 V 30 w(function\)\(void\)\))227 1112 y Fr(Establishes)31
-b(the)f(barrier)g(routine)g(among)h(tasks.)42 b(It)30
-b(is)g(needed)g(for)h(sync)m(hronization)g(purp)s(oses.)0
-1401 y Fk(5.3)135 b(Sp)t(ecial)31 b(considerations)g(for)f(Cell)h
-(Broadband)e(Engine)i(tracing)g(pac)l(k-)306 1551 y(age)0
-1754 y Fr(Instead)f(of)h(including)f Fn($)p Fi(f)p Fn(EXTRAE)p
-1206 1754 V 33 w(HOME)p Fi(g)p Fn(/include/extrae)p 2196
-1754 V 29 w(user)p 2417 1754 V 33 w(events.h)f Fr(include:)p
-Black 136 1944 a Fi(\017)p Black 46 w Fn($)p Fi(f)p Fn(EXTRAE)p
-614 1944 V 33 w(HOME)p Fi(g)p Fn(/include/ppu)p 1460
-1944 V 31 w(trace)p 1731 1944 V 33 w(sdk2.h)f Fr(on)j(the)f(PPE)g
-(side,)h(and,)p Black 136 2134 a Fi(\017)p Black 46 w
-Fn($)p Fi(f)p Fn(EXTRAE)p 614 2134 V 33 w(HOME)p Fi(g)p
-Fn(/include/sputrace)p 1700 2134 V 29 w(user)p 1921 2134
-V 34 w(events.h)d Fr(on)i(the)g(SPE)g(side.)0 2380 y
-Fj(5.3.1)112 b(PPE)37 b(side)0 2553 y Fr(The)32 b(routines)g(sho)m(wn)g
+Black 136 1851 a Fi(\017)p Black 46 w Fn(void)47 b(Extrae)p
+760 1851 V 33 w(set)p 937 1851 V 33 w(barrier)p 1306
+1851 V 33 w(tasks)p 1579 1851 V 33 w(function)e(\(void)i
+(\(*barriertasks)p 3000 1851 V 30 w(function\)\(void\)\))227
+1964 y Fr(Establishes)31 b(the)f(barrier)g(routine)g(among)h(tasks.)42
+b(It)30 b(is)g(needed)g(for)h(sync)m(hronization)g(purp)s(oses.)0
+2291 y Fk(5.3)135 b(Sp)t(ecial)31 b(considerations)g(for)f(Cell)h
+(Broadband)e(Engine)i(tracing)g(pac)l(k-)306 2441 y(age)0
+2657 y Fr(Instead)f(of)h(including)f Fn($)p Fi(f)p Fn(EXTRAE)p
+1206 2657 V 33 w(HOME)p Fi(g)p Fn(/include/extrae)p 2196
+2657 V 29 w(user)p 2417 2657 V 33 w(events.h)f Fr(include:)p
+Black 136 2874 a Fi(\017)p Black 46 w Fn($)p Fi(f)p Fn(EXTRAE)p
+614 2874 V 33 w(HOME)p Fi(g)p Fn(/include/ppu)p 1460
+2874 V 31 w(trace)p 1731 2874 V 33 w(sdk2.h)f Fr(on)j(the)f(PPE)g
+(side,)h(and,)p Black 136 3090 a Fi(\017)p Black 46 w
+Fn($)p Fi(f)p Fn(EXTRAE)p 614 3090 V 33 w(HOME)p Fi(g)p
+Fn(/include/sputrace)p 1700 3090 V 29 w(user)p 1921 3090
+V 34 w(events.h)d Fr(on)i(the)g(SPE)g(side.)0 3375 y
+Fj(5.3.1)112 b(PPE)37 b(side)0 3560 y Fr(The)32 b(routines)g(sho)m(wn)g
 (on)g(section)i(5.1)f(are)g(a)m(v)-5 b(ailable)35 b(for)d(the)h(PPE)f
 (elemen)m(t.)48 b(In)32 b(addition,)h(t)m(w)m(o)h(additional)0
-2666 y(routines)f(are)h(a)m(v)-5 b(ailable)36 b(to)e(con)m(trol)h(the)f
+3673 y(routines)f(are)h(a)m(v)-5 b(ailable)36 b(to)e(con)m(trol)h(the)f
 (creation)h(and)e(\014nalization)i(of)f(the)f(SPE)g(threads.)50
-b(These)33 b(routines)0 2778 y(are:)p Black 136 2994
-a Fi(\017)p Black 46 w Fn(int)47 b(CELLtrace)p 856 2994
-V 32 w(init)g(\(int)f(spus,)h(spe)p 1796 2994 V 33 w(context)p
-2165 2994 V 33 w(ptr)p 2342 2994 V 33 w(t)h(*)f(spe)p
-2710 2994 V 34 w(ids\))227 3106 y Fr(Con)m(tacts)32 b(with)e(the)h(SPE)
+b(These)33 b(routines)0 3786 y(are:)p Black 136 4035
+a Fi(\017)p Black 46 w Fn(int)47 b(CELLtrace)p 856 4035
+V 32 w(init)g(\(int)f(spus,)h(spe)p 1796 4035 V 33 w(context)p
+2165 4035 V 33 w(ptr)p 2342 4035 V 33 w(t)h(*)f(spe)p
+2710 4035 V 34 w(ids\))227 4148 y Fr(Con)m(tacts)32 b(with)e(the)h(SPE)
 f(thread)g(to)h(initialize)i(once)e(the)g(SPE)e(tracing)j(en)m
-(vironmen)m(t.)42 b(Suc)m(h)29 b(call)j(has)227 3219
+(vironmen)m(t.)42 b(Suc)m(h)29 b(call)j(has)227 4260
 y(to)39 b(b)s(e)f(sync)m(hronized)g(with)g(the)h(in)m(v)m(o)s(cation)h
-(of)f Fn(SPUtrace)p 2356 3219 V 32 w(init)e Fr(\(see)i(5.3.2\))i(call)f
-(on)e(the)g(SPE)g(side)227 3332 y(due)c(to)h(the)g(presence)g(of)g
+(of)f Fn(SPUtrace)p 2356 4260 V 32 w(init)e Fr(\(see)i(5.3.2\))i(call)f
+(on)e(the)g(SPE)g(side)227 4373 y(due)c(to)h(the)g(presence)g(of)g
 (message)g(passing)g(using)f(the)g(mailb)s(o)m(xes.)54
-b(The)35 b(routine)f(receiv)m(es)i(the)f(total)227 3445
+b(The)35 b(routine)f(receiv)m(es)i(the)f(total)227 4486
 y(n)m(um)m(b)s(er)e(of)g(con)m(texts)j(created)e(b)m(y)g(the)g(Cell)g
-(SDK)f Fn(spe)p 2206 3445 V 34 w(context)p 2576 3445
+(SDK)f Fn(spe)p 2206 4486 V 34 w(context)p 2576 4486
 V 32 w(create)f Fr(and)h(a)h(v)m(ector)h(p)s(oin)m(ting)f(to)227
-3558 y(those)29 b(con)m(texts.)42 b(Eac)m(h)29 b(of)g(those)g(con)m
+4599 y(those)29 b(con)m(texts.)42 b(Eac)m(h)29 b(of)g(those)g(con)m
 (texts)h(will)f(reference)g(to)g(a)g(single)g(SPE)f(thread)g(created)h
-(b)m(y)g(a)g(call)227 3671 y(to)i Fn(pthread)p 680 3671
-V 33 w(create)p Fr(.)p Black 136 3861 a Fi(\017)p Black
-46 w Fn(void)47 b(CELLtrace)p 904 3861 V 32 w(fini)f(\(void\))227
-3974 y Fr(W)-8 b(aits)38 b(for)e(the)g(\014nalization)i(of)e(all)h(the)
-g(threads)e(registered)i(in)f Fn(CELLtrace)p 2978 3974
-V 32 w(init)f Fr(and)h(dumps)e(their)227 4086 y(in)m(termediate)e
-(tracing)g(bu\013ers.)0 4333 y Fj(5.3.2)112 b(SPE)37
-b(side)0 4505 y Fr(Due)j(to)g(the)g(lac)m(k)h(of)f(parallel)h
+(b)m(y)g(a)g(call)227 4712 y(to)i Fn(pthread)p 680 4712
+V 33 w(create)p Fr(.)p Black 136 4929 a Fi(\017)p Black
+46 w Fn(void)47 b(CELLtrace)p 904 4929 V 32 w(fini)f(\(void\))227
+5041 y Fr(W)-8 b(aits)38 b(for)e(the)g(\014nalization)i(of)e(all)h(the)
+g(threads)e(registered)i(in)f Fn(CELLtrace)p 2978 5041
+V 32 w(init)f Fr(and)h(dumps)e(their)227 5154 y(in)m(termediate)e
+(tracing)g(bu\013ers.)p Black 1905 5400 a(33)p Black
+eop end
+%%Page: 34 44
+TeXDict begin 34 43 bop Black Black 0 91 a Fj(5.3.2)112
+b(SPE)37 b(side)0 263 y Fr(Due)j(to)g(the)g(lac)m(k)h(of)f(parallel)h
 (paradigms)e(and)g(hardw)m(are)g(coun)m(ters)h(inside)g(the)g(SPE)e
-(elemen)m(t,)44 b(the)c(SPE)0 4618 y(tracing)35 b(library)e(is)h(a)g
+(elemen)m(t,)44 b(the)c(SPE)0 376 y(tracing)35 b(library)e(is)h(a)g
 (subset)f(of)g(the)h(t)m(ypical)h(tracing)g(library)-8
 b(.)51 b(The)33 b(follo)m(wing)i(API)e(calls)i(are)f(a)m(v)-5
-b(ailable)36 b(for)0 4731 y(the)31 b(SPE)e(elemen)m(t:)p
-Black 136 4946 a Fi(\017)p Black 46 w Fn(void)47 b(SPUtrace)p
-856 4946 V 32 w(init)g(\(void\))227 5059 y Fr(Initializes)23
+b(ailable)36 b(for)0 489 y(the)31 b(SPE)e(elemen)m(t:)p
+Black 136 701 a Fi(\017)p Black 46 w Fn(void)47 b(SPUtrace)p
+856 701 29 4 v 32 w(init)g(\(void\))227 814 y Fr(Initializes)23
 b(the)e(tracing)h(pac)m(k)-5 b(age)23 b(in)d(the)i(SPE)e(side.)37
 b(It)21 b(has)g(to)h(b)s(e)e(sync)m(hronized)h(with)f
-Fn(CELLtrace)p 3683 5059 V 32 w(init)227 5172 y Fr(due)30
+Fn(CELLtrace)p 3683 814 V 32 w(init)227 927 y Fr(due)30
 b(to)h(the)g(message)g(passing)f(using)g(mailb)s(o)m(xes.)p
-Black 1905 5400 a(33)p Black eop end
-%%Page: 34 44
-TeXDict begin 34 43 bop Black Black Black 136 91 a Fi(\017)p
-Black 46 w Fn(void)47 b(SPUtrace)p 856 91 29 4 v 32 w(fini)g(\(void\))
-227 204 y Fr(Noti\014es)36 b(the)e(\014nalization)i(of)f(the)g(w)m(ork)
-f(p)s(erformed)f(in)i(the)f(SPE)g(thread)g(and)g(transfers)g(the)h
-(tracing)227 317 y(bu\013er)30 b(to)h(the)f(PPE)g(elemen)m(t.)p
-Black 136 505 a Fi(\017)p Black 46 w Fn(void)47 b(SPUtrace)p
-856 505 V 32 w(event)f(\(unsigned)g(event,)g(unsigned)f(value\))227
-618 y Fr(Has)31 b(the)g(same)f(seman)m(tics)i(as)f Fn(Extrae)p
-1610 618 V 32 w(event)p Fr(.)p Black 136 805 a Fi(\017)p
-Black 46 w Fn(void)47 b(SPUtrace)p 856 805 V 32 w(nevent)f(\(unsigned)f
-(count,)i(unsigned)e(*types,)h(unsigned)f(*values\))227
-918 y Fr(Has)31 b(the)g(same)f(seman)m(tics)i(as)f Fn(Extrae)p
-1610 918 V 32 w(nevent)p Fr(.)p Black 1905 5400 a(34)p
+Black 136 1115 a Fi(\017)p Black 46 w Fn(void)47 b(SPUtrace)p
+856 1115 V 32 w(fini)g(\(void\))227 1228 y Fr(Noti\014es)36
+b(the)e(\014nalization)i(of)f(the)g(w)m(ork)f(p)s(erformed)f(in)i(the)f
+(SPE)g(thread)g(and)g(transfers)g(the)h(tracing)227 1341
+y(bu\013er)30 b(to)h(the)f(PPE)g(elemen)m(t.)p Black
+136 1528 a Fi(\017)p Black 46 w Fn(void)47 b(SPUtrace)p
+856 1528 V 32 w(event)f(\(unsigned)g(event,)g(unsigned)f(value\))227
+1641 y Fr(Has)31 b(the)g(same)f(seman)m(tics)i(as)f Fn(Extrae)p
+1610 1641 V 32 w(event)p Fr(.)p Black 136 1829 a Fi(\017)p
+Black 46 w Fn(void)47 b(SPUtrace)p 856 1829 V 32 w(nevent)f(\(unsigned)
+f(count,)i(unsigned)e(*types,)h(unsigned)f(*values\))227
+1942 y Fr(Has)31 b(the)g(same)f(seman)m(tics)i(as)f Fn(Extrae)p
+1610 1942 V 32 w(nevent)p Fr(.)p Black 1905 5400 a(34)p
 Black eop end
 %%Page: 35 45
 TeXDict begin 35 44 bop Black Black 0 714 a Fl(Chapter)65

@@ -2387,7 +2387,7 @@ Finalizes the tracing library and dumps the intermediate tracing buffers onto di
 
 <P>
 </LI>
-<LI><TT>void Extrae_event (unsigned event, unsigned value)</TT>
+<LI><TT>void Extrae_event (extrae_type_t type, extrae_value_t value)</TT>
 <BR>
 The Extrae_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
 
@@ -2430,7 +2430,7 @@ Some common use of events are:
 
 <P>
 </LI>
-<LI><TT>void Extrae_nevent (unsigned count, unsigned *types, unsigned *values)</TT>
+<LI><TT>void Extrae_nevent (unsigned count, extrae_type_t *types, extrae_value_t *values)</TT>
 <BR>
 Allows the user to place <EM>count</EM> events with the same timestamp at the given position.
 
@@ -2442,13 +2442,13 @@ Emits the value of the active hardware counters set. See chapter <A HREF="#cha:X
 
 <P>
 </LI>
-<LI><TT>void Extrae_eventandcounters (int event, int value)</TT>
+<LI><TT>void Extrae_eventandcounters (extrae_type_t event, extrae_value_t value)</TT>
 <BR>
 This routine lets the user add an event and obtain the performance counters with one call and a single timestamp.
 
 <P>
 </LI>
-<LI><TT>void Extrae_neventandcounters (unsigned count, unsigned *types, unsigned *values)</TT>
+<LI><TT>void Extrae_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values)</TT>
 <BR>
 This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
 

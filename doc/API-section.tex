@@ -28,7 +28,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
  Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
  {\bf NOTE:} As it happened by using {\tt Extrae\_init}, this routine is automatically called in the same circumstances (but on call to MPI\_Finalize in the first case).
 
- \item {\tt void Extrae\_event (unsigned event, unsigned value)}\\
+ \item {\tt void Extrae\_event (extrae\_type\_t type, extrae\_value\_t value)}\\
  The Extrae\_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
 
  Some common use of events are:
@@ -62,16 +62,16 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
    \item Identify any point in the application using a unique combination of type and value.
   \end{itemize}
 
- \item {\tt void Extrae\_nevent (unsigned count, unsigned *types, unsigned *values)}\\
+ \item {\tt void Extrae\_nevent (unsigned count, extrae\_type\_t *types, extrae\_value\_t *values)}\\
   Allows the user to place {\em count} events with the same timestamp at the given position.
 
  \item {\tt void Extrae\_counters (void)}\\
   Emits the value of the active hardware counters set. See chapter \ref{cha:XML} for further information.
 
- \item {\tt void Extrae\_eventandcounters (int event, int value)}\\
+ \item {\tt void Extrae\_eventandcounters (extrae\_type\_t event, extrae\_value\_t value)}\\
   This routine lets the user add an event and obtain the performance counters with one call and a single timestamp.
 
- \item {\tt void Extrae\_neventandcounters (unsigned count, unsigned *types, unsigned *values)}\\
+ \item {\tt void Extrae\_neventandcounters (unsigned count, extrae\_type\_t *types, extrae\_value\_t *values)}\\
   This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
 
  \item {\tt void Extrae\_shutdown (void)}\\

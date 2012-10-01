@@ -1,6 +1,12 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 01Oct2012 Added two additional checks tests/functional/dump-events and
+   tests/functional/auto-init-fini. The former checks the basic API to emit
+   events whereas the second checks for the instrumentation auto
+   initialization and finalization.
+ * 01Oct2012 Extrae API calls now honor extre_type_t / extrae_value_t instead
+   of basic types (unsigned/unsigned long).
  * 28Set2012 Turned 
    void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char
 	 *s2) 

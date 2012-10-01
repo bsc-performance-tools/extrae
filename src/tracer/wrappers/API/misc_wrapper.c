@@ -91,12 +91,7 @@ void Extrae_restart_Wrapper (void)
 	TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, TRACING_EV, EVT_BEGIN, EMPTY);
 }
 
-void Extrae_Event_Wrapper (unsigned *tipus, unsigned *valor)
-{
-	TRACE_MISCEVENT (LAST_READ_TIME, USER_EV, *tipus, *valor);
-}
-
-void Extrae_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
+void Extrae_N_Event_Wrapper (unsigned *count, extrae_type_t *types, extrae_value_t *values)
 {
 	unsigned i;
 	int events_id[*count];
@@ -109,18 +104,7 @@ void Extrae_N_Event_Wrapper (unsigned *count, unsigned *types, unsigned *values)
 	}
 }
 
-void Extrae_Eventandcounters_Wrapper (unsigned *tipus, unsigned *valor)
-{
-#if USE_HARDWARE_COUNTERS
-	if (tracejant)
-		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, USER_EV, *tipus, *valor);
-#else
-	Extrae_Event_Wrapper (tipus, valor);
-#endif
-}
-
-
-void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *types, unsigned *values)
+void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, extrae_type_t *types, extrae_value_t *values)
 {
 	unsigned i;
 	int events_id[*count];
@@ -237,7 +221,7 @@ void Extrae_user_function_Wrapper (int enter)
 	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
 }
 
-void Extrae_function_from_address_Wrapper (int type, void *address)
+void Extrae_function_from_address_Wrapper (extrae_type_t type, void *address)
 {
 	if (type == USRFUNC_EV || type == OMPFUNC_EV)
 	{

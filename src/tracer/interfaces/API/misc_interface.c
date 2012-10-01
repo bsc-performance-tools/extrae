@@ -77,24 +77,25 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_IS_INITIALIZED)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FINI)
 
 #define apifTRACE_EVENT(x) \
-	void CtoF77(x##_event) (unsigned *tipus, unsigned *valor) \
+	void CtoF77(x##_event) (extrae_type_t *type, extrae_value_t *value) \
 	{ \
 		if (mpitrace_on) \
 		{ \
+			unsigned one = 1; \
 			Backend_Enter_Instrumentation (1); \
-			Extrae_Event_Wrapper (tipus, valor); \
+			Extrae_N_Event_Wrapper (&one, type, value); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENT)
 
 #define apifTRACE_NEVENT(x) \
-	void CtoF77(x##_nevent) (unsigned *count, unsigned *tipus, unsigned *valor) \
+	void CtoF77(x##_nevent) (unsigned *count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
 		if (mpitrace_on) \
 		{ \
 			Backend_Enter_Instrumentation (*count); \
-			Extrae_N_Event_Wrapper (count, tipus, valor); \
+			Extrae_N_Event_Wrapper (count, types, values); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
@@ -113,24 +114,25 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEVENT)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SHUTDOWN)
 
 #define apifTRACE_EVENTANDCOUNTERS(x) \
-	void CtoF77(x##_eventandcounters) (unsigned *tipus, unsigned *valor) \
+	void CtoF77(x##_eventandcounters) (extrae_type_t *type, extrae_value_t *value) \
 	{ \
 		if (mpitrace_on) \
 		{ \
+			unsigned one = 1; \
 			Backend_Enter_Instrumentation (1); \
-			Extrae_Eventandcounters_Wrapper (tipus, valor); \
+			Extrae_N_Eventsandcounters_Wrapper (&one, type, value); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_EVENTANDCOUNTERS)
 
 #define apifTRACE_NEVENTANDCOUNTERS(x) \
-	void CtoF77(x##_neventandcounters) (unsigned *count, unsigned *tipus, unsigned *valor) \
+	void CtoF77(x##_neventandcounters) (unsigned *count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
 		if (mpitrace_on) \
 		{ \
 			Backend_Enter_Instrumentation (*count); \
-			Extrae_N_Eventsandcounters_Wrapper (count, tipus, valor); \
+			Extrae_N_Eventsandcounters_Wrapper (count, types, values); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
@@ -209,7 +211,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION);
 
 #define apifTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
-	void CtoF77(x##_function_from_address) (int *type, void *address) \
+	void CtoF77(x##_function_from_address) (extrae_type_t *type, extrae_value_t *address) \
 	{ \
 		if (mpitrace_on) \
 		{ \
@@ -272,48 +274,50 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_IS_INITIALIZED)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_FINI)
 
 #define apiTRACE_EVENT(x) \
-	void x##_event (unsigned tipus, unsigned valor) \
+	void x##_event (extrae_type_t type, extrae_value_t value) \
 	{ \
 		if (mpitrace_on) \
 		{ \
+			unsigned one = 1; \
 			Backend_Enter_Instrumentation (1); \
-			Extrae_Event_Wrapper (&tipus, &valor); \
+			Extrae_N_Event_Wrapper (&one, &type, &value); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENT)
 
 #define apiTRACE_NEVENT(x) \
-	void x##_nevent (unsigned count, unsigned *tipus, unsigned *valors) \
+	void x##_nevent (unsigned count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
 		if (mpitrace_on) \
 		{ \
 			Backend_Enter_Instrumentation (count); \
-			Extrae_N_Event_Wrapper (&count, tipus, valors); \
+			Extrae_N_Event_Wrapper (&count, types, values); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEVENT)
 
 #define apiTRACE_EVENTANDCOUNTERS(x) \
-	void x##_eventandcounters (unsigned tipus, unsigned valor) \
+	void x##_eventandcounters (extrae_type_t type, extrae_value_t value) \
 	{ \
 		if (mpitrace_on) \
-		{	 \
+		{ \
+			unsigned one = 1; \
 			Backend_Enter_Instrumentation (1); \
-			Extrae_Eventandcounters_Wrapper (&tipus, &valor); \
+			Extrae_N_Eventsandcounters_Wrapper (&one, &type, &value); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_EVENTANDCOUNTERS)
 
 #define apiTRACE_NEVENTANDCOUNTERS(x) \
-	void x##_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors) \
+	void x##_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values) \
 	{ \
 		if (mpitrace_on) \
 		{ \
 			Backend_Enter_Instrumentation (count); \
-			Extrae_N_Eventsandcounters_Wrapper (&count, tipus, valors); \
+			Extrae_N_Eventsandcounters_Wrapper (&count, types, values); \
 			Backend_Leave_Instrumentation (); \
 		} \
 	}
@@ -404,7 +408,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 
 #define apiTRACE_USER_FUNCTION_FROM_ADDRESS(x) \
-	void x##_function_from_address (int type, void *address) \
+	void x##_function_from_address (extrae_type_t type, extrae_value_t *address) \
 	{ \
 		if (mpitrace_on) \
 		{ \
@@ -537,46 +541,48 @@ void Extrae_fini (void)
 		Extrae_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_C(_event, Extrae_event, (unsigned tipus, unsigned valors),void)
-void Extrae_event (unsigned tipus, unsigned valors)
+INTERFACE_ALIASES_C(_event, Extrae_event, (extrae_type_t type, extrae_value_t value),void)
+void Extrae_event (extrae_type_t type, extrae_value_t value)
 {
 	if (mpitrace_on)
 	{
+		unsigned one = 1;
 		Backend_Enter_Instrumentation (1);
-		Extrae_Event_Wrapper (&tipus, &valors);
+		Extrae_N_Event_Wrapper (&one, &type, &value);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
-INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned count, unsigned *tipus, unsigned *valors),void)
-void Extrae_nevent (unsigned count, unsigned *tipus, unsigned *valors)
+INTERFACE_ALIASES_C(_nevent, Extrae_nevent, (unsigned count, extrae_type_t *types, extrae_value_t *values),void)
+void Extrae_nevent (unsigned count, extrae_type_t *types, extrae_value_t *values)
 {
 	if (mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (count);
-		Extrae_N_Event_Wrapper (&count, tipus, valors);
+		Extrae_N_Event_Wrapper (&count, types, values);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
-INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (unsigned tipus, unsigned valor),void)
-void Extrae_eventandcounters (unsigned tipus, unsigned valor)
+INTERFACE_ALIASES_C(_eventandcounters, Extrae_eventandcounters, (extrae_type_t type, extrae_value_t value),void)
+void Extrae_eventandcounters (extrae_type_t type, extrae_value_t value)
 {
 	if (mpitrace_on)
 	{
+		unsigned one = 1;
 		Backend_Enter_Instrumentation (1);
-		Extrae_Eventandcounters_Wrapper (&tipus, &valor);
+		Extrae_N_Eventsandcounters_Wrapper (&one, &type, &value);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
-INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned count, unsigned *tipus, unsigned *valors),void)
-void Extrae_neventandcounters (unsigned count, unsigned *tipus, unsigned *valors)
+INTERFACE_ALIASES_C(_neventandcounters, Extrae_neventandcounters, (unsigned count, extrae_type_t *types, extrae_value_t *values),void)
+void Extrae_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values)
 {
  	if (mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (count);
-		Extrae_N_Eventsandcounters_Wrapper (&count, tipus, valors);
+		Extrae_N_Eventsandcounters_Wrapper (&count, types, values);
 		Backend_Leave_Instrumentation ();
 	}
 }
@@ -658,8 +664,8 @@ void Extrae_user_function (int enter)
 	}
 }
 
-INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address,(int type, void *address),void)
-void Extrae_function_from_address (int type, void *address)
+INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address,(extrae_type_t type, void *address),void)
+void Extrae_function_from_address (extrae_type_t type, void *address)
 {
 	if (mpitrace_on)
 	{
@@ -785,24 +791,25 @@ void extrae_fini (void)
 		Extrae_fini_Wrapper ();
 }
 
-INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(unsigned *tipus, unsigned *valor),void)
-void extrae_event (unsigned *tipus, unsigned *valor)
+INTERFACE_ALIASES_F(_event,_EVENT,extrae_event,(extrae_type_t *type, extrae_value_t *value),void)
+void extrae_event (extrae_type_t *type, extrae_value_t *value)
 {
 	if (mpitrace_on)
 	{
+		unsigned one = 1;
 		Backend_Enter_Instrumentation (1);
-		Extrae_Event_Wrapper (tipus, valor);
+		Extrae_N_Event_Wrapper (&one, type, value);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
-INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned *count, unsigned *tipus, unsigned *valor),void)
-void extrae_nevent (unsigned *count, unsigned *tipus, unsigned *valor)
+INTERFACE_ALIASES_F(_nevent,_NEVENT,extrae_nevent,(unsigned *count, extrae_type_t *types, extrae_value_t *values),void)
+void extrae_nevent (unsigned *count, extrae_type_t *types, extrae_value_t *values)
 {
 	if (mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (1);
-		Extrae_N_Event_Wrapper (count, tipus, valor);
+		Extrae_N_Event_Wrapper (count, types, values);
 		Backend_Leave_Instrumentation ();
 	}
 }
@@ -829,24 +836,25 @@ void extrae_restart (void)
 	}
 }
 
-INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (unsigned *tipus, unsigned *valor),void)
-void extrae_eventandcounters (unsigned *tipus, unsigned *valor)
+INTERFACE_ALIASES_F(_eventandcounters,_EVENTANDCOUNTERS,extrae_eventandcounters, (extrae_type_t *type, extrae_value_t *value),void)
+void extrae_eventandcounters (extrae_type_t *type, extrae_value_t *value)
 {
 	if (mpitrace_on)
 	{
+		unsigned one = 1;
 		Backend_Enter_Instrumentation (1);
-		Extrae_Eventandcounters_Wrapper (tipus, valor);
+		Extrae_N_Eventsandcounters_Wrapper (&one, type, value);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
-INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned *count, unsigned *tipus, unsigned *valor),void)
-void extrae_neventandcounters (unsigned *count, unsigned *tipus, unsigned *valor)
+INTERFACE_ALIASES_F(_neventandcounters,_NEVENTANDCOUNTERS,extrae_neventandcounters, (unsigned *count, extrae_type_t *types, extrae_value_t *values),void)
+void extrae_neventandcounters (unsigned *count, extrae_type_t *types, extrae_value_t *values)
 {
 	if (mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (*count);
-		Extrae_N_Eventsandcounters_Wrapper (count, tipus, valor);
+		Extrae_N_Eventsandcounters_Wrapper (count, types, values);
 		Backend_Leave_Instrumentation ();
 	}
 }
@@ -906,8 +914,8 @@ void extrae_user_function (int *enter)
 	}
 }
 
-INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_function_from_address,(int *type, void *address),void)
-void extrae_function_from_address (int *type, void *address)
+INTERFACE_ALIASES_F(_function_from_address,_USER_FUNCTION_FROM_ADDRESS,extrae_function_from_address,(extrae_type_t *type, void *address),void)
+void extrae_function_from_address (extrae_type_t *type, void *address)
 {
 	if (mpitrace_on)
 	{
