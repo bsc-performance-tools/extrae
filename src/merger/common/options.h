@@ -93,6 +93,9 @@ void set_option_merge_NanosTaskView (int b);
 int get_option_merge_RemoveFiles (void);
 void set_option_merge_RemoveFiles (int b);
 
+int get_option_dump_Time (void);
+void set_option_dump_Time (int b);
+
 #if defined(IS_BG_MACHINE)
 int get_option_merge_BG_XYZT (void);
 void set_option_merge_BG_XYZT (int b);

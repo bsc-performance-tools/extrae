@@ -37,6 +37,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdlib.h>
 #endif
 
+#include "options.h"
 #include "events.h"
 #include "record.h"
 #include "file_set.h"
@@ -48,20 +49,36 @@ static int num_counters = 0;
 
 static void show_current (event_t * c, UINT64 max_time)
 {
+	int dump_time = get_option_dump_Time();
+
+	printf ("dump_time = %d\n", dump_time);
+
 	if (c->time < max_time) /* Check whether this event is back in time */
 	{
+		if (dump_time)
 #if SIZEOF_LONG == 8
-		fprintf (stdout, "EV: %d VAL: %lu [0x%lx] TIME: %lu (delta = %lu) ", c->event, c->value, c->value, c->time, max_time-c->time);
+			fprintf (stdout, "TIME: %lu (delta = %lu) EV: %d VAL: %lu [0x%lx] ", c->time, max_time-c->time, c->event, c->value, c->value);
+		else
+			fprintf (stdout, "TIME: - (delta = -) EV: %d VAL: %lu [0x%lx] ", c->event, c->value, c->value);
 #else
-		fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu (delta = %llu) ", c->event, c->value, c->value, c->time, max_time-c->time);
+			fprintf (stdout, "TIME: %lu (delta = %lu) EV: %d VAL: %llu [0x%llx] ", c->time, max_time-c->time, c->event, c->value, c->value);
+		else
+			fprintf (stdout, "TIME: - (delta = -) EV: %d VAL: %llu [0x%llx] ", c->event, c->value, c->value);
 #endif
 	}
 	else 
 	{
+		char *clock_append = (c->time==max_time)?"+ ":"";
+
+		if (dump_time)
 #if SIZEOF_LONG == 8
-		fprintf (stdout, "EV: %d VAL: %lu [0x%lx] TIME: %lu %s", c->event, c->value, c->value, c->time, (c->time==max_time)?"+ ":"");
+			fprintf (stdout, "TIME: %lu %s EV: %d VAL: %lu [0x%lx] ", c->time, clock_append, c->event, c->value, c->value);
+		else
+			fprintf (stdout, "TIME: - %s EV: %d VAL: %lu [0x%lx] ", clock_append, c->event, c->value, c->value);
 #else
-		fprintf (stdout, "EV: %d VAL: %llu [0x%llx] TIME: %llu %s", c->event, c->value, c->value, c->time, (c->time==max_time)?"+ ":"");
+			fprintf (stdout, "TIME: %llu %s EV: %d VAL: %llu [0x%llx] ", c->time, clock_append, c->event, c->value, c->value);
+		else
+			fprintf (stdout, "TIME: - %s EV: %d VAL: %llu [0x%llx] ", clock_append, c->event, c->value, c->value);
 #endif
 	}
 

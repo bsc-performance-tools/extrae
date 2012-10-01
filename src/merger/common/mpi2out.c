@@ -127,7 +127,9 @@ void Help (const char *ProgName)
           "    -use-disk-for-comms Uses the disk instead of memory to match foreign communications.\n"
 #endif
           "    -s file   Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
-          "    -d        Sequentially dumps the contents of every *.mpit file.\n"
+          "    -d/-dump  Sequentially dumps the contents of every *.mpit file.\n"
+          "    -dump-without-time\n"
+					"              Do not show event time in when dumping events.\n"
 					"    -remove-files\n"
 					"              Remove intermediate files after processing them.\n"
           "    -split-states\n"
@@ -686,9 +688,19 @@ void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
 			}
 			continue;
 		}
-		if (!strcmp (argv[CurArg], "-d"))
+		if (!strcmp (argv[CurArg], "-d") || !strcmp(argv[CurArg], "-dump"))
 		{
 			set_option_merge_dump (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-dump-without-time"))
+		{
+			set_option_dump_Time (FALSE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-dump-with-time"))
+		{
+			set_option_dump_Time (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-maxmem"))

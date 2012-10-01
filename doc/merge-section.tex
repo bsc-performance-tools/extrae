@@ -48,9 +48,11 @@ The following sections describe the available options for the Paraver mergers. T
 These are the available options for the sequential Paraver merger:
 
 \begin{itemize}
- \item {\tt -d}
+ \item {\tt -d} or {\tt -dump}\\
  Dumps the information stored in the intermediate trace files.
- \item {\tt -e BINARY}
+ \item {\tt -dump-without-time}\\
+ The information dumped with {\tt -d} (or {\tt -dump}) does not show the timestamp.
+ \item {\tt -e BINARY}\\
  Uses the given BINARY to translate addresses that are stored in the intermediate trace files into useful information (including function name, source file and line). The application has to be compiled with {\tt -g} flag so as to obtain valuable information.
  \item {\tt -evtnum N}\\
  Partially processes (up to N events) the intermediate trace files to generate the Dimemas tracefile.

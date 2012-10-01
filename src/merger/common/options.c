@@ -114,6 +114,10 @@ static int option_merge_RemoveFiles = FALSE;
 int get_option_merge_RemoveFiles (void) { return option_merge_RemoveFiles; }
 void set_option_merge_RemoveFiles (int b) { option_merge_RemoveFiles = b; }
 
+static int option_dump_Time = TRUE;
+int get_option_dump_Time (void) { return option_merge_RemoveFiles; }
+void set_option_dump_Time (int b) { option_merge_RemoveFiles = b; }
+
 #if defined(IS_BG_MACHINE)
 static int option_merge_BG_XYZT = FALSE;
 int get_option_merge_BG_XYZT (void) { return option_merge_BG_XYZT; }
