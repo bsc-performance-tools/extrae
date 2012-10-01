@@ -40,6 +40,8 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdio.h>
 #endif
 
+#include "debug.h"
+
 #define EXTRAE_VECTOR_ALLOC_SIZE 32
 
 void Extrae_Vector_Init (Extrae_Vector_t *v)
@@ -80,9 +82,7 @@ unsigned Extrae_Vector_Count (Extrae_Vector_t *v)
 
 void * Extrae_Vector_Get (Extrae_Vector_t *v, unsigned position)
 {
-	if (position < v->count)
-		return v->data[position];
-	else
-		return NULL;
+	ASSERT(position<v->count, "Out Of Bounds access to Extrae_Vector_Get")
+	return v->data[position];
 }
 
