@@ -468,7 +468,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	{ \
 		if (mpitrace_on) \
 		{ \
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation (1); \
 			Extrae_Resume_virtual_thread_Wrapper (u); \
 			Backend_Leave_Instrumentation ();
 		} \
