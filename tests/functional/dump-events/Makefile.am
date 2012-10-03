@@ -1,10 +1,10 @@
 include $(top_srcdir)/PATHS
 
-check_PROGRAMS = check-dump-events
+check_PROGRAMS = dump-events
 
-TESTS = check-dump-events.sh
+TESTS = dump-events.sh
 
-check_dump_events_SOURCES = check-dump-events.c
-check_dump_events_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
-check_dump_events_LDADD = -L$(TRACER_DIR) -lseqtrace
+dump_events_SOURCES = dump-events.c
+dump_events_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
+dump_events_LDADD = -L$(TRACER_DIR) -lseqtrace
 
