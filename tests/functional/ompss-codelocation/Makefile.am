@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-check_PROGRAMS = ompss_codelocation
+check_PROGRAMS = ompss-codelocation
 
 TESTS = ompss-codelocation.sh
 
