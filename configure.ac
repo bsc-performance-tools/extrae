@@ -616,7 +616,7 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   tests/Makefile \
   tests/src/Makefile tests/src/common/Makefile \
   tests/functional/Makefile tests/functional/dump-events/Makefile \
-  tests/functional/auto-init-fini/Makefile])
+  tests/functional/auto-init-fini/Makefile tests/functional/ompss-codelocation/Makefile])
 #if test "${MRNET_INSTALLED}" = "yes" ; then
 AC_CONFIG_FILES([src/tracer/mrnet/Makefile])
 #fi

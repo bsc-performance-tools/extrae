@@ -632,6 +632,7 @@ void Labels_loadSYMfile (int taskid, char *name)
 		{
 			switch (Type)
 			{
+				case 'O':
 				case 'U':
 				case 'P':
 					{
@@ -639,13 +640,23 @@ void Labels_loadSYMfile (int taskid, char *name)
 						/* Example of line: U 0x100016d4 fA mpi_test.c 0 */
 						char fname[1024], modname[1024];
 						int line;
+						int type;
 						UINT64 address;
 
 						sscanf (LINE, "%llx %s %s %d", &address, fname, modname, &line);
-						if (get_option_merge_UniqueCallerID())
-							Address2Info_AddSymbol (address, UNIQUE_TYPE, fname, modname, line);
+						if (!get_option_merge_UniqueCallerID())
+						{
+							if (Type == 'O')
+								type = OTHER_FUNCTION_TYPE;
+							else if (Type == 'U')
+								type = USER_FUNCTION_TYPE;
+							else /* if (Type == 'P') */
+								type = OUTLINED_OPENMP_TYPE;
+						}
 						else
-							Address2Info_AddSymbol (address, (Type=='U')?USER_FUNCTION_TYPE:OUTLINED_OPENMP_TYPE, fname, modname, line);
+							type = UNIQUE_TYPE;
+
+						Address2Info_AddSymbol (address, type, fname, modname, line);
 						function_count++;
 #endif /* HAVE_BFD */
 					}

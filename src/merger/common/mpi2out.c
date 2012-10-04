@@ -1174,7 +1174,10 @@ int merger_post (int numtasks, int taskid)
 	}
 #endif
 
-	if (strlen(get_merge_SymbolFileName()) == 0 && last_mpits_file != NULL)
+	if (taskid == 0 &&
+		strlen(get_merge_ExecutableFileName()) > 0 &&
+		strlen(get_merge_SymbolFileName()) == 0 &&
+		last_mpits_file != NULL)
 	{
 		char tmp[1024];
 		strncpy (tmp, last_mpits_file, 1024);

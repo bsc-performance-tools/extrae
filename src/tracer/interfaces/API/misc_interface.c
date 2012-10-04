@@ -517,6 +517,16 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 		} \
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_REGISTER_CODELOCATION_TYPE);
+
+#define apiTRACE_REGISTER_FUNCTION_ADDRESS(x) \
+	void x##register_function_address (void *ptr, char *funcname, char *modname, unsigned line) \
+	{ \
+		if (mpitrace_on) \
+		{ \
+				Extrae_register_function_address_Wrapper (ptr, funcname, modname, line); \
+		} \
+	}
+	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_REGISTER_FUNCTION_ADDRESS);
 	
 #else /* HAVE_WEAK_ALIAS_ATTRIBUTE */
 
@@ -767,6 +777,15 @@ void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char
 		Backend_Enter_Instrumentation (1);
 		Extrae_register_codelocation_type_Wrapper (t1, t2, s1, s2);
 		Backend_Leave_Instrumentation ();
+	}
+}
+
+INTERFACE_ALIASES_C(_register_function_address,Extrae_register_function_address,(void*,char*,char*,unsigned),void)
+void Extrae_register_function_address (void *ptr, char *funcname, char *modname, unsigned line)
+{
+	if (mpitrace_on)
+	{
+		Extrae_register_function_address_Wrapper (ptr, funcname, modname, line);
 	}
 }
 

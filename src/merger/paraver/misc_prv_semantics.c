@@ -238,7 +238,9 @@ static int User_Event (event_t * current_event,
 		for (u = 0; u < umax; u++)
 		{
 			addr2types = Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
-			found = addr2types->FunctionType == EvType;
+			found = addr2types->LineType == EvType;
+			/* Probably could be FunctionType also instead of LineType*/
+
 			if (found)
 				break;
 		}

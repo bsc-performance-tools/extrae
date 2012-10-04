@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 04Oct2012 Added void Extrae_register_function_address (void *ptr, char
+ *funcname, char *modname, unsigned line); into the API
+ + 04Oct2012 Added additional checks for Extrae_register_function_address call
  + 01Oct2012 Added two additional checks tests/functional/dump-events and
    tests/functional/auto-init-fini. The former checks the basic API to emit
    events whereas the second checks for the instrumentation auto

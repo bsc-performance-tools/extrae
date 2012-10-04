@@ -129,4 +129,7 @@
 	rettype PPUTRACE##base_up params  __attribute__ ((alias (#orig)));
 #endif
 
+void Extrae_init (void);
+void Extrea_fini (void);
+
 #endif /* MPI_INTERFACE_H_INCLUDED */

@@ -151,6 +151,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "sampling.h"
 
+#include "debug.h"
+
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
 #warning "Control variables below (tracejant, tracejant_mpi, tracejant_hwc_mpi...) should be moved to mode.c and indexed per mode"
@@ -358,6 +360,9 @@ static void Extrae_AnnotateTopology (int enter, UINT64 timestamp)
 	Extrae_MN_gettopology (enter, timestamp);
 #elif defined(IS_BG_MACHINE)
 	Extrae_BG_gettopology (enter, timestamp);
+#else
+	UNREFERENCED_PARAMETER(enter);
+	UNREFERENCED_PARAMETER(timestamp);
 #endif
 }
 
@@ -2071,6 +2076,8 @@ void Extrae_AddTypeValuesEntryToSYM (char code_type, int type, char *description
 	char trace_sym[TMP_DIR];
 	int fd;
 
+	ASSERT(strlen(description)<1024, "Description for type is too large");
+
 	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
@@ -2081,10 +2088,33 @@ void Extrae_AddTypeValuesEntryToSYM (char code_type, int type, char *description
 			unsigned i;
 			for (i = 0; i < nvalues; i++)
 			{
-				snprintf (line, sizeof(line), "%c %d %s\n", code_values, values[i], description_values[i]);
+				ASSERT(strlen(description_values[i])<1024, "Description for value is too large");
+
+				snprintf (line, sizeof(line), "%c %llu %s\n", code_values, values[i], description_values[i]);
 				write (fd, line, strlen(line));
 			}
 		}
 		close (fd);
 	}
 }
+
+void Extrae_AddFunctionDefinitionEntryToSYM (char code_type, void *address,
+	char *functionname, char *modulename, unsigned fileline)
+{
+	char line[1024];
+	char trace_sym[TMP_DIR];
+	int fd;
+
+	ASSERT(strlen(functionname)+strlen(modulename)<1024, "Function name and module name are too large!");
+
+	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
+	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
+	{
+		/* Example of format: U 0x100016d4 fA mpi_test.c 0 */
+		snprintf (line, sizeof(line), "%c %p %s %s %u\n", code_type, address,
+			functionname, modulename, fileline);
+		write (fd, line, strlen(line));
+		close (fd);
+	}
+}
+

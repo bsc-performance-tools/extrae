@@ -1,1 +1,3 @@
-SUBDIRS = dump-events auto-init-fini
+SUBDIRS = dump-events \
+ auto-init-fini \
+ ompss-codelocation

@@ -198,8 +198,8 @@ void Extrae_suspend_virtual_thread (void);
 void Extrae_register_stacked_type (extrae_type_t type);
 
 void Extrae_get_version (unsigned *major, unsigned *minor, unsigned *revision);
-
 void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char* s1, char *s2);
+void Extrae_register_function_address (void *ptr, char *funcname, char *modname, unsigned line);
 
 #ifdef __cplusplus
 }

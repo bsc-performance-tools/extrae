@@ -390,7 +390,7 @@ extern int MaxClusterId;
 
 void Address2Info_Write_Labels (FILE *);
 int Labels_GeneratePCFfile (char *name, long long options);
-void Labels_LoadSYMfile (char *name);
+void Labels_loadSYMfile (int taskid, char *name);
 int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description);
 
 #endif

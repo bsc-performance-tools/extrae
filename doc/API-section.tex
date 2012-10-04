@@ -226,7 +226,9 @@ The extended API contains the following routines:
 	\item {\tt void Extrae\_suspend\_virtual\_thread (void)}\\
 	This routine recovers the original thread identifier (given by routines like pthread\_self or omp\_get\_thread\_num, for instance).
 	\item {\tt void Extrae\_register\_codelocation\_type (extrae\_type\_t t1, extrae\_type\_t t2, char* s1, char *s2)}\\
-	Registers type t1 to reference user source code location (assigning type t1 to the event type that references the user function and to the event t2 to the event that references the file name and line location).
+	Registers type {\tt t2} to reference user source code location by using its address. During the merge phase the mpi2prv command will assign type {\tt t1} to the event type that references the user function and to the event {\tt t2} to the event that references the file name and line location.
+	\item {\tt void Extrae\_register\_function\_address (void *ptr, char *funcname, char *modname, unsigned line);}\\
+	By default, the mpi2prv process uses the binary debugging information to translate program addresses into information that contains function name, the module name and line. The Extrae\_register\_function\_address allows providing such information by hand during the execution of the instrumented application. This function must provide the function name ({\tt funcname}), module name ({\tt modname}) and line number for a given address.
 	\item {\tt void Extrae\_register\_stacked\_type (extrae\_type\_t type)}\\
 	Registers which event types are required to be managed in a stack way whenever {\tt void Extrae\_resume\_virtual\_thread} or {\tt void Extrae\_suspend\_virtual\_thread} are called.
 	\item {\tt void Extrae\_set\_threadid\_function (unsigned (*threadid\_function)(void))}\\

@@ -452,3 +452,8 @@ void Extrae_register_codelocation_type_Wrapper (extrae_type_t type_function,
 	Extrae_AddTypeValuesEntryToSYM ('c', type_file_line, description_file_line, (char)0, 0, NULL, NULL);
 }
 
+void Extrae_register_function_address_Wrapper (void *ptr, char *funcname, 
+	char *modname, unsigned line)
+{
+	Extrae_AddFunctionDefinitionEntryToSYM ('O', ptr, funcname, modname, line);
+}
