@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 04Oct2012 Added void Extrae_define_event_type (extrae_type_t type, char
+ *type_description, unsigned nvalues, extrae_value_t *values, char
+ **values_description); into the API
  + 04Oct2012 Added void Extrae_register_function_address (void *ptr, char
  *funcname, char *modname, unsigned line); into the API
  + 04Oct2012 Added additional checks for Extrae_register_function_address call

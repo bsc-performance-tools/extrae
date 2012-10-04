@@ -242,6 +242,14 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 
 #endif /* PTHREAD_SUPPORT */
 
+# define apifDEFINE_EVENT_TYPE(x) \
+	void x##_define_event_type (int *type, char *description, unsigned *nvalues, unsigned long long *values, char **description_values) \
+	{ \
+		if (mpitrace_on) \
+			Extrae_AddTypeValuesEntryToSYM ('D', *type, description, 'd', *nvalues, values, description_values); \
+	}
+EXPAND_F_ROUTINE_WITH_PREFIXES(apifDEFINE_EVENT_TYPE);
+
 #define apifTRACE_GET_VERSION(x) \
 	void x##_get_version (unsigned *M, unsigned *m, unsigned *r) \
 	{ \
@@ -434,8 +442,17 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 		if (mpitrace_on) \
 			Backend_setNumTentativeThreads (numthreads); \
 	}
-	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SET_NUM_TENTATIVE_THREADS);
+ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SET_NUM_TENTATIVE_THREADS);
+
 #endif /* PTHREAD_SUPPORT */
+
+# define apiDEFINE_EVENT_TYPE(x) \
+	void x##_define_event_type (int type, char *description, unsigned nvalues, unsigned long long *values, char **description_values) \
+	{ \
+		if (mpitrace_on) \
+			Extrae_AddTypeValuesEntryToSYM ('D', type, description, 'd', nvalues, values, description_values); \
+	}
+ EXPAND_ROUTINE_WITH_PREFIXES(apiDEFINE_EVENT_TYPE);
 
 #define apiTRACE_INIT_USERCOMMUNICATION(x) \
 	void x##_init_UserCommunication (struct extrae_UserCommunication *ptr) \
@@ -699,7 +716,15 @@ void Extrae_set_num_tentative_threads (int numthreads)
 	if (mpitrace_on)
 		Backend_setNumTentativeThreads (numthreads);
 }
+
 #endif /* PTHREAD_SUPPORT */
+
+INTERFACE_ALIASES_C(_define_event_type,Extrae_define_event_type,(int type, char *description, unsigned nvalues, unsigned long long *values, char **description_values),void)
+void Extrae_define_event_type (int type, char *description, unsigned nvalues, unsigned long long *values, char **description_values)
+{
+	if (mpitrace_on)
+		Extrae_AddTypeValuesEntryToSYM ('D', type, description, 'd', nvalues, values, description_values);
+}
 
 INTERFACE_ALIASES_C(_init_UserCommunication,Extrae_init_UserCommunication,(struct extrae_UserCommunication *ptr),void)
 void Extrae_init_UserCommunication (struct extrae_UserCommunication *ptr)
@@ -958,7 +983,15 @@ void extrae_set_num_tentative_threads (int *numthreads)
 	if (mpitrace_on)
 		Backend_setNumTentativeThreads (*numthreads);
 }
+
 #endif /* PTHREAD_SUPPORT */
+
+INTERFACE_ALIASES_F(_define_event_type,_DEFINE_EVENT_TYPE,extrae_define_event_type,(int *type, char *description, unsigned nvalues, unsigned long long *values, char **description_values),void)
+void extrae_define_event_type (int *type, char *description, unsigned *nvalues, unsigned long long *values, char **description_values)
+{
+	if (mpitrace_on)
+		Extrae_AddTypeValuesEntryToSYM ('D', *type, description, 'd', *nvalues, values, description_values);
+}
 
 INTERFACE_ALIASES_F(_get_version,_GET_VERSION,extrae_get_version,(unsigned*,unsigned*,unsigned*),void)
 void extrae_get_version (unsigned *M, unsigned *m, unsigned *r)

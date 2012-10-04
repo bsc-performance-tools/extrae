@@ -31,6 +31,7 @@
 #define _LABELS_H
 
 #include "events.h"
+#include <extrae_vector.h>
 
 typedef enum {
 	CODELOCATION_FUNCTION,

@@ -79,6 +79,15 @@ static char UNUSED rcsid[] = "$Id$";
 static codelocation_label_t *labels_codelocation = NULL;
 static unsigned num_labels_codelocation = 0;
 
+typedef struct event_type_t 
+{
+     evttype_t event_type;
+     Extrae_Vector_t event_values;
+}
+event_type_t;
+
+static Extrae_Vector_t defined_user_event_types;
+
 static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t type, char *description)
 {
 	labels_codelocation = (codelocation_label_t*) realloc (labels_codelocation, (num_labels_codelocation+1)*sizeof(codelocation_label_t));
@@ -606,6 +615,9 @@ void Labels_loadSYMfile (int taskid, char *name)
 	char LINE[1024], Type;
 	int function_count = 0, hwc_count = 0;
 
+    Extrae_Vector_Init (&defined_user_event_types);
+    event_type_t * last_event_type_used = NULL;
+
 	if (!name)
 		return;
 
@@ -686,6 +698,83 @@ void Labels_loadSYMfile (int taskid, char *name)
 					}
 					break;
 
+                case 'd':
+                    {
+                        int eventvalue;
+                        char value_description[1024];
+                        value_t * evt_value = NULL;
+                        unsigned i, max = Extrae_Vector_Count (&last_event_type_used->event_values);
+
+                        sscanf (LINE, "%d %[^\n]", &eventvalue, value_description);
+                        
+                        for (i = 0; i < max; i++)
+                        {
+                            value_t * evt = Extrae_Vector_Get (&last_event_type_used->event_values, i);
+                            if(evt->value == eventvalue)
+                            {
+                                if(strcmp(evt->label, value_description))
+                                {
+                                        fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
+                                }
+                                evt_value = evt;
+                                break;
+                            }
+                        }
+                        if (!evt_value)
+                        {
+                            evt_value = (value_t*) malloc (sizeof (value_t));
+                            if (evt_value == NULL)
+                            {
+                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'd' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+                                exit(-1);
+                            }
+                            evt_value->value = eventvalue;
+                            strcpy(evt_value->label, value_description);
+                            Extrae_Vector_Append (&last_event_type_used->event_values, evt_value);
+                        }
+                    }
+                    break;
+                case 'D':
+                    {
+                        int eventcode;
+                        char code_description[1024];
+                        unsigned i, max = Extrae_Vector_Count (&defined_user_event_types);
+                        event_type_t * evt_type = NULL;
+
+                        sscanf (LINE, "%d %[^\n]", &eventcode, code_description);
+
+                        for (i = 0; i < max; i++)
+                        {
+                            event_type_t * evt = Extrae_Vector_Get (&defined_user_event_types, i);
+                            if (evt->event_type.type == eventcode)
+                            {
+                                if(strcmp(evt->event_type.label, code_description))
+                                {
+                                    fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for type %d!\n", __FILE__, __LINE__, code_description, eventcode);
+                                }
+                                evt_type = evt;
+                                break;
+                            }
+                        }
+
+                        if (!evt_type)
+                        {
+                            evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
+                            if (evt_type == NULL)
+                            {
+                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'D' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+                                exit(-1);
+                            }
+                            evt_type->event_type.type = eventcode;
+                            strcpy(evt_type->event_type.label, code_description);
+                            Extrae_Vector_Init(&evt_type->event_values);
+    
+                            Extrae_Vector_Append(&defined_user_event_types, evt_type); 
+                        }
+                        last_event_type_used = evt_type;
+                    }
+                    break;
+
 				default:
 					fprintf (stderr, PACKAGE_NAME" mpi2prv: Error! Task %d found unexpected line in symbol file '%s'\n", taskid, LINE);
 					break;
@@ -700,6 +789,28 @@ void Labels_loadSYMfile (int taskid, char *name)
 	}
 
 	fclose (FD);
+}
+
+void Write_UserDefined_Labels(FILE * pcf_fd)
+{
+    unsigned i, j, max_types = Extrae_Vector_Count (&defined_user_event_types);
+    for (i = 0; i < max_types; i++)
+    {
+        event_type_t * evt = Extrae_Vector_Get (&defined_user_event_types, i);
+        unsigned max_values = Extrae_Vector_Count (&evt->event_values);
+        fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+        fprintf (pcf_fd, "0    %d    %s\n", evt->event_type.type, evt->event_type.label);
+        if (max_values>0)
+        {
+            fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+            for (j = 0; j < max_values; j++)
+            {
+                value_t * values = Extrae_Vector_Get (&evt->event_values, j);
+                fprintf (pcf_fd, "%d      %s\n", values->value, values->label);
+            }
+        }
+        LET_SPACES (pcf_fd);
+    }
 }
 
 /******************************************************************************
@@ -752,6 +863,8 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
 
+    Write_UserDefined_Labels(fd);
+    
 	Concat_User_Labels (fd);
 
 	fclose(fd);
