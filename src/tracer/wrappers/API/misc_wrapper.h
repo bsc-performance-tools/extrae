@@ -65,6 +65,8 @@ void Extrae_register_codelocation_type_Wrapper (extrae_type_t type_function,
 	char *description_file_line);
 void Extrae_register_function_address_Wrapper (void *ptr, char *funcname, 
 	char *modname, unsigned line);
+void Extrae_define_event_type_Wrapper (extrae_type_t type, char *description,
+	unsigned nvalues, extrae_value_t *values, char **description_values);
 void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
   unsigned *revision);
 

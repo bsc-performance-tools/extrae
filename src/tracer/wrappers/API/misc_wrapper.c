@@ -447,9 +447,13 @@ void Extrae_register_codelocation_type_Wrapper (extrae_type_t type_function,
 	extrae_type_t type_file_line, char *description_function,
 	char *description_file_line)
 {
-	TRACE_MISCEVENT(LAST_READ_TIME,REGISTER_CODELOCATION_TYPE_EV, type_function, type_file_line);
-	Extrae_AddTypeValuesEntryToSYM ('C', type_function, description_function, (char)0,  0, NULL, NULL);
-	Extrae_AddTypeValuesEntryToSYM ('c', type_file_line, description_file_line, (char)0, 0, NULL, NULL);
+	TRACE_MISCEVENT(LAST_READ_TIME,REGISTER_CODELOCATION_TYPE_EV, type_function,
+		type_file_line);
+
+	Extrae_AddTypeValuesEntryToSYM ('C', type_function, description_function,
+		(char)0,  0, NULL, NULL);
+	Extrae_AddTypeValuesEntryToSYM ('c', type_file_line, description_file_line,
+		(char)0, 0, NULL, NULL);
 }
 
 void Extrae_register_function_address_Wrapper (void *ptr, char *funcname, 
@@ -457,3 +461,11 @@ void Extrae_register_function_address_Wrapper (void *ptr, char *funcname,
 {
 	Extrae_AddFunctionDefinitionEntryToSYM ('O', ptr, funcname, modname, line);
 }
+
+void Extrae_define_event_type_Wrapper (extrae_type_t type, char *description,
+	unsigned nvalues, extrae_value_t *values, char **description_values)
+{
+	Extrae_AddTypeValuesEntryToSYM ('D', type, description, 'd', nvalues, values,
+		description_values);
+}
+
