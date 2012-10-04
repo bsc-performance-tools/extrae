@@ -17,7 +17,7 @@ make
 make install
 
 COMMAND for BG/Q:
-./configure --prefix=/bgsys/home/zrlrod/pub/release/bgq/gnu/extrae --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --without-papi --disable-openmp --disable-pthread --with-libz=no
+./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1
 make
 make install
 
