@@ -69,6 +69,10 @@ To build the instrumentation package, just issue {\tt make} after the configurat
 
 To install the instrumentation package in the directory chosen at configure step (through {\tt --prefix} option), issue {\tt make install}.
 
+\section{Check}
+
+The \TRACE package contains some consistency checks. The aim of such checks is to determine whether a functionality is operative in the target (installation) environment and/or check whether the development of \TRACE has introduced any misbehavior. To run the checks, just issue {\tt make check} after the configuration. Please, notice that checks are meant to be run in the machine that the configure script was run, thus the results of the checks on machines with back-end nodes different to front-end nodes (like BG/* systems) are not representative at all.
+
 \section{Examples of configuration on different machines}
 
 All commands given here are given as an example to configure and install the package, you may need to tune them properly (i.e., choose the appropriate directories for packages and so).  These examples assume that you are using a sh/bash shell, you must adequate them if you use other shells (like csh/tcsh).
