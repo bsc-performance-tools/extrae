@@ -13,13 +13,13 @@ ChangeLog
    initialization and finalization.
  * 01Oct2012 Extrae API calls now honor extre_type_t / extrae_value_t instead
    of basic types (unsigned/unsigned long).
- * 28Set2012 Turned 
+ * 28Sep2012 Turned 
    void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char
 	 *s2) 
 	 into
 	 void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2,
 	 char* s1, char *s2)
- + 28set2012 Added make check capability into Extrae. Currently there is only
+ + 28Sep2012 Added make check capability into Extrae. Currently there is only
     one check
  + 21Sep2012 Added instrumentation call
     void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char *s2)
