@@ -478,7 +478,7 @@ AC_ARG_ENABLE(xml,
 )
 if test "${enable_xml}" = "yes" ; then
    # BG/L does not have XML2
-   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
+   if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
       XML_enabled="no"
    else
       XML_enabled="yes"
