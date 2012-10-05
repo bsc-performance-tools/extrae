@@ -1417,6 +1417,15 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 			fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
 	}
 
+	if (getenv("EXTRAE_DYNINST_RUN") == NULL)
+	{
+		/* If we trace, remove the .sym file only if we're not under dyninst 
+ 		  launcher (it will create its own .sym) */
+		char trace_sym[TMP_DIR];
+		FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
+		unlink (trace_sym);
+	}
+
 	/* Allocate a bitmap to know which tasks are tracing */
 	Extrae_Allocate_Task_Bitmap (world_size);
 
@@ -1566,15 +1575,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Write hardware counter definitions into the .sym file */
 	if (me == 0)
 	{
-		if (getenv("EXTRAE_DYNINST_RUN") == NULL)
-		{
-			/* If we trace, remove the .sym file only if we're not under dyninst 
-	 		  launcher (it will create its own .sym */
-			char trace_sym[TMP_DIR];
-			FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
-			unlink (trace_sym);
-		}
-
 		unsigned count;
 		HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
 		if (hwc_defs != NULL)
