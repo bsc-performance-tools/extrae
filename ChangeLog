@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 05Oct2012 Adding support for libxml2 (static) to BG/Q systems
  + 04Oct2012 Added void Extrae_define_event_type (extrae_type_t type, char
  *type_description, unsigned nvalues, extrae_value_t *values, char
  **values_description); into the API

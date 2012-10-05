@@ -16,8 +16,13 @@ COMMAND for BG/P:
 make
 make install
 
-COMMAND for BG/Q:
-./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1
+COMMAND for BG/Q (without libxml2 support):
+./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --disable-xml
+make
+make install
+
+COMMAND for BG/Q (with libxml2 support):
+./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2 --disable-xmltest
 make
 make install
 
