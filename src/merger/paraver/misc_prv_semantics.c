@@ -57,9 +57,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "HardwareCounters.h"
 #endif
 
-#ifdef HAVE_BFD
-# include "addr2info.h" 
-#endif
+#include "addr2info.h" 
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
