@@ -219,7 +219,8 @@ MPI_EXAMPLE_FILES=\
 
 MPICUDA_EXAMPLE_FILES=\
  example/LINUX/MPI+CUDA/ld-preload \
- example/LINUX/MPI+CUDA/dyninst
+ example/LINUX/MPI+CUDA/dyninst \
+ example/LINUX/MPI+CUDA/extrae.xml
 
 OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/extrae.xml \
