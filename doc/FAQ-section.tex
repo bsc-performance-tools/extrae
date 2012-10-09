@@ -71,6 +71,25 @@
       {\bf Answer 1:} Check that the configure step was compiled without {\tt --disable-shared} or force it to be enabled through {\tt --enable-shared}.\\
       {\bf Answer 2:} Some MPI libraries (like MPICH 1.2.x) do not generate the shared libraries by default. The instrumentation package rely on them to generate its shared libraries, so make sure that the shared libraries of the MPI library are generated.
 
+\item {\bf Question:} In BlueGene systems where the libxml2 (or any optional library for extrae) the linker shows error messages like when compiling the final application with the \TRACE library:\\
+			{\tt
+			../libxml2/lib/libxml2.a(xmlschemastypes.o): In function `\_xmlSchemaDateAdd':\\
+			../libxml2-2.7.2/xmlschemastypes.c:3771: undefined reference to `\_\_uitrunc'\\
+			../libxml2-2.7.2/xmlschemastypes.c:3796: undefined reference to `\_\_uitrunc'\\
+			../libxml2-2.7.2/xmlschemastypes.c:3801: undefined reference to `\_\_uitrunc'\\
+			../libxml2-2.7.2/xmlschemastypes.c:3842: undefined reference to `\_\_uitrunc'\\
+			../libxml2-2.7.2/xmlschemastypes.c:3843: undefined reference to `\_\_uitrunc'\\
+			../libxml2/lib/libxml2.a(xmlschemastypes.o): In function `xmlSchemaGetCanonValue':\\
+			../libxml2-2.7.2/xmlschemastypes.c:5840: undefined reference to `\_\_f64tou64rz'\\
+			../libxml2-2.7.2/xmlschemastypes.c:5843: undefined reference to `\_\_f64tou64rz'\\
+			../libxml2-2.7.2/xmlschemastypes.c:5846: undefined reference to `\_\_f64tou64rz'\\
+			../libxml2-2.7.2/xmlschemastypes.c:5849: undefined reference to `\_\_f64tou64rz'\\
+			../libxml2/lib/libxml2.a(debugXML.o): In function `xmlShell':\\
+			../libxml2-2.7.2/debugXML.c:2802: undefined reference to `\_fill'\\
+			collect2: ld returned 1 exit status\\
+			}
+			{\bf Answer:  } The libxml2 library (or any other optional library) has been compiled using the IBM XL compiler. There are two alternatives to circumvent the problem: add the XL libraries into the link stage when building your application, or recompile the libxml2 library using the GNU gcc cross compiler for BlueGene.
+
 \end{itemize}
 
 \section{Execution FAQ}

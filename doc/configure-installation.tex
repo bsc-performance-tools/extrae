@@ -90,15 +90,15 @@ make install}}
 
 \subsection{BlueGene/Q}
 
-To enable parsing the XML configuration file, the libxml2 must be installed. As of the time of writing this user guide, we have been only able to install the static version of the library in a BG/Q machine, so take this into consideration if you install the libxml2 in the system. Also notice that the XML tests provided by the libxml2 cannot be run because the tests are intended for the back-end node whereas the configure runs in the front-en node, so they must be disabled when running the configure script.
+To enable parsing the XML configuration file, the libxml2 must be installed. As of the time of writing this user guide, we have been only able to install the static version of the library in a BG/Q machine, so take this into consideration if you install the libxml2 in the system.  Similarly, the binutils package (responsible for translating application addresses into source code locations) that is available in the system may not be properly installed and we suggest installing the binutils from the source code using the BG/Q cross-compiler. Regarding the cross-compilers, we have found that using the IBM XL compilers may require using the XL libraries when generating the final application binary with Extrae, so we would suggest using the GNU cross-compilers ({\tt /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-*}).
 
-If you want to add libxml2 support into Extrae, your configuration command may resemble to:
+If you want to add libxml2 and binutils support into Extrae, your configuration command may resemble to:
 
-\graybox{{\tt ./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread\\--with-libz=/bgsys/local/zlib/v1.2.5\\--with-papi=/usr/local/UNITE/packages/papi/5.0.1 --with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2 --disable-xmltest}}
+\graybox{{\tt./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread\\ --with-libz=/bgsys/local/zlib/v1.2.5\\ --with-papi=/usr/local/UNITE/packages/papi/5.0.1\\ --with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2-gcc\\ --with-binutils=/homec/jzam11/jzam1128/aplic/juqueen/binutils-gcc\\ --enable-merge-in-trace}}
 
 Otherwise, if you do not want to add support for the libxml2 library, your configuration may look like this:
 
-\graybox{{\tt ./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --disable-xml}}
+\graybox{{\tt ./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread\\ --with-libz=/bgsys/local/zlib/v1.2.5\\ --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --disable-xml}}
 
 In any situation, the build and installation commands are:
 

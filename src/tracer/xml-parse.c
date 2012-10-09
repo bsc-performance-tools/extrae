@@ -1501,11 +1501,11 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 	xmlNodePtr root_tag;
 	char cwd[TMP_DIR];
 
-  /*
-  * This initialize the library and check potential ABI mismatches
-  * between the version it was compiled for and the actual shared
-  * library used.
-  */
+	/*
+	* This initialize the library and check potential ABI mismatches
+	* between the version it was compiled for and the actual shared
+	* library used.
+	*/
 	LIBXML_TEST_VERSION;
 
 	mfprintf (stdout, PACKAGE_NAME": Parsing the configuration file (%s) begins\n", filename);   
@@ -1547,9 +1547,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
 						mfprintf (stderr, PACKAGE_NAME": WARNING! XML parser version and property '%s' do not match. Check the XML file. Trying to proceed...\n", TRACE_PARSER_ID);
 						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
-
-            mfprintf (stderr, PACKAGE_NAME": %s found '%s' when expecting '%s'.\n", TRACE_PARSER_ID, xmlparserid, &rcsid[1]);
-
+						mfprintf (stderr, PACKAGE_NAME": %s found '%s' when expecting '%s'.\n", TRACE_PARSER_ID, xmlparserid, &rcsid[1]);
 					}
 
 					if (tracehome != NULL)

@@ -76,7 +76,8 @@ MPI_EXAMPLE_FILES= example/BGQ/ll_merge.sh \
  example/BGQ/ll_trace.sh \
  example/BGQ/Makefile example/BGQ/mpi_ping.f \
  example/BGQ/papi_bgq_avail.txt \
- example/BGQ/papi_bgq_native_avail.txt
+ example/BGQ/papi_bgq_native_avail.txt \
+ example/BGQ/extrae.xml
 
 PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
@@ -327,6 +328,8 @@ endif
 	./substitute $(SED) "@sub_LIBERTY_HOME@" "${LIBERTY_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_BFD_LIBS@" "${BFD_LDFLAGS} ${BFD_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_LIBERTY_LIBS@" "${LIBERTY_LDFLAGS} ${LIBERTY_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_ZLIB_HOME@" "${LIBZ_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_ZLIB_LIBS@" "${LIBZ_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 if WANT_CUPTI
 	./substitute $(SED) "@sub_CUPTI_LIBS@" "-L${CUPTI_HOME}/lib -lcupti" $(DESTDIR)$(datadir)/example/Makefile.inc
 else

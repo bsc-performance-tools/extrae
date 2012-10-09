@@ -3,7 +3,8 @@ include ../Makefile.inc
 BG_HOME = /bgsys/drivers/ppcfloor
 
 F77 = $(MPI_HOME)/bin/mpif77
-FLIBS = -L$(EXTRAE_HOME)/lib -lmpitracef -L$(PAPI_HOME)/lib $(PAPI_LIBS)
+FLIBS = -L$(EXTRAE_HOME)/lib -lmpitracef $(PAPI_LIBS) -L$(XML2_HOME)/lib $(XML2_LIBS) -L$(ZLIB_HOME)/lib $(ZLIB_LIBS) $(BFD_LIBS)
+
 FFLAGS = -O2 -g
 
 all: mpi_ping

@@ -16,13 +16,15 @@ COMMAND for BG/P:
 make
 make install
 
-COMMAND for BG/Q (without libxml2 support):
+COMMAND for BG/Q (without libxml2 support and without binutils):
 ./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --disable-xml
 make
 make install
 
-COMMAND for BG/Q (with libxml2 support):
-./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2 --disable-xmltest
+COMMAND for BG/Q (with libxml2 support and binutils):
+** Please note this may need to compile libxml2 and binutils using the GNU cross-compiler for BG/Q (/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-gcc) **
+
+./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2-gcc --enable-merge-in-trace --with-binutils=/homec/jzam11/jzam1128/aplic/juqueen/binutils-gcc
 make
 make install
 
