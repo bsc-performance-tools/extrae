@@ -31,6 +31,7 @@ static char rcsid[] = "$Id$";
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 #define PRINT_SIZE(t) \
   printf ("sizeof(%s) = %d\n", #t, sizeof(t));
@@ -39,12 +40,15 @@ static char rcsid[] = "$Id$";
 
 int main (int argc, char *argv[])
 {
-  PRINT_SIZE(long)
   PRINT_SIZE(long long)
-  PRINT_SIZE(char)
+  PRINT_SIZE(long)
   PRINT_SIZE(int)
+	PRINT_SIZE(short)
+  PRINT_SIZE(char)
   PRINT_SIZE(off_t)
   PRINT_SIZE(ssize_t)
+  PRINT_SIZE(size_t)
   PRINT_SIZE(void*)
+	PRINT_SIZE(pid_t)
 }
 
