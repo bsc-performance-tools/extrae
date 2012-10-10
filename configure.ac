@@ -346,52 +346,8 @@ if test "${enable_openmp}" = "yes" ; then
 fi
 AM_CONDITIONAL(WANT_OPENMP, test "${enable_openmp}" = "yes" )
 
-AC_MSG_CHECKING([for CUPTI])
-AC_ARG_WITH(cupti,
-   AC_HELP_STRING(
-      [--with-cupti@<:@=DIR@:>@],
-      [specify where to find CUPTI libraries and includes]
-   ),
-   [cupti_path="${withval}"],
-   [cupti_path="none"]
-)
-
-enable_cupti="no"
-if test "${cupti_path}" != "none" ; then
-   if test -r "${cupti_path}/lib/libcupti.so" -a -r "${cupti_path}/include/cupti.h" ; then
-      AC_MSG_RESULT(${cupti_path})
-      enable_cupti="yes"
-   else
-      AC_MSG_ERROR([Cannot locate CUPTI in the specified directory])
-   fi
-fi
-AX_FLAGS_SAVE()
-AX_FIND_INSTALLATION([CUPTI], [${cupti_path}], [cupti])
-AX_FLAGS_RESTORE()
-
-AC_ARG_ENABLE(cuda,
-   AC_HELP_STRING(
-      [--enable-cuda],
-      [Enable support for tracing CUDA (disabled by default) - Superseded by CUPTI]
-   ),
-   [enable_cuda="${enableval}"],
-   [enable_cuda="no"]
-)
-
-if test "${enable_cupti}" = "yes" ; then
-   AC_DEFINE([CUDA_WITH_CUPTI_INSTRUMENTATION], [1], [Determine if CUDA instrumentation must rely on CUPTI])
-else
-   if test "${enable_cuda}" = "yes" ; then
-      AC_DEFINE([CUDA_WITHOUT_CUPTI_INSTRUMENTATION], [1], [Determine if CUDA instrumentation must NOT rely on CUPTI])
-   fi
-fi
-
-#
-# CUDA is superseded by CUPTI. If CUPTI is available, use it instead dlopen alternative.
-#
-AM_CONDITIONAL(WANT_CUPTI, test "${enable_cupti}" = "yes" )
-AM_CONDITIONAL(WANT_CUDA, test "${enable_cuda}" = "yes" -a "${enable_cupti}" = "no" )
-AM_CONDITIONAL(WANT_CUDAorCUPTI, test "${enable_cuda}" = "yes" -o "${enable_cupti}" = "yes" )
+AX_CUDA
+AX_CUPTI
 
 AC_ARG_ENABLE(pthread-support-in-all-libs,
    AC_HELP_STRING(

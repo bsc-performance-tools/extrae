@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2012.6.5)  9 OCT 2012 15:04
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2012.6.5)  10 OCT 2012 11:10
 entering extended mode
  %&-line parsing enabled.
 **./images.tex
@@ -194,8 +194,8 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 151.
 LaTeX Font Info:    ... okay on input line 151.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 151.
 LaTeX Font Info:    ... okay on input line 151.
-ABD: EveryShipout initializing macros (/home/harald/development/extrae-2.2.1-bg
-q/doc/user-guide.aux
+ABD: EveryShipout initializing macros (/home/harald/development/extrae-2.2.1-wi
+thcuda/doc/user-guide.aux
 
 LaTeX Warning: Label `cha:QuickStart' multiply defined.
 
@@ -401,7 +401,7 @@ Overfull \hbox (5.19447pt too wide) in paragraph at lines 320--320
 []\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
  []
 
-l2hSize :landscape3718:465.73293pt::0.0pt::650.43001pt.
+l2hSize :landscape3721:465.73293pt::0.0pt::650.43001pt.
 [1
 
 
@@ -409,7 +409,7 @@ l2hSize :landscape3718:465.73293pt::0.0pt::650.43001pt.
 
 
 ]
-l2hSize :landscape3739:412.94963pt::0.0pt::650.43001pt.
+l2hSize :landscape3742:412.94963pt::0.0pt::650.43001pt.
 [2
 
 
@@ -422,7 +422,7 @@ LaTeX Warning: There were multiply-defined labels.
  ) 
 Here is how much of TeX's memory you used:
  2433 strings out of 256217
- 32280 string characters out of 1917096
+ 32295 string characters out of 1917096
  92155 words of memory out of 1500000
  5669 multiletter control sequences out of 10000+200000
  9424 words of font info for 36 fonts, out of 1200000 for 2000

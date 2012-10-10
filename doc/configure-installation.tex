@@ -19,8 +19,6 @@ There are many options to be applied at configuration time for the instrumentati
 	Enable PAPI sampling support.
 	\item {\tt --enable-pmapi} \\
 	Enable PMAPI library to gather CPU performance counters. PMAPI is a base package installed in AIX systems since version 5.2.
-	\item {\tt --enable-cuda} \\
-	Enable support for tracing CUDA calls on nVidia hardware. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the {\tt LD\_PRELOAD} mechanism. It is superseded by {\tt --with-cupti} which also supports instrmentation for static binaries.
 	\item {\tt --enable-openmp} \\
 	Enable support for tracing OpenMP on IBM and GNU runtimes. The IBM runtime instrumentation is only available for PowerPC systems.
 	\item {\tt --enable-smpss} \\
@@ -57,8 +55,10 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
   \item {\tt --with-dyninst=DIR} \\
   Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst. This flag is mandatory.
+	\item {\tt --with-cuda=DIR} \\
+	Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the {\tt LD\_PRELOAD} mechanism. It is superseded by {\tt --with-cupti=DIR} which also supports instrmentation for static binaries.
   \item {\tt --with-cupti=DIR} \\
-  Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --enable-cuda}.
+  Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --with-cuda}, although it still requires {\tt --with-cuda}.
 \end{itemize}
 
 \section{Build}

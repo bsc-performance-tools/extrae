@@ -287,7 +287,7 @@ List of Tables</A>
 <LI>1.2. <A NAME="tex2html10"
   HREF="user-guide.html#184">Available libraries in Extrae. Their availability depends upon the configure process.</A>
 <LI>6.1. <A NAME="tex2html19"
-  HREF="user-guide.html#3018">Description of the available mergers in the <I>Extrae</I> package.</A></UL>
+  HREF="user-guide.html#3021">Description of the available mergers in the <I>Extrae</I> package.</A></UL>
 <P>
 
 <P>
@@ -804,10 +804,6 @@ Enable PAPI sampling support.
 <BR>
 Enable PMAPI library to gather CPU performance counters. PMAPI is a base package installed in AIX systems since version 5.2.
 </LI>
-<LI><TT>-enable-cuda</TT> 
-<BR>
-Enable support for tracing CUDA calls on nVidia hardware. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the <TT>LD_PRELOAD</TT> mechanism. It is superseded by <TT>-with-cupti</TT> which also supports instrmentation for static binaries.
-</LI>
 <LI><TT>-enable-openmp</TT> 
 <BR>
 Enable support for tracing OpenMP on IBM and GNU runtimes. The IBM runtime instrumentation is only available for PowerPC systems.
@@ -880,9 +876,13 @@ Specify where to find the libiberty package. In conjunction with Binary File Des
 <BR>
 Specify the installation location for the DynInst package. <I>Extrae</I> also requires the DWARF package <TT>-with-dwarf=DIR</TT> when using DynInst. This flag is mandatory.
 </LI>
+<LI><TT>-with-cuda=DIR</TT> 
+<BR>
+Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the <TT>LD_PRELOAD</TT> mechanism. It is superseded by <TT>-with-cupti=DIR</TT> which also supports instrmentation for static binaries.
+</LI>
 <LI><TT>-with-cupti=DIR</TT> 
 <BR>
-Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the <TT>-enable-cuda</TT>.
+Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the <TT>-with-cuda</TT>, although it still requires <TT>-with-cuda</TT>.
 </LI>
 </UL>
 
@@ -1918,8 +1918,8 @@ The instrumentation library can be compiled with support for collecting performa
 
 <UL>
 <LI>Processor performance counters. Such access is granted by PAPI<A NAME="tex2html12"
-  HREF="#foot1786"><SUP>4.1</SUP></A> or PMAPI<A NAME="tex2html14"
-  HREF="#foot1782"><SUP>4.2</SUP></A>
+  HREF="#foot1789"><SUP>4.1</SUP></A> or PMAPI<A NAME="tex2html14"
+  HREF="#foot1785"><SUP>4.2</SUP></A>
 </LI>
 <LI>Network performance counters. <EM>(Only available in systems with Myrinet GM/MX networks).</EM>
 </LI>
@@ -1981,8 +1981,8 @@ Processor performance counters are configured in the <TT>&lt;cpu&gt;</TT> nodes.
 
 <P>
 Each set contain a list of performance counters to be gathered at different instrumentation points (see sections <A HREF="#sec:XMLSectionMPI">4.2</A>, <A HREF="#sec:XMLSectionOpenMP">4.5</A> and <A HREF="#sec:XMLSectionUF">4.8</A>). If the tracing library is compiled to support PAPI, performance counters must be given using the canonical name (like PAPI_TOT_CYC and PAPI_L1_DCM), or the PAPI code in hexadecimal format (like 8000003b and 80000000, respectively)<A NAME="tex2html15"
-  HREF="#foot1876"><SUP>4.3</SUP></A>. If the tracing library is compiled to support PMAPI, only one group identifier can be given per set<A NAME="tex2html16"
-  HREF="#foot1877"><SUP>4.4</SUP></A> and can be either the group name (like pm_basic and pm_hpmcount1) or the group number (like 6 and 22, respectively). 
+  HREF="#foot1879"><SUP>4.3</SUP></A>. If the tracing library is compiled to support PMAPI, only one group identifier can be given per set<A NAME="tex2html16"
+  HREF="#foot1880"><SUP>4.4</SUP></A> and can be either the group name (like pm_basic and pm_hpmcount1) or the group number (like 6 and 22, respectively). 
 
 <P>
 In the given example (which refers to PAPI support in the tracing library) two sets are defined. First set will read PAPI_TOT_INS (total instructions), PAPI_TOT_CYC (total cycles) and PAPI_L1_DCM (1st level cache misses). Second set is configured to obtain PAPI_TOT_INS (total instructions), PAPI_TOT_CYC (total cycles) and PAPI_FP_INS (floating point instructions).
@@ -2061,7 +2061,7 @@ Such options refer to:
 <LI><TT>trace-prefix</TT> Sets the intermediate trace file prefix. Its default value is TRACE.
 </LI>
 <LI><TT>size</TT> Let the user restrict the maximum size (in megabytes) of each resulting intermediate trace file<A NAME="tex2html17"
-  HREF="#foot2026"><SUP>4.5</SUP></A>.
+  HREF="#foot2029"><SUP>4.5</SUP></A>.
 </LI>
 <LI><TT>temporal-directory</TT> Where the intermediate trace files will be stored during the execution of the application. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.
 <BR></LI>
@@ -2893,11 +2893,11 @@ In order to use Paraver, those intermediate files (<I>i.e.</I>, <TT>.mpit</TT> f
 
 <P>
 The target trace type is defined in the XML configuration file used at the instrumentation step (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters <TT>-paraver</TT> or <TT>-dimemas</TT><A NAME="tex2html18"
-  HREF="#foot3011"><SUP>6.1</SUP></A>.
+  HREF="#foot3014"><SUP>6.1</SUP></A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="3018"></A>
+<DIV ALIGN="CENTER"><A NAME="3021"></A>
 <TABLE>
 <CAPTION><STRONG>Table 6.1:</STRONG>
 Description of the available mergers in the <I>Extrae</I> package.</CAPTION>
@@ -3224,7 +3224,7 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 <P>
 DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures<A NAME="tex2html20"
-  HREF="#foot3351"><SUP>7.1</SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+  HREF="#foot3354"><SUP>7.1</SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
 
 <P>
 
@@ -3312,7 +3312,7 @@ Please note, this script is particularly adapted to the MOAB/Slurm queue systems
 
 <P>
 LD_PRELOAD (or LDR_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names<A NAME="tex2html21"
-  HREF="#foot3447"><SUP>7.2</SUP></A>) they are not tested.
+  HREF="#foot3450"><SUP>7.2</SUP></A>) they are not tested.
 
 <P>
 We show how this mechanism works on Linux (or similar environments) in subsection <A HREF="#subsec:Examples_Linux">7.2.1</A> and on AIX in subsection <A HREF="#subsec:Examples_AIX">7.2.3</A>.
@@ -3703,10 +3703,10 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
  WIDTH="989" HEIGHT="697" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="\begin{landscape}
-% latex2html id marker 3718\begin{table}
+% latex2html id marker 3721\begin{table}
 \centerline{
 \begin...
-...riables available to configure {\sf {E}xtrae} }
+...riables available to configure {\sf {E}xtrae}\ }
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -3717,11 +3717,11 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
  WIDTH="989" HEIGHT="613" ALIGN="BOTTOM" BORDER="0"
  SRC="img4.png"
  ALT="\begin{landscape}
-% latex2html id marker 3739\par
+% latex2html id marker 3742\par
 \begin{table}
 \centerline{
 \...
-... to configure {\sf {E}xtrae} ({\em continued})}
+... to configure {\sf {E}xtrae}\ ({\em continued})}
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -3985,7 +3985,7 @@ These are the instrumented MPI routines in the <I>Extrae</I> package:
 <LI>MPI_Init
 </LI>
 <LI>MPI_Init_thread<A NAME="tex2html23"
-  HREF="#foot3351"><SUP>D.1</SUP></A>
+  HREF="#foot3354"><SUP>D.1</SUP></A>
 </LI>
 <LI>MPI_Finalize
 </LI>
@@ -4084,40 +4084,40 @@ These are the instrumented MPI routines in the <I>Extrae</I> package:
 <LI>MPI_Sendrecv_replace
 </LI>
 <LI>MPI_File_open<A NAME="tex2html24"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_close<A NAME="tex2html25"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read<A NAME="tex2html26"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_all<A NAME="tex2html27"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write<A NAME="tex2html28"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_all<A NAME="tex2html29"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_at<A NAME="tex2html30"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_at_all<A NAME="tex2html31"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_at<A NAME="tex2html32"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_at_all<A NAME="tex2html33"
-  HREF="#foot3447"><SUP>D.2</SUP></A>
+  HREF="#foot3450"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_Get<A NAME="tex2html34"
-  HREF="#foot1876"><SUP>D.3</SUP></A>
+  HREF="#foot1879"><SUP>D.3</SUP></A>
 </LI>
 <LI>MPI_Put<A NAME="tex2html35"
-  HREF="#foot1876"><SUP>D.3</SUP></A>
+  HREF="#foot1879"><SUP>D.3</SUP></A>
 </LI>
 </UL>
 
@@ -4152,10 +4152,10 @@ These are the instrument routines of the Intel OpenMP runtime functions using Dy
 <LI>__kmpc_invoke_task_func
 </LI>
 <LI>__kmpc_set_lock<A NAME="tex2html36"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>__kmpc_unset_lock<A NAME="tex2html37"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 </UL>
 
@@ -4178,16 +4178,16 @@ The instrumentation of the Intel OpenMP runtime for version 11.0 to 12.0 is only
 <LI>__kmpc_end_single
 </LI>
 <LI>__kmpc_critical<A NAME="tex2html38"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>__kmpc_end_critical<A NAME="tex2html39"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>omp_set_lock<A NAME="tex2html40"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>omp_unset_lock<A NAME="tex2html41"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>__kmpc_omp_task_alloc
 </LI>
@@ -4227,10 +4227,10 @@ These are the instrumented routines of the IBM OpenMP runtime:
 <LI>_xlsmpWSSectSetup_TPO
 </LI>
 <LI>_xlsmpRelDefaultSLock<A NAME="tex2html42"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>_xlsmpGetDefaultSLock<A NAME="tex2html43"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 </UL>
 
@@ -4294,22 +4294,22 @@ These are the instrumented routines of the IBM OpenMP runtime:
 <LI>GOMP_barrier
 </LI>
 <LI>GOMP_critical_name_enter<A NAME="tex2html44"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>GOMP_critical_name_exit<A NAME="tex2html45"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>GOMP_critical_enter<A NAME="tex2html46"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>GOMP_critical_exit<A NAME="tex2html47"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>GOMP_atomic_enter<A NAME="tex2html48"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>GOMP_atomic_exit<A NAME="tex2html49"
-  HREF="#foot1877"><SUP>D.4</SUP></A>
+  HREF="#foot1880"><SUP>D.4</SUP></A>
 </LI>
 <LI>GOMP_task
 </LI>
@@ -4384,7 +4384,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2012-10-09
+The translation was initiated by Harald Servat on 2012-10-10
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot210">... file</A><A
@@ -4396,43 +4396,43 @@ The translation was initiated by Harald Servat on 2012-10-09
 <DD>If the application is Fortran append an f to the library. For example, if you want to instrument a Fortran application that is using MPI, use <TT>libmpitracef</TT> instead of <TT>libmpitrace</TT>.
 
 </DD>
-<DT><A NAME="foot1786">... PAPI</A><A
+<DT><A NAME="foot1789">... PAPI</A><A
  HREF="user-guide.html#tex2html12"><SUP>4.1</SUP></A></DT>
 <DD>More information available on their website <TT><A NAME="tex2html13"
   HREF="http://icl.cs.utk.edu/papi">http://icl.cs.utk.edu/papi</A></TT>. <I>Extrae</I> requires PAPI 3.x at least.
 
 </DD>
-<DT><A NAME="foot1782">... PMAPI</A><A
+<DT><A NAME="foot1785">... PMAPI</A><A
  HREF="user-guide.html#tex2html14"><SUP>4.2</SUP></A></DT>
 <DD>PMAPI is only available for AIX operating system, and it is on the base operating system since AIX5.3. <I>Extrae</I> requires AIX 5.3 at least.
 
 </DD>
-<DT><A NAME="foot1876">... respectively)</A><A
+<DT><A NAME="foot1879">... respectively)</A><A
  HREF="user-guide.html#tex2html15"><SUP>4.3</SUP></A></DT>
 <DD>Some architectures do not allow grouping some performance counters in the same set.
 
 </DD>
-<DT><A NAME="foot1877">... set</A><A
+<DT><A NAME="foot1880">... set</A><A
  HREF="user-guide.html#tex2html16"><SUP>4.4</SUP></A></DT>
 <DD>Each group contains several performance counters
 
 </DD>
-<DT><A NAME="foot2026">... file</A><A
+<DT><A NAME="foot2029">... file</A><A
  HREF="user-guide.html#tex2html17"><SUP>4.5</SUP></A></DT>
 <DD>This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section <A HREF="#sec:XMLSectionBuffer">4.11</A>).
 
 </DD>
-<DT><A NAME="foot3011">...<TT>-dimemas</TT></A><A
+<DT><A NAME="foot3014">...<TT>-dimemas</TT></A><A
  HREF="user-guide.html#tex2html18"><SUP>6.1</SUP></A></DT>
 <DD>The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.
 
 </DD>
-<DT><A NAME="foot3351">... architectures</A><A
+<DT><A NAME="foot3354">... architectures</A><A
  HREF="user-guide.html#tex2html20"><SUP>7.1</SUP></A></DT>
 <DD>The IA-64 architecture support was dropped by DynInst 7.0
 
 </DD>
-<DT><A NAME="foot3447">... names</A><A
+<DT><A NAME="foot3450">... names</A><A
  HREF="user-guide.html#tex2html21"><SUP>7.2</SUP></A></DT>
 <DD>Look at <TT><A NAME="tex2html22"
   HREF="http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html">http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html</A></TT> for further information.
@@ -4450,7 +4450,7 @@ The translation was initiated by Harald Servat on 2012-10-09
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2012-10-09
+2012-10-10
 </ADDRESS>
 </BODY>
 </HTML>
