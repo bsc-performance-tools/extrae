@@ -32,23 +32,32 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <mpi.h>
 
 #define PRINT_SIZE(t) \
-  printf ("sizeof(%s) = %d\n", #t, sizeof(t));
-
-/* These are the types checked in configure.ac */
+  printf ("sizeof(%s) = %ld\n", #t, sizeof(t));
 
 int main (int argc, char *argv[])
 {
-  PRINT_SIZE(long long)
-  PRINT_SIZE(long)
-  PRINT_SIZE(int)
-	PRINT_SIZE(short)
-  PRINT_SIZE(char)
-  PRINT_SIZE(off_t)
-  PRINT_SIZE(ssize_t)
-  PRINT_SIZE(size_t)
-  PRINT_SIZE(void*)
+	MPI_Status s;
+	long addr1 = (long) &s;
+	long addr2 = (long) &(s.MPI_SOURCE);
+	long addr3 = (long) &(s.MPI_TAG);
+
+	PRINT_SIZE(long long)
+	PRINT_SIZE(long)
+	PRINT_SIZE(int)
 	PRINT_SIZE(pid_t)
+	PRINT_SIZE(ssize_t)
+	PRINT_SIZE(size_t)
+	PRINT_SIZE(void*)
+	PRINT_SIZE(short)
+	PRINT_SIZE(char)
+	
+	printf ("size for MPI_Status in sizeof(int) = %ld\n", sizeof(MPI_Status)/sizeof(int));
+	printf ("offset of MPI_Status.MPI_SOURCE in sizeof(int) = %ld\n", (addr2-addr1)/sizeof(int));
+	printf ("offset of MPI_Status.MPI_TAG in sizeof(int) = %ld\n", (addr3-addr1)/sizeof(int));
+
+	return 0;
 }
 
