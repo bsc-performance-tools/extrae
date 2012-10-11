@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2012.6.5)  10 OCT 2012 11:10
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2012.6.5)  11 OCT 2012 11:25
 entering extended mode
  %&-line parsing enabled.
 **./images.tex
@@ -194,8 +194,8 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 151.
 LaTeX Font Info:    ... okay on input line 151.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 151.
 LaTeX Font Info:    ... okay on input line 151.
-ABD: EveryShipout initializing macros (/home/harald/development/extrae-2.2.1-wi
-thcuda/doc/user-guide.aux
+ABD: EveryShipout initializing macros (/home/harald/development/extrae-2.2.1-mi
+c-mpi/doc/user-guide.aux
 
 LaTeX Warning: Label `cha:QuickStart' multiply defined.
 
@@ -389,19 +389,19 @@ latex2htmlLength oddsidemargin=0.0pt
 
 latex2htmlLength evensidemargin=0.0pt
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 320.
+LaTeX Font Info:    Try loading font information for U+msa on input line 321.
 (/usr/share/texmf/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2002/01/19 v2.2g AMS font definitions
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 320.
+LaTeX Font Info:    Try loading font information for U+msb on input line 321.
 (/usr/share/texmf/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2002/01/19 v2.2g AMS font definitions
 )
-Overfull \hbox (5.19447pt too wide) in paragraph at lines 320--320
+Overfull \hbox (5.19447pt too wide) in paragraph at lines 321--321
 []\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
  []
 
-l2hSize :landscape3721:465.73293pt::0.0pt::650.43001pt.
+l2hSize :landscape3756:465.73293pt::0.0pt::650.43001pt.
 [1
 
 
@@ -409,7 +409,7 @@ l2hSize :landscape3721:465.73293pt::0.0pt::650.43001pt.
 
 
 ]
-l2hSize :landscape3742:412.94963pt::0.0pt::650.43001pt.
+l2hSize :landscape3777:412.94963pt::0.0pt::650.43001pt.
 [2
 
 
@@ -422,7 +422,7 @@ LaTeX Warning: There were multiply-defined labels.
  ) 
 Here is how much of TeX's memory you used:
  2433 strings out of 256217
- 32295 string characters out of 1917096
+ 32292 string characters out of 1917096
  92155 words of memory out of 1500000
  5669 multiletter control sequences out of 10000+200000
  9424 words of font info for 36 fonts, out of 1200000 for 2000

@@ -98,6 +98,17 @@ CC=/gpfs/APPS/BIN/GCC-4.6.2/bin/gcc-4.6.2 ./configure --prefix=/gpfs/CEPBATOOLS/
 make
 make install
 
+Intel MIC accelerators support (KNF and KNC):
+--
+The Intel MIC accelerators are not binary compatible with the host (even if it is a x86 chip), thus the Extrae package must be compiled twice, one for the host and one for the accelerator. While the host configuration and installation has been shown before, in order to compile Extrae for the accelerator you must configure Extrae like:
+
+./configure --with-mpi=/opt/intel/impi/4.1.0.024/mic --without-dyninst --without-papi --without-unwind --disable-xml --disable-posix-clock --with-libz=/opt/extrae/zlib-mic --host=x86_64-suse-linux-gnu --prefix=/home/Computational/harald/extrae-mic CFLAGS="-O -mmic -I/usr/include" --enable-mic CC=icc CXX=icpc MPICC=/opt/intel/impi/4.1.0.024/mic/bin/mpiicc
+
+To compile it, just issue
+make 
+make install
+
+
 AIX
 --
 NOTES:

@@ -161,6 +161,8 @@ AC_DEFUN([AX_CHECK_POINTER_SIZE],
       POINTER_SIZE=64
    elif test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" ; then
       POINTER_SIZE=32
+   elif test "${IS_MIC_MACHINE}" = "yes" ; then
+      POINTER_SIZE=64
    else
       AC_TRY_RUN(
          [

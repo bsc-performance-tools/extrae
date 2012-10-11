@@ -86,6 +86,16 @@ AM_CONFIG_HEADER(config.h)
 #    Checks for programs    #
 #############################
 
+AC_ARG_ENABLE(mic,
+   AC_HELP_STRING(
+      [--enable-mic],
+      [Enable compilation for the Intel MIC architecture (disabled by default)]
+   ),
+   [enable_mic="${enableval}"],
+   [enable_mic="no"]
+)
+IS_MIC_MACHINE=${enable_mic}
+
 # Check if this is an Altix machine and if it has an /dev/mmtimer device
 # (which is a global clock!)
 AC_ARG_ENABLE(check-altix,
@@ -494,6 +504,17 @@ elif test "${IS_BGQ_MACHINE}" = "yes" ; then
    voidp_size=8
    short_size=2
    char_size=1
+elif test "${IS_MIC_MACHINE}" = "yes" ; then
+	cross_compiling="yes"
+	long_long_size=8
+	long_size=8
+	int_size=4
+	pid_t_size=4
+	ssize_t_size=8
+	size_t_size=8
+	voidp_size=8
+	short_size=2
+	char_size=1
 else
    cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
    long_long_size=0
@@ -530,6 +551,8 @@ AC_CHECK_MEMBER(struct mallinfo.arena,
 if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
    cross_compiling="no"
 fi
+
+cross_compiling="no"
 
 # Test if the architecture is little or big endian
 AX_CHECK_ENDIANNESS

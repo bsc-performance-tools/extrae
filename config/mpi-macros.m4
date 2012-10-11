@@ -148,7 +148,11 @@ AC_DEFUN([AX_PROG_MPI],
             MPICC_DOES_NOT_EXIST="no"
          fi
       else
-         AC_MSG_RESULT([${MPICC}])
+         if test -x ${MPICC} ; then
+            AC_MSG_RESULT([${MPICC}])
+         else
+            AC_MSG_ERROR([Cannot find givne \${MPICC}. Please give the full path for the MPI C compiler])
+         fi
       fi
    fi
    dnl AC_SUBST(MPICC)
@@ -205,6 +209,10 @@ AC_DEFUN([AX_CHECK_MPI_STATUS_SIZE],
    AC_MSG_CHECKING([for size of the MPI_Status struct])
    AX_FLAGS_SAVE()
    CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
+
+   if test "${IS_MIC_MACHINE}" = "yes" ; then
+     SIZEOF_MPI_STATUS=5
+   else
    AC_TRY_RUN(
       [
          #include <mpi.h>
@@ -216,6 +224,7 @@ AC_DEFUN([AX_CHECK_MPI_STATUS_SIZE],
       [ SIZEOF_MPI_STATUS="0" ],
       [ SIZEOF_MPI_STATUS="$?"]
    )
+   fi
    AC_MSG_RESULT([${SIZEOF_MPI_STATUS}])
    AC_DEFINE_UNQUOTED([SIZEOF_MPI_STATUS], ${SIZEOF_MPI_STATUS}, [Size of the MPI_Status structure in "sizeof-int" terms])
    AX_FLAGS_RESTORE()
@@ -233,6 +242,9 @@ AC_DEFUN([AX_CHECK_MPI_SOURCE_OFFSET],
                 [#include <mpi.h>])
 
    AC_MSG_CHECKING([for offset of SOURCE field in MPI_Status])
+   if test "${IS_MIC_MACHINE}" = "yes" ; then
+     MPI_SOURCE_OFFSET=2
+   else
    AC_TRY_RUN(
       [
          #include <mpi.h>
@@ -248,6 +260,7 @@ AC_DEFUN([AX_CHECK_MPI_SOURCE_OFFSET],
       [ MPI_SOURCE_OFFSET="0" ],
       [ MPI_SOURCE_OFFSET="$?"]
    )
+   fi
    AC_MSG_RESULT([${MPI_SOURCE_OFFSET}])
    AC_DEFINE_UNQUOTED([MPI_SOURCE_OFFSET], ${MPI_SOURCE_OFFSET}, [Offset of the SOURCE field in MPI_Status in sizeof-int terms])
    AX_FLAGS_RESTORE()
@@ -265,6 +278,9 @@ AC_DEFUN([AX_CHECK_MPI_TAG_OFFSET],
                 [#include <mpi.h>])
 
    AC_MSG_CHECKING([for offset of TAG field in MPI_Status])
+   if test "${IS_MIC_MACHINE}" = "yes" ; then
+     MPI_TAG_OFFSET=3
+   else
    AC_TRY_RUN(
       [
          #include <mpi.h>
@@ -280,6 +296,7 @@ AC_DEFUN([AX_CHECK_MPI_TAG_OFFSET],
       [ MPI_TAG_OFFSET="0" ],
       [ MPI_TAG_OFFSET="$?"]
    )
+   fi
    AC_MSG_RESULT([${MPI_TAG_OFFSET}])
    AC_DEFINE_UNQUOTED([MPI_TAG_OFFSET], ${MPI_TAG_OFFSET}, [Offset of the TAG field in MPI_Status in sizeof-int terms])
    AX_FLAGS_RESTORE()

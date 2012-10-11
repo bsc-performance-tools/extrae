@@ -202,6 +202,17 @@ Build and installation commands:
 \graybox{{\tt make\\
 make install}}
 
+\subsubsection{Compiling for the Intel MIC accelerator}
+
+The Intel MIC accelerators (codenamed KnightsFerry - KNF and KnightsCorner - KNC) are not binary compatible with the host (even if it is a x86 or x86/64 chip), thus the Extrae package must be compiled specially for the accelerator (twice if you want Extrae for the host). While the host configuration and installation has been shown before, in order to compile Extrae for the accelerator you must configure Extrae like:
+
+\graybox{{\tt ./configure --with-mpi=/opt/intel/impi/4.1.0.024/mic --without-dyninst --without-papi --without-unwind --disable-xml --disable-posix-clock --with-libz=/opt/extrae/zlib-mic --host=x86\_64-suse-linux-gnu --prefix=/home/Computational/harald/extrae-mic --enable-mic\\CFLAGS="-O -mmic -I/usr/include" CC=icc CXX=icpc\\MPICC=/opt/intel/impi/4.1.0.024/mic/bin/mpiicc}}
+
+To compile it, just issue:
+
+\graybox{{\tt make\\
+make install}}
+
 \subsubsection{Compiling on a Power CELL processor using Linux}
 
 Configuration command:

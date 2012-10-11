@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 11Oct2012 Improved support for Intel MIC KNC/KNF, now with support for
+   Intel MPI 
  * 10Oct2012 Changed --enable-cuda for --with-cuda=DIR in the configure script
  + 09Oct2012 Improved support for BG/Q systems. Improved example for this
    architecture using libxml2 and binutils.
