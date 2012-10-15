@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 rm -fr TRACE.sym TRACE.mpits set-0 omps-codelocation-2.???
 

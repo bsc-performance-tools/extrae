@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 EXTRAE_ON=1 ./auto-init-fini
 ../../../src/merger/mpi2prv -f TRACE.mpits -dump -dump-without-time >& OUTPUT

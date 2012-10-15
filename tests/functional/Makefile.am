@@ -1,3 +1,4 @@
 SUBDIRS = dump-events \
  auto-init-fini \
- ompss-codelocation
+ ompss-codelocation \
+ define_event_type
