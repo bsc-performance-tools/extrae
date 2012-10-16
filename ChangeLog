@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 16Oct2012 Do not use -lrt if the system automatically adds clock_gettime
  * 11Oct2012 Improved support for Intel MIC KNC/KNF, now with support for
    Intel MPI 
  * 10Oct2012 Changed --enable-cuda for --with-cuda=DIR in the configure script

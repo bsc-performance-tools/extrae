@@ -373,8 +373,12 @@ endif
 if HAVE_MRNET
   MRNET_LINKER_FLAGS = -L@MRNET_LIBSDIR@ -R @MRNET_LIBSDIR@ @MRNET_LIBS@
 endif
+
+# POSIX clock may be available by default. Avoid adding these if unneeded.
 if USE_POSIX_CLOCK
+if NEED_POSIX_CLOCK 
   POSIXCLOCK_LINKER_FLAGS = -L@RT_LIBSDIR@ -R @RT_LIBSDIR@ @RT_LIBS@
+endif
 endif
 
 core_CFLAGS =
