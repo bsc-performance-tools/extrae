@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 17Oct2012 Added Intel OpenMP runtime instrumentation when using Dyninst.
+   Also, some minor enhacenements done when using DynInst.
  * 16Oct2012 Do not use -lrt if the system automatically adds clock_gettime
  * 11Oct2012 Improved support for Intel MIC KNC/KNF, now with support for
    Intel MPI 

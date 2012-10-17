@@ -42,9 +42,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdlib.h>
 #endif
 
-#include "wrapper.h"
-#include "trace_macros.h"
-#include "omp_probe.h"
+// #include "wrapper.h"
+// #include "trace_macros.h"
+#include "threadid.h"
+#include "omp-common.h"
 
 //#define DEBUG
 
@@ -105,18 +106,16 @@ static void callme_pardo (char *ptr, long lbnd, long ubnd, unsigned thid)
 	fprintf (stderr, PACKAGE_NAME": callme_pardo: pardo_uf=%p\n", p);
 #endif
 
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry ((UINT64) p);
 	pardo_uf (ptr, lbnd, ubnd, thid);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
+	Extrae_OpenMP_UF_Exit ();
 }
 
 /*
-		callme_do (char*, ull, ull)
-		With the same header as the routine to be called by the SMP runtime, just
-    acts as a trampoline to this call. Invokes the required iterations of the
-    parallel do loop.
+	callme_do (char*, ull, ull)
+	With the same header as the routine to be called by the SMP runtime, just
+	acts as a trampoline to this call. Invokes the required iterations of the
+	parallel do loop.
 */
 static void callme_do (char *ptr, long lbnd, long ubnd)
 {
@@ -127,17 +126,15 @@ static void callme_do (char *ptr, long lbnd, long ubnd)
 	fprintf (stderr, PACKAGE_NAME": callme_do: do_uf=%p\n", p);
 #endif
 
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry ((UINT64) p);
 	do_uf[THREADID] (ptr, lbnd, ubnd);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
+	Extrae_OpenMP_UF_Exit ();
 }
 /*
-		callme_par (char*)
-		With the same header as the routine to be called by the SMP runtime, just
-    acts as a trampoline to this call. Each thread runs the very same routine
-    with different params.
+	callme_par (char*)
+	With the same header as the routine to be called by the SMP runtime, just
+	acts as a trampoline to this call. Each thread runs the very same routine
+	with different params.
 */
 static void callme_par (char *ptr)
 {
@@ -148,11 +145,9 @@ static void callme_par (char *ptr)
 	fprintf (stderr, PACKAGE_NAME": callme_par: par_uf=%p\n", p);
 #endif
 
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry ((UINT64) p);
 	par_uf (ptr);
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
+	Extrae_OpenMP_UF_Exit ();
 }
 
 /*
@@ -169,11 +164,9 @@ static void callme_single(void)
 	fprintf (stderr, PACKAGE_NAME": callme_single: par_single=%p\n", p);
 #endif
 
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry ((UINT64) p);
 	par_single ();
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
+	Extrae_OpenMP_UF_Exit ();
 }
 
 /*
@@ -217,11 +210,9 @@ static void callme_section(void)
 	fprintf (stderr, PACKAGE_NAME": callme_section: par_sections[%d]=%p\n", index, par_sections[index-1]);
 #endif
 
-	Backend_Enter_Instrumentation (1);
-	Probe_OpenMP_UF_Entry ((UINT64) par_sections[index]);
+	Extrae_OpenMP_UF_Entry ((UINT64) par_sections[index]);
 	par_sections[index]();
-	Probe_OpenMP_UF_Exit ();
-	Backend_Leave_Instrumentation ();
+	Extrae_OpenMP_UF_Exit ();
 }
 
 static void (*_xlsmpParallelDoSetup_TPO_real)(int,void**,long,long,long,long,void**,void**,void**,long,long,void**,long) = NULL;
@@ -338,11 +329,9 @@ void _xlsmpParallelDoSetup_TPO(int p1, void *p2, long p3, long p4, long p5, long
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(char*, long, long, unsigned))p2;
 
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_ParDO_Entry ();
+		Extrae_OpenMP_ParDO_Entry ();
 		_xlsmpParallelDoSetup_TPO_real (p1, (void**)callme_pardo, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
-		Probe_OpenMP_ParDO_Exit ();	
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_ParDO_Exit ();	
 	}
 	else
 	{
@@ -363,11 +352,9 @@ void _xlsmpParRegionSetup_TPO (int p1, void *p2, int p3, void* p4, void* p5, voi
 		/* Set the pointer to the correct PARALLEL user function */
 		par_uf = (void(*)(char*))p2;
 
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_ParRegion_Entry();
+		Extrae_OpenMP_ParRegion_Entry();
 		_xlsmpParRegionSetup_TPO_real (p1, callme_par, p3, p4, p5, p6, p7, p8);
-		Probe_OpenMP_ParRegion_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_ParRegion_Exit();
   }
 	else
 	{
@@ -388,12 +375,10 @@ void _xlsmpWSDoSetup_TPO (int p1, void *p2, long p3, long p4, long p5, long p6, 
 		/* Set the pointer to the correct DO user function */
 		do_uf[THREADID] = (void(*)(char*, long, long))p2;
 
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_DO_Entry ();
+		Extrae_OpenMP_DO_Entry ();
 		_xlsmpWSDoSetup_TPO_real
 			(p1, callme_do, p3, p4, p5, p6, p7, p8, p9, p10);
-		Probe_OpenMP_DO_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_DO_Exit();
 	}
 	else
 	{
@@ -411,11 +396,9 @@ void _xlsmpBarrier_TPO (int p1, int *p2)
 
 	if (_xlsmpBarrier_TPO_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_Barrier_Entry ();
+		Extrae_OpenMP_Barrier_Entry ();
 		_xlsmpBarrier_TPO_real (p1, p2);
-		Probe_OpenMP_Barrier_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Barrier_Exit ();
 	}
 	else
 	{
@@ -436,11 +419,9 @@ void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4)
 		/* Set the pointer to the correct SINGLE user function */
 		par_single = (void(*)(void))p2;
 
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_Single_Entry();
+		Extrae_OpenMP_Single_Entry();
 		_xlsmpSingleSetup_TPO_real (p1, callme_single, p3, p4);
-		Probe_OpenMP_Single_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Single_Exit();
 	}
 	else
 	{
@@ -469,11 +450,9 @@ void _xlsmpWSSectSetup_TPO (int p1, void *p2, long p3, void *p4, void *p5, void*
 		atomic_index.counter = 0;
 		par_sections = (void(**)(void))p2;
 
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_Section_Entry();
+		Extrae_OpenMP_Section_Entry();
 		_xlsmpWSSectSetup_TPO_real (p1, callme_sections, p3, p4, p5, p6, p7, p8);
-		Probe_OpenMP_Section_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Section_Exit();
 	}
 	else
 	{
@@ -490,11 +469,9 @@ void _xlsmpRelDefaultSLock (void *p1)
 
 	if (_xlsmpRelDefaultSLock_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_Unnamed_Unlock_Entry();
+		Extrae_OpenMP_Unnamed_Unlock_Entry();
 		_xlsmpRelDefaultSLock_real(p1);
-		Probe_OpenMP_Unnamed_Unlock_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Unnamed_Unlock_Exit();
 	}
 	else
 	{
@@ -511,11 +488,9 @@ void _xlsmpRelSLock (void *p1)
 
 	if (_xlsmpRelSLock_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_Named_Unlock_Entry();
+		Extrae_OpenMP_Named_Unlock_Entry();
 		_xlsmpRelSLock_real(p1);
-		Probe_OpenMP_Named_Unlock_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Named_Unlock_Exit();
 	}
 	else
 	{
@@ -532,11 +507,9 @@ void _xlsmpGetDefaultSLock (void *p1)
 
 	if (_xlsmpGetDefaultSLock_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_Unnamed_Lock_Entry();
+		Extrae_OpenMP_Unnamed_Lock_Entry();
 		_xlsmpGetDefaultSLock_real (p1);
-		Probe_OpenMP_Unnamed_Lock_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Unnamed_Lock_Exit();
 	}
 	else
 	{
@@ -553,11 +526,9 @@ void _xlsmpGetSLock (void *p1)
 
 	if (_xlsmpGetSLock_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_Named_Lock_Entry();
+		Extrae_OpenMP_Named_Lock_Entry();
 		_xlsmpGetSLock_real (p1);
-		Probe_OpenMP_Named_Lock_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Named_Lock_Exit();
 	}
 	else
 	{

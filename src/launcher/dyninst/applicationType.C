@@ -41,10 +41,6 @@ static char UNUSED rcsid[] = "$Id$";
 #define INTEL_PARLOOP_RTNS     ".*_[0-9]+__par_loop[0-9]+.*"
 #define INTEL_PARRGN_RTNS      ".*_[0-9]+__par_region[0-9]+.*"
 
-/* For Intel 11.x - 12.x */
-#define INTEL_KMPV_RTNS        "___kmpv_zero.*_[0-9]+"
-                                
-
 string ApplicationType::TranslatePFToUF (string PF, OMP_rte_t type)
 {
 	string result;
@@ -61,8 +57,8 @@ string ApplicationType::TranslatePFToUF (string PF, OMP_rte_t type)
 	}
 	else if (type == Intel_v11)
 	{
-		string prefix = "___kmpv_zero";
-		result = PF.substr (prefix.length(), PF.rfind ("_"));
+		/* We don't know how to handle this, if possible */
+		result = PF;
 	}
 	else if (type == IBM_v16)
 	{
@@ -70,7 +66,12 @@ string ApplicationType::TranslatePFToUF (string PF, OMP_rte_t type)
 	}
 	else if (type == GNU_v42)
 	{
-		result = PF.substr (0, PF.find (".omp_fn."));
+		if (PF.find (".omp_fn.") != string::npos)
+			result = PF.substr (0, PF.find (".omp_fn."));
+		else if (PF.find ("._omp_fn.") != string::npos)
+			result = PF.substr (0, PF.find ("._omp_fn."));
+		else /* unhandled */
+			result = PF;
 	}
 
 	return result;
@@ -104,24 +105,10 @@ ApplicationType::OMP_rte_t ApplicationType::checkIntelOpenMPRuntime (BPatch_imag
 		if (appImage->findFunction (routinev9_1.c_str(), found_funcs) != NULL)
 			if (found_funcs.size() > 0)
 				return Intel_v9_1;
-
 	}
 
-	/* Check if there's any OpenMP parallel routine in the binary */
-	appImage->findFunction (INTEL_KMPV_RTNS, found_funcs);
-
-	if (found_funcs.size() > 0)
-	{
-		char functionName[1024];
-		found_funcs[0]->getName (functionName, 1024);
-		string routinev11 = TranslatePFToUF (functionName, Intel_v11);
-
-		if (appImage->findFunction (routinev11.c_str(), found_funcs) != NULL)
-			if (found_funcs.size() > 0)
-				return Intel_v11;
-	}
-
-	return Unknown;
+	/* If we don't know about the runtime, try with icc v11 */
+	return Intel_v11;
 }
 
 void ApplicationType::detectApplicationType (BPatch_image *appImage)
@@ -232,8 +219,8 @@ bool ApplicationType::isMangledOpenMProutine (string name)
 	}
 	else if (OpenMP_runtime == Intel_v11)
 	{
-		/* routines are prefixed with ___kmpv_zero */
-		result = name.find ("___kmpv_zero") == 0;
+		/* We don't know how to handle these */
+		result = false;
 	}
 	else if (OpenMP_runtime == IBM_v16)
 	{
@@ -241,7 +228,7 @@ bool ApplicationType::isMangledOpenMProutine (string name)
 	}
 	else if (OpenMP_runtime == GNU_v42)
 	{
-		result = name.find (".omp_fn.") != string::npos;
+		result = name.find (".omp_fn.") != string::npos || name.find ("._omp_fn.") != string::npos;
 	}
 
 	return result;

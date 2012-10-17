@@ -140,7 +140,7 @@ static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPat
 	ofstream symfile;
 	string symname = string(::XML_GetFinalDirectory())+string("/")+string(::XML_GetTracePrefix())+".sym";
 
-	symfile.open (symname.c_str());
+	symfile.open (symname.c_str(), ios::app);
 	if (!symfile.good())
 	{
 		cerr << "Cannot create the symbolic file" << symname << endl;
@@ -395,6 +395,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 {
 	unsigned i = 0;
 	unsigned OMPinsertion = 0;
+	unsigned OMPreplacement_intel_v11 = 0;
 	unsigned MPIinsertion = 0;
 	unsigned APIinsertion = 0;
 	unsigned UFinsertion = 0;
@@ -539,6 +540,27 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
 						}
 					}
+
+					/* Special instrumentation for calls in Intel OpenMP runtime v11/v12
+					   currently only for __kmpc_fork_call */
+					if (appType->get_OpenMP_rte() == ApplicationType::Intel_v11 &&
+						  strncmp (calledname, "__kmpc_fork_call", strlen("__kmpc_fork_call")) == 0)
+					{
+						string s = "__kmpc_fork_call_extrae_dyninst";
+						BPatch_function *patch_openmp = getRoutine (s, appImage, false);
+						if (patch_openmp != NULL)
+						{
+							if (appProcess->replaceFunctionCall (*((*vpoints)[j]), *patch_openmp))
+							{
+								OMPreplacement_intel_v11++;
+								if (VerboseLevel)
+									cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << sharedlibname << ")" << endl;
+							}
+							else
+								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
+						}
+					}
+
 				}
 				j++;
 			}
@@ -600,7 +622,11 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	if (appType->get_isMPI())
 		cout << PACKAGE_NAME << ": " << MPIinsertion << " MPI patches applied" << endl;
 	if (appType->get_isOpenMP())
+	{
 		cout << PACKAGE_NAME << ": " << OMPinsertion << " OpenMP patches applied to outlined routines" << endl;
+		if (appType->get_OpenMP_rte() == ApplicationType::Intel_v11)
+			cout << PACKAGE_NAME << ": " << OMPreplacement_intel_v11 << " OpenMP patches applied to specific locations for Intel runtime" << endl;
+	}
 	if (UserList.size() > 0)
 		cout << PACKAGE_NAME << ": " << UFinsertion << " user function" << ((UFinsertion!=1)?"s":"") << " instrumented" << endl;
 }
@@ -693,6 +719,11 @@ int main (int argc, char *argv[])
 
 	char buffer[1024];
 	BPatch_process *appProcess = bpatch->processCreate ((const char*) argv[index], (const char**) &argv[index], (const char**) environ);
+	if (appProcess == NULL)
+	{
+		cerr << PACKAGE_NAME << ": Error creating the target application" << endl;
+		exit (-1);
+	}
 
 	/* Stop the execution in order to load the instrumentation library */
 	cout << PACKAGE_NAME << ": Stopping mutatee execution" << endl;
@@ -758,7 +789,7 @@ int main (int argc, char *argv[])
 		{
 			if (appType->get_isOpenMP())
 			{
-				sprintf (buffer, "%s/lib/libomptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				sprintf (buffer, "%s/lib/lib_dyn_omptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 			}
 			else
 			{
@@ -793,10 +824,13 @@ int main (int argc, char *argv[])
 		if (appType->get_isMPI() && ::XML_GetTraceMPI())
 			loadMPIPatches (appImage);
 
-		InstrumentCalls (appImage, appProcess, appType, ParallelFunctions, UserFunctions, ::XML_GetTraceMPI(), ::XML_GetTraceOMP(), true);
-
 		if (appType->get_isOpenMP())
 		{
+			if (appType->get_OpenMP_rte() == ApplicationType::Intel_v11)
+			{
+				cout << PACKAGE_NAME << ": Gathering information for Intel v11 OpenMP runtime" << endl;
+				InstrumentOMPruntime_Intel (appImage, appProcess);
+			}
 			cout << PACKAGE_NAME << ": Instrumenting OpenMP runtime" << endl;
 			InstrumentOMPruntime (::XML_GetTraceOMP_locks(), appType, appImage, appProcess);
 		}
@@ -835,6 +869,8 @@ int main (int argc, char *argv[])
 			}
 			extrae_detecting_application_type = false;
 		}
+
+		InstrumentCalls (appImage, appProcess, appType, ParallelFunctions, UserFunctions, ::XML_GetTraceMPI(), ::XML_GetTraceOMP(), true);
 
 		GenerateSymFile (ParallelFunctions, UserFunctions, appImage, appProcess);
 	}

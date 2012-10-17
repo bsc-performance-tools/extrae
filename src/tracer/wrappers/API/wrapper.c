@@ -1388,6 +1388,7 @@ void Backend_setNumTentativeThreads (int numofthreads)
 
 int Backend_preInitialize (int me, int world_size, char *config_file)
 {
+	char trace_sym[TMP_DIR];
 	char *shell_name;
 #if defined(OMP_SUPPORT)
 	char *omp_value;
@@ -1410,21 +1411,16 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	{
 		if (getenv("EXTRAE_DYNINST_RUN") != NULL)
 		{
-			if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") != 0)
+			if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") == 0)
 				fprintf (stdout, PACKAGE_NAME": Target application is being run.\n");
 		}
 		else
 			fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
 	}
 
-	if (getenv("EXTRAE_DYNINST_RUN") == NULL)
-	{
-		/* If we trace, remove the .sym file only if we're not under dyninst 
- 		  launcher (it will create its own .sym) */
-		char trace_sym[TMP_DIR];
-		FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
-		unlink (trace_sym);
-	}
+	/* Remove the .sym file */
+	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
+	unlink (trace_sym);
 
 	/* Allocate a bitmap to know which tasks are tracing */
 	Extrae_Allocate_Task_Bitmap (world_size);
@@ -1453,7 +1449,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 
 #if defined(OMP_SUPPORT)
 	/* If the application is not running under dyninst, initialize
-	   the CUDA runtime wrapping */
+	   the OpenMP runtime wrapping */
 	if (getenv("EXTRAE_DYNINST_RUN") != NULL)
 	{
 		if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") != 0)

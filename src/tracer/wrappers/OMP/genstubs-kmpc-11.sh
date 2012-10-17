@@ -31,16 +31,14 @@ do
 	done
 	echo ")) par_func;" >> ${INTERMEDIATE_FUNCS}
 	echo "" >> ${INTERMEDIATE_FUNCS}
-	echo -e "\tBackend_Enter_Instrumentation (2);" >> ${INTERMEDIATE_FUNCS}
-	echo -e "\tProbe_OpenMP_UF_Entry ((UINT64)p);" >> ${INTERMEDIATE_FUNCS}
+	echo -e "\tExtrae_OpenMP_UF_Entry ((UINT64)p);" >> ${INTERMEDIATE_FUNCS}
 	echo -e -n "\tintermediate (par1,par2" >> ${INTERMEDIATE_FUNCS}
 	for i in `seq 1 ${number}`
 	do
 	  echo -n ",p${i}" >> ${INTERMEDIATE_FUNCS}
 	done
 	echo ");" >> ${INTERMEDIATE_FUNCS}
-	echo -e "\tProbe_OpenMP_UF_Exit ();" >> ${INTERMEDIATE_FUNCS}
-	echo -e "\tBackend_Leave_Instrumentation ();" >> ${INTERMEDIATE_FUNCS}
+	echo -e "\tExtrae_OpenMP_UF_Exit ();" >> ${INTERMEDIATE_FUNCS}
 	echo "}" >> ${INTERMEDIATE_FUNCS}
 	echo >> ${INTERMEDIATE_FUNCS}
 

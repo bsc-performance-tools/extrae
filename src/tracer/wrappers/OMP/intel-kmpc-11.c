@@ -46,9 +46,10 @@
 # include <pthread.h>
 #endif
 
-#include "wrapper.h"
-#include "trace_macros.h"
-#include "omp_probe.h"
+// #include "wrapper.h"
+// #include "trace_macros.h"
+#include "threadid.h"
+#include "omp-common.h"
 
 //#define DEBUG
 
@@ -97,7 +98,7 @@ int intel_kmpc_11_hook_points (int rank)
 	int count = 0;
 
 	/* Create mutex to protect intel omp tasks allocation calls */
-        pthread_mutex_init (&extrae_map_kmpc_mutex, NULL);
+	pthread_mutex_init (&extrae_map_kmpc_mutex, NULL);
 
 	/* Obtain @ for __kmpc_fork_call */
 	__kmpc_fork_call_real =
@@ -220,21 +221,52 @@ static void *par_func;
 
 #include "intel-kmpc-11-intermediate.c"
 
+#if defined(DYNINST_MODULE)
+void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
+{
+	/* Create mutex to protect intel omp tasks allocation calls */
+	pthread_mutex_init (&extrae_map_kmpc_mutex, NULL);
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME" DEBUG: Extrae_intel_kmpc_runtime_init_dyninst:\n");
+	fprintf (stderr, PACKAGE_NAME" DEBUG: fork_call = %p\n", fork_call);
+#endif
+
+	__kmpc_fork_call_real = (void(*)(void*,int,void*,...)) fork_call;
+}
+#endif
+
+/*
+ * kmpc_fork_call / kmpc_fork_call_extrae_dyninst
+ *   dlsym does not seem to work under dyninst and we can't replace this
+ *   function by itself (opposite to MPI, OpenMP does not have something like
+ *   PMPI). Thus, we need to pass the address of the original __kmpc_fork_call
+ *   (through Extrae_intel_kmpc_runtime_init_dyninst) and let the new 
+ *   __kmpc_fork_call_extrae_dyninst do the work by finally calling to
+ *   __kmpc_fork_call passed.
+ */
+
+#if !defined(DYNINST_MODULE)
 void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
+#else
+void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
+#endif
 {
 	void *params[64];
 	va_list ap;
 	int i;
 
 #if defined(DEBUG)
+#if defined(DYNINST_MODULE)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call_extrae_dyninst is at %p\n", THREADID, __kmpc_fork_call_extrae_dyninst);
+#endif
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call is at %p\n", THREADID, __kmpc_fork_call_real);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
 #endif
 
 	if (__kmpc_fork_call_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_ParRegion_Entry ();
+		Extrae_OpenMP_ParRegion_Entry ();
 
 		/* Grab parameters */
 		va_start (ap, p3);
@@ -255,8 +287,7 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 				break;
 		}
 
-		Probe_OpenMP_ParRegion_Exit ();	
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_ParRegion_Exit ();	
 	}
 	else
 	{
@@ -265,6 +296,7 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 	}
 }
 
+#if !defined(DYNINST_MODULE)
 void __kmpc_barrier (void *p1, int p2)
 {
 #if defined(DEBUG)
@@ -274,11 +306,9 @@ void __kmpc_barrier (void *p1, int p2)
 
 	if (__kmpc_barrier_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Barrier_Entry ();
+		Extrae_OpenMP_Barrier_Entry ();
 		__kmpc_barrier_real (p1, p2);
-		Probe_OpenMP_Barrier_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Barrier_Exit ();
 	}
 	else
 	{
@@ -296,11 +326,9 @@ void __kmpc_critical (void *p1, int p2, void *p3)
 
 	if (__kmpc_critical_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Named_Lock_Entry ();
+		Extrae_OpenMP_Named_Lock_Entry ();
 		__kmpc_critical_real (p1, p2, p3);
-		Probe_OpenMP_Named_Lock_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Named_Lock_Exit ();
 	}
 	else
 	{
@@ -318,11 +346,9 @@ void __kmpc_end_critical (void *p1, int p2, void *p3)
 
 	if (__kmpc_end_critical_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Named_Unlock_Entry ();
+		Extrae_OpenMP_Named_Unlock_Entry ();
 		__kmpc_end_critical_real (p1, p2, p3);
-		Probe_OpenMP_Named_Unlock_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Named_Unlock_Exit ();
 	}
 	else
 	{
@@ -342,18 +368,14 @@ int __kmpc_dispatch_next_4 (void *p1, int p2, int *p3, int *p4, int *p5, int *p6
 
 	if (__kmpc_dispatch_next_8_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Work_Entry();
+		Extrae_OpenMP_Work_Entry();
 		res = __kmpc_dispatch_next_4_real (p1, p2, p3, p4, p5, p6);
-		Probe_OpenMP_Work_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Work_Exit();
 
 		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_4 which seems not to be called ? */
 		{
-			Backend_Enter_Instrumentation (2);
-			Probe_OpenMP_UF_Exit ();
-			Probe_OpenMP_DO_Exit ();
-			Backend_Leave_Instrumentation ();
+			Extrae_OpenMP_UF_Exit ();
+			Extrae_OpenMP_DO_Exit ();
 		}
 	}
 	else
@@ -374,17 +396,14 @@ int __kmpc_dispatch_next_8 (void *p1, int p2, int *p3, long long *p4, long long 
 #endif
 	if (__kmpc_dispatch_next_8_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Work_Entry();
+		Extrae_OpenMP_Work_Entry();
 		res = __kmpc_dispatch_next_8_real (p1, p2, p3, p4, p5, p6);
-		Probe_OpenMP_Work_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Work_Exit();
 
 		if (res == 0) /* Alternative to call __kmpc_dispatch_fini_8 which seems not to be called ? */
 		{
-			Probe_OpenMP_UF_Exit ();
-			Probe_OpenMP_DO_Exit ();
-			Backend_Leave_Instrumentation ();
+			Extrae_OpenMP_UF_Exit ();
+			Extrae_OpenMP_DO_Exit ();
 		}
 	}
 	else
@@ -406,24 +425,20 @@ int __kmpc_single (void *p1, int p2)
 
 	if (__kmpc_single_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Single_Entry ();
+		Extrae_OpenMP_Single_Entry ();
 
 		res = __kmpc_single_real (p1, p2);
 
 		if (res) /* If the thread entered in the single region, track it */
 		{
 			struct __kmpv_location_t *loc = (struct __kmpv_location_t*) p1;
-
 			// printf ("loc->location = %s\n", loc->location);
-
-			Probe_OpenMP_UF_Entry ((UINT64) loc->location);
+			Extrae_OpenMP_UF_Entry ((UINT64) loc->location);
 		}
 		else
 		{
-			Probe_OpenMP_Single_Exit ();
+			Extrae_OpenMP_Single_Exit ();
 		}
-		Backend_Leave_Instrumentation ();
 	}
 	else
 	{
@@ -444,11 +459,9 @@ void __kmpc_end_single (void *p1, int p2)
 	if (__kmpc_single_real != NULL)
 	{
 		/* This is only executed by the thread that entered the single region */
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_UF_Exit ();
+		Extrae_OpenMP_UF_Exit ();
 		__kmpc_end_single_real (p1, p2);
-		Probe_OpenMP_Single_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Single_Exit ();
 	}
 	else
 	{
@@ -467,12 +480,9 @@ void __kmpc_dispatch_init_4 (void *p1, int p2, int p3, int p4, int p5, int p6,
 
 	if (__kmpc_dispatch_init_4_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_DO_Entry ();
+		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_4_real (p1, p2, p3, p4, p5, p6, p7);
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
 	}
 	else
 	{
@@ -491,12 +501,9 @@ void __kmpc_dispatch_init_8 (void *p1, int p2, int p3, long long p4,
 
 	if (__kmpc_dispatch_init_8_real != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_DO_Entry ();
+		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_8_real (p1, p2, p3, p4, p5, p6, p7);
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
 	}
 	else
 	{
@@ -514,11 +521,9 @@ void __kmpc_dispatch_fini_4 (void *p1, int p2)
 
 	if (__kmpc_dispatch_fini_4_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_DO_Exit ();
+		Extrae_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_4_real (p1, p2);
-		Probe_OpenMP_UF_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_UF_Exit ();
 	}
 	else
 	{
@@ -536,11 +541,9 @@ void __kmpc_dispatch_fini_8 (void *p1, long long p2)
 
 	if (__kmpc_dispatch_fini_8_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_DO_Exit ();
+		Extrae_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_8_real (p1, p2);
-		Probe_OpenMP_UF_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_UF_Exit ();
 	}
 	else
 	{
@@ -615,13 +618,9 @@ static void __extrae_kmpc_task_substitute (int p1, void *p2)
 
 	if (__kmpc_task_substituted_func != NULL)
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
-
+		Extrae_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
 		__kmpc_task_substituted_func (p1, p2); /* Original code execution */
-
-		Probe_OpenMP_TaskUF_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_TaskUF_Exit ();
 	}
 	else
 	{
@@ -641,14 +640,10 @@ void * __kmpc_omp_task_alloc (void *p1, int p2, int p3, size_t p4, size_t p5, vo
 
 	if (__kmpc_omp_task_alloc_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Task_Entry ((UINT64)p6);
-
+		Extrae_OpenMP_Task_Entry ((UINT64)p6);
 		res = __kmpc_omp_task_alloc_real (p1, p2, p3, p4, p5, __extrae_kmpc_task_substitute);
 		__extrae_add_kmpc_task_function (res, p6);
-
-		Probe_OpenMP_Task_Exit ();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Task_Exit ();
 	}
 	else
 	{
@@ -672,9 +667,7 @@ void __kmpc_omp_task_begin_if0 (void *p1, int p2, void *p3)
 	{
 		if (__kmpc_omp_task_begin_if0_real != NULL)
 		{
-			Backend_Enter_Instrumentation (1);
-			Probe_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
-
+			Extrae_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
 			__kmpc_omp_task_begin_if0_real (p1, p2, p3);
 		}
 		else
@@ -700,9 +693,7 @@ void __kmpc_omp_task_complete_if0 (void *p1, int p2, void *p3)
 	if (__kmpc_omp_task_complete_if0_real != NULL)
 	{
 		__kmpc_omp_task_complete_if0_real (p1, p2, p3);
-
-		Backend_Enter_Instrumentation (1);
-		Probe_OpenMP_TaskUF_Exit ();
+		Extrae_OpenMP_TaskUF_Exit ();
 	}
 	else
 	{
@@ -722,11 +713,9 @@ int __kmpc_omp_taskwait (void *p1, int p2)
 
 	if (__kmpc_omp_taskwait_real != NULL)
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Taskwait_Entry();
+		Extrae_OpenMP_Taskwait_Entry();
 		res = __kmpc_omp_taskwait_real (p1, p2);
-		Probe_OpenMP_Taskwait_Exit();
-		Backend_Leave_Instrumentation ();
+		Extrae_OpenMP_Taskwait_Exit();
 	}
 	else
 	{
@@ -735,3 +724,4 @@ int __kmpc_omp_taskwait (void *p1, int p2)
 	}
 	return res;
 }
+#endif /* !defined(DYNINST_MODULE) */

@@ -79,7 +79,6 @@ static struct APIroutines_t APIroutines[] =
 		APIROUTINE_T(trace_restart),
 		APIROUTINE_T(trace_next_hwc_set),
 		APIROUTINE_T(trace_previous_hwc_set),
-		
 		APIROUTINE_T_END
 	};
 

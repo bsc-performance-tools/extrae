@@ -87,6 +87,9 @@ endif
 endif
 
 if HAVE_DYNINST
+if WANT_OPENMP
+  lib_LTLIBRARIES += lib_dyn_omptrace.la
+endif
 if HAVE_MPI
   lib_LTLIBRARIES += lib_dyn_mpitracec.la lib_dyn_mpitracef.la
 if WANT_OPENMP
@@ -126,6 +129,7 @@ WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
 
 # Probes for OpenMP instrumentation
 WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
+ wrappers/OMP/omp-common.c wrappers/OMP/omp-common.h \
  wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h \
  wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h \
  wrappers/OMP/intel-kmpc-11.c wrappers/OMP/intel-kmpc-11.h
@@ -223,6 +227,7 @@ libsmpssmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
 libsmpssmpitracef_lb_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 
 # For DynInst instrumentation
+lib_dyn_omptrace_la_SOURCES = $(libomptrace_la_SOURCES)
 lib_dyn_mpitracec_la_SOURCES = $(libmpitrace_la_SOURCES)
 lib_dyn_mpitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
 lib_dyn_ompitracec_la_SOURCES = $(libompitrace_la_SOURCES)
@@ -310,6 +315,7 @@ libompitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/
 libsmpssmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB)
 libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB)
 
+lib_dyn_omptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 lib_dyn_mpitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB)
 lib_dyn_mpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB)
 lib_dyn_ompitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB)
@@ -434,6 +440,7 @@ libompitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS)
 libsmpssmpitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DSMPSS_SUPPORT -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 libsmpssmpitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DSMPSS_SUPPORT -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 
+lib_dyn_omptrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS) -DDYNINST_MODULE -DOMP_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 lib_dyn_mpitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE $(PARALLEL_CFLAGS_MERGE_LIB)
 lib_dyn_mpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE $(PARALLEL_CFLAGS_MERGE_LIB)
 lib_dyn_ompitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE -DOMP_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
@@ -490,6 +497,7 @@ libompitracef_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
 libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
+lib_dyn_omptrace_la_LDFLAGS = $(libomptrace_la_LDFLAGS)
 lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared
 lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared
 lib_dyn_ompitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) # inherits -shared
