@@ -1418,9 +1418,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 			fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
 	}
 
-	/* Remove the .sym file */
-	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
-	unlink (trace_sym);
 
 	/* Allocate a bitmap to know which tasks are tracing */
 	Extrae_Allocate_Task_Bitmap (world_size);
@@ -1551,6 +1548,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* If we aren't tracing, just skip everything! */
 	if (!mpitrace_on)
 		return FALSE;
+
+	/* Remove the .sym file */
+	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
+	unlink (trace_sym);
 
 	make_names ();
 
