@@ -444,22 +444,22 @@ void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
  *************************************************************************/
 
 void Extrae_register_codelocation_type_Wrapper (extrae_type_t type_function,
-	extrae_type_t type_file_line, char *description_function,
-	char *description_file_line)
+	extrae_type_t type_file_line, const char *description_function,
+	const char *description_file_line)
 {
 	TRACE_MISCEVENT(LAST_READ_TIME,REGISTER_CODELOCATION_TYPE_EV, type_function,
 		type_file_line);
 
-	Extrae_AddTypeValuesEntryToSYM ('C', type_function, description_function,
+	Extrae_AddTypeValuesEntryToSYM ('C', type_function, (char*)description_function,
 		(char)0,  0, NULL, NULL);
-	Extrae_AddTypeValuesEntryToSYM ('c', type_file_line, description_file_line,
+	Extrae_AddTypeValuesEntryToSYM ('c', type_file_line, (char*)description_file_line,
 		(char)0, 0, NULL, NULL);
 }
 
-void Extrae_register_function_address_Wrapper (void *ptr, char *funcname, 
-	char *modname, unsigned line)
+void Extrae_register_function_address_Wrapper (void *ptr, const char *funcname, 
+	const char *modname, unsigned line)
 {
-	Extrae_AddFunctionDefinitionEntryToSYM ('O', ptr, funcname, modname, line);
+	Extrae_AddFunctionDefinitionEntryToSYM ('O', ptr, (char*)funcname, (char*)modname, line);
 }
 
 void Extrae_define_event_type_Wrapper (extrae_type_t type, char *description,

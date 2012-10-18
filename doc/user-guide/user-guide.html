@@ -2786,11 +2786,11 @@ This routine changes the thread identifier so as to be vthread in the final trac
 <BR>
 This routine recovers the original thread identifier (given by routines like pthread_self or omp_get_thread_num, for instance).
 </LI>
-<LI><TT>void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char* s1, char *s2)</TT>
+<LI><TT>void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, const char* s1, const char *s2)</TT>
 <BR>
 Registers type <TT>t2</TT> to reference user source code location by using its address. During the merge phase the mpi2prv command will assign type <TT>t1</TT> to the event type that references the user function and to the event <TT>t2</TT> to the event that references the file name and line location.
 </LI>
-<LI><TT>void Extrae_register_function_address (void *ptr, char *funcname, char *modname, unsigned line);</TT>
+<LI><TT>void Extrae_register_function_address (void *ptr, const char *funcname, const char *modname, unsigned line);</TT>
 <BR>
 By default, the mpi2prv process uses the binary debugging information to translate program addresses into information that contains function name, the module name and line. The Extrae_register_function_address allows providing such information by hand during the execution of the instrumented application. This function must provide the function name (<TT>funcname</TT>), module name (<TT>modname</TT>) and line number for a given address.
 </LI>
@@ -3761,7 +3761,7 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
 \begin{table}
 \centerline{
 \...
-... to configure {\sf {E}xtrae}\ ({\em continued})}
+... to configure {\sf {E}xtrae} ({\em continued})}
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -4424,7 +4424,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2012-10-17
+The translation was initiated by Harald Servat on 2012-10-18
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot210">... file</A><A
@@ -4490,7 +4490,7 @@ The translation was initiated by Harald Servat on 2012-10-17
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2012-10-17
+2012-10-18
 </ADDRESS>
 </BODY>
 </HTML>

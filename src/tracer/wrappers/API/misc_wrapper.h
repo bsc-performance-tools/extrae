@@ -61,10 +61,10 @@ void Extrae_Resume_virtual_thread_Wrapper (unsigned u);
 void Extrae_Suspend_virtual_thread_Wrapper (void);
 void Extrae_register_stacked_type_Wrapper (extrae_type_t type);
 void Extrae_register_codelocation_type_Wrapper (extrae_type_t type_function,
-	extrae_type_t type_file_line, char *description_function,
-	char *description_file_line);
-void Extrae_register_function_address_Wrapper (void *ptr, char *funcname, 
-	char *modname, unsigned line);
+	extrae_type_t type_file_line, const char *description_function,
+	const char *description_file_line);
+void Extrae_register_function_address_Wrapper (void *ptr, const char *funcname, 
+	const char *modname, unsigned line);
 void Extrae_define_event_type_Wrapper (extrae_type_t type, char *description,
 	unsigned nvalues, extrae_value_t *values, char **description_values);
 void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,

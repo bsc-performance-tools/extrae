@@ -320,8 +320,7 @@ static void Concat_User_Labels (FILE * fd)
 		labels = fopen (str, "r");
 		if (labels == NULL)
 		{
-			fprintf (stderr, "mpi2prv: Cannot open file %s (pointed by EXTRAE_LABELS)\n",
-			  labels);
+			fprintf (stderr, "mpi2prv: Cannot open file pointed by EXTRAE_LABELS (%s)\n",str);
       return;
 		}
 
@@ -613,10 +612,10 @@ void Labels_loadSYMfile (int taskid, char *name)
 {
 	FILE *FD;
 	char LINE[1024], Type;
-	int function_count = 0, hwc_count = 0;
+	unsigned function_count = 0, hwc_count = 0, other_count = 0;
 
-    Extrae_Vector_Init (&defined_user_event_types);
-    event_type_t * last_event_type_used = NULL;
+	Extrae_Vector_Init (&defined_user_event_types);
+	event_type_t * last_event_type_used = NULL;
 
 	if (!name)
 		return;
@@ -653,9 +652,13 @@ void Labels_loadSYMfile (int taskid, char *name)
 						char fname[1024], modname[1024];
 						int line;
 						int type;
+						int res;
 						UINT64 address;
 
-						sscanf (LINE, "%llx %s %s %d", &address, fname, modname, &line);
+						res = sscanf (LINE, "%lx \"%[^\"]\" \"%[^\"]\" %d", &address, fname, modname, &line);
+						if (res != 4)
+							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+
 						if (!get_option_merge_UniqueCallerID())
 						{
 							if (Type == 'O')
@@ -676,10 +679,13 @@ void Labels_loadSYMfile (int taskid, char *name)
 
 				case 'H':
 					{
-						int eventcode;
+						int res, eventcode;
 						char hwc_description[1024];
 
-						sscanf (LINE, "%d %[^\n]", &eventcode, hwc_description);
+						res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, hwc_description);
+						if (res != 2)
+							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+
 						Labels_AddHWCounter_Code_Description (eventcode, hwc_description);
 						hwc_count++;
 					}
@@ -688,24 +694,30 @@ void Labels_loadSYMfile (int taskid, char *name)
 				case 'c':
 				case 'C':
 					{
-						int eventcode;
+						int res, eventcode;
 						char code_description[1024];
 
-						sscanf (LINE, "%d %[^\n]", &eventcode, code_description);
+						res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, code_description);
+						if (res != 2)
+							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+
 						Labels_Add_CodeLocation_Label (eventcode,
 							Type=='C'?CODELOCATION_FUNCTION:CODELOCATION_FILELINE,
 							code_description);
+						other_count++;
 					}
 					break;
 
                 case 'd':
                     {
-                        int eventvalue;
+                        int res, eventvalue;
                         char value_description[1024];
                         value_t * evt_value = NULL;
                         unsigned i, max = Extrae_Vector_Count (&last_event_type_used->event_values);
 
-                        sscanf (LINE, "%d %[^\n]", &eventvalue, value_description);
+                        res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, value_description);
+                        if (res != 2)
+                            fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
                         
                         for (i = 0; i < max; i++)
                         {
@@ -714,7 +726,7 @@ void Labels_loadSYMfile (int taskid, char *name)
                             {
                                 if(strcmp(evt->label, value_description))
                                 {
-                                        fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
+                                    fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
                                 }
                                 evt_value = evt;
                                 break;
@@ -731,17 +743,20 @@ void Labels_loadSYMfile (int taskid, char *name)
                             evt_value->value = eventvalue;
                             strcpy(evt_value->label, value_description);
                             Extrae_Vector_Append (&last_event_type_used->event_values, evt_value);
+                            other_count++;
                         }
                     }
                     break;
                 case 'D':
                     {
-                        int eventcode;
+                        int res, eventcode;
                         char code_description[1024];
                         unsigned i, max = Extrae_Vector_Count (&defined_user_event_types);
                         event_type_t * evt_type = NULL;
 
-                        sscanf (LINE, "%d %[^\n]", &eventcode, code_description);
+                        res = sscanf (LINE, "%d \"%[^\"]\"", &eventcode, code_description);
+                        if (res != 2)
+                            fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
 
                         for (i = 0; i < max; i++)
                         {
@@ -769,7 +784,8 @@ void Labels_loadSYMfile (int taskid, char *name)
                             strcpy(evt_type->event_type.label, code_description);
                             Extrae_Vector_Init(&evt_type->event_values);
     
-                            Extrae_Vector_Append(&defined_user_event_types, evt_type); 
+                            Extrae_Vector_Append(&defined_user_event_types, evt_type);
+                            other_count++;
                         }
                         last_event_type_used = evt_type;
                     }
@@ -784,8 +800,9 @@ void Labels_loadSYMfile (int taskid, char *name)
 
 	if (taskid == 0)
 	{
-		fprintf (stdout, "mpi2prv: %d symbols successfully imported from %s file\n", function_count, name);
-		fprintf (stdout, "mpi2prv: %d HWC counter descriptions successfully imported from %s file\n", hwc_count, name);
+		fprintf (stdout, "mpi2prv: A total of %u symbols were imported from %s file\n", function_count+hwc_count+other_count, name);
+		fprintf (stdout, "mpi2prv: %u function symbols successfully imported\n", function_count);
+		fprintf (stdout, "mpi2prv: %u HWC counter descriptions successfully\n", hwc_count);
 	}
 
 	fclose (FD);

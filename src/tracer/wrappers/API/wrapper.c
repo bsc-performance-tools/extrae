@@ -2078,7 +2078,8 @@ void Extrae_AddTypeValuesEntryToSYM (char code_type, int type, char *description
 	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
-		snprintf (line, sizeof(line), "%c %d %s\n", code_type, type, description);
+		snprintf (line, sizeof(line), "%c %d \"%s\"\n", code_type, type,
+			description);
 		write (fd, line, strlen(line));
 		if (nvalues > 0)
 		{
@@ -2087,7 +2088,8 @@ void Extrae_AddTypeValuesEntryToSYM (char code_type, int type, char *description
 			{
 				ASSERT(strlen(description_values[i])<1024, "Description for value is too large");
 
-				snprintf (line, sizeof(line), "%c %llu %s\n", code_values, values[i], description_values[i]);
+				snprintf (line, sizeof(line), "%c %llu \"%s\"\n", code_values,
+					values[i], description_values[i]);
 				write (fd, line, strlen(line));
 			}
 		}
@@ -2108,8 +2110,8 @@ void Extrae_AddFunctionDefinitionEntryToSYM (char code_type, void *address,
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		/* Example of format: U 0x100016d4 fA mpi_test.c 0 */
-		snprintf (line, sizeof(line), "%c %p %s %s %u\n", code_type, address,
-			functionname, modulename, fileline);
+		snprintf (line, sizeof(line), "%c %p \"%s\" \"%s\" %u\n", code_type,
+			address, functionname, modulename, fileline);
 		write (fd, line, strlen(line));
 		close (fd);
 	}

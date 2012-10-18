@@ -524,7 +524,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
   EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_GET_VERSION);
 
 #define apiTRACE_REGISTER_CODELOCATION_TYPE(x) \
-	void x##register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char *s1, char *s2) \
+	void x##register_codelocation_type (extrae_type_t t1, extrae_type_t t2, const char *s1, const char *s2) \
 	{ \
 		if (mpitrace_on) \
 		{ \
@@ -536,7 +536,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_REGISTER_CODELOCATION_TYPE);
 
 #define apiTRACE_REGISTER_FUNCTION_ADDRESS(x) \
-	void x##register_function_address (void *ptr, char *funcname, char *modname, unsigned line) \
+	void x##register_function_address (void *ptr, const char *funcname, const char *modname, unsigned line) \
 	{ \
 		if (mpitrace_on) \
 		{ \
@@ -794,8 +794,8 @@ void Extrae_get_version (unsigned *M, unsigned *m, unsigned *r)
 	Extrae_get_version_Wrapper (M, m, r);
 }
 
-INTERFACE_ALIASES_C(_register_codelocation_type,Extrae_register_codelocation_type,(extrae_type_t,char*,char*),void)
-void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char* s1, char *s2)
+INTERFACE_ALIASES_C(_register_codelocation_type,Extrae_register_codelocation_type,(extrae_type_t,const char*, const char*),void)
+void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, const char* s1, const char *s2)
 {
 	if (mpitrace_on)
 	{
@@ -805,8 +805,8 @@ void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, char
 	}
 }
 
-INTERFACE_ALIASES_C(_register_function_address,Extrae_register_function_address,(void*,char*,char*,unsigned),void)
-void Extrae_register_function_address (void *ptr, char *funcname, char *modname, unsigned line)
+INTERFACE_ALIASES_C(_register_function_address,Extrae_register_function_address,(void*,const char*,const char*,unsigned),void)
+void Extrae_register_function_address (void *ptr,const char *funcname,const char *modname, unsigned line)
 {
 	if (mpitrace_on)
 	{
