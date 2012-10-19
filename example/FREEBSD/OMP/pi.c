@@ -30,7 +30,7 @@
 #include <omp.h>
 #include <math.h>
 
-int main(int argc, char **argv)
+void do_work(void)
 {
 	int i;
 	int n = 1000000;
@@ -68,4 +68,9 @@ int main(int argc, char **argv)
 	}
 	pi = h * area;
 	printf("pi (by using #pragma omp parallel sections) is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
+}
+
+int main(int argc, char **argv)
+{
+	do_work();
 }

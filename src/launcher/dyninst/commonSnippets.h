@@ -36,6 +36,9 @@
 
 using namespace std;
 
+BPatch_Vector<BPatch_function *> getRoutines (string &routine,
+	BPatch_image *appImage, bool warn = true);
+
 BPatch_function * getRoutine (string &routine, BPatch_image *appImage,
 	bool warn = true);
 

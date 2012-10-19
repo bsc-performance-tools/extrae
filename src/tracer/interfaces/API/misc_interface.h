@@ -130,6 +130,6 @@
 #endif
 
 void Extrae_init (void);
-void Extrea_fini (void);
+void Extrae_fini (void);
 
 #endif /* MPI_INTERFACE_H_INCLUDED */

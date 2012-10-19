@@ -63,6 +63,11 @@ class ApplicationType
 
 	string TranslatePFToUF (string PF, OMP_rte_t type);
 	OMP_rte_t checkIntelOpenMPRuntime (BPatch_image *appImage);
+	bool detectApplicationType_checkIntelOpenMPrte (BPatch_image *appImage);
+	bool detectApplicationType_checkIBMOpenMPrte (BPatch_image *appImage);
+	bool detectApplicationType_checkGNUOpenMPrte (BPatch_image *appImage);
+	bool detectApplicationType_checkOpenMPrte (vector<string> &routines,
+		string library, BPatch_image *appImage);
 };
 
 inline bool ApplicationType::get_isMPI (void) const

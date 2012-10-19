@@ -32,7 +32,7 @@
 
 #include "extrae_user_events.h"
 
-int main(int argc, char **argv)
+void do_work(void)
 {
 	int i;
 	int n = 1000000;
@@ -77,4 +77,9 @@ int main(int argc, char **argv)
 
 	/* Extre_fini() must be the last call */
 	Extrae_fini();
+}
+
+int main(int argc, char **argv)
+{
+	do_work();
 }

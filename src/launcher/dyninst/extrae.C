@@ -79,8 +79,8 @@ static int VerboseLevel = 0;  /* Verbose Level */
 static bool useHWC = false;
 static bool ListFunctions = false;
 static bool extrae_detecting_application_type = false;
-
-string loadedModule;
+static bool BinaryLinkedWithInstrumentation;
+static string loadedModule;
 
 #define DYNINST_NO_ERROR -1
 
@@ -159,14 +159,17 @@ static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPat
 			appProces->getSourceLines ((unsigned long) f->getBaseAddr(), lines);
 			if (lines.size() > 0)
 			{
-				symfile << "P " << hex << f->getBaseAddr() <<  dec << " " << *iter << " " <<  lines[0].fileName() <<  " " << lines[0].lineNumber() << endl;
+				symfile << "P " << hex << f->getBaseAddr() << dec << " \"" << *iter
+					<< "\" \"" <<  lines[0].fileName() <<  "\" " << lines[0].lineNumber()
+					<< endl;
 			}
 			else
 			{
 				/* this happens if the application was not compiled with -g */
 				char modname[1024];
 				f->getModuleName (modname, 1024);
-				symfile << "P " << hex << f->getBaseAddr() <<  dec << " " << *iter << " " << modname << " 0" << endl;
+				symfile << "P " << hex << f->getBaseAddr() << dec << " \"" << *iter
+					<< "\" \"" << modname << "\" 0" << endl;
 			}
 		}
 	}
@@ -183,14 +186,17 @@ static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPat
 			appProces->getSourceLines ((unsigned long) f->getBaseAddr(), lines);
 			if (lines.size() > 0)
 			{
-				symfile << "U " << hex << f->getBaseAddr() <<  dec << " " << *iter << " " <<  lines[0].fileName() <<  " " << lines[0].lineNumber() << endl;
+				symfile << "U " << hex << f->getBaseAddr() << dec << " \"" << *iter
+					<< "\" \"" << lines[0].fileName() <<  "\" " << lines[0].lineNumber()
+					<< endl;
 			}
 			else
 			{
 				/* this happens if the application was not compiled with -g */
 				char modname[1024];
 				f->getModuleName (modname, 1024);
-				symfile << "U " << hex << f->getBaseAddr() <<  dec << " " << *iter << " " << modname << " 0" << endl;
+				symfile << "U " << hex << f->getBaseAddr() << dec << " \"" << *iter
+					<< "\" \"" << modname << "\" 0" << endl;
 			}
 		}
 	}
@@ -438,19 +444,27 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		else
 			sharedlibname_ext = "";
 
-		if (instrumentOMP && appType->get_isOpenMP() && loadedModule != sharedlibname)
+		/* For OpenMP apps, if the application has been linked with Extrae, just need to
+		   instrument the function calls that have #pragma omp in them. The outlined
+			 routines will be instrumented by the library attached to the binary */
+		if (!BinaryLinkedWithInstrumentation &&
+		    instrumentOMP && appType->get_isOpenMP() && loadedModule != sharedlibname)
 		{
 			/* OpenMP instrumentation (just for OpenMP apps) */
 			if (appType->isMangledOpenMProutine (name))
 			{
 				if (VerboseLevel)
-					cout << PACKAGE_NAME << ": Instrumenting OpenMP outlined routine " << name << endl;
+					if (!BinaryLinkedWithInstrumentation)
+						cout << PACKAGE_NAME << ": Instrumenting OpenMP outlined routine " << name << endl;
 
-				/* Instrument routine */ 
-				wrapTypeRoutine (f, name, OMPFUNC_EV, appImage, appProcess);
+				if (!BinaryLinkedWithInstrumentation)
+				{
+					/* Instrument routine */ 
+					wrapTypeRoutine (f, name, OMPFUNC_EV, appImage, appProcess);
 
-				/* Add to list if not already there */
-				OMPList.push_back (name);
+					/* Add to list if not already there */
+					OMPList.push_back (name);
+				}
 
 				/* Demangle name and add into the UF list if it didn't exist there */
 				string demangled = appType->demangleOpenMProutine (name);
@@ -458,18 +472,10 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 				list<string>::iterator iter = find (UserList.begin(), UserList.end(), demangled);
 				if (iter == UserList.end())
 				{
-					if (demangled != "main")
-					{
-						UserList.push_back (demangled);
+					UserList.push_back (demangled);
 
-						if (VerboseLevel)
-							cout << PACKAGE_NAME << ": Adding demangled OpenMP routine " << demangled << " to the user function list" << endl;	
-					}
-					else
-					{
-						if (VerboseLevel)
-							cout << PACKAGE_NAME << ": will not add main as a demangled OpenMP routine" << endl;
-					}
+					if (VerboseLevel)
+						cout << PACKAGE_NAME << ": Adding demangled OpenMP routine " << demangled << " to the user function list" << endl;	
 				}
 
 				OMPinsertion++;
@@ -516,14 +522,15 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 						{
 							APIinsertion++;
 							if (VerboseLevel)
-								cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << "(" << sharedlibname << ")" << endl;
+								cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << sharedlibname << ")" << endl;
 						}
 						else
 							cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
 					}
 
 					/* Check MPI calls */
-					if (instrumentMPI && appType->get_isMPI() && (
+					if (!BinaryLinkedWithInstrumentation &&
+					    instrumentMPI && appType->get_isMPI() && (
 					    strncmp (calledname, PMPI_C_prefix, 5) == 0 || strncmp (calledname, MPI_C_prefix, 4) == 0 ||
 					    strncmp (calledname, PMPI_F_prefix, 5) == 0 || strncmp (calledname, MPI_F_prefix, 4) == 0))
 					{
@@ -543,7 +550,8 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 
 					/* Special instrumentation for calls in Intel OpenMP runtime v11/v12
 					   currently only for __kmpc_fork_call */
-					if (appType->get_OpenMP_rte() == ApplicationType::Intel_v11 &&
+					if (!BinaryLinkedWithInstrumentation &&
+					    appType->get_OpenMP_rte() == ApplicationType::Intel_v11 &&
 						  strncmp (calledname, "__kmpc_fork_call", strlen("__kmpc_fork_call")) == 0)
 					{
 						string s = "__kmpc_fork_call_extrae_dyninst";
@@ -558,6 +566,21 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 							}
 							else
 								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
+						}
+					}
+
+					/* Instrument routines that call CUDA */
+					if (appType->get_isCUDA() &&
+              strncmp (calledname, "cudaLaunch", strlen("cudaLaunch")) == 0)
+					{
+
+						list<string>::iterator iter = find (UserList.begin(), UserList.end(), name);
+						if (iter == UserList.end())
+						{
+							UserList.push_back (name);
+
+							if (VerboseLevel)
+								cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it launche a CUDA kernel" << endl;	
 						}
 					}
 
@@ -595,20 +618,28 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		list<string>::iterator iter = UserList.begin();
 		while (iter != UserList.end())
 		{
-			BPatch_function *f = getFunction (appImage, *iter);
-
-			if (f != NULL)
+			if (*iter != "main")
 			{
-				wrapTypeRoutine (f, *iter, USRFUNC_EV, appImage, appProcess);
-				UFinsertion++;
+				BPatch_function *f = getFunction (appImage, *iter);
 
-				if (VerboseLevel)
-					cout << PACKAGE_NAME << ": Instrumenting user function : " << *iter << endl;
+				if (f != NULL)
+				{
+					wrapTypeRoutine (f, *iter, USRFUNC_EV, appImage, appProcess);
+					UFinsertion++;
+
+					if (VerboseLevel)
+						cout << PACKAGE_NAME << ": Instrumenting user function : " << *iter << endl;
+				}
+				else
+				{
+					if (VerboseLevel)
+						cout << PACKAGE_NAME << ": Unable to instrument user function : " << *iter << endl;
+				}
 			}
 			else
 			{
 				if (VerboseLevel)
-					cout << PACKAGE_NAME << ": Unable to instrument user function : " << *iter << endl;
+					cout << PACKAGE_NAME << ": Although 'main' symbol was in the instrumented functions list, it will not be instrumented" << endl;
 			}
 			iter++;
 		}
@@ -734,6 +765,11 @@ int main (int argc, char *argv[])
 	}
 
 	BPatch_image *appImage = appProcess->getImage();
+	if (appImage == NULL)
+	{
+		cerr << PACKAGE_NAME << ": Error while acquiring application image" << endl;
+		exit (-1);
+	}
 
 	/* The user asks for the list of functions, simply show it */
 	if (ListFunctions)
@@ -754,77 +790,95 @@ int main (int argc, char *argv[])
 	if (::XML_CheckTraceEnabled())
 	{
 		ApplicationType *appType = new ApplicationType ();
+
 		extrae_detecting_application_type = true;
+
 		cout << PACKAGE_NAME << ": Detecting application type " << endl;
 		appType->detectApplicationType (appImage);
-		extrae_detecting_application_type = false;
 		appType->dumpApplicationType ();
 
-		/* Check for the correct library to be loaded */
-		if (appType->get_isMPI())
-		{
-			if (appType->get_isOpenMP())
-			{
-				if (appType->get_MPI_type() == ApplicationType::MPI_C)
-					sprintf (buffer, "%s/lib/lib_dyn_ompitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-				else
-					sprintf (buffer, "%s/lib/lib_dyn_ompitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-			}
-			else if (appType->get_isCUDA())
-			{
-				if (appType->get_MPI_type() == ApplicationType::MPI_C)
-					sprintf (buffer, "%s/lib/lib_dyn_cudampitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-				else
-					sprintf (buffer, "%s/lib/lib_dyn_cudampitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-			}
-			else
-			{
-				if (appType->get_MPI_type() == ApplicationType::MPI_C)
-					sprintf (buffer, "%s/lib/lib_dyn_mpitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-				else
-					sprintf (buffer, "%s/lib/lib_dyn_mpitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-			}
-		}
-		else
-		{
-			if (appType->get_isOpenMP())
-			{
-				sprintf (buffer, "%s/lib/lib_dyn_omptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-			}
-			else
-			{
-				if (appType->get_isCUDA())
-					sprintf (buffer, "%s/lib/libcudatrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-				else
-					sprintf (buffer, "%s/lib/libseqtrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-			}
-		}
-		loadedModule = buffer;
+		cout << PACKAGE_NAME << ": Detecting whether the application has been already linked with Extrae : ";
+		string Extrae_init_call = "Extrae_init";
+		BPatch_function *extrae_init = getRoutine (Extrae_init_call, appImage, false);
+		BinaryLinkedWithInstrumentation = extrae_init != NULL;
+		cout << (BinaryLinkedWithInstrumentation?"yes":"no") << endl;
 
-		/* Load the module into the mutattee */
-		cout << PACKAGE_NAME << ": Loading " << loadedModule << " into the target application" << endl;
+		extrae_detecting_application_type = false;
+
+		/* If the application has not been linked with instrumentation library, load the
+		   appropriate module */
+		if (!BinaryLinkedWithInstrumentation)
+		{
+			/* Check for the correct library to be loaded */
+			if (appType->get_isMPI())
+			{
+				if (appType->get_isOpenMP())
+				{
+					if (appType->get_MPI_type() == ApplicationType::MPI_C)
+						sprintf (buffer, "%s/lib/lib_dyn_ompitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					else
+						sprintf (buffer, "%s/lib/lib_dyn_ompitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				}
+				else if (appType->get_isCUDA())
+				{
+					if (appType->get_MPI_type() == ApplicationType::MPI_C)
+						sprintf (buffer, "%s/lib/lib_dyn_cudampitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					else
+						sprintf (buffer, "%s/lib/lib_dyn_cudampitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				}
+				else
+				{
+					if (appType->get_MPI_type() == ApplicationType::MPI_C)
+						sprintf (buffer, "%s/lib/lib_dyn_mpitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					else
+						sprintf (buffer, "%s/lib/lib_dyn_mpitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				}
+			}
+			else
+			{
+				if (appType->get_isOpenMP())
+				{
+					sprintf (buffer, "%s/lib/lib_dyn_omptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				}
+				else
+				{
+					if (appType->get_isCUDA())
+						sprintf (buffer, "%s/lib/libcudatrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					else
+						sprintf (buffer, "%s/lib/libseqtrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+				}
+			}
+
+			loadedModule = buffer;
+
+			/* Load the module into the mutattee */
+			cout << PACKAGE_NAME << ": Loading " << loadedModule << " into the target application" << endl;
 	
-		if (!file_exists (buffer))
-		{
-			/* If the library does not exist, terminate the mutatee and exit */
-			cerr << PACKAGE_NAME << ": Cannot find the module. It must be under $EXTRAE_HOME/lib" << endl;
-			appProcess->terminateExecution();
-			exit (-1);
-		}
-		if (!appProcess->loadLibrary (loadedModule.c_str()))
-		{
-			/* If the library cannot be loaded, terminate the mutatee and exit */
-			cerr << PACKAGE_NAME << ": Cannot load library! Retry using -v to gather more information on this error!" << endl;
-			appProcess->terminateExecution();
-			exit (-1);
-		}
+			if (!file_exists (buffer))
+			{
+				/* If the library does not exist, terminate the mutatee and exit */
+				cerr << PACKAGE_NAME << ": Cannot find the module. It must be under $EXTRAE_HOME/lib" << endl;
+				appProcess->terminateExecution();
+				exit (-1);
+			}
+			if (!appProcess->loadLibrary (loadedModule.c_str()))
+			{
+				/* If the library cannot be loaded, terminate the mutatee and exit */
+				cerr << PACKAGE_NAME << ": Cannot load library! Retry using -v to gather more information on this error!" << endl;
+				appProcess->terminateExecution();
+				exit (-1);
+			}
+		} /* ! BinaryLinkedWithInstrumentation */
+		else
+			cout << PACKAGE_NAME << ": The application seems to be linked with Extrae libraries. Won't load additional libraries..." << endl;
 
 		/* Load instrumentation API patches */
 		loadAPIPatches (appImage);
 		if (appType->get_isMPI() && ::XML_GetTraceMPI())
 			loadMPIPatches (appImage);
 
-		if (appType->get_isOpenMP())
+		/* Apply instrumentation of runtimes only if not linked with Extrae */
+		if (!BinaryLinkedWithInstrumentation && appType->get_isOpenMP())
 		{
 			if (appType->get_OpenMP_rte() == ApplicationType::Intel_v11)
 			{
@@ -835,7 +889,8 @@ int main (int argc, char *argv[])
 			InstrumentOMPruntime (::XML_GetTraceOMP_locks(), appType, appImage, appProcess);
 		}
 
-		if (appType->get_isCUDA())
+		/* Apply instrumentation of runtimes only if not linked with Extrae */
+		if (!BinaryLinkedWithInstrumentation && appType->get_isCUDA())
 		{
 			cout << PACKAGE_NAME << ": Instrumenting CUDA runtime" << endl;
 			InstrumentCUDAruntime (appType, appImage, appProcess);
@@ -843,7 +898,8 @@ int main (int argc, char *argv[])
 
 		/* If the application is NOT MPI, instrument the MAIN symbol in order to
  		   initialize and finalize the instrumentation */
-		if (!appType->get_isMPI())
+		/* Apply instrumentation of runtimes only if not linked with Extrae */
+		if (!BinaryLinkedWithInstrumentation && !appType->get_isMPI())
 		{
 			/* Typical main entry & exit */
 			wrapRoutine (appImage, appProcess, "main", "Extrae_init", "Extrae_fini");

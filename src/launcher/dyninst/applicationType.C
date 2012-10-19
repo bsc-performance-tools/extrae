@@ -35,6 +35,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include <BPatch.h>
 #include <BPatch_function.h>
 
+#include <commonSnippets.h>
+
 #include <iostream>
 
 /* For Intel 8.x - 9.x (maybe 10.x?) */
@@ -111,31 +113,78 @@ ApplicationType::OMP_rte_t ApplicationType::checkIntelOpenMPRuntime (BPatch_imag
 	return Intel_v11;
 }
 
+bool ApplicationType::detectApplicationType_checkOpenMPrte (
+	vector<string> &routines, string library, BPatch_image *appImage)
+{
+	bool result = false;
+
+	unsigned numroutines = routines.size();
+	for (unsigned r = 0; r < numroutines && !result; r++)
+	{
+		BPatch_Vector<BPatch_function *> found_funcs;
+		found_funcs = getRoutines (routines[r], appImage, false);
+		unsigned numfuncs = found_funcs.size();
+		for (unsigned u = 0; u < numfuncs; u++)
+		{
+			char buffer[1024];
+			char *module = found_funcs[u]->getModuleName (buffer, sizeof(buffer));
+			result = library == module;
+		}
+	}
+
+	return result;
+}
+
+bool ApplicationType::detectApplicationType_checkGNUOpenMPrte (BPatch_image *appImage)
+{
+	const char *functions[] = {"GOMP_parallel_start",
+		"GOMP_loop_end",
+		"GOMP_barrier"};
+	vector<string> v (functions, functions+3);
+
+	return detectApplicationType_checkOpenMPrte (v, "libgomp.so.1", appImage);
+}
+
+bool ApplicationType::detectApplicationType_checkIntelOpenMPrte (BPatch_image *appImage)
+{
+	const char *functions[] = {"__kmpc_fork_call",
+		"__kmpc_invoke_task_func",
+		"__kmpc_barrier"};
+	vector<string> v (functions, functions+3);
+
+	return detectApplicationType_checkOpenMPrte (v, "libiomp5.so", appImage);
+}
+
+bool ApplicationType::detectApplicationType_checkIBMOpenMPrte (BPatch_image *appImage)
+{
+	const char *functions[] = {"_xlsmpParallelDoSetup_TPO",
+		"_xlsmpParRegionSetup_TPO",
+		"_xlsmpWSDoSetup_TPO" };
+	vector<string> v (functions, functions+3);
+
+	return detectApplicationType_checkOpenMPrte (v, "libxlsmp.so.1", appImage);
+}
+
 void ApplicationType::detectApplicationType (BPatch_image *appImage)
 {
 	BPatch_Vector<BPatch_function *> found_funcs;
 
 	isOpenMP = isMPI = isCUDA = false;
 
-	/* Check for different implementations of OpenMP rte */
-	if ((appImage->findFunction ("__kmpc_fork_call", found_funcs) != NULL) ||
-	    (appImage->findFunction ("__kmpc_invoke_task_func", found_funcs) != NULL) )
+	/* Check for different implementation of OpenMP rte */
+	if (detectApplicationType_checkIntelOpenMPrte (appImage))
 	{
-		OpenMP_runtime = checkIntelOpenMPRuntime (appImage);
 		isOpenMP = true;
+		OpenMP_runtime = checkIntelOpenMPRuntime (appImage);
 	}
-	else if ((appImage->findFunction ("_xlsmpParallelDoSetup_TPO", found_funcs) != NULL) ||
-	         (appImage->findFunction ("_xlsmpParRegionSetup_TPO", found_funcs) != NULL) ||
-	         (appImage->findFunction ("_xlsmpWSDoSetup_TPO", found_funcs) != NULL))
+	else if (detectApplicationType_checkGNUOpenMPrte (appImage))
+	{
+		isOpenMP = true;
+		OpenMP_runtime = GNU_v42;
+	}
+	else if (detectApplicationType_checkIBMOpenMPrte (appImage))
 	{
 		OpenMP_runtime = IBM_v16;
-		isOpenMP = true;
-	}
-	else if ((appImage->findFunction ("GOMP_parallel_start", found_funcs) != NULL) ||
-	         (appImage->findFunction ("GOMP_loop_end", found_funcs) != NULL) ||
-	         (appImage->findFunction ("GOMP_barrier", found_funcs) != NULL))
-	{
-		OpenMP_runtime = GNU_v42;
 		isOpenMP = true;
 	}
 

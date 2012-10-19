@@ -55,7 +55,8 @@ using namespace std;
 #include <BPatch_point.h>
 #include "commonSnippets.h"
 
-BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn)
+
+BPatch_Vector<BPatch_function *> getRoutines (string &routine, BPatch_image *appImage, bool warn)
 {
 	BPatch_Vector<BPatch_function *> found_funcs;
 
@@ -66,8 +67,15 @@ BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn
 			string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find function ")+routine;
 			PRINT_PRETTY_ERROR("WARNING", error.c_str());
 		}
-		return NULL;
 	}
+
+	return found_funcs;
+}
+
+BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn)
+{
+	BPatch_Vector<BPatch_function *> found_funcs = getRoutines (routine, appImage, warn);
+
 	if (found_funcs.size() < 1)
 	{
 		if (warn)

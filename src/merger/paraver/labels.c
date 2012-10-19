@@ -321,7 +321,7 @@ static void Concat_User_Labels (FILE * fd)
 		if (labels == NULL)
 		{
 			fprintf (stderr, "mpi2prv: Cannot open file pointed by EXTRAE_LABELS (%s)\n",str);
-      return;
+			return;
 		}
 
 		fprintf (fd, "\n");

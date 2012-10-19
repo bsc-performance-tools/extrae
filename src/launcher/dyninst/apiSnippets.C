@@ -61,24 +61,26 @@ struct APIroutines_t
 };
 
 #define APIROUTINE_T_S(x)  {#x,NULL}
-#define APIROUTINE_C_T(x)  APIROUTINE_T_S(OMP##x), APIROUTINE_T_S(MPI##x), APIROUTINE_T_S(OMPI##x), APIROUTINE_T_S(SEQ##x)
-#define APIROUTINE_F_T(x)  APIROUTINE_T_S(omp##x), APIROUTINE_T_S(mpi##x), APIROUTINE_T_S(ompi##x), APIROUTINE_T_S(seq##x)
+#define APIROUTINE_C_T(x)  APIROUTINE_T_S(OMPtrace##x), APIROUTINE_T_S(MPItrace##x), APIROUTINE_T_S(OMPItrace##x), APIROUTINE_T_S(SEQtrace##x), APIROUTINE_T_S(Extrae##x)
+#define APIROUTINE_F_T(x)  APIROUTINE_T_S(omptrace##x), APIROUTINE_T_S(mpitrace##x), APIROUTINE_T_S(ompitrace##x), APIROUTINE_T_S(seqtrace##x), APIROUTINE_T_S(extrae##x)
 #define APIROUTINE_T(x)    APIROUTINE_C_T(x), APIROUTINE_F_T(x)
 #define APIROUTINE_T_END   {NULL,NULL}
 
 static struct APIroutines_t APIroutines[] =
 	{
-		APIROUTINE_T(trace_init),
-		APIROUTINE_T(trace_fini),
-		APIROUTINE_T(trace_event),
-		APIROUTINE_T(trace_nevent),
-		APIROUTINE_T(trace_eventandcounters),
-		APIROUTINE_T(trace_neventandcounters),
-		APIROUTINE_T(trace_counters),
-		APIROUTINE_T(trace_shutdown),
-		APIROUTINE_T(trace_restart),
-		APIROUTINE_T(trace_next_hwc_set),
-		APIROUTINE_T(trace_previous_hwc_set),
+		APIROUTINE_T(_init),
+		APIROUTINE_T(_fini),
+		APIROUTINE_T(_is_initialized),
+		APIROUTINE_T(_event),
+		APIROUTINE_T(_nevent),
+		APIROUTINE_T(_eventandcounters),
+		APIROUTINE_T(_neventandcounters),
+		APIROUTINE_T(_counters),
+		APIROUTINE_T(_shutdown),
+		APIROUTINE_T(_restart),
+		APIROUTINE_T(_next_hwc_set),
+		APIROUTINE_T(_previous_hwc_set),
+		APIROUTINE_T(_define_event_type),
 		APIROUTINE_T_END
 	};
 

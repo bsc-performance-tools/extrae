@@ -30,9 +30,16 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#if HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+# include <string.h>
+#endif
+
 #include <misc_interface.h>
 
-static Extrae_automatically_loaded = FALSE;
+static int Extrae_automatically_loaded = FALSE;
 
 __attribute__((destructor))
 void Extrae_auto_library_fini (void)
@@ -49,6 +56,10 @@ void Extrae_auto_library_init (void)
 {
 	if (!Extrae_automatically_loaded)
 	{
+		/* Do not automatically load if DynInst is orchestrating the tracing */
+		if (getenv("EXTRAE_DYNINST_RUN") != NULL)
+			if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") == 0)
+				return;
 		Extrae_init();
 		Extrae_automatically_loaded = TRUE;
 
@@ -58,3 +69,4 @@ void Extrae_auto_library_init (void)
 		atexit (Extrae_auto_library_fini);
 	}
 }
+
