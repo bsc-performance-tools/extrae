@@ -140,7 +140,7 @@ static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPat
 	ofstream symfile;
 	string symname = string(::XML_GetFinalDirectory())+string("/")+string(::XML_GetTracePrefix())+".sym";
 
-	symfile.open (symname.c_str(), ios::app);
+	symfile.open (symname.c_str());
 	if (!symfile.good())
 	{
 		cerr << "Cannot create the symbolic file" << symname << endl;
