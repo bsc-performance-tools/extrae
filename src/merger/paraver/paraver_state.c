@@ -197,54 +197,6 @@ void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigne
 	}
 }
 
-#if defined(DEAD_CODE)
-void OLD_Initialize_States (FileSet_t * fset)
-{
-   int obj;
-   unsigned int ptask, task, thread, cpu;
-   thread_t * thread_info;
-
-   num_excluded_states = 1; 
-   excluded_states = (int *)malloc(sizeof(int) * num_excluded_states);
-   excluded_states[0] = STATE_IDLE;
-
-   for (obj = 0; obj < num_Files_FS (fset); obj++)
-   {
-      GetNextObj_FS (fset, obj, &cpu, &ptask, &task, &thread);
-
-      /* Mark no state has been written yet */
-      thread_info = GET_THREAD_INFO (ptask, task, thread);
-      thread_info->incomplete_state_offset = (off_t)-1;
-
-      if (tracingCircularBuffer())
-      {
-#if 0
-         /* First state is set to STATE_NOT_TRACING */
-         Push_State (STATE_NOT_TRACING, ptask, task, thread);
-/*
-   When using circular buffers, the merger skips all events until the first collective operation.
-   This makes the TRACING_MODE_EV to be ommitted, so "Initialize_Trace_Mode_States" (which pops 
-   STATE_NOT_TRACING and pushes STATE_RUNNING) is never called. In this way, the application base 
-   state is STATE_NOT_TRACING instead of STATE_RUNNING. We could try to solve this forcing to process all 
-   events up to MPI_Init END.
-   Make note if we process the first events of the trace, then the trace does not start with STATE_NOT_TRACING. 
-*/
-#else
-         Push_State (STATE_RUNNING, ptask, task, thread);
-#endif
-      }
-      else
-      {
-         /* First state is set to STATE_STOPPED */
-         Push_State (STATE_STOPPED, ptask, task, thread);
-      }
-
-      /* Write the first state in the trace */
-      trace_paraver_state (cpu, ptask, task, thread, 0);
-   }
-}
-#endif
-
 void Initialize_States (FileSet_t * fset)
 {
    int obj;

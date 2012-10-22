@@ -42,8 +42,6 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdlib.h>
 #endif
 
-//#include "wrapper.h"
-//#include "trace_macros.h"
 #include "threadid.h"
 #include "omp-common.h"
 

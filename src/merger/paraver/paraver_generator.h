@@ -65,34 +65,6 @@ void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
 	unsigned int com_id, unsigned int send_size, unsigned int recv_size,
 	unsigned int is_root, unsigned isMPI);
 
-#if defined(DEAD_CODE)
-int paraver_state (struct fdz_fitxer fdz, unsigned int cpu,
-	unsigned int ptask, unsigned int task, unsigned int thread,
-	unsigned long long ini_time, unsigned long long end_time,
-	unsigned int state);
-
-int paraver_event (struct fdz_fitxer fdz, unsigned int cpu,
-	unsigned int ptask, unsigned int task, unsigned int thread,
-	unsigned long long time, unsigned int type, UINT64 value);
-
-int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
-	unsigned int ptask, unsigned int task, unsigned int thread,
-	unsigned long long time, unsigned int count, unsigned int *type,
-	UINT64 *value);
-
-int paraver_communication (struct fdz_fitxer fdz, unsigned int cpu_s,
-	unsigned int ptask_s, unsigned int task_s, unsigned int thread_s,
-	unsigned long long log_s, unsigned long long phy_s, unsigned int cpu_r,
-	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r,
-	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
-	unsigned int tag);
-
-int paraver_global_op (struct fdz_fitxer fdz, unsigned int cpu,
-	unsigned int ptask, unsigned int task, unsigned int thread,
-	unsigned long long time, unsigned int com_id, unsigned int send_size,
-	unsigned int receive_size, unsigned int glop_id, unsigned int root_rank);
-#endif
-
 int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 	unsigned long long Ftime, struct Pair_NodeCPU *NodeCPUinfo, int numtasks,
 	int taskid, unsigned long long records_per_task, int tree_fan_out);
