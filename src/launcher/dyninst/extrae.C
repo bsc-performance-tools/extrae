@@ -414,6 +414,50 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	BPatch_Vector<BPatch_function *> *vfunctions = appImage->getProcedures (false);
 	cout << "Done" << endl;
 
+	vector<string> CUDAkernels;
+
+	/* Look for CUDA kernels if the application is CUDA */
+	if (appType->get_isCUDA())
+	{
+		if (VerboseLevel)
+			cout << PACKAGE_NAME << ": Looking for CUDA kernels inside binary (this may take a while)..." << endl;
+
+		i = 0;
+		while (i < vfunctions->size())
+		{
+			char name[1024];
+
+			BPatch_function *f = (*vfunctions)[i];
+			f->getName (name, sizeof(name));
+			BPatch_Vector<BPatch_point *> *vpoints = f->findPoint (BPatch_subroutine);
+
+			if (vpoints != NULL)
+			{
+				unsigned j = 0;
+				while (j < vpoints->size())
+				{
+					BPatch_function *called = ((*vpoints)[j])->getCalledFunction();
+					if (NULL != called)
+					{
+						char calledname[1024];
+						called->getName (calledname, 1024);
+	
+						if (strncmp (calledname, "__device_stub__", strlen("__device_stub__")) == 0)
+						{
+							CUDAkernels.push_back (name);
+							if (VerboseLevel)
+								cout << PACKAGE_NAME << ": Found kernel " << name << endl;
+						}
+					}
+					j++;
+				}
+			}
+			i++;
+		}
+		if (VerboseLevel)
+			cout << PACKAGE_NAME << ": Finished looking for CUDA kernels" << endl;
+	}
+
 	cout << PACKAGE_NAME << ": Parsing executable looking for instrumentation points (" << vfunctions->size() << ") ";
 	if (VerboseLevel)
 		cout << endl;
@@ -428,13 +472,14 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	  d) instrument api calls
 	*/
 
+	i = 0;
 	while (i < vfunctions->size())
 	{
 		char name[1024], sharedlibname_c[1024];
 
 		BPatch_function *f = (*vfunctions)[i];
-		(f->getModule())->getFullName (sharedlibname_c, 1024);
-		f->getName (name, 1024);
+		(f->getModule())->getFullName (sharedlibname_c, sizeof(sharedlibname_c));
+		f->getName (name, sizeof(name));
 
 		string sharedlibname = sharedlibname_c;
 
@@ -491,7 +536,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		  sharedlibname_ext == ".c++" || /* c++ */
 		  sharedlibname_ext == ".i" || /* some compilers generate this extension in intermediate files */ 
 		  sharedlibname == "DEFAULT_MODULE" /* Dyninst specific container that represents the executable */
-	  )
+		)
 		{
 			/* API instrumentation (for any kind of apps)
 	
@@ -552,7 +597,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 					   currently only for __kmpc_fork_call */
 					if (!BinaryLinkedWithInstrumentation &&
 					    appType->get_OpenMP_rte() == ApplicationType::Intel_v11 &&
-						  strncmp (calledname, "__kmpc_fork_call", strlen("__kmpc_fork_call")) == 0)
+					    strncmp (calledname, "__kmpc_fork_call", strlen("__kmpc_fork_call")) == 0)
 					{
 						string s = "__kmpc_fork_call_extrae_dyninst";
 						BPatch_function *patch_openmp = getRoutine (s, appImage, false);
@@ -570,17 +615,20 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 					}
 
 					/* Instrument routines that call CUDA */
-					if (appType->get_isCUDA() &&
-              strncmp (calledname, "cudaLaunch", strlen("cudaLaunch")) == 0)
+					if (appType->get_isCUDA())
 					{
+						string scalledname (calledname);
 
-						list<string>::iterator iter = find (UserList.begin(), UserList.end(), name);
-						if (iter == UserList.end())
+						if (find (CUDAkernels.begin(), CUDAkernels.end(), scalledname) != CUDAkernels.end())
 						{
-							UserList.push_back (name);
+							list<string>::iterator iter = find (UserList.begin(), UserList.end(), name);
+							if (iter == UserList.end())
+							{
+								UserList.push_back (name);
 
-							if (VerboseLevel)
-								cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it launche a CUDA kernel" << endl;	
+								if (VerboseLevel)
+									cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it calls the CUDA kernel '" << calledname<< "'" << endl;	
+							}
 						}
 					}
 
