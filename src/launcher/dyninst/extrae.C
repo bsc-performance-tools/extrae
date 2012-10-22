@@ -838,7 +838,7 @@ int main (int argc, char *argv[])
 			{
 				if (appType->get_isOpenMP())
 				{
-					sprintf (buffer, "%s/lib/lib_dyn_omptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					sprintf (buffer, "%s/lib/libomptrace-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 				}
 				else
 				{
@@ -899,7 +899,7 @@ int main (int argc, char *argv[])
 		/* If the application is NOT MPI, instrument the MAIN symbol in order to
  		   initialize and finalize the instrumentation */
 		/* Apply instrumentation of runtimes only if not linked with Extrae */
-		if (!BinaryLinkedWithInstrumentation && !appType->get_isMPI())
+		if (!appType->get_isMPI())
 		{
 			/* Typical main entry & exit */
 			wrapRoutine (appImage, appProcess, "main", "Extrae_init", "Extrae_fini");

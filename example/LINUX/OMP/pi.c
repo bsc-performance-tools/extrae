@@ -48,6 +48,15 @@ void do_work(void)
 	pi = h * area;
 	printf("pi (by using #pragma omp parallel for) is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
 
+	#pragma omp parallel
+	{
+		#pragma omp barrier
+
+		fprintf (stdout, "In a barrier\n");
+
+		#pragma omp barrier
+	}
+
 	h = 1.0 / (double) n;
 	area = 0.0;
 	#pragma omp parallel sections private(i,x) reduction(+:area)

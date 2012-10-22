@@ -1422,16 +1422,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Allocate a bitmap to know which tasks are tracing */
 	Extrae_Allocate_Task_Bitmap (world_size);
 
-#if defined(DEAD_CODE)
-	/* Just check we aren't running mpirun nor a shell! */
-	if (!(strcmp (PROGRAM_NAME, "mpirun")))
-		return FALSE;
-
-	shell_name = getenv ("SHELL");
-	if (shell_name != NULL && !(strcmp (PROGRAM_NAME, shell_name)))
-		return FALSE;
-#endif
-
 #if defined(CUDA_SUPPORT)
 	/* If the application is not running under dyninst, initialize
 	   the CUDA runtime wrapping */
@@ -1445,15 +1435,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 #endif
 
 #if defined(OMP_SUPPORT)
-	/* If the application is not running under dyninst, initialize
-	   the OpenMP runtime wrapping */
-	if (getenv("EXTRAE_DYNINST_RUN") != NULL)
-	{
-		if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") != 0)
-			Extrae_OpenMP_init ();
-	}
-	else
-		Extrae_OpenMP_init();
+
+	Extrae_OpenMP_init();
 
 	/* Obtain the number of runnable threads in this execution.
 	   Just check for OMP_NUM_THREADS env var (if this compilation

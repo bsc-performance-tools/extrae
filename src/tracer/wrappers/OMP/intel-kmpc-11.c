@@ -98,13 +98,19 @@ int intel_kmpc_11_hook_points (int rank)
 	/* Create mutex to protect intel omp tasks allocation calls */
 	pthread_mutex_init (&extrae_map_kmpc_mutex, NULL);
 
-	/* Obtain @ for __kmpc_fork_call */
-	__kmpc_fork_call_real =
-		(void(*)(void*,int,void*,...))
-		dlsym (RTLD_NEXT, "__kmpc_fork_call");
-	if (__kmpc_fork_call_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_fork_call in DSOs!!\n");
-	INC_IF_NOT_NULL(__kmpc_fork_call_real,count);
+
+	/* Careful, do not overwrite the pointer to the real call if DynInst has
+	   already done it */
+	if (__kmpc_fork_call_real == NULL)
+	{
+		/* Obtain @ for __kmpc_fork_call */
+		__kmpc_fork_call_real =
+			(void(*)(void*,int,void*,...))
+			dlsym (RTLD_NEXT, "__kmpc_fork_call");
+		if (__kmpc_fork_call_real == NULL && rank == 0)
+			fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_fork_call in DSOs!!\n");
+		INC_IF_NOT_NULL(__kmpc_fork_call_real,count);
+	}
 
 	/* Obtain @ for __kmpc_barrier */
 	__kmpc_barrier_real =
@@ -222,9 +228,6 @@ static void *par_func;
 #if defined(DYNINST_MODULE)
 void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
 {
-	/* Create mutex to protect intel omp tasks allocation calls */
-	pthread_mutex_init (&extrae_map_kmpc_mutex, NULL);
-
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME" DEBUG: Extrae_intel_kmpc_runtime_init_dyninst:\n");
 	fprintf (stderr, PACKAGE_NAME" DEBUG: fork_call = %p\n", fork_call);
