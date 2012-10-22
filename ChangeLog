@@ -5,7 +5,7 @@ ChangeLog
    Now sports pcontrol, stackwalk, dynelf/dwarf and symlite. 
  * 18Oct2012 Fixes for DynInst launch
              CUDA applications instrumented with DynInst now instruments
-						 routines that call cudaLaunch.
+						 routines that call kernels.
  * 17Oct2012 Added Intel OpenMP runtime instrumentation when using Dyninst.
    Also, some minor enhacenements done when using DynInst.
  * 16Oct2012 Do not use -lrt if the system automatically adds clock_gettime
