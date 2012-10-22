@@ -4,14 +4,16 @@ bin_PROGRAMS = extrae
 
 noinst_PROGRAMS = load-module
 
+DYNINST_EXTRA_LIBS=
+
 # After 7.0.1 there were several steps to fragment dyninst
 # Step #1, add patch api
 if DYNINST_HAVE_PATCHAPI
-DYNINST_EXTRA_LIBS = -lpatchAPI
+DYNINST_EXTRA_LIBS += -lpatchAPI
 endif
 # Step #2, add pcontrol, stackwalk, dynDwarf/Elf and symLite
 if DYNINST_HAVE_PCONTROL
-DYNINST_EXTRA_LIBS = -lpcontrol -lstackwalk -lcommon -ldynDwarf -ldynElf -lsymLite 
+DYNINST_EXTRA_LIBS += -lpcontrol -lstackwalk -lcommon -ldynDwarf -ldynElf -lsymLite 
 endif
 
 extrae_SOURCES = extrae.C \

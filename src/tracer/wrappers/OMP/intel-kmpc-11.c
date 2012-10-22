@@ -225,7 +225,6 @@ static void *par_func;
 
 #include "intel-kmpc-11-intermediate.c"
 
-#if defined(DYNINST_MODULE)
 void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
 {
 #if defined(DEBUG)
@@ -235,7 +234,6 @@ void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
 
 	__kmpc_fork_call_real = (void(*)(void*,int,void*,...)) fork_call;
 }
-#endif
 
 /*
  * kmpc_fork_call / kmpc_fork_call_extrae_dyninst
@@ -246,21 +244,13 @@ void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
  *   __kmpc_fork_call_extrae_dyninst do the work by finally calling to
  *   __kmpc_fork_call passed.
  */
-
-#if !defined(DYNINST_MODULE)
 void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
-#else
-void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
-#endif
 {
 	void *params[64];
 	va_list ap;
 	int i;
 
 #if defined(DEBUG)
-#if defined(DYNINST_MODULE)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call_extrae_dyninst is at %p\n", THREADID, __kmpc_fork_call_extrae_dyninst);
-#endif
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call is at %p\n", THREADID, __kmpc_fork_call_real);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
 #endif
@@ -297,7 +287,51 @@ void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 	}
 }
 
-#if !defined(DYNINST_MODULE)
+
+void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
+{
+	void *params[64];
+	va_list ap;
+	int i;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call_extrae_dyninst is at %p\n", THREADID, __kmpc_fork_call_extrae_dyninst);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call is at %p\n", THREADID, __kmpc_fork_call_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
+#endif
+
+	if (__kmpc_fork_call_real != NULL)
+	{
+		Extrae_OpenMP_ParRegion_Entry ();
+
+		/* Grab parameters */
+		va_start (ap, p3);
+		for (i = 0; i < p2; i++)
+			params[i] = va_arg (ap, void*);
+		va_end (ap);
+
+		par_func = p3;
+
+		switch (p2)
+		{
+			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
+#include "intel-kmpc-11-intermediate-switch.c"
+
+			default:
+				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n", p2);
+				exit (-1);
+				break;
+		}
+
+		Extrae_OpenMP_ParRegion_Exit ();	
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
+
 void __kmpc_barrier (void *p1, int p2)
 {
 #if defined(DEBUG)
@@ -725,4 +759,3 @@ int __kmpc_omp_taskwait (void *p1, int p2)
 	}
 	return res;
 }
-#endif /* !defined(DYNINST_MODULE) */
