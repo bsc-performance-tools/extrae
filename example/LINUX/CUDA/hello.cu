@@ -5,7 +5,7 @@
 __global__ void helloWorld(char*);
 
 // Host function
-int main(int argc, char** argv)
+void do_work (void)
 {
 	int i;
 
@@ -41,6 +41,11 @@ int main(int argc, char** argv)
 
 	// everyone's favorite part
 	printf("%s\n", str);
+}
+
+int main (int argc, char *argv[])
+{
+	do_work();
 
 	return 0;
 }
