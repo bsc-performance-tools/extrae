@@ -1461,8 +1461,8 @@ AC_DEFUN([AX_PROG_DYNINST],
    dnl Check for patchAPI within DynInst (is Dyninst > 7.0.1?)
    AM_CONDITIONAL(DYNINST_HAVE_PATCHAPI, test -f ${DYNINST_LIBSDIR}/libpatchAPI.so)
 
-   dnl Check for pcontrol within DynInst (is Dyninst > 7.0.1?)
-   AM_CONDITIONAL(DYNINST_HAVE_PCONTROL, test -f ${DYNINST_LIBSDIR}/libpcontrol.so)
+   dnl Check for stackwalk within DynInst (is Dyninst > 7.0.1?)
+   AM_CONDITIONAL(DYNINST_HAVE_STACKWALK, test -f ${DYNINST_LIBSDIR}/libstackwalk.so)
 
    dnl Did the checks pass?
    AM_CONDITIONAL(HAVE_DYNINST, test "${DYNINST_INSTALLED}" = "yes")

@@ -12,7 +12,7 @@ if DYNINST_HAVE_PATCHAPI
 DYNINST_EXTRA_LIBS += -lpatchAPI
 endif
 # Step #2, add pcontrol, stackwalk, dynDwarf/Elf and symLite
-if DYNINST_HAVE_PCONTROL
+if DYNINST_HAVE_STACKWALK
 DYNINST_EXTRA_LIBS += -lpcontrol -lstackwalk -lcommon -ldynDwarf -ldynElf -lsymLite 
 endif
 
