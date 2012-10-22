@@ -124,11 +124,12 @@ bool ApplicationType::detectApplicationType_checkOpenMPrte (
 		BPatch_Vector<BPatch_function *> found_funcs;
 		found_funcs = getRoutines (routines[r], appImage, false);
 		unsigned numfuncs = found_funcs.size();
-		for (unsigned u = 0; u < numfuncs; u++)
+		for (unsigned u = 0; u < numfuncs && !result; u++)
 		{
 			char buffer[1024];
 			char *module = found_funcs[u]->getModuleName (buffer, sizeof(buffer));
-			result = library == module;
+			string smodule (module);
+			result = smodule.find (library) == 0;
 		}
 	}
 
@@ -184,8 +185,8 @@ void ApplicationType::detectApplicationType (BPatch_image *appImage)
 	}
 	else if (detectApplicationType_checkIBMOpenMPrte (appImage))
 	{
-		OpenMP_runtime = IBM_v16;
 		isOpenMP = true;
+		OpenMP_runtime = IBM_v16;
 	}
 
 	/* MPI applications must have MPI_Init (or mpi_init fortran names) */
