@@ -42,6 +42,12 @@ BPatch_Vector<BPatch_function *> getRoutines (string &routine,
 BPatch_function * getRoutine (string &routine, BPatch_image *appImage,
 	bool warn = true);
 
+BPatch_Vector<BPatch_function *> getRoutines (const char *routine,
+	BPatch_image *appImage, bool warn = true);
+
+BPatch_function * getRoutine (const char *routine, BPatch_image *appImage,
+	bool warn = true);
+
 void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
 	string routine, string wrap_begin, string wrap_end, unsigned nparams = 0);
 

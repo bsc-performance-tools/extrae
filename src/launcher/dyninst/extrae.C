@@ -47,6 +47,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include <list>
+#include <set>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -122,20 +123,7 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 	}
 }
 
-static BPatch_function * getFunction (BPatch_image *appImage, string &name)
-{
-	BPatch_Vector<BPatch_function *> found_funcs;
-
-	if (appImage->findFunction (name.c_str(), found_funcs) == NULL)
-		return NULL;
-
-	if (found_funcs.size() < 1)
-		return NULL;
-
-	return found_funcs[0];
-}
-
-static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPatch_image *appImage, BPatch_process *appProces)
+static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch_image *appImage, BPatch_process *appProces)
 {
 	ofstream symfile;
 	string symname = string(::XML_GetFinalDirectory())+string("/")+string(::XML_GetTracePrefix())+".sym";
@@ -147,10 +135,10 @@ static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPat
 		return;
 	}
 
-	for (list<string>::iterator iter = ParFunc.begin();
+	for (set<string>::iterator iter = ParFunc.begin();
 		iter != ParFunc.end(); iter++)
 	{
-		BPatch_function *f = getFunction (appImage, *iter);
+		BPatch_function *f = getRoutine ((*iter).c_str(), appImage);
 
 		if (f != NULL)
 		{
@@ -174,10 +162,10 @@ static void GenerateSymFile (list<string> &ParFunc, list<string> &UserFunc, BPat
 		}
 	}
 
-	for (list<string>::iterator iter = UserFunc.begin();
+	for (set<string>::iterator iter = UserFunc.begin();
 		iter != UserFunc.end(); iter++)
 	{
-		BPatch_function *f = getFunction (appImage, *iter);
+		BPatch_function *f = getRoutine ((*iter).c_str(), appImage);
 
 		if (f != NULL)
 		{
@@ -280,7 +268,7 @@ static int processParams (int argc, char *argv[])
 	return i;
 }
 
-static void ReadFileIntoList (char *fitxer, list<string>& container)
+static void ReadFileIntoList (char *fitxer, set<string>& container)
 {
 	char str[2048];
 
@@ -296,15 +284,9 @@ static void ReadFileIntoList (char *fitxer, list<string>& container)
 
 	while (file_op >> str)
 	{
-		/* Add element into list if it didn't exist */
-		list<string>::iterator iter = find (container.begin(), container.end(), str);
-
-		if (iter == container.end())
-		{
-			if (VerboseLevel >= 2)
-				cout << " " << str;
-			container.push_back (str);
-		}
+		container.insert (str);
+		if (VerboseLevel >= 2)
+			cout << " " << str;
 	}
 
 	if (VerboseLevel >= 2)
@@ -396,7 +378,7 @@ static void printCallingSites (int id, int total, char *name, string sharedlibna
 }
 
 static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
-	ApplicationType *appType, list<string> &OMPList, list<string> &UserList,
+	ApplicationType *appType, set<string> &OMPset, set<string> &USERset,
 	bool instrumentMPI, bool instrumentOMP, bool instrumentUF)
 {
 	unsigned i = 0;
@@ -419,8 +401,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	/* Look for CUDA kernels if the application is CUDA */
 	if (appType->get_isCUDA())
 	{
-		if (VerboseLevel)
-			cout << PACKAGE_NAME << ": Looking for CUDA kernels inside binary (this may take a while)..." << endl;
+		cout << PACKAGE_NAME << ": Looking for CUDA kernels inside binary (this may take a while)..." << endl;
 
 		i = 0;
 		while (i < vfunctions->size())
@@ -454,8 +435,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 			}
 			i++;
 		}
-		if (VerboseLevel)
-			cout << PACKAGE_NAME << ": Finished looking for CUDA kernels" << endl;
+		cout << PACKAGE_NAME << ": Finished looking for CUDA kernels" << endl;
 	}
 
 	cout << PACKAGE_NAME << ": Parsing executable looking for instrumentation points (" << vfunctions->size() << ") ";
@@ -466,7 +446,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 
 	/*
 	  The 1st step includes:
-	  a) gather information of openmp outlined routines (original is added to UserList),
+	  a) gather information of openmp outlined routines (original is added to USERset),
 	  b) instrument openmp outlined routines
 	  c) instrument mpi calls
 	  d) instrument api calls
@@ -508,20 +488,14 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 					wrapTypeRoutine (f, name, OMPFUNC_EV, appImage, appProcess);
 
 					/* Add to list if not already there */
-					OMPList.push_back (name);
+					OMPset.insert (name);
 				}
 
 				/* Demangle name and add into the UF list if it didn't exist there */
 				string demangled = appType->demangleOpenMProutine (name);
-
-				list<string>::iterator iter = find (UserList.begin(), UserList.end(), demangled);
-				if (iter == UserList.end())
-				{
-					UserList.push_back (demangled);
-
-					if (VerboseLevel)
-						cout << PACKAGE_NAME << ": Adding demangled OpenMP routine " << demangled << " to the user function list" << endl;	
-				}
+				USERset.insert (demangled);
+				if (VerboseLevel)
+					cout << PACKAGE_NAME << ": Adding demangled OpenMP routine " << demangled << " to the user function list" << endl;	
 
 				OMPinsertion++;
 			}
@@ -599,8 +573,8 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 					    appType->get_OpenMP_rte() == ApplicationType::Intel_v11 &&
 					    strncmp (calledname, "__kmpc_fork_call", strlen("__kmpc_fork_call")) == 0)
 					{
-						string s = "__kmpc_fork_call_extrae_dyninst";
-						BPatch_function *patch_openmp = getRoutine (s, appImage, false);
+						BPatch_function *patch_openmp = getRoutine (
+							"__kmpc_fork_call_extrae_dyninst", appImage, false);
 						if (patch_openmp != NULL)
 						{
 							if (appProcess->replaceFunctionCall (*((*vpoints)[j]), *patch_openmp))
@@ -612,6 +586,11 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 							else
 								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
 						}
+
+						/* Instrument the routine that invokes the runtime */
+						USERset.insert (name);
+						if (VerboseLevel)
+							cout << PACKAGE_NAME << ": Adding call to OpenMP routine " << name << " to the user function list" << endl;	
 					}
 
 					/* Instrument routines that call CUDA */
@@ -621,14 +600,9 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 
 						if (find (CUDAkernels.begin(), CUDAkernels.end(), scalledname) != CUDAkernels.end())
 						{
-							list<string>::iterator iter = find (UserList.begin(), UserList.end(), name);
-							if (iter == UserList.end())
-							{
-								UserList.push_back (name);
-
-								if (VerboseLevel)
-									cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it calls the CUDA kernel '" << calledname<< "'" << endl;	
-							}
+							USERset.insert (name);
+							if (VerboseLevel)
+								cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it calls the CUDA kernel '" << calledname<< "'" << endl;	
 						}
 					}
 
@@ -653,7 +627,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	if (!VerboseLevel)
 		cout << ".Done" << endl;
 
-	if (UserList.size() > 0 && instrumentUF)
+	if (USERset.size() > 0 && instrumentUF)
 	{
 		/* Instrument user functions! */
 
@@ -663,12 +637,12 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		else
 			cout << flush;
 
-		list<string>::iterator iter = UserList.begin();
-		while (iter != UserList.end())
+		set<string>::iterator iter = USERset.begin();
+		while (iter != USERset.end())
 		{
 			if (*iter != "main")
 			{
-				BPatch_function *f = getFunction (appImage, *iter);
+				BPatch_function *f = getRoutine ((*iter).c_str(), appImage);
 
 				if (f != NULL)
 				{
@@ -706,18 +680,14 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 		if (appType->get_OpenMP_rte() == ApplicationType::Intel_v11)
 			cout << PACKAGE_NAME << ": " << OMPreplacement_intel_v11 << " OpenMP patches applied to specific locations for Intel runtime" << endl;
 	}
-	if (UserList.size() > 0)
+	if (USERset.size() > 0)
 		cout << PACKAGE_NAME << ": " << UFinsertion << " user function" << ((UFinsertion!=1)?"s":"") << " instrumented" << endl;
 }
 
 int main (int argc, char *argv[])
 {
-	list<string> UserFunctions;
-	list<string> ParallelFunctions;
-	list<string> excludedUserFunctions;
-#if defined(ALLOW_EXCLUDE_PARALLEL)
-	list<string> excludedParallelFunctions;
-#endif
+	set<string> UserFunctions;
+	set<string> ParallelFunctions;
 
 	int index;
 
@@ -846,8 +816,7 @@ int main (int argc, char *argv[])
 		appType->dumpApplicationType ();
 
 		cout << PACKAGE_NAME << ": Detecting whether the application has been already linked with Extrae : ";
-		string Extrae_init_call = "Extrae_init";
-		BPatch_function *extrae_init = getRoutine (Extrae_init_call, appImage, false);
+		BPatch_function *extrae_init = getRoutine ("Extrae_init", appImage, false);
 		BinaryLinkedWithInstrumentation = extrae_init != NULL;
 		cout << (BinaryLinkedWithInstrumentation?"yes":"no") << endl;
 
@@ -966,7 +935,7 @@ int main (int argc, char *argv[])
 			extrae_detecting_application_type = true;
 			while (exit_calls[i].length() > 0)
 			{
-				BPatch_function *special_exit = getRoutine (exit_calls[i], appImage, false);
+				BPatch_function *special_exit = getRoutine (exit_calls[i].c_str(), appImage, false);
 				if (NULL != special_exit)
 					wrapRoutine (appImage, appProcess, exit_calls[i], "Extrae_fini", "");
 				i++;

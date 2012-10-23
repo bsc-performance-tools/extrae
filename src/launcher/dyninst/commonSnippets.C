@@ -58,9 +58,19 @@ using namespace std;
 
 BPatch_Vector<BPatch_function *> getRoutines (string &routine, BPatch_image *appImage, bool warn)
 {
+	return getRoutines (routine.c_str(), appImage, warn);
+}
+
+BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn)
+{
+	return getRoutine (routine.c_str(), appImage, warn);
+}
+
+BPatch_Vector<BPatch_function *> getRoutines (const char* routine, BPatch_image *appImage, bool warn)
+{
 	BPatch_Vector<BPatch_function *> found_funcs;
 
-	if (appImage->findFunction (routine.c_str(), found_funcs) == NULL)
+	if (appImage->findFunction (routine, found_funcs) == NULL)
 	{
 		if (warn)
 		{
@@ -72,7 +82,7 @@ BPatch_Vector<BPatch_function *> getRoutines (string &routine, BPatch_image *app
 	return found_funcs;
 }
 
-BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn)
+BPatch_function * getRoutine (const char *routine, BPatch_image *appImage, bool warn)
 {
 	BPatch_Vector<BPatch_function *> found_funcs = getRoutines (routine, appImage, warn);
 

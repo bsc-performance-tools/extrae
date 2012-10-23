@@ -58,8 +58,8 @@ using namespace std;
 void InstrumentOMPruntime_Intel (BPatch_image *appImage, BPatch_process *appProcess)
 {
 	/* Gather information for all the instrumented calls */
-	string f = "Extrae_intel_kmpc_runtime_init_dyninst";
-	BPatch_function *function = getRoutine (f, appImage, false);
+	BPatch_function *function = getRoutine (
+		"Extrae_intel_kmpc_runtime_init_dyninst", appImage, false);
 	if (function == NULL)
 	{
 		cerr << PACKAGE_NAME << ": Fatal error! Cannot find Extrae_intel_kmpc_runtime_init_dyninst! Dying..." << endl;
@@ -67,8 +67,8 @@ void InstrumentOMPruntime_Intel (BPatch_image *appImage, BPatch_process *appProc
 	}
 
 	BPatch_Vector<BPatch_snippet*> args;
-	string s0 = "__kmpc_fork_call";
-	BPatch_function *pfunction = getRoutine (s0, appImage, false);
+	BPatch_function *pfunction = getRoutine (
+		"__kmpc_fork_call", appImage, false);
 	if (pfunction == NULL)
 	{
 		cerr << PACKAGE_NAME << ": Fatal error! Cannot find __kmpc_fork_call! Dying..." << endl;

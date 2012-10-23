@@ -94,10 +94,9 @@ void loadAPIPatches (BPatch_image *appImage)
 	i = 0;
 	while (APIroutines[i].name != NULL)
 	{
-		string s = APIroutines[i].name;
-		APIroutines[i].patch = getRoutine (s, appImage);
+		APIroutines[i].patch = getRoutine (APIroutines[i].name, appImage);
 		if (NULL == APIroutines[i].patch)
-			cerr << "Unable to find " << s << " in the application image" << endl;
+			cerr << "Unable to find " << APIroutines[i].name << " in the application image" << endl;
 		i++;
 	}
 

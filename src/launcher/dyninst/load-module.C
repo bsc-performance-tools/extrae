@@ -87,7 +87,7 @@ void error_function (BPatchErrorLevel level, int num, const char* const* params)
 	}
 }
 
-int main (int argc, char *argv[], const char *envp[])
+int main (int argc, char *argv[])
 {
 	if (getenv("EXTRAE_HOME") == NULL)
 	{
