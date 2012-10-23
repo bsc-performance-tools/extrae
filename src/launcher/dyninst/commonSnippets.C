@@ -108,9 +108,11 @@ BPatch_function * getRoutine (const char *routine, BPatch_image *appImage, bool 
 	return found_funcs[0];
 }
 
-void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
-	string routine, string wrap_begin, string wrap_end, unsigned nparams)
+void wrapRoutine (BPatch_image *appImage, string routine, string wrap_begin,
+	string wrap_end, unsigned nparams)
 {
+	BPatch_addressSpace *appAddrSpace = appImage->getAddressSpace();
+
 	BPatch_function *function = getRoutine (routine, appImage, false);
 
 	if (function == NULL)
@@ -150,7 +152,7 @@ void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
 
 		BPatch_funcCallExpr callExpr_entry (*snippet_begin, args_entry);
 
-		if (appProcess->insertSnippet (callExpr_entry, *entry_point) == NULL)
+		if (appAddrSpace->insertSnippet (callExpr_entry, *entry_point) == NULL)
 			cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at entry point" << endl;
 	}
 
@@ -166,14 +168,16 @@ void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
 		BPatch_Vector<BPatch_snippet *> args_exit;
 		BPatch_funcCallExpr callExpr_exit (*snippet_end, args_exit);
 
-		if (appProcess->insertSnippet (callExpr_exit, *exit_point) == NULL)
+		if (appAddrSpace->insertSnippet (callExpr_exit, *exit_point) == NULL)
 			cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at entry point" << endl;
 	}
 }
 
 void wrapTypeRoutine (BPatch_function *function, string routine, int type,
-	BPatch_image *appImage, BPatch_process *appProcess)
+	BPatch_image *appImage)
 {
+	BPatch_addressSpace *appAddrSpace = appImage->getAddressSpace();
+
 	string snippet_name = "Extrae_function_from_address";
 
 	BPatch_Vector<BPatch_point *> *entry_point = function->findPoint(BPatch_entry);
@@ -215,10 +219,10 @@ void wrapTypeRoutine (BPatch_function *function, string routine, int type,
 	BPatch_funcCallExpr callExpr_entry (*snippet, args_entry);
 	BPatch_funcCallExpr callExpr_exit (*snippet, args_exit);
 
-	if (appProcess->insertSnippet (callExpr_entry, *entry_point) == NULL)
+	if (appAddrSpace->insertSnippet (callExpr_entry, *entry_point) == NULL)
 		cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at entry point" << endl;
 
-	if (appProcess->insertSnippet (callExpr_exit, *exit_point) == NULL)
+	if (appAddrSpace->insertSnippet (callExpr_exit, *exit_point) == NULL)
 		cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at exit point" << endl;
 }
 

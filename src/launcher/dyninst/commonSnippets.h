@@ -48,11 +48,11 @@ BPatch_Vector<BPatch_function *> getRoutines (const char *routine,
 BPatch_function * getRoutine (const char *routine, BPatch_image *appImage,
 	bool warn = true);
 
-void wrapRoutine (BPatch_image *appImage, BPatch_process *appProcess,
-	string routine, string wrap_begin, string wrap_end, unsigned nparams = 0);
+void wrapRoutine (BPatch_image *appImage, string routine, string wrap_begin,
+	string wrap_end, unsigned nparams = 0);
 
 void wrapTypeRoutine (BPatch_function *function, string routine, int type,
-	BPatch_image *appImage, BPatch_process *appProcess);
+	BPatch_image *appImage);
 
 #endif
 

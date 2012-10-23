@@ -80,7 +80,8 @@ static int VerboseLevel = 0;  /* Verbose Level */
 static bool useHWC = false;
 static bool ListFunctions = false;
 static bool extrae_detecting_application_type = false;
-static bool BinaryLinkedWithInstrumentation;
+static bool BinaryLinkedWithInstrumentation = false;
+static bool BinaryRewrite = false;
 static string loadedModule;
 
 #define DYNINST_NO_ERROR -1
@@ -123,7 +124,7 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 	}
 }
 
-static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch_image *appImage, BPatch_process *appProces)
+static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch_image *appImage, BPatch_addressSpace *appProces)
 {
 	ofstream symfile;
 	string symname = string(::XML_GetFinalDirectory())+string("/")+string(::XML_GetTracePrefix())+".sym";
@@ -194,7 +195,7 @@ static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch
 
 static int processParams (int argc, char *argv[])
 {
-	bool sortir = false;
+	bool leave = false;
 	int i = 1;
 
 	if (argc <= 1)
@@ -203,21 +204,21 @@ static int processParams (int argc, char *argv[])
 		exit (1);
 	}
 
-	while (!sortir)
+	while (!leave)
 	{
 		if (strcmp (argv[i], "-exclude") == 0)
 		{
 			i++;
 			excludeUF = argv[i];
 			i++;
-			sortir = (i >= argc);
+			leave = (i >= argc);
 		}
 		else if (strcmp (argv[i], "-include") == 0)
 		{
 			i++;
 			includeUF = argv[i];
 			i++;
-			sortir = (i >= argc);
+			leave = (i >= argc);
 		}
 #if defined(ALLOW_EXCLUDE_PARALLEL)
 		else if (strcmp (argv[i], "-exclude-parallel") == 0)
@@ -225,7 +226,7 @@ static int processParams (int argc, char *argv[])
 			i++;
 			excludePF = argv[i];
 			i++;
-			sortir = (i >= argc);
+			leave = (i >= argc);
 		}
 #endif
 		else if (strcmp (argv[i], "-config") == 0)
@@ -233,30 +234,34 @@ static int processParams (int argc, char *argv[])
 			i++;
 			configXML = argv[i];
 			i++;
-			sortir = (i >= argc);
+			leave = (i >= argc);
 		}
 		else if (strcmp(argv[i], "-counters") == 0)
 		{
 			useHWC = true;
 			i++;
-			sortir = (i >= argc);
+			leave = (i >= argc);
 		}
 		else if (strcmp (argv[i], "-v") == 0)
 		{
 			VerboseLevel++;
 			i++;
-			sortir = (i >= argc);
+			leave = (i >= argc);
 		}
 		else if (strcmp (argv[i], "-list-functions") == 0)
 		{
 			ListFunctions = true;
 			i++;
-			sortir = (i >= argc);
+			leave = (i >= argc);
+		}
+		else if (strcmp (argv[i], "-rewrite") == 0)
+		{
+			BinaryRewrite = true;
+			i++;
+			leave = (i >= argc);
 		}
 		else
-		{
-			sortir = true;
-		}
+			leave = true;
 	}
 	
 	if (i >= argc)
@@ -377,7 +382,7 @@ static void printCallingSites (int id, int total, char *name, string sharedlibna
 	}
 }
 
-static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
+static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appProcess,
 	ApplicationType *appType, set<string> &OMPset, set<string> &USERset,
 	bool instrumentMPI, bool instrumentOMP, bool instrumentUF)
 {
@@ -396,7 +401,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	BPatch_Vector<BPatch_function *> *vfunctions = appImage->getProcedures (false);
 	cout << "Done" << endl;
 
-	vector<string> CUDAkernels;
+	set<string> CUDAkernels;
 
 	/* Look for CUDA kernels if the application is CUDA */
 	if (appType->get_isCUDA())
@@ -425,7 +430,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 	
 						if (strncmp (calledname, "__device_stub__", strlen("__device_stub__")) == 0)
 						{
-							CUDAkernels.push_back (name);
+							CUDAkernels.insert (name);
 							if (VerboseLevel)
 								cout << PACKAGE_NAME << ": Found kernel " << name << endl;
 						}
@@ -485,7 +490,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 				if (!BinaryLinkedWithInstrumentation)
 				{
 					/* Instrument routine */ 
-					wrapTypeRoutine (f, name, OMPFUNC_EV, appImage, appProcess);
+					wrapTypeRoutine (f, name, OMPFUNC_EV, appImage);
 
 					/* Add to list if not already there */
 					OMPset.insert (name);
@@ -646,7 +651,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_process *appProcess,
 
 				if (f != NULL)
 				{
-					wrapTypeRoutine (f, *iter, USRFUNC_EV, appImage, appProcess);
+					wrapTypeRoutine (f, *iter, USRFUNC_EV, appImage);
 					UFinsertion++;
 
 					if (VerboseLevel)
@@ -757,8 +762,12 @@ int main (int argc, char *argv[])
 	/* Don't check recursion in snippets */
 	bpatch->setTrampRecursive (true);
 
-	cout << "Welcome to " << PACKAGE_STRING << " launcher based on DynInst" << endl
-	     << PACKAGE_NAME << ": Creating process for image binary " << argv[index] << endl;
+	cout << "Welcome to " << PACKAGE_STRING << " launcher based on DynInst" << endl;
+	if (!BinaryRewrite)
+		cout << PACKAGE_NAME << ": Creating process for image binary " << argv[index] << endl;
+	else
+		cout << PACKAGE_NAME << ": Rewriting binary " << argv[index] << endl;
+
 	int i = 1;
 	while (argv[index+i] != NULL)
 	{
@@ -766,23 +775,40 @@ int main (int argc, char *argv[])
 		i++;
 	}
 
-	char buffer[1024];
-	BPatch_process *appProcess = bpatch->processCreate ((const char*) argv[index], (const char**) &argv[index], (const char**) environ);
-	if (appProcess == NULL)
+	BPatch_process *appProcess = NULL;
+	BPatch_binaryEdit *appBin = NULL;
+	BPatch_addressSpace *appAddrSpace = NULL;
+
+	if (!BinaryRewrite)
 	{
-		cerr << PACKAGE_NAME << ": Error creating the target application" << endl;
-		exit (-1);
+		appProcess = bpatch->processCreate ((const char*) argv[index], (const char**) &argv[index], (const char**) environ);
+		if (appProcess == NULL)
+		{
+			cerr << PACKAGE_NAME << ": Error creating the target application process" << endl;
+			exit (-1);
+		}
+
+		/* Stop the execution in order to load the instrumentation library */
+		cout << PACKAGE_NAME << ": Stopping mutatee execution" << endl;
+		if (!appProcess->stopExecution())
+		{
+			cerr << PACKAGE_NAME << ": Cannot stop execution of the target application" << endl;
+			exit (-1);
+		}
+		appAddrSpace = appProcess;
+	}
+	else
+	{
+		appBin = bpatch->openBinary ((const char*) argv[index], true);
+		if (appBin == NULL)
+		{
+			cerr << PACKAGE_NAME << ": Error opening binary for rewriting" << endl;
+			exit (-1);
+		}
+		appAddrSpace = appBin;
 	}
 
-	/* Stop the execution in order to load the instrumentation library */
-	cout << PACKAGE_NAME << ": Stopping mutatee execution" << endl;
-	if (!appProcess->stopExecution())
-	{
-		cerr << PACKAGE_NAME << ": Cannot stop execution of the target application" << endl;
-		exit (-1);
-	}
-
-	BPatch_image *appImage = appProcess->getImage();
+	BPatch_image *appImage = appAddrSpace->getImage();
 	if (appImage == NULL)
 	{
 		cerr << PACKAGE_NAME << ": Error while acquiring application image" << endl;
@@ -793,7 +819,8 @@ int main (int argc, char *argv[])
 	if (ListFunctions)
 	{
 		ShowFunctions (appImage);
-		appProcess->terminateExecution();
+		if (!BinaryRewrite)		
+			appProcess->terminateExecution();
 		exit (-1);
 	}
 
@@ -826,6 +853,8 @@ int main (int argc, char *argv[])
 		   appropriate module */
 		if (!BinaryLinkedWithInstrumentation)
 		{
+			char buffer[1024]; /* will hold the library to load */
+
 			/* Check for the correct library to be loaded */
 			if (appType->get_isMPI())
 			{
@@ -878,7 +907,7 @@ int main (int argc, char *argv[])
 				appProcess->terminateExecution();
 				exit (-1);
 			}
-			if (!appProcess->loadLibrary (loadedModule.c_str()))
+			if (!appAddrSpace->loadLibrary (loadedModule.c_str()))
 			{
 				/* If the library cannot be loaded, terminate the mutatee and exit */
 				cerr << PACKAGE_NAME << ": Cannot load library! Retry using -v to gather more information on this error!" << endl;
@@ -900,17 +929,18 @@ int main (int argc, char *argv[])
 			if (appType->get_OpenMP_rte() == ApplicationType::Intel_v11)
 			{
 				cout << PACKAGE_NAME << ": Gathering information for Intel v11 OpenMP runtime" << endl;
+# warning "Aixo nomes es per !BinaryRewriting!"
 				InstrumentOMPruntime_Intel (appImage, appProcess);
 			}
 			cout << PACKAGE_NAME << ": Instrumenting OpenMP runtime" << endl;
-			InstrumentOMPruntime (::XML_GetTraceOMP_locks(), appType, appImage, appProcess);
+			InstrumentOMPruntime (::XML_GetTraceOMP_locks(), appType, appImage);
 		}
 
 		/* Apply instrumentation of runtimes only if not linked with Extrae */
 		if (!BinaryLinkedWithInstrumentation && appType->get_isCUDA())
 		{
 			cout << PACKAGE_NAME << ": Instrumenting CUDA runtime" << endl;
-			InstrumentCUDAruntime (appType, appImage, appProcess);
+			InstrumentCUDAruntime (appType, appImage);
 		}
 
 		/* If the application is NOT MPI, instrument the MAIN symbol in order to
@@ -919,7 +949,7 @@ int main (int argc, char *argv[])
 		if (!appType->get_isMPI())
 		{
 			/* Typical main entry & exit */
-			wrapRoutine (appImage, appProcess, "main", "Extrae_init", "Extrae_fini");
+			wrapRoutine (appImage, "main", "Extrae_init", "Extrae_fini");
 
 			/* Special cases (e.g., fortran stop call) */
 			string exit_calls[] =
@@ -937,35 +967,51 @@ int main (int argc, char *argv[])
 			{
 				BPatch_function *special_exit = getRoutine (exit_calls[i].c_str(), appImage, false);
 				if (NULL != special_exit)
-					wrapRoutine (appImage, appProcess, exit_calls[i], "Extrae_fini", "");
+					wrapRoutine (appImage, exit_calls[i], "Extrae_fini", "");
 				i++;
 			}
 			extrae_detecting_application_type = false;
 		}
 
-		InstrumentCalls (appImage, appProcess, appType, ParallelFunctions, UserFunctions, ::XML_GetTraceMPI(), ::XML_GetTraceOMP(), true);
+		InstrumentCalls (appImage, appAddrSpace, appType, ParallelFunctions,
+		  UserFunctions, ::XML_GetTraceMPI(), ::XML_GetTraceOMP(), true);
 
-		GenerateSymFile (ParallelFunctions, UserFunctions, appImage, appProcess);
+		GenerateSymFile (ParallelFunctions, UserFunctions, appImage,
+		  appAddrSpace);
 	}
 
-	cout << PACKAGE_NAME << ": Starting program execution" << endl;
-	if (!appProcess->continueExecution())
+	if (!BinaryRewrite)
 	{
-		/* If the application cannot continue, terminate the mutatee and exit */
-		cerr << PACKAGE_NAME << ": Cannot continue execution of the target application" << endl;
-		appProcess->terminateExecution();
-		exit (-1);
+		cout << PACKAGE_NAME << ": Starting program execution" << endl;
+		if (!appProcess->continueExecution())
+		{
+			/* If the application cannot continue, terminate the mutatee and exit */
+			cerr << PACKAGE_NAME << ": Cannot continue execution of the target application" << endl;
+			appProcess->terminateExecution();
+			exit (-1);
+		}
+
+		while (!appProcess->isTerminated())
+			bpatch->waitForStatusChange();
+
+		if (appProcess->terminationStatus() == ExitedNormally)
+			appProcess->getExitCode();
+		else if(appProcess->terminationStatus() == ExitedViaSignal)
+			appProcess->getExitSignal();
+
+		delete appProcess;
 	}
-
-	while (!appProcess->isTerminated())
-		bpatch->waitForStatusChange();
-
-	if (appProcess->terminationStatus() == ExitedNormally)
-		appProcess->getExitCode();
-	else if(appProcess->terminationStatus() == ExitedViaSignal)
-		appProcess->getExitSignal();
-
-	delete appProcess;
+	else
+	{
+		string newfile = string(argv[index])+".extrae";
+		cout << PACKAGE_NAME << ": Generating the instrumented binary" << endl;
+		if (appBin->writeFile (newfile.c_str()))
+			cout << PACKAGE_NAME << ": Congratulations " << newfile << " has been generated" << endl;
+		else
+			cout << PACKAGE_NAME << ": Error! Could not generate " << newfile << endl;
+		
+		delete appBin;
+	}
 
 	return 0;
 }

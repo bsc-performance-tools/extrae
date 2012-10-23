@@ -93,13 +93,13 @@
 extern "C" {
 #endif /* c++ */
 
-  void Parse_XML_File (int, int, char*);
+	void Parse_XML_File (int, int, char*);
 
-  int XML_CheckTraceEnabled (void);
+	int XML_CheckTraceEnabled (void);
 
-  char * XML_GetFinalDirectory (void);
+	char * XML_GetFinalDirectory (void);
 
-  char * XML_GetTracePrefix (void);
+	char * XML_GetTracePrefix (void);
 
 	int XML_GetTraceMPI (void);
 
@@ -110,7 +110,6 @@ extern "C" {
 	char * XML_UFlist (void);
 
 	int XML_have_UFlist (void);
-
 
 #ifdef  __cplusplus
 }

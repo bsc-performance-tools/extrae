@@ -33,8 +33,7 @@
 #include <BPatch.h>
 #include "applicationType.h"
 
-void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage,
-	BPatch_process *appProcess);
+void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage);
 
 #endif
 

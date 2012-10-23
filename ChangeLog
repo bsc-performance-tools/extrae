@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 23Oct2012 Added support for binary rewriting using DynInst
  * 22Oct2012 DynInst compilation changed and broke into different components.
    Now sports pcontrol, stackwalk, dynelf/dwarf and symlite. 
  * 18Oct2012 Fixes for DynInst launch

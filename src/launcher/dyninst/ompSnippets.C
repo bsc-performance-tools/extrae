@@ -83,8 +83,7 @@ void InstrumentOMPruntime_Intel (BPatch_image *appImage, BPatch_process *appProc
 }
 
 
-void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appImage,
-	BPatch_process *appProcess)
+void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appImage)
 {
 	if (at->get_OpenMP_rte() == ApplicationType::Intel_v8_1 ||
 	    at->get_OpenMP_rte() == ApplicationType::Intel_v9_1 ||
@@ -94,117 +93,116 @@ void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appIma
 		   InstrumentCalls in extrae.C */
 		if (!at->get_OpenMP_rte() == ApplicationType::Intel_v11)
 		{
-			wrapRoutine (appImage, appProcess, "__kmpc_fork_call",
+			wrapRoutine (appImage, "__kmpc_fork_call",
 			  "Extrae_OpenMP_ParRegion_Entry", "Probe_OpenMP_ParRegion_Exit");
 		}
 
-		wrapRoutine (appImage, appProcess, "__kmpc_barrier",
+		wrapRoutine (appImage, "__kmpc_barrier",
 		  "Extrae_OpenMP_Barrier_Entry", "Probe_OpenMP_Barrier_Exit");
-		wrapRoutine (appImage, appProcess, "__kmpc_invoke_task_func",
+		wrapRoutine (appImage, "__kmpc_invoke_task_func",
 		  "Extrae_OpenMP_ParDO_Entry", "Probe_OpenMP_ParDO_Exit");
 		if (locks)
 		{
-			wrapRoutine (appImage, appProcess, "__kmpc_set_lock",
+			wrapRoutine (appImage, "__kmpc_set_lock",
 			  "Extrae_OpenMP_Unnamed_Lock_Entry", "Probe_OpenMP_Unnamed_Lock_Exit");
-			wrapRoutine (appImage, appProcess, "__kmpc_unset_lock",
+			wrapRoutine (appImage, "__kmpc_unset_lock",
 			  "Extrae_OpenMP_Unnamed_Unlock_Entry", "Probe_OpenMP_Unnamed_Unlock_Exit");
-			wrapRoutine (appImage, appProcess, "__kmpc_critical",
+			wrapRoutine (appImage, "__kmpc_critical",
 			  "Extrae_OpenMP_Named_Lock_Entry", "Probe_OpenMP_Named_Lock_Exit");
-			wrapRoutine (appImage, appProcess, "__kmpc_end_critical",
+			wrapRoutine (appImage, "__kmpc_end_critical",
 			  "Extrae_OpenMP_Named_Unlock_Entry", "Probe_OpenMP_Named_Unlock_Exit");
 		}
 	}
 
 	if (at->get_OpenMP_rte() == ApplicationType::IBM_v16)
 	{
-		wrapRoutine (appImage, appProcess, "_xlsmpParallelDoSetup_TPO",
+		wrapRoutine (appImage, "_xlsmpParallelDoSetup_TPO",
 		  "Extrae_OpenMP_ParDO_Entry", "Probe_OpenMP_ParDO_Exit");
-		wrapRoutine (appImage, appProcess, "_xlsmpWSDoSetup_TPO",
+		wrapRoutine (appImage, "_xlsmpWSDoSetup_TPO",
 		  "Extrae_OpenMP_DO_Entry", "Probe_OpenMP_DO_Exit");
-		wrapRoutine (appImage, appProcess, "_xlsmpParRegionSetup_TPO",
+		wrapRoutine (appImage, "_xlsmpParRegionSetup_TPO",
 		  "Extrae_OpenMP_ParRegion_Entry", "Probe_OpenMP_ParRegion_Exit");
-		wrapRoutine (appImage, appProcess, "_xlsmpWSSectSetup_TPO",
+		wrapRoutine (appImage, "_xlsmpWSSectSetup_TPO",
 		  "Extrae_OpenMP_Section_Entry", "Probe_OpenMP_Section_Exit");
-		wrapRoutine (appImage, appProcess, "_xlsmpSingleSetup_TPO",
+		wrapRoutine (appImage, "_xlsmpSingleSetup_TPO",
 		  "Extrae_OpenMP_Single_Entry", "Probe_OpenMP_Single_Exit");
-		wrapRoutine (appImage, appProcess, "_xlsmpBarrier_TPO",
+		wrapRoutine (appImage, "_xlsmpBarrier_TPO",
 		  "Extrae_OpenMP_Barrier_Entry", "Probe_OpenMP_Barrier_Exit");
 
 		if (locks)
 		{
-			wrapRoutine (appImage, appProcess, "_xlsmpRelDefaultSLock",
+			wrapRoutine (appImage, "_xlsmpRelDefaultSLock",
 			  "Extrae_OpenMP_Unnamed_Lock_Entry", "Probe_OpenMP_Unnamed_Unlock_Exit");
-			wrapRoutine (appImage, appProcess, "_xlsmpGetDefaultSLock",
+			wrapRoutine (appImage, "_xlsmpGetDefaultSLock",
 			  "Extrae_OpenMP_Unnamed_Unlock_Entry", "Probe_OpenMP_Unnamed_Lock_Exit");
-			wrapRoutine (appImage, appProcess, "_xlsmpRelSLock",
+			wrapRoutine (appImage, "_xlsmpRelSLock",
 			  "Extrae_OpenMP_Named_Lock_Entry", "Probe_OpenMP_Named_Unlock_Exit");
-			wrapRoutine (appImage, appProcess, "_xlsmpGetSLock",
+			wrapRoutine (appImage, "_xlsmpGetSLock",
 			  "Extrae_OpenMP_Named_Unlock_Entry", "Probe_OpenMP_Named_Lock_Exit");
 		}
 	}
 
 	if (at->get_OpenMP_rte() == ApplicationType::GNU_v42)
 	{
-		wrapRoutine (appImage, appProcess, "GOMP_parallel_start",
+		wrapRoutine (appImage, "GOMP_parallel_start",
 			"Extrae_OpenMP_ParRegion_Entry","");
-		wrapRoutine (appImage, appProcess, "GOMP_parallel_sections_start",
+		wrapRoutine (appImage, "GOMP_parallel_sections_start",
 		  "Extrae_OpenMP_ParSections_Entry", "");
-		wrapRoutine (appImage, appProcess, "GOMP_parallel_end",
+		wrapRoutine (appImage, "GOMP_parallel_end",
 			"", "Extrae_OpenMP_ParRegion_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_sections_start",
+		wrapRoutine (appImage, "GOMP_sections_start",
 		  "Extrae_OpenMP_Section_Entry", "Probe_OpenMP_Section_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_sections_next",
+		wrapRoutine (appImage, "GOMP_sections_next",
 		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_sections_end",
+		wrapRoutine (appImage, "GOMP_sections_end",
 		  "Extrae_OpenMP_Join_Wait_Entry", "Probe_OpenMP_Join_Wait_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_sections_end_nowait",
+		wrapRoutine (appImage, "GOMP_sections_end_nowait",
 		  "Extrae_OpenMP_Join_NoWait_Entry", "Probe_OpenMP_Join_NoWait_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_end",
+		wrapRoutine (appImage, "GOMP_loop_end",
 		  "Extrae_OpenMP_Join_Wait_Entry", "Probe_OpenMP_Join_Wait_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_end_nowait",
+		wrapRoutine (appImage, "GOMP_loop_end_nowait",
 		  "Extrae_OpenMP_Join_NoWait_Entry", "Probe_OpenMP_Join_NoWait_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_static_start",
+		wrapRoutine (appImage, "GOMP_loop_static_start",
 		  "Extrae_OpenMP_DO_Entry", "Probe_OpenMP_DO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_dynamic_start",
+		wrapRoutine (appImage, "GOMP_loop_dynamic_start",
 		  "Extrae_OpenMP_DO_Entry", "Probe_OpenMP_DO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_guided_start",
+		wrapRoutine (appImage, "GOMP_loop_guided_start",
 		  "Extrae_OpenMP_DO_Entry", "Probe_OpenMP_DO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_runtime_start",
+		wrapRoutine (appImage, "GOMP_loop_runtime_start",
 		  "Extrae_OpenMP_DO_Entry", "Probe_OpenMP_DO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_parallel_loop_static_start",
+		wrapRoutine (appImage, "GOMP_parallel_loop_static_start",
 		  "Extrae_OpenMP_ParDO_Entry", "Probe_OpenMP_ParDO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_parallel_loop_dynamic_start",
+		wrapRoutine (appImage, "GOMP_parallel_loop_dynamic_start",
 		  "Extrae_OpenMP_ParDO_Entry", "Probe_OpenMP_ParDO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_parallel_loop_guided_start",
+		wrapRoutine (appImage, "GOMP_parallel_loop_guided_start",
 		  "Extrae_OpenMP_ParDO_Entry", "Probe_OpenMP_ParDO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_parallel_loop_runtime_start",
+		wrapRoutine (appImage, "GOMP_parallel_loop_runtime_start",
 		  "Extrae_OpenMP_ParDO_Entry", "Probe_OpenMP_ParDO_Exit");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_static_next",
+		wrapRoutine (appImage, "GOMP_loop_static_next",
 		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_dynamic_next",
+		wrapRoutine (appImage, "GOMP_loop_dynamic_next",
 		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_guided_next",
+		wrapRoutine (appImage, "GOMP_loop_guided_next",
 		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
-		wrapRoutine (appImage, appProcess, "GOMP_loop_runtime_next",
+		wrapRoutine (appImage, "GOMP_loop_runtime_next",
 		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
-		wrapRoutine (appImage, appProcess, "GOMP_barrier",
+		wrapRoutine (appImage, "GOMP_barrier",
 		  "Extrae_OpenMP_Barrier_Entry", "Probe_OpenMP_Barrier_Exit");
 
 		if (locks)
 		{
-			wrapRoutine (appImage, appProcess, "GOMP_critical_name_start",
+			wrapRoutine (appImage, "GOMP_critical_name_start",
 			  "Extrae_OpenMP_Named_Lock_Entry", "Probe_OpenMP_Named_Lock_Exit");
-			wrapRoutine (appImage, appProcess, "GOMP_critical_name_end",
+			wrapRoutine (appImage, "GOMP_critical_name_end",
 			  "Extrae_OpenMP_Named_Unlock_Entry", "Probe_OpenMP_Named_Unlock_Exit");
-			wrapRoutine (appImage, appProcess, "GOMP_critical_start",
+			wrapRoutine (appImage, "GOMP_critical_start",
 			  "Extrae_OpenMP_Unnamed_Lock_Entry", "Probe_OpenMP_Unnamed_Lock_Exit");
-			wrapRoutine (appImage, appProcess, "GOMP_critical_end",
+			wrapRoutine (appImage, "GOMP_critical_end",
 			  "Extrae_OpenMP_Unnamed_Unlock_Entry", "Probe_OpenMP_Unnamed_Unlock_Exit");
-			wrapRoutine (appImage, appProcess, "GOMP_atomic_start",
+			wrapRoutine (appImage, "GOMP_atomic_start",
 			  "Extrae_OpenMP_Unnamed_Lock_Entry", "Probe_OpenMP_Unnamed_Lock_Exit");
-			wrapRoutine (appImage, appProcess, "GOMP_atomic_end",
+			wrapRoutine (appImage, "GOMP_atomic_end",
 			  "Extrae_OpenMP_Unnamed_Unlock_Entry", "Probe_OpenMP_Unnamed_Unlock_Exit");
 		}
 	}
-
 }

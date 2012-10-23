@@ -55,24 +55,23 @@ using namespace std;
 
 #include <BPatch_function.h>
 
-void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage,
-	BPatch_process *appProcess)
+void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage)
 {
 	UNREFERENCED_PARAMETER(at);
 
-	wrapRoutine (appImage, appProcess, "cudaLaunch",
+	wrapRoutine (appImage, "cudaLaunch",
 	  "Extrae_cudaLaunch_Enter", "Extrae_cudaLaunch_Exit", 1);
-	wrapRoutine (appImage, appProcess, "cudaConfigureCall",
+	wrapRoutine (appImage, "cudaConfigureCall",
 	  "Extrae_cudaConfigureCall_Enter", "Extrae_cudaConfigureCall_Exit", 4);
-	wrapRoutine (appImage, appProcess, "cudaStreamCreate",
+	wrapRoutine (appImage, "cudaStreamCreate",
 	  "Extrae_cudaStreamCreate_Enter", "Extrae_cudaStreamCreate_Exit", 1);
-	wrapRoutine (appImage, appProcess, "cudaMemcpyAsync",
+	wrapRoutine (appImage, "cudaMemcpyAsync",
 	  "Extrae_cudaMemcpyAsync_Enter", "Extrae_cudaMemcpyAsync_Exit", 5);
-	wrapRoutine (appImage, appProcess, "cudaMemcpy",
+	wrapRoutine (appImage, "cudaMemcpy",
 	  "Extrae_cudaMemcpy_Enter", "Extrae_cudaMemcpy_Exit", 4);
-	wrapRoutine (appImage, appProcess, "cudaThreadSynchronize",
+	wrapRoutine (appImage, "cudaThreadSynchronize",
 	  "Extrae_cudaThreadSynchronize_Enter", "Extrae_cudaThreadSynchronize_Exit", 0);
-	wrapRoutine (appImage, appProcess, "cudaStreamSynchronize",
+	wrapRoutine (appImage, "cudaStreamSynchronize",
 	  "Extrae_cudaStreamSynchronize_Enter", "Extrae_cudaStreamSynchronize_Exit", 1);
 }
 

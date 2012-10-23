@@ -33,9 +33,8 @@
 #include <BPatch.h>
 #include "applicationType.h"
 
-void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appImage,
-	BPatch_process *appProcess);
-void InstrumentOMPruntime_Intel (BPatch_image *appImage, BPatch_process *appProces);
+void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appImage);
+void InstrumentOMPruntime_Intel (BPatch_image *appImage, BPatch_process *appProcess);
 
 #endif
 
