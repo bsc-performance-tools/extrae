@@ -385,7 +385,7 @@ static int Exist_Counter (fcounter_t *fcounter, long long EvCnt)
 static void HWC_PARAVER_Labels (FILE * pcfFD)
 {
 #if defined(PAPI_COUNTERS)
-  struct fcounter_t *fcounter=NULL;
+	struct fcounter_t *fcounter=NULL;
 #elif defined(PMAPI_COUNTERS)
 	pm_info2_t ProcessorMetric_Info; /* On AIX pre 5.3 it was pm_info_t */
 	pm_groups_info_t HWCGroup_Info;
@@ -427,7 +427,7 @@ static void HWC_PARAVER_Labels (FILE * pcfFD)
 						AddedCounters++;
 
 						/* fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(position), description); */
-						fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(ptmp->Events[cnt]), description);
+						fprintf (pcfFD, "%d  %lld %s\n", 7, HWC_COUNTER_TYPE(ptmp->Events[cnt]), description);
 					}
 				}
 #elif defined(PMAPI_COUNTERS)
@@ -801,8 +801,8 @@ void Labels_loadSYMfile (int taskid, char *name)
 	if (taskid == 0)
 	{
 		fprintf (stdout, "mpi2prv: A total of %u symbols were imported from %s file\n", function_count+hwc_count+other_count, name);
-		fprintf (stdout, "mpi2prv: %u function symbols imported\n", function_count);
-		fprintf (stdout, "mpi2prv: %u HWC counter descriptions imported\n", hwc_count);
+		fprintf (stdout, "mpi2prv: %u function symbols successfully imported\n", function_count);
+		fprintf (stdout, "mpi2prv: %u HWC counter descriptions successfully\n", hwc_count);
 	}
 
 	fclose (FD);
@@ -880,7 +880,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
 
-    Write_UserDefined_Labels(fd);
+	Write_UserDefined_Labels(fd);
     
 	Concat_User_Labels (fd);
 

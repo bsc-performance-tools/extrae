@@ -49,12 +49,14 @@ int Caller_Deepness[COUNT_CALLER_TYPES] = { 0, 0 };
 int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0 }; 
 
 #if defined(UNWIND_SUPPORT)
+
 # define UNW_LOCAL_ONLY
 # ifdef HAVE_LIBUNWIND_H
 #  include <libunwind.h>
 # endif
 
-void trace_callers (iotimer_t time, int offset, int type) {
+void trace_callers (iotimer_t time, int offset, int type)
+{
 	int current_deep = 1;
 	unw_cursor_t cursor;
 	unw_context_t uc;
@@ -126,15 +128,15 @@ UINT64 get_caller (int offset)
 	while (current_deep <= offset)
 	{
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
+
 #if defined(DEBUG)
-		fprintf (stderr, "DEBUG: depth %d address %08llx %c\n", current_deep, ip, (offset == current_deep)?'*':' ');
+		fprintf (stderr, "DEBUG: offset %d depth %d address %08llx %c\n", offset, current_deep, ip, (offset == current_deep)?'*':' ');
 #endif
 		if (unw_step (&cursor) <= 0)
 			return 0;
 		current_deep ++;
 	}
 	return (UINT64) ip;
-	return 0;
 }
 
 #else /* UNWIND_SUPPORT */
@@ -152,10 +154,10 @@ UINT64 get_caller (int offset)
 # if (defined(OS_LINUX) && !defined(ARCH_IA64)) || defined(OS_FREEBSD) || defined(OS_DARWIN) || defined(IS_BG_MACHINE)
 
 void trace_callers (iotimer_t time, int offset, int type) {
-   void * callstack[MAX_STACK_DEEPNESS];
-   int i, size;
+	void * callstack[MAX_STACK_DEEPNESS];
+	int i, size;
 #ifdef MPICALLER_DEBUG
-   char **strings; 
+	char **strings; 
 #endif
 
 	/* Check for valid CALLER types */
@@ -175,15 +177,12 @@ void trace_callers (iotimer_t time, int offset, int type) {
 #endif
 
 #ifdef MPICALLER_DEBUG
-  /*
-   * Para printar aqui el nombre de la funcion, compilar la aplicacion con -rdynamic
-   */
-   strings = backtrace_symbols (callstack, size);
+	/* To print the name of the function, compile with -rdynamic */
+	strings = backtrace_symbols (callstack, size);
 
-   printf ("%zd llamadas en la pila.\n", size);
-   for (i = 0; i < size; i++) {
-      printf ("%s\n", strings[i]);
-   }
+	printf ("%d calls in the callstack.\n", size);
+	for (i = 0; i < size; i++)
+		printf ("%s\n", strings[i]);
 #endif
 
 	for (i=0; (i<Caller_Deepness[type] && (i+offset-1)<size); i++)
