@@ -24,4 +24,4 @@ merge-pthread-example:
 	$(EXTRAE_HOME)/bin/mpi2prv set-0/*.mpit -e ./pthread-example
 
 clean:
-	rm -fr user-comms pthread-example set-0 *.prv *.pcf *.row TRACE.mpits
+	rm -fr user-comms pthread-example set-0 *.prv *.pcf *.row TRACE.mpits TRACE.sym

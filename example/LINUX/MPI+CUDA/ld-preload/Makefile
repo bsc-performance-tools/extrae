@@ -10,5 +10,5 @@ mpi_hello: mpi_hello.cu
 	$(NVCC) $(CFLAGS) mpi_hello.cu $(CLIBS) -o mpi_hello
 
 clean:
-	rm -fr mpi_hello TRACE.mpits set-0
+	rm -fr mpi_hello TRACE.mpits TRACE.sym set-0
 

@@ -28,8 +28,8 @@ worker:	worker.o
 	$(SPU_CC) worker.o -o worker $(SPU_LIB) $(SPU_CFLAGS)
 
 clean: 
-	rm -fr *.o worker master core.* *.mpit* *.prv *.pcf *.row
+	rm -fr *.o worker master core.* *.mpit* *.prv *.pcf *.row *.sym
 
 mrproper: clean
-	rm -fr *.prv *.pcf *.mpit* *.tmp *.row
+	rm -fr *.prv *.pcf *.mpit* *.tmp *.row *.sym
 	

@@ -9,5 +9,5 @@ hello: hello.cu
 	nvcc -g hello.cu -o hello
 
 clean:
-	rm -fr hello hello_instrumented TRACE.mpits set-0
+	rm -fr hello hello_instrumented TRACE.mpits TRACE.sym set-0
 
