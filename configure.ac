@@ -594,8 +594,8 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   doc/Makefile etc/Makefile \
   tests/Makefile \
   tests/src/Makefile tests/src/common/Makefile \
-  tests/functional/Makefile tests/functional/dump-events/Makefile tests/functional/define-event-type/Makefile \
-  tests/functional/auto-init-fini/Makefile tests/functional/ompss-codelocation/Makefile])
+  tests/functional/Makefile tests/functional/launcher/Makefile tests/functional/tracer/Makefile \
+  tests/functional/merger/Makefile])
 #if test "${MRNET_INSTALLED}" = "yes" ; then
 AC_CONFIG_FILES([src/tracer/mrnet/Makefile])
 #fi
@@ -604,3 +604,5 @@ AC_CONFIG_FILES([src/tracer/mrnet/Makefile])
 AC_OUTPUT
 
 AX_SHOW_CONFIGURATION
+
+echo ${prefix} > PREFIX
