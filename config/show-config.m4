@@ -99,6 +99,12 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo libxml2 available: no
 	fi
 
+	if test "${BOOST_enabled}" = "yes" ; then
+		echo BOOST available: yes \(${BOOST_HOME}\)
+	else
+		echo BOOST available: no
+	fi
+
 	if test "${libunwind_works}" = "yes" ; then
 		echo -e callstack access: through libunwind \(${UNWIND_HOME}\)
 	else
