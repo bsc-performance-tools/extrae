@@ -287,7 +287,7 @@ List of Tables</A>
 <LI>1.2. <A NAME="tex2html10"
   HREF="user-guide.html#184">Available libraries in Extrae. Their availability depends upon the configure process.</A>
 <LI>6.1. <A NAME="tex2html19"
-  HREF="user-guide.html#3056">Description of the available mergers in the <I>Extrae</I> package.</A></UL>
+  HREF="user-guide.html#3068">Description of the available mergers in the <I>Extrae</I> package.</A></UL>
 <P>
 
 <P>
@@ -911,7 +911,7 @@ To install the instrumentation package in the directory chosen at configure step
 </H1>
 
 <P>
-The <I>Extrae</I> package contains some consistency checks. The aim of such checks is to determine whether a functionality is operative in the target (installation) environment and/or check whether the development of <I>Extrae</I> has introduced any misbehavior. To run the checks, just issue <TT>make check</TT> after the configuration. Please, notice that checks are meant to be run in the machine that the configure script was run, thus the results of the checks on machines with back-end nodes different to front-end nodes (like BG/* systems) are not representative at all.
+The <I>Extrae</I> package contains some consistency checks. The aim of such checks is to determine whether a functionality is operative in the target (installation) environment and/or check whether the development of <I>Extrae</I> has introduced any misbehavior. To run the checks, just issue <TT>make check</TT> after the installation. Please, notice that checks are meant to be run in the machine that the configure script was run, thus the results of the checks on machines with back-end nodes different to front-end nodes (like BG/* systems) are not representative at all.
 
 <P>
 
@@ -2788,7 +2788,7 @@ This routine recovers the original thread identifier (given by routines like pth
 </LI>
 <LI><TT>void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, const char* s1, const char *s2)</TT>
 <BR>
-Registers type <TT>t2</TT> to reference user source code location by using its address. During the merge phase the mpi2prv command will assign type <TT>t1</TT> to the event type that references the user function and to the event <TT>t2</TT> to the event that references the file name and line location.
+Registers type <TT>t2</TT> to reference user source code location by using its address. During the merge phase the mpi2prv command will assign type <TT>t1</TT> to the event type that references the user function and to the event <TT>t2</TT> to the event that references the file name and line location. The strings <TT>s1</TT> and <TT>s2</TT> refers, respectively, to the description of <TT>t1</TT> and <TT>t2</TT>
 </LI>
 <LI><TT>void Extrae_register_function_address (void *ptr, const char *funcname, const char *modname, unsigned line);</TT>
 <BR>
@@ -2933,11 +2933,11 @@ In order to use Paraver, those intermediate files (<I>i.e.</I>, <TT>.mpit</TT> f
 
 <P>
 The target trace type is defined in the XML configuration file used at the instrumentation step (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters <TT>-paraver</TT> or <TT>-dimemas</TT><A NAME="tex2html18"
-  HREF="#foot3049"><SUP>6.1</SUP></A>.
+  HREF="#foot3061"><SUP>6.1</SUP></A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="3056"></A>
+<DIV ALIGN="CENTER"><A NAME="3068"></A>
 <TABLE>
 <CAPTION><STRONG>Table 6.1:</STRONG>
 Description of the available mergers in the <I>Extrae</I> package.</CAPTION>
@@ -3264,7 +3264,7 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 <P>
 DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures<A NAME="tex2html20"
-  HREF="#foot3389"><SUP>7.1</SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+  HREF="#foot3401"><SUP>7.1</SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
 
 <P>
 
@@ -3352,7 +3352,7 @@ Please note, this script is particularly adapted to the MOAB/Slurm queue systems
 
 <P>
 LD_PRELOAD (or LDR_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names<A NAME="tex2html21"
-  HREF="#foot3485"><SUP>7.2</SUP></A>) they are not tested.
+  HREF="#foot3497"><SUP>7.2</SUP></A>) they are not tested.
 
 <P>
 We show how this mechanism works on Linux (or similar environments) in subsection <A HREF="#subsec:Examples_Linux">7.2.1</A> and on AIX in subsection <A HREF="#subsec:Examples_AIX">7.2.3</A>.
@@ -3743,10 +3743,10 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
  WIDTH="989" HEIGHT="697" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="\begin{landscape}
-% latex2html id marker 3756\begin{table}
+% latex2html id marker 3768\begin{table}
 \centerline{
 \begin...
-...riables available to configure {\sf {E}xtrae} }
+...riables available to configure {\sf {E}xtrae}\ }
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -3757,11 +3757,11 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
  WIDTH="989" HEIGHT="613" ALIGN="BOTTOM" BORDER="0"
  SRC="img4.png"
  ALT="\begin{landscape}
-% latex2html id marker 3777\par
+% latex2html id marker 3789\par
 \begin{table}
 \centerline{
 \...
-... to configure {\sf {E}xtrae} ({\em continued})}
+... to configure {\sf {E}xtrae}\ ({\em continued})}
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -4025,7 +4025,7 @@ These are the instrumented MPI routines in the <I>Extrae</I> package:
 <LI>MPI_Init
 </LI>
 <LI>MPI_Init_thread<A NAME="tex2html23"
-  HREF="#foot3389"><SUP>D.1</SUP></A>
+  HREF="#foot3401"><SUP>D.1</SUP></A>
 </LI>
 <LI>MPI_Finalize
 </LI>
@@ -4124,34 +4124,34 @@ These are the instrumented MPI routines in the <I>Extrae</I> package:
 <LI>MPI_Sendrecv_replace
 </LI>
 <LI>MPI_File_open<A NAME="tex2html24"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_close<A NAME="tex2html25"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read<A NAME="tex2html26"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_all<A NAME="tex2html27"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write<A NAME="tex2html28"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_all<A NAME="tex2html29"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_at<A NAME="tex2html30"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_read_at_all<A NAME="tex2html31"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_at<A NAME="tex2html32"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_File_write_at_all<A NAME="tex2html33"
-  HREF="#foot3485"><SUP>D.2</SUP></A>
+  HREF="#foot3497"><SUP>D.2</SUP></A>
 </LI>
 <LI>MPI_Get<A NAME="tex2html34"
   HREF="#foot1914"><SUP>D.3</SUP></A>
@@ -4424,7 +4424,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2012-10-18
+The translation was initiated by Harald Servat on 2012-10-24
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot210">... file</A><A
@@ -4462,17 +4462,17 @@ The translation was initiated by Harald Servat on 2012-10-18
 <DD>This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section <A HREF="#sec:XMLSectionBuffer">4.11</A>).
 
 </DD>
-<DT><A NAME="foot3049">...<TT>-dimemas</TT></A><A
+<DT><A NAME="foot3061">...<TT>-dimemas</TT></A><A
  HREF="user-guide.html#tex2html18"><SUP>6.1</SUP></A></DT>
 <DD>The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.
 
 </DD>
-<DT><A NAME="foot3389">... architectures</A><A
+<DT><A NAME="foot3401">... architectures</A><A
  HREF="user-guide.html#tex2html20"><SUP>7.1</SUP></A></DT>
 <DD>The IA-64 architecture support was dropped by DynInst 7.0
 
 </DD>
-<DT><A NAME="foot3485">... names</A><A
+<DT><A NAME="foot3497">... names</A><A
  HREF="user-guide.html#tex2html21"><SUP>7.2</SUP></A></DT>
 <DD>Look at <TT><A NAME="tex2html22"
   HREF="http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html">http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html</A></TT> for further information.
@@ -4490,7 +4490,7 @@ The translation was initiated by Harald Servat on 2012-10-18
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2012-10-18
+2012-10-24
 </ADDRESS>
 </BODY>
 </HTML>

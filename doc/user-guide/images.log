@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2012.6.5)  17 OCT 2012 17:12
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2012.6.5)  24 OCT 2012 16:01
 entering extended mode
  %&-line parsing enabled.
 **./images.tex
@@ -182,19 +182,190 @@ LaTeX Warning: Label `sec:OpenMPruntimesinstrumented' multiply defined.
 )
 \openout1 = `images.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 147.
-LaTeX Font Info:    ... okay on input line 147.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 147.
-LaTeX Font Info:    ... okay on input line 147.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 147.
-LaTeX Font Info:    ... okay on input line 147.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 147.
-LaTeX Font Info:    ... okay on input line 147.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 147.
-LaTeX Font Info:    ... okay on input line 147.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 147.
-LaTeX Font Info:    ... okay on input line 147.
-ABD: EveryShipout initializing macros
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 151.
+LaTeX Font Info:    ... okay on input line 151.
+ABD: EveryShipout initializing macros (/home/harald/development/extrae-2.2.1-ch
+eck/doc/user-guide.aux
+
+LaTeX Warning: Label `cha:QuickStart' multiply defined.
+
+
+LaTeX Warning: Label `tab:PackageDescription' multiply defined.
+
+
+LaTeX Warning: Label `subsec:RunningTraceDynInst' multiply defined.
+
+
+LaTeX Warning: Label `subsec:RunningTraceNOTDynInst' multiply defined.
+
+
+LaTeX Warning: Label `tab:AvailableExtraeLIBS' multiply defined.
+
+
+LaTeX Warning: Label `cha:Introduction' multiply defined.
+
+
+LaTeX Warning: Label `cha:Configuration' multiply defined.
+
+
+LaTeX Warning: Label `cha:XML' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionTraceConfiguration' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionMPI' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionPACX' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionOpenMP' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionOpenMP' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLcell' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionCallers' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionUF' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionPerformanceCounters' multiply defined.
+
+
+LaTeX Warning: Label `subsec:ProcessorPerformanceCounters' multiply defined.
+
+
+LaTeX Warning: Label `subsec:NetworkPerformanceCounters' multiply defined.
+
+
+LaTeX Warning: Label `subsec:OperatingSystemAccounting' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionStorage' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionBuffer' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionTraceControl' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionBursts' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionOthers' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionSampling' multiply defined.
+
+
+LaTeX Warning: Label `sec:XMLSectionMerge' multiply defined.
+
+
+LaTeX Warning: Label `sec:EnvVars_in_XML' multiply defined.
+
+
+LaTeX Warning: Label `cha:API' multiply defined.
+
+
+LaTeX Warning: Label `sec:BasicAPI' multiply defined.
+
+
+LaTeX Warning: Label `sec:ExtendedAPI' multiply defined.
+
+
+LaTeX Warning: Label `subsec:PPEside' multiply defined.
+
+
+LaTeX Warning: Label `subsec:SPEside' multiply defined.
+
+
+LaTeX Warning: Label `cha:Merging' multiply defined.
+
+
+LaTeX Warning: Label `tab:MergerDescription' multiply defined.
+
+
+LaTeX Warning: Label `cha:Examples' multiply defined.
+
+
+LaTeX Warning: Label `sec:Examples_DynInst' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_DynInst_Intermediate' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_DynInst_Intermediate_MPI' multiply define
+d.
+
+
+LaTeX Warning: Label `sec:Examples_LDPRELOAD' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_Linux' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_CUDA' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_AIX' multiply defined.
+
+
+LaTeX Warning: Label `sec:Examples_static' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_static_link' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_static_Intermediate' multiply defined.
+
+
+LaTeX Warning: Label `subsec:Examples_LDPRELOAD_Final' multiply defined.
+
+
+LaTeX Warning: Label `cha:wholeXML' multiply defined.
+
+
+LaTeX Warning: Label `cha:EnvVar' multiply defined.
+
+
+LaTeX Warning: Label `tab:EnvironmentVariables' multiply defined.
+
+
+LaTeX Warning: Label `tab:EnvironmentVariables_continued' multiply defined.
+
+
+LaTeX Warning: Label `sec:FAQ' multiply defined.
+
+
+LaTeX Warning: Label `cha:InstrumentedRoutines' multiply defined.
+
+
+LaTeX Warning: Label `sec:MPIinstrumentedroutines' multiply defined.
+
+
+LaTeX Warning: Label `sec:OpenMPruntimesinstrumented' multiply defined.
+
+
+LaTeX Warning: Label `sec:OpenMPruntimesinstrumented' multiply defined.
+
+)
 
 latex2htmlLength hsize=349.0pt
 
@@ -218,17 +389,28 @@ latex2htmlLength oddsidemargin=0.0pt
 
 latex2htmlLength evensidemargin=0.0pt
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 314.
+LaTeX Font Info:    Try loading font information for U+msa on input line 321.
 (/usr/share/texmf/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2002/01/19 v2.2g AMS font definitions
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 314.
+LaTeX Font Info:    Try loading font information for U+msb on input line 321.
 (/usr/share/texmf/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2002/01/19 v2.2g AMS font definitions
 )
-l2hSize :landscape3777:412.94963pt::0.0pt::650.43001pt.
+Overfull \hbox (5.19447pt too wide) in paragraph at lines 321--321
+[]\OT1/cmr/m/n/10.95 EXTRAE[]FUNCTIONS[]COUNTERS[]ON| 
+ []
+
+l2hSize :landscape3768:465.73293pt::0.0pt::650.43001pt.
 [1
 
+
+
+
+
+]
+l2hSize :landscape3789:412.94963pt::0.0pt::650.43001pt.
+[2
 
 
 
@@ -239,12 +421,12 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 2427 strings out of 256217
- 32080 string characters out of 1917096
- 91155 words of memory out of 1500000
- 5668 multiletter control sequences out of 10000+200000
- 9256 words of font info for 35 fonts, out of 1200000 for 2000
+ 2433 strings out of 256217
+ 32286 string characters out of 1917096
+ 92155 words of memory out of 1500000
+ 5669 multiletter control sequences out of 10000+200000
+ 9424 words of font info for 36 fonts, out of 1200000 for 2000
  645 hyphenation exceptions out of 8191
- 32i,12n,24p,222b,320s stack positions out of 5000i,500n,6000p,200000b,15000s
+ 32i,12n,24p,222b,322s stack positions out of 5000i,500n,6000p,200000b,15000s
 
-Output written on images.dvi (1 page, 5644 bytes).
+Output written on images.dvi (2 pages, 11208 bytes).
