@@ -9,6 +9,12 @@ fi
 rm -fr TRACE.sym TRACE.mpits set-0
 
 export EXTRAE_HOME=`cat ../../../PREFIX`
+
+if test ! -x ${EXTRAE_HOME}/bin/extrae ; then
+	echo "Could not execute binary rewriter test because ${EXTRAE_HOME}/bin/extrae does not exist"
+	exit -2
+fi
+
 source ${EXTRAE_HOME}/etc/extrae.sh
 
 ${EXTRAE_HOME}/bin/extrae -config extrae.xml -rewrite ./pi
