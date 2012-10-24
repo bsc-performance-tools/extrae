@@ -135,7 +135,7 @@ void fake_kernel_ol_2 (void)
 	Extrae_emit_CombinedEvents (&evt);
 }
 
-int main(int argc, char **argv)
+int main (void)
 {
 	int n = 1000;
 	double PI25DT = 3.141592653589793238462643;
