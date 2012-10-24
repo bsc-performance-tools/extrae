@@ -157,6 +157,7 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 
 void setTimeSampling (unsigned long long period, int sampling_type)
 {
+	int signum;
 	int ret;
 	struct sigaction act;
 
@@ -175,16 +176,6 @@ void setTimeSampling (unsigned long long period, int sampling_type)
 		return;
 	}
 
-	act.sa_sigaction = TimeSamplingHandler;
-	act.sa_flags     = SA_SIGINFO;
-
-	ret = sigaction(SIGALRM, &act, NULL);
-	if (ret != 0)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
-		return;
-	}
-
 	/* The period is given in nanoseconds */
 	period = period / 1000;
 
@@ -194,11 +185,30 @@ void setTimeSampling (unsigned long long period, int sampling_type)
 	SamplingPeriod.it_value.tv_usec = period % 1000000;
 
 	if (sampling_type == SAMPLING_TIMING_VIRTUAL)
+	{
 		SamplingClockType = ITIMER_VIRTUAL;
+		signum = SIGVTALRM;
+	}
 	else if (sampling_type == SAMPLING_TIMING_PROF)
+	{
 		SamplingClockType = ITIMER_PROF;
+		signum = SIGPROF;
+	}
 	else
+	{
 		SamplingClockType = ITIMER_REAL;
+		signum = SIGALRM;
+	}
+
+	act.sa_sigaction = TimeSamplingHandler;
+	act.sa_flags = SA_SIGINFO;
+
+	ret = sigaction (signum, &act, NULL);
+	if (ret != 0)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
+		return;
+	}
 
 	setitimer (SamplingClockType, &SamplingPeriod, NULL);
 }
