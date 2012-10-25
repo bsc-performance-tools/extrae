@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 24Oct2012 Sampling support for pthreads/openmp -> change type from default
+   to virtual or prof.
  + 23Oct2012 Added support for binary rewriting using DynInst
  * 22Oct2012 DynInst compilation changed and broke into different components.
    Now sports pcontrol, stackwalk, dynelf/dwarf and symlite. 

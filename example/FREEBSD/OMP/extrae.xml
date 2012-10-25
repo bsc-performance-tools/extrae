@@ -60,7 +60,7 @@
     <minimum-time enabled="no">10M</minimum-time>
   </others>
 
-  <sampling enabled="no" type="default" period="50m" />
+  <sampling enabled="no" type="virtual" period="50m" />
 
   <merge enabled="yes" 
     synchronization="default"

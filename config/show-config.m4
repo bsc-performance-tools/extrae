@@ -100,7 +100,11 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	fi
 
 	if test "${BOOST_enabled}" = "yes" ; then
-		echo BOOST available: yes \(${BOOST_HOME}\)
+		if test "${BOOST_default}" = "yes" ; then
+			echo BOOST available: yes \(in default compiler path\)
+		else
+			echo BOOST available: yes \(${BOOST_HOME}\)
+		fi
 	else
 		echo BOOST available: no
 	fi
