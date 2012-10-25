@@ -25,7 +25,6 @@ AC_DEFUN([AX_PROG_BOOST],
 		BOOST_default="yes"
 		BOOST_HOME=""
 		AC_SUBST(BOOST_HOME)
-		AC_MSG_RESULT([found in ${BoostDir}])
 
 	else
 
