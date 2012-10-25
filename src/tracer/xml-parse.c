@@ -88,7 +88,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(SAMPLING_SUPPORT)
 # include "sampling.h"
 #endif
-#include "pthread_probe.h"
+#if defined(PTHREAD_SUPPORT)
+# include "pthread_probe.h"
+#endif
 
 /* Some global (but local in the module) variables */
 static char *temporal_d = NULL, *final_d = NULL;

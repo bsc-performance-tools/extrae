@@ -152,7 +152,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "sampling.h"
 #include "debug.h"
 #include "threadinfo.h"
-#include "pthread_probe.h"
+#if defined(PTHREAD_SUPPORT)
+# include "pthread_probe.h"
+#endif
 
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
