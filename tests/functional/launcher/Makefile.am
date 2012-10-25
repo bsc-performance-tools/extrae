@@ -1,5 +1,7 @@
 include $(top_srcdir)/PATHS
 
+if HAVE_DYNINST
+
 check_PROGRAMS = pi
 
 TESTS = \
@@ -8,4 +10,6 @@ TESTS = \
  test-dyninst-2.sh
 
 pi_SOURCES = pi.c
+
+endif
 
