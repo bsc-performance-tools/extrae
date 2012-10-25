@@ -76,7 +76,7 @@ CntQueue CountersTraced;
  ******************************************************************************/
 
 int HardwareCounters_Emit (int ptask, int task, int thread,
-	long long time, event_t * Event, unsigned int *outtype,
+	unsigned long long time, event_t * Event, unsigned int *outtype,
 	unsigned long long *outvalue)
 {
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
@@ -155,7 +155,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	return TRUE;
 }
 
-static int HardwareCounters_Compare (long long *HWC1, int *used1, long long *HWC2, int *used2)
+static int HardwareCounters_Compare (int *HWC1, int *used1, int *HWC2, int *used2)
 {
 	int i;
 
@@ -166,7 +166,7 @@ static int HardwareCounters_Compare (long long *HWC1, int *used1, long long *HWC
 	return TRUE;
 }
 
-static int HardwareCounters_Exist (long long *HWC, int *used)
+static int HardwareCounters_Exist (int *HWC, int *used)
 {
 	CntQueue *queue, *ptmp;
 
@@ -183,7 +183,7 @@ void HardwareCounters_Show (event_t * Event, int ncounters)
   int cnt;
   fprintf (stdout, "COUNTERS: ");
   for (cnt = 0; cnt < ncounters; cnt++)
-    fprintf (stdout, "[%llu] ", Event->HWCValues[cnt]);
+    fprintf (stdout, "[%lld] ", Event->HWCValues[cnt]);
   fprintf (stdout, "\n");
 }
 
@@ -224,12 +224,7 @@ void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int new
 		{
 			if (HWCIds != NULL)
 			{
-				int position;
-
 				Sthread->HWCSets[newSet][i] = (int)HWCIds[i];
-				
-				//if (Labels_LookForHWCCounter (HWCIds[i], &position, NULL))
-				//Sthread->HWCSets_types[newSet][i] = HWC_COUNTER_TYPE(position);
 				Sthread->HWCSets_types[newSet][i] = HWC_COUNTER_TYPE(HWCIds[i]);
 			}
 			else
@@ -278,8 +273,7 @@ int HardwareCounters_GetCurrentSet(int ptask, int task, int thread)
  ******************************************************************************/
 
 void HardwareCounters_Change (int ptask, int task, int thread,
-	int newSet, unsigned int *outtypes,
-	unsigned long long *outvalues)
+	int newSet, int *outtypes, unsigned long long *outvalues)
 {
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
 	int cnt;
@@ -348,7 +342,7 @@ void HardwareCounters_SetOverflow (int ptask, int task, int thread, event_t *Eve
 #include "mpi-tags.h"
 #include "mpi-aux.h"
 
-static void HardwareCounters_Add (long long *HWCValues, int *used)
+static void HardwareCounters_Add (int *HWCValues, int *used)
 {
   int cnt;
   CntQueue *cItem;
@@ -373,16 +367,16 @@ void Share_Counters_Usage (int size, int rank)
 	{
 		/* Code to run the master */
 		int slave, ncounters;
-		long long counters[MAX_HWC];
+		int counters[MAX_HWC];
 		int used[MAX_HWC];
 
 		for (slave = 1; slave < size; slave++)
 		{
 			/* How many set of counters has each slave? */
-			res = MPI_Recv (&ncounters, 1, MPI_INTEGER, slave, NUMBER_OF_HWC_SETS_TAG, MPI_COMM_WORLD, &s);
+			res = MPI_Recv (&ncounters, 1, MPI_INT, slave, NUMBER_OF_HWC_SETS_TAG, MPI_COMM_WORLD, &s);
 			MPI_CHECK(res, MPI_Recv, "Receiving number of sets of HWC");
 
-			res = MPI_Send (&ncounters, 1, MPI_INTEGER, slave, HWC_SETS_READY, MPI_COMM_WORLD);
+			res = MPI_Send (&ncounters, 1, MPI_INT, slave, HWC_SETS_READY, MPI_COMM_WORLD);
 			MPI_CHECK(res, MPI_Send, "Sending ready statement");
 
 			if (ncounters > 0)
@@ -391,9 +385,9 @@ void Share_Counters_Usage (int size, int rank)
 				/* Just receive the counters of each slave */
 				for (i = 0; i < ncounters; i++)
 				{
-					res = MPI_Recv (counters, MAX_HWC, MPI_LONG_LONG, slave, HWC_SETS_TAG, MPI_COMM_WORLD, &s);
+					res = MPI_Recv (counters, MAX_HWC, MPI_INT, slave, HWC_SETS_TAG, MPI_COMM_WORLD, &s);
 					MPI_CHECK(res, MPI_Recv, "Receiving HWC");
-					res = MPI_Recv (used, MAX_HWC, MPI_INTEGER, slave, HWC_SETS_ENABLED_TAG, MPI_COMM_WORLD, &s);
+					res = MPI_Recv (used, MAX_HWC, MPI_INT, slave, HWC_SETS_ENABLED_TAG, MPI_COMM_WORLD, &s);
 					MPI_CHECK(res, MPI_Recv, "Receiving used HWC bitmap");
 					HardwareCounters_Add (counters, used);
 				}
@@ -412,10 +406,10 @@ void Share_Counters_Usage (int size, int rank)
 		for (ptmp = (queue)->prev; ptmp != (queue); ptmp = ptmp->prev)
 			count++;
 
-		res = MPI_Send (&count, 1, MPI_INTEGER, 0, NUMBER_OF_HWC_SETS_TAG, MPI_COMM_WORLD);
+		res = MPI_Send (&count, 1, MPI_INT, 0, NUMBER_OF_HWC_SETS_TAG, MPI_COMM_WORLD);
 		MPI_CHECK(res, MPI_Send, "Sending number of HWC sets");
 
-		res = MPI_Recv (&count, 1, MPI_INTEGER, 0, HWC_SETS_READY, MPI_COMM_WORLD, &s);
+		res = MPI_Recv (&count, 1, MPI_INT, 0, HWC_SETS_READY, MPI_COMM_WORLD, &s);
 		MPI_CHECK(res, MPI_Recv, "Receiving ready statement");
 
 		if (count > 0)
@@ -423,9 +417,9 @@ void Share_Counters_Usage (int size, int rank)
   		queue = &CountersTraced;
  		 	for (ptmp = (queue)->prev; ptmp != (queue); ptmp = ptmp->prev)
 			{
-				res = MPI_Send (ptmp->Events, MAX_HWC, MPI_LONG_LONG, 0, HWC_SETS_TAG, MPI_COMM_WORLD);
+				res = MPI_Send (ptmp->Events, MAX_HWC, MPI_INT, 0, HWC_SETS_TAG, MPI_COMM_WORLD);
 				MPI_CHECK(res, MPI_Send, "Sending HWC");
-				res = MPI_Send (ptmp->Traced, MAX_HWC, MPI_INTEGER, 0, HWC_SETS_ENABLED_TAG, MPI_COMM_WORLD);
+				res = MPI_Send (ptmp->Traced, MAX_HWC, MPI_INT, 0, HWC_SETS_ENABLED_TAG, MPI_COMM_WORLD);
 				MPI_CHECK(res, MPI_Send, "Sending used HWC bitmap");
 			}
 		}

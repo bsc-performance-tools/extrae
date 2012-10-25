@@ -76,7 +76,7 @@ typedef struct
   UINT64 value;                  /* Value of this event                   */
   UINT64 time;                   /* Timestamp of this event               */
 #if 1 || USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-  INT64 HWCValues[MAX_HWC];      /* Hardware counters read for this event */
+  long long HWCValues[MAX_HWC];      /* Hardware counters read for this event */
 #endif
   INT32 event;                   /* Type of this event                    */
 #if 1 || USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)

@@ -46,7 +46,7 @@
 # include <pthread.h>
 #endif
 
-#include "threadid.h"
+#include "wrapper.h"
 #include "omp-common.h"
 
 //#define DEBUG
@@ -255,7 +255,7 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
 #endif
 
-	if (__kmpc_fork_call_real != NULL)
+	if (__kmpc_fork_call_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_ParRegion_Entry ();
 
@@ -279,6 +279,27 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 		}
 
 		Extrae_OpenMP_ParRegion_Exit ();	
+	}
+	else if (__kmpc_fork_call_real != NULL && !mpitrace_on)
+	{
+		/* Grab parameters */
+		va_start (ap, p3);
+		for (i = 0; i < p2; i++)
+			params[i] = va_arg (ap, void*);
+		va_end (ap);
+
+		par_func = p3;
+
+		switch (p2)
+		{
+			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
+#include "intel-kmpc-11-intermediate-switch.c"
+
+			default:
+				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n", p2);
+				exit (-1);
+				break;
+		}
 	}
 	else
 	{
@@ -300,7 +321,7 @@ void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
 #endif
 
-	if (__kmpc_fork_call_real != NULL)
+	if (__kmpc_fork_call_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_ParRegion_Entry ();
 
@@ -325,6 +346,27 @@ void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 
 		Extrae_OpenMP_ParRegion_Exit ();	
 	}
+	else if (__kmpc_fork_call_real != NULL && !mpitrace_on)
+	{
+		/* Grab parameters */
+		va_start (ap, p3);
+		for (i = 0; i < p2; i++)
+			params[i] = va_arg (ap, void*);
+		va_end (ap);
+
+		par_func = p3;
+
+		switch (p2)
+		{
+			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
+#include "intel-kmpc-11-intermediate-switch.c"
+
+			default:
+				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n", p2);
+				exit (-1);
+				break;
+		}
+	}
 	else
 	{
 		fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call is not hooked! exiting!!\n");
@@ -339,11 +381,15 @@ void __kmpc_barrier (void *p1, int p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_barrier params %p %d\n", THREADID, p1, p2);
 #endif
 
-	if (__kmpc_barrier_real != NULL)
+	if (__kmpc_barrier_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Barrier_Entry ();
 		__kmpc_barrier_real (p1, p2);
 		Extrae_OpenMP_Barrier_Exit ();
+	}
+	else if (__kmpc_barrier_real != NULL && mpitrace_on)
+	{
+		__kmpc_barrier_real (p1, p2);
 	}
 	else
 	{
@@ -359,11 +405,15 @@ void __kmpc_critical (void *p1, int p2, void *p3)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_critical params %p %d %p\n", THREADID, p1, p2, p3);
 #endif
 
-	if (__kmpc_critical_real != NULL)
+	if (__kmpc_critical_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Named_Lock_Entry ();
 		__kmpc_critical_real (p1, p2, p3);
 		Extrae_OpenMP_Named_Lock_Exit ();
+	}
+	else if (__kmpc_critical_real != NULL && !mpitrace_on)
+	{
+		__kmpc_critical_real (p1, p2, p3);
 	}
 	else
 	{
@@ -379,11 +429,15 @@ void __kmpc_end_critical (void *p1, int p2, void *p3)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_end_critical params %p %d %p\n", THREADID, p1, p2, p3);
 #endif
 
-	if (__kmpc_end_critical_real != NULL)
+	if (__kmpc_end_critical_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Named_Unlock_Entry ();
 		__kmpc_end_critical_real (p1, p2, p3);
 		Extrae_OpenMP_Named_Unlock_Exit ();
+	}
+	else if (__kmpc_end_critical_real != NULL && !mpitrace_on)
+	{
+		__kmpc_end_critical_real (p1, p2, p3);
 	}
 	else
 	{
@@ -401,7 +455,7 @@ int __kmpc_dispatch_next_4 (void *p1, int p2, int *p3, int *p4, int *p5, int *p6
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_next_4 params %p %d %p %p %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
-	if (__kmpc_dispatch_next_8_real != NULL)
+	if (__kmpc_dispatch_next_8_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Work_Entry();
 		res = __kmpc_dispatch_next_4_real (p1, p2, p3, p4, p5, p6);
@@ -412,6 +466,10 @@ int __kmpc_dispatch_next_4 (void *p1, int p2, int *p3, int *p4, int *p5, int *p6
 			Extrae_OpenMP_UF_Exit ();
 			Extrae_OpenMP_DO_Exit ();
 		}
+	}
+	else if (__kmpc_dispatch_next_8_real != NULL && !mpitrace_on)
+	{
+		res = __kmpc_dispatch_next_4_real (p1, p2, p3, p4, p5, p6);
 	}
 	else
 	{
@@ -429,7 +487,7 @@ int __kmpc_dispatch_next_8 (void *p1, int p2, int *p3, long long *p4, long long 
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_next_8 is at %p\n", THREADID, __kmpc_dispatch_next_8_real);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_next_8 params %p %d %p %p %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
-	if (__kmpc_dispatch_next_8_real != NULL)
+	if (__kmpc_dispatch_next_8_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Work_Entry();
 		res = __kmpc_dispatch_next_8_real (p1, p2, p3, p4, p5, p6);
@@ -440,6 +498,10 @@ int __kmpc_dispatch_next_8 (void *p1, int p2, int *p3, long long *p4, long long 
 			Extrae_OpenMP_UF_Exit ();
 			Extrae_OpenMP_DO_Exit ();
 		}
+	}
+	else if (__kmpc_dispatch_next_8_real != NULL && !mpitrace_on)
+	{
+		res = __kmpc_dispatch_next_8_real (p1, p2, p3, p4, p5, p6);
 	}
 	else
 	{
@@ -458,7 +520,7 @@ int __kmpc_single (void *p1, int p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_single params %p %d\n", THREADID, p1, p2);
 #endif
 
-	if (__kmpc_single_real != NULL)
+	if (__kmpc_single_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Single_Entry ();
 
@@ -474,6 +536,10 @@ int __kmpc_single (void *p1, int p2)
 		{
 			Extrae_OpenMP_Single_Exit ();
 		}
+	}
+	else if (__kmpc_single_real != NULL && !mpitrace_on)
+	{
+		res = __kmpc_single_real (p1, p2);
 	}
 	else
 	{
@@ -491,12 +557,16 @@ void __kmpc_end_single (void *p1, int p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_end_single params %p %d\n", THREADID, p1, p2);
 #endif
 
-	if (__kmpc_single_real != NULL)
+	if (__kmpc_single_real != NULL && mpitrace_on)
 	{
 		/* This is only executed by the thread that entered the single region */
 		Extrae_OpenMP_UF_Exit ();
 		__kmpc_end_single_real (p1, p2);
 		Extrae_OpenMP_Single_Exit ();
+	}
+	else if (__kmpc_single_real != NULL && !mpitrace_on)
+	{
+		__kmpc_end_single_real (p1, p2);
 	}
 	else
 	{
@@ -513,11 +583,15 @@ void __kmpc_dispatch_init_4 (void *p1, int p2, int p3, int p4, int p5, int p6,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_init_4 params are %p %d %d %d %d %d %d\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
-	if (__kmpc_dispatch_init_4_real != NULL)
+	if (__kmpc_dispatch_init_4_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_4_real (p1, p2, p3, p4, p5, p6, p7);
 		Extrae_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+	}
+	else if (__kmpc_dispatch_init_4_real != NULL && !mpitrace_on)
+	{
+		__kmpc_dispatch_init_4_real (p1, p2, p3, p4, p5, p6, p7);
 	}
 	else
 	{
@@ -534,11 +608,15 @@ void __kmpc_dispatch_init_8 (void *p1, int p2, int p3, long long p4,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_init_8 params are %p %d %d %lld %lld %lld %lld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
-	if (__kmpc_dispatch_init_8_real != NULL)
+	if (__kmpc_dispatch_init_8_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_8_real (p1, p2, p3, p4, p5, p6, p7);
 		Extrae_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+	}
+	else if (__kmpc_dispatch_init_8_real != NULL && !mpitrace_on)
+	{
+		__kmpc_dispatch_init_8_real (p1, p2, p3, p4, p5, p6, p7);
 	}
 	else
 	{
@@ -554,11 +632,15 @@ void __kmpc_dispatch_fini_4 (void *p1, int p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_4 params are %p %d\n", THREADID, p1, p2);
 #endif
 
-	if (__kmpc_dispatch_fini_4_real != NULL)
+	if (__kmpc_dispatch_fini_4_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_4_real (p1, p2);
 		Extrae_OpenMP_UF_Exit ();
+	}
+	else if (__kmpc_dispatch_fini_4_real != NULL && !mpitrace_on)
+	{
+		__kmpc_dispatch_fini_4_real (p1, p2);
 	}
 	else
 	{
@@ -574,11 +656,15 @@ void __kmpc_dispatch_fini_8 (void *p1, long long p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_8 params are %p %lld\n", THREADID, p1, p2);
 #endif
 
-	if (__kmpc_dispatch_fini_8_real != NULL)
+	if (__kmpc_dispatch_fini_8_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_DO_Exit ();
 		__kmpc_dispatch_fini_8_real (p1, p2);
 		Extrae_OpenMP_UF_Exit ();
+	}
+	else if (__kmpc_dispatch_fini_8_real != NULL && !mpitrace_on)
+	{
+		__kmpc_dispatch_fini_8_real (p1, p2);
 	}
 	else
 	{
@@ -673,12 +759,16 @@ void * __kmpc_omp_task_alloc (void *p1, int p2, int p3, size_t p4, size_t p5, vo
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_alloc params %p %d %d %d %d %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
-	if (__kmpc_omp_task_alloc_real != NULL)
+	if (__kmpc_omp_task_alloc_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Task_Entry ((UINT64)p6);
 		res = __kmpc_omp_task_alloc_real (p1, p2, p3, p4, p5, __extrae_kmpc_task_substitute);
 		__extrae_add_kmpc_task_function (res, p6);
 		Extrae_OpenMP_Task_Exit ();
+	}
+	else if (__kmpc_omp_task_alloc_real != NULL && !mpitrace_on)
+	{
+		res = __kmpc_omp_task_alloc_real (p1, p2, p3, p4, p5, p6);
 	}
 	else
 	{
@@ -698,7 +788,7 @@ void __kmpc_omp_task_begin_if0 (void *p1, int p2, void *p3)
 
 	void (*__kmpc_task_substituted_func)(int,void*) = (void(*)(int,void*)) __extrae_remove_kmpc_task_function (p3);
 
-	if (__kmpc_task_substituted_func != NULL)
+	if (__kmpc_task_substituted_func != NULL && mpitrace_on)
 	{
 		if (__kmpc_omp_task_begin_if0_real != NULL)
 		{
@@ -710,6 +800,10 @@ void __kmpc_omp_task_begin_if0 (void *p1, int p2, void *p3)
 			fprintf (stderr, PACKAGE_NAME": __kmpc_omp_task_begin_if0 is not hooked! Exiting!!\n");
 			exit (0);
 		}
+	}
+	else if (__kmpc_task_substituted_func != NULL && !mpitrace_on)
+	{
+		 __kmpc_omp_task_begin_if0_real (p1, p2, p3);
 	}
 	else
 	{
@@ -725,10 +819,14 @@ void __kmpc_omp_task_complete_if0 (void *p1, int p2, void *p3)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_omp_task_complete_if0 params %p %d %p\n", THREADID, p1, p2, p3);
 #endif
 
-	if (__kmpc_omp_task_complete_if0_real != NULL)
+	if (__kmpc_omp_task_complete_if0_real != NULL && mpitrace_on)
 	{
 		__kmpc_omp_task_complete_if0_real (p1, p2, p3);
 		Extrae_OpenMP_TaskUF_Exit ();
+	}
+	else if (__kmpc_omp_task_complete_if0_real != NULL && !mpitrace_on)
+	{
+		__kmpc_omp_task_complete_if0_real (p1, p2, p3);
 	}
 	else
 	{

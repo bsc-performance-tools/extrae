@@ -150,8 +150,9 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "sampling.h"
-
 #include "debug.h"
+#include "threadinfo.h"
+#include "pthread_probe.h"
 
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
@@ -828,7 +829,7 @@ static int read_environment_variables (int me)
 
 	/* Will we trace openmp-locks ? */
 	str = getenv ("EXTRAE_PTHREAD_LOCKS");
-	setTrace_PTHREADLocks ((str != NULL && (strcmp (str, "1"))));
+	Extrae_pthread_instrument_locks ((str != NULL && (strcmp (str, "1"))));
 #endif
 
 	/* Should we configure a signal handler ? */
@@ -864,7 +865,7 @@ static int read_environment_variables (int me)
 
 		if (sampling_period != 0)
 		{
-			char str2;
+			char *str2;
 			if ((str2 = getenv ("EXTRAE_SAMPLING_CLOCKTYPE")) != NULL)
 			{
 				if (strcmp (str2, "DEFAULT") == 0)
@@ -1390,7 +1391,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 {
 	int runningInDynInst = FALSE;
 	char trace_sym[TMP_DIR];
-	char *shell_name;
 #if defined(OMP_SUPPORT)
 	char *omp_value;
 	char *new_num_omp_threads_clause;
@@ -1571,9 +1571,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	/* Write hardware counters set definitions (i.e. those given at config time) into the .mpit files*/
 	for (set=0; set<HWC_Get_Num_Sets(); set++)
 	{
-		int num_hwc, *HWCid;
+		int *HWCid;
 
-		num_hwc = HWC_Get_Set_Counters_Ids (set, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
+		HWC_Get_Set_Counters_Ids (set, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
 		TRACE_EVENT_AND_GIVEN_COUNTERS (ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
 		xfree (HWCid);
 	}
@@ -1688,9 +1688,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 #warning "Aixo caldria separar-ho en mes events (mpi_init no hi fa res aqui!!) -- synchro + options"
 	int i;
 	unsigned long long *StartingTimes=NULL, *SynchronizationTimes=NULL;
-#if defined(MPI_SUPPORT)
-	int rc;
-#endif
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, InitTime, EndTime);
@@ -1706,8 +1703,19 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 #if defined(MPI_SUPPORT)
 	if (world_size > 1)
 	{
+		int rc;
 		rc = PMPI_Allgather (&ApplBegin_Time, 1, MPI_LONG_LONG, StartingTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+		if (rc != MPI_SUCCESS)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! Could not gather starting times!\n");
+			exit(1);
+		}
 		rc = PMPI_Allgather (&EndTime, 1, MPI_LONG_LONG, SynchronizationTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+		if (rc != MPI_SUCCESS)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! Could not gather synchronization times!\n");
+			exit(1);
+		}
 	}
 	else
 	{

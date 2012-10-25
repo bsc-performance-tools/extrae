@@ -135,7 +135,7 @@ static void ResetCounters (unsigned ptask, unsigned task, unsigned thread)
  **      Function name : Evt_SetCounters
  **      Description :
  ******************************************************************************/
-static int Evt_SetCounters ( event_t * current_event, unsigned long long current_time,
+static int Evt_SetCounters (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset )
 {
@@ -144,6 +144,8 @@ static int Evt_SetCounters ( event_t * current_event, unsigned long long current
 	unsigned int hwctype[MAX_HWC+1];
 	unsigned long long hwcvalue[MAX_HWC+1];
 	unsigned int newSet = Get_EvValue(current_event);
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(cpu);
 
 	Dimemas_CPU_Burst (fset->output_file, task-1, thread-1, 0);
 	ResetCounters (ptask, task, thread);

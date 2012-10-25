@@ -32,6 +32,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "omp_probe.h"
 #include "omp-common.h"
+#include "wrapper.h"
 
 void Extrae_OpenMP_Join_NoWait_Entry (void)
 {

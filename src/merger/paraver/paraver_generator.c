@@ -240,9 +240,10 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	unsigned int ptask_r, unsigned int task_r, unsigned int thread_r, unsigned int size, unsigned int tag)
 {
 	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
-	thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
+
+	UNREFERENCED_PARAMETER(thread_r);
 
 	if (!EnabledTasks[ptask_s-1][task_s-1])
 		return;
@@ -259,7 +260,6 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	record.cpu_r = cpu_r;
 	record.ptask_r = ptask_r;
 	record.task_r = task_r;
-	/* record.thread_r = thread_info_r->virtual_thread; */
 
 	trace_paraver_record (wfb, &record);
 }
@@ -274,10 +274,11 @@ void trace_paraver_communication (unsigned int cpu_s, unsigned int ptask_s,
 	unsigned long long phy_r, unsigned int size, unsigned int tag,
 	int giveOffset, off_t position)
 {
-	thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 	paraver_rec_t record;
+
+	UNREFERENCED_PARAMETER(thread_r);
 
 	if (!(EnabledTasks[ptask_s-1][task_s-1] || EnabledTasks[ptask_r-1][task_r-1]))
 		return;
@@ -312,12 +313,12 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	unsigned long long log_r, unsigned long long phy_r, unsigned int size,
 	unsigned int tag)
 {
-	thread_t * thread_info_r = GET_THREAD_INFO (ptask_r, task_r, thread_r);
 	thread_t * thread_info_s = GET_THREAD_INFO (ptask_s, task_s, thread_s);
 	off_t where;
 	paraver_rec_t record;
 	WriteFileBuffer_t *wfb = thread_info_s->file->wfb;
 
+	UNREFERENCED_PARAMETER(thread_r);
 	UNREFERENCED_PARAMETER(log_r);
 	UNREFERENCED_PARAMETER(phy_r);
 
@@ -678,7 +679,11 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 #if defined(HAVE_MPI)  /* Sequential tracing does not use comunicators */
 	TipusComunicador com;
 	int i, final;
-	unsigned int num_tasks;
+#endif
+
+	UNREFERENCED_PARAMETER(numtasks);
+#if !defined(PARALLEL_MERGE)
+	UNREFERENCED_PARAMETER(fset);
 #endif
 
 	if (taskid == 0)
@@ -728,8 +733,8 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
 #if defined(PARALLEL_MERGE)
-		unsigned *vthreads_count = Gather_Paraver_VirtualThreads (numtasks, taskid,
-		  ptask, fset);
+		unsigned *vthreads_count = Gather_Paraver_VirtualThreads (taskid, ptask,
+			fset);
 #endif
 
 		if (taskid == 0)
@@ -778,8 +783,6 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 		/* Write the communicator definition for every application */
 		for (ptask = 1; ptask <= num_appl; ptask++)
 		{
-			num_tasks = obj_table[ptask - 1].ntasks;
-
 			/* Write the communicators created manually by the application */
 			final = (primer_comunicador (&com) < 0);
 			while (!final)
@@ -844,7 +847,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	paraver_rec_t *current;
 	double pct, last_pct;
 	unsigned long long current_event, tmp;
-	int error;
+	int error = FALSE;
 	int num_incomplete_state = 0;
 	int num_unmatched_comm = 0;
 	int num_pending_comm = 0;
@@ -1053,7 +1056,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 	int tree_max_depth;
 	int current_depth;
 #endif
-	PRVFileSet_t *prvfset;
+	PRVFileSet_t *prvfset = NULL;
 	unsigned long long num_of_events;
 	struct fdz_fitxer prv_fd;
 	int error = FALSE;

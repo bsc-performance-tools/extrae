@@ -65,20 +65,22 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	{
 		case CUDACONFIGCALL_EV:	
 			state = STATE_OTHERS;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case CUDALAUNCH_EV:
 			state = STATE_OVHD;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case CUDASTREAMBARRIER_EV:
 		case CUDATHREADBARRIER_EV:
 			state = STATE_BARRIER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case CUDAMEMCPY_EV:
 			state = STATE_MEMORY_XFER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 	}
-
-	Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	if (EvValue != EVT_END)
@@ -112,16 +114,17 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 	{
 		case CUDAKERNEL_GPU_EV:
 			state = STATE_RUNNING;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case CUDAMEMCPY_GPU_EV:
 			state = STATE_MEMORY_XFER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case CUDACONFIGKERNEL_GPU_EV:
 			state = STATE_OTHERS;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 	}
-
-	Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 

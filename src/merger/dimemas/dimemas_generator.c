@@ -79,7 +79,6 @@ int Dimemas_WriteHeader (unsigned num_appl, FILE *trf_fd,
 #if defined (HAVE_MPI)  /* Sequential tracing does not use comunicators */
 	TipusComunicador com;
 	int i, final;
-	unsigned int num_tasks;
 #endif
 
 	UNREFERENCED_PARAMETER(info);
@@ -110,8 +109,6 @@ int Dimemas_WriteHeader (unsigned num_appl, FILE *trf_fd,
 	/* Write the communicator definition for every application */
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		num_tasks = obj_table[ptask].ntasks;
-
 		/* Write the communicators created manually by the application */
 		final = (primer_comunicador (&com) < 0);
 		while (!final)

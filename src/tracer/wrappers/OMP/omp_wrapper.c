@@ -104,13 +104,17 @@ void omp_set_lock (int *p1)
 	fprintf (stderr, PACKAGE_NAME": omp_set_lock params %p\n", p1);
 #endif
 
-	if (omp_set_lock_real != NULL)
+	if (omp_set_lock_real != NULL && mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Lock_Entry();
-		omp_set_lock_real(p1);
+		omp_set_lock_real (p1);
 		Probe_OpenMP_Named_Lock_Exit();
 		Backend_Leave_Instrumentation ();
+	}
+	else if (omp_set_lock_real != NULL && !mpitrace_on)
+	{
+		omp_set_lock_real (p1);
 	}
 	else
 	{
@@ -126,13 +130,17 @@ void omp_unset_lock (int *p1)
 	fprintf (stderr, PACKAGE_NAME": omp_unset_lock params %p\n", p1);
 #endif
 
-	if (omp_unset_lock_real != NULL)
+	if (omp_unset_lock_real != NULL && mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Lock_Entry();
 		omp_unset_lock_real (p1);
 		Probe_OpenMP_Named_Lock_Exit();
 		Backend_Leave_Instrumentation ();
+	}
+	else if (omp_unset_lock_real != NULL && !mpitrace_on)
+	{
+		omp_unset_lock_real (p1);
 	}
 	else
 	{
@@ -148,7 +156,7 @@ void omp_set_num_threads (int p1)
 	fprintf (stderr, PACKAGE_NAME": omp_set_num_threads params %d\n", p1);
 #endif
 
-	if (omp_set_num_threads_real != NULL)
+	if (omp_set_num_threads_real != NULL && mpitrace_on)
 	{
 		Backend_ChangeNumberOfThreads (p1);
 
@@ -157,6 +165,10 @@ void omp_set_num_threads (int p1)
 		omp_set_num_threads_real (p1);
 		Probe_OpenMP_SetNumThreads_Exit ();
 		Backend_Leave_Instrumentation ();
+	}
+	else if (omp_set_num_threads_real != NULL && mpitrace_on)
+	{
+		omp_set_num_threads_real (p1);
 	}
 	else
 	{
@@ -175,7 +187,7 @@ int omp_get_num_threads (int p1)
   fprintf (stderr, PACKAGE_NAME": omp_get_num_threads params %d\n", p1);
 #endif
 
-  if (omp_get_num_threads_real != NULL)
+  if (omp_get_num_threads_real != NULL && mpitrace_on)
   {
     Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_GetNumThreads_Entry ();
@@ -183,6 +195,10 @@ int omp_get_num_threads (int p1)
 		Probe_OpenMP_GetNumThreads_Exit ();
     Backend_Leave_Instrumentation ();
   }
+  else if (omp_get_num_threads_real != NULL && !mpitrace_on)
+	{
+		res = omp_get_num_threads_real ();
+	}
   else
   {
     fprintf (stderr, PACKAGE_NAME": omp_set_num_threads is not hooked! exiting!!\n");

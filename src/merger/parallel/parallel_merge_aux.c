@@ -50,6 +50,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "pthread_prv_events.h"
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
+#include "trt_prv_events.h"
+#include "cuda_prv_events.h"
 #include "addr2info.h"
 #include "options.h"
 
@@ -210,7 +212,7 @@ static void MatchRecv (int fd, off_t offset, UINT64 physic_time, UINT64 logic_ti
   if (sizeof(receives) != size)
   {
     perror ("write");
-    fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to write (fd = %d, size = %d, written = %d)\n", fd, sizeof(r), size);
+    fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to write (fd = %d, size = %ld, written = %Zu)\n", fd, sizeof(r), size);
     exit (-2);
   }
 }
@@ -797,8 +799,8 @@ void ShareNodeNames (int numtasks, char ***nodenames)
 	*nodenames = TasksNodes;
 }
 
-unsigned * Gather_Paraver_VirtualThreads (unsigned numtasks, unsigned taskid,
-	unsigned ptask, FileSet_t *fset)
+unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
+	FileSet_t *fset)
 {
 	int res;
 	unsigned *temp, *temp_out = NULL;

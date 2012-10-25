@@ -43,7 +43,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 static int TracePthreadLocks = FALSE;
 
-void setTrace_PTHREADLocks (int value)
+void Extrae_pthread_instrument_locks (int value)
 {
 	TracePthreadLocks = value;
 }

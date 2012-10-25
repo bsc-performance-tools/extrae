@@ -322,7 +322,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	if (res != trace_file_size)
 	{
 		fprintf (stderr, "mpi2prv: `fread` failed to read from file %s\n", trace_file_name);
-		fprintf (stderr, "mpi2prv:        returned %d (instead of %d)\n", res, trace_file_size);
+		fprintf (stderr, "mpi2prv:        returned %Zu (instead of %lld)\n", res, trace_file_size);
 		exit (1);
 	}
 	ptr_last = fitem->first + (trace_file_size/sizeof(event_t));
@@ -334,7 +334,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		if (res != sample_file_size)
 		{
 			fprintf (stderr, "mpi2prv: `fread` failed to read from file %s\n", sample_file_name);
-			fprintf (stderr, "mpi2prv:        returned %d (instead of %d)\n", res, sample_file_size);
+			fprintf (stderr, "mpi2prv:        returned %Zu (instead of %lld)\n", res, sample_file_size);
 			exit (1);
 		}
 	}
@@ -348,7 +348,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		if (res != mrn_file_size)
 		{
 			fprintf (stderr, "mpi2prv: `read` failed to read from file %s\n", mrn_file_name);
-			fprintf (stderr, "mpi2prv:        returned %d (instead of %d)\n", res, mrn_file_size);
+			fprintf (stderr, "mpi2prv:        returned %Zu (instead of %lld)\n", res, mrn_file_size);
 			exit (1);
 		}
 	}
@@ -784,7 +784,7 @@ static void Read_PRV_LocalFile (PRVFileItem_t *file, unsigned records_per_block)
 	if (file->first_mapped_p == NULL)
 	{
 		perror ("malloc");
-		fprintf (stderr, "mpi2prv: Failed to obtain memory for block of %u events (size %u)\n", records_per_block, want_to_read);
+		fprintf (stderr, "mpi2prv: Failed to obtain memory for block of %u events (size %Zu)\n", records_per_block, want_to_read);
 		fflush (stderr);
 		exit (0);
 	}
@@ -793,7 +793,7 @@ static void Read_PRV_LocalFile (PRVFileItem_t *file, unsigned records_per_block)
 	if (-1 == res)
 	{
 		perror ("read");
-		fprintf (stderr, "mpi2prv: Failed to read %u bytes on local file (result = %u)\n", want_to_read, res);
+		fprintf (stderr, "mpi2prv: Failed to read %Zu bytes on local file (result = %Zu)\n", want_to_read, res);
 		fflush (stderr);
 		exit (0);
 	}
@@ -1695,6 +1695,7 @@ void FSet_Forward_To_First_GlobalOp (FileSet_t *fset, int numtasks, int taskid)
 				FileItem_t *sfile = &(fset->files[file]);
 				unsigned int cpu, ptask, task, thread;
 				CurrentObj_FS (sfile, cpu, ptask, task, thread);
+				UNREFERENCED_PARAMETER(cpu);
 
 				/* Disable communications matching */
 				MatchComms_Off (ptask, task, thread);

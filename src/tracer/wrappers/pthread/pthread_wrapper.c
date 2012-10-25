@@ -41,6 +41,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_TIME_H
 # include <time.h>
 #endif
@@ -238,55 +241,67 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 	int res;
 	struct pthread_create_info i;
 
-	/* This is a bit tricky.
-	   Some OSes (like FreeBSD) delegates the pthread library initialization
-	   to the very first call of pthread_create. In order to initialize the 
-	   library the OS calls pthread_create again to create the structure for
-	   the main thread.
-	   So, pthread_library_depth > 0 controls this situation
-	*/
-
-	/* Protect creation, just one at a time */
-	pthread_mutex_lock_real (&extrae_pthread_create_mutex);
-
-	if (0 == pthread_library_depth)
+	if (pthread_create_real != NULL && mpitrace_on)
 	{
-		pthread_library_depth++;
+		/* This is a bit tricky.
+		   Some OSes (like FreeBSD) delegates the pthread library initialization
+		   to the very first call of pthread_create. In order to initialize the 
+		   library the OS calls pthread_create again to create the structure for
+		   the main thread.
+		   So, pthread_library_depth > 0 controls this situation
+		*/
 
-		Backend_Enter_Instrumentation (1);
+		/* Protect creation, just one at a time */
+		pthread_mutex_lock_real (&extrae_pthread_create_mutex);
 
-		Probe_pthread_Create_Entry (p3);
+		if (0 == pthread_library_depth)
+		{
+			pthread_library_depth++;
+
+			Backend_Enter_Instrumentation (1);
+
+			Probe_pthread_Create_Entry (p3);
 		
-		pthread_cond_init (&(i.wait), NULL);
-		pthread_mutex_init (&(i.lock), NULL);
-		pthread_mutex_lock_real (&(i.lock));
+			pthread_cond_init (&(i.wait), NULL);
+			pthread_mutex_init (&(i.lock), NULL);
+			pthread_mutex_lock_real (&(i.lock));
 
-		i.arg = p4;
-		i.routine = p3;
-		i.pthreadID = Backend_getNumberOfThreads();
+			i.arg = p4;
+			i.routine = p3;
+			i.pthreadID = Backend_getNumberOfThreads();
 
-		Backend_ChangeNumberOfThreads (i.pthreadID+1);
+			Backend_ChangeNumberOfThreads (i.pthreadID+1);
 
-		res = pthread_create_real (p1, p2, pthread_create_hook, (void*) &i);
+			res = pthread_create_real (p1, p2, pthread_create_hook, (void*) &i);
 
-		if (0 == res)
-			/* if succeded, wait for a completion on copy the info */
-			pthread_cond_wait (&(i.wait), &(i.lock));
+			if (0 == res)
+				/* if succeded, wait for a completion on copy the info */
+				pthread_cond_wait (&(i.wait), &(i.lock));
 
-		pthread_mutex_unlock_real (&(i.lock));
-		pthread_mutex_destroy (&(i.lock));
-		pthread_cond_destroy (&(i.wait));
+			pthread_mutex_unlock_real (&(i.lock));
+			pthread_mutex_destroy (&(i.lock));
+			pthread_cond_destroy (&(i.wait));
 
-		Probe_pthread_Create_Exit ();
-		Backend_Leave_Instrumentation ();
+			Probe_pthread_Create_Exit ();
+			Backend_Leave_Instrumentation ();
 
-		pthread_library_depth--;
+			pthread_library_depth--;
+		}
+		else
+			res = pthread_create_real (p1, p2, p3, p4);
+
+		/* Stop protecting the region, more pthread creations can enter */
+		pthread_mutex_unlock_real (&extrae_pthread_create_mutex);
+	}
+	else if (pthread_create_real != NULL && !mpitrace_on)
+	{
+		res = pthread_create_real (p1, p2, p3, p4);
 	}
 	else
-		res = pthread_create_real (p1, p2, p3, p4);
-
-	/* Stop protecting the region, more pthread creations can enter */
-	pthread_mutex_unlock_real (&extrae_pthread_create_mutex);
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_create was not hooked\n");
+		exit (-1);
+	}
 
 	return res;
 }
@@ -295,31 +310,67 @@ int pthread_join (pthread_t p1, void **p2)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_Join_Entry ();
-	res = pthread_join_real (p1, p2);
-	Probe_pthread_Join_Exit ();
-	Backend_Leave_Instrumentation ();
+	if (pthread_join_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_Join_Entry ();
+		res = pthread_join_real (p1, p2);
+		Probe_pthread_Join_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_join_real != NULL && !mpitrace_on)
+	{
+		res = pthread_join_real (p1, p2);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_join was not hooked\n");
+		exit (-1);
+	}
 	return res;
 }
 
 void pthread_exit (void *p1)
 {
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_Exit_Entry();
-	Backend_Leave_Instrumentation ();
-	pthread_exit_real (p1);
+	if (pthread_exit_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_Exit_Entry();
+		Backend_Leave_Instrumentation ();
+		pthread_exit_real (p1);
+	}
+	else if (pthread_exit_real != NULL && !mpitrace_on)
+	{
+		pthread_exit_real (p1);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_exit was not hooked\n");
+		exit (-1);
+	}
 }
 
 int pthread_detach (pthread_t p1)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_Detach_Entry ();
-	res = pthread_detach_real (p1);
-	Probe_pthread_Detach_Exit ();
-	Backend_Leave_Instrumentation ();
+	if (pthread_detach_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_Detach_Entry ();
+		res = pthread_detach_real (p1);
+		Probe_pthread_Detach_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_detach_real != NULL && !mpitrace_on)
+	{
+		res = pthread_detach_real (p1);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_detach was not hooked\n");
+		exit (-1);
+	}
 	return res;
 }
 
@@ -327,11 +378,23 @@ int pthread_mutex_lock (pthread_mutex_t *m)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_mutex_lock_Entry (m);
-	res = pthread_mutex_lock_real (m);
-	Probe_pthread_mutex_lock_Exit (m);
-	Backend_Leave_Instrumentation ();
+	if (pthread_mutex_lock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_mutex_lock_Entry (m);
+		res = pthread_mutex_lock_real (m);
+		Probe_pthread_mutex_lock_Exit (m);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_mutex_lock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_mutex_lock_real (m);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_mutex_lock was not hooked\n");
+		exit (-1);
+	}
 	return res;
 }
 
@@ -339,11 +402,24 @@ int pthread_mutex_trylock (pthread_mutex_t *m)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_mutex_lock_Entry (m);
-	res = pthread_mutex_trylock_real (m);
-	Probe_pthread_mutex_lock_Exit (m);
-	Backend_Leave_Instrumentation ();
+	if (pthread_mutex_trylock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_mutex_lock_Entry (m);
+		res = pthread_mutex_trylock_real (m);
+		Probe_pthread_mutex_lock_Exit (m);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_mutex_trylock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_mutex_trylock_real (m);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_mutex_trylock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -351,11 +427,24 @@ int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *t)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_mutex_lock_Entry (m);
-	res = pthread_mutex_timedlock_real (m, t);
-	Probe_pthread_mutex_lock_Exit (m);
-	Backend_Leave_Instrumentation ();
+	if (pthread_mutex_timedlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_mutex_lock_Entry (m);
+		res = pthread_mutex_timedlock_real (m, t);
+		Probe_pthread_mutex_lock_Exit (m);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_mutex_timedlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_mutex_timedlock_real (m, t);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_mutex_timedlock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -363,11 +452,24 @@ int pthread_mutex_unlock (pthread_mutex_t *m)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_mutex_unlock_Entry (m);
-	res = pthread_mutex_unlock_real (m);
-	Probe_pthread_mutex_unlock_Exit (m);
-	Backend_Leave_Instrumentation ();
+	if (pthread_mutex_unlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_mutex_unlock_Entry (m);
+		res = pthread_mutex_unlock_real (m);
+		Probe_pthread_mutex_unlock_Exit (m);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_mutex_unlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_mutex_unlock_real (m);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_mutex_unlock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -377,11 +479,24 @@ int pthread_cond_signal (pthread_cond_t *c)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_cond_signal_Entry (c);
-	res = pthread_cond_signal_real (c);
-	Probe_pthread_cond_signal_Exit (c);
-	Backend_Leave_Instrumentation ();
+	if (pthread_cond_signal_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_cond_signal_Entry (c);
+		res = pthread_cond_signal_real (c);
+		Probe_pthread_cond_signal_Exit (c);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_cond_signal_real != NULL && !mpitrace_on)
+	{
+		res = pthread_cond_signal_real (c);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_cond_signal was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -389,11 +504,23 @@ int pthread_cond_broadcast (pthread_cond_t *c)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_cond_broadcast_Entry (c);
-	res = pthread_cond_broadcast_real (c);
-	Probe_pthread_cond_broadcast_Exit (c);
-	Backend_Leave_Instrumentation ();
+	if (pthread_cond_broadcast_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_cond_broadcast_Entry (c);
+		res = pthread_cond_broadcast_real (c);
+		Probe_pthread_cond_broadcast_Exit (c);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_cond_broadcast_real != NULL && !mpitrace_on)
+	{
+		res = pthread_cond_broadcast_real (c);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_cond_broadcast was not hooked\n");
+		exit (-1);
+	}
 	return res;
 }
 
@@ -401,11 +528,23 @@ int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_cond_wait_Entry (c);
-	res = pthread_cond_wait_real (c, m);
-	Probe_pthread_cond_wait_Exit (c);
-	Backend_Leave_Instrumentation ();
+	if (pthread_cond_wait_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_cond_wait_Entry (c);
+		res = pthread_cond_wait_real (c, m);
+		Probe_pthread_cond_wait_Exit (c);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_cond_wait_real != NULL && !mpitrace_on)
+	{
+		res = pthread_cond_wait_real (c, m);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_cond_wait was not hooked\n");
+		exit (-1);
+	}
 	return res;
 }
 
@@ -413,11 +552,24 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_cond_wait_Entry (c);
-	res = pthread_cond_timedwait_real (c,m,t);
-	Probe_pthread_cond_wait_Exit (c);
-	Backend_Leave_Instrumentation ();
+	if (pthread_cond_timedwait_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_cond_wait_Entry (c);
+		res = pthread_cond_timedwait_real (c,m,t);
+		Probe_pthread_cond_wait_Exit (c);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_cond_timedwait_real != NULL && !mpitrace_on)
+	{
+		res = pthread_cond_timedwait_real (c,m,t);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_cond_timedwait was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 #endif
@@ -426,11 +578,24 @@ int pthread_rwlock_rdlock (pthread_rwlock_t *l)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_rwlock_lockrd_Entry (l);
-	res = pthread_rwlock_rdlock_real (l);
-	Probe_pthread_rwlock_lockrd_Exit (l);
-	Backend_Leave_Instrumentation ();
+	if (pthread_rwlock_rdlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_rwlock_lockrd_Entry (l);
+		res = pthread_rwlock_rdlock_real (l);
+		Probe_pthread_rwlock_lockrd_Exit (l);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_rwlock_rdlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_rwlock_rdlock_real (l);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_rwlock_rdlock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -438,11 +603,24 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *l)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_rwlock_lockrd_Entry (l);
-	res = pthread_rwlock_tryrdlock_real (l);
-	Probe_pthread_rwlock_lockrd_Exit (l);
-	Backend_Leave_Instrumentation ();
+	if (pthread_rwlock_tryrdlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_rwlock_lockrd_Entry (l);
+		res = pthread_rwlock_tryrdlock_real (l);
+		Probe_pthread_rwlock_lockrd_Exit (l);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_rwlock_tryrdlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_rwlock_tryrdlock_real (l);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_rwlock_tryrdlock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -450,11 +628,24 @@ int pthread_rwlock_timedrdlock(pthread_rwlock_t *l, const struct timespec *t)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_rwlock_lockrd_Entry (l);
-	res = pthread_rwlock_timedrdlock_real (l, t);
-	Probe_pthread_rwlock_lockrd_Exit (l);
-	Backend_Leave_Instrumentation ();
+	if (pthread_rwlock_timedrdlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_rwlock_lockrd_Entry (l);
+		res = pthread_rwlock_timedrdlock_real (l, t);
+		Probe_pthread_rwlock_lockrd_Exit (l);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_rwlock_timedrdlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_rwlock_timedrdlock_real (l, t);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_rwlock_timedrdlock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -462,11 +653,23 @@ int pthread_rwlock_wrlock(pthread_rwlock_t *l)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_rwlock_lockwr_Entry (l);
-	res = pthread_rwlock_wrlock_real (l);
-	Probe_pthread_rwlock_lockwr_Exit (l);
-	Backend_Leave_Instrumentation ();
+	if (pthread_rwlock_wrlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_rwlock_lockwr_Entry (l);
+		res = pthread_rwlock_wrlock_real (l);
+		Probe_pthread_rwlock_lockwr_Exit (l);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_rwlock_wrlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_rwlock_wrlock_real (l);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_rwlock_wrlock was not hooked\n");
+		exit (-1);
+	}
 	return res;
 }
 
@@ -474,11 +677,23 @@ int pthread_rwlock_trywrlock(pthread_rwlock_t *l)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_rwlock_lockwr_Entry (l);
-	res = pthread_rwlock_trywrlock_real (l);
-	Probe_pthread_rwlock_lockwr_Exit (l);
-	Backend_Leave_Instrumentation ();
+	if (pthread_rwlock_trywrlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_rwlock_lockwr_Entry (l);
+		res = pthread_rwlock_trywrlock_real (l);
+		Probe_pthread_rwlock_lockwr_Exit (l);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_rwlock_trywrlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_rwlock_trywrlock_real (l);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_rwlock_trywrlock was not hooked\n");
+		exit (-1);
+	}
 	return res;
 }
 
@@ -486,11 +701,24 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *l, const struct timespec *t)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_rwlock_lockwr_Entry (l);
-	res = pthread_rwlock_timedwrlock_real (l, t);
-	Probe_pthread_rwlock_lockwr_Exit (l);
-	Backend_Leave_Instrumentation ();
+	if (pthread_rwlock_timedwrlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_rwlock_lockwr_Entry (l);
+		res = pthread_rwlock_timedwrlock_real (l, t);
+		Probe_pthread_rwlock_lockwr_Exit (l);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_rwlock_timedwrlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_rwlock_timedwrlock_real (l, t);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": pthread_rwlock_timedwrlock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 
@@ -498,11 +726,24 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 {
 	int res;
 
-	Backend_Enter_Instrumentation (1);
-	Probe_pthread_rwlock_unlock_Entry (l);
-	res = pthread_rwlock_unlock_real (l);
-	Probe_pthread_rwlock_unlock_Exit (l);
-	Backend_Leave_Instrumentation ();
+	if (pthread_rwlock_unlock_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (1);
+		Probe_pthread_rwlock_unlock_Entry (l);
+		res = pthread_rwlock_unlock_real (l);
+		Probe_pthread_rwlock_unlock_Exit (l);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_rwlock_unlock_real != NULL && !mpitrace_on)
+	{
+		res = pthread_rwlock_unlock_real (l);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": pthread_rwlock_unlock was not hooked\n");
+		exit (-1);
+	}
+
 	return res;
 }
 

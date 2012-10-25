@@ -680,6 +680,7 @@ int PACX_PersistentRequest_Event (event_t * current_event,
 	unsigned recv_thread, send_thread, recv_vthread, send_vthread;
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
+	task_info = GET_TASK_INFO(ptask, task);
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	/* If this is a send, look for the receive */

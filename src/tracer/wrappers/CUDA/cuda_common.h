@@ -128,7 +128,7 @@ struct RegisteredStreams_t
 	unsigned threadid; /* In Paraver sense */
 	cudaStream_t stream;
 
-	int nevents;
+	unsigned nevents;
 	cudaEvent_t ts_events[MAX_CUDA_EVENTS];
 	unsigned events[MAX_CUDA_EVENTS];
 	unsigned long long types[MAX_CUDA_EVENTS];

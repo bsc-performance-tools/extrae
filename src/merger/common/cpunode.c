@@ -43,6 +43,8 @@ static char UNUSED rcsid[] = "$Id$";
 # include <string.h>
 #endif
 
+#include "options.h"
+
 #include "cpunode.h"
 
 #define FLOG(x) ((x)<10?1:(x)<100?2:(x)<1000?3:(x)<10000?4:(x)<100000?5:(x)<1000000?6:(x)<10000000?7:8)
@@ -137,8 +139,11 @@ struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
 	{
 		/* Has the node already appeared? */
 		for (found_pos = 0, found = FALSE, j = 0; j < numnodes && !found; j++)
-			if (found = (strcmp (nodenames[j], files[i].node) == 0))
+		{
+			found = strcmp (nodenames[j], files[i].node) == 0;
+			if (found)
 				found_pos = j;
+		}
 
 #if defined(DEBUG)
 		fprintf (stdout, "Checking for node %s - found? %d - position? %d\n", files[i].node, found, found_pos);

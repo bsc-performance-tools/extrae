@@ -165,11 +165,9 @@ static int OpenMP_Function_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType;
 	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);

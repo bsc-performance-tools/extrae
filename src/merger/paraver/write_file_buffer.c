@@ -120,7 +120,7 @@ void WriteFileBuffer_flush (WriteFileBuffer_t *wfb)
 	}
 	else if (wfb->numElements*wfb->sizeElement != res_write)
 	{
-		fprintf (stderr, "mpi2prv: Error! Could not write %d bytes to disk\n"
+		fprintf (stderr, "mpi2prv: Error! Could not write %Zu bytes to disk\n"
 		                 "mpi2prv: Error! Check your quota or set TMPDIR to a free disk zone\n", wfb->numElements*wfb->sizeElement);
 		exit (-1);
 	}

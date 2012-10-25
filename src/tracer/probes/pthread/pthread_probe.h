@@ -30,7 +30,7 @@
 #ifndef PTHREAD_PROBE_H_INCLUDED
 #define PTHREAD_PROBE_H_INCLUDED
 
-void setTrace_PTHREADLocks (int value);
+void Extrae_pthread_instrument_locks (int value);
 
 void Probe_pthread_Create_Entry (void *p);
 void Probe_pthread_Create_Exit (void);

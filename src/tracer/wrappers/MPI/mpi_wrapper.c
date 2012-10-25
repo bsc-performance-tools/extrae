@@ -260,7 +260,6 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 	  pot ser que hi hagi un problema a l'hora de calcular els  bytes p2p
 	  pq ignora la quantitat de dades enviada
 	*/
-#warning "Aixo es pot millorar"
 	ret = PMPI_Type_size (p_request->datatype, &size);
 	MPI_CHECK(ret, PMPI_Type_size);
 
@@ -404,7 +403,7 @@ void CheckControlFile(void)
 
 static void InitMPICommunicators (void)
 {
-	int i;
+	unsigned i;
 
 	/** Inicialitzacio de les variables per la creacio de comunicadors **/
 	ranks_global = malloc (sizeof(int)*Extrae_get_num_tasks());
@@ -450,6 +449,7 @@ char **TasksNodes = NULL;
 
 static void Gather_Nodes_Info (void)
 {
+	unsigned u;
 	int i, rc;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
 	int hostname_length;
@@ -471,11 +471,11 @@ static void Gather_Nodes_Info (void)
 
 	/* Store the information in a global array */
 	TasksNodes = (char **)malloc (Extrae_get_num_tasks() * sizeof(char *));
-	for (i=0; i<Extrae_get_num_tasks(); i++)
+	for (u=0; u<Extrae_get_num_tasks(); u++)
 	{
-		char *tmp = &buffer_names[i*MPI_MAX_PROCESSOR_NAME];
-		TasksNodes[i] = (char *)malloc((strlen(tmp)+1) * sizeof(char));
-		strcpy (TasksNodes[i], tmp);
+		char *tmp = &buffer_names[u*MPI_MAX_PROCESSOR_NAME];
+		TasksNodes[u] = (char *)malloc((strlen(tmp)+1) * sizeof(char));
+		strcpy (TasksNodes[u], tmp);
 	}
 
 	/* Free the local array, not the global one */
@@ -485,11 +485,10 @@ static void Gather_Nodes_Info (void)
 /******************************************************************************
  ***  MPI_Generate_Task_File_List
  ******************************************************************************/
-static int MPI_Generate_Task_File_List (int n_tasks, char **node_list)
+static int MPI_Generate_Task_File_List (char **node_list)
 {
-	int ierror;
-	int i, filedes, thid;
-	unsigned ret;
+	int filedes, ierror;
+	unsigned u, ret, thid;
 	char tmpname[1024];
 	unsigned *buffer = NULL;
 	unsigned tmp[3]; /* we store pid, nthreads and taskid on each position */
@@ -522,20 +521,20 @@ static int MPI_Generate_Task_File_List (int n_tasks, char **node_list)
 		if (filedes < 0)
 			return -1;
 
-		for (i = 0; i < Extrae_get_num_tasks(); i++)
+		for (u = 0; u < Extrae_get_num_tasks(); u++)
 		{
 			char tmpline[2048];
-			unsigned TID = buffer[i*3+0];
-			unsigned PID = buffer[i*3+1];
-			unsigned NTHREADS = buffer[i*3+2];
+			unsigned TID = buffer[u*3+0];
+			unsigned PID = buffer[u*3+1];
+			unsigned NTHREADS = buffer[u*3+2];
 
-			if (i == 0)
+			if (u == 0)
 			{
 				/* If Im processing MASTER, I know my threads and their names */
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
 					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
-					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], Extrae_get_thread_name(thid));
+					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[u], Extrae_get_thread_name(thid));
 					ret = write (filedes, tmpline, strlen (tmpline));
 					if (ret != strlen (tmpline))
 					{
@@ -567,7 +566,7 @@ static int MPI_Generate_Task_File_List (int n_tasks, char **node_list)
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
 					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
-					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], &tmp[thid*THREAD_INFO_NAME_LEN]);
+					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[u], &tmp[thid*THREAD_INFO_NAME_LEN]);
 					ret = write (filedes, tmpline, strlen (tmpline));
 					if (ret != strlen (tmpline))
 					{
@@ -591,8 +590,8 @@ static int MPI_Generate_Task_File_List (int n_tasks, char **node_list)
 			fprintf (stderr, "Fatal error! Cannot allocate memory to transfer thread names\n");
 			exit (-1);
 		}
-		for (i = 0; i < Backend_getMaximumOfThreads(); i++)
-			memcpy (&tmp[i*THREAD_INFO_NAME_LEN], Extrae_get_thread_name(i), THREAD_INFO_NAME_LEN);
+		for (u = 0; u < Backend_getMaximumOfThreads(); u++)
+			memcpy (&tmp[u*THREAD_INFO_NAME_LEN], Extrae_get_thread_name(u), THREAD_INFO_NAME_LEN);
 
 		/* Wait for master to ask */
 		PMPI_Recv (&foo, 1, MPI_INT, 0, 123456, MPI_COMM_WORLD, &s);
@@ -707,19 +706,19 @@ int MPI_generate_spu_file_list (int number_of_spus)
    NOTE: Some C libraries (mpich 1.2.x) use the C initialization and do not
    offer mpi_init (fortran).
 */
-//HSG: I think that MPI_C_CONTAINS_FORTRAN_MPI_INIT is not the proper check to do here
-//#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
-//     !defined(COMBINED_SYMBOLS))
+/*
+ HSG: I think that MPI_C_CONTAINS_FORTRAN_MPI_INIT is not the proper check to do here
+#if (defined(COMBINED_SYMBOLS) && !defined(MPI_C_CONTAINS_FORTRAN_MPI_INIT) || \
+     !defined(COMBINED_SYMBOLS))
+*/
+
 /******************************************************************************
  ***  PMPI_Init_Wrapper
  ******************************************************************************/
 void PMPI_Init_Wrapper (MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
-	int res;
-	MPI_Fint ret, comm, tipus_enter;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
-	char *config_file;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
@@ -734,10 +733,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
-
-	/* OpenMPI does not allow us to do this before the MPI_Init! */
-	comm = MPI_Comm_c2f (MPI_COMM_WORLD);
-	tipus_enter = MPI_Type_c2f (MPI_INT);
 
 	InitMPICommunicators();
 
@@ -776,7 +771,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	   by Extrae_init */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
-	MPI_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	MPI_Generate_Task_File_List (TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -891,7 +886,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	   by Extrae_init */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
-	MPI_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	MPI_Generate_Task_File_List (TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -969,7 +964,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 #endif
 
 	/* Generate the final file list */
-	MPI_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	MPI_Generate_Task_File_List (TasksNodes);
 
   /* Finalize only if its initialized by MPI_init call */
   if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
@@ -3390,7 +3385,7 @@ void PMPI_Startall_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
    */
 	for (ii = 0; ii < (*count); ii++)
 	{
-		MPI_Request req = MPI_Request_f2c(&(save_reqs[ii]));
+		MPI_Request req = MPI_Request_f2c(save_reqs[ii]);
 		Traceja_Persistent_Request (&req, LAST_READ_TIME);
 	}
 
@@ -4010,10 +4005,8 @@ static int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
 
 int MPI_Init_C_Wrapper (int *argc, char ***argv)
 {
-	int val = 0, ret;
+	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
-	MPI_Comm comm = MPI_COMM_WORLD;
-	char *config_file;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
@@ -4066,7 +4059,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	   by Extrae_init */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
-	MPI_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	MPI_Generate_Task_File_List (TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -4114,10 +4107,8 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 #if defined(MPI_HAS_INIT_THREAD_C)
 int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
 {
-	int val = 0, ret;
+	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
-	MPI_Comm comm = MPI_COMM_WORLD;
-	char *config_file;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
@@ -4173,7 +4164,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	   by Extrae_init */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
-	MPI_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	MPI_Generate_Task_File_List (TasksNodes);
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -4251,7 +4242,7 @@ int MPI_Finalize_C_Wrapper (void)
 #endif
 
 	/* Generate the final file list */
-	MPI_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
+	MPI_Generate_Task_File_List (TasksNodes);
 
   /* Finalize only if its initialized by MPI_init call */
   if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
@@ -5488,7 +5479,6 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 {
   MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
   MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-	UINT64 iireq;
   hash_data_t *hash_req;
   int src_world, size, tag, ret, ierror, ii;
   iotimer_t temps_final;
@@ -5533,8 +5523,6 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
   {
     for (ii = 0; ii < (*outcount); ii++)
     {
-    	iireq = (long) save_reqs[array_of_indices[ii]];
-
       if ((hash_req = hash_search (&requests, save_reqs[array_of_indices[ii]])) != NULL)
       {
 				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
@@ -7444,7 +7432,7 @@ void Extrae_network_routes_Wrapper (int mpi_rank)
  ******************************************************************************/
 void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to)
 {
-	int i, tmp;
+	unsigned i, tmp;
 
 	if (Extrae_get_num_tasks() > 1)
 	{
@@ -7546,7 +7534,7 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen)
 		}
 
 		/* Send the file */
-		PMPI_Bcast (storage, file_size, MPI_CHARACTER, 0, MPI_COMM_WORLD);
+		PMPI_Bcast (storage, file_size, MPI_BYTE, 0, MPI_COMM_WORLD);
 
 		/* Close the file */
 		close (fd);
@@ -7583,7 +7571,7 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen)
 		fd = mkstemp (result_file);
 
 		/* Receive the file */
-		PMPI_Bcast (storage, file_size, MPI_CHARACTER, 0, MPI_COMM_WORLD);
+		PMPI_Bcast (storage, file_size, MPI_BYTE, 0, MPI_COMM_WORLD);
 
 		if (file_size != write (fd, storage, file_size))
 		{

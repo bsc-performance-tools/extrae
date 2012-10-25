@@ -46,8 +46,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "utils.h"
 #include "UF_gcc_instrument.h"
 
-static int LookForUF (char *fname);
-
+static int LookForUF (const char *fname);
 static int UF_names_allocated = 0;
 static int UF_names_count = 0;
 static char **UF_names = NULL;
@@ -113,7 +112,7 @@ static void AddUFtoInstrument (char *fname)
 	UF_names_count++;
 }
 
-static int LookForUF (char *fname)
+static int LookForUF (const char *fname)
 {
 	int i;
 

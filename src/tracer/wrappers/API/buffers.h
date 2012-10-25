@@ -33,12 +33,15 @@
 #define MASK_NOFLUSH   (1 << 0)
 #define MASK_CLUSTERED (1 << 1)
 
-
-
-#include <sys/uio.h>
-#if defined(HAVE_MRNET)
-#include <pthread.h>
+#ifdef HAVE_SYS_UIO_H
+# include <sys/uio.h>
 #endif
+#if defined(HAVE_MRNET)
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
+#endif
+
 #include "record.h"
 
 #define LOCK_AT_INSERT 1

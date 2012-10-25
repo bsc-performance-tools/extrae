@@ -77,6 +77,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "cell_wrapper.h"
 #endif
 #include "UF_gcc_instrument.h"
+#include "UF_xl_instrument.h"
 #if defined(HAVE_MRNET)
 # include "mrn_config.h"
 # include "mrnet_be.h"
@@ -87,6 +88,7 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(SAMPLING_SUPPORT)
 # include "sampling.h"
 #endif
+#include "pthread_probe.h"
 
 /* Some global (but local in the module) variables */
 static char *temporal_d = NULL, *final_d = NULL;
@@ -283,7 +285,7 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 
 
 #if defined(SAMPLING_SUPPORT)
-static void Parse_XML_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 {
 	xmlChar *period = xmlGetProp_env (rank, current_tag, TRACE_PERIOD);
 	xmlChar *clocktype = xmlGetProp_env (rank, current_tag, TRACE_TYPE);
@@ -548,7 +550,7 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 
 
 /* Configure UserFunction related parameters */
-static void Parse_XML_UF (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+static void Parse_XML_UF (int rank, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
 	char *list = (char*) xmlGetProp_env (rank, current_tag, TRACE_LIST);
@@ -656,7 +658,7 @@ static void Parse_XML_PTHREAD (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		else if (!xmlStrcasecmp (tag->name, TRACE_PTHREAD_LOCKS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			setTrace_PTHREADLocks ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+			Extrae_pthread_instrument_locks ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 			XML_FREE(enabled);
 		}
 		/* Shall we gather counters in the UF calls? */
@@ -914,7 +916,7 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 	xmlNodePtr set_tag;
 	char **setofcounters;
 	xmlChar *enabled;
-	int numofcounters, res;
+	int numofcounters;
 	int numofsets = 0;
 	int i;
 
@@ -950,7 +952,7 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 
 				Parse_XML_Counters_CPU_Sampling (rank, xmldoc, set_tag, &OvfNum, &OvfCounters, &OvfPeriods);
 
-				res = HWC_Add_Set (numofsets, rank, numofcounters, setofcounters, domain, changeat_glops, changeat_time, OvfNum, OvfCounters, OvfPeriods);
+				HWC_Add_Set (numofsets, rank, numofcounters, setofcounters, domain, changeat_glops, changeat_time, OvfNum, OvfCounters, OvfPeriods);
 
 				for (i = 0; i < numofcounters; i++)
 					xfree (setofcounters[i]);
@@ -1043,22 +1045,26 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 #if defined(HAVE_MRNET)
 static void Parse_XML_MRNet (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
-    xmlNodePtr tag;
-    tag = current_tag->xmlChildrenNode;
-    while (tag != NULL)
-    {
-        /* Skip coments */
-        if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
-        {
-        }
-        else if (!xmlStrcasecmp (tag->name, RC_MRNET_SPECTRAL))
-        {
+	xmlNodePtr tag;
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		{
+		}
+		else if (!xmlStrcasecmp (tag->name, RC_MRNET_SPECTRAL))
+		{
 			/* Spectral analysis options */
 			xmlChar *min_seen = xmlGetProp_env (rank, tag, SPECTRAL_MIN_SEEN);
 			xmlChar *max_periods = xmlGetProp_env (rank, tag, SPECTRAL_MAX_PERIODS);
 			xmlChar *num_iters = xmlGetProp_env (rank, tag, SPECTRAL_NUM_ITERS);
 
 			MRNCfg_SetupSpectral ( atoi(min_seen), atoi(max_periods), atoi(num_iters) );
+
+			XML_FREE(min_seen);
+			XML_FREE(max_periods);
+			XML_FREE(num_iters);
 		}
 		else if (!xmlStrcasecmp (tag->name, RC_MRNET_CLUSTERING))
 		{
@@ -1067,10 +1073,13 @@ static void Parse_XML_MRNet (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			xmlChar *max_points = xmlGetProp_env (rank, tag, CLUSTERING_MAX_POINTS);
 
 			MRNCfg_SetupClustering ( atoi(max_tasks), atoi(max_points) );
+
+			XML_FREE(max_tasks);
+			XML_FREE(max_points);
 		}
 
-        tag = tag->next;
-    }
+		tag = tag->next;
+	}
 }
 #endif
 
@@ -1624,7 +1633,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-							Parse_XML_UF (rank, xmldoc, current_tag);
+							Parse_XML_UF (rank, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Callers related information instrumentation */
@@ -1723,7 +1732,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(SAMPLING_SUPPORT)
-							Parse_XML_Sampling (rank, xmldoc, current_tag);
+							Parse_XML_Sampling (rank, current_tag);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support sampling.\n", TRACE_SAMPLING);
 #endif

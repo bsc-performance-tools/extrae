@@ -66,8 +66,10 @@ void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void))
 
 #if defined(OMP_SUPPORT)
 extern int omp_get_thread_num(void);
+extern int omp_get_num_threads(void);
 #elif defined(SMPSS_SUPPORT)
 extern int css_get_thread_num(void);
+extern int css_get_max_threads();
 #elif defined(NANOS_SUPPORT)
 /* extern unsigned int nanos_extrae_get_thread_num(void); */ 
 /* NANOS uses Extrae_set_threadid_function/Extrae_set_numthreads_function */
@@ -126,6 +128,7 @@ void * Extrae_get_thread_number_function (void)
 unsigned Extrae_get_num_threads (void)
 {
 #if defined(OMP_SUPPORT)
+	return omp_get_num_threads();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_max_threads();
 #elif defined(NANOS_SUPPORT)
@@ -133,10 +136,10 @@ unsigned Extrae_get_num_threads (void)
 #elif defined(PTHREAD_SUPPORT)
 	return Backend_getNumberOfThreads();
 #elif defined(TRT_SUPPORT)
-	return 0;
+	return 1;
 #elif defined(UPC_SUPPORT)
 	return GetNumUPCthreads();
 #else
-	return 0;
+	return 1;
 #endif
 }

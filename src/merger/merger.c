@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
 	MPI_CHECK (res, MPI_Comm_size, "Failed to call MPI_Comm_rank");
 
 	merger_pre (ntasks);
-	ProcessArgs (ntasks, idtask, argc, argv);
+	ProcessArgs (idtask, argc, argv);
 	merger_post (ntasks, idtask);
 
 	res = MPI_Finalize ();
@@ -72,7 +72,7 @@ int main (int argc, char *argv[])
 int main (int argc, char *argv[])
 {
 	merger_pre (1);
-	ProcessArgs (1, 0, argc, argv);
+	ProcessArgs (0, argc, argv);
 	merger_post (1, 0);
 
 	return 0;

@@ -43,7 +43,7 @@ void Probe_OpenMP_Join_Wait_Exit (void);
 void Probe_OpenMP_DO_Entry (void);
 void Probe_OpenMP_DO_Exit (void);
 void Probe_OpenMP_Sections_Entry (void);
-void Probe_OpenMP_Sections_Entry (void);
+void Probe_OpenMP_Sections_Exit (void);
 void Probe_OpenMP_Single_Entry (void);
 void Probe_OpenMP_Single_Exit (void);
 void Probe_OpenMP_Section_Entry(void);

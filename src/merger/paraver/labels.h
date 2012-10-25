@@ -364,7 +364,7 @@ extern struct pacx_stats_evt_t pacx_stats_evt_labels[PACX_STATS_EVENTS_COUNT];
 
 /* Clustering events labels */
 #define CLUSTER_ID_LABEL "Cluster ID"
-extern int MaxClusterId;
+extern unsigned MaxClusterId;
 
 #define TYPE_LABEL           "EVENT_TYPE"
 #define VALUES_LABEL         "VALUES"

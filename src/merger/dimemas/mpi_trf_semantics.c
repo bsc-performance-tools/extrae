@@ -444,7 +444,6 @@ static int SendRecv_Event (event_t * current, unsigned long long current_time,
 	unsigned int sender = 0;
 	unsigned int receive_tag = 0;
 	unsigned int receive_size = 0;
-	int comm_id;
 	int tipus;
 	int comunicador;
 	double temps;
@@ -474,7 +473,6 @@ static int SendRecv_Event (event_t * current, unsigned long long current_time,
 				sender= Get_EvTarget(current);
 				receive_tag= Get_EvTag(current);
 				receive_size= Get_EvSize(current);                       
-				comm_id= Get_EvComm(current);
 
 #ifdef CPUZERO
 				Dimemas_CPU_Burst(fset->output_file, task-1, thread-1, 0);

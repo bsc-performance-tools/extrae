@@ -63,6 +63,9 @@ static char UNUSED rcsid[] = "$Id$";
 #  include <fcntl.h>
 # endif
 #endif
+#ifdef HAVE_LIBGEN_H
+# include <libgen.h>
+#endif
 
 #if defined(NEED_ERRNO_LOCATION_PATCH)
 /* On some machines (BG/L for instance) this symbol is undefined but required by
@@ -102,8 +105,8 @@ int Tables_Initialized = FALSE;
 int Translate_Addresses = FALSE;
 
 /* These variables are global to maintain backwards compatibility with the "map_over_sections" method */
-static const char * translated_filename;
-static const char * translated_funcname;
+static char * translated_filename;
+static char * translated_funcname;
 static unsigned int translated_line;
 static int address_found;
 
@@ -727,11 +730,10 @@ int system_call_to_addr2line(char *binary, char *address)
  *
  * @return No return value.
  */
-static void Translate_Address (UINT64 address, char ** funcname, char ** filename, int * line) {
-	int resolved_function = FALSE; 
-	int resolved_file = FALSE;
+static void Translate_Address (UINT64 address, char ** funcname, char ** filename, int * line)
+{
 	char caddress[MAX_ADDR_LENGTH];
-	char * file_basename;
+	char *file_basename;
 
 	/* Convert the address into hexadecimal string format */
 #if SIZEOF_LONG == 8
@@ -815,7 +817,6 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 			else
 				sprintf (buffer, demangled);
 
-			resolved_function = TRUE;
 			COPY_STRING(buffer, *funcname);
 		}
 
@@ -825,7 +826,6 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 		}
 		else 
 		{
-			resolved_file = TRUE;
 			file_basename = basename((char *)translated_filename);
 			COPY_STRING(file_basename, *filename);
 		}

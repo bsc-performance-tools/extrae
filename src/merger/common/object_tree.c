@@ -128,7 +128,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 		task_t *task_info = GET_TASK_INFO(files[i].ptask, files[i].task);
 		thread_t *thread_info = GET_THREAD_INFO(files[i].ptask, files[i].task, files[i].thread);
 
-		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, task);
+		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, maxtasks);
 		task_info->nodeid = files[i].nodeid;
 		task_info->nthreads = MAX (task_info->nthreads, files[i].thread);
 		thread_info->cpu = files[i].cpu;

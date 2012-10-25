@@ -543,11 +543,11 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
  */
 void HWC_Parse_Env_Config (int task_id)
 {
-    int res, numofcounters;
+    int numofcounters;
     char **setofcounters;
 
     numofcounters = explode (getenv("EXTRAE_COUNTERS"), ",", &setofcounters);
-    res = HWC_Add_Set (1, task_id, numofcounters, setofcounters, getenv("EXTRAE_COUNTERS_DOMAIN"), 0, 0, 0, NULL, 0);
+    HWC_Add_Set (1, task_id, numofcounters, setofcounters, getenv("EXTRAE_COUNTERS_DOMAIN"), 0, 0, 0, NULL, 0);
 }
 
 /** 

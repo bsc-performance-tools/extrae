@@ -306,12 +306,11 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 	int taskid)
 {
 	int info;
-	FILE *fd = fopen (file, "r");
 	char mybuffer[4096];
 	char host[2048];
 	char thdname[2048];
 	char path[2048];
-
+	FILE *fd = fopen (file, "r");
 	if (fd == NULL)
 	{
 		fprintf (stderr, "mpi2prv: Unable to open %s file.\n", file);
@@ -342,7 +341,7 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 			stripped = strip (path);
 
 			/* If mode is not forced, check first if the absolute path exists,
-			   if not, try to open in the curren directory */
+			   if not, try to open in the current directory */
 			if (opentype == FileOpen_Default)
 			{
 				if (!file_exists(stripped))
@@ -387,7 +386,7 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 					{
 						char dir_file[2048];
 						char *duplicate = strdup (file);
-						char *directory = dirname (file);
+						char *directory = dirname (duplicate);
 
 						sprintf (dir_file, "%s%s", directory, stripped_basename);
 						Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
@@ -411,7 +410,7 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
  ***  ProcessArgs
  ******************************************************************************/
 
-void ProcessArgs (int numtasks, int rank, int argc, char *argv[])
+void ProcessArgs (int rank, int argc, char *argv[])
 {
 	char *BinaryName;
 	int CurArg;

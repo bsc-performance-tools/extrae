@@ -84,10 +84,9 @@ static int TRT_Function_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
 	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);

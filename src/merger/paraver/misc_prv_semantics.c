@@ -82,7 +82,7 @@ int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 int PACX_Stats_Events_Found = FALSE;
 int PACX_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 
-int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
+unsigned int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
 
 /******************************************************************************
  ***  Flush_Event
@@ -470,11 +470,9 @@ static int USRFunction_Event (event_t * current,
   unsigned long long current_time, unsigned int cpu, unsigned int ptask,
   unsigned int task, unsigned int thread, FileSet_t *fset )
 {
-	unsigned int EvType;
 	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current);
 	EvValue = Get_EvValue (current);
 
 	/* HSG, I think this is not true... we should only maintain the previous
@@ -665,9 +663,9 @@ int HWC_Change_Ev (
    unsigned int thread)
 {
 	int i;
-	unsigned int hwctype[MAX_HWC+1];
+	int hwctype[MAX_HWC+1];
+	int prev_hwctype[MAX_HWC];
 	unsigned long long hwcvalue[MAX_HWC+1];
-	unsigned int prev_hwctype[MAX_HWC];
 	thread_t * Sthread;
 	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
 	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
@@ -704,7 +702,8 @@ int HWC_Change_Ev (
 
 			while ((!found) && (k < MAX_HWC))
 			{
-				if (hwctype[i] == prev_hwctype[k]) found = TRUE;
+				if (hwctype[i] == prev_hwctype[k])
+					found = TRUE;
 				k ++;
 			}
 
@@ -741,10 +740,9 @@ static int CPU_Burst_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
 	Switch_State (STATE_RUNNING, (EvValue == EVT_BEGIN), ptask, task, thread);
@@ -858,7 +856,7 @@ static int Spectral_Event (event_t * current_event,
     EvType  = Get_EvEvent (current_event);
     EvValue = Get_EvValue (current_event);
 
-    trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
     return 0;
 }
@@ -879,7 +877,6 @@ static int User_Send_Event (event_t * current_event,
 
 	task_info = GET_TASK_INFO(ptask, task);
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
-
 
 	if (MatchComms_Enabled(ptask, task, thread))
 	{
@@ -1008,6 +1005,8 @@ static int Resume_Virtual_Thread_Event (event_t * current_event,
 	thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_t *task_info = GET_TASK_INFO(ptask, task);
 
+	UNREFERENCED_PARAMETER(fset);
+
 	if (!get_option_merge_NanosTaskView())
 	{
 		unsigned i, u;
@@ -1070,6 +1069,9 @@ static int Suspend_Virtual_Thread_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
+	UNREFERENCED_PARAMETER(current_event);
+	UNREFERENCED_PARAMETER(fset);
+
 	/* If we don't want to see nanos tasks, we need to support emit the
 	   stacked values pops at suspend time */
 	if (!get_option_merge_NanosTaskView())
@@ -1100,6 +1102,13 @@ static int Register_Stacked_Type_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(thread);
+	UNREFERENCED_PARAMETER(fset);
+
 	Vector_Add (RegisteredStackValues, Get_EvValue(current_event));
 
 	return 0;
@@ -1116,6 +1125,13 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 {
 	unsigned int EvFunction, EvLine;
 	Extrae_Addr2Type_t *cl_types;
+
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(thread);
+	UNREFERENCED_PARAMETER(fset);
 
 	EvFunction = Get_EvValue (current_event); /* Value refers to the function type  */
 	EvLine = Get_EvMiscParam (current_event); /* Param refers to the file and line no */
