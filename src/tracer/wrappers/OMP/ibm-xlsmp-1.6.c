@@ -105,7 +105,7 @@ static void callme_pardo (char *ptr, long lbnd, long ubnd, unsigned thid)
 	fprintf (stderr, PACKAGE_NAME": callme_pardo: pardo_uf=%p\n", p);
 #endif
 
-	Extrae_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry (p);
 	pardo_uf (ptr, lbnd, ubnd, thid);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -125,7 +125,7 @@ static void callme_do (char *ptr, long lbnd, long ubnd)
 	fprintf (stderr, PACKAGE_NAME": callme_do: do_uf=%p\n", p);
 #endif
 
-	Extrae_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry (p);
 	do_uf[THREADID] (ptr, lbnd, ubnd);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -144,7 +144,7 @@ static void callme_par (char *ptr)
 	fprintf (stderr, PACKAGE_NAME": callme_par: par_uf=%p\n", p);
 #endif
 
-	Extrae_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry (p);
 	par_uf (ptr);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -163,7 +163,7 @@ static void callme_single(void)
 	fprintf (stderr, PACKAGE_NAME": callme_single: par_single=%p\n", p);
 #endif
 
-	Extrae_OpenMP_UF_Entry ((UINT64) p);
+	Extrae_OpenMP_UF_Entry (p);
 	par_single ();
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -209,7 +209,7 @@ static void callme_section(char *p1, unsigned p2)
 	{
 		_xlsmp_sections real = real_sections[THREADID];
 
-		Extrae_OpenMP_UF_Entry ((UINT64) (real[index]));
+		Extrae_OpenMP_UF_Entry (real[index]);
 		real[index] (p1, p2);
 		Extrae_OpenMP_UF_Exit ();
 	}

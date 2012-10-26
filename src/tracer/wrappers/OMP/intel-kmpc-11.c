@@ -530,7 +530,7 @@ int __kmpc_single (void *p1, int p2)
 		{
 			struct __kmpv_location_t *loc = (struct __kmpv_location_t*) p1;
 			// printf ("loc->location = %s\n", loc->location);
-			Extrae_OpenMP_UF_Entry ((UINT64) loc->location);
+			Extrae_OpenMP_UF_Entry (loc->location);
 		}
 		else
 		{
@@ -587,7 +587,7 @@ void __kmpc_dispatch_init_4 (void *p1, int p2, int p3, int p4, int p5, int p6,
 	{
 		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_4_real (p1, p2, p3, p4, p5, p6, p7);
-		Extrae_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+		Extrae_OpenMP_UF_Entry (par_func /*p1*/); /* p1 cannot be translated with bfd? */
 	}
 	else if (__kmpc_dispatch_init_4_real != NULL && !mpitrace_on)
 	{
@@ -612,7 +612,7 @@ void __kmpc_dispatch_init_8 (void *p1, int p2, int p3, long long p4,
 	{
 		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_8_real (p1, p2, p3, p4, p5, p6, p7);
-		Extrae_OpenMP_UF_Entry ((UINT64) par_func /*(UINT64)p1*/); /* p1 cannot be translated with bfd? */
+		Extrae_OpenMP_UF_Entry (par_func /*p1*/); /* p1 cannot be translated with bfd? */
 	}
 	else if (__kmpc_dispatch_init_8_real != NULL && !mpitrace_on)
 	{
@@ -739,7 +739,7 @@ static void __extrae_kmpc_task_substitute (int p1, void *p2)
 
 	if (__kmpc_task_substituted_func != NULL)
 	{
-		Extrae_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
+		Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
 		__kmpc_task_substituted_func (p1, p2); /* Original code execution */
 		Extrae_OpenMP_TaskUF_Exit ();
 	}
@@ -761,7 +761,7 @@ void * __kmpc_omp_task_alloc (void *p1, int p2, int p3, size_t p4, size_t p5, vo
 
 	if (__kmpc_omp_task_alloc_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Task_Entry ((UINT64)p6);
+		Extrae_OpenMP_Task_Entry (p6);
 		res = __kmpc_omp_task_alloc_real (p1, p2, p3, p4, p5, __extrae_kmpc_task_substitute);
 		__extrae_add_kmpc_task_function (res, p6);
 		Extrae_OpenMP_Task_Exit ();
@@ -792,7 +792,7 @@ void __kmpc_omp_task_begin_if0 (void *p1, int p2, void *p3)
 	{
 		if (__kmpc_omp_task_begin_if0_real != NULL)
 		{
-			Extrae_OpenMP_TaskUF_Entry ((UINT64) __kmpc_task_substituted_func);
+			Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
 			__kmpc_omp_task_begin_if0_real (p1, p2, p3);
 		}
 		else

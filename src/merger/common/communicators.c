@@ -106,7 +106,7 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 		unsigned long long tmp_time = 0;
 		if (current_event != NULL) tmp_time = Get_EvTime(current_event);
 		fprintf (stderr, "mpi2prv: Error: Incorrect communicator definition! (%d out of %d definitions)\n"
-			"EvType: %lld, Time: %lld, ptask: %d, task: %d, thread: %d\n",
+			"EvType: %u, Time: %llu, ptask: %u, task: %u, thread: %u\n",
 			i, new_comm.num_tasks, EvType, tmp_time, ptask, task, thread);
 		exit (0);
 	}

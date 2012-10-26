@@ -230,7 +230,7 @@ AC_CHECK_HEADERS(
   byteswap.h limits.h malloc.h stdint.h stdio.h stdlib.h values.h assert.h \
   bgl_perfctr.h bgl_perfctr_events.h ctype.h dlfcn.h excpt.h fcntl.h getopt.h \
   libgen.h libspe.h libspe2.h pdsc.h signal.h stdarg.h math.h inttypes.h time.h \
-  ucontext.h pthread.h semaphore.h]
+  ucontext.h pthread.h semaphore.h execinfo.h]
 )
 AC_CHECK_HEADERS(
   [sys/types.h sys/socket.h sys/utsname.h sys/wait.h sys/resource.h \

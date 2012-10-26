@@ -31,7 +31,7 @@ do
 	done
 	echo ")) par_func;" >> ${INTERMEDIATE_FUNCS}
 	echo "" >> ${INTERMEDIATE_FUNCS}
-	echo -e "\tExtrae_OpenMP_UF_Entry ((UINT64)p);" >> ${INTERMEDIATE_FUNCS}
+	echo -e "\tExtrae_OpenMP_UF_Entry (p);" >> ${INTERMEDIATE_FUNCS}
 	echo -e -n "\tintermediate (par1,par2" >> ${INTERMEDIATE_FUNCS}
 	for i in `seq 1 ${number}`
 	do

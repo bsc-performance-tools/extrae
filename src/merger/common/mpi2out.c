@@ -1017,7 +1017,7 @@ void merger_pre (int numtasks)
 static void merger_post_share_file_sizes (int taskid)
 {
 	int res;
-	int i;
+	unsigned i;
 	unsigned long long *sizes;
 
 	sizes = malloc (sizeof(unsigned long long)*nTraces);

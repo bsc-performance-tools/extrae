@@ -109,7 +109,7 @@ static void callme_parsection (void *p1)
 		exit (0);
 	}
 
-	Extrae_OpenMP_UF_Entry ((UINT64) parsection_uf);
+	Extrae_OpenMP_UF_Entry (parsection_uf);
 	parsection_uf (p1);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -131,7 +131,7 @@ static void callme_pardo (void *p1)
 		exit (0);
 	}
 
-	Extrae_OpenMP_UF_Entry ((UINT64) pardo_uf);
+	Extrae_OpenMP_UF_Entry (pardo_uf);
 	pardo_uf (p1);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -154,7 +154,7 @@ static void callme_par (void *p1)
 		exit (0);
 	}
 
-	Extrae_OpenMP_UF_Entry ((UINT64) par_uf);
+	Extrae_OpenMP_UF_Entry (par_uf);
 	par_uf (p1);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -419,7 +419,7 @@ static void callme_task (void *p1)
 	struct openmp_task_st *helper = (struct openmp_task_st*) p1;
 	void (*task_uf)(void*) = (void(*)(void*)) helper->p1;
 
-	Extrae_OpenMP_TaskUF_Entry ((UINT64) helper->p1);
+	Extrae_OpenMP_TaskUF_Entry (helper->p1);
 
 	/* Extremely hack:
 
@@ -464,7 +464,7 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 		helper.p6 = p6;
 		helper.p7 = p7;
 
-		Extrae_OpenMP_Task_Entry ((UINT64)p1);
+		Extrae_OpenMP_Task_Entry (p1);
 		GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7);
 		Extrae_OpenMP_Task_Exit ();
 	}
@@ -518,7 +518,7 @@ void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry ((UINT64) p1);
+			Extrae_OpenMP_UF_Entry (p1);
 
 		/* Extrae_OpenMP_ParSections_Exit(); */
 	}
@@ -803,7 +803,7 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry ((UINT64) pardo_uf);
+			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
 	else if (GOMP_parallel_loop_static_start_real != NULL && !mpitrace_on)
 	{
@@ -834,7 +834,7 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry ((UINT64) pardo_uf);
+			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
 	else if (GOMP_parallel_loop_runtime_start_real != NULL && !mpitrace_on)
 	{
@@ -865,7 +865,7 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry ((UINT64) pardo_uf);
+			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
 	else if (GOMP_parallel_loop_static_start_real != NULL && !mpitrace_on)
 	{
@@ -896,7 +896,7 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 
 		/* The master thread continues the execution and then calls pardo_uf */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry ((UINT64) pardo_uf);
+			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
 	else if (GOMP_parallel_loop_dynamic_start_real != NULL && !mpitrace_on)
 	{
@@ -1033,7 +1033,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 
 		/* GCC/libgomp does not execute callme_par per root thread, emit
 		   the required event here - call Backend to get a new time! */
-		Extrae_OpenMP_UF_Entry ((UINT64) p1);
+		Extrae_OpenMP_UF_Entry (p1);
 	}
 	else if (GOMP_parallel_start_real != NULL && !mpitrace_on)
 	{

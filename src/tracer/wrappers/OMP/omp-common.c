@@ -58,10 +58,10 @@ void Extrae_OpenMP_Join_Wait_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_UF_Entry (UINT64 uf)
+void Extrae_OpenMP_UF_Entry (void *uf)
 {
 	Backend_Enter_Instrumentation (2);
-	Probe_OpenMP_UF_Entry (uf);
+	Probe_OpenMP_UF_Entry ((UINT64) uf);
 }
 
 void Extrae_OpenMP_UF_Exit (void)
@@ -250,10 +250,10 @@ void Extrae_OpenMP_SetNumThreads_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_Task_Entry (UINT64 uf)
+void Extrae_OpenMP_Task_Entry (void* uf)
 {
 	Backend_Enter_Instrumentation (2);
-	Probe_OpenMP_Task_Entry (uf);
+	Probe_OpenMP_Task_Entry ((UINT64) uf);
 }
 
 void Extrae_OpenMP_Task_Exit (void)
@@ -262,10 +262,10 @@ void Extrae_OpenMP_Task_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_TaskUF_Entry (UINT64 uf)
+void Extrae_OpenMP_TaskUF_Entry (void* uf)
 {
 	Backend_Enter_Instrumentation (2);
-	Probe_OpenMP_TaskUF_Entry (uf);
+	Probe_OpenMP_TaskUF_Entry ((UINT64) uf);
 }
 
 void Extrae_OpenMP_TaskUF_Exit (void)
