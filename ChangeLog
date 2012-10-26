@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 26Oct2012 Improved configure checks for C++ and MRNet
  * 24Oct2012 Sampling support for pthreads/openmp -> change type from default
    to virtual or prof.
  + 23Oct2012 Added support for binary rewriting using DynInst
