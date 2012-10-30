@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -fr *.sym *.mpits set-0
+
 EXTRAE_ON=1 ./auto-init-fini
 ../../../src/merger/mpi2prv -f TRACE.mpits -dump -dump-without-time >& OUTPUT
 
