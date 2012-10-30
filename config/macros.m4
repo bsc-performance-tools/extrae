@@ -28,10 +28,10 @@ AC_DEFUN([AX_FLAGS_RESTORE],
 # --------------------
 AC_DEFUN([AX_FIND_INSTALLATION],
 [
-    AC_REQUIRE([AX_SELECT_BINARY_TYPE])
+	AC_REQUIRE([AX_SELECT_BINARY_TYPE])
 
-    dnl Search for home directory
-    AC_MSG_CHECKING([for $1 installation])
+	dnl Search for home directory
+	AC_MSG_CHECKING([for $1 installation])
     for home_dir in [$2 "not found"]; do
         if test -d "$home_dir/$BITS" ; then
             home_dir="$home_dir/$BITS"
@@ -40,95 +40,95 @@ AC_DEFUN([AX_FIND_INSTALLATION],
             break
         fi
     done
-    AC_MSG_RESULT([$home_dir])
-    $1_HOME="$home_dir"
-    if test "$$1_HOME" = "not found" ; then
-        $1_HOME=""
-    else
+	AC_MSG_RESULT([$home_dir])
+	$1_HOME="$home_dir"
+	if test "$$1_HOME" = "not found" ; then
+		$1_HOME=""
+	else
 
-        dnl Did the user passed a headers directory to check first?
-        AC_ARG_WITH([$3-headers],
-            AC_HELP_STRING(
-                [--with-$3-headers@<:@=ARG@:>@],
-                [Specify location of include files for package $3]
-            ),
-            [ForcedHeaders="$withval"],
-            [ForcedHeaders=""]
-        )
+		dnl Did the user passed a headers directory to check first?
+		AC_ARG_WITH([$3-headers],
+			AC_HELP_STRING(
+				[--with-$3-headers@<:@=ARG@:>@],
+				[Specify location of include files for package $3]
+			),
+			[ForcedHeaders="$withval"],
+			[ForcedHeaders=""]
+		)
 
-        dnl Search for includes directory
-        AC_MSG_CHECKING([for $1 includes directory])
+		dnl Search for includes directory
+		AC_MSG_CHECKING([for $1 includes directory])
 
-        if test "${ForcedHeaders}" = "" ; then
-            for incs_dir in [$$1_HOME/include$BITS $$1_HOME/include "not found"] ; do
-                if test -d "$incs_dir" ; then
-                    break
-                fi
-            done
-        else
-            for incs_dir in [${ForcedHeaders} "not found"] ; do
-                if test -d "$incs_dir" ; then
-                    break
-                fi
-            done
-        fi
+		if test "${ForcedHeaders}" = "" ; then
+			for incs_dir in [$$1_HOME/include$BITS $$1_HOME/include "not found"] ; do
+				if test -d "$incs_dir" ; then
+					break
+				fi
+			done
+		else
+			for incs_dir in [${ForcedHeaders} "not found"] ; do
+				if test -d "$incs_dir" ; then
+					break
+				fi
+			done
+		fi
 
-        AC_MSG_RESULT([$incs_dir])
-        $1_INCLUDES="$incs_dir"
-        if test "$$1_INCLUDES" = "not found" ; then
-            AC_MSG_ERROR([Unable to find header directory for package $3. Check option --with-$3-headers.])
-        else
-            $1_CFLAGS="-I$$1_INCLUDES"
-            $1_CXXFLAGS="-I$$1_INCLUDES"
-            $1_CPPFLAGS="-I$$1_INCLUDES"
-        fi
+		AC_MSG_RESULT([$incs_dir])
+		$1_INCLUDES="$incs_dir"
+		if test "$$1_INCLUDES" = "not found" ; then
+			AC_MSG_ERROR([Unable to find header directory for package $3. Check option --with-$3-headers.])
+		else
+			$1_CFLAGS="-I$$1_INCLUDES"
+			$1_CXXFLAGS="-I$$1_INCLUDES"
+			$1_CPPFLAGS="-I$$1_INCLUDES"
+		fi
 
-        dnl Did the user passed a headers directory to check first?
-        AC_ARG_WITH([$3-libs],
-            AC_HELP_STRING(
-                [--with-$3-libs@<:@=ARG@:>@],
-                [Specify location of library files for package $3]
-            ),
-            [ForcedLibs="$withval"],
-            [ForcedLibs=""]
-        )
+		dnl Did the user passed a headers directory to check first?
+		AC_ARG_WITH([$3-libs],
+			AC_HELP_STRING(
+				[--with-$3-libs@<:@=ARG@:>@],
+				[Specify location of library files for package $3]
+			),
+			[ForcedLibs="$withval"],
+			[ForcedLibs=""]
+		)
 
-        dnl Search for libs directory
-        AC_MSG_CHECKING([for $1 libraries directory])
-        if test "${ForcedLibs}" = "" ; then
-            for libs_dir in [$$1_HOME/lib$BITS $$1_HOME/lib "not found"] ; do
-                if test -d "$libs_dir" ; then
-                    break
-                fi
-            done
-        else
-            for libs_dir in [${ForcedLibs} "not found"] ; do
-                if test -d "$libs_dir" ; then
-                    break
-                fi
-            done
-        fi
+		dnl Search for libs directory
+		AC_MSG_CHECKING([for $1 libraries directory])
+		if test "${ForcedLibs}" = "" ; then
+			for libs_dir in [$$1_HOME/lib$BITS $$1_HOME/lib "not found"] ; do
+				if test -d "$libs_dir" ; then
+					break
+				fi
+			done
+		else
+			for libs_dir in [${ForcedLibs} "not found"] ; do
+				if test -d "$libs_dir" ; then
+					break
+				fi
+			done
+		fi
 
-        AC_MSG_RESULT([$libs_dir])
-        $1_LIBSDIR="$libs_dir"
-        if test "$$1_LIBSDIR" = "not found" ; then
-            AC_MSG_ERROR([Unable to find library directory for package $3. Check option --with-$3-libs.])
-        else
+		AC_MSG_RESULT([$libs_dir])
+		$1_LIBSDIR="$libs_dir"
+		if test "$$1_LIBSDIR" = "not found" ; then
+			AC_MSG_ERROR([Unable to find library directory for package $3. Check option --with-$3-libs.])
+		else
        $1_LDFLAGS="-L$$1_LIBSDIR"
        if test -d "$$1_LIBSDIR/shared" ; then
           $1_SHAREDLIBSDIR="$$1_LIBSDIR/shared"
        else
           $1_SHAREDLIBSDIR=$$1_LIBSDIR
        fi
-        fi
-    fi
+		fi
+	fi
 
-    dnl Everything went OK?
-    if test "$$1_HOME" != "" -a "$$1_INCLUDES" != "" -a "$$1_LIBSDIR" != "" ; then
-        $1_INSTALLED="yes"
+	dnl Everything went OK?
+	if test "$$1_HOME" != "" -a "$$1_INCLUDES" != "" -a "$$1_LIBSDIR" != "" ; then
+		$1_INSTALLED="yes"
 
-        AC_SUBST($1_HOME)
-        AC_SUBST($1_INCLUDES)
+		AC_SUBST($1_HOME)
+		AC_SUBST($1_INCLUDES)
 
     AC_SUBST($1_CFLAGS)
     AC_SUBST($1_CXXFLAGS)
@@ -143,9 +143,9 @@ AC_DEFUN([AX_FIND_INSTALLATION],
     CXXFLAGS="$CXXFLAGS $$1_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $$1_CPPFLAGS"
     LDFLAGS="$LDFLAGS $$1_LDFLAGS"
-    else    
-        $1_INSTALLED="no"
-    fi
+	else	
+		$1_INSTALLED="no"
+	fi
 ])
 
 
@@ -183,75 +183,74 @@ AC_DEFUN([AX_CHECK_POINTER_SIZE],
 # Check the binary type the user wants to build and verify whether it can be successfully built
 AC_DEFUN([AX_SELECT_BINARY_TYPE],
 [
-    AC_ARG_WITH(binary-type,
-        AC_HELP_STRING(
-            [--with-binary-type@<:@=ARG@:>@],
-            [choose the binary type between: 32, 64, default @<:@default=default@:>@]
-        ),
-        [Selected_Binary_Type="$withval"],
-        [Selected_Binary_Type="default"]
-    )
+	AC_ARG_WITH(binary-type,
+		AC_HELP_STRING(
+			[--with-binary-type@<:@=ARG@:>@],
+			[choose the binary type between: 32, 64, default @<:@default=default@:>@]
+		),
+		[Selected_Binary_Type="$withval"],
+		[Selected_Binary_Type="default"]
+	)
 
-    if test "$Selected_Binary_Type" != "default" -a "$Selected_Binary_Type" != "32" -a "$Selected_Binary_Type" != "64" ; then
-        AC_MSG_ERROR([--with-binary-type: Invalid argument '$Selected_Binary_Type'. Valid options are: 32, 64, default.])
-    fi
+	if test "$Selected_Binary_Type" != "default" -a "$Selected_Binary_Type" != "32" -a "$Selected_Binary_Type" != "64" ; then
+		AC_MSG_ERROR([--with-binary-type: Invalid argument '$Selected_Binary_Type'. Valid options are: 32, 64, default.])
+	fi
 
-    C_compiler="$CC"
-    CXX_compiler="$CXX"
+	C_compiler="$CC"
+	CXX_compiler="$CXX"
 
-    AC_LANG_SAVE([])
-    m4_ifdef([${GXX}], m4_define([langx], [[C], [C++]]), m4_define([langx], [[C]]))
-    m4_foreach([language], [langx], [
-        AC_LANG_PUSH(language)
+	AC_LANG_SAVE([])
+	m4_foreach([language], [[C], [C++]], [
+		AC_LANG_PUSH(language)
 
-        AC_CACHE_CHECK(
-            [for $_AC_LANG_PREFIX[]_compiler compiler default binary type], 
-            [[]_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type],
-            [
-                AX_CHECK_POINTER_SIZE
-                Default_Binary_Type="$POINTER_SIZE"
-                []_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type="$Default_Binary_Type""-bit"
-            ]
-        )
+		AC_CACHE_CHECK(
+			[for $_AC_LANG_PREFIX[]_compiler compiler default binary type], 
+			[[]_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type],
+			[
+				AX_CHECK_POINTER_SIZE
+				Default_Binary_Type="$POINTER_SIZE"
+				[]_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type="$Default_Binary_Type""-bit"
+			]
+		)
 
-        if test "$Default_Binary_Type" != "32" -a "$Default_Binary_Type" != 64 ; then
-            AC_MSG_NOTICE([Unknown default binary type (pointer size is $POINTER_SIZE!?)])
+		if test "$Default_Binary_Type" != "32" -a "$Default_Binary_Type" != 64 ; then
+			AC_MSG_NOTICE([Unknown default binary type (pointer size is $POINTER_SIZE!?)])
                         AC_MSG_ERROR([[]_AC_LANG_PREFIX[] compiler '$_AC_LANG_PREFIX[]_compiler' might not be installed?])
-        fi
+		fi
 
-        if test "$Selected_Binary_Type" = "default" ; then
-            Selected_Binary_Type="$Default_Binary_Type"
-        fi
+		if test "$Selected_Binary_Type" = "default" ; then
+			Selected_Binary_Type="$Default_Binary_Type"
+		fi
 
-        if test "$Selected_Binary_Type" != "$Default_Binary_Type" ; then
+		if test "$Selected_Binary_Type" != "$Default_Binary_Type" ; then
 
-            force_bit_flags="-m32 -q32 -32 -maix32 -m64 -q64 -64 -maix64 none"
+			force_bit_flags="-m32 -q32 -32 -maix32 -m64 -q64 -64 -maix64 none"
 
-            AC_MSG_CHECKING([for $_AC_LANG_PREFIX[]_compiler compiler flags to build a $Selected_Binary_Type-bit binary])
-            for flag in [$force_bit_flags]; do
-                old_[]_AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS"
-                []_AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS $flag"
+			AC_MSG_CHECKING([for $_AC_LANG_PREFIX[]_compiler compiler flags to build a $Selected_Binary_Type-bit binary])
+			for flag in [$force_bit_flags]; do
+				old_[]_AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS"
+				[]_AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS $flag"
 
-                AX_CHECK_POINTER_SIZE()
-                if test "$POINTER_SIZE" = "$Selected_Binary_Type" ; then
-                    AC_MSG_RESULT([$flag])
-                    break
-                else
-                    []_AC_LANG_PREFIX[]FLAGS="$old_[]_AC_LANG_PREFIX[]FLAGS"
-                    if test "$flag" = "none" ; then
-                        AC_MSG_RESULT([unknown])
-                        AC_MSG_NOTICE([${Selected_Binary_Type}-bit binaries not supported])
-                        AC_MSG_ERROR([Please use '--with-binary-type' to select an appropriate binary type.])
+				AX_CHECK_POINTER_SIZE()
+				if test "$POINTER_SIZE" = "$Selected_Binary_Type" ; then
+					AC_MSG_RESULT([$flag])
+					break
+				else
+					[]_AC_LANG_PREFIX[]FLAGS="$old_[]_AC_LANG_PREFIX[]FLAGS"
+					if test "$flag" = "none" ; then
+						AC_MSG_RESULT([unknown])
+						AC_MSG_NOTICE([${Selected_Binary_Type}-bit binaries not supported])
+						AC_MSG_ERROR([Please use '--with-binary-type' to select an appropriate binary type.])
 
-                    fi
-                fi
-            done
+					fi
+				fi
+			done
 
-        fi
-        AC_LANG_POP(language)
-    ])
-    AC_LANG_RESTORE([])
-    BITS="$Selected_Binary_Type"
+		fi
+		AC_LANG_POP(language)
+	])
+	AC_LANG_RESTORE([])
+	BITS="$Selected_Binary_Type"
 ])
 
 
@@ -905,7 +904,7 @@ AC_DEFUN([AX_IS_ALTIX_MACHINE],
    if test -r /etc/sgi-release ; then 
       AC_MSG_RESULT([yes])
       IS_ALTIX_MACHINE="yes"
-            AC_DEFINE([IS_ALTIX], 1, [Defined if this machine is a SGI Altix])
+			AC_DEFINE([IS_ALTIX], 1, [Defined if this machine is a SGI Altix])
    else
       AC_MSG_RESULT([no])
       IS_ALTIX_MACHINE="no"
@@ -1134,7 +1133,7 @@ AC_DEFUN([AX_OPENMP],
             *) []_AC_LANG_PREFIX[]FLAGS="$save[]_AC_LANG_PREFIX[]FLAGS $ax_openmp_flag" ;;
          esac
          AC_TRY_LINK_FUNC(omp_set_num_threads,
-           [ax_cv_[]_AC_LANG_ABBREV[]_openmp=$ax_openmp_flag; break])
+   	       [ax_cv_[]_AC_LANG_ABBREV[]_openmp=$ax_openmp_flag; break])
       done
       []_AC_LANG_PREFIX[]FLAGS=$save[]_AC_LANG_PREFIX[]FLAGS])
       if test "x$ax_cv_[]_AC_LANG_ABBREV[]_openmp" = "xunknown"; then
@@ -1287,7 +1286,7 @@ AC_DEFUN([AX_CHECK_LIBZ],
 
    if test "${zlib_cv_libz}" = "yes" -a "${zlib_cv_zlib_h}" = "yes" ; then
       AC_DEFINE([HAVE_ZLIB], [1], [Zlib available])
-            ZLIB_INSTALLED="yes"
+			ZLIB_INSTALLED="yes"
    else
       ZLIB_INSTALLED="no"
    fi
@@ -1320,11 +1319,11 @@ AC_DEFUN([AX_PROG_LIBEXECINFO],
            if test -f ${EXECINFO_HOME}/include/execinfo.h ; then
               CFLAGS="-I ${XECINFO_HOME}/include"
               LIBS="-L ${EXECINFO_HOME}/lib -lexecinfo"
-                  AC_TRY_LINK(
-                      [ #include <execinfo.h> ],
-                      [ backtrace ((void*)0, 0); ],
-                      [ execinfo_links="yes" ]
-                    )
+		          AC_TRY_LINK(
+		              [ #include <execinfo.h> ],
+		              [ backtrace ((void*)0, 0); ],
+		              [ execinfo_links="yes" ]
+		            )
               if test "${execinfo_links}" = "yes" ; then
                  AC_DEFINE([HAVE_EXECINFO_H], 1, [Define to 1 if you have the <execinfo.h> header file.])
               else
@@ -1428,7 +1427,7 @@ AC_DEFUN([AX_PROG_DYNINST],
    AX_FLAGS_SAVE()
 
    AC_ARG_WITH(dyninst,
-   AC_HELP_STRING(
+      AC_HELP_STRING(
          [--with-dyninst@<:@=DIR@:>@],
          [specify where to find DynInst libraries and includes]
       ),
@@ -1440,28 +1439,24 @@ AC_DEFUN([AX_PROG_DYNINST],
       AC_MSG_ERROR([Attention! You haven't specified the location for DynInst, DynInst is a library for instrumenting binaries and allows Extrae to modify the application to analyze without having to modify the application sources. To use DynInst you have to pass --with-dyninst with the location of the DynInst installation and also --with-dwarf with the location of the libdwarf package and --with-elf with the location of the libelf package. You can download Dyninst from http://www.dyninst.org. If you are not interested on DynInst, simply pass --without-dyninst to the configure parameters.])
    fi
 
-   if test ! "${dyninst_paths}" = "no" -a  ! "${GXX}" = "yes"; then
-       AC_MSG_ERROR([You have passed --with-dyninst, although DynInst needs a C++ compiler which is not found in the system. Please provide a C++ compiler.])
-   else
-       if test "${libdwarf_found}" != "yes" -a "${dyninst_paths}" != "no" ; then
-          AC_MSG_ERROR([Cannot add DynInst support without libdwarf. Check for --with-dwarf option])
-       fi
+   if test "${libdwarf_found}" != "yes" -a "${dyninst_paths}" != "no" ; then
+      AC_MSG_ERROR([Cannot add DynInst support without libdwarf. Check for --with-dwarf option])
+   fi
 
-       dnl Search for Dyninst installation
-       AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
+   dnl Search for Dyninst installation
+   AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
 
-       if test "${DYNINST_INSTALLED}" = "yes" ; then
-          AC_LANG_SAVE()
+   if test "${DYNINST_INSTALLED}" = "yes" ; then
+      AC_LANG_SAVE()
 
-          AC_LANG_PUSH([C++])
+      AC_LANG_PUSH([C++])
 
-          dnl Check for Dyninst header files.
-          CXXFLAGS="${CXXFLAGS} -I${DYNINST_INCLUDES}"
-          CPPFLAGS="${CPPFLAGS} -I${DYNINST_INCLUDES}"
-          AC_CHECK_HEADERS([BPatch.h], [], [DYNINST_INSTALLED="no"])
+      dnl Check for Dyninst header files.
+      CXXFLAGS="${CXXFLAGS} -I${DYNINST_INCLUDES}"
+      CPPFLAGS="${CPPFLAGS} -I${DYNINST_INCLUDES}"
+      AC_CHECK_HEADERS([BPatch.h], [], [DYNINST_INSTALLED="no"])
 
-          AC_LANG_RESTORE()
-       fi
+      AC_LANG_RESTORE()
    fi
 
    dnl Check for patchAPI within DynInst (is Dyninst > 7.0.1?)
@@ -1486,191 +1481,177 @@ AC_DEFUN([AX_PROG_DYNINST],
 # -------------
 AC_DEFUN([AX_PROG_MRNET],
 [
-    AX_FLAGS_SAVE()
-    AC_LANG_SAVE()
-    AC_LANG([C++])
+	AX_FLAGS_SAVE()
+	AC_LANG_SAVE()
+	AC_LANG([C++])
 
+	if test -f "src/tracer/mrnet/mrnet_root.C" ; then
 
-    AC_ARG_WITH(mrnet,
-        AC_HELP_STRING(
-            [--with-mrnet@<:@=DIR@:>@],
-            [specify where to find MRNet libraries and includes]
-        ),
-        [mrnet_paths="$withval"],
-        [mrnet_paths="no"]
-    )
+		AC_ARG_WITH(mrnet,
+			AC_HELP_STRING(
+				[--with-mrnet@<:@=DIR@:>@],
+				[specify where to find MRNet libraries and includes]
+			),
+			[mrnet_paths="$withval"],
+			[mrnet_paths="/home/bsc41/bsc41127/mrnet_last"] dnl List of possible default paths
+		)
 
-    if test "${mrnet_paths}" != "no" ; then
-        if test "${GXX}" = "no" ; then
-            AC_MSG_ERROR([You have passed --with-mrnet, although MRNET needs a C++ compiler which is not found in the system. Please provide a C++ compiler.])
-            MRNET_COMPILE=0
-        else
-            MRNET_COMPILE=1
-        fi
-    else
-        AC_MSG_WARN([MRNet support has been disabled])
-        MRNET_COMPILE=0
-    fi
+		dnl Search for MRNet installation
+		AX_FIND_INSTALLATION([MRNET], [$mrnet_paths], [mrnet])
 
-    if test "${MRNET_COMPILE}" = "1" ; then
+		if test "$MRNET_INSTALLED" = "yes" ; then
 
-        dnl Search for MRNet installation
-        AX_FIND_INSTALLATION([MRNET], [$mrnet_paths], [mrnet])
+			dnl Begin hack
+			MRNET_CXXFLAGS="${MRNET_CXXFLAGS} -I${MRNET_HOME}/src/src -Dos_linux -I/gpfs/apps/BOOST/boost_1_33_1-64/include/boost-1_33_1"
+			AC_SUBST(MRNET_CXXFLAGS)
+			dnl End hack
 
-        if test "$MRNET_INSTALLED" = "yes" ; then
+			dnl Check for MRNet header files.
+			CXXFLAGS="${CXXFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
+			CPPFLAGS="${CPPFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
+			AC_CHECK_HEADERS([MRNet.h], [], [MRNET_INSTALLED="no"])
 
-            dnl Begin hack
-            MRNET_CXXFLAGS="${MRNET_CXXFLAGS} -I${MRNET_HOME}/src/src -Dos_linux -I/gpfs/apps/BOOST/boost_1_33_1-64/include/boost-1_33_1 -I${MRNET_HOME}/lib/xplat-4.0.0/include/ -I${MRNET_HOME}/lib/mrnet-4.0.0/include"
-            AC_SUBST(MRNET_CXXFLAGS)
-            dnl End hack
+			dnl Check for libraries.
+			AC_MSG_CHECKING([for libmrnet and libxplat])
 
-            dnl Check for MRNet header files.
-            CXXFLAGS="${CXXFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
-            CPPFLAGS="${CPPFLAGS} -I${MRNET_INCLUDES}/mrnet ${MRNET_CXXFLAGS}"
-            AC_CHECK_HEADERS([MRNet.h], [], [MRNET_INSTALLED="no"])
+			if test -f ${MRNET_LIBSDIR}/libmrnet.a -a -f ${MRNET_LIBSDIR}/libxplat.a ; then
+				MRNET_LIBS="-lmrnet -lxplat -lpthread -ldl"
+				AC_SUBST(MRNET_LIBS)
+				AC_MSG_RESULT([yes])
+			else
+				MRNET_INSTALLED="no"
+				AC_MSG_RESULT([no])
+			fi
+		fi
 
-            dnl Check for libraries.
-            AC_MSG_CHECKING([for libmrnet and libxplat])
+		if test "${MRNET_INSTALLED}" = "no" ; then
+			AC_MSG_WARN([MRNet support has been disabled])
+		else
+			AC_DEFINE([HAVE_MRNET], 1, [Define to 1 if MRNET is installed in the system])
+	
+			AX_FLAGS_RESTORE()
+			dnl Check for clustering and spectral support
+			AC_ARG_WITH(clustering,
+				AC_HELP_STRING(
+					[--with-clustering@<:@=DIR@:>@],
+					[specify where to find clustering libraries and includes]
+				),
+				[clustering_paths="$withval"],
+				[clustering_paths="/gpfs/apps/CEPBATOOLS/burst-clusterizer-devel"] dnl List of possible default paths
+			)
+			dnl Search for Clustering installation
+			AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [clustering])
 
-            if test -f ${MRNET_LIBSDIR}/libmrnet.a -a -f ${MRNET_LIBSDIR}/libxplat.a ; then
-                MRNET_LIBS="-lmrnet -lxplat -lpthread -ldl"
-                AC_SUBST(MRNET_LIBS)
-                AC_MSG_RESULT([yes])
-            else
-                MRNET_INSTALLED="no"
-                AC_MSG_RESULT([no])
-            fi
-        fi
+			if test "${CLUSTERING_INSTALLED}" = "yes" ; then
+		        CLUSTERING_LIBS="-lMRNetClustering"
 
-        if test "${MRNET_INSTALLED}" = "no" ; then
-            AC_MSG_WARN([libmrnet.a and libxplat.a not found in the MRNET directory. MRNet support has been disabled])
-        else
-            AC_DEFINE([HAVE_MRNET], 1, [Define to 1 if MRNET is installed in the system])
+		        dnl FIXME: Can't do these checks because MRNetClustering includes types.h, which includes config.h, which is not distributed!
+		        dnl AC_MSG_CHECKING([whether a program can be linked with libMRNetClustering])
+		        dnl AC_TRY_LINK(
+		        dnl [ /* #include <MRNetClustering.h> */ ],
+		        dnl [ MRNetClustering *c = new MRNetClustering(); ],
+		        dnl [ clustering_links="yes" ]
+		        dnl )
 
-            AX_FLAGS_RESTORE()
-            dnl Check for clustering and spectral support
-            AC_ARG_WITH(clustering,
-                AC_HELP_STRING(
-                    [--with-clustering@<:@=DIR@:>@],
-                    [specify where to find clustering libraries and includes]
-                ),
-                [clustering_paths="$withval"],
-                [clustering_paths="/gpfs/apps/CEPBATOOLS/burst-clusterizer-devel"] dnl List of possible default paths
-            )
-            dnl Search for Clustering installation
-            AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [clustering])
+		        AC_SUBST(CLUSTERING_LIBS)
+				AC_DEFINE([HAVE_CLUSTERING], 1, [Define to 1 if CLUSTERING is installed in the system])
+		    fi
+			AX_FLAGS_RESTORE()
 
-            if test "${CLUSTERING_INSTALLED}" = "yes" ; then
-                CLUSTERING_LIBS="-lMRNetClustering"
+			AC_ARG_WITH(clustering-ann,
+				AC_HELP_STRING(
+					[--with-clustering-ann@<:@=DIR@:>@],
+					[specify where to find ANN libraries and includes]
+				),
+				[clustering_ann_paths="$withval"],
+				[clustering_ann_paths="/gpfs/apps/CEPBATOOLS/libMRNetANN"] dnl List of possible default paths
+			)
+			dnl Search for libANN installation
+			AX_FIND_INSTALLATION([ANN], [$clustering_ann_paths], [clustering-ann])
+			if test "${ANN_INSTALLED}" = "yes" ; then
+				ANN_LIBS="-lMRNetANN"
+				AC_SUBST(ANN_LIBS)
+				AC_DEFINE([HAVE_ANN], 1, [Define to 1 if libANN is installed in the system])
+			fi
+			AX_FLAGS_RESTORE()
 
-                dnl FIXME: Can't do these checks because MRNetClustering includes types.h, which includes config.h, which is not distributed!
-                dnl AC_MSG_CHECKING([whether a program can be linked with libMRNetClustering])
-                dnl AC_TRY_LINK(
-                dnl [ /* #include <MRNetClustering.h> */ ],
-                dnl [ MRNetClustering *c = new MRNetClustering(); ],
-                dnl [ clustering_links="yes" ]
-                dnl )
+			AC_ARG_WITH(spectral,
+				AC_HELP_STRING(
+					[--with-spectral@<:@=DIR@:>@],
+					[specify where to find spectral analysis libraries and includes]
+				),
+				[spectral_paths="$withval"],
+				[spectral_paths="/home/bsc41/bsc41127/apps/spectral_last"] dnl List of possible default paths
+			)
+			dnl Search for Spectral Analysis installation
+			AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths], [spectral])
 
-                AC_SUBST(CLUSTERING_LIBS)
-                AC_DEFINE([HAVE_CLUSTERING], 1, [Define to 1 if CLUSTERING is installed in the system])
-            fi
-            AX_FLAGS_RESTORE()
+			if test "${SPECTRAL_HOME}" != "" ; then
 
-            AC_ARG_WITH(clustering-ann,
-                AC_HELP_STRING(
-                    [--with-clustering-ann@<:@=DIR@:>@],
-                    [specify where to find ANN libraries and includes]
-                ),
-                [clustering_ann_paths="$withval"],
-                [clustering_ann_paths="/gpfs/apps/CEPBATOOLS/libMRNetANN"] dnl List of possible default paths
-            )
-            dnl Search for libANN installation
-            AX_FIND_INSTALLATION([ANN], [$clustering_ann_paths], [clustering-ann])
-            if test "${ANN_INSTALLED}" = "yes" ; then
-                ANN_LIBS="-lMRNetANN"
-                AC_SUBST(ANN_LIBS)
-                AC_DEFINE([HAVE_ANN], 1, [Define to 1 if libANN is installed in the system])
-            fi
-            AX_FLAGS_RESTORE()
+		        LIBS="-L${SPECTRAL_HOME} -lspectral" dnl No need once the installation follows the standard (-L)
+		        CXXFLAGS="${CXXFLAGS} -I${SPECTRAL_HOME}"        dnl No need once the installation follows the standard
 
-            AC_ARG_WITH(spectral,
-                AC_HELP_STRING(
-                    [--with-spectral@<:@=DIR@:>@],
-                    [specify where to find spectral analysis libraries and includes]
-                ),
-                [spectral_paths="$withval"],
-                [spectral_paths="/home/bsc41/bsc41127/apps/spectral_last"] dnl List of possible default paths
-            )
-            dnl Search for Spectral Analysis installation
-            AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths], [spectral])
-    
-            if test "${SPECTRAL_HOME}" != "" ; then
-    
-                LIBS="-L${SPECTRAL_HOME} -lspectral" dnl No need once the installation follows the standard (-L)
-                CXXFLAGS="${CXXFLAGS} -I${SPECTRAL_HOME}"        dnl No need once the installation follows the standard
-    
-                AC_MSG_CHECKING([whether libspectral has unresolved dependencies with libfft])
-                AC_TRY_LINK(
-                    [ #include <stdio.h>
-                      #include <signal_interface.h> ],
-                    [ destroySignal(NULL); ],
-                    [ spectral_links="yes" ]
-                )
-    
-                if test "${spectral_links}" = "yes" ; then
-                    AC_MSG_RESULT([no])
-                else
-                    dnl There are unresolved dependencies with fftw3
-                    AC_MSG_RESULT([yes])
-                    AC_ARG_WITH(spectral-fft,
-                        AC_HELP_STRING(
-                            [--with-spectral-fft@<:@=DIR@:>@],
-                            [specify where to find FFT libraries and includes]
-                        ),
-                        [fft_paths="$withval"],
-                        [fft_paths="/gpfs/apps/FFTW/3.1.1"] dnl List of possible default paths
-                    )
-                    dnl Search for FFT installation
-                    AX_FIND_INSTALLATION([FFT], [$fft_paths], [spectral-fft])
-    
-                    LIBS="${LIBS} ${FFT_LDFLAGS} -lfftw3 -lm"
-    
-                    AC_TRY_LINK(
-                        [ #include <stdio.h>
-                          #include <signal_interface.h> ],
-                        [ destroySignal(NULL); ],
-                        [ spectral_links="yes" ]
-                    )
-                fi
-    
-                AC_MSG_CHECKING([whether a program can be linked with libspectral])
-                if test "${spectral_links}" = "yes" ; then
-                    SPECTRAL_LIBS="${LIBS}"
-                    SPECTRAL_CXXFLAGS="-I${SPECTRAL_HOME}" dnl No need once the installation follows the standard
-                    AC_SUBST(SPECTRAL_LIBS)
-                    AC_SUBST(SPECTRAL_CXXFLAGS)   dnl No need once the installation follows the standard
-                    AC_MSG_RESULT([yes])
-                    AC_DEFINE([HAVE_SPECTRAL], 1, [Define to 1 if SPECTRAL ANALYSIS is installed in the system])
-                else
-                    AC_MSG_RESULT([no])
-                fi
-            fi
-        fi
-    fi
+		        AC_MSG_CHECKING([whether libspectral has unresolved dependencies with libfft])
+		        AC_TRY_LINK(
+		            [ #include <stdio.h>
+		              #include <signal_interface.h> ],
+		            [ destroySignal(NULL); ],
+		            [ spectral_links="yes" ]
+		        )
 
-    dnl Did the checks pass?
-    AM_CONDITIONAL(HAVE_MRNET, test "${MRNET_INSTALLED}" = "yes")
-    AM_CONDITIONAL(HAVE_CLUSTERING, test "${CLUSTERING_INSTALLED}" = "yes")
-    AM_CONDITIONAL(HAVE_SPECTRAL, test "${spectral_links}" = "yes")
-    
-dnl MRNET_SRCDIR=""
-dnl if test "${MRNET_INSTALLED}" = "yes" ; then
-dnl     MRNET_SRCDIR="mrnet"
-dnl fi
-dnl AC_SUBST([MRNET_SRCDIR])
+		        if test "${spectral_links}" = "yes" ; then
+		            AC_MSG_RESULT([no])
+		        else
+		            dnl There are unresolved dependencies with fftw3
+		            AC_MSG_RESULT([yes])
+		            AC_ARG_WITH(spectral-fft,
+		                AC_HELP_STRING(
+		                    [--with-spectral-fft@<:@=DIR@:>@],
+		                    [specify where to find FFT libraries and includes]
+		                ),
+		                [fft_paths="$withval"],
+		                [fft_paths="/gpfs/apps/FFTW/3.1.1"] dnl List of possible default paths
+		            )
+		            dnl Search for FFT installation
+		            AX_FIND_INSTALLATION([FFT], [$fft_paths], [spectral-fft])
+	
+		            LIBS="${LIBS} ${FFT_LDFLAGS} -lfftw3 -lm"
+	
+		            AC_TRY_LINK(
+		                [ #include <stdio.h>
+		                  #include <signal_interface.h> ],
+		                [ destroySignal(NULL); ],
+		                [ spectral_links="yes" ]
+		            )
+		        fi
+	
+		        AC_MSG_CHECKING([whether a program can be linked with libspectral])
+				if test "${spectral_links}" = "yes" ; then
+					SPECTRAL_LIBS="${LIBS}"
+					SPECTRAL_CXXFLAGS="-I${SPECTRAL_HOME}" dnl No need once the installation follows the standard
+					AC_SUBST(SPECTRAL_LIBS)
+					AC_SUBST(SPECTRAL_CXXFLAGS)   dnl No need once the installation follows the standard
+					AC_MSG_RESULT([yes])
+					AC_DEFINE([HAVE_SPECTRAL], 1, [Define to 1 if SPECTRAL ANALYSIS is installed in the system])
+				else
+					AC_MSG_RESULT([no])
+				fi
+			fi
+		fi
+	fi
+	dnl Did the checks pass?
+	AM_CONDITIONAL(HAVE_MRNET, test "${MRNET_INSTALLED}" = "yes")
+	AM_CONDITIONAL(HAVE_CLUSTERING, test "${CLUSTERING_INSTALLED}" = "yes")
+	AM_CONDITIONAL(HAVE_SPECTRAL, test "${spectral_links}" = "yes")
+	
+dnl	MRNET_SRCDIR=""
+dnl	if test "${MRNET_INSTALLED}" = "yes" ; then
+dnl		MRNET_SRCDIR="mrnet"
+dnl	fi
+dnl	AC_SUBST([MRNET_SRCDIR])
 
-    AX_FLAGS_RESTORE()
-    AC_LANG_RESTORE()
+	AX_FLAGS_RESTORE()
+	AC_LANG_RESTORE()
 ])
 
 AC_DEFUN([AX_CHECK_WEAK_ALIAS_ATTRIBUTE],
@@ -1826,35 +1807,35 @@ AC_DEFUN([AX_CHECK_LOAD_BALANCING],
 
 AC_DEFUN([AX_OFF_T_64BIT],
 [
-    AC_MSG_CHECKING([how to get 64-bit off_t])
-    if test "${OperatingSystem}" = "linux" ; then
-        AC_DEFINE([_FILE_OFFSET_BITS],[64],[Define the bits for the off_t structure])
-        AC_MSG_RESULT([define _FILE_OFFSET_BITS=64])
-    elif test "${OperatingSystem}" = "freebsd" ; then
-        AC_MSG_RESULT([nothing required])
-    else
-        AC_MSG_RESULT([unknown])
-    fi
+	AC_MSG_CHECKING([how to get 64-bit off_t])
+	if test "${OperatingSystem}" = "linux" ; then
+		AC_DEFINE([_FILE_OFFSET_BITS],[64],[Define the bits for the off_t structure])
+		AC_MSG_RESULT([define _FILE_OFFSET_BITS=64])
+	elif test "${OperatingSystem}" = "freebsd" ; then
+		AC_MSG_RESULT([nothing required])
+	else
+		AC_MSG_RESULT([unknown])
+	fi
 ])
 
 AC_DEFUN([AX_CHECK_PROC_CPUINFO],
 [
-    AC_MSG_CHECKING(for /proc/cpuinfo)
-    if test -r /proc/cpuinfo ; then
-        AC_MSG_RESULT([found])
-        AC_DEFINE([HAVE_PROC_CPUINFO], 1, [Define to 1 the OS has /proc/cpuinfo])
-    else
-        AC_MSG_RESULT([not found])
-    fi
+	AC_MSG_CHECKING(for /proc/cpuinfo)
+	if test -r /proc/cpuinfo ; then
+		AC_MSG_RESULT([found])
+		AC_DEFINE([HAVE_PROC_CPUINFO], 1, [Define to 1 the OS has /proc/cpuinfo])
+	else
+		AC_MSG_RESULT([not found])
+	fi
 ])
 
 AC_DEFUN([AX_CHECK_PROC_MEMINFO],
 [
-    AC_MSG_CHECKING(for /proc/meminfo)
-    if test -r /proc/meminfo ; then
-        AC_MSG_RESULT([found])
-        AC_DEFINE([HAVE_PROC_MEMINFO], 1, [Define to 1 the OS has /proc/meminfo])
-    else
-        AC_MSG_RESULT([not found])
-    fi
+	AC_MSG_CHECKING(for /proc/meminfo)
+	if test -r /proc/meminfo ; then
+		AC_MSG_RESULT([found])
+		AC_DEFINE([HAVE_PROC_MEMINFO], 1, [Define to 1 the OS has /proc/meminfo])
+	else
+		AC_MSG_RESULT([not found])
+	fi
 ])

@@ -26,11 +26,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo Installation prefix: ${prefix}
 	echo Cross compilation:   ${CROSSC}
 	echo CC:                  ${CC}
-    if test "${GXX}" = "yes" ; then
-    	echo CXX:                 ${CXX}
-    else
-        echo CXX:                 C++ compiler not found. MRNET, DYNINST support can not be included.
-    fi
+	echo CXX:                 ${CXX}
 	echo Binary type:         ${BITS} bits
 	echo 
 
