@@ -468,7 +468,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_INIT_COMBINEDEVENTS);
 
-#define apiTRACE_INIT_USERCOMMUNICATION(x) \
+#define apiTRACE_EMIT_COMBINEDEVENTS(x) \
 	void x##_emit_CombinedEvents (struct extrae_UserCommunication *ptr) \
 	{ \
 		if (mpitrace_on) \
@@ -487,7 +487,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 		{ \
 			Backend_Enter_Instrumentation (1); \
 			Extrae_Resume_virtual_thread_Wrapper (u); \
-			Backend_Leave_Instrumentation ();
+			Backend_Leave_Instrumentation (); \
 		} \
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_RESUME_VIRTUAL_THREAD);

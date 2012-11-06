@@ -505,7 +505,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 			unlink (paraver_tmp);
 		}
 		else
-			prvfset->files[i].destination = 0xbeefdead;
+			prvfset->files[i].destination = (WriteFileBuffer_t*) 0xbeefdead;
 
 		prvfset->files[i].source = WriteFileBuffer_getFD(fset->files[i].wfb);
 		prvfset->files[i].type = LOCAL;
@@ -650,7 +650,7 @@ PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * infset,
 
 		infset->nfiles = 1;
 		infset->files[0].source = WriteFileBuffer_getFD(infset->files[0].destination);
-		infset->files[0].destination = 0xdeadbeef;
+		infset->files[0].destination = (WriteFileBuffer_t*) 0xdeadbeef;
 		infset->files[0].type = LOCAL;
 
 		/* Set local file first */

@@ -76,9 +76,9 @@ in "-pedantic  % -Wall -W"       dnl   GCC
    "-std1      % -verbose -w0 -warnprotos" dnl Digital Unix
    "-qlanglvl=ansi % -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
    "-ansi -ansiE % -fullwarn" dnl IRIX
+   "-h conform % -h msglevel_2" dnl Cray C (Unicos)
    "+ESlit     % +w1"         dnl HP-UX C
    "-Xc        % -pvctl[,]fullmsg" dnl NEC SX-5 (Super-UX 10)
-   "-h conform % -h msglevel 2" dnl Cray C (Unicos)
    #
 do FLAGS="$ac_save_[]FLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
    AC_TRY_COMPILE([],[return 0;],
@@ -119,9 +119,9 @@ in "-pedantic  % -Wall -W"       dnl   GCC
    "-std1      % -verbose -w0 -warnprotos" dnl Digital Unix
    "-qlanglvl=ansi % -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
    "-ansi -ansiE % -fullwarn" dnl IRIX
+   "-h conform % -h msglevel_2" dnl Cray C (Unicos)
    "+ESlit     % +w1"         dnl HP-UX C
    "-Xc        % -pvctl[,]fullmsg" dnl NEC SX-5 (Super-UX 10)
-   "-h conform % -h msglevel 2" dnl Cray C (Unicos)
    #
 do FLAGS="$ac_save_[]FLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
    AC_TRY_COMPILE([],[return 0;],
@@ -240,9 +240,9 @@ in "-pedantic  % -Wall -ansi -pedantic"       dnl   GCC
    "-std1      % -verbose -w0 -warnprotos -std1" dnl Digital Unix
    " % -qlanglvl=ansi -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
    " % -ansi -ansiE -fullwarn"                dnl IRIX
+   "-h conform % -h msglevel_2 -h conform"    dnl Cray C (Unicos)
    "+ESlit     % +w1 -Aa"                     dnl HP-UX C
    "-Xc        % -pvctl[,]fullmsg -Xc"        dnl NEC SX-5 (Super-UX 10)
-   "-h conform % -h msglevel 2 -h conform"    dnl Cray C (Unicos)
    #
 do FLAGS="$ac_save_[]FLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
    AC_TRY_COMPILE([],[return 0;],
@@ -288,9 +288,9 @@ in "-pedantic  % -Wall -ansi -pedantic"       dnl   GCC
    "-std1      % -verbose -w0 -warnprotos -std1" dnl Digital Unix
    " % -qlanglvl=ansi -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
    " % -ansi -ansiE -fullwarn"                dnl IRIX
+   "-h conform % -h msglevel_2 -h conform"    dnl Cray C (Unicos)
    "+ESlit     % +w1 -Aa"                     dnl HP-UX C
    "-Xc        % -pvctl[,]fullmsg -Xc"        dnl NEC SX-5 (Super-UX 10)
-   "-h conform % -h msglevel 2 -h conform"    dnl Cray C (Unicos)
    #
 do FLAGS="$ac_save_[]FLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
    AC_TRY_COMPILE([],[return 0;],

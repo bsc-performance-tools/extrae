@@ -71,7 +71,7 @@ struct __kmp_task_t
 	int part_id;
 };
 
-static pthread_mutex_t extrae_map_kmpc_mutex;
+static pthread_mutex_t extrae_map_kmpc_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void (*__kmpc_fork_call_real)(void*,int,void*,...) = NULL;
 static void (*__kmpc_barrier_real)(void*,int) = NULL;
@@ -94,10 +94,6 @@ static int (*__kmpc_omp_taskwait_real)(void*,int) = NULL;
 int intel_kmpc_11_hook_points (int rank)
 {
 	int count = 0;
-
-	/* Create mutex to protect intel omp tasks allocation calls */
-	pthread_mutex_init (&extrae_map_kmpc_mutex, NULL);
-
 
 	/* Careful, do not overwrite the pointer to the real call if DynInst has
 	   already done it */
