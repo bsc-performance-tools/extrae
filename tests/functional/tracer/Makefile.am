@@ -12,6 +12,16 @@ TESTS = \
  ompss-codelocation.sh \
  ompss-codelocation-2.sh
 
+EXTRA_DIST = \
+ auto-init-fini.reference \
+ auto-init-fini.sh \
+ define_event_type_gen_pcf.reference \
+ define_event_type_gen_pcf.sh \
+ ompss-codelocation-2.reference \
+ ompss-codelocation-2.sh \
+ ompss-codelocation.reference \
+ ompss-codelocation.sh
+
 auto_init_fini_SOURCES = auto-init-fini.c
 auto_init_fini_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
 auto_init_fini_LDADD = -L$(TRACER_DIR) -lseqtrace
