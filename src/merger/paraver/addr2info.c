@@ -357,10 +357,17 @@ static void AddressTable_Initialize (void)
  * Add a symbol (address, name, filename and line tuple) in the translation
  * table of the specified address_type 
  */
-int Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
+void Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
 	char * filename, int line)
 {
-	return AddressTable_Insert (address, addr_type, strdup(funcname), strdup(filename), line);
+	int found = FALSE;
+	int i;
+
+	for (i = 0; i < AddressTable[addr_type]->num_addresses && !found; i++)
+		found = AddressTable[addr_type]->address[i].address == address;
+
+	if (!found)
+		AddressTable_Insert (address, addr_type, strdup(funcname), strdup(filename), line);
 }
 
 /** Address2Info_Translate

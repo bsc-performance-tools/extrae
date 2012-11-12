@@ -257,6 +257,13 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifDEFINE_EVENT_TYPE);
 	}
   EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_GET_VERSION);
 
+#define apifCHANGE_NUM_THREADS(x) \
+	void x##_change_num_threads (unsigned *n) \
+	{ \
+		Extrae_change_number_of_threads_Wrapper (*n); \
+	}
+  EXPAND_F_ROUTINE_WITH_PREFIXES(apifCHANGE_NUM_THREADS);
+
 /*** C BINDINGS + non alias routine duplication ****/
 
 #define apiTRACE_INIT(x) \
@@ -544,6 +551,13 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 		} \
 	}
 	EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_REGISTER_FUNCTION_ADDRESS);
+
+#define apiCHANGE_NUM_THREADS(x) \
+	void x##_change_num_threads (unsigned n) \
+	{ \
+		Extrae_change_number_of_threads_Wrapper (n); \
+	}
+  EXPAND_ROUTINE_WITH_PREFIXES(apiCHANGE_NUM_THREADS);
 	
 #else /* HAVE_WEAK_ALIAS_ATTRIBUTE */
 
@@ -814,6 +828,12 @@ void Extrae_register_function_address (void *ptr,const char *funcname,const char
 	}
 }
 
+INTERFACE_ALIASES_C(_change_num_threads,Extrae_change_num_threads,(unsigned),void)
+void Extrae_change_num_threads (unsigned n)
+{
+	Extrae_change_number_of_threads_Wrapper (n);
+}
+
 /** FORTRAN BINDINGS **/
 
 INTERFACE_ALIASES_F(_init,_INIT,extrae_init,(void),void)
@@ -997,6 +1017,12 @@ INTERFACE_ALIASES_F(_get_version,_GET_VERSION,extrae_get_version,(unsigned*,unsi
 void extrae_get_version (unsigned *M, unsigned *m, unsigned *r)
 {
 	Extrae_get_version_Wrapper (M, m, r);
+}
+
+INTERFACE_ALIASES_F(_change_num_threads,_CHANGE_NUM_THREADS,extrae_change_num_threads,(unsigned),void)
+void extrae_change_num_threads (unsigned *n)
+{
+	Extrae_change_number_of_threads_Wrapper (*n);
 }
 
 #endif

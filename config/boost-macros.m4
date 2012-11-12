@@ -55,5 +55,4 @@ AC_DEFUN([AX_PROG_BOOST],
 	fi
 
 	AM_CONDITIONAL(NEED_BOOST_HOME, test "${BOOST_default}" = "no")
-
 ])

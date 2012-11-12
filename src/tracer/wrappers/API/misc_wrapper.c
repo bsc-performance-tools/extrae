@@ -469,3 +469,11 @@ void Extrae_define_event_type_Wrapper (extrae_type_t type, char *description,
 		description_values);
 }
 
+/**************************************************************************
+ Lets change the number of active threads 
+ *************************************************************************/
+void Extrae_change_number_of_threads_Wrapper (unsigned nthreads)
+{
+	Backend_ChangeNumberOfThreads (nthreads);
+}
+

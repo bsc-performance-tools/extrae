@@ -801,8 +801,8 @@ void Labels_loadSYMfile (int taskid, char *name)
 	if (taskid == 0)
 	{
 		fprintf (stdout, "mpi2prv: A total of %u symbols were imported from %s file\n", function_count+hwc_count+other_count, name);
-		fprintf (stdout, "mpi2prv: %u function symbols successfully imported\n", function_count);
-		fprintf (stdout, "mpi2prv: %u HWC counter descriptions successfully\n", hwc_count);
+		fprintf (stdout, "mpi2prv: %u function symbols imported\n", function_count);
+		fprintf (stdout, "mpi2prv: %u HWC counter descriptions imported\n", hwc_count);
 	}
 
 	fclose (FD);

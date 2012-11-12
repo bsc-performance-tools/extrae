@@ -69,7 +69,7 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 	codelocation_label_t *labels);
 void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid);
-int Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
+void Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
   char * filename, int line);
 void Address2Info_Sort (int unique_ids);
 

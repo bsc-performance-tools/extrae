@@ -151,7 +151,11 @@ AC_DEFUN([AX_PROG_MPI],
          if test -x ${MPICC} ; then
             AC_MSG_RESULT([${MPICC}])
          else
-            AC_MSG_ERROR([Cannot find givne \${MPICC}. Please give the full path for the MPI C compiler])
+						if test -x `which ${MPICC}` ; then
+            	AC_MSG_RESULT([${MPICC}])
+						else
+ 	          	AC_MSG_ERROR([Cannot find given \${MPICC}. Please give the full path for the MPI C compiler])
+						fi
          fi
       fi
    fi
