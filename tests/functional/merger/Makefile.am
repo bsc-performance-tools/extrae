@@ -2,7 +2,11 @@ include $(top_srcdir)/PATHS
 
 check_PROGRAMS = dump-events
 
-TESTS = dump-events.sh
+TESTS = dump-events.sh 
+
+EXTRA_DIST = \
+ dump-events.reference \
+ dump-events.sh
 
 dump_events_SOURCES = dump-events.c
 dump_events_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
