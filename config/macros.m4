@@ -214,15 +214,23 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 		)
 
 		if test "$Default_Binary_Type" != "32" -a "$Default_Binary_Type" != 64 ; then
-			AC_MSG_NOTICE([Unknown default binary type (pointer size is $POINTER_SIZE!?)])
-                        AC_MSG_ERROR([[]_AC_LANG_PREFIX[] compiler '$_AC_LANG_PREFIX[]_compiler' might not be installed?])
+			[]_AC_LANG_PREFIX[]_PRESENT="no"
+                        msg="language compiler '$_AC_LANG_PREFIX[]_compiler' seems not to be installed in the system.
+Please verify there is a working installation of the language compiler '$_AC_LANG_PREFIX[]_compiler'."
+			if test "language" == "C" ; then
+				AC_MSG_ERROR($msg)
+			else 
+                        	AC_MSG_WARN($msg)
+			fi
+		else
+			[]_AC_LANG_PREFIX[]_PRESENT="yes"
 		fi
 
 		if test "$Selected_Binary_Type" = "default" ; then
 			Selected_Binary_Type="$Default_Binary_Type"
 		fi
 
-		if test "$Selected_Binary_Type" != "$Default_Binary_Type" ; then
+		if test "$Selected_Binary_Type" != "$Default_Binary_Type" -a "$[]_AC_LANG_PREFIX[]_PRESENT" = "yes" ; then
 
 			force_bit_flags="-m32 -q32 -32 -maix32 -m64 -q64 -64 -maix64 none"
 
@@ -251,6 +259,18 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 	])
 	AC_LANG_RESTORE([])
 	BITS="$Selected_Binary_Type"
+])
+
+# AX_ENSURE_CXX_PRESENT
+# ---------------------
+# Check the cxx compiler is present
+AC_DEFUN([AX_ENSURE_CXX_PRESENT],
+[
+  AC_REQUIRE([AX_SELECT_BINARY_TYPE])
+
+  if test "$CXX_PRESENT" != "yes" ; then
+    AC_MSG_ERROR([You have enabled the '$1' functionality which requires a working CXX compiler installed in the system, but it seems the compiler is not present. Check the 'config.log' file for previous errors or disable this option.])
+  fi
 ])
 
 
@@ -1447,6 +1467,8 @@ AC_DEFUN([AX_PROG_DYNINST],
    AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
 
    if test "${DYNINST_INSTALLED}" = "yes" ; then
+      AX_ENSURE_CXX_PRESENT([dyninst])
+
       AC_LANG_SAVE()
 
       AC_LANG_PUSH([C++])
