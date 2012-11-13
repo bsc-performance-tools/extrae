@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Nov2012 Added checks for the C++ compiler only when it is required by 
+   other functionalities like Dyninst or MRNet
  + 03Nov2012 Extrae version 2.3 in SVN
  * 24Oct2012 Sampling support for pthreads/openmp -> change type from default
    to virtual or prof.
