@@ -244,10 +244,10 @@ int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id)
 	if ((set_id+1 > Sthread->num_HWCSets) || (set_id < 0))
 	{
 		warn_count ++;
-		if (warn_count <= 10)
+		if (warn_count < 10)
 		{
-			fprintf(stderr, "\nmpi2prv: WARNING! Definitions for HWC set '%d' were not found!\n"
-			"You're probably using an old version of the tracing library, please upgrade it!\n", set_id);
+			fprintf(stderr, "\nmpi2prv: WARNING! Definitions for HWC set '%d' were not found for object (%d.%d.%d)!\n"
+			"You're probably using an old version of the tracing library, please upgrade it!\n", set_id, ptask, task, thread);
 		}
 		else if (warn_count == 10)
 		{

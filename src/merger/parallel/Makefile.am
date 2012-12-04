@@ -97,7 +97,7 @@ endif
 if HAVE_ZLIB
   libmpimpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpimpi2prv_CFLAGS += @LIBZ_CFLAGS@
-  mpimpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_LIBS@
+  mpimpi2prv_LDFLAGS += -L@LIBZ_SHAREDLIBSDIR@ -R @LIBZ_SHAREDLIBSDIR@ @LIBZ_LIBS@
 endif
 
 if HAVE_PAPI

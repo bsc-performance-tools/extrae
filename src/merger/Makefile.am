@@ -88,16 +88,12 @@ endif
 if HAVE_ZLIB
   libmpi2prv_la_CFLAGS += @LIBZ_CFLAGS@
   mpi2prv_CFLAGS += @LIBZ_CFLAGS@
-  mpi2prv_LDFLAGS += @LIBZ_LDFLAGS@ @LIBZ_LIBS@
+  mpi2prv_LDFLAGS += -L@LIBZ_SHAREDLIBSDIR@ -R @LIBZ_SHAREDLIBSDIR@ @LIBZ_LIBS@
 endif
 
 if HAVE_PAPI
   libmpi2prv_la_CFLAGS += @PAPI_CFLAGS@
   mpi2prv_CFLAGS += @PAPI_CFLAGS@
-endif
-
-if HAVE_PMAPI
-  mpi2prv_LDFLAGS += -lpmapi
 endif
 
 install-exec-hook:
