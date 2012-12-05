@@ -1162,20 +1162,21 @@ static void copy_program_name (void)
  ******************************************************************************/
 int remove_temporal_files(void)
 {
-  unsigned int thread;
-  char tmpname[TMP_NAME_LENGTH];
+	unsigned int thread;
+	char tmpname[TMP_NAME_LENGTH];
+	unsigned initialTASKID = Extrae_get_initial_TASKID();
 
-  for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
-  {
-		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_MPIT);
-    if (unlink(tmpname) == -1)
-      fprintf (stderr, PACKAGE_NAME": Error removing a temporal tracing file\n");
+	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+	{
+		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
+		if (unlink(tmpname) == -1)
+			fprintf (stderr, PACKAGE_NAME": Error removing a temporal tracing file\n");
 
-		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_TMP_SAMPLE);
-    if (unlink(tmpname) == -1)
-      fprintf (stderr, PACKAGE_NAME": Error removing a temporal sampling file\n");
-  }
-  return 0;
+		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_SAMPLE);
+		if (unlink(tmpname) == -1)
+			fprintf (stderr, PACKAGE_NAME": Error removing a temporal sampling file\n");
+	}
+	return 0;
 }
 
 /**
@@ -1185,6 +1186,7 @@ int remove_temporal_files(void)
  */
 static int Allocate_buffer_and_file (int thread_id)
 {
+	unsigned initialTASKID;
 	int ret;
 	int attempts = 100;
 	char tmp_file[TMP_NAME_LENGTH];
@@ -1202,7 +1204,9 @@ static int Allocate_buffer_and_file (int thread_id)
 		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create temporal directory %s\n", TASKID, Get_TemporalDir(TASKID));
 	}
 
-	FileName_PTT(tmp_file, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread_id, EXT_TMP_MPIT);
+	initialTASKID = Extrae_get_initial_TASKID();
+
+	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
 
 	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
 	if (TracingBuffer[thread_id] == NULL)
@@ -1216,7 +1220,7 @@ static int Allocate_buffer_and_file (int thread_id)
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], Extrae_Flush_Wrapper);
 
 #if defined(SAMPLING_SUPPORT)
-	FileName_PTT(tmp_file, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread_id, EXT_TMP_SAMPLE);
+	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
 	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
 	if (SamplingBuffer[thread_id] == NULL)
 	{
@@ -1854,7 +1858,7 @@ static void Backend_Finalize_close_mpits (int thread)
 	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
   FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_MPIT);
 
-	rename_or_copy (tmp_name, trace);
+	rename_or_copy (tmp_name, trace); 
 	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
 
 #if defined(SAMPLING_SUPPORT)

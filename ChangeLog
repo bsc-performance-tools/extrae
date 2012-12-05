@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 05Dec2012 Fixed problems with trace names when using omp_set_num_threads
+     with OmpSs.
+		         Added -lb libraries to nanos+mpi.
  +`04Dec2012 Added libz to dependencies when generating the shared libraries
  * 13Nov2012 Added checks for the C++ compiler only when it is required by 
    other functionalities like Dyninst or MRNet. Updated documentation.
