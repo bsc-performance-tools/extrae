@@ -96,6 +96,11 @@ if HAVE_PAPI
   mpi2prv_CFLAGS += @PAPI_CFLAGS@
 endif
 
+if HAVE_PMAPI
+  mpimpi2prv_LDFLAGS += -lpmapi
+endif
+
+
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) ; $(LN_S) -f mpi2prv$(EXEEXT) mpi2dim$(EXEEXT)
 
