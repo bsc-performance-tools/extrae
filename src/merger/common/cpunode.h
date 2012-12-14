@@ -41,7 +41,7 @@ struct Pair_NodeCPU
 };
 
 struct Pair_NodeCPU *AssignCPUNode(int nfiles, struct input_t *files);
-int GenerateROWfile (char *name, struct Pair_NodeCPU *info);
+int GenerateROWfile (char *name, struct Pair_NodeCPU *info, int nfiles, struct input_t *files);
 
 int ComparaTraces (struct input_t *t1, struct input_t *t2);
 int SortByHost (const void *t1, const void *t2);

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 14Dec2012 Fixed bug in the generation of the ROW file, where the threads appeared disordered.
  * 05Dec2012 Fixed problems with trace names when using omp_set_num_threads
      with OmpSs.
 		         Added -lb libraries to nanos+mpi.

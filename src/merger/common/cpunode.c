@@ -259,7 +259,7 @@ struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
   GenerateROWfile
   Creates a .ROW file containing in which nodes were running (if some input has NODE info).
 ***/
-int GenerateROWfile (char *name, struct Pair_NodeCPU *info)
+int GenerateROWfile (char *name, struct Pair_NodeCPU *info, int nfiles, struct input_t *files)
 {
 	int i, j, k;
 	int numNodes;
@@ -285,7 +285,7 @@ int GenerateROWfile (char *name, struct Pair_NodeCPU *info)
 #endif
 	fprintf (fd, "LEVEL CPU SIZE %d\n", numCPUs);
 
-	/* K will be our "Global CPU" counter */	
+	/* K will be our "Global CPU" counter */
 	k = 1;
 	for (i = 0; i < numNodes; i++)
 	{
@@ -305,9 +305,9 @@ int GenerateROWfile (char *name, struct Pair_NodeCPU *info)
 	if (!get_option_merge_NanosTaskView())
 	{
 		fprintf (fd, "\nLEVEL THREAD SIZE %d\n", numCPUs);
-		for (i = 0; i < numNodes; i++)
-			for (j = 0; j < info[i].CPUs; j++) 
-				fprintf (fd, "%s\n", info[i].files[j]->threadname);
+		for (i = 0; i < nfiles; i++)
+			fprintf (fd, "%s\n", files[i].threadname);
+		
 	}
 	else
 	{

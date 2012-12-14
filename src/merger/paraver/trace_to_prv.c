@@ -617,7 +617,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			fprintf (stderr, "mpi2prv: WARNING! Unable to create PCF file!\n");
 
 		strcpy (tmp, ".row");
-		if (GenerateROWfile (envName, NodeCPUinfo) == -1)
+		if (GenerateROWfile (envName, NodeCPUinfo, nfiles, files) == -1)
 			fprintf (stderr, "mpi2prv: WARNING! Unable to create ROW file!\n");
 	}
 

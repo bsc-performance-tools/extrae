@@ -522,7 +522,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		}
 
 		strcpy (tmp, ".row");
-		if (GenerateROWfile (envName, NodeCPUinfo) == -1)
+		if (GenerateROWfile (envName, NodeCPUinfo, nfiles, files) == -1)
 		{
 			fprintf (stderr, "mpi2dim: WARNING! Unable to create ROW file!\n");
 			somefailed = TRUE;
