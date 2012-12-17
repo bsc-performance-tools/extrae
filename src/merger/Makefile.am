@@ -97,7 +97,7 @@ if HAVE_PAPI
 endif
 
 if HAVE_PMAPI
-  mpimpi2prv_LDFLAGS += -lpmapi
+  mpi2prv_LDFLAGS += -lpmapi
 endif
 
 
