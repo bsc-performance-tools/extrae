@@ -96,6 +96,9 @@ static int Get_State (unsigned int EvType)
 			state = STATE_PROBE;
 		break;
 		case MPI_TEST_EV:
+		case MPI_TESTALL_EV:
+		case MPI_TESTSOME_EV:
+		case MPI_TESTANY_EV:
 		case MPI_WAIT_EV:
 		case MPI_WAITALL_EV:
 		case MPI_WAITSOME_EV:
@@ -943,6 +946,9 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_BARRIER_EV, GlobalOP_event },
 	{ MPI_CANCEL_EV, Other_MPI_Event },
 	{ MPI_TEST_EV, Other_MPI_Event },
+	{ MPI_TESTALL_EV, Other_MPI_Event },
+	{ MPI_TESTANY_EV, Other_MPI_Event },
+	{ MPI_TESTSOME_EV, Other_MPI_Event },
 	{ MPI_WAIT_EV, Other_MPI_Event },
 	{ MPI_WAITALL_EV, Other_MPI_Event },
 	{ MPI_WAITANY_EV, Other_MPI_Event },

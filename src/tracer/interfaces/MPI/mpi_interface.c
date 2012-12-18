@@ -60,6 +60,8 @@ static char UNUSED rcsid[] = "$Id$";
 #define ENTER	TRUE
 #define LEAVE	FALSE
 
+//#define DEBUG_MPITRACE
+
 #if defined(DEBUG_MPITRACE)
 #	define DEBUG_INTERFACE(enter) \
 	{ fprintf (stderr, "Task %d %s %s\n", TASKID, (enter)?"enters":"leaves", __func__); }
@@ -870,16 +872,16 @@ void NAME_ROUTINE_F(mpi_cancel) (MPI_Fint *request, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_cancel) (MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-  if (mpitrace_on)
-  {
+	if (mpitrace_on)
+	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_Cancel_Wrapper (request, ierror);
+		PMPI_Cancel_Wrapper (request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-  }
-  else
-    CtoF77 (pmpi_cancel) (request, ierror);
+	}
+	else
+		CtoF77 (pmpi_cancel) (request, ierror);
 }
 
 /******************************************************************************
@@ -899,13 +901,100 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (5+Caller_Count[CALLER_MPI]);
-    PMPI_Test_Wrapper (request, flag, status, ierror);
+		PMPI_Test_Wrapper (request, flag, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
     CtoF77 (pmpi_test) (request, flag, status, ierror);
 }
+
+/******************************************************************************
+ ***  MPI_TestAll
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_testall__,mpi_testall_,MPI_TESTALL,mpi_testall,(MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror))
+
+void NAME_ROUTINE_F(mpi_testall) (MPI_Fint * count,
+	MPI_Fint array_of_requests[], MPI_Fint *flag,
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint * ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
+	MPI_Fint array_of_requests[], MPI_Fint *flag,
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS],
+	MPI_Fint * ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+*count+Caller_Count[CALLER_MPI]);
+		PMPI_TestAll_Wrapper (count, array_of_requests, flag, array_of_statuses, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+	CtoF77 (pmpi_testall) (count, array_of_requests, flag,
+		array_of_statuses, ierror);
+}
+
+
+/******************************************************************************
+ ***  MPI_TestAny
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_testany__,mpi_testany_,MPI_TESTANY,mpi_testany,(MPI_Fint *count, MPI_Fint array_of_requests[],MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[],
+	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[],
+	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
+		PMPI_TestAny_Wrapper (count, array_of_requests, index, flag, status, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, status, ierror);
+}
+
+
+/******************************************************************************
+ ***  MPI_TestSome
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_testsome__,mpi_testsome_,MPI_TESTSOME,mpi_testsome, (MPI_Fint *incount, MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[], MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_testsome) (MPI_Fint *incount,
+	MPI_Fint array_of_requests[], MPI_Fint *outcount, MPI_Fint array_of_indices[],
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
+	MPI_Fint *outcount, MPI_Fint array_of_indices[],
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+*incount+Caller_Count[CALLER_MPI]);
+		PMPI_TestSome_Wrapper (incount, array_of_requests, outcount,
+                           array_of_indices, array_of_statuses, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (pmpi_testsome) (incount, array_of_requests, outcount,
+                            array_of_indices, array_of_statuses, ierror);
+}
+
 
 /******************************************************************************
  ***  MPI_Wait
@@ -923,16 +1012,16 @@ void NAME_ROUTINE_C2F(mpi_wait) (MPI_Fint *request, MPI_Fint *status,
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_wait_enter (request, status, ierror);
 #endif
-  if (mpitrace_on)
-  {
+	if (mpitrace_on)
+	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
-    PMPI_Wait_Wrapper (request, status, ierror);
+		PMPI_Wait_Wrapper (request, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-  }
-  else
-    CtoF77 (pmpi_wait) (request, status, ierror);
+	}
+	else
+		CtoF77 (pmpi_wait) (request, status, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_wait_leave ();
 #endif
@@ -956,18 +1045,18 @@ void NAME_ROUTINE_C2F(mpi_waitall) (MPI_Fint * count,
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_waitall_enter (count, array_of_requests, array_of_statuses, ierror);
 #endif
-  if (mpitrace_on)
-  {
+	if (mpitrace_on)
+	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+*count+Caller_Count[CALLER_MPI]);
-    PMPI_WaitAll_Wrapper (count, array_of_requests, array_of_statuses,
-                          ierror);
+		PMPI_WaitAll_Wrapper (count, array_of_requests, array_of_statuses,
+		  ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-  }
-  else
-    CtoF77 (pmpi_waitall) (count, array_of_requests, array_of_statuses,
-                           ierror);
+	}
+	else
+		CtoF77 (pmpi_waitall) (count, array_of_requests, array_of_statuses,
+		  ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_waitall_leave ();
 #endif
@@ -990,16 +1079,16 @@ void NAME_ROUTINE_C2F(mpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_waitany_enter (count, array_of_requests, index, status, ierror);
 #endif
-  if (mpitrace_on)
-  {
+	if (mpitrace_on)
+	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
-    PMPI_WaitAny_Wrapper (count, array_of_requests, index, status, ierror);
+		PMPI_WaitAny_Wrapper (count, array_of_requests, index, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-  }
-  else
-    CtoF77 (pmpi_waitany) (count, array_of_requests, index, status, ierror);
+	}
+	else
+	    CtoF77 (pmpi_waitany) (count, array_of_requests, index, status, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_waitany_leave ();
 #endif
@@ -1029,13 +1118,13 @@ void NAME_ROUTINE_C2F(mpi_waitsome) (MPI_Fint *incount, MPI_Fint array_of_reques
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+*incount+Caller_Count[CALLER_MPI]);
 		PMPI_WaitSome_Wrapper (incount, array_of_requests, outcount,
-                           array_of_indices, array_of_statuses, ierror);
+		  array_of_indices, array_of_statuses, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
 		CtoF77 (pmpi_waitsome) (incount, array_of_requests, outcount,
-                            array_of_indices, array_of_statuses, ierror);
+		  array_of_indices, array_of_statuses, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_waitsome_leave ();
 #endif
@@ -3006,6 +3095,72 @@ int NAME_ROUTINE_C(MPI_Test) (MPI_Request *request, int *flag, MPI_Status *statu
 	}
 	else
 		return PMPI_Test (request, flag, status);
+}
+
+/******************************************************************************
+ ***  MPI_Testall
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Testall) (int count, MPI_Request *requests,
+	int *flag, MPI_Status *statuses)
+{
+	int res;
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
+		res = MPI_Testall_C_Wrapper (count, requests, flag, statuses);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Testall (count, requests, flag, statuses);
+
+	return res;
+}
+
+/******************************************************************************
+ ***  MPI_Testany
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Testany) (int count, MPI_Request *requests, int *index,
+	int *flag, MPI_Status *status)
+{
+	int res;
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
+		res = MPI_Testany_C_Wrapper (count, requests, index, flag, status);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Testany (count, requests, index, flag, status);
+
+	return res;
+}
+
+/******************************************************************************
+ ***  MPI_Testsome
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Testsome) (int incount, MPI_Request * requests,
+	int *outcount, int *indices, MPI_Status *statuses)
+{
+	int res;
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+incount+Caller_Count[CALLER_MPI]);
+		res = MPI_Testsome_C_Wrapper (incount, requests, outcount, indices, statuses);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Testsome (incount, requests, outcount, indices, statuses);
+
+	return res;
 }
 
 /******************************************************************************

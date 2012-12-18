@@ -104,6 +104,7 @@ int hash_add (hash_t * hash, const hash_data_t * data)
      */
     hash->overflow[free].data = *data;
   }
+
   return FALSE;
 }
 
@@ -120,6 +121,7 @@ hash_data_t *hash_search (const hash_t * hash, MPI_Request key)
 
   if (hash->table[cell].ovf_link == HASH_FREE)
     return NULL;
+
   if (hash->table[cell].data.key == key)
     return (hash_data_t *) & hash->table[cell].data;
 

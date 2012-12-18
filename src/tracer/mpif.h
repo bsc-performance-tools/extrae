@@ -113,6 +113,16 @@ void CtoF77 (mpi_cancel) (MPI_Fint *request, MPI_Fint *ierror);
 void CtoF77 (mpi_test) (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	MPI_Fint *ierror);
 
+void CtoF77 (mpi_testall) (MPI_Fint * count, MPI_Fint array_of_requests[],
+  MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror);
+
+void CtoF77 (mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[],
+	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
+   
+void CtoF77 (mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
+	MPI_Fint *outcount, MPI_Fint array_of_indices[],
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror);
+
 void CtoF77 (mpi_wait) (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror);
 
 void CtoF77 (mpi_waitall) (MPI_Fint * count, MPI_Fint array_of_requests[],
@@ -341,6 +351,16 @@ void CtoF77 (pmpi_cancel) (MPI_Fint *request, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_test) (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	MPI_Fint *ierror);
+
+void CtoF77 (pmpi_testall) (MPI_Fint * count, MPI_Fint array_of_requests[],
+  MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror);
+
+void CtoF77 (pmpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[],
+	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
+   
+void CtoF77 (pmpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_requests[],
+	MPI_Fint *outcount, MPI_Fint array_of_indices[],
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror);
 
 void CtoF77 (pmpi_wait) (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror);
 

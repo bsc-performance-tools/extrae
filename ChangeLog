@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 18Dec2012 Added instrumentation for MPI_Testany/all/some
+             Fixed issues when renaming *.ttmp into *.mpit tracefiles for MPI apps
  * 14Dec2012 Fixed bug in the generation of the ROW file, where the threads appeared disordered.
  * 05Dec2012 Fixed problems with trace names when using omp_set_num_threads
      with OmpSs.

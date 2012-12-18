@@ -190,6 +190,9 @@ enum {
 #define MPI_IRECV_EV                 50000023
 #define MPI_IRCV_EV                  50000025
 #define MPI_TEST_EV                  50000026
+#define MPI_TESTALL_EV               50000082
+#define MPI_TESTANY_EV               50000083
+#define MPI_TESTSOME_EV              50000084
 #define MPI_TEST_COUNTER_EV          50000080
 #define MPI_WAIT_EV                  50000027
 #define MPI_CANCEL_EV                50000030
@@ -278,6 +281,9 @@ enum {
 #define PACX_IRECV_EV                 51000023
 #define PACX_IRCV_EV                  51000025
 #define PACX_TEST_EV                  51000026
+#define PACX_TESTALL_EV               51000082
+#define PACX_TESTANY_EV               51000083
+#define PACX_TESTSOME_EV              51000084
 #define PACX_TEST_COUNTER_EV          51000080
 #define PACX_WAIT_EV                  51000027
 #define PACX_CANCEL_EV                51000030

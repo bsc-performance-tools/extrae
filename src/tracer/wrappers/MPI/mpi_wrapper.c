@@ -52,11 +52,9 @@ static char UNUSED rcsid[] = "$Id$";
 # include <string.h>
 #endif
 
-#include "hash_table.h"
 #include "mpi_wrapper.h"
 #include "wrapper.h"
 #include "clock.h"
-#include "hash_table.h"
 #include "signals.h"
 #if defined(DEAD_CODE)
 # include "myrinet_hwc.h"
@@ -68,6 +66,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include <mpi.h>
 #include "mpif.h"
+#include "hash_table.h"
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -747,8 +746,12 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	{
 		int res;
 		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+
 		if (config_file == NULL)
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+		Extrae_set_initial_TASKID (TASKID);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
 
 		if (config_file != NULL)
 			/* Obtain a localized copy *except for the master process* */
@@ -787,26 +790,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return;
 
-	/* End initialization of the backend if the tracing was not already initialized */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
-	{
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
-		Extrae_set_initial_TASKID (TASKID);
-	}
-	else
-	{
-		char *previous = "Unknown";
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-			previous = "API";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-			previous = "MPI";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
-			previous = "PACX";
-
-		if (TASKID == 0)
-			fprintf (stderr, PACKAGE_NAME": Warning! MPI tries to initialize more than once. Previous init was done by %s.\n", previous);
-	}
-
 	/* Annotate already built communicators */
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, MPI_Init_start_time,
 	  MPI_Init_end_time, FALSE);
@@ -821,12 +804,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror)
 /* Aquest codi nomes el volem per traceig sequencial i per mpi_init de fortran */
 {
-	unsigned int ret;
-	int res;
-	MPI_Fint comm;
-	MPI_Fint tipus_enter;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
-	char *config_file;
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
@@ -845,10 +823,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
 	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
-	/* OpenMPI does not allow us to do this before the MPI_Init! */
-	comm = MPI_Comm_c2f (MPI_COMM_WORLD);
-	tipus_enter = MPI_Type_c2f (MPI_INT);
-
 	InitMPICommunicators();
 
 #if defined(SAMPLING_SUPPORT)
@@ -862,8 +836,12 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	{
 		int res;
 		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+
 		if (config_file == NULL)
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+		Extrae_set_initial_TASKID (TASKID);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
 
 		if (config_file != NULL)
 			/* Obtain a localized copy *except for the master process* */
@@ -900,26 +878,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return;
-
-	/* End initialization of the backend if the tracing was not already initialized */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
-	{
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
-		Extrae_set_initial_TASKID (TASKID);
-	}
-	else
-	{
-		char *previous = "Unknown";
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-			previous = "API";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-			previous = "MPI";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
-			previous = "PACX";
-
-		if (TASKID == 0)
-			fprintf (stderr, PACKAGE_NAME": Warning! MPI tries to initialize more than once. Previous init was done by %s.\n", previous);
-	}
 
 	/* Annotate already built communicators */
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD,MPI_Init_start_time,
@@ -1485,12 +1443,14 @@ void PMPI_Recv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
  ***  PMPI_IRecv_Wrapper
  ******************************************************************************/
 
+#if 0
 #if defined(MPICH)
 	/* HSG this function has no prototype in the MPICH header! but it's needed to
 	   convert requests from Fortran to C!
 	*/
 # warning "MPIR_ToPointer has no prototype"
 	extern MPI_Request MPIR_ToPointer(MPI_Fint);
+#endif
 #endif
 
 void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
@@ -1935,123 +1895,90 @@ void Bursts_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 	MPI_Fint *ierror)
 {
 	MPI_Request req;
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret;
-  iotimer_t temps_final;
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret;
+	iotimer_t temps_final;
 
-  /*
-   *   event : TEST_EV                      value : EVT_BEGIN
-   *   target : request to test             size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
-  req = MPI_Request_f2c (*request);
+	req = MPI_Request_f2c (*request);
 
-  CtoF77 (pmpi_test) (request, flag, status, ierror);
+	CtoF77 (pmpi_test) (request, flag, status, ierror);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (*flag && ((hash_req = hash_search (&requests, req)) != NULL))
-  {
+	if (*flag && ((hash_req = hash_search (&requests, req)) != NULL))
+	{
 		if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
 		{
 			*ierror = ret;
 			return;
 		}
-    if (hash_req->group != MPI_GROUP_NULL)
-    {
+		if (hash_req->group != MPI_GROUP_NULL)
+		{
 			MPI_Fint group = MPI_Group_c2f(hash_req->group);
-      CtoF77 (pmpi_group_free) (&group, &ret);
+			CtoF77 (pmpi_group_free) (&group, &ret);
 			MPI_CHECK (ret, pmpi_group_free);
-    }
+		}
 
-    P2P_Communications ++;
-    P2P_Bytes_Recv += size; /* get_Irank_obj above return size (number of bytes received) */
+		P2P_Communications ++;
+		P2P_Bytes_Recv += size; /* get_Irank_obj above return size (number of bytes received) */
 
-    /*
-     *   event : IRECVED_EV                 value : ---
-     *   target : sender                    size  : received message size
-     *   tag : message tag                  commid: communicator identifier
-     *   aux : request
-     */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
-    hash_remove (&requests, req);
-  }
-  /*
-   *   event : TEST_EV                    value : EVT_END
-   *   target : ---                       size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+		hash_remove (&requests, req);
+	}
+
+	TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	MPI_Fint *ierror)
 {
 	MPI_Request req;
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret;
-  iotimer_t temps_inicial, temps_final;
-  static int Test_Software_Counter = 0;
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret;
+	iotimer_t temps_inicial, temps_final;
+	static int Test_Software_Counter = 0;
 
-  temps_inicial = LAST_READ_TIME;
+	temps_inicial = LAST_READ_TIME;
 
-  req = MPI_Request_f2c(*request);
+	req = MPI_Request_f2c(*request);
 
-  CtoF77 (pmpi_test) (request, flag, status, ierror);
+	CtoF77 (pmpi_test) (request, flag, status, ierror);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (*flag && ((hash_req = hash_search (&requests, req)) != NULL))
-  {
-    /*
-     *   event : TEST_EV                      value : EVT_BEGIN
-     *   target : request to test             size  : ---
-     *   tag : ---
-     */
-    if (Test_Software_Counter != 0) {
+	if (*flag && ((hash_req = hash_search (&requests, req)) != NULL))
+	{
+		if (Test_Software_Counter != 0)
 			TRACE_EVENT (temps_inicial, MPI_TEST_COUNTER_EV, Test_Software_Counter);
-    }
-    TRACE_MPIEVENT (temps_inicial, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
-    Test_Software_Counter = 0;
+		Test_Software_Counter = 0;
+
+		TRACE_MPIEVENT (temps_inicial, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
 		if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
 		{
 			*ierror = ret;
 			return;
 		}
-    if (hash_req->group != MPI_GROUP_NULL)
-    {
+		if (hash_req->group != MPI_GROUP_NULL)
+		{
 			MPI_Fint group = MPI_Group_c2f (hash_req->group);
-      CtoF77 (pmpi_group_free) (&group, &ret);
+			CtoF77 (pmpi_group_free) (&group, &ret);
 			MPI_CHECK (ret, pmpi_group_free);
-    }
+		}
 
-    /*
-     *   event : IRECVED_EV                 value : ---
-     *   target : sender                    size  : received message size
-     *   tag : message tag                  commid: communicator identifier
-     *   aux : request
-     */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
-    hash_remove (&requests, req);
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+		hash_remove (&requests, req);
 
-    /*
-     *   event : TEST_EV                    value : EVT_END
-     *   target : ---                       size  : ---
-     *   tag : ---
-     */
-    TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-  }
-  else {
-    if (Test_Software_Counter == 0) {
-      /* El primer test que falla */
-      TRACE_EVENTANDCOUNTERS    (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
-    }
-    Test_Software_Counter ++;
-  }
+		TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	}
+	else
+	{
+		if (Test_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_Software_Counter ++;
+	}
 }
 
 void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
@@ -2062,14 +1989,224 @@ void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
 
 	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
-	{
 		Bursts_PMPI_Test_Wrapper(request, flag, ptr_status, ierror);
+	else
+		Normal_PMPI_Test_Wrapper(request, flag, ptr_status, ierror);
+}
+
+
+/******************************************************************************
+ ***  PMPI_TestAll_Wrapper
+ ******************************************************************************/
+
+void PMPI_TaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag,
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror)
+{
+	MPI_Fint my_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS], *ptr_statuses;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ireq;
+	iotimer_t temps_final, temps_inicial;
+	int i;
+	static int Test_F_Software_Counter = 0;
+
+	temps_inicial = LAST_READ_TIME;
+
+	if (*count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, "PANIC: too many requests in mpi_testtall\n");
+	else
+		for (i = 0; i < *count; i++)
+			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
+
+	ptr_statuses = (MPI_F_STATUSES_IGNORE == (MPI_Fint*)array_of_statuses)?my_statuses:array_of_statuses;
+
+	CtoF77 (pmpi_testall) (count, array_of_requests, flag, ptr_statuses, ierror);
+
+	temps_final = TIME;
+	if (*ierror == MPI_SUCCESS && *flag)
+	{
+		TRACE_MPIEVENT (LAST_READ_TIME, MPI_TESTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+                  EMPTY);
+
+		if (Test_F_Software_Counter != 0)
+			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		Test_F_Software_Counter = 0;
+
+		for (ireq = 0; ireq < *count; ireq++)
+		{
+			if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
+			{
+				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, &ptr_statuses[ireq*SIZEOF_MPI_STATUS])) != MPI_SUCCESS)
+				{
+					*ierror = ret;
+					return;
+				}
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					MPI_Fint group = MPI_Group_c2f(hash_req->group);
+					CtoF77 (pmpi_group_free) (&group, &ret);
+					MPI_CHECK(ret, pmpi_group_free);
+				}
+
+				P2P_Communications ++; 
+				P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
+
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[ireq]);
+				hash_remove (&requests, save_reqs[ireq]);
+			}
+		}
+		TRACE_MPIEVENT (temps_final, MPI_TESTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	}
 	else
 	{
-		Normal_PMPI_Test_Wrapper(request, flag, ptr_status, ierror);
+		if (Test_F_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_F_Software_Counter ++;
 	}
 }
+
+
+/******************************************************************************
+ ***  PMPI_TestAny_Wrapper
+ ******************************************************************************/
+
+void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
+	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
+{
+	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, i;
+	iotimer_t temps_final, temps_inicial;
+	static int Test_F_Software_Counter = 0;
+
+	temps_inicial = LAST_READ_TIME;
+
+	if (*count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, "PANIC: too many requests in mpi_waitany\n");
+	else
+		for (i = 0; i < *count; i++)
+			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
+
+	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
+
+	CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, ptr_status, ierror);
+
+	temps_final = TIME;
+
+	if (*index != MPI_UNDEFINED && *ierror == MPI_SUCCESS && *flag)
+	{
+		TRACE_MPIEVENT (temps_inicial, MPI_TESTANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+                  EMPTY);
+
+		if (Test_F_Software_Counter != 0)
+			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		Test_F_Software_Counter = 0;
+
+		MPI_Request req = save_reqs[*index-1];
+
+		if ((hash_req = hash_search (&requests, req)) != NULL)
+		{
+			if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
+			{
+				*ierror = ret;
+				return;
+			}
+			if (hash_req->group != MPI_GROUP_NULL)
+			{
+				MPI_Fint group = MPI_Group_c2f(hash_req->group);
+				CtoF77 (pmpi_group_free) (&group, &ret);
+				MPI_CHECK(ret, pmpi_group_free);
+			}
+			P2P_Communications ++; 
+ 			P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
+
+			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+
+			hash_remove (&requests, req);
+		}
+		TRACE_MPIEVENT (temps_final, MPI_TESTANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	}
+	else
+	{
+		if (Test_F_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_F_Software_Counter ++;
+	}
+}
+
+/*****************************************************************************
+ ***  PMPI_TestSome_Wrapper
+ ******************************************************************************/
+
+void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
+	MPI_Fint *outcount, MPI_Fint array_of_indices[],
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
+{
+	MPI_Fint my_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS], *ptr_statuses;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, i;
+	iotimer_t temps_final, temps_inicial;
+	static int Test_F_Software_Counter = 0;
+
+	temps_inicial = LAST_READ_TIME;
+
+	if (*incount > MAX_WAIT_REQUESTS)
+		fprintf (stderr, "PANIC: too many requests in mpi_waitsome\n");
+	else
+		for (i = 0; i < *incount; i++)
+			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
+
+	ptr_statuses = (MPI_F_STATUSES_IGNORE == (MPI_Fint*) array_of_statuses)?my_statuses:array_of_statuses;
+
+	CtoF77(pmpi_testsome) (incount, array_of_requests, outcount, array_of_indices,
+	  ptr_statuses, ierror);
+
+	temps_final = TIME;
+
+	if (*ierror == MPI_SUCCESS && *outcount > 0)
+	{
+		TRACE_MPIEVENT (temps_inicial, MPI_TESTSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+                  EMPTY);
+
+		if (Test_F_Software_Counter != 0)
+			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		Test_F_Software_Counter = 0;
+
+		for (i = 0; i < *outcount; i++)
+		{
+			MPI_Request req = save_reqs[array_of_indices[i]];
+			if ((hash_req = hash_search (&requests, req)) != NULL)
+			{
+				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, &ptr_statuses[i*SIZEOF_MPI_STATUS])) != MPI_SUCCESS)
+				{
+					*ierror = ret;
+					return;
+				}
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					MPI_Fint group = MPI_Group_c2f(hash_req->group);
+					CtoF77 (pmpi_group_free) (&group, &ret);
+					MPI_CHECK(ret, pmpi_group_free);
+				}
+
+				P2P_Communications ++;
+				P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+				hash_remove (&requests, req);
+			}
+		}
+		TRACE_MPIEVENT (temps_final, MPI_TESTSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	}
+	else
+	{
+		if (Test_F_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_F_Software_Counter ++;
+	}
+}
+
 
 /******************************************************************************
  ***  PMPI_Wait_Wrapper
@@ -2078,57 +2215,41 @@ void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 {
 	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
-  hash_data_t *hash_req;
-  iotimer_t temps_final;
-  int src_world, size, tag, ret;
+	hash_data_t *hash_req;
+	iotimer_t temps_final;
+	int src_world, size, tag, ret;
 	MPI_Request req = MPI_Request_f2c(*request);
 
-  /*
-   *   event : WAIT_EV                      value : EVT_BEGIN
-   *   target : request to test             size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
 
-  CtoF77 (pmpi_wait) (request, ptr_status, ierror);
+	CtoF77 (pmpi_wait) (request, ptr_status, ierror);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (*ierror == MPI_SUCCESS && ((hash_req = hash_search (&requests, req)) != NULL))
-  {
+	if (*ierror == MPI_SUCCESS && ((hash_req = hash_search (&requests, req)) != NULL))
+	{
 		if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 		{
 			*ierror = ret;
 			return;
 		}
-    if (hash_req->group != MPI_GROUP_NULL)
-    {
+		if (hash_req->group != MPI_GROUP_NULL)
+		{
 			MPI_Fint group = MPI_Group_c2f (hash_req->group);
-      CtoF77 (pmpi_group_free) (&group, &ret);
+			CtoF77 (pmpi_group_free) (&group, &ret);
 			MPI_CHECK (ret, pmpi_group_free);
-    }
+		}
 
-    /* MPI Stats */
-    P2P_Communications ++; 
-    P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
+		P2P_Communications ++; 
+		P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
 
-    /*
-     *   event : IRECVED_EV                 value : ---
-     *   target : sender                    size  : received message size
-     *   tag : message tag                  commid: communicator identifier
-     *   aux : request
-     */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req); /* NOHWC */
-    hash_remove (&requests, req);
-  }
-  /*
-   *   event : WAIT_EV                    value : EVT_END
-   *   target : ---                       size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req); /* NOHWC */
+		hash_remove (&requests, req);
+	}
+
+	TRACE_MPIEVENT (temps_final, MPI_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 /******************************************************************************
@@ -2145,67 +2266,45 @@ void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
 	iotimer_t temps_final;
 	int i;
 
-  /*
-   *   event : WAITALL_EV                      value : EVT_BEGIN
-   *   target : ---                            size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  /*
-   * Arreglar-ho millor de cara a OMP
-   */
-  if (*count > MAX_WAIT_REQUESTS)
-    fprintf (stderr, "PANIC: too many requests in mpi_waitall\n");
+	if (*count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, "PANIC: too many requests in mpi_waitall\n");
 	else
 		for (i = 0; i < *count; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
 
 	ptr_statuses = (MPI_F_STATUSES_IGNORE == (MPI_Fint*)array_of_statuses)?my_statuses:array_of_statuses;
 
-  CtoF77 (pmpi_waitall) (count, array_of_requests, ptr_statuses, ierror);
+	CtoF77 (pmpi_waitall) (count, array_of_requests, ptr_statuses, ierror);
 
-  temps_final = TIME;
-  if (*ierror == MPI_SUCCESS)
-  {
-    for (ireq = 0; ireq < *count; ireq++)
-    {
-      if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
-      {
+	temps_final = TIME;
+	if (*ierror == MPI_SUCCESS)
+	{
+		for (ireq = 0; ireq < *count; ireq++)
+		{
+			if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
+			{
 				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, &ptr_statuses[ireq*SIZEOF_MPI_STATUS])) != MPI_SUCCESS)
 				{
 					*ierror = ret;
 					return;
 				}
-        if (hash_req->group != MPI_GROUP_NULL)
-        {
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
 					MPI_Fint group = MPI_Group_c2f(hash_req->group);
-          CtoF77 (pmpi_group_free) (&group, &ret);
+					CtoF77 (pmpi_group_free) (&group, &ret);
 					MPI_CHECK(ret, pmpi_group_free);
-        }
-
-        /* MPI Stats */
-        P2P_Communications ++; 
-        P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
-
-        /*
-         *   event : IRECVED_EV                 value : ---
-         *   target : sender                    size  : received message size
-         *   tag : message tag                  commid: communicator identifier
-         *   aux : request
-         */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[ireq]);
-        hash_remove (&requests, save_reqs[ireq]);
-      }
-    }
-  }
-  /*
-   *   event : WAIT_EV                    value : EVT_END
-   *   target : ---                       size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+				}
+				P2P_Communications ++; 
+				P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[ireq]);
+				hash_remove (&requests, save_reqs[ireq]);
+			}
+		}
+	}
+	TRACE_MPIEVENT (temps_final, MPI_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 
@@ -2218,61 +2317,49 @@ void PMPI_WaitAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 {
 	MPI_Fint my_status[SIZEOF_MPI_STATUS], *ptr_status;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-  hash_data_t *hash_req;
+	hash_data_t *hash_req;
 	int src_world, size, tag, ret, i;
-  iotimer_t temps_final;
+	iotimer_t temps_final;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  if (*count > MAX_WAIT_REQUESTS)
-    fprintf (stderr, "PANIC: too many requests in mpi_waitall\n");
+	if (*count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, "PANIC: too many requests in mpi_waitany\n");
 	else
 		for (i = 0; i < *count; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
 
 	ptr_status = (MPI_F_STATUS_IGNORE == status)?my_status:status;
 
-  CtoF77 (pmpi_waitany) (count, array_of_requests, index, ptr_status, ierror);
+	CtoF77 (pmpi_waitany) (count, array_of_requests, index, ptr_status, ierror);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (*index != MPI_UNDEFINED && *ierror == MPI_SUCCESS)
-  {
+	if (*index != MPI_UNDEFINED && *ierror == MPI_SUCCESS)
+	{
 		MPI_Request req = save_reqs[*index-1];
 
-    if ((hash_req = hash_search (&requests, req)) != NULL)
-    {
+		if ((hash_req = hash_search (&requests, req)) != NULL)
+		{
 			if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 			{
 				*ierror = ret;
 				return;
 			}
-
-      if (hash_req->group != MPI_GROUP_NULL)
-      {
+			if (hash_req->group != MPI_GROUP_NULL)
+			{
 				MPI_Fint group = MPI_Group_c2f(hash_req->group);
-        CtoF77 (pmpi_group_free) (&group, &ret);
+				CtoF77 (pmpi_group_free) (&group, &ret);
 				MPI_CHECK(ret, pmpi_group_free);
-      }
-
-      /* MPI Stats */
-      P2P_Communications ++; 
-      P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
-
-      /*
-       *   event : IRECVED_EV                 value : ---
-       *   target : sender                    size  : received message size
-       *   tag : message tag                  commid: communicator identifier
-       *   aux : request
-       */
-      TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
-
-      hash_remove (&requests, req);
-    }
-
-  }
-  TRACE_MPIEVENT (temps_final, MPI_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+			}
+			P2P_Communications ++; 
+			P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
+			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+			hash_remove (&requests, req);
+		}
+	}
+	TRACE_MPIEVENT (temps_final, MPI_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 /*****************************************************************************
@@ -2285,22 +2372,15 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 {
 	MPI_Fint my_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS], *ptr_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret, i;
-  iotimer_t temps_final;
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, i;
+	iotimer_t temps_final;
 
-  /*
-   *   event : WAITSOME_EV                     value : EVT_BEGIN
-   *   target : ---                            size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
-  /*
-   * Arreglar-ho millor de cara a OMP
-   */
-  if (*incount > MAX_WAIT_REQUESTS)
-    fprintf (stderr, "PANIC: too many requests in mpi_waitall\n");
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
+
+	if (*incount > MAX_WAIT_REQUESTS)
+		fprintf (stderr, "PANIC: too many requests in mpi_waitsome\n");
 	else
 		for (i = 0; i < *incount; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
@@ -2310,48 +2390,34 @@ void PMPI_WaitSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	CtoF77(pmpi_waitsome) (incount, array_of_requests, outcount, array_of_indices,
 	  ptr_statuses, ierror);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (*ierror == MPI_SUCCESS)
-  {
-    for (i = 1; i <= *outcount; i++)
-    {
-			MPI_Request req = save_reqs[array_of_indices[i-1]];
-      if ((hash_req = hash_search (&requests, req)) != NULL)
-      {
-				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, &ptr_statuses[(i-1)*SIZEOF_MPI_STATUS])) != MPI_SUCCESS)
+	if (*ierror == MPI_SUCCESS)
+	{
+		for (i = 0; i < *outcount; i++)
+		{
+			MPI_Request req = save_reqs[array_of_indices[i]];
+			if ((hash_req = hash_search (&requests, req)) != NULL)
+			{
+				if ((ret = get_Irank_obj (hash_req, &src_world, &size, &tag, &ptr_statuses[i*SIZEOF_MPI_STATUS])) != MPI_SUCCESS)
 				{
 					*ierror = ret;
 					return;
 				}
-        if (hash_req->group != MPI_GROUP_NULL)
-        {
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
 					MPI_Fint group = MPI_Group_c2f(hash_req->group);
-          CtoF77 (pmpi_group_free) (&group, &ret);
+					CtoF77 (pmpi_group_free) (&group, &ret);
 					MPI_CHECK(ret, pmpi_group_free);
-        }
-
-        /* MPI Stats */
-        P2P_Communications ++;
-        P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
-
-        /*
-         *   event : IRECVED_EV                 value : ---
-         *   target : sender                    size  : received message size
-         *   tag : message tag                  commid: communicator identifier
-         *   aux : request
-         */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
-        hash_remove (&requests, req);
-      }
-    }
-  }
-  /*
-   *   event : WAITSOME_EV                value : EVT_END
-   *   target : ---                       size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+				}
+				P2P_Communications ++;
+				P2P_Bytes_Recv += size; /* get_Irank_obj above returns size (the number of bytes received) */
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+				hash_remove (&requests, req);
+			}
+		}
+	}
+	TRACE_MPIEVENT (temps_final, MPI_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 }
 
 /******************************************************************************
@@ -4035,8 +4101,12 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	{
 		int res;
 		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+
 		if (config_file == NULL)
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+		Extrae_set_initial_TASKID (TASKID);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
 
 		if (config_file != NULL)
 			/* Obtain a localized copy *except for the master process* */
@@ -4074,26 +4144,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return val;
-
-	/* End initialization of the backend if the tracing was not already initialized */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
-	{
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
-		Extrae_set_initial_TASKID (TASKID);
-	}
-	else
-	{
-		char *previous = "Unknown";
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-			previous = "API";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-			previous = "MPI";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
-			previous = "PACX";
-
-		if (TASKID == 0)
-			fprintf (stderr, PACKAGE_NAME": Warning! MPI tries to initialize more than once. Previous init was done by %s.\n", previous);
-	}
 
 	/* Annotate already built communicators */
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, MPI_Init_start_time,
@@ -4140,8 +4190,12 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	{
 		int res;
 		char *config_file = getenv ("EXTRAE_CONFIG_FILE");
+
 		if (config_file == NULL)
 			config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+		Extrae_set_initial_TASKID (TASKID);
+		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
 
 		if (config_file != NULL)
 			/* Obtain a localized copy *except for the master process* */
@@ -4178,26 +4232,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), MPI_INIT_EV, MPI_Init_start_time, MPI_Init_end_time, TasksNodes))
 		return val;
-
-	/* End initialization of the backend if the tracing was not already initialized */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
-	{
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_MPI_INIT);
-		Extrae_set_initial_TASKID (TASKID);
-	}
-	else
-	{
-		char *previous = "Unknown";
-		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
-			previous = "API";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-			previous = "MPI";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
-			previous = "PACX";
-
-		if (TASKID == 0)
-			fprintf (stderr, PACKAGE_NAME": Warning! MPI tries to initialize more than once. Previous init was done by %s.\n", previous);
-	}
 
 	/* Annotate already built communicators */
 	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, MPI_Init_start_time,
@@ -5116,50 +5150,32 @@ int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 	int src_world, size, tag, ret, ierror;
 	iotimer_t temps_final;
 
-  /*
-   *   event : TEST_EV                      value : EVT_BEGIN
-   *   target : request to test             size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
 	req = *request;
 
-  ierror = PMPI_Test (request, flag, status);
+	ierror = PMPI_Test (request, flag, status);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
-  {
+	if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
+	{
 		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
 			return ret;
-    if (hash_req->group != MPI_GROUP_NULL)
-    {
-      ret = PMPI_Group_free (&hash_req->group);
+		if (hash_req->group != MPI_GROUP_NULL)
+		{
+			ret = PMPI_Group_free (&hash_req->group);
 			MPI_CHECK(ret, PMPI_Group_free);
-    }
+		}
+		P2P_Communications ++;
+		P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+		hash_remove (&requests, req);
+	}
+	TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-    P2P_Communications ++;
-    P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
-
-    /*
-     *   event : IRECVED_EV                 value : ---
-     *   target : sender                    size  : received message size
-     *   tag : message tag                  commid: communicator identifier
-     *   aux : request
-     */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
-    hash_remove (&requests, req);
-  }
-  /*
-   *   event : TEST_EV                    value : EVT_END
-   *   target : ---                       size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
-  return ierror;
+	return ierror;
 }
 
 int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
@@ -5170,78 +5186,296 @@ int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 	iotimer_t temps_inicial, temps_final;
 	static int Test_C_Software_Counter = 0;
 
-  temps_inicial = LAST_READ_TIME;
+	temps_inicial = LAST_READ_TIME;
 
 	req = *request;
 
-  ierror = PMPI_Test (request, flag, status);
+	ierror = PMPI_Test (request, flag, status);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
-  {
-    /*
-     *   event : TEST_EV                      value : EVT_BEGIN
-     *   target : request to test             size  : ---
-     *   tag : ---
-     */
-    if (Test_C_Software_Counter != 0) {
-       TRACE_EVENT    (temps_inicial, MPI_TEST_COUNTER_EV, Test_C_Software_Counter);
-    }
-    TRACE_MPIEVENT (temps_inicial, MPI_TEST_EV, EVT_BEGIN, hash_req->key, EMPTY, EMPTY, EMPTY, EMPTY);
-    Test_C_Software_Counter = 0;
+	if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
+	{
+		if (Test_C_Software_Counter != 0)
+			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_C_Software_Counter);
+
+		TRACE_MPIEVENT (temps_inicial, MPI_TEST_EV, EVT_BEGIN, hash_req->key, EMPTY, EMPTY, EMPTY, EMPTY);
+		Test_C_Software_Counter = 0;
 
 		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
 			return ret;
-    if (hash_req->group != MPI_GROUP_NULL)
-    {
-      ret = PMPI_Group_free (&hash_req->group);
-			MPI_CHECK(ret, PMPI_Group_free);
-    }
 
-    /*
-     *   event : IRECVED_EV                 value : ---
-     *   target : sender                    size  : received message size
-     *   tag : message tag                  commid: communicator identifier
-     *   aux : request
-     */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
-    hash_remove (&requests, req);
-  
-    /*
-     *   event : TEST_EV                    value : EVT_END
-     *   target : ---                       size  : ---
-     *   tag : ---
-     */
-    TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-  }
-  else {
-    if (Test_C_Software_Counter == 0) {
-      /* El primer test que falla */
-      TRACE_EVENTANDCOUNTERS    (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
-    }     
-    Test_C_Software_Counter ++;
-  }
-  return ierror;
+		if (hash_req->group != MPI_GROUP_NULL)
+		{
+			ret = PMPI_Group_free (&hash_req->group);
+			MPI_CHECK(ret, PMPI_Group_free);
+		}
+
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+		hash_remove (&requests, req);
+		TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	}
+	else
+	{
+		if (Test_C_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_C_Software_Counter ++;
+	}
+	return ierror;
 }
 
 int MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
 {
 	MPI_Status my_status, *ptr_status;
-   int ret;
+	int ret;
 
-	ptr_status = (status == MPI_STATUS_IGNORE)?&my_status:status;
-   
-   if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
-   {
-      ret = Bursts_MPI_Test_C_Wrapper (request, flag, ptr_status);
-   }
-   else
-   {
-      ret = Normal_MPI_Test_C_Wrapper (request, flag, ptr_status);
-   }
-   return ret;
+	if (status == MPI_STATUS_IGNORE)
+		ptr_status = &my_status;
+	else
+		ptr_status = status;
+
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+		ret = Bursts_MPI_Test_C_Wrapper (request, flag, ptr_status);
+	else
+		ret = Normal_MPI_Test_C_Wrapper (request, flag, ptr_status);
+
+	return ret;
 }
+
+/******************************************************************************
+ ***  MPI_Testall_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Testall_C_Wrapper (int count, MPI_Request *array_of_requests, int *flag,
+	MPI_Status *array_of_statuses)
+{
+	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ireq, ierror;
+	iotimer_t temps_final, temps_inicial;
+#if defined(DEBUG_MPITRACE)
+	int index;
+#endif
+	static int Test_C_Software_Counter = 0;
+
+	temps_inicial = LAST_READ_TIME;
+
+	if (count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitall\n");
+	memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
+
+#if defined(DEBUG_MPITRACE)
+	fprintf (stderr,  PACKAGE_NAME" %d: TESTALL summary\n", TASKID);
+	for (index = 0; index < count; index++)
+# if SIZEOF_LONG == 8
+		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, index, (UINT64) array_of_requests[index]);
+# elif SIZEOF_LONG == 4
+		fprintf (stderr, "%d: position %d -> request %llu\n", TASKID, index, (UINT64) array_of_requests[index]);
+# endif
+#endif
+
+	ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+
+	ierror = PMPI_Testall (count, array_of_requests, flag, ptr_array_of_statuses);
+
+	temps_final = TIME;
+
+	if (ierror == MPI_SUCCESS && *flag)
+	{
+		TRACE_MPIEVENT (temps_inicial, MPI_TESTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+			EMPTY);
+
+		if (Test_C_Software_Counter != 0)
+			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_C_Software_Counter);
+
+		Test_C_Software_Counter = 0;
+
+		for (ireq = 0; ireq < count; ireq++)
+		{
+			if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
+			{
+				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ireq]))) != MPI_SUCCESS)
+					return ret;
+
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					ret = PMPI_Group_free (&hash_req->group);
+					MPI_CHECK(ret, PMPI_Group_free);
+				}
+				P2P_Communications ++;
+				P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+				hash_remove (&requests, save_reqs[ireq]);
+			}
+		}
+		TRACE_MPIEVENT (temps_final, MPI_TESTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	}
+	else
+	{
+		if (Test_C_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_C_Software_Counter ++;
+	}
+
+	return ierror;
+}
+
+/******************************************************************************
+ ***  MPI_Testany_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Testany_C_Wrapper (int count, MPI_Request *array_of_requests,
+                           int *index, int *flag, MPI_Status *status)
+{
+	MPI_Status my_status, *ptr_status;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ierror;
+#if defined(DEBUG_MPITRACE)
+	int i;
+#endif
+	iotimer_t temps_final, temps_inicial;
+	static int Test_C_Software_Counter = 0;
+
+	temps_inicial = LAST_READ_TIME;
+
+	if (count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, PACKAGE_NAME ": PANIC! too many requests in mpi_waitany\n");
+	memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
+
+#if defined(DEBUG_MPITRACE)
+	fprintf (stderr, PACKAGE_NAME" %d: TESTANY summary\n", TASKID);
+	for (i = 0; i < count; i++)
+# if SIZEOF_LONG == 8
+		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, i, (UINT64) array_of_requests[i]);
+# elif SIZEOF_LONG == 4
+		fprintf (stderr, "%d: position %d -> request %llu\n", TASKID, i, (UINT64) array_of_requests[i]);
+# endif
+#endif
+
+	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status;
+
+	ierror = PMPI_Testany (count, array_of_requests, index, flag, ptr_status);
+
+	temps_final = TIME;
+
+	if (*index != MPI_UNDEFINED && ierror == MPI_SUCCESS && *flag)
+	{
+		TRACE_MPIEVENT (temps_inicial, MPI_TESTANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+                  EMPTY);
+		if (Test_C_Software_Counter != 0)
+			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_C_Software_Counter);
+
+		Test_C_Software_Counter = 0;
+
+		if ((hash_req = hash_search (&requests, save_reqs[*index])) != NULL)
+		{
+			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
+				return ret;
+			if (hash_req->group != MPI_GROUP_NULL)
+			{
+				ret = PMPI_Group_free (&hash_req->group);
+				MPI_CHECK(ret, PMPI_Group_free);
+			}
+			P2P_Communications ++;
+			P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+			hash_remove (&requests, save_reqs[*index]);
+		}
+		TRACE_MPIEVENT (temps_final, MPI_TESTANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	}
+	else
+	{
+		if (Test_C_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_C_Software_Counter ++;
+	}
+
+  return ierror;
+}
+
+/******************************************************************************
+ ***  MPI_Testsome_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Testsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
+                            int *outcount, int *array_of_indices,
+                            MPI_Status *array_of_statuses)
+{
+	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ierror, ii;
+	iotimer_t temps_final, temps_inicial;
+#if defined(DEBUG_MPITRACE)
+	int index;
+#endif
+	static int Test_C_Software_Counter = 0;
+
+	temps_inicial = LAST_READ_TIME;
+
+	if (incount > MAX_WAIT_REQUESTS)
+		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitsome\n");
+
+	memcpy (save_reqs, array_of_requests, incount * sizeof (MPI_Request));
+
+#if defined(DEBUG_MPITRACE)
+	fprintf (stderr, PACKAGE_NAME " %d: WAITSOME summary\n", TASKID);
+	for (index = 0; index < incount; index++)
+# if SIZEOF_LONG == 8
+		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, index, (UINT64) array_of_requests[index]);
+# elif SIZEOF_LONG == 4
+		fprintf (stderr, "%d: position %d -> request %llu\n", TASKID, index, (UINT64) array_of_requests[index]);
+# endif
+#endif
+
+	ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+
+	ierror = PMPI_Waitsome (incount, array_of_requests, outcount, 
+		array_of_indices, ptr_array_of_statuses);
+
+	temps_final = TIME;
+
+	if (ierror == MPI_SUCCESS && *outcount > 0)
+	{
+		TRACE_MPIEVENT (temps_inicial, MPI_TESTSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+                  EMPTY);
+		if (Test_C_Software_Counter != 0)
+			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_C_Software_Counter);
+		Test_C_Software_Counter = 0;
+
+		for (ii = 0; ii < *outcount; ii++)
+		{
+			if ((hash_req = hash_search (&requests, save_reqs[array_of_indices[ii]])) != NULL)
+			{
+				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
+					return ret;
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					ret = PMPI_Group_free (&hash_req->group);
+					MPI_CHECK(ret, PMPI_Group_free);
+				}
+				P2P_Communications ++;
+				P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
+				hash_remove (&requests, save_reqs[array_of_indices[ii]]);
+			}
+		}
+		TRACE_MPIEVENT (temps_final, MPI_TESTSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	}
+	else
+	{
+		if (Test_C_Software_Counter == 0)
+			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		Test_C_Software_Counter ++;
+	}
+
+	return ierror;
+}
+
+
 
 /******************************************************************************
  ***  MPI_Wait_C_Wrapper
@@ -5251,57 +5485,37 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 {
 	MPI_Status my_status, *ptr_status;
 	MPI_Request req;
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret, ierror;
-  iotimer_t temps_final;
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ierror;
+	iotimer_t temps_final;
 
-  /*
-   *   event : WAIT_EV                      value : EVT_BEGIN
-   *   target : request to test             size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	req = *request;
 
 	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status;
 
-  ierror = PMPI_Wait (request, ptr_status);
+	ierror = PMPI_Wait (request, ptr_status);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (ierror == MPI_SUCCESS && ((hash_req = hash_search (&requests, req)) != NULL))
-  {
+	if (ierror == MPI_SUCCESS && ((hash_req = hash_search (&requests, req)) != NULL))
+	{
 		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 			return ret;
-    if (hash_req->group != MPI_GROUP_NULL)
-    {
-      ret = PMPI_Group_free (&hash_req->group);
+		if (hash_req->group != MPI_GROUP_NULL)
+		{
+			ret = PMPI_Group_free (&hash_req->group);
 			MPI_CHECK(ret,PMPI_Group_free);
-    }
+		}
+		P2P_Communications ++;
+		P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+		hash_remove (&requests, req);
+	}
+	TRACE_MPIEVENT (temps_final, MPI_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-    /* MPI Stats */
-    P2P_Communications ++;
-    P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
-
-    /*
-     *   event : IRECVED_EV                 value : ---
-     *   target : sender                    size  : received message size
-     *   tag : message tag                  commid: communicator identifier
-     *   aux : request
-     */
-    TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
-    hash_remove (&requests, req);
-  }
-
-  /*
-   *   event : WAIT_EV                    value : EVT_END
-   *   target : ---                       size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
-  return ierror;
+	return ierror;
 }
 
 
@@ -5313,30 +5527,21 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
                            MPI_Status *array_of_statuses)
 {
-  MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
-  MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret, ireq, ierror;
-  iotimer_t temps_final;
+	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ireq, ierror;
+	iotimer_t temps_final;
 #if defined(DEBUG_MPITRACE)
 	int index;
 #endif
 
-  /*
-   *   event : WAITALL_EV                      value : EVT_BEGIN
-   *   target : ---                            size  : ---
-   *   tag : ---
-   */
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
-
-  /*
-   * Arreglar-ho millor de cara a OMP
-   */
-  if (count > MAX_WAIT_REQUESTS)
-    fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitall\n");
-  memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
+	if (count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitall\n");
+	memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
 
 #if defined(DEBUG_MPITRACE)
 	fprintf (stderr,  PACKAGE_NAME" %d: WAITALL summary\n", TASKID);
@@ -5348,50 +5553,34 @@ int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
 # endif
 #endif
 
-  ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+	ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
 
-  ierror = PMPI_Waitall (count, array_of_requests, ptr_array_of_statuses);
+	ierror = PMPI_Waitall (count, array_of_requests, ptr_array_of_statuses);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (ierror == MPI_SUCCESS)
-  {
-    for (ireq = 0; ireq < count; ireq++)
-    {
-      if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
-      {
+	if (ierror == MPI_SUCCESS)
+	{
+		for (ireq = 0; ireq < count; ireq++)
+		{
+			if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
+			{
 				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ireq]))) != MPI_SUCCESS)
 					return ret;
-
-        if (hash_req->group != MPI_GROUP_NULL)
-        {
-          ret = PMPI_Group_free (&hash_req->group);
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					ret = PMPI_Group_free (&hash_req->group);
 					MPI_CHECK(ret, PMPI_Group_free);
-        }
-
-        /* MPI Stats */
-        P2P_Communications ++;
-        P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
-
-        /*
-         *   event : IRECVED_EV                 value : ---
-         *   target : sender                    size  : received message size
-         *   tag : message tag                  commid: communicator identifier
-         *   aux : request
-         */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
-        hash_remove (&requests, save_reqs[ireq]);
-      }
-    }
-  }
-  /*
-   *   event : WAIT_EV                    value : EVT_END
-   *   target : ---                       size  : ---
-   *   tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
-  return ierror;
+				}
+				P2P_Communications ++;
+				P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+				hash_remove (&requests, save_reqs[ireq]);
+			}
+		}
+	}
+	TRACE_MPIEVENT (temps_final, MPI_WAITALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	return ierror;
 }
 
 
@@ -5404,20 +5593,20 @@ int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
                            int *index, MPI_Status *status)
 {
 	MPI_Status my_status, *ptr_status;
-  MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret, ierror;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ierror;
 #if defined(DEBUG_MPITRACE)
-  int i;
+	int i;
 #endif
-  iotimer_t temps_final;
+	iotimer_t temps_final;
 
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  if (count > MAX_WAIT_REQUESTS)
-    fprintf (stderr, PACKAGE_NAME ": PANIC! too many requests in mpi_waitany\n");
-  memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
+	if (count > MAX_WAIT_REQUESTS)
+		fprintf (stderr, PACKAGE_NAME ": PANIC! too many requests in mpi_waitany\n");
+	memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
 
 #if defined(DEBUG_MPITRACE)
 	fprintf (stderr, PACKAGE_NAME" %d: WAITANY summary\n", TASKID);
@@ -5431,41 +5620,29 @@ int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
 
 	ptr_status = (MPI_STATUS_IGNORE == status)?&my_status:status;
 
-  ierror = PMPI_Waitany (count, array_of_requests, index, ptr_status);
+	ierror = PMPI_Waitany (count, array_of_requests, index, ptr_status);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (*index != MPI_UNDEFINED && ierror == MPI_SUCCESS)
-  {
-    if ((hash_req = hash_search (&requests, save_reqs[*index])) != NULL)
-    {
+	if (*index != MPI_UNDEFINED && ierror == MPI_SUCCESS)
+	{
+		if ((hash_req = hash_search (&requests, save_reqs[*index])) != NULL)
+		{
 			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
 				return ret;
-
-      if (hash_req->group != MPI_GROUP_NULL)
-      {
-        ret = PMPI_Group_free (&hash_req->group);
+			if (hash_req->group != MPI_GROUP_NULL)
+			{
+				ret = PMPI_Group_free (&hash_req->group);
 				MPI_CHECK(ret, PMPI_Group_free);
-      }
-
-      /* MPI Stats */
-      P2P_Communications ++;
-      P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
-
-      /*
-       *   event : IRECVED_EV                 value : ---
-       *   target : sender                    size  : received message size
-       *   tag : message tag                  commid: communicator identifier
-       *   aux : request
-       */
-      TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
-      hash_remove (&requests, save_reqs[*index]);
-    }
-  }
-
-  TRACE_MPIEVENT (temps_final, MPI_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
-  return ierror;
+			}
+			P2P_Communications ++;
+			P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+			hash_remove (&requests, save_reqs[*index]);
+		}
+	}
+	TRACE_MPIEVENT (temps_final, MPI_WAITANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	return ierror;
 }
 
 
@@ -5477,30 +5654,21 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
                             int *outcount, int *array_of_indices,
                             MPI_Status *array_of_statuses)
 {
-  MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
-  MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-  hash_data_t *hash_req;
-  int src_world, size, tag, ret, ierror, ii;
-  iotimer_t temps_final;
+	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
+	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
+	hash_data_t *hash_req;
+	int src_world, size, tag, ret, ierror, ii;
+	iotimer_t temps_final;
 #if defined(DEBUG_MPITRACE)
 	int index;
 #endif
 
-  /*
-   * event : WAITSOME_EV                     value : EVT_BEGIN
-   * target : ---                            size  : ---
-   * tag : ---
-   */
-  TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
-                  EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAITSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
 
-  /*
-   * Arreglar-ho millor de cara a OMP
-   */
-  if (incount > MAX_WAIT_REQUESTS)
-    fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitsome\n");
-
-  memcpy (save_reqs, array_of_requests, incount * sizeof (MPI_Request));
+	if (incount > MAX_WAIT_REQUESTS)
+		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitsome\n");
+	memcpy (save_reqs, array_of_requests, incount * sizeof (MPI_Request));
 
 #if defined(DEBUG_MPITRACE)
 	fprintf (stderr, PACKAGE_NAME " %d: WAITSOME summary\n", TASKID);
@@ -5512,50 +5680,35 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 # endif
 #endif
 
-  ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
+	ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
 
-  ierror = PMPI_Waitsome (incount, array_of_requests, outcount, 
-    array_of_indices, ptr_array_of_statuses);
+	ierror = PMPI_Waitsome (incount, array_of_requests, outcount, 
+	  array_of_indices, ptr_array_of_statuses);
 
-  temps_final = TIME;
+	temps_final = TIME;
 
-  if (ierror == MPI_SUCCESS)
-  {
-    for (ii = 0; ii < (*outcount); ii++)
-    {
-      if ((hash_req = hash_search (&requests, save_reqs[array_of_indices[ii]])) != NULL)
-      {
+	if (ierror == MPI_SUCCESS && *outcount > 0)
+	{
+		for (ii = 0; ii < *outcount; ii++)
+		{
+			if ((hash_req = hash_search (&requests, save_reqs[array_of_indices[ii]])) != NULL)
+			{
 				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
 					return ret;
-        if (hash_req->group != MPI_GROUP_NULL)
-        {
-          ret = PMPI_Group_free (&hash_req->group);
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					ret = PMPI_Group_free (&hash_req->group);
 					MPI_CHECK(ret, PMPI_Group_free);
-        }
-
-        /* MPI Stats */
-        P2P_Communications ++;
-        P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
-
-        /*
-         * event : IRECVED_EV                 value : ---
-         * target : sender                    size  : received message size
-         * tag : message tag                  commid: communicator identifier
-         * aux : request
-         */
-        TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
-        hash_remove (&requests, save_reqs[array_of_indices[ii]]);
-      }
-    }
-  }
-  /*
-   * event : WAITSOME_EV                value : EVT_END
-   * target : ---                       size  : ---
-   * tag : ---
-   */
-  TRACE_MPIEVENT (temps_final, MPI_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
-  return ierror;
+				}
+				P2P_Communications ++;
+				P2P_Bytes_Recv += size; /* get_Irank_obj_C above returns size (number of bytes received) */
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
+				hash_remove (&requests, save_reqs[array_of_indices[ii]]);
+			}
+		}
+	}
+	TRACE_MPIEVENT (temps_final, MPI_WAITSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	return ierror;
 }
 
 

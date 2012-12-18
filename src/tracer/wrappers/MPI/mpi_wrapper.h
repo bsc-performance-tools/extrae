@@ -125,6 +125,16 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror);
 void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	MPI_Fint *ierror);
 
+void PMPI_TestAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
+	MPI_Fint *flag, MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror);
+
+void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
+	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
+
+void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
+	MPI_Fint *outcount, MPI_Fint array_of_indices[],
+	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror);
+
 void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror);
 
 void PMPI_WaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[],
@@ -344,6 +354,14 @@ int MPI_Barrier_C_Wrapper (MPI_Comm comm);
 int MPI_Cancel_C_Wrapper (MPI_Request * request);
 
 int MPI_Test_C_Wrapper (MPI_Request * request, int *flag, MPI_Status *status);
+
+int MPI_Testall_C_Wrapper (int count, MPI_Request* requests, int *flag, MPI_Status *statuses);
+
+int MPI_Testany_C_Wrapper (int count, MPI_Request* requests, int *index,
+  int *flag, MPI_Status *status);
+
+int MPI_Testsome_C_Wrapper (int incount, MPI_Request* requests, int *outcount,
+  int *indices, MPI_Status *statuses);
 
 int MPI_Wait_C_Wrapper (MPI_Request * request, MPI_Status *status);
 
