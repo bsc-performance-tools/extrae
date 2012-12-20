@@ -897,6 +897,10 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
 	MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_test_enter (request, flag, status, ierror);
+#endif
+
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
@@ -907,6 +911,10 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
   }
   else
     CtoF77 (pmpi_test) (request, flag, status, ierror);
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_testall_leave ();
+#endif
 }
 
 /******************************************************************************
@@ -926,6 +934,10 @@ void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
 	MPI_Fint * ierror)
 #endif
 {
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_testall_enter (count, array_of_requests, flag, array_of_statuses, ierror);
+#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -937,6 +949,10 @@ void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
 	else
 	CtoF77 (pmpi_testall) (count, array_of_requests, flag,
 		array_of_statuses, ierror);
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_testall_leave ();
+#endif
 }
 
 
@@ -953,6 +969,10 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[
 	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_testany_enter (count, array_of_requests, index, flag, status, ierror);
+#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -963,6 +983,10 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[
 	}
 	else
 		CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, status, ierror);
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_testany_leave ();
+#endif
 }
 
 
@@ -981,6 +1005,11 @@ void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_reques
 	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
 #endif
 {
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_testsome_enter (incount, array_of_requests, outcount,
+                           array_of_indices, array_of_statuses, ierror);
+#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -993,6 +1022,9 @@ void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_reques
 	else
 		CtoF77 (pmpi_testsome) (incount, array_of_requests, outcount,
                             array_of_indices, array_of_statuses, ierror);
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_mpi_testsome_leave ();
+#endif
 }
 
 
@@ -3084,6 +3116,11 @@ int NAME_ROUTINE_C(MPI_Cancel) (MPI_Request *request)
 int NAME_ROUTINE_C(MPI_Test) (MPI_Request *request, int *flag, MPI_Status *status)
 {
 	int res;
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Test_enter (request, flag, status);
+#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -3095,6 +3132,10 @@ int NAME_ROUTINE_C(MPI_Test) (MPI_Request *request, int *flag, MPI_Status *statu
 	}
 	else
 		return PMPI_Test (request, flag, status);
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Test_leave ();
+#endif
 }
 
 /******************************************************************************
@@ -3104,6 +3145,10 @@ int NAME_ROUTINE_C(MPI_Testall) (int count, MPI_Request *requests,
 	int *flag, MPI_Status *statuses)
 {
 	int res;
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Testall_enter (count, requests, flag, statuses);
+#endif
 
 	if (mpitrace_on)
 	{
@@ -3116,6 +3161,10 @@ int NAME_ROUTINE_C(MPI_Testall) (int count, MPI_Request *requests,
 	else
 		res = PMPI_Testall (count, requests, flag, statuses);
 
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Testall_leave ();
+#endif
+
 	return res;
 }
 
@@ -3126,6 +3175,10 @@ int NAME_ROUTINE_C(MPI_Testany) (int count, MPI_Request *requests, int *index,
 	int *flag, MPI_Status *status)
 {
 	int res;
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Testany_enter (count, requests, index, flag, status);
+#endif
 
 	if (mpitrace_on)
 	{
@@ -3138,6 +3191,10 @@ int NAME_ROUTINE_C(MPI_Testany) (int count, MPI_Request *requests, int *index,
 	else
 		res = PMPI_Testany (count, requests, index, flag, status);
 
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Testany_leave ();
+#endif
+
 	return res;
 }
 
@@ -3149,6 +3206,10 @@ int NAME_ROUTINE_C(MPI_Testsome) (int incount, MPI_Request * requests,
 {
 	int res;
 
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Testsome_enter (incount, requests, outcount, indices, statuses);
+#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -3159,6 +3220,10 @@ int NAME_ROUTINE_C(MPI_Testsome) (int incount, MPI_Request * requests,
 	}
 	else
 		res = PMPI_Testsome (incount, requests, outcount, indices, statuses);
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Testsome_leave ();
+#endif
 
 	return res;
 }
