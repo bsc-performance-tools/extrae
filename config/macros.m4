@@ -461,10 +461,11 @@ AC_DEFUN([AX_PROG_BINUTILS],
    if test "${BFD_INSTALLED}" = "yes" ; then
       AC_MSG_CHECKING([whether libbfd and libiberty work])
 
-      if test "${OperatingSystem}" != "aix" ; then
+      if test "${OperatingSystem}" != "aix" -a "${OperatingSystem}" != "freebsd" ; then
          LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS}"
       else
          LIBS="-L${BFD_LIBSDIR} -lbfd -L${LIBERTY_LIBSDIR} -liberty ${LIBZ_LDFLAGS} ${LIBZ_LIBS} -lintl"
+         libbfd_needs_lintl="yes"
       fi
       AC_TRY_LINK(
          [ #include <bfd.h> ], 
@@ -614,7 +615,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
    fi
 
    AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
-
+   AM_CONDITIONAL(BFD_NEEDS_LINTL, test "${libbfd_needs_lintl}" = "yes")
 
 ])
 

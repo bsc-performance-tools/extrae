@@ -84,6 +84,9 @@ mpi2prv_DEPENDENCIES = libmpi2prv.la
 if BFD_NEEDS_LDL
   mpi2prv_LDFLAGS += -ldl
 endif
+if BFD_NEEDS_LINTL
+  mpi2prv_LDFLAGS += -lintl
+endif
 
 if HAVE_ZLIB
   libmpi2prv_la_CFLAGS += @LIBZ_CFLAGS@

@@ -93,6 +93,9 @@ endif
 if BFD_NEEDS_LDL
   mpimpi2prv_LDFLAGS += -ldl
 endif
+if BFD_NEEDS_LINTL
+  mpimpi2prv_LDFLAGS += -lintl
+endif
 
 if HAVE_ZLIB
   libmpimpi2prv_la_CFLAGS += @LIBZ_CFLAGS@

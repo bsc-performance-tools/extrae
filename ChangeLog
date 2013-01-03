@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 03Jan2013 Added -lintl in some OSes
  * 18Dec2012 Added instrumentation for MPI_Testany/all/some
              Fixed issues when renaming *.ttmp into *.mpit tracefiles for MPI apps
  * 14Dec2012 Fixed bug in the generation of the ROW file, where the threads appeared disordered.
