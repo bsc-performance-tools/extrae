@@ -185,10 +185,13 @@ void Extrae_set_ApplicationIsPACX (int isPACX);
 
 int Extrae_Allocate_Task_Bitmap (int size);
 
-void Extrae_AddTypeValuesEntryToSYM (char code_type, int type, char *description,
+void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *description,
 	char code_values, unsigned nvalues, unsigned long long *values,
 	char **description_values);
-void Extrae_AddFunctionDefinitionEntryToSYM (char code_type, void *address,
+void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *description,
+	char code_values, unsigned nvalues, unsigned long long *values,
+	char **description_values);
+void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	char *functionname, char *modulename, unsigned fileline);
 
 int Backend_preInitialize (int rank, int world_size, char *config_file);

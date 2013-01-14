@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 14Jan2013 Fixed typo in MPI_Testall wrapper for Fortran
+             Fixed error when generating .sym files. Now creating also local
+						 .sym files
  * 03Jan2013 Added -lintl in some OSes
  * 18Dec2012 Added instrumentation for MPI_Testany/all/some
              Fixed issues when renaming *.ttmp into *.mpit tracefiles for MPI apps

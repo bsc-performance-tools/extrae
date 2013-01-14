@@ -608,13 +608,18 @@ static void Write_Clustering_Labels (FILE * pcf_fd)
 /******************************************************************************
  *** Labels_loadSYMfile
  ******************************************************************************/
-void Labels_loadSYMfile (int taskid, char *name)
+void Labels_loadSYMfile (int taskid, char *name, int report)
 {
+	static int Labels_loadSYMfile_init = FALSE;
 	FILE *FD;
 	char LINE[1024], Type;
 	unsigned function_count = 0, hwc_count = 0, other_count = 0;
 
-	Extrae_Vector_Init (&defined_user_event_types);
+	if (!Labels_loadSYMfile_init)
+	{
+		Extrae_Vector_Init (&defined_user_event_types);
+		Labels_loadSYMfile_init = TRUE;
+	}
 	event_type_t * last_event_type_used = NULL;
 
 	if (!name)
@@ -798,7 +803,7 @@ void Labels_loadSYMfile (int taskid, char *name)
 		}
 	}
 
-	if (taskid == 0)
+	if (taskid == 0 && report)
 	{
 		fprintf (stdout, "mpi2prv: A total of %u symbols were imported from %s file\n", function_count+hwc_count+other_count, name);
 		fprintf (stdout, "mpi2prv: %u function symbols imported\n", function_count);

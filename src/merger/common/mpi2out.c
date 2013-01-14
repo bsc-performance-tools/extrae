@@ -1185,11 +1185,11 @@ int merger_post (int numtasks, int taskid)
 		{
 			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
 			if (file_exists(tmp))
-				Labels_loadSYMfile (taskid, tmp);
+				Labels_loadSYMfile (taskid, tmp, TRUE);
 		}
 	}
 	else
-		Labels_loadSYMfile (taskid, get_merge_SymbolFileName());
+		Labels_loadSYMfile (taskid, get_merge_SymbolFileName(), TRUE);
 
 	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
