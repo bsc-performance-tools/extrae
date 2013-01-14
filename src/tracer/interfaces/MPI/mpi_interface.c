@@ -913,7 +913,7 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
     CtoF77 (pmpi_test) (request, flag, status, ierror);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_testall_leave ();
+	DLB_mpi_test_leave ();
 #endif
 }
 

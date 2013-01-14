@@ -1999,7 +1999,7 @@ void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
  ***  PMPI_TestAll_Wrapper
  ******************************************************************************/
 
-void PMPI_TaitAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag,
+void PMPI_TestAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[], MPI_Fint *flag,
 	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint * ierror)
 {
 	MPI_Fint my_statuses[MAX_WAIT_REQUESTS][SIZEOF_MPI_STATUS], *ptr_statuses;
