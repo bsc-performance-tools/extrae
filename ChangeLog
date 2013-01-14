@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 03Nov2012 Released Extrae version 2.3.1
  * 14Jan2013 Fixed typo in MPI_Testall wrapper for Fortran
              Fixed error when generating .sym files. Now creating also local
 						 .sym files
