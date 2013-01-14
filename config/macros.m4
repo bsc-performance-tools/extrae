@@ -407,8 +407,10 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
    if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
       binutils_default_paths="${BG_HOME}/blrts-gnu"
+      binutils_require_shared="no"
    else
       binutils_default_paths="/usr /usr/local /opt/local"
+      binutils_require_shared=${enable_shared}
    fi
 
    AC_ARG_WITH(binutils,
@@ -427,11 +429,11 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
       if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-      elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a "${enable_shared}" = "no" ; then
-         BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
       elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib"
-      elif test -r "${binutils_home_dir}/lib/libbfd.a" -a "${enable_shared}" = "no" ; then
+      elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
+         BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+      elif test -r "${binutils_home_dir}/lib/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib"
       fi
 
