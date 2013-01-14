@@ -422,16 +422,16 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
    AC_MSG_CHECKING([for binutils])
    for binutils_home_dir in [${binutils_paths} "not found"]; do
-      BFD_LIBSDIR=""
-      LIBERTY_LIBSDIR=""
+      unset BFD_LIBSDIR
+      unset LIBERTY_LIBSDIR
 
       if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-      elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" ; then
+      elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a "${enable_shared}" = "no" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
       elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib"
-      elif test -r "${binutils_home_dir}/lib/libbfd.a" ; then
+      elif test -r "${binutils_home_dir}/lib/libbfd.a" -a "${enable_shared}" = "no" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib"
       fi
 
@@ -447,12 +447,16 @@ AC_DEFUN([AX_PROG_BINUTILS],
          LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
       fi
 
-      if test -n $BFD_LIBSDIR && test -n $LIBERTY_LIBSDIR ; then
+      if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then
         # Both libraries are present
         break
       fi
    done
    AC_MSG_RESULT(${binutils_home_dir})
+
+   if test "${binutils_paths}" != "${binutils_default_paths}" -a "${binutils_home_dir}" = "not found" ; then
+      AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed. Also, if you want to generate shared libraries check for the existance of the libbfd.so library])
+   fi
 
    AX_FLAGS_SAVE()
    CFLAGS="-I${binutils_home_dir}/include ${CFLAGS}"
