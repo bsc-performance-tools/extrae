@@ -64,7 +64,7 @@
 
   <merge enabled="yes" 
     synchronization="default"
-    binary="pthread_example"
+    binary="pthread-example"
     tree-fan-out="16"
     max-memory="512"
     joint-states="yes"
@@ -72,7 +72,7 @@
     sort-addresses="yes"
 		remove-files="no"
   >
-    pthread_example.prv
+    pthread-example.prv
   </merge>
 
 </trace>
