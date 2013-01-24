@@ -1,24 +1,27 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 24Jan2013 Extrae version 2.3.2
  * 24Jan2013 Fixed Paraver header generation when number of threads differs
-             across tasks.
- + 14Jan2012 Released Extrae version 2.3.1
+               across tasks.
+             Release resources (files and memory) as soon as pthreads terminate
+               (only through pthread_exit() or pthread_join())
+ + 14Jan2012 Extrae version 2.3.1
  * 14Jan2013 Fixed typo in MPI_Testall wrapper for Fortran
              Fixed error when generating .sym files. Now creating also local
-						 .sym files
-						 Fixed locating binutils package when --enable-shared is set
+             .sym files
+             Fixed locating binutils package when --enable-shared is set
  * 03Jan2013 Added -lintl in some OSes
  * 18Dec2012 Added instrumentation for MPI_Testany/all/some
              Fixed issues when renaming *.ttmp into *.mpit tracefiles for MPI apps
  * 14Dec2012 Fixed bug in the generation of the ROW file, where the threads appeared disordered.
  * 05Dec2012 Fixed problems with trace names when using omp_set_num_threads
      with OmpSs.
-		         Added -lb libraries to nanos+mpi.
+     Added -lb libraries to nanos+mpi.
  +`04Dec2012 Added libz to dependencies when generating the shared libraries
  * 13Nov2012 Added checks for the C++ compiler only when it is required by 
    other functionalities like Dyninst or MRNet. Updated documentation.
- + 03Nov2012 Extrae version 2.3 in SVN
+ + 03Nov2012 Extrae version 2.3
  * 24Oct2012 Sampling support for pthreads/openmp -> change type from default
    to virtual or prof.
  + 23Oct2012 Added support for binary rewriting using DynInst

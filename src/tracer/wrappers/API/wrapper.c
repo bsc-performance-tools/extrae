@@ -1348,14 +1348,60 @@ static int getnumProcessors (void)
 
 #if defined(PTHREAD_SUPPORT)
 
-
 /*
   This 'pthread_key' will store the thread identifier of every pthread
   created and instrumented 
 */
 
+static pthread_t *pThreads = NULL;
 static pthread_key_t pThreadIdentifier;
 static pthread_mutex_t pThreadIdentifier_mtx;
+
+static void Extrae_reallocate_pthread_info (int new_num_threads)
+{
+	xrealloc(pThreads, pThreads, new_num_threads * sizeof(pthread_t));
+}
+
+void Backend_SetpThreadID (pthread_t *t, int threadid)
+{
+	pThreads[threadid] = *t;
+}
+
+pthread_t Backend_GetpThreadID (int threadid)
+{
+	return pThreads[threadid];
+}
+
+int Backend_ispThreadFinished (int threadid)
+{
+	return Backend_GetpThreadID(threadid) == 0;
+}
+
+static void Backend_Finalize_close_mpits (int thread);
+
+void Backend_Flush_pThread (pthread_t t)
+{
+	unsigned u, max = Backend_getNumberOfThreads();
+
+	for (u = 0; u < max; u++)
+	{
+		if (pThreads[u] == t)
+		{
+			Buffer_Flush(TRACING_BUFFER(u));
+			Backend_Finalize_close_mpits (u);
+
+			Buffer_Free (TRACING_BUFFER(u));
+			TRACING_BUFFER(u) = NULL;
+#if defined(SAMPLING_SUPPORT)
+			Buffer_Free (SAMPLING_BUFFER(u));
+			SAMPLING_BUFFER(u) = NULL;
+#endif
+
+			pThreads[u] = (pthread_t)0;
+			break;
+		}
+	}
+}
 
 void Backend_CreatepThreadIdentifier (void)
 {
@@ -1385,6 +1431,7 @@ void Backend_NotifyNewPthread (void)
 
 	pthread_mutex_unlock (&pThreadIdentifier_mtx);
 }
+#endif
 
 void Backend_setNumTentativeThreads (int numofthreads)
 {
@@ -1396,7 +1443,6 @@ void Backend_setNumTentativeThreads (int numofthreads)
 	Backend_ChangeNumberOfThreads (numthreads);
 }
 
-#endif
 
 /******************************************************************************
  * Backend_preInitialize :
@@ -1661,6 +1707,11 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		Extrae_reallocate_CUDA_info (new_num_threads);
 #endif
 
+#if defined(PTHREAD_SUPPORT)
+		/* Allocate thread info for pthread execs */
+		Extrae_reallocate_pthread_info (new_num_threads);
+#endif
+
 		maximum_NumOfThreads = current_NumOfThreads = new_num_threads;
 	}
 	else
@@ -1778,7 +1829,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	Extrae_AnnotateTopology (FALSE, EndTime);
 
 	/* HSG force a write to disk! */
-	Buffer_Flush(TracingBuffer[THREADID]);
+	Buffer_Flush(TRACING_BUFFER(THREADID));
 
 	if (mpitrace_on && !CheckForControlFile && !CheckForGlobalOpsTracingIntervals)
 	{
@@ -1843,7 +1894,8 @@ static void Backend_Finalize_close_mpits (int thread)
 	char trace[TMP_DIR];
 	char tmp_name[TMP_DIR];
 
-	if (Buffer_IsClosed(TRACING_BUFFER(thread))) return;
+	if (Buffer_IsClosed(TRACING_BUFFER(thread)))
+		return;
 
 	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
 	   as that moment was 0, independently if MPI or PACX has run */
@@ -1959,27 +2011,25 @@ void Backend_Finalize (void)
 	/* Stop sampling right now */
 	setSamplingEnabled (FALSE);
 
-	/* Write files back to disk */
+	/* Write files back to disk , 1st part will include flushing events*/
 	for (thread = 0; thread < maximum_NumOfThreads; thread++) 
-	{
-		Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
-	}
+		if (TRACING_BUFFER(thread) != NULL)
+			Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
+
 	if (THREADID == 0) 
 	{
 		Extrae_getrusage_Wrapper ();
 		Extrae_memusage_Wrapper ();
 	}
-	for (thread = 0; thread < maximum_NumOfThreads; thread++)
-	{
-		TRACE_EVENT (TIME, APPL_EV, EVT_END);
-		Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
-	}
 
-	/* Rename the files */
+	/* Final write files to disk, include renaming of the filenames */
 	for (thread = 0; thread < maximum_NumOfThreads; thread++)
-	{
-		Backend_Finalize_close_mpits (thread);
-	}
+		if (TRACING_BUFFER(thread) != NULL)
+		{
+			TRACE_EVENT (TIME, APPL_EV, EVT_END);
+			Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
+			Backend_Finalize_close_mpits (thread);
+		}
 
 	/* Free allocated memory */
 	{
@@ -1989,8 +2039,10 @@ void Backend_Finalize (void)
 		for (thread = 0; thread < maximum_NumOfThreads; thread++)
 		{
 			Buffer_Free (TRACING_BUFFER(thread));
+			TRACING_BUFFER(thread) = NULL;
 #if defined(SAMPLING_SUPPORT)
 			Buffer_Free (SAMPLING_BUFFER(thread));
+			SAMPLING_BUFFER(thread) = NULL;
 #endif
 		}
 		xfree(TracingBuffer);

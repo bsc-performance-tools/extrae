@@ -201,11 +201,18 @@ unsigned Backend_getNumberOfThreads (void);
 unsigned Backend_getMaximumOfThreads (void);
 
 int Backend_ChangeNumberOfThreads (unsigned numberofthreads);
+void Backend_setNumTentativeThreads (int numofthreads);
+
+#if defined(PTHREAD_SUPPORT)
 void Backend_SetpThreadIdentifier (int ID);
+int Backend_ispThreadFinished (int threadid);
+pthread_t Backend_GetpThreadID (int threadid);
 int Backend_GetpThreadIdentifier (void);
+void Backend_SetpThreadID (pthread_t *t, int threadid);
 void Backend_NotifyNewPthread (void);
 void Backend_CreatepThreadIdentifier (void);
-void Backend_setNumTentativeThreads (int numofthreads);
+void Backend_Flush_pThread (pthread_t t);
+#endif
 
 iotimer_t Backend_Get_Last_Enter_Time (void);
 iotimer_t Backend_Get_Last_Leave_Time (void);
