@@ -41,17 +41,23 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	unsigned long nfiles)
 {
 	unsigned int ptask, task, thread, i, j;
-	unsigned int maxtasks = 0, maxthreads = 0;
-
-	/* This is not the perfect way to allocate everything, but it's
-	  good enough for runs where all the ptasks (usually 1), have the
-	  same number of threads */
+	unsigned int ntasks = 0, *nthreads = NULL;
 
 	for (i = 0; i < nfiles; i++)
+		ntasks = MAX(files[i].task, ntasks);
+
+	if ((nthreads = (unsigned*) malloc (ntasks*sizeof(unsigned))) == NULL)
 	{
-		maxtasks = MAX(files[i].task, maxtasks);
-		maxthreads = MAX(files[i].thread, maxthreads);
+		fprintf (stderr, "mpi2prv: Error! cannot allocate memory to allocate nthreads!\n");
+		fflush (stderr);
+		exit (-1);
 	}
+	else
+		for (i = 0; i < ntasks; i++)
+			nthreads[i] = 0;
+
+	for (i = 0; i < nfiles; i++)
+		nthreads[files[i].task-1] = MAX(files[i].thread, nthreads[files[i].task-1]);
 
 	obj_table = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
 	if (NULL == obj_table)
@@ -63,24 +69,24 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	for (i = 0; i < num_appl; i++)
 	{
 		/* Allocate per task information within each ptask */
-		obj_table[i].tasks = (task_t*) malloc (sizeof(task_t)*maxtasks);
+		obj_table[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks);
 		if (NULL == obj_table[i].tasks)
 		{
-			fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d tasks (ptask = %d)\n", maxtasks, i+1);
+			fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d tasks (ptask = %d)\n", ntasks, i+1);
 			fflush (stderr);
 			exit (-1);
 		}
-		for (j = 0; j < maxtasks; j++)
+		for (j = 0; j < ntasks; j++)
 		{
 			/* Initialize pending communication queues for each task */
 			CommunicationQueues_Init (&(obj_table[i].tasks[j].send_queue),
 			  &(obj_table[i].tasks[j].recv_queue));
 
 			/* Allocate per thread information within each task */
-			obj_table[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*maxthreads);
+			obj_table[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*nthreads[j]);
 			if (NULL == obj_table[i].tasks[j].threads)
 			{
-				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", maxthreads, i+1, j+1);
+				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", nthreads[j], i+1, j+1);
 				fflush (stderr);
 				exit (-1);
 			}
@@ -94,14 +100,14 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
 		obj_table[ptask].ntasks = 0;
-		for (task = 0; task < maxtasks; task++)
+		for (task = 0; task < ntasks; task++)
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
 			task_info->tracing_disabled = FALSE;
 			task_info->nthreads = 0;
 			task_info->num_virtual_threads = 0;
 
-			for (thread = 0; thread < maxthreads; thread++)
+			for (thread = 0; thread < nthreads[task]; thread++)
 			{
 				thread_t *thread_info = GET_THREAD_INFO(ptask+1,task+1,thread+1);
 
@@ -128,7 +134,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 		task_t *task_info = GET_TASK_INFO(files[i].ptask, files[i].task);
 		thread_t *thread_info = GET_THREAD_INFO(files[i].ptask, files[i].task, files[i].thread);
 
-		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, maxtasks);
+		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, ntasks);
 		task_info->nodeid = files[i].nodeid;
 		task_info->nthreads = MAX (task_info->nthreads, files[i].thread);
 		thread_info->cpu = files[i].cpu;
@@ -137,11 +143,14 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 
 	/* This is needed for get_option_merge_NanosTaskView() == FALSE */
 	for (ptask = 0; ptask < num_appl; ptask++)
-		for (task = 0; task < maxtasks; task++)
+		for (task = 0; task < ntasks; task++)
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1, task+1);
 			task_info->num_active_task_threads = 0;
 			task_info->active_task_threads = NULL;
 		}
+
+	if (nthreads != NULL)
+		free (nthreads);
 }
 
