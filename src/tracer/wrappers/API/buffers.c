@@ -482,8 +482,8 @@ int Buffer_Flush(Buffer_t *buffer)
 	event_t *head = NULL, *tail = NULL;
 	int num_flushed, overflow;
 
-	if (Buffer_IsEmpty(buffer) || Buffer_IsClosed(buffer))
-		return 0;
+	if ((Buffer_IsEmpty(buffer)) || (Buffer_IsClosed(buffer))) return 0;
+
 
 	head = Buffer_GetHead(buffer);
 	tail = head;

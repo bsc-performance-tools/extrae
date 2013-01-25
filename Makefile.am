@@ -49,7 +49,7 @@ MPI_EXAMPLE_FILES=example/CELL/MPI/worker.c \
 PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
-MRNET_EXAMPLE_FILES=/dev/null
+ONLINE_EXAMPLE_FILES=/dev/null
 else
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
@@ -83,7 +83,7 @@ PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
 SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
-MRNET_EXAMPLE_FILES=/dev/null
+ONLINE_EXAMPLE_FILES=/dev/null
 endif
 else
 if OS_AIX
@@ -100,7 +100,7 @@ PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
 SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
-MRNET_EXAMPLE_FILES=/dev/null
+ONLINE_EXAMPLE_FILES=/dev/null
 else
 
 if OS_FREEBSD
@@ -241,15 +241,14 @@ SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/run_instrumented.sh \
  example/LINUX/SEQ/README
 
-MRNET_EXAMPLE_FILES=\
- example/LINUX/MRNET/Makefile \
- example/LINUX/MRNET/merge.sh \
- example/LINUX/MRNET/test.c \
- example/LINUX/MRNET/extrae.xml \
- example/LINUX/MRNET/cl.I.IPC.xml \
- example/LINUX/MRNET/run.cmd \
- example/LINUX/MRNET/trace.sh \
- example/LINUX/MRNET/README
+ONLINE_EXAMPLE_FILES=\
+ example/LINUX/ONLINE/Makefile \
+ example/LINUX/ONLINE/merge.sh \
+ example/LINUX/ONLINE/test.c \
+ example/LINUX/ONLINE/extrae.xml \
+ example/LINUX/ONLINE/slurm_trace.sh \
+ example/LINUX/ONLINE/trace.sh \
+ example/LINUX/ONLINE/README
 
 PTHREAD_EXAMPLE_FILES=\
  example/LINUX/PTHREAD/Makefile \
@@ -301,9 +300,9 @@ if WANT_OPENMP
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMP
 	cp -f $(OMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
 endif
-if HAVE_MRNET
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/MRNET
-	cp -f $(MRNET_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MRNET
+if HAVE_ONLINE
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/ONLINE
+	cp -f $(ONLINE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/ONLINE
 endif
 if WANT_PTHREAD
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/PTHREAD

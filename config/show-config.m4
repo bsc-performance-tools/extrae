@@ -131,6 +131,11 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo
  	echo Optional features:
 	echo ------------------
+        echo On-line analysis: ${ONLINE_enabled}
+        if test "${ONLINE_enabled}" = "yes" ; then
+		echo -e \\\tClustering suite available: ${CLUSTERING_INSTALLED}
+		echo -e \\\tSpectral analysis available: ${SPECTRAL_INSTALLED}
+        fi
   if test "${USE_POSIX_CLOCK}" = "yes" ; then
     echo Clock routine: POSIX / clock_gettime
   else

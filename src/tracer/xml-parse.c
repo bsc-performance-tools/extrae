@@ -78,9 +78,8 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #include "UF_gcc_instrument.h"
 #include "UF_xl_instrument.h"
-#if defined(HAVE_MRNET)
-# include "mrn_config.h"
-# include "mrnet_be.h"
+#if defined(HAVE_ONLINE)
+# include "OnlineConfig.h"
 #endif
 #if defined(OMP_SUPPORT)
 # include "omp_probe.h"
@@ -1044,161 +1043,132 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 	}
 }
 
-#if defined(HAVE_MRNET)
-static void Parse_XML_MRNet (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+#if defined(HAVE_ONLINE)
+static void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
-	xmlNodePtr tag;
-	tag = current_tag->xmlChildrenNode;
-	while (tag != NULL)
-	{
-		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
-		{
-		}
-		else if (!xmlStrcasecmp (tag->name, RC_MRNET_SPECTRAL))
-		{
-			/* Spectral analysis options */
-			xmlChar *min_seen = xmlGetProp_env (rank, tag, SPECTRAL_MIN_SEEN);
-			xmlChar *max_periods = xmlGetProp_env (rank, tag, SPECTRAL_MAX_PERIODS);
-			xmlChar *num_iters = xmlGetProp_env (rank, tag, SPECTRAL_NUM_ITERS);
+  xmlNodePtr tag;
 
-			MRNCfg_SetupSpectral ( atoi(min_seen), atoi(max_periods), atoi(num_iters) );
+  tag = current_tag;
+  xmlChar *analysis  = xmlGetProp_env (rank, tag, RC_ONLINE_ANALYSIS_TYPE);
+  xmlChar *frequency = xmlGetProp_env (rank, tag, RC_ONLINE_ANALYSIS_FREQ);
 
-			XML_FREE(min_seen);
-			XML_FREE(max_periods);
-			XML_FREE(num_iters);
-		}
-		else if (!xmlStrcasecmp (tag->name, RC_MRNET_CLUSTERING))
-		{
-			/* Clustering analysis options */
-			xmlChar *max_tasks = xmlGetProp_env (rank, tag, CLUSTERING_MAX_TASKS);
-			xmlChar *max_points = xmlGetProp_env (rank, tag, CLUSTERING_MAX_POINTS);
+  /* Configure the type of analysis */
+  if (analysis != NULL)
+  {
+    if (xmlStrcasecmp(analysis, RC_ONLINE_CLUSTERING) == 0)
+    {
+      Online_SetAnalysis(ONLINE_DO_CLUSTERING);
+    }
+    else if (xmlStrcasecmp(analysis, RC_ONLINE_SPECTRAL) == 0)
+    {
+      Online_SetAnalysis(ONLINE_DO_SPECTRAL);
+    }
+    else
+    {
+      mfprintf(stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>'%s'\n",
+        analysis, REMOTE_CONTROL_METHOD_ONLINE, RC_ONLINE_ANALYSIS_TYPE);
+      exit(-1);
+    }
+  }
 
-			MRNCfg_SetupClustering ( atoi(max_tasks), atoi(max_points) );
+  /* Configure the frequency of the analysis */
+  if (frequency != NULL)
+  {
+    Online_SetFrequency(atoi(frequency));
+  }
 
-			XML_FREE(max_tasks);
-			XML_FREE(max_points);
-		}
+  XML_FREE(analysis);
+  XML_FREE(frequency);
 
-		tag = tag->next;
-	}
+  tag = current_tag->xmlChildrenNode;
+  while (tag != NULL)
+  {
+    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT)) { /* Skip coments */ }
+#if defined(HAVE_CLUSTERING)
+    else if (!xmlStrcasecmp (tag->name, RC_ONLINE_CLUSTERING))
+    {
+
+    }
+#endif
+#if defined(HAVE_SPECTRAL)
+    else if (!xmlStrcasecmp (tag->name, RC_ONLINE_SPECTRAL))
+    {
+    }
+#endif
+    tag = tag->next;
+  }
 }
 #endif
 
 /* Configure <remote-control> related parameters */
 static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
-	xmlNodePtr tag;
-	int countRemotesEnabled = 0;
+  xmlNodePtr tag;
+  int ActiveRemoteControls = 0;
 
-#if !defined(HAVE_MRNET)
-	UNREFERENCED_PARAMETER(xmldoc);
-#endif
+  /* Parse all TAGs, and annotate them to use them later */
+  tag = current_tag->xmlChildrenNode;
+  while (tag != NULL)
+  {
+    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT)) { /* Skip comments */ }
 
-	/* Parse all TAGs, and annotate them to use them later */
-	tag = current_tag->xmlChildrenNode;
-	while (tag != NULL)
-	{
-		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
-		{
-		}
-		else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_MRNET))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-			{
-				xmlChar *target = xmlGetProp_env (rank, tag, RC_MRNET_TARGET);
-				xmlChar *analysis = xmlGetProp_env (rank, tag, RC_MRNET_ANALYSIS);
-				xmlChar *start_after = xmlGetProp_env (rank, tag, RC_MRNET_START_AFTER);
+    else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_ONLINE))
+    {
+      xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+      if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+      {
+#if defined(HAVE_ONLINE)
+        ActiveRemoteControls++;
 
-				countRemotesEnabled++;
+        /* Enable the on-line analysis */
+        Online_Enable();
 
-#if defined(HAVE_MRNET)
-				/* Configure the target trace size */
-				if (target != NULL)
-				{
-					MRNCfg_SetTargetTraceSize(atoi(target));
-				}
-				/* Configure the analysis type */
-				if ((analysis != NULL) && (start_after != NULL))
-				{
-					if (xmlStrcasecmp (analysis, (xmlChar*) "clustering") == 0)
-					{
-						MRNCfg_SetAnalysisType(MRN_ANALYSIS_CLUSTER, atoi(start_after));
-					}
-					else if (xmlStrcasecmp (analysis, (xmlChar*) "spectral") == 0)
-					{
-						MRNCfg_SetAnalysisType(MRN_ANALYSIS_SPECTRAL, atoi(start_after));
-					}
-					else
-					{
-						mfprintf(stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>%s'\n",
-							analysis, REMOTE_CONTROL_METHOD_MRNET, RC_MRNET_ANALYSIS);
-						exit(-1);
-					}
-				}
-				else
-				{
-					mfprintf(stderr, PACKAGE_NAME": XML error: Properties %s and %s are required for tag <%s>\n",
-						RC_MRNET_ANALYSIS, RC_MRNET_START_AFTER, REMOTE_CONTROL_METHOD_MRNET);
-					exit(-1);
-				}
-				/* Setup signals to pause/resume the application */
-				Signals_SetupPauseAndResume (SIGUSR1, SIGUSR2);
-
-				Parse_XML_MRNet(rank, xmldoc, tag);
-
-				/* Activate the MRNet */
-				Enable_MRNet();
+        /* Parse the on-line analysis configuration */
+        Parse_XML_Online(rank, xmldoc, current_tag);
 #else
-				mfprintf(stdout, PACKAGE_NAME": XML Warning: Remote control mechanism set to \"MRNet\" but this library does not support it.\n");
-#endif 
-				XML_FREE(target);
-				XML_FREE(analysis);
-				XML_FREE(start_after);
-			}
-			XML_FREE(enabled);
-		}
-		else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_SIGNAL))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-			{
-				fprintf(stderr, "Parsing SIGNAL XML SUBSEC\n");
-				countRemotesEnabled++;
+        mfprintf(stdout, PACKAGE_NAME": XML Warning: Remote control mechanism set to \"On-line analysis\" but this library does not support it! Setting will be ignored...\n");
+#endif
+      }
+      XML_FREE(enabled);
+    }
+    else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_SIGNAL))
+    {
+      xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+      if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+      {
+        ActiveRemoteControls++;
 
-				/* Which SIGNAL will we use to interrupt the tracing */
-				xmlChar *which = xmlGetProp_env (rank, tag,  RC_SIGNAL_WHICH);
-				if (which != NULL)
-				{
-					if ((xmlStrcasecmp (which, (xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (xmlChar*) "") == 0))
-					{
-						mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush buffers to disk and stop further tracing\n");
-						Signals_SetupFlushAndTerminate (SIGUSR1);
-					}
-					else if (xmlStrcasecmp (which, (xmlChar *) "USR2") == 0)
-					{
-						mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush buffers to disk and stop further tracing\n");
-						Signals_SetupFlushAndTerminate (SIGUSR2);
-					}
-					else
-					{
-						mfprintf (stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>%s'\n", 
-							which, REMOTE_CONTROL_METHOD_SIGNAL, RC_SIGNAL_WHICH);
-					}
-				}
-				XML_FREE(which);
-			}
-			XML_FREE(enabled);
-		}
-		tag = tag->next;
-	}
-	if (countRemotesEnabled > 1)
-	{
-		mfprintf (stderr, PACKAGE_NAME": XML error: Only 1 remote control mechanism can be active at a time at <%s>\n", TRACE_REMOTE_CONTROL);
-		exit(-1);
-	}
+        /* Which SIGNAL will we use to interrupt the tracing */
+        xmlChar *which = xmlGetProp_env (rank, tag,  RC_SIGNAL_WHICH);
+        if (which != NULL)
+        {
+          if ((xmlStrcasecmp (which, (xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (xmlChar*) "") == 0))
+          {
+            mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush buffers to disk and stop further tracing\n");
+            Signals_SetupFlushAndTerminate (SIGUSR1);
+          }
+          else if (xmlStrcasecmp (which, (xmlChar *) "USR2") == 0)
+          {
+            mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush buffers to disk and stop further tracing\n");
+            Signals_SetupFlushAndTerminate (SIGUSR2);
+          }
+          else
+          {
+            mfprintf (stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>%s'\n", 
+            which, REMOTE_CONTROL_METHOD_SIGNAL, RC_SIGNAL_WHICH);
+          }
+        }
+        XML_FREE(which);
+      }
+      XML_FREE(enabled);
+    }
+    tag = tag->next;
+  }
+  if (ActiveRemoteControls > 1)
+  {
+    mfprintf (stderr, PACKAGE_NAME": XML error: Only 1 remote control mechanism can be activated at <%s>\n", TRACE_REMOTE_CONTROL);
+    exit(-1);
+  }
 }
 
 /* Configure <others> related parameters */
@@ -1212,10 +1182,8 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 	tag = current_tag->xmlChildrenNode;
 	while (tag != NULL)
 	{
-		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
-		{
-		}
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT)) { /* Skip comments */ }
+
 		/* Must we check for a control file? */
 		else if (!xmlStrcasecmp (tag->name, TRACE_CONTROL_FILE))
 		{
@@ -1271,52 +1239,17 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 			}
 			XML_FREE(enabled);
 		}
+
 		else if (!xmlStrcasecmp (tag->name, TRACE_REMOTE_CONTROL))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				Parse_XML_RemoteControl (rank, xmldoc, tag);
-
-#if defined(DEAD_CODE)
-				xmlChar *method = xmlGetProp_env (rank, tag, TRACE_REMOTE_CONTROL_METHOD);
-				if (method != NULL && !xmlStrcasecmp (method, TRACE_REMOTE_CONTROL_MRNET))
-				{
-#if defined(HAVE_MRNET)
-					Signals_SetupPauseAndResume (SIGUSR1, SIGUSR2);
-					Enable_MRNet();
-#else
-					mfprintf(stdout, PACKAGE_NAME": Remote control set to \"mrnet\" but MRNet is not supported.\n");
-#endif 
-				}
-				else if (method != NULL && !xmlStrcasecmp (method, TRACE_REMOTE_CONTROL_SIGNAL))
-				{
-					/* Which SIGNAL will we use to interrupt the tracing */
-					xmlChar *str = xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
-					if (str != NULL)
-					{
-						if ((xmlStrcasecmp (str, (xmlChar*) "USR1") == 0) || (xmlStrcmp (str, (xmlChar*) "") == 0))
-						{
-							mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush the buffers to the disk and stop further tracing\n");
-							Signals_SetupFlushAndTerminate (SIGUSR1);
-						}
-						else if (xmlStrcasecmp (str, (xmlChar *) "USR2") == 0)
-						{
-							mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush the buffers to the disk and stop further tracing\n");
-							Signals_SetupFlushAndTerminate (SIGUSR2);
-						}
-						else
-						{
-							mfprintf (stderr, PACKAGE_NAME": Error value '%s' is not a valid one for %s tag\n", str, TRACE_REMOTE_CONTROL);
-						}
-					}
-					XML_FREE(str);
-				}
-				XML_FREE(method);
-#endif
 			}
 			XML_FREE(enabled);
 		}
+
 		else
 		{
 			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <%s> level\n", tag->name, TRACE_CONTROL);

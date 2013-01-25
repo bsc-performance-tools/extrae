@@ -7,8 +7,8 @@ EXTRA_DIST = external \
  wrappers/OMP/intel-kmpc-11-intermediate-switch.c \
  wrappers/OMP/intel-kmpc-11-intermediate.c
 
-if HAVE_MRNET
-  SUBDIRS += mrnet
+if HAVE_ONLINE
+  SUBDIRS += online
 endif
 
 if IS_CELL_MACHINE
@@ -238,16 +238,15 @@ core_MODULES = \
  $(COMMON_DIR)/libcommon.la \
  $(CLOCKS_DIR)/libclock.la \
  $(HWC_DIR)/libhwc.la
+if HAVE_ONLINE
+ core_MODULES += $(ONLINE_DIR)/libonline.la
+endif
 
 INTERFACE_API_PTHREAD = $(INTERFACES_DIR)/API/libiface_api_pthread.la
 if PTHREAD_SUPPORT_IN_ALL_LIBS
  INTERFACE_API = $(INTERFACE_API_PTHREAD)
 else
  INTERFACE_API = $(INTERFACES_DIR)/API/libiface_api.la
-endif
-
-if HAVE_MRNET
- core_MODULES += $(MRNET_DIR)/libmrn.la
 endif
 
 # Apply these to BGQ and other non-BG machines
@@ -341,8 +340,8 @@ endif
 if HAVE_XML2
   core_INCLUDES += @XML2_CFLAGS@
 endif
-if HAVE_MRNET
-  core_INCLUDES += -I$(MRNET_DIR)
+if HAVE_ONLINE
+  core_INCLUDES += -I$(ONLINE_DIR)
 endif
 if WANT_OPENMP
   core_INCLUDES += -I$(PROBES_DIR)/OMP
@@ -376,9 +375,6 @@ if HAVE_LIBDL
 endif
 if HAVE_UNWIND
   UNWIND_LINKER_FLAGS = -L@UNWIND_LIBSDIR@ -R @UNWIND_LIBSDIR@ @UNWIND_LIBS@
-endif
-if HAVE_MRNET
-  MRNET_LINKER_FLAGS = -L@MRNET_LIBSDIR@ -R @MRNET_LIBSDIR@ @MRNET_LIBS@
 endif
 
 # POSIX clock may be available by default. Avoid adding these if unneeded.

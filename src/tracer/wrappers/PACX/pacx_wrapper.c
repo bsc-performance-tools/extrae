@@ -71,10 +71,6 @@ static char UNUSED rcsid[] = "$Id$";
 # define COMBINED_SYMBOLS
 #endif
 
-#if defined(HAVE_MRNET)
-# include "mrnet_be.h"
-#endif
-
 #define PACX_COMM_WORLD_ALIAS 1
 #define PACX_COMM_SELF_ALIAS  2
 
@@ -937,13 +933,6 @@ void PPACX_Finalize_Wrapper (PACX_Fint *ierror)
 	TRACE_MYRINET_HWC();
 
 	TRACE_PACXEVENT (TIME, PACX_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
-#if HAVE_MRNET
-	if (MRNet_isEnabled())
-	{
-		Quit_MRNet(TASKID);
-	}
-#endif
 
 	/* Generate the final file list */
 	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);
@@ -3982,13 +3971,6 @@ int PACX_Finalize_C_Wrapper (void)
 	TRACE_MYRINET_HWC();
 
 	TRACE_PACXEVENT (TIME, PACX_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
-#if HAVE_MRNET
-	if (MRNet_isEnabled())
-	{
-		Quit_MRNet(TASKID);
-	}
-#endif
 
 	/* Generate the final file list */
 	PACX_Generate_Task_File_List (Extrae_get_num_tasks(), TasksNodes);

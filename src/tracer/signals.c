@@ -141,7 +141,7 @@ void SigHandler_ResumeApplication (int signum)
 }
 
 /* ----------------------------------------
- * Signals_Signals_SetupPauseAndResume
+ * Signals_SetupPauseAndResume
  * Assign the appropriate signal handlers 
  * ---------------------------------------- */
 

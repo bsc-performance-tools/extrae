@@ -132,9 +132,8 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #include "trace_buffers.h"
 #include "timesync.h"
-#if defined(HAVE_MRNET)
-# include "mrn_config.h"
-# include "mrnet_be.h"
+#if defined(HAVE_ONLINE)
+# include "OnlineControl.h"
 #endif
 #if defined(UPC_SUPPORT)
 # include <external/upc.h>
@@ -1251,10 +1250,7 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
 {
 	int i;
 
-#if !defined(HAVE_MRNET)
-	UNREFERENCED_PARAMETER(world_size);
-#else
-#if 0
+#if 0 /* MRNET */
 	/* FIXME: Temporarily disabled. new_buffer_size overflows when target_mbs > 1000 */
 	if (MRNet_isEnabled())
 	{
@@ -1269,7 +1265,6 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
 
 		buffer_size = new_buffer_size;
 	}
-#endif
 #endif
 
 	xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
@@ -1804,20 +1799,10 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	xfree(StartingTimes);
 	xfree(SynchronizationTimes);
 
-#if defined(HAVE_MRNET)
-	if (MRNet_isEnabled())
+#if defined(HAVE_ONLINE)
+	if (Online_isEnabled())
 	{
-		int rc = Join_MRNet(rank);
-
-		if (rc)
-		{
-			fprintf (stdout, PACKAGE_NAME": MRNet successfully set up.\n");
-		}
-		else
-		{
-			fprintf (stderr, PACKAGE_NAME": Error while setting up the MRNet.\n");
-			exit(1);
-		}
+		Online_Start(rank, world_size, node_list);
 	}
 #endif
 
@@ -1950,12 +1935,6 @@ static void Backend_Finalize_close_mpits (int thread)
 	}
 #endif
 
-#if defined(HAVE_MRNET)
-	if (MRNet_isEnabled())
-	{
-		MRN_CloseFiles();
-	}
-#endif
 }
 
 /**
@@ -2008,6 +1987,13 @@ void Backend_Finalize (void)
 {
 	unsigned thread;
 
+#if HAVE_ONLINE 
+	if (Online_isEnabled())
+	{
+		Online_Stop();
+	}
+#endif
+	
 	/* Stop sampling right now */
 	setSamplingEnabled (FALSE);
 

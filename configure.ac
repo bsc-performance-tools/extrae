@@ -326,7 +326,7 @@ AX_PROG_MX
 AX_PROG_LIBEXECINFO
 AX_PROG_DYNINST
 AX_PROG_COUNTERS # Check for PAPI and/or PMAPI
-AX_PROG_MRNET
+AX_PROG_ONLINE
 
 AX_CHECK_LOAD_BALANCING
 
@@ -596,9 +596,7 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   tests/src/Makefile tests/src/common/Makefile \
   tests/functional/Makefile tests/functional/launcher/Makefile tests/functional/tracer/Makefile \
   tests/functional/merger/Makefile])
-#if test "${MRNET_INSTALLED}" = "yes" ; then
-AC_CONFIG_FILES([src/tracer/mrnet/Makefile])
-#fi
+AC_CONFIG_FILES([src/tracer/online/Makefile])
 ### TEMPORARILY_DISABLED
 ### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])
 AC_OUTPUT
