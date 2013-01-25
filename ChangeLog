@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 25Jan2013 Fixed configure checks to link with the spectral analysis toolkit
  + 25Jan2013 Added base code for on-line support
  * 24Jan2013 Extrae version 2.3.2
  * 24Jan2013 Fixed Paraver header generation when number of threads differs

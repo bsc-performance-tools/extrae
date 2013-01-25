@@ -1616,14 +1616,15 @@ AC_DEFUN([AX_PROG_SPECTRAL],
     AC_MSG_CHECKING([whether libspectral has unresolved dependencies with libfft])
     AC_TRY_LINK(
       [ #include <stdio.h>
-        #include <signal_interface.h> ],
-      [ destroySignal(NULL); ],
+        #include <spectral-api.h> ],
+      [ Spectral_AllocateSignal(0); ],
       [ spectral_works="yes" ]
     )
     if test "${spectral_works}" = "yes" ; then
       AC_MSG_RESULT([no])
     else
       dnl There are unresolved dependencies with fftw3
+      AC_MSG_RESULT([yes])
       AC_ARG_WITH(fft,
         AC_HELP_STRING(
           [--with-fft@<:@=DIR@:>@],
@@ -1638,8 +1639,8 @@ AC_DEFUN([AX_PROG_SPECTRAL],
       LIBS="${LIBS} ${FFT_LDFLAGS} -lfftw3 -lm"
       AC_TRY_LINK(
         [ #include <stdio.h>
-          #include <signal_interface.h> ],
-        [ destroySignal(NULL); ],
+          #include <spectral-api.h> ],
+        [ Spectral_AllocateSignal(0); ],
         [ spectral_works="yes" ]
       )
     fi
