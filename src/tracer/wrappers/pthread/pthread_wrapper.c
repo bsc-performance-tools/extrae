@@ -358,7 +358,8 @@ void pthread_exit (void *p1)
 
 	if (pthread_exit_real != NULL && mpitrace_on)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_FUNC_EV, EVT_END ,EMPTY);
 		Probe_pthread_Exit_Entry();
 		Backend_Leave_Instrumentation ();
 
