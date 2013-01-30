@@ -668,7 +668,7 @@ static void Parse_XML_PTHREAD (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			tracejant_hwc_pthread = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, PACKAGE_NAME": pthread routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT");
+			mfprintf (stdout, PACKAGE_NAME": pthread routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT ");
 #else
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <pthread> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
 			tracejant_hwc_omp = FALSE;
