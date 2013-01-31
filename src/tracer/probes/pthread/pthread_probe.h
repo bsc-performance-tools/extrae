@@ -31,6 +31,7 @@
 #define PTHREAD_PROBE_H_INCLUDED
 
 void Extrae_pthread_instrument_locks (int value);
+int Extrae_get_pthread_instrument_locks (void);
 
 void Probe_pthread_Create_Entry (void *p);
 void Probe_pthread_Create_Exit (void);
@@ -38,6 +39,9 @@ void Probe_pthread_Join_Entry (void);
 void Probe_pthread_Join_Exit (void);
 void Probe_pthread_Detach_Entry (void);
 void Probe_pthread_Detach_Exit (void);
+
+void Probe_pthread_Function_Entry (void *p);
+void Probe_pthread_Function_Exit (void);
 
 void Probe_pthread_Exit_Entry(void);
 

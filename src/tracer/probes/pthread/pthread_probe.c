@@ -48,6 +48,11 @@ void Extrae_pthread_instrument_locks (int value)
 	TracePthreadLocks = value;
 }
 
+int Extrae_get_pthread_instrument_locks (void)
+{
+	return TracePthreadLocks;
+}
+
 void Probe_pthread_Create_Entry (void *p)
 {
 	DEBUG
@@ -60,6 +65,20 @@ void Probe_pthread_Create_Exit (void)
 	DEBUG
 	if (mpitrace_on)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_CREATE_EV, EVT_END, EMPTY);
+}
+
+void Probe_pthread_Function_Entry (void *p)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_FUNC_EV, (UINT64)p ,EMPTY);
+}
+
+void Probe_pthread_Function_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_FUNC_EV, EVT_END ,EMPTY);
 }
 
 void Probe_pthread_Exit_Entry(void)
