@@ -55,10 +55,11 @@ AC_DEFUN([AX_PROG_MPI],
       dnl In MN, MPICH2 requires special libraries when building mpimpi2prv
       AX_CHECK_DEFINED([mpi.h], [MPICH2], [MPI_IS_MPICH2="yes"], [MPI_IS_MPICH2="no"])
 
-      if test "${MPI_IS_MPICH2}" = "yes" -a  "${IS_MN_MACHINE}" = "yes" ; then
-        MPIMPI2PRV_EXTRA_LIBS="-lpmi"
-        AC_SUBST(MPIMPI2PRV_EXTRA_LIBS)
-      fi
+      dnl This is no longer needed in MN3
+      dnl if test "${MPI_IS_MPICH2}" = "yes" -a  "${IS_MN_MACHINE}" = "yes" ; then
+      dnl   MPIMPI2PRV_EXTRA_LIBS="-lpmi"
+      dnl  AC_SUBST(MPIMPI2PRV_EXTRA_LIBS)
+      dnl fi
 
       dnl Check for the MPI library.
       dnl We won't use neither AC_CHECK_LIB nor AC_TRY_LINK because this library may have unresolved references to other libs (i.e: libgm).

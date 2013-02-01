@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 01Feb2013 Removed useless lib dependencies for MN3 (MF-tag-2.3.2)
  * 25Jan2013 Fixed configure checks to link with the spectral analysis toolkit
  + 25Jan2013 Added base code for on-line support
  * 24Jan2013 Extrae version 2.3.2
