@@ -63,6 +63,8 @@ static char UNUSED rcsid[] = "$Id$";
 # include <mpi.h>
 #endif
 
+/* #define DEBUG */
+
 static int Get_State (unsigned int EvType)
 {
 	int state = 0;
@@ -249,10 +251,11 @@ static int SendRecv_Event (event_t * current_event,
 		if (Get_EvValue (current_event) == EVT_BEGIN)
 		{
 			thread_info->Send_Rec = current_event;
-			thread_info->Recv_Rec = current_event;
 		}
 		else if (Get_EvValue (current_event) == EVT_END)
 		{
+			thread_info->Recv_Rec = current_event;
+
 			/* Treat the send part */
 			if (MatchComms_Enabled(ptask, task, thread))
 				if (MPI_PROC_NULL != Get_EvTarget (thread_info->Send_Rec))
@@ -260,7 +263,7 @@ static int SendRecv_Event (event_t * current_event,
 					if (isTaskInMyGroup (fset, Get_EvTarget(thread_info->Send_Rec)))
 					{
 #if defined(DEBUG)
-						fprintf (stdout, "SENDRECV/SEND: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+						fprintf (stdout, "SENDRECV/SEND: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(thread_info->Send_Rec), task-1, Get_EvTarget(thread_info->Send_Rec), Get_EvTag(thread_info->Send_Rec));
 #endif
 						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(thread_info->Send_Rec)+1);
 
@@ -274,13 +277,13 @@ static int SendRecv_Event (event_t * current_event,
 							fprintf (stdout, "SENDRECV/SEND DID NOT find partner\n");
 #endif
 							position = WriteFileBuffer_getPosition (thread_info->file->wfb);
-							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
+							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(thread_info->Send_Rec), Get_EvTag(thread_info->Send_Rec), 0);
 							trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 						}
 						else if (recv_begin != NULL && recv_end != NULL)
 						{
 #if defined(DEBUG)
-							fprintf (stdout, "SENDRECV/SEND find partner\n");
+							fprintf (stdout, "SENDRECV/SEND found partner\n");
 #endif
 							trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, 1+Get_EvTarget(thread_info->Send_Rec), recv_thread, recv_vthread, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
 						}
@@ -295,31 +298,31 @@ static int SendRecv_Event (event_t * current_event,
 
 			/* Treat the receive part */
 			if (MatchComms_Enabled(ptask, task, thread))
-				if (MPI_PROC_NULL != Get_EvTarget (current_event))
+				if (MPI_PROC_NULL != Get_EvTarget (thread_info->Recv_Rec))
 				{
-					if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+					if (isTaskInMyGroup (fset, Get_EvTarget(thread_info->Recv_Rec)))
 					{
 #if defined(DEBUG)
-						fprintf (stdout, "SENDRECV/RECV: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+						fprintf (stdout, "SENDRECV/RECV: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(thread_info->Recv_Rec), task-1, Get_EvTarget(thread_info->Recv_Rec), Get_EvTag(thread_info->Recv_Rec));
 #endif
 
-						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
+						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(thread_info->Recv_Rec)+1);
 
-						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
+						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (thread_info->Recv_Rec), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
 						if (NULL == send_begin && NULL == send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/RECV DID NOT find partner\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Recv_Rec, current_event, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Recv_Rec, current_event, thread, thread_info->virtual_thread, Get_EvTarget(thread_info->Recv_Rec), Get_EvTag(thread_info->Recv_Rec), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
-							fprintf (stdout, "SENDRECV/RECV find partner\n");
+							fprintf (stdout, "SENDRECV/RECV found partner\n");
 #endif
-							trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Recv_Rec, current_event, TRUE, send_position);
+							trace_communicationAt (ptask, 1+Get_EvTarget(thread_info->Recv_Rec), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Recv_Rec, thread_info->Recv_Rec, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
