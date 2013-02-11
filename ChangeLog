@@ -1,6 +1,11 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ - 11Feb2013 Support for freq_table in pair with freqtable to determine
+               whether to use the posix clock routines.
+             Removed auto instrumentation of libpttrace anb libtrtrace because
+               pthread_mutex was issued before starting and was not hooked
+               (MF-tag-2.3.2)
  * 06Feb2013 Fixed SendRecv communication matching error (MF-tag-2.3.2)
  * 01Feb2013 Removed useless lib dependencies for MN3 (MF-tag-2.3.2)
  * 25Jan2013 Fixed configure checks to link with the spectral analysis toolkit

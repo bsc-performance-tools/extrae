@@ -213,8 +213,8 @@ libnanosmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
 libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) mpif.h
 
 # pthreads & TRT
-libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD) $(auto_instr_SRCS)
-libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT) $(auto_instr_SRCS)
+libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD)
+libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT)
 
 # LoadBalancing
 libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)

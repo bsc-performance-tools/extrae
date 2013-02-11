@@ -28,8 +28,9 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
             enable_posix_clock="yes"
          fi
          freqtable=`${LSMOD} | grep  ^freqtable | wc -l`
-         if test "${freqtable}" -ge 1 ; then
-            AC_MSG_WARN([Attention! It seems that your processor frequency changes on the fly through 'freqtable' module. We add --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
+         freq_table=`${LSMOD} | grep  ^freq_table | wc -l`
+         if test "${freqtable}" -ge 1 -o "${freq_table}" -ge 1; then
+            AC_MSG_WARN([Attention! It seems that your processor frequency changes on the fly through 'freqtable/freq_table' module. We add --enable-posix-clock to your configure line so as to use clock routines that can adapt to the processor frequency changes. However, if you know for sure that your processor speed does not change, you can proceed by adding --disable-posix-clock to use the fastest clock routines])
             enable_posix_clock="yes"
          fi
          upowerd=`ps -efa | grep upowerd | grep -v grep | wc -l`
