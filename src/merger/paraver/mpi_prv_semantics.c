@@ -251,10 +251,6 @@ static int SendRecv_Event (event_t * current_event,
 		if (Get_EvValue (current_event) == EVT_BEGIN)
 		{
 			thread_info->Send_Rec = current_event;
-		}
-		else if (Get_EvValue (current_event) == EVT_END)
-		{
-			thread_info->Recv_Rec = current_event;
 
 			/* Treat the send part */
 			if (MatchComms_Enabled(ptask, task, thread))
@@ -296,6 +292,11 @@ static int SendRecv_Event (event_t * current_event,
 #endif /* PARALLEL_MERGE */
 					}
 
+		}
+		else if (Get_EvValue (current_event) == EVT_END)
+		{
+			thread_info->Recv_Rec = current_event;
+
 			/* Treat the receive part */
 			if (MatchComms_Enabled(ptask, task, thread))
 				if (MPI_PROC_NULL != Get_EvTarget (thread_info->Recv_Rec))
@@ -315,14 +316,14 @@ static int SendRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/RECV DID NOT find partner\n");
 #endif
-							CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Recv_Rec, current_event, thread, thread_info->virtual_thread, Get_EvTarget(thread_info->Recv_Rec), Get_EvTag(thread_info->Recv_Rec), 0);
+							CommunicationQueues_QueueRecv (task_info->recv_queue, thread_info->Send_Rec, current_event, thread, thread_info->virtual_thread, Get_EvTarget(thread_info->Recv_Rec), Get_EvTag(thread_info->Recv_Rec), 0);
 						}
 						else if (NULL != send_begin && NULL != send_end)
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/RECV found partner\n");
 #endif
-							trace_communicationAt (ptask, 1+Get_EvTarget(thread_info->Recv_Rec), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Recv_Rec, thread_info->Recv_Rec, TRUE, send_position);
+							trace_communicationAt (ptask, 1+Get_EvTarget(thread_info->Recv_Rec), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Send_Rec, thread_info->Recv_Rec, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -332,7 +333,7 @@ static int SendRecv_Event (event_t * current_event,
 					{
 						UINT64 log_r, phy_r;
 
-						log_r = TIMESYNC (task-1, Get_EvTime(thread_info->Recv_Rec));
+						log_r = TIMESYNC (task-1, Get_EvTime(thread_info->Send_Rec));
 						phy_r = TIMESYNC (task-1, Get_EvTime(current_event));
 						AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1, thread_info->virtual_thread-1,
 						  Get_EvTarget(current_event), fset);

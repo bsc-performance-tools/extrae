@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Feb2013 Removes duplicate creation of temporal files (MFB 2.3)
+ * 13Feb2013 Actually Fixed SendRecv communication (refixes 06Feb2013) (MFB
+               2.3)
  - 11Feb2013 Support for freq_table in pair with freqtable to determine
                whether to use the posix clock routines.
              Removed auto instrumentation of libpttrace anb libtrtrace because

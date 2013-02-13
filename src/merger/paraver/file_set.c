@@ -153,8 +153,10 @@ int inWhichGroup (int task, FileSet_t *fset)
 	return -1;
 }
 
-void newTemporalFile (int taskid, int initial, int depth, char *filename)
+static int newTemporalFile (int taskid, int initial, int depth, char *filename)
 {
+	int ID;
+
 	if (initial)
 	{
 		if (getenv ("MPI2PRV_TMP_DIR") == NULL)
@@ -181,13 +183,15 @@ void newTemporalFile (int taskid, int initial, int depth, char *filename)
 	}
 
 	/* Make a temporal name for a file */	
-	if (mkstemp (filename) == -1)
+	if ((ID = mkstemp (filename)) == -1)
 	{
 		perror ("mkstemp");
 		fprintf (stderr, "mpi2prv: Error! Unable to create temporal file using mkstemp");
 		fflush (stderr);
 		exit (-1);
 	}
+
+	return ID;
 }
 
 
@@ -395,11 +399,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 
 	(GET_THREAD_INFO(fitem->ptask,IFile->task,IFile->thread))->file = fitem;
 
-	/* Create a temporal file */
-	newTemporalFile (taskid, TRUE, 0, paraver_tmp);
-
 	/* Create a buffered file with 512 entries of paraver_rec_t */
-	fitem->wfb = WriteFileBuffer_new (paraver_tmp, 512, sizeof(paraver_rec_t));
+	fitem->wfb = WriteFileBuffer_new (newTemporalFile (taskid, TRUE, 0, paraver_tmp), 512, sizeof(paraver_rec_t));
 
 	/* Remove the created file... while we don't die, it won't be removed */
 	unlink (paraver_tmp);
@@ -508,8 +509,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 			char paraver_tmp[PATH_MAX];
 
 			/* Create a temporal file */
-			newTemporalFile (taskid, FALSE, 0, paraver_tmp);
-			prvfset->files[i].destination = WriteFileBuffer_new (paraver_tmp, 512, sizeof(paraver_rec_t));
+			prvfset->files[i].destination = WriteFileBuffer_new (newTemporalFile (taskid, FALSE, 0, paraver_tmp), 512, sizeof(paraver_rec_t));
 			unlink (paraver_tmp);
 		}
 		else
@@ -598,8 +598,7 @@ PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * infset,
 			infset->files[0].source = WriteFileBuffer_getFD(infset->files[0].destination);
 
 			/* Create a temporal file */
-			newTemporalFile (taskid, FALSE, 0, paraver_tmp);
-			infset->files[0].destination = WriteFileBuffer_new (paraver_tmp, 512, sizeof(paraver_rec_t));
+			infset->files[0].destination = WriteFileBuffer_new (newTemporalFile (taskid, FALSE, 0, paraver_tmp), 512, sizeof(paraver_rec_t));
 			unlink (paraver_tmp);
 
 			/* Set local file first */

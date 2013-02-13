@@ -48,7 +48,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "write_file_buffer.h"
 
-WriteFileBuffer_t * WriteFileBuffer_new (char *filename, int maxElements, size_t sizeElement)
+WriteFileBuffer_t * WriteFileBuffer_new (int FD, int maxElements, size_t sizeElement)
 {
 	WriteFileBuffer_t *res;
 
@@ -65,12 +65,7 @@ WriteFileBuffer_t * WriteFileBuffer_new (char *filename, int maxElements, size_t
 
 	res->maxElements = maxElements;
 	res->sizeElement = sizeElement;
-	res->FD = open (filename, O_RDWR, 0600);
-	if (-1 == res->FD)
-	{
-		fprintf (stderr, "mpi2prv: Cannot open file (%s) at WriteFileBuffer\n", filename);
-		exit (-1);
-	}
+	res->FD = FD; // open (filename, O_RDWR, 0600);
 	res->numElements = 0;
 	res->lastWrittenLocation = 0;
 	res->Buffer = (void*) malloc (res->maxElements*sizeElement);
