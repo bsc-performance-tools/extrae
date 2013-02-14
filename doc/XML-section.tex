@@ -280,7 +280,7 @@ This section contains two attributes besides {\tt enabled}. These are
 \begin{itemize}
  \item {\bf type}: determines which timer domain is used (see {\tt man 2 setitimer} or {\tt man 3p setitimer} for further information on time domains). Available options are: {\tt real} (which is also the {\tt default} value, {\tt virtual} and {\tt prof} (which use the SIGALRM, SIGVTALRM and SIGPROF respectively). The defaul timing accumulates real time, but only issues samples at master thread. To let all the threads to collect samples, the type must be {\tt virtual} or {\tt prof}.
  \item {\bf period}: specifies the sampling periodicity. In the example above, samples are gathered every 50ms.
- \item {\bf variability}: specifies the variability to the sampling periodicity. Such variability is calculated through the {\tt random() system call and then is added to the periodicity. In the given example, the variability is set to 10ms, thus the final sampling period ranges from 45 to 55ms.}
+ \item {\bf variability}: specifies the variability to the sampling periodicity. Such variability is calculated through the {\tt random()} system call and then is added to the periodicity. In the given example, the variability is set to 10ms, thus the final sampling period ranges from 45 to 55ms.
 \end{itemize}
 
 \graybox{See {\bf EXTRAE\_SAMPLING\_PERIOD}, {\bf EXTRAE\_SAMPLING\_VARIABILITY}, {\bf EXTRAE\_SAMPLING\_CLOCKTYPE} and {\bf EXTRAE\_SAMPLING\_CALLER} environment variables in appendix \ref{cha:EnvVar}.}
