@@ -71,9 +71,7 @@ static CommInfo_t comunicadors; /* La llista de communicadors */
 static CommAliasInfo_t **alies_comunicadors;    /* Llista alies per cada ptask-task */
 static CommInfo_t *comm_actual = NULL;
 
-#if defined(HAVE_MPI)
 static void afegir_alies (TipusComunicador * comm, CommInfo_t * info_com, int ptask, int task);
-#endif
 
 /*******************************************************************
  * initialize_comunicadors
@@ -118,7 +116,6 @@ void initialize_comunicadors (int n_ptasks)
  *******************************************************************/
 uintptr_t alies_comunicador (uintptr_t comid, int ptask, int task)
 {
-#if defined(HAVE_MPI)
   CommAliasInfo_t *info;
 
   ptask--;
@@ -131,7 +128,6 @@ uintptr_t alies_comunicador (uintptr_t comid, int ptask, int task)
 			return info->alies;
 
   printf ("mpi2prv: Error: Cannot find : comid = %d, ptask = %d, task = %d\n", comid, ptask, task);
-#endif /* HAVE_MPI */
 
   return 0;                    /* No hauria de poder passar mai */
 }
@@ -171,7 +167,6 @@ int compara_comunicadors (TipusComunicador * comm1, TipusComunicador * comm2)
  *******************************************************************/
 void afegir_comunicador (TipusComunicador * comm, int ptask, int task)
 {
-#if defined(HAVE_MPI)
 	int i;
   int trobat;
   CommInfo_t *info_com;
@@ -222,12 +217,9 @@ void afegir_comunicador (TipusComunicador * comm, int ptask, int task)
    * En qualsevol cas hem de guardar un alias per aquest identificador 
    */
   afegir_alies (comm, info_com, ptask, task);
-#endif
 }
 
 
-
-#if defined(HAVE_MPI)
 /*******************************************************************
  * afegir_alies
  * --------------------
@@ -285,7 +277,6 @@ static void afegir_alies (TipusComunicador * comm, CommInfo_t * info_com,
   fprintf (stderr, "      id %d -> %d\n", comm->id, info_alies->alies);
 #endif
 }
-#endif /* HAVE_MPI */
 
 
 

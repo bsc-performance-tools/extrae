@@ -676,10 +676,8 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 	int NumNodes;
 	char Header[1024];
 	unsigned threads, task, ptask, node, num_cpus = 1;
-#if defined(HAVE_MPI)  /* Sequential tracing does not use comunicators */
 	TipusComunicador com;
 	int i, final;
-#endif
 
 	UNREFERENCED_PARAMETER(numtasks);
 #if !defined(PARALLEL_MERGE)
@@ -761,11 +759,7 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 #endif
 			node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
 
-#if defined(HAVE_MPI)
 			sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
-#else
-			sprintf (Header, "%d:%d),0", threads, node);
-#endif
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 #if defined(PARALLEL_MERGE)
@@ -779,7 +773,6 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 		sprintf (Header, "\n");
 		PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
-#if defined(HAVE_MPI)
 		/* Write the communicator definition for every application */
 		for (ptask = 1; ptask <= num_appl; ptask++)
 		{
@@ -801,7 +794,6 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 			final = (seguent_comunicador (&com) < 0);
 			}
 		}
-#endif
 	}
 
   return 0;
