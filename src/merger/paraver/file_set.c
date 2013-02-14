@@ -201,6 +201,7 @@ static int newTemporalFile (int taskid, int initial, int depth, char *filename)
 
 static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 {
+	int tmp_fd;
 	int ret;
 	FILE *fd_trace;
 	ssize_t res;
@@ -400,7 +401,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	(GET_THREAD_INFO(fitem->ptask,IFile->task,IFile->thread))->file = fitem;
 
 	/* Create a buffered file with 512 entries of paraver_rec_t */
-	fitem->wfb = WriteFileBuffer_new (newTemporalFile (taskid, TRUE, 0, paraver_tmp), 512, sizeof(paraver_rec_t));
+	tmp_fd = newTemporalFile (taskid, TRUE, 0, paraver_tmp);
+	fitem->wfb = WriteFileBuffer_new (tmp_fd, paraver_tmp, 512, sizeof(paraver_rec_t));
 
 	/* Remove the created file... while we don't die, it won't be removed */
 	unlink (paraver_tmp);
@@ -509,7 +511,8 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 			char paraver_tmp[PATH_MAX];
 
 			/* Create a temporal file */
-			prvfset->files[i].destination = WriteFileBuffer_new (newTemporalFile (taskid, FALSE, 0, paraver_tmp), 512, sizeof(paraver_rec_t));
+			int fd = newTemporalFile (taskid, FALSE, 0, paraver_tmp);
+			prvfset->files[i].destination = WriteFileBuffer_new (fd, paraver_tmp, 512, sizeof(paraver_rec_t));
 			unlink (paraver_tmp);
 		}
 		else
@@ -595,10 +598,13 @@ PRVFileSet_t * ReMap_Paraver_files_binary (PRVFileSet_t * infset,
 
 		if (infset->nfiles > 1)
 		{
+			int fd;
+
 			infset->files[0].source = WriteFileBuffer_getFD(infset->files[0].destination);
 
 			/* Create a temporal file */
-			infset->files[0].destination = WriteFileBuffer_new (newTemporalFile (taskid, FALSE, 0, paraver_tmp), 512, sizeof(paraver_rec_t));
+			fd = newTemporalFile (taskid, FALSE, 0, paraver_tmp);
+			infset->files[0].destination = WriteFileBuffer_new (fd, paraver_tmp, 512, sizeof(paraver_rec_t));
 			unlink (paraver_tmp);
 
 			/* Set local file first */

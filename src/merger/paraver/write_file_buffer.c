@@ -48,7 +48,11 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "write_file_buffer.h"
 
-WriteFileBuffer_t * WriteFileBuffer_new (int FD, int maxElements, size_t sizeElement)
+static unsigned nSeenBuffers = 0;
+static WriteFileBuffer_t **SeenBuffers = NULL;
+
+
+WriteFileBuffer_t * WriteFileBuffer_new (int FD, char *filename, int maxElements, size_t sizeElement)
 {
 	WriteFileBuffer_t *res;
 
@@ -65,13 +69,32 @@ WriteFileBuffer_t * WriteFileBuffer_new (int FD, int maxElements, size_t sizeEle
 
 	res->maxElements = maxElements;
 	res->sizeElement = sizeElement;
-	res->FD = FD; // open (filename, O_RDWR, 0600);
+	res->FD = FD;
+	res->filename = strdup(filename);
+	if (res->filename == NULL)
+	{
+		fprintf (stderr, "mpi2prv: Error! cannot duplicate string for WriteFileBuffer\n");
+		exit (-1);
+	}
 	res->numElements = 0;
 	res->lastWrittenLocation = 0;
 	res->Buffer = (void*) malloc (res->maxElements*sizeElement);
 	if (NULL == res->Buffer)
 	{
 		fprintf (stderr, "mpi2prv: Cannot allocate memory for %d elements in WriteFileBuffer\n", maxElements);
+		exit (-1);
+	}
+
+	/* Annotate this buffer as a seen buffer for later WriteFileBuffer_deleteall */
+	SeenBuffers = (WriteFileBuffer_t **) realloc (SeenBuffers, sizeof(WriteFileBuffer_t*)*(nSeenBuffers+1));
+	if (SeenBuffers != NULL)
+	{
+		SeenBuffers[nSeenBuffers] = res;
+		nSeenBuffers++;
+	}
+	else
+	{
+		fprintf (stderr, "mpi2prv: Error! Cannot reallocate SeenBuffers\n");
 		exit (-1);
 	}
 
@@ -85,13 +108,22 @@ void WriteFileBuffer_delete (WriteFileBuffer_t *wfb)
 #endif
 
 	WriteFileBuffer_flush (wfb);
-	if (-1 == close (wfb->FD))
-	{
-		fprintf (stderr, "mpi2prv: Error! Cannot close WriteFileBuffer!\n");
-		exit (-1);
-	}
+	close (wfb->FD);
 	free (wfb->Buffer);
 	free (wfb);
+	unlink (wfb->filename);
+}
+
+void WriteFileBuffer_deleteall (void)
+{
+	unsigned u;
+
+#if defined(DEBUG)
+	fprintf (stderr, "WriteFileBuffer_deleteall\n");
+#endif
+
+	for (u = 0; u < nSeenBuffers; u++)
+		WriteFileBuffer_delete (SeenBuffers[u]);
 }
 
 int WriteFileBuffer_getFD (WriteFileBuffer_t *wfb)

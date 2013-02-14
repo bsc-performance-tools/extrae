@@ -1212,6 +1212,16 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 	Free_FS (fset);
 
+	fprintf (stdout, "mpi2prv: Removing temporal files... ");
+	fflush (stdout);
+	gettimeofday (&time_begin, NULL);
+	WriteFileBuffer_deleteall();
+	gettimeofday (&time_end, NULL);
+	fprintf (stdout, "done\n");
+	fflush (stdout);
+	delta = time_end.tv_sec - time_begin.tv_sec;
+	fprintf (stdout, "mpi2prv: Elapsed time removing temporal files: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+
 #if defined(IS_BG_MACHINE)
 #if defined(DEAD_CODE)
 	/* FIXME must be implemented in parallel */

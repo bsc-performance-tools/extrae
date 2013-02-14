@@ -37,14 +37,16 @@ typedef struct
 	void *Buffer;
 	off_t lastWrittenLocation;
 	size_t sizeElement;
-	int FD;
 	int maxElements;
 	int numElements;
+	int FD;
+	char *filename;
 }
 WriteFileBuffer_t;
 
-WriteFileBuffer_t * WriteFileBuffer_new (int FD, int maxElements, size_t sizeElement);
+WriteFileBuffer_t * WriteFileBuffer_new (int FD, char *filename, int maxElements, size_t sizeElement);
 void WriteFileBuffer_delete (WriteFileBuffer_t *wfb);
+void WriteFileBuffer_deleteall (void);
 int WriteFileBuffer_getFD (WriteFileBuffer_t *wfb);
 void WriteFileBuffer_flush (WriteFileBuffer_t *wfb);
 off_t WriteFileBuffer_getPosition (WriteFileBuffer_t *wfb);
