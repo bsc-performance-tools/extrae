@@ -83,7 +83,7 @@
     <spu-dma-channel enabled="yes">2</spu-dma-channel>
   </cell>
 
-  <sampling enabled="no" type="default" period="50m" />
+  <sampling enabled="no" type="default" period="50m" variability="10m" />
 
   <merge enabled="yes" 
     synchronization="default"

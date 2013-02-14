@@ -39,6 +39,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_UCONTEXT_H
 # include <ucontext.h>
 #endif
@@ -96,6 +99,8 @@ void Extrae_SamplingHandler (void* address)
 # error "Don't know how to access the PC! Check if it is like BG/P"
 #endif
 
+static unsigned long long Sampling_variability;
+static struct itimerval SamplingPeriod_base;
 static struct itimerval SamplingPeriod;
 static int SamplingClockType;
 
@@ -151,11 +156,28 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	Extrae_SamplingHandler ((void*) pc);
 
 	/* Set next timer! */
+	if (Sampling_variability > 0)
+	{
+		long int r = random();
+		unsigned long long v = r%(Sampling_variability);
+		unsigned long long s, us;
+
+		us = (v + SamplingPeriod_base.it_value.tv_usec) % 1000000;
+		s = (v + SamplingPeriod_base.it_value.tv_usec) / 1000000 + SamplingPeriod_base.it_interval.tv_sec;
+
+		SamplingPeriod.it_interval.tv_sec = 0;
+		SamplingPeriod.it_interval.tv_usec = 0;
+		SamplingPeriod.it_value.tv_usec = us;
+		SamplingPeriod.it_value.tv_sec = s;
+	}
+	else
+		SamplingPeriod = SamplingPeriod_base;
+
 	setitimer (SamplingClockType ,&SamplingPeriod, NULL);
 }
 
 
-void setTimeSampling (unsigned long long period, int sampling_type)
+void setTimeSampling (unsigned long long period, unsigned long long variability, int sampling_type)
 {
 	int signum;
 	int ret;
@@ -176,13 +198,20 @@ void setTimeSampling (unsigned long long period, int sampling_type)
 		return;
 	}
 
-	/* The period is given in nanoseconds */
-	period = period / 1000;
+	if (variability > period)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Sampling variability can't be higher than sampling period\n");
+		variability = 0;
+	}
 
-	SamplingPeriod.it_interval.tv_sec = 0;
-	SamplingPeriod.it_interval.tv_usec = 0;
-	SamplingPeriod.it_value.tv_sec = period / 1000000;
-	SamplingPeriod.it_value.tv_usec = period % 1000000;
+	/* The period and variability are given in nanoseconds */
+	period = (period - variability) / 1000; /* We well afterwards add the variability, this is the base */
+	variability = variability / 1000;
+ 
+	SamplingPeriod_base.it_interval.tv_sec = 0;
+	SamplingPeriod_base.it_interval.tv_usec = 0;
+	SamplingPeriod_base.it_value.tv_sec = period / 1000000;
+	SamplingPeriod_base.it_value.tv_usec = period % 1000000;
 
 	if (sampling_type == SAMPLING_TIMING_VIRTUAL)
 	{
@@ -209,6 +238,31 @@ void setTimeSampling (unsigned long long period, int sampling_type)
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
 		return;
 	}
+
+	if (variability >= RAND_MAX)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Sampling variability is too high (%llu microseconds). Setting to %llu microseconds.\n", variability, (unsigned long long) RAND_MAX);
+		Sampling_variability = RAND_MAX;
+	}
+	else
+		Sampling_variability = 2*variability;
+
+	if (variability > 0)
+	{
+		long int r = random();
+		unsigned long long v = r%Sampling_variability;
+		unsigned long long s, us;
+
+		us = (v + SamplingPeriod_base.it_value.tv_usec) % 1000000;
+		s = (v + SamplingPeriod_base.it_value.tv_usec) / 1000000 + SamplingPeriod_base.it_interval.tv_sec;
+
+		SamplingPeriod.it_interval.tv_sec = 0;
+		SamplingPeriod.it_interval.tv_usec = 0;
+		SamplingPeriod.it_value.tv_usec = us;
+		SamplingPeriod.it_value.tv_sec = s;
+	}
+	else
+		SamplingPeriod = SamplingPeriod_base;
 
 	setitimer (SamplingClockType, &SamplingPeriod, NULL);
 }

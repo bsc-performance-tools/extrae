@@ -58,6 +58,7 @@
 #define TRACE_MINIMUM_TIME              ((xmlChar*) "minimum-time")
 #define TRACE_FREQUENCY                 ((xmlChar*) "frequency")
 #define TRACE_PERIOD                    ((xmlChar*) "period")
+#define TRACE_VARIABILITY               ((xmlChar*) "variability")
 #define TRACE_TYPE                      ((xmlChar*) "type")
 #define TRACE_GATHER_MPITS              ((xmlChar*) "gather-mpits")
 #define TRACE_CIRCULAR                  ((xmlChar*) "circular")

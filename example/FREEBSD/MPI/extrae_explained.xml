@@ -183,9 +183,11 @@
 
   <!-- Enable sampling capabilities using system clock.
        Type may refer to: default, real, prof and virtual.
-       Period stands for the sampling period (50ms here)
+       Period stands for the sampling period (50ms here) 
+       plus a variability of 10ms, which means periods from 
+       45 to 55ms.
   -->
-  <sampling enabled="no" type="default" period="50m" />
+  <sampling enabled="no" type="default" period="50m" variability="10m" />
 
   <!-- Do merge the intermediate tracefiles into the final tracefile?
        options: 

@@ -40,7 +40,7 @@
     <memory-usage enabled="no" />
   </counters>
 
-  <sampling enabled="no" type="default" period="50m" />
+  <sampling enabled="no" type="default" period="50m" variability="10m" />
 
   <merge enabled="yes" 
     synchronization="default"

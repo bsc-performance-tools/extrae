@@ -863,6 +863,11 @@ static int read_environment_variables (int me)
 	{
 		unsigned long long sampling_period = getTimeFromStr (
 		  getenv("EXTRAE_SAMPLING_PERIOD"), "EXTRAE_SAMPLING_PERIOD", me);
+		unsigned long long sampling_variability = 0;
+		char *str_var = getenv("EXTRAE_SAMPLING_VARIABILITY");
+		if (str_var != NULL)
+			sampling_variability = getTimeFromStr (
+				getenv("EXTRAE_SAMPLING_VARIABILITY"), "EXTRAE_SAMPLING_VARIABILITY", me);
 
 		if (sampling_period != 0)
 		{
@@ -870,13 +875,13 @@ static int read_environment_variables (int me)
 			if ((str2 = getenv ("EXTRAE_SAMPLING_CLOCKTYPE")) != NULL)
 			{
 				if (strcmp (str2, "DEFAULT") == 0)
-					setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_DEFAULT);
 				else if (strcmp (str2, "REAL") == 0)
-					setTimeSampling (sampling_period, SAMPLING_TIMING_REAL);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_REAL);
 				else if (strcmp (str2, "VIRTUAL") == 0)
-					setTimeSampling (sampling_period, SAMPLING_TIMING_VIRTUAL);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_VIRTUAL);
 				else if (strcmp (str2, "PROF") == 0)
-					setTimeSampling (sampling_period, SAMPLING_TIMING_PROF);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_PROF);
 				else
 				{
 					if (me == 0)
@@ -884,10 +889,10 @@ static int read_environment_variables (int me)
 				}
 			}
 			else	
-				setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+				setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_DEFAULT);
 
 			if (me == 0)
-				fprintf (stdout, "Extrae: Sampling enabled with period of %lld microseconds.\n", sampling_period/1000);
+				fprintf (stdout, "Extrae: Sampling enabled with a period of %lld microseconds and a variability of %lld microseconds.\n", sampling_period/1000, sampling_variability/1000);
 		}
 		else
 		{

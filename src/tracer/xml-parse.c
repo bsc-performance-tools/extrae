@@ -289,32 +289,36 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 {
 	xmlChar *period = xmlGetProp_env (rank, current_tag, TRACE_PERIOD);
+	xmlChar *variability = xmlGetProp_env (rank, current_tag, TRACE_VARIABILITY);
 	xmlChar *clocktype = xmlGetProp_env (rank, current_tag, TRACE_TYPE);
 
 	if (period != NULL)
 	{
 		unsigned long long sampling_period = getTimeFromStr (period,
 			"<sampling period=\"..\" />", rank);
+		unsigned long long sampling_variability = 0;
+		if (variability != NULL)
+			sampling_variability = getTimeFromStr (variability, "<sampling variability=\"..\" />", rank);
 
 		if (sampling_period != 0)
 		{
 			if (clocktype != NULL)
 			{
 				if (!xmlStrcasecmp(clocktype, "DEFAULT"))
-					setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_DEFAULT);
 				else if (!xmlStrcasecmp (clocktype, "REAL"))
-					setTimeSampling (sampling_period, SAMPLING_TIMING_REAL);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_REAL);
 				else if (!xmlStrcasecmp (clocktype, "VIRTUAL"))
-					setTimeSampling (sampling_period, SAMPLING_TIMING_VIRTUAL);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_VIRTUAL);
 				else if (!xmlStrcasecmp (clocktype, "PROF"))
-					setTimeSampling (sampling_period, SAMPLING_TIMING_PROF);
+					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_PROF);
 				else 
 					mfprintf (stderr, "Extrae: Warning! Value '%s' <sampling type=\"..\" /> is unrecognized. Using default clock.\n", clocktype);					
 			}
 			else	
-				setTimeSampling (sampling_period, SAMPLING_TIMING_DEFAULT);
+				setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_DEFAULT);
 
-			mfprintf (stdout, "Extrae: Sampling enabled with period of %lld microseconds.\n", sampling_period/1000);
+			fprintf (stdout, "Extrae: Sampling enabled with a period of %lld microseconds and a variability of %lld microseconds.\n", sampling_period/1000, sampling_variability/1000);
 		}
 		else
 		{
@@ -323,6 +327,7 @@ static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 	}
 
 	XML_FREE(period);
+	XML_FREE(variability);
 	XML_FREE(clocktype);
 }
 #endif /* SAMPLING_SUPPORT */

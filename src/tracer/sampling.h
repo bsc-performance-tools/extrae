@@ -38,7 +38,7 @@ enum
 	SAMPLING_TIMING_DEFAULT = SAMPLING_TIMING_REAL
 };
 
-void setTimeSampling (unsigned long long period, int sampling_type);
+void setTimeSampling (unsigned long long period, unsigned long long variability, int sampling_type);
 void Extrae_SamplingHandler (void* address);
 
 int isSamplingEnabled(void);
