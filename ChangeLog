@@ -5,6 +5,7 @@ ChangeLog
                2.3)
              Don't require MPI to generate the MPI communicators within the
                PRV file (MFB 2.3)
+             MPI statistics (burst mode) were calculated incorrectly, 1 missing
  * 13Feb2013 Removes duplicate creation of temporal files (MFB 2.3)
              Actually Fixed SendRecv communication (refixes 06Feb2013) (MFB
                2.3)
