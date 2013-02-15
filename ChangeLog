@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 15Feb2013 Improve detection of libbfd*.so (MFB 2.3)
  * 14Feb2013 Removes all temporal files at the end of the merge process (MFB
                2.3)
              Don't require MPI to generate the MPI communicators within the
