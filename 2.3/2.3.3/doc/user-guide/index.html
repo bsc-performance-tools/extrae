@@ -1,0 +1,4503 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2008 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Extrae User guide manual for version 2.3.3</TITLE>
+<META NAME="description" CONTENT="Extrae User guide manual for version 2.3.3">
+<META NAME="keywords" CONTENT="user-guide">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-15">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="user-guide.css">
+
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
+ SRC="file:/usr/share/latex2html/icons/nx_grp_g.png"> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up_g.png"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev_g.png">   
+<BR>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<P>
+
+<P>
+
+<P>
+<H1 ALIGN="CENTER"><I>Extrae</I> 
+<BR>
+User guide manual
+<BR>
+for version 2.3.3</H1>
+<DIV>
+
+<P ALIGN="CENTER"><STRONG>tools@bsc.es
+</STRONG></P>
+</DIV>
+<BR>
+
+<H2><A NAME="SECTION00100000000000000000">
+Contents</A>
+</H2>
+<!--Table of Contents-->
+
+<UL>
+<LI><A NAME="tex2html154"
+  HREF="user-guide.html#SECTION00200000000000000000">List of Figures</A>
+<LI><A NAME="tex2html155"
+  HREF="user-guide.html#SECTION00300000000000000000">List of Tables</A>
+<LI><A NAME="tex2html156"
+  HREF="user-guide.html#SECTION00400000000000000000">1. Quick start guide</A>
+<UL>
+<LI><A NAME="tex2html157"
+  HREF="user-guide.html#SECTION00410000000000000000">1.1 The instrumentation package</A>
+<UL>
+<LI><A NAME="tex2html158"
+  HREF="user-guide.html#SECTION00411000000000000000">1.1.1 Uncompressing the package</A>
+<LI><A NAME="tex2html159"
+  HREF="user-guide.html#SECTION00412000000000000000">1.1.2 Post-configuring the package</A>
+</UL>
+<LI><A NAME="tex2html160"
+  HREF="user-guide.html#SECTION00420000000000000000">1.2 Quick running</A>
+<UL>
+<LI><A NAME="tex2html161"
+  HREF="user-guide.html#SECTION00421000000000000000">1.2.1 Quick running Extrae - based on DynInst</A>
+<LI><A NAME="tex2html162"
+  HREF="user-guide.html#SECTION00422000000000000000">1.2.2 Quick running Extrae - NOT based on DynInst</A>
+</UL>
+<LI><A NAME="tex2html163"
+  HREF="user-guide.html#SECTION00430000000000000000">1.3 Quick merging the intermediate traces</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html164"
+  HREF="user-guide.html#SECTION00500000000000000000">2. Introduction</A>
+<LI><A NAME="tex2html165"
+  HREF="user-guide.html#SECTION00600000000000000000">3. Configuration, build and installation</A>
+<UL>
+<LI><A NAME="tex2html166"
+  HREF="user-guide.html#SECTION00610000000000000000">3.1 Configuration of the instrumentation package</A>
+<LI><A NAME="tex2html167"
+  HREF="user-guide.html#SECTION00620000000000000000">3.2 Build</A>
+<LI><A NAME="tex2html168"
+  HREF="user-guide.html#SECTION00630000000000000000">3.3 Installation</A>
+<LI><A NAME="tex2html169"
+  HREF="user-guide.html#SECTION00640000000000000000">3.4 Check</A>
+<LI><A NAME="tex2html170"
+  HREF="user-guide.html#SECTION00650000000000000000">3.5 Examples of configuration on different machines</A>
+<UL>
+<LI><A NAME="tex2html171"
+  HREF="user-guide.html#SECTION00651000000000000000">3.5.1 Bluegene (L and P variants)</A>
+<LI><A NAME="tex2html172"
+  HREF="user-guide.html#SECTION00652000000000000000">3.5.2 BlueGene/Q</A>
+<LI><A NAME="tex2html173"
+  HREF="user-guide.html#SECTION00653000000000000000">3.5.3 AIX</A>
+<LI><A NAME="tex2html174"
+  HREF="user-guide.html#SECTION00654000000000000000">3.5.4 Linux</A>
+</UL>
+<LI><A NAME="tex2html175"
+  HREF="user-guide.html#SECTION00660000000000000000">3.6 Knowing how a package was configured</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html176"
+  HREF="user-guide.html#SECTION00700000000000000000">4. Extrae XML configuration file</A>
+<UL>
+<LI><A NAME="tex2html177"
+  HREF="user-guide.html#SECTION00710000000000000000">4.1 XML Section: Trace configuration</A>
+<LI><A NAME="tex2html178"
+  HREF="user-guide.html#SECTION00720000000000000000">4.2 XML Section: MPI</A>
+<LI><A NAME="tex2html179"
+  HREF="user-guide.html#SECTION00730000000000000000">4.3 XML Section: PACX</A>
+<LI><A NAME="tex2html180"
+  HREF="user-guide.html#SECTION00740000000000000000">4.4 XML Section: pthread</A>
+<LI><A NAME="tex2html181"
+  HREF="user-guide.html#SECTION00750000000000000000">4.5 XML Section: OpenMP</A>
+<LI><A NAME="tex2html182"
+  HREF="user-guide.html#SECTION00760000000000000000">4.6 XML Section: CELL</A>
+<LI><A NAME="tex2html183"
+  HREF="user-guide.html#SECTION00770000000000000000">4.7 XML Section: Callers</A>
+<LI><A NAME="tex2html184"
+  HREF="user-guide.html#SECTION00780000000000000000">4.8 XML Section: User functions</A>
+<LI><A NAME="tex2html185"
+  HREF="user-guide.html#SECTION00790000000000000000">4.9 XML Section: Performance counters</A>
+<UL>
+<LI><A NAME="tex2html186"
+  HREF="user-guide.html#SECTION00791000000000000000">4.9.1 Processor performance counters</A>
+<LI><A NAME="tex2html187"
+  HREF="user-guide.html#SECTION00792000000000000000">4.9.2 Network performance counters</A>
+<LI><A NAME="tex2html188"
+  HREF="user-guide.html#SECTION00793000000000000000">4.9.3 Operating system accounting</A>
+</UL>
+<LI><A NAME="tex2html189"
+  HREF="user-guide.html#SECTION007100000000000000000">4.10 XML Section: Storage management</A>
+<LI><A NAME="tex2html190"
+  HREF="user-guide.html#SECTION007110000000000000000">4.11 XML Section: Buffer management</A>
+<LI><A NAME="tex2html191"
+  HREF="user-guide.html#SECTION007120000000000000000">4.12 XML Section: Trace control</A>
+<LI><A NAME="tex2html192"
+  HREF="user-guide.html#SECTION007130000000000000000">4.13 XML Section: Bursts</A>
+<LI><A NAME="tex2html193"
+  HREF="user-guide.html#SECTION007140000000000000000">4.14 XML Section: Others</A>
+<LI><A NAME="tex2html194"
+  HREF="user-guide.html#SECTION007150000000000000000">4.15 XML Section: Sampling</A>
+<LI><A NAME="tex2html195"
+  HREF="user-guide.html#SECTION007160000000000000000">4.16 XML Section: Merge</A>
+<LI><A NAME="tex2html196"
+  HREF="user-guide.html#SECTION007170000000000000000">4.17 Using environment variables within the XML file</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html197"
+  HREF="user-guide.html#SECTION00800000000000000000">5. Extrae API</A>
+<UL>
+<LI><A NAME="tex2html198"
+  HREF="user-guide.html#SECTION00810000000000000000">5.1 Basic API</A>
+<LI><A NAME="tex2html199"
+  HREF="user-guide.html#SECTION00820000000000000000">5.2 Extended API</A>
+<LI><A NAME="tex2html200"
+  HREF="user-guide.html#SECTION00830000000000000000">5.3 Special considerations for Cell Broadband Engine tracing package</A>
+<UL>
+<LI><A NAME="tex2html201"
+  HREF="user-guide.html#SECTION00831000000000000000">5.3.1 PPE side</A>
+<LI><A NAME="tex2html202"
+  HREF="user-guide.html#SECTION00832000000000000000">5.3.2 SPE side</A>
+</UL>
+</UL>
+<BR>
+<LI><A NAME="tex2html203"
+  HREF="user-guide.html#SECTION00900000000000000000">6. Merging process</A>
+<UL>
+<LI><A NAME="tex2html204"
+  HREF="user-guide.html#SECTION00910000000000000000">6.1 Paraver merger</A>
+<UL>
+<LI><A NAME="tex2html205"
+  HREF="user-guide.html#SECTION00911000000000000000">6.1.1 Sequential Paraver merger</A>
+<LI><A NAME="tex2html206"
+  HREF="user-guide.html#SECTION00912000000000000000">6.1.2 Parallel Paraver merger</A>
+</UL>
+<LI><A NAME="tex2html207"
+  HREF="user-guide.html#SECTION00920000000000000000">6.2 Dimemas merger</A>
+<LI><A NAME="tex2html208"
+  HREF="user-guide.html#SECTION00930000000000000000">6.3 Environment variables</A>
+<UL>
+<LI><A NAME="tex2html209"
+  HREF="user-guide.html#SECTION00931000000000000000">6.3.1 Environment variables suitable to Paraver merger</A>
+<LI><A NAME="tex2html210"
+  HREF="user-guide.html#SECTION00932000000000000000">6.3.2 Environment variables suitable to Dimemas merger</A>
+</UL>
+</UL>
+<BR>
+<LI><A NAME="tex2html211"
+  HREF="user-guide.html#SECTION001000000000000000000">7. Examples</A>
+<UL>
+<LI><A NAME="tex2html212"
+  HREF="user-guide.html#SECTION001010000000000000000">7.1 DynInst based examples</A>
+<UL>
+<LI><A NAME="tex2html213"
+  HREF="user-guide.html#SECTION001011000000000000000">7.1.1 Generating intermediate files for serial or OpenMP applications</A>
+<LI><A NAME="tex2html214"
+  HREF="user-guide.html#SECTION001012000000000000000">7.1.2 Generating intermediate files for MPI applications</A>
+</UL>
+<LI><A NAME="tex2html215"
+  HREF="user-guide.html#SECTION001020000000000000000">7.2 LD_PRELOAD based examples</A>
+<UL>
+<LI><A NAME="tex2html216"
+  HREF="user-guide.html#SECTION001021000000000000000">7.2.1 Linux</A>
+<LI><A NAME="tex2html217"
+  HREF="user-guide.html#SECTION001022000000000000000">7.2.2 CUDA</A>
+<LI><A NAME="tex2html218"
+  HREF="user-guide.html#SECTION001023000000000000000">7.2.3 AIX</A>
+</UL>
+<LI><A NAME="tex2html219"
+  HREF="user-guide.html#SECTION001030000000000000000">7.3 Statically linked based examples</A>
+<UL>
+<LI><A NAME="tex2html220"
+  HREF="user-guide.html#SECTION001031000000000000000">7.3.1 Linking the application</A>
+<LI><A NAME="tex2html221"
+  HREF="user-guide.html#SECTION001032000000000000000">7.3.2 Generating the intermediate files</A>
+</UL>
+<LI><A NAME="tex2html222"
+  HREF="user-guide.html#SECTION001040000000000000000">7.4 Generating the final tracefile</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html223"
+  HREF="user-guide.html#SECTION001100000000000000000">A. An example of Extrae XML configuration file</A>
+<LI><A NAME="tex2html224"
+  HREF="user-guide.html#SECTION001200000000000000000">B. Environment variables</A>
+<LI><A NAME="tex2html225"
+  HREF="user-guide.html#SECTION001300000000000000000">C. Frequently Asked Questions</A>
+<UL>
+<LI><A NAME="tex2html226"
+  HREF="user-guide.html#SECTION001310000000000000000">C.1 Configure, compile and link FAQ</A>
+<LI><A NAME="tex2html227"
+  HREF="user-guide.html#SECTION001320000000000000000">C.2 Execution FAQ</A>
+<LI><A NAME="tex2html228"
+  HREF="user-guide.html#SECTION001330000000000000000">C.3 Performance monitoring counters FAQ</A>
+<LI><A NAME="tex2html229"
+  HREF="user-guide.html#SECTION001340000000000000000">C.4 Merging traces FAQ</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html230"
+  HREF="user-guide.html#SECTION001400000000000000000">D. Instrumented routines</A>
+<UL>
+<LI><A NAME="tex2html231"
+  HREF="user-guide.html#SECTION001410000000000000000">D.1 Instrumented MPI routines</A>
+<LI><A NAME="tex2html232"
+  HREF="user-guide.html#SECTION001420000000000000000">D.2 Instrumented OpenMP runtimes</A>
+<UL>
+<LI><A NAME="tex2html233"
+  HREF="user-guide.html#SECTION001421000000000000000">D.2.1 Intel compilers - icc, iCC, ifort</A>
+<LI><A NAME="tex2html234"
+  HREF="user-guide.html#SECTION001422000000000000000">D.2.2 IBM compilers - xlc, xlC, xlf</A>
+<LI><A NAME="tex2html235"
+  HREF="user-guide.html#SECTION001423000000000000000">D.2.3 GNU compilers - gcc, g++, gfortran</A>
+</UL>
+<LI><A NAME="tex2html236"
+  HREF="user-guide.html#SECTION001430000000000000000">D.3 Instrumented pthread runtimes</A>
+</UL></UL>
+<!--End of Table of Contents-->
+<BR>
+
+<H2><A NAME="SECTION00200000000000000000">
+List of Figures</A>
+</H2><UL>
+<LI>1.1. <A NAME="tex2html2"
+  HREF="user-guide.html#209">An example of the <TT>extrae-post-installation-upgrade.sh</TT> script execution</A></UL>
+<BR>
+
+<H2><A NAME="SECTION00300000000000000000">
+List of Tables</A>
+</H2><UL>
+<LI>1.1. <A NAME="tex2html1"
+  HREF="user-guide.html#106">Package contents description</A>
+<LI>1.2. <A NAME="tex2html10"
+  HREF="user-guide.html#185">Available libraries in Extrae. Their availability depends upon the configure process.</A>
+<LI>. <A NAME="tex2html19"
+  HREF="user-guide.html#3091">Description of the available mergers in the <I>Extrae</I> package.</A></UL>
+<P>
+
+<P>
+
+<P>
+
+<H1><A NAME="SECTION00400000000000000000"></A><A NAME="cha:QuickStart"></A>
+<BR>
+1. Quick start guide
+</H1>
+
+<P>
+
+<P>
+
+<H1><A NAME="SECTION00410000000000000000">
+1.1 The instrumentation package</A>
+</H1>
+
+<P>
+
+<H2><A NAME="SECTION00411000000000000000">
+1.1.1 Uncompressing the package</A>
+</H2>
+
+<P>
+<I>Extrae</I> is a dynamic instrumentation package to trace programs compiled and run with the shared memory model (like OpenMP and pthreads), the message passing (MPI) programming model or both programming models (different MPI processes using OpenMP or pthrads within each MPI process). <I>Extrae</I> generates trace files that can be latter visualized with <I>Paraver</I> .
+
+<P>
+The package is distributed in compressed tar format (e.g., extrae.tar.gz).  To unpack it, execute from the desired target directory the following command line :
+
+<P>
+<PRE>
+               gunzip -c extrae.tar.gz | tar -xvf -
+</PRE>
+
+<P>
+The unpacking process will create different directories on the current directory (see table <A HREF="#tab:PackageDescription">1.1</A>).
+
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="106"></A>
+<TABLE>
+<CAPTION><STRONG>Table 1.1:</STRONG>
+Package contents description</CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT"><B>Directory</B></TD>
+<TD ALIGN="LEFT"><B>Contents</B></TD>
+</TR>
+<TR><TD ALIGN="LEFT">bin</TD>
+<TD ALIGN="LEFT">Contains the binary files of the <I>Extrae</I> tool.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">etc</TD>
+<TD ALIGN="LEFT">Contains some scripts to set up environment variables and the</TD>
+</TR>
+<TR><TD ALIGN="LEFT">&nbsp;</TD>
+<TD ALIGN="LEFT"><I>Extrae</I> internal files.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">lib</TD>
+<TD ALIGN="LEFT">Contains the <I>Extrae</I> tool libraries.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">share/man</TD>
+<TD ALIGN="LEFT">Contains the <I>Extrae</I> manual entries.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">share/doc</TD>
+<TD ALIGN="LEFT">Contains the <I>Extrae</I> manuals (pdf, ps and html versions).</TD>
+</TR>
+<TR><TD ALIGN="LEFT">share/example</TD>
+<TD ALIGN="LEFT">Contains examples to illustrate the <I>Extrae</I> instrumentation.</TD>
+</TR>
+</TABLE></DIV>
+
+<A NAME="tab:PackageDescription"></A></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+
+<P>
+
+<H2><A NAME="SECTION00412000000000000000">
+1.1.2 Post-configuring the package</A>
+</H2>
+
+<P>
+There are some files within <I>Extrae</I> that contain references to libraries given at configure time. Because of this, you need to adapt the installation to your system. In order to do that <I>Extrae</I> provides an automatic mechanism that post-configures the package. Once you have installed <I>Extrae</I> , just set <TT>EXTRAE_HOME</TT> environment variable to the directory where you have untarred it and execute <TT>${EXTRAE_HOME}/bin/extrae-post-installation-upgrade.sh</TT>. This script will guide you into some questions about the location of several libraries needed by <I>Extrae</I> . The script shows the current value for the library directories and gives the user the chance to change them. In case the libraries were unused at configure time, thet current value will be an empty string.
+
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="209"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 1.1:</STRONG>
+An example of the <TT>extrae-post-installation-upgrade.sh</TT> script execution</CAPTION>
+<TR><TD><IMG
+ WIDTH="542" HEIGHT="364" BORDER="0"
+ SRC="img1.png"
+ ALT="\begin{figure}\centering
+\psfig{figure=images/extrae-post-installation.eps, width=12cm}\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<H1><A NAME="SECTION00420000000000000000">
+1.2 Quick running</A>
+</H1>
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    There are several included examples in the installation package. These examples are installed in <TT>${EXTRAE_HOME}/share/example</TT> and cover different application types (including serial/MPI/OpenMP/CUDA/<EM>etc</EM>). We suggest the user to look at them to get an idea on how to instrument their application.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<BR>
+<P>
+Once the package has been unpacked, set the <TT>EXTRAE_HOME</TT> environment variable to the directory where the package was installed. Use the <TT>export</TT> or <TT>setenv</TT> commands to set it up depending on the shell you use.  If you use sh-based shell (like sh, bash, ksh, zsh, ...), issue this command
+<PRE>
+               export EXTRAE_HOME=dir
+</PRE>
+however, if you use csh-based shell (like csh, tcsh), execute the following command
+<PRE>
+               setenv EXTRAE_HOME dir
+</PRE>
+where <EM>dir</EM> refers where the <I>Extrae</I> was installed. Henceforth, all references to the usage of the environment variables will be used following the sh format unless specified.
+
+<P>
+<I>Extrae</I> is offered in two different flavors: as a DynInst-based application, or stand-alone application. DynInst is a dynamic instrumentation library that allows the injection of code in a running application without the need to recompile the target application. If the DynInst instrumentation library is not installed, <I>Extrae</I> also offers different mechanisms to trace applications.
+
+<P>
+
+<H2><A NAME="SECTION00421000000000000000"></A><A NAME="subsec:RunningTraceDynInst"></A>
+<BR>
+1.2.1 Quick running <I>Extrae</I> - based on DynInst
+</H2>
+
+<P>
+<I>Extrae</I> needs some environment variables to be setup on each session. Issuing the command 
+
+<P>
+<PRE>
+               source ${EXTRAE_HOME}/etc/extrae.sh
+</PRE>
+
+<P>
+on a sh-based shell, or 
+
+<P>
+<PRE>
+               source ${EXTRAE_HOME}/etc/extrae.csh
+</PRE>
+
+<P>
+on a csh-based shell will do the work. Then copy the default XML configuration file<A NAME="tex2html3"
+  HREF="#foot211"><SUP>1.1</SUP></A> into the working directory by executing
+
+<P>
+<PRE>
+               cp ${EXTRAE_HOME}/share/example/MPI/extrae.xml .
+</PRE>
+
+<P>
+If needed, set the application environment variables as usual (like <TT>OMP_NUM_THREADS</TT>, for example), and finally launch the application using the <TT>${EXTRAE_HOME}/bin/extrae</TT> instrumenter like:
+
+<P>
+<PRE>
+               ${EXTRAE_HOME}/bin/extrae -config extrae.xml &lt;program&gt;
+</PRE>
+
+<P>
+where <TT>&lt;program&gt;</TT> is the application binary.
+
+<P>
+
+<H2><A NAME="SECTION00422000000000000000"></A><A NAME="subsec:RunningTraceNOTDynInst"></A>
+<BR>
+1.2.2 Quick running <I>Extrae</I> - NOT based on DynInst
+</H2>
+
+<P>
+<I>Extrae</I> needs some environment variables to be setup on each session. Issuing the command 
+
+<P>
+<PRE>
+               source ${EXTRAE_HOME}/etc/extrae.sh
+</PRE>
+
+<P>
+on a sh-based shell, or 
+
+<P>
+<PRE>
+               source ${EXTRAE_HOME}/etc/extrae.csh
+</PRE>
+
+<P>
+on a csh-based shell will do the work. Then copy the default XML configuration file<A NAME="tex2html4"
+  HREF="#foot211"><SUP>1.1</SUP></A>into the working directory by executing
+
+<P>
+<PRE>
+               cp ${EXTRAE_HOME}/share/example/MPI/extrae.xml .
+</PRE>
+
+<P>
+and export the EXTRAE_CONFIG_FILE as
+
+<P>
+<PRE>
+               export EXTRAE_CONFIG_FILE=extrae.xml
+</PRE>
+
+<P>
+If needed, set the application environment variables as usual (like <TT>OMP_NUM_THREADS</TT>, for example). Just before executing the target application, issue the following command:
+
+<P>
+<PRE>
+               export LD_PRELOAD=${EXTRAE_HOME}/lib/&lt;lib&gt;
+</PRE>
+
+<P>
+where <TT>&lt;lib&gt;</TT> is one of those listed in Table <A HREF="#tab:AvailableExtraeLIBS">1.2</A>. 
+
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="185"></A>
+<TABLE>
+<CAPTION><STRONG>Table 1.2:</STRONG>
+Available libraries in Extrae. Their availability depends upon the configure process.</CAPTION>
+<TR><TD> <DIV ALIGN="CENTER">  0.90
+  <TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT"><B>Library</B></TD>
+<TD ALIGN="CENTER" COLSPAN=7><B>Application type</B></TD>
+</TR>
+<TR><TD ALIGN="LEFT">&nbsp;</TD>
+<TD ALIGN="CENTER"><B>Serial</B></TD>
+<TD ALIGN="CENTER"><B>MPI</B></TD>
+<TD ALIGN="CENTER"><B>OpenMP</B></TD>
+<TD ALIGN="CENTER"><B>pthread</B></TD>
+<TD ALIGN="CENTER"><B>SMPss</B></TD>
+<TD ALIGN="CENTER"><B>nanos/OMPss</B></TD>
+<TD ALIGN="CENTER"><B>CUDA</B></TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libseqtrace</TT></TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libmpitrace</TT><A NAME="footfnm2"
+ HREF="#fnm2"><SUP>1.2</SUP></A></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libomptrace</TT></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libpttrace</TT></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libsmpsstrace</TT></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libnanostrace</TT></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libcudatrace</TT></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libompitrace</TT><A NAME="tex2html5"
+  HREF="#footfnm2"><SUP>1.2</SUP></A></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libptmpitrace</TT><A NAME="tex2html6"
+  HREF="#footfnm2"><SUP>1.2</SUP></A></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libsmpssmpitrace</TT><A NAME="tex2html7"
+  HREF="#footfnm2"><SUP>1.2</SUP></A></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libnanosmpitrace</TT><A NAME="tex2html8"
+  HREF="#footfnm2"><SUP>1.2</SUP></A></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+</TR>
+<TR><TD ALIGN="LEFT"><TT>libcudampitrace</TT><A NAME="tex2html9"
+  HREF="#footfnm2"><SUP>1.2</SUP></A></TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">Yes</TD>
+</TR>
+</TABLE> 
+<A NAME="tab:AvailableExtraeLIBS"></A></DIV></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+
+<P>
+
+<P>
+
+<H1><A NAME="SECTION00430000000000000000">
+1.3 Quick merging the intermediate traces</A>
+</H1>
+
+<P>
+Once the intermediate trace files (*.mpit files) have been created, they have to be merged (using the <TT>mpi2prv</TT> command) in order to generate the final <I>Paraver</I> trace file. Execute the following command to proceed with the merge:
+
+<P>
+<PRE>
+               ${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -o output.prv
+</PRE>
+
+<P>
+The result of the merge process is a <I>Paraver</I> tracefile called output.prv. If the -o option is not given, the resulting tracefile is called EXTRAE_Paraver_Trace.prv. 
+
+<P>
+
+<H1><A NAME="SECTION00500000000000000000"></A><A NAME="cha:Introduction"></A>
+<BR>
+2. Introduction
+</H1>
+
+<P>
+<I>Extrae</I> is a dynamic instrumentation package to trace programs compiled and run with the shared memory model (like OpenMP and pthreads), the message passing (MPI) programming model or both programming models (different MPI processes using OpenMP or pthreads within each MPI process). <I>Extrae</I> generates trace files that can be visualized with <I>Paraver</I> .
+
+<P>
+<I>Extrae</I> is currently available on different platforms and operating systems: IBM PowerPC running Linux or AIX, and x86 and x86-64 running Linux. It also has been ported to OpenSolaris and FreeBSD.
+
+<P>
+The combined use of <I>Extrae</I> and <I>Paraver</I> offers an enormous analysis potential, both qualitative and quantitative. With these tools the actual performance bottlenecks of parallel applications can be identified. The microscopic view of the program behavior that the tools provide is very useful to optimize the parallel program performance.
+
+<P>
+This document tries to give the basic knowledge to use the <I>Extrae</I> tool. Chapter <A HREF="#cha:Configuration">3</A> explains how the package can be configured and installed. Chapter <A HREF="#cha:Examples">7</A> explains how to monitor an application to obtain its trace file. At the end of this document there are appendices that include: a Frequent Asked Questions appendix and a list of routines instrumented in the package.
+
+<P>
+
+<H2><A NAME="SECTION00501000000000000000">
+What is the <I>Paraver</I> tool?</A>
+</H2>
+
+<P>
+<I>Paraver</I> is a flexible parallel program visualization and analysis tool based on an easy-to-use Motif GUI. <I>Paraver</I> was developed responding to the need of hacing a qualitative global perception of the application behavior by visual inspection and then to be able to focus on the detailed quantitative analysis of the problems. <I>Paraver</I> provides a large amount of information useful to decide the points on which to invest the programming effort to optimize an application.
+
+<P>
+Expressive power, flexibility and the capability of efficiently handling large traces are key features addressed in the design of <I>Paraver</I> . The clear and modular structure of <I>Paraver</I> plays a significant role towers achieving these targets.
+
+<P>
+Some <I>Paraver</I> features are the support for:
+
+<UL>
+<LI>Detailed quantitative analysis of program performance,
+</LI>
+<LI>concurrent comparative analysis of several traces,
+</LI>
+<LI>fast analysis of very large traces,
+</LI>
+<LI>support for mixed message passing and shared memory (network of SMPs), and,
+</LI>
+<LI>customizable semantics of the visualized information.
+</LI>
+</UL>
+
+<P>
+One of the main features of <I>Paraver</I> is the flexibility to represent traces coming from different environments. Traces are composed of state records, events and communications with associated timestamp. These three elements can be used to build traces that capture the behavior along time of very different kind of systems. The <I>Paraver</I> distribution includes, either in its own distribution or as additional packages, the following instrumentation modules:
+
+<OL>
+<LI>Sequential application tracing: it is included in the <I>Paraver</I> distribution. It can be used to trace the value of certain variables, procedure invocations, ... in a sequential program.
+</LI>
+<LI>Parallel application tracing: a set of modules are optionally available to capture the activity of parallel applications using shared-memory, message-passing paradigms, or a combination of them.
+</LI>
+<LI>System activity tracing in a multiprogrammed environment: an application to trace processor allocations and process migrations is optionally available in the <I>Paraver</I> distribution.
+</LI>
+<LI>Hardware counters tracing: an application to trace the hardware counter values is optionally available in the <I>Paraver</I> distribution.
+</LI>
+</OL>
+
+<P>
+
+<H2><A NAME="SECTION00502000000000000000">
+Where the <I>Paraver</I> tool can be found?</A>
+</H2>
+
+<P>
+The <I>Paraver</I> distribution can be found at URL:
+
+<P>
+<TT><A NAME="tex2html11"
+  HREF="http://www.bsc.es/paraver">http://www.bsc.es/paraver</A></TT>
+<P>
+<I>Paraver</I> binaries are available for Linux/x86, Linux/x86-64 and Linux/ia64, Windows.
+
+<P>
+In the Documentation Tool section of the aforementioned URL you can find the <EM><I>Paraver</I> Reference Manual</EM> and <EM><I>Paraver</I> Tutorial</EM> in addition to the documentation for other instrumentation packages.
+
+<P>
+<I>Extrae</I> and <I>Paraver</I> tools e-mail support is <B>tools@bsc.es</B>.
+
+<P>
+
+<H1><A NAME="SECTION00600000000000000000"></A><A NAME="cha:Configuration"></A>
+<BR>
+3. Configuration, build and installation
+</H1>
+
+<P>
+
+<H1><A NAME="SECTION00610000000000000000">
+3.1 Configuration of the instrumentation package</A>
+</H1>
+
+<P>
+There are many options to be applied at configuration time for the instrumentation package. We point out here some of the relevant options, sorted alphabetically. To get the whole list run <TT>configure -help</TT>. Options can be enabled or disabled. To enable them use -enable-X or -with-X= (depending on which option is available), to disable them use -disable-X or -without-X.
+
+<P>
+
+<UL>
+<LI><TT>-enable-merge-in-trace</TT> 
+<BR>
+Embed the merging process in the tracing library so the final tracefile can be generated automatically from the application run.
+</LI>
+<LI><TT>-enable-parallel-merge</TT> 
+<BR>
+Build the parallel mergers (mpimpi2prv/mpimpi2dim) based on MPI.
+</LI>
+<LI><TT>-enable-posix-clock</TT> 
+<BR>
+Use POSIX clock (clock_gettime call) instead of low level timing routines. Use this option if the system where you install the instrumentation package modifies the frequency of its processors at runtime.
+</LI>
+<LI><TT>-enable-single-mpi-lib</TT> 
+<BR>
+Produces a single instrumentation library for MPI that contains both Fortran and C wrappers. Applications that call the MPI library from both C and Fortran languages need this flag to be enabled.
+</LI>
+<LI><TT>-enable-spu-write</TT> 
+<BR>
+Enable direct write operations to disk from SPUs in CELL machines avoiding the usage of DMA transfers. The write mechanism is very slow compared with the original behavior.
+</LI>
+<LI><TT>-enable-sampling</TT> 
+<BR>
+Enable PAPI sampling support.
+</LI>
+<LI><TT>-enable-pmapi</TT> 
+<BR>
+Enable PMAPI library to gather CPU performance counters. PMAPI is a base package installed in AIX systems since version 5.2.
+</LI>
+<LI><TT>-enable-openmp</TT> 
+<BR>
+Enable support for tracing OpenMP on IBM and GNU runtimes. The IBM runtime instrumentation is only available for PowerPC systems.
+</LI>
+<LI><TT>-enable-smpss</TT> 
+<BR>
+Enable support for tracing SMP-superscalar.
+</LI>
+<LI><TT>-enable-nanos</TT> 
+<BR>
+Enable support for tracing Nanos run-time.
+</LI>
+<LI><TT>-enable-pthread</TT> 
+<BR>
+Enable support for tracing pthread library calls.
+</LI>
+<LI><TT>-enable-upc</TT> 
+<BR>
+Enable support for tracing UPC run-time.
+</LI>
+<LI><TT>-enable-xml</TT> 
+<BR>
+Enable support for XML configuration (not available on BG/L, BG/P and BG/Q systems).
+</LI>
+<LI><TT>-enable-xmltest</TT> 
+<BR>
+Do not try to compile and run a test LIBXML program.
+</LI>
+<LI><TT>-enable-doc</TT> 
+<BR>
+Generates this documentation.
+</LI>
+<LI><TT>-prefix=DIR</TT> 
+<BR>
+Location where the installation will be placed. After issuing <TT>make install</TT> you will find under DIR the entries <TT>lib/</TT>, <TT>include/</TT>, <TT>share/</TT> and <TT>bin/</TT> containing everything needed to run the instrumentation package.
+</LI>
+<LI><TT>-with-mpi=DIR</TT> 
+<BR>
+Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
+</LI>
+<LI><TT>-with-binary-type=OPTION</TT> 
+<BR>
+Available options are: 32, 64 and default. Specifies the type of memory address model when compiling (32bit or 64bit).
+</LI>
+<LI><TT>-with-boost=DIR</TT> 
+<BR>
+Specify the location of the BOOST package. This package is required when using the DynInst instrumentation with versions newer than 7.0.1.
+</LI>
+<LI><TT>-with-mpi-name-mangling=OPTION</TT> 
+<BR>
+Available options are: 0u, 1u, 2u, upcase and auto. Choose the Fortran name decoration (0, 1 or 2 underscores) for MPI symbols. Let OPTION be auto to automatically detect the name mangling.
+</LI>
+<LI><TT>-with-pacx=DIR</TT> 
+<BR>
+Specify where PACX communication library can be find.
+</LI>
+<LI><TT>-with-unwind=DIR</TT> 
+<BR>
+Specify where to find Unwind libraries and includes. This library is used to get callstack information on several architectures (including IA64 and Intel x86-64). This flag is mandatory.
+</LI>
+<LI><TT>-with-papi=DIR</TT> 
+<BR>
+Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters. This flag is mandatory.
+</LI>
+<LI><TT>-with-bfd=DIR</TT> 
+<BR>
+Specify where to find the Binary File Descriptor package. In conjunction with libiberty, it is used to translate addresses into source code locations.
+</LI>
+<LI><TT>-with-liberty=DIR</TT> 
+<BR>
+Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
+</LI>
+<LI><TT>-with-dyninst=DIR</TT> 
+<BR>
+Specify the installation location for the DynInst package. <I>Extrae</I> also requires the DWARF package <TT>-with-dwarf=DIR</TT> when using DynInst. Also, newer versions of DynInst (versions after 7.0.1) require the BOOST package <TT>-with-boost</TT>. This flag is mandatory. Requires a working installation of a C++ compiler.
+</LI>
+<LI><TT>-with-cuda=DIR</TT> 
+<BR>
+Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the <TT>LD_PRELOAD</TT> mechanism. It is superseded by <TT>-with-cupti=DIR</TT> which also supports instrmentation for static binaries.
+</LI>
+<LI><TT>-with-cupti=DIR</TT> 
+<BR>
+Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the <TT>-with-cuda</TT>, although it still requires <TT>-with-cuda</TT>.
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION00620000000000000000">
+3.2 Build</A>
+</H1>
+
+<P>
+To build the instrumentation package, just issue <TT>make</TT> after the configuration.
+
+<P>
+
+<H1><A NAME="SECTION00630000000000000000">
+3.3 Installation</A>
+</H1>
+
+<P>
+To install the instrumentation package in the directory chosen at configure step (through <TT>-prefix</TT> option), issue <TT>make install</TT>.
+
+<P>
+
+<H1><A NAME="SECTION00640000000000000000">
+3.4 Check</A>
+</H1>
+
+<P>
+The <I>Extrae</I> package contains some consistency checks. The aim of such checks is to determine whether a functionality is operative in the target (installation) environment and/or check whether the development of <I>Extrae</I> has introduced any misbehavior. To run the checks, just issue <TT>make check</TT> after the installation. Please, notice that checks are meant to be run in the machine that the configure script was run, thus the results of the checks on machines with back-end nodes different to front-end nodes (like BG/* systems) are not representative at all.
+
+<P>
+
+<H1><A NAME="SECTION00650000000000000000">
+3.5 Examples of configuration on different machines</A>
+</H1>
+
+<P>
+All commands given here are given as an example to configure and install the package, you may need to tune them properly (i.e., choose the appropriate directories for packages and so).  These examples assume that you are using a sh/bash shell, you must adequate them if you use other shells (like csh/tcsh).
+
+<P>
+
+<H2><A NAME="SECTION00651000000000000000">
+3.5.1 Bluegene (L and P variants)</A>
+</H2>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=/homec/jzam11/jzam1128/aplic/extrae/2.2.0 -with-papi=/homec/jzam11/jzam1128/aplic/papi/4.1.2.1 -with-bfd=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux -with-liberty=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-bgp-linux -with-mpi=/bgsys/drivers/ppcfloor/comm -without-unwind -without-dyninst</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H2><A NAME="SECTION00652000000000000000">
+3.5.2 BlueGene/Q</A>
+</H2>
+
+<P>
+To enable parsing the XML configuration file, the libxml2 must be installed. As of the time of writing this user guide, we have been only able to install the static version of the library in a BG/Q machine, so take this into consideration if you install the libxml2 in the system.  Similarly, the binutils package (responsible for translating application addresses into source code locations) that is available in the system may not be properly installed and we suggest installing the binutils from the source code using the BG/Q cross-compiler. Regarding the cross-compilers, we have found that using the IBM XL compilers may require using the XL libraries when generating the final application binary with Extrae, so we would suggest using the GNU cross-compilers (<TT>/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-*</TT>).
+
+<P>
+If you want to add libxml2 and binutils support into Extrae, your configuration command may resemble to:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 -with-mpi=/bgsys/drivers/ppcfloor/comm/gcc -without-unwind -without-dyninst -disable-openmp -disable-pthread
+<BR>-with-libz=/bgsys/local/zlib/v1.2.5
+<BR>-with-papi=/usr/local/UNITE/packages/papi/5.0.1
+<BR>-with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2-gcc
+<BR>-with-binutils=/homec/jzam11/jzam1128/aplic/juqueen/binutils-gcc
+<BR>-enable-merge-in-trace</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Otherwise, if you do not want to add support for the libxml2 library, your configuration may look like this:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 -with-mpi=/bgsys/drivers/ppcfloor/comm/gcc -without-unwind -without-dyninst -disable-openmp -disable-pthread
+<BR>-with-libz=/bgsys/local/zlib/v1.2.5
+<BR>-with-papi=/usr/local/UNITE/packages/papi/5.0.1 -disable-xml</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+In any situation, the build and installation commands are:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H2><A NAME="SECTION00653000000000000000">
+3.5.3 AIX</A>
+</H2>
+
+<P>
+Some extensions of <I>Extrae</I> do not work properly (nanos, SMPss and OpenMP) on AIX. In addition, if using IBM MPI (aka POE) the make will complain when generating the parallel merge if the main compiler is not xlc/xlC. So, you can either change the compiler or disable the parallel merge at compile step. Also, command <TT>ar</TT> can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT_MODE=64 set to avoid this.
+
+<P>
+
+<H3><A NAME="SECTION00653100000000000000">
+3.5.3.1 Compiling the 32bit package using the IBM compilers</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>CC=xlc CXX=xlC ./configure -prefix=PREFIX -disable-nanos -disable-smpss -disable-openmp -with-binary-type=32 -without-unwind -enable-pmapi -without-dyninst -with-mpi=/usr/lpp/ppe.poe</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00653200000000000000">
+3.5.3.2 Compiling the 64bit package without the parallel merge</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=PREFIX -disable-nanos -disable-smpss -disable-openmp -disable-parallel-merge -with-binary-type=64 -without-unwind -enable-pmapi -without-dyninst -with-mpi=/usr/lpp/ppe.poe</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>OBJECT_MODE=64 make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H2><A NAME="SECTION00654000000000000000">
+3.5.4 Linux</A>
+</H2>
+
+<P>
+
+<H3><A NAME="SECTION00654100000000000000">
+3.5.4.1 Compiling using default binary type using MPICH, OpenMP and PAPI</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=PREFIX -with-mpi=/home/harald/aplic/mpich/1.2.7 -with-papi=/usr/local/papi -enable-openmp -without-dyninst -without-unwind</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654200000000000000">
+3.5.4.2 Compiling 32bit package in a 32/64bit mixed environment</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=PREFIX -with-mpi=/opt/osshpc/mpich-mx -with-papi=/gpfs/apps/PAPI/3.6.2-970mp -with-binary-type=32 -with-unwind=$HOME/aplic/unwind/1.0.1/32 -with-elf=/usr -with-dwarf=/usr -with-dyninst=$HOME/aplic/dyninst/7.0.1/32</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make 
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654300000000000000">
+3.5.4.3 Compiling 64bit package in a 32/64bit mixed environment</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=PREFIX -with-mpi=/opt/osshpc/mpich-mx -with-papi=/gpfs/apps/PAPI/3.6.2-970mp -with-binary-type=64  -with-unwind=$HOME/aplic/unwind/1.0.1/64 -with-elf=/usr -with-dwarf=/usr -with-dyninst=$HOME/aplic/dyninst/7.0.1/64</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make 
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654400000000000000">
+3.5.4.4 Compiling using default binary type using OpenMPI and PACX</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=PREFIX -with-mpi=/home/harald/aplic/openmpi/1.3.1 -with-pacx=/home/harald/aplic/pacx/07.2009-openmpi -without-papi -without-unwind -without-dyninst</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654500000000000000">
+3.5.4.5 Compiling using default binary type, using OpenMPI, DynInst and libunwind</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=PREFIX -with-mpi=/home/harald/aplic/openmpi/1.3.1 -with-dyninst=/home/harald/dyninst/7.0.1 -with-dwarf=/usr
+<BR>-with-elf=/usr -with-unwind=/home/harald/aplic/unwind/1.0.1
+<BR>-without-papi</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654600000000000000">
+3.5.4.6 Compiling on CRAY XT5 for 64bit package and adding sampling</A>
+</H3>
+
+<P>
+Notice the "-disable-xmltest". As backends programs cannot be run in the frontend, we skip running the XML test. Also using a local installation of libunwind.
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' ./configure -with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu -with-binary-type=64 -with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1_gnu4.1.2 -disable-xmltest -with-bfd=/opt/cray/cce/7.1.5/cray-binutils -with-liberty=/opt/cray/cce/7.1.5/cray-binutils -enable-sampling -enable-shared=no -prefix=PREFIX -with-papi=/opt/xt-tools/papi/3.7.2/v23 -with-unwind=/ccs/home/user/lib -without-dyninst</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654700000000000000">
+3.5.4.7 Compiling for the Intel MIC accelerator</A>
+</H3>
+
+<P>
+The Intel MIC accelerators (codenamed KnightsFerry - KNF and KnightsCorner - KNC) are not binary compatible with the host (even if it is a x86 or x86/64 chip), thus the Extrae package must be compiled specially for the accelerator (twice if you want Extrae for the host). While the host configuration and installation has been shown before, in order to compile Extrae for the accelerator you must configure Extrae like:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -with-mpi=/opt/intel/impi/4.1.0.024/mic -without-dyninst -without-papi -without-unwind -disable-xml -disable-posix-clock -with-libz=/opt/extrae/zlib-mic -host=x86_64-suse-linux-gnu -prefix=/home/Computational/harald/extrae-mic -enable-mic
+<BR>
+CFLAGS="-O -mmic -I/usr/include" CC=icc CXX=icpc
+<BR>
+MPICC=/opt/intel/impi/4.1.0.024/mic/bin/mpiicc</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+To compile it, just issue:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654800000000000000">
+3.5.4.8 Compiling on a Power CELL processor using Linux</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -with-mpi=/opt/openmpi/ppc32 -without-unwind -without-dyninst -without-papi -prefix=/gpfs/data/apps/CEPBATOOLS/extrae/2.2.0/openmpi/32 -with-binary-type=32</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION00654900000000000000">
+3.5.4.9 Compiling on a ARM based processor machine using Linux</A>
+</H3>
+
+<P>
+If using the GNU toolchain to compile the library, we suggest at least using version 4.6.2 because of its enhaced in this architecture.
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>CC=/gpfs/APPS/BIN/GCC-4.6.2/bin/gcc-4.6.2 ./configure -prefix=/gpfs/CEPBATOOLS/extrae/2.2.0
+<BR>-with-unwind=/gpfs/CEPBATOOLS/libunwind/1.0.1-git
+<BR>-with-papi=/gpfs/CEPBATOOLS/papi/4.2.0 -with-mpi=/usr -enable-posix-clock -without-dyninst</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION006541000000000000000">
+3.5.4.10 Compiling in a Slurm/MOAB environment with support for MPICH2</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>export MP_IMPL=anl2 ./configure -prefix=PREFIX
+<BR>-with-mpi=/gpfs/apps/MPICH2/mx/1.0.8p1..3/32
+<BR>-with-papi=/gpfs/apps/PAPI/3.6.2-970mp -with-binary-type=64 -without-dyninst -without-unwind</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION006541100000000000000">
+3.5.4.11 Compiling in a environment with IBM compilers and POE</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>CC=xlc CXX=xlC ./configure -prefix=PREFIX -with-mpi=/opt/ibmhpc/ppe.poe -without-dyninst -without-unwind -without-papi</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H3><A NAME="SECTION006541200000000000000">
+3.5.4.12 Compiling in a environment with GNU compilers and POE</A>
+</H3>
+
+<P>
+Configuration command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>./configure -prefix=PREFIX -with-mpi=/opt/ibmhpc/ppe.poe -without-dyninst -without-unwind -without-papi</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+Build and installation commands:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>MP_COMPILER=gcc make
+<BR>
+make install</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00660000000000000000">
+3.6 Knowing how a package was configured</A>
+</H1>
+
+<P>
+If you are interested on knowing how an <I>Extrae</I> package was configured execute the following command after setting <TT>EXTRAE_HOME</TT> to the base location of an installation
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>${EXTRAE_HOME}/etc/configured.sh</TT>
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+this command will show the configure command itself and the location of some dependencies of the instrumentation package.
+
+<P>
+
+<H1><A NAME="SECTION00700000000000000000"></A><A NAME="cha:XML"></A>
+<BR>
+4. <I>Extrae</I> XML configuration file
+</H1>
+
+<P>
+<I>Extrae</I> is configured through a XML file that is set through the <TT>EXTRAE_CONFIG_FILE</TT> environment variable. The included examples provide several XML files to serve as a basis for the end user. There are four XML files:
+
+<UL>
+<LI><TT>extrae.xml</TT> Exemplifies all the options available to set up in the configuration file. We will discuss below all the sections and options available. It is also available on this document on appendix <A HREF="#cha:wholeXML">A</A>.
+</LI>
+<LI><TT>extrae_explained.xml</TT> The same as the above with some comments on each section.
+</LI>
+<LI><TT>summarized_trace_basic.xml</TT> A small example for gathering information of MPI and OpenMP information with some performace counters and calling information at each MPI call.
+</LI>
+<LI><TT>detailed_trace_basic.xml</TT> A small example for gathering a summarized information of MPI and OpenMP parallel paradigms.
+</LI>
+</UL>
+
+<P>
+Please note that most of the nodes present in the XML file have an <TT>enabled</TT> attribute that allows turning on and off some parts of the instrumentation mechanism. For example, <TT>&lt;mpi enabled="yes"&gt;</TT> means MPI instrumentation is enabled and process all the contained XML subnodes, if any; whether <TT>&lt;mpi enabled="no"&gt;</TT> means to skip gathering MPI information and do not process XML subnodes.
+
+<P>
+Each section points which environment variables could be used if the tracing package lacks XML support. See appendix <A HREF="#cha:EnvVar">B</A> for the entire list.
+
+<P>
+Sometimes the XML tags are used for time selection (duration, for instance). In such tags, the following postfixes can be used: n for nanoseconds, u for microseconds, m for milliseconds, s for seconds, M for minutes, H for hours and D for days.
+
+<P>
+
+<H1><A NAME="SECTION00710000000000000000"></A><A NAME="sec:XMLSectionTraceConfiguration"></A>
+<BR>
+4.1 XML Section: Trace configuration
+</H1>
+
+<P>
+The basic trace behavior is determined in the first part of the XML and <B>contains</B> all of the remaining options. It looks like:
+
+<P>
+<PRE>
+&lt;?xml version='1.0'?&gt;
+
+&lt;trace enabled="yes"
+ home="@sed_MYPREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="@sed_XMLID@"
+&gt;
+
+&lt; ... other XML nodes ... &gt;
+
+&lt;/trace&gt;
+</PRE>
+
+<P>
+The <TT>&lt;?xml version='1.0'?&gt;</TT> is mandatory for all XML files. Don't touch this. The available tunable options are under the <TT>&lt;trace&gt;</TT> node:
+
+<UL>
+<LI><TT>enabled</TT> Set to <TT>"yes"</TT> if you want to generate tracefiles.
+</LI>
+<LI><TT>home</TT> Set to where the instrumentation package is installed. Usually it points to the same location that <TT>EXTRAE_HOME</TT> environment variable.
+</LI>
+<LI><TT>initial-mode</TT> Available options
+  
+<UL>
+<LI><TT>detail</TT> Provides detailed information of the tracing.
+</LI>
+<LI><TT>bursts</TT> Provides summarized information of the tracing. This mode removes most of the information present in the detailed traces (like OpenMP and MPI calls among others) and only produces information for computation bursts.
+  
+</LI>
+</UL> 
+</LI>
+<LI><TT>type</TT> Available options
+  
+<UL>
+<LI><TT>paraver</TT> The intermediate files are meant to generate Paraver tracefiles.
+</LI>
+<LI><TT>dimemas</TT> The intermediate files are meant to generate Dimemas tracefiles.
+  
+</LI>
+</UL>
+</LI>
+<LI><TT>xml-parser-id</TT> This is used to check whether the XML parsing scheme and the file scheme match or not.
+</LI>
+</UL>
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_ON</B>, <B>EXTRAE_HOME</B>, <B>EXTRAE_INITIAL_MODE</B> and <B>EXTRAE_TRACE_TYPE</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00720000000000000000"></A><A NAME="sec:XMLSectionMPI"></A>
+<BR>
+4.2 XML Section: MPI
+</H1>
+
+<P>
+The MPI configuration part is nested in the config file (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>) and its nodes are the following:
+
+<P>
+<PRE>
+&lt;mpi enabled="yes"&gt;
+  &lt;counters enabled="yes" /&gt;
+&lt;/mpi&gt;
+</PRE>
+
+<P>
+MPI calls can gather performance information at the begin and end of MPI calls. To activate this behavior, just set to yes the attribute of the nested <TT>&lt;counters&gt;</TT> node.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_DISABLE_MPI</B> and <B>EXTRAE_MPI_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00730000000000000000"></A><A NAME="sec:XMLSectionPACX"></A>
+<BR>
+4.3 XML Section: PACX
+</H1>
+
+<P>
+The PACX configuration part is nested in the config file (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>) and its nodes are the following:
+
+<P>
+<PRE>
+&lt;pacx enabled="yes"&gt;
+  &lt;counters enabled="yes" /&gt;
+&lt;/pacx&gt;
+</PRE>
+
+<P>
+PACX calls can gather performance information at the begin and end of PACX calls. To activate this behavior, just set to yes the attribute of the nested <TT>&lt;counters&gt;</TT> node.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_DISABLE_PACX</B> and <B>EXTRAE_PACX_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00740000000000000000"></A><A NAME="sec:XMLSectionOpenMP"></A>
+<BR>
+4.4 XML Section: pthread
+</H1>
+
+<P>
+The pthread configuration part is nested in the config file (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>) and its nodes are the following:
+
+<P>
+<PRE>
+&lt;pthread enabled="yes"&gt;
+  &lt;locks enabled="no" /&gt;
+  &lt;counters enabled="yes" /&gt;
+&lt;/pthread&gt;
+</PRE>
+
+<P>
+The tracing package allows to gather information of some pthread routines. In addition to that, the user can also enable gathering information of locks and also gathering performance counters in all of these routines. This is achieved by modifying the enabled attribute of the <TT>&lt;locks&gt;</TT> and <TT>&lt;counters&gt;</TT>, respectively.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_DISABLE_PTHREAD</B>, <B>EXTRAE_PTHREAD_LOCKS</B> and <B>EXTRAE_PTHREAD_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00750000000000000000"></A><A NAME="sec:XMLSectionOpenMP"></A>
+<BR>
+4.5 XML Section: OpenMP
+</H1>
+
+<P>
+The OpenMP configuration part is nested in the config file (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>) and its nodes are the following:
+
+<P>
+<PRE>
+&lt;openmp enabled="yes"&gt;
+  &lt;locks enabled="no" /&gt;
+  &lt;counters enabled="yes" /&gt;
+&lt;/openmp&gt;
+</PRE>
+
+<P>
+The tracing package allows to gather information of some OpenMP runtimes and outlined routines. In addition to that, the user can also enable gathering information of locks and also gathering performance counters in all of these routines. This is achieved by modifying the enabled attribute of the <TT>&lt;locks&gt;</TT> and <TT>&lt;counters&gt;</TT>, respectively.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_DISABLE_OMP</B>, <B>EXTRAE_OMP_LOCKS</B> and <B>EXTRAE_OMP_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00760000000000000000"></A><A NAME="sec:XMLcell"></A>
+<BR>
+4.6 XML Section: CELL
+</H1>
+
+<P>
+The Cell configuration part is only parsed for tracing packages suited for the Cell architecture, and as the rest of sections it is nested in the config file (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>). The available nodes only affect the SPE side, and they are:
+
+<P>
+<PRE>
+&lt;cell enabled="no"&gt;
+  &lt;spu-file-size enabled="yes"&gt;5&lt;/spu-file-size&gt;
+  &lt;spu-buffer-size enabled="yes"&gt;64&lt;/spu-buffer-size&gt;
+  &lt;spu-dma-channel enabled="yes"&gt;2&lt;/spu-dma-channel&gt;
+&lt;/cell&gt;
+</PRE>
+
+<P>
+
+<UL>
+<LI><TT>spu-file-size</TT> Limits the resulting intermediate trace file for each SPE thread that has been instrumented.
+</LI>
+<LI><TT>spu-buffer-size</TT> Specifies the number of events contained in the buffer on the SPE side. Remember that memory is very scarce on the SPE, so setting a high value can exhaust all memory.
+</LI>
+<LI><TT>spu-dma-channel</TT> Chooses which DMA channel will be used to perform the intermediate trace files transfers to the PPE side.
+</LI>
+</UL>
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_SPU_FILE_SIZE</B>, <B>EXTRAE_SPU_BUFFER_SIZE</B> and <B>EXTRAE_SPU_DMA_CHANNEL</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00770000000000000000"></A><A NAME="sec:XMLSectionCallers"></A>
+<BR>
+4.7 XML Section: Callers
+</H1>
+
+<P>
+<PRE>
+&lt;callers enabled="yes"&gt;
+  &lt;mpi enabled="yes"&gt;1-3&lt;/mpi&gt;
+  &lt;pacx enabled="no"&gt;1-3&lt;/pacx&gt;
+  &lt;sampling enabled="no"&gt;1-5&lt;/sampling&gt;
+&lt;/callers&gt;
+</PRE>
+
+<P>
+Callers are the routine addresses present in the process stack at any given moment during the application run. Callers can be used to link the tracefile with the source code of the application.
+
+<P>
+The instrumentation library can collect a partial view of those addresses during the instrumentation. Such collected addresses are translated by the merging process if the correspondent parameter is given and the application has been compiled and linked with debug information.
+
+<P>
+There are three points where the instrumentation can gather this information:
+
+<P>
+
+<UL>
+<LI>Entry of MPI calls
+</LI>
+<LI>Entry of PACX calls
+</LI>
+<LI>Sampling points <EM>(if sampling is available in the tracing package)</EM>
+</LI>
+</UL>
+
+<P>
+The user can choose which addresses to save in the trace (starting from 1, which is the closest point to the MPI call or sampling point) specifying several stack levels by separating them by commas or using the hyphen symbol.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_MPI_CALLER</B> and <B>EXTRAE_PACX_CALLER</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00780000000000000000"></A><A NAME="sec:XMLSectionUF"></A>
+<BR>
+4.8 XML Section: User functions
+</H1>
+
+<P>
+<PRE>
+&lt;user-functions enabled="no" list="/home/bsc41/bsc41273/user-functions.dat"&gt;
+  &lt;counters enabled="yes" /&gt;
+&lt;/user-functions&gt;
+</PRE>
+
+<P>
+There are two different mechanisms to instrument user functions. One is using DynInst support, the other relies on compiling and linking the application using additional options. 
+
+<P>
+
+<UL>
+<LI>If you use DynInst support in the instrumentation package, then the pointed list in the <TT>list</TT> attribute within the tag is just a name list of the functions to be traced.
+
+<P>
+</LI>
+<LI>If you use the IBM XL compilers, specify the option <TT>-qdebug=function_trace</TT> at compile and link stages. The <TT>list</TT> attribute, as in DynInst, points to a name list of functions to be traced.
+
+<P>
+</LI>
+<LI>If you use the GNU C compiler with the option <TT>-finstrument-functions</TT> at compile and link stages, the <TT>list</TT> attribute must point a file with a list of entries like:
+
+<P>
+<TT>address # function_name</TT>
+
+<P>
+You can generate this list by using the nm command applied to the binary. For example, <TT>nm | grep FUNCTION</TT> will show you the function name, followed by the type of FUNCTION (should be T or t) and then followed by the address of the symbol.
+</LI>
+</UL>
+
+<P>
+Finally, in order to gather performance counters in these functions and also in those instrumented using the <TT>extrae_user_function</TT> API call, the node <TT>counters</TT> has to be enabled.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_FUNCTIONS</B> environment variable in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION00790000000000000000"></A><A NAME="sec:XMLSectionPerformanceCounters"></A>
+<BR>
+4.9 XML Section: Performance counters
+</H1>
+
+<P>
+The instrumentation library can be compiled with support for collecting performance metrics of different components available on the system. These components include:
+
+<P>
+
+<UL>
+<LI>Processor performance counters. Such access is granted by PAPI<A NAME="tex2html12"
+  HREF="#foot1831"><SUP>4.1</SUP></A> or PMAPI<A NAME="tex2html14"
+  HREF="#foot1827"><SUP>4.2</SUP></A>
+</LI>
+<LI>Network performance counters. <EM>(Only available in systems with Myrinet GM/MX networks).</EM>
+</LI>
+<LI>Operating system accounts.
+</LI>
+</UL>
+
+<P>
+Here is an example of the counters section in the XML configuration file:
+
+<P>
+<PRE>
+&lt;counters enabled="yes"&gt;
+  &lt;cpu enabled="yes" starting-set-distribution="1"&gt;
+    &lt;set enabled="yes" domain="all" changeat-time="5s"&gt;
+      PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM
+      &lt;sampling enabled="yes" period="100000000"&gt;PAPI_TOT_CYC&lt;/sampling&gt;
+    &lt;/set&gt;
+    &lt;set enabled="yes" domain="user" changeat-globalops="5"&gt;
+      PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_FP_INS
+    &lt;/set&gt;
+  &lt;/cpu&gt;
+  &lt;network enabled="yes" /&gt;
+  &lt;resource-usage enabled="yes" /&gt;
+&lt;/counters&gt;
+</PRE>
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_COUNTERS</B>, <B>EXTRAE_NETWORK_COUNTERS</B> and <B>EXTRAE_RUSAGE</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H2><A NAME="SECTION00791000000000000000"></A><A NAME="subsec:ProcessorPerformanceCounters"></A>
+<BR>
+4.9.1 Processor performance counters
+</H2>
+
+<P>
+Processor performance counters are configured in the <TT>&lt;cpu&gt;</TT> nodes. The user can configure many sets in the <TT>&lt;cpu&gt;</TT> node using the <TT>&lt;set&gt;</TT> node, but just one set will be used at any given time in a specific task. The <TT>&lt;cpu&gt;</TT> node supports the <TT>tarting-set-distribution</TT> attribute with the following accepted values:
+
+<P>
+
+<UL>
+<LI><TT>number</TT> (<EM>in range 1..N, where N is the number of configured sets</EM>) All tasks will start using the set specified by number.
+</LI>
+<LI><TT>block</TT> Each task will start using the given sets distributed in blocks (<EM>i.e.</EM>, if two sets are defined and there are four running tasks: tasks 1 and 2 will use set 1, and tasks 3 and 4 will use set 2).
+</LI>
+<LI><TT>cyclic</TT> Each task will start using the given sets distributed cyclically (<EM>i.e.</EM>, if two sets are defined and there are four running tasks: tasks 1 and 3 will use, and tasks 2 and 4 will use set 2).
+</LI>
+</UL>
+
+<P>
+Each set contain a list of performance counters to be gathered at different instrumentation points (see sections <A HREF="#sec:XMLSectionMPI">4.2</A>, <A HREF="#sec:XMLSectionOpenMP">4.5</A> and <A HREF="#sec:XMLSectionUF">4.8</A>). If the tracing library is compiled to support PAPI, performance counters must be given using the canonical name (like PAPI_TOT_CYC and PAPI_L1_DCM), or the PAPI code in hexadecimal format (like 8000003b and 80000000, respectively)<A NAME="tex2html15"
+  HREF="#foot1921"><SUP>4.3</SUP></A>. If the tracing library is compiled to support PMAPI, only one group identifier can be given per set<A NAME="tex2html16"
+  HREF="#foot1922"><SUP>4.4</SUP></A> and can be either the group name (like pm_basic and pm_hpmcount1) or the group number (like 6 and 22, respectively). 
+
+<P>
+In the given example (which refers to PAPI support in the tracing library) two sets are defined. First set will read PAPI_TOT_INS (total instructions), PAPI_TOT_CYC (total cycles) and PAPI_L1_DCM (1st level cache misses). Second set is configured to obtain PAPI_TOT_INS (total instructions), PAPI_TOT_CYC (total cycles) and PAPI_FP_INS (floating point instructions).
+
+<P>
+Additionally, if the underlying performance library supports sampling mechanisms, each set can be configured to gather information (see section <A HREF="#sec:XMLSectionCallers">4.7</A>) each time the specified counter reaches a specific value. The counter that is used for sampling must be present in the set. In the given example, the first set is enabled to gather sampling information every 100M cycles.
+
+<P>
+Furthermore, performance counters can be configured to report accounting on different basis depending on the <TT>domain</TT> attribute specified on each set. Available options are
+
+<UL>
+<LI><TT>kernel</TT> Only counts events ocurred when the application is running in kernel mode.
+</LI>
+<LI><TT>user</TT> Only counts events ocurred when the application is running in user-space mode.
+</LI>
+<LI><TT>all</TT> Counts events independently of the application running mode.
+</LI>
+</UL>
+
+<P>
+In the given example, first set is configured to count all the events ocurred, while the second one only counts those events ocurred when the application is running in user-space mode.
+
+<P>
+Finally, the instrumentation can change the active set in a manual and an automatic fashion. To change the active set manually see <TT>Extrae_previous_hwc_set</TT> and <TT>Extrae_next_hwc_set</TT> API calls in <A HREF="#sec:BasicAPI">5.1</A>. To change automatically the active set two options are allowed: based on time and based on application code. The former mechanism requires adding the attribute <TT>changeat-time</TT> and specify the minimum time to hold the set. The latter requires adding the attribute <TT>changeat-globalops</TT> with a value. The tracing library will automatically change the active set when the application has executed as many MPI global operations as selected in that attribute. When In any case, if either attribute is set to zero, then the set will not me changed automatically.
+
+<P>
+
+<H2><A NAME="SECTION00792000000000000000"></A><A NAME="subsec:NetworkPerformanceCounters"></A>
+<BR>
+4.9.2 Network performance counters
+</H2>
+
+<P>
+Network performance counters are only available on systems with Myrinet GM/MX networks and they are fixed depending on the firmware used. Other systems, like BG/* may provide some network performance counters, but they are accessed through the PAPI interface (see section <A HREF="#sec:XMLSectionPerformanceCounters">4.9</A> and PAPI documentation).
+
+<P>
+If <TT>&lt;network&gt;</TT> is enabled the network performance counters appear at the end of the application run, giving a summary for the whole run.
+
+<P>
+
+<H2><A NAME="SECTION00793000000000000000"></A><A NAME="subsec:OperatingSystemAccounting"></A>
+<BR>
+4.9.3 Operating system accounting
+</H2>
+
+<P>
+Operating system accounting is obtained through the getrusage(2) system call when <TT>&lt;resource-usage&gt;</TT> is enabled. As network performance counters, they appear at the end of the application run, giving a summary for the whole run.
+
+<P>
+
+<H1><A NAME="SECTION007100000000000000000"></A><A NAME="sec:XMLSectionStorage"></A>
+<BR>
+4.10 XML Section: Storage management
+</H1>
+
+<P>
+The instrumentation packages can be instructed on what/where/how produce the intermediate trace files. These are the available options:
+
+<P>
+<PRE>
+&lt;storage enabled="no"&gt;
+  &lt;trace-prefix enabled="yes"&gt;TRACE&lt;/trace-prefix&gt;
+  &lt;size enabled="no"&gt;5&lt;/size&gt;
+  &lt;temporal-directory enabled="yes"&gt;/scratch&lt;/temporal-directory&gt;
+  &lt;final-directory enabled="yes"&gt;/gpfs/scratch/bsc41/bsc41273&lt;/final-directory&gt;
+  &lt;gather-mpits enabled="no" /&gt;
+&lt;/storage&gt;
+</PRE>
+
+<P>
+Such options refer to:
+
+<P>
+
+<UL>
+<LI><TT>trace-prefix</TT> Sets the intermediate trace file prefix. Its default value is TRACE.
+</LI>
+<LI><TT>size</TT> Let the user restrict the maximum size (in megabytes) of each resulting intermediate trace file<A NAME="tex2html17"
+  HREF="#foot2071"><SUP>4.5</SUP></A>.
+</LI>
+<LI><TT>temporal-directory</TT> Where the intermediate trace files will be stored during the execution of the application. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.
+<BR></LI>
+<LI><TT>final-directory</TT> Where the intermediate trace files will be stored once the execution has been finished. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.
+<BR></LI>
+<LI><TT>gather-mpits</TT> If the system does not provide a global filesystem the resulting trace files will be distributed among the computation nodes. Turning on this option will use the underlying communication mechanism (MPI) to gather all the intermediate trace files into the root node.
+</LI>
+</UL>
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_PROGRAM_NAME</B>, <B>EXTRAE_FILE_SIZE</B>, <B>EXTRAE_DIR</B>, <B>EXTRAE_FINAL_DIR</B> and <B>EXTRAE_GATHER_MPITS</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION007110000000000000000"></A><A NAME="sec:XMLSectionBuffer"></A>
+<BR>
+4.11 XML Section: Buffer management
+</H1>
+
+<P>
+Modify the buffer management entry to tune the tracing buffer behavior.
+
+<P>
+<PRE>
+&lt;buffer enabled="yes"&gt;
+  &lt;size enabled="yes"&gt;150000&lt;/size&gt;
+  &lt;circular enabled="no" /&gt;
+&lt;/buffer&gt;
+</PRE>
+
+<P>
+By, default (even if the enabled attribute is "no") the tracing buffer is set to 500k events (see section <A HREF="#sec:XMLcell">4.6</A> for further information of buffer in the CELL). If <TT>&lt;size&gt;</TT> is enabled the tracing buffer will be set to the number of events indicated by this node. If the circular option is enabled, the buffer will be created as a circular buffer and the buffer will be dumped only once with the last events generated by the tracing package.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_BUFFER_SIZE</B> environment variable in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION007120000000000000000"></A><A NAME="sec:XMLSectionTraceControl"></A>
+<BR>
+4.12 XML Section: Trace control
+</H1>
+
+<P>
+<PRE>
+&lt;trace-control enabled="yes"&gt;
+  &lt;file enabled="no" frequency="5M"&gt;/gpfs/scratch/bsc41/bsc41273/control&lt;/file&gt;
+  &lt;global-ops enabled="no"&gt;10&lt;/global-ops&gt;
+  &lt;remote-control enabled="yes"&gt;
+    &lt;mrnet enabled="yes" target="150" analysis="spectral" start-after="30"&gt;
+      &lt;clustering max_tasks="26" max_points="8000"/&gt;
+      &lt;spectral min_seen="1" max_periods="0" num_iters="3" signals="DurBurst,InMPI"/&gt;
+    &lt;/mrnet&gt;
+    &lt;signal enabled="no" which="USR1"/&gt;
+  &lt;/remote-control&gt;
+&lt;/trace-control&gt;
+</PRE>
+
+<P>
+This section groups together a set of options to limit/reduce the final trace size. There are three mechanisms which are based on file existance, global operations executed and external remote control procedures.
+
+<P>
+Regarding the <TT>file</TT>, the application starts with the tracing disabled, and it is turned on when a control file is created. Use the property <TT>frequency</TT> to choose at which frequency this check must be done. If not supplied, it will be checked every 100 global operations on MPI_COMM_WORLD.
+
+<P>
+If the <TT>global-ops</TT> tag is enabled, the instrumentation package begins disabled and starts the tracing when the given number of global operations on MPI_COMM_WORLD has been executed.
+
+<P>
+The <TT>remote-control</TT> tag section allows to configure some external mechanisms to automatically control the tracing. Currently, there is only one option which is built on top of MRNet and it is based on clustering and spectral analysis to generate a small yet representative trace.
+
+<P>
+These are the options in the <TT>mrnet</TT> tag:
+
+<P>
+
+<UL>
+<LI><B>target</B>: the approximate requested size for the final trace (in Mb).
+</LI>
+<LI><B>analysis</B>: one between <TT>clustering</TT> and <TT>spectral</TT>.
+</LI>
+<LI><B>start-after</B>: number of seconds before the first analysis starts.
+</LI>
+</UL>
+
+<P>
+The <TT>clustering</TT> tag configures the clustering analysis parameters:
+
+<UL>
+<LI><B>max_tasks</B>: maximum number of tasks to get samples from.
+</LI>
+<LI><B>max_points</B>: maximum number of points to cluster.
+</LI>
+</UL>
+
+<P>
+The <TT>spectral</TT> tag section configures the spectral analysis parameters:
+
+<UL>
+<LI><B>min_seen</B>: minimum times a given type of period has to be seen to trace a sample
+</LI>
+<LI><B>max_periods</B>: maximum number of representative periods to trace. 0 equals to unlimited.
+</LI>
+<LI><B>num_iters</B>: number of iterations to trace for every representative period found.
+</LI>
+<LI>signals: performance signals used to analyze the application. If not specified, <TT>DurBurst</TT> is used by default.
+</LI>
+</UL>
+
+<P>
+A signal can be used to terminate the tracing when using the remote control. Available values can be only USR1/USR2 Some MPI implementations handle one of those, so check first which is available to you. Set in tag <TT>signal</TT> the signal code you want to use.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_CONTROL_FILE</B>, <B>EXTRAE_CONTROL_GLOPS</B>, <B>EXTRAE_CONTROL_TIME</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION007130000000000000000"></A><A NAME="sec:XMLSectionBursts"></A>
+<BR>
+4.13 XML Section: Bursts
+</H1>
+
+<P>
+<PRE>
+&lt;bursts enabled="no"&gt;
+  &lt;threshold enabled="yes"&gt;500u&lt;/threshold&gt;
+  &lt;mpi-statistics enabled="yes" /&gt;
+  &lt;pacx-statistics enabled="yes" /&gt;
+&lt;/bursts&gt;
+</PRE>
+
+<P>
+If the user enables this option, the instrumentation library will just emit information of computation bursts (<EM>i.e.</EM>, not does not trace MPI calls, OpenMP runtime, and so on) when the current mode (through initial-mode in <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>) is set to <TT>bursts</TT>. The library will discard all those computation bursts that last less than the selected threshold.
+
+<P>
+In addition to that, when the tracing library is running in burst mode, it computes some statistics of MPI and PACX activity. Such statistics can be dumped in the tracefile by enabling <TT>mpi-statistics</TT> and <TT>pacx-statistics</TT> respectively.
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_INITIAL_MODE</B>, <B>EXTRAE_BURST_THRESHOLD</B>, <B>EXTRAE_MPI_STATISTICS</B> and <B>EXTRAE_PACX_STATISTICS</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION007140000000000000000"></A><A NAME="sec:XMLSectionOthers"></A>
+<BR>
+4.14 XML Section: Others
+</H1>
+
+<P>
+<PRE>
+&lt;others enabled="yes"&gt;
+  &lt;minimum-time enabled="no"&gt;10m&lt;/minimum-time&gt;
+&lt;/others&gt;
+</PRE>
+
+<P>
+This section contains other configuration details that do not fit in the previous sections. Right now, there is only one option available and it is devoted to tell the instrumentation package the minimum instrumentation time. To enable it, set <TT>enabled</TT> to "yes" and set the minimum time within the <TT>minimum-time</TT> tag.
+
+<P>
+
+<H1><A NAME="SECTION007150000000000000000"></A><A NAME="sec:XMLSectionSampling"></A>
+<BR>
+4.15 XML Section: Sampling
+</H1>
+
+<P>
+<PRE>
+&lt;sampling enabled="no" type="default" period="50m" variability="10m"/&gt;
+</PRE>
+
+<P>
+This sections configures the time-based sampling capabilities. Every sample contains processor performance counters (if enabled in section <A HREF="#subsec:ProcessorPerformanceCounters">4.9.1</A> and either PAPI or PMAPI are referred at configure time) and callstack information (if enabled in section <A HREF="#sec:XMLSectionCallers">4.7</A> and proper dependencies are set at configure time).
+
+<P>
+This section contains two attributes besides <TT>enabled</TT>. These are
+
+<UL>
+<LI><B>type</B>: determines which timer domain is used (see <TT>man 2 setitimer</TT> or <TT>man 3p setitimer</TT> for further information on time domains). Available options are: <TT>real</TT> (which is also the <TT>default</TT> value, <TT>virtual</TT> and <TT>prof</TT> (which use the SIGALRM, SIGVTALRM and SIGPROF respectively). The defaul timing accumulates real time, but only issues samples at master thread. To let all the threads to collect samples, the type must be <TT>virtual</TT> or <TT>prof</TT>.
+</LI>
+<LI><B>period</B>: specifies the sampling periodicity. In the example above, samples are gathered every 50ms.
+</LI>
+<LI><B>variability</B>: specifies the variability to the sampling periodicity. Such variability is calculated through the <TT>random()</TT> system call and then is added to the periodicity. In the given example, the variability is set to 10ms, thus the final sampling period ranges from 45 to 55ms.
+</LI>
+</UL>
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    See <B>EXTRAE_SAMPLING_PERIOD</B>, <B>EXTRAE_SAMPLING_VARIABILITY</B>, <B>EXTRAE_SAMPLING_CLOCKTYPE</B> and <B>EXTRAE_SAMPLING_CALLER</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION007160000000000000000"></A><A NAME="sec:XMLSectionMerge"></A>
+<BR>
+4.16 XML Section: Merge
+</H1>
+
+<P>
+<PRE>
+&lt;merge enabled="yes" 
+  synchronization="default"
+  binary="mpi_ping"
+  tree-fan-out="16"
+  max-memory="512"
+  joint-states="yes"
+  keep-mpits="yes"
+  sort-addresses="yes"
+  remove-files="no"
+&gt;
+  mpi_ping.prv 
+&lt;/merge&gt;
+</PRE>
+
+<P>
+If this section is enabled and the instrumentation packaged is configured to support this, the merge process will be automatically invoked after the application run. The merge process will use all the resources devoted to run the application.
+
+<P>
+The leaf of this node will be used as the tracefile name (<TT>mpi_ping.prv</TT> in this example). Current available options for the merge process are given as attribute of the <TT>&lt;merge&gt;</TT> node and they are:
+
+<P>
+
+<UL>
+<LI><TT>synchronization</TT>: which can be set to <TT>default</TT>, <TT>node</TT>, <TT>task</TT>, <TT>no</TT>. This determines how task clocks will be synchronized (<EM>default is node</EM>).
+</LI>
+<LI><TT>binary</TT>: points to the binary that is being executed. It will be used to translate gathered addresses (MPI callers, sampling points and user functions) into source code references.
+</LI>
+<LI><TT>tree-fan-out</TT>: <EM>only for MPI executions</EM> sets the tree-based topology to run the merger in a parallel fashion.
+</LI>
+<LI><TT>max-memory</TT>: limits the intermediate merging process to run up to the specified limit (in MBytes).
+</LI>
+<LI><TT>joint-states</TT>: which can be set to <TT>yes</TT>, <TT>no</TT>. Determines if the resulting Paraver tracefile will split or join equal consecutive states (<EM>default is yes</EM>).
+</LI>
+<LI><TT>keep-mpits</TT>: whether to keep the intermediate tracefiles after performing the merge (<EM>currently unimplemented</EM>).
+</LI>
+<LI><TT>sort-addresses</TT>: whether to sort all addresses that refer to the source code (enabled by default).
+</LI>
+<LI><TT>sort-addresses</TT>: set it to yes if you want to remove all the intermediate files after generating the Paraver tracefile.
+</LI>
+</UL>
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    For further references, see chapter <A HREF="#cha:Merging">6</A>.
+    </TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+
+<H1><A NAME="SECTION007170000000000000000"></A><A NAME="sec:EnvVars_in_XML"></A>
+<BR>
+4.17 Using environment variables within the XML file
+</H1>
+
+<P>
+XML tags and attributes can refer to environment variables that are defined in the environment during the application run. If you want to refer to an environment variable within the XML file, just enclose the name of the variable using the dollar symbol (<TT>$</TT>), for example: <TT>$FOO$</TT>.
+
+<P>
+Note that the user has to put an specific value or a reference to an environment variable which means that expanding environment variables in text is not allowed as in a regular shell (i.e., the instrumentation package will not convert the follwing text <TT>bar$FOO$bar</TT>).
+
+<P>
+
+<H1><A NAME="SECTION00800000000000000000"></A><A NAME="cha:API"></A>
+<BR>
+5. <I>Extrae</I> API
+</H1>
+
+<P>
+There are two levels of the API in the <I>Extrae</I> instrumentation package. Basic API refers to the basic functionality provided and includes emitting events, source code tracking, changing instrumentation mode and so. Extended API is an <EM>experimental</EM> addition to provide several of the basic API within single and powerful calls using specific data structures.
+
+<P>
+
+<H1><A NAME="SECTION00810000000000000000"></A><A NAME="sec:BasicAPI"></A>
+<BR>
+5.1 Basic API
+</H1>
+
+<P>
+The following routines are defined in the <TT>${EXTRAE_HOME}/include/extrae_user_events.h</TT>. These routines are intended to be called by C/C++ programs. The instrumentation package also provides bindings for Fortran applications. The Fortran API bindings have the same name as the C API but honoring the Fortran compiler function name mangling scheme. The <I>Extrae</I> constants for Fortran applications can be included from <TT>${EXTRAE_HOME}/include/extraef_user_events.h</TT>.
+
+<P>
+
+<UL>
+<LI><TT>void Extrae_get_version (unsigned *major, unsigned *minor, unsigned *revision)</TT>
+<BR>
+Returns the version of the underlying <I>Extrae</I> package. Although an application may be compiled to a specific <I>Extrae</I> library, by using the appropriate shared library commands, the application may use a different <I>Extrae</I> library.
+
+<P>
+</LI>
+<LI><TT>void Extrae_init (void)</TT>
+<BR>
+Initializes the tracing library.
+<BR> <B>NOTE:</B> This routine is called automatically in different circumstances, which include:
+    
+<UL>
+<LI>Call to MPI_Init when the appropriate instrumentation library is linked or preload with the application.
+</LI>
+<LI>Usage of the DynInst launcher.
+</LI>
+<LI>If either the <TT>libseqtrace.so</TT>, <TT>libomptrace.so</TT> or <TT>libpttrace.so</TT> are linked dynamically or preloaded with the application.
+    
+</LI>
+</UL>
+  No major problems should occur if the library is initialized twice, only a warning appears in the terminal output noticing the intent of double initialization.
+
+<P>
+</LI>
+<LI><TT>extrae_init_type_t Extrae_is_initialized (void)</TT>
+<BR>
+This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API, MPI or PACX initialization).
+
+<P>
+</LI>
+<LI><TT>void Extrae_fini (void)</TT>
+<BR>
+Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.
+<BR> <B>NOTE:</B> As it happened by using <TT>Extrae_init</TT>, this routine is automatically called in the same circumstances (but on call to MPI_Finalize in the first case).
+
+<P>
+</LI>
+<LI><TT>void Extrae_event (extrae_type_t type, extrae_value_t value)</TT>
+<BR>
+The Extrae_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
+
+<P>
+Some common use of events are:
+  
+<UL>
+<LI>Identify loop iterations (or any code block): Given a loop, the user can set a unique type for the loop and a value related to the iterator value of the loop. For example:
+    <PRE>
+     for (i = 1; i &lt;= MAX_ITERS; i++)
+     {
+       Extrae_event (1000, i);
+       [original loop code]
+     }
+     Extrae_event (1000, 0);
+</PRE>
+   The last added call to Extrae_event marks the end of the loop setting the event value to 0, which facilitates the analysis with Paraver.
+</LI>
+<LI>Identify user routines: Choosing a constant type (6000019 in this example) and different values for different routines (set to 0 to mark a "leave" event) 
+    <PRE>
+     void routine1 (void)
+     {
+      Extrae_event (6000019, 1);
+      [routine 1 code]
+      Extrae_event (6000019, 0);
+     }
+
+     void routine2 (void)
+     {
+      Extrae_event (6000019, 2);
+      [routine 2 code]
+      Extrae_event (6000019, 0);
+     }
+</PRE>
+</LI>
+<LI>Identify any point in the application using a unique combination of type and value.
+  
+</LI>
+</UL>
+
+<P>
+</LI>
+<LI><TT>void Extrae_nevent (unsigned count, extrae_type_t *types, extrae_value_t *values)</TT>
+<BR>
+Allows the user to place <EM>count</EM> events with the same timestamp at the given position.
+
+<P>
+</LI>
+<LI><TT>void Extrae_counters (void)</TT>
+<BR>
+Emits the value of the active hardware counters set. See chapter <A HREF="#cha:XML">4</A> for further information.
+
+<P>
+</LI>
+<LI><TT>void Extrae_eventandcounters (extrae_type_t event, extrae_value_t value)</TT>
+<BR>
+This routine lets the user add an event and obtain the performance counters with one call and a single timestamp.
+
+<P>
+</LI>
+<LI><TT>void Extrae_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values)</TT>
+<BR>
+This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
+
+<P>
+</LI>
+<LI><TT>void Extrae_define_event_type (extrae_type_t type, char *description, unsigned nvalues, extrae_value_t *values, char **description_values)</TT>
+<BR>
+This routine adds to the Paraver Configuration File human readable information regarding type <TT>type</TT> and its values <TT>values</TT>. If no values needs to be decribed set <TT>nvalues</TT> to 0 and also set <TT>values</TT> and <TT>description_values</TT> to NULL.
+
+<P>
+</LI>
+<LI><TT>void Extrae_shutdown (void)</TT>
+<BR>
+Turns off the instrumentation.
+
+<P>
+</LI>
+<LI><TT>void Extrae_restart (void)</TT>
+<BR>
+Turns on the instrumentation.
+
+<P>
+</LI>
+<LI><TT>void Extrae_previous_hwc_set (void)</TT>
+<BR>
+Makes the previous hardware counter set defined in the XML file to be the active set (see section <A HREF="#sec:XMLSectionMPI">4.2</A> for further information).
+
+<P>
+</LI>
+<LI><TT>void Extrae_next_hwc_set (void)</TT>
+<BR>
+Makes the following hardware counter set defined in the XML file to be the active set (see section <A HREF="#sec:XMLSectionMPI">4.2</A> for further information).
+
+<P>
+</LI>
+<LI><TT>void Extrae_set_tracing_tasks (int from, int to)</TT>
+<BR>
+Allows the user to choose from which tasks (not <EM>threads</EM>!) store informartion in the tracefile
+
+<P>
+</LI>
+<LI><TT>void Extrae_set_options (int options)</TT>
+<BR>
+Permits configuring several tracing options at runtime. The <TT>options</TT> parameter has to be a bitwise or combination of the following options, depending on the user's needs:
+  
+<UL>
+<LI><TT>EXTRAE_CALLER_OPTION</TT>
+<BR>
+Dumps caller information at each entry or exit point of the MPI routines. Caller levels need to be configured at XML (see chapter <A HREF="#cha:XML">4</A>).
+</LI>
+<LI><TT>EXTRAE_HWC_OPTION</TT>
+<BR>
+Activates hardware counter gathering.
+</LI>
+<LI><TT>EXTRAE_MPI_OPTION</TT>
+<BR>
+Activates tracing of MPI calls.
+</LI>
+<LI><TT>EXTRAE_MPI_HWC_OPTION</TT>
+<BR>
+Activates hardware counter gathering in MPI routines.
+</LI>
+<LI><TT>EXTRAE_OMP_OPTION</TT>
+<BR>
+Activates tracing of OpenMP runtime or outlined routines.
+</LI>
+<LI><TT>EXTRAE_OMP_HWC_OPTION</TT>
+<BR>
+Activates hardware counter gathering in OpenMP runtime or outlined routines.
+</LI>
+<LI><TT>EXTRAE_UF_HWC_OPTION</TT>
+<BR>
+Activates hardware counter gathering in the user functions.
+  
+</LI>
+</UL>
+
+<P>
+</LI>
+<LI><TT>void Extrae_network_counters (void)</TT>
+<BR>
+Emits the value of the network counters if the system has this capability. <EM>(Only available for systems with Myrinet GM/MX networks).</EM>
+
+<P>
+</LI>
+<LI><TT>void Extrae_network_routes (int task)</TT>
+<BR>
+Emits the network routes for an specific <TT>task</TT>. <EM>(Only available for systems with Myrinet GM/MX networks).</EM>
+
+<P>
+</LI>
+<LI><TT>void Extrae_user_function (int enter)</TT>
+<BR>
+Emits an event into the tracefile which references the source code (data includes: source line number, file name and function name). If <TT>enter</TT> is 0 it marks an end (i.e., leaving the function), otherwise it marks the beginning of the routine. The user must be careful to place the call of this routine in places where the code is always executed, being careful not to place them inside <TT>if</TT> and <TT>return</TT> statements.
+    <PRE>
+     void routine1 (void)
+     {
+      Extrae_user_function (1);
+      [routine 1 code]
+      Extrae_user_function (0);
+     }
+
+     void routine2 (void)
+     {
+      Extrae_user_function (1);
+      [routine 2 code]
+      Extrae_user_function (0);
+     }
+</PRE>
+   In order to gather performance counters during the execution of these calls, the <TT>user-functions</TT> tag in the XML configuration and its <TT>counters</TT> have to be both enabled.
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION00820000000000000000"></A><A NAME="sec:ExtendedAPI"></A>
+<BR>
+5.2 Extended API
+</H1>
+
+<P>
+<EM><B>NOTE:</B> This API is in experimental stage and it is only available in C. Use it at your own risk!</EM>
+
+<P>
+The extended API makes use of two special structures located in <TT>${PREFIX}/include/extrae_types.h</TT>. The structures are <TT>extrae_UserCommunication</TT> and <TT>extrae_CombinedEvents</TT>. The former is intended to encode an event that will be converted into a Paraver communication when its partner equivalent event has found. The latter is used to generate events containing multiple kinds of information at the same time.
+
+<P>
+<PRE>
+struct extrae_UserCommunication
+{
+  extrae_user_communication_types_t type;
+  extrae_comm_tag_t tag;
+  unsigned size; /* size_t? */
+  extrae_comm_partner_t partner;
+  extrae_comm_id_t id;
+};
+</PRE>
+
+<P>
+The structure <TT>extrae_UserCommunication</TT> contains the following fields:
+
+<UL>
+<LI><TT>type</TT>
+<BR>
+Available options are:
+	
+<UL>
+<LI><TT>EXTRAE_USER_SEND</TT>, if this event represents a send point.
+</LI>
+<LI><TT>EXTRAE_USER_RECV</TT>, if this event represents a receive point.
+	
+</LI>
+</UL>
+</LI>
+<LI><TT>tag</TT>
+<BR>
+The tag information in the communication record. 
+</LI>
+<LI><TT>size</TT>
+<BR>
+The size information in the communication record.
+</LI>
+<LI><TT>partner</TT>
+<BR>
+The partner of this communication (receive if this is a send or send if this is a receive). Partners (ranging from 0 to N-1) are considered across tasks whereas all threads share a single communication queue.
+</LI>
+<LI><TT>id</TT>
+<BR>
+An identifier that is used to match communications between partners.
+</LI>
+</UL>
+
+<P>
+<PRE>
+struct extrae_CombinedEvents
+{
+  /* These are used as boolean values */
+  int HardwareCounters;
+  int Callers;
+  int UserFunction;
+  /* These are intended for N events */
+  unsigned nEvents;
+  extrae_type_t  *Types;
+  extrae_value_t *Values;
+  /* These are intended for user communication records */
+  unsigned nCommunications;
+  extrae_user_communication_t *Communications;
+};
+</PRE>
+
+<P>
+The structure <TT>extrae_CombinedEvents</TT> contains the following fields:
+
+<UL>
+<LI><TT>HardwareCounters</TT>
+<BR>
+Set to non-zero if this event has to gather hardware performance counters.
+</LI>
+<LI><TT>Callers</TT>
+<BR>
+Set to non-zero if this event has to emit callstack information.
+</LI>
+<LI><TT>UserFunction</TT>
+<BR>
+Available options are:
+	
+<UL>
+<LI><TT>EXTRAE_USER_FUNCTION_NONE</TT>, if this event should not provide information about user routines.
+</LI>
+<LI><TT>EXTRAE_USER_FUNCTION_ENTER</TT>, if this event represents the starting point of a user routine.
+</LI>
+<LI><TT>EXTRAE_USER_FUNCTION_LEAVE</TT>, if this event represents the ending point of a user routine.
+	
+</LI>
+</UL>
+</LI>
+<LI><TT>nEvents</TT>
+<BR>
+Set the number of events given in the <TT>Types</TT> and <TT>Values</TT> fields.
+</LI>
+<LI><TT>Types</TT>
+<BR>
+A pointer containing <TT>nEvents</TT> type that will be stored in the trace.
+</LI>
+<LI><TT>Values</TT>
+<BR>
+A pointer containing <TT>nEvents</TT> values that will be stored in the trace.
+</LI>
+<LI><TT>nCommunications</TT>
+<BR>
+Set the number of communications given in the <TT>Communications</TT> field.
+</LI>
+<LI><TT>Communications</TT>
+<BR>
+A pointer to <TT>extrae_UserCommunication</TT> structures containing <TT>nCommunications</TT> elements that represent the involved communications.
+</LI>
+</UL>
+
+<P>
+The extended API contains the following routines:
+
+<UL>
+<LI><TT>void Extrae_init_UserCommunication (struct extrae_UserCommunication *)</TT>
+<BR>
+Use this routine to initialize an extrae_UserCommunication structure.
+</LI>
+<LI><TT>void Extrae_init_CombinedEvents (struct extrae_CombinedEvents *)</TT>
+<BR>
+Use this routine to initialize an extrae_CombinedEvents structure.
+</LI>
+<LI><TT>void Extrae_emit_CombinedEvents (struct extrae_CombinedEvents *)</TT>
+<BR>
+Use this routine to emit to the tracefile the events set in the extrae_CombinedEvents given.
+</LI>
+<LI><TT>void Extrae_resume_virtual_thread (unsigned vthread)</TT>
+<BR>
+This routine changes the thread identifier so as to be vthread in the final tracefile. <EM>Improper use of this routine may result in corrupt tracefiles.</EM>
+</LI>
+<LI><TT>void Extrae_suspend_virtual_thread (void)</TT>
+<BR>
+This routine recovers the original thread identifier (given by routines like pthread_self or omp_get_thread_num, for instance).
+</LI>
+<LI><TT>void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2, const char* s1, const char *s2)</TT>
+<BR>
+Registers type <TT>t2</TT> to reference user source code location by using its address. During the merge phase the mpi2prv command will assign type <TT>t1</TT> to the event type that references the user function and to the event <TT>t2</TT> to the event that references the file name and line location. The strings <TT>s1</TT> and <TT>s2</TT> refers, respectively, to the description of <TT>t1</TT> and <TT>t2</TT>
+</LI>
+<LI><TT>void Extrae_register_function_address (void *ptr, const char *funcname, const char *modname, unsigned line);</TT>
+<BR>
+By default, the mpi2prv process uses the binary debugging information to translate program addresses into information that contains function name, the module name and line. The Extrae_register_function_address allows providing such information by hand during the execution of the instrumented application. This function must provide the function name (<TT>funcname</TT>), module name (<TT>modname</TT>) and line number for a given address.
+</LI>
+<LI><TT>void Extrae_register_stacked_type (extrae_type_t type)</TT>
+<BR>
+Registers which event types are required to be managed in a stack way whenever <TT>void Extrae_resume_virtual_thread</TT> or <TT>void Extrae_suspend_virtual_thread</TT> are called.
+</LI>
+<LI><TT>void Extrae_set_threadid_function (unsigned (*threadid_function)(void))</TT>
+<BR>
+Defines the routine that will be used as a thread identifier inside the tracing facility.
+</LI>
+<LI><TT>void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void))</TT>
+<BR>
+Defines the routine that will count all the executing threads inside the tracing facility.
+</LI>
+<LI><TT>void Extrae_set_taskid_function (unsigned (*taskid_function)(void))</TT>
+<BR>
+Defines the routine that will be used as a task identifier inside the tracing facility.
+</LI>
+<LI><TT>void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void))</TT>
+<BR>
+Defines the routine that will count all the executing tasks inside the tracing facility.
+</LI>
+<LI><TT>void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void))</TT>
+<BR>
+Establishes the barrier routine among tasks. It is needed for synchronization purposes.
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION00830000000000000000">
+5.3 Special considerations for Cell Broadband Engine tracing package</A>
+</H1>
+
+<P>
+Instead of including <TT>${EXTRAE_HOME}/include/extrae_user_events.h</TT> include:
+
+<UL>
+<LI><TT>${EXTRAE_HOME}/include/ppu_trace_sdk2.h</TT> on the PPE side, and,
+</LI>
+<LI><TT>${EXTRAE_HOME}/include/sputrace_user_events.h</TT> on the SPE side.
+</LI>
+</UL>
+
+<P>
+
+<H2><A NAME="SECTION00831000000000000000"></A><A NAME="subsec:PPEside"></A>
+<BR>
+5.3.1 PPE side
+</H2>
+
+<P>
+The routines shown on section <A HREF="#sec:BasicAPI">5.1</A> are available for the PPE element. In addition, two additional routines are available to control the creation and finalization of the SPE threads. These routines are:
+
+<P>
+
+<UL>
+<LI><TT>int  CELLtrace_init (int spus, spe_context_ptr_t * spe_ids)</TT>
+<BR>
+Contacts with the SPE thread to initialize once the SPE tracing environment. Such call has to be synchronized with the invocation of <TT>SPUtrace_init</TT> (see <A HREF="#subsec:SPEside">5.3.2</A>) call on the SPE side due to the presence of message passing using the mailboxes. The routine receives the total number of contexts created by the Cell SDK <TT>spe_context_create</TT> and a vector pointing to those contexts. Each of those contexts will reference to a single SPE thread created by a call to <TT>pthread_create</TT>.
+
+<P>
+</LI>
+<LI><TT>void CELLtrace_fini (void)</TT>
+<BR>
+Waits for the finalization of all the threads registered in <TT>CELLtrace_init</TT> and dumps their intermediate tracing buffers.
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H2><A NAME="SECTION00832000000000000000"></A><A NAME="subsec:SPEside"></A>
+<BR>
+5.3.2 SPE side
+</H2>
+
+<P>
+Due to the lack of parallel paradigms and hardware counters inside the SPE element, the SPE tracing library is a subset of the typical tracing library. The following API calls are available for the SPE element:
+
+<P>
+
+<UL>
+<LI><TT>void SPUtrace_init (void)</TT>
+<BR>
+Initializes the tracing package in the SPE side. It has to be synchronized with <TT>CELLtrace_init</TT> due to the message passing using mailboxes.
+
+<P>
+</LI>
+<LI><TT>void SPUtrace_fini (void)</TT>
+<BR>
+Notifies the finalization of the work performed in the SPE thread and transfers the tracing buffer to the PPE element.
+
+<P>
+</LI>
+<LI><TT>void SPUtrace_event (unsigned event, unsigned value)</TT>
+<BR>
+Has the same semantics as <TT>Extrae_event</TT>.
+
+<P>
+</LI>
+<LI><TT>void SPUtrace_nevent (unsigned count, unsigned *types, unsigned *values)</TT>
+<BR>
+Has the same semantics as <TT>Extrae_nevent</TT>.
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<P>
+
+<H1><A NAME="SECTION00900000000000000000"></A><A NAME="cha:Merging"></A>
+<BR>
+6. Merging process
+</H1>
+
+<P>
+Once the application has finished, and if the automatic merge process is not setup, the merge must be executed manually. Here we detail how to run the merge process manually.
+
+<P>
+The inserted probes in the instrumented binary are responsible for gathering performance metrics of each task/thread and for each of them several files are created where the XML configuration file specified (see section <A HREF="#sec:XMLSectionStorage">4.10</A>). Such files are:
+
+<P>
+
+<UL>
+<LI>As many <TT>.mpit</TT> files as tasks and threads where running the target application. Each file contains information gathered by the specified task/thread in raw binary format.
+</LI>
+<LI>A single <TT>.mpits</TT> file that contain a list of related <TT>.mpit</TT> files.
+</LI>
+<LI>If the DynInst based instrumentation package was used, an addition <TT>.sym</TT> file that contains some symbolic information gathered by the DynInst library.
+</LI>
+</UL>
+
+<P>
+In order to use Paraver, those intermediate files (<I>i.e.</I>, <TT>.mpit</TT> files) must be merged and translated into Paraver trace file format. The same applies if the user wants to use the Dimemas simulator. To proceed with any of these translation all the intermediate trace files must be merged into a single trace file using one of the available mergers in the <TT>bin</TT> directory (see table <A HREF="#tab:MergerDescription">6.1</A>).
+
+<P>
+The target trace type is defined in the XML configuration file used at the instrumentation step (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters <TT>-paraver</TT> or <TT>-dimemas</TT><A NAME="tex2html18"
+  HREF="#foot3084"><SUP>6.1</SUP></A>.
+
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="3091"></A>
+<TABLE>
+<CAPTION><STRONG>Table:</STRONG>
+Description of the available mergers in the <I>Extrae</I> package.</CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+<TABLE CELLPADDING=3 BORDER="1">
+<TR><TD ALIGN="LEFT"><B>Binary</B></TD>
+<TD ALIGN="LEFT"><B>Description</B></TD>
+</TR>
+<TR><TD ALIGN="LEFT">mpi2prv</TD>
+<TD ALIGN="LEFT">Sequential version of the Paraver merger.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">mpi2dim</TD>
+<TD ALIGN="LEFT">Sequential version of the Dimemas merger.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">mpimpi2prv</TD>
+<TD ALIGN="LEFT">Parallel version of the Paraver merger.</TD>
+</TR>
+<TR><TD ALIGN="LEFT">mpimpi2dim</TD>
+<TD ALIGN="LEFT">Parallel version of the Dimemas merger.</TD>
+</TR>
+</TABLE></DIV>
+
+<A NAME="tab:MergerDescription"></A></TD></TR>
+</TABLE>
+</DIV><P></P>
+<BR>
+
+<P>
+
+<H1><A NAME="SECTION00910000000000000000">
+6.1 Paraver merger</A>
+</H1>
+
+<P>
+As stated before, there are two Paraver mergers: <TT>mpi2prv</TT> and <TT>mpimpi2prv</TT>. The former is for use in a single processor mode while the latter is meant to be used with multiple processors using MPI (and cannot be run using one MPI task).
+
+<P>
+Paraver merger receives a set of intermediate trace files and generates three files with the same name (which is set with the <TT>-o</TT> option) but differ in the extension. The Paraver trace itself (.prv file) that contains timestamped records that represent the  information gathered during the execution of the instrumented application. It also generates the Paraver Configuration File (.pcf file), which is responsible for translating values contained in the Paraver trace into a more human readable values. Finally, it also generates a file containing the distribution of the application across the cluster computation resources (.row file).
+
+<P>
+The following sections describe the available options for the Paraver mergers. Typically, options available for single processor mode are also available in the parallel version, unless specified.
+
+<P>
+
+<H2><A NAME="SECTION00911000000000000000">
+6.1.1 Sequential Paraver merger</A>
+</H2>
+
+<P>
+These are the available options for the sequential Paraver merger:
+
+<P>
+
+<UL>
+<LI><TT>-d</TT> or <TT>-dump</TT>
+<BR>
+Dumps the information stored in the intermediate trace files.
+</LI>
+<LI><TT>-dump-without-time</TT>
+<BR>
+The information dumped with <TT>-d</TT> (or <TT>-dump</TT>) does not show the timestamp.
+</LI>
+<LI><TT>-e BINARY</TT>
+<BR>
+Uses the given BINARY to translate addresses that are stored in the intermediate trace files into useful information (including function name, source file and line). The application has to be compiled with <TT>-g</TT> flag so as to obtain valuable information.
+</LI>
+<LI><TT>-evtnum N</TT>
+<BR>
+Partially processes (up to N events) the intermediate trace files to generate the Dimemas tracefile.
+</LI>
+<LI><TT>-f FILE.mpits</TT> <EM>(where <TT>FILE.mpits</TT> file is generated by the instrumentation)</EM>
+<BR>
+The merger uses the given file (which contains a list of intermediate trace files of a single executions) instead of giving set of intermediate trace files.
+<BR>
+This option looks first for each file listed in the parameter file. Each contained file is searched in the absolute given path, if it does not exist, then it's searched in the current directory.
+</LI>
+<LI><TT>-f-relative FILE.mpits</TT> <EM>(where <TT>FILE.mpits</TT> file is generated by the instrumentation)</EM>
+<BR>
+This options behaves like the -f options but looks for the intermediate files in the current directory.
+</LI>
+<LI><TT>-f-absolute FILE.mpits</TT> <EM>(where <TT>FILE.mpits</TT> file is generated by the instrumentation)</EM>
+<BR>
+This options behaves like the -f options but uses the full path of every intermediate file so as to locate them.
+</LI>
+<LI><TT>-h</TT>
+<BR>
+Provides minimal help about merger options.
+</LI>
+<LI><TT>-maxmem M</TT>
+<BR>
+The last step of the merging process will be limited to use <EM>M</EM> megabytes of memory. By default, M is 512.
+</LI>
+<LI><TT>-s FILE.sym</TT> <EM>(where <TT>FILE.sym</TT> file is generated with the DynInst instrumentator)</EM>
+<BR>
+Passes information regarding instrumented symbols into the merger to aid the Paraver analysis. If <TT>-f</TT>, <TT>-f-relative</TT> or <TT>-f-absolute</TT> paramters are given, the merge process will try to automatically load the symbol file associated to that FILE.mpits file.
+</LI>
+<LI><TT>-no-syn</TT>
+<BR>
+If set, the merger will not attempt to synchronize the different tasks. This is useful when merging intermediate files obtained from a single node (and thus, share a single clock).
+</LI>
+<LI><TT>-o FILE.prv</TT>
+<BR>
+Choose the name of the target Paraver tracefile.
+</LI>
+<LI><TT>-o FILE.prv.gz</TT>
+<BR>
+Choose the name of the target Paraver tracefile compressed using the libz library.
+</LI>
+<LI><TT>-remove-files</TT>
+<BR>
+The merging process removes the intermediate tracefiles when succesfully generating the Paraver tracefile.
+</LI>
+<LI><TT>-skip-sendrecv</TT>
+<BR>
+Do not match point to point communications issued by <TT>MPI_Sendrecv</TT> or <TT>MPI_Sendrecv_replace</TT>.
+</LI>
+<LI><TT>-sort-addresses</TT>
+<BR>
+Sort event values that reference source code locations so as the values are sorted by file name first and then line number (enabled by default).
+</LI>
+<LI><TT>-split-states</TT>
+<BR>
+Do not join consecutive states that are the same into a single one.
+</LI>
+<LI><TT>-syn</TT>
+<BR>
+If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI_Init call. This will usually lead to "synchronized" tasks, but it will depend on how the clocks advance in time.
+</LI>
+<LI><TT>-syn-node</TT>
+<BR>
+If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI_Init call and the node where they ran. This will usually lead to better synchronized tasks than using -syn, but, again, it will depend on how the clocks advance in time.
+</LI>
+<LI><TT>-unique-caller-id</TT>
+<BR>
+Choose whether use a unique value identifier for different callers locations (MPI calling routines, user routines, OpenMP outlined routines andpthread routines).
+</LI>
+</UL>
+
+<P>
+
+<H2><A NAME="SECTION00912000000000000000">
+6.1.2 Parallel Paraver merger</A>
+</H2>
+
+<P>
+These options are specific to the parallel version of the Paraver merger:
+
+<P>
+
+<UL>
+<LI><TT>-block</TT>
+<BR>
+Intermediate trace files will be distributed in a block fashion instead of a cyclic fashion to the merger.
+</LI>
+<LI><TT>-cyclic</TT>
+<BR>
+Intermediate trace files will be distributed in a cyclic fashion instead of a block fashion to the merger.
+</LI>
+<LI><TT>-size</TT>
+<BR>
+The intermediate trace files will be sorted by size and then assigned to processors in a such manner that each processor receives approximately the same size.
+</LI>
+<LI><TT>-consecutive-size</TT>
+<BR>
+Intermediate trace files will be distributed consecutively to processors but trying to distribute the overall size equally among processors.
+</LI>
+<LI><TT>-use-disk-for-comms</TT>
+<BR>
+Use this option if your memory resources are limited. This option uses an alternative matching communication algorithm that saves memory but uses intensively the disk.
+</LI>
+<LI><TT>-tree-fan-out N</TT>
+<BR>
+Use this option to instruct the merger to generate the tracefile using a tree-based topology. This should improve the performance when using a large number of processes at the merge step. Depending on the combination of processes and the width of the tree, the merger will need to run several stages to generate the final tracefile.
+<BR>
+The number of processes used in the merge process must be equal or greater than the <EM>N</EM> parameter. If it is not, the merger itself will automatically set the width of the tree to the number of processes used.
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION00920000000000000000">
+6.2 Dimemas merger</A>
+</H1>
+
+<P>
+As stated before, there are two Dimemas mergers: <TT>mpi2dim</TT> and <TT>mpimpi2dim</TT>. The former is for use in a single processor mode while the latter is meant to be used with multiple processors using MPI.
+
+<P>
+In contrast with Paraver merger, Dimemas mergers generate a single output file with the .dim extension that is suitable for the Dimemas simulator from the given intermediate trace files..
+
+<P>
+These are the available options for both Dimemas mergers:
+
+<P>
+
+<UL>
+<LI><TT>-evtnum N</TT>
+<BR>
+Partially processes (up to N events) the intermediate trace files to generate the Dimemas tracefile.
+</LI>
+<LI><TT>-f FILE.mpits</TT> <EM>(where <TT>FILE.mpits</TT> file is generated by the instrumentation)</EM>
+<BR>
+The merger uses the given file (which contains a list of intermediate trace files of a single executions) instead of giving set of intermediate trace files.
+<BR>
+This option takes only the file name of every intermediate file so as to locate them.
+</LI>
+<LI><TT>-f-relative FILE.mpits</TT> <EM>(where <TT>FILE.mpits</TT> file is generated by the instrumentation)</EM>
+<BR>
+This options works exactly as the -f option.
+</LI>
+<LI><TT>-f-absolute FILE.mpits</TT> <EM>(where <TT>FILE.mpits</TT> file is generated by the instrumentation)</EM>
+<BR>
+This options behaves like the -f options but uses the full path of every intermediate file so as to locate them.
+</LI>
+<LI><TT>-h</TT>
+<BR>
+Provides minimal help about merger options.
+</LI>
+<LI><TT>-maxmem M</TT>
+<BR>
+The last step of the merging process will be limited to use <EM>M</EM> megabytes of memory. By default, M is 512.
+</LI>
+<LI><TT>-o FILE.dim</TT>
+<BR>
+Choose the name of the target Dimemas tracefile.
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION00930000000000000000">
+6.3 Environment variables</A>
+</H1>
+
+<P>
+There are some environment variables that are related Two environment variables 
+
+<P>
+
+<H2><A NAME="SECTION00931000000000000000">
+6.3.1 Environment variables suitable to Paraver merger</A>
+</H2>
+
+<P>
+
+<H3><A NAME="SECTION00931100000000000000">
+6.3.1.1 EXTRAE_LABELS</A>
+</H3>
+
+<P>
+This environment variable lets the user add custom information to the generated Paraver Configuration File (<TT>.pcf</TT>). Just set this variable to point to a file containing labels for the unknown (user) events.
+
+<P>
+The format for the file is:
+
+<P>
+<PRE>
+  EVENT_TYPE
+  0 [type1] [label1]
+  0 [type2] [label2]
+  ...
+  0 [typeK] [labelK]
+</PRE>
+
+<P>
+Where <TT>[typeN]</TT> is the event value and <TT>[labelN]</TT> is the description for the event with value [typeN].
+It is also possible to link both type and value of an event:
+
+<P>
+<PRE>
+  EVENT_TYPE
+  0 [type] [label]
+  VALUES
+  [value1] [label1]
+  [value2] [label2]
+  ...
+  [valueN] [labelN]
+</PRE>
+
+<P>
+With this information, Paraver can deal with both type and  value when giving textual information to the end user. If Paraver does not find any information for an event/type it will shown it in numerical form.
+
+<P>
+
+<H3><A NAME="SECTION00931200000000000000">
+6.3.1.2 MPI2PRV_TMP_DIR</A>
+</H3>
+
+<P>
+Points to a directory where all intermediate temporary files will be stored. These files will be removed as soon the application ends.
+
+<P>
+
+<H2><A NAME="SECTION00932000000000000000">
+6.3.2 Environment variables suitable to Dimemas merger</A>
+</H2>
+
+<P>
+
+<H3><A NAME="SECTION00932100000000000000">
+6.3.2.1 MPI2DIM_TMP_DIR</A>
+</H3>
+
+<P>
+Points to a directory where all intermediate temporary files will be stored. These files will be removed as soon the application ends.
+
+<P>
+
+<H1><A NAME="SECTION001000000000000000000"></A><A NAME="cha:Examples"></A>
+<BR>
+7. Examples
+</H1>
+
+<P>
+We present here three different examples of generating a Paraver tracefile. First example requires the package to be compiled with DynInst libraries. Second example uses the <TT>LD_PRELOAD</TT> or <TT>LDR_PRELOAD[64]</TT> mechanism to interpose code in the application. Such mechanism is available in Linux and FreeBSD operating systems and only works when the application uses dynamic libraries. Finally, there is an example using the static library of the instrumentation package.
+
+<P>
+
+<H1><A NAME="SECTION001010000000000000000"></A><A NAME="sec:Examples_DynInst"></A>
+<BR>
+7.1 DynInst based examples
+</H1>
+
+<P>
+DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures<A NAME="tex2html20"
+  HREF="#foot3424"><SUP>7.1</SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+
+<P>
+
+<H2><A NAME="SECTION001011000000000000000"></A><A NAME="subsec:Examples_DynInst_Intermediate"></A>
+<BR>
+7.1.1 Generating intermediate files for serial or OpenMP applications
+</H2>
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=run\_dyninst.sh]
+#!/bin/sh
+
+export EXTRAE_HOME=WRITE-HERE-THE-PACKAGE-LOCATION
+export LD_LIBRARY_PATH=${EXTRAE_HOME}/lib
+source ${EXTRAE_HOME}/etc/extrae.sh
+
+## Run the desired program
+${EXTRAE_HOME}/bin/extrae -config extrae.xml $*
+</PRE>
+
+<P>
+A similar script can be found in the share/example/SEQ directory in your tracing package directory. Just tune the <TT>EXTRAE_HOME</TT> environment variable and make the script executable (using <TT>chmod u+x</TT>). You can either pass the XML configuration file through the <TT>EXTRAE_CONFIG_FILE</TT> if you prefer instead. Line no. 5 is responsible for loading all the environment variables needed for the DynInst launcher (called extrae) that is invoked in line 8.
+
+<P>
+In fact, there are two examples provided in share/example/SEQ, one for static (or manual) instrumentation and another for the DynInst-based instrumentation. When using the DynInst instrumentation, the user may add new routines to instrument using the existing <TT>function-list</TT> file that is already pointed by the <TT>extrae.xml</TT> configuration file. The way to specify the routines to instrument is add as many lines with the name of every routine to be instrumented.
+
+<P>
+Running OpenMP applications using DynInst is rather similar to serial codes. Just compile the application with the appropiate OpenMP flags and run as before. You can find an example in the share/example/OMP directory.
+
+<P>
+
+<H2><A NAME="SECTION001012000000000000000"></A><A NAME="subsec:Examples_DynInst_Intermediate_MPI"></A>
+<BR>
+7.1.2 Generating intermediate files for MPI applications
+</H2>
+
+<P>
+MPI applications can also be instrumented using the DynInst instrumentator. The instrumentation is done independently to each spawned MPI process, so in order to execute the DynInst-based instrumentation package on a MPI application, you must be sure that your MPI launcher supports running shell-scripts. The following scripts show how to run the DynInst instrumentator from the MOAB/Slurm queue system. The first script just sets the environment for the job whereas the second is responsible for instrumenting every spawned task.
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=slurm\_trace.sh]
+#!/bin/bash
+# @ initialdir = .
+# @ output = trace.out
+# @ error =  trace.err
+# @ total_tasks = 4
+# @ cpus_per_task = 1
+# @ tasks_per_node = 4
+# @ wall_clock_limit = 00:10:00
+# @ tracing = 1
+
+srun ./run.sh ./mpi_ping
+</PRE>
+
+<P>
+The most important thing in the previous script is the line number 11, which is responsible for spawning the MPI tasks (using the srun command). The spawn method is told to execute <TT>./run.sh ./mpi_ping</TT> which in fact refers to instrument the <TT>mpi_ping</TT> binary using the <TT>run.sh</TT> script. You must adapt this file to your queue-system (if any) and to your MPI submission mechanism (i.e., change srun to mpirun, mpiexec, poe, <I>etc</I>...).  Note that changing the line 11 to read like <TT>./run.sh srun ./mpi_ping</TT> would result in instrumenting the srun application not mpi_ping.
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=run.sh]
+#!/bin/bash
+
+export EXTRAE_HOME=@sub_PREFIXDIR@
+source ${EXTRAE_HOME}/etc/extrae.sh
+
+# Only show output for task 0, others task send output to /dev/null
+if test "${SLURM_PROCID}" == "0" ; then
+  ${EXTRAE_HOME}/bin/extrae -config ../extrae.xml $@ &gt; job.out 2&gt; job.err
+else
+  ${EXTRAE_HOME}/bin/extrae -config ../extrae.xml $@ &gt; /dev/null 2&gt; /dev/null
+fi
+</PRE>
+
+<P>
+This is the script responsible for instrumenting a single MPI task. In line number 4 we set-up the instrumentation environment by executing the commands from <TT>extrae.sh</TT>. Then we execute the binary passed to the <TT>run.sh</TT> script in lines 8 and 10. Both lines are executing the same command except that line 8 sends all the output to two different files (one for standard output and another for standard error) and line 10 sends all the output to <TT>/dev/null</TT>.
+
+<P>
+Please note, this script is particularly adapted to the MOAB/Slurm queue systems. You may need to adapt the script to other systems by using the appropiate environment variables. Particularly, <TT>SLURM_PROCID</TT> identifies the MPI task id (i.e., the task rank) and may be changed to the proper environemnt variable (PMI_RANK in ParaStation/Torque/MOAB system or MXMPI_ID in systems having Myrinet MX devices, for example).
+
+<P>
+
+<H1><A NAME="SECTION001020000000000000000"></A><A NAME="sec:Examples_LDPRELOAD"></A>
+<BR>
+7.2 LD_PRELOAD based examples
+</H1>
+
+<P>
+LD_PRELOAD (or LDR_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names<A NAME="tex2html21"
+  HREF="#foot3520"><SUP>7.2</SUP></A>) they are not tested.
+
+<P>
+We show how this mechanism works on Linux (or similar environments) in subsection <A HREF="#subsec:Examples_Linux">7.2.1</A> and on AIX in subsection <A HREF="#subsec:Examples_AIX">7.2.3</A>.
+
+<P>
+
+<H2><A NAME="SECTION001021000000000000000"></A><A NAME="subsec:Examples_Linux"></A>
+<BR>
+7.2.1 Linux
+</H2>
+
+<P>
+The following script preloads the libmpitrace library to instrument MPI calls of the application passed as an argument (tune <TT>EXTRAE_HOME</TT> according to your installation).
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=trace.sh]
+#!/bin/sh
+
+export EXTRAE_HOME=WRITE-HERE-THE-PACKAGE-LOCATION
+export EXTRAE_CONFIG_FILE=extrae.xml
+export LD_PRELOAD=${EXTRAE_HOME}/lib/libmpitrace.so
+
+## Run the desired program
+$*
+</PRE>
+
+<P>
+The previous script can be found in the share/example/MPI/ld-preload directory in your tracing package directory. Copy the script to one of your directories, tune the <TT>EXTRAE_HOME</TT> environment variable and make the script executable (using <TT>chmod u+x</TT>). Also copy the XML configuration extrae.xml file from the share/example/MPI directory instrumentation package to the current directory. This file is used to configure the whole behavior of the instrumentation package (there is more information about the XML file on chapter <A HREF="#cha:XML">4</A>). The last line in the script, <IMG
+ WIDTH="22" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
+ SRC="img2.png"
+ ALT="$\$\ast$">, executes the arguments given to the script, so as you can run the instrumentation by simply adding the script in between your execution command.
+
+<P>
+Regarding the execution, if you run MPI applications from the command-line, you can issue the typical mpirun command as:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>${MPI_HOME}/bin/mpirun -np N ./trace.sh mpi-app
+    </TT></TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+where, <TT>${MPI_HOME}</TT> is the directory for your MPI installation, <TT>N</TT> is the number of MPI tasks you want to run and <TT>mpi-app</TT> is the binary of the MPI application you want to run.
+
+<P>
+However, if you execute your MPI applications through a queue system you may need to write a submission script. The following script is an example of a submission script for MOAB/Slurm queuing system using the aforementioned trace.sh script for an execution of the <TT>mpi-app</TT> on two processors.
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=slurm-trace.sh]
+#! /bin/bash
+#@ job_name         = trace_run
+#@ output           = trace_run%j.out
+#@ error            = trace_run%j.out
+#@ initialdir       = .
+#@ class            = bsc_cs
+#@ total_tasks      = 2
+#@ wall_clock_limit = 00:30:00
+
+srun ./trace.sh mpi_app
+</PRE>
+
+<P>
+If your system uses LoadLeveler your job script may look like:
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=ll.sh]
+#! /bin/bash
+#@ job_type = parallel
+#@ output = trace_run.ouput
+#@ error = trace_run.error
+#@ blocking = unlimited
+#@ total_tasks = 2
+#@ class = debug
+#@ wall_clock_limit = 00:10:00
+#@ restart = no
+#@ group = bsc41 
+#@ queue
+
+export MLIST=/tmp/machine_list ${$}
+/opt/ibmll/LoadL/full/bin/ll_get_machine_list &gt; ${MLIST}
+set NP = `cat ${MLIST} | wc -l`
+
+${MPI_HOME}/mpirun -np ${NP} -machinefile ${MLIST} ./trace.sh ./mpi-app
+
+rm ${MLIST}
+</PRE>
+
+<P>
+Besides the job specification given in lines 1-11, there are commands of particular interest. Lines 13-15 are used to know which and how many nodes are involved in the computation. Such information information is given to the <TT>mpirun</TT> command to proceed with the execution. Once the execution finished, the temporal file created on line 14 is removed on line 19.
+
+<P>
+
+<H2><A NAME="SECTION001022000000000000000"></A><A NAME="subsec:Examples_CUDA"></A>
+<BR>
+7.2.2 CUDA
+</H2>
+
+<P>
+There are two ways to instrument CUDA applications, depending on how the package was configured. If the package was configure with <TT>-enable-cuda</TT> only interposition on binaries using shared libraries are available. If the package was configured with <TT>-with-cupti</TT> any kind of binary can be instrumented because the instrumentation relies on the CUPTI library to instrument CUDA calls. The example shown below is intended for the former case.
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=run.sh]
+#!/bin/bash
+
+export EXTRAE_HOME=/home/harald/extrae
+export PAPI_HOME=/home/harald/aplic/papi/4.1.4
+
+EXTRAE_CONFIG_FILE=extrae.xml LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:${PAPI_HOME}/lib:${LD_LIBRARY_PATH} ./hello
+${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -e ./hello
+</PRE>
+
+<P>
+In this example, the hello application is compiled using the <TT>nvcc</TT> compiler and linked against the <TT>-lcudatrace</TT> library. The binary contains calls to <TT>Extrae_init</TT> and <TT>Extrae_fini</TT> and then executes a CUDA kernel. Line number 6 refers to the execution of the application itself. The <I>Extrae</I> configuration file and the location of the shared libraries are set in this line. Line number 7 invokes the merge process to generate the final tracefile.
+
+<P>
+
+<H2><A NAME="SECTION001023000000000000000"></A><A NAME="subsec:Examples_AIX"></A>
+<BR>
+7.2.3 AIX
+</H2>
+
+<P>
+AIX typically ships with POE and LoadLeveler as MPI implementation and queue system respectively. An example for a system with these software packages is given below. Please, note that the example is intended for 64 bit applications, if using 32 bit applications then <TT>LDR_PRELOAD64</TT> needs to be changed in favour of <TT>LDR_PRELOAD</TT>.
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=ll-aix64.sh]
+#@ job_name = basic_test
+#@ output = basic_stdout
+#@ error = basic_stderr
+#@ shell = /bin/bash
+#@ job_type = parallel
+#@ total_tasks = 8
+#@ wall_clock_limit = 00:15:00
+#@ queue
+
+export EXTRAE_HOME=WRITE-HERE-THE-PACKAGE-LOCATION
+export EXTRAE_CONFIG_FILE=extrae.xml
+export LDR_PRELOAD64=${EXTRAE_HOME}/lib/libmpitrace.so
+
+./mpi-app
+</PRE>
+
+<P>
+Lines 1-8 contain a basic LoadLeveler job definition. Line 10 sets the <I>Extrae</I> package directory in EXTRAE_HOME environment variable. Follows setting the XML configuration file that will be used to set up the tracing. Then follows setting <TT>LDR_PRELOAD64</TT> which is responsible for instrumentation using the shared library <TT>libmpitrace.so</TT>. Finally, line 14 executes the application binary.
+
+<P>
+
+<H1><A NAME="SECTION001030000000000000000"></A><A NAME="sec:Examples_static"></A>
+<BR>
+7.3 Statically linked based examples
+</H1>
+
+<P>
+This is the basic instrumentation method suited for those installations that neither support DynInst nor LD_PRELOAD, or require adding some manual calls to the <I>Extrae</I> API.
+
+<P>
+
+<H2><A NAME="SECTION001031000000000000000"></A><A NAME="subsec:Examples_static_link"></A>
+<BR>
+7.3.1 Linking the application
+</H2>
+
+<P>
+To get the instrumentation working on your code, first you have to link your application with the <I>Extrae</I> libraries. There are installed examples in your package distribution under share/examples directory. There you can find MPI, OpenMP, pthread and sequential examples depending on the support at configure time.
+
+<P>
+Consider the example Makefile found in share/examples/MPI/static:
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=Makefile]
+MPI_HOME = /gpfs/apps/MPICH2/mx/1.0.7..2/64
+EXTRAE_HOME = /home/bsc41/bsc41273/foreign-pkgs/extrae-11oct-mpich2/64
+PAPI_HOME = /gpfs/apps/PAPI/3.6.2-970mp-patched/64
+XML2_LDFLAGS = -L/usr/lib64
+XML2_LIBS = -lxml2
+
+F77 = $(MPI_HOME)/bin/mpif77 
+FFLAGS = -O2
+FLIBS = $(EXTRAE_HOME)/lib/libmpitracef.a \
+        -L$(PAPI_HOME)/lib -lpapi -lperfctr \
+        $(XML2_LDFLAGS) $(XML2_LIBS)
+
+all: mpi_ping
+
+mpi_ping: mpi_ping.f
+	$(F77) $(FFLAGS) mpi_ping.f $(FLIBS) -o mpi_ping
+
+clean:
+	rm -f mpi_ping *.o pingtmp? TRACE.*
+</PRE>
+
+<P>
+Lines 2-5 are definitions of some Makefile variables to set up the location of different packages needed by the instrumentation. In particular, <TT>EXTRAE_HOME</TT> sets where the <I>Extrae</I> package directory is located. In order to link your application with <I>Extrae</I> you have to add its libraries in the link stage (see lines 9-11 and 16). Besides <TT>libmpitracef.a</TT> we also add some PAPI libraries (<TT>-lpapi</TT>, and its dependency (which you may or not need <TT>-lperfctr</TT>), the libxml2 parsing library (<TT>-lxml2</TT>), and finally, the bfd and liberty libraries (<TT>-lbfd</TT> and <TT>-liberty</TT>), if the instrumentation package was compiled to support merge after trace (see chapter <A HREF="#cha:Configuration">3</A> for further information).
+
+<P>
+
+<H2><A NAME="SECTION001032000000000000000"></A><A NAME="subsec:Examples_static_Intermediate"></A>
+<BR>
+7.3.2 Generating the intermediate files
+</H2>
+
+<P>
+Executing an application with the statically linked version of the instrumentation package is very similar as the method shown in Section <A HREF="#sec:Examples_LDPRELOAD">7.2</A>. There is, however, a difference: do not set LD_PRELOAD in <TT>trace.sh</TT>.
+
+<P>
+<PRE>[frame=single,numbers=left,labelposition=topline,label=trace.sh]
+#!/bin/sh
+
+export EXTRAE_HOME=WRITE-HERE-THE-PACKAGE-LOCATION
+export EXTRAE_CONFIG_FILE=extrae.xml
+export LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:\
+                       /gpfs/apps/MPICH2/mx/1.0.7..2/64/lib:\
+                       /gpfs/apps/PAPI/3.6.2-970mp-patched/64/lib
+
+## Run the desired program
+$*
+</PRE>
+
+<P>
+See section <A HREF="#sec:Examples_LDPRELOAD">7.2</A> to know how to run this script either through command line or queue systems.
+
+<P>
+
+<H1><A NAME="SECTION001040000000000000000"></A><A NAME="subsec:Examples_LDPRELOAD_Final"></A>
+<BR>
+7.4 Generating the final tracefile
+</H1>
+
+<P>
+Independently from the tracing method chosen, it is necessary to translate the intermediate tracefiles into a Paraver tracefile. The Paraver tracefile can be generated automatically (if the tracing package and the XML configuration file were set up accordingly, see chapters <A HREF="#cha:Configuration">3</A> and <A HREF="#cha:XML">4</A>) or manually. In case of using the automatic merging process, it will use all the resources allocated for the application to perform the merge once the application ends.
+
+<P>
+To manually generate the final Paraver tracefile issue the following command:
+
+<P>
+
+<P>
+<BR>
+  <BLINK><FONT COLOR="#bfbfbf">
+    <TABLE  WIDTH="95%">
+<TR><TD>
+    <TT>${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -e mpi-app -o trace.prv
+    </TT></TD></TR>
+</TABLE></FONT></BLINK>
+
+<P>
+This command will convert the intermediate files generated in the previous step into a single Paraver tracefile. The <TT>TRACE.mpits</TT> is a file generated automatically by the instrumentation and contains a reference to all the intermediate files generated during the execution run. The <TT>-e</TT> parameter receives the application binary <TT>mpi-app</TT> in order to perform translations from addresses to source code. To use this feature, the binary must have been compiled with debugging information. Finally, the <TT>-o</TT> flag tells the merger how the Paraver tracefile will be named (trace.prv in this case).
+
+<P>
+
+<P>
+
+<H1><A NAME="SECTION001100000000000000000"></A><A NAME="cha:wholeXML"></A>
+<BR>
+A. An example of <I>Extrae</I> XML configuration file
+</H1>
+
+<P>
+<PRE>
+&lt;?xml version='1.0'?&gt;
+
+&lt;trace enabled="yes"
+ home="@sed_MYPREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="@sed_XMLID@"
+&gt;
+  &lt;mpi enabled="yes"&gt;
+    &lt;counters enabled="yes" /&gt;
+  &lt;/mpi&gt;
+
+  &lt;pacx enabled="no"&gt;
+    &lt;counters enabled="yes" /&gt;
+  &lt;/pacx&gt;
+
+  &lt;pthread enabled="yes"&gt;
+    &lt;locks enabled="no" /&gt;
+    &lt;counters enabled="yes" /&gt;
+  &lt;/pthread&gt;
+
+  &lt;openmp enabled="yes"&gt;
+    &lt;locks enabled="no" /&gt;
+    &lt;counters enabled="yes" /&gt;
+  &lt;/openmp&gt;
+
+  &lt;callers enabled="yes"&gt;
+    &lt;mpi enabled="yes"&gt;1-3&lt;/mpi&gt;
+    &lt;pacx enabled="no"&gt;1-3&lt;/pacx&gt;
+    &lt;sampling enabled="no"&gt;1-5&lt;/sampling&gt;
+  &lt;/callers&gt;
+
+  &lt;user-functions enabled="no" list="/home/bsc41/bsc41273/user-functions.dat"&gt;
+    &lt;counters enabled="yes" /&gt;
+  &lt;/user-functions&gt;
+
+  &lt;counters enabled="yes"&gt;
+    &lt;cpu enabled="yes" starting-set-distribution="1"&gt;
+      &lt;set enabled="yes" domain="all" changeat-globalops="5"&gt;
+        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM
+        &lt;sampling enabled="no" period="100000000"&gt;PAPI_TOT_CYC&lt;/sampling&gt;
+      &lt;/set&gt;
+      &lt;set enabled="yes" domain="user" changeat-globalops="5"&gt;
+        PAPI_TOT_INS,PAPI_FP_INS,PAPI_TOT_CYC
+      &lt;/set&gt;
+    &lt;/cpu&gt;
+    &lt;network enabled="yes" /&gt;
+    &lt;resource-usage enabled="yes" /&gt;
+  &lt;/counters&gt;
+
+  &lt;storage enabled="no"&gt;
+    &lt;trace-prefix enabled="yes"&gt;TRACE&lt;/trace-prefix&gt;
+    &lt;size enabled="no"&gt;5&lt;/size&gt;
+    &lt;temporal-directory enabled="yes"&gt;/scratch&lt;/temporal-directory&gt;
+    &lt;final-directory enabled="yes"&gt;/gpfs/scratch/bsc41/bsc41273&lt;/final-directory&gt;
+    &lt;gather-mpits enabled="no" /&gt;
+  &lt;/storage&gt;
+
+  &lt;buffer enabled="yes"&gt;
+    &lt;size enabled="yes"&gt;150000&lt;/size&gt;
+    &lt;circular enabled="no" /&gt;
+  &lt;/buffer&gt;
+
+  &lt;trace-control enabled="yes"&gt;
+    &lt;file enabled="no" frequency="5M"&gt;/gpfs/scratch/bsc41/bsc41273/control&lt;/file&gt;
+    &lt;global-ops enabled="no"&gt;10&lt;/global-ops&gt;
+    &lt;remote-control enabled="yes"&gt;
+      &lt;mrnet enabled="yes" target="150" analysis="spectral" start-after="30"&gt;
+        &lt;clustering max_tasks="26" max_points="8000"/&gt;
+        &lt;spectral min_seen="1" max_periods="0" num_iters="3" signals="DurBurst,InMPI"/&gt;
+      &lt;/mrnet&gt;
+      &lt;signal enabled="no" which="USR1"/&gt;
+    &lt;/remote-control&gt;
+  &lt;/trace-control&gt; 
+
+  &lt;others enabled="yes"&gt;
+    &lt;minimum-time enabled="no"&gt;10m&lt;/minimum-time&gt;
+  &lt;/others&gt;
+
+  &lt;bursts enabled="no"&gt;
+    &lt;threshold enabled="yes"&gt;500u&lt;/threshold&gt;
+    &lt;mpi-statistics enabled="yes" /&gt;
+    &lt;pacx-statistics enabled="no" /&gt;
+  &lt;/bursts&gt;
+
+  &lt;cell enabled="no"&gt;
+    &lt;spu-file-size enabled="yes"&gt;5&lt;/spu-file-size&gt;
+    &lt;spu-buffer-size enabled="yes"&gt;64&lt;/spu-buffer-size&gt;
+    &lt;spu-dma-channel enabled="yes"&gt;2&lt;/spu-dma-channel&gt;
+  &lt;/cell&gt;
+
+  &lt;sampling enabled="no" type="default" period="50m" variability="10m"/&gt;
+
+  &lt;merge enabled="yes" 
+    synchronization="default"
+    binary="mpi_ping"
+    tree-fan-out="16"
+    max-memory="512"
+    joint-states="yes"
+    keep-mpits="yes"
+    sort-addresses="yes"
+    remove-files="no"
+  &gt;
+    mpi_ping.prv 
+  &lt;/merge&gt;
+
+&lt;/trace&gt;
+</PRE>
+
+<P>
+
+<H1><A NAME="SECTION001200000000000000000"></A><A NAME="cha:EnvVar"></A>
+<BR>
+B. Environment variables
+</H1>
+
+<P>
+Although <I>Extrae</I> is configured through an XML file (which is pointed by the <TT>EXTRAE_CONFIG_FILE</TT>), it also supports minimal configuration to be done via environment variables for those systems that do not have the library responsible for parsing the XML files (<EM>i.e.,</EM> libxml2).
+
+<P>
+This appendix presents the environment variables the <I>Extrae</I> package uses if <TT>EXTRAE_CONFIG_FILE</TT> is not set and a description. For those environment variable that refer to XML 'enabled' attributes (<EM>i.e.</EM>, that can be set to "yes" or "no") are considered to be enabled if their value are defined to 1.
+
+<P>
+<BR>
+<A NAME="tab:EnvironmentVariables"></A><IMG
+ WIDTH="989" HEIGHT="697" ALIGN="BOTTOM" BORDER="0"
+ SRC="img3.png"
+ ALT="\begin{landscape}
+% latex2html id marker 3791\begin{table}
+\centerline{
+\begin...
+...riables available to configure {\sf {E}xtrae} }
+\end{table}\par
+\end{landscape}">
+<BR>
+
+<P>
+<BR>
+<A NAME="tab:EnvironmentVariables_continued"></A><IMG
+ WIDTH="989" HEIGHT="635" ALIGN="BOTTOM" BORDER="0"
+ SRC="img4.png"
+ ALT="\begin{landscape}
+% latex2html id marker 3812\par
+\begin{table}
+\centerline{
+\...
+... to configure {\sf {E}xtrae} ({\em continued})}
+\end{table}\par
+\end{landscape}">
+<BR>
+
+<P>
+
+<H1><A NAME="SECTION001300000000000000000"></A><A NAME="sec:FAQ"></A>
+<BR>
+C. Frequently Asked Questions
+</H1>
+
+<P>
+
+<H1><A NAME="SECTION001310000000000000000">
+C.1 Configure, compile and link FAQ</A>
+</H1>
+
+<P>
+
+<UL>
+<LI><B>Question:</B> The <TT>bootstrap</TT> script claims <TT>libtool</TT> errors like:
+<BR>      <TT>      src/common/Makefile.am:9: Libtool library used but `LIBTOOL' is undefined
+<BR>
+src/common/Makefile.am:9:   The usual way to define `LIBTOOL' is to add `AC_PROG_LIBTOOL'
+<BR>
+src/common/Makefile.am:9:   to `configure.ac' and run `aclocal' and `autoconf' again.
+<BR>
+src/common/Makefile.am:9:   If `AC_PROG_LIBTOOL' is in `configure.ac', make sure
+<BR>
+src/common/Makefile.am:9:   its definition is in aclocal's search path.
+<BR>      </TT>
+      <B>Answer:  </B> Add to the <TT>aclocal</TT> (which is called in <TT>bootstrap</TT>) the directory where it can find the M4-macro files from <TT>libtool</TT>. Use the <TT>-I option</TT> to add it.
+
+<P>
+</LI>
+<LI><B>Question:</B> The <TT>bootstrap</TT> script claims that some macros are not found in the library, like:
+<BR>      <TT>      aclocal:configure.ac:338: warning: macro `AM_PATH_XML2' not found in library
+<BR>      </TT>
+      <B>Answer:  </B> Some M4 macros are not found. In this specific example, the libxml2 is not installed or cannot be found in the typical installation directory. To solve this issue, check whether the libxml2 is installed and modify the line in the <TT>bootstrap</TT> script that reads
+<BR>      <TT>      &amp;&amp; aclocal -I config  
+<BR>      </TT>
+      into
+<BR>      <TT>      &amp;&amp; aclocal -I config -I/path/to/xml/m4/macros  
+<BR>      </TT>
+      where <TT>/path/to/xml/m4/macros</TT> is the directory where the libxml2 M4 got installed (for example /usr/local/share/aclocal).
+
+<P>
+</LI>
+<LI><B>Question:</B> The application cannot be linked succesfully. The link stage complains about (or something similar like)
+<BR>      <TT>ld: 0711-317 ERROR: Undefined symbol: .__udivdi3</TT>.
+<BR>      <TT>ld: 0711-317 ERROR: Undefined symbol: .__mulvsi3</TT>.
+<BR>      <B>Answer:  </B> The instrumentation libraries have been compiled with GNU compilers whereas the application is compiled using IBM XL compilers. Add the libgcc_s library to the link stage of the application. This library can be found under the installation directory of the GNU compiler.
+
+<P>
+</LI>
+<LI><B>Question:</B> The make command dies when building libraries belonging <I>Extrae</I> in an AIX machine with messages like:
+<BR>      <TT>      libtool: link: ar cru libcommon.a libcommon_la-utils.o libcommon_la-events.o
+<BR>
+ar: 0707-126 libcommon_la-utils.o is not valid with the current object file mode.
+<BR>
+Use the -X option to specify the desired object mode.
+<BR>
+ar: 0707-126 libcommon_la-events.o is not valid with the current object file mode.
+<BR>
+Use the -X option to specify the desired object mode.
+<BR>      </TT>
+      <B>Answer:  </B> <TT>Libtool</TT> uses <TT>ar</TT> command to build static libraries. However, <TT>ar</TT> does need special flags (-X64) to deal with 64 bit objects. To workaround this problem, just set the environment variable OBJECT_MODE to 64 before executing <TT>gmake</TT>. The <TT>ar</TT> command honors this variable to properly handle the object files in 64 bit mode.
+
+<P>
+</LI>
+<LI><B>Question:</B> The <TT>configure</TT> script dies saying
+<BR>      <TT>configure: error: Unable to determine pthread library support</TT>.
+<BR>      <B>Answer:  </B> Some systems (like BG/L) does not provide a pthread library and <TT>configure</TT> claims that cannot find it. Launch the <TT>configure</TT> script with the <TT>-disable-pthread</TT> parameter.
+
+<P>
+</LI>
+<LI><B>Question:</B> NOT! <TT>gmake</TT> command fails when compiling the instrumentation package in a machine running AIX operating system, using 64 bit mode and IBM XL compilers complaining about Profile MPI (PMPI) symbols.
+<BR>      <B>Answer:  </B> NOT! Use the reentrant version of IBM compilers (<TT>xlc_r</TT> and <TT>xlC_r</TT>). Non reentrant versions of MPI library does not include 64 bit MPI symbols, whereas reentrant versions do. To use these compilers, set the CC (C compiler) and CXX (C++ compiler) environment variables before running the <TT>configure</TT> script.
+
+<P>
+</LI>
+<LI><B>Question:</B> The compiler fails complaining that some parameters can not be understand when compiling the parallel merge.
+      <B>Answer:  </B> If the environment has more than one compiler (for example, IBM and GNU compilers), is it possible that the parallel merge compiler is not the same as the rest of the package. There are two ways to solve this:
+      
+<UL>
+<LI>Force the package compilation with the same backend as the parallel compiler. For example, for IBM compiler, set <TT>CC=xlc</TT> and <TT>CXX=xlC</TT> at the configure step.
+</LI>
+<LI>Tell the parallel compiler to use the same compiler as the rest of the package. For example, for IBM compiler mpcc, set <TT>MP_COMPILER=gcc</TT> when issuing the make command.
+      
+</LI>
+</UL>
+
+<P>
+</LI>
+<LI><B>Question:</B> The instrumentation package does not generate the shared instrumentation libraries but generates the satatic instrumentation libraries.
+<BR>      <B>Answer 1:</B> Check that the configure step was compiled without <TT>-disable-shared</TT> or force it to be enabled through <TT>-enable-shared</TT>.
+<BR>      <B>Answer 2:</B> Some MPI libraries (like MPICH 1.2.x) do not generate the shared libraries by default. The instrumentation package rely on them to generate its shared libraries, so make sure that the shared libraries of the MPI library are generated.
+
+<P>
+</LI>
+<LI><B>Question:</B> In BlueGene systems where the libxml2 (or any optional library for extrae) the linker shows error messages like when compiling the final application with the <I>Extrae</I> library:
+<BR>			<TT>			../libxml2/lib/libxml2.a(xmlschemastypes.o): In function `_xmlSchemaDateAdd':
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:3771: undefined reference to `__uitrunc'
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:3796: undefined reference to `__uitrunc'
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:3801: undefined reference to `__uitrunc'
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:3842: undefined reference to `__uitrunc'
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:3843: undefined reference to `__uitrunc'
+<BR>			../libxml2/lib/libxml2.a(xmlschemastypes.o): In function `xmlSchemaGetCanonValue':
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:5840: undefined reference to `__f64tou64rz'
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:5843: undefined reference to `__f64tou64rz'
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:5846: undefined reference to `__f64tou64rz'
+<BR>			../libxml2-2.7.2/xmlschemastypes.c:5849: undefined reference to `__f64tou64rz'
+<BR>			../libxml2/lib/libxml2.a(debugXML.o): In function `xmlShell':
+<BR>			../libxml2-2.7.2/debugXML.c:2802: undefined reference to `_fill'
+<BR>
+collect2: ld returned 1 exit status
+<BR>			</TT>
+			<B>Answer:  </B> The libxml2 library (or any other optional library) has been compiled using the IBM XL compiler. There are two alternatives to circumvent the problem: add the XL libraries into the link stage when building your application, or recompile the libxml2 library using the GNU gcc cross compiler for BlueGene.
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION001320000000000000000">
+C.2 Execution FAQ</A>
+</H1>
+
+<P>
+
+<UL>
+<LI><B>Question:</B> Why do the environment variables are not exported?
+<BR>      <B>Answer:  </B> MPI applications are launched using special programs (like <TT>mpirun, poe, mprun, srun...</TT>) that spawn the application for the selected resources. Some of these programs do not export all the environment variables to the spawned processes. Check if the the launching program does have special parameters to do that, or use the approach used on section <A HREF="#cha:Examples">7</A> based on launching scripts instead of MPI applications.
+
+<P>
+</LI>
+<LI><B>Question:</B> The application runs but does not generate intermediate trace files (*.mpit)
+<BR>      <B>Answer 1:</B> Check that environment variables are correctly passed to the application.
+<BR>      <B>Answer 2:</B> If the code is Fortran, check that the number of underscores used to decorate routines in the instrumentation library matches the number of underscores added by the Fortran compiler you used to compile and link the application. You can use the <TT>nm</TT> and <TT>grep</TT> commands to check it.
+<BR>      <B>Answer 3:</B> If the code is MPI and Fortran, check that you're using the proper Fortran library for the instrumentation.
+<BR>      <B>Answer 4:</B> If the code is MPI and you are using LD_PRELOAD, check that the binary is linked against a shared MPI library (you can use the <TT>ldd</TT> command).
+<BR>
+<P>
+</LI>
+<LI><B>Question:</B> The instrumentation begins for a single process instead for several processes?
+<BR>      <B>Answer 1:</B> Check that you place the appropriate parameter to indicate the number of tasks (typically -np).
+<BR>      <B>Answer 2:</B> Some MPI implementation require the application to receive special MPI parameters to run correctly. For example, MPICH based on CH-P4 device require the binary to receive som paramters. The following example is an sh-script that solves this issue:
+<BR>      <TT>#!/bin/sh
+<BR>
+EXTRAE_CONFIG_FILE=extrae.xml ./mpi_program $@ real_params</TT>
+<BR>
+<P>
+</LI>
+<LI><B>Question:</B> The application blocks at the beginning?
+<BR>      <B>Answer  :</B> The application may be waiting for all tasks to startup but only some of them are running. Check for the previous question.
+
+<P>
+</LI>
+<LI><B>Question:</B> The resulting traces does not contain the routines that have been instrumented.
+<BR>      <B>Answer 1:</B> Check that the routines have been actually executed.
+<BR>      <B>Answer 2:</B> Some compilers do automatic inlining of functions at some optimization levels (e.g., Intel Compiler at -O2). When functions are inlined, they do not have entry and exit blocks and cannot be instrumented. Turn off inlining or decrease the optimization level.
+
+<P>
+</LI>
+<LI><B>Question:</B> Number of threads = 1?
+<BR>      <B>Answer  :</B> Some MPI launchers (<I>i.e.</I> mpirun, poe, mprun...) do not export all the environment variables to all tasks. Look at chapter <A HREF="#cha:Examples">7</A> to workaround this and/or contact your support staff to know how to do it.
+
+<P>
+</LI>
+<LI><B>Question:</B> When running the instrumented application, the loader complains about:
+<BR>              <TT>undefined symbol: clock_gettime</TT>
+<BR>      <B>Answer  :</B> The instrumentation package was configured using <TT>-enable-posix-clock</TT> and on many systems this implies the inclusion of additional libraries (namely, <TT>-lrt</TT>).
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION001330000000000000000">
+C.3 Performance monitoring counters FAQ</A>
+</H1>
+
+<P>
+
+<UL>
+<LI><B>Question:</B> How do I know the available performance counters on the system?
+<BR>      <B>Answer 1:</B> If using PAPI, check the <TT>papi_avail</TT> or <TT>papi_native_avail</TT> commands found in the PAPI installation directory.
+<BR>      <B>Answer 2:</B> If using PMAPI (on AIX systems), check for the <TT>pmlist</TT> command. Specifically, check for the available groups running <TT>pmlist -g -1</TT>.
+
+<P>
+</LI>
+<LI><B>Question:</B> How do I know how many performance counters can I use?
+<BR>      <B>Answer:  </B> The <I>Extrae</I> package can gather up to eight (8) performance counters at the same time. This also depends on the underlying library used to gather them.
+
+<P>
+</LI>
+<LI><B>Question:</B> When using PAPI, I cannot read eight performance counters or the specified in <TT>papi_avail</TT> output.
+<BR>      <B>Answer 1:</B> There are some performance counters (those listed in <TT>papi_avail</TT>) that are classified as derived. Such performance counters depend on more than one counter increasing the number of real performance counters used. Check for the derived column within the list to check whether a performance counter is derived or not.
+<BR>			<B>Answer 2:</B> On some architectures, like the PowerPC, the performance counters are grouped in a such way that choosing a performance counter precludes others from being elected in the same set. A feasible work-around is to create as many sets in the XML file to gather all the required hardware counters and make sure that the sets change from time to time.
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION001340000000000000000">
+C.4 Merging traces FAQ</A>
+</H1>
+
+<P>
+
+<UL>
+<LI><B>Question:</B> The <TT>mpi2prv</TT> command shows the following messages at the start-up:
+<BR>      <TT>      PANIC! Trace file TRACE.0000011148000001000000.mpit is 16 bytes too big!
+<BR>
+PANIC! Trace file TRACE.0000011147000002000000.mpit is 32 bytes too big!
+<BR>
+PANIC! Trace file TRACE.0000011146000003000000.mpit is 16 bytes too big!
+<BR>      </TT>
+      and it dies when parsing the intermediate files.
+<BR>      <B>Answer  1:</B> The aforementioned messages are typically related with incomplete writes in disk. Check for enough disk space using the <TT>quota</TT> and <TT>df</TT> commands.
+      <B>Answer  2:</B> If your system supports multiple ABIs (for example, linux x86-64 supports 32 and 64 bits ABIs), check that the ABI of the target application and the ABI of the merger match.
+
+<P>
+</LI>
+<LI><B>Question:</B> The resulting Paraver tracefile contains invalid references to the source code.
+<BR>      <B>Answer:  </B> This usually happens when the code has not been compiled and linked with the -g flag. Moreover, some high level optimizations (which includes inlining, interprocedural analysis, and so on) can lead to generate bad references.
+
+<P>
+</LI>
+<LI><B>Question:</B> The resulting trace contains information regarding the stack (like callers) but their value does not coincide with the source code.
+<BR>      <B>Answer:  </B> Check that the same binary is used to generate the trace and referenced with the the <TT>-e</TT> parameter when generating the Paraver tracefile.
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION001400000000000000000"></A><A NAME="cha:InstrumentedRoutines"></A>
+<BR>
+D. Instrumented routines
+</H1>
+
+<P>
+
+<H1><A NAME="SECTION001410000000000000000"></A><A NAME="sec:MPIinstrumentedroutines"></A>
+<BR>
+D.1 Instrumented MPI routines
+</H1>
+
+<P>
+These are the instrumented MPI routines in the <I>Extrae</I> package:
+
+<P>
+
+<UL>
+<LI>MPI_Init
+</LI>
+<LI>MPI_Init_thread<A NAME="tex2html23"
+  HREF="#foot3424"><SUP>D.1</SUP></A>
+</LI>
+<LI>MPI_Finalize
+</LI>
+<LI>MPI_Bsend
+</LI>
+<LI>MPI_Ssend
+</LI>
+<LI>MPI_Rsend
+</LI>
+<LI>MPI_Send
+</LI>
+<LI>MPI_Bsend_init
+</LI>
+<LI>MPI_Ssend_init
+</LI>
+<LI>MPI_Rsend_init
+</LI>
+<LI>MPI_Send_init
+</LI>
+<LI>MPI_Ibsend
+</LI>
+<LI>MPI_Issend
+</LI>
+<LI>MPI_Irsend
+</LI>
+<LI>MPI_Isend
+</LI>
+<LI>MPI_Recv
+</LI>
+<LI>MPI_Irecv
+</LI>
+<LI>MPI_Recv_init
+</LI>
+<LI>MPI_Reduce
+</LI>
+<LI>MPI_Reduce_scatter
+</LI>
+<LI>MPI_Allreduce
+</LI>
+<LI>MPI_Barrier
+</LI>
+<LI>MPI_Cancel
+</LI>
+<LI>MPI_Test
+</LI>
+<LI>MPI_Wait
+</LI>
+<LI>MPI_Waitall
+</LI>
+<LI>MPI_Waitany
+</LI>
+<LI>MPI_Waitsome
+</LI>
+<LI>MPI_Bcast
+</LI>
+<LI>MPI_Alltoall
+</LI>
+<LI>MPI_Alltoallv
+</LI>
+<LI>MPI_Allgather
+</LI>
+<LI>MPI_Allgatherv
+</LI>
+<LI>MPI_Gather
+</LI>
+<LI>MPI_Gatherv
+</LI>
+<LI>MPI_Scatter
+</LI>
+<LI>MPI_Scatterv
+</LI>
+<LI>MPI_Comm_rank
+</LI>
+<LI>MPI_Comm_size
+</LI>
+<LI>MPI_Comm_create
+</LI>
+<LI>MPI_Comm_dup
+</LI>
+<LI>MPI_Comm_split
+</LI>
+<LI>MPI_Cart_create
+</LI>
+<LI>MPI_Cart_sub
+</LI>
+<LI>MPI_Start
+</LI>
+<LI>MPI_Startall
+</LI>
+<LI>MPI_Request_free
+</LI>
+<LI>MPI_Scan
+</LI>
+<LI>MPI_Sendrecv
+</LI>
+<LI>MPI_Sendrecv_replace
+</LI>
+<LI>MPI_File_open<A NAME="tex2html24"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_close<A NAME="tex2html25"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_read<A NAME="tex2html26"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_read_all<A NAME="tex2html27"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_write<A NAME="tex2html28"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_write_all<A NAME="tex2html29"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_read_at<A NAME="tex2html30"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_read_at_all<A NAME="tex2html31"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_write_at<A NAME="tex2html32"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_File_write_at_all<A NAME="tex2html33"
+  HREF="#foot3520"><SUP>D.2</SUP></A>
+</LI>
+<LI>MPI_Get<A NAME="tex2html34"
+  HREF="#foot1921"><SUP>D.3</SUP></A>
+</LI>
+<LI>MPI_Put<A NAME="tex2html35"
+  HREF="#foot1921"><SUP>D.3</SUP></A>
+</LI>
+</UL>
+
+<P>
+
+<P>
+
+<H1><A NAME="SECTION001420000000000000000"></A><A NAME="sec:OpenMPruntimesinstrumented"></A>
+<BR>
+D.2 Instrumented OpenMP runtimes
+</H1>
+
+<P>
+
+<H2><A NAME="SECTION001421000000000000000">
+D.2.1 Intel compilers - icc, iCC, ifort</A>
+</H2>
+
+<P>
+The instrumentation of the Intel OpenMP runtime for versions 8.1 to 10.1 is only available using the <I>Extrae</I> package based on DynInst library.
+
+<P>
+These are the instrument routines of the Intel OpenMP runtime functions using DynInst:
+
+<P>
+
+<UL>
+<LI>__kmpc_fork_call
+</LI>
+<LI>__kmpc_barrier
+</LI>
+<LI>__kmpc_invoke_task_func
+</LI>
+<LI>__kmpc_set_lock<A NAME="tex2html36"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>__kmpc_unset_lock<A NAME="tex2html37"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+</UL>
+
+<P>
+The instrumentation of the Intel OpenMP runtime for version 11.0 to 12.0 is available using the <I>Extrae</I> package based on the <TT>LD_PRELOAD</TT> and also the DynInst mechanisms. The instrumented routines include:
+
+<P>
+
+<UL>
+<LI>__kmpc_fork_call
+</LI>
+<LI>__kmpc_barrier
+</LI>
+<LI>__kmpc_dispatch_next_4
+</LI>
+<LI>__kmpc_dispatch_next_8
+</LI>
+<LI>__kmpc_single
+</LI>
+<LI>__kmpc_end_single
+</LI>
+<LI>__kmpc_critical<A NAME="tex2html38"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>__kmpc_end_critical<A NAME="tex2html39"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>omp_set_lock<A NAME="tex2html40"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>omp_unset_lock<A NAME="tex2html41"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>__kmpc_omp_task_alloc
+</LI>
+<LI>__kmpc_omp_task_begin_if0
+</LI>
+<LI>__kmpc_omp_task_complete_if0
+</LI>
+<LI>__kmpc_omp_taskwait
+</LI>
+</UL>
+
+<P>
+
+<H2><A NAME="SECTION001422000000000000000">
+D.2.2 IBM compilers - xlc, xlC, xlf</A>
+</H2>
+
+<P>
+<I>Extrae</I> supports IBM OpenMP runtime 1.6.
+
+<P>
+These are the instrumented routines of the IBM OpenMP runtime:
+
+<P>
+
+<UL>
+<LI>_xlsmpParallelDoSetup_TPO
+</LI>
+<LI>_xlsmpParRegionSetup_TPO
+</LI>
+<LI>_xlsmpWSDoSetup_TPO
+</LI>
+<LI>_xlsmpBarrier_TPO
+</LI>
+<LI>_xlsmpSingleSetup_TPO
+</LI>
+<LI>_xlsmpWSSectSetup_TPO
+</LI>
+<LI>_xlsmpRelDefaultSLock<A NAME="tex2html42"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>_xlsmpGetDefaultSLock<A NAME="tex2html43"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+</UL>
+
+<P>
+
+<H2><A NAME="SECTION001423000000000000000">
+D.2.3 GNU compilers - gcc, g++, gfortran</A>
+</H2>
+
+<P>
+<I>Extrae</I> supports GNU OpenMP runtime 4.2.
+
+<P>
+These are the instrumented routines of the IBM OpenMP runtime:
+
+<P>
+
+<UL>
+<LI>GOMP_parallel_start
+</LI>
+<LI>GOMP_parallel_sections_start
+</LI>
+<LI>GOMP_parallel_end
+</LI>
+<LI>GOMP_sections_start
+</LI>
+<LI>GOMP_sections_next
+</LI>
+<LI>GOMP_sections_end
+</LI>
+<LI>GOMP_sections_end_nowait
+</LI>
+<LI>GOMP_loop_end
+</LI>
+<LI>GOMP_loop_end_nowait
+</LI>
+<LI>GOMP_loop_static_start
+</LI>
+<LI>GOMP_loop_dynamic_start
+</LI>
+<LI>GOMP_loop_guided_start
+</LI>
+<LI>GOMP_loop_runtime_start
+</LI>
+<LI>GOMP_parallel_loop_static_start
+</LI>
+<LI>GOMP_parallel_loop_dynamic_start
+</LI>
+<LI>GOMP_parallel_loop_guided_start
+</LI>
+<LI>GOMP_parallel_loop_runtime_start
+</LI>
+<LI>GOMP_loop_static_next
+</LI>
+<LI>GOMP_loop_dynamic_next
+</LI>
+<LI>GOMP_loop_guided_next
+</LI>
+<LI>GOMP_loop_runtime_next
+</LI>
+<LI>GOMP_barrier
+</LI>
+<LI>GOMP_critical_name_enter<A NAME="tex2html44"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>GOMP_critical_name_exit<A NAME="tex2html45"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>GOMP_critical_enter<A NAME="tex2html46"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>GOMP_critical_exit<A NAME="tex2html47"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>GOMP_atomic_enter<A NAME="tex2html48"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>GOMP_atomic_exit<A NAME="tex2html49"
+  HREF="#foot1922"><SUP>D.4</SUP></A>
+</LI>
+<LI>GOMP_task
+</LI>
+<LI>GOMP_taskwait
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION001430000000000000000"></A><A NAME="sec:OpenMPruntimesinstrumented"></A>
+<BR>
+D.3 Instrumented pthread runtimes
+</H1>
+
+<P>
+These are the instrumented routines of the pthread runtime:
+
+<P>
+
+<UL>
+<LI>pthread_create
+</LI>
+<LI>pthread_detach
+</LI>
+<LI>pthread_join
+</LI>
+<LI>pthread_mutex_lock
+</LI>
+<LI>pthread_mutex_trylock
+</LI>
+<LI>pthread_mutex_timedlock
+</LI>
+<LI>pthread_mutex_unlock
+</LI>
+<LI>pthread_rwlock_rdlock
+</LI>
+<LI>pthread_rwlock_tryrdlock
+</LI>
+<LI>pthread_rwlock_timedrdlock
+</LI>
+<LI>pthread_rwlock_wrlock
+</LI>
+<LI>pthread_rwlock_trywrlock
+</LI>
+<LI>pthread_rwlock_timedwrlock
+</LI>
+<LI>pthread_rwlock_unlock
+</LI>
+</UL>
+
+<P>
+
+<H1><A NAME="SECTION001500000000000000000">
+About this document ...</A>
+</H1>
+ <STRONG><I>Extrae</I> 
+<BR>
+User guide manual
+<BR>
+for version 2.3.3</STRONG><P>
+This document was generated using the
+<A HREF="http://www.latex2html.org/"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A> translator Version 2008 (1.71)
+<P>
+Copyright &#169; 1993, 1994, 1995, 1996,
+<A HREF="http://cbl.leeds.ac.uk/nikos/personal.html">Nikos Drakos</A>, 
+Computer Based Learning Unit, University of Leeds.
+<BR>
+Copyright &#169; 1997, 1998, 1999,
+<A HREF="http://www.maths.mq.edu.au/~ross/">Ross Moore</A>, 
+Mathematics Department, Macquarie University, Sydney.
+<P>
+The command line arguments were: <BR>
+ <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
+<P>
+The translation was initiated by Harald Servat on 2013-02-14
+<BR><HR><H4>Footnotes</H4>
+<DL>
+<DT><A NAME="foot211">... file</A><A
+ HREF="user-guide.html#tex2html3"><SUP>1.1</SUP></A></DT>
+<DD>See section <A HREF="#cha:XML">4</A> for further details regarding this file
+
+</DD>
+<DT><A NAME="fnm2">... libmpitrace<SUP>1.2</SUP></A></DT>
+<DD>If the application is Fortran append an f to the library. For example, if you want to instrument a Fortran application that is using MPI, use <TT>libmpitracef</TT> instead of <TT>libmpitrace</TT>.
+
+</DD>
+<DT><A NAME="foot1831">... PAPI</A><A
+ HREF="user-guide.html#tex2html12"><SUP>4.1</SUP></A></DT>
+<DD>More information available on their website <TT><A NAME="tex2html13"
+  HREF="http://icl.cs.utk.edu/papi">http://icl.cs.utk.edu/papi</A></TT>. <I>Extrae</I> requires PAPI 3.x at least.
+
+</DD>
+<DT><A NAME="foot1827">... PMAPI</A><A
+ HREF="user-guide.html#tex2html14"><SUP>4.2</SUP></A></DT>
+<DD>PMAPI is only available for AIX operating system, and it is on the base operating system since AIX5.3. <I>Extrae</I> requires AIX 5.3 at least.
+
+</DD>
+<DT><A NAME="foot1921">... respectively)</A><A
+ HREF="user-guide.html#tex2html15"><SUP>4.3</SUP></A></DT>
+<DD>Some architectures do not allow grouping some performance counters in the same set.
+
+</DD>
+<DT><A NAME="foot1922">... set</A><A
+ HREF="user-guide.html#tex2html16"><SUP>4.4</SUP></A></DT>
+<DD>Each group contains several performance counters
+
+</DD>
+<DT><A NAME="foot2071">... file</A><A
+ HREF="user-guide.html#tex2html17"><SUP>4.5</SUP></A></DT>
+<DD>This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section <A HREF="#sec:XMLSectionBuffer">4.11</A>).
+
+</DD>
+<DT><A NAME="foot3084">...<TT>-dimemas</TT></A><A
+ HREF="user-guide.html#tex2html18"><SUP>6.1</SUP></A></DT>
+<DD>The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.
+
+</DD>
+<DT><A NAME="foot3424">... architectures</A><A
+ HREF="user-guide.html#tex2html20"><SUP>7.1</SUP></A></DT>
+<DD>The IA-64 architecture support was dropped by DynInst 7.0
+
+</DD>
+<DT><A NAME="foot3520">... names</A><A
+ HREF="user-guide.html#tex2html21"><SUP>7.2</SUP></A></DT>
+<DD>Look at <TT><A NAME="tex2html22"
+  HREF="http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html">http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html</A></TT> for further information.
+
+</DD>
+</DL><HR>
+<!--Navigation Panel-->
+<IMG WIDTH="81" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next_inactive"
+ SRC="file:/usr/share/latex2html/icons/nx_grp_g.png"> 
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up_g.png"> 
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev_g.png">   
+<BR>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Harald Servat
+2013-02-14
+</ADDRESS>
+</BODY>
+</HTML>

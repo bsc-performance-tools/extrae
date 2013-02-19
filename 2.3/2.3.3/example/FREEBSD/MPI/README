@@ -1,0 +1,8 @@
+This example is structured in two directories:
+
+  ld-preload/
+    Contains an example using the LD_PRELOAD feature.
+
+  static/
+    Contains an example using the instrumentation package using statically linked libraries.
+

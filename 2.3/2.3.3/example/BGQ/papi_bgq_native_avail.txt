@@ -1,0 +1,1728 @@
+Available native events and hardware information.
+--------------------------------------------------------------------------------
+PAPI Version             : 5.0.1.0
+Vendor string and code   :  (0)
+Model string and code    :  (0)
+CPU Revision             : 0.000000
+CPU Max Megahertz        : 1600
+CPU Min Megahertz        : 1600
+NUMA Nodes               : 1
+CPUs per Node            : 64
+Total CPUs               : 64
+Running in a VM          : no
+Number Hardware Counters : 277
+Max Multiplex Counters   : 277
+--------------------------------------------------------------------------------
+
+===============================================================================
+ Native Events in Component: linux-bgq
+===============================================================================
+| PEVT_AXU_INSTR_COMMIT                                                        |
+|            A valid AXU (non-load/store) instruction has completed (past the l|
+|            ast flush stage).
+in EX6 pipeline stage.
+-AXU uCode sub-operations|
+|             are excluded                                                     |
+--------------------------------------------------------------------------------
+| PEVT_AXU_CR_COMMIT                                                           |
+|            A valid AXU CR updater instruction has completed, past the last fl|
+|            ush point.
+in EX6 in pipeline stage                               |
+--------------------------------------------------------------------------------
+| PEVT_AXU_IDLE                                                                |
+|            No valid AXU instruction is in the last stage of the floating poin|
+|            t unit.
+EX6 stage is empty                                        |
+--------------------------------------------------------------------------------
+| PEVT_AXU_FP_DS_ACTIVE                                                        |
+|            A Floating-Point Divide or Square Root sequence is in progress (in|
+|            cl single-precision).                                             |
+--------------------------------------------------------------------------------
+| PEVT_AXU_FP_DS_ACTIVE_CYC                                                    |
+|            Number of cycles a Floating-Point Divide or Square Root sequence i|
+|            s in progress (incl single-precision).                            |
+--------------------------------------------------------------------------------
+| PEVT_AXU_DENORM_FLUSH                                                        |
+|            A B operand of a Floating Point instruction caused a Denormal Oper|
+|            and flush2ucode. Microcode prenormalization sequence will follow. |
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_AXU_UCODE_OPS_COMMIT                                                    |
+|            A valid AXU ucode operation is committed past the last flush point|
+|            . This does not include the original AXU instruction, but only the|
+|             operations from the expanded ucode sequence                      |
+--------------------------------------------------------------------------------
+| PEVT_AXU_FP_EXCEPT                                                           |
+|            FP Exception - FX bit of the FPSCR                                |
+--------------------------------------------------------------------------------
+| PEVT_AXU_FP_ENAB_EXCEPT                                                      |
+|            FP Enabled Exception - FEX bit of the FPSCR                       |
+--------------------------------------------------------------------------------
+| PEVT_IU_IL1_MISS                                                             |
+|            A thread is waiting for a reload from the L2.
+-Not when cache inhi|
+|            bited.
+-Not when thread held off for a reload that another thread |
+|            is waiting for.
+-Still counts even if flush has occurred.         |
+--------------------------------------------------------------------------------
+| PEVT_IU_IL1_MISS_CYC                                                         |
+|            Number of cycles a thread is waiting for a reload from the L2.
+-No|
+|            t when cache inhibited.
+-Not when thread held off for a reload tha|
+|            t another thread is waiting for.
+-Still counts even if flush has o|
+|            ccurred.                                                          |
+--------------------------------------------------------------------------------
+| PEVT_IU_IL1_RELOADS_DROPPED                                                  |
+|            Number of times a reload from the L2 is dropped, per thread
+-Not w|
+|            hen cache inhibited
+-Does not count when not loading cache due to |
+|            a back invalidate to that address                                 |
+--------------------------------------------------------------------------------
+| PEVT_IU_RELOAD_COLLISIONS                                                    |
+|            A ready thread is held off due to the L1 Cache being reloaded
+-Cou|
+|            ld occur on multiple threads per cycle                            |
+--------------------------------------------------------------------------------
+| PEVT_IU_RELOAD_COLLISIONS_CYC                                                |
+|            Number of cycles a ready thread is held off due to the L1 Cache be|
+|            ing reloaded
+-Could occur on multiple threads per cycle           |
+--------------------------------------------------------------------------------
+| PEVT_IU_IU0_REDIR_CYC                                                        |
+|            Cycles IU0 is flushed for any reason (XU, UC, BP, etc.)           |
+--------------------------------------------------------------------------------
+| PEVT_IU_IERAT_MISS                                                           |
+|            IERAT Miss occurrence
+-Can only occur on one thread per cycle     |
+--------------------------------------------------------------------------------
+| PEVT_IU_IERAT_MISS_CYC                                                       |
+|            Number of cycles ierat Miss occurrence
+-Can only occur on one thre|
+|            ad per cycle                                                      |
+--------------------------------------------------------------------------------
+| PEVT_IU_ICACHE_FETCH                                                         |
+|            ICache read completes for instruction
+-Does not count if flushed b|
+|            efore IU2
+-Counts whether cache hit or miss
+-Can only occur on one|
+|             thread per cycle                                                 |
+--------------------------------------------------------------------------------
+| PEVT_IU_ICACHE_FETCH_CYC                                                     |
+|            Number of cycles icache read completes for instruction
+-Does not c|
+|            ount if flushed before IU2
+-Counts whether cache hit or miss
+-Can |
+|            only occur on one thread per cycle                                |
+--------------------------------------------------------------------------------
+| PEVT_IU_INSTR_FETCHED                                                        |
+|            Instructions fetched, divided by 4 (only counts every 4 instructio|
+|            ns)
+-Uses a counter so fetches of 1, 2, or 3 instructions are not |
+|            lost
+-Includes CI=0 or 1, hit or miss (any instruction that comes |
+|            through IU2)                                                      |
+--------------------------------------------------------------------------------
+| PEVT_IU_INSTR_FETCHED_CYC                                                    |
+|            Number of cycles instructions fetched, divided by 4 (only counts e|
+|            very 4 instructions)
+-Uses a counter so fetches of 1, 2, or 3 inst|
+|            ructions are not lost
+-Includes CI=0 or 1, hit or miss (any instru|
+|            ction that comes through IU2)                                     |
+--------------------------------------------------------------------------------
+| PEVT_IU_RSV_ANY_L2_BACK_INV                                                  |
+|            Back invalidate from L2
+-Per core, not per thread                 |
+--------------------------------------------------------------------------------
+| PEVT_IU_RSV_ANY_L2_BACK_INV_CYC                                              |
+|            Number of cycles back invalidate from L2
+-Per core, not per thread|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_IU_L2_BACK_INV_HITS                                                     |
+|            Back invalidate from L2, and data was contained within the instruc|
+|            tion cache.
+-Per core, not per thread
+-Does not count if hits cach|
+|            eline for which we are waiting for a reload                       |
+--------------------------------------------------------------------------------
+| PEVT_IU_L2_BACK_INV_HITS_CYC                                                 |
+|            Number of cycles back invalidate from L2, and data was contained w|
+|            ithin the instruction cache.
+-Per core, not per thread
+-Does not c|
+|            ount if hits cacheline for which we are waiting for a reload      |
+--------------------------------------------------------------------------------
+| PEVT_IU_IBUFF_EMPTY                                                          |
+|            Instruction buffers are empty                                     |
+--------------------------------------------------------------------------------
+| PEVT_IU_IBUFF_EMPTY_CYC                                                      |
+|            Number of cycles instruction buffers are empty                    |
+--------------------------------------------------------------------------------
+| PEVT_IU_IBUFF_FLUSH                                                          |
+|            Instruction buffer address range mismatch and flush               |
+--------------------------------------------------------------------------------
+| PEVT_IU_IBUFF_FLUSH_CYC                                                      |
+|            Number of cycles instruction buffer address range mismatch and flu|
+|            sh                                                                |
+--------------------------------------------------------------------------------
+| PEVT_IU_IS1_STALL_CYC                                                        |
+|            Register Dependency Stall
+-any stall due to dependencies between i|
+|            nstructions (IU5 stage).
+-includes Issue Stage Stalls (IU6)       |
+--------------------------------------------------------------------------------
+| PEVT_IU_IS2_STALL_CYC                                                        |
+|            Instruction Issue Stall
+Each execution unig (XU or AXU) can receiv|
+|            e one instruction from any of the 4 threads each cycle. This stall|
+|             occurs while an instruction is ready, but another ready thread ta|
+|            kes a turn (Stage IU6)                                            |
+--------------------------------------------------------------------------------
+| PEVT_IU_BARRIER_OP_STALL_CYC                                                 |
+|            Stalled pending barrier op resolution (each uCoded instruction wil|
+|            l also cause a barrier operation).
+-Caveot. The results from this |
+|            event may be suspect: The barrier stall cycles include event from |
+|            sync instruction, pls stall due to AIX and XU uCoded instructions.|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_IU_SLOW_SPR_ACCESS_CYC                                                  |
+|            Stalled for MFSPR/MTSPR ops that move across the slow SPR bus.    |
+--------------------------------------------------------------------------------
+| PEVT_IU_RAW_DEP_HIT_CYC                                                      |
+|            Stalled for Read-After-Write dependency                           |
+--------------------------------------------------------------------------------
+| PEVT_IU_WAW_DEP_HIT_CYC                                                      |
+|            Stalled for Write-After-Write dependency                          |
+--------------------------------------------------------------------------------
+| PEVT_IU_SYNC_DEP_HIT_CYC                                                     |
+|            Stalled for SYNC/ISYNC/TLBSYNC instructions                       |
+--------------------------------------------------------------------------------
+| PEVT_IU_SPR_DEP_HIT_CYC                                                      |
+|            Stalled for SPR use or update dependency                          |
+--------------------------------------------------------------------------------
+| PEVT_IU_AXU_DEP_HIT_CYC                                                      |
+|            Stalled for any AXU dependency (excludes IS2 stall)               |
+--------------------------------------------------------------------------------
+| PEVT_IU_FXU_DEP_HIT_CYC                                                      |
+|            Stalled for any FXU dependency (excludes IS2 stall)
+Caveat: AXU uc|
+|            ode Barrier stall cycles included, but XU uCode barrier stall cycl|
+|            es are not. Must subtract 2*PEVT_INST_QFPU_UCODE to get more accur|
+|            ate representation of FXU stalls.                                 |
+--------------------------------------------------------------------------------
+| PEVT_IU_AXU_FXU_DEP_HIT_CYC                                                  |
+|            Stalled for any AXU/FXU dependency (excludes IS2 stall)           |
+--------------------------------------------------------------------------------
+| PEVT_IU_AXU_ISSUE_PRI_LOSS_CYC                                               |
+|            AXU instruction that is valid in issue and another thread issues b|
+|            ecause it has priority (see IS2 Stall for combined AXU/FXU issue p|
+|            riority loss)                                                     |
+--------------------------------------------------------------------------------
+| PEVT_IU_FXU_ISSUE_PRI_LOSS_CYC                                               |
+|            FXU instruction that is valid in issue and another thread issues b|
+|            ecause it has priority (see IS2 Stall for combined AXU/FXU issue p|
+|            riority loss)                                                     |
+--------------------------------------------------------------------------------
+| PEVT_IU_FXU_ISSUE_COUNT                                                      |
+|            FXU instructions issued per thread. AXU Issues is broken; Instead |
+|            use axu issues = total issues - fxu issues                        |
+--------------------------------------------------------------------------------
+| PEVT_IU_TOT_ISSUE_COUNT                                                      |
+|            all instructions issued per thread                                |
+--------------------------------------------------------------------------------
+| PEVT_XU_PROC_BUSY                                                            |
+|            Cycles that any thread is running on the core.                    |
+--------------------------------------------------------------------------------
+| PEVT_XU_BR_COMMIT_CORE                                                       |
+|            Number of Branches committed                                      |
+--------------------------------------------------------------------------------
+| PEVT_XU_BR_MISPRED_COMMIT_CORE                                               |
+|            Number of mispredicted Branches committed (does not include target|
+|             address mispredicted)                                            |
+--------------------------------------------------------------------------------
+| PEVT_XU_BR_TARG_ADDR_MISPRED_COMMIT_CORE                                     |
+|            Number of Branch Target addresses mispredicted committed          |
+--------------------------------------------------------------------------------
+| PEVT_XU_THRD_RUNNING                                                         |
+|            Number of cycles that thread is in run state.
+only meaningful in B|
+|            GPM_MODE_HWDISTRIB, since otherwise counters are stopped if SW thr|
+|            ead is swapped out                                                |
+--------------------------------------------------------------------------------
+| PEVT_XU_TIMEBASE_TICK                                                        |
+|            Number of times the timebase has incremented (same as GetBaseTime(|
+|            ))                                                                |
+--------------------------------------------------------------------------------
+| PEVT_XU_SPR_READ_COMMIT                                                      |
+|            Number of mfspr, mftb, mfmsr or mfcr instructions committed       |
+--------------------------------------------------------------------------------
+| PEVT_XU_SPR_WRITE_COMMIT                                                     |
+|            Number of mtspr, mtmsr, mtcrf, wrtee, wrteei instructions committe|
+|            d                                                                 |
+--------------------------------------------------------------------------------
+| PEVT_XU_STALLED_ON_WAITRSV                                                   |
+|            Between commit of waitrsv and wakeup by lost reservation.         |
+--------------------------------------------------------------------------------
+| PEVT_XU_STALLED_ON_WAITRSV_CYC                                               |
+|            Number of cycles between commit of waitrsv and wakeup by lost rese|
+|            rvation.                                                          |
+--------------------------------------------------------------------------------
+| PEVT_XU_EXT_INT_ASSERT                                                       |
+|            Number of cycles the external interrupt signal is asserted        |
+--------------------------------------------------------------------------------
+| PEVT_XU_CRIT_EXT_INT_ASSERT                                                  |
+|            Number of cycles the critical external interrupt signal is asserte|
+|            d                                                                 |
+--------------------------------------------------------------------------------
+| PEVT_XU_PERF_MON_INT_ASSERT                                                  |
+|            Number of cycles the performance monitor interrupt signal is asser|
+|            ted                                                               |
+--------------------------------------------------------------------------------
+| PEVT_XU_PPC_COMMIT                                                           |
+|            Number of instructions committed. uCode sequences count as one ins|
+|            truction.
+- Similar to PEVT_INSTR_ALL except that it may be contex|
+|            t sensitive. Includes AXU instructions.                           |
+--------------------------------------------------------------------------------
+| PEVT_XU_COMMIT                                                               |
+|            Number of XU operations committed.
+-Includes every committed sub-o|
+|            peration of an XU uCode sequence.
+-Includes one committed operatio|
+|            n per AXU uCode sequence;
+-Includes all XU committed instructions |
+--------------------------------------------------------------------------------
+| PEVT_XU_UCODE_COMMIT                                                         |
+|            Number of uCode instructions committed (includes QFPU ucode instru|
+|            ctions committed). Does not include uCode sub-operations          |
+--------------------------------------------------------------------------------
+| PEVT_XU_ANY_FLUSH                                                            |
+|            Number of cycles flush is asserted to the IU                      |
+--------------------------------------------------------------------------------
+| PEVT_XU_BR_COMMIT                                                            |
+|            Number of Branches committed                                      |
+--------------------------------------------------------------------------------
+| PEVT_XU_BR_MISPRED_COMMIT                                                    |
+|            Number of mispredicted Branches committed (does not include target|
+|             address mispredicted)                                            |
+--------------------------------------------------------------------------------
+| PEVT_XU_BR_TAKEN_COMMIT                                                      |
+|            Number of taken branches committed                                |
+--------------------------------------------------------------------------------
+| PEVT_XU_BR_TARG_ADDR_MISPRED_COMMIT                                          |
+|            Number of Branch Target addresses mispredicted committed          |
+--------------------------------------------------------------------------------
+| PEVT_XU_MULT_DIV_COLLISION                                                   |
+|            Number of Multiply/Divide resource collisions                     |
+--------------------------------------------------------------------------------
+| PEVT_XU_EXT_INT_PEND                                                         |
+|            Count number of cycles the interrupt signal into the processor is |
+|            asserted before the completion logic redirects program flow to the|
+|             interrupt vector                                                 |
+--------------------------------------------------------------------------------
+| PEVT_XU_CRIT_EXT_INT_PEND                                                    |
+|            Count number of cycles the interrupt signal into the processor is |
+|            asserted before the completion logic redirects program flow to the|
+|             interrupt vector                                                 |
+--------------------------------------------------------------------------------
+| PEVT_XU_PERF_MON_INT_PEND                                                    |
+|            Count number of cycles the interrupt signal into the processor is |
+|            asserted before the completion logic redirects program flow to the|
+|             interrupt vector                                                 |
+--------------------------------------------------------------------------------
+| PEVT_XU_RUN_INSTR                                                            |
+|            Number of PPC instruction commits while any thread is in run state|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_XU_INTS_TAKEN                                                           |
+|            Number of external, critical external, or performance mintor inter|
+|            rupt taken across all threads.
+Does not count more than one per cy|
+|            cle, although up to 4 can occur simultaneously.                   |
+--------------------------------------------------------------------------------
+| PEVT_XU_EXT_INT_TAKEN                                                        |
+|            Number of external interrupts taken                               |
+--------------------------------------------------------------------------------
+| PEVT_XU_CRIT_EXT_INT_TAKEN                                                   |
+|            Number of critical external interrupts taken                      |
+--------------------------------------------------------------------------------
+| PEVT_XU_PERF_MON_INT_TAKEN                                                   |
+|            Number of performance monitor interrupts taken                    |
+--------------------------------------------------------------------------------
+| PEVT_XU_DOORBELL_INT_TAKEN                                                   |
+|            Number of doorbell or doorbell critical interrupts taken          |
+--------------------------------------------------------------------------------
+| PEVT_XU_STCX_FAIL                                                            |
+|            Number of failing stwcx./stdcx. instructions                      |
+--------------------------------------------------------------------------------
+| PEVT_XU_ICSWX_FAILED                                                         |
+|            Number of failing icswx/icswepx instructions                      |
+--------------------------------------------------------------------------------
+| PEVT_XU_ICSWX_COMMIT                                                         |
+|            Number of icswx/icswepx instructions committed                    |
+--------------------------------------------------------------------------------
+| PEVT_XU_MULT_DIV_BUSY                                                        |
+|            Number of cycles the multiplier or divider is in use.             |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_STS                                                          |
+|            Number of completed store commands.
+-Microcoded instructions will |
+|            count more than once.
+-Does not count syncs,tlb ops,dcbz,icswx, or|
+|             data cache management instructions.
+-Includes stcx, but does not |
+|            wait for stcx complete response from the L2.
+-Includes cache-inhib|
+|            ited stores.                                                      |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_ST_MISSES                                                    |
+|            Number of completed store commands that missed the L1 Data Cache. |
+|            Note that store misses are pipelined and write through to the L2, |
+|            so the store time typically has less impact on performance than lo|
+|            ad misses.
+-Microcoded instructions may be counted more than once.|
+|            
+-Does not count syncs,tlb ops,dcbz,icswx, or data cache managemen|
+|            t instructions.
+-Includes stcx, but does not wait for stcx complet|
+|            e response from the L2.
+-Does not includes cache-inhibited stores.|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_LD_MISSES                                                    |
+|            Number of completed load commands that missed the L1 Data Cache.
+-|
+|            Microcoded instructions may be counted more than once.
+-Does not c|
+|            ount dcbt[st][ls][ep].
+-Include larx.
+-Does not includes cache-inh|
+|            ibited loads.                                                     |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_CACHE_INHIB_LD_MISSES                                        |
+|            Number of completed cache-inhibited load commands.
+-Microcoded ins|
+|            tructions may be counted more than once.
+-Does not count dcbt[st][|
+|            ls][ep].
+-Does not includes cacheable loads.                      |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_CACHEABLE_LDS                                                |
+|            Number of completed cache-able load commands.
+-Microcoded instruct|
+|            ions may be counted more than once.
+-Does not count dcbt[st][ls][e|
+|            p].
+-Include larx.
+-Does not includes cache-inhibited loads.      |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_DCBT_MISSES                                                  |
+|            Number of completed dcbt[st][ls][ep] commands that missed the L1 D|
+|            ata Cache.
+-Does not include touch ops that were dropped due to th|
+|            e following:
+1) Unsupported TH(CT) fields.
+2) Translated to cache-|
+|            inhibited.
+3) Exception detected on dcbt[st][ep].                 |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_DCBT_HITS                                                    |
+|            Number of completed dcbt[st][ls][ep] commands that hit the L1 Data|
+|             Cache.
+-Does not include touch ops that were dropped due to the f|
+|            ollowing:
+1) Unsupported TH(CT) fields.
+2) Translated to cache-inh|
+|            ibited.
+3) Exception detected on dcbt[st][ep].                    |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_AXU_LDS                                                      |
+|            Number of completed AXU loads. AXU refers to the unit attached on |
+|            the AXU interface (i.e a floating point unit).
+-Cacheable and cach|
+|            e-inhibited loads are counted.                                    |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_AXU_STS                                                      |
+|            Number of completed AXU stores. AXU refers to the unit attached on|
+|             the AXU interface (i.e a floating point unit).
+-Cacheable and cac|
+|            he-inhibited stores are counted.                                  |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_STCX                                                         |
+|            Number of completed STCX instructions. Does not wait for the stcx |
+|            complete response from the L2.                                    |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_WCLR                                                         |
+|            Number of completed WCLR instructions.                            |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_WCLR_WL                                                      |
+|            Number of completed WCLR instructions that set the Watchlost indic|
+|            ator.                                                             |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_LDAWX                                                        |
+|            Number of completed LDAWX instructions.                           |
+--------------------------------------------------------------------------------
+| PEVT_LSU_UNSUPPORTED_ALIGNMENT_FLUSH                                         |
+|            Number of flushes due to an unsupported alignment.
+-This is a spec|
+|            ulative count.
+-Includes speculative flushes to microcode.
+-Includ|
+|            es speculative flushes to the alignment interrupt due to
+unaligned|
+|             larx,stcx,icswx,ldawx or XUCR0[FLSTA]=1 or XUCR0[AFLSTA]=1.      |
+--------------------------------------------------------------------------------
+| PEVT_LSU_RELOAD_RESRC_CONFLICT_FLUSH                                         |
+|            Number of flushes due to a resource conflict on a reload.
+1)Cache-|
+|            Inhibited Reload colliding with store,icswx,mftgpr,mffgpr, mtdp,mf|
+|            dp instructions valid in EX2 pipe stage.
+2)Cache-Inhibited Reload |
+|            targeting AXU colliding with AXU load instruction.
+3)1st half of C|
+|            acheable Reload colliding with dcbt[st]ls or ldawx.               |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_DUPLICATE_LDAWX                                              |
+|            Number of completed LDAWX which set CR=001||XER[SO].              |
+--------------------------------------------------------------------------------
+| PEVT_LSU_INTER_THRD_DIR_ACCESS_FLUSH                                         |
+|            Number of flushes due to a thread setting/clearing cacheline direc|
+|            tory contents (i.e. valid,lock,thread watch bits) and different th|
+|            read
+accesses same cacheline. Also, count of non-committed WCLR L[|
+|            0]=0 in pipe and different thread has a directory access in EX3.
+-|
+|            This is a speculative count.                                      |
+--------------------------------------------------------------------------------
+| PEVT_LSU_LMQ_DEPENDENCY_FLUSH                                                |
+|            Number of flushes due to a RAW/WAW hazard detected against the Loa|
+|            d Miss Queue.
+-This is a speculative count.                       |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_WCHKALL                                                      |
+|            Number of completed WCHKALL instructions.                         |
+--------------------------------------------------------------------------------
+| PEVT_LSU_COMMIT_SUCC_WCHKALL                                                 |
+|            Number of completed WCHKALL instructions that returned CR=000||XER|
+|            [SO].                                                             |
+--------------------------------------------------------------------------------
+| PEVT_LSU_LD_MISS_Q_FULL_FLUSH                                                |
+|            Number of flushes due to the Load Miss Queue being full. Load Miss|
+|             Queue Full is determined when all 8 entries are in use and new lo|
+|            ad
+miss is flushed. Also, count of load miss command sequence wrap|
+|            ped flushes.
+-This is a speculative count.                        |
+--------------------------------------------------------------------------------
+| PEVT_LSU_ST_Q_FULL_FLUSH                                                     |
+|            Number of flushes due to the Store Queue being full or a sync,mbar|
+|            ,tlbsync instruction hits against outstanding load for issuing thr|
+|            ead.
+-This is a speculative count.                                |
+--------------------------------------------------------------------------------
+| PEVT_LSU_HIT_LD_FLUSH                                                        |
+|            Number of flushes due to a cache instruction (i.e load,store, or c|
+|            ache management) hit against an outstanding load miss.
+-XUCR0[CLS]|
+|            =0Cacheline check is down to the 64Byte boundary, else check is do|
+|            wn to the 128Byte boundary.
+-This is a speculative count.         |
+--------------------------------------------------------------------------------
+| PEVT_LSU_HIT_IG1_REQ_FLUSH                                                   |
+|            Number of flushes due to a cache instruction (i.e load,store, or c|
+|            ache management) hit against an outstanding guarded cache-inhibite|
+|            d
+request in the load miss queue or in the store queue.
+-This is a|
+|             speculative count.                                               |
+--------------------------------------------------------------------------------
+| PEVT_LSU_LARX_FINISHED                                                       |
+|            Number of completed LARX instructions.
+-Waits for reload from the |
+|            L2                                                                |
+--------------------------------------------------------------------------------
+| PEVT_LSU_INTER_THRD_ST_WATCH_LOST                                            |
+|            Number of Watch Lost indicator sets due to a different thread stor|
+|            ing to a watched line by another thread.                          |
+--------------------------------------------------------------------------------
+| PEVT_LSU_RELOAD_WATCH_LOST                                                   |
+|            Number of Watch Lost indicator sets due to a reload evicting watch|
+|            ed line.                                                          |
+--------------------------------------------------------------------------------
+| PEVT_LSU_BACK_INV_WATCH_LOST                                                 |
+|            Number of Watch Lost indicator sets due to a back invalidate to a |
+|            watched line.                                                     |
+--------------------------------------------------------------------------------
+| PEVT_LSU_L1_DCACHE_BACK_INVAL                                                |
+|            Number of back-invalidates sent to the L1 Data Cache.             |
+--------------------------------------------------------------------------------
+| PEVT_LSU_L1_DCACHE_BACK_INVAL_HITS                                           |
+|            Number of back-invalidates sent to the L1 Data Cache that invalida|
+|            ted a line.                                                       |
+--------------------------------------------------------------------------------
+| PEVT_LSU_L1_CACHE_PTYERR_DETECTED                                            |
+|            Number of parity errors detected in the L1 Directories and Caches.|
+|            
+-Includes both Instruction and Data Directories and Caches.
+-Does|
+|             not count more than one per cycle, although up to 4 may occur sim|
+|            ultaneously.                                                      |
+--------------------------------------------------------------------------------
+| PEVT_LSU_LD_LAT_MEM_SUBSYS_CYC                                               |
+|            load miss queue entry 0 is in use was the intent - but is broken. |
+|            Doesn't indicate anything useful.                                 |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_HIT_DIRECT_IERAT                                                |
+|            TLB hit direct entry (instruction, ind=0 entry hit for fetch)     |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_MISS_DIRECT_IERAT                                               |
+|            TLB miss direct entry (instruction, ind=0 entry missed for fetch) |
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_MISS_INDIR_IERAT                                                |
+|            TLB miss indirect entry (instruction, ind=1 entry missed for fetch|
+|            , results in i-tlb exception)                                     |
+--------------------------------------------------------------------------------
+| PEVT_MMU_HTW_HIT_IERAT                                                       |
+|            H/W tablewalk hit (instruction, pte reload with PTE.V=1 for fetch)|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_HTW_MISS_IERAT                                                      |
+|            H/W tablewalk miss (instruction, pte reload with PTE.V=0 for fetch|
+|            , results in PT fault exception -> isi)                           |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_HIT_DIRECT_DERAT                                                |
+|            TLB hit direct entry (data, ind=0 entry hit for load/store/cache o|
+|            p)                                                                |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_MISS_DIRECT_DERAT                                               |
+|            TLB miss direct entry (data, ind=0 entry miss for load/store/cache|
+|             op)                                                              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_MISS_INDIR_DERAT                                                |
+|            TLB miss indirect entry (data, ind=1 entry missed for load/store/c|
+|            ache op, results in d-tlb exception)                              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_HTW_HIT_DERAT                                                       |
+|            H/W tablewalk hit (data, pte reload with PTE.V=1 for load/store/ca|
+|            che op)                                                           |
+--------------------------------------------------------------------------------
+| PEVT_MMU_HTW_MISS_DERAT                                                      |
+|            H/W tablewalk miss (data, pte reload with PTE.V=0 for load/store/c|
+|            ache op, results in PT fault exception -> dsi)                    |
+--------------------------------------------------------------------------------
+| PEVT_MMU_IERAT_MISS                                                          |
+|            IERAT miss (edge) or latency (level) (total ierat misses or latenc|
+|            y)                                                                |
+--------------------------------------------------------------------------------
+| PEVT_MMU_IERAT_MISS_CYC                                                      |
+|            Number of cycles ierat miss (edge) or latency (level) (total ierat|
+|             misses or latency)                                               |
+--------------------------------------------------------------------------------
+| PEVT_MMU_DERAT_MISS                                                          |
+|            DERAT miss (edge) or latency (level) (total derat misses or latenc|
+|            y)                                                                |
+--------------------------------------------------------------------------------
+| PEVT_MMU_DERAT_MISS_CYC                                                      |
+|            Number of cycles derat miss (edge) or latency (level) (total derat|
+|             misses or latency)                                               |
+--------------------------------------------------------------------------------
+| PEVT_MMU_IERAT_MISS_TOT                                                      |
+|            IERAT miss total (part of direct entry search total)              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_DERAT_MISS_TOT                                                      |
+|            DERAT miss total (part of direct entry search total)              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_MISS_DIRECT_TOT                                                 |
+|            TLB miss direct entry total (total TLB ind=0 misses)              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_HIT_FIRSTSIZE_TOT                                               |
+|            TLB hit direct entry first page size (first mmucr2 size)          |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_HIT_INDIR_TOT                                                   |
+|            TLB indirect entry hits total (=page table searches)              |
+--------------------------------------------------------------------------------
+| PEVT_MMU_HTW_PTERELOAD_TOT                                                   |
+|            H/W tablewalk successful installs total (with no PTfault, TLB inel|
+|            igible, or LRAT miss)                                             |
+--------------------------------------------------------------------------------
+| PEVT_MMU_LRAT_TRANS_TOT                                                      |
+|            LRAT translation request total (for GS=1 tlbwe and ptereload)     |
+--------------------------------------------------------------------------------
+| PEVT_MMU_LRAT_MISS_TOT                                                       |
+|            LRAT misses total (for GS=1 tlbwe and ptereload)                  |
+--------------------------------------------------------------------------------
+| PEVT_MMU_PT_FAULT_TOT                                                        |
+|            Page table faults total (PTE.V=0 for ptereload, resulting in isi/d|
+|            si)                                                               |
+--------------------------------------------------------------------------------
+| PEVT_MMU_PT_INELIG_TOT                                                       |
+|            TLB ineligible total (all TLB ways are iprot=1 for ptereloads, res|
+|            ulting in isi/dsi)                                                |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLBWEC_FAIL_TOT                                                     |
+|            tlbwe conditional failed total (total tlbwe WQ=01 with no reservat|
+|            ion match)                                                        |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLBWEC_SUCC_TOT                                                     |
+|            tlbwe conditional success total (total tlbwe WQ=01 with reservatio|
+|            n match)                                                          |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLBILX_SRC_TOT                                                      |
+|            tlbilx local invalidations sourced total (sourced tlbilx on this c|
+|            ore total)                                                        |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLBIVAX_SRC_TOT                                                     |
+|            tlbivax invalidations sourced total (sourced tlbivax on this core |
+|            total)                                                            |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLBIVAX_SNOOP_TOT                                                   |
+|            tlbivax snoops total (total tlbivax snoops received from bus, loca|
+|            l bit = don't care)                                               |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_FLUSH_REQ_TOT                                                   |
+|            TLB flush requests total (TLB requested flushes due to TLB busy or|
+|             instruction hazards)                                             |
+--------------------------------------------------------------------------------
+| PEVT_MMU_TLB_FLUSH_REQ_TOT_CYC                                               |
+|            Number of cycles tlb flush requests total (TLB requested flushes d|
+|            ue to TLB busy or instruction hazards)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_STRM_LINE_ESTB                                                  |
+|            Lines established for stream prefetch                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_HIT                                                             |
+|            Hits in prefetch directory                                        |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_PF2DFC                                                          |
+|            Prefetch to demand fetch conversions                              |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_MISS                                                            |
+|            Misses in L1p by prefetchable loads                               |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_DRAIN                                                        |
+|            Lookup was held by guarded store waiting for drain                |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_DRAIN_CYC                                                    |
+|            Cycles lookup was held by guarded store waiting for drain         |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LD                                                              |
+|            Loads                                                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_ST_WC                                                           |
+|            Write combined stores (even and odd bits to accomidate x1 to x2 cl|
+|            ock conversion                                                    |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_ST_32BYTE                                                       |
+|            QPX stores                                                        |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_ST_CRACKED                                                      |
+|            Stores cracked into two switch requests                           |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_SRT                                                    |
+|            Lookup was held by full switch request table                      |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_SRT_CYC                                                |
+|            Cycles lookup was held by full switch request table               |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_MMIO_DCR                                               |
+|            Lookup was held by MMIO or DCR access                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_MMIO_DCR_CYC                                           |
+|            Cycles lookup was held by MMIO or DCR access                      |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_STRM_DET                                               |
+|            Lookup was held while a stream was established                    |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_STRM_DET_CYC                                           |
+|            Cycles lookup was held while a stream was established             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_LIST_RD                                                |
+|            Lookup was held while list fetched addresses                      |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_LIST_RD_CYC                                            |
+|            Cycles lookup was held while list fetched addresses               |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_ST                                                              |
+|            Stores non-combined                                               |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_LIST_WRT                                               |
+|            Lookup was held while list wrote list data                        |
+--------------------------------------------------------------------------------
+| PEVT_L1P_BAS_LU_STALL_LIST_WRT_CYC                                           |
+|            Cycles lookup was held while list wrote list data                 |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_MAS_SW_REQ_VAL                                                   |
+|            requests to the sw xbar                                           |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_MAS_SW_REQ_GATE                                                  |
+|            active request info cycles to the sw xbar                         |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_MAS_SW_DATA_GATE                                                 |
+|            active write data cycles to the sw xbar                           |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_SR_MAS_RD_VAL_2                                                  |
+|            read response cycles from the sr xbar                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_SI_MAS_REQ_VAL_2                                                 |
+|            requests to the invalidation(si) xbar                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_SW_MAS_SKED_VAL_2                                                |
+|            "normally" scheduled sw xbar requests                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_SW_MAS_EAGER_VAL_2                                               |
+|            "eagerly" scheduled sw xbar requests                              |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_TLB_FILL                                                         |
+|            mmu read requests                                                 |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_STWCX_FAIL                                                       |
+|            failed stwcx (store with reservation) requests                    |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_STWCX                                                            |
+|            stwcx (store with reservation) requests                           |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_I_FETCH                                                          |
+|            instruction fetch requests                                        |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_MSYNC                                                            |
+|            hwsync requests                                                   |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_LWARX                                                            |
+|            lwarx (load with reservation) requests                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_KILL_L2_RSV                                                      |
+|            Lwarx reservation kill sent from L1p to L2 slice                  |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_L2_CANCEL_A2_RSV                                                 |
+|            Lwarx reservation kill send from L2 slice to L1p                  |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_L1_INVAL                                                         |
+|            invalidate to L1                                                  |
+--------------------------------------------------------------------------------
+| PEVT_L1P_SW_WC_EVICT_ADDR                                                    |
+|            write combine buffer was evicted by store to same 128 byte window |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_LINE_ESTB                                                      |
+|            lines established for any reason and thread                       |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_HIT_FWD                                                        |
+|            Hit in L1p forwarded to L2 (measure speculation traffic)          |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_L1_HIT_FWD                                                     |
+|            Hit in L1 forwarded to L2                                         |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_EVICT_UNUSED                                                   |
+|            Lines fetched and never hit evicted                               |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_EVICT_PART_USED                                                |
+|            Line fetched and only partially used evicted                      |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_REMOTE_INVAL_MATCH                                             |
+|            Remote invalidate collided with a valid line                      |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_DONT_CACHE                                                     |
+|            Don't cache bit was set for a line fill                           |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_STRM_DEPTH_STEAL                                               |
+|            Adaptation events per thread                                      |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_STRM_ESTB                                                      |
+|            streams detected and established                                  |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_WRT_INVAL                                                      |
+|            Local write collided with a valid line                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_LINE_ESTB_ALL_LIST                                             |
+|            Lines established by all list engines                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_HIT_LIST                                                       |
+|            Hits for lines fetched by list engine                             |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_PF2DFC_LIST                                                    |
+|            Prefetch to demand fetch conversions for line established by list |
+--------------------------------------------------------------------------------
+| PEVT_L1P_STRM_PART_INVAL_REFCH                                               |
+|            Partially invalid line refetched                                  |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP_1                                                         |
+|            core address skipped by 1 (any thread)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP_2                                                         |
+|            core address skipped by 2 (any thread)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP_3                                                         |
+|            core address skipped by 3 (any thread)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP_4                                                         |
+|            core address skipped by 4 (any thread)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP_5                                                         |
+|            core address skipped by 5 (any thread)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP_6                                                         |
+|            core address skipped by 6 (any thread)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP_7                                                         |
+|            core address skipped by 7 (any thread)                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_ABANDON                                                        |
+|            A2 loads mismatching pattern resulted in abandoned list prefetch  |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_CMP                                                            |
+|            core address was compared against list                            |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_SKIP                                                           |
+|            core address matched a non head of queue list address (per thread)|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_MISMATCH                                                       |
+|            core address does not match a list address                        |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_STARTED                                                        |
+|            List prefetch process was started                                 |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_OVF_MEM                                                        |
+|            Written pattern exceeded allocated buffer                         |
+--------------------------------------------------------------------------------
+| PEVT_L1P_LIST_CMP_OVRUN_PREFCH                                               |
+|            core address advances faster than prefetch lines can be establishe|
+|            d dropping prefetches                                             |
+--------------------------------------------------------------------------------
+| PEVT_WAKE_HIT_10                                                             |
+|            wakeup unit address compare 10/11 hit the target address          |
+--------------------------------------------------------------------------------
+| PEVT_WAKE_HIT_11                                                             |
+|            wakeup unit address compare 10/11 hit the target address          |
+--------------------------------------------------------------------------------
+| PEVT_CYCLES                                                                  |
+|            Total CPU Cycles                                                  |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_MATCH                                                           |
+|            Perform a major/minor opcode match on completed XU instructions. U|
+|            se Bgpm_SetXuMatch() on event to choose pattern. Only one may be s|
+|            et per core. If not set, will count all completed XU Instructions.|
+|             Choosing whether to match is multiplexable, but the pattern to ma|
+|            tch is not.                                                       |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_GRP_MASK                                                        |
+|            Build a mask from XU instruction groups to count. See Bgpm_SetXuGr|
+|            pMask().                                                          |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_FLD                                                             |
+|            Floating point load instructions completed (UPC_P_XU_OGRP_FLD). Se|
+|            e Bgpm Opcode Groups page for which instructions match this group.|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_FST                                                             |
+|            Floating point store instructions completed (UPC_P_XU_OGRP_FST). S|
+|            ee Bgpm Opcode Groups page for which instructions match this group|
+|            .                                                                 |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_QLD                                                             |
+|            Quad Floating point load instructions completed (UPC_P_XU_OGRP_QLD|
+|            ). See Bgpm Opcode Groups page for which instructions match this g|
+|            roup.                                                             |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_QST                                                             |
+|            Quad Floating point Store instructions completed (UPC_P_XU_OGRP_QS|
+|            T). See Bgpm Opcode Groups page for which instructions match this |
+|            group.                                                            |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_BITS                                                            |
+|            Bit manipulations instructions completed (UPC_P_XU_OGRP_BITS). See|
+|             Bgpm Opcode Groups page for which instructions match this group. |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_BRC                                                             |
+|            Conditional Branch Instructions Completed (UPC_P_XU_OGRP_BRC). See|
+|             Bgpm Opcode Groups page for which instructions match this group. |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_BRU                                                             |
+|            Unconditional Branch Instructions Completed (UPC_P_XU_OGRP_BRU). S|
+|            ee Bgpm Opcode Groups page for which instructions match this group|
+|            .                                                                 |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_CINV                                                            |
+|            Cache Invalidate Instructions Completed (UPC_P_XU_OGRP_CINV). See |
+|            Bgpm Opcode Groups page for which instructions match this group.  |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_CSTO                                                            |
+|            Cache Store Instructions Completed (UPC_P_XU_OGRP_CSTO). See Bgpm |
+|            Opcode Groups page for which instructions match this group.       |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_CTCH                                                            |
+|            Cache Touch Instructions Completed (UPC_P_XU_OGRP_CTCH). See Bgpm |
+|            Opcode Groups page for which instructions match this group.       |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_IADD                                                            |
+|            Integer Arithmetic Instructions Completed (UPC_P_XU_OGRP_IADD). Se|
+|            e Bgpm Opcode Groups page for which instructions match this group.|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_ICMP                                                            |
+|            Compare Instructions Completed (UPC_P_XU_OGRP_ICMP). See Bgpm Opco|
+|            de Groups page for which instructions match this group.           |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_ICSW                                                            |
+|            Coprocessor Instructions Completed (UPC_P_XU_OGRP_ICSW). See Bgpm |
+|            Opcode Groups page for which instructions match this group.       |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_IDIV                                                            |
+|            Integer Divide Instructions Completed (UPC_P_XU_OGRP_IDIV). See Bg|
+|            pm Opcode Groups page for which instructions match this group.    |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_ILOG                                                            |
+|            Logical Instructions Completed (UPC_P_XU_OGRP_ILOG). See Bgpm Opco|
+|            de Groups page for which instructions match this group.           |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_IMOV                                                            |
+|            Move register Instructions Completed (UPC_P_XU_OGRP_IMOV). See Bgp|
+|            m Opcode Groups page for which instructions match this group.     |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_IMUL                                                            |
+|            Integer Multiply Instructions Completed (UPC_P_XU_OGRP_IMUL). See |
+|            Bgpm Opcode Groups page for which instructions match this group.  |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_INT                                                             |
+|            Interrupt and System call Instructions Completed (UPC_P_XU_OGRP_IN|
+|            T). See Bgpm Opcode Groups page for which instructions match this |
+|            group.                                                            |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_LD                                                              |
+|            Load Instructions Completed (UPC_P_XU_OGRP_LD). uCoded Instruction|
+|            s are counted once. See Bgpm Opcode Groups page for which instruct|
+|            ions match this group                                             |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_LSCX                                                            |
+|            Load and Store Reserve Instructions Completed (UPC_P_XU_OGRP_LSCX)|
+|            . uCoded Instructions are counted once. See Bgpm Opcode Groups pag|
+|            e for which instructions match this group.                        |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_ST                                                              |
+|            Store Instructions Completed (UPC_P_XU_OGRP_ST). uCoded Instructio|
+|            ns are counted once. See Bgpm Opcode Groups page for which instruc|
+|            tions match this group.                                           |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_SYNC                                                            |
+|            Completed Instructions which cause a Context Sync (UPC_P_XU_OGRP_S|
+|            YNC). See Bgpm Opcode Groups page for which instructions match thi|
+|            s group.                                                          |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_TLB                                                             |
+|            Translation Look-aside buffer Instructions Completed (UPC_P_XU_OGR|
+|            P_TLB). See Bgpm Opcode Groups page for which instructions match t|
+|            his group                                                         |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_TLBI                                                            |
+|            Translation Look-aside buffer Invalidate Instructions Completed (U|
+|            PC_P_XU_OGRP_TLBI). See Bgpm Opcode Groups page for which instruct|
+|            ions match this group                                             |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_WCH                                                             |
+|            Watch Instructions Completed (UPC_P_XU_OGRP_WCH). See Bgpm Opcode |
+|            Groups page for which instructions match this group               |
+--------------------------------------------------------------------------------
+| PEVT_INST_XU_ALL                                                             |
+|            All XU instructions completed (instructions which use A2 FX unit -|
+|             UPC_P_XU_OGRP_*). See Bgpm Opcode Groups page for which instructi|
+|            ons match this group.                                             |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_MATCH                                                         |
+|            Perform a major/minor opcode match on completed AXU (QFPU) instruc|
+|            tions. Use Bgpm_SetQfpuMatch() on event to choose pattern and poss|
+|            ible Floating point scaling value. Only one may be set per core. I|
+|            f not set, will count all completed AXU Instructions. Choosing whe|
+|            ther to match is multiplexable, but the pattern to match is not.  |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_GRP_MASK                                                      |
+|            Build a mask from AXU (QFPU) instruction groups to count. See Bgpm|
+|            _SetQfpuGrpMask().                                                |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FOTH                                                          |
+|            Single floating point instruction completes (instructions not in o|
+|            ther groups UPC_P_AXU_OGRP_FOTH). See Bgpm Opcode Groups page for |
+|            which instructions match this group                               |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FRES                                                          |
+|            Single floating point reciprocal estimate instruction completes (U|
+|            PC_P_AXU_OGRP_FRES). See Bgpm Opcode Groups page for which instruc|
+|            tions match this group                                            |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FADD                                                          |
+|            Single floating point addition instructions completes (UPC_P_AXU_O|
+|            GRP_FADD). See Bgpm Opcode Groups page for which instructions matc|
+|            h this group                                                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FCVT                                                          |
+|            Single floating point convert instructions completes (UPC_P_AXU_OG|
+|            RP_FCVT). See Bgpm Opcode Groups page for which instructions match|
+|             this group                                                       |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FCMP                                                          |
+|            Single floating point compare instructions completes (UPC_P_AXU_OG|
+|            RP_FCMP). See Bgpm Opcode Groups page for which instructions match|
+|             this group                                                       |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FDIV                                                          |
+|            Single floating point division instructions completes (UPC_P_AXU_O|
+|            GRP_FDIV). See Bgpm Opcode Groups page for which instructions matc|
+|            h this group                                                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FMOV                                                          |
+|            Single floating point move instructions completes (UPC_P_AXU_OGRP_|
+|            FMOV). See Bgpm Opcode Groups page for which instructions match th|
+|            is group                                                          |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FMA                                                           |
+|            Single floating point multiply-add instructions completes (UPC_P_A|
+|            XU_OGRP_FMA). See Bgpm Opcode Groups page for which instructions m|
+|            atch this group                                                   |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FMUL                                                          |
+|            Single floating point multiply instructions completes (UPC_P_AXU_O|
+|            GRP_FMUL). See Bgpm Opcode Groups page for which instructions matc|
+|            h this group                                                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FRND                                                          |
+|            Single floating point round instructions completes (UPC_P_AXU_OGRP|
+|            _FRND). See Bgpm Opcode Groups page for which instructions match t|
+|            his group                                                         |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FSQE                                                          |
+|            Single floating point square root estimate instructions completes |
+|            (UPC_P_AXU_OGRP_FSQE). See Bgpm Opcode Groups page for which instr|
+|            uctions match this group                                          |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FSQ                                                           |
+|            Single floating point square root instructions completes (UPC_P_AX|
+|            U_OGRP_FSQ). See Bgpm Opcode Groups page for which instructions ma|
+|            tch this group                                                    |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QMOV                                                          |
+|            Quad floating point move instructions complete (UPC_P_AXU_OGRP_QMO|
+|            V). See Bgpm Opcode Groups page for which instructions match this |
+|            group                                                             |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QOTH                                                          |
+|            Quad floating point instructions not counted in other groups (UPC_|
+|            P_AXU_OGRP_QOTH). See Bgpm Opcode Groups page for which instructio|
+|            ns match this group                                               |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QADD                                                          |
+|            Quad floating point add instructions complete (UPC_P_AXU_OGRP_QADD|
+|            ). See Bgpm Opcode Groups page for which instructions match this g|
+|            roup                                                              |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QMUL                                                          |
+|            Quad floating point multiply instructions complete (UPC_P_AXU_OGRP|
+|            _QMUL). See Bgpm Opcode Groups page for which instructions match t|
+|            his group                                                         |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QRES                                                          |
+|            Quad floating point reciprocal estimate instructions complete (UPC|
+|            _P_AXU_OGRP_QRES). See Bgpm Opcode Groups page for which instructi|
+|            ons match this group                                              |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QMA                                                           |
+|            Quad floating point multiply-add instructions complete (UPC_P_AXU_|
+|            OGRP_QMA). See Bgpm Opcode Groups page for which instructions matc|
+|            h this group                                                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QRND                                                          |
+|            Quad floating point round instructions complete (UPC_P_AXU_OGRP_QR|
+|            ND). See Bgpm Opcode Groups page for which instructions match this|
+|             group                                                            |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QCVT                                                          |
+|            Quad floating point convert instructions complete (UPC_P_AXU_OGRP_|
+|            QCVT). See Bgpm Opcode Groups page for which instructions match th|
+|            is group                                                          |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_QCMP                                                          |
+|            Quad floating point compare instructions complete (UPC_P_AXU_OGRP_|
+|            QCMP). See Bgpm Opcode Groups page for which instructions match th|
+|            is group                                                          |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_UCODE                                                         |
+|            Count all completed floating point instructions which are microcod|
+|            ed. Useful in CPI calculations. Ucode sub-operations are excluded.|
+|                                                                              |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_ALL                                                           |
+|            Count all completed instructions which processed by the QFPU unit |
+|            (UPC_P_AXU_OGRP_*)                                                |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP1                                                        |
+|            Count completed floating point operations scaled according QFPU ca|
+|            pacity. See the Bgpm Opcode Groups page for more information.     |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP1_SINGLE                                                 |
+|            Count completed Single (just Fxx operations) subset of FPGRP1. See|
+|             the Bgpm Opcode Groups page for more information                 |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP1_QUAD                                                   |
+|            Count completed Quad (just Qfxx operations) subset of FPGRP1. See |
+|            the Bgpm Opcode Groups page for more information.                 |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP2                                                        |
+|            Count completed floating point operations, but excluding rounding,|
+|             copy and conversion instructions. See the Bgpm Opcode Groups page|
+|             for more information.                                            |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP2_SINGLE                                                 |
+|            Count completed Single (Fxx operations) subset of FPGRP2. See the |
+|            Bgpm Opcode Groups page for more information                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP2_QUAD                                                   |
+|            Count completed Quad (Qfxx operations) subset of FPGRP2. See the B|
+|            gpm Opcode Groups page for more information.                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP1_INSTR                                                  |
+|            Count completed floating point instructions matching FPGRP1. See t|
+|            he Bgpm Opcode Groups page for more information.                  |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP1_SINGLE_INSTR                                           |
+|            Count completed Single Fxx instructions subset of FPGRP1. See the |
+|            Bgpm Opcode Groups page for more information                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP1_QUAD_INSTR                                             |
+|            Count completed Quad Qfxx instructions subset of FPGRP1. See the B|
+|            gpm Opcode Groups page for more information.                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP2_INSTR                                                  |
+|            Count completed floating point instructions matching FPGRP2. See t|
+|            he Bgpm Opcode Groups page for more information.                  |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP2_SINGLE_INSTR                                           |
+|            Count completed Single Fxx instructions subset of FPGRP2. See the |
+|            Bgpm Opcode Groups page for more information                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_QFPU_FPGRP2_QUAD_INSTR                                             |
+|            Count completed Quad Qfxx instructions subset of FPGRP2. See the B|
+|            gpm Opcode Groups page for more information.                      |
+--------------------------------------------------------------------------------
+| PEVT_INST_ALL                                                                |
+|            Count all completed instructions.
+-Equivalent to PEVT_XU_PPC_COMMI|
+|            T, but this event is preferred as may use any counter, versus the |
+|            XU event which is restricted to 4 available counters.             |
+--------------------------------------------------------------------------------
+===============================================================================
+ Native Events in Component: bgpm/L2Unit
+===============================================================================
+| L2Unit:::PEVT_L2_HITS                                                        |
+|            hits in L2, both load and store. Network Polling store operations |
+|            from core 17 on BG/Q pollute in this count during normal use.     |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_MISSES                                                      |
+|            cacheline miss in L2 (both loads and stores)                      |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_PREFETCH                                                    |
+|            fetching cacheline ahead of L1P prefetch                          |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_FETCH_LINE                                                  |
+|            Load 128 byte line from main memory                               |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_STORE_LINE                                                  |
+|            Store 128 byte line to main memory                                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_STORE_PARTIAL_LINE                                          |
+|            Store Partial line to main memory                                 |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_REJECT                                                  |
+|            Request sent by the core was processed, but rejected for later pro|
+|            cessing. Examples reasons are: address currently reloaded from or |
+|            evicted to main memory, speculative data for address already clean|
+|            ed. The request remains and is retried later                      |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_RETIRE                                                  |
+|            Request completes right away after look-up and neither enters the |
+|            hit nor missqueue. Examples are some dcbtls hitting in L2, some l1|
+|            -hit notifications                                                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_MISS_AND_EVICT                                          |
+|            Request misses in L2 and evicts a line (subset of L2 misses and su|
+|            bset of L2 Miss and Evict)                                        |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_MISS_AND_EVICT_SPEC                                     |
+|            Request misses in L2 and evicts a line, while speculative state is|
+|             pending and the victim may be a speculative line (subset of L2 Re|
+|            q Miss and Evict and subset of L2 Miss and Evict Spec)            |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_MISS_AND_EVICT                                              |
+|            Request misses in L2 and evicts line, but includes evictions due t|
+|            o L2-initiated prefetches                                         |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_MISS_AND_EVICT_SPEC                                         |
+|            Request misses in L2 and evicts a line, while speculative state is|
+|             pending and the victim may be a speculative line, but includes ev|
+|            ictions due to L2-initiated prefetches (subset of L2 Miss and Evic|
+|            t)                                                                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_SPEC_ADDR_CLEANUP                                       |
+|            Request address has speculative state needing cleanup (has been in|
+|            validated or committed)                                           |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_SPEC_ADDR_CLEANUP                                           |
+|            Request address has speculative state needing cleanup (has been in|
+|            validated or committed), but including L2 initiated prefetches.   |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_SPEC_SET_CLEANUP                                            |
+|            Request address is mapped to a set that contains other addresses n|
+|            eeding cleanup (has been invalidated or committed)                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_SPEC_RETRY                                                  |
+|            Request needs to be retried later because it would interfere with |
+|            a speculation commit currently in flight                          |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_HITS_SLICE                                                  |
+|            hits in L2, both load and store. Network Polling store operations |
+|            from core 17 on BG/Q pollute in this count during normal use.     |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_MISSES_SLICE                                                |
+|            Cacheline miss in L2 (both loads and stores)                      |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_PREFETCH_SLICE                                              |
+|            Fetching cacheline ahead of L1P prefetch                          |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_FETCH_LINE_SLICE                                            |
+|            Load 128 byte line from main memory                               |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_STORE_LINE_SLICE                                            |
+|            Store 128 byte line to main memory                                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_STORE_PARTIAL_LINE_SLICE                                    |
+|            Store Partial line to main memory                                 |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_REJECT_SLICE                                            |
+|            Request sent by the core was processed, but rejected for later pro|
+|            cessing. Examples reasons are: address currently reloaded from or |
+|            evicted to main memory, speculative data for address already clean|
+|            ed. The request remains and is retried later                      |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_RETIRE_SLICE                                            |
+|            Request completes right away after look-up and neither enters the |
+|            hit nor missqueue. Examples are some dcbtls hitting in L2, some l1|
+|            -hit notifications                                                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_MISS_AND_EVICT_SLICE                                    |
+|            Request misses in L2 and evicts a line (subset of L2 misses and su|
+|            bset of L2 Miss and Evict)                                        |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_MISS_AND_EVICT_SPEC_SLICE                               |
+|            Request misses in L2 and evicts a line, while speculative state is|
+|             pending and the victim may be a speculative line (subset of L2 Re|
+|            q Miss and Evict and subset of L2 Miss and Evict Spec)            |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_MISS_AND_EVICT_SLICE                                        |
+|            Request misses in L2 and evicts line, but includes evictions due t|
+|            o L2-initiated prefetches                                         |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_MISS_AND_EVICT_SPEC_SLICE                                   |
+|            Request misses in L2 and evicts a line, while speculative state is|
+|             pending and the victim may be a speculative line, but includes ev|
+|            ictions due to L2-initiated prefetches (subset of L2 Miss and Evic|
+|            t)                                                                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_REQ_SPEC_ADDR_CLEANUP_SLICE                                 |
+|            Request address has speculative state needing cleanup (has been in|
+|            validated or committed)                                           |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_SPEC_ADDR_CLEANUP_SLICE                                     |
+|            Request address has speculative state needing cleanup (has been in|
+|            validated or committed), but including L2 initiated prefetches.   |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_SPEC_SET_CLEANUP_SLICE                                      |
+|            Request address is mapped to a set that contains other addresses n|
+|            eeding cleanup (has been invalidated or committed)                |
+--------------------------------------------------------------------------------
+| L2Unit:::PEVT_L2_SPEC_RETRY_SLICE                                            |
+|            Request needs to be retried later because it would interfere with |
+|            a speculation commit currently in flight                          |
+--------------------------------------------------------------------------------
+===============================================================================
+ Native Events in Component: bgpm/CNKUnit
+===============================================================================
+| CNKUnit:::PEVT_CNKNODE_MUINT                                                 |
+|            Number of Message Unit non-fatal interrupts                       |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKNODE_NDINT                                                 |
+|            Number of Network Device non-fatal interrupts                     |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKPROC_RSV                                                   |
+|                                                                              |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_SYSCALL                                                |
+|            System Calls                                                      |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_STANDARD                                               |
+|            External Input Interrupts                                         |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_CRITICAL                                               |
+|            Critical Input Interrupts                                         |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_DECREMENTER                                            |
+|            Decrementer Interrupts                                            |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_FIT                                                    |
+|            Fixed Interval Timer Interrupts                                   |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_WATCHDOG                                               |
+|            Watchdog Timer Interrupts                                         |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_UDEC                                                   |
+|            User Decrementer Interrupts                                       |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_PERFMON                                                |
+|            Performance Monitor interrupts                                    |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_UNKDEBUG                                               |
+|            Unknown/Invalid Interrupts                                        |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_DEBUG                                                  |
+|            Debug Interrupts                                                  |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_DSI                                                    |
+|            Data Storage Interrupts                                           |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_ISI                                                    |
+|            Instruction Storage Interrupts                                    |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_ALIGNMENT                                              |
+|            Alignment Interrupts                                              |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_PROGRAM                                                |
+|            Program Interrupts                                                |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_FPU                                                    |
+|            FPU Unavailable Interrupts                                        |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_APU                                                    |
+|            APU Unavailable Interrupts                                        |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_DTLB                                                   |
+|            Data TLB Interrupts                                               |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_ITLB                                                   |
+|            Instruction TLB Interrupts                                        |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_VECTOR                                                 |
+|            Vector Unavailable Interrupts                                     |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_UNDEF                                                  |
+|            Undefined Interrupts                                              |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_PDBI                                                   |
+|            Processor Doorbell Interrupts                                     |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_PDBCI                                                  |
+|            Processor Doorbell Critical Ints                                  |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_GDBI                                                   |
+|            Guest Doorbell Interrupts                                         |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_GDBCI                                                  |
+|            Guest Doorbell Crit or MChk Ints                                  |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_EHVSC                                                  |
+|            Embedded Hypervisor System Calls                                  |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_EHVPRIV                                                |
+|            Embedded Hypervisor Privileged                                    |
+--------------------------------------------------------------------------------
+| CNKUnit:::PEVT_CNKHWT_LRATE                                                  |
+|            LRAT exception                                                    |
+--------------------------------------------------------------------------------
+===============================================================================
+ Native Events in Component: bgpm/IOUnit
+===============================================================================
+| IOUnit:::PEVT_MU_PKT_INJ                                                     |
+|            A new packet has been injected (Packet has been stored to ND FIFO)|
+|                                                                              |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_MSG_INJ                                                     |
+|            A new message has been injected (All packets of the message have b|
+|            een stored to ND FIFO)                                            |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_FIFO_PKT_RCV                                                |
+|            A new FIFO packet has been received (The packet has been stored to|
+|             L2. There is no pending switch request)                          |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_RGET_PKT_RCV                                                |
+|            A new RGET packet has been received (The packet has been stored to|
+|             L2. There is no pending switch request. ICSRAM has accepted updat|
+|            e tail request)                                                   |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PUT_PKT_RCV                                                 |
+|            A new PUT packet has been received (rME has started to process the|
+|             packet). Note that this counter is incremented before packet has |
+|            been completely processed (stored to L2). This is because event is|
+|             checked by RPUT SRAM access but it is accessed only when         |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT0_16B_WRT                                               |
+|            Master port 0 has issued a 16B write request to the switch.       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT0_32B_RD                                                |
+|            Master port 0 has issued a 32B read request to the switch.        |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT0_64B_RD                                                |
+|            Master port 0 has issued a 64B read request to the switch.        |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT0_128B_RD                                               |
+|            Master port 0 has issued a 128B read request to the switch.       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT1_16B_WRT                                               |
+|            Master port 1 has issued a 16B write request to the switch.       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT1_32B_RD                                                |
+|            Master port 1 has issued a 32B read request to the switch.        |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT1_64B_RD                                                |
+|            Master port 1 has issued a 64B read request to the switch.        |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT1_128B_RD                                               |
+|            Master port 1 has issued a 128B read request to the switch.       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT2_16B_WRT                                               |
+|            Master port 2 has issued a 16B write request to the switch.       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT2_32B_RD                                                |
+|            Master port 2 has issued a 32B read request to the switch.        |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT2_64B_RD                                                |
+|            Master port 2 has issued a 64B read request to the switch.        |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT2_128B_RD                                               |
+|            Master port 2 has issued a 128B read request to the switch.       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_SLV_PORT_RD                                                 |
+|            Slave port has received a read request.                           |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_SLV_PORT_WRT                                                |
+|            Slave port has received a write request.                          |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT0_PEND_WRT                                              |
+|            Number of write requests pending in master port 0.                |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT0_PEND_RD                                               |
+|            Number of read requests pending in master port 0.                 |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT1_PEND_WRT                                              |
+|            Number of write requests pending in master port 1.                |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT1_PEND_RD                                               |
+|            Number of read requests pending in master port 1.                 |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT2_PEND_WRT                                              |
+|            Number of write requests pending in master port 2.                |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_MU_PORT2_PEND_RD                                               |
+|            Number of read requests pending in master port 2.                 |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_INB_RD_BYTES                                              |
+|            Inbound Read Bytes Requested                                      |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_INB_RDS                                                   |
+|            Inbound Read Requests                                             |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_INB_RD_CMPLT                                              |
+|            Inbound Read Completions                                          |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_OUTB_WRT_BYTES                                            |
+|            outbound memory write bytes                                       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_OUTB_CFG_X                                                |
+|            Outbound CFG transactions                                         |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_OUTB_IO_X                                                 |
+|            Outbound IO transactions                                          |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_RX_DLLP                                                   |
+|            RX DLLP Count                                                     |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_RX_TLP                                                    |
+|            RX TLP Count                                                      |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_RX_TLP_SIZE                                               |
+|            RX TLP Size in DWORDS                                             |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_TX_DLLP                                                   |
+|            TX DLLP Count                                                     |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_TX_TLP                                                    |
+|            TX TLP Count                                                      |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_PCIE_TX_TLP_SIZE                                               |
+|            TX TLP Size in DWORDS                                             |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_DB_PCIE_INB_WRT_BYTES                                          |
+|            PCIe inbound write bytes written                                  |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_DB_PCIE_OUTB_RD_BYTES                                          |
+|            PCIe outbound read bytes requested                                |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_DB_PCIE_OUTB_RDS                                               |
+|            PCIe outbound read requests                                       |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_DB_PCIE_OUTB_RD_CMPLT                                          |
+|            PCIe outbound read completions                                    |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_DB_BOOT_EDRAM_WRT_BYTES                                        |
+|            Boot eDRAM bytes written                                          |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_DB_BOOT_EDRAM_RD_BYTES                                         |
+|            Boot eDRAM bytes read                                             |
+--------------------------------------------------------------------------------
+| IOUnit:::PEVT_DB_MSG_SIG_INTS                                                |
+|            Message-Signaled Interrupts (MSIs)                                |
+--------------------------------------------------------------------------------
+===============================================================================
+ Native Events in Component: bgpm/NWUnit
+===============================================================================
+| NWUnit:::PEVT_NW_USER_PP_SENT                                                |
+|            Number of 32 byte user point to point packet chunks sent. Includes|
+|             packets originating or passing through the current node.         |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_DYN_PP_SENT                                            |
+|            Number of 32 byte user dynamic point to point packet chunks sent. |
+|            Includes packets originating or passing through the current node. |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_ESC_PP_SENT                                            |
+|            Number of 32 byte user escape point to point packet chunks sent. I|
+|            ncludes packets originating or passing through the current node.  |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_PRI_PP_SENT                                            |
+|            Number of 32 byte user priority point to point packet chunks sent.|
+|             Includes packets originating or passing through the current node.|
+|                                                                              |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_SYS_PP_SENT                                                 |
+|            Number of 32 byte system point to point packet chunks sent. Includ|
+|            es packets originating or passing through the current node.       |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_WORLD_COL_SENT                                         |
+|            Number of 32 byte user world collective packet chunks sent. Includ|
+|            es packets originating or passing through the current node.       |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_SUBC_COL_SENT                                          |
+|            Number of 32 byte user sub-communicator collective packet chunks s|
+|            ent. Includes packets originating or passing through the current n|
+|            ode.                                                              |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_SYS_COL_SENT                                                |
+|            Number of 32 byte system collective packet chunks sent. Includes p|
+|            ackets originating or passing through the current node.           |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_COMMWORLD_COL_SENT                                          |
+|            Number of 32 byte comm-world collective packet chunks sent. Includ|
+|            es packets originating or passing through the current node.       |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_PP_RECV                                                |
+|            Number of user point to point packets received. Includes packets o|
+|            riginating or passing through the current node.                   |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_DYN_PP_RECV                                            |
+|            Number of user dynamic point to point packets received. Includes p|
+|            ackets originating or passing through the current node.           |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_ESC_PP_RECV                                            |
+|            Number of user escape point to point packets received. Includes pa|
+|            ckets originating or passing through the current node.            |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_PRI_PP_RECV                                            |
+|            Number of user priority point to point packets received. Includes |
+|            packets originating or passing through the current node.          |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_SYS_PP_RECV                                                 |
+|            Number of system point to point packets received. Includes packets|
+|             originating or passing through the current node.                 |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_WORLD_COL_RECV                                         |
+|            Number of user world collective packets received. Includes packets|
+|             originating or passing through the current node.                 |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_SUBC_COL_RECV                                          |
+|            Number of user sub-communicator collective packets received. Inclu|
+|            des packets originating or passing through the current node.      |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_SYS_COL_RECV                                                |
+|            Number of system collective packets received. Includes packets ori|
+|            ginating or passing through the current node.                     |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_COMMWORLD_COL_RECV                                          |
+|            Number of comm-world collective packets received. Includes packets|
+|             originating or passing through the current node.                 |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_PP_RECV_FIFO                                           |
+|            Number of user point to point packets in receive fifo queue. Inclu|
+|            des packets received or passing through the current node. Count is|
+|             accumulated each cycle.                                          |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_DYN_PP_RECV_FIFO                                       |
+|            Number of user dynamic point to point packets in receive fifo queu|
+|            e. Includes packets received or passing through the current node. |
+|            Count is accumulated each cycle.                                  |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_ESC_PP_RECV_FIFO                                       |
+|            Number of user escape point to point packets in receive fifo queue|
+|            . Includes packets received or passing through the current node. C|
+|            ount is accumulated each cycle.                                   |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_PRI_PP_RECV_FIFO                                       |
+|            Number of user priority point to point packets in receive fifo que|
+|            ue. Includes packets received or passing through the current node.|
+|             Count is accumulated each cycle.                                 |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_SYS_PP_RECV_FIFO                                            |
+|            Number of system point to point packets in receive fifo queue. Inc|
+|            ludes packets received or passing through the current node. Count |
+|            is accumulated each cycle.                                        |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_WORLD_COL_RECV_FIFO                                    |
+|            Number of user world collective packets in receive fifo queue. Inc|
+|            ludes packets received or passing through the current node. Count |
+|            is accumulated each cycle.                                        |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_USER_SUBC_COL_RECV_FIFO                                     |
+|            Number of user sub-communicator collective packets in receive fifo|
+|             queue. Includes packets received or passing through the current n|
+|            ode. Count is accumulated each cycle.                             |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_SYS_COL_RECV_FIFO                                           |
+|            Number of system collective packets in receive fifo queue. Include|
+|            s packets received or passing through the current node. Count is a|
+|            ccumulated each cycle.                                            |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_COMMWORLD_COL_RECV_FIFO                                     |
+|            Number of comm-world collective packets in receive fifo queue. Inc|
+|            ludes packets received or passing through the current node. Count |
+|            is accumulated each cycle.                                        |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_SENT                                                        |
+|            Use NW channel filter attribute to select types of 32 byte packet |
+|            chunks sent                                                       |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_RECV                                                        |
+|            Use NW channel filter attribute to select types of packets receive|
+|            d.                                                                |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_RECV_FIFO                                                   |
+|            Use NW channel filter attribute to select types of packets counted|
+|             which remain in receive fifo queue.                              |
+--------------------------------------------------------------------------------
+| NWUnit:::PEVT_NW_CYCLES                                                      |
+|            The delta network cycles which have occurred since the last networ|
+|            k counter reset.                                                  |
+--------------------------------------------------------------------------------
+
+Total events reported: 414
+native_avail.c                       PASSED
+
