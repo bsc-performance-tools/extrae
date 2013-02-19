@@ -1,0 +1,14 @@
+This directory contains two examples. First is pthread-example which shows basic functionality of the instrumentation mechanism using pthreads. The second, user-comms, is intended to show how to use user communications within threads.
+
+PTHREAD-EXAMPLE instructions
+---
+To compile this example, issue make.
+To run this example, issue make run-pthread-example.
+To merge the resulting intermediate tracefiles, issue make merge-pthread-example.
+
+USER-COMMS instructions
+---
+To compile this example, issue make.
+To run this example, issue make run-user-comms.
+To merge the resulting intermediate tracefiles, issue make merge-user-comms.
+
