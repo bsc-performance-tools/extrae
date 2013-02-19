@@ -1,0 +1,548 @@
+Available native events and hardware information.
+--------------------------------------------------------------------------------
+PAPI Version             : 4.1.3.0
+Vendor string and code   :  (0)
+Model string and code    :  (0)
+CPU Revision             : 0.000000
+CPU Megahertz            : 1600.000000
+CPU Clock Megahertz      : 0
+NUMA Nodes               : 1
+CPU's per Node           : 64
+Total CPU's              : 64
+Number Hardware Counters : 270
+Max Multiplex Counters   : 270
+--------------------------------------------------------------------------------
+The following correspond to fields in the PAPI_event_info_t structure.
+
+Event Code   Symbol  | Long Description |
+--------------------------------------------------------------------------------
+0x40000000   PEVT_UNDEF  | undefined                                           |
+0x40000001   PEVT_AXU_INSTR_COMMIT  | AXU Instruction Committed                |
+0x40000002   PEVT_AXU_CR_COMMIT  | AXU CR Instruction Committed                |
+0x40000003   PEVT_AXU_IDLE  | AXU Idle                                         |
+0x40000004   PEVT_AXU_FP_DS_ACTIVE  | AXU FP Divide or Square root in progress |
+           |                                                                   |
+0x40000005   PEVT_AXU_FP_DS_ACTIVE_CYC  | AXU FP Divide or Square root in prog |
+           | ress cycles                                                       |
+0x40000006   PEVT_AXU_DENORM_FLUSH  | AXU Denormal Operand flush               |
+0x40000007   PEVT_AXU_UCODE_OPS_COMMIT  | AXU uCode Operations Committed       |
+0x40000008   PEVT_AXU_FP_EXCEPT  | AXU Floating Point Exception                |
+0x40000009   PEVT_AXU_FP_ENAB_EXCEPT  | AXU Floating Point Enabled Exception   |
+0x4000000a   PEVT_IU_IL1_MISS  | IL1 Miss                                      |
+0x4000000b   PEVT_IU_IL1_MISS_CYC  | IL1 Miss cycles                           |
+0x4000000c   PEVT_IU_IL1_RELOADS_DROPPED  | IL1 Reloads Dropped                |
+0x4000000d   PEVT_IU_RELOAD_COLLISIONS  | Reload Collisions                    |
+0x4000000e   PEVT_IU_RELOAD_COLLISIONS_CYC  | Reload Collisions cycles         |
+0x4000000f   PEVT_IU_IU0_REDIR_CYC  | IU0 Redirected cycles                    |
+0x40000010   PEVT_IU_IERAT_MISS  | IERAT Miss                                  |
+0x40000011   PEVT_IU_IERAT_MISS_CYC  | IERAT Miss cycles                       |
+0x40000012   PEVT_IU_ICACHE_FETCH  | ICache Fetch                              |
+0x40000013   PEVT_IU_ICACHE_FETCH_CYC  | ICache Fetch cycles                   |
+0x40000014   PEVT_IU_INSTR_FETCHED  | Instructions Fetched                     |
+0x40000015   PEVT_IU_INSTR_FETCHED_CYC  | Instructions Fetched cycles          |
+0x40000016   PEVT_IU_RSV_ANY_L2_BACK_INV  | reserved any L2 Back Invalidates   |
+0x40000017   PEVT_IU_RSV_ANY_L2_BACK_INV_CYC  | reserved any L2 Back Invalidat |
+           | es cycles                                                         |
+0x40000018   PEVT_IU_L2_BACK_INV_HITS  | L2 Back Invalidates - Hits            |
+0x40000019   PEVT_IU_L2_BACK_INV_HITS_CYC  | L2 Back Invalidates - Hits cycles |
+           |                                                                   |
+0x4000001a   PEVT_IU_IBUFF_EMPTY  | IBuff Empty                                |
+0x4000001b   PEVT_IU_IBUFF_EMPTY_CYC  | IBuff Empty cycles                     |
+0x4000001c   PEVT_IU_IBUFF_FLUSH  | IBuff Flush                                |
+0x4000001d   PEVT_IU_IBUFF_FLUSH_CYC  | IBuff Flush cycles                     |
+0x4000001e   PEVT_IU_IS1_STALL_CYC  | IU5 Stage Register Dependency Stall      |
+0x4000001f   PEVT_IU_IS2_STALL_CYC  | IU6 Instruction Issue Stall              |
+0x40000020   PEVT_IU_BARRIER_OP_STALL_CYC  | Barrier Op Stall                  |
+0x40000021   PEVT_IU_SLOW_SPR_ACCESS_CYC  | Slow SPR Access                    |
+0x40000022   PEVT_IU_RAW_DEP_HIT_CYC  | RAW Dep Hit                            |
+0x40000023   PEVT_IU_WAW_DEP_HIT_CYC  | WAW Dep Hit                            |
+0x40000024   PEVT_IU_SYNC_DEP_HIT_CYC  | Sync Dep Hit                          |
+0x40000025   PEVT_IU_SPR_DEP_HIT_CYC  | SPR Dep Hit                            |
+0x40000026   PEVT_IU_AXU_DEP_HIT_CYC  | AXU Dep Hit                            |
+0x40000027   PEVT_IU_FXU_DEP_HIT_CYC  | FXU Dep Hit                            |
+0x40000028   PEVT_IU_AXU_FXU_DEP_HIT_CYC  | AXU CR Instruction Committed       |
+0x40000029   PEVT_IU_AXU_ISSUE_PRI_LOSS_CYC  | AXU Issue Priority Loss         |
+0x4000002a   PEVT_IU_FXU_ISSUE_PRI_LOSS_CYC  | FXU Issue Priority Loss         |
+0x4000002b   PEVT_IU_FXU_ISSUE_COUNT  | FXU Issue Count                        |
+0x4000002c   PEVT_IU_TOT_ISSUE_COUNT  | Total Issue Count                      |
+0x4000002d   PEVT_IU_INSTR_MATCH_COUNT  | Instruction Match Count              |
+0x4000002e   PEVT_XU_PROC_BUSY  | Processor Busy                               |
+0x4000002f   PEVT_XU_BR_COMMIT_CORE  | Branch Commit                           |
+0x40000030   PEVT_XU_BR_MISPRED_COMMIT_CORE  | Branch Mispredict Commit        |
+0x40000031   PEVT_XU_BR_TARG_ADDR_MISPRED_COMMIT_CORE  | Branch Target Address |
+           |  Mispredict Commit                                                |
+0x40000032   PEVT_XU_THRD_RUNNING  | Thread Running                            |
+0x40000033   PEVT_XU_TIMEBASE_TICK  | Timebase Tick                            |
+0x40000034   PEVT_XU_SPR_READ_COMMIT  | SPR Read Commit                        |
+0x40000035   PEVT_XU_SPR_WRITE_COMMIT  | SPR Write Commit                      |
+0x40000036   PEVT_XU_STALLED_ON_WAITRSV  | Cycles stalled on waitrsv           |
+0x40000037   PEVT_XU_STALLED_ON_WAITRSV_CYC  | Cycles stalled on waitrsv cycle |
+           | s                                                                 |
+0x40000038   PEVT_XU_EXT_INT_ASSERT  | External Interrupt Asserted             |
+0x40000039   PEVT_XU_CRIT_EXT_INT_ASSERT  | Critical External Interrupt Assert |
+           | ed                                                                |
+0x4000003a   PEVT_XU_PERF_MON_INT_ASSERT  | Performance Monitor Interrupt Asse |
+           | rted                                                              |
+0x4000003b   PEVT_XU_PPC_COMMIT  | PPC Commit                                  |
+0x4000003c   PEVT_XU_COMMIT  | XU Operations Committed                         |
+0x4000003d   PEVT_XU_UCODE_COMMIT  | uCode Sequence Commit                     |
+0x4000003e   PEVT_XU_ANY_FLUSH  | Any Flush                                    |
+0x4000003f   PEVT_XU_BR_COMMIT  | Branch Commit                                |
+0x40000040   PEVT_XU_BR_MISPRED_COMMIT  | Branch Mispredict Commit             |
+0x40000041   PEVT_XU_BR_TAKEN_COMMIT  | Branch Taken Commit                    |
+0x40000042   PEVT_XU_BR_TARG_ADDR_MISPRED_COMMIT  | Branch Target Address Misp |
+           | redict Commit                                                     |
+0x40000043   PEVT_XU_MULT_DIV_COLLISION  | Mult/Div Collision                  |
+0x40000044   PEVT_XU_EXT_INT_PEND  | External Interrupt Pending                |
+0x40000045   PEVT_XU_CRIT_EXT_INT_PEND  | Critical External Interrupt Pending  |
+0x40000046   PEVT_XU_PERF_MON_INT_PEND  | Performance Monitor Interrupt Pendin |
+           | g                                                                 |
+0x40000047   PEVT_XU_OPCODE_MATCH  | Opcode Match                              |
+0x40000048   PEVT_XU_RUN_INSTR  | Run Instructions                             |
+0x40000049   PEVT_XU_INTS_TAKEN  | Interrupts Taken                            |
+0x4000004a   PEVT_XU_EXT_INT_TAKEN  | External Interrupt Taken                 |
+0x4000004b   PEVT_XU_CRIT_EXT_INT_TAKEN  | Critical External Interrupt Taken   |
+0x4000004c   PEVT_XU_PERF_MON_INT_TAKEN  | Performance Monitor Interrupt Taken |
+           |                                                                   |
+0x4000004d   PEVT_XU_DOORBELL_INT_TAKEN  | Doorbell Interrupt Taken            |
+0x4000004e   PEVT_XU_STCX_FAIL  | stcx fail                                    |
+0x4000004f   PEVT_XU_ICSWX_FAILED  | icswx failed                              |
+0x40000050   PEVT_XU_ICSWX_COMMIT  | icswx commit                              |
+0x40000051   PEVT_XU_MULT_DIV_BUSY  | Mult/Div Busy                            |
+0x40000052   PEVT_LSU_COMMIT_STS  | Committed Stores                           |
+0x40000053   PEVT_LSU_COMMIT_ST_MISSES  | Committed Store Misses               |
+0x40000054   PEVT_LSU_COMMIT_LD_MISSES  | Committed Load Misses                |
+0x40000055   PEVT_LSU_COMMIT_CACHE_INHIB_LD_MISSES  | Committed Cache-Inhibite |
+           | d Load Misses                                                     |
+0x40000056   PEVT_LSU_COMMIT_CACHEABLE_LDS  | Committed Cacheable Loads        |
+0x40000057   PEVT_LSU_COMMIT_DCBT_MISSES  | Committed DCBT Misses              |
+0x40000058   PEVT_LSU_COMMIT_DCBT_HITS  | Committed DCBT Hits                  |
+0x40000059   PEVT_LSU_COMMIT_AXU_LDS  | Committed AXU Loads                    |
+0x4000005a   PEVT_LSU_COMMIT_AXU_STS  | Committed AXU Stores                   |
+0x4000005b   PEVT_LSU_COMMIT_STCX  | Committed STCX                            |
+0x4000005c   PEVT_LSU_COMMIT_WCLR  | Committed WCLR                            |
+0x4000005d   PEVT_LSU_COMMIT_WCLR_WL  | Committed WCLR Watchlost               |
+0x4000005e   PEVT_LSU_COMMIT_LDAWX  | Committed LDAWX                          |
+0x4000005f   PEVT_LSU_UNSUPPORTED_ALIGNMENT_FLUSH  | Unsupported Alignment Flu |
+           | sh                                                                |
+0x40000060   PEVT_LSU_RELOAD_RESRC_CONFLICT_FLUSH  | Reload Resource Conflict  |
+           | Flush                                                             |
+0x40000061   PEVT_LSU_COMMIT_DUPLICATE_LDAWX  | Committed Duplicate LDAWX      |
+0x40000062   PEVT_LSU_INTER_THRD_DIR_ACCESS_FLUSH  | Inter-Thread Directory Ac |
+           | cess Flush                                                        |
+0x40000063   PEVT_LSU_LMQ_DEPENDENCY_FLUSH  | Load Miss Queue Dependency Flush |
+           |                                                                   |
+0x40000064   PEVT_LSU_COMMIT_WCHKALL  | Committed WCHKALL                      |
+0x40000065   PEVT_LSU_COMMIT_SUCC_WCHKALL  | Committed Successful WCHKALL      |
+0x40000066   PEVT_LSU_LD_MISS_Q_FULL_FLUSH  | Load Miss Queue Full Flush       |
+0x40000067   PEVT_LSU_ST_Q_FULL_FLUSH  | Store Queue Full Flush                |
+0x40000068   PEVT_LSU_HIT_LD_FLUSH  | Hit Against Outstanding Load Flush       |
+0x40000069   PEVT_LSU_HIT_IG1_REQ_FLUSH  | Hit Against Outstanding I=G=1 Reque |
+           | st Flush                                                          |
+0x4000006a   PEVT_LSU_LARX_FINISHED  | LARX Finished                           |
+0x4000006b   PEVT_LSU_INTER_THRD_ST_WATCH_LOST  | Inter-Thread Store Set Watch |
+           |  Lost Indicator                                                   |
+0x4000006c   PEVT_LSU_RELOAD_WATCH_LOST  | Reload Set Watch Lost Indicator     |
+0x4000006d   PEVT_LSU_BACK_INV_WATCH_LOST  | Back-Invalidate Set Watch Lost In |
+           | dicator                                                           |
+0x4000006e   PEVT_LSU_L1_DCACHE_BACK_INVAL  | L1 Data Cache Back-Invalidate    |
+0x4000006f   PEVT_LSU_L1_DCACHE_BACK_INVAL_HITS  | L1 Data Cache Back-Invalida |
+           | te Hits                                                           |
+0x40000070   PEVT_LSU_L1_CACHE_PTYERR_DETECTED  | L1 Cache Parity Error Detect |
+           | ed                                                                |
+0x40000071   PEVT_LSU_LD_LAT_MEM_SUBSYS_CYC  | Load Latency Memory Subsystem   |
+0x40000072   PEVT_MMU_TLB_HIT_DIRECT_IERAT  | TLB hit direct after ierat miss  |
+0x40000073   PEVT_MMU_TLB_MISS_DIRECT_IERAT  | TLB miss direct after ierat mis |
+           | s                                                                 |
+0x40000074   PEVT_MMU_TLB_MISS_INDIR_IERAT  | TLB miss indirect after ierat mi |
+           | ss                                                                |
+0x40000075   PEVT_MMU_HTW_HIT_IERAT  | Hardware Table walk hit after ierat mis |
+           | s                                                                 |
+0x40000076   PEVT_MMU_HTW_MISS_IERAT  | Hardware Table walk miss after ierat m |
+           | iss                                                               |
+0x40000077   PEVT_MMU_TLB_HIT_DIRECT_DERAT  | TLB hit direct after derat miss  |
+0x40000078   PEVT_MMU_TLB_MISS_DIRECT_DERAT  | TLB miss direct after derat mis |
+           | s                                                                 |
+0x40000079   PEVT_MMU_TLB_MISS_INDIR_DERAT  | TLB miss indirect after derat mi |
+           | ss                                                                |
+0x4000007a   PEVT_MMU_HTW_HIT_DERAT  | Hardware Table walk hit after derat mis |
+           | s                                                                 |
+0x4000007b   PEVT_MMU_HTW_MISS_DERAT  | Hardware Table walk miss after derat m |
+           | iss                                                               |
+0x4000007c   PEVT_MMU_IERAT_MISS  | Ierat miss                                 |
+0x4000007d   PEVT_MMU_IERAT_MISS_CYC  | Ierat miss cycles                      |
+0x4000007e   PEVT_MMU_DERAT_MISS  | Derat miss                                 |
+0x4000007f   PEVT_MMU_DERAT_MISS_CYC  | Derat miss cycles                      |
+0x40000080   PEVT_MMU_IERAT_MISS_TOT  | Ierat miss total                       |
+0x40000081   PEVT_MMU_DERAT_MISS_TOT  | derat miss total                       |
+0x40000082   PEVT_MMU_TLB_MISS_DIRECT_TOT  | tlb miss direct total             |
+0x40000083   PEVT_MMU_TLB_HIT_FIRSTSIZE_TOT  | tlb hit firstsize total         |
+0x40000084   PEVT_MMU_TLB_HIT_INDIR_TOT  | tlb hit indirect total              |
+0x40000085   PEVT_MMU_HTW_PTERELOAD_TOT  | htw ptereload total                 |
+0x40000086   PEVT_MMU_LRAT_TRANS_TOT  | lrat translation total                 |
+0x40000087   PEVT_MMU_LRAT_MISS_TOT  | lrat miss total                         |
+0x40000088   PEVT_MMU_PT_FAULT_TOT  | pt fault total                           |
+0x40000089   PEVT_MMU_PT_INELIG_TOT  | pt inelig total                         |
+0x4000008a   PEVT_MMU_TLBWEC_FAIL_TOT  | tlbwec fail total                     |
+0x4000008b   PEVT_MMU_TLBWEC_SUCC_TOT  | tlbwec success total                  |
+0x4000008c   PEVT_MMU_TLBILX_SRC_TOT  | tlbilx local source total              |
+0x4000008d   PEVT_MMU_TLBIVAX_SRC_TOT  | tlbivax local source total            |
+0x4000008e   PEVT_MMU_TLBIVAX_SNOOP_TOT  | tlbivax snoop total                 |
+0x4000008f   PEVT_MMU_TLB_FLUSH_REQ_TOT  | tlb flush req total                 |
+0x40000090   PEVT_MMU_TLB_FLUSH_REQ_TOT_CYC  | tlb flush req total cycles      |
+0x40000091   PEVT_L1P_BAS_STRM_LINE_ESTB  | L1p stream line establish          |
+0x40000092   PEVT_L1P_BAS_HIT  | L1p hit                                       |
+0x40000093   PEVT_L1P_BAS_PF2DFC  | L1p pf2dfc                                 |
+0x40000094   PEVT_L1P_BAS_MISS  | L1p miss                                     |
+0x40000095   PEVT_L1P_BAS_LU_DRAIN  | L1p LU drain                             |
+0x40000096   PEVT_L1P_BAS_LU_DRAIN_CYC  | L1p LU drain Cyc                     |
+0x40000097   PEVT_L1P_BAS_LD  | L1p Load                                       |
+0x40000098   PEVT_L1P_BAS_ST_WC  | L1p Store-WC                                |
+0x40000099   PEVT_L1P_BAS_ST_32BYTE  | L1p Store 32byte                        |
+0x4000009a   PEVT_L1P_BAS_ST_CRACKED  | L1p Store-cracked                      |
+0x4000009b   PEVT_L1P_BAS_LU_STALL_SRT  | L1p LU stall-SRT                     |
+0x4000009c   PEVT_L1P_BAS_LU_STALL_SRT_CYC  | L1p LU stall-SRT Cyc             |
+0x4000009d   PEVT_L1P_BAS_LU_STALL_MMIO_DCR  | L1p LU stall-MMIO/DCR           |
+0x4000009e   PEVT_L1P_BAS_LU_STALL_MMIO_DCR_CYC  | L1p LU stall-MMIO/DCR Cyc   |
+0x4000009f   PEVT_L1P_BAS_LU_STALL_STRM_DET  | L1p LU stall-stream detect      |
+0x400000a0   PEVT_L1P_BAS_LU_STALL_STRM_DET_CYC  | L1p LU stall-stream detect  |
+           | Cyc                                                               |
+0x400000a1   PEVT_L1P_BAS_LU_STALL_LIST_RD  | L1p LU stall-list read           |
+0x400000a2   PEVT_L1P_BAS_LU_STALL_LIST_RD_CYC  | L1p LU stall-list read Cyc   |
+0x400000a3   PEVT_L1P_BAS_ST  | L1p Store                                      |
+0x400000a4   PEVT_L1P_BAS_LU_STALL_LIST_WRT  | L1p LU stall-list write         |
+0x400000a5   PEVT_L1P_BAS_LU_STALL_LIST_WRT_CYC  | L1p LU stall-list write Cyc |
+           |                                                                   |
+0x400000a6   PEVT_L1P_SW_MAS_SW_REQ_VAL  | L1p switch master sw req valid      |
+0x400000a7   PEVT_L1P_SW_MAS_SW_REQ_GATE  | L1p switch master sw req gate      |
+0x400000a8   PEVT_L1P_SW_MAS_SW_DATA_GATE  | L1p switch master sw data gate    |
+0x400000a9   PEVT_L1P_SW_SR_MAS_RD_VAL_2  | L1p switch sr master rd valid 2    |
+0x400000aa   PEVT_L1P_SW_SI_MAS_REQ_VAL_2  | L1p switch si master req valid 2  |
+0x400000ab   PEVT_L1P_SW_SW_MAS_SKED_VAL_2  | L1p switch sw master sked valid  |
+           | 2                                                                 |
+0x400000ac   PEVT_L1P_SW_SW_MAS_EAGER_VAL_2  | L1p switch sw master eager vali |
+           | d 2                                                               |
+0x400000ad   PEVT_L1P_SW_TLB_FILL  | L1p switch tlb fill                       |
+0x400000ae   PEVT_L1P_SW_STWCX_FAIL  | L1p switch stwcx fail                   |
+0x400000af   PEVT_L1P_SW_STWCX  | L1p switch stwcx                             |
+0x400000b0   PEVT_L1P_SW_I_FETCH  | L1p switch I-fetch                         |
+0x400000b1   PEVT_L1P_SW_MSYNC  | L1p switch Msync                             |
+0x400000b2   PEVT_L1P_SW_LWARX  | L1p switch Lwarx                             |
+0x400000b3   PEVT_L1P_SW_KILL_L2_RSV  | L1p switch L1p killed L2 slice reserve |
+           |                                                                   |
+0x400000b4   PEVT_L1P_SW_L2_CANCEL_A2_RSV  | L1p switch L2 slice cancelled A2  |
+           | reserve                                                           |
+0x400000b5   PEVT_L1P_SW_L1_INVAL  | L1p switch L1 inval                       |
+0x400000b6   PEVT_L1P_SW_WC_EVICT_ADDR  | L1p switch WC evict by nearby addres |
+           | s                                                                 |
+0x400000b7   PEVT_L1P_STRM_LINE_ESTB  | L1p stream L1p single line established |
+           |                                                                   |
+0x400000b8   PEVT_L1P_STRM_HIT_FWD  | L1p stream L1p hit forwarded             |
+0x400000b9   PEVT_L1P_STRM_L1_HIT_FWD  | L1p stream L1 hit forwarded           |
+0x400000ba   PEVT_L1P_STRM_EVICT_UNUSED  | L1p stream L1p evict unused         |
+0x400000bb   PEVT_L1P_STRM_EVICT_PART_USED  | L1p stream L1p evict partially u |
+           | sed                                                               |
+0x400000bc   PEVT_L1P_STRM_REMOTE_INVAL_MATCH  | L1p stream L1p Remote Invalid |
+           | ate match                                                         |
+0x400000bd   PEVT_L1P_STRM_DONT_CACHE  | L1p stream L1p don't cache            |
+0x400000be   PEVT_L1P_STRM_STRM_DEPTH_STEAL  | L1p stream L1p Stream depth ste |
+           | al                                                                |
+0x400000bf   PEVT_L1P_STRM_STRM_ESTB  | L1p stream L1p streams established     |
+0x400000c0   PEVT_L1P_STRM_WRT_INVAL  | L1p stream L1p Write Invalidate        |
+0x400000c1   PEVT_L1P_STRM_LINE_ESTB_ALL_LIST  | L1p stream L1p line establish |
+           |  (all list)                                                       |
+0x400000c2   PEVT_L1P_STRM_HIT_LIST  | L1p stream L1p hit (list)               |
+0x400000c3   PEVT_L1P_STRM_PF2DFC_LIST  | L1p stream L1p pf2dfc (list)         |
+0x400000c4   PEVT_L1P_STRM_PART_INVAL_REFCH  | L1p stream L1p partial invalid  |
+           | refetched                                                         |
+0x400000c5   PEVT_L1P_LIST_SKIP_1  | L1p list skip by 1                        |
+0x400000c6   PEVT_L1P_LIST_SKIP_2  | L1p list skip by 2                        |
+0x400000c7   PEVT_L1P_LIST_SKIP_3  | L1p list skip by 3                        |
+0x400000c8   PEVT_L1P_LIST_SKIP_4  | L1p list skip by 4                        |
+0x400000c9   PEVT_L1P_LIST_SKIP_5  | L1p list skip by 5                        |
+0x400000ca   PEVT_L1P_LIST_SKIP_6  | L1p list skip by 6                        |
+0x400000cb   PEVT_L1P_LIST_SKIP_7  | L1p list skip by 7                        |
+0x400000cc   PEVT_L1P_LIST_ABANDON  | L1p list abandoned                       |
+0x400000cd   PEVT_L1P_LIST_CMP  | L1p list comparison                          |
+0x400000ce   PEVT_L1P_LIST_SKIP  | L1p list skip                               |
+0x400000cf   PEVT_L1P_LIST_MISMATCH  | L1p list mismatch                       |
+0x400000d0   PEVT_L1P_LIST_STARTED  | L1p list started.                        |
+0x400000d1   PEVT_L1P_LIST_OVF_MEM  | L1p list overflow mem                    |
+0x400000d2   PEVT_L1P_LIST_CMP_OVRUN_PREFCH  | L1p list cmp overrun prefetch   |
+0x400000d3   PEVT_WAKE_HIT_10  | Wakeup hit 10                                 |
+0x400000d4   PEVT_WAKE_HIT_11  | Wakeup hit 11                                 |
+0x400000d5   PEVT_CYCLES  | x1 cycles                                          |
+0x400000d6   PEVT_INST_XU_MATCH  | Match XU OpCode                             |
+0x400000d7   PEVT_INST_XU_GRP_MASK  | XU OpCode Mask Multiple Groups           |
+0x400000d8   PEVT_INST_XU_FLD  | Floating Point Load Instr Compl               |
+0x400000d9   PEVT_INST_XU_FST  | Floating Point Store Instr Compl              |
+0x400000da   PEVT_INST_XU_QLD  | Quad Floating Point Load Instr Compl          |
+0x400000db   PEVT_INST_XU_QST  | Quad Floating Point Store Instr Compl         |
+0x400000dc   PEVT_INST_XU_BITS  | Bit manipulation Instr Compl                 |
+0x400000dd   PEVT_INST_XU_BRC  | Branch Conditional Instr Compl                |
+0x400000de   PEVT_INST_XU_BRU  | Branch Unconditional Instr Compl              |
+0x400000df   PEVT_INST_XU_CINV  | Cache Invalidate Instr Compl                 |
+0x400000e0   PEVT_INST_XU_CSTO  | Cache Store Instr Compl                      |
+0x400000e1   PEVT_INST_XU_CTCH  | Cache Touch Instr Compl                      |
+0x400000e2   PEVT_INST_XU_IADD  | Integer Arithmetic Instr Compl               |
+0x400000e3   PEVT_INST_XU_ICMP  | Compare Instr Compl                          |
+0x400000e4   PEVT_INST_XU_ICSW  | Coprocessor Instr Compl                      |
+0x400000e5   PEVT_INST_XU_IDIV  | integer divide Instr Compl                   |
+0x400000e6   PEVT_INST_XU_ILOG  | Logical Instr Compl                          |
+0x400000e7   PEVT_INST_XU_IMOV  | Quick Register move Instr Compl              |
+0x400000e8   PEVT_INST_XU_IMUL  | integer multiply Instr Compl                 |
+0x400000e9   PEVT_INST_XU_INT  | Interrupt/system call Instr Compl             |
+0x400000ea   PEVT_INST_XU_LD  | Load Instr Compl                               |
+0x400000eb   PEVT_INST_XU_LSCX  | Load & Store reserve conditional Instr Compl |
+           |                                                                   |
+0x400000ec   PEVT_INST_XU_ST  | Store Instr Compl                              |
+0x400000ed   PEVT_INST_XU_SYNC  | Context Sync Instr Compl                     |
+0x400000ee   PEVT_INST_XU_TLB  | TLB other Instr Compl                         |
+0x400000ef   PEVT_INST_XU_TLBI  | TLB Invalidate Instr Compl                   |
+0x400000f0   PEVT_INST_XU_WCH  | Watch Instr Compl                             |
+0x400000f1   PEVT_INST_XU_ALL  | All XU Instruction Completions                |
+0x400000f2   PEVT_INST_QFPU_MATCH  | AXU Opcode Match                          |
+0x400000f3   PEVT_INST_QFPU_GRP_MASK  | AXU Opcode Mask Multiple Groups        |
+0x400000f4   PEVT_INST_QFPU_FOTH  | Floating Point Other Instr Compl           |
+0x400000f5   PEVT_INST_QFPU_FRES  | Floating Point Reciprocal Estimate Instr C |
+           | ompl                                                              |
+0x400000f6   PEVT_INST_QFPU_FADD  | Floating Point Add Instr Compl             |
+0x400000f7   PEVT_INST_QFPU_FCVT  | Floating Point Convert Instr Compl         |
+0x400000f8   PEVT_INST_QFPU_FCMP  | Floating Point Compare Instr Compl         |
+0x400000f9   PEVT_INST_QFPU_FDIV  | Floating Point Divide Instr Compl          |
+0x400000fa   PEVT_INST_QFPU_FMOV  | Floating Point Move Instr Compl            |
+0x400000fb   PEVT_INST_QFPU_FMA  | Floating Point Multiply-Add Instr Compl     |
+0x400000fc   PEVT_INST_QFPU_FMUL  | Floating Point Multiply Instr Compl        |
+0x400000fd   PEVT_INST_QFPU_FRND  | Floating Point Round Instr Compl           |
+0x400000fe   PEVT_INST_QFPU_FSQE  | Floating Point Square Root Estimate Instr  |
+           | Compl                                                             |
+0x400000ff   PEVT_INST_QFPU_FSQ  | Floating Point Square Root Instr Compl      |
+0x40000100   PEVT_INST_QFPU_QMOV  | Quad Floating Point Move Instr Compl       |
+0x40000101   PEVT_INST_QFPU_QOTH  | Quad Floating Point Other Instr Compl      |
+0x40000102   PEVT_INST_QFPU_QADD  | Quad Floating Point Add Instr Compl        |
+0x40000103   PEVT_INST_QFPU_QMUL  | Quad Floating Point Multiply Instr Compl   |
+0x40000104   PEVT_INST_QFPU_QRES  | Quad Floating Point Reciprocal Estimate In |
+           | str Compl                                                         |
+0x40000105   PEVT_INST_QFPU_QMA  | Quad Floating Point Multiply-Add Instr Comp |
+           | l                                                                 |
+0x40000106   PEVT_INST_QFPU_QRND  | Quad Floating Point Round Instr Compl      |
+0x40000107   PEVT_INST_QFPU_QCVT  | Quad Floating Point Convert Instr Compl    |
+0x40000108   PEVT_INST_QFPU_QCMP  | Quad Floating Point Compare Instr Compl    |
+0x40000109   PEVT_INST_QFPU_UCODE  | Floating Point microcoded instructions    |
+0x4000010a   PEVT_INST_QFPU_ALL  | All AXU Instruction Completions             |
+0x4000010b   PEVT_INST_QFPU_FPGRP1  | FP Operations Group 1                    |
+0x4000010c   PEVT_INST_QFPU_FPGRP2  | FP Operations Group 2                    |
+0x4000010d   PEVT_INST_ALL  | All Instruction Completions                      |
+0x44000000   BGPM_L2unit.PEVT_L2_HITS  | L2 Hits                               |
+0x44000001   BGPM_L2unit.PEVT_L2_MISSES  | L2 Misses                           |
+0x44000002   BGPM_L2unit.PEVT_L2_PREFETCH  | L2 prefetch ahead of L1P prefetch |
+           |                                                                   |
+0x44000003   BGPM_L2unit.PEVT_L2_FETCH_LINE  | L2 fetch 128 byte line from mai |
+           | n memory                                                          |
+0x44000004   BGPM_L2unit.PEVT_L2_STORE_LINE  | L2 store 128 byte line to main  |
+           | memory                                                            |
+0x44000005   BGPM_L2unit.PEVT_L2_STORE_PARTIAL_LINE  | L2 store partial line t |
+           | o main memory                                                     |
+0x44000006   BGPM_L2unit.PEVT_L2_REQ_REJECT  | L2 Req Reject                   |
+0x44000007   BGPM_L2unit.PEVT_L2_REQ_RETIRE  | L2 Req Retire                   |
+0x44000008   BGPM_L2unit.PEVT_L2_REQ_MISS_AND_EVICT  | L2 Req Miss and Evict   |
+0x44000009   BGPM_L2unit.PEVT_L2_REQ_MISS_AND_EVICT_SPEC  | L2 Req Miss and Ev |
+           | ict Spec                                                          |
+0x4400000a   BGPM_L2unit.PEVT_L2_MISS_AND_EVICT  | L2 Miss and Evict           |
+0x4400000b   BGPM_L2unit.PEVT_L2_MISS_AND_EVICT_SPEC  | L2 Miss and Evict Spec |
+           |                                                                   |
+0x4400000c   BGPM_L2unit.PEVT_L2_REQ_SPEC_ADDR_CLEANUP  | L2 Req Spec Addr Cle |
+           | anup                                                              |
+0x4400000d   BGPM_L2unit.PEVT_L2_SPEC_ADDR_CLEANUP  | L2 Spec Addr Cleanup     |
+0x4400000e   BGPM_L2unit.PEVT_L2_SPEC_SET_CLEANUP  | L2 Spec Set Cleanup       |
+0x4400000f   BGPM_L2unit.PEVT_L2_SPEC_RETRY  | L2 Spec Retry                   |
+0x44000010   BGPM_L2unit.PEVT_L2_HITS_SLICE  | L2 Cache Slice Hits             |
+0x44000011   BGPM_L2unit.PEVT_L2_MISSES_SLICE  | L2 Cache Slice Misses         |
+0x44000012   BGPM_L2unit.PEVT_L2_PREFETCH_SLICE  | L2 Cache Slice prefetch ahe |
+           | ad of L1P prefetch                                                |
+0x44000013   BGPM_L2unit.PEVT_L2_FETCH_LINE_SLICE  | L2 Cache Slice fetch 128  |
+           | byte line from main memory                                        |
+0x44000014   BGPM_L2unit.PEVT_L2_STORE_LINE_SLICE  | L2 Cache Slice store 128  |
+           | byte line to main memory                                          |
+0x44000015   BGPM_L2unit.PEVT_L2_STORE_PARTIAL_LINE_SLICE  | L2 Cache Slice st |
+           | ore partial line to main memory                                   |
+0x44000016   BGPM_L2unit.PEVT_L2_REQ_REJECT_SLICE  | L2 Cache Slice Req Reject |
+           |                                                                   |
+0x44000017   BGPM_L2unit.PEVT_L2_REQ_RETIRE_SLICE  | L2 Cache Slice Req Retire |
+           |                                                                   |
+0x44000018   BGPM_L2unit.PEVT_L2_REQ_MISS_AND_EVICT_SLICE  | L2 Cache Slice Re |
+           | q Miss and Evict                                                  |
+0x44000019   BGPM_L2unit.PEVT_L2_REQ_MISS_AND_EVICT_SPEC_SLICE  | L2 Cache Sli |
+           | ce Req Miss and Evict Spec                                        |
+0x4400001a   BGPM_L2unit.PEVT_L2_MISS_AND_EVICT_SLICE  | L2 Cache Slice Miss a |
+           | nd Evict                                                          |
+0x4400001b   BGPM_L2unit.PEVT_L2_MISS_AND_EVICT_SPEC_SLICE  | L2 Cache Slice M |
+           | iss and Evict Spec                                                |
+0x4400001c   BGPM_L2unit.PEVT_L2_REQ_SPEC_ADDR_CLEANUP_SLICE  | L2 Cache Slice |
+           |  Req Spec Addr Cleanup                                            |
+0x4400001d   BGPM_L2unit.PEVT_L2_SPEC_ADDR_CLEANUP_SLICE  | L2 Cache Slice Spe |
+           | c Addr Cleanup                                                    |
+0x4400001e   BGPM_L2unit.PEVT_L2_SPEC_SET_CLEANUP_SLICE  | L2 Cache Slice Spec |
+           |  Set Cleanup                                                      |
+0x4400001f   BGPM_L2unit.PEVT_L2_SPEC_RETRY_SLICE  | L2 Cache Slice Spec Retry |
+           |                                                                   |
+0x48000000   BGPM_CNKunit.PEVT_CNK_NODE_TBD  | CNK Node events are not yet def |
+           | ined                                                              |
+0x48000001   BGPM_CNKunit.PEVT_CNK_PROC_TBD  | CNK Process events are not yet  |
+           | defined                                                           |
+0x48000002   BGPM_CNKunit.PEVT_CNKHWT_SYSCALL   | System Calls                 |
+0x48000003   BGPM_CNKunit.PEVT_CNKHWT_STANDARD   | External Input Interrupts   |
+0x48000004   BGPM_CNKunit.PEVT_CNKHWT_CRITICAL   | Critical Input Interrupts   |
+0x48000005   BGPM_CNKunit.PEVT_CNKHWT_DECREMENTER  | Decrementer Interrupts    |
+0x48000006   BGPM_CNKunit.PEVT_CNKHWT_FIT   | Fixed Interval Timer Interrupts  |
+0x48000007   BGPM_CNKunit.PEVT_CNKHWT_WATCHDOG   | Watchdog Timer Interrupts   |
+0x48000008   BGPM_CNKunit.PEVT_CNKHWT_UDEC   | User Decrementer Interrupts     |
+0x48000009   BGPM_CNKunit.PEVT_CNKHWT_PERFMON   | Performance Monitor interrup |
+           | ts                                                                |
+0x4800000a   BGPM_CNKunit.PEVT_CNKHWT_UNKDEBUG   | Unknown/Invalid Interrupts  |
+0x4800000b   BGPM_CNKunit.PEVT_CNKHWT_DEBUG   | Debug Interrupts               |
+0x4800000c   BGPM_CNKunit.PEVT_CNKHWT_DSI   | Data Storage Interrupts          |
+0x4800000d   BGPM_CNKunit.PEVT_CNKHWT_ISI   | Instruction Storage Interrupts   |
+0x4800000e   BGPM_CNKunit.PEVT_CNKHWT_ALIGNMENT   | Alignment Interrupts       |
+0x4800000f   BGPM_CNKunit.PEVT_CNKHWT_PROGRAM   | Program Interrupts           |
+0x48000010   BGPM_CNKunit.PEVT_CNKHWT_FPU   | FPU Unavailable Interrupts       |
+0x48000011   BGPM_CNKunit.PEVT_CNKHWT_APU   | APU Unavailable Interrupts       |
+0x48000012   BGPM_CNKunit.PEVT_CNKHWT_DTLB   | Data TLB Interrupts             |
+0x48000013   BGPM_CNKunit.PEVT_CNKHWT_ITLB   | Instruction TLB Interrupts      |
+0x48000014   BGPM_CNKunit.PEVT_CNKHWT_VECTOR   | Vector Unavailable Interrupts |
+           |                                                                   |
+0x48000015   BGPM_CNKunit.PEVT_CNKHWT_UNDEF   | Undefined Interrupts           |
+0x48000016   BGPM_CNKunit.PEVT_CNKHWT_PDBI   | Processor Doorbell Interrupts   |
+0x48000017   BGPM_CNKunit.PEVT_CNKHWT_PDBCI   | Processor Doorbell Critical In |
+           | ts                                                                |
+0x48000018   BGPM_CNKunit.PEVT_CNKHWT_GDBI   | Guest Doorbell Interrupts       |
+0x48000019   BGPM_CNKunit.PEVT_CNKHWT_GDBCI   | Guest Doorbell Crit or MChk In |
+           | ts                                                                |
+0x4800001a   BGPM_CNKunit.PEVT_CNKHWT_EHVSC   | Embedded Hypervisor System Cal |
+           | ls                                                                |
+0x4800001b   BGPM_CNKunit.PEVT_CNKHWT_EHVPRIV   | Embedded Hypervisor Privileg |
+           | ed                                                                |
+0x4800001c   BGPM_CNKunit.PEVT_CNKHWT_LRATE   | LRAT exception                 |
+0x4c000000   BGPM_IOunit.PEVT_MU_PKT_INJ  | Mu packet injected                 |
+0x4c000001   BGPM_IOunit.PEVT_MU_MSG_INJ  | Mu message injected                |
+0x4c000002   BGPM_IOunit.PEVT_MU_FIFO_PKT_RCV  | Mu FIFO packet received       |
+0x4c000003   BGPM_IOunit.PEVT_MU_RGET_PKT_RCV  | Mu RGET packet received       |
+0x4c000004   BGPM_IOunit.PEVT_MU_PUT_PKT_RCV  | Mu PUT packet received         |
+0x4c000005   BGPM_IOunit.PEVT_MU_PORT0_16B_WRT  | Mu port 0 16B write          |
+0x4c000006   BGPM_IOunit.PEVT_MU_PORT0_32B_RD  | Mu port 0 32B read            |
+0x4c000007   BGPM_IOunit.PEVT_MU_PORT0_64B_RD  | Mu port 0 64B read            |
+0x4c000008   BGPM_IOunit.PEVT_MU_PORT0_128B_RD  | Mu port 0 128B read          |
+0x4c000009   BGPM_IOunit.PEVT_MU_PORT1_16B_WRT  | Mu port 1 16B write          |
+0x4c00000a   BGPM_IOunit.PEVT_MU_PORT1_32B_RD  | Mu port 1 32B read            |
+0x4c00000b   BGPM_IOunit.PEVT_MU_PORT1_64B_RD  | Mu port 1 64B read            |
+0x4c00000c   BGPM_IOunit.PEVT_MU_PORT1_128B_RD  | Mu port 1 128B read          |
+0x4c00000d   BGPM_IOunit.PEVT_MU_PORT2_16B_WRT  | Mu port 2 16B write          |
+0x4c00000e   BGPM_IOunit.PEVT_MU_PORT2_32B_RD  | Mu port 2 32B read            |
+0x4c00000f   BGPM_IOunit.PEVT_MU_PORT2_64B_RD  | Mu port 2 64B read            |
+0x4c000010   BGPM_IOunit.PEVT_MU_PORT2_128B_RD  | Mu port 2 128B read          |
+0x4c000011   BGPM_IOunit.PEVT_MU_SLV_PORT_RD  | Mu Slave port read             |
+0x4c000012   BGPM_IOunit.PEVT_MU_SLV_PORT_WRT  | Mu Slave port write           |
+0x4c000013   BGPM_IOunit.PEVT_MU_PORT0_PEND_WRT  | Mu port 0 pending write req |
+           | uests                                                             |
+0x4c000014   BGPM_IOunit.PEVT_MU_PORT0_PEND_RD  | Mu port 0 pending read reque |
+           | sts                                                               |
+0x4c000015   BGPM_IOunit.PEVT_MU_PORT1_PEND_WRT  | Mu port 1 pending write req |
+           | uests                                                             |
+0x4c000016   BGPM_IOunit.PEVT_MU_PORT1_PEND_RD  | Mu port 1 pending read reque |
+           | sts                                                               |
+0x4c000017   BGPM_IOunit.PEVT_MU_PORT2_PEND_WRT  | Mu port 2 pending write req |
+           | uests                                                             |
+0x4c000018   BGPM_IOunit.PEVT_MU_PORT2_PEND_RD  | Mu port 2 pending read reque |
+           | sts                                                               |
+0x4c000019   BGPM_IOunit.PEVT_PCIE_INB_RD_BYTES  | Pcie Inbound Read Bytes     |
+0x4c00001a   BGPM_IOunit.PEVT_PCIE_INB_RDS  | Pcie Inbound Read Requests       |
+0x4c00001b   BGPM_IOunit.PEVT_PCIE_INB_RD_CMPLT  | Pcie Inbound Read Completio |
+           | ns                                                                |
+0x4c00001c   BGPM_IOunit.PEVT_PCIE_OUTB_WRT_BYTES  | Pcie outbound memory writ |
+           | e bytes                                                           |
+0x4c00001d   BGPM_IOunit.PEVT_PCIE_OUTB_CFG_X  | Pcie Outbound CFG transaction |
+           | s                                                                 |
+0x4c00001e   BGPM_IOunit.PEVT_PCIE_OUTB_IO_X  | Pcie Outbound IO transactions  |
+0x4c00001f   BGPM_IOunit.PEVT_PCIE_RX_DLLP  | Pcie RX DLLP Count               |
+0x4c000020   BGPM_IOunit.PEVT_PCIE_RX_TLP  | Pcie RX TLP Count                 |
+0x4c000021   BGPM_IOunit.PEVT_PCIE_RX_TLP_SIZE  | Pcie RX TLP Size in DWORDS   |
+0x4c000022   BGPM_IOunit.PEVT_PCIE_TX_DLLP  | Pcie TX DLLP Count               |
+0x4c000023   BGPM_IOunit.PEVT_PCIE_TX_TLP  | Pcie TX TLP Count                 |
+0x4c000024   BGPM_IOunit.PEVT_PCIE_TX_TLP_SIZE  | Pcie TX TLP Size in DWORDS   |
+0x4c000025   BGPM_IOunit.PEVT_DB_PCIE_INB_WRT_BYTES  | Devbus PCIe inbound wri |
+           | te bytes written                                                  |
+0x4c000026   BGPM_IOunit.PEVT_DB_PCIE_OUTB_RD_BYTES  | Devbus PCIe outbound re |
+           | ad bytes requested                                                |
+0x4c000027   BGPM_IOunit.PEVT_DB_PCIE_OUTB_RDS  | Devbus PCIe outbound read re |
+           | quests                                                            |
+0x4c000028   BGPM_IOunit.PEVT_DB_PCIE_OUTB_RD_CMPLT  | Devbus PCIe outbound re |
+           | ad completions                                                    |
+0x4c000029   BGPM_IOunit.PEVT_DB_BOOT_EDRAM_WRT_BYTES  | Devbus Boot eDRAM byt |
+           | es written                                                        |
+0x4c00002a   BGPM_IOunit.PEVT_DB_BOOT_EDRAM_RD_BYTES  | Devbus Boot eDRAM byte |
+           | s read                                                            |
+0x4c00002b   BGPM_IOunit.PEVT_DB_MSG_SIG_INTS  | Devbus Message-Signaled Inter |
+           | rupts (MSIs)                                                      |
+0x50000000   BGPM_NWunit.PEVT_NW_USER_PP_SENT  | User pt-pt 32B packet chunks  |
+           | sent                                                              |
+0x50000001   BGPM_NWunit.PEVT_NW_USER_DYN_PP_SENT  | User dynamic pt-pt 32B pa |
+           | cket chunks sent                                                  |
+0x50000002   BGPM_NWunit.PEVT_NW_USER_ESC_PP_SENT  | User escape pt-pt 32B pac |
+           | ket chunks sent                                                   |
+0x50000003   BGPM_NWunit.PEVT_NW_USER_PRI_PP_SENT  | User priority pt-pt 32B p |
+           | acket chunks sent                                                 |
+0x50000004   BGPM_NWunit.PEVT_NW_SYS_PP_SENT  | System pt-pt 32B packet chunks |
+           |  sent                                                             |
+0x50000005   BGPM_NWunit.PEVT_NW_USER_WORLD_COL_SENT  | User world collective  |
+           | 32B packet chunks sent                                            |
+0x50000006   BGPM_NWunit.PEVT_NW_USER_SUBC_COL_SENT  | User sub-comm collectiv |
+           | e 32B packet chunks sent                                          |
+0x50000007   BGPM_NWunit.PEVT_NW_SYS_COL_SENT  | System collective 32B packet  |
+           | chunks sent                                                       |
+0x50000008   BGPM_NWunit.PEVT_NW_COMMWORLD_COL_SENT  | Comm-world collective 3 |
+           | 2B packet chunks sent                                             |
+0x50000009   BGPM_NWunit.PEVT_NW_USER_PP_RECV  | User pt-pt packets received   |
+0x5000000a   BGPM_NWunit.PEVT_NW_USER_DYN_PP_RECV  | User dynamic pt-pt packet |
+           | s received                                                        |
+0x5000000b   BGPM_NWunit.PEVT_NW_USER_ESC_PP_RECV  | User escape pt-pt packets |
+           |  received                                                         |
+0x5000000c   BGPM_NWunit.PEVT_NW_USER_PRI_PP_RECV  | User priority pt-pt packe |
+           | ts received                                                       |
+0x5000000d   BGPM_NWunit.PEVT_NW_SYS_PP_RECV  | System pt-pt packets received  |
+           |                                                                   |
+0x5000000e   BGPM_NWunit.PEVT_NW_USER_WORLD_COL_RECV  | User world collective  |
+           | packets received                                                  |
+0x5000000f   BGPM_NWunit.PEVT_NW_USER_SUBC_COL_RECV  | User sub-comm collectiv |
+           | e packets received                                                |
+0x50000010   BGPM_NWunit.PEVT_NW_SYS_COL_RECV  | System collective packets rec |
+           | eived                                                             |
+0x50000011   BGPM_NWunit.PEVT_NW_COMMWORLD_COL_RECV  | Comm-world collective p |
+           | ackets received                                                   |
+0x50000012   BGPM_NWunit.PEVT_NW_USER_PP_RECV_FIFO  | User pt-pt packets in re |
+           | ceive fifo                                                        |
+0x50000013   BGPM_NWunit.PEVT_NW_USER_DYN_PP_RECV_FIFO  | User dynamic pt-pt p |
+           | ackets in receive fifo                                            |
+0x50000014   BGPM_NWunit.PEVT_NW_USER_ESC_PP_RECV_FIFO  | User escape pt-pt pa |
+           | ckets in receive fifo                                             |
+0x50000015   BGPM_NWunit.PEVT_NW_USER_PRI_PP_RECV_FIFO  | User priority pt-pt  |
+           | packets in receive fifo                                           |
+0x50000016   BGPM_NWunit.PEVT_NW_SYS_PP_RECV_FIFO  | System pt-pt packets in r |
+           | eceive fifo                                                       |
+0x50000017   BGPM_NWunit.PEVT_NW_USER_WORLD_COL_RECV_FIFO  | User world collec |
+           | tive packets in receive fifo                                      |
+0x50000018   BGPM_NWunit.PEVT_NW_USER_SUBC_COL_RECV_FIFO  | User subcomm colle |
+           | ctive packets in receive fifo                                     |
+0x50000019   BGPM_NWunit.PEVT_NW_SYS_COL_RECV_FIFO  | System collective packet |
+           | s in receive fifo                                                 |
+0x5000001a   BGPM_NWunit.PEVT_NW_COMMWORLD_COL_RECV_FIFO  | Comm-world collect |
+           | ive packets in receive fifo                                       |
+0x5000001b   BGPM_NWunit.PEVT_NW_SENT  | Set attribute to filter 32B packet ch |
+           | unks sent                                                         |
+0x5000001c   BGPM_NWunit.PEVT_NW_RECV  | Set attribute to filter packets recei |
+           | ved                                                               |
+0x5000001d   BGPM_NWunit.PEVT_NW_RECV_FIFO  | Set attribute to filter packets  |
+           | in receive fifo                                                   |
+0x5000001e   BGPM_NWunit.PEVT_NW_CYCLES  | Network cycles since reset          |
+--------------------------------------------------------------------------------
+Total events reported: 406
+native_avail.c                           PASSED
