@@ -1,0 +1,534 @@
+Available native events and hardware information.
+-------------------------------------------------------------------------
+Vendor string and code   : IBM (0)
+Model string and code    : PVR=0x0000:0x000e  Serial=R00-M1-N08-J23 (14)
+CPU Revision             : 0.000140
+CPU Megahertz            : 0.000850
+CPU's in this Node       : 4
+Nodes in this System     : 32
+Total CPU's              : 128
+Number Hardware Counters : 256
+Max Multiplex Counters   : 256
+-------------------------------------------------------------------------
+The following correspond to fields in the PAPI_event_info_t structure.
+
+Symbol                           Event Code   Long Description
+ Register Name[n]
+ Register Value[n]
+
+PNE_BGP_PU0_JPIPE_INSTRUCTIONS   0x40000000   P0 CPU:  J-pipe instructions
+PNE_BGP_PU0_JPIPE_ADD_SUB        0x40000001   P0 CPU:  Add/Sub in J-pipe
+PNE_BGP_PU0_JPIPE_LOGICAL_OPS    0x40000002   P0 CPU:  Logical operations in J-pipe
+PNE_BGP_PU0_JPIPE_SHROTMK        0x40000003   P0 CPU:  J-pipe shift/rotate/mask instructions
+PNE_BGP_PU0_IPIPE_INSTRUCTIONS   0x40000004   P0 CPU:  I-pipe instructions
+PNE_BGP_PU0_IPIPE_MULT_DIV       0x40000005   P0 CPU:  Mult/Div in I-pipe
+PNE_BGP_PU0_IPIPE_ADD_SUB        0x40000006   P0 CPU:  Add/Sub in I-pipe
+PNE_BGP_PU0_IPIPE_LOGICAL_OPS    0x40000007   P0 CPU:  Logical operations in I-pipe
+PNE_BGP_PU0_IPIPE_SHROTMK        0x40000008   P0 CPU:  I-pipe shift/rotate/mask instructions
+PNE_BGP_PU0_IPIPE_BRANCHES       0x40000009   P0 CPU:  Branches
+PNE_BGP_PU0_IPIPE_TLB_OPS        0x4000000a   P0 CPU:  TLB operations
+PNE_BGP_PU0_IPIPE_PROCESS_CONTROL 0x4000000b   P0 CPU:  Process control
+PNE_BGP_PU0_IPIPE_OTHER          0x4000000c   P0 CPU:  Other I-pipe operations
+PNE_BGP_PU0_DCACHE_LINEFILLINPROG 0x4000000d   P0 CPU:  Cycles for data cache LineFillInProgress
+PNE_BGP_PU0_ICACHE_LINEFILLINPROG 0x4000000e   P0 CPU:  Cycles for inst cache LineFillInProgress
+PNE_BGP_PU0_DCACHE_MISS          0x4000000f   P0 CPU:  Accesses to data cache which missed data cache
+PNE_BGP_PU0_DCACHE_HIT           0x40000010   P0 CPU:  Accesses to data cache which hit data cache
+PNE_BGP_PU0_DATA_LOADS           0x40000011   P0 CPU:  Data loads
+PNE_BGP_PU0_DATA_STORES          0x40000012   P0 CPU:  Data stores
+PNE_BGP_PU0_DCACHE_OPS           0x40000013   P0 CPU:  Data cache operations
+PNE_BGP_PU0_ICACHE_MISS          0x40000014   P0 CPU:  Accesses to inst cache which missed inst cache
+PNE_BGP_PU0_ICACHE_HIT           0x40000015   P0 CPU:  Accesses to inst cache which hit inst cache
+PNE_BGP_PU0_FPU_ADD_SUB_1        0x40000016   P0 FPU:  Add/Sub:  fadd, fadds, fsub, fsubs
+PNE_BGP_PU0_FPU_MULT_1           0x40000017   P0 FPU:  Mult:  fmul fmuls
+PNE_BGP_PU0_FPU_FMA_2            0x40000018   P0 FPU:  FMA:  fmadd, fmadds, fmsub, fmsubs, fnmadd fnmadds, fnmsub, fnmsubs;  1 result generated per instruction, 2 flops
+PNE_BGP_PU0_FPU_DIV_1            0x40000019   P0 FPU:  Div: fdiv, fdivs
+PNE_BGP_PU0_FPU_OTHER_NON_STORAGE_OPS 0x4000001a   P0 FPU:  other non-storage instructions: fabs, fnabs, frsp, fctiw, fctiw, fctiwz, fres, frsqrte, fsel, fmr fneg, fcmpu, fcmpo, mffs, mcrfs, mtfsfi, mtfsf, mtfsb0, mtfsb1
+PNE_BGP_PU0_FPU_ADD_SUB_2        0x4000001b   P0 FPU:  Add/Sub Dual Pipe: fpadd fpsub
+PNE_BGP_PU0_FPU_MULT_2           0x4000001c   P0 FPU:  Mult Dual Pipe: fpmul, fxmul, fxpmul, fxsmul
+PNE_BGP_PU0_FPU_FMA_4            0x4000001d   P0 FPU:  FMA Dual Pipe: fpmadd, fpnmadd, fpmsub, fpnmsub fxmadd, fxnmadd, fxmsub, fxnmsub fxcpmadd, fxcsmadd, fxcpnmadd fxcsnmadd, fxcpmsub, fxcsmsub fxcpnmsub, fxcsnmsub, fxcpnpma fxcsnpma, fxcpnsma, fxcsnsma fxcxnpma, fxcxnsma, fxcxma, fxcxnms; 2 results generated per instruction, 4 flops
+PNE_BGP_PU0_FPU_DUAL_PIPE_OTHER_NON_STORAGE_OPS 0x4000001e   P0 FPU:  Dual Pipe other non-storage instructions: fpmr, fpneg, fsmr, fsneg, fxmr, fsmfp, fsmtp, fpabs, fpnabs, fsabs, fsnabs, fprsp, fpctiw, fpctiwz, fpre, fprsqrte, fpsel, fscmp
+PNE_BGP_PU0_FPU_QUADWORD_LOADS   0x4000001f   P0 FPU:  Quad-word Loads: lfpdx, lfpdux, lfxdx, lfxdux
+PNE_BGP_PU0_FPU_OTHER_LOADS      0x40000020   P0 FPU:  Other Loads: lfs, lfsx, lfsu, lfsux, lfpsx, fpsux, lfsdx, lfsdux, lfssx, lfssux, lfd, lfdx, lfdu, lfdux, lfxsx, lfxsux
+PNE_BGP_PU0_FPU_QUADWORD_STORES  0x40000021   P0 FPU:  Quad-word Stores: stfpdx, stfpdux, stfxdx, stfxdux
+PNE_BGP_PU0_FPU_OTHER_STORES     0x40000022   P0 FPU:  Other Stores: stfs, stfsx, stfsu, stfsux, stfd, stfdx, stfdu, stfdux, stfiwx, stfpsx, stfpsux, stfpiwx, stfsdx, stfsdux, stfssx,stfssux, stfxsx, stfxsux
+PNE_BGP_PU1_JPIPE_INSTRUCTIONS   0x40000023   P1 CPU:  J-pipe instructions
+PNE_BGP_PU1_JPIPE_ADD_SUB        0x40000024   P1 CPU:  Add/Sub in J-pipe
+PNE_BGP_PU1_JPIPE_LOGICAL_OPS    0x40000025   P1 CPU:  Logical operations in J-pipe
+PNE_BGP_PU1_JPIPE_SHROTMK        0x40000026   P1 CPU:  J-pipe shift/rotate/mask instruction
+PNE_BGP_PU1_IPIPE_INSTRUCTIONS   0x40000027   P1 CPU:  I-pipe instructions
+PNE_BGP_PU1_IPIPE_MULT_DIV       0x40000028   P1 CPU:  Mult/Div in I-pipe
+PNE_BGP_PU1_IPIPE_ADD_SUB        0x40000029   P1 CPU:  Add/Sub in I-pipe
+PNE_BGP_PU1_IPIPE_LOGICAL_OPS    0x4000002a   P1 CPU:  Logical operations in I-pipe
+PNE_BGP_PU1_IPIPE_SHROTMK        0x4000002b   P1 CPU:  I-pipe shift/rotate/mask instruction
+PNE_BGP_PU1_IPIPE_BRANCHES       0x4000002c   P1 CPU:  Branches
+PNE_BGP_PU1_IPIPE_TLB_OPS        0x4000002d   P1 CPU:  TLB operations
+PNE_BGP_PU1_IPIPE_PROCESS_CONTROL 0x4000002e   P1 CPU:  Process control
+PNE_BGP_PU1_IPIPE_OTHER          0x4000002f   P1 CPU:  Other I-pipe operations
+PNE_BGP_PU1_DCACHE_LINEFILLINPROG 0x40000030   P1 CPU:  Cycles for data cache LineFillInProgress
+PNE_BGP_PU1_ICACHE_LINEFILLINPROG 0x40000031   P1 CPU:  Cycles for inst cache LineFillInProgress
+PNE_BGP_PU1_DCACHE_MISS          0x40000032   P1 CPU:  Accesses to data cache which missed data cache
+PNE_BGP_PU1_DCACHE_HIT           0x40000033   P1 CPU:  Accesses to data cache which hit data cache
+PNE_BGP_PU1_DATA_LOADS           0x40000034   P1 CPU:  Data loads
+PNE_BGP_PU1_DATA_STORES          0x40000035   P1 CPU:  Data stores
+PNE_BGP_PU1_DCACHE_OPS           0x40000036   P1 CPU:  Data cache operations
+PNE_BGP_PU1_ICACHE_MISS          0x40000037   P1 CPU:  Accesses to inst cache which missed inst cache
+PNE_BGP_PU1_ICACHE_HIT           0x40000038   P1 CPU:  Accesses to inst cache which hit inst cache
+PNE_BGP_PU1_FPU_ADD_SUB_1        0x40000039   P1 FPU:  Add/Sub:  fadd, fadds, fsub, fsubs
+PNE_BGP_PU1_FPU_MULT_1           0x4000003a   P1 FPU:  Mult:  fmul fmuls
+PNE_BGP_PU1_FPU_FMA_2            0x4000003b   P1 FPU:  FMA:  fmadd, fmadds, fmsub, fmsubs, fnmadd fnmadds, fnmsub, fnmsubs;  1 result generated per instruction, 2 flops
+PNE_BGP_PU1_FPU_DIV_1            0x4000003c   P1 FPU:  Div:  fdiv, fdivs
+PNE_BGP_PU1_FPU_OTHER_NON_STORAGE_OPS 0x4000003d   P1 FPU:  other non-storage instructions:  fabs, fnabs, frsp, fctiw, fctiw, fctiwz, fres, frsqrte, fsel, fmr fneg, fcmpu, fcmpo, mffs, mcrfs, mtfsfi, mtfsf, mtfsb0, mtfsb2
+PNE_BGP_PU1_FPU_ADD_SUB_2        0x4000003e   P1 FPU:  Add/Sub Dual Pipe:  fpadd fpsub
+PNE_BGP_PU1_FPU_MULT_2           0x4000003f   P1 FPU:  Mult Dual Pipe:  fpmul, fxmul, fxpmul, fxsmul
+PNE_BGP_PU1_FPU_FMA_4            0x40000040   P1 FPU:  FMA Dual Pipe:  fpmadd, fpnmadd, fpmsub, fpnmsub fxmadd, fxnmadd, fxmsub, fxnmsub fxcpmadd, fxcsmadd, fxcpnmadd fxcsnmadd, fxcpmsub, fxcsmsub fxcpnmsub, fxcsnmsub, fxcpnpma fxcsnpma, fxcpnsma, fxcsnsma fxcxnpma, fxcxnsma, fxcxma, fxcxnms;  2 results generated per instruction, 4 flops
+PNE_BGP_PU1_FPU_DUAL_PIPE_OTHER_NON_STORAGE_OPS 0x40000041   P1 FPU:  Dual Pipe other non-storage instructions:  fpmr, fpneg, fsmr, fsneg, fxmr, fsmfp, fsmtp, fpabs, fpnabs, fsabs, fsnabs, fprsp, fpctiw, fpctiwz, fpre, fprsqrte, fpsel, fscmp
+PNE_BGP_PU1_FPU_QUADWORD_LOADS   0x40000042   P1 FPU:  Quad-word Loads:  lfpdx, lfpdux, lfxdx, lfxdux
+PNE_BGP_PU1_FPU_OTHER_LOADS      0x40000043   P1 FPU:  Other Loads:  lfs, lfsx, lfsu, lfsux, lfpsx, fpsux, lfsdx, lfsdux, lfssx, lfssux, lfd, lfdx, lfdu, lfdux, lfxsx, lfxsux
+PNE_BGP_PU1_FPU_QUADWORD_STORES  0x40000044   P1 FPU:  Quad-word Stores:  stfpdx, stfpdux, stfxdx, stfxdux
+PNE_BGP_PU1_FPU_OTHER_STORES     0x40000045   P1 FPU:  Other Stores:  stfs, stfsx, stfsu, stfsux, stfd, stfdx, stfdu, stfdux, stfiwx, stfpsx, stfpsux, stfpiwx, stfsdx, stfsdux, stfssx,stfssux, stfxsx, stfxsux
+PNE_BGP_PU0_L1_INVALIDATION_REQUESTS 0x40000046   P0 L1:  Invalidation requested
+PNE_BGP_PU1_L1_INVALIDATION_REQUESTS 0x40000047   P1 L1:  Invalidation requested
+PNE_BGP_PU0_L2_VALID_PREFETCH_REQUESTS 0x40000048   P0 L2:  Pre-fetch request valid
+PNE_BGP_PU0_L2_PREFETCH_HITS_IN_FILTER 0x40000049   P0 L2:  Pre-fetch hits in filter
+PNE_BGP_PU0_L2_PREFETCH_HITS_IN_STREAM 0x4000004a   P0 L2:  Pre-fetch hits in active stream
+PNE_BGP_PU0_L2_CYCLES_PREFETCH_PENDING 0x4000004b   P0 L2:  Number of cycles for which L2 pre-fetch is pending
+PNE_BGP_PU0_L2_PAGE_ALREADY_IN_L2 0x4000004c   P0 L2:  Requested PF is already in L2
+PNE_BGP_PU0_L2_PREFETCH_SNOOP_HIT_SAME_CORE 0x4000004d   P0 L2:  Pre-fetch snoop hit from same core (write)
+PNE_BGP_PU0_L2_PREFETCH_SNOOP_HIT_OTHER_CORE 0x4000004e   P0 L2:  Pre-fetch snoop hit from other core
+PNE_BGP_PU0_L2_PREFETCH_SNOOP_HIT_PLB 0x4000004f   P0 L2:  Pre-fetch snoop hit PLB (write)
+PNE_BGP_PU0_L2_CYCLES_READ_REQUEST_PENDING 0x40000050   P0 L2:  Number of cycles for which read request is pending
+PNE_BGP_PU0_L2_READ_REQUESTS     0x40000051   P0 L2:  Read requests
+PNE_BGP_PU0_L2_DEVBUS_READ_REQUESTS 0x40000052   P0 L2:  Devbus read requests (SRAM, LOCK, and UPC)
+PNE_BGP_PU0_L2_L3_READ_REQUESTS  0x40000053   P0 L2:  L3 read request
+PNE_BGP_PU0_L2_NETBUS_READ_REQUESTS 0x40000054   P0 L2:  Netbus read requests (tree and torus)
+PNE_BGP_PU0_L2_BLIND_DEV_READ_REQUESTS 0x40000055   P0 L2:  Blind device read request
+PNE_BGP_PU0_L2_PREFETCHABLE_REQUESTS 0x40000056   P0 L2:  Pre-fetchable requests
+PNE_BGP_PU0_L2_HIT               0x40000057   P0 L2:  L2 hit
+PNE_BGP_PU0_L2_SAME_CORE_SNOOPS  0x40000058   P0 L2:  Same core snoops
+PNE_BGP_PU0_L2_OTHER_CORE_SNOOPS 0x40000059   P0 L2:  Other core snoops
+PNE_BGP_PU0_L2_OTHER_DP_PU0_SNOOPS 0x4000005a   P0 L2:  Other DP PU0 snoops
+PNE_BGP_PU0_L2_OTHER_DP_PU1_SNOOPS 0x4000005b   P0 L2:  Other DP PU1 snoops
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 92 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 93 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 94 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 95 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 96 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 97 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 98 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 99 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 100 specified.
+PNE_BGP_PU0_L2_MEMORY_WRITES     0x40000065   P0 L2: Writes to memory
+PNE_BGP_PU0_L2_NETWORK_WRITES    0x40000066   P0 L2: Writes to network
+PNE_BGP_PU0_L2_DEVBUS_WRITES     0x40000067   P0 L2: Writes to devbus
+PNE_BGP_PU1_L2_VALID_PREFETCH_REQUESTS 0x40000068   P1 L2:  Pre-fetch request valid
+PNE_BGP_PU1_L2_PREFETCH_HITS_IN_FILTER 0x40000069   P1 L2:  Pre-fetch hits in filter
+PNE_BGP_PU1_L2_PREFETCH_HITS_IN_STREAM 0x4000006a   P1 L2:  Pre-fetch hits in active stream
+PNE_BGP_PU1_L2_CYCLES_PREFETCH_PENDING 0x4000006b   P1 L2:  Number of cycles for which L2 pre-fetch is pending
+PNE_BGP_PU1_L2_PAGE_ALREADY_IN_L2 0x4000006c   P1 L2:  Requested PF is already in L2
+PNE_BGP_PU1_L2_PREFETCH_SNOOP_HIT_SAME_CORE 0x4000006d   P1 L2:  Pre-fetch snoop hit from same core (write)
+PNE_BGP_PU1_L2_PREFETCH_SNOOP_HIT_OTHER_CORE 0x4000006e   P1 L2:  Pre-fetch snoop hit from other core
+PNE_BGP_PU1_L2_PREFETCH_SNOOP_HIT_PLB 0x4000006f   P1 L2:  Pre-fetch snoop hit PLB (write)
+PNE_BGP_PU1_L2_CYCLES_READ_REQUEST_PENDING 0x40000070   P1 L2:  Number of cycles for which read request is pending
+PNE_BGP_PU1_L2_READ_REQUESTS     0x40000071   P1 L2:  Read requests
+PNE_BGP_PU1_L2_DEVBUS_READ_REQUESTS 0x40000072   P1 L2:  Devbus read requests (SRAM, LOCK, and UPC)
+PNE_BGP_PU1_L2_L3_READ_REQUESTS  0x40000073   P1 L2:  L3 read request
+PNE_BGP_PU1_L2_NETBUS_READ_REQUESTS 0x40000074   P1 L2:  Netbus read requests (tree and torus)
+PNE_BGP_PU1_L2_BLIND_DEV_READ_REQUESTS 0x40000075   P1 L2:  Blind device read request
+PNE_BGP_PU1_L2_PREFETCHABLE_REQUESTS 0x40000076   P1 L2:  Pre-fetchable requests
+PNE_BGP_PU1_L2_HIT               0x40000077   P1 L2:  L2 hit
+PNE_BGP_PU1_L2_SAME_CORE_SNOOPS  0x40000078   P1 L2:  Same core snoops
+PNE_BGP_PU1_L2_OTHER_CORE_SNOOPS 0x40000079   P1 L2:  Other core snoops
+PNE_BGP_PU1_L2_OTHER_DP_PU0_SNOOPS 0x4000007a   P1 L2:  Other DP PU0 snoops
+PNE_BGP_PU1_L2_OTHER_DP_PU1_SNOOPS 0x4000007b   P1 L2:  Other DP PU1 snoops
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 124 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 125 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 126 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 127 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 128 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 129 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 130 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 131 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 132 specified.
+PNE_BGP_PU1_L2_MEMORY_WRITES     0x40000085   P1 L2: Writes to memory
+PNE_BGP_PU1_L2_NETWORK_WRITES    0x40000086   P1 L2: Writes to network
+PNE_BGP_PU1_L2_DEVBUS_WRITES     0x40000087   P1 L2: Writes to devbus
+PNE_BGP_L3_M0_RD0_SINGLE_LINE_DELIVERED_L2 0x40000088   L3 M0 Rd 0:  Single line delivered to L2
+PNE_BGP_L3_M0_RD0_BURST_DELIVERED_L2 0x40000089   L3 M0 Rd 0:  Burst delivered to L2
+PNE_BGP_L3_M0_RD0_READ_RETURN_COLLISION 0x4000008a   L3 M0 Rd 0:  Read return collision
+PNE_BGP_L3_M0_RD0_DIR0_HIT_OR_INFLIGHT 0x4000008b   L3 M0 Rd 0:  dir0 hit or in flight
+PNE_BGP_L3_M0_RD0_DIR0_MISS_OR_LOCKDOWN 0x4000008c   L3 M0 Rd 0:  dir0 miss or lock-down
+PNE_BGP_L3_M0_RD0_DIR1_HIT_OR_INFLIGHT 0x4000008d   L3 M0 Rd 0:  dir1 hit or in flight
+PNE_BGP_L3_M0_RD0_DIR1_MISS_OR_LOCKDOWN 0x4000008e   L3 M0 Rd 0:  dir1 miss or lock-down
+PNE_BGP_L3_M0_RD1_SINGLE_LINE_DELIVERED_L2 0x4000008f   L3 M0 Rd 1:  Single line delivered to L2
+PNE_BGP_L3_M0_RD1_BURST_DELIVERED_L2 0x40000090   L3 M0 Rd 1:  Burst delivered to L2
+PNE_BGP_L3_M0_RD1_READ_RETURN_COLLISION 0x40000091   L3 M0 Rd 1:  Read return collision
+PNE_BGP_L3_M0_RD1_DIR0_HIT_OR_INFLIGHT 0x40000092   L3 M0 Rd 1:  dir0 hit or in flight
+PNE_BGP_L3_M0_RD1_DIR0_MISS_OR_LOCKDOWN 0x40000093   L3 M0 Rd 1:  dir0 miss or lock-down
+PNE_BGP_L3_M0_RD1_DIR1_HIT_OR_INFLIGHT 0x40000094   L3 M0 Rd 1:  dir1 hit or in flight
+PNE_BGP_L3_M0_RD1_DIR1_MISS_OR_LOCKDOWN 0x40000095   L3 M0 Rd 1:  dir1 miss or lock-down
+PNE_BGP_L3_M0_DIR0_LOOKUPS       0x40000096   L3 M0 Dir 0:  Number of lookups
+PNE_BGP_L3_M0_DIR0_CYCLES_REQUESTS_NOT_TAKEN 0x40000097   L3 M0 Dir 0:  Number of cycles with requests that are not taken
+PNE_BGP_L3_M0_DIR1_LOOKUPS       0x40000098   L3 M0 Dir 1:  Number of lookups
+PNE_BGP_L3_M0_DIR1_CYCLES_REQUESTS_NOT_TAKEN 0x40000099   L3 M0 Dir 1:  Number of cycles with requests that are not taken
+PNE_BGP_L3_M0_MH_DDR_STORES      0x4000009a   L3 M0 MH:  Number of stores to DDR
+PNE_BGP_L3_M0_MH_DDR_FETCHES     0x4000009b   L3 M0 MH:  Number of fetches from DDR
+PNE_BGP_L3_M1_RD0_SINGLE_LINE_DELIVERED_L2 0x4000009c   L3 M1 Rd 0:  Single line delivered to L2
+PNE_BGP_L3_M1_RD0_BURST_DELIVERED_L2 0x4000009d   L3 M1 Rd 0:  Burst delivered to L2
+PNE_BGP_L3_M1_RD0_READ_RETURN_COLLISION 0x4000009e   L3 M1 Rd 0:  Read return collision
+PNE_BGP_L3_M1_RD0_DIR0_HIT_OR_INFLIGHT 0x4000009f   L3 M1 Rd 0:  dir0 hit or in flight
+PNE_BGP_L3_M1_RD0_DIR0_MISS_OR_LOCKDOWN 0x400000a0   L3 M1 Rd 0:  dir0 miss or lock-down
+PNE_BGP_L3_M1_RD0_DIR1_HIT_OR_INFLIGHT 0x400000a1   L3 M1 Rd 0:  dir1 hit or in flight
+PNE_BGP_L3_M1_RD0_DIR1_MISS_OR_LOCKDOWN 0x400000a2   L3 M1 Rd 0:  dir1 miss or lock-down
+PNE_BGP_L3_M1_RD1_SINGLE_LINE_DELIVERED_L2 0x400000a3   L3 M1 Rd 1:  Single line delivered to L2
+PNE_BGP_L3_M1_RD1_BURST_DELIVERED_L2 0x400000a4   L3 M1 Rd 1:  Burst delivered to L2
+PNE_BGP_L3_M1_RD1_READ_RETURN_COLLISION 0x400000a5   L3 M1 Rd 1:  Read return collision
+PNE_BGP_L3_M1_RD1_DIR0_HIT_OR_INFLIGHT 0x400000a6   L3 M1 Rd 1:  dir0 hit or in flight
+PNE_BGP_L3_M1_RD1_DIR0_MISS_OR_LOCKDOWN 0x400000a7   L3 M1 Rd 1:  dir0 miss or lock-down
+PNE_BGP_L3_M1_RD1_DIR1_HIT_OR_INFLIGHT 0x400000a8   L3 M1 Rd 1:  dir1 hit or in flight
+PNE_BGP_L3_M1_RD1_DIR1_MISS_OR_LOCKDOWN 0x400000a9   L3 M1 Rd 1:  dir1 miss or lock-down
+PNE_BGP_L3_M1_DIR0_LOOKUPS       0x400000aa   L3 M1 Dir 0:  Number of lookups
+PNE_BGP_L3_M1_DIR0_CYCLES_REQUESTS_NOT_TAKEN 0x400000ab   L3 M1 Dir 0:  Number of cycles with requests that are not taken
+PNE_BGP_L3_M1_DIR1_LOOKUPS       0x400000ac   L3 M1 Dir 1:  Number of lookups
+PNE_BGP_L3_M1_DIR1_CYCLES_REQUESTS_NOT_TAKEN 0x400000ad   L3 M1 Dir 1:  Number of cycles with requests that are not taken
+PNE_BGP_L3_M1_MH_DDR_STORES      0x400000ae   L3 M1 MH:  Number of stores to DDR
+PNE_BGP_L3_M1_MH_DDR_FETCHES     0x400000af   L3 M1 MH:  Number of fetches from DDR
+PNE_BGP_PU0_SNOOP_PORT0_REMOTE_SOURCE_REQUESTS 0x400000b0   P0 SNP:  Port 0 received a snoop request from a remote source
+PNE_BGP_PU0_SNOOP_PORT1_REMOTE_SOURCE_REQUESTS 0x400000b1   P0 SNP:  Port 1 received a snoop request from a remote source
+PNE_BGP_PU0_SNOOP_PORT2_REMOTE_SOURCE_REQUESTS 0x400000b2   P0 SNP:  Port 2 received a snoop request from a remote source
+PNE_BGP_PU0_SNOOP_PORT3_REMOTE_SOURCE_REQUESTS 0x400000b3   P0 SNP:  Port 3 received a snoop request from a remote source
+PNE_BGP_PU0_SNOOP_PORT0_REJECTED_REQUESTS 0x400000b4   P0 SNP:  Port 0 snoop filter rejected a snoop request
+PNE_BGP_PU0_SNOOP_PORT1_REJECTED_REQUESTS 0x400000b5   P0 SNP:  Port 1 snoop filter rejected a snoop request
+PNE_BGP_PU0_SNOOP_PORT2_REJECTED_REQUESTS 0x400000b6   P0 SNP:  Port 2 snoop filter rejected a snoop request
+PNE_BGP_PU0_SNOOP_PORT3_REJECTED_REQUESTS 0x400000b7   P0 SNP:  Port 3 snoop filter rejected a snoop request
+PNE_BGP_PU0_SNOOP_L1_CACHE_WRAP  0x400000b8   P0 SNP:  Snoop filter detected an L1 cache wrap
+PNE_BGP_PU1_SNOOP_PORT0_REMOTE_SOURCE_REQUESTS 0x400000b9   P1 SNP:  Port 0 received a snoop request from a remote source
+PNE_BGP_PU1_SNOOP_PORT1_REMOTE_SOURCE_REQUESTS 0x400000ba   P1 SNP:  Port 1 received a snoop request from a remote source
+PNE_BGP_PU1_SNOOP_PORT2_REMOTE_SOURCE_REQUESTS 0x400000bb   P1 SNP:  Port 2 received a snoop request from a remote source
+PNE_BGP_PU1_SNOOP_PORT3_REMOTE_SOURCE_REQUESTS 0x400000bc   P1 SNP:  Port 3 received a snoop request from a remote source
+PNE_BGP_PU1_SNOOP_PORT0_REJECTED_REQUESTS 0x400000bd   P1 SNP:  Port 0 snoop filter rejected a snoop request
+PNE_BGP_PU1_SNOOP_PORT1_REJECTED_REQUESTS 0x400000be   P1 SNP:  Port 1 snoop filter rejected a snoop request
+PNE_BGP_PU1_SNOOP_PORT2_REJECTED_REQUESTS 0x400000bf   P1 SNP:  Port 2 snoop filter rejected a snoop request
+PNE_BGP_PU1_SNOOP_PORT3_REJECTED_REQUESTS 0x400000c0   P1 SNP:  Port 3 snoop filter rejected a snoop request
+PNE_BGP_PU1_SNOOP_L1_CACHE_WRAP  0x400000c1   P1 SNP:  Snoop filter detected an L1 cache wrap
+PNE_BGP_TORUS_XP_PACKETS         0x400000c2   TORUS:  Number of packets sent to X+ dimension
+PNE_BGP_TORUS_XP_32BCHUNKS       0x400000c3   TORUS:  Number of 32B chunks sent to X+
+PNE_BGP_TORUS_XM_PACKETS         0x400000c4   TORUS:  Number of packets sent to X-dimension
+PNE_BGP_TORUS_XM_32BCHUNKS       0x400000c5   TORUS:  Number of 32B chunks sent to X-
+PNE_BGP_TORUS_YP_PACKETS         0x400000c6   TORUS:  Number of packets sent to Y+ dimension
+PNE_BGP_TORUS_YP_32BCHUNKS       0x400000c7   TORUS:  Number of 32B chunks sent to Y+
+PNE_BGP_TORUS_YM_PACKETS         0x400000c8   TORUS:  Number of packets sent to Y-dimension
+PNE_BGP_TORUS_YM_32BCHUNKS       0x400000c9   TORUS:  Number of 32B chunks sent to Y-
+PNE_BGP_TORUS_ZP_PACKETS         0x400000ca   TORUS:  Number of packets sent to Z+ dimension
+PNE_BGP_TORUS_ZP_32BCHUNKS       0x400000cb   TORUS:  Number of 32B chunks sent to Z+
+PNE_BGP_TORUS_ZM_PACKETS         0x400000cc   TORUS:  Number of packets sent to Z-dimension
+PNE_BGP_TORUS_ZM_32BCHUNKS       0x400000cd   TORUS:  Number of 32B chunks sent to Z-
+PNE_BGP_DMA_PACKETS_INJECTED     0x400000ce   DMA:  Number of packets injected
+PNE_BGP_DMA_DESCRIPTORS_READ_FROM_L3 0x400000cf   DMA:  Number of descriptors read from L3
+PNE_BGP_DMA_FIFO_PACKETS_RECEIVED 0x400000d0   DMA:  Number of fifo packets received
+PNE_BGP_DMA_COUNTER_PACKETS_RECEIVED 0x400000d1   DMA:  Number of counter packets received
+PNE_BGP_DMA_REMOTE_GET_PACKETS_RECEIVED 0x400000d2   DMA:  Number of remote get packets received
+PNE_BGP_DMA_IDPU_READ_REQUESTS_TO_L3 0x400000d3   DMA:  Number of read requests to L3 by IDPU
+PNE_BGP_DMA_READ_VALID_RETURNED  0x400000d4   DMA:  Number of read valid returned from L3
+PNE_BGP_DMA_ACKED_READ_REQUESTS  0x400000d5   DMA:  Number of acknowledged read requests
+PNE_BGP_DMA_CYCLES_RDPU_WRITE_ACTIVE 0x400000d6   DMA:  Number of cycles RDPU wants to write to L3, independent of the write ready
+PNE_BGP_DMA_WRITE_REQUESTS_TO_L3 0x400000d7   DMA:  Number of write requests to L3
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 216 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 217 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 218 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 219 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 220 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 221 specified.
+PNE_BGP_COL_AC_CH2_VC0_MATURE    0x400000de   COL:  Arbiter_core ch2_vc0_mature
+PNE_BGP_COL_AC_CH1_VC0_MATURE    0x400000df   COL:  Arbiter_core ch1_vc0_mature
+PNE_BGP_COL_AC_CH0_VC0_MATURE    0x400000e0   COL:  Arbiter_core ch0_vc0_mature
+PNE_BGP_COL_AC_INJECT_VC0_MATURE 0x400000e1   COL:  Arbiter_core inj_vc0_mature
+PNE_BGP_COL_AC_CH2_VC1_MATURE    0x400000e2   COL:  Arbiter_core ch2_vc1_mature
+PNE_BGP_COL_AC_CH1_VC1_MATURE    0x400000e3   COL:  Arbiter_core ch1_vc1_mature
+PNE_BGP_COL_AC_CH0_VC1_MATURE    0x400000e4   COL:  Arbiter_core ch0_vc1_mature
+PNE_BGP_COL_AC_INJECT_VC1_MATURE 0x400000e5   COL:  Arbiter_core inj_vc1_mature
+PNE_BGP_COL_AC_PENDING_REQUESTS  0x400000e6   COL:  Arbiter_core requests pending
+PNE_BGP_COL_AC_WAITING_REQUESTS  0x400000e7   COL:  Arbiter_core requests waiting (ready to go)
+PNE_BGP_COL_AR2_PACKET_TAKEN     0x400000e8   COL:  Arbiter receiver 2 packet taken
+PNE_BGP_COL_AR1_PACKET_TAKEN     0x400000e9   COL:  Arbiter receiver 1 packet taken
+PNE_BGP_COL_AR0_PACKET_TAKEN     0x400000ea   COL:  Arbiter receiver 0 packet taken
+PNE_BGP_COL_ALC_PACKET_TAKEN     0x400000eb   COL:  Arbiter local client packet taken
+PNE_BGP_COL_AR0_VC0_DATA_PACKETS_RECEIVED 0x400000ec   COL:  Receiver 0 vc0 data packet received
+PNE_BGP_COL_AR0_VC1_DATA_PACKETS_RECEIVED 0x400000ed   COL:  Receiver 0 vc1 data packet received
+PNE_BGP_COL_AR1_VC0_DATA_PACKETS_RECEIVED 0x400000ee   COL:  Receiver 1 vc0 data packet received
+PNE_BGP_COL_AR1_VC1_DATA_PACKETS_RECEIVED 0x400000ef   COL:  Receiver 1 vc1 data packet received
+PNE_BGP_COL_AR2_VC0_DATA_PACKETS_RECEIVED 0x400000f0   COL:  Receiver 2 vc0 data packet received
+PNE_BGP_COL_AR2_VC1_DATA_PACKETS_RECEIVED 0x400000f1   COL:  Receiver 2 vc1 data packet received
+PNE_BGP_COL_AS0_VC0_DATA_PACKETS_SENT 0x400000f2   COL:  Sender 0 vc0 DATA packets sent
+PNE_BGP_COL_AS0_VC1_DATA_PACKETS_SENT 0x400000f3   COL:  Sender 0 vc1 DATA packets sent
+PNE_BGP_COL_AS1_VC0_DATA_PACKETS_SENT 0x400000f4   COL:  Sender 1 vc0 DATA packets sent
+PNE_BGP_COL_AS1_VC1_DATA_PACKETS_SENT 0x400000f5   COL:  Sender 1 vc1 DATA packets sent
+PNE_BGP_COL_AS2_VC0_DATA_PACKETS_SENT 0x400000f6   COL:  Sender 2 vc0 DATA packets sent
+PNE_BGP_COL_AS2_VC1_DATA_PACKETS_SENT 0x400000f7   COL:  Sender 2 vc1 DATA packets sent
+PNE_BGP_COL_INJECT_VC0_HEADER    0x400000f8   COL:  Injection vc0 header
+PNE_BGP_COL_INJECT_VC1_HEADER    0x400000f9   COL:  Injection vc1 header added
+PNE_BGP_COL_RECEPTION_VC0_PACKET_ADDED 0x400000fa   COL:  Reception vc0 packet added
+PNE_BGP_COL_RECEPTION_VC1_PACKET_ADDED 0x400000fb   COL:  Reception vc1 packet added
+PNE_BGP_IC_TIMESTAMP             0x400000fc   IC:  Timestamp
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 253 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 254 specified.
+PNE_BGP_MISC_ELAPSED_TIME        0x400000ff   MISC:  Elapsed running time
+PNE_BGP_PU2_JPIPE_INSTRUCTIONS   0x40000100   P2 CPU:  J-pipe instructions
+PNE_BGP_PU2_JPIPE_ADD_SUB        0x40000101   P2 CPU:  Add/Sub in J-pipe
+PNE_BGP_PU2_JPIPE_LOGICAL_OPS    0x40000102   P2 CPU:  Logical operations in J-pipe
+PNE_BGP_PU2_JPIPE_SHROTMK        0x40000103   P2 CPU:  J-pipe shift/rotate/mask instruction
+PNE_BGP_PU2_IPIPE_INSTRUCTIONS   0x40000104   P2 CPU:  I-pipe instructions
+PNE_BGP_PU2_IPIPE_MULT_DIV       0x40000105   P2 CPU:  Mult/Div in I-pipe
+PNE_BGP_PU2_IPIPE_ADD_SUB        0x40000106   P2 CPU:  Add/Sub in I-pipe
+PNE_BGP_PU2_IPIPE_LOGICAL_OPS    0x40000107   P2 CPU:  Logical operations in I-pipe
+PNE_BGP_PU2_IPIPE_SHROTMK        0x40000108   P2 CPU:  I-pipe shift/rotate/mask instruction
+PNE_BGP_PU2_IPIPE_BRANCHES       0x40000109   P2 CPU:  Branches
+PNE_BGP_PU2_IPIPE_TLB_OPS        0x4000010a   P2 CPU:  TLB operations
+PNE_BGP_PU2_IPIPE_PROCESS_CONTROL 0x4000010b   P2 CPU:  Process control
+PNE_BGP_PU2_IPIPE_OTHER          0x4000010c   P2 CPU:  Other I-pipe operations
+PNE_BGP_PU2_DCACHE_LINEFILLINPROG 0x4000010d   P2 CPU:  Cycles for data cache LineFillInProgress
+PNE_BGP_PU2_ICACHE_LINEFILLINPROG 0x4000010e   P2 CPU:  Cycles for inst cache LineFillInProgress
+PNE_BGP_PU2_DCACHE_MISS          0x4000010f   P2 CPU:  Accesses to data cache which missed data cache
+PNE_BGP_PU2_DCACHE_HIT           0x40000110   P2 CPU:  Accesses to data cache which hit data cache
+PNE_BGP_PU2_DATA_LOADS           0x40000111   P2 CPU:  Data loads
+PNE_BGP_PU2_DATA_STORES          0x40000112   P2 CPU:  Data stores
+PNE_BGP_PU2_DCACHE_OPS           0x40000113   P2 CPU:  Data cache operations
+PNE_BGP_PU2_ICACHE_MISS          0x40000114   P2 CPU:  Accesses to inst cache which missed inst cache
+PNE_BGP_PU2_ICACHE_HIT           0x40000115   P2 CPU:  Accesses to inst cache which hit inst cache
+PNE_BGP_PU2_FPU_ADD_SUB_1        0x40000116   P2 FPU:  Add/Sub:  fadd, fadds, fsub, fsubs
+PNE_BGP_PU2_FPU_MULT_1           0x40000117   P2 FPU:  Mult:  fmul fmuls
+PNE_BGP_PU2_FPU_FMA_2            0x40000118   P2 FPU:  FMA:  fmadd, fmadds, fmsub, fmsubs, fnmadd fnmadds, fnmsub, fnmsubs;  1 result generated per instruction, 2 flops
+PNE_BGP_PU2_FPU_DIV_1            0x40000119   P2 FPU:  Div:  fdiv, fdivs
+PNE_BGP_PU2_FPU_OTHER_NON_STORAGE_OPS 0x4000011a   P2 FPU:  other non-storage instructions:  fabs, fnabs, frsp, fctiw, fctiw, fctiwz, fres, frsqrte, fsel, fmr fneg, fcmpu, fcmpo, mffs, mcrfs, mtfsfi, mtfsf, mtfsb0, mtfsb3
+PNE_BGP_PU2_FPU_ADD_SUB_2        0x4000011b   P2 FPU:  Add/Sub Dual Pipe:  fpadd fpsub
+PNE_BGP_PU2_FPU_MULT_2           0x4000011c   P2 FPU:  Mult Dual Pipe:  fpmul, fxmul, fxpmul, fxsmul
+PNE_BGP_PU2_FPU_FMA_4            0x4000011d   P2 FPU:  FMA Dual Pipe:  fpmadd, fpnmadd, fpmsub, fpnmsub fxmadd, fxnmadd, fxmsub, fxnmsub fxcpmadd, fxcsmadd, fxcpnmadd fxcsnmadd, fxcpmsub, fxcsmsub fxcpnmsub, fxcsnmsub, fxcpnpma fxcsnpma, fxcpnsma, fxcsnsma fxcxnpma, fxcxnsma, fxcxma, fxcxnms;  2 results generated per instruction, 4 flops
+PNE_BGP_PU2_FPU_DUAL_PIPE_OTHER_NON_STORAGE_OPS 0x4000011e   P2 FPU:  Dual Pipe other non-storage instructions:  fpmr, fpneg, fsmr, fsneg, fxmr, fsmfp, fsmtp, fpabs, fpnabs, fsabs, fsnabs, fprsp, fpctiw, fpctiwz, fpre, fprsqrte, fpsel, fscmp
+PNE_BGP_PU2_FPU_QUADWORD_LOADS   0x4000011f   P2 FPU:  Quad-word Loads:  lfpdx, lfpdux, lfxdx, lfxdux
+PNE_BGP_PU2_FPU_OTHER_LOADS      0x40000120   P2 FPU:  Other Loads:  lfs, lfsx, lfsu, lfsux, lfpsx, fpsux, lfsdx, lfsdux, lfssx, lfssux, lfd, lfdx, lfdu, lfdux, lfxsx, lfxsux
+PNE_BGP_PU2_FPU_QUADWORD_STORES  0x40000121   P2 FPU:  Quad-word Stores:  stfpdx, stfpdux, stfxdx, stfxdux
+PNE_BGP_PU2_FPU_OTHER_STORES     0x40000122   P2 FPU:  Other Stores:  stfs, stfsx, stfsu, stfsux, stfd, stfdx, stfdu, stfdux, stfiwx, stfpsx, stfpsux, stfpiwx, stfsdx, stfsdux, stfssx,stfssux, stfxsx, stfxsux
+PNE_BGP_PU3_JPIPE_INSTRUCTIONS   0x40000123   P3 CPU:  J-pipe instructions
+PNE_BGP_PU3_JPIPE_ADD_SUB        0x40000124   P3 CPU:  Add/Sub in J-pipe
+PNE_BGP_PU3_JPIPE_LOGICAL_OPS    0x40000125   P3 CPU:  Logical operations in J-pipe
+PNE_BGP_PU3_JPIPE_SHROTMK        0x40000126   P3 CPU:  J-pipe shift/rotate/mask instruction
+PNE_BGP_PU3_IPIPE_INSTRUCTIONS   0x40000127   P3 CPU:  I-pipe instructions
+PNE_BGP_PU3_IPIPE_MULT_DIV       0x40000128   P3 CPU:  Mult/Div in I-pipe
+PNE_BGP_PU3_IPIPE_ADD_SUB        0x40000129   P3 CPU:  Add/Sub in I-pipe
+PNE_BGP_PU3_IPIPE_LOGICAL_OPS    0x4000012a   P3 CPU:  Logical operations in I-pipe
+PNE_BGP_PU3_IPIPE_SHROTMK        0x4000012b   P3 CPU:  I-pipe shift/rotate/mask instruction
+PNE_BGP_PU3_IPIPE_BRANCHES       0x4000012c   P3 CPU:  Branches
+PNE_BGP_PU3_IPIPE_TLB_OPS        0x4000012d   P3 CPU:  TLB operations
+PNE_BGP_PU3_IPIPE_PROCESS_CONTROL 0x4000012e   P3 CPU:  Process control
+PNE_BGP_PU3_IPIPE_OTHER          0x4000012f   P3 CPU:  Other I-pipe operations
+PNE_BGP_PU3_DCACHE_LINEFILLINPROG 0x40000130   P3 CPU:  Cycles for data cache LineFillInProgress
+PNE_BGP_PU3_ICACHE_LINEFILLINPROG 0x40000131   P3 CPU:  Cycles for inst cache LineFillInProgress
+PNE_BGP_PU3_DCACHE_MISS          0x40000132   P3 CPU:  Accesses to data cache which missed data cache
+PNE_BGP_PU3_DCACHE_HIT           0x40000133   P3 CPU:  Accesses to data cache which hit data cache
+PNE_BGP_PU3_DATA_LOADS           0x40000134   P3 CPU:  Data loads
+PNE_BGP_PU3_DATA_STORES          0x40000135   P3 CPU:  Data stores
+PNE_BGP_PU3_DCACHE_OPS           0x40000136   P3 CPU:  Data cache operations
+PNE_BGP_PU3_ICACHE_MISS          0x40000137   P3 CPU:  Accesses to inst cache which missed inst cache
+PNE_BGP_PU3_ICACHE_HIT           0x40000138   P3 CPU:  Accesses to inst cache which hit inst cache
+PNE_BGP_PU3_FPU_ADD_SUB_1        0x40000139   P3 FPU:  Add/Sub:  fadd, fadds, fsub, fsubs
+PNE_BGP_PU3_FPU_MULT_1           0x4000013a   P3 FPU:  Mult:  fmul fmuls
+PNE_BGP_PU3_FPU_FMA_2            0x4000013b   P3 FPU:  FMA:  fmadd, fmadds, fmsub, fmsubs, fnmadd fnmadds, fnmsub, fnmsubs;  1 result generated per instruction, 2 flops
+PNE_BGP_PU3_FPU_DIV_1            0x4000013c   P3 FPU:  Div:  fdiv, fdivs
+PNE_BGP_PU3_FPU_OTHER_NON_STORAGE_OPS 0x4000013d   P3 FPU:  other non-storage instructions:  fabs, fnabs, frsp, fctiw, fctiw, fctiwz, fres, frsqrte, fsel, fmr fneg, fcmpu, fcmpo, mffs, mcrfs, mtfsfi, mtfsf, mtfsb0, mtfsb4
+PNE_BGP_PU3_FPU_ADD_SUB_2        0x4000013e   P3 FPU:  Add/Sub Dual Pipe:  fpadd fpsub
+PNE_BGP_PU3_FPU_MULT_2           0x4000013f   P3 FPU:  Mult Dual Pipe:  fpmul, fxmul, fxpmul, fxsmul
+PNE_BGP_PU3_FPU_FMA_4            0x40000140   P3 FPU:  FMA Dual Pipe:  fpmadd, fpnmadd, fpmsub, fpnmsub fxmadd, fxnmadd, fxmsub, fxnmsub fxcpmadd, fxcsmadd, fxcpnmadd fxcsnmadd, fxcpmsub, fxcsmsub fxcpnmsub, fxcsnmsub, fxcpnpma fxcsnpma, fxcpnsma, fxcsnsma fxcxnpma, fxcxnsma, fxcxma, fxcxnms;  2 results generated per instruction, 4 flops
+PNE_BGP_PU3_FPU_DUAL_PIPE_OTHER_NON_STORAGE_OPS 0x40000141   P3 FPU:  Dual Pipe other non-storage instructions:  fpmr, fpneg, fsmr, fsneg, fxmr, fsmfp, fsmtp, fpabs, fpnabs, fsabs, fsnabs, fprsp, fpctiw, fpctiwz, fpre, fprsqrte, fpsel, fscmp
+PNE_BGP_PU3_FPU_QUADWORD_LOADS   0x40000142   P3 FPU:  Quad-word Loads:  lfpdx, lfpdux, lfxdx, lfxdux
+PNE_BGP_PU3_FPU_OTHER_LOADS      0x40000143   P3 FPU:  Other Loads:  lfs, lfsx, lfsu, lfsux, lfpsx, fpsux, lfsdx, lfsdux, lfssx, lfssux, lfd, lfdx, lfdu, lfdux, lfxsx, lfxsux
+PNE_BGP_PU3_FPU_QUADWORD_STORES  0x40000144   P3 FPU:  Quad-word Stores:  stfpdx, stfpdux, stfxdx, stfxdux
+PNE_BGP_PU3_FPU_OTHER_STORES     0x40000145   P3 FPU:  Other Stores:  stfs, stfsx, stfsu, stfsux, stfd, stfdx, stfdu, stfdux, stfiwx, stfpsx, stfpsux, stfpiwx, stfsdx, stfsdux, stfssx,stfssux, stfxsx, stfxsux
+PNE_BGP_PU2_L1_INVALIDATION_REQUESTS 0x40000146   P2 L1:  Invalidation requested
+PNE_BGP_PU3_L1_INVALIDATION_REQUESTS 0x40000147   P3 L1:  Invalidation requested
+PNE_BGP_COL_AC_CH2_VC0_MATURE_UM1 0x40000148   COL:  Arbiter_core ch2_vc0_mature
+PNE_BGP_COL_AC_CH1_VC0_MATURE_UM1 0x40000149   COL:  Arbiter_core ch1_vc0_mature
+PNE_BGP_COL_AC_CH0_VC0_MATURE_UM1 0x4000014a   COL:  Arbiter_core ch0_vc0_mature
+PNE_BGP_COL_AC_INJECT_VC0_MATURE_UM1 0x4000014b   COL:  Arbiter_core inj_vc0_mature
+PNE_BGP_COL_AC_CH2_VC1_MATURE_UM1 0x4000014c   COL:  Arbiter_core ch2_vc1_mature
+PNE_BGP_COL_AC_CH1_VC1_MATURE_UM1 0x4000014d   COL:  Arbiter_core ch1_vc1_mature
+PNE_BGP_COL_AC_CH0_VC1_MATURE_UM1 0x4000014e   COL:  Arbiter_core ch0_vc1_mature
+PNE_BGP_COL_AC_INJECT_VC1_MATURE_UM1 0x4000014f   COL:  Arbiter_core inj_vc1_mature
+PNE_BGP_COL_AR0_VC0_EMPTY_PACKET 0x40000150   COL:  Receiver 0 vc0 empty packet
+PNE_BGP_COL_AR0_VC1_EMPTY_PACKET 0x40000151   COL:  Receiver 0 vc1 empty packet
+PNE_BGP_COL_AR0_IDLE_PACKET      0x40000152   COL:  Receiver 0 IDLE packet
+PNE_BGP_COL_AR0_BAD_PACKET_MARKER 0x40000153   COL:  Receiver 0 known-bad-packet marker
+PNE_BGP_COL_AR0_VC0_CUT_THROUGH  0x40000154   COL:  Receiver 0 vc0 cut-through
+PNE_BGP_COL_AR0_VC1_CUT_THROUGH  0x40000155   COL:  Receiver 0 vc1 cut-through
+PNE_BGP_COL_AR0_HEADER_PARITY_ERROR 0x40000156   COL:  Receiver 0 header parity error
+PNE_BGP_COL_AR0_UNEXPECTED_HEADER_ERROR 0x40000157   COL:  Receiver 0 unexpected header error
+PNE_BGP_COL_AR0_RESYNC           0x40000158   COL:  Receiver 0 resynch-mode (after error)
+PNE_BGP_COL_AR1_VC0_EMPTY_PACKET 0x40000159   COL:  Receiver 1 vc0 empty packet
+PNE_BGP_COL_AR1_VC1_EMPTY_PACKET 0x4000015a   COL:  Receiver 1 vc1 empty packet
+PNE_BGP_COL_AR1_IDLE_PACKET      0x4000015b   COL:  Receiver 1 IDLE packet
+PNE_BGP_COL_AR1_BAD_PACKET_MARKER 0x4000015c   COL:  Receiver 1 known-bad-packet marker
+PNE_BGP_COL_AR1_VC0_CUT_THROUGH  0x4000015d   COL:  Receiver 1 vc0 cut-through
+PNE_BGP_COL_AR1_VC1_CUT_THROUGH  0x4000015e   COL:  Receiver 1 vc1 cut-through
+PNE_BGP_COL_AR1_HEADER_PARITY_ERROR 0x4000015f   COL:  Receiver 1 header parity error
+PNE_BGP_COL_AR1_UNEXPECTED_HEADER_ERROR 0x40000160   COL:  Receiver 1 unexpected header error
+PNE_BGP_COL_AR1_RESYNC           0x40000161   COL:  Receiver 1 resynch-mode (after error)
+PNE_BGP_COL_AR2_VC0_EMPTY_PACKET 0x40000162   COL:  Receiver 2 vc0 empty packet
+PNE_BGP_COL_AR2_VC1_EMPTY_PACKET 0x40000163   COL:  Receiver 2 vc1 empty packet
+PNE_BGP_COL_AR2_IDLE_PACKET      0x40000164   COL:  Receiver 2 IDLE packet
+PNE_BGP_COL_AR2_BAD_PACKET_MARKER 0x40000165   COL:  Receiver 2 known-bad-packet marker
+PNE_BGP_COL_AR2_VC0_CUT_THROUGH  0x40000166   COL:  Receiver 2 vc0 cut-through
+PNE_BGP_COL_AR2_VC1_CUT_THROUGH  0x40000167   COL:  Receiver 2 vc1 cut-through
+PNE_BGP_COL_AR2_HEADER_PARITY_ERROR 0x40000168   COL:  Receiver 2 header parity error
+PNE_BGP_COL_AR2_UNEXPECTED_HEADER_ERROR 0x40000169   COL:  Receiver 2 unexpected header error
+PNE_BGP_COL_AR2_RESYNC           0x4000016a   COL:  Receiver 2 resynch-mode (after error)
+PNE_BGP_COL_AS0_VC0_CUT_THROUGH  0x4000016b   COL:  Sender 0 vc0 cut-through
+PNE_BGP_COL_AS0_VC1_CUT_THROUGH  0x4000016c   COL:  Sender 0 vc1 cut-through
+PNE_BGP_COL_AS0_VC0_PACKETS_SENT 0x4000016d   COL:  Sender 0 vc0 packet sent (total)
+PNE_BGP_COL_AS0_VC1_PACKETS_SENT 0x4000016e   COL:  Sender 0 vc1 packet sent (total)
+PNE_BGP_COL_AS0_IDLE_PACKETS_SENT 0x4000016f   COL:  Sender 0 IDLE packets sent
+PNE_BGP_COL_AS1_VC0_CUT_THROUGH  0x40000170   COL:  Sender 1 vc0 cut-through
+PNE_BGP_COL_AS1_VC1_CUT_THROUGH  0x40000171   COL:  Sender 1 vc1 cut-through
+PNE_BGP_COL_AS1_VC0_PACKETS_SENT 0x40000172   COL:  Sender 1 vc0 packet sent (total)
+PNE_BGP_COL_AS1_VC1_PACKETS_SENT 0x40000173   COL:  Sender 1 vc1 packet sent (total)
+PNE_BGP_COL_AS1_IDLE_PACKETS_SENT 0x40000174   COL:  Sender 1 IDLE packets sent
+PNE_BGP_COL_AS2_VC0_CUT_THROUGH  0x40000175   COL:  Sender 2 vc0 cut-through
+PNE_BGP_COL_AS2_VC1_CUT_THROUGH  0x40000176   COL:  Sender 2 vc1 cut-through
+PNE_BGP_COL_AS2_VC0_PACKETS_SENT 0x40000177   COL:  Sender 2 vc0 packet sent (total)
+PNE_BGP_COL_AS2_VC1_PACKETS_SENT 0x40000178   COL:  Sender 2 vc1 packet sent (total)
+PNE_BGP_COL_AS2_IDLE_PACKETS_SENT 0x40000179   COL:  Sender 2 IDLE packets sent
+PNE_BGP_COL_INJECT_VC0_PAYLOAD_ADDED 0x4000017a   COL:  Injection vc0 payload added
+PNE_BGP_COL_INJECT_VC1_PAYLOAD_ADDED 0x4000017b   COL:  Injection vc1 payload added
+PNE_BGP_COL_INJECT_VC0_PACKET_TAKEN 0x4000017c   COL:  Injection vc0 packet taken
+PNE_BGP_COL_INJECT_VC1_PACKET_TAKEN 0x4000017d   COL:  Injection vc1 packet taken
+PNE_BGP_COL_RECEPTION_VC0_HEADER_TAKEN 0x4000017e   COL:  Reception vc0 header taken
+PNE_BGP_COL_RECEPTION_VC1_HEADER_TAKEN 0x4000017f   COL:  Reception vc1 header taken
+PNE_BGP_COL_RECEPTION_VC0_PAYLOAD_TAKEN 0x40000180   COL:  Reception vc0 payload taken
+PNE_BGP_COL_RECEPTION_VC1_PAYLOAD_TAKEN 0x40000181   COL:  Reception vc1 payload taken
+PNE_BGP_COL_RECEPTION_VC0_PACKET_DISCARDED 0x40000182   COL:  Reception vc0 packet discarded
+PNE_BGP_COL_RECEPTION_VC1_PACKET_DISCARDED 0x40000183   COL:  Reception vc1 packet discarded
+PNE_BGP_PU2_L2_VALID_PREFETCH_REQUESTS 0x40000184   P2 L2:  Pre-fetch request valid
+PNE_BGP_PU2_L2_PREFETCH_HITS_IN_FILTER 0x40000185   P2 L2:  Pre-fetch hits in filter
+PNE_BGP_PU2_L2_PREFETCH_HITS_IN_STREAM 0x40000186   P2 L2:  Pre-fetch hits in active stream
+PNE_BGP_PU2_L2_CYCLES_PREFETCH_PENDING 0x40000187   P2 L2:  Number of cycles for which L2 pre-fetch is pending
+PNE_BGP_PU2_L2_PAGE_ALREADY_IN_L2 0x40000188   P2 L2:  Requested PF is already in L2
+PNE_BGP_PU2_L2_PREFETCH_SNOOP_HIT_SAME_CORE 0x40000189   P2 L2:  Pre-fetch snoop hit from same core (write)
+PNE_BGP_PU2_L2_PREFETCH_SNOOP_HIT_OTHER_CORE 0x4000018a   P2 L2:  Pre-fetch snoop hit from other core
+PNE_BGP_PU2_L2_PREFETCH_SNOOP_HIT_PLB 0x4000018b   P2 L2:  Pre-fetch snoop hit PLB (write)
+PNE_BGP_PU2_L2_CYCLES_READ_REQUEST_PENDING 0x4000018c   P2 L2:  Number of cycles for which read request is pending
+PNE_BGP_PU2_L2_READ_REQUESTS     0x4000018d   P2 L2:  Read requests
+PNE_BGP_PU2_L2_DEVBUS_READ_REQUESTS 0x4000018e   P2 L2:  Devbus read requests (SRAM, LOCK, and UPC)
+PNE_BGP_PU2_L2_L3_READ_REQUESTS  0x4000018f   P2 L2:  L3 read request
+PNE_BGP_PU2_L2_NETBUS_READ_REQUESTS 0x40000190   P2 L2:  Netbus read requests (tree and torus)
+PNE_BGP_PU2_L2_BLIND_DEV_READ_REQUESTS 0x40000191   P2 L2:  Blind device read request
+PNE_BGP_PU2_L2_PREFETCHABLE_REQUESTS 0x40000192   P2 L2:  Pre-fetchable requests
+PNE_BGP_PU2_L2_HIT               0x40000193   P2 L2:  L2 hit
+PNE_BGP_PU2_L2_SAME_CORE_SNOOPS  0x40000194   P2 L2:  Same core snoops
+PNE_BGP_PU2_L2_OTHER_CORE_SNOOPS 0x40000195   P2 L2:  Other core snoops
+PNE_BGP_PU2_L2_OTHER_DP_PU0_SNOOPS 0x40000196   P2 L2:  Other DP PU0 snoops
+PNE_BGP_PU2_L2_OTHER_DP_PU1_SNOOPS 0x40000197   P2 L2:  Other DP PU1 snoops
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 408 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 409 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 410 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 411 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 412 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 413 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 414 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 415 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 416 specified.
+PNE_BGP_PU2_L2_MEMORY_WRITES     0x400001a1   P2 L2: Writes to memory
+PNE_BGP_PU2_L2_NETWORK_WRITES    0x400001a2   P2 L2: Writes to network
+PNE_BGP_PU2_L2_DEVBUS_WRITES     0x400001a3   P2 L2: Writes to devbus
+PNE_BGP_PU3_L2_VALID_PREFETCH_REQUESTS 0x400001a4   P3 L2:  Pre-fetch request valid
+PNE_BGP_PU3_L2_PREFETCH_HITS_IN_FILTER 0x400001a5   P3 L2:  Pre-fetch hits in filter
+PNE_BGP_PU3_L2_PREFETCH_HITS_IN_STREAM 0x400001a6   P3 L2:  Pre-fetch hits in active stream
+PNE_BGP_PU3_L2_CYCLES_PREFETCH_PENDING 0x400001a7   P3 L2:  Number of cycles for which L2 pre-fetch is pending
+PNE_BGP_PU3_L2_PAGE_ALREADY_IN_L2 0x400001a8   P3 L2:  Requested PF is already in L2
+PNE_BGP_PU3_L2_PREFETCH_SNOOP_HIT_SAME_CORE 0x400001a9   P3 L2:  Pre-fetch snoop hit from same core (write)
+PNE_BGP_PU3_L2_PREFETCH_SNOOP_HIT_OTHER_CORE 0x400001aa   P3 L2:  Pre-fetch snoop hit from other core
+PNE_BGP_PU3_L2_PREFETCH_SNOOP_HIT_PLB 0x400001ab   P3 L2:  Pre-fetch snoop hit PLB (write)
+PNE_BGP_PU3_L2_CYCLES_READ_REQUEST_PENDING 0x400001ac   P3 L2:  Number of cycles for which read request is pending
+PNE_BGP_PU3_L2_READ_REQUESTS     0x400001ad   P3 L2:  Read requests
+PNE_BGP_PU3_L2_DEVBUS_READ_REQUESTS 0x400001ae   P3 L2:  Devbus read requests (SRAM, LOCK, and UPC)
+PNE_BGP_PU3_L2_L3_READ_REQUESTS  0x400001af   P3 L2:  L3 read request
+PNE_BGP_PU3_L2_NETBUS_READ_REQUESTS 0x400001b0   P3 L2:  Netbus read requests (tree and torus)
+PNE_BGP_PU3_L2_BLIND_DEV_READ_REQUESTS 0x400001b1   P3 L2:  Blind device read request
+PNE_BGP_PU3_L2_PREFETCHABLE_REQUESTS 0x400001b2   P3 L2:  Pre-fetchable requests
+PNE_BGP_PU3_L2_HIT               0x400001b3   P3 L2:  L2 hit
+PNE_BGP_PU3_L2_SAME_CORE_SNOOPS  0x400001b4   P3 L2:  Same core snoops
+PNE_BGP_PU3_L2_OTHER_CORE_SNOOPS 0x400001b5   P3 L2:  Other core snoops
+PNE_BGP_PU3_L2_OTHER_DP_PU0_SNOOPS 0x400001b6   P3 L2:  Other DP PU0 snoops
+PNE_BGP_PU3_L2_OTHER_DP_PU1_SNOOPS 0x400001b7   P3 L2:  Other DP PU1 snoops
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 440 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 441 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 442 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 443 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 444 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 445 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 446 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 447 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 448 specified.
+PNE_BGP_PU3_L2_MEMORY_WRITES     0x400001c1   P3 L2: Writes to memory
+PNE_BGP_PU3_L2_NETWORK_WRITES    0x400001c2   P3 L2: Writes to network
+PNE_BGP_PU3_L2_DEVBUS_WRITES     0x400001c3   P3 L2: Writes to devbus
+PNE_BGP_L3_M0_R2_SINGLE_LINE_DELIVERED_L2 0x400001c4   L3 M0 Rd 2:  Single line delivered to L2
+PNE_BGP_L3_M0_R2_BURST_DELIVERED_L2 0x400001c5   L3 M0 Rd 2:  Burst delivered to L2
+PNE_BGP_L3_M0_R2_READ_RETURN_COLLISION 0x400001c6   L3 M0 Rd 2:  Read return collision
+PNE_BGP_L3_M0_R2_DIR0_HIT_OR_INFLIGHT 0x400001c7   L3 M0 Rd 2:  dir0 hit or in flight
+PNE_BGP_L3_M0_R2_DIR0_MISS_OR_LOCKDOWN 0x400001c8   L3 M0 Rd 2:  dir0 miss or lock-down
+PNE_BGP_L3_M0_R2_DIR1_HIT_OR_INFLIGHT 0x400001c9   L3 M0 Rd 2:  dir1 hit or in flight
+PNE_BGP_L3_M0_R2_DIR1_MISS_OR_LOCKDOWN 0x400001ca   L3 M0 Rd 2:  dir1 miss or lock-down
+PNE_BGP_L3_M0_W0_DEPOSIT_REQUESTS 0x400001cb   L3 M0 WRB 0:  Total accepted deposit requests from write queues to write buffer
+PNE_BGP_L3_M0_W0_CYCLES_REQUESTS_NOT_TAKEN 0x400001cc   L3 M0 WRB 0:  Number of cycles with requests from queues that are not taken
+PNE_BGP_L3_M0_W1_DEPOSIT_REQUESTS 0x400001cd   L3 M0 WRB 1:  Total accepted deposit requests from write queues to write buffer
+PNE_BGP_L3_M0_W1_CYCLES_REQUESTS_NOT_TAKEN 0x400001ce   L3 M0 WRB 1:  Number of cycles with requests from queues that are not taken
+PNE_BGP_L3_M0_MH_ALLOCATION_REQUESTS 0x400001cf   L3 M0 MH:  Number of allocation requests to write buffer
+PNE_BGP_L3_M0_MH_CYCLES_ALLOCATION_REQUESTS_NOT_TAKEN 0x400001d0   L3 M0 MH:  Number of allocation request cycles to write buffer without being taken
+PNE_BGP_L3_M0_PF_PREFETCH_INTO_EDRAM 0x400001d1   L3 M0 PF:  Number of line pre-fetches brought into eDRAM
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 466 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 467 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 468 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 469 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 470 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 471 specified.
+PNE_BGP_L3_M1_R2_SINGLE_LINE_DELIVERED_L2 0x400001d8   L3 M1 Rd 2:  Single line delivered to L2
+PNE_BGP_L3_M1_R2_BURST_DELIVERED_L2 0x400001d9   L3 M1 Rd 2:  Burst delivered to L2
+PNE_BGP_L3_M1_R2_READ_RETURN_COLLISION 0x400001da   L3 M1 Rd 2:  Read return collision
+PNE_BGP_L3_M1_R2_DIR0_HIT_OR_INFLIGHT 0x400001db   L3 M1 Rd 2:  dir0 hit or in flight
+PNE_BGP_L3_M1_R2_DIR0_MISS_OR_LOCKDOWN 0x400001dc   L3 M1 Rd 2:  dir0 miss or lock-down
+PNE_BGP_L3_M1_R2_DIR1_HIT_OR_INFLIGHT 0x400001dd   L3 M1 Rd 2:  dir1 hit or in flight
+PNE_BGP_L3_M1_R2_DIR1_MISS_OR_LOCKDOWN 0x400001de   L3 M1 Rd 2:  dir1 miss or lock-down
+PNE_BGP_L3_M1_W0_DEPOSIT_REQUESTS 0x400001df   L3 M1 WRB 0:  Total accepted deposit requests from write queues to write buffer
+PNE_BGP_L3_M1_W0_CYCLES_REQUESTS_NOT_TAKEN 0x400001e0   L3 M1 WRB 0:  Number of cycles with requests from queues that are not taken
+PNE_BGP_L3_M1_W1_DEPOSIT_REQUESTS 0x400001e1   L3 M1 WRB 1:  Total accepted deposit requests from write queues to write buffer
+PNE_BGP_L3_M1_W1_CYCLES_REQUESTS_NOT_TAKEN 0x400001e2   L3 M1 WRB 1:  Number of cycles with requests from queues that are not taken
+PNE_BGP_L3_M1_MH_ALLOCATION_REQUESTS 0x400001e3   L3 M1 MH:  Number of allocation requests to write buffer
+PNE_BGP_L3_M1_MH_CYCLES_ALLOCATION_REQUESTS_NOT_TAKEN 0x400001e4   L3 M1 MH:  Number of allocation request cycles to write buffer without being taken
+PNE_BGP_L3_M1_PF_PREFETCH_INTO_EDRAM 0x400001e5   L3 M1 PF:  Number of line pre-fetches brought into eDRAM
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 486 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 487 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 488 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 489 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 490 specified.
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 491 specified.
+PNE_BGP_PU2_SNOOP_PORT0_REMOTE_SOURCE_REQUESTS 0x400001ec   P2 SNP:  Port 0 received a snoop request from a remote source
+PNE_BGP_PU2_SNOOP_PORT1_REMOTE_SOURCE_REQUESTS 0x400001ed   P2 SNP:  Port 1 received a snoop request from a remote source
+PNE_BGP_PU2_SNOOP_PORT2_REMOTE_SOURCE_REQUESTS 0x400001ee   P2 SNP:  Port 2 received a snoop request from a remote source
+PNE_BGP_PU2_SNOOP_PORT3_REMOTE_SOURCE_REQUESTS 0x400001ef   P2 SNP:  Port 3 received a snoop request from a remote source
+PNE_BGP_PU2_SNOOP_PORT0_REJECTED_REQUESTS 0x400001f0   P2 SNP:  Port 0 snoop filter rejected a snoop request
+PNE_BGP_PU2_SNOOP_PORT1_REJECTED_REQUESTS 0x400001f1   P2 SNP:  Port 1 snoop filter rejected a snoop request
+PNE_BGP_PU2_SNOOP_PORT2_REJECTED_REQUESTS 0x400001f2   P2 SNP:  Port 2 snoop filter rejected a snoop request
+PNE_BGP_PU2_SNOOP_PORT3_REJECTED_REQUESTS 0x400001f3   P2 SNP:  Port 3 snoop filter rejected a snoop request
+PNE_BGP_PU2_SNOOP_L1_CACHE_WRAP  0x400001f4   P2 SNP:  Snoop filter detected an L1 cache wrap
+PNE_BGP_PU3_SNOOP_PORT0_REMOTE_SOURCE_REQUESTS 0x400001f5   P3 SNP:  Port 0 received a snoop request from a remote source
+PNE_BGP_PU3_SNOOP_PORT1_REMOTE_SOURCE_REQUESTS 0x400001f6   P3 SNP:  Port 1 received a snoop request from a remote source
+PNE_BGP_PU3_SNOOP_PORT2_REMOTE_SOURCE_REQUESTS 0x400001f7   P3 SNP:  Port 2 received a snoop request from a remote source
+PNE_BGP_PU3_SNOOP_PORT3_REMOTE_SOURCE_REQUESTS 0x400001f8   P3 SNP:  Port 3 received a snoop request from a remote source
+PNE_BGP_PU3_SNOOP_PORT0_REJECTED_REQUESTS 0x400001f9   P3 SNP:  Port 0 snoop filter rejected a snoop request
+PNE_BGP_PU3_SNOOP_PORT1_REJECTED_REQUESTS 0x400001fa   P3 SNP:  Port 1 snoop filter rejected a snoop request
+PNE_BGP_PU3_SNOOP_PORT2_REJECTED_REQUESTS 0x400001fb   P3 SNP:  Port 2 snoop filter rejected a snoop request
+PNE_BGP_PU3_SNOOP_PORT3_REJECTED_REQUESTS 0x400001fc   P3 SNP:  Port 3 snoop filter rejected a snoop request
+PNE_BGP_PU3_SNOOP_L1_CACHE_WRAP  0x400001fd   P3 SNP:  Snoop filter detected an L1 cache wrap
+BGP_UPC_Get_Event_Short_Name:  Invalid event id 510 specified.
+PNE_BGP_MISC_ELAPSED_TIME_UM1    0x400001ff   MISC:  Elapsed running time
+
+-------------------------------------------------------------------------
+Total events reported: 455
+native_avail.c                           PASSED

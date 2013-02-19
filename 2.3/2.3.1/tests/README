@@ -1,0 +1,14 @@
+Here will go all the strange tests (required) by some machines.
+
+Information of each directory:
+
+sizeof -> check empirically the size of each type required in configure.ac.
+          This is usually done by configure, but cross-compiling does not 
+          allow AC_CHECK_SIZEOF.
+          Machines that may use this test : BG/L, NEC-SX?
+
+event  -> check the size of the event_t structure.
+          Use this test to know how many bytes are occupied by an event.
+
+mpi-characteristics -> Tests executed on BG/L to gather MPI + HWC information
+
