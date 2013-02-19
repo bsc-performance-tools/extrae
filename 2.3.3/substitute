@@ -1,0 +1,28 @@
+#!/bin/sh
+
+if [ $# -ne 4 ] ; then
+  echo "Invalid parameters. Pass SED location, KEY, VALUE and FILE"
+	exit 0
+fi
+
+SED=$1
+KEY=$2
+VALUE=$3
+FILE=$4
+
+# Some OS don't have mktemp, AIX 5.3 for instance :S
+if [ ! -f /bin/mktemp ] ; then
+	TMPFILE=substitute-$$
+else
+	TMPFILE=`/bin/mktemp substitute-XXXXXX`
+fi
+
+${SED} "s|${KEY}|${VALUE}|g" < ${FILE} >${TMPFILE}
+/bin/mv -f ${TMPFILE} ${FILE}
+
+chmod a+r ${FILE}
+
+# Check if the resulting file is a script
+if [ "${FILE##*.}" = "sh" ] ; then
+	chmod a+x ${FILE}
+fi
