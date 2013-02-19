@@ -1,0 +1,19 @@
+
+1) Develop, code, fix, add and test new functionalities as wanted/needed.
+ 1.a) Make sure that all files have:
+      - License text on top
+      - SVN keywords (command svn propset svn:keywords "Date Revision Author HeadURL Id" [-R] [directories/files])
+ 1.b) Keep ChangeLog file up-to-date
+
+2) Change the version in the configure.ac (see AC_INIT)
+
+3) Generate binary packages using the buildfarm script
+  - this makes sure that the package will compile at least on our environment -
+
+4) Generate the documentation (pdf format) and add it to the buildfarm output
+
+5) Tag in SVN using
+   svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
+
+6) Email & celebrate
+

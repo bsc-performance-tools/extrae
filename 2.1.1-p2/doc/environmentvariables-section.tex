@@ -1,0 +1,125 @@
+\chapter{Environment variables}\label{cha:EnvVar}
+
+Although \TRACE is configured through an XML file (which is pointed by the {\tt EXTRAE\_CONFIG\_FILE}), it also supports minimal configuration to be done via environment variables for those systems that do not have the library responsible for parsing the XML files ({\em i.e.,} libxml2).
+
+This appendix presents the environment variables the \TRACE package uses if {\tt EXTRAE\_CONFIG\_FILE} is not set and a description. For those environment variable that refer to XML 'enabled' attributes ({\em i.e.}, that can be set to "yes" or "no") are considered to be enabled if their value are defined to 1.
+ 
+\begin{landscape}
+
+\begin{table}
+\centerline {
+\begin{tabular}{| p{7cm} | p{14cm} |}
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+  \hline
+  EXTRAE\_BUFFER\_SIZE & Set the number of records that the instrumentation buffer can\\
+                        &  hold before flushing them.\\
+  \hline
+  EXTRAE\_CIRCULAR\_BUFFER & {\em (deprecated)} \\
+  \hline
+  EXTRAE\_COUNTERS & See section \ref{subsec:ProcessorPerformanceCounters}. Just one set can be defined. Counters (in PAPI)\\
+                    & groups (in PMAPI) are given separated by commas.\\
+  \hline
+  EXTRAE\_CONTROL\_FILE & The instrumentation will be enabled only when the file pointed exists.\\
+  \hline
+  EXTRAE\_CONTROL\_GLOPS & Starts the instrumentation when the specified number of global collectives\\ 
+                         & have been executed.\\
+  \hline
+  EXTRAE\_CONTROL\_TIME & Checks the file pointed by {\tt EXTRAE\_CONTROL\_FILE} at this period.\\
+  \hline
+  EXTRAE\_DIR  & Specifies where temporal files will be created during\\
+               & instrumentation.\\
+  \hline
+  EXTRAE\_DISABLE\_MPI & Disable MPI instrumentation.\\
+  \hline
+  EXTRAE\_DISABLE\_OMP & Disable OpenMP instrumentation.\\
+  \hline
+  EXTRAE\_DISABLE\_PTHREAD & Disable pthread instrumentation.\\
+  \hline
+  EXTRAE\_DISABLE\_PACX & Disable PACX instrumentation.\\
+  \hline
+  EXTRAE\_FILE\_SIZE & Set the maximum size (in Mbytes) for the intermediate trace file.\\
+  \hline
+  EXTRAE\_FUNCTIONS & List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
+                    & GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
+                    & option at compile and link time. \\
+  \hline
+  EXTRAE\_FUNCTIONS\_COUNTERS\_ON & Specify if the performance counters should be collected when a\\
+                                   & user function event is emitted.\\
+  \hline
+  EXTRAE\_FINAL\_DIR & Specifies where files will be stored when the application ends.\\
+  \hline
+  EXTRAE\_GATHER\_MPITS & Gather intermediate trace files into a single directory\\
+                        & (\em{this is only available when instrumenting MPI applications}).\\
+  \hline
+  EXTRAE\_HOME & Points where the \TRACE is installed.\\
+  \hline
+  EXTRAE\_INITIAL\_MODE & Choose whether the instrumentation runs in in {\tt detail} or\\
+                        & in {\tt bursts} mode.\\
+  \hline
+  EXTRAE\_BURST\_THRESHOLD & Specify the threshold time to filter running bursts.\\
+  \hline
+  EXTRAE\_MINIMUM\_TIME & Specify the minimum amount of instrumentation time.\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure \TRACE}
+\label{tab:EnvironmentVariables}
+\end{table}
+
+\end{landscape}
+
+\begin{landscape}
+
+\begin{table}
+\centerline {
+\begin{tabular}{| p{7cm} | p{14cm} |}
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+	\hline
+  EXTRAE\_MPI\_CALLER  & Choose which MPI calling routines should be dumped into the\\
+                       & tracefile.\\
+  \hline
+  EXTRAE\_MPI\_COUNTERS\_ON & Set to 1 if MPI must report performace counter values.\\
+  \hline 
+  EXTRAE\_MPI\_STATISTICS & Set to 1 if basic MPI statistics must be collected in burst mode\\
+                              & {\em (Only available in systems with Myrinet GM/MX networks)}.\\
+  \hline
+  EXTRAE\_NETWORK\_COUNTERS & Set to 1 to dump network performance counters at flush points.\\
+  \hline
+  EXTRAE\_PTHREAD\_COUNTERS\_ON & Set to 1 if pthread must report performance counters values. \\
+  \hline
+  EXTRAE\_OMP\_COUNTERS\_ON & Set to 1 if OpenMP must report performance counters values. \\
+  \hline
+  EXTRAE\_PTHREAD\_LOCKS & Set to 1 if pthread locks have to be instrumented.\\
+  \hline
+  EXTRAE\_OMP\_LOCKS & Set to 1 if OpenMP locks have to be instrumented.\\
+  \hline 
+  EXTRAE\_ON & Enables instrumentation\\
+  \hline
+  EXTRAE\_PACX\_CALLER & Choose which PACX calling routines should be dumped into the\\
+                       & tracefile.\\
+  \hline
+  EXTRAE\_PACX\_COUNTERS\_ON & Set to 1 if PACX must report performace counter values.\\
+  \hline 
+  EXTRAE\_PACX\_STATISTICS & Set to 1 if basic PACX statistics must be collected in burst mode.\\
+  \hline
+  EXTRAE\_PROGRAM\_NAME & Specify the prefix of the resulting intermediate trace files.\\ 
+  \hline
+  EXTRAE\_RUSAGE & Instrumentation emits resource usage at flush points if set to 1.\\
+  \hline
+  EXTRAE\_SPU\_DMA\_CHANNEL & Choose the SPU-PPU dma communication channel.\\
+  \hline
+  EXTRAE\_SPU\_BUFFER\_SIZE & Set the buffer size of the SPU side.\\
+  \hline 
+  EXTRAE\_SPU\_FILE\_SIZE & Set the maximum size for the SPU side (default: 5Mbytes).\\
+  \hline
+  EXTRAE\_TRACE\_TYPE & Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure \TRACE ({\em continued})}
+\label{tab:EnvironmentVariables_continued}
+\end{table}
+
+\end{landscape}
