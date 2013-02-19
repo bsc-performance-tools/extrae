@@ -1,0 +1,130 @@
+\chapter{Quick start guide}\label{cha:QuickStart}
+
+\section{The instrumentation package}
+
+\TRACE is a dynamic instrumentation package to trace programs compiled and run with the shared memory model (like OpenMP and pthreads), the message passing (MPI) programming model or both programming models (different MPI processes using OpenMP or pthrads within each MPI process). \TRACE generates trace files that can be latter visualized with \PARAVER.
+
+The package is distributed in compressed tar format (e.g., extrae.tar.gz).  To unpack it, execute from the desired target directory the following command line :
+
+\begin{verbatim}
+               gunzip -c extrae.tar.gz | tar -xvf -
+\end{verbatim}
+
+The unpacking process will create different directories on the current directory (see table \ref{tab:PackageDescription}).
+
+\begin{table}[!ht]
+\centerline {
+\begin{tabular}{| l | l |}
+\hline
+{\bf Directory}     & {\bf Contents} \\
+\hline
+bin           & Contains the binary files of the \TRACE tool.\\
+\hline
+etc           & Contains some scripts to set up environment variables and the\\
+              & \TRACE internal files.\\
+\hline
+lib           & Contains the \TRACE tool libraries.\\
+\hline
+share/man     & Contains the \TRACE manual entries.\\
+\hline
+share/doc     & Contains the \TRACE manuals (pdf, ps and html versions).\\
+\hline
+share/example & Contains examples to illustrate the \TRACE instrumentation.\\
+\hline
+\end{tabular}
+}
+\caption{Package contents description}
+\label{tab:PackageDescription}
+\end{table}
+
+\section{Quick running}
+
+Once the package has been unpacked, set the {\tt EXTRAE\_HOME} environment variable to the directory where the package was installed. Use the {\tt export} or {\tt setenv} commands to set it up depending on the shell you use.  If you use sh-based shell (like sh, bash, ksh, zsh, ...), issue this command
+\begin{verbatim}
+               export EXTRAE_HOME=dir
+\end{verbatim}
+however, if you use csh-based shell (like csh, tcsh), execute the following command
+\begin{verbatim}
+               setenv EXTRAE_HOME dir
+\end{verbatim}
+where {\em dir} refers where the \TRACE was installed. Henceforth, all references to the usage of the environment variables will be used following the sh format unless specified.
+
+\TRACE is offered in two different flavors: as a DynInst-based application, or stand-alone application. DynInst is a dynamic instrumentation library that allows the injection of code in a running application without the need to recompile the target application. If the DynInst instrumentation library is not installed, \TRACE also offers different mechanisms to trace applications.
+
+\subsection{Quick running \TRACE - based on DynInst}\label{subsec:RunningTraceDynInst}
+
+\TRACE needs some environment variables to be setup on each session. Issuing the command 
+
+\begin{verbatim}
+               source ${EXTRAE_HOME}/etc/extrae.sh
+\end{verbatim}
+
+on a sh-based shell, or 
+
+\begin{verbatim}
+               source ${EXTRAE_HOME}/etc/extrae.csh
+\end{verbatim}
+
+on a csh-based shell will do the work. Then copy the default XML configuration file\footnote{See section \ref{cha:XML} for further details regarding this file} into the working directory by executing
+
+\begin{verbatim}
+               cp ${EXTRAE_HOME}/share/example/MPI/extrae.xml .
+\end{verbatim}
+
+If needed, set the application environment variables as usual (like {\tt OMP\_NUM\_THREADS}, for example), and finally launch the application using the {\tt \$\{EXTRAE\_HOME\}/bin/ompitrace} instrumenter like:
+
+\begin{verbatim}
+               ${EXTRAE_HOME}/bin/ompitrace -config extrae.xml <program>
+\end{verbatim}
+
+where {\tt <program>} is the application binary.
+
+\subsection{Quick running \TRACE - NOT based on DynInst}\label{subsec:RunningTraceNOTDynInst}
+
+\TRACE needs some environment variables to be setup on each session. Issuing the command 
+
+\begin{verbatim}
+               source ${EXTRAE_HOME}/etc/extrae.sh
+\end{verbatim}
+
+on a sh-based shell, or 
+
+\begin{verbatim}
+               source ${EXTRAE_HOME}/etc/extrae.csh
+\end{verbatim}
+
+on a csh-based shell will do the work. Then copy the default XML configuration file\footnotemark[1] into the working directory by executing
+
+\begin{verbatim}
+               cp ${EXTRAE_HOME}/share/example/MPI/extrae.xml .
+\end{verbatim}
+
+and export the {EXTRAE\_CONFIG\_FILE} as
+
+\begin{verbatim}
+               export EXTRAE_CONFIG_FILE=extrae.xml
+\end{verbatim}
+
+If needed, set the application environment variables as usual (like {\tt OMP\_NUM\_THREADS}, for example). Just before executing the target application, issue the following command:
+
+\begin{verbatim}
+               export LD_PRELOAD=${EXTRAE_HOME}/lib/<lib>
+\end{verbatim}
+
+where {\tt <lib>} is
+
+\begin{itemize}
+ \item {\tt libmpitrace.so} If the application is just MPI.
+ \item {\tt libomptrace.so} If the application is just OpenMP.
+ \item {\tt libompitrace.so} If the application is MPI and OpenMP.
+\end{itemize}
+
+\section{Quick merging the intermediate traces}
+
+Once the intermediate trace files (*.mpit files) have been created, they have to be merged (using the {\tt mpi2prv} command) in order to generate the final \PARAVER trace file. Execute the following command to proceed with the merge:
+
+\begin{verbatim}
+               ${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -o output.prv
+\end{verbatim}
+
+The result of the merge process is a \PARAVER tracefile called output.prv. If the -o option is not given, the resulting tracefile is called MPITRACE\_Paraver\_Trace.prv. 
