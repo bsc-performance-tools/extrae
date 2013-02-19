@@ -1,0 +1,62 @@
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                   Extrae                                  *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *     ___     This library is free software; you can redistribute it and/or *
+ *    /  __         modify it under the terms of the GNU LGPL as published   *
+ *   /  /  _____    by the Free Software Foundation; either version 2.1      *
+ *  /  /  /     \   of the License, or (at your option) any later version.   *
+ * (  (  ( B S C )                                                           *
+ *  \  \  \_____/   This library is distributed in hope that it will be      *
+ *   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
+ *    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
+ *                  PARTICULAR PURPOSE. See the GNU LGPL for more details.   *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public License  *
+ * along with this library; if not, write to the Free Software Foundation,   *
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA          *
+ * The GNU LEsser General Public License is contained in the file COPYING.   *
+ *                                 ---------                                 *
+ *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
+\*****************************************************************************/
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
+#ifndef MISC_WRAPPER_DEFINED
+#define MISC_WRAPPER_DEFINED
+
+#include "clock.h"
+#include "extrae_types.h"
+
+void Extrae_init_Wrapper(void);
+void Extrae_fini_Wrapper(void);
+void Extrae_shutdown_Wrapper (void);
+void Extrae_restart_Wrapper (void);
+
+void Extrae_Event_Wrapper (unsigned *tipus, unsigned *valor);
+void Extrae_N_Event_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
+void Extrae_Eventandcounters_Wrapper (unsigned *Type, unsigned *Value);
+void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, unsigned *tipus, unsigned *valors);
+void Extrae_counters_Wrapper ();
+void Extrae_setcounters_Wrapper (int *evc1, int *evc2);
+void Extrae_set_options_Wrapper (int options);
+void Extrae_getrusage_Wrapper (iotimer_t timestamp);
+void Extrae_memusage_Wrapper (iotimer_t timestamp);
+void Extrae_user_function_Wrapper (int enter);
+void Extrae_function_from_address_Wrapper (int type, void *address);
+
+void Extrae_next_hwc_set_Wrapper (void);
+void Extrae_previous_hwc_set_Wrapper (void);
+
+void Extrae_notify_new_pthread (void);
+
+void Extrae_init_UserCommunication_Wrapper (struct extrae_UserCommunication *ptr);
+void Extrae_init_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
+void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr);
+
+#endif

@@ -1,0 +1,92 @@
+
+Configuration & Installation of the package at several machines:
+******
+
+All commands given here are given as an example to configure and install the package, you may need to tune them properly.
+These examples assume that you are using a sh/bash shell, you must adequate them if you use other shells.
+
+
+Jugene (Bluegene/P)
+--
+NOTES:
+Bluegene/{L,P} only support static libraries.
+
+COMMAND:
+./configure --prefix=PREFIX --with-papi=/bgsys/local/papi/papi-c-3.9.0 --without-libz --with-bfd=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-bgp-linux
+make
+make install
+
+
+Linux
+--
+NOTES:
+
+COMMAND:
+Example 1 - OpenMPI and PACX (over OpenMPI)
+./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-pacx=/home/harald/aplic/pacx/07.2009-openmpi
+make
+make install
+
+Example 2 - MPICH, OpenMP and PAPI
+./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp
+
+Example 3 - Forcing 32bit package in a 32/64bit mixed environment.
+./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=32
+make
+make install
+
+Example 4 - Forcing 64bit package in a 32/64bit mixed environment.
+./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64
+make
+make install
+
+Example 5 - MPICH2 (+ Slurm/MOAB) in a 32/64bi mixed environment
+export MP_IMPL=anl2 ./configure --prefix=PREFIX --with-mpi=/gpfs/apps/MPICH2/mx/1.0.8p1..3/32 --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64
+make
+make install
+
+Example 6 - Linux with Power Processor in a environment with IBM compilers & GNU compilers
+ a) Using IBM compilers
+ CC=xlc CXX=xlC ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe
+ make
+ make install
+
+ b) Using GNU compilers (and forcing when using MPCC in parallel merge)
+ ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe
+ MP_COMPILER=gcc make
+ make install
+
+Example 7 - Linux on CRAY XT5 for 64bit package and adding sampling. Notice the "--disable-xmltest". As the backends programs cannot be run in the frontent, we skip running the XML test. Also using a local installation of libunwind.
+
+./configure \
+  --with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu
+  --with-binary-type=64 \
+  --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1_gnu4.1.2
+  --disable-xmltest \
+  --with-bfd=/opt/cray/cce/7.1.5/cray-binutils \
+  --with-liberty=/opt/cray/cce/7.1.5/cray-binutils \
+  --enable-sampling \
+  --enable-shared=no \
+  --prefix=PREFIX \
+  --with-papi=/opt/xt-tools/papi/3.7.2/v23 \
+  --with-unwind=/ccs/home/khuck/lib \
+  CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' F77=ftn FFLAGS='-O3 -g'
+
+
+AIX
+--
+NOTES:
+Some extensions of Extrae do not work properly (nanos, SMPss and OpenMP).
+In addition, if using IBM MPI (aka POE) the make will complain when generating the parallel merge if the main compiler is not xlc/xlC. So, you can change the compiler or disable the parallel merge at compile step.
+Command ar can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT_MODE=64 set to avoid this.
+
+COMMAND:
+Example 1 - Compiling the 32bit package using the IBM compilers
+CC=xlc CXX=xlC ./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --with-binary-type=32
+make
+make install
+
+Example 2 - Compiling the 64bit package without the parallel merge
+./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64
+OBJECT_MODE=64 make
+make install
