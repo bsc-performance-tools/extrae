@@ -506,11 +506,12 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 			}
 		}
 
-		if (sharedlibname_ext == ".f" || sharedlibname_ext == ".F" || /* fortran */
+		if (sharedlibname_ext == ".f" || sharedlibname_ext == ".F" ||   /* fortran */
 		  sharedlibname_ext == ".for" || sharedlibname_ext == ".FOR" || /* fortran */
 		  sharedlibname_ext == ".f90" || sharedlibname_ext == ".F90" || /* fortran 90 */
+		  sharedlibname_ext == ".i90" ||                                /* fortran 90 through ifort */
 		  sharedlibname_ext == ".f77" || sharedlibname_ext == ".F77" || /* fortran 77 */
-		  sharedlibname_ext == ".c" || sharedlibname_ext == ".C" || /* C */
+		  sharedlibname_ext == ".c" || sharedlibname_ext == ".C" ||     /* C */
 		  sharedlibname_ext == ".cxx" || sharedlibname_ext == ".cpp" || /* c++ */
 		  sharedlibname_ext == ".c++" || /* c++ */
 		  sharedlibname_ext == ".i" || /* some compilers generate this extension in intermediate files */ 

@@ -2,7 +2,9 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 20Feb2013 Added instrumentation for Intel omp_set_num_threads (which is
-               named ompc_set_num_threads)
+               named ompc_set_num_threads) (MFB 2.3)
+              Added support for Intel fortran compiler with F90 code to
+                instrument using dyninst (MFB 2.3)
  * 15Feb2013 Improve detection of libbfd*.so (MFB 2.3)
  * 14Feb2013 Removes all temporal files at the end of the merge process (MFB
                2.3)
