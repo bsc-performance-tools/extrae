@@ -213,6 +213,12 @@ int intel_kmpc_11_hook_points (int rank)
 	if (__kmpc_omp_taskwait_real == NULL)
 		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_taskwait in DSOs!!\n");
 
+	/* Obtain @ for ompc_set_num_threads */
+	ompc_set_num_threads_real =
+		(void(*)(int)) dlsym (RTLD_NEXT, "ompc_set_num_threads");
+	if (ompc_set_num_threads_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find ompc_set_num_threads in DSOs!!\n");
+
 	/* Any hook point? */
 	return count > 0;
 }
@@ -853,3 +859,30 @@ int __kmpc_omp_taskwait (void *p1, int p2)
 	}
 	return res;
 }
+
+void ompc_set_num_threads (int p1)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": ompc_set_num_threads is at %p\n", ompc_set_num_threads_real);
+	fprintf (stderr, PACKAGE_NAME": ompc_set_num_threads params %d\n", p1);
+#endif
+
+	if (ompc_set_num_threads_real != NULL && mpitrace_on)
+	{
+		Backend_ChangeNumberOfThreads (p1);
+
+		Backend_Enter_Instrumentation (2);
+		Probe_OpenMP_SetNumThreads_Entry (p1);
+		ompc_set_num_threads_real (p1);
+		Probe_OpenMP_SetNumThreads_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (ompc_set_num_threads_real != NULL && !mpitrace_on)
+	{
+		ompc_set_num_threads_real (p1);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": ompc_set_num_threads is not hooked! exiting!!\n");
+		exit (0);
+	}

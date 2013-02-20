@@ -166,7 +166,7 @@ void omp_set_num_threads (int p1)
 		Probe_OpenMP_SetNumThreads_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
-	else if (omp_set_num_threads_real != NULL && mpitrace_on)
+	else if (omp_set_num_threads_real != NULL && !mpitrace_on)
 	{
 		omp_set_num_threads_real (p1);
 	}
