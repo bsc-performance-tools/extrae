@@ -217,7 +217,8 @@ static int User_Event (event_t * current_event,
                        unsigned int thread,
                        FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned EvType;
+	unsigned long long EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the user event type.  */
