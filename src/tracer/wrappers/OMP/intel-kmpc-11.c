@@ -47,6 +47,7 @@
 #endif
 
 #include "wrapper.h"
+#include "omp_probe.h"
 #include "omp-common.h"
 
 //#define DEBUG
@@ -90,6 +91,8 @@ static void* (*__kmpc_omp_task_alloc_real)(void*,int,int,size_t,size_t,void*) = 
 static void (*__kmpc_omp_task_begin_if0_real)(void*,int,void*) = NULL;
 static void (*__kmpc_omp_task_complete_if0_real)(void*,int,void*) = NULL;
 static int (*__kmpc_omp_taskwait_real)(void*,int) = NULL;
+
+static void (*ompc_set_num_threads_real)(int) = NULL;
 
 int intel_kmpc_11_hook_points (int rank)
 {
@@ -886,3 +889,5 @@ void ompc_set_num_threads (int p1)
 		fprintf (stderr, PACKAGE_NAME": ompc_set_num_threads is not hooked! exiting!!\n");
 		exit (0);
 	}
+}
+
