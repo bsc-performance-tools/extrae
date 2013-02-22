@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 22Feb2013 Fixed bad instrumentation of GOMP_*_next using dyninst (MFB 2.3)
  * 20Feb2013 Added instrumentation for Intel omp_set_num_threads (which is
                named ompc_set_num_threads) (MFB 2.3)
               Added support for Intel fortran compiler with F90 code to

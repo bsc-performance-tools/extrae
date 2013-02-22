@@ -179,13 +179,13 @@ void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appIma
 		wrapRoutine (appImage, "GOMP_parallel_loop_runtime_start",
 		  "Extrae_OpenMP_ParDO_Entry", "Probe_OpenMP_ParDO_Exit");
 		wrapRoutine (appImage, "GOMP_loop_static_next",
-		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
+		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Exit");
 		wrapRoutine (appImage, "GOMP_loop_dynamic_next",
-		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
+		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Exit");
 		wrapRoutine (appImage, "GOMP_loop_guided_next",
-		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
+		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Exit");
 		wrapRoutine (appImage, "GOMP_loop_runtime_next",
-		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Entry");
+		  "Extrae_OpenMP_Work_Entry", "Probe_OpenMP_Work_Exit");
 		wrapRoutine (appImage, "GOMP_barrier",
 		  "Extrae_OpenMP_Barrier_Entry", "Probe_OpenMP_Barrier_Exit");
 
