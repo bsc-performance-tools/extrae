@@ -594,53 +594,68 @@ void HWCBE_PAPI_Initialize (int TRCOptions)
 	}
 }
 
-int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid)
+int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 {
 	int i, j, rc;
 	PAPI_option_t options;
 
-	/* If there aren't configured sets, or the thread is already init'ed, leave */
-	if (HWC_num_sets <= 0 || HWC_Thread_Initialized[threadid])
+	if (HWC_num_sets <= 0)
 		return FALSE;
 
-	memset (&options, 0, sizeof(options));
-
-	for (i = 0; i < HWC_num_sets; i++)
+	if (forked)
 	{
-		/* Create the eventset. Each thread will create its own eventset */
-		rc = PAPI_create_eventset (&(HWC_sets[i].eventsets[threadid]));
-		if (PAPI_OK != rc)
+		PAPI_stop (HWCEVTSET(threadid), NULL);
+
+		for (i = 0; i < HWC_num_sets; i++)
 		{
-			fprintf (stderr, PACKAGE_NAME": Error! Unable to create eventset (%d of %d) in thread %d\n", i+1, HWC_num_sets, threadid);
-			continue;
+			rc = PAPI_cleanup_eventset (HWC_sets[i].eventsets[threadid]);
+			if (rc == PAPI_OK)
+				PAPI_destroy_eventset (&HWC_sets[i].eventsets[threadid]);
+
+			HWC_sets[i].eventsets[threadid] = PAPI_NULL;
 		}
+	}
 
-		/* Add the selected counters */
-		for (j = 0; j < HWC_sets[i].num_counters; j++)
+	//if (!forked)
+	{
+		memset (&options, 0, sizeof(options));
+
+		for (i = 0; i < HWC_num_sets; i++)
 		{
-			if (HWC_sets[i].counters[j] != NO_COUNTER)
+			/* Create the eventset. Each thread will create its own eventset */
+			rc = PAPI_create_eventset (&(HWC_sets[i].eventsets[threadid]));
+			if (PAPI_OK != rc)
 			{
-				rc = PAPI_add_event (HWC_sets[i].eventsets[threadid], HWC_sets[i].counters[j]);
-				if (rc != PAPI_OK)
-				{
-					char EventName[PAPI_MAX_STR_LEN];
+				fprintf (stderr, PACKAGE_NAME": Error! Unable to create eventset (%d of %d) in thread %d\n", i+1, HWC_num_sets, threadid);
+				continue;
+			}
 
-					PAPI_event_code_to_name (HWC_sets[i].counters[j], EventName);
-					fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, threadid);
-					HWC_sets[i].counters[j] = NO_COUNTER;
-					/* break; */
+			/* Add the selected counters */
+			for (j = 0; j < HWC_sets[i].num_counters; j++)
+			{
+				if (HWC_sets[i].counters[j] != NO_COUNTER)
+				{
+					rc = PAPI_add_event (HWC_sets[i].eventsets[threadid], HWC_sets[i].counters[j]);
+					if (rc != PAPI_OK)
+					{
+						char EventName[PAPI_MAX_STR_LEN];
+	
+						PAPI_event_code_to_name (HWC_sets[i].counters[j], EventName);
+						fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, threadid);
+						HWC_sets[i].counters[j] = NO_COUNTER;
+						/* break; */
+					}
 				}
 			}
+
+			/* Set the domain for these eventsets */
+			options.domain.eventset = HWC_sets[i].eventsets[threadid];
+			options.domain.domain = HWC_sets[i].domain;
+			rc = PAPI_set_opt (PAPI_DOMAIN, &options);
+			if (rc != PAPI_OK)
+				fprintf (stderr, PACKAGE_NAME": Error when setting domain for eventset %d\n", i+1);
 		}
-
-		/* Set the domain for these eventsets */
-		options.domain.eventset = HWC_sets[i].eventsets[threadid];
-		options.domain.domain = HWC_sets[i].domain;
-		rc = PAPI_set_opt (PAPI_DOMAIN, &options);
-		if (rc != PAPI_OK)
-			fprintf (stderr, PACKAGE_NAME": Error when setting domain for eventset %d\n", i+1);
-
-	}
+	} /* forked */ 
 
 	HWC_Thread_Initialized[threadid] = HWCBE_PAPI_Start_Set (0, time, HWC_current_set[threadid], threadid);
 

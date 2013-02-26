@@ -56,35 +56,26 @@ using namespace std;
 #include "commonSnippets.h"
 
 
-BPatch_Vector<BPatch_function *> getRoutines (string &routine, BPatch_image *appImage, bool warn)
+BPatch_Vector<BPatch_function *> getRoutines (string &routine, BPatch_image *appImage)
 {
-	return getRoutines (routine.c_str(), appImage, warn);
+	return getRoutines (routine.c_str(), appImage);
+}
+
+BPatch_Vector<BPatch_function *> getRoutines (const char* routine, BPatch_image *appImage)
+{
+	BPatch_Vector<BPatch_function *> found_funcs;
+	appImage->findFunction (routine, found_funcs);
+	return found_funcs;
 }
 
 BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn)
 {
-	return getRoutine (routine.c_str(), appImage, warn);
-}
-
-BPatch_Vector<BPatch_function *> getRoutines (const char* routine, BPatch_image *appImage, bool warn)
-{
-	BPatch_Vector<BPatch_function *> found_funcs;
-
-	if (appImage->findFunction (routine, found_funcs) == NULL)
-	{
-		if (warn)
-		{
-			string error = string(PACKAGE_NAME": appImage->findFunction: Failed to find function ")+routine;
-			PRINT_PRETTY_ERROR("WARNING", error.c_str());
-		}
-	}
-
-	return found_funcs;
+	return getRoutine (routine.c_str(), appImage);
 }
 
 BPatch_function * getRoutine (const char *routine, BPatch_image *appImage, bool warn)
 {
-	BPatch_Vector<BPatch_function *> found_funcs = getRoutines (routine, appImage, warn);
+	BPatch_Vector<BPatch_function *> found_funcs = getRoutines (routine, appImage);
 
 	if (found_funcs.size() < 1)
 	{
@@ -106,6 +97,28 @@ BPatch_function * getRoutine (const char *routine, BPatch_image *appImage, bool 
 	}
 
 	return found_funcs[0];
+}
+
+BPatch_snippet SnippetForRoutineCall (BPatch_image *appImage, string routine, unsigned nparams)
+{
+	if (routine.length() > 0)
+	{
+		BPatch_function *snippet = getRoutine (routine, appImage, true);
+		if (snippet == NULL)
+		{
+			string error = string (PACKAGE_NAME": getRoutine: Failed to find routine ")+routine;
+			PRINT_PRETTY_ERROR("WARNING", error.c_str());
+			return BPatch_nullExpr();
+		}
+
+		BPatch_Vector<BPatch_snippet *> args;
+		for (unsigned u = 0; u < nparams; u++)
+			args.push_back (new BPatch_paramExpr (u));
+
+		return BPatch_funcCallExpr (*snippet, args);
+	}
+	else
+		return BPatch_nullExpr();
 }
 
 void wrapRoutine (BPatch_image *appImage, string routine, string wrap_begin,
@@ -136,41 +149,13 @@ void wrapRoutine (BPatch_image *appImage, string routine, string wrap_begin,
 		PRINT_PRETTY_ERROR("WARNING", error.c_str());
 	}
 
-	if (wrap_begin.length() > 0)
-	{
-		BPatch_function *snippet_begin = getRoutine (wrap_begin, appImage, true);
-		if (snippet_begin == NULL)
-		{
-			string error = string (PACKAGE_NAME": getRoutine: Failed to find wrap_begin ")+wrap_begin;
-			PRINT_PRETTY_ERROR("WARNING", error.c_str());
-			return;
-		}
+	BPatch_snippet sentry = SnippetForRoutineCall (appImage, wrap_begin, nparams);
+	if (appAddrSpace->insertSnippet (sentry, *entry_point) == NULL)
+		cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at entry point" << endl;
 
-		BPatch_Vector<BPatch_snippet *> args_entry;
-		for (unsigned u = 0; u < nparams; u++)
-			args_entry.push_back (new BPatch_paramExpr (u));
-
-		BPatch_funcCallExpr callExpr_entry (*snippet_begin, args_entry);
-
-		if (appAddrSpace->insertSnippet (callExpr_entry, *entry_point) == NULL)
-			cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at entry point" << endl;
-	}
-
-	if (wrap_end.length() > 0)
-	{
-		BPatch_function *snippet_end = getRoutine (wrap_end, appImage, true);
-		if (snippet_end == NULL)
-		{
-			string error = string (PACKAGE_NAME": getRoutine: Failed to find wrap_end ")+wrap_begin;
-			PRINT_PRETTY_ERROR("WARNING", error.c_str());
-			return;
-		}
-		BPatch_Vector<BPatch_snippet *> args_exit;
-		BPatch_funcCallExpr callExpr_exit (*snippet_end, args_exit);
-
-		if (appAddrSpace->insertSnippet (callExpr_exit, *exit_point) == NULL)
-			cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at entry point" << endl;
-	}
+	BPatch_snippet sexit = SnippetForRoutineCall (appImage, wrap_end, nparams);
+	if (appAddrSpace->insertSnippet (sexit, *exit_point) == NULL)
+		cerr << PACKAGE_NAME << ": Error! Failed to insert snippet at exit point" << endl;
 }
 
 void wrapTypeRoutine (BPatch_function *function, string routine, int type,

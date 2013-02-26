@@ -756,7 +756,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 			config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return;
 
@@ -846,7 +846,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 			config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return;
 
@@ -4081,7 +4081,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 			config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return val;
 
@@ -4170,7 +4170,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 			config_file = MPI_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return val;
 

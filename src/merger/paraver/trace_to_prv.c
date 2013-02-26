@@ -184,8 +184,9 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	unsigned long long records_per_task;
 	double pct, last_pct;
 	UINT64 *StartingTimes, *SynchronizationTimes;
-	int i, j, total_tasks;
+	int i, j;
 	long long options;
+	int num_appl_tasks[num_appl];
 
 	records_per_task = 1024*1024/sizeof(paraver_rec_t); /* num of events in 1 Mbytes */
 	records_per_task *= get_option_merge_MaxMem();            /* let's use this memory */
@@ -194,6 +195,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 #endif
 
 	InitializeObjectTable (num_appl, files, nfiles);
+	for (i = 0; i < num_appl; i++)
+		num_appl_tasks[i] = obj_table[i].ntasks;
 
 #if defined(PARALLEL_MERGE)
 	InitCommunicators();
@@ -253,27 +256,14 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		fprintf (stdout, "mpi2prv: Searching synchronization points...");
 		fflush (stdout);
 	}
-	total_tasks = Search_Synchronization_Times(fset, &StartingTimes, &SynchronizationTimes);
+	Search_Synchronization_Times (taskid, numtasks, fset, &StartingTimes, &SynchronizationTimes);
 	if (0 == taskid)
 		fprintf (stdout, " done\n");
 
-	TimeSync_Initialize (total_tasks);
-	i = 0;
-	j = 0;
-	while (j < total_tasks && i < nfiles)
-	{
-		/* Only use master tasks, do not involve threads/accelerators */
-		if (files[i].thread - 1 == 0)
-		{
-			TimeSync_SetInitialTime (j, StartingTimes[j], SynchronizationTimes[j], files[i].node);
-			j++;
-		}
-		i++;
-	}
-
-	if (i == nfiles && j < total_tasks)
-		if (0 == taskid)
-			fprintf (stderr, "mpi2prv: Error! Didn't encounter all the tasks within all files when running time-synchronization\n");
+	TimeSync_Initialize (num_appl, num_appl_tasks);
+	for (i = 0; i < nfiles; i++)
+		if (files[i].thread-1 == 0)
+			TimeSync_SetInitialTime (files[i].ptask-1, files[i].task-1, StartingTimes[i], SynchronizationTimes[i], files[i].node);
 
 	if (get_option_merge_SincronitzaTasks_byNode())
 	{
@@ -341,7 +331,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 		if (getEventType (EvType, &Type))
 		{
-			current_time = TIMESYNC(task-1, Get_EvTime (current_event));
+			current_time = TIMESYNC(ptask-1, task-1, Get_EvTime (current_event));
 #if defined(DEBUG)
 			fprintf (stderr, "mpi2prv: Parsing event %u:%u:%u <%u,%llu(%llu)> @%llu|%llu\n", ptask, task, thread, Get_EvEvent (current_event), Get_EvValue (current_event), Get_EvMiscParam(current_event), current_time, Get_EvTime(current_event));
 #endif

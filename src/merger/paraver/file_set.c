@@ -42,9 +42,6 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
-#ifdef HAVE_ASSERT_H
-# include <assert.h>
-#endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -69,6 +66,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "mpi-aux.h"
 # include "tree-logistics.h"
 #endif
+#include "labels.h"
 #include "utils.h"
 #include "semantics.h"
 #include "cpunode.h"
@@ -112,7 +110,7 @@ void GetNextObj_FS (FileSet_t * fset, int file, unsigned int *cpu, unsigned int 
 {
   FileItem_t *sfile;
 
-  assert (file < fset->nfiles);
+  ASSERT (file >= 0 && file < fset->nfiles, "Invalid file identifier");
 
   sfile = &(fset->files[file]);
   CurrentObj_FS (sfile, *cpu, *ptask, *task, *thread);
@@ -951,7 +949,7 @@ static event_t * Search_CPU_Burst (
 			}
 			else 
 			{ 
-				if (TIMESYNC(fset->files[fminimum].task - 1, minimum->time) > TIMESYNC(fset->files[file].task - 1, current->time))
+				if (TIMESYNC(fset->files[fminimum].ptask-1, fset->files[fminimum].task-1, minimum->time) > TIMESYNC(fset->files[file].ptask-1, fset->files[file].task-1, current->time))
 				{
 					minimum = current;
 					fminimum = file;
@@ -993,7 +991,7 @@ static event_t *GetNextEvent_FS_prv (FileSet_t * fset, unsigned int *cpu,
 		}
 		else if (minimum != NULL && current != NULL)
 		{
-			if (TIMESYNC(fset->files[fminimum].task - 1, minimum->time) > TIMESYNC(fset->files[file].task - 1, current->time))
+			if (TIMESYNC(fset->files[fminimum].ptask-1, fset->files[fminimum].task-1, minimum->time) > TIMESYNC(fset->files[file].ptask-1, fset->files[file].task-1, current->time))
 			{
 				minimum = current;
 				fminimum = file;
@@ -1053,7 +1051,7 @@ event_t * GetNextEvent_FS (
 			/* No more events to parse */
 			ret = NULL;
 		}
-		else if ((min_event == NULL) || (min_burst != NULL && TIMESYNC(min_burst_task-1, min_burst->time) < TIMESYNC(min_event_task-1, min_event->time)))
+		else if ((min_event == NULL) || (min_burst != NULL && TIMESYNC(min_burst_ptask-1, min_burst_task-1, min_burst->time) < TIMESYNC(min_event_ptask-1, min_event_task-1, min_event->time)))
 		{
 			/* Return the minimum CPU burst event */
 			ret = min_burst;
@@ -1064,7 +1062,7 @@ event_t * GetNextEvent_FS (
 			/* Select the following CPU burst event */
 			min_burst = Search_CPU_Burst (fset, &min_burst_cpu, &min_burst_ptask, &min_burst_task, &min_burst_thread);
 		}
-		else if ((min_burst == NULL) || (min_event != NULL && TIMESYNC(min_event_task-1, min_event->time) <= TIMESYNC(min_burst_task-1, min_burst->time)))
+		else if ((min_burst == NULL) || (min_event != NULL && TIMESYNC(min_event_ptask-1, min_event_task-1, min_event->time) <= TIMESYNC(min_burst_ptask-1, min_burst_task-1, min_burst->time)))
 		{
 			/* Return the minimum normal event */
 			ret = min_event;
@@ -1229,15 +1227,17 @@ int MatchComms_Enabled(unsigned int ptask, unsigned int task, unsigned int threa
  ***  Search_Synchronization_Times
  ******************************************************************************/
 
-int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes)
+int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
+	UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes)
 {
 #if defined(PARALLEL_MERGE)
 	int rc = 0;
+	int pos = 0;
+	UINT64 *tmp_StartingTimes = NULL;
+	UINT64 *tmp_SynchronizationTimes = NULL;
 #endif
 	int i = 0;
 	int total_mpits = 0;
-	int mpit_taskid = 0;
-	int num_tasks = 0, sum_num_tasks = 0;
 	UINT64 *StartingTimes = NULL;
 	UINT64 *SynchronizationTimes = NULL;
 	event_t *current = NULL;
@@ -1255,20 +1255,21 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 	/* Allocate space for the synchronization times of each task */
 	xmalloc(StartingTimes, total_mpits * sizeof(UINT64));
 	memset (StartingTimes, 0, total_mpits * sizeof(UINT64));
-
 	xmalloc(SynchronizationTimes, total_mpits * sizeof(UINT64));
 	memset (SynchronizationTimes, 0, total_mpits * sizeof(UINT64));
+
+#if defined(PARALLEL_MERGE)
+	xmalloc(tmp_StartingTimes, total_mpits * sizeof(UINT64));
+	memset (tmp_StartingTimes, 0, total_mpits * sizeof(UINT64));
+	xmalloc(tmp_SynchronizationTimes, total_mpits * sizeof(UINT64));
+	memset (tmp_SynchronizationTimes, 0, total_mpits * sizeof(UINT64));
+#endif
 
 	for (i=0; i<fset->nfiles; i++)
 	{
 		/* All threads within a task share the synchronization times */
 		if (fset->files[i].thread - 1 == 0)
 		{
-			num_tasks ++;
-
-			/* Which task is this mpit? */
-			mpit_taskid = fset->files[i].task - 1;
-
 			current = Current_FS (&(fset->files[i]));
 			if (current != NULL)
 			{
@@ -1279,7 +1280,7 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 				mpi_init_end_time = pacx_init_end_time = trace_init_end_time = 0;
 
 				/* Save the starting tracing time of this task */
-				StartingTimes[mpit_taskid] = current->time;
+				StartingTimes[i] = current->time;
 
 				/* Locate MPI_INIT_EV, PACX_INIT_EV and/or TRACE_INIT_EV
 				   Be careful not to stop on TRACE_INIT_EV because a MPI_INIT_EV/PACX_INIT_EV may
@@ -1306,11 +1307,11 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 				}
 
 				if (found_mpi_init_end_time)
-					SynchronizationTimes[mpit_taskid] = mpi_init_end_time;
+					SynchronizationTimes[i] = mpi_init_end_time;
 				else if (found_pacx_init_end_time)
-					SynchronizationTimes[mpit_taskid] = pacx_init_end_time;
+					SynchronizationTimes[i] = pacx_init_end_time;
 				else if (found_trace_init_end_time)
-					SynchronizationTimes[mpit_taskid] = trace_init_end_time;
+					SynchronizationTimes[i] = trace_init_end_time;
 			}
 		}
 	}
@@ -1323,28 +1324,64 @@ int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, U
 	xmalloc(*io_SynchronizationTimes, total_mpits * sizeof(UINT64));
 	memset (*io_SynchronizationTimes, 0, total_mpits * sizeof(UINT64));
 
-	rc = MPI_Allreduce(StartingTimes, *io_StartingTimes, total_mpits, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
-	MPI_CHECK(rc, MPI_Allreduce, "Failed to share starting times information!");
+	if (taskid == 0)
+	{
+		for (i = 0; i < fset->nfiles; i++)
+		{
+			tmp_StartingTimes[i] = StartingTimes[i];
+			tmp_SynchronizationTimes[i] = SynchronizationTimes[i];
+		}
+		pos = fset->nfiles;
+	}
+	for (i = 1; i < ntasks; i++)
+	{
+		if (taskid == 0)
+		{
+			MPI_Status s;
+			unsigned tmp;
+			rc = MPI_Recv (&tmp, 1, MPI_UNSIGNED, i, NUMBER_SYNC_TIMES_TAG, MPI_COMM_WORLD, &s);
+			MPI_CHECK(rc, MPI_Recv, "Sharing (recv) number of sync times");
+			rc = MPI_Recv (&tmp_StartingTimes[pos], tmp, MPI_LONG_LONG_INT, i, SYNC_TIMES_TAG, MPI_COMM_WORLD, &s);
+			MPI_CHECK(rc, MPI_Recv, "Sharing (recv) starting times");
+			rc = MPI_Recv (&tmp_SynchronizationTimes[pos], tmp, MPI_LONG_LONG_INT, i, START_TIMES_TAG, MPI_COMM_WORLD, &s);
+			MPI_CHECK(rc, MPI_Recv, "Sharing (recv) synchronization times");
 
-	rc = MPI_Allreduce(SynchronizationTimes, *io_SynchronizationTimes, total_mpits, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
-	MPI_CHECK(rc, MPI_Allreduce, "Failed to share synchronization times information!");
-	
+			pos += tmp;
+		}
+		else if (taskid == i)
+		{
+			rc = MPI_Send (&(fset->nfiles), 1, MPI_UNSIGNED, 0, NUMBER_SYNC_TIMES_TAG, MPI_COMM_WORLD);
+			MPI_CHECK(rc, MPI_Send, "Sharing (send) number of sync times");
+			rc = MPI_Send (StartingTimes, fset->nfiles, MPI_LONG_LONG_INT, 0, SYNC_TIMES_TAG, MPI_COMM_WORLD);
+			MPI_CHECK(rc, MPI_Send, "Sharing (send) starting times");
+			rc = MPI_Send (SynchronizationTimes, fset->nfiles, MPI_LONG_LONG_INT, 0, START_TIMES_TAG, MPI_COMM_WORLD);
+			MPI_CHECK(rc, MPI_Send, "Sharing (send) synchronization times");
+		}
+		rc = MPI_Barrier (MPI_COMM_WORLD);
+		MPI_CHECK(rc, MPI_Barrier, "Synchronization of sync times");
+	}
+
+	rc = MPI_Bcast (&total_mpits, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_CHECK(rc, MPI_Bcast, "Sharing count of io_StartingTimes/io_SynchronizationTimes");
+	rc = MPI_Bcast (tmp_StartingTimes, total_mpits, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
+	MPI_CHECK(rc, MPI_Bcast, "Sharing io_StartingTimes");
+	rc = MPI_Bcast (tmp_SynchronizationTimes, total_mpits, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
+	MPI_CHECK(rc, MPI_Bcast, "Sharing io_SynchronizationTimes");
+
+	*io_StartingTimes = tmp_StartingTimes;
+	*io_SynchronizationTimes = tmp_SynchronizationTimes;
+
 	xfree(StartingTimes);
 	xfree(SynchronizationTimes);
 
-	/* Every process has a subset of mpits => num_tasks has to be aggregated */
-	rc = MPI_Allreduce(&num_tasks, &sum_num_tasks, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 #else
 	*io_StartingTimes = StartingTimes;
 	*io_SynchronizationTimes = SynchronizationTimes;
-
-	sum_num_tasks = num_tasks;
 #endif
 
 	Rewind_FS (fset);
 
-	/*return total_mpits;*/
-	return sum_num_tasks;
+	return 0;
 }
 
 #if defined(HETEROGENEOUS_SUPPORT)

@@ -109,6 +109,10 @@ value_t;
 #define FLUSH_LBL              "Flushing Traces"
 #define READ_LBL               "I/O Read"
 #define WRITE_LBL              "I/O Write"
+#define FORK_LBL               "fork()"
+#define WAIT_LBL               "wait()"
+#define WAITPID_LBL            "waitpid()"
+#define EXEC_LBL               "exec() or similar"
 
 #define TRACING_LBL            "Tracing"
 

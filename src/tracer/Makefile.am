@@ -106,7 +106,9 @@ WRAPPERS_CORE = \
  wrappers/API/threadinfo.c wrappers/API/threadinfo.h \
  wrappers/API/trace_buffers.h \
  trace_macros.h trace_macros_mpi.h trace_macros_omp.h trace_macros_pacx.h \
- trace_hwc.h
+ trace_hwc.h \
+ wrappers/fork/fork_wrapper.c wrappers/fork/fork_wrapper.h \
+ probes/fork/fork_probe.c probes/fork/fork_probe.h 
 
 # Wrappers for CUDA instrumentation
 WRAPPERS_CUDA = probes/CUDA/cuda_probe.c probes/CUDA/cuda_probe.h \
@@ -330,7 +332,9 @@ core_INCLUDES = \
  -I. -I$(HWC_DIR) -I$(CLOCKS_DIR) -I$(INTERFACES_DIR)/API -I$(INTERFACES_DIR)/MPI -I$(INTERFACES_DIR)/PACX \
  -I$(WRAPPERS_DIR)/API -I$(WRAPPERS_DIR)/MPI -I$(WRAPPERS_DIR)/PACX \
  -I$(WRAPPERS_DIR)/OMP -I$(WRAPPERS_DIR)/pthread -I$(WRAPPERS_DIR)/CUDA \
+ -I$(PROBES_DIR)/fork \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_DIR) $(UNWIND_CFLAGS)
+
 if IS_CELL_MACHINE
   core_INCLUDES += -I$(WRAPPERS_DIR)/CELL -I$(TRACER_DIR)/spu
 endif

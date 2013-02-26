@@ -27,45 +27,22 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+#ifndef FORK_WRAPPER_H_INCLUDED
+#define FORK_WRAPPER_H_INCLUDED
 
-#include "config.h"
+void Extrae_Probe_fork_Entry (void);
+void Extrae_Probe_fork_Exit (void);
+void Extrae_Probe_fork_parent_Exit (void);
+void Extrae_Probe_fork_child_Exit (void);
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+void Extrae_Probe_wait_Entry (void);
+void Extrae_Probe_wait_Exit (void);
 
-typedef struct input_t
-{
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
+void Extrae_Probe_waitpid_Entry (void);
+void Extrae_Probe_waitpid_Exit (void);
 
-	int InputForWorker;           /* Which task is responsible for this file */
+void Extrae_Probe_exec_Entry (void);
+void Extrae_Probe_exec_Exit (void);
 
-	int fd;
-	char *name;
-	char *node;
-	char *threadname;
-}
-input_t;
+#endif /* FORK_WRAPPER_H_INCLUDED */
 
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
-
-void merger_pre (int numtasks);
-void ProcessArgs (int rank, int argc, char *argv[]);
-int merger_post (int numtasks, int idtask);
-
-void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid);
-
-#endif

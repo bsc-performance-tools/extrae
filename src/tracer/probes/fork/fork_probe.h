@@ -27,45 +27,20 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+#ifndef PTHREAD_FORK_H_INCLUDED
+#define PTHREAD_FORK_H_INCLUDED
 
-#include "config.h"
+void Probe_fork_Entry (void);
+void Probe_fork_parent_Exit (void);
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+void Probe_wait_Entry (void);
+void Probe_wait_Exit (void);
 
-typedef struct input_t
-{
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
+void Probe_waitpid_Entry (void);
+void Probe_waitpid_Exit (void);
 
-	int InputForWorker;           /* Which task is responsible for this file */
+void Probe_exec_Entry (void);
+void Probe_exec_Exit (void);
 
-	int fd;
-	char *name;
-	char *node;
-	char *threadname;
-}
-input_t;
+#endif /* PTHREAD_FORK_H_INCLUDED */
 
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
-
-void merger_pre (int numtasks);
-void ProcessArgs (int rank, int argc, char *argv[]);
-int merger_post (int numtasks, int idtask);
-
-void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid);
-
-#endif

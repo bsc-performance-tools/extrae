@@ -33,7 +33,7 @@
 /*------------------------------------------------ Prototypes ---------------*/
 
 void HWCBE_PMAPI_Initialize (int TRCOptions);
-int HWCBE_PMAPI_Init_Thread (UINT64 time, int threadid);
+int HWCBE_PMAPI_Init_Thread (UINT64 time, int threadid, int forked);
 void HWCBE_PMAPI_CleanUp (void);
 
 int HWCBE_PMAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int threadid);

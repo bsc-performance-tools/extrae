@@ -112,8 +112,8 @@ extern int * HWC_current_set;
 # define HWCBE_INITIALIZE(options) \
     HWCBE_PAPI_Initialize (options)
 
-# define HWCBE_START_COUNTERS_THREAD(time, tid)    \
-    HWCBE_PAPI_Init_Thread(time, tid)
+# define HWCBE_START_COUNTERS_THREAD(time, tid, forked) \
+    HWCBE_PAPI_Init_Thread(time, tid, forked)
 
 # define HWCBE_START_SET(glops, time, current_set, thread_id) \
     HWCBE_PAPI_Start_Set(glops, time, current_set, thread_id)
@@ -150,8 +150,8 @@ extern int * HWC_current_set;
 # define HWCBE_INITIALIZE(options) \
     HWCBE_PMAPI_Initialize (options)
 
-# define HWCBE_START_COUNTERS_THREAD(time, tid) \
-    HWCBE_PMAPI_Init_Thread(time, tid)
+# define HWCBE_START_COUNTERS_THREAD(time, tid, forked) \
+    HWCBE_PMAPI_Init_Thread(time, tid, forked)
 
 # define HWCBE_START_SET(glops, time, current_set, thread_id) \
     HWCBE_PMAPI_Start_Set(glops, time, current_set, thread_id);

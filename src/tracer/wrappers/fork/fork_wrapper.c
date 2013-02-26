@@ -26,46 +26,91 @@
  | @last_commit: $Date$
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+static char UNUSED rcsid[] = "$Id$";
 
-#include "config.h"
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
+#include "threadid.h"
+#include "wrapper.h"
+#include "trace_macros.h"
+#include "fork_probe.h"
 
-typedef struct input_t
+static pid_t MYPID; /* Used to determin parent's PID and discern between parent & child */
+
+void Extrae_Probe_fork_Entry (void)
 {
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
+	MYPID = getpid();
 
-	int InputForWorker;           /* Which task is responsible for this file */
+	Backend_Enter_Instrumentation (2);
+	Probe_fork_Entry ();
 
-	int fd;
-	char *name;
-	char *node;
-	char *threadname;
-}
-input_t;
-
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
-
-void merger_pre (int numtasks);
-void ProcessArgs (int rank, int argc, char *argv[]);
-int merger_post (int numtasks, int idtask);
-
-void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid);
-
+#if USE_HARDWARE_COUNTERS
+	/* We need to stop counters and restart after fork() */
+	HWC_Stop_Current_Set (LAST_READ_TIME, THREADID);
 #endif
+}
+
+void Extrae_Probe_fork_parent_Exit (void)
+{
+	Probe_fork_parent_Exit();
+
+#if USE_HARDWARE_COUNTERS
+	/* We need to start counters again */
+	HWC_Start_Current_Set (0, LAST_READ_TIME, THREADID);
+#endif
+	Backend_Leave_Instrumentation();
+}
+
+void Extrae_Probe_fork_child_Exit (void)
+{
+	if (mpitrace_on)
+		Extrae_init_tracing (TRUE);
+}
+
+void Extrae_Probe_fork_Exit (void)
+{
+	if (MYPID == getpid())
+		Extrae_Probe_fork_parent_Exit();
+	else
+		Extrae_Probe_fork_child_Exit();
+}
+
+void Extrae_Probe_wait_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_wait_Entry();
+}
+
+void Extrae_Probe_wait_Exit (void)
+{
+	Probe_wait_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void Extrae_Probe_waitpid_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_waitpid_Entry();
+}
+
+void Extrae_Probe_waitpid_Exit (void)
+{
+	Probe_waitpid_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void Extrae_Probe_exec_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_exec_Entry();
+}
+
+void Extrae_Probe_exec_Exit (void)
+{
+	Probe_exec_Exit();
+	Backend_Leave_Instrumentation();
+}
+

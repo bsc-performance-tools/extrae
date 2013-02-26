@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 26Feb2013 Initial fork+wait+waitpid instrumentation under dyninst (MFB 2.3)
  * 22Feb2013 Fixed bad instrumentation of GOMP_*_next using dyninst (MFB 2.3)
  * 20Feb2013 Added instrumentation for Intel omp_set_num_threads (which is
                named ompc_set_num_threads) (MFB 2.3)

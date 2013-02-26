@@ -333,10 +333,10 @@ static int SendRecv_Event (event_t * current_event,
 					{
 						UINT64 log_r, phy_r;
 
-						log_r = TIMESYNC (task-1, Get_EvTime(thread_info->Send_Rec));
-						phy_r = TIMESYNC (task-1, Get_EvTime(current_event));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1, thread_info->virtual_thread-1,
-						  Get_EvTarget(current_event), fset);
+						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(thread_info->Send_Rec));
+						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
+						AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1,
+							thread_info->virtual_thread-1, Get_EvTarget(current_event), fset);
 					}
 #endif /* PARALLEL_MERGE */
 				}
@@ -557,10 +557,10 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 				{
 					UINT64 log_r, phy_r;
 
-					log_r = TIMESYNC (task-1, Get_EvTime(thread_info->Recv_Rec));
-					phy_r = TIMESYNC (task-1, Get_EvTime(current_event));
-					AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1, thread_info->virtual_thread-1,
-					  Get_EvTarget(current_event), fset);
+					log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(thread_info->Recv_Rec));
+					phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
+					AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1,
+						thread_info->virtual_thread-1, Get_EvTarget(current_event), fset);
 				}
 #endif
 			}
@@ -635,10 +635,10 @@ static int IRecv_Event (event_t * current_event,
 					{
 						UINT64 log_r, phy_r;
 
-						log_r = TIMESYNC (task-1, Get_EvTime(current_event));
-						phy_r = TIMESYNC (task-1, Get_EvTime(receive));
-
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), task-1, thread-1, thread_info->virtual_thread-1, Get_EvTarget(receive), fset);
+						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
+						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), task-1, thread-1,
+							thread_info->virtual_thread-1, Get_EvTarget(receive), fset);
 					}
 #endif
 				}
@@ -762,10 +762,10 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 					{
 						UINT64 log_r, phy_r;
 
-						log_r = TIMESYNC (task-1, Get_EvTime(current_event));
-						phy_r = TIMESYNC (task-1, Get_EvTime(receive));
-
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), task-1, thread-1, thread_info->virtual_thread-1, Get_EvTarget(receive), fset);
+						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
+						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), task-1, thread-1,
+							thread_info->virtual_thread-1, Get_EvTarget(receive), fset);
 					}
 #endif
 				}

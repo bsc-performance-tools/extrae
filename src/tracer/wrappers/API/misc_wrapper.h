@@ -34,6 +34,7 @@
 #include "extrae_types.h"
 
 void Extrae_init_Wrapper(void);
+void Extrae_init_tracing (int forked);
 void Extrae_fini_Wrapper(void);
 void Extrae_shutdown_Wrapper (void);
 void Extrae_restart_Wrapper (void);

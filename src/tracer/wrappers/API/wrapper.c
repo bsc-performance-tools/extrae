@@ -1270,6 +1270,8 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
 
 		buffer_size = new_buffer_size;
 	}
+#else
+	UNREFERENCED_PARAMETER(world_size);
 #endif
 
 	xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
@@ -1448,7 +1450,7 @@ void Backend_setNumTentativeThreads (int numofthreads)
  * Backend_preInitialize :
  ******************************************************************************/
 
-int Backend_preInitialize (int me, int world_size, char *config_file)
+int Backend_preInitialize (int me, int world_size, char *config_file, int forked)
 {
 	int runningInDynInst = FALSE;
 	char trace_sym[TMP_DIR];
@@ -1473,19 +1475,20 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	{
 		if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") == 0)
 		{
-			if (me == 0)
+			if (me == 0 && !forked)
 				fprintf (stdout, PACKAGE_NAME": Target application is being run.\n");
 			runningInDynInst = TRUE;
 		}
 	}
 	else
 	{
-		if (me == 0)
+		if (me == 0 && !forked)
 			fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
 	}
 
 	/* Allocate a bitmap to know which tasks are tracing */
-	Extrae_Allocate_Task_Bitmap (world_size);
+	if (!forked)
+		Extrae_Allocate_Task_Bitmap (world_size);
 
 #if defined(CUDA_SUPPORT)
 		Extrae_CUDA_init (me);
@@ -1559,30 +1562,35 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 #endif
 
 	/* Initialize the clock */
-	CLOCK_INIT (maximum_NumOfThreads);
+	if (!forked)
+		CLOCK_INIT (maximum_NumOfThreads);
 
 	/* Allocate thread info structure */
-	Extrae_allocate_thread_info (maximum_NumOfThreads);
+	if (!forked)
+		Extrae_allocate_thread_info (maximum_NumOfThreads);
 
 	/* Configure the tracing subsystem */
+	if (!forked)
+	{
 #if defined(HAVE_XML2)
-	if (config_file != NULL)
-	{
-		Parse_XML_File  (me, world_size, config_file);
-	}
-	else
-	{
-		if (getenv ("EXTRAE_ON") != NULL)
+		if (config_file != NULL)
+		{
+			Parse_XML_File  (me, world_size, config_file);
+		}
+		else
+		{
+			if (getenv ("EXTRAE_ON") != NULL)
+				read_environment_variables (me);
+			else
+				fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT neither EXTRAE_ON nor EXTRAE_CONFIG_FILE are set!\n");
+		}
+#else
+		if (getenv("EXTRAE_ON") != NULL)
 			read_environment_variables (me);
 		else
-			fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT neither EXTRAE_ON nor EXTRAE_CONFIG_FILE are set!\n");
-	}
-#else
-	if (getenv("EXTRAE_ON") != NULL)
-		read_environment_variables (me);
-	else
-		fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT EXTRAE_ON is NOT set!\n");
+			fprintf (stdout, PACKAGE_NAME": Application has been linked or preloaded with Extrae, BUT EXTRAE_ON is NOT set!\n");
 #endif
+	}
 
 	/* If we aren't tracing, just skip everything! */
 	if (!mpitrace_on)
@@ -1599,7 +1607,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 
 	/* Allocate the buffers and trace files */
 	Allocate_buffers_and_files (world_size, maximum_NumOfThreads);
-
 #if defined(CUDA_SUPPORT)
 	/* Allocate thread info for CUDA execs */
 	Extrae_reallocate_CUDA_info (maximum_NumOfThreads);
@@ -1610,9 +1617,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
 
 #if USE_HARDWARE_COUNTERS
-
 	/* Write hardware counter definitions into the .sym file */
-	if (me == 0)
+	if (me == 0 && !forked)
 	{
 		unsigned count;
 		HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
@@ -1640,10 +1646,13 @@ int Backend_preInitialize (int me, int world_size, char *config_file)
 	}
 
 	/* Start reading counters */
-	HWC_Start_Counters (maximum_NumOfThreads);
+	HWC_Start_Counters (maximum_NumOfThreads, forked);
 #endif
 
 	/* Initialize Tracing Mode related variables */
+	if (forked)
+		Trace_Mode_CleanUp();
+
 	Trace_Mode_Initialize (maximum_NumOfThreads);
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
@@ -1759,7 +1768,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, InitTime, EndTime);
 #endif
 
-	TimeSync_Initialize (world_size);
+	TimeSync_Initialize (1, &world_size);
 
 	xmalloc(StartingTimes, world_size * sizeof(UINT64));
 	memset (StartingTimes, 0, world_size * sizeof(UINT64));
@@ -1796,7 +1805,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	for (i=0; i<world_size; i++)
 	{
 		char *node = (node_list == NULL) ? "" : node_list[i];
-		TimeSync_SetInitialTime (i, StartingTimes[i], SynchronizationTimes[i], node);
+		TimeSync_SetInitialTime (0, i, StartingTimes[i], SynchronizationTimes[i], node);
 	}
 
 	TimeSync_CalculateLatencies (TS_NODE);
@@ -2059,7 +2068,7 @@ void Backend_Finalize (void)
 	/* Launch the merger */
 	if (MergeAfterTracing)
 	{
-		int ptask = 1, cfile = 1;
+		int ptask = 1;
 		char tmp[1024];
 		mpitrace_on = FALSE; /* Turn off tracing now */
 
@@ -2077,7 +2086,7 @@ void Backend_Finalize (void)
 
 		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 		merger_pre (Extrae_get_num_tasks());
-		Read_MPITS_file (tmp, &ptask, &cfile, FileOpen_Default, TASKID);
+		Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
 
 		if (TASKID == 0)
 			fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);

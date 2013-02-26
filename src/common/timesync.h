@@ -51,18 +51,18 @@ enum
 #ifdef __cplusplus
 extern "C" {
 #endif
-int TimeSync_Initialize (int num_tasks);
+int TimeSync_Initialize (int num_appls, int *num_tasks);
 void TimeSync_CleanUp (void);
-int TimeSync_SetInitialTime (int task, UINT64 init_time, UINT64 sync_time, char *node);
+int TimeSync_SetInitialTime (int app, int task, UINT64 init_time, UINT64 sync_time, char *node);
 int TimeSync_CalculateLatencies (int sync_strategy);
-UINT64 TimeSync (int task, UINT64 time);
-UINT64 TimeDesync (int task, UINT64 time);
+UINT64 TimeSync (int app, int task, UINT64 time);
+UINT64 TimeDesync (int app, int task, UINT64 time);
 #ifdef __cplusplus
 }
 #endif
 
-#define TIMESYNC(task, time) TimeSync(task, time)
+#define TIMESYNC(app, task, time) TimeSync(app, task, time)
 
-#define TIMEDESYNC(task, time) TimeDesync(task, time)
+#define TIMEDESYNC(app, task, time) TimeDesync(app,task, time)
 
 #endif /* __TIMESYNC_H__ */

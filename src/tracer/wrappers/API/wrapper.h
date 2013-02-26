@@ -194,7 +194,7 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	char *functionname, char *modulename, unsigned fileline);
 
-int Backend_preInitialize (int rank, int world_size, char *config_file);
+int Backend_preInitialize (int rank, int world_size, char *config_file, int forked);
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);
 
 unsigned Backend_getNumberOfThreads (void);

@@ -269,38 +269,44 @@ static void Generate_Task_File_List (void)
 	return;
 }
 
+void Extrae_init_tracing (int forked)
+{
+	iotimer_t temps_init, temps_fini;
+	char * config_file = getenv ("EXTRAE_CONFIG_FILE");
+	if (config_file == NULL)
+		config_file = getenv ("MPTRACE_CONFIG_FILE");
+
+	/* Initialize the backend */
+	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, forked))
+		return;
+
+	/* Generate a tentative file list */
+	Generate_Task_File_List();
+
+	/* Take the time */
+	temps_init = TIME;
+
+	/* Execute a barrier within tasks so they will be synchronized */
+	Extrae_barrier_tasks();
+
+	/* Take the time (a newer one) */
+	temps_fini = TIME;
+
+	/* End initialization of the backend */
+	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), TRACE_INIT_EV, temps_init, temps_fini, NULL))
+		return;
+
+	Extrae_set_is_initialized (EXTRAE_INITIALIZED_EXTRAE_INIT);
+	Extrae_set_initial_TASKID (TASKID);
+}
+
 void Extrae_init_Wrapper (void)
 {
 	/* Do not initialize if it's already initialized */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
-		iotimer_t temps_init, temps_fini;
-		char * config_file = getenv ("EXTRAE_CONFIG_FILE");
-		if (config_file == NULL)
-			config_file = getenv ("MPTRACE_CONFIG_FILE");
-
-		/* Initialize the backend */
-		if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file))
-			return;
-
-		/* Generate a tentative file list */
-		Generate_Task_File_List();
-
-		/* Take the time */
-		temps_init = TIME;
-
-		/* Execute a barrier within tasks so they will be synchronized */
-		Extrae_barrier_tasks();
-
-		/* Take the time (a newer one) */
-		temps_fini = TIME;
-
-		/* End initialization of the backend */
-		if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), TRACE_INIT_EV, temps_init, temps_fini, NULL))
-			return;
-
-		Extrae_set_is_initialized (EXTRAE_INITIALIZED_EXTRAE_INIT);
-		Extrae_set_initial_TASKID (TASKID);
+		/* Actually initialize the tracing */
+		Extrae_init_tracing(FALSE);
 	}
 	else
 	{

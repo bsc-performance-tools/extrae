@@ -350,8 +350,10 @@ void HWCBE_PMAPI_Initialize (int TRCOptions)
 	fprintf (stdout, PACKAGE_NAME": PMAPI successfully initialized for %s processor with %d available PMCs.\n", ProcessorMetric_Info.proc_name, ProcessorMetric_Info.maxpmcs);
 }
 
-int HWCBE_PMAPI_Init_Thread (UINT64 time, int threadid)
+int HWCBE_PMAPI_Init_Thread (UINT64 time, int threadid, int forked)
 {
+	UNREFERENCED_PARAMETER(forked);
+
 	HWC_Thread_Initialized[threadid] = HWCBE_PMAPI_Start_Set (0, time, HWC_current_set[threadid], threadid);
 	return HWC_Thread_Initialized[threadid];
 }

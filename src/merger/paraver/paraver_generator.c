@@ -759,7 +759,11 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 #endif
 			node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
 
-			sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
+			/* Add the communicators info at the last application / ptask */
+			if (ptask == num_appl-1)
+				sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
+			else
+				sprintf (Header, "%d:%d),", threads, node);
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
 #if defined(PARALLEL_MERGE)
@@ -1169,7 +1173,8 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 			/* Do nothing */
 		}
 
-		MPI_Barrier (MPI_COMM_WORLD);
+		res = MPI_Barrier (MPI_COMM_WORLD);
+		MPI_CHECK(res, MPI_Barrier, "Failed to step to the next tree level")
 		if (taskid == 0)
 		{
 			gettimeofday (&time_end, NULL);
@@ -1204,15 +1209,25 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 	Free_FS (fset);
 
-	fprintf (stdout, "mpi2prv: Removing temporal files... ");
-	fflush (stdout);
-	gettimeofday (&time_begin, NULL);
+	if (taskid == 0)
+	{
+		fprintf (stdout, "mpi2prv: Removing temporal files... ");
+		fflush (stdout);
+		gettimeofday (&time_begin, NULL);
+	}
 	WriteFileBuffer_deleteall();
-	gettimeofday (&time_end, NULL);
-	fprintf (stdout, "done\n");
-	fflush (stdout);
-	delta = time_end.tv_sec - time_begin.tv_sec;
-	fprintf (stdout, "mpi2prv: Elapsed time removing temporal files: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+#if defined(PARALLEL_MERGE)
+	res = MPI_Barrier (MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Barrier, "Failed to step to the next tree level")
+#endif
+	if (taskid == 0)
+	{
+		gettimeofday (&time_end, NULL);
+		fprintf (stdout, "done\n");
+		fflush (stdout);
+		delta = time_end.tv_sec - time_begin.tv_sec;
+		fprintf (stdout, "mpi2prv: Elapsed time removing temporal files: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+	}
 
 #if defined(IS_BG_MACHINE)
 #if defined(DEAD_CODE)

@@ -33,9 +33,6 @@ static char UNUSED rcsid[] = "$Id$";
 #if HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
-#if HAVE_STDIO_H
-# include <stdio.h>
-#endif
 #if HAVE_STRING_H
 # include <string.h>
 #endif
@@ -61,6 +58,7 @@ using namespace std;
 
 #include "commonSnippets.h"
 #include "applicationType.h"
+#include "forkSnippets.h"
 #include "cudaSnippets.h"
 #include "ompSnippets.h"
 #include "mpiSnippets.h"
@@ -91,10 +89,10 @@ static string loadedModule;
  **      Author : HSG
  **      Description : Checks whether a file exists
  ******************************************************************************/
-static int file_exists (char *fitxer)
+static int file_exists (char *fname)
 {
 	struct stat buffer;
-	return stat(fitxer, &buffer)== 0;
+	return stat (fname, &buffer)== 0;
 }
 
 void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
@@ -106,7 +104,7 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 		{
 			// conditional reporting of warnings and informational messages
 			if (level != BPatchInfo)
-				fprintf (stderr, PACKAGE_NAME": %s", params[0]);
+				cerr << PACKAGE_NAME": " << params[0] << endl;
 		}
 		else
 		{
@@ -118,7 +116,7 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 			if (num != DYNINST_NO_ERROR)
 			{
 				if (num != 112)
-					fprintf (stderr, PACKAGE_NAME":Error #%d (level %d): %s\n", num, level, line);
+					cerr << PACKAGE_NAME": Error #" << num << " (level " << level << "): " << line << endl;
 			}
 		}
 	}
@@ -763,7 +761,7 @@ int main (int argc, char *argv[])
 	/* Don't check recursion in snippets */
 	bpatch->setTrampRecursive (true);
 
-	cout << "Welcome to " << PACKAGE_STRING << " launcher based on DynInst" << endl;
+	cout << "Welcome to " << PACKAGE_STRING << " launcher based on DynInst " << DYNINST_MAJOR << "." << DYNINST_MINOR << "." << DYNINST_SUBMINOR << endl;
 	if (!BinaryRewrite)
 		cout << PACKAGE_NAME << ": Creating process for image binary " << argv[index] << endl;
 	else
@@ -923,6 +921,9 @@ int main (int argc, char *argv[])
 		loadAPIPatches (appImage);
 		if (appType->get_isMPI() && ::XML_GetTraceMPI())
 			loadMPIPatches (appImage);
+
+		/* Instrument fork, wait, waitpid and exec calls */
+		InstrumentForks (appImage);
 
 		/* Apply instrumentation of runtimes only if not linked with Extrae */
 		if (!BinaryLinkedWithInstrumentation && appType->get_isOpenMP())

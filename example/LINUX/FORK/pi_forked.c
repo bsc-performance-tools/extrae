@@ -26,46 +26,51 @@
  | @last_commit: $Date$
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
-
-#include "config.h"
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
+double pi_kernel (int n, double h)
 {
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
+	double tmp = 0;
+	double x;
+	int i;
 
-	int InputForWorker;           /* Which task is responsible for this file */
+	for (i = 1; i <= n; i++)
+	{
+		x = h * ((double)i - 0.5);
+		tmp += (4.0 / (1.0 + x*x));
+	}
 
-	int fd;
-	char *name;
-	char *node;
-	char *threadname;
+	return tmp;
 }
-input_t;
 
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
+int main(int argc, char **argv)
+{
+	int n = 100*1000*1000;
+	double PI25DT = 3.141592653589793238462643;
+	double pi, h, area, x;
+	pid_t p;
+	int i;
 
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
+	p = fork();
 
-void merger_pre (int numtasks);
-void ProcessArgs (int rank, int argc, char *argv[]);
-int merger_post (int numtasks, int idtask);
-
-void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid);
-
-#endif
+	if (p == 0)
+	{
+		printf ("Child is about to calculate pi...\n");
+		fflush (stdout);
+		pi_kernel (n, h);
+		printf ("Child finished\n");
+		fflush (stdout);
+	}
+	else
+	{
+		int status;
+		printf ("Parent is waiting...\n");
+		fflush (stdout);
+		waitpid (p, &status, 0);
+		printf ("Parent finished waiting\n");
+		fflush (stdout);
+	}
+	return 0;
+}

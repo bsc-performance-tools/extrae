@@ -122,7 +122,7 @@ bool ApplicationType::detectApplicationType_checkOpenMPrte (
 	for (unsigned r = 0; r < numroutines && !result; r++)
 	{
 		BPatch_Vector<BPatch_function *> found_funcs;
-		found_funcs = getRoutines (routines[r], appImage, false);
+		found_funcs = getRoutines (routines[r], appImage);
 		unsigned numfuncs = found_funcs.size();
 		for (unsigned u = 0; u < numfuncs && !result; u++)
 		{

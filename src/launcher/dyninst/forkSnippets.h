@@ -27,45 +27,16 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+#ifndef _FORK_SNIPPETS_H_INCLUDED_
+#define _FORK_SNIPPETS_H_INCLUDED_
 
-#include "config.h"
+#include <BPatch.h>
+#include <BPatch_snippet.h>
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
-{
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
-
-	int InputForWorker;           /* Which task is responsible for this file */
-
-	int fd;
-	char *name;
-	char *node;
-	char *threadname;
-}
-input_t;
-
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
-
-void merger_pre (int numtasks);
-void ProcessArgs (int rank, int argc, char *argv[]);
-int merger_post (int numtasks, int idtask);
-
-void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid);
+void InstrumentForks (BPatch_image *appImage);
+BPatch_snippet getSnippetForkEntry (void);
+BPatch_snippet getSnippetForkParentExit (void);
+BPatch_snippet getSnippetForkChildExit (void);
 
 #endif
+

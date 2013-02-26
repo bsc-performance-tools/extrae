@@ -43,7 +43,9 @@
 /* To ensure certain conditions at any point in the code */
 #define ASSERT(condition, message) {                               \
    if (!(condition)) {                                             \
-      fprintf (stderr, PACKAGE_NAME ": ASSERTION FAILED on %s [%s:%d]\n%s\n%s\n", \
+      fprintf (stderr, PACKAGE_NAME ": ASSERTION FAILED on %s [%s:%d]\n" \
+                       PACKAGE_NAME ": CONDITION:   %s\n" \
+                       PACKAGE_NAME ": DESCRIPTION: %s\n", \
                __FUNCTION__,                                       \
                __FILE__,                                           \
                __LINE__,                                           \
@@ -55,7 +57,8 @@
                   
 #define PRINT_PRETTY_ERROR(severity, message)                      \
 {                                                                  \
-   fprintf (stderr, PACKAGE_NAME ": %s on %s [%s:%d]\n%s\n",         \
+   fprintf (stderr, PACKAGE_NAME ": %s on %s [%s:%d]\n"            \
+                    PACKAGE_NAME ": DESCRIPTION: %s\n",            \
             severity,                                              \
             __FUNCTION__,                                          \
             __FILE__,                                              \

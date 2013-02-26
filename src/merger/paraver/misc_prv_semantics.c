@@ -984,8 +984,8 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 		{
 			UINT64 log_r, phy_r;
 
-			log_r = TIMESYNC (task-1, Get_EvTime(current_event));
-			phy_r = TIMESYNC (task-1, Get_EvTime(current_event));
+			log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
+			phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1,
 			  thread_info->virtual_thread-1, partner, fset);
 		}
@@ -1145,6 +1145,68 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 	return 0;
 }
 
+/******************************************************************************
+ ***  Register_CodeLocation_Type_Event
+ ******************************************************************************/
+
+static int Fork_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Switch_State (STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  Register_CodeLocation_Type_Event
+ ******************************************************************************/
+
+static int Wait_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Switch_State (STATE_BLOCKED, (EvValue == EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  Register_CodeLocation_Type_Event
+ ******************************************************************************/
+
+static int Exec_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(current_event);
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(thread);
+	UNREFERENCED_PARAMETER(fset);
+
+	return 0;
+}
 
 /*****************************************************************************/
 
@@ -1183,6 +1245,10 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SUSPEND_VIRTUAL_THREAD_EV, Suspend_Virtual_Thread_Event },
 	{ REGISTER_STACKED_TYPE_EV, Register_Stacked_Type_Event },
 	{ REGISTER_CODELOCATION_TYPE_EV, Register_CodeLocation_Type_Event },
+	{ FORK_EV, Fork_Event },
+	{ WAIT_EV, Wait_Event },
+	{ WAITPID_EV, Wait_Event },
+	{ EXEC_EV, Exec_Event },
 	{ NULL_EV, NULL }
 };
 

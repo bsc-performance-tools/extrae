@@ -53,7 +53,7 @@ extern "C" {
 int HWC_IsEnabled();
 void HWC_Initialize (int options);
 void HWC_CleanUp (unsigned nthreads);
-void HWC_Start_Counters (int num_threads);
+void HWC_Start_Counters (int num_threads, int forked);
 void HWC_Restart_Counters (int old_num_threads, int new_num_threads);
 
 void HWC_Start_Next_Set (UINT64 glops, UINT64 time, int thread_id);
@@ -62,7 +62,8 @@ int HWC_Check_Pending_Set_Change (UINT64 countglops, UINT64 time, int thread_id)
 int HWC_Add_Set (int pretended_set, int rank, int ncounters, char **counters, char *domain, 
                  char *change_at_globalops, char *change_at_time, int num_overflows, 
                  char **overflow_counters, unsigned long long *overflow_values);
-
+void HWC_Start_Current_Set (UINT64 countglops, UINT64 time, int thread_id);
+void HWC_Stop_Current_Set (UINT64 time, int thread_id);
 int HWC_Get_Current_Set (int threadid);
 int HWC_Get_Num_Sets ();
 int HWC_Get_Set_Counters_Ids (int set_id, int **io_HWCIds);

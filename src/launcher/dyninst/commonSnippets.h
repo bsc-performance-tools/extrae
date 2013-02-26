@@ -37,13 +37,13 @@
 using namespace std;
 
 BPatch_Vector<BPatch_function *> getRoutines (string &routine,
-	BPatch_image *appImage, bool warn = true);
+	BPatch_image *appImage);
 
 BPatch_function * getRoutine (string &routine, BPatch_image *appImage,
 	bool warn = true);
 
 BPatch_Vector<BPatch_function *> getRoutines (const char *routine,
-	BPatch_image *appImage, bool warn = true);
+	BPatch_image *appImage);
 
 BPatch_function * getRoutine (const char *routine, BPatch_image *appImage,
 	bool warn = true);
@@ -53,6 +53,10 @@ void wrapRoutine (BPatch_image *appImage, string routine, string wrap_begin,
 
 void wrapTypeRoutine (BPatch_function *function, string routine, int type,
 	BPatch_image *appImage);
+
+BPatch_snippet SnippetForRoutineCall (BPatch_image *appImage, string routine, 
+	unsigned nparams);
+
 
 #endif
 

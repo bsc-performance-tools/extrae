@@ -153,13 +153,13 @@ void Help (const char *ProgName)
  ******************************************************************************/
 
 static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptask,
-	int *cfiles, int taskid)
+	int taskid)
 {
 	int name_length;
 	int task;
 	int thread;
 	int i;
-	int cur_ptask = *cptask, cur_files = *cfiles;
+	int cur_ptask = *cptask;
 	char *tmp_name;
 
 	InputTraces[nTraces].InputForWorker = -1;
@@ -264,9 +264,6 @@ static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptas
 	}
 
 	nTraces++;
-	cur_files++;
-
-	*cfiles = cur_files;
 }
 
 /******************************************************************************
@@ -302,8 +299,7 @@ static char *strip (char *buffer)
 
 static char *last_mpits_file = NULL;
 
-void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t opentype,
-	int taskid)
+void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid)
 {
 	int info;
 	char mybuffer[4096];
@@ -340,10 +336,16 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 			info = sscanf (mybuffer, "%s on %s named %s", path, host, thdname);
 			stripped = strip (path);
 
-			/* If mode is not forced, check first if the absolute path exists,
-			   if not, try to open in the current directory */
-			if (opentype == FileOpen_Default)
+			if (strncmp (mybuffer, "--", 2) == 0)
 			{
+				/* If we find --, advance to the next ptask */
+				(*cptask)++;
+			}
+			else if (info >= 1 && opentype == FileOpen_Default)
+			{
+				/* If mode is not forced, check first if the absolute path exists,
+				   if not, try to open in the current directory */
+
 				if (!file_exists(stripped))
 				{
 					/* Look for /set- in string, and then use set- (thus +1) */
@@ -358,24 +360,24 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 							char *directory = dirname (duplicate);
 
 							sprintf (dir_file, "%s%s", directory, stripped_basename);
-							Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
+							Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
 
 							free (duplicate);
 						}
 						else
-							Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
+							Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
 					}
 					else
 						fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
 				}
 				else
-					Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
+					Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
 			}
-			else if (opentype == FileOpen_Absolute)
+			else if (info >= 1 && opentype == FileOpen_Absolute)
 			{
-				Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
+				Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
 			}
-			else if (opentype == FileOpen_Relative)
+			else if (info >= 1 && opentype == FileOpen_Relative)
 			{
 				/* Look for /set- in string, and then use set- (thus +1) */
 				char * stripped_basename = strstr (stripped, "/set-");
@@ -389,12 +391,12 @@ void Read_MPITS_file (const char *file, int *cptask, int *cfiles, FileOpen_t ope
 						char *directory = dirname (duplicate);
 
 						sprintf (dir_file, "%s%s", directory, stripped_basename);
-						Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
+						Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
 
 						free (duplicate);
 					}
 					else
-						Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, cfiles, taskid);
+						Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
 				}
 				else
 					fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
@@ -416,8 +418,6 @@ void ProcessArgs (int rank, int argc, char *argv[])
 	int CurArg;
 	unsigned int cur_ptask = 1;   /* Ptask counter. Each -- the ptask number is
 	                               * incremented. */
-	unsigned int cur_files = 1;   /* File counter within a Ptask. */
-
 	if (argc == 1)                /* No params? */
 	{
 		Help (argv[0]);
@@ -534,7 +534,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Default, rank);
+				Read_MPITS_file (argv[CurArg], &cur_ptask, FileOpen_Default, rank);
 			}
 			else 
 			{
@@ -550,7 +550,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Relative, rank);
+				Read_MPITS_file (argv[CurArg], &cur_ptask, FileOpen_Relative, rank);
 			}
 			else 
 			{
@@ -566,7 +566,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			CurArg++;
 			if (CurArg < argc)
 			{
-				Read_MPITS_file (argv[CurArg], &cur_ptask, &cur_files, FileOpen_Absolute, rank);
+				Read_MPITS_file (argv[CurArg], &cur_ptask, FileOpen_Absolute, rank);
 			}
 			else 
 			{
@@ -795,15 +795,11 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		}
 		if (!strcmp (argv[CurArg], "--"))
 		{
-			if (cur_files != 1)
-			{
-				cur_ptask++;
-				cur_files = 1;
-			}
+			cur_ptask++;
 			continue;
 		}
 		else
-			Process_MPIT_File ((char *) (argv[CurArg]), NULL, NULL, &cur_ptask, &cur_files, rank);
+			Process_MPIT_File ((char *) (argv[CurArg]), NULL, NULL, &cur_ptask, rank);
 	}
 	set_option_merge_NumApplications (cur_ptask);
 

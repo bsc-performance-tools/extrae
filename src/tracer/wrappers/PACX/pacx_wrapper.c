@@ -743,7 +743,7 @@ void PPACX_Init_Wrapper (PACX_Fint *ierror)
 			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return;
 
@@ -862,7 +862,7 @@ void PPACX_Init_thread_Wrapper (PACX_Fint *required, PACX_Fint *provided, PACX_F
 			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return;
 
@@ -3791,7 +3791,7 @@ int PACX_Init_C_Wrapper (int *argc, char ***argv)
 			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return val;
 
@@ -3895,7 +3895,7 @@ int PACX_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *prov
 			config_file = PACX_Distribute_XML_File (TASKID, Extrae_get_num_tasks(), config_file);
 
 		/* Initialize the backend */
-		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file);
+		res = Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, FALSE);
 		if (!res)
 			return val;
 

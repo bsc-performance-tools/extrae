@@ -183,6 +183,40 @@ int HWC_Get_Position_In_Set (int set_id, int hwc_id)
 }
 
 /**
+ * Stops the current set
+ * \param thread_id The thread that changes the set. 
+ */
+void HWC_Stop_Current_Set (UINT64 time, int thread_id)
+{
+	/* If there are less than 2 sets, don't do anything! */
+	if (HWC_num_sets > 0)
+	{
+		/* make sure we don't loose the current counter values */
+		Extrae_counters_Wrapper();
+
+		/* Actually stop the counters */
+		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
+	}
+}
+
+/**
+ * Resumes the current set
+ * \param thread_id The thread that changes the set. 
+ */
+void HWC_Start_Current_Set (UINT64 countglops, UINT64 time, int thread_id)
+{
+	/* If there are less than 2 sets, don't do anything! */
+	if (HWC_num_sets > 0)
+	{
+		/* make sure we don't loose the current counter values */
+		Extrae_counters_Wrapper();
+
+		/* Actually stop the counters */
+		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
+	}
+}
+
+/**
  * Stops the current set and starts reading the next one.
  * \param thread_id The thread that changes the set. 
  */
@@ -191,15 +225,12 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
 	{
-		/* make sure we don't loose the current counter values */
-		Extrae_counters_Wrapper();
-
-		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
+		HWC_Stop_Current_Set (time, thread_id);
 
 		/* Move to the next set */
 		HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
 
-		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
+		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
 }
 
@@ -212,15 +243,12 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
 	{
-		/* make sure we don't loose the current counter values */
-		Extrae_counters_Wrapper();
-
-		HWCBE_STOP_SET (time, HWC_current_set[thread_id], thread_id);
+		HWC_Stop_Current_Set (time, thread_id);
 
 		/* Move to the previous set */
 		HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
 
-		HWCBE_START_SET (countglops, time, HWC_current_set[thread_id], thread_id);
+		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
 }
 
@@ -293,25 +321,14 @@ void HWC_Initialize (int options)
 	int num_threads = Backend_getMaximumOfThreads();
 
 	HWC_current_set = (int *)malloc(sizeof(int) * num_threads);
-	if (NULL == HWC_current_set)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_set\n");
-		return;
-	}
+	ASSERT(HWC_current_set != NULL, "Cannot allocate memory for HWC_current_set");
 	memset (HWC_current_set, 0, sizeof(int) * num_threads);
 
 	HWC_current_timebegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
-	if (NULL == HWC_current_timebegin)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_timebegin\n");
-		return;
-	}
+	ASSERT(HWC_current_timebegin != NULL, "Cannot allocate memory for HWC_current_timebegin");
+
 	HWC_current_glopsbegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
-	if (NULL == HWC_current_glopsbegin)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for HWC_current_glopsbegin\n");
-		return;
-	}
+	ASSERT(HWC_current_glopsbegin != NULL, "Cannot allocate memory for HWC_current_glopsbegin");
 
 	HWCBE_INITIALIZE(options);
 }
@@ -339,55 +356,41 @@ void HWC_CleanUp (unsigned nthreads)
  * Starts reading counters.
  * \param num_threads Total number of threads.
  */
-void HWC_Start_Counters (int num_threads)
+void HWC_Start_Counters (int num_threads, int forked)
 {
 	int i;
 
-	HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
-	if (NULL == HWC_Thread_Initialized)
+	/* Allocate memory if this process has not been forked */
+	if (!forked)
 	{
-		fprintf (stderr, PACKAGE_NAME ": Error! Cannot allocate memory for HWC_Thread_Initialized!\n");
-		return;
-	}
+		HWC_Thread_Initialized = (int *) malloc (sizeof(int) * num_threads);
+		ASSERT(HWC_Thread_Initialized!=NULL, "Cannot allocate memory for HWC_Thread_Initialized!");
 
-	/* Mark all the threads as uninitialized */
-	for (i = 0; i < num_threads; i++)
-	{
-		HWC_Thread_Initialized[i] = FALSE;
-	}
+		/* Mark all the threads as uninitialized */
+		for (i = 0; i < num_threads; i++)
+			HWC_Thread_Initialized[i] = FALSE;
 
-	Accumulated_HWC_Valid = (int *)malloc(sizeof(int) * num_threads);
-	if (NULL == Accumulated_HWC_Valid)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for Accumulated_HWC_Valid\n");
-		return;
-	}
+		Accumulated_HWC_Valid = (int *)malloc(sizeof(int) * num_threads);
+		ASSERT(Accumulated_HWC_Valid!=NULL, "Cannot allocate memory for Accumulated_HWC_Valid");
 
-	Accumulated_HWC = (long long **)malloc(sizeof(long long *) * num_threads);
-	if (NULL == Accumulated_HWC)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for Accumulated_HWC\n");
-		return;
-	}
+		Accumulated_HWC = (long long **)malloc(sizeof(long long *) * num_threads);
+		ASSERT(Accumulated_HWC!=NULL, "Cannot allocate memory for Accumulated_HWC");
 
-	for (i = 0; i < num_threads; i++)
-	{
-		Accumulated_HWC[i] = (long long *)malloc(sizeof(long long) * MAX_HWC);
-		if (NULL == Accumulated_HWC[i])
+		for (i = 0; i < num_threads; i++)
 		{
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot allocate memory for Accumulated_HWC[%d]\n", i);
-			return;
+			Accumulated_HWC[i] = (long long *)malloc(sizeof(long long) * MAX_HWC);
+			ASSERT(Accumulated_HWC[i]!=NULL, "Cannot allocate memory for Accumulated_HWC");
+			HWC_Accum_Reset(i);
 		}
-		HWC_Accum_Reset(i);
+
+		if (HWC_num_sets <= 0)
+			return;
+
+		HWCEnabled = TRUE;
 	}
-
-	if (HWC_num_sets <= 0)
-		return;
-
-	HWCEnabled = TRUE;
 
 	/* Init counters for thread 0 */
-	HWCEnabled = HWCBE_START_COUNTERS_THREAD (TIME, 0);
+	HWCEnabled = HWCBE_START_COUNTERS_THREAD (TIME, 0, forked);
 
 	/* Inherit hwc set change values from thread 0 */
 	for (i = 1; i < num_threads; i++)
@@ -413,61 +416,33 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 #endif
 
 	HWC_Thread_Initialized = (int *) realloc (HWC_Thread_Initialized, sizeof(int) * new_num_threads);
-	if (NULL == HWC_Thread_Initialized)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_Thread_Initialized!\n");
-		return;
-	}
+	ASSERT(HWC_Thread_Initialized!=NULL, "Cannot reallocate memory for HWC_Thread_Initialized!");
 
 	/* Mark all the threads as uninitialized */
 	for (i = old_num_threads; i < new_num_threads; i++)
 		HWC_Thread_Initialized[i] = FALSE;
 
 	Accumulated_HWC_Valid = (int *) realloc (Accumulated_HWC_Valid, sizeof(int) * new_num_threads);
-	if (NULL == Accumulated_HWC_Valid)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for Accumulated_HWC_Valid\n");
-		return;
-	}
+	ASSERT(Accumulated_HWC_Valid!=NULL, "Cannot reallocate memory for Accumulated_HWC_Valid");
 
 	Accumulated_HWC = (long long **) realloc (Accumulated_HWC, sizeof(long long *) * new_num_threads);
-	if (NULL == Accumulated_HWC)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for Accumulated_HWC\n");
-		return;
-	}
+	ASSERT(Accumulated_HWC!=NULL, "Cannot reallocate memory for Accumulated_HWC");
 
 	for (i = old_num_threads; i < new_num_threads; i++)
 	{
 		Accumulated_HWC[i] = (long long *)malloc(sizeof(long long) * MAX_HWC);
-		if (NULL == Accumulated_HWC[i])
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for Accumulated_HWC[%d]\n", i);
-			return;
-		}
+		ASSERT(Accumulated_HWC[i]!=NULL, "Cannot reallocate memory for Accumulated_HWC");
 		HWC_Accum_Reset(i);
 	}
 
 	HWC_current_set = (int *) realloc (HWC_current_set, sizeof(int) * new_num_threads);
-	if (NULL == HWC_current_set)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_current_set\n");
-		return;
-	}
+	ASSERT(HWC_current_set!=NULL, "Cannot reallocate memory for HWC_current_set");
 
 	HWC_current_timebegin = (unsigned long long *) realloc (HWC_current_timebegin, sizeof(unsigned long long) * new_num_threads);
-	if (NULL == HWC_current_timebegin)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_current_timebegin\n");
-		return;
-	}
+	ASSERT(HWC_current_timebegin!=NULL, "Cannot reallocate memory for HWC_current_timebegin");
 
 	HWC_current_glopsbegin = (unsigned long long *) realloc (HWC_current_glopsbegin, sizeof(unsigned long long) * new_num_threads);
-	if (NULL == HWC_current_glopsbegin)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate memory for HWC_current_glopsbegin\n");
-		return;
-	}
+	ASSERT(HWC_current_glopsbegin!=NULL, "Cannot reallocate memory for HWC_current_glopsbegin");
 
 	for (i = old_num_threads; i < new_num_threads; i++)
 	{
@@ -564,7 +539,7 @@ int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer)
 	if (HWCEnabled)
 	{
 		if (!HWC_Thread_Initialized[tid])
-			HWCBE_START_COUNTERS_THREAD(time, tid);
+			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( store_buffer );
 
 		read_ok = HWCBE_READ (tid, store_buffer);
@@ -605,7 +580,7 @@ int HWC_Accum (unsigned int tid, UINT64 time)
 	if (HWCEnabled)
 	{
 		if (!HWC_Thread_Initialized[tid])
-			HWCBE_START_COUNTERS_THREAD(time, tid);
+			HWCBE_START_COUNTERS_THREAD(time, tid, FALSE);
 		TOUCH_LASTFIELD( Accumulated_HWC[tid] );
 
 #if defined(SAMPLING_SUPPORT)

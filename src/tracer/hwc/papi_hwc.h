@@ -35,7 +35,7 @@
 /*------------------------------------------------ Prototypes ---------------*/
 
 void HWCBE_PAPI_Initialize (int TRCOptions);
-int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid);
+int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked);
 int HWCBE_PAPI_Allocate_eventsets_per_thread (int num_set, int old_thread_num, int new_thread_num);
 
 int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int threadid);

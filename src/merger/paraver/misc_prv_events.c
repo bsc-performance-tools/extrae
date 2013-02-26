@@ -44,10 +44,11 @@ static char UNUSED rcsid[] = "$Id$";
 #define FLUSH_INDEX             1
 #define TRACING_INDEX           2
 #define INOUT_INDEX             3
+#define FORK_INDEX              4
 
-#define MAX_MISC_INDEX	         4
+#define MAX_MISC_INDEX	        5
 
-static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_MISC_Operation (int type)
 {
@@ -59,6 +60,8 @@ void Enable_MISC_Operation (int type)
 		inuse[TRACING_INDEX] = TRUE;
 	else if (type == READ_EV || type == WRITE_EV || type == IOSIZE_EV)
 		inuse[INOUT_INDEX] = TRUE;
+	else if (type == FORK_EV || type == WAIT_EV || type == WAITPID_EV || type == EXEC_EV)
+		inuse[FORK_INDEX] = TRUE;
 }
 
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
@@ -122,6 +125,17 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOSIZE_EV, IOSIZE_LBL);
 		LET_SPACES (fd);
+	}
+	if (inuse[FORK_INDEX])
+	{
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, FORK_EV, FORK_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, WAIT_EV, WAIT_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, WAITPID_EV, WAITPID_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, EXEC_EV, EXEC_LBL);
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
+		fprintf (fd, "%d      %s\n", EVT_BEGIN, EVT_BEGIN_LBL);
 	}
 }
 

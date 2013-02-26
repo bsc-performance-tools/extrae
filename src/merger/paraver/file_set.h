@@ -188,7 +188,7 @@ event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * 
 event_t *Search_PACX_IRECVED (event_t * current, long long request, FileItem_t * freceive);
 
 long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid);
-int Search_Synchronization_Times (FileSet_t * fset, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes);
+int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes);
 void CheckCircularBufferWhenTracing (FileSet_t * fset, int numtasks, int taskid);
 int CheckBursts (FileSet_t *fset, int numtasks, int idtask);
 void setLimitOfEvents (int limit);

@@ -50,6 +50,7 @@ PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 ONLINE_EXAMPLE_FILES=/dev/null
+FORK_EXAMPLE_FILES=/dev/null
 else
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
@@ -84,6 +85,7 @@ OMP_EXAMPLE_FILES=/dev/null
 SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 ONLINE_EXAMPLE_FILES=/dev/null
+FORK_EXAMPLE_FILES=/dev/null
 endif
 else
 if OS_AIX
@@ -101,6 +103,7 @@ OMP_EXAMPLE_FILES=/dev/null
 SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 ONLINE_EXAMPLE_FILES=/dev/null
+FORK_EXAMPLE_FILES=/dev/null
 else
 
 if OS_FREEBSD
@@ -153,6 +156,8 @@ PTHREAD_EXAMPLE_FILES=\
  example/FREEBSD/PTHREAD/extrae.xml \
  example/FREEBSD/PTHREAD/user-comms.c
 
+FORK_EXAMPLE_FILES=/dev/null
+
 else
 
 if OS_DARWIN
@@ -204,6 +209,8 @@ PTHREAD_EXAMPLE_FILES=\
  example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/extrae.xml \
  example/FREEBSD/PTHREAD/user-comms.c
+
+FORK_EXAMPLE_FILES=/dev/null
 
 else 
 
@@ -270,6 +277,14 @@ CUDA_EXAMPLE_FILES=\
  example/LINUX/CUDA/run_dyninst.sh \
  example/LINUX/CUDA/run_instrumented.sh
 
+FORK_EXAMPLE_FILES=\
+ example/LINUX/FORK/extrae.xml \
+ example/LINUX/FORK/function-list \
+ example/LINUX/FORK/Makefile \
+ example/LINUX/FORK/pi_forked.c \
+ example/LINUX/FORK/README \
+ example/LINUX/FORK/run_dyninst.sh 
+
 endif
 endif
 
@@ -284,6 +299,8 @@ install-data-hook:
 	cp -f example/Makefile.inc $(DESTDIR)$(datadir)/example
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/SEQ
 	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/FORK
+	cp -f $(FORK_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/FORK
 if HAVE_PACX
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/PACX
 	cp -f $(PACX_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PACX

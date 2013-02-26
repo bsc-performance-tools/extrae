@@ -26,46 +26,17 @@
  | @last_commit: $Date$
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef _MPI2OUT_H
-#define _MPI2OUT_H
+static char UNUSED rcsid[] = "$Id$";
 
-#include "config.h"
+#include "commonSnippets.h"
+#include "forkSnippets.h"
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-typedef struct input_t
+void InstrumentForks (BPatch_image *appImage)
 {
-	off_t filesize;
-	unsigned int order;
-	unsigned int cpu;
-	unsigned int nodeid;
-	unsigned int ptask;
-	unsigned int task;
-	unsigned int thread;
-
-	int InputForWorker;           /* Which task is responsible for this file */
-
-	int fd;
-	char *name;
-	char *node;
-	char *threadname;
+	wrapRoutine (appImage, "fork", "Extrae_Probe_fork_Entry", "Extrae_Probe_fork_Exit");
+	wrapRoutine (appImage, "wait", "Extrae_Probe_wait_Entry", "Extrae_Probe_wait_Exit");
+	wrapRoutine (appImage, "waitpid", "Extrae_Probe_waitpid_Entry", "Extrae_Probe_waitpid_Exit");
+	//wrapRoutine (appImage, "exec", "Extrae_Probe_exec_Entry", "Extrae_Probe_exec_Exit");
 }
-input_t;
-
-#define GetInput_ptask(item)  ((item)->ptask)
-#define GetInput_task(item)   ((item)->task)
-#define GetInput_name(item)   ((item)->name)
-#define GetInput_fd(item)     ((item)->fd)
-
-typedef enum {FileOpen_Default, FileOpen_Absolute, FileOpen_Relative} FileOpen_t;
-
-void merger_pre (int numtasks);
-void ProcessArgs (int rank, int argc, char *argv[]);
-int merger_post (int numtasks, int idtask);
-
-void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int taskid);
-
-#endif

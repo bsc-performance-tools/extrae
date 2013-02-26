@@ -41,24 +41,39 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	unsigned long nfiles)
 {
 	unsigned int ptask, task, thread, i, j;
-	unsigned int ntasks = 0, *nthreads = NULL;
+	unsigned int ntasks[num_appl], **nthreads = NULL;
+
+	/* First step, collect number of applications, number of tasks per application and
+	   number of threads per task within an app */
+	for (i = 0; i < num_appl; i++)
+		ntasks[i] = 0;
 
 	for (i = 0; i < nfiles; i++)
-		ntasks = MAX(files[i].task, ntasks);
+		ntasks[files[i].ptask-1] = MAX(files[i].task, ntasks[files[i].ptask-1]);
 
-	if ((nthreads = (unsigned*) malloc (ntasks*sizeof(unsigned))) == NULL)
+	if ((nthreads = (unsigned**) malloc (num_appl*sizeof(unsigned*))) == NULL)
 	{
-		fprintf (stderr, "mpi2prv: Error! cannot allocate memory to allocate nthreads!\n");
+		fprintf (stderr, "mpi2prv: Error! cannot allocate memory to allocate nthreads for whole appl!\n");
 		fflush (stderr);
 		exit (-1);
 	}
-	else
-		for (i = 0; i < ntasks; i++)
-			nthreads[i] = 0;
+	for (i = 0; i < num_appl; i++)
+	{
+		if ((nthreads[i] = (unsigned*) malloc (ntasks[i]*sizeof(unsigned))) == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Error! cannot allocate memory to allocate nthreads for appl %d!\n", i);
+			fflush (stderr);
+			exit (-1);
+		}
+		else
+			for (j = 0; j < ntasks[i]; j++)
+				nthreads[i][j] = 0;
+	}
 
 	for (i = 0; i < nfiles; i++)
-		nthreads[files[i].task-1] = MAX(files[i].thread, nthreads[files[i].task-1]);
+		nthreads[files[i].ptask-1][files[i].task-1] = MAX(files[i].thread, nthreads[files[i].ptask-1][files[i].task-1]);
 
+	/* Second step, allocate structures respecting the number of apps, tasks and threads found */
 	obj_table = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
 	if (NULL == obj_table)
 	{
@@ -69,24 +84,24 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	for (i = 0; i < num_appl; i++)
 	{
 		/* Allocate per task information within each ptask */
-		obj_table[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks);
+		obj_table[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks[i]);
 		if (NULL == obj_table[i].tasks)
 		{
 			fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d tasks (ptask = %d)\n", ntasks, i+1);
 			fflush (stderr);
 			exit (-1);
 		}
-		for (j = 0; j < ntasks; j++)
+		for (j = 0; j < ntasks[i]; j++)
 		{
 			/* Initialize pending communication queues for each task */
 			CommunicationQueues_Init (&(obj_table[i].tasks[j].send_queue),
 			  &(obj_table[i].tasks[j].recv_queue));
 
 			/* Allocate per thread information within each task */
-			obj_table[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*nthreads[j]);
+			obj_table[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*nthreads[i][j]);
 			if (NULL == obj_table[i].tasks[j].threads)
 			{
-				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", nthreads[j], i+1, j+1);
+				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", nthreads[i][j], i+1, j+1);
 				fflush (stderr);
 				exit (-1);
 			}
@@ -97,28 +112,27 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	INIT_QUEUE (&CountersTraced);
 #endif
 
+	/* 3rd step, Initialize the object table structure */
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		obj_table[ptask].ntasks = 0;
-		for (task = 0; task < ntasks; task++)
+		obj_table[ptask].ntasks = ntasks[ptask];
+		for (task = 0; task < ntasks[ptask]; task++)
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
 			task_info->tracing_disabled = FALSE;
-			task_info->nthreads = 0;
-			task_info->num_virtual_threads = 0;
+			task_info->nthreads = nthreads[ptask][task];
+			task_info->num_virtual_threads = nthreads[ptask][task];
 
-			for (thread = 0; thread < nthreads[task]; thread++)
+			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{
 				thread_t *thread_info = GET_THREAD_INFO(ptask+1,task+1,thread+1);
-
+				thread_info->cpu = files[i].cpu;
+				thread_info->dimemas_size = 0;
 				thread_info->virtual_thread = thread+1;
-				task_info->num_virtual_threads = MAX(thread_info->virtual_thread, task_info->num_virtual_threads);
-
 				thread_info->nStates = 0;
 				thread_info->First_Event = TRUE;
 				thread_info->HWCChange_count = 0;
 				thread_info->MatchingComms = TRUE;
-
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
 				thread_info->HWCSets_types = NULL;
@@ -129,28 +143,29 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 		}
 	}
 
+	/* 4th step Assign the node ID */
 	for (i = 0; i < nfiles; i++)
 	{
 		task_t *task_info = GET_TASK_INFO(files[i].ptask, files[i].task);
-		thread_t *thread_info = GET_THREAD_INFO(files[i].ptask, files[i].task, files[i].thread);
-
-		obj_table[ptask-1].ntasks = MAX (obj_table[ptask-1].ntasks, ntasks);
 		task_info->nodeid = files[i].nodeid;
-		task_info->nthreads = MAX (task_info->nthreads, files[i].thread);
-		thread_info->cpu = files[i].cpu;
-		thread_info->dimemas_size = 0;
 	}
 
 	/* This is needed for get_option_merge_NanosTaskView() == FALSE */
 	for (ptask = 0; ptask < num_appl; ptask++)
-		for (task = 0; task < ntasks; task++)
+		for (task = 0; task < ntasks[ptask]; task++)
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1, task+1);
 			task_info->num_active_task_threads = 0;
 			task_info->active_task_threads = NULL;
 		}
 
+	/* Clean up */
 	if (nthreads != NULL)
-		free (nthreads);
+	{
+		for (i = 0; i < num_appl; i++)
+			if (nthreads[i] != NULL)
+				free (nthreads[i]);
+		free (nthreads);		
+	}
 }
 

@@ -69,10 +69,10 @@ void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s, 
 	cpu_s = thread_s_info->cpu;
 
 	/* Synchronize event times */
-	log_s = TIMESYNC(task_s-1, Get_EvTime (send_begin));
-	phy_s = TIMESYNC(task_s-1, Get_EvTime (send_end));
-	log_r = TIMESYNC(task_r-1, Get_EvTime (recv_begin));
-	phy_r = TIMESYNC(task_r-1, Get_EvTime (recv_end));
+	log_s = TIMESYNC(ptask-1, task_s-1, Get_EvTime (send_begin));
+	phy_s = TIMESYNC(ptask-1, task_s-1, Get_EvTime (send_end));
+	log_r = TIMESYNC(ptask-1, task_r-1, Get_EvTime (recv_begin));
+	phy_r = TIMESYNC(ptask-1, task_r-1, Get_EvTime (recv_end));
 
 	trace_paraver_communication (cpu_s, ptask, task_s, thread_s, vthread_s, log_s, phy_s,
 	  cpu_r, ptask, task_r, thread_r, vthread_r, log_r, phy_r, Get_EvSize (recv_end),
@@ -86,8 +86,8 @@ int trace_pending_communication (unsigned int ptask, unsigned int task,
 	unsigned long long log_s, phy_s;
 
 	/* Synchronize event times */
-	log_s = TIMESYNC (task-1, Get_EvTime (begin_s));
-	phy_s = TIMESYNC (task-1, Get_EvTime (end_s));
+	log_s = TIMESYNC (ptask-1, task-1, Get_EvTime (begin_s));
+	phy_s = TIMESYNC (ptask-1, task-1, Get_EvTime (end_s));
 
 	trace_paraver_pending_communication (task, ptask, task, thread, vthread, log_s,
 		phy_s, recvr + 1, ptask, recvr + 1, thread /* 1? */ , thread /*vthread_r?*/,

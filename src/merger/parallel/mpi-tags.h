@@ -32,6 +32,10 @@
 
 #define REMAINING_TAG                  1000 /* Ask how many remaining events are on the merged intermediate file */
 
+#define NUMBER_SYNC_TIMES_TAG          1100 /* # of sync times to be sent recved */
+#define SYNC_TIMES_TAG                 1101 /* sync times to be sent recved */
+#define START_TIMES_TAG                1102 /* sync times to be sent recved */
+
 #define ASK_MERGE_REMOTE_BLOCK_TAG     2000 /* Ask for the next remote merged block of events */
 #define HOWMANY_MERGE_REMOTE_BLOCK_TAG 2001 /* Answer: how many events will be send */
 #define BUFFER_MERGE_REMOTE_BLOCK_TAG  2002 /* Answer: actual buffer */
