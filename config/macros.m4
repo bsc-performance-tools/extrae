@@ -427,17 +427,24 @@ AC_DEFUN([AX_PROG_BINUTILS],
       unset BFD_LIBSDIR
       unset LIBERTY_LIBSDIR
 
-      shlibs1=`echo ${binutils_home_dir}/lib${BITS}/libbfd*.so | wc -w`
-      shlibs2=`echo ${binutils_home_dir}/lib/libbfd*.so | wc -w` 
-
-      if test ${shlibs1} -ge 1 ; then
+      if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-      elif test ${shlibs2} -ge 1 ; then
+      elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib"
       elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
       elif test -r "${binutils_home_dir}/lib/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
          BFD_LIBSDIR="${binutils_home_dir}/lib"
+      else
+         dnl If we were unable to find, try this. This works if the library is named like
+         dnl  libbfd-2.23.1.so and there is no symbolic link to it!
+         shlibs1=`find ${binutils_home_dir}/lib${BITS} -maxdepth 1 -name libbfd\*.so | wc -l`
+         shlibs2=`find ${binutils_home_dir}/lib -maxdepth 1 -name libbfd\*.so | wc -l`
+         if test ${shlibs1} -ge 1 ; then
+            BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+         elif test ${shlibs2} -ge 1 ; then 
+            BFD_LIBSDIR="${binutils_home_dir}/lib"
+         fi
       fi
 
       if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" ; then
