@@ -112,7 +112,11 @@ static void show_current (event_t * c, UINT64 max_time)
 	}
 	else if (c->event == USER_EV)
 	{
-		fprintf (stdout, "USER_EV value: %llu [0x%llx]\n", c->param.misc_param.param, c->param.misc_param.param);
+		fprintf (stdout, "USER EVENT value: %llu [0x%llx]\n", c->param.misc_param.param, c->param.misc_param.param);
+	}
+	else if (c->event == NAMEDCRIT_EV && (c->value == LOCK_VAL || c->value == UNLOCK_VAL))
+	{
+		fprintf (stdout, "NAMED CRITICAL ADDRESS: %llu [0x%llx]\n", c->param.omp_param.param, c->param.omp_param.param);
 	}
 #if USE_HARDWARE_COUNTERS
 	else if (c->event == HWC_DEF_EV)

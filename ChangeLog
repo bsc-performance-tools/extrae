@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 27Feb2013 Emit lock address when instrumenting named locks (MFB 2.3)
  + 26Feb2013 Initial fork+wait+waitpid instrumentation under dyninst (MFB 2.3)
              Improved detection of binutils package (uses find)
  * 22Feb2013 Fixed bad instrumentation of GOMP_*_next using dyninst (MFB 2.3)

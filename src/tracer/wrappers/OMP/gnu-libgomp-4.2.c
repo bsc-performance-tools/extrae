@@ -1101,7 +1101,7 @@ void GOMP_critical_name_start (void **p1)
 
 	if (GOMP_critical_name_start_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Lock_Entry();
+		Extrae_OpenMP_Named_Lock_Entry(p1);
 		GOMP_critical_name_start_real (p1);
 		Extrae_OpenMP_Named_Lock_Exit();
 	}
@@ -1125,7 +1125,7 @@ void GOMP_critical_name_end (void **p1)
 
 	if (GOMP_critical_name_end_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Unlock_Entry();
+		Extrae_OpenMP_Named_Unlock_Entry(p1);
 		GOMP_critical_name_end_real (p1);
 		Extrae_OpenMP_Named_Unlock_Exit();
 	}

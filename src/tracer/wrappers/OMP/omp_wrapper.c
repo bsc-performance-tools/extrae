@@ -107,7 +107,7 @@ void omp_set_lock (int *p1)
 	if (omp_set_lock_real != NULL && mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Named_Lock_Entry();
+		Probe_OpenMP_Named_Lock_Entry(p1);
 		omp_set_lock_real (p1);
 		Probe_OpenMP_Named_Lock_Exit();
 		Backend_Leave_Instrumentation ();
@@ -133,7 +133,7 @@ void omp_unset_lock (int *p1)
 	if (omp_unset_lock_real != NULL && mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Named_Lock_Entry();
+		Probe_OpenMP_Named_Lock_Entry(p1);
 		omp_unset_lock_real (p1);
 		Probe_OpenMP_Named_Lock_Exit();
 		Backend_Leave_Instrumentation ();

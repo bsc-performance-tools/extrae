@@ -210,11 +210,11 @@ void Probe_OpenMP_Section_Exit (void)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, WSH_EV, EVT_END, EMPTY); 
 }
 
-void Probe_OpenMP_Named_Lock_Entry (void)
+void Probe_OpenMP_Named_Lock_Entry (void *name)
 {
 	DEBUG
 	if (TraceOMPLocks && mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, NAMEDCRIT_EV, LOCK_VAL, EMPTY);
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, NAMEDCRIT_EV, LOCK_VAL, (UINT64) name);
 }
 
 void Probe_OpenMP_Named_Lock_Exit (void)
@@ -224,11 +224,11 @@ void Probe_OpenMP_Named_Lock_Exit (void)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, NAMEDCRIT_EV, LOCKED_VAL, EMPTY);
 }
 
-void Probe_OpenMP_Named_Unlock_Entry (void)
+void Probe_OpenMP_Named_Unlock_Entry (void *name)
 {
 	DEBUG
 	if (TraceOMPLocks && mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, NAMEDCRIT_EV, UNLOCK_VAL, EMPTY);
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, NAMEDCRIT_EV, UNLOCK_VAL, (UINT64) name);
 }
 
 void Probe_OpenMP_Named_Unlock_Exit (void)

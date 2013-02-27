@@ -178,10 +178,10 @@ void Extrae_OpenMP_Section_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_Named_Lock_Entry (void)
+void Extrae_OpenMP_Named_Lock_Entry (void *name)
 {
 	Backend_Enter_Instrumentation (2);
-	Probe_OpenMP_Named_Lock_Entry ();
+	Probe_OpenMP_Named_Lock_Entry (name);
 }
 
 void Extrae_OpenMP_Named_Lock_Exit (void)
@@ -190,10 +190,10 @@ void Extrae_OpenMP_Named_Lock_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_Named_Unlock_Entry (void)
+void Extrae_OpenMP_Named_Unlock_Entry (void *name)
 {
 	Backend_Enter_Instrumentation (2);
-	Probe_OpenMP_Named_Unlock_Entry ();
+	Probe_OpenMP_Named_Unlock_Entry (name);
 }
 
 void Extrae_OpenMP_Named_Unlock_Exit (void)

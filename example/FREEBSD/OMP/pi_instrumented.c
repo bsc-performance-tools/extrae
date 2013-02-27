@@ -39,9 +39,6 @@ void do_work(void)
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area, x;
 
-	/* Extrae_init() must be called before any #pragma omp or OMP call */
-	Extrae_init();
-
 	h = 1.0 / (double) n;
 	area = 0.0;
 	#pragma omp parallel for private(x) reduction(+:area)
@@ -82,13 +79,15 @@ void do_work(void)
 	}
 	pi = h * area;
 	printf("pi (by using #pragma omp parallel sections) is approximately %.16f, Error is %.16f\n",pi,fabs(pi - PI25DT));
-
-
-	/* Extre_fini() must be the last call */
-	Extrae_fini();
 }
 
 int main(int argc, char **argv)
 {
+	/* Extrae_init() must be called before any #pragma omp or OMP call */
+	Extrae_init();
+
 	do_work();
+
+	/* Extre_fini() must be the last call */
+	Extrae_fini();
 }

@@ -406,6 +406,7 @@ enum {
 #define TASKFUNC_INST_LINE_EV    60000124 /* at #pragma omp task */
 #define OMPSETNUMTHREADS_EV      60000030
 #define OMPGETNUMTHREADS_EV      60000031
+#define NAMEDCRIT_NAME_EV        60000032 /* Critical address name */
 
 /******************************************************************************
  *   User events to trace Pthread/TRT parallel execution.

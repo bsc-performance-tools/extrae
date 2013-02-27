@@ -412,7 +412,7 @@ void __kmpc_critical (void *p1, int p2, void *p3)
 
 	if (__kmpc_critical_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Lock_Entry ();
+		Extrae_OpenMP_Named_Lock_Entry (p3);
 		__kmpc_critical_real (p1, p2, p3);
 		Extrae_OpenMP_Named_Lock_Exit ();
 	}
@@ -436,7 +436,7 @@ void __kmpc_end_critical (void *p1, int p2, void *p3)
 
 	if (__kmpc_end_critical_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Unlock_Entry ();
+		Extrae_OpenMP_Named_Unlock_Entry (p3);
 		__kmpc_end_critical_real (p1, p2, p3);
 		Extrae_OpenMP_Named_Unlock_Exit ();
 	}

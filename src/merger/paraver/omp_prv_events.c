@@ -165,6 +165,9 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 		             "%d Unlock\n"
 		             "%d Locked status\n\n",
 		             UNLOCKED_VAL, LOCK_VAL, UNLOCK_VAL, LOCKED_VAL);
+
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d   %d OpenMP named-Lock address name\n", 0, NAMEDCRIT_NAME_EV);
 	}
 	if (inuse[ULCK_OMP_INDEX])
 	{

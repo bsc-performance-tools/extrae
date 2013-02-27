@@ -520,7 +520,7 @@ void _xlsmpRelSLock (void *p1)
 
 	if (_xlsmpRelSLock_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Unlock_Entry();
+		Extrae_OpenMP_Named_Unlock_Entry(p1);
 		_xlsmpRelSLock_real(p1);
 		Extrae_OpenMP_Named_Unlock_Exit();
 	}
@@ -566,7 +566,7 @@ void _xlsmpGetSLock (void *p1)
 
 	if (_xlsmpGetSLock_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Lock_Entry();
+		Extrae_OpenMP_Named_Lock_Entry(p1);
 		_xlsmpGetSLock_real (p1);
 		Extrae_OpenMP_Named_Lock_Exit();
 	}
