@@ -1,3 +1,4 @@
+No implementation found for style `hyperref'
 No implementation found for style `fontenc'
 No implementation found for style `url'
 No implementation found for style `subfigure'
@@ -7,3 +8,9 @@ No implementation found for style `a4wide'
 No implementation found for style `calc'
 No implementation found for style `pdflscape'
 No implementation found for style `fancyvrb'
+
+? brace missing for \
+
+Substitution of arg to newlabelxx delayed.
+
+No number for "Descriptionoftheavailablemergersinthe<I>Extrae</I>package."
