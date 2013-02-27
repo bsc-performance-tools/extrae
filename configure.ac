@@ -20,7 +20,7 @@ AC_CANONICAL_SYSTEM
 
 # Write defines in the output header file for the architecture and operating system
 case "${target_cpu}" in
-  armv7l)    Architecture="arm"
+  arm*)      Architecture="arm"
              AC_DEFINE([ARCH_ARM], [1], [Define if architecture is ARM]) ;;
   i*86|x86_64|amd64)
              Architecture="ia32"
@@ -89,12 +89,22 @@ AM_CONFIG_HEADER(config.h)
 AC_ARG_ENABLE(mic,
    AC_HELP_STRING(
       [--enable-mic],
-      [Enable compilation for the Intel MIC architecture (disabled by default)]
+      [Enable compilation for the Intel MIC architecture (disabled by default; needed when cross-compiling for Intel MIC/Xeon Phi)]
    ),
    [enable_mic="${enableval}"],
    [enable_mic="no"]
 )
 IS_MIC_MACHINE=${enable_mic}
+
+AC_ARG_ENABLE(arm,
+   AC_HELP_STRING(
+      [--enable-arm],
+      [Enable compilation for ARM architecture (disabled by default; needed when cross-compiling for ARM)]
+   ),
+   [enable_arm="${enableval}"],
+   [enable_arm="no"]
+)
+IS_ARM_MACHINE=${enable_arm}
 
 # Check if this is an Altix machine and if it has an /dev/mmtimer device
 # (which is a global clock!)
@@ -515,17 +525,28 @@ elif test "${IS_MIC_MACHINE}" = "yes" ; then
 	voidp_size=8
 	short_size=2
 	char_size=1
+elif test "${IS_ARM_MACHINE}" = "yes" ; then
+	cross_compiling="yes"
+	long_long_size=8
+	long_size=4
+	int_size=4
+	pid_t_size=4
+	ssize_t_size=4
+	size_t_size=4
+	voidp_size=4
+	short_size=2
+	char_size=1
 else
-   cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
-   long_long_size=0
-   long_size=0
-   int_size=0
-   pid_t_size=0
-   ssize_t_size=0
-   size_t_size=0
-   voidp_size=0
-   short_size=0
-   char_size=0
+	cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
+	long_long_size=0
+	long_size=0
+	int_size=0
+	pid_t_size=0
+	ssize_t_size=0
+	size_t_size=0
+	voidp_size=0
+	short_size=0
+	char_size=0
 fi
 
 AC_CHECK_TYPES([int64_t, uint64_t, int32_t, uint32_t, int16_t, uint16_t, \

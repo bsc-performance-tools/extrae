@@ -6,6 +6,7 @@ ChangeLog
                DynInst mutator (MFB 2.3).
              Add exclude-automatic-functions in the <user-functions> tag (MFB
                2.3).
+             Allow cross-compiling for ARM through --enable-arm.
  + 26Feb2013 Initial fork+wait+waitpid instrumentation under dyninst (MFB 2.3)
              Improved detection of binutils package (uses find)
  * 22Feb2013 Fixed bad instrumentation of GOMP_*_next using dyninst (MFB 2.3)
