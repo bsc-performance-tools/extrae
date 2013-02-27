@@ -77,6 +77,7 @@
 #define TRACE_SPU_BUFFERSIZE            ((xmlChar*) "spu-buffer-size")
 #define TRACE_LIST                      ((xmlChar*) "list")
 #define TRACE_USERFUNCTION              ((xmlChar*) "user-functions")
+#define TRACE_EXCLUDE_AUTOMATIC_FUNCTIONS ((xmlChar*) "exclude-automatic-functions")
 #define TRACE_MAX_DEPTH                 ((xmlChar*) "max-depth")
 #define TRACE_SAMPLING                  ((xmlChar*) "sampling")
 #define TRACE_FREQUENCY                 ((xmlChar*) "frequency")
@@ -110,6 +111,8 @@ extern "C" {
 	char * XML_UFlist (void);
 
 	int XML_have_UFlist (void);
+
+	int XML_excludeAutomaticFunctions (void);
 
 #ifdef  __cplusplus
 }

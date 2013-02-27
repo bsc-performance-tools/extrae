@@ -7,7 +7,7 @@
  xml-parser-id="@sub_XMLID@"
 >
 
-  <user-functions enabled="yes" list="function-list">
+  <user-functions enabled="yes" list="function-list" exclude-automatic-functions="no">
     <counters enabled="yes" />
   </user-functions>
 

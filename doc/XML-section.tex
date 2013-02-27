@@ -129,6 +129,8 @@ There are two different mechanisms to instrument user functions. One is using Dy
 {\tt address \# function\_name}
 
 You can generate this list by using the nm command applied to the binary. For example, {\tt nm | grep FUNCTION} will show you the function name, followed by the type of FUNCTION (should be T or t) and then followed by the address of the symbol.
+
+The {\tt exclude-automatic-functions} attribute is used only by the DynInst instrumenter. By setting this attribute to {\tt yes} the instrumenter will avoid automatically instrumenting the routines that either call OpenMP outlined routines (i.e. routines with OpenMP pragmas) or call CUDA kernels.
 \end{itemize}
 
 Finally, in order to gather performance counters in these functions and also in those instrumented using the {\tt extrae\_user\_function} API call, the node {\tt counters} has to be enabled.

@@ -69,6 +69,7 @@ static char UNUSED rcsid[] = "$Id$";
 static const xmlChar *xmlYES = (xmlChar*) "yes";
 static const xmlChar *xmlCOMMENT = (xmlChar*) "COMMENT";
 static const xmlChar *xmlTEXT = (xmlChar*) "text";
+static const xmlChar XML_ENVVAR_CHARACTER = (xmlChar) '$';
 
 /* Some global (but local in the module) variables */
 static char *temporal_d = NULL, *final_d = NULL;
@@ -79,6 +80,7 @@ static int TraceMPI = FALSE;
 static int TraceOpenMP = FALSE;
 static int TraceOpenMP_locks = FALSE;
 static char *UFlist = NULL;
+static int ExcludeAutomaticFunctions = FALSE;
 
 int XML_CheckTraceEnabled (void)
 { return TraceEnabled; }
@@ -104,10 +106,102 @@ char* XML_UFlist (void)
 int XML_have_UFlist (void)
 { return UFlist != NULL; }
 
+int XML_excludeAutomaticFunctions (void)
+{ return ExcludeAutomaticFunctions; }
+
+#define is_Whitespace(c) \
+   ((c) == ' ' || (c) == '\t' || (c) == '\v' || (c) == '\f' || (c) == '\n')
 
 /* Free memory if not null */
 #define XML_FREE(ptr) \
 	if (ptr != NULL) xmlFree(ptr);
+
+static xmlChar * deal_xmlChar_env (xmlChar *str)
+{
+	xmlChar *tmp;
+	int i;
+	int initial = 0;
+	int sublen = 0;
+	int length = xmlStrlen (str);
+	int final = length;
+
+	/* First get rid of the leading and trailing white spaces */
+	for (i = 0; i < length; i++)
+		if (!is_Whitespace (str[i]))
+			break;
+	initial = i;
+	for (; final-1 >= i; final--)
+		if (!is_Whitespace (str[final-1]))
+			break;
+
+	sublen = final - initial;
+
+	tmp = xmlStrsub (str, initial, sublen);
+
+	if (sublen > 0)
+	{
+		/* If the string is wrapped by XML_ENVVAR_CHARACTER, perform a getenv and
+		   return its result */
+		if (sublen > 1 && tmp[0] == XML_ENVVAR_CHARACTER && tmp[sublen-1] == XML_ENVVAR_CHARACTER)
+		{
+			char tmp2[sublen];
+			memset (tmp2, 0, sublen);
+			strncpy (tmp2, &tmp[1], sublen-2);
+
+			if (getenv (tmp2) == NULL)
+			{
+				fprintf (stderr, PACKAGE_NAME": Environment variable %s is not defined!\n", tmp2);
+				return NULL;
+			}
+			else
+			{
+				if (strlen(getenv(tmp2)) == 0)
+				{
+					fprintf (stderr, PACKAGE_NAME": Environment variable %s is set but empty!\n", tmp2);
+					return NULL;
+				}
+				else
+					return xmlCharStrdup (getenv(tmp2));
+			}
+		}
+		else
+			return tmp;
+	}
+	else
+		return tmp;
+}
+
+static xmlChar * xmlNodeListGetString_env (xmlDocPtr doc, xmlNodePtr list, int inLine)
+{
+	xmlChar *tmp;
+
+	tmp = xmlNodeListGetString (doc, list, inLine);
+	if (tmp != NULL)
+	{
+		xmlChar *tmp2;
+		tmp2 = deal_xmlChar_env (tmp);
+		XML_FREE(tmp);
+		return tmp2;
+	}
+	else
+		return NULL;
+}
+
+static xmlChar* xmlGetProp_env (xmlNodePtr node, xmlChar *attribute)
+{
+	xmlChar *tmp;
+
+	tmp = xmlGetProp (node, attribute);
+	if (tmp != NULL)
+	{
+		xmlChar *tmp2;
+		tmp2 = deal_xmlChar_env (tmp);
+		XML_FREE(tmp);
+		return tmp2;
+	}
+	else
+		return NULL;	
+}
 
 /* Configure OpenMP related parameters */
 static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
@@ -128,7 +222,7 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		/* Shall we instrument openmp lock routines? */
 		else if (!xmlStrcmp (tag->name, TRACE_OMP_LOCKS))
 		{
-			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			xmlChar *enabled = xmlGetProp_env (tag, TRACE_ENABLED);
 			TraceOpenMP_locks = ((enabled != NULL && !xmlStrcmp (enabled, xmlYES)));
 			XML_FREE(enabled);
 		}
@@ -155,26 +249,26 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		/* Where must we store the intermediate files? DON'T FREE it's used below */
 		else if (!xmlStrcmp (tag->name, TRACE_DIR))
 		{
-			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			xmlChar *enabled = xmlGetProp_env (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
-				temporal_d = (char*) xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
+				temporal_d = (char*) xmlNodeListGetString_env (xmldoc, tag->xmlChildrenNode, 1);
 			XML_FREE(enabled);
 		}
 		/* Where must we store the final intermediate files?  DON'T FREE it's used below */
 		else if (!xmlStrcmp (tag->name, TRACE_FINAL_DIR))
 		{
-			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			xmlChar *enabled = xmlGetProp_env (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
-				final_d = (char*) xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
+				final_d = (char*) xmlNodeListGetString_env (xmldoc, tag->xmlChildrenNode, 1);
 			XML_FREE(enabled);
 		}
 		/* Obtain the MPIT prefix */
 		else if (!xmlStrcmp (tag->name, TRACE_PREFIX))
 		{
-			xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+			xmlChar *enabled = xmlGetProp_env (tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 			{
-				char *p_name = (char*)xmlNodeListGetString (xmldoc, tag->xmlChildrenNode, 1);
+				char *p_name = (char*)xmlNodeListGetString_env (xmldoc, tag->xmlChildrenNode, 1);
 				strncpy (TracePrefix, p_name, sizeof(TracePrefix));
 				TracePrefixFound = TRUE;
 				XML_FREE(p_name);
@@ -227,8 +321,8 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 				*/
 
 				/* Full tracing control */
-				char *tracehome = (char*) xmlGetProp (root_tag, TRACE_HOME);
-				xmlChar *traceenabled = xmlGetProp (root_tag, TRACE_ENABLED);
+				char *tracehome = (char*) xmlGetProp_env (root_tag, TRACE_HOME);
+				xmlChar *traceenabled = xmlGetProp_env (root_tag, TRACE_ENABLED);
 				TraceEnabled = (traceenabled != NULL) && !xmlStrcmp (traceenabled, xmlYES);
 
 				XML_FREE(traceenabled);
@@ -244,22 +338,29 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 					/* UF related information instrumentation */
 					else if (!xmlStrcmp (current_tag->name, TRACE_USERFUNCTION))
 					{
-						xmlChar *enabled = xmlGetProp (current_tag, TRACE_ENABLED);
+						xmlChar *enabled = xmlGetProp_env (current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
-							UFlist = (char*) xmlGetProp (current_tag, TRACE_LIST);
+						{
+							xmlChar *excludeautofunctions;
+							UFlist = (char*) xmlGetProp_env (current_tag, TRACE_LIST);
+							excludeautofunctions = xmlGetProp_env (current_tag, TRACE_EXCLUDE_AUTOMATIC_FUNCTIONS);
+							if (excludeautofunctions != NULL)
+								ExcludeAutomaticFunctions = !xmlStrcmp (excludeautofunctions, xmlYES);
+							XML_FREE(excludeautofunctions);
+						}
 						XML_FREE(enabled);
 					}
 					/* MPI related configuration */
 					else if (!xmlStrcmp (current_tag->name, TRACE_MPI))
 					{
-						xmlChar *enabled = xmlGetProp (current_tag, TRACE_ENABLED);
+						xmlChar *enabled = xmlGetProp_env (current_tag, TRACE_ENABLED);
 						TraceMPI = (enabled != NULL && !xmlStrcmp (enabled, xmlYES));
 						XML_FREE(enabled);
 					}
 					/* OpenMP related configuration */
 					else if (!xmlStrcmp (current_tag->name, TRACE_OMP))
 					{
-						xmlChar *enabled = xmlGetProp (current_tag, TRACE_ENABLED);
+						xmlChar *enabled = xmlGetProp_env (current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 						{
 							Parse_XML_OMP (rank, xmldoc, current_tag);
@@ -272,7 +373,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 					/* Storage related configuration */
 					else if (!xmlStrcmp (current_tag->name, TRACE_STORAGE))
 					{
-						xmlChar *enabled = xmlGetProp (current_tag, TRACE_ENABLED);
+						xmlChar *enabled = xmlGetProp_env (current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcmp (enabled, xmlYES))
 							Parse_XML_Storage (rank, xmldoc, current_tag);
 						XML_FREE(enabled);

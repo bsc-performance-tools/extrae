@@ -84,6 +84,7 @@
 #define TRACE_SPU_FILESIZE              ((xmlChar*) "spu-file-size")
 #define TRACE_SPU_BUFFERSIZE            ((xmlChar*) "spu-buffer-size")
 #define TRACE_LIST                      ((xmlChar*) "list")
+#define TRACE_EXCLUDE_AUTOMATIC_FUNCTIONS ((xmlChar*) "exclude-automatic-functions")
 #define TRACE_USERFUNCTION              ((xmlChar*) "user-functions")
 #define TRACE_SAMPLING                  ((xmlChar*) "sampling")
 

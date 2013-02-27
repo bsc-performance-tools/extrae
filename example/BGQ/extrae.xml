@@ -16,7 +16,7 @@
 		<sampling enabled="no">1-5</sampling>
 	</callers>
 
-	<user-functions enabled="no" list="function-list">
+	<user-functions enabled="no" list="function-list" exclude-automatic-functions="no">
 		<counters enabled="yes" />
 	</user-functions>
 

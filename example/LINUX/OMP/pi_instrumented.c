@@ -59,6 +59,18 @@ void do_work(void)
 		#pragma omp barrier
 	}
 
+	#pragma omp parallel
+	{
+		#pragma omp critical (foo)
+		printf ("critical foo\n");
+		#pragma omp critical (bar)
+		printf ("critical bar\n");
+		#pragma omp critical (foo)
+		printf ("critical foo (again)\n");
+		#pragma omp critical 
+		printf ("critical unnamed\n");
+	}
+
 	h = 1.0 / (double) n;
 	area = 0.0;
 	#pragma omp parallel sections private(i,x) reduction(+:area)

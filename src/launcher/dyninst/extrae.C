@@ -496,9 +496,15 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 
 				/* Demangle name and add into the UF list if it didn't exist there */
 				string demangled = appType->demangleOpenMProutine (name);
-				USERset.insert (demangled);
+				if (!XML_excludeAutomaticFunctions())
+					USERset.insert (demangled);
 				if (VerboseLevel)
-					cout << PACKAGE_NAME << ": Adding demangled OpenMP routine " << demangled << " to the user function list" << endl;	
+				{
+					if (!XML_excludeAutomaticFunctions())
+						cout << PACKAGE_NAME << ": Adding demangled OpenMP routine " << demangled << " to the user function list" << endl;	
+					else
+						cout << PACKAGE_NAME << ": Will not add demangled OpenMP routine " << demangled << " due to user request in the XML configuration file" << endl;
+				}
 
 				OMPinsertion++;
 			}
@@ -592,9 +598,15 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 						}
 
 						/* Instrument the routine that invokes the runtime */
-						USERset.insert (name);
+						if (!XML_excludeAutomaticFunctions())
+							USERset.insert (name);
 						if (VerboseLevel)
-							cout << PACKAGE_NAME << ": Adding call to OpenMP routine " << name << " to the user function list" << endl;	
+						{
+							if (!XML_excludeAutomaticFunctions())
+								cout << PACKAGE_NAME << ": Adding call to OpenMP routine " << name << " to the user function list" << endl;
+							else
+								cout << PACKAGE_NAME << ": Will not add call to OpenMP routine " << name << " due to user request in the XML configuration file" << endl;
+						}
 					}
 
 					/* Instrument routines that call CUDA */
@@ -604,9 +616,16 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 
 						if (find (CUDAkernels.begin(), CUDAkernels.end(), scalledname) != CUDAkernels.end())
 						{
-							USERset.insert (name);
+							if (!XML_excludeAutomaticFunctions())
+								USERset.insert (name);
+
 							if (VerboseLevel)
-								cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it calls the CUDA kernel '" << calledname<< "'" << endl;	
+							{
+								if (!XML_excludeAutomaticFunctions())
+									cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it calls the CUDA kernel '" << calledname<< "'" << endl;	
+								else
+									cout << PACKAGE_NAME << ": Will not instrument CUDA routine " << name << " due to user request in the XML configuration file" << endl;
+							}
 						}
 					}
 

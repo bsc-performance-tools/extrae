@@ -49,7 +49,7 @@
   </pthread>
 
   <!-- Configuration of User Functions -->
-  <user-functions enabled="yes" list="/home/bsc41/bsc41273/user-functions.dat">
+  <user-functions enabled="yes" list="/home/bsc41/bsc41273/user-functions.dat" exclude-automatic-functions="no">
     <!-- Gather counters on the UF routines? -->
     <counters enabled="yes" />
   </user-functions>

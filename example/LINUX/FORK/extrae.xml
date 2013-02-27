@@ -7,7 +7,7 @@
  xml-parser-id="Id: xml-parse.c 1517 2013-02-19 13:09:21Z harald $"
 >
 
-  <user-functions enabled="yes" list="function-list">
+  <user-functions enabled="yes" list="function-list" exclude-automatic-functions="no">
     <counters enabled="yes" />
   </user-functions>
 
