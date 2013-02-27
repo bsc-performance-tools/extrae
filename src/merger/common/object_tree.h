@@ -43,11 +43,14 @@
 
 #define MAX_STATES 16
 
+#define GET_PTASK_INFO(ptask) \
+		&(ApplicationTable.ptasks[ptask - 1])
+
 #define GET_TASK_INFO(ptask, task) \
-    &(obj_table[ptask - 1].tasks[task - 1])
+    &(ApplicationTable.ptasks[ptask - 1].tasks[task - 1])
 
 #define GET_THREAD_INFO(ptask, task, thread) \
-    &(obj_table[ptask - 1].tasks[task - 1].threads[thread - 1])
+    &(ApplicationTable.ptasks[ptask - 1].tasks[task - 1].threads[thread - 1])
 
 typedef struct thread_st
 {
@@ -132,7 +135,7 @@ typedef struct appl_st
 	ptask_t *ptasks;
 } appl_t;
 
-extern ptask_t *obj_table;
+extern appl_t ApplicationTable;
 
 void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	unsigned long nfiles);

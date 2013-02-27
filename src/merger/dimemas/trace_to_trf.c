@@ -110,8 +110,8 @@ unsigned long long Dimemas_hr_to_relative (UINT64 iotimer)
 	return iotimer - InitTracingTime;
 }
 
-static void Dimemas_GenerateOffsets (unsigned num_appl, ptask_t *table,
-	unsigned long long **ptr, unsigned int *count)
+static void Dimemas_GenerateOffsets (unsigned num_appl, unsigned long long **ptr,
+	unsigned int *count)
 {
 	unsigned long long *offsets;
 	unsigned i = 0;
@@ -124,8 +124,14 @@ static void Dimemas_GenerateOffsets (unsigned num_appl, ptask_t *table,
 
 	/* Count total number of running threads of the application */
 	for (ptask = 0; ptask < num_appl; ptask++)
-		for (task = 0; task < table[ptask].ntasks; task++)
-			i += table[ptask].tasks[task].nthreads;
+	{
+		ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+		for (task = 0; task < ptask_info->ntasks; task++)
+		{
+			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			i += task_info->nthreads;
+		}
+	}
 
 	/* Allocate memory for the offsets of those threads */
 	offsets = (unsigned long long*) malloc (sizeof(unsigned long long)*i);
@@ -139,9 +145,18 @@ static void Dimemas_GenerateOffsets (unsigned num_appl, ptask_t *table,
 	/* Put the dimemas_size field on the offsets */
 	i = 0;
 	for (ptask = 0; ptask < num_appl; ptask++)
-		for (task = 0; task < table[ptask].ntasks; task++)
-			for (thread = 0; thread < table[ptask].tasks[task].nthreads; thread++, i++)
-				offsets[i] = table[ptask].tasks[task].threads[thread].dimemas_size;
+	{
+		ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+		for (task = 0; task < ptask_info->ntasks; task++)
+		{
+			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			for (thread = 0; thread < task_info->nthreads; thread++, i++)
+			{
+				thread_t *thread_info = GET_THREAD_INFO(ptask+1,task+1,thread+1);
+				offsets[i] = thread_info->dimemas_size;
+			}
+		}
+	}
 
 	/* Put the returning values */
 	*ptr = offsets;
@@ -468,7 +483,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	fprintf (stdout, "mpi2dim: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
 	fflush (stdout);
 
-	Dimemas_GenerateOffsets (num_appl, obj_table, &offsets, &count);
+	Dimemas_GenerateOffsets (num_appl, &offsets, &count);
 
 #if defined(PARALLEL_MERGE)
 	if (numtasks > 1)

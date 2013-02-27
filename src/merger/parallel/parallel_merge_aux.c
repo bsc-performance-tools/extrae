@@ -804,7 +804,8 @@ unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
 {
 	int res;
 	unsigned *temp, *temp_out = NULL;
-	unsigned ntasks = obj_table[ptask].ntasks;
+	ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+	unsigned ntasks = ptask_info->ntasks;
 	unsigned u;
 
 	if (0 == taskid)
@@ -832,7 +833,10 @@ unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
 
 	for (u = 0; u < ntasks; u++)
 		if (isTaskInMyGroup(fset, u))
-			temp[u] = obj_table[ptask].tasks[u].num_virtual_threads;
+		{
+			task_t *task_info = GET_TASK_INFO(ptask+1, u+1);
+			temp[u] = task_info->num_virtual_threads;
+		}
 		else
 			temp[u] = 0;
 

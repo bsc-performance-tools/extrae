@@ -196,7 +196,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	InitializeObjectTable (num_appl, files, nfiles);
 	for (i = 0; i < num_appl; i++)
-		num_appl_tasks[i] = obj_table[i].ntasks;
+		num_appl_tasks[i] = (GET_PTASK_INFO(i+1))->ntasks;
 
 #if defined(PARALLEL_MERGE)
 	InitCommunicators();

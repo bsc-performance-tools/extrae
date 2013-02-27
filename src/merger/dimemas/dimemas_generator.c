@@ -88,14 +88,17 @@ int Dimemas_WriteHeader (unsigned num_appl, FILE *trf_fd,
 	/* DIMEMAS just supports 1 ptask */
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		fprintf (trf_fd, "%d(", obj_table[ptask].ntasks);
+		ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+		task_t *last_task_info = GET_TASK_INFO(ptask+1, ptask_info->ntasks);
 
-		for (task = 0; task < obj_table[ptask].ntasks - 1; task++)
+		fprintf (trf_fd, "%d(", ptask_info->ntasks);
+
+		for (task = 0; task < ptask_info->ntasks - 1; task++)
 		{
-			threads = obj_table[ptask].tasks[task].nthreads;
-			fprintf (trf_fd, "%d,", threads);
+			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+			fprintf (trf_fd, "%d,", task_info->threads);
 		}
-		threads = obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nthreads;
+		threads = last_task_info->nthreads;
 #if defined(HAVE_MPI)
 		fprintf (trf_fd, "%d),%d", threads, numero_comunicadors());
 #else

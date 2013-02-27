@@ -675,7 +675,7 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 {
 	int NumNodes;
 	char Header[1024];
-	unsigned threads, task, ptask, node, num_cpus = 1;
+	unsigned threads, task, ptask, node;
 	TipusComunicador com;
 	int i, final;
 
@@ -691,9 +691,6 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 
 		time (&h);
 		strftime (Date, 80, "%d/%m/%Y at %H:%M", localtime (&h));
-
-		for (ptask = 0; ptask < num_appl; ptask++)
-			num_cpus = MAX (num_cpus, obj_table[ptask].ntasks);
 
 		/* Write the Paraver header */
 #if SIZEOF_LONG == 8
@@ -737,27 +734,32 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 
 		if (taskid == 0)
 		{
-			sprintf (Header, "%d(", obj_table[ptask].ntasks);
+			ptask_t *ptask_info = GET_PTASK_INFO(ptask+1);
+			task_t *last_task_info = GET_TASK_INFO(ptask+1,ptask_info->ntasks);
+
+			sprintf (Header, "%d(", ptask_info->ntasks);
 			PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 
-			for (task = 0; task < obj_table[ptask].ntasks - 1; task++)
+			for (task = 0; task < ptask_info->ntasks-1; task++)
 			{
+				task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
+
 #if defined(PARALLEL_MERGE)
 				threads = vthreads_count[task];
 #else
-				threads = obj_table[ptask].tasks[task].num_virtual_threads; /*nthreads;*/
+				threads = task_info->num_virtual_threads; /*nthreads;*/
 #endif
-				node = obj_table[ptask].tasks[task].nodeid;
+				node = task_info->nodeid;
 
 				sprintf (Header, "%d:%d,", threads, node);
 				PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 			}
 #if defined(PARALLEL_MERGE)
-			threads = vthreads_count[obj_table[ptask].ntasks-1];
+			threads = vthreads_count[ptask_info->ntasks-1];
 #else
-			threads = obj_table[ptask].tasks[obj_table[ptask].ntasks-1].num_virtual_threads; /*nthreads;*/
+			threads = last_task_info->num_virtual_threads; /* nthreads */
 #endif
-			node =  obj_table[ptask].tasks[obj_table[ptask].ntasks-1].nodeid;
+			node = last_task_info->nodeid;
 
 			/* Add the communicators info at the last application / ptask */
 			if (ptask == num_appl-1)

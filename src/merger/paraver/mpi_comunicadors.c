@@ -43,6 +43,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdio.h>
 #endif
 
+#include "debug.h"
 #include "queue.h"
 #include "mpi_comunicadors.h"
 #include "trace_to_prv.h"
@@ -84,19 +85,13 @@ void initialize_comunicadors (int n_ptasks)
 	INIT_QUEUE (&comunicadors);
 
 	alies_comunicadors = (CommAliasInfo_t **) malloc (n_ptasks * sizeof (CommAliasInfo_t *));
-	if (alies_comunicadors == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Error: Not enough memory! (%s:%d)\n", __FILE__,__LINE__);
-		exit (1);
-	}
+	ASSERT(alies_comunicadors!=NULL, "Not enough memory for communicators alias");
+
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
-		alies_comunicadors[ii] = (CommAliasInfo_t *) malloc (obj_table[ii].ntasks * sizeof (CommAliasInfo_t));
-		if (alies_comunicadors[ii] == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Error: Not enough memory! (%s:%d)\n", __FILE__,__LINE__);
-			exit (1);
-		}
+		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
+		alies_comunicadors[ii] = (CommAliasInfo_t *) malloc (ptask_info->ntasks * sizeof (CommAliasInfo_t));
+		ASSERT(alies_comunicadors[ii]!=NULL, "Not enough memory for communicators alias");
 	}
 
 #if defined(DEBUG_COMMUNICATORS)
@@ -104,8 +99,11 @@ void initialize_comunicadors (int n_ptasks)
 #endif
 
 	for (ii = 0; ii < n_ptasks; ii++)
-		for (jj = 0; jj < obj_table[ii].ntasks; jj++)
+	{
+		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
+		for (jj = 0; jj < ptask_info->ntasks; jj++)
 			INIT_QUEUE (&(alies_comunicadors[ii][jj]));
+	}
 }
 
 

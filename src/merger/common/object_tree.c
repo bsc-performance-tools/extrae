@@ -31,8 +31,9 @@
 static char UNUSED rcsid[] = "$Id$";
 
 #include "object_tree.h"
+#include "debug.h"
 
-ptask_t *obj_table = NULL;
+appl_t ApplicationTable;
 
 /******************************************************************************
  ***  InitializeObjectTable
@@ -51,60 +52,43 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	for (i = 0; i < nfiles; i++)
 		ntasks[files[i].ptask-1] = MAX(files[i].task, ntasks[files[i].ptask-1]);
 
-	if ((nthreads = (unsigned**) malloc (num_appl*sizeof(unsigned*))) == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Error! cannot allocate memory to allocate nthreads for whole appl!\n");
-		fflush (stderr);
-		exit (-1);
-	}
+	nthreads = (unsigned**) malloc (num_appl*sizeof(unsigned*));
+	ASSERT(nthreads!=NULL, "Cannot allocate memory to store nthreads for whole applications");
+
 	for (i = 0; i < num_appl; i++)
 	{
-		if ((nthreads[i] = (unsigned*) malloc (ntasks[i]*sizeof(unsigned))) == NULL)
-		{
-			fprintf (stderr, "mpi2prv: Error! cannot allocate memory to allocate nthreads for appl %d!\n", i);
-			fflush (stderr);
-			exit (-1);
-		}
-		else
-			for (j = 0; j < ntasks[i]; j++)
-				nthreads[i][j] = 0;
+		nthreads[i] = (unsigned*) malloc (ntasks[i]*sizeof(unsigned));
+		ASSERT(nthreads[i]!=NULL, "Cannot allocate memory to store nthreads for application");
+
+		for (j = 0; j < ntasks[i]; j++)
+			nthreads[i][j] = 0;
 	}
 
 	for (i = 0; i < nfiles; i++)
 		nthreads[files[i].ptask-1][files[i].task-1] = MAX(files[i].thread, nthreads[files[i].ptask-1][files[i].task-1]);
 
 	/* Second step, allocate structures respecting the number of apps, tasks and threads found */
-	obj_table = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
-	if (NULL == obj_table)
-	{
-		fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d ptasks!\n", num_appl);
-		fflush (stderr);
-		exit (-1);
-	}
+	ApplicationTable.nptasks = num_appl;
+	ApplicationTable.ptasks = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
+	ASSERT(ApplicationTable.ptasks!=NULL, "Unable to allocate memory for ptasks");
+
 	for (i = 0; i < num_appl; i++)
 	{
 		/* Allocate per task information within each ptask */
-		obj_table[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks[i]);
-		if (NULL == obj_table[i].tasks)
-		{
-			fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d tasks (ptask = %d)\n", ntasks, i+1);
-			fflush (stderr);
-			exit (-1);
-		}
+		ApplicationTable.ptasks[i].ntasks = ntasks[i];
+		ApplicationTable.ptasks[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks[i]);
+		ASSERT(ApplicationTable.ptasks[i].tasks!=NULL, "Unable to allocate memory for tasks");
+
 		for (j = 0; j < ntasks[i]; j++)
 		{
 			/* Initialize pending communication queues for each task */
-			CommunicationQueues_Init (&(obj_table[i].tasks[j].send_queue),
-			  &(obj_table[i].tasks[j].recv_queue));
+			CommunicationQueues_Init (
+			  &(ApplicationTable.ptasks[i].tasks[j].send_queue),
+			  &(ApplicationTable.ptasks[i].tasks[j].recv_queue));
 
 			/* Allocate per thread information within each task */
-			obj_table[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*nthreads[i][j]);
-			if (NULL == obj_table[i].tasks[j].threads)
-			{
-				fprintf (stderr, "mpi2prv: Error! Unable to alloc memory for %d threads (ptask = %d / task = %d)\n", nthreads[i][j], i+1, j+1);
-				fflush (stderr);
-				exit (-1);
-			}
+			ApplicationTable.ptasks[i].tasks[j].threads = (thread_t*) malloc (sizeof(thread_t)*nthreads[i][j]);
+			ASSERT(ApplicationTable.ptasks[i].tasks[j].threads!=NULL,"Unable to allocate memory for threads");
 		}
 	}
 
@@ -115,7 +99,6 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	/* 3rd step, Initialize the object table structure */
 	for (ptask = 0; ptask < num_appl; ptask++)
 	{
-		obj_table[ptask].ntasks = ntasks[ptask];
 		for (task = 0; task < ntasks[ptask]; task++)
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
