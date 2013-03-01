@@ -1190,7 +1190,7 @@ static int Wait_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  Register_CodeLocation_Type_Event
+ ***  Exec_Event
  ******************************************************************************/
 
 static int Exec_Event (event_t * current_event,
@@ -1204,6 +1204,22 @@ static int Exec_Event (event_t * current_event,
 	UNREFERENCED_PARAMETER(task);
 	UNREFERENCED_PARAMETER(thread);
 	UNREFERENCED_PARAMETER(fset);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  GetCPU_Event
+ ******************************************************************************/
+
+static int GetCPU_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	  Get_EvEvent (current_event), Get_EvValue (current_event));
 
 	return 0;
 }
@@ -1249,6 +1265,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ WAIT_EV, Wait_Event },
 	{ WAITPID_EV, Wait_Event },
 	{ EXEC_EV, Exec_Event },
+	{ GETCPU_EV, GetCPU_Event },
 	{ NULL_EV, NULL }
 };
 

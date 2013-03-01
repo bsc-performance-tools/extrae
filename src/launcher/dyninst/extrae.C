@@ -122,6 +122,11 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 	}
 }
 
+void ExecCallback (BPatch_thread *thread)
+{
+	cout << "Process " << thread->getProcess() << " is executing exec() call" << endl;
+}
+
 static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch_image *appImage, BPatch_addressSpace *appProces)
 {
 	ofstream symfile;
@@ -1000,6 +1005,8 @@ int main (int argc, char *argv[])
 		GenerateSymFile (ParallelFunctions, UserFunctions, appImage,
 		  appAddrSpace);
 	}
+
+	bpatch->registerExecCallback(ExecCallback);
 
 	if (!BinaryRewrite)
 	{

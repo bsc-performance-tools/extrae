@@ -100,6 +100,11 @@ static char UNUSED rcsid[] = "$Id$";
 # endif
 #endif /* IS_BG_MACHINE */
 
+#if defined(HAVE_SCHED_GETCPU)
+	/* Although man indicates that this should be in sched.h, it seems to be not there */
+	extern int sched_getcpu(void);
+#endif 
+
 #if defined(IS_CELL_MACHINE)
 # include "defaults.h"
 # include "cell_wrapper.h"
@@ -329,42 +334,17 @@ static void Extrae_BG_gettopology (int enter, UINT64 timestamp)
 }
 #endif
 
-#if defined(IS_MN_MACHINE)
-#define MAX_BUFFER 1024
-static void Extrae_MN_gettopology (int enter, UINT64 timestamp) 
-{
-	char hostname[MAX_BUFFER];
-	int rc;
-	int server,center,blade;
-	int linear_host;
-	int linecard, host;
-
-	if (gethostname(hostname, MAX_BUFFER - 1) == 0)
-	{
-		rc = sscanf(hostname, "s%dc%db%d", &server, &center, &blade);
-		if (rc != 3) return;
-		linear_host = server*(4*14) + (center - 1) * 14 + (blade - 1);
-		linecard = linear_host / 16;
-		host = linear_host % 16;
-
-		TRACE_MISCEVENT(timestamp, USER_EV, MN_LINEAR_HOST_EVENT, enter?linear_host:0);
-		TRACE_MISCEVENT(timestamp, USER_EV, MN_LINECARD_EVENT, enter?linecard:0);
-		TRACE_MISCEVENT(timestamp, USER_EV, MN_HOST_EVENT, enter?host:0);
-	}
-	else
-		fprintf(stderr, PACKAGE_NAME": could not get hostname, is it longer than %d bytes?\n", (MAX_BUFFER-1));
-}
-#endif
-
 static void Extrae_AnnotateTopology (int enter, UINT64 timestamp)
 {
-#if defined(IS_MN_MACHINE)
-	Extrae_MN_gettopology (enter, timestamp);
-#elif defined(IS_BG_MACHINE)
+#if defined(IS_BG_MACHINE)
 	Extrae_BG_gettopology (enter, timestamp);
 #else
 	UNREFERENCED_PARAMETER(enter);
+# if defined(HAVE_SCHED_GETCPU)
+	TRACE_EVENT (timestamp, GETCPU_EV, sched_getcpu());
+# else
 	UNREFERENCED_PARAMETER(timestamp);
+# endif
 #endif
 }
 
@@ -1615,6 +1595,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	/* This has been moved a few lines above to make sure the APPL_EV is the first in the trace */
 	ApplBegin_Time = TIME;
 	TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
+#if !defined(IS_BG_MACHINE)
+	Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
+#endif
 
 #if USE_HARDWARE_COUNTERS
 	/* Write hardware counter definitions into the .sym file */
@@ -1749,8 +1732,6 @@ static int GetTraceOptions (void)
 
 #if defined(IS_BG_MACHINE)
 	options |= TRACEOPTION_BG_ARCH;
-#elif defined(IS_MN_MACHINE)
-	options |= TRACEOPTION_MN_ARCH;
 #else
 	options |= TRACEOPTION_UNK_ARCH;
 #endif
@@ -1977,7 +1958,13 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 		HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, FALSE);
 
 		BUFFER_INSERT (THREADID, buffer, FlushEv_Begin);
+#if !defined(IS_BG_MACHINE)
+		Extrae_AnnotateTopology (TRUE, FlushEv_Begin.time);
+#endif
 		BUFFER_INSERT (THREADID, buffer, FlushEv_End);
+#if !defined(IS_BG_MACHINE)
+		Extrae_AnnotateTopology (TRUE, FlushEv_End.time);
+#endif
 
 		check_size = !hasMinimumTracingTime || (hasMinimumTracingTime && (TIME > MinimumTracingTime+initTracingTime));
 		if (file_size > 0 && check_size)
@@ -2027,6 +2014,9 @@ void Backend_Finalize (void)
 		if (TRACING_BUFFER(thread) != NULL)
 		{
 			TRACE_EVENT (TIME, APPL_EV, EVT_END);
+#if !defined(IS_BG_MACHINE)
+			Extrae_AnnotateTopology (TRUE, LAST_READ_TIME);
+#endif
 			Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 			Backend_Finalize_close_mpits (thread);
 		}

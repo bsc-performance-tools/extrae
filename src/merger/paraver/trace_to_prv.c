@@ -184,7 +184,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	unsigned long long records_per_task;
 	double pct, last_pct;
 	UINT64 *StartingTimes, *SynchronizationTimes;
-	int i, j;
+	int i;
 	long long options;
 	int num_appl_tasks[num_appl];
 

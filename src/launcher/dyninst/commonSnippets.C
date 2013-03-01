@@ -70,7 +70,7 @@ BPatch_Vector<BPatch_function *> getRoutines (const char* routine, BPatch_image 
 
 BPatch_function * getRoutine (string &routine, BPatch_image *appImage, bool warn)
 {
-	return getRoutine (routine.c_str(), appImage);
+	return getRoutine (routine.c_str(), appImage, warn);
 }
 
 BPatch_function * getRoutine (const char *routine, BPatch_image *appImage, bool warn)

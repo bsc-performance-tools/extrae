@@ -130,8 +130,6 @@ if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_
   IS_BG_MACHINE="yes"
 fi
 AM_CONDITIONAL(IS_BG_MACHINE, test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes")
-
-AX_IS_MN_MACHINE
 AX_IS_CELL_MACHINE
 
 if test "${IS_CELL_MACHINE}" = "yes" ; then
@@ -197,6 +195,9 @@ AM_PROG_CC_C_O
 # Check for /proc/cpuinfo & /proc/meminfo
 AX_CHECK_PROC_CPUINFO
 AX_CHECK_PROC_MEMINFO
+
+# Check whether we can determine on which CPU we're working
+AX_CHECK_GETCPU
 
 # PGI compilers do not handle well GCC attributes
 AX_CHECK_PGI

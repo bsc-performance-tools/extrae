@@ -1111,6 +1111,10 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
   xmlNodePtr tag;
   int ActiveRemoteControls = 0;
 
+#if !defined(HAVE_ONLINE)
+	UNREFERENCED_PARAMETER(xmldoc);
+#endif
+
   /* Parse all TAGs, and annotate them to use them later */
   tag = current_tag->xmlChildrenNode;
   while (tag != NULL)

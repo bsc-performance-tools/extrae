@@ -1126,31 +1126,6 @@ AC_DEFUN([AX_IS_BGL_MACHINE],
    AM_CONDITIONAL(IS_BGL_MACHINE, test "${IS_BGL_MACHINE}" = "yes")
 ])
 
-# AX_IS_MN_MACHINE
-#---------------------
-AC_DEFUN([AX_IS_MN_MACHINE],
-[
-   AC_ARG_ENABLE(check-mn,
-      AC_HELP_STRING(
-         [--enable-check-mn],
-         [Enable check to known if this is MareNostrum (enabled by default)]
-      ),
-      [enable_check_mn="${enableval}"],
-      [enable_check_mn="yes"]
-   )
-   AC_MSG_CHECKING([if this is MN machine])
-   grep "Welcome to MareNostrum" /etc/motd 2> /dev/null > /dev/null
-   GREP_RESULT=$?
-   if test "${enable_check_mn}" = "yes" -a "${GREP_RESULT}" = "0" ; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([IS_MN_MACHINE], 1, [Defined if this machine is MN])
-      IS_MN_MACHINE="yes"
-   else
-      AC_MSG_RESULT([no])
-      IS_MN_MACHINE="no"
-   fi
-])
-
 # AX_OPENMP
 #-----------------
 AC_DEFUN([AX_OPENMP],
@@ -1911,4 +1886,10 @@ AC_DEFUN([AX_CHECK_PROC_MEMINFO],
 	else
 		AC_MSG_RESULT([not found])
 	fi
+])
+
+AC_DEFUN([AX_CHECK_GETCPU],
+[
+	AC_CHECK_HEADERS([sched.h])
+	AC_CHECK_FUNC(sched_getcpu, [AC_DEFINE([HAVE_SCHED_GETCPU],[1],[Define if have sched_getcpu])])
 ])

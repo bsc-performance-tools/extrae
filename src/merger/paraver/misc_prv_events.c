@@ -45,10 +45,11 @@ static char UNUSED rcsid[] = "$Id$";
 #define TRACING_INDEX           2
 #define INOUT_INDEX             3
 #define FORK_INDEX              4
+#define GETCPU_INDEX            5
 
-#define MAX_MISC_INDEX	        5
+#define MAX_MISC_INDEX	        6
 
-static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_MISC_Operation (int type)
 {
@@ -62,19 +63,13 @@ void Enable_MISC_Operation (int type)
 		inuse[INOUT_INDEX] = TRUE;
 	else if (type == FORK_EV || type == WAIT_EV || type == WAITPID_EV || type == EXEC_EV)
 		inuse[FORK_INDEX] = TRUE;
+	else if (type == GETCPU_EV)
+		inuse[GETCPU_INDEX] = TRUE;
 }
 
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
-{
-	if (options & TRACEOPTION_MN_ARCH)
-	{
-		fprintf (fd, "%s\n", TYPE_LABEL);
-		fprintf (fd, "%d   %d   %s\n", 0, MN_LINEAR_HOST_EVENT, MN_LINEAR_HOST_LABEL);
-		fprintf (fd, "%d   %d   %s\n", 0, MN_LINECARD_EVENT, MN_LINECARD_LABEL);
-		fprintf (fd, "%d   %d   %s\n", 0, MN_HOST_EVENT, MN_HOST_LABEL);
-		LET_SPACES(fd);
-	}
-	else if (options & TRACEOPTION_BG_ARCH)
+{	
+	if (options & TRACEOPTION_BG_ARCH)
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_PROCESSOR_ID, BG_PROCESSOR_ID);
@@ -84,6 +79,12 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_D, BG_TORUS_D);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, BG_PERSONALITY_TORUS_E, BG_TORUS_E);
 		LET_SPACES (fd);
+	}
+	if (inuse[GETCPU_INDEX])
+	{
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, GETCPU_EV, GETCPU_LBL);
+		LET_SPACES(fd);
 	}
 	if (inuse[APPL_INDEX])
 	{

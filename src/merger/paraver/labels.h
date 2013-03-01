@@ -113,6 +113,7 @@ value_t;
 #define WAIT_LBL               "wait()"
 #define WAITPID_LBL            "waitpid()"
 #define EXEC_LBL               "exec() or similar"
+#define GETCPU_LBL             "Executing CPU"
 
 #define TRACING_LBL            "Tracing"
 

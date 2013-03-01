@@ -108,7 +108,10 @@ unsigned IsMPICollective (unsigned EvType);
 #define FORK_EV                  40000027
 #define WAIT_EV                  40000028
 #define WAITPID_EV               40000029
-#define EXEC_EV                  40000030
+#define WAITEDPID_EV             40000030
+#define EXEC_EV                  40000031
+#define EXEC_BIN_EV              40000032
+#define GETCPU_EV                40000033
 
 #define RUSAGE_BASE              45000000
 enum {

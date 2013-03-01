@@ -1242,6 +1242,11 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 	UINT64 *SynchronizationTimes = NULL;
 	event_t *current = NULL;
 
+#if !defined(PARALLEL_MERGE)
+	UNREFERENCED_PARAMETER(taskid);
+	UNREFERENCED_PARAMETER(ntasks);
+#endif
+
 	Rewind_FS (fset);
 
 	/* Calculate the total number of mpits (note this doesn't check the application they belong!) */
