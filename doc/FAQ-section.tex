@@ -43,6 +43,14 @@
       {\tt ld: 0711-317 ERROR: Undefined symbol: .\_\_mulvsi3}.\\
       {\bf Answer:  } The instrumentation libraries have been compiled with GNU compilers whereas the application is compiled using IBM XL compilers. Add the libgcc\_s library to the link stage of the application. This library can be found under the installation directory of the GNU compiler.
 
+\item {\bf Question:} The application cannot be linked. The linker misses some routines like\\
+      {\tt src/common/utils.c:122: undefined reference to `\_\_intel\_sse2\_strlen'}\\
+      {\tt src/common/utils.c:125: undefined reference to `\_\_intel\_sse2\_strdup'}\\
+      {\tt src/common/utils.c:132: undefined reference to `\_\_intel\_sse2\_strtok'}\\
+      {\tt src/common/utils.c:100: undefined reference to `\_\_intel\_sse2\_strncpy'}\\
+      {\tt src/common/timesync.c:211: undefined reference to `\_intel\_fast\_memset'}\\
+      {\bf Answer:  } The instrumentation libraries have been compiled using Intel compilers (i.e. {\tt icc}, {\tt icpc}) whereas the application is being linked through non-Intel compilers or {\tt ld} directly. You can proceed in three directions, you can either compile your application using the Intel compilers, or add a Intel library that provides these routines ({\tt libintlc.so} and {\tt libirc.so}, for instance), or even recompile \TRACE using the GNU compilers. Note, moreover, that using Intel MPI compiler does not guarantee using the Intel compiler backends, just run the MPI compiler ({\tt mpicc}, {\tt mpiCC}, {\tt mpif77}, {\tt mpif90}, .. ) with the {\tt -v} flag to get information on what compiler backend relies.
+
 \item {\bf Question:} The make command dies when building libraries belonging \TRACE in an AIX machine with messages like:\\
       {\tt
       libtool: link: ar cru libcommon.a libcommon\_la-utils.o libcommon\_la-events.o\\

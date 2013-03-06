@@ -3760,7 +3760,7 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
 % latex2html id marker 3799\begin{table}
 \centerline{
 \begin...
-...riables available to configure {\sf {E}xtrae}\ }
+...riables available to configure {\sf {E}xtrae} }
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -3775,7 +3775,7 @@ This appendix presents the environment variables the <I>Extrae</I> package uses 
 \begin{table}
 \centerline{
 \...
-... to configure {\sf {E}xtrae}\ ({\em continued})}
+... to configure {\sf {E}xtrae} ({\em continued})}
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -3828,6 +3828,16 @@ src/common/Makefile.am:9:   its definition is in aclocal's search path.
 <BR>      <TT>ld: 0711-317 ERROR: Undefined symbol: .__udivdi3</TT>.
 <BR>      <TT>ld: 0711-317 ERROR: Undefined symbol: .__mulvsi3</TT>.
 <BR>      <B>Answer:  </B> The instrumentation libraries have been compiled with GNU compilers whereas the application is compiled using IBM XL compilers. Add the libgcc_s library to the link stage of the application. This library can be found under the installation directory of the GNU compiler.
+
+<P>
+</LI>
+<LI><B>Question:</B> The application cannot be linked. The linker misses some routines like
+<BR>      <TT>src/common/utils.c:122: undefined reference to `__intel_sse2_strlen'</TT>
+<BR>      <TT>src/common/utils.c:125: undefined reference to `__intel_sse2_strdup'</TT>
+<BR>      <TT>src/common/utils.c:132: undefined reference to `__intel_sse2_strtok'</TT>
+<BR>      <TT>src/common/utils.c:100: undefined reference to `__intel_sse2_strncpy'</TT>
+<BR>      <TT>src/common/timesync.c:211: undefined reference to `_intel_fast_memset'</TT>
+<BR>      <B>Answer:  </B> The instrumentation libraries have been compiled using Intel compilers (i.e. <TT>icc</TT>, <TT>icpc</TT>) whereas the application is being linked through non-Intel compilers or <TT>ld</TT> directly. You can proceed in three directions, you can either compile your application using the Intel compilers, or add a Intel library that provides these routines (<TT>libintlc.so</TT> and <TT>libirc.so</TT>, for instance), or even recompile <I>Extrae</I> using the GNU compilers. Note, moreover, that using Intel MPI compiler does not guarantee using the Intel compiler backends, just run the MPI compiler (<TT>mpicc</TT>, <TT>mpiCC</TT>, <TT>mpif77</TT>, <TT>mpif90</TT>, .. ) with the <TT>-v</TT> flag to get information on what compiler backend relies.
 
 <P>
 </LI>
@@ -4438,7 +4448,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2013-02-27
+The translation was initiated by Harald Servat on 2013-03-06
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot211">... file</A><A
@@ -4504,7 +4514,7 @@ The translation was initiated by Harald Servat on 2013-02-27
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2013-02-27
+2013-03-06
 </ADDRESS>
 </BODY>
 </HTML>
