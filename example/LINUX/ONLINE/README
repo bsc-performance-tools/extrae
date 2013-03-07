@@ -12,7 +12,7 @@
 1. Introduction [INTRO]
 =======================
 
-This tracing setup is tailored towards long MPI executions that are producing large traces. Using spectral analysis techniques, the application is repeatedly analyzed in order to find its main periods. Then, a detailed trace for a few representative iterations of the periods is automatically produced.
+This tracing setup is tailored towards long MPI executions that are producing large traces. Using spectral analysis techniques, the application is repeatedly analyzed in order to find its main periods. Then, a detailed trace for a few representative iterations of every different period is automatically produced.
 
 Please note that:
 - Applying this system to a very short execution, or if no periodicity can be detected in the application, may result in an empty trace.

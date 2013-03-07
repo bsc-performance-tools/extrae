@@ -7,7 +7,11 @@
 
 /**
  * Test MPI program where every task sends a message to the next, 
- * then all tasks synchronize and sleep for 1 second.
+ * then all tasks synchronize and sleep for 1 second. 
+ *
+ * Beyond iteration #100, the length of the iteration is doubled, 
+ * so that the analysis detects two different periodic behaviors
+ * and takes a sample for each of them.
  */
 int main(int argc, char ** argv) 
 {

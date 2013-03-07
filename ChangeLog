@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 07Mar2013 Fixed minor compilation issues and changed the default configuration of the online example.
  + 07Mar2013 Extrae version 3.0
  + 07Mar2013 Added on-line spectral analysis.
  + 01Mar2013 Emit CPU through sched_getcpu at Init and Flushes.

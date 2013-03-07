@@ -68,7 +68,7 @@ void BurstsExtractor::ProcessEvent(event_t *evt)
   {
     /* Here ends a burst */
     unsigned long long ts_ini      = Get_EvTime(LastBegin);
-    unsigned long long ts_ini_sync = TIMESYNC(TASKID, ts_ini);
+    unsigned long long ts_ini_sync = TIMESYNC(0, TASKID, ts_ini);
     unsigned long long ts_end      = Get_EvTime(evt);
     unsigned long long duration    = ts_end - ts_ini;
     int hwc_set = Get_EvHWCSet(evt);

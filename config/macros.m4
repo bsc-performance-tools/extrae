@@ -1507,7 +1507,7 @@ AC_DEFUN([AX_PROG_MRNETAPP],
       [specify where to find MRNetApp libraries and includes]
     ),
     [mrnetapp_paths="$withval"],
-    [mrnetapp_paths="/home/bsc41/bsc41127/apps/MRNetApp"] # List of possible default paths
+    [mrnetapp_paths="not_set"] # List of possible default paths
   )
 
   dnl Search for MRNet installation
@@ -1570,7 +1570,7 @@ AC_DEFUN([AX_PROG_CLUSTERING],
       [specify where to find clustering libraries and includes]
     ),
     [clustering_paths="$withval"],
-    [clustering_paths="/gpfs/apps/NVIDIA/CEPBATOOLS/ClusteringSuite/latest"] dnl List of possible default paths
+    [clustering_paths="not_set"] dnl List of possible default paths
   )
   dnl Search for Clustering installation
   AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [clustering])
@@ -1590,7 +1590,7 @@ AC_DEFUN([AX_PROG_SPECTRAL],
       [specify where to find spectral analysis libraries and includes]
     ),
     [spectral_paths="$withval"],
-    [spectral_paths="/home/bsc41/bsc41127/apps/spectral_last"] dnl List of possible default paths
+    [spectral_paths="not_set"] dnl List of possible default paths
   )
 
   dnl Search for Spectral Analysis installation
@@ -1618,7 +1618,7 @@ AC_DEFUN([AX_PROG_SPECTRAL],
           [specify where to find FFT libraries and includes]
         ),
         [fft_paths="$withval"],
-        [fft_paths="/gpfs/apps/NVIDIA/FFTW/3.3"] dnl List of possible default paths
+        [fft_paths="not_set"] dnl List of possible default paths
       )
       dnl Search for FFT installation
       AX_FIND_INSTALLATION([FFT], [$fft_paths], [fft])

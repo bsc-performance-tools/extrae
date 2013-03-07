@@ -52,6 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <string.h>
 #endif
 
+#include "utils.h"
 #include "mpi_wrapper.h"
 #include "wrapper.h"
 #include "clock.h"
@@ -2967,7 +2968,7 @@ void PMPI_GatherV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	if (me == *root)
 	{
 		if (recvcount != NULL)
-			for (proc = 0; proc < nprocs; proc++)
+			for (proc = 0; proc < csize; proc++)
 				recvc += recvcount[proc];
 
 		GLOBAL_Bytes_Recv += recvc * recvsize;
@@ -3143,7 +3144,7 @@ void PMPI_ScatterV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	if (me == *root)
 	{
 		if (sendcount != NULL)
-			for (proc = 0; proc < nprocs; proc++)
+			for (proc = 0; proc < csize; proc++)
 				sendc += sendcount[proc];
 
 		GLOBAL_Bytes_Sent += sendc * sendsize;
@@ -6232,7 +6233,7 @@ int MPI_Gatherv_C_Wrapper (void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	if (me == root)
 	{
 		if (recvcounts != NULL)
-			for (proc = 0; proc < nprocs; proc++)
+			for (proc = 0; proc < csize; proc++)
 				recvc += recvcounts[proc];
 
 		GLOBAL_Bytes_Recv += recvc * recvsize;
@@ -6401,7 +6402,7 @@ int MPI_Scatterv_C_Wrapper (void *sendbuf, int *sendcounts, int *displs,
 	if (me == root)
 	{
 		if (sendcounts != NULL)
-			for (proc = 0; proc < nprocs; proc++)
+			for (proc = 0; proc < csize; proc++)
 				sendc += sendcounts[proc];
 
 		GLOBAL_Bytes_Sent += sendc * sendsize;

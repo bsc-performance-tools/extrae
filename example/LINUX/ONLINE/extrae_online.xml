@@ -52,8 +52,8 @@
   </storage>
 
   <buffer enabled="yes">
+    <!-- Circular buffer has to be enabled and be rather big -->
     <size enabled="yes">1000000</size>
-    <!-- Circular buffer has to be enabled -->
     <circular enabled="yes" />
   </buffer>
 
@@ -65,8 +65,8 @@
         <online enabled="yes" analysis="spectral" frequency="60" topology="auto">
             <!-- frequency: idle seconds before repeating the analysis 
                  topology : set to "auto" or specify an MRNet generic tree topology (see mrnet_topgen) -->
-            <spectral max_periods="1" num_iters="3" min_seen="0" min_likeness="80"/>
-                <!-- max_periods : set to the maximum number of periods to trace, or "all" 
+            <spectral max_periods="all" num_iters="3" min_seen="0" min_likeness="80"/>
+                <!-- max_periods : set to the maximum number of periods to trace, or "all" to explore the whole run
                      num_iters   : set to the number of iterations to trace per period
                      min_seen    : minimum repetitions of a period before tracing it
                      min_likeness: minimum similarity to compare to periods equivalent -->

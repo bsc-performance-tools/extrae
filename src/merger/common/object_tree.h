@@ -43,6 +43,9 @@
 
 #define MAX_STATES 16
 
+#define GET_NUM_TASKS(ptask) \
+    (ApplicationTable.ptasks[ptask - 1].ntasks)
+
 #define GET_PTASK_INFO(ptask) \
 		&(ApplicationTable.ptasks[ptask - 1])
 

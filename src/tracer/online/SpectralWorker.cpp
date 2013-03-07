@@ -154,8 +154,8 @@ void SpectralWorker::Trace_Period(Period_t *CurrentPeriod, long long int *best_i
   Buffer_t *buffer = TRACING_BUFFER(0);
 
   /* Transform the global times of the boundaries of the period into local times */
-  long long int real_best_ini = TIMEDESYNC(TASKID, CurrentPeriod->best_ini);
-  long long int real_best_end = TIMEDESYNC(TASKID, CurrentPeriod->best_end);
+  long long int real_best_ini = TIMEDESYNC(0, TASKID, CurrentPeriod->best_ini);
+  long long int real_best_end = TIMEDESYNC(0, TASKID, CurrentPeriod->best_end);
 
   /* Get the first and last events for the given time interval */
   event_t *period_ini_evt = NULL;
