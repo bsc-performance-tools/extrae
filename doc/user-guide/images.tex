@@ -37,7 +37,7 @@
 %
 \providecommand{\TRACE}{{\sf {E}xtrae}\ }%
 \providecommand{\PARAVER}{{\sf Paraver}\ }%
-\providecommand{\TRACEVERSION}{2.3.2} 
+\providecommand{\TRACEVERSION}{3.0} 
 
 
 
@@ -50,10 +50,6 @@
 
 
 \makeatletter
-\AtBeginDocument{\makeatletter
-\input /home/harald/development/extrae-trunk/doc/user-guide.aux
-\makeatother
-}
 
 \makeatletter
 \count@=\the\catcode`\_ \catcode`\_=8 
@@ -258,75 +254,6 @@
 \appendix
 \stepcounter{chapter}
 \stepcounter{chapter}
-{\newpage\clearpage
-\lthtmlfigureA{landscape3799}%
-\begin{landscape}
-% latex2html id marker 3799
-
-\begin{table}
-\centerline{
-\begin{tabular}{| p{7cm} | p{14cm} |}
-  \hline
-  {\bf Environment variable} & {\bf Description}\\
-  \hline
-  EXTRAE\_BUFFER\_SIZE & Set the number of records that the instrumentation buffer can\\
-                        &  hold before flushing them.\\
-  \hline
-  EXTRAE\_CIRCULAR\_BUFFER & {\em (deprecated)} \\
-  \hline
-  EXTRAE\_COUNTERS & See section \ref{subsec:ProcessorPerformanceCounters}. Just one set can be defined. Counters (in PAPI)\\
-                    & groups (in PMAPI) are given separated by commas.\\
-  \hline
-  EXTRAE\_CONTROL\_FILE & The instrumentation will be enabled only when the file pointed exists.\\
-  \hline
-  EXTRAE\_CONTROL\_GLOPS & Starts the instrumentation when the specified number of global collectives\\
-                         & have been executed.\\
-  \hline
-  EXTRAE\_CONTROL\_TIME & Checks the file pointed by {\tt EXTRAE\_CONTROL\_FILE} at this period.\\
-  \hline
-  EXTRAE\_DIR  & Specifies where temporal files will be created during\\
-               & instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_MPI & Disable MPI instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_OMP & Disable OpenMP instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_PTHREAD & Disable pthread instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_PACX & Disable PACX instrumentation.\\
-  \hline
-  EXTRAE\_FILE\_SIZE & Set the maximum size (in Mbytes) for the intermediate trace file.\\
-  \hline
-  EXTRAE\_FUNCTIONS & List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
-                    & GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
-                    & option at compile and link time. \\
-  \hline
-  EXTRAE\_FUNCTIONS\_COUNTERS\_ON & Specify if the performance counters should be collected when a\\
-                                   & user function event is emitted.\\
-  \hline
-  EXTRAE\_FINAL\_DIR & Specifies where files will be stored when the application ends.\\
-  \hline
-  EXTRAE\_GATHER\_MPITS & Gather intermediate trace files into a single directory\\
-                        & (\em{this is only available when instrumenting MPI applications}).\\
-  \hline
-  EXTRAE\_HOME & Points where the {\sf {E}xtrae}\ is installed.\\
-  \hline
-  EXTRAE\_INITIAL\_MODE & Choose whether the instrumentation runs in in {\tt detail} or\\
-                        & in {\tt bursts} mode.\\
-  \hline
-  EXTRAE\_BURST\_THRESHOLD & Specify the threshold time to filter running bursts.\\
-  \hline
-  EXTRAE\_MINIMUM\_TIME & Specify the minimum amount of instrumentation time.\\
-  \hline
-\end{tabular}
-}
-\caption{Set of environment variables available to configure {\sf {E}xtrae}\ }
-\end{table}
-\par
-\end{landscape}%
-\lthtmlfigureZ
-\lthtmlcheckvsize\clearpage}
-
 {\newpage\clearpage
 \lthtmlfigureA{landscape3820}%
 \begin{landscape}

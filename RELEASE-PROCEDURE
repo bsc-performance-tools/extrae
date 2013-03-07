@@ -12,7 +12,7 @@
 2) Change the version if necessary **
  2.a) in the configure.ac (see AC_INIT)
  2.b) in src/common/extrae_version.h
- 2.c) bootstrap & configure to rebuild documentation (1.c)
+ 2.c) bootstrap & configure & cd doc & make build-documentation, to rebuild documentation (1.c)
  2.d) add entry in ChangeLog
 
 ** In fact, some developers change version just after releasing a version.

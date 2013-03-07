@@ -13,4 +13,10 @@ No implementation found for style `fancyvrb'
 
 Substitution of arg to newlabelxx delayed.
 
-No number for "Descriptionoftheavailablemergersinthe<I>Extrae</I>package."
+redefining command \ 
+
+? brace missing for \oldcontentsline
+
+? brace missing for \oldnewlabel
+
+No number for "Descriptionoftheavailablemergersinthe<ICLASS="sans">Extrae</I>package."

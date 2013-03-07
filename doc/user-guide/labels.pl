@@ -297,12 +297,12 @@ $key = q/tab:EnvironmentVariables_continued/;
 $external_latex_labels{$key} = q|B.2|; 
 $noresave{$key} = "$nosave";
 
-$key = q/subsec:ProcessorPerformanceCounters/;
-$external_latex_labels{$key} = q|4.9.1|; 
-$noresave{$key} = "$nosave";
-
 $key = q/subsec:RunningTraceDynInst/;
 $external_latex_labels{$key} = q|1.2.1|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:ProcessorPerformanceCounters/;
+$external_latex_labels{$key} = q|4.9.1|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:ExtendedAPI/;
@@ -329,12 +329,12 @@ $key = q/subsec:Examples_Linux/;
 $external_latex_labels{$key} = q|7.2.1|; 
 $noresave{$key} = "$nosave";
 
-$key = q/sec:XMLSectionUF/;
-$external_latex_labels{$key} = q|4.8|; 
-$noresave{$key} = "$nosave";
-
 $key = q/sec:XMLSectionMPI/;
 $external_latex_labels{$key} = q|4.2|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionUF/;
+$external_latex_labels{$key} = q|4.8|; 
 $noresave{$key} = "$nosave";
 
 $key = q/cha:API/;

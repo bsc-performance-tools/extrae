@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 07Mar2013 Extrae version 3.0
  + 07Mar2013 Added on-line spectral analysis.
  + 01Mar2013 Emit CPU through sched_getcpu at Init and Flushes.
              Removed MN specific code that no longer has sense.
