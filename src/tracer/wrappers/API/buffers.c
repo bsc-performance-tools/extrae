@@ -52,7 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 # ifdef HAVE_PTHREAD_H
 #  include <pthread.h>
 # endif
@@ -65,16 +65,11 @@ static char UNUSED rcsid[] = "$Id$";
 #define ALL_BITS_SET 0xFFFFFFFF
 
 /* Forward declarations */
-static void NewMask_ChangeRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id, int set);
-static int NewMask_Get (Buffer_t *buffer, event_t *event, int mask_id);
+static void Mask_ChangeRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id, int set);
+static int Mask_Get (Buffer_t *buffer, event_t *event, int mask_id);
 
 static event_t * Buffer_GetFirst (Buffer_t *buffer);
 static event_t * Buffer_GetLast (Buffer_t *buffer);
-#if defined(MASKS_DEAD_CODE)
-static void Buffer_SetMask (Buffer_t *buffer, int index, int value);
-static int Buffer_CheckMask (Buffer_t *buffer, int index);
-static void Buffer_SetMaskRegion (Buffer_t *buffer, event_t *first_evt, event_t *last_evt, int value);
-#endif /* MASKS_DEAD_CODE */
 static void dump_buffer (int fd, int n_blocks, struct iovec *blocks);
 
 
@@ -83,10 +78,10 @@ static void DataBlocks_AddSorted (DataBlocks_t *blocks, void *ini_address, void 
 static void DataBlocks_Add (DataBlocks_t *blocks, void *ini_address, void *end_address);
 static void DataBlocks_Free (DataBlocks_t *blocks);
 
-Buffer_t * new_Buffer (int n_events, char *file)
+Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 {
 	Buffer_t *buffer = NULL;
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 	pthread_mutexattr_t attr;
 	int rc;
 #endif
@@ -111,7 +106,7 @@ Buffer_t * new_Buffer (int n_events, char *file)
 		exit(1);
 	}
 
-#if defined(HAVE_MRNET) 
+#if defined(HAVE_ONLINE) 
 	pthread_mutexattr_init( &attr );
 	pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE_NP );
 
@@ -126,13 +121,19 @@ Buffer_t * new_Buffer (int n_events, char *file)
 	pthread_mutexattr_destroy( &attr );
 #endif
 
-#if defined(MASKS_DEAD_CODE)
-	xmalloc(buffer->Mask, n_events * sizeof(int));
-#endif
-	xmalloc(buffer->NewMasks, n_events * sizeof(Mask_t));
-	NewMask_Wipe(buffer);
+	xmalloc(buffer->Masks, n_events * sizeof(Mask_t));
+	Mask_Wipe(buffer);
 
 	buffer->FlushCallback = CALLBACK_FLUSH;
+
+
+	buffer->NumberOfCachedEvents = 0;
+	buffer->CachedEvents         = NULL;
+	buffer->VictimCache          = NULL;
+	if (enable_cache)
+	{
+		buffer->VictimCache = new_Buffer(BUFFER_CACHE_SIZE, file, 0);
+	}
 
 	return buffer;
 }
@@ -142,15 +143,52 @@ void Buffer_Free (Buffer_t *buffer)
 	if (buffer != NULL)
 	{
 		xfree (buffer->FirstEvt);
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 		pthread_mutex_destroy(&(buffer->Lock));
 #endif
-#if defined(MASKS_DEAD_CODE)
-		xfree (buffer->Mask);
-#endif
-		xfree (buffer->NewMasks);
+		xfree (buffer->Masks);
+
+                xfree (buffer->CachedEvents);
+                if (buffer->VictimCache != NULL)
+		{
+			Buffer_Free(buffer->VictimCache);
+		}
 		xfree (buffer);
 	}
+}
+
+void Buffer_AddCachedEvent(Buffer_t *buffer, INT32 event_type)
+{
+  if ((buffer != NULL) && (buffer->VictimCache != NULL))
+  {
+    buffer->NumberOfCachedEvents ++;
+    xrealloc(buffer->CachedEvents, buffer->CachedEvents, sizeof(INT32) * buffer->NumberOfCachedEvents);
+    buffer->CachedEvents[ buffer->NumberOfCachedEvents - 1 ] = event_type;
+  }
+}
+
+int Buffer_IsEventCached(Buffer_t *buffer, INT32 event_type)
+{
+  int i = 0;
+  if ((buffer != NULL) && (buffer->VictimCache != NULL))
+  {
+    for (i=0; i<buffer->NumberOfCachedEvents; i++)
+    {
+      if (buffer->CachedEvents[i] == event_type) return 1;
+    }
+  }
+  return 0;
+}
+
+void Buffer_CacheEvent(Buffer_t *buffer, event_t *event)
+{
+  if (buffer != NULL)
+  {
+    if (Buffer_IsEventCached(buffer, Get_EvEvent(event)))
+    {
+      Buffer_InsertSingle(buffer->VictimCache, event);
+    }
+  }
 }
 
 /**
@@ -216,6 +254,7 @@ void Buffer_Close (Buffer_t *buffer)
 {
 	if (buffer->fd != -1)
 	{
+		Buffer_FlushCache(buffer);
 		close(buffer->fd);
 	}
 	buffer->fd = -1;
@@ -278,74 +317,9 @@ event_t * Buffer_GetNext (Buffer_t *buffer, event_t *current)
     return next;
 }
 
-#if defined(MASKS_DEAD_CODE)
-void Buffer_ClearMask (Buffer_t *buffer)
-{
-    memset (buffer->Mask, 0, buffer->MaxEvents * sizeof(int));
-}
-
-static void Buffer_SetMask (Buffer_t *buffer, int index, int value)
-{
-    buffer->Mask[index] = value;
-}
-
-void Buffer_MaskIn (Buffer_t *buffer, event_t *evt)
-{
-    Buffer_SetMask(buffer, evt - Buffer_GetFirst(buffer), 1);
-}
-
-void Buffer_MaskOut (Buffer_t *buffer, event_t *evt)
-{
-    Buffer_SetMask(buffer, evt - Buffer_GetFirst(buffer), 0);
-}
-
-static int Buffer_CheckMask (Buffer_t *buffer, int index)
-{
-    return buffer->Mask[index];
-}
-
-int Buffer_IsMaskedOut (Buffer_t *buffer, event_t *evt)
-{
-    return ( Buffer_CheckMask(buffer, evt - Buffer_GetFirst(buffer)) == 0 );
-}
-
-int Buffer_IsMaskedIn (Buffer_t *buffer, event_t *evt)
-{
-    return ( Buffer_CheckMask(buffer, evt - Buffer_GetFirst(buffer)) == 1 );
-}
-
-static void Buffer_SetMaskRegion (Buffer_t *buffer, event_t *first_evt, event_t *last_evt, int value)
-{
-    event_t *current = first_evt;
-
-    do
-    {
-        if (value)
-            Buffer_MaskIn (buffer, current);
-        else
-            Buffer_MaskOut (buffer, current);
-
-		current = Buffer_GetNext (buffer, current);
-    } while (current != last_evt);
-
-    /* Both range limits included */
-    Buffer_MaskIn (buffer, last_evt);
-}
-
-void Buffer_MaskRegionIn (Buffer_t *buffer, event_t *first_evt, event_t *last_evt)
-{
-    Buffer_SetMaskRegion (buffer, first_evt, last_evt, 1);
-}
-
-void Buffer_MaskRegionOut (Buffer_t *buffer, event_t *first_evt, event_t *last_evt)
-{
-    Buffer_SetMaskRegion (buffer, first_evt, last_evt, 0);
-}
-#endif /* MASKS_DEAD_CODE */
-
 void Buffer_Lock (Buffer_t *buffer)
 {
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 	pthread_mutex_lock(&(buffer->Lock));
 #else
 	UNREFERENCED_PARAMETER(buffer);
@@ -354,7 +328,7 @@ void Buffer_Lock (Buffer_t *buffer)
 
 void Buffer_Unlock (Buffer_t *buffer)
 {
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 	pthread_mutex_unlock(&(buffer->Lock));
 #else
 	UNREFERENCED_PARAMETER(buffer);
@@ -461,11 +435,7 @@ void Buffer_InsertSingle(Buffer_t *buffer, event_t *new_event)
 
 	/* Insert new event */
 	memcpy(buffer->CurEvt, new_event, sizeof(event_t));
-#if defined(MASKS_DEAD_CODE)
-	Buffer_MaskIn (buffer, buffer->CurEvt);
-#else
-	NewMask_UnsetAll (buffer, buffer->CurEvt);
-#endif /* MASKS_DEAD_CODE */
+	Mask_UnsetAll (buffer, buffer->CurEvt);
 
 	/* Move tail forwards */
 	buffer->CurEvt = Buffer_GetNext(buffer, buffer->CurEvt);
@@ -490,7 +460,7 @@ int Buffer_Flush(Buffer_t *buffer)
 	num_flushed = Buffer_GetFillCount(buffer);
 	CIRCULAR_STEP (tail, num_flushed, buffer->FirstEvt, buffer->LastEvt, &overflow);
 
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 	/* Select events depending on the mask */
 	Filter_Buffer(buffer, head, tail, db);
 #else
@@ -512,6 +482,14 @@ int Buffer_Flush(Buffer_t *buffer)
 	return 1;
 }
 
+int Buffer_FlushCache(Buffer_t *buffer)
+{
+  if ((buffer != NULL) && (buffer->VictimCache != NULL))
+  {
+    Buffer_Flush(buffer->VictimCache);
+  }
+}
+
 void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, DataBlocks_t *io_db)
 {
     void *ini_addr = NULL;
@@ -520,11 +498,7 @@ void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, 
     current = first_event;
     do
     {
-#if defined(MASKS_DEAD_CODE)
-        if (Buffer_IsMaskedOut(buffer, current))
-#else
-		if (NewMask_IsSet(buffer, current, MASK_NOFLUSH))
-#endif
+	if (Mask_IsSet(buffer, current, MASK_NOFLUSH) && !Buffer_IsEventCached(buffer, Get_EvEvent(current)))
         {
             if (ini_addr != NULL)
             {
@@ -541,7 +515,7 @@ void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, 
         }
 
         /* Next */
-		current = Buffer_GetNext(buffer, current);
+	current = Buffer_GetNext(buffer, current);
     } while (current != last_event);
 
     if (ini_addr != NULL)
@@ -552,14 +526,16 @@ void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, 
 
 int Buffer_DiscardOldest (Buffer_t *buffer)
 {
-    event_t *head = NULL;
+    event_t *old_head = NULL, *new_head = NULL;
 
-	head = Buffer_GetNext(buffer, buffer->HeadEvt);
+    old_head = buffer->HeadEvt;
+    Buffer_CacheEvent(buffer, old_head);
 
+    new_head = Buffer_GetNext(buffer, buffer->HeadEvt);
     buffer->FillCount --;
-    buffer->HeadEvt = head;
+    buffer->HeadEvt = new_head;
 
-	return 1;
+    return 1;
 }
 
 int Buffer_Discard10Pct (Buffer_t *buffer)
@@ -568,7 +544,7 @@ int Buffer_Discard10Pct (Buffer_t *buffer)
     int pct10 = buffer->MaxEvents * 0.1;
 
     head = buffer->HeadEvt;
-	last = buffer->LastEvt;
+    last = buffer->LastEvt;
 
     head += pct10;
     if (head >= last)
@@ -576,7 +552,7 @@ int Buffer_Discard10Pct (Buffer_t *buffer)
         head = buffer->FirstEvt + (head - last);
     }
 
-	buffer->FillCount -= pct10;
+    buffer->FillCount -= pct10;
     buffer->HeadEvt = head;
 
 	return 1;
@@ -589,92 +565,6 @@ int Buffer_DiscardAll (Buffer_t *buffer)
 
 	return 1;
 }
-#if 0
-/* Una funcion como esta deberia estar en la banda del traceo ? */
-void Action_When_Buffer_Is_Full (Buffer_t *buffer)
-{
-#if defined(HAVE_MRNET)
-    Buffer_Lock(buffer);
-#endif
-
-    switch(DefaultActionWhenFull)
-    {
-        case OVERWRITE:
-            Buffer_DiscardOldest (buffer);
-            break;
-        case DISCARD:
-            Buffer_DiscardAll (buffer);
-            break;
-        case FLUSH:
-            Buffer_Flush(buffer, FALSE);
-            break;
-        case SYNC_FLUSH:
-#if defined(HAVE_MRNET)
-//          Buffer_Unlock(thread);
-            MRNet_Sync_Flush ();
-#endif
-            break;
-        default:
-            fprintf(stderr, PACKAGE_NAME": Buffer is full and no action specified!\n");
-            exit(1);
-    }
-#if defined(HAVE_MRNET)
-    Buffer_Unlock(buffer);
-#endif
-}
-#endif
-
-#if 0
-void advance_current(Buffer_t *buffer)
-{
-#if defined(HAVE_MRNET)
-    Buffer_MaskIn(buffer, buffer->CurEvt);
-#endif
-	buffer->CurEvt = Buffer_GetNext (buffer, buffer->CurEvt);
-	buffer->FillCount ++;
-
-	if (Buffer_IsFull (buffer))
-	{
-		Action_When_Buffer_Is_Full (buffer);
-	}
-
-#if USE_HARDWARE_COUNTERS
-    CheckForHWCSetChange ( CHANGE_TIME, thread );
-#endif
-}
-
-int linearize(Buffer_t *buffer, event_t **buffer)
-{
-    event_t *linear_buffer, *head, *current;
-    int num_events, num_ev1, num_ev2;
-    int size, size1, size2;
-
-    head = buffer->HeadEvt;
-    current = buffer->CurEvt;
-
-    if (current > head)
-    {
-        num_events = current - head;
-        size = num_events * sizeof(event_t);
-        xmalloc(linear_buffer, size);
-        memcpy(linear_buffer, head, size);
-    }
-    else
-    {
-        num_ev1 = buffer->LastEvt - head;
-        num_ev2 = current - buffer->FirstEvt; 
-        num_events = num_ev1 + num_ev2;
-        size1 = num_ev1 * sizeof(event_t);
-        size2 = num_ev2 * sizeof(event_t);
-        size = size1 + size2;
-        xmalloc(linear_buffer, size);
-        memcpy (linear_buffer, head, size1);
-        memcpy (linear_buffer+num_ev1, buffer->FirstEvt, size2);
-    }
-    *buffer = linear_buffer;
-    return num_events;
-}
-#endif
 
 /***************************************************************************/
 /***************************************************************************/
@@ -754,15 +644,35 @@ static BufferIterator_t * new_Iterator(Buffer_t *buffer)
 
 	xmalloc(it, sizeof(BufferIterator_t));
 
-	it->Buffer = buffer;
-	it->OutOfBounds = Buffer_IsEmpty(buffer);
+	it->Buffer         = buffer;
+	it->OutOfBounds    = Buffer_IsEmpty(buffer);
+	it->CurrentElement = NULL;
+	it->StartBound     = Buffer_GetHead(buffer);
+	it->EndBound       = Buffer_GetTail(buffer);
 #if defined(DEBUG)
 	fprintf(stderr, "[DBG_BUFFERS] new_Iterator: Buffer=%p, OutOfBounds=%d\n", it->Buffer, it->OutOfBounds);
 #endif
-	it->StartBound = Buffer_GetHead(buffer);
-	it->EndBound = Buffer_GetTail(buffer);
-
 	return it;
+}
+
+/**
+ * Clones an iterator
+ * \param orig The iterator to copy
+ * \return The new iterator
+ */
+BufferIterator_t * BufferIterator_Copy (BufferIterator_t *orig)
+{
+  BufferIterator_t *copy = NULL; 
+  if (orig != NULL)
+  {
+    xmalloc(copy, sizeof(BufferIterator_t));
+    copy->Buffer         = orig->Buffer;
+    copy->OutOfBounds    = orig->OutOfBounds;
+    copy->CurrentElement = orig->CurrentElement;
+    copy->StartBound     = orig->StartBound;
+    copy->EndBound       = orig->EndBound;
+  }
+  return copy;
 }
 
 /**
@@ -905,156 +815,121 @@ void BufferIterator_Free (BufferIterator_t *it)
 	xfree(it);
 }
 
-#if defined(MASKS_DEAD_CODE)
-void BufferIterator_MaskIn (BufferIterator_t *it)
+void Mask_Wipe (Buffer_t *buffer)
 {
-	ASSERT_VALID_BOUNDS(it);
-
-	Buffer_MaskIn (it->Buffer, it->CurrentElement);
+    memset (buffer->Masks, 0, buffer->MaxEvents * sizeof(Mask_t));
 }
 
-void BufferIterator_MaskOut (BufferIterator_t *it)
-{
-    ASSERT_VALID_BOUNDS(it);
-
-    Buffer_MaskOut (it->Buffer, it->CurrentElement);
-}
-
-int BufferIterator_IsMaskedIn (BufferIterator_t *it)
-{
-	ASSERT_VALID_BOUNDS(it);
-
-	return Buffer_IsMaskedIn (it->Buffer, it->CurrentElement);
-}
-
-int BufferIterator_IsMaskedOut (BufferIterator_t *it)
-{
-    ASSERT_VALID_BOUNDS(it);
-
-    return Buffer_IsMaskedOut (it->Buffer, it->CurrentElement);
-}
-#endif /* MASKS_DEAD_CODE */
-
-/********************************************************/
-#if 1
-
-void NewMask_Wipe (Buffer_t *buffer)
-{
-    memset (buffer->NewMasks, 0, buffer->MaxEvents * sizeof(Mask_t));
-}
-
-void NewMask_Set (Buffer_t *buffer, event_t *event, int mask_id)
+void Mask_Set (Buffer_t *buffer, event_t *event, int mask_id)
 {
 	int index = EVENT_INDEX(buffer, event);
-	buffer->NewMasks[index] |= mask_id;
+	buffer->Masks[index] |= mask_id;
 }
 
-void NewMask_SetAll (Buffer_t *buffer, event_t *event)
+void Mask_SetAll (Buffer_t *buffer, event_t *event)
 {
 	int index = EVENT_INDEX(buffer, event);
-	buffer->NewMasks[index] = ALL_BITS_SET;	
+	buffer->Masks[index] = ALL_BITS_SET;	
 }
 
-void NewMask_SetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id)
+void Mask_SetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id)
 {
-    NewMask_ChangeRegion (buffer, start, end, mask_id, 1);
+    Mask_ChangeRegion (buffer, start, end, mask_id, 1);
 }
 
-void NewMask_Unset (Buffer_t *buffer, event_t *event, int mask_id)
-{
-	int index = EVENT_INDEX(buffer, event);
-	buffer->NewMasks[index] &= ~mask_id;
-}
-
-void NewMask_UnsetAll (Buffer_t *buffer, event_t *event)
+void Mask_Unset (Buffer_t *buffer, event_t *event, int mask_id)
 {
 	int index = EVENT_INDEX(buffer, event);
-	buffer->NewMasks[index] = 0;	
+	buffer->Masks[index] &= ~mask_id;
 }
 
-void NewMask_UnsetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id)
+void Mask_UnsetAll (Buffer_t *buffer, event_t *event)
 {
-	NewMask_ChangeRegion (buffer, start, end, mask_id, 0);
+	int index = EVENT_INDEX(buffer, event);
+	buffer->Masks[index] = 0;	
 }
 
-static void NewMask_ChangeRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id, int set)
+void Mask_UnsetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id)
+{
+	Mask_ChangeRegion (buffer, start, end, mask_id, 0);
+}
+
+static void Mask_ChangeRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id, int set)
 {
 	event_t *current = start;
 
     do
     {
 		if (set)
-			NewMask_Set (buffer, current, mask_id);
+			Mask_Set (buffer, current, mask_id);
 		else
-			NewMask_Unset (buffer, current, mask_id);
+			Mask_Unset (buffer, current, mask_id);
 
 		current = Buffer_GetNext (buffer, current);
     } while (current != end);
 
     /* Both range limits included */
 	if (set)
-		NewMask_Set (buffer, current, mask_id);
+		Mask_Set (buffer, current, mask_id);
 	else
-		NewMask_Unset (buffer, current, mask_id);
+		Mask_Unset (buffer, current, mask_id);
 }
 
-void NewMask_Flip (Buffer_t *buffer, event_t *event, int mask_id)
+void Mask_Flip (Buffer_t *buffer, event_t *event, int mask_id)
 {
 	int index = EVENT_INDEX(buffer, event);
-	buffer->NewMasks[index] ^= mask_id;
+	buffer->Masks[index] ^= mask_id;
 }
 
-static int NewMask_Get (Buffer_t *buffer, event_t *event, int mask_id)
+static int Mask_Get (Buffer_t *buffer, event_t *event, int mask_id)
 {
 	int index = EVENT_INDEX(buffer, event);
-	return ((buffer->NewMasks[index] & (mask_id)) == mask_id);
+	return ((buffer->Masks[index] & (mask_id)) == mask_id);
 }
 
-int NewMask_IsSet (Buffer_t *buffer, event_t *event, int mask_id)
+int Mask_IsSet (Buffer_t *buffer, event_t *event, int mask_id)
 {
-	return (NewMask_Get (buffer, event, mask_id) == 1);
+	return (Mask_Get (buffer, event, mask_id) == 1);
 }
 
-int NewMask_IsUnset (Buffer_t *buffer, event_t *event, int mask_id)
+int Mask_IsUnset (Buffer_t *buffer, event_t *event, int mask_id)
 {
-	return (NewMask_Get (buffer, event, mask_id) == 0);
+	return (Mask_Get (buffer, event, mask_id) == 0);
 }
 
 void BufferIterator_MaskSet (BufferIterator_t *it, int mask_id)
 {
     ASSERT_VALID_BOUNDS(it);
-    NewMask_Set (it->Buffer, it->CurrentElement, mask_id);
+    Mask_Set (it->Buffer, it->CurrentElement, mask_id);
 }
 
 void BufferIterator_MaskSetAll (BufferIterator_t *it)
 {
     ASSERT_VALID_BOUNDS(it);
-    NewMask_SetAll (it->Buffer, it->CurrentElement);
+    Mask_SetAll (it->Buffer, it->CurrentElement);
 }
 
 void BufferIterator_MaskUnset (BufferIterator_t *it, int mask_id)
 {
     ASSERT_VALID_BOUNDS(it);
-    NewMask_Unset (it->Buffer, it->CurrentElement, mask_id);
+    Mask_Unset (it->Buffer, it->CurrentElement, mask_id);
 }
 
 void BufferIterator_MaskUnsetAll (BufferIterator_t *it)
 {
     ASSERT_VALID_BOUNDS(it);
-    NewMask_UnsetAll (it->Buffer, it->CurrentElement);
+    Mask_UnsetAll (it->Buffer, it->CurrentElement);
 }
 
 int BufferIterator_IsMaskSet (BufferIterator_t *it, int mask_id)
 {
     ASSERT_VALID_BOUNDS(it);
-    return NewMask_IsSet (it->Buffer, it->CurrentElement, mask_id);
+    return Mask_IsSet (it->Buffer, it->CurrentElement, mask_id);
 }
 
 int BufferIterator_IsMaskUnset (BufferIterator_t *it, int mask_id)
 {
     ASSERT_VALID_BOUNDS(it);
-    return NewMask_IsUnset (it->Buffer, it->CurrentElement, mask_id);
+    return Mask_IsUnset (it->Buffer, it->CurrentElement, mask_id);
 }
 
-
-#endif

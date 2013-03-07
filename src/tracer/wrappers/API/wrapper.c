@@ -162,6 +162,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
+static void Backend_Finalize_close_mpits (int thread);
+
 #warning "Control variables below (tracejant, tracejant_mpi, tracejant_hwc_mpi...) should be moved to mode.c and indexed per mode"
 
 /***** Variable global per saber si en un moment donat cal tracejar ******/
@@ -348,6 +350,10 @@ static void Extrae_AnnotateTopology (int enter, UINT64 timestamp)
 #endif
 }
 
+char * Get_ApplName (void)
+{
+  return appl_name;
+}
 
 /******************************************************************************
  *** Store whether the app is MPI and/or PACX
@@ -388,21 +394,6 @@ extrae_init_type_t Extrae_is_initialized_Wrapper (void)
 void Extrae_set_is_initialized (extrae_init_type_t type)
 {
 	Extrae_Init_Type = type;
-}
-
-/******************************************************************************
- *** Store the first taskid 
- ******************************************************************************/
-static unsigned Extrae_Initial_TASKID = 0;
-
-unsigned Extrae_get_initial_TASKID (void)
-{
-	return Extrae_Initial_TASKID;
-}
-
-void Extrae_set_initial_TASKID (unsigned u)
-{
-	Extrae_Initial_TASKID = u;
 }
 
 /******************************************************************************
@@ -1169,6 +1160,9 @@ int remove_temporal_files(void)
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing symbol file (%s)\n", tmpname);
 	}
+#if defined(HAVE_ONLINE)
+	Online_CleanTemporaries();
+#endif
 	return 0;
 }
 
@@ -1201,20 +1195,30 @@ static int Allocate_buffer_and_file (int thread_id)
 
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
 
-	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
+	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, 1);
 	if (TracingBuffer[thread_id] == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error allocating tracing buffer for thread %d\n", thread_id);
 		return 0;
 	}
 	if (circular_buffering)
+	{
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_COMM_CREATE_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_COMM_DUP_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_COMM_SPLIT_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_CART_CREATE_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_CART_SUB_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_RANK_CREACIO_COMM_EV);
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], Buffer_DiscardOldest);
+	}
 	else
+	{
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], Extrae_Flush_Wrapper);
+	}
 
 #if defined(SAMPLING_SUPPORT)
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
-	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file);
+	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, 0);
 	if (SamplingBuffer[thread_id] == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error allocating sampling buffer for thread %d\n", thread_id);
@@ -1359,7 +1363,6 @@ int Backend_ispThreadFinished (int threadid)
 	return Backend_GetpThreadID(threadid) == 0;
 }
 
-static void Backend_Finalize_close_mpits (int thread);
 
 void Backend_Flush_pThread (pthread_t t)
 {
@@ -1866,6 +1869,17 @@ char *Get_TemporalDir (int task)
 /******************************************************************************
  ***  Backend_Finalize_close_mpits
  ******************************************************************************/
+
+void Backend_Finalize_close_files()
+{
+  int thread = 0;
+
+  for (thread = 0; thread < maximum_NumOfThreads; thread++)
+  {
+    Backend_Finalize_close_mpits( thread );
+  }	
+}
+
 static void Backend_Finalize_close_mpits (int thread)
 {
 	unsigned initialTASKID;
@@ -1898,9 +1912,10 @@ static void Backend_Finalize_close_mpits (int thread)
 
 	/* Rename MPIT file */
 	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
-  FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_MPIT);
+	FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_MPIT);
 	rename_or_copy (tmp_name, trace); 
 	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
+	fflush(stdout);
 
 	/* Rename SYM file, if it exists */
 	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_SYM);
@@ -1922,6 +1937,7 @@ static void Backend_Finalize_close_mpits (int thread)
 		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SAMPLE);
 		rename_or_copy (tmp_name, trace);
 		fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
+		fflush(stdout);
 	}
 	else
 	{
@@ -1929,7 +1945,6 @@ static void Backend_Finalize_close_mpits (int thread)
 		unlink (tmp_name);
 	}
 #endif
-
 }
 
 /**
@@ -1988,13 +2003,6 @@ void Backend_Finalize (void)
 {
 	unsigned thread;
 
-#if HAVE_ONLINE 
-	if (Online_isEnabled())
-	{
-		Online_Stop();
-	}
-#endif
-	
 	/* Stop sampling right now */
 	setSamplingEnabled (FALSE);
 
@@ -2021,6 +2029,14 @@ void Backend_Finalize (void)
 			Backend_Finalize_close_mpits (thread);
 		}
 
+#if defined(HAVE_ONLINE)
+	/* Stop the analysis threads and flush the online buffers */
+	if (Online_isEnabled())
+	{
+		Online_Stop();
+	}
+#endif /* HAVE_ONLINE */
+	
 	/* Free allocated memory */
 	{
 		if (TASKID == 0)

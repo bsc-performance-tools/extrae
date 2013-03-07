@@ -103,6 +103,10 @@ if HAVE_PMAPI
   mpi2prv_LDFLAGS += -lpmapi
 endif
 
+if HAVE_ONLINE
+  mpi2prv_CFLAGS += -I$(ONLINE_DIR)
+  libmpi2prv_la_CFLAGS += -I$(ONLINE_DIR)
+endif
 
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) ; $(LN_S) -f mpi2prv$(EXEEXT) mpi2dim$(EXEEXT)

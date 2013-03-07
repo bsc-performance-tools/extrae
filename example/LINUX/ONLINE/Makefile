@@ -3,11 +3,11 @@ include ../Makefile.inc
 CC     = mpicc
 CFLAGS = -O2 -g
 
-all: test
+all: ping
 
-test: test.c
+ping: ping.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -f test *.o 
+	rm -f ping *.o 
 

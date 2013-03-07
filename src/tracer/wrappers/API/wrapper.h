@@ -117,14 +117,21 @@ extern char trace_home[TMP_DIR];
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
+char *Get_ApplName (void);
 char *Get_FinalDir (int task);
 char *Get_TemporalDir (int task);
 
+unsigned Backend_getNumberOfThreads (void);
+unsigned Backend_getMaximumOfThreads (void);
+
+void Backend_Finalize (void);
+void Backend_Finalize_close_files (void);
+
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 // Know if the run is controlled by a creation of a file 
 extern char ControlFileName[TMP_DIR];
@@ -175,8 +182,6 @@ extern unsigned long long WantedCheckControlPeriod;
 
 extrae_init_type_t Extrae_is_initialized_Wrapper (void);
 void Extrae_set_is_initialized (extrae_init_type_t type);
-unsigned Extrae_get_initial_TASKID (void);
-void Extrae_set_initial_TASKID (unsigned u);
 
 int Extrae_get_ApplicationIsMPI (void);
 int Extrae_get_ApplicationIsPACX (void);
@@ -196,9 +201,6 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 
 int Backend_preInitialize (int rank, int world_size, char *config_file, int forked);
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);
-
-unsigned Backend_getNumberOfThreads (void);
-unsigned Backend_getMaximumOfThreads (void);
 
 int Backend_ChangeNumberOfThreads (unsigned numberofthreads);
 void Backend_setNumTentativeThreads (int numofthreads);
@@ -225,10 +227,6 @@ extern event_t *circular_HEAD;
 
 void Parse_Callers (int, char *, int);
 
-int file_exists (char *fitxer);
-
-void Backend_Finalize (void);
-
 enum {
    KEEP,
    RESTART,
@@ -237,10 +235,6 @@ enum {
 
 int GlobalOp_Changes_Trace_Status (int current_glop);
 void Parse_GlobalOps_Tracing_Intervals(char * sequence);
-
-#if defined(HAVE_MRNET)
-void clustering_filter (int thread, int *out_CountBursts, int **out_HWCIds, int *out_CountHWC, long long **out_Timestamp, int *len_Timestamp, long long **out_Durations, int *len_Durations, long long **out_HWCValues, int *len_HWCValues);
-#endif /* HAVE_MRNET */
 
 #if defined(EMBED_MERGE_IN_TRACE)
 extern int MergeAfterTracing;

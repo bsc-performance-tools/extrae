@@ -340,7 +340,7 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
 			else
 			{
 				if (rank == 0)
-					fprintf (stdout, PACKAGE_NAME": Warning! %s time units unkown! Using seconds\n", envvar);
+					fprintf (stdout, PACKAGE_NAME": Warning! %s time units unknown! Using seconds\n", envvar);
 			}
 			break;
 		}

@@ -52,6 +52,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "options.h"
 #include "extrae_types.h"
 
+#if defined(HAVE_ONLINE)
+#include "online_events.h"
+#endif
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -815,21 +818,38 @@ static int SetTracing_Event (
 	return 0;
 }
 
-static int MRNet_Event (event_t * current_event,
+static int Online_Event (event_t * current_event,
     unsigned long long current_time, unsigned int cpu, unsigned int ptask,
     unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
-	UNREFERENCED_PARAMETER(fset);
+  unsigned int EvType, EvValue;
+  UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
+  EvType  = Get_EvValue (current_event);
+  EvValue = Get_EvMiscParam (current_event);
 
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+  switch(EvType)
+  {
+    case REP_PERIOD_EV:
+      if (EvValue == 0)
+      {
+        /* Clear pending unmatched communications so that they don't match when the tracing is restarted */
+        MatchComms_Off (ptask, task);
 
-	return 0;
+        /* Remove any unclosed state before going to not tracing */
+        Pop_Until (STATE_RUNNING, ptask, task, thread);
+
+        /* Mark the application state as not tracing outside the selected iterations */
+        Push_State (STATE_NOT_TRACING, ptask, task, thread);
+        trace_paraver_state (cpu, ptask, task, thread, current_time);
+      }
+      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+      break;
+  }
+  return 0;
 }
 
+#if 0
 static int Clustering_Event (event_t * current_event,
     unsigned long long current_time, unsigned int cpu, unsigned int ptask,
     unsigned int task, unsigned int thread, FileSet_t *fset)
@@ -861,6 +881,7 @@ static int Spectral_Event (event_t * current_event,
 
     return 0;
 }
+#endif
 
 /******************************************************************************
  ***  User_Send_Event
@@ -879,7 +900,7 @@ static int User_Send_Event (event_t * current_event,
 	task_info = GET_TASK_INFO(ptask, task);
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 
-	if (MatchComms_Enabled(ptask, task, thread))
+	if (MatchComms_Enabled(ptask, task))
 	{
 		if (Get_EvTarget(current_event)==EXTRAE_COMM_PARTNER_MYSELF)
 			partner = task-1;
@@ -945,7 +966,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 	task_info = GET_TASK_INFO(ptask, task);
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 
-	if (MatchComms_Enabled(ptask, task, thread))
+	if (MatchComms_Enabled(ptask, task))
 	{
 		if (Get_EvTarget(current_event)==EXTRAE_COMM_PARTNER_MYSELF)
 			partner = task-1;
@@ -1252,9 +1273,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ PACX_STATS_EV, PACX_Stats_Event },
 	{ USRFUNC_EV, USRFunction_Event },
 	{ TRACING_MODE_EV, Tracing_Mode_Event },
-	{ MRNET_EV, MRNet_Event },
-	{ CLUSTER_ID_EV, Clustering_Event },
-	{ SPECTRAL_PERIOD_EV, Spectral_Event },
+	{ ONLINE_EV, Online_Event },
 	{ USER_SEND_EV, User_Send_Event },
 	{ USER_RECV_EV, User_Recv_Event },
 	{ RESUME_VIRTUAL_THREAD_EV, Resume_Virtual_Thread_Event },

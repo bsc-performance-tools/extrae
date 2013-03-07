@@ -36,7 +36,7 @@
 #ifdef HAVE_SYS_UIO_H
 # include <sys/uio.h>
 #endif
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 # ifdef HAVE_PTHREAD_H
 #  include <pthread.h>
 # endif
@@ -49,28 +49,30 @@
 
 typedef int Mask_t; 
 
-typedef struct Buffer
+typedef struct Buffer Buffer_t;
+
+struct Buffer
 {
-	int MaxEvents;
-    int FillCount;
-    event_t *FirstEvt;
-    event_t *LastEvt;
-    event_t *HeadEvt;
-    event_t *CurEvt;
+  int MaxEvents;
+  int FillCount;
+  event_t *FirstEvt;
+  event_t *LastEvt;
+  event_t *HeadEvt;
+  event_t *CurEvt;
 
-    int fd;
+  int fd;
 
-#if defined(HAVE_MRNET) 
-    pthread_mutex_t Lock;
+#if defined(HAVE_ONLINE) 
+  pthread_mutex_t Lock;
 #endif
-#if defined(MASKS_DEAD_CODE)
-    int *Mask;
-#endif /* MASKS_DEAD_CODE */
-    Mask_t *NewMasks;
+  Mask_t *Masks;
 
-	int (*FlushCallback)(struct Buffer *);
+  int (*FlushCallback)(struct Buffer *);
 
-} Buffer_t;
+  int       NumberOfCachedEvents;
+  INT32    *CachedEvents;
+  Buffer_t *VictimCache;
+};
 
 typedef struct
 {
@@ -96,18 +98,19 @@ typedef struct
 #define IOV_MAX 512
 #endif
 
-#define CALLBACK_FLUSH Buffer_Flush
+#define CALLBACK_FLUSH     Buffer_Flush
 #define CALLBACK_OVERWRITE Buffer_DiscardOldest
-#define CALLBACK_DISCARD Buffer_DiscardAll
+#define CALLBACK_DISCARD   Buffer_DiscardAll
+#define BUFFER_CACHE_SIZE  1000
 
-/*
+/***
 enum {
-    OVERWRITE,
-    FLUSH,
-    DISCARD,
-	SYNC_FLUSH
+  OVERWRITE,
+  FLUSH,
+  DISCARD,
+  SYNC_FLUSH
 };
-*/
+***/
 
 #define MAX_MULTIPLE_EVENTS 50
 
@@ -115,87 +118,72 @@ enum {
 extern "C" {
 #endif
 
-Buffer_t * new_Buffer (int n_events, char *file);
+Buffer_t * new_Buffer (int n_events, char *file, int enable_cache);
 void Buffer_Free (Buffer_t *buffer);
+void Buffer_AddCachedEvent(Buffer_t *buffer, INT32 event_type);
+int  Buffer_IsEventCached(Buffer_t *buffer, INT32 event_type);
 unsigned long long Buffer_GetFileSize (Buffer_t *buffer);
 void Buffer_SetFlushCallback (Buffer_t *buffer, int (*callback)(struct Buffer *));
-int Buffer_ExecuteFlushCallback (Buffer_t *buffer);
+int  Buffer_ExecuteFlushCallback (Buffer_t *buffer);
 void Buffer_Close (Buffer_t *buffer);
-int Buffer_IsClosed (Buffer_t *buffer);
-int Buffer_IsEmpty (Buffer_t *buffer);
-int Buffer_IsFull (Buffer_t *buffer);
+int  Buffer_IsClosed (Buffer_t *buffer);
+int  Buffer_IsEmpty (Buffer_t *buffer);
+int  Buffer_IsFull (Buffer_t *buffer);
 event_t * Buffer_GetHead (Buffer_t *buffer);
 event_t * Buffer_GetTail (Buffer_t *buffer);
 int Buffer_GetFillCount (Buffer_t *buffer);
 int Buffer_RemainingEvents (Buffer_t *buffer);
 int Buffer_EnoughSpace (Buffer_t *buffer, int num_events);
 event_t * Buffer_GetNext (Buffer_t *buffer, event_t *current);
-#if defined(MASKS_DEAD_CODE)
-void Buffer_ClearMask (Buffer_t *buffer);
-void Buffer_MaskIn (Buffer_t *buffer, event_t *evt);
-void Buffer_MaskOut (Buffer_t *buffer, event_t *evt);
-int Buffer_IsMaskedOut (Buffer_t *buffer, event_t *evt);
-int Buffer_IsMaskedIn (Buffer_t *buffer, event_t *evt);
-void Buffer_MaskRegionIn (Buffer_t *buffer, event_t *first_evt, event_t *last_evt);
-void Buffer_MaskRegionOut (Buffer_t *buffer, event_t *first_evt, event_t *last_evt);
-#endif /* MASKS_DEAD_CODE */
 void Buffer_Lock (Buffer_t *buffer);
 void Buffer_Unlock (Buffer_t *buffer);
 void Buffer_InsertSingle(Buffer_t *buffer, event_t *new_event);
 void Buffer_InsertMultiple(Buffer_t *buffer, event_t *events_list, int num_events);
-int Buffer_Flush(Buffer_t *buffer);
+int  Buffer_Flush(Buffer_t *buffer);
+int  Buffer_FlushCache(Buffer_t *buffer);
 void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, DataBlocks_t *io_db);
-int Buffer_DiscardOldest (Buffer_t *buffer);
-int Buffer_Discard10Pct (Buffer_t *buffer);
-int Buffer_DiscardAll (Buffer_t *buffer);
+int  Buffer_DiscardOldest (Buffer_t *buffer);
+int  Buffer_Discard10Pct (Buffer_t *buffer);
+int  Buffer_DiscardAll (Buffer_t *buffer);
 void Action_When_Buffer_Is_Full (Buffer_t *buffer);
-//void advance_current(Buffer_t *buffer);
-//int linearize(Buffer_t *buffer, event_t **buffer);
 
+BufferIterator_t * BufferIterator_Copy (BufferIterator_t *orig);
 BufferIterator_t * BufferIterator_NewForward (Buffer_t *buffer);
 BufferIterator_t * BufferIterator_NewBackward (Buffer_t *buffer);
 BufferIterator_t * BufferIterator_NewRange (Buffer_t *buffer, unsigned long long start_time, unsigned long long end_time);
-void BufferIterator_Next (BufferIterator_t *it);
-void BufferIterator_Previous (BufferIterator_t *it);
-int BufferIterator_OutOfBounds (BufferIterator_t *it);
+void      BufferIterator_Next (BufferIterator_t *it);
+void      BufferIterator_Previous (BufferIterator_t *it);
+int       BufferIterator_OutOfBounds (BufferIterator_t *it);
 event_t * BufferIterator_GetEvent (BufferIterator_t *it);
+void      BufferIterator_Free (BufferIterator_t *it);
 
-#define BIT_NewForward(buffer)  BufferIterator_NewForward(buffer)
-#define BIT_NewBackward(buffer) BufferIterator_NewBackward(buffer)
+#define BIT_Copy(it)                   BufferIterator_Copy(it)
+#define BIT_NewForward(buffer)         BufferIterator_NewForward(buffer)
+#define BIT_NewBackward(buffer)        BufferIterator_NewBackward(buffer)
 #define BIT_NewRange(buffer,start,end) BufferIterator_NewRange(buffer, start, end)
-#define BIT_Next(it)            BufferIterator_Next(it)
-#define BIT_Prev(it)            BufferIterator_Previous(it)
-#define BIT_OutOfBounds(it)     BufferIterator_OutOfBounds(it)
-#define BIT_GetEvent(it)        BufferIterator_GetEvent(it)
-#define BIT_Free(it)            BufferIterator_Free(it)
-#if defined(MASKS_DEAD_CODE)
-void BufferIterator_MaskIn (BufferIterator_t *it);
-void BufferIterator_MaskOut (BufferIterator_t *it);
-int BufferIterator_IsMaskedIn (BufferIterator_t *it);
-int BufferIterator_IsMaskedOut (BufferIterator_t *it);
-#define BIT_MaskIn(it) BufferIterator_MaskIn(it)
-#define BIT_MaskOut(it) BufferIterator_MaskOut(it)
-#define BIT_IsMaskedIn(it) BufferIterator_IsMaskedIn(it)
-#define BIT_IsMaskedOut(it) BufferIterator_IsMaskedOut(it)
-#endif /* MASKS_DEAD_CODE */
+#define BIT_Next(it)                   BufferIterator_Next(it)
+#define BIT_Prev(it)                   BufferIterator_Previous(it)
+#define BIT_OutOfBounds(it)            BufferIterator_OutOfBounds(it)
+#define BIT_GetEvent(it)               BufferIterator_GetEvent(it)
+#define BIT_Free(it)                   BufferIterator_Free(it)
 
-void NewMask_Wipe (Buffer_t *buffer);
-void NewMask_Set (Buffer_t *buffer, event_t *event, int mask_id);
-void NewMask_SetAll (Buffer_t *buffer, event_t *event);
-void NewMask_SetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id);
-void NewMask_Unset (Buffer_t *buffer, event_t *event, int mask_id);
-void NewMask_UnsetAll (Buffer_t *buffer, event_t *event);
-void NewMask_UnsetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id);
-void NewMask_Flip (Buffer_t *buffer, event_t *event, int mask_id);
-int NewMask_IsSet (Buffer_t *buffer, event_t *event, int mask_id);
-int NewMask_IsUnset (Buffer_t *buffer, event_t *event, int mask_id);
+void Mask_Wipe (Buffer_t *buffer);
+void Mask_Set (Buffer_t *buffer, event_t *event, int mask_id);
+void Mask_SetAll (Buffer_t *buffer, event_t *event);
+void Mask_SetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id);
+void Mask_Unset (Buffer_t *buffer, event_t *event, int mask_id);
+void Mask_UnsetAll (Buffer_t *buffer, event_t *event);
+void Mask_UnsetRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id);
+void Mask_Flip (Buffer_t *buffer, event_t *event, int mask_id);
+int  Mask_IsSet (Buffer_t *buffer, event_t *event, int mask_id);
+int  Mask_IsUnset (Buffer_t *buffer, event_t *event, int mask_id);
 
 void BufferIterator_MaskSet (BufferIterator_t *it, int mask_id);
 void BufferIterator_MaskSetAll (BufferIterator_t *it);
 void BufferIterator_MaskUnset (BufferIterator_t *it, int mask_id);
 void BufferIterator_MaskUnsetAll (BufferIterator_t *it);;
-int BufferIterator_IsMaskSet (BufferIterator_t *it, int mask_id);
-int BufferIterator_IsMaskUnset (BufferIterator_t *it, int mask_id);
+int  BufferIterator_IsMaskSet (BufferIterator_t *it, int mask_id);
+int  BufferIterator_IsMaskUnset (BufferIterator_t *it, int mask_id);
 
 #define BIT_MaskSet(it, mask_id)      BufferIterator_MaskSet(it, mask_id)
 #define BIT_MaskSetAll(it)            BufferIterator_MaskSetAll(it)

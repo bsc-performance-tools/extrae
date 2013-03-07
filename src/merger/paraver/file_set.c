@@ -81,8 +81,11 @@ static char UNUSED rcsid[] = "$Id$";
 #include "communication_queues.h"
 
 #define EVENTS_FOR_NUM_GLOBAL_OPS(x) \
-	((x) == MPI_BARRIER_EV || (x) == MPI_BCAST_EV || (x) == MPI_ALLREDUCE_EV ||  \
-	 (x) == MPI_ALLTOALL_EV || (x) == MPI_ALLTOALLV_EV || (x) == MPI_SCAN_EV)
+     ((x) == MPI_BARRIER_EV  || (x) == MPI_BCAST_EV     || (x) == MPI_ALLREDUCE_EV  || \
+      (x) == MPI_ALLTOALL_EV || (x) == MPI_ALLTOALLV_EV || (x) == MPI_SCAN_EV       || \
+      (x) == MPI_REDUCE_EV   || (x) == MPI_ALLGATHER_EV || (x) == MPI_ALLGATHERV_EV || \
+      (x) == MPI_GATHER_EV   || (x) == MPI_GATHERV_EV   || (x) == MPI_SCATTER_EV    || \
+      (x) == MPI_SCATTERV_EV || (x) == MPI_REDUCESCAT_EV)
 
 static int Is_FS_Rewound = TRUE;
 static int LimitOfEvents = 0;
@@ -116,7 +119,7 @@ void GetNextObj_FS (FileSet_t * fset, int file, unsigned int *cpu, unsigned int 
   CurrentObj_FS (sfile, *cpu, *ptask, *task, *thread);
 }
 
-#if defined(SAMPLING_SUPPORT) || defined(HAVE_MRNET)
+#if defined(SAMPLING_SUPPORT) || defined(HAVE_ONLINE)
 static int event_timing_sort (const void *e1, const void *e2)
 {
 	event_t *ev1 = (event_t*) e1;
@@ -213,12 +216,12 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	long long sample_file_size;
 	FILE *fd_sample;
 #endif
-#if defined(HAVE_MRNET)
-	char mrn_file_name[PATH_MAX];
-	long long mrn_file_size;
-	int fd_mrn;
+#if defined(HAVE_ONLINE)
+	char online_file_name[PATH_MAX];
+	long long online_file_size;
+	int fd_online;
 #endif
-#if defined(SAMPLING_SUPPORT) || defined(HAVE_MRNET)
+#if defined(SAMPLING_SUPPORT) || defined(HAVE_ONLINE)
 	int sort_needed = FALSE;
 #endif
 	event_t *ptr_last = NULL;
@@ -245,12 +248,12 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 
 	fd_sample = fopen (sample_file_name, "r");
 #endif
-#if defined(HAVE_MRNET)
-	strcpy (mrn_file_name, IFile->name);
-	mrn_file_name[strlen(mrn_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
-	strcat (mrn_file_name, EXT_MRN);
+#if defined(HAVE_ONLINE)
+	strcpy (online_file_name, IFile->name);
+	online_file_name[strlen(online_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
+	strcat (online_file_name, EXT_ONLINE);
 
-	fd_mrn = open (mrn_file_name, O_RDONLY);
+	fd_online = open (online_file_name, O_RDONLY);
 #endif
 
 	ret = fseeko (fd_trace, 0, SEEK_END);
@@ -276,16 +279,16 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		sample_file_size = 0;
 #endif
 
-#if defined(HAVE_MRNET)
-	mrn_file_size = (fd_mrn != -1)?lseek (fd_mrn, 0, SEEK_END):0;
+#if defined(HAVE_ONLINE)
+	online_file_size = (fd_online != -1)?lseek (fd_online, 0, SEEK_END):0;
 #endif
 
 	fitem->size = trace_file_size;
 #if defined(SAMPLING_SUPPORT)
 	fitem->size += sample_file_size;
 #endif
-#if defined(HAVE_MRNET)
-	fitem->size += mrn_file_size;
+#if defined(HAVE_ONLINE)
+	fitem->size += online_file_size;
 #endif
 
 #if 0
@@ -299,8 +302,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	if (NULL != fd_sample)
 		rewind (fd_sample);
 #endif
-#if defined(HAVE_MRNET)
-	if (fd_mrn != -1) lseek (fd_mrn, 0, SEEK_SET);
+#if defined(HAVE_ONLINE)
+	if (fd_online != -1) lseek (fd_online, 0, SEEK_SET);
 #endif
 
 	{
@@ -313,10 +316,10 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		if (extra != 0)
 			printf ("PANIC! Sample file %s is %d bytes too big!\n", sample_file_name, extra);
 #endif
-#if defined(HAVE_MRNET)
-		extra = (mrn_file_size % sizeof (event_t));
+#if defined(HAVE_ONLINE)
+		extra = (online_file_size % sizeof (event_t));
 		if (extra != 0)
-			printf ("PANIC! MRNet file %s is %d bytes too big!\n", mrn_file_name, extra);
+			printf ("PANIC! Online file %s is %d bytes too big!\n", online_file_name, extra);
 #endif
 	}
 
@@ -352,22 +355,22 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	sort_needed = sample_file_size > 0;
 	ptr_last += (sample_file_size/sizeof(event_t));
 #endif
-#if defined(HAVE_MRNET)
-	if (fd_mrn != -1)
+#if defined(HAVE_ONLINE)
+	if (fd_online != -1)
 	{
-		res = read (fd_mrn, ptr_last, mrn_file_size);
-		if (res != mrn_file_size)
+		res = read (fd_online, ptr_last, online_file_size);
+		if (res != online_file_size)
 		{
-			fprintf (stderr, "mpi2prv: `read` failed to read from file %s\n", mrn_file_name);
-			fprintf (stderr, "mpi2prv:        returned %Zu (instead of %lld)\n", res, mrn_file_size);
+			fprintf (stderr, "mpi2prv: `read` failed to read from file %s\n", online_file_name);
+			fprintf (stderr, "mpi2prv:        returned %Zu (instead of %lld)\n", res, online_file_size);
 			exit (1);
 		}
 	}
-	if (mrn_file_size > 0) sort_needed = TRUE;
-	ptr_last += (mrn_file_size/sizeof(event_t));	
+	if (online_file_size > 0) sort_needed = TRUE;
+	ptr_last += (online_file_size/sizeof(event_t));	
 #endif
 
-#if defined(SAMPLING_SUPPORT) || defined(HAVE_MRNET)
+#if defined(SAMPLING_SUPPORT) || defined(HAVE_ONLINE)
 	if (sort_needed)
 	{
 		qsort (fitem->first, fitem->num_of_events, sizeof(event_t), event_timing_sort);
@@ -380,8 +383,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	if (NULL != fd_sample)
 		fclose (fd_sample);
 #endif
-#if defined(HAVE_MRNET)
-	close (fd_mrn);
+#if defined(HAVE_ONLINE)
+	close (fd_online);
 #endif
 
 	tmp = (char *) fitem->first;
@@ -1140,17 +1143,20 @@ void Rewind_FS (FileSet_t * fs)
 		/* Rewind to the first useful event */
 		if ((tracingCircularBuffer()) && (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_EVENTS))
 		{
-			/* All pointers are set to the 1st glop */
-			fs->files[i].current = fs->files[i].first_glop;
-			fs->files[i].next_cpu_burst = fs->files[i].first_glop;
-			fs->files[i].last_recv = fs->files[i].first_glop;
+			/* All pointers are set to the 1st event after the 1st common global op.
+			 * This is because the search for the first global op leaves first_glop 
+			 * pointing to the EVT_END of the collective. 
+			 */ 
+			fs->files[i].current = fs->files[i].first_glop ++;
+			fs->files[i].next_cpu_burst = fs->files[i].first_glop ++;
+			fs->files[i].last_recv = fs->files[i].first_glop ++;
 		}
 		else if ((tracingCircularBuffer()) && (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_MATCHES))
 		{
 			/* Pointers are set to the 1st event, but we search for comm matches after the 1st glop */
             fs->files[i].current = fs->files[i].first;
             fs->files[i].next_cpu_burst = fs->files[i].first;
-            fs->files[i].last_recv = fs->files[i].first_glop;
+            fs->files[i].last_recv = fs->files[i].first_glop ++;
 		}
 		else if (!tracingCircularBuffer())
 		{
@@ -1202,25 +1208,28 @@ int getTagForCircularBuffer (void)
  *** Communications matching
  *****************************************************************************/
 
-void MatchComms_On(unsigned int ptask, unsigned int task, unsigned int thread)
+void MatchComms_On(unsigned int ptask, unsigned int task)
 {   
-    thread_t * thread_info;
-    thread_info = GET_THREAD_INFO(ptask, task, thread);
-    thread_info->MatchingComms = TRUE;
+  task_t *task_info = GET_TASK_INFO(ptask, task);
+
+  task_info->MatchingComms = TRUE;
 }
 
-void MatchComms_Off(unsigned int ptask, unsigned int task, unsigned int thread)
+void MatchComms_Off(unsigned int ptask, unsigned int task)
 {   
-    thread_t * thread_info;
-    thread_info = GET_THREAD_INFO(ptask, task, thread);
-    thread_info->MatchingComms = FALSE;
+  task_t *task_info = GET_TASK_INFO(ptask, task);
+
+  task_info->MatchingComms = FALSE;
+
+  CommunicationQueues_Clear (task_info->send_queue);
+  CommunicationQueues_Clear (task_info->recv_queue);
 }
 
-int MatchComms_Enabled(unsigned int ptask, unsigned int task, unsigned int thread)
+int MatchComms_Enabled(unsigned int ptask, unsigned int task)
 {   
-    thread_t * thread_info;
-    thread_info = GET_THREAD_INFO(ptask, task, thread);
-    return thread_info->MatchingComms;
+  task_t *task_info = GET_TASK_INFO(ptask, task);
+
+  return task_info->MatchingComms;
 }
 
 /******************************************************************************
@@ -1655,7 +1664,7 @@ void FSet_Forward_To_First_GlobalOp (FileSet_t *fset, int numtasks, int taskid)
 		while (current != NULL)
 		{
 			if (EVENTS_FOR_NUM_GLOBAL_OPS(Get_EvEvent (current)) &&
-			   (Get_EvValue (current) == EVT_BEGIN) && (Get_EvAux (current) != 0))
+			   (Get_EvValue (current) == EVT_END) && (Get_EvAux (current) != 0))
 				break;
 			StepOne_FS (&(fset->files[file]));
 			current = Current_FS (&(fset->files[file]));
@@ -1715,12 +1724,12 @@ void FSet_Forward_To_First_GlobalOp (FileSet_t *fset, int numtasks, int taskid)
 		while (current != NULL)
 		{
 			if (EVENTS_FOR_NUM_GLOBAL_OPS(Get_EvEvent(current)) &&
-			   (Get_EvValue (current) == EVT_BEGIN) && 
+			   (Get_EvValue (current) == EVT_END) && 
 			   (Get_EvAux (current) == max_tag_circular_buffer ))
 				break;
 
 			if (EVENTS_FOR_NUM_GLOBAL_OPS(Get_EvEvent(current)) &&
-			   (Get_EvValue (current) == EVT_BEGIN) && 
+			   (Get_EvValue (current) == EVT_END) && 
 				 (Get_EvAux (current) != max_tag_circular_buffer ))
 			{
 				local_max = MAX(Get_EvAux (current), local_max);
@@ -1753,7 +1762,7 @@ void FSet_Forward_To_First_GlobalOp (FileSet_t *fset, int numtasks, int taskid)
 				UNREFERENCED_PARAMETER(cpu);
 
 				/* Disable communications matching */
-				MatchComms_Off (ptask, task, thread);
+				MatchComms_Off (ptask, task);
 			}
 		}
 	}
@@ -1811,9 +1820,9 @@ void CheckCircularBufferWhenTracing (FileSet_t * fset, int numtasks, int taskid)
 	}
 	else
 	{
+		circular_buffer_enabled = TRUE;
 		if (0 == taskid)
 		{
-			circular_buffer_enabled = TRUE;
 			fprintf (stdout, "YES\nmpi2prv: Searching required information...\n");
 			fflush (stdout);
 		}

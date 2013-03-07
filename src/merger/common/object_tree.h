@@ -67,9 +67,6 @@ typedef struct thread_st
 	int State_Stack[MAX_STATES];
 	int nStates;
 
-	/* Controls whether this thread matches comms or not */
-	int MatchingComms;
-
 	/* Stores the time of the last event */
 	UINT64 Previous_Event_Time;
 
@@ -114,6 +111,9 @@ typedef struct task_st
 	unsigned int nthreads;
 	thread_t *threads;
 	unsigned int tracing_disabled;
+
+	/* Controls whether this task matches comms or not */
+	int MatchingComms;
 	NewQueue_t *recv_queue;
 	NewQueue_t *send_queue;
 

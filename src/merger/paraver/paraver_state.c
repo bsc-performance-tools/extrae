@@ -61,7 +61,7 @@ int Get_Last_State (void)
 unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned int task, unsigned int thread)
 {	
 	unsigned int top_state;
-	thread_t * thread_info;
+	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 
 #if defined(DEBUG_STATES)
 	fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] PUSH_STATE %d\n", ptask, task, thread, new_state);
@@ -69,12 +69,19 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 
 	/* First event removes the STATE_NOT_TRACING */
 	top_state = Top_State(ptask, task, thread);
+
 	if (top_state == STATE_NOT_TRACING)
 	{
-		Pop_State(STATE_NOT_TRACING, ptask, task, thread);
+		if (thread_info->nStates - 1 >= 0)
+		{
+			top_state = thread_info->State_Stack[--thread_info->nStates];
+		}
+		else
+		{
+			top_state = STATE_IDLE;
+		}
 	}
 
-	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	if (thread_info->nStates + 1 >= MAX_STATES)
 	{
 		fprintf(stderr, "mpi2rpv: Error! MAX states stack reached (%d:%d:%d)\n", ptask, task, thread);
@@ -88,13 +95,27 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int task, unsigned int thread)
 {
    unsigned int top_state;
-   thread_t * thread_info;
+   thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 
 #if defined(DEBUG_STATES)
    fprintf(stderr, "mpi2prv: DEBUG [%d:%d:%d] POP_STATE\n", ptask, task, thread);
 #endif
 
+   /* First event removes the STATE_NOT_TRACING */
    top_state = Top_State(ptask, task, thread);
+
+   if (top_state == STATE_NOT_TRACING)
+   {
+     if (thread_info->nStates - 1 >= 0)
+     {
+       top_state = thread_info->State_Stack[--thread_info->nStates];
+     }
+     else
+     {
+       top_state = STATE_IDLE;
+     }
+   }
+
    /* Check the top of the stack has the state we are trying to pop (unless STATE_ANY is specified) */
    if ((old_state != STATE_ANY) && (top_state != old_state))
    {
@@ -114,6 +135,40 @@ unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int
    
    return top_state;
 }
+
+static unsigned int Pop_State_On_Top(unsigned int ptask, unsigned int task, unsigned int thread)
+{
+   unsigned int top_state;
+   thread_t * thread_info;
+
+   thread_info = GET_THREAD_INFO(ptask, task, thread);
+   if (thread_info->nStates - 1 >= 0)
+   {
+      thread_info->nStates --;
+      top_state = Top_State(ptask, task, thread);
+   }
+   else
+   {
+      top_state = STATE_IDLE;
+   }
+   return top_state;
+}
+
+unsigned int Pop_Until (unsigned int until_state, unsigned int ptask, unsigned int task, unsigned int thread)
+{
+   unsigned int top_state;
+   thread_t * thread_info;
+
+   thread_info = GET_THREAD_INFO(ptask, task, thread);
+
+   top_state = Top_State (ptask, task, thread);
+   while ((top_state != until_state) && (thread_info->nStates > 0))
+   {
+      top_state = Pop_State_On_Top (ptask, task, thread);
+   }
+   return top_state;
+}
+
 
 unsigned int Switch_State (unsigned int state, int condition, unsigned int ptask, unsigned int task, unsigned int thread)
 {
@@ -220,7 +275,7 @@ void Initialize_States (FileSet_t * fset)
 
       if ((tracingCircularBuffer()) && (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_EVENTS))
       {
-		 /* States stack is initialized when TRACING_MODE_EV is processed. 
+         /* States stack is initialized when TRACING_MODE_EV is processed. 
           * In this tracing behavior The TRACING_MODE_EV is skipped, so we set the initial states here 
           */
          Push_State (STATE_RUNNING, ptask, task, thread);

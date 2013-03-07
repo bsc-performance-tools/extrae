@@ -618,7 +618,7 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   tests/src/Makefile tests/src/common/Makefile \
   tests/functional/Makefile tests/functional/launcher/Makefile tests/functional/tracer/Makefile \
   tests/functional/merger/Makefile])
-AC_CONFIG_FILES([src/tracer/online/Makefile])
+AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
 ### TEMPORARILY_DISABLED
 ### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])
 AC_OUTPUT

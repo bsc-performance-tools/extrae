@@ -454,7 +454,7 @@ enum {
 #define CALLER_EV                70000000
 #define CALLER_LINE_EV           80000000
 
-#define MRNET_EV                 50000
+#define ONLINE_EV                50000
 #define CLUSTER_ID_EV            90000001
 #define SPECTRAL_PERIOD_EV       91000001
 

@@ -32,10 +32,18 @@
 
 #define THREADID Extrae_get_thread_number()
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 unsigned Extrae_get_thread_number (void);
 unsigned Extrae_get_num_threads (void);
 
 void * Extrae_get_thread_number_function (void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __THREADID_H_INCLUDED__ */
 

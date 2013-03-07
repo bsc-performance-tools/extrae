@@ -250,11 +250,14 @@ SEQ_EXAMPLE_FILES=\
 
 ONLINE_EXAMPLE_FILES=\
  example/LINUX/ONLINE/Makefile \
- example/LINUX/ONLINE/merge.sh \
- example/LINUX/ONLINE/test.c \
- example/LINUX/ONLINE/extrae.xml \
- example/LINUX/ONLINE/slurm_trace.sh \
+ example/LINUX/ONLINE/ping.c \
+ example/LINUX/ONLINE/extrae_online.xml \
+ example/LINUX/ONLINE/run_mn.sh \
+ example/LINUX/ONLINE/run_mt.sh \
  example/LINUX/ONLINE/trace.sh \
+ example/LINUX/ONLINE/merge.sh \
+ example/LINUX/ONLINE/merge_parallel_mn.sh \
+ example/LINUX/ONLINE/merge_parallel_mt.sh \
  example/LINUX/ONLINE/README
 
 PTHREAD_EXAMPLE_FILES=\

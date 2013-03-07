@@ -98,9 +98,24 @@ typedef struct
 #define Get_EvParam(ptr)         ((ptr)->param.omp_param.param)
 #define Get_EvMiscParam(ptr)     ((ptr)->param.misc_param.param)
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-# define Get_EvHWCRead(ptr)      (((ptr)->HWCReadSet > 0) ? 1 : 0) /* 0 = not read, >0 = set_id + 1 */
-# define Get_EvHWCSet(ptr)       ((ptr)->HWCReadSet - 1) 
+# define Get_EvHWCRead(ptr)      (((ptr)->HWCReadSet != 0) ? 1 : 0) /* 0 = not read, >0 = set_id + 1 */
+
+# define Get_EvHWCSet(ptr)       (((ptr)->HWCReadSet > 0) ? ((ptr)->HWCReadSet - 1) : ((((ptr)->HWCReadSet)*(-1)) - 1) )
+
 # define Get_EvHWCVal(ptr)       ((ptr)->HWCValues)
+
+# define Reset_EvHWCs(ptr)                        \
+{                                                 \
+  if ((ptr)->HWCReadSet > 0)                      \
+  {                                               \
+    (ptr)->HWCReadSet = (ptr)->HWCReadSet * (-1); \
+  }                                               \
+}
+
+# define Check_EvHWCsReset(ptr) ((ptr)->HWCReadSet < 0 ? 1 : 0)
+
+# define Get_EvHWC(ptr, cnt) (Check_EvHWCsReset(ptr) ? 0 : (ptr)->HWCValues[cnt])
+
 #endif /* USE_HARDWARE_COUNTERS */
 
 #endif /* RECORD_H_INCLUDED */

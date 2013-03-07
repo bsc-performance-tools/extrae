@@ -228,3 +228,12 @@ void CommunicationQueues_Init (NewQueue_t **send, NewQueue_t **receive)
 	*send = NewQueue_create (sizeof(SendData_t), 1024);
 	*receive = NewQueue_create (sizeof(RecvData_t), 1024);
 }
+
+void CommunicationQueues_Clear (NewQueue_t *queue)
+{
+	if (queue != NULL)
+	{
+		NewQueue_clear(queue);
+	}
+}
+

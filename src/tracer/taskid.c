@@ -91,3 +91,18 @@ void Extrae_finalize_task (void)
 	finalize_task();
 }
 
+/******************************************************************************
+ *** Store the first taskid 
+ ******************************************************************************/
+static unsigned Extrae_Initial_TASKID = 0;
+
+unsigned Extrae_get_initial_TASKID (void)
+{
+        return Extrae_Initial_TASKID;
+}
+
+void Extrae_set_initial_TASKID (unsigned u)
+{
+        Extrae_Initial_TASKID = u;
+}
+

@@ -39,6 +39,8 @@
 
 void CommunicationQueues_Init (NewQueue_t **fsend, NewQueue_t **freceive);
 
+void CommunicationQueues_Clear (NewQueue_t *queue);
+
 void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
 	event_t *send_end, off_t send_position, unsigned thread,
 	unsigned vthread, unsigned partner, unsigned tag, long long key);

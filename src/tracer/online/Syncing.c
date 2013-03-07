@@ -1,6 +1,45 @@
-#include <mpi.h>
-#include <stdio.h>
-#include <stdlib.h>
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                   Extrae                                  *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *     ___     This library is free software; you can redistribute it and/or *
+ *    /  __         modify it under the terms of the GNU LGPL as published   *
+ *   /  /  _____    by the Free Software Foundation; either version 2.1      *
+ *  /  /  /     \   of the License, or (at your option) any later version.   *
+ * (  (  ( B S C )                                                           *
+ *  \  \  \_____/   This library is distributed in hope that it will be      *
+ *   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
+ *    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
+ *                  PARTICULAR PURPOSE. See the GNU LGPL for more details.   *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public License  *
+ * along with this library; if not, write to the Free Software Foundation,   *
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA          *
+ * The GNU LEsser General Public License is contained in the file COPYING.   *
+ *                                 ---------                                 *
+ *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
+\*****************************************************************************/
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/xml-parse.c $
+ | @last_commit: $Date: 2013-01-25 15:56:47 +0100 (Fri, 25 Jan 2013) $
+ | @version:     $Revision: 1464 $
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
+#include "common.h"
+
+static char UNUSED rcsid[] = "$Id: threadid.c 1311 2012-10-25 11:05:07Z harald $";
+
+#ifdef HAVE_MPI_H
+# include <mpi.h>
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #include "Syncing.h"
 
 /**
@@ -19,7 +58,7 @@
  *
  * @return 0 if any task got errors; 1 otherwise 
  */
-int SyncPendingConnections(
+int SyncAttachments(
   int   rank,
   int   root,
   int   rdy_to_connect,
@@ -90,6 +129,8 @@ int SyncPendingConnections(
 
 
 /**
+ * Perform a global barrier to synchronize all back-ends
+ * @param this_be_ok Set to 0 if current back-end had errors; 0 otherwise.
  * @return 0 if any task got errors; 1 otherwise 
  */
 int  SyncOk(int this_be_ok)

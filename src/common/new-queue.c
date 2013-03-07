@@ -67,6 +67,14 @@ NewQueue_t * NewQueue_create (size_t SizeOfElement, int ElementsPerAllocation)
 	return tmp;
 }
 
+void NewQueue_clear (NewQueue_t *q)
+{
+	if (q != NULL)
+	{
+		q->NumOfElements = 0;
+	}
+}
+
 void NewQueue_add (NewQueue_t *q, void *data)
 {
 	size_t offset;

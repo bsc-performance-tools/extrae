@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source @sub_MRNETAPP_HOME@/etc/sourceme.sh
+
+export EXTRAE_HOME=@sub_PREFIX@
+export MRNAPP_FILTER_PATH=$EXTRAE_HOME/lib:$MRNAPP_FILTER_PATH
+export LD_LIBRARY_PATH=@sub_MRNETAPP_LIBSDIR@:$LD_LIBRARY_PATH
+

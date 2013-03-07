@@ -105,6 +105,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			task_info->tracing_disabled = FALSE;
 			task_info->nthreads = nthreads[ptask][task];
 			task_info->num_virtual_threads = nthreads[ptask][task];
+			task_info->MatchingComms = TRUE;
 
 			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{
@@ -115,7 +116,6 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 				thread_info->nStates = 0;
 				thread_info->First_Event = TRUE;
 				thread_info->HWCChange_count = 0;
-				thread_info->MatchingComms = TRUE;
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
 				thread_info->HWCSets_types = NULL;

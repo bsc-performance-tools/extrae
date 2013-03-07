@@ -46,6 +46,9 @@ unsigned Extrae_get_num_tasks (void);
 void Extrae_barrier_tasks (void);
 void Extrae_finalize_task (void);
 
+unsigned Extrae_get_initial_TASKID (void);
+void Extrae_set_initial_TASKID (unsigned u);
+
 #if defined(__cplusplus)
 }
 #endif

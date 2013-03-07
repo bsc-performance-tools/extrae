@@ -1054,8 +1054,10 @@ static void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
   xmlNodePtr tag;
 
   tag = current_tag;
-  xmlChar *analysis  = xmlGetProp_env (rank, tag, RC_ONLINE_ANALYSIS_TYPE);
-  xmlChar *frequency = xmlGetProp_env (rank, tag, RC_ONLINE_ANALYSIS_FREQ);
+
+  xmlChar *analysis  = xmlGetProp_env (rank, tag, RC_ONLINE_TYPE);
+  xmlChar *frequency = xmlGetProp_env (rank, tag, RC_ONLINE_FREQ);
+  xmlChar *topology  = xmlGetProp_env (rank, tag, RC_ONLINE_TOPO);
 
   /* Configure the type of analysis */
   if (analysis != NULL)
@@ -1071,7 +1073,7 @@ static void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
     else
     {
       mfprintf(stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>'%s'\n",
-        analysis, REMOTE_CONTROL_METHOD_ONLINE, RC_ONLINE_ANALYSIS_TYPE);
+        analysis, REMOTE_CONTROL_METHOD_ONLINE, RC_ONLINE_TYPE);
       exit(-1);
     }
   }
@@ -1080,6 +1082,12 @@ static void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
   if (frequency != NULL)
   {
     Online_SetFrequency(atoi(frequency));
+  }
+
+  /* Configure the topology */
+  if (topology != NULL)
+  {
+    Online_SetTopology(topology);
   }
 
   XML_FREE(analysis);
@@ -1098,6 +1106,21 @@ static void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 #if defined(HAVE_SPECTRAL)
     else if (!xmlStrcasecmp (tag->name, RC_ONLINE_SPECTRAL))
     {
+      xmlChar *max_periods_str  = xmlGetProp_env (rank, tag, SPECTRAL_MAX_PERIODS);
+      xmlChar *num_iters_str    = xmlGetProp_env (rank, tag, SPECTRAL_NUM_ITERS);
+      xmlChar *min_seen_str     = xmlGetProp_env (rank, tag, SPECTRAL_MIN_SEEN);
+      xmlChar *min_likeness_str = xmlGetProp_env (rank, tag, SPECTRAL_MIN_LIKENESS);
+      int max_periods  = 0;
+
+      if (max_periods_str != NULL)
+      {
+        if (strcmp(max_periods_str, "all") == 0) max_periods = 0;
+        else max_periods = atoi(max_periods_str);
+        Online_SetSpectralMaxPeriods ( max_periods );
+      }
+      if (num_iters_str    != NULL) Online_SetSpectralNumIters   ( atoi(num_iters_str) );
+      if (min_seen_str     != NULL) Online_SetSpectralMinSeen    ( atoi(min_seen_str) );
+      if (min_likeness_str != NULL) Online_SetSpectralMinLikeness( (atof(min_likeness_str) / 100.0) );
     }
 #endif
     tag = tag->next;
@@ -1110,10 +1133,6 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 {
   xmlNodePtr tag;
   int ActiveRemoteControls = 0;
-
-#if !defined(HAVE_ONLINE)
-	UNREFERENCED_PARAMETER(xmldoc);
-#endif
 
   /* Parse all TAGs, and annotate them to use them later */
   tag = current_tag->xmlChildrenNode;
@@ -1133,7 +1152,7 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
         Online_Enable();
 
         /* Parse the on-line analysis configuration */
-        Parse_XML_Online(rank, xmldoc, current_tag);
+        Parse_XML_Online(rank, xmldoc, tag);
 #else
         mfprintf(stdout, PACKAGE_NAME": XML Warning: Remote control mechanism set to \"On-line analysis\" but this library does not support it! Setting will be ignored...\n");
 #endif

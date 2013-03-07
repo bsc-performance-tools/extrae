@@ -34,6 +34,7 @@
 
 unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned int task, unsigned int thread);
 unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int task, unsigned int thread);
+unsigned int Pop_Until (unsigned int until_state, unsigned int ptask, unsigned int task, unsigned int thread);
 unsigned int Switch_State (unsigned int state, int condition, unsigned int ptask, unsigned int task, unsigned int thread);
 unsigned int Top_State (unsigned int ptask, unsigned int task, unsigned int thread);
 int State_Excluded (unsigned int state);

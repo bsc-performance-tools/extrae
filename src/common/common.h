@@ -97,8 +97,8 @@
 #define EXT_TMP_SAMPLE ".stmp"
 #define EXT_SAMPLE     ".sample"
 
-#define EXT_TMP_MRN    ".mtmp"
-#define EXT_MRN        ".mrn"
+#define EXT_TMP_ONLINE ".otmp"
+#define EXT_ONLINE     ".online"
 
 #define EXT_SYM        ".sym"
 

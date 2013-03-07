@@ -181,7 +181,7 @@ static int Any_Send_Event (event_t * current_event,
 			thread_info->Send_Rec = current_event;
 		break;
 		case EVT_END:
-			if (MatchComms_Enabled(ptask, task, thread))
+			if (MatchComms_Enabled(ptask, task))
 				if (MPI_PROC_NULL != Get_EvTarget (current_event))
 				{
 					if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
@@ -253,7 +253,7 @@ static int SendRecv_Event (event_t * current_event,
 			thread_info->Send_Rec = current_event;
 
 			/* Treat the send part */
-			if (MatchComms_Enabled(ptask, task, thread))
+			if (MatchComms_Enabled(ptask, task))
 				if (MPI_PROC_NULL != Get_EvTarget (thread_info->Send_Rec))
 				{
 					if (isTaskInMyGroup (fset, Get_EvTarget(thread_info->Send_Rec)))
@@ -298,7 +298,7 @@ static int SendRecv_Event (event_t * current_event,
 			thread_info->Recv_Rec = current_event;
 
 			/* Treat the receive part */
-			if (MatchComms_Enabled(ptask, task, thread))
+			if (MatchComms_Enabled(ptask, task))
 				if (MPI_PROC_NULL != Get_EvTarget (thread_info->Recv_Rec))
 				{
 					if (isTaskInMyGroup (fset, Get_EvTarget(thread_info->Recv_Rec)))
@@ -434,10 +434,15 @@ static int GlobalOP_event (event_t * current_event,
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	/* First global operation found, start matching communications from now on (if this is the behaviour for the circular buffer) */
-	if ((tracingCircularBuffer()) && (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_MATCHES) && (!MatchComms_Enabled(ptask, task, thread)) && (EvValue == EVT_BEGIN) && (getTagForCircularBuffer() == Get_EvAux(current_event)))
+	/* First global operation found, start matching communications from now on */
+	if ((tracingCircularBuffer())                                  && /* Circular buffer is enabled */ 
+            (getBehaviourForCircularBuffer() == CIRCULAR_SKIP_MATCHES) && /* The buffer behavior is to skip matches */
+            (!MatchComms_Enabled(ptask, task))                         && /* Not matching already */
+            (EvValue == EVT_END)                                       && /* End of the collective */
+            (Get_EvSize(current_event) == GET_NUM_TASKS(ptask))           /* World collective */
+            /* (getTagForCircularBuffer() == Get_EvAux(current_event)) */)
 	{
-		MatchComms_On(ptask, task, thread);
+		MatchComms_On(ptask, task);
 	}
 
 	Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
@@ -522,7 +527,7 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 	}
 	else
 	{
-		if (MatchComms_Enabled(ptask, task, thread))
+		if (MatchComms_Enabled(ptask, task))
 		{
 			if (MPI_PROC_NULL != Get_EvTarget(current_event))
 			{
@@ -597,7 +602,7 @@ static int IRecv_Event (event_t * current_event,
 
 	if (EvValue == EVT_END)
 	{
-		if (MatchComms_Enabled(ptask, task, thread))
+		if (MatchComms_Enabled(ptask, task))
 		{
 			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
 			if (NULL != receive)
@@ -697,7 +702,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	/* If this is a send, look for the receive */
 	if (Get_EvValue (current_event) == MPI_ISEND_EV)
 	{
-		if (MatchComms_Enabled(ptask, task, thread))
+		if (MatchComms_Enabled(ptask, task))
 		{
 			if (MPI_PROC_NULL != Get_EvTarget (current_event))
 			{
@@ -733,7 +738,7 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	/* If this is a receive, look for the send */
 	if (Get_EvValue(current_event) == MPI_IRECV_EV)
 	{
-		if (MatchComms_Enabled(ptask, task, thread))
+		if (MatchComms_Enabled(ptask, task))
 		{
 			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
 			if (MPI_PROC_NULL != Get_EvTarget(receive))
