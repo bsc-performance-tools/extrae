@@ -62,7 +62,9 @@ void BurstsExtractor::ProcessEvent(event_t *evt)
   {
     /* Here begins a burst */
     LastBegin = evt;
+#if USE_HARDWARE_COUNTERS
     BURST_HWC_CLEAR(OngoingBurstHWCs);
+#endif /* USE_HARDWARE_COUNTERS */
   }
   else if ((isBurstEnd(evt)) && (LastBegin != NULL))
   {
@@ -71,7 +73,6 @@ void BurstsExtractor::ProcessEvent(event_t *evt)
     unsigned long long ts_ini_sync = TIMESYNC(0, TASKID, ts_ini);
     unsigned long long ts_end      = Get_EvTime(evt);
     unsigned long long duration    = ts_end - ts_ini;
-    int hwc_set = Get_EvHWCSet(evt);
 
     /* Only store those bursts that are longer than the given threshold */
     if (duration >= DurationFilter)
@@ -80,9 +81,14 @@ void BurstsExtractor::ProcessEvent(event_t *evt)
        * between the end and the start of the burst to have the 
        * counters values for the region.
        */
+#if USE_HARDWARE_COUNTERS
+      int hwc_set = Get_EvHWCSet(evt);
       BURST_HWC_DIFF(OngoingBurstHWCs, evt, LastBegin);
 
       ExtractedBursts->Insert(ts_ini_sync, duration, hwc_set, OngoingBurstHWCs);
+#else
+      ExtractedBursts->Insert(ts_ini_sync, duration);
+#endif /* USE_HARDWARE_COUNTERS */
     }
   }
   else

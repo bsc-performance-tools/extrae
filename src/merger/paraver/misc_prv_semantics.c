@@ -51,10 +51,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "addresses.h"
 #include "options.h"
 #include "extrae_types.h"
-
-#if defined(HAVE_ONLINE)
 #include "online_events.h"
-#endif
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"

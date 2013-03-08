@@ -221,7 +221,7 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
+		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcasecmp (tag->name, xmlTEXT))
 		{
 		}
 		/* Shall we gather counters in the MPI calls? */
@@ -258,7 +258,7 @@ static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
+		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcasecmp (tag->name, xmlTEXT))
 		{
 		}
 		/* Shall we gather counters in the PACX calls? */
@@ -344,7 +344,7 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Must the tracing facility obtain information about PACX callers? */
@@ -417,7 +417,7 @@ static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Buffer size of the SPU tracing unit  */
@@ -507,7 +507,7 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Which is the threshold for the Bursts? */
@@ -573,7 +573,7 @@ static void Parse_XML_UF (int rank, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Shall we gather counters in the UF calls? */
@@ -610,7 +610,7 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Shall we instrument openmp lock routines? */
@@ -657,7 +657,7 @@ static void Parse_XML_PTHREAD (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Shall we instrument openmp lock routines? */
@@ -701,7 +701,7 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Does the user want to change the file size? */
@@ -791,7 +791,7 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Must we limit the buffer size? */
@@ -852,7 +852,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 	while (set_tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcasecmp (set_tag->name, xmlCOMMENT))
 		{
 		}
 		else if (!xmlStrcasecmp (set_tag->name, TRACE_SAMPLING))
@@ -883,7 +883,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 		while (set_tag != NULL && i < num_sampling_hwc)
 		{
 			/* Skip coments */
-			if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
+			if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcasecmp (set_tag->name, xmlCOMMENT))
 			{
 			}
 			else if (!xmlStrcasecmp (set_tag->name, TRACE_SAMPLING))
@@ -931,7 +931,7 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 	while (set_tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcmp (set_tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (set_tag->name, xmlTEXT) || !xmlStrcasecmp (set_tag->name, xmlCOMMENT))
 		{
 		}
 		else if (!xmlStrcasecmp (set_tag->name, TRACE_HWCSET))
@@ -992,7 +992,7 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 		/* Here we will check all the options for <counters tag>. Nowadays the only
 		   available subtag is <cpu> which depends on the availability of PAPI. */
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Check if the HWC are being configured at the XML. If so, init them
@@ -1096,7 +1096,7 @@ static void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
   tag = current_tag->xmlChildrenNode;
   while (tag != NULL)
   {
-    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT)) { /* Skip coments */ }
+    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT)) { /* Skip coments */ }
 #if defined(HAVE_CLUSTERING)
     else if (!xmlStrcasecmp (tag->name, RC_ONLINE_CLUSTERING))
     {
@@ -1138,7 +1138,7 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
   tag = current_tag->xmlChildrenNode;
   while (tag != NULL)
   {
-    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT)) { /* Skip comments */ }
+    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT)) { /* Skip comments */ }
 
     else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_ONLINE))
     {
@@ -1210,7 +1210,7 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 	tag = current_tag->xmlChildrenNode;
 	while (tag != NULL)
 	{
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT)) { /* Skip comments */ }
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT)) { /* Skip comments */ }
 
 		/* Must we check for a control file? */
 		else if (!xmlStrcasecmp (tag->name, TRACE_CONTROL_FILE))
@@ -1430,7 +1430,7 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	while (tag != NULL)
 	{
 		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcmp (tag->name, xmlCOMMENT))
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
 		{
 		}
 		/* Must the trace run for at least some time? */
@@ -1588,7 +1588,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 				while (current_tag != NULL && mpitrace_on)
 				{
 					/* Skip coments */
-					if (!xmlStrcasecmp (current_tag->name, xmlTEXT) || !xmlStrcmp (current_tag->name, xmlCOMMENT))
+					if (!xmlStrcasecmp (current_tag->name, xmlTEXT) || !xmlStrcasecmp (current_tag->name, xmlCOMMENT))
 					{
 					}
 					/* UF related information instrumentation */

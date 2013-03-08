@@ -31,6 +31,9 @@
 
 static char UNUSED rcsid[] = "$Id: threadid.c 1311 2012-10-25 11:05:07Z harald $";
 
+#if defined(HAVE_STDLIB_H)
+# include <stdlib.h>
+#endif
 #include "Chopper.h"
 
 /**
@@ -149,6 +152,7 @@ void Chopper::Chop(unsigned long long fromTime, unsigned long long toTime, event
   {
     firstEv = BIT_GetEvent(firstIt);
 
+#if USE_HARDWARE_COUNTERS
     /* Look for the first event that emits counters in the chopped region */
     event_t *first_with_hwcs = firstEv;
     while ((!Get_EvHWCRead(first_with_hwcs)) && (!BIT_OutOfBounds(firstIt)))
@@ -157,6 +161,7 @@ void Chopper::Chop(unsigned long long fromTime, unsigned long long toTime, event
       first_with_hwcs = BIT_GetEvent(firstIt);
     }
     Reset_EvHWCs(first_with_hwcs); /* The first event that reads counters after the chop sets them to 0 */
+#endif
 
     /* Find the last event of the region */
     lastIt = RemoveLastState(toTime);

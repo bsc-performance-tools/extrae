@@ -40,19 +40,26 @@ class Bursts
     Bursts();
     ~Bursts();
 
-    void Insert(unsigned long long timestamp, unsigned long long duration, int hwc_set, long long *hwcs);
+    void Insert(unsigned long long timestamp, unsigned long long duration);
 
     int GetNumberOfBursts();
     unsigned long long GetBurstTime(int burst_id);
     unsigned long long GetBurstDuration(int burst_id);
+
+#if USE_HARDWARE_COUNTERS
+    void Insert(unsigned long long timestamp, unsigned long long duration, int hwc_set, long long *hwcs);
+
     int GetBurstCountersSet(int burst_id);
     int GetBurstCountersValues(int burst_id, long long *& hwcs);
+#endif /* USE_HARDWARE_COUNTERS */
 
   private:
     unsigned long long *Timestamps;
     unsigned long long *Durations;
+#if USE_HARDWARE_COUNTERS
     long long          *HWCValues;
     int                *HWCSets;
+#endif /* USE_HARDWARE_COUNTERS */
 
     int NumberOfBursts;
     int MaxBursts;

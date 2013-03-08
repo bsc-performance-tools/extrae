@@ -240,9 +240,6 @@ core_MODULES = \
  $(COMMON_DIR)/libcommon.la \
  $(CLOCKS_DIR)/libclock.la \
  $(HWC_DIR)/libhwc.la
-if HAVE_ONLINE
- core_MODULES += $(ONLINE_DIR)/libonline.la
-endif
 
 INTERFACE_API_PTHREAD = $(INTERFACES_DIR)/API/libiface_api_pthread.la
 if PTHREAD_SUPPORT_IN_ALL_LIBS
@@ -343,9 +340,6 @@ if HAVE_PAPI
 endif
 if HAVE_XML2
   core_INCLUDES += @XML2_CFLAGS@
-endif
-if HAVE_ONLINE
-  core_INCLUDES += -I$(ONLINE_DIR)
 endif
 if WANT_OPENMP
   core_INCLUDES += -I$(PROBES_DIR)/OMP
@@ -454,6 +448,21 @@ lib_dyn_ompitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EX
 lib_dyn_ompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE -DOMP_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 lib_dyn_cudampitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE -DCUDA_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 lib_dyn_cudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(EXTRA_OMP_CFLAGS) $(MPITRACE_SYMBOLS) -DFORTRAN_SYMBOLS -DMPI_SUPPORT -DDYNINST_MODULE -DCUDA_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
+
+#
+# Online support is only activated for the MPI libraries
+# 
+if HAVE_ONLINE
+libmpitrace_la_LIBADD       += $(ONLINE_DIR)/libonline.la
+libmpitracef_la_LIBADD      += $(ONLINE_DIR)/libonline.la
+lib_dyn_mpitracec_la_LIBADD += $(ONLINE_DIR)/libonline.la
+lib_dyn_mpitracef_la_LIBADD += $(ONLINE_DIR)/libonline.la
+
+libmpitrace_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_DIR)
+libmpitracef_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_DIR)
+lib_dyn_mpitracec_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
+lib_dyn_mpitracef_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
+endif
 
 #
 # Link flags

@@ -32,12 +32,18 @@
 
 #include "BufferExtractor.h"
 #include "Bursts.h"
-#include "num_hwc.h"
 
-#define BURST_HWC_CLEAR(accum) \
-  for (int k=0; k<MAX_HWC; k++) { accum[k]  = 0; }
-#define BURST_HWC_DIFF(accum, evt_end, evt_ini) \
-  for (int k=0; k<MAX_HWC; k++) { accum[k] = (Get_EvHWCVal(evt_end))[k] - (Get_EvHWCVal(evt_ini))[k]; }
+#if USE_HARDWARE_COUNTERS
+
+# include "num_hwc.h"
+
+# define BURST_HWC_CLEAR(accum) \
+   for (int k=0; k<MAX_HWC; k++) { accum[k]  = 0; }
+# define BURST_HWC_DIFF(accum, evt_end, evt_ini) \
+   for (int k=0; k<MAX_HWC; k++) { accum[k] = (Get_EvHWCVal(evt_end))[k] - (Get_EvHWCVal(evt_ini))[k]; }
+
+#endif /* USE_HARDWARE_COUNTERS */
+
 
 class BurstsExtractor : public BufferExtractor
 {
@@ -51,10 +57,12 @@ class BurstsExtractor : public BufferExtractor
     Bursts * GetBursts();
 
   private:
+    Bursts            *ExtractedBursts;
     event_t           *LastBegin;
     unsigned long long DurationFilter;
+#if USE_HARDWARE_COUNTERS
     long long          OngoingBurstHWCs[MAX_HWC];
-    Bursts            *ExtractedBursts;
+#endif /* USE_HARDWARE_COUNTERS */
 };
 
 #endif /* __BURSTS_EXTRACTOR_H__ */

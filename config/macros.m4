@@ -1693,11 +1693,6 @@ AC_DEFUN([AX_PROG_ONLINE],
       have_online="yes"
       AC_MSG_RESULT([$have_online])
     fi
-
-    if test "x$have_online" = "xyes" ; then
-      AC_DEFINE([HAVE_ONLINE], 1,
-                [Define if on-line analysis dependencies are installed: MRNetApp, MPI, Clustering, Spectral])
-    fi
   fi
   AM_CONDITIONAL(HAVE_ONLINE, test "x$have_online" = "xyes")
 ])

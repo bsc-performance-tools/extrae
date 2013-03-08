@@ -35,8 +35,10 @@ static char UNUSED rcsid[] = "$Id: threadid.c 1311 2012-10-25 11:05:07Z harald $
 # include <stdlib.h>
 #endif
 #include "Bursts.h"
-#include "num_hwc.h"
 #include "tags.h"
+#if USE_HARDWARE_COUNTERS
+# include "num_hwc.h"
+#endif /* USE_HARDWARE_COUNTERS */
 
 Bursts::Bursts()
 {
@@ -45,8 +47,10 @@ Bursts::Bursts()
 
   Timestamps = NULL;
   Durations  = NULL;
+#if USE_HARDWARE_COUNTERS
   HWCValues  = NULL;
   HWCSets    = NULL;
+#endif /* USE_HARDWARE_COUNTERS */
 }
 
 Bursts::~Bursts()
@@ -55,13 +59,16 @@ Bursts::~Bursts()
   {
     free(Timestamps);
     free(Durations);
+#if USE_HARDWARE_COUNTERS
     free(HWCValues);
     free(HWCSets);
+#endif /* USE_HARDWARE_COUNTERS */
   }
 }
 
+#if USE_HARDWARE_COUNTERS
 /**
- * Store a new burst.
+ * Store a new burst with hardware counters.
  * \param timestamp The timestamp of the burst.
  * \param duration  The duration of the burst.
  * \param hwc_set   The set of counters read in this burst.
@@ -87,6 +94,27 @@ void Bursts::Insert(unsigned long long timestamp, unsigned long long duration, i
   }
   NumberOfBursts ++;
 }
+#endif /* USE_HARDWARE_COUNTERS */
+
+/**
+ * Store a new burst.
+ *
+ * \param timestamp The timestamp of the burst.
+ * \param duration  The duration of the burst.
+ */
+void Bursts::Insert(unsigned long long timestamp, unsigned long long duration)
+{
+  if (NumberOfBursts == MaxBursts)
+  {
+    MaxBursts += BURSTS_CHUNK;
+    Timestamps = (unsigned long long *)realloc(Timestamps, MaxBursts * sizeof(unsigned long long));
+    Durations  = (unsigned long long *)realloc(Durations, MaxBursts * sizeof(unsigned long long));
+  }
+  Timestamps[ NumberOfBursts ] = timestamp;
+  Durations [ NumberOfBursts ] = duration;
+  NumberOfBursts ++;
+}
+
 
 /**
  * Returns the number of bursts in the container.
@@ -121,6 +149,8 @@ unsigned long long Bursts::GetBurstDuration(int burst_id)
     return Durations[burst_id];
 }
 
+#if USE_HARDWARE_COUNTERS
+
 /**
  * Returns the set of counters read for the specified burst.
  * \return The counters set identifier.
@@ -148,3 +178,4 @@ int Bursts::GetBurstCountersValues(int burst_id, long long *& hwcs)
   return MAX_HWC;
 }
 
+#endif /* USE_HARDWARE_COUNTERS */
