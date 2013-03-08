@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 08Mar2013 Extrae version 3.0rc1
  * 08Mar2013 Fixed compilation issues (made on-line support only available to the MPI tracing libraries).
              Fixed XML parse to skip comments.
              Hardware counters are no longer a requirement for the on-line spectral analysis.
