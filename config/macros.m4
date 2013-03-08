@@ -843,9 +843,8 @@ AC_DEFUN([AX_PROG_PAPI],
          [Enable PAPI sampling support]
       ),
       [enable_sampling="${enableval}"],
-      [enable_sampling="auto"]
+      [enable_sampling="yes"]
    )
-   PAPI_SAMPLING_ENABLED="no"
 
    dnl Search for PAPI installation
    AX_FIND_INSTALLATION([PAPI], [$papi_paths], [papi])
@@ -901,7 +900,6 @@ AC_DEFUN([AX_PROG_PAPI],
    AC_DEFINE([SAMPLING_SUPPORT], [1], [Enable Sampling])
 
    if test "${PAPI_ENABLED}" = "yes" ; then
-      PAPI_SAMPLING_ENABLED="yes"
       AC_DEFINE([PAPI_COUNTERS], [1], [PAPI is used as API to gain access to CPU hwc])
       AC_DEFINE([NEW_HWC_SYSTEM], [1], [Enable HWC support])
       AC_MSG_NOTICE([PAPI and substrate libraries: ${PAPI_LIBS}])
