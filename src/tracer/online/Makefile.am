@@ -14,12 +14,18 @@ noinst_SCRIPTS     = $(ONLINE_ENV_SH)
 ###     LIBRARIES     ###
 #########################
 
-libonline_la_SOURCES  = \
-  OnlineControl.cpp \
-  Syncing.c         \
-  OnlineConfig.cpp  \
-  SpectralRoot.cpp  \
-  SpectralWorker.cpp 
+libonline_la_SOURCES  =               \
+  OnlineControl.cpp  OnlineControl.h  \
+  Syncing.c          Syncing.h        \
+  OnlineConfig.cpp   OnlineConfig.h   \
+  SpectralRoot.cpp   SpectralRoot.h   \
+  SpectralWorker.cpp SpectralWorker.h \
+  filter_defs.h      online_buffers.h \
+  online_events.h    tags.h
+
+EXTRA_DIST = \
+  $(ONLINE_ENV_SH).in
+  
 
 # DEBUG
 #  mrnet_threads.cpp \

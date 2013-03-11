@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 11Mar2013 Fixed Makefiles to distribute some missing files
  * 08Mar2013 Fixed minor compilation issues.
  * 08Mar2013 Extrae version 3.0rc1
  * 08Mar2013 Fixed compilation issues (made on-line support only available to the MPI tracing libraries).
