@@ -518,26 +518,38 @@ int Generate_Topology(int world_size, char **node_list, char *ResourcesFile, cha
   selected_topology = Online_GetTopology();
   if (strcmp(selected_topology, "auto") == 0)
   {
-    /* Build an automatic topology with the default fanout */
-    int cps_x_level = world_size;
-    int tree_depth  = 0;
-    stringstream ssTopology; 
-
-    while (cps_x_level > DEFAULT_FANOUT)
+    if (world_size > 512)
     {
-      cps_x_level = cps_x_level / DEFAULT_FANOUT;
-      tree_depth ++;
-    }
+      /* Build an automatic topology with the default fanout */
+      int cps_x_level = world_size;
+      int tree_depth  = 0;
+      stringstream ssTopology; 
 
-    for (k=0; k<tree_depth; k++)
-    {
-      ssTopology << DEFAULT_FANOUT;
-      if (k < tree_depth - 1) ssTopology << "x"; 
+      while (cps_x_level > DEFAULT_FANOUT)
+      {
+        cps_x_level = cps_x_level / DEFAULT_FANOUT;
+        tree_depth ++;
+      }
+
+      for (k=0; k<tree_depth; k++)
+      {
+        ssTopology << DEFAULT_FANOUT;
+        if (k < tree_depth - 1) ssTopology << "x"; 
+      }
+      Topology = ssTopology.str();
+      TopologyType = "b";
     }
-    Topology = ssTopology.str();
-    TopologyType = "b";
- 
-    ONLINE_DBG_1("Using an automatic topology: %s\n", (Topology.length() == 0 ? "root-only" : Topology.c_str()));
+    else
+    {
+      /* Set a fixed number of CPs for small executions */
+      TopologyType = "g";
+      Topology = "";
+      if (world_size >= 32)  Topology = "2";
+      if (world_size >= 64)  Topology = "4";
+      if (world_size >= 128) Topology = "8";
+      if (world_size >= 256) Topology = "16";
+    }
+    ONLINE_DBG_1("Using an automatic topology: %s: %s\n", TopologyType.c_str(), (Topology.length() == 0 ? "root-only" : Topology.c_str()));
   }
   else if (strcmp(selected_topology, "root") == 0)
   {
