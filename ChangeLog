@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 12Mar2013 Modified SVN propset using
+              svn propset svn:keywords "Date Revision Author HeadURL Id"
  * 12Mar2013 Code restructuring.
  * 11Mar2013 Changed the automatic generation of topologies for small online executions
  * 11Mar2013 Fixed Makefiles to distribute some missing files
