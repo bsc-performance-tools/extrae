@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 12Mar2013 Code restructuring.
  * 11Mar2013 Changed the automatic generation of topologies for small online executions
  * 11Mar2013 Fixed Makefiles to distribute some missing files
  * 08Mar2013 Fixed minor compilation issues.

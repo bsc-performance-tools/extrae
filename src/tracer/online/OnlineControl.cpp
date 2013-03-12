@@ -124,16 +124,197 @@ static void Online_GenerateOutputFiles()
 
 
 /*****************************************************************\
+|***                      FRONT-END SIDE                       ***|
+\*****************************************************************/
+
+/**
+ * Front-end analysis thread
+ *
+ * Waits for all back-ends to attach, loads the analysis protocols and 
+ * enters the main analysis loop, dispatching commands periodically.
+ */
+void * FE_main_loop(UNUSED void *context)
+{
+  int done = 0;
+
+  /* Stall the front-end until all back-ends have connected */
+  FE->Connect();
+
+  /* Load the FE-side analysis protocols */
+  FrontProtocol *fp = new SpectralRoot();
+  FE->LoadProtocol( fp );
+
+  ONLINE_DBG_1("Front-end entering the main analysis loop...\n");
+  do 
+  {
+    ONLINE_DBG_1("Front-end going to sleep for %d seconds...\n", Online_GetFrequency());
+    sleep(Online_GetFrequency());
+
+    /* Take the mutex to prevent starting a new protocol if the application has just finished */
+    pthread_mutex_lock(&FE_running_prot_lock);
+    if (FE->isUp())
+    {
+      FE->Dispatch("SPECTRAL", done);
+    }
+    pthread_mutex_unlock(&FE_running_prot_lock);
+
+  } while ((FE->isUp()) && (!done));
+
+  ONLINE_DBG_1("Front-end exiting the main analysis loop...\n");
+
+  /* The analysis is over, start the network shutdown */
+  Stop_FE();
+
+  return NULL;
+}
+
+/**
+ * Stop_FE
+ *
+ * Initiates the network shutdown, which will cause the analysis threads to quit.
+ * This routine can be called either by the main thread (app has finished) or 
+ * the front-end analysis thread (analyis is over).
+ */
+static void Stop_FE()
+{
+  /* Take the mutex to prevent a shutdown while a protocol is being computed */
+  pthread_mutex_lock(&FE_running_prot_lock);
+  if (FE->isUp())
+  {
+    ONLINE_DBG_1("Shutting down the front-end...\n");
+    FE->Shutdown(); /* All backends will leave the main analysis loop */
+  }
+  pthread_mutex_unlock(&FE_running_prot_lock);
+}
+
+
+/**
+ * Generates the network topology specification and writes it into a file.
+ *
+ * @return 0 on success; -1 otherwise.
+ */
+int Generate_Topology(int world_size, char **node_list, char *ResourcesFile, char *TopologyFile)
+{
+  int  i = 0, k = 0;
+  FILE *fd = NULL;
+  char *selected_topology = NULL;
+  char *env_topgen = NULL;
+  string Topology = "";
+  string TopologyType = "";
+
+  /* Write the available resources in a file */
+  fd = fopen(ResourcesFile, "w+");
+  for (i=0; i<world_size; i++)
+  {
+    fprintf(fd, "%s\n", node_list[i]);
+  }
+  fclose(fd);
+
+#if 1
+  /* Check the topology specified in the XML */
+  selected_topology = Online_GetTopology();
+  if (strcmp(selected_topology, "auto") == 0)
+  {
+    if (world_size > 512)
+    {
+      /* Build an automatic topology with the default fanout */
+      int cps_x_level = world_size;
+      int tree_depth  = 0;
+      stringstream ssTopology; 
+
+      while (cps_x_level > DEFAULT_FANOUT)
+      {
+        cps_x_level = cps_x_level / DEFAULT_FANOUT;
+        tree_depth ++;
+      }
+
+      for (k=0; k<tree_depth; k++)
+      {
+        ssTopology << DEFAULT_FANOUT;
+        if (k < tree_depth - 1) ssTopology << "x"; 
+      }
+      Topology = ssTopology.str();
+      TopologyType = "b";
+    }
+    else
+    {
+      /* Set a fixed number of CPs for small executions */
+      TopologyType = "g";
+      Topology = "";
+      if (world_size >= 32)  Topology = "2";
+      if (world_size >= 64)  Topology = "4";
+      if (world_size >= 128) Topology = "8";
+      if (world_size >= 256) Topology = "16";
+    }
+    ONLINE_DBG_1("Using an automatic topology: %s: %s\n", TopologyType.c_str(), (Topology.length() == 0 ? "root-only" : Topology.c_str()));
+  }
+  else if (strcmp(selected_topology, "root") == 0)
+  {
+    /* All backends will connect directly to the front-end */
+    Topology = "";
+    ONLINE_DBG_1("Using a root-only topology\n");
+  }
+  else
+  {
+    /* Use the topology specified by the user */
+    Topology = string(selected_topology);
+    TopologyType = "g";
+    ONLINE_DBG_1("Using the user topology: %s\n", Topology.c_str());
+  }
+
+  /* Write the topology file */
+  env_topgen = getenv("MRNET_TOPGEN");
+  if ((Topology.length() == 0) || (env_topgen == NULL))
+  {
+    /* Writing a root-only topology */
+    fd = fopen(TopologyFile, "w+");
+    fprintf(fd, "%s:0 ;\n", node_list[FRONTEND_RANK(world_size)]);
+    fclose(fd);
+  }
+  else
+  {
+    /* Invoking mrnet_topgen to build the topology file */
+    string cmd;
+    cmd = string(env_topgen) + " -f " + node_list[FRONTEND_RANK(world_size)] + " --hosts=" + string(ResourcesFile) + " --topology=" + TopologyType + ":" + Topology + " -o " + string(TopologyFile);
+    ONLINE_DBG_1("Invoking the topology generator: %s\n", cmd.c_str());
+    system(cmd.c_str());
+
+  }
+  ONLINE_DBG_1("Topology written at '%s'\n", TopologyFile);
+#endif
+
+#if 0
+#if 0
+    fd = fopen(TopologyFile, "w+");
+    fprintf(fd, "%s:0; \n", node_list[FRONTEND_RANK(world_size)]);
+    fclose(fd);
+#else
+    fd = fopen(TopologyFile, "w+");
+    fprintf(fd, "%s:0 => \n", node_list[FRONTEND_RANK(world_size)]);
+    fprintf(fd, "  %s:1  \n", node_list[FRONTEND_RANK(world_size)]);
+    fprintf(fd, "  %s:2  \n", node_list[FRONTEND_RANK(world_size)]);
+    fprintf(fd, "  %s:3  \n", node_list[FRONTEND_RANK(world_size)]);
+    fprintf(fd, "  %s:4  \n", node_list[FRONTEND_RANK(world_size)]);
+    fprintf(fd, "  %s:5; \n", node_list[FRONTEND_RANK(world_size)]);
+    fclose(fd);
+#endif
+#endif
+
+  return 0;
+}
+
+
+/*****************************************************************\
 |***                      BACK-END SIDE                        ***|
 \*****************************************************************/
 
 /**
  * Online_Start
  *
- * The root task specified by FRONTEND_RANK initializes the front-end,
- * and all tasks initialize a back-end. The routine returns when
- * the network is connected and the FE and BE analysis threads have 
- * been created.
+ * All tasks initialize a back-end. Additionally, the root task 
+ * specified by FRONTEND_RANK initializes the front-end. 
+ * The routine returns when the network is connected and the FE 
+ * and BE analysis threads have been created.
  *
  * @param rank       This MPI task rank.
  * @param world_size Total number of MPI tasks.
@@ -307,80 +488,6 @@ void Online_Stop()
 
 
 /**
- * Stop_FE
- *
- * Initiates the network shutdown, which will cause the analysis threads to quit.
- * This routine can be called either by the main thread (app has finished) or 
- * the front-end analysis thread (analyis is over).
- */
-static void Stop_FE()
-{
-  /* Take the mutex to prevent a shutdown while a protocol is being computed */
-  pthread_mutex_lock(&FE_running_prot_lock);
-  if (FE->isUp())
-  {
-    ONLINE_DBG_1("Shutting down the front-end...\n");
-    FE->Shutdown(); /* All backends will leave the main analysis loop */
-  }
-  pthread_mutex_unlock(&FE_running_prot_lock);
-}
-
-
-/**
- * Stop_BE
- *
- * This routine is called when the back-end analysis thread quits, 
- * either because the application or the analysis has finished.
- */
-static void Stop_BE()
-{
-  Online_Flush();
-}
-
-
-/**
- * Front-end analysis thread
- *
- * Waits for all back-ends to attach, loads the analysis protocols and 
- * enters the main analysis loop, dispatching commands periodically.
- */
-void * FE_main_loop(UNUSED void *context)
-{
-  int done = 0;
-
-  /* Stall the front-end until all back-ends have connected */
-  FE->Connect();
-
-  /* Load the FE-side analysis protocols */
-  FrontProtocol *fp = new SpectralRoot();
-  FE->LoadProtocol( fp );
-
-  ONLINE_DBG_1("Front-end entering the main analysis loop...\n");
-  do 
-  {
-    ONLINE_DBG_1("Front-end going to sleep for %d seconds...\n", Online_GetFrequency());
-    sleep(Online_GetFrequency());
-
-    /* Take the mutex to prevent starting a new protocol if the application has just finished */
-    pthread_mutex_lock(&FE_running_prot_lock);
-    if (FE->isUp())
-    {
-      FE->Dispatch("SPECTRAL", done);
-    }
-    pthread_mutex_unlock(&FE_running_prot_lock);
-
-  } while ((FE->isUp()) && (!done));
-
-  ONLINE_DBG_1("Front-end exiting the main analysis loop...\n");
-
-  /* The analysis is over, start the network shutdown */
-  Stop_FE();
-
-  return NULL;
-}
-
-
-/**
  * Back-end analysis thread
  *
  * Loads the counterpart analysis protocols and enters an infinite loop waiting for commands
@@ -436,174 +543,14 @@ static void BE_post_protocol(UNUSED string prot_id, UNUSED Protocol *p)
 
 
 /**
- * Pause the application by locking the mutex on all tracing buffers.
- */
-void Online_PauseApp()
-{
-  unsigned int thread = 0;
-  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
-  {
-    Buffer_Lock(TRACING_BUFFER(thread));
-  }
-  AppPausedAt = TIME;
-}
-
-
-/**
- * Flushes the tracing buffers to disk after the analysis, and resumes
- * the application by releasing the mutex on all tracing buffers.
- */
-void Online_ResumeApp()
-{
-  unsigned int thread = 0;
-  AppResumedAt = TIME;
-
-  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
-  {
-    Buffer_Flush(TRACING_BUFFER(thread));
-  }
-  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
-  {
-    Buffer_Unlock(TRACING_BUFFER(thread));
-  }
-}
-
-
-/**
- * Returns the timestamp when the application was last paused.
+ * Stop_BE
  *
- * @return the last pause time.
+ * This routine is called when the back-end analysis thread quits, 
+ * either because the application or the analysis has finished.
  */
-unsigned long long Online_GetAppPauseTime()
+static void Stop_BE()
 {
-  return AppPausedAt;
-}
-
-
-/**
- * Returns the timestamp when the application was last resumed.
- *
- * @return the last resume time.
- */
-unsigned long long Online_GetAppResumeTime()
-{
-  return AppResumedAt;;
-}
-
-
-/**
- * Generates the network topology specification and writes it into a file.
- *
- * @return 0 on success; -1 otherwise.
- */
-int Generate_Topology(int world_size, char **node_list, char *ResourcesFile, char *TopologyFile)
-{
-  int  i = 0, k = 0;
-  FILE *fd = NULL;
-  char *selected_topology = NULL;
-  char *env_topgen = NULL;
-  string Topology = "";
-  string TopologyType = "";
-
-  /* Write the available resources in a file */
-  fd = fopen(ResourcesFile, "w+");
-  for (i=0; i<world_size; i++)
-  {
-    fprintf(fd, "%s\n", node_list[i]);
-  }
-  fclose(fd);
-
-#if 1
-  /* Check the topology specified in the XML */
-  selected_topology = Online_GetTopology();
-  if (strcmp(selected_topology, "auto") == 0)
-  {
-    if (world_size > 512)
-    {
-      /* Build an automatic topology with the default fanout */
-      int cps_x_level = world_size;
-      int tree_depth  = 0;
-      stringstream ssTopology; 
-
-      while (cps_x_level > DEFAULT_FANOUT)
-      {
-        cps_x_level = cps_x_level / DEFAULT_FANOUT;
-        tree_depth ++;
-      }
-
-      for (k=0; k<tree_depth; k++)
-      {
-        ssTopology << DEFAULT_FANOUT;
-        if (k < tree_depth - 1) ssTopology << "x"; 
-      }
-      Topology = ssTopology.str();
-      TopologyType = "b";
-    }
-    else
-    {
-      /* Set a fixed number of CPs for small executions */
-      TopologyType = "g";
-      Topology = "";
-      if (world_size >= 32)  Topology = "2";
-      if (world_size >= 64)  Topology = "4";
-      if (world_size >= 128) Topology = "8";
-      if (world_size >= 256) Topology = "16";
-    }
-    ONLINE_DBG_1("Using an automatic topology: %s: %s\n", TopologyType.c_str(), (Topology.length() == 0 ? "root-only" : Topology.c_str()));
-  }
-  else if (strcmp(selected_topology, "root") == 0)
-  {
-    /* All backends will connect directly to the front-end */
-    Topology = "";
-    ONLINE_DBG_1("Using a root-only topology\n");
-  }
-  else
-  {
-    /* Use the topology specified by the user */
-    Topology = string(selected_topology);
-    TopologyType = "g";
-    ONLINE_DBG_1("Using the user topology: %s\n", Topology.c_str());
-  }
-
-  /* Write the topology file */
-  env_topgen = getenv("MRNET_TOPGEN");
-  if ((Topology.length() == 0) || (env_topgen == NULL))
-  {
-    /* Writing a root-only topology */
-    fd = fopen(TopologyFile, "w+");
-    fprintf(fd, "%s:0 ;\n", node_list[FRONTEND_RANK(world_size)]);
-    fclose(fd);
-  }
-  else
-  {
-    /* Invoking mrnet_topgen to build the topology file */
-    string cmd;
-    cmd = string(env_topgen) + " -f " + node_list[FRONTEND_RANK(world_size)] + " --hosts=" + string(ResourcesFile) + " --topology=" + TopologyType + ":" + Topology + " -o " + string(TopologyFile);
-    ONLINE_DBG_1("Invoking the topology generator: %s\n", cmd.c_str());
-    system(cmd.c_str());
-
-  }
-  ONLINE_DBG_1("Topology written at '%s'\n", TopologyFile);
-#endif
-
-#if 0
-#if 0
-    fd = fopen(TopologyFile, "w+");
-    fprintf(fd, "%s:0; \n", node_list[FRONTEND_RANK(world_size)]);
-    fclose(fd);
-#else
-    fd = fopen(TopologyFile, "w+");
-    fprintf(fd, "%s:0 => \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:1  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:2  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:3  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:4  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:5; \n", node_list[FRONTEND_RANK(world_size)]);
-    fclose(fd);
-#endif
-#endif
-
-  return 0;
+  Online_Flush();
 }
 
 
@@ -658,3 +605,60 @@ char * Online_GetFinalBufferName()
 {
   return finalBufferFile;
 }
+
+/**
+ * Pause the application by locking the mutex on all tracing buffers.
+ */
+void Online_PauseApp()
+{
+  unsigned int thread = 0;
+  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
+  {
+    Buffer_Lock(TRACING_BUFFER(thread));
+  }
+  AppPausedAt = TIME;
+}
+
+
+/**
+ * Returns the timestamp when the application was last paused.
+ *
+ * @return the last pause time.
+ */
+unsigned long long Online_GetAppPauseTime()
+{
+  return AppPausedAt;
+}
+
+
+/**
+ * Flushes the tracing buffers to disk after the analysis, and resumes
+ * the application by releasing the mutex on all tracing buffers.
+ */
+void Online_ResumeApp()
+{
+  unsigned int thread = 0;
+  AppResumedAt = TIME;
+
+  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
+  {
+    Buffer_Flush(TRACING_BUFFER(thread));
+  }
+  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
+  {
+    Buffer_Unlock(TRACING_BUFFER(thread));
+  }
+}
+
+
+/**
+ * Returns the timestamp when the application was last resumed.
+ *
+ * @return the last resume time.
+ */
+unsigned long long Online_GetAppResumeTime()
+{
+  return AppResumedAt;;
+}
+
+
