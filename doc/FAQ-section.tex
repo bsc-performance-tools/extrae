@@ -98,7 +98,7 @@
 			}
 			{\bf Answer:  } The libxml2 library (or any other optional library) has been compiled using the IBM XL compiler. There are two alternatives to circumvent the problem: add the XL libraries into the link stage when building your application, or recompile the libxml2 library using the GNU gcc cross compiler for BlueGene.
 
-\item {\bf Question:} Where do I get the procedure and constant declarations for Fortran?
+\item {\bf Question:} Where do I get the procedure and constant declarations for Fortran?\\
       {\bf Answer:  } You can find a module (ready to be compiled) in {\tt \${EXTRAE\_HOME}/include/extrae\_module.f}. To use the module, just compile it (do not link it), and then use it in your compiling / linking step. If you do not use the module, the trace generation (specially for those routines that expect parameters which are not {\tt INTEGER*4}) can result in type errors and thus generate a tracefile that does not honor the \TRACE calls.
 
 \end{itemize}
