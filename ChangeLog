@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 15Mar2013 Added Fortran module with Extrae constant and function
+                declarations
  * 12Mar2013 Modified SVN propset using
               svn propset svn:keywords "Date Revision Author HeadURL Id"
  * 12Mar2013 Code restructuring.
