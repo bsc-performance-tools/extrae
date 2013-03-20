@@ -69,7 +69,7 @@ else:
     sys.exit(1)
 
 ### Load the sequential tracing library
-Extrae = cdll.LoadLibrary('@sub_PREFIX@')
+Extrae = cdll.LoadLibrary('@sub_PREFIX@/lib/libseqtrace.so')
 #Extrae.Extrae_init() ### Extrae_init() is called automatically in the sequential library when is preloaded
 Initialized = True
 

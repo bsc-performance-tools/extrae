@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 20Mar2013 Fixed paths in pyextrae.py
  + 20Mar2013 Added pyextrae.py module in src/others to instrument python programs
  * 15Mar2013 Added Fortran module with Extrae constant and function
                 declarations
