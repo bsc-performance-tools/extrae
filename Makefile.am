@@ -51,6 +51,7 @@ OMP_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 ONLINE_EXAMPLE_FILES=/dev/null
 FORK_EXAMPLE_FILES=/dev/null
+PYTHON_EXAMPLE_FILES=/dev/null
 else
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
@@ -86,6 +87,7 @@ SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 ONLINE_EXAMPLE_FILES=/dev/null
 FORK_EXAMPLE_FILES=/dev/null
+PYTHON_EXAMPLE_FILES=/dev/null
 endif
 else
 if OS_AIX
@@ -104,6 +106,7 @@ SEQ_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
 ONLINE_EXAMPLE_FILES=/dev/null
 FORK_EXAMPLE_FILES=/dev/null
+PYTHON_EXAMPLE_FILES=/dev/null
 else
 
 if OS_FREEBSD
@@ -260,6 +263,12 @@ ONLINE_EXAMPLE_FILES=\
  example/LINUX/ONLINE/merge_parallel_mt.sh \
  example/LINUX/ONLINE/README
 
+PYTHON_EXAMPLE_FILES=\
+ example/LINUX/PYTHON/test.py \
+ example/LINUX/PYTHON/extrae.xml \
+ example/LINUX/PYTHON/function-list \
+ example/LINUX/PYTHON/run.sh 
+
 PTHREAD_EXAMPLE_FILES=\
  example/LINUX/PTHREAD/Makefile \
  example/LINUX/PTHREAD/pthread-example.c \
@@ -304,6 +313,8 @@ install-data-hook:
 	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/FORK
 	cp -f $(FORK_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/FORK
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/PYTHON
+	cp -f $(PYTHON_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PYTHON
 if HAVE_PACX
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/PACX
 	cp -f $(PACX_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PACX
