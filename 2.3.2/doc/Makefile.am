@@ -24,6 +24,10 @@ endif
 endif
 if BUILD_HTML_DOCS
 	$(latex2html) -split 0 -show_section_numbers -nonumbered_footnotes $(manual_ug)
+	sed s/HREF=\"user-guide.html/HREF=\"/ < user-guide/index.html > user-guide/index.2.html
+	sed s/SRC=\"img/SRC=\"http:\\/\\/www.bsc.es\\/sites\\/default\\/files\\/public\\/computer_science\\/performance_tools\\/img/ < user-guide/index.2.html > user-guide/index.bsc.html
+	rm -fr user-guide/index.2.html
+	cd ..
 endif
 
 version.tex:
