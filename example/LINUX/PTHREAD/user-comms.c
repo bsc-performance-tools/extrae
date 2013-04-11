@@ -36,8 +36,8 @@ void * Task1(void *param)
 {
 	struct extrae_CombinedEvents events;
 	struct extrae_UserCommunication comm;
-	unsigned types[2] = { 123456, 123457 } ;
-	unsigned values[2] = { 1, 2 };
+	extrae_type_t types[2] = { 123456, 123457 } ;
+	extrae_value_t values[2] = { 1, 2 };
 
 	Extrae_init_UserCommunication (&comm);
 	comm.type = EXTRAE_USER_RECV;
@@ -60,8 +60,8 @@ void * Task0(void *param)
 {
 	struct extrae_CombinedEvents events;
 	struct extrae_UserCommunication comm;
-	unsigned types[2] = { 123456, 123457 } ;
-	unsigned values[2] = { 1, 2 };
+	extrae_type_t types[2] = { 123456, 123457 } ;
+	extrae_value_t values[2] = { 1, 2 };
 
 	Extrae_init_UserCommunication (&comm);
 	comm.type = EXTRAE_USER_SEND;

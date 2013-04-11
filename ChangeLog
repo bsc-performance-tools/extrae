@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 11Apr2013 Instrumented pthread_barrier_wait
  + 20Mar2013 Added example for Python instrumentation 
  * 20Mar2013 Fixed paths in pyextrae.py
  + 20Mar2013 Added pyextrae.py module in src/others to instrument python programs

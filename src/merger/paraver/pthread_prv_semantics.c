@@ -63,6 +63,26 @@ static char UNUSED rcsid[] = "$Id$";
  ***  WorkSharing_Event
  ******************************************************************************/
 
+static int pthread_barrier_wait (event_t * current_event, unsigned long long current_time,
+	unsigned int cpu, unsigned int ptask, unsigned int task,
+	unsigned int thread, FileSet_t *fset )
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	Switch_State (STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+
+
 static int pthread_Call (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset )
@@ -154,6 +174,7 @@ SingleEv_Handler_t PRV_pthread_Event_Handlers[] = {
 	{ PTHREAD_COND_SIGNAL_EV, pthread_Lock },
 	{ PTHREAD_COND_BROADCAST_EV, pthread_Lock },
 	{ PTHREAD_COND_WAIT_EV, pthread_Lock },
+	{ PTHREAD_BARRIER_WAIT_EV, pthread_barrier_wait },
 	{ NULL_EV, NULL }
 };
 

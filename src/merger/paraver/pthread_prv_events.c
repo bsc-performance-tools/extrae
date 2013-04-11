@@ -50,10 +50,11 @@ static char UNUSED rcsid[] = "$Id$";
 #define PTHD_MUTEX_LOCK_INDEX   5  /* pthread_mutex* functions */
 #define PTHD_COND_INDEX         6  /* pthread_cond* functions */
 #define PTHD_EXIT_INDEX         7  /* pthread_exit function */
+#define PTHD_BARRIER_WAIT_INDEX 8  /* pthread_barrier_wait function */
 
-#define MAX_PTHD_INDEX		8
+#define MAX_PTHD_INDEX		9
 
-static int inuse[MAX_PTHD_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_PTHD_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_pthread_Operation (int tipus)
 {
@@ -75,6 +76,8 @@ void Enable_pthread_Operation (int tipus)
 		inuse[PTHD_COND_INDEX] = TRUE;
 	else if (tipus == PTHREAD_EXIT_EV)
 		inuse[PTHD_EXIT_INDEX] = TRUE;
+	else if (tipus == PTHREAD_BARRIER_WAIT_EV)
+		inuse[PTHD_BARRIER_WAIT_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -149,6 +152,12 @@ void pthreadEvent_WriteEnabledOperations (FILE * fd)
 		         0, PTHREAD_COND_WAIT_EV,
 		         0, PTHREAD_COND_SIGNAL_EV,
 		         0, PTHREAD_COND_BROADCAST_EV);
+	}
+	if (inuse[PTHD_BARRIER_WAIT_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d   %d    pthread_barrier_wait\n", 0, PTHREAD_BARRIER_WAIT_EV);
+		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
 
 #if defined(HAVE_BFD)

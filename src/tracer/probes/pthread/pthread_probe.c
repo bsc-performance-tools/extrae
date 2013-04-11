@@ -250,3 +250,16 @@ void Probe_pthread_cond_wait_Exit (void *p)
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_COND_WAIT_EV, EMPTY, EMPTY);
 }
 
+void Probe_pthread_Barrier_Wait_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_PTHEVENTANDCOUNTERS(LAST_READ_TIME, PTHREAD_BARRIER_WAIT_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_pthread_Barrier_Wait_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_BARRIER_WAIT_EV, EVT_END, EMPTY);
+}

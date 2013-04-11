@@ -59,6 +59,7 @@ static int (*pthread_create_real)(pthread_t*,const pthread_attr_t*,void *(*) (vo
 static int (*pthread_join_real)(pthread_t,void**) = NULL;
 static int (*pthread_detach_real)(pthread_t) = NULL;
 static void (*pthread_exit_real)(void*) = NULL;
+static int (*pthread_barrier_wait_real)(pthread_barrier_t *barrier) = NULL;
 
 static int (*pthread_mutex_lock_real)(pthread_mutex_t*) = NULL;
 static int (*pthread_mutex_trylock_real)(pthread_mutex_t*) = NULL;
@@ -102,6 +103,12 @@ static void GetpthreadHookPoints (int rank)
 		(int(*)(pthread_t,void**)) dlsym (RTLD_NEXT, "pthread_join");
 	if (pthread_join_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_join in DSOs!!\n");
+
+  	/* Obtain @ for pthread_barrier_wait */
+	pthread_barrier_wait_real =
+		(int(*)(pthread_t,void**)) dlsym (RTLD_NEXT, "pthread_barrier_wait");
+	if (pthread_barrier_wait_real == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_barrier_wait in DSOs!!\n");
 
 	/* Obtain @ for pthread_detach */
 	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
@@ -321,12 +328,12 @@ int pthread_join (pthread_t p1, void **p2)
 	int res;
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join (%p, %p, %p, %p)\n", p1, p2);
+	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join (%p, %p)\n", p1, p2);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join_real at %p\n", pthread_join_real);
 #endif
 	if (pthread_join_real != NULL && mpitrace_on)
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation (2);
 		Probe_pthread_Join_Entry ();
 
 		res = pthread_join_real (p1, p2);
@@ -854,6 +861,39 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 
 	return res;
 }
+
+int pthread_barrier_wait (pthread_barrier_t *barrier)
+{
+	int res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_barrier_wait (%p)\n", barrier);
+	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_barrier_wait_real at %p\n", pthread_barrier_wait_real);
+#endif
+	if (pthread_barrier_wait_real != NULL && mpitrace_on)
+	{
+		Backend_Enter_Instrumentation (2);
+		Probe_pthread_Barrier_Wait_Entry ();
+
+		res = pthread_barrier_wait_real (barrier);
+
+		Probe_pthread_Barrier_Wait_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (pthread_barrier_wait_real != NULL && !mpitrace_on)
+	{
+		res = pthread_barrier_wait_real (barrier);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error pthread_barrier_wait was not hooked\n");
+		exit (-1);
+	}
+	return res;
+}
+
+
+
 
 /*
   This __attribute__ tells the loader to run this routine when

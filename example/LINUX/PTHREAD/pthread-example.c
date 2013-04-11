@@ -28,15 +28,41 @@
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include <stdio.h>
 #include <pthread.h>
+#include <stdlib.h>
 
 #include "extrae_user_events.h"
 
 #define MAX_THREADS 32
 
+/* Barrier variable */
+pthread_barrier_t barrier;
+
+void longExecution(long th_id)
+{
+    Extrae_user_function (1);
+    printf ("Thread %d: Waiting 5 seconds\n", th_id);
+    sleep(5);
+    Extrae_user_function (0);
+}
+
 void *routine1 (void *parameters)
 {
+	long th_id = (long) parameters;
 	Extrae_event (1, 1);
-	printf ("routine1 : (thread=%08x, param %p)\n", pthread_self(), parameters);
+	if (th_id == 0)
+	{
+		printf ("routine1 thread 0 executing a long function\n");
+		longExecution(th_id);
+	}
+	printf ("routine1 stopped for barrier : (thread=%08x, param %p)\n", pthread_self(), parameters);
+	// Synchronization point
+	int rc = pthread_barrier_wait(&barrier);
+	if(rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD)
+	{
+		printf("Could not wait on barrier\n");
+		exit(-1);
+	}
+	printf ("routine1 exiting from barrier : (thread=%08x, param %p)\n", pthread_self(), parameters);
 	Extrae_event (1, 0);
 }
 
@@ -52,6 +78,12 @@ int main (int argc, char *argv[])
 {
 	pthread_t t[MAX_THREADS];
 	int i;
+    // Barrier initialization
+    if(pthread_barrier_init(&barrier, NULL, MAX_THREADS))
+    {
+        printf("Could not create a barrier\n");
+        return -1;
+    }
 
 	Extrae_init ();
 
