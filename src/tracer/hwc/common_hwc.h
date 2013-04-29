@@ -51,7 +51,6 @@ struct HWC_Set_t
     int num_counters;
     unsigned long long change_at;
     enum ChangeType_t change_type;
-
 #if defined(PAPI_SAMPLING_SUPPORT)
     long long *OverflowValue;
     int *OverflowCounter;

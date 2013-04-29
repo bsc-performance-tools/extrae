@@ -2,6 +2,8 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 29Apr2013 Do not require -e to import symbols
+             Added 'random' starting-set-distribution for performance counter
+             sets
  + 11Apr2013 Instrumented pthread_barrier_wait
  + 20Mar2013 Added example for Python instrumentation 
  * 20Mar2013 Fixed paths in pyextrae.py

@@ -45,6 +45,11 @@ enum ChangeType_t {
   CHANGE_TIME
 };
 
+enum ChangeTo_t {
+  CHANGE_SEQUENTIAL=0,
+  CHANGE_RANDOM
+};
+
 /*------------------------------------------------ Prototypes ---------------*/
 
 #ifdef __cplusplus

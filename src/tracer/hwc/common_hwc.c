@@ -86,6 +86,7 @@ unsigned long long HWC_current_changeat = 0;
 unsigned long long * HWC_current_timebegin;
 unsigned long long * HWC_current_glopsbegin;
 enum ChangeType_t HWC_current_changetype = CHANGE_NEVER;
+enum ChangeTo_t HWC_current_changeto = CHANGE_SEQUENTIAL;
 int HWC_num_sets = 0;
 int * HWC_current_set;
 
@@ -226,9 +227,12 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 	if (HWC_num_sets > 1)
 	{
 		HWC_Stop_Current_Set (time, thread_id);
-
+		
 		/* Move to the next set */
-		HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
+		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
+			HWC_current_set[thread_id] = (HWC_current_set[thread_id] + 1) % HWC_num_sets;
+		else if (HWC_current_changeto == CHANGE_RANDOM)
+			HWC_current_set[thread_id] = random()%HWC_num_sets;
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -246,7 +250,10 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 		HWC_Stop_Current_Set (time, thread_id);
 
 		/* Move to the previous set */
-		HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
+		if (HWC_current_changeto == CHANGE_SEQUENTIAL)
+			HWC_current_set[thread_id] = ((HWC_current_set[thread_id] - 1) < 0) ? (HWC_num_sets - 1) : (HWC_current_set[thread_id] - 1) ;
+		else if (HWC_current_changeto == CHANGE_RANDOM)
+			HWC_current_set[thread_id] = random()%HWC_num_sets;
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
@@ -465,7 +472,27 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 	/* Do this if we have more than 1 counter set */
 	if (HWC_num_sets > 1)
 	{
-		if (strncasecmp (distribution, "cyclic", 6) == 0)
+		if (strncasecmp (distribution, "random", 6) == 0)
+		{
+			int i;
+			unsigned long long rset;
+
+			unsigned seed = ((unsigned) LAST_READ_TIME);
+			for (i = 0; i < task_id; i++) /* Add some randomness here */
+				seed = (seed >> 1) ^ ~(num_tasks | task_id);
+			srandom (seed);
+
+			rset = random()%HWC_num_sets;
+
+			HWC_current_changeto = CHANGE_RANDOM;
+
+			for(threadid=0; threadid<Backend_getMaximumOfThreads(); threadid++) 
+				HWC_current_set[threadid] = rset;
+
+			if (task_id == 0)
+				fprintf (stdout, PACKAGE_NAME": Starting distribution hardware counters set is established to 'random'\n");
+		}
+		else if (strncasecmp (distribution, "cyclic", 6) == 0)
 		{
 			/* Sets are distributed among tasks like:
 			0 1 2 3 .. n-1 0 1 2 3 .. n-1  0 1 2 3 ... */
