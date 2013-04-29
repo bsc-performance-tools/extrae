@@ -1170,7 +1170,6 @@ int merger_post (int numtasks, int taskid)
 #endif
 
 	if (taskid == 0 &&
-		strlen(get_merge_ExecutableFileName()) > 0 &&
 		strlen(get_merge_SymbolFileName()) == 0 &&
 		last_mpits_file != NULL)
 	{
