@@ -1179,8 +1179,7 @@ int merger_post (int numtasks, int taskid)
 		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
 		{
 			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
-			if (file_exists(tmp))
-				Labels_loadSYMfile (taskid, tmp, TRUE);
+			Labels_loadSYMfile (taskid, tmp, TRUE);
 		}
 	}
 	else

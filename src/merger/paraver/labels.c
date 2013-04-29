@@ -631,7 +631,7 @@ void Labels_loadSYMfile (int taskid, char *name, int report)
 	FD = (FILE *) fopen (name, "r");
 	if (FD == NULL)
 	{
-		fprintf (stderr, PACKAGE_NAME"mpi2prv: WARNING: Task %d Can\'t find file %s\n", taskid, name);
+		fprintf (stderr, "mpi2prv: WARNING: Task %d Can\'t find symbols file %s\n", taskid, name);
 		return;
 	}
 
