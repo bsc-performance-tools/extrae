@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 30Apr2013 Added support for cudaDeviceReset.
+             Honor --with-cuda instead of adding /opt/cuda/4.0 in Makefile
+             Look for specific intel mpi libs
  * 29Apr2013 Do not require -e to import symbols
              Added 'random' starting-set-distribution for performance counter
              sets

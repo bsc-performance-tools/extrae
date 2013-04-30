@@ -72,6 +72,8 @@ AC_DEFUN([AX_PROG_MPI],
          fi
       elif test -f "${MPI_LIBSDIR}/libmpi.so" ; then
          MPI_LIBS="-lmpi"
+      elif test -f "${MPI_LIBSDIR}/libmpich_intel.so"; then
+         MPI_LIBS="-lmpich_intel"
       elif test -f "${MPI_LIBSDIR}/libmpich.a" -o -f "${MPI_LIBSDIR}/libmpich.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" ; then
          MPI_LIBS="-lmpich"
       elif test -f "${MPI_LIBSDIR}/libmpi_ibm.so" ; then
@@ -91,7 +93,8 @@ AC_DEFUN([AX_PROG_MPI],
 			AC_MSG_CHECKING([for shared MPI library])
       if test -f "${MPI_LIBSDIR}/libmpi.so" -o -f "${MPI_LIBSDIR}/libmpich.so" -o \
          -f "${MPI_LIBSDIR}/shared/libmpi.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" -o \
-         -f "${MPI_LIBSDIR}/libmpi_ibm.so" -o -f "${MPI_LIBSDIR}/libmpich.cnk.so" ; then
+         -f "${MPI_LIBSDIR}/libmpi_ibm.so" -o -f "${MPI_LIBSDIR}/libmpich.cnk.so" -o \
+         -f "${MPI_LIBSDIR}/libmpich_intel.so" ; then
          MPI_SHARED_LIB_FOUND="yes"
       else
          MPI_SHARED_LIB_FOUND="not found"
