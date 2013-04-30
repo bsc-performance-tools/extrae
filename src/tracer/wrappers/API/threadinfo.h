@@ -42,6 +42,7 @@ void Extrae_allocate_thread_info (unsigned nthreads);
 void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads);
 void Extrae_set_thread_name (unsigned thread, char *name);
 char *Extrae_get_thread_name (unsigned thread);
+unsigned Extrae_search_thread_name (char *name, int *found);
 
 
 #endif /* __THREADINFO_H_INCLUDED_ */

@@ -60,6 +60,7 @@ static cudaError_t (*real_cudaStreamSynchronize)(cudaStream_t) = NULL;
 static cudaError_t (*real_cudaMemcpy)(void*,const void*,size_t,enum cudaMemcpyKind) = NULL;
 static cudaError_t (*real_cudaMemcpyAsync)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t) = NULL;
 static cudaError_t (*real_cudaStreamCreate)(cudaStream_t*) = NULL;
+static cudaError_t (*real_cudaDeviceReset)(void) = NULL;
 
 void Extrae_CUDA_init (int rank)
 {
@@ -90,6 +91,10 @@ void Extrae_CUDA_init (int rank)
 	real_cudaStreamCreate = (cudaError_t(*)(cudaStream_t*)) dlsym (RTLD_NEXT, "cudaStreamCreate");
 	if (real_cudaStreamCreate == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find cudaStreamCreate in DSOs!!\n");
+
+	real_cudaDeviceReset = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceReset");
+	if (real_cudaStreamCreate == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find cudaDeviceReset in DSOs!!\n");
 }
 
 #if 0
@@ -285,6 +290,30 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 	else
 	{
 		fprintf (stderr, "Unable to find cudaStreamSynchronize in DSOs!! Dying...\n");
+		exit (0);
+	}
+
+	return res;
+}
+
+cudaError_t cudaDeviceReset (void)
+{
+	cudaError_t res;
+
+	if (real_cudaDeviceReset != NULL && mpitrace_on)
+	{
+		int devid;
+		res = real_cudaDeviceReset (p1);
+		cudaGetDevice (&devid);
+		Extrae_CUDA_deInitialize (devid);
+	}
+	else if (real_cudaStreamSynchronize != NULL && !mpitrace_on)
+	{
+		res = real_cudaDeviceReset (p1);
+	}
+	else
+	{
+		fprintf (stderr, "Unable to find cudaDeviceReset in DSOs!! Dying...\n");
 		exit (0);
 	}
 

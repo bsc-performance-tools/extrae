@@ -29,6 +29,9 @@ AC_DEFUN([AX_CUDA],
 		else
 			AC_MSG_ERROR([The specified path for CUDA does not exist])
 		fi
+		AX_FLAGS_SAVE()
+		AX_FIND_INSTALLATION([CUDA], [${cuda_path}], [cuda])
+		AX_FLAGS_RESTORE()
 	fi
 
 ])

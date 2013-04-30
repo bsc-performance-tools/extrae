@@ -116,6 +116,19 @@ static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
 	devices[devid].Stream[streamid].host_reference_time = TIME;
 }
 
+void Extrae_CUDA_deInitialize (int devid)
+{
+	if (devices != NULL)
+	{
+		if (devices[devid].initialized)
+		{
+			free (devices[devid].Stream);
+			devices[devid].Stream = NULL;
+			devices[devid].initialized = FALSE;
+		}
+	}
+}
+
 static void Extrae_CUDA_Initialize (int devid)
 {
 	cudaError_t err;
@@ -141,6 +154,10 @@ static void Extrae_CUDA_Initialize (int devid)
 	/* If the device we're using is not initialized, create its structures */
 	if (!devices[devid].initialized)
 	{
+		char _threadname[THREAD_INFO_NAME_LEN];
+		char _hostname[HOST_NAME_MAX];
+		unsigned prev_threadid, found;
+
 		devices[devid].nstreams = 1;
 
 		devices[devid].Stream = (struct RegisteredStreams_t*) malloc (
@@ -151,25 +168,31 @@ static void Extrae_CUDA_Initialize (int devid)
 			exit (-1);
 		}
 
-		/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
-		Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
+		/* Was the thread created before (i.e. did we executed a cudadevicereset?) */
+		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
+			sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, _hostname);
+		else
+			sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, "unknown-host");
+		prev_threadid = Extrae_search_thread_name (_threadname, &found);
 
-		/* default device stream */
-		devices[devid].Stream[0].threadid = Backend_getNumberOfThreads()-1;
-		devices[devid].Stream[0].stream = (cudaStream_t) 0;
-		devices[devid].Stream[0].nevents = 0;
-
-		/* Set thread name */
+		if (found)
 		{
-			char _threadname[THREAD_INFO_NAME_LEN];
-			char _hostname[HOST_NAME_MAX];
+			/* If thread name existed, reuse its thread id */
+			devices[devid].Stream[0].threadid = prev_threadid;
+		}
+		else
+		{
+			/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
+			Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
+			devices[devid].Stream[0].threadid = Backend_getNumberOfThreads()-1;
 
-			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-				sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, _hostname);
-			else
-				sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, "unknown-host");
+			/* Set thread name */
 			Extrae_set_thread_name (devices[devid].Stream[0].threadid, _threadname);
 		}
+
+		/* default device stream */
+		devices[devid].Stream[0].stream = (cudaStream_t) 0;
+		devices[devid].Stream[0].nevents = 0;
 
 		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */

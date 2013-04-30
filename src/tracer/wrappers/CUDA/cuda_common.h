@@ -149,6 +149,7 @@ struct CUDAdevices_t
 #endif
 };
 
+void Extrae_CUDA_deInitialize (int devid);
 void Extrae_cudaLaunch_Enter (const char*);
 void Extrae_cudaLaunch_Exit (void);
 void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);

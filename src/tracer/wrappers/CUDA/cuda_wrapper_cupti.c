@@ -129,6 +129,17 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 				Extrae_cudaMemcpyAsync_Exit ();
 			}
 			break;
+
+			case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020:
+			{
+				if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				{
+					int devid;
+					cudaGetDevice (&devid);
+					Extrae_CUDA_deInitialize (devid);
+				}
+			}
+			break;
 		}
 	}
 }
@@ -147,5 +158,6 @@ void Extrae_CUDA_init (int rank)
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020);
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaMemcpy_v3020);
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyAsync_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020);
 }
 
