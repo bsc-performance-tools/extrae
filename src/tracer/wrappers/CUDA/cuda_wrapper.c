@@ -303,13 +303,13 @@ cudaError_t cudaDeviceReset (void)
 	if (real_cudaDeviceReset != NULL && mpitrace_on)
 	{
 		int devid;
-		res = real_cudaDeviceReset (p1);
+		res = real_cudaDeviceReset ();
 		cudaGetDevice (&devid);
 		Extrae_CUDA_deInitialize (devid);
 	}
 	else if (real_cudaStreamSynchronize != NULL && !mpitrace_on)
 	{
-		res = real_cudaDeviceReset (p1);
+		res = real_cudaDeviceReset ();
 	}
 	else
 	{
