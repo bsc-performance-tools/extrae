@@ -283,7 +283,7 @@ static void ReadFileIntoList (char *fitxer, set<string>& container)
 	fstream file_op (fitxer, ios::in);
 	if (!file_op.good())
 	{
-		cerr << PACKAGE_NAME << "Error: Cannot open file " << fitxer << endl;
+		cerr << PACKAGE_NAME << " ERROR! Cannot open file " << fitxer << endl;
 		return;
 	}
 
