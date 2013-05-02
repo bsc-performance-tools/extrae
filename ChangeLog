@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  + 02May2013 Added support for CUDA5+CUPTI
+             Changed substitute script to use sed -i
  + 30Apr2013 Added support for cudaDeviceReset.
              Honor --with-cuda instead of adding /opt/cuda/4.0 in Makefile
              Look for specific intel mpi libs

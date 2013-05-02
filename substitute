@@ -17,8 +17,9 @@ else
 	TMPFILE=`/bin/mktemp substitute-XXXXXX`
 fi
 
-${SED} "s|${KEY}|${VALUE}|g" < ${FILE} >${TMPFILE}
-/bin/mv -f ${TMPFILE} ${FILE}
+# ${SED} "s|${KEY}|${VALUE}|g" < ${FILE} >${TMPFILE}
+# /bin/mv -f ${TMPFILE} ${FILE}
+${SED} "s|${KEY}|${VALUE}|g" -i ${FILE}
 
 chmod a+r ${FILE}
 
