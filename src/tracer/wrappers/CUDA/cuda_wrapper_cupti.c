@@ -65,7 +65,11 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			{
 			cudaLaunch_v3020_params *p = (cudaLaunch_v3020_params*) cbinfo->functionParams;
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+#if CUPTI_API_VERSION >= 3
+				Extrae_cudaLaunch_Enter (p->func);
+#else
 				Extrae_cudaLaunch_Enter (p->entry);
+#endif
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 				Extrae_cudaLaunch_Exit ();
 			}
