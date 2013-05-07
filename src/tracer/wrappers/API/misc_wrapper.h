@@ -42,6 +42,7 @@ void Extrae_restart_Wrapper (void);
 void Extrae_N_Event_Wrapper (unsigned *count, extrae_type_t *tipus, extrae_value_t *valors);
 void Extrae_N_Eventsandcounters_Wrapper (unsigned *count, extrae_type_t *tipus, extrae_value_t *valors);
 void Extrae_counters_Wrapper (void);
+void Extrae_counters_at_Time_Wrapper (UINT64 time);
 void Extrae_setcounters_Wrapper (int *evc1, int *evc2);
 void Extrae_set_options_Wrapper (int options);
 void Extrae_getrusage_Wrapper (void);

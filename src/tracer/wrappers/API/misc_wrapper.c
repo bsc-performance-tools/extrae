@@ -89,6 +89,9 @@ void Extrae_restart_Wrapper (void)
 {
 	tracejant = TRUE;
 	TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, TRACING_EV, EVT_BEGIN, EMPTY);
+
+	/* Force bursty tracing to consider only from this point */
+	last_mpi_exit_time = LAST_READ_TIME;
 }
 
 void Extrae_N_Event_Wrapper (unsigned *count, extrae_type_t *types, extrae_value_t *values)
@@ -121,6 +124,13 @@ void Extrae_counters_Wrapper (void)
 {
 #if USE_HARDWARE_COUNTERS
 	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, HWC_EV, 0, TRUE);
+#endif
+}
+
+void Extrae_counters_at_Time_Wrapper (UINT64 time)
+{
+#if USE_HARDWARE_COUNTERS
+	TRACE_EVENTANDCOUNTERS (time, HWC_EV, 0, TRUE);
 #endif
 }
 

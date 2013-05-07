@@ -49,6 +49,7 @@ int Trace_Mode_Initialize (int num_threads);
 int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads);
 void Trace_Mode_Change (int tid, iotimer_t time);
 void Trace_Mode_CleanUp (void);
+void Trace_mode_switch (void);
 
 /* Bursts mode specific */
 

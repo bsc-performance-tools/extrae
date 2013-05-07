@@ -52,6 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "sampling.h"
 #include "trace_macros.h"
 #include "threadid.h"
+#include "wrapper.h"
 
 #if defined(SAMPLING_SUPPORT)
 int SamplingSupport = FALSE;
@@ -79,7 +80,7 @@ void setSamplingEnabled (int enabled)
 
 void Extrae_SamplingHandler (void* address)
 {
-	if (isSamplingEnabled())
+	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation())
 	{
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);

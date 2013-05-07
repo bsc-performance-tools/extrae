@@ -66,42 +66,45 @@
 }
 
 #define TRACE_MPIEVENT(evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux) \
-{                                                                                    \
-	int thread_id = THREADID;                                                          \
-	unsigned long long current_time = evttime;                                         \
-                                                                                     \
-	if (CURRENT_TRACE_MODE(thread_id) == TRACE_MODE_BURSTS)                            \
-	{                                                                                  \
-		BURSTS_MODE_TRACE_MPIEVENT(thread_id, current_time, evtvalue, FOUR_CALLS_AGO);   \
-	}                                                                                  \
-	else                                                                               \
-	{                                                                                  \
-		NORMAL_MODE_TRACE_MPIEVENT(thread_id,                                            \
-		                           current_time,                                         \
-		                           evttype,                                              \
-		                           evtvalue,                                             \
-		                           evttarget,                                            \
-		                           evtsize,                                              \
-		                           evttag,                                               \
-		                           evtcomm,                                              \
-		                           evtaux,                                               \
-		                           FOUR_CALLS_AGO);                                      \
-	}                                                                                  \
-	/* Check for pending changes */                                                    \
-	if (evtvalue == EVT_BEGIN)                                                         \
-	{                                                                                  \
-		INCREASE_MPI_DEEPNESS(thread_id);                                                \
-		last_mpi_begin_time = current_time;                                              \
-                                                                                     \
-	}                                                                                  \
-	else if (evtvalue == EVT_END)                                                      \
-	{                                                                                  \
-		DECREASE_MPI_DEEPNESS(thread_id);                                                \
-	                                                                                   \
-		/* Update last parallel region time */                                           \
-		last_mpi_exit_time = current_time;                                               \
-		Elapsed_Time_In_MPI += last_mpi_exit_time - last_mpi_begin_time;                 \
-	}                                                                                  \
+{ \
+	if (tracejant) \
+	{ \
+		int thread_id = THREADID;                                                          \
+		unsigned long long current_time = evttime;                                         \
+		                                                                                   \
+		if (CURRENT_TRACE_MODE(thread_id) == TRACE_MODE_BURSTS)                            \
+		{                                                                                  \
+			BURSTS_MODE_TRACE_MPIEVENT(thread_id, current_time, evtvalue, FOUR_CALLS_AGO);   \
+		}                                                                                  \
+		else                                                                               \
+		{                                                                                  \
+			NORMAL_MODE_TRACE_MPIEVENT(thread_id,                                            \
+			                           current_time,                                         \
+			                           evttype,                                              \
+			                           evtvalue,                                             \
+			                           evttarget,                                            \
+			                           evtsize,                                              \
+			                           evttag,                                               \
+			                           evtcomm,                                              \
+			                           evtaux,                                               \
+			                           FOUR_CALLS_AGO);                                      \
+		}                                                                                  \
+		/* Check for pending changes */                                                    \
+		if (evtvalue == EVT_BEGIN)                                                         \
+		{                                                                                  \
+			INCREASE_MPI_DEEPNESS(thread_id);                                                \
+			last_mpi_begin_time = current_time;                                              \
+		                                                                                   \
+		}                                                                                  \
+		else if (evtvalue == EVT_END)                                                      \
+		{                                                                                  \
+			DECREASE_MPI_DEEPNESS(thread_id);                                                \
+		                                                                                   \
+			/* Update last parallel region time */                                           \
+			last_mpi_exit_time = current_time;                                               \
+			Elapsed_Time_In_MPI += last_mpi_exit_time - last_mpi_begin_time;                 \
+		}                                                                                  \
+	} \
 }
 
 #define NORMAL_MODE_TRACE_MPIEVENT(thread_id,evttime,evttype,evtvalue,evttarget,evtsize,evttag,evtcomm,evtaux,offset) \
@@ -109,7 +112,7 @@
 	event_t evt;                                                  \
 	int traceja_event = 0;                                        \
                                                                 \
-	if (tracejant && tracejant_mpi)                               \
+	if (tracejant_mpi)                                            \
 	{                                                             \
 		/* We don't want the compiler to reorganize ops */          \
 		/* The "if" prevents that */                                \
@@ -161,6 +164,7 @@
 			COPY_ACCUMULATED_COUNTERS_HERE(thread_id, burst_begin); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
 			COMM_STATS_WRAPPER(last_mpi_exit_time); \
+			HARDWARE_COUNTERS_CHANGE(current_time, thread_id); \
 			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
 			TRACE_MPI_CALLER (burst_end.time,evtvalue,offset) \
@@ -299,7 +303,7 @@ While in CPU Bursts tracing mode we still trace these events, since we may chang
 	evt.param.mpi_param.tag = (evttag);                       \
 	evt.param.mpi_param.comm = (intptr_t)(evtcomm);           \
 	evt.param.mpi_param.aux = (evtaux);                       \
-	HARDWARE_COUNTERS_READ (thread_id, evt, TRACING_HWC_MPI); \
+	HARDWARE_COUNTERS_READ (thread_id, evt, FALSE /* TRACING_HWC_MPI */); \
 	BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 }
 

@@ -153,6 +153,7 @@ enum {
    MPI_STATS_GLOBAL_BYTES_SENT_EV,
    MPI_STATS_GLOBAL_BYTES_RECV_EV,
    MPI_STATS_TIME_IN_MPI_EV, 
+   MPI_STATS_OTHERS_COUNT, 
    MPI_STATS_EVENTS_COUNT /* Total number of MPI statistics */
 };
 
@@ -224,6 +225,7 @@ enum {
 #define MPI_COMM_DUP_EV              50000049
 #define MPI_COMM_SPLIT_EV            50000050
 #define MPI_RANK_CREACIO_COMM_EV     50000051      /* Used to define communicators */
+#define MPI_ALIAS_COMM_CREATE_EV     50000061      /* Used to define communicators */
 #define MPI_ALLGATHER_EV             50000052
 #define MPI_ALLGATHERV_EV            50000053
 #define MPI_CART_CREATE_EV           50000058
@@ -315,6 +317,7 @@ enum {
 #define PACX_COMM_DUP_EV              51000049
 #define PACX_COMM_SPLIT_EV            51000050
 #define PACX_RANK_CREACIO_COMM_EV     51000051      /* Used to define communicators */
+#define PACX_ALIAS_COMM_CREATE_EV     50000061      /* Used to define communicators */
 #define PACX_ALLGATHER_EV             51000052
 #define PACX_ALLGATHERV_EV            51000053
 #define PACX_CART_CREATE_EV           51000058

@@ -32,7 +32,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "events.h"
 
-#define MPI_EVENTS 66
+#define MPI_EVENTS 71
 static unsigned mpi_events[] = {
 	MPI_BSEND_EV, MPI_SSEND_EV, MPI_BARRIER_EV, MPI_BCAST_EV, MPI_SEND_EV,
 	MPI_RECV_EV, MPI_SENDRECV_EV, MPI_SENDRECV_REPLACE_EV, MPI_IBSEND_EV,
@@ -50,7 +50,9 @@ static unsigned mpi_events[] = {
 	MPI_TEST_COUNTER_EV, MPI_FILE_OPEN_EV, MPI_FILE_CLOSE_EV, MPI_FILE_READ_EV,
 	MPI_FILE_READ_ALL_EV, MPI_FILE_WRITE_EV, MPI_FILE_WRITE_ALL_EV, 
 	MPI_FILE_READ_AT_EV, MPI_FILE_READ_AT_ALL_EV, MPI_FILE_WRITE_AT_EV,
-	MPI_FILE_WRITE_AT_ALL_EV, MPI_IRECVED_EV, MPI_GET_EV, MPI_PUT_EV };
+	MPI_FILE_WRITE_AT_ALL_EV, MPI_IRECVED_EV, MPI_GET_EV, MPI_PUT_EV,
+	MPI_COMM_CREATE_EV, MPI_COMM_DUP_EV, MPI_COMM_SPLIT_EV,
+	MPI_CART_CREATE_EV, MPI_CART_SUB_EV };
 
 /******************************************************************************
  ***  IsMPI
@@ -66,7 +68,7 @@ unsigned IsMPI (unsigned EvType)
   return FALSE;
 }
 
-#define PACX_EVENTS 61
+#define PACX_EVENTS 66
 static unsigned pacx_events[] = {
 	PACX_BSEND_EV, PACX_SSEND_EV, PACX_BARRIER_EV, PACX_BCAST_EV, PACX_SEND_EV,
 	PACX_RECV_EV, PACX_SENDRECV_EV, PACX_SENDRECV_REPLACE_EV, PACX_IBSEND_EV,
@@ -83,7 +85,9 @@ static unsigned pacx_events[] = {
 	PACX_TEST_COUNTER_EV, PACX_FILE_OPEN_EV, PACX_FILE_CLOSE_EV, PACX_FILE_READ_EV,
 	PACX_FILE_READ_ALL_EV, PACX_FILE_WRITE_EV, PACX_FILE_WRITE_ALL_EV, 
 	PACX_FILE_READ_AT_EV, PACX_FILE_READ_AT_ALL_EV, PACX_FILE_WRITE_AT_EV,
-	PACX_FILE_WRITE_AT_ALL_EV, PACX_IRECVED_EV };
+	PACX_FILE_WRITE_AT_ALL_EV, PACX_IRECVED_EV,
+	PACX_COMM_CREATE_EV, PACX_COMM_DUP_EV, PACX_COMM_SPLIT_EV,
+	PACX_CART_CREATE_EV, PACX_CART_SUB_EV };
 
 /******************************************************************************
  ***  IsMPI
@@ -319,16 +323,12 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 		*Type = CUDA_TYPE;
 		return TRUE;
 	}
-	else if (EvType == MPI_COMM_CREATE_EV || EvType == MPI_COMM_DUP_EV ||
-	EvType == MPI_COMM_SPLIT_EV || EvType == MPI_CART_CREATE_EV ||
-	EvType == MPI_CART_SUB_EV)
+	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)
 	{
 		*Type = MPI_COMM_ALIAS_TYPE;
 		return TRUE;
 	}
-	else if (EvType == PACX_COMM_CREATE_EV ||
-	EvType == PACX_COMM_DUP_EV || EvType == PACX_COMM_SPLIT_EV ||
-	EvType == PACX_CART_CREATE_EV || EvType == PACX_CART_SUB_EV)
+	else if (EvType == PACX_ALIAS_COMM_CREATE_EV)
 	{
 		*Type = PACX_COMM_ALIAS_TYPE;
 		return TRUE;

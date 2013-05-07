@@ -220,6 +220,7 @@ iotimer_t Backend_Get_Last_Enter_Time (void);
 iotimer_t Backend_Get_Last_Leave_Time (void);
 void Backend_Enter_Instrumentation (unsigned Nevents);
 void Backend_Leave_Instrumentation (void);
+int Backend_inInstrumentation (void);
 
 void advance_current(int);
 extern int circular_buffering, circular_OVERFLOW;
@@ -241,4 +242,3 @@ extern int MergeAfterTracing;
 #endif
 
 #endif /* __WRAPPER_H__ */
-

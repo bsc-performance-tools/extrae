@@ -1,6 +1,12 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 07May2013 Multiple small fixes in the bursty tracing
+               Avoided problems when Extrae_shutdown was called
+               Emission of MPI others statistics
+               MPI communicators minor refactoring
+             Removed erroneous emission of hardware counters when a set is
+               about to start
  + 02May2013 Added support for CUDA5+CUPTI
              Changed substitute script to use sed -i
  + 30Apr2013 Added support for cudaDeviceReset.

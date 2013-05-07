@@ -332,6 +332,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		if (getEventType (EvType, &Type))
 		{
 			current_time = TIMESYNC(ptask-1, task-1, Get_EvTime (current_event));
+
 #if defined(DEBUG)
 			fprintf (stderr, "mpi2prv: Parsing event %u:%u:%u <%u,%llu(%llu)> @%llu|%llu\n", ptask, task, thread, Get_EvEvent (current_event), Get_EvValue (current_event), Get_EvMiscParam(current_event), current_time, Get_EvTime(current_event));
 #endif
@@ -421,8 +422,9 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					int i;
 					unsigned int hwctype[MAX_HWC];
 					unsigned long long hwcvalue[MAX_HWC];
+					thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
 
-					if (Get_EvHWCSet(current_event) != HardwareCounters_GetCurrentSet(ptask, task, thread))
+					if (Get_EvHWCSet(current_event) != HardwareCounters_GetCurrentSet(ptask, task, thread) || Sthread->HWCChange_count == 0)
 					{
 						/* The HWC_CHANGE_EV was missing (probably due to a circular buffer) */
 						HWC_Change_Ev (Get_EvHWCSet(current_event), current_time, cpu, ptask, task, thread);

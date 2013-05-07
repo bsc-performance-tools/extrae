@@ -89,6 +89,10 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 	}
 	thread_info->State_Stack[thread_info->nStates++] = new_state;
 
+#if defined(DEBUG_STATES)
+	fprintf (stderr, "mpi2prv: TOP of the stack is %d, depth is %d\n", new_state, thread_info->nStates);
+#endif
+
 	return new_state;
 }
 
@@ -132,6 +136,10 @@ unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int
    {
       top_state = STATE_IDLE;
    }
+
+#if defined(DEBUG_STATES)
+	fprintf (stderr, "mpi2prv: TOP of the stack was %d (current is %d), depth is %d\n", top_state, (thread_info->nStates - 1 >= 0)?thread_info->State_Stack[thread_info->nStates-1]:STATE_IDLE, thread_info->nStates);
+#endif
    
    return top_state;
 }

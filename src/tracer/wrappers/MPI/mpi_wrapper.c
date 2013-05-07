@@ -149,8 +149,7 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen);
 #if defined(DEAD_CODE) /* This is outdated */
 static void Gather_MPITS(void);
 #endif
-static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm,
-	UINT64 init_time, UINT64 end_time, int in_trace);
+static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace);
 
 /* int mpit_gathering_enabled = FALSE; */
 
@@ -180,6 +179,7 @@ static int GLOBAL_Bytes_Sent     = 0;      /* Sent "bytes" by MPI global operati
 static int GLOBAL_Bytes_Recv     = 0;      /* Recv "bytes" by MPI global operations */
 static int P2P_Communications    = 0;      /* Number of point to point communications */
 static int GLOBAL_Communications = 0;      /* Number of global operations */
+static int MPI_Others_count      = 0;      /* Number of global operations */
 static int Elapsed_Time_In_MPI   = 0;      /* Time inside MPI calls */
 
 /******************************************************************************
@@ -790,10 +790,8 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 		return;
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
 }
 
 #if defined(MPI_HAS_INIT_THREAD_F)
@@ -879,10 +877,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 		return;
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD,MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF,MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
 }
 #endif /* MPI_HAS_INIT_THREAD_F */
 
@@ -902,9 +898,13 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 #endif
 
   if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	{
 		MPI_stats_Wrapper (LAST_READ_TIME);
+		Trace_mode_switch();
+		Trace_Mode_Change (THREADID, LAST_READ_TIME);
+	}
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); 
 
 #if defined(DEAD_CODE)
 	TRACE_MYRINET_HWC();
@@ -1654,6 +1654,8 @@ void PMPI_Probe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
    *   tag : ---
    */
   TRACE_MPIEVENT (TIME, MPI_PROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, c, EMPTY);
+
+	MPI_Others_count++;
 }
 
 /******************************************************************************
@@ -1743,14 +1745,16 @@ void Normal_PMPI_IProbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm
 void PMPI_IProbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
     MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
 {
-   if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
-   {
-      Bursts_PMPI_IProbe_Wrapper (source, tag, comm, flag, status, ierror);
-   }
-   else
-   {
-      Normal_PMPI_IProbe_Wrapper (source, tag, comm, flag, status, ierror);
-   }
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	{
+		Bursts_PMPI_IProbe_Wrapper (source, tag, comm, flag, status, ierror);
+	}
+	else
+	{
+		Normal_PMPI_IProbe_Wrapper (source, tag, comm, flag, status, ierror);
+	}
+
+	MPI_Others_count++;
 }
 
 /******************************************************************************
@@ -1837,6 +1841,8 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
    *   tag : ---
    */
   TRACE_MPIEVENT (TIME, MPI_CANCEL_EV, EVT_END, req, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 /******************************************************************************
@@ -3166,6 +3172,8 @@ void PMPI_Comm_Rank_Wrapper (MPI_Fint *comm, MPI_Fint *rank, MPI_Fint *ierror)
 	CtoF77 (pmpi_comm_rank) (comm, rank, ierror);
 	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3182,6 +3190,8 @@ void PMPI_Comm_Size_Wrapper (MPI_Fint *comm, MPI_Fint *size, MPI_Fint *ierror)
 	CtoF77 (pmpi_comm_size) (comm, size, ierror);
 	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
+
+	MPI_Others_count++;
 }
 
 /******************************************************************************
@@ -3191,16 +3201,25 @@ void PMPI_Comm_Size_Wrapper (MPI_Fint *comm, MPI_Fint *size, MPI_Fint *ierror)
 void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 	MPI_Fint *newcomm, MPI_Fint *ierror)
 {
-	UINT64 entry_time = LAST_READ_TIME;
-	MPI_Fint cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
 
 	CtoF77 (pmpi_comm_create) (comm, group, newcomm, ierror);
 
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{	
 		MPI_Comm comm_id = MPI_Comm_f2c(*newcomm);
-		Trace_MPI_Communicator (MPI_COMM_CREATE_EV, comm_id, entry_time, TIME, TRUE);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3211,16 +3230,25 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror)
 {
-	UINT64 entry_time = LAST_READ_TIME;
-	MPI_Fint cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
 
 	CtoF77 (pmpi_comm_dup) (comm, newcomm, ierror);
 
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*newcomm);
-		Trace_MPI_Communicator (MPI_COMM_DUP_EV, comm_id, entry_time, TIME, TRUE);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+		EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3232,16 +3260,25 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror)
 {
-	UINT64 entry_time = LAST_READ_TIME;
-	MPI_Fint cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
 
 	CtoF77 (pmpi_comm_split) (comm, color, key, newcomm, ierror);
 
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*newcomm);
-		Trace_MPI_Communicator (MPI_COMM_SPLIT_EV, comm_id, entry_time, TIME, TRUE);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_EV, EVT_END, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3500,6 +3537,8 @@ void PMPI_Request_free_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
    */
   TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3545,6 +3584,8 @@ void PMPI_Recv_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    */
   TRACE_MPIEVENT (TIME, MPI_RECV_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3591,6 +3632,8 @@ void PMPI_Send_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
   TRACE_MPIEVENT (TIME, MPI_SEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3636,6 +3679,8 @@ void PMPI_Bsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    */
   TRACE_MPIEVENT (TIME, MPI_BSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3680,6 +3725,8 @@ void PMPI_Rsend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    */
   TRACE_MPIEVENT (TIME, MPI_RSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
 }
 
 
@@ -3724,29 +3771,44 @@ void PMPI_Ssend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
    */
   TRACE_MPIEVENT (TIME, MPI_SSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror)
 {
-	UINT64 entry_time = LAST_READ_TIME;
-	MPI_Fint comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
+	MPI_Fint comm_null;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_SUB_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
 
 	CtoF77 (pmpi_cart_sub) (comm, remain_dims, comm_new, ierror);
 
 	if (*ierror == MPI_SUCCESS && *comm_new != comm_null)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*comm_new);
-		Trace_MPI_Communicator (MPI_CART_SUB_EV, comm_id, entry_time, TIME, TRUE);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
+
+	TRACE_MPIEVENT (TIME, MPI_CART_SUB_EV, EVT_END, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 	MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
 	MPI_Fint *ierror)
 {
-	UINT64 entry_time = LAST_READ_TIME;
-	MPI_Fint comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
+	MPI_Fint comm_null;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
 
 	CtoF77 (pmpi_cart_create) (comm_old, ndims, dims, periods, reorder,
 	  comm_cart, ierror);
@@ -3754,8 +3816,13 @@ void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 	if (*ierror == MPI_SUCCESS && *comm_cart != comm_null)
 	{
 		MPI_Comm comm_id = MPI_Comm_f2c (*comm_cart);
-		Trace_MPI_Communicator (MPI_CART_CREATE_EV, comm_id, entry_time, TIME, TRUE);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_CREATE_EV, EVT_END, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
@@ -3892,6 +3959,8 @@ void PMPI_File_open_Fortran_Wrapper (MPI_Fint *comm, char *filename, MPI_Fint *a
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_OPEN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_open) (comm, filename, amode, info, fh, len);
     TRACE_MPIEVENT (TIME, MPI_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_close_Fortran_Wrapper (MPI_File *fh, MPI_Fint *ierror)
@@ -3899,6 +3968,8 @@ void PMPI_File_close_Fortran_Wrapper (MPI_File *fh, MPI_Fint *ierror)
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_CLOSE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_close) (fh, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_CLOSE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_read_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
@@ -3907,6 +3978,8 @@ void PMPI_File_read_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_read) (fh, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_READ_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_read_all_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
@@ -3915,6 +3988,8 @@ void PMPI_File_read_all_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *coun
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_read_all) (fh, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_READ_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_write_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
@@ -3923,6 +3998,8 @@ void PMPI_File_write_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_write) (fh, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_write_all_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
@@ -3931,6 +4008,8 @@ void PMPI_File_write_all_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *cou
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_write_all) (fh, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_read_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
@@ -3939,6 +4018,8 @@ void PMPI_File_read_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* 
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_read_at) (fh, offset, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_read_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
@@ -3947,6 +4028,8 @@ void PMPI_File_read_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, vo
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_read_at_all) (fh, offset, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_write_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
@@ -3955,6 +4038,8 @@ void PMPI_File_write_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void*
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_write_at) (fh, offset, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, void* buf,
@@ -3963,6 +4048,8 @@ void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, v
     TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
     CtoF77 (pmpi_file_write_at_all) (fh, offset, buf, count, datatype, status, ierror);
     TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 #endif /* MPI_SUPPORTS_MPI_IO */
@@ -3977,6 +4064,8 @@ void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
 	CtoF77(pmpi_get) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
@@ -3987,6 +4076,8 @@ void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
 	CtoF77(pmpi_put) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 }
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
@@ -4139,10 +4230,8 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		return val;
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
 
 	return val;
 }
@@ -4227,10 +4316,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		return val;
 
 	/* Annotate already built communicators */
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_WORLD, MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
-	Trace_MPI_Communicator (MPI_COMM_CREATE_EV, MPI_COMM_SELF, MPI_Init_start_time,
-	  MPI_Init_end_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
+	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
 
 	return val;
 }
@@ -4250,7 +4337,11 @@ int MPI_Finalize_C_Wrapper (void)
 #endif
 
   if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	{
 		MPI_stats_Wrapper (LAST_READ_TIME);
+		Trace_mode_switch();
+		Trace_Mode_Change (THREADID, LAST_READ_TIME);
+	}
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -4954,6 +5045,8 @@ int MPI_Probe_C_Wrapper (int source, int tag, MPI_Comm comm, MPI_Status *status)
    */
   TRACE_MPIEVENT (TIME, MPI_PROBE_EV, EVT_END, EMPTY, EMPTY, EMPTY, comm, EMPTY);
 
+	MPI_Others_count++;
+
   return ierror;
 }
 
@@ -5135,6 +5228,8 @@ int MPI_Cancel_C_Wrapper (MPI_Request *request)
    *   tag : ---
    */
   TRACE_MPIEVENT (TIME, MPI_CANCEL_EV, EVT_END, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 
   return ierror;
 }
@@ -6428,6 +6523,8 @@ int MPI_Comm_rank_C_Wrapper (MPI_Comm comm, int *rank)
 	TRACE_MPIEVENT (TIME, MPI_COMM_RANK_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -6447,6 +6544,8 @@ int MPI_Comm_size_C_Wrapper (MPI_Comm comm, int *size)
 	TRACE_MPIEVENT (TIME, MPI_COMM_SIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
 
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -6457,12 +6556,19 @@ int MPI_Comm_size_C_Wrapper (MPI_Comm comm, int *size)
 
 int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm)
 {
-	UINT64 entry_time = LAST_READ_TIME;
   int ierror;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Comm_create (comm, group, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (MPI_COMM_CREATE_EV, *newcomm, entry_time, TIME, FALSE);
+    Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
+
+	MPI_Others_count++;
 
   return ierror;
 }
@@ -6474,12 +6580,19 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 
 int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm)
 {
-	UINT64 entry_time = LAST_READ_TIME;
   int ierror;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Comm_dup (comm, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (MPI_COMM_DUP_EV, *newcomm, entry_time, TIME, FALSE);
+    Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+		EMPTY);
+
+	MPI_Others_count++;
 
   return ierror;
 }
@@ -6491,12 +6604,19 @@ int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm)
 
 int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 {
-	UINT64 entry_time = LAST_READ_TIME;
   int ierror;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
 
   ierror = PMPI_Comm_split (comm, color, key, newcomm);
   if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (MPI_COMM_SPLIT_EV, *newcomm, entry_time, TIME, FALSE);
+    Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+		EMPTY);
+
+	MPI_Others_count++;
 
   return ierror;
 }
@@ -6637,12 +6757,21 @@ int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
                                int *periods, int reorder, MPI_Comm *comm_cart)
 {
-	UINT64 entry_time = LAST_READ_TIME;
-	int ierror = PMPI_Cart_create (comm_old, ndims, dims, periods, reorder,
+	int ierror;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	ierror = PMPI_Cart_create (comm_old, ndims, dims, periods, reorder,
 	  comm_cart);
 
 	if (ierror == MPI_SUCCESS && *comm_cart != MPI_COMM_NULL)
-		Trace_MPI_Communicator (MPI_CART_CREATE_EV, *comm_cart, entry_time, TIME, FALSE);
+		Trace_MPI_Communicator (*comm_cart, LAST_READ_TIME, FALSE);
+
+	TRACE_MPIEVENT (TIME, MPI_CART_CREATE_EV, EVT_END, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -6652,11 +6781,20 @@ int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
    ------------------------------------------------------------------------- */
 int MPI_Cart_sub_C_Wrapper (MPI_Comm comm, int *remain_dims, MPI_Comm *comm_new)
 {
-	UINT64 entry_time = LAST_READ_TIME;
-	int ierror = PMPI_Cart_sub (comm, remain_dims, comm_new);
+	int ierror;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_CART_SUB_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	ierror = PMPI_Cart_sub (comm, remain_dims, comm_new);
 
 	if (ierror == MPI_SUCCESS && *comm_new != MPI_COMM_NULL)
-		Trace_MPI_Communicator (MPI_CART_SUB_EV, *comm_new, entry_time, TIME, FALSE);
+		Trace_MPI_Communicator (*comm_new, LAST_READ_TIME, FALSE);
+
+	TRACE_MPIEVENT (TIME, MPI_CART_SUB_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+		EMPTY); 
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -6770,6 +6908,9 @@ int MPI_Request_free_C_Wrapper (MPI_Request *request)
    */
   TRACE_MPIEVENT (TIME, MPI_REQUEST_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
+
   return ierror;
 }
 
@@ -6812,6 +6953,9 @@ int MPI_Recv_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int so
    */
   TRACE_MPIEVENT (TIME, MPI_RECV_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
+
   return ierror;
 }
 
@@ -6854,6 +6998,9 @@ int MPI_Send_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int de
    */
   TRACE_MPIEVENT (TIME, MPI_SEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
+
   return ierror;
 }
 
@@ -6896,6 +7043,9 @@ int MPI_Bsend_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int d
    */
   TRACE_MPIEVENT (TIME, MPI_BSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
+
   return ierror;
 }
 
@@ -6938,6 +7088,9 @@ int MPI_Rsend_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int d
    */
   TRACE_MPIEVENT (TIME, MPI_RSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
+
+	MPI_Others_count++;
+
   return ierror;
 }
 
@@ -6980,6 +7133,8 @@ int MPI_Ssend_init_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int d
 	 */
 	TRACE_MPIEVENT (TIME, MPI_SSEND_INIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 	  EMPTY);
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -7127,6 +7282,8 @@ int MPI_File_open_C_Wrapper (MPI_Comm comm, char * filename, int amode, MPI_Info
 	ierror = PMPI_File_open (comm, filename, amode, info, fh);
 	TRACE_MPIEVENT (TIME, MPI_FILE_OPEN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -7137,6 +7294,8 @@ int MPI_File_close_C_Wrapper (MPI_File *fh)
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_CLOSE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_close (fh);
 	TRACE_MPIEVENT (TIME, MPI_FILE_CLOSE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -7149,6 +7308,8 @@ int MPI_File_read_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype da
 	ierror = PMPI_File_read (fh, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_READ_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -7159,6 +7320,8 @@ int MPI_File_read_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatyp
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_all (fh, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_READ_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -7171,6 +7334,8 @@ int MPI_File_write_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype d
 	ierror = PMPI_File_write (fh, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -7181,6 +7346,8 @@ int MPI_File_write_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Dataty
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_all (fh, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -7193,6 +7360,8 @@ int MPI_File_read_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int 
 	ierror = PMPI_File_read_at (fh, offset, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -7203,6 +7372,8 @@ int MPI_File_read_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_at_all (fh, offset, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -7215,6 +7386,8 @@ int MPI_File_write_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int
 	ierror = PMPI_File_write_at (fh, offset, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -7225,6 +7398,8 @@ int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf,
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_at_all (fh, offset, buf, count, datatype, status);
 	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
 
 	return ierror;
 }
@@ -7242,6 +7417,9 @@ int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	ierror = PMPI_Get (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
 	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -7254,6 +7432,9 @@ int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	ierror = PMPI_Put (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
 	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
+
 	return ierror;
 }
 
@@ -7522,21 +7703,21 @@ static void Gather_MPITS(void)
 
 static void MPI_stats_Wrapper (iotimer_t timestamp)
 {
-	unsigned int vec_types[7] =
+	unsigned int vec_types[8] =
 		{ MPI_STATS_EV, MPI_STATS_EV, MPI_STATS_EV, MPI_STATS_EV, MPI_STATS_EV,
-		MPI_STATS_EV, MPI_STATS_EV };
-	unsigned int vec_values[7] =
+		MPI_STATS_EV, MPI_STATS_EV, MPI_STATS_EV };
+	unsigned int vec_values[8] =
 		{ MPI_STATS_P2P_COMMS_EV, MPI_STATS_P2P_BYTES_SENT_EV,
 		MPI_STATS_P2P_BYTES_RECV_EV, MPI_STATS_GLOBAL_COMMS_EV,
 		MPI_STATS_GLOBAL_BYTES_SENT_EV, MPI_STATS_GLOBAL_BYTES_RECV_EV,
-		MPI_STATS_TIME_IN_MPI_EV };
-	unsigned int vec_params[7] = 
+		MPI_STATS_TIME_IN_MPI_EV, MPI_STATS_OTHERS_COUNT };
+	unsigned int vec_params[8] = 
 		{ P2P_Communications, P2P_Bytes_Sent, P2P_Bytes_Recv, 
 		GLOBAL_Communications, GLOBAL_Bytes_Sent, GLOBAL_Bytes_Recv,
-		Elapsed_Time_In_MPI };
+    Elapsed_Time_In_MPI, MPI_Others_count };
 
 	if (TRACING_MPI_STATISTICS)
-		TRACE_N_MISCEVENT (timestamp, 7, vec_types, vec_values, vec_params);
+		TRACE_N_MISCEVENT (timestamp, 8, vec_types, vec_values, vec_params);
 
 	/* Reset the counters */
 	P2P_Communications = 0;
@@ -7545,6 +7726,7 @@ static void MPI_stats_Wrapper (iotimer_t timestamp)
 	GLOBAL_Communications = 0;
 	GLOBAL_Bytes_Sent = 0;
 	GLOBAL_Bytes_Recv = 0;
+	MPI_Others_count = 0;
 	Elapsed_Time_In_MPI = 0;
 }
 
@@ -7727,32 +7909,10 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen)
 	}
 }
 
-#if defined(DEAD_CODE)
-/**
- * Checks whether a given communicator is a MPI_COMM_WORLD alias.
- * We consider them synonyms if both have the same number of members.
- * \param comm The communicator.
- * \return 1 if is MPI_COMM_WORLD alias, 0 otherwise.
- */
-int is_MPI_World_Comm (MPI_Comm comm)
-{
-	static int world_size = 0;
-	int comm_size;
-	
-	/* Trick to check this once */
-	if (world_size == 0)
-		PMPI_Comm_size (MPI_COMM_WORLD, &world_size);
-	PMPI_Comm_size (comm, &comm_size);
-
-	return (comm_size == world_size);
-}
-#endif
-
 /******************************************************************************
  ***  Trace_MPI_Communicator
  ******************************************************************************/
-static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm,
-	UINT64 init_time, UINT64 end_time, int trace)
+static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 {
 	/* Store in the tracefile the definition of the communicator.
 	   If the communicator is self/world, store an alias, otherwise store the
@@ -7785,11 +7945,11 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm,
 		ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
 		MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 
-		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, trace);
+		FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, trace);
 
 		/* Dump each of the task ids */
 		for (i = 0; i < num_tasks; i++)
-			FORCE_TRACE_MPIEVENT (init_time, MPI_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
+			FORCE_TRACE_MPIEVENT (time, MPI_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
 				EMPTY, EMPTY, EMPTY, EMPTY);
 
 		/* Free the group */
@@ -7801,14 +7961,14 @@ static void Trace_MPI_Communicator (int tipus_event, MPI_Comm newcomm,
 	}
 	else if (is_comm_world)
 	{
-		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, MPI_COMM_WORLD_ALIAS,
+		FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, MPI_COMM_WORLD_ALIAS,
 			Extrae_get_num_tasks(), EMPTY, newcomm, trace);
 	}
 	else if (is_comm_self)
 	{
-		FORCE_TRACE_MPIEVENT (init_time, tipus_event, EVT_BEGIN, MPI_COMM_SELF_ALIAS,
+		FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, MPI_COMM_SELF_ALIAS,
 			1, EMPTY, newcomm, trace);
 	}
 
-	FORCE_TRACE_MPIEVENT (end_time, tipus_event, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, trace);
+	FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, newcomm, trace);
 }

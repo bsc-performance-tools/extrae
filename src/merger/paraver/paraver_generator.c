@@ -146,18 +146,31 @@ void trace_paraver_state (
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 	current_state = Top_State(ptask, task, thread);
 
+#if 0
+	fprintf (stderr, "trace_paraver_state (..)\n");
+	fprintf (stderr, "thread_info->incomplete_state_offset = %u\n", thread_info->incomplete_state_offset);
+#endif
+
 	/* Complete the previous state */
 	if (thread_info->incomplete_state_offset != (off_t)-1) /* This isn't the first state */
 	{
+#if 0
+		fprintf (stderr, "get_option_merge_JointStates() = %d Get_Last_State() = %d\n", get_option_merge_JointStates(), Get_Last_State());
+		fprintf (stderr, "thread_info->incomplete_state_record.value = %d == current_state = %d\n", thread_info->incomplete_state_record.value, current_state);
+#endif
+
 		/* Do not split states whether appropriate */
 		if (get_option_merge_JointStates() && !Get_Last_State())
 			if (thread_info->incomplete_state_record.value == current_state)
 				return;
+
 		/* Write the record into the *.tmp file if the state isn't excluded */
 #if defined(DEBUG_STATES)
 		fprintf(stderr, "mpi2prv: DEBUG [T:%d] Closing state %u at %llu\n", task,  
 		(unsigned int)thread_info->incomplete_state_record.value, current_time);
+		fprintf (stderr, "Excluded? %d\n", State_Excluded(thread_info->incomplete_state_record.value));
 #endif
+
 		if (!State_Excluded(thread_info->incomplete_state_record.value))
 		{
 			thread_info->incomplete_state_record.end_time = current_time;
@@ -175,7 +188,7 @@ void trace_paraver_state (
 	thread_info->incomplete_state_record.value  = current_state;
 	/* Save a slot in the *.tmp file for this record if this state isn't excluded */
 #if defined(DEBUG_STATES)
-	fprintf(stderr, "mpi2prv: DEBUG [T:%d] Starting state %u at %llu\n", task, current_state, current_time);
+	fprintf(stderr, "mpi2prv: DEBUG [T:%d] Starting state %u (excluded? %d) at %llu\n", task, current_state, State_Excluded(current_state), current_time);
 #endif
 	if (!State_Excluded(current_state))
 	{

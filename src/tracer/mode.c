@@ -167,7 +167,7 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 	}
 }
 
-void Extrae_switch_mode(void)
+void Trace_mode_switch (void)
 {   
 	unsigned i;
 

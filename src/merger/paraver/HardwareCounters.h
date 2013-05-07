@@ -78,8 +78,7 @@ typedef struct _cQueue
                                  * *  indicates if counter is readed or not.
                                  * *
                                  */
-}
-CntQueue;
+} CntQueue;
 
 extern CntQueue CountersTraced;
 

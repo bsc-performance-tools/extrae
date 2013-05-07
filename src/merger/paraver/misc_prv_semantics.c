@@ -80,7 +80,7 @@ int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
 int MPI_Stats_Events_Found = FALSE;
 int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 int PACX_Stats_Events_Found = FALSE;
-int PACX_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
+int PACX_Stats_Labels_Used[PACX_STATS_EVENTS_COUNT];
 
 unsigned int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
 
@@ -673,6 +673,7 @@ int HWC_Change_Ev (
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 	Sthread->last_hw_group_change = current_time;
+	Sthread->HWCChange_count++;
 
 	/* HSG changing the HWC set do not should change the application state */
 	/* trace_paraver_state (cpu, ptask, task, thread, current_time); */
@@ -724,8 +725,13 @@ static int Evt_SetCounters (
    unsigned int thread,
    FileSet_t *fset )
 {
+	thread_t * Sthread;
+
 	UNREFERENCED_PARAMETER(fset);
 	unsigned int newSet = Get_EvValue (current_event);
+
+	Sthread = GET_THREAD_INFO(ptask, task, thread);
+	Sthread->last_hw_group_change = current_time;
 
 	return HWC_Change_Ev (newSet, current_time, cpu, ptask, task, thread);
 }
@@ -1254,7 +1260,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ HWC_EV, SkipHandler /* traceCounters */ },
 #if USE_HARDWARE_COUNTERS
 	{ HWC_DEF_EV, Evt_CountersDefinition },
-	{ HWC_CHANGE_EV, Evt_SetCounters },
+	{ HWC_CHANGE_EV, SkipHandler /* Evt_SetCounters */},
 	{ HWC_SET_OVERFLOW_EV, Set_Overflow_Event },
 #else
 	{ HWC_DEF_EV, SkipHandler },

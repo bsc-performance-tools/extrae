@@ -350,6 +350,7 @@ typedef struct mpi_stats_evt_t
 #define MPI_STATS_GLOBAL_BYTES_SENT_LBL "Global operations bytes sent through MPI"
 #define MPI_STATS_GLOBAL_BYTES_RECV_LBL "Global operations bytes received through MPI"
 #define MPI_STATS_TIME_IN_MPI_LBL       "Elapsed time in MPI"
+#define MPI_STATS_OTHER_COUNT_LBL       "Number of MPI calls that are neither Point-to-Point nor Global operations"
 extern struct mpi_stats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT];
 
 typedef struct pacx_stats_evt_t

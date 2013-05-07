@@ -90,6 +90,11 @@ static int Get_State (unsigned int EvType)
 		case MPI_REQUEST_FREE_EV:
 		case MPI_COMM_RANK_EV:
 		case MPI_COMM_SIZE_EV:
+		case MPI_COMM_CREATE_EV:
+		case MPI_COMM_DUP_EV:
+		case MPI_COMM_SPLIT_EV:
+		case MPI_CART_CREATE_EV:
+		case MPI_CART_SUB_EV:
 		case MPI_CANCEL_EV:
 			state = STATE_MIXED;
 		break;
@@ -987,6 +992,11 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_REQUEST_FREE_EV, MPI_PersistentRequest_Free_Event },
 	{ MPI_COMM_RANK_EV, Other_MPI_Event },
 	{ MPI_COMM_SIZE_EV, Other_MPI_Event },
+	{ MPI_COMM_CREATE_EV, Other_MPI_Event },
+	{ MPI_COMM_SPLIT_EV, Other_MPI_Event },
+	{ MPI_COMM_DUP_EV, Other_MPI_Event },
+	{ MPI_CART_CREATE_EV, Other_MPI_Event },
+	{ MPI_CART_SUB_EV, Other_MPI_Event },
 	{ MPI_IPROBE_COUNTER_EV, MPI_IProbeSoftwareCounter_Event },
 	{ MPI_TIME_OUTSIDE_IPROBES_EV, MPI_ElapsedTimeOutsideIProbes_Event },
 	{ MPI_TEST_COUNTER_EV, MPI_TestSoftwareCounter_Event },

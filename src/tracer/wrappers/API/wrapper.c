@@ -2105,6 +2105,13 @@ void Backend_Finalize (void)
 
 /* */
 
+static int Extrae_inInstrumentation = FALSE;
+
+int Backend_inInstrumentation (void)
+{
+	return Extrae_inInstrumentation;
+}
+
 void Backend_Enter_Instrumentation (unsigned Nevents)
 {
 	unsigned thread = THREADID;
@@ -2113,6 +2120,8 @@ void Backend_Enter_Instrumentation (unsigned Nevents)
 	if (!mpitrace_on)
 		return;
 
+	Extrae_inInstrumentation = TRUE;
+
 	/* Check whether we will fill the buffer soon (or now) */
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= Nevents)
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
@@ -2120,8 +2129,10 @@ void Backend_Enter_Instrumentation (unsigned Nevents)
 	/* Record the time when this is happening */
 	current_time = TIME;
 
-	/* Must change counters? */
-	HARDWARE_COUNTERS_CHANGE(current_time, thread);
+	/* Must change counters? check only at detail tracing, at bursty
+     tracing it is leveraged to the mpi macros at BURSTS_MODE_TRACE_MPIEVENT */
+	if (CURRENT_TRACE_MODE(thread) == TRACE_MODE_DETAIL)
+		HARDWARE_COUNTERS_CHANGE(current_time, thread);
 }
 
 void Backend_Leave_Instrumentation (void)
@@ -2134,6 +2145,8 @@ void Backend_Leave_Instrumentation (void)
 	/* Change trace mode? (issue from API) */
 	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
 		Trace_Mode_Change(thread, LAST_READ_TIME);
+
+	Extrae_inInstrumentation = FALSE;
 }
 
 void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *description,
