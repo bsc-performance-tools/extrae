@@ -55,12 +55,12 @@ int main(void)
 	int n = 1000000;
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area;
-    unsigned long long values[4] = {0, 1, 2, 2};
-    char * description_values[4] = {"End", "Begin", "Phase1", "Phase2" };
+	extrae_value_t values[4] = {0, 1, 2, 2};
+	char * description_values[4] = {"End", "Begin", "Phase1", "Phase2" };
 
 	Extrae_init();
-    Extrae_define_event_type(1000, "Kernel execution", 4, values, description_values);
-    Extrae_define_event_type(2000, "Kernel execution_2", 0, NULL, NULL);
+	Extrae_define_event_type(1000, "Kernel execution", 4, values, description_values);
+	Extrae_define_event_type(2000, "Kernel execution_2", 0, NULL, NULL);
 
 	h = 1.0 / (double) n;
 

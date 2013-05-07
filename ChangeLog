@@ -7,6 +7,9 @@ ChangeLog
                MPI communicators minor refactoring
              Removed erroneous emission of hardware counters when a set is
                about to start
+             Added installation of extrae_module.f
+             OpenMP snippets were misused in DynInst, use the appropriate
+             Add cross-compiled librt for ARM architectures if available
  + 02May2013 Added support for CUDA5+CUPTI
              Changed substitute script to use sed -i
  + 30Apr2013 Added support for cudaDeviceReset.

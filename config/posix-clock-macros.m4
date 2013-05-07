@@ -83,7 +83,11 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
       AC_MSG_CHECKING([for clock_gettime and CLOCK_MONOTONIC in libraries])
       LIBS_old=${LIBS}
       TRYING_RT_LIBS=`/sbin/ldconfig -p | grep librt | ${AWK} -F '=> ' '{ print $'2' }'`
-      for ac_cv_clock_gettime_lib in "" ${TRYING_RT_LIBS} "NO" ;
+
+      dnl Adding additional locations for librt
+      ARM_cross_compiled_librt=/usr/arm-linux-gnueabi/lib/librt.so
+
+      for ac_cv_clock_gettime_lib in "" ${TRYING_RT_LIBS} ${ARM_cross_compiled_librt} "NO" ;
       do
          LIBS="${ac_cv_clock_gettime_lib}"
          AC_TRY_LINK(

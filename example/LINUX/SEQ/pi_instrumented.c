@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 	int n = 1000000;
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area, x;
-	unsigned long long values[2] = {0, 1};
+	extrae_value_t values[2] = {0, 1};
 	char * description_values[2] = {"End", "Begin" };
 
 	Extrae_init();
