@@ -424,49 +424,59 @@ AC_DEFUN([AX_PROG_BINUTILS],
       [binutils_paths="${binutils_default_paths}"]
    )
 
-   AC_MSG_CHECKING([for binutils])
-   for binutils_home_dir in [${binutils_paths} "not found"]; do
-      unset BFD_LIBSDIR
-      unset LIBERTY_LIBSDIR
-
-      if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
-         BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-      elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
-         BFD_LIBSDIR="${binutils_home_dir}/lib"
-      elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
-         BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-      elif test -r "${binutils_home_dir}/lib/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
-         BFD_LIBSDIR="${binutils_home_dir}/lib"
-      else
-         dnl If we were unable to find, try this. This works if the library is named like
-         dnl  libbfd-2.23.1.so and there is no symbolic link to it!
-         shlibs1=`find ${binutils_home_dir}/lib${BITS} -maxdepth 1 -name libbfd\*.so | wc -l`
-         shlibs2=`find ${binutils_home_dir}/lib -maxdepth 1 -name libbfd\*.so | wc -l`
-         if test ${shlibs1} -ge 1 ; then
+   if test "${binutils_paths}" != "no" ; then
+      AC_MSG_CHECKING([for binutils])
+      for binutils_home_dir in [${binutils_paths} "notfound"]; do
+         unset BFD_LIBSDIR
+         unset LIBERTY_LIBSDIR
+   
+         if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test ${shlibs2} -ge 1 ; then 
+         elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib"
+         elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
+            BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+         elif test -r "${binutils_home_dir}/lib/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
+            BFD_LIBSDIR="${binutils_home_dir}/lib"
+         else
+            dnl If we were unable to find, try this. This works if the library is named like
+            dnl  libbfd-2.23.1.so and there is no symbolic link to it!
+            if test -d ${binutils_home_dir}/lib${BITS} ; then
+               shlibs1=`find ${binutils_home_dir}/lib${BITS} -maxdepth 1 -name libbfd\*.so | wc -l`
+            else
+               shlibs1=0
+            fi
+            if test -d ${binutils_home_dir}/lib ; then
+               shlibs2=`find ${binutils_home_dir}/lib -maxdepth 1 -name libbfd\*.so | wc -l`
+            else
+               shlibs2=0
+            fi
+            if test ${shlibs1} -ge 1 ; then
+               BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+            elif test ${shlibs2} -ge 1 ; then 
+               BFD_LIBSDIR="${binutils_home_dir}/lib"
+            fi
          fi
-      fi
-
-      if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" ; then
-         LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-      elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
-         LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-      elif test -r "${binutils_home_dir}/lib/x86_64/libiberty.a" ; then  # dnl Special handle for MacOSx
-         LIBERTY_LIBSDIR="${binutils_home_dir}/lib/x86_64"
-      elif test -r "${binutils_home_dir}/lib/libiberty.so" ; then
-         LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
-      elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
-         LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
-      fi
-
-      if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then
-        # Both libraries are present
-        break
-      fi
-   done
-   AC_MSG_RESULT(${binutils_home_dir})
+   
+         if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+         elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+         elif test -r "${binutils_home_dir}/lib/x86_64/libiberty.a" ; then  # dnl Special handle for MacOSx
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/x86_64"
+         elif test -r "${binutils_home_dir}/lib/libiberty.so" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
+         elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
+         fi
+   
+         if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then
+           # Both libraries are present
+           break
+         fi
+      done
+      AC_MSG_RESULT(${binutils_home_dir})
+   fi
 
    if test "${binutils_paths}" != "${binutils_default_paths}" -a "${binutils_home_dir}" = "not found" ; then
       AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed. Also, if you want to generate shared libraries check for the existance of the libbfd.so library])
@@ -626,11 +636,21 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
    AX_FLAGS_RESTORE()
 
+   dnl If unwind is given, then we'll need the binutils for sure!
    if test "${unwind_paths}" != "no"; then
       if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
-         AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
+         AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind which must be translated using binutils, but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
       fi
    fi
+
+   dnl If this is running on Linux, then we'll probably need the binutils
+   dnl linux offers the backtrace syscall, removing the requirement for the unwind
+   case "${target_os}" in
+      linux* )
+         if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
+            AC_MSG_ERROR([You can gather call-site information which must be translated using binutils, but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
+         fi ;;
+   esac
 
    AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
    AM_CONDITIONAL(BFD_NEEDS_LINTL, test "${libbfd_needs_lintl}" = "yes")

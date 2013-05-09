@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 09May2013 Require binutils if using unwind or compiling in linuxos
+               (provides backtrace)
  * 07May2013 Multiple small fixes in the bursty tracing
                Avoided problems when Extrae_shutdown was called
                Emission of MPI others statistics
