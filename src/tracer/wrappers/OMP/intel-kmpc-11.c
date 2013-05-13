@@ -106,8 +106,6 @@ int intel_kmpc_11_hook_points (int rank)
 		__kmpc_fork_call_real =
 			(void(*)(void*,int,void*,...))
 			dlsym (RTLD_NEXT, "__kmpc_fork_call");
-		if (__kmpc_fork_call_real == NULL && rank == 0)
-			fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_fork_call in DSOs!!\n");
 		INC_IF_NOT_NULL(__kmpc_fork_call_real,count);
 	}
 
@@ -115,112 +113,85 @@ int intel_kmpc_11_hook_points (int rank)
 	__kmpc_barrier_real =
 		(void(*)(void*,int))
 		dlsym (RTLD_NEXT, "__kmpc_barrier");
-	if (__kmpc_barrier_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_barrier in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_barrier_real,count);
 
 	/* Obtain @ for __kmpc_critical */
 	__kmpc_critical_real =
 		(void(*)(void*,int,void*))
 		dlsym (RTLD_NEXT, "__kmpc_critical");
-	if (__kmpc_critical_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_critical in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_critical_real,count);
 
 	/* Obtain @ for __kmpc_end_critical */
 	__kmpc_end_critical_real =
 		(void(*)(void*,int,void*))
 		dlsym (RTLD_NEXT, "__kmpc_end_critical");
-	if (__kmpc_end_critical_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_end_critical in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_end_critical_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_next_4 */
 	__kmpc_dispatch_next_4_real =
 		(int(*)(void*,int,int*,int*,int*,int*))
 		dlsym (RTLD_NEXT, "__kmpc_dispatch_next_4");
-	if (__kmpc_dispatch_next_4_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_next_4 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_next_4_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_next_8 */
 	__kmpc_dispatch_next_8_real =
 		(int(*)(void*,int,int*,long long *,long long *, long long *))
 		dlsym (RTLD_NEXT, "__kmpc_dispatch_next_8");
-	if (__kmpc_dispatch_next_8_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_next_8 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_next_8_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_next_8 */
 	__kmpc_single_real =
 		(int(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_single");
-	if (__kmpc_single_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_single in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_single_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_next_8 */
 	__kmpc_end_single_real =
 		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_end_single");
-	if (__kmpc_end_single_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_end_single in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_end_single_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_init_4 */
 	__kmpc_dispatch_init_4_real =
 		(void(*)(void*,int,int,int,int,int,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_4");
-	if (__kmpc_dispatch_init_4_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_init_4 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_init_4_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_init_8 */
 	__kmpc_dispatch_init_8_real =
 		(void(*)(void*,int,int,long long,long long,long long,long long)) dlsym (RTLD_NEXT, "__kmpc_dispatch_init_8");
-	if (__kmpc_dispatch_init_8_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_init_8 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_init_8_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_fini_4 */
 	__kmpc_dispatch_fini_4_real =
 		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_4");
-	if (__kmpc_dispatch_fini_4_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_fini_4 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_fini_4_real,count);
 
 	/* Obtain @ for __kmpc_dispatch_fini_8 */
 	__kmpc_dispatch_fini_8_real =
 		(void(*)(void*,long long)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_8");
-	if (__kmpc_dispatch_fini_8_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find __kmpc_dispatch_fini_8 in DSOs!!\n");
 	INC_IF_NOT_NULL(__kmpc_dispatch_fini_8_real,count);
 
 	/* Obtain @ for __kmpc_omp_task_alloc */
 	__kmpc_omp_task_alloc_real =
 		(void*(*)(void*,int,int,size_t,size_t,void*)) dlsym (RTLD_NEXT, "__kmpc_omp_task_alloc");
-	if (__kmpc_omp_task_alloc_real == NULL)
-		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_task_alloc in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_omp_task_alloc_real, count);
 
 	/* Obtain @ for __kmpc_omp_task_begin_if0 */
 	__kmpc_omp_task_begin_if0_real =
 		(void(*)(void*,int,void*)) dlsym (RTLD_NEXT, "__kmpc_omp_task_begin_if0");
-	if (__kmpc_omp_task_begin_if0_real == NULL)
-		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_task_begin_if0 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_omp_task_begin_if0_real, count);
 
 	/* Obtain @ for __kmpc_omp_task_complete_if0 */
 	__kmpc_omp_task_complete_if0_real =
 		(void(*)(void*,int,void*)) dlsym (RTLD_NEXT, "__kmpc_omp_task_complete_if0");
-	if (__kmpc_omp_task_complete_if0_real == NULL)
-		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_task_complete_if0 in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_omp_task_complete_if0_real, count);
 
 	/* Obtain @ for __kmpc_omp_taskwait */
 	__kmpc_omp_taskwait_real = (int(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_omp_taskwait");
-	if (__kmpc_omp_taskwait_real == NULL)
-		fprintf (stderr, PACKAGE_NAME": Unable to find  __kmpc_omp_taskwait in DSOs!!\n");
+	INC_IF_NOT_NULL(__kmpc_omp_taskwait_real, count);
 
 	/* Obtain @ for ompc_set_num_threads */
 	ompc_set_num_threads_real =
 		(void(*)(int)) dlsym (RTLD_NEXT, "ompc_set_num_threads");
-	if (ompc_set_num_threads_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find ompc_set_num_threads in DSOs!!\n");
+	INC_IF_NOT_NULL(ompc_set_num_threads_real, count);
 
 	/* Any hook point? */
 	return count > 0;

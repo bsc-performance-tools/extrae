@@ -197,6 +197,18 @@ void InstrumentOMPruntime (bool locks, ApplicationType *at, BPatch_image *appIma
 		wrapRoutine (appImage, "GOMP_loop_runtime_start",
 		  "Extrae_OpenMP_DO_Entry",
 		  "Extrae_OpenMP_DO_Exit");
+		wrapRoutine (appImage, "GOMP_loop_ordered_static_start",
+		  "Extrae_OpenMP_DO_Entry",
+		  "Extrae_OpenMP_DO_Exit");
+		wrapRoutine (appImage, "GOMP_loop_ordered_runtime_start",
+		  "Extrae_OpenMP_DO_Entry",
+		  "Extrae_OpenMP_DO_Exit");
+		wrapRoutine (appImage, "GOMP_loop_ordered_dynamic_start",
+		  "Extrae_OpenMP_DO_Entry",
+		  "Extrae_OpenMP_DO_Exit");
+		wrapRoutine (appImage, "GOMP_loop_ordered_guided_start",
+		  "Extrae_OpenMP_DO_Entry",
+		  "Extrae_OpenMP_DO_Exit");
 		wrapRoutine (appImage, "GOMP_parallel_loop_static_start",
 		  "Extrae_OpenMP_ParDO_Entry",
 		  "Extrae_OpenMP_ParDO_Exit");

@@ -2067,7 +2067,7 @@ void Backend_Finalize (void)
 #endif
 	}
 
-	if (TASKID == 0)
+	if (TASKID == 0 && Extrae_isProcessMaster())
 		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
 #if defined(EMBED_MERGE_IN_TRACE)
@@ -2153,11 +2153,12 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	char code_values, unsigned nvalues, unsigned long long *values,
 	char **description_values)
 {
-	char line[1024];
+	#define LINE_SIZE 2048
+	char line[LINE_SIZE];
 	char trace_sym[TMP_DIR];
 	int fd;
 
-	ASSERT(strlen(description)<1024, "Description for type is too large");
+	ASSERT(strlen(description)<LINE_SIZE, "Description for type is too large");
 
 	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
@@ -2170,7 +2171,7 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 			unsigned i;
 			for (i = 0; i < nvalues; i++)
 			{
-				ASSERT(strlen(description_values[i])<1024, "Description for value is too large");
+				ASSERT(strlen(description_values[i])<LINE_SIZE, "Description for value is too large");
 
 				snprintf (line, sizeof(line), "%c %llu \"%s\"\n", code_values,
 					values[i], description_values[i]);
@@ -2179,19 +2180,20 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 		}
 		close (fd);
 	}
+	#undef LINE_SIZE
 }
 
 void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *description,
 	char code_values, unsigned nvalues, unsigned long long *values,
 	char **description_values)
 {
-	char line[1024];
+	#define LINE_SIZE 2048
+	char line[LINE_SIZE];
 	char trace_sym[TMP_DIR];
 	int fd;
 
-	ASSERT(strlen(description)<1024, "Description for type is too large");
+	ASSERT(strlen(description)<LINE_SIZE, "Description for type is too large");
 
-	//FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 	FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
 		appl_name, getpid(), Extrae_get_initial_TASKID(), THREADID, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
@@ -2199,12 +2201,13 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 		snprintf (line, sizeof(line), "%c %d \"%s\"\n", code_type, type,
 			description);
 		write (fd, line, strlen(line));
+
 		if (nvalues > 0)
 		{
 			unsigned i;
 			for (i = 0; i < nvalues; i++)
 			{
-				ASSERT(strlen(description_values[i])<1024, "Description for value is too large");
+				ASSERT(strlen(description_values[i])<LINE_SIZE, "Description for value is too large");
 
 				snprintf (line, sizeof(line), "%c %llu \"%s\"\n", code_values,
 					values[i], description_values[i]);
@@ -2213,18 +2216,19 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 		}
 		close (fd);
 	}
+	#undef LINE_SIZE
 }
 
 void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	char *functionname, char *modulename, unsigned fileline)
 {
-	char line[1024];
+	#define LINE_SIZE 2048
+	char line[LINE_SIZE];
 	char trace_sym[TMP_DIR];
 	int fd;
 
-	ASSERT(strlen(functionname)+strlen(modulename)<1024, "Function name and module name are too large!");
+	ASSERT(strlen(functionname)+strlen(modulename)<LINE_SIZE, "Function name and module name are too large!");
 
-	//FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 	FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
 		appl_name, getpid(), Extrae_get_initial_TASKID(), THREADID, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
@@ -2235,5 +2239,6 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 		write (fd, line, strlen(line));
 		close (fd);
 	}
+	#undef LINE_SIZE
 }
 

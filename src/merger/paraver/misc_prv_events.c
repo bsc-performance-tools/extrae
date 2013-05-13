@@ -40,11 +40,17 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_prv_semantics.h"
 #include "labels.h"
 
+#define PRV_FORK_VALUE          1
+#define PRV_WAIT_VALUE          2
+#define PRV_WAITPID_VALUE       3
+#define PRV_EXEC_VALUE          4
+#define PRV_SYSTEM_VALUE        5
+
 #define APPL_INDEX              0
 #define FLUSH_INDEX             1
 #define TRACING_INDEX           2
 #define INOUT_INDEX             3
-#define FORK_INDEX              4
+#define FORK_SYSCALL_INDEX      4
 #define GETCPU_INDEX            5
 
 #define MAX_MISC_INDEX	        6
@@ -61,10 +67,30 @@ void Enable_MISC_Operation (int type)
 		inuse[TRACING_INDEX] = TRUE;
 	else if (type == READ_EV || type == WRITE_EV || type == IOSIZE_EV)
 		inuse[INOUT_INDEX] = TRUE;
-	else if (type == FORK_EV || type == WAIT_EV || type == WAITPID_EV || type == EXEC_EV)
-		inuse[FORK_INDEX] = TRUE;
+	else if (type == FORK_EV || type == WAIT_EV || type == WAITPID_EV ||
+	  type == EXEC_EV || type == SYSTEM_EV)
+		inuse[FORK_SYSCALL_INDEX] = TRUE;
 	else if (type == GETCPU_EV)
 		inuse[GETCPU_INDEX] = TRUE;
+}
+
+unsigned MISC_event_GetValueForForkRelated (unsigned type)
+{
+	switch (type)
+	{
+		case FORK_EV:
+			return PRV_FORK_VALUE;
+		case WAIT_EV:
+			return PRV_WAIT_VALUE;
+		case WAITPID_EV:
+			return PRV_WAITPID_VALUE;
+		case EXEC_EV:
+			return PRV_EXEC_VALUE;
+		case SYSTEM_EV:
+			return PRV_SYSTEM_VALUE;
+		default:
+			return 0;
+	}
 }
 
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
@@ -127,16 +153,17 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOSIZE_EV, IOSIZE_LBL);
 		LET_SPACES (fd);
 	}
-	if (inuse[FORK_INDEX])
+	if (inuse[FORK_SYSCALL_INDEX])
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, FORK_EV, FORK_LBL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, WAIT_EV, WAIT_LBL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, WAITPID_EV, WAITPID_LBL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, EXEC_EV, EXEC_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, FORK_SYSCALL_EV, FORK_SYSCALL_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
 		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
-		fprintf (fd, "%d      %s\n", EVT_BEGIN, EVT_BEGIN_LBL);
+		fprintf (fd, "%d      %s\n", PRV_FORK_VALUE, FORK_LBL);
+		fprintf (fd, "%d      %s\n", PRV_WAIT_VALUE, WAIT_LBL);
+		fprintf (fd, "%d      %s\n", PRV_WAITPID_VALUE, WAITPID_LBL);
+		fprintf (fd, "%d      %s\n", PRV_EXEC_VALUE, EXEC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_SYSTEM_VALUE, SYSTEM_LBL);
 	}
 }
 

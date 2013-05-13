@@ -355,8 +355,7 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
  ******************************************************************************/
 int file_exists (char *file)
 {
-	struct stat buffer;
-	return stat(file, &buffer)== 0;
+	return access (file, F_OK)== 0;
 }
 
 /******************************************************************************

@@ -66,20 +66,14 @@ static void common_GetOpenMPHookPoints (int rank)
 	/* Obtain @ for omp_set_lock */
 	omp_set_lock_real =
 		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_set_lock");
-	if (omp_set_lock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find omp_set_lock in DSOs!!\n");
 
 	/* Obtain @ for omp_unset_lock */
 	omp_unset_lock_real =
 		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_unset_lock");
-	if (omp_unset_lock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find omp_unset_lock in DSOs!!\n");
 
 	/* Obtain @ for omp_set_num_threads */
 	omp_set_num_threads_real =
 		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads");
-	if (omp_set_num_threads_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find omp_set_num_threads in DSOs!!\n");
 
 #if 0 /* Don't instrument omp_get_num_threads */
 	/* Obtain @ for omp_get_num_threads */

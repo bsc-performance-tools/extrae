@@ -30,6 +30,9 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#include <BPatch.h>
+#include <BPatch_point.h>
+
 #include "commonSnippets.h"
 #include "forkSnippets.h"
 
@@ -38,5 +41,15 @@ void InstrumentForks (BPatch_image *appImage)
 	wrapRoutine (appImage, "fork", "Extrae_Probe_fork_Entry", "Extrae_Probe_fork_Exit");
 	wrapRoutine (appImage, "wait", "Extrae_Probe_wait_Entry", "Extrae_Probe_wait_Exit");
 	wrapRoutine (appImage, "waitpid", "Extrae_Probe_waitpid_Entry", "Extrae_Probe_waitpid_Exit");
-	//wrapRoutine (appImage, "exec", "Extrae_Probe_exec_Entry", "Extrae_Probe_exec_Exit");
+	wrapRoutine (appImage, "system", "Extrae_Probe_system_Entry", "Extrae_Probe_system_Exit", 1);
+
+	wrapRoutine (appImage, "execl", "Extrae_Probe_exec_l_Entry", "", 1);
+	wrapRoutine (appImage, "execle", "Extrae_Probe_exec_l_Entry", "", 1);
+	wrapRoutine (appImage, "execlp", "Extrae_Probe_exec_l_Entry", "", 1);
+
+	wrapRoutine (appImage, "execv", "Extrae_Probe_exec_v_Entry", "", 2);
+	// wrapRoutine (appImage, "execve", "Extrae_Probe_exec_v_Entry", "", 2);  // not in all systems?
+	wrapRoutine (appImage, "execvp", "Extrae_Probe_exec_v_Entry", "", 2);
+	wrapRoutine (appImage, "execvpe", "Extrae_Probe_exec_v_Entry", "", 2);
 }
+

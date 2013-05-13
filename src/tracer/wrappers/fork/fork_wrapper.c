@@ -40,6 +40,12 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_wrapper.h"
 
 static pid_t MYPID; /* Used to determin parent's PID and discern between parent & child */
+static int IamMasterOfAllProcesses = TRUE;
+
+int Extrae_isProcessMaster (void)
+{
+	return IamMasterOfAllProcesses;
+}
 
 void Extrae_Probe_fork_Entry (void)
 {
@@ -73,10 +79,13 @@ void Extrae_Probe_fork_child_Exit (void)
 
 void Extrae_Probe_fork_Exit (void)
 {
-	if (MYPID == getpid())
-		Extrae_Probe_fork_parent_Exit();
-	else
+	if (MYPID != getpid())
+	{
+		IamMasterOfAllProcesses = FALSE;
 		Extrae_Probe_fork_child_Exit();
+	}
+	else
+		Extrae_Probe_fork_parent_Exit();
 }
 
 void Extrae_Probe_wait_Entry (void)
@@ -103,10 +112,91 @@ void Extrae_Probe_waitpid_Exit (void)
 	Backend_Leave_Instrumentation();
 }
 
-void Extrae_Probe_exec_Entry (void)
+/* This is not safest, but should work to identify all the system calls */
+static extrae_value_t last_system_id = 1;
+
+void Extrae_Probe_system_Entry (char *newbinary)
 {
 	Backend_Enter_Instrumentation (2);
+	Probe_system_Entry();
+
+	/* Dude!, grab the binary we're about to execute and post it into the .sym file */
+	Extrae_define_event_type_Wrapper (SYSTEM_BIN_EV, "system() binary name", 1,
+		&last_system_id, &newbinary);
+	TRACE_MISCEVENT(LAST_READ_TIME, USER_EV, SYSTEM_BIN_EV, last_system_id);
+
+	last_system_id++;
+}
+
+void Extrae_Probe_system_Exit (void)
+{
+	Probe_system_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void Extrae_Probe_exec_l_Entry (char *newbinary)
+{
+	printf ("Extrae_Probe_exec_l_Entry, Extrae_Probe_exec_l_Entry, Extrae_Probe_exec_l_Entry\n");
+
+	Backend_Enter_Instrumentation (2);
 	Probe_exec_Entry();
+
+	extrae_value_t v = getpid();
+
+	/* Dude!, we are changing the process image! Dump all the information
+	   generated into the tracefile */
+	Extrae_define_event_type_Wrapper (EXEC_BIN_EV, "exec() binary name", 1, &v, &newbinary);
+	TRACE_MISCEVENT(LAST_READ_TIME, USER_EV, EXEC_BIN_EV, getpid());
+
+	Extrae_fini_Wrapper();
+}
+
+void Extrae_Probe_exec_v_Entry (char *newbinary, char *const argv[])
+{
+	#define BUFFER_SIZE 1024
+	char buffer[BUFFER_SIZE];
+	char *pbuffer[1] = { buffer };
+	int i = 0;
+	int remaining = BUFFER_SIZE -1;
+	int position = 0;
+
+	Backend_Enter_Instrumentation (2);
+	Probe_exec_Entry();
+
+	for (i = 0; i < BUFFER_SIZE; i++)
+		buffer[i] = 0;
+
+	i = 0;
+	while (argv[i] != NULL && remaining > 0)
+	{
+		int length = strlen (argv[i]);
+
+		if (length < remaining)
+		{
+			strncpy (&buffer[position], argv[i], length);
+			buffer[position+length] = ' ';
+			position += length + 1;
+			remaining -= length + 1;
+		}
+		else
+		{
+			strncpy (&buffer[position], argv[i], remaining);
+			remaining = 0;
+		}
+		i++;
+	}
+
+	extrae_value_t v = getpid();
+
+	/* Dude!, we are changing the process image! Dump all the information
+	   generated into the tracefile */
+	pbuffer[0] = &buffer;
+	Extrae_define_event_type_Wrapper (EXEC_BIN_EV, "exec() binary name", 1, &v, pbuffer);
+	TRACE_MISCEVENT(LAST_READ_TIME, USER_EV, EXEC_BIN_EV, getpid());
+
+	Extrae_fini_Wrapper();
+
+	#undef BUFFER_SIZE
 }
 
 void Extrae_Probe_exec_Exit (void)

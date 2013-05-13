@@ -62,8 +62,7 @@ BPatch *bpatch;
 
 static int file_exists (char *fitxer)
 {
-  struct stat buffer;
-  return stat(fitxer, &buffer)== 0;
+	return access (fitxer, F_OK) == 0;
 }
 
 void error_function (BPatchErrorLevel level, int num, const char* const* params)

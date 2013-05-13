@@ -51,12 +51,10 @@ static char UNUSED rcsid[] = "$Id$";
 char **files = NULL;
 int lastfile = 0;
 
-void DumpFiles (void)
+void DumpFiles (int pidlabel)
 {
-	int task;
-	char *tmp;
-	char *tmp_name;
-	int i, j;
+	int task, pid, i, j;
+	char *tmp, *tmp_name;
 
 	for (j = 0; j < lastfile; j++)
 	{
@@ -65,11 +63,18 @@ void DumpFiles (void)
 		for (task = 0, i = 0; i < DIGITS_TASK; i++, tmp_name++)
 			task = task * 10 + ((int) tmp_name[0] - ((int) '0'));
 
+		tmp_name = &(tmp[strlen(tmp)-strlen(EXT_MPIT)-DIGITS_PID-DIGITS_TASK-DIGITS_THREAD]);
+		for (pid = 0, i = 0; i < DIGITS_PID; i++, tmp_name++)
+			pid = pid * 10 + ((int) tmp_name[0] - ((int) '0'));
+
 		/* If this is not the first file but we are in task id 0, generate a new app */
 		if (task == 0 && j > 0)
 			fprintf (stdout, "--\n");
 
-		fprintf (stdout, "%s\n", tmp);
+		if (pidlabel)
+			fprintf (stdout, "%s on unknown-node named process-%d\n", tmp, pid);
+		else
+			fprintf (stdout, "%s on unknown-node named\n", tmp);
 	}
 }
 
@@ -127,6 +132,7 @@ void AddFileOfFiles (char *file)
 
 int main (int argc, char *argv[])
 {
+	int pidlabel = FALSE;
 	int i;
 
 	files = (char**) malloc (MAX_MPIT_FILES*sizeof(char*));
@@ -141,7 +147,11 @@ int main (int argc, char *argv[])
 	i = 1;
 	while (i < argc)
 	{
-		if (strncmp ("-f", argv[i], 2) == 0)
+		if (strncmp ("-pidlabel", argv[i], 9) == 0)
+		{
+			pidlabel = TRUE;
+		}
+		else if (strncmp ("-f", argv[i], 2) == 0)
 		{
 			i++;
 			if (i < argc)
@@ -191,7 +201,7 @@ int main (int argc, char *argv[])
 	}
 
 	SortFilesByTime ();
-	DumpFiles ();
+	DumpFiles (pidlabel);
 
 	free (files);
 

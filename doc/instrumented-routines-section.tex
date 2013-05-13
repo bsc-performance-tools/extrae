@@ -95,8 +95,12 @@ The instrumentation of the Intel OpenMP runtime for version 11.0 to 12.0 is avai
 \begin{itemize}
 \item \_\_kmpc\_fork\_call
 \item \_\_kmpc\_barrier
+\item \_\_kmpc\_dispatch\_init\_4
+\item \_\_kmpc\_dispatch\_init\_8
 \item \_\_kmpc\_dispatch\_next\_4
 \item \_\_kmpc\_dispatch\_next\_8
+\item \_\_kmpc\_dispatch\_fini\_4
+\item \_\_kmpc\_dispatch\_fini\_8
 \item \_\_kmpc\_single
 \item \_\_kmpc\_end\_single
 \item \_\_kmpc\_critical\footnotemark[4]
@@ -130,7 +134,7 @@ These are the instrumented routines of the IBM OpenMP runtime:
 
 \TRACE supports GNU OpenMP runtime 4.2.
 
-These are the instrumented routines of the IBM OpenMP runtime:
+These are the instrumented routines of the GNU OpenMP runtime:
 
 \begin{itemize}
 \item GOMP\_parallel\_start
@@ -146,6 +150,10 @@ These are the instrumented routines of the IBM OpenMP runtime:
 \item GOMP\_loop\_dynamic\_start
 \item GOMP\_loop\_guided\_start
 \item GOMP\_loop\_runtime\_start
+\item GOMP\_loop\_ordered\_static\_start
+\item GOMP\_loop\_ordered\_dynamic\_start
+\item GOMP\_loop\_ordered\_guided\_start
+\item GOMP\_loop\_ordered\_runtime\_start
 \item GOMP\_parallel\_loop\_static\_start
 \item GOMP\_parallel\_loop\_dynamic\_start
 \item GOMP\_parallel\_loop\_guided\_start

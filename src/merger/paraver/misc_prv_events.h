@@ -37,6 +37,8 @@
 void Enable_MISC_Operation (int type);
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options);
 
+unsigned MISC_event_GetValueForForkRelated (unsigned type);
+
 #define MN_LINEAR_HOST_LABEL  "Linear host number"
 #define MN_LINECARD_LABEL     "Linecard"
 #define MN_HOST_LABEL         "Node inside linecard"

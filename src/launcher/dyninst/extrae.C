@@ -91,8 +91,7 @@ static string loadedModule;
  ******************************************************************************/
 static int file_exists (char *fname)
 {
-	struct stat buffer;
-	return stat (fname, &buffer)== 0;
+	return access (fname, F_OK) == 0;
 }
 
 void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
@@ -124,7 +123,7 @@ void errorFunc(BPatchErrorLevel level, int num, const char* const* params)
 
 void ExecCallback (BPatch_thread *thread)
 {
-	cout << "Process " << thread->getProcess() << " is executing exec() call" << endl;
+	cout << "Process " << thread->getProcess()->getPid() << " is executing exec() call" << endl;
 }
 
 static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch_image *appImage, BPatch_addressSpace *appProces)
@@ -283,7 +282,7 @@ static void ReadFileIntoList (char *fitxer, set<string>& container)
 	fstream file_op (fitxer, ios::in);
 	if (!file_op.good())
 	{
-		cerr << PACKAGE_NAME << " ERROR! Cannot open file " << fitxer << endl;
+		cerr << PACKAGE_NAME << ": Error! Cannot open file " << fitxer << endl;
 		return;
 	}
 
@@ -786,10 +785,6 @@ int main (int argc, char *argv[])
 	bpatch->setTrampRecursive (true);
 
 	cout << "Welcome to " << PACKAGE_STRING << " launcher based on DynInst " << DYNINST_MAJOR << "." << DYNINST_MINOR << "." << DYNINST_SUBMINOR << endl;
-	if (!BinaryRewrite)
-		cout << PACKAGE_NAME << ": Creating process for image binary " << argv[index] << endl;
-	else
-		cout << PACKAGE_NAME << ": Rewriting binary " << argv[index] << endl;
 
 	int i = 1;
 	while (argv[index+i] != NULL)
@@ -804,12 +799,15 @@ int main (int argc, char *argv[])
 
 	if (!BinaryRewrite)
 	{
+		cout << PACKAGE_NAME << ": Creating process for image binary " << argv[index];
+		cout.flush ();
 		appProcess = bpatch->processCreate ((const char*) argv[index], (const char**) &argv[index], (const char**) environ);
 		if (appProcess == NULL)
 		{
-			cerr << PACKAGE_NAME << ": Error creating the target application process" << endl;
+			cerr << endl << PACKAGE_NAME << ": Error creating the target application process" << endl;
 			exit (-1);
 		}
+		cout << " PID(" << appProcess->getPid() << ")" << endl;
 
 		/* Stop the execution in order to load the instrumentation library */
 		cout << PACKAGE_NAME << ": Stopping mutatee execution" << endl;
@@ -822,6 +820,7 @@ int main (int argc, char *argv[])
 	}
 	else
 	{
+		cout << PACKAGE_NAME << ": Rewriting binary " << argv[index] << endl;
 		appBin = bpatch->openBinary ((const char*) argv[index], true);
 		if (appBin == NULL)
 		{
@@ -980,9 +979,10 @@ int main (int argc, char *argv[])
 			/* Special cases (e.g., fortran stop call) */
 			string exit_calls[] =
 			{
-				  "_xlfExit",
-				  "_gfortran_stop_numeric",
-				  "for_stop_core",
+				  "exit", /* C */
+				  "_xlfExit", /* Fortran IBM XL */
+				  "_gfortran_stop_numeric", /* Fortran GNU */
+				  "for_stop_core", /* Fortran Intel */
 				  ""
 			};
 
@@ -1006,7 +1006,7 @@ int main (int argc, char *argv[])
 		  appAddrSpace);
 	}
 
-	bpatch->registerExecCallback(ExecCallback);
+	// bpatch->registerExecCallback(ExecCallback);
 
 	if (!BinaryRewrite)
 	{

@@ -1,6 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13May2013 Added instrumentation for #pragma omp for ordered in GNU
+             Removed useless warnings when instrumenting OpenMP using preload
+ * 10May2013 Improved support for fork+wait+waitpid+system+exec calls
+               using dyninst launcher
  * 09May2013 Require binutils if using unwind or compiling in linuxos
                (provides backtrace)
  * 07May2013 Multiple small fixes in the bursty tracing

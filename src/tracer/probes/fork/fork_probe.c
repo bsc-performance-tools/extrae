@@ -100,3 +100,19 @@ void Probe_exec_Exit (void)
 		TRACE_EVENTANDCOUNTERS(TIME, EXEC_EV, EVT_END, TRUE);
 }
 
+void Probe_system_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, SYSTEM_EV, EVT_BEGIN, TRUE);
+}
+
+void Probe_system_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(TIME, SYSTEM_EV, EVT_END, TRUE);
+}
+
+
+

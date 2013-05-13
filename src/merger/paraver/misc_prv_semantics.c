@@ -1170,10 +1170,10 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  Register_CodeLocation_Type_Event
+ ***  System_Event
  ******************************************************************************/
 
-static int Fork_Event (event_t * current_event,
+static int System_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
@@ -1192,20 +1192,38 @@ static int Fork_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  Register_CodeLocation_Type_Event
+ ***  Fork_Event
  ******************************************************************************/
 
-static int Wait_Event (event_t * current_event,
+static int ForkWaitSystem_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned int EvType, EvValue;
+	unsigned int state;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
+	switch (Get_EvEvent (current_event))
+	{
+		case SYSTEM_EV:
+		case FORK_EV:
+			state = STATE_OVHD;
+			break;
+		case WAIT_EV:
+		case WAITPID_EV:
+			state = STATE_BLOCKED;
+			break;
+	}
 
-	Switch_State (STATE_BLOCKED, (EvValue == EVT_BEGIN), ptask, task, thread);
+	Switch_State (state, (Get_EvValue(current_event) == EVT_BEGIN), ptask, task,
+	  thread);
+
+	if (Get_EvValue (current_event) == EVT_BEGIN)
+		EvValue = MISC_event_GetValueForForkRelated (Get_EvEvent (current_event));
+	else
+		EvValue = 0;
+
+	EvType = FORK_SYSCALL_EV;
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
@@ -1283,9 +1301,10 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SUSPEND_VIRTUAL_THREAD_EV, Suspend_Virtual_Thread_Event },
 	{ REGISTER_STACKED_TYPE_EV, Register_Stacked_Type_Event },
 	{ REGISTER_CODELOCATION_TYPE_EV, Register_CodeLocation_Type_Event },
-	{ FORK_EV, Fork_Event },
-	{ WAIT_EV, Wait_Event },
-	{ WAITPID_EV, Wait_Event },
+	{ FORK_EV, ForkWaitSystem_Event },
+	{ WAIT_EV, ForkWaitSystem_Event },
+	{ SYSTEM_EV, ForkWaitSystem_Event },
+	{ WAITPID_EV, ForkWaitSystem_Event },
 	{ EXEC_EV, Exec_Event },
 	{ GETCPU_EV, GetCPU_Event },
 	{ NULL_EV, NULL }

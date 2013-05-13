@@ -238,74 +238,54 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
 	_xlsmpParallelDoSetup_TPO_real =
 		(void(*)(int,void**,long,long,long,long,void**,void**,void**,long,long,void**,long))
 		dlsym (RTLD_NEXT, "_xlsmpParallelDoSetup_TPO");
-	if (_xlsmpParallelDoSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpParallelDoSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpParallelDoSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpParRegionSetup_TPO */
 	_xlsmpParRegionSetup_TPO_real =
 		(void(*)(int,void*,int,void*,void*,void**,long,long))
 		dlsym (RTLD_NEXT, "_xlsmpParRegionSetup_TPO");
-	if (_xlsmpParRegionSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpParRegionSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpParRegionSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpWSDoSetup_TPO */
 	_xlsmpWSDoSetup_TPO_real =
 		(void(*)(int,void*,long,long,long,long,void*,void*,void**,long))
 		dlsym (RTLD_NEXT, "_xlsmpWSDoSetup_TPO");
-	if (_xlsmpWSDoSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpWSDoSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpWSDoSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpWSSectSetup_TPO */
 	_xlsmpWSSectSetup_TPO_real =
 		(void(*)(int,void*,long,void*,void*,void**,long,long))
 		dlsym (RTLD_NEXT, "_xlsmpWSSectSetup_TPO");
-	if (_xlsmpWSSectSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpWSSectSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpWSSectSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpSingleSetup_TPO */
 	_xlsmpSingleSetup_TPO_real =
 		(void(*)(int,void*,int,void*)) dlsym (RTLD_NEXT, "_xlsmpSingleSetup_TPO");
-	if (_xlsmpSingleSetup_TPO_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpSingleSetup_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpSingleSetup_TPO_real,count);
 
 	/* Obtain @ for _xlsmpBarrier_TPO */
 	_xlsmpBarrier_TPO_real =
 		(void(*)(int,int*)) dlsym (RTLD_NEXT, "_xlsmpBarrier_TPO");
-	if (_xlsmpBarrier_TPO_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpBarrier_TPO in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpBarrier_TPO_real,count);
 
 	/* Obtain @ for _xlsmpGetDefaultSLock */
 	_xlsmpGetDefaultSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpGetDefaultSLock");
-	if (_xlsmpGetDefaultSLock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpGetDefaultSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpGetDefaultSLock_real,count);
 
 	/* Obtain @ for _xlsmpRelDefaultSLock */
 	_xlsmpRelDefaultSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpRelDefaultSLock");
-	if (_xlsmpRelDefaultSLock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpRelDefaultSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpRelDefaultSLock_real,count);
 
 	/* Obtain @ for _xlsmpGetSLock */
 	_xlsmpGetSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpGetSLock");
-	if (_xlsmpGetSLock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpGetSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpGetSLock_real,count);
 
 	/* Obtain @ for _xlsmpRelSLock */
 	_xlsmpRelSLock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "_xlsmpRelSLock");
-	if (_xlsmpRelSLock_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find _xlsmpRelSLock in DSOs!!\n");
 	INC_IF_NOT_NULL(_xlsmpRelSLock_real,count);
 
 	/* Any hook point? */

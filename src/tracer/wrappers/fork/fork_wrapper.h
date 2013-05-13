@@ -30,6 +30,8 @@
 #ifndef FORK_WRAPPER_H_INCLUDED
 #define FORK_WRAPPER_H_INCLUDED
 
+int Extrae_isProcessMaster (void);
+
 void Extrae_Probe_fork_Entry (void);
 void Extrae_Probe_fork_Exit (void);
 void Extrae_Probe_fork_parent_Exit (void);
@@ -41,8 +43,12 @@ void Extrae_Probe_wait_Exit (void);
 void Extrae_Probe_waitpid_Entry (void);
 void Extrae_Probe_waitpid_Exit (void);
 
-void Extrae_Probe_exec_Entry (void);
+void Extrae_Probe_exec_l_Entry (char *newbinary);
+void Extrae_Probe_exec_v_Entry (char *newbinary, char *const argv[]);
 void Extrae_Probe_exec_Exit (void);
+
+void Extrae_Probe_system_Entry (char *newbinary);
+void Extrae_Probe_system_Exit (void);
 
 #endif /* FORK_WRAPPER_H_INCLUDED */
 

@@ -42,5 +42,8 @@ void Probe_waitpid_Exit (void);
 void Probe_exec_Entry (void);
 void Probe_exec_Exit (void);
 
+void Probe_system_Entry (void);
+void Probe_system_Exit (void);
+
 #endif /* PTHREAD_FORK_H_INCLUDED */
 
