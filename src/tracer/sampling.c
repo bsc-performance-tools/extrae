@@ -189,8 +189,6 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	int ret;
 	struct sigaction act;
 
-	printf ("setTimeSampling\n");
-
 	memset (&act, 0, sizeof(act));
 
 	ret = sigemptyset(&act.sa_mask);
