@@ -5,6 +5,7 @@ ChangeLog
              Renamed devices and streams in CUDA traces so that their
                numbering goes from 1 to N instead of 0 to N-1.
              Support for time suffixes ns, ms, and us.
+             Instrumented MPI_Comm_free.
  * 13May2013 Added instrumentation for #pragma omp for ordered in GNU
              Removed useless warnings when instrumenting OpenMP using preload
  * 10May2013 Improved support for fork+wait+waitpid+system+exec calls

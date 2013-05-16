@@ -189,6 +189,8 @@ void PMPI_Comm_Size_Wrapper (MPI_Fint *comm, MPI_Fint *size, MPI_Fint *ierror);
 void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
 
+void PMPI_Comm_Free_Wrapper (MPI_Fint *comm, MPI_Fint *ierror);
+
 void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
 
@@ -405,6 +407,8 @@ int MPI_Comm_rank_C_Wrapper (MPI_Comm comm, int *rank);
 int MPI_Comm_size_C_Wrapper (MPI_Comm comm, int *size);
 
 int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm);
+
+int MPI_Comm_free_C_Wrapper (MPI_Comm *comm);
 
 int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm);
 

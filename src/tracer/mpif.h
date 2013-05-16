@@ -177,6 +177,8 @@ void CtoF77 (mpi_comm_size) (MPI_Fint *comm, MPI_Fint *size, MPI_Fint *ierror);
 void CtoF77 (mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
 
+void CtoF77 (mpi_comm_free) (MPI_Fint *comm, MPI_Fint *ierror);
+
 void CtoF77 (mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
 
@@ -415,6 +417,8 @@ void CtoF77 (pmpi_comm_size) (MPI_Fint *comm, MPI_Fint *size, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_comm_free) (MPI_Fint *comm, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);

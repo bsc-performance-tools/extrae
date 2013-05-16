@@ -238,6 +238,7 @@ enum {
 #define MPI_SCAN_EV                  50000063
 #define MPI_PROBE_EV                 50000065
 #define MPI_IPROBE_EV                50000066
+#define MPI_COMM_FREE_EV             50000067
 
 #define MPI_PERSIST_REQ_EV           50000070
 #define MPI_START_EV                 50000071
@@ -330,6 +331,7 @@ enum {
 #define PACX_SCAN_EV                  51000063
 #define PACX_PROBE_EV                 51000065
 #define PACX_IPROBE_EV                51000066
+#define PACX_COMM_FREE_EV             51000067
 
 #define PACX_PERSIST_REQ_EV           51000070
 #define PACX_START_EV                 51000071

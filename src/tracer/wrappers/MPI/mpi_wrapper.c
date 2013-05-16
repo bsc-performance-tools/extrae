@@ -3222,6 +3222,23 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 	MPI_Others_count++;
 }
 
+/******************************************************************************
+ ***  PMPI_Comm_Free_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Free_Wrapper (MPI_Fint *comm, MPI_Fint *ierror)
+{
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	*ierror = MPI_SUCCESS;
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_FREE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	MPI_Others_count++;
+}
 
 /******************************************************************************
  ***  PMPI_Comm_Dup_Wrapper
@@ -6571,6 +6588,23 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 	MPI_Others_count++;
 
   return ierror;
+}
+
+/******************************************************************************
+ ***  MPI_Comm_create_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_free_C_Wrapper (MPI_Comm *comm)
+{
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+	  EMPTY);
+
+	MPI_Others_count++;
+
+	return MPI_SUCCESS;
 }
 
 
