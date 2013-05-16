@@ -105,6 +105,29 @@ static struct itimerval SamplingPeriod_base;
 static struct itimerval SamplingPeriod;
 static int SamplingClockType;
 
+static void PrepareNextAlarm (void)
+{
+	/* Set next timer! */
+	if (Sampling_variability > 0)
+	{
+		long int r = random();
+		unsigned long long v = r%(Sampling_variability);
+		unsigned long long s, us;
+
+		us = (v + SamplingPeriod_base.it_value.tv_usec) % 1000000;
+		s = (v + SamplingPeriod_base.it_value.tv_usec) / 1000000 + SamplingPeriod_base.it_interval.tv_sec;
+
+		SamplingPeriod.it_interval.tv_sec = 0;
+		SamplingPeriod.it_interval.tv_usec = 0;
+		SamplingPeriod.it_value.tv_usec = us;
+		SamplingPeriod.it_value.tv_sec = s;
+	}
+	else
+		SamplingPeriod = SamplingPeriod_base;
+
+	setitimer (SamplingClockType ,&SamplingPeriod, NULL);
+}
+
 static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 {
 	caddr_t pc;
@@ -156,25 +179,7 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 
 	Extrae_SamplingHandler ((void*) pc);
 
-	/* Set next timer! */
-	if (Sampling_variability > 0)
-	{
-		long int r = random();
-		unsigned long long v = r%(Sampling_variability);
-		unsigned long long s, us;
-
-		us = (v + SamplingPeriod_base.it_value.tv_usec) % 1000000;
-		s = (v + SamplingPeriod_base.it_value.tv_usec) / 1000000 + SamplingPeriod_base.it_interval.tv_sec;
-
-		SamplingPeriod.it_interval.tv_sec = 0;
-		SamplingPeriod.it_interval.tv_usec = 0;
-		SamplingPeriod.it_value.tv_usec = us;
-		SamplingPeriod.it_value.tv_sec = s;
-	}
-	else
-		SamplingPeriod = SamplingPeriod_base;
-
-	setitimer (SamplingClockType ,&SamplingPeriod, NULL);
+	PrepareNextAlarm ();
 }
 
 
@@ -183,6 +188,8 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	int signum;
 	int ret;
 	struct sigaction act;
+
+	printf ("setTimeSampling\n");
 
 	memset (&act, 0, sizeof(act));
 
@@ -248,23 +255,53 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	else
 		Sampling_variability = 2*variability;
 
-	if (variability > 0)
+	PrepareNextAlarm ();
+}
+
+
+void setTimeSampling_postfork (void)
+{
+	int signum;
+	int ret;
+	struct sigaction act;
+
+	printf ("setTimeSampling_postfork %d\n", EnabledSampling);
+
+	if (EnabledSampling)
 	{
-		long int r = random();
-		unsigned long long v = r%Sampling_variability;
-		unsigned long long s, us;
+		memset (&act, 0, sizeof(act));
 
-		us = (v + SamplingPeriod_base.it_value.tv_usec) % 1000000;
-		s = (v + SamplingPeriod_base.it_value.tv_usec) / 1000000 + SamplingPeriod_base.it_interval.tv_sec;
-
-		SamplingPeriod.it_interval.tv_sec = 0;
-		SamplingPeriod.it_interval.tv_usec = 0;
-		SamplingPeriod.it_value.tv_usec = us;
-		SamplingPeriod.it_value.tv_sec = s;
+		ret = sigemptyset(&act.sa_mask);
+		if (ret != 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
+			return;
+		}
+		ret = sigaddset(&act.sa_mask, SIGALRM);
+		if (ret != 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
+			return;
+		}
+	
+		if (SamplingClockType == ITIMER_VIRTUAL)
+			signum = SIGVTALRM;
+		else if (SamplingClockType == ITIMER_PROF)
+			signum = SIGPROF;
+		else
+			signum = SIGALRM;
+	
+		act.sa_sigaction = TimeSamplingHandler;
+		act.sa_flags = SA_SIGINFO;
+	
+		ret = sigaction (signum, &act, NULL);
+		if (ret != 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
+			return;
+		}
+	
+		PrepareNextAlarm ();
 	}
-	else
-		SamplingPeriod = SamplingPeriod_base;
-
-	setitimer (SamplingClockType, &SamplingPeriod, NULL);
 }
 

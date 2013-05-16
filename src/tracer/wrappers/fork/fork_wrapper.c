@@ -83,6 +83,7 @@ void Extrae_Probe_fork_Exit (void)
 	{
 		IamMasterOfAllProcesses = FALSE;
 		Extrae_Probe_fork_child_Exit();
+		setTimeSampling_postfork ();
 	}
 	else
 		Extrae_Probe_fork_parent_Exit();

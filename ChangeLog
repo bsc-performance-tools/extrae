@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 16May2013 Restart sampling once leaving the fork call as child
  * 13May2013 Added instrumentation for #pragma omp for ordered in GNU
              Removed useless warnings when instrumenting OpenMP using preload
  * 10May2013 Improved support for fork+wait+waitpid+system+exec calls
