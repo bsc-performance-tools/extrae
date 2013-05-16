@@ -71,6 +71,17 @@ int is_Whitespace(char c)
    return c == ' ' || c == '\t' || c == '\v' || c == '\f' || c == '\n';
 }
 
+int is_Alphabetic(char c)
+{
+	/* Avoid using isspace() and iscntrl() to remove internal dependency with ctype_b/ctype_b_loc.
+	 * This symbol name depends on the glibc version; newer versions define ctype_b_loc and compat 
+	 * symbols have been removed. This dependency may end up in undefined references when porting
+	 * binaries to machines with different glibc versions.
+	 */
+
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
 /* Supress the spaces at both sides of the string sourceStr */
 static char *trim (char *sourceStr)
 { 
@@ -280,11 +291,19 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
 {
 	unsigned long long MinTimeFactor;
 	char tmp_buff[256];
+	size_t strl;
 
 	if (time == NULL)
 		return 0;
 
-	strncpy (tmp_buff, time, sizeof(tmp_buff));
+    strncpy (tmp_buff, time, sizeof(tmp_buff));
+
+	strl = strlen(tmp_buff);
+
+	if (strl > 2 && is_Alphabetic(tmp_buff[strl-2]) && tmp_buff[strl-1] == 's')
+	{
+		tmp_buff[strl-1] = 0x0; // Strip the last 's' of ms/ns/us
+	}
 
 	switch (tmp_buff[strlen(tmp_buff)-1])
 	{

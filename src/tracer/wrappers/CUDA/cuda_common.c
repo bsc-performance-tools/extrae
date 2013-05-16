@@ -170,9 +170,9 @@ static void Extrae_CUDA_Initialize (int devid)
 
 		/* Was the thread created before (i.e. did we executed a cudadevicereset?) */
 		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-			sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, _hostname);
+			sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, 1, _hostname);
 		else
-			sprintf (_threadname, "CUDA-%d.%d-%s", devid, 0, "unknown-host");
+			sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, 1, "unknown-host");
 		prev_threadid = Extrae_search_thread_name (_threadname, &found);
 
 		if (found)
@@ -252,9 +252,9 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 			char _hostname[HOST_NAME_MAX];
 
 			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, _hostname);
+				sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, _hostname);
 			else
-				sprintf (_threadname, "CUDA-%d.%d-%s", devid, i, "unknown-host");
+				sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, "unknown-host");
 			Extrae_set_thread_name (devices[devid].Stream[i].threadid, _threadname);
 		}
 

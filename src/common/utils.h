@@ -67,6 +67,7 @@ extern "C" {
 #endif
 
 int is_Whitespace (char c);
+int is_Alphabetic (char c);
 int explode (char *sourceStr, const char *delimiter, char ***tokenArray);
 void rename_or_copy (char *origen, char *desti);
 unsigned long long getTimeFromStr (char *time, char *envvar, int rank);
