@@ -4,7 +4,9 @@ if GENERATE_DOCUMENTATION
 SUBDIRS += doc
 endif
 
-EXTRA_DIST = example \
+EXTRA_DIST = \
+	ChangeLog \
+  example \
   INSTALL-examples \
 	substitute \
 	substitute-all

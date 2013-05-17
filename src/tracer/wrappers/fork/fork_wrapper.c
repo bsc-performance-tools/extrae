@@ -38,6 +38,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "fork_probe.h"
 #include "misc_wrapper.h"
+#include "sampling.h"
 
 static pid_t MYPID; /* Used to determin parent's PID and discern between parent & child */
 static int IamMasterOfAllProcesses = TRUE;
@@ -160,6 +161,8 @@ void Extrae_Probe_exec_v_Entry (char *newbinary, char *const argv[])
 	int i = 0;
 	int remaining = BUFFER_SIZE -1;
 	int position = 0;
+
+	UNREFERENCED_PARAMETER(newbinary);
 
 	Backend_Enter_Instrumentation (2);
 	Probe_exec_Entry();

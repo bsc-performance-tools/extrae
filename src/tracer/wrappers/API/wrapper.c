@@ -118,6 +118,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "pacx_wrapper.h"
 #endif
 #include "misc_wrapper.h"
+#include "fork_wrapper.h"
 #include "clock.h"
 #include "hwc.h"
 #include "signals.h"
