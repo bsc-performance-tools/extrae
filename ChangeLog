@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 17May2013 Added extrae_define_event_type to be callable by Fortran
+             Added sequential example of pi, including the above call.
  * 16May2013 Restart sampling once leaving the fork call as child
              Renamed devices and streams in CUDA traces so that their
                numbering goes from 1 to N instead of 0 to N-1.

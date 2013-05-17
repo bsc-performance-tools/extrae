@@ -74,7 +74,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
  \item {\tt void Extrae\_neventandcounters (unsigned count, extrae\_type\_t *types, extrae\_value\_t *values)}\\
   This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
 
- \item {\tt void Extrae\_define\_event\_type (extrae\_type\_t type, char *description, unsigned nvalues, extrae\_value\_t *values, char **description\_values)}\\
+ \item {\tt void Extrae\_define\_event\_type (extrae\_type\_t *type, char *description, unsigned *nvalues, extrae\_value\_t *values, char **description\_values)}\\
  This routine adds to the Paraver Configuration File human readable information regarding type {\tt type} and its values {\tt values}. If no values needs to be decribed set {\tt nvalues} to 0 and also set {\tt values} and {\tt description\_values} to NULL.
 
  \item {\tt void Extrae\_shutdown (void)}\\

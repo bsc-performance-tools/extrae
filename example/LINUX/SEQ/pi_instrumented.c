@@ -55,11 +55,13 @@ int main(int argc, char **argv)
 	int n = 1000000;
 	double PI25DT = 3.141592653589793238462643;
 	double pi, h, area, x;
+	extrae_type_t type = 1000;
+	int nvalues = 2;
 	extrae_value_t values[2] = {0, 1};
 	char * description_values[2] = {"End", "Begin" };
 
 	Extrae_init();
-	Extrae_define_event_type(1000, "Kernel execution", 2, values, description_values);
+	Extrae_define_event_type (&type, "Kernel execution", &nvalues, values, description_values);
 
 	h = 1.0 / (double) n;
 

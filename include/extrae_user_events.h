@@ -116,7 +116,7 @@ void MPItrace_neventandcounters (unsigned count, extrae_type_t *types, extrae_va
 void OMPtrace_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values);
 void SEQtrace_neventandcounters (unsigned count, extrae_type_t *types, extrae_value_t *values);
 
-void Extrae_define_event_type (extrae_type_t type, char *type_description, unsigned nvalues, extrae_value_t *values, char **values_description);
+void Extrae_define_event_type (extrae_type_t *type, char *type_description, unsigned *nvalues, extrae_value_t *values, char **values_description);
 
 void Extrae_set_tracing_tasks (unsigned from, unsigned to);
 void OMPtrace_set_tracing_tasks (unsigned from, unsigned to);

@@ -58,7 +58,7 @@
 
   <merge enabled="yes" 
     synchronization="default"
-    binary="pi_instrumented"
+    binary="$EXECUTABLE$"
     tree-fan-out="16"
     max-memory="512"
     joint-states="yes"

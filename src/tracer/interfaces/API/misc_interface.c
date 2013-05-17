@@ -245,10 +245,9 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 # define apifDEFINE_EVENT_TYPE(x) \
 	void x##_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values) \
 	{ \
-		if (mpitrace_on) \
-			Extrae_define_event_type_Wrapper (*type, description, *nvalues, values, description_values); \
+		Extrae_define_event_type_Wrapper (*type, description, *nvalues, values, description_values); \
 	}
-EXPAND_F_ROUTINE_WITH_PREFIXES(apifDEFINE_EVENT_TYPE);
+ EXPAND_ROUTINE_WITH_PREFIXES(apifDEFINE_EVENT_TYPE);
 
 #define apifTRACE_GET_VERSION(x) \
 	void x##_get_version (unsigned *M, unsigned *m, unsigned *r) \
@@ -454,10 +453,9 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION_FROM_ADDRESS);
 #endif /* PTHREAD_SUPPORT */
 
 # define apiDEFINE_EVENT_TYPE(x) \
-	void x##_define_event_type (extrae_type_t type, char *description, unsigned nvalues, extrae_value_t *values, char **description_values) \
+	void x##_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values) \
 	{ \
-		if (mpitrace_on) \
-			Extrae_define_event_type_Wrapper (type, description, nvalues, values, description_values); \
+		Extrae_define_event_type_Wrapper (*type, description, *nvalues, values, description_values); \
 	}
  EXPAND_ROUTINE_WITH_PREFIXES(apiDEFINE_EVENT_TYPE);
 
@@ -733,11 +731,10 @@ void Extrae_set_num_tentative_threads (int numthreads)
 
 #endif /* PTHREAD_SUPPORT */
 
-INTERFACE_ALIASES_C(_define_event_type,Extrae_define_event_type,(extrae_type_t type, char *description, unsigned nvalues, extrae_value_t *values, char **description_values),void)
-void Extrae_define_event_type (extrae_type_t type, char *description, unsigned nvalues, extrae_value_t *values, char **description_values)
+INTERFACE_ALIASES_C(_define_event_type,Extrae_define_event_type,(extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values),void)
+void Extrae_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values)
 {
-	if (mpitrace_on)
-		Extrae_define_event_type_Wrapper (type, description, nvalues, values, description_values);
+	Extrae_define_event_type_Wrapper (*type, description, *nvalues, values, description_values);
 }
 
 INTERFACE_ALIASES_C(_init_UserCommunication,Extrae_init_UserCommunication,(struct extrae_UserCommunication *ptr),void)
@@ -1006,23 +1003,13 @@ void extrae_set_num_tentative_threads (int *numthreads)
 
 #endif /* PTHREAD_SUPPORT */
 
-INTERFACE_ALIASES_F(_define_event_type,_DEFINE_EVENT_TYPE,extrae_define_event_type,(extrae_type_t *type, char *description, unsigned nvalues, extrae_value_t *values, char **description_values),void)
-void extrae_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values)
-{
-	if (mpitrace_on)
-		Extrae_define_event_type_Wrapper (*type, description, *nvalues, values, description_values);
-}
+INTERFACE_ALIASES_F_REUSE_C(_define_event_type,_DEFINE_EVENT_TYPE,Extrae_define_event_type,(extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values),void)
+/* This extrae_define_event_type calls automatically to the C version */
 
-INTERFACE_ALIASES_F(_get_version,_GET_VERSION,extrae_get_version,(unsigned*,unsigned*,unsigned*),void)
-void extrae_get_version (unsigned *M, unsigned *m, unsigned *r)
-{
-	Extrae_get_version_Wrapper (M, m, r);
-}
+INTERFACE_ALIASES_F_REUSE_C(_get_version,_GET_VERSION,Extrae_get_version,(unsigned*,unsigned*,unsigned*),void)
+/* This extrae_get_version calls automatically to the C version */
 
-INTERFACE_ALIASES_F(_change_num_threads,_CHANGE_NUM_THREADS,extrae_change_num_threads,(unsigned),void)
-void extrae_change_num_threads (unsigned *n)
-{
-	Extrae_change_number_of_threads_Wrapper (*n);
-}
+INTERFACE_ALIASES_F_REUSE_C(_change_num_threads,_CHANGE_NUM_THREADS,Extrae_change_num_threads,(unsigned),void)
+/* This extrae_change_num_threads calls automatically to the C version */
 
 #endif

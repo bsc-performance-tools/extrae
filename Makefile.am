@@ -145,10 +145,12 @@ OMP_EXAMPLE_FILES=\
 SEQ_EXAMPLE_FILES=\
  example/FREEBSD/SEQ/pi.c \
  example/FREEBSD/SEQ/pi_instrumented.c \
+ example/FREEBSD/SEQ/pi_instrumented.f90 \
  example/FREEBSD/SEQ/README \
  example/FREEBSD/SEQ/Makefile \
  example/FREEBSD/SEQ/extrae.xml \
  example/FREEBSD/SEQ/run_instrumented.sh \
+ example/FREEBSD/SEQ/run_instrumentedf.sh \
  example/FREEBSD/SEQ/function-list \
  example/FREEBSD/SEQ/run_dyninst.sh
 
@@ -247,8 +249,10 @@ SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/Makefile \
  example/LINUX/SEQ/pi.c \
  example/LINUX/SEQ/pi_instrumented.c \
+ example/LINUX/SEQ/pi_instrumented.f90 \
  example/LINUX/SEQ/run_dyninst.sh \
  example/LINUX/SEQ/run_instrumented.sh \
+ example/LINUX/SEQ/run_instrumentedf.sh \
  example/LINUX/SEQ/README
 
 ONLINE_EXAMPLE_FILES=\
