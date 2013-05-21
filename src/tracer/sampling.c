@@ -263,8 +263,6 @@ void setTimeSampling_postfork (void)
 	int ret;
 	struct sigaction act;
 
-	printf ("setTimeSampling_postfork %d\n", EnabledSampling);
-
 	if (EnabledSampling)
 	{
 		memset (&act, 0, sizeof(act));

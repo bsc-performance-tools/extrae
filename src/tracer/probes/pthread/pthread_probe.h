@@ -64,4 +64,7 @@ void Probe_pthread_cond_broadcast_Exit (void *p);
 void Probe_pthread_cond_wait_Entry (void *p);
 void Probe_pthread_cond_wait_Exit (void *p);
 
+void Probe_pthread_Barrier_Wait_Entry (void);
+void Probe_pthread_Barrier_Wait_Exit (void);
+
 #endif
