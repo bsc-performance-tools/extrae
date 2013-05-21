@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 21May2013 Get performance counters at flushes
  + 17May2013 Added extrae_define_event_type to be callable by Fortran
              Added sequential example of pi, including the above call.
  * 16May2013 Restart sampling once leaving the fork call as child
