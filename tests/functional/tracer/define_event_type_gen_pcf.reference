@@ -57,6 +57,10 @@ STATES_COLOR
 
 
 EVENT_TYPE
+6    40000033    Executing CPU
+
+
+EVENT_TYPE
 6    40000001    Application
 VALUES
 0      End
