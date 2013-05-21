@@ -88,9 +88,25 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 
 	/* Don't emit hwc that coincide in time  with a hardware counter group change.
 	   Special treatment for the first HWC change, which must be excluded in order
-	   to get the first counters.
+	   to get the first counters (which shall be 0).
 	   However, we must track the value of counters if SAMPLING_SUPPORT */
-	if (Sthread->last_hw_group_change == time && Sthread->HWCChange_count > 1)
+	if (Sthread->last_hw_group_change == time && Sthread->HWCChange_count == 1)
+	{
+#if defined(PAPI_COUNTERS) && defined (SAMPLING_SUPPORT)
+		for (cnt = 0; cnt < MAX_HWC; cnt++)
+			if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
+			    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
+			{
+				Sthread->counters[cnt] = Event->HWCValues[cnt];
+				outvalue[cnt] = 0;
+				outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
+			}
+			else
+				outtype[cnt] = NO_COUNTER;
+#endif
+		return TRUE;
+	}
+	else if (Sthread->last_hw_group_change == time && Sthread->HWCChange_count > 1)
 	{
 #if defined(PAPI_COUNTERS) && defined (SAMPLING_SUPPORT)
 		for (cnt = 0; cnt < MAX_HWC; cnt++)
@@ -98,7 +114,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 			    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
 				Sthread->counters[cnt] = Event->HWCValues[cnt];
 #endif
-		return FALSE;
+		return TRUE;
 	}
 
 	for (cnt = 0; cnt < MAX_HWC; cnt++)
