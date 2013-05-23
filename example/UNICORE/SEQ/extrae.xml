@@ -26,7 +26,7 @@
 
     <resource-usage enabled="no" />
 
-	<memory-usage enabled="no" />
+    <memory-usage enabled="no" />
   </counters>
 
   <buffer enabled="yes">

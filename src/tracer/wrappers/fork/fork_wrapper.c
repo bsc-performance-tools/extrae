@@ -42,10 +42,16 @@ static char UNUSED rcsid[] = "$Id$";
 
 static pid_t MYPID; /* Used to determin parent's PID and discern between parent & child */
 static int IamMasterOfAllProcesses = TRUE;
+static int MyDepthOfAllProcesses = 1;
 
 int Extrae_isProcessMaster (void)
 {
 	return IamMasterOfAllProcesses;
+}
+
+int Extrae_myDepthOfAllProcesses (void)
+{
+	return MyDepthOfAllProcesses;
 }
 
 void Extrae_Probe_fork_Entry (void)
@@ -75,14 +81,21 @@ void Extrae_Probe_fork_parent_Exit (void)
 void Extrae_Probe_fork_child_Exit (void)
 {
 	if (mpitrace_on)
+	{
 		Extrae_init_tracing (TRUE);
+	}
 }
 
 void Extrae_Probe_fork_Exit (void)
 {
 	if (MYPID != getpid())
 	{
+		/* If I'm the child, I'm no longer the master */
 		IamMasterOfAllProcesses = FALSE;
+
+		/* Increase depth of this process */
+		MyDepthOfAllProcesses++;
+
 		Extrae_Probe_fork_child_Exit();
 		setTimeSampling_postfork ();
 	}

@@ -1,6 +1,11 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 23May2013 Emitted pid(), ppid() and fork depth in the tracefile
+             getrusage and mallinfo are emitted to 0 at the beginning
+             Fixed make check
+             Dyninst/fork instrumentation, free parent's buffer
+             Trace initialization state / delimited even for Extrae_init
  * 21May2013 Get performance counters at flushes
  + 17May2013 Added extrae_define_event_type to be callable by Fortran
              Added sequential example of pi, including the above call.

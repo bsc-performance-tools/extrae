@@ -162,16 +162,31 @@ void Extrae_set_options_Wrapper (int options)
 	setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
 }
 
+void Extrae_getrusage_set_to_0_Wrapper (UINT64 time)
+{
+	if (TRACING_RUSAGE)
+	{
+		TRACE_MISCEVENT(time, RUSAGE_EV, RUSAGE_UTIME_EV,  0);
+		TRACE_MISCEVENT(time, RUSAGE_EV, RUSAGE_STIME_EV,  0);
+		TRACE_MISCEVENT(time, RUSAGE_EV, RUSAGE_MINFLT_EV, 0);
+		TRACE_MISCEVENT(time, RUSAGE_EV, RUSAGE_MAJFLT_EV, 0);
+		TRACE_MISCEVENT(time, RUSAGE_EV, RUSAGE_NVCSW_EV,  0);
+		TRACE_MISCEVENT(time, RUSAGE_EV, RUSAGE_NIVCSW_EV, 0);
+	}
+}
+
 void Extrae_getrusage_Wrapper (void)
 {
 	int err;
-	struct rusage current_usage;
 	static int init_pending = TRUE;
 	static int getrusage_running = FALSE;
-	static struct rusage accum_usage;
+	static struct rusage last_usage;
 
 	if (TRACING_RUSAGE)
 	{
+		struct rusage current_usage;
+		struct rusage delta_usage;
+	
 		if (getrusage_running)
 			return;
 
@@ -179,48 +194,88 @@ void Extrae_getrusage_Wrapper (void)
 
 		err = getrusage(RUSAGE_SELF, &current_usage);
 
-		if (init_pending) 
+		if (!init_pending) 
 		{
-			memset(&accum_usage, 0, sizeof(accum_usage));
-			init_pending = FALSE;
+			delta_usage.ru_utime.tv_sec = current_usage.ru_utime.tv_sec - last_usage.ru_utime.tv_sec;
+			delta_usage.ru_utime.tv_usec = current_usage.ru_utime.tv_usec - last_usage.ru_utime.tv_usec;
+			delta_usage.ru_stime.tv_sec = current_usage.ru_stime.tv_sec - last_usage.ru_stime.tv_sec;
+			delta_usage.ru_stime.tv_usec = current_usage.ru_stime.tv_usec - last_usage.ru_stime.tv_usec;
+			delta_usage.ru_minflt = current_usage.ru_minflt - last_usage.ru_minflt;
+			delta_usage.ru_majflt = current_usage.ru_majflt - last_usage.ru_majflt;
+			delta_usage.ru_nvcsw = current_usage.ru_nvcsw - last_usage.ru_nvcsw;
+			delta_usage.ru_nivcsw = current_usage.ru_nivcsw - last_usage.ru_nivcsw;
 		}
+		else
+			delta_usage = current_usage;
 
 		if (!err) 
 		{
-			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_UTIME_EV, ((current_usage.ru_utime.tv_sec * 1000000) + current_usage.ru_utime.tv_usec) - ((accum_usage.ru_utime.tv_sec * 1000000) + accum_usage.ru_utime.tv_usec))
-			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_STIME_EV, ((current_usage.ru_stime.tv_sec * 1000000) + current_usage.ru_stime.tv_usec) - ((accum_usage.ru_stime.tv_sec * 1000000) + accum_usage.ru_stime.tv_usec))
-			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_MINFLT_EV, current_usage.ru_minflt - accum_usage.ru_minflt);
-			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_MAJFLT_EV, current_usage.ru_majflt - accum_usage.ru_majflt);
-			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_NVCSW_EV,  current_usage.ru_nvcsw - accum_usage.ru_nvcsw);
-			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_NIVCSW_EV, current_usage.ru_nivcsw - accum_usage.ru_nivcsw);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_UTIME_EV,  delta_usage.ru_utime.tv_sec * 1000000 + delta_usage.ru_utime.tv_usec);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_STIME_EV,  delta_usage.ru_stime.tv_sec * 1000000 + delta_usage.ru_stime.tv_usec);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_MINFLT_EV, delta_usage.ru_minflt);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_MAJFLT_EV, delta_usage.ru_majflt);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_NVCSW_EV,  delta_usage.ru_nvcsw);
+			TRACE_MISCEVENT(LAST_READ_TIME, RUSAGE_EV, RUSAGE_NIVCSW_EV, delta_usage.ru_nivcsw);
 		}
 
-		accum_usage.ru_utime.tv_sec = current_usage.ru_utime.tv_sec;
-		accum_usage.ru_utime.tv_usec = current_usage.ru_utime.tv_usec;
-		accum_usage.ru_stime.tv_sec = current_usage.ru_stime.tv_sec;
-		accum_usage.ru_stime.tv_usec = current_usage.ru_stime.tv_usec;
-		accum_usage.ru_minflt = current_usage.ru_minflt;
-		accum_usage.ru_majflt = current_usage.ru_majflt;
-		accum_usage.ru_nvcsw  = current_usage.ru_nvcsw;
-		accum_usage.ru_nivcsw = current_usage.ru_nivcsw;
-  
+		last_usage = current_usage;
+		init_pending = FALSE;
 		getrusage_running = FALSE;
 	}
+}
+
+void Extrae_memusage_set_to_0_Wrapper (UINT64 time)
+{
+#if defined(HAVE_MALLINFO)
+	if (TRACING_MEMUSAGE)
+	{
+		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    0);
+		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   0);
+		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, 0);
+		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, 0);
+		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    0);
+	}
+#endif
 }
 
 void Extrae_memusage_Wrapper (void)
 {
 #if defined(HAVE_MALLINFO)
+	static struct mallinfo last_mi;
+	static int init_pending = TRUE;
+	static int mallinfo_running = FALSE;
+
 	if (TRACING_MEMUSAGE)
 	{
-		struct mallinfo mi = mallinfo();
-		int inuse = mi.arena + mi.hblkhd - mi.fordblks;
+		if (mallinfo_running)
+			return;
 
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    mi.arena);
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   mi.hblkhd);
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, mi.uordblks);
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, mi.fordblks);
+		mallinfo_running = TRUE;
+
+		struct mallinfo current_mi = mallinfo();
+		struct mallinfo delta_mi;
+
+		if (!init_pending)
+		{
+			delta_mi.arena = current_mi.arena - last_mi.arena;
+			delta_mi.hblkhd = current_mi.hblkhd - last_mi.hblkhd;
+			delta_mi.uordblks = current_mi.uordblks - last_mi.uordblks;
+			delta_mi.fordblks = current_mi.fordblks - last_mi.fordblks;
+		}
+		else
+			delta_mi = current_mi;
+
+		int inuse = delta_mi.arena + delta_mi.hblkhd - delta_mi.fordblks;
+
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    delta_mi.arena);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   delta_mi.hblkhd);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, delta_mi.uordblks);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, delta_mi.fordblks);
 		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    inuse);
+
+		last_mi = current_mi;
+		init_pending = FALSE;
+		mallinfo_running = FALSE;
 	}
 #endif
 }

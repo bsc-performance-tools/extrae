@@ -106,6 +106,7 @@ value_t;
  ******************************************************************************/
 
 #define APPL_LBL               "Application"
+#define TRACE_INIT_LBL         "Trace initialization"
 #define FLUSH_LBL              "Flushing Traces"
 #define READ_LBL               "I/O Read"
 #define WRITE_LBL              "I/O Write"
@@ -116,6 +117,9 @@ value_t;
 #define EXEC_LBL               "exec() or similar"
 #define SYSTEM_LBL             "system()"
 #define GETCPU_LBL             "Executing CPU"
+#define PID_LBL                "Process IDentifier"
+#define PPID_LBL               "Parent Process IDentifier"
+#define FORK_DEPTH_LBL         "fork() depth"
 
 #define TRACING_LBL            "Tracing"
 

@@ -31,6 +31,7 @@
 #define FORK_WRAPPER_H_INCLUDED
 
 int Extrae_isProcessMaster (void);
+int Extrae_myDepthOfAllProcesses (void);
 
 void Extrae_Probe_fork_Entry (void);
 void Extrae_Probe_fork_Exit (void);

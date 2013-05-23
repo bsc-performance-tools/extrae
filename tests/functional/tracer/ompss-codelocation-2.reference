@@ -74,6 +74,21 @@ VALUES
 1      Begin
 
 
+EVENT_TYPE
+6    40000002    Trace initialization
+VALUES
+0      End
+1      Begin
+
+
+EVENT_TYPE
+6    40000036    Process IDentifier
+6    40000037    Parent Process IDentifier
+6    40000038    fork() depth
+
+
+
+
 GRADIENT_COLOR
 0    {0,255,2}
 1    {0,244,13}

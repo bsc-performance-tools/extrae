@@ -25,8 +25,9 @@ if test -f TRACE.sym ; then
 		rm TRACE.sym
 		${EXTRAE_HOME}/bin/mpi2prv -dump-without-time -f TRACE.mpits -d >& MYDUMP
 		grep ^TIME MYDUMP > MYDUMP2
-		rm -f MYDUMP
-		diff test-dyninst-2.reference MYDUMP2
+		grep -v "EV: 40000033" MYDUMP2 > MYDUMP3
+		rm -f MYDUMP MYDUMP2
+		diff test-dyninst-2.reference MYDUMP3
 	else
 		echo "Could not generate a proper TRACE.sym (something written in there?"
 		exit 2

@@ -1172,7 +1172,7 @@ int remove_temporal_files(void)
  * \param thread_id The thread identifier.
  * \return 1 if success, 0 otherwise. 
  */
-static int Allocate_buffer_and_file (int thread_id)
+static int Allocate_buffer_and_file (int thread_id, int forked)
 {
 	unsigned initialTASKID;
 	int ret;
@@ -1195,6 +1195,9 @@ static int Allocate_buffer_and_file (int thread_id)
 	initialTASKID = Extrae_get_initial_TASKID();
 
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
+
+	if (forked)
+		Buffer_Free (TracingBuffer[thread_id]);
 
 	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, 1);
 	if (TracingBuffer[thread_id] == NULL)
@@ -1219,6 +1222,10 @@ static int Allocate_buffer_and_file (int thread_id)
 
 #if defined(SAMPLING_SUPPORT)
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
+
+	if (forked)
+		Buffer_Free (TracingBuffer[thread_id]);
+
 	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, 0);
 	if (SamplingBuffer[thread_id] == NULL)
 	{
@@ -1236,7 +1243,7 @@ static int Allocate_buffer_and_file (int thread_id)
  * \param num_threads Total number of threads.
  * \return 1 if success, 0 otherwise.
  */
-int Allocate_buffers_and_files (int world_size, int num_threads)
+static int Allocate_buffers_and_files (int world_size, int num_threads, int forked)
 {
 	int i;
 
@@ -1259,13 +1266,16 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
 	UNREFERENCED_PARAMETER(world_size);
 #endif
 
-	xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
+	if (!forked)
+	{
+		xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
 #if defined(SAMPLING_SUPPORT)
-	xmalloc(SamplingBuffer, num_threads * sizeof(Buffer_t *));
+		xmalloc(SamplingBuffer, num_threads * sizeof(Buffer_t *));
 #endif
+	}
 
 	for (i = 0; i < num_threads; i++)
-		Allocate_buffer_and_file (i);
+		Allocate_buffer_and_file (i, forked);
 
 	return TRUE;
 }
@@ -1275,7 +1285,7 @@ int Allocate_buffers_and_files (int world_size, int num_threads)
  * \param new_num_threads Total new number of threads.
  * \return 1 if success, 0 otherwise.
  */
-int Reallocate_buffers_and_files (int new_num_threads)
+static int Reallocate_buffers_and_files (int new_num_threads)
 {
 	int i;
 
@@ -1285,7 +1295,7 @@ int Reallocate_buffers_and_files (int new_num_threads)
 #endif
 
 	for (i = get_maximum_NumOfThreads(); i < new_num_threads; i++)
-		Allocate_buffer_and_file (i);
+		Allocate_buffer_and_file (i, FALSE);
 
 	return TRUE;
 }
@@ -1590,7 +1600,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	}
 
 	/* Allocate the buffers and trace files */
-	Allocate_buffers_and_files (world_size, maximum_NumOfThreads);
+	Allocate_buffers_and_files (world_size, maximum_NumOfThreads, forked);
+
 #if defined(CUDA_SUPPORT)
 	/* Allocate thread info for CUDA execs */
 	Extrae_reallocate_CUDA_info (maximum_NumOfThreads);
@@ -1806,8 +1817,15 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 #endif
 
 	/* Add initialization begin and end events */
-	TRACE_MPIINITEV (InitTime, init_event, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIINITEV (InitTime, init_event, EVT_BEGIN,
+	  getpid(),
+	  Extrae_isProcessMaster()?0:getppid(),
+	  Extrae_myDepthOfAllProcesses(),
+	  EMPTY,
+	  EMPTY);
 	Extrae_AnnotateTopology (TRUE, InitTime);
+	Extrae_getrusage_set_to_0_Wrapper (InitTime);
+	Extrae_memusage_set_to_0_Wrapper (InitTime);
 
 	TRACE_MPIINITEV (EndTime, init_event, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
 	Extrae_AnnotateTopology (FALSE, EndTime);

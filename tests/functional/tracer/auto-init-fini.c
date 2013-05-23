@@ -4,8 +4,6 @@
 
 int main (int argc, char *argv[])
 {
-	extrae_combined_events_t evt;
-
 	UNREFERENCED(argc);
 	UNREFERENCED(argv);
 

@@ -463,6 +463,36 @@ static int PACX_Stats_Event (
 	return 0;
 }
 
+/******************************************************************************
+ ***  InitTracing_Event
+ ******************************************************************************/
+static int InitTracing_Event (event_t * current,
+  unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+  unsigned int task, unsigned int thread, FileSet_t *fset )
+{
+	UINT64 EvValue = Get_EvValue (current);
+
+	UNREFERENCED_PARAMETER(fset);
+
+	Switch_State (STATE_INITFINI, (EvValue == EVT_BEGIN), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, TRACE_INIT_EV, EvValue);
+
+	if (EvValue == EVT_BEGIN)
+	{
+		UINT32 PID = Get_EvTarget (current);
+		UINT32 PPID = Get_EvSize (current);
+		UINT32 Depth = Get_EvTag (current);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, PID_EV, PID);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, PPID_EV, PPID);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, FORK_DEPTH_EV, Depth);
+	}
+
+	return 0;
+}
+
+
 
 /******************************************************************************
  ***  USRFunction_Event
@@ -477,8 +507,7 @@ static int USRFunction_Event (event_t * current,
 	EvValue = Get_EvValue (current);
 
 	/* HSG, I think this is not true... we should only maintain the previous
-	   state
-	Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
+	   state Switch_State (STATE_RUNNING, (EvValue != EVT_END), ptask, task, thread);
 	*/
 
 #if defined(HAVE_BFD)
@@ -761,30 +790,6 @@ static int CPU_Burst_Event (
 
 	return 0;
 }
-
-#if 0
-/******************************************************************************
- **      Function name : traceCounters
- **      Description :
- ******************************************************************************/
-
-static int traceCounters (
-   event_t * current_event,
-   unsigned long long current_time,
-   unsigned int cpu,
-   unsigned int ptask,
-   unsigned int task,
-   unsigned int thread,
-   FileSet_t *fset )
-{
-	UNREFERENCED_PARAMETER(fset);
-	UNREFERENCED_PARAMETER(current_event);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-
-	return 0;
-}
-#endif
 
 static int SetTracing_Event (
    event_t * current_event,
@@ -1170,28 +1175,6 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  System_Event
- ******************************************************************************/
-
-static int System_Event (event_t * current_event,
-	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
-	unsigned int task, unsigned int thread, FileSet_t *fset)
-{
-	unsigned int EvType, EvValue;
-	UNREFERENCED_PARAMETER(fset);
-
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
-
-	Switch_State (STATE_OVHD, (EvValue == EVT_BEGIN), ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-
-	return 0;
-}
-
-/******************************************************************************
  ***  Fork_Event
  ******************************************************************************/
 
@@ -1200,7 +1183,7 @@ static int ForkWaitSystem_Event (event_t * current_event,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned int EvType, EvValue;
-	unsigned int state;
+	unsigned int state = 0;
 	UNREFERENCED_PARAMETER(fset);
 
 	switch (Get_EvEvent (current_event))
@@ -1212,6 +1195,8 @@ static int ForkWaitSystem_Event (event_t * current_event,
 		case WAIT_EV:
 		case WAITPID_EV:
 			state = STATE_BLOCKED;
+			break;
+		default:
 			break;
 	}
 
@@ -1273,9 +1258,9 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ READ_EV, ReadWrite_Event },
 	{ WRITE_EV, ReadWrite_Event },
 	{ APPL_EV, Appl_Event },
-	{ TRACE_INIT_EV, SkipHandler },
+	{ TRACE_INIT_EV, InitTracing_Event },
 	{ USER_EV, User_Event },
-	{ HWC_EV, SkipHandler /* traceCounters */ },
+	{ HWC_EV, SkipHandler }, /* Automatically done outside */
 #if USE_HARDWARE_COUNTERS
 	{ HWC_DEF_EV, Evt_CountersDefinition },
 	{ HWC_CHANGE_EV, SkipHandler /* Evt_SetCounters */},

@@ -52,10 +52,11 @@ static char UNUSED rcsid[] = "$Id$";
 #define INOUT_INDEX             3
 #define FORK_SYSCALL_INDEX      4
 #define GETCPU_INDEX            5
+#define TRACE_INIT_INDEX        6
 
-#define MAX_MISC_INDEX	        6
+#define MAX_MISC_INDEX	        7
 
-static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_MISC_Operation (int type)
 {
@@ -72,6 +73,8 @@ void Enable_MISC_Operation (int type)
 		inuse[FORK_SYSCALL_INDEX] = TRUE;
 	else if (type == GETCPU_EV)
 		inuse[GETCPU_INDEX] = TRUE;
+	else if (type == TRACE_INIT_EV)
+		inuse[TRACE_INIT_INDEX] = TRUE;
 }
 
 unsigned MISC_event_GetValueForForkRelated (unsigned type)
@@ -140,6 +143,16 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", EVT_BEGIN, TRAC_ENABLED_LBL);
 		LET_SPACES (fd);
 	}
+	if (inuse[TRACE_INIT_INDEX])
+	{
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, TRACE_INIT_EV, TRACE_INIT_LBL);
+
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
+		fprintf (fd, "%d      %s\n", EVT_BEGIN, EVT_BEGIN_LBL);
+		LET_SPACES (fd);
+	}
 	if (inuse[INOUT_INDEX])
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
@@ -148,7 +161,6 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%s\n", VALUES_LABEL);
 		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
 		fprintf (fd, "%d      %s\n", EVT_BEGIN, EVT_BEGIN_LBL);
-
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOSIZE_EV, IOSIZE_LBL);
 		LET_SPACES (fd);
@@ -164,7 +176,15 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", PRV_WAITPID_VALUE, WAITPID_LBL);
 		fprintf (fd, "%d      %s\n", PRV_EXEC_VALUE, EXEC_LBL);
 		fprintf (fd, "%d      %s\n", PRV_SYSTEM_VALUE, SYSTEM_LBL);
+		LET_SPACES (fd);
 	}
+
+	/* These events are always emitted */
+	fprintf (fd, "%s\n", TYPE_LABEL);
+	fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, PID_EV, PID_LBL);
+	fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, PPID_EV, PPID_LBL);
+	fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, FORK_DEPTH_EV, FORK_DEPTH_LBL);
+	LET_SPACES (fd);
 }
 
 #if defined(PARALLEL_MERGE)

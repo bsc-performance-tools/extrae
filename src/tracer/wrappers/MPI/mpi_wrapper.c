@@ -3229,6 +3229,7 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 void PMPI_Comm_Free_Wrapper (MPI_Fint *comm, MPI_Fint *ierror)
 {
 	MPI_Fint cnull;
+	UNREFERENCED_PARAMETER(comm);
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
@@ -6596,6 +6597,8 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 
 int MPI_Comm_free_C_Wrapper (MPI_Comm *comm)
 {
+	UNREFERENCED_PARAMETER(comm);
+
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 

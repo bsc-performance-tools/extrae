@@ -821,7 +821,7 @@ int main (int argc, char *argv[])
 	else
 	{
 		cout << PACKAGE_NAME << ": Rewriting binary " << argv[index] << endl;
-		appBin = bpatch->openBinary ((const char*) argv[index], true);
+		appBin = bpatch->openBinary ((const char*) argv[index], false); /* passed true to instrument libraries before !? */
 		if (appBin == NULL)
 		{
 			cerr << PACKAGE_NAME << ": Error opening binary for rewriting" << endl;

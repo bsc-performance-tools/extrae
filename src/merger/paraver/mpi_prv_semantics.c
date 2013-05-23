@@ -502,6 +502,16 @@ static int Other_MPI_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
+	if (EvType == MPI_INIT_EV && EvValue == EVT_BEGIN)
+	{
+		UINT32 PID = Get_EvTarget (current_event);
+		UINT32 PPID = Get_EvSize (current_event);
+		UINT32 Depth = Get_EvTag (current_event);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, PID_EV, PID);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, PPID_EV, PPID);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, FORK_DEPTH_EV, Depth);
+	}
+
 	return 0;
 }
 
