@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  + 30May2013 First part of the OpenCL instrumentation
+             Added tests to check clock resolution
  + 23May2013 Emitted pid(), ppid() and fork depth in the tracefile
              getrusage and mallinfo are emitted to 0 at the beginning
              Fixed make check

@@ -217,6 +217,14 @@ AC_CHECK_FUNC(fseeko64, [AC_DEFINE([HAVE_FSEEKO64],[1],[Define if have fseeko64]
 AC_CHECK_FUNC(fgetpos64, [AC_DEFINE([HAVE_FGETPOS64],[1],[Define if have fgetpos64])])
 AC_CHECK_FUNC(fsetpos64, [AC_DEFINE([HAVE_FSETPOS64],[1],[Define if have fsetpos64])])
 
+# Checks for sleep operations
+AC_CHECK_FUNC(sleep, [have_sleep="yes"], [have_sleep="no"])
+AC_CHECK_FUNC(usleep, [have_usleep="yes"], [have_usleep="no"])
+AC_CHECK_FUNC(nanosleep, [have_nanosleep="yes"], [have_nanosleep="no"])
+AM_CONDITIONAL(HAVE_SLEEP, test "${have_sleep}" = "yes")
+AM_CONDITIONAL(HAVE_USLEEP, test "${have_usleep}" = "yes")
+AM_CONDITIONAL(HAVE_NANOSLEEP, test "${have_nanosleep}" = "yes")
+
 # Check if sysconf is available
 AC_CHECK_FUNC(sysconf, [AC_DEFINE([HAVE_SYSCONF],[1],[Define if have sysconf])])
 
@@ -616,7 +624,8 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   src/merger/Makefile src/merger/parallel/Makefile src/others/Makefile  \
   doc/Makefile etc/Makefile \
   tests/Makefile \
-  tests/src/Makefile tests/src/common/Makefile \
+  tests/src/Makefile tests/src/common/Makefile tests/src/tracer/Makefile \
+  tests/src/tracer/clocks/Makefile \
   tests/functional/Makefile tests/functional/launcher/Makefile tests/functional/tracer/Makefile \
   tests/functional/merger/Makefile])
 AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
