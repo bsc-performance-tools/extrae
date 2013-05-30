@@ -339,7 +339,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
 			    Type == MPI_TYPE || Type == PACX_TYPE || Type == TRT_TYPE ||
-			    Type == CUDA_TYPE)
+			    Type == CUDA_TYPE || Type == OPENCL_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
 
@@ -363,6 +363,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_TRT_Operation (EvType);
 					else if (CUDA_TYPE == Type)
 						Enable_CUDA_Operation (EvType);
+					else if (OPENCL_TYPE == Type)
+						Enable_OpenCL_Operation (EvType);
 				}
 				else
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);

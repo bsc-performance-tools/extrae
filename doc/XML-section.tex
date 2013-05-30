@@ -288,6 +288,18 @@ This section contains two attributes besides {\tt enabled}. These are
 
 \graybox{See {\bf EXTRAE\_SAMPLING\_PERIOD}, {\bf EXTRAE\_SAMPLING\_VARIABILITY}, {\bf EXTRAE\_SAMPLING\_CLOCKTYPE} and {\bf EXTRAE\_SAMPLING\_CALLER} environment variables in appendix \ref{cha:EnvVar}.}
 
+\section{XML Section: CUDA}\label{sec:XMLSectionCUDA}
+
+\intput{XML/cuda.xml}
+
+This section indicates whether the CUDA calls should be instrumented or not. If {\tt enabled} is set to yes, CUDA calls will be instrumented, otherwise they will not be instrumented.
+
+\section{XML Section: OpenCL}\label{sec:XMLSectionOPENCL}
+
+\intput{XML/opencl.xml}
+
+This section indicates whether the OpenCL calls should be instrumented or not. If {\tt enabled} is set to yes, Opencl calls will be instrumented, otherwise they will not be instrumented.
+
 \section{XML Section: Merge}\label{sec:XMLSectionMerge}
 
 \input{XML/merge.xml}

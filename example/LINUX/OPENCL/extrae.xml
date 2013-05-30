@@ -7,6 +7,10 @@
  xml-parser-id="@sub_XMLID@"
 >
 
+  <user-functions enabled="yes" list="function-list" exclude-automatic-functions="no">
+    <counters enabled="yes" />
+  </user-functions>
+
   <counters enabled="yes">
     <cpu enabled="yes" starting-set-distribution="1">
       <set enabled="yes" domain="all" changeat-globalops="5">
@@ -52,9 +56,11 @@
 
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 
+	<opencl enabled="yes" />
+
   <merge enabled="yes" 
     synchronization="default"
-    binary="hello"
+    binary="vadd"
     tree-fan-out="16"
     max-memory="512"
     joint-states="yes"
@@ -62,9 +68,8 @@
     sort-addresses="yes"
 		remove-files="no"
   >
-    hello.prv
+    vadd.prv
   </merge>
 
-	<cuda enabled="yes" />
 
 </trace>

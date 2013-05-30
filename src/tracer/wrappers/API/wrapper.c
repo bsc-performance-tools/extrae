@@ -206,6 +206,10 @@ int tracejant_rusage = FALSE;
 /** Store information about malloc?                                     **/
 int tracejant_memusage = FALSE;
 
+int tracing_opencl = FALSE;
+int tracing_cuda = FALSE;
+
+
 /**** Variable global que controla quin subset de les tasks generen o ****/
 /**** no generen trasa ***************************************************/
 int *TracingBitmap = NULL;
@@ -262,9 +266,6 @@ unsigned file_size = 0;
 static unsigned current_NumOfThreads = 0;
 static unsigned maximum_NumOfThreads = 0;
 
-unsigned int mptrace_suspend_tracing = FALSE;
-unsigned int mptrace_tracing_is_suspended = FALSE;
-
 #define TMP_NAME_LENGTH     512
 #define APPL_NAME_LENGTH    512
 char appl_name[APPL_NAME_LENGTH];
@@ -286,6 +287,10 @@ event_t *circular_HEAD;
 #if defined(EMBED_MERGE_IN_TRACE)
 int MergeAfterTracing = FALSE;
 #endif
+
+int EXTRAE_ON (void) { return mpitrace_on; }
+int EXTRAE_TRACING_OPENCL (void) { return tracing_opencl; }
+int EXTRAE_TRACING_CUDA (void) { return tracing_cuda; }
 
 static unsigned get_maximum_NumOfThreads (void)
 {
@@ -1485,7 +1490,11 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		Extrae_Allocate_Task_Bitmap (world_size);
 
 #if defined(CUDA_SUPPORT)
-		Extrae_CUDA_init (me);
+	Extrae_CUDA_init (me);
+#endif
+
+#if defined(OPENCL_SUPPORT)
+	Extrae_OpenCL_init (me);
 #endif
 
 #if defined(OMP_SUPPORT)

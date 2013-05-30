@@ -885,6 +885,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_PACX_Stats_Labels (fd);
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
+	WriteEnabled_OpenCL_Operations (fd);
 
 	Write_UserDefined_Labels(fd);
     

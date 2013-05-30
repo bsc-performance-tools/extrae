@@ -62,6 +62,13 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		fi
 	fi
 
+	if test "${enable_opencl}" = "yes" ; then
+		echo OpenCL instrumentation: yes, through LD_PRELOAD
+		echo -e \\\tOpenCL home: ${opencl_path}
+	else
+		echo OpenCL instrumentation: no
+  fi
+
 	echo
 	if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" ; then
 		echo Performance counters at instrumentation: yes

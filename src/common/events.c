@@ -195,7 +195,7 @@ static unsigned cuda_events[] = { CUDALAUNCH_EV, CUDACONFIGCALL_EV,
 	CUDAMEMCPY_GPU_EV };
 
 /******************************************************************************
- ***  IsTRT
+ ***  IsCUDA
  ******************************************************************************/
 
 unsigned IsCUDA (unsigned EvType)
@@ -204,6 +204,38 @@ unsigned IsCUDA (unsigned EvType)
 
   for (evt = 0; evt < CUDA_EVENTS; evt++)
     if (cuda_events[evt] == EvType)
+      return TRUE;
+  return FALSE;
+}
+
+#define OPENCL_EVENTS 29
+static unsigned opencl_events[] = {
+	OPENCL_CLCREATEBUFFER_EV, OPENCL_CLCREATECOMMANDQUEUE_EV, 
+	OPENCL_CLCREATECONTEXT_EV, OPENCL_CLCREATECONTEXTFROMTYPE_EV,
+	OPENCL_CLCREATESUBBUFFER_EV, OPENCL_CLCREATEKERNEL_EV,
+	OPENCL_CLCREATEKERNELSINPROGRAM_EV, OPENCL_CLSETKERNELARG_EV,
+	OPENCL_CLCREATEPROGRAMWITHSOURCE_EV, OPENCL_CLCREATEPROGRAMWITHBINARY_EV,
+	OPENCL_CLCREATEPROGRAMWITHBUILTINKERNELS_EV, OPENCL_CLENQUEUEFILLBUFFER_EV,
+	OPENCL_CLENQUEUECOPYBUFFER_EV, OPENCL_CLENQUEUECOPYBUFFERRECT_EV,
+	OPENCL_CLENQUEUENDRANGEKERNEL_EV, OPENCL_CLENQUEUETASK_EV,
+	OPENCL_CLENQUEUENATIVEKERNEL_EV, OPENCL_CLENQUEUEREADBUFFER_EV,
+	OPENCL_CLENQUEUEREADBUFFERRECT_EV, OPENCL_CLENQUEUEWRITEBUFFER_EV,
+	OPENCL_CLENQUEUEWRITEBUFFERRECT_EV, OPENCL_CLBUILDPROGRAM_EV,
+	OPENCL_CLCOMPILEPROGRAM_EV, OPENCL_CLLINKPROGRAM_EV,
+	OPENCL_CLFINISH_EV, OPENCL_CLFLUSH_EV, OPENCL_CLWAITFOREVENTS_EV,
+	OPENCL_CLENQUEUEMARKERWITHWAITLIST_EV,
+	OPENCL_CLENQUEUEBARRIERWITHWAITLIST_EV };
+
+/******************************************************************************
+ ***  IsOpenCL
+ ******************************************************************************/
+
+unsigned IsOpenCL (unsigned EvType)
+{
+  unsigned evt;
+
+  for (evt = 0; evt < OPENCL_EVENTS; evt++)
+    if (opencl_events[evt] == EvType)
       return TRUE;
   return FALSE;
 }
@@ -321,6 +353,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (IsCUDA(EvType))
 	{
 		*Type = CUDA_TYPE;
+		return TRUE;
+	}
+	else if (IsOpenCL(EvType))
+	{
+		*Type = OPENCL_TYPE;
 		return TRUE;
 	}
 	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)

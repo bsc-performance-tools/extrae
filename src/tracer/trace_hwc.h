@@ -101,7 +101,7 @@
 # define ACCUMULATED_COUNTERS_INITIALIZED(tid) 0
 # define COPY_ACCUMULATED_COUNTERS_HERE(tid, evt)
 # define ADD_ACCUMULATED_COUNTERS_HERE(tid, evt)
-# define HARDWARE_COUNTERS_CHANGE(time, tid)
+# define HARDWARE_COUNTERS_CHANGE(time, tid) {}
 # define MARK_SET_READ(tid, evt, filter)
 
 #endif

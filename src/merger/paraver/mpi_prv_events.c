@@ -577,18 +577,21 @@ void SoftCountersEvent_WriteEnabled_MPI_Operations (FILE * fd)
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
 			MPI_IPROBE_COUNTER_EV, IPROBE_COUNTER_LBL);
+		LET_SPACES(fd);
 	}
 	if (MPI_SoftCounters_used[TIME_OUTSIDE_IPROBES_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
 			MPI_TIME_OUTSIDE_IPROBES_EV, TIME_OUTSIDE_IPROBES_LBL);
+		LET_SPACES(fd);
 	}
 	if (MPI_SoftCounters_used[TEST_CNT_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
 			MPI_TEST_COUNTER_EV, TEST_COUNTER_LBL);
+		LET_SPACES(fd);
 	}
 	if (MPI_SoftCounters_used[COLLECTIVE_INDEX])
 	{

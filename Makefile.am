@@ -295,6 +295,12 @@ CUDA_EXAMPLE_FILES=\
  example/LINUX/CUDA/run_dyninst.sh \
  example/LINUX/CUDA/run_instrumented.sh
 
+OPENCL_EXAMPLE_FILES=\
+ example/LINUX/OPENCL/extrae.xml \
+ example/LINUX/OPENCL/Makefile \
+ example/LINUX/OPENCL/run.sh \
+ example/LINUX/OPENCL/vadd.c
+
 FORK_EXAMPLE_FILES=\
  example/LINUX/FORK/extrae.xml \
  example/LINUX/FORK/function-list \
@@ -348,6 +354,10 @@ endif
 if WANT_CUDAorCUPTI
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/CUDA
 	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
+endif
+if WANT_OPENCL
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/OPENCL
+	cp -f $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
 endif
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE

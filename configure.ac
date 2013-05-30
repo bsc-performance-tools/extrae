@@ -369,6 +369,7 @@ AM_CONDITIONAL(WANT_OPENMP, test "${enable_openmp}" = "yes" )
 
 AX_CUDA
 AX_CUPTI
+AX_OPENCL
 
 AC_ARG_ENABLE(pthread-support-in-all-libs,
    AC_HELP_STRING(

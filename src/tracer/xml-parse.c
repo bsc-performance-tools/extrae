@@ -207,6 +207,71 @@ static xmlChar* xmlGetProp_env (int rank, xmlNodePtr node, xmlChar *attribute)
 		return NULL;	
 }
 
+#if defined(CUDA_SUPPORT)
+/* Configure CUDA related parameters */
+static void Parse_XML_CUDA (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	UNREFERENCED_PARAMETER(xmldoc);
+
+	/* Parse all TAGs, and annotate them to use them later */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
+		{
+		}
+		/* Shall we gather counters in the CUDA calls? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			tracing_cuda = enabled != NULL && !xmlStrcasecmp (enabled, xmlYES);
+			XML_FREE(enabled);
+		}
+		else
+		{
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <CUDA> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
+
+#if defined(OPENCL_SUPPORT)
+/* Configure OpenCL related parameters */
+static void Parse_XML_OpenCL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	UNREFERENCED_PARAMETER(xmldoc);
+
+	/* Parse all TAGs, and annotate them to use them later */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcmp (tag->name, xmlTEXT))
+		{
+		}
+		/* Shall we gather counters in the MPI calls? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			tracing_opencl = enabled != NULL && !xmlStrcasecmp (enabled, xmlYES);
+			XML_FREE(enabled);
+		}
+		else
+		{
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <OPENCL> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
 
 #if defined(MPI_SUPPORT)
 /* Configure MPI related parameters */
@@ -1605,6 +1670,42 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_Callers (rank, xmldoc, current_tag);
+						XML_FREE(enabled);
+					}
+					/* CUDA related configuration */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_CUDA))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
+#if defined(CUDA_SUPPORT)
+							tracing_cuda = TRUE;
+							Parse_XML_CUDA (rank, xmldoc, current_tag);
+#else
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support CUDA.\n", TRACE_CUDA);
+#endif
+						}
+						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
+							tracing_cuda = FALSE;
+						XML_FREE(enabled);
+					}
+					/* OpenCL related configuration */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_OPENCL))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
+#if defined(OPENCL_SUPPORT)
+							tracing_opencl = TRUE;
+							Parse_XML_OpenCL (rank, xmldoc, current_tag);
+#else
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OpenCL.\n", TRACE_OPENCL);
+#endif
+						}
+						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
+							tracing_opencl = FALSE;
 						XML_FREE(enabled);
 					}
 					/* MPI related configuration */

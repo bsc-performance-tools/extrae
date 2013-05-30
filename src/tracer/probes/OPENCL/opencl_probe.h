@@ -1,0 +1,120 @@
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                   Extrae                                  *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *     ___     This library is free software; you can redistribute it and/or *
+ *    /  __         modify it under the terms of the GNU LGPL as published   *
+ *   /  /  _____    by the Free Software Foundation; either version 2.1      *
+ *  /  /  /     \   of the License, or (at your option) any later version.   *
+ * (  (  ( B S C )                                                           *
+ *  \  \  \_____/   This library is distributed in hope that it will be      *
+ *   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
+ *    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
+ *                  PARTICULAR PURPOSE. See the GNU LGPL for more details.   *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public License  *
+ * along with this library; if not, write to the Free Software Foundation,   *
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA          *
+ * The GNU LEsser General Public License is contained in the file COPYING.   *
+ *                                 ---------                                 *
+ *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
+\*****************************************************************************/
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/tracer/probes/CUDA/cuda_probe.h $
+ | @last_commit: $Date: 2011-10-17 16:29:40 +0200 (dl, 17 oct 2011) $
+ | @version:     $Revision: 785 $
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
+#ifndef OPENCL_PROBE_H_INCLUDED
+#define OPENCL_PROBE_H_INCLUDED
+
+void Extrae_Probe_clCreateBuffer_Enter (void);
+void Extrae_Probe_clCreateBuffer_Exit (void);
+
+void Extrae_Probe_clCreateCommandQueue_Enter (void);
+void Extrae_Probe_clCreateCommandQueue_Exit (void);
+
+void Extrae_Probe_clCreateContext_Enter (void);
+void Extrae_Probe_clCreateContext_Exit (void);
+
+void Extrae_Probe_clCreateContextFromType_Enter (void);
+void Extrae_Probe_clCreateContextFromType_Exit (void);
+
+void Extrae_Probe_clCreateSubBuffer_Enter (void);
+void Extrae_Probe_clCreateSubBuffer_Exit (void);
+
+void Extrae_Probe_clCreateKernel_Enter (void);
+void Extrae_Probe_clCreateKernel_Exit (void);
+
+void Extrae_Probe_clCreateKernelsInProgram_Enter (void);
+void Extrae_Probe_clCreateKernelsInProgram_Exit (void);
+
+void Extrae_Probe_clSetKernelArg_Enter (void);
+void Extrae_Probe_clSetKernelArg_Exit (void);
+
+void Extrae_Probe_clCreateProgramWithSource_Enter (void);
+void Extrae_Probe_clCreateProgramWithSource_Exit (void);
+
+void Extrae_Probe_clCreateProgramWithBinary_Enter (void);
+void Extrae_Probe_clCreateProgramWithBinary_Exit (void);
+
+void Extrae_Probe_clCreateProgramWithBuiltInKernels_Enter (void);
+void Extrae_Probe_clCreateProgramWithBuiltInKernels_Exit (void);
+
+void Extrae_Probe_clEnqueueFillBuffer_Enter (void);
+void Extrae_Probe_clEnqueueFillBuffer_Exit (void);
+
+void Extrae_Probe_clEnqueueCopyBuffer_Enter (void);
+void Extrae_Probe_clEnqueueCopyBuffer_Exit (void);
+
+void Extrae_Probe_clEnqueueCopyBufferRect_Enter (void);
+void Extrae_Probe_clEnqueueCopyBufferRect_Exit (void);
+
+void Extrae_Probe_clEnqueueNDRangeKernel_Enter (void);
+void Extrae_Probe_clEnqueueNDRangeKernel_Exit (void);
+
+void Extrae_Probe_clEnqueueTask_Enter (void);
+void Extrae_Probe_clEnqueueTask_Exit (void);
+
+void Extrae_Probe_clEnqueueNativeKernel_Enter (void);
+void Extrae_Probe_clEnqueueNativeKernel_Exit (void);
+
+void Extrae_Probe_clEnqueueReadBuffer_Enter (void);
+void Extrae_Probe_clEnqueueReadBuffer_Exit (void);
+
+void Extrae_Probe_clEnqueueReadBufferRect_Enter (void);
+void Extrae_Probe_clEnqueueReadBufferRect_Exit (void);
+
+void Extrae_Probe_clEnqueueWriteBuffer_Enter (void);
+void Extrae_Probe_clEnqueueWriteBuffer_Exit (void);
+
+void Extrae_Probe_clEnqueueWriteBufferRect_Enter (void);
+void Extrae_Probe_clEnqueueWriteBufferRect_Exit (void);
+
+void Extrae_Probe_clBuildProgram_Enter (void);
+void Extrae_Probe_clBuildProgram_Exit (void);
+
+void Extrae_Probe_clCompileProgram_Enter (void);
+void Extrae_Probe_clCompileProgram_Exit (void);
+
+void Extrae_Probe_clLinkProgram_Enter (void);
+void Extrae_Probe_clLinkProgram_Exit (void);
+
+void Extrae_Probe_clFinish_Enter (void);
+void Extrae_Probe_clFinish_Exit (void);
+
+void Extrae_Probe_clFlush_Enter (void);
+void Extrae_Probe_clFlush_Exit (void);
+
+void Extrae_Probe_clWaitForEvents_Enter (void);
+void Extrae_Probe_clWaitForEvents_Exit (void);
+
+void Extrae_Probe_clEnqueueMarkerWithWaitList_Enter (void);
+void Extrae_Probe_clEnqueueMarkerWithWaitList_Exit (void);
+
+void Extrae_Probe_clEnqueueBarrierWithWaitList_Enter (void);
+void Extrae_Probe_clEnqueueBarrierWithWaitList_Exit (void);
+
+#endif /* OPENCL_PROBE_H_INCLUDED */

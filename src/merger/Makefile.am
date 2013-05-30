@@ -43,6 +43,7 @@ paraver_FILES = \
  paraver/pthread_prv_semantics.c paraver/pthread_prv_semantics.h \
  paraver/trt_prv_semantics.c paraver/trt_prv_semantics.h \
  paraver/cuda_prv_semantics.c paraver/cuda_prv_semantics.h \
+ paraver/opencl_prv_semantics.c paraver/opencl_prv_semantics.h \
  paraver/mpi_prv_events.c paraver/mpi_prv_events.h \
  paraver/pacx_prv_events.c paraver/pacx_prv_events.h \
  paraver/omp_prv_events.c paraver/omp_prv_events.h \
@@ -50,6 +51,7 @@ paraver_FILES = \
  paraver/pthread_prv_events.c paraver/pthread_prv_events.h \
  paraver/trt_prv_events.c paraver/trt_prv_events.h \
  paraver/cuda_prv_events.c paraver/cuda_prv_events.h \
+ paraver/opencl_prv_events.c paraver/opencl_prv_events.h \
  paraver/write_file_buffer.c paraver/write_file_buffer.h \
  paraver/paraver_nprintf.c paraver/paraver_nprintf.h \
  paraver/MPI_EventEncoding.h \

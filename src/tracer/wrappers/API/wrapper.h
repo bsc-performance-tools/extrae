@@ -72,14 +72,8 @@ extern unsigned long long initTracingTime;
 /* Es defineix el numero de caracters '_' que afegeix el compilador de fortran */
 #include "defines.h"
 
-//extern event_t **buffers;
-extern int *fd;
 extern unsigned int buffer_size;
 extern unsigned file_size;
-extern unsigned int hw_counters, event0, event1;
-
-extern unsigned int mptrace_suspend_tracing;
-extern unsigned int mptrace_tracing_is_suspended;
 
 #include "taskid.h"
 
@@ -105,6 +99,13 @@ extern int *TracingBitmap;
 /****** Variable global per saber si cal tracejar l'aplicacio ********/
 // Serveix per fer com si no hi hagues MPITRACE durant TOTA l'execucio
 extern int mpitrace_on;
+
+extern int tracing_cuda;
+extern int tracing_opencl;
+
+int EXTRAE_ON (void);
+int EXTRAE_TRACING_OPENCL (void);
+int EXTRAE_TRACING_CUDA (void);
 
 /****** Variable global per coneixer el nom del l'aplicacio *******/
 // Serveix per poder donar als fitxers generats el nom del programa
