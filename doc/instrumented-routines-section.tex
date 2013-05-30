@@ -201,6 +201,21 @@ These are the instrumented routines of the pthread runtime:
 \item pthread\_rwlock\_unlock
 \end{itemize}
 
+\section{Instrumented CUDA routines}\label{sec:CUDAinstrumentedroutines}
+
+These are the instrumented CUDA routines in the \TRACE package:
+
+\begin{itemize}
+\item cudaLaunch
+\item cudaConfigureCall
+\item	cudaThreadSynchronize
+\item	cudaStreamCreate
+\item	cudaStreamSynchronize
+\item	cudaMemcpy
+\item	cudaMemcpyAsync
+\item	cudaDeviceReset
+\end{itemize}
+
 \section{Instrumented OpenCL routines}\label{sec:OPENCLinstrumentedroutines}
 
 These are the instrumented OpenCL routines in the \TRACE package:
