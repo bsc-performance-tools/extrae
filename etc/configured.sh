@@ -17,9 +17,6 @@ fi
 
 if test "${EXTRAE_HOME}" != "" ; then
 
-	echo Extrae SVN revision: \$ Rev $Rev$
-	echo
-
 	# Read configuration variables if available!
 	if ! test -f ${EXTRAE_HOME}/etc/extrae-vars.sh ; then
 		echo "Error! Unable to locate ${EXTRAE_HOME}/etc/extrae-vars.sh"
@@ -29,6 +26,10 @@ if test "${EXTRAE_HOME}" != "" ; then
 		source ${EXTRAE_HOME}/etc/extrae-vars.sh
 		echo "Loaded specs for ${PACKAGE_NAME:-Extrae} from ${EXTRAE_HOME}/etc/extrae-vars.sh"
 	fi
+
+	echo
+	echo Extrae SVN branch ${EXTRAE_SVN_BRANCH} at revision ${EXTRAE_SVN_REVISION}
+	echo
 
 	echo ${PACKAGE_NAME} was configured with:
 	echo ${CONFIGURE_LINE}

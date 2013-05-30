@@ -15,6 +15,31 @@ AC_INIT(Extrae, 3.0rc1, tools@bsc.es)
 # GNU Autotools intermediate files are stored in the following directory
 AC_CONFIG_AUX_DIR(config)
 
+SVN=`which svn`
+
+# If SVN command exists and .svn directory also exists, check for the versioning
+if test $? -eq 0 -a -d .svn ; then
+
+	SVN_branch=`${SVN} info . | grep URL | cut -d/ -f 6-`
+	SVN_branch_res=$?
+	SVN_revision=`${SVN} info . | grep "Last Changed Rev:"  | cut -d: -f 2`
+	SVN_revision_res=$?
+	if test ${SVN_branch_res} -eq 0 -a ${SVN_revision_res} -eq 0 ; then
+		echo ${SVN_branch} > SVN-branch
+		echo ${SVN_revision} > SVN-revision
+	fi
+
+fi
+
+if test -f SVN-branch -a -f SVN-revision ; then
+	SVN_branch=`cat SVN-branch`
+	SVN_revision=`cat SVN-revision`
+else
+	SVN_branch=unknown
+	SVN_revision=unknown
+fi
+echo Configuring package ${PACKAGE_STRING} based on ${SVN_branch} revision ${SVN_revision}
+
 # Loads some shell variables like host_cpu and host_os, to get the host information 
 AC_CANONICAL_SYSTEM
 

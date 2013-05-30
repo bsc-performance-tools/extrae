@@ -12,8 +12,13 @@
 2) Change the version if necessary **
  2.a) in the configure.ac (see AC_INIT)
  2.b) in src/common/extrae_version.h
- 2.c) bootstrap & configure & cd doc & make build-documentation, to rebuild documentation (1.c)
- 2.d) add entry in ChangeLog
+ 2.c) svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
+       OR
+      svn copy https://svn.bsc.es/repos/ptools/extrae/branches/2.3 https://svn.bsc.es/repos/ptools/extrae/tags/2.3.5
+ 2.d) download from the new tag
+ 2.e) bootstrap & configure to rebuild documentation (1.c)
+ 2.f) commit the documentation
+ 2.f) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
 
 ** In fact, some developers change version just after releasing a version.
 
@@ -21,9 +26,6 @@
   - this makes sure that the package will compile at least on our environment -
 
 4) Copy the documentation (pdf format) and add it to the buildfarm output to publish it in the webpage
-
-5) Tag in SVN using
-   svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
 
 6) Email & celebrate
   6.a) Addresses

@@ -24,6 +24,8 @@ SHscripts:
 	echo "export EXTRAE_CFLAGS=\"${CFLAGS}\"" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CXX=${CXX}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CXXFLAGS=\"${CXXFLAGS}\"" >> $(SH_SCRIPT)
+	echo "export EXTRAE_SVN_REVISION=`cat ../SVN-revision`" >> $(SH_SCRIPT)
+	echo "export EXTRAE_SVN_BRANCH=`cat ../SVN-branch`" >> $(SH_SCRIPT)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.sh
 	cp extrae.sh $(DESTDIR)$(sysconfdir)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.sh
@@ -44,6 +46,8 @@ CSHscripts:
 	echo "setenv EXTRAE_CFLAGS \"${CFLAGS}\"" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_CXX ${CXX}" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_CXXFLAGS \"${CXXFLAGS}\"" >> $(CSH_SCRIPT)
+	echo "setenv EXTRAE_SVN_REVISION `cat ../SVN-revision`" >> $(CSH_SCRIPT)
+	echo "setenv EXTRAE_SVN_BRANCH `cat ../SVN-branch`" >> $(CSH_SCRIPT)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 	cp extrae.csh $(DESTDIR)$(sysconfdir)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.csh
