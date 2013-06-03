@@ -372,9 +372,28 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
  **      Author : HSG
  **      Description : Checks whether a file exists
  ******************************************************************************/
-int file_exists (char *file)
+int file_exists (char *fname)
 {
-	return access (file, F_OK)== 0;
+#if defined(HAVE_ACCESS)
+	return access (fname, F_OK) == 0;
+#elif defined(HAVE_STAT64)
+	struct stat64 sb;
+	stat64 (fname, &sb);
+	return (sb.st_mode & S_IFMT) == S_IFREG;
+#elif defined(HAVE_STAT)
+	struct stat sb;
+	stat (fname, &sb);
+	return (sb.st_mode & S_IFMT) == S_IFREG;
+#else
+	int fd = open (fname, O_RDONLY);
+	if (fd >= 0)
+	{
+		close (fd);
+		return TRUE;
+	}
+	else
+		return FALSE;
+#endif
 }
 
 /******************************************************************************
