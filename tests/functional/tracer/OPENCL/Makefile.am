@@ -1,7 +1,7 @@
 include $(top_srcdir)/PATHS
 
 EXTRA_DIST = \
- opencl_pcf.reference \
+ opencl-check.pcf.reference \
  opencl-check.sh \
  extrae.xml
 
