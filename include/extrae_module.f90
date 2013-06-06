@@ -1,31 +1,31 @@
-C*****************************************************************************
-C*                        ANALYSIS PERFORMANCE TOOLS                         *
-C*                                   Extrae                                  *
-C*              Instrumentation package for parallel applications            *
-C*****************************************************************************
-C*     ___     This library is free software; you can redistribute it and/or *
-C*    /  __         modify it under the terms of the GNU LGPL as published   *
-C*   /  /  _____    by the Free Software Foundation; either version 2.1      *
-C*  /  /  /     \   of the License, or (at your option) any later version.   *
-C* (  (  ( B S C )                                                           *
-C*  \  \  \_____/   This library is distributed in hope that it will be      *
-C*   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
-C*    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
-C*                  PARTICULAR PURPOSE. See the GNU LGPL for more details.   *
-C*                                                                           *
-C* You should have received a copy of the GNU Lesser General Public License  *
-C* along with this library; if not, write to the Free Software Foundation,   *
-C* Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA          *
-C* The GNU LEsser General Public License is contained in the file COPYING.   *
-C*                                 ---------                                 *
-C*   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
-C*****************************************************************************
+!*****************************************************************************
+!*                        ANALYSIS PERFORMANCE TOOLS                         *
+!*                                   Extrae                                  *
+!*              Instrumentation package for parallel applications            *
+!*****************************************************************************
+!*     ___     This library is free software; you can redistribute it and/or *
+!*    /  __         modify it under the terms of the GNU LGPL as published   *
+!*   /  /  _____    by the Free Software Foundation; either version 2.1      *
+!*  /  /  /     \   of the License, or (at your option) any later version.   *
+!* (  (  ( B S C )                                                           *
+!*  \  \  \_____/   This library is distributed in hope that it will be      *
+!*   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
+!*    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
+!*                  PARTICULAR PURPOSE. See the GNU LGPL for more details.   *
+!*                                                                           *
+!* You should have received a copy of the GNU Lesser General Public License  *
+!* along with this library; if not, write to the Free Software Foundation,   *
+!* Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA          *
+!* The GNU LEsser General Public License is contained in the file COPYING.   *
+!*                                 ---------                                 *
+!*   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
+!*****************************************************************************
 
-C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-C| @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/include/extrae_module.f $
-C| @last_commit: $Date: 2013-05-16 12:34:14 +0200 (dj, 16 mai 2013) $
-C| @version:     $Revision: 1724 $
-C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
+!* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
+!| @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/include/extrae_module.f $
+!| @last_commit: $Date: 2013-05-16 12:34:14 +0200 (dj, 16 mai 2013) $
+!| @version:     $Revision: 1724 $
+!* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
 
       module EXTRAE_MODULE
 
@@ -96,8 +96,8 @@ C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
          integer*8, intent(in) :: extrae_values
          end subroutine extrae_nevent
 
-         subroutine extrae_neventandcounters (num, extrae_types, 
-     1     extrae_value)
+         subroutine extrae_neventandcounters (num, extrae_types, &
+           extrae_value)
          integer*4:: num
          integer*4:: extrae_types
          integer*8:: extrae_values

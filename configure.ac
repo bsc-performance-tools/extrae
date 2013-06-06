@@ -187,12 +187,15 @@ if test "${IS_BG_MACHINE}" = "yes" ; then
       AC_MSG_NOTICE([Attention!])
    else
       if test "${IS_BGL_MACHINE}" = "yes" ; then
+         FC="${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-gfortran"
          CC="${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-gcc"
          CXX="${BG_HOME}/blrts-gnu/bin/powerpc-bgl-blrts-gnu-g++"
       elif test "${IS_BGP_MACHINE}" = "yes" ; then
+         FC="${BG_HOME}/gnu-linux/bin/powerpc-bgp-linux-gfortran"
          CC="${BG_HOME}/gnu-linux/bin/powerpc-bgp-linux-gcc"
          CXX="${BG_HOME}/gnu-linux/bin/powerpc-bgp-linux-g++"
       elif test "${IS_BGQ_MACHINE}" = "yes" ; then
+         FC="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-gfortran"
          CC="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-gcc"
          CXX="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-g++"
          AR="${BG_HOME}/gnu-linux/bin/powerpc64-bgq-linux-ar"
@@ -200,12 +203,14 @@ if test "${IS_BG_MACHINE}" = "yes" ; then
       fi
    fi
 else
-   wanted_C_Compilers="gcc xlc cc"
-   wanted_CXX_Compilers="g++ xlC CC"
+   wanted_C_Compilers="gcc xlc icc cc"
+   wanted_F_Compilers="gfortran xlf ifort f90"
+   wanted_CXX_Compilers="g++ xlC icpc CC"
 fi
 AC_PROG_CC(${wanted_C_Compilers})
 AC_PROG_CXX(${wanted_CXX_Compilers})
 AC_PROG_CPP
+AC_PROG_FC(${wanted_F_Compilers})
 AC_PROG_INSTALL
 AC_PROG_SED
 AC_PROG_AWK
