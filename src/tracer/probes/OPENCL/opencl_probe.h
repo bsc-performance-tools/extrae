@@ -72,10 +72,10 @@ void Extrae_Probe_clEnqueueCopyBuffer_Exit (void);
 void Extrae_Probe_clEnqueueCopyBufferRect_Enter (void);
 void Extrae_Probe_clEnqueueCopyBufferRect_Exit (void);
 
-void Extrae_Probe_clEnqueueNDRangeKernel_Enter (void);
+void Extrae_Probe_clEnqueueNDRangeKernel_Enter (unsigned long long KID);
 void Extrae_Probe_clEnqueueNDRangeKernel_Exit (void);
 
-void Extrae_Probe_clEnqueueTask_Enter (void);
+void Extrae_Probe_clEnqueueTask_Enter (unsigned long long KID);
 void Extrae_Probe_clEnqueueTask_Exit (void);
 
 void Extrae_Probe_clEnqueueNativeKernel_Enter (void);
@@ -116,5 +116,20 @@ void Extrae_Probe_clEnqueueMarkerWithWaitList_Exit (void);
 
 void Extrae_Probe_clEnqueueBarrierWithWaitList_Enter (void);
 void Extrae_Probe_clEnqueueBarrierWithWaitList_Exit (void);
+
+void Extrae_Probe_clEnqueueMarker_Enter (void);
+void Extrae_Probe_clEnqueueMarker_Exit (void);
+
+void Extrae_Probe_clEnqueueBarrier_Enter (void);
+void Extrae_Probe_clEnqueueBarrier_Exit (void);
+
+void Extrae_Probe_clEnqueueUnmapMemObject_Enter (void);
+void Extrae_Probe_clEnqueueUnmapMemObject_Exit(void);
+
+void Extrae_Probe_clEnqueueMapBuffer_Enter (void);
+void Extrae_Probe_clEnqueueMapBuffer_Exit (void);
+
+void Extrae_Probe_clEnqueueMigrateMemObjects_Enter (void);
+void Extrae_Probe_clEnqueueMigrateMemObjects_Exit (void);
 
 #endif /* OPENCL_PROBE_H_INCLUDED */

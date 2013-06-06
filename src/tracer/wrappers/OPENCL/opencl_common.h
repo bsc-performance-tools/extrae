@@ -22,28 +22,30 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/tracer/wrappers/CUDA/cuda_wrapper.c $
+ | @last_commit: $Date: 2013-04-30 15:15:24 +0200 (dt, 30 abr 2013) $
+ | @version:     $Revision: 1696 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _SAMPLING_H_INCLUDED_
-#define _SAMPLING_H_INCLUDED_
+#ifndef OPENCL_COMMON_H_INCLUDED
+#define OPENCL_COMMON_H_INCLUDED
 
-enum
-{
-	SAMPLING_TIMING_REAL,
-	SAMPLING_TIMING_VIRTUAL,
-	SAMPLING_TIMING_PROF,
-	SAMPLING_TIMING_DEFAULT = SAMPLING_TIMING_REAL
-};
+#include <CL/cl.h>
 
-void setTimeSampling (unsigned long long period, unsigned long long variability, int sampling_type);
-void setTimeSampling_postfork (void);
-void Extrae_SamplingHandler (void* address);
+void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
+	cl_device_id device, cl_command_queue_properties properties);
 
-int isSamplingEnabled(void);
-void setSamplingEnabled (int enabled);
-void unsetTimeSampling (void);
+int Extrae_OpenCL_Queue_OoO (cl_command_queue q);
 
-#endif
+void Extrae_OpenCL_clQueueFlush (cl_command_queue queue);
+void Extrae_OpenCL_clQueueFlush_All (void);
+
+void Extrae_OpenCL_addEventToQueue (cl_command_queue queue, cl_event ocl_evt, 
+	unsigned prv_evt);
+void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
+	cl_event ocl_evt, unsigned prv_evt, cl_kernel k);
+
+int Extrae_OpenCL_lookForKernel (cl_kernel k, unsigned *position);
+void Extrae_OpenCL_annotateKernelName (cl_kernel k, char *kname);
+
+#endif /* OPENCL_WRAPPER_H_INCLUDED */

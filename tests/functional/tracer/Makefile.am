@@ -1,5 +1,8 @@
 include $(top_srcdir)/PATHS
 
+SUBDIRS = \
+  OPENCL
+
 check_PROGRAMS = \
  auto-init-fini \
  define_event_type_gen_pcf \

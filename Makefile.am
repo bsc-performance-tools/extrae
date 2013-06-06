@@ -384,6 +384,13 @@ if WANT_CUPTI
 else
 	./substitute $(SED) "@sub_CUPTI_LIBS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
+if WANT_OPENCL
+	./substitute $(SED) "@sub_OPENCL_HOME@" "${OPENCL_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_OPENCL_LDFLAGS@" "${OPENCL_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+else
+	./substitute $(SED) "@sub_OPENCL_HOME@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_OPENCL_LDFLAGS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+endif
 	./substitute $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
 	./substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example

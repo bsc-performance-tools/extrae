@@ -125,9 +125,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "utils.h"
 #include "calltrace.h"
 #include "xml-parse.h"
-#if defined(DEAD_CODE)
-# include "myrinet_hwc.h"
-#endif
 #include "UF_gcc_instrument.h"
 #include "UF_xl_instrument.h"
 #include "mode.h"
@@ -146,6 +143,9 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #if defined(CUDA_SUPPORT)
 # include "cuda_wrapper.h"
+#endif
+#if defined(OPENCL_SUPPORT)
+# include "opencl_wrapper.h"
 #endif
 #include "common_hwc.h"
 
@@ -1919,6 +1919,10 @@ static void Backend_Finalize_close_mpits (int thread)
 	if (Buffer_IsClosed(TRACING_BUFFER(thread)))
 		return;
 
+#if defined(OPENCL_SUPPORT)
+	Extrae_OpenCL_fini ();
+#endif
+
 	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
 	   as that moment was 0, independently if MPI or PACX has run */
 	initialTASKID = Extrae_get_initial_TASKID();
@@ -2033,6 +2037,7 @@ void Backend_Finalize (void)
 
 	/* Stop sampling right now */
 	setSamplingEnabled (FALSE);
+	unsetTimeSampling ();
 
 	/* Write files back to disk , 1st part will include flushing events*/
 	for (thread = 0; thread < maximum_NumOfThreads; thread++) 

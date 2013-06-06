@@ -55,8 +55,72 @@ static char UNUSED rcsid[] = "$Id: mpi_prv_semantics.c 1761 2013-05-23 16:04:22Z
 
 #include "opencl_prv_events.h"
 
+static int OpenCL_Acc_Call (event_t * event, unsigned long long time,
+	unsigned int cpu, unsigned int ptask, unsigned int task,
+	unsigned int thread, FileSet_t *fset )
+{
+	unsigned state;
+	unsigned EvType, nEvType;
+	unsigned long long EvValue, nEvValue;
+	
+	UNREFERENCED_PARAMETER(fset);
 
-static int OpenCL_Call (event_t * event, unsigned long long time,
+	EvType  = Get_EvEvent (event);
+	EvValue = Get_EvValue (event);
+
+	switch (EvType)
+	{
+		case OPENCL_CLENQUEUEFILLBUFFER_ACC_EV:
+		case OPENCL_CLENQUEUECOPYBUFFER_ACC_EV:
+		case OPENCL_CLENQUEUECOPYBUFFERRECT_ACC_EV:
+		case OPENCL_CLENQUEUEREADBUFFER_ACC_EV:
+		case OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV:
+		case OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV:
+		case OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV:
+		case OPENCL_CLENQUEUEMAPBUFFER_ACC_EV:
+		case OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_ACC_EV:
+			state = STATE_MEMORY_XFER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			break;
+
+		case OPENCL_CLENQUEUEBARRIERWITHWAITLIST_ACC_EV:
+		case OPENCL_CLENQUEUEBARRIER_ACC_EV:
+			state = STATE_BARRIER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			break;
+
+		case OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV:
+		case OPENCL_CLENQUEUETASK_ACC_EV:
+		case OPENCL_CLENQUEUENATIVEKERNEL_ACC_EV:
+			state = STATE_RUNNING;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			break;
+
+		default:
+			state = STATE_OVHD;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			break;
+	}
+
+	trace_paraver_state (cpu, ptask, task, thread, time);
+
+	Translate_OpenCL_Operation (EvType, EvValue, &nEvType, &nEvValue);
+	trace_paraver_event (cpu, ptask, task, thread, time, nEvType, nEvValue);
+
+	if (EvType == OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV ||
+	  EvType == OPENCL_CLENQUEUETASK_ACC_EV)
+	{
+		unsigned long long EvParam;
+		EvParam = Get_EvParam (event);
+		trace_paraver_event (cpu, ptask, task, thread, time,
+		  OPENCL_KERNEL_NAME_EV, EvParam);
+	}
+
+	return 0;
+}
+
+
+static int OpenCL_Host_Call (event_t * event, unsigned long long time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset )
 {
@@ -78,13 +142,18 @@ static int OpenCL_Call (event_t * event, unsigned long long time,
 		case OPENCL_CLENQUEUEWRITEBUFFER_EV:
 		case OPENCL_CLENQUEUEREADBUFFERRECT_EV:
 		case OPENCL_CLENQUEUEWRITEBUFFERRECT_EV:
+		case OPENCL_CLENQUEUEMAPBUFFER_EV:
+		case OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_EV:
 			state = STATE_MEMORY_XFER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 
 		case OPENCL_CLWAITFOREVENTS_EV:
 		case OPENCL_CLENQUEUEBARRIERWITHWAITLIST_EV:
+		case OPENCL_CLENQUEUEBARRIER_EV:
 		case OPENCL_CLFINISH_EV:
 			state = STATE_BARRIER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 
 		default:
@@ -98,36 +167,70 @@ static int OpenCL_Call (event_t * event, unsigned long long time,
 	Translate_OpenCL_Operation (EvType, EvValue, &nEvType, &nEvValue);
 	trace_paraver_event (cpu, ptask, task, thread, time, nEvType, nEvValue);
 
+	if (EvType == OPENCL_CLENQUEUENDRANGEKERNEL_EV ||
+	  EvType == OPENCL_CLENQUEUETASK_EV)
+	{
+		unsigned long long EvParam;
+		EvParam = Get_EvParam (event);
+		trace_paraver_event (cpu, ptask, task, thread, time,
+		  OPENCL_KERNEL_NAME_EV, EvParam);
+	}
+
 	return 0;
 }
 
 SingleEv_Handler_t PRV_OpenCL_Event_Handlers[] = {
-	{ OPENCL_CLCREATEBUFFER_EV, OpenCL_Call },
-	{ OPENCL_CLCREATECOMMANDQUEUE_EV, OpenCL_Call },
-	{ OPENCL_CLCREATECONTEXT_EV, OpenCL_Call },
-	{ OPENCL_CLCREATECONTEXTFROMTYPE_EV, OpenCL_Call },
-	{ OPENCL_CLCREATESUBBUFFER_EV, OpenCL_Call },
-	{ OPENCL_CLCREATEKERNEL_EV, OpenCL_Call },
-	{ OPENCL_CLCREATEKERNELSINPROGRAM_EV, OpenCL_Call },
-	{ OPENCL_CLSETKERNELARG_EV, OpenCL_Call },
-	{ OPENCL_CLCREATEPROGRAMWITHSOURCE_EV, OpenCL_Call },
-	{ OPENCL_CLCREATEPROGRAMWITHBINARY_EV, OpenCL_Call },
-	{ OPENCL_CLCREATEPROGRAMWITHBUILTINKERNELS_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUEFILLBUFFER_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUECOPYBUFFER_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUECOPYBUFFERRECT_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUENDRANGEKERNEL_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUETASK_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUENATIVEKERNEL_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUEREADBUFFER_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUEREADBUFFERRECT_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUEWRITEBUFFER_EV, OpenCL_Call },
-	{ OPENCL_CLENQUEUEWRITEBUFFERRECT_EV, OpenCL_Call },
-	{ OPENCL_CLBUILDPROGRAM_EV, OpenCL_Call },
-	{ OPENCL_CLCOMPILEPROGRAM_EV, OpenCL_Call },
-	{ OPENCL_CLLINKPROGRAM_EV, OpenCL_Call },
-	{ OPENCL_CLFINISH_EV, OpenCL_Call },
-	{ OPENCL_CLFLUSH_EV, OpenCL_Call },
+	{ OPENCL_CLCREATEBUFFER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATECOMMANDQUEUE_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATECONTEXT_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATECONTEXTFROMTYPE_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATESUBBUFFER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATEKERNEL_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATEKERNELSINPROGRAM_EV, OpenCL_Host_Call },
+	{ OPENCL_CLSETKERNELARG_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATEPROGRAMWITHSOURCE_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATEPROGRAMWITHBINARY_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCREATEPROGRAMWITHBUILTINKERNELS_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEFILLBUFFER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUECOPYBUFFER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUECOPYBUFFERRECT_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUENDRANGEKERNEL_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUETASK_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUENATIVEKERNEL_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEREADBUFFER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEREADBUFFERRECT_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEWRITEBUFFER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEWRITEBUFFERRECT_EV, OpenCL_Host_Call },
+	{ OPENCL_CLBUILDPROGRAM_EV, OpenCL_Host_Call },
+	{ OPENCL_CLCOMPILEPROGRAM_EV, OpenCL_Host_Call },
+	{ OPENCL_CLLINKPROGRAM_EV, OpenCL_Host_Call },
+	{ OPENCL_CLFINISH_EV, OpenCL_Host_Call },
+	{ OPENCL_CLFLUSH_EV, OpenCL_Host_Call },
+	{ OPENCL_CLWAITFOREVENTS_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEMARKERWITHWAITLIST_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEBARRIERWITHWAITLIST_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEMAPBUFFER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEUNMAPMEMOBJECT_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEMARKER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEBARRIER_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEFILLBUFFER_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUECOPYBUFFER_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUECOPYBUFFERRECT_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV, OpenCL_Acc_Call }, 
+	{ OPENCL_CLENQUEUETASK_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUENATIVEKERNEL_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEREADBUFFER_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEMARKERWITHWAITLIST_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEBARRIERWITHWAITLIST_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEMAPBUFFER_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEUNMAPMEMOBJECT_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEMARKER_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEBARRIER_ACC_EV, OpenCL_Acc_Call },
 	{ NULL_EV, NULL }
 };
 

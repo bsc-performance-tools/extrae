@@ -17,7 +17,7 @@ pi_instrumented:	pi_instrumented.c
 	$(CC) $(CFLAGS) pi_instrumented.c -o pi_instrumented $(LFLAGS)
 
 pi_instrumentedf:   pi_instrumented.f90
-	$(FC) -c $(EXTRAE_HOME)/include/extrae_module.f
+	$(FC) -c $(EXTRAE_HOME)/include/extrae_module.f90
 	$(FC) $(FFLAGS) pi_instrumented.f90 -o pi_instrumentedf $(LFLAGS)
 
 clean:

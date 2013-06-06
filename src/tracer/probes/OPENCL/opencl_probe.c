@@ -301,12 +301,12 @@ void Extrae_Probe_clEnqueueCopyBufferRect_Exit (void)
 }
 
 
-void Extrae_Probe_clEnqueueNDRangeKernel_Enter (void)
+void Extrae_Probe_clEnqueueNDRangeKernel_Enter (unsigned long long KID)
 {
 	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
 	{
 		Backend_Enter_Instrumentation (2);
-		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUENDRANGEKERNEL_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUENDRANGEKERNEL_EV, EVT_BEGIN, KID);
 	}
 }
 
@@ -320,12 +320,12 @@ void Extrae_Probe_clEnqueueNDRangeKernel_Exit (void)
 }
 
 
-void Extrae_Probe_clEnqueueTask_Enter (void)
+void Extrae_Probe_clEnqueueTask_Enter (unsigned long long KID)
 {
 	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
 	{
 		Backend_Enter_Instrumentation (2);
-		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUETASK_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUETASK_EV, EVT_BEGIN, KID);
 	}
 }
 
@@ -584,4 +584,97 @@ void Extrae_Probe_clEnqueueBarrierWithWaitList_Exit (void)
 		Backend_Leave_Instrumentation ();
 	}
 }
+
+
+void Extrae_Probe_clEnqueueMarker_Enter (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		Backend_Enter_Instrumentation (2);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEMARKER_EV, EVT_BEGIN, EMPTY);
+	}
+}
+
+void Extrae_Probe_clEnqueueMarker_Exit (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEMARKER_EV, EVT_END, EMPTY);
+		Backend_Leave_Instrumentation ();
+	}
+}
+
+
+void Extrae_Probe_clEnqueueBarrier_Enter (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		Backend_Enter_Instrumentation (2);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEBARRIER_EV, EVT_BEGIN, EMPTY);
+	}
+}
+
+void Extrae_Probe_clEnqueueBarrier_Exit (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEBARRIER_EV, EVT_END, EMPTY);
+		Backend_Leave_Instrumentation ();
+	}
+}
+
+void Extrae_Probe_clEnqueueUnmapMemObject_Enter (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		Backend_Enter_Instrumentation (2);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEUNMAPMEMOBJECT_EV, EVT_BEGIN, EMPTY);
+	}
+}
+
+void Extrae_Probe_clEnqueueUnmapMemObject_Exit(void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEUNMAPMEMOBJECT_EV, EVT_END, EMPTY);
+		Backend_Leave_Instrumentation ();
+	}
+}
+
+void Extrae_Probe_clEnqueueMapBuffer_Enter (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		Backend_Enter_Instrumentation (2);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEMAPBUFFER_EV, EVT_BEGIN, EMPTY);
+	}
+}
+
+void Extrae_Probe_clEnqueueMapBuffer_Exit (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEMAPBUFFER_EV, EVT_END, EMPTY);
+		Backend_Leave_Instrumentation ();
+	}
+}
+
+void Extrae_Probe_clEnqueueMigrateMemObjects_Enter (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		Backend_Enter_Instrumentation (2);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_EV, EVT_BEGIN, EMPTY);
+	}
+}
+
+void Extrae_Probe_clEnqueueMigrateMemObjects_Exit (void)
+{
+	if (EXTRAE_ON() && EXTRAE_TRACING_OPENCL())
+	{
+		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_EV, EVT_END, EMPTY);
+		Backend_Leave_Instrumentation ();
+	}
+}
+
 

@@ -56,6 +56,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #if defined(SAMPLING_SUPPORT)
 int SamplingSupport = FALSE;
+int SamplingRunning = FALSE;
 int EnabledSampling = FALSE;
 #endif
 
@@ -197,7 +198,24 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
 		return;
 	}
-	ret = sigaddset(&act.sa_mask, SIGALRM);
+
+	if (sampling_type == SAMPLING_TIMING_VIRTUAL)
+	{
+		SamplingClockType = ITIMER_VIRTUAL;
+		signum = SIGVTALRM;
+	}
+	else if (sampling_type == SAMPLING_TIMING_PROF)
+	{
+		SamplingClockType = ITIMER_PROF;
+		signum = SIGPROF;
+	}
+	else
+	{
+		SamplingClockType = ITIMER_REAL;
+		signum = SIGALRM;
+	}
+
+	ret = sigaddset(&act.sa_mask, signum);
 	if (ret != 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
@@ -219,22 +237,6 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	SamplingPeriod_base.it_value.tv_sec = period / 1000000;
 	SamplingPeriod_base.it_value.tv_usec = period % 1000000;
 
-	if (sampling_type == SAMPLING_TIMING_VIRTUAL)
-	{
-		SamplingClockType = ITIMER_VIRTUAL;
-		signum = SIGVTALRM;
-	}
-	else if (sampling_type == SAMPLING_TIMING_PROF)
-	{
-		SamplingClockType = ITIMER_PROF;
-		signum = SIGPROF;
-	}
-	else
-	{
-		SamplingClockType = ITIMER_REAL;
-		signum = SIGALRM;
-	}
-
 	act.sa_sigaction = TimeSamplingHandler;
 	act.sa_flags = SA_SIGINFO;
 
@@ -252,6 +254,8 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	}
 	else
 		Sampling_variability = 2*variability;
+
+	SamplingRunning = TRUE;
 
 	PrepareNextAlarm ();
 }
@@ -273,19 +277,20 @@ void setTimeSampling_postfork (void)
 			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
 			return;
 		}
-		ret = sigaddset(&act.sa_mask, SIGALRM);
-		if (ret != 0)
-		{
-			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
-			return;
-		}
-	
+
 		if (SamplingClockType == ITIMER_VIRTUAL)
 			signum = SIGVTALRM;
 		else if (SamplingClockType == ITIMER_PROF)
 			signum = SIGPROF;
 		else
 			signum = SIGALRM;
+
+		ret = sigaddset(&act.sa_mask, signum);
+		if (ret != 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
+			return;
+		}
 	
 		act.sa_sigaction = TimeSamplingHandler;
 		act.sa_flags = SA_SIGINFO;
@@ -296,8 +301,26 @@ void setTimeSampling_postfork (void)
 			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
 			return;
 		}
+
+		SamplingRunning = TRUE;
 	
 		PrepareNextAlarm ();
 	}
 }
 
+void unsetTimeSampling (void)
+{
+	if (SamplingRunning)
+	{
+		int signum;
+
+		if (SamplingClockType == ITIMER_VIRTUAL)
+			signum = SIGVTALRM;
+		else if (SamplingClockType == ITIMER_PROF)
+			signum = SIGPROF;
+		else
+			signum = SIGALRM;
+
+		signal (signum, SIG_DFL);
+	}
+}

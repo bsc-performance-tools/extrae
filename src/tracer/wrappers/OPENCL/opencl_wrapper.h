@@ -30,6 +30,7 @@
 #ifndef OPENCL_WRAPPER_H_INCLUDED
 #define OPENCL_WRAPPER_H_INCLUDED
 
-void Extrae_OpenCL_init (unsigned rank)
+void Extrae_OpenCL_init (unsigned rank);
+void Extrae_OpenCL_fini (void);
 
 #endif /* OPENCL_WRAPPER_H_INCLUDED */

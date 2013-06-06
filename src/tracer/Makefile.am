@@ -133,7 +133,8 @@ WRAPPERS_CUDA_CFLAGS = -I$(CUPTI_HOME)/include -I$(CUDA_HOME)/include
 endif
 
 WRAPPERS_OCL = probes/OPENCL/opencl_probe.c probes/OPENCL/opencl_probe.h \
- wrappers/OPENCL/opencl_wrapper.c wrappers/OPENCL/opencl_wrapper.h
+ wrappers/OPENCL/opencl_wrapper.c wrappers/OPENCL/opencl_wrapper.h \
+ wrappers/OPENCL/opencl_common.c wrappers/OPENCL/opencl_common.h
 WRAPPERS_OCL_CFLAGS = -I$(OPENCL_HOME)/include
 
 # Wrappers for MPI instrumentation

@@ -256,3 +256,13 @@ AC_DEFUN([AX_CHECK_PPACX_NAME_MANGLING],
       AC_MSG_RESULT([${FORTRAN_DECORATION}])
    fi
 ])
+
+# AX_PACX_SHOW_CONFIGURATION
+# ----------
+AC_DEFUN([AX_PACX_SHOW_CONFIGURATION],
+[
+	echo PACX instrumentation: ${PACX_INSTALLED}
+	if test "${PACX_INSTALLED}" = "yes" ; then
+		echo -e \\\tPACX home:          ${PACX_HOME}
+	fi
+])

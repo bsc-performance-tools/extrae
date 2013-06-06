@@ -216,6 +216,9 @@ These are the instrumented CUDA routines in the \TRACE package:
 \item	cudaDeviceReset
 \end{itemize}
 
+The CUDA accelerators do not have memory for the tracing buffers, so the tracing buffer resides in the host side.
+Typically, the CUDA tracing buffer is flushed at {\tt cudaThreadSynchronize}, {\tt cudaStreamSynchronize} and {\tt cudaMemcpy} calls, so it is possible that the tracing buffer for the device gets filled if no calls to this routines are executed.
+
 \section{Instrumented OpenCL routines}\label{sec:OPENCLinstrumentedroutines}
 
 These are the instrumented OpenCL routines in the \TRACE package:
@@ -238,11 +241,14 @@ These are the instrumented OpenCL routines in the \TRACE package:
 \item clEnqueueCopyBufferRect
 \item clEnqueueFillBuffer
 \item clEnqueueMarkerWithWaitList
+\item clEnqueueMapBuffer
+\item clEnqueueMigrateMemObjects
 \item clEnqueueNativeKernel
 \item clEnqueueNDRangeKernel
 \item clEnqueueReadBuffer
 \item clEnqueueReadBufferRect
 \item clEnqueueTask
+\item clEnqueueUnmapMemObject
 \item clEnqueueWriteBuffer
 \item clEnqueueWriteBufferRect
 \item clFinish
@@ -251,3 +257,9 @@ These are the instrumented OpenCL routines in the \TRACE package:
 \item clSetKernelArg
 \item clWaitForEvents
 \end{itemize}
+
+The OpenCL accelerators have small amounts of memory, so the tracing buffer resides in the host side.
+Typically, the accelerator tracing buffer is flushed at each {\tt cl\_Finish} call, so it is possible that the tracing buffer for the accelerator gets filled if no calls to this routine are executed.
+However if the operated OpenCL command queue is tagged as not Out-of-Order, then flushes will also happen at {\tt clEnqueueReadBuffer}, {\tt clEnqueueReadBufferRect} and {\tt clEnqueueMapBuffer} if their corresponding blocking parameter is set to true.
+
+

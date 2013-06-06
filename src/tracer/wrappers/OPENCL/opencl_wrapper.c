@@ -48,6 +48,7 @@ static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 1696 2013-04-30 13:15:24Z hara
 #include <CL/cl.h>
 #include "wrapper.h"
 #include "opencl_probe.h"
+#include "opencl_common.h"
 
 static cl_mem (*real_clCreateBuffer)(cl_context, cl_mem_flags, size_t, void*, cl_int *) = NULL;
 static cl_command_queue (*real_clCreateCommandQueue)(cl_context, cl_device_id, cl_command_queue_properties, cl_int*) = NULL;
@@ -76,8 +77,22 @@ static cl_program (*real_clLinkProgram)(cl_context, cl_uint, const cl_device_id 
 static cl_int (*real_clFinish)(cl_command_queue) = NULL;
 static cl_int (*real_clFlush)(cl_command_queue) = NULL;
 static cl_int (*real_clWaitForEvents)(cl_uint, const cl_event *el) = NULL;
+#ifdef CL_VERSION_1_2
 static cl_int (*real_clEnqueueMarkerWithWaitList)(cl_command_queue, cl_uint, const cl_event *, cl_event *) = NULL;
 static cl_int (*real_clEnqueueBarrierWithWaitList)(cl_command_queue, cl_uint, const cl_event *, cl_event *) = NULL;
+#endif
+static cl_int (*real_clEnqueueMarker)(cl_command_queue, cl_event *) = NULL;
+static cl_int (*real_clEnqueueBarrier)(cl_command_queue) = NULL;
+static void* (*real_clEnqueueMapBuffer)(cl_command_queue, cl_mem, cl_bool, cl_map_flags, size_t, size_t, cl_uint, const cl_event *, cl_event *, cl_int *) = NULL;
+static cl_int (*real_clEnqueueUnmapMemObject)(cl_command_queue, cl_mem, void *, cl_uint, const cl_event *, cl_event *) = NULL;
+static cl_int (*real_clEnqueueMigrateMemObjects)(cl_command_queue, cl_uint, const cl_mem *, cl_mem_migration_flags, cl_uint, const cl_event *, cl_event *) = NULL;
+
+static int Extrae_Prepare_CommandQueue = FALSE;
+
+void Extrae_OpenCL_fini (void)
+{
+	Extrae_OpenCL_clQueueFlush_All();
+}
 
 void Extrae_OpenCL_init (unsigned rank)
 {
@@ -215,15 +230,42 @@ void Extrae_OpenCL_init (unsigned rank)
 	if (real_clWaitForEvents == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find clWaitForEvents in DSOs!!\n");
 
+#ifdef CL_VERSION_1_2
 	real_clEnqueueMarkerWithWaitList = (cl_int(*)(cl_command_queue, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueMarkerWithWaitList");
 	if (real_clEnqueueMarkerWithWaitList == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMarkerWithWaitList");
+		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMarkerWithWaitList in DSOs!!\n");
 
 	real_clEnqueueBarrierWithWaitList = (cl_int(*)(cl_command_queue, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueBarrierWithWaitList");
 	if (real_clEnqueueBarrierWithWaitList == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueBarrierWithWaitList");
+		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueBarrierWithWaitList in DSOs!!\n");
+#endif
+
+	real_clEnqueueMarker = (cl_int(*)(cl_command_queue, cl_event *))
+		dlsym (RTLD_NEXT, "clEnqueueMarker");
+	if (real_clEnqueueMarker == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMarker in DSOs!!\n");
+
+	real_clEnqueueBarrier = (cl_int(*)(cl_command_queue))
+		dlsym (RTLD_NEXT, "clEnqueueBarrier");
+	if (real_clEnqueueBarrier == NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueBarrier in DSOs!!\n");
+
+	real_clEnqueueMapBuffer = (void* (*)(cl_command_queue, cl_mem, cl_bool, cl_map_flags, size_t, size_t, cl_uint, const cl_event *, cl_event *, cl_int *))
+		dlsym (RTLD_NEXT, "clEnqueueMapBuffer");
+	if (real_clEnqueueMapBuffer != NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMapBuffer in DSOs!!\n");
+
+	real_clEnqueueUnmapMemObject = (cl_int (*)(cl_command_queue, cl_mem, void *, cl_uint, const cl_event *, cl_event *))
+		dlsym (RTLD_NEXT, "clEnqueueUnmapMemObject");
+	if (real_clEnqueueUnmapMemObject != NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueUnmapMemObject in DSOs!!\n");
+
+	real_clEnqueueMigrateMemObjects = (cl_int (*)(cl_command_queue, cl_uint, const cl_mem *, cl_mem_migration_flags, cl_uint, const cl_event *, cl_event *))
+		dlsym (RTLD_NEXT, "clEnqueueMigrateMemObjects");
+	if (real_clEnqueueMigrateMemObjects != NULL && rank == 0)
+		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMigrateMemObjects in DSOs!!\n");
 
 }
 
@@ -270,7 +312,10 @@ cl_command_queue clCreateCommandQueue (cl_context c, cl_device_id d,
 	if (mpitrace_on && real_clCreateCommandQueue != NULL)
 	{
 		Extrae_Probe_clCreateCommandQueue_Enter ();
+		Extrae_Prepare_CommandQueue = TRUE;
 		r = real_clCreateCommandQueue (c, d, p, e);
+		Extrae_OpenCL_clCreateCommandQueue (r, d, p);
+		Extrae_Prepare_CommandQueue = FALSE;
 		Extrae_Probe_clCreateCommandQueue_Exit ();
 	}
 	else if (!mpitrace_on && real_clCreateCommandQueue != NULL)
@@ -386,6 +431,7 @@ cl_kernel clCreateKernel (cl_program p, const char *k, cl_int *e)
 	{
 		Extrae_Probe_clCreateKernel_Enter ();
 		r = real_clCreateKernel (p, k, e);
+		Extrae_OpenCL_annotateKernelName (r, (char*) k);
 		Extrae_Probe_clCreateKernel_Exit ();
 	}
 	else if (!mpitrace_on && real_clCreateKernel != NULL)
@@ -551,8 +597,13 @@ cl_int clEnqueueFillBuffer (cl_command_queue c, cl_mem m, const void *ptr,
 
 	if (mpitrace_on && real_clEnqueueFillBuffer != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueFillBuffer_Enter ();
-		r = real_clEnqueueFillBuffer (c, m, ptr, ps, o, s, n, ewl, e);
+		r = real_clEnqueueFillBuffer (c, m, ptr, ps, o, s, n, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEFILLBUFFER_ACC_EV);
+		if (e != NULL)
+			*e = evt;
 		Extrae_Probe_clEnqueueFillBuffer_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueFillBuffer != NULL)
@@ -569,7 +620,7 @@ cl_int clEnqueueFillBuffer (cl_command_queue c, cl_mem m, const void *ptr,
 }
 
 cl_int clEnqueueCopyBuffer (cl_command_queue c, cl_mem src, cl_mem dst, 
-	size_t so, size_t dso, size_t s, cl_uint n, const cl_event *e, cl_event *evt)
+	size_t so, size_t dso, size_t s, cl_uint n, const cl_event *e, cl_event *ev)
 {
 	cl_int r;
 
@@ -579,13 +630,18 @@ cl_int clEnqueueCopyBuffer (cl_command_queue c, cl_mem src, cl_mem dst,
 
 	if (mpitrace_on && real_clEnqueueCopyBuffer != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueCopyBuffer_Enter ();
-		r = real_clEnqueueCopyBuffer (c, src, dst, so, dso, s, n, e, evt);
+		r = real_clEnqueueCopyBuffer (c, src, dst, so, dso, s, n, e, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUECOPYBUFFER_ACC_EV);
+		if (ev != NULL)
+			*ev = evt;
 		Extrae_Probe_clEnqueueCopyBuffer_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueCopyBuffer != NULL)
 	{
-		r = real_clEnqueueCopyBuffer (c, src, dst, so, dso, s, n, e, evt);
+		r = real_clEnqueueCopyBuffer (c, src, dst, so, dso, s, n, e, ev);
 	}
 	else
 	{
@@ -608,9 +664,14 @@ cl_int clEnqueueCopyBufferRect (cl_command_queue c, cl_mem src, cl_mem dst,
 
 	if (mpitrace_on && real_clEnqueueCopyBufferRect != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueCopyBufferRect_Enter ();
 		res = real_clEnqueueCopyBufferRect (c, src, dst, s, d, r, srp, ssp,
-		  drp, dsp, n, ewl, e);
+		  drp, dsp, n, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUECOPYBUFFER_ACC_EV);
+		if (e != NULL)
+			*e = evt;
 		Extrae_Probe_clEnqueueCopyBufferRect_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueCopyBufferRect != NULL)
@@ -639,8 +700,19 @@ cl_int clEnqueueNDRangeKernel (cl_command_queue c, cl_kernel k, cl_uint n,
 
 	if (mpitrace_on && real_clEnqueueNDRangeKernel != NULL)
 	{
-		Extrae_Probe_clEnqueueNDRangeKernel_Enter ();
-		r = real_clEnqueueNDRangeKernel (c, k, n, gwo, gws, lws, ne, ewl, e);
+		cl_event evt;
+		unsigned kid = 0;
+
+		if (!Extrae_OpenCL_lookForKernel (k, &kid))
+			fprintf (stderr, PACKAGE_NAME": Error! Cannot retrieve kernel name!\n");
+		else
+			kid++;
+		
+		Extrae_Probe_clEnqueueNDRangeKernel_Enter (kid);
+		r = real_clEnqueueNDRangeKernel (c, k, n, gwo, gws, lws, ne, ewl, &evt);
+		Extrae_OpenCL_addEventToQueueWithKernel (c, evt, OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV, k);
+		if (e != NULL)
+			*e = evt;
 		Extrae_Probe_clEnqueueNDRangeKernel_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueNDRangeKernel != NULL)
@@ -666,8 +738,19 @@ cl_int clEnqueueTask (cl_command_queue c, cl_kernel k, cl_uint n,
 
 	if (mpitrace_on && real_clEnqueueTask != NULL)
 	{
-		Extrae_Probe_clEnqueueTask_Enter ();
-		r = real_clEnqueueTask (c, k, n, ewl, e);
+		cl_event evt;
+		unsigned kid = 0;
+
+		if (!Extrae_OpenCL_lookForKernel (k, &kid))
+			fprintf (stderr, PACKAGE_NAME": Error! Cannot retrieve kernel name!\n");
+		else
+			kid++;
+
+		Extrae_Probe_clEnqueueTask_Enter (kid);
+		r = real_clEnqueueTask (c, k, n, ewl, &evt);
+		Extrae_OpenCL_addEventToQueueWithKernel (c, evt, OPENCL_CLENQUEUETASK_ACC_EV, k);
+		if (e != NULL)
+			*e = evt;
 		Extrae_Probe_clEnqueueTask_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueTask != NULL)
@@ -696,8 +779,13 @@ cl_int clEnqueueNativeKernel (cl_command_queue c,
 
 	if (mpitrace_on && real_clEnqueueNativeKernel != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueNativeKernel_Enter ();
-		r = real_clEnqueueNativeKernel (c, ptr, args, cb, nmo, ml, aml, newl, ewl, e);
+		r = real_clEnqueueNativeKernel (c, ptr, args, cb, nmo, ml, aml, newl, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUENATIVEKERNEL_ACC_EV);
+		if (e != NULL)
+			*e = evt;
 		Extrae_Probe_clEnqueueNativeKernel_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueNativeKernel != NULL)
@@ -714,7 +802,7 @@ cl_int clEnqueueNativeKernel (cl_command_queue c,
 }
 
 cl_int clEnqueueReadBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
-	size_t s, void *p, cl_uint u, const cl_event *e, cl_event *evt)
+	size_t s, void *p, cl_uint u, const cl_event *e, cl_event *ev)
 {
 	cl_int r;
 
@@ -724,13 +812,20 @@ cl_int clEnqueueReadBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 
 	if (mpitrace_on && real_clEnqueueReadBuffer != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueReadBuffer_Enter ();
-		r = real_clEnqueueReadBuffer (c, m, b, o, s, p, u, e, evt);
+		r = real_clEnqueueReadBuffer (c, m, b, o, s, p, u, e, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEREADBUFFER_ACC_EV);
+		if (ev != NULL)
+			*ev = evt;
+		if (b && !Extrae_OpenCL_Queue_OoO (c))
+			Extrae_OpenCL_clQueueFlush (c);
 		Extrae_Probe_clEnqueueReadBuffer_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueReadBuffer != NULL)
 	{
-		r = real_clEnqueueReadBuffer (c, m, b, o, s, p, u, e, evt);
+		r = real_clEnqueueReadBuffer (c, m, b, o, s, p, u, e, ev);
 	}
 	else
 	{
@@ -754,9 +849,16 @@ cl_int clEnqueueReadBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 
 	if (mpitrace_on && real_clEnqueueReadBufferRect != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueReadBufferRect_Enter ();
 		res = real_clEnqueueReadBufferRect (c, m, b, bo, ho, r, brp, bsp, hrp,
-		  hsp, ptr, n, ewl ,e);
+		  hsp, ptr, n, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV);
+		if (e != NULL)
+			*e = evt;
+		if (b && !Extrae_OpenCL_Queue_OoO (c))
+			Extrae_OpenCL_clQueueFlush (c);
 		Extrae_Probe_clEnqueueReadBufferRect_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueReadBufferRect != NULL)
@@ -774,7 +876,7 @@ cl_int clEnqueueReadBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 }
 
 cl_int clEnqueueWriteBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
-	size_t s, const void *p, cl_uint u, const cl_event *e, cl_event *evt)
+	size_t s, const void *p, cl_uint u, const cl_event *e, cl_event *ev)
 {
 	cl_int r;
 
@@ -784,13 +886,25 @@ cl_int clEnqueueWriteBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 
 	if (mpitrace_on && real_clEnqueueWriteBuffer != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueWriteBuffer_Enter ();
-		r = real_clEnqueueWriteBuffer (c, m, b, o, s, p, u, e, evt);
+		r = real_clEnqueueWriteBuffer (c, m, b, o, s, p, u, e, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV);
+		if (ev != NULL)
+			*ev = evt;
+/*
+		This is not sure, when writebuffer returns it means that it is sent to
+		the accel, but it does not need to be finished.
+
+		if (b && !Extrae_OpenCL_Queue_OoO (c))
+			Extrae_OpenCL_clQueueFlush (c);
+*/
 		Extrae_Probe_clEnqueueWriteBuffer_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueWriteBuffer != NULL)
 	{
-		r = real_clEnqueueWriteBuffer (c, m, b, o, s, p, u, e, evt);
+		r = real_clEnqueueWriteBuffer (c, m, b, o, s, p, u, e, ev);
 	}
 	else
 	{
@@ -814,9 +928,21 @@ cl_int clEnqueueWriteBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 
 	if (mpitrace_on && real_clEnqueueWriteBufferRect != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueWriteBufferRect_Enter ();
 		res = real_clEnqueueWriteBufferRect (c, m, b, bo, ho, r, brp, bsp,
-		  hrp, hsp, ptr, n, ewl, e);
+		  hrp, hsp, ptr, n, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV);
+		if (e != NULL)
+			*e = evt;
+/*
+		This is not sure, when writebuffer returns it means that it is sent to
+		the accel, but it does not need to be finished.
+
+		if (b && !Extrae_OpenCL_Queue_OoO (c))
+			Extrae_OpenCL_clQueueFlush (c);
+*/
 		Extrae_Probe_clEnqueueWriteBufferRect_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueWriteBufferRect != NULL)
@@ -933,9 +1059,14 @@ cl_int clFinish (cl_command_queue q)
 
 	if (mpitrace_on && real_clFinish != NULL)
 	{
-		Extrae_Probe_clFinish_Enter ();
+		if (!Extrae_Prepare_CommandQueue)
+			Extrae_Probe_clFinish_Enter ();
 		r = real_clFinish (q);
-		Extrae_Probe_clFinish_Exit ();
+		if (!Extrae_Prepare_CommandQueue)
+		{
+			Extrae_OpenCL_clQueueFlush (q);
+			Extrae_Probe_clFinish_Exit ();
+		}
 	}
 	else if (!mpitrace_on && real_clFinish != NULL)
 	{
@@ -982,7 +1113,7 @@ cl_int clWaitForEvents (cl_uint n, const cl_event *el)
 	cl_int r;
 
 #ifdef DEBUG
-	fprintf (stderr, PACKAGE_NAME": Debug: clWaitForEvents (real at %p)\n", real_clWaitForEvents);
+	fprintf (stderr, PACKAGE_NAME": Debug : clWaitForEvents (real at %p)\n", real_clWaitForEvents);
 #endif
 
 	if (mpitrace_on && real_clWaitForEvents != NULL)
@@ -1004,20 +1135,26 @@ cl_int clWaitForEvents (cl_uint n, const cl_event *el)
 	return r;
 }
 
+#ifdef CL_VERSION_1_2
 cl_int clEnqueueMarkerWithWaitList (cl_command_queue q, cl_uint n,
 	const cl_event *ewl, cl_event *e)
 {
 	cl_int r;
 
 #ifdef DEBUG
-	fprintf (stderr, PACKAGE_NAME": Debug: clEnqueueMarkerWithWaitList (real at %p)\n", real_clEnqueueMarkerWithWaitList);
+	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueMarkerWithWaitList (real at %p)\n", real_clEnqueueMarkerWithWaitList);
 #endif
 
 	if (mpitrace_on && real_clEnqueueMarkerWithWaitList != NULL)
 	{
+		cl_event evt;
+
 		Extrae_Probe_clEnqueueMarkerWithWaitList_Enter ();
-		r = real_clEnqueueMarkerWithWaitList (q, n, ewl, e);
-		Extrae_Probe_clEnqueueMarkerWithWaitList_Enter ();
+		r = real_clEnqueueMarkerWithWaitList (q, n, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEMARKERWITHWAITLIST_ACC_EV);
+		if (e != NULL)
+			*e = evt;
+		Extrae_Probe_clEnqueueMarkerWithWaitList_Exit ();
 	}
 	else if (!mpitrace_on && real_clEnqueueMarkerWithWaitList != NULL)
 	{
@@ -1025,7 +1162,7 @@ cl_int clEnqueueMarkerWithWaitList (cl_command_queue q, cl_uint n,
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueMarkerWithWaitList!\n");
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueMarkerWithWaitList was not hooked!\n");
 		exit (-1);
 	}
 
@@ -1038,22 +1175,210 @@ cl_int clEnqueueBarrierWithWaitList (cl_command_queue q, cl_uint n,
 	cl_int r;
 
 #ifdef DEBUG
-	fprintf (stderr, PACKAGE_NAME": Debug: clEnqueueBarrierWithWaitList (real at %p)\n", real_clEnqueueBarrierWithWaitList);
+	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueBarrierWithWaitList (real at %p)\n", real_clEnqueueBarrierWithWaitList);
 #endif
 
-	if (mpitrace_on && real_clEnqueueMarkerWithWaitList != NULL)
+	if (mpitrace_on && real_clEnqueueBarrierWithWaitList != NULL)
 	{
-		Extrae_Probe_clEnqueueBarrierWithWaitList_Enter ();
-		r = real_clEnqueueBarrierWithWaitList (q, n, ewl, e);
-		Extrae_Probe_clEnqueueBarrierWithWaitList_Enter ();
+		cl_event evt;
+
+		if (!Extrae_Prepare_CommandQueue)
+			Extrae_Probe_clEnqueueBarrierWithWaitList_Enter ();
+		r = real_clEnqueueBarrierWithWaitList (q, n, ewl, &evt);
+		if (!Extrae_Prepare_CommandQueue)
+		{
+			Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEBARRIERWITHWAITLIST_ACC_EV);
+			if (e != NULL)
+				*e = evt;
+			Extrae_Probe_clEnqueueBarrierWithWaitList_Exit ();
+		}
+		else
+		{
+			if (e != NULL)
+				*e = evt;
+		}
 	}
-	else if (!mpitrace_on && real_clEnqueueMarkerWithWaitList != NULL)
+	else if (!mpitrace_on && real_clEnqueueBarrierWithWaitList != NULL)
 	{
 		r = real_clEnqueueBarrierWithWaitList (q, n, ewl, e);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueBarrierWithWaitList!\n");
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueBarrierWithWaitList was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+#endif
+
+cl_int clEnqueueMarker (cl_command_queue q, cl_event *e)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueMarker (real at %p)\n", real_clEnqueueMarker);
+#endif
+
+	if (mpitrace_on && real_clEnqueueMarker != NULL)
+	{
+		cl_event evt;
+
+		if (!Extrae_Prepare_CommandQueue)
+			Extrae_Probe_clEnqueueMarker_Enter ();
+		r = real_clEnqueueMarker (q, &evt);
+		if (!Extrae_Prepare_CommandQueue)
+		{
+			Extrae_Probe_clEnqueueMarker_Exit ();
+			Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEMARKER_ACC_EV);
+			if (e != NULL)
+				*e = evt;
+		}
+		else
+		{
+			if (e != NULL)
+				*e = evt;
+		}
+	}
+	else if (!mpitrace_on && real_clEnqueueMarker != NULL)
+	{
+		r = real_clEnqueueMarker (q, e);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueMarker was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clEnqueueBarrier (cl_command_queue q)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueBarrier (real at %p)\n", real_clEnqueueBarrier);
+#endif
+
+	if (mpitrace_on && real_clEnqueueBarrier != NULL)
+	{
+		if (!Extrae_Prepare_CommandQueue)
+			Extrae_Probe_clEnqueueBarrier_Enter ();
+		r = real_clEnqueueBarrier (q);
+		if (!Extrae_Prepare_CommandQueue)
+			Extrae_Probe_clEnqueueBarrier_Exit ();
+	}
+	else if (!mpitrace_on && real_clEnqueueBarrier != NULL)
+	{
+		r = real_clEnqueueBarrier (q);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueBarrier was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+void *clEnqueueMapBuffer (cl_command_queue q, cl_mem m, cl_bool b,
+	cl_map_flags mf, size_t o, size_t s, cl_uint n, const cl_event *ewl,
+	cl_event *e, cl_int *err)
+{
+	void *r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueMapBuffer (real at %p)\n", real_clEnqueueMapBuffer);
+#endif
+
+	if (mpitrace_on && real_clEnqueueMapBuffer != NULL)
+	{
+		cl_event evt;
+
+		Extrae_Probe_clEnqueueMapBuffer_Enter ();
+		r = real_clEnqueueMapBuffer (q, m, b, mf, o, s, n, ewl, &evt, err);
+		Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEUNMAPMEMOBJECT_ACC_EV);
+		if (e != NULL)
+			*e = evt;
+		if (b && !Extrae_OpenCL_Queue_OoO (q))
+			Extrae_OpenCL_clQueueFlush (q);
+		Extrae_Probe_clEnqueueMapBuffer_Exit ();
+	}
+	else if (!mpitrace_on && real_clEnqueueMapBuffer != NULL)
+	{
+		r = real_clEnqueueMapBuffer (q, m, b, mf, o, s, n, ewl, e, err);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueMapBuffer was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clEnqueueUnmapMemObject (cl_command_queue q, cl_mem m, void *p,
+	cl_uint n, const cl_event *ewl, cl_event *e)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueUnmapMemObject (real at %p)\n", real_clEnqueueUnmapMemObject);
+#endif
+
+	if (mpitrace_on && real_clEnqueueUnmapMemObject != NULL)
+	{
+		cl_event evt;
+
+		Extrae_Probe_clEnqueueUnmapMemObject_Enter ();
+		r = real_clEnqueueUnmapMemObject (q, m, p, n, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEUNMAPMEMOBJECT_ACC_EV);
+		if (e != NULL)
+			*e = evt;
+		Extrae_Probe_clEnqueueUnmapMemObject_Exit ();
+	}
+	else if (!mpitrace_on && real_clEnqueueUnmapMemObject != NULL)
+	{
+		r = real_clEnqueueUnmapMemObject (q, m, p, n, ewl, e);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": FatalError clEnqueueUnmapMemObject was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clEnqueueMigrateMemObjects (cl_command_queue q, cl_uint n, 
+	const cl_mem *mo, cl_mem_migration_flags f, cl_uint ne,
+	const cl_event *ewl, cl_event *e)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueUnmapMemObject (real at %p)\n", real_clEnqueueUnmapMemObject);
+#endif
+
+	if (mpitrace_on && real_clEnqueueMigrateMemObjects != NULL)
+	{
+		cl_event evt;
+
+		Extrae_Probe_clEnqueueMigrateMemObjects_Enter ();
+		r = real_clEnqueueMigrateMemObjects (q, n, mo, f, ne, ewl, &evt);
+		Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_ACC_EV);
+		if (e != NULL)
+			*e = evt;
+		Extrae_Probe_clEnqueueMigrateMemObjects_Exit ();
+	}
+	else if (!mpitrace_on && real_clEnqueueMigrateMemObjects != NULL)
+	{
+		r = real_clEnqueueMigrateMemObjects (q, n, mo, f, ne, ewl, e);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": FatalError clclEnqueueMigrateMemObjects was not hooked!\n");
 		exit (-1);
 	}
 
