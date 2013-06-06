@@ -13,4 +13,4 @@ if test ${NENTRIES} -ne 2 -o ${NENTRIES} -ne 2 ; then
 	exit 1
 fi
 
-diff opencl-check.reference opencl-check.pcf 
+diff opencl-check.reference opencl-check.pcf
