@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 07Jun2013 Add CUDA fini to flush all streams just in case some did
+               not get flushed
  + 06Jun2013 Added check for Extrae fortran API / define_event_type
              Additional bits for instrumenting OpenCL
  + 30May2013 First part of the OpenCL instrumentation

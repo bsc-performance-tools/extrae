@@ -1919,6 +1919,10 @@ static void Backend_Finalize_close_mpits (int thread)
 	if (Buffer_IsClosed(TRACING_BUFFER(thread)))
 		return;
 
+#if defined(CUDA_SUPPORT)
+	Extrae_CUDA_fini ();
+#endif
+
 #if defined(OPENCL_SUPPORT)
 	Extrae_OpenCL_fini ();
 #endif

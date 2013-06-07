@@ -97,6 +97,11 @@ void Extrae_CUDA_init (int rank)
 		fprintf (stderr, PACKAGE_NAME": Unable to find cudaDeviceReset in DSOs!!\n");
 }
 
+void Extrae_CUDA_fini (void)
+{
+	Extrae_CUDA_flush_all_streams();
+}
+
 #if 0
 static int _cudaLaunch_device = 0;
 static int _cudaLaunch_stream = 0;

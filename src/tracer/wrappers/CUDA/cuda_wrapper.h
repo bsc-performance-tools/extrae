@@ -31,6 +31,7 @@
 #define CUDA_WRAPPER_H_
 
 void Extrae_CUDA_init (int rank);
+void Extrae_CUDA_fini (void);
 
 #endif
 

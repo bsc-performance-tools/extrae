@@ -445,6 +445,15 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
+void Extrae_CUDA_flush_all_streams (void)
+{
+	for (i = 0; i < devices[devid].nstreams; i++)
+	{
+		Extrae_CUDA_FlushStream (devid, i);
+		Extrae_CUDA_SynchronizeStream (devid, i);
+	}
+}
+
 void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
 {
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
@@ -672,3 +681,20 @@ void Extrae_reallocate_CUDA_info (unsigned nthreads)
 	}
 }
 
+void Extrae_cudaThreadSynchronize_Exit (void)
+{
+	int devid;
+	int i;
+
+	cudaGetDevice (&devid);
+	Extrae_CUDA_Initialize (devid);
+
+	for (i = 0; i < devices[devid].nstreams; i++)
+	{
+		Extrae_CUDA_FlushStream (devid, i);
+		Extrae_CUDA_SynchronizeStream (devid, i);
+	}
+
+	Probe_Cuda_ThreadBarrier_Exit ();
+	Backend_Leave_Instrumentation ();
+}
