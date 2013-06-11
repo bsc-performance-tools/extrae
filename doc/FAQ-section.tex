@@ -107,14 +107,14 @@
 
 \begin{itemize}
 
-\item {\bf Question:} Why do the environment variables are not exported?\\
-      {\bf Answer:  } MPI applications are launched using special programs (like {\tt mpirun, poe, mprun, srun...}) that spawn the application for the selected resources. Some of these programs do not export all the environment variables to the spawned processes. Check if the the launching program does have special parameters to do that, or use the approach used on section \ref{cha:Examples} based on launching scripts instead of MPI applications.
-
-\item {\bf Question:} The application runs but does not generate intermediate trace files (*.mpit)\\
+\item {\bf Question:} I executed my application instrumenting with Extrae, even though it appears that Extrae is not intrumenting anything. There is neither any Extrae message nor any Extrae output files (set-X/*.mpit)\\
       {\bf Answer 1:} Check that environment variables are correctly passed to the application.\\
       {\bf Answer 2:} If the code is Fortran, check that the number of underscores used to decorate routines in the instrumentation library matches the number of underscores added by the Fortran compiler you used to compile and link the application. You can use the {\tt nm} and {\tt grep} commands to check it.\\
       {\bf Answer 3:} If the code is MPI and Fortran, check that you're using the proper Fortran library for the instrumentation.\\
       {\bf Answer 4:} If the code is MPI and you are using LD\_PRELOAD, check that the binary is linked against a shared MPI library (you can use the {\tt ldd} command).\\
+
+\item {\bf Question:} Why do the environment variables are not exported?\\
+      {\bf Answer:  } MPI applications are launched using special programs (like {\tt mpirun, poe, mprun, srun...}) that spawn the application for the selected resources. Some of these programs do not export all the environment variables to the spawned processes. Check if the the launching program does have special parameters to do that, or use the approach used on section \ref{cha:Examples} based on launching scripts instead of MPI applications.
 
 \item {\bf Question:} The instrumentation begins for a single process instead for several processes?\\
       {\bf Answer 1:} Check that you place the appropriate parameter to indicate the number of tasks (typically -np).\\
