@@ -1,7 +1,8 @@
 include $(top_srcdir)/PATHS
 
 SUBDIRS = \
-  OPENCL
+  OPENCL \
+  CUDA
 
 check_PROGRAMS = \
  auto-init-fini \

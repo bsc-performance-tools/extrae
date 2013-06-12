@@ -660,7 +660,8 @@ AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
   tests/src/Makefile tests/src/common/Makefile tests/src/tracer/Makefile \
   tests/src/tracer/clocks/Makefile \
   tests/functional/Makefile tests/functional/launcher/Makefile \
-  tests/functional/tracer/Makefile tests/functional/tracer/OPENCL/Makefile \
+  tests/functional/tracer/Makefile \
+  tests/functional/tracer/OPENCL/Makefile tests/functional/tracer/CUDA/Makefile \
   tests/functional/merger/Makefile])
 AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
 ### TEMPORARILY_DISABLED

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 12Jun2013 Add check for CUDA
  + 07Jun2013 Add CUDA fini to flush all streams just in case some did
                not get flushed
  + 06Jun2013 Added check for Extrae fortran API / define_event_type
