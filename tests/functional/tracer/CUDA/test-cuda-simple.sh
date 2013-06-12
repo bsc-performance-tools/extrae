@@ -68,7 +68,6 @@ nvcc -g hello.cu -o hello
 
 ./trace.sh ./hello
 
-
 # Check tests
 getEventType "Flushing Traces" hello.prv
 checkInPCF "CUDA" hello.pcf 
