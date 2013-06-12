@@ -447,11 +447,15 @@ void Extrae_cudaThreadSynchronize_Exit (void)
 
 void Extrae_CUDA_flush_all_streams (void)
 {
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_FlushStream (devid, i);
-		Extrae_CUDA_SynchronizeStream (devid, i);
-	}
+	int i;
+	int devid;
+
+	for (devid = 0; devid < CUDAdevices; devid++)
+		for (i = 0; i < devices[devid].nstreams; i++)
+		{
+			Extrae_CUDA_FlushStream (devid, i);
+			Extrae_CUDA_SynchronizeStream (devid, i);
+		}
 }
 
 void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
@@ -679,22 +683,4 @@ void Extrae_reallocate_CUDA_info (unsigned nthreads)
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot reallocate CUDA parameters buffers per thread!\n");
 		exit (-1);
 	}
-}
-
-void Extrae_cudaThreadSynchronize_Exit (void)
-{
-	int devid;
-	int i;
-
-	cudaGetDevice (&devid);
-	Extrae_CUDA_Initialize (devid);
-
-	for (i = 0; i < devices[devid].nstreams; i++)
-	{
-		Extrae_CUDA_FlushStream (devid, i);
-		Extrae_CUDA_SynchronizeStream (devid, i);
-	}
-
-	Probe_Cuda_ThreadBarrier_Exit ();
-	Backend_Leave_Instrumentation ();
 }
