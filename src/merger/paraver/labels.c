@@ -429,6 +429,8 @@ static void HWC_PARAVER_Labels (FILE * pcfFD)
 
 						/* fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(position), description); */
 						fprintf (pcfFD, "%d  %d %s\n", 7, HWC_COUNTER_TYPE(ptmp->Events[cnt]), description);
+						if (get_option_merge_AbsoluteCounters())
+							fprintf (pcfFD, "%d  %d Absolute %s\n", 7, HWC_COUNTER_TYPE(ptmp->Events[cnt])+HWC_DELTA_ABSOLUTE, description);
 					}
 				}
 #elif defined(PMAPI_COUNTERS)
@@ -445,6 +447,8 @@ static void HWC_PARAVER_Labels (FILE * pcfFD)
 						fprintf (pcfFD, "%s\n", TYPE_LABEL);
 
 					fprintf (pcfFD, "%d  %d %s (%s)\n", 7, HWC_COUNTER_TYPE(cnt, EvCnt), evp->short_name, evp->long_name);
+					if (get_option_merge_AbsoluteCounters())
+						fprintf (pcfFD, "%d  %d Absolute %s (%s)\n", 7, HWC_COUNTER_TYPE(cnt, EvCnt)+HWC_DELTA_ABSOLUTE, evp->short_name, evp->long_name);
 					AddedCounters++;
 				}
 #endif

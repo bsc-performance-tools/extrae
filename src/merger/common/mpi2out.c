@@ -106,6 +106,7 @@ void Help (const char *ProgName)
           "Options:\n"
           "    -h        Get this help.\n"
           "    -v        Increase verbosity.\n"
+          "    -absolute-counters Emit hardware counters in absolute form in addition to relative form.\n"
           "    -o file   Output trace file name.\n"
           "    -e file   Uses the executable file to obtain some information.\n"
           "    -f file   MpitFILE File with the names of the \".mpit\" input files.\n"
@@ -463,6 +464,11 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		if (!strcmp (argv[CurArg], "-v"))
 		{
 			set_option_merge_VerboseLevel (get_option_merge_VerboseLevel()+1);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-absolute-counters"))
+		{
+			set_option_merge_AbsoluteCounters (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-o"))

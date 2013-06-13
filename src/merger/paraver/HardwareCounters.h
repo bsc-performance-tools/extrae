@@ -83,8 +83,9 @@ typedef struct _cQueue
 extern CntQueue CountersTraced;
 
 int HardwareCounters_Emit (int ptask, int task, int thread,
-  unsigned long long time, event_t * Event,
-	unsigned int *outtype, unsigned long long *outvalue);
+	unsigned long long time, event_t * Event,
+	unsigned int *outtype, unsigned long long *outvalue,
+	int absolute);
 void HardwareCounters_Show (event_t * Event, int ncounters);
 void HardwareCounters_Get (event_t *Event, unsigned long long *buffer);
 void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds);

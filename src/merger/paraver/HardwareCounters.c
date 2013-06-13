@@ -77,7 +77,7 @@ CntQueue CountersTraced;
 
 int HardwareCounters_Emit (int ptask, int task, int thread,
 	unsigned long long time, event_t * Event, unsigned int *outtype,
-	unsigned long long *outvalue)
+	unsigned long long *outvalue, int absolute)
 {
 #warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
 	int cnt;
@@ -97,9 +97,19 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 			if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
 			    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
 			{
-				Sthread->counters[cnt] = Event->HWCValues[cnt];
-				outvalue[cnt] = 0;
-				outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
+				if (!absolute)
+				{
+					Sthread->counters[cnt] = 0; /* Event->HWCValues[cnt]; */
+					outvalue[cnt] = 0;
+					outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
+				}
+				else
+				{
+					Sthread->counters[cnt] = 0; /* Event->HWCValues[cnt]; */
+					outvalue[cnt] = 0;
+					outtype[cnt] = Sthread->HWCSets_types[set_id][cnt]
+					  + HWC_DELTA_ABSOLUTE;
+				}
 			}
 			else
 				outtype[cnt] = NO_COUNTER;
@@ -137,16 +147,34 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 			/* Protect when counters are incorrect (major timestamp, lower counter value) */
 			if (Event->HWCValues[cnt] >= Sthread->counters[cnt])
 			{
-				outvalue[cnt] = Event->HWCValues[cnt] - Sthread->counters[cnt];
-				outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
+				if (!absolute)
+				{
+					outvalue[cnt] = Event->HWCValues[cnt] - Sthread->counters[cnt];
+					outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
+				}
+				else
+				{
+					outvalue[cnt] = Event->HWCValues[cnt];
+					outtype[cnt] = Sthread->HWCSets_types[set_id][cnt]
+					  + HWC_DELTA_ABSOLUTE;
+				}
 			}
 			else
 			{
 				outtype[cnt] = NO_COUNTER;
 			}
 # else
-			outvalue[cnt] = Event->HWCValues[cnt];
-			outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
+			if (!absolute)
+			{
+				outvalue[cnt] = Event->HWCValues[cnt];
+				outtype[cnt] = Sthread->HWCSets_types[set_id][cnt];
+			}
+			else
+			{
+				outvalue[cnt] = Event->HWCValues[cnt];
+				outtype[cnt] = Sthread->HWCSets_types[set_id][cnt]
+				  + HWC_DELTA_ABSOLUTE;
+			}
 # endif
 
 			Sthread->counters[cnt] = Event->HWCValues[cnt];
@@ -158,9 +186,18 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 
 		if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER)
 		{
-			outvalue[cnt]= Event->HWCValues[cnt] - Sthread->counters[cnt];
-			outtype[cnt] = HWC_COUNTER_TYPE (cnt, Sthread->HWCSets[set_id][cnt]);
-			Sthread->counters[cnt] = Event->HWCValues[cnt];
+			if (!absolute)
+			{
+				outvalue[cnt]= Event->HWCValues[cnt] - Sthread->counters[cnt];
+				outtype[cnt] = HWC_COUNTER_TYPE (cnt, Sthread->HWCSets[set_id][cnt]);
+				Sthread->counters[cnt] = Event->HWCValues[cnt];
+			}
+			else
+			{
+				outvalue[cnt]= Event->HWCValues[cnt] - Sthread->counters[cnt];
+				outtype[cnt] = HWC_COUNTER_TYPE (cnt, Sthread->HWCSets[set_id][cnt]) 
+				  + HWC_DELTA_ABSOLUTE;
+			}
 		}
 		else
 			outtype[cnt] = NO_COUNTER;

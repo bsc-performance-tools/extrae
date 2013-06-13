@@ -124,3 +124,7 @@ int get_option_merge_BG_XYZT (void) { return option_merge_BG_XYZT; }
 void set_option_merge_BG_XYZT (int b) { option_merge_BG_XYZT = b; }
 #endif
 
+static int option_merge_AbsoluteCounters = FALSE;
+int get_option_merge_AbsoluteCounters (void) { return option_merge_AbsoluteCounters; }
+void set_option_merge_AbsoluteCounters (int b) { option_merge_AbsoluteCounters = b; }
+

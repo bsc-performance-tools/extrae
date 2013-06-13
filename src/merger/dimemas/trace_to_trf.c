@@ -433,14 +433,21 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 				if (Get_EvHWCRead (current_event))
 				{
 					int i;
-					unsigned int hwctype[MAX_HWC];
-					unsigned long long hwcvalue[MAX_HWC];
+					unsigned int hwctype[2*MAX_HWC];
+					unsigned long long hwcvalue[2*MAX_HWC];
 
-#warning "Aixo es horrible, caldra retocar-ho"
-					HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue);
+#warning "Aixo es horrible, caldra retocar-ho" 
+					HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE);
 					for (i = 0; i < MAX_HWC; i++)
 						if (NO_COUNTER != hwctype[i])
 							Dimemas_User_Event (fset->output_file, task-1, thread-1, hwctype[i], hwcvalue[i]);
+					if (get_option_merge_AbsoluteCounters())
+					{
+						HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE);
+						for (i = 0; i < MAX_HWC; i++)
+							if (NO_COUNTER != hwctype[i])
+								Dimemas_User_Event (fset->output_file, task-1, thread-1, hwctype[i], hwcvalue[i]);
+					}
 				}
 #endif
 			}

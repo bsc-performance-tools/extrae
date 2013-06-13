@@ -101,4 +101,7 @@ int get_option_merge_BG_XYZT (void);
 void set_option_merge_BG_XYZT (int b);
 #endif
 
+int get_option_merge_AbsoluteCounters (void);
+void set_option_merge_AbsoluteCounters (int b);
+
 #endif

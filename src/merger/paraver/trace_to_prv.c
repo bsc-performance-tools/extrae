@@ -433,10 +433,17 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					}
 
 #warning "Aixo es horrible, caldra retocar-ho"
-					if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue))
+					if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE))
 						for (i = 0; i < MAX_HWC; i++)
 							if (NO_COUNTER != hwctype[i])
 								trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+					if (get_option_merge_AbsoluteCounters())
+					{
+						if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE))
+							for (i = 0; i < MAX_HWC; i++)
+								if (NO_COUNTER != hwctype[i])
+									trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+					}
 				}
 #endif
 			}
