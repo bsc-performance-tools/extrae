@@ -632,6 +632,34 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 						}
 					}
 
+					/* Special instrumentation for fork() / wait() / exec* calls */
+					if (!BinaryLinkedWithInstrumentation &&
+					   (
+					    strncmp (calledname, "fork", strlen("fork")) == 0 ||
+					    strncmp (calledname, "wait", strlen("wait")) == 0 ||
+					    strncmp (calledname, "waitpid", strlen("waitpid")) == 0 ||
+					    strncmp (calledname, "system", strlen("system")) == 0 ||
+					    strncmp (calledname, "execl", strlen("execl")) == 0 ||
+					    strncmp (calledname, "execle", strlen("execle")) == 0 ||
+					    strncmp (calledname, "execlp", strlen("execlp")) == 0 ||
+					    strncmp (calledname, "execv", strlen("execv")) == 0 ||
+					    strncmp (calledname, "execve", strlen("execve")) == 0 ||
+					    strncmp (calledname, "execvp", strlen("execvp")) == 0
+						)
+					   )
+					{
+						/* Instrument the routine that invokes the runtime */
+						if (!XML_excludeAutomaticFunctions() && strncmp(name, "vvfork", strlen("vvfork")) != 0)
+							USERset.insert (name);
+						if (VerboseLevel)
+						{
+							if (!XML_excludeAutomaticFunctions())
+								cout << PACKAGE_NAME << ": Adding routine " << name << " to the user function list because it calls to " << calledname << endl;
+							else
+								cout << PACKAGE_NAME << ": Will not add routine to the user function list " << name << " due to user request in the XML configuration file" << endl;
+						}
+					}
+
 					/* Instrument routines that call CUDA */
 					if (appType->get_isCUDA())
 					{

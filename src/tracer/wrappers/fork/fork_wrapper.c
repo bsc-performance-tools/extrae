@@ -61,6 +61,8 @@ void Extrae_Probe_fork_Entry (void)
 	Backend_Enter_Instrumentation (2);
 	Probe_fork_Entry ();
 
+	unsetTimeSampling();
+
 #if USE_HARDWARE_COUNTERS
 	/* We need to stop counters and restart after fork() */
 	HWC_Stop_Current_Set (LAST_READ_TIME, THREADID);
@@ -97,10 +99,11 @@ void Extrae_Probe_fork_Exit (void)
 		MyDepthOfAllProcesses++;
 
 		Extrae_Probe_fork_child_Exit();
-		setTimeSampling_postfork ();
 	}
 	else
 		Extrae_Probe_fork_parent_Exit();
+
+	setTimeSampling_postfork ();
 }
 
 void Extrae_Probe_wait_Entry (void)

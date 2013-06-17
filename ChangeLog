@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 17Jun2013 Add instrumentation for routines that call fork/wait/...
  + 12Jun2013 Add check for CUDA
  + 07Jun2013 Add CUDA fini to flush all streams just in case some did
                not get flushed
