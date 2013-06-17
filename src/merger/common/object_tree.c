@@ -110,7 +110,17 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{
 				thread_t *thread_info = GET_THREAD_INFO(ptask+1,task+1,thread+1);
-				thread_info->cpu = files[i].cpu;
+
+				/* Look for the appropriate CPU for this ptask, task, thread */
+				for (i = 0; i < nfiles; i++)
+					if (files[i].ptask == ptask+1 &&
+					    files[i].task == task+1 &&
+					    files[i].thread == thread+1)
+					{
+						thread_info->cpu = files[i].cpu;
+						break;
+					}
+
 				thread_info->dimemas_size = 0;
 				thread_info->virtual_thread = thread+1;
 				thread_info->nStates = 0;

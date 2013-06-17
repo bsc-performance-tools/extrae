@@ -1129,7 +1129,7 @@ int merger_post (int numtasks, int taskid)
 		unsigned first_node = InputTraces[0].nodeid;
 		for (i = 1; i < nTraces && all_nodes_are_equal; i++)
 			all_nodes_are_equal = (first_node == InputTraces[i].nodeid);
-    set_option_merge_SincronitzaTasks (!all_nodes_are_equal);
+		set_option_merge_SincronitzaTasks (!all_nodes_are_equal);
 
 		if (0 == taskid)
 		{
