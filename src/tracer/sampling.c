@@ -60,6 +60,8 @@ int SamplingRunning = FALSE;
 int EnabledSampling = FALSE;
 #endif
 
+static struct sigaction signalaction;
+
 int isSamplingEnabled(void)
 {
 #if defined(SAMPLING_SUPPORT)
@@ -188,11 +190,10 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 {
 	int signum;
 	int ret;
-	struct sigaction act;
 
-	memset (&act, 0, sizeof(act));
+	memset (&signalaction, 0, sizeof(signalaction));
 
-	ret = sigemptyset(&act.sa_mask);
+	ret = sigemptyset(&signalaction.sa_mask);
 	if (ret != 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
@@ -215,7 +216,7 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 		signum = SIGALRM;
 	}
 
-	ret = sigaddset(&act.sa_mask, signum);
+	ret = sigaddset(&signalaction.sa_mask, signum);
 	if (ret != 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
@@ -237,10 +238,10 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	SamplingPeriod_base.it_value.tv_sec = period / 1000000;
 	SamplingPeriod_base.it_value.tv_usec = period % 1000000;
 
-	act.sa_sigaction = TimeSamplingHandler;
-	act.sa_flags = SA_SIGINFO;
+	signalaction.sa_sigaction = TimeSamplingHandler;
+	signalaction.sa_flags = SA_SIGINFO;
 
-	ret = sigaction (signum, &act, NULL);
+	ret = sigaction (signum, &signalaction, NULL);
 	if (ret != 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
@@ -265,13 +266,12 @@ void setTimeSampling_postfork (void)
 {
 	int signum;
 	int ret;
-	struct sigaction act;
 
 	if (EnabledSampling)
 	{
-		memset (&act, 0, sizeof(act));
+		memset (&signalaction, 0, sizeof(signalaction));
 
-		ret = sigemptyset(&act.sa_mask);
+		ret = sigemptyset(&signalaction.sa_mask);
 		if (ret != 0)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
@@ -285,17 +285,17 @@ void setTimeSampling_postfork (void)
 		else
 			signum = SIGALRM;
 
-		ret = sigaddset(&act.sa_mask, signum);
+		ret = sigaddset(&signalaction.sa_mask, signum);
 		if (ret != 0)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
 			return;
 		}
 	
-		act.sa_sigaction = TimeSamplingHandler;
-		act.sa_flags = SA_SIGINFO;
+		signalaction.sa_sigaction = TimeSamplingHandler;
+		signalaction.sa_flags = SA_SIGINFO;
 	
-		ret = sigaction (signum, &act, NULL);
+		ret = sigaction (signum, &signalaction, NULL);
 		if (ret != 0)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Sampling error: %s\n", strerror(ret));
@@ -312,7 +312,7 @@ void unsetTimeSampling (void)
 {
 	if (SamplingRunning)
 	{
-		int signum;
+		int ret, signum;
 
 		if (SamplingClockType == ITIMER_VIRTUAL)
 			signum = SIGVTALRM;
@@ -321,6 +321,10 @@ void unsetTimeSampling (void)
 		else
 			signum = SIGALRM;
 
-		signal (signum, SIG_DFL);
+		ret = sigdelset (&signalaction.sa_mask, signum);
+		if (ret != 0)
+			fprintf (stderr, PACKAGE_NAME": Error Sampling error: %s\n", strerror(ret));
+
+		SamplingRunning = FALSE;
 	}
 }
