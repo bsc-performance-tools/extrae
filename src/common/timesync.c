@@ -244,7 +244,6 @@ int TimeSync_CalculateLatencies (int sync_strategy)
 
 		/* Calculate the absolute maximum synchronization time */
 		for (i=0; i<TotalNodes; i++)
-			for (j = 0; j < TotalTasksToSync[i]; j++)
 			max_sync_time = MAX(max_sync_time, max_sync_time_per_node[i]);
 
 		/* Move all tasks of the other nodes to the right */
