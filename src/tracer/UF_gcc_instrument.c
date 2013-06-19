@@ -212,7 +212,7 @@ void InstrumentUFroutines_GCC (int rank, char *filename)
 	}
 	else
 	{
-		if (strlen(filename) > 0)
+		if (strlen(filename) > 0 && rank == 0)
 			fprintf (stderr, PACKAGE_NAME": Warning! Cannot open %s file\n", filename);
 	}
 
