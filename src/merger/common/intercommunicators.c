@@ -95,7 +95,8 @@ void intercommunicators_load( char *spawns_file_path, int ptask )
   }
   fclose(fd);
 
-  intercommunicators_print();
+  /* DEBUG
+  intercommunicators_print(); */
 }
 
 void intercommunicators_map_ptask_to_spawn_group( int SpawnGroup, int ptask )

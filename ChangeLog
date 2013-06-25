@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * Removed extra debug messages.
  + 25Jun2013 Added instrumentation support for MPI_comm_spawn and MPI_comm_spawn_multiple
  + 17Jun2013 Add instrumentation for routines that call fork/wait/...
              Fix bug that malformed communication records in mpi2prv serial
