@@ -83,13 +83,18 @@ void trace_communicationAt (unsigned ptask_s, unsigned task_s, unsigned thread_s
 int trace_pending_communication (unsigned int ptask_s, unsigned int task_s,
 	unsigned int thread_s, unsigned vthread_s, event_t * begin_s, event_t * end_s, unsigned int ptask_r, unsigned int task_r)
 {
+	thread_t *thread_s_info = NULL;
 	unsigned long long log_s, phy_s;
+	unsigned cpu_s;
+
+	thread_s_info = GET_THREAD_INFO(ptask_s, task_s, thread_s);
+	cpu_s = thread_s_info->cpu; /* The receiver cpu is fixed at FixPendingCommunication */
 
 	/* Synchronize event times */
 	log_s = TIMESYNC (ptask_s-1, task_s-1, Get_EvTime (begin_s));
 	phy_s = TIMESYNC (ptask_s-1, task_s-1, Get_EvTime (end_s));
 
-	trace_paraver_pending_communication (task_s, ptask_s, task_s, thread_s, vthread_s, log_s,
+	trace_paraver_pending_communication (cpu_s, ptask_s, task_s, thread_s, vthread_s, log_s,
 		phy_s, task_r + 1, ptask_r, task_r + 1, thread_s /* 1? */ , thread_s /*vthread_r?*/,
 		0ULL, 0ULL, Get_EvSize (begin_s), Get_EvTag (begin_s));
   return 0;

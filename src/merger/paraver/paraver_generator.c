@@ -831,9 +831,13 @@ static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 
 	if (NULL != tmp)
 	{
+		thread_t *thread_r_info = NULL;	
+
 		current->receive[LOGICAL_COMMUNICATION] = tmp->logic;
 		current->receive[PHYSICAL_COMMUNICATION] = tmp->physic;
 		current->thread_r = tmp->vthread+1; /* AddForeignRecv is called with (vthread-1) */
+		thread_r_info = GET_THREAD_INFO(current->ptask_r, current->task_r, current->thread_r);
+		current->cpu_r = thread_r_info->cpu; /* The sender cpu is set at trace_paraver_pending_communication */
 		current->type = COMMUNICATION;
 		tmp->logic = tmp->physic = 0;
 		return TRUE;
