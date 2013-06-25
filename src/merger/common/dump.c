@@ -99,13 +99,6 @@ static void show_current (event_t * c, UINT64 max_time)
 		  c->param.mpi_param.target, c->param.mpi_param.size,
 			c->param.mpi_param.tag, c->param.mpi_param.aux);
 	}
-	else if (c->event == MPI_COMM_SPLIT_EV || c->event == MPI_COMM_DUP_EV ||
-	         c->event == MPI_COMM_CREATE_EV || c->event == MPI_CART_CREATE_EV ||
-	         c->event == MPI_CART_SUB_EV)
-	{
-		fprintf (stdout, "COMM DEF SIZE: %d COMM: %d TRACE? %d\n",
-		  c->param.mpi_param.size, c->param.mpi_param.comm, c->param.mpi_param.aux);
-	}
 	else if (c->event == MPI_INIT_EV && c->value == EVT_END)
 	{
 		fprintf (stdout, "OPTIONS: 0x%08llx\n", c->param.mpi_param.aux);

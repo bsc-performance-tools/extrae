@@ -825,9 +825,9 @@ static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 	struct ForeignRecv_t* tmp;
 	int group;
 
-	group = inWhichGroup (current->task_r-1, fset);
+	group = inWhichGroup (current->ptask_r-1, current->task_r-1, fset);
 
-	tmp = SearchForeignRecv (group, current->task-1, current->task_r-1, current->value);
+	tmp = SearchForeignRecv (group, current->ptask-1, current->task-1, current->ptask_r-1, current->task_r-1, current->value);
 
 	if (NULL != tmp)
 	{

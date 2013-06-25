@@ -206,8 +206,8 @@ void GetNextObj_FS (FileSet_t * fset, int file, unsigned int *cpu,
 void EndianCorrection (FileSet_t *fset, int numtasks, int taskid);
 #endif
 
-int isTaskInMyGroup (FileSet_t *fset, int task);
-int inWhichGroup (int task, FileSet_t *fset);
+int isTaskInMyGroup (FileSet_t *fset, int ptask, int task);
+int inWhichGroup (int ptask, int task, FileSet_t *fset);
 
 #if defined(PARALLEL_MERGE)
 

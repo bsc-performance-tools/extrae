@@ -211,7 +211,9 @@ typedef enum
   MPI_FILE_READ_AT_VAL,
   MPI_FILE_READ_AT_ALL_VAL,
   MPI_FILE_WRITE_AT_VAL,
-  MPI_FILE_WRITE_AT_ALL_VAL /* 150 */
+  MPI_FILE_WRITE_AT_ALL_VAL, /* 150 */
+  MPI_COMM_SPAWN_VAL,
+  MPI_COMM_SPAWN_MULTIPLE_VAL
 }
 MPIVal;
 
@@ -306,6 +308,8 @@ MPIVal;
 #define  MPI_COMM_CREATE_LABEL             "MPI_Comm_create"
 #define  MPI_COMM_DUP_LABEL                "MPI_Comm_dup"
 #define  MPI_COMM_SPLIT_LABEL              "MPI_Comm_split"
+#define  MPI_COMM_SPAWN_LABEL              "MPI_Comm_spawn"
+#define  MPI_COMM_SPAWN_MULTIPLE_LABEL     "MPI_Comm_spawn_multiple"
 #define  MPI_COMM_GROUP_LABEL              "MPI_Comm_group"
 #define  MPI_COMM_FREE_LABEL               "MPI_Comm_free"
 #define  MPI_COMM_REMOTE_GROUP_LABEL       "MPI_Comm_remote_group"

@@ -79,9 +79,11 @@
 #define DIGITS_PID   10
 #define DIGITS_TASK   6
 #define DIGITS_THREAD 6
+#define MPIT_ID_LENGTH (DIGITS_PID + DIGITS_TASK + DIGITS_THREAD + 1)
 
-#define TEMPLATE_PTT "%s/%s.%.10d%.6d%.6u%s"
-#define TEMPLATE_P   "%s/%s%s"
+#define TEMPLATE_DIGITS "%.10d%.6d%.6u"
+#define TEMPLATE_PTT    "%s/%s."TEMPLATE_DIGITS"%s"
+#define TEMPLATE_P      "%s/%s%s"
 
 /* Uses pid, task id and thread id to generate the name of the file */
 #define FileName_PTT(name, path, prefix, pid, task, thread, ext) \
@@ -90,6 +92,9 @@
 /* Uses pid to generate the name of the file */
 #define FileName_P(name, path, prefix, ext) \
 	snprintf(name, sizeof(name), TEMPLATE_P, path, prefix, ext);
+
+#define EXT_MPITS      ".mpits"
+#define EXT_SPAWN      ".spawn"
 
 #define EXT_TMP_MPIT   ".ttmp"
 #define EXT_MPIT       ".mpit"

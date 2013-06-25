@@ -32,7 +32,7 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "events.h"
 
-#define MPI_EVENTS 72
+#define MPI_EVENTS 74
 static unsigned mpi_events[] = {
 	MPI_BSEND_EV, MPI_SSEND_EV, MPI_BARRIER_EV, MPI_BCAST_EV, MPI_SEND_EV,
 	MPI_RECV_EV, MPI_SENDRECV_EV, MPI_SENDRECV_REPLACE_EV, MPI_IBSEND_EV,
@@ -52,7 +52,9 @@ static unsigned mpi_events[] = {
 	MPI_FILE_READ_AT_EV, MPI_FILE_READ_AT_ALL_EV, MPI_FILE_WRITE_AT_EV,
 	MPI_FILE_WRITE_AT_ALL_EV, MPI_IRECVED_EV, MPI_GET_EV, MPI_PUT_EV,
 	MPI_COMM_CREATE_EV, MPI_COMM_DUP_EV, MPI_COMM_SPLIT_EV,
-	MPI_CART_CREATE_EV, MPI_CART_SUB_EV, MPI_COMM_FREE_EV };
+	MPI_CART_CREATE_EV, MPI_CART_SUB_EV, MPI_COMM_FREE_EV,
+	MPI_COMM_SPAWN_EV, MPI_COMM_SPAWN_MULTIPLE_EV
+ };
 
 /******************************************************************************
  ***  IsMPI

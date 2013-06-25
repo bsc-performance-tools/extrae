@@ -231,6 +231,8 @@ enum {
 #define MPI_COMM_CREATE_EV           50000048
 #define MPI_COMM_DUP_EV              50000049
 #define MPI_COMM_SPLIT_EV            50000050
+#define MPI_COMM_SPAWN_EV            50000054
+#define MPI_COMM_SPAWN_MULTIPLE_EV   50000055
 #define MPI_RANK_CREACIO_COMM_EV     50000051      /* Used to define communicators */
 #define MPI_ALIAS_COMM_CREATE_EV     50000061      /* Used to define communicators */
 #define MPI_ALLGATHER_EV             50000052

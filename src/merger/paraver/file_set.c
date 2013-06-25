@@ -79,6 +79,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "HardwareCounters.h"
 #include "trace_to_prv.h"
 #include "communication_queues.h"
+#include "intercommunicators.h"
 
 #define EVENTS_FOR_NUM_GLOBAL_OPS(x) \
      ((x) == MPI_BARRIER_EV  || (x) == MPI_BCAST_EV     || (x) == MPI_ALLREDUCE_EV  || \
@@ -134,23 +135,32 @@ static int event_timing_sort (const void *e1, const void *e2)
 }
 #endif
 
-int isTaskInMyGroup (FileSet_t *fset, int task)
+int isTaskInMyGroup (FileSet_t *fset, int ptask, int task)
 {
 	int i;
 
+	
 	for (i = 0; i < fset->nfiles; i++)
-		if (fset->files[i].task-1 == task)
-		return TRUE;
+	{
+		if ((fset->files[i].ptask-1 == ptask) && (fset->files[i].task-1 == task))
+                {
+			return TRUE;
+		}
+	}
 	return FALSE;
 }
 
-int inWhichGroup (int task, FileSet_t *fset)
+int inWhichGroup (int ptask, int task, FileSet_t *fset)
 {
 	int i;
 
 	for (i = 0; i < fset->num_input_files; i++)
-		if (fset->input_files[i].task-1 == task)
+	{
+		if ((fset->input_files[i].ptask-1 == ptask) && (fset->input_files[i].task-1 == task))
+		{
 			return fset->input_files[i].InputForWorker;
+		}
+	}
 	return -1;
 }
 

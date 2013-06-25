@@ -915,7 +915,7 @@ static int User_Send_Event (event_t * current_event,
 		else
 			partner = Get_EvTarget(current_event);
 
-		if (isTaskInMyGroup (fset, partner))
+		if (isTaskInMyGroup (fset, ptask-1, partner))
 		{
 			task_info_partner = GET_TASK_INFO(ptask, partner+1);
 
@@ -943,12 +943,12 @@ static int User_Send_Event (event_t * current_event,
 #if defined(DEBUG)
 				fprintf (stdout, "USER SEND_CMD(%u) DID NOT find receiver\n", Get_EvEvent(current_event));
 #endif
-				trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, partner+1, recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
+				trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, ptask, partner+1, recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
 			}
 		}
 #if defined(PARALLEL_MERGE)
 		else
-			trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, current_event, current_event, partner);
+			trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, current_event, current_event, ptask, partner);
 #endif
 	}
 
@@ -981,7 +981,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 		else
 			partner = Get_EvTarget(current_event);
 
-		if (isTaskInMyGroup (fset, partner))
+		if (isTaskInMyGroup (fset, ptask-1, partner))
 		{
 			task_info_partner = GET_TASK_INFO(ptask, partner+1);
 
@@ -1003,7 +1003,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 #if defined(DEBUG)
 						fprintf (stdout, "USER RECV_CMD find partner\n");
 #endif
-				trace_communicationAt (ptask, partner+1, send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
+				trace_communicationAt (ptask, partner+1, send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, current_event, TRUE, send_position);
 			}
 			else
 				fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -1015,8 +1015,8 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 
 			log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 			phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
-			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1,
-			  thread_info->virtual_thread-1, partner, fset);
+			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), ptask-1, task-1, thread-1,
+			  thread_info->virtual_thread-1, ptask-1, partner, fset);
 		}
 #endif
 	}

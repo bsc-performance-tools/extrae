@@ -136,11 +136,11 @@ void InitPendingCommunication (void)
 	PendingComms.data = NULL;
 }
 
-void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int task_r, 
-	unsigned thread_r, unsigned vthread_r, int task_s, FileSet_t *fset)
+void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int ptask_r, int task_r, 
+	unsigned thread_r, unsigned vthread_r, int ptask_s, int task_s, FileSet_t *fset)
 {
 	int count;
-	int group = inWhichGroup (task_s, fset);
+	int group = inWhichGroup (ptask_s, task_s, fset);
 
 	if (-1 == group)
 	{
@@ -158,7 +158,9 @@ void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int task_r,
 					ForeignRecvs[group].size*sizeof(struct ForeignRecv_t));
 	}
 	ForeignRecvs[group].data[count].sender = task_s;
+	ForeignRecvs[group].data[count].sender_app = ptask_s;
 	ForeignRecvs[group].data[count].recver = task_r;
+	ForeignRecvs[group].data[count].recver_app = ptask_r;
 	ForeignRecvs[group].data[count].tag = tag;
 	ForeignRecvs[group].data[count].physic = physic;
 	ForeignRecvs[group].data[count].logic = logic;
@@ -242,7 +244,7 @@ static int MatchRecvs (struct ForeignRecv_t *data, int count)
 }
 
 
-struct ForeignRecv_t* SearchForeignRecv (int group, int sender, int recver, int tag)
+struct ForeignRecv_t* SearchForeignRecv (int group, int sender_app, int sender, int recver_app, int recver, int tag)
 {
 	int i;
 
@@ -252,7 +254,9 @@ struct ForeignRecv_t* SearchForeignRecv (int group, int sender, int recver, int 
 			for (i = 0; i < myForeignRecvs_count[group]; i++)
 			{
 				if (myForeignRecvs[group][i].sender == sender &&
+				    myForeignRecvs[group][i].sender_app == sender_app &&
 				    myForeignRecvs[group][i].recver == recver &&
+				    myForeignRecvs[group][i].recver_app == recver_app &&
 			  	  (myForeignRecvs[group][i].tag == tag || myForeignRecvs[group][i].tag == MPI_ANY_TAG) &&
 			    	!myForeignRecvs_used[group][i])
 				{
@@ -751,7 +755,7 @@ void Gather_Dimemas_Offsets (int numtasks, int taskid, int count,
 
 		if (taskid > i)
 			for (j = 0; j < count; j++)
-				if (inWhichGroup (j, fset) == taskid)
+				if (inWhichGroup (0, j, fset) == taskid)
 					in_offsets[j] += other_trace_size;
 	}
 
@@ -832,7 +836,7 @@ unsigned * Gather_Paraver_VirtualThreads (unsigned taskid, unsigned ptask,
 	}
 
 	for (u = 0; u < ntasks; u++)
-		if (isTaskInMyGroup(fset, u))
+		if (isTaskInMyGroup(fset, ptask, u))
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1, u+1);
 			temp[u] = task_info->num_virtual_threads;

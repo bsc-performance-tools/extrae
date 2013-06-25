@@ -197,6 +197,10 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
 
+void PMPI_Comm_Spawn_Wrapper (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
+
+void PMPI_Comm_Spawn_Multiple_Wrapper (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
+
 void PMPI_Reduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
 	MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror);
@@ -413,6 +417,13 @@ int MPI_Comm_free_C_Wrapper (MPI_Comm *comm);
 int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm);
 
 int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newcomm);
+
+int MPI_Comm_spawn_C_Wrapper (char *command, char **argv, int maxprocs, MPI_Info info,
+  int root, MPI_Comm comm, MPI_Comm *intercomm, int *array_of_errcodes);
+
+int MPI_Comm_spawn_multiple_C_Wrapper (int count, char *array_of_commands[], char* *array_of_argv[],
+  int array_of_maxprocs[], MPI_Info array_of_info[], int root, MPI_Comm comm,
+  MPI_Comm *intercomm, int array_of_errcodes[]);
 
 int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf, int *recvcounts,
   MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);

@@ -1797,6 +1797,66 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
     CtoF77 (pmpi_comm_split) (comm, color, key, newcomm, ierror);
 }
 
+
+/******************************************************************************
+ ***  MPI_Comm_spawn
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_comm_spawn__,mpi_comm_spawn_,MPI_COMM_SPAWN,mpi_comm_spawn,( char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror ))
+
+void NAME_ROUTINE_F(mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+#endif
+{
+  if (mpitrace_on)
+  {
+    DEBUG_INTERFACE(ENTER)
+    Backend_Enter_Instrumentation (5 + (*maxprocs) + Caller_Count[CALLER_MPI]);
+    PMPI_Comm_Spawn_Wrapper (command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes, ierror);
+    Backend_Leave_Instrumentation ();
+    DEBUG_INTERFACE(LEAVE)
+  }
+  else
+  {
+    CtoF77 (pmpi_comm_spawn) (command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes, ierror);
+  }
+}
+
+
+/******************************************************************************
+ ***  MPI_Comm_spawn_multiple
+ ******************************************************************************/
+
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_comm_spawn_multiple__,mpi_comm_spawn_multiple_,MPI_COMM_SPAWN_MULTIPLE,mpi_comm_spawn_multiple,( MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror ))
+
+void NAME_ROUTINE_F(mpi_comm_spawn_multiple)   (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+#endif
+{
+  int i, n_events = 0;
+
+  if (mpitrace_on)
+  {
+    DEBUG_INTERFACE(ENTER)
+    for (i=0; i<(*count); i++) 
+    {
+      n_events += 5 + array_of_maxprocs[i] + Caller_Count[CALLER_MPI];
+    }
+    Backend_Enter_Instrumentation (n_events);
+    PMPI_Comm_Spawn_Multiple_Wrapper (count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes, ierror);
+    Backend_Leave_Instrumentation ();
+    DEBUG_INTERFACE(LEAVE)
+  }
+  else
+  {
+    CtoF77 (pmpi_comm_spawn_multiple) (count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes, ierror);
+  }
+}
+
+
 /******************************************************************************
  *** MPI_Cart_create
  ******************************************************************************/
@@ -3930,6 +3990,72 @@ int NAME_ROUTINE_C(MPI_Comm_split) (MPI_Comm comm, int color, int key,
 		return PMPI_Comm_split (comm, color, key, newcomm);
 }
 
+
+/******************************************************************************
+ ***  MPI_Comm_spawn
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Comm_spawn) (
+  char     *command,
+  char    **argv,
+  int       maxprocs,
+  MPI_Info  info,
+  int       root,
+  MPI_Comm  comm,
+  MPI_Comm *intercomm,
+  int      *array_of_errcodes)
+{
+  int res;
+
+  if (mpitrace_on)
+  {
+    DEBUG_INTERFACE(ENTER)
+    Backend_Enter_Instrumentation (5 + maxprocs + Caller_Count[CALLER_MPI]);
+    res = MPI_Comm_spawn_C_Wrapper (command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes);
+    Backend_Leave_Instrumentation ();
+    DEBUG_INTERFACE(LEAVE)
+    return res;
+  }
+  else
+  {
+    return PMPI_Comm_spawn (command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes);
+  }
+}
+
+
+/******************************************************************************
+ ***  MPI_Comm_spawn_multiple
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Comm_spawn_multiple) (
+  int       count,
+  char     *array_of_commands[],
+  char*    *array_of_argv[],
+  int       array_of_maxprocs[],
+  MPI_Info  array_of_info[],
+  int       root,
+  MPI_Comm  comm,
+  MPI_Comm *intercomm,
+  int       array_of_errcodes[])
+{
+  int i, n_events = 0, res;
+
+  if (mpitrace_on)
+  {
+    DEBUG_INTERFACE(ENTER)
+    for (i=0; i<count; i++)
+    {
+      n_events += 5 + array_of_maxprocs[i] + Caller_Count[CALLER_MPI];
+    }
+    Backend_Enter_Instrumentation (n_events);
+    res = MPI_Comm_spawn_multiple_C_Wrapper (count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes);
+    Backend_Leave_Instrumentation ();
+    DEBUG_INTERFACE(LEAVE)
+    return res;
+  }
+  else
+  {
+    return PMPI_Comm_spawn_multiple (count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes);
+  }
+}
 
 /******************************************************************************
  *** MPI_Cart_create

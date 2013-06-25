@@ -51,8 +51,8 @@ static char UNUSED rcsid[] = "$Id$";
  ***  trace_communication
  ******************************************************************************/
 
-void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s, unsigned vthread_s,
-	unsigned task_r, unsigned thread_r, unsigned vthread_r, event_t *send_begin,
+void trace_communicationAt (unsigned ptask_s, unsigned task_s, unsigned thread_s, unsigned vthread_s,
+	unsigned ptask_r, unsigned task_r, unsigned thread_r, unsigned vthread_r, event_t *send_begin,
 	event_t *send_end, event_t *recv_begin, event_t *recv_end, 
 	int atposition, off_t position)
 {
@@ -61,36 +61,36 @@ void trace_communicationAt (unsigned ptask, unsigned task_s, unsigned thread_s, 
 	unsigned cpu_r, cpu_s;
 
 	/* Look for the receive partner ... in the sender events */
-	thread_r_info = GET_THREAD_INFO(ptask, task_r, thread_r);
+	thread_r_info = GET_THREAD_INFO(ptask_r, task_r, thread_r);
 	cpu_r = thread_r_info->cpu;
 
 	/* Look for the sender partner ... in the receiver events */
-	thread_s_info = GET_THREAD_INFO(ptask, task_s, thread_s);
+	thread_s_info = GET_THREAD_INFO(ptask_s, task_s, thread_s);
 	cpu_s = thread_s_info->cpu;
 
 	/* Synchronize event times */
-	log_s = TIMESYNC(ptask-1, task_s-1, Get_EvTime (send_begin));
-	phy_s = TIMESYNC(ptask-1, task_s-1, Get_EvTime (send_end));
-	log_r = TIMESYNC(ptask-1, task_r-1, Get_EvTime (recv_begin));
-	phy_r = TIMESYNC(ptask-1, task_r-1, Get_EvTime (recv_end));
+	log_s = TIMESYNC(ptask_s-1, task_s-1, Get_EvTime (send_begin));
+	phy_s = TIMESYNC(ptask_s-1, task_s-1, Get_EvTime (send_end));
+	log_r = TIMESYNC(ptask_r-1, task_r-1, Get_EvTime (recv_begin));
+	phy_r = TIMESYNC(ptask_r-1, task_r-1, Get_EvTime (recv_end));
 
-	trace_paraver_communication (cpu_s, ptask, task_s, thread_s, vthread_s, log_s, phy_s,
-	  cpu_r, ptask, task_r, thread_r, vthread_r, log_r, phy_r, Get_EvSize (recv_end),
+	trace_paraver_communication (cpu_s, ptask_s, task_s, thread_s, vthread_s, log_s, phy_s,
+	  cpu_r, ptask_r, task_r, thread_r, vthread_r, log_r, phy_r, Get_EvSize (recv_end),
 		Get_EvTag (recv_end), atposition, position);
 }
 
 #if defined(PARALLEL_MERGE)
-int trace_pending_communication (unsigned int ptask, unsigned int task,
-	unsigned int thread, unsigned vthread, event_t * begin_s, event_t * end_s, unsigned int recvr)
+int trace_pending_communication (unsigned int ptask_s, unsigned int task_s,
+	unsigned int thread_s, unsigned vthread_s, event_t * begin_s, event_t * end_s, unsigned int ptask_r, unsigned int task_r)
 {
 	unsigned long long log_s, phy_s;
 
 	/* Synchronize event times */
-	log_s = TIMESYNC (ptask-1, task-1, Get_EvTime (begin_s));
-	phy_s = TIMESYNC (ptask-1, task-1, Get_EvTime (end_s));
+	log_s = TIMESYNC (ptask_s-1, task_s-1, Get_EvTime (begin_s));
+	phy_s = TIMESYNC (ptask_s-1, task_s-1, Get_EvTime (end_s));
 
-	trace_paraver_pending_communication (task, ptask, task, thread, vthread, log_s,
-		phy_s, recvr + 1, ptask, recvr + 1, thread /* 1? */ , thread /*vthread_r?*/,
+	trace_paraver_pending_communication (task_s, ptask_s, task_s, thread_s, vthread_s, log_s,
+		phy_s, task_r + 1, ptask_r, task_r + 1, thread_s /* 1? */ , thread_s /*vthread_r?*/,
 		0ULL, 0ULL, Get_EvSize (begin_s), Get_EvTag (begin_s));
   return 0;
 }

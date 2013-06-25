@@ -15,6 +15,7 @@ common_FILES = \
  common/dump.c common/dump.h \
  common/checkoptions.h common/checkoptions.c \
  common/communicators.c common/communicators.h \
+ common/intercommunicators.c common/intercommunicators.h \
  common/cpunode.c common/cpunode.h \
  common/mpi2out.c common/mpi2out.h \
  common/options.c common/options.h \

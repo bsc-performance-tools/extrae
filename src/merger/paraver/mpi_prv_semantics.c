@@ -52,6 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "communication_queues.h"
 #include "trace_communication.h"
 #include "options.h"
+#include "intercommunicators.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -94,6 +95,8 @@ static int Get_State (unsigned int EvType)
 		case MPI_COMM_FREE_EV:
 		case MPI_COMM_DUP_EV:
 		case MPI_COMM_SPLIT_EV:
+		case MPI_COMM_SPAWN_EV:
+		case MPI_COMM_SPAWN_MULTIPLE_EV:
 		case MPI_CART_CREATE_EV:
 		case MPI_CART_SUB_EV:
 		case MPI_CANCEL_EV:
@@ -169,9 +172,11 @@ static int Any_Send_Event (event_t * current_event,
 	thread_t *thread_info;
 	task_t *task_info, *task_info_partner;
 	event_t * recv_begin, * recv_end;
+	int EvComm;
 
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
+	EvType  = Get_EvEvent(current_event);
+	EvValue = Get_EvValue(current_event);
+	EvComm  = Get_EvComm (current_event);
 
 	Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
 
@@ -188,14 +193,17 @@ static int Any_Send_Event (event_t * current_event,
 		break;
 		case EVT_END:
 			if (MatchComms_Enabled(ptask, task))
+			{
 				if (MPI_PROC_NULL != Get_EvTarget (current_event))
 				{
-					if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+					int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
+
+					if (isTaskInMyGroup (fset, target_ptask-1, Get_EvTarget(current_event)))
 					{
 #if defined(DEBUG)
 						fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", EvType, current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
 #endif
-						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
+						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(current_event)+1);
 						CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, &recv_vthread, 0);
 
 						if (recv_begin == NULL || recv_end == NULL)
@@ -207,21 +215,24 @@ static int Any_Send_Event (event_t * current_event,
 #endif
 							position = WriteFileBuffer_getPosition (thread_info->file->wfb);
 							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
-							trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
+							trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, target_ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 						}
 						else
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "SEND_CMD(%u) find receiver\n", EvType);
 #endif
-							trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, 1+Get_EvTarget(current_event), recv_thread, recv_vthread, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
+							trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, target_ptask, 1+Get_EvTarget(current_event), recv_thread, recv_vthread, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
 						}
 					}
 #if defined(PARALLEL_MERGE)
 					else
-						trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, Get_EvTarget (current_event));
+					{
+						trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, target_ptask, Get_EvTarget (current_event));
+					}
 #endif
 				}
+			}
 		break;
 	}
 	return 0;
@@ -243,6 +254,7 @@ static int SendRecv_Event (event_t * current_event,
 	event_t *recv_begin, *recv_end, *send_begin, *send_end;
 	off_t send_position;
 #endif
+	int EvComm = Get_EvComm (current_event);
 
 	Switch_State (STATE_SENDRECVOP, (Get_EvValue(current_event) == EVT_BEGIN), ptask, task, thread);
 
@@ -262,12 +274,14 @@ static int SendRecv_Event (event_t * current_event,
 			if (MatchComms_Enabled(ptask, task))
 				if (MPI_PROC_NULL != Get_EvTarget (thread_info->Send_Rec))
 				{
-					if (isTaskInMyGroup (fset, Get_EvTarget(thread_info->Send_Rec)))
+					int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
+
+					if (isTaskInMyGroup (fset, target_ptask-1, Get_EvTarget(thread_info->Send_Rec)))
 					{
 #if defined(DEBUG)
 						fprintf (stdout, "SENDRECV/SEND: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(thread_info->Send_Rec), task-1, Get_EvTarget(thread_info->Send_Rec), Get_EvTag(thread_info->Send_Rec));
 #endif
-						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(thread_info->Send_Rec)+1);
+						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(thread_info->Send_Rec)+1);
 
 						CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (thread_info->Send_Rec), &recv_begin, &recv_end, &recv_thread, &recv_vthread, 0);
 
@@ -280,21 +294,21 @@ static int SendRecv_Event (event_t * current_event,
 #endif
 							position = WriteFileBuffer_getPosition (thread_info->file->wfb);
 							CommunicationQueues_QueueSend (task_info->send_queue, thread_info->Send_Rec, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(thread_info->Send_Rec), Get_EvTag(thread_info->Send_Rec), 0);
-							trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
+							trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, target_ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 						}
 						else if (recv_begin != NULL && recv_end != NULL)
 						{
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/SEND found partner\n");
 #endif
-							trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, 1+Get_EvTarget(thread_info->Send_Rec), recv_thread, recv_vthread, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
+							trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, target_ptask, 1+Get_EvTarget(thread_info->Send_Rec), recv_thread, recv_vthread, thread_info->Send_Rec, current_event, recv_begin, recv_end, FALSE, 0);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractRecv returned recv_begin = %p and recv_end = %p\n", recv_begin, recv_end);
 					}
 #if defined(PARALLEL_MERGE)
 					else
-						trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, Get_EvTarget (thread_info->Send_Rec));
+						trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, target_ptask, Get_EvTarget (thread_info->Send_Rec));
 #endif /* PARALLEL_MERGE */
 					}
 
@@ -307,13 +321,15 @@ static int SendRecv_Event (event_t * current_event,
 			if (MatchComms_Enabled(ptask, task))
 				if (MPI_PROC_NULL != Get_EvTarget (thread_info->Recv_Rec))
 				{
-					if (isTaskInMyGroup (fset, Get_EvTarget(thread_info->Recv_Rec)))
+					int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
+
+					if (isTaskInMyGroup (fset, target_ptask-1, Get_EvTarget(thread_info->Recv_Rec)))
 					{
 #if defined(DEBUG)
 						fprintf (stdout, "SENDRECV/RECV: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(thread_info->Recv_Rec), task-1, Get_EvTarget(thread_info->Recv_Rec), Get_EvTag(thread_info->Recv_Rec));
 #endif
 
-						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(thread_info->Recv_Rec)+1);
+						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(thread_info->Recv_Rec)+1);
 
 						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (thread_info->Recv_Rec), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
@@ -329,7 +345,7 @@ static int SendRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "SENDRECV/RECV found partner\n");
 #endif
-							trace_communicationAt (ptask, 1+Get_EvTarget(thread_info->Recv_Rec), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Send_Rec, thread_info->Recv_Rec, TRUE, send_position);
+							trace_communicationAt (target_ptask, 1+Get_EvTarget(thread_info->Recv_Rec), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Send_Rec, thread_info->Recv_Rec, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -341,8 +357,8 @@ static int SendRecv_Event (event_t * current_event,
 
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(thread_info->Send_Rec));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1,
-							thread_info->virtual_thread-1, Get_EvTarget(current_event), fset);
+						AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), ptask-1, task-1, thread-1,
+							thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(current_event), fset);
 					}
 #endif /* PARALLEL_MERGE */
 				}
@@ -528,12 +544,14 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 	unsigned EvType, EvValue, send_thread, send_vthread;
 	thread_t *thread_info;
 	task_t *task_info, *task_info_partner;
+	int EvComm;
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_info = GET_TASK_INFO(ptask, task);
 
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
+	EvComm  = Get_EvComm  (current_event);
 
 	Switch_State (STATE_WAITMESS, (EvValue == EVT_BEGIN), ptask, task, thread);
 
@@ -547,12 +565,14 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 		{
 			if (MPI_PROC_NULL != Get_EvTarget(current_event))
 			{
-				if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+				int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
+
+				if (isTaskInMyGroup (fset, target_ptask-1, Get_EvTarget(current_event)))
 				{
 #if defined(DEBUG)
 					fprintf (stdout, "RECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
 #endif
-					task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
+					task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(current_event)+1);
 
 					CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (current_event), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
@@ -568,7 +588,7 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 #if defined(DEBUG)
 						fprintf (stdout, "RECV_CMD find partner\n");
 #endif
-						trace_communicationAt (ptask, 1+Get_EvTarget(current_event), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Recv_Rec, current_event, TRUE, send_position);
+						trace_communicationAt (target_ptask, 1+Get_EvTarget(current_event), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, thread_info->Recv_Rec, current_event, TRUE, send_position);
 					}
 					else
 						fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -580,8 +600,8 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 
 					log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(thread_info->Recv_Rec));
 					phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
-					AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), task-1, thread-1,
-						thread_info->virtual_thread-1, Get_EvTarget(current_event), fset);
+					AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), ptask-1, task-1, thread-1,
+						thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(current_event), fset);
 				}
 #endif
 			}
@@ -607,12 +627,14 @@ static int IRecv_Event (event_t * current_event,
 	unsigned EvType, EvValue, send_thread, send_vthread;
 	thread_t *thread_info;
 	task_t *task_info, *task_info_partner;
+	int EvComm;
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_info = GET_TASK_INFO(ptask, task);
 
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
+	EvComm  = Get_EvComm  (current_event);
 
 	Switch_State (STATE_IWAITMESS, (EvValue == EVT_BEGIN), ptask, task, thread);
 
@@ -625,12 +647,14 @@ static int IRecv_Event (event_t * current_event,
 			{
 				if (MPI_PROC_NULL != Get_EvTarget(receive))
 				{
-					if (isTaskInMyGroup (fset, Get_EvTarget(receive)))
+					int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
+
+					if (isTaskInMyGroup (fset, target_ptask-1, Get_EvTarget(receive)))
 					{
 #if defined(DEBUG)
 						fprintf (stdout, "IRECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(receive), Get_EvTag(receive));
 #endif
-						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(receive)+1);
+						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(receive)+1);
 
 						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
@@ -646,7 +670,7 @@ static int IRecv_Event (event_t * current_event,
 #if defined(DEBUG)
 							fprintf (stdout, "IRECV_CMD find COMM (partner times = %lld/%lld)\n", Get_EvTime(send_begin), Get_EvTime(send_end));
 #endif
-							trace_communicationAt (ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						}
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
@@ -658,8 +682,8 @@ static int IRecv_Event (event_t * current_event,
 
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), task-1, thread-1,
-							thread_info->virtual_thread-1, Get_EvTarget(receive), fset);
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
+							thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset);
 					}
 #endif
 				}
@@ -710,6 +734,9 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	event_t *send_begin, *send_end;
 	off_t send_position;
 	unsigned recv_thread, send_thread, recv_vthread, send_vthread;
+	int EvComm; 
+
+	EvComm = Get_EvComm( current_event );
 
 	thread_info = GET_THREAD_INFO(ptask, task, thread);
 	task_info = GET_TASK_INFO(ptask, task);
@@ -722,13 +749,15 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 		{
 			if (MPI_PROC_NULL != Get_EvTarget (current_event))
 			{
-				if (isTaskInMyGroup (fset, Get_EvTarget(current_event)))
+				int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
+
+				if (isTaskInMyGroup (fset, target_ptask-1, Get_EvTarget(current_event)))
 				{
 #if defined(DEBUG)
 					fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", Get_EvValue (current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
 #endif
 
-					task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
+					task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(current_event)+1);
 
 					CommunicationQueues_ExtractRecv (task_info_partner->recv_queue, task-1, Get_EvTag (current_event), &recv_begin, &recv_end, &recv_thread, &recv_vthread, 0);
 
@@ -737,15 +766,15 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 						off_t position;
 						position = WriteFileBuffer_getPosition (thread_info->file->wfb);
 						CommunicationQueues_QueueSend (task_info->send_queue, current_event, current_event, position, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
-						trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
+						trace_paraver_unmatched_communication (1, ptask, task, thread, thread_info->virtual_thread, current_time, Get_EvTime(current_event), 1, target_ptask, Get_EvTarget(current_event)+1, 1, Get_EvSize(current_event), Get_EvTag(current_event));
 					}
 					else
-						trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, 1+Get_EvTarget(current_event), recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
+						trace_communicationAt (ptask, task, thread, thread_info->virtual_thread, target_ptask, 1+Get_EvTarget(current_event), recv_thread, recv_vthread, current_event, current_event, recv_begin, recv_end, FALSE, 0);
 
 				}
 #if defined(PARALLEL_MERGE)
 				else
-					trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, Get_EvTarget (current_event));
+					trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, target_ptask, Get_EvTarget (current_event));
 #endif
 			}
 		}
@@ -759,22 +788,24 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);
 			if (MPI_PROC_NULL != Get_EvTarget(receive))
 			{
+				int target_ptask = intercommunicators_get_target_ptask( ptask, task, EvComm );
+
 				if (NULL != receive)
 				{
-					if (isTaskInMyGroup (fset, Get_EvTarget(receive)))
+					if (isTaskInMyGroup (fset, target_ptask-1, Get_EvTarget(receive)))
 					{
 #if defined(DEBUG)
 						fprintf (stdout, "PERS_REQ_IRECV_CMD: TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d\n", current_time, Get_EvTime(current_event), task-1, Get_EvTarget(receive), Get_EvTag(receive));
 #endif
 
-						task_info_partner = GET_TASK_INFO(ptask, Get_EvTarget(current_event)+1);
+						task_info_partner = GET_TASK_INFO(target_ptask, Get_EvTarget(current_event)+1);
 
 						CommunicationQueues_ExtractSend (task_info_partner->send_queue, task-1, Get_EvTag (receive), &send_begin, &send_end, &send_position, &send_thread, &send_vthread, 0);
 
 						if (NULL == send_begin || NULL == send_end)
 							CommunicationQueues_QueueRecv (task_info->recv_queue, current_event, receive, thread, thread_info->virtual_thread, Get_EvTarget(current_event), Get_EvTag(current_event), 0);
 						else if (NULL != send_begin && NULL != send_end)
-							trace_communicationAt (ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
+							trace_communicationAt (target_ptask, 1+Get_EvTarget(receive), send_thread, send_vthread, ptask, task, thread, thread_info->virtual_thread, send_begin, send_end, current_event, receive, TRUE, send_position);
 						else
 							fprintf (stderr, "mpi2prv: Attention CommunicationQueues_ExtractSend returned send_begin = %p and send_end = %p\n", send_begin, send_end);
 					}
@@ -785,8 +816,8 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
-						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), task-1, thread-1,
-							thread_info->virtual_thread-1, Get_EvTarget(receive), fset);
+						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
+							thread_info->virtual_thread-1, target_ptask-1, Get_EvTarget(receive), fset);
 					}
 #endif
 				}
@@ -1006,6 +1037,8 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_COMM_CREATE_EV, Other_MPI_Event },
 	{ MPI_COMM_FREE_EV, Other_MPI_Event },
 	{ MPI_COMM_SPLIT_EV, Other_MPI_Event },
+	{ MPI_COMM_SPAWN_EV, Other_MPI_Event },
+	{ MPI_COMM_SPAWN_MULTIPLE_EV, Other_MPI_Event },
 	{ MPI_COMM_DUP_EV, Other_MPI_Event },
 	{ MPI_CART_CREATE_EV, Other_MPI_Event },
 	{ MPI_CART_SUB_EV, Other_MPI_Event },

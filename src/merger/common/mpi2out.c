@@ -74,6 +74,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "paraver_state.h"
 #include "options.h"
 #include "addresses.h"
+#include "intercommunicators.h"
 
 #if defined(PARALLEL_MERGE)
 # include "parallel_merge_aux.h"
@@ -293,6 +294,19 @@ static char *strip (char *buffer)
 }
 
 
+void Read_SPAWN_file (char *mpit_file, int current_ptask)
+{
+  char spawn_file_name[PATH_MAX];
+  strcpy (spawn_file_name, mpit_file);
+  spawn_file_name[strlen(spawn_file_name)-strlen(EXT_MPITS)] = (char) 0; /* remove ".mpit" extension */
+  strcat (spawn_file_name, EXT_SPAWN);
+
+  if (file_exists(spawn_file_name))
+    intercommunicators_load (spawn_file_name, current_ptask);
+}
+
+
+
 /******************************************************************************
  ***  Read_MPITS_file
  ***  Inserts into trace tables the contents of a ascii file!
@@ -407,6 +421,8 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 	while (!feof(fd));
 
 	fclose (fd);
+
+        Read_SPAWN_file (file, *cptask);
 }
 
 /******************************************************************************

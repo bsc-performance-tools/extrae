@@ -11,6 +11,7 @@ common_FILES = \
  ../common/fdz.h \
  ../common/dump.c ../common/dump.h \
  ../common/communicators.c ../common/communicators.h \
+ ../common/intercommunicators.c ../common/intercommunicators.h \
  ../common/checkoptions.h ../common/checkoptions.c \
  ../common/cpunode.c ../common/cpunode.h \
  ../common/mpi2out.c ../common/mpi2out.h \

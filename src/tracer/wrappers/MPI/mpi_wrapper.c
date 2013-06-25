@@ -107,6 +107,8 @@ static char UNUSED rcsid[] = "$Id$";
 		exit (1); \
 	}
 
+#define MAX_WAIT_REQUESTS 16384
+
 static unsigned Extrae_MPI_NumTasks (void)
 {
 	static int run = FALSE;
@@ -151,15 +153,17 @@ static void Gather_MPITS(void);
 #endif
 static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace);
 
-/* int mpit_gathering_enabled = FALSE; */
+static void MPI_stats_Wrapper (iotimer_t timestamp);
 
 /******************************************************************************
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
 
-static void MPI_stats_Wrapper (iotimer_t timestamp);
+/* int mpit_gathering_enabled = FALSE; */
 
-#define MAX_WAIT_REQUESTS 16384
+char *MpitsFileName  = NULL;    /* Name of the .mpits file (only significant at rank 0) */
+char *SpawnsFileName = NULL;    /* Name of the .spawn file (all tasks have it defined)  */
+int   SpawnGroup     = 0;
 
 static hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
 static PR_Queue_t PR_queue;     /* Persistent requests queue */
@@ -218,8 +222,13 @@ static int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver)
 
 		if (inter)
 		{
+/* XXX
 			ret = PMPI_Comm_remote_group (comm, &group);
 			MPI_CHECK (ret, PMPI_Comm_remote_group);
+ */
+			*receiver = dest;
+			return MPI_SUCCESS;
+
 		}
 		else
 		{
@@ -480,6 +489,7 @@ static void Gather_Nodes_Info (void)
 	free (buffer_names);
 }
 
+
 /******************************************************************************
  ***  MPI_Generate_Task_File_List
  ******************************************************************************/
@@ -513,11 +523,28 @@ static int MPI_Generate_Task_File_List (char **node_list)
 
 	if (TASKID == 0)
 	{
-		sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+		if (MpitsFileName == NULL)
+		{
+			do
+			{
+				SpawnGroup ++;
+				if (SpawnGroup > 1)
+					sprintf (tmpname, "%s/%s-%d.mpits", final_dir, appl_name, SpawnGroup);
+				else
+					sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
 
-		filedes = open (tmpname, O_RDWR | O_CREAT | O_TRUNC, 0644);
-		if (filedes < 0)
-			return -1;
+				filedes = open (tmpname, O_RDWR | O_CREAT | O_EXCL | O_TRUNC, 0644);
+			} while (filedes == -1);
+			MpitsFileName = strdup( tmpname );
+		}
+		else
+		{
+			filedes = open (MpitsFileName, O_RDWR | O_CREAT | O_TRUNC, 0644);
+			if (filedes == -1) 
+			{
+				return -1;
+			}
+		}
 
 		for (u = 0; u < Extrae_get_num_tasks(); u++)
 		{
@@ -606,6 +633,180 @@ static int MPI_Generate_Task_File_List (char **node_list)
 
 	return 0;
 }
+
+
+/******************************************************************************
+ ***  MPI_Generate_Spawns_List ()
+ ***  Prepares the name of the .spawn list, and broadcast the name of the file
+ ***  to all tasks, but does not create the file. The file will be later open 
+ ***  and written exclusively by any task that does a spawn.
+ ******************************************************************************/
+static void MPI_Generate_Spawns_List ()
+{
+  int namelen = 0;
+
+  if (TASKID == 0)
+  {
+    /* Only task 0 knows the name of the .mpits file */
+    char *x = NULL;
+
+    SpawnsFileName = strdup( MpitsFileName );
+
+    x = strrchr(SpawnsFileName, '.');
+    strcpy(x, EXT_SPAWN); /* No need to realloc SpawnsFileName because the length of EXT_SPAWN is the same of EXT_MPITS */
+    namelen = strlen(SpawnsFileName);
+  }
+
+  PMPI_Bcast (&namelen, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+  if (TASKID != 0)
+  {
+    SpawnsFileName = (char *)malloc((namelen+1) * sizeof(char));
+  }
+  
+  PMPI_Bcast (SpawnsFileName, namelen+1, MPI_CHAR, 0, MPI_COMM_WORLD);
+#if defined(DEBUG_SPAWN)
+  fprintf(stderr, "[DEBUG MPI_Generate_Spawn_List] TASKID=%d SpawnsFileName=%s\n", TASKID, SpawnsFileName);
+#endif
+}
+
+
+/******************************************************************************
+ ***  get_mpit_id
+ ******************************************************************************/
+static char * get_mpit_id()
+{
+  char *mpit_id = (char *)malloc(MPIT_ID_LENGTH * sizeof(char));
+
+  sprintf(mpit_id, TEMPLATE_DIGITS, getpid(), TASKID, THREADID);
+
+  return mpit_id;
+}
+
+
+/**
+ * Spawn_Parent_Sync()
+ *
+ * Gathers the mpit id's and the parent intercommunicator id's from all spawned processes,
+ * writes this information in the SpawnsFileName file, which will be later processed by
+ * the merger, and synchronizes with the spawned processes' MPI_Init.
+ */
+static void Spawn_Parent_Sync (MPI_Comm intercomm, int maxprocs, MPI_Comm spawn_comm)
+{
+  int i = 0;
+
+  if ((intercomm != MPI_COMM_NULL) && (spawn_comm != MPI_COMM_NULL))
+  {
+    char      *mpit_id           = get_mpit_id();
+    char      *children_mpit_ids = NULL;
+    int       *children_comms    = NULL;
+    int       *all_parents_comms = NULL;
+    int        RemoteSpawnGroup  = 0;
+    MPI_Status sts;
+    int        my_rank;
+    int        num_parents;
+    
+    PMPI_Comm_rank(spawn_comm, &my_rank);
+
+    /* Register the intercommunicator */
+    Trace_MPI_Communicator (intercomm, LAST_READ_TIME, FALSE);
+
+    /* Gather the parent comm id's from the participating tasks */
+    PMPI_Comm_size(spawn_comm, &num_parents);
+    all_parents_comms = (int *)malloc( num_parents * sizeof(int) );
+
+    PMPI_Gather(&intercomm, 1, MPI_INT, all_parents_comms, 1, MPI_INT, 0, spawn_comm);
+
+    /* Exchange the spawn group id's */
+    PMPI_Bcast( &SpawnGroup, 1, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
+    PMPI_Bcast( &RemoteSpawnGroup, 1, MPI_INT, 0, intercomm );
+
+    /* Register each child parent_comm_id in the spawns list */
+    if (my_rank == 0)
+    {
+      FILE *fd = fopen(SpawnsFileName, "w");
+      for (i=0; i<num_parents; i++)
+      {
+        fprintf(fd, "%d %d %d\n", i, (int)all_parents_comms[i], RemoteSpawnGroup);
+      }
+      fclose(fd);
+    }
+
+    /* Synchronize with the MPI_Init of the spawned tasks (see complementary barrier at MPI_Init) */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] CALLING -> PMPI_Barrier(intercomm)\n", TASKID);
+#endif
+    PMPI_Barrier( intercomm );
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-MASTER %d] PMPI_Barrier(intercomm) -> RETURNS\n", TASKID);
+#endif
+
+    xfree(all_parents_comms);
+  }
+}
+
+
+/**
+ * Spawn_Children_Sync()
+ *
+ * Checks if this application has been spawned through MPI_Comm_spawn. 
+ * If so, synchronizes with the parent application and sends the 
+ * children intercommunicator id's and the corresponding mpit id's to 
+ * link the apps.
+ */
+static void Spawn_Children_Sync(iotimer_t init_time)
+{
+  MPI_Comm parent;
+
+  PMPI_Comm_get_parent(&parent);
+
+  if (parent != MPI_COMM_NULL)
+  {
+    int        i = 0;
+    char      *mpit_id = get_mpit_id();
+    MPI_Status sts;
+    int        RemoteSpawnGroup = 0;
+    int        num_children     = 0;
+    int       *all_children_comms = NULL;
+
+    /* This task has been spawned through MPI_Comm_spawn! */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-WORKER %d] I HAVE BEEN SPAWNED!\n", TASKID);
+    fprintf(stderr, "[EXTRAE-WORKER %d] parent_comm_id=%d\n", TASKID, (int)parent);
+#endif
+    Trace_MPI_Communicator (parent, init_time, FALSE);
+    
+    /* Gather the children communicators to the parent */
+    PMPI_Comm_size(MPI_COMM_WORLD, &num_children);
+    all_children_comms = (int *)malloc(sizeof(int) * num_children);
+    PMPI_Gather(&parent, 1, MPI_INT, all_children_comms, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    /* Exchange the spawn group id's */
+    PMPI_Bcast( &RemoteSpawnGroup, 1, MPI_INT, 0, parent );
+    PMPI_Bcast( &SpawnGroup, 1, MPI_INT, (TASKID == 0 ? MPI_ROOT : MPI_PROC_NULL), parent );
+
+    if (TASKID == 0)
+    {
+      FILE *fd = fopen(SpawnsFileName, "w");
+      for (i=0; i<num_children; i++)
+      {
+        fprintf(fd, "%d %d %d\n", i, (int)all_children_comms[i], RemoteSpawnGroup);
+      }
+      fclose(fd);
+    }
+
+    /* Synchronize with the parent's MPI_Comm_spawn() */
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-WORKER %d] CALLING -> PMPI_Barrier(parent)\n", TASKID);
+#endif
+    PMPI_Barrier( parent );
+#if defined(DEBUG_SPAWN)
+    fprintf(stderr, "[EXTRAE-WORKER %d] PMPI_Barrier(parent) -> RETURNS\n", TASKID);
+#endif
+    xfree(all_children_comms);
+  }
+}
+
 
 #if defined(IS_CELL_MACHINE)
 /******************************************************************************
@@ -774,6 +975,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
+        MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -792,7 +994,10 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	/* Annotate already built communicators */
 	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
 	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
+
+        Spawn_Children_Sync (MPI_Init_start_time);
 }
+
 
 #if defined(MPI_HAS_INIT_THREAD_F)
 /******************************************************************************
@@ -862,6 +1067,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
+        MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -879,6 +1085,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	/* Annotate already built communicators */
 	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
 	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
+
+        Spawn_Children_Sync (MPI_Init_start_time);
 }
 #endif /* MPI_HAS_INIT_THREAD_F */
 
@@ -969,8 +1177,12 @@ static int get_rank_obj (int *comm, int *dest, int *receiver)
 
 		if (inter)
 		{
+/* XXX
 			CtoF77 (pmpi_comm_remote_group) (comm, &group, &ret);
 			MPI_CHECK(ret, pmpi_comm_remote_group);
+ */
+			*receiver = *dest;
+			return MPI_SUCCESS;
 		}
 		else
 		{
@@ -3228,7 +3440,6 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 
 void PMPI_Comm_Free_Wrapper (MPI_Fint *comm, MPI_Fint *ierror)
 {
-	MPI_Fint cnull;
 	UNREFERENCED_PARAMETER(comm);
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
@@ -3297,6 +3508,65 @@ void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 		EMPTY, EMPTY, EMPTY);
 
 	MPI_Others_count++;
+}
+
+
+/******************************************************************************
+ ***  PMPI_Comm_Spawn_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Spawn_Wrapper (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+{
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPAWN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  CtoF77 (pmpi_comm_spawn) (command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes, ierror);
+
+  if (*ierror == MPI_SUCCESS)
+  {
+    MPI_Comm intercomm_c;
+    intercomm_c = PMPI_Comm_f2c(*intercomm);
+
+    MPI_Comm comm_c;
+    comm_c = PMPI_Comm_f2c(*comm);
+    Spawn_Parent_Sync (intercomm_c, *maxprocs, comm_c);
+  }
+
+  TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  MPI_Others_count ++;
+}
+
+
+/******************************************************************************
+ ***  PMPI_Comm_Spawn_Multiple_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Spawn_Multiple_Wrapper (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+{
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPAWN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  CtoF77 (pmpi_comm_spawn_multiple) (count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes, ierror);
+
+  if (*ierror == MPI_SUCCESS)
+  { 
+    MPI_Comm intercomm_c;
+    intercomm_c = PMPI_Comm_f2c(*intercomm);
+
+    MPI_Comm comm_c;
+    comm_c = PMPI_Comm_f2c(*comm);
+
+    int i, maxprocs = 0;
+    for (i=0; i<count; i++)
+    {
+      maxprocs += array_of_maxprocs[i];
+    }
+
+    Spawn_Parent_Sync (intercomm_c, maxprocs, comm_c);
+  }
+
+  TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  MPI_Others_count ++;
 }
 
 
@@ -4232,6 +4502,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
+        MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -4251,8 +4522,11 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
 	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
 
+        Spawn_Children_Sync( MPI_Init_start_time );
+
 	return val;
 }
+
 
 #if defined(MPI_HAS_INIT_THREAD_C)
 int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provided)
@@ -4319,6 +4593,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
+        MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -4336,6 +4611,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	/* Annotate already built communicators */
 	Trace_MPI_Communicator (MPI_COMM_WORLD, MPI_Init_start_time, FALSE);
 	Trace_MPI_Communicator (MPI_COMM_SELF, MPI_Init_start_time, FALSE);
+
+        Spawn_Children_Sync (MPI_Init_start_time);
 
 	return val;
 }
@@ -6657,6 +6934,64 @@ int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newco
 
   return ierror;
 }
+
+
+/******************************************************************************
+ ***  MPI_Comm_spawn_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_spawn_C_Wrapper (char *command, char **argv, int maxprocs, MPI_Info info,
+  int root, MPI_Comm comm, MPI_Comm *intercomm, int *array_of_errcodes)
+{
+  int ierror;
+
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPAWN_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  ierror = PMPI_Comm_spawn (command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes);
+
+  if (ierror == MPI_SUCCESS)
+  {
+    Spawn_Parent_Sync (*intercomm, maxprocs, comm);
+  }
+
+  TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  MPI_Others_count ++;
+
+  return ierror;
+}
+
+
+/******************************************************************************
+ ***  MPI_Comm_spawn_multiple_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_spawn_multiple_C_Wrapper (int count, char *array_of_commands[], char* *array_of_argv[],
+  int array_of_maxprocs[], MPI_Info array_of_info[], int root, MPI_Comm comm,
+  MPI_Comm *intercomm, int array_of_errcodes[])
+{
+  int ierror;
+
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPAWN_MULTIPLE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  ierror = PMPI_Comm_spawn_multiple (count, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, root, comm, intercomm, array_of_errcodes);
+
+  if (ierror == MPI_SUCCESS)
+  {
+    int i, maxprocs = 0;
+    for (i=0; i<count; i++)
+    {
+      maxprocs += array_of_maxprocs[i];
+    }
+    Spawn_Parent_Sync (*intercomm, maxprocs, comm);
+  }
+
+  TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_MULTIPLE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+  return ierror;
+}
+
+
 
 
 /******************************************************************************
