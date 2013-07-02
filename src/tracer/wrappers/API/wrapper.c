@@ -1212,11 +1212,7 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	}
 	if (circular_buffering)
 	{
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_COMM_CREATE_EV);
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_COMM_DUP_EV);
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_COMM_SPLIT_EV);
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_CART_CREATE_EV);
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_CART_SUB_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_ALIAS_COMM_CREATE_EV);
 		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_RANK_CREACIO_COMM_EV);
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], Buffer_DiscardOldest);
 	}
