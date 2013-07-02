@@ -88,7 +88,7 @@ int SpectralRoot::Run()
   NumDetectedPeriods = Spectral_ExecuteAnalysis( 
     sig_dur_burst, 
     Online_GetSpectralNumIters(),
-    WINDOWING_NONE,
+    (Step == 1 ? WINDOWING_10PCT : WINDOWING_NONE),
     &ListOfPeriods);
 
   /* Send the number of detected periods */
