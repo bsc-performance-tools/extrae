@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 02Jul2013 Fixed compilation flags for the merger to enable the online support.
  * 02Jul2013 Fixed which events are cached to keep the communicators definitions in the online analysis. 
  * 02Jul2013 The first spectral analysis now applies windowing to the first 10% of the data.
  * 02Jul2013 Fixed missing dependencies in the online libraries.

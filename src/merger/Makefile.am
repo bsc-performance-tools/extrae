@@ -107,8 +107,8 @@ if HAVE_PMAPI
 endif
 
 # Online support
-mpi2prv_CFLAGS += -I$(ONLINE_DIR)
-libmpi2prv_la_CFLAGS += -I$(ONLINE_DIR)
+mpi2prv_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
+libmpi2prv_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
 
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) ; $(LN_S) -f mpi2prv$(EXEEXT) mpi2dim$(EXEEXT)
