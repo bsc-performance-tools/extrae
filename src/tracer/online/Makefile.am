@@ -51,7 +51,7 @@ if HAVE_SPECTRAL
 libonline_la_CXXFLAGS += @SPECTRAL_CXXFLAGS@
 libonline_la_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
 endif
-libonline_la_LIBADD    = extractors/libextractors.la
+libonline_la_LIBADD    = extractors/libextractors.la extractors/libcontainers.la
 
 
 #########################
