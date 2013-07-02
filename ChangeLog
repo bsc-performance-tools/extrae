@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 02Jul2013 Fixed report message for the circular buffer when parsing the XML configuration.
  * 25Jun2013 Fixed bug in the cpu IDs of unmatched communications through different tasks of the parallel merge.
  * 25Jun2013 Removed extra debug messages.
  + 25Jun2013 Added instrumentation support for MPI_comm_spawn and MPI_comm_spawn_multiple

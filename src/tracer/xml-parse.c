@@ -882,9 +882,9 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
-				mfprintf (stdout, PACKAGE_NAME": Circular buffer %s.\n", circular_buffering?"enabled":"disabled");
 				circular_buffering = 1;
 			}
+			mfprintf (stdout, PACKAGE_NAME": Circular buffer %s.\n", circular_buffering?"enabled":"disabled");
 			XML_FREE(enabled);
 		}
 		else
