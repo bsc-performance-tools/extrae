@@ -684,3 +684,9 @@ void Extrae_reallocate_CUDA_info (unsigned nthreads)
 		exit (-1);
 	}
 }
+
+void Extrae_CUDA_fini (void)
+{
+	Extrae_CUDA_flush_all_streams();
+}
+

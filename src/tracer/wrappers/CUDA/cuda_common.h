@@ -168,3 +168,4 @@ void Extrae_cudaMemcpyAsync_Exit (void);
 
 void Extrae_reallocate_CUDA_info (unsigned nthreads);
 
+void Extrae_CUDA_fini (void);
