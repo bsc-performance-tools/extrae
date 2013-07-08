@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/tracer/auto_init_fini.c $
- | @last_commit: $Date: 2012-10-19 12:52:48 +0200 (dv, 19 oct 2012) $
- | @version:     $Revision: 1276 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: auto_init_fini.c 1276 2012-10-19 10:52:48Z harald $";
+static char UNUSED rcsid[] = "$Id$";
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>

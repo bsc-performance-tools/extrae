@@ -22,9 +22,9 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/tracer/auto_init_fini.c $
- | @last_commit: $Date: 2012-10-19 12:52:48 +0200 (dv, 19 oct 2012) $
- | @version:     $Revision: 1276 $
+ | @file: $HeadURL$
+ | @last_commit: $Date$
+ | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
 #ifndef AUTO_LIBRARY_FINI_H_INCLUDED
