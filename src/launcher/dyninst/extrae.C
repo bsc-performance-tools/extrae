@@ -1022,7 +1022,14 @@ int main (int argc, char *argv[])
 		{
 			/* Typical main entry & exit */
 			wrapRoutine (appImage, "main", "Extrae_init", "Extrae_fini");
+		}
+		else
+		{
+			/* Cover those cases that MPI apps do not call MPI_Finalize */
+			wrapRoutine (appImage, "main", "", "Extrae_fini_last_chance_Wrapper");
+		}
 
+		{
 			/* Special cases (e.g., fortran stop call) */
 			string exit_calls[] =
 			{
@@ -1040,7 +1047,7 @@ int main (int argc, char *argv[])
 			{
 				BPatch_function *special_exit = getRoutine (exit_calls[i].c_str(), appImage, false);
 				if (NULL != special_exit)
-					wrapRoutine (appImage, exit_calls[i], "Extrae_fini", "");
+					wrapRoutine (appImage, exit_calls[i], "Extrae_fini_last_chance_Wrapper", "");
 				i++;
 			}
 			extrae_detecting_application_type = false;
