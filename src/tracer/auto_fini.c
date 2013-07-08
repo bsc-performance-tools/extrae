@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/tracer/auto_init_fini.c $
+ | @last_commit: $Date: 2012-10-19 12:52:48 +0200 (dv, 19 oct 2012) $
+ | @version:     $Revision: 1276 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+static char UNUSED rcsid[] = "$Id: auto_init_fini.c 1276 2012-10-19 10:52:48Z harald $";
 
 #if HAVE_STDLIB_H
 # include <stdlib.h>
@@ -37,36 +37,11 @@ static char UNUSED rcsid[] = "$Id$";
 # include <string.h>
 #endif
 
-#include <misc_interface.h>
-
-static int Extrae_automatically_loaded = FALSE;
+#include <misc_wrapper.h>
 
 __attribute__((destructor))
 void Extrae_auto_library_fini (void)
 {
-	if (Extrae_automatically_loaded)
-	{
-		Extrae_fini();
-		Extrae_automatically_loaded = FALSE;
-	}
-}
-
-__attribute__((constructor))
-void Extrae_auto_library_init (void)
-{
-	if (!Extrae_automatically_loaded)
-	{
-		/* Do not automatically load if DynInst is orchestrating the tracing */
-		if (getenv("EXTRAE_DYNINST_RUN") != NULL)
-			if (strcmp (getenv("EXTRAE_DYNINST_RUN"), "yes") == 0)
-				return;
-		Extrae_init();
-		Extrae_automatically_loaded = TRUE;
-
-		/* We have experienced issues with __attribute__(destructor).
-		   If it fails, give another chance to close instrumentation
-		   through atexit(3) */
-		atexit (Extrae_auto_library_fini);
-	}
+	Extrae_fini_last_chance_Wrapper ();
 }
 

@@ -1105,7 +1105,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	BGL_disable_barrier_inside = 1;
 #endif
 
-  if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
 	{
 		MPI_stats_Wrapper (LAST_READ_TIME);
 		Trace_mode_switch();
@@ -1134,8 +1134,8 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	/* Generate the final file list */
 	MPI_Generate_Task_File_List (TasksNodes);
 
-  /* Finalize only if its initialized by MPI_init call */
-  if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+	/* Finalize only if its initialized by MPI_init call */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
 		Backend_Finalize ();
 
@@ -1146,6 +1146,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 		CtoF77(pmpi_finalize) (ierror);
 
+		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 		mpitrace_on = FALSE;
 	}
 	else
@@ -4672,6 +4673,7 @@ int MPI_Finalize_C_Wrapper (void)
 
 		ierror = PMPI_Finalize();
 
+		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 		mpitrace_on = FALSE;
 	}
 	else

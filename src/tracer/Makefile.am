@@ -193,28 +193,29 @@ core_SRCS = \
  $(WRAPPERS_CORE)
 
 # Auto instrumentation through constructor and destructors
-auto_instr_SRCS = auto_init_fini.c
+auto_init_instr_SRCS = auto_init.c
+auto_fini_instr_SRCS = auto_fini.c auto_fini.h
 
 # CUDA trace
-libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(auto_instr_SRCS)
-libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(WRAPPERS_MPI) $(core_MPI_SRCS)
+libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(auto_fini_instr_SRCS)
 libcudampitracef_la_SOURCES = $(libcudampitrace_la_SOURCES) mpif.h
 
 # OpenCL trace
-libocltrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL) $(auto_instr_SRCS)
-liboclmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL) $(WRAPPERS_MPI) $(core_MPI_SRCS)
+libocltrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+liboclmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(auto_fini_instr_SRCS)
 liboclmpitracef_la_SOURCES = $(liboclmpitrace_la_SOURCES) mpif.h
 
 # MPItrace & Sequential trace
-libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
+libmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(auto_fini_instr_SRCS)
 libmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
-libseqtrace_la_SOURCES = $(core_SRCS) $(auto_instr_SRCS)
+libseqtrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
-libptmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(WRAPPERS_PTHREAD)
+libptmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(WRAPPERS_PTHREAD) $(auto_fini_instr_SRCS)
 libptmpitracef_la_SOURCES = $(libptmpitrace_la_SOURCES) mpif.h
 
 # UPC (only C?)
-libupctrace_la_SOURCES = $(core_SRCS) $(auto_instr_SRCS)
+libupctrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
 # PACXtrace 
 libpacxtrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PACX) $(core_PACX_SRCS)
@@ -223,21 +224,21 @@ libpacxtracef_la_SOURCES = $(libpacxtrace_la_SOURCES)
 # OpenMP & OpenMP + MPI
 libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES) $(WRAPPERS_OMP)
 libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES) $(WRAPPERS_OMP) mpif.h
-libomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OMP) $(auto_instr_SRCS)
+libomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OMP) $(auto_instr_SRCS) $(auto_fini_instr_SRCS)
 
 # SMPSS & SMPSS + MPI
+libsmpsstrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 libsmpssmpitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
 libsmpssmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
-libsmpsstrace_la_SOURCES = $(core_SRCS)
 
 # Nanos
-libnanostrace_la_SOURCES = $(core_SRCS)
-libnanosmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
+libnanostrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
+libnanosmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(auto_fini_instr_SRCS)
 libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) mpif.h
 
 # pthreads & TRT
-libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD)
-libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT)
+libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
 # LoadBalancing
 libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)

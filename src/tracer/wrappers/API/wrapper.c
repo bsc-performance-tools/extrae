@@ -2103,13 +2103,14 @@ void Backend_Finalize (void)
 	if (TASKID == 0 && Extrae_isProcessMaster())
 		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
+	mpitrace_on = FALSE; /* Turn off tracing now */
+
 #if defined(EMBED_MERGE_IN_TRACE)
 	/* Launch the merger */
 	if (MergeAfterTracing)
 	{
 		int ptask = 1;
 		char tmp[1024];
-		mpitrace_on = FALSE; /* Turn off tracing now */
 
 		if (TASKID == 0)
 			fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");

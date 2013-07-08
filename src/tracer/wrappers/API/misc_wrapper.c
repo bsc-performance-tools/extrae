@@ -395,9 +395,6 @@ void Extrae_fini_Wrapper (void)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 	{
 #if !defined(IS_CELL_MACHINE)
-		/* Generate the definitive file list. Cell machines touch the list
-	 	   as the execution runs... don't touch on that case */
-
 		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX())
@@ -409,6 +406,33 @@ void Extrae_fini_Wrapper (void)
 
 		/* Call additional code to finalize the task including
 	     MPI_Finalize, PACX_Finalize,... */
+		Extrae_finalize_task();
+
+		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
+	}
+}
+
+void Extrae_fini_last_chance_Wrapper (void)
+{
+	/* Finalize independently from who did the initialization ! */
+	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
+	{
+
+		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+			fprintf (stderr, PACKAGE_NAME": Error! MPI task %d application did not terminate using MPI_Finalize! Review your application code.\n", TASKID);
+
+#if !defined(IS_CELL_MACHINE)
+		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
+		   for gathering and generating the .MPITS file*/
+		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX())
+			Generate_Task_File_List();
+#endif
+
+		/* Finalize tracing library */
+		Backend_Finalize ();
+
+		/* Call additional code to finalize the task including
+		   MPI_Finalize, PACX_Finalize,... */
 		Extrae_finalize_task();
 
 		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
