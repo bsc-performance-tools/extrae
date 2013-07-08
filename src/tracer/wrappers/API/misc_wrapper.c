@@ -341,6 +341,8 @@ void Extrae_init_tracing (int forked)
 	if (config_file == NULL)
 		config_file = getenv ("MPTRACE_CONFIG_FILE");
 
+	Extrae_set_initial_TASKID (TASKID);
+
 	/* Initialize the backend */
 	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, forked))
 		return;
@@ -362,7 +364,6 @@ void Extrae_init_tracing (int forked)
 		return;
 
 	Extrae_set_is_initialized (EXTRAE_INITIALIZED_EXTRAE_INIT);
-	Extrae_set_initial_TASKID (TASKID);
 }
 
 void Extrae_init_Wrapper (void)

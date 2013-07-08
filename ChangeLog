@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 08Jul2013 Allow OpenMP user code to generate samples again
+             Moved Extrae_set_initial_taskid at the very beginning
  * 04Jul2013 Fix compilation of papi_best_set for PAPI when using CUDA
              Move Extrae_CUDA_fini to cuda_common.c
  * 02Jul2013 Fixed compilation flags for the merger to enable the online support.
