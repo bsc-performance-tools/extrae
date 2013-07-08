@@ -222,7 +222,7 @@ void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
  */
 void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 {
-	void *params[64];
+	void *params[128];
 	va_list ap;
 	int i;
 
@@ -287,7 +287,7 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 
 void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 {
-	void *params[64];
+	void *params[128];
 	va_list ap;
 	int i;
 

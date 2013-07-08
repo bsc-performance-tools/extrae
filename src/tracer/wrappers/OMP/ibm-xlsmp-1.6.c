@@ -106,6 +106,7 @@ static void callme_pardo (char *ptr, long lbnd, long ubnd, unsigned thid)
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
+	Backend_Leave_Instrumentation (); /* We're entering in user code */
 	pardo_uf (ptr, lbnd, ubnd, thid);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -126,6 +127,7 @@ static void callme_do (char *ptr, long lbnd, long ubnd)
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
+	Backend_Leave_Instrumentation (); /* We're entering in user code */
 	do_uf[THREADID] (ptr, lbnd, ubnd);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -145,6 +147,7 @@ static void callme_par (char *ptr)
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
+	Backend_Leave_Instrumentation (); /* We're entering in user code */
 	par_uf (ptr);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -164,6 +167,7 @@ static void callme_single(void)
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
+	Backend_Leave_Instrumentation (); /* We're entering in user code */
 	par_single ();
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -210,6 +214,7 @@ static void callme_section(char *p1, unsigned p2)
 		_xlsmp_sections real = real_sections[THREADID];
 
 		Extrae_OpenMP_UF_Entry (real[index]);
+		Backend_Leave_Instrumentation (); /* We're entering in user code */
 		real[index] (p1, p2);
 		Extrae_OpenMP_UF_Exit ();
 	}

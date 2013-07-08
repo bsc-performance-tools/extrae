@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAXNUMBER=64
+MAXNUMBER=128
 INTERMEDIATE_FUNCS="intel-kmpc-11-intermediate.c"
 INTERMEDIATE_SWITCH="intel-kmpc-11-intermediate-switch.c"
 
@@ -32,6 +32,7 @@ do
 	echo ")) par_func;" >> ${INTERMEDIATE_FUNCS}
 	echo "" >> ${INTERMEDIATE_FUNCS}
 	echo -e "\tExtrae_OpenMP_UF_Entry (p);" >> ${INTERMEDIATE_FUNCS}
+	echo -e "\tBackend_Leave_Instrumentation (); /* We're entering in user code */" >> ${INTERMEDIATE_FUNCS}
 	echo -e -n "\tintermediate (par1,par2" >> ${INTERMEDIATE_FUNCS}
 	for i in `seq 1 ${number}`
 	do
