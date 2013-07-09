@@ -80,12 +80,12 @@ void trace_callers (iotimer_t time, int offset, int type)
 	while ((unw_step(&cursor) > 0) && (current_deep < Caller_Deepness[type]+offset))
 	{
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
+
 #if defined(MPICALLER_DEBUG)
 		if (current_deep >= offset)
-		{
-			unw_get_reg(&cursor, UNW_REG_SP, &sp);
-			fprintf (stderr, "(%d) ip = %lx, sp = %lx\n", current_deep, (long) ip, (long) sp);
-		}
+			fprintf (stderr, "emitted (deep = %d, offset = %d) ip = %lx\n", current_deep, offset, (long) ip);
+		else
+			fprintf (stderr, "ignored (deep = %d, offset = %d) ip = %lx\n", current_deep, offset, (long) ip);
 #endif
     
 		if (current_deep >= offset)
@@ -187,20 +187,20 @@ void trace_callers (iotimer_t time, int offset, int type) {
 
 	for (i=0; (i<Caller_Deepness[type] && (i+offset-1)<size); i++)
 	{
+#ifdef MPICALLER_DEBUG
+		fprintf (stderr, "i = %d p-callstack=%d ip = %lx\n", i, i+offset-1, callstack[i+offset-1]);
+#endif
+
 		if (type == CALLER_MPI)
 		{
 			if (Trace_Caller[CALLER_MPI][i])
-			{
 				TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(i+1), (UINT64) callstack[i+offset-1]);
-			}
 		}
 #if defined(SAMPLING_SUPPORT)
 		else if (type == CALLER_SAMPLING)
 		{
 			if (Trace_Caller[CALLER_SAMPLING][i])
-			{
 				SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+i+1, (UINT64) callstack[i+offset-1]);
-			}
 		}
 #endif
 	}	  
