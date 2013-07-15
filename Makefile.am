@@ -303,6 +303,12 @@ OPENCL_EXAMPLE_FILES=\
  example/LINUX/OPENCL/run.sh \
  example/LINUX/OPENCL/vadd.c
 
+MPIOPENCL_EXAMPLE_FILES=\
+ example/LINUX/MPI+OPENCL/extrae.xml \
+ example/LINUX/MPI+OPENCL/Makefile \
+ example/LINUX/MPI+OPENCL/run.sh \
+ example/LINUX/MPI+OPENCL/mpi-vadd.c
+
 FORK_EXAMPLE_FILES=\
  example/LINUX/FORK/extrae.xml \
  example/LINUX/FORK/function-list \
@@ -339,6 +345,10 @@ if HAVE_MPI
 if WANT_CUDAorCUPTI
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+CUDA
 	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
+endif
+if WANT_OPENCL
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+OPENCL
+	cp -fr $(MPIOPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OPENCL
 endif
 endif
 if WANT_OPENMP

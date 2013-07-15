@@ -283,7 +283,7 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx)
 			continue;
 		}
 
-		utmp = utmp - delta_time; /* Correct timing between Host & Accel */
+		utmp = utmp + delta_time; /* Correct timing between Host & Accel */
 
 		if (CommandQueues[idx].k_event[u] != NULL)
 		{
@@ -309,8 +309,8 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx)
 			fprintf (stderr, PACKAGE_NAME": Error! Cannot obtain OpenCL profiling info!\n");
 			continue;
 		}
- 
-		utmp = utmp - delta_time; /* Correct timing between Host & Accel */
+
+		utmp = utmp + delta_time; /* Correct timing between Host & Accel */
 
 		THREAD_TRACE_MISCEVENT (threadid, utmp,
 		  CommandQueues[idx].prv_event[u], EVT_END, 0);
