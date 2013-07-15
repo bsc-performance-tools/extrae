@@ -58,7 +58,7 @@
 
 	<opencl enabled="yes" />
 
-  <merge enabled="no" 
+  <merge enabled="yes" 
     synchronization="default"
     binary="mpi-vadd"
     tree-fan-out="16"
