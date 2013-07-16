@@ -300,13 +300,15 @@ CUDA_EXAMPLE_FILES=\
 OPENCL_EXAMPLE_FILES=\
  example/LINUX/OPENCL/extrae.xml \
  example/LINUX/OPENCL/Makefile \
- example/LINUX/OPENCL/run.sh \
+ example/LINUX/OPENCL/trace.sh \
+ example/LINUX/OPENCL/README \
  example/LINUX/OPENCL/vadd.c
 
 MPIOPENCL_EXAMPLE_FILES=\
  example/LINUX/MPI+OPENCL/extrae.xml \
  example/LINUX/MPI+OPENCL/Makefile \
- example/LINUX/MPI+OPENCL/run.sh \
+ example/LINUX/MPI+OPENCL/trace.sh \
+ example/LINUX/MPI+OPENCL/README \
  example/LINUX/MPI+OPENCL/mpi-vadd.c
 
 FORK_EXAMPLE_FILES=\
