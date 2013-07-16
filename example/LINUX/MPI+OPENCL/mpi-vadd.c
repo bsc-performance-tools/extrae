@@ -28,7 +28,7 @@
 //pick up device type from compiler command line or from 
 //the default type
 #ifndef DEVICE
-#define DEVICE CL_DEVICE_TYPE_CPU
+#define DEVICE CL_DEVICE_TYPE_GPU
 #endif
 
 static int output_device_info (int mpirank, cl_device_id device_id)
