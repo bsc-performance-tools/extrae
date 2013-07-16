@@ -419,7 +419,7 @@ void Extrae_fini_last_chance_Wrapper (void)
 	{
 
 		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
-			fprintf (stderr, PACKAGE_NAME": Error! MPI task %d application did not terminate using MPI_Finalize! Review your application code.\n", TASKID);
+			fprintf (stderr, PACKAGE_NAME": Warning! MPI task %d application did not terminate using MPI_Finalize! Review your application code.\n", TASKID);
 
 #if !defined(IS_CELL_MACHINE)
 		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
