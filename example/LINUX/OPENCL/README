@@ -1,0 +1,12 @@
+Type
+  make
+to compile the application. Then type
+  ./trace.sh ./vadd
+to execute and instrument the application.
+
+Type
+  make
+to compile the application. Then type
+  ./trace.sh ./vadd
+to execute and instrument the application.
+

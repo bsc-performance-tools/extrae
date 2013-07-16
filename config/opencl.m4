@@ -26,7 +26,7 @@ AC_DEFUN([AX_OPENCL],
 		if test -r ${OPENCL_INCLUDES}/CL/cl.h ; then
 			AC_MSG_RESULT([found])
 			AC_MSG_CHECKING([for OPENCL lib files])
-			if test -r ${OPENCL_LIBSDIR}}/libOpenCL.so ; then
+			if test -r ${OPENCL_LIBSDIR}/libOpenCL.so ; then
 				AC_MSG_RESULT([found])
 				enable_opencl="yes"
 				AC_MSG_RESULT(${opencl_path})

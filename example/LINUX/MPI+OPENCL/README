@@ -1,0 +1,6 @@
+Type
+  make
+to compile the application. Then type
+  mpirun -np [NumOfMPIProcesses] ./trace.sh ./mpi-vadd
+to execute and instrument the application.
+
