@@ -85,7 +85,9 @@ static cl_int (*real_clEnqueueMarker)(cl_command_queue, cl_event *) = NULL;
 static cl_int (*real_clEnqueueBarrier)(cl_command_queue) = NULL;
 static void* (*real_clEnqueueMapBuffer)(cl_command_queue, cl_mem, cl_bool, cl_map_flags, size_t, size_t, cl_uint, const cl_event *, cl_event *, cl_int *) = NULL;
 static cl_int (*real_clEnqueueUnmapMemObject)(cl_command_queue, cl_mem, void *, cl_uint, const cl_event *, cl_event *) = NULL;
+#ifdef CL_VERSION_1_2
 static cl_int (*real_clEnqueueMigrateMemObjects)(cl_command_queue, cl_uint, const cl_mem *, cl_mem_migration_flags, cl_uint, const cl_event *, cl_event *) = NULL;
+#endif
 
 static int Extrae_Prepare_CommandQueue = FALSE;
 
@@ -262,10 +264,12 @@ void Extrae_OpenCL_init (unsigned rank)
 	if (real_clEnqueueUnmapMemObject != NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueUnmapMemObject in DSOs!!\n");
 
+#ifdef CL_VERSION_1_2
 	real_clEnqueueMigrateMemObjects = (cl_int (*)(cl_command_queue, cl_uint, const cl_mem *, cl_mem_migration_flags, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueMigrateMemObjects");
 	if (real_clEnqueueMigrateMemObjects != NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMigrateMemObjects in DSOs!!\n");
+#endif
 
 }
 
@@ -1351,6 +1355,7 @@ cl_int clEnqueueUnmapMemObject (cl_command_queue q, cl_mem m, void *p,
 	return r;
 }
 
+#ifdef CL_VERSION_1_2
 cl_int clEnqueueMigrateMemObjects (cl_command_queue q, cl_uint n, 
 	const cl_mem *mo, cl_mem_migration_flags f, cl_uint ne,
 	const cl_event *ewl, cl_event *e)
@@ -1384,4 +1389,4 @@ cl_int clEnqueueMigrateMemObjects (cl_command_queue q, cl_uint n,
 
 	return r;
 }
-
+#endif
