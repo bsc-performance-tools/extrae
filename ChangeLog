@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 17Jul2013 Added overhead tests
  * 09Jul2013 Fix sampling handler callstack level
  * 08Jul2013 Allow OpenMP user code to generate samples again
              Moved Extrae_set_initial_taskid at the very beginning
