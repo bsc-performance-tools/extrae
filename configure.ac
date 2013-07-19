@@ -40,6 +40,9 @@ else
 fi
 echo Configuring package ${PACKAGE_STRING} based on ${SVN_branch} revision ${SVN_revision}
 
+AC_DEFINE_UNQUOTED([EXTRAE_SVN_REVISION], [${SVN_revision}], [Define SVN version for this Extrae])
+AC_DEFINE_UNQUOTED([EXTRAE_SVN_BRANCH], ["${SVN_branch}"], [Define SVN branch for this Extrae])
+
 # Loads some shell variables like host_cpu and host_os, to get the host information 
 AC_CANONICAL_SYSTEM
 

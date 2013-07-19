@@ -230,7 +230,7 @@ static void * pthread_create_hook (void *p1)
 	pthread_cond_signal (&(i->wait));
 	pthread_mutex_unlock_real (&(i->lock));
 
-	Backend_Enter_Instrumentation (1);
+	Backend_Enter_Instrumentation (2);
 	Probe_pthread_Function_Entry (routine);
 	Backend_Leave_Instrumentation ();
 

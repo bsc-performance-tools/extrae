@@ -189,6 +189,8 @@ int Extrae_get_ApplicationIsPACX (void);
 void Extrae_set_ApplicationIsMPI (int isMPI);
 void Extrae_set_ApplicationIsPACX (int isPACX);
 
+void Extrae_AnnotateCPU (UINT64 timestamp);
+
 int Extrae_Allocate_Task_Bitmap (int size);
 
 void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *description,

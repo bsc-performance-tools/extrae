@@ -71,14 +71,20 @@ void Probe_pthread_Function_Entry (void *p)
 {
 	DEBUG
 	if (mpitrace_on)
+	{
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_FUNC_EV, (UINT64)p ,EMPTY);
+		Extrae_AnnotateCPU (LAST_READ_TIME);
+	}
 }
 
 void Probe_pthread_Function_Exit (void)
 {
 	DEBUG
 	if (mpitrace_on)
+	{
 		TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_FUNC_EV, EVT_END ,EMPTY);
+		Extrae_AnnotateCPU (LAST_READ_TIME);
+	}
 }
 
 void Probe_pthread_Exit_Entry(void)

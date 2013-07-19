@@ -342,17 +342,22 @@ static void Extrae_BG_gettopology (int enter, UINT64 timestamp)
 }
 #endif
 
+void Extrae_AnnotateCPU (UINT64 timestamp)
+{
+#if defined(HAVE_SCHED_GETCPU)
+    TRACE_EVENT (timestamp, GETCPU_EV, sched_getcpu());
+#else
+    UNREFERENCED_PARAMETER(timestamp);
+#endif
+}
+
 static void Extrae_AnnotateTopology (int enter, UINT64 timestamp)
 {
 #if defined(IS_BG_MACHINE)
 	Extrae_BG_gettopology (enter, timestamp);
 #else
 	UNREFERENCED_PARAMETER(enter);
-# if defined(HAVE_SCHED_GETCPU)
-	TRACE_EVENT (timestamp, GETCPU_EV, sched_getcpu());
-# else
-	UNREFERENCED_PARAMETER(timestamp);
-# endif
+	Extrae_AnnotateCPU (timestamp);
 #endif
 }
 
@@ -1478,7 +1483,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	else
 	{
 		if (me == 0 && !forked)
-			fprintf (stdout, "Welcome to "PACKAGE_STRING"\n");
+			fprintf (stdout, "Welcome to "PACKAGE_STRING" (revision %d based on %s)\n", EXTRAE_SVN_REVISION, EXTRAE_SVN_BRANCH);
 	}
 
 	/* Allocate a bitmap to know which tasks are tracing */

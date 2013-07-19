@@ -29,7 +29,6 @@ AC_DEFUN([AX_OPENCL],
 			if test -r ${OPENCL_LIBSDIR}/libOpenCL.so ; then
 				AC_MSG_RESULT([found])
 				enable_opencl="yes"
-				AC_MSG_RESULT(${opencl_path})
 			else
 				AC_MSG_ERROR([Cannot find the necessary library files for OpenCL])
 			fi
