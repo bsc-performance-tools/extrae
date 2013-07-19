@@ -2203,12 +2203,13 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
-		snprintf (line, sizeof(line), "%c %d \"%s\"\n", code_type, type,
+		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
 			description);
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 				line[j] = ' ';
 		write (fd, line, strlen(line));
+		write (fd, "\n", strlen("\n"));
 		if (nvalues > 0)
 		{
 			unsigned i;
@@ -2216,12 +2217,13 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 			{
 				ASSERT(strlen(description_values[i])<LINE_SIZE, "Description for value is too large");
 
-				snprintf (line, sizeof(line), "%c %llu \"%s\"\n", code_values,
+				snprintf (line, sizeof(line), "%c %llu \"%s\"", code_values,
 					values[i], description_values[i]);
 				for (j = 0; j < strlen(line); j++)
 					if (line[j] == '\n')
 						line[j] = ' ';
 				write (fd, line, strlen(line));
+				write (fd, "\n", strlen("\n"));
 			}
 		}
 		close (fd);
@@ -2248,9 +2250,10 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 					line[j] = ' ';
-		snprintf (line, sizeof(line), "%c %d \"%s\"\n", code_type, type,
+		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
 			description);
 		write (fd, line, strlen(line));
+		write (fd, "\n", strlen("\n"));
 
 		if (nvalues > 0)
 		{
@@ -2259,12 +2262,13 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 			{
 				ASSERT(strlen(description_values[i])<LINE_SIZE, "Description for value is too large");
 
-				snprintf (line, sizeof(line), "%c %llu \"%s\"\n", code_values,
+				snprintf (line, sizeof(line), "%c %llu \"%s\"", code_values,
 					values[i], description_values[i]);
 				for (j = 0; j < strlen(line); j++)
 					if (line[j] == '\n')
 						line[j] = ' ';
 				write (fd, line, strlen(line));
+				write (fd, "\n", strlen("\n"));
 			}
 		}
 		close (fd);
@@ -2289,12 +2293,13 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 		unsigned j;
 
 		/* Example of format: U 0x100016d4 fA mpi_test.c 0 */
-		snprintf (line, sizeof(line), "%c %p \"%s\" \"%s\" %u\n", code_type,
+		snprintf (line, sizeof(line), "%c %p \"%s\" \"%s\" %u", code_type,
 			address, functionname, modulename, fileline);
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 				line[j] = ' ';
 		write (fd, line, strlen(line));
+		write (fd, "\n", strlen("\n"));
 		close (fd);
 	}
 	#undef LINE_SIZE
