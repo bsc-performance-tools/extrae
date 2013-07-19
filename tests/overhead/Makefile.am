@@ -44,6 +44,9 @@ if HAVE_UNWIND
 extrae_header_CFLAGS += -DUNWIND_HOME='"$(UNWIND_HOME)"' @UNWIND_CFLAGS@
 extrae_header_LDFLAGS += -L@UNWIND_SHAREDLIBSDIR@ -R@UNWIND_SHAREDLIBSDIR@ @UNWIND_LIBS@
 endif
+if IS_BG_MACHINE
+extrae_header_LDFLAGS += -all-static
+endif
 
 install-data-hook:
 	$(mkdir_p) $(DESTDIR)$(datadir)/tests/overhead
