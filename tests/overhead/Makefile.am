@@ -51,6 +51,7 @@ install-data-hook:
 	cp Makefile.tests.overhead $(DESTDIR)$(datadir)/tests/overhead/Makefile
 	$(BASE_DIR)/substitute $(SED) "@sub_EXTRAE_HOME@" "$(prefix)" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
 	$(BASE_DIR)/substitute $(SED) "@sub_PAPI_SHAREDLIBSDIR@" "$(PAPI_SHAREDLIBSDIR)" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
+	$(BASE_DIR)/substitute $(SED) "@sub_UNWIND_SHAREDLIBSDIR@" "$(UNWIND_SHAREDLIBSDIR)" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
 if HAVE_PAPI
 	$(BASE_DIR)/substitute $(SED) "@sub_COUNTERS_OVERHEAD_TESTS@" "./extrae_eventandcounters ./papi_read1 ./papi_read4" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
 endif

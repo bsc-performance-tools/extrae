@@ -16,7 +16,7 @@ function run_test {
 
 
 export EXTRAE_CONFIG_FILE=extrae.xml
-export LD_LIBRARY_PATH+=:@sub_EXTRAE_HOME@/lib:@sub_PAPI_SHAREDLIBSDIR@
+export LD_LIBRARY_PATH+=:@sub_EXTRAE_HOME@/lib:@sub_PAPI_SHAREDLIBSDIR@:@sub_UNWIND_SHAREDLIBSDIR@
 
 EXECUTABLES="./posix_clock ./ia32_rdtsc_clock ./extrae_event ./extrae_nevent4"
 EXECUTABLES+=" @sub_COUNTERS_OVERHEAD_TESTS@"

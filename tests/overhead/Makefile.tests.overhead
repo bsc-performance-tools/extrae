@@ -2,7 +2,7 @@ include ../../example/Makefile.inc
 
 CC = gcc
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include -I $(PAPI_HOME)/include
-LFLAGS = -L$(EXTRAE_HOME)/lib -lseqtrace $(UNWIND_LIBS) $(XML2_LIBS) $(POSIX_CLOCK_LIBS)
+LFLAGS = -L$(EXTRAE_HOME)/lib -lseqtrace $(UNWIND_LIBS) $(XML2_LIBS) $(POSIX_CLOCK_LIBS) -lrt
 
 TARGETS = posix_clock ia32_rdtsc_clock extrae_event extrae_nevent4 extrae_eventandcounters extrae_user_function extrae_get_caller1 extrae_get_caller6 extrae_trace_callers papi_read1 papi_read4
 
@@ -36,10 +36,10 @@ extrae_trace_callers:	extrae_trace_callers.c
 	$(CC) $(CFLAGS) $< -o $@ $(LFLAGS)
 
 papi_read1:	papi_read1.c
-	$(CC) $(CFLAGS) $< -o $@ $(PAPI_LIBS)
+	$(CC) $(CFLAGS) $< -o $@ $(PAPI_LIBS) -lrt
 
 papi_read4:	papi_read4.c
-	$(CC) $(CFLAGS) $< -o $@ $(PAPI_LIBS)
+	$(CC) $(CFLAGS) $< -o $@ $(PAPI_LIBS) -lrt
 
 clean:
 	rm -fr TRACE*.mpit* TRACE.sym set-0 $(TARGETS)
