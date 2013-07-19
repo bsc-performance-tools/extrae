@@ -2202,8 +2202,12 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
+		unsigned j;
 		snprintf (line, sizeof(line), "%c %d \"%s\"\n", code_type, type,
 			description);
+		for (j = 0; j < strlen(line); j++)
+			if (line[j] == '\n')
+				line[j] = ' ';
 		write (fd, line, strlen(line));
 		if (nvalues > 0)
 		{
@@ -2214,6 +2218,9 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 
 				snprintf (line, sizeof(line), "%c %llu \"%s\"\n", code_values,
 					values[i], description_values[i]);
+				for (j = 0; j < strlen(line); j++)
+					if (line[j] == '\n')
+						line[j] = ' ';
 				write (fd, line, strlen(line));
 			}
 		}
@@ -2237,6 +2244,10 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 		appl_name, getpid(), Extrae_get_initial_TASKID(), THREADID, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
+		unsigned j;
+		for (j = 0; j < strlen(line); j++)
+			if (line[j] == '\n')
+					line[j] = ' ';
 		snprintf (line, sizeof(line), "%c %d \"%s\"\n", code_type, type,
 			description);
 		write (fd, line, strlen(line));
@@ -2250,6 +2261,9 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 
 				snprintf (line, sizeof(line), "%c %llu \"%s\"\n", code_values,
 					values[i], description_values[i]);
+				for (j = 0; j < strlen(line); j++)
+					if (line[j] == '\n')
+						line[j] = ' ';
 				write (fd, line, strlen(line));
 			}
 		}
@@ -2272,9 +2286,14 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 		appl_name, getpid(), Extrae_get_initial_TASKID(), THREADID, EXT_SYM);
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
+		unsigned j;
+
 		/* Example of format: U 0x100016d4 fA mpi_test.c 0 */
 		snprintf (line, sizeof(line), "%c %p \"%s\" \"%s\" %u\n", code_type,
 			address, functionname, modulename, fileline);
+		for (j = 0; j < strlen(line); j++)
+			if (line[j] == '\n')
+				line[j] = ' ';
 		write (fd, line, strlen(line));
 		close (fd);
 	}
