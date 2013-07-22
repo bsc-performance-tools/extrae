@@ -55,22 +55,38 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
+#if PAPI_VERSION_MAJOR(PAPI_VERSION) >= 5
 	if (PAPI_add_named_event (e, "PAPI_TOT_INS") != PAPI_OK)
+#else
+	if (PAPI_add_event (e, PAPI_TOT_INS) != PAPI_OK)
+#endif
 	{
 		fprintf (stderr, "Failed to add PAPI_TOT_INS\n");
 		exit (1);
 	}
+#if PAPI_VERSION_MAJOR(PAPI_VERSION) >= 5
 	if (PAPI_add_named_event (e, "PAPI_TOT_CYC") != PAPI_OK)
+#else
+	if (PAPI_add_event (e, PAPI_TOT_CYC) != PAPI_OK)
+#endif
 	{
 		fprintf (stderr, "Failed to add PAPI_TOT_CYC\n");
 		exit (1);
 	}
+#if PAPI_VERSION_MAJOR(PAPI_VERSION) >= 5
 	if (PAPI_add_named_event (e, "PAPI_BR_INS") != PAPI_OK)
+#else
+	if (PAPI_add_event (e, PAPI_BR_INS) != PAPI_OK)
+#endif
 	{
 		fprintf (stderr, "Failed to add PAPI_BR_INS\n");
 		exit (1);
 	}
+#if PAPI_VERSION_MAJOR(PAPI_VERSION) >= 5
 	if (PAPI_add_named_event (e, "PAPI_L1_DCM") != PAPI_OK)
+#else
+	if (PAPI_add_event (e, PAPI_L1_DCM) != PAPI_OK)
+#endif
 	{
 		fprintf (stderr, "Failed to add PAPI_L1_DCM\n");
 		exit (1);
