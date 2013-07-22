@@ -70,9 +70,13 @@ int main (int argc, char *argv[])
 {
 	UNREFERENCED_PARAMETER(argc);
 	UNREFERENCED_PARAMETER(argv);
+	char *cpuinfo;
 
 	printf (PACKAGE_STRING" SVN revision %d based on " EXTRAE_SVN_BRANCH"\n", EXTRAE_SVN_REVISION);
-	printf ("CPU info%s", search_in_cpu_info ("model name")); // search_in_cpu_info emits the leading : and the trailing \n
+	cpuinfo = search_in_cpu_info ("model name");
+	if (cpuinfo == NULL)
+		cpuinfo = search_in_cpu_info ("Processor");
+	printf ("CPU info%s", cpuinfo);
 
 #if defined(HAVE_LIBUNWIND_H)
     printf ("Using libunwind v%d.%d from %s\n",
