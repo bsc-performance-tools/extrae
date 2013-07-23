@@ -1,15 +1,23 @@
 #!/bin/bash
 
 function run_test {
-	echo Test `basename $1` - $2 executions taking the $3 best runs
+	echo Test `basename $1` - $2 executions
 	rm -fr tmp.$$
+	let total=0
 	for ex in `seq $2`
 	do
 		# Ignore stderr!
-		$1 2>/dev/null | grep "^RESULT :" | cut -d " " -f 4- >> tmp.$$
+		timing[${ex}]=`$1 2>/dev/null | grep "^RESULT :" | cut -d " " -f 4`
+		echo ${timing[${ex}]} >> tmp.$$
+		let total=${total}+${timing[${ex}]} 
 		rm -fr set-0 TRACE.mpits TRACE.sym
 	done
-	sort -n tmp.$$ | head -$3
+	min=`sort -n tmp.$$ | head -1`
+	let avg=${total}/$2
+	max=`sort -n tmp.$$ | tail -1`
+	echo min: ${min} ns
+	echo avg: ${avg} ns
+	echo max: ${max} ns
 	echo  # Additional line
 	rm -fr tmp.$$
 }
@@ -50,5 +58,5 @@ echo
 
 for e in ${EXECUTABLES}
 do
-	run_test $e 10 3
+	run_test $e 10
 done
