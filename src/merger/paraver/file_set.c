@@ -249,7 +249,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	symbol_file_name[strlen(symbol_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
 	strcat (symbol_file_name, EXT_SYM);
 	if (file_exists(symbol_file_name))
-		Labels_loadSYMfile (taskid, symbol_file_name, FALSE);
+		if (taskid == 0)
+			Labels_loadSYMfile (taskid, symbol_file_name, FALSE);
 
 #if defined(SAMPLING_SUPPORT)
 	strcpy (sample_file_name, IFile->name);

@@ -1203,7 +1203,10 @@ int merger_post (int numtasks, int taskid)
 		}
 	}
 	else
-		Labels_loadSYMfile (taskid, get_merge_SymbolFileName(), TRUE);
+	{
+		if (taskid == 0)
+			Labels_loadSYMfile (taskid, get_merge_SymbolFileName(), TRUE);
+	}
 
 	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
