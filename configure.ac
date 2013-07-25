@@ -36,7 +36,7 @@ if test -f SVN-branch -a -f SVN-revision ; then
 	SVN_revision=`cat SVN-revision`
 else
 	SVN_branch=unknown
-	SVN_revision=unknown
+	SVN_revision=0
 fi
 echo Configuring package ${PACKAGE_STRING} based on ${SVN_branch} revision ${SVN_revision}
 
