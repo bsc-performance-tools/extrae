@@ -122,7 +122,7 @@ There are two different mechanisms to instrument user functions. One is using Dy
 \begin{itemize}
  \item If you use DynInst support in the instrumentation package, then the pointed list in the {\tt list} attribute within the tag is just a name list of the functions to be traced.
 
- \item If you use the IBM XL compilers, specify the option {\tt -qdebug=function\_trace} at compile and link stages. The {\tt list} attribute, as in DynInst, points to a name list of functions to be traced.
+ \item If you use the IBM XL compilers, specify the option {\tt -qfunctrace+function}\footnote{In earlier versions of the compiler the flag was: {\tt -qdebug=function\_trace}} at compile and link stages. The {\tt list} attribute, as in DynInst, points to a name list of functions to be traced.
 
  \item If you use the GNU C compiler with the option {\tt -finstrument-functions} at compile and link stages, the {\tt list} attribute must point a file with a list of entries like:
 
