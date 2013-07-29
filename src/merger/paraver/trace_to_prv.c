@@ -165,6 +165,52 @@ static void InitializeEnabledTasks (int numberoftasks, int numberofapplications)
   }
 }
 
+static void HandleStackedType (unsigned ptask, unsigned task, unsigned thread,
+	unsigned EvType, event_t *current_event)
+{
+	if (Get_EvEvent(current_event) == USER_EV &&
+	    Vector_Search (RegisteredStackValues, EvType))
+	{
+		unsigned pos;
+		unsigned u;
+		int found;
+		task_t *task_info = GET_TASK_INFO(ptask, task);
+		thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+		active_task_thread_t *att = &(task_info->active_task_threads[thread_info->active_task_thread-1]);
+
+		/* Look for existing stacked_types for the current task/thread */
+		for (found = FALSE, u = 0; u < att->num_stacks && !found; u++)
+			if (att->stacked_type[u].type == EvType)
+			{
+				pos = u;
+				found = TRUE;
+			}
+		if (!found)
+		{
+			/* If wasn't find, this is the first event for such type in
+			   this task/thread, create it */
+			pos = att->num_stacks;
+
+			att->stacked_type = (active_task_thread_stack_type_t*) realloc
+			  (att->stacked_type, sizeof(active_task_thread_stack_type_t)*(pos+1));
+			if (att->stacked_type == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Fatal error! Cannot reallocate stacked_type for the task/thread\n");
+				exit (0);
+			}
+			att->stacked_type[pos].stack = Stack_Init();
+			att->stacked_type[pos].type = EvType;
+			att->num_stacks++;
+		}
+
+		if (Get_EvMiscParam(current_event) > 0)
+			Stack_Push (att->stacked_type[pos].stack, Get_EvMiscParam(current_event));
+		else if (Get_EvMiscParam (current_event) == 0)
+			Stack_Pop (att->stacked_type[pos].stack);
+	}
+}
+
+
 /******************************************************************************
  ***  Paraver_ProcessTraceFiles
  ******************************************************************************/
@@ -375,47 +421,19 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 				    Vector_Count(RegisteredStackValues) > 0 &&
 				    task_info->num_active_task_threads > 0)
 				{
+					int found;
+					unsigned u;
+					Extrae_Addr2Type_t *addr2types;
 
-					if (Get_EvEvent(current_event) == USER_EV &&
-					    Vector_Search (RegisteredStackValues, Get_EvValue(current_event)))
+					HandleStackedType (ptask, task, thread, Get_EvValue(current_event), current_event);
+
+					for (found = FALSE, u = 0; u < Extrae_Vector_Count (&RegisteredCodeLocationTypes) && !found; u++)
 					{
-						thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
-						active_task_thread_t *att = &(task_info->active_task_threads[thread_info->active_task_thread-1]);
-						unsigned u;
-						unsigned pos;
-						int found = FALSE;
-
-						/* Look for existing stacked_types for the current task/thread */
-						for (u = 0; u < att->num_stacks; u++)
-							if (att->stacked_type[u].type == Get_EvValue(current_event))
-							{
-								pos = u;
-								found = TRUE;
-								break;
-							}
-						if (!found)
-						{
-							/* If wasn't find, this is the first event for such type in
-							   this task/thread, create it */
-							pos = att->num_stacks;
-
-							att->stacked_type = (active_task_thread_stack_type_t*) realloc
-							  (att->stacked_type, sizeof(active_task_thread_stack_type_t)*(pos+1));
-							if (att->stacked_type == NULL)
-							{
-								fprintf (stderr, "mpi2prv: Fatal error! Cannot reallocate stacked_type for the task/thread\n");
-								exit (0);
-							}
-							att->stacked_type[pos].stack = Stack_Init();
-							att->stacked_type[pos].type = Get_EvValue(current_event);
-							att->num_stacks++;
-						}
-
-						if (Get_EvMiscParam(current_event) > 0)
-							Stack_Push (att->stacked_type[pos].stack, Get_EvMiscParam(current_event));
-						else if (Get_EvMiscParam (current_event) == 0)
-							Stack_Pop (att->stacked_type[pos].stack);
+						addr2types = Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
+						found = addr2types->LineType == Get_EvValue(current_event);
 					}
+					if (found)
+						HandleStackedType (ptask, task, thread, addr2types->FunctionType, current_event);
 				}
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)

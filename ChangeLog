@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 29Jul2013 Fixed generation of codelocation & user function in nanos stacked
  + 19Jul2013 Add CPU information at begin & end of
                - routine executing pthread_create
                - OpenMP worksharing, function, ... *
