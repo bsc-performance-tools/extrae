@@ -4,6 +4,7 @@ ChangeLog
  * 30Jul2013 Added overwrite option in <merge> section
              Removed unused 'remove-files' in favor of 'keep-mpits'
              Fix fortran declarations on API
+             Fix MPI interfaces declarations
  * 29Jul2013 Fixed generation of codelocation & user function in nanos stacked
  + 19Jul2013 Add CPU information at begin & end of
                - routine executing pthread_create

@@ -4669,14 +4669,6 @@ void Extrae_set_tracing_tasks (unsigned from, unsigned to)
    }
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NETWORK_ROUTES);
 
-# define apiTRACE_USER_FUNCTION(x) \
-	void x##_user_function (int enter) \
-	{ \
-		if (mpitrace_on) \
-			Extrae_user_function_Wrapper (enter); \
-	}
-EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
-
 #define apiTRACE_SETTRACINGTASKS(x) \
 	void x##_set_tracing_tasks (unsigned from, unsigned to) \
    { \
