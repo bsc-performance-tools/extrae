@@ -225,7 +225,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_FROM_ADDRESS);
 #if defined(PTHREAD_SUPPORT)
 
 # define apifTRACE_NOTIFY_NEW_PTHREAD(x) \
-	void x##_notify_new_pthread (void) \
+	void CtoF77(x##_notify_new_pthread) (void) \
 	{ \
 		if (mpitrace_on) \
 			Backend_NotifyNewPthread (); \
@@ -233,7 +233,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_USER_FUNCTION_FROM_ADDRESS);
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NOTIFY_NEW_PTHREAD);
 
 # define apifTRACE_SET_NUM_TENTATIVE_THREADS(x) \
-	void x##_set_num_tentative_threads (int *numthreads) \
+	void CtoF77(x##_set_num_tentative_threads) (int *numthreads) \
 	{ \
 		if (mpitrace_on) \
 			Backend_setNumTentativeThreads (*numthreads); \
@@ -243,21 +243,21 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 #endif /* PTHREAD_SUPPORT */
 
 # define apifDEFINE_EVENT_TYPE(x) \
-	void x##_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values) \
+	void CtoF77(x##_define_event_type) (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values) \
 	{ \
 		Extrae_define_event_type_Wrapper (*type, description, *nvalues, values, description_values); \
 	}
- EXPAND_ROUTINE_WITH_PREFIXES(apifDEFINE_EVENT_TYPE);
+  EXPAND_F_ROUTINE_WITH_PREFIXES(apifDEFINE_EVENT_TYPE);
 
 #define apifTRACE_GET_VERSION(x) \
-	void x##_get_version (unsigned *M, unsigned *m, unsigned *r) \
+	void CtoF77(x##_get_version) (unsigned *M, unsigned *m, unsigned *r) \
 	{ \
 		Extrae_get_version_Wrapper (M, m, r); \
 	}
   EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_GET_VERSION);
 
 #define apifCHANGE_NUM_THREADS(x) \
-	void x##_change_num_threads (unsigned *n) \
+	void CtoF77(x##_change_num_threads) (unsigned *n) \
 	{ \
 		Extrae_change_number_of_threads_Wrapper (*n); \
 	}
