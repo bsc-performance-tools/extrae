@@ -65,6 +65,8 @@ These are the available options for the sequential Paraver merger:
  This options behaves like the -f options but uses the full path of every intermediate file so as to locate them.
  \item {\tt -h}\\
  Provides minimal help about merger options.
+ \item {\tt -keep-mpits} (or inversely, {\tt -no-keep-mpits})\\
+ Tells the merger to keep (or remove) the intermediate tracefiles after the trace generation.
  \item {\tt -maxmem M}\\
  The last step of the merging process will be limited to use {\em M} megabytes of memory. By default, M is 512.
  \item {\tt -s FILE.sym} {\em (where {\tt FILE.sym} file is generated with the DynInst instrumentator)}\\
@@ -87,6 +89,8 @@ These are the available options for the sequential Paraver merger:
  If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI\_Init call. This will usually lead to "synchronized" tasks, but it will depend on how the clocks advance in time.
  \item {\tt -syn-node}\\
  If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI\_Init call and the node where they ran. This will usually lead to better synchronized tasks than using -syn, but, again, it will depend on how the clocks advance in time.
+ \item {\tt -trace-overwrite} (or inversely, {\tt -no-trace-overwrite})\\
+ Tells the merger to overwrite (or not) the final tracefile if it already exists. If the tracefile exists and {\tt -no-trace-overwrite} is given, the tracefile name will have an increasing numbering in addition to the name given by the user.
  \item {\tt -unique-caller-id}\\
  Choose whether use a unique value identifier for different callers locations (MPI calling routines, user routines, OpenMP outlined routines andpthread routines).
 \end{itemize}

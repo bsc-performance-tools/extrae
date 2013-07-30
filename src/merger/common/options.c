@@ -128,3 +128,6 @@ static int option_merge_AbsoluteCounters = FALSE;
 int get_option_merge_AbsoluteCounters (void) { return option_merge_AbsoluteCounters; }
 void set_option_merge_AbsoluteCounters (int b) { option_merge_AbsoluteCounters = b; }
 
+static int option_merge_TraceOverwrite = TRUE;
+int get_option_merge_TraceOverwrite (void) { return option_merge_TraceOverwrite; }
+void set_option_merge_TraceOverwrite (int b) { option_merge_TraceOverwrite = b; }

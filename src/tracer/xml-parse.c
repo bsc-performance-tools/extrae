@@ -1365,11 +1365,11 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 #if defined(MPI_SUPPORT)
 	xmlChar *treefanout;
 #endif
-	xmlChar *removefiles;
 	xmlChar *maxmemory;
 	xmlChar *jointstates;
 	xmlChar *sortaddresses;
-	xmlChar *keepmpits; /* This is ignored currently! */
+	xmlChar *keepmpits;
+	xmlChar *traceoverwrite;
 	char *filename;
 
 	if (tracetype != NULL && !xmlStrcasecmp (tracetype, TRACE_TYPE_DIMEMAS))
@@ -1377,11 +1377,17 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	else
 		set_option_merge_ParaverFormat (TRUE);
 
-	removefiles = xmlGetProp_env (rank, current_tag, TRACE_MERGE_REMOVEFILES);
-	if (removefiles != NULL)
-		set_option_merge_RemoveFiles (!xmlStrcasecmp (removefiles, xmlYES));
+	keepmpits = xmlGetProp_env (rank, current_tag, TRACE_MERGE_KEEP_MPITS);
+	if (keepmpits != NULL)
+		set_option_merge_RemoveFiles (!(!xmlStrcasecmp (keepmpits, xmlYES)));
 	else
 		set_option_merge_RemoveFiles (FALSE);
+
+	traceoverwrite = xmlGetProp_env (rank, current_tag, TRACE_MERGE_OVERWRITE);
+	if (traceoverwrite != NULL)
+		set_option_merge_TraceOverwrite (!xmlStrcasecmp (traceoverwrite, xmlYES));
+	else
+		set_option_merge_TraceOverwrite (TRUE);
 
 	sortaddresses = xmlGetProp_env (rank, current_tag, TRACE_MERGE_SORTADDRESSES);
 	if (sortaddresses != NULL)
@@ -1458,7 +1464,6 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	else
 		set_option_merge_JointStates (TRUE);
 
-	keepmpits = xmlGetProp_env (rank, current_tag, TRACE_MERGE_KEEP_MPITS);
 
 	filename = xmlNodeListGetString_env (rank, xmldoc, current_tag->xmlChildrenNode, 1);
 	if (filename == NULL || strlen(filename) == 0)
@@ -1481,7 +1486,8 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 #endif
 	XML_FREE (maxmemory);
 	XML_FREE (jointstates);
-	XML_FREE (keepmpits); /* This is ignored currently! */
+	XML_FREE (keepmpits);
+	XML_FREE (traceoverwrite);
 }
 #endif
 

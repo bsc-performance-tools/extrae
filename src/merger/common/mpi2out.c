@@ -102,50 +102,47 @@ static unsigned Num_MPITS_Files = 0;
 void Help (const char *ProgName)
 {
   printf ("Usage: %s inputfile1 ... [--] inputfileN [-o <OutputFile>] [otheroptions]\n"
-          "       %s -f file.mpits [-o <OutputFile>] [otheroptions]\n"
-          "       %s -h\n"
-          "Options:\n"
-          "    -h        Get this help.\n"
-          "    -v        Increase verbosity.\n"
-          "    -absolute-counters Emit hardware counters in absolute form in addition to relative form.\n"
-          "    -o file   Output trace file name.\n"
-          "    -e file   Uses the executable file to obtain some information.\n"
-          "    -f file   MpitFILE File with the names of the \".mpit\" input files.\n"
-          "    -syn      Synchronize traces at the end of MPI_Init.\n"
-          "    -syn-node Synchronize traces using node information.\n"
-          "    -no-syn   Do not synchronize traces at the end of MPI_Init.\n"
-          "    -maxmem M Uses up to M megabytes of memory at the last step of merging process.\n"
-          "    -dimemas  Force the generation of a Dimemas trace.\n"
-          "    -paraver  Force the generation of a Paraver trace.\n"
+		  "       %s -f file.mpits [-o <OutputFile>] [otheroptions]\n"
+		  "       %s -h\n"
+		  "Options:\n"
+		  "    -h                   Get this help.\n"
+		  "    -v                   Increase verbosity.\n"
+		  "    -absolute-counters   Emit hardware counters in absolute form in addition to relative form.\n"
+		  "    -o file              Output trace file name.\n"
+		  "    -e file              Uses the executable file to obtain some information.\n"
+		  "    -f file              MpitFILE File with the names of the \".mpit\" input files.\n"
+		  "    -syn                 Synchronize traces at the end of MPI_Init.\n"
+		  "    -syn-node            Synchronize traces using node information.\n"
+		  "    -no-syn              Do not synchronize traces at the end of MPI_Init.\n"
+		  "    -maxmem M            Uses up to M megabytes of memory at the last step of merging process.\n"
+		  "    -dimemas             Force the generation of a Dimemas trace.\n"
+		  "    -paraver             Force the generation of a Paraver trace.\n"
+		  "    -keep-mpits          Keeps MPIT files after trace generation (default)\n"
+		  "    -no-keep-mpits       Removes MPIT files after trace generation.\n"
+		  "    -trace-overwrite     Overwrites the tracefile.\n"
+		  "    -no-trace-overwrite  Do not overwrite the tracefile, renaming the new one.\n"
 #if defined(IS_BG_MACHINE)
-          "    -xyzt     Generates additional output file with BG/L torus coordinates.\n"
+		  "    -xyzt                Generates additional output file with BG/L torus coordinates.\n"
 #endif
 #if defined(PARALLEL_MERGE)
-					"    -tree-fan-out N   Orders the parallel merge to distribute its work in a N-order tree.\n"
-          "    -cyclic   Distributes MPIT files cyclically among tasks.\n"
-          "    -block    Distributes MPIT files in a block fashion among tasks.\n"
-          "    -size     Distributes MPIT trying to build groups of equal size.\n"
-          "    -consecutive-size Distributes MPIT files in a block fashion considering file size.\n"
-          "    -use-disk-for-comms Uses the disk instead of memory to match foreign communications.\n"
+		  "    -tree-fan-out N      Orders the parallel merge to distribute its work in a N-order tree.\n"
+		  "    -cyclic              Distributes MPIT files cyclically among tasks.\n"
+		  "    -block               Distributes MPIT files in a block fashion among tasks.\n"
+		  "    -size                Distributes MPIT trying to build groups of equal size.\n"
+		  "    -consecutive-size    Distributes MPIT files in a block fashion considering file size.\n"
+		  "    -use-disk-for-comms  Uses the disk instead of memory to match foreign communications.\n"
 #endif
-          "    -s file   Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
-          "    -d/-dump  Sequentially dumps the contents of every *.mpit file.\n"
-          "    -dump-without-time\n"
-					"              Do not show event time in when dumping events.\n"
-					"    -remove-files\n"
-					"              Remove intermediate files after processing them.\n"
-          "    -split-states\n"
-          "              Do not merge consecutives states that are the same.\n"
-          "    -skip-sendrecv\n"
-          "              Do not emit communication for SendReceive operations.\n"
-          "    -unique-caller-id\n"
-          "              Choose whether use a unique value identifier for different callers.\n"  
-          "    -sort-addresses\n"
-					"              Sort file name, line events in information linked with source code.\n"
-          "    -task-view\n"
-					"              Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
-          "    --        Take the next trace files as a diferent parallel task.\n"
-          "\n",
+		  "    -s file              Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
+		  "    -d/-dump             Sequentially dumps the contents of every *.mpit file.\n"
+		  "    -dump-without-time   Do not show event time in when dumping events.\n"
+		  "    -remove-files        Remove intermediate files after processing them.\n"
+		  "    -split-states        Do not merge consecutives states that are the same.\n"
+		  "    -skip-sendrecv       Do not emit communication for SendReceive operations.\n"
+		  "    -unique-caller-id    Choose whether use a unique value identifier for different callers.\n"  
+		  "    -sort-addresses      Sort file name, line events in information linked with source code.\n"
+		  "    -task-view           Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
+		  "    --                   Take the next trace files as a diferent parallel task.\n"
+		  "\n",
           ProgName, ProgName, ProgName);
 }
 
@@ -476,6 +473,26 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		{
 			Help (argv[0]);
 			exit (0);
+		}
+		if (!strcmp (argv[CurArg], "-keep-mpits"))
+		{
+			set_option_merge_RemoveFiles (FALSE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-keep-mpits"))
+		{
+			set_option_merge_RemoveFiles (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-trace-overwrite"))
+		{
+			set_option_merge_TraceOverwrite (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-trace-overwrite"))
+		{
+			set_option_merge_TraceOverwrite (FALSE);
+			continue;
 		}
 		if (!strcmp (argv[CurArg], "-v"))
 		{
@@ -1194,7 +1211,7 @@ int merger_post (int numtasks, int taskid)
 		last_mpits_file != NULL)
 	{
 		char tmp[1024];
-		strncpy (tmp, last_mpits_file, 1024);
+		strncpy (tmp, last_mpits_file, sizeof(tmp));
 
 		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
 		{
@@ -1206,6 +1223,43 @@ int merger_post (int numtasks, int taskid)
 	{
 		if (taskid == 0)
 			Labels_loadSYMfile (taskid, get_merge_SymbolFileName(), TRUE);
+	}
+
+	if (file_exists(get_merge_OutputTraceName()) &&
+	    !get_option_merge_TraceOverwrite())
+	{
+		unsigned lastid = 0;
+		char tmp[1024];
+		do
+		{
+			lastid++;
+			if (lastid >= 10000)
+			{
+				fprintf (stderr, "Error! Automatically given ID for the tracefile surpasses 10000!\n");
+				exit (-1);
+			}
+
+			strncpy (tmp, get_merge_OutputTraceName(), sizeof(tmp));
+			if (strcmp (&tmp[strlen(tmp)-strlen(".prv")], ".prv") == 0)
+			{
+				char extra[1+4+1+3+1];
+				sprintf (extra, ".%04d.prv", lastid);
+				strncpy (&tmp[strlen(tmp)-strlen(".prv")], extra, strlen(extra));
+			}
+			else if (strcmp (&tmp[strlen(tmp)-strlen(".dim")], ".dim") == 0)
+			{
+				char extra[1+4+1+3+1];
+				sprintf (extra, ".%04d.dim", lastid);
+				strncpy (&tmp[strlen(tmp)-strlen(".dim")], extra, strlen(extra));
+			}
+			else if (strcmp (&tmp[strlen(tmp)-strlen(".prv.gz")], ".prv.gz") == 0)
+			{
+				char extra[1+4+1+3+1+2+1];
+				sprintf (extra, ".%04d.prv.gz", lastid);
+				strncpy (&tmp[strlen(tmp)-strlen(".prv.gz")], extra, strlen(extra));
+			}
+		} while (file_exists (tmp));
+		set_merge_OutputTraceName (tmp);
 	}
 
 	if (get_option_merge_ParaverFormat())
@@ -1227,7 +1281,7 @@ int merger_post (int numtasks, int taskid)
 			for (u = 0; u < Num_MPITS_Files; u++)
 			{
 				char tmp[1024];
-				strncpy (tmp, MPITS_Files[u], 1024);
+				strncpy (tmp, MPITS_Files[u], sizeof(tmp));
 
 				if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
 				{
@@ -1239,11 +1293,19 @@ int merger_post (int numtasks, int taskid)
 
 			for (u = 0; u < nTraces; u++)
 			{
-				if (unlink (InputTraces[u].name) == 0)
+				/* Remove the .mpit file */
+				unlink (InputTraces[u].name);
+
+				/* Remove the local .sym file for that .mpit file */
 				{
-					/* If removal succeeded, try to remove the set-X directory */
-					rmdir (dirname (InputTraces[u].name));
+					char tmp[1024];
+					strncpy (tmp, InputTraces[u].name, sizeof(tmp));
+					strncpy (&tmp[strlen(tmp)-strlen(".mpit")], ".sym", strlen(".sym")+1);
+					unlink (tmp);
 				}
+
+				/* Try to remove the container set-X directory */
+				rmdir (dirname (InputTraces[u].name));
 			}
 		}
 	}
