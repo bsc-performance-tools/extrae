@@ -40,6 +40,7 @@ void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void));
 void Extrae_set_taskid_function (unsigned (*taskid_function)(void));
 void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void));
 void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void));
+void Extrae_set_finalize_task_function (void (*finalizetask_function)(void));
 
 #ifdef __cplusplus
 }
