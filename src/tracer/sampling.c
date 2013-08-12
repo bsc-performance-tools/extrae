@@ -239,7 +239,7 @@ void setTimeSampling (unsigned long long period, unsigned long long variability,
 	SamplingPeriod_base.it_value.tv_usec = period % 1000000;
 
 	signalaction.sa_sigaction = TimeSamplingHandler;
-	signalaction.sa_flags = SA_SIGINFO;
+	signalaction.sa_flags = SA_SIGINFO | SA_RESTART;
 
 	ret = sigaction (signum, &signalaction, NULL);
 	if (ret != 0)
@@ -293,7 +293,7 @@ void setTimeSampling_postfork (void)
 		}
 	
 		signalaction.sa_sigaction = TimeSamplingHandler;
-		signalaction.sa_flags = SA_SIGINFO;
+		signalaction.sa_flags = SA_SIGINFO | SA_RESTART;
 	
 		ret = sigaction (signum, &signalaction, NULL);
 		if (ret != 0)
