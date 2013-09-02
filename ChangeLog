@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 02Sep2013 Fixing OpenCL instrumentation (added clRetain & clRelease calls)
+             Fixed some event mismatches in the OpenCL accelerator side
+             Added OpenCL C++ example
  * 30Jul2013 Added overwrite option in <merge> section
              Removed unused 'remove-files' in favor of 'keep-mpits'
              Fix fortran declarations on API

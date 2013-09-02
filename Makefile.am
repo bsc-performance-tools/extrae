@@ -298,11 +298,9 @@ CUDA_EXAMPLE_FILES=\
  example/LINUX/CUDA/run_instrumented.sh
 
 OPENCL_EXAMPLE_FILES=\
- example/LINUX/OPENCL/extrae.xml \
- example/LINUX/OPENCL/Makefile \
- example/LINUX/OPENCL/trace.sh \
  example/LINUX/OPENCL/README \
- example/LINUX/OPENCL/vadd.c
+ example/LINUX/OPENCL/C++ \
+ example/LINUX/OPENCL/C
 
 MPIOPENCL_EXAMPLE_FILES=\
  example/LINUX/MPI+OPENCL/extrae.xml \
@@ -371,7 +369,7 @@ if WANT_CUDAorCUPTI
 endif
 if WANT_OPENCL
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/OPENCL
-	cp -f $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
+	cp -fr $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
 endif
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE

@@ -230,6 +230,7 @@ void Extrae_OpenCL_addEventToQueue (cl_command_queue queue, cl_event ocl_evt,
 	CommandQueues[idx].prv_event[idx2] = prv_evt;
 	CommandQueues[idx].k_event[idx2] = NULL;
 	CommandQueues[idx].nevents++;
+	clRetainEvent (ocl_evt);
 }
 
 void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
@@ -253,6 +254,7 @@ void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
 	CommandQueues[idx].prv_event[idx2] = prv_evt;
 	CommandQueues[idx].k_event[idx2] = k;
 	CommandQueues[idx].nevents++;
+	clRetainEvent (ocl_evt);
 }
 
 static void Extrae_OpenCL_real_clQueueFlush (unsigned idx)
@@ -314,6 +316,8 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx)
 
 		THREAD_TRACE_MISCEVENT (threadid, utmp,
 		  CommandQueues[idx].prv_event[u], EVT_END, 0);
+
+		clReleaseEvent (evt);
 	}
 
 	CommandQueues[idx].nevents = 0;

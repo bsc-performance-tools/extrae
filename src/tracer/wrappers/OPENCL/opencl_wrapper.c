@@ -673,7 +673,7 @@ cl_int clEnqueueCopyBufferRect (cl_command_queue c, cl_mem src, cl_mem dst,
 		Extrae_Probe_clEnqueueCopyBufferRect_Enter ();
 		res = real_clEnqueueCopyBufferRect (c, src, dst, s, d, r, srp, ssp,
 		  drp, dsp, n, ewl, &evt);
-		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUECOPYBUFFER_ACC_EV);
+		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUECOPYBUFFERRECT_ACC_EV);
 		if (e != NULL)
 			*e = evt;
 		Extrae_Probe_clEnqueueCopyBufferRect_Exit ();
@@ -1302,7 +1302,7 @@ void *clEnqueueMapBuffer (cl_command_queue q, cl_mem m, cl_bool b,
 
 		Extrae_Probe_clEnqueueMapBuffer_Enter ();
 		r = real_clEnqueueMapBuffer (q, m, b, mf, o, s, n, ewl, &evt, err);
-		Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEUNMAPMEMOBJECT_ACC_EV);
+		Extrae_OpenCL_addEventToQueue (q, evt, OPENCL_CLENQUEUEMAPBUFFER_ACC_EV);
 		if (e != NULL)
 			*e = evt;
 		if (b && !Extrae_OpenCL_Queue_OoO (q))
