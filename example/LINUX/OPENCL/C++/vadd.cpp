@@ -42,7 +42,7 @@ int main(void)
 {
     std::vector<float> h_a(LENGTH);                // a vector 
     std::vector<float> h_b(LENGTH);                // b vector 	
-    std::vector<float> h_c (LENGTH, 0xdeadbeef);    // c = a + b, from compute device
+    std::vector<float> h_c(LENGTH, 0xdeadbeef);    // c = a + b, from compute device
 
     cl::Buffer d_a;                        // device memory used for the input  a vector
     cl::Buffer d_b;                        // device memory used for the input  b vector
@@ -64,7 +64,7 @@ int main(void)
         // Load in kernel source, creating a program object for the context
 
         cl::Program program(context, util::loadProgram("vadd.cl"));
-        program.build("-g");
+        program.build();
 
         // Get the command queue
         cl::CommandQueue queue(context);
