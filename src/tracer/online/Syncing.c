@@ -65,7 +65,7 @@ int SyncAttachments(
   char *sendbuf,
   int  *sendcnts,
   int  *displs,
-  BE_thread_data_t *BE_args)
+  BE_data_t *BE_args)
 {
   int i_went_ok = 0;
 
@@ -76,9 +76,9 @@ int SyncAttachments(
   {
     if (rank == 0)
     {
-      fprintf(stdout, "WARNING: There were problems initializing the on-line analysis!");
+      fprintf(stdout, "WARNING: There were problems initializing the on-line analysis!\n");
     }
-    return -1;
+    return 0;
   }
 
   char *ParentInfo = NULL;

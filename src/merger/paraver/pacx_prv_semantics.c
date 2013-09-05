@@ -325,7 +325,7 @@ static int SendRecv_Event (event_t * current_event,
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(thread_info->Recv_Rec));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), ptask-1, task-1, thread-1,
-							thread_info->virtual_thread-1, ptask-1, Get_EvTarget(current_event), fset);
+							thread_info->virtual_thread-1, ptask-1, Get_EvTarget(current_event), fset, MatchComms_GetZone(ptask, task));
 					}
 #endif /* PARALLEL_MERGE */
 				}
@@ -564,7 +564,7 @@ static int Recv_Event (event_t * current_event, unsigned long long current_time,
 					log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(thread_info->Recv_Rec));
 					phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 					AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), ptask-1, task-1, thread-1,
-						thread_info->virtual_thread-1, ptask-1, Get_EvTarget(current_event), fset);
+						thread_info->virtual_thread-1, ptask-1, Get_EvTarget(current_event), fset, MatchComms_GetZone(ptask, task));
 				}
 #endif
 			}
@@ -642,7 +642,7 @@ static int IRecv_Event (event_t * current_event,
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
 						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
-							thread_info->virtual_thread-1, ptask-1, Get_EvTarget(receive), fset);
+							thread_info->virtual_thread-1, ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
 					}
 #endif
 				}
@@ -769,7 +769,7 @@ int PACX_PersistentRequest_Event (event_t * current_event,
 						log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 						phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(receive));
 						AddForeignRecv (phy_r, log_r, Get_EvTag(receive), ptask-1, task-1, thread-1,
-							thread_info->virtual_thread-1, ptask-1, Get_EvTarget(receive), fset);
+							thread_info->virtual_thread-1, ptask-1, Get_EvTarget(receive), fset, MatchComms_GetZone(ptask, task));
 					}
 #endif
 				}

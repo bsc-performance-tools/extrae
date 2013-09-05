@@ -1219,9 +1219,25 @@ int getTagForCircularBuffer (void)
  *** Communications matching
  *****************************************************************************/
 
+void MatchComms_ChangeZone(unsigned int ptask, unsigned int task)
+{
+  task_t *task_info = GET_TASK_INFO(ptask, task);
+
+  task_info->match_zone ++;
+}
+
+int MatchComms_GetZone(unsigned int ptask, unsigned int task)
+{
+  task_t *task_info = GET_TASK_INFO(ptask, task);
+
+  return task_info->match_zone;
+}
+
 void MatchComms_On(unsigned int ptask, unsigned int task)
 {   
   task_t *task_info = GET_TASK_INFO(ptask, task);
+
+  MatchComms_ChangeZone(ptask, task);
 
   task_info->MatchingComms = TRUE;
 }
@@ -1229,6 +1245,8 @@ void MatchComms_On(unsigned int ptask, unsigned int task)
 void MatchComms_Off(unsigned int ptask, unsigned int task)
 {   
   task_t *task_info = GET_TASK_INFO(ptask, task);
+
+  MatchComms_ChangeZone(ptask, task);
 
   task_info->MatchingComms = FALSE;
 

@@ -351,11 +351,13 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 	record.ptask_r = ptask_r;
 	record.task_r = task_r;
 	record.thread_r = vthread_r; /* may need fixing? thread_r instead? */
-  record.receive[LOGICAL_COMMUNICATION] = 0;
-  record.receive[PHYSICAL_COMMUNICATION] = 0;
+
+	/* record.receive[LOGICAL_COMMUNICATION] stores the matching zone (see FixPendingCommunication) */
+	record.receive[LOGICAL_COMMUNICATION] = MatchComms_GetZone(ptask_s, task_s);
+	record.receive[PHYSICAL_COMMUNICATION] = MatchComms_GetZone(ptask_s, task_s);
 
 	where = WriteFileBuffer_getPosition (wfb);
-	AddPendingCommunication (WriteFileBuffer_getFD(wfb), where, tag, task_r-1, task_s-1);
+	AddPendingCommunication (WriteFileBuffer_getFD(wfb), where, tag, task_r-1, task_s-1, MatchComms_GetZone(ptask_s, task_s));
 	trace_paraver_record (wfb, &record);
 
 	return 0;
@@ -827,7 +829,8 @@ static int FixPendingCommunication (paraver_rec_t *current, FileSet_t *fset)
 
 	group = inWhichGroup (current->ptask_r-1, current->task_r-1, fset);
 
-	tmp = SearchForeignRecv (group, current->ptask-1, current->task-1, current->ptask_r-1, current->task_r-1, current->value);
+	/* current->receive[LOGICAL_COMMUNICATION] stores the matching zone (see trace_paraver_pending_communication) */
+	tmp = SearchForeignRecv (group, current->ptask-1, current->task-1, current->ptask_r-1, current->task_r-1, current->value, current->receive[LOGICAL_COMMUNICATION]);
 
 	if (NULL != tmp)
 	{

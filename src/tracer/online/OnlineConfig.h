@@ -73,6 +73,13 @@ int    Online_GetSpectralNumIters   ( void );
 double Online_GetSpectralMinLikeness( void );
 #endif /* HAVE_SPECTRAL */
 
+#if defined(HAVE_CLUSTERING)
+#define DEFAULT_CLUSTERING_CONFIG "cl.I.IPC.xml"
+
+void   Online_SetClusteringConfig( char *clustering_config_xml );
+char * Online_GetClusteringConfig( void );
+#endif /* HAVE_CLUSTERING */
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

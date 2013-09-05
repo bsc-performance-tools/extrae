@@ -265,7 +265,7 @@ ONLINE_EXAMPLE_FILES=\
  example/LINUX/ONLINE/extrae_online.xml \
  example/LINUX/ONLINE/run_mn.sh \
  example/LINUX/ONLINE/run_mt.sh \
- example/LINUX/ONLINE/trace.sh \
+ example/LINUX/ONLINE/trace_online.sh \
  example/LINUX/ONLINE/merge.sh \
  example/LINUX/ONLINE/merge_parallel_mn.sh \
  example/LINUX/ONLINE/merge_parallel_mt.sh \

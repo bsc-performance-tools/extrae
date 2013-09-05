@@ -197,6 +197,8 @@ int tracingCircularBuffer (void);
 int getTagForCircularBuffer (void);
 void MatchComms_On(unsigned int ptask, unsigned int task);
 void MatchComms_Off(unsigned int ptask, unsigned int task);
+void MatchComms_ChangeZone(unsigned int ptask, unsigned int task);
+int  MatchComms_GetZone(unsigned int ptask, unsigned int task);
 int MatchComms_Enabled(unsigned int ptask, unsigned int task);
 int num_Files_FS (FileSet_t * fset);
 void GetNextObj_FS (FileSet_t * fset, int file, unsigned int *cpu,

@@ -106,6 +106,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			task_info->nthreads = nthreads[ptask][task];
 			task_info->num_virtual_threads = nthreads[ptask][task];
 			task_info->MatchingComms = TRUE;
+			task_info->match_zone = 0;
 
 			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{

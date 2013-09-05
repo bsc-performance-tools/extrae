@@ -110,7 +110,7 @@ void InitCommunicators(void)
 }
 
 void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
-	int task_s)
+	int task_s, int mz)
 {
 	int count = PendingComms.count;
 
@@ -127,6 +127,7 @@ void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
 	PendingComms.data[count].sender = task_s;
 	PendingComms.data[count].tag = tag;
 	PendingComms.data[count].match = 0;
+	PendingComms.data[count].match_zone = mz;
 	PendingComms.count++;
 }
 
@@ -137,7 +138,7 @@ void InitPendingCommunication (void)
 }
 
 void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int ptask_r, int task_r, 
-	unsigned thread_r, unsigned vthread_r, int ptask_s, int task_s, FileSet_t *fset)
+	unsigned thread_r, unsigned vthread_r, int ptask_s, int task_s, FileSet_t *fset, int mz)
 {
 	int count;
 	int group = inWhichGroup (ptask_s, task_s, fset);
@@ -166,6 +167,7 @@ void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int ptask_r, int task
 	ForeignRecvs[group].data[count].logic = logic;
 	ForeignRecvs[group].data[count].thread = thread_r;
 	ForeignRecvs[group].data[count].vthread = vthread_r;
+	ForeignRecvs[group].data[count].match_zone = mz; 
 	ForeignRecvs[group].count++;
 }
 
@@ -229,7 +231,8 @@ static int MatchRecvs (struct ForeignRecv_t *data, int count)
 	for (i = 0; i < count; i++)
 		for (j = 0; j < PendingComms.count; j++)
 		{
-			if (data[i].sender == PendingComms.data[j].sender &&
+			if (data[i].match_zone == PendingComms.data[j].match_zone &&
+			    data[i].sender == PendingComms.data[j].sender &&
 			    data[i].recver == PendingComms.data[j].recver &&
 			    (data[i].tag == PendingComms.data[j].tag  || data[i].tag == MPI_ANY_TAG) &&
 			    !PendingComms.data[j].match)
@@ -244,7 +247,7 @@ static int MatchRecvs (struct ForeignRecv_t *data, int count)
 }
 
 
-struct ForeignRecv_t* SearchForeignRecv (int group, int sender_app, int sender, int recver_app, int recver, int tag)
+struct ForeignRecv_t* SearchForeignRecv (int group, int sender_app, int sender, int recver_app, int recver, int tag, int mz)
 {
 	int i;
 
@@ -253,7 +256,8 @@ struct ForeignRecv_t* SearchForeignRecv (int group, int sender_app, int sender, 
 		if (myForeignRecvs[group] != NULL)
 			for (i = 0; i < myForeignRecvs_count[group]; i++)
 			{
-				if (myForeignRecvs[group][i].sender == sender &&
+				if (myForeignRecvs[group][i].match_zone == mz &&
+				    myForeignRecvs[group][i].sender == sender &&
 				    myForeignRecvs[group][i].sender_app == sender_app &&
 				    myForeignRecvs[group][i].recver == recver &&
 				    myForeignRecvs[group][i].recver_app == recver_app &&

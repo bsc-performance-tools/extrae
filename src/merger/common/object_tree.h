@@ -117,6 +117,7 @@ typedef struct task_st
 
 	/* Controls whether this task matches comms or not */
 	int MatchingComms;
+	int match_zone;
 	NewQueue_t *recv_queue;
 	NewQueue_t *send_queue;
 

@@ -32,36 +32,8 @@
 
 #include "OnlineConfig.h"
 
-//#define ONLINE_DEBUG                               /* Define this to activate debug messages         */
-
-#if defined(ONLINE_DEBUG)
-# define ONLINE_DBG(msg, args...)                         \
-{                                                         \
-   fprintf(stderr, "[ONLINE %d%s] "                       \
-     msg, this_BE_rank, (I_am_root ? "R" : ""), ## args); \
-   fflush(stderr);                                        \
-}
-#else
-# define ONLINE_DBG(msg, args...) { ; }
-#endif
-
-#define ONLINE_DBG_1 \
-  if (I_am_root) ONLINE_DBG
-
-#define FRONTEND_RANK(world_size) (world_size - 1) /* Last MPI process runs the front-end by default */
-
-#define DEFAULT_FANOUT 32                          /* Default fan-out for the MRNet-tree             */
-
-/**
- * Structure to pass data to the front-end thread
- */
-typedef struct 
-{
-  char resources_file[128];
-  char topology_file[128];
-  int  num_backends;
-  char attach_file[128];
-} FE_thread_data_t;
+#define MASTER_BACKEND_RANK(world_size) (world_size - 1) /* Last MPI process runs the master back-end by default */
+//#define MASTER_BACKEND_RANK(world_size) 0
 
 /**
  * Structure to pass data to the back-end thread
@@ -72,16 +44,14 @@ typedef struct
   char parent_hostname[128];
   int  parent_port;
   int  parent_rank;
-} BE_thread_data_t;
-
+} BE_data_t;
 
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
 
-int  Generate_Topology(int world_size, char **node_list, char *resources_file, char *topology_file);
-
-int  Online_Start(int rank, int world_size, char **node_list);
+int  Online_Init(int rank, int world_size);
+int  Online_Start(char **node_list);
 void Online_Stop();
 void Online_PauseApp();
 void Online_ResumeApp();
@@ -93,7 +63,6 @@ void Online_CleanTemporaries();
 char * Online_GetTmpBufferName();
 char * Online_GetFinalBufferName();
 
-void * FE_main_loop(void *context);
 void * BE_main_loop(void *context);
 
 #if defined(__cplusplus)

@@ -22,49 +22,21 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/online/ClusteringRoot.h $
+ | @last_commit: $Date: 2013-03-12 11:37:48 +0100 (mar, 12 mar 2013) $
+ | @version:     $Revision: 1597 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __BURSTS_EXTRACTOR_H__
-#define __BURSTS_EXTRACTOR_H__
+#ifndef __CLUSTERING_ROOT_H__
+#define __CLUSTERING_ROOT_H__
 
-#include "BufferExtractor.h"
-#include "Bursts.h"
+#include "TDBSCANRoot.h"
 
-#if USE_HARDWARE_COUNTERS
-
-# include "num_hwc.h"
-
-# define BURST_HWC_CLEAR(accum) \
-   for (int k=0; k<MAX_HWC; k++) { accum[k]  = 0; }
-# define BURST_HWC_DIFF(accum, evt_end, evt_ini) \
-   for (int k=0; k<MAX_HWC; k++) { accum[k] = (Get_EvHWCVal(evt_end))[k] - (Get_EvHWCVal(evt_ini))[k]; }
-
-#endif /* USE_HARDWARE_COUNTERS */
-
-
-class BurstsExtractor : public BufferExtractor
+class ClusteringRoot : public TDBSCANRoot
 {
   public:
-    BurstsExtractor(unsigned long long min_duration, bool sync_times = true);
-    ~BurstsExtractor();
-
-    void ProcessEvent(event_t *evt);
-    bool isBurstBegin(event_t *evt);
-    bool isBurstEnd  (event_t *evt);
-
-    Bursts * GetBursts();
-
-  private:
-    Bursts            *ExtractedBursts;
-    event_t           *LastBegin;
-    unsigned long long DurationFilter;
-#if USE_HARDWARE_COUNTERS
-    long long          OngoingBurstHWCs[MAX_HWC];
-#endif /* USE_HARDWARE_COUNTERS */
-    bool               SynchronizeTimes;
+    ClusteringRoot();
 };
 
-#endif /* __BURSTS_EXTRACTOR_H__ */
+#endif /* __CLUSTERING_ROOT_H__ */
+

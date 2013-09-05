@@ -30,6 +30,20 @@
 #ifndef _XML_PARSE_H_INCLUDED_
 #define _XML_PARSE_H_INCLUDED_
 
+#define xmlYES               (xmlChar*) "yes"
+#define xmlNO                (xmlChar*) "no"
+#define xmlCOMMENT           (xmlChar*) "COMMENT"
+#define xmlTEXT              (xmlChar*) "text"
+#define XML_ENVVAR_CHARACTER (xmlChar)  '$'
+
+/* Free memory if not null */
+#define XML_FREE(ptr) \
+        if (ptr != NULL) xmlFree(ptr);
+
+/* master fprintf :) */
+#define mfprintf \
+        if (rank == 0) fprintf 
+
 #define TRACE_TAG                       ((xmlChar*) "trace")
 #define TRACE_HOME                      ((xmlChar*) "home")
 #define TRACE_TYPE                      ((xmlChar*) "type")
@@ -112,6 +126,7 @@
 #define RC_ONLINE_CLUSTERING            ((xmlChar*) "clustering")
 #define CLUSTERING_MAX_TASKS            ((xmlChar*) "max_tasks")
 #define CLUSTERING_MAX_POINTS           ((xmlChar*) "max_points")
+#define CLUSTERING_CONFIG               ((xmlChar*) "config")
 
 #define TRACE_MERGE                     ((xmlChar*) "merge")
 #define TRACE_MERGE_SYNCHRONIZATION     ((xmlChar*) "synchronization")

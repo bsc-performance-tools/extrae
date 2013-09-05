@@ -849,8 +849,14 @@ static int Online_Event (event_t * current_event,
 
         /* Mark the application state as not tracing outside the selected iterations */
         Push_State (STATE_NOT_TRACING, ptask, task, thread);
+
         trace_paraver_state (cpu, ptask, task, thread, current_time);
       }
+      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+      break;
+
+    case CLUSTER_ID_EV:
+      MaxClusterId = MAX(MaxClusterId, EvValue);
       trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
       break;
   }
@@ -1016,7 +1022,7 @@ static int User_Recv_Event (event_t * current_event, unsigned long long current_
 			log_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 			phy_r = TIMESYNC (ptask-1, task-1, Get_EvTime(current_event));
 			AddForeignRecv (phy_r, log_r, Get_EvTag(current_event), ptask-1, task-1, thread-1,
-			  thread_info->virtual_thread-1, ptask-1, partner, fset);
+			  thread_info->virtual_thread-1, ptask-1, partner, fset, MatchComms_GetZone(ptask, task));
 		}
 #endif
 	}

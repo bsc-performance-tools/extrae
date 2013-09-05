@@ -3,54 +3,103 @@ include $(top_srcdir)/PATHS
 
 SUBDIRS = extractors
 
-lib_LTLIBRARIES    = 
+bin_PROGRAMS = online_root.bin
+
+lib_LTLIBRARIES = 
 
 noinst_LTLIBRARIES = libonline.la
 
-ONLINE_ENV_SH      = online_env.sh
-noinst_SCRIPTS     = $(ONLINE_ENV_SH)
+SCRIPT_ONLINE_ENV  = online_env.sh
+SCRIPT_ONLINE_ROOT = online_root
+noinst_SCRIPTS     = $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
+
+EXTRA_DIST = $(SCRIPT_ONLINE_ENV).in $(SCRIPT_ONLINE_ROOT).in
+
+
+EXTRACTORS_INCLUDES = -I$(ONLINE_DIR)/extractors -I$(COMMON_DIR) -I$(BUFFERS_DIR) 
+CONTAINERS_INCLUDES = -I$(ONLINE_DIR)/extractors -I$(COMMON_DIR)
+
+#########################
+###     BINARIES      ###
+#########################
+
+online_root_bin_SOURCES = \
+  OnlineRoot.cpp     OnlineRoot.h       \
+  OnlineConfig.cpp   OnlineConfig.h     \
+  OnlineUtils.cpp    OnlineUtils.h      \
+  IPC.cpp            IPC.h              \
+  Messaging.cpp      Messaging.h        \
+  xml-parse-online.c xml-parse-online.h \
+  KnownProtocols.h
+online_root_bin_CFLAGS   = \
+  -I$(COMMON_DIR) -I$(TRACER_DIR) 
+online_root_bin_CXXFLAGS = \
+  -I$(COMMON_DIR) -I$(TRACER_DIR) \
+  `@MRNETAPP_CONFIG@ --fe-cflags` $(CONTAINERS_INCLUDES)
+online_root_bin_LDFLAGS = \
+  `@MRNETAPP_CONFIG@ --fe-libs` 
+
+if HAVE_SPECTRAL
+online_root_bin_SOURCES += \
+  SpectralRoot.cpp   SpectralRoot.h
+online_root_bin_CXXFLAGS += @SPECTRAL_CXXFLAGS@
+online_root_bin_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
+endif
+
+if HAVE_CLUSTERING
+online_root_bin_SOURCES += \
+  ClusteringRoot.cpp   ClusteringRoot.h
+online_root_bin_CXXFLAGS += @CLUSTERING_CXXFLAGS@
+online_root_bin_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
+endif
+
+online_root_bin_LDADD     = extractors/libcontainers.la
+
 
 #########################
 ###     LIBRARIES     ###
 #########################
 
-libonline_la_SOURCES  =               \
-  OnlineControl.cpp  OnlineControl.h  \
-  Syncing.c          Syncing.h        \
-  OnlineConfig.cpp   OnlineConfig.h   \
-  SpectralRoot.cpp   SpectralRoot.h   \
-  SpectralWorker.cpp SpectralWorker.h \
-  filter_defs.h      online_buffers.h \
-  online_events.h    tags.h
+libonline_la_SOURCES  = \
+  OnlineControl.cpp  OnlineControl.h    \
+  OnlineConfig.cpp   OnlineConfig.h     \
+  OnlineUtils.cpp    OnlineUtils.h      \
+  IPC.cpp            IPC.h              \
+  Syncing.c          Syncing.h          \
+  Messaging.cpp      Messaging.h        \
+  xml-parse-online.c xml-parse-online.h \
+  online_buffers.h   online_events.h    \
+  filter_defs.h      tags.h             \
+  KnownProtocols.h
+if HAVE_SPECTRAL
+libonline_la_SOURCES += \
+  SpectralWorker.cpp SpectralWorker.h
+endif
+if HAVE_CLUSTERING
+libonline_la_SOURCES += \
+  ClusteringWorker.cpp ClusteringWorker.h
+endif
 
-EXTRA_DIST = \
-  $(ONLINE_ENV_SH).in
-  
-
-# DEBUG
-#  mrnet_threads.cpp \
-#  Syncing.c         \
-#  OnlineConfig.cpp
-
-EXTRACTORS_INCLUDES = -I$(ONLINE_DIR)/extractors -I$(COMMON_DIR) -I$(BUFFERS_DIR) 
-CONTAINERS_INCLUDES = -I$(ONLINE_DIR)/extractors -I$(COMMON_DIR)
-
-libonline_la_CFLAGS    = -I$(COMMON_DIR) @MPI_CFLAGS@
+libonline_la_CFLAGS    = -I$(COMMON_DIR) -I$(TRACER_DIR) @MPI_CFLAGS@
 
 libonline_la_CXXFLAGS  = \
   -I$(COMMON_DIR) -I$(INCLUDE_DIR) -I$(CLOCKS_DIR) -I$(HWC_DIR) -I$(TRACER_DIR) -I$(BUFFERS_DIR) \
   $(EXTRACTORS_INCLUDES) \
-  `@MRNETAPP_CONFIG@ --fe-cflags` \
   `@MRNETAPP_CONFIG@ --be-cflags`
 
 libonline_la_LDFLAGS   = \
-  `@MRNETAPP_CONFIG@ --fe-libs` \
   `@MRNETAPP_CONFIG@ --be-libs`
 
 if HAVE_SPECTRAL
 libonline_la_CXXFLAGS += @SPECTRAL_CXXFLAGS@
 libonline_la_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
 endif
+
+if HAVE_CLUSTERING
+libonline_la_CXXFLAGS += @CLUSTERING_CXXFLAGS@
+libonline_la_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
+endif
+
 libonline_la_LIBADD    = extractors/libextractors.la extractors/libcontainers.la
 
 
@@ -73,15 +122,23 @@ endif
 ###      SCRIPTS      ###
 #########################
 
-$(ONLINE_ENV_SH): $(ONLINE_ENV_SH).in
+$(SCRIPT_ONLINE_ENV): $(SCRIPT_ONLINE_ENV).in
 	cp $^ $@
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} $@
 	$(top_srcdir)/substitute $(SED) "@sub_MRNETAPP_HOME@" @MRNETAPP_HOME@ $@
 	$(top_srcdir)/substitute $(SED) "@sub_MRNETAPP_LIBSDIR@" @MRNETAPP_LIBSDIR@ $@
+	$(top_srcdir)/substitute $(SED) "@sub_CLUSTERING_HOME@" @CLUSTERING_HOME@ $@
+
+$(SCRIPT_ONLINE_ROOT): $(SCRIPT_ONLINE_ROOT).in
+	cp $^ $@
+	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} $@
+	chmod u+x $@
 
 install-data-hook:
 	$(mkdir_p) $(prefix)/etc
-	cp $(ONLINE_ENV_SH) $(prefix)/etc
+	cp $(SCRIPT_ONLINE_ENV) $(prefix)/etc
+	cp $(SCRIPT_ONLINE_ROOT) $(prefix)/bin
+	chmod u+x $(prefix)/bin/$(SCRIPT_ONLINE_ROOT)
 
 clean-local:
 	rm -f $(ONLINE_ENV_SH)

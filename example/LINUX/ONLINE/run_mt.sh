@@ -8,5 +8,5 @@
 
 APPL_NAME=./ping
 
-srun ./trace.sh $APPL_NAME
+srun ./trace_online.sh $APPL_NAME
 

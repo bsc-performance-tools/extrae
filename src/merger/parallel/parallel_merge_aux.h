@@ -57,7 +57,7 @@ extern struct Communicators_t Communicators;
 
 struct PendingCommunication_t
 {
-	int sender, recver, tag, descriptor, match;
+	int sender, recver, tag, descriptor, match, match_zone;
 	off_t offset;
 };
 struct PendingComms_t 
@@ -70,7 +70,7 @@ extern struct PendingComms_t PendingComms;
 struct ForeignRecv_t
 {
 	UINT64 physic, logic;
-	int sender, sender_app, recver, recver_app, tag;
+	int sender, sender_app, recver, recver_app, tag, match_zone;
 	unsigned thread, vthread;
 };
 struct ForeignRecvs_t
@@ -82,14 +82,14 @@ extern struct ForeignRecvs_t *ForeignRecvs;
 
 void InitForeignRecvs (int numtasks);
 void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int ptask_r, int task_r,
-	unsigned thread_r, unsigned vthread_r, int ptask_s, int task_s, FileSet_t *fset);
+	unsigned thread_r, unsigned vthread_r, int ptask_s, int task_s, FileSet_t *fset, int mz);
 
 void DistributePendingComms (int numtasks, int taskid);
 void NewDistributePendingComms (int numtasks, int taskid, int match);
-struct ForeignRecv_t* SearchForeignRecv (int group, int sender_app, int sender, int recver_app, int recver, int tag);
+struct ForeignRecv_t* SearchForeignRecv (int group, int sender_app, int sender, int recver_app, int recver, int tag, int mz);
 
 void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
-	int task_s);
+	int task_s, int mz);
 void InitPendingCommunication (void);
 
 void InitCommunicators(void);

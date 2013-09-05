@@ -1593,7 +1593,33 @@ AC_DEFUN([AX_PROG_CLUSTERING],
   dnl Search for Clustering installation
   AX_FIND_INSTALLATION([CLUSTERING], [$clustering_paths], [clustering])
 
-  # Check old versions to see what is missing here
+  dnl Check for TreeDBSCAN online libraries
+  if test "${CLUSTERING_INSTALLED}" = "yes" ; then
+    AC_MSG_CHECKING([for libTDBSCAN-fe])
+    if test -f "${CLUSTERING_LIBSDIR}/libTDBSCAN-fe.so" ; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      CLUSTERING_INSTALLED="no"
+    fi
+
+    AC_MSG_CHECKING([for libTDBSCAN-be-online])
+    if test -f "${CLUSTERING_LIBSDIR}/libTDBSCAN-be-online.so" ; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      CLUSTERING_INSTALLED="no"
+    fi
+  fi
+
+  if test "${CLUSTERING_INSTALLED}" = "yes" ; then
+    CLUSTERING_LIBS="-lTDBSCAN-fe -lTDBSCAN-be-online"
+
+    AC_SUBST(CLUSTERING_LIBS)
+    AC_DEFINE([HAVE_CLUSTERING], 1, [Define to 1 if CLUSTERING is installed in the system])
+  fi
+
+  AM_CONDITIONAL(HAVE_CLUSTERING, test "x${CLUSTERING_INSTALLED}" = "xyes")
 
   AX_FLAGS_RESTORE()
 ])
@@ -1712,7 +1738,7 @@ AC_DEFUN([AX_PROG_ONLINE],
       AC_MSG_RESULT([$have_online])
     fi
   fi
-  AM_CONDITIONAL(HAVE_ONLINE, test "x$have_online" = "xyes")
+  AM_CONDITIONAL(HAVE_ONLINE, test "x${have_online}" = "xyes")
 ])
 
 AC_DEFUN([AX_CHECK_WEAK_ALIAS_ATTRIBUTE],

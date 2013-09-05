@@ -80,6 +80,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "UF_xl_instrument.h"
 #if defined(HAVE_ONLINE)
 # include "OnlineConfig.h"
+# include "xml-parse-online.h"
 #endif
 #if defined(OMP_SUPPORT)
 # include "omp_probe.h"
@@ -94,21 +95,6 @@ static char UNUSED rcsid[] = "$Id$";
 /* Some global (but local in the module) variables */
 static char *temporal_d = NULL, *final_d = NULL;
 static int TracePrefixFound = FALSE;
-
-static const xmlChar *xmlYES = (xmlChar*) "yes";
-static const xmlChar *xmlNO = (xmlChar*) "no";
-static const xmlChar *xmlCOMMENT = (xmlChar*) "COMMENT";
-static const xmlChar *xmlTEXT = (xmlChar*) "text";
-
-static const xmlChar XML_ENVVAR_CHARACTER = (xmlChar) '$';
-
-/* Free memory if not null */
-#define XML_FREE(ptr) \
-	if (ptr != NULL) xmlFree(ptr);
-
-/* master fprintf :) */
-#define mfprintf \
-	if (rank == 0) fprintf 
 
 /**********************************************************************
     WRAPPERS for
@@ -1113,85 +1099,6 @@ static void Parse_XML_Counters (int rank, int world_size, xmlDocPtr xmldoc, xmlN
 	}
 }
 
-#if defined(HAVE_ONLINE)
-static void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
-{
-  xmlNodePtr tag;
-
-  tag = current_tag;
-
-  xmlChar *analysis  = xmlGetProp_env (rank, tag, RC_ONLINE_TYPE);
-  xmlChar *frequency = xmlGetProp_env (rank, tag, RC_ONLINE_FREQ);
-  xmlChar *topology  = xmlGetProp_env (rank, tag, RC_ONLINE_TOPO);
-
-  /* Configure the type of analysis */
-  if (analysis != NULL)
-  {
-    if (xmlStrcasecmp(analysis, RC_ONLINE_CLUSTERING) == 0)
-    {
-      Online_SetAnalysis(ONLINE_DO_CLUSTERING);
-    }
-    else if (xmlStrcasecmp(analysis, RC_ONLINE_SPECTRAL) == 0)
-    {
-      Online_SetAnalysis(ONLINE_DO_SPECTRAL);
-    }
-    else
-    {
-      mfprintf(stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>'%s'\n",
-        analysis, REMOTE_CONTROL_METHOD_ONLINE, RC_ONLINE_TYPE);
-      exit(-1);
-    }
-  }
-
-  /* Configure the frequency of the analysis */
-  if (frequency != NULL)
-  {
-    Online_SetFrequency(atoi(frequency));
-  }
-
-  /* Configure the topology */
-  if (topology != NULL)
-  {
-    Online_SetTopology(topology);
-  }
-
-  XML_FREE(analysis);
-  XML_FREE(frequency);
-
-  tag = current_tag->xmlChildrenNode;
-  while (tag != NULL)
-  {
-    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT)) { /* Skip coments */ }
-#if defined(HAVE_CLUSTERING)
-    else if (!xmlStrcasecmp (tag->name, RC_ONLINE_CLUSTERING))
-    {
-
-    }
-#endif
-#if defined(HAVE_SPECTRAL)
-    else if (!xmlStrcasecmp (tag->name, RC_ONLINE_SPECTRAL))
-    {
-      xmlChar *max_periods_str  = xmlGetProp_env (rank, tag, SPECTRAL_MAX_PERIODS);
-      xmlChar *num_iters_str    = xmlGetProp_env (rank, tag, SPECTRAL_NUM_ITERS);
-      xmlChar *min_seen_str     = xmlGetProp_env (rank, tag, SPECTRAL_MIN_SEEN);
-      xmlChar *min_likeness_str = xmlGetProp_env (rank, tag, SPECTRAL_MIN_LIKENESS);
-      int max_periods  = 0;
-
-      if (max_periods_str != NULL)
-      {
-        if (strcmp(max_periods_str, "all") == 0) max_periods = 0;
-        else max_periods = atoi(max_periods_str);
-        Online_SetSpectralMaxPeriods ( max_periods );
-      }
-      if (num_iters_str    != NULL) Online_SetSpectralNumIters   ( atoi(num_iters_str) );
-      if (min_seen_str     != NULL) Online_SetSpectralMinSeen    ( atoi(min_seen_str) );
-      if (min_likeness_str != NULL) Online_SetSpectralMinLikeness( (atof(min_likeness_str) / 100.0) );
-    }
-#endif
-    tag = tag->next;
-  }
-}
-#endif
 
 /* Configure <remote-control> related parameters */
 static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)

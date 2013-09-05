@@ -31,6 +31,7 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#include <iostream>
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
@@ -38,7 +39,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "tags.h"
 #if USE_HARDWARE_COUNTERS
 # include "num_hwc.h"
+# include "hwc.h"
 #endif /* USE_HARDWARE_COUNTERS */
+#include "utils.h"
 
 Bursts::Bursts()
 {

@@ -43,7 +43,7 @@ int  SyncAttachments(
   char *sendbuf,
   int  *sendcnts,
   int  *displs,
-  BE_thread_data_t *BE_args);
+  BE_data_t *BE_args);
 
 int  SyncOk(int this_be_ok);
 

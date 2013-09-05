@@ -11,5 +11,5 @@ module load intel openmpi
 
 APPL_NAME=./ping
 
-mpirun -np 8 ./trace.sh $APPL_NAME
+mpirun -np 8 ./trace_online.sh $APPL_NAME
 

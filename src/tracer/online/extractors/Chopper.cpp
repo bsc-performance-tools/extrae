@@ -35,6 +35,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdlib.h>
 #endif
 #include "Chopper.h"
+#include "events.h"
 
 /**
  * Constructor. Creates a new forward iterator for the extraction buffer.
@@ -112,6 +113,7 @@ BufferIterator_t * Chopper::DontBreakStates(unsigned long long time_to_find, boo
  */
 BufferIterator_t * Chopper::RemoveLastState(unsigned long long time_to_find)
 {
+#if 1
   BufferIterator_t *found=NULL, *prev=NULL;
   event_t *curEvt=NULL;
 
@@ -127,6 +129,32 @@ BufferIterator_t * Chopper::RemoveLastState(unsigned long long time_to_find)
     prev = BIT_Copy(ExtractionIterator);
   }
   return found;
+#else
+  BufferIterator_t  *last_mpi_exit      = NULL;  
+  unsigned long long last_mpi_exit_time = 0;
+
+  while ((!BIT_OutOfBounds(ExtractionIterator)))
+  {
+    event_t           *current_event = BIT_GetEvent(ExtractionIterator);
+    unsigned long long current_time  = Get_EvTime(current_event);
+    INT32              current_type  = Get_EvEvent(current_event);
+    UINT64             current_value = Get_EvValue(current_event);
+    
+    if (current_time > time_to_find)
+    {
+      return last_mpi_exit;
+    }
+
+    if ((IsMPI(current_type) && (current_value == EVT_END)) ||
+        (current_time == last_mpi_exit_time))
+    {
+      BIT_Free(last_mpi_exit);
+      last_mpi_exit      = BIT_Copy(ExtractionIterator);
+      last_mpi_exit_time = current_time;
+    }    
+  }
+  return NULL;
+#endif
 }
 
 

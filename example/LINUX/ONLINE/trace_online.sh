@@ -5,8 +5,14 @@ export EXTRAE_HOME=@sub_PREFIXDIR@
 # Load the online environment
 source ${EXTRAE_HOME}/etc/online_env.sh
 
-# Select the Extrae configuration file
+# Set the Extrae configuration
 export EXTRAE_CONFIG_FILE=./extrae_online.xml
+#export EXTRAE_ONLINE_DEBUG=1
+
+# Start the analysis front-end 
+if [ ${OMPI_COMM_WORLD_RANK} -eq 0 ]; then
+  ${EXTRAE_HOME}/bin/online_root &
+fi
 
 # Preload the tracing library 
 export LD_PRELOAD=${EXTRAE_HOME}/lib/libmpitrace.so    # C programs

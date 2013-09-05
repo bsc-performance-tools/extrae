@@ -42,11 +42,17 @@ static char UNUSED rcsid[] = "$Id$";
  *
  * @param min_duration The minimum duration of a CPU burst to consider.
  */
-BurstsExtractor::BurstsExtractor(unsigned long long min_duration)
+BurstsExtractor::BurstsExtractor(unsigned long long min_duration, bool sync_times)
 {
-  LastBegin       = NULL;
-  DurationFilter  = min_duration;
-  ExtractedBursts = new Bursts();
+  LastBegin        = NULL;
+  DurationFilter   = min_duration;
+  SynchronizeTimes = sync_times;
+  ExtractedBursts  = new Bursts();
+}
+
+BurstsExtractor::~BurstsExtractor()
+{
+  delete ExtractedBursts;
 }
 
 /**
@@ -73,6 +79,7 @@ void BurstsExtractor::ProcessEvent(event_t *evt)
     unsigned long long ts_ini_sync = TIMESYNC(0, TASKID, ts_ini);
     unsigned long long ts_end      = Get_EvTime(evt);
     unsigned long long duration    = ts_end - ts_ini;
+    unsigned long long ts          = (SynchronizeTimes ? ts_ini_sync : ts_ini);
 
     /* Only store those bursts that are longer than the given threshold */
     if (duration >= DurationFilter)
@@ -85,9 +92,9 @@ void BurstsExtractor::ProcessEvent(event_t *evt)
       int hwc_set = Get_EvHWCSet(evt);
       BURST_HWC_DIFF(OngoingBurstHWCs, evt, LastBegin);
 
-      ExtractedBursts->Insert(ts_ini_sync, duration, hwc_set, OngoingBurstHWCs);
+      ExtractedBursts->Insert(ts, duration, hwc_set, OngoingBurstHWCs);
 #else
-      ExtractedBursts->Insert(ts_ini_sync, duration);
+      ExtractedBursts->Insert(ts, duration);
 #endif /* USE_HARDWARE_COUNTERS */
     }
   }

@@ -31,6 +31,9 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -48,6 +51,10 @@ static int    cfgSpectralMinSeen     = DEFAULT_SPECTRAL_MIN_SEEN;       /* How m
 static int    cfgSpectralNumIters    = DEFAULT_SPECTRAL_NUM_ITERS;      /* How many iterations to trace for a given behavior                */
 static double cfgSpectralMinLikeness = DEFAULT_SPECTRAL_MIN_LIKENESS;   /* Minimum similarity to consider to periods equivalent             */
 #endif /* HAVE_SPECTRAL */
+
+#if defined(HAVE_CLUSTERING)
+static char *cfgClusteringConfig     = (char *)DEFAULT_CLUSTERING_CONFIG;       /* The clustering configuration xml file */
+#endif /* HAVE_CLUSTERING */
 
 /**
  * Enables the online module.
@@ -175,3 +182,18 @@ double Online_GetSpectralMinLikeness(void)
 }
 
 #endif /* HAVE_SPECTRAL */
+
+#if defined(HAVE_CLUSTERING)
+
+void Online_SetClusteringConfig( char *clustering_config_xml )
+{
+  cfgClusteringConfig = strdup(clustering_config_xml);
+}
+
+char * Online_GetClusteringConfig()
+{
+  return cfgClusteringConfig;
+}
+
+#endif /* HAVE_CLUSTERING */
+

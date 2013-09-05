@@ -432,7 +432,7 @@ void Extrae_fini_last_chance_Wrapper (void)
 		Backend_Finalize ();
 
 		/* Call additional code to finalize the task including
-		   MPI_Finalize, PACX_Finalize,... */
+		MPI_Finalize, PACX_Finalize,... */
 		Extrae_finalize_task();
 
 		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);

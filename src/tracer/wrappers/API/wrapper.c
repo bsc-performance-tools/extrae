@@ -1217,8 +1217,8 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	}
 	if (circular_buffering)
 	{
-		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_ALIAS_COMM_CREATE_EV);
 		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_RANK_CREACIO_COMM_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_ALIAS_COMM_CREATE_EV);
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], Buffer_DiscardOldest);
 	}
 	else
@@ -1667,6 +1667,20 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	Myrinet_HWC_Initialize();
 #endif
 
+#if defined(HAVE_ONLINE)
+	if (Online_isEnabled())
+	{
+		int rc;
+
+		rc = Online_Init(me, world_size);
+		if (rc == -1)
+		{
+			Online_Disable();
+			fprintf(stderr, "Backend_preInitialize:: ERROR: Online_Init() failed.\n");
+		}	
+	}
+#endif
+
 	last_mpi_exit_time = ApplBegin_Time;
 
 	return TRUE;
@@ -1822,7 +1836,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 #if defined(HAVE_ONLINE)
 	if (Online_isEnabled())
 	{
-		Online_Start(rank, world_size, node_list);
+		Online_Start(node_list);
 	}
 #endif
 

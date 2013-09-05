@@ -31,9 +31,6 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -43,387 +40,175 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
-#ifdef HAVE_DLFCN_H
-# include <dlfcn.h>
-#endif
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+
 #include <string>
-#include <sstream>
-#include <FrontEnd.h>
+using std::string;
+
 #include <BackEnd.h>
 #include <PendingConnections.h>
-#include "threadid.h"
+
+#include "OnlineControl.h"
+#include "Syncing.h"
+#include "IPC.h"
+#include "Messaging.h"
+#include "KnownProtocols.h"
+#include "online_buffers.h"
 #include "clock.h"
 #include "wrapper.h"
 #include "utils.h"
-#include "trace_buffers.h"
-#include "online_buffers.h"
-#include "OnlineControl.h"
-#include "Syncing.h"
-#include "SpectralRoot.h"
-#include "SpectralWorker.h"
 
-using std::string;
-using std::stringstream;
 
-/**
- * Global variables
- */
-int  this_BE_rank   = 0;
-int  I_am_root      = 0;
+/************************\
+ *** Global variables ***
+\************************/
 
-/**
- * These are only significant in the MPI process that runs the front-end (FRONTEND_RANK define)
- */
-FrontEnd        *FE = NULL;
-pthread_t        FE_thread;             // Thread running the front-end 
-int              FE_thread_started = 0; // 1 if the FE thread is spawned successfully
-FE_thread_data_t FE_data;               // Arguments for the front-end
-pthread_mutex_t  FE_running_prot_lock;
+/* Ranks */
+int  this_BE_rank       = 0;
+bool I_am_master_BE     = false;
+int  NumberOfBackends   = 0;
 
-static void Stop_FE();
+/* Messaging */
+Messaging *Msgs = NULL;
 
-/**
- * Each task runs a back-end
- */
-BackEnd         *BE = NULL; 
-pthread_t        BE_thread;             // Thread running the back-end analysis loop
-int              BE_thread_started = 0; // 1 if the BE thread is spawned successfully
-BE_thread_data_t BE_data;               // Connection information for the back-end
-unsigned long long AppPausedAt  = 0;
-unsigned long long AppResumedAt = 0;
+/* Synchronization with the root process */
+IPC *InterProcessToRoot = NULL;
 
-static void Stop_BE();
-static void BE_pre_protocol (string prot_id, Protocol *p);
-static void BE_post_protocol(string prot_id, Protocol *p);
+/* Backend running in this process */
+BackEnd  *BE = NULL;                  // Handler for the MRNetApp library
+pthread_t BE_thread;                  // Thread running the back-end analysis loop
+bool      BE_thread_started  = false; // 1 if the BE thread is spawned successfully
+bool      FE_process_started = false; // true if the FE process is spawned successfully
+BE_data_t BE_data;                    // Connection information for the back-end
 
-/**
- * Control that the main app thread and the back-end thread don't stop the network twice.
- */
-int STOP_Ongoing = 0;
-pthread_mutex_t STOP_lock;
+/* Timers */
+unsigned long long AppPausedAt  = 0;  // Timestamp when the current analysis started
+unsigned long long AppResumedAt = 0;  // Timestamp when the previous analysis finished
 
-/**
- * Buffer for the online events
- */
+/* Tracing buffer for the online events */
 Buffer_t *OnlineBuffer = NULL;
 char      tmpBufferFile[TMP_DIR];
 char      finalBufferFile[TMP_DIR];
 
+/* Prototypes for private functions */
+static void Stop_FE();
+static void Stop_BE();
+
+static void BE_load_known_protocols();
+static void BE_pre_protocol (string prot_id, Protocol *p);
+static void BE_post_protocol(string prot_id, Protocol *p);
+
+static void Online_GenerateOutputFiles();
+static void Initialize_Online_Buffers();
+
+
+/*************************\
+ *** Back-end controls ***
+\*************************/
+
 /**
- * Generates the paths for the temporary and final trace buffers.
- */
-static void Online_GenerateOutputFiles()
-{
-  int initial_TASKID = Extrae_get_initial_TASKID();
-  FileName_PTT(tmpBufferFile, Get_TemporalDir(initial_TASKID), Get_ApplName(), getpid(), initial_TASKID, 0, EXT_TMP_ONLINE);
-  FileName_PTT(finalBufferFile, Get_FinalDir(TASKID), Get_ApplName(),  getpid(), TASKID, 0, EXT_ONLINE);
-}
-
-
-/*****************************************************************\
-|***                      FRONT-END SIDE                       ***|
-\*****************************************************************/
-
-/**
- * Front-end analysis thread
+ * Initializes the rank variables and the inter-process
+ * communicator to the root process in the master back-end.
  *
- * Waits for all back-ends to attach, loads the analysis protocols and 
- * enters the main analysis loop, dispatching commands periodically.
- */
-void * FE_main_loop(UNUSED void *context)
-{
-  int done = 0;
+ * @param rank ID of this MPI process (back-end).
+ * @param world_size Number of MPI processes (back-ends).
 
-  /* Stall the front-end until all back-ends have connected */
-  FE->Connect();
-
-  /* Load the FE-side analysis protocols */
-  FrontProtocol *fp = new SpectralRoot();
-  FE->LoadProtocol( fp );
-
-  ONLINE_DBG_1("Front-end entering the main analysis loop...\n");
-  do 
-  {
-    ONLINE_DBG_1("Front-end going to sleep for %d seconds...\n", Online_GetFrequency());
-    sleep(Online_GetFrequency());
-
-    /* Take the mutex to prevent starting a new protocol if the application has just finished */
-    pthread_mutex_lock(&FE_running_prot_lock);
-    if (FE->isUp())
-    {
-      FE->Dispatch("SPECTRAL", done);
-    }
-    pthread_mutex_unlock(&FE_running_prot_lock);
-
-  } while ((FE->isUp()) && (!done));
-
-  ONLINE_DBG_1("Front-end exiting the main analysis loop...\n");
-
-  /* The analysis is over, start the network shutdown */
-  Stop_FE();
-
-  return NULL;
-}
-
-/**
- * Stop_FE
- *
- * Initiates the network shutdown, which will cause the analysis threads to quit.
- * This routine can be called either by the main thread (app has finished) or 
- * the front-end analysis thread (analyis is over).
- */
-static void Stop_FE()
-{
-  /* Take the mutex to prevent a shutdown while a protocol is being computed */
-  pthread_mutex_lock(&FE_running_prot_lock);
-  if (FE->isUp())
-  {
-    ONLINE_DBG_1("Shutting down the front-end...\n");
-    FE->Shutdown(); /* All backends will leave the main analysis loop */
-  }
-  pthread_mutex_unlock(&FE_running_prot_lock);
-}
-
-
-/**
- * Generates the network topology specification and writes it into a file.
- *
  * @return 0 on success; -1 otherwise.
  */
-int Generate_Topology(int world_size, char **node_list, char *ResourcesFile, char *TopologyFile)
+int Online_Init(int rank, int world_size) 
 {
-  int  i = 0, k = 0;
-  FILE *fd = NULL;
-  char *selected_topology = NULL;
-  char *env_topgen = NULL;
-  string Topology = "";
-  string TopologyType = "";
+  this_BE_rank     = rank;
+  I_am_master_BE   = (rank == MASTER_BACKEND_RANK(world_size));
+  NumberOfBackends = world_size;
 
-  /* Write the available resources in a file */
-  fd = fopen(ResourcesFile, "w+");
-  for (i=0; i<world_size; i++)
+  Msgs = new Messaging(this_BE_rank, I_am_master_BE);
+
+  if (I_am_master_BE)
   {
-    fprintf(fd, "%s\n", node_list[i]);
+    InterProcessToRoot = new IPC(this_BE_rank);
   }
-  fclose(fd);
-
-#if 1
-  /* Check the topology specified in the XML */
-  selected_topology = Online_GetTopology();
-  if (strcmp(selected_topology, "auto") == 0)
-  {
-    if (world_size > 512)
-    {
-      /* Build an automatic topology with the default fanout */
-      int cps_x_level = world_size;
-      int tree_depth  = 0;
-      stringstream ssTopology; 
-
-      while (cps_x_level > DEFAULT_FANOUT)
-      {
-        cps_x_level = cps_x_level / DEFAULT_FANOUT;
-        tree_depth ++;
-      }
-
-      for (k=0; k<tree_depth; k++)
-      {
-        ssTopology << DEFAULT_FANOUT;
-        if (k < tree_depth - 1) ssTopology << "x"; 
-      }
-      Topology = ssTopology.str();
-      TopologyType = "b";
-    }
-    else
-    {
-      /* Set a fixed number of CPs for small executions */
-      TopologyType = "g";
-      Topology = "";
-      if (world_size >= 32)  Topology = "2";
-      if (world_size >= 64)  Topology = "4";
-      if (world_size >= 128) Topology = "8";
-      if (world_size >= 256) Topology = "16";
-    }
-    ONLINE_DBG_1("Using an automatic topology: %s: %s\n", TopologyType.c_str(), (Topology.length() == 0 ? "root-only" : Topology.c_str()));
-  }
-  else if (strcmp(selected_topology, "root") == 0)
-  {
-    /* All backends will connect directly to the front-end */
-    Topology = "";
-    ONLINE_DBG_1("Using a root-only topology\n");
-  }
-  else
-  {
-    /* Use the topology specified by the user */
-    Topology = string(selected_topology);
-    TopologyType = "g";
-    ONLINE_DBG_1("Using the user topology: %s\n", Topology.c_str());
-  }
-
-  /* Write the topology file */
-  env_topgen = getenv("MRNET_TOPGEN");
-  if ((Topology.length() == 0) || (env_topgen == NULL))
-  {
-    /* Writing a root-only topology */
-    fd = fopen(TopologyFile, "w+");
-    fprintf(fd, "%s:0 ;\n", node_list[FRONTEND_RANK(world_size)]);
-    fclose(fd);
-  }
-  else
-  {
-    /* Invoking mrnet_topgen to build the topology file */
-    string cmd;
-    cmd = string(env_topgen) + " -f " + node_list[FRONTEND_RANK(world_size)] + " --hosts=" + string(ResourcesFile) + " --topology=" + TopologyType + ":" + Topology + " -o " + string(TopologyFile);
-    ONLINE_DBG_1("Invoking the topology generator: %s\n", cmd.c_str());
-    system(cmd.c_str());
-
-  }
-  ONLINE_DBG_1("Topology written at '%s'\n", TopologyFile);
-#endif
-
-#if 0
-#if 0
-    fd = fopen(TopologyFile, "w+");
-    fprintf(fd, "%s:0; \n", node_list[FRONTEND_RANK(world_size)]);
-    fclose(fd);
-#else
-    fd = fopen(TopologyFile, "w+");
-    fprintf(fd, "%s:0 => \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:1  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:2  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:3  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:4  \n", node_list[FRONTEND_RANK(world_size)]);
-    fprintf(fd, "  %s:5; \n", node_list[FRONTEND_RANK(world_size)]);
-    fclose(fd);
-#endif
-#endif
-
   return 0;
 }
 
-
-/*****************************************************************\
-|***                      BACK-END SIDE                        ***|
-\*****************************************************************/
-
 /**
- * Online_Start
+ * Passes the resources to the root, waits for the network to be created
+ * and attaches the back-ends.
  *
- * All tasks initialize a back-end. Additionally, the root task 
- * specified by FRONTEND_RANK initializes the front-end. 
- * The routine returns when the network is connected and the FE 
- * and BE analysis threads have been created.
- *
- * @param rank       This MPI task rank.
- * @param world_size Total number of MPI tasks.
- * @param node_list  List of hostnames where each task is running.
- *
- * @return 1 if all tasks joined the network without errors; 0 otherwise.
+ * @param node_list List of nodes where each MPI task is executing.
+ * 
+ * @return 1 on success; 0 otherwise;
  */
-int Online_Start(int rank, int world_size, char **node_list)
+int Online_Start(char **node_list)
 {
-  int me_init_ok     = 0;
-  int we_init_ok     = 0;
-  int ok_dist        = 0;
-  int ok_init        = 0;
-  int rdy_to_connect = 0;
+  /* Variables to control the status of the different initialization stages */
+  int ok_sync     = 0;
+  int ok_init     = 0;
+  int me_init_ok  = 0;
+  int all_init_ok = 0;
+  int BE_ready_to_connect = 0;
 
-  char *sendbuf  = NULL;
-  int  *sendcnts = NULL;
-  int  *displs   = NULL;
+  /* Buffers to distribute the attachments information through MPI */
+  char *send_buffer   = NULL;
+  int  *send_counts   = NULL;
+  int  *displacements = NULL;
 
-  ONLINE_DBG("Starting the on-line analysis ...\n");
+  Msgs->debug(cerr, "Starting the on-line analysis...");
 
-  this_BE_rank = rank;
-  I_am_root    = (rank == FRONTEND_RANK(world_size));
-
-  if (I_am_root)
+  if (I_am_master_BE)
   {
-    /* Start the front-end */
-    pid_t pid = getpid();
+    bool AttachmentsReady = false;
 
-#if defined(ONLINE_DEBUG)
-    int i = 0;
-    ONLINE_DBG_1("I will start the front-end (world_size=%d, node_list=", world_size); 
-    for (i=0; i<world_size; i++)
+    /* 
+     * Write the available resources in a file. The MRNet root process
+     * is waiting for this file to start the network. 
+     */
+    InterProcessToRoot->SendResources( NumberOfBackends, node_list );
+
+    /* 
+     * At this point, the root will wake up, generate the topology, start
+     * the network and write the attachments file that is required by the back-ends.
+     */
+    AttachmentsReady = InterProcessToRoot->WaitForAttachments( NumberOfBackends );
+
+    if (AttachmentsReady)
     {
-      fprintf(stderr, "%s", node_list[i]);
-      if (i<world_size-1) fprintf(stderr, ",");
-    }
-    fprintf(stderr, ")\n");
-#endif /* ONLINE_DEBUG */
+      FE_process_started = 1;
 
-    snprintf(FE_data.resources_file, 128, "%d.rlist",  (int)pid);
-    snprintf(FE_data.topology_file,  128, "%d.top",    (int)pid);
-    snprintf(FE_data.attach_file,    128, "%d.attach", (int)pid);
-
-    ONLINE_DBG_1("Generating the network topology...\n");
-    FE_data.num_backends = world_size;
-    Generate_Topology(world_size, node_list, FE_data.resources_file, FE_data.topology_file);
-
-    ONLINE_DBG_1("Launching the front-end...\n");
-    FE = new FrontEnd();
-    FE->Init(
-      FE_data.topology_file,
-      FE_data.num_backends,
-      FE_data.attach_file,
-      false /* Don't wait for BEs to attach */ );
-
-    /* When Init() returns the attachments file has been written.
-     * Only the root parses this file to avoid stressing the filesystem.
-     */ 
-    PendingConnections BE_connex(string(FE_data.attach_file));
-    if (BE_connex.ParseForMPIDistribution(world_size, sendbuf, sendcnts, displs) == 0)
-    {
-      /* The attachments file was parsed successfully. The root will 
-       * distribute the information to the rest of ranks */
-      rdy_to_connect = 1;
+      /* The master back-end parses the attachments file and distributes the information through MPI */
+      Msgs->debug_one(cerr, "Distributing attachments information to all back-ends...");
+      PendingConnections BE_connex(string( InterProcessToRoot->GetAttachmentsFile()));
+      if (BE_connex.ParseForMPIDistribution(NumberOfBackends, send_buffer, send_counts, displacements) == 0)
+      {
+        BE_ready_to_connect = 1;
+      }
     }
   }
 
-  ONLINE_DBG_1("Distributing attachments information to all back-ends...\n");
   /* All back-ends wait for their attachment information */
-  ok_dist = SyncAttachments(
-              rank, 
-              FRONTEND_RANK(world_size), 
-              rdy_to_connect, 
-              sendbuf,
-              sendcnts,
-              displs,
+  ok_sync = SyncAttachments(
+              this_BE_rank,
+              MASTER_BACKEND_RANK(NumberOfBackends),
+              BE_ready_to_connect,
+              send_buffer,
+              send_counts,
+              displacements,
               &BE_data);
 
-  if (ok_dist)
+  if (ok_sync)
   {
-    /* The attachments were successfully distributed */
-    if (I_am_root)
-    {
-#if !defined(ONLINE_DEBUG)
-      /* Temporary files are deleted unless there's an error or debug is enabled*/
-      unlink(FE_data.resources_file);
-      unlink(FE_data.topology_file);
-      unlink(FE_data.attach_file);
-#endif
-
-      /* Start the front-end analysis thread */
-      FE_thread_started = (pthread_create(&FE_thread, NULL, FE_main_loop, NULL) == 0);
-      if (!FE_thread_started)
-      {
-        perror("pthread_create: Front-end analysis thread: ");
-      }
-    }
-
-    /* Start the back-ends */
-    ONLINE_DBG("Launching the back-end...\n");
+    /* Start the back-end */
+    Msgs->debug(cerr, "Launching the back-end...");
     BE = new BackEnd();
     ok_init = (BE->Init( BE_data.my_rank,
                          BE_data.parent_hostname,
                          BE_data.parent_port,
                          BE_data.parent_rank) == 0);
+
     if (ok_init)
     {
-      ONLINE_DBG("Back-end is ready!\n");
+      Msgs->debug(cerr, "Back-end is ready!");
 
       /* Start the back-end analysis thread */
       BE_thread_started = (pthread_create(&BE_thread, NULL, BE_main_loop, NULL) == 0);
@@ -435,52 +220,46 @@ int Online_Start(int rank, int world_size, char **node_list)
   }
 
   /* Final synchronization to check whether all back-ends are ok */
-  me_init_ok = (ok_dist && ok_init && BE_thread_started && ((I_am_root && FE_thread_started) || (!I_am_root)));
+  me_init_ok = (ok_sync && ok_init && BE_thread_started && ((I_am_master_BE && FE_process_started) || (!I_am_master_BE)));
 
-  we_init_ok = SyncOk(me_init_ok);
-
-  if (!we_init_ok) 
+  all_init_ok = SyncOk(me_init_ok);
+  if (!all_init_ok)
   {
-    /* Any task had errors... shutdown everything! */ 
-    if (rank == 0) fprintf(stderr, "Online_Start:: FATAL ERROR: Initializing the on-line analysis (see errors above).\n");
-    Online_Disable();
+    /* One or more tasks had errors... shutdown everything! */
+    Msgs->debug_one(cerr, "Online_Start:: FATAL ERROR: Initializing the on-line analysis (see errors above).");
     Online_Stop();
   }
   else
   {
-    /* Create the online buffer */
-    Online_GenerateOutputFiles();
-    OnlineBuffer = new_Buffer(1000, tmpBufferFile, 0);
+    Initialize_Online_Buffers();
   }
-  return (we_init_ok);
+
+  return (all_init_ok);
 }
 
 
 /**
- * Online_Stop
- *
- * The root task starts the network shutdown, and all tasks
- * stall waiting for their analysis threads to die.
+ * Communicates with the root process to start the network shutdown, 
+ * and all backends stall waiting for their analysis threads to die.
  */
 void Online_Stop()
 {
-  ONLINE_DBG("Stopping the online-analysis...\n");
+  Msgs->debug(cerr, "Stopping the online-analysis");
 
-  if (I_am_root)
+  Online_Disable();
+
+  if (I_am_master_BE)
   {
-    /* Start the network shutdown */
+    /* Tell the root to quit */
     Stop_FE();
   }
 
-  ONLINE_DBG("Waiting for back-end to finish...\n");
+  Msgs->debug(cerr, "Waiting for back-end to finish...");
   
-  /* Wait for the analysis threads to die */
-  if (FE_thread_started)
-    pthread_join(FE_thread, NULL);
   if (BE_thread_started)
     pthread_join(BE_thread, NULL);
 
-  ONLINE_DBG("Back-end closed!\n");
+  Msgs->debug(cerr, "Back-end closed!");
 
   /* Barrier synchronization */
   SyncWaitAll(); 
@@ -488,29 +267,62 @@ void Online_Stop()
 
 
 /**
- * Back-end analysis thread
- *
- * Loads the counterpart analysis protocols and enters an infinite loop waiting for commands
- * from the front-end. This thread exists when the front-end initiates the network shutdown
- * calling to Stop_FE().
+ * Sends a termination notice to the MRNet root process which will cause this process to quit.
+ */
+static void Stop_FE()
+{
+  Msgs->debug_one(cerr, "Sending termination notice to root process");
+  InterProcessToRoot->SendTermination();
+}
+
+
+/**
+ * This routine is called when the back-end analysis thread quits, 
+ * either because the application or the analysis has finished.
+ */
+static void Stop_BE()
+{
+  Online_Flush();
+}
+
+
+/**
+ * Main analysis loop executed by the back-end thread. Loads the counterpart analysis protocols and 
+ * enters an infinite loop waiting for commands from the front-end. This thread exits when the master 
+ * back-end initiates the network shutdown calling to Stop_FE() at the end of the execution, or when 
+ * the root process decides to end the analysis. 
  */
 void * BE_main_loop(UNUSED void *context)
 {
   /* Load the BE-side analysis protocols */
-  BackProtocol *bp = new SpectralWorker();
-  BE->LoadProtocol( bp );
+  BE_load_known_protocols(); 
 
   /* Enter the main analysis loop */
-  ONLINE_DBG("Back-end entering the main analysis loop...\n");
+  Msgs->debug(cerr, "Back-end entering the main analysis loop...");
   BE->Loop(&BE_pre_protocol, &BE_post_protocol);
-  ONLINE_DBG("Back-end exiting the main analysis loop...\n");
+  Msgs->debug(cerr, "Back-end exiting the main analysis loop...");
 
   /* At this point, the front-end did a shutdown and quit, and the back-ends exit the listening loop and quit */
   Stop_BE();
 
-  ONLINE_DBG("Bye!\n");
+  Msgs->debug(cerr, "Bye!");
 
   return NULL;
+}
+
+
+/**
+ * Loads all back-end side protocols
+ */
+static void BE_load_known_protocols()
+{
+#if defined(HAVE_SPECTRAL)
+  BE->LoadProtocol( (Protocol *)(new SpectralWorker()) );
+#endif
+
+#if defined(HAVE_CLUSTERING)
+  BE->LoadProtocol( (Protocol *)(new ClusteringWorker()) );
+#endif
 }
 
 
@@ -542,39 +354,78 @@ static void BE_post_protocol(UNUSED string prot_id, UNUSED Protocol *p)
 }
 
 
+/************************************************\
+ *** Main application pause / resume controls ***
+\************************************************/
+
 /**
- * Stop_BE
- *
- * This routine is called when the back-end analysis thread quits, 
- * either because the application or the analysis has finished.
+ * Pause the application by locking the mutex on all tracing buffers.
  */
-static void Stop_BE()
+void Online_PauseApp()
 {
-  Online_Flush();
+  unsigned int thread = 0;
+  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
+  {
+    Buffer_Lock(TRACING_BUFFER(thread));
+  }
+  AppPausedAt = TIME;
 }
 
 
 /**
- * Closes all tracing buffers and dumps the online buffer to disk. 
+ * Flushes the tracing buffers to disk after the analysis, and resumes
+ * the application by releasing the mutex on all tracing buffers.
  */
-void Online_Flush()
+void Online_ResumeApp()
 {
-  /* Close the application buffers */
-  Online_PauseApp();
-  Backend_Finalize_close_files();
-  Online_ResumeApp();
+  unsigned int thread = 0;
+  AppResumedAt = TIME;
 
-  /* Flush and close the online buffer */
-  Buffer_Flush(OnlineBuffer);
-  Buffer_Close(OnlineBuffer);
-
-  /* Rename the temporary file into the final online buffer */
-  if (file_exists (tmpBufferFile))
+  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
   {
-    rename_or_copy (tmpBufferFile, finalBufferFile);
-    fprintf (stdout, PACKAGE_NAME": Online trace file created : %s\n", finalBufferFile);
-    fflush(stdout);
+    Buffer_Flush(TRACING_BUFFER(thread));
   }
+  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
+  {
+    Buffer_Unlock(TRACING_BUFFER(thread));
+  }
+}
+
+
+/**
+ * Returns the timestamp when the application was last paused.
+ *
+ * @return the last pause time.
+ */
+unsigned long long Online_GetAppPauseTime()
+{
+  return AppPausedAt;
+}
+
+
+/**
+ * Returns the timestamp when the application was last resumed.
+ *
+ * @return the last resume time.
+ */
+unsigned long long Online_GetAppResumeTime()
+{
+  return AppResumedAt;;
+}
+
+
+/*******************************\
+ *** Online buffers controls ***
+\*******************************/
+
+/**
+ * Generates the paths for the temporary and final trace buffers.
+ */
+static void Online_GenerateOutputFiles()
+{
+  int initial_TASKID = Extrae_get_initial_TASKID();
+  FileName_PTT(tmpBufferFile, Get_TemporalDir(initial_TASKID), Get_ApplName(), getpid(), initial_TASKID, 0, EXT_TMP_ONLINE);
+  FileName_PTT(finalBufferFile, Get_FinalDir(TASKID), Get_ApplName(),  getpid(), TASKID, 0, EXT_ONLINE);
 }
 
 
@@ -606,59 +457,39 @@ char * Online_GetFinalBufferName()
   return finalBufferFile;
 }
 
+
 /**
- * Pause the application by locking the mutex on all tracing buffers.
+ * Creates the tracing buffers to hold the on-line events.
  */
-void Online_PauseApp()
+static void Initialize_Online_Buffers()
 {
-  unsigned int thread = 0;
-  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
-  {
-    Buffer_Lock(TRACING_BUFFER(thread));
-  }
-  AppPausedAt = TIME;
+  /* Create the online tracing buffer */
+  Online_GenerateOutputFiles();
+
+  OnlineBuffer = new_Buffer(1000, Online_GetTmpBufferName(), 0);
 }
 
 
 /**
- * Returns the timestamp when the application was last paused.
- *
- * @return the last pause time.
+ * Closes all tracing buffers and dumps the online buffer to disk. 
  */
-unsigned long long Online_GetAppPauseTime()
+void Online_Flush()
 {
-  return AppPausedAt;
-}
+  /* Close the application buffers */
+  Online_PauseApp();
+  Backend_Finalize_close_files();
+  Online_ResumeApp();
 
+  /* Flush and close the online buffer */
+  Buffer_Flush(OnlineBuffer);
+  Buffer_Close(OnlineBuffer);
 
-/**
- * Flushes the tracing buffers to disk after the analysis, and resumes
- * the application by releasing the mutex on all tracing buffers.
- */
-void Online_ResumeApp()
-{
-  unsigned int thread = 0;
-  AppResumedAt = TIME;
-
-  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
+  /* Rename the temporary file into the final online buffer */
+  if (file_exists (tmpBufferFile))
   {
-    Buffer_Flush(TRACING_BUFFER(thread));
-  }
-  for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
-  {
-    Buffer_Unlock(TRACING_BUFFER(thread));
+    rename_or_copy (tmpBufferFile, finalBufferFile);
+    fprintf (stdout, PACKAGE_NAME": Online trace file created : %s\n", finalBufferFile);
+    fflush(stdout);
   }
 }
-
-
-/**
- * Returns the timestamp when the application was last resumed.
- *
- * @return the last resume time.
- */
-unsigned long long Online_GetAppResumeTime()
-{
-  return AppResumedAt;;
-}
-
 
