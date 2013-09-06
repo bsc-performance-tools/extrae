@@ -41,6 +41,8 @@ static char UNUSED rcsid[] = "$Id: vector.c 1060 2012-04-19 08:31:02Z harald $";
 # include <string.h>
 #endif
 
+#if defined(HAVE_BFD)
+
 #include "debug.h"
 #include "bfd_manager.h"
 
@@ -265,6 +267,8 @@ int BFDmanager_translateAddress (bfd *bfdImage, asymbol **bfdSymbols,
 
 	return syminfo.found;
 }
+
+#endif /* HAVE_BFD */
 
 #if defined(DEAD_CODE)
 

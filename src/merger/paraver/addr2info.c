@@ -65,10 +65,12 @@ int *__errno_location(void)
 #include "options.h"
 
 static void AddressTable_Initialize (void);
-static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
-	char **module, char ** funcname, char ** filename, int * line);
 static int  AddressTable_Insert (UINT64 address, int event_type,
 	char *module, char *funcname, char *filename, int line);
+#if defined(HAVE_BFD)
+static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
+	char **module, char ** funcname, char ** filename, int * line);
+#endif
 
 struct address_table  * AddressTable  [COUNT_ADDRESS_TYPES]; /* Addresses translation table     */
 struct function_table * FunctionTable [COUNT_ADDRESS_TYPES]; /* Function name translation table */
@@ -201,6 +203,8 @@ void Address2Info_Initialize (char * binary)
 
 	if (binary != NULL)
 		BFDmanager_loadDefaultBinary (binary);
+#else
+	UNREFERENCED_PARAMETER(binary);
 #endif
 
 	/* Initialize the hash cache */
@@ -278,6 +282,12 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 	int query, int uniqueID)
 {
 #if !defined(HAVE_BFD)
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(address);
+	UNREFERENCED_PARAMETER(query);
+	UNREFERENCED_PARAMETER(uniqueID);
+
 	return address;
 #else
 	UINT64 caller_address;
@@ -552,15 +562,12 @@ static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
 	return new_address_id;
 }
 
+#if defined(HAVE_BFD)
 static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	char **module, char ** funcname, char ** filename, int * line)
 {
 	binary_object_t *obj;
 	int found;
-	char *file_basename;
-	char *translated_function;
-	char *translated_filename;
-	int translated_line;
 
 	*funcname = ADDR_UNRESOLVED;
 	*filename = ADDR_UNRESOLVED;
@@ -569,7 +576,6 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	if (!Translate_Addresses) 
 		return;
 
-#if defined(HAVE_BFD)
 	obj = ObjectTable_GetBinaryObjectAt (ptask, task, address);
 # if defined(DEBUG)
 	if (obj)
@@ -582,6 +588,10 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 # endif
 	if (obj)
 	{
+		char *translated_function;
+		char *translated_filename;
+		int translated_line;
+
 		found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
 		  (void*) address, &translated_function, &translated_filename, &translated_line);
 
@@ -639,7 +649,7 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 
 		if (translated_filename != NULL) 
 		{
-			file_basename = basename((char *)translated_filename);
+			char *file_basename = basename((char *)translated_filename);
 			COPY_STRING(file_basename, *filename);
 		}
 		else
@@ -650,12 +660,16 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	if (obj != NULL)
 		if (obj->module != NULL)
 			*module = strdup (basename ((char*) obj->module));
-#endif /* HAVE_BFD */
 }
+#endif /* HAVE_BFD */
 
 UINT64 Address2Info_GetLibraryID (unsigned ptask, unsigned task, UINT64 address)
 {
-#if defined(HAVE_BFD)
+#if !defined(HAVE_BFD)
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(address);
+#else
 	binary_object_t *obj = ObjectTable_GetBinaryObjectAt (ptask, task, address);
 	if (obj)
 		return obj->index;
@@ -665,6 +679,9 @@ UINT64 Address2Info_GetLibraryID (unsigned ptask, unsigned task, UINT64 address)
 
 void Address2Info_Write_LibraryIDs (FILE *pcf_fd)
 {
+#if !defined(HAVE_BFD)
+	UNREFERENCED_PARAMETER(pcf_fd);
+#else
 	if (BFDmanager_numLoadedBinaries() > 0 && 
 	    get_option_merge_EmitLibraryEvents())
 	{
@@ -680,6 +697,7 @@ void Address2Info_Write_LibraryIDs (FILE *pcf_fd)
 		}
 		LET_SPACES(pcf_fd);
 	}
+#endif
 }
 
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
