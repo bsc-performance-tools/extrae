@@ -568,6 +568,9 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 {
 	binary_object_t *obj;
 	int found;
+	char *translated_function;
+	char *translated_filename;
+	int translated_line;
 
 	*funcname = ADDR_UNRESOLVED;
 	*filename = ADDR_UNRESOLVED;
@@ -588,10 +591,6 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 # endif
 	if (obj)
 	{
-		char *translated_function;
-		char *translated_filename;
-		int translated_line;
-
 		found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
 		  (void*) address, &translated_function, &translated_filename, &translated_line);
 
