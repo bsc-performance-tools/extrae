@@ -32,8 +32,12 @@
 static char UNUSED rcsid[] = "$Id$";
 
 #include <string>
+#include <iostream>
 
 using std::string;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>

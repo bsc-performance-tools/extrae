@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 06Sep2013 Fixed minor configure/compilation issues
  * 06Sep2013 Protected includes of system headers by their appropriate #ifdef's
  + 06Sep2013 Added missing licensing headers
  * 05Sep2013 Upgraded to version 3.0rc2

@@ -18,6 +18,8 @@ fi
 export LD_PRELOAD=${EXTRAE_HOME}/lib/libmpitrace.so    # C programs
 #export LD_PRELOAD=${EXTRAE_HOME}/lib/libmpitracef.so  # Fortran programs
 
-## Run the program
+# Run the program
 $*
 
+# Wait for the analysis front-end to quit gracefully
+wait

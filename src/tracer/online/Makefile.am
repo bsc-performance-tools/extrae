@@ -39,6 +39,12 @@ online_root_bin_CXXFLAGS = \
 online_root_bin_LDFLAGS = \
   `@MRNETAPP_CONFIG@ --fe-libs` 
 
+if HAVE_XML2
+online_root_bin_CFLAGS   += @XML2_CFLAGS@
+online_root_bin_CXXFLAGS += @XML2_CFLAGS@
+online_root_bin_LDFLAGS  += -L@XML2_SHAREDLIBSDIR@ -R @XML2_SHAREDLIBSDIR@ @XML2_LIBS@
+endif
+
 if HAVE_SPECTRAL
 online_root_bin_SOURCES += \
   SpectralRoot.cpp   SpectralRoot.h
@@ -71,14 +77,6 @@ libonline_la_SOURCES  = \
   online_buffers.h   online_events.h    \
   filter_defs.h      tags.h             \
   KnownProtocols.h
-if HAVE_SPECTRAL
-libonline_la_SOURCES += \
-  SpectralWorker.cpp SpectralWorker.h
-endif
-if HAVE_CLUSTERING
-libonline_la_SOURCES += \
-  ClusteringWorker.cpp ClusteringWorker.h
-endif
 
 libonline_la_CFLAGS    = -I$(COMMON_DIR) -I$(TRACER_DIR) @MPI_CFLAGS@
 
@@ -90,12 +88,22 @@ libonline_la_CXXFLAGS  = \
 libonline_la_LDFLAGS   = \
   `@MRNETAPP_CONFIG@ --be-libs`
 
+if HAVE_XML2
+libonline_la_CFLAGS += @XML2_CFLAGS@
+endif
+
 if HAVE_SPECTRAL
+libonline_la_SOURCES += \
+  SpectralWorker.cpp SpectralWorker.h
+
 libonline_la_CXXFLAGS += @SPECTRAL_CXXFLAGS@
 libonline_la_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
 endif
 
 if HAVE_CLUSTERING
+libonline_la_SOURCES += \
+  ClusteringWorker.cpp ClusteringWorker.h
+
 libonline_la_CXXFLAGS += @CLUSTERING_CXXFLAGS@
 libonline_la_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
 endif

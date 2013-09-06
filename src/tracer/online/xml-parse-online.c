@@ -31,6 +31,9 @@
 
 static char UNUSED rcsid[] = "$Id: OnlineControl.cpp 2093 2013-09-05 16:43:35Z gllort $";
 
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif

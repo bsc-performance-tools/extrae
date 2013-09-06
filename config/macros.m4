@@ -1694,6 +1694,7 @@ AC_DEFUN([AX_PROG_ONLINE],
   AC_REQUIRE([AX_PROG_MRNETAPP])
   AC_REQUIRE([AX_PROG_CLUSTERING])
   AC_REQUIRE([AX_PROG_SPECTRAL])
+  AC_REQUIRE([AX_PROG_XML2])
 
   AC_ARG_ENABLE(online,
     AC_HELP_STRING(
@@ -1703,6 +1704,13 @@ AC_DEFUN([AX_PROG_ONLINE],
     [ONLINE_enabled="${enableval}"],
     [ONLINE_enabled="no"]
   )
+
+  if test "$ONLINE_enabled" = "yes" ; then
+   if test "${XML_enabled}" != "yes" ; then
+      AC_MSG_WARN([You enabled the on-line analysis mode, but a required dependency is missing!])
+      AC_MSG_ERROR([Please enable support for XML with --enable-xml])
+   fi
+  fi
 
   if test "$ONLINE_enabled" = "yes" ; then
     AX_ENSURE_CXX_PRESENT([on-line analysis])

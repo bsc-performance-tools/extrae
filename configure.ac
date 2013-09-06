@@ -381,7 +381,6 @@ AX_PROG_MX
 AX_PROG_LIBEXECINFO
 AX_PROG_DYNINST
 AX_PROG_COUNTERS # Check for PAPI and/or PMAPI
-AX_PROG_ONLINE
 
 AX_CHECK_LOAD_BALANCING
 
@@ -525,6 +524,12 @@ AC_ARG_ENABLE(doc,
    [enable_doc="yes"]
 )
 AM_CONDITIONAL(GENERATE_DOCUMENTATION, test "${enable_doc}" = "yes" )
+
+#################################
+#        On-line checks         #
+#################################
+
+AX_PROG_ONLINE
 
 #################################
 #    External library checks    #
