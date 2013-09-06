@@ -82,7 +82,6 @@ static int pthread_barrier_wait (event_t * current_event, unsigned long long cur
 }
 
 
-
 static int pthread_Call (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset )
@@ -96,7 +95,23 @@ static int pthread_Call (event_t * current_event, unsigned long long current_tim
 	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+	if (EvType == PTHREAD_CREATE_EV)
+		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue?1:0);
+	else
+		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	if (EvType == PTHREAD_CREATE_EV)
+	{
+#if defined(HAVE_BFD)
+		if (get_option_merge_SortAddresses() && EvValue > 0)
+		{
+			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);
+			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_LINE);
+		}
+#endif
+		trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREAD_FUNC_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREAD_FUNC_LINE_EV, EvValue);
+	}
 
 	return 0;
 }
