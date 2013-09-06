@@ -31,6 +31,10 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#include <string>
+
+using std::string;
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -43,9 +47,6 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
-
-#include <string>
-using std::string;
 
 #include <BackEnd.h>
 #include <PendingConnections.h>

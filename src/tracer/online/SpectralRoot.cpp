@@ -31,15 +31,18 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
-#include <Signal.h>
 #include <iostream>
 #include <sstream>
+
+using std::stringstream;
+
+#include "utils.h"
+
 #include "SpectralRoot.h"
 #include "OnlineConfig.h"
 #include "OnlineControl.h"
-#include "utils.h"
+#include "Signal.h"
 
-using std::stringstream;
 
 SpectralRoot::SpectralRoot()
 {

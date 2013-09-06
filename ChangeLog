@@ -1,9 +1,11 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 06Sep2013 Protected includes of system headers by their appropriate #ifdef's
+ + 06Sep2013 Added missing licensing headers
  * 05Sep2013 Upgraded to version 3.0rc2
              Major changes to the on-line analysis. The front-end is now launched as a separate process.
-             Added a new control (matching_zone) to the communications matching algorithm, so as not to make matches that cross areas where the tracing was disabled.
+ + 05Sep2013 Added a new control (matching_zone) to the communications matching algorithm, so as not to make matches that cross areas where the tracing was disabled.
  * 02Sep2013 Fixing OpenCL instrumentation (added clRetain & clRelease calls)
              Fixed some event mismatches in the OpenCL accelerator side
              Added OpenCL C++ example

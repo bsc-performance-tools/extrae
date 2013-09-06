@@ -32,16 +32,17 @@
 static char UNUSED rcsid[] = "$Id$";
 
 #include <sstream>
+
+#include "trace_buffers.h"
+#include "taskid.h"
+#include "timesync.h"
+
 #include "SpectralWorker.h"
 #include "BurstsExtractor.h"
 #include "Chopper.h"
 #include "Signal.h"
 #include "OnlineControl.h"
-#include "trace_buffers.h"
 #include "online_buffers.h"
-#include "taskid.h"
-#include "trace_buffers.h"
-#include "timesync.h"
 #include "tags.h"
 
 

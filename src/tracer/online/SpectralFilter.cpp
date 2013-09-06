@@ -33,12 +33,15 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include <iostream>
 #include <vector>
+
+using std::vector;
+
 #include <MRNet_wrappers.h>
+
 #include "SpectralFilter.h"
 #include "Signal.h"
 #include "tags.h"
 
-using std::vector;
 
 extern "C" {
 

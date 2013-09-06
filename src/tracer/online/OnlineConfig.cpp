@@ -37,6 +37,7 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+
 #include "OnlineConfig.h"
 
 static int   OnlineUserEnabled = 0;                                     /* Controls if the online module is enabled     */
