@@ -30,7 +30,12 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+
 #include "object_tree.h"
+#include "utils.h"
 #include "debug.h"
 
 appl_t ApplicationTable;
@@ -72,14 +77,14 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	ApplicationTable.ptasks = (ptask_t*) malloc (sizeof(ptask_t)*num_appl);
 	ASSERT(ApplicationTable.ptasks!=NULL, "Unable to allocate memory for ptasks");
 
-	for (i = 0; i < num_appl; i++)
+	for (i = 0; i < ApplicationTable.nptasks; i++)
 	{
 		/* Allocate per task information within each ptask */
 		ApplicationTable.ptasks[i].ntasks = ntasks[i];
 		ApplicationTable.ptasks[i].tasks = (task_t*) malloc (sizeof(task_t)*ntasks[i]);
 		ASSERT(ApplicationTable.ptasks[i].tasks!=NULL, "Unable to allocate memory for tasks");
 
-		for (j = 0; j < ntasks[i]; j++)
+		for (j = 0; j < ApplicationTable.ptasks[i].ntasks; j++)
 		{
 			/* Initialize pending communication queues for each task */
 			CommunicationQueues_Init (
@@ -97,9 +102,8 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 #endif
 
 	/* 3rd step, Initialize the object table structure */
-	for (ptask = 0; ptask < num_appl; ptask++)
-	{
-		for (task = 0; task < ntasks[ptask]; task++)
+	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++)
+		for (task = 0; task < ApplicationTable.ptasks[ptask].ntasks; task++)
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1,task+1);
 			task_info->tracing_disabled = FALSE;
@@ -107,6 +111,8 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			task_info->num_virtual_threads = nthreads[ptask][task];
 			task_info->MatchingComms = TRUE;
 			task_info->match_zone = 0;
+			task_info->num_binary_objects = 0;
+			task_info->binary_objects = NULL;
 
 			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{
@@ -135,7 +141,6 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 #endif
 			}
 		}
-	}
 
 	/* 4th step Assign the node ID */
 	for (i = 0; i < nfiles; i++)
@@ -145,8 +150,8 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	}
 
 	/* This is needed for get_option_merge_NanosTaskView() == FALSE */
-	for (ptask = 0; ptask < num_appl; ptask++)
-		for (task = 0; task < ntasks[ptask]; task++)
+	for (ptask = 0; ptask < ApplicationTable.nptasks; ptask++)
+		for (task = 0; task < ApplicationTable.ptasks[ptask].ntasks; task++)
 		{
 			task_t *task_info = GET_TASK_INFO(ptask+1, task+1);
 			task_info->num_active_task_threads = 0;
@@ -161,5 +166,73 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 				free (nthreads[i]);
 		free (nthreads);		
 	}
+}
+
+static void AddBinaryObjectInto (unsigned ptask, unsigned task,
+	unsigned long long start, unsigned long long end, unsigned long long offset,
+	char *binary)
+{
+	task_t *task_info = GET_TASK_INFO(ptask, task);
+	unsigned found = FALSE, u;
+
+	if (!file_exists(binary))
+		return;
+
+	for (u = 0; u < task_info->num_binary_objects && !found; u++)
+		found = strcmp (task_info->binary_objects[u].module, binary) == 0;
+
+	if (!found)
+	{
+		unsigned last_index = task_info->num_binary_objects;
+		task_info->binary_objects = (binary_object_t*) realloc (
+		  task_info->binary_objects,
+		  (last_index+1) * sizeof(binary_object_t));
+		if (task_info->binary_objects == NULL)
+		{
+			fprintf (stderr, "Fatal error! Cannot allocate memory for binary object!\n");
+			exit (-1);
+		}
+		task_info->binary_objects[last_index].module = strdup (binary);
+		task_info->binary_objects[last_index].start_address = start;
+		task_info->binary_objects[last_index].end_address = end;
+		task_info->binary_objects[last_index].offset = offset;
+		task_info->binary_objects[last_index].index = last_index+1;
+
+#if defined(HAVE_BFD)
+		BFDmanager_loadBinary (binary,
+		  &(task_info->binary_objects[last_index].bfdImage),
+		  &(task_info->binary_objects[last_index].bfdSymbols));
+#endif
+
+		task_info->num_binary_objects++;
+	}
+}
+
+void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
+	unsigned long long start, unsigned long long end, unsigned long long offset,
+	char *binary)
+{
+	if (allobjects)
+	{
+		unsigned _ptask, _task;
+		for (_ptask = 0; _ptask < ApplicationTable.nptasks; _ptask++)
+			for (_task = 0; _task < ApplicationTable.ptasks[_ptask].ntasks; _task++)
+				AddBinaryObjectInto (_ptask, _task, start, end, offset, binary);
+	}
+	else
+		AddBinaryObjectInto (ptask, task, start, end, offset, binary);
+}
+
+binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, UINT64 address)
+{
+	task_t *task_info = GET_TASK_INFO(ptask, task);
+	unsigned u;
+
+	for (u = 0; u < task_info->num_binary_objects; u++)
+		if (address >= task_info->binary_objects[u].start_address &&
+		    address <= task_info->binary_objects[u].end_address)
+			return &(task_info->binary_objects[u]);
+
+	return NULL;
 }
 

@@ -116,8 +116,8 @@ static int pthread_Function_Event (event_t * current_event,
 #if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
-		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_FUNCTION);
-		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2OMP_LINE);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_LINE);
 	}
 #endif
 

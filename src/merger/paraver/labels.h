@@ -120,6 +120,7 @@ value_t;
 #define PID_LBL                "Process IDentifier"
 #define PPID_LBL               "Parent Process IDentifier"
 #define FORK_DEPTH_LBL         "fork() depth"
+#define LIBRARY_LBL            "Library"
 
 #define TRACING_LBL            "Tracing"
 
@@ -403,7 +404,8 @@ extern unsigned MaxClusterId;
 
 void Address2Info_Write_Labels (FILE *);
 int Labels_GeneratePCFfile (char *name, long long options);
-void Labels_loadSYMfile (int taskid, char *name, int report);
+void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
+	unsigned task, char *name, int report);
 int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description);
 
 #endif

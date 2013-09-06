@@ -22,7 +22,7 @@ endif
 HWC_LINKER_FLAGS = $(PAPI_LINKER_FLAGS) $(PMAPI_LINKER_FLAGS)
 
 opencl_check_SOURCES = opencl-check.c
-opencl_check_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
+opencl_check_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common @OPENCL_CFLAGS@
 opencl_check_LDFLAGS = -L$(TRACER_DIR) -locltrace $(HWC_LINKER_FLAGS) -L@OPENCL_SHAREDLIBSDIR@ -R @PAPI_SHAREDLIBSDIR@ -lOpenCL
 
 endif

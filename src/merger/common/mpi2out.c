@@ -138,7 +138,10 @@ void Help (const char *ProgName)
 		  "    -remove-files        Remove intermediate files after processing them.\n"
 		  "    -split-states        Do not merge consecutives states that are the same.\n"
 		  "    -skip-sendrecv       Do not emit communication for SendReceive operations.\n"
-		  "    -unique-caller-id    Choose whether use a unique value identifier for different callers.\n"  
+		  "    -unique-caller-id    Choose whether use a unique value identifier for different callers.\n"
+		  "    -translate-addresses Translate code addresses into code references if available.\n"
+		  "    -no-translate-addresses Do not translate code addresses into code references if available.\n"
+		  "    -emit-library-events Emit library information for unknown references if possible.\n"
 		  "    -sort-addresses      Sort file name, line events in information linked with source code.\n"
 		  "    -task-view           Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
 		  "    --                   Take the next trace files as a diferent parallel task.\n"
@@ -338,8 +341,8 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 
 	do
 	{
-		fgets (mybuffer, sizeof(mybuffer), fd);
-		if (!feof(fd))
+		char * res = fgets (mybuffer, sizeof(mybuffer), fd);
+		if (!feof(fd) && res != NULL)
 		{
 			char *stripped;
 
@@ -497,6 +500,22 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		if (!strcmp (argv[CurArg], "-v"))
 		{
 			set_option_merge_VerboseLevel (get_option_merge_VerboseLevel()+1);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-translate-addresses"))
+		{
+			set_option_merge_TranslateAddresses (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-no-translate-addresses"))
+		{
+			set_option_merge_TranslateAddresses (FALSE);
+			set_option_merge_SortAddresses (FALSE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-emit-library-events"))
+		{
+			set_option_merge_EmitLibraryEvents (TRUE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-absolute-counters"))
@@ -1169,26 +1188,13 @@ int merger_post (int numtasks, int taskid)
 		}
 	}
 
-#if defined(HAVE_BFD)
-	if (taskid == 0 && strlen(get_merge_ExecutableFileName()) > 0)
-		Address2Info_Initialize (get_merge_ExecutableFileName());
-
-	if (get_option_merge_SortAddresses() && !Address2Info_Initialized())
+	if (get_option_merge_TranslateAddresses())
 	{
-		if (taskid == 0)
-		{
-			fprintf (stderr, "mpi2prv: WARNING! Ignoring '-sort-addresses' because addresses can't be translated.\n");
-			fprintf (stderr, "mpi2prv:          Check for -e parameter, and if it's given, check for the package configuration.\n");
-		}	
-		set_option_merge_SortAddresses (FALSE);
+		if (taskid == 0 && strlen(get_merge_ExecutableFileName()) > 0)
+			Address2Info_Initialize (get_merge_ExecutableFileName());
+		else
+			Address2Info_Initialize (NULL);
 	}
-#else
-	if (taskid == 0)
-	{
-		fprintf (stdout, PACKAGE_NAME": WARNING! This mpi2prv does not support -e flag!\n");
-		set_option_merge_SortAddresses (FALSE);
-	}
-#endif
 
 #if defined(PARALLEL_MERGE)
 	if (taskid == 0)
@@ -1216,13 +1222,13 @@ int merger_post (int numtasks, int taskid)
 		if (strcmp (&tmp[strlen(tmp)-strlen(".mpits")], ".mpits") == 0)
 		{
 			strncpy (&tmp[strlen(tmp)-strlen(".mpits")], ".sym", strlen(".sym")+1);
-			Labels_loadSYMfile (taskid, tmp, TRUE);
+			Labels_loadSYMfile (taskid, TRUE, 0, 0, tmp, TRUE);
 		}
 	}
 	else
 	{
 		if (taskid == 0)
-			Labels_loadSYMfile (taskid, get_merge_SymbolFileName(), TRUE);
+			Labels_loadSYMfile (taskid, FALSE, 0, 0, get_merge_SymbolFileName(), TRUE);
 	}
 
 	if (file_exists(get_merge_OutputTraceName()) &&

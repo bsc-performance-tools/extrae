@@ -22,35 +22,49 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/merger/common/vector.h $
+ | @last_commit: $Date: 2012-04-19 10:31:02 +0200 (Thu, 19 Apr 2012) $
+ | @version:     $Revision: 1060 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _ADDRESSES_H_
-#define _ADDRESSES_H_
+#ifndef BFD_MANAGER_H_INCLUDED
+#define BFD_MANAGER_H_INCLUDED
 
-struct address_collector_t
+#ifdef HAVE_BFD
+
+#include <bfd.h>
+
+typedef struct loadedModule_st
 {
-	UINT64 *addresses;
-	int *types;
-	unsigned *ptasks;
-	unsigned *tasks;
-	unsigned count;
-	unsigned allocated;
-};
+	char *module;
+	bfd *bfdImage;
+	asymbol **bfdSymbols;
+} loadedModule_t;
 
-void AddressCollector_Initialize (struct address_collector_t *ac);
-void AddressCollector_Add (struct address_collector_t *ac, unsigned ptask,
-	unsigned task, UINT64 address, int type);
-unsigned AddressCollector_Count (struct address_collector_t *ac);
-UINT64* AddressCollector_GetAllAddresses (struct address_collector_t *ac);
-int* AddressCollector_GetAllTypes (struct address_collector_t *ac);
-unsigned* AddressCollector_GetAllPtasks (struct address_collector_t *ac);
-unsigned* AddressCollector_GetAllTasks (struct address_collector_t *ac);
+/* These variables are used to pass information between
+   translate_addresses and find_address_in_section.  */
+typedef struct BFDmanager_symbolInfo_st
+{
+	bfd_vma pc;
+	asymbol **symbols;
+	const char *filename;
+	const char *function;
+	unsigned int line;
+	bfd_boolean found;
+} BFDmanager_symbolInfo_t;
 
-#if defined(PARALLEL_MERGE)
-void AddressCollector_GatherAddresses (int numtasks, int taskid, struct address_collector_t *ac);
-#endif
-#endif
 
+void BFDmanager_init (void);
+unsigned BFDmanager_numLoadedBinaries (void);
+loadedModule_t *BFDmanager_getLoadedModule (unsigned idx);
+void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols);
+int BFDmanager_translateAddress (bfd *bfdImage, asymbol **bfdSymbols, void *address,
+	char **function, char **file, int *line);
+
+void BFDmanager_loadDefaultBinary (char *file);
+bfd *BFDmanager_getDefaultImage (void);
+asymbol **BFDmanager_getDefaultSymbols (void);
+
+#endif /* HAVE_BFD */
+
+#endif /* MPI2PRV_VECTOR_H_INCLUDED */

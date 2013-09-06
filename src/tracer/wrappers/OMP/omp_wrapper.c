@@ -63,6 +63,8 @@ static int (*omp_get_num_threads_real)(void) = NULL;
 
 static void common_GetOpenMPHookPoints (int rank)
 {
+	UNREFERENCED_PARAMETER(rank);
+
 	/* Obtain @ for omp_set_lock */
 	omp_set_lock_real =
 		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_set_lock");

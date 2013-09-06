@@ -101,6 +101,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_prv_events.h"
 #include "trt_prv_events.h"
 #include "cuda_prv_events.h"
+#include "opencl_prv_events.h"
 #include "addr2info.h"
 #include "timesync.h"
 #include "vector.h"
@@ -423,7 +424,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 				{
 					int found;
 					unsigned u;
-					Extrae_Addr2Type_t *addr2types;
+					Extrae_Addr2Type_t *addr2types = NULL;
 
 					HandleStackedType (ptask, task, thread, Get_EvValue(current_event), current_event);
 
@@ -555,7 +556,6 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	   paraver_rec_t for a new state, remove it (so TRUE in 2nd param) */
 	Flush_FS (fset, FALSE);
 
-#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
 		gettimeofday (&time_begin, NULL);
@@ -569,9 +569,12 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		{
 			UINT64 *buffer_addresses = AddressCollector_GetAllAddresses (&CollectedAddresses);
 			int *buffer_types = AddressCollector_GetAllTypes (&CollectedAddresses);
+			unsigned *buffer_ptasks = AddressCollector_GetAllPtasks (&CollectedAddresses);
+			unsigned *buffer_tasks = AddressCollector_GetAllTasks (&CollectedAddresses);
 
 			for (i = 0; i < AddressCollector_Count(&CollectedAddresses); i++)
-				Address2Info_Translate (buffer_addresses[i], buffer_types[i], get_option_merge_UniqueCallerID());
+				Address2Info_Translate (buffer_ptasks[i], buffer_tasks[i],
+				  buffer_addresses[i], buffer_types[i], get_option_merge_UniqueCallerID());
 
 			Address2Info_Sort (get_option_merge_UniqueCallerID());
 		}
@@ -588,7 +591,6 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 #endif
 		}
 	}
-#endif
 
 #if defined(PARALLEL_MERGE)
 	if (taskid == 0)

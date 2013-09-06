@@ -65,6 +65,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "omp_prv_events.h"
 #include "trt_prv_events.h"
 #include "cuda_prv_events.h"
+#include "opencl_prv_events.h"
 #include "pthread_prv_events.h"
 #include "misc_prv_events.h"
 #include "misc_prv_semantics.h"
@@ -72,6 +73,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "addr2info.h" 
 #include "mpi2out.h"
 #include "options.h"
+#include "object_tree.h"
 
 #include "HardwareCounters.h"
 #include "queue.h"
@@ -589,10 +591,10 @@ static void Write_Trace_Mode_Labels (FILE * pcf_fd)
 
 static void Write_Clustering_Labels (FILE * pcf_fd)
 {
-	int i;
-
 	if (MaxClusterId > 0)
 	{
+		unsigned i;
+
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf (pcf_fd, "9    %d    %s\n", CLUSTER_ID_EV, CLUSTER_ID_LABEL);
 		fprintf (pcf_fd, "%s\n", VALUES_LABEL);
@@ -603,9 +605,7 @@ static void Write_Clustering_Labels (FILE * pcf_fd)
 		fprintf (pcf_fd, "4   Threshold Filtered\n");
 		fprintf (pcf_fd, "5   Noise\n");
 		for (i=6; i<=MaxClusterId; i++)
-		{
 			fprintf (pcf_fd, "%d   Cluster %d\n", i, i-5);
-		}
 		LET_SPACES (pcf_fd);
 	}
 }
@@ -613,7 +613,8 @@ static void Write_Clustering_Labels (FILE * pcf_fd)
 /******************************************************************************
  *** Labels_loadSYMfile
  ******************************************************************************/
-void Labels_loadSYMfile (int taskid, char *name, int report)
+void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
+	unsigned task, char *name, int report)
 {
 	static int Labels_loadSYMfile_init = FALSE;
 	FILE *FD;
@@ -653,6 +654,27 @@ void Labels_loadSYMfile (int taskid, char *name, int report)
 		{
 			switch (Type)
 			{
+				case 'B':
+					{
+						unsigned long start, end, offset;
+						char module[1024];
+						int res = sscanf (LINE, "0 \"%lx-%lx %lx %[^\n\"]\"", &start, &end, &offset, module);
+						if (res == 4)
+						{
+#ifdef HAVE_BFD
+							ObjectTable_AddBinaryObject (allobjects, ptask, task, start, end, offset, module);
+#else
+							fprintf (stdout, "mpi2prv: Ignoring symbols from %s because mpi2prv does not support BFD\n", module);
+							UNREFERENCED_PARAMETER(allobjects);
+							UNREFERENCED_PARAMETER(ptask);
+							UNREFERENCED_PARAMETER(task);
+#endif
+						}
+						else
+							fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+					}
+					break;
+
 				case 'O':
 				case 'U':
 				case 'P':
@@ -736,7 +758,7 @@ void Labels_loadSYMfile (int taskid, char *name, int report)
                             {
                                 if(strcmp(evt->label, value_description))
                                 {
-                                    fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
+                                    fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, value_description,last_event_type_used->event_type.type, eventvalue);
                                 }
                                 evt_value = evt;
                                 break;
@@ -747,7 +769,7 @@ void Labels_loadSYMfile (int taskid, char *name, int report)
                             evt_value = (value_t*) malloc (sizeof (value_t));
                             if (evt_value == NULL)
                             {
-                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'd' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+                                fprintf (stderr, PACKAGE_NAME"(%s,%d): Fatal error! Cannot allocate memory to store the 'd' symbol in TRACE.sym file\n", __FILE__, __LINE__);
                                 exit(-1);
                             }
                             evt_value->value = eventvalue;
@@ -775,7 +797,7 @@ void Labels_loadSYMfile (int taskid, char *name, int report)
                             {
                                 if(strcmp(evt->event_type.label, code_description))
                                 {
-                                    fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for type %d!\n", __FILE__, __LINE__, code_description, eventcode);
+                                    fprintf(stderr, PACKAGE_NAME"(%s,%d): Warning! Ignoring duplicate definition \"%s\" for type %d!\n", __FILE__, __LINE__, code_description, eventcode);
                                 }
                                 evt_type = evt;
                                 break;
@@ -875,6 +897,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Paraver_gradient_names (fd);
 
 #ifdef HAVE_BFD
+	Address2Info_Write_LibraryIDs (fd);
 	Address2Info_Write_MPI_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_UF_Labels (fd, get_option_merge_UniqueCallerID());
 	Address2Info_Write_Sample_Labels (fd, get_option_merge_UniqueCallerID());

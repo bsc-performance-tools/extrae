@@ -49,17 +49,17 @@
 #include "labels.h"
 #include "addr2types.h"
 
-#define TARGET          "default"
-#define CODE_SECTION    ".text"
-
-#define MAX_ADDR_LENGTH 20
 #define ADDR_UNRESOLVED "Unresolved"
 #define ADDR_NOT_FOUND  "_NOT_Found"
+#define UNRESOLVED_ID 0
+#define NOT_FOUND_ID 1
+
 
 /* Public routines */
 void Address2Info_Initialize (char * binary);
 int Address2Info_Initialized (void);
-UINT64  Address2Info_Translate (UINT64 address, int event_type, int uniqueID);
+UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
+	int event_type, int uniqueID);
 void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
@@ -72,6 +72,9 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
   char * filename, int line);
 void Address2Info_Sort (int unique_ids);
+
+UINT64 Address2Info_GetLibraryID (unsigned ptask, unsigned task, UINT64 address);
+void Address2Info_Write_LibraryIDs (FILE *pcf_fd);
 
 enum
 {
@@ -108,6 +111,7 @@ struct address_info
 	UINT64 address;
 	int function_id;
 	char * file_name;
+	char * module;
 	int line;
 };
 

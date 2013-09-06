@@ -30,10 +30,6 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
-#ifdef HAVE_BFD
-
-#undef USE_SYSTEM_CALL /* Define this to call system's addr2line command (use for debug purposes!) */
-
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -45,23 +41,6 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
-#endif
-#if defined(USE_SYSTEM_CALL)
-# ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-# endif
-# ifdef HAVE_SYS_WAIT_H
-#  include <sys/wait.h>
-# endif
-# ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-# endif
-# ifdef HAVE_SYS_STAT_H
-#  include <sys/stat.h>
-# endif
-# ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
-# endif
 #endif
 #ifdef HAVE_LIBGEN_H
 # include <libgen.h>
@@ -76,39 +55,27 @@ int *__errno_location(void)
 }   
 #endif
 
+#include "bfd_manager.h"
 #include "events.h"
 #include "addr2info.h"
 #include "labels.h"
 #include "misc_prv_semantics.h"
 #include "addr2info_hashcache.h"
+#include "object_tree.h"
+#include "options.h"
 
-static void Read_SymTab (void);
 static void AddressTable_Initialize (void);
-static void Translate_Address (UINT64 address, char ** funcname, char ** filename, int * line);
-static void Find_Address_In_Section (bfd * abfd, asection * section, PTR data);
-static int  AddressTable_Insert (UINT64 address, int event_type, char * funcname, char * filename, int line);
+static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
+	char **module, char ** funcname, char ** filename, int * line);
+static int  AddressTable_Insert (UINT64 address, int event_type,
+	char *module, char *funcname, char *filename, int line);
 
 struct address_table  * AddressTable  [COUNT_ADDRESS_TYPES]; /* Addresses translation table     */
 struct function_table * FunctionTable [COUNT_ADDRESS_TYPES]; /* Function name translation table */
 
-bfd * abfd;                          /* Binary file descriptor      */
-static bfd_vma pc;                   /* BFD address representation  */
-static asymbol ** symtab;            /* Binary symbol table         */
-asection * section;                  /* Binary .text section        */
-
-#if defined(USE_SYSTEM_CALL)
-char *BinaryName = NULL;
-#endif
-
 /* Addresses will be translated into function, file and line if set to TRUE */
-int Tables_Initialized = FALSE;
-int Translate_Addresses = FALSE;
-
-/* These variables are global to maintain backwards compatibility with the "map_over_sections" method */
-static char * translated_filename;
-static char * translated_funcname;
-static unsigned int translated_line;
-static int address_found;
+static int Tables_Initialized = FALSE;
+static int Translate_Addresses = FALSE;
 
 /* Determine whether to write the translation tables into the PCF file */
 #define A2I_MPI      0
@@ -119,9 +86,6 @@ static int address_found;
 #define A2I_OTHERS   5
 #define A2I_LAST     6
 int Address2Info_Labels[A2I_LAST];
-
-#define UNRESOLVED_ID 0
-#define NOT_FOUND_ID 1
 
 static int Address2Info_Sort_routine(const void *p1, const void *p2)
 {
@@ -214,7 +178,6 @@ int Address2Info_Initialized (void)
 void Address2Info_Initialize (char * binary)
 {
 	int type;
-	char ** matching;
 
 	Translate_Addresses = FALSE;
 
@@ -226,96 +189,25 @@ void Address2Info_Initialize (char * binary)
 	for (type = 0; type < COUNT_ADDRESS_TYPES; type++)
 	{
 		/* Add fake address 0x0 to link "Unresolved" functions */
-		AddressTable_Insert (UNRESOLVED_ID, type, ADDR_UNRESOLVED, ADDR_UNRESOLVED, 0);
+		AddressTable_Insert (UNRESOLVED_ID, type, NULL, ADDR_UNRESOLVED, ADDR_UNRESOLVED, 0);
 
 		/* Add fake address 0x1 to link "Address not found" functions */
-		AddressTable_Insert (NOT_FOUND_ID, type, ADDR_NOT_FOUND, ADDR_NOT_FOUND, 0);
+		AddressTable_Insert (NOT_FOUND_ID, type, NULL, ADDR_NOT_FOUND, ADDR_NOT_FOUND, 0);
 	}
 
-#if defined(USE_SYSTEM_CALL)
-	/* Save the name of the application binary to pass it to the addr2line command */
-	BinaryName = (char *)malloc((strlen(binary) + 1) * sizeof(char));
-	if (BinaryName == NULL)
-	{
-		fprintf (stderr, "mpi2prv: Fatal error! Cannot allocate memory for binary name when doing a syscall!\n");
-		exit (-1);
-	}
-	strcpy(BinaryName, binary);
-#endif
-
-	/* If no binary has been specified addresses won't be translated */
-	if ((binary == (char *)NULL) || (strlen(binary) == 0)) 
-		return;
-
+#if defined(HAVE_BFD)
 	/* Initialize BFD libraries */
-	bfd_init();
+	BFDmanager_init();
 
-	/* Open the binary file in read-only mode */
-	abfd = bfd_openr (binary, (char *)TARGET);
-	if (abfd == NULL)
-	{
-		const char *errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "mpi2prv: WARNING! Cannot open binary file '%s': %s.\n"
-		                "         Addresses will not be translated into source code references\n"
-		                , binary, errmsg);
-		return;
-	}
-
-	/* Check the binary file format */
-	if (!bfd_check_format_matches (abfd, bfd_object, &matching))
-	{
-		const char * errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "mpi2prv: Binary file format doesn't match: %s\n", errmsg);
-		exit(1);
-	}
-
-	/* Load the Symbol Table */
-	Read_SymTab();
-
-	/* Retrieve the binary code section (.text) */
-	section = bfd_get_section_by_name(abfd, CODE_SECTION);
-	if (section == NULL) 
-	{
-		const char * errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "mpi2prv: Section %s cannot be found: %s\n", CODE_SECTION, errmsg);
-		exit(1);
-	}
+	if (binary != NULL)
+		BFDmanager_loadDefaultBinary (binary);
+#endif
 
 	/* Initialize the hash cache */
 	Addr2Info_HashCache_Initialize();
 
 	/* The addresses translation module has been successfully initialized */
 	Translate_Addresses = TRUE;
-}
-
-/** Read_SymTab
- *
- * Load to memory the symbol table of the open binary
- *
- * @return No return value.
- */
-static void Read_SymTab (void)
-{
-	long         symcount;
-	unsigned int size;
-
-	if ((bfd_get_file_flags (abfd) & HAS_SYMS) == 0) 
-	{
-		return;
-	}
-	symcount = bfd_read_minisymbols (abfd, FALSE, (PTR) &symtab, &size);
-	if (symcount == 0) 
-	{
-		symcount = bfd_read_minisymbols (abfd, TRUE /* dynamic */, (PTR) &symtab, &size);
-	}
-	if (symcount < 0) 
-	{
-		/* There aren't symbols! */
-		const char *errmsg = bfd_errmsg( bfd_get_error() );
-		fprintf(stderr, "Error reading symbol table (bfd_read_minisymbols < 0): %s\n", errmsg);
-		exit(1);
-	}
-/*	fprintf(stderr, "Number of symbols in SymTab: %d\n", symcount); */
 }
 
 /** AddressTable_Initialize
@@ -367,7 +259,7 @@ void Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
 		found = AddressTable[addr_type]->address[i].address == address;
 
 	if (!found)
-		AddressTable_Insert (address, addr_type, strdup(funcname), strdup(filename), line);
+		AddressTable_Insert (address, addr_type, NULL, strdup(funcname), strdup(filename), line);
 }
 
 /** Address2Info_Translate
@@ -382,20 +274,20 @@ void Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
  *
  * @return
  */
-UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
+UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
+	int query, int uniqueID)
 {
+#if !defined(HAVE_BFD)
+	return address;
+#else
 	UINT64 caller_address;
 	int addr_type;
 	int i;
 	int already_translated;
-	int line;
-	char * funcname;
-	char * filename;
 	int line_id = 0;
 	int function_id = 0;
 	UINT64 result;
 	int found;
-
 
 /* address es la direccion de retorno por donde continuara ejecutandose el
  * codigo despues de cada CALL a una rutina MPI. En arquitecturas x86, despues
@@ -425,6 +317,9 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
  * un octeto intermedio de una instruccion, y de esta forma obtendremos la linea correcta en ambos casos.
  *
  */
+
+	if (address == 0 || !Translate_Addresses)
+		return address;
 
 	/* Enable vars to generate labels in the PCF */
 	switch (query)
@@ -469,12 +364,6 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 			return address;
 	}
 
-	/* If subsystem is not enabled or address is 0, return */
-	if (!Translate_Addresses || address == 0)
-	{
-		return address;
-	}
-
 /* Traduciremos caller_address para obtener la linea exacta del codigo, pero
  * escribiremos address en el PCF.
  * En un objdump y utilidades similares, no podemos buscar
@@ -508,17 +397,20 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 
 	if (!already_translated) 
 	{
+		int line;
+		char * funcname;
+		char * filename;
+		char * module;
+
 		/* Translate address into function, file and number line */
-		Translate_Address (caller_address, &funcname, &filename, &line);
+		Translate_Address (caller_address, ptask, task, &module, &funcname, &filename, &line);
 
 		/* Samples can be taken anywhere in the code. It can happen that two
 		   samples at the different addresses refer to the same combination of
 		   function/file/line... We search again if this combination has been
 		   already translated */
 		if (ADDR2SAMPLE_FUNCTION == query || ADDR2SAMPLE_LINE == query)
-		{
 			for (i = 0; i < AddressTable[addr_type]->num_addresses; i++)
-			{
 				if (AddressTable[addr_type]->address[i].line == line &&
 				    strcmp (AddressTable[addr_type]->address[i].file_name, filename) == 0)
 				{
@@ -527,8 +419,6 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 					line_id = i;
 					break;
 				}
-			}
-		}
 
 		if (funcname == NULL || filename == NULL)
 		{
@@ -536,13 +426,13 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 			line_id = UNRESOLVED_ID;
 			already_translated = TRUE;
 		}
-		else if (strcmp (ADDR_UNRESOLVED, funcname) == 0 || strcmp (ADDR_UNRESOLVED, filename) == 0)
+		else if (!strcmp (ADDR_UNRESOLVED, funcname) || !strcmp (ADDR_UNRESOLVED, filename))
 		{
 			function_id = UNRESOLVED_ID;
 			line_id = UNRESOLVED_ID;
 			already_translated = TRUE;
 		}
-		else if (strcmp(ADDR_NOT_FOUND, funcname) == 0 || strcmp (ADDR_NOT_FOUND, filename) == 0)
+		else if (!strcmp(ADDR_NOT_FOUND, funcname) || !strcmp (ADDR_NOT_FOUND, filename))
 		{
 			function_id = NOT_FOUND_ID;
 			line_id = NOT_FOUND_ID;
@@ -552,7 +442,7 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 		/* Again, if not found, insert into the translation table */
 		if (!already_translated)
 		{
-			line_id = AddressTable_Insert(address, addr_type, funcname, filename, line);
+			line_id = AddressTable_Insert (address, addr_type, module, funcname, filename, line);
 			function_id = AddressTable[addr_type]->address[line_id].function_id;
 		}
 	}
@@ -582,6 +472,7 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
 	}
 
 	return result;
+#endif /* HAVE_BFD */
 }
 
 /** AddressTable_Insert
@@ -593,7 +484,8 @@ UINT64 Address2Info_Translate(UINT64 address, int query, int uniqueID)
  * 
  * @return 
  */
-static int AddressTable_Insert(UINT64 address, int addr_type, char * funcname, char * filename, int line) 
+static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
+	char *funcname, char *filename, int line) 
 {
 	int i; 
 	int found;
@@ -618,19 +510,18 @@ static int AddressTable_Insert(UINT64 address, int addr_type, char * funcname, c
 	
 	AddrTab->address[new_address_id].address = address;
 	AddrTab->address[new_address_id].file_name = filename;
+	AddrTab->address[new_address_id].module = module;
 	AddrTab->address[new_address_id].line = line;
 
 	/* Search for the function id */
 	found = FALSE;
 	for (i=0; i < FuncTab->num_functions; i++) 
-	{
-		if (strcmp(funcname, FuncTab->function[i]) == 0) 
+		if (!strcmp(funcname, FuncTab->function[i])) 
 		{
 			found = TRUE;
 			function_id = i;
 			break;
 		}
-	}
 
 	if (!found) 
 	{
@@ -661,125 +552,55 @@ static int AddressTable_Insert(UINT64 address, int addr_type, char * funcname, c
 	return new_address_id;
 }
 
-#if defined(USE_SYSTEM_CALL)
-int system_call_to_addr2line(char *binary, char *address)
+static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
+	char **module, char ** funcname, char ** filename, int * line)
 {
-	char *cmd[] = { "addr2line", "-f", "-e", binary, address, (char *)0 };
-	pid_t pid;
-	int status;
-	int fd[2], null_fd;
-	int matches;
-	char addr2line_result[1024];
-	char **tmp1 = NULL, **tmp2 = NULL;
-
-	pipe(fd);
-
-	pid = fork();
-	switch(pid)
-	{
-		case -1:
-			perror("fork");
-			exit(1);
-		case 0: 
-			close(1); /* close stdout */
-			dup(fd[1]); /* make stdout same as fd[1] */
-
-			/* Redirect stderr to /dev/null */
-			null_fd = open("/dev/null", O_WRONLY);
-			if (null_fd > 0)
-			{
-				close(2); /* close stderr */
-				dup(null_fd);
-			}
-
-			close(fd[0]); /* we don't need this */
-
-			execvp("addr2line", cmd);
-			break;
-	}
-	close(fd[1]); 
-	read (fd[0], addr2line_result, sizeof(addr2line_result));
-	wait(&status);
-
-/*	fprintf(stderr, "ADDR2LINE_RESULT: %s\n", addr2line_result); */
-
-	matches = explode(addr2line_result, "\n", &tmp1);
-	if (matches < 2) {
-		return 0;
-	}
-	matches = explode(tmp1[1], ":", &tmp2);
-	if (matches < 2) {
-		return 0;
-	}
-
-	translated_funcname = tmp1[0];
-	translated_filename = tmp2[0];
-	translated_line = atoi(tmp2[1]);
-
-/*  fprintf(stderr, "[EXPLODED] func: %s file: %s line: %d", translated_funcname, translated_filename, translated_line); */
-	if (!strcmp(translated_funcname, "??") && !strcmp(translated_filename, "??") && translated_line == 0)
-		return 0;
-	else
-		return 1;
-}
-#endif /* USE_SYSTEM_CALL */
-
-/** Translate_Address
- *
- * Tradueix l'adreca codificada al string address en format hexadecimal, al
- * nom de la funcio a la que correspon i el numero de linea del fitxer font
- * on es troba la instruccio
- *
- * @param address
- * @param [I/O] funcname
- * @param [I/O] filename
- * @param [I/O] line
- *
- * @return No return value.
- */
-static void Translate_Address (UINT64 address, char ** funcname, char ** filename, int * line)
-{
-	char caddress[MAX_ADDR_LENGTH];
+	binary_object_t *obj;
+	int found;
 	char *file_basename;
+	char *translated_function;
+	char *translated_filename;
+	int translated_line;
 
-	/* Convert the address into hexadecimal string format */
-#if SIZEOF_LONG == 8
-	sprintf(caddress, "0x%lx", address);
-#elif SIZEOF_LONG == 4
-	sprintf(caddress, "0x%llx", address);
-#endif
+	*funcname = ADDR_UNRESOLVED;
+	*filename = ADDR_UNRESOLVED;
+	*line = 0;
 
 	if (!Translate_Addresses) 
-	{
-		*funcname = ADDR_UNRESOLVED;
-		*filename = ADDR_UNRESOLVED;
-		*line = 0;
 		return;
+
+#if defined(HAVE_BFD)
+	obj = ObjectTable_GetBinaryObjectAt (ptask, task, address);
+# if defined(DEBUG)
+	if (obj)
+	{
+		printf ("\naddress %llx is at file %s [%llx - %llx] - abfd = %p asym = %p\n", address,
+		  obj->module, obj->start_address, obj->end_address, obj->bfdImage, obj->bfdSymbols);
 	}
+	else
+		printf ("obj = NULL for address %llx\n", address);
+# endif
+	if (obj)
+	{
+		found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
+		  (void*) address, &translated_function, &translated_filename, &translated_line);
 
-	/* Convert the string into the BFD internal address representation format */
-	pc = bfd_scan_vma (caddress, NULL, 16);
+		/* If we didn't find the address, then the function is possibly in a shared
+		   library. Substract base address and retry.
+		   If we found it, just ensure we don't get the module name for the main binary */
+		if (!found)
+			found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
+			  (void*) (address - obj->start_address), &translated_function,
+			  &translated_filename, &translated_line);
+		else
+			obj = NULL;
+	}
+	else
+		found = BFDmanager_translateAddress (BFDmanager_getDefaultImage(),
+		  BFDmanager_getDefaultSymbols(), (void*) address, &translated_function,
+		  &translated_filename, &translated_line);
 
-	address_found = FALSE;
-
-#if defined(USE_SYSTEM_CALL)
-	address_found = system_call_to_addr2line(BinaryName, caddress);
-#else
-	/*
-	 *  Aquest metode itera sobre totes les seccions del binari, i
-	 *  aplica la funcio "Find_Address_In_Section" dins de cada una
- 	 */
-	bfd_map_over_sections (abfd, Find_Address_In_Section, (PTR) NULL);
-	 
-	/* Some systems define routines (or trampolines to routines) in other sections
-	   than .text (p.e. Linux / PPC has trampolines in the .DATA section
-
-     The symbol we're looking for has to be located inside the ".text" section
-	   of the binary. */
-  /* Find_Address_In_Section(abfd, section, (PTR) NULL); */
-#endif
-
-	if (!address_found) 
+	if (!found) 
 	{
 		/* The address has not been found in the binary */
 		*filename = ADDR_NOT_FOUND;
@@ -790,27 +611,14 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 	{
 		*line = translated_line;
 
-		if (translated_funcname == (char *)NULL) 
-		{
-			*funcname = ADDR_UNRESOLVED;
-		}
-		else 
+		if (translated_function != NULL) 
 		{
 			char buffer[1024];
 			unsigned count = 0;
 			char *ptr;
 
-#if HAVE_BFD_DEMANGLE
-			char *demangled = bfd_demangle (abfd, translated_funcname, 0);
-#else
-			char *demangled = NULL;
-#endif
-
-			if (demangled == NULL) /* If cannot demangle return original */
-				demangled = translated_funcname;
-
 			/* Remove CUDA prefixes */
-			if ((ptr = strstr (demangled, "__device_stub__Z")) != NULL)
+			if ((ptr = strstr (translated_function, "__device_stub__Z")) != NULL)
 			{
 				ptr += strlen ("__device_stub__Z");
 				while (ptr[0]>='0' && ptr[0]<='9')
@@ -818,75 +626,60 @@ static void Translate_Address (UINT64 address, char ** funcname, char ** filenam
 					count = count * 10 + (ptr[0] - '0');
 					ptr++;
 				}
-				/* Add +1 in the demangled name for additional \0 in C */
-				snprintf (buffer, MIN(count+1,sizeof(buffer)), ptr);
+				/* Add +1 in the translated_function name for additional \0 in C */
+				snprintf (buffer, MIN(count+1,sizeof(buffer)), "%s", ptr);
 			}
 			else
-				sprintf (buffer, demangled);
+				sprintf (buffer, "%s", translated_function);
 
 			COPY_STRING(buffer, *funcname);
 		}
+		else
+			*funcname = ADDR_UNRESOLVED;
 
-		if (translated_filename == (char *)NULL) 
-		{
-			*filename = ADDR_UNRESOLVED;
-		}
-		else 
+		if (translated_filename != NULL) 
 		{
 			file_basename = basename((char *)translated_filename);
 			COPY_STRING(file_basename, *filename);
 		}
+		else
+			*filename = ADDR_UNRESOLVED;
 	}
+
+	*module = NULL;
+	if (obj != NULL)
+		if (obj->module != NULL)
+			*module = strdup (basename ((char*) obj->module));
+#endif /* HAVE_BFD */
 }
 
-/** Find_Address_In_Section
- *
- * Localitza la direccio (pc) dins de la seccio ".text" del binari
- *
- * @param abfd
- * @param section
- * @param data
- *
- * @return No return value.
- */
-static void Find_Address_In_Section (bfd * abfd, asection * section, PTR data)
+UINT64 Address2Info_GetLibraryID (unsigned ptask, unsigned task, UINT64 address)
 {
-	bfd_vma       vma;
-#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
-	bfd_size_type size;
+#if defined(HAVE_BFD)
+	binary_object_t *obj = ObjectTable_GetBinaryObjectAt (ptask, task, address);
+	if (obj)
+		return obj->index;
 #endif
+	return 0;
+}
 
-	UNREFERENCED_PARAMETER(data);
-
-	if (address_found) return;
-
-	/* En cas d'iterar sobre totes les seccions amb "bfd_map_over_sections",
-	 * i nomes busquem una d'especifica
-	 *
-	 * if (strcmp(section->name, SECTION) != 0) return;
-	 */
-
-	if ((bfd_get_section_flags (abfd, section) & SEC_ALLOC) == 0) return;
-
-	vma = bfd_get_section_vma (abfd, section);
-
-	/* Comprovem que l'adreca estigui dins de la seccio */
-	if (pc < vma) return;
-
-#if HAVE_BFD_GET_SECTION_SIZE
-	size = bfd_get_section_size (section);
-	if (pc >= vma + size) return;
-#elif HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
-	size = bfd_get_section_size_before_reloc (section);
-	if (pc >= vma + size) return;
-#else
-    /* Do nothing? */
-#endif
-
-	address_found = bfd_find_nearest_line (abfd, section, symtab, pc - vma /*Offset dins seccio*/, &translated_filename, &translated_funcname, &translated_line);
-/* Si es troba un simbol que coincideix amb la direccio en aquesta seccio,
- * filename, funcname and line actualitzen els seus valors per referencia
- */
+void Address2Info_Write_LibraryIDs (FILE *pcf_fd)
+{
+	if (BFDmanager_numLoadedBinaries() > 0 && 
+	    get_option_merge_EmitLibraryEvents())
+	{
+		unsigned b;
+		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+		fprintf (pcf_fd, "0    %d    %s\n", LIBRARY_EV, LIBRARY_LBL);
+		fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+		fprintf (pcf_fd, "0    Unknown\n");
+		for (b = 0; b < BFDmanager_numLoadedBinaries(); b++)
+		{
+			loadedModule_t *m = BFDmanager_getLoadedModule (b);
+			fprintf(pcf_fd, "%d    %s\n", b+1, m->module);
+		}
+		LET_SPACES(pcf_fd);
+	}
 }
 
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
@@ -904,34 +697,21 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 		if (MPI_Caller_Multiple_Levels_Traced) 
 		{
 			if (MPI_Caller_Labels_Used == NULL) 
-			{
 				for(i=1; i<=MAX_CALLERS; i++) 
-				{
 					fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_EV+i, CALLER_LVL_LBL, i);
-				}
-			}
 			else 
-			{
 				for(i=1; i<=MAX_CALLERS; i++) 
-				{
 					if (MPI_Caller_Labels_Used[i-1] == TRUE) 
-					{
 						fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_EV+i, CALLER_LVL_LBL, i);
-					}
-				}
-			}
 		}
 		else 
-		{
 			fprintf(pcf_fd, "0    %d    %s\n", CALLER_EV, CALLER_LBL);
-		}
+
 		if (Address2Info_Initialized())
 		{
 			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i=0; i<FuncTab->num_functions; i++) 
-			{
 				fprintf(pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
-			}
 			LET_SPACES(pcf_fd);
 		}
 
@@ -939,33 +719,30 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 		if (MPI_Caller_Multiple_Levels_Traced) 
 		{
 			if (MPI_Caller_Labels_Used == NULL) 
-			{
 				for(i=1; i<=MAX_CALLERS; i++) 
-				{
 					fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_LINE_EV+i, CALLER_LINE_LVL_LBL, i);
-				}
-			}
 			else 
-			{
 				for(i=1; i<=MAX_CALLERS; i++) 
-				{
 					if (MPI_Caller_Labels_Used[i-1] == TRUE) 
-					{
 						fprintf(pcf_fd, "0    %d    %s %d\n", CALLER_LINE_EV+i, CALLER_LINE_LVL_LBL, i);
-					}
-				}
-			}
 		}
 		else 
-		{
 			fprintf(pcf_fd, "0    %d    %s\n", CALLER_LINE_EV, CALLER_LINE_LBL);
-		}
+
 		if (Address2Info_Initialized())
 		{
 			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
-			for (i = 0; i < AddrTab->num_addresses; i ++) 
-				fprintf(pcf_fd, "%d   %d (%s)\n", 
-					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			for (i = 0; i < AddrTab->num_addresses; i ++)
+			{
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d   %d (%s)\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
+
+			}
 			LET_SPACES(pcf_fd);
 		}
 	}
@@ -1003,8 +780,16 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
 			for (i = 0; i < AddrTab->num_addresses; i ++)
-				fprintf(pcf_fd, "%d   %d (%s)\n", 
-					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			{
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d   %d (%s)\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
+
+			}
 			LET_SPACES(pcf_fd);
 		}
 	}
@@ -1042,8 +827,16 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
 			for (i = 0; i < AddrTab->num_addresses; i ++)
-				fprintf(pcf_fd, "%d   %d (%s)\n", 
-					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			{
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d   %d (%s)\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
+
+			}
 			LET_SPACES(pcf_fd);
 		}
 	}
@@ -1080,8 +873,16 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
-				fprintf(pcf_fd, "%d   %d (%s)\n", 
-					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			{
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d   %d (%s)\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
+
+			}
 			LET_SPACES(pcf_fd);
 		}
 	}
@@ -1123,8 +924,16 @@ void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
-				fprintf(pcf_fd, "%d   %d (%s)\n", 
-					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			{
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d   %d (%s)\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
+
+			}
 			LET_SPACES(pcf_fd);
 		}
 	}
@@ -1169,8 +978,16 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
-				fprintf(pcf_fd, "%d   %d (%s)\n", 
-					i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+			{
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d   %d (%s)\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
+						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
+
+			}
 			LET_SPACES(pcf_fd);
 		}
 	}
@@ -1230,4 +1047,3 @@ void Share_Callers_Usage (void)
 }
 #endif /* PARALLEL_MERGE */
 
-#endif /* HAVE_BFD */

@@ -98,6 +98,8 @@ int intel_kmpc_11_hook_points (int rank)
 {
 	int count = 0;
 
+	UNREFERENCED_PARAMETER(rank);
+
 	/* Careful, do not overwrite the pointer to the real call if DynInst has
 	   already done it */
 	if (__kmpc_fork_call_real == NULL)

@@ -55,6 +55,8 @@
 #define ADDRESSCOLLECTOR_NUM_TAG       6001 /* Number of addresses collected */
 #define ADDRESSCOLLECTOR_ADDRESSES_TAG 6002 /* Addresses collected */
 #define ADDRESSCOLLECTOR_TYPES_TAG     6003 /* Types collected */
+#define ADDRESSCOLLECTOR_PTASKS_TAG    6004 /* PTasks involved in the address */
+#define ADDRESSCOLLECTOR_TASKS_TAG     6005 /* Tasks involved in the address */
 
 #endif
 

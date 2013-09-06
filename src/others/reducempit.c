@@ -68,22 +68,20 @@ void AddFile (char *file)
 
 void AddFileOfFiles (char *file)
 {
-  FILE *fd = fopen (file, "r");
-  char path[4096];
+	FILE *fd = fopen (file, "r");
+	char path[4096];
 
-  if (fd == NULL)
-  {
-    fprintf (stderr, "Unable to open %s file.\n", file);
-    return;
-  }
-
-  while (!feof (fd))
-  {
-    fscanf (fd, "%s\n", path);
-    AddFile (path);
+	if (fd == NULL)
+	{
+		fprintf (stderr, "Unable to open %s file.\n", file);
+		return;
 	}
 
-  fclose (fd);
+	while (!feof (fd))
+		if (fscanf (fd, "%s\n", path) == 1)
+			AddFile (path);
+
+	fclose (fd);
 }
 
 void ReduceFileTo (char *file, int numofevents)

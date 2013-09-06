@@ -570,36 +570,51 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
 }
 
 #if defined(HAVE_BFD)
-static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
+static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
+	unsigned eventtype, UINT64 eventvalue)
 {
 	if (eventtype == USRFUNC_EV)
-		return Address2Info_Translate (eventvalue, ADDR2UF_FUNCTION, get_option_merge_UniqueCallerID());
-	else if (eventtype >= CALLER_EV && eventtype < CALLER_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2MPI_FUNCTION, get_option_merge_UniqueCallerID());
-	else if (eventtype >= CALLER_LINE_EV && eventtype < CALLER_LINE_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2MPI_LINE, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2UF_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == USRFUNC_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2UF_LINE, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2UF_LINE, get_option_merge_UniqueCallerID());
+	else if (eventtype >= CALLER_EV && eventtype < CALLER_EV + MAX_CALLERS)
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2MPI_FUNCTION, get_option_merge_UniqueCallerID());
+	else if (eventtype >= CALLER_LINE_EV && eventtype < CALLER_LINE_EV + MAX_CALLERS)
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2MPI_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype >= SAMPLING_EV && eventtype < SAMPLING_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_FUNCTION, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2SAMPLE_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype >= SAMPLING_LINE_EV && eventtype < SAMPLING_LINE_EV + MAX_CALLERS)
-		return Address2Info_Translate (eventvalue, ADDR2SAMPLE_LINE, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2SAMPLE_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == OMPFUNC_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == OMPFUNC_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == TASKFUNC_INST_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == TASKFUNC_INST_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == PTHREAD_FUNC_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == PTHREAD_FUNC_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == CUDAFUNC_EV)
-		return Address2Info_Translate (eventvalue, ADDR2CUDA_FUNCTION, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2CUDA_FUNCTION, get_option_merge_UniqueCallerID());
 	else if (eventtype == CUDAFUNC_LINE_EV)
-		return Address2Info_Translate (eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
+		return Address2Info_Translate (ptask, task, 
+		  eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
 	else
 	{
 		if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -612,9 +627,11 @@ static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
 					Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
 
 				if (element->FunctionType == eventtype)
-					return Address2Info_Translate (eventvalue, element->FunctionType_lbl, get_option_merge_UniqueCallerID());
+					return Address2Info_Translate (ptask, task, 
+					  eventvalue, element->FunctionType_lbl, get_option_merge_UniqueCallerID());
 				else if (element->LineType == eventtype)
-					return Address2Info_Translate (eventvalue, element->LineType_lbl, get_option_merge_UniqueCallerID());
+					return Address2Info_Translate (ptask, task, 
+					  eventvalue, element->LineType_lbl, get_option_merge_UniqueCallerID());
 			}
 		}
 	}
@@ -623,7 +640,7 @@ static UINT64 translate_bfd_event (unsigned eventtype, UINT64 eventvalue)
 }
 #endif /* HAVE_BFD */
 
-static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
+static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 	PRVFileSet_t * fset, unsigned long long *num_events)
 {
 #define MAX_EVENT_COUNT_IN_MULTI_EVENT	1024
@@ -658,7 +675,72 @@ static int build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** current,
 				values[i] = (UINT64)alies_comunicador ((int) cur->value, cur->ptask, cur->task);
 #if defined(HAVE_BFD)
 			else
-				values[i] = translate_bfd_event (cur->event, cur->value);
+			{
+				if (cur->event == USRFUNC_EV || cur->event == USRFUNC_LINE_EV ||
+				  (cur->event >= CALLER_EV && cur->event < CALLER_EV + MAX_CALLERS) || 
+				  (cur->event >= CALLER_LINE_EV && cur->event < CALLER_LINE_EV + MAX_CALLERS) ||
+				  (cur->event >= SAMPLING_EV && cur->event < SAMPLING_EV + MAX_CALLERS) ||
+				  (cur->event >= SAMPLING_LINE_EV && cur->event < SAMPLING_LINE_EV + MAX_CALLERS) ||
+				  cur->event == OMPFUNC_EV || cur->event == OMPFUNC_LINE_EV ||
+				  cur->event == TASKFUNC_INST_EV || cur->event == TASKFUNC_INST_LINE_EV ||
+				  cur->event == PTHREAD_FUNC_EV || cur->event == PTHREAD_FUNC_LINE_EV ||
+				  cur->event == CUDAFUNC_EV || cur->event == CUDAFUNC_LINE_EV)
+				{
+					values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+				}
+
+				if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
+				{
+					unsigned u;
+					unsigned umax = Extrae_Vector_Count (&RegisteredCodeLocationTypes);
+					for (u = 0; u < umax; u++)
+					{
+						Extrae_Addr2Type_t *element = 
+							Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
+
+						if (element->FunctionType == cur->event || element->LineType == cur->event)
+							values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+					}
+				}
+
+				if (get_option_merge_EmitLibraryEvents())
+				{
+					if (cur->event == USRFUNC_EV ||
+					  (cur->event >= CALLER_EV && cur->event < CALLER_EV + MAX_CALLERS) || 
+					  (cur->event >= SAMPLING_EV && cur->event < SAMPLING_EV + MAX_CALLERS) ||
+					  cur->event == OMPFUNC_EV || cur->event == TASKFUNC_INST_EV ||
+					  cur->event == PTHREAD_FUNC_EV || cur->event == CUDAFUNC_EV)
+					{
+						if (values[i] == UNRESOLVED_ID+1 || values[i] == NOT_FOUND_ID+1)
+						{
+							i++;
+							events[i] = LIBRARY_EV;
+							values[i] = Address2Info_GetLibraryID (cur->ptask, cur->task, cur->value);
+						}
+					}
+					else
+					{
+						if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
+						{
+							unsigned u;
+							unsigned umax = Extrae_Vector_Count (&RegisteredCodeLocationTypes);
+							for (u = 0; u < umax; u++)
+							{
+								Extrae_Addr2Type_t *element = 
+									Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
+	
+								if (element->FunctionType == cur->event || element->LineType == cur->event)
+									if (values[i] == UNRESOLVED_ID+1 || values[i] == NOT_FOUND_ID+1)
+									{
+										i++;
+										events[i] = LIBRARY_EV;
+										values[i] = Address2Info_GetLibraryID (cur->ptask, cur->task, cur->value);
+									}
+							}
+						}
+					}
+				}
+			}
 #endif
 			i++;
 		}
@@ -901,7 +983,7 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 			break;
 		
 			case EVENT:
-			error = build_multi_event (prv_fd, &current, prvfset, &tmp);
+			error = paraver_build_multi_event (prv_fd, &current, prvfset, &tmp);
 			current_event += tmp;
 			break;
 
@@ -1086,6 +1168,11 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 #if !defined(PARALLEL_MERGE)
 	UNREFERENCED_PARAMETER(tree_fan_out);
+#endif
+
+	prv_fd.handle = NULL;
+#ifdef HAVE_ZLIB
+	prv_fd.handleGZ = NULL;
 #endif
 
 	if (0 == taskid)

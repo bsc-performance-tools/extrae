@@ -107,4 +107,10 @@ void set_option_merge_AbsoluteCounters (int b);
 int get_option_merge_TraceOverwrite (void);
 void set_option_merge_TraceOverwrite (int b);
 
+int get_option_merge_TranslateAddresses (void);
+void set_option_merge_TranslateAddresses (int b);
+
+int get_option_merge_EmitLibraryEvents (void);
+void set_option_merge_EmitLibraryEvents (int b);
+
 #endif

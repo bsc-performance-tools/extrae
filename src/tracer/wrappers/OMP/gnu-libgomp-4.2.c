@@ -208,6 +208,8 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 {
 	int count = 0;
 
+	UNREFERENCED_PARAMETER(rank);
+
 	/* Obtain @ for GOMP_parallel_start */
 	GOMP_parallel_start_real =
 		(void(*)(void*,void*,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_start");

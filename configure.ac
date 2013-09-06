@@ -654,23 +654,41 @@ AM_CONDITIONAL(BUILD_HTML_DOCS, test "${latex}" != "no" -a "${latex2html}" != "n
 #    Checks for user defined options    #
 #########################################
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile manuals/Makefile \
-  src/launcher/Makefile src/launcher/static/Makefile src/launcher/dyninst/Makefile \
+AC_CONFIG_FILES([
+  Makefile \
+  src/Makefile \
+  include/Makefile manuals/Makefile \
+  src/launcher/Makefile \
+  src/launcher/static/Makefile \
+  src/launcher/dyninst/Makefile \
   scripts/Makefile \
-  src/common/Makefile src/tracer/Makefile src/tracer/clocks/Makefile \
-  src/tracer/interfaces/Makefile src/tracer/interfaces/API/Makefile \
-  src/tracer/interfaces/MPI/Makefile src/tracer/interfaces/PACX/Makefile \
+  src/common/Makefile \
+  src/tracer/Makefile \
+  src/tracer/clocks/Makefile \
+  src/tracer/interfaces/Makefile 
+  src/tracer/interfaces/API/Makefile \
+  src/tracer/interfaces/MPI/Makefile \
+  src/tracer/interfaces/PACX/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/spu/Makefile \
-  src/merger/Makefile src/merger/parallel/Makefile src/others/Makefile  \
+  src/merger/Makefile \
+  src/merger/parallel/Makefile src/others/Makefile  \
   doc/Makefile etc/Makefile \
-  tests/Makefile \
-  tests/src/Makefile tests/src/common/Makefile tests/src/tracer/Makefile \
+  tests/Makefile])
+
+AC_CONFIG_FILES([\
+  tests/src/Makefile \
+  tests/src/common/Makefile \
+  tests/src/tracer/Makefile \
   tests/src/tracer/clocks/Makefile \
-  tests/functional/Makefile tests/functional/launcher/Makefile \
+  tests/functional/Makefile \
+  tests/functional/launcher/Makefile \
   tests/functional/tracer/Makefile \
-  tests/functional/tracer/OPENCL/Makefile tests/functional/tracer/CUDA/Makefile \
+  tests/functional/tracer/OPENCL/Makefile \
+  tests/functional/tracer/CUDA/Makefile \
   tests/functional/merger/Makefile \
+  tests/functional/merger/dump-events/Makefile \
+  tests/functional/merger/shared-libraries/Makefile \
   tests/overhead/Makefile])
 AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
 ### TEMPORARILY_DISABLED

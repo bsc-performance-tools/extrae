@@ -20,7 +20,8 @@ common_FILES = \
  ../common/semantics.c ../common/semantics.h \
  ../common/addresses.c ../common/addresses.h \
  ../common/vector.c ../common/vector.h \
- ../common/stack.c ../common/stack.h
+ ../common/stack.c ../common/stack.h \
+ ../common/bfd_manager.c ../common/bfd_manager.h
 
 dimemas_FILES = \
  ../dimemas/dimemas_generator.c ../dimemas/dimemas_generator.h \

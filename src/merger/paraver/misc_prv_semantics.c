@@ -247,8 +247,8 @@ static int User_Event (event_t * current_event,
 #if defined(HAVE_BFD)
 		if (found && get_option_merge_SortAddresses() && EvValue != 0)
 		{
-			AddressCollector_Add (&CollectedAddresses, EvValue, addr2types->FunctionType_lbl);
-			AddressCollector_Add (&CollectedAddresses, EvValue, addr2types->LineType_lbl);
+			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, addr2types->FunctionType_lbl);
+			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, addr2types->LineType_lbl);
 		}
 #endif
 
@@ -309,8 +309,8 @@ static int MPI_Caller_Event (event_t * current_event,
 #if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
-		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2MPI_FUNCTION);
-		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2MPI_LINE);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2MPI_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2MPI_LINE);
 	}
 #endif
 
@@ -513,8 +513,8 @@ static int USRFunction_Event (event_t * current,
 #if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses() && EvValue != 0)
 	{
-		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2UF_FUNCTION);
-		AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2UF_LINE);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2UF_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2UF_LINE);
 	}
 #endif
 
@@ -564,15 +564,15 @@ static int Sampling_Caller_Event (event_t * current,
 			{
 				/* If depth == 0 (in EvTypeDelta) addresses are taken from the overflow
 				   routine which points to the "originating" address */
-				AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2SAMPLE_FUNCTION);
-				AddressCollector_Add (&CollectedAddresses, EvValue, ADDR2SAMPLE_LINE);
+				AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2SAMPLE_FUNCTION);
+				AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2SAMPLE_LINE);
 			}
 			else
 			{
 				/* If depth != 0 (in EvTypeDelta), addresses are taken from the callstack
 				   and point to the next instruction, so substract 1 */
-				AddressCollector_Add (&CollectedAddresses, EvValue-1, ADDR2SAMPLE_FUNCTION);
-				AddressCollector_Add (&CollectedAddresses, EvValue-1, ADDR2SAMPLE_LINE);
+				AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue-1, ADDR2SAMPLE_FUNCTION);
+				AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue-1, ADDR2SAMPLE_LINE);
 			}
 		}
 #endif
@@ -745,6 +745,7 @@ int HWC_Change_Ev (
 	return 0;
 }
 
+#if defined(DEAD_CODE)
 static int Evt_SetCounters (
    event_t * current_event,
    unsigned long long current_time,
@@ -764,6 +765,7 @@ static int Evt_SetCounters (
 
 	return HWC_Change_Ev (newSet, current_time, cpu, ptask, task, thread);
 }
+#endif
 
 #endif /* HARDWARE_COUNTERS */
 

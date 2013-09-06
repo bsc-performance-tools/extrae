@@ -106,7 +106,7 @@ static void GetpthreadHookPoints (int rank)
 
   	/* Obtain @ for pthread_barrier_wait */
 	pthread_barrier_wait_real =
-		(int(*)(pthread_t,void**)) dlsym (RTLD_NEXT, "pthread_barrier_wait");
+		(int(*)(pthread_barrier_t *)) dlsym (RTLD_NEXT, "pthread_barrier_wait");
 	if (pthread_barrier_wait_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_barrier_wait in DSOs!!\n");
 

@@ -65,36 +65,20 @@ static cudaError_t (*real_cudaDeviceReset)(void) = NULL;
 void Extrae_CUDA_init (int rank)
 {
 	real_cudaLaunch = (cudaError_t(*)(const char*)) dlsym (RTLD_NEXT, "cudaLaunch");
-	if (real_cudaLaunch == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaLaunch in DSOs!!\n");
 
 	real_cudaConfigureCall = (cudaError_t(*)(dim3, dim3, size_t, cudaStream_t)) dlsym (RTLD_NEXT, "cudaConfigureCall");
-	if (real_cudaConfigureCall == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaConfigureCall in DSOs!!\n");
 
 	real_cudaThreadSynchronize = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaThreadSynchronize");
-	if (real_cudaThreadSynchronize == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaThreadSynchronize in DSOs!!\n");
 
 	real_cudaStreamSynchronize = (cudaError_t(*)(cudaStream_t)) dlsym (RTLD_NEXT, "cudaStreamSynchronize");
-	if (real_cudaStreamSynchronize == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaStreamSynchronize in DSOs!!\n");
 
 	real_cudaMemcpy = (cudaError_t(*)(void*,const void*,size_t,enum cudaMemcpyKind)) dlsym (RTLD_NEXT, "cudaMemcpy");
-	if (real_cudaMemcpy == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaMemcpy in DSOs!!\n");
 
 	real_cudaMemcpyAsync = (cudaError_t(*)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t)) dlsym (RTLD_NEXT, "cudaMemcpyAsync");
-	if (real_cudaMemcpyAsync == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaMemcpyAsync in DSOs!!\n");
 
 	real_cudaStreamCreate = (cudaError_t(*)(cudaStream_t*)) dlsym (RTLD_NEXT, "cudaStreamCreate");
-	if (real_cudaStreamCreate == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaStreamCreate in DSOs!!\n");
 
 	real_cudaDeviceReset = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceReset");
-	if (real_cudaStreamCreate == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find cudaDeviceReset in DSOs!!\n");
 }
 
 #if 0

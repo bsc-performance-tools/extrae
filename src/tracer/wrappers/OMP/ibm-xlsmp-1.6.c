@@ -235,9 +235,11 @@ extern int omp_get_max_threads();
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 
-static int ibm_xlsmp_1_6_GetOpenMPHookPoints(int rank)
+static int ibm_xlsmp_1_6_GetOpenMPHookPoints (int rank)
 {
 	int count = 0;
+
+	UNREFERENCED_PARAMETER(rank)
 
 	/* Obtain @ for _xlsmpParallelDoSetup_TPO */
 	_xlsmpParallelDoSetup_TPO_real =

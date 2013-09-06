@@ -284,6 +284,8 @@ int CheckForGlobalOpsTracingIntervals = FALSE;
 int circular_buffering = 0;
 event_t *circular_HEAD;
 
+static void Extrae_getExecutableInfo (void);
+
 #if defined(EMBED_MERGE_IN_TRACE)
 int MergeAfterTracing = FALSE;
 #endif
@@ -976,7 +978,7 @@ void Parse_Callers (int me, char * mpi_callers, int type)
 
    while ((caller = strtok(callers, (const char *)",")) != NULL) {
       callers = NULL;
-      if (sscanf(caller, "%d-%d", &from, &to) != 2) {
+      if (sscanf(caller, "%d-%d", &from, &to) != 2){
          /* 
           * No es un rango => Intentamos convertir el string a un numero.  
           */
@@ -1413,12 +1415,12 @@ void Backend_CreatepThreadIdentifier (void)
 
 void Backend_SetpThreadIdentifier (int ID)
 {
-	pthread_setspecific (pThreadIdentifier, (void*) ID);
+	pthread_setspecific (pThreadIdentifier, (void*)((long) ID));
 }
 
 int Backend_GetpThreadIdentifier (void)
 {
-	return (int) pthread_getspecific (pThreadIdentifier);
+	return (int) ((long)pthread_getspecific (pThreadIdentifier));
 }
 
 void Backend_NotifyNewPthread (void)
@@ -1452,6 +1454,7 @@ void Backend_setNumTentativeThreads (int numofthreads)
 
 int Backend_preInitialize (int me, int world_size, char *config_file, int forked)
 {
+	int i;
 	int runningInDynInst = FALSE;
 	char trace_sym[TMP_DIR];
 #if defined(OMP_SUPPORT)
@@ -1606,7 +1609,17 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	if (me == 0 && !runningInDynInst)
 	{
 		FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
-		unlink (trace_sym);
+		if (file_exists(trace_sym))
+			unlink (trace_sym);
+	}
+
+	/* Remove the locals .sym file */
+	for (i = 0; i < maximum_NumOfThreads; i++)
+	{
+		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()), appl_name,
+		  getpid(), Extrae_get_initial_TASKID(), i, EXT_SYM);
+		if (file_exists (trace_sym))
+			unlink (trace_sym);
 	}
 
 	/* Allocate the buffers and trace files */
@@ -1680,6 +1693,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		}	
 	}
 #endif
+
+	Extrae_getExecutableInfo ();
 
 	last_mpi_exit_time = ApplBegin_Time;
 
@@ -2222,8 +2237,11 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 				line[j] = ' ';
-		write (fd, line, strlen(line));
-		write (fd, "\n", strlen("\n"));
+		if (write (fd, line, strlen(line)) < 0)
+			fprintf (stderr, PACKAGE_NAME": Error writing definition into global symbolic file");
+
+		if (write (fd, "\n", strlen("\n")) < 0)
+			fprintf (stderr, PACKAGE_NAME": Error writing definition into global symbolic file");
 		if (nvalues > 0)
 		{
 			unsigned i;
@@ -2236,8 +2254,10 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 				for (j = 0; j < strlen(line); j++)
 					if (line[j] == '\n')
 						line[j] = ' ';
-				write (fd, line, strlen(line));
-				write (fd, "\n", strlen("\n"));
+				if (write (fd, line, strlen(line)) < 0)
+					fprintf (stderr, PACKAGE_NAME": Error writing definition into global symbolic file");
+				if (write (fd, "\n", strlen("\n")) < 0)
+					fprintf (stderr, PACKAGE_NAME": Error writing definition into global symbolic file");
 			}
 		}
 		close (fd);
@@ -2266,8 +2286,11 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 					line[j] = ' ';
 		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
 			description);
-		write (fd, line, strlen(line));
-		write (fd, "\n", strlen("\n"));
+
+		if (write (fd, line, strlen(line)) < 0)
+			fprintf (stderr, PACKAGE_NAME": Error writing definition into local symbolic file");
+		if (write (fd, "\n", strlen("\n")) < 0)
+			fprintf (stderr, PACKAGE_NAME": Error writing definition into local symbolic file");
 
 		if (nvalues > 0)
 		{
@@ -2281,8 +2304,10 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 				for (j = 0; j < strlen(line); j++)
 					if (line[j] == '\n')
 						line[j] = ' ';
-				write (fd, line, strlen(line));
-				write (fd, "\n", strlen("\n"));
+				if (write (fd, line, strlen(line)) < 0)
+					fprintf (stderr, PACKAGE_NAME": Error writing definition into local symbolic file");
+				if (write (fd, "\n", strlen("\n")) < 0)
+					fprintf (stderr, PACKAGE_NAME": Error writing definition into local symbolic file");
 			}
 		}
 		close (fd);
@@ -2312,10 +2337,50 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 				line[j] = ' ';
-		write (fd, line, strlen(line));
-		write (fd, "\n", strlen("\n"));
+		if (write (fd, line, strlen(line)) < 0)
+			fprintf (stderr, PACKAGE_NAME": Error writing function definition into local symbolic file");
+		if (write (fd, "\n", strlen("\n")) < 0)
+			fprintf (stderr, PACKAGE_NAME": Error writing function definition into local symbolic file");
 		close (fd);
 	}
 	#undef LINE_SIZE
 }
+
+static void Extrae_getExecutableInfo (void)
+{
+#if defined(OS_LINUX)
+	FILE *mapsfile = fopen("/proc/self/maps", "r");
+
+	if (mapsfile == NULL)
+		return;
+
+	#define LINE_SIZE 2048
+	char line[LINE_SIZE];
+	while (!feof(mapsfile))
+		if (fgets (line, LINE_SIZE, mapsfile) != NULL)
+		{
+			int match;
+			unsigned long start, end, offset;
+			char module[LINE_SIZE];
+			char perms[5];
+			module[0] = 0;
+		
+			match = sscanf (line, "%lx-%lx %s %lx %*s %*u %[^\n]", &start, &end, perms,
+			  &offset, module);
+
+			if (match == 5)
+				if (strcmp(perms, "r-xp") == 0 || strcmp(perms, "rwxp") == 0)
+					if (strlen(module) > 0 && module[0] != '[') // avoid [vdso], [syscall] and others
+					{
+						char nline[LINE_SIZE];
+						sprintf (nline, "%lx-%lx %lx %s", start, end, offset, module);
+						Extrae_AddTypeValuesEntryToLocalSYM ('B', 0, nline, (char) 0, 0, NULL, NULL);
+					}
+		}
+	#undef LINE_SIZE
+
+	fclose(mapsfile);
+#endif
+}
+
 

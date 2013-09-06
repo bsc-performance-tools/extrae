@@ -45,10 +45,10 @@ static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 1696 2013-04-30 13:15:24Z hara
 # include <unistd.h>
 #endif
 
-#include <CL/cl.h>
 #include "wrapper.h"
 #include "opencl_probe.h"
 #include "opencl_common.h"
+#include "opencl_wrapper.h"
 
 static cl_mem (*real_clCreateBuffer)(cl_context, cl_mem_flags, size_t, void*, cl_int *) = NULL;
 static cl_command_queue (*real_clCreateCommandQueue)(cl_context, cl_device_id, cl_command_queue_properties, cl_int*) = NULL;
@@ -88,6 +88,20 @@ static cl_int (*real_clEnqueueUnmapMemObject)(cl_command_queue, cl_mem, void *, 
 #ifdef CL_VERSION_1_2
 static cl_int (*real_clEnqueueMigrateMemObjects)(cl_command_queue, cl_uint, const cl_mem *, cl_mem_migration_flags, cl_uint, const cl_event *, cl_event *) = NULL;
 #endif
+static cl_int (*real_clRetainCommandQueue)(cl_command_queue) = NULL;
+static cl_int (*real_clReleaseCommandQueue)(cl_command_queue) = NULL;
+static cl_int (*real_clRetainContext)(cl_context) = NULL;
+static cl_int (*real_clReleaseContext)(cl_context) = NULL;
+static cl_int (*real_clRetainDevice)(cl_device_id) = NULL;
+static cl_int (*real_clReleaseDevice)(cl_device_id) = NULL;
+static cl_int (*real_clRetainEvent)(cl_event) = NULL;
+static cl_int (*real_clReleaseEvent)(cl_event) = NULL;
+static cl_int (*real_clRetainKernel)(cl_kernel) = NULL;
+static cl_int (*real_clReleaseKernel)(cl_kernel) = NULL;
+static cl_int (*real_clRetainMemObject)(cl_mem) = NULL;
+static cl_int (*real_clReleaseMemObject)(cl_mem) = NULL;
+static cl_int (*real_clRetainProgram)(cl_program) = NULL;
+static cl_int (*real_clReleaseProgram)(cl_program) = NULL;
 
 static int Extrae_Prepare_CommandQueue = FALSE;
 
@@ -98,179 +112,155 @@ void Extrae_OpenCL_fini (void)
 
 void Extrae_OpenCL_init (unsigned rank)
 {
+	UNREFERENCED_PARAMETER(rank);
+
 	real_clCreateBuffer = (cl_mem(*)(cl_context, cl_mem_flags, size_t, void*, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateBuffer");
-	if (real_clCreateBuffer == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateBuffer in DSOs!!\n");
 
 	real_clCreateCommandQueue = (cl_command_queue(*)(cl_context, cl_device_id, cl_command_queue_properties, cl_int*))
 		dlsym (RTLD_NEXT, "clCreateCommandQueue");
-	if (real_clCreateCommandQueue == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateCommandQueue in DSOs!!\n");
 
 	real_clCreateContext = (cl_context(*)(const cl_context_properties *, cl_uint, const cl_device_id *, void *, void *, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateContext");
-	if (real_clCreateContext == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateContext in DSOs!!\n");
 
 	real_clCreateContextFromType = (cl_context(*)(const cl_context_properties *, cl_device_type, void *, void *, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateContextFromType");
-	if (real_clCreateContextFromType == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateContextFromType in DSOs!!\n");
 
 	real_clCreateKernel = (cl_kernel(*)(cl_program, const char *, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateKernel");
-	if (real_clCreateKernel == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateKernel in DSOs!!\n");
 
 	real_clCreateKernelsInProgram = (cl_int(*)(cl_program, cl_uint, cl_kernel *, cl_uint *))
 		dlsym (RTLD_NEXT, "clCreateKernelsInProgram");
-	if (real_clCreateKernelsInProgram == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateKernelsInProgram in DSOs!!\n");
 
 	real_clSetKernelArg = (cl_int(*)(cl_kernel, cl_uint, size_t, const void *))
 		dlsym (RTLD_NEXT, "clSetKernelArg");
-	if (real_clSetKernelArg == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clSetKernelArg in DSOs!!\n");
 
 	real_clCreateProgramWithSource = (cl_program(*)(cl_context, cl_uint, const char **, const size_t *, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateProgramWithSource");
-	if (real_clCreateProgramWithSource == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateProgramWithSource in DSOs!!\n");
 
 	real_clCreateProgramWithBinary = (cl_program(*)(cl_context, cl_uint, const cl_device_id *, const size_t *, const unsigned char **, cl_int *, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateProgramWithBinary");
-	if (real_clCreateProgramWithBinary == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateProgramWithBinary in DSOs!!\n");
 
 	real_clCreateProgramWithBuiltInKernels = (cl_program(*)(cl_context, cl_uint, const cl_device_id *, const char *, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateProgramWithBuiltInKernels");
-	if (real_clCreateProgramWithBuiltInKernels == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateProgramWithBuiltInKernels in DSOs!!\n");
 
 	real_clCreateSubBuffer = (cl_mem(*)(cl_mem, cl_mem_flags, cl_buffer_create_type, const void *, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateSubBuffer");
-	if (real_clCreateSubBuffer == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCreateSubBuffer in DSOs!!\n");
 
 	real_clEnqueueFillBuffer = (cl_int(*)(cl_command_queue, cl_mem, const void *, size_t, size_t, size_t, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueFillBuffer");
-	if (real_clEnqueueFillBuffer == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueFillBuffer in DSOs!!\n");
 
 	real_clEnqueueCopyBuffer = (cl_int(*)(cl_command_queue, cl_mem, cl_mem, size_t, size_t, size_t, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueCopyBuffer");
-	if (real_clEnqueueCopyBuffer == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueCopyBuffer in DSOs!!\n");
 
 	real_clEnqueueCopyBufferRect = (cl_int(*)(cl_command_queue, cl_mem, cl_mem, const size_t *, const size_t *, const size_t *, size_t, size_t, size_t, size_t, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueCopyBufferRect");
-	if (real_clEnqueueCopyBufferRect == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueCopyBufferRect in DSOs!!\n");
 
 	real_clEnqueueNDRangeKernel = (cl_int(*)(cl_command_queue, cl_kernel, cl_uint, const size_t *, const size_t *, const size_t *, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueNDRangeKernel");
-	if (real_clEnqueueNDRangeKernel == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueNDRangeKernel in DSOs!!\n");
 
 	real_clEnqueueTask = (cl_int(*)(cl_command_queue, cl_kernel, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueTask");
-	if (real_clEnqueueTask == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueTask in DSOs!!\n");
 
 	real_clEnqueueNativeKernel = (cl_int(*)(cl_command_queue, void *, void *, size_t, cl_uint, const cl_mem *, const void **, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueNativeKernel");
-	if (real_clEnqueueNativeKernel == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueNativeKernel in DSOs!!\n");
 
 	real_clEnqueueReadBuffer = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, size_t, size_t, void *, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueReadBuffer");
-	if (real_clEnqueueReadBuffer == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueReadBuffer in DSOs!!\n");
 
 	real_clEnqueueReadBufferRect = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, const size_t *, const size_t *, const size_t *, size_t, size_t, size_t, size_t, void *, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueReadBufferRect");
-	if (real_clEnqueueReadBufferRect == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueReadBufferRect in DSOs!!\n");
+
 	real_clEnqueueWriteBuffer = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, size_t, size_t, const void *, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueWriteBuffer");
-	if (real_clEnqueueWriteBuffer == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueWriteBuffer in DSOs!!\n");
 
 	real_clEnqueueWriteBufferRect = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, const size_t *, const size_t *, const size_t *, size_t, size_t, size_t, size_t, const void *, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueWriteBufferRect");
-	if (real_clEnqueueWriteBufferRect == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueWriteBufferRect in DSOs!!\n");
 
 	real_clBuildProgram = (cl_int(*)(cl_program, cl_uint, const cl_device_id *, const char *, void *, void *))
 		dlsym (RTLD_NEXT, "clBuildProgram");
-	if (real_clBuildProgram == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clBuildProgram in DSOs!!\n");
 
 	real_clCompileProgram = (cl_int(*)(cl_program, cl_uint, const cl_device_id *, const char *, cl_uint, const cl_program *, const char **, void *, void *))
 		dlsym (RTLD_NEXT, "clCompileProgram");
-	if (real_clCompileProgram == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clCompileProgram in DSOs!!\n");
 
 	real_clLinkProgram = (cl_program(*)(cl_context, cl_uint, const cl_device_id *, const char *, cl_uint, const cl_program *, void *, void *, cl_int *))
 		dlsym (RTLD_NEXT, "clLinkProgram");
-	if (real_clLinkProgram == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clLinkProgram in DSOs!!\n");
 
 	real_clFinish = (cl_int(*)(cl_command_queue))
 		dlsym (RTLD_NEXT, "clFinish");
-	if (real_clFinish == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clFinish in DSOs!!\n");
 
 	real_clFlush = (cl_int(*)(cl_command_queue))
 		dlsym (RTLD_NEXT, "clFlush");
-	if (real_clFlush == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clFlush in DSOs!!\n");
 
 	real_clWaitForEvents = (cl_int(*)(cl_uint, const cl_event *el))
 		dlsym (RTLD_NEXT, "clWaitForEvents");
-	if (real_clWaitForEvents == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clWaitForEvents in DSOs!!\n");
 
 #ifdef CL_VERSION_1_2
 	real_clEnqueueMarkerWithWaitList = (cl_int(*)(cl_command_queue, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueMarkerWithWaitList");
-	if (real_clEnqueueMarkerWithWaitList == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMarkerWithWaitList in DSOs!!\n");
 
 	real_clEnqueueBarrierWithWaitList = (cl_int(*)(cl_command_queue, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueBarrierWithWaitList");
-	if (real_clEnqueueBarrierWithWaitList == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueBarrierWithWaitList in DSOs!!\n");
 #endif
 
 	real_clEnqueueMarker = (cl_int(*)(cl_command_queue, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueMarker");
-	if (real_clEnqueueMarker == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMarker in DSOs!!\n");
 
 	real_clEnqueueBarrier = (cl_int(*)(cl_command_queue))
 		dlsym (RTLD_NEXT, "clEnqueueBarrier");
-	if (real_clEnqueueBarrier == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueBarrier in DSOs!!\n");
 
 	real_clEnqueueMapBuffer = (void* (*)(cl_command_queue, cl_mem, cl_bool, cl_map_flags, size_t, size_t, cl_uint, const cl_event *, cl_event *, cl_int *))
 		dlsym (RTLD_NEXT, "clEnqueueMapBuffer");
-	if (real_clEnqueueMapBuffer != NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMapBuffer in DSOs!!\n");
 
 	real_clEnqueueUnmapMemObject = (cl_int (*)(cl_command_queue, cl_mem, void *, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueUnmapMemObject");
-	if (real_clEnqueueUnmapMemObject != NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueUnmapMemObject in DSOs!!\n");
 
 #ifdef CL_VERSION_1_2
 	real_clEnqueueMigrateMemObjects = (cl_int (*)(cl_command_queue, cl_uint, const cl_mem *, cl_mem_migration_flags, cl_uint, const cl_event *, cl_event *))
 		dlsym (RTLD_NEXT, "clEnqueueMigrateMemObjects");
-	if (real_clEnqueueMigrateMemObjects != NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find clEnqueueMigrateMemObjects in DSOs!!\n");
 #endif
 
+	real_clRetainCommandQueue = (cl_int(*)(cl_command_queue))
+	  dlsym (RTLD_NEXT, "clRetainCommandQueue");
+
+	real_clReleaseCommandQueue = (cl_int(*)(cl_command_queue))
+	  dlsym (RTLD_NEXT, "clReleaseCommandQueue");
+
+	real_clRetainContext = (cl_int(*)(cl_context))
+	  dlsym (RTLD_NEXT, "clRetainContext");
+
+	real_clReleaseContext = (cl_int(*)(cl_context))
+	  dlsym (RTLD_NEXT, "clReleaseContext");
+
+	real_clRetainDevice = (cl_int(*)(cl_device_id))
+	  dlsym (RTLD_NEXT, "clRetainDevice");
+
+	real_clReleaseDevice = (cl_int(*)(cl_device_id))
+	  dlsym (RTLD_NEXT, "clReleaseDevice");
+
+	real_clRetainEvent = (cl_int(*)(cl_event))
+	  dlsym (RTLD_NEXT, "clRetainEvent");
+
+	real_clReleaseEvent = (cl_int(*)(cl_event))
+	  dlsym (RTLD_NEXT, "clReleaseEvent");
+
+	real_clRetainKernel = (cl_int(*)(cl_kernel))
+	  dlsym (RTLD_NEXT, "clRetainKernel");
+
+	real_clReleaseKernel = (cl_int(*)(cl_kernel))
+	  dlsym (RTLD_NEXT, "clReleaseKernel");
+
+	real_clRetainMemObject = (cl_int(*)(cl_mem))
+	  dlsym (RTLD_NEXT, "clRetainMemObject");
+
+	real_clReleaseMemObject = (cl_int(*)(cl_mem))
+	  dlsym (RTLD_NEXT, "clReleaseMemObject");
+
+	real_clRetainProgram = (cl_int(*)(cl_program))
+	  dlsym (RTLD_NEXT, "clRetainProgram");
+
+	real_clReleaseProgram = (cl_int(*)(cl_program))
+	  dlsym (RTLD_NEXT, "clReleaseProgram");
 }
 
 cl_mem clCreateBuffer (cl_context c, cl_mem_flags m, size_t s, void *p, 
@@ -1348,7 +1338,7 @@ cl_int clEnqueueUnmapMemObject (cl_command_queue q, cl_mem m, void *p,
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": FatalError clEnqueueUnmapMemObject was not hooked!\n");
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueUnmapMemObject was not hooked!\n");
 		exit (-1);
 	}
 
@@ -1383,7 +1373,7 @@ cl_int clEnqueueMigrateMemObjects (cl_command_queue q, cl_uint n,
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": FatalError clclEnqueueMigrateMemObjects was not hooked!\n");
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clEnqueueMigrateMemObjects was not hooked!\n");
 		exit (-1);
 	}
 

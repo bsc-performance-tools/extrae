@@ -250,7 +250,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	strcat (symbol_file_name, EXT_SYM);
 	if (file_exists(symbol_file_name))
 		if (taskid == 0)
-			Labels_loadSYMfile (taskid, symbol_file_name, FALSE);
+			Labels_loadSYMfile (taskid, FALSE, IFile->ptask, IFile->task,
+			  symbol_file_name, FALSE);
 
 #if defined(SAMPLING_SUPPORT)
 	strcpy (sample_file_name, IFile->name);
@@ -1789,6 +1790,7 @@ void FSet_Forward_To_First_GlobalOp (FileSet_t *fset, int numtasks, int taskid)
 				unsigned int cpu, ptask, task, thread;
 				CurrentObj_FS (sfile, cpu, ptask, task, thread);
 				UNREFERENCED_PARAMETER(cpu);
+				UNREFERENCED_PARAMETER(thread);
 
 				/* Disable communications matching */
 				MatchComms_Off (ptask, task);

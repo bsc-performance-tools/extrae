@@ -49,8 +49,10 @@ void AddressCollector_Initialize (struct address_collector_t *ac)
 {
 	ac->allocated = 0;
 	ac->count = 0;
-	ac->types = NULL;
 	ac->addresses = NULL;
+	ac->types = NULL;
+	ac->tasks = NULL;
+	ac->ptasks = NULL;
 }
 
 static int AddresCollector_Search (struct address_collector_t *ac,
@@ -64,7 +66,8 @@ static int AddresCollector_Search (struct address_collector_t *ac,
 	return FALSE;
 }
 
-void AddressCollector_Add (struct address_collector_t *ac, UINT64 address, int type)
+void AddressCollector_Add (struct address_collector_t *ac, unsigned ptask,
+	unsigned task, UINT64 address, int type)
 {
 	if (!AddresCollector_Search (ac, address, type))
 	{
@@ -82,8 +85,22 @@ void AddressCollector_Add (struct address_collector_t *ac, UINT64 address, int t
 				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
 				exit (-1);
 			}
+			ac->ptasks = (int*) realloc (ac->ptasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
+			if (ac->ptasks == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
+				exit (-1);
+			}
+			ac->tasks = (int*) realloc (ac->tasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
+			if (ac->tasks == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
+				exit (-1);
+			}
 			ac->allocated += AC_ALLOC_CHUNK;
 		}
+		ac->ptasks[ac->count] = ptask;
+		ac->tasks[ac->count] = task;
 		ac->addresses[ac->count] = address;
 		ac->types[ac->count] = type;
 		ac->count++;
@@ -105,6 +122,15 @@ int* AddressCollector_GetAllTypes (struct address_collector_t *ac)
 	return ac->types;
 }
 
+unsigned* AddressCollector_GetAllPtasks (struct address_collector_t *ac)
+{
+	return ac->ptasks;
+}
+
+unsigned* AddressCollector_GetAllTasks (struct address_collector_t *ac)
+{
+	return ac->tasks;
+}
 #if defined(PARALLEL_MERGE)
 
 #include "mpi-tags.h"
@@ -139,16 +165,25 @@ void AddressCollector_GatherAddresses (int numtasks, int taskid,
 					unsigned i;
 					UINT64 buffer_addresses[num_addresses];
 					int buffer_types[num_addresses];
+					unsigned buffer_ptasks[num_addresses];
+					unsigned buffer_tasks[num_addresses];
 
 					res = MPI_Recv (&buffer_addresses, num_addresses, MPI_LONG_LONG, task,
 						ADDRESSCOLLECTOR_ADDRESSES_TAG, MPI_COMM_WORLD, &s);
 					MPI_CHECK(res, MPI_Recv, "Failed receiving collected addresses");
-					res = MPI_Recv (&buffer_types, num_addresses, MPI_LONG_LONG, task,
+					res = MPI_Recv (&buffer_types, num_addresses, MPI_INT, task,
 						ADDRESSCOLLECTOR_TYPES_TAG, MPI_COMM_WORLD, &s);
+					MPI_CHECK(res, MPI_Recv, "Failed receiving collected addresses");
+					res = MPI_Recv (&buffer_ptasks, num_addresses, MPI_INT, task,
+						ADDRESSCOLLECTOR_PTASKS_TAG, MPI_COMM_WORLD, &s);
+					MPI_CHECK(res, MPI_Recv, "Failed receiving collected addresses");
+					res = MPI_Recv (&buffer_tasks, num_addresses, MPI_INT, task,
+						ADDRESSCOLLECTOR_TASKS_TAG, MPI_COMM_WORLD, &s);
 					MPI_CHECK(res, MPI_Recv, "Failed receiving collected addresses");
 
 					for (i = 0; i < num_addresses; i++)
-						AddressCollector_Add (ac, buffer_addresses[i], buffer_types[i]);
+						AddressCollector_Add (ac, buffer_ptasks[i], buffer_tasks[i],
+						  buffer_addresses[i], buffer_types[i]);
 				}
 			}
 
@@ -170,12 +205,20 @@ void AddressCollector_GatherAddresses (int numtasks, int taskid,
 			{
 				UINT64 *buffer_addresses = AddressCollector_GetAllAddresses (ac);
 				int *buffer_events = AddressCollector_GetAllTypes (ac);
+				unsigned *buffer_ptasks = AddressCollector_GetAllPtasks (ac);
+				unsigned *buffer_tasks = AddressCollector_GetAllTasks (ac);
 
 				res = MPI_Send (buffer_addresses, num_addresses, MPI_LONG_LONG, 0,
 					ADDRESSCOLLECTOR_ADDRESSES_TAG, MPI_COMM_WORLD);
 				MPI_CHECK(res, MPI_Send, "Failed sending collected addresses");
 				res = MPI_Send (buffer_events, num_addresses, MPI_INT, 0,
 					ADDRESSCOLLECTOR_TYPES_TAG, MPI_COMM_WORLD);
+				MPI_CHECK(res, MPI_Send, "Failed sending collected addresses");
+				res = MPI_Send (buffer_ptasks, num_addresses, MPI_UNSIGNED, 0,
+					ADDRESSCOLLECTOR_PTASKS_TAG, MPI_COMM_WORLD);
+				MPI_CHECK(res, MPI_Send, "Failed sending collected addresses");
+				res = MPI_Send (buffer_tasks, num_addresses, MPI_UNSIGNED, 0,
+					ADDRESSCOLLECTOR_TASKS_TAG, MPI_COMM_WORLD);
 				MPI_CHECK(res, MPI_Send, "Failed sending collected addresses");
 			}
 		}

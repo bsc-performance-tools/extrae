@@ -131,3 +131,12 @@ void set_option_merge_AbsoluteCounters (int b) { option_merge_AbsoluteCounters =
 static int option_merge_TraceOverwrite = TRUE;
 int get_option_merge_TraceOverwrite (void) { return option_merge_TraceOverwrite; }
 void set_option_merge_TraceOverwrite (int b) { option_merge_TraceOverwrite = b; }
+
+static int option_merge_TranslateAddresses = TRUE;
+int get_option_merge_TranslateAddresses (void) { return option_merge_TranslateAddresses; }
+void set_option_merge_TranslateAddresses (int b) { option_merge_TranslateAddresses = b; }
+
+static int option_merge_EmitLibraryEvents = FALSE;
+int get_option_merge_EmitLibraryEvents (void) { return option_merge_EmitLibraryEvents; }
+void set_option_merge_EmitLibraryEvents (int b) { option_merge_EmitLibraryEvents = b; }
+

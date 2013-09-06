@@ -695,6 +695,8 @@ static void Spawn_Parent_Sync (MPI_Comm intercomm, int maxprocs, MPI_Comm spawn_
 {
   int i = 0;
 
+	UNREFERENCED_PARAMETER(maxprocs)
+
   if ((intercomm != MPI_COMM_NULL) && (spawn_comm != MPI_COMM_NULL))
   {
     char      *mpit_id           = get_mpit_id();

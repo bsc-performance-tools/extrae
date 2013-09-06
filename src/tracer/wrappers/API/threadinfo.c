@@ -79,7 +79,7 @@ void Extrae_set_thread_name (unsigned thread, char *name)
 	memset (thread_info[thread].ThreadName, 0, THREAD_INFO_NAME_LEN);
 
 	/* Copy name */
-	snprintf (thread_info[thread].ThreadName, THREAD_INFO_NAME_LEN, name);
+	snprintf (thread_info[thread].ThreadName, THREAD_INFO_NAME_LEN, "%s", name);
 
 	/* Set last char to empty */
 	thread_info[thread].ThreadName[THREAD_INFO_NAME_LEN-1] = (char) 0;

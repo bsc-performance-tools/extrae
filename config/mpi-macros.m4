@@ -72,6 +72,10 @@ AC_DEFUN([AX_PROG_MPI],
          fi
       elif test -f "${MPI_LIBSDIR}/libmpi.so" ; then
          MPI_LIBS="-lmpi"
+      elif test -f "${MPI_LIBSDIR}/libmpich-gcc.legacy.a"; then
+         MPI_LIBS="-lmpich-gcc.legacy"
+      elif test -f "${MPI_LIBSDIR}/libmpich-xl.legacy.a"; then
+         MPI_LIBS="-lmpich-xl.legacy"
       elif test -f "${MPI_LIBSDIR}/libmpich_intel.so"; then
          MPI_LIBS="-lmpich_intel"
       elif test -f "${MPI_LIBSDIR}/libmpich.a" -o -f "${MPI_LIBSDIR}/libmpich.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" ; then
