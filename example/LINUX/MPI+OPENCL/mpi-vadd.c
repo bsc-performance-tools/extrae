@@ -118,7 +118,8 @@ int main(int argc, char** argv)
 	int          err;                // error code returned from OpenCL calls
 	float        h_a[LENGTH];        // a vector 
 	float        h_b[LENGTH];        // b vector 
-	float        h_c[LENGTH];        // c vector (a+b) returned from the compute device
+	float        h_c[LENGTH];        // c vector (a+b) returned from the compute device (local per task)
+	float        _h_c[LENGTH];       // c vector (a+b) returned from the compute device (global for master)
 	unsigned int correct;            // number of correct results  
 
 	size_t global;                   // global domain size  
