@@ -59,6 +59,8 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo
 	if test "${BFD_INSTALLED}" = "yes" ; then
 		echo libbfd available: yes \(${BFD_HOME}\)
+    else
+		echo libbfd available: no
 	fi
 
 	if test "${LIBERTY_INSTALLED}" = "yes" ; then
@@ -66,6 +68,9 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	else
 		echo libiberty available: no
 	fi
+    if test "${BFD_INSTALLED}" != "yes" -o "${LIBERTY_INSTALLED}" != "yes" ; then
+        echo Warning! Source code addresses cannot be translated due to lack of libbfd/libiberty
+    fi
 
 	if test "${zhome_dir}" != "not found" ; then
 		echo zlib available: yes \(${LIBZ_HOME}\)
@@ -77,6 +82,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo libxml2 available: yes \(${XML2_HOME}\)
 	else
 		echo libxml2 available: no
+        echo Warning! Extrae will not be able to read XML files for its configuration. Configuration will only occur through environment variables.
 	fi
 
 	if test "${BOOST_enabled}" = "yes" ; then

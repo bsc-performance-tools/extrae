@@ -484,9 +484,9 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
    AX_FLAGS_SAVE()
    CFLAGS="-I${binutils_home_dir}/include ${CFLAGS}"
-   AC_CHECK_HEADERS([bfd.h], [BFD_INSTALLED="yes"], [BFD_INSTALLED="no"])
+   AC_CHECK_HEADERS([bfd.h], [BFD_HEADER_INSTALLED="yes"], [BFD_HEADER_INSTALLED="no"])
 
-   if test "${BFD_INSTALLED}" = "yes" ; then
+   if test "${BFD_HEADER_INSTALLED}" = "yes" ; then
       AC_MSG_CHECKING([whether libbfd and libiberty work])
 
       if test "${OperatingSystem}" != "aix" -a "${OperatingSystem}" != "freebsd" ; then
@@ -636,21 +636,24 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
    AX_FLAGS_RESTORE()
 
-   dnl If unwind is given, then we'll need the binutils for sure!
-   if test "${unwind_paths}" != "no"; then
+   dnl If unwind is given, then we'll need the binutils for sure, unless stated no!
+   if test "${unwind_paths}" != "no" -a "${binutils_paths}" != "no"; then
       if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
          AC_MSG_ERROR([You have asked to gather call-site information through --with-unwind which must be translated using binutils, but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
       fi
    fi
 
    dnl If this is running on Linux, then we'll probably need the binutils
-   dnl linux offers the backtrace syscall, removing the requirement for the unwind
-   case "${target_os}" in
-      linux* )
-         if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
-            AC_MSG_ERROR([You can gather call-site information which must be translated using binutils, but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
-         fi ;;
-   esac
+   dnl linux offers the backtrace syscall, removing the requirement for the
+   dnl unwind, again, unless stated no
+   if test "${binutils_paths}" != "no"; then
+      case "${target_os}" in
+         linux* )
+            if test "${BFD_INSTALLED}" = "no" -o "${LIBERTY_INSTALLED}" = "no" ; then
+               AC_MSG_ERROR([You can gather call-site information which must be translated using binutils, but either libbfd or libiberty are not found. Please make sure that the binutils-dev package is installed and specify where to find these libraries through --with-binutils. The latest source can be downloaded from http://www.gnu.org/software/binutils])
+            fi ;;
+      esac
+   fi
 
    AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
    AM_CONDITIONAL(BFD_NEEDS_LINTL, test "${libbfd_needs_lintl}" = "yes")
