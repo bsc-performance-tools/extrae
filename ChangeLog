@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 06Sep2013 Fixed some warnings
  * 06Sep2013 Read /proc/self/maps to know which binaries & libraries are used
              Create tests to test the usage of binaries & libraries
              Additional location for MPI libraries / includes / binaries in BG/Q

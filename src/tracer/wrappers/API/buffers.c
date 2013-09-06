@@ -486,8 +486,9 @@ int Buffer_FlushCache(Buffer_t *buffer)
 {
   if ((buffer != NULL) && (buffer->VictimCache != NULL))
   {
-    Buffer_Flush(buffer->VictimCache);
+    return Buffer_Flush(buffer->VictimCache);
   }
+  return 0;
 }
 
 void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, DataBlocks_t *io_db)
