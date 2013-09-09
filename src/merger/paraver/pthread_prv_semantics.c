@@ -58,47 +58,36 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "record.h"
 #include "events.h"
+#include "pthread_prv_events.h"
 
 /******************************************************************************
  ***  WorkSharing_Event
  ******************************************************************************/
 
-static int pthread_barrier_wait (event_t * current_event, unsigned long long current_time,
-	unsigned int cpu, unsigned int ptask, unsigned int task,
-	unsigned int thread, FileSet_t *fset )
-{
-	unsigned int EvType, EvValue;
-	UNREFERENCED_PARAMETER(fset);
-
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
-
-	Switch_State (STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-
-	return 0;
-}
-
-
 static int pthread_Call (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType, nEvType;
+	unsigned long long EvValue, nEvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+	if (EvType == PTHREAD_RWLOCK_WR_EV || EvType == PTHREAD_RWLOCK_RD_EV ||
+	    EvType == PTHREAD_RWLOCK_UNLOCK_EV ||
+	    EvType == PTHREAD_MUTEX_LOCK_EV || EvType == PTHREAD_MUTEX_UNLOCK_EV ||
+	    EvType == PTHREAD_COND_SIGNAL_EV || EvType == PTHREAD_COND_BROADCAST_EV ||
+	    EvType == PTHREAD_COND_WAIT_EV || 
+	    EvType == PTHREAD_BARRIER_WAIT_EV )
+		Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
+	else if (EvType == PTHREAD_EXIT_EV)
+		Switch_State (STATE_RUNNING, (Get_EvValue (current_event) != EVT_BEGIN), ptask, task, thread);
+	else 
+		Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	if (EvType == PTHREAD_CREATE_EV)
-		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue?1:0);
-	else
-		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
 	if (EvType == PTHREAD_CREATE_EV)
 	{
@@ -112,6 +101,13 @@ static int pthread_Call (event_t * current_event, unsigned long long current_tim
 		trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREAD_FUNC_EV, EvValue);
 		trace_paraver_event (cpu, ptask, task, thread, current_time, PTHREAD_FUNC_LINE_EV, EvValue);
 	}
+
+	Enable_pthread_Operation (EvType);
+	if (EvType == PTHREAD_CREATE_EV)
+		Translate_pthread_Operation (EvType, EvValue?1:0, &nEvType, &nEvValue);
+	else
+		Translate_pthread_Operation (EvType, EvValue, &nEvType, &nEvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, nEvType, nEvValue);
 
 	return 0;
 }
@@ -143,53 +139,21 @@ static int pthread_Function_Event (event_t * current_event,
 	return 0;
 }
 
-static int pthread_Lock (event_t * current_event, 
-	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
-	unsigned int task, unsigned int thread, FileSet_t *fset )
-{
-	UNREFERENCED_PARAMETER(fset);
-
-	Switch_State (STATE_SYNC, (Get_EvValue (current_event) != EVT_END),
-	  ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time,
-	  Get_EvEvent (current_event), Get_EvValue (current_event));
-
-	return 0;
-}
-
-static int pthread_Exit (event_t * current_event, 
-	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
-	unsigned int task, unsigned int thread, FileSet_t *fset )
-{
-	UNREFERENCED_PARAMETER(fset);
-
-	/* POP top state if the pthread_exit is entered */
-	Switch_State (STATE_RUNNING, (Get_EvValue (current_event) != EVT_BEGIN), ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time,
-	  Get_EvEvent (current_event), Get_EvValue (current_event));
-
-	return 0;
-}
-
 SingleEv_Handler_t PRV_pthread_Event_Handlers[] = {
 	{ PTHREAD_CREATE_EV, pthread_Call },
-	{ PTHREAD_EXIT_EV, pthread_Exit },
+	{ PTHREAD_EXIT_EV, pthread_Call },
 	{ PTHREAD_JOIN_EV, pthread_Call },
 	{ PTHREAD_DETACH_EV, pthread_Call },
 	{ PTHREAD_FUNC_EV, pthread_Function_Event },
-	{ PTHREAD_RWLOCK_WR_EV, pthread_Lock },
-	{ PTHREAD_RWLOCK_RD_EV, pthread_Lock },
-	{ PTHREAD_RWLOCK_UNLOCK_EV, pthread_Lock },
-	{ PTHREAD_MUTEX_LOCK_EV, pthread_Lock },
-	{ PTHREAD_MUTEX_UNLOCK_EV, pthread_Lock },
-	{ PTHREAD_COND_SIGNAL_EV, pthread_Lock },
-	{ PTHREAD_COND_BROADCAST_EV, pthread_Lock },
-	{ PTHREAD_COND_WAIT_EV, pthread_Lock },
-	{ PTHREAD_BARRIER_WAIT_EV, pthread_barrier_wait },
+	{ PTHREAD_RWLOCK_WR_EV, pthread_Call },
+	{ PTHREAD_RWLOCK_RD_EV, pthread_Call },
+	{ PTHREAD_RWLOCK_UNLOCK_EV, pthread_Call },
+	{ PTHREAD_MUTEX_LOCK_EV, pthread_Call },
+	{ PTHREAD_MUTEX_UNLOCK_EV, pthread_Call },
+	{ PTHREAD_COND_SIGNAL_EV, pthread_Call },
+	{ PTHREAD_COND_BROADCAST_EV, pthread_Call },
+	{ PTHREAD_COND_WAIT_EV, pthread_Call },
+	{ PTHREAD_BARRIER_WAIT_EV, pthread_Call },
 	{ NULL_EV, NULL }
 };
 

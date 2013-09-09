@@ -160,6 +160,7 @@ void Share_OpenCL_Operations (void)
 	int res;
 	int i, tmp_in[MAX_OPENCL_TYPE_ENTRIES], tmp_out[MAX_OPENCL_TYPE_ENTRIES];
 
+	/* Share host-side calls */
 	for (i = 0; i < MAX_OPENCL_TYPE_ENTRIES; i++)
 		tmp_in[i] = OpenCL_event_presency_label_host[i].present;
 
@@ -169,6 +170,7 @@ void Share_OpenCL_Operations (void)
 	for (i = 0; i < MAX_OPENCL_TYPE_ENTRIES; i++)
 		OpenCL_event_presency_label_host[i].present = tmp_out[i];
 
+	/* Share accelerator-side calls */
 	for (i = 0; i < MAX_OPENCL_TYPE_ENTRIES; i++)
 		tmp_in[i] = OpenCL_event_presency_label_acc[i].present;
 
@@ -271,6 +273,5 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 					OpenCL_event_presency_label_acc[u].description);
 		LET_SPACES(fd);
 	}
-
 }
 

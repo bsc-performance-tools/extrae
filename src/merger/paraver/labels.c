@@ -884,7 +884,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	SoftCountersEvent_WriteEnabled_MPI_Operations (fd);
 	SoftCountersEvent_WriteEnabled_PACX_Operations (fd);
 	OMPEvent_WriteEnabledOperations (fd);
-	pthreadEvent_WriteEnabledOperations (fd);
+	WriteEnabled_pthread_Operations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
 	TRTEvent_WriteEnabledOperations (fd);
 	CUDAEvent_WriteEnabledOperations (fd);

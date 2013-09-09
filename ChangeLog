@@ -1,8 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 09Sep2013 Revamped pthread event types so as all calls are only one type
  * 06Sep2013 Fixed some warnings
- * 06Sep2013 Read /proc/self/maps to know which binaries & libraries are used
+             Read /proc/self/maps to know which binaries & libraries are used
              Create tests to test the usage of binaries & libraries
              Additional location for MPI libraries / includes / binaries in BG/Q
              Many minor bugfixes

@@ -42,42 +42,65 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpi2out.h"
 #include "options.h"
 
-#define PTHD_CREATE_INDEX       0  /* pthread_create index */
-#define PTHD_JOIN_INDEX         1  /* pthread_join index */
-#define PTHD_DETACH_INDEX       2  /* pthread_detach index */
-#define PTHD_USRF_INDEX         3  /* pthread_create @ target address index */
-#define PTHD_WRRD_LOCK_INDEX    4  /* pthread_rwlock* functions */
-#define PTHD_MUTEX_LOCK_INDEX   5  /* pthread_mutex* functions */
-#define PTHD_COND_INDEX         6  /* pthread_cond* functions */
-#define PTHD_EXIT_INDEX         7  /* pthread_exit function */
-#define PTHD_BARRIER_WAIT_INDEX 8  /* pthread_barrier_wait function */
-
-#define MAX_PTHD_INDEX		9
-
-static int inuse[MAX_PTHD_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
-
-void Enable_pthread_Operation (int tipus)
+struct pthread_event_presency_label_st
 {
-	if (tipus == PTHREAD_CREATE_EV)
-		inuse[PTHD_CREATE_INDEX] = TRUE;
-	else if (tipus == PTHREAD_JOIN_EV)
-		inuse[PTHD_JOIN_INDEX] = TRUE;
-	else if (tipus == PTHREAD_DETACH_EV)
-		inuse[PTHD_DETACH_INDEX] = TRUE;
-	else if (tipus == PTHREAD_FUNC_EV)
-		inuse[PTHD_USRF_INDEX] = TRUE;
-	else if (tipus == PTHREAD_RWLOCK_WR_EV || tipus == PTHREAD_RWLOCK_RD_EV ||
-	  tipus == PTHREAD_RWLOCK_UNLOCK_EV)
-		inuse[PTHD_WRRD_LOCK_INDEX] = TRUE;
-	else if (tipus == PTHREAD_MUTEX_UNLOCK_EV || tipus == PTHREAD_MUTEX_LOCK_EV)
-		inuse[PTHD_MUTEX_LOCK_INDEX] = TRUE;
-	else if (tipus == PTHREAD_COND_SIGNAL_EV || tipus == PTHREAD_COND_WAIT_EV ||
-	  tipus == PTHREAD_COND_BROADCAST_EV)
-		inuse[PTHD_COND_INDEX] = TRUE;
-	else if (tipus == PTHREAD_EXIT_EV)
-		inuse[PTHD_EXIT_INDEX] = TRUE;
-	else if (tipus == PTHREAD_BARRIER_WAIT_EV)
-		inuse[PTHD_BARRIER_WAIT_INDEX] = TRUE;
+	unsigned eventtype;
+	unsigned present;
+	char * description;
+	int eventval;
+}; 
+
+#define MAX_PTHREAD_TYPE_ENTRIES 13
+
+static struct pthread_event_presency_label_st
+ pthread_event_presency_label[MAX_PTHREAD_TYPE_ENTRIES] = 
+{
+ { PTHREAD_EXIT_EV, FALSE, "pthread_exit", 1 },
+ { PTHREAD_CREATE_EV, FALSE, "pthread_create", 2 },
+ { PTHREAD_JOIN_EV, FALSE, "pthread_join", 3 },
+ { PTHREAD_DETACH_EV, FALSE, "pthread_detach", 4 },
+ { PTHREAD_RWLOCK_WR_EV, FALSE, "pthread_rwlock_*wrlock", 5 },
+ { PTHREAD_RWLOCK_RD_EV, FALSE, "pthread_rwlock_*rdlock", 6 },
+ { PTHREAD_RWLOCK_UNLOCK_EV, FALSE, "pthread_rwlock_unlock", 7 },
+ { PTHREAD_MUTEX_LOCK_EV, FALSE, "pthread_mutex_*lock", 8 },
+ { PTHREAD_MUTEX_UNLOCK_EV, FALSE, "pthread_mutex_unlock", 9 },
+ { PTHREAD_COND_SIGNAL_EV, FALSE, "pthread_cond_signal", 10 },
+ { PTHREAD_COND_BROADCAST_EV, FALSE, "pthread_cond_broadcast", 11 },
+ { PTHREAD_COND_WAIT_EV, FALSE, "pthread_cond_*wait", 12 },
+ { PTHREAD_BARRIER_WAIT_EV, FALSE, "pthread_barrier_wait", 13 } 
+};
+
+int Translate_pthread_Operation (unsigned in_evttype, 
+	unsigned long long in_evtvalue, unsigned *out_evttype,
+	unsigned long long *out_evtvalue)
+{
+	unsigned u;
+	unsigned out_type;
+
+	for (u = 0; u < MAX_PTHREAD_TYPE_ENTRIES; u++)
+		if (pthread_event_presency_label[u].eventtype == in_evttype)
+		{
+			*out_evttype = PTHREAD_BASE_EV;
+			if (in_evtvalue != 0)
+				*out_evtvalue = pthread_event_presency_label[u].eventval;
+			else
+				*out_evtvalue = 0;
+			return TRUE;
+		}
+
+	return FALSE;
+}
+
+void Enable_pthread_Operation (unsigned evttype)
+{
+	unsigned u;
+
+	for (u = 0; u < MAX_PTHREAD_TYPE_ENTRIES; u++)
+		if (pthread_event_presency_label[u].eventtype == evttype)
+		{
+			pthread_event_presency_label[u].present = TRUE;
+			break;
+		}
 }
 
 #if defined(PARALLEL_MERGE)
@@ -87,84 +110,59 @@ void Enable_pthread_Operation (int tipus)
 
 void Share_pthread_Operations (void)
 {
-	int res, i, tmp[MAX_PTHD_INDEX];
+	int res;
+	int i, tmp_in[MAX_PTHREAD_TYPE_ENTRIES], tmp_out[MAX_PTHREAD_TYPE_ENTRIES];
 
-	res = MPI_Reduce (inuse, tmp, MAX_PTHD_INDEX, MPI_INT, MPI_BOR, 0,
-		MPI_COMM_WORLD);
+	for (i = 0; i < MAX_PTHREAD_TYPE_ENTRIES; i++)
+		tmp_in[i] = pthread_event_presency_label[i].present;
+
+	res = MPI_Reduce (tmp_in, tmp_out, MAX_PTHREAD_TYPE_ENTRIES, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "While sharing pthread enabled operations");
 
-	for (i = 0; i < MAX_PTHD_INDEX; i++)
-		inuse[i] = tmp[i];
+	for (i = 0; i < MAX_PTHREAD_TYPE_ENTRIES; i++)
+		pthread_event_presency_label[i].present = tmp_out[i];
 }
 
 #endif
 
-void pthreadEvent_WriteEnabledOperations (FILE * fd)
+void WriteEnabled_pthread_Operations (FILE * fd)
 {
-	if (inuse[PTHD_CREATE_INDEX])
+	unsigned u;
+	int anypresent = FALSE;
+#if defined(HAVE_BFD)
+	int createpresent = FALSE;
+#endif
+
+	for (u = 0; u < MAX_PTHREAD_TYPE_ENTRIES; u++)
 	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_create\n", 0, PTHREAD_CREATE_EV);
-		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
+		anypresent = anypresent || pthread_event_presency_label[u].present;
+#if defined(HAVE_BFD)
+		if (pthread_event_presency_label[u].eventtype == PTHREAD_CREATE_EV)
+			createpresent = TRUE;
+#endif
 	}
-	if (inuse[PTHD_EXIT_INDEX])
+
+	if (anypresent)
 	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_exit\n", 0, PTHREAD_EXIT_EV);
-		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
-	}
-	if (inuse[PTHD_JOIN_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_join\n", 0, PTHREAD_JOIN_EV);
-		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
-	}
-	if (inuse[PTHD_DETACH_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_detach\n", 0, PTHREAD_DETACH_EV);
-		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
-	}
-	if (inuse[PTHD_WRRD_LOCK_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_rw_lock_wr\n"
-		             "%d   %d    pthread_rw_lock_rd\n"
-		             "%d   %d    pthread_rw_unlock\n",
-		         0, PTHREAD_RWLOCK_WR_EV,
-		         0, PTHREAD_RWLOCK_RD_EV,
-		         0, PTHREAD_RWLOCK_UNLOCK_EV);
-	}
-	if (inuse[PTHD_MUTEX_LOCK_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_mutex_lock\n"
-		             "%d   %d    pthread_mutex_unlock\n",
-		         0, PTHREAD_MUTEX_LOCK_EV,
-		         0, PTHREAD_MUTEX_UNLOCK_EV);
-	}
-	if (inuse[PTHD_COND_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_cond_wait\n"
-		             "%d   %d    pthread_cond_signal\n"
-		             "%d   %d    pthread_cond_broadcast\n",
-		         0, PTHREAD_COND_WAIT_EV,
-		         0, PTHREAD_COND_SIGNAL_EV,
-		         0, PTHREAD_COND_BROADCAST_EV);
-	}
-	if (inuse[PTHD_BARRIER_WAIT_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n"
-		             "%d   %d    pthread_barrier_wait\n", 0, PTHREAD_BARRIER_WAIT_EV);
-		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
+
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d    %d    %s\n", 0, PTHREAD_BASE_EV, "pthread call");
+		fprintf (fd, "VALUES\n");
+		fprintf (fd, "0 Outside pthread call\n");
+		for (u = 0; u < MAX_PTHREAD_TYPE_ENTRIES; u++)
+			if (pthread_event_presency_label[u].present)
+				fprintf (fd, "%d %s\n", 
+					pthread_event_presency_label[u].eventval,
+					pthread_event_presency_label[u].description);
+		LET_SPACES(fd);
 	}
 
 #if defined(HAVE_BFD)
 	/* Hey, pthread & OpenMP share the same labels? */
-	if (inuse[PTHD_USRF_INDEX])
+	if (createpresent)
 		Address2Info_Write_OMP_Labels (fd, PTHREAD_FUNC_EV, "Parallel function",
 			PTHREAD_FUNC_LINE_EV, "Parallel function line and file",
 			get_option_merge_UniqueCallerID());
 #endif
 }
+

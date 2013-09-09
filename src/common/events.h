@@ -429,20 +429,20 @@ enum {
 /******************************************************************************
  *   User events to trace Pthread/TRT parallel execution.
  ******************************************************************************/
-#define PTHREAD_EXIT_EV          61000000
-#define PTHREAD_CREATE_EV        61000001
-#define PTHREAD_JOIN_EV          61000002
-#define PTHREAD_DETACH_EV        61000003
-
-#define PTHREAD_RWLOCK_WR_EV       61000004
-#define PTHREAD_RWLOCK_RD_EV       61000005
-#define PTHREAD_RWLOCK_UNLOCK_EV   61000006
-#define PTHREAD_MUTEX_LOCK_EV      61000007
-#define PTHREAD_MUTEX_UNLOCK_EV    61000008
-#define PTHREAD_COND_SIGNAL_EV     61000009
-#define PTHREAD_COND_BROADCAST_EV  61000010
-#define PTHREAD_COND_WAIT_EV       61000011
-#define PTHREAD_BARRIER_WAIT_EV    61000012
+#define PTHREAD_BASE_EV            61000000
+#define PTHREAD_EXIT_EV            61000001
+#define PTHREAD_CREATE_EV          61000002
+#define PTHREAD_JOIN_EV            61000003
+#define PTHREAD_DETACH_EV          61000004
+#define PTHREAD_RWLOCK_WR_EV       61000005
+#define PTHREAD_RWLOCK_RD_EV       61000006
+#define PTHREAD_RWLOCK_UNLOCK_EV   61000007
+#define PTHREAD_MUTEX_LOCK_EV      61000008
+#define PTHREAD_MUTEX_UNLOCK_EV    61000009
+#define PTHREAD_COND_SIGNAL_EV     61000010
+#define PTHREAD_COND_BROADCAST_EV  61000011
+#define PTHREAD_COND_WAIT_EV       61000012
+#define PTHREAD_BARRIER_WAIT_EV    61000013
 
 #define PTHREAD_FUNC_EV          60000020
 #define PTHREAD_FUNC_LINE_EV     60000120

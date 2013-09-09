@@ -36,11 +36,14 @@
 # include <stdio.h>
 #endif
 
-void Enable_pthread_Operation (int tipus);
-void pthreadEvent_WriteEnabledOperations (FILE * fd);
+int Translate_pthread_Operation (unsigned in_evttype, 
+	unsigned long long in_evtvalue, unsigned *out_evttype,
+	unsigned long long *out_evtvalue);
 
 #if defined(PARALLEL_MERGE)
 void Share_pthread_Operations (void);
 #endif
+void Enable_pthread_Operation (unsigned evttype);
+void WriteEnabled_pthread_Operations (FILE * fd);
 
 #endif
