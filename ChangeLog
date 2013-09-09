@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 09Sep2013 Added a quicksort algorithm for files 
  * 09Sep2013 Revamped pthread event types so as all calls are only one type
              Prepare scripts for LSF & slurm (MPI)
  * 06Sep2013 Fixed some warnings

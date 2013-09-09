@@ -6,6 +6,7 @@ common_SRCS = \
  timesync.c timesync.h \
  new-queue.c new-queue.h \
  extrae_vector.c extrae_vector.h \
+ qs_disk.c qs_disk.h \
  debug.h \
  common.h \
  num_hwc.h \
