@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 09Sep2013 Revamped pthread event types so as all calls are only one type
+             Prepare scripts for LSF & slurm (MPI)
  * 06Sep2013 Fixed some warnings
              Read /proc/self/maps to know which binaries & libraries are used
              Create tests to test the usage of binaries & libraries

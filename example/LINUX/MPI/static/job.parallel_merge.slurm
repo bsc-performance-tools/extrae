@@ -1,11 +1,11 @@
 #!/bin/sh
 # @ initialdir = .
-# @ output = par_merge.out
-# @ error =  par_merge.err
-# @ total_tasks = 5
+# @ output = parallel_merge.out
+# @ error =  parallel_merge.err
+# @ total_tasks = 4
 # @ cpus_per_task = 1
 # @ tasks_per_node = 4
-# @ wall_clock_limit = 01:00:00
+# @ wall_clock_limit = 00:10:00
 
 export EXTRAE_HOME=@sub_PREFIXDIR@
 
