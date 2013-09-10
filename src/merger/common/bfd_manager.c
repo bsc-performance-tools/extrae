@@ -257,7 +257,8 @@ int BFDmanager_translateAddress (bfd *bfdImage, asymbol **bfdSymbols,
 			char *demangled = NULL;
 			*file = (char*) syminfo.filename;
 			*line = syminfo.line;
-			demangled = bfd_demangle (bfdImage, syminfo.function, 0);
+			if (syminfo.function)
+				demangled = bfd_demangle (bfdImage, syminfo.function, 0);
 			if (demangled)
 				*function = demangled;
 			else
