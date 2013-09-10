@@ -98,7 +98,8 @@ AC_DEFUN([AX_PROG_MPI],
       if test -f "${MPI_LIBSDIR}/libmpi.so" -o -f "${MPI_LIBSDIR}/libmpich.so" -o \
          -f "${MPI_LIBSDIR}/shared/libmpi.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" -o \
          -f "${MPI_LIBSDIR}/libmpi_ibm.so" -o -f "${MPI_LIBSDIR}/libmpich.cnk.so" -o \
-         -f "${MPI_LIBSDIR}/libmpich_intel.so" ; then
+         -f "${MPI_LIBSDIR}/libmpich_intel.so" -o \
+         -f "${MPI_LIBSDIR}/libmpich-gcc.legacy.so" -o -f "${MPI_LIBSDIR}/libmpich-xl.legacy.so"; then
          MPI_SHARED_LIB_FOUND="yes"
       else
          MPI_SHARED_LIB_FOUND="not found"
@@ -123,6 +124,12 @@ AC_DEFUN([AX_PROG_MPI],
       elif test -f "${MPI_LIBSDIR}/libmpif.a" -o -f "${MPI_LIBSDIR}/libmpif.so" -o -f "${MPI_LIBSDIR}/shared/libmpif.so"; then
          MPI_F_LIB_FOUND="yes"
          MPI_F_LIB="-lmpif"
+      elif test -f "${MPI_LIBSDIR}/libmpichf77-gcc.legacy.a" ; then
+         MPI_F_LIB_FOUND="yes"
+         MPI_F_LIB="-lmpif77-gcc.legacy"
+      elif test -f "${MPI_LIBSDIR}/libmpichf77-xl.legacy.a" ; then
+         MPI_F_LIB_FOUND="yes"
+         MPI_F_LIB="-lmpif77-xl.legacy"
       else
          MPI_F_LIB_FOUND="not found"
       fi
