@@ -77,7 +77,7 @@ void Probe_OpenMP_UF_Entry (UINT64 uf)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPFUNC_EV, uf, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -86,7 +86,7 @@ void Probe_OpenMP_UF_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPFUNC_EV, EVT_END, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -96,7 +96,7 @@ void Probe_OpenMP_Work_Entry (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, WORK_EV, EVT_BEGIN, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -106,7 +106,7 @@ void Probe_OpenMP_Work_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, WORK_EV, EVT_END, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -116,7 +116,7 @@ void Probe_OpenMP_DO_Entry (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, WSH_EV, WSH_DO_VAL, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -126,7 +126,7 @@ void Probe_OpenMP_DO_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, WSH_EV, WSH_END_VAL, EMPTY); 
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -330,7 +330,7 @@ void Probe_OpenMP_Task_Entry (UINT64 uf)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASK_EV, uf, EMPTY)
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -340,7 +340,7 @@ void Probe_OpenMP_Task_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TASK_EV, EVT_END, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -350,7 +350,7 @@ void Probe_OpenMP_TaskUF_Entry (UINT64 uf)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKFUNC_EV, uf, EMPTY)
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
@@ -360,7 +360,7 @@ void Probe_OpenMP_TaskUF_Exit (void)
 	if (mpitrace_on)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKFUNC_EV, EVT_END, EMPTY);
-		Extrae_AnnotateCPU (LAST_READ_TIME);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
 	}
 }
 
