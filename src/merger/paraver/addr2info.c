@@ -601,8 +601,6 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 			found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
 			  (void*) (address - obj->start_address), &translated_function,
 			  &translated_filename, &translated_line);
-		else
-			obj = NULL;
 	}
 	else
 		found = BFDmanager_translateAddress (BFDmanager_getDefaultImage(),
