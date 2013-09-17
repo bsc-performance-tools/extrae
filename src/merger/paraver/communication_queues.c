@@ -30,6 +30,7 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#include <stdio.h>
 #include "communication_queues.h"
 
 #ifndef HAVE_MPI_H
@@ -65,6 +66,12 @@ typedef struct
 }
 SendDataReference_t;
 
+void queue_print_sends(void *data)
+{
+  SendData_t *d = (SendData_t*) data;
+  fprintf(stderr, "[DEBUG] queue_print_sends:: %d %d %lld\n", d->tag, d->partner, d->key);
+}
+
 void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
 	event_t *send_end, off_t send_position, unsigned thread,
 	unsigned vthread, unsigned partner, unsigned tag, long long key)
@@ -72,7 +79,7 @@ void CommunicationQueues_QueueSend (NewQueue_t *qsend, event_t *send_begin,
 	SendData_t tmp;
 
 #if defined(DEBUG)
-	printf ("CommunicationQueues_QueueSend (.. thread=%u, vthread=%u, partner=%d, tag=%u, key=%lld)\n", thread, vthread, partner, tag, key);
+	fprintf (stderr, "[DEBUG] CommunicationQueues_QueueSend (.. thread=%u, vthread=%u, partner=%d, tag=%u, key=%lld)\n", thread, vthread, partner, tag, key);
 #endif
 
 	tmp.send_begin = send_begin;
@@ -93,7 +100,7 @@ static int CompareSend_cbk (void *reference, void *data)
 	SendDataReference_t *ref = (SendDataReference_t*) reference;
 
 #if defined(DEBUG)
-	printf ("CompareSend_cbk (<tag=%d,target=%d,key=%lld>,<tag=%d,target=%d,key=%lld>)\n", ref->tag, ref->target, ref->key, d->tag, d->partner, d->key);
+	fprintf (stderr, "[DEBUG] CompareSend_cbk (<tag=%d,target=%d,key=%lld>,<tag=%d,target=%d,key=%lld>)\n", ref->tag, ref->target, ref->key, d->tag, d->partner, d->key);
 #endif
 
 	/* Return OK if the TAG, TARGET and KEY are the same */
@@ -112,6 +119,8 @@ void CommunicationQueues_ExtractSend (NewQueue_t *qsend, int receiver,
 	reference.target = receiver;
 	reference.key = key;
 
+	/* DEBUG 
+	NewQueue_dump(qsend, queue_printer); */
 	res = (SendData_t*) NewQueue_search (qsend, &reference, CompareSend_cbk);
 
 	if (NULL != res)
@@ -155,6 +164,12 @@ typedef struct
 }
 RecvDataReference_t;
 
+void queue_print_recvs(void *data)
+{
+  RecvData_t *d = (RecvData_t*) data;
+  fprintf(stderr, "[DEBUG] queue_print_recvs:: %d %d %lld\n", d->tag, d->partner, d->key);
+}
+
 void CommunicationQueues_QueueRecv (NewQueue_t *qreceive, event_t *recv_begin,
 	event_t *recv_end, unsigned thread, unsigned vthread,
 	unsigned partner, unsigned tag, long long key)
@@ -162,7 +177,7 @@ void CommunicationQueues_QueueRecv (NewQueue_t *qreceive, event_t *recv_begin,
 	RecvData_t tmp;
 
 #if defined(DEBUG)
-	printf ("CommunicationQueues_QueueRecv (.. thread=%u, vthread=%u, partner=%d, tag=%u, key=%lld)\n", thread, vthread, partner, tag, key);
+	fprintf (stderr, "[DEBUG] CommunicationQueues_QueueRecv (.. thread=%u, vthread=%u, partner=%d, tag=%u, key=%lld)\n", thread, vthread, partner, tag, key);
 #endif
 
 	tmp.recv_begin = recv_begin;
@@ -182,7 +197,7 @@ static int CompareRecv_cbk (void *reference, void *data)
 	RecvDataReference_t *ref = (RecvDataReference_t*) reference;
 
 #if defined(DEBUG)
-	printf ("CompareRecv_cbk (<tag=%d,target=%d,key=%lld>,<tag=%d,target=%d,key=%lld>)\n", ref->tag, ref->target, ref->key, d->tag, d->partner, d->key);
+	fprintf (stderr, "[DEBUG] CompareRecv_cbk (<tag=%d,target=%d,key=%lld>,<tag=%d,target=%d,key=%lld>)\n", ref->tag, ref->target, ref->key, d->tag, d->partner, d->key);
 #endif
 
 	/* Return OK if the TAG, TARGET and KEY are the same */
@@ -201,6 +216,8 @@ void CommunicationQueues_ExtractRecv (NewQueue_t *qreceive, int sender,
 	reference.target = sender;
 	reference.key = key;
 
+	/* DEBUG
+	NewQueue_dump(qreceive, queue_printer); */
 	res = (RecvData_t*) NewQueue_search (qreceive, &reference, CompareRecv_cbk);
 
 	if (NULL != res)

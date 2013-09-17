@@ -44,6 +44,9 @@
 
 #include "wrapper.h"
 
+#define RANK_OBJ_SEND 1
+#define RANK_OBJ_RECV 0
+
 void gettopology (void);
 void configure_MPI_vars (void);
 unsigned long long CalculateNumOpsForPeriod (unsigned long long wannaPeriod, unsigned long long NumOfGlobals, unsigned long long runnedPeriod);

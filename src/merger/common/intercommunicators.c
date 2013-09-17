@@ -95,7 +95,7 @@ void intercommunicators_load( char *spawns_file_path, int ptask )
   }
   fclose(fd);
 
-  /* DEBUG
+  /* DEBUG 
   intercommunicators_print(); */
 }
 
@@ -223,28 +223,35 @@ int intercommunicators_get_target_ptask(int from_ptask, int from_task, int from_
 {
   int from_spawn_group = get_spawn_group(from_ptask);
   int to_spawn_group;
+  int ret;
 
   if (from_spawn_group == -1)
   {
     /* There's no spawns! */
-    return from_ptask;
+    ret = from_ptask;
   }
+  else 
+  { 
+    to_spawn_group = find_link(from_spawn_group, from_task, from_comm); 
 
-  to_spawn_group = find_link(from_spawn_group, from_task, from_comm); 
-
-  if (to_spawn_group == -1)
-  {
-    /* This is not an intercommunicator, the target of the message is in the same ptask */
-    return from_ptask;
-  }
-  else
-  {
-    /* This is an intercommunicator, find the target spawn group and translate to the corresponding ptask */
-    int to_ptask = get_ptask( to_spawn_group );
-    if (to_ptask == -1)
-      return from_ptask;
+    if (to_spawn_group == -1)
+    {
+      /* This is not an intercommunicator, the target of the message is in the same ptask */
+      ret = from_ptask;
+    }
     else
-      return to_ptask; 
+    {
+      /* This is an intercommunicator, find the target spawn group and translate to the corresponding ptask */
+      int to_ptask = get_ptask( to_spawn_group );
+      if (to_ptask == -1)
+        ret = from_ptask;
+      else
+        ret = to_ptask; 
+    }
   }
+  /* DEBUG 
+  fprintf(stderr, "\n[DEBUG] intercommunicators_get_target_ptask from_ptask=%d from_task=%d from_comm=%d target_ptask=%d\n",
+    from_ptask, from_task, from_comm, ret); */
+  return ret;
 }
 

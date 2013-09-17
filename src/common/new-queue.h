@@ -48,6 +48,7 @@ void NewQueue_clear (NewQueue_t *q);
 void NewQueue_add (NewQueue_t *q, void *data);
 void* NewQueue_search (NewQueue_t *q, void *reference, int(*compare)(void *, void*));
 void NewQueue_delete (NewQueue_t *q, void *data);
+void NewQueue_dump(NewQueue_t *q, void(*printer)(void *));
 
 #endif
 

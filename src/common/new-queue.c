@@ -165,3 +165,19 @@ void NewQueue_delete (NewQueue_t *q, void *data)
 	q->NumOfElements--;
 }
 
+void NewQueue_dump(NewQueue_t *q, void(*printer)(void *))
+{
+        int i = 0;
+        size_t offset = 0;
+
+        if (q->NumOfElements > 0)
+        {
+                while (i < q->NumOfElements)
+                {
+                        (*printer) (((char*)q->Data)+offset);
+                        offset += q->SizeOfElement;
+                        i++;
+                }
+        }
+}
+
