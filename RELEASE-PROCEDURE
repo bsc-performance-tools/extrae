@@ -15,7 +15,7 @@
  2.c) svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
        OR
       svn copy https://svn.bsc.es/repos/ptools/extrae/branches/2.3 https://svn.bsc.es/repos/ptools/extrae/tags/2.3.5
- 2.d) download from the new tag using svn export command
+ 2.d) download from the new tag
  2.e) bootstrap & configure to rebuild documentation (1.c)
  2.f) commit the documentation
  2.f) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
