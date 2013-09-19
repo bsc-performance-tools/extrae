@@ -1,0 +1,125 @@
+Available events and hardware information.
+-------------------------------------------------------------------------
+Vendor string and code   :  (1312)
+Model string and code    : PVR=0x5202:0x1891  Serial=R00-M1-N0-C:J16-U01 (1375869073)
+CPU Revision             : 20994.062500
+CPU Megahertz            : 700.000000
+CPU's in this Node       : 1
+Nodes in this System     : 8
+Total CPU's              : 8
+Number Hardware Counters : 52
+Max Multiplex Counters   : 32
+-------------------------------------------------------------------------
+The following correspond to fields in the PAPI_event_info_t structure.
+
+Name		Code		Avail	Deriv	Description (Note)
+PAPI_L1_DCM	0x80000000	No	No	Level 1 data cache misses
+PAPI_L1_ICM	0x80000001	No	No	Level 1 instruction cache misses
+PAPI_L2_DCM	0x80000002	No	No	Level 2 data cache misses
+PAPI_L2_ICM	0x80000003	No	No	Level 2 instruction cache misses
+PAPI_L3_DCM	0x80000004	No	No	Level 3 data cache misses
+PAPI_L3_ICM	0x80000005	No	No	Level 3 instruction cache misses
+PAPI_L1_TCM	0x80000006	No	No	Level 1 cache misses
+PAPI_L2_TCM	0x80000007	No	No	Level 2 cache misses
+PAPI_L3_TCM	0x80000008	Yes	No	Level 3 cache misses
+PAPI_CA_SNP	0x80000009	No	No	Requests for a snoop
+PAPI_CA_SHR	0x8000000a	No	No	Requests for exclusive access to shared cache line
+PAPI_CA_CLN	0x8000000b	No	No	Requests for exclusive access to clean cache line
+PAPI_CA_INV	0x8000000c	No	No	Requests for cache line invalidation
+PAPI_CA_ITV	0x8000000d	No	No	Requests for cache line intervention
+PAPI_L3_LDM	0x8000000e	Yes	Yes	Level 3 load misses
+PAPI_L3_STM	0x8000000f	Yes	No	Level 3 store misses
+PAPI_BRU_IDL	0x80000010	No	No	Cycles branch units are idle
+PAPI_FXU_IDL	0x80000011	No	No	Cycles integer units are idle
+PAPI_FPU_IDL	0x80000012	No	No	Cycles floating point units are idle
+PAPI_LSU_IDL	0x80000013	No	No	Cycles load/store units are idle
+PAPI_TLB_DM	0x80000014	No	No	Data translation lookaside buffer misses
+PAPI_TLB_IM	0x80000015	No	No	Instruction translation lookaside buffer misses
+PAPI_TLB_TL	0x80000016	No	No	Total translation lookaside buffer misses
+PAPI_L1_LDM	0x80000017	No	No	Level 1 load misses
+PAPI_L1_STM	0x80000018	No	No	Level 1 store misses
+PAPI_L2_LDM	0x80000019	No	No	Level 2 load misses
+PAPI_L2_STM	0x8000001a	No	No	Level 2 store misses
+PAPI_BTAC_M	0x8000001b	No	No	Branch target address cache misses
+PAPI_PRF_DM	0x8000001c	No	No	Data prefetch cache misses
+PAPI_L3_DCH	0x8000001d	No	No	Level 3 data cache hits
+PAPI_TLB_SD	0x8000001e	No	No	Translation lookaside buffer shootdowns
+PAPI_CSR_FAL	0x8000001f	No	No	Failed store conditional instructions
+PAPI_CSR_SUC	0x80000020	No	No	Successful store conditional instructions
+PAPI_CSR_TOT	0x80000021	No	No	Total store conditional instructions
+PAPI_MEM_SCY	0x80000022	No	No	Cycles Stalled Waiting for memory accesses
+PAPI_MEM_RCY	0x80000023	No	No	Cycles Stalled Waiting for memory Reads
+PAPI_MEM_WCY	0x80000024	No	No	Cycles Stalled Waiting for memory writes
+PAPI_STL_ICY	0x80000025	No	No	Cycles with no instruction issue
+PAPI_FUL_ICY	0x80000026	No	No	Cycles with maximum instruction issue
+PAPI_STL_CCY	0x80000027	No	No	Cycles with no instructions completed
+PAPI_FUL_CCY	0x80000028	No	No	Cycles with maximum instructions completed
+PAPI_HW_INT	0x80000029	No	No	Hardware interrupts
+PAPI_BR_UCN	0x8000002a	No	No	Unconditional branch instructions
+PAPI_BR_CN	0x8000002b	No	No	Conditional branch instructions
+PAPI_BR_TKN	0x8000002c	No	No	Conditional branch instructions taken
+PAPI_BR_NTK	0x8000002d	No	No	Conditional branch instructions not taken
+PAPI_BR_MSP	0x8000002e	No	No	Conditional branch instructions mispredicted
+PAPI_BR_PRC	0x8000002f	No	No	Conditional branch instructions correctly predicted
+PAPI_FMA_INS	0x80000030	Yes	No	FMA instructions completed
+PAPI_TOT_IIS	0x80000031	No	No	Instructions issued
+PAPI_TOT_INS	0x80000032	No	No	Instructions completed
+PAPI_INT_INS	0x80000033	No	No	Integer instructions
+PAPI_FP_INS	0x80000034	No	No	Floating point instructions
+PAPI_LD_INS	0x80000035	No	No	Load instructions
+PAPI_SR_INS	0x80000036	No	No	Store instructions
+PAPI_BR_INS	0x80000037	No	No	Branch instructions
+PAPI_VEC_INS	0x80000038	No	No	Vector/SIMD instructions
+PAPI_RES_STL	0x80000039	No	No	Cycles stalled on any resource
+PAPI_FP_STAL	0x8000003a	No	No	Cycles the FP unit(s) are stalled
+PAPI_TOT_CYC	0x8000003b	Yes	No	Total cycles
+PAPI_LST_INS	0x8000003c	No	No	Load/store instructions completed
+PAPI_SYC_INS	0x8000003d	No	No	Synchronization instructions completed
+PAPI_L1_DCH	0x8000003e	No	No	Level 1 data cache hits
+PAPI_L2_DCH	0x8000003f	Yes	Yes	Level 2 data cache hits
+PAPI_L1_DCA	0x80000040	No	No	Level 1 data cache accesses
+PAPI_L2_DCA	0x80000041	Yes	Yes	Level 2 data cache accesses
+PAPI_L3_DCA	0x80000042	No	No	Level 3 data cache accesses
+PAPI_L1_DCR	0x80000043	No	No	Level 1 data cache reads
+PAPI_L2_DCR	0x80000044	No	No	Level 2 data cache reads
+PAPI_L3_DCR	0x80000045	No	No	Level 3 data cache reads
+PAPI_L1_DCW	0x80000046	No	No	Level 1 data cache writes
+PAPI_L2_DCW	0x80000047	No	No	Level 2 data cache writes
+PAPI_L3_DCW	0x80000048	No	No	Level 3 data cache writes
+PAPI_L1_ICH	0x80000049	No	No	Level 1 instruction cache hits
+PAPI_L2_ICH	0x8000004a	No	No	Level 2 instruction cache hits
+PAPI_L3_ICH	0x8000004b	No	No	Level 3 instruction cache hits
+PAPI_L1_ICA	0x8000004c	No	No	Level 1 instruction cache accesses
+PAPI_L2_ICA	0x8000004d	No	No	Level 2 instruction cache accesses
+PAPI_L3_ICA	0x8000004e	No	No	Level 3 instruction cache accesses
+PAPI_L1_ICR	0x8000004f	No	No	Level 1 instruction cache reads
+PAPI_L2_ICR	0x80000050	No	No	Level 2 instruction cache reads
+PAPI_L3_ICR	0x80000051	No	No	Level 3 instruction cache reads
+PAPI_L1_ICW	0x80000052	No	No	Level 1 instruction cache writes
+PAPI_L2_ICW	0x80000053	No	No	Level 2 instruction cache writes
+PAPI_L3_ICW	0x80000054	No	No	Level 3 instruction cache writes
+PAPI_L1_TCH	0x80000055	No	No	Level 1 total cache hits
+PAPI_L2_TCH	0x80000056	No	No	Level 2 total cache hits
+PAPI_L3_TCH	0x80000057	Yes	No	Level 3 total cache hits
+PAPI_L1_TCA	0x80000058	No	No	Level 1 total cache accesses
+PAPI_L2_TCA	0x80000059	No	No	Level 2 total cache accesses
+PAPI_L3_TCA	0x8000005a	No	No	Level 3 total cache accesses
+PAPI_L1_TCR	0x8000005b	No	No	Level 1 total cache reads
+PAPI_L2_TCR	0x8000005c	No	No	Level 2 total cache reads
+PAPI_L3_TCR	0x8000005d	No	No	Level 3 total cache reads
+PAPI_L1_TCW	0x8000005e	No	No	Level 1 total cache writes
+PAPI_L2_TCW	0x8000005f	No	No	Level 2 total cache writes
+PAPI_L3_TCW	0x80000060	No	No	Level 3 total cache writes
+PAPI_FML_INS	0x80000061	Yes	No	Floating point multiply instructions
+PAPI_FAD_INS	0x80000062	Yes	No	Floating point add instructions
+PAPI_FDV_INS	0x80000063	No	No	Floating point divide instructions
+PAPI_FSQ_INS	0x80000064	No	No	Floating point square root instructions
+PAPI_FNV_INS	0x80000065	No	No	Floating point inverse instructions
+PAPI_FP_OPS	0x80000066	No	No	Floating point operations
+PAPI_BGL_OED	0x80000067	Yes	No	BGL special event: Oedipus operations
+PAPI_BGL_TS_32B	0x80000068	Yes	Yes	BGL special event: Torus 32B chunks sent
+PAPI_BGL_TS_FULL	0x80000069	Yes	Yes	BGL special event: Torus no token UPC cycles
+PAPI_BGL_TR_DPKT	0x8000006a	Yes	Yes	BGL special event: Tree 256 byte packets
+PAPI_BGL_TR_FULL	0x8000006b	Yes	Yes	BGL special event: UPC cycles (CLOCKx2) tree rcv is full
+-------------------------------------------------------------------------
+avail.c                                  PASSED
