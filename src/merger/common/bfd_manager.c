@@ -231,7 +231,7 @@ int BFDmanager_translateAddress (bfd *bfdImage, asymbol **bfdSymbols,
 	void *address, char **function, char **file, int *line)
 {
 	BFDmanager_symbolInfo_t syminfo;
-	char caddress[16];
+	char caddress[32];
 
 #if defined(DEBUG)
 	printf ("DEBUG: BFDmanager_translateAddress (%p, %p, address = %p)\n", bfdImage, bfdSymbols, address);
