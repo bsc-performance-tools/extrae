@@ -174,7 +174,7 @@ int tracejant = TRUE;
 int tracejant_mpi = TRUE;
 
 /***** Variable global per saber si MPI s'ha de tracejar amb hwc *********/
-int tracejant_hwc_mpi = FALSE;
+int tracejant_hwc_mpi = TRUE;
 
 /***** Global variable to control whether PACX must be instrumented ******/
 int tracejant_pacx = TRUE;
@@ -186,16 +186,16 @@ int tracejant_hwc_pacx = FALSE;
 int tracejant_omp = TRUE;
 
 /***** Variable global per saber si OpenMP s'ha de tracejar amb hwc ******/
-int tracejant_hwc_omp = FALSE;
+int tracejant_hwc_omp = TRUE;
 
 /***** Variable global per saber si pthread s'ha de tracejar **************/
 int tracejant_pthread = TRUE;
 
 /***** Variable global per saber si pthread s'ha de tracejar amb hwc ******/
-int tracejant_hwc_pthread = FALSE;
+int tracejant_hwc_pthread = TRUE;
 
 /***** Variable global per saber si UFs s'han de tracejar amb hwc ********/
-int tracejant_hwc_uf = FALSE;
+int tracejant_hwc_uf = TRUE;
 
 /*** Variable global per saber si hem d'obtenir comptador de la xarxa ****/
 int tracejant_network_hwc = FALSE;
