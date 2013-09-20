@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
 #elif defined(__i386__)
 	printf ("x86");
 #elif defined(__ia64__)
-	printf ("intel itanium")
+	printf ("intel itanium");
 #elif defined(__powerpc__)
 	printf ("powerpc");
 #elif defined(__powerpc64__)
