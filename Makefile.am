@@ -16,6 +16,8 @@ EXTRA_DIST = \
 VPATH=@srcdir@
 SRCDIR=@srcdir@
 
+ACLOCAL_AMFLAGS=-I config
+
 @SET_MAKE@
 
 dist-hook:
