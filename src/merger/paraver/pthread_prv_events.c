@@ -161,8 +161,8 @@ void WriteEnabled_pthread_Operations (FILE * fd)
 #if defined(HAVE_BFD)
 	/* Hey, pthread & OpenMP share the same labels? */
 	if (createpresent)
-		Address2Info_Write_OMP_Labels (fd, PTHREAD_FUNC_EV, "Parallel function",
-			PTHREAD_FUNC_LINE_EV, "Parallel function line and file",
+		Address2Info_Write_OMP_Labels (fd, PTHREAD_FUNC_EV, "pthread function",
+			PTHREAD_FUNC_LINE_EV, "pthread function line and file",
 			get_option_merge_UniqueCallerID());
 #endif
 }
