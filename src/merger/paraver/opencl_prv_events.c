@@ -47,6 +47,7 @@ static char UNUSED rcsid[] = "$Id: mpi_prv_semantics.c 1761 2013-05-23 16:04:22Z
 #include "trace_communication.h"
 #include "addresses.h"
 #include "options.h"
+#include "labels.h"
 #include "extrae_types.h"
 
 #if USE_HARDWARE_COUNTERS

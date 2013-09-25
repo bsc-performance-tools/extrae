@@ -41,6 +41,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "omp_prv_events.h"
 #include "mpi2out.h"
 #include "options.h"
+#include "labels.h"
 
 struct pthread_event_presency_label_st
 {
