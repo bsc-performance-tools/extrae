@@ -13,7 +13,8 @@ manual_ug = user-guide
 all:
 	@echo Nothing to be done by default. If you want to build the documentation issue make build-documentation.
 
-build-documentation: $(manual_ug).tex version.tex API-section.tex common-macros.tex configure-installation.tex environmentvariables-section.tex examples-section.tex FAQ-section.tex instrumented-routines-section.tex merge-section.tex quick-guide-section.tex wholeXML-section.tex XML-section.tex
+build-documentation: $(manual_ug).tex API-section.tex common-macros.tex configure-installation.tex environmentvariables-section.tex examples-section.tex FAQ-section.tex instrumented-routines-section.tex merge-section.tex quick-guide-section.tex wholeXML-section.tex XML-section.tex
+	@echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
 if BUILD_DOCS_PS
 	$(latex) $(manual_ug)
 	$(latex) $(manual_ug)
@@ -29,9 +30,6 @@ if BUILD_HTML_DOCS
 	rm -fr user-guide/index.2.html
 	cd ..
 endif
-
-version.tex:
-	@echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
 
 install-exec-hook: $(manual_ug).ps $(manual_ug).pdf
 	$(mkdir_p) $(DESTDIR)$(datadir)/doc
