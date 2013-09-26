@@ -27,6 +27,10 @@
 
 4) Copy the documentation (pdf format) and add it to the buildfarm output to publish it in the webpage
 
+5) Make sure that the documentation in pdf format is within the binary packages.
+  - use buildfarm/inject-user-guide.sh to add use guide into tar.bz2s like
+       inject-user-guide.sh extrae-user-guide.pdf *.tar.bz2
+
 6) Email & celebrate
   6.a) Addresses
          tools@bsc.es
