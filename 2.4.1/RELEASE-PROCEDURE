@@ -1,0 +1,39 @@
+
+1) Develop, code, fix, add and test new functionalities as wanted/needed.
+ 1.a) Make sure that all files have:
+      - License text on top
+      - SVN keywords (command svn propset svn:keywords "Date Revision Author HeadURL Id" [-R] [directories/files])
+ 1.b) Keep ChangeLog file up-to-date
+ 1.c) Keep the documentation up-to-date
+   1.c.i)   Modify the latex files
+   1.c.ii)  Invoke make build-documentation
+   1.c.iii) Commit all the latex, pdf/ps and html files into the SVN
+
+2) Change the version if necessary **
+ 2.a) in the configure.ac (see AC_INIT)
+ 2.b) in src/common/extrae_version.h
+ 2.c) svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
+       OR
+      svn copy https://svn.bsc.es/repos/ptools/extrae/branches/2.3 https://svn.bsc.es/repos/ptools/extrae/tags/2.3.5
+ 2.d) download from the new tag 
+ 2.e) bootstrap & configure to rebuild documentation (1.c)
+ 2.f) commit the documentation
+ 2.f) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
+
+** If this wasn't done at the previous release step.
+
+3) Generate binary packages using the buildfarm script
+  - this makes sure that the package will compile at least on our environment -
+
+4) Copy the documentation (pdf format) and add it to the buildfarm output to publish it in the webpage
+
+5) Make sure that the documentation in pdf format is within the binary packages.
+  - use buildfarm/inject-user-guide.sh to add use guide into tar.bz2s like
+       inject-user-guide.sh extrae-user-guide.pdf *.tar.bz2
+
+6) Email & celebrate
+  6.a) Addresses
+         tools@bsc.es
+         support@bsc.es
+         pm-tools@bsc.es
+

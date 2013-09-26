@@ -1,0 +1,7 @@
+If you have installed Extrae with DynInst support you can use automatic instrumentation of uninstrumented binaries as shown in the script
+
+  run_dyninst.sh
+
+Otherwise, you need some code modifications (i.e., adding Extrae_init and Extrae_fini calls) and run the application like in
+
+  run_ldpreload.sh

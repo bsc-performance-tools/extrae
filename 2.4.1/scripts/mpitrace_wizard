@@ -1,0 +1,609 @@
+#!/bin/bash
+
+# Constants
+OK=0
+TRUE=0
+FALSE=1
+
+# Error codes
+ERR_BAD_ARGS=1
+ERR_FILE_NOT_FOUND=2
+ERR_WRITING=3 
+ERR_BAD_SLURM=4
+ERR_BAD_ENV=5
+ERR_BAD_APPL=6
+
+# Check whether $1 is a number
+IS_NUMBER ()
+{
+   if ! [ $1 -eq $1 2> /dev/null ] || [ "$1" = "" ] ; then
+      return ${FALSE}
+   else
+      return ${TRUE}
+   fi
+}
+
+# Check whether file $1 is an executable
+IS_EXECUTABLE ()
+{
+
+   if [ -f $1 ] ; then
+      eval "stat -c %A -- $1 | grep x >& /dev/null"
+      return $?
+   else
+      return ${ERR_FILE_NOT_FOUND}
+   fi
+}
+
+# Check whether file $1 is binary
+IS_BINARY ()
+{
+   if [ -f $1 ] ; then
+      eval "file $1 | grep executable >& /dev/null"
+      return $?
+   else
+      return ${ERR_FILE_NOT_FOUND}
+   fi
+}
+
+# Check whether binary $1 is a MPI application
+IS_MPI ()
+{
+   if IS_BINARY $1 ; then
+      eval "nm $1 | grep -i mpi_init >& /dev/null"
+      return $?
+   else
+      return ${FALSE}
+   fi
+}
+
+# Check whether binary $1 is an OpenMP application
+IS_OPENMP ()
+{
+   if IS_BINARY $1 ; then
+      eval "nm $1 | grep -i omp_get_thread_num >& /dev/null"
+      return $?
+   else
+      return ${FALSE}
+   fi
+}
+
+# Check whether binary $1 is a Pthreads application
+IS_PTHREADS ()
+{
+   if IS_BINARY $1 ; then
+      eval "nm $1 | grep -i pthread_create >& /dev/null"
+      return $?
+   else
+      return ${FALSE}
+   fi
+}
+
+# Check whether file $1 is textual
+IS_TEXT ()
+{
+   if [ -f $1 ] ; then
+      eval "file $1 | grep text >& /dev/null "
+      return $?
+   else
+      return ${FALSE}
+   fi
+}
+
+# Check whether file $1 is a Slurm/Moab script
+IS_SLURM ()
+{
+   if IS_TEXT $1 ; then
+      eval "mnsubmit -test $1 >& /dev/null"
+      return $?
+   fi
+   return ${FALSE}
+}
+
+# Check whether the Slurm/Moab script $1 has the tracing already interposed
+ALREADY_TRACED ()
+{
+   eval "cat $1 | grep ${SETENV_NAME} >& /dev/null"
+   return $?
+}
+
+# Given the base working directory and a relative path, returns the full path of a file
+Relative_To_Full_Path ()
+{
+   Working_Dir=$1
+   Relative_Path=$2
+   if [ ${Relative_Path:0:1} != "/" ] ; then
+      Relative_Path=${Working_Dir}/${Relative_Path}
+   fi
+
+   if test -d ${Relative_Path} ; then
+      cd `dirname ${Relative_Path} >& /dev/null `
+      Relative_To_Full_Path_Result=`pwd`"/"`basename ${Relative_Path}`
+      Relative_To_Full_Path_Result=`echo ${Relative_To_Full_Path_Result} | sed 's/\/\+/\//g'`
+      cd -
+      return ${TRUE}
+   else
+      Relative_To_Full_Path_Result=${Relative_Path} 
+      return ${FALSE}
+   fi
+}
+
+Create_Execution_Script ()
+{
+   NTASKS_DEFAULT=1
+   if IS_MPI ${APPLICATION_PATH} ; then
+      # Ask for number of tasks
+      echo "'${APPLICATION_NAME}' seems to be a MPI application." 
+      echo -n "How many tasks do you want to execute? [${NTASKS_DEFAULT}]: "
+      read NTASKS
+      menu_ntasks()
+      {
+         if ! IS_NUMBER ${NTASKS} ; then
+            if test "${NTASKS}" == "" ; then
+               NTASKS=${NTASKS_DEFAULT}
+            else
+               echo -n "Type a valid number or press ENTER for default value [${NTASKS_DEFAULT}]: "
+               read NTASKS
+               menu_ntasks
+            fi
+         fi
+      }
+      menu_ntasks
+
+   else
+      NTASKS=${NTASKS_DEFAULT}
+   fi
+
+   NTHREADS_DEFAULT=1
+   HAVE_THREADS=${TRUE}
+   if IS_OPENMP ${APPLICATION_PATH} ; then
+      echo "'${APPLICATION_NAME}' seems to be an OpenMP application."
+   elif IS_PTHREADS ${APPLICATION_PATH} ; then
+      echo "'${APPLICATION_NAME}' seems to use POSIX threads."
+   else 
+      HAVE_THREADS=${FALSE}
+   fi
+
+   if [ ${HAVE_THREADS} == ${TRUE} ] ; then
+      echo -n "How many threads do you want to execute per task? [${NTHREADS_DEFAULT}]: "
+      read NTHREADS
+      menu_nthreads()
+      {
+         if ! IS_NUMBER ${NTHREADS} ; then
+            if test "${NTHREADS}" == "" ; then
+               NTHREADS=${NTHREADS_DEFAULT}
+            else
+               echo -n "Type a valid number or press ENTER for default value [${NTHREADS_DEFAULT}]: "
+               read NTHREADS
+               menu_nthreads
+            fi
+         fi
+      }
+      menu_nthreads
+   else
+      NTHREADS=${NTHREADS_DEFAULT}
+   fi
+
+   RUN_OUT="${CWD}run_${APPLICATION_NAME}.out.%j"
+   RUN_ERR="${CWD}run_${APPLICATION_NAME}.err.%j"
+   # If the application is MPI processes will be spawned through srun
+   if [ ${NTASKS} -gt 1 ] ; then
+      SRUN="srun "
+   else
+      SRUN=""
+   fi
+   echo "#!/bin/bash"                                           >> ${RUN_SCRIPT}
+   echo "# @ initialdir = ${TMP_DIRPATH}"                       >> ${RUN_SCRIPT}
+   echo "# @ output = ${RUN_OUT}"                               >> ${RUN_SCRIPT}
+   echo "# @ error = ${RUN_ERR}"                                >> ${RUN_SCRIPT}
+   echo "# @ total_tasks = ${NTASKS}"                           >> ${RUN_SCRIPT}
+   echo "# @ cpus_per_task = ${NTHREADS}"                       >> ${RUN_SCRIPT}
+   echo "# @ tasks_per_node = 4"                                >> ${RUN_SCRIPT}
+   echo "# @ wall_clock_limit = 00:01:00"                       >> ${RUN_SCRIPT}
+   echo ""                                                      >> ${RUN_SCRIPT}
+   if [ ${NTHREADS} -gt 0 ] ; then                        
+      echo "export OMP_NUM_THREADS=${NTHREADS}"                 >> ${RUN_SCRIPT}
+      echo ""                                                   >> ${RUN_SCRIPT}
+   fi
+   echo "${SRUN}${SETENV_SCRIPT} ${APPLICATION_AND_PARAMS}"     >> ${RUN_SCRIPT}
+   echo ""                                                      >> ${RUN_SCRIPT}
+   echo "mnsubmit ${MERGE_SCRIPT}"                              >> ${RUN_SCRIPT}
+
+   if [ $? -gt 0 ] ; then
+      echo "Error creating script '${RUN_SCRIPT}'."
+   else
+      return ${OK}
+   fi
+}
+
+Interpose_Execution_Script ()
+{
+   # Read the total_tasks directive to know how many tasks have been requested (used to calculate number of tasks for the merging process)
+   TOTAL_TASKS=`cat ${PROVIDED_SCRIPT} | grep total_tasks`
+   NTASKS=`echo ${TOTAL_TASKS} | grep total_tasks | cut -d = -f 2 | sed 's/^[ \t]*//;s/[ \t]*$//' `
+
+   if ! IS_NUMBER ${NTASKS} ; then
+      echo "Error: @total_tasks is not defined in script '${PROVIDED_SCRIPT}' or specifies an invalid value (${NTASKS})"
+      return ${ERR_BAD_SLURM}
+   fi
+ 
+   if ALREADY_TRACED ${PROVIDED_SCRIPT} ; then
+      echo "Error: Tracing library seems to be already interposed. Found call(s) to '${SETENV_NAME}' at:"
+      echo `cat ${PROVIDED_SCRIPT} | grep -n ${SETENV_NAME}`
+      return ${ERR_BAD_SLURM}
+   fi
+
+   # Search for ${MPITRACE} tag and replace it if found
+   if [ `cat ${PROVIDED_SCRIPT} | grep \$\{MPITRACE\} | wc -l` -gt 0 ] ; then
+      cat ${PROVIDED_SCRIPT} | sed "s|\\\${MPITRACE}|${SETENV_SCRIPT}|g" >> ${RUN_SCRIPT}
+   else
+      # Parse the script searching for the execution command
+
+      # If a line ends with a backslash, append the next line to it
+      sed -e :a -e '/\\$/N; s/\\\n//; ta' ${PROVIDED_SCRIPT} | while read line 
+      do
+         # Skip comments & lines not containing the application name
+         if [ `echo ${line} | grep -v ^\# | grep ${APPLICATION_NAME} | wc -l` == 1 ] ; then
+
+            Get_Token ()
+            {
+               Sub_Get_Token_IDX=$1 ; shift
+               Sub_Get_Token_TEXT="$* "
+               Get_Token_Result=`echo "${Sub_Get_Token_TEXT} " | cut -d\  -f ${Sub_Get_Token_IDX}`
+            }
+
+            Get_Token 1 ${line}
+            FirstParam=`basename ${Get_Token_Result}`
+            Get_Token 2 ${line}
+            if [ -z ${Get_Token_Result} ] ; then
+               SecondParam=""
+            else 
+               SecondParam=`basename ${Get_Token_Result}`
+            fi
+   
+            # This line is a "known-syntax" execution command?
+            if [ `echo ${line} | grep srun | wc -l` == 1 ] ||                                # ... srun ... ./appl ... 
+               [ ${FirstParam} == ${APPLICATION_NAME} ]    ||                                # ./appl 
+               ( [ ${FirstParam} == "time" ] && [ ${SecondParam} == ${APPLICATION_NAME} ] ); # time ./appl
+            then
+                # Locate the application execution parameter 
+                Interposed=${FALSE}
+                EndLine=${FALSE}
+                CurrentIdx=1
+                while [ ${Interposed} -eq ${FALSE} ] && [ ${EndLine} -eq ${FALSE} ] ; do
+                   Get_Token ${CurrentIdx} ${line}
+                   CurrentParam=${Get_Token_Result}
+
+                   if [ -z ${CurrentParam} ] ; then
+                      EndLine=${TRUE}
+                   else
+                      if [ `basename ${CurrentParam}` == ${APPLICATION_NAME} ] ; then
+
+                         # Interpose the tracing before the current parameter
+                         PrevParam=`expr ${CurrentIdx} - 1`
+                         if [ ${PrevParam} -gt 0 ] ; then
+                            Get_Token 1-${PrevParam} ${line}
+                            echo -n ${Get_Token_Result}     >> ${RUN_SCRIPT}
+                            echo -n " "                     >> ${RUN_SCRIPT}
+                         fi 
+                         echo -n "${SETENV_SCRIPT} "        >> ${RUN_SCRIPT}
+                         Get_Token ${CurrentIdx}- ${line}
+                         echo ${Get_Token_Result}           >> ${RUN_SCRIPT}
+                         Interposed=${TRUE}
+                      fi
+                   fi
+                   let CurrentIdx=${CurrentIdx}+1
+                done
+            else
+               echo ${line} >> ${RUN_SCRIPT}
+            fi
+         else
+            echo ${line} >> ${RUN_SCRIPT}
+         fi 
+      done
+   fi
+
+   if ! ALREADY_TRACED ${RUN_SCRIPT} ; then 
+      echo "Error: Can not guess where to interpose the tracing."
+      return ${ERR_BAD_SLURM}
+   fi
+
+   echo ""                         >> ${RUN_SCRIPT}
+   echo "mnsubmit ${MERGE_SCRIPT}" >> ${RUN_SCRIPT}
+
+   if [ $? -gt 0 ] ; then
+      echo "Error creating script '${RUN_SCRIPT}'."
+      return ${ERR_WRITING}
+   else
+      return ${OK}
+   fi
+}
+
+Create_Setenv_Script ()
+{
+   # Check if the application has been linked with MPItrace
+   LDD=`ldd ${APPLICATION_PATH} | grep -i mpitrace | wc -l`
+   NM=`nm ${APPLICATION_PATH} | grep -i mpitrace | wc -l`
+
+   if [ ${LDD} -eq 0 ] && [ ${NM} -eq 0 ] ; then
+      # Tracing library is NOT linked. Choose the appropriate library to preload.
+      if IS_OPENMP ${APPLICATION_PATH} ; then
+
+         if IS_MPI ${APPLICATION_PATH} ; then
+            # Mixed MPI + OpenMP application
+            PRELOAD_LIBRARY="libompitrace.so"
+         else
+            MPItrace_init_Called=`nm ${APPLICATION_PATH} | grep -i mpitrace_init | wc -l`
+   
+            if [ ${MPItrace_init_Called} -lt 1 ] ; then
+               echo "Error: The application seems to be OpenMP but no calls to MPItrace_init detected."
+               echo "It is required to invoke this function before any parallel region in order to trace an OpenMP application."
+               return ${ERR_BAD_APPL}
+            else
+               PRELOAD_LIBRARY="libompitrace.so"
+            fi 
+         fi
+      elif IS_MPI ${APPLICATION_PATH} ; then
+         PRELOAD_LIBRARY="libmpitrace.so"
+      elif IS_PTHREADS ${APPLICATION_PATH} ; then
+         PRELOAD_LIBRARY="libpttrace.so"
+      else
+         echo "Error: The application seems to be sequential but no MPItrace symbols can be found."
+         echo "In order to trace a sequential application you have to add calls to the MPItrace API and link against libseqtrace.[a|so]."
+         return ${ERR_BAD_APPL}
+      fi
+   else
+      # Tracing library is linked. Do NOT preload anything. 
+      PRELOAD_LIBRARY=""
+   fi
+ 
+   # Select the tracing mode (Only relevant for MPI applications)
+   if IS_MPI ${APPLICATION_PATH} ; then
+      MODE_DEFAULT="d"
+      echo -n "Would you like to get a (d)etailed or (s)ummarized trace? (d/s) [${MODE_DEFAULT}]: "
+      read MODE
+
+      menu_mode()
+      {
+         case ${MODE} in
+            "d"|"D"|"")
+               MODE="D"
+               XML_TEMPLATE="${MPITRACE_HOME}/share/example/detailed_trace_basic.xml"
+               ;;
+            "s"|"S")
+               MODE="S"
+               XML_TEMPLATE="${MPITRACE_HOME}/share/example/summarized_trace_basic.xml"
+               ;;
+            *)
+               echo -n "Valid options are: d, s or press ENTER for default [${MODE_DEFAULT}]. Please select: "
+               read MODE
+               menu_mode
+               ;;
+         esac
+      }
+      menu_mode
+   else
+      MODE="D"
+      XML_TEMPLATE="${MPITRACE_HOME}/share/example/detailed_trace_basic.xml"
+   fi
+
+   # Check whether configuration template exists
+   if ! eval "cp ${XML_TEMPLATE} ${CONFIG_FILE}" ; then
+      echo "Error: Can't find configuration template '${XML_TEMPLATE}'."
+      return ${ERR_FILE_NOT_FOUND}
+   fi
+
+   # Write the environment setup script
+   echo "#!/bin/sh"                                            >> ${SETENV_SCRIPT}
+   echo ""                                                     >> ${SETENV_SCRIPT}
+   echo "export MPITRACE_HOME=${MPITRACE_HOME}"                >> ${SETENV_SCRIPT}
+   echo "export MPTRACE_CONFIG_FILE=${CONFIG_FILE}"            >> ${SETENV_SCRIPT}
+   echo ""                                                     >> ${SETENV_SCRIPT}
+   if [ ! -z ${PRELOAD_LIBRARY} ] ; then
+      echo "export LD_PRELOAD=${MPITRACE_HOME}/lib/${LIBRARY}" >> ${SETENV_SCRIPT}
+   fi
+   echo "\$*"                                                  >> ${SETENV_SCRIPT}
+   chmod u+x ${SETENV_SCRIPT}
+
+   if [ $? -gt 0 ] ; then
+      echo "Error creating script '${SETENV_SCRIPT}'."
+      return ${ERR_WRITING}
+   else
+      return ${OK}
+   fi
+}
+
+Create_Merge_Script ()
+{
+   # Calculate how many tasks are needed to merge the mpits
+   # This depends on the number of mpits (${NTASKS})
+   if ! IS_NUMBER ${NTASKS} ; then
+      MERGE_NTASKS=1
+   else
+      MERGE_NTASKS=`expr ${NTASKS} / 16 + 1`
+   fi
+
+   # Write the merge script
+   MERGE_OUT="${CWD}merge_${APPLICATION_NAME}.out.%j"
+   MERGE_ERR="${CWD}merge_${APPLICATION_NAME}.err.%j"
+   MERGE_BIN="${MPITRACE_HOME}/bin/mpimpi2prv"
+   PRV="${CWD}${APPLICATION_NAME}_${NTASKS}.prv"
+   echo "#!/bin/bash"                                           >> ${MERGE_SCRIPT}
+   echo "# @ initialdir = ${TMP_DIRPATH}"                       >> ${MERGE_SCRIPT}
+   echo "# @ output = ${MERGE_OUT}"                             >> ${MERGE_SCRIPT}
+   echo "# @ error = ${MERGE_ERR}"                              >> ${MERGE_SCRIPT}
+   echo "# @ total_tasks = ${MERGE_NTASKS}"                     >> ${MERGE_SCRIPT}
+   echo "# @ cpus_per_task = 1"                                 >> ${MERGE_SCRIPT}
+   echo "# @ tasks_per_node = 4"                                >> ${MERGE_SCRIPT}
+   echo "# @ wall_clock_limit = 00:01:00"                       >> ${MERGE_SCRIPT}
+   echo ""                                                      >> ${MERGE_SCRIPT}
+   echo "export MPITRACE_HOME=${MPITRACE_HOME}"                 >> ${MERGE_SCRIPT}
+   echo ""                                                      >> ${MERGE_SCRIPT}
+   echo "srun ${MERGE_BIN} -f ./TRACE.mpits -o ${PRV}"          >> ${MERGE_SCRIPT}
+   echo ""                                                      >> ${MERGE_SCRIPT}
+   echo "${CLEAN_SCRIPT}"                                       >> ${MERGE_SCRIPT}
+ 
+   if [ $? -gt 0 ] ; then
+      echo "Error creating script '${MERGE_SCRIPT}'."
+      return ${ERR_WRITING}
+   else 
+      return ${OK}
+   fi
+}
+
+Create_Cleanup_Script ()
+{
+   echo "#!/bin/bash"                                           >> ${CLEAN_SCRIPT}
+   echo ""                                                      >> ${CLEAN_SCRIPT}
+   echo "rm -fr ${AUTOTRACE}"                                   >> ${CLEAN_SCRIPT}
+   echo "rm -fr ${TMP_DIRPATH}"                                 >> ${CLEAN_SCRIPT}
+   chmod u+x ${CLEAN_SCRIPT}
+
+   if [ $? -gt 0 ] ; then
+      echo "Error creating script '${CLEAN_SCRIPT}'."
+      return ${ERR_WRITING}
+   else
+      return ${OK}
+   fi
+}
+
+Create_Launch_Script ()
+{
+   echo "#!/bin/sh"                                             >> ${AUTOTRACE}
+   echo ""                                                      >> ${AUTOTRACE}
+   echo "if [ \"\$1\" = \"clean\" ] ; then"                     >> ${AUTOTRACE}
+   echo "   ${CLEAN_SCRIPT}"                                    >> ${AUTOTRACE}
+   echo "   exit"                                               >> ${AUTOTRACE}
+   echo "fi"                                                    >> ${AUTOTRACE}
+   echo "mnsubmit ${RUN_SCRIPT}"                                >> ${AUTOTRACE}
+   chmod u+x ${AUTOTRACE}          
+
+   if [ $? -gt 0 ] ; then
+      echo "Error creating script '${CLEAN_SCRIPT}'."
+      return ${ERR_WRITING}
+   else
+      return ${OK}
+   fi
+}
+
+Print_Summary ()
+{
+   echo ""
+   echo "You may want to modify the tracing configuration manually:"
+   echo ""
+   echo "   ${CONFIG_FILE}"
+   echo ""
+   echo "In order to trace the application please execute:"
+   echo ""
+   echo "   ${AUTOTRACE}"
+   echo ""
+}
+
+
+clean_and_exit ()
+{
+   echo ""
+   echo "MPItrace wizard exits due to previous errors (code=$1)."
+
+   rm -rf ${TMP_DIRPATH} ${AUTOTRACE}
+   exit $1
+}
+
+Show_Help ()
+{
+   echo "Error: Invalid arguments."
+   echo ""
+   echo "Syntax: `basename $0` <application> [appl_params]"
+   echo "Syntax: `basename $0` <slurm_script> <application>"
+   echo ""
+   exit 
+}
+
+#############
+#   MAIN    #
+#############
+
+# Check MPITRACE_HOME environment variable
+if [ -z ${MPITRACE_HOME} ] ; then
+   echo "Error: MPITRACE_HOME environment variable is not set."
+   echo ""
+   echo "Please define it pointing to the directory where the tracing library is installed:"
+   echo "i.e.: export MPITRACE_HOME=/gpfs/apps/CEPBATOOLS/mpitrace/64"
+   echo ""
+   exit $ERR_BAD_ENV
+fi
+
+# Check for syntax
+if [ $# -lt 1 ] ; then
+   Show_Help
+fi
+
+if IS_BINARY $1 ; then
+   APPLICATION_PATH=$1
+   APPLICATION_NAME=`basename $1`
+   APPLICATION_AND_PARAMS=$*
+elif IS_SLURM $1 ; then
+   if [ $# -lt 2 ] ; then
+      Show_Help
+   fi
+   if ! IS_BINARY $2 ; then
+      echo "Error: '$2' is not an application"
+      exit ${ERR_BAD_ARGS}
+   fi
+   PROVIDED_SCRIPT=$1
+   APPLICATION_PATH=$2
+   APPLICATION_NAME=`basename $2`
+else
+   echo "Error: '$1' doesn't seem to be neither an application nor a Slurm/Moab script."
+   exit ${ERR_BAD_ARGS}
+fi
+
+# Convert relative into full path 
+Relative_To_Full_Path `pwd` ${APPLICATION_PATH}
+APPLICATION_PATH=${Relative_To_Full_Path_Result}
+
+# Create temporal directories 
+TMP_DIRNAME=`mktemp -d XXXXXXXX`
+if [ $? != 0 ] ; then
+   echo "Error: Can not create temporal files."
+   echo "Do you have write permissions on '`dirname ${CWD}`'?"
+   exit ${ERR_WRITING}
+fi
+
+CWD=`pwd`"/"
+TMP_DIRPATH="${CWD}${TMP_DIRNAME}"
+AUTOTRACE="${CWD}autotrace.${TMP_DIRNAME}"
+RUN_SCRIPT="${TMP_DIRPATH}/run_${APPLICATION_NAME}"
+SETENV_NAME="mpitrace_setenv" 
+SETENV_SCRIPT="${TMP_DIRPATH}/${SETENV_NAME}_${APPLICATION_NAME}"
+MERGE_SCRIPT="${TMP_DIRPATH}/merge_${APPLICATION_NAME}"
+CLEAN_SCRIPT="${TMP_DIRPATH}/clean_${APPLICATION_NAME}"
+CONFIG_FILE="${TMP_DIRPATH}/mpitrace_config_${APPLICATION_NAME}.xml"
+
+############## Debug ##############
+#echo "CWD: ${CWD}"
+#echo "TMP_DIRNAME: ${TMP_DIRNAME}"
+#echo "TMP_DIRPATH: ${TMP_DIRPATH}"
+#echo "AUTOTRACE: ${AUTOTRACE}"
+#echo "RUN_SCRIPT: ${RUN_SCRIPT}"
+#echo "SETENV_SCRIPT: ${SETENV_SCRIPT}"
+#echo "MERGE_SCRIPT: ${MERGE_SCRIPT}"
+#echo "CLEAN_SCRIPT: ${CLEAN_SCRIPT}"
+#echo "PROVIDED_SCRIPT: ${PROVIDED_SCRIPT}"
+###################################
+
+# Generate output files
+if IS_BINARY $1 ; then
+   Create_Execution_Script
+   rc=$?
+elif IS_SLURM $1 ; then
+   Interpose_Execution_Script 
+   rc=$?
+fi
+([ ${rc} == 0 ]        || clean_and_exit $rc) &&
+(Create_Setenv_Script  || clean_and_exit $?)  &&
+(Create_Merge_Script   || clean_and_exit $?)  &&
+(Create_Cleanup_Script || clean_and_exit $?)  &&
+(Create_Launch_Script  || clean_and_exit $?)  &&
+(Print_Summary)
+

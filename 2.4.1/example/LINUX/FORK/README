@@ -1,0 +1,8 @@
+
+
+  * Make sure that the <merge> section is not enabled in the XML.
+  * Remove set-0 directory, if it exists.
+  * Run ./run_dyninst.sh to gather information regarding pi_forked binary.
+  * Run ${EXTRAE_HOME}/bin/genmpits set-0 > TRACE.mpits to generate a new TRACE.mpits file
+  * Run ${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -e pi_forked -o pi_forked.prv
+
