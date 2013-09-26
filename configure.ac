@@ -13,7 +13,8 @@ AC_INIT(Extrae, 3.0rc2, tools@bsc.es)
 #AC_CONFIG_SRCDIR(src/mpitrace.c)
 
 # GNU Autotools intermediate files are stored in the following directory
-AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([config])
 
 SVN=`which svn`
 

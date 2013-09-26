@@ -1,6 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 26Sep2013 Fix missing header in merger files
+             BFD compilation in cross-compiled environments
+             Autodetection of librt using gcc --print-file-name=librt.so
+             New --with-librt to pass the location of librt
  * 17Sep2013 Improved instrumentation support for MPI_Comm_spawn. Now supports concurrent spawns from different process of the parent application.
  + 09Sep2013 Added a quicksort algorithm for files 
  * 09Sep2013 Revamped pthread event types so as all calls are only one type

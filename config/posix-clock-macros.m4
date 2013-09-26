@@ -12,6 +12,15 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
       [enable_posix_clock="not_set"]
    )
 
+   AC_ARG_WITH(librt,
+      AC_HELP_STRING(
+         [--with-librt@<:@=DIR@:>@],
+         [specify where to find librt libraries]
+      ),
+      [librt_path=${withval}],
+      [librt_path="not_set"]
+   )
+
    if test -x /sbin/lsmod ; then
      LSMOD="/sbin/lsmod"
    elif test -x /bin/lsmod ; then
@@ -19,7 +28,7 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
    else
      LSMOD="lsmod"
    fi
-     
+
    if test "${enable_posix_clock}" = "not_set" ; then
       if test "${OperatingSystem}" = "linux" ; then
          acpi_cpufreq=`${LSMOD} | grep  ^acpi_cpufreq | wc -l`
@@ -80,31 +89,63 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
       fi
 
       dnl Check for existance of clock_gettime / CLOCK_MONOTONIC
-      AC_MSG_CHECKING([for clock_gettime and CLOCK_MONOTONIC in libraries])
-      LIBS_old=${LIBS}
-      TRYING_RT_LIBS=`/sbin/ldconfig -p | grep librt | ${AWK} -F '=> ' '{ print $'2' }'`
+      AC_MSG_CHECKING([for clock_gettime and CLOCK_MONOTONIC in default libraries])
 
-      dnl Adding additional locations for librt
-      ARM_cross_compiled_librt=/usr/arm-linux-gnueabi/lib/librt.so
+      AC_TRY_LINK(
+         [#include <time.h>], 
+         [
+            struct timespec t;
+            clock_gettime (CLOCK_MONOTONIC, &t);
+         ],
+         [RT_found_without_libraries_required="yes"],
+         [RT_found_without_libraries_required="no"]
+      )
 
-      for ac_cv_clock_gettime_lib in "" ${TRYING_RT_LIBS} ${ARM_cross_compiled_librt} "NO" ;
-      do
-         LIBS="${ac_cv_clock_gettime_lib}"
-         AC_TRY_LINK(
-            [#include <time.h>], 
-            [
-               struct timespec t;
-               clock_gettime (CLOCK_MONOTONIC, &t);
-            ],
-            [break],
-            []
-         )
-      done
-      LIBS=${LIBS_old}
-      if test "${ac_cv_clock_gettime_lib}" = "NO" ; then
-         AC_MSG_ERROR([Unable to find a library that contains clock_gettime (typically found in -lc or -lrt)])
+      if test "${RT_found_without_libraries_required}" = "no" ; then
+         LIBS_old=${LIBS}
+
+         AC_MSG_RESULT([not found])
+
+         AC_MSG_CHECKING([for clock_gettime and CLOCK_MONOTONIC in additional libraries])
+
+         if test "${librt_path}" != "not_set" ; then
+           TRYING_RT_LIBS=${librt_path}
+         else
+           CC_RT_POINTER=`${CC} --print-file-name=librt.so`
+           if test -f "${CC_RT_POINTER}" ; then
+              TRYING_RT_LIBS=`readlink -f ${CC_RT_POINTER}`
+              if test ${?} ne 0 ; then
+                 TRYING_RT_LIBS=`/sbin/ldconfig -p | grep librt | ${AWK} -F '=> ' '{ print $'2' }'`
+              fi
+           else
+              TRYING_RT_LIBS=`/sbin/ldconfig -p | grep librt | ${AWK} -F '=> ' '{ print $'2' }'`
+           fi
+         fi
+
+         for ac_cv_clock_gettime_lib in ${TRYING_RT_LIBS} "NO"
+         do
+            LIBS="${ac_cv_clock_gettime_lib}"
+            AC_TRY_LINK(
+               [#include <time.h>], 
+               [
+                  struct timespec t;
+                  clock_gettime (CLOCK_MONOTONIC, &t);
+               ],
+               [break],
+               []
+            )
+         done
+         LIBS=${LIBS_old}
       fi
-      if test "${ac_cv_clock_gettime_lib}" = "" ; then
+
+      if test "${ac_cv_clock_gettime_lib}" = "NO" -a "${RT_found_without_libraries_required}" = "no"; then
+         if test "${librt_path}" != "not_set" ; then
+            AC_MSG_ERROR([Unable to find a library that contains clock_gettime (typically found in -lc or -lrt). You gave one library using --with-librt but the library does not seem to contain the realtime clock routines.])
+         else
+            AC_MSG_ERROR([Unable to find a library that contains clock_gettime (typically found in -lc or -lrt). You can use --with-librt to specify the exact location of the library you want to use.])
+         fi
+      fi
+      if test "${RT_found_without_libraries_required}" = "yes" ; then
          AC_MSG_RESULT([found])
          USE_POSIX_CLOCK="yes"
          NEED_POSIX_CLOCK_LIB="no"
@@ -125,10 +166,10 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
   AC_SUBST(RT_LDFLAGS)
   AC_SUBST(RT_SHAREDLIBSDIR)
   AC_SUBST(RT_LIBS)
-	AM_CONDITIONAL(USE_POSIX_CLOCK, test "${USE_POSIX_CLOCK}" = "yes")
-	AM_CONDITIONAL(NEED_POSIX_CLOCK, test "${NEED_POSIX_CLOCK_LIB}" = "yes")
-	if test "${USE_POSIX_CLOCK}" = "yes" ; then
-		AC_DEFINE([USE_POSIX_CLOCK], 1, [Defined if using posix clock routines / clock_gettime])
-	fi
+  AM_CONDITIONAL(USE_POSIX_CLOCK, test "${USE_POSIX_CLOCK}" = "yes")
+  AM_CONDITIONAL(NEED_POSIX_CLOCK, test "${NEED_POSIX_CLOCK_LIB}" = "yes")
+  if test "${USE_POSIX_CLOCK}" = "yes" ; then
+    AC_DEFINE([USE_POSIX_CLOCK], 1, [Defined if using posix clock routines / clock_gettime])
+  fi
 ])
 

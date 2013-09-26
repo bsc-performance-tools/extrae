@@ -5,11 +5,11 @@ SUBDIRS += doc
 endif
 
 EXTRA_DIST = \
-	ChangeLog \
+  ChangeLog \
   example \
   INSTALL-examples \
-	substitute \
-	substitute-all \
+  substitute \
+  substitute-all \
   SVN-branch \
   SVN-revision
 

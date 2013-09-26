@@ -483,7 +483,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
    fi
 
    AX_FLAGS_SAVE()
-   CFLAGS="-I${binutils_home_dir}/include ${CFLAGS}"
+   CPPFLAGS="-I${binutils_home_dir}/include ${CPPFLAGS}"
    AC_CHECK_HEADERS([bfd.h], [BFD_HEADER_INSTALLED="yes"], [BFD_HEADER_INSTALLED="no"])
 
    if test "${BFD_HEADER_INSTALLED}" = "yes" ; then

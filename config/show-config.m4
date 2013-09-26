@@ -123,7 +123,11 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo -e \\\tSpectral analysis available: ${SPECTRAL_INSTALLED}
         fi
   if test "${USE_POSIX_CLOCK}" = "yes" ; then
-    echo Clock routine: POSIX / clock_gettime
+    if test "${NEED_POSIX_CLOCK_LIB}" = "no" ; then
+      echo Clock routine: POSIX / clock_gettime, but don\'t need posix clock lib explicitly
+    else
+      echo Clock routine: POSIX / clock_gettime, library in ${POSIX_CLOCK_LIB}
+    fi
   else
     echo Clock routine: low-level / architecture dependant
   fi
