@@ -74,6 +74,11 @@ void trace_communicationAt (unsigned ptask_s, unsigned task_s, unsigned thread_s
 	log_r = TIMESYNC(ptask_r-1, task_r-1, Get_EvTime (recv_begin));
 	phy_r = TIMESYNC(ptask_r-1, task_r-1, Get_EvTime (recv_end));
 
+#if defined(DEBUG)
+	fprintf (stderr, "trace_communicationAt: %u.%u.%u -> %u.%u.%u atposition=%d position=%llu\n",
+	  ptask, task_s, thread_s, ptask, task_r, thread_r, atposition, position);
+#endif
+
 	trace_paraver_communication (cpu_s, ptask_s, task_s, thread_s, vthread_s, log_s, phy_s,
 	  cpu_r, ptask_r, task_r, thread_r, vthread_r, log_r, phy_r, Get_EvSize (recv_end),
 		Get_EvTag (recv_end), atposition, position);

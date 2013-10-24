@@ -273,6 +273,7 @@ void trace_paraver_unmatched_communication (unsigned int cpu_s, unsigned int pta
 	record.cpu_r = cpu_r;
 	record.ptask_r = ptask_r;
 	record.task_r = task_r;
+	record.thread_r = thread_r;
 
 	trace_paraver_record (wfb, &record);
 }
