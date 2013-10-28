@@ -649,7 +649,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 					   )
 					{
 						/* Instrument the routine that invokes the runtime */
-						if (!XML_excludeAutomaticFunctions() && strncmp(name, "vvfork", strlen("vvfork")) != 0)
+						if (!XML_excludeAutomaticFunctions())
 							USERset.insert (name);
 						if (VerboseLevel)
 						{
