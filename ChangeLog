@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 07Nov2013 Disallow --with-X= in the configure line
  * 09Oct2013 Fixed bug in merger when processing HWC_CHANGE_EV: counters shared by the old and the new set appeared twice.
  + 26Sep2013 Fix missing header in merger files
              BFD compilation in cross-compiled environments

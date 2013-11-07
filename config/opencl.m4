@@ -11,6 +11,10 @@ AC_DEFUN([AX_OPENCL],
 		[opencl_path="none"]
 	)
 
+	if test -z "${opencl_path}" ; then
+		AC_MSG_ERROR([Cannot find OpenCL])
+	fi
+
 	enable_opencl="no"
 
 	if test "${opencl_path}" != "none" ; then

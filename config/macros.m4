@@ -424,6 +424,10 @@ AC_DEFUN([AX_PROG_BINUTILS],
       [binutils_paths="${binutils_default_paths}"]
    )
 
+   if test -z "${binutils_paths}" ; then
+      AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed. Also, if you want to generate shared libraries check for the existance of the libbfd.so library])
+   fi
+
    if test "${binutils_paths}" != "no" ; then
       AC_MSG_CHECKING([for binutils])
       for binutils_home_dir in [${binutils_paths} "notfound"]; do
@@ -860,6 +864,10 @@ AC_DEFUN([AX_PROG_PAPI],
       [papi_paths="not_set"] dnl List of possible default paths
    )
 
+   if test -z "${papi_paths}" ; then
+      AC_MSG_ERROR([Error PAPI was not found but was enabled at configure time!])
+   fi
+
    AC_ARG_ENABLE(sampling,
       AC_HELP_STRING(
          [--enable-sampling],
@@ -949,7 +957,7 @@ AC_DEFUN([AX_PROG_PAPI],
       fi
    else
       if test "${papi_paths}" != "no" -a "${papi_paths}" != "not_set"; then
-         AC_MSG_ERROR([Error PAPI was not found and was enabled at configure time!])
+         AC_MSG_ERROR([Error PAPI was not found but was enabled at configure time!])
       fi
    fi
 
@@ -1392,6 +1400,10 @@ AC_DEFUN([AX_PROG_LIBDWARF],
       [dwarf_paths="no"]
    )
 
+   if test -z "${dwarf_paths}" ; then
+      AC_MSG_ERROR([Cannot find DWARF library])
+   fi
+
    if test "${dwarf_paths}" != "no" ; then
       AX_FIND_INSTALLATION([DWARF], [${dwarf_paths}], [dwarf])
       if test "${DWARF_INSTALLED}" = "yes" ; then
@@ -1431,6 +1443,10 @@ AC_DEFUN([AX_PROG_LIBELF],
       [elf_paths="${withval}"],
       [elf_paths="no"]
    )
+
+   if test -z "${elf_paths}" ; then
+      AC_MSG_ERROR([Cannot find ELF library])
+   fi
 
    if test "${elf_paths}" != "no" ; then
       AX_FIND_INSTALLATION([ELF], [${elf_paths}], [elf])
@@ -1472,6 +1488,10 @@ AC_DEFUN([AX_PROG_DYNINST],
 
    if test "${dyninst_paths}" = "not_set" ; then
       AC_MSG_ERROR([Attention! You haven't specified the location for DynInst, DynInst is a library for instrumenting binaries and allows Extrae to modify the application to analyze without having to modify the application sources. To use DynInst you have to pass --with-dyninst with the location of the DynInst installation and also --with-dwarf with the location of the libdwarf package and --with-elf with the location of the libelf package. You can download Dyninst from http://www.dyninst.org. If you are not interested on DynInst, simply pass --without-dyninst to the configure parameters.])
+   fi
+
+   if test -z "${dyninst_paths}" ; then
+      AC_MSG_ERROR([Dyninst cannot be found])
    fi
 
    if test "${libdwarf_found}" != "yes" -a "${dyninst_paths}" != "no" ; then
