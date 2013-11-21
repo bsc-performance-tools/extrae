@@ -14,7 +14,7 @@ AC_DEFUN([AX_CUDA],
 	enable_cuda="no"
 
 	if test -z "${cuda_path}" ; then
-		AC_MSG_ERROR([Cannot find OpenCL])
+		AC_MSG_ERROR([Cannot find CUDA])
 	fi
 
 	if test "${cuda_path}" != "none" ; then
@@ -56,7 +56,7 @@ AC_DEFUN([AX_CUPTI],
 	)
 
 	if test -z "${cupti_path}" ; then
-		AC_MSG_ERROR([Cannot find OpenCL])
+		AC_MSG_ERROR([Cannot find CUPTI])
 	fi
 
 	if test "${cupti_path}" != "none" -a "${enable_cuda}" = "no" ; then

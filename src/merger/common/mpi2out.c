@@ -212,6 +212,7 @@ static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptas
 	tmp_name = InputTraces[nTraces].name;
 	tmp_name = &(tmp_name[name_length - strlen(EXT_MPIT) - DIGITS_TASK - DIGITS_THREAD]);
 
+	/* Extract the information from the filename */
 	task = 0;
 	for (i = 0; i < DIGITS_TASK; i++)
 	{
@@ -529,6 +530,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			if (CurArg < argc)
 			{
 				set_merge_OutputTraceName (argv[CurArg]);
+				set_merge_GivenTraceName (TRUE);
 			}
 			else 
 			{
@@ -1229,43 +1231,6 @@ int merger_post (int numtasks, int taskid)
 	{
 		if (taskid == 0)
 			Labels_loadSYMfile (taskid, FALSE, 0, 0, get_merge_SymbolFileName(), TRUE);
-	}
-
-	if (file_exists(get_merge_OutputTraceName()) &&
-	    !get_option_merge_TraceOverwrite())
-	{
-		unsigned lastid = 0;
-		char tmp[1024];
-		do
-		{
-			lastid++;
-			if (lastid >= 10000)
-			{
-				fprintf (stderr, "Error! Automatically given ID for the tracefile surpasses 10000!\n");
-				exit (-1);
-			}
-
-			strncpy (tmp, get_merge_OutputTraceName(), sizeof(tmp));
-			if (strcmp (&tmp[strlen(tmp)-strlen(".prv")], ".prv") == 0)
-			{
-				char extra[1+4+1+3+1];
-				sprintf (extra, ".%04d.prv", lastid);
-				strncpy (&tmp[strlen(tmp)-strlen(".prv")], extra, strlen(extra));
-			}
-			else if (strcmp (&tmp[strlen(tmp)-strlen(".dim")], ".dim") == 0)
-			{
-				char extra[1+4+1+3+1];
-				sprintf (extra, ".%04d.dim", lastid);
-				strncpy (&tmp[strlen(tmp)-strlen(".dim")], extra, strlen(extra));
-			}
-			else if (strcmp (&tmp[strlen(tmp)-strlen(".prv.gz")], ".prv.gz") == 0)
-			{
-				char extra[1+4+1+3+1+2+1];
-				sprintf (extra, ".%04d.prv.gz", lastid);
-				strncpy (&tmp[strlen(tmp)-strlen(".prv.gz")], extra, strlen(extra));
-			}
-		} while (file_exists (tmp));
-		set_merge_OutputTraceName (tmp);
 	}
 
 	if (get_option_merge_ParaverFormat())

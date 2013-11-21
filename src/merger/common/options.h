@@ -57,6 +57,9 @@ void set_option_merge_VerboseLevel (int l);
 char * get_merge_OutputTraceName (void);
 void set_merge_OutputTraceName (char* s);
 
+int get_merge_GivenTraceName (void);
+void set_merge_GivenTraceName (int b);
+
 char * get_merge_CallbackFileName (void);
 void set_merge_CallbackFileName (char* s);
 

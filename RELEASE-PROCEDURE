@@ -22,17 +22,20 @@
 
 ** If this wasn't done at the previous release step.
 
-3) Generate binary packages using the buildfarm script
+3) Specific issues:
+    - Make sure the nanos/mercurium team tests the package if applies.
+
+4) Generate binary packages using the buildfarm script
   - this makes sure that the package will compile at least on our environment -
 
-4) Copy the documentation (pdf format) and add it to the buildfarm output to publish it in the webpage
+5) Copy the documentation (pdf format) and add it to the buildfarm output to publish it in the webpage
 
-5) Make sure that the documentation in pdf format is within the binary packages.
+6) Make sure that the documentation in pdf format is within the binary packages.
   - use buildfarm/inject-user-guide.sh to add use guide into tar.bz2s like
        inject-user-guide.sh extrae-user-guide.pdf *.tar.bz2
 
-6) Email & celebrate
-  6.a) Addresses
+7) Email & celebrate
+  7.a) Addresses
          tools@bsc.es
          support@bsc.es
          pm-tools@bsc.es

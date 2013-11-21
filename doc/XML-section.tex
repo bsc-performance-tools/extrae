@@ -306,7 +306,7 @@ This section indicates whether the OpenCL calls should be instrumented or not. I
 
 If this section is enabled and the instrumentation packaged is configured to support this, the merge process will be automatically invoked after the application run. The merge process will use all the resources devoted to run the application.
 
-The leaf of this node will be used as the tracefile name ({\tt mpi\_ping.prv} in this example). Current available options for the merge process are given as attribute of the {\tt <merge>} node and they are:
+In the example given, the leaf of this node will be used as the tracefile name ({\tt mpi\_ping.prv} in this example). Current available options for the merge process are given as attribute of the {\tt <merge>} node and they are:
 
 \begin{itemize}
  \item {\tt synchronization}: which can be set to {\tt default}, {\tt node}, {\tt task}, {\tt no}. This determines how task clocks will be synchronized ({\em default is node}).
@@ -318,6 +318,10 @@ The leaf of this node will be used as the tracefile name ({\tt mpi\_ping.prv} in
  \item {\tt sort-addresses}: whether to sort all addresses that refer to the source code (enabled by default).
  \item {\tt overwrite}: set to yes if the new tracefile can overwrite an existing tracefile with the same name. If set to no, then the tracefile will be given a new name using a consecutive id.
 \end{itemize}
+
+In Linux systems, the tracing package can take advantage of certain functionalities from the system and can guess the binary name, and from it the tracefile name. In such systems, you can use the following reduced XML section replacing the earlier section.
+
+\input{XML/merge-reduced.xml}
 
 \graybox{For further references, see chapter \ref{cha:Merging}.}
 

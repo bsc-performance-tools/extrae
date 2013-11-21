@@ -311,6 +311,28 @@ MPIOPENCL_EXAMPLE_FILES=\
  example/LINUX/MPI+OPENCL/README \
  example/LINUX/MPI+OPENCL/mpi-vadd.c
 
+OMPSS_EXAMPLE_FILES=\
+ example/LINUX/OMPSS/extrae.xml \
+ example/LINUX/OMPSS/heat.h \
+ example/LINUX/OMPSS/heat-ompss.c \
+ example/LINUX/OMPSS/Makefile \
+ example/LINUX/OMPSS/misc.c \
+ example/LINUX/OMPSS/solver-ompss.c \
+ example/LINUX/OMPSS/trace.sh \
+ example/LINUX/OMPSS/job.lsf \
+ example/LINUX/OMPSS/test.dat
+
+MPIOMPSS_EXAMPLE_FILES=\
+ example/LINUX/MPI+OMPSS/extrae.xml \
+ example/LINUX/MPI+OMPSS/heat.h \
+ example/LINUX/MPI+OMPSS/heat-mpi-ompss.c \
+ example/LINUX/MPI+OMPSS/Makefile \
+ example/LINUX/MPI+OMPSS/misc.c \
+ example/LINUX/MPI+OMPSS/solver-mpi-ompss.c \
+ example/LINUX/MPI+OMPSS/trace.sh \
+ example/LINUX/MPI+OMPSS/job.lsf \
+ example/LINUX/MPI+OMPSS/test.dat
+
 FORK_EXAMPLE_FILES=\
  example/LINUX/FORK/extrae.xml \
  example/LINUX/FORK/function-list \
@@ -352,6 +374,10 @@ if WANT_OPENCL
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+OPENCL
 	cp -fr $(MPIOPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OPENCL
 endif
+if WANT_NANOS
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+OMPSS
+	cp -fr $(MPIOMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMPSS
+endif
 endif
 if WANT_OPENMP
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMP
@@ -372,6 +398,10 @@ endif
 if WANT_OPENCL
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/OPENCL
 	cp -fr $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
+endif
+if WANT_NANOS
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMPSS
+	cp -fr $(OMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMPSS
 endif
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE

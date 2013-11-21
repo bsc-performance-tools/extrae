@@ -344,16 +344,19 @@ void HWC_CleanUp (unsigned nthreads)
 {
 	unsigned u;
 
-	HWCBE_CLEANUP_COUNTERS_THREAD(nthreads);
+	if (HWC_num_sets > 0)
+	{
+		HWCBE_CLEANUP_COUNTERS_THREAD(nthreads);
 
-	xfree (HWC_current_set);
-	xfree (HWC_current_timebegin);
-	xfree (HWC_current_glopsbegin);
-	xfree (HWC_Thread_Initialized);
-	xfree (Accumulated_HWC_Valid);
-	for (u = 0; u < nthreads; u++)
-		xfree (Accumulated_HWC[u]);
-	xfree (Accumulated_HWC);
+		xfree (HWC_current_set);
+		xfree (HWC_current_timebegin);
+		xfree (HWC_current_glopsbegin);
+		xfree (HWC_Thread_Initialized);
+		xfree (Accumulated_HWC_Valid);
+		for (u = 0; u < nthreads; u++)
+			xfree (Accumulated_HWC[u]);
+		xfree (Accumulated_HWC);
+	}
 }
 
 /**

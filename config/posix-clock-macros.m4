@@ -114,7 +114,7 @@ AC_DEFUN([AX_CHECK_POSIX_CLOCK],
            CC_RT_POINTER=`${CC} --print-file-name=librt.so`
            if test -f "${CC_RT_POINTER}" ; then
               TRYING_RT_LIBS=`readlink -f ${CC_RT_POINTER}`
-              if test ${?} ne 0 ; then
+              if test ${?} -ne 0 ; then
                  TRYING_RT_LIBS=`/sbin/ldconfig -p | grep librt | ${AWK} -F '=> ' '{ print $'2' }'`
               fi
            else

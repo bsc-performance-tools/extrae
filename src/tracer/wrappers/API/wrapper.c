@@ -160,6 +160,7 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(PTHREAD_SUPPORT)
 # include "pthread_probe.h"
 #endif
+#include "taskid.h"
 
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
@@ -407,6 +408,31 @@ extrae_init_type_t Extrae_is_initialized_Wrapper (void)
 void Extrae_set_is_initialized (extrae_init_type_t type)
 {
 	Extrae_Init_Type = type;
+}
+
+/******************************************************************************
+ ***  Backend_createExtraeDirectory
+ ***   creates extrae directories to store tracefiles
+ ******************************************************************************/
+static void Backend_createExtraeDirectory (unsigned taskid, int Temporal)
+{
+	int ret;
+	int attempts = 100;
+	char *dirname;
+
+	dirname = (Temporal)?Get_TemporalDir(taskid):Get_FinalDir(taskid);
+
+	ret = mkdir_recursive (dirname);
+	while (!ret && attempts > 0)
+	{
+		ret = mkdir_recursive (dirname);
+		attempts--;
+	}
+	
+	if (!ret && attempts == 0 && Temporal)
+		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create temporal directory %s\n", taskid, dirname);
+	else if (!ret && attempts == 0 && !Temporal)
+		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", taskid, dirname);
 }
 
 /******************************************************************************
@@ -1156,6 +1182,9 @@ int remove_temporal_files(void)
 
 	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 	{
+		/* Remember .mpit and .sample intermediate files are allocated once and do
+	     NOT change even if the TASK changes during runtime, thus use initialTASKID
+		   instead of TASKID */
 		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
 		if (file_exists(tmpname))
 			if (unlink(tmpname) == -1)
@@ -1168,7 +1197,7 @@ int remove_temporal_files(void)
 				fprintf (stderr, PACKAGE_NAME": Error removing a temporal sampling file (%s)\n", tmpname);
 #endif
 
-		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_SYM);
+		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SYM);
 		if (file_exists (tmpname))
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing symbol file (%s)\n", tmpname);
@@ -1186,25 +1215,10 @@ int remove_temporal_files(void)
  */
 static int Allocate_buffer_and_file (int thread_id, int forked)
 {
-	unsigned initialTASKID;
-	int ret;
-	int attempts = 100;
 	char tmp_file[TMP_NAME_LENGTH];
+	unsigned initialTASKID = Extrae_get_initial_TASKID();
 
-	/* Some FS looks quite lazy and "needs time" to create directories?
-	   This loop fixes this issue (seen in BGP) */
-	ret = mkdir_recursive (Get_TemporalDir(TASKID));
-	while (!ret && attempts > 0)
-	{
-		ret = mkdir_recursive (Get_TemporalDir(TASKID));
-		attempts --;
-	}
-	if (!ret && attempts == 0)
-	{
-		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create temporal directory %s\n", TASKID, Get_TemporalDir(TASKID));
-	}
-
-	initialTASKID = Extrae_get_initial_TASKID();
+	Backend_createExtraeDirectory (initialTASKID, TRUE);
 
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
 
@@ -1616,8 +1630,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	/* Remove the locals .sym file */
 	for (i = 0; i < maximum_NumOfThreads; i++)
 	{
-		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()), appl_name,
-		  getpid(), Extrae_get_initial_TASKID(), i, EXT_SYM);
+		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
+		  appl_name, getpid(), Extrae_get_initial_TASKID(), i, EXT_SYM);
 		if (file_exists (trace_sym))
 			unlink (trace_sym);
 	}
@@ -1940,11 +1954,9 @@ void Backend_Finalize_close_files()
 
 static void Backend_Finalize_close_mpits (int thread)
 {
-	unsigned initialTASKID;
-	int attempts = 100;
-	int ret;
 	char trace[TMP_DIR];
 	char tmp_name[TMP_DIR];
+	unsigned initialTASKID;
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread)))
 		return;
@@ -1961,18 +1973,7 @@ static void Backend_Finalize_close_mpits (int thread)
 	   as that moment was 0, independently if MPI or PACX has run */
 	initialTASKID = Extrae_get_initial_TASKID();
 
-	/* Some FS looks quite lazy and "needs time" to create directories?
-	   This loop fixes this issue (seen in BGP) */
-	ret = mkdir_recursive (Get_FinalDir(TASKID));
-	while (!ret && attempts > 0)
-	{
-		ret = mkdir_recursive (Get_FinalDir(TASKID));
-		attempts --;
-	}
-	if (!ret && attempts == 0)
-	{
-		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", TASKID, Get_FinalDir(TASKID));
-	}
+	Backend_createExtraeDirectory (TASKID, FALSE);
 
 	Buffer_Close(TRACING_BUFFER(thread));
 
@@ -1982,15 +1983,6 @@ static void Backend_Finalize_close_mpits (int thread)
 	rename_or_copy (tmp_name, trace); 
 	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
 	fflush(stdout);
-
-	/* Rename SYM file, if it exists */
-	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_SYM);
-	if (file_exists (tmp_name))
-	{
-		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SYM);
-		rename_or_copy (tmp_name, trace); 
-		fprintf (stdout, PACKAGE_NAME": Symbol file created : %s\n", trace);
-	}
 
 	/* Rename SAMPLE file, if it exists */
 #if defined(SAMPLING_SUPPORT)
@@ -2229,6 +2221,7 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	ASSERT(strlen(description)<LINE_SIZE, "Description for type is too large");
 
 	FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
+
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
@@ -2276,8 +2269,9 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 
 	ASSERT(strlen(description)<LINE_SIZE, "Description for type is too large");
 
-	FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
-		appl_name, getpid(), Extrae_get_initial_TASKID(), THREADID, EXT_SYM);
+	FileName_PTT(trace_sym, Get_TemporalDir(TASKID),
+		appl_name, getpid(), TASKID, THREADID, EXT_SYM);
+
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
@@ -2325,8 +2319,9 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 
 	ASSERT(strlen(functionname)+strlen(modulename)<LINE_SIZE, "Function name and module name are too large!");
 
-	FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
-		appl_name, getpid(), Extrae_get_initial_TASKID(), THREADID, EXT_SYM);
+	FileName_PTT(trace_sym, Get_TemporalDir(TASKID),
+		appl_name, getpid(), TASKID, THREADID, EXT_SYM);
+
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
@@ -2341,6 +2336,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 			fprintf (stderr, PACKAGE_NAME": Error writing function definition into local symbolic file");
 		if (write (fd, "\n", strlen("\n")) < 0)
 			fprintf (stderr, PACKAGE_NAME": Error writing function definition into local symbolic file");
+
 		close (fd);
 	}
 	#undef LINE_SIZE
@@ -2383,4 +2379,42 @@ static void Extrae_getExecutableInfo (void)
 #endif
 }
 
+/***
+ * Backend_updateTaskID
+ * what shall be done when changing the task ID, for instancen when executing 
+ * first Extrae_init and then MPI_Init
+ */
+void Backend_updateTaskID (void)
+{
+	char file1[TMP_DIR], file2[TMP_DIR];
+	unsigned thread;
+
+	if (Extrae_get_initial_TASKID() == TASKID)
+		return;
+
+	/* Make sure the directory exists */
+	Backend_createExtraeDirectory (TASKID, TRUE);
+
+	/* Rename SYM file, if it exists, per thread */
+	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+	{
+		FileName_PTT(file1, Get_TemporalDir(Extrae_get_initial_TASKID()), appl_name,
+		  getpid(), Extrae_get_initial_TASKID(), thread, EXT_SYM);
+		if (file_exists (file1))
+		{
+			FileName_PTT(file2, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID,
+			  thread, EXT_SYM);
+
+			/* Remove file if it already exists, and then copy the "new" version */
+			if (file_exists (file2))
+				if (!unlink (file2) == 0)
+					fprintf (stderr, PACKAGE_NAME": Cannot unlink file: %s, symbols will be corrupted!\n", file2);
+
+			rename_or_copy (file1, file2); 
+		}
+	}
+	/* NOTE: we skip renaming the MPIT and the SAMPLE files because there are
+	   open handlers referring to this, and renaming the file would require
+	   closing the handler and reopening it again. */
+}
 

@@ -255,6 +255,54 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	fset = Create_FS (nfiles, files, taskid, PRV_SEMANTICS);
 	error = (fset == NULL);
 
+	if (taskid == 0)
+		Labels_loadLocalSymbols (taskid, nfiles, files);
+
+	/* If no actual filename is given, use the binary name if possible */
+	if (!get_merge_GivenTraceName())
+	{
+		char *FirstBinaryName = ObjectTable_GetBinaryObjectName (1, 1);
+		if (FirstBinaryName != NULL)
+		{
+			char prvfile[strlen(FirstBinaryName) + 5];
+			sprintf (prvfile, "%s.prv", FirstBinaryName);
+			set_merge_OutputTraceName (prvfile);
+			set_merge_GivenTraceName (TRUE);
+		}
+	}
+
+	if (file_exists(get_merge_OutputTraceName()) &&
+	    !get_option_merge_TraceOverwrite())
+	{
+		unsigned lastid = 0;
+		char tmp[1024];
+		do
+		{
+			lastid++;
+			if (lastid >= 10000)
+			{
+				fprintf (stderr, "Error! Automatically given ID for the tracefile surpasses 10000!\n");
+				exit (-1);
+			}
+
+			strncpy (tmp, get_merge_OutputTraceName(), sizeof(tmp));
+			if (strcmp (&tmp[strlen(tmp)-strlen(".prv")], ".prv") == 0)
+			{
+				char extra[1+4+1+3+1];
+				sprintf (extra, ".%04d.prv", lastid);
+				strncpy (&tmp[strlen(tmp)-strlen(".prv")], extra, strlen(extra));
+			}
+			else if (strcmp (&tmp[strlen(tmp)-strlen(".prv.gz")], ".prv.gz") == 0)
+			{
+				char extra[1+4+1+3+1+2+1];
+				sprintf (extra, ".%04d.prv.gz", lastid);
+				strncpy (&tmp[strlen(tmp)-strlen(".prv.gz")], extra, strlen(extra));
+			}
+		} while (file_exists (tmp));
+		set_merge_OutputTraceName (tmp);
+		set_merge_GivenTraceName (TRUE);
+	}
+
 #if defined(PARALLEL_MERGE)
 	if (numtasks > 1)
 	{

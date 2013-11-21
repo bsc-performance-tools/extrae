@@ -993,6 +993,8 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 			unlink (config_file);
 		free (config_file);
 	}
+	else
+		Backend_updateTaskID ()
 
 	Gather_Nodes_Info ();
 
@@ -1085,6 +1087,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 			unlink (config_file);
 		free (config_file);
 	}
+	else
+		Backend_updateTaskID ()
 
 	Gather_Nodes_Info ();
 
@@ -4524,6 +4528,8 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 			unlink (config_file);
 		free (config_file);
 	}
+	else
+		Backend_updateTaskID ()
 
 	Gather_Nodes_Info ();
 
@@ -4615,6 +4621,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 			unlink (config_file);
 		free (config_file);
 	}
+	else
+		Backend_updateTaskID ()
 
 	Gather_Nodes_Info ();
 
@@ -8275,6 +8283,10 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen)
 		/* Build the temporal file pattern */
 		if (getenv("TMPDIR"))
 		{
+			/* If TMPDIR exists but points to non-existent directory, create it */
+			if (!directory_exists (getenv("TMPDIR")))
+				mkdir_recursive (getenv("TMPDIR"));
+
 			/* 14 is the length from /XMLFileXXXXXX */
 			result_file = (char*) malloc (14+strlen(getenv("TMPDIR")+1)*sizeof(char));
 			sprintf (result_file, "%s/XMLFileXXXXXX", getenv ("TMPDIR"));

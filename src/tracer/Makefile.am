@@ -224,7 +224,7 @@ libpacxtracef_la_SOURCES = $(libpacxtrace_la_SOURCES)
 # OpenMP & OpenMP + MPI
 libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES) $(WRAPPERS_OMP)
 libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES) $(WRAPPERS_OMP) mpif.h
-libomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OMP) $(auto_instr_SRCS) $(auto_fini_instr_SRCS)
+libomptrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OMP) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
 # SMPSS & SMPSS + MPI
 libsmpsstrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
@@ -232,8 +232,8 @@ libsmpssmpitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
 libsmpssmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) mpif.h
 
 # Nanos
-libnanostrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
-libnanosmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS) $(auto_fini_instr_SRCS)
+libnanostrace_la_SOURCES = $(core_SRCS)
+libnanosmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_MPI) $(core_MPI_SRCS)
 libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) mpif.h
 
 # pthreads & TRT
@@ -432,6 +432,7 @@ MPITRACE_SYMBOLS= -DC_SYMBOLS
 endif
 
 COMMON_LINKER_FLAGS = -release $(PACKAGE_VERSION) $(HWC_LINKER_FLAGS) $(UNWIND_LINKER_FLAGS) $(POSIXCLOCK_LINKER_FLAGS) $(MRNET_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(LIBZ_LINKER_FLAGS)
+#COMMON_LINKER_FLAGS = -avoid-version $(HWC_LINKER_FLAGS) $(UNWIND_LINKER_FLAGS) $(POSIXCLOCK_LINKER_FLAGS) $(MRNET_LINKER_FLAGS) $(XML2_LINKER_FLAGS) $(LDL) $(LIBZ_LINKER_FLAGS)
 
 libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
@@ -514,13 +515,6 @@ else
 NEW_MPI_LIBS = -L@MPI_LIBSDIR@ @MPI_LIBS@ -static
 endif
 
-libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-libcudampitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-libcudampitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-
-libocltrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-liboclmpitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-liboclmpitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
@@ -535,31 +529,39 @@ libptmpitracef_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) # -static
 libpacxtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libpacxtracef_la_LDFLAGS = $(libpacxtrace_la_LDFLAGS) # -static
 
-libompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libompitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libcudatrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libcudampitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+libcudampitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
 
-libsmpssmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libsmpssmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+libocltrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+liboclmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+liboclmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
+
+libomptrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libompitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+libompitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
+
 libsmpsstrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libsmpssmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+libsmpssmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
 
 libnanostrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-libnanosmpitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-libnanosmpitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libnanosmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+libnanosmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
 
 libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -lpthread
 libtrttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
+libmpitracef_lb_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) # -static
 libompitrace_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
-libompitracef_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
+libompitracef_lb_la_LDFLAGS = $(libompitracef_la_LDFLAGS)
 
 libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 
-libnanosmpitrace_lb_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-libnanosmpitracef_lb_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libnanosmpitrace_lb_la_LDFLAGS = $(libnanosmpitrace_la_LDFLAGS)
+libnanosmpitracef_lb_la_LDFLAGS = $(libnanosmpitracef_la_LDFLAGS)
 
 lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared
 lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared

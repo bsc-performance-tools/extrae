@@ -220,7 +220,6 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	char paraver_tmp[PATH_MAX];
 	char trace_file_name[PATH_MAX];
 	long long trace_file_size;
-	char symbol_file_name[PATH_MAX];
 #if defined(SAMPLING_SUPPORT)
 	char sample_file_name[PATH_MAX];
 	long long sample_file_size;
@@ -244,14 +243,6 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		fprintf (stderr, "mpi2prv Error: Opening trace file %s\n", trace_file_name);
 		return (-1);
 	}
-
-	strcpy (symbol_file_name, IFile->name);
-	symbol_file_name[strlen(symbol_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
-	strcat (symbol_file_name, EXT_SYM);
-	if (file_exists(symbol_file_name))
-		if (taskid == 0)
-			Labels_loadSYMfile (taskid, FALSE, IFile->ptask, IFile->task,
-			  symbol_file_name, FALSE);
 
 #if defined(SAMPLING_SUPPORT)
 	strcpy (sample_file_name, IFile->name);

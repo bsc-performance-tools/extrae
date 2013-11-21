@@ -30,6 +30,7 @@
 #ifndef _LABELS_H
 #define _LABELS_H
 
+#include "mpi2out.h"
 #include "events.h"
 #include <extrae_vector.h>
 
@@ -406,6 +407,8 @@ void Address2Info_Write_Labels (FILE *);
 int Labels_GeneratePCFfile (char *name, long long options);
 void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 	unsigned task, char *name, int report);
+void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
+	struct input_t * IFiles);
 int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description);
 
 #endif

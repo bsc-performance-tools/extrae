@@ -1,7 +1,14 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 21Nov2012 Added improved support to instrument nanos+MPI apps including
+               examples for OmpSs and MPI+OmpSs
+             In Linux, merging process automatically uses binary name as
+               default trace file name and no longer requires -e neither in xml.
  * 07Nov2013 Disallow --with-X= in the configure line
+ * 05Nov2013 Added -rpath to the used MPI library to all lib*mpi*so libraries
+             Fix segfault when no performance counters are given to Extrae
+             Create TMPDIR directory if it does not exist
  * 09Oct2013 Fixed bug in merger when processing HWC_CHANGE_EV: counters shared by the old and the new set appeared twice.
  + 26Sep2013 Fix missing header in merger files
              BFD compilation in cross-compiled environments

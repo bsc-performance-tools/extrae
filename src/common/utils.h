@@ -74,6 +74,7 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank);
 unsigned long long getFactorValue (char *value, char *ref, int rank);
 int mkdir_recursive (char *path);
 int file_exists (char *file);
+int directory_exists (char *file);
 
 #if defined(__cplusplus)
 }

@@ -204,6 +204,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 
 int Backend_preInitialize (int rank, int world_size, char *config_file, int forked);
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);
+void Backend_updateTaskID (void);
 
 int Backend_ChangeNumberOfThreads (unsigned numberofthreads);
 void Backend_setNumTentativeThreads (int numofthreads);

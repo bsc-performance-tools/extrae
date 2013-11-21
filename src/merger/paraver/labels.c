@@ -71,9 +71,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_prv_semantics.h"
 #include "trace_mode.h"
 #include "addr2info.h" 
-#include "mpi2out.h"
 #include "options.h"
 #include "object_tree.h"
+#include "utils.h"
 
 #include "HardwareCounters.h"
 #include "queue.h"
@@ -634,10 +634,13 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 	if (strlen(name) == 0)
 		return;
 
+	if (!file_exists(name))
+		return;
+
 	FD = (FILE *) fopen (name, "r");
 	if (FD == NULL)
 	{
-		fprintf (stderr, "mpi2prv: WARNING: Task %d Can\'t find symbols file %s\n", taskid, name);
+		fprintf (stderr, "mpi2prv: WARNING: Task %d Can\'t open symbols file %s\n", taskid, name);
 		return;
 	}
 
@@ -922,3 +925,22 @@ int Labels_GeneratePCFfile (char *name, long long options)
     
 	return 0;
 }
+
+void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
+	struct input_t * IFiles)
+{
+	unsigned long file;
+
+	for (file = 0; file < nfiles; file++)
+	{
+		char symbol_file_name[PATH_MAX];
+
+		strcpy (symbol_file_name, IFiles[file].name);
+		symbol_file_name[strlen(symbol_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
+		strcat (symbol_file_name, EXT_SYM); /* add ".sym" */
+		if (file_exists(symbol_file_name))
+			Labels_loadSYMfile (taskid, FALSE, IFiles[file].ptask, 
+			  IFiles[file].task, symbol_file_name, FALSE);
+	}
+}
+

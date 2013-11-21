@@ -1383,6 +1383,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	else
 	{
 		set_merge_OutputTraceName (filename);
+		set_merge_GivenTraceName (TRUE);
 	}
 
 	XML_FREE (synchronization);

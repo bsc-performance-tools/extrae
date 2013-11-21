@@ -376,14 +376,10 @@ int file_exists (char *fname)
 {
 #if defined(HAVE_ACCESS)
 	return access (fname, F_OK) == 0;
-#elif defined(HAVE_STAT64)
-	struct stat64 sb;
-	stat64 (fname, &sb);
-	return (sb.st_mode & S_IFMT) == S_IFREG;
 #elif defined(HAVE_STAT)
 	struct stat sb;
 	stat (fname, &sb);
-	return (sb.st_mode & S_IFMT) == S_IFREG;
+	return S_ISREG(sb.st_mode);
 #else
 	int fd = open (fname, O_RDONLY);
 	if (fd >= 0)
@@ -393,6 +389,22 @@ int file_exists (char *fname)
 	}
 	else
 		return FALSE;
+#endif
+}
+
+/******************************************************************************
+ **      Function name : directory_exists (char*)
+ **      Author : HSG
+ **      Description : Checks whether a directory exists
+ ******************************************************************************/
+int directory_exists (char *fname)
+{
+#if defined(HAVE_STAT)
+	struct stat sb;
+	stat (fname, &sb);
+	return S_ISDIR(sb.st_mode);
+#else
+# error "Don't know how to check whether a directory exists"
 #endif
 }
 

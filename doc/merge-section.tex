@@ -77,7 +77,7 @@ These are the available options for the sequential Paraver merger:
  \item {\tt -no-syn}\\
  If set, the merger will not attempt to synchronize the different tasks. This is useful when merging intermediate files obtained from a single node (and thus, share a single clock).
  \item {\tt -o FILE.prv}\\
- Choose the name of the target Paraver tracefile.
+ Choose the name of the target Paraver tracefile. If {\tt -o} is not given, the merging process will automatically name the tracefile using the application binary name, if possible.
  \item {\tt -o FILE.prv.gz}\\
  Choose the name of the target Paraver tracefile compressed using the libz library.
  \item {\tt -remove-files}\\

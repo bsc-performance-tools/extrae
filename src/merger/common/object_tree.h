@@ -164,5 +164,6 @@ void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
 	unsigned long long start, unsigned long long end, unsigned long long offset,
 	char *binary);
 binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, UINT64 address);
+char * ObjectTable_GetBinaryObjectName (unsigned ptask, unsigned task);
 
 #endif

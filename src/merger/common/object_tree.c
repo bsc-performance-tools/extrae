@@ -223,6 +223,16 @@ void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
 		AddBinaryObjectInto (ptask, task, start, end, offset, binary);
 }
 
+char * ObjectTable_GetBinaryObjectName (unsigned ptask, unsigned task)
+{
+	task_t *task_info = GET_TASK_INFO(ptask, task);
+
+	if (task_info->num_binary_objects > 0)
+		return task_info->binary_objects[0].module;
+	else
+		return NULL;
+}
+
 binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, UINT64 address)
 {
 	task_t *task_info = GET_TASK_INFO(ptask, task);

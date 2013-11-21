@@ -66,6 +66,10 @@ static char OutputTraceName[1024] = "";
 char * get_merge_OutputTraceName (void) { return OutputTraceName; }
 void set_merge_OutputTraceName (char* s) { strcpy (OutputTraceName, s); }
 
+static int option_merge_GivenTraceName = FALSE;
+int get_merge_GivenTraceName (void) { return option_merge_GivenTraceName; }
+void set_merge_GivenTraceName (int b) { option_merge_GivenTraceName = b; }
+
 static char callback_file[1024] = "";
 char * get_merge_CallbackFileName (void) { return callback_file; }
 void set_merge_CallbackFileName (char* s) { strcpy (callback_file, s); }

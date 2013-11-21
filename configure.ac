@@ -107,6 +107,10 @@ fi
 
 # Initialize automake
 AM_INIT_AUTOMAKE
+
+dnl Enable silent rules, use with make V=0 
+AM_SILENT_RULES([yes])
+
 AM_PROG_MKDIR_P
 
 # Specify the output configuration header file
