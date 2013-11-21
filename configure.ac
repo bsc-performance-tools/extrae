@@ -12,6 +12,14 @@ AC_INIT(Extrae, 3.0rc2, tools@bsc.es)
 # Safety check to ensure that the directory told with `--srcdir` contains the source code
 #AC_CONFIG_SRCDIR(src/mpitrace.c)
 
+# Initialize automake
+AM_INIT_AUTOMAKE
+
+dnl Enable silent rules, use with make V=0 
+AM_SILENT_RULES([yes])
+
+AM_PROG_MKDIR_P
+
 # GNU Autotools intermediate files are stored in the following directory
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
@@ -104,14 +112,6 @@ AM_CONDITIONAL(OS_SOLARIS,   test "${OperatingSystem}" = "solaris" )
 if test "${OperatingSystem}" = "freebsd" ; then
 	CFLAGS="${CFLAGS} -I/usr/local/include"
 fi
-
-# Initialize automake
-AM_INIT_AUTOMAKE
-
-dnl Enable silent rules, use with make V=0 
-AM_SILENT_RULES([yes])
-
-AM_PROG_MKDIR_P
 
 # Specify the output configuration header file
 AM_CONFIG_HEADER(config.h)
