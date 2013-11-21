@@ -12,14 +12,6 @@ AC_INIT(Extrae, 3.0rc2, tools@bsc.es)
 # Safety check to ensure that the directory told with `--srcdir` contains the source code
 #AC_CONFIG_SRCDIR(src/mpitrace.c)
 
-# Initialize automake
-AM_INIT_AUTOMAKE
-
-dnl Enable silent rules, use with make V=0 
-AM_SILENT_RULES([yes])
-
-AM_PROG_MKDIR_P
-
 # GNU Autotools intermediate files are stored in the following directory
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
@@ -93,6 +85,14 @@ case "${target_os}" in
   darwin*  ) OperatingSystem="darwin"
              AC_DEFINE([OS_DARWIN], [1], [Define if operating system is Darwin]) ;;
 esac
+
+# Initialize automake
+AM_INIT_AUTOMAKE
+
+dnl Enable silent rules, use with make V=0 
+AM_SILENT_RULES([yes])
+
+AM_PROG_MKDIR_P
 
 # Publish these defines for conditional compilation 
 AM_CONDITIONAL(ARCH_IA32,    test "${Architecture}"    = "ia32"    )
