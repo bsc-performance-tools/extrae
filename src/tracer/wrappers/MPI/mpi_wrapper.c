@@ -994,7 +994,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 		free (config_file);
 	}
 	else
-		Backend_updateTaskID ()
+		Backend_updateTaskID ();
 
 	Gather_Nodes_Info ();
 
@@ -1088,7 +1088,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 		free (config_file);
 	}
 	else
-		Backend_updateTaskID ()
+		Backend_updateTaskID ();
 
 	Gather_Nodes_Info ();
 
@@ -4529,7 +4529,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		free (config_file);
 	}
 	else
-		Backend_updateTaskID ()
+		Backend_updateTaskID ();
 
 	Gather_Nodes_Info ();
 
@@ -4622,7 +4622,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		free (config_file);
 	}
 	else
-		Backend_updateTaskID ()
+		Backend_updateTaskID ();
 
 	Gather_Nodes_Info ();
 
