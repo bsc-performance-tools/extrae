@@ -53,6 +53,7 @@ static char UNUSED rcsid[] = "$Id$";
 /**
  ** Regular LD_PRELOAD instrumentation
  **/
+#if defined(PIC)
 static cudaError_t (*real_cudaLaunch)(const char*) = NULL;
 static cudaError_t (*real_cudaConfigureCall)(dim3, dim3, size_t, cudaStream_t) = NULL;
 static cudaError_t (*real_cudaThreadSynchronize)(void) = NULL;
@@ -61,9 +62,11 @@ static cudaError_t (*real_cudaMemcpy)(void*,const void*,size_t,enum cudaMemcpyKi
 static cudaError_t (*real_cudaMemcpyAsync)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t) = NULL;
 static cudaError_t (*real_cudaStreamCreate)(cudaStream_t*) = NULL;
 static cudaError_t (*real_cudaDeviceReset)(void) = NULL;
+#endif /* PIC */
 
 void Extrae_CUDA_init (int rank)
 {
+#if defined(PIC)
 	real_cudaLaunch = (cudaError_t(*)(const char*)) dlsym (RTLD_NEXT, "cudaLaunch");
 
 	real_cudaConfigureCall = (cudaError_t(*)(dim3, dim3, size_t, cudaStream_t)) dlsym (RTLD_NEXT, "cudaConfigureCall");
@@ -79,7 +82,17 @@ void Extrae_CUDA_init (int rank)
 	real_cudaStreamCreate = (cudaError_t(*)(cudaStream_t*)) dlsym (RTLD_NEXT, "cudaStreamCreate");
 
 	real_cudaDeviceReset = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceReset");
+#else
+	fprintf (stderr, PACKAGE_NAME": Warning! CUDA instrumentation requires linking with shared library!\n");
+#endif /* PIC */
 }
+
+/*
+	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
+	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
+*/
+
+#if defined(PIC)
 
 #if 0
 static int _cudaLaunch_device = 0;
@@ -304,3 +317,4 @@ cudaError_t cudaDeviceReset (void)
 	return res;
 }
 
+#endif /* PIC */

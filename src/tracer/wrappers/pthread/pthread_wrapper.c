@@ -55,6 +55,7 @@ static char UNUSED rcsid[] = "$Id$";
 //#define DEBUG
 //#define DEBUG_MUTEX
 
+#if defined(PIC)
 static int (*pthread_create_real)(pthread_t*,const pthread_attr_t*,void *(*) (void *),void*) = NULL;
 static int (*pthread_join_real)(pthread_t,void**) = NULL;
 static int (*pthread_detach_real)(pthread_t) = NULL;
@@ -86,8 +87,11 @@ static int (*pthread_rwlock_unlock_real)(pthread_rwlock_t *) = NULL;
 
 static pthread_mutex_t extrae_pthread_create_mutex;
 
+#endif /* PIC */
+
 static void GetpthreadHookPoints (int rank)
 {
+#if defined(PIC)
 	/* Create mutex to protect pthread_create calls */
 	pthread_mutex_init (&extrae_pthread_create_mutex, NULL);
 
@@ -196,6 +200,9 @@ static void GetpthreadHookPoints (int rank)
 	pthread_rwlock_unlock_real = (int(*)(pthread_rwlock_t*)) dlsym (RTLD_NEXT, "pthread_rwlock_unlock");
 	if (pthread_rwlock_unlock_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_rwlock_unlock in DSOs!!\n");
+#else
+	fprintf (stderr, PACKAGE_NAME": Warning! pthread instrumentation requires linking with shared library!\n");
+#endif /* PIC */
 }
 
 /*
@@ -204,6 +211,9 @@ static void GetpthreadHookPoints (int rank)
 	 INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
 
 */
+
+#if defined(PIC)
+
 struct pthread_create_info
 {
 	int pthreadID;
@@ -892,8 +902,7 @@ int pthread_barrier_wait (pthread_barrier_t *barrier)
 	return res;
 }
 
-
-
+#endif /* PIC */
 
 /*
   This __attribute__ tells the loader to run this routine when
@@ -905,3 +914,5 @@ void pthread_tracing_init (void)
 	GetpthreadHookPoints (0);
 	Backend_CreatepThreadIdentifier ();
 }
+
+

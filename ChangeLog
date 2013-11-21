@@ -5,6 +5,7 @@ ChangeLog
                examples for OmpSs and MPI+OmpSs
              In Linux, merging process automatically uses binary name as
                default trace file name and no longer requires -e neither in xml.
+             Add checkers for PIC/noPIC code in instrumentation libraries that use dlsym
  * 07Nov2013 Disallow --with-X= in the configure line
  * 05Nov2013 Added -rpath to the used MPI library to all lib*mpi*so libraries
              Fix segfault when no performance counters are given to Extrae

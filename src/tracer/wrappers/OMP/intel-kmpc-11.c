@@ -54,6 +54,8 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#if defined(PIC)
+
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 
 struct __kmpv_location_t
@@ -864,3 +866,4 @@ void ompc_set_num_threads (int p1)
 	}
 }
 
+#endif /* PIC */

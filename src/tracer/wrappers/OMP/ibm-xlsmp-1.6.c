@@ -45,6 +45,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #include "omp-common.h"
 
+#if defined(PIC)
+
 //#define DEBUG
 
 /*
@@ -589,3 +591,5 @@ int ibm_xlsmp_1_6_hook_points (int ntask)
 
 	return hooked;
 }
+
+#endif /* PIC */

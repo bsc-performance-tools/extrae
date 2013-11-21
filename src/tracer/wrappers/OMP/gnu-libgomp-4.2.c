@@ -47,6 +47,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 //#define DEBUG
 
+#if defined(PIC)
+
 struct openmp_task_st
 {
 	void *p1;
@@ -1362,3 +1364,4 @@ int gnu_libgomp_4_2_hook_points (int ntask)
 	return hooked;
 }
 
+#endif /* PIC */

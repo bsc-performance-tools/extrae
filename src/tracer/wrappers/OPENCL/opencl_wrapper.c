@@ -50,6 +50,7 @@ static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 1696 2013-04-30 13:15:24Z hara
 #include "opencl_common.h"
 #include "opencl_wrapper.h"
 
+#if defined(PIC)
 static cl_mem (*real_clCreateBuffer)(cl_context, cl_mem_flags, size_t, void*, cl_int *) = NULL;
 static cl_command_queue (*real_clCreateCommandQueue)(cl_context, cl_device_id, cl_command_queue_properties, cl_int*) = NULL;
 static cl_context (*real_clCreateContext)(const cl_context_properties *, cl_uint, const cl_device_id *, void *, void *, cl_int *) = NULL;
@@ -105,6 +106,8 @@ static cl_int (*real_clReleaseProgram)(cl_program) = NULL;
 
 static int Extrae_Prepare_CommandQueue = FALSE;
 
+#endif /* PIC */
+
 void Extrae_OpenCL_fini (void)
 {
 	Extrae_OpenCL_clQueueFlush_All();
@@ -114,6 +117,7 @@ void Extrae_OpenCL_init (unsigned rank)
 {
 	UNREFERENCED_PARAMETER(rank);
 
+#if defined(PIC)
 	real_clCreateBuffer = (cl_mem(*)(cl_context, cl_mem_flags, size_t, void*, cl_int *))
 		dlsym (RTLD_NEXT, "clCreateBuffer");
 
@@ -261,7 +265,17 @@ void Extrae_OpenCL_init (unsigned rank)
 
 	real_clReleaseProgram = (cl_int(*)(cl_program))
 	  dlsym (RTLD_NEXT, "clReleaseProgram");
+#else
+	fprintf (stderr, PACKAGE_NAME": Warning! OpenCL instrumentation requires linking with shared library!\n");
+#endif /* PIC */
 }
+
+/*
+	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
+	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
+*/
+
+#if defined(PIC)
 
 cl_mem clCreateBuffer (cl_context c, cl_mem_flags m, size_t s, void *p, 
 	cl_int *e)
@@ -1380,3 +1394,420 @@ cl_int clEnqueueMigrateMemObjects (cl_command_queue q, cl_uint n,
 	return r;
 }
 #endif
+
+cl_int clRetainCommandQueue (cl_command_queue cq)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clRetainCommandQueue (real at %p)\n", real_clRetainCommandQueue);
+#endif
+
+	if (mpitrace_on && real_clRetainCommandQueue != NULL)
+	{
+		Extrae_Probe_clRetainCommandQueue_Enter ();
+		r = real_clRetainCommandQueue (cq);
+		Extrae_Probe_clRetainCommandQueue_Exit ();
+	}
+	else if (!mpitrace_on && real_clRetainCommandQueue != NULL)
+	{
+		r = real_clRetainCommandQueue (cq);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainCommandQueue was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clReleaseCommandQueue (cl_command_queue cq)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseCommandQueue (real at %p)\n", real_clReleaseCommandQueue);
+#endif
+
+	if (mpitrace_on && real_clReleaseCommandQueue != NULL)
+	{
+		Extrae_Probe_clReleaseCommandQueue_Enter ();
+		r = real_clReleaseCommandQueue (cq);
+		Extrae_Probe_clReleaseCommandQueue_Exit ();
+	}
+	else if (!mpitrace_on && real_clReleaseCommandQueue != NULL)
+	{
+		r = real_clReleaseCommandQueue (cq);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clReleaseCommandQueue was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clRetainContext (cl_context c)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clRetainContext (real at %p)\n", real_clRetainContext);
+#endif
+
+	if (mpitrace_on && real_clRetainContext != NULL)
+	{
+		Extrae_Probe_clRetainContext_Enter ();
+		r = real_clRetainContext (c);
+		Extrae_Probe_clRetainContext_Exit ();
+	}
+	else if (!mpitrace_on && real_clRetainContext != NULL)
+	{
+		r = real_clRetainContext (c);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainContext was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clReleaseContext (cl_context c)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseContext (real at %p)\n", real_clRetainContext);
+#endif
+
+	if (mpitrace_on && real_clReleaseContext != NULL)
+	{
+		Extrae_Probe_clReleaseContext_Enter ();
+		r = real_clReleaseContext (c);
+		Extrae_Probe_clReleaseContext_Exit ();
+	}
+	else if (!mpitrace_on && real_clReleaseContext != NULL)
+	{
+		r = real_clReleaseContext (c);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clReleaseContext was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clRetainDevice (cl_device_id d)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clRetainDevice (real at %p)\n", real_clRetainDevice);
+#endif
+
+	if (mpitrace_on && real_clRetainDevice != NULL)
+	{
+		Extrae_Probe_clRetainDevice_Enter ();
+		r = real_clRetainDevice (d);
+		Extrae_Probe_clRetainDevice_Exit ();
+	}
+	else if (!mpitrace_on && real_clRetainDevice != NULL)
+	{
+		r = real_clRetainDevice (d);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainDevice was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clReleaseDevice (cl_device_id d)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseDevice (real at %p)\n", real_clReleaseDevice);
+#endif
+
+	if (mpitrace_on && real_clReleaseDevice != NULL)
+	{
+		Extrae_Probe_clReleaseDevice_Enter ();
+		r = real_clReleaseDevice (d);
+		Extrae_Probe_clReleaseDevice_Exit ();
+	}
+	else if (!mpitrace_on && real_clReleaseDevice != NULL)
+	{
+		r = real_clReleaseDevice (d);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clReleaseDevice was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int Extrae_clRetainEvent_real (cl_event e)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : Extrae_clRetainEvent_real (real at %p)\n", real_clRetainEvent);
+#endif
+
+	if (real_clRetainEvent != NULL)
+		r = real_clRetainEvent (e);
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainEvent was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int Extrae_clReleaseEvent_real (cl_event e)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : Extrae_clReleaseEvent_real (real at %p)\n", real_clReleaseEvent);
+#endif
+
+	if (real_clReleaseEvent != NULL)
+		r = real_clReleaseEvent (e);
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clReleaseEvent was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+cl_int clRetainEvent (cl_event e)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clRetainEvent (real at %p)\n", real_clRetainEvent);
+#endif
+
+	if (mpitrace_on && real_clRetainEvent != NULL)
+	{
+		Extrae_Probe_clRetainEvent_Enter ();
+		r = real_clRetainEvent (e);
+		Extrae_Probe_clRetainEvent_Exit ();
+	}
+	else if (!mpitrace_on && real_clRetainEvent != NULL)
+	{
+		r = real_clRetainEvent (e);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainEvent was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clReleaseEvent (cl_event e)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseEvent (real at %p)\n", real_clReleaseEvent);
+#endif
+
+	if (mpitrace_on && real_clReleaseEvent != NULL)
+	{
+		Extrae_Probe_clReleaseEvent_Enter ();
+		r = real_clReleaseEvent (e);
+		Extrae_Probe_clReleaseEvent_Exit ();
+	}
+	else if (!mpitrace_on && real_clReleaseEvent != NULL)
+	{
+		r = real_clReleaseEvent (e);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clReleaseEvent was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clRetainKernel (cl_kernel k)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clRetainKernel (real at %p)\n", real_clRetainKernel);
+#endif
+
+	if (mpitrace_on && real_clRetainKernel != NULL)
+	{
+		Extrae_Probe_clRetainKernel_Enter ();
+		r = real_clRetainKernel (k);
+		Extrae_Probe_clRetainKernel_Exit ();
+	}
+	else if (!mpitrace_on && real_clRetainKernel != NULL)
+	{
+		r = real_clRetainKernel (k);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainKernel was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clReleaseKernel (cl_kernel k)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseKernel (real at %p)\n", real_clReleaseKernel);
+#endif
+
+	if (mpitrace_on && real_clReleaseKernel != NULL)
+	{
+		Extrae_Probe_clReleaseKernel_Enter ();
+		r = real_clReleaseKernel (k);
+		Extrae_Probe_clReleaseKernel_Exit ();
+	}
+	else if (!mpitrace_on && real_clReleaseKernel != NULL)
+	{
+		r = real_clReleaseKernel (k);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRelaseKernel was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clRetainMemObject (cl_mem m)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clRetainMemObject (real at %p)\n", real_clRetainMemObject);
+#endif
+
+	if (mpitrace_on && real_clRetainMemObject != NULL)
+	{
+		Extrae_Probe_clRetainMemObject_Enter ();
+		r = real_clRetainMemObject (m);
+		Extrae_Probe_clRetainMemObject_Exit ();
+	}
+	else if (!mpitrace_on && real_clRetainMemObject != NULL)
+	{
+		r = real_clRetainMemObject (m);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainMemObject was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clReleaseMemObject (cl_mem m)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseMemObject (real at %p)\n", real_clReleaseMemObject);
+#endif
+
+	if (mpitrace_on && real_clReleaseMemObject != NULL)
+	{
+		Extrae_Probe_clReleaseMemObject_Enter ();
+		r = real_clReleaseMemObject (m);
+		Extrae_Probe_clReleaseMemObject_Exit ();
+	}
+	else if (!mpitrace_on && real_clReleaseMemObject != NULL)
+	{
+		r = real_clReleaseMemObject (m);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clReleaseMemObject was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clRetainProgram (cl_program p)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clRetainProgram (real at %p)\n", real_clRetainProgram);
+#endif
+
+	if (mpitrace_on && real_clRetainProgram != NULL)
+	{
+		Extrae_Probe_clRetainProgram_Enter ();
+		r = real_clRetainProgram (p);
+		Extrae_Probe_clRetainProgram_Exit ();
+	}
+	else if (!mpitrace_on && real_clRetainProgram != NULL)
+	{
+		r = real_clRetainProgram (p);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clRetainProgram was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+cl_int clReleaseProgram (cl_program p)
+{
+	cl_int r;
+
+#ifdef DEBUG
+	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseProgram (real at %p)\n", real_clReleaseProgram);
+#endif
+
+	if (mpitrace_on && real_clReleaseProgram != NULL)
+	{
+		Extrae_Probe_clReleaseProgram_Enter ();
+		r = real_clReleaseProgram (p);
+		Extrae_Probe_clReleaseProgram_Exit ();
+	}
+	else if (!mpitrace_on && real_clReleaseProgram != NULL)
+	{
+		r = real_clReleaseProgram (p);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! clReleaseProgram was not hooked!\n");
+		exit (-1);
+	}
+
+	return r;
+}
+
+#endif /* PIC */

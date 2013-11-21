@@ -52,6 +52,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 //#define DEBUG
 
+#if defined(PIC)
+
 static void (*omp_set_lock_real)(int *) = NULL;
 static void (*omp_unset_lock_real)(int *) = NULL;
 static void (*omp_set_num_threads_real)(int) = NULL;
@@ -61,10 +63,13 @@ static void (*omp_set_num_threads_real)(int) = NULL;
 static int (*omp_get_num_threads_real)(void) = NULL;
 #endif
 
+#endif /* PIC */
+
 static void common_GetOpenMPHookPoints (int rank)
 {
 	UNREFERENCED_PARAMETER(rank);
 
+#if defined(PIC)
 	/* Obtain @ for omp_set_lock */
 	omp_set_lock_real =
 		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_set_lock");
@@ -77,13 +82,14 @@ static void common_GetOpenMPHookPoints (int rank)
 	omp_set_num_threads_real =
 		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads");
 
-#if 0 /* Don't instrument omp_get_num_threads */
+# if 0 /* Don't instrument omp_get_num_threads */
 	/* Obtain @ for omp_get_num_threads */
 	omp_get_num_threads_real =
 		(int(*)(void)) dlsym (RTLD_NEXT, "omp_get_num_threads");
 	if (omp_get_num_threads_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find omp_get_num_threads in DSOs!!\n");
-#endif
+# endif
+#endif /* PIC */
 }
 
 /*
@@ -92,6 +98,8 @@ static void common_GetOpenMPHookPoints (int rank)
    INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
 
 */
+
+#if defined(PIC)
 
 void omp_set_lock (int *p1)
 {
@@ -205,10 +213,11 @@ int omp_get_num_threads (int p1)
 }
 #endif
 
-extern int omp_get_max_threads();
+#endif /* PIC */
 
 void Extrae_OpenMP_init(void)
 {
+#if defined(PIC)
 	int hooked;
 
 #if defined(OS_LINUX) && defined(ARCH_PPC)
@@ -236,4 +245,7 @@ void Extrae_OpenMP_init(void)
 	   common OpenMP routines */
 	if (hooked)
 		common_GetOpenMPHookPoints(0);
+#else
+	fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
+#endif
 }
