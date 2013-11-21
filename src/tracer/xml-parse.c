@@ -1677,7 +1677,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							tracejant_omp = TRUE;
 							Parse_XML_OMP (rank, xmldoc, current_tag);
 #else
-							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OpenMP.\n", TRACE_OMP);
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OpenMP.\n", TRACE_PTHREAD);
 							tracejant_omp = FALSE;
 #endif
 						}
