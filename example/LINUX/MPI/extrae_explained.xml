@@ -189,6 +189,12 @@
   -->
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 
+  <!-- Enable dynamic memory instrumentation (experimental) -->
+  <dynamic-memory enabled="no" />
+
+  <!-- Enable I/O (read, write) instrumentation (experimental -->
+  <input-output enabled="no" />
+
   <!-- Do merge the intermediate tracefiles into the final tracefile?
        Named according to the binary name
        options: 

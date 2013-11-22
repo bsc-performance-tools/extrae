@@ -22,49 +22,26 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/tracer/wrappers/OMP/omp_wrapper.c $
+ | @last_commit: $Date: 2013-09-06 14:39:32 +0200 (Fri, 06 Sep 2013) $
+ | @version:     $Revision: 2098 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef MISC_PRV_EVENTS_H
-#define MISC_PRV_EVENTS_H
+#ifndef PROBE_IO_H_INCLUDED
+#define PROBE_IO_H_INCLUDED
 
-#if HAVE_STDIO_H
-# include <stdio.h>
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
 #endif
 
-void Enable_MISC_Operation (int type);
-void MISCEvent_WriteEnabledOperations (FILE * fd, long long options);
+void Extrae_set_trace_io (int b);
+int Extrae_get_trace_io (void);
 
-unsigned MISC_event_GetValueForForkRelated (unsigned type);
-unsigned MISC_event_GetValueForDynamicMemory (unsigned type);
+void Probe_IO_write_Entry (int f, size_t s);
+void Probe_IO_write_Exit (void);
 
-#define BG_TORUS_A            "BG A Coordinate in Torus"
-#define BG_TORUS_B            "BG B Coordinate in Torus"
-#define BG_TORUS_C            "BG C Coordinate in Torus"
-#define BG_TORUS_D            "BG D Coordinate in Torus"
-#define BG_TORUS_E            "BG E Coordinate in Torus"
+void Probe_IO_read_Entry (int f, size_t s);
+void Probe_IO_read_Exit (void);
 
-#define BG_PROCESSOR_ID       "BG Processor ID"
 
-#if defined(PARALLEL_MERGE)
-void Share_MISC_Operations (void);
-#endif
-
-#define DYNAMIC_MEM_LBL                 "Dynamic memory calls"
-#define MALLOC_LBL                      "malloc()"
-#define CALLOC_LBL                      "calloc()"
-#define REALLOC_LBL                     "realloc()"
-#define FREE_LBL                        "free()"
-#define DYNAMIC_MEM_REQUESTED_SIZE_LBL  "Requested size in dynamic memory call"
-#define DYNAMIC_MEM_POINTER_IN_LBL      "In pointer (free, realloc)"
-#define DYNAMIC_MEM_POINTER_OUT_LBL     "Out pointer (malloc, calloc, realloc)"
-
-#define IO_LBL                          "I/O calls"
-#define READ_LBL                        "read()"
-#define WRITE_LBL                       "write()"
-#define IO_DESCRIPTOR_LBL               "I/O descriptor"
-#define IO_SIZE_LBL                     "I/O size"
-
-#endif
+#endif /* PROBE_IO_H_INCLUDED */

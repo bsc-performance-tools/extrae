@@ -22,49 +22,61 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/merger/common/vector.h $
+ | @last_commit: $Date: 2012-04-19 10:31:02 +0200 (Thu, 19 Apr 2012) $
+ | @version:     $Revision: 1060 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef MISC_PRV_EVENTS_H
-#define MISC_PRV_EVENTS_H
+#ifndef BFD_MANAGER_EXTRA_H_INCLUDED
+#define BFD_MANAGER_EXTRA_H_INCLUDED
 
-#if HAVE_STDIO_H
-# include <stdio.h>
-#endif
+/* NOTE:
+   The structures below are taken from binutils 2.23.2 file bfd/elf-bfd.h
+*/
 
-void Enable_MISC_Operation (int type);
-void MISCEvent_WriteEnabledOperations (FILE * fd, long long options);
+/* Information held for an ELF symbol.  The first field is the
+   corresponding asymbol.  Every symbol is an ELF file is actually a
+   pointer to this structure, although it is often handled as a
+   pointer to an asymbol.  */
 
-unsigned MISC_event_GetValueForForkRelated (unsigned type);
-unsigned MISC_event_GetValueForDynamicMemory (unsigned type);
+struct elf_internal_sym {
+  bfd_vma   st_value;       /* Value of the symbol */
+  bfd_vma   st_size;        /* Associated symbol size */
+  unsigned long st_name;        /* Symbol name, index in string tbl */
+  unsigned char st_info;        /* Type and binding attributes */
+  unsigned char st_other;       /* Visibilty, and target specific */
+  unsigned char st_target_internal; /* Internal-only information */
+  unsigned int  st_shndx;       /* Associated section index */
+};
 
-#define BG_TORUS_A            "BG A Coordinate in Torus"
-#define BG_TORUS_B            "BG B Coordinate in Torus"
-#define BG_TORUS_C            "BG C Coordinate in Torus"
-#define BG_TORUS_D            "BG D Coordinate in Torus"
-#define BG_TORUS_E            "BG E Coordinate in Torus"
 
-#define BG_PROCESSOR_ID       "BG Processor ID"
+/* Information held for an ELF symbol.  The first field is the
+   corresponding asymbol.  Every symbol is an ELF file is actually a
+   pointer to this structure, although it is often handled as a
+   pointer to an asymbol.  */
 
-#if defined(PARALLEL_MERGE)
-void Share_MISC_Operations (void);
-#endif
+typedef struct
+{
+	/* The BFD symbol.  */
+	asymbol symbol;
 
-#define DYNAMIC_MEM_LBL                 "Dynamic memory calls"
-#define MALLOC_LBL                      "malloc()"
-#define CALLOC_LBL                      "calloc()"
-#define REALLOC_LBL                     "realloc()"
-#define FREE_LBL                        "free()"
-#define DYNAMIC_MEM_REQUESTED_SIZE_LBL  "Requested size in dynamic memory call"
-#define DYNAMIC_MEM_POINTER_IN_LBL      "In pointer (free, realloc)"
-#define DYNAMIC_MEM_POINTER_OUT_LBL     "Out pointer (malloc, calloc, realloc)"
+	/* ELF symbol information.  */
+	struct elf_internal_sym internal_elf_sym;
 
-#define IO_LBL                          "I/O calls"
-#define READ_LBL                        "read()"
-#define WRITE_LBL                       "write()"
-#define IO_DESCRIPTOR_LBL               "I/O descriptor"
-#define IO_SIZE_LBL                     "I/O size"
+	/* Backend specific information.  */
+	union
+	{
+		unsigned int hppa_arg_reloc;
+		void *mips_extr;
+		void *any;
+	}
+	tc_data;
 
-#endif
+	/* Version information.  This is from an Elf_Internal_Versym
+	  structure in a SHT_GNU_versym section.  It is zero if there is no
+	  version information.  */
+	unsigned short version;
+
+} elf_symbol_type;
+
+#endif /* BFD_MANAGER_EXTRA_H_INCLUDED */

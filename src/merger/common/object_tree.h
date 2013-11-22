@@ -109,6 +109,13 @@ typedef struct active_task_thread_st
 	unsigned num_stacks;
 } active_task_thread_t;
 
+typedef struct data_symbol_st
+{
+	char *name;
+	void *address;
+	unsigned long long size;
+} data_symbol_t;
+
 typedef struct binary_object_st
 {
 	char *module;
@@ -119,6 +126,8 @@ typedef struct binary_object_st
 #if defined(HAVE_BFD)
 	bfd *bfdImage;
 	asymbol **bfdSymbols;
+	unsigned nDataSymbols;
+	data_symbol_t *dataSymbols;
 #endif
 } binary_object_t;
 
@@ -165,5 +174,9 @@ void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
 	char *binary);
 binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, UINT64 address);
 char * ObjectTable_GetBinaryObjectName (unsigned ptask, unsigned task);
+
+# if defined(BFD_MANAGER_GENERATE_ADDRESSES)
+void ObjectTable_dumpAddresses (FILE *fd, unsigned eventstart);
+# endif
 
 #endif

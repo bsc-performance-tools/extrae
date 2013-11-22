@@ -1391,6 +1391,8 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 	xmlDocPtr  xmldoc;
 	xmlNodePtr root_tag;
 	char cwd[TMP_DIR];
+	int DynamicMemoryInstrumentation = FALSE;
+	int IOInstrumentation = FALSE;
 
 	/*
 	* This initialize the library and check potential ABI mismatches
@@ -1740,6 +1742,22 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not have merging process embedded.\n", TRACE_MERGE);
 #endif
 					}
+					/* Check for dynamic memory instrumentation */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_DYNAMIC_MEMORY))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							DynamicMemoryInstrumentation = TRUE;
+						XML_FREE(enabled);
+					}
+					/* Check for basic I/O instrumentation */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_IO))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							IOInstrumentation = TRUE;
+						XML_FREE(enabled);
+					}
 					else
 					{
 						mfprintf (stderr, PACKAGE_NAME": Warning! XML unknown tag '%s'\n", current_tag->name);
@@ -1760,6 +1778,23 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 	{
 		mfprintf (stderr, PACKAGE_NAME": Error! xmlParseFile routine failed!\n");
 	}
+
+#if defined(PIC)
+	mfprintf (stdout, PACKAGE_NAME": Dynamic memory instrumentation is %s.\n",
+	  DynamicMemoryInstrumentation?"enabled":"disabled");
+	setRequestedDynamicMemoryInstrumentation (DynamicMemoryInstrumentation);
+
+	mfprintf (stdout, PACKAGE_NAME": Basic I/O memory instrumentation is %s.\n",
+	  IOInstrumentation?"enabled":"disabled");
+	setRequestedIOInstrumentation (IOInstrumentation);
+#else
+	if (DynamicMemoryInstrumentation)
+		mfprintf (stdout, PACKAGE_NAME": Dynamic memory instrumentation cannot be enabled using static version of the instrumentation library.\n");
+
+	if (IOInstrumentation)
+		mfprintf (stdout, PACKAGE_NAME": I/O instrumentation cannot be enabled using static version of the instrumentation library.\n");
+#endif
+
 	mfprintf (stdout, PACKAGE_NAME": Parsing the configuration file (%s) has ended\n", filename);   
 
 	/* If the tracing has been enabled, continue with the configuration */

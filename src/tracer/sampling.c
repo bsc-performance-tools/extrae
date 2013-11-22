@@ -83,7 +83,7 @@ void setSamplingEnabled (int enabled)
 
 void Extrae_SamplingHandler (void* address)
 {
-	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation())
+	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);

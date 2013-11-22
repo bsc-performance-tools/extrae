@@ -114,31 +114,45 @@ static int Flush_Event (event_t * current_event,
  ***  Read_Event
  ******************************************************************************/
 
-static int ReadWrite_Event (event_t * current_event,
-	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
-	unsigned int task, unsigned int thread, FileSet_t *fset)
+static int ReadWrite_Event (event_t * event, unsigned long long time,
+	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+	FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
-	unsigned long EvParam;
+	unsigned int EvType;
+	unsigned long EvValue, EvParam;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
-	EvParam = Get_EvParam (current_event);
+	EvType  = Get_EvEvent (event);
+	EvValue = Get_EvValue (event);
+	EvParam = Get_EvParam (event);
 
-	Switch_State (STATE_IO, (EvValue == EVT_BEGIN), ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-
-	switch (EvValue)
+	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
 	{
-		case EVT_BEGIN:
-		trace_paraver_event (cpu, ptask, task, thread, current_time, IOSIZE_EV, EvParam);
-		break;
-		case EVT_END:
-		break;
+		Switch_State (STATE_IO, (EvValue == EVT_BEGIN), ptask, task, thread);
+		trace_paraver_state (cpu, ptask, task, thread, time);
 	}
+
+	if (EvValue != EVT_END)
+	{
+		switch (Get_EvValue(event))
+		{
+			case EVT_BEGIN:
+			trace_paraver_event (cpu, ptask, task, thread, time, IO_EV,
+		  	  EvType==READ_EV?READ_VAL_EV:WRITE_VAL_EV);
+			trace_paraver_event (cpu, ptask, task, thread, time, IO_DESCRIPTOR_EV,
+			  EvParam);
+			break;
+			case EVT_BEGIN+1:
+			trace_paraver_event (cpu, ptask, task, thread, time, IO_SIZE_EV,
+			  EvParam);
+			break;
+			default:
+			break;
+		}
+	}
+	else
+		trace_paraver_event (cpu, ptask, task, thread, time, IO_EV, 0);
+
 	return 0;
 }
 
@@ -334,7 +348,8 @@ static int GetRusage_Event (
    FileSet_t *fset )
 {
 	int i;
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	unsigned long long EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
@@ -370,7 +385,8 @@ static int Memusage_Event (
    FileSet_t *fset )
 {
     int i;
-    unsigned int EvType, EvValue;
+    unsigned int EvType;
+	unsigned long long EvValue;
     UNREFERENCED_PARAMETER(fset);
 
     EvType  = Get_EvValue (current_event);       /* Value is the user event type.  */
@@ -405,7 +421,8 @@ static int MPI_Stats_Event (
    FileSet_t *fset )
 {
 	int i;
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	unsigned long long EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
@@ -441,7 +458,8 @@ static int PACX_Stats_Event (
    FileSet_t *fset )
 {
 	int i;
-	unsigned int EvType, EvValue;
+	unsigned int EvType;
+	unsigned long long EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
@@ -526,6 +544,53 @@ static int USRFunction_Event (event_t * current,
 	return 0;
 }
 
+/******************************************************************************
+ ***  Sampling_Address_Event
+ ******************************************************************************/
+static int Sampling_Address_Event (event_t * current,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned i;
+	UINT64 EvValue;
+	UINT64 EvParam;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvValue = Get_EvValue (current);
+	EvParam = Get_EvMiscParam (current); /* Param is the sampled address */
+
+	if (Sample_Caller_Labels_Used == NULL) 
+	{
+		Sample_Caller_Labels_Used = (int *)malloc(sizeof(int)*MAX_CALLERS);
+		for (i = 0; i < MAX_CALLERS; i++) 
+			Sample_Caller_Labels_Used[i] = FALSE;
+	}	     
+	if (Sample_Caller_Labels_Used != NULL) 
+		Sample_Caller_Labels_Used [0] = TRUE; 
+
+	if (EvValue != 0)
+	{
+
+#if defined(HAVE_BFD)
+		if (get_option_merge_SortAddresses())
+		{
+			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2SAMPLE_FUNCTION);
+			AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2SAMPLE_LINE);
+		}
+#endif
+
+		/* HSG, samples should not break states?
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
+		*/
+		trace_paraver_event (cpu, ptask, task, thread, current_time, SAMPLING_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, SAMPLING_LINE_EV, EvValue);
+	}
+
+	if (EvParam != 0)
+		trace_paraver_event (cpu, ptask, task, thread, current_time, SAMPLING_ADDRESS_EV, EvParam);
+
+	return 0;
+}
 /******************************************************************************
  ***  Sampling_Caller_Event
  ******************************************************************************/
@@ -1161,7 +1226,8 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvFunction, EvLine;
+	unsigned int EvFunction;
+	unsigned long long EvLine;
 	Extrae_Addr2Type_t *cl_types;
 
 	UNREFERENCED_PARAMETER(current_time);
@@ -1259,6 +1325,74 @@ static int GetCPU_Event (event_t * current_event,
 	return 0;
 }
 
+
+/******************************************************************************
+ ***  DynamicMemory_Event
+ ******************************************************************************/
+
+static int DynamicMemory_Event (event_t * event,
+	unsigned long long time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	unsigned EvType = Get_EvEvent (event);
+	unsigned long long EvParam = Get_EvParam (event);
+	unsigned long long EvValue = Get_EvValue (event);
+	int isBegin = EvValue == EVT_BEGIN;
+
+	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
+	{
+		unsigned PRVValue = isBegin?MISC_event_GetValueForDynamicMemory(EvType):0;
+		Switch_State (STATE_OTHERS, EvValue == EVT_BEGIN, ptask, task, thread);
+		trace_paraver_state (cpu, ptask, task, thread, time);
+		trace_paraver_event (cpu, ptask, task, thread, time, DYNAMIC_MEM_EV, PRVValue);
+	}
+
+	if (EvType == MALLOC_EV)
+	{
+		/* Malloc: in size, out pointer */
+		if (isBegin)
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
+		else
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
+	}
+	else if (EvType == FREE_EV)
+	{
+		/* Free: in pointer */
+		if (isBegin)
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_POINTER_IN_EV, EvParam);
+	}
+	else if (EvType == REALLOC_EV)
+	{
+		/* Realloc: in size, in pointer (in EVT_BEGIN+1), out ptr*/
+		if (EvValue == EVT_BEGIN)
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_POINTER_IN_EV, EvParam);
+		else if (EvValue == EVT_BEGIN+1)
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
+		else
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
+	
+	}
+	else if (EvType == CALLOC_EV)
+	{
+		/* Calloc: in size, out pointer */
+		if (isBegin)
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
+		else
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
+	}
+	return 0;
+}
+
 /*****************************************************************************/
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
@@ -1300,6 +1434,11 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ WAITPID_EV, ForkWaitSystem_Event },
 	{ EXEC_EV, Exec_Event },
 	{ GETCPU_EV, GetCPU_Event },
+	{ SAMPLING_ADDRESS_EV, Sampling_Address_Event },
+	{ MALLOC_EV, DynamicMemory_Event },
+	{ CALLOC_EV, DynamicMemory_Event },
+	{ FREE_EV, DynamicMemory_Event },
+	{ REALLOC_EV, DynamicMemory_Event },
 	{ NULL_EV, NULL }
 };
 

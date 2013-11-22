@@ -531,6 +531,42 @@ AC_ARG_ENABLE(doc,
 )
 AM_CONDITIONAL(GENERATE_DOCUMENTATION, test "${enable_doc}" = "yes" )
 
+AC_ARG_ENABLE(instrument-io,
+	AC_HELP_STRING(
+		[--enable-instrument-io],
+		[Enables instrumentation for basic I/O (read, write) calls  (experimental, disabled by default)]
+	),
+	[enable_instrument_io="${enableval}"],
+	[enable_instrument_io="no"]
+)
+if test "${enable_instrument_io}" = "yes" ; then
+	AC_DEFINE([INSTRUMENT_IO], [1], [Determine whether read/write are meant to be instrumented])
+fi
+
+AC_ARG_ENABLE(instrument-dynamic-memory,
+	AC_HELP_STRING(
+		[--enable-instrument-dynamic-memory],
+		[Enables instrumentation for dynamic memory (malloc, free, realloc) calls (experimental, disabled by default)]
+	),
+	[enable_instrument_dynamic_memory="${enableval}"],
+	[enable_instrument_dynamic_memory="no"]
+)
+if test "${enable_instrument_dynamic_memory}" = "yes" ; then
+	AC_DEFINE([INSTRUMENT_DYNAMIC_MEMORY], [1], [Determine whether dynamic memory calls are meant to be instrumented])
+fi
+
+AC_ARG_ENABLE(bfd-generate-addresses,
+	AC_HELP_STRING(
+		[--enable-bfd-generate-addresses],
+		[Generates information for data objects found in binaries (experimental, disabled by default)]
+	),
+	[enable_bfd_generate_addresses="${enableval}"],
+	[enable_bfd_generate_addresses="no"]
+)
+if test "${enable_bfd_generate_addresses}" = "yes" ; then
+	AC_DEFINE([BFD_MANAGER_GENERATE_ADDRESSES], [1], [Determine if BFD must generate information for data objects in binary])
+fi
+
 #################################
 #        On-line checks         #
 #################################

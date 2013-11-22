@@ -55,13 +55,13 @@ int *__errno_location(void)
 }   
 #endif
 
+#include "object_tree.h"
 #include "bfd_manager.h"
 #include "events.h"
 #include "addr2info.h"
 #include "labels.h"
 #include "misc_prv_semantics.h"
 #include "addr2info_hashcache.h"
-#include "object_tree.h"
 #include "options.h"
 
 static void AddressTable_Initialize (void);

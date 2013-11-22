@@ -80,17 +80,22 @@ unsigned IsMPICollective (unsigned EvType);
 #define SAMPLING_LINE_EV         30000100
 #define SAMPLING_CALLER_OFFSET     100000
 #define HWC_SET_OVERFLOW_EV      31000000
+#define SAMPLING_ADDRESS_EV      32000000
 
 #define APPL_EV                  40000001
 #define TRACE_INIT_EV            40000002
 #define FLUSH_EV                 40000003
 #define READ_EV                  40000004
+#define IO_EV                    READ_EV  /* Used in merger */
 #define WRITE_EV                 40000005
+#define READ_VAL_EV                     1 /* Used in merger, with IO_EV */
+#define WRITE_VAL_EV                    2 /* Used in merger, with IO_EV */
 #define USER_EV                  40000006
 #define HWC_DEF_EV               40000007
 #define HWC_CHANGE_EV            40000008
 #define HWC_EV                   40000009
-#define IOSIZE_EV                40000011
+#define IO_DESCRIPTOR_EV         40000010
+#define IO_SIZE_EV               40000011
 #define TRACING_EV               40000012
 #define SET_TRACE_EV             40000014
 #define CPU_BURST_EV             40000015
@@ -119,6 +124,16 @@ unsigned IsMPICollective (unsigned EvType);
 #define PPID_EV                  40000037
 #define FORK_DEPTH_EV            40000038
 #define LIBRARY_EV               40000039
+#define MALLOC_EV                40000040
+#define FREE_EV                  40000041
+#define CALLOC_EV                40000042
+#define REALLOC_EV               40000043
+#define DYNAMIC_MEM_EV                     MALLOC_EV         /* Used in merger only */
+#define DYNAMIC_MEM_REQUESTED_SIZE_EV      DYNAMIC_MEM_EV+1  /* Used in merger only */
+#define DYNAMIC_MEM_POINTER_IN_EV          DYNAMIC_MEM_EV+2  /* Used in merger only, free input, realloc in */
+#define DYNAMIC_MEM_POINTER_OUT_EV         DYNAMIC_MEM_EV+3  /* Used in merger only, malloc output, calloc output, realloc out */
+
+#define ADDRESSES_FOR_BINARY_EV  41000000
 
 #define RUSAGE_BASE              45000000
 enum {

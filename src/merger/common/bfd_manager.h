@@ -34,6 +34,10 @@
 
 #include <bfd.h>
 
+#if defined(BFD_MANAGER_GENERATE_ADDRESSES)
+# include <bfd_manager_extra.h>
+#endif
+
 typedef struct loadedModule_st
 {
 	char *module;
@@ -53,11 +57,15 @@ typedef struct BFDmanager_symbolInfo_st
 	bfd_boolean found;
 } BFDmanager_symbolInfo_t;
 
+/* Forward declarations from object_tree.h */
+struct data_symbol_st;
+typedef struct data_symbol_st data_symbol_t;
 
 void BFDmanager_init (void);
 unsigned BFDmanager_numLoadedBinaries (void);
 loadedModule_t *BFDmanager_getLoadedModule (unsigned idx);
-void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols);
+void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols,
+	unsigned *nDataSymbols, data_symbol_t **DataSymbols);
 int BFDmanager_translateAddress (bfd *bfdImage, asymbol **bfdSymbols, void *address,
 	char **function, char **file, int *line);
 
@@ -67,4 +75,4 @@ asymbol **BFDmanager_getDefaultSymbols (void);
 
 #endif /* HAVE_BFD */
 
-#endif /* MPI2PRV_VECTOR_H_INCLUDED */
+#endif /* BFD_MANAGER_H_INCLUDED */

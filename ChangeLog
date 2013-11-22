@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 22Nov2013 Honor <cuda enabled> and <opencl enabled>
              MFB missing OpenCL probes
+             Experimental support for isntrumenting I/O & dynamic memory calls
  * 21Nov2013 Added improved support to instrument nanos+MPI apps including
                examples for OmpSs and MPI+OmpSs
              In Linux, merging process automatically uses binary name as

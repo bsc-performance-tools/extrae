@@ -45,6 +45,7 @@ static char UNUSED rcsid[] = "$Id: vector.c 1060 2012-04-19 08:31:02Z harald $";
 
 #include "debug.h"
 #include "bfd_manager.h"
+#include "object_tree.h"
 
 static loadedModule_t *loadedModules = NULL;
 static unsigned numLoadedModules = 0;
@@ -70,10 +71,16 @@ loadedModule_t *BFDmanager_getLoadedModule (unsigned idx)
 		return NULL;
 }
 
-static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols)
+static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
+	unsigned *nDataSymbols, data_symbol_t **DataSymbols)
 {
 	bfd *bfdImage = NULL;
 	asymbol **bfdSymbols = NULL;
+
+	if (nDataSymbols)
+		*nDataSymbols = 0;
+	if (DataSymbols)
+		*DataSymbols = NULL;
 
 	/* Open the binary file in read-only mode */
 	bfdImage = bfd_openr (file, NULL);
@@ -102,6 +109,12 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols)
 		size_t size = bfd_get_symtab_upper_bound (bfdImage);
 		if (size > 0)
 		{
+#if defined(BFD_MANAGER_GENERATE_ADDRESSES)
+			long s;
+			unsigned nDataSyms = 0;
+			data_symbol_t *DataSyms = NULL;
+#endif
+
 			bfdSymbols = (asymbol**) malloc (size);
 			if (bfdSymbols == NULL)
 				FATAL_ERROR ("Cannot allocate memory to translate addresses into source code references\n");
@@ -113,6 +126,38 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols)
 				symcount = bfd_read_minisymbols (bfdImage, TRUE, (PTR) bfdSymbols, &usize);
 #else
 			symcount = bfd_canonicalize_symtab (bfdImage, bfdSymbols);
+
+# if defined(BFD_MANAGER_GENERATE_ADDRESSES)
+			if (nDataSymbols && DataSymbols)
+			{
+				for (s = 0; s < symcount; s++)
+				{
+					symbol_info syminfo;
+					bfd_get_symbol_info (bfdImage, bfdSymbols[s], &syminfo);
+					if (((bfdSymbols[s]->flags & BSF_DEBUGGING) == 0) &&
+					    (syminfo.type == 'R' || syminfo.type == 'r' || /* read-only data */
+					    syminfo.type == 'B' || syminfo.type == 'b' || /* uninited data */
+					    syminfo.type == 'G' || syminfo.type == 'g' || /* inited data */ 
+					    syminfo.type == 'C')) /* common data*/
+					{
+						unsigned long long sz = 0;
+						if (bfd_get_flavour(bfdImage) == bfd_target_elf_flavour)
+							sz = ((elf_symbol_type*) bfdSymbols[s])->internal_elf_sym.st_size;
+
+						DataSyms = (data_symbol_t*) realloc (DataSyms, sizeof(data_symbol_t)*(nDataSyms+1));
+						if (DataSyms == NULL)
+							FATAL_ERROR ("Cannot allocate memory to allocate data symbols\n");
+						DataSyms[nDataSyms].name = strdup (syminfo.name);
+						DataSyms[nDataSyms].address = (void*) syminfo.value;
+						DataSyms[nDataSyms].size = sz;
+						nDataSyms++;
+					}
+				}
+
+				*nDataSymbols = nDataSyms;
+				*DataSymbols = DataSyms;
+			}
+# endif
 #endif
 
 			if (symcount < 0) 
@@ -136,7 +181,8 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols)
 
 }
 
-void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols)
+void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols,
+	unsigned *nDataSymbols, data_symbol_t **DataSymbols)
 {
 	unsigned u, idx;
 
@@ -160,7 +206,7 @@ void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols)
 		FATAL_ERROR("Cannot obtain memory to duplicate module name");
 
 	BFDmanager_loadBFDdata (loadedModules[idx].module, &loadedModules[idx].bfdImage,
-	  &loadedModules[idx].bfdSymbols);
+	  &loadedModules[idx].bfdSymbols, nDataSymbols, DataSymbols);
 	*bfdImage = loadedModules[idx].bfdImage;
 	*bfdSymbols = loadedModules[idx].bfdSymbols;
 	numLoadedModules++;
@@ -168,7 +214,8 @@ void BFDmanager_loadBinary (char *file, bfd **bfdImage, asymbol ***bfdSymbols)
 
 void BFDmanager_loadDefaultBinary (char *file)
 {
-	BFDmanager_loadBFDdata (file, &default_bfdImage, &default_bfdSymbols);
+	BFDmanager_loadBFDdata (file, &default_bfdImage, &default_bfdSymbols,
+		NULL, NULL);
 }
 
 bfd *BFDmanager_getDefaultImage (void)

@@ -56,7 +56,11 @@
 
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 
-	<opencl enabled="yes" />
+  <opencl enabled="yes" />
+
+  <dynamic-memory enabled="no" />
+
+  <input-output enabled="no" />
 
   <merge enabled="yes" 
     synchronization="default"

@@ -46,6 +46,11 @@ static char UNUSED rcsid[] = "$Id$";
 #define PRV_EXEC_VALUE          4
 #define PRV_SYSTEM_VALUE        5
 
+#define PRV_MALLOC_VALUE        1
+#define PRV_FREE_VALUE          2
+#define PRV_REALLOC_VALUE       3
+#define PRV_CALLOC_VALUE        4
+
 #define APPL_INDEX              0
 #define FLUSH_INDEX             1
 #define TRACING_INDEX           2
@@ -53,8 +58,9 @@ static char UNUSED rcsid[] = "$Id$";
 #define FORK_SYSCALL_INDEX      4
 #define GETCPU_INDEX            5
 #define TRACE_INIT_INDEX        6
+#define DYNAMIC_MEM_INDEX       7
 
-#define MAX_MISC_INDEX	        7
+#define MAX_MISC_INDEX	        8
 
 static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
@@ -66,7 +72,7 @@ void Enable_MISC_Operation (int type)
 		inuse[FLUSH_INDEX] = TRUE;
 	else if (type == TRACING_EV)
 		inuse[TRACING_INDEX] = TRUE;
-	else if (type == READ_EV || type == WRITE_EV || type == IOSIZE_EV)
+	else if (type == READ_EV || type == WRITE_EV)
 		inuse[INOUT_INDEX] = TRUE;
 	else if (type == FORK_EV || type == WAIT_EV || type == WAITPID_EV ||
 	  type == EXEC_EV || type == SYSTEM_EV)
@@ -75,6 +81,9 @@ void Enable_MISC_Operation (int type)
 		inuse[GETCPU_INDEX] = TRUE;
 	else if (type == TRACE_INIT_EV)
 		inuse[TRACE_INIT_INDEX] = TRUE;
+	else if (type == MALLOC_EV || type == REALLOC_EV || type == FREE_EV ||
+	  type == CALLOC_EV)
+		inuse[DYNAMIC_MEM_INDEX] = TRUE;
 }
 
 unsigned MISC_event_GetValueForForkRelated (unsigned type)
@@ -91,6 +100,23 @@ unsigned MISC_event_GetValueForForkRelated (unsigned type)
 			return PRV_EXEC_VALUE;
 		case SYSTEM_EV:
 			return PRV_SYSTEM_VALUE;
+		default:
+			return 0;
+	}
+}
+
+unsigned MISC_event_GetValueForDynamicMemory (unsigned type)
+{
+	switch (type)
+	{
+		case MALLOC_EV:
+			return PRV_MALLOC_VALUE;
+		case FREE_EV:
+			return PRV_FREE_VALUE;
+		case REALLOC_EV:
+			return PRV_REALLOC_VALUE;
+		case CALLOC_EV:
+			return PRV_CALLOC_VALUE;
 		default:
 			return 0;
 	}
@@ -156,13 +182,17 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 	if (inuse[INOUT_INDEX])
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, READ_EV, READ_LBL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, WRITE_EV, WRITE_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_EV, IO_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
 		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
-		fprintf (fd, "%d      %s\n", EVT_BEGIN, EVT_BEGIN_LBL);
+		fprintf (fd, "%d      %s\n", READ_VAL_EV, READ_LBL);
+		fprintf (fd, "%d      %s\n", WRITE_VAL_EV, WRITE_LBL);
+		LET_SPACES (fd);
 		fprintf (fd, "%s\n", TYPE_LABEL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOSIZE_EV, IOSIZE_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_SIZE_EV, IO_SIZE_LBL);
+		LET_SPACES (fd);
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_DESCRIPTOR_EV, IO_DESCRIPTOR_LBL);
 		LET_SPACES (fd);
 	}
 	if (inuse[FORK_SYSCALL_INDEX])
@@ -176,6 +206,30 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", PRV_WAITPID_VALUE, WAITPID_LBL);
 		fprintf (fd, "%d      %s\n", PRV_EXEC_VALUE, EXEC_LBL);
 		fprintf (fd, "%d      %s\n", PRV_SYSTEM_VALUE, SYSTEM_LBL);
+		LET_SPACES (fd);
+	}
+	if (inuse[DYNAMIC_MEM_INDEX])
+	{
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, DYNAMIC_MEM_EV, DYNAMIC_MEM_LBL);
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
+		fprintf (fd, "%d      %s\n", PRV_MALLOC_VALUE, MALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_FREE_VALUE, FREE_LBL);
+		fprintf (fd, "%d      %s\n", PRV_REALLOC_VALUE, REALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_CALLOC_VALUE, CALLOC_LBL);
+		LET_SPACES (fd);
+
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT,
+		  DYNAMIC_MEM_REQUESTED_SIZE_EV,
+		  DYNAMIC_MEM_REQUESTED_SIZE_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT,
+		  DYNAMIC_MEM_POINTER_IN_EV,
+		  DYNAMIC_MEM_POINTER_IN_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT,
+		  DYNAMIC_MEM_POINTER_OUT_EV,
+		  DYNAMIC_MEM_POINTER_OUT_LBL);
 		LET_SPACES (fd);
 	}
 

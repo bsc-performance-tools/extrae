@@ -112,7 +112,6 @@ static void callme_parsection (void *p1)
 	}
 
 	Extrae_OpenMP_UF_Entry (parsection_uf);
-	Backend_Leave_Instrumentation (); /* We're entering in user code */
 	parsection_uf (p1);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -135,7 +134,6 @@ static void callme_pardo (void *p1)
 	}
 
 	Extrae_OpenMP_UF_Entry (pardo_uf);
-	Backend_Leave_Instrumentation (); /* We're entering in user code */
 	pardo_uf (p1);
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -159,7 +157,6 @@ static void callme_par (void *p1)
 	}
 
 	Extrae_OpenMP_UF_Entry (par_uf);
-	Backend_Leave_Instrumentation (); /* We're entering in user code */
 	par_uf (p1);
 	Extrae_OpenMP_UF_Exit ();
 }

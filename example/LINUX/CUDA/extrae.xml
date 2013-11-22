@@ -52,6 +52,12 @@
 
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 
+  <cuda enabled="yes" />
+
+  <dynamic-memory enabled="no" />
+
+  <input-output enabled="no" />
+
   <merge enabled="yes" 
     synchronization="default"
     tree-fan-out="16"
@@ -61,7 +67,5 @@
     sort-addresses="yes"
     overwrite="yes"
   />
-
-	<cuda enabled="yes" />
 
 </trace>

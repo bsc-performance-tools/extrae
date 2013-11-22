@@ -109,8 +109,6 @@ value_t;
 #define APPL_LBL               "Application"
 #define TRACE_INIT_LBL         "Trace initialization"
 #define FLUSH_LBL              "Flushing Traces"
-#define READ_LBL               "I/O Read"
-#define WRITE_LBL              "I/O Write"
 #define FORK_SYSCALL_LBL       "Process-related syscalls"
 #define FORK_LBL               "fork()"
 #define WAIT_LBL               "wait()"
@@ -127,8 +125,6 @@ value_t;
 
 #define TRAC_ENABLED_LBL       "Enabled"
 #define TRAC_DISABLED_LBL      "Disabled"
-
-#define IOSIZE_LBL             "I/O Size"
 
 #define MPI_GLOBAL_OP_ROOT_LBL      "Root in MPI Global OP"
 #define MPI_GLOBAL_OP_SENDSIZE_LBL  "Send Size in MPI Global OP"

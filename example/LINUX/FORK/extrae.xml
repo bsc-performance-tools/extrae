@@ -50,6 +50,12 @@
     <minimum-time enabled="no">10M</minimum-time>
   </others>
 
+  <sampling enabled="no" type="default" period="50m" variability="10m" />
+
+  <dynamic-memory enabled="no" />
+
+  <input-output enabled="no" />
+
   <merge enabled="no" 
     synchronization="default"
     tree-fan-out="16"

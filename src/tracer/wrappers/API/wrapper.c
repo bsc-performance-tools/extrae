@@ -160,9 +160,27 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(PTHREAD_SUPPORT)
 # include "pthread_probe.h"
 #endif
+#include "malloc_probe.h"
+#include "malloc_wrapper.h"
+#include "io_probe.h"
+#include "io_wrapper.h"
 #include "taskid.h"
 
 int Extrae_Flush_Wrapper (Buffer_t *buffer);
+
+static int requestedDynamicMemoryInstrumentation = FALSE;
+
+void setRequestedDynamicMemoryInstrumentation (int b)
+{
+	requestedDynamicMemoryInstrumentation = b;
+}
+
+static int requestedIOInstrumentation = FALSE;
+
+void setRequestedIOInstrumentation (int b)
+{
+	requestedIOInstrumentation = b;
+}
 
 static void Backend_Finalize_close_mpits (int thread);
 
@@ -819,7 +837,7 @@ static int read_environment_variables (int me)
 	{
 		if (me == 0)
 			fprintf (stdout, PACKAGE_NAME": pthread runtime calls are NOT traced.\n");
-  	tracejant_omp = FALSE;
+		tracejant_omp = FALSE;
 	}
 
 	/* HWC must be gathered at OpenMP? */
@@ -1475,6 +1493,14 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	int set;
 #endif
 
+#if defined(INSTRUMENT_DYNAMIC_MEMORY)
+	Extrae_malloctrace_init();
+#endif
+
+#if defined(INSTRUMENT_IO)
+	Extrae_iotrace_init();
+#endif
+
 #if defined(PTHREAD_SUPPORT)
 	Backend_CreatepThreadIdentifier ();
 #endif
@@ -1574,16 +1600,16 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #endif
 
 #if defined(IS_CELL_MACHINE)
-	prepare_CELLTrace_init (maximum_NumOfThreads);
+	prepare_CELLTrace_init (get_maximum_NumOfThreads());
 #endif
 
 	/* Initialize the clock */
 	if (!forked)
-		CLOCK_INIT (maximum_NumOfThreads);
+		CLOCK_INIT (get_maximum_NumOfThreads());
 
 	/* Allocate thread info structure */
 	if (!forked)
-		Extrae_allocate_thread_info (maximum_NumOfThreads);
+		Extrae_allocate_thread_info (get_maximum_NumOfThreads());
 
 	/* Configure the tracing subsystem */
 	if (!forked)
@@ -1622,8 +1648,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 			unlink (trace_sym);
 	}
 
+	Backend_ChangeNumberOfThreads_InInstrumentation (get_maximum_NumOfThreads());
+
 	/* Remove the locals .sym file */
-	for (i = 0; i < maximum_NumOfThreads; i++)
+	for (i = 0; i < get_maximum_NumOfThreads(); i++)
 	{
 		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
 		  appl_name, getpid(), Extrae_get_initial_TASKID(), i, EXT_SYM);
@@ -1632,11 +1660,11 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	}
 
 	/* Allocate the buffers and trace files */
-	Allocate_buffers_and_files (world_size, maximum_NumOfThreads, forked);
+	Allocate_buffers_and_files (world_size, get_maximum_NumOfThreads(), forked);
 
 #if defined(CUDA_SUPPORT)
 	/* Allocate thread info for CUDA execs */
-	Extrae_reallocate_CUDA_info (maximum_NumOfThreads);
+	Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads());
 #endif
 
 	/* This has been moved a few lines above to make sure the APPL_EV is the first in the trace */
@@ -1676,14 +1704,14 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	}
 
 	/* Start reading counters */
-	HWC_Start_Counters (maximum_NumOfThreads, forked);
+	HWC_Start_Counters (get_maximum_NumOfThreads(), forked);
 #endif
 
 	/* Initialize Tracing Mode related variables */
 	if (forked)
 		Trace_Mode_CleanUp();
 
-	Trace_Mode_Initialize (maximum_NumOfThreads);
+	Trace_Mode_Initialize (get_maximum_NumOfThreads());
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
@@ -1738,8 +1766,16 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		return FALSE;
 
 	/* Just modify things if there are more threads */
-	if (new_num_threads > maximum_NumOfThreads)
+	if (new_num_threads > get_maximum_NumOfThreads())
 	{
+		unsigned u;
+
+		/* Reallocate InInstrumentation structures */
+		Backend_ChangeNumberOfThreads_InInstrumentation (new_num_threads);
+		/* We leave... so, we're no longer in instrumentatin from this point */
+		for (u = get_maximum_NumOfThreads(); u < new_num_threads; u++)
+			Backend_setInInstrumentation (u, FALSE);
+
 		/* Reallocate clock structures */
 		Clock_AllocateThreads (new_num_threads);
 
@@ -1747,15 +1783,15 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		Reallocate_buffers_and_files (new_num_threads);
 
 		/* Reallocate trace mode */
-		Trace_Mode_reInitialize (maximum_NumOfThreads, new_num_threads);
+		Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads);
 
 #if USE_HARDWARE_COUNTERS
 		/* Reallocate and start reading counters for these threads */
-		HWC_Restart_Counters (maximum_NumOfThreads, new_num_threads);
+		HWC_Restart_Counters (get_maximum_NumOfThreads(), new_num_threads);
 #endif
 
 		/* Allocate thread info structure */
-		Extrae_reallocate_thread_info (maximum_NumOfThreads, new_num_threads);
+		Extrae_reallocate_thread_info (get_maximum_NumOfThreads(), new_num_threads);
 
 #if defined(CUDA_SUPPORT)
 		/* Allocate thread info for CUDA execs */
@@ -1902,8 +1938,21 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 		Extrae_shutdown_Wrapper();
 	}
 
+
+	/* Enable dynamic memory instrumentation if requested */
+	if (requestedDynamicMemoryInstrumentation)
+		Extrae_set_trace_malloc (TRUE);
+
+	/* Enable dynamic memory instrumentation if requested */
+	if (requestedIOInstrumentation)
+		Extrae_set_trace_io (TRUE);
+
 	/* Enable sampling capabilities */
 	setSamplingEnabled (TRUE);
+
+	/* We leave... so, we're no longer in instrumentatin from this point */
+	for (i = 0; i < get_maximum_NumOfThreads(); i++)
+		Backend_setInInstrumentation (i, FALSE);
 
 	return TRUE;
 }
@@ -2056,12 +2105,18 @@ void Backend_Finalize (void)
 {
 	unsigned thread;
 
+	/* Stop collecting information from dynamic memory instrumentation */
+	Extrae_set_trace_io (FALSE);
+
+	/* Stop collecting information from dynamic memory instrumentation */
+	Extrae_set_trace_malloc (FALSE);
+
 	/* Stop sampling right now */
 	setSamplingEnabled (FALSE);
 	unsetTimeSampling ();
 
 	/* Write files back to disk , 1st part will include flushing events*/
-	for (thread = 0; thread < maximum_NumOfThreads; thread++) 
+	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
 		if (TRACING_BUFFER(thread) != NULL)
 			Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 
@@ -2072,7 +2127,7 @@ void Backend_Finalize (void)
 	}
 
 	/* Final write files to disk, include renaming of the filenames */
-	for (thread = 0; thread < maximum_NumOfThreads; thread++)
+	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 		if (TRACING_BUFFER(thread) != NULL)
 		{
 			TRACE_EVENT (TIME, APPL_EV, EVT_END);
@@ -2096,7 +2151,7 @@ void Backend_Finalize (void)
 		if (TASKID == 0)
 			fprintf (stdout, PACKAGE_NAME": Deallocating memory.\n");
 
-		for (thread = 0; thread < maximum_NumOfThreads; thread++)
+		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 		{
 			Buffer_Free (TRACING_BUFFER(thread));
 			TRACING_BUFFER(thread) = NULL;
@@ -2160,11 +2215,34 @@ void Backend_Finalize (void)
 
 /* */
 
-static int Extrae_inInstrumentation = FALSE;
+//static int Extrae_inInstrumentation = FALSE;
+static int *Extrae_inInstrumentation = NULL;
 
-int Backend_inInstrumentation (void)
+int Backend_inInstrumentation (unsigned thread)
 {
-	return Extrae_inInstrumentation;
+	if (Extrae_inInstrumentation != NULL)
+		return Extrae_inInstrumentation[thread];
+	else
+		return FALSE;
+	/* return Extrae_inInstrumentation; */
+}
+
+void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
+{
+	if (Extrae_inInstrumentation != NULL)
+		Extrae_inInstrumentation[thread] = ininstrumentation;
+}
+
+void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
+{
+	Extrae_inInstrumentation = (int*) realloc (Extrae_inInstrumentation,
+	  sizeof(int)*nthreads);
+	if (Extrae_inInstrumentation == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME
+		  ": Failed to allocate memory for inInstrumentation structure\n");
+		exit (-1);
+	}
 }
 
 void Backend_Enter_Instrumentation (unsigned Nevents)
@@ -2175,7 +2253,7 @@ void Backend_Enter_Instrumentation (unsigned Nevents)
 	if (!mpitrace_on)
 		return;
 
-	Extrae_inInstrumentation = TRUE;
+	Backend_setInInstrumentation (thread, TRUE);
 
 	/* Check whether we will fill the buffer soon (or now) */
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= Nevents)
@@ -2201,7 +2279,7 @@ void Backend_Leave_Instrumentation (void)
 	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)
 		Trace_Mode_Change(thread, LAST_READ_TIME);
 
-	Extrae_inInstrumentation = FALSE;
+	Backend_setInInstrumentation (thread, FALSE);
 }
 
 void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *description,
@@ -2412,4 +2490,3 @@ void Backend_updateTaskID (void)
 	   open handlers referring to this, and renaming the file would require
 	   closing the handler and reopening it again. */
 }
-

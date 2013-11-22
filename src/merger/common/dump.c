@@ -107,6 +107,10 @@ static void show_current (event_t * c, UINT64 max_time)
 	{
 		fprintf (stdout, "USER EVENT value: %llu [0x%llx]\n", c->param.misc_param.param, c->param.misc_param.param);
 	}
+	else if (c->event == SAMPLING_ADDRESS_EV)
+	{
+		fprintf (stdout, "SAMPLING_ADDRESS EVENT value: %llu [0x%llx]\n", c->param.misc_param.param, c->param.misc_param.param);
+	}
 	else if (c->event == NAMEDCRIT_EV && (c->value == LOCK_VAL || c->value == UNLOCK_VAL))
 	{
 		fprintf (stdout, "NAMED CRITICAL ADDRESS: %llu [0x%llx]\n", c->param.omp_param.param, c->param.omp_param.param);

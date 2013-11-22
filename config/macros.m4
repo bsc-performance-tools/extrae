@@ -1250,7 +1250,7 @@ AC_DEFUN([AX_CHECK_UNWIND],
          AC_DEFINE([UNWIND_SUPPORT], [1], [Unwinding support enabled for IA64/x86-64])
          AC_DEFINE([HAVE_LIBUNWIND_H], [1], [Define to 1 if you have <libunwind.h> header file])
       else
-         AC_MSG_ERROR([Cannot link libunwind example. Check that --with-unwind points to the appropriate libunwind directory.])
+         AC_MSG_ERROR([Cannot link libunwind test. Check that --with-unwind points to the appropriate libunwind directory.])
       fi
    fi
    AX_FLAGS_RESTORE()

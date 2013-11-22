@@ -197,6 +197,9 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	char *functionname, char *modulename, unsigned fileline);
 
+void setRequestedDynamicMemoryInstrumentation (int b);
+void setRequestedIOInstrumentation (int b);
+
 int Backend_preInitialize (int rank, int world_size, char *config_file, int forked);
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);
 void Backend_updateTaskID (void);
@@ -219,7 +222,9 @@ iotimer_t Backend_Get_Last_Enter_Time (void);
 iotimer_t Backend_Get_Last_Leave_Time (void);
 void Backend_Enter_Instrumentation (unsigned Nevents);
 void Backend_Leave_Instrumentation (void);
-int Backend_inInstrumentation (void);
+int Backend_inInstrumentation (unsigned thread);
+void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);
+void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads);
 
 void advance_current(int);
 extern int circular_buffering, circular_OVERFLOW;

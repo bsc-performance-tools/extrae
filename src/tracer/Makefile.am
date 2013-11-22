@@ -118,7 +118,11 @@ WRAPPERS_CORE = \
  trace_macros.h trace_macros_mpi.h trace_macros_omp.h trace_macros_pacx.h \
  trace_hwc.h \
  wrappers/fork/fork_wrapper.c wrappers/fork/fork_wrapper.h \
- probes/fork/fork_probe.c probes/fork/fork_probe.h 
+ probes/fork/fork_probe.c probes/fork/fork_probe.h \
+ wrappers/MALLOC/malloc_wrapper.c wrappers/MALLOC/malloc_wrapper.h \
+ probes/MALLOC/malloc_probe.c probes/MALLOC/malloc_probe.h \
+ wrappers/IO/io_wrapper.c wrappers/IO/io_wrapper.h \
+ probes/IO/io_probe.c probes/IO/io_probe.h 
 
 # Wrappers for CUDA instrumentation
 WRAPPERS_CUDA = probes/CUDA/cuda_probe.c probes/CUDA/cuda_probe.h \
@@ -361,6 +365,8 @@ core_INCLUDES = \
  -I$(WRAPPERS_DIR)/OMP -I$(WRAPPERS_DIR)/pthread \
  -I$(WRAPPERS_DIR)/CUDA -I$(WRAPPERS_DIR)/OPENCL \
  -I$(WRAPPERS_DIR)/fork -I$(PROBES_DIR)/fork \
+ -I$(WRAPPERS_DIR)/MALLOC -I$(PROBES_DIR)/MALLOC \
+ -I$(WRAPPERS_DIR)/IO -I$(PROBES_DIR)/IO \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_DIR) $(UNWIND_CFLAGS)
 
 if IS_CELL_MACHINE

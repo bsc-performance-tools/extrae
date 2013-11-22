@@ -62,6 +62,10 @@
 
   <sampling enabled="no" type="virtual" period="50m" variability="10m" />
 
+  <dynamic-memory enabled="no" />
+
+  <input-output enabled="no" />
+
   <merge enabled="yes" 
     synchronization="default"
     tree-fan-out="16"
