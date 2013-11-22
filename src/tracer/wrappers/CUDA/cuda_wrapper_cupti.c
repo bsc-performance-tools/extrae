@@ -52,7 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain domain,
 	CUpti_CallbackId cbid, const CUpti_CallbackData *cbinfo)
 {
-	if (!mpitrace_on)
+	if (!mpitrace_on || !Extrae_get_trace_CUDA())
 		return;
 
 	UNREFERENCED_PARAMETER(udata);

@@ -132,4 +132,49 @@ void Extrae_Probe_clEnqueueMapBuffer_Exit (void);
 void Extrae_Probe_clEnqueueMigrateMemObjects_Enter (void);
 void Extrae_Probe_clEnqueueMigrateMemObjects_Exit (void);
 
+void Extrae_Probe_clRetainCommandQueue_Enter (void);
+void Extrae_Probe_clRetainCommandQueue_Exit (void);
+
+void Extrae_Probe_clReleaseCommandQueue_Enter (void);
+void Extrae_Probe_clReleaseCommandQueue_Exit (void);
+
+void Extrae_Probe_clRetainContext_Enter (void);
+void Extrae_Probe_clRetainContext_Exit (void);
+
+void Extrae_Probe_clReleaseContext_Enter (void);
+void Extrae_Probe_clReleaseContext_Exit (void);
+
+void Extrae_Probe_clRetainDevice_Enter (void);
+void Extrae_Probe_clRetainDevice_Exit (void);
+
+void Extrae_Probe_clReleaseDevice_Enter (void);
+void Extrae_Probe_clReleaseDevice_Exit (void);
+
+void Extrae_Probe_clRetainEvent_Enter (void);
+void Extrae_Probe_clRetainEvent_Exit (void);
+
+void Extrae_Probe_clReleaseEvent_Enter (void);
+void Extrae_Probe_clReleaseEvent_Exit (void);
+
+void Extrae_Probe_clRetainKernel_Enter (void);
+void Extrae_Probe_clRetainKernel_Exit (void);
+
+void Extrae_Probe_clReleaseKernel_Enter (void);
+void Extrae_Probe_clReleaseKernel_Exit (void);
+
+void Extrae_Probe_clRetainMemObject_Enter (void);
+void Extrae_Probe_clRetainMemObject_Exit (void);
+
+void Extrae_Probe_clReleaseMemObject_Enter (void);
+void Extrae_Probe_clReleaseMemObject_Exit (void);
+
+void Extrae_Probe_clRetainProgram_Enter (void);
+void Extrae_Probe_clRetainProgram_Exit (void);
+
+void Extrae_Probe_clReleaseProgram_Enter (void);
+void Extrae_Probe_clReleaseProgram_Exit (void);
+
+void Extrae_set_trace_OpenCL (int b);
+int Extrae_get_trace_OpenCL (void);
+
 #endif /* OPENCL_PROBE_H_INCLUDED */

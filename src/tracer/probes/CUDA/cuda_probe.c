@@ -35,6 +35,14 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "cuda_probe.h"
 
+int trace_cuda = TRUE;
+
+void Extrae_set_trace_CUDA (int b)
+{ trace_cuda = b; }
+
+int Extrae_get_trace_CUDA (void)
+{ return trace_cuda; }
+
 #if 0
 # define DEBUG fprintf (stdout, "THREAD %d: %s\n", THREADID, __FUNCTION__);
 #else
@@ -44,42 +52,42 @@ static char UNUSED rcsid[] = "$Id$";
 void Probe_Cuda_Launch_Entry (UINT64 p1)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDALAUNCH_EV, p1, EMPTY);
 }
 
 void Probe_Cuda_Launch_Exit (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDALAUNCH_EV, EVT_END, EMPTY);
 }
 
 void Probe_Cuda_ConfigureCall_Entry (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDACONFIGCALL_EV, EVT_BEGIN, EMPTY);
 }
 
 void Probe_Cuda_ConfigureCall_Exit (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDACONFIGCALL_EV, EVT_END, EMPTY);
 }
 
 void Probe_Cuda_Memcpy_Entry (size_t size)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPY_EV, size, EMPTY);
 }
 
 void Probe_Cuda_Memcpy_Exit (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDAMEMCPY_EV, EVT_END, EMPTY); 
 }
 
@@ -87,28 +95,28 @@ void Probe_Cuda_Memcpy_Exit (void)
 void Probe_Cuda_ThreadBarrier_Entry (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDATHREADBARRIER_EV, EVT_BEGIN, EMPTY);
 }
 
 void Probe_Cuda_ThreadBarrier_Exit (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDATHREADBARRIER_EV, EVT_END, EMPTY); 
 }
 
 void Probe_Cuda_StreamBarrier_Entry (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDASTREAMBARRIER_EV, EVT_BEGIN, EMPTY);
 }
 
 void Probe_Cuda_StreamBarrier_Exit (void)
 {
 	DEBUG
-	if (mpitrace_on)
+	if (mpitrace_on && trace_cuda)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMBARRIER_EV, EVT_END, EMPTY); 
 }
 

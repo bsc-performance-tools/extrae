@@ -108,13 +108,13 @@ cudaError_t cudaLaunch (const char *p1)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaLaunch params %p\n", THREADID, p1);
 #endif
 
-	if (real_cudaLaunch != NULL && mpitrace_on)
+	if (real_cudaLaunch != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaLaunch_Enter (p1);
 		res = real_cudaLaunch (p1);
 		Extrae_cudaLaunch_Exit ();
 	}
-	else if (real_cudaLaunch != NULL && !mpitrace_on)
+	else if (real_cudaLaunch != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaLaunch (p1);
 	}
@@ -136,13 +136,13 @@ cudaError_t cudaConfigureCall (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaConfigureCall params p1 p2 %d %d\n", THREADID, p3, p4);
 #endif
 
-	if (real_cudaConfigureCall != NULL && mpitrace_on)
+	if (real_cudaConfigureCall != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaConfigureCall_Enter (p1, p2, p3, p4);
 		res = real_cudaConfigureCall (p1, p2, p3, p4);
 		Extrae_cudaConfigureCall_Exit ();
 	}
-	else if (real_cudaConfigureCall != NULL && !mpitrace_on)
+	else if (real_cudaConfigureCall != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaConfigureCall (p1, p2, p3, p4);
 	}
@@ -164,13 +164,13 @@ cudaError_t cudaStreamCreate (cudaStream_t *p1)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate params %p %p %d %d %d\n", THREADID, p1);
 #endif
 
-	if (real_cudaStreamCreate != NULL && mpitrace_on)
+	if (real_cudaStreamCreate != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaStreamCreate_Enter (p1);
 		res = real_cudaStreamCreate (p1);
 		Extrae_cudaStreamCreate_Exit ();
 	}
-	else if (real_cudaStreamCreate != NULL && !mpitrace_on)
+	else if (real_cudaStreamCreate != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaStreamCreate (p1);
 	}
@@ -192,13 +192,13 @@ cudaError_t cudaMemcpyAsync (void *p1, const void *p2, size_t p3, enum cudaMemcp
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpyAsync params %p %p %d %d %d\n", THREADID, p1, p2, p3, p4, p5);
 #endif
 
-	if (real_cudaMemcpyAsync != NULL && mpitrace_on)
+	if (real_cudaMemcpyAsync != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaMemcpyAsync_Enter (p1, p2, p3, p4, p5);
 		res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
 		Extrae_cudaMemcpyAsync_Exit ();
 	}
-	else if (real_cudaMemcpyAsync != NULL && !mpitrace_on)
+	else if (real_cudaMemcpyAsync != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaMemcpyAsync (p1, p2, p3, p4, p5);
 	}
@@ -220,13 +220,13 @@ cudaError_t cudaMemcpy (void *p1, const void *p2, size_t p3, enum cudaMemcpyKind
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaMemcpy params %p %p %d %d\n", THREADID, p1, p2, p3, p4);
 #endif
 
-	if (real_cudaMemcpy != NULL && mpitrace_on)
+	if (real_cudaMemcpy != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaMemcpy_Enter (p1, p2, p3, p4);
 		res = real_cudaMemcpy (p1, p2, p3, p4);
 		Extrae_cudaMemcpy_Exit ();
 	}
-	else if (real_cudaMemcpy != NULL && !mpitrace_on)
+	else if (real_cudaMemcpy != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaMemcpy (p1, p2, p3, p4);
 	}
@@ -246,13 +246,13 @@ cudaError_t cudaThreadSynchronize (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize is at %p\n", THREADID, real_cudaThreadSynchronize);
 #endif
 
-	if (real_cudaThreadSynchronize != NULL && mpitrace_on)
+	if (real_cudaThreadSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaThreadSynchronize_Enter ();
 		res = real_cudaThreadSynchronize ();
 		Extrae_cudaThreadSynchronize_Exit ();
 	}
-	else if (real_cudaThreadSynchronize != NULL && !mpitrace_on)
+	else if (real_cudaThreadSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaThreadSynchronize ();
 	}
@@ -274,13 +274,13 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize params %d\n", THREADID, p1);
 #endif
 
-	if (real_cudaStreamSynchronize != NULL && mpitrace_on)
+	if (real_cudaStreamSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		Extrae_cudaStreamSynchronize_Enter (p1);
 		res = real_cudaStreamSynchronize (p1);
 		Extrae_cudaStreamSynchronize_Exit ();
 	}
-	else if (real_cudaStreamSynchronize != NULL && !mpitrace_on)
+	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaStreamSynchronize (p1);
 	}
@@ -297,14 +297,14 @@ cudaError_t cudaDeviceReset (void)
 {
 	cudaError_t res;
 
-	if (real_cudaDeviceReset != NULL && mpitrace_on)
+	if (real_cudaDeviceReset != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		int devid;
 		res = real_cudaDeviceReset ();
 		cudaGetDevice (&devid);
 		Extrae_CUDA_deInitialize (devid);
 	}
-	else if (real_cudaStreamSynchronize != NULL && !mpitrace_on)
+	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
 		res = real_cudaDeviceReset ();
 	}

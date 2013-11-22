@@ -207,9 +207,6 @@ int tracejant_rusage = FALSE;
 /** Store information about malloc?                                     **/
 int tracejant_memusage = FALSE;
 
-int tracing_opencl = FALSE;
-int tracing_cuda = FALSE;
-
 
 /**** Variable global que controla quin subset de les tasks generen o ****/
 /**** no generen trasa ***************************************************/
@@ -292,8 +289,6 @@ int MergeAfterTracing = FALSE;
 #endif
 
 int EXTRAE_ON (void) { return mpitrace_on; }
-int EXTRAE_TRACING_OPENCL (void) { return tracing_opencl; }
-int EXTRAE_TRACING_CUDA (void) { return tracing_cuda; }
 
 static unsigned get_maximum_NumOfThreads (void)
 {

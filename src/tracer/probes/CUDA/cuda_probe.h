@@ -41,4 +41,7 @@ void Probe_Cuda_ThreadBarrier_Exit (void);
 void Probe_Cuda_StreamBarrier_Entry (void);
 void Probe_Cuda_StreamBarrier_Exit (void);
 
+void Extrae_set_trace_CUDA (int b);
+int Extrae_get_trace_CUDA (void);
+
 #endif

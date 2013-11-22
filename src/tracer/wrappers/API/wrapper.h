@@ -100,12 +100,7 @@ extern int *TracingBitmap;
 // Serveix per fer com si no hi hagues MPITRACE durant TOTA l'execucio
 extern int mpitrace_on;
 
-extern int tracing_cuda;
-extern int tracing_opencl;
-
 int EXTRAE_ON (void);
-int EXTRAE_TRACING_OPENCL (void);
-int EXTRAE_TRACING_CUDA (void);
 
 /****** Variable global per coneixer el nom del l'aplicacio *******/
 // Serveix per poder donar als fitxers generats el nom del programa

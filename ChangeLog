@@ -1,7 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
- * 21Nov2012 Added improved support to instrument nanos+MPI apps including
+ * 22Nov2013 Honor <cuda enabled> and <opencl enabled>
+             MFB missing OpenCL probes
+ * 21Nov2013 Added improved support to instrument nanos+MPI apps including
                examples for OmpSs and MPI+OmpSs
              In Linux, merging process automatically uses binary name as
                default trace file name and no longer requires -e neither in xml.
