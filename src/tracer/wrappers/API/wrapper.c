@@ -2298,8 +2298,11 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
+
 		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
 			description);
+
+		/* Avoid cr in line */
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 				line[j] = ' ';
@@ -2317,9 +2320,12 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 
 				snprintf (line, sizeof(line), "%c %llu \"%s\"", code_values,
 					values[i], description_values[i]);
+
+				/* Avoid cr in line */
 				for (j = 0; j < strlen(line); j++)
 					if (line[j] == '\n')
 						line[j] = ' ';
+
 				if (write (fd, line, strlen(line)) < 0)
 					fprintf (stderr, PACKAGE_NAME": Error writing definition into global symbolic file");
 				if (write (fd, "\n", strlen("\n")) < 0)
@@ -2348,11 +2354,14 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
 		unsigned j;
+
+		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
+			description);
+
+		/* Avoid cr in line */
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 					line[j] = ' ';
-		snprintf (line, sizeof(line), "%c %d \"%s\"", code_type, type,
-			description);
 
 		if (write (fd, line, strlen(line)) < 0)
 			fprintf (stderr, PACKAGE_NAME": Error writing definition into local symbolic file");
@@ -2368,9 +2377,12 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 
 				snprintf (line, sizeof(line), "%c %llu \"%s\"", code_values,
 					values[i], description_values[i]);
+
+				/* Avoid cr in line */
 				for (j = 0; j < strlen(line); j++)
 					if (line[j] == '\n')
 						line[j] = ' ';
+
 				if (write (fd, line, strlen(line)) < 0)
 					fprintf (stderr, PACKAGE_NAME": Error writing definition into local symbolic file");
 				if (write (fd, "\n", strlen("\n")) < 0)
@@ -2402,9 +2414,12 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 		/* Example of format: U 0x100016d4 fA mpi_test.c 0 */
 		snprintf (line, sizeof(line), "%c %p \"%s\" \"%s\" %u", code_type,
 			address, functionname, modulename, fileline);
+
+		/* Avoid cr in line */
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 				line[j] = ' ';
+
 		if (write (fd, line, strlen(line)) < 0)
 			fprintf (stderr, PACKAGE_NAME": Error writing function definition into local symbolic file");
 		if (write (fd, "\n", strlen("\n")) < 0)
