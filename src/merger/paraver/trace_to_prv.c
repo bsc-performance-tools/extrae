@@ -63,6 +63,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
+#ifdef HAVE_LIBGEN_H
+# include <libgen.h>
+#endif
 #if defined (PARALLEL_MERGE)
 # include <mpi.h>
 # include "mpi-tags.h"
@@ -261,11 +264,17 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	/* If no actual filename is given, use the binary name if possible */
 	if (!get_merge_GivenTraceName())
 	{
-		char *FirstBinaryName = ObjectTable_GetBinaryObjectName (1, 1);
+		char *tmp = ObjectTable_GetBinaryObjectName (1, 1);
+
+		/* Duplicate the string as basename may modify it */
+		char *FirstBinaryName = NULL;
+		if (tmp != NULL)
+			FirstBinaryName = strdup (tmp);
+
 		if (FirstBinaryName != NULL)
 		{
 			char prvfile[strlen(FirstBinaryName) + 5];
-			sprintf (prvfile, "%s.prv", FirstBinaryName);
+			sprintf (prvfile, "%s.prv", basename(FirstBinaryName));
 			set_merge_OutputTraceName (prvfile);
 			set_merge_GivenTraceName (TRUE);
 		}
