@@ -280,8 +280,8 @@ unsigned file_size = 0;
 
 #define MBytes							*1024*1024
 
-static unsigned current_NumOfThreads = 0;
-static unsigned maximum_NumOfThreads = 0;
+static unsigned current_NumOfThreads = 1;
+static unsigned maximum_NumOfThreads = 1;
 
 #define TMP_NAME_LENGTH     512
 #define APPL_NAME_LENGTH    512
