@@ -502,24 +502,24 @@ void HWCBE_PAPI_CleanUp (unsigned nthreads)
 		int i;
 		unsigned t;
 
-		if (PAPI_state (HWC_sets[HWCEVTSET(THREADID)].eventsets[THREADID], &state) == PAPI_OK)
+		if (PAPI_state (HWCEVTSET(THREADID), &state) == PAPI_OK)
 		{
 			if (state & PAPI_RUNNING)
 			{
 				long long tmp[MAX_HWC];
-				PAPI_stop (HWC_sets[HWCEVTSET(THREADID)].eventsets[THREADID], tmp);
+				PAPI_stop (HWCEVTSET(THREADID), tmp);
 			}
+		}
 
-			for (i = 0; i < HWC_num_sets; i++)
+		for (i = 0; i < HWC_num_sets; i++)
+		{
+			for (t = 0; t < nthreads; t++)
 			{
-				for (t = 0; t < nthreads; t++)
-				{
-					/* Remove all events in the eventset and destroy the eventset */
-					PAPI_cleanup_eventset(HWC_sets[i].eventsets[t]);
-					PAPI_destroy_eventset(&HWC_sets[i].eventsets[t]);
-				}
-				xfree (HWC_sets[i].eventsets);
+				/* Remove all events in the eventset and destroy the eventset */
+				PAPI_cleanup_eventset(HWC_sets[i].eventsets[t]);
+				PAPI_destroy_eventset(&HWC_sets[i].eventsets[t]);
 			}
+			xfree (HWC_sets[i].eventsets);
 		}
 
 #if defined(PAPI_SAMPLING_SUPPORT)
