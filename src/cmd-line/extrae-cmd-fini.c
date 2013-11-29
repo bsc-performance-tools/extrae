@@ -22,63 +22,50 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/tracer/taskid.c $
+ | @last_commit: $Date: 2012-03-30 10:06:18 +0200 (Fri, 30 Mar 2012) $
+ | @version:     $Revision: 1045 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#include "common.h"
 
+static char UNUSED rcsid[] = "$Id: threadid.c 1311 2012-10-25 11:05:07Z harald $";
+
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
-#include "debug.h"
-
-#define xmalloc(ptr,size)             \
-{                                     \
-   ptr = malloc(size);                \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xrealloc(ptr,src,size)        \
-{                                     \
-   ptr = realloc(src, size);          \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xfree(ptr)                    \
-{                                     \
-   if (ptr != NULL)                   \
-   {                                  \
-      free(ptr);                      \
-   }                                  \
-   ptr = NULL;                        \
-} 
-
-#if defined(__cplusplus)
-extern "C" {
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
 #endif
 
-int is_Whitespace (char c);
-int is_Alphabetic (char c);
-int explode (char *sourceStr, const char *delimiter, char ***tokenArray);
-void append_from_to_file (const char *source, const char *destination);
-void rename_or_copy (char *origen, char *desti);
-unsigned long long getTimeFromStr (char *time, char *envvar, int rank);
-unsigned long long getFactorValue (char *value, char *ref, int rank);
-int mkdir_recursive (char *path);
-int file_exists (char *file);
-int directory_exists (char *file);
+#include "extrae-cmd.h"
+#include "extrae-cmd-fini.h"
 
-#if defined(__cplusplus)
+int Extrae_CMD_Fini (int i, int argc, char *argv[])
+{
+	char HOST[1024];
+
+	UNREFERENCED_PARAMETER (i);
+	UNREFERENCED_PARAMETER (argc);
+	UNREFERENCED_PARAMETER (argv);
+
+	if (0 == gethostname (HOST, sizeof(HOST)))
+	{
+		char TMPFILE[2048];
+		sprintf (TMPFILE, EXTRAE_CMD_FILE_PREFIX"%s", HOST);
+		if (unlink (TMPFILE) != 0)
+			fprintf (stderr, CMD_FINI " Error! Cannot remove temporal file\n");
+	}
+
+	return 0;
 }
-#endif
 
-#endif /* __UTILS_H__ */

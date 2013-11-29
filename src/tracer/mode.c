@@ -71,7 +71,7 @@ void Trace_Mode_CleanUp (void)
 	xfree (Pending_Trace_Mode_Change);
 }
 
-int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
+int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads, int emitevent)
 {
 	int i, size;
 
@@ -112,14 +112,16 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 		Future_Trace_Mode[i] = Starting_Trace_Mode;
 		Pending_Trace_Mode_Change[i] = FALSE;
 	}
-	THREADS_TRACE_EVENT(old_num_threads, new_num_threads, TIME, TRACING_MODE_EV, Starting_Trace_Mode);
+
+	if (emitevent)
+		THREADS_TRACE_EVENT(old_num_threads, new_num_threads, TIME, TRACING_MODE_EV, Starting_Trace_Mode);
 
 	return TRUE;
 }
 
-int Trace_Mode_Initialize (int num_threads)
+int Trace_Mode_Initialize (int num_threads, int emitevent)
 {
-	int res = Trace_Mode_reInitialize (0, num_threads);
+	int res = Trace_Mode_reInitialize (0, num_threads, emitevent);
 
 	/* Show configuration */
 	if (res && TASKID == 0)

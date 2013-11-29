@@ -34,8 +34,10 @@
 
 #include <bfd.h>
 
+#include "bfd_data_symbol.h"
+
 #if defined(BFD_MANAGER_GENERATE_ADDRESSES)
-# include <bfd_manager_extra.h>
+# include "bfd_manager_extra.h"
 #endif
 
 typedef struct loadedModule_st
@@ -56,10 +58,6 @@ typedef struct BFDmanager_symbolInfo_st
 	unsigned int line;
 	bfd_boolean found;
 } BFDmanager_symbolInfo_t;
-
-/* Forward declarations from object_tree.h */
-struct data_symbol_st;
-typedef struct data_symbol_st data_symbol_t;
 
 void BFDmanager_init (void);
 unsigned BFDmanager_numLoadedBinaries (void);

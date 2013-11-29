@@ -1,6 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 29Nov2013 Added initial Java instrumentation (--with-java at configure)
+             Added initial Extrae command line instrumentation
+             Added gettimeofday clock
+             Added flag for David Carrera's Hadoop instrumentation (--enable-dcarrera-hadoop)
  * 22Nov2013 Honor <cuda enabled> and <opencl enabled>
              MFB missing OpenCL probes
              Experimental support for isntrumenting I/O & dynamic memory calls

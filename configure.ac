@@ -220,6 +220,7 @@ AC_PROG_CC(${wanted_C_Compilers})
 AC_PROG_CXX(${wanted_CXX_Compilers})
 AC_PROG_CPP
 AC_PROG_FC(${wanted_F_Compilers})
+AX_JAVA
 AC_PROG_INSTALL
 AC_PROG_SED
 AC_PROG_AWK
@@ -323,6 +324,7 @@ AC_CHECK_HEADERS(
 ## Check for clock routines
 ##
 AX_CHECK_POSIX_CLOCK
+AX_CHECK_GETTIMEOFDAY_CLOCK
 
 ##
 ## Check for MPI things
@@ -567,6 +569,18 @@ if test "${enable_bfd_generate_addresses}" = "yes" ; then
 	AC_DEFINE([BFD_MANAGER_GENERATE_ADDRESSES], [1], [Determine if BFD must generate information for data objects in binary])
 fi
 
+AC_ARG_ENABLE(dcarrera-hadoop,
+	AC_HELP_STRING(
+		[--enable-dcarrera-hadoop],
+		[Specific changes for David Carrera to use in Hadopp (experimental, disabled by default)]
+	),
+	[enable_dcarrera_hadoop="${enableval}"],
+	[enable_dcarrera_hadoop="no"]
+)
+if test "${enable_dcarrera_hadoop}" = "yes" ; then
+	AC_DEFINE([DCARRERA_HADDOP], [1], [Determine if Davids tweaks must be applied])
+fi
+
 #################################
 #        On-line checks         #
 #################################
@@ -714,11 +728,15 @@ AC_CONFIG_FILES([
   src/tracer/hwc/Makefile \
   src/tracer/spu/Makefile \
   src/merger/Makefile \
-  src/merger/parallel/Makefile src/others/Makefile  \
-  doc/Makefile etc/Makefile \
-  tests/Makefile])
+  src/merger/parallel/Makefile \
+  src/others/Makefile \
+  src/cmd-line/Makefile \
+  src/java-connector/Makefile \
+  src/java-connector/jni/Makefile \
+  doc/Makefile etc/Makefile ])
 
 AC_CONFIG_FILES([\
+  tests/Makefile
   tests/src/Makefile \
   tests/src/common/Makefile \
   tests/src/tracer/Makefile \

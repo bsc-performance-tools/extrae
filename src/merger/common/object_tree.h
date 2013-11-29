@@ -109,13 +109,6 @@ typedef struct active_task_thread_st
 	unsigned num_stacks;
 } active_task_thread_t;
 
-typedef struct data_symbol_st
-{
-	char *name;
-	void *address;
-	unsigned long long size;
-} data_symbol_t;
-
 typedef struct binary_object_st
 {
 	char *module;

@@ -44,7 +44,12 @@ static char UNUSED rcsid[] = "$Id$";
 
 #include "clock.h"
 
-#if defined(USE_POSIX_CLOCK)
+#if defined(USE_GETTIMEOFDAY_CLOCK)
+# include <gettimeofday_clock.h>
+# define  GET_CLOCK    gettimeofday_getTime()
+# define  INIT_CLOCK   gettimeofday_Initialize()
+# define  INIT_CLOCK_T gettimeofday_Initialize_thread()
+#elif defined(USE_POSIX_CLOCK)
 # include <posix_clock.h>
 # define  GET_CLOCK    posix_getTime()
 # define  INIT_CLOCK   posix_Initialize()

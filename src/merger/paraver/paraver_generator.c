@@ -215,8 +215,10 @@ void trace_paraver_event (
 	thread_info = GET_THREAD_INFO (ptask, task, thread);
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 
+#if !defined(DCARRERA_HADDOP)
 	if (!EnabledTasks[ptask - 1][task - 1])
 		return;
+#endif
 
 	if (type >= MPI_MIN_EV && type <= MPI_MAX_EV)
 	{

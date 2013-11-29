@@ -133,36 +133,42 @@ where {\tt <lib>} is one of those listed in Table \ref{tab:AvailableExtraeLIBS}.
 
 \begin{table}[!ht]
  \centering
-  \scalebox{0.90}{
-  \begin{tabular}{| l | c | c | c | c | c | c | c |}
+  \scalebox{0.80}{
+  \begin{tabular}{| l | c | c | c | c | c | c | c | c | c |}
   \hline
-  {\bf Library}              & \multicolumn{7}{| c |}{{\bf Application type}} \\
+  {\bf Library}              & \multicolumn{9}{| c |}{{\bf Application type}} \\
   \hline
-                             & {\bf Serial} & {\bf MPI} & {\bf OpenMP} & {\bf pthread} & {\bf SMPss} & {\bf nanos/OMPss} & {\bf CUDA} \\
+                             & {\bf Serial} & {\bf MPI} & {\bf OpenMP} & {\bf pthread} & {\bf SMPss} & {\bf nanos/OMPss} & {\bf CUDA} & {\bf OpenCL} & {\bf Java} \\
   \hline
-  {\tt libseqtrace}          & Yes \checkmark & & & & & & \\
+  {\tt libseqtrace}          & Yes \checkmark & & & & & & & & \\
   \hline
-  {\tt libmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & \\
+  {\tt libmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & & & \\
   \hline
-  {\tt libomptrace}          & & & Yes \checkmark & & & & \\
+  {\tt libomptrace}          & & & Yes \checkmark & & & & & & \\
   \hline
-  {\tt libpttrace}           & & & & Yes \checkmark & & & \\
+  {\tt libpttrace}           & & & & Yes \checkmark & & & & & \\
   \hline
-  {\tt libsmpsstrace}        & & & & & Yes \checkmark & & \\
+  {\tt libsmpsstrace}        & & & & & Yes \checkmark & & & & \\
   \hline
-  {\tt libnanostrace}        & & & & & & Yes \checkmark & \\
+  {\tt libnanostrace}        & & & & & & Yes \checkmark & & & \\
   \hline
-  {\tt libcudatrace}         & & & & & & & Yes \checkmark \\
+  {\tt libcudatrace}         & & & & & & & Yes \checkmark & & \\
   \hline
-  {\tt libompitrace}\footnotemark[2] & & Yes \checkmark & Yes \checkmark & & & & \\
+  {\tt libocltrace}          & & & & & & & & Yes \checkmark & \\
   \hline
-  {\tt libptmpitrace}\footnotemark[2] & & Yes \checkmark & & Yes \checkmark & & & \\
+  {\tt javaseqtrace.jar}     & & & & & & & & & Yes \checkmark \\
   \hline
-  {\tt libsmpssmpitrace}\footnotemark[2] & & Yes \checkmark & & & Yes \checkmark & & \\
+  {\tt libompitrace}\footnotemark[2] & & Yes \checkmark & Yes \checkmark & & & & & & \\
   \hline
-  {\tt libnanosmpitrace}\footnotemark[2] & & Yes \checkmark & & & & Yes \checkmark & \\
+  {\tt libptmpitrace}\footnotemark[2] & & Yes \checkmark & & Yes \checkmark & & & & & \\
   \hline
-  {\tt libcudampitrace}\footnotemark[2] & & Yes \checkmark & & & &  & Yes \checkmark \\
+  {\tt libsmpssmpitrace}\footnotemark[2] & & Yes \checkmark & & & Yes \checkmark & & & & \\
+  \hline
+  {\tt libnanosmpitrace}\footnotemark[2] & & Yes \checkmark & & & & Yes \checkmark & & & \\
+  \hline
+  {\tt libcudampitrace}\footnotemark[2] & & Yes \checkmark & & & & & Yes \checkmark & & \\
+  \hline
+  {\tt liboclmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & & Yes \checkmark & \\
   \hline
   \end{tabular}
 } % scalebox

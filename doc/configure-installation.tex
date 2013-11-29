@@ -61,6 +61,8 @@ There are many options to be applied at configuration time for the instrumentati
 	Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the {\tt LD\_PRELOAD} mechanism. It is superseded by {\tt --with-cupti=DIR} which also supports instrmentation for static binaries.
 	\item {\tt --with-cupti=DIR} \\
 	Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --with-cuda}, although it still requires {\tt --with-cuda}.
+    \item {\tt --with-java=DIR} \\
+    Specify the location of JAVA development kit.
 \end{itemize}
 
 \section{Build}

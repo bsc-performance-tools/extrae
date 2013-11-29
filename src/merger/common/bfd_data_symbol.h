@@ -22,63 +22,20 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/merger/common/object_tree.h $
+ | @last_commit: $Date: 2013-11-22 12:47:07 +0100 (Fri, 22 Nov 2013) $
+ | @version:     $Revision: 2327 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef BFD_DATA_SYMBOL_H_INCLUDED
+#define BFD_DATA_SYMBOL_H_INCLUDED
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-#include "debug.h"
+typedef struct data_symbol_st
+{
+	char *name;
+	void *address;
+	unsigned long long size;
+} data_symbol_t;
 
-#define xmalloc(ptr,size)             \
-{                                     \
-   ptr = malloc(size);                \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
+#endif /* BFD_DATA_SYMBOL_H_INCLUDED */
 
-#define xrealloc(ptr,src,size)        \
-{                                     \
-   ptr = realloc(src, size);          \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xfree(ptr)                    \
-{                                     \
-   if (ptr != NULL)                   \
-   {                                  \
-      free(ptr);                      \
-   }                                  \
-   ptr = NULL;                        \
-} 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-int is_Whitespace (char c);
-int is_Alphabetic (char c);
-int explode (char *sourceStr, const char *delimiter, char ***tokenArray);
-void append_from_to_file (const char *source, const char *destination);
-void rename_or_copy (char *origen, char *desti);
-unsigned long long getTimeFromStr (char *time, char *envvar, int rank);
-unsigned long long getFactorValue (char *value, char *ref, int rank);
-int mkdir_recursive (char *path);
-int file_exists (char *file);
-int directory_exists (char *file);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __UTILS_H__ */

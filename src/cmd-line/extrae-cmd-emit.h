@@ -22,63 +22,14 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/tracer/taskid.c $
+ | @last_commit: $Date: 2012-03-30 10:06:18 +0200 (Fri, 30 Mar 2012) $
+ | @version:     $Revision: 1045 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef EXTRAE_CMD_EMIT_H_INCLUDED
+#define EXTRAE_CMD_EMIT_H_INCLUDED
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-#include "debug.h"
+int Extrae_CMD_Emit (int, int, char *argv[]);
 
-#define xmalloc(ptr,size)             \
-{                                     \
-   ptr = malloc(size);                \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xrealloc(ptr,src,size)        \
-{                                     \
-   ptr = realloc(src, size);          \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xfree(ptr)                    \
-{                                     \
-   if (ptr != NULL)                   \
-   {                                  \
-      free(ptr);                      \
-   }                                  \
-   ptr = NULL;                        \
-} 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-int is_Whitespace (char c);
-int is_Alphabetic (char c);
-int explode (char *sourceStr, const char *delimiter, char ***tokenArray);
-void append_from_to_file (const char *source, const char *destination);
-void rename_or_copy (char *origen, char *desti);
-unsigned long long getTimeFromStr (char *time, char *envvar, int rank);
-unsigned long long getFactorValue (char *value, char *ref, int rank);
-int mkdir_recursive (char *path);
-int file_exists (char *file);
-int directory_exists (char *file);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __UTILS_H__ */
+#endif /* EXTRAE_CMD_EMIT_H_INCLUDED */

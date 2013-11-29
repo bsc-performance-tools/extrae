@@ -122,15 +122,21 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo -e \\\tClustering suite available: ${CLUSTERING_INSTALLED}
 		echo -e \\\tSpectral analysis available: ${SPECTRAL_INSTALLED}
         fi
-  if test "${USE_POSIX_CLOCK}" = "yes" ; then
-    if test "${NEED_POSIX_CLOCK_LIB}" = "no" ; then
-      echo Clock routine: POSIX / clock_gettime, but don\'t need posix clock lib explicitly
-    else
-      echo Clock routine: POSIX / clock_gettime, library in ${POSIX_CLOCK_LIB}
-    fi
+
+  if test "${USE_GETTIMEOFDAY_CLOCK}" = "yes" ; then
+    echo Clock routine: gettimeofday
   else
-    echo Clock routine: low-level / architecture dependant
+    if test "${USE_POSIX_CLOCK}" = "yes" ; then
+      if test "${NEED_POSIX_CLOCK_LIB}" = "no" ; then
+        echo Clock routine: POSIX / clock_gettime, but don\'t need posix clock lib explicitly
+      else
+        echo Clock routine: POSIX / clock_gettime, library in ${POSIX_CLOCK_LIB}
+      fi
+    else
+      echo Clock routine: low-level / architecture dependant
+    fi
   fi
+
  	echo Heterogeneous support: ${enable_hetero}
 	if test "${MPI_INSTALLED}" = "yes" -a "${enable_parallel_merge}" = "yes" ; then
 		echo Parallel merge: yes
@@ -141,4 +147,6 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 			echo Parallel merge: disabled
 		fi
 	fi
+
+	AX_JAVA_SHOW_CONFIGURATION
 ])

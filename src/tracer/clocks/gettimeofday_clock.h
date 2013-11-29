@@ -22,63 +22,19 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/tracer/clocks/posix_clock.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (Tue, 26 Oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#include "clock.h"
 
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-#include "debug.h"
+#ifndef GETTIMEOFDAY_CLOCK_H
+#define GETTIMEOFDAY_CLOCK_H
 
-#define xmalloc(ptr,size)             \
-{                                     \
-   ptr = malloc(size);                \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
+iotimer_t gettimeofday_getTime (void);
+void gettimeofday_Initialize (void);
+void gettimeofday_Initialize_thread (void);
 
-#define xrealloc(ptr,src,size)        \
-{                                     \
-   ptr = realloc(src, size);          \
-   ASSERT (                           \
-      (ptr != NULL),                  \
-      "Error allocating memory."      \
-   );                                 \
-}
-
-#define xfree(ptr)                    \
-{                                     \
-   if (ptr != NULL)                   \
-   {                                  \
-      free(ptr);                      \
-   }                                  \
-   ptr = NULL;                        \
-} 
-
-#if defined(__cplusplus)
-extern "C" {
 #endif
 
-int is_Whitespace (char c);
-int is_Alphabetic (char c);
-int explode (char *sourceStr, const char *delimiter, char ***tokenArray);
-void append_from_to_file (const char *source, const char *destination);
-void rename_or_copy (char *origen, char *desti);
-unsigned long long getTimeFromStr (char *time, char *envvar, int rank);
-unsigned long long getFactorValue (char *value, char *ref, int rank);
-int mkdir_recursive (char *path);
-int file_exists (char *file);
-int directory_exists (char *file);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __UTILS_H__ */

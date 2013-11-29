@@ -22,91 +22,48 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/tracer/clocks/posix_clock.c $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (Tue, 26 Oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+static char UNUSED rcsid[] = "$Id: posix_clock.c 476 2010-10-26 12:58:30Z harald $";
 
-#include "taskid.h"
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 
-/*
-   Default routines
-   1 taskid in total, task id is always 0 and barrier does nothing
-*/
+#include <clock.h>
 
-static unsigned Extrae_taskid_default_function (void)
-{ return 0; }
+#include "gettimeofday_clock.h"
 
-static unsigned Extrae_num_tasks_default_function (void)
-{ return 1; }
-
-static void Extrae_callback_routine_do_nothing (void)
-{ return; }
-
-/* Callback definitions and API */
-
-static unsigned (*get_task_num) (void) = Extrae_taskid_default_function;
-static unsigned (*get_num_tasks) (void) = Extrae_num_tasks_default_function;
-static void (*barrier_tasks) (void) = Extrae_callback_routine_do_nothing;
-static void (*finalize_task) (void) = Extrae_callback_routine_do_nothing;
-
-void Extrae_set_taskid_function (unsigned (*taskid_function)(void))
+void gettimeofday_Initialize (void)
 {
-	get_task_num = taskid_function;
+	/* Do nothing */
 }
 
-void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void))
+void gettimeofday_Initialize_thread (void)
 {
-	get_num_tasks = numtasks_function;
+	/* Do nothing */
 }
 
-void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void))
+iotimer_t gettimeofday_getTime (void)
 {
-	barrier_tasks = barriertasks_function;
-}
+	struct timeval tv;
+	iotimer_t t_sec, t_nsec;
 
-void Extrae_set_finalize_task_function (void (*finalizetask_function)(void))
-{
-	finalize_task = finalizetask_function;
-}
+	gettimeofday (&tv, NULL);
 
-/* Internal routines */
+	t_sec = tv.tv_sec;
+	t_nsec = tv.tv_usec * 1000;
 
-unsigned Extrae_get_task_number (void)
-{
-	return get_task_num();
-}
-
-unsigned Extrae_get_num_tasks (void)
-{
-	return get_num_tasks();
-}
-
-void Extrae_barrier_tasks (void)
-{
-	barrier_tasks();
-}
-
-void Extrae_finalize_task (void)
-{
-	finalize_task();
-}
-
-/******************************************************************************
- *** Store the first taskid 
- ******************************************************************************/
-static unsigned Extrae_Initial_TASKID = 0;
-
-unsigned Extrae_get_initial_TASKID (void)
-{
-        return Extrae_Initial_TASKID;
-}
-
-void Extrae_set_initial_TASKID (unsigned u)
-{
-        Extrae_Initial_TASKID = u;
+	return t_sec * 1000000000 + t_nsec;
 }
 

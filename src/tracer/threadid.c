@@ -100,7 +100,7 @@ unsigned Extrae_get_thread_number (void)
 #elif defined(UPC_SUPPORT)
 	return GetUPCthreadID();
 #else
-	return 0;
+	return get_thread_num();
 #endif
 }
 
@@ -140,6 +140,6 @@ unsigned Extrae_get_num_threads (void)
 #elif defined(UPC_SUPPORT)
 	return GetNumUPCthreads();
 #else
-	return 1;
+	return get_num_threads();
 #endif
 }

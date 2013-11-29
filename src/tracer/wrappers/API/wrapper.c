@@ -160,6 +160,7 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(PTHREAD_SUPPORT)
 # include "pthread_probe.h"
 #endif
+
 #include "malloc_probe.h"
 #include "malloc_wrapper.h"
 #include "io_probe.h"
@@ -182,7 +183,7 @@ void setRequestedIOInstrumentation (int b)
 	requestedIOInstrumentation = b;
 }
 
-static void Backend_Finalize_close_mpits (int thread);
+static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append);
 
 #warning "Control variables below (tracejant, tracejant_mpi, tracejant_hwc_mpi...) should be moved to mode.c and indexed per mode"
 
@@ -1238,7 +1239,7 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	if (forked)
 		Buffer_Free (TracingBuffer[thread_id]);
 
-	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, 1);
+	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, TRUE);
 	if (TracingBuffer[thread_id] == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error allocating tracing buffer for thread %d\n", thread_id);
@@ -1259,9 +1260,9 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
 
 	if (forked)
-		Buffer_Free (TracingBuffer[thread_id]);
+		Buffer_Free (SamplingBuffer[thread_id]);
 
-	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, 0);
+	SamplingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, FALSE);
 	if (SamplingBuffer[thread_id] == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error allocating sampling buffer for thread %d\n", thread_id);
@@ -1409,7 +1410,6 @@ int Backend_ispThreadFinished (int threadid)
 	return Backend_GetpThreadID(threadid) == 0;
 }
 
-
 void Backend_Flush_pThread (pthread_t t)
 {
 	unsigned u, max = Backend_getNumberOfThreads();
@@ -1419,7 +1419,7 @@ void Backend_Flush_pThread (pthread_t t)
 		if (pThreads[u] == t)
 		{
 			Buffer_Flush(TRACING_BUFFER(u));
-			Backend_Finalize_close_mpits (u);
+			Backend_Finalize_close_mpits (getpid(), u, FALSE);
 
 			Buffer_Free (TRACING_BUFFER(u));
 			TRACING_BUFFER(u) = NULL;
@@ -1492,6 +1492,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #if USE_HARDWARE_COUNTERS
 	int set;
 #endif
+	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
 #if defined(INSTRUMENT_DYNAMIC_MEMORY)
 	Extrae_malloctrace_init();
@@ -1590,7 +1591,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
 #else
 	/* If we don't support OpenMP we still have this running thread :) */
-	current_NumOfThreads = maximum_NumOfThreads = 1;
+	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
+
 	if (getenv("OMP_NUM_THREADS"))
 	{
 		if (me == 0)
@@ -1667,51 +1669,53 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads());
 #endif
 
-	/* This has been moved a few lines above to make sure the APPL_EV is the first in the trace */
-	ApplBegin_Time = TIME;
-	TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
+	if (!appending)
+	{
+		ApplBegin_Time = TIME;
+		TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
 #if !defined(IS_BG_MACHINE)
-	Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
+		Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
 #endif
 
 #if USE_HARDWARE_COUNTERS
-	/* Write hardware counter definitions into the .sym file */
-	if (me == 0 && !forked)
-	{
-		unsigned count;
-		HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
-		if (hwc_defs != NULL)
+		/* Write hardware counter definitions into the .sym file */
+		if (me == 0 && !forked)
 		{
-			unsigned u = 0;
-			while (u < count)
+			unsigned count;
+			HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
+			if (hwc_defs != NULL)
 			{
-				Extrae_AddTypeValuesEntryToGlobalSYM ('H', hwc_defs[u].event_code,
-					hwc_defs[u].description, (char)0, 0, NULL, NULL);
-				u++;
+				unsigned u = 0;
+				while (u < count)
+				{
+					Extrae_AddTypeValuesEntryToGlobalSYM ('H', hwc_defs[u].event_code,
+						hwc_defs[u].description, (char)0, 0, NULL, NULL);
+					u++;
+				}
+				free (hwc_defs);
 			}
-			free (hwc_defs);
 		}
-	}
-
-	/* Write hardware counters set definitions (i.e. those given at config time) into the .mpit files*/
-	for (set=0; set<HWC_Get_Num_Sets(); set++)
-	{
-		int *HWCid;
-
-		HWC_Get_Set_Counters_Ids (set, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
-		TRACE_EVENT_AND_GIVEN_COUNTERS (ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
-		xfree (HWCid);
-	}
-
-	/* Start reading counters */
-	HWC_Start_Counters (get_maximum_NumOfThreads(), forked);
+	
+		/* Write hardware counters set definitions (i.e. those given at config time) into the .mpit files*/
+		for (set=0; set<HWC_Get_Num_Sets(); set++)
+		{
+			int *HWCid;
+	
+			HWC_Get_Set_Counters_Ids (set, &HWCid); /* HWCid is allocated up to MAX_HWC and sets NO_COUNTER where appropriate */
+			TRACE_EVENT_AND_GIVEN_COUNTERS (ApplBegin_Time, HWC_DEF_EV, set, MAX_HWC, HWCid);
+			xfree (HWCid);
+		}
+	
+		/* Start reading counters */
+		HWC_Start_Counters (get_maximum_NumOfThreads(), forked);
 #endif
+	}
 
 	/* Initialize Tracing Mode related variables */
 	if (forked)
 		Trace_Mode_CleanUp();
 
-	Trace_Mode_Initialize (get_maximum_NumOfThreads());
+	Trace_Mode_Initialize (get_maximum_NumOfThreads(), !appending);
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
@@ -1783,7 +1787,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		Reallocate_buffers_and_files (new_num_threads);
 
 		/* Reallocate trace mode */
-		Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads);
+		Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads, TRUE);
 
 #if USE_HARDWARE_COUNTERS
 		/* Reallocate and start reading counters for these threads */
@@ -1843,6 +1847,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 #warning "Aixo caldria separar-ho en mes events (mpi_init no hi fa res aqui!!) -- synchro + options"
 	int i;
 	unsigned long long *StartingTimes=NULL, *SynchronizationTimes=NULL;
+	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, InitTime, EndTime);
@@ -1900,19 +1905,22 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	}
 #endif
 
-	/* Add initialization begin and end events */
-	TRACE_MPIINITEV (InitTime, init_event, EVT_BEGIN,
-	  getpid(),
-	  Extrae_isProcessMaster()?0:getppid(),
-	  Extrae_myDepthOfAllProcesses(),
-	  EMPTY,
-	  EMPTY);
-	Extrae_AnnotateTopology (TRUE, InitTime);
-	Extrae_getrusage_set_to_0_Wrapper (InitTime);
-	Extrae_memusage_set_to_0_Wrapper (InitTime);
+	if (!appending)
+	{
+		/* Add initialization begin and end events */
+		TRACE_MPIINITEV (InitTime, init_event, EVT_BEGIN,
+		  getpid(),
+		  Extrae_isProcessMaster()?0:getppid(),
+		  Extrae_myDepthOfAllProcesses(),
+		  EMPTY,
+		  EMPTY);
+		Extrae_AnnotateTopology (TRUE, InitTime);
+		Extrae_getrusage_set_to_0_Wrapper (InitTime);
+		Extrae_memusage_set_to_0_Wrapper (InitTime);
 
-	TRACE_MPIINITEV (EndTime, init_event, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
-	Extrae_AnnotateTopology (FALSE, EndTime);
+		TRACE_MPIINITEV (EndTime, init_event, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
+		Extrae_AnnotateTopology (FALSE, EndTime);
+	}
 
 	/* HSG force a write to disk! */
 	Buffer_Flush(TRACING_BUFFER(THREADID));
@@ -1986,17 +1994,17 @@ char *Get_TemporalDir (int task)
  ***  Backend_Finalize_close_mpits
  ******************************************************************************/
 
-void Backend_Finalize_close_files()
+void Backend_Finalize_close_files(void)
 {
-  int thread = 0;
+  int thread;
 
-  for (thread = 0; thread < maximum_NumOfThreads; thread++)
+  for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
   {
-    Backend_Finalize_close_mpits( thread );
+    Backend_Finalize_close_mpits( getpid(), thread, FALSE );
   }	
 }
 
-static void Backend_Finalize_close_mpits (int thread)
+static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 {
 	char trace[TMP_DIR];
 	char tmp_name[TMP_DIR];
@@ -2004,14 +2012,6 @@ static void Backend_Finalize_close_mpits (int thread)
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread)))
 		return;
-
-#if defined(CUDA_SUPPORT)
-	Extrae_CUDA_fini ();
-#endif
-
-#if defined(OPENCL_SUPPORT)
-	Extrae_OpenCL_fini ();
-#endif
 
 	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
 	   as that moment was 0, independently if MPI or PACX has run */
@@ -2021,25 +2021,33 @@ static void Backend_Finalize_close_mpits (int thread)
 
 	Buffer_Close(TRACING_BUFFER(thread));
 
-	/* Rename MPIT file */
-	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
-	FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_MPIT);
-	rename_or_copy (tmp_name, trace); 
-	fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
-	fflush(stdout);
+	/* Rename MPIT file (PID from origin is getpid(), PID from destination
+	   maybe different if append == TRUE */
+	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(),
+	  initialTASKID, thread, EXT_TMP_MPIT);
+	FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, pid, TASKID, thread,
+	  EXT_MPIT);
+	if (!append)
+		rename_or_copy (tmp_name, trace); 
+	else
+		append_from_to_file (tmp_name, trace);
+	fprintf (stdout,
+	  PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
 
 	/* Rename SAMPLE file, if it exists */
 #if defined(SAMPLING_SUPPORT)
-	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_SAMPLE);
+	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, pid,
+	  initialTASKID, thread, EXT_TMP_SAMPLE);
 	if (Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
 	{
 		Buffer_Flush(SAMPLING_BUFFER(thread));
 		Buffer_Close(SAMPLING_BUFFER(thread));
 
-		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SAMPLE);
+		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, pid, TASKID,
+		  thread, EXT_SAMPLE);
 		rename_or_copy (tmp_name, trace);
-		fprintf (stdout, PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
-		fflush(stdout);
+		fprintf (stdout,
+		  PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
 	}
 	else
 	{
@@ -2047,6 +2055,7 @@ static void Backend_Finalize_close_mpits (int thread)
 		unlink (tmp_name);
 	}
 #endif
+
 }
 
 /**
@@ -2093,7 +2102,7 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 					fprintf (stdout, PACKAGE_NAME": File size limit reached. File occupies %llu bytes.\n", current_size);
 					fprintf (stdout, "Further tracing is disabled.\n");
 				}
-				Backend_Finalize_close_mpits (THREADID);
+				Backend_Finalize_close_mpits (getpid(), THREADID, FALSE);
 				mpitrace_on = FALSE;
 			}
 		}
@@ -2104,116 +2113,131 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 void Backend_Finalize (void)
 {
 	unsigned thread;
+	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
-	/* Stop collecting information from dynamic memory instrumentation */
-	Extrae_set_trace_io (FALSE);
-
-	/* Stop collecting information from dynamic memory instrumentation */
-	Extrae_set_trace_malloc (FALSE);
-
-	/* Stop sampling right now */
-	setSamplingEnabled (FALSE);
-	unsetTimeSampling ();
-
-	/* Write files back to disk , 1st part will include flushing events*/
-	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
-		if (TRACING_BUFFER(thread) != NULL)
-			Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
-
-	if (THREADID == 0) 
-	{
-		Extrae_getrusage_Wrapper ();
-		Extrae_memusage_Wrapper ();
-	}
-
-	/* Final write files to disk, include renaming of the filenames */
-	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
-		if (TRACING_BUFFER(thread) != NULL)
-		{
-			TRACE_EVENT (TIME, APPL_EV, EVT_END);
-#if !defined(IS_BG_MACHINE)
-			Extrae_AnnotateTopology (TRUE, LAST_READ_TIME);
+#if defined(CUDA_SUPPORT)
+	Extrae_CUDA_fini ();
 #endif
-			Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
-			Backend_Finalize_close_mpits (thread);
+
+#if defined(OPENCL_SUPPORT)
+	Extrae_OpenCL_fini ();
+#endif
+
+	if (!appending)
+	{
+		/* Stop collecting information from dynamic memory instrumentation */
+		Extrae_set_trace_io (FALSE);
+
+		/* Stop collecting information from dynamic memory instrumentation */
+		Extrae_set_trace_malloc (FALSE);
+
+		/* Stop sampling right now */
+		setSamplingEnabled (FALSE);
+		unsetTimeSampling ();
+
+		/* Write files back to disk , 1st part will include flushing events*/
+		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
+			if (TRACING_BUFFER(thread) != NULL)
+				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
+
+		if (THREADID == 0) 
+		{
+			Extrae_getrusage_Wrapper ();
+			Extrae_memusage_Wrapper ();
 		}
+
+		/* Final write files to disk, include renaming of the filenames */
+		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+			if (TRACING_BUFFER(thread) != NULL)
+			{
+				TRACE_EVENT (TIME, APPL_EV, EVT_END);
+#if !defined(IS_BG_MACHINE)
+				Extrae_AnnotateTopology (TRUE, LAST_READ_TIME);
+#endif
+				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
+				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
+			}
 
 #if defined(HAVE_ONLINE)
-	/* Stop the analysis threads and flush the online buffers */
-	if (Online_isEnabled())
-	{
-		Online_Stop();
-	}
+		/* Stop the analysis threads and flush the online buffers */
+		if (Online_isEnabled())
+		{
+			Online_Stop();
+		}
 #endif /* HAVE_ONLINE */
 	
-	/* Free allocated memory */
-	{
-		if (TASKID == 0)
-			fprintf (stdout, PACKAGE_NAME": Deallocating memory.\n");
-
-		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+		/* Free allocated memory */
 		{
-			Buffer_Free (TRACING_BUFFER(thread));
-			TRACING_BUFFER(thread) = NULL;
+			if (TASKID == 0)
+				fprintf (stdout, PACKAGE_NAME": Deallocating memory.\n");
+
+			for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+			{
+				Buffer_Free (TRACING_BUFFER(thread));
+				TRACING_BUFFER(thread) = NULL;
 #if defined(SAMPLING_SUPPORT)
-			Buffer_Free (SAMPLING_BUFFER(thread));
-			SAMPLING_BUFFER(thread) = NULL;
+				Buffer_Free (SAMPLING_BUFFER(thread));
+				SAMPLING_BUFFER(thread) = NULL;
+#endif
+			}
+			xfree(TracingBuffer);
+#if defined(SAMPLING_SUPPORT)
+			xfree(SamplingBuffer);
+#endif
+			xfree (TracingBitmap);
+			Extrae_allocate_thread_CleanUp();
+			TimeSync_CleanUp();
+			Trace_Mode_CleanUp();
+			Clock_CleanUp();
+			InstrumentUFroutines_GCC_CleanUp();
+			InstrumentUFroutines_XL_CleanUp();
+#if USE_HARDWARE_COUNTERS
+			HWC_CleanUp (get_maximum_NumOfThreads());
 #endif
 		}
-		xfree(TracingBuffer);
-#if defined(SAMPLING_SUPPORT)
-		xfree(SamplingBuffer);
-#endif
-		xfree (TracingBitmap);
-		Extrae_allocate_thread_CleanUp();
-		TimeSync_CleanUp();
-		Trace_Mode_CleanUp();
-		Clock_CleanUp();
-		InstrumentUFroutines_GCC_CleanUp();
-		InstrumentUFroutines_XL_CleanUp();
-#if USE_HARDWARE_COUNTERS
-		HWC_CleanUp (get_maximum_NumOfThreads());
-#endif
-	}
 
-	if (TASKID == 0 && Extrae_isProcessMaster())
-		fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
+		if (TASKID == 0 && Extrae_isProcessMaster())
+			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
-	mpitrace_on = FALSE; /* Turn off tracing now */
+		mpitrace_on = FALSE; /* Turn off tracing now */
 
 #if defined(EMBED_MERGE_IN_TRACE)
-	/* Launch the merger */
-	if (MergeAfterTracing)
-	{
-		int ptask = 1;
-		char tmp[1024];
+		/* Launch the merger */
+		if (MergeAfterTracing)
+		{
+			int ptask = 1;
+			char tmp[1024];
 
-		if (TASKID == 0)
-			fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");
+			if (TASKID == 0)
+				fprintf (stdout, PACKAGE_NAME ": Proceeding with the merge of the intermediate tracefiles.\n");
 
 #if defined(MPI_SUPPORT)
-		/* Synchronize all tasks at this point so none overtakes the master and
-		   gets and invalid/blank trace file list (.mpits file) */
-		if (TASKID == 0)
-			fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
+			/* Synchronize all tasks at this point so none overtakes the master and
+			   gets and invalid/blank trace file list (.mpits file) */
+			if (TASKID == 0)
+				fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
 
-		MPI_Barrier (MPI_COMM_WORLD);
+			MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
-		sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
-		merger_pre (Extrae_get_num_tasks());
-		Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
+			sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
+			merger_pre (Extrae_get_num_tasks());
+			Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
 
-		if (TASKID == 0)
-			fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);
+			if (TASKID == 0)
+				fprintf (stdout, PACKAGE_NAME ": Executing the merge process (using %s).\n", tmp);
 
-		merger_post (Extrae_get_num_tasks(), TASKID);
-	}
+			merger_post (Extrae_get_num_tasks(), TASKID);
+		}
 #endif /* EMBED_MERGE_IN_TRACE */
+	}
+	else
+	{
+		Buffer_Flush(TRACING_BUFFER(THREADID));
+		Backend_Finalize_close_mpits (atoi(getenv("EXTRAE_APPEND_PID")), THREADID, TRUE);
+		remove_temporal_files ();
+	}
 }
-
-
-/* */
 
 //static int Extrae_inInstrumentation = FALSE;
 static int *Extrae_inInstrumentation = NULL;
@@ -2306,6 +2330,7 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 		for (j = 0; j < strlen(line); j++)
 			if (line[j] == '\n')
 				line[j] = ' ';
+
 		if (write (fd, line, strlen(line)) < 0)
 			fprintf (stderr, PACKAGE_NAME": Error writing definition into global symbolic file");
 

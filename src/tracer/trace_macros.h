@@ -134,7 +134,27 @@
 #define TRACE_MISCEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam) TRACE_MISCEVENT(evttime,evttype,evtvalue,evtparam)
 #endif
 
-#define TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams)              \
+#if defined(DCARRERA_HADDOP)
+# define TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams) \
+{ \
+	if (tracejant && TracingBitmap[TASKID]) \
+	{ \
+		unsigned i, thread_id=THREADID; \
+		event_t events_list[count]; \
+\
+		for (i=0; i<count; i++) \
+		{ \
+			events_list[i].time = evttime; \
+			events_list[i].event = evttypes[i]; \
+			events_list[i].value = evtvalues[i]; \
+			events_list[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
+			HARDWARE_COUNTERS_READ(thread_id, events_list[i], FALSE); \
+		} \
+		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), events_list, count); \
+	} \
+}
+#else
+# define TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams)              \
 {                                                                                  \
 	if (tracejant && TracingBitmap[TASKID])                                          \
 	{                                                                                \
@@ -152,6 +172,7 @@
 		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), events_list, count);     \
 	}                                                                                \
 }
+#endif
 
 #if USE_HARDWARE_COUNTERS
 #define TRACE_N_MISCEVENTANDCOUNTERS(evttime,count,evttypes,evtvalues,evtparams)   \

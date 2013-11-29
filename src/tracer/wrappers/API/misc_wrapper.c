@@ -347,8 +347,9 @@ void Extrae_init_tracing (int forked)
 	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, forked))
 		return;
 
-	/* Generate a tentative file list */
-	Generate_Task_File_List();
+	/* Generate a tentative file list if we don't reuse a previous execution */
+	if (getenv ("EXTRAE_APPEND_PID") == NULL)
+		Generate_Task_File_List();
 
 	/* Take the time */
 	temps_init = TIME;
@@ -398,7 +399,8 @@ void Extrae_fini_Wrapper (void)
 		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX())
-			Generate_Task_File_List();
+			if (getenv ("EXTRAE_APPEND_PID") == NULL)
+				Generate_Task_File_List();
 #endif
 
 		/* Finalize tracing library */

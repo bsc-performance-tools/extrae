@@ -22,91 +22,46 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/tracer/taskid.c $
+ | @last_commit: $Date: 2012-03-30 10:06:18 +0200 (Fri, 30 Mar 2012) $
+ | @version:     $Revision: 1045 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+static char UNUSED rcsid[] = "$Id: threadid.c 1311 2012-10-25 11:05:07Z harald $";
 
-#include "taskid.h"
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 
-/*
-   Default routines
-   1 taskid in total, task id is always 0 and barrier does nothing
-*/
+#include "extrae-cmd.h"
+#include "extrae-cmd-init.h"
+#include "extrae-cmd-emit.h"
+#include "extrae-cmd-fini.h"
 
-static unsigned Extrae_taskid_default_function (void)
-{ return 0; }
-
-static unsigned Extrae_num_tasks_default_function (void)
-{ return 1; }
-
-static void Extrae_callback_routine_do_nothing (void)
-{ return; }
-
-/* Callback definitions and API */
-
-static unsigned (*get_task_num) (void) = Extrae_taskid_default_function;
-static unsigned (*get_num_tasks) (void) = Extrae_num_tasks_default_function;
-static void (*barrier_tasks) (void) = Extrae_callback_routine_do_nothing;
-static void (*finalize_task) (void) = Extrae_callback_routine_do_nothing;
-
-void Extrae_set_taskid_function (unsigned (*taskid_function)(void))
+int main (int argc, char *argv[])
 {
-	get_task_num = taskid_function;
+	int i = 1;
+
+	while (i < argc)
+	{
+		int advance = 0;
+
+		if (!strncasecmp (argv[i], CMD_INIT, strlen (CMD_INIT)))
+			advance = Extrae_CMD_Init (i+1, argc, argv);
+		else if (!strncasecmp (argv[i], CMD_EMIT, strlen(CMD_EMIT)))
+			advance = Extrae_CMD_Emit (i+1, argc, argv);
+		else if (!strncasecmp (argv[i], CMD_FINI, strlen(CMD_FINI)))
+			advance = Extrae_CMD_Fini (i+1, argc, argv);
+		else
+			fprintf (stderr, "Unknown option %s\n", argv[i]);
+
+		i += advance+1;
+	}
+
+	return 0;
 }
-
-void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void))
-{
-	get_num_tasks = numtasks_function;
-}
-
-void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void))
-{
-	barrier_tasks = barriertasks_function;
-}
-
-void Extrae_set_finalize_task_function (void (*finalizetask_function)(void))
-{
-	finalize_task = finalizetask_function;
-}
-
-/* Internal routines */
-
-unsigned Extrae_get_task_number (void)
-{
-	return get_task_num();
-}
-
-unsigned Extrae_get_num_tasks (void)
-{
-	return get_num_tasks();
-}
-
-void Extrae_barrier_tasks (void)
-{
-	barrier_tasks();
-}
-
-void Extrae_finalize_task (void)
-{
-	finalize_task();
-}
-
-/******************************************************************************
- *** Store the first taskid 
- ******************************************************************************/
-static unsigned Extrae_Initial_TASKID = 0;
-
-unsigned Extrae_get_initial_TASKID (void)
-{
-        return Extrae_Initial_TASKID;
-}
-
-void Extrae_set_initial_TASKID (unsigned u)
-{
-        Extrae_Initial_TASKID = u;
-}
-

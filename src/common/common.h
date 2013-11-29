@@ -43,6 +43,7 @@
 #endif
 
 #define UNREFERENCED_PARAMETER(a) {(void) (a);}
+#define UNREFERENCED(a)           {(void) (a);}
 
 #if !defined(TRUE)
 # define TRUE (1==1)

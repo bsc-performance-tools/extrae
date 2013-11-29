@@ -288,3 +288,27 @@ Due to the lack of parallel paradigms and hardware counters inside the SPE eleme
 
 \end{itemize}
 
+\section{Java bindings}\label{sec:JavaBindings}
+
+If Java is enabled at configure time, a basic instrumentation library for serial application based on JNI bindings to Extrae will be installed. The current bindings are within the package {\tt es.bsc.cepbatools.extrae} and the following bindings are provided:
+
+\begin{itemize}
+
+  \item {\tt void Init();}
+
+  \item {\tt void Fini();}
+
+  \item {\tt void Event(int id, long val);}
+
+  \item {\tt void nEvent(int types[], long values[]);}
+
+  \item {\tt void defineEventType(int type, String description, long nValues, long[] values, String[] descriptionValues);}
+
+  \item {\tt void SetOptions(int options);}
+
+  \item {\tt void Shutdown();}
+
+  \item {\tt void Restart();}
+
+\end{itemize}
+

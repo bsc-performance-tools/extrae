@@ -20,6 +20,7 @@ AC_DEFUN([AX_OPENCL],
 	if test "${opencl_path}" != "none" ; then
 		AC_MSG_CHECKING([for OPENCL])
 		if test -d "${opencl_path}" ; then
+			AC_MSG_RESULT([found])
 			AX_FLAGS_SAVE()
 			AX_FIND_INSTALLATION([OPENCL], [${opencl_path}], [opencl])
 			AX_FLAGS_RESTORE()

@@ -333,6 +333,11 @@ MPIOMPSS_EXAMPLE_FILES=\
  example/LINUX/MPI+OMPSS/job.lsf \
  example/LINUX/MPI+OMPSS/test.dat
 
+JAVA_EXAMPLE_FILES=\
+ example/LINUX/JAVA/extrae.xml \
+ example/LINUX/JAVA/Makefile \
+ example/LINUX/JAVA/pi.java
+
 FORK_EXAMPLE_FILES=\
  example/LINUX/FORK/extrae.xml \
  example/LINUX/FORK/function-list \
@@ -402,6 +407,10 @@ endif
 if WANT_NANOS
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMPSS
 	cp -fr $(OMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMPSS
+endif
+if WANT_JAVA
+	$(mkdir_p) $(DESTDIR)$(datadir)/example/JAVA
+	cp -fr $(JAVA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/JAVA
 endif
 	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
