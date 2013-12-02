@@ -36,7 +36,7 @@
 //------------------------------------------------------------------------------
 
 #define TOL    (0.001)   // tolerance used in floating point comparisons
-#define LENGTH (1024)    // length of vectors a, b, and c
+#define LENGTH (16384)    // length of vectors a, b, and c
 
 int main(void)
 {
