@@ -92,7 +92,8 @@ AM_INIT_AUTOMAKE
 dnl Enable silent rules, use with make V=0 
 AM_SILENT_RULES([yes])
 
-AM_PROG_MKDIR_P
+dnl AM_PROG_MKDIR_P
+AC_PROG_MKDIR_P
 
 # Publish these defines for conditional compilation 
 AM_CONDITIONAL(ARCH_IA32,    test "${Architecture}"    = "ia32"    )
