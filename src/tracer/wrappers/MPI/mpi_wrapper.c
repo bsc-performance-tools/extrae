@@ -490,15 +490,30 @@ static void Gather_Nodes_Info (void)
 
 	/* Share information among all tasks */
 	buffer_names = (char*) malloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);
+	if (buffer_names == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for nodes name\n");
+		exit (-1);
+	}
 	rc = PMPI_Allgather (hostname, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, buffer_names, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD);
 	MPI_CHECK(rc, PMPI_Gather);
 
 	/* Store the information in a global array */
 	TasksNodes = (char **)malloc (Extrae_get_num_tasks() * sizeof(char *));
+	if (TasksNodes == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for nodes info\n");
+		exit (-1);
+	}
 	for (u=0; u<Extrae_get_num_tasks(); u++)
 	{
 		char *tmp = &buffer_names[u*MPI_MAX_PROCESSOR_NAME];
 		TasksNodes[u] = (char *)malloc((strlen(tmp)+1) * sizeof(char));
+		if (TasksNodes[u] == NULL)
+		{
+			fprintf (stderr, PACKAGE_NAME": Fatal error! Cannot allocate memory for node info %u\n", u);
+			exit (-1);
+		}
 		strcpy (TasksNodes[u], tmp);
 	}
 
