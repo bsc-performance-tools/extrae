@@ -48,7 +48,6 @@ void Extrae_setcounters_Wrapper (int *evc1, int *evc2);
 void Extrae_set_options_Wrapper (int options);
 void Extrae_getrusage_set_to_0_Wrapper (UINT64 time);
 void Extrae_getrusage_Wrapper (void);
-void Extrae_memusage_set_to_0_Wrapper (UINT64 time);
 void Extrae_memusage_Wrapper (void);
 void Extrae_user_function_Wrapper (int enter);
 void Extrae_function_from_address_Wrapper (extrae_type_t type, void *address);

@@ -1916,7 +1916,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 		  EMPTY);
 		Extrae_AnnotateTopology (TRUE, InitTime);
 		Extrae_getrusage_set_to_0_Wrapper (InitTime);
-		Extrae_memusage_set_to_0_Wrapper (InitTime);
 
 		TRACE_MPIINITEV (EndTime, init_event, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, GetTraceOptions());
 		Extrae_AnnotateTopology (FALSE, EndTime);

@@ -224,59 +224,36 @@ void Extrae_getrusage_Wrapper (void)
 	}
 }
 
-void Extrae_memusage_set_to_0_Wrapper (UINT64 time)
-{
-#if defined(HAVE_MALLINFO)
-	if (TRACING_MEMUSAGE)
-	{
-		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    0);
-		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   0);
-		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, 0);
-		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, 0);
-		TRACE_MISCEVENT(time, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    0);
-	}
-#endif
-}
-
 void Extrae_memusage_Wrapper (void)
 {
 #if defined(HAVE_MALLINFO)
-	static struct mallinfo last_mi;
-	static int init_pending = TRUE;
-	static int mallinfo_running = FALSE;
+        static int mallinfo_running = FALSE;
 
-	if (TRACING_MEMUSAGE)
-	{
-		if (mallinfo_running)
-			return;
+        if (TRACING_MEMUSAGE)
+        {
+                if (mallinfo_running)
+                        return;
 
-		mallinfo_running = TRUE;
+                mallinfo_running = TRUE;
 
-		struct mallinfo current_mi = mallinfo();
-		struct mallinfo delta_mi;
+                struct mallinfo current_mi = mallinfo();
+                int inuse = current_mi.arena + current_mi.hblkhd - current_mi.fordblks;
 
-		if (!init_pending)
-		{
-			delta_mi.arena = current_mi.arena - last_mi.arena;
-			delta_mi.hblkhd = current_mi.hblkhd - last_mi.hblkhd;
-			delta_mi.uordblks = current_mi.uordblks - last_mi.uordblks;
-			delta_mi.fordblks = current_mi.fordblks - last_mi.fordblks;
-		}
-		else
-			delta_mi = current_mi;
-
-		int inuse = delta_mi.arena + delta_mi.hblkhd - delta_mi.fordblks;
-
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    delta_mi.arena);
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   delta_mi.hblkhd);
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, delta_mi.uordblks);
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, delta_mi.fordblks);
-		TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    inuse);
-
-		last_mi = current_mi;
-		init_pending = FALSE;
-		mallinfo_running = FALSE;
-	}
+                TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_ARENA_EV,    current_mi.arena);
+                TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_HBLKHD_EV,   current_mi.hblkhd);
+                TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_UORDBLKS_EV, current_mi.uordblks);
+                TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_FORDBLKS_EV, current_mi.fordblks);
+                TRACE_MISCEVENT(LAST_READ_TIME, MEMUSAGE_EV, MEMUSAGE_INUSE_EV,    inuse);
+                if (inuse < 0)
+                {
+                        fprintf(stderr, "WARNING: Negative value for MEMUSAGE_INUSE_EV detected (inuse=%d+%d-%d=%d). Please submit a bug report.\n",
+                                current_mi.arena,
+                                current_mi.hblkhd,
+                                current_mi.fordblks,
+                                inuse);
+                }
+                mallinfo_running = FALSE;
+        }
 #endif
 }
 
