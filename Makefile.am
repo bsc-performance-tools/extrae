@@ -247,6 +247,7 @@ OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/pi.c \
  example/LINUX/OMP/pi_instrumented.c \
  example/LINUX/OMP/run_dyninst.sh \
+ example/LINUX/OMP/run_ldpreload.sh \
  example/LINUX/OMP/run_instrumented.sh
 
 SEQ_EXAMPLE_FILES=\

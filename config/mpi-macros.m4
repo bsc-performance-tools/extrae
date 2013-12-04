@@ -4,6 +4,15 @@ AC_DEFUN([AX_PROG_MPI],
 [
    AX_FLAGS_SAVE()
 
+   AC_ARG_WITH(mpi-lib-name,
+      AC_HELP_STRING(
+         [--with-mpi-lib@<:@=library name@:>@],
+         [specify the name of the MPI library (i.e. mpi, mpich, mpi_mt...)]
+      ),
+      [mpi_lib_name=${withval}],
+      [mpi_lib_name="not_set"]
+   )
+
    AC_ARG_WITH(mpi,
       AC_HELP_STRING(
          [--with-mpi@<:@=DIR@:>@],
@@ -67,29 +76,34 @@ AC_DEFUN([AX_PROG_MPI],
       dnl Check for the MPI library.
       dnl We won't use neither AC_CHECK_LIB nor AC_TRY_LINK because this library may have unresolved references to other libs (i.e: libgm).
       AC_MSG_CHECKING([for MPI library])
-      if test -f "${MPI_LIBSDIR}/libmpi.a" ; then
-         if test "${OperatingSystem}" = "aix" -a "${BITS}" = "64" ; then
-            MPI_LIBS="-lmpi_r"
-         else
-            MPI_LIBS="-lmpi"
-         fi
-      elif test -f "${MPI_LIBSDIR}/libmpi.so" ; then
-         MPI_LIBS="-lmpi"
-      elif test -f "${MPI_LIBSDIR}/libmpich-gcc.legacy.a"; then
-         MPI_LIBS="-lmpich-gcc.legacy"
-      elif test -f "${MPI_LIBSDIR}/libmpich-xl.legacy.a"; then
-         MPI_LIBS="-lmpich-xl.legacy"
-      elif test -f "${MPI_LIBSDIR}/libmpich_intel.so"; then
-         MPI_LIBS="-lmpich_intel"
-      elif test -f "${MPI_LIBSDIR}/libmpich.a" -o -f "${MPI_LIBSDIR}/libmpich.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" ; then
-         MPI_LIBS="-lmpich"
-      elif test -f "${MPI_LIBSDIR}/libmpi_ibm.so" ; then
-         MPI_LIBS="-lmpi_ibm"
-      dnl Specific for BG/P machine
-      elif test -f "${MPI_LIBSDIR}/libmpich.cnk.a" ; then
-         MPI_LIBS="-lmpich.cnk"
+
+      if test "${mpi_lib_name}" != "not_set"; then
+         MPI_LIBS="-l${mpi_lib_name}"
       else
-         MPI_LIBS="not found"
+         if test -f "${MPI_LIBSDIR}/libmpi.a" ; then
+            if test "${OperatingSystem}" = "aix" -a "${BITS}" = "64" ; then
+               MPI_LIBS="-lmpi_r"
+            else
+               MPI_LIBS="-lmpi"
+            fi
+         elif test -f "${MPI_LIBSDIR}/libmpi.so" ; then
+            MPI_LIBS="-lmpi"
+         elif test -f "${MPI_LIBSDIR}/libmpich-gcc.legacy.a"; then
+            MPI_LIBS="-lmpich-gcc.legacy"
+         elif test -f "${MPI_LIBSDIR}/libmpich-xl.legacy.a"; then
+            MPI_LIBS="-lmpich-xl.legacy"
+         elif test -f "${MPI_LIBSDIR}/libmpich_intel.so"; then
+            MPI_LIBS="-lmpich_intel"
+         elif test -f "${MPI_LIBSDIR}/libmpich.a" -o -f "${MPI_LIBSDIR}/libmpich.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" ; then
+            MPI_LIBS="-lmpich"
+         elif test -f "${MPI_LIBSDIR}/libmpi_ibm.so" ; then
+            MPI_LIBS="-lmpi_ibm"
+         dnl Specific for BG/P machine
+         elif test -f "${MPI_LIBSDIR}/libmpich.cnk.a" ; then
+            MPI_LIBS="-lmpich.cnk"
+         else
+            MPI_LIBS="not found"
+         fi
       fi
       AC_MSG_RESULT([${MPI_LIBSDIR}, ${MPI_LIBS}])
 
