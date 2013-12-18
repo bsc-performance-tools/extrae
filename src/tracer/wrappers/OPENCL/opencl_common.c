@@ -47,6 +47,10 @@ static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 1696 2013-04-30 13:15:24Z hara
 
 #define MAX_OPENCL_EVENTS 32768
 
+#if defined(__APPLE__)
+# define HOST_NAME_MAX 512
+#endif
+
 typedef struct RegisteredCommandQueue_st
 {
 	cl_command_queue queue;

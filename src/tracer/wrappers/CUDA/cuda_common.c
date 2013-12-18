@@ -47,6 +47,10 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "cuda_probe.h"
 
+#if defined(__APPLE__)
+# define HOST_NAME_MAX 512
+#endif
+
 /* Structures that will hold the parameters needed for the exit parts of the
    instrumentation code. This way we can support dyninst/ld-preload/cupti
    instrumentation with a single file */

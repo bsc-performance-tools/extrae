@@ -46,6 +46,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include <sys/stat.h>
 #endif
 
+#if defined(__APPLE__)
+# define NAME_MAX 512
+#endif
+
 #define MAX_MPIT_FILES 32768
 
 char **files = NULL;

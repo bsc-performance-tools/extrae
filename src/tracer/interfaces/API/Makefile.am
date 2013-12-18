@@ -9,7 +9,10 @@ iface_API_INCLUDES = \
    -I$(top_srcdir)/include \
    -I$(WRAPPERS_DIR)/API @PAPI_CFLAGS@
 
-noinst_LTLIBRARIES      = libiface_api.la libiface_api_pthread.la
+noinst_LTLIBRARIES = libiface_api.la
+if WANT_PTHREAD
+noinst_LTLIBRARIES += libiface_api_pthread.la
+endif
 
 libiface_api_la_SOURCES = $(iface_API_SRCS)
 libiface_api_la_CFLAGS  = $(iface_API_INCLUDES)

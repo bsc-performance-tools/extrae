@@ -118,153 +118,160 @@ void Extrae_OpenCL_init (unsigned rank)
 	UNREFERENCED_PARAMETER(rank);
 
 #if defined(PIC)
+
+#if defined(__APPLE__)
+	void *lib = dlopen("/System/Libraries/Frameworks/OpenCL.framework/OpenCL", RTLD_NOW);
+#else
+	void *lib = RTLD_NEXT;
+#endif
+
 	real_clCreateBuffer = (cl_mem(*)(cl_context, cl_mem_flags, size_t, void*, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateBuffer");
+		dlsym (lib, "clCreateBuffer");
 
 	real_clCreateCommandQueue = (cl_command_queue(*)(cl_context, cl_device_id, cl_command_queue_properties, cl_int*))
-		dlsym (RTLD_NEXT, "clCreateCommandQueue");
+		dlsym (lib, "clCreateCommandQueue");
 
 	real_clCreateContext = (cl_context(*)(const cl_context_properties *, cl_uint, const cl_device_id *, void *, void *, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateContext");
+		dlsym (lib, "clCreateContext");
 
 	real_clCreateContextFromType = (cl_context(*)(const cl_context_properties *, cl_device_type, void *, void *, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateContextFromType");
+		dlsym (lib, "clCreateContextFromType");
 
 	real_clCreateKernel = (cl_kernel(*)(cl_program, const char *, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateKernel");
+		dlsym (lib, "clCreateKernel");
 
 	real_clCreateKernelsInProgram = (cl_int(*)(cl_program, cl_uint, cl_kernel *, cl_uint *))
-		dlsym (RTLD_NEXT, "clCreateKernelsInProgram");
+		dlsym (lib, "clCreateKernelsInProgram");
 
 	real_clSetKernelArg = (cl_int(*)(cl_kernel, cl_uint, size_t, const void *))
-		dlsym (RTLD_NEXT, "clSetKernelArg");
+		dlsym (lib, "clSetKernelArg");
 
 	real_clCreateProgramWithSource = (cl_program(*)(cl_context, cl_uint, const char **, const size_t *, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateProgramWithSource");
+		dlsym (lib, "clCreateProgramWithSource");
 
 	real_clCreateProgramWithBinary = (cl_program(*)(cl_context, cl_uint, const cl_device_id *, const size_t *, const unsigned char **, cl_int *, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateProgramWithBinary");
+		dlsym (lib, "clCreateProgramWithBinary");
 
 	real_clCreateProgramWithBuiltInKernels = (cl_program(*)(cl_context, cl_uint, const cl_device_id *, const char *, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateProgramWithBuiltInKernels");
+		dlsym (lib, "clCreateProgramWithBuiltInKernels");
 
 	real_clCreateSubBuffer = (cl_mem(*)(cl_mem, cl_mem_flags, cl_buffer_create_type, const void *, cl_int *))
-		dlsym (RTLD_NEXT, "clCreateSubBuffer");
+		dlsym (lib, "clCreateSubBuffer");
 
 	real_clEnqueueFillBuffer = (cl_int(*)(cl_command_queue, cl_mem, const void *, size_t, size_t, size_t, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueFillBuffer");
+		dlsym (lib, "clEnqueueFillBuffer");
 
 	real_clEnqueueCopyBuffer = (cl_int(*)(cl_command_queue, cl_mem, cl_mem, size_t, size_t, size_t, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueCopyBuffer");
+		dlsym (lib, "clEnqueueCopyBuffer");
 
 	real_clEnqueueCopyBufferRect = (cl_int(*)(cl_command_queue, cl_mem, cl_mem, const size_t *, const size_t *, const size_t *, size_t, size_t, size_t, size_t, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueCopyBufferRect");
+		dlsym (lib, "clEnqueueCopyBufferRect");
 
 	real_clEnqueueNDRangeKernel = (cl_int(*)(cl_command_queue, cl_kernel, cl_uint, const size_t *, const size_t *, const size_t *, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueNDRangeKernel");
+		dlsym (lib, "clEnqueueNDRangeKernel");
 
 	real_clEnqueueTask = (cl_int(*)(cl_command_queue, cl_kernel, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueTask");
+		dlsym (lib, "clEnqueueTask");
 
 	real_clEnqueueNativeKernel = (cl_int(*)(cl_command_queue, void *, void *, size_t, cl_uint, const cl_mem *, const void **, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueNativeKernel");
+		dlsym (lib, "clEnqueueNativeKernel");
 
 	real_clEnqueueReadBuffer = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, size_t, size_t, void *, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueReadBuffer");
+		dlsym (lib, "clEnqueueReadBuffer");
 
 	real_clEnqueueReadBufferRect = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, const size_t *, const size_t *, const size_t *, size_t, size_t, size_t, size_t, void *, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueReadBufferRect");
+		dlsym (lib, "clEnqueueReadBufferRect");
 
 	real_clEnqueueWriteBuffer = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, size_t, size_t, const void *, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueWriteBuffer");
+		dlsym (lib, "clEnqueueWriteBuffer");
 
 	real_clEnqueueWriteBufferRect = (cl_int(*)(cl_command_queue, cl_mem, cl_bool, const size_t *, const size_t *, const size_t *, size_t, size_t, size_t, size_t, const void *, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueWriteBufferRect");
+		dlsym (lib, "clEnqueueWriteBufferRect");
 
 	real_clBuildProgram = (cl_int(*)(cl_program, cl_uint, const cl_device_id *, const char *, void *, void *))
-		dlsym (RTLD_NEXT, "clBuildProgram");
+		dlsym (lib, "clBuildProgram");
 
 	real_clCompileProgram = (cl_int(*)(cl_program, cl_uint, const cl_device_id *, const char *, cl_uint, const cl_program *, const char **, void *, void *))
-		dlsym (RTLD_NEXT, "clCompileProgram");
+		dlsym (lib, "clCompileProgram");
 
 	real_clLinkProgram = (cl_program(*)(cl_context, cl_uint, const cl_device_id *, const char *, cl_uint, const cl_program *, void *, void *, cl_int *))
-		dlsym (RTLD_NEXT, "clLinkProgram");
+		dlsym (lib, "clLinkProgram");
 
 	real_clFinish = (cl_int(*)(cl_command_queue))
-		dlsym (RTLD_NEXT, "clFinish");
+		dlsym (lib, "clFinish");
 
 	real_clFlush = (cl_int(*)(cl_command_queue))
-		dlsym (RTLD_NEXT, "clFlush");
+		dlsym (lib, "clFlush");
 
 	real_clWaitForEvents = (cl_int(*)(cl_uint, const cl_event *el))
-		dlsym (RTLD_NEXT, "clWaitForEvents");
+		dlsym (lib, "clWaitForEvents");
 
 #ifdef CL_VERSION_1_2
 	real_clEnqueueMarkerWithWaitList = (cl_int(*)(cl_command_queue, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueMarkerWithWaitList");
+		dlsym (lib, "clEnqueueMarkerWithWaitList");
 
 	real_clEnqueueBarrierWithWaitList = (cl_int(*)(cl_command_queue, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueBarrierWithWaitList");
+		dlsym (lib, "clEnqueueBarrierWithWaitList");
 #endif
 
 	real_clEnqueueMarker = (cl_int(*)(cl_command_queue, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueMarker");
+		dlsym (lib, "clEnqueueMarker");
 
 	real_clEnqueueBarrier = (cl_int(*)(cl_command_queue))
-		dlsym (RTLD_NEXT, "clEnqueueBarrier");
+		dlsym (lib, "clEnqueueBarrier");
 
 	real_clEnqueueMapBuffer = (void* (*)(cl_command_queue, cl_mem, cl_bool, cl_map_flags, size_t, size_t, cl_uint, const cl_event *, cl_event *, cl_int *))
-		dlsym (RTLD_NEXT, "clEnqueueMapBuffer");
+		dlsym (lib, "clEnqueueMapBuffer");
 
 	real_clEnqueueUnmapMemObject = (cl_int (*)(cl_command_queue, cl_mem, void *, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueUnmapMemObject");
+		dlsym (lib, "clEnqueueUnmapMemObject");
 
 #ifdef CL_VERSION_1_2
 	real_clEnqueueMigrateMemObjects = (cl_int (*)(cl_command_queue, cl_uint, const cl_mem *, cl_mem_migration_flags, cl_uint, const cl_event *, cl_event *))
-		dlsym (RTLD_NEXT, "clEnqueueMigrateMemObjects");
+		dlsym (lib, "clEnqueueMigrateMemObjects");
 #endif
 
 	real_clRetainCommandQueue = (cl_int(*)(cl_command_queue))
-	  dlsym (RTLD_NEXT, "clRetainCommandQueue");
+	  dlsym (lib, "clRetainCommandQueue");
 
 	real_clReleaseCommandQueue = (cl_int(*)(cl_command_queue))
-	  dlsym (RTLD_NEXT, "clReleaseCommandQueue");
+	  dlsym (lib, "clReleaseCommandQueue");
 
 	real_clRetainContext = (cl_int(*)(cl_context))
-	  dlsym (RTLD_NEXT, "clRetainContext");
+	  dlsym (lib, "clRetainContext");
 
 	real_clReleaseContext = (cl_int(*)(cl_context))
-	  dlsym (RTLD_NEXT, "clReleaseContext");
+	  dlsym (lib, "clReleaseContext");
 
 	real_clRetainDevice = (cl_int(*)(cl_device_id))
-	  dlsym (RTLD_NEXT, "clRetainDevice");
+	  dlsym (lib, "clRetainDevice");
 
 	real_clReleaseDevice = (cl_int(*)(cl_device_id))
-	  dlsym (RTLD_NEXT, "clReleaseDevice");
+	  dlsym (lib, "clReleaseDevice");
 
 	real_clRetainEvent = (cl_int(*)(cl_event))
-	  dlsym (RTLD_NEXT, "clRetainEvent");
+	  dlsym (lib, "clRetainEvent");
 
 	real_clReleaseEvent = (cl_int(*)(cl_event))
-	  dlsym (RTLD_NEXT, "clReleaseEvent");
+	  dlsym (lib, "clReleaseEvent");
 
 	real_clRetainKernel = (cl_int(*)(cl_kernel))
-	  dlsym (RTLD_NEXT, "clRetainKernel");
+	  dlsym (lib, "clRetainKernel");
 
 	real_clReleaseKernel = (cl_int(*)(cl_kernel))
-	  dlsym (RTLD_NEXT, "clReleaseKernel");
+	  dlsym (lib, "clReleaseKernel");
 
 	real_clRetainMemObject = (cl_int(*)(cl_mem))
-	  dlsym (RTLD_NEXT, "clRetainMemObject");
+	  dlsym (lib, "clRetainMemObject");
 
 	real_clReleaseMemObject = (cl_int(*)(cl_mem))
-	  dlsym (RTLD_NEXT, "clReleaseMemObject");
+	  dlsym (lib, "clReleaseMemObject");
 
 	real_clRetainProgram = (cl_int(*)(cl_program))
-	  dlsym (RTLD_NEXT, "clRetainProgram");
+	  dlsym (lib, "clRetainProgram");
 
 	real_clReleaseProgram = (cl_int(*)(cl_program))
-	  dlsym (RTLD_NEXT, "clReleaseProgram");
+	  dlsym (lib, "clReleaseProgram");
 #else
 	fprintf (stderr, PACKAGE_NAME": Warning! OpenCL instrumentation requires linking with shared library!\n");
 #endif /* PIC */
@@ -465,8 +472,25 @@ cl_int clCreateKernelsInProgram (cl_program p, cl_uint n, cl_kernel *ks, cl_uint
 
 	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateKernelsInProgram != NULL)
 	{
+		cl_uint i;
 		Extrae_Probe_clCreateKernelsInProgram_Enter ();
 		r = real_clCreateKernelsInProgram (p, n, ks, e);
+		for (i = 0; i < n; ++i)
+		{
+			char *k;
+			cl_int ret = 0;
+			size_t len = 0;
+
+			ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, 0, NULL, &len);
+			if (CL_SUCCESS == ret)
+			{
+				k = malloc (sizeof(char)*(len+1));
+				ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, len, k, NULL);
+				if (CL_SUCCESS == ret)
+					Extrae_OpenCL_annotateKernelName (ks[i], (char*) k);
+				free (k);
+			}
+		}
 		Extrae_Probe_clCreateKernelsInProgram_Exit ();
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateKernelsInProgram != NULL)

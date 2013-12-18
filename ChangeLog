@@ -1,9 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 18Dec2013 Improved support to instrument OpenCL in Apple machines
  + 04Dec2013 Added example of OpenMP using LD_PRELOAD in Linux
  + 03Dec2013 Added a new configure flag (--with-mpi-lib-name) to force the specific name of the MPI library to link with.
- * 03Dec2013 Changed the mallinfo() wrapper (Extrae_memusage_Wrapper) to emit absolute values instead of deltas.
+             Changed the mallinfo() wrapper (Extrae_memusage_Wrapper) to emit absolute values instead of deltas.
              Removed the initialization calls to Extrae_memusage_set_to_0_Wrapper().
  * 29Nov2013 Added initial Java instrumentation (--with-java at configure)
              Added initial Extrae command line instrumentation

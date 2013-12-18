@@ -17,7 +17,7 @@
 #include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef APPLE
+#ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #include <unistd.h>
 #else

@@ -223,6 +223,18 @@ PTHREAD_EXAMPLE_FILES=\
 
 FORK_EXAMPLE_FILES=/dev/null
 
+OPENCL_EXAMPLE_FILES=\
+ example/LINUX/OPENCL/README \
+ example/LINUX/OPENCL/C++ \
+ example/LINUX/OPENCL/C
+
+MPIOPENCL_EXAMPLE_FILES=\
+ example/LINUX/MPI+OPENCL/extrae.xml \
+ example/LINUX/MPI+OPENCL/Makefile \
+ example/LINUX/MPI+OPENCL/trace.sh \
+ example/LINUX/MPI+OPENCL/README \
+ example/LINUX/MPI+OPENCL/mpi-vadd.c
+
 else 
 
 MPI_EXAMPLE_FILES=\
