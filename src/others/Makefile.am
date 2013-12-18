@@ -31,7 +31,7 @@ else
 endif
 
 install-data-hook:
-	$(mkdir_p) $(prefix)/lib
+	$(MKDIR_P) $(prefix)/lib
 	cp $(PYTHON_MODULE) $(prefix)/lib
 
 clean-local:

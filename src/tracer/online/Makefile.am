@@ -143,7 +143,7 @@ $(SCRIPT_ONLINE_ROOT): $(SCRIPT_ONLINE_ROOT).in
 	chmod u+x $@
 
 install-data-hook:
-	$(mkdir_p) $(prefix)/etc
+	$(MKDIR_P) $(prefix)/etc
 	cp $(SCRIPT_ONLINE_ENV) $(prefix)/etc
 	cp $(SCRIPT_ONLINE_ROOT) $(prefix)/bin
 	chmod u+x $(prefix)/bin/$(SCRIPT_ONLINE_ROOT)

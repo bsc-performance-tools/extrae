@@ -369,63 +369,63 @@ endif
 UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 install-data-hook:
-	$(mkdir_p) $(DESTDIR)$(datadir)/example
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example
 	cp -f example/Makefile.inc $(DESTDIR)$(datadir)/example
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/SEQ
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/SEQ
 	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/FORK
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/FORK
 	cp -f $(FORK_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/FORK
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/PYTHON
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PYTHON
 	cp -f $(PYTHON_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PYTHON
 if HAVE_PACX
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/PACX
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PACX
 	cp -f $(PACX_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PACX
 endif
 if HAVE_MPI
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI
 	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
 if WANT_CUDAorCUPTI
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+CUDA
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+CUDA
 	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
 endif
 if WANT_OPENCL
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+OPENCL
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OPENCL
 	cp -fr $(MPIOPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OPENCL
 endif
 if WANT_NANOS
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/MPI+OMPSS
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMPSS
 	cp -fr $(MPIOMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMPSS
 endif
 endif
 if WANT_OPENMP
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMP
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMP
 	cp -f $(OMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
 endif
 if HAVE_ONLINE
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/ONLINE
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/ONLINE
 	cp -f $(ONLINE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/ONLINE
 endif
 if WANT_PTHREAD
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/PTHREAD
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PTHREAD
 	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
 endif
 if WANT_CUDAorCUPTI
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/CUDA
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/CUDA
 	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
 endif
 if WANT_OPENCL
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/OPENCL
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OPENCL
 	cp -fr $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
 endif
 if WANT_NANOS
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/OMPSS
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMPSS
 	cp -fr $(OMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMPSS
 endif
 if WANT_JAVA
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/JAVA
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/JAVA
 	cp -fr $(JAVA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/JAVA
 endif
-	$(mkdir_p) $(DESTDIR)$(datadir)/example/UNICORE
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
 # Apply post-installation modifications
 	./substitute $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc

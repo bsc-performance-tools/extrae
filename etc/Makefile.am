@@ -5,7 +5,7 @@ SH_SCRIPT = $(DESTDIR)$(sysconfdir)/extrae-vars.sh
 CSH_SCRIPT= $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 
 mkdirSHscripts:
-	$(mkdir_p) $(DESTDIR)$(sysconfdir)
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)
 	rm -fr $(DESTDIR)$(sysconfdir)/extrae-vars.sh $(DESTDIR)$(sysconfdir)/extrae-vars.csh
 
 SHscripts:

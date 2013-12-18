@@ -49,7 +49,7 @@ extrae_header_LDFLAGS += -all-static
 endif
 
 install-data-hook:
-	$(mkdir_p) $(DESTDIR)$(datadir)/tests/overhead
+	$(MKDIR_P) $(DESTDIR)$(datadir)/tests/overhead
 	cp $(myFILES) $(DESTDIR)$(datadir)/tests/overhead
 	cp Makefile.tests.overhead $(DESTDIR)$(datadir)/tests/overhead/Makefile
 	$(BASE_DIR)/substitute $(SED) "@sub_EXTRAE_HOME@" "$(prefix)" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
