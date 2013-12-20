@@ -477,18 +477,16 @@ cl_int clCreateKernelsInProgram (cl_program p, cl_uint n, cl_kernel *ks, cl_uint
 		r = real_clCreateKernelsInProgram (p, n, ks, e);
 		for (i = 0; i < n; ++i)
 		{
-			char *k;
 			cl_int ret = 0;
 			size_t len = 0;
 
 			ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, 0, NULL, &len);
 			if (CL_SUCCESS == ret)
 			{
-				k = malloc (sizeof(char)*(len+1));
+				char k[len+1];
 				ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, len, k, NULL);
 				if (CL_SUCCESS == ret)
-					Extrae_OpenCL_annotateKernelName (ks[i], (char*) k);
-				free (k);
+					Extrae_OpenCL_annotateKernelName (ks[i], k);
 			}
 		}
 		Extrae_Probe_clCreateKernelsInProgram_Exit ();

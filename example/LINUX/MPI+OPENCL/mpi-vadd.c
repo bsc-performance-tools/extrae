@@ -354,7 +354,7 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	err = MPI_Gather (h_c, mycount, MPI_FLOAT, h_c, mycount, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	err = MPI_Gather (h_c, mycount, MPI_FLOAT, _h_c, mycount, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	if (err != MPI_SUCCESS)
 	{
 		printf ("MPI_Gather failed receiving h_c\n");
@@ -370,11 +370,11 @@ int main(int argc, char** argv)
 		for(i = 0; i < LENGTH; i++)
 		{
 			tmp = h_a[i] + h_b[i];     // assign element i of a+b to tmp
-			tmp -= h_c[i];             // compute deviation of expected and output result
+			tmp -= _h_c[i];             // compute deviation of expected and output result
 			if(tmp*tmp < TOL*TOL)      // correct if square deviation is less than tolerance squared
 				correct++;
 			else 
-				printf(" tmp %f h_a %f h_b %f h_c %f \n",tmp, h_a[i], h_b[i], h_c[i]);
+				printf(" tmp %f h_a %f h_b %f h_c %f \n",tmp, h_a[i], h_b[i], _h_c[i]);
 		}
 
 		// summarize results
