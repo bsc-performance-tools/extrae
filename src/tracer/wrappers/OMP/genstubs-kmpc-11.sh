@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAXNUMBER=128
+MAXNUMBER=256
 INTERMEDIATE_FUNCS="intel-kmpc-11-intermediate.c"
 INTERMEDIATE_SWITCH="intel-kmpc-11-intermediate-switch.c"
 
