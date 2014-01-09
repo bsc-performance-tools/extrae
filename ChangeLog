@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 09Jan2014 Extended sampling addresses support
  * 07Jan2014 Support up to 256 parameters for Intel OMP/runtime.
  * 18Dec2013 Improved support to instrument OpenCL in Apple machines
  + 04Dec2013 Added example of OpenMP using LD_PRELOAD in Linux

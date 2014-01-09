@@ -59,10 +59,12 @@ static char UNUSED rcsid[] = "$Id$";
 #define GETCPU_INDEX            5
 #define TRACE_INIT_INDEX        6
 #define DYNAMIC_MEM_INDEX       7
+#define SAMPLING_MEM_INDEX      8
 
-#define MAX_MISC_INDEX	        8
+#define MAX_MISC_INDEX	        9
 
-static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+	FALSE, FALSE };
 
 void Enable_MISC_Operation (int type)
 {
@@ -84,6 +86,10 @@ void Enable_MISC_Operation (int type)
 	else if (type == MALLOC_EV || type == REALLOC_EV || type == FREE_EV ||
 	  type == CALLOC_EV)
 		inuse[DYNAMIC_MEM_INDEX] = TRUE;
+	else if (type == SAMPLING_ADDRESS_MEM_LEVEL_EV ||
+	  type == SAMPLING_ADDRESS_TLB_LEVEL_EV ||
+	  type == SAMPLING_ADDRESS_EV)
+		inuse[SAMPLING_MEM_INDEX] = TRUE;
 }
 
 unsigned MISC_event_GetValueForForkRelated (unsigned type)
@@ -230,6 +236,53 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT,
 		  DYNAMIC_MEM_POINTER_OUT_EV,
 		  DYNAMIC_MEM_POINTER_OUT_LBL);
+		LET_SPACES (fd);
+	}
+	if (inuse[SAMPLING_MEM_INDEX])
+	{
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_EV,
+		  SAMPLING_ADDRESS_LBL);
+		LET_SPACES (fd);
+
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_MEM_LEVEL_EV,
+		  SAMPLING_ADDRESS_MEM_LEVEL_LBL);
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "0 other (uncacheable or I/O)\n");
+		fprintf (fd, "1 L1 cache\n");
+		fprintf (fd, "2 Line Fill Buffer (LFB)\n");
+		fprintf (fd, "3 L2 cache\n");
+		fprintf (fd, "4 L3 cache\n");
+		fprintf (fd, "5 Remote (1 or 2 hop) cache\n");
+		fprintf (fd, "6 DRAM (either local or remote)\n");
+		LET_SPACES(fd);
+
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_MEM_HITORMISS_EV,
+		  SAMPLING_ADDRESS_MEM_HITORMISS_LBL);
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "0 N/A\n");
+		fprintf (fd, "1 hit\n");
+		fprintf (fd, "2 miss\n");
+		LET_SPACES (fd);
+
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_TLB_LEVEL_EV,
+		  SAMPLING_ADDRESS_TLB_LEVEL_LBL);
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "0 other (hw walker or OS fault handler)\n");
+		fprintf (fd, "1 L1 TLB\n");
+		fprintf (fd, "2 L2 TLB\n");
+		LET_SPACES (fd);
+
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_TLB_HITORMISS_EV,
+		  SAMPLING_ADDRESS_TLB_HITORMISS_LBL);
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "0 N/A\n");
+		fprintf (fd, "1 hit\n");
+		fprintf (fd, "2 miss\n");
 		LET_SPACES (fd);
 	}
 
