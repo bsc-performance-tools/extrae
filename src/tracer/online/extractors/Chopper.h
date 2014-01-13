@@ -44,9 +44,16 @@ class Chopper : public BufferExtractor
       event_t *&firstEv,
       event_t *&lastEv);
 
-  private:
+    BufferIterator_t * FindCloserRunning(unsigned long long time_to_find);
+    unsigned long long TimeCloserRunning(unsigned long long time_to_find);
+    event_t *EventCloserRunning( unsigned long long time_to_find );
+
     BufferIterator_t * DontBreakStates(unsigned long long time_to_find, bool inclusively);
     BufferIterator_t * RemoveLastState(unsigned long long time_to_find);
+/*
+    unsigned long long GetDontBreakStates(unsigned long long time_to_find, bool inclusively);
+    unsigned long long RemoveLastState(unsigned long long time_to_find);
+*/
 };
 
 #endif /* __CHOPPER_H__ */

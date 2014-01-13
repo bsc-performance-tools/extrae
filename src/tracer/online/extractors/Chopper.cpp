@@ -54,7 +54,6 @@ Chopper::~Chopper()
   BIT_Free(ExtractionIterator);
 }
 
-
 /**
  * Selects the event closest to the specified timestamp. 
  *
@@ -105,15 +104,25 @@ BufferIterator_t * Chopper::DontBreakStates(unsigned long long time_to_find, boo
   return found;
 }
 
+/*
+unsigned long long Chopper::DontBreakStates(unsigned long long time_to_find, bool inclusively)
+{
+  BufferIterator_t *it = DontBreakStates(time_to_find, inclusively);
+  if (!BIT_OutOfBounds(it))
+  {
+    return Get_EvTime( BIT_GetEvent(it) );  
+  }
+  else return time_to_find;
+}
+*/
 
 /**
- * Select the event after the specified timestamp. 
+ * Select the event before the specified timestamp. 
  * \param time_to_find  The timestamp we're looking for.
  * \return The iterator pointing to the event that is closer to the given timestamp.
  */
 BufferIterator_t * Chopper::RemoveLastState(unsigned long long time_to_find)
 {
-#if 1
   BufferIterator_t *found=NULL, *prev=NULL;
   event_t *curEvt=NULL;
 
@@ -129,33 +138,85 @@ BufferIterator_t * Chopper::RemoveLastState(unsigned long long time_to_find)
     prev = BIT_Copy(ExtractionIterator);
   }
   return found;
-#else
-  BufferIterator_t  *last_mpi_exit      = NULL;  
-  unsigned long long last_mpi_exit_time = 0;
+}
 
-  while ((!BIT_OutOfBounds(ExtractionIterator)))
+BufferIterator_t * Chopper::FindCloserRunning(unsigned long long time_to_find)
+{
+  BufferIterator_t *last_running_start = NULL, *next_running_start = NULL;
+
+  while (!BIT_OutOfBounds(ExtractionIterator))
   {
-    event_t           *current_event = BIT_GetEvent(ExtractionIterator);
-    unsigned long long current_time  = Get_EvTime(current_event);
-    INT32              current_type  = Get_EvEvent(current_event);
-    UINT64             current_value = Get_EvValue(current_event);
-    
-    if (current_time > time_to_find)
+    event_t *current_event = BIT_GetEvent( ExtractionIterator );
+    unsigned long long current_time = Get_EvTime(current_event);
+
+    if (isBurstEnd(current_event)) 
     {
-      return last_mpi_exit;
+      BIT_Free( last_running_start );
+      last_running_start = BIT_Copy( ExtractionIterator );
     }
 
-    if ((IsMPI(current_type) && (current_value == EVT_END)) ||
-        (current_time == last_mpi_exit_time))
+    if (current_time >= time_to_find)
     {
-      BIT_Free(last_mpi_exit);
-      last_mpi_exit      = BIT_Copy(ExtractionIterator);
-      last_mpi_exit_time = current_time;
-    }    
+      return last_running_start;
+    }
+
+    BIT_Next( ExtractionIterator );
   }
   return NULL;
-#endif
 }
+
+event_t *Chopper::EventCloserRunning( unsigned long long time_to_find )
+{
+  BufferIterator_t *it = FindCloserRunning( time_to_find );
+  if (!BIT_OutOfBounds( it ))
+  {
+    return BIT_GetEvent( it );
+  }
+  else return NULL;
+}
+
+unsigned long long Chopper::TimeCloserRunning( unsigned long long time_to_find )
+{
+  BufferIterator_t *it = FindCloserRunning( time_to_find );
+  if (!BIT_OutOfBounds( it ))
+  {
+    return Get_EvTime( BIT_GetEvent( it ) );
+  }
+  else return time_to_find;
+}
+
+
+/*
+unsigned long long Chopper::RemoveLastState(unsigned long long time_to_find)
+{
+  BufferIterator_t *it = RemoveLastState(time_to_find);
+  if (!BIT_OutOfBounds(it))
+  {
+    return Get_EvTime( BIT_GetEvent(it) );
+  }
+  else return time_to_find;
+}
+*/
+
+#if 0
+
+Rewind()
+{
+  pon el iter al principio
+}
+
+CHOP(from, to)
+{
+  busca la primera salida de mpi
+  y coge de ahi hasta la ultima salida de mpi
+
+  retorna los eventos de esos puntos
+
+  conforme avanzas por los eventos, que pasa con los contadores???
+
+}
+
+#endif
 
 
 /** 
@@ -193,6 +254,7 @@ void Chopper::Chop(unsigned long long fromTime, unsigned long long toTime, event
 
     /* Find the last event of the region */
     lastIt = RemoveLastState(toTime);
+//    lastIt = DontBreakStates(toTime, true);
     lastEv = BIT_GetEvent(lastIt);
   
     BIT_Free(firstIt);

@@ -37,10 +37,15 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #include "Bursts.h"
 #include "tags.h"
+#if defined(BACKEND)
+# include "taskid.h"
+# include "timesync.h"
+# include "online_buffers.h"
 #if USE_HARDWARE_COUNTERS
 # include "num_hwc.h"
 # include "hwc.h"
 #endif /* USE_HARDWARE_COUNTERS */
+#endif /* BACKEND */
 #include "utils.h"
 
 Bursts::Bursts()
@@ -50,10 +55,9 @@ Bursts::Bursts()
 
   Timestamps = NULL;
   Durations  = NULL;
-#if USE_HARDWARE_COUNTERS
-  HWCValues  = NULL;
-  HWCSets    = NULL;
-#endif /* USE_HARDWARE_COUNTERS */
+
+  BurstStats.clear();
+  AccumulatedStats.clear();
 }
 
 Bursts::~Bursts()
@@ -62,50 +66,15 @@ Bursts::~Bursts()
   {
     free(Timestamps);
     free(Durations);
-#if USE_HARDWARE_COUNTERS
-    free(HWCValues);
-    free(HWCSets);
-#endif /* USE_HARDWARE_COUNTERS */
+    for (int i=0; i<NumberOfBursts; i++)
+    {
+      delete BurstStats[i];
+      delete AccumulatedStats[i];
+    }
   }
 }
 
-#if USE_HARDWARE_COUNTERS
-/**
- * Store a new burst with hardware counters.
- * \param timestamp The timestamp of the burst.
- * \param duration  The duration of the burst.
- * \param hwc_set   The set of counters read in this burst.
- * \param hwcs      The value of the counters.
- */
-void Bursts::Insert(unsigned long long timestamp, unsigned long long duration, int hwc_set, long long *hwcs)
-{
-  if (NumberOfBursts == MaxBursts)
-  {
-    MaxBursts += BURSTS_CHUNK;
-    Timestamps = (unsigned long long *)realloc(Timestamps, MaxBursts * sizeof(unsigned long long));
-    Durations  = (unsigned long long *)realloc(Durations, MaxBursts * sizeof(unsigned long long));
-    HWCValues  = (long long *)realloc(HWCValues, MaxBursts * MAX_HWC * sizeof(long long));
-    HWCSets    = (int *)realloc(HWCSets, MaxBursts * sizeof(int));
-  }
-  Timestamps[ NumberOfBursts ] = timestamp;
-  Durations [ NumberOfBursts ] = duration;
-  HWCSets   [ NumberOfBursts ] = hwc_set;
-  for (int i=0; i<MAX_HWC; i++)
-  {
-    int idx = (NumberOfBursts * MAX_HWC) + i;
-    HWCValues[ idx ] = hwcs[i];
-  }
-  NumberOfBursts ++;
-}
-#endif /* USE_HARDWARE_COUNTERS */
-
-/**
- * Store a new burst.
- *
- * \param timestamp The timestamp of the burst.
- * \param duration  The duration of the burst.
- */
-void Bursts::Insert(unsigned long long timestamp, unsigned long long duration)
+void Bursts::Insert(unsigned long long timestamp, unsigned long long duration, PhaseStats *PreviousPhase, PhaseStats *CurrentPhase)
 {
   if (NumberOfBursts == MaxBursts)
   {
@@ -116,6 +85,9 @@ void Bursts::Insert(unsigned long long timestamp, unsigned long long duration)
   Timestamps[ NumberOfBursts ] = timestamp;
   Durations [ NumberOfBursts ] = duration;
   NumberOfBursts ++;
+
+  AccumulatedStats.push_back( PreviousPhase );
+  BurstStats.push_back( CurrentPhase );
 }
 
 
@@ -152,33 +124,103 @@ unsigned long long Bursts::GetBurstDuration(int burst_id)
     return Durations[burst_id];
 }
 
-#if USE_HARDWARE_COUNTERS
+#if defined(BACKEND)
+#if USE_HARDWARE_COUNTERS 
+using std::cerr;
+using std::cout;
+using std::endl;
 
-/**
- * Returns the set of counters read for the specified burst.
- * \return The counters set identifier.
- */
-int Bursts::GetBurstCountersSet(int burst_id)
+void Bursts::GetCounters(int burst_id, map<unsigned int, long unsigned int> &BurstHWCs)
 {
-  if (burst_id >= NumberOfBursts)
-    return 0;
-  else
-    return HWCSets[burst_id];
-}
+  map<unsigned int, long unsigned int> HWCsAtBegin, HWCsAtEnd;
+  map<unsigned int, long unsigned int>::iterator it;
 
-/**
- * Returns the value of the counters read for the specified burst.
- * \return The counters values by reference, and the number of counters by value.
- */
-int Bursts::GetBurstCountersValues(int burst_id, long long *& hwcs)
-{
-  hwcs = (long long *)malloc(sizeof(long long) * MAX_HWC);
-  for (int i=0; i<MAX_HWC; i++)
+  int last_set = AccumulatedStats[burst_id]->GetLastSet();
+  int first_set = BurstStats[burst_id]->GetFirstSet();
+
+  if (last_set != first_set)
   {
-    int idx = (burst_id * MAX_HWC) + i;
-    hwcs[i] = HWCValues[idx];
+    /* The counter set was changed just at the beginning of the burst, and so they were reset to 0.
+     * Then we don't need to compute any differences, just read the counters at the end of the burst. 
+     */
+    BurstStats[burst_id]->GetCommonCounters( BurstHWCs );
   }
-  return MAX_HWC;
+  else
+  {
+    /* Compute the difference between the end and the beginning of the burst */
+    
+    AccumulatedStats[burst_id]->GetLastCommonCounters(HWCsAtBegin); 
+    BurstStats[burst_id]->GetCommonCounters(HWCsAtEnd);
+
+    BurstHWCs.clear();
+    for (it=HWCsAtEnd.begin(); it!=HWCsAtEnd.end(); ++it)
+    {
+      BurstHWCs[ it->first ] = it->second - HWCsAtBegin[ it->first ];
+    }
+  }
 }
 
-#endif /* USE_HARDWARE_COUNTERS */
+#endif
+
+void Bursts::EmitPhase(unsigned long long from, unsigned long long to, bool initialize, bool dump_hwcs)
+{
+  unsigned long long global_from = TIMESYNC( 0, TASKID, from ); 
+  unsigned long long global_to   = TIMESYNC( 0, TASKID, to ); 
+  PhaseStats *Phase = new PhaseStats( Extrae_get_num_tasks() );
+
+//if (TASKID == 0) fprintf(stderr, "[DEBUG] EmitPhase BEGINS ============================== from=%llu (global_from=%llu) to=%llu (global_to=%llu)\n", from, global_from, to, global_to);
+
+  for (int i=0; i<NumberOfBursts; i++)
+  {
+    if ((Timestamps[i] >= global_from) && (Timestamps[i] + Durations[i] <= global_to))
+    {
+//if (TASKID == 0) fprintf(stderr, "[DEBUG] Burst from %llu to %llu\n", TIMEDESYNC(0, TASKID, Timestamps[i]), TIMEDESYNC(0, TASKID, Timestamps[i] + Durations[i]));
+      if (i > 0)
+        Phase->Concatenate( AccumulatedStats[i] );
+      Phase->Concatenate( BurstStats[i] );
+    }
+    if (Timestamps[i] > global_to) break;
+  }
+
+//if (TASKID == 0) Phase->Dump();
+
+  if (initialize)
+    Phase->DumpZeros( from );
+  Phase->DumpToTrace( to, dump_hwcs );
+}
+
+void Bursts::EmitBursts(unsigned long long local_from, unsigned long long local_to, unsigned long long threshold)
+{
+
+
+  unsigned long long global_from = TIMESYNC( 0, TASKID, local_from );
+  unsigned long long global_to   = TIMESYNC( 0, TASKID, local_to );
+  PhaseStats *Accum = new PhaseStats( Extrae_get_num_tasks() );
+
+  for (int i=0; i<NumberOfBursts; i++)
+  {
+    if ((Timestamps[i] >= global_from) && (Timestamps[i] + Durations[i] <= global_to))
+    {
+      if (Durations[i] > threshold)
+      {
+        unsigned long long burst_ini_ts = TIMEDESYNC( 0, TASKID, Timestamps[i] );
+        unsigned long long burst_end_ts = burst_ini_ts + Durations[i];
+
+        Accum->Concatenate( AccumulatedStats[i] );
+        TRACE_ONLINE_EVENT( burst_ini_ts, CPU_BURST_EV, 1);
+	Accum->DumpToTrace( burst_ini_ts, true );
+        TRACE_ONLINE_EVENT( burst_end_ts, CPU_BURST_EV, 0);
+        BurstStats[i]->DumpToTrace( burst_end_ts, true );
+        Accum->Reset();
+      }
+      else
+      {
+        Accum->Concatenate( AccumulatedStats[i] );
+        Accum->Concatenate( BurstStats[i] );
+      }
+    }
+  }
+  delete Accum;
+}
+
+#endif

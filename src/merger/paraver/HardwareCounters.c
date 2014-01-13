@@ -360,12 +360,16 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 			outvalues[cnt+1] = 0;
 		}
 		else
+		{
 			outtypes[cnt+1] = NO_COUNTER;
+		}
 	}
 
 	/* Add this counters (if didn't exist) to a queue in order to put them into the PCF */
 	if (HardwareCounters_Exist (newIds, counters_used))
+	{
 		return;
+	}
 
 	ALLOC_NEW_ITEM (FreeListItems, sizeof (CntQueue), cItem, "CntQueue");
 	for (cnt = 0; cnt < MAX_HWC; cnt++)

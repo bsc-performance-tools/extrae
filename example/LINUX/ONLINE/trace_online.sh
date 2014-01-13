@@ -10,7 +10,7 @@ export EXTRAE_CONFIG_FILE=./extrae_online.xml
 #export EXTRAE_ONLINE_DEBUG=1
 
 # Start the analysis front-end 
-if [ ${OMPI_COMM_WORLD_RANK} -eq 0 ]; then
+if [ ${OMPI_COMM_WORLD_RANK} -eq 0 -o ${SLURM_PROCID} -eq 0 -o ${PMI_RANK} -eq 0 ]; then
   ${EXTRAE_HOME}/bin/online_root &
 fi
 

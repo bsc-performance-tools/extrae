@@ -55,12 +55,4 @@ extern int PACX_Stats_Labels_Used[PACX_STATS_EVENTS_COUNT];
 extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
 extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];
 
-int HWC_Change_Ev (
-   int newSet,
-   unsigned long long current_time,
-   unsigned int cpu,
-   unsigned int ptask,
-   unsigned int task,
-   unsigned int thread);
-
 #endif /* __MISC_PRV_SEMANTICS_H__ */

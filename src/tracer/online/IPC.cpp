@@ -33,6 +33,9 @@ static char UNUSED rcsid[] = "$Id: OnlineControl.cpp 2093 2013-09-05 16:43:35Z g
 
 #include <iostream>
 #include <fstream>
+#ifdef HAVE_SYS_SELECT_H
+# include <sys/select.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -223,7 +226,7 @@ void IPC::SendResources(int NumberOfNodes, char **ListOfNodes)
  */
 bool IPC::WaitForResources(vector<string> &Backends)
 {
-  bool found = WaitForFile( PathTo(ONLINE_RESOURCES_FILE), MAX_WAIT_RETRIES, 1 );
+  bool found = WaitForFile( PathTo(ONLINE_RESOURCES_FILE), MAX_WAIT_RETRIES, 10 );
 
   if (found)
   {
@@ -286,7 +289,7 @@ void IPC::SendAttachments()
 bool IPC::WaitForAttachments(int ExpectedAttachments)
 {
   int  NumberOfAttachments = 0;
-  bool found = WaitForFile( PathTo(ONLINE_ATTACHMENTS_FILE), MAX_WAIT_RETRIES, 1 );
+  bool found = WaitForFile( PathTo(ONLINE_ATTACHMENTS_FILE), MAX_WAIT_RETRIES, 10 );
 
   if (found)
   {

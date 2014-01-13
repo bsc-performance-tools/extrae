@@ -86,4 +86,33 @@ void BufferExtractor::ProcessEvent(UNUSED event_t *current_evt)
 {
 }
 
+/**
+ * Returns true if the given event marks the start of a burst.
+ *
+ * @param evt A buffer event.
+ * @return true if delimits the start of a burst; false otherwise.
+ */
+bool BufferExtractor::isBurstBegin(event_t *evt)
+{
+  int type  = Get_EvEvent(evt);
+  int value = Get_EvValue(evt);
+
+  return (((IsMPI(type)) && (type != MPI_IRECVED_EV) && (type != MPI_PERSIST_REQ_EV) && (type != MPI_TEST_COUNTER_EV) && (type != MPI_IPROBE_COUNTER_EV) && (value == EVT_END)) ||
+          ((IsBurst(type)) && (value == EVT_BEGIN)));
+}
+
+/**
+ * Returns true if the given event marks the end of a burst.
+ *
+ * @param evt A buffer event.
+ * @return true if delimits the end of a burst; false otherwise.
+ */
+bool BufferExtractor::isBurstEnd(event_t *evt)
+{
+  int type  = Get_EvEvent (evt);
+  int value = Get_EvValue (evt);
+
+  return (((IsMPI(type)) && (type != MPI_IRECVED_EV) && (type != MPI_PERSIST_REQ_EV) && (type != MPI_TEST_COUNTER_EV) && (type != MPI_IPROBE_COUNTER_EV) && (value == EVT_BEGIN)) ||
+          ((IsBurst(type)) && (value == EVT_END)));
+}
 

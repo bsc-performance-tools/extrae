@@ -5,6 +5,7 @@ COMMON_DIR           = $(SRC_DIR)/common
 TRACER_DIR           = $(SRC_DIR)/tracer
 CLOCKS_DIR           = $(TRACER_DIR)/clocks
 HWC_DIR              = $(TRACER_DIR)/hwc
+STATS_DIR            = $(TRACER_DIR)/stats
 WRAPPERS_DIR         = $(TRACER_DIR)/wrappers
 BUFFERS_DIR          = $(WRAPPERS_DIR)/API
 INTERFACES_DIR       = $(TRACER_DIR)/interfaces

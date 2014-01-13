@@ -30,7 +30,11 @@
 #ifndef __BURSTS_H__
 #define __BURSTS_H__
 
+#include <vector>
 #include <MRNet_wrappers.h>
+#include "PhaseStats.h"
+
+using std::vector;
 
 #define BURSTS_CHUNK 100
 
@@ -40,29 +44,30 @@ class Bursts
     Bursts();
     ~Bursts();
 
-    void Insert(unsigned long long timestamp, unsigned long long duration);
+    void Insert(unsigned long long timestamp, unsigned long long duration, PhaseStats *PreviousPhase, PhaseStats *CurrentPhase);
 
     int GetNumberOfBursts();
     unsigned long long GetBurstTime(int burst_id);
     unsigned long long GetBurstDuration(int burst_id);
 
-#if USE_HARDWARE_COUNTERS
-    void Insert(unsigned long long timestamp, unsigned long long duration, int hwc_set, long long *hwcs);
+#if defined(BACKEND)
+void EmitPhase(unsigned long long from, unsigned long long to, bool initialize, bool dump_hwcs);
+void EmitBursts(unsigned long long local_from, unsigned long long local_to, unsigned long long threshold);
 
-    int GetBurstCountersSet(int burst_id);
-    int GetBurstCountersValues(int burst_id, long long *& hwcs);
-#endif /* USE_HARDWARE_COUNTERS */
+#if USE_HARDWARE_COUNTERS
+void GetCounters(int burst_id, map<unsigned int, long unsigned int> &Counters);
+#endif
+#endif
 
   private:
     unsigned long long *Timestamps;
     unsigned long long *Durations;
-#if USE_HARDWARE_COUNTERS
-    long long          *HWCValues;
-    int                *HWCSets;
-#endif /* USE_HARDWARE_COUNTERS */
 
     int NumberOfBursts;
     int MaxBursts;
+
+    vector<PhaseStats *> BurstStats;
+    vector<PhaseStats *> AccumulatedStats;
 };
 
 

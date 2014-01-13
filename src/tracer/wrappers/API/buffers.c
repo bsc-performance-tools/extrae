@@ -68,10 +68,7 @@ static char UNUSED rcsid[] = "$Id$";
 static void Mask_ChangeRegion (Buffer_t *buffer, event_t *start, event_t *end, int mask_id, int set);
 static int Mask_Get (Buffer_t *buffer, event_t *event, int mask_id);
 
-static event_t * Buffer_GetFirst (Buffer_t *buffer);
-static event_t * Buffer_GetLast (Buffer_t *buffer);
 static void dump_buffer (int fd, int n_blocks, struct iovec *blocks);
-
 
 static DataBlocks_t * new_DataBlocks (Buffer_t *buffer);
 static void DataBlocks_AddSorted (DataBlocks_t *blocks, void *ini_address, void *end_address);
@@ -283,6 +280,22 @@ static event_t * Buffer_GetFirst (Buffer_t *buffer)
 static event_t * Buffer_GetLast (Buffer_t *buffer)
 {
     return (buffer->LastEvt);
+}
+
+event_t * Buffer_GetFirstEvent (Buffer_t *buffer)
+{
+    if (Buffer_GetFillCount(buffer) > 0)
+      return Buffer_GetHead(buffer);
+    else 
+      return NULL;
+}
+
+event_t * Buffer_GetLastEvent (Buffer_t *buffer)
+{
+    if (Buffer_GetFillCount(buffer) > 0)
+      return (Buffer_GetTail(buffer) - 1);
+    else 
+      return NULL;
 }
 
 event_t * Buffer_GetHead (Buffer_t *buffer)

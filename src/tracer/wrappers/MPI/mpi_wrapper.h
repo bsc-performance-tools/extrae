@@ -43,6 +43,7 @@
 #include "defines.h"
 
 #include "wrapper.h"
+#include "mpi_stats.h"
 
 #define RANK_OBJ_SEND 1
 #define RANK_OBJ_RECV 0

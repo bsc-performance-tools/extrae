@@ -32,7 +32,6 @@
 static char UNUSED rcsid[] = "$Id$";
 
 #include "BurstsExtractor.h"
-#include "events.h"
 #include "timesync.h"
 #include "taskid.h"
 #include "hwc.h"
@@ -44,10 +43,13 @@ static char UNUSED rcsid[] = "$Id$";
  */
 BurstsExtractor::BurstsExtractor(unsigned long long min_duration, bool sync_times)
 {
-  LastBegin        = NULL;
-  DurationFilter   = min_duration;
-  SynchronizeTimes = sync_times;
-  ExtractedBursts  = new Bursts();
+  BurstBegin = BurstEnd = LastMPIBegin = LastMPIEnd = NULL;
+  DurationFilter    = min_duration;
+  SynchronizeTimes  = sync_times;
+  ExtractedBursts   = new Bursts();
+
+  CurrentPhase      = new PhaseStats( Extrae_get_num_tasks() );
+  PreviousPhase     = NULL;
 }
 
 BurstsExtractor::~BurstsExtractor()
@@ -62,79 +64,57 @@ BurstsExtractor::~BurstsExtractor()
  *
  * @param evt The event being parsed.
  */
+/* XXX Information in burst mode not supported -- Take into account MPI_STATS_EV because there will not be MPI_EVs */
+#if 1
 void BurstsExtractor::ProcessEvent(event_t *evt)
 {
   if (isBurstBegin(evt))
   {
     /* Here begins a burst */
-    LastBegin = evt;
-#if USE_HARDWARE_COUNTERS
-    BURST_HWC_CLEAR(OngoingBurstHWCs);
-#endif /* USE_HARDWARE_COUNTERS */
+    BurstBegin = LastMPIEnd = evt;
+
+    CurrentPhase->UpdateMPI(LastMPIBegin, LastMPIEnd);
+    CurrentPhase->UpdateHWC(BurstBegin);
+
+    PreviousPhase = CurrentPhase;
+    CurrentPhase  = new PhaseStats( Extrae_get_num_tasks() );
   }
-  else if ((isBurstEnd(evt)) && (LastBegin != NULL))
+  else if ((isBurstEnd(evt)) && (BurstBegin != NULL))
   {
     /* Here ends a burst */
-    unsigned long long ts_ini      = Get_EvTime(LastBegin);
+    BurstEnd = LastMPIBegin = evt;
+
+    unsigned long long ts_ini      = Get_EvTime(BurstBegin);
     unsigned long long ts_ini_sync = TIMESYNC(0, TASKID, ts_ini);
-    unsigned long long ts_end      = Get_EvTime(evt);
+    unsigned long long ts_end      = Get_EvTime(BurstEnd);
     unsigned long long duration    = ts_end - ts_ini;
     unsigned long long ts          = (SynchronizeTimes ? ts_ini_sync : ts_ini);
 
     /* Only store those bursts that are longer than the given threshold */
     if (duration >= DurationFilter)
     {
-      /* The counters are always accumulating, so make the diff 
-       * between the end and the start of the burst to have the 
-       * counters values for the region.
-       */
-#if USE_HARDWARE_COUNTERS
-      int hwc_set = Get_EvHWCSet(evt);
-      BURST_HWC_DIFF(OngoingBurstHWCs, evt, LastBegin);
+      CurrentPhase->UpdateHWC(BurstEnd);
 
-      ExtractedBursts->Insert(ts, duration, hwc_set, OngoingBurstHWCs);
-#else
-      ExtractedBursts->Insert(ts, duration);
-#endif /* USE_HARDWARE_COUNTERS */
+      ExtractedBursts->Insert(ts, duration, PreviousPhase, CurrentPhase);
+
+      CurrentPhase  = new PhaseStats( Extrae_get_num_tasks() );
+      PreviousPhase = NULL;
+    }
+    else
+    {
+      PreviousPhase->Concatenate(CurrentPhase);
+      delete CurrentPhase;
+      CurrentPhase = PreviousPhase;
     }
   }
   else
   {
-    if (Get_EvEvent(evt) == HWC_CHANGE_EV)
-    {
-      /* If counters changed in the middle of the burst, discard it */
-      LastBegin = NULL;
-    }
+    CurrentPhase->UpdateMPI( evt );
+    CurrentPhase->UpdateHWC( evt );
   }
 }
+#endif
 
-/**
- * Returns true if the given event marks the start of a burst.
- *
- * @param evt A buffer event.
- * @return true if delimits the start of a burst; false otherwise.
- */
-bool BurstsExtractor::isBurstBegin(event_t *evt)
-{
-  int type  = Get_EvEvent(evt);
-  int value = Get_EvValue(evt);
-
-  return (((IsMPI(type)) && (value == EVT_END)) || ((IsBurst(type)) && (value == EVT_BEGIN)));
-}
-
-/**
- * Returns true if the given event marks the end of a burst.
- *
- * @param evt A buffer event.
- * @return true if delimits the end of a burst; false otherwise.
- */
-bool BurstsExtractor::isBurstEnd(event_t *evt)
-{
-  int type  = Get_EvEvent (evt);
-  int value = Get_EvValue (evt);
-
-  return (((IsMPI(type)) && (value == EVT_BEGIN)) || ((IsBurst(type)) && (value == EVT_END)));
-}
 
 /**
  * @return the extracted bursts.
@@ -142,4 +122,66 @@ bool BurstsExtractor::isBurstEnd(event_t *evt)
 Bursts * BurstsExtractor::GetBursts()
 {
   return ExtractedBursts;
+}
+
+void BurstsExtractor::DetailToCPUBursts(unsigned long long t1, unsigned long long t2)
+{
+  int num_bursts = ExtractedBursts->GetNumberOfBursts();
+
+  for (int i=0; i<num_bursts; i++)
+  {
+    unsigned long long ts_ini = ExtractedBursts->GetBurstTime(i);
+    unsigned long long ts_end = ts_ini + ExtractedBursts->GetBurstDuration(i);
+
+    if ((ts_ini >= t1) && (ts_end <= t2))
+    {
+
+    }
+  }
+}
+
+#include <algorithm>
+#include <vector>
+
+using std::sort;
+using std::vector;
+
+unsigned long long BurstsExtractor::AdjustThreshold(double KeepThisPercentageOfComputingTime)
+{
+  unsigned int i         = 0;
+  unsigned int NumBursts = 0;
+  unsigned long long AggregatedTime = 0;
+  unsigned long long BurstThreshold = 0;
+  vector< unsigned long long > DurationsArray;
+  vector< unsigned long long > AggregatedTimeArray;
+  float MinAggregatedTime = 0;
+
+  NumBursts = ExtractedBursts->GetNumberOfBursts();
+  if (NumBursts > 0)
+  {
+    for (i=0; i<NumBursts; i++)
+    {
+      unsigned long long CurrentBurstDuration = ExtractedBursts->GetBurstDuration(i);
+
+      DurationsArray.push_back( CurrentBurstDuration );
+    }
+
+    sort( DurationsArray.begin(), DurationsArray.end() );
+
+    for (i=0; i<DurationsArray.size(); i++)
+    {
+      AggregatedTime += DurationsArray[i];
+      AggregatedTimeArray.push_back( AggregatedTime );
+    }
+
+    MinAggregatedTime = AggregatedTime * (100 - KeepThisPercentageOfComputingTime) * 0.01;
+
+    for (i=0; i<AggregatedTimeArray.size(); i++)
+    {
+      if (AggregatedTimeArray[i] > MinAggregatedTime) break;
+    }
+
+    BurstThreshold = DurationsArray[i];
+  }
+  return BurstThreshold;
 }

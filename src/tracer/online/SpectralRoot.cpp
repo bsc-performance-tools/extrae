@@ -140,6 +140,11 @@ int SpectralRoot::Run()
   xfree (ListOfPeriods);
   delete DurBurstSignal;
 
+  if (NumDetectedPeriods <= 0)
+  {
+    Online_UpdateFrequency(50);
+  }
+
   return ( Done() ? 1 : 0 );
 }
 

@@ -495,36 +495,30 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 				}
 
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
-                                if (Get_EvHWCRead (current_event))
-                                {
-                                        thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
-
-                                        if ((Get_EvEvent (current_event) == HWC_CHANGE_EV)                                      ||
-                                            (Get_EvHWCSet(current_event) != HardwareCounters_GetCurrentSet(ptask, task, thread) ||
-                                            (Sthread->HWCChange_count == 0)))
-                                        {
-                                                HWC_Change_Ev (Get_EvHWCSet(current_event), current_time, cpu, ptask, task, thread);
-                                        }
-                                        else
-                                        {
-                                                int i;
-                                                unsigned int hwctype[MAX_HWC];
-                                                unsigned long long hwcvalue[MAX_HWC];
+				if (Get_EvHWCRead (current_event))
+				{
+					thread_t *Sthread = GET_THREAD_INFO(ptask, task, thread);
+ 
+					if (Sthread->last_hw_group_change != current_time)
+					{
+						int i;
+						unsigned int hwctype[MAX_HWC];
+						unsigned long long hwcvalue[MAX_HWC];
 
 #warning "Aixo es horrible, caldra retocar-ho"
-                                                if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE))
-                                                        for (i = 0; i < MAX_HWC; i++)
-                                                                if (NO_COUNTER != hwctype[i])
-                                                                        trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-                                                if (get_option_merge_AbsoluteCounters())
-                                                {
-                                                        if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE))
-                                                                for (i = 0; i < MAX_HWC; i++)
-                                                                        if (NO_COUNTER != hwctype[i])
-                                                                                trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
-                                                }
-                                        }
-                                }
+						if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE))
+							for (i = 0; i < MAX_HWC; i++)
+								if (NO_COUNTER != hwctype[i])
+									trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+						if (get_option_merge_AbsoluteCounters())
+						{
+							if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, TRUE))
+								for (i = 0; i < MAX_HWC; i++)
+									if (NO_COUNTER != hwctype[i])
+										trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+						}
+					}
+				}
 #endif
 			}
 			else if (Type == MPI_COMM_ALIAS_TYPE)

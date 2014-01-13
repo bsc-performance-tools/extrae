@@ -215,7 +215,7 @@ void trace_paraver_event (
 	thread_info = GET_THREAD_INFO (ptask, task, thread);
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 
-#if !defined(DCARRERA_HADDOP)
+#if !defined(DCARRERA_HADOOP)
 	if (!EnabledTasks[ptask - 1][task - 1])
 		return;
 #endif

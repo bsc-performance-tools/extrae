@@ -35,7 +35,7 @@
 void SigHandler_FlushAndTerminate (int signum);
 void Signals_SetupFlushAndTerminate (int signum);
 
-#if defined(HAVE_MRNET)
+#if defined(HAVE_ONLINE)
 typedef struct
 {
     int WaitingForCondition;
@@ -60,7 +60,7 @@ void Signals_CondWakeUp (Condition_t *cond);
 }
 #endif /* __cplusplus */
 
-#endif /* HAVE_MRNET */
+#endif /* HAVE_ONLINE */
 
 void Signals_Inhibit ();
 void Signals_Desinhibit ();

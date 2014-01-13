@@ -1,6 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 13Jan2014 Added advanced functionalities in the on-line mode (automatic threshold, conversion from detail to burst, phase profiling)
+             Added new MPI statistics
+             Changed the management of the HWC_CHANGE_EV
+             Updated version to 3.0rc3
  * 09Jan2014 Extended sampling addresses support
  * 07Jan2014 Support up to 256 parameters for Intel OMP/runtime.
  * 18Dec2013 Improved support to instrument OpenCL in Apple machines

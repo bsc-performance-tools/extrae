@@ -74,6 +74,8 @@ int *HWC_Thread_Initialized;
 long long **Accumulated_HWC;
 int *Accumulated_HWC_Valid; /* Marks whether Accumulated_HWC has valid values */
 
+HWC_Set_Count_t *CommonHWCs = NULL; /* To keep track in how many sets each counter appears */
+int              AllHWCs    = 0;    /* Count of all the different counters from all sets   */
 
 /*------------------------------------------------ Static Variables ---------*/
 
@@ -354,7 +356,9 @@ void HWC_CleanUp (unsigned nthreads)
 		xfree (HWC_Thread_Initialized);
 		xfree (Accumulated_HWC_Valid);
 		for (u = 0; u < nthreads; u++)
+		{
 			xfree (Accumulated_HWC[u]);
+		}
 		xfree (Accumulated_HWC);
 	}
 }
@@ -686,7 +690,44 @@ int HWC_Add_Set (int pretended_set, int rank, int ncounters, char **counters,
 	char *domain, char *change_at_globalops, char *change_at_time,
 	int num_overflows, char **overflow_counters, unsigned long long *overflow_values)
 {
-	return HWCBE_ADD_SET (pretended_set, rank, ncounters, counters, domain, change_at_globalops, change_at_time, num_overflows, overflow_counters, overflow_values);
+  int i                = 0;
+  int counters_per_set = 0;
+  int new_set          = 0;
+
+  counters_per_set = HWCBE_ADD_SET (pretended_set, rank, ncounters, counters, domain, change_at_globalops, change_at_time, num_overflows, overflow_counters, overflow_values);
+  new_set          = HWC_Get_Num_Sets() - 1;
+
+  /* Count for each counter in how many sets appears */
+  for (i=0; i<counters_per_set; i++)
+  {
+    int j      = 0;
+    int found  = 0;
+    int hwc_id = HWC_sets[new_set].counters[i];
+
+    while ((!found) && (j < AllHWCs))
+    {
+      if (CommonHWCs[j].hwc_id == hwc_id)
+      {
+        CommonHWCs[j].sets_count ++;
+        found = 1;
+      }
+      j ++;
+    }
+    if (!found)
+    {
+      CommonHWCs = (HWC_Set_Count_t *)realloc(CommonHWCs, (AllHWCs + 1) * sizeof(HWC_Set_Count_t));
+      if (CommonHWCs == NULL)
+      {
+        fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for CommonHWCs");
+        exit(-1);
+      } 
+      CommonHWCs[ AllHWCs ].hwc_id     = hwc_id;
+      CommonHWCs[ AllHWCs ].sets_count = 1;
+
+      AllHWCs ++;
+    }
+  } 
+  return counters_per_set;
 }
 
 /** 
@@ -703,3 +744,44 @@ void HWC_Set_ChangeAtTime_Frequency (int set, unsigned long long ns)
 	}
 	HWC_current_changetype = CHANGE_TIME;
 }
+
+
+/**
+ * Returns 1 if the counter specificed by its set_id and index is common to all sets; 0 otherwise.
+ */
+int HWC_IsCommonToAllSets(int set_id, int hwc_index)
+{
+  int i;
+  int hwc_id = HWC_sets[set_id].counters[hwc_index];
+
+  for (i=0; i<AllHWCs; i++)
+  {
+    if (CommonHWCs[i].hwc_id == hwc_id)
+    {
+      if (CommonHWCs[i].sets_count == HWC_Get_Num_Sets())
+      {
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+/**
+ * Returns how many counters are common to all sets 
+ */
+int HWC_GetNumberOfCommonCounters(void)
+{
+  int i           = 0;
+  int common_hwcs = 0;
+
+  for (i=0; i<AllHWCs; i++)
+  {
+    if (CommonHWCs[i].sets_count == HWC_Get_Num_Sets())
+    {
+      common_hwcs ++;
+    }
+  }
+  return common_hwcs;
+}
+

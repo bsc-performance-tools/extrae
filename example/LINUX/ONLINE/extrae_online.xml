@@ -65,11 +65,16 @@
         <online enabled="yes" analysis="spectral" frequency="60" topology="auto">
             <!-- frequency: idle seconds before repeating the analysis 
                  topology : set to "auto" or specify an MRNet generic tree topology (see mrnet_topgen) -->
-            <spectral max_periods="all" num_iters="3" min_seen="0" min_likeness="80"/>
+            <spectral max_periods="all" num_iters="3" min_seen="0" min_likeness="80">
                 <!-- max_periods : set to the maximum number of periods to trace, or "all" to explore the whole run
                      num_iters   : set to the number of iterations to trace per period
                      min_seen    : minimum repetitions of a period before tracing it
                      min_likeness: minimum similarity to compare to periods equivalent -->
+                <spectral_advanced enabled="no" burst_threshold="80">
+                    <periodic_zone     detail_level="profile"/>                <!-- choose from: none, profile         -->
+                    <non_periodic_zone detail_level="none" min_duration="1s"/> <!-- choose from: none, profile, bursts -->
+                </spectral_advanced>
+            </spectral>
         </online>
 	<signal enabled="no" which="USR1"/>
     </remote-control>

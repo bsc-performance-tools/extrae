@@ -97,6 +97,7 @@ void Messaging::error(const char *fmt, ...)
   buffer[ sizeof(buffer)-4 ] = '.';
 
   cerr << ProcessLabel << " ERROR: " << buffer << endl;
+  cerr.flush();
 }
 
 void Messaging::say(ostream &out, const char *fmt, ...)
@@ -114,6 +115,7 @@ void Messaging::say(ostream &out, const char *fmt, ...)
   buffer[ sizeof(buffer)-4 ] = '.';
 
   out << ProcessLabel << " " << buffer << endl; 
+  out.flush();
 }
 
 void Messaging::say_one(ostream &out, const char *fmt, ...)
@@ -133,6 +135,7 @@ void Messaging::say_one(ostream &out, const char *fmt, ...)
     buffer[ sizeof(buffer)-4 ] = '.';
 
     out << ProcessLabel << " " << buffer << endl;
+    out.flush();
   }
 }
 
@@ -153,6 +156,7 @@ void Messaging::debug(ostream &out, const char *fmt, ...)
     buffer[ sizeof(buffer)-4 ] = '.';
 
     out << "[DEBUG] " << ProcessLabel << " " << buffer << endl;
+    out.flush();
   }
 }
 
@@ -173,6 +177,7 @@ void Messaging::debug_one(ostream &out, const char *fmt, ...)
     buffer[ sizeof(buffer)-4 ] = '.';
 
     out << "[DEBUG] " << ProcessLabel << " " << buffer << endl;
+    out.flush();
   }
 }
 

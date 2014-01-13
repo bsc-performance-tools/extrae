@@ -347,14 +347,24 @@ typedef struct mpi_stats_evt_t
 	char * label;
 } mpi_stats_evt_t;
 
-#define MPI_STATS_P2P_COMMS_LBL         "Number of Point-to-Point communications through MPI"
-#define MPI_STATS_P2P_BYTES_SENT_LBL    "Point-to-Point bytes sent through MPI"
-#define MPI_STATS_P2P_BYTES_RECV_LBL    "Point-to-Point bytes received through MPI"
-#define MPI_STATS_GLOBAL_COMMS_LBL      "Number of global operations through MPI"
-#define MPI_STATS_GLOBAL_BYTES_SENT_LBL "Global operations bytes sent through MPI"
-#define MPI_STATS_GLOBAL_BYTES_RECV_LBL "Global operations bytes received through MPI"
-#define MPI_STATS_TIME_IN_MPI_LBL       "Elapsed time in MPI"
-#define MPI_STATS_OTHER_COUNT_LBL       "Number of MPI calls that are neither Point-to-Point nor Global operations"
+/* Original stats */
+#define MPI_STATS_P2P_COUNT_LBL                    "Number of P2P MPI calls"
+#define MPI_STATS_P2P_BYTES_SENT_LBL               "Bytes sent in P2P MPI calls"
+#define MPI_STATS_P2P_BYTES_RECV_LBL               "Bytes received in P2P MPI calls"
+#define MPI_STATS_GLOBAL_COUNT_LBL                 "Number of GLOBAL MPI calls"
+#define MPI_STATS_GLOBAL_BYTES_SENT_LBL            "Bytes sent in GLOBAL MPI calls"
+#define MPI_STATS_GLOBAL_BYTES_RECV_LBL            "Bytes received in GLOBAL MPI calls"
+#define MPI_STATS_TIME_IN_MPI_LBL                  "Elapsed time in MPI"
+/* New stats */
+#define MPI_STATS_P2P_INCOMING_COUNT_LBL           "Number of incoming P2P MPI calls"
+#define MPI_STATS_P2P_OUTGOING_COUNT_LBL           "Number of outgoing P2P MPI calls"
+#define MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_LBL  "Number of partners in incoming communications"
+#define MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_LBL  "Number of partners in outgoing communications"
+#define MPI_STATS_TIME_IN_OTHER_LBL                "Elapsed time in OTHER MPI calls"
+#define MPI_STATS_TIME_IN_P2P_LBL                  "Elapsed time in P2P MPI calls"
+#define MPI_STATS_TIME_IN_GLOBAL_LBL               "Elapsed time in GLOBAL MPI calls"
+#define MPI_STATS_OTHER_COUNT_LBL                  "Number of OTHER MPI calls"
+
 extern struct mpi_stats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT];
 
 typedef struct pacx_stats_evt_t

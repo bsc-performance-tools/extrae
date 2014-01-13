@@ -7,7 +7,7 @@
 
 # Initialize autoconf & define package name, version and bug-report address 
 #  -- keep version in sync with src/common/extrae_version.h
-AC_INIT(Extrae, 3.0rc2, tools@bsc.es)
+AC_INIT(Extrae, 3.0rc3, tools@bsc.es)
 
 # Safety check to ensure that the directory told with `--srcdir` contains the source code
 #AC_CONFIG_SRCDIR(src/mpitrace.c)
@@ -579,7 +579,7 @@ AC_ARG_ENABLE(dcarrera-hadoop,
 	[enable_dcarrera_hadoop="no"]
 )
 if test "${enable_dcarrera_hadoop}" = "yes" ; then
-	AC_DEFINE([DCARRERA_HADDOP], [1], [Determine if Davids tweaks must be applied])
+	AC_DEFINE([DCARRERA_HADOOP], [1], [Determine if Davids tweaks must be applied])
 fi
 
 #################################
@@ -726,6 +726,7 @@ AC_CONFIG_FILES([
   src/tracer/interfaces/API/Makefile \
   src/tracer/interfaces/MPI/Makefile \
   src/tracer/interfaces/PACX/Makefile \
+  src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/spu/Makefile \
   src/merger/Makefile \

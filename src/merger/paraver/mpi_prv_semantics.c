@@ -390,6 +390,9 @@ static unsigned int Get_GlobalOP_isRoot (event_t *current, int task)
 		case MPI_SCATTERV_EV:
 			res = Get_EvTarget(current) == task-1;
 		break;
+		case MPI_REDUCESCAT_EV:
+			res = Get_EvTarget(current) == 0;
+		break;
 	}
 	return res;
 }
@@ -430,6 +433,8 @@ static unsigned int Get_GlobalOP_RecvSize (event_t *current, int is_root)
 			res = (is_root)?0:Get_EvSize(current);
 		break;
 		case MPI_REDUCESCAT_EV:
+			res = (is_root)?Get_EvSize(current):Get_EvAux(current);
+		break;
 		case MPI_SCAN_EV:
 		case MPI_ALLREDUCE_EV:
 			res = Get_EvSize(current);

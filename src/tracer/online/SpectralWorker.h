@@ -32,6 +32,8 @@
 
 #include <spectral-api.h>
 #include "BackProtocol.h"
+#include "Bursts.h"
+
 
 class SpectralWorker : public BackProtocol
 {
@@ -43,7 +45,9 @@ class SpectralWorker : public BackProtocol
   private:
     STREAM *stSpectral;
 
-    void Trace_Period(Period_t *CurrentPeriod, long long int *best_ini_out, long long int *best_end_out);
+    void ProcessPeriod(Bursts *AllBursts, Period_t *CurrentPeriod, int trace_this_period, int rep_period_id, unsigned long long PrevNonPeriodicZoneStartTime, unsigned long long &NextNonPeriodicZoneStartTime);
+    void Trace_Period(Period_t *CurrentPeriod, unsigned long long *best_ini_out, unsigned long long *best_end_out);
+    void New_Trace_Period(event_t *start, event_t *end);
 };
 
 #endif /* __SPECTRAL_WORKER_H__ */

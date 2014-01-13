@@ -1247,8 +1247,10 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	}
 	if (circular_buffering)
 	{
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_INIT_EV);
 		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_RANK_CREACIO_COMM_EV);
 		Buffer_AddCachedEvent (TracingBuffer[thread_id], MPI_ALIAS_COMM_CREATE_EV);
+		Buffer_AddCachedEvent (TracingBuffer[thread_id], HWC_CHANGE_EV);
 		Buffer_SetFlushCallback (TracingBuffer[thread_id], Buffer_DiscardOldest);
 	}
 	else
@@ -2124,6 +2126,14 @@ void Backend_Finalize (void)
 
 	if (!appending)
 	{
+#if defined(HAVE_ONLINE)
+		/* Stop the analysis threads and flush the online buffers */
+		if (Online_isEnabled())
+		{
+			Online_Stop();
+		}
+#endif /* HAVE_ONLINE */
+
 		/* Stop collecting information from dynamic memory instrumentation */
 		Extrae_set_trace_io (FALSE);
 
@@ -2157,13 +2167,6 @@ void Backend_Finalize (void)
 				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
 			}
 
-#if defined(HAVE_ONLINE)
-		/* Stop the analysis threads and flush the online buffers */
-		if (Online_isEnabled())
-		{
-			Online_Stop();
-		}
-#endif /* HAVE_ONLINE */
 	
 		/* Free allocated memory */
 		{

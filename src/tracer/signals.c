@@ -41,6 +41,11 @@ static char UNUSED rcsid[] = "$Id$";
 #include "signals.h"
 #include "utils.h"
 #include "wrapper.h"
+#if defined(HAVE_ONLINE)
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
+#endif
 
 /* #define DBG_SIGNALS */
 
@@ -108,9 +113,7 @@ void Signals_SetupFlushAndTerminate (int signum)
     signal (signum, SigHandler_FlushAndTerminate);
 }
 
-#if defined(HAVE_MRNET)
-
-#include <pthread.h>
+#if defined(HAVE_ONLINE)
 
 pthread_t MainApplThread;
 
@@ -195,33 +198,6 @@ void Signals_WaitForPause ()
 	sigsuspend (&pause_set);
 }
 
-#if defined(DEAD_CODE)
-int             WaitingForCondition;
-pthread_cond_t  WaitCondition;
-pthread_mutex_t ConditionMutex;
-
-void Signals_CondWait ()
-{
-	int rc; 
-	rc = pthread_mutex_lock(&ConditionMutex);
-	WaitingForCondition = TRUE;
-	while (WaitingForCondition)
-	{
-		rc = pthread_cond_wait(&WaitCondition, &ConditionMutex);
-	}
-	rc = pthread_mutex_unlock(&ConditionMutex);
-}
-
-void Signals_CondWakeUp ()
-{
-	int rc; 
-	rc = pthread_mutex_lock(&ConditionMutex);
-	WaitingForCondition = FALSE;
-	rc = pthread_cond_signal(&WaitCondition);
-	rc = pthread_mutex_unlock(&ConditionMutex);
-}
-#endif
-
 void Signals_CondInit (Condition_t *cond)
 {
 	pthread_mutex_init(&(cond->ConditionMutex), NULL);
@@ -247,5 +223,5 @@ void Signals_CondWakeUp (Condition_t *cond)
 	pthread_mutex_unlock(&(cond->ConditionMutex));
 }
 
-#endif /* HAVE_MRNET */
+#endif /* HAVE_ONLINE */
 

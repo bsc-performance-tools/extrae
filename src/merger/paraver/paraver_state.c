@@ -245,7 +245,15 @@ void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigne
 		/* We want the state to appear as IDLE Outside CPU Bursts */
 		Push_State (STATE_IDLE, ptask, task, thread);
 	}
-	else 
+	else if (mode == TRACE_MODE_PHASE_PROFILE)
+	{
+		Push_State (STATE_PROFILING, ptask, task, thread);
+	}
+	else if (mode == TRACE_MODE_DISABLED)
+	{
+		Push_State (STATE_NOT_TRACING, ptask, task, thread);
+	}
+	else /* Detail */
 	{
 		if (thread > 1) 
 		{

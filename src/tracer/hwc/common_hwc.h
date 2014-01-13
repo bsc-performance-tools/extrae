@@ -66,6 +66,13 @@ typedef struct HWC_Definition_st
 	char description[MAX_HWC_DESCRIPTION_LENGTH];
 } HWC_Definition_t;
 
+/* A pair of counter ID and in how many sets appears */
+typedef struct
+{
+  int hwc_id;
+  int sets_count;
+} HWC_Set_Count_t;
+
 /*------------------------------------------------ Global Variables  --------*/
 
 extern int *HWC_Thread_Initialized;

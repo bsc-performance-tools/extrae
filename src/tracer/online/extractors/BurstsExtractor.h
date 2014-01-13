@@ -52,19 +52,23 @@ class BurstsExtractor : public BufferExtractor
     ~BurstsExtractor();
 
     void ProcessEvent(event_t *evt);
-    bool isBurstBegin(event_t *evt);
-    bool isBurstEnd  (event_t *evt);
 
     Bursts * GetBursts();
 
+    void DetailToCPUBursts(unsigned long long t1, unsigned long long t2);
+    unsigned long long AdjustThreshold(double KeepThisPercentageOfComputingTime);
+
   private:
     Bursts            *ExtractedBursts;
-    event_t           *LastBegin;
+    event_t           *BurstBegin, *BurstEnd, *LastMPIBegin, *LastMPIEnd;
+//    event_t           *LastBegin;
     unsigned long long DurationFilter;
 #if USE_HARDWARE_COUNTERS
     long long          OngoingBurstHWCs[MAX_HWC];
 #endif /* USE_HARDWARE_COUNTERS */
     bool               SynchronizeTimes;
+
+    PhaseStats *CurrentPhase, *PreviousPhase;
 };
 
 #endif /* __BURSTS_EXTRACTOR_H__ */

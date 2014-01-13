@@ -434,10 +434,14 @@ int file_exists (char *fname)
 {
 #if defined(HAVE_ACCESS)
 	return access (fname, F_OK) == 0;
+#elif defined(HAVE_STAT64)
+	struct stat64 sb;
+	stat64 (fname, &sb);
+	return (sb.st_mode & S_IFMT) == S_IFREG;
 #elif defined(HAVE_STAT)
 	struct stat sb;
 	stat (fname, &sb);
-	return S_ISREG(sb.st_mode);
+	return (sb.st_mode & S_IFMT) == S_IFREG;
 #else
 	int fd = open (fname, O_RDONLY);
 	if (fd >= 0)

@@ -55,6 +55,7 @@ static void ClusteringDataExtractor(libDistributedClustering *libClustering)
 
   Bursts *data = extBursts->GetBursts();
 
+#if 0
   /* Query the counters read in each counter set */ 
   map< int, vector<event_type_t> > HWCSetToIds;
   int num_sets = HWC_Get_Num_Sets();
@@ -71,15 +72,17 @@ static void ClusteringDataExtractor(libDistributedClustering *libClustering)
     xfree(array_hwc_ids);
     HWCSetToIds[set_id] = vector_hwc_ids;
   }
+#endif
 
   /* Feed the bursts one by one to the clustering library */
   for (int current_burst=0; current_burst < data->GetNumberOfBursts(); current_burst++)
   {
-    int set_id = data->GetBurstCountersSet(current_burst);
 
     timestamp_t BeginTime = data->GetBurstTime(current_burst);
     duration_t  Duration  = data->GetBurstDuration(current_burst);
     timestamp_t EndTime   = BeginTime + Duration;
+#if 0
+    int set_id = data->GetBurstCountersSet(current_burst);
     long long *hwcs = NULL;
     data->GetBurstCountersValues(current_burst, hwcs);
     map<event_type_t, event_value_t> Counters;
@@ -92,6 +95,10 @@ static void ClusteringDataExtractor(libDistributedClustering *libClustering)
       Counters[hwc_id] = hwc_value;
     }
     xfree(hwcs);
+#endif
+
+    map<unsigned int, long unsigned int> Counters;
+    data->GetCounters( current_burst, Counters );
 
     /* DEBUG 
     fprintf(stderr, "[DEBUG] ClusteringDataExtractor: Burst #%d: BeginTime=%llu Duration=%llu EndTime=%llu Counters=", i, BeginTime, Duration, EndTime);
@@ -109,12 +116,14 @@ static void ClusteringDataExtractor(libDistributedClustering *libClustering)
   delete extBursts;
 }
 
-static void ClustersFeedback(vector<timestamp_t> &BeginTimes, vector<timestamp_t> &EndTimes, vector<cluster_id_t> &ClusterIDs)
+static void ClustersFeedback(vector<timestamp_t> &BeginTimes, vector<timestamp_t> &EndTimes, vector<cluster_id_t> &ClusterIDs, vector<int> &BurstsSupport)
 {
   for (int i=0; i<ClusterIDs.size(); i++)
   {
     TRACE_ONLINE_EVENT(BeginTimes[i], CLUSTER_ID_EV, ClusterIDs[i] + PARAVER_OFFSET);
+    TRACE_ONLINE_EVENT(BeginTimes[i], CLUSTER_SUPPORT_EV, BurstsSupport[i]);
     TRACE_ONLINE_EVENT(EndTimes[i], CLUSTER_ID_EV, 0);
+    TRACE_ONLINE_EVENT(EndTimes[i], CLUSTER_SUPPORT_EV, 0);
   }
 }
 

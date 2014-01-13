@@ -36,6 +36,6 @@
 
 void Stop_FE();
 void FE_main_loop(int frequency);
-
+bool AnalysisRound();
 
 #endif /* __ONLINE_ROOT_H__ */

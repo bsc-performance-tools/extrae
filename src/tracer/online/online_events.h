@@ -30,16 +30,47 @@
 #ifndef __ONLINE_EVENTS_H__
 #define __ONLINE_EVENTS_H__
 
+/*
+ * List of event types 
+ */
 enum
 {
-  ONLINE_STATE_EV = 1000,
-  REP_PERIOD_EV
+  ONLINE_STATE_EV = 666000,
+  PERIODICITY_EV,
+  DETAIL_LEVEL_EV,
+  ORIGINAL_PERIODICITY_EV,
+  ORIGINAL_BEST_ITERS_EV,
+  HWC_MEASUREMENT
 };
 
+/* 
+ * Values for event ONLINE_STATE_EV 
+ */
 enum
 {
-  ONLINE_RESUME_APP = 0,
+  ONLINE_RESUME_APP,
   ONLINE_PAUSE_APP
 };
+
+/* 
+ * Values for event PERIODICITY_EV 
+ */
+enum
+{
+  NON_PERIODIC_ZONE = 0,
+  REPRESENTATIVE_PERIOD
+};
+
+/*
+ * Values for event DETAIL_LEVEL_EV
+ */
+enum
+{
+  NOT_TRACING = 0,
+  PHASE_PROFILE,
+  BURST_MODE,
+  DETAIL_MODE
+};
+ 
 
 #endif /* __ONLINE_EVENTS_H__ */

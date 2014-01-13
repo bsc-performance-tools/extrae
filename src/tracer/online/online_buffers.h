@@ -50,4 +50,19 @@ extern Buffer_t *OnlineBuffer;
         Buffer_InsertSingle(OnlineBuffer, &evt);       \
 }
 
+#define TRACE_ONLINE_COUNTERS(evttime, hwcset, hwcvalues) \
+{                                                                  \
+	int i=0;                                                   \
+	event_t evt;                                               \
+	evt.time = evttime;                                        \
+	evt.event = ONLINE_EV;                                     \
+	evt.value = HWC_EV;                                        \
+	evt.HWCReadSet = hwcset + 1;                               \
+	for (i=0; i<MAX_HWC; i++)                                  \
+	{                                                          \
+		evt.HWCValues[i] = hwcvalues[i];                   \
+	}                                                          \
+        Buffer_InsertSingle(OnlineBuffer, &evt);                   \
+}
+
 #endif /* __ONLINE_BUFFERS_H__ */

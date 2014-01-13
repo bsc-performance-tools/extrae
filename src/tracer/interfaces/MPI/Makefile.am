@@ -7,6 +7,7 @@ iface_MPI_INCLUDES =     \
    -I$(TRACER_DIR)       \
    -I$(CLOCKS_DIR)       \
    -I$(HWC_DIR)          \
+   -I$(STATS_DIR)/MPI    \
    -I$(WRAPPERS_DIR)/API \
    -I$(WRAPPERS_DIR)/MPI \
    -I$(INTERFACES_DIR)/API \

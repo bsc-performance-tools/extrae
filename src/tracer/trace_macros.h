@@ -134,7 +134,7 @@
 #define TRACE_MISCEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam) TRACE_MISCEVENT(evttime,evttype,evtvalue,evtparam)
 #endif
 
-#if defined(DCARRERA_HADDOP)
+#if defined(DCARRERA_HADOOP)
 # define TRACE_N_MISCEVENT(evttime,count,evttypes,evtvalues,evtparams) \
 { \
 	if (tracejant && TracingBitmap[TASKID]) \

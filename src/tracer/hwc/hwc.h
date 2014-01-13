@@ -88,6 +88,9 @@ void HWC_Parse_Env_Config (int task_id);
 
 void HWC_Set_ChangeAtTime_Frequency (int set, unsigned long long ns);
 
+int HWC_IsCommonToAllSets(int set_id, int hwc_index);
+int HWC_GetNumberOfCommonCounters(void);
+
 #ifdef __cplusplus
 }
 #endif

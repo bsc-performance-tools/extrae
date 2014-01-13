@@ -52,6 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "options.h"
 #include "extrae_types.h"
 #include "online_events.h"
+#include "trace_mode.h"
 
 #if USE_HARDWARE_COUNTERS
 # include "HardwareCounters.h"
@@ -781,13 +782,14 @@ static void ResetCounters (unsigned ptask, unsigned task, unsigned thread)
  **      Description :
  ******************************************************************************/
 
-int HWC_Change_Ev (
-   int newSet,
+static int HWC_Change_Ev (
+   event_t *current_event,
    unsigned long long current_time,
    unsigned int cpu,
    unsigned int ptask,
    unsigned int task,
-   unsigned int thread)
+   unsigned int thread,
+   FileSet_t *fset)
 {
 	int i;
 	int hwctype[MAX_HWC+1];
@@ -800,17 +802,20 @@ int HWC_Change_Ev (
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 	Sthread->last_hw_group_change = current_time;
 	Sthread->HWCChange_count++;
+	int newSet = Get_EvValue(current_event);
 
 	/* HSG changing the HWC set do not should change the application state */
 	/* trace_paraver_state (cpu, ptask, task, thread, current_time); */
 
 	/* Store which were the counters being read before (they're overwritten with the new set at HardwareCounters_Change) */
 	for (i=0; i<MAX_HWC; i++)
+	{
 #if defined(PMAPI_COUNTERS)
 		prev_hwctype[i] = HWC_COUNTER_TYPE(i, oldsIds[i]);
 #else
 		prev_hwctype[i] = HWC_COUNTER_TYPE(oldIds[i]);
 #endif
+	}
 
 	ResetCounters (ptask, task, thread);
 	HardwareCounters_Change (ptask, task, thread, newSet, hwctype, hwcvalue);
@@ -836,7 +841,9 @@ int HWC_Change_Ev (
 			}
 
 			if (!found)
+			{
 				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
+			}
 		}
 	}
 	return 0;
@@ -875,17 +882,23 @@ static int CPU_Burst_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvValue;
 	UNREFERENCED_PARAMETER(fset);
+	UINT64 EvValue;
 
-	EvValue = Get_EvValue (current_event);
+	if (Get_EvEvent( current_event ) == ONLINE_EV)
+	{
+		EvValue = Get_EvMiscParam (current_event);
+	}
+	else
+	{
+		EvValue = Get_EvValue (current_event);
+	}
 
 	Switch_State (STATE_RUNNING, (EvValue == EVT_BEGIN), ptask, task, thread);
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
-/* We don't trace this event in CPU Burst mode. This is just for debugging purposes
-   trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue); 
-*/
+	/* DEBUG -- we don't trace this event in CPU Burst mode. This is just for debugging purposes
+	trace_paraver_event (cpu, ptask, task, thread, current_time, CPU_BURST_EV, EvValue); */
 
 	return 0;
 }
@@ -937,27 +950,80 @@ static int Online_Event (event_t * current_event,
 
   switch(EvType)
   {
-    case REP_PERIOD_EV:
-      if (EvValue == 0)
+    case ORIGINAL_PERIODICITY_EV:
+    case ORIGINAL_BEST_ITERS_EV:
+    case PERIODICITY_EV:
+      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+      break;
+
+    case DETAIL_LEVEL_EV:
+      /* Remove any unclosed state */
+//      Pop_Until (STATE_RUNNING, ptask, task, thread);
+
+      if (EvValue != DETAIL_MODE)
       {
         /* Clear pending unmatched communications so that they don't match when the tracing is restarted */
+
         MatchComms_Off (ptask, task);
-
-        /* Remove any unclosed state before going to not tracing */
-        Pop_Until (STATE_RUNNING, ptask, task, thread);
-
-        /* Mark the application state as not tracing outside the selected iterations */
-        Push_State (STATE_NOT_TRACING, ptask, task, thread);
-
-        trace_paraver_state (cpu, ptask, task, thread, current_time);
       }
+
+      if (EvValue == DETAIL_MODE)
+      {
+        Initialize_Trace_Mode_States( cpu, ptask, task, thread, TRACE_MODE_DETAIL );
+      }
+      if (EvValue == BURST_MODE)
+      {
+        Initialize_Trace_Mode_States( cpu, ptask, task, thread, TRACE_MODE_BURSTS );
+      }
+      if (EvValue == PHASE_PROFILE)
+      {
+        Initialize_Trace_Mode_States( cpu, ptask, task, thread, TRACE_MODE_PHASE_PROFILE );
+      } 
+      if (EvValue == NOT_TRACING)
+      {
+        Initialize_Trace_Mode_States( cpu, ptask, task, thread, TRACE_MODE_DISABLED );
+      }
+
       trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
       break;
 
     case CLUSTER_ID_EV:
       MaxClusterId = MAX(MaxClusterId, EvValue);
       trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
       break;
+
+    case CLUSTER_SUPPORT_EV:
+      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+      break;
+
+    case ONLINE_STATE_EV:
+      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+      break;
+
+    case MPI_STATS_P2P_COUNT_EV:
+    case MPI_STATS_P2P_BYTES_SENT_EV:
+    case MPI_STATS_P2P_BYTES_RECV_EV:
+    case MPI_STATS_GLOBAL_COUNT_EV:
+    case MPI_STATS_GLOBAL_BYTES_SENT_EV:
+    case MPI_STATS_GLOBAL_BYTES_RECV_EV:
+    case MPI_STATS_TIME_IN_MPI_EV:
+    case MPI_STATS_P2P_INCOMING_COUNT_EV:
+    case MPI_STATS_P2P_OUTGOING_COUNT_EV:
+    case MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV:
+    case MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV:
+    case MPI_STATS_TIME_IN_OTHER_EV:
+    case MPI_STATS_TIME_IN_P2P_EV:
+    case MPI_STATS_TIME_IN_GLOBAL_EV:
+    case MPI_STATS_OTHER_COUNT_EV:
+      MPI_Stats_Event( current_event, current_time, cpu, ptask, task, thread, fset );
+      break;
+
+    case CPU_BURST_EV:
+//      fprintf(stderr, "[DEBUG] ONLINE_EV: CPU_BURST_EV: Val=%d\n", EvValue);
+      CPU_Burst_Event( current_event, current_time, cpu, ptask, task, thread, fset );
+      break;
+
   }
   return 0;
 }
@@ -1437,7 +1503,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ HWC_EV, SkipHandler }, /* Automatically done outside */
 #if USE_HARDWARE_COUNTERS
 	{ HWC_DEF_EV, Evt_CountersDefinition },
-	{ HWC_CHANGE_EV, SkipHandler /* Evt_SetCounters */},
+	{ HWC_CHANGE_EV, HWC_Change_Ev },
 	{ HWC_SET_OVERFLOW_EV, Set_Overflow_Event },
 #else
 	{ HWC_DEF_EV, SkipHandler },

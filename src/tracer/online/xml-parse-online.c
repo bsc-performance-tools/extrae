@@ -43,6 +43,7 @@ static char UNUSED rcsid[] = "$Id: OnlineControl.cpp 2093 2013-09-05 16:43:35Z g
 
 #include "OnlineConfig.h"
 #include "xml-parse-online.h"
+#include "utils.h"
 
 
 /**
@@ -150,7 +151,7 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
   /* Configure the frequency of the analysis */
   if (frequency != NULL)
   {
-    Online_SetFrequency(atoi((const char *)frequency));
+    Online_SetFrequencyString(frequency);
   }
 
   /* Configure the topology */
@@ -207,9 +208,65 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
       XML_FREE(num_iters_str);
       XML_FREE(min_seen_str);
       XML_FREE(min_likeness_str);
+
+      Parse_XML_SpectralAdvanced(rank, xmldoc, tag->xmlChildrenNode);
     }
 #endif
     tag = tag->next;
   }
 }
+
+#if defined(HAVE_SPECTRAL)
+void Parse_XML_SpectralAdvanced (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+  xmlNodePtr tag, tag2;
+
+  tag = current_tag;
+
+  while (tag != NULL)
+  {
+    if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT)) { /* Skip coments */ }
+
+    else if (!xmlStrcasecmp (tag->name, RC_ONLINE_SPECTRAL_ADVANCED))
+    {
+      xmlChar *enabled = xmlGetProp (tag, TRACE_ENABLED);
+      if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+      {
+        xmlChar *burst_threshold = xmlGetProp (tag, SPECTRAL_BURST_THRESHOLD);
+        Online_SetSpectralBurstThreshold( atof((const char *)burst_threshold) );
+        XML_FREE(burst_threshold);
+
+        tag2 = tag->xmlChildrenNode;
+
+        while (tag2 != NULL)
+        {
+          if (!xmlStrcasecmp (tag2->name, xmlTEXT) || !xmlStrcasecmp (tag2->name, xmlCOMMENT)) { /* Skip coments */ }
+          else if (!xmlStrcasecmp (tag2->name, RC_ONLINE_SPECTRAL_ADVANCED_PERIODIC_ZONE))
+          {
+            xmlChar *detail_level = xmlGetProp (tag2, SPECTRAL_DETAIL_LEVEL);
+
+            Online_SetSpectralPZoneDetail( detail_level );
+
+            XML_FREE(detail_level);
+          }
+          else if (!xmlStrcasecmp (tag2->name, RC_ONLINE_SPECTRAL_ADVANCED_NON_PERIODIC_ZONE))
+          {
+            xmlChar *detail_level = xmlGetProp (tag2, SPECTRAL_DETAIL_LEVEL);
+            xmlChar *min_duration = xmlGetProp (tag2, SPECTRAL_MIN_DURATION);
+
+            Online_SetSpectralNPZoneDetail( detail_level );
+            Online_SetSpectralNPZoneMinDuration( getTimeFromStr( min_duration, "<non_periodic_zone min_duration=\"..\" />", rank ) );
+
+            XML_FREE(detail_level);
+            XML_FREE(min_duration);
+          }
+          tag2 = tag2->next;
+        }
+      }
+      XML_FREE(enabled);
+    }
+    tag = tag->next;
+  }
+}
+#endif
 

@@ -131,6 +131,8 @@ int  Buffer_IsEmpty (Buffer_t *buffer);
 int  Buffer_IsFull (Buffer_t *buffer);
 event_t * Buffer_GetHead (Buffer_t *buffer);
 event_t * Buffer_GetTail (Buffer_t *buffer);
+event_t * Buffer_GetFirstEvent (Buffer_t *buffer);
+event_t * Buffer_GetLastEvent (Buffer_t *buffer);
 int Buffer_GetFillCount (Buffer_t *buffer);
 int Buffer_RemainingEvents (Buffer_t *buffer);
 int Buffer_EnoughSpace (Buffer_t *buffer, int num_events);

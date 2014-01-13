@@ -43,6 +43,10 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag);
 
 void Parse_XML_Online_From_File (char *filename);
 
+#if defined(HAVE_SPECTRAL)
+void Parse_XML_SpectralAdvanced (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif

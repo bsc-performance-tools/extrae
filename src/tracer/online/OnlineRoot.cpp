@@ -88,6 +88,7 @@ Messaging *Msgs = NULL;
 /* Synchronization with the master back-end process */
 IPC *InterProcessToBackend = NULL;
 
+bool TargetMet = false;
 
 /**
  * Writes the topology file required to create the MRNet network.
@@ -231,8 +232,6 @@ void * ListenForTermination(void UNUSED *context)
  */
 void AnalysisLoop()
 {
-  int done = 0;
-
   /* Load the FE-side analysis protocols */
   FE_load_known_protocols(); 
 
@@ -242,23 +241,38 @@ void AnalysisLoop()
     Msgs->debug(cerr, "Going to sleep for %d seconds...", Online_GetFrequency());
     sleep(Online_GetFrequency());
 
-    /* Take the mutex to prevent starting a new protocol if the application has just finished */
-    pthread_mutex_lock(&FE_running_prot_lock);
-    if (FE->isUp())
-    {
-      if (Online_GetAnalysis() == ONLINE_DO_SPECTRAL)
-        FE->Dispatch("SPECTRAL", done);
-      else if (Online_GetAnalysis() == ONLINE_DO_CLUSTERING)
-        FE->Dispatch("TDBSCAN", done);
-    }
-    pthread_mutex_unlock(&FE_running_prot_lock);
+    Msgs->debug(cerr, "Awake! Starting the next analysis round...");
+    TargetMet = AnalysisRound();
 
-  } while ((FE->isUp()) && (!done));
+    Msgs->debug(cerr, "Analysis round is over! Targets were met? %s!", (TargetMet ? "yes" : "no"));
+  } while ((FE->isUp()) && (!TargetMet));
 
   Msgs->debug(cerr, "Exiting the main analysis loop");
 
   /* The analysis is over, start the network shutdown */
   Stop_FE();
+}
+
+
+/**
+ * Dispatches a new round of analysis
+ */
+bool AnalysisRound()
+{
+  int done = 0;
+
+  /* Take the mutex to prevent starting a new protocol if the application has just finished */
+  pthread_mutex_lock(&FE_running_prot_lock);
+  if (FE->isUp())
+  {
+    if (Online_GetAnalysis() == ONLINE_DO_SPECTRAL)
+      FE->Dispatch("SPECTRAL", done);
+    else if (Online_GetAnalysis() == ONLINE_DO_CLUSTERING)
+      FE->Dispatch("TDBSCAN", done);
+  }
+  pthread_mutex_unlock(&FE_running_prot_lock);
+
+  return done;
 }
 
 
@@ -348,6 +362,13 @@ void Stop_FE()
 {
   /* Take the mutex to prevent a shutdown while a protocol is being computed */
   pthread_mutex_lock(&FE_running_prot_lock);
+
+  /* Trigger a last round of analysis with the remaining data if the target was not met */
+  if (!TargetMet)
+  {
+    AnalysisRound();
+  }
+
   if (FE->isUp())
   {
     Msgs->debug(cerr, "Shutting down the front-end...");

@@ -22,33 +22,24 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/MPI/mpi_utils.h $
+ | @last_commit: $Date: 2013-06-25 16:26:00 +0200 (Tue, 25 Jun 2013) $
+ | @version:     $Revision: 1850 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __BUFFER_EXTRACTOR_H__
-#define __BUFFER_EXTRACTOR_H__
+#ifndef MPI_UTILS_DEFINED
+#define MPI_UTILS_DEFINED
+
+#include <config.h>
 
 #include "events.h"
-#include "record.h"
-#include "buffers.h"
+#include "common.h"
 
-class BufferExtractor
-{
-  public:
-    BufferExtractor();
+#define NUM_MPI_P2P_EVENT_TYPES 39
+#define NUM_MPI_COLLECTIVE_EVENT_TYPES 18
+#define NUM_MPI_OTHER_EVENT_TYPES 25
 
-    bool isBurstBegin(event_t *evt);
-    bool isBurstEnd  (event_t *evt);
-
-    virtual void Extract(unsigned long long from, unsigned long long to);
-    void ExtractAll();
-
-    virtual void ProcessEvent(event_t *evt);
-
-    Buffer_t         *ExtractionBuffer;
-    BufferIterator_t *ExtractionIterator; 
-};
-
-#endif /* __BUFFER_EXTRACTOR_H__ */
+unsigned isMPI_Global(unsigned EvtType);
+unsigned isMPI_P2P(unsigned EvtType);
+unsigned isMPI_Others(unsigned EvtType);
+#endif /* End of MPI_UTILS_DEFINED */

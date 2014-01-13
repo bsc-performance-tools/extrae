@@ -102,7 +102,8 @@
 		                                                                                   \
 			/* Update last parallel region time */                                           \
 			last_mpi_exit_time = current_time;                                               \
-			Elapsed_Time_In_MPI += last_mpi_exit_time - last_mpi_begin_time;                 \
+            mpi_stats_update_elapsed_time(global_mpi_stats, evttype,                       \
+                last_mpi_exit_time - last_mpi_begin_time);                                  \
 		}                                                                                  \
 	} \
 }

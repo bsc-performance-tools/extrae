@@ -1,5 +1,6 @@
 
 include $(top_srcdir)/PATHS
+include extractors/Makefile.inc
 
 SUBDIRS = extractors
 
@@ -14,10 +15,6 @@ SCRIPT_ONLINE_ROOT = online_root
 noinst_SCRIPTS     = $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
 
 EXTRA_DIST = $(SCRIPT_ONLINE_ENV).in $(SCRIPT_ONLINE_ROOT).in
-
-
-EXTRACTORS_INCLUDES = -I$(ONLINE_DIR)/extractors -I$(COMMON_DIR) -I$(BUFFERS_DIR) 
-CONTAINERS_INCLUDES = -I$(ONLINE_DIR)/extractors -I$(COMMON_DIR)
 
 #########################
 ###     BINARIES      ###
@@ -59,7 +56,8 @@ online_root_bin_CXXFLAGS += @CLUSTERING_CXXFLAGS@
 online_root_bin_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
 endif
 
-online_root_bin_LDADD     = extractors/libcontainers.la
+online_root_bin_LDADD        = extractors/libcontainers-fe.la $(STATS_DIR)/libmpistats.la $(COMMON_DIR)/libcommon.la
+online_root_bin_DEPENDENCIES = $(STATS_DIR)/libmpistats.la
 
 
 #########################
@@ -108,7 +106,7 @@ libonline_la_CXXFLAGS += @CLUSTERING_CXXFLAGS@
 libonline_la_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
 endif
 
-libonline_la_LIBADD    = extractors/libextractors.la extractors/libcontainers.la
+libonline_la_LIBADD    = extractors/libextractors.la extractors/libcontainers-be.la
 
 
 #########################
@@ -122,7 +120,7 @@ libfilterOnlineSpectral_la_SOURCES  = \
   SpectralFilter.cpp SpectralFilter.h 
 libfilterOnlineSpectral_la_CXXFLAGS = `@MRNETAPP_CONFIG@ --cp-cflags` $(CONTAINERS_INCLUDES) @SPECTRAL_CXXFLAGS@
 libfilterOnlineSpectral_la_LDFLAGS  = @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
-libfilterOnlineSpectral_la_LIBADD   = extractors/libcontainers.la
+libfilterOnlineSpectral_la_LIBADD   = extractors/libcontainers-cp.la
 endif
 
 
@@ -146,7 +144,7 @@ install-data-hook:
 	$(MKDIR_P) $(prefix)/etc
 	cp $(SCRIPT_ONLINE_ENV) $(prefix)/etc
 	cp $(SCRIPT_ONLINE_ROOT) $(prefix)/bin
-	chmod u+x $(prefix)/bin/$(SCRIPT_ONLINE_ROOT)
+	chmod a+x $(prefix)/bin/$(SCRIPT_ONLINE_ROOT)
 
 clean-local:
 	rm -f $(ONLINE_ENV_SH)

@@ -21,7 +21,8 @@ common_FILES = \
  ../common/addresses.c ../common/addresses.h \
  ../common/vector.c ../common/vector.h \
  ../common/stack.c ../common/stack.h \
- ../common/bfd_manager.c ../common/bfd_manager.h ../common/bfd_manager_extra.h ../common/bfd_data_symbol.h
+ ../common/bfd_manager.c ../common/bfd_manager.h \
+ ../common/bfd_manager_extra.h ../common/bfd_data_symbol.h
 
 dimemas_FILES = \
  ../dimemas/dimemas_generator.c ../dimemas/dimemas_generator.h \
@@ -86,7 +87,7 @@ libmpimpi2prv_la_LDFLAGS = -o libmpimpi2prv.la $(CFLAGS)
 
 mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I.. -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
 mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_DIR)/libcommon.la -o mpimpi2prv @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@ @MPI_LDFLAGS@ 
-mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la
+mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la $(COMMON_DIR)/libcommon.la
 
 if NEED_MPI_LIB_INCLUDE
   libmpimpi2prv_la_CFLAGS += @MPI_CFLAGS@

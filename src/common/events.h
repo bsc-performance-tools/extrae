@@ -172,14 +172,24 @@ enum {
 
 #define MPI_STATS_BASE           54000000
 enum {
-   MPI_STATS_P2P_COMMS_EV = 0,
+   /* Original stats */
+   MPI_STATS_P2P_COUNT_EV = 0,
    MPI_STATS_P2P_BYTES_SENT_EV,
    MPI_STATS_P2P_BYTES_RECV_EV,
-   MPI_STATS_GLOBAL_COMMS_EV,
+   MPI_STATS_GLOBAL_COUNT_EV,
    MPI_STATS_GLOBAL_BYTES_SENT_EV,
    MPI_STATS_GLOBAL_BYTES_RECV_EV,
    MPI_STATS_TIME_IN_MPI_EV, 
-   MPI_STATS_OTHERS_COUNT, 
+   /* New stats */
+   MPI_STATS_P2P_INCOMING_COUNT_EV,
+   MPI_STATS_P2P_OUTGOING_COUNT_EV,
+   MPI_STATS_P2P_INCOMING_PARTNERS_COUNT_EV,
+   MPI_STATS_P2P_OUTGOING_PARTNERS_COUNT_EV,
+   MPI_STATS_TIME_IN_OTHER_EV,
+   MPI_STATS_TIME_IN_P2P_EV,
+   MPI_STATS_TIME_IN_GLOBAL_EV,
+   MPI_STATS_OTHER_COUNT_EV, 
+
    MPI_STATS_EVENTS_COUNT /* Total number of MPI statistics */
 };
 
@@ -562,6 +572,7 @@ enum {
 
 #define ONLINE_EV                50000
 #define CLUSTER_ID_EV            90000001
+#define CLUSTER_SUPPORT_EV       92000001
 #define SPECTRAL_PERIOD_EV       91000001
 
 /* 
@@ -642,6 +653,7 @@ enum {
 #define STATE_MIXED              15
 #define STATE_SENDRECVOP         16
 #define STATE_MEMORY_XFER        17
+#define STATE_PROFILING          18
 
 #if defined(DEAD_CODE)
 /* ==========================================================================
