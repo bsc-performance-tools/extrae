@@ -117,21 +117,35 @@ The user can choose which addresses to save in the trace (starting from 1, which
 
 \input{XML/userfunctions.xml.tex}
 
-There are two different mechanisms to instrument user functions. One is using DynInst support, the other relies on compiling and linking the application using additional options. 
+The file contains a list of functions to be instrumented by \TRACE. There are different alternatives to instrument application functions, and some alternatives provides additional flexibility, as a result, the format of the list varies depending of the instrumentation mechanism used:
 
 \begin{itemize}
- \item If you use DynInst support in the instrumentation package, then the pointed list in the {\tt list} attribute within the tag is just a name list of the functions to be traced.
 
- \item If you use the IBM XL compilers, specify the option {\tt -qfunctrace+function}\footnote{In earlier versions of the compiler the flag was: {\tt -qdebug=function\_trace}} at compile and link stages. The {\tt list} attribute, as in DynInst, points to a name list of functions to be traced.
+ \item DynInst\\
+  Supports instrumentation of  user functions, outer loops, loops and basic blocks.
+  The given list contains the desired function names to be instrumented. After each function name, optionally you can define different basic blocks or loops inside the desired function always by providing different suffixes that are provided after the {\tt +} character. For instance:\\
+  \begin{itemize}
+  \item To instrument the entry and exit points of foo function just provide the function name ({\tt foo}).
+  \item To instrument the entry and exit points of foo function plus the entry and exit points of its outer loop, suffix the function name with {\tt outerloops} ({\em i.e.} {\tt foo+outerloops}).
+  \item To instrument the entry and exit points of foo function plus the entry and exit points of its N-th loop function you have to suffix it as {\tt loop\_N}, for instance {\tt foo+loop\_3}.
+  \item To instrument the entry and exit points of foo function plus the entry and exit points of its N-th basic block inside the function you have to use the suffix {\tt bb\_N}, for instqance {\tt foo+bb\_5}. In this case, it is also possible to specifically ask for the entry or exit point of the basic block by additionally suffixing {\tt \_s} or {\tt \_e}, respectively.
+  \end{itemize}
+  Additionally, these options can be added by using comas, as in:\\
+  {\tt foo+outerloops,loop\_3,bb\_3\_e,bb\_4\_s,bb\_5}.
 
- \item If you use the GNU C compiler with the option {\tt -finstrument-functions} at compile and link stages, the {\tt list} attribute must point a file with a list of entries like:
-
-{\tt address \# function\_name}
-
-You can generate this list by using the nm command applied to the binary. For example, {\tt nm | grep FUNCTION} will show you the function name, followed by the type of FUNCTION (should be T or t) and then followed by the address of the symbol.
+  To discover the instrumentable loops and basic blocks of a certain function you can execute the command {\tt \${EXTRAE\_HOME}/bin/extrae -config extrae.xml -decodeBB}, where {\tt extrae.xml} is an \TRACE configuration file that provides a list on the user functions attribute that you want to get the information.
+  \item GCC and ICC (through {\tt -finstrument-functions})\\
+  GNU and Intel compiler provides a compile and link flag named {\tt -finstrument-functions} that instruments the routines of a source code file that \TRACE can use. To take advantage of this functionality the list of routines must point to a list with the format:
+	{\tt hexadecimal address\#function name}
+  where hexadecimal address refers to the hexadecimal address of the function in the binary file (obtained throug the {\tt nm binary} and function name is the name of the function to be instrumented. For instance to instrument the routine {\tt pi\_kernel} from the {\tt pi} binary we execute nm as follows:
+  \begin{verbatim}
+    # nm -a pi | grep pi_kernel
+    00000000004005ed T pi_kernel
+  \end{verbatim}
+  and add {\tt 4005ed\#pi\_kernel} into the function list.
+\end{itemize}
 
 The {\tt exclude-automatic-functions} attribute is used only by the DynInst instrumenter. By setting this attribute to {\tt yes} the instrumenter will avoid automatically instrumenting the routines that either call OpenMP outlined routines (i.e. routines with OpenMP pragmas) or call CUDA kernels.
-\end{itemize}
 
 Finally, in order to gather performance counters in these functions and also in those instrumented using the {\tt extrae\_user\_function} API call, the node {\tt counters} has to be enabled.
 

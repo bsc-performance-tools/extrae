@@ -90,6 +90,8 @@ event_type_t;
 
 static Extrae_Vector_t defined_user_event_types;
 
+static Extrae_Vector_t defined_basic_block_labels;
+
 static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t type, char *description)
 {
 	labels_codelocation = (codelocation_label_t*) realloc (labels_codelocation, (num_labels_codelocation+1)*sizeof(codelocation_label_t));
@@ -624,6 +626,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 	if (!Labels_loadSYMfile_init)
 	{
 		Extrae_Vector_Init (&defined_user_event_types);
+        Extrae_Vector_Init (&defined_basic_block_labels);
 		Labels_loadSYMfile_init = TRUE;
 	}
 	event_type_t * last_event_type_used = NULL;
@@ -826,6 +829,64 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
                     }
                     break;
 
+                case 'b': // BasicBlocks symbol
+                    {
+                        int res, eventvalue;
+                        char bb_description[1024];
+                        unsigned i, max = Extrae_Vector_Count (&defined_basic_block_labels);
+                        event_type_t * evt_type = NULL;
+                        value_t * evt_value = NULL;
+
+                        res = sscanf (LINE, "%d \"%[^\"]\"", &eventvalue, bb_description);
+                        if (res != 2)
+                            fprintf (stderr, PACKAGE_NAME": Error! Invalid line ('%s') in %s\n", LINE, name);
+                        if (max==0){
+                            evt_type = (event_type_t*)  malloc (sizeof (event_type_t));
+                            if (evt_type == NULL)
+                            {
+                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+                                exit(-1);
+                            }
+                            evt_type->event_type.type = USRFUNC_EV_BB;
+                            strcpy(evt_type->event_type.label, "BASIC_BLOCKS");
+                            Extrae_Vector_Init(&evt_type->event_values);
+                            Extrae_Vector_Append(&defined_basic_block_labels, evt_type);
+                        } else 
+                        {
+                            evt_type = Extrae_Vector_Get (&defined_basic_block_labels, 0); // There is only one event type in the vector
+                        }
+
+                        max = Extrae_Vector_Count (&evt_type->event_values);
+
+                        for(i = 0; i < max; i++)
+                        {
+                            value_t * evt = Extrae_Vector_Get (&evt_type->event_values, i);
+                            if(evt->value == eventvalue)
+                            {
+                                if(strcmp(evt->label, bb_description))
+                                {
+                                    fprintf(stderr, "Extrae (%s,%d): Warning! Ignoring duplicate definition \"%s\" for value type %d,%d!\n",__FILE__, __LINE__, bb_description,evt_type->event_type.type, eventvalue);
+                                }
+                                evt_value = evt;
+                                break;
+                            }
+                        }
+
+                        if (!evt_value)
+                        {
+                            evt_value = (value_t*) malloc (sizeof (value_t));
+                            if (evt_value == NULL)
+                            {
+                                fprintf (stderr, "Extrae (%s,%d): Fatal error! Cannot allocate memory to store the 'B' symbol in TRACE.sym file\n", __FILE__, __LINE__);
+                                exit(-1);
+                            }
+                            evt_value->value = eventvalue;
+                            strcpy(evt_value->label, bb_description);
+                            Extrae_Vector_Append (&evt_type->event_values, evt_value);
+                            other_count++;
+                        }
+                    }
+                    break;
 				default:
 					fprintf (stderr, PACKAGE_NAME" mpi2prv: Error! Task %d found unexpected line in symbol file '%s'\n", taskid, LINE);
 					break;
@@ -863,6 +924,29 @@ void Write_UserDefined_Labels(FILE * pcf_fd)
         }
         LET_SPACES (pcf_fd);
     }
+}
+
+void Write_BasickBlock_Labels(FILE * pcf_fd)
+{
+     unsigned i, j, max_types = Extrae_Vector_Count (&defined_basic_block_labels);
+    for (i = 0; i < max_types; i++)
+    {
+        event_type_t * evt = Extrae_Vector_Get (&defined_basic_block_labels, i);
+        unsigned max_values = Extrae_Vector_Count (&evt->event_values);
+        fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+        fprintf (pcf_fd, "0    %d    %s\n", evt->event_type.type, evt->event_type.label);
+        if (max_values>0)
+        {
+            fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+            for (j = 0; j < max_values; j++)
+            {
+                value_t * values = Extrae_Vector_Get (&evt->event_values, j);
+                fprintf (pcf_fd, "%d      %s\n", values->value, values->label);
+            }
+        }
+        LET_SPACES (pcf_fd);
+    }
+   
 }
 
 /******************************************************************************
@@ -921,6 +1005,8 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	WriteEnabled_OpenCL_Operations (fd);
 
 	Write_UserDefined_Labels(fd);
+
+    Write_BasickBlock_Labels(fd);
     
 	Concat_User_Labels (fd);
 

@@ -23,6 +23,7 @@ extrae_SOURCES = extrae.C \
  apiSnippets.C apiSnippets.h \
  mpiSnippets.C mpiSnippets.h \
  commonSnippets.C commonSnippets.h \
+ cpp_utils.C cpp_utils.h \
  applicationType.C applicationType.h \
  mini-xml-parse.c mini-xml-parse.h
 extrae_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@

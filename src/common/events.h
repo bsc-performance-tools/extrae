@@ -435,6 +435,7 @@ enum {
 #define OMPFUNC_LINE_EV          60000118
 #define USRFUNC_EV               60000019
 #define USRFUNC_LINE_EV          60000119
+#define USRFUNC_EV_BB            60000219
 #define TASK_EV                  60000021
 #define TASKWAIT_EV              60000022
 #define TASKFUNC_EV              60000023

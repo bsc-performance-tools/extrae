@@ -27,6 +27,7 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
+#include "cpp_utils.h"
 
 static char UNUSED rcsid[] = "$Id$";
 
@@ -67,6 +68,9 @@ using namespace std;
 #include <BPatch_statement.h>
 #include <BPatch_point.h>
 
+#define SPLIT_CHAR '+'
+void discoverInstrumentationLevel(set<string> & UserFunctions, map<string, vector<string> > & LoopLevels);
+
 static BPatch *bpatch;
 
 static char *excludeUF = NULL; /* Fitxer que indica quines User Functions s'exclouen */
@@ -80,6 +84,7 @@ static bool ListFunctions = false;
 static bool extrae_detecting_application_type = false;
 static bool BinaryLinkedWithInstrumentation = false;
 static bool BinaryRewrite = false;
+static bool DecodeBasicBlock = false;
 static string loadedModule;
 
 #define DYNINST_NO_ERROR -1
@@ -211,8 +216,39 @@ static void GenerateSymFile (set<string> &ParFunc, set<string> &UserFunc, BPatch
 		}
 	}
 
+    map<string, unsigned>::iterator BB_symbols_iter = BB_symbols->begin();
+    map<string, unsigned>::iterator BB_symbols_end = BB_symbols->end();
+    while(BB_symbols_iter != BB_symbols_end){
+        symfile << "b " << BB_symbols_iter->second << " \"" << BB_symbols_iter->first << "\"\n";
+        BB_symbols_iter++;
+    }
+
+
+
 	symfile.close();
 }
+
+char * printUsage()
+{
+    char * buffer = (char*) malloc(1024*sizeof(char*));
+    strcat(buffer, "Extrae dyninst utility\n\n");
+    strcat(buffer, "Usage: extrae OPTIONS binary\n\n");
+    strcat(buffer, "OPTIONS:\n");
+    strcat(buffer, "-exclude              Exclude functions from the instrumentation.\n");
+    strcat(buffer, "-include              Include functions to be instrumented.\n");
+#if defined(ALLOW_EXCLUDE_PARALLEL)
+    strcat(buffer, "-exclude-parallel     Exclude parallel\n");
+#endif
+    strcat(buffer, "-config               Path to Extrae XML config file.\n");
+    strcat(buffer, "-counters             Instrument hardware counters.\n");
+    strcat(buffer, "-list-functions       List functions found in the binary/process image.\n");
+    strcat(buffer, "-rewrite              Rewrite the binay to link with the extrae instrumentation.\n");
+    strcat(buffer, "-decodeBB             Decode the BB for the selected user functions identifying loops.\n");
+    strcat(buffer, "-v                    Verbose\n");
+
+    return buffer;
+}
+
 
 static int processParams (int argc, char *argv[])
 {
@@ -227,7 +263,12 @@ static int processParams (int argc, char *argv[])
 
 	while (!leave)
 	{
-		if (strcmp (argv[i], "-exclude") == 0)
+        if ((strcmp (argv[i], "-h") == 0) || (strcmp (argv[i], "--help") == 0))
+        {
+            printf("%s\n", printUsage());
+            exit(-1);
+        }
+		else if (strcmp (argv[i], "-exclude") == 0)
 		{
 			i++;
 			excludeUF = argv[i];
@@ -281,6 +322,12 @@ static int processParams (int argc, char *argv[])
 			i++;
 			leave = (i >= argc);
 		}
+        else if (strcmp (argv[i], "-decodeBB") == 0)
+        {
+            DecodeBasicBlock = true;
+            i++;
+            leave = (i >= argc);
+        }
 		else
 			leave = true;
 	}
@@ -347,7 +394,8 @@ static void ShowFunctions (BPatch_image *appImage)
 			     << "    Module name : " << modname << endl
 			     << "    Base address: " << f->getBaseAddr() << endl
 			     << "    Instrumentable? " << (f->isInstrumentable()?"yes":"no") << endl
-			     << "    In shared library? " << (f->isSharedLib()?"yes":"no") << endl;
+			     << "    In shared library? " << (f->isSharedLib()?"yes":"no") << endl
+                 << "    Number of BB: " << getBasicBlocksSize(f) << endl; 
 
 			if (f->isSharedLib())
 			{
@@ -405,7 +453,8 @@ static void printCallingSites (int id, int total, char *name, string sharedlibna
 
 static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appProcess,
 	ApplicationType *appType, set<string> &OMPset, set<string> &USERset,
-	bool instrumentMPI, bool instrumentOMP, bool instrumentUF)
+    map<string, vector<string> > & LoopLevels,
+    bool instrumentMPI, bool instrumentOMP, bool instrumentUF)
 {
 	unsigned i = 0;
 	unsigned OMPinsertion = 0;
@@ -721,6 +770,11 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 				if (f != NULL)
 				{
 					wrapTypeRoutine (f, *iter, USRFUNC_EV, appImage);
+
+                    vector<string> points = LoopLevels[*iter]; // LoopLevels['foo'] = [bb_1,loop_1.2.3,bb_5]
+                    instrumentLoops(f, *iter, appImage, points);
+                    instrumentBasicBlocks(f, appImage, points);
+
 					UFinsertion++;
 
 					if (VerboseLevel)
@@ -762,6 +816,7 @@ int main (int argc, char *argv[])
 {
 	set<string> UserFunctions;
 	set<string> ParallelFunctions;
+    map<string, vector<string> > LoopLevels;
 
 	int index;
 
@@ -901,7 +956,31 @@ int main (int argc, char *argv[])
 		if (VerboseLevel)
 			cout << PACKAGE_NAME << ": Reading instrumented user functions from " << ::XML_UFlist() << endl;
 		ReadFileIntoList (::XML_UFlist(), UserFunctions);
+        discoverInstrumentationLevel(UserFunctions, LoopLevels);
 	}
+
+    if (DecodeBasicBlock)
+    {
+        std::set<string>::iterator f_begin = UserFunctions.begin();
+        std::set<string>::iterator f_end = UserFunctions.end();
+        while (f_begin != f_end)
+        {
+            BPatch_function *f = getRoutine ((*f_begin).c_str(), appImage);
+            if (f == NULL)
+            {
+                cerr << PACKAGE_NAME << ": Unable to find " << *f_begin << " function!" << endl;
+            }
+            else
+            {
+                cout<<decodeBasicBlocks(f, *f_begin);
+            }
+            f_begin++;
+        }
+		if (!BinaryRewrite)	{	
+			appProcess->terminateExecution();
+            }
+        exit(-1);
+    }
 
 	if (::XML_CheckTraceEnabled())
 	{
@@ -1056,7 +1135,7 @@ int main (int argc, char *argv[])
 		}
 
 		InstrumentCalls (appImage, appAddrSpace, appType, ParallelFunctions,
-		  UserFunctions, ::XML_GetTraceMPI(), ::XML_GetTraceOMP(), true);
+		  UserFunctions, LoopLevels, ::XML_GetTraceMPI(), ::XML_GetTraceOMP(), true);
 
 		GenerateSymFile (ParallelFunctions, UserFunctions, appImage,
 		  appAddrSpace);
@@ -1099,4 +1178,57 @@ int main (int argc, char *argv[])
 
 	return 0;
 }
+
+void discoverInstrumentationLevel(set<string> & UserFunctions, map<string, vector<string> > & LoopLevels)
+{
+    set<string>::iterator uf_it = UserFunctions.begin();
+    set<string>::iterator uf_end = UserFunctions.end();
+    while(uf_it != uf_end)
+    {
+        vector<string> tokens;
+        string uf = *uf_it;
+        split(tokens, uf, SPLIT_CHAR);
+        if (tokens.size() > 1)
+        {
+            string uf_name = tokens[0]; // [kernel]+loop_1.1,loop_1.2
+            string bb_part = tokens[1]; // kernel+[loop_1.1,loop_1.2]
+            tokens.clear();
+            split(tokens, bb_part, ',');
+            for(unsigned i=0; i < tokens.size(); i++)
+            {
+                LoopLevels[uf_name].push_back(tokens[i]);
+            }
+            UserFunctions.erase(uf_it);
+            UserFunctions.insert(uf_name);
+        }
+        uf_it++;
+    }
+
+    uf_it = UserFunctions.begin();
+    uf_end = UserFunctions.end();
+    cout<< PACKAGE_NAME": XML functions parsed: ";
+    while(uf_it != uf_end){
+        if (LoopLevels.find(*uf_it) != LoopLevels.end())
+        {
+            cout<< "\""<<*uf_it<<"\"" <<"->[loops:";
+            for(unsigned i=0; i < LoopLevels[*uf_it].size(); i++){
+                cout<<LoopLevels[*uf_it][i]<<",";
+            }
+            cout<<"]";
+        }
+        else
+        {
+            cout<< "\""<<*uf_it<<"\"";
+        }
+        
+        set<string>::iterator uf_it_plus_one = uf_it;
+        uf_it_plus_one++;
+        if (uf_it_plus_one != uf_end)
+        {
+            cout<<";";
+        } else cout<<endl;
+        uf_it++;
+    }
+}
+
 

@@ -30,11 +30,25 @@
 #ifndef _COMMON_SNIPPETS_H_INCLUDED_
 #define _COMMON_SNIPPETS_H_INCLUDED_
 
+#include "events.h"
+#include "cpp_utils.h"
 #include <BPatch.h>
 #include <BPatch_function.h>
+#include <BPatch_point.h>
+#include <BPatch_flowGraph.h>
+#include <BPatch_basicBlock.h>
 #include <string>
+#include <CodeObject.h>
+#include <InstructionDecoder.h>
+
+using namespace Dyninst;
 
 using namespace std;
+
+extern unsigned BB_event_value; // Global variable
+extern map<string, unsigned> * BB_symbols; // Global variable
+
+unsigned getEventValueForSymbol(string  sym);
 
 BPatch_Vector<BPatch_function *> getRoutines (string &routine,
 	BPatch_image *appImage);
@@ -56,6 +70,18 @@ void wrapTypeRoutine (BPatch_function *function, string routine, int type,
 
 BPatch_snippet SnippetForRoutineCall (BPatch_image *appImage, string routine, 
 	unsigned nparams);
+
+int getBasicBlocksSize(BPatch_function *function);
+
+int instrumentBasicBlocks(BPatch_function *function, BPatch_image *appImage, 
+    vector<string> & basicblocks);
+
+int instrumentLoops(BPatch_function *function, string routine,
+    BPatch_image *appImage, vector<string> & Loops);
+
+string decodeBasicBlocks(BPatch_function * function, string routine);
+
+BPatch_loopTreeNode * getLoopTreeForBB(BPatch_loopTreeNode * root, BPatch_basicBlock * bb);
 
 
 #endif
