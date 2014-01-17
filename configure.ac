@@ -89,8 +89,8 @@ esac
 # Initialize automake
 AM_INIT_AUTOMAKE
 
-dnl Enable silent rules, use with make V=0 
-AM_SILENT_RULES([yes])
+dnl Enable silent rules (if these exist), use with make V=0  or V=1
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl AM_PROG_MKDIR_P
 AC_PROG_MKDIR_P
@@ -232,6 +232,9 @@ fi
 
 # Automake 1.10 reports a problem if this is not defined
 AM_PROG_CC_C_O
+
+# Check for the AR command (only if AM_PROG_AR exists)
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 # Check for /proc/cpuinfo & /proc/meminfo
 AX_CHECK_PROC_CPUINFO
