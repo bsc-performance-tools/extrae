@@ -983,7 +983,7 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 
 		/* Then dump line-functions */
 		fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-		fprintf (pcf_fd, "0    %d    %s\n", SAMPLING_LINE_EV, "Sampled line functions");
+		fprintf (pcf_fd, "0    %d    %s\n", SAMPLING_LINE_EV, "Sampled line functions (depth 0)");
 		if (Sample_Caller_Labels_Used != NULL)
 			for (i = 1; i <= MAX_CALLERS; i++)
 				if (Sample_Caller_Labels_Used[i-1])
