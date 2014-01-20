@@ -88,6 +88,7 @@ int SpectralWorker::Run()
     Online_GetAppResumeTime(),
     Online_GetAppPauseTime()
   ); 
+
   AutomaticBurstThreshold = Bursts->AdjustThreshold( Online_GetSpectralBurstThreshold() );
   fprintf(stderr, "[DEBUG] AutomaticBurstThreshold=%llu\n", AutomaticBurstThreshold);
 

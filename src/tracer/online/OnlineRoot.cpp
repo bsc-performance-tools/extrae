@@ -238,7 +238,7 @@ void AnalysisLoop()
   Msgs->debug(cerr, "Entering the main analysis loop");
   do
   {
-    Msgs->debug(cerr, "Going to sleep for %d seconds...", Online_GetFrequency());
+    Msgs->debug(cerr, "Sleeping for %d seconds...", Online_GetFrequency());
     sleep(Online_GetFrequency());
 
     Msgs->debug(cerr, "Awake! Starting the next analysis round...");
@@ -278,11 +278,18 @@ bool AnalysisRound()
 
 int main(int UNUSED argc, char UNUSED **argv)
 {
-  vector<string> BackendNodes;
-  int            NumberOfBackends = 0;
-  bool           ResourcesReady   = false;
-  string         TopologyFile;
+  vector<string>      BackendNodes;
+  int                 NumberOfBackends = 0;
+  bool                ResourcesReady   = false;
+  string              TopologyFile;
+  pthread_mutexattr_t attr;
 
+  /* Initialize the mutex */
+  pthread_mutexattr_init (&attr);
+  pthread_mutexattr_settype (&attr, PTHREAD_MUTEX_RECURSIVE_NP);
+  pthread_mutex_init (&FE_running_prot_lock, &attr);
+  pthread_mutexattr_destroy (&attr);
+ 
   /* Initialize the messaging system */
   Msgs = new Messaging();
 

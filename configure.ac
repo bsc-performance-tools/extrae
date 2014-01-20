@@ -7,7 +7,7 @@
 
 # Initialize autoconf & define package name, version and bug-report address 
 #  -- keep version in sync with src/common/extrae_version.h
-AC_INIT(Extrae, 3.0rc3, tools@bsc.es)
+AC_INIT(Extrae, 3.0rc4, tools@bsc.es)
 
 # Safety check to ensure that the directory told with `--srcdir` contains the source code
 #AC_CONFIG_SRCDIR(src/mpitrace.c)
@@ -115,7 +115,7 @@ if test "${OperatingSystem}" = "freebsd" ; then
 fi
 
 # Specify the output configuration header file
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADER(config.h)
 
 #############################
 #    Checks for programs    #
