@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 23Jan2014 Nanos examples for BG/Q
  * 20Jan2014 Added initialization of mutex in the on-line root that went missing in the previous update
              Updated version to 3.0rc4
  + 13Jan2014 Added advanced functionalities in the on-line mode (automatic threshold, conversion from detail to burst, phase profiling)

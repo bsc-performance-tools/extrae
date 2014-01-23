@@ -52,6 +52,28 @@ MPI_EXAMPLE_FILES=example/CELL/MPI/worker.c \
  example/CELL/MPI/trace-xml.sh \
  example/CELL/MPI/Makefile
 
+OMPSS_EXAMPLE_FILES=\
+ example/LINUX/OMPSS/extrae.xml \
+ example/LINUX/OMPSS/heat.h \
+ example/LINUX/OMPSS/heat-ompss.c \
+ example/LINUX/OMPSS/Makefile \
+ example/LINUX/OMPSS/misc.c \
+ example/LINUX/OMPSS/solver-ompss.c \
+ example/LINUX/OMPSS/trace.sh \
+ example/LINUX/OMPSS/job.lsf \
+ example/LINUX/OMPSS/test.dat
+
+MPIOMPSS_EXAMPLE_FILES=\
+ example/LINUX/MPI+OMPSS/extrae.xml \
+ example/LINUX/MPI+OMPSS/heat.h \
+ example/LINUX/MPI+OMPSS/heat-mpi-ompss.c \
+ example/LINUX/MPI+OMPSS/Makefile \
+ example/LINUX/MPI+OMPSS/misc.c \
+ example/LINUX/MPI+OMPSS/solver-mpi-ompss.c \
+ example/LINUX/MPI+OMPSS/trace.sh \
+ example/LINUX/MPI+OMPSS/job.lsf \
+ example/LINUX/MPI+OMPSS/test.dat
+
 PTHREAD_EXAMPLE_FILES=/dev/null
 OMP_EXAMPLE_FILES=/dev/null
 PACX_EXAMPLE_FILES=/dev/null
