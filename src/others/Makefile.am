@@ -15,6 +15,8 @@ papi_best_set_CFLAGS  = -I. -I../common -DPAPI_HOME='"$(PAPI_HOME)"' @PAPI_CFLAG
 papi_best_set_LDFLAGS = @PAPI_LDFLAGS@ @PAPI_LIBS@
 if IS_BG_MACHINE
 papi_best_set_LDFLAGS += -all-static
+else
+papi_best_set_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
 endif
 
 PYTHON_MODULE = pyextrae.py
