@@ -654,6 +654,7 @@ enum {
 #define STATE_SENDRECVOP         16
 #define STATE_MEMORY_XFER        17
 #define STATE_PROFILING          18
+#define STATE_ONLINE_ANALYSIS    19
 
 #if defined(DEAD_CODE)
 /* ==========================================================================

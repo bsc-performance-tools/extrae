@@ -61,6 +61,9 @@ using std::endl;
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
+#endif
 
 #include <FrontEnd.h>
 
@@ -68,7 +71,7 @@ using std::endl;
 #include "OnlineConfig.h"
 #include "OnlineUtils.h"
 #include "Messaging.h"
-#include "IPC.h"
+#include "Binder.h"
 #include "KnownProtocols.h"
 #include "xml-parse-online.h"
 
@@ -80,15 +83,15 @@ using std::endl;
 FrontEnd *FE = NULL;                   /* Front-end handler for the MRNetApp library */
 
 pthread_t       TerminationThread;     /* Thread listening for termination signals from the main back-end */
-pthread_mutex_t FE_running_prot_lock;  /* Lock taken while executing an analysis protocol */
 
 /* Messaging */
 Messaging *Msgs = NULL;
 
 /* Synchronization with the master back-end process */
-IPC *InterProcessToBackend = NULL;
+Binder *BindToBackend = NULL;
 
 bool TargetMet = false;
+bool QuitNow   = false;
 
 /**
  * Writes the topology file required to create the MRNet network.
@@ -177,7 +180,7 @@ int Generate_Topology(int NumberOfBackends, string TopologySpec, string Topology
 
     /* Invoking mrnet_topgen to build the topology file */
     string cmd;
-    cmd = string(env_topgen) + " --fehost=" + Select_NIC(myHostname) + " --hosts=" + InterProcessToBackend->GetResourcesFile() + " --topology=" + TopologyType + ":" + Topology + " -o " + TopologyFile;
+    cmd = string(env_topgen) + " --fehost=" + Select_NIC(myHostname) + " --hosts=" + BindToBackend->GetResourcesFile() + " --topology=" + TopologyType + ":" + Topology + " -o " + TopologyFile;
     Msgs->say(cerr, "Invoking the topology generator: %s", cmd.c_str());
     system(cmd.c_str());
 
@@ -216,11 +219,11 @@ void FE_load_known_protocols()
 void * ListenForTermination(void UNUSED *context)
 {
   /* Stalls until the termination notice is received */
-  InterProcessToBackend->WaitForTermination();
+  BindToBackend->WaitForTermination();
 
-  Msgs->debug(cerr, "Termination notice received, stopping...");
+  Msgs->debug(cerr, "Termination notice received");
 
-  Stop_FE();
+  QuitNow = true;
 
   return NULL;
 }
@@ -232,24 +235,35 @@ void * ListenForTermination(void UNUSED *context)
  */
 void AnalysisLoop()
 {
+  int RoundCounter = 1;
+
   /* Load the FE-side analysis protocols */
   FE_load_known_protocols(); 
 
   Msgs->debug(cerr, "Entering the main analysis loop");
   do
   {
-    Msgs->debug(cerr, "Sleeping for %d seconds...", Online_GetFrequency());
-    sleep(Online_GetFrequency());
+    int NextAnalysis = Online_GetFrequency();
 
-    Msgs->debug(cerr, "Awake! Starting the next analysis round...");
-    TargetMet = AnalysisRound();
+    Msgs->debug(cerr, "Sleeping for %d seconds...", NextAnalysis);
+    while ((NextAnalysis > 0) && (!QuitNow))
+    {
+      sleep(1);
+      //Msgs->debug(cerr, "%d seconds left...", NextAnalysis);
+      NextAnalysis --;
+    }
+    Msgs->debug(cerr, "Awake!");
 
-    Msgs->debug(cerr, "Analysis round is over! Targets were met? %s!", (TargetMet ? "yes" : "no"));
-  } while ((FE->isUp()) && (!TargetMet));
+    if (!TargetMet) 
+    {
+      Msgs->debug(cerr, "Starting analysis round #%d...", RoundCounter);
+      TargetMet = AnalysisRound();
+      Msgs->debug(cerr, "Analysis round #%d is over! Targets were met? %s!", RoundCounter, (TargetMet ? "yes" : "no"));
+      RoundCounter++;
+    }
+  } while ((!TargetMet) && (!QuitNow));
 
-  Msgs->debug(cerr, "Exiting the main analysis loop");
-
-  /* The analysis is over, start the network shutdown */
+  Msgs->debug(cerr, "Starting network shutdown...");
   Stop_FE();
 }
 
@@ -261,18 +275,22 @@ bool AnalysisRound()
 {
   int done = 0;
 
-  /* Take the mutex to prevent starting a new protocol if the application has just finished */
-  pthread_mutex_lock(&FE_running_prot_lock);
   if (FE->isUp())
   {
     if (Online_GetAnalysis() == ONLINE_DO_SPECTRAL)
+    {
       FE->Dispatch("SPECTRAL", done);
+    }
     else if (Online_GetAnalysis() == ONLINE_DO_CLUSTERING)
+    {
       FE->Dispatch("TDBSCAN", done);
+    }
+    return done;
   }
-  pthread_mutex_unlock(&FE_running_prot_lock);
-
-  return done;
+  else
+  {
+    return 1;
+  }
 }
 
 
@@ -282,19 +300,12 @@ int main(int UNUSED argc, char UNUSED **argv)
   int                 NumberOfBackends = 0;
   bool                ResourcesReady   = false;
   string              TopologyFile;
-  pthread_mutexattr_t attr;
 
-  /* Initialize the mutex */
-  pthread_mutexattr_init (&attr);
-  pthread_mutexattr_settype (&attr, PTHREAD_MUTEX_RECURSIVE_NP);
-  pthread_mutex_init (&FE_running_prot_lock, &attr);
-  pthread_mutexattr_destroy (&attr);
- 
   /* Initialize the messaging system */
   Msgs = new Messaging();
 
   /* Initialize the inter-process communicator with the master back-end */
-  InterProcessToBackend = new IPC();
+  BindToBackend = new Binder();
   
   /* Read the environment variable EXTRAE_CONFIG_FILE */
   char *env_extrae_config_file = getenv("EXTRAE_CONFIG_FILE");
@@ -319,7 +330,7 @@ int main(int UNUSED argc, char UNUSED **argv)
   pthread_create(&TerminationThread, NULL, ListenForTermination, NULL);
 
   /* Wait for the list of available resources */
-  ResourcesReady = InterProcessToBackend->WaitForResources(BackendNodes);
+  ResourcesReady = BindToBackend->WaitForResources(BackendNodes);
   if (!ResourcesReady)
   {
     Msgs->error("Resources are not ready!");
@@ -329,12 +340,12 @@ int main(int UNUSED argc, char UNUSED **argv)
   Msgs->say(cerr, "Resources are ready!");
 
   /* Generate the network topology */
-  TopologyFile = InterProcessToBackend->GetTopologyFile();
+  TopologyFile = BindToBackend->GetTopologyFile();
 
   if (Generate_Topology(NumberOfBackends, string(Online_GetTopology()), TopologyFile) == -1)
   {
     /* Send empty attachments to wake up the back-ends before their time-out */
-    InterProcessToBackend->SendAttachments();
+    BindToBackend->SendAttachments();
     Msgs->error("Generate_Topology failed: Quitting the front-end now!");
     exit(-1);
   }
@@ -347,11 +358,11 @@ int main(int UNUSED argc, char UNUSED **argv)
   FE->Init(
       TopologyFile.c_str(),
       NumberOfBackends,
-      InterProcessToBackend->GetAttachmentsTmpFile().c_str(),
+      BindToBackend->GetAttachmentsTmpFile().c_str(),
       false /* false = Don't wait for BEs to attach */ );
 
   /* Send the attachments to the master back-end */
-  InterProcessToBackend->SendAttachments();
+  BindToBackend->SendAttachments();
 
   /* Wait for all back-ends to attach */
   FE->Connect(); 
@@ -367,15 +378,6 @@ int main(int UNUSED argc, char UNUSED **argv)
  */
 void Stop_FE()
 {
-  /* Take the mutex to prevent a shutdown while a protocol is being computed */
-  pthread_mutex_lock(&FE_running_prot_lock);
-
-  /* Trigger a last round of analysis with the remaining data if the target was not met */
-  if (!TargetMet)
-  {
-    AnalysisRound();
-  }
-
   if (FE->isUp())
   {
     Msgs->debug(cerr, "Shutting down the front-end...");
@@ -385,12 +387,8 @@ void Stop_FE()
   /* Clean all exchanged files */
   if (!Msgs->debugging())
   {
-    InterProcessToBackend->WipeExchangeData();
+    BindToBackend->WipeExchangeData();
   }
   Msgs->debug(cerr, "Bye!");
-
-  //pthread_mutex_unlock(&FE_running_prot_lock);
-
-  exit(0);
 }
 

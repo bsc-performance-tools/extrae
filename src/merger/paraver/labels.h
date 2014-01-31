@@ -230,10 +230,18 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define STATE17_LBL          "Memory transfer"
 #define STATE17_COLOR        {0xff, 0x0, 0x60}
 
+#define STATE_18             18
+#define STATE18_LBL          "Profiling"
+#define STATE18_COLOR        {169, 169, 169}
+
+#define STATE_19             19
+#define STATE19_LBL          "On-line analysis"
+#define STATE19_COLOR        {169, 0, 0}
+
 #define STATES_LBL           "STATES"
 #define STATES_COLOR_LBL     "STATES_COLOR"
 
-#define STATES_NUMBER        18
+#define STATES_NUMBER        20
 extern struct color_t states_inf[STATES_NUMBER];
 
 /******************************************************************************
@@ -383,8 +391,15 @@ typedef struct pacx_stats_evt_t
 extern struct pacx_stats_evt_t pacx_stats_evt_labels[PACX_STATS_EVENTS_COUNT];
 
 /* Clustering events labels */
-#define CLUSTER_ID_LABEL "Cluster ID"
-extern unsigned MaxClusterId;
+#define CLUSTER_ID_LABEL   "Cluster ID"
+extern unsigned int MaxClusterId;
+
+#define PERIODICITY_LABEL     "Representative periods"
+#define DETAIL_LEVEL_LABEL    "Detail level"
+#define RAW_PERIODICITY_LABEL "Raw periodic zone"
+#define RAW_BEST_ITERS_LABEL  "Raw best iterations"
+extern unsigned int MaxRepresentativePeriod;
+extern unsigned int HaveSpectralEvents;
 
 #define TYPE_LABEL           "EVENT_TYPE"
 #define VALUES_LABEL         "VALUES"

@@ -50,32 +50,32 @@ using std::endl;
 #include "OnlineConfig.h"
 #include "online_events.h"
 
-static int         OnlineUserEnabled = 0;                               /* Controls if the online module is enabled     */
+static int         OnlineUserEnabled = 0;                       /* Controls if the online module is enabled     */
 
-static int         OnlineType     = ONLINE_DO_NOTHING;                  /* Controls the analysis that will be performed */
-static int         OnlineFreq     = DEFAULT_ANALYSIS_FREQUENCY;         /* Controls how often the analysis triggers     */
+static int         OnlineType     = ONLINE_DO_NOTHING;          /* Controls the analysis that will be performed */
+static int         OnlineFreq     = DEFAULT_ANALYSIS_FREQUENCY; /* Controls how often the analysis triggers     */
 static bool        OnlineFreqAuto = false;
-static const char *OnlineTopo     = DEFAULT_TOPOLOGY;                   /* Specify the network topology                 */
+static const char *OnlineTopo     = DEFAULT_TOPOLOGY;           /* Specify the network topology                 */
 
 #if defined(HAVE_SPECTRAL)
-static int                cfgSpectralMaxPeriods        = DEFAULT_SPECTRAL_MAX_PERIODS;    /* How many (different) types of periodic behavior to look for      */
-static int                cfgSpectralMinSeen           = DEFAULT_SPECTRAL_MIN_SEEN;       /* How many times a given behavior has to be seen before tracing it */
-static int                cfgSpectralNumIters          = DEFAULT_SPECTRAL_NUM_ITERS;      /* How many iterations to trace for a given behavior                */
-static double             cfgSpectralMinLikeness       = DEFAULT_SPECTRAL_MIN_LIKENESS;   /* Minimum similarity to consider to periods equivalent             */
-static int                cfgSpectralPZoneDetail       = PHASE_PROFILE;
-static int                cfgSpectralNPZoneDetail      = NOT_TRACING;
-static unsigned long long cfgSpectralNPZoneMinDuration = DEFAULT_SPECTRAL_NP_ZONE_MIN_DURATION; 
-static double             cfgSpectralBurstThreshold    = DEFAULT_SPECTRAL_BURST_THRESHOLD;
+static int                cfgSpectralMaxPeriods               = DEFAULT_SPECTRAL_MAX_PERIODS;  /* How many (different) types of periodic behavior to look for      */
+static int                cfgSpectralMinSeen                  = DEFAULT_SPECTRAL_MIN_SEEN;     /* How many times a given behavior has to be seen before tracing it */
+static int                cfgSpectralNumIters                 = DEFAULT_SPECTRAL_NUM_ITERS;    /* How many iterations to trace for a given behavior                */
+static double             cfgSpectralMinLikeness              = DEFAULT_SPECTRAL_MIN_LIKENESS; /* Minimum similarity to consider to periods equivalent             */
+static int                cfgSpectralPeriodZoneLevel          = PHASE_PROFILE;
+static int                cfgSpectralNonPeriodZoneLevel       = NOT_TRACING;
+static unsigned long long cfgSpectralNonPeriodZoneMinDuration = DEFAULT_SPECTRAL_NP_ZONE_MIN_DURATION; 
+static double             cfgSpectralBurstThreshold           = DEFAULT_SPECTRAL_BURST_THRESHOLD;
 #endif /* HAVE_SPECTRAL */
 
 #if defined(HAVE_CLUSTERING)
-static char *cfgClusteringConfig     = (char *)DEFAULT_CLUSTERING_CONFIG;       /* The clustering configuration xml file */
+static char *cfgClusteringConfig = (char *)DEFAULT_CLUSTERING_CONFIG; /* The clustering configuration xml file */
 #endif /* HAVE_CLUSTERING */
 
 /**
  * Enables the online module.
  */
-void Online_Enable() 
+void Online_Enable( void ) 
 {
   OnlineUserEnabled = 1;
 }
@@ -83,7 +83,7 @@ void Online_Enable()
 /**
  * Disables the online module.
  */
-void Online_Disable()
+void Online_Disable( void )
 {
   OnlineUserEnabled = 0;
 }
@@ -92,7 +92,7 @@ void Online_Disable()
  * Checks whether the online module is enabled.
  * @return 1 if enabled; 0 otherwise.
  */
-int Online_isEnabled()
+int Online_isEnabled( void )
 {
   return OnlineUserEnabled;
 }
@@ -100,7 +100,7 @@ int Online_isEnabled()
 /**
  * Set the type of analysis to perform.
  */
-void Online_SetAnalysis(int analysis_type)
+void Online_SetAnalysis( int analysis_type )
 {
   OnlineType = analysis_type;
 }
@@ -109,7 +109,7 @@ void Online_SetAnalysis(int analysis_type)
  * Check the type of analyisis that is being performed.
  * @return The type of analysis.
  */
-int Online_GetAnalysis()
+int Online_GetAnalysis( void )
 {
   return OnlineType;
 }
@@ -117,7 +117,7 @@ int Online_GetAnalysis()
 /**
  * Set the frequency to repeat the analysis.
  */
-void Online_SetFrequency(int seconds) 
+void Online_SetFrequency( int seconds ) 
 {
   if (seconds > 0)
   {
@@ -130,7 +130,7 @@ void Online_SetFrequency(int seconds)
   OnlineFreqAuto = false;
 }
 
-void Online_SetFrequencyString(char *seconds_str)
+void Online_SetFrequencyString( char *seconds_str )
 {
   if (strcmp(seconds_str, "auto") == 0)
   {
@@ -151,7 +151,7 @@ void Online_SetFrequencyString(char *seconds_str)
 /**
  * Increases the frequency by percentage 'pct', only if frequency was first set to 'auto' 
  */
-void Online_UpdateFrequency(int pct)
+void Online_UpdateFrequency( int pct )
 {
   if (OnlineFreqAuto)
   {
@@ -163,7 +163,7 @@ void Online_UpdateFrequency(int pct)
  * Check the frequency of analysis.
  * @return The analysis frequency.
  */
-int Online_GetFrequency()
+int Online_GetFrequency( void )
 {
   return OnlineFreq;
 }
@@ -172,7 +172,7 @@ int Online_GetFrequency()
  * Set the topology for the reduction network.
  * @param topology The topology in mrnet_topgen format.
  */
-void Online_SetTopology(char *topology)
+void Online_SetTopology( char *topology )
 {
   OnlineTopo = topology;
 }
@@ -181,7 +181,7 @@ void Online_SetTopology(char *topology)
  * Returns the reduction network topology.
  * @return The selected topology in mrnet_topgen format.
  */
-char * Online_GetTopology()
+char * Online_GetTopology( void )
 {
   return (char *)OnlineTopo;
 } 
@@ -214,80 +214,82 @@ void Online_SetSpectralMinLikeness( double min_likeness )
   cfgSpectralMinLikeness = MIN(cfgSpectralMinLikeness, 1);
 }
 
-int Online_GetSpectralMaxPeriods (void)
+int Online_GetSpectralMaxPeriods( void )
 {
   return cfgSpectralMaxPeriods;
 }
 
-int Online_GetSpectralMinSeen    (void)
+int Online_GetSpectralMinSeen( void )
 {
   return cfgSpectralMinSeen;
 }
 
-int Online_GetSpectralNumIters   (void)
+int Online_GetSpectralNumIters( void )
 {
   return cfgSpectralNumIters;
 }
 
-double Online_GetSpectralMinLikeness(void)
+double Online_GetSpectralMinLikeness( void )
 {
   return cfgSpectralMinLikeness;
 }
 
-void Online_SetSpectralPZoneDetail( char *detail_level )
+void Online_SetSpectralPeriodZoneLevel( char *detail_level )
 {
-  if (strcmp(detail_level, "none") == 0) {
-    cfgSpectralPZoneDetail = NOT_TRACING;
+  if (strcmp(detail_level, "none") == 0) 
+  {
+    cfgSpectralPeriodZoneLevel = NOT_TRACING;
   }
   else if (strcmp(detail_level, "profile") == 0) 
   {
-    cfgSpectralPZoneDetail = PHASE_PROFILE;
+    cfgSpectralPeriodZoneLevel = PHASE_PROFILE;
   }
   else
   {
     cerr << "Warning: Invalid setting: <periodic_zone detail_level=\"" << detail_level << "\">. Valid settings are: none, profile. Set to 'none'..." << endl;
-    cfgSpectralPZoneDetail = NOT_TRACING;
+    cfgSpectralPeriodZoneLevel = NOT_TRACING;
   }
 }
 
-int Online_GetSpectralPZoneDetail(void)
+int Online_GetSpectralPeriodZoneLevel( void )
 {
-  return cfgSpectralPZoneDetail;
+  return cfgSpectralPeriodZoneLevel;
 }
 
-void Online_SetSpectralNPZoneDetail( char *detail_level )
+void Online_SetSpectralNonPeriodZoneLevel( char *detail_level )
 {
-  if (strcmp(detail_level, "none") == 0) {
-    cfgSpectralNPZoneDetail = NOT_TRACING;
+  if (strcmp(detail_level, "none") == 0) 
+  {
+    cfgSpectralNonPeriodZoneLevel = NOT_TRACING;
   }
   else if (strcmp(detail_level, "profile") == 0) 
   {
-    cfgSpectralNPZoneDetail = PHASE_PROFILE;
+    cfgSpectralNonPeriodZoneLevel = PHASE_PROFILE;
   }
   else if (strcmp(detail_level, "bursts") == 0) 
   {
-    cfgSpectralNPZoneDetail = BURST_MODE;
+    cfgSpectralNonPeriodZoneLevel = BURST_MODE;
   }
   else 
   {
     cerr << "Warning: Invalid setting: <non_periodic_zone detail_level=\"" << detail_level << "\">. Setting to 'none'..." << endl;
-    cfgSpectralNPZoneDetail = NOT_TRACING;
+    cfgSpectralNonPeriodZoneLevel = NOT_TRACING;
   }
 }
 
-int Online_GetSpectralNPZoneDetail(void)
+int Online_GetSpectralNonPeriodZoneLevel( void )
 {
-  return cfgSpectralNPZoneDetail;
+  return cfgSpectralNonPeriodZoneLevel;
 }
 
-void Online_SetSpectralNPZoneMinDuration( unsigned long long min_duration )
+void Online_SetSpectralNonPeriodZoneMinDuration( unsigned long long min_duration )
 {
-  cfgSpectralNPZoneMinDuration = min_duration;
+  cfgSpectralNonPeriodZoneMinDuration = min_duration;
 }
 
-unsigned long long Online_GetSpectralNPZoneMinDuration(void)
+unsigned long long Online_GetSpectralNonPeriodZoneMinDuration( void )
 {
-  return cfgSpectralNPZoneMinDuration;
+  return cfgSpectralNonPeriodZoneMinDuration;
 }
 
 void Online_SetSpectralBurstThreshold( double burst_threshold )
@@ -312,7 +314,7 @@ void Online_SetClusteringConfig( char *clustering_config_xml )
   cfgClusteringConfig = strdup(clustering_config_xml);
 }
 
-char * Online_GetClusteringConfig()
+char * Online_GetClusteringConfig( void )
 {
   return cfgClusteringConfig;
 }

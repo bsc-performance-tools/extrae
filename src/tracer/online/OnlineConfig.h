@@ -46,18 +46,17 @@ enum
 extern "C" {
 #endif /* __cplusplus */
 
-void Online_Enable   ( void );
-void Online_Disable  ( void );
-int  Online_isEnabled( void );
-
-void  Online_SetAnalysis ( int analyis_type );
-int   Online_GetAnalysis ( void );
-void  Online_SetFrequency( int seconds );
-void  Online_SetFrequencyString( char *seconds_str );
-void  Online_UpdateFrequency(int pct);
-int   Online_GetFrequency( void );
-void  Online_SetTopology ( char *topology );
-char *Online_GetTopology ( void );
+void   Online_Enable( void );
+void   Online_Disable( void );
+int    Online_isEnabled( void );
+int    Online_GetAnalysis( void );
+void   Online_SetAnalysis( int analyis_type );
+int    Online_GetFrequency( void );
+void   Online_SetFrequency( int seconds );
+void   Online_SetFrequencyString( char *seconds_str );
+void   Online_UpdateFrequency( int pct );
+char * Online_GetTopology( void );
+void   Online_SetTopology( char *topology );
 
 #if defined(HAVE_SPECTRAL)
 #define DEFAULT_SPECTRAL_MAX_PERIODS          1
@@ -67,31 +66,31 @@ char *Online_GetTopology ( void );
 #define DEFAULT_SPECTRAL_NP_ZONE_MIN_DURATION 1000000000
 #define DEFAULT_SPECTRAL_BURST_THRESHOLD      80
 
-void               Online_SetSpectralMaxPeriods       ( int max_periods );
-void               Online_SetSpectralMinSeen          ( int min_seen );
-void               Online_SetSpectralNumIters         ( int num_iters );
-void               Online_SetSpectralMinLikeness      ( double min_likeness );
-void               Online_SetSpectralPZoneDetail      ( char *detail_level );
-void               Online_SetSpectralNPZoneDetail     ( char *detail_level );
-void               Online_SetSpectralNPZoneMinDuration( unsigned long long min_duration );
-int                Online_GetSpectralPZoneDetail      ( void );
-int                Online_GetSpectralNPZoneDetail     ( void );
-unsigned long long Online_GetSpectralNPZoneMinDuration( void );
-void               Online_SetSpectralBurstThreshold   ( double burst_threshold );
-double             Online_GetSpectralBurstThreshold   ( void );
+int                Online_GetSpectralMaxPeriods( void );
+int                Online_GetSpectralMinSeen( void );
+int                Online_GetSpectralNumIters( void );
+double             Online_GetSpectralMinLikeness( void );
+int                Online_GetSpectralPeriodZoneLevel( void );
+int                Online_GetSpectralNonPeriodZoneLevel( void );
+unsigned long long Online_GetSpectralNonPeriodZoneMinDuration( void );
+double             Online_GetSpectralBurstThreshold( void );
+void               Online_SetSpectralMaxPeriods( int max_periods );
+void               Online_SetSpectralMinSeen( int min_seen );
+void               Online_SetSpectralNumIters( int num_iters );
+void               Online_SetSpectralMinLikeness( double min_likeness );
+void               Online_SetSpectralPeriodZoneLevel( char *detail_level );
+void               Online_SetSpectralNonPeriodZoneLevel( char *detail_level );
+void               Online_SetSpectralNonPeriodZoneMinDuration( unsigned long long min_duration );
+void               Online_SetSpectralBurstThreshold( double burst_threshold );
 
-int    Online_GetSpectralMaxPeriods ( void );
-int    Online_GetSpectralMinSeen    ( void );
-int    Online_GetSpectralNumIters   ( void );
-double Online_GetSpectralMinLikeness( void );
 
 #endif /* HAVE_SPECTRAL */
 
 #if defined(HAVE_CLUSTERING)
 #define DEFAULT_CLUSTERING_CONFIG "cl.I.IPC.xml"
 
-void   Online_SetClusteringConfig( char *clustering_config_xml );
 char * Online_GetClusteringConfig( void );
+void   Online_SetClusteringConfig( char *clustering_config_xml );
 #endif /* HAVE_CLUSTERING */
 
 #if defined(__cplusplus)

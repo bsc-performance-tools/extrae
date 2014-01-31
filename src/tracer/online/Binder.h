@@ -27,8 +27,8 @@
  | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __IPC_H__
-#define __IPC_H__
+#ifndef __BINDER_H__
+#define __BINDER_H__
 
 #include <string>
 #include <vector>
@@ -52,19 +52,19 @@ using std::vector;
 
 #define ONLINE_TERMINATION_FILE     OUT_PREFIX"kill.txt"
 
-class IPC
+class Binder
 {
   public:
     void WipeExchangeData();
 
     /* Root side */
-    IPC();
+    Binder();
     bool WaitForResources(vector<string> &Backends);
     void SendAttachments();
     bool WaitForTermination();
 
     /* Master back-end side */
-    IPC(int rank);
+    Binder(int rank);
     void SendResources(int NumberOfNodes, char **ListOfNodes);
     bool WaitForAttachments(int ExpectedAttachments);
     void SendTermination();
@@ -82,6 +82,7 @@ class IPC
 
     string PathTo(string FileName);
     bool WaitForFile(string FileName, int MaxRetries, int StallTime);
+    bool WaitForFilePolling(string FileName, int MaxRetries, int StallTime);
 };
 
-#endif /* __IPC_H__ */
+#endif /* __BINDER_H__ */

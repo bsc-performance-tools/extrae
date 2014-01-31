@@ -5,4 +5,4 @@ rm -f .tmp-extrae-online-*
 
 source @sub_PREFIX@/etc/online_env.sh
 
-@sub_PREFIX@/bin/online_root.bin &
+@sub_PREFIX@/bin/online_root.bin

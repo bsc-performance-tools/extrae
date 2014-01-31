@@ -87,7 +87,7 @@ typedef struct
 
 #define EVT_SIZE  sizeof(event_t)
 
-#define Get_EvTime(ptr)          ((ptr)->time)
+#define Get_EvTime(ptr)          (ptr == NULL ? 0 : ptr->time)
 #define Get_EvEvent(ptr)         ((ptr)->event)
 #define Get_EvValue(ptr)         ((ptr)->value)
 #define Get_EvTarget(ptr)        ((ptr)->param.mpi_param.target)

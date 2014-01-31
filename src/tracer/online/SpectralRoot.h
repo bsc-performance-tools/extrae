@@ -63,11 +63,11 @@ class SpectralRoot : public FrontProtocol
 
     vector<RepresentativePeriod_t> RepresentativePeriods;
 
-    int  FindRepresentative( signal_t *signal, Period_t *period );
-    int  Get_RepTraced(int rep_period_id);
-    void Set_RepTraced(int rep_period_id, int traced);
-    int  Get_RepSeen  (int rep_period_id);
-    bool Done         (void);
+    int  FindRepresentative( signal_t *chop, Period_t *period );
+    int  Get_RepIsTraced(int rep_period_id);
+    void Set_RepIsTraced(int rep_period_id, int traced);
+    int  Get_RepIsSeen  (int rep_period_id);
+    bool Done           (void);
 };
 
 #endif /* __SPECTRAL_ROOT_H__ */

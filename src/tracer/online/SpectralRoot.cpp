@@ -42,6 +42,7 @@ using std::stringstream;
 #include "OnlineConfig.h"
 #include "OnlineControl.h"
 #include "Signal.h"
+#include "Messaging.h"
 
 
 SpectralRoot::SpectralRoot()
@@ -72,6 +73,7 @@ int SpectralRoot::Run()
   int          tag;
   PACKET_PTR   p; 
   stringstream ss;
+  Messaging   *Msgs = new Messaging();
 
   Step ++;
 
@@ -82,65 +84,91 @@ int SpectralRoot::Run()
 
   /* DEBUG -- Dump the signal to disk */
   ss << "signal_step_" << Step << ".txt";
-  Spectral_DumpSignal( DurBurstSignal->GetSignal(), (char *)ss.str().c_str() );
+  Spectral_DumpSignal( sig_dur_burst, (char *)ss.str().c_str() );
 
   /* Run the spectral analysis */
-  int NumDetectedPeriods   = 0;
-  Period_t **ListOfPeriods = NULL;
+  int NumDetectedPeriods     = 0;
+  int NumValidPeriods        = 0;
+  Period_t **DetectedPeriods = NULL;
+  vector<signal_t *> ListOfChops;
 
   NumDetectedPeriods = Spectral_ExecuteAnalysis( 
     sig_dur_burst, 
     Online_GetSpectralNumIters(),
     (Step == 1 ? WINDOWING_10PCT : WINDOWING_NONE),
-    &ListOfPeriods);
+    &DetectedPeriods);
 
-  /* Send the number of detected periods */
-  MRN_STREAM_SEND(stSpectral, SPECTRAL_DETECTED_PERIODS, "%d", NumDetectedPeriods);
+  for (int i=0; i<NumDetectedPeriods; i++)
+  {	
+    Period_t *CurrentPeriod = DetectedPeriods[i];
+    signal_t *CurrentChop   = Spectral_ChopSignal( sig_dur_burst, CurrentPeriod->best_ini, CurrentPeriod->best_end );
+
+    if (CurrentChop != NULL)
+    {
+      NumValidPeriods ++;
+    }
+    ListOfChops.push_back( CurrentChop );
+  }
+
+  Msgs->debug(cerr, "Detected %d period(s) - %d valid", NumDetectedPeriods, NumValidPeriods);
+
+  /* Send the number of valid periods (if a chop is null, that period is not counted) */
+  MRN_STREAM_SEND(stSpectral, SPECTRAL_DETECTED_PERIODS, "%d", NumValidPeriods);
 
   /* Process every period */
   for (int i=0; i<NumDetectedPeriods; i++)
   {
-    Period_t *CurrentPeriod     =  ListOfPeriods[i];
-    int       rep_period_id     = -1;
-    int       trace_this_period =  0;
+    Period_t *CurrentPeriod          =  DetectedPeriods[i];
+    int       TraceThisPeriod        =  0;
+    int       RepresentativePeriodID = -1;
 
-    /* Check if this period has been seen before */
-    rep_period_id = FindRepresentative( sig_dur_burst, CurrentPeriod );
-
-    /* Decide if current period will be traced */
-    trace_this_period = (
-      ((TotalPeriodsTraced < Online_GetSpectralMaxPeriods()) ||
-       (Online_GetSpectralMaxPeriods() == 0))                   && /* Not traced enough */
-      (!Get_RepTraced(rep_period_id))                           && /* Not traced before */
-      (Get_RepSeen(rep_period_id) > Online_GetSpectralMinSeen())   /* Seen enough times */
-    ); 
-
-    if (trace_this_period)
+    /* Skip the period if the chop is empty */
+    if (ListOfChops[i] != NULL)
     {
-      /* Mark that this period is going to be traced */
-      Set_RepTraced(rep_period_id, 1);
-    }
+      /* Check if this period has been seen before */
+      RepresentativePeriodID = FindRepresentative( ListOfChops[i], CurrentPeriod );
+
+      /* Decide if current period will be traced */
+      TraceThisPeriod = (
+        ((TotalPeriodsTraced < Online_GetSpectralMaxPeriods()) ||
+         (Online_GetSpectralMaxPeriods() == 0))                             && /* Not traced enough */
+        (!Get_RepIsTraced(RepresentativePeriodID))                          && /* Not traced before */
+        (Get_RepIsSeen(RepresentativePeriodID) > Online_GetSpectralMinSeen())  /* Seen enough times */
+      ); 
+
+      if (TraceThisPeriod)
+      {
+        /* Mark that this period is going to be traced */
+        Set_RepIsTraced(RepresentativePeriodID, 1);
+      }
     
-    /* Transfer the period information to the back-ends */
-    MRN_STREAM_SEND(stSpectral, SPECTRAL_PERIOD, "%f %ld %lf %lf %lf %ld %ld %ld %ld %d %d",
-            CurrentPeriod->iters,
-            CurrentPeriod->length,
-            CurrentPeriod->goodness,
-            CurrentPeriod->goodness2,
-            CurrentPeriod->goodness3,
-            CurrentPeriod->ini,
-            CurrentPeriod->end,
-            CurrentPeriod->best_ini,
-            CurrentPeriod->best_end,
-            trace_this_period,
-            rep_period_id
-    );
-    xfree (ListOfPeriods[i]);
+      /* Transfer the period information to the back-ends */
+      MRN_STREAM_SEND(stSpectral, SPECTRAL_PERIOD, "%f %ld %lf %lf %lf %ld %ld %ld %ld %d %d",
+              CurrentPeriod->iters,
+              CurrentPeriod->length,
+              CurrentPeriod->goodness,
+              CurrentPeriod->goodness2,
+              CurrentPeriod->goodness3,
+              CurrentPeriod->ini,
+              CurrentPeriod->end,
+              CurrentPeriod->best_ini,
+              CurrentPeriod->best_end,
+              TraceThisPeriod,
+              RepresentativePeriodID
+      );
+    }
+    xfree (DetectedPeriods[i]);
   }
-  xfree (ListOfPeriods);
+  xfree (DetectedPeriods);
+
+  for (int i=0; i<ListOfChops.size(); i++)
+  {
+    Spectral_FreeSignal( ListOfChops[i] );
+  }
+
   delete DurBurstSignal;
 
-  if (NumDetectedPeriods <= 0)
+  if (NumValidPeriods <= 0)
   {
     Online_UpdateFrequency(50);
   }
@@ -160,49 +188,43 @@ int SpectralRoot::Run()
  *
  * @returns the representative period identifier.
  */
-int SpectralRoot::FindRepresentative( signal_t *signal, Period_t *period )
+int SpectralRoot::FindRepresentative( signal_t *chop, Period_t *period )
 {
   int found = -1;
-  signal_t *chop = NULL;
 
-  /* Cut the best iterations for the period */
-  chop = Spectral_ChopSignal( signal, period->best_ini, period->best_end );
-
-  for (unsigned int i=0; i<RepresentativePeriods.size(); i++)
+  if (chop != NULL)
   {
-    double likeness = Spectral_CompareSignals( RepresentativePeriods[i].chop, chop, WINDOWING_NONE );
-    if (likeness >= Online_GetSpectralMinLikeness())
+    for (unsigned int i=0; i<RepresentativePeriods.size(); i++)
     {
-      found = i;
-      RepresentativePeriods[i].seen ++;
-      break;
+      double likeness = Spectral_CompareSignals( RepresentativePeriods[i].chop, chop, WINDOWING_NONE );
+      if (likeness >= Online_GetSpectralMinLikeness())
+      {
+        found = i;
+        RepresentativePeriods[i].seen ++;
+        break;
+      }
+    }
+
+    if (found == -1)
+    {
+      /* Save a new representative period */
+      RepresentativePeriod_t rep_period;    
+
+      rep_period.period = (Period_t *)malloc(sizeof(Period_t));
+      memcpy(rep_period.period, period, sizeof(Period_t));
+      rep_period.seen   = 1;
+      rep_period.traced = 0;
+      rep_period.chop   = Spectral_CloneSignal(chop);
+ 
+      RepresentativePeriods.push_back( rep_period );
+      found = RepresentativePeriods.size() - 1;
+    
+      /* Write this representative to disk */
+      stringstream ss;
+      ss << "rep_period_" << found+1 << ".txt";
+      Spectral_DumpSignal( chop, (char *)ss.str().c_str() );
     }
   }
-
-  if (found == -1)
-  {
-    /* Save a new representative period */
-    RepresentativePeriod_t rep_period;    
-
-    rep_period.period = (Period_t *)malloc(sizeof(Period_t));
-    memcpy(rep_period.period, period, sizeof(Period_t));
-    rep_period.seen   = 1;
-    rep_period.traced = 0;
-    rep_period.chop   = chop;
- 
-    RepresentativePeriods.push_back( rep_period );
-    found = RepresentativePeriods.size() - 1;
-
-    /* Write this representative to disk */
-    stringstream ss;
-    ss << "rep_period_" << found+1 << ".txt";
-    Spectral_DumpSignal( chop, (char *)ss.str().c_str() );
-  }
-  else
-  {
-    Spectral_FreeSignal(chop);
-  }
-
   return found;
 }
 
@@ -212,7 +234,7 @@ int SpectralRoot::FindRepresentative( signal_t *signal, Period_t *period )
  * @param rep_period_id The period identifier.
  * @return 1 if traced; 0 otherwise.
  */
-int SpectralRoot::Get_RepTraced(int rep_period_id)
+int SpectralRoot::Get_RepIsTraced(int rep_period_id)
 {
   if (rep_period_id > (int)RepresentativePeriods.size())
   {
@@ -230,7 +252,7 @@ int SpectralRoot::Get_RepTraced(int rep_period_id)
  * @param rep_period_id The period identifier.
  * @param traced        1 traced; 0 not traced.
  */
-void SpectralRoot::Set_RepTraced(int rep_period_id, int traced)
+void SpectralRoot::Set_RepIsTraced(int rep_period_id, int traced)
 {
   if ((rep_period_id >= 0) && (rep_period_id <= (int)RepresentativePeriods.size()))
   {
@@ -245,7 +267,7 @@ void SpectralRoot::Set_RepTraced(int rep_period_id, int traced)
  * @param rep_period_id The period identifier.
  * @return the number of times the given period has been seen.
  */
-int SpectralRoot::Get_RepSeen(int rep_period_id)
+int SpectralRoot::Get_RepIsSeen(int rep_period_id)
 {
   if (rep_period_id > (int)RepresentativePeriods.size())
   {

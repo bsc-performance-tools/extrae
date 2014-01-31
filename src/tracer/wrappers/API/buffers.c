@@ -104,6 +104,7 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 	}
 
 #if defined(HAVE_ONLINE) 
+#if 0
 	pthread_mutexattr_init( &attr );
 	pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_RECURSIVE_NP );
 
@@ -116,6 +117,15 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 		exit(1);
 	}
 	pthread_mutexattr_destroy( &attr );
+#else
+	rc = pthread_mutex_init( &(buffer->Lock), NULL );
+	if ( rc != 0 )
+	{
+		perror("pthread_mutex_init");
+		fprintf(stderr, "new_Buffer: Failed to initialize mutex.\n");
+		exit(1);
+	}
+#endif
 #endif
 
 	xmalloc(buffer->Masks, n_events * sizeof(Mask_t));

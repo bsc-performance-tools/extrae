@@ -39,13 +39,14 @@ class BufferExtractor
   public:
     BufferExtractor();
 
-    bool isBurstBegin(event_t *evt);
-    bool isBurstEnd  (event_t *evt);
+    bool isBurstBegin( event_t *evt );
+    bool isBurstEnd( event_t *evt );
+    Buffer_t *GetBuffer( void );
 
-    virtual void Extract(unsigned long long from, unsigned long long to);
-    void ExtractAll();
+    virtual void Extract( unsigned long long from, unsigned long long to );
+    void ExtractAll( void );
 
-    virtual void ProcessEvent(event_t *evt);
+    virtual void ProcessEvent( event_t *evt );
 
     Buffer_t         *ExtractionBuffer;
     BufferIterator_t *ExtractionIterator; 

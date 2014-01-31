@@ -74,6 +74,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "options.h"
 #include "object_tree.h"
 #include "utils.h"
+#include "online_events.h"
 
 #include "HardwareCounters.h"
 #include "queue.h"
@@ -175,7 +176,9 @@ struct color_t states_inf[STATES_NUMBER] = {
   {STATE_14, STATE14_LBL, STATE14_COLOR},
   {STATE_15, STATE15_LBL, STATE15_COLOR},
   {STATE_16, STATE16_LBL, STATE16_COLOR},
-  {STATE_17, STATE17_LBL, STATE17_COLOR}
+  {STATE_17, STATE17_LBL, STATE17_COLOR},
+  {STATE_18, STATE18_LBL, STATE18_COLOR},
+  {STATE_19, STATE19_LBL, STATE19_COLOR}
 };
 
 struct color_t gradient_inf[GRADIENT_NUMBER] = {
@@ -621,6 +624,47 @@ static void Write_Clustering_Labels (FILE * pcf_fd)
 	}
 }
 
+static void Write_Spectral_Labels (FILE * pcf_fd)
+{
+        if (HaveSpectralEvents)
+        {
+		unsigned i;
+
+                fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+                fprintf (pcf_fd, "9    %d    %s\n", PERIODICITY_EV, PERIODICITY_LABEL);
+                fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+                fprintf (pcf_fd, "0   Non-periodic zone\n");
+		for (i=1; i<=MaxRepresentativePeriod; i++)
+			fprintf (pcf_fd, "%d   Period #%d\n", i, i);
+                LET_SPACES (pcf_fd);
+
+                fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+                fprintf (pcf_fd, "9    %d    %s\n", DETAIL_LEVEL_EV, DETAIL_LEVEL_LABEL);
+                fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+                fprintf (pcf_fd, "0   Not tracing\n");
+                fprintf (pcf_fd, "1   Profiling\n");
+                fprintf (pcf_fd, "2   Burst mode\n");
+                fprintf (pcf_fd, "3   Detail mode\n");
+                LET_SPACES (pcf_fd);
+
+                fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+                fprintf (pcf_fd, "9    %d    %s\n", RAW_PERIODICITY_EV, RAW_PERIODICITY_LABEL);
+                fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+                fprintf (pcf_fd, "0   Non-periodic zone\n");
+                for (i=1; i<=MaxRepresentativePeriod; i++)
+                        fprintf (pcf_fd, "%d   Raw period #%d\n", i, i);
+                LET_SPACES (pcf_fd);
+
+                fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+                fprintf (pcf_fd, "9    %d    %s\n", RAW_BEST_ITERS_EV, RAW_BEST_ITERS_LABEL);
+                fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+                for (i=1; i<=MaxRepresentativePeriod; i++)
+                        fprintf (pcf_fd, "%d   Selected iterations from period #%d\n", i, i);
+                LET_SPACES (pcf_fd);
+        }
+}
+
+
 /******************************************************************************
  *** Labels_loadSYMfile
  ******************************************************************************/
@@ -1011,6 +1055,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_PACX_Stats_Labels (fd);
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
+	Write_Spectral_Labels (fd);
 	WriteEnabled_OpenCL_Operations (fd);
 
 	Write_UserDefined_Labels(fd);

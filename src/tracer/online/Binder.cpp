@@ -40,7 +40,17 @@ static char UNUSED rcsid[] = "$Id: OnlineControl.cpp 2093 2013-09-05 16:43:35Z g
 # include <stdlib.h>
 #endif
 #include "OnlineUtils.h"
-#include "IPC.h"
+#include "Binder.h"
+#if defined(HAVE_INOTIFY)
+#include <sys/select.h>
+#include <sys/types.h>
+#include <sys/inotify.h>
+#include <limits.h>
+#include <errno.h>
+#include <stdio.h>
+#include <libgen.h>
+#include <string.h>
+#endif
 
 using std::cout;
 using std::cerr;
@@ -57,7 +67,7 @@ using std::ifstream;
 /**
  * Root constructor
  */
-IPC::IPC()
+Binder::Binder()
 {
   GPFSPath = "";
   WipeExchangeData();
@@ -74,7 +84,7 @@ IPC::IPC()
 /**
  * Master back-end constructor 
  */
-IPC::IPC(int rank)
+Binder::Binder(int rank)
 {
   GPFSPath = "";
   WipeExchangeData();
@@ -91,7 +101,7 @@ IPC::IPC(int rank)
 /** 
  * Returns the full path to the given file name taking into account the definition of the environment variable EXTRAE_ONLINE_GPFS_PATH
  */
-string IPC::PathTo(string FileName)
+string Binder::PathTo(string FileName)
 {
   string FullPath = GPFSPath + FileName;
   return FullPath;
@@ -101,7 +111,7 @@ string IPC::PathTo(string FileName)
 /**
  * Returns the full path to the ONLINE_RESOURCES_FILE 
  */
-string IPC::GetResourcesFile()
+string Binder::GetResourcesFile()
 {
   return PathTo(string(ONLINE_RESOURCES_FILE));
 }
@@ -110,7 +120,7 @@ string IPC::GetResourcesFile()
 /**
  * Returns the full path to the TMP_ONLINE_RESOURCES_FILE 
  */
-string IPC::GetResourcesTmpFile()
+string Binder::GetResourcesTmpFile()
 {
   return PathTo(string(TMP_ONLINE_RESOURCES_FILE));
 }
@@ -119,7 +129,7 @@ string IPC::GetResourcesTmpFile()
 /**
  * Returns the full path to the ONLINE_TOPOLOGY_FILE
  */
-string IPC::GetTopologyFile()
+string Binder::GetTopologyFile()
 {
   return PathTo(string(ONLINE_TOPOLOGY_FILE));
 }
@@ -128,7 +138,7 @@ string IPC::GetTopologyFile()
 /**
  * Returns the full path to the ONLINE_ATTACHMENTS_FILE
  */
-string IPC::GetAttachmentsFile()
+string Binder::GetAttachmentsFile()
 {
   return PathTo(string(ONLINE_ATTACHMENTS_FILE));
 }
@@ -137,7 +147,7 @@ string IPC::GetAttachmentsFile()
 /**
  * Returns the full path to the TMP_ONLINE_ATTACHMENTS_FILE
  */
-string IPC::GetAttachmentsTmpFile()
+string Binder::GetAttachmentsTmpFile()
 {
   return PathTo(string(TMP_ONLINE_ATTACHMENTS_FILE));
 }
@@ -146,10 +156,126 @@ string IPC::GetAttachmentsTmpFile()
 /**
  * Returns the full path to the ONLINE_TERMINATION_FILE
  */
-string IPC::GetTerminationFile()
+string Binder::GetTerminationFile()
 {
   return PathTo(string(ONLINE_TERMINATION_FILE));
 }
+
+
+/**
+ * Sets inotify to watch for the given control file until it is created or a timeout expires.
+ *
+ * @param FileName Name of the file to check for.
+ * @param MaxRetries Maximum number of retries.
+ * @param StallTime Number of seconds for each stall.
+ * @returns true if file is found; false otherwise.
+ */
+#if defined(HAVE_INOTIFY)
+
+# define MAX_EVENTS 1024                                      /* Max number of events to process at one go */
+# define LEN_NAME   16                                        /* Assuming that the length of the filename won't exceed 16 bytes */
+# define EVENT_SIZE ( sizeof (struct inotify_event) )         /* Size of one event */
+# define BUF_LEN    ( MAX_EVENTS * ( EVENT_SIZE + LEN_NAME )) /* Buffer to store the data of events */
+
+bool Binder::WaitForFile(string FileName, int MaxRetries, int StallTime)
+{
+  int            fd, wd, ready;
+  fd_set         descriptors;
+  struct timeval timeout;
+  bool           done  = false;
+  bool           found = false;
+  char           buffer[BUF_LEN];
+
+  /* Initialize inotify*/
+  fd = inotify_init();
+  if ( fd < 0 ) 
+  {
+    Msgs->error("inotify: error initializing");
+    return WaitForFilePolling(FileName, MaxRetries, StallTime);
+  }
+  
+  /* Add watch to starting directory */
+  wd = inotify_add_watch(fd, dirname((char *)FileName.c_str()), IN_CREATE | IN_MOVED_TO );
+
+  if (wd == -1)
+  {
+    Msgs->error("inotify: couldn't add watch to directory '%s'", dirname((char *)FileName.c_str()));
+    return WaitForFilePolling(FileName, MaxRetries, StallTime);
+  }
+  else
+  {
+    Msgs->debug(cerr, "inotify: watching directory '%s' for file '%s'", dirname((char *)FileName.c_str()), basename((char *)FileName.c_str()));
+  }
+
+  FD_ZERO ( &descriptors );
+  FD_SET ( fd, &descriptors );
+
+  timeout.tv_sec = MaxRetries * StallTime;
+  timeout.tv_usec = 0;
+
+  while (!done)
+  {
+    if (MaxRetries < 0)
+      ready = select ( fd + 1, &descriptors, NULL, NULL, NULL);
+    else
+      ready = select ( fd + 1, &descriptors, NULL, NULL, &timeout);
+
+    if ( ready < 0 )
+    {
+      perror("select");
+      return WaitForFilePolling(FileName, MaxRetries, StallTime);
+    }
+    else if ( !ready )
+    {
+      /* Timeout expired */
+      found = false;
+      done  = true;
+    }
+    else if ( FD_ISSET( fd, &descriptors ))
+    {
+      int i, length;
+      
+      /* Process the inotify events */
+      length = read( fd, buffer, BUF_LEN );
+
+      if ( length < 0 ) 
+      {
+        perror( "read" );
+        return false;
+      }
+
+      i = 0;
+      while ( i < length ) 
+      {
+        struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
+        if ( event->len ) 
+        {
+          if (( event->mask & IN_CREATE ) || ( event->mask & IN_MOVED_TO ))
+          {
+            if (strcmp(event->name, basename((char *)FileName.c_str())) == 0)
+            {
+              Msgs->debug(cerr, "inotify: detected file '%s'", basename((char *)FileName.c_str()));
+              found = true; 
+              done  = true;
+            }
+          }
+          i += EVENT_SIZE + event->len;
+        }
+      }
+    }
+  }
+
+  inotify_rm_watch ( fd, wd );
+  close( fd );
+
+  return found;
+}
+#else
+bool Binder::WaitForFile(string FileName, int MaxRetries, int StallTime)
+{
+  return WaitForFilePolling(FileName, MaxRetries, StallTime);
+}
+#endif
 
 
 /**
@@ -160,7 +286,7 @@ string IPC::GetTerminationFile()
  * @param StallTime Number of seconds for each stall.
  * @returns true if file is found; false otherwise.
  */
-bool IPC::WaitForFile(string FileName, int MaxRetries, int StallTime)
+bool Binder::WaitForFilePolling(string FileName, int MaxRetries, int StallTime)
 {
   bool found = false;
   int  retry = 0;
@@ -196,7 +322,7 @@ bool IPC::WaitForFile(string FileName, int MaxRetries, int StallTime)
  * @param NumberOfNodes Total count of nodes (number of MPI tasks).
  * @param ListOfNodes Array containing the name of all nodes.
  */
-void IPC::SendResources(int NumberOfNodes, char **ListOfNodes)
+void Binder::SendResources(int NumberOfNodes, char **ListOfNodes)
 {
   FILE *fd = NULL;
 
@@ -221,9 +347,9 @@ void IPC::SendResources(int NumberOfNodes, char **ListOfNodes)
  *
  * @param Backends (out) Will contain the list of node names after the call.
  */
-bool IPC::WaitForResources(vector<string> &Backends)
+bool Binder::WaitForResources(vector<string> &Backends)
 {
-  bool found = WaitForFile( PathTo(ONLINE_RESOURCES_FILE), MAX_WAIT_RETRIES, 10 );
+  bool found = WaitForFile( PathTo(ONLINE_RESOURCES_FILE), MAX_WAIT_RETRIES, 1 );
 
   if (found)
   {
@@ -252,7 +378,7 @@ bool IPC::WaitForResources(vector<string> &Backends)
  * called first, which produces this information in a temporary file. Here we rename the file, and we need 
  * this step so that the back-end does not see the file while it is being written! 
  */
-void IPC::SendAttachments()
+void Binder::SendAttachments()
 {
   /* A previous call to FE->Init() in the root must have produced the temporary file TMP_ONLINE_ATTACHMENTS_FILE */
   ifstream fd( PathTo(TMP_ONLINE_ATTACHMENTS_FILE).c_str() );
@@ -283,10 +409,10 @@ void IPC::SendAttachments()
  * 
  * @param ExpectedAttachments Number of lines that should contain the attachments file (equal to the number of back-ends).
  */
-bool IPC::WaitForAttachments(int ExpectedAttachments)
+bool Binder::WaitForAttachments(int ExpectedAttachments)
 {
   int  NumberOfAttachments = 0;
-  bool found = WaitForFile( PathTo(ONLINE_ATTACHMENTS_FILE), MAX_WAIT_RETRIES, 10 );
+  bool found = WaitForFile( PathTo(ONLINE_ATTACHMENTS_FILE), MAX_WAIT_RETRIES, 1 );
 
   if (found)
   {
@@ -315,7 +441,7 @@ bool IPC::WaitForAttachments(int ExpectedAttachments)
 /**
  * The master-backend sends a termination notice to the root when the application has reached the MPI_Finalize.
  */
-void IPC::SendTermination()
+void Binder::SendTermination()
 {
   FILE *fd = NULL;
 
@@ -327,9 +453,9 @@ void IPC::SendTermination()
 /**
  * A thread in the root stalls waiting for the termination notice, when it is received, the root will quit.
  */
-bool IPC::WaitForTermination()
+bool Binder::WaitForTermination()
 {
-  bool found = WaitForFile( PathTo(ONLINE_TERMINATION_FILE), -1, 10 );
+  bool found = WaitForFile( PathTo(ONLINE_TERMINATION_FILE), -1, 1 );
   return found;
 }
 
@@ -337,7 +463,7 @@ bool IPC::WaitForTermination()
 /* 
  * Can be called either at root or back-end to delete the exchanged files.  
  */
-void IPC::WipeExchangeData()
+void Binder::WipeExchangeData()
 {
   unlink( PathTo(TMP_ONLINE_RESOURCES_FILE).c_str() );
   unlink( PathTo(ONLINE_RESOURCES_FILE).c_str() );

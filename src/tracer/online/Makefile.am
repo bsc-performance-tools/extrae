@@ -24,7 +24,7 @@ online_root_bin_SOURCES = \
   OnlineRoot.cpp     OnlineRoot.h       \
   OnlineConfig.cpp   OnlineConfig.h     \
   OnlineUtils.cpp    OnlineUtils.h      \
-  IPC.cpp            IPC.h              \
+  Binder.cpp         Binder.h           \
   Messaging.cpp      Messaging.h        \
   xml-parse-online.c xml-parse-online.h \
   KnownProtocols.h
@@ -68,7 +68,7 @@ libonline_la_SOURCES  = \
   OnlineControl.cpp  OnlineControl.h    \
   OnlineConfig.cpp   OnlineConfig.h     \
   OnlineUtils.cpp    OnlineUtils.h      \
-  IPC.cpp            IPC.h              \
+  Binder.cpp         Binder.h           \
   Syncing.c          Syncing.h          \
   Messaging.cpp      Messaging.h        \
   xml-parse-online.c xml-parse-online.h \

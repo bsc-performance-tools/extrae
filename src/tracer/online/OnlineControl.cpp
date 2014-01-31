@@ -57,7 +57,7 @@ using std::endl;
 
 #include "OnlineControl.h"
 #include "Syncing.h"
-#include "IPC.h"
+#include "Binder.h"
 #include "Messaging.h"
 #include "KnownProtocols.h"
 #include "online_buffers.h"
@@ -79,7 +79,7 @@ int  NumberOfBackends   = 0;
 Messaging *Msgs = NULL;
 
 /* Synchronization with the root process */
-IPC *InterProcessToRoot = NULL;
+Binder *BindToRoot = NULL;
 
 /* Backend running in this process */
 BackEnd  *BE = NULL;                  // Handler for the MRNetApp library
@@ -132,7 +132,7 @@ int Online_Init(int rank, int world_size)
 
   if (I_am_master_BE)
   {
-    InterProcessToRoot = new IPC(this_BE_rank);
+    BindToRoot = new Binder(this_BE_rank);
   }
   return 0;
 }
@@ -169,13 +169,13 @@ int Online_Start(char **node_list)
      * Write the available resources in a file. The MRNet root process
      * is waiting for this file to start the network. 
      */
-    InterProcessToRoot->SendResources( NumberOfBackends, node_list );
+    BindToRoot->SendResources( NumberOfBackends, node_list );
 
     /* 
      * At this point, the root will wake up, generate the topology, start
      * the network and write the attachments file that is required by the back-ends.
      */
-    AttachmentsReady = InterProcessToRoot->WaitForAttachments( NumberOfBackends );
+    AttachmentsReady = BindToRoot->WaitForAttachments( NumberOfBackends );
 
     if (AttachmentsReady)
     {
@@ -183,7 +183,7 @@ int Online_Start(char **node_list)
 
       /* The master back-end parses the attachments file and distributes the information through MPI */
       Msgs->debug_one(cerr, "Distributing attachments information to all back-ends...");
-      PendingConnections BE_connex(string( InterProcessToRoot->GetAttachmentsFile()));
+      PendingConnections BE_connex(string( BindToRoot->GetAttachmentsFile()));
       if (BE_connex.ParseForMPIDistribution(NumberOfBackends, send_buffer, send_counts, displacements) == 0)
       {
         BE_ready_to_connect = 1;
@@ -277,7 +277,7 @@ void Online_Stop()
 static void Stop_FE()
 {
   Msgs->debug_one(cerr, "Sending termination notice to root process");
-  InterProcessToRoot->SendTermination();
+  BindToRoot->SendTermination();
 }
 
 
@@ -333,7 +333,7 @@ static void BE_load_known_protocols()
 
 /**
  * Callback called before the back-end runs a protocol. 
- * We pause the application, then emit events into the online buffer.
+ * We pause the application.
  *
  * @param prot_id The protocol identifier.
  * @param p       The protocol object.
@@ -341,20 +341,18 @@ static void BE_load_known_protocols()
 static void BE_pre_protocol(UNUSED string prot_id, UNUSED Protocol *p)
 {
   Online_PauseApp();
-  TRACE_ONLINE_EVENT(TIME, ONLINE_STATE_EV, ONLINE_PAUSE_APP);
 }
 
 
 /**
  * Callback called after the back-end runs a protocol.
- * We emit events into the online buffer, then resume the application.
+ * We resume the application.
  *
  * @param prot_id The protocol identifier.
  * @param p       The protocol object.
  */
 static void BE_post_protocol(UNUSED string prot_id, UNUSED Protocol *p)
 {
-  TRACE_ONLINE_EVENT(TIME, ONLINE_STATE_EV, ONLINE_RESUME_APP);
   Online_ResumeApp();
 }
 
@@ -366,14 +364,19 @@ static void BE_post_protocol(UNUSED string prot_id, UNUSED Protocol *p)
 /**
  * Pause the application by locking the mutex on all tracing buffers.
  */
-void Online_PauseApp()
+void Online_PauseApp(bool emit_events)
 {
   unsigned int thread = 0;
+
   for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
   {
     Buffer_Lock(TRACING_BUFFER(thread));
   }
   AppPausedAt = TIME;
+  if (emit_events) 
+  {
+    TRACE_ONLINE_EVENT(LAST_READ_TIME, ONLINE_STATE_EV, ONLINE_PAUSE_APP);
+  }
 }
 
 
@@ -381,11 +384,15 @@ void Online_PauseApp()
  * Flushes the tracing buffers to disk after the analysis, and resumes
  * the application by releasing the mutex on all tracing buffers.
  */
-void Online_ResumeApp()
+void Online_ResumeApp(bool emit_events)
 {
   unsigned int thread = 0;
-  AppResumedAt = TIME;
 
+  AppResumedAt = TIME;
+  if (emit_events)
+  {
+    TRACE_ONLINE_EVENT(LAST_READ_TIME, ONLINE_STATE_EV, ONLINE_RESUME_APP);
+  }
   for (thread=0; thread<Backend_getMaximumOfThreads(); thread++)
   {
     Buffer_Flush(TRACING_BUFFER(thread));
@@ -481,9 +488,9 @@ static void Initialize_Online_Buffers()
 void Online_Flush()
 {
   /* Close the application buffers */
-  Online_PauseApp();
+  Online_PauseApp(false);
   Backend_Finalize_close_files();
-  Online_ResumeApp();
+  Online_ResumeApp(false);
 
   /* Flush and close the online buffer */
   Buffer_Flush(OnlineBuffer);

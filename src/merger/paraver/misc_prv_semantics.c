@@ -85,6 +85,9 @@ int PACX_Stats_Labels_Used[PACX_STATS_EVENTS_COUNT];
 
 unsigned int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
 
+unsigned int MaxRepresentativePeriod = 0;
+unsigned int HaveSpectralEvents = FALSE;
+
 /******************************************************************************
  ***  Flush_Event
  ******************************************************************************/
@@ -950,13 +953,16 @@ static int Online_Event (event_t * current_event,
 
   switch(EvType)
   {
-    case ORIGINAL_PERIODICITY_EV:
-    case ORIGINAL_BEST_ITERS_EV:
+    case RAW_PERIODICITY_EV:
+    case RAW_BEST_ITERS_EV:
     case PERIODICITY_EV:
+      HaveSpectralEvents = TRUE;
+      MaxRepresentativePeriod = MAX(MaxRepresentativePeriod, EvValue);
       trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
       break;
 
     case DETAIL_LEVEL_EV:
+      HaveSpectralEvents = TRUE;
       /* Remove any unclosed state */
 //      Pop_Until (STATE_RUNNING, ptask, task, thread);
 
@@ -984,8 +990,8 @@ static int Online_Event (event_t * current_event,
         Initialize_Trace_Mode_States( cpu, ptask, task, thread, TRACE_MODE_DISABLED );
       }
 
-      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
       trace_paraver_state (cpu, ptask, task, thread, current_time);
+      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
       break;
 
     case CLUSTER_ID_EV:
@@ -998,6 +1004,8 @@ static int Online_Event (event_t * current_event,
       break;
 
     case ONLINE_STATE_EV:
+      Switch_State( STATE_ONLINE_ANALYSIS, (EvValue == ONLINE_PAUSE_APP), ptask, task, thread);
+      trace_paraver_state (cpu, ptask, task, thread, current_time);
       trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
       break;
 

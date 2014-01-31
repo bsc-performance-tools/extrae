@@ -32,8 +32,8 @@
 
 #include "OnlineConfig.h"
 
-#define MASTER_BACKEND_RANK(world_size) (world_size - 1) /* Last MPI process runs the master back-end by default */
-//#define MASTER_BACKEND_RANK(world_size) 0
+//#define MASTER_BACKEND_RANK(world_size) (world_size - 1) /* Last MPI process runs the master back-end by default */
+#define MASTER_BACKEND_RANK(world_size) 0
 
 /**
  * Structure to pass data to the back-end thread
@@ -47,25 +47,22 @@ typedef struct
 } BE_data_t;
 
 #if defined(__cplusplus)
-extern "C" {
-#endif /* __cplusplus */
-
+extern "C" 
+{
 int  Online_Init(int rank, int world_size);
 int  Online_Start(char **node_list);
-void Online_Stop();
-void Online_PauseApp();
-void Online_ResumeApp();
+void Online_Stop(void);
+void Online_PauseApp(bool emit_events = true);
+void Online_ResumeApp(bool emit_events = true);
 unsigned long long Online_GetAppPauseTime();
 unsigned long long Online_GetAppResumeTime();
 
-void Online_Flush();
-void Online_CleanTemporaries();
-char * Online_GetTmpBufferName();
-char * Online_GetFinalBufferName();
+void Online_Flush(void);
+void Online_CleanTemporaries(void);
+char * Online_GetTmpBufferName(void);
+char * Online_GetFinalBufferName(void);
 
 void * BE_main_loop(void *context);
-
-#if defined(__cplusplus)
 }
 #endif /* __cplusplus */
 

@@ -245,7 +245,7 @@ void Parse_XML_SpectralAdvanced (int rank, xmlDocPtr xmldoc, xmlNodePtr current_
           {
             xmlChar *detail_level = xmlGetProp (tag2, SPECTRAL_DETAIL_LEVEL);
 
-            Online_SetSpectralPZoneDetail( detail_level );
+            Online_SetSpectralPeriodZoneLevel( detail_level );
 
             XML_FREE(detail_level);
           }
@@ -254,8 +254,8 @@ void Parse_XML_SpectralAdvanced (int rank, xmlDocPtr xmldoc, xmlNodePtr current_
             xmlChar *detail_level = xmlGetProp (tag2, SPECTRAL_DETAIL_LEVEL);
             xmlChar *min_duration = xmlGetProp (tag2, SPECTRAL_MIN_DURATION);
 
-            Online_SetSpectralNPZoneDetail( detail_level );
-            Online_SetSpectralNPZoneMinDuration( getTimeFromStr( min_duration, "<non_periodic_zone min_duration=\"..\" />", rank ) );
+            Online_SetSpectralNonPeriodZoneLevel( detail_level );
+            Online_SetSpectralNonPeriodZoneMinDuration( getTimeFromStr( min_duration, "<non_periodic_zone min_duration=\"..\" />", rank ) );
 
             XML_FREE(detail_level);
             XML_FREE(min_duration);

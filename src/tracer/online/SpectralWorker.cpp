@@ -36,17 +36,12 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_buffers.h"
 #include "taskid.h"
 #include "timesync.h"
-#include "BurstsExtractor.h"
 #include "SpectralWorker.h"
 #include "Chopper.h"
 #include "Signal.h"
 #include "OnlineControl.h"
 #include "online_buffers.h"
 #include "tags.h"
-
-int LevelAtPeriodicZone    = NOT_TRACING;
-int LevelAtNonPeriodicZone = NOT_TRACING;
-unsigned long long AutomaticBurstThreshold = 100000;
 
 /**
  * Receives the streams used in this protocol.
@@ -69,31 +64,20 @@ void SpectralWorker::Setup()
  */
 int SpectralWorker::Run()
 {
-  int        NumDetectedPeriods = 0;
   int        tag;
   PACKET_PTR p;
-  Period_t  *DetectedPeriods = NULL;
-  Buffer_t  *buffer = TRACING_BUFFER(0);
-
-  LevelAtPeriodicZone    = Online_GetSpectralPZoneDetail();
-  LevelAtNonPeriodicZone = Online_GetSpectralNPZoneDetail();
-
-  /* Mask out all the trace data */
-  Mask_SetRegion (buffer, Buffer_GetHead(buffer), Buffer_GetTail(buffer), MASK_NOFLUSH);
+  int        NumDetectedPeriods = 0;
 
   /* Extract all bursts since the last analysis */
-  BurstsExtractor *Bursts = new BurstsExtractor(0); 
+  BurstsExtractor *ExtractedBursts = new BurstsExtractor(0); 
 
-  Bursts->Extract(
+  ExtractedBursts->Extract(
     Online_GetAppResumeTime(),
     Online_GetAppPauseTime()
   ); 
 
-  AutomaticBurstThreshold = Bursts->AdjustThreshold( Online_GetSpectralBurstThreshold() );
-  fprintf(stderr, "[DEBUG] AutomaticBurstThreshold=%llu\n", AutomaticBurstThreshold);
-
   /* Generate the DurBurst signal from the bursts information */
-  Signal *DurBurstSignal = new Signal(Bursts->GetBursts());
+  Signal *DurBurstSignal = new Signal( ExtractedBursts->GetBursts() );
  
   /* DEBUG -- Dump the signal generated at the back-end 
   stringstream ss;
@@ -107,181 +91,240 @@ int SpectralWorker::Run()
   MRN_STREAM_RECV(stSpectral, &tag, p, SPECTRAL_DETECTED_PERIODS);
   PACKET_unpack(p, "%d", &NumDetectedPeriods);
 
-  /* Mark the detail level as bursts from the first first timestamp that has tracing data until the first periodic zone is found */
-  unsigned long long PrevNonPeriodicZoneStartTime = Get_EvTime(Buffer_GetFirstEvent(buffer));
-  unsigned long long NextNonPeriodicZoneStartTime = 0;
-  unsigned long long LastNonPeriodicZoneEndTime = 0;
-  TRACE_ONLINE_EVENT(PrevNonPeriodicZoneStartTime, DETAIL_LEVEL_EV, LevelAtNonPeriodicZone);
-
   /* Receive each period */
-  DetectedPeriods = (Period_t *)malloc(NumDetectedPeriods * sizeof(Period_t));
-  for (int i=0; i<NumDetectedPeriods; i++)
+  if (NumDetectedPeriods > 0)
   {
-    int trace_this_period = 0;
-    int rep_period_id     = 0;
-  
-    Period_t *CurrentPeriod = &(DetectedPeriods[i]);
-    MRN_STREAM_RECV(stSpectral, &tag, p, SPECTRAL_PERIOD);
-    PACKET_unpack(p, "%f %ld %lf %lf %lf %ld %ld %ld %ld %d %d",
-      &CurrentPeriod->iters,
-      &CurrentPeriod->length,
-      &CurrentPeriod->goodness,
-      &CurrentPeriod->goodness2,
-      &CurrentPeriod->goodness3,
-      &CurrentPeriod->ini,
-      &CurrentPeriod->end,
-      &CurrentPeriod->best_ini,
-      &CurrentPeriod->best_end,
-      &trace_this_period,
-      &rep_period_id
-    );      
+    vector<Period> DetectedPeriods( NumDetectedPeriods );
 
-    ProcessPeriod( Bursts->GetBursts(), CurrentPeriod, trace_this_period, rep_period_id, PrevNonPeriodicZoneStartTime, NextNonPeriodicZoneStartTime );
-    PrevNonPeriodicZoneStartTime = NextNonPeriodicZoneStartTime;
+    for (int i=0; i<NumDetectedPeriods; i++)
+    {
+      MRN_STREAM_RECV(stSpectral, &tag, p, SPECTRAL_PERIOD);
+      PACKET_unpack(p, "%f %ld %lf %lf %lf %ld %ld %ld %ld %d %d",
+        &(DetectedPeriods[i].info.iters),
+        &(DetectedPeriods[i].info.length),
+        &(DetectedPeriods[i].info.goodness),
+        &(DetectedPeriods[i].info.goodness2),
+        &(DetectedPeriods[i].info.goodness3),
+        &(DetectedPeriods[i].info.ini),
+        &(DetectedPeriods[i].info.end),
+        &(DetectedPeriods[i].info.best_ini),
+        &(DetectedPeriods[i].info.best_end),
+        &(DetectedPeriods[i].traced),
+        &(DetectedPeriods[i].id)
+      );      
+    }
+
+    ProcessPeriods(DetectedPeriods, ExtractedBursts);
   }
 
-  LastNonPeriodicZoneEndTime = Get_EvTime(Buffer_GetLastEvent(buffer));
-
-  /* Mark that there's no data since the last event in the buffer until the first event in the next step */
-  TRACE_ONLINE_EVENT(LastNonPeriodicZoneEndTime, DETAIL_LEVEL_EV, NOT_TRACING); 
-
-  /* Emit bursts in the last non-periodic zone */
-  if (LastNonPeriodicZoneEndTime - PrevNonPeriodicZoneStartTime > Online_GetSpectralNPZoneMinDuration())
-  {
-    if (LevelAtNonPeriodicZone == BURST_MODE)
-    {
-      Bursts->GetBursts()->EmitBursts( PrevNonPeriodicZoneStartTime, LastNonPeriodicZoneEndTime, AutomaticBurstThreshold );
-    }
-    else if (LevelAtNonPeriodicZone == PHASE_PROFILE)
-    {
-      Bursts->GetBursts()->EmitPhase( PrevNonPeriodicZoneStartTime, LastNonPeriodicZoneEndTime, true, true );
-    }
-  }
-
-  delete Bursts; 
+  delete DurBurstSignal;
+  delete ExtractedBursts; 
 
   return 0;
 }
 
-
-void SpectralWorker::ProcessPeriod(Bursts *AllBursts, Period_t *CurrentPeriod, int trace_this_period, int rep_period_id, unsigned long long PrevNonPeriodicZoneStartTime, unsigned long long &NextNonPeriodicZoneStartTime)
+void SpectralWorker::ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor *ExtractedBursts)
 {
-  unsigned long long periodic_zone_ini     = TIMEDESYNC(0, TASKID, CurrentPeriod->ini);
-  unsigned long long periodic_zone_end     = TIMEDESYNC(0, TASKID, CurrentPeriod->end);
-  unsigned long long best_iters_ini        = TIMEDESYNC(0, TASKID, CurrentPeriod->best_ini);
-  unsigned long long best_iters_end        = TIMEDESYNC(0, TASKID, CurrentPeriod->best_end);
-  unsigned long long best_iters_ini_fitted = best_iters_ini;
-  unsigned long long best_iters_end_fitted = best_iters_end;
-  unsigned long long current_time          = 0;
-  unsigned long long current_time_fitted   = 0;
-  long long int      period_length_ns      = CurrentPeriod->length * 1000000;
-  vector<unsigned long long> iters_start_time;
-  vector<bool>               iters_in_detail;
-  Chopper *EventFinder = new Chopper();
-  int remaining_detailed_iters = 0;
-    event_t *best_iters_ini_ev = NULL;
-    event_t *best_iters_end_ev   = NULL;
-   
-  int all_iters      = (int)(CurrentPeriod->iters);
-  int detailed_iters = (int)((best_iters_end - best_iters_ini) / period_length_ns);
-  if ((all_iters < 1) || (detailed_iters < 1)) return;
+  Buffer_t          *buffer                   = ExtractedBursts->GetBuffer();
+  unsigned long long FirstEvtTime             = Get_EvTime(Buffer_GetFirstEvent(buffer));
+  unsigned long long LastEvtTime              = Get_EvTime(Buffer_GetLastEvent(buffer));
+  int                LevelAtPeriodZone        = Online_GetSpectralPeriodZoneLevel();
+  int                LevelAtNonPeriodZone     = Online_GetSpectralNonPeriodZoneLevel();
+  unsigned long long NonPeriodZoneMinDuration = Online_GetSpectralNonPeriodZoneMinDuration();
+  unsigned long long PreviousPeriodZoneEnd    = 0;
+  unsigned long long AutomaticBurstThreshold  = 100000;
+  int                NumDetectedPeriods       = AllPeriods.size();
+  Bursts            *BurstsData               = ExtractedBursts->GetBursts();
+  Chopper           *EventFinder              = new Chopper();
 
-  remaining_detailed_iters = detailed_iters;
+  if (FirstEvtTime < Online_GetAppResumeTime()) FirstEvtTime = Online_GetAppResumeTime();
+  if (LastEvtTime  > Online_GetAppPauseTime())  LastEvtTime  = Online_GetAppPauseTime();
 
-  /* Project the starting time of each iteration from the first detailed one */
-  current_time = best_iters_ini;
-  while (current_time >= periodic_zone_ini)
+  /* Mask out all traced data */
+  Mask_SetRegion (buffer, Buffer_GetHead(buffer), Buffer_GetTail(buffer), MASK_NOFLUSH);
+
+  /* Compute the burst threshold that keeps the configured percentage of computations */
+  if (LevelAtNonPeriodZone == BURST_MODE)
   {
-    current_time -= period_length_ns;
+    AutomaticBurstThreshold = ExtractedBursts->AdjustThreshold( Online_GetSpectralBurstThreshold() );
   }
-  current_time += period_length_ns; /* Now points to the start time of the first iteration in the periodic zone */
-
-  for (int i=0; i<all_iters + 1; i++)
+ 
+  /* Process each period */
+  for (int i=0; i<NumDetectedPeriods; i++)
   {
-    event_t *evt = EventFinder->EventCloserRunning( current_time );
-    current_time_fitted = (evt != NULL ? Get_EvTime(evt) : current_time);
+    Period *CurrentPeriod  = &(AllPeriods[i]);
+    Period *PreviousPeriod = (i > 0 ? &(AllPeriods[i-1]) : NULL);
+    Period *NextPeriod     = (i < NumDetectedPeriods - 1 ? &(AllPeriods[i+1]) : NULL);
+    unsigned long long         PeriodZoneIni      = TIMEDESYNC(0, TASKID, CurrentPeriod->info.ini);
+    unsigned long long         PeriodZoneEnd      = TIMEDESYNC(0, TASKID, CurrentPeriod->info.end);
+    unsigned long long         BestItersIni       = TIMEDESYNC(0, TASKID, CurrentPeriod->info.best_ini);
+    unsigned long long         BestItersEnd       = TIMEDESYNC(0, TASKID, CurrentPeriod->info.best_end);
+    long long int              PeriodLength       = CurrentPeriod->info.length * 1000000; /* Nanoseconds resolution */
+    int                        AllIters           = (int)(CurrentPeriod->info.iters);
+    int                        DetailedIters      = (int)( (BestItersEnd - BestItersIni) / PeriodLength );
+    int                        DetailedItersLeft  = DetailedIters;
+    unsigned long long         CurrentTime        = 0;
+    unsigned long long         CurrentTimeFitted  = 0;
+    event_t                   *BestItersFirstEvt  = NULL;
+    event_t                   *BestItersLastEvt   = NULL;
+    vector<unsigned long long> ItersStartingTimes;
+    vector<bool>               ItersInDetail;
+    unsigned long long         NonPeriodZoneStart = 0;
+    unsigned long long         NonPeriodZoneEnd   = 0;
+    bool                       InsideDetailedZone = false;
 
-    iters_start_time.push_back( current_time_fitted );
+/* XXX */    if ((AllIters < 1) || (DetailedIters < 1)) continue;
 
-    if ((current_time >= best_iters_ini) && (remaining_detailed_iters > 0))
+    /* Project the starting time of each iteration from the first detailed one */
+    CurrentTime = BestItersIni;
+    while (CurrentTime >= PeriodZoneIni)
     {
-      if (best_iters_ini_ev == NULL) best_iters_ini_ev = evt;
-      iters_in_detail.push_back( true );
-      remaining_detailed_iters --;
+      CurrentTime -= PeriodLength;
     }
-    else
+    CurrentTime += PeriodLength; /* Now points to the start time of the first iteration in the periodic zone */
+
+    /* Adjust the starting time of the iteration to the closest running burst starting time */
+    for (int count = 0; count <= AllIters; count ++)
     {
-      if ((best_iters_end_ev == NULL) && (remaining_detailed_iters == 0)) best_iters_end_ev = evt;
-      iters_in_detail.push_back( false );
+      event_t *ClosestRunningEvt = EventFinder->EventCloserRunning( CurrentTime );
+
+      CurrentTimeFitted = (ClosestRunningEvt != NULL ? Get_EvTime(ClosestRunningEvt) : CurrentTime);
+      ItersStartingTimes.push_back( CurrentTimeFitted );
+
+      if ( (CurrentTime >= BestItersIni) && (DetailedItersLeft > 0) )
+      {
+        if (BestItersFirstEvt == NULL) BestItersFirstEvt = ClosestRunningEvt;
+        ItersInDetail.push_back( true );
+        DetailedItersLeft --;
+      }
+      else
+      {
+        if ( (BestItersLastEvt == NULL) && (DetailedItersLeft == 0) ) BestItersLastEvt = ClosestRunningEvt;
+        ItersInDetail.push_back( false );
+      }
+      CurrentTime += PeriodLength;
     }
-    current_time += period_length_ns;
+    /*
+     * vector ItersStartingTimes contains the starting time adjusted to the closest running for each iteration in the periodic zone.
+     * vector ItersInDetail marks for each iteration if it has to be traced in detail or not. 
+     */
+ 
+    /* Discard the first and/or last iterations if the time adjustment exceeds the timestamps when the application was resumed/paused */
+    if (ItersStartingTimes[0] < Online_GetAppResumeTime())
+    {
+      ItersStartingTimes.erase( ItersStartingTimes.begin() );
+    }
+    if (ItersStartingTimes[ ItersStartingTimes.size() - 1 ] > Online_GetAppPauseTime())
+    {
+      ItersStartingTimes.pop_back();
+    }
+
+    /* Now emit events marking the phases, the structure is as follows :
+     *  ----------------------------------------------------------------------------------------------------------------
+     *  ... ANALYSIS | NON-PERIOD | PERIOD #1 | BEST ITERS | PERIOD #1 | NON-PERIOD | PERIOD #2 | NON-PERIOD | ANALYSIS |
+     *  ----------------------------------------------------------------------------------------------------------------
+     *               |                                                                                       |
+     *            FirstEvt                                                                                LastEvt
+     */
+    if (PreviousPeriod == NULL) /* First period in the current block of trace data */
+    {
+      if (Online_GetAppResumeTime() > 0) /* Not the first round of analysis */
+      {
+        /* Mark NOT TRACING from the last analysis */ 
+        TRACE_ONLINE_EVENT(Online_GetAppResumeTime(), DETAIL_LEVEL_EV, NOT_TRACING);
+        TRACE_ONLINE_EVENT(Online_GetAppResumeTime(), 12345, 1);
+      }
+      /* NON-PERIODIC zone from the first event in the buffer until the start of the first periodic zone */
+      NonPeriodZoneStart    = FirstEvtTime;
+      NonPeriodZoneEnd      = ItersStartingTimes[0];
+    }
+    else /* Further periods in the current block of trace data */
+    {
+      /* NON-PERIODIC zone from the end of the previous period to the start of the current one */
+      NonPeriodZoneStart    = PreviousPeriodZoneEnd;
+      NonPeriodZoneEnd      = ItersStartingTimes[0];
+    }
+    Summarize( NonPeriodZoneStart, NonPeriodZoneEnd, NonPeriodZoneMinDuration, LevelAtNonPeriodZone, BurstsData, AutomaticBurstThreshold );
+
+    /* PERIODIC zone */
+    TRACE_ONLINE_EVENT(ItersStartingTimes[0], DETAIL_LEVEL_EV, LevelAtPeriodZone);
+    for (unsigned int current_iter = 0; current_iter < ItersStartingTimes.size() - 1; current_iter ++)
+    {
+      if (ItersInDetail[current_iter] && !InsideDetailedZone)
+      {
+        InsideDetailedZone = true;
+        TRACE_ONLINE_EVENT(ItersStartingTimes[current_iter], DETAIL_LEVEL_EV, DETAIL_MODE); /* Entry of detailed zone */
+
+      }
+      else if (!ItersInDetail[current_iter] && InsideDetailedZone)
+      {
+        InsideDetailedZone = false;
+        TRACE_ONLINE_EVENT(ItersStartingTimes[current_iter], DETAIL_LEVEL_EV, LevelAtPeriodZone); /* Exit of detailed zone */
+      }
+
+      /* Emit the period ID at the start of each iteration */
+      TRACE_ONLINE_EVENT(ItersStartingTimes[current_iter], PERIODICITY_EV, REPRESENTATIVE_PERIOD + CurrentPeriod->id);
+
+      if (LevelAtPeriodZone == PHASE_PROFILE)
+      {
+        BurstsData->EmitPhase( ItersStartingTimes[current_iter], ItersStartingTimes[current_iter + 1], (current_iter == 0), !InsideDetailedZone );
+      }
+    }
+  
+    /* NON-PERIODIC zone after the PERIODIC zone */
+    TRACE_ONLINE_EVENT(ItersStartingTimes[ ItersStartingTimes.size() - 1 ], PERIODICITY_EV, NON_PERIODIC_ZONE);
+    PreviousPeriodZoneEnd = ItersStartingTimes[ ItersStartingTimes.size() - 1 ];
+
+    if (NextPeriod == NULL)
+    {
+      NonPeriodZoneStart    = PreviousPeriodZoneEnd;
+      NonPeriodZoneEnd      = LastEvtTime;
+
+      Summarize( NonPeriodZoneStart, NonPeriodZoneEnd, NonPeriodZoneMinDuration, LevelAtNonPeriodZone, BurstsData, AutomaticBurstThreshold );
+
+      TRACE_ONLINE_EVENT( NonPeriodZoneEnd, DETAIL_LEVEL_EV, NOT_TRACING );
+      TRACE_ONLINE_EVENT(NonPeriodZoneEnd, 12345, 2);
+    }
+
+    if (CurrentPeriod->traced)
+    {
+      Trace_Period(buffer, BestItersFirstEvt, BestItersLastEvt);
+    }
+
+    /* DEBUG -- Raw values returned by the spectral analysis 
+    TRACE_ONLINE_EVENT(PeriodZoneIni, RAW_PERIODICITY_EV, REPRESENTATIVE_PERIOD + CurrentPeriod->id);
+    TRACE_ONLINE_EVENT(PeriodZoneEnd, RAW_PERIODICITY_EV, 0);
+    TRACE_ONLINE_EVENT(BestItersIni, RAW_BEST_ITERS_EV, REPRESENTATIVE_PERIOD + CurrentPeriod->id);
+    TRACE_ONLINE_EVENT(BestItersEnd, RAW_BEST_ITERS_EV, 0); */
+
   }
-
-  /* Previous non-periodic zone from PrevNonPeriodicZoneStartTime to iters_start_time[0] */
-  if (iters_start_time[0] - PrevNonPeriodicZoneStartTime > Online_GetSpectralNPZoneMinDuration())
-  {
-    if (LevelAtNonPeriodicZone == BURST_MODE)
-    {
-      AllBursts->EmitBursts( PrevNonPeriodicZoneStartTime, iters_start_time[0], AutomaticBurstThreshold );
-    }
-    else if (LevelAtNonPeriodicZone == PHASE_PROFILE)
-    {
-      AllBursts->EmitPhase( PrevNonPeriodicZoneStartTime, iters_start_time[0], true, true );
-    }
-  }
-
-  NextNonPeriodicZoneStartTime = iters_start_time[ iters_start_time.size() - 1 ];
-
-  bool detailed_zone_reached = false;
-  bool dump_iteration = true;
-
-  TRACE_ONLINE_EVENT(iters_start_time[0], DETAIL_LEVEL_EV, LevelAtPeriodicZone);
-  for (int i=0; i<iters_start_time.size() - 1; i++)
-  {
-/*
-    if (dump_iteration)
-    {
-      TRACE_ONLINE_EVENT(iters_start_time[i], PERIODICITY_EV, REPRESENTATIVE_PERIOD + rep_period_id);
-      if (TASKID == 0) fprintf(stderr, "[DEBUG] SpectralWorker::ProcessPeriod iter=%d calling EmitPhase\n", i);
-      AllBursts->EmitPhase( iters_start_time[i], iters_start_time[i+1], ((i == 0) ? true : false) );
-    }
-*/
-
-    if (iters_in_detail[i] && !detailed_zone_reached)
-    {
-      detailed_zone_reached = true;
-      dump_iteration = false;
-      TRACE_ONLINE_EVENT(iters_start_time[i], DETAIL_LEVEL_EV, DETAIL_MODE);
-    }
-    else if (!iters_in_detail[i] && detailed_zone_reached)
-    {
-      detailed_zone_reached = false;
-      dump_iteration = true;
-      TRACE_ONLINE_EVENT(iters_start_time[i], DETAIL_LEVEL_EV, LevelAtPeriodicZone);
-    }
-
-    TRACE_ONLINE_EVENT(iters_start_time[i], PERIODICITY_EV, REPRESENTATIVE_PERIOD + rep_period_id);
-
-    if (LevelAtPeriodicZone == PHASE_PROFILE)
-    {
-      AllBursts->EmitPhase( iters_start_time[i], iters_start_time[i+1], ((i == 0) ? true : false), !detailed_zone_reached );
-    }
-  }
-  TRACE_ONLINE_EVENT(iters_start_time[ iters_start_time.size() - 1 ], PERIODICITY_EV, NON_PERIODIC_ZONE);
-  TRACE_ONLINE_EVENT(iters_start_time[ iters_start_time.size() - 1 ], DETAIL_LEVEL_EV, LevelAtNonPeriodicZone);
-
-  if (trace_this_period)
-  {
-//    fprintf(stderr, "[DEBUG] New_Trace_Period %llu %llu\n", Get_EvTime(best_iters_ini_ev), Get_EvTime(best_iters_end_ev));
-    New_Trace_Period(best_iters_ini_ev, best_iters_end_ev);
-  }
-
-  /* DEBUG -- Raw values returned by the spectral analysis */
-  TRACE_ONLINE_EVENT(periodic_zone_ini, ORIGINAL_PERIODICITY_EV, REPRESENTATIVE_PERIOD + rep_period_id);
-  TRACE_ONLINE_EVENT(periodic_zone_end, ORIGINAL_PERIODICITY_EV, 0);
-  TRACE_ONLINE_EVENT(best_iters_ini, ORIGINAL_BEST_ITERS_EV, REPRESENTATIVE_PERIOD + rep_period_id);
-  TRACE_ONLINE_EVENT(best_iters_end, ORIGINAL_BEST_ITERS_EV, 0);
+  delete EventFinder;
 }
+
+void SpectralWorker::Summarize(unsigned long long NonPeriodZoneStart, unsigned long long NonPeriodZoneEnd, unsigned long long DurationThreshold, int LevelAtNonPeriodZone, Bursts *BurstsData, unsigned long long BurstsThreshold)
+{
+  unsigned long long NonPeriodZoneDuration = NonPeriodZoneEnd - NonPeriodZoneStart;
+
+  if (NonPeriodZoneDuration > DurationThreshold)
+  {
+    /* The NON-PERIODIC zone is long, transform detail into bursts/profile */
+    TRACE_ONLINE_EVENT( NonPeriodZoneStart, DETAIL_LEVEL_EV, LevelAtNonPeriodZone );
+    if (LevelAtNonPeriodZone == BURST_MODE)
+    {
+      BurstsData->EmitBursts( NonPeriodZoneStart, NonPeriodZoneEnd, BurstsThreshold );
+    }
+    else if (LevelAtNonPeriodZone == PHASE_PROFILE)
+    {
+      BurstsData->EmitPhase( NonPeriodZoneStart, NonPeriodZoneEnd, true, true );
+    }
+  }    
+  else
+  {
+    /* The NON-PERIODIC zone is short, discard it */
+    TRACE_ONLINE_EVENT( NonPeriodZoneStart, DETAIL_LEVEL_EV, NOT_TRACING );
+  }
+}
+
 
 /**
  * Unsets the NO_FLUSH mask of all the events between the given times, that represent
@@ -292,13 +335,11 @@ void SpectralWorker::ProcessPeriod(Bursts *AllBursts, Period_t *CurrentPeriod, i
  * @return best_ini_out The local timestamp for the first event of the traced region.
  * @return best_end_out The local timestamp for the last event of the traced region.
  */
-void SpectralWorker::New_Trace_Period(event_t *start, event_t *end)
+void SpectralWorker::Trace_Period(Buffer_t *buffer, event_t *start_ev, event_t *end_ev)
 {
-  Buffer_t *buffer = TRACING_BUFFER(0);
-
-  if (start != NULL && end != NULL && start != end)
+  if (start_ev != NULL && end_ev != NULL && start_ev != end_ev)
   {
-    Mask_UnsetRegion(buffer, start, end, MASK_NOFLUSH);
+    Mask_UnsetRegion(buffer, start_ev, end_ev, MASK_NOFLUSH);
   }
 }
 

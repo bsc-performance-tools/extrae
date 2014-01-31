@@ -42,6 +42,11 @@ BufferExtractor::BufferExtractor()
   ExtractionBuffer = TRACING_BUFFER(0); 
 }
 
+Buffer_t * BufferExtractor::GetBuffer()
+{
+  return ExtractionBuffer;
+}
+
 /**
  * Parses the whole extraction buffer. For each event, calls the method ProcessEvent, 
  * which is defined in the derived class.

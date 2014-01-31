@@ -732,9 +732,9 @@ void Extrae_set_num_tentative_threads (int numthreads)
 #endif /* PTHREAD_SUPPORT */
 
 INTERFACE_ALIASES_C(_define_event_type,Extrae_define_event_type,(extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values),void)
-void Extrae_define_event_type (extrae_type_t *type, char *description, unsigned *nvalues, extrae_value_t *values, char **description_values)
+void Extrae_define_event_type (extrae_type_t type, char *description, unsigned nvalues, extrae_value_t *values, char **description_values)
 {
-	Extrae_define_event_type_Wrapper (*type, description, *nvalues, values, description_values);
+	Extrae_define_event_type_Wrapper (type, description, nvalues, values, description_values);
 }
 
 INTERFACE_ALIASES_C(_init_UserCommunication,Extrae_init_UserCommunication,(struct extrae_UserCommunication *ptr),void)

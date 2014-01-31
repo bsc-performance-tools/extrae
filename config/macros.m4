@@ -1728,6 +1728,20 @@ AC_DEFUN([AX_PROG_ONLINE],
     [ONLINE_enabled="no"]
   )
 
+  AC_ARG_ENABLE(inotify,
+    AC_HELP_STRING(
+      [--enable-inotify],
+      [Enable inotify support]
+    ),
+    [INOTIFY_enabled="${enableval}"],
+    [INOTIFY_enabled="no"]
+  )
+
+  if test "x$INOTIFY_enabled" = "xyes" ; then
+    AC_DEFINE([HAVE_INOTIFY], 1,
+              [Define this if inotify is supported])
+  fi
+
   if test "$ONLINE_enabled" = "yes" ; then
    if test "${XML_enabled}" != "yes" ; then
       AC_MSG_WARN([You enabled the on-line analysis mode, but a required dependency is missing!])
