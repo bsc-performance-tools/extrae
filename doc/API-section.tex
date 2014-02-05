@@ -136,6 +136,9 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
    \end{verbatim}
    In order to gather performance counters during the execution of these calls, the {\tt user-functions} tag in the XML configuration and its {\tt counters} have to be both enabled.
 
+ \item {\tt void Extrae\_flush (void)}\\
+  Forces the calling thread to write the events stored in the tracing buffers to disk.
+
 \end{itemize}
 
 \section{Extended API}\label{sec:ExtendedAPI}

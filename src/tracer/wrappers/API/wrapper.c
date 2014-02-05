@@ -2060,6 +2060,14 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 }
 
 /**
+ * Force the given thread to flush 
+ */
+void Flush_Thread(int thread_id)
+{
+  Extrae_Flush_Wrapper( TRACING_BUFFER(thread_id) );
+}
+
+/**
  * Flushes the buffer to disk and marks this I/O in trace.
  * \param buffer The buffer to be flushed.
  * \return 1 on success, 0 otherwise.

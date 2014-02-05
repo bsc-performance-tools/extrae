@@ -241,6 +241,8 @@ enum {
 int GlobalOp_Changes_Trace_Status (int current_glop);
 void Parse_GlobalOps_Tracing_Intervals(char * sequence);
 
+void Flush_Thread(int thread_id);
+
 #if defined(EMBED_MERGE_IN_TRACE)
 extern int MergeAfterTracing;
 #endif

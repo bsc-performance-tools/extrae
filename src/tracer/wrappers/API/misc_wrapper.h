@@ -76,4 +76,6 @@ void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
 
 void Extrae_change_number_of_threads_Wrapper (unsigned nthreads);
 
+void Extrae_flush_manual_Wrapper ();
+
 #endif

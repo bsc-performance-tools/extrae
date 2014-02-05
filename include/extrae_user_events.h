@@ -56,6 +56,12 @@ void MPItrace_fini (void);
 void OMPtrace_fini (void);
 void SEQtrace_fini (void);
 
+void Extrae_flush (void);
+void OMPItrace_flush (void);
+void MPItrace_flush (void);
+void OMPtrace_flush (void);
+void SEQtrace_flush (void);
+
 void Extrae_user_function (unsigned enter);
 void OMPItrace_user_function (unsigned enter);
 void MPItrace_user_function (unsigned enter);

@@ -552,3 +552,11 @@ void Extrae_change_number_of_threads_Wrapper (unsigned nthreads)
 	Backend_ChangeNumberOfThreads (nthreads);
 }
 
+/******************************************************************************
+ Called through the API by the user, initiates the flush of the current thread 
+ *****************************************************************************/
+void Extrae_flush_manual_Wrapper (void)
+{
+  Flush_Thread( THREADID );
+}
+

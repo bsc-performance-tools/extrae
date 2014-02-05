@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 05Feb2014 Added API call Extrae_flush to force flushing of the calling thread
  * 31Jan2014 Fixed bug that stalled the on-line analysis (on-line root running in double-background was killed by garbage collector)
              Removed unnecessary recursive mutexes.
              Refactored the way the spectral worker emits online events

@@ -263,6 +263,13 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SET_NUM_TENTATIVE_THREADS);
 	}
   EXPAND_F_ROUTINE_WITH_PREFIXES(apifCHANGE_NUM_THREADS);
 
+#define apifTRACE_FLUSH(x) \
+	void CtoF77(x##_flush) (void) \
+	{ \
+		Extrae_flush_manual_Wrapper (); \
+	}
+  EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_FLUSH)
+
 /*** C BINDINGS + non alias routine duplication ****/
 
 #define apiTRACE_INIT(x) \
@@ -825,6 +832,12 @@ void Extrae_change_num_threads (unsigned n)
 	Extrae_change_number_of_threads_Wrapper (n);
 }
 
+INTERFACE_ALIASES_C(_flush,Extrae_flush,(void),void)
+void Extrae_flush (void)
+{
+	Extrae_flush_manual_Wrapper ();
+}
+
 /** FORTRAN BINDINGS **/
 
 INTERFACE_ALIASES_F(_init,_INIT,extrae_init,(void),void)
@@ -1005,5 +1018,11 @@ INTERFACE_ALIASES_F_REUSE_C(_get_version,_GET_VERSION,Extrae_get_version,(unsign
 
 INTERFACE_ALIASES_F_REUSE_C(_change_num_threads,_CHANGE_NUM_THREADS,Extrae_change_num_threads,(unsigned),void)
 /* This extrae_change_num_threads calls automatically to the C version */
+
+INTERFACE_ALIASES_F(_flush,_FLUSH,extrae_flush,(void), void)
+void extrae_flush (void)
+{
+	Extrae_flush_manual_Wrapper();
+}
 
 #endif

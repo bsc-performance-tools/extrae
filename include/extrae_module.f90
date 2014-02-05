@@ -67,6 +67,9 @@
          subroutine extrae_fini
          end subroutine extrae_fini
 
+         subroutine extrae_flush
+         end subroutine extrae_flush
+
          subroutine extrae_version (major, minor, revision)
          integer*4, intent (out) :: major
          integer*4, intent (out) :: minor
