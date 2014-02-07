@@ -11,7 +11,7 @@ libmpistats_la_SOURCES = \
   $(STATS_DIR)/MPI/mpi_stats.c \
   $(STATS_DIR)/MPI/mpi_stats.h \
   $(STATS_DIR)/MPI/mpi_utils.c \
-  $(STATS_DIR)/MPI/mpi_stats.h
+  $(STATS_DIR)/MPI/mpi_utils.h
 
 libmpistats_la_CFLAGS  = -I$(COMMON_DIR)
 
