@@ -488,12 +488,12 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 
 void Extrae_Resume_virtual_thread_Wrapper (unsigned u)
 {
-	TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, RESUME_VIRTUAL_THREAD_EV, u, TRUE);
+	TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, RESUME_VIRTUAL_THREAD_EV, u, FALSE);
 }
 
 void Extrae_Suspend_virtual_thread_Wrapper (void)
 {
-	TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, SUSPEND_VIRTUAL_THREAD_EV, EMPTY, TRUE);
+	TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, SUSPEND_VIRTUAL_THREAD_EV, EMPTY, FALSE);
 }
 
 void Extrae_register_stacked_type_Wrapper (extrae_type_t type)

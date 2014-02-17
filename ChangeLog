@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  + 17Feb2014 Splitted --enable-openmp for the several supported runtimes
+             Extrae_suspend/resume_virtual thread no longer captures HWCs
  * 07Feb2014 Fixed missing include 'stats/MPI/mpi_utils.h' in the distribution 
  + 05Feb2014 Added API call Extrae_flush to force flushing of the calling thread
  * 31Jan2014 Fixed bug that stalled the on-line analysis (on-line root running in double-background was killed by garbage collector)
