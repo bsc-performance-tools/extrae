@@ -34,7 +34,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 
 	AX_PACX_SHOW_CONFIGURATION
 
-	echo OpenMP instrumentation: ${enable_openmp}
+	AX_OPENMP_SHOW_CONFIGURATION
 
 	echo pThread instrumentation: ${enable_pthread}
 

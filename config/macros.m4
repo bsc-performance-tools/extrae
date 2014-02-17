@@ -468,6 +468,8 @@ AC_DEFUN([AX_PROG_BINUTILS],
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
          elif test -r "${binutils_home_dir}/lib/x86_64/libiberty.a" ; then  # dnl Special handle for MacOSx
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib/x86_64"
+         elif test -r "${binutils_home_dir}/lib/arm-linux-gnueabihf/libiberty.a" ; then # dnl Special case for Linux ARM/HF
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/arm-linux-gnueabihf"
          elif test -r "${binutils_home_dir}/lib/libiberty.so" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then

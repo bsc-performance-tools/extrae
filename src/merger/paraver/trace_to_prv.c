@@ -73,6 +73,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "parallel_merge_aux.h"
 #endif
 
+#include "utils.h"
 #include "file_set.h"
 #include "events.h"
 #include "record.h"

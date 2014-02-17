@@ -46,6 +46,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "cuda_common.h"
+#include "cuda_probe.h"
 #include "wrapper.h"
 
 //#define DEBUG

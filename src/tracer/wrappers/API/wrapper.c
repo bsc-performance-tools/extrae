@@ -143,6 +143,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 #if defined(CUDA_SUPPORT)
 # include "cuda_wrapper.h"
+# include "cuda_common.h"
 #endif
 #if defined(OPENCL_SUPPORT)
 # include "opencl_wrapper.h"

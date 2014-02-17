@@ -396,31 +396,11 @@ AX_PROG_COUNTERS # Check for PAPI and/or PMAPI
 
 AX_CHECK_LOAD_BALANCING
 
-#AC_ARG_ENABLE(load-balancing,
-#   AC_HELP_STRING(
-#      [--enable-load-balancing],
-#      [Enable experimental support for Dynamic Load Balancing (disabled by default)]
-#   ),
-#   [enable_load_balancing="${enableval}"],
-#   [enable_load_balancing="no"]
-#)
-#AM_CONDITIONAL(GENERATE_LOAD_BALANCING, test "${enable_load_balancing}" = "yes" )
-
 #######################################
 # Enable/Disable some tracing options #
 #######################################
-AC_ARG_ENABLE(openmp,
-   AC_HELP_STRING(
-      [--enable-openmp],
-      [Enable support for tracing OpenMP -IBM and GNU runtimes- (enabled by default, IBM only on PPC)]
-   ),
-   [enable_openmp="${enableval}"],
-   [enable_openmp="yes"]
-)
-if test "${enable_openmp}" = "yes" ; then
-   AX_OPENMP()
-fi
-AM_CONDITIONAL(WANT_OPENMP, test "${enable_openmp}" = "yes" )
+
+AX_CHECK_OPENMP
 
 AX_CUDA
 AX_CUPTI
