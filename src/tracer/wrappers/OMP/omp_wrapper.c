@@ -218,9 +218,9 @@ int omp_get_num_threads (int p1)
 void Extrae_OpenMP_init(void)
 {
 #if defined(PIC)
-	int hooked;
+	int hooked = 0;
 
-#if defined(OS_LINUX) && defined(ARCH_PPC)
+#if defined(OS_LINUX) && defined(ARCH_PPC) && defined(IBM_OPENMP)
 	/* On PPC systems, check first for IBM XL runtime, if we don't find any
 	   symbol, check for GNU then */
 	hooked = ibm_xlsmp_1_6_hook_points(0);
@@ -229,17 +229,25 @@ void Extrae_OpenMP_init(void)
 		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with IBM XL OpenMP runtime!\n");
 		hooked = gnu_libgomp_4_2_hook_points(0);
 	}
-#else
-	hooked = intel_kmpc_11_hook_points(0);
+#endif
+
+#if defined(INTEL_OPENMP)
 	if (!hooked)
 	{
-		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with Intel KAP OpenMP runtime!\n");
-		hooked = gnu_libgomp_4_2_hook_points(0);
+		hooked = intel_kmpc_11_hook_points(0);
+		if (!hooked)
+			fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with Intel KAP OpenMP runtime!\n");
 	}
 #endif
 
+#if defined(GNU_OPENMP)
 	if (!hooked)
-		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");
+	{
+		hooked = gnu_libgomp_4_2_hook_points(0);
+		if (!hooked)
+			fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");
+	}
+#endif
 
 	/* If we hooked any compiler-specific routines, just hook for the 
 	   common OpenMP routines */

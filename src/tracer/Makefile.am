@@ -151,20 +151,24 @@ WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
 WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
  wrappers/OMP/omp-common.c wrappers/OMP/omp-common.h \
  wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h
+EXTRA_OMP_CFLAGS =
 
 if WANT_OPENMP_INTEL
 WRAPPERS_OMP += wrappers/OMP/intel-kmpc-11.c wrappers/OMP/intel-kmpc-11.h
+EXTRA_OMP_CFLAGS += -DINTEL_OPENMP
 endif
 
 if WANT_OPENMP_GNU
 WRAPPERS_OMP += wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h
+EXTRA_OMP_CFLAGS += -DGNU_OPENMP
 endif
 
 if ARCH_POWERPC
 if OS_LINUX
 if WANT_OPENMP_IBM
  WRAPPERS_OMP += wrappers/OMP/ibm-xlsmp-1.6.c wrappers/OMP/ibm-xlsmp-1.6.h
- EXTRA_OMP_CFLAGS = -I/usr/src/linux
+ EXTRA_OMP_CFLAGS += -I/usr/src/linux
+ EXTRA_OMP_CFLAGS += -DIBM_OPENMP
 endif
 endif
 endif

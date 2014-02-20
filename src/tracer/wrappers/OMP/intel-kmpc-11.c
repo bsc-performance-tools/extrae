@@ -703,6 +703,7 @@ static void * __extrae_remove_kmpc_task_function (void *kmpc_task)
 				res = extrae_map_kmpc_task_function[u].function;
 				extrae_map_kmpc_task_function[u].kmpc_task = NULL;
 				extrae_map_kmpc_task_function[u].function = NULL;
+				extrae_map_kmpc_count--;
 				break;
 			}
 			u++;
