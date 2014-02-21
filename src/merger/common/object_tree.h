@@ -42,7 +42,7 @@
 #include "communication_queues.h"
 #include "stack.h"
 
-#define MAX_STATES 16
+#define MAX_STATES 128
 
 #define GET_NUM_TASKS(ptask) \
     (ApplicationTable.ptasks[ptask - 1].ntasks)
