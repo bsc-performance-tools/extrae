@@ -597,7 +597,7 @@ static int Sampling_Address_Event (event_t * current,
 }
 
 /******************************************************************************
- ***  Sampling_Address_MEM_Event
+ ***  Sampling_Address_MEM_TLB_Event
  ******************************************************************************/
 static int Sampling_Address_MEM_TLB_Event (event_t * current,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
@@ -624,6 +624,11 @@ static int Sampling_Address_MEM_TLB_Event (event_t * current,
 		  SAMPLING_ADDRESS_TLB_LEVEL_EV, EvParam);
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
 		  SAMPLING_ADDRESS_TLB_HITORMISS_EV, EvValue);
+	}
+	else if (Get_EvEvent (current) == SAMPLING_ADDRESS_REFERENCE_COST_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  SAMPLING_ADDRESS_REFERENCE_COST_EV, EvValue);
 	}
 }
 
@@ -1543,6 +1548,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SAMPLING_ADDRESS_EV, Sampling_Address_Event },
 	{ SAMPLING_ADDRESS_MEM_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_TLB_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
+	{ SAMPLING_ADDRESS_REFERENCE_COST_EV, Sampling_Address_MEM_TLB_Event },
 	{ MALLOC_EV, DynamicMemory_Event },
 	{ CALLOC_EV, DynamicMemory_Event },
 	{ FREE_EV, DynamicMemory_Event },

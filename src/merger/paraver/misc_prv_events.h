@@ -66,6 +66,7 @@ void Share_MISC_Operations (void);
 #define SAMPLING_ADDRESS_MEM_HITORMISS_LBL  "Memory hierarchy location for sampled address hit?"
 #define SAMPLING_ADDRESS_TLB_LEVEL_LBL  "TLB hierarchy location for sampled address"
 #define SAMPLING_ADDRESS_TLB_HITORMISS_LBL  "TLB hierarchy location for sampled address hit?"
+#define SAMPLING_ADDRESS_REFERENCE_COST_LBL "Memory reference cost in core cycles"
 
 #define IO_LBL                          "I/O calls"
 #define READ_LBL                        "read()"
