@@ -137,6 +137,11 @@ void Online_SetFrequencyString( char *seconds_str )
     OnlineFreq     = DEFAULT_ANALYSIS_FREQUENCY;
     OnlineFreqAuto = true;
   }
+  else if (strcmp(seconds_str, "off") == 0)
+  {
+    OnlineFreq     = -1;
+    OnlineFreqAuto = false;
+  }
   else
   {
     OnlineFreq = atoi((const char *)seconds_str);

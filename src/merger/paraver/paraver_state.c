@@ -85,6 +85,7 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 	if (thread_info->nStates + 1 >= MAX_STATES)
 	{
 		fprintf(stderr, "mpi2rpv: Error! MAX states stack reached (%d:%d:%d)\n", ptask, task, thread);
+		Dump_States_Stack(ptask, task, thread);
 		exit(-1);
 	}
 	thread_info->State_Stack[thread_info->nStates++] = new_state;
@@ -266,6 +267,19 @@ void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigne
 			Push_State (STATE_RUNNING, ptask, task, thread);
 		}
 	}
+}
+
+void Dump_States_Stack (unsigned int ptask, unsigned int task, unsigned int thread)
+{
+  int i = 0;
+  thread_t *thread_info = NULL;
+
+  thread_info = GET_THREAD_INFO(ptask, task, thread);
+  fprintf(stderr, "Dumping states stack:\n");
+  for (i=0; i<thread_info->nStates; i++)
+  {
+    fprintf(stderr, "STATE %d: %d\n", i, thread_info->State_Stack[i]);
+  }
 }
 
 void Initialize_States (FileSet_t * fset)

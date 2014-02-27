@@ -140,6 +140,8 @@ $(SCRIPT_ONLINE_ROOT): $(SCRIPT_ONLINE_ROOT).in
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} $@
 	chmod u+x $@
 
+.PHONY : $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
+
 install-data-hook:
 	$(MKDIR_P) $(prefix)/etc
 	cp $(SCRIPT_ONLINE_ENV) $(prefix)/etc
@@ -147,5 +149,5 @@ install-data-hook:
 	chmod a+x $(prefix)/bin/$(SCRIPT_ONLINE_ROOT)
 
 clean-local:
-	rm -f $(ONLINE_ENV_SH)
+	rm -f $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
 

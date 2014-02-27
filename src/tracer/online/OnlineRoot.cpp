@@ -245,8 +245,12 @@ void AnalysisLoop()
   {
     int NextAnalysis = Online_GetFrequency();
 
-    Msgs->debug(cerr, "Sleeping for %d seconds...", NextAnalysis);
-    while ((NextAnalysis > 0) && (!QuitNow))
+    if (NextAnalysis > 0)
+      Msgs->debug(cerr, "Sleeping for %d seconds...", NextAnalysis);
+    else
+      Msgs->debug(cerr, "Sleeping until the end of the execution...");
+
+    while ((NextAnalysis != 0) && (!QuitNow))
     {
       sleep(1);
       //Msgs->debug(cerr, "%d seconds left...", NextAnalysis);

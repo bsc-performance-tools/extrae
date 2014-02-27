@@ -37,6 +37,7 @@ unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int
 unsigned int Pop_Until (unsigned int until_state, unsigned int ptask, unsigned int task, unsigned int thread);
 unsigned int Switch_State (unsigned int state, int condition, unsigned int ptask, unsigned int task, unsigned int thread);
 unsigned int Top_State (unsigned int ptask, unsigned int task, unsigned int thread);
+void Dump_States_Stack (unsigned int ptask, unsigned int task, unsigned int thread);
 int State_Excluded (unsigned int state);
 void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread, int mode);
 void Initialize_States (FileSet_t * fset);

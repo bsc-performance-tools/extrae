@@ -74,7 +74,7 @@ if test "${EXTRAE_HOME}" != "" ; then
 
 	if test "${DYNINST_HOME}" != "" ; then
 		if test "${DWARF_HOME}" == "" ; then
-			echo "DynInst was enabled with the instrumentation package, but DWARF package was not set? Exitting!"
+			echo "DynInst was enabled with the instrumentation package, but DWARF package was not set? Exiting!"
 		else
 			if ! test -d ${DYNINST_HOME}/lib ; then
 				echo "Unable to find DynInst library directory!"
@@ -88,7 +88,10 @@ if test "${EXTRAE_HOME}" != "" ; then
 			fi
 		fi
 	fi
-
+	
+	if test -f "${EXTRAE_ONLINE_SOURCES}"; then
+		source ${EXTRAE_ONLINE_SOURCES}
+	fi
 else
 	echo "You have to define EXTRAE_HOME to run this script"
 fi

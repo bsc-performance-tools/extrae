@@ -1,6 +1,12 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 27Feb2014 Added option to run the on-line analysis at the end of the execution instead of periodically.
+             Fixed bug in the Makefiles that caused that the online_env.sh script was not reinstalled after a reconfigure.
+             Added routine to dump the states stack in the merger when the MAX_STATES limit is reached.
+             The extrae.sh sources the necessary environment for the online analysis (no support for csh yet).
+             Online examples updated.
+             Updated version to 3.0rc6.
  + 17Feb2014 Splitted --enable-openmp for the several supported runtimes
              Extrae_suspend/resume_virtual thread no longer captures HWCs
  * 07Feb2014 Fixed missing include 'stats/MPI/mpi_utils.h' in the distribution 
