@@ -79,11 +79,11 @@ if test "${EXTRAE_HOME}" != "" ; then
 			if ! test -d ${DYNINST_HOME}/lib ; then
 				echo "Unable to find DynInst library directory!"
 			else
-				if ! test -f ${DYNINST_HOME}/lib/libdyninstAPI_RT.so ; then
+				if ! test -f ${DYNINST_LIBSDIR}/libdyninstAPI_RT.so ; then
 					echo "Unable to find libdyninstAPI_RT.so in the Dyninst library directory!"
 				else
 					export LD_LIBRARY_PATH=${DYNINST_HOME}/lib:${DWARF_HOME}/lib:${ELF_HOME}/lib:${LD_LIBRARY_PATH}
-					export DYNINSTAPI_RT_LIB=${DYNINST_HOME}/lib/libdyninstAPI_RT.so
+					export DYNINSTAPI_RT_LIB=${DYNINST_LIBSDIR}/libdyninstAPI_RT.so
 				fi
 			fi
 		fi

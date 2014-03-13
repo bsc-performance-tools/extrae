@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Mar2014 Ensure DYNINSTAPI_RT_LIB is correctly set in extrae.sh/csh
  * 27Feb2014 Added option to run the on-line analysis at the end of the execution instead of periodically.
              Fixed bug in the Makefiles that caused that the online_env.sh script was not reinstalled after a reconfigure.
              Added routine to dump the states stack in the merger when the MAX_STATES limit is reached.
