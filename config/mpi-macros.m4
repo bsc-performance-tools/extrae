@@ -6,7 +6,7 @@ AC_DEFUN([AX_PROG_MPI],
 
    AC_ARG_WITH(mpi-lib-name,
       AC_HELP_STRING(
-         [--with-mpi-lib@<:@=library name@:>@],
+         [--with-mpi-lib-name@<:@=library name@:>@],
          [specify the name of the MPI library (i.e. mpi, mpich, mpi_mt...)]
       ),
       [mpi_lib_name=${withval}],
