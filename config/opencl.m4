@@ -8,7 +8,7 @@ AC_DEFUN([AX_OPENCL],
 			[Enable support for tracing OpenCL]
 		),
 		[opencl_path="${withval}"],
-		[opencl_path="none"]
+		[opencl_path="no"]
 	)
 
 	if test -z "${opencl_path}" ; then
@@ -17,7 +17,7 @@ AC_DEFUN([AX_OPENCL],
 
 	enable_opencl="no"
 
-	if test "${opencl_path}" != "none" ; then
+	if test "${opencl_path}" != "no" ; then
 		AC_MSG_CHECKING([for OPENCL])
 		if test "${OperatingSystem}" != "darwin" ; then
 			if test -d "${opencl_path}" ; then
