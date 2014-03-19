@@ -671,6 +671,9 @@ static void Write_Spectral_Labels (FILE * pcf_fd)
 void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 	unsigned task, char *name, int report)
 {
+#ifndef HAVE_BFD
+	static int shown_BFD_missing = FALSE;
+#endif
 	static int Labels_loadSYMfile_init = FALSE;
 	FILE *FD;
 	char LINE[1024], Type;
@@ -723,7 +726,9 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 #ifdef HAVE_BFD
 							ObjectTable_AddBinaryObject (allobjects, ptask, task, start, end, offset, module);
 #else
-							fprintf (stdout, "mpi2prv: Ignoring symbols from %s because mpi2prv does not support BFD\n", module);
+							if (!shown_BFD_missing)
+								fprintf (stdout, "mpi2prv: Ignoring symbols from the application execution because mpi2prv does not support BFD\n");
+							shown_BFD_missing = TRUE;
 							UNREFERENCED_PARAMETER(allobjects);
 							UNREFERENCED_PARAMETER(ptask);
 							UNREFERENCED_PARAMETER(task);
