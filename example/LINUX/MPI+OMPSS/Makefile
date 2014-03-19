@@ -2,11 +2,8 @@ include ../Makefile.inc
 
 CC	= imcc --ompss
 
-LDFLAGS = -L$(MPI_HOME)/lib -lmpi
-
-CFLAGS = -I$(MPI_HOME)/include
-
-CFLAGS += --instrument
+LDFLAGS = -g -O $(MPI_LDFLAGS) $(MPI_LIBS)
+CFLAGS =  -g -O -instrument $(MPI_CFLAGS)
 
 OBJECTS = misc.o solver-mpi-ompss.o heat-mpi-ompss.o
 

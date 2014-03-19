@@ -1,8 +1,8 @@
 include ../../Makefile.inc
 
 NVCC = nvcc
-CFLAGS = -O2 -g -I$(MPI_HOME)/include
-CLIBS = -L$(MPI_HOME)/lib -lmpi
+CFLAGS = -O2 -g $(MPI_CFLAGS)
+CLIBS = -O2 -g $(MPI_LDFLAGS) $(MPI_LIBS)
 
 all: mpi_hello 
 

@@ -4,7 +4,7 @@ CC = gcc
 FC = gfortran
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include
 FFLAGS = -O -g -I $(EXTRAE_HOME)/include
-LFLAGS = -L$(EXTRAE_HOME)/lib -lseqtrace $(UNWIND_LIBS) $(XML2_LIBS) $(POSIX_CLOCK_LIBS)
+LFLAGS = -L$(EXTRAE_HOME)/lib -lseqtrace
 
 TARGETS = pi pi_instrumented pi_instrumentedf
 

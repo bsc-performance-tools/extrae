@@ -451,6 +451,9 @@ endif
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
 # Apply post-installation modifications
 	./substitute $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_MPI_CFLAGS@" "${MPI_CFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_MPI_LDFLAGS@" "${MPI_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	./substitute $(SED) "@sub_MPI_LIBS@" "${MPI_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	./substitute $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
