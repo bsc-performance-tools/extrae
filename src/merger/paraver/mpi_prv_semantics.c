@@ -64,7 +64,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <mpi.h>
 #endif
 
-/* #define DEBUG */
+//#define DEBUG
 
 static int Get_State (unsigned int EvType)
 {
@@ -228,6 +228,9 @@ static int Any_Send_Event (event_t * current_event,
 #if defined(PARALLEL_MERGE)
 					else
 					{
+#if defined(DEBUG)
+						fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d >> PENDING\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+#endif
 						trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, target_ptask, Get_EvTarget (current_event));
 					}
 #endif
@@ -308,7 +311,12 @@ static int SendRecv_Event (event_t * current_event,
 					}
 #if defined(PARALLEL_MERGE)
 					else
+					{
+#if defined(DEBUG)
+						fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d >> PENDING\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+#endif
 						trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, target_ptask, Get_EvTarget (thread_info->Send_Rec));
+					}
 #endif /* PARALLEL_MERGE */
 					}
 
@@ -750,6 +758,8 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	/* If this is a send, look for the receive */
 	if (Get_EvValue (current_event) == MPI_ISEND_EV)
 	{
+		thread_info->Send_Rec = current_event;
+
 		if (MatchComms_Enabled(ptask, task))
 		{
 			if (MPI_PROC_NULL != Get_EvTarget (current_event))
@@ -787,7 +797,12 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 				}
 #if defined(PARALLEL_MERGE)
 				else
+				{
+#if defined(DEBUG)
+					fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d >> PENDING\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+#endif
 					trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, thread_info->Send_Rec, current_event, target_ptask, Get_EvTarget (current_event));
+				}
 #endif
 			}
 		}
@@ -796,6 +811,8 @@ int MPI_PersistentRequest_Event (event_t * current_event,
 	/* If this is a receive, look for the send */
 	if (Get_EvValue(current_event) == MPI_IRECV_EV)
 	{
+		thread_info->Recv_Rec = current_event;
+
 		if (MatchComms_Enabled(ptask, task))
 		{
 			event_t *receive = Search_MPI_IRECVED (current_event, Get_EvAux (current_event), thread_info->file);

@@ -603,7 +603,6 @@ static int Sampling_Address_MEM_TLB_Event (event_t * current,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned i;
 	UINT64 EvValue;
 	UINT64 EvParam;
 	UNREFERENCED_PARAMETER(fset);
@@ -641,8 +640,8 @@ static int Sampling_Caller_Event (event_t * current,
 {
 	unsigned EvType;
 	unsigned LINE_EV_DELTA;
-	unsigned int EvTypeDelta, i;
-	UINT64  EvValue;
+	unsigned EvTypeDelta, i;
+	UINT64 EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType = Get_EvEvent(current);
@@ -1132,7 +1131,12 @@ static int User_Send_Event (event_t * current_event,
 		}
 #if defined(PARALLEL_MERGE)
 		else
+		{
+#if defined(DEBUG)
+			fprintf (stdout, "SEND_CMD(%u): TIME/TIMESTAMP %lld/%lld IAM %d PARTNER %d tag %d >> PENDING\n", Get_EvEvent(current_event), current_time, Get_EvTime(current_event), task-1, Get_EvTarget(current_event), Get_EvTag(current_event));
+#endif
 			trace_pending_communication (ptask, task, thread, thread_info->virtual_thread, current_event, current_event, ptask, partner);
+		}
 #endif
 	}
 

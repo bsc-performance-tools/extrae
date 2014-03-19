@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 19Mar2014 Sanitize examples' Makefiles (MPI basically) 
+             Fix unmatched persistent requests with parallel merge.
  * 13Mar2014 Ensure DYNINSTAPI_RT_LIB is correctly set in extrae.sh/csh
  * 27Feb2014 Added option to run the on-line analysis at the end of the execution instead of periodically.
              Fixed bug in the Makefiles that caused that the online_env.sh script was not reinstalled after a reconfigure.

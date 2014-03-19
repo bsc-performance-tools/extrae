@@ -101,6 +101,8 @@ static char UNUSED rcsid[] = "$Id$";
 # include "tree-logistics.h"
 #endif
 
+//#define DEBUG
+
 /* Variable will hold whether all times end with 000 even if the timing routine
    is told to be generating nanoseconds! */
 static int TimeIn_MicroSecs = TRUE;

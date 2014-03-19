@@ -55,6 +55,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "addr2info.h"
 #include "options.h"
 
+//#define DEBUG
+
 static struct ForeignRecv_t **myForeignRecvs;
 static int *myForeignRecvs_count;
 static char **myForeignRecvs_used;
@@ -121,6 +123,10 @@ void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
 			realloc (PendingComms.data, 
 			PendingComms.size*sizeof(struct PendingCommunication_t));
 	}
+#if defined(DEBUG)
+	fprintf (stdout, "DEBUG: AddPendingCommunication (descriptor = %d, offset = %ld, tag = %d, task_r = %d, task_s = %d)\n",
+		descriptor, offset, tag, task_r, task_s);
+#endif
 	PendingComms.data[count].offset = offset;
 	PendingComms.data[count].descriptor = descriptor;
 	PendingComms.data[count].recver = task_r;
@@ -158,6 +164,12 @@ void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int ptask_r, int task
 			realloc (ForeignRecvs[group].data, 
 					ForeignRecvs[group].size*sizeof(struct ForeignRecv_t));
 	}
+
+#if defined(DEBUG)
+	fprintf (stdout, "DEBUG: AddForeignRecv (phy_time = %llu, log_time = %llu, tag = %d, task_r = %d, thread_r = %d task_s = %d)\n",
+		physic, logic, tag, task_r, thread_r, task_s);
+#endif
+
 	ForeignRecvs[group].data[count].sender = task_s;
 	ForeignRecvs[group].data[count].sender_app = ptask_s;
 	ForeignRecvs[group].data[count].recver = task_r;
@@ -192,33 +204,33 @@ static void MatchRecv (int fd, off_t offset, UINT64 physic_time, UINT64 logic_ti
 	unsigned long long receives[NUM_COMMUNICATION_TYPE];
 	long offset_in_struct;
 
-  /* Search offset of receives within the paraver_rec_t struct */
-  offset_in_struct = ((long) &r.receive) - ((long) &r);
+	/* Search offset of receives within the paraver_rec_t struct */
+	offset_in_struct = ((long) &r.receive) - ((long) &r);
 
-  receives[LOGICAL_COMMUNICATION] = logic_time;
-  receives[PHYSICAL_COMMUNICATION] = physic_time;
+	receives[LOGICAL_COMMUNICATION] = logic_time;
+	receives[PHYSICAL_COMMUNICATION] = physic_time;
 
-  ret = lseek (fd, offset+offset_in_struct, SEEK_SET);
-  if (ret != offset)
-  {
-    perror ("lseek");
+	ret = lseek (fd, offset+offset_in_struct, SEEK_SET);
+	if (ret != offset)
+	{
+		perror ("lseek");
 #if SIZEOF_OFF_T == SIZEOF_LONG
-    fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to lseek (fd = %d, offset = %ld)\n", fd, offset);
+		fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to lseek (fd = %d, offset = %ld)\n", fd, offset);
 #elif SIZEOF_OFF_T == SIZEOF_LONG_LONG
-    fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to lseek (fd = %d, offset = %lld)\n", fd, offset);
+		fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to lseek (fd = %d, offset = %lld)\n", fd, offset);
 #elif SIZEOF_OFF_T == 4
-    fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to lseek (fd = %d, offset = %d)\n", fd, offset);
+		fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to lseek (fd = %d, offset = %d)\n", fd, offset);
 #endif
-    exit (-2);
-  }
+		exit (-2);
+	}
 
-  size = write (fd, &receives, sizeof(receives));
-  if (sizeof(receives) != size)
-  {
-    perror ("write");
-    fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to write (fd = %d, size = %ld, written = %Zu)\n", fd, sizeof(r), size);
-    exit (-2);
-  }
+	size = write (fd, &receives, sizeof(receives));
+	if (sizeof(receives) != size)
+	{
+		perror ("write");
+		fprintf (stderr, "mpi2prv: Error on MatchRecv! Unable to write (fd = %d, size = %ld, written = %Zu)\n", fd, sizeof(r), size);
+		exit (-2);
+	}
 }
 
 
@@ -251,11 +263,23 @@ struct ForeignRecv_t* SearchForeignRecv (int group, int sender_app, int sender, 
 {
 	int i;
 
+#if defined(DEBUG)
+	fprintf (stdout, "DEBUG: SearchForeignRecv (group = %d, sender/app = %d/%d, recver/app = %d, tag = %d)\n",
+		group, sender, sender_app, recver, recver_app, tag);
+#endif
+
 	if (myForeignRecvs_count != NULL && myForeignRecvs != NULL)
 	{
 		if (myForeignRecvs[group] != NULL)
 			for (i = 0; i < myForeignRecvs_count[group]; i++)
 			{
+#if defined(DEBUG)
+				fprintf (stdout, "DEBUG: (sender/app = %d/%d, recver/app = %d/%d, tag = %d) vs (sender/app = %d/%d, recver = %d/%d, tag = %d)\n",
+				  sender, sender_app, recver, recver_app, tag,
+				  myForeignRecvs[group][i].sender, myForeignRecvs[group][i].sender_app,
+				  myForeignRecvs[group][i].recver, myForeignRecvs[group][i].recver_app,
+				  myForeignRecvs[group][i].tag);
+#endif
 				if (myForeignRecvs[group][i].match_zone == mz &&
 				    myForeignRecvs[group][i].sender == sender &&
 				    myForeignRecvs[group][i].sender_app == sender_app &&

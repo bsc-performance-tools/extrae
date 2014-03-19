@@ -102,6 +102,7 @@ int trace_pending_communication (unsigned int ptask_s, unsigned int task_s,
 	trace_paraver_pending_communication (cpu_s, ptask_s, task_s, thread_s, vthread_s, log_s,
 		phy_s, task_r + 1, ptask_r, task_r + 1, thread_s /* 1? */ , thread_s /*vthread_r?*/,
 		0ULL, 0ULL, Get_EvSize (begin_s), Get_EvTag (begin_s));
+
   return 0;
 }
 #endif
