@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 27Mar2014 Reverted prototype of API call Extrae_define_event_type to receive parameters by reference to be compatible with Fortran
  * 19Mar2014 Sanitize examples' Makefiles (MPI basically) 
              Fix unmatched persistent requests with parallel merge.
  * 13Mar2014 Ensure DYNINSTAPI_RT_LIB is correctly set in extrae.sh/csh
