@@ -900,7 +900,7 @@ AC_DEFUN([AX_PROG_PAPI],
          if test "${OperatingSystem}" = "freebsd" ; then
             LIBS="-lpapi -lpmc"
          elif test "${OperatingSystem}" = "linux" -a "${Architecture}" = "powerpc" ; then
-            LIBS="-lpapi -lperfctr"
+            LIBS="-lpapi"
             if test -d "${PAPI_HOME}/perfctr/lib" ; then
                LIBS="-L${PAPI_HOME}/perfctr/lib ${LIBS}"
             fi

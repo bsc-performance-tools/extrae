@@ -33,6 +33,6 @@
 #include "semantics.h"
 #include "file_set.h"
 
-extern SingleEv_Handler_t PRV_OpenCL_Event_Handlers[]; 
+extern RangeEv_Handler_t PRV_OpenCL_Event_Handlers[]; 
 
 #endif /* OPENCL_PRV_SEMANTICS_H */

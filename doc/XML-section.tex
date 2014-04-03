@@ -169,7 +169,7 @@ Here is an example of the counters section in the XML configuration file:
 
 \subsection{Processor performance counters}\label{subsec:ProcessorPerformanceCounters}
 
-Processor performance counters are configured in the {\tt <cpu>} nodes. The user can configure many sets in the {\tt <cpu>} node using the {\tt <set>} node, but just one set will be used at any given time in a specific task. The {\tt <cpu>} node supports the {\tt tarting-set-distribution} attribute with the following accepted values:
+Processor performance counters are configured in the {\tt <cpu>} nodes. The user can configure many sets in the {\tt <cpu>} node using the {\tt <set>} node, but just one set will be used at any given time in a specific task. The {\tt <cpu>} node supports the {\tt starting-set-distribution} attribute with the following accepted values:
 
 \begin{itemize}
  \item {\tt number} ({\em in range 1..N, where N is the number of configured sets}) All tasks will start using the set specified by number.

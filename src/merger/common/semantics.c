@@ -90,7 +90,7 @@ void Semantics_Initialize (int output_format)
 			Register_Event_Handlers (PRV_pthread_Event_Handlers);
 			Register_Event_Handlers (PRV_TRT_Event_Handlers);
 			Register_Event_Handlers (PRV_CUDA_Event_Handlers);
-			Register_Event_Handlers (PRV_OpenCL_Event_Handlers);
+			Register_Range_Handlers (PRV_OpenCL_Event_Handlers);
 			break;
 	}
 }

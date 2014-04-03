@@ -3,7 +3,13 @@ include ../../Makefile.inc
 CC=gcc
 
 CFLAGS= -g -I$(OPENCL_HOME)/include -O3 -lm -Wall
-LIBS = $(OPENCL_LDFLAGS) -lOpenCL
+
+PLATFORM = $(shell uname -s)
+ifeq ($(PLATFORM), Darwin)
+	LIBS = -framework OpenCL
+else
+	LIBS = $(OPENCL_LDFLAGS) -lOpenCL
+endif
 
 vadd: vadd.c 
 	$(CC) $^ $(CFLAGS) $(LIBS) -o $@

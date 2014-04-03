@@ -72,9 +72,10 @@ struct OpenCL_event_presency_label_st
 	int eventval;
 }; 
 
-#define MAX_OPENCL_TYPE_ENTRIES 34
+#define MAX_OPENCL_TYPE_ENTRIES 48
 
-static struct OpenCL_event_presency_label_st OpenCL_event_presency_label_host[MAX_OPENCL_TYPE_ENTRIES] = 
+static struct OpenCL_event_presency_label_st
+ OpenCL_event_presency_label_host[MAX_OPENCL_TYPE_ENTRIES] = 
 {
  { OPENCL_CLCREATEBUFFER_EV, FALSE, "clCreateBuffer", 1 },
  { OPENCL_CLCREATECOMMANDQUEUE_EV, FALSE, "clCreateCommandQueue", 2 },
@@ -110,9 +111,24 @@ static struct OpenCL_event_presency_label_st OpenCL_event_presency_label_host[MA
  { OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_EV, FALSE, "clEnqueueMigrateMemObjects", 32},
  { OPENCL_CLENQUEUEMARKER_EV, FALSE, "clEnqueueMarker", 33 },
  { OPENCL_CLENQUEUEBARRIER_EV, FALSE, "clEnqueueBarrier", 34 },
+ { OPENCL_CLRETAINCOMMANDQUEUE_EV, FALSE, "clRetainCommandQueue", 35 },
+ { OPENCL_CLRELEASECOMMANDQUEUE_EV, FALSE, "clReleaseCommandQueue", 36 },
+ { OPENCL_CLRETAINCONTEXT_EV, FALSE, "clRetainContext", 37 },
+ { OPENCL_CLRELEASECONTEXT_EV, FALSE, "clReleaseContext", 38 },
+ { OPENCL_CLRETAINDEVICE_EV, FALSE, "clRetainDevice", 39 },
+ { OPENCL_CLRELEASEDEVICE_EV, FALSE, "clReleaseDevice", 40 },
+ { OPENCL_CLRETAINEVENT_EV, FALSE, "clRetainEvent", 41 },
+ { OPENCL_CLRELEASEEVENT_EV, FALSE, "clReleaseEvent", 42 },
+ { OPENCL_CLRETAINKERNEL_EV, FALSE, "clRetainKernel", 43 },
+ { OPENCL_CLRELEASEKERNEL_EV, FALSE, "clReleaseKernel", 44 },
+ { OPENCL_CLRETAINMEMOBJECT_EV, FALSE, "clRetainMemObject", 45 },
+ { OPENCL_CLRELEASEMEMOBJECT_EV, FALSE, "clReleaseMemObject", 46 },
+ { OPENCL_CLRETAINPROGRAM_EV, FALSE, "clRetainProgram", 47 },
+ { OPENCL_CLRELEASEPROGRAM_EV, FALSE, "clReleaseProgram", 48 }
 };
 
-static struct OpenCL_event_presency_label_st OpenCL_event_presency_label_acc[MAX_OPENCL_TYPE_ENTRIES] = 
+static struct OpenCL_event_presency_label_st
+ OpenCL_event_presency_label_acc[MAX_OPENCL_TYPE_ENTRIES] = 
 {
  { 0, FALSE, "clCreateBuffer", 1 },
  { 0, FALSE, "clCreateCommandQueue", 2 },
@@ -148,6 +164,20 @@ static struct OpenCL_event_presency_label_st OpenCL_event_presency_label_acc[MAX
  { OPENCL_CLENQUEUEMIGRATEMEMOBJECTS_ACC_EV, FALSE, "clEnqueueMigrateMemObjects", 32},
  { OPENCL_CLENQUEUEMARKER_ACC_EV, FALSE, "clEnqueueMarker", 33 },
  { OPENCL_CLENQUEUEBARRIER_ACC_EV, FALSE, "clEnqueueBarrier", 34 },
+ { 0, FALSE, "clRetainCommandQueue", 35 },
+ { 0, FALSE, "clReleaseCommandQueue", 36 },
+ { 0, FALSE, "clRetainContext", 37 },
+ { 0, FALSE, "clReleaseContext", 38 },
+ { 0, FALSE, "clRetainDevice", 39 },
+ { 0, FALSE, "clReleaseDevice", 40 },
+ { 0, FALSE, "clRetainEvent", 41 },
+ { 0, FALSE, "clReleaseEvent", 42 },
+ { 0, FALSE, "clRetainKernel", 43 },
+ { 0, FALSE, "clReleaseKernel", 44 },
+ { 0, FALSE, "clRetainMemObject", 45 },
+ { 0, FALSE, "clReleaseMemObject", 46 },
+ { 0, FALSE, "clRetainProgram", 47 },
+ { 0, FALSE, "clReleaseProgram", 48 }
 };
 
 
