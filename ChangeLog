@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 03Apr2014 Fix improper access to MPI_STATUS_IGNORE in mpi_sendrecv, mpi_sendrecv_replace and MPI_Sendrecv_replace
  * 27Mar2014 Reverted prototype of API call Extrae_define_event_type to receive parameters by reference to be compatible with Fortran
  * 19Mar2014 Sanitize examples' Makefiles (MPI basically) 
              Fix unmatched persistent requests with parallel merge.

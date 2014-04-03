@@ -4189,7 +4189,7 @@ void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	CtoF77(pmpi_sendrecv) (sendbuf, sendcount, sendtype, dest, sendtag,
 	  recvbuf, recvcount, recvtype, source, recvtag, comm, ptr_status, ierr);
 
-	CtoF77(pmpi_get_count) (status, recvtype, &Count, &ret);
+	CtoF77(pmpi_get_count) (ptr_status, recvtype, &Count, &ret);
 	MPI_CHECK(ret, pmpi_get_count);
 
 	if (Count != MPI_UNDEFINED)
@@ -4245,7 +4245,7 @@ void MPI_Sendrecv_replace_Fortran_Wrapper (void *buf, MPI_Fint *count, MPI_Fint 
 
 	CtoF77(pmpi_sendrecv_replace) (buf, count, type, dest, sendtag, source, recvtag, comm, ptr_status, ierr);
 
-	CtoF77(pmpi_get_count) (status, type, &Count, &ret);
+	CtoF77(pmpi_get_count) (ptr_status, type, &Count, &ret);
 	MPI_CHECK(ret, pmpi_get_count);
 
 	if (Count != MPI_UNDEFINED)
@@ -7624,7 +7624,7 @@ int MPI_Sendrecv_replace_C_Wrapper (void *buf, int count, MPI_Datatype type,
 	ierror = PMPI_Sendrecv_replace (buf, count, type, dest, sendtag, source,
 	  recvtag, comm, ptr_status);
 
-	ret = PMPI_Get_count (status, type, &Count);
+	ret = PMPI_Get_count (ptr_status, type, &Count);
 	MPI_CHECK(ret, PMPI_Get_count);
 
 	if (Count != MPI_UNDEFINED)
