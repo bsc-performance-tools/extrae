@@ -63,6 +63,7 @@ static cudaError_t (*real_cudaMemcpy)(void*,const void*,size_t,enum cudaMemcpyKi
 static cudaError_t (*real_cudaMemcpyAsync)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t) = NULL;
 static cudaError_t (*real_cudaStreamCreate)(cudaStream_t*) = NULL;
 static cudaError_t (*real_cudaDeviceReset)(void) = NULL;
+static cudaError_t (*real_cudaThreadExit)(void) = NULL;
 #endif /* PIC */
 
 void Extrae_CUDA_init (int rank)
@@ -83,6 +84,8 @@ void Extrae_CUDA_init (int rank)
 	real_cudaStreamCreate = (cudaError_t(*)(cudaStream_t*)) dlsym (RTLD_NEXT, "cudaStreamCreate");
 
 	real_cudaDeviceReset = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceReset");
+
+	real_cudaThreadExit = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaThreadExit");
 #else
 	fprintf (stderr, PACKAGE_NAME": Warning! CUDA instrumentation requires linking with shared library!\n");
 #endif /* PIC */
@@ -244,7 +247,7 @@ cudaError_t cudaThreadSynchronize (void)
 	cudaError_t res;
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamSynchronize is at %p\n", THREADID, real_cudaThreadSynchronize);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaThreadSynchronize is at %p\n", THREADID, real_cudaThreadSynchronize);
 #endif
 
 	if (real_cudaThreadSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
@@ -294,15 +297,48 @@ cudaError_t cudaStreamSynchronize (cudaStream_t p1)
 	return res;
 }
 
+cudaError_t cudaThreadExit (void)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaThreadExit is at %p\n", THREADID, real_cudaThreadExit);
+#endif
+
+	if (real_cudaThreadExit != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		int devid;
+		cudaGetDevice (&devid);
+		res = real_cudaThreadExit ();
+		Extrae_CUDA_deInitialize (devid);
+	}
+	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaThreadExit ();
+	}
+	else
+	{
+		fprintf (stderr, "Unable to find cudaThreadExit in DSOs!! Dying...\n");
+		exit (0);
+	}
+
+	return res;
+}
+
+
 cudaError_t cudaDeviceReset (void)
 {
 	cudaError_t res;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaDeviceReset is at %p\n", THREADID, real_cudaDeviceReset);
+#endif
+
 	if (real_cudaDeviceReset != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
 		int devid;
-		res = real_cudaDeviceReset ();
 		cudaGetDevice (&devid);
+		res = real_cudaDeviceReset ();
 		Extrae_CUDA_deInitialize (devid);
 	}
 	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))

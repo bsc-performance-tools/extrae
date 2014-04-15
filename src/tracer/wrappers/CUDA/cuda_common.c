@@ -110,6 +110,7 @@ static void Extrae_CUDA_SynchronizeStream (int devid, int streamid)
 #ifdef DEBUG
 	fprintf (stderr, "Extrae_CUDA_SynchronizeStream (devid=%d, streamid=%d, stream=%p)\n", devid, streamid, devices[devid].Stream[streamid].stream);
 #endif
+
 	err = cudaEventRecord (devices[devid].Stream[streamid].device_reference_time,
 		devices[devid].Stream[streamid].stream);
 	CHECK_CU_ERROR(err, cudaEventRecord);
@@ -333,9 +334,10 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 
 		if (devices[devid].Stream[streamid].timetype[i] == EXTRAE_CUDA_NEW_TIME)
 		{
-			cudaEventElapsedTime (&ftmp,
+			err = cudaEventElapsedTime (&ftmp,
 			  devices[devid].Stream[streamid].device_reference_time,
 			  devices[devid].Stream[streamid].ts_events[i]);
+			CHECK_CU_ERROR(err, cudaEventElapsedTime);
 			ftmp *= 1000000;
 			utmp = devices[devid].Stream[streamid].host_reference_time + (UINT64) (ftmp);
 		}
@@ -455,11 +457,12 @@ void Extrae_CUDA_flush_all_streams (void)
 	int devid;
 
 	for (devid = 0; devid < CUDAdevices; devid++)
-		for (i = 0; i < devices[devid].nstreams; i++)
-		{
-			Extrae_CUDA_FlushStream (devid, i);
-			Extrae_CUDA_SynchronizeStream (devid, i);
-		}
+		if(devices[devid].initialized)
+	    		for (i = 0; i < devices[devid].nstreams; i++)
+	    		{
+	    			Extrae_CUDA_FlushStream (devid, i);
+	    			Extrae_CUDA_SynchronizeStream (devid, i);
+	    		}
 }
 
 void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
