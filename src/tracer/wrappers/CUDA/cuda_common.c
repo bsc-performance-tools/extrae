@@ -618,9 +618,11 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	}
 
 	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
-		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0, CUDAMEMCPY_GPU_EV, p3, 0, 0);
+		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0,
+		  CUDAMEMCPY_GPU_EV, EVT_BEGIN, 0, 0);
 	else
-		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0, CUDAMEMCPY_GPU_EV, p3, tag, p3);
+		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0,
+		  CUDAMEMCPY_GPU_EV, EVT_BEGIN, tag, p3);
 }
 
 void Extrae_cudaMemcpy_Exit (void)
@@ -701,10 +703,10 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 
 	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_EV, p3, 0, 0);
+		  CUDAMEMCPYASYNC_GPU_EV, EVT_BEGIN, 0, 0);
 	else
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, strid,
-		  CUDAMEMCPYASYNC_GPU_EV, p3, tag, p3);
+		  CUDAMEMCPYASYNC_GPU_EV, EVT_BEGIN, tag, p3);
 }
 
 void Extrae_cudaMemcpyAsync_Exit (void)
