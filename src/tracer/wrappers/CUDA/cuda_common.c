@@ -284,9 +284,9 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 	}
 }
 
-static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype, int devid,
-	int streamid, unsigned event, unsigned long long type, unsigned tag,
-	unsigned size)
+static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype,
+	int devid, int streamid, unsigned event, unsigned long long value,
+	unsigned tag, unsigned size)
 {
 	int evt_index, err;
 	struct RegisteredStreams_t *ptr;
@@ -304,7 +304,7 @@ static void Extrae_CUDA_AddEventToStream (Extrae_CUDA_Time_Type timetype, int de
 		CHECK_CU_ERROR(err, cudaEventRecord);
 
 		ptr->events[evt_index] = event;
-		ptr->types[evt_index] = type;
+		ptr->values[evt_index] = value;
 		ptr->tag[evt_index] = tag;
 		ptr->size[evt_index] = size;
 		ptr->timetype[evt_index] = timetype;
@@ -348,21 +348,21 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 
 		THREAD_TRACE_MISCEVENT (threadid, utmp,
 		  devices[devid].Stream[streamid].events[i],
-		  devices[devid].Stream[streamid].types[i], 0);
+		  devices[devid].Stream[streamid].values[i], 0);
 
 		if (devices[devid].Stream[streamid].events[i] == CUDAMEMCPY_GPU_EV ||
 		    devices[devid].Stream[streamid].events[i] == CUDAMEMCPYASYNC_GPU_EV)
 		{
 			if (devices[devid].Stream[streamid].tag[i] > 0)
 				THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,
-				 (devices[devid].Stream[streamid].types[i]==EVT_END)?USER_RECV_EV:USER_SEND_EV,
+				 (devices[devid].Stream[streamid].values[i]==EVT_END)?USER_RECV_EV:USER_SEND_EV,
 				 TASKID,
 				 devices[devid].Stream[streamid].size[i],
 				 devices[devid].Stream[streamid].tag[i],
 				 devices[devid].Stream[streamid].tag[i]);
 		}
 		else if (devices[devid].Stream[streamid].events[i] == CUDAKERNEL_GPU_EV &&
-		         devices[devid].Stream[streamid].types[i] != EVT_END)
+		         devices[devid].Stream[streamid].values[i] != EVT_END)
 		{
 			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,
 			 USER_RECV_EV,
@@ -372,7 +372,7 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 			 Extrae_CUDA_tag_generator());
 		}
 		else if (devices[devid].Stream[streamid].events[i] == CUDACONFIGKERNEL_GPU_EV &&
-		         devices[devid].Stream[streamid].types[i] != EVT_END)
+		         devices[devid].Stream[streamid].values[i] != EVT_END)
 		{
 			THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, utmp,
 			 USER_RECV_EV,

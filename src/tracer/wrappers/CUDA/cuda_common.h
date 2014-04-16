@@ -131,7 +131,7 @@ struct RegisteredStreams_t
 	unsigned nevents;
 	cudaEvent_t ts_events[MAX_CUDA_EVENTS];
 	unsigned events[MAX_CUDA_EVENTS];
-	unsigned long long types[MAX_CUDA_EVENTS];
+	unsigned long long values[MAX_CUDA_EVENTS];
 	unsigned tag[MAX_CUDA_EVENTS];
 	unsigned size[MAX_CUDA_EVENTS];
 	Extrae_CUDA_Time_Type timetype[MAX_CUDA_EVENTS];
