@@ -149,8 +149,7 @@ struct CUDAdevices_t
 #endif
 };
 
-void Extrae_CUDA_flush_all_streams(void);
-void Extrae_CUDA_deInitialize (int devid);
+void Extrae_CUDA_flush_all_streams(int synchronize);
 void Extrae_cudaLaunch_Enter (const char*);
 void Extrae_cudaLaunch_Exit (void);
 void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);
@@ -165,6 +164,10 @@ void Extrae_cudaMemcpy_Enter (void*, const void*, size_t, enum cudaMemcpyKind);
 void Extrae_cudaMemcpy_Exit (void);
 void Extrae_cudaMemcpyAsync_Enter (void*, const void*, size_t, enum cudaMemcpyKind, cudaStream_t);
 void Extrae_cudaMemcpyAsync_Exit (void);
+void Extrae_cudaDeviceReset_Enter (void);
+void Extrae_cudaDeviceReset_Exit (void);
+void Extrae_cudaThreadExit_Enter (void);
+void Extrae_cudaThreadExit_Exit (void);
 
 void Extrae_reallocate_CUDA_info (unsigned nthreads);
 

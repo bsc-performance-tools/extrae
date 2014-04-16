@@ -47,23 +47,32 @@ static char UNUSED rcsid[] = "$Id$";
 #define CUDAMEMCPY_INDEX           2
 #define CUDATHREADBARRIER_INDEX    3
 #define CUDASTREAMBARRIER_INDEX    4
+#define CUDAMEMCPYASYNC_INDEX      5
+#define CUDATHREADEXIT_INDEX       6
+#define CUDADEVICERESET_INDEX      7
 
-#define MAX_CUDA_INDEX             5
+#define MAX_CUDA_INDEX             8
 
-static int inuse[MAX_CUDA_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_CUDA_INDEX] = { FALSE };
 
-void Enable_CUDA_Operation (int tipus)
+void Enable_CUDA_Operation (int type)
 {
-	if (tipus == CUDALAUNCH_EV)
+	if (type == CUDALAUNCH_EV)
 		inuse[CUDALAUNCH_INDEX] = TRUE;
-	else if (tipus == CUDAMEMCPY_EV)
+	else if (type == CUDAMEMCPY_EV)
 		inuse[CUDAMEMCPY_INDEX] = TRUE;
-	else if (tipus == CUDASTREAMBARRIER_EV)
+	else if (type == CUDASTREAMBARRIER_EV)
 		inuse[CUDASTREAMBARRIER_INDEX] = TRUE;
-	else if (tipus == CUDATHREADBARRIER_EV)
+	else if (type == CUDATHREADBARRIER_EV)
 		inuse[CUDATHREADBARRIER_INDEX] = TRUE;
-	else if (tipus == CUDACONFIGCALL_EV)
+	else if (type == CUDACONFIGCALL_EV)
 		inuse[CUDACONFIGCALL_INDEX] = TRUE;
+	else if (type == CUDAMEMCPYASYNC_EV)
+		inuse[CUDAMEMCPYASYNC_INDEX] = TRUE;
+	else if (type == CUDADEVICERESET_EV)
+		inuse[CUDADEVICERESET_INDEX] = TRUE;
+	else if (type == CUDATHREADEXIT_EV)
+		inuse[CUDATHREADEXIT_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -98,20 +107,35 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d   %d    CUDA library call\n", 0, CUDACALL_EV);
 		fprintf (fd, "VALUES\n"
-		             "0 End\n"
-		             "%d cudaLaunch\n"
-		             "%d cudaConfigureCall\n"
-		             "%d cudaMemcpy\n"
-		             "%d cudaThreadSynchronize\n"
-		             "%d cudaStreamSynchronize\n"
-		             "\n",
-		             CUDALAUNCH_EV - CUDABASE_EV,
-		             CUDACONFIGCALL_EV - CUDABASE_EV,
-		             CUDAMEMCPY_EV - CUDABASE_EV,
-		             CUDATHREADBARRIER_EV - CUDABASE_EV,
-		             CUDASTREAMBARRIER_EV - CUDABASE_EV);
+		             "0 End\n");
+
+		if (inuse[CUDALAUNCH_INDEX])
+			fprintf (fd, "%d cudaLaunch\n", CUDALAUNCH_EV - CUDABASE_EV);
+
+		if (inuse[CUDACONFIGCALL_INDEX])
+			fprintf (fd, "%d cudaConfigureCall\n", CUDACONFIGCALL_EV - CUDABASE_EV);
 
 		if (inuse[CUDAMEMCPY_INDEX])
+			fprintf (fd, "%d cudaMemcpy\n", CUDAMEMCPY_EV - CUDABASE_EV);
+
+		if (inuse[CUDATHREADBARRIER_INDEX])
+			fprintf (fd, "%d cudaThreadSynchronize\n", CUDATHREADBARRIER_EV - CUDABASE_EV);
+
+		if (inuse[CUDASTREAMBARRIER_INDEX])
+			fprintf (fd, "%d cudaStreamynchronize\n", CUDASTREAMBARRIER_EV - CUDABASE_EV);
+
+		if (inuse[CUDAMEMCPYASYNC_INDEX])
+			fprintf (fd, "%d cudaMemcpyAsync\n", CUDAMEMCPYASYNC_EV - CUDABASE_EV);
+
+		if (inuse[CUDADEVICERESET_INDEX])
+			fprintf (fd, "%d cudaDeviceReset\n", CUDADEVICERESET_EV - CUDABASE_EV);
+
+		if (inuse[CUDATHREADEXIT_INDEX])
+			fprintf (fd, "%d cudaThreadExit\n", CUDATHREADEXIT_EV - CUDABASE_EV);
+
+		fprintf (fd, "\n");
+
+		if (inuse[CUDAMEMCPY_INDEX] || inuse[CUDAMEMCPYASYNC_INDEX])
 			fprintf (fd, "EVENT_TYPE\n"
 			              "%d   %d    cudaMemcpy size\n"
 			              "\n",

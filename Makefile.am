@@ -331,6 +331,7 @@ CUDA_EXAMPLE_FILES=\
  example/LINUX/CUDA/hello_instrumented.cu \
  example/LINUX/CUDA/Makefile \
  example/LINUX/CUDA/README \
+ example/LINUX/CUDA/run_ldpreload.sh \
  example/LINUX/CUDA/run_dyninst.sh \
  example/LINUX/CUDA/run_instrumented.sh
 

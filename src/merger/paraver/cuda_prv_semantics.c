@@ -67,6 +67,8 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 			state = STATE_OTHERS;
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
+		case CUDATHREADEXIT_EV:
+		case CUDADEVICERESET_EV:
 		case CUDALAUNCH_EV:
 			state = STATE_OVHD;
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
@@ -77,6 +79,7 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
 		case CUDAMEMCPY_EV:
+		case CUDAMEMCPYASYNC_EV:
 			state = STATE_MEMORY_XFER;
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
@@ -88,7 +91,7 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	else
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EVT_END);
 
-	if (EvType == CUDAMEMCPY_EV)
+	if (EvType == CUDAMEMCPY_EV || EvType == CUDAMEMCPYASYNC_EV)
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
 
 	if (EvType == CUDALAUNCH_EV)
@@ -116,6 +119,11 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 			state = STATE_RUNNING;
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
+		case CUDATHREADBARRIER_GPU_EV:
+			state = STATE_BARRIER;
+			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
+			break;
+		case CUDAMEMCPYASYNC_GPU_EV:
 		case CUDAMEMCPY_GPU_EV:
 			state = STATE_MEMORY_XFER;
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
@@ -128,7 +136,12 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
-	if (EvType == CUDAMEMCPY_GPU_EV)
+	if (EvValue != EVT_END)
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EvType - CUDABASE_GPU_EV);
+	else
+		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EVT_END);
+
+	if (EvType == CUDAMEMCPY_GPU_EV || EvType == CUDAMEMCPYASYNC_EV)
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
 
 	if (EvType == CUDAKERNEL_GPU_EV)
@@ -141,14 +154,21 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 }
 
 SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
+	/* Host calls */
 	{ CUDACONFIGCALL_EV, CUDA_Call },
 	{ CUDALAUNCH_EV, CUDA_Call },
 	{ CUDAMEMCPY_EV, CUDA_Call },
+	{ CUDAMEMCPYASYNC_EV, CUDA_Call },
 	{ CUDATHREADBARRIER_EV, CUDA_Call },
 	{ CUDASTREAMBARRIER_EV, CUDA_Call },
+	{ CUDADEVICERESET_EV, CUDA_Call },
+	{ CUDATHREADEXIT_EV, CUDA_Call },
+	/* Accelerator calls */
 	{ CUDAKERNEL_GPU_EV, CUDA_GPU_Call },
 	{ CUDACONFIGKERNEL_GPU_EV, CUDA_GPU_Call },
 	{ CUDAMEMCPY_GPU_EV, CUDA_GPU_Call },
+	{ CUDAMEMCPYASYNC_GPU_EV, CUDA_GPU_Call },
+	{ CUDATHREADBARRIER_GPU_EV, CUDA_GPU_Call },
 	{ NULL_EV, NULL }
 };
 

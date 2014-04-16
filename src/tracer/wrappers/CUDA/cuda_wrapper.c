@@ -307,10 +307,9 @@ cudaError_t cudaThreadExit (void)
 
 	if (real_cudaThreadExit != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		int devid;
-		cudaGetDevice (&devid);
+		Extrae_cudaThreadExit_Enter ();
 		res = real_cudaThreadExit ();
-		Extrae_CUDA_deInitialize (devid);
+		Extrae_cudaThreadExit_Exit ();
 	}
 	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
@@ -336,10 +335,9 @@ cudaError_t cudaDeviceReset (void)
 
 	if (real_cudaDeviceReset != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		int devid;
-		cudaGetDevice (&devid);
+		Extrae_cudaDeviceReset_Enter ();
 		res = real_cudaDeviceReset ();
-		Extrae_CUDA_deInitialize (devid);
+		Extrae_cudaDeviceReset_Exit ();
 	}
 	else if (real_cudaStreamSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{

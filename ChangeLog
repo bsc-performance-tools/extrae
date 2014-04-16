@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 16Apr2014 Emit additional CUDA information for future Dimemas simulations
  * 14Apr2014 Bring libcudaompitrace to life
  * 03Apr2014 Fix improper access to MPI_STATUS_IGNORE in mpi_sendrecv, mpi_sendrecv_replace and MPI_Sendrecv_replace
              MFB 2.5 
