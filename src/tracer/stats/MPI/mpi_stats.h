@@ -70,7 +70,6 @@ void updateStats_COLLECTIVE(mpi_stats_t * mpi_stats, int inputSize, int outputSi
 void updateStats_OTHER(mpi_stats_t * mpi_stats);
 int mpi_stats_get_num_partners(mpi_stats_t * mpi_stats, int * partners_vector);
 void mpi_stats_update_elapsed_time(mpi_stats_t * mpi_stats, unsigned EvtType, unsigned long long elapsedTime);
-void updateStats_P2Px(mpi_stats_t * mpi_stats, int partner, int inputSize, int outputSize);
 
 
 #if defined(__cplusplus)

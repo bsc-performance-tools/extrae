@@ -154,7 +154,6 @@ static void PACX_stats_Wrapper (iotimer_t timestamp);
 
 static hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
 static PR_Queue_t PR_queue;     /* Persistent requests queue */
-static int *ranks_aux;          /* Auxiliary ranks vector */
 static int *ranks_global;       /* Global ranks vector (from 1 to NProcs) */
 static PACX_Group grup_global;   /* Group attached to the PACX_COMM_WORLD */
 static PACX_Fint grup_global_F;  /* Group attached to the PACX_COMM_WORLD (Fortran) */
@@ -397,12 +396,6 @@ static void InitPACXCommunicators (void)
 	if (ranks_global == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_global'");
-		exit (0);
-	}
-	ranks_aux = malloc (sizeof(int)*Extrae_get_num_tasks());
-	if (ranks_aux == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error! Unable to get memory for 'ranks_aux'");
 		exit (0);
 	}
 
@@ -6895,16 +6888,20 @@ static void Trace_PACX_Communicator (int tipus_event, PACX_Comm newcomm,
 		ierror = PPACX_Group_size (group, &num_tasks);
 		PACX_CHECK(ierror, PPACX_Group_size);
 
-		/* Obtain task id of each element */
-		ierror = PPACX_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
-		PACX_CHECK(ierror, PPACX_Group_translate_ranks);
+		{
+			int ranks_aux[num_tasks];
 
-		FORCE_TRACE_PACXEVENT (entry_time, tipus_event, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, EMPTY);
+			/* Obtain task id of each element */
+			ierror = PPACX_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
+			PACX_CHECK(ierror, PPACX_Group_translate_ranks);
 
-		/* Dump each of the task ids */
-		for (i = 0; i < num_tasks; i++)
-			FORCE_TRACE_PACXEVENT (entry_time, PACX_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
-				EMPTY, EMPTY, EMPTY, EMPTY);
+			FORCE_TRACE_PACXEVENT (entry_time, tipus_event, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, EMPTY);
+
+			/* Dump each of the task ids */
+			for (i = 0; i < num_tasks; i++)
+				FORCE_TRACE_PACXEVENT (entry_time, PACX_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
+					EMPTY, EMPTY, EMPTY, EMPTY);
+		}
 
 		/* Free the group */
 		if (group != PACX_GROUP_NULL)

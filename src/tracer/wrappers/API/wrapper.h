@@ -247,4 +247,28 @@ void Flush_Thread(int thread_id);
 extern int MergeAfterTracing;
 #endif
 
+unsigned long long getApplBeginTime();
+
+#if defined(STANDALONE)
+
+typedef enum 
+{
+  CORE_MODULE = 0,
+  MPI_MODULE,
+  OPENMP_MODULE
+} module_id_t;
+
+typedef struct
+{
+  module_id_t id;
+  void (*init_ptr)(void);
+  void (*fini_ptr)(void);
+} module_t;
+
+void Extrae_RegisterModule(module_id_t id, void *init_ptr, void *fini_ptr);
+void Extrae_core_set_current_threads(int current_threads);
+void Extrae_core_set_maximum_threads(int maximum_threads);
+
+#endif /* STANDALONE */
+
 #endif /* __WRAPPER_H__ */

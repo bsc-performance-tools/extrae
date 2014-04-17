@@ -135,6 +135,7 @@
 #define CLUSTERING_MAX_TASKS            ((xmlChar*) "max_tasks")
 #define CLUSTERING_MAX_POINTS           ((xmlChar*) "max_points")
 #define CLUSTERING_CONFIG               ((xmlChar*) "config")
+#define RC_ONLINE_GREMLINS              ((xmlChar*) "gremlins")
 
 #define TRACE_MERGE                     ((xmlChar*) "merge")
 #define TRACE_MERGE_SYNCHRONIZATION     ((xmlChar*) "synchronization")

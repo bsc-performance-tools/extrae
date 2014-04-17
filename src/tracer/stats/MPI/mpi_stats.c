@@ -152,13 +152,6 @@ void updateStats_P2P(mpi_stats_t * mpi_stats, int partner, int inputSize, int ou
    }
 }
 
-void updateStats_P2Px(mpi_stats_t * mpi_stats, int partner, int inputSize, int outputSize)
-{
-//  fprintf(stderr, "[DEBUG] updateStats_P2Px mpi_stats=0x%x, partner=%d, inputSize=%d, outputSize=%d\n", 
-//    mpi_stats, partner, inputSize, outputSize);
-  updateStats_P2P( mpi_stats, partner, inputSize, outputSize);
-}
-
 void updateStats_COLLECTIVE(mpi_stats_t * mpi_stats, int inputSize, int outputSize)
 {
     mpi_stats->COLLECTIVE_Communications ++;

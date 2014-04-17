@@ -33,6 +33,12 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
+#endif
+
 #include "persistent_requests.h"
 #include "wrapper.h"
 
@@ -40,8 +46,19 @@ static char UNUSED rcsid[] = "$Id$";
 # error "This should not be compiled outside MPI/PACX bounds"
 #endif
 
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+pthread_mutex_t pr_lock;
+#endif
+
 void PR_queue_init (PR_Queue_t * cua)
 {
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  if (pthread_mutex_init(&pr_lock, NULL) != 0)
+  {
+    fprintf (stderr, PACKAGE_NAME": PR_queue_init: Mutex initialization failed.\n");
+    exit(-1);
+  }
+#endif
   INIT_QUEUE (cua);
 }
 
@@ -69,12 +86,18 @@ void PR_Elimina_request (PR_Queue_t * cua, MPI_Request* reqid)
 {
   PR_Queue_t *element_cua;
 
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_lock(&pr_lock);
+#endif
   element_cua = PR_QueueSearch (cua, reqid);
   if (element_cua == NULL)
     return;
   free (element_cua->request);
   REMOVE_ITEM (element_cua);
   free (element_cua);
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_unlock(&pr_lock);
+#endif
 }
 
 void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
@@ -83,6 +106,9 @@ void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
   persistent_req_t *nova_pr;
   PR_Queue_t *nou_element_cua;
 
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_lock(&pr_lock);
+#endif
   /*
    * Es reserva memoria per la nova request 
    */
@@ -116,4 +142,7 @@ void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
 	}
   nou_element_cua->request = nova_pr;
   INSERT_ITEM_INCREASING (cua, nou_element_cua, PR_Queue_t, request->req);
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_unlock(&pr_lock);
+#endif
 }

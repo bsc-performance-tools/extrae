@@ -1036,6 +1036,10 @@ static int Online_Event (event_t * current_event,
       CPU_Burst_Event( current_event, current_time, cpu, ptask, task, thread, fset );
       break;
 
+    case GREMLIN_EV:
+      trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+      break;
+
   }
   return 0;
 }

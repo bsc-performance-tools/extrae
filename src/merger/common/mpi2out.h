@@ -48,6 +48,8 @@ typedef struct input_t
 
 	int InputForWorker;           /* Which task is responsible for this file */
 
+	unsigned long long SpawnOffset;
+
 	int fd;
 	char *name;
 	char *node;

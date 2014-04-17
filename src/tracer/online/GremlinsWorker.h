@@ -22,14 +22,25 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/online/GremlinsWorker.h $
+ | @last_commit: $Date: 2014-01-31 14:13:36 +0100 (vie, 31 ene 2014) $
+ | @version:     $Revision: 2459 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef OMP_WRAPPER_H_
-#define OMP_WRAPPER_H_
+#ifndef __GREMLINS_WORKER_H__
+#define __GREMLINS_WORKER_H__
 
-void Extrae_OpenMP_init (int me);
+#include "BackProtocol.h"
 
-#endif
+class GremlinsWorker : public BackProtocol
+{
+  public:
+    string ID (void) { return "GREMLINS"; } /* ID matches the front-end protocol */
+    void Setup(void);
+    int  Run  (void);
+
+  private:
+    STREAM *stGremlins;
+};
+
+#endif /* __GREMLINS_WORKER_H__ */

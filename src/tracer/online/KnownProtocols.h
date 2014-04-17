@@ -40,4 +40,7 @@
 # include "ClusteringWorker.h"
 #endif
 
+#include "GremlinsRoot.h"
+#include "GremlinsWorker.h"
+
 #endif /* __KNOWN_PROTOCOLS_H__ */

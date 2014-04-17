@@ -698,6 +698,7 @@ AC_CONFIG_FILES([
   Makefile \
   src/Makefile \
   include/Makefile manuals/Makefile \
+  src/loader/Makefile \
   src/launcher/Makefile \
   src/launcher/static/Makefile \
   src/launcher/dyninst/Makefile \

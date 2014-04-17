@@ -172,6 +172,23 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer);
 
 static int requestedDynamicMemoryInstrumentation = FALSE;
 
+
+#if defined(STANDALONE)
+module_t *Modules = NULL;
+NumberOfModules   = 0;
+
+void Extrae_RegisterModule(module_id_t id, void *init_ptr, void *fini_ptr)
+{
+  NumberOfModules ++;
+  xrealloc(Modules, Modules, sizeof(module_t) * NumberOfModules);
+
+  Modules[NumberOfModules-1].init_ptr = init_ptr;
+  Modules[NumberOfModules-1].fini_ptr = fini_ptr;
+}
+#endif /* STANDALONE */
+
+
+
 void setRequestedDynamicMemoryInstrumentation (int b)
 {
 	requestedDynamicMemoryInstrumentation = b;
@@ -1497,6 +1514,18 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #endif
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
+#if defined(STANDALONE)
+fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
+	int current_module = 0;
+	for (current_module=0; current_module<NumberOfModules; current_module++)
+	{
+		void (*module_init_func)(int) = Modules[i].init_ptr;
+
+		module_init_func(me);
+	}
+	fprintf(stderr, "[DEBUG] current_NumOfThreads=%d maximum_NumOfThreads=%d\n", current_NumOfThreads, maximum_NumOfThreads);
+#else
+
 #if defined(INSTRUMENT_DYNAMIC_MEMORY)
 	Extrae_malloctrace_init();
 #endif
@@ -1540,8 +1569,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	Extrae_OpenCL_init (me);
 #endif
 
+
 #if defined(OMP_SUPPORT)
-	Extrae_OpenMP_init();
+	Extrae_OpenMP_init(me);
 
 	/* Obtain the number of runnable threads in this execution.
 	   Just check for OMP_NUM_THREADS env var (if this compilation
@@ -1607,6 +1637,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #if defined(IS_CELL_MACHINE)
 	prepare_CELLTrace_init (get_maximum_NumOfThreads());
 #endif
+
+#endif /* STANDALONE */
 
 	/* Initialize the clock */
 	if (!forked)
@@ -2231,8 +2263,13 @@ void Backend_Finalize (void)
 			MPI_Barrier (MPI_COMM_WORLD);
 #endif
 
-			sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 			merger_pre (Extrae_get_num_tasks());
+
+#if defined(MPI_SUPPORT)
+			sprintf(tmp, "%s", Extrae_core_get_mpits_file_name());
+#else
+			sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
+#endif
 			Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
 
 			if (TASKID == 0)
@@ -2541,3 +2578,21 @@ void Backend_updateTaskID (void)
 	   open handlers referring to this, and renaming the file would require
 	   closing the handler and reopening it again. */
 }
+
+unsigned long long getApplBeginTime()
+{
+  return ApplBegin_Time;
+}
+
+#if defined(STANDALONE)
+void Extrae_core_set_current_threads(int current_threads)
+{
+  current_NumOfThreads = current_threads;
+}
+
+void Extrae_core_set_maximum_threads(int maximum_threads)
+{
+  maximum_NumOfThreads = maximum_threads;
+}
+#endif
+

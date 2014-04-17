@@ -44,17 +44,20 @@ endif
 
 if HAVE_SPECTRAL
 online_root_bin_SOURCES += \
-  SpectralRoot.cpp   SpectralRoot.h
+  SpectralRoot.cpp SpectralRoot.h
 online_root_bin_CXXFLAGS += @SPECTRAL_CXXFLAGS@
 online_root_bin_LDFLAGS  += @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
 endif
 
 if HAVE_CLUSTERING
 online_root_bin_SOURCES += \
-  ClusteringRoot.cpp   ClusteringRoot.h
+  ClusteringRoot.cpp ClusteringRoot.h
 online_root_bin_CXXFLAGS += @CLUSTERING_CXXFLAGS@
 online_root_bin_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
 endif
+
+online_root_bin_SOURCES += \
+  GremlinsRoot.cpp GremlinsRoot.h
 
 online_root_bin_LDADD        = extractors/libcontainers-fe.la $(STATS_DIR)/libmpistats.la $(COMMON_DIR)/libcommon.la
 online_root_bin_DEPENDENCIES = $(STATS_DIR)/libmpistats.la
@@ -106,7 +109,11 @@ libonline_la_CXXFLAGS += @CLUSTERING_CXXFLAGS@
 libonline_la_LDFLAGS  += @CLUSTERING_LDFLAGS@ @CLUSTERING_LIBS@
 endif
 
-libonline_la_LIBADD    = extractors/libextractors.la extractors/libcontainers-be.la
+libonline_la_SOURCES += \
+  GremlinsWorker.cpp GremlinsWorker.h
+libonline_la_CXXFLAGS += @MPI_CFLAGS@
+
+libonline_la_LIBADD = extractors/libextractors.la extractors/libcontainers-be.la
 
 
 #########################

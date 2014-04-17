@@ -368,7 +368,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	TimeSync_Initialize (num_appl, num_appl_tasks);
 	for (i = 0; i < nfiles; i++)
 		if (files[i].thread-1 == 0)
-			TimeSync_SetInitialTime (files[i].ptask-1, files[i].task-1, StartingTimes[i], SynchronizationTimes[i], files[i].node);
+			TimeSync_SetInitialTime (files[i].ptask-1, files[i].task-1, StartingTimes[i], SynchronizationTimes[i] - files[i].SpawnOffset, files[i].node);
 
 	if (get_option_merge_SincronitzaTasks_byNode())
 	{

@@ -41,16 +41,29 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
 
 #include "wrapper.h"
 #include "trace_macros.h"
 #include "omp_probe.h"
+#include "omp_wrapper.h"
 
 #include "ibm-xlsmp-1.6.h"
 #include "gnu-libgomp-4.2.h"
 #include "intel-kmpc-11.h"
 
 //#define DEBUG
+
+#if defined(STANDALONE)
+void __attribute__ ((constructor)) extrae_openmp_setup(void)
+{
+  fprintf(stderr, "[DEBUG-OPENMP] Registering module init=%p\n", Extrae_OpenMP_init);
+  Extrae_RegisterModule(OPENMP_MODULE, Extrae_OpenMP_init, NULL);
+}
+#endif
 
 #if defined(PIC)
 
@@ -215,45 +228,142 @@ int omp_get_num_threads (int p1)
 
 #endif /* PIC */
 
-void Extrae_OpenMP_init(void)
+static int getnumProcessors (void)
+{
+  int numProcessors = 0;
+
+#if HAVE_SYSCONF
+  numProcessors = (int) sysconf (_SC_NPROCESSORS_CONF);
+  if (-1 == numProcessors)
+  {
+    fprintf (stderr, PACKAGE_NAME": Cannot determine number of configured processors using sysconf\n");
+    exit (-1);
+  }
+#else
+# error "Cannot determine number of processors"
+#endif
+
+  return numProcessors;
+}
+
+void Extrae_OpenMP_init(int me)
 {
 #if defined(PIC)
-	int hooked = 0;
+  int hooked = 0;
 
-#if defined(OS_LINUX) && defined(ARCH_PPC) && defined(IBM_OPENMP)
-	/* On PPC systems, check first for IBM XL runtime, if we don't find any
-	   symbol, check for GNU then */
-	hooked = ibm_xlsmp_1_6_hook_points(0);
-	if (!hooked)
-	{
-		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with IBM XL OpenMP runtime!\n");
-		hooked = gnu_libgomp_4_2_hook_points(0);
-	}
-#endif
+# if defined(OS_LINUX) && defined(ARCH_PPC) && defined(IBM_OPENMP)
+  /*
+   * On PPC systems, check first for IBM XL runtime, if we don't find any
+   * symbol, check for GNU then 
+   */
+  hooked = ibm_xlsmp_1_6_hook_points(0);
+  if (!hooked)
+  {
+    fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with IBM XL OpenMP runtime!\n");
+    hooked = gnu_libgomp_4_2_hook_points(0);
+  }
+# endif /* OS_LINUX && ARCH_PPC && IBM_OPENMP */
 
-#if defined(INTEL_OPENMP)
-	if (!hooked)
-	{
-		hooked = intel_kmpc_11_hook_points(0);
-		if (!hooked)
-			fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with Intel KAP OpenMP runtime!\n");
-	}
-#endif
+# if defined(INTEL_OPENMP)
+  if (!hooked)
+  {
+    hooked = intel_kmpc_11_hook_points(0);
+    if (!hooked)
+    {
+      fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with Intel KAP OpenMP runtime!\n");
+    }
+  }
+# endif /* INTEL_OPENMP */
 
-#if defined(GNU_OPENMP)
-	if (!hooked)
-	{
-		hooked = gnu_libgomp_4_2_hook_points(0);
-		if (!hooked)
-			fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");
-	}
-#endif
+# if defined(GNU_OPENMP)
+  if (!hooked)
+  {
+    hooked = gnu_libgomp_4_2_hook_points(0);
+    if (!hooked)
+    {
+      fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");
+    }
+  }
+# endif /* GNU_OPENMP */
 
-	/* If we hooked any compiler-specific routines, just hook for the 
-	   common OpenMP routines */
-	if (hooked)
-		common_GetOpenMPHookPoints(0);
-#else
-	fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
-#endif
+  /* 
+   * If we hooked any compiler-specific routines, just hook for the 
+   * common OpenMP routines 
+   */
+  if (hooked)
+  {
+    common_GetOpenMPHookPoints(0);
+  }
+
+#else  /* PIC */
+
+  fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
+
+#endif /* PIC */
+
+#if defined(STANDALONE)
+  int numProcessors = 0;
+  char *new_num_omp_threads_clause = NULL;
+  char *omp_value = NULL;
+
+  /* 
+   * Obtain the number of runnable threads in this execution.
+   * Just check for OMP_NUM_THREADS env var (if this compilation
+   * allows instrumenting OpenMP 
+   */
+  numProcessors = getnumProcessors();
+
+  new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
+  if (NULL == new_num_omp_threads_clause)
+  {
+    fprintf (stderr, PACKAGE_NAME": Unable to allocate memory for tentative OMP_NUM_THREADS\n");
+    exit (-1);
+  }
+  if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
+  {
+    fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
+    exit (-1);
+  }
+
+  sprintf (new_num_omp_threads_clause, "OMP_NUM_THREADS=%d\n", numProcessors);
+  omp_value = getenv ("OMP_NUM_THREADS");
+  if (omp_value)
+  {
+    int num_of_threads = atoi (omp_value);
+    if (num_of_threads != 0)
+    {
+      Extrae_core_set_maximum_threads( num_of_threads );
+      Extrae_core_set_current_threads( num_of_threads );
+      if (me == 0)
+      {
+        fprintf (stdout, PACKAGE_NAME": OMP_NUM_THREADS set to %d\n", num_of_threads);
+      }
+    }
+    else
+    {
+      if (me == 0)
+      {
+        fprintf (stderr,
+          PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
+          PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
+      }
+      putenv (new_num_omp_threads_clause);
+      Extrae_core_set_maximum_threads( numProcessors );
+      Extrae_core_set_current_threads( numProcessors );
+    }
+  }
+  else
+  {
+    if (me == 0)
+    {
+      fprintf (stderr,
+        PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
+        PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
+    }
+    putenv (new_num_omp_threads_clause);
+    Extrae_core_set_maximum_threads( numProcessors );
+    Extrae_core_set_current_threads( numProcessors );
+  }
+#endif /* STANDALONE */
 }
+

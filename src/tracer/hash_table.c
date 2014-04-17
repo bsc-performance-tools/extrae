@@ -39,10 +39,19 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #endif
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
+#endif
 #include "hash_table.h"
 
 #if !defined(MPI_SUPPORT) && !defined(PACX_SUPPORT) /* This shouldn't be compiled if MPI or PACX are not used */
 # error "This should not be compiled outside MPI/PACX bounds"
+#endif
+
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+pthread_mutex_t hash_lock;
 #endif
 
 /*
@@ -51,6 +60,14 @@ static char UNUSED rcsid[] = "$Id$";
 void hash_init (hash_t * hash)
 {
   int i;
+
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  if (pthread_mutex_init(&hash_lock, NULL) != 0)
+  {
+    fprintf (stderr, PACKAGE_NAME": hash_init: Mutex initialization failed.\n");
+    exit(-1);
+  }
+#endif
 
   for (i = 0; i < HASH_TABLE_SIZE; i++)
     hash->table[i].ovf_link = HASH_FREE;
@@ -74,6 +91,11 @@ void hash_init (hash_t * hash)
 int hash_add (hash_t * hash, const hash_data_t * data)
 {
   int cell, free;
+  int rc = FALSE;
+
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_lock(&hash_lock);
+#endif
 
   cell = HASH_FUNCTION (data->key);
 
@@ -90,22 +112,29 @@ int hash_add (hash_t * hash, const hash_data_t * data)
     if ((free = hash->ovf_free) == HASH_NULL)
     {
       fprintf (stderr, PACKAGE_NAME": hash_add: No space left in hash table. Size is %d+%d\n", HASH_TABLE_SIZE, HASH_OVERFLOW_SIZE);
-      return TRUE;
+      rc = TRUE;
     }
-    hash->ovf_free = hash->overflow[free].next;
+    else
+    {
+      hash->ovf_free = hash->overflow[free].next;
 
-    /*
-     * Insert free into overflow list of cell 
-     */
-    hash->overflow[free].next = hash->table[cell].ovf_link;
-    hash->table[cell].ovf_link = free;
-    /*
-     * Update user data 
-     */
-    hash->overflow[free].data = *data;
+      /*
+       * Insert free into overflow list of cell 
+       */
+      hash->overflow[free].next = hash->table[cell].ovf_link;
+      hash->table[cell].ovf_link = free;
+      /*
+       * Update user data 
+       */
+      hash->overflow[free].data = *data;
+    }
   }
 
-  return FALSE;
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_unlock(&hash_lock);
+#endif
+
+  return rc;
 }
 
 
@@ -146,21 +175,25 @@ hash_data_t *hash_search (const hash_t * hash, MPI_Request key)
 int hash_remove (hash_t * hash, MPI_Request key)
 {
   int cell, ovf, prev;
+  int rc = FALSE;
+
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_lock(&hash_lock);
+#endif
 
   cell = HASH_FUNCTION (key);
 
   if (hash->table[cell].ovf_link == HASH_FREE)
   {
 #if SIZEOF_LONG == 8
-		fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
+    fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
 #elif SIZEOF_LONG == 4
-		fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
+    fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
 #endif
-
-    return TRUE;
+    rc = TRUE;
   }
-  if (hash->table[cell].data.key == key)
-	{
+  else if (hash->table[cell].data.key == key)
+  {
     /*
      * Remove the main entry 
      */
@@ -178,10 +211,10 @@ int hash_remove (hash_t * hash, MPI_Request key)
       hash->ovf_free = ovf;
     }
     else
-		{
+    {
       hash->table[cell].ovf_link = HASH_FREE;   /* Mark as free */
-		}
-	}
+    }
+  }
   else
   {
     /*
@@ -197,19 +230,31 @@ int hash_remove (hash_t * hash, MPI_Request key)
     if (ovf == HASH_NULL)       /* Not found */
     {
 #if SIZEOF_LONG == 8
-			fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
+      fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
 #elif SIZEOF_LONG == 4
-			fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
+      fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
 #endif
-      return TRUE;
+      rc = TRUE;
     }
-    if (prev == HASH_NULL)
-      hash->table[cell].ovf_link = hash->overflow[ovf].next;
     else
-      hash->overflow[prev].next = hash->overflow[ovf].next;
-    hash->overflow[ovf].next = hash->ovf_free;
-    hash->ovf_free = ovf;
+    {
+      if (prev == HASH_NULL)
+      {
+        hash->table[cell].ovf_link = hash->overflow[ovf].next;
+      }
+      else
+      {
+        hash->overflow[prev].next = hash->overflow[ovf].next;
+      }
+      hash->overflow[ovf].next = hash->ovf_free;
+      hash->ovf_free = ovf;
+    }
   }
-  return FALSE;
+
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_unlock(&hash_lock);
+#endif
+
+  return rc;
 }
 

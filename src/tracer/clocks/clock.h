@@ -30,6 +30,8 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+#include "threadid.h"
+
 enum
 {
   REAL_CLOCK = 0,

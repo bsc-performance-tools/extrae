@@ -64,31 +64,15 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
       case MPI_ISEND_EV:
       case MPI_ISSEND_EV:
       case MPI_IRSEND_EV:
-        if ((Get_EvTarget(MPIEndEv) < 0) || (Get_EvTarget(MPIEndEv) >= 64))
-        {
-          fprintf(stderr, "[DEBUG] BAD PARTNER Ts=%llu Evt=%d Partner=%d\n", Get_EvTime(MPIEndEv), Get_EvEvent(MPIEndEv), Get_EvTarget(MPIEndEv));
-        }
-        updateStats_P2Px( MPI_Stats, Get_EvTarget(MPIEndEv), 0, Get_EvSize(MPIEndEv) );
+        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), 0, Get_EvSize(MPIEndEv) );
         break;
       case MPI_RECV_EV:
-        if ((Get_EvTarget(MPIEndEv) < 0) || (Get_EvTarget(MPIEndEv) >= 64))
-        {
-          fprintf(stderr, "[DEBUG] BAD PARTNER Evt=%d\n", Get_EvEvent(MPIEndEv));
-        }
-        updateStats_P2Px( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
+        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
         break;
       case MPI_SENDRECV_EV:
       case MPI_SENDRECV_REPLACE_EV:
-        if ((Get_EvTarget(MPIBeginEv) < 0) || (Get_EvTarget(MPIBeginEv) >= 64))
-        {
-          fprintf(stderr, "[DEBUG] BAD PARTNER BEGIN Evt=%d\n", Get_EvEvent(MPIEndEv));
-        }
-        if ((Get_EvTarget(MPIEndEv) < 0) || (Get_EvTarget(MPIEndEv) >= 64))
-        {
-          fprintf(stderr, "[DEBUG] BAD PARTNER END Evt=%d\n", Get_EvEvent(MPIEndEv));
-        }
-        updateStats_P2Px( MPI_Stats, Get_EvTarget(MPIBeginEv), 0, Get_EvSize(MPIBeginEv) );
-        updateStats_P2Px( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
+        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIBeginEv), 0, Get_EvSize(MPIBeginEv) );
+        updateStats_P2P( MPI_Stats, Get_EvTarget(MPIEndEv), Get_EvSize(MPIEndEv), 0 );
         break;
       
       /* Collectives */
@@ -242,8 +226,11 @@ void PhaseStats::UpdateHWC(event_t *Ev)
       }
     }
 
-    /* Store the accumulated counters in the current timestamp */
-    HWC_Stats[ts]  = make_pair( Get_EvHWCSet(Ev), Get_EvHWCVal(Ev) );
+    if (HWC_Stats.find( ts ) == HWC_Stats.end())
+    {
+      /* Store the accumulated counters in the current timestamp */
+      HWC_Stats[ts]  = make_pair( Get_EvHWCSet(Ev), Get_EvHWCVal(Ev) );
+    }
   }
 }
 #endif
@@ -294,6 +281,36 @@ mpi_stats_t * PhaseStats::GetMPIStats()
 
 #if defined(BACKEND)
 #if USE_HARDWARE_COUNTERS
+
+void PhaseStats::GetAllCounters(map<unsigned int, long unsigned int> &Counters)
+{
+  map< timestamp_t, hwc_set_val_pair_t >::iterator it;
+
+  for (it = HWC_Stats.begin(); it != HWC_Stats.end(); ++it)
+  {
+    int        set_id = it->second.first;
+    long long *values = it->second.second;
+
+    for (int current_hwc=0; current_hwc < MAX_HWC; current_hwc++)
+    {
+      int       type  = HWCSetToIds[set_id][current_hwc];
+      long long value = values[current_hwc];
+
+      if (type != -1)
+      {
+        if (Counters.find( type ) == Counters.end())
+        {
+          Counters[type] = value;
+        }
+        else
+        {
+          Counters[type] += value;
+        }
+      }
+    }
+  }
+}
+
 void PhaseStats::GetCommonCounters(map<unsigned int, long unsigned int> &Counters)
 {
   map< timestamp_t, hwc_set_val_pair_t >::iterator it;
@@ -308,7 +325,38 @@ void PhaseStats::GetCommonCounters(map<unsigned int, long unsigned int> &Counter
       int       type  = HWCSetToIds[set_id][current_hwc];
       long long value = values[current_hwc];
 
-      if (HWC_IsCommonToAllSets(set_id, current_hwc))
+
+      if ((type != -1) && (HWC_IsCommonToAllSets(set_id, current_hwc)))
+      {
+        if (Counters.find( type ) == Counters.end())
+        {
+          Counters[type] = value;
+        }
+        else
+        {
+          Counters[type] += value;
+        }
+      }
+    }
+  }
+}
+
+void PhaseStats::GetLastAllCounters(map<unsigned int, long unsigned int> &Counters)
+{
+  map< timestamp_t, hwc_set_val_pair_t >::reverse_iterator it;
+
+  it = HWC_Stats.rbegin();
+  if (it != HWC_Stats.rend())
+  {
+    int        set_id = it->second.first;
+    long long *values = it->second.second;
+
+    for (int current_hwc=0; current_hwc < MAX_HWC; current_hwc++)
+    {
+      int       type  = HWCSetToIds[set_id][current_hwc];
+      long long value = values[current_hwc];
+
+      if (type != -1)
       {
         if (Counters.find( type ) == Counters.end())
         {
@@ -338,7 +386,7 @@ void PhaseStats::GetLastCommonCounters(map<unsigned int, long unsigned int> &Cou
       int       type  = HWCSetToIds[set_id][current_hwc];
       long long value = values[current_hwc];
 
-      if (HWC_IsCommonToAllSets(set_id, current_hwc))
+      if ((type != -1) && (HWC_IsCommonToAllSets(set_id, current_hwc)))
       {
         if (Counters.find( type ) == Counters.end())
         {

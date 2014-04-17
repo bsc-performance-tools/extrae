@@ -22,14 +22,38 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/online/GremlinsRoot.cpp $
+ | @last_commit: $Date: 2014-01-31 14:13:36 +0100 (vie, 31 ene 2014) $
+ | @version:     $Revision: 2459 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef OMP_WRAPPER_H_
-#define OMP_WRAPPER_H_
+#include "common.h"
 
-void Extrae_OpenMP_init (int me);
+static char UNUSED rcsid[] = "$Id: GremlinsRoot.cpp 2459 2014-01-31 13:13:36Z gllort $";
 
-#endif
+#include "GremlinsRoot.h"
+
+GremlinsRoot::GremlinsRoot()
+{
+
+}
+
+/**
+ * Register the stream that will perform the signal reduction 
+ */
+void GremlinsRoot::Setup()
+{
+  /* stGremlins uses the filter OnlineGremlins */
+  stGremlins = Register_Stream(TFILTER_NULL, SFILTER_WAITFORALL);
+}
+
+/**
+ * Front-end side of the Gremlins analysis.
+ *
+ * @return 1 if the analysis target is achieved; 0 otherwise.
+ */
+int GremlinsRoot::Run()
+{
+  return 0;
+}
+

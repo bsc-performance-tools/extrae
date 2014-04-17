@@ -210,6 +210,8 @@ void FE_load_known_protocols()
 #if defined(HAVE_CLUSTERING)
   FE->LoadProtocol( (Protocol *)(new ClusteringRoot()) );
 #endif
+
+  FE->LoadProtocol( (Protocol *)(new GremlinsRoot()) );
 }
 
 

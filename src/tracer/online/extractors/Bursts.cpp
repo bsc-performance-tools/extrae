@@ -143,14 +143,17 @@ void Bursts::GetCounters(int burst_id, map<unsigned int, long unsigned int> &Bur
     /* The counter set was changed just at the beginning of the burst, and so they were reset to 0.
      * Then we don't need to compute any differences, just read the counters at the end of the burst. 
      */
-    BurstStats[burst_id]->GetCommonCounters( BurstHWCs );
+    //BurstStats[burst_id]->GetCommonCounters( BurstHWCs );
+    BurstStats[burst_id]->GetAllCounters( BurstHWCs );
   }
   else
   {
     /* Compute the difference between the end and the beginning of the burst */
     
-    AccumulatedStats[burst_id]->GetLastCommonCounters(HWCsAtBegin); 
-    BurstStats[burst_id]->GetCommonCounters(HWCsAtEnd);
+    //AccumulatedStats[burst_id]->GetLastCommonCounters(HWCsAtBegin); 
+    //BurstStats[burst_id]->GetCommonCounters(HWCsAtEnd);
+    AccumulatedStats[burst_id]->GetLastAllCounters(HWCsAtBegin); 
+    BurstStats[burst_id]->GetAllCounters(HWCsAtEnd);
 
     BurstHWCs.clear();
     for (it=HWCsAtEnd.begin(); it!=HWCsAtEnd.end(); ++it)

@@ -303,7 +303,28 @@ void Read_SPAWN_file (char *mpit_file, int current_ptask)
   strcat (spawn_file_name, EXT_SPAWN);
 
   if (file_exists(spawn_file_name))
+  {
+    /* Read the synchronization latency */
+    int i = 0;
+    FILE *fd = fopen(spawn_file_name, "r");
+    char line[256];
+    unsigned long long SpawnSyncLatency = 0;
+
+    fgets(line, sizeof(line), fd);
+    sscanf(line, "%llu", &SpawnSyncLatency);
+    fclose(fd);
+
+    for (i=0; i<nTraces; i++)
+    {
+      if (InputTraces[i].ptask == current_ptask)
+      {
+        InputTraces[i].SpawnOffset = SpawnSyncLatency;
+      }
+    }
+    
+    /* Load the intercommunicators table */
     intercommunicators_load (spawn_file_name, current_ptask);
+  }
 }
 
 
@@ -423,7 +444,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 
 	fclose (fd);
 
-        Read_SPAWN_file (file, *cptask);
+	Read_SPAWN_file (file, *cptask);
 }
 
 /******************************************************************************

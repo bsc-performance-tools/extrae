@@ -140,6 +140,10 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
     {
       Online_SetAnalysis(ONLINE_DO_SPECTRAL);
     }
+    else if (xmlStrcasecmp(analysis, RC_ONLINE_GREMLINS) == 0)
+    {
+      Online_SetAnalysis(ONLINE_DO_GREMLINS);
+    }
     else
     {
       mfprintf(stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>'%s'\n",
@@ -212,6 +216,9 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
       Parse_XML_SpectralAdvanced(rank, xmldoc, tag->xmlChildrenNode);
     }
 #endif
+    else if (!xmlStrcasecmp (tag->name, RC_ONLINE_GREMLINS))
+    {
+    }
     tag = tag->next;
   }
 }

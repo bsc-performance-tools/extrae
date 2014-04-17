@@ -155,11 +155,13 @@ int HWC_Get_Set_Counters_ParaverIds (int set_id, int **io_HWCParaverIds)
 	
 	/* Convert PAPI/PMAPI Ids to Paraver Ids */
 	for (i=0; i<num_counters; i++)
+	{
 #if defined(PMAPI_COUNTERS)
-        HWCIds[i] = HWC_COUNTER_TYPE(i, HWCIds[i]);
+		HWCIds[i] = HWC_COUNTER_TYPE(i, HWCIds[i]);
 #else
-        HWCIds[i] = HWC_COUNTER_TYPE(HWCIds[i]);
+		HWCIds[i] = HWC_COUNTER_TYPE(HWCIds[i]);
 #endif
+	}
 
     *io_HWCParaverIds = HWCIds;
     return num_counters;

@@ -328,6 +328,8 @@ static void BE_load_known_protocols()
 #if defined(HAVE_CLUSTERING)
   BE->LoadProtocol( (Protocol *)(new ClusteringWorker()) );
 #endif
+
+  BE->LoadProtocol( (Protocol *)(new GremlinsWorker()) );
 }
 
 

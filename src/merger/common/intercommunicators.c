@@ -85,6 +85,7 @@ void intercommunicators_load( char *spawns_file_path, int ptask )
   FILE *fd = fopen(spawns_file_path, "r");
   char line[256];
 
+  fgets(line, sizeof(line), fd); /* Skip the first line (the synchronization latency) */
   while (fgets(line, sizeof(line), fd)) 
   {
     int from_task, from_comm, to_spawn_group;

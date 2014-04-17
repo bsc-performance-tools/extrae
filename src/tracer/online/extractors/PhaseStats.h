@@ -31,6 +31,8 @@ void Dump();
 #if USE_HARDWARE_COUNTERS 
     void UpdateHWC(event_t *Ev);
     void GetCommonCounters(map<unsigned int, long unsigned int> &Counters);
+    void GetAllCounters(map<unsigned int, long unsigned int> &Counters);
+    void GetLastAllCounters(map<unsigned int, long unsigned int> &Counters);
     void GetLastCommonCounters(map<unsigned int, long unsigned int> &Counters);
     int  GetLastSet();
     int  GetFirstSet();

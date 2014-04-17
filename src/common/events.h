@@ -581,6 +581,7 @@ enum {
 #define CLUSTER_ID_EV            90000001
 #define CLUSTER_SUPPORT_EV       92000001
 #define SPECTRAL_PERIOD_EV       91000001
+#define GREMLIN_EV               93000001
 
 /* 
  * Values.
