@@ -1,0 +1,77 @@
+Juny 2008
+
+* Sembla que el merger paralel falla (en els casos que vam analitzar del Dimitri -> recv_init + start) usant tants processadors al traceig com al merge (usaven 32 pels dos casos).
+
+Maig 2008
+- La capsalera Paraver pot estar mal generada si el num_aplicacions > 1
+
+  sprintf (Header, "%d:%d),%d", threads, node, numero_comunicadors());
+  >> aqui el numero_comunicadors hauria de dependre de la ptask. Ara mateix s'hi passen tots els comunicadors, i pel que indica el bucle on esta hauria de ser per cada aplicacio / ptask.
+
+
+April 2008
+- Afegir una crida a la API que faci flush dels buffers a voluntat del client.
+- Quan hi ha canvi de grup de comptadors hardware estaria be posar els valors dels comptadors anteriors. La complicacio radica en els comptadors que son en el conjunt anterior i en el futur... no s'hauria de tocar res aqui.
+- Canviar de lloc la informacio dels nodes. Passar-ho del traceig al merge.
+
+18 Jan 2008
+- Separar el traceig en els seus components
+- A dimemas li falta: -> callers
+- MPIT gathering, comprovar si funciona sota condicions d final-directory, i temporal-directory
+- Les operacions colectives son un caos per a identificar el tamany enviat/rebut i qui es el root/si es root.
+- La instrumentacio de pthreads esta controlada pel tag <openmp> del XML? S'hauria de corregir
+- MPItrace_N_event a CELL
+- Els exemples no tenen perque copiar-se sencers. Per exemple, si no hi hi LL no cal copiar els exemples de LL, si no hi ha slurm no cal copiar els exemples d'slurm.
+- El atribut constructor i destructor ens permetria no invocar a MPItrace_init/MPItrace_fini ?
+  -> funciona,
+  --> comprovar com reduir l'esfors de tracejar a CELL (interposicio en el moment de crear el SPEthread?)
+  --> com fariem la comprovacio d'static + LD_PRELOAD
+- libompitrace per a fortran?
+- libomptrace per a c/fortran (i.e., seq+openmp)
+- (judit) Events duals en un mateix timestamp (reutilitzant un mateix event_t)
+- Hi ha uns MAX_FILEs corrent pel codi que alocaten vectors del tamany directament -> canviar-ho a malloc/realloc.
+
+03 Jan 2008
+
+- igual que es guarda el MPI_COMM_SELF/MPI_COMM_WORLD, s'hauria de guardar el MPI_PROC_NULL (nomes caldria en una sola task)
+- mirar de posar la task (i el node on corre) en els missatges de l'estil:
+mpi2prv ERROR: Failed to write to disk the trace file.
+mpi2prv ERROR: No space left on device
+
+22 Oct 2007
+
+- Mirar els warnings afegits per la separacio dels moduls sequencial/mpi
+- Traceja_Persisten_Request (versio C i Fortran unica?)
+- Fer "--disable-sequential / --enable-sequential"?
+- Analitzar Rice/Valgrind?
+
+20 Apr 2007
+- Revisar si cal posar el PAPI_reset a cada consulta de PAPI.
+
+17 Apr 2007
+- Afegir "transaccions" per poder capturar les entrades i les sortides com una unica unitat
+    --> Sobre el mateix buffer de traceig gestionar punters CURRENT i COMMITTED_CURRENT. Les macros de traceig avançan el primer i operació commit que avança el segon.
+
+10 Jan 2007
+
+- Flush en els shutdowns derivats del control de fitxer
+	--> rebobinar al principi a cadascun d'aquests shutdowns?
+- Instrumentacio de read/write -> mirar si es fan per shared library
+
+22 Nov 2006
+
+- MN: que passa amb les lectures de comptadors (PAPI_TOT_CYC)
+- Poner contadores RUsage y MPIstats con TRACE_N_MISCEVENT.
+- Modificar el flush para poder tracear eventos despues del flush sin provocar un bucle infinito. Revisar que el traceo de MPI stats, RUsage y contadores Myrinet no de problemas.
+- Limpiar codigo de las libs de contadores de GM / MX.
+- Poner numero de version en los MPITs.
+- Poner el tiempo de entrada y salida correcto en las llamadas MPI_Comm_xxxx. Leer contadores en esos puntos si no esta hecho ya.
+- Reasignacion de numeros de evento.
+- Recuperar pDiTools.
+- MPIDtrace con libs .so en AIX.
+- Comunicadors amb temps d'entrada i sortida correctes (i comptadors).
+- Traces de 100Ks.
+- Treure PAPI HWC del merger.
+- Separar la union del event_t.
+- /proc te informacio sobre {xarxa,memoria,...}. Potser hi ha informacio interessant per posar a la trasa.
+

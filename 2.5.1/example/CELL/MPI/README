@@ -1,0 +1,16 @@
+
+So as to run the example, simply issue:
+
+> gmake
+
+ -- in order to make the target application.
+
+> ./run.sh
+
+ -- will run & instrument the application using 4 SPUs
+
+> ./merge.sh
+
+ -- to generate a Paraver trace file using the intermediate files obtained in the previous command.
+
+

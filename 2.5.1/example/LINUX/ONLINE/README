@@ -1,0 +1,68 @@
+Introduction
+============
+
+This tracing setup is tailored towards long MPI executions that are producing large traces. The application is repeatedly analyzed, using clustering techniques, until a representative period is found. A detailed trace of that region is then produced, along with several periodic performance reports.
+
+As the analysis progresses, performance reports are produced for consecutive time intervals of the application. The last set of reports corresponds with the traced interval. Please note the trace does not represent the whole execution, but the representative period only. The different outputs produced are detailed below.
+
+This system should not be used for very small executions, as results might not be accurate.
+
+Compilation of the test program
+===============================
+
+Simply issue:
+> gmake
+
+Run the application
+===================
+
+Submit the following job:
+> mnsubmit ./run.cmd
+
+Generate a Paraver trace
+========================
+
+Merge the intermediate files (*.mpit, *.mrn) obtained from the execution with:
+> ./merge.sh
+
+Adapt the example to your own application
+=========================================
+
+These are the basic steps you have to follow in order to use your own application:
+
+1. Edit run.cmd
+
+   1.1. Change the application binary (APPL_NAME) and number of tasks to run with (APPL_NPROCS). 
+        If your binary takes parameters, you can add them next to the binary name. 
+
+   1.2. Request more resources than those used by the application itself, with the #@total_tasks directive.
+        At least, 1 extra task is required. The more tasks used by the application, the more extra tasks you should set.
+        For guidance, with applications using:
+		- >=128 tasks, set >=4 extra tasks. 
+		- >=512 tasks, set >=8 extra tasks. 
+
+2. Advanced users might want to tune the tracing and clustering configuration, editing mpitrace.xml and cl.I.IPC.xml respectively. 
+   Some important parameters that can be set in mpitrace.xml, section 'trace-control > remote-control > mrnet':
+   - target: Allows to specify the final trace size (250 Mb by default)
+   - start-after: Idle seconds before the analysis starts. This is meant to skip the initialization phase (30 secs by default).
+
+3. The path in the variable EXTRAE_HOME, that points to the installation of the tracing package, might need to be updated in the different scripts (run.cmd, trace.sh and merge.sh) to select between the 32/64-bit version of the package.
+
+Results
+=======
+
+- Scatter plots (*.cl_IPC.Native_Instr.gnuplot)
+	GNUplot scripts that draw a scatter plot characterizing the application's general structure. All computing bursts are grouped according their similarity in terms of duration and performance counters. In the example, we use the metrics 'IPC' and 'Instructions completed' for the analysis, as they bring insight on the overall complexity and performance of the application. If you want to use a different set of metrics, you can change this setting in the configuration file cl.I.IPC.xml.
+
+- Counters report per cluster (*.clusters_info.csv)
+	A report with the average values of the different metrics and a counters extrapolation per cluster. This information can be loaded into Excel/oocalc using the template 'CPIStackDetailed.xls' for extra charts and tables.
+
+- CPIstack graphs (*.cpistack_*.gnuplot)
+    Graphs that depict the percentage of cycles in which the processor is completing work or stalled. The stall component is further decomposed into the possible causes (empty pipeline, waiting for memory, arithmetic or floating point units, etc.). These are presented in two levels of detail: a general view (*.cpistack_general.gnuplot) and a detailed decomposition (*.cpistack_detailed.gnuplot).
+
+- Sequences of plots & graphs
+	Sequences of scatter plots (CLUSTERS_PLOTS) and CPIstack graphs (CPISTACK_GENERAL, CPISTACK_DETAIL) showing snapshots of the evolution of the state of the application at the different analysis steps until a representative period is found.
+
+- Paraver trace
+	The execution produces 1 trace file per task (*.mpit), which can later be merged (see "Generate a Paraver trace" section above) to produce the final Paraver trace. This trace comprises a representative interval of the whole execution, where every computing burst has been labeled with the cluster to whom it belongs to. You can see the distribution of clusters over time in Paraver loading the configuration file: 'General > views > clusterID.cfg'.
+
