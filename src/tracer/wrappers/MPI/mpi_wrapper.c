@@ -803,10 +803,6 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm inter
     PMPI_Bcast( &num_parents, 1, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
     PMPI_Bcast( all_parents_ranks, num_parents, MPI_INT, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
 
-    /* Send the synchronization time */
-    ChildSpawnOffset = SpawnOffset + (SpawnStartTime - getApplBeginTime());
-    PMPI_Bcast ( &ChildSpawnOffset, 1, MPI_UNSIGNED_LONG_LONG, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
-
     /* Register each child parent_comm_id in the spawns list */
     if (my_rank == 0)
     {
@@ -826,6 +822,10 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm inter
         fclose(fd);
       }
     }
+
+    /* Send the synchronization time */
+    ChildSpawnOffset = SpawnOffset + (TIME - getApplBeginTime()); /* Changed SpawnStartTime to TIME to see the synchronization at the end of the spawn call */ 
+    PMPI_Bcast ( &ChildSpawnOffset, 1, MPI_UNSIGNED_LONG_LONG, (my_rank == 0 ? MPI_ROOT : MPI_PROC_NULL), intercomm );
 
     /* Synchronize with the MPI_Init of the spawned tasks (see complementary barrier at MPI_Init) */
 #if defined(DEBUG_SPAWN)

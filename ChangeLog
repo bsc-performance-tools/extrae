@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 25Apr2014 Changed the synchronization point for spawned processes from the start of the spawn call to the end.
  * 17Apr2014 MPI_Comm_spawn*: added time synchronization, fixed communications from child to parent.
              Online clustering: pass all counters to the clustering library, not only the common ones.
              Added online gremlins. 
