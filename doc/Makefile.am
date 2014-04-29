@@ -33,17 +33,11 @@ endif
 
 install-exec-hook: $(manual_ug).ps $(manual_ug).pdf
 	$(MKDIR_P) $(DESTDIR)$(datadir)/doc
-if BUILD_DOCS_PS
 	cp $(manual_ug).ps $(DESTDIR)$(datadir)/doc
-if BUILD_DOCS_PDF
 	cp $(manual_ug).pdf $(DESTDIR)$(datadir)/doc
-endif
-endif
-if BUILD_HTML_DOCS
 	$(MKDIR_P) $(DESTDIR)$(datadir)/doc/html
 	cp user-guide/user-guide.html user-guide/user-guide.css user-guide/*.png $(DESTDIR)$(datadir)/doc/html
 	ln -f $(DESTDIR)$(datadir)/doc/html/user-guide.html $(DESTDIR)$(datadir)/doc/html/index.html
-endif
 
 clean:
 	@echo Nothing to be done by default. If you want to clean the documentation issue make clean-documentation.
