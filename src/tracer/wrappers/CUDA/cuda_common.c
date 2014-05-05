@@ -546,11 +546,12 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation (2);
-	Probe_Cuda_StreamBarrier_Entry ();
-
 	strid = Extrae_CUDA_SearchStream (devid,
 	  Extrae_CUDA_saved_params[THREADID].css.stream);
+
+	Backend_Enter_Instrumentation (2);
+	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
+
 	if (strid == -1)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot determine stream index in cudaStreamSynchronize\n");
@@ -582,7 +583,7 @@ void Extrae_cudaStreamSynchronize_Exit (void)
 
 	/* Emit one thread synchronize per stream (begin event) */
 	Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, strid,
-	  CUDATHREADBARRIER_GPU_EV, EVT_BEGIN, 0, 0);
+	  CUDATHREADBARRIER_GPU_EV, EVT_END, 0, 0);
 
 	Extrae_CUDA_FlushStream (devid, strid);
 	Extrae_CUDA_SynchronizeStream (devid, strid);

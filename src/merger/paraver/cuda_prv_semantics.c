@@ -100,6 +100,10 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
 	}
 
+	if (EvType == CUDASTREAMBARRIER_EV)
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDASTREAMBARRIER_THID_EV, 1+Get_EvMiscParam(current_event));
+
 	return 0;
 }
 

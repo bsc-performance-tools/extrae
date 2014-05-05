@@ -122,7 +122,7 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			fprintf (fd, "%d cudaThreadSynchronize\n", CUDATHREADBARRIER_EV - CUDABASE_EV);
 
 		if (inuse[CUDASTREAMBARRIER_INDEX])
-			fprintf (fd, "%d cudaStreamynchronize\n", CUDASTREAMBARRIER_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaStreamSynchronize\n", CUDASTREAMBARRIER_EV - CUDABASE_EV);
 
 		if (inuse[CUDAMEMCPYASYNC_INDEX])
 			fprintf (fd, "%d cudaMemcpyAsync\n", CUDAMEMCPYASYNC_EV - CUDABASE_EV);
@@ -140,5 +140,11 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			              "%d   %d    cudaMemcpy size\n"
 			              "\n",
 			              0, CUDAMEMCPY_SIZE_EV);
+
+		if (inuse[CUDASTREAMBARRIER_INDEX])
+			fprintf (fd, "EVENT_TYPE\n"
+			             "%d    %d    Synchronized stream (on thread)\n"
+                         "\n",
+                         0, CUDASTREAMBARRIER_THID_EV);
 	}
 }

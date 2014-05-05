@@ -119,11 +119,11 @@ void Probe_Cuda_ThreadBarrier_Exit (void)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDATHREADBARRIER_EV, EVT_END, EMPTY); 
 }
 
-void Probe_Cuda_StreamBarrier_Entry (void)
+void Probe_Cuda_StreamBarrier_Entry (unsigned threadid)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDASTREAMBARRIER_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDASTREAMBARRIER_EV, EVT_BEGIN, threadid);
 }
 
 void Probe_Cuda_StreamBarrier_Exit (void)

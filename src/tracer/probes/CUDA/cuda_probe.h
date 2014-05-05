@@ -40,7 +40,7 @@ void Probe_Cuda_MemcpyAsync_Entry (size_t size);
 void Probe_Cuda_MemcpyAsync_Exit (void);
 void Probe_Cuda_ThreadBarrier_Entry (void);
 void Probe_Cuda_ThreadBarrier_Exit (void);
-void Probe_Cuda_StreamBarrier_Entry (void);
+void Probe_Cuda_StreamBarrier_Entry (unsigned thread);
 void Probe_Cuda_StreamBarrier_Exit (void);
 void Probe_Cuda_DeviceReset_Enter (void);
 void Probe_Cuda_DeviceReset_Exit (void);
