@@ -291,6 +291,10 @@ bool AnalysisRound()
     {
       FE->Dispatch("TDBSCAN", done);
     }
+    else if (Online_GetAnalysis() == ONLINE_DO_GREMLINS)
+    {
+      FE->Dispatch("GREMLINS", done);
+    }
     return done;
   }
   else

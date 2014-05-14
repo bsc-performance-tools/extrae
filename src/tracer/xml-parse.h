@@ -136,6 +136,9 @@
 #define CLUSTERING_MAX_POINTS           ((xmlChar*) "max_points")
 #define CLUSTERING_CONFIG               ((xmlChar*) "config")
 #define RC_ONLINE_GREMLINS              ((xmlChar*) "gremlins")
+#define GREMLINS_START                  ((xmlChar*) "start")
+#define GREMLINS_INCREMENT              ((xmlChar*) "increment")
+#define GREMLINS_ROUNDTRIP              ((xmlChar*) "roundtrip")
 
 #define TRACE_MERGE                     ((xmlChar*) "merge")
 #define TRACE_MERGE_SYNCHRONIZATION     ((xmlChar*) "synchronization")

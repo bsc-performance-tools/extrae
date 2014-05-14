@@ -41,6 +41,15 @@ class GremlinsWorker : public BackProtocol
 
   private:
     STREAM *stGremlins;
+    int NumberOfGremlins;
+    int MinGremlins;
+    int MaxGremlins;
+    int Loops;
+    int Roundtrip;
+    int TargetGremlins;
+
+    void SwitchSome(int GremlinsToChange);
+
 };
 
 #endif /* __GREMLINS_WORKER_H__ */

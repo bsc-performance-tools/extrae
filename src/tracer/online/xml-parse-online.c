@@ -218,6 +218,25 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #endif
     else if (!xmlStrcasecmp (tag->name, RC_ONLINE_GREMLINS))
     {
+      xmlChar *start_str     = xmlGetProp(tag, GREMLINS_START);
+      xmlChar *increment_str = xmlGetProp(tag, GREMLINS_INCREMENT);
+      xmlChar *roundtrip_str = xmlGetProp(tag, GREMLINS_ROUNDTRIP);
+
+      if (start_str != NULL)
+      {
+        Online_SetGremlinsStartCount ( atoi((const char *)start_str) );
+      }
+      if (increment_str != NULL)
+      {
+        Online_SetGremlinsIncrement ( atoi((const char *)increment_str) );
+      }
+      if (roundtrip_str != NULL)
+      {
+        if (strcmp((const char *)roundtrip_str, "yes") == 0)
+        {
+          Online_SetGremlinsRoundtrip ( 1 );
+        }
+      }
     }
     tag = tag->next;
   }

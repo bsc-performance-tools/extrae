@@ -72,6 +72,10 @@ static double             cfgSpectralBurstThreshold           = DEFAULT_SPECTRAL
 static char *cfgClusteringConfig = (char *)DEFAULT_CLUSTERING_CONFIG; /* The clustering configuration xml file */
 #endif /* HAVE_CLUSTERING */
 
+static int cfgGremlinsStartCount = DEFAULT_GREMLINS_START_COUNT;
+static int cfgGremlinsIncrement  = DEFAULT_GREMLINS_INCREMENT;
+static int cfgGremlinsRoundtrip  = DEFAULT_GREMLINS_ROUNDTRIP;
+
 /**
  * Enables the online module.
  */
@@ -325,4 +329,35 @@ char * Online_GetClusteringConfig( void )
 }
 
 #endif /* HAVE_CLUSTERING */
+
+
+void Online_SetGremlinsStartCount( int start_count )
+{
+  cfgGremlinsStartCount = start_count;
+}
+
+int Online_GetGremlinsStartCount( void )
+{
+  return cfgGremlinsStartCount;
+}
+
+void Online_SetGremlinsIncrement( int increment )
+{
+  cfgGremlinsIncrement = increment;
+}
+
+int Online_GetGremlinsIncrement( void )
+{
+  return cfgGremlinsIncrement;
+}
+
+void Online_SetGremlinsRoundtrip( int enabled ) 
+{
+  cfgGremlinsRoundtrip = enabled;
+}
+
+int Online_GetGremlinsRoundtrip( void )
+{
+  return cfgGremlinsRoundtrip;
+}
 

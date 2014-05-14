@@ -38,6 +38,7 @@ static char UNUSED rcsid[] = "$Id: GremlinsWorker.cpp 2459 2014-01-31 13:13:36Z 
 #include "GremlinsWorker.h"
 #include "clock.h"
 #include "online_buffers.h"
+#include "OnlineConfig.h"
 
 /**
  * Receives the streams used in this protocol.
@@ -45,22 +46,113 @@ static char UNUSED rcsid[] = "$Id: GremlinsWorker.cpp 2459 2014-01-31 13:13:36Z 
 void GremlinsWorker::Setup()
 {
   Register_Stream(stGremlins);
-}
 
-int NumberOfGremlins = 0;
+  char *env_max_gremlins = getenv("N_CONTS");
+  
+  MinGremlins      = 0;
+  MaxGremlins      = atoi((const char *)env_max_gremlins);
+  NumberOfGremlins = Online_GetGremlinsStartCount();
+  TargetGremlins   = (Online_GetGremlinsIncrement() > 0 ? MaxGremlins : MinGremlins );
+  Roundtrip        = (TargetGremlins > MinGremlins ? 1 : -1);
+
+  if (NumberOfGremlins > MaxGremlins)
+  {
+    NumberOfGremlins = MaxGremlins;
+  }
+
+  TRACE_ONLINE_EVENT(TIME, GREMLIN_EV, NumberOfGremlins);
+  
+  fprintf(stderr, "GremlinsWorker:: StartingGremlins=%d\n", NumberOfGremlins);
+  SwitchSome( NumberOfGremlins );
+
+  Loops = 0;
+}
 
 /**
  * Back-end side of the Gremlins analysis.
  */
 int GremlinsWorker::Run()
 {
-  NumberOfGremlins ++;
+  int CurrentGremlins = NumberOfGremlins;
+
+  if ((CurrentGremlins == TargetGremlins) && (Online_GetGremlinsRoundtrip()))
+  {
+    Roundtrip = Roundtrip * -1;
+    TargetGremlins = CurrentGremlins + (MaxGremlins * Roundtrip);
+    Loops ++;
+    if (Loops == 2)
+    {
+      return 1;
+    }
+  }
+
+  int GremlinsToChange = Online_GetGremlinsIncrement() * Roundtrip;
+  if (CurrentGremlins + GremlinsToChange < MinGremlins)
+  {
+    GremlinsToChange = CurrentGremlins * -1;
+  }
+  else if (CurrentGremlins + GremlinsToChange > MaxGremlins)
+  {
+    GremlinsToChange = MaxGremlins - CurrentGremlins; 
+  }
+
+  NumberOfGremlins = CurrentGremlins + GremlinsToChange;
+  fprintf(stderr, "GremlinsWorker:: Run: CurrentGremlins=%d NextGremlins=%d Increment=%d\n", CurrentGremlins, NumberOfGremlins, GremlinsToChange);
 
   TRACE_ONLINE_EVENT(TIME, GREMLIN_EV, NumberOfGremlins);
-  fprintf(stderr, "[DEBUG-GREMLINS %d] Online sending signal\n", getpid());
 
-  kill(getpid(), SIGUSR1);
+  SwitchSome( GremlinsToChange );
 
   return 0;
 }
+
+void GremlinsWorker::SwitchSome(int GremlinsToChange)
+{
+  char env_extrae_online_gremlins[1024];
+  snprintf(env_extrae_online_gremlins, 1024, "%s=%d", "EXTRAE_ONLINE_GREMLINS", GremlinsToChange);
+  putenv(env_extrae_online_gremlins);
+
+  if (GremlinsToChange != 0)
+  {
+    kill(getpid(), SIGUSR1);
+  }
+}
+
+#if 0
+int GremlinsWorker::Run()
+{
+  if ((StopPhase) && (NumberOfGremlins == 0))
+  {
+    return 1;
+  }
+
+  fprintf(stderr, "[DEBUG-GREMLINS %d] Online CurrentGremlins=%d MaxGremlins=%d\n", getpid(), NumberOfGremlins, MaxGremlins);
+
+  if (StartPhase)
+  {
+    if (NumberOfGremlins >= MaxGremlins)
+    {
+      StopPhase = true;
+      StartPhase = false;
+    }
+    else
+    {
+      NumberOfGremlins ++;
+      kill(getpid(), SIGUSR1);
+    }
+
+  }
+  if (StopPhase)
+  {
+    if (NumberOfGremlins > 0)
+    {
+      NumberOfGremlins --;
+      kill(getpid(), SIGUSR2);
+    }
+  }
+  TRACE_ONLINE_EVENT(TIME, GREMLIN_EV, NumberOfGremlins);
+
+  return 0;
+}
+#endif
 

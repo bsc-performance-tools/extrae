@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 14May2014 Added support for activating/pausing gremlins at run-time and options in the xml file to configure a repetitive pattern
  * 05May2014 Fixes for additional CUDA/Dimemas simulations
  * 25Apr2014 Changed the synchronization point for spawned processes from the start of the spawn call to the end.
  * 17Apr2014 MPI_Comm_spawn*: added time synchronization, fixed communications from child to parent.
