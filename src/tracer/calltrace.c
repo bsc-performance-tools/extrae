@@ -61,9 +61,6 @@ void trace_callers (iotimer_t time, int offset, int type)
 	unw_cursor_t cursor;
 	unw_context_t uc;
 	unw_word_t ip;
-#if defined(MPICALLER_DEBUG)
-	unw_word_t sp;
-#endif
 
 	/* Check for valid CALLER types */
 	if (type != CALLER_MPI && type != CALLER_SAMPLING)
@@ -263,7 +260,8 @@ UINT64 get_caller (int offset)
 # include <pdsc.h>
 #endif
 
-void trace_mpi_callers(iotimer_t time, int offset) {
+void trace_mpi_callers(iotimer_t time, int offset)
+{
    CONTEXT contexto;
    int rc = 0, actual_deep = 1;
 
@@ -299,7 +297,8 @@ void trace_mpi_callers(iotimer_t time, int offset) {
 # include <ucontext.h>
 #endif
 
-void trace_callers(iotimer_t time, int offset, int type) {
+void trace_callers(iotimer_t time, int offset, int type)
+{
 	ucontext_t Contexto;
 	void *  InstructionPointer;
 	void ** StackFrame;
@@ -356,6 +355,8 @@ void trace_callers(iotimer_t time, int offset, int type) {
 
 UINT64 get_caller (int offset)
 {
+	UNREFERENCED_PARAMETER(offset);
+
 	/* TODO */
 	/* AIX ucontext */
    return 0;
@@ -374,10 +375,16 @@ void trace_callers (iotimer_t time, int offset, int type)
 {
 	/* TODO */
 	/* Solaris walkcontext */
+
+	UNREFERENCED_PARAMETER(time);
+	UNREFERENCED_PARAMETER(offset);
+	UNREFERENCED_PARAMETER(type);
 }
 
 UINT64 get_caller (int offset)
 {
+	UNREFERENCED_PARAMETER(offset);
+
 	return 0;
 }
 #endif

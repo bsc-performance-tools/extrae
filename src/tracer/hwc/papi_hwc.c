@@ -394,7 +394,7 @@ void PAPI_sampling_handler (int EventSet, void *address, long_long overflow_vect
 	UNREFERENCED_PARAMETER(context);
 	UNREFERENCED_PARAMETER(EventSet);
 
-	Extrae_SamplingHandler (address);
+	Extrae_SamplingHandler_PAPI(address);
 }
 #endif
 

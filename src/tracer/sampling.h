@@ -41,6 +41,7 @@ enum
 void setTimeSampling (unsigned long long period, unsigned long long variability, int sampling_type);
 void setTimeSampling_postfork (void);
 void Extrae_SamplingHandler (void* address);
+void Extrae_SamplingHandler_PAPI (void *address);
 
 int isSamplingEnabled(void);
 void setSamplingEnabled (int enabled);

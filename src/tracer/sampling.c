@@ -91,6 +91,16 @@ void Extrae_SamplingHandler (void* address)
 	}
 }
 
+void Extrae_SamplingHandler_PAPI (void* address)
+{
+	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	{
+		UINT64 temps = Clock_getCurrentTime_nstore();
+		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
+		trace_callers (temps, 8, CALLER_SAMPLING);
+	}
+}
+
 #if defined(IS_BGP_MACHINE) || defined(IS_BGQ_MACHINE)
 /* BG/P  & BG/Q */
 # if __WORDSIZE == 32
