@@ -50,7 +50,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "record.h"
 #include "events.h"
 
-static int CUDA_Call (event_t * current_event, unsigned long long current_time,
+static int CUDA_Call (event_t* event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset )
 {
@@ -58,8 +58,8 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 	unsigned EvType, EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
+	EvType  = Get_EvEvent (event);
+	EvValue = Get_EvValue (event);
 
 	switch (EvType)
 	{
@@ -87,35 +87,40 @@ static int CUDA_Call (event_t * current_event, unsigned long long current_time,
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	if (EvValue != EVT_END)
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EvType - CUDABASE_EV);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDACALL_EV, EvType - CUDABASE_EV);
 	else
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EVT_END);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDACALL_EV, EVT_END);
 
 	if (EvType == CUDAMEMCPY_EV || EvType == CUDAMEMCPYASYNC_EV)
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDAMEMCPY_SIZE_EV, Get_EvMiscParam(event));
 
 	if (EvType == CUDALAUNCH_EV)
 	{
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_EV, EvValue);
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDAFUNC_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDAFUNC_LINE_EV, EvValue);
 	}
 
 	if (EvType == CUDASTREAMBARRIER_EV)
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  CUDASTREAMBARRIER_THID_EV, 1+Get_EvMiscParam(current_event));
+		  CUDASTREAMBARRIER_THID_EV, 1+Get_EvMiscParam(event));
 
 	return 0;
 }
 
-static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_time,
+static int CUDA_GPU_Call (event_t *event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task,
 	unsigned int thread, FileSet_t *fset)
 {
 	unsigned EvType, EvValue, state;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
+	EvType  = Get_EvEvent (event);
+	EvValue = Get_EvValue (event);
 
 	switch (EvType)
 	{
@@ -141,17 +146,22 @@ static int CUDA_GPU_Call (event_t *current_event, unsigned long long current_tim
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	if (EvValue != EVT_END)
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EvType - CUDABASE_GPU_EV);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDACALL_EV, EvType - CUDABASE_GPU_EV);
 	else
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDACALL_EV, EVT_END);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDACALL_EV, EVT_END);
 
 	if (EvType == CUDAMEMCPY_GPU_EV || EvType == CUDAMEMCPYASYNC_EV)
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAMEMCPY_SIZE_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDAMEMCPY_SIZE_EV, Get_EvMiscParam(event));
 
 	if (EvType == CUDAKERNEL_GPU_EV)
 	{
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_EV, EvValue);
-		trace_paraver_event (cpu, ptask, task, thread, current_time, CUDAFUNC_LINE_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDAFUNC_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  CUDAFUNC_LINE_EV, EvValue);
 	}
 
 	return 0;

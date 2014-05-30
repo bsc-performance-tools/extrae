@@ -81,7 +81,7 @@ void Probe_Cuda_Memcpy_Entry (size_t size)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPY_EV, size, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPY_EV, EVT_BEGIN, size);
 }
 
 void Probe_Cuda_Memcpy_Exit (void)
@@ -95,7 +95,7 @@ void Probe_Cuda_MemcpyAsync_Entry (size_t size)
 {
 	DEBUG
 	if (mpitrace_on && Extrae_get_trace_CUDA())
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPYASYNC_EV, size, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, CUDAMEMCPYASYNC_EV, EVT_BEGIN, size);
 }
 
 void Probe_Cuda_MemcpyAsync_Exit (void)

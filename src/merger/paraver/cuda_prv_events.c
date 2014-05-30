@@ -100,7 +100,10 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 	int i;
 
 	for (i = 0; i < MAX_CUDA_INDEX; i++)
+	{
+		inuse[i] = TRUE;
 		anyused = anyused || inuse[i];
+	}
 
 	if (anyused)
 	{

@@ -346,9 +346,20 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 		else
 			utmp = last_time;
 
-		THREAD_TRACE_MISCEVENT (threadid, utmp,
-		  devices[devid].Stream[streamid].events[i],
-		  devices[devid].Stream[streamid].values[i], 0);
+		if (devices[devid].Stream[streamid].events[i] == CUDAMEMCPY_GPU_EV ||
+		    devices[devid].Stream[streamid].events[i] == CUDAMEMCPYASYNC_GPU_EV)
+		{
+			THREAD_TRACE_MISCEVENT (threadid, utmp,
+			  devices[devid].Stream[streamid].events[i],
+			  devices[devid].Stream[streamid].values[i],
+			  devices[devid].Stream[streamid].size[i]);
+		}
+		else
+		{
+			THREAD_TRACE_MISCEVENT (threadid, utmp,
+			  devices[devid].Stream[streamid].events[i],
+			  devices[devid].Stream[streamid].values[i], 0);
+		}
 
 		if (devices[devid].Stream[streamid].events[i] == CUDAMEMCPY_GPU_EV ||
 		    devices[devid].Stream[streamid].events[i] == CUDAMEMCPYASYNC_GPU_EV)
