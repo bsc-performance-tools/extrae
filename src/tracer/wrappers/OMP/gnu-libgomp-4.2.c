@@ -1090,9 +1090,9 @@ void GOMP_critical_name_start (void **p1)
 
 	if (GOMP_critical_name_start_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Lock_Entry(p1);
+		Extrae_OpenMP_Named_Lock_Entry();
 		GOMP_critical_name_start_real (p1);
-		Extrae_OpenMP_Named_Lock_Exit();
+		Extrae_OpenMP_Named_Lock_Exit(p1);
 	}
 	else if (GOMP_critical_name_start_real != NULL && !mpitrace_on)
 	{

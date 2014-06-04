@@ -124,9 +124,9 @@ void omp_set_lock (int *p1)
 	if (omp_set_lock_real != NULL && mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_Named_Lock_Entry(p1);
+		Probe_OpenMP_Named_Lock_Entry();
 		omp_set_lock_real (p1);
-		Probe_OpenMP_Named_Lock_Exit();
+		Probe_OpenMP_Named_Lock_Exit(p1);
 		Backend_Leave_Instrumentation ();
 	}
 	else if (omp_set_lock_real != NULL && !mpitrace_on)

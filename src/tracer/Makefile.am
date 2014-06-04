@@ -165,19 +165,27 @@ WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
 
 # Probes for OpenMP instrumentation
 WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
- wrappers/OMP/omp-common.c wrappers/OMP/omp-common.h \
- wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h
+ wrappers/OMP/omp-common.c wrappers/OMP/omp-common.h 
 EXTRA_OMP_CFLAGS =
+
+if WANT_OPENMP_OMPT
+WRAPPERS_OMP += wrappers/OMP/ompt-wrapper.c wrappers/OMP/ompt-helper.h wrappers/OMP/ompt-helper.c
+EXTRA_OMP_CFLAGS += -DOMPT_OPENMP
+
+else
+
+# These files are needed by intel/ibm/gnu openmp instrumentation, but not by OMPT
+WRAPPERS_OMP += wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h
 
 if WANT_OPENMP_INTEL
 WRAPPERS_OMP += wrappers/OMP/intel-kmpc-11.c wrappers/OMP/intel-kmpc-11.h
 EXTRA_OMP_CFLAGS += -DINTEL_OPENMP
-endif
+endif # WANT_OPENMP_INTEL
 
 if WANT_OPENMP_GNU
 WRAPPERS_OMP += wrappers/OMP/gnu-libgomp-4.2.c wrappers/OMP/gnu-libgomp-4.2.h
 EXTRA_OMP_CFLAGS += -DGNU_OPENMP
-endif
+endif # WANT_OPENMP_GNU
 
 if ARCH_POWERPC
 if OS_LINUX
@@ -185,9 +193,11 @@ if WANT_OPENMP_IBM
  WRAPPERS_OMP += wrappers/OMP/ibm-xlsmp-1.6.c wrappers/OMP/ibm-xlsmp-1.6.h
  EXTRA_OMP_CFLAGS += -I/usr/src/linux
  EXTRA_OMP_CFLAGS += -DIBM_OPENMP
-endif
-endif
-endif
+endif # ARCH_POWERPC
+endif # OS_LINUX
+endif # WANT_OPENMP_IBM
+
+endif # WANT_OPENMP_OMPT
 
 # Wrappers for TRT instrumentation (experimental)
 WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c wrappers/TRT/trt_wrapper.h \

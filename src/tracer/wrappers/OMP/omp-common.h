@@ -54,8 +54,8 @@ void Extrae_OpenMP_Single_Entry (void);
 void Extrae_OpenMP_Single_Exit (void);
 void Extrae_OpenMP_Section_Entry (void);
 void Extrae_OpenMP_Section_Exit (void);
-void Extrae_OpenMP_Named_Lock_Entry (void *name);
-void Extrae_OpenMP_Named_Lock_Exit (void);
+void Extrae_OpenMP_Named_Lock_Entry (void);
+void Extrae_OpenMP_Named_Lock_Exit (void *name);
 void Extrae_OpenMP_Named_Unlock_Entry (void *name);
 void Extrae_OpenMP_Named_Unlock_Exit (void);
 void Extrae_OpenMP_Unnamed_Lock_Entry (void);
@@ -72,5 +72,23 @@ void Extrae_OpenMP_TaskUF_Entry (void* uf);
 void Extrae_OpenMP_TaskUF_Exit (void);
 void Extrae_OpenMP_Taskwait_Entry (void);
 void Extrae_OpenMP_Taskwait_Exit (void);
+
+/* OMPT probes */
+
+void Extrae_OMPT_Critical_Entry (void);
+void Extrae_OMPT_Critical_Exit (void);
+void Extrae_OMPT_Atomic_Entry (void);
+void Extrae_OMPT_Atomic_Exit (void);
+void Extrae_OMPT_Loop_Entry (void);
+void Extrae_OMPT_Loop_Exit (void);
+void Extrae_OMPT_Workshare_Entry (void);
+void Extrae_OMPT_Workshare_Exit (void);
+void Extrae_OMPT_Sections_Entry (void);
+void Extrae_OMPT_Sections_Exit (void);
+void Extrae_OMPT_Single_Entry (void);
+void Extrae_OMPT_Single_Exit (void);
+void Extrae_OMPT_Master_Entry (void);
+void Extrae_OMPT_Master_Exit (void);
+
 
 #endif /* #define OMP_COMMON_H_INCLUDED */

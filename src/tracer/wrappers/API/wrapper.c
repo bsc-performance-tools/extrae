@@ -1569,9 +1569,11 @@ fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
 	Extrae_OpenCL_init (me);
 #endif
 
-
 #if defined(OMP_SUPPORT)
+
+#if !defined(OMPT_INSTRUMENTATION)
 	Extrae_OpenMP_init(me);
+#endif
 
 	/* Obtain the number of runnable threads in this execution.
 	   Just check for OMP_NUM_THREADS env var (if this compilation

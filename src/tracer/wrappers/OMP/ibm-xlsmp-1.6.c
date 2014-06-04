@@ -205,11 +205,19 @@ static void callme_single(void)
 # error "This file can only be compiled at linux/ppc nowadays!"
 #endif
 
+#ifdef __powerpc64__
+static atomic64_t atomic_index;
+#else
 static atomic_t atomic_index;
+#endif
 
 static void callme_section(char *p1, unsigned p2)
 {
+#ifdef __powerpc64__
+	int index = atomic64_inc_return (&atomic_index)-1;
+#else
 	int index = atomic_inc_return (&atomic_index)-1;
+#endif
 
 	if (index < num_real_sections[THREADID])
 	{
@@ -555,9 +563,9 @@ void _xlsmpGetSLock (void *p1)
 
 	if (_xlsmpGetSLock_real != NULL && mpitrace_on)
 	{
-		Extrae_OpenMP_Named_Lock_Entry(p1);
+		Extrae_OpenMP_Named_Lock_Entry();
 		_xlsmpGetSLock_real (p1);
-		Extrae_OpenMP_Named_Lock_Exit();
+		Extrae_OpenMP_Named_Lock_Exit(p1);
 	}
 	else if (_xlsmpGetSLock_real != NULL && !mpitrace_on)
 	{

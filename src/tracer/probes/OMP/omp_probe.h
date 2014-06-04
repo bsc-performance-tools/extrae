@@ -46,6 +46,8 @@ void Probe_OpenMP_Sections_Entry (void);
 void Probe_OpenMP_Sections_Exit (void);
 void Probe_OpenMP_Single_Entry (void);
 void Probe_OpenMP_Single_Exit (void);
+void Probe_OpenMP_Master_Entry (void);
+void Probe_OpenMP_Master_Exit (void);
 void Probe_OpenMP_Section_Entry(void);
 void Probe_OpenMP_Section_Exit (void);
 
@@ -59,8 +61,8 @@ void Probe_OpenMP_ParSections_Exit (void);
 void Probe_OpenMP_Barrier_Entry (void);
 void Probe_OpenMP_Barrier_Exit (void);
 
-void Probe_OpenMP_Named_Lock_Entry (void *name);
-void Probe_OpenMP_Named_Lock_Exit (void);
+void Probe_OpenMP_Named_Lock_Entry (void);
+void Probe_OpenMP_Named_Lock_Exit (void *name);
 void Probe_OpenMP_Named_Unlock_Entry (void *name);
 void Probe_OpenMP_Named_Unlock_Exit (void);
 void Probe_OpenMP_Unnamed_Lock_Entry (void);
@@ -81,5 +83,22 @@ void Probe_OpenMP_TaskUF_Entry (UINT64 uf);
 void Probe_OpenMP_TaskUF_Exit (void);
 void Probe_OpenMP_Taskwait_Entry (void);
 void Probe_OpenMP_Taskwait_Exit (void);
+
+/* OMPT probes */
+
+void Probe_OMPT_Critical_Entry (void);
+void Probe_OMPT_Critical_Exit (void);
+void Probe_OMPT_Atomic_Entry (void);
+void Probe_OMPT_Atomic_Exit (void);
+void Probe_OMPT_Loop_Entry (void);
+void Probe_OMPT_Loop_Exit (void);
+void Probe_OMPT_Workshare_Entry (void);
+void Probe_OMPT_Workshare_Exit (void);
+void Probe_OMPT_Sections_Entry (void);
+void Probe_OMPT_Sections_Exit (void);
+void Probe_OMPT_Single_Entry (void);
+void Probe_OMPT_Single_Exit (void);
+void Probe_OMPT_Master_Entry (void);
+void Probe_OMPT_Master_Exit (void);
 
 #endif

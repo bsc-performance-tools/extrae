@@ -178,15 +178,15 @@ void Extrae_OpenMP_Section_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_Named_Lock_Entry (void *name)
+void Extrae_OpenMP_Named_Lock_Entry (void)
 {
 	Backend_Enter_Instrumentation (2);
-	Probe_OpenMP_Named_Lock_Entry (name);
+	Probe_OpenMP_Named_Lock_Entry ();
 }
 
-void Extrae_OpenMP_Named_Lock_Exit (void)
+void Extrae_OpenMP_Named_Lock_Exit (void *name)
 {
-	Probe_OpenMP_Named_Lock_Exit ();
+	Probe_OpenMP_Named_Lock_Exit (name);
 	Backend_Leave_Instrumentation ();
 }
 
@@ -285,4 +285,93 @@ void Extrae_OpenMP_Taskwait_Exit (void)
 	Probe_OpenMP_Taskwait_Exit ();
 	Backend_Leave_Instrumentation ();
 }
+
+/*
+	OMPT added probes for OMPT events that do not match the previous events
+*/
+
+void Extrae_OMPT_Critical_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Critical_Entry ();
+}
+
+void Extrae_OMPT_Critical_Exit (void)
+{
+	Probe_OMPT_Critical_Exit();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OMPT_Atomic_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Atomic_Entry();	
+}
+
+void Extrae_OMPT_Atomic_Exit (void)
+{
+	Probe_OMPT_Atomic_Exit();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OMPT_Loop_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Loop_Entry();
+}
+
+void Extrae_OMPT_Loop_Exit (void)
+{
+	Probe_OMPT_Loop_Exit();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OMPT_Workshare_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Workshare_Entry ();
+}
+
+void Extrae_OMPT_Workshare_Exit (void)
+{
+	Probe_OMPT_Workshare_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OMPT_Sections_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Sections_Entry ();
+}
+
+void Extrae_OMPT_Sections_Exit (void)
+{
+	Probe_OMPT_Sections_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OMPT_Single_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Single_Entry ();
+}
+
+void Extrae_OMPT_Single_Exit (void)
+{
+	Probe_OMPT_Single_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OMPT_Master_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Master_Entry ();
+}
+
+void Extrae_OMPT_Master_Exit (void)
+{
+	Probe_OMPT_Master_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
 

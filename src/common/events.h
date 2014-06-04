@@ -456,6 +456,13 @@ enum {
 #define OMPSETNUMTHREADS_EV      60000030
 #define OMPGETNUMTHREADS_EV      60000031
 #define NAMEDCRIT_NAME_EV        60000032 /* Critical address name */
+#define OMPT_CRITICAL_EV         60000050
+#define OMPT_ATOMIC_EV           60000051
+#define OMPT_LOOP_EV             60000052
+#define OMPT_WORKSHARE_EV        60000053
+#define OMPT_SECTIONS_EV         60000054
+#define OMPT_SINGLE_EV           60000055
+#define OMPT_MASTER_EV           60000056
 
 /******************************************************************************
  *   User events to trace Pthread/TRT parallel execution.
@@ -599,6 +606,7 @@ enum {
 #define PAR_WSH_VAL              1 /* Parallel worksharing constructs : * PARALLEL DO */
 #define PAR_SEC_VAL              2 /* Parallel worksharing constructs : * PARALLEL SECTIONS */
 #define PAR_REG_VAL              3 /* Parallel region construct : * PARALLEL. */
+
 /* 
  * Worksharing construct values
  */
@@ -606,6 +614,7 @@ enum {
 #define WSH_DO_VAL               4 /* worksharing constructs : DO * and SECTIONS. */
 #define WSH_SEC_VAL              5 /* worksharing constructs : DO * and SECTIONS. */
 #define WSH_SINGLE_VAL           6 /* worksharing construct : SINGLE */ 
+#define WSH_MASTER_VAL           7 /* worksharing construct : MASTER */
 
 /* Workharing ending values */
 #define JOIN_WAIT_VAL            1
