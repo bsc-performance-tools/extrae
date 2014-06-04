@@ -51,7 +51,7 @@
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
     (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
 # define COMM_STATS_WRAPPER(x) \
-    MPI_stats_Wrapper (last_mpi_exit_time);
+    MPI_stats_Wrapper (x);
 #elif defined(PACX_SUPPORT)
 # define TRACING_BITMAP_VALID_EVTYPE(evttype) \
    ((evttype) == PACX_BSEND_EV || (evttype) == PACX_SSEND_EV || (evttype) == PACX_RSEND_EV || \
@@ -59,7 +59,7 @@
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
     (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
 # define COMM_STATS_WRAPPER(x) \
-    PACX_stats_Wrapper (last_mpi_exit_time);
+    PACX_stats_Wrapper (x);
 #else
 # define TRACING_BITMAP_VALID_EVTYPE(evttype)     (TRUE)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget) (TRUE)

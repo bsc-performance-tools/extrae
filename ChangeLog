@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 04Jun2014 Fixed bug in MPI statistics in burst mode: the resets were missing, and the timestamp of the events was wrong.
  + 04Jun2014 Preliminary OMPT support (tested with IBM OpenMP rte).
  + 14May2014 Added support for activating/pausing gremlins at run-time and options in the xml file to configure a repetitive pattern
  * 05May2014 Fixes for additional CUDA/Dimemas simulations

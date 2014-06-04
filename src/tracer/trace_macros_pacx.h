@@ -160,9 +160,10 @@
 		{ \
 			COPY_ACCUMULATED_COUNTERS_HERE(thread_id, burst_begin); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
-			COMM_STATS_WRAPPER(last_pacx_exit_time); \
+			COMM_STATS_WRAPPER(burst_begin.time); \
 			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
+			COMM_STATS_WRAPPER(burst_end.time); \
 			TRACE_PACX_CALLER (burst_end.time,evtvalue,offset) \
 			ACCUMULATED_COUNTERS_RESET(thread_id); \
 		} \
@@ -201,9 +202,10 @@
 				HARDWARE_COUNTERS_READ (thread_id, burst_begin, FALSE); \
 			} \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_begin); \
-			COMM_STATS_WRAPPER(last_pacx_exit_time); \
+			COMM_STATS_WRAPPER(burst_begin.time); \
 			HARDWARE_COUNTERS_READ (thread_id, burst_end, TRUE); \
 			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), burst_end); \
+			COMM_STATS_WRAPPER(burst_end.time); \
 			TRACE_PACX_CALLER (burst_end.time,evtvalue,offset) \
 		} \
 		else \
