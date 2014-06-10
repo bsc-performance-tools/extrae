@@ -628,8 +628,8 @@ struct OMPT_callbacks_st ompt_callbacks[] =
 	 CALLBACK_ENTRY (ompt_event_task_end, OMPT_event_task_end),
 	 CALLBACK_ENTRY (ompt_event_wait_taskwait_begin, OMPT_event_wait_taskwait_begin),
 	 CALLBACK_ENTRY (ompt_event_wait_taskwait_end, OMPT_event_wait_taskwait_end),
-	 CALLBACK_ENTRY (ompt_event_taskwait_begin, OMPT_event_taskwait_begin), /* 20 */
-	 CALLBACK_ENTRY (ompt_event_taskwait_end, OMPT_event_taskwait_end),
+	 //CALLBACK_ENTRY (ompt_event_taskwait_begin, OMPT_event_taskwait_begin), /* 20 */
+	 //CALLBACK_ENTRY (ompt_event_taskwait_end, OMPT_event_taskwait_end),
 	 CALLBACK_ENTRY (ompt_event_wait_taskgroup_begin, OMPT_event_wait_taskgroup_begin),
 	 CALLBACK_ENTRY (ompt_event_wait_taskgroup_end, OMPT_event_wait_taskgroup_end),
 	 CALLBACK_ENTRY (ompt_event_taskgroup_begin, OMPT_event_taskgroup_begin),

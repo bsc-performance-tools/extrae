@@ -321,6 +321,42 @@ static int Taskwait_Event (
 	return 0;
 }
 
+static int OMPT_event (event_t * current_event,
+	unsigned long long current_time,
+	unsigned cpu,
+	unsigned ptask,
+	unsigned task,
+	unsigned thread,
+	FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	switch (EvType)
+	{
+		case OMPT_CRITICAL_EV:
+		case OMPT_ATOMIC_EV:
+		case OMPT_SINGLE_EV:
+		case OMPT_MASTER_EV:
+		Switch_State (STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
+		break;
+
+		case OMPT_LOOP_EV:
+		case OMPT_WORKSHARE_EV:
+		case OMPT_SECTIONS_EV:
+		Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+		break;
+	}
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
 SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ WSH_EV, WorkSharing_Event },
 	{ PAR_EV, Parallel_Event },
@@ -335,6 +371,13 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ TASK_EV, Task_Event },
 	{ TASKWAIT_EV, Taskwait_Event },
 	{ TASKFUNC_EV, OpenMP_Function_Event },
+	{ OMPT_CRITICAL_EV, OMPT_event },
+	{ OMPT_ATOMIC_EV, OMPT_event },
+	{ OMPT_LOOP_EV, OMPT_event },
+	{ OMPT_WORKSHARE_EV, OMPT_event },
+	{ OMPT_SECTIONS_EV, OMPT_event },
+	{ OMPT_SINGLE_EV, OMPT_event },
+	{ OMPT_MASTER_EV, OMPT_event },
 	{ NULL_EV, NULL }
 };
 
