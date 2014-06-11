@@ -933,6 +933,7 @@ AC_DEFUN([AX_PROG_PAPI],
    AC_DEFINE([SAMPLING_SUPPORT], [1], [Enable Sampling])
 
    if test "${PAPI_ENABLED}" = "yes" ; then
+      PAPI_SAMPLING_ENABLED="no"
       AC_DEFINE([PAPI_COUNTERS], [1], [PAPI is used as API to gain access to CPU hwc])
       AC_DEFINE([NEW_HWC_SYSTEM], [1], [Enable HWC support])
       AC_MSG_NOTICE([PAPI and substrate libraries: ${PAPI_LIBS}])
@@ -946,11 +947,13 @@ AC_DEFUN([AX_PROG_PAPI],
             if test "${hardware_intr_sig}" = "yes" ; then
                AC_DEFINE([HAVE_HARDWARE_INTR_SIG], [1], [Use hardware_intr_sig field])
                AC_DEFINE([PAPI_SAMPLING_SUPPORT], [1], [Enable PAPI sampling support])
+               PAPI_SAMPLING_ENABLED="yes"
             else
                AC_CHECK_MEMBER([PAPI_component_info_t.hardware_intr],[support_comp_hw="yes"],[support_comp_hw="no"],[#include <papi.h>])
                if test "${support_comp_hw}" = "yes" ; then
                   AC_DEFINE([HAVE_COMPONENT_HARDWARE_INTR], [1], [Use hardware_intr in PAPI_component_info_t field])
                   AC_DEFINE([PAPI_SAMPLING_SUPPORT], [1], [Enable PAPI sampling support])
+                  PAPI_SAMPLING_ENABLED="yes"
                else
                   AC_MSG_NOTICE([Cannot determine how to check whether PAPI supports HW overflows! Will use software-based sampling.])
                fi
