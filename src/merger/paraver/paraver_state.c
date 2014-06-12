@@ -84,7 +84,7 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 
 	if (thread_info->nStates + 1 >= MAX_STATES)
 	{
-		fprintf(stderr, "mpi2rpv: Error! MAX states stack reached (%d:%d:%d)\n", ptask, task, thread);
+		fprintf(stderr, "mpi2prv: Error! MAX states stack reached (%d:%d:%d)\n", ptask, task, thread);
 		Dump_States_Stack(ptask, task, thread);
 		exit(-1);
 	}
