@@ -49,6 +49,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "paraver_state.h"
 #include "paraver_generator.h"
 
+// #define DEBUG_STATES
+
 static int Last_State = FALSE;
 static int *excluded_states = NULL;
 static int num_excluded_states = 0;
@@ -74,7 +76,8 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 	{
 		if (thread_info->nStates - 1 >= 0)
 		{
-			top_state = thread_info->State_Stack[--thread_info->nStates];
+			thread_info->nStates--;
+			top_state = Top_State (ptask, task, thread);
 		}
 		else
 		{
@@ -113,7 +116,8 @@ unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int
    {
      if (thread_info->nStates - 1 >= 0)
      {
-       top_state = thread_info->State_Stack[--thread_info->nStates];
+       thread_info->nStates--;
+       top_state = Top_State (ptask, task, thread);
      }
      else
      {
