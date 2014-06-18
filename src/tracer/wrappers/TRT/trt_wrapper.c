@@ -46,7 +46,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "trt_probe.h"
 
-#define DEBUG
+//#define DEBUG
 
 static void* (*threadSpawn_real)(void *fun, void *arg) = NULL;
 static void* (*threadRead_real)(void*) = NULL;

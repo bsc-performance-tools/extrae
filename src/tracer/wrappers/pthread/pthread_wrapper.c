@@ -60,7 +60,9 @@ static int (*pthread_create_real)(pthread_t*,const pthread_attr_t*,void *(*) (vo
 static int (*pthread_join_real)(pthread_t,void**) = NULL;
 static int (*pthread_detach_real)(pthread_t) = NULL;
 static void (*pthread_exit_real)(void*) = NULL;
+#ifndef OS_ANDROID
 static int (*pthread_barrier_wait_real)(pthread_barrier_t *barrier) = NULL;
+#endif
 
 static int (*pthread_mutex_lock_real)(pthread_mutex_t*) = NULL;
 static int (*pthread_mutex_trylock_real)(pthread_mutex_t*) = NULL;
@@ -108,11 +110,13 @@ static void GetpthreadHookPoints (int rank)
 	if (pthread_join_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_join in DSOs!!\n");
 
+#ifndef OS_ANDROID
   	/* Obtain @ for pthread_barrier_wait */
 	pthread_barrier_wait_real =
 		(int(*)(pthread_barrier_t *)) dlsym (RTLD_NEXT, "pthread_barrier_wait");
 	if (pthread_barrier_wait_real == NULL && rank == 0)
 		fprintf (stderr, PACKAGE_NAME": Unable to find pthread_barrier_wait in DSOs!!\n");
+#endif
 
 	/* Obtain @ for pthread_detach */
 	pthread_detach_real = (int(*)(pthread_t)) dlsym (RTLD_NEXT, "pthread_detach");
@@ -872,6 +876,7 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 	return res;
 }
 
+#ifndef OS_ANDROID
 int pthread_barrier_wait (pthread_barrier_t *barrier)
 {
 	int res;
@@ -901,7 +906,7 @@ int pthread_barrier_wait (pthread_barrier_t *barrier)
 	}
 	return res;
 }
-
+#endif /* OS_ANDROID */
 #endif /* PIC */
 
 /*

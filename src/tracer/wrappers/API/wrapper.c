@@ -2507,7 +2507,8 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 
 static void Extrae_getExecutableInfo (void)
 {
-#if defined(OS_LINUX)
+#if defined(OS_LINUX) || defined(OS_ANDROID) || defined(HAVE_PROC_MAPS)
+
 	FILE *mapsfile = fopen("/proc/self/maps", "r");
 
 	if (mapsfile == NULL)
@@ -2539,6 +2540,15 @@ static void Extrae_getExecutableInfo (void)
 	#undef LINE_SIZE
 
 	fclose(mapsfile);
+#else
+    if (TASKID == 0)
+    {
+        static Extrae_getExecutableInfo_first_time_call = 0;
+        if (!Extrae_getExecutableInfo_first_time_call)
+        {
+            fprintf (stderr, PACKAGE_NAME": Warning! File /proc/self/maps doesn't exist. Address translation may be limited.\n");
+        }
+    }
 #endif
 }
 

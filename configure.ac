@@ -70,6 +70,8 @@ case "${target_cpu}" in
 esac
 
 case "${target_os}" in
+  *android*) OperatingSystem="android"
+             AC_DEFINE([OS_ANDROID], [1], [Define if operating system is Android]) ;;
   linux*   ) OperatingSystem="linux"
              AC_DEFINE([OS_LINUX], [1], [Define if operating system is Linux]) ;;
   aix*     ) OperatingSystem="aix"
@@ -85,6 +87,15 @@ case "${target_os}" in
   darwin*  ) OperatingSystem="darwin"
              AC_DEFINE([OS_DARWIN], [1], [Define if operating system is Darwin]) ;;
 esac
+
+# Check if exist /proc/self/maps for address translation
+if test ${cross_compiling} == "no"; then
+    AC_CHECK_FILE(
+        [/proc/self/maps],
+        [AC_DEFINE([HAVE_PROC_MAPS],[1],[Define if have /proc/self/maps])],
+        AC_MSG_WARN(["/proc/self/maps" not found. Address translation may be not fully supported.])
+    )
+fi
 
 # Initialize automake
 AM_INIT_AUTOMAKE
@@ -102,6 +113,7 @@ AM_CONDITIONAL(ARCH_IA64,    test "${Architecture}"    = "ia64"    )
 AM_CONDITIONAL(ARCH_ALPHA,   test "${Architecture}"    = "alpha"   )
 AM_CONDITIONAL(ARCH_MIPS,    test "${Architecture}"    = "mips"    )
   
+AM_CONDITIONAL(OS_ANDROID,   test "${OperatingSystem}" = "android" )
 AM_CONDITIONAL(OS_LINUX,     test "${OperatingSystem}" = "linux"   )
 AM_CONDITIONAL(OS_AIX,       test "${OperatingSystem}" = "aix"     )
 AM_CONDITIONAL(OS_DEC,       test "${OperatingSystem}" = "dec"     )

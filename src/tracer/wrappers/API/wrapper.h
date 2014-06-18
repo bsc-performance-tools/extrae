@@ -33,6 +33,9 @@
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef OS_ANDROID
+#include <pthread.h>
+#endif
 #include "clock.h"
 #include "threadid.h"
 #include "record.h"

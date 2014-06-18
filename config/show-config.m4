@@ -1,9 +1,11 @@
 # AX_SHOW_CONFIGURATION
 # --------------------
+# Cross compiling information:
+# http://www.gnu.org/savannah-checkouts/gnu/autoconf/manual/autoconf-2.69/html_node/Hosts-and-Cross_002dCompilation.html#Hosts-and-Cross_002dCompilation 
 AC_DEFUN([AX_SHOW_CONFIGURATION],
 [
-	if test "${host}" != "${target}" ; then
-		CROSSC="${host} to ${target}"
+	if test "${host}" != "${build}" ; then
+		CROSSC="${host} to ${build}"
 	else
 		if test "${IS_BGL_MACHINE}" = "yes" ; then
 			CROSSC="${host} with BG/L system support"

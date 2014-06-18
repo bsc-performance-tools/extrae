@@ -45,6 +45,12 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_UCONTEXT_H
 # include <ucontext.h>
 #endif
+
+#ifdef OS_ANDROID
+#warning "In case NDK doesn't provide ucontext you can download it from https://google-breakpad.googlecode.com/svn-history/r1000/trunk/src/client/linux/android_ucontext.h"
+# include <asm/android_ucontext.h>
+#endif
+
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
@@ -156,7 +162,7 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 
 #if defined(IS_BGP_MACHINE) || defined(IS_BGQ_MACHINE)
 	pc = (caddr_t)UCONTEXT_REG(uc, PPC_REG_PC);
-#elif defined(OS_LINUX)
+#elif defined(OS_LINUX) || defined(OS_ANDROID)
 # if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)
   pc = (caddr_t)sc->eip;
 # elif defined(ARCH_IA32) && defined(ARCH_IA32_x64)

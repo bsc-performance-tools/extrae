@@ -15,6 +15,10 @@ if IS_CELL_MACHINE
   SUBDIRS += spu
 endif
 
+if ! OS_ANDROID
+	LIBPTHREAD = -lpthread
+endif
+
 #
 # Libraries ending with c/f are for C/Fortran libraries. If not specified, 
 # they should contain symbols for both languages.
@@ -480,6 +484,9 @@ core_CFLAGS =
 if PTHREAD_SUPPORT_IN_ALL_LIBS
 core_CFLAGS += -DPTHREAD_SUPPORT
 endif
+if OS_ANDROID
+core_CFLAGS += -DHOST_NAME_MAX=255
+endif
 
 if SINGLE_MPI_LIBRARY
 MPITRACE_SYMBOLS= -DC_SYMBOLS -DFORTRAN_SYMBOLS
@@ -584,7 +591,7 @@ libupctrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) # -static 
 
-libptmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) -lpthread
+libptmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS) $(LIBPTHREAD)
 libptmpitracef_la_LDFLAGS = $(libptmpitrace_la_LDFLAGS) # -static 
 
 libpacxtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
@@ -610,7 +617,7 @@ libnanostrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libnanosmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libnanosmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
 
-libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) -lpthread
+libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(LIBPTHREAD)
 libtrttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)

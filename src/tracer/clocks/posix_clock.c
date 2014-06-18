@@ -40,7 +40,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include <clock.h>
 
 #if _POSIX_C_SOURCE < 199309L
+#ifndef OS_ANDROID
 # error "Looks like _POSIX_C_SOURCE is not appropriate to compile this file!"
+#endif
 #endif
 
 #include "posix_clock.h"

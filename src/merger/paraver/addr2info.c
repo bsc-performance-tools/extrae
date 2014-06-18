@@ -46,6 +46,8 @@ static char UNUSED rcsid[] = "$Id$";
 # include <libgen.h>
 #endif
 
+//#define DEBUG
+
 #if defined(NEED_ERRNO_LOCATION_PATCH)
 /* On some machines (BG/L for instance) this symbol is undefined but required by
    BFD library. */

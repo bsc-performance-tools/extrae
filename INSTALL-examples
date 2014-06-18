@@ -131,3 +131,24 @@ This platform is not supported
 ./configure --prefix=/Users/bsccns/T --with-mpi=/Users/bsccns/aplic/openmpi/1.4.4 --without-dyninst --without-papi --without-unwind --with-execinfo=/usr --with-bfd=/opt/local --with-liberty=/opt/local
 make
 make install
+
+
+ANDROID OS (Cross Compiling)
+--
+CFLAGS="--sysroot=${NDK_SROOT}" LDFLAGS="--sysroot=${NDK_SROOT}" ./configure \
+--host=arm-linux-androideabi \
+--prefix=... \
+--without-mpi \
+--with-papi=.../papi/ \
+--without-dyninst \
+--with-binutils=.../binutils/ \
+--with-unwind=.../libunwind/ \
+--without-boost \
+--with-xml-exec-prefix=.../xml/ \
+--with-libz=${NDK_SROOT}/usr/ \
+--disable-posix-clock \
+--enable-gettimeofday-clock \
+--enable-openmp \
+--with-opencl=${NDK_SROOT}/usr/
+
+make && make install

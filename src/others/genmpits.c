@@ -45,6 +45,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
 #endif
+#ifdef HAVE_LIMITS_H
+# include <limits.h> /* defines NAME_MAX */
+#endif
 
 #if defined(__APPLE__)
 # define NAME_MAX 512
