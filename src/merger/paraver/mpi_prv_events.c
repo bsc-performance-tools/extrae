@@ -59,6 +59,8 @@ struct t_prv_val_label
   char *label;
 };
 
+#define NUM_MPI_PRV_ELEMENTS 153    /* 127 */
+
 static struct t_event_mpit2prv event_mpit2prv[NUM_MPI_PRV_ELEMENTS] = {
 	{MPI_ALLGATHER_EV, MPITYPE_COLLECTIVE, MPI_ALLGATHER_VAL, FALSE}, /*   1 */
 	{MPI_ALLGATHERV_EV, MPITYPE_COLLECTIVE, MPI_ALLGATHERV_VAL, FALSE},       /*   2 */
@@ -211,7 +213,8 @@ static struct t_event_mpit2prv event_mpit2prv[NUM_MPI_PRV_ELEMENTS] = {
 	{MPI_FILE_WRITE_AT_EV, MPITYPE_IO, MPI_FILE_WRITE_AT_VAL, FALSE}, /* 149 */
 	{MPI_FILE_WRITE_AT_ALL_EV, MPITYPE_IO, MPI_FILE_WRITE_AT_ALL_VAL, FALSE}, /* 150 */
 	{MPI_COMM_SPAWN_EV, MPITYPE_COMM, MPI_COMM_SPAWN_VAL, FALSE}, /* 151 */
-	{MPI_COMM_SPAWN_MULTIPLE_EV, MPITYPE_COMM, MPI_COMM_SPAWN_MULTIPLE_VAL, FALSE} /* 152 */
+	{MPI_COMM_SPAWN_MULTIPLE_EV, MPITYPE_COMM, MPI_COMM_SPAWN_MULTIPLE_VAL, FALSE}, /* 152 */
+	{MPI_REQUEST_GET_STATUS_EV, MPITYPE_OTHER, MPI_REQUEST_GET_STATUS_VAL, FALSE}        /*  153 */
 };
 
 
@@ -300,6 +303,7 @@ static struct t_prv_val_label mpi_prv_val_label[NUM_MPI_PRV_ELEMENTS] = {
 	{MPI_WAITANY_VAL, MPI_WAITANY_LABEL},
 	{MPI_WAITSOME_VAL, MPI_WAITSOME_LABEL},
 	{MPI_PROBE_VAL, MPI_PROBE_LABEL},
+	{MPI_REQUEST_GET_STATUS_VAL, MPI_REQUEST_GET_STATUS_LABEL},
 	{MPI_IPROBE_VAL, MPI_IPROBE_LABEL},
 	{MPI_WIN_CREATE_VAL, MPI_WIN_CREATE_LABEL},
 	{MPI_WIN_FREE_VAL, MPI_WIN_FREE_LABEL},
@@ -392,14 +396,16 @@ static struct t_prv_val_label mpi_prv_val_label[NUM_MPI_PRV_ELEMENTS] = {
 };
 
 
-#define IPROBE_CNT_INDEX							0
-#define TIME_OUTSIDE_IPROBES_INDEX		1
-#define TEST_CNT_INDEX								2
-#define COLLECTIVE_INDEX              3
+#define IPROBE_CNT_INDEX                                    0
+#define TIME_OUTSIDE_IPROBES_INDEX                          1
+#define TEST_CNT_INDEX                                      2
+#define COLLECTIVE_INDEX                                    3
+#define MPI_REQUEST_GET_STATUS_CNT_INDEX                    4
+#define TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_INDEX           5
 
-#define MAX_SOFTCNT										4
+#define MAX_SOFTCNT                                         6
 
-int MPI_SoftCounters_used[MAX_SOFTCNT] = { FALSE, FALSE, FALSE, FALSE };
+int MPI_SoftCounters_used[MAX_SOFTCNT] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
 void Enable_MPI_Soft_Counter (unsigned int EvType)
 {
@@ -409,6 +415,10 @@ void Enable_MPI_Soft_Counter (unsigned int EvType)
 		MPI_SoftCounters_used[TIME_OUTSIDE_IPROBES_INDEX] = TRUE;
 	else if (EvType == MPI_TEST_COUNTER_EV)
 		MPI_SoftCounters_used[TEST_CNT_INDEX] = TRUE;
+    else if (EvType == MPI_REQUEST_GET_STATUS_COUNTER_EV)
+        MPI_SoftCounters_used[MPI_REQUEST_GET_STATUS_CNT_INDEX] = TRUE;
+    else if (EvType == MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV)
+        MPI_SoftCounters_used[TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_INDEX] = TRUE;
 	else if (EvType == MPI_REDUCE_EV || EvType == MPI_ALLREDUCE_EV ||
 	         EvType == MPI_BARRIER_EV || EvType == MPI_BCAST_EV ||
 	         EvType == MPI_ALLTOALL_EV || EvType == MPI_ALLTOALLV_EV ||
@@ -570,9 +580,11 @@ void MPITEvent_WriteEnabled_MPI_Operations (FILE * fd)
  *   Software counters labels
  ******************************************************************************/
 
-#define IPROBE_COUNTER_LBL       "MPI_Iprobe misses"
-#define TIME_OUTSIDE_IPROBES_LBL "Elapsed time outside MPI_Iprobe"
-#define TEST_COUNTER_LBL         "MPI_Test misses"
+#define IPROBE_COUNTER_LBL                          "MPI_Iprobe misses"
+#define TIME_OUTSIDE_IPROBES_LBL                    "Elapsed time outside MPI_Iprobe"
+#define TEST_COUNTER_LBL                            "MPI_Test misses"
+#define MPI_REQUEST_GET_STATUS_COUNTER_LBL          "MPI_Request_get_status counter"
+#define TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_LBL     "Elapsed time outside MPI_Request_get_status"
 
 void SoftCountersEvent_WriteEnabled_MPI_Operations (FILE * fd)
 {
@@ -610,6 +622,21 @@ void SoftCountersEvent_WriteEnabled_MPI_Operations (FILE * fd)
 		         MPI_GLOBAL_OP_COMM_LBL);
 		LET_SPACES (fd);
 	}
+	if (MPI_SoftCounters_used[MPI_REQUEST_GET_STATUS_CNT_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d    %d    %s\n\n", 0, 
+			MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_REQUEST_GET_STATUS_COUNTER_LBL);
+		LET_SPACES(fd);
+	}
+	if (MPI_SoftCounters_used[TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d    %d    %s\n\n", 0, 
+			MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_LBL);
+		LET_SPACES(fd);
+	}
+
 }
 
 void Translate_MPI_MPIT2PRV (int typempit, UINT64 valuempit, int *typeprv, UINT64 *valueprv)

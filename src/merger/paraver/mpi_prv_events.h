@@ -52,8 +52,6 @@ void Enable_MPI_Soft_Counter(unsigned int EvType);
 
 #define NUM_MPI_BLOCK_GROUPS  8     /* Dels 12, de moment nomes 8 son diferents */
 
-#define NUM_MPI_PRV_ELEMENTS 152    /* 127 */
-
 #if 0
 extern struct t_event_mpit2prv event_mpit2prv[];
 extern struct t_prv_type_info prv_block_groups[];

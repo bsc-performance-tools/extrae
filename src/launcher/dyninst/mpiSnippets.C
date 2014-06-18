@@ -125,6 +125,7 @@ static struct MPIroutines_t MPIroutines[] =
 		MPIROUTINE_C_T(PMPI_Scan),
 		MPIROUTINE_C_T(PMPI_Sendrecv),
 		MPIROUTINE_C_T(PMPI_Sendrecv_replace),
+		MPIROUTINE_C_T(PMPI_Request_get_status),
 #if defined(MPI_SUPPORTS_MPI_IO)
 		MPIROUTINE_C_T(PMPI_File_open),
 		MPIROUTINE_C_T(PMPI_File_close),
@@ -190,6 +191,7 @@ static struct MPIroutines_t MPIroutines[] =
 		MPIROUTINE_F_T(pmpi_scan, PMPI_SCAN),
 		MPIROUTINE_F_T(pmpi_sendrecv, PMPI_SENDRECV),
 		MPIROUTINE_F_T(pmpi_sendrecv_replace, PMPI_SENDRECV_REPLACE),
+		MPIROUTINE_F_T(PMPI_Request_get_status, PMPI_REQUEST_GET_STATUS),
 #if defined(MPI_SUPPORTS_MPI_IO)
 		MPIROUTINE_F_T(pmpi_file_open, PMPI_FILE_OPEN),
 		MPIROUTINE_F_T(pmpi_file_close, PMPI_FILE_CLOSE),

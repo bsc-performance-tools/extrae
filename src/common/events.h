@@ -286,6 +286,7 @@ enum {
 #define MPI_BSEND_INIT_EV            50000076
 #define MPI_RSEND_INIT_EV            50000077
 #define MPI_SSEND_INIT_EV            50000078
+#define MPI_REQUEST_GET_STATUS_EV    50000079
 
 #define MPI_GLOBAL_OP_SENDSIZE       (MPI_INIT_EV+100000)
 #define MPI_GLOBAL_OP_RECVSIZE       (MPI_INIT_EV+100001)
@@ -308,6 +309,8 @@ enum {
 
 #define MPI_IPROBE_COUNTER_EV        50000300
 #define MPI_TIME_OUTSIDE_IPROBES_EV  50000301
+#define MPI_REQUEST_GET_STATUS_COUNTER_EV               50000302
+#define MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV      50000303
 
 /******************************************************************************
  *   User events to trace several MPI functions.

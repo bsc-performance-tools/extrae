@@ -213,7 +213,8 @@ typedef enum
   MPI_FILE_WRITE_AT_VAL,
   MPI_FILE_WRITE_AT_ALL_VAL, /* 150 */
   MPI_COMM_SPAWN_VAL,
-  MPI_COMM_SPAWN_MULTIPLE_VAL
+  MPI_COMM_SPAWN_MULTIPLE_VAL,
+  MPI_REQUEST_GET_STATUS_VAL
 }
 MPIVal;
 
@@ -385,6 +386,7 @@ MPIVal;
 #define  MPI_FILE_READ_AT_ALL_LABEL        "MPI_File_read_at_all"
 #define  MPI_FILE_WRITE_AT_LABEL           "MPI_File_write_at"
 #define  MPI_FILE_WRITE_AT_ALL_LABEL       "MPI_File_write_at_all"
+#define  MPI_REQUEST_GET_STATUS_LABEL      "MPI_Request_get_status"
 
 
 #endif /* _MPI_EVENTENCODING_H */

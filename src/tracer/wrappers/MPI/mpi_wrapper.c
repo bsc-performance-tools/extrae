@@ -5452,6 +5452,95 @@ int MPI_Probe_C_Wrapper (int source, int tag, MPI_Comm comm, MPI_Status *status)
   return ierror;
 }
 
+/******************************************************************************
+ ***  MPI_Request_get_status_Wrapper
+ ******************************************************************************/
+int Bursts_MPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *status)
+{
+	int ierror;
+	/*
+	*   event : MPI_REQUEST_GET_STATUS_EV                     value : EVT_BEGIN
+	*   target : ---                          size  : ---
+	*   tag : ---
+	*/
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, request, EMPTY, EMPTY, EMPTY, EMPTY);
+
+    ierror = PMPI_Request_get_status(request, flag, status);
+	/*
+	*   event : MPI_REQUEST_GET_STATUS_EV                     value : EVT_END
+	*   target : ---                          size  : ---
+	*   tag : ---
+	*/
+    TRACE_MPIEVENT (TIME, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+}
+
+int Normal_MPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *status)
+{
+    static int MPI_Request_get_status_counter = 0;
+    static iotimer_t elapsed_time_outside_MPI_Request_get_status_C = 0, last_MPI_Request_get_status_C_exit_time = 0; 
+	iotimer_t begin_time, end_time;
+	int ierror;
+
+	begin_time = LAST_READ_TIME;
+
+	if (MPI_Request_get_status_counter == 0)
+	{
+		/* Primer request */
+		elapsed_time_outside_MPI_Request_get_status_C = 0;
+	}
+	else
+	{
+		elapsed_time_outside_MPI_Request_get_status_C += (begin_time - last_MPI_Request_get_status_C_exit_time);
+	}
+
+    ierror = PMPI_Request_get_status(request, flag, status);
+	end_time = TIME;
+	last_MPI_Request_get_status_C_exit_time = end_time;
+
+	if (tracejant_mpi)
+	{
+		if (*flag)
+		{
+			if (MPI_Request_get_status_counter != 0)
+			{
+				TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, elapsed_time_outside_MPI_Request_get_status_C);
+				TRACE_EVENT (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_counter);
+			}
+
+			TRACE_MPIEVENT (begin_time, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+    
+			TRACE_MPIEVENT (end_time, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+			MPI_Request_get_status_counter = 0;
+		} 
+		else
+		{
+			if (MPI_Request_get_status_counter == 0)
+			{
+				/* El primer request que falla */
+				TRACE_EVENTANDCOUNTERS (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, 0, TRUE);
+			}
+			MPI_Request_get_status_counter ++;
+		}
+	}
+	return ierror;
+
+}
+
+int MPI_Request_get_status_C_Wrapper(MPI_Request request, int *flag, MPI_Status *status)
+{
+    int ret;
+
+    if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+    {
+        ret = Bursts_MPI_Request_get_status(request, flag, status);
+    }
+    else
+    {
+        ret = Normal_MPI_Request_get_status(request, flag, status);
+    }
+
+}
 
 
 /******************************************************************************

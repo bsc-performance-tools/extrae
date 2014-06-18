@@ -786,6 +786,29 @@ void NAME_ROUTINE_C2F(mpi_probe) (MPI_Fint *source, MPI_Fint *tag,
   else
     CtoF77 (pmpi_probe) (source, tag, comm, status, ierror);
 }
+/******************************************************************************
+ ***  MPI_Request_get_status
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_request_get_status__,mpi_request_get_status_,MPI_REQUEST_GET_STATUS,mpi_request_get_status,(MPI_Request request, int *flag, MPI_Status *status))
+
+void NAME_ROUTINE_F(mpi_request_get_status) (MPI_Request request, int *flag, MPI_Status *status)
+#else
+void NAME_ROUTINE_C2F(mpi_request_get_status) (MPI_Request request, int *flag, MPI_Status *status)
+#endif
+{
+  if (mpitrace_on)
+  {
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
+    PMPI_Request_get_status_Wrapper (request, flag, status);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+  }
+  else
+    CtoF77 (pmpi_request_get_status) (request, flag, status);
+}
+
 
 
 /******************************************************************************
@@ -3113,6 +3136,25 @@ int NAME_ROUTINE_C(MPI_Probe) (int source, int tag, MPI_Comm comm,
 	}
 	else
 		return PMPI_Probe (source, tag, comm, status);
+}
+
+/******************************************************************************
+ *** MPI_Request_get_status 
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Request_get_status) (MPI_Request request, int *flag, MPI_Status *status)
+{
+	int res;
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
+		res = MPI_Request_get_status_C_Wrapper (request, flag, status);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+		return res;
+	}
+	else
+		return PMPI_Request_get_status(request, flag, status);
 }
 
 /******************************************************************************

@@ -354,8 +354,7 @@ int MPI_Allreduce_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 
 int MPI_Probe_C_Wrapper (int source, int tag, MPI_Comm comm, MPI_Status *status);
 
-int MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int *flag,
-  MPI_Status *status);
+int MPI_Request_get_status_C_Wrapper(MPI_Request request, int *flag, MPI_Status *status);
 
 int MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int *flag,
   MPI_Status *status);

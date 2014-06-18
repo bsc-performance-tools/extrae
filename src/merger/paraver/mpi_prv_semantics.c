@@ -100,6 +100,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_CART_CREATE_EV:
 		case MPI_CART_SUB_EV:
 		case MPI_CANCEL_EV:
+        case MPI_REQUEST_GET_STATUS_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:
@@ -928,6 +929,54 @@ int MPI_Start_Event (event_t * current_event, unsigned long long current_time,
 
 
 /******************************************************************************
+ ***  MPI_Request_get_status_SoftwareCounter_Event
+ ******************************************************************************/
+
+int MPI_Request_get_status_SoftwareCounter_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	Enable_MPI_Soft_Counter (EvType);
+
+	return 0;
+}
+
+/******************************************************************************
+ ***  MPI_ElapsedTimeOutsideRequest_get_status_Event
+ ******************************************************************************/
+
+int MPI_ElapsedTimeOutsideRequest_get_status_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType;
+	unsigned long long EvValue;
+	UINT64 elapsed_time;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	elapsed_time = Get_EvValue (current_event);
+	EvValue = (unsigned long long) (elapsed_time);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	Enable_MPI_Soft_Counter (EvType);
+
+	return 0;
+}
+
+
+/******************************************************************************
  ***  MPI_IProbeSoftwareCounter_Event
  ******************************************************************************/
 
@@ -960,7 +1009,7 @@ int MPI_ElapsedTimeOutsideIProbes_Event (event_t * current_event,
 {
 	unsigned int EvType;
 	unsigned long long EvValue;
-	double elapsed_time;
+	UINT64  elapsed_time;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -1038,6 +1087,7 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_REDUCE_EV, GlobalOP_event },
 	{ MPI_ALLREDUCE_EV, GlobalOP_event },
 	{ MPI_PROBE_EV, Other_MPI_Event },
+	{ MPI_REQUEST_GET_STATUS_EV, Other_MPI_Event },
 	{ MPI_IPROBE_EV, Other_MPI_Event },
 	{ MPI_BARRIER_EV, GlobalOP_event },
 	{ MPI_CANCEL_EV, Other_MPI_Event },
@@ -1082,6 +1132,8 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_COMM_DUP_EV, Other_MPI_Event },
 	{ MPI_CART_CREATE_EV, Other_MPI_Event },
 	{ MPI_CART_SUB_EV, Other_MPI_Event },
+    { MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_SoftwareCounter_Event },
+    { MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, MPI_ElapsedTimeOutsideRequest_get_status_Event },
 	{ MPI_IPROBE_COUNTER_EV, MPI_IProbeSoftwareCounter_Event },
 	{ MPI_TIME_OUTSIDE_IPROBES_EV, MPI_ElapsedTimeOutsideIProbes_Event },
 	{ MPI_TEST_COUNTER_EV, MPI_TestSoftwareCounter_Event },
