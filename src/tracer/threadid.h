@@ -36,6 +36,9 @@
 extern "C" {
 #endif
 
+void Extrae_set_threadid_function (unsigned (*threadid_function)(void));
+void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void));
+
 unsigned Extrae_get_thread_number (void);
 unsigned Extrae_get_num_threads (void);
 

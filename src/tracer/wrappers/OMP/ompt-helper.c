@@ -238,7 +238,7 @@ void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid)
 int Extrae_OMPT_get_tf_task_id_is_implicit (ompt_task_id_t ompt_tid)
 {
 	unsigned u;
-	int res;
+	int res = (1 == 0);
 
 	pthread_mutex_lock (&mutex_tid_tf);
 	for (u = 0; u < n_ompt_tids_tf; u++)

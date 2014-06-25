@@ -52,12 +52,18 @@ static char UNUSED rcsid[] = "$Id$";
 #define BARRIER_OMP_INDEX       7  /* Barriers */
 #define GETSETNUMTHREADS_INDEX  8  /* Set or Get num threads */
 #define TASK_INDEX              9  /* Task event */
-#define TASKWAIT_INDEX         10  /* Taskwait event */
+#define TASKWAIT_INDEX          10 /* Taskwait event */
+#define OMPT_CRITICAL_INDEX     11
+#define OMPT_ATOMIC_INDEX       12
+#define OMPT_LOOP_INDEX         13
+#define OMPT_WORKSHARE_INDEX    14
+#define OMPT_SECTIONS_INDEX     15
+#define OMPT_SINGLE_INDEX       16
+#define OMPT_MASTER_INDEX       17
 
-#define MAX_OMP_INDEX		11
+#define MAX_OMP_INDEX		18
 
-static int inuse[MAX_OMP_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 
-	FALSE, FALSE, FALSE, FALSE, FALSE };
+static int inuse[MAX_OMP_INDEX] = { FALSE };
 
 void Enable_OMP_Operation (int tipus)
 {
@@ -83,6 +89,18 @@ void Enable_OMP_Operation (int tipus)
 		inuse[TASK_INDEX] = TRUE;
 	else if (tipus == TASKWAIT_EV)
 		inuse[TASKWAIT_INDEX] = TRUE;
+
+#define ENABLE_TYPE_IF(x,type,v) \
+	if (x ## _EV == type) \
+		v[x ## _INDEX] = TRUE;
+
+	ENABLE_TYPE_IF(OMPT_CRITICAL, tipus, inuse);
+	ENABLE_TYPE_IF(OMPT_ATOMIC, tipus, inuse);
+	ENABLE_TYPE_IF(OMPT_LOOP, tipus, inuse);
+	ENABLE_TYPE_IF(OMPT_WORKSHARE, tipus, inuse);
+	ENABLE_TYPE_IF(OMPT_SECTIONS, tipus, inuse);
+	ENABLE_TYPE_IF(OMPT_SINGLE, tipus, inuse);
+	ENABLE_TYPE_IF(OMPT_MASTER, tipus, inuse);
 }
 
 #if defined(PARALLEL_MERGE)
@@ -212,5 +230,54 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 		fprintf (fd, "VALUES\n"
 		             "0 End\n"
 		             "1 Begin\n");
+	}
+	if (inuse[OMPT_CRITICAL_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d %d OMP critical\n"
+		             "VALUES\n0 End\n1 Begin\n",
+		         0, OMPT_CRITICAL_EV);
+	}
+	if (inuse[OMPT_ATOMIC_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d %d OMP atomic\n"
+		             "VALUES\n0 End\n1 Begin\n",
+		         0, OMPT_ATOMIC_EV);
+	}
+	if (inuse[OMPT_LOOP_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d %d OMP loop\n"
+		             "VALUES\n0 End\n1 Begin\n",
+		         0, OMPT_LOOP_EV);
+	}
+	if (inuse[OMPT_WORKSHARE_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d %d OMP workshare\n"
+		             "VALUES\n0 End\n1 Begin\n",
+		         0, OMPT_WORKSHARE_EV);
+	}
+	if (inuse[OMPT_SECTIONS_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d %d OMP sections\n"
+		             "VALUES\n0 End\n1 Begin\n",
+		         0, OMPT_SECTIONS_EV);
+	}
+	if (inuse[OMPT_SINGLE_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d %d OMP single\n"
+		             "VALUES\n0 End\n1 Begin\n",
+		         0, OMPT_SINGLE_EV);
+	}
+	if (inuse[OMPT_MASTER_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d %d OMP master\n"
+		             "VALUES\n0 End\n1 Begin\n",
+		         0, OMPT_MASTER_EV);
 	}
 }

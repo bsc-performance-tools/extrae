@@ -86,7 +86,7 @@ extern int threadGetID(void);
 
 unsigned Extrae_get_thread_number (void)
 {
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) && !defined(OMPT_INSTRUMENTATION)
 	return omp_get_thread_num();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num();
@@ -106,7 +106,7 @@ unsigned Extrae_get_thread_number (void)
 
 void * Extrae_get_thread_number_function (void)
 {
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) && !defined(OMPT_INSTRUMENTATION)
 	return (void*) omp_get_thread_num;
 #elif defined(SMPSS_SUPPORT)
 	return css_get_thread_num;
@@ -127,7 +127,7 @@ void * Extrae_get_thread_number_function (void)
 
 unsigned Extrae_get_num_threads (void)
 {
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) && !defined(OMPT_INSTRUMENTATION)
 	return omp_get_num_threads();
 #elif defined(SMPSS_SUPPORT)
 	return css_get_max_threads();

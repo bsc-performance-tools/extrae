@@ -14,18 +14,18 @@ AC_DEFUN([AX_CHECK_OPENMP],
 	if test "${enable_openmp}" = "yes" ; then
 		AX_OPENMP()
 
-		AC_ARG_WITH(openmp-ompt,
+		AC_ARG_ENABLE(openmp-ompt,
 		   AC_HELP_STRING(
-		      [--with-openmp-ompt=<header>],
-		      [Enable support for tracing OpenMP through OMPT interface - giving OMPT header file]
+		      [--enable-openmp-ompt],
+		      [Enable support for tracing OpenMP through OMPT interface]
 		   ),
-		   [with_openmp_ompt="${withval}"],
-		   [with_openmp_ompt="no"]
+		   [enable_openmp_ompt="${enableval}"],
+		   [enable_openmp_ompt="no"]
 		)
 
 		# OMP & other OpenMP instrumentations are not compatible
 
-		if test "${with_openmp_ompt}" = "no" ; then
+		if test "${enable_openmp_ompt}" = "no" ; then
 
 			AC_ARG_ENABLE(openmp-intel,
 			   AC_HELP_STRING(
@@ -56,15 +56,9 @@ AC_DEFUN([AX_CHECK_OPENMP],
 			enable_openmp_ibm="no"
 			enable_openmp_gnu="no"
 			enable_openmp_intel="no"
-
-			if test ! -r ${with_openmp_ompt} ; then
-				AC_MSG_ERROR([Cannot find OMPT header given by --with-openmp-ompt=])
-			fi
-
 			enable_openmp_ompt="yes"
 
 			AC_DEFINE([OMPT_INSTRUMENTATION], [1], [Define if OpenMP is instrumented through OMPT])
-			AC_DEFINE_UNQUOTED([OMPT_HEADER_LOCATION], "${with_openmp_ompt}", [Location of the OMPT header file])
 		fi
 
 	fi
@@ -95,9 +89,6 @@ AC_DEFUN([AX_OPENMP_SHOW_CONFIGURATION],
 		echo -e \\\tIBM OpenMP: ${enable_openmp_ibm}
 		echo -e \\\tIntel OpenMP: ${enable_openmp_intel}
 		echo -e \\\tOMPT: ${enable_openmp_ompt}
-		if test "${enable_openmp_ompt}" ; then
-			echo -e \\\t\\\tHeader file: ${with_openmp_ompt}
-		fi
 	else
 		echo OpenMP instrumentation: no
   fi

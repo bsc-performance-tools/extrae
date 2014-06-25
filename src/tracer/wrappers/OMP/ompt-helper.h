@@ -32,7 +32,7 @@
 
 #include "common.h"
 
-#include OMPT_HEADER_LOCATION
+#include "ompt-helper-defs.h"
 
 void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid, void *pf);
 void Extrae_OMPT_unregister_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid);
@@ -41,6 +41,10 @@ void * Extrae_OMPT_get_pf_parallel_id (ompt_parallel_id_t ompt_pid);
 void Extrae_OMPT_register_ompt_task_id_pf (ompt_task_id_t ompt_tid, void *pf);
 void Extrae_OMPT_unregister_ompt_task_id_pf (ompt_task_id_t ompt_tid);
 void * Extrae_OMPT_get_pf_task_id (ompt_task_id_t ompt_tid);
+
+void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, int implicit);
+void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid);
+void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid);
 int Extrae_OMPT_get_tf_task_id_is_implicit (ompt_task_id_t ompt_tid);
 
 #endif /* OMPT_HELPER_H_INCLUDED */

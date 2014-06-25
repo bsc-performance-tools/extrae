@@ -173,7 +173,8 @@ WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
 EXTRA_OMP_CFLAGS =
 
 if WANT_OPENMP_OMPT
-WRAPPERS_OMP += wrappers/OMP/ompt-wrapper.c wrappers/OMP/ompt-helper.h wrappers/OMP/ompt-helper.c
+WRAPPERS_OMP += wrappers/OMP/ompt-wrapper.c \
+ wrappers/OMP/ompt-helper-defs.h wrappers/OMP/ompt-helper.h wrappers/OMP/ompt-helper.c 
 EXTRA_OMP_CFLAGS += -DOMPT_OPENMP
 
 else

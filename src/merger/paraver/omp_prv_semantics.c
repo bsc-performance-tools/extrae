@@ -342,16 +342,10 @@ static int OMPT_event (event_t * current_event,
 		case OMPT_SINGLE_EV:
 		case OMPT_MASTER_EV:
 		Switch_State (STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
-		break;
-
-		case OMPT_LOOP_EV:
-		case OMPT_WORKSHARE_EV:
-		case OMPT_SECTIONS_EV:
-		Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
 		break;
 	}
 
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
 	return 0;

@@ -42,6 +42,9 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
@@ -51,17 +54,14 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 # undef __USE_GNU
 #endif
 
+#include "misc_wrapper.h"
+#include "threadid.h"
+
 #include "omp-common.h"
 
 #include "ompt-helper.h"
 
 // #define DEBUG
-
-#if defined(__INTEL_COMPILER)
-# define ompt_interface_fn(f) OMPT_API_FNTYPE(f) f ## _fn;
-#  include "/home/bsc41/bsc41273/src/ompt/ompt-intel-openmp/itt/libomp_oss/src/ompt-fns.h"
-# undef ompt_interface_fn
-#endif
 
 //*****************************************************************************
 // interface operations
@@ -71,19 +71,32 @@ int (*ompt_set_callback_fn)(ompt_event_t, ompt_callback_t) = NULL;
 ompt_thread_id_t (*ompt_get_thread_id_fn)(void) = NULL;
 ompt_frame_t* (*ompt_get_task_frame_fn)(int) = NULL;
 
-static ompt_thread_id_t *ompt_thids = NULL;
+typedef struct omptthid_threadid_st
+{
+	ompt_thread_id_t thid;
+	unsigned threadid;
+} omptthid_threadid_t;
+
+static omptthid_threadid_t *ompt_thids = NULL;
 static unsigned n_ompt_thids = 0;
 static pthread_mutex_t mutex_thids = PTHREAD_MUTEX_INITIALIZER;
 
-void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid)
+void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid, unsigned threadid)
 {
 	pthread_mutex_lock (&mutex_thids);
-	ompt_thids = (ompt_thread_id_t*) realloc (ompt_thids,
-	  (n_ompt_thids+1)*sizeof(ompt_thread_id_t));
+
+	ompt_thids = (omptthid_threadid_t*) realloc (ompt_thids,
+	  (n_ompt_thids+1)*sizeof(omptthid_threadid_t));
 	assert (ompt_thids != NULL);
 
-	ompt_thids[n_ompt_thids] = ompt_thid;
+#if defined(DEBUG)
+	printf ("REGISTERING(%u) { %llu, %u }\n", n_ompt_thids, ompt_thid, threadid);
+#endif
+
+	ompt_thids[n_ompt_thids].thid     = ompt_thid;
+	ompt_thids[n_ompt_thids].threadid = threadid;
 	n_ompt_thids++;
+
 	pthread_mutex_unlock (&mutex_thids);
 }
 
@@ -93,14 +106,31 @@ unsigned Extrae_OMPT_threadid (void)
 	unsigned u;
 
 	pthread_mutex_lock (&mutex_thids);
+
+	/* If we haven't tracked any thread atm, return thid 0 */
+	if (n_ompt_thids == 0)
+	{
+		pthread_mutex_unlock (&mutex_thids);
+		return 0;
+	}
+
 	for (u = 0; u < n_ompt_thids; u++)
-		if (ompt_thids[u] == thd)
+	{
+#if defined(DEBUG)
+		printf ("SEARCHING (%llu) [%u] { %llu, %u }\n", thd, u, ompt_thids[u].thid, ompt_thids[u].threadid);
+#endif
+		if (ompt_thids[u].thid == thd)
 		{
 			pthread_mutex_unlock (&mutex_thids);
-			return u;
+#if defined(DEBUG)
+			printf ("RETURNING %u\n",  ompt_thids[u].threadid);
+#endif
+			return ompt_thids[u].threadid;
 		}
+	}
 
 	pthread_mutex_unlock (&mutex_thids);
+	fprintf (stderr, "OMPTOOL: Failed to search OpenMP(T) thread %llu\n", thd);
 	assert (1 != 1);
 	return 0;
 }
@@ -134,20 +164,30 @@ unsigned Extrae_OMPT_threadid (void)
 # define PROTOTYPE_MESSAGE_NOTHREAD(...)
 #endif
 
-void OMPT_event_initial_thread_begin (ompt_thread_id_t thid)
-{
-	PROTOTYPE_MESSAGE_NOTHREAD(" TYPE %d THID %ld", 0, thid);
-	Extrae_OMPT_register_ompt_thread_id (thid);
-	// TODO: EXTRAE
-}
+extern int mpitrace_on;
+
+static pthread_mutex_t mutex_init_threads = PTHREAD_MUTEX_INITIALIZER;
 
 void OMPT_event_thread_begin (ompt_thread_type_t type, ompt_thread_id_t thid)
 {
-	UNREFERENCED_PARAMETER(type);
+	pthread_mutex_lock (&mutex_init_threads);
 
-	PROTOTYPE_MESSAGE_NOTHREAD(" TYPE %d (worker == %d) THID %ld", type, ompt_thread_worker, thid);
-	Extrae_OMPT_register_ompt_thread_id (thid);
-	// TODO: EXTRAE
+	/* Get last thread id in instrumentation rte */
+	unsigned threads = Backend_getNumberOfThreads();
+
+	PROTOTYPE_MESSAGE_NOTHREAD(" TYPE %d (worker == %d) THID %llu (threads=%u)", type, ompt_thread_worker, thid, threads);
+
+	if (type == ompt_thread_initial)
+	{
+		Extrae_OMPT_register_ompt_thread_id (thid, 0);
+	}
+	else
+	{
+		Extrae_OMPT_register_ompt_thread_id (thid, threads);
+		Backend_ChangeNumberOfThreads (threads + 1);
+	}
+
+	pthread_mutex_unlock (&mutex_init_threads);
 }
 
 void OMPT_event_thread_end (ompt_thread_type_t type, ompt_thread_id_t thid)
@@ -155,7 +195,6 @@ void OMPT_event_thread_end (ompt_thread_type_t type, ompt_thread_id_t thid)
 	UNREFERENCED_PARAMETER(type);
 
 	PROTOTYPE_MESSAGE(" TYPE %d THID %ld", type, thid);
-	// TODO: EXTRAE
 }
 
 void OMPT_event_loop_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
@@ -584,13 +623,13 @@ void OMPT_event_control (uint64_t command, uint64_t modifier)
 	PROTOTYPE_MESSAGE(" (cmd = %lu, mod = %lu)", command, modifier);
 
 	if (command == 1) /* API spec: start or restart monitoring */
-		Extrae_restart();
+		Extrae_restart_Wrapper();
 	else if (command == 2) /* API spec: pause monitoring */
-		Extrae_shutdown();
+		Extrae_shutdown_Wrapper();
 	else if (command == 3) /* API spec: flush tool buffer & continue */
-		Extrae_flush();
+		Extrae_flush_manual_Wrapper();
 	else if (command == 4) /* API spec: shutdown */
-		Extrae_fini();
+		Extrae_fini_Wrapper();
 }
 
 //*****************************************************************************
@@ -671,7 +710,7 @@ typedef enum { OMPT_RTE_IBM, OMPT_RTE_INTEL, OMPT_UNKNOWN } ompt_runtime_t;
 int ompt_initialize(
 	ompt_function_lookup_t lookup,
 	const char *runtime_version_string, 
-	int ompt_version)
+	unsigned ompt_version)
 {
 	ompt_runtime_t ompt_rte = OMPT_UNKNOWN;	
 	int i;
@@ -710,21 +749,30 @@ int ompt_initialize(
 	i = 0;
 	while (ompt_callbacks[i].evt != (ompt_event_t) 0)
 	{
-		if (ompt_rte == OMPT_RTE_IBM &&
-			(ompt_callbacks[i].evt != ompt_event_master_begin &&
-			 ompt_callbacks[i].evt != ompt_event_master_end))
+		if (ompt_rte == OMPT_RTE_IBM)
+		{
+			if (ompt_callbacks[i].evt != ompt_event_master_begin
+			    && ompt_callbacks[i].evt != ompt_event_master_end)
+			{
+				r = ompt_set_callback_fn (ompt_callbacks[i].evt, ompt_callbacks[i].cbk);
+#if defined(DEBUG)
+				printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks[i].evt_name, r);
+#endif
+			}
+#if defined(DEBUG)
+			else
+			{
+				printf ("OMPTOOL: Ignoring ompt_event_master_begin/end in IBM rte.\n");
+			}
+#endif
+		}
+		else
 		{
 			r = ompt_set_callback_fn (ompt_callbacks[i].evt, ompt_callbacks[i].cbk);
 #if defined(DEBUG)
 			printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks[i].evt_name, r);
 #endif
 		}
-#if defined(DEBUG)
-		else
-		{
-			printf ("OMPTOOL: Ignoring ompt_event_master_begin/end in IBM rte.\n");
-		}
-#endif
 		i++;
 	}
 

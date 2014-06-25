@@ -1515,7 +1515,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
 #if defined(STANDALONE)
-fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
+	fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
 	int current_module = 0;
 	for (current_module=0; current_module<NumberOfModules; current_module++)
 	{
@@ -1571,9 +1571,8 @@ fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
 
 #if defined(OMP_SUPPORT)
 
-#if !defined(OMPT_INSTRUMENTATION)
+#if  !defined(OMPT_INSTRUMENTATION)
 	Extrae_OpenMP_init(me);
-#endif
 
 	/* Obtain the number of runnable threads in this execution.
 	   Just check for OMP_NUM_THREADS env var (if this compilation
@@ -1622,6 +1621,8 @@ fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
 		putenv (new_num_omp_threads_clause);
 		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 	}
+# endif /* OMP_INSTRUMENTATION */
+
 #elif defined(SMPSS_SUPPORT) || defined(NANOS_SUPPORT) || defined (UPC_SUPPORT)
 	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
 #else

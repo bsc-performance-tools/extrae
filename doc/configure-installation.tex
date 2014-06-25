@@ -27,8 +27,8 @@ There are many options to be applied at configuration time for the instrumentati
 	Enable support for tracing OpenMP on Intel runtime.
 	\item {\tt --enable-openmp-ibm} \\
 	Enable support for tracing OpenMP IBM runtime. The IBM runtime instrumentation is only available for Linux/PowerPC systems.
-    \item {\tt --with-openmp-ompt=HEADER} \\
-    Enables support for tracing OpenMP runtimes through the OMPT specification. This mechanism requires an OpenMP-related header with the OMPT information. \textbf{NOTE:} enabling this option disables the regular instrumentation system available through \texttt{--enable-openmp-ibm}, \texttt{--enable-openmp-intel} and \texttt{--enable-openmp-gnu}.
+    \item {\tt --enable-openmp-ompt} \\
+    Enables support for tracing OpenMP runtimes through the OMPT specification. \textbf{NOTE:} enabling this option disables the regular instrumentation system available through \texttt{--enable-openmp-ibm}, \texttt{--enable-openmp-intel} and \texttt{--enable-openmp-gnu}.
 	\item {\tt --enable-smpss} \\
 	Enable support for tracing SMP-superscalar.
 	\item {\tt --enable-nanos} \\
