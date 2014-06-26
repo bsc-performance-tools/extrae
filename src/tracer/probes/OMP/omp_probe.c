@@ -48,6 +48,11 @@ void setTrace_OMPLocks (int value)
 	TraceOMPLocks = value;
 }
 
+int getTrace_OMPLocks (void)
+{
+	return TraceOMPLocks;
+}
+
 void Probe_OpenMP_Join_NoWait_Entry (void)
 {
 	if (mpitrace_on)

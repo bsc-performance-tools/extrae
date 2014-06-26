@@ -76,6 +76,7 @@ void Probe_OpenMP_SetNumThreads_Entry (int);
 void Probe_OpenMP_SetNumThreads_Exit (void);
 
 void setTrace_OMPLocks (int value);
+int getTrace_OMPLocks (void);
 
 void Probe_OpenMP_Task_Entry (UINT64 uf);
 void Probe_OpenMP_Task_Exit (void);

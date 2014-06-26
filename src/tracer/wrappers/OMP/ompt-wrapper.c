@@ -69,7 +69,6 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 
 int (*ompt_set_callback_fn)(ompt_event_t, ompt_callback_t) = NULL;
 ompt_thread_id_t (*ompt_get_thread_id_fn)(void) = NULL;
-ompt_frame_t* (*ompt_get_task_frame_fn)(int) = NULL;
 
 typedef struct omptthid_threadid_st
 {
@@ -647,63 +646,75 @@ struct OMPT_callbacks_st
 
 struct OMPT_callbacks_st ompt_callbacks[] =
 {
-	 CALLBACK_ENTRY (ompt_event_loop_begin, OMPT_event_loop_begin), /* 0 */
-	 CALLBACK_ENTRY (ompt_event_loop_end, OMPT_event_loop_end),
-	 CALLBACK_ENTRY (ompt_event_parallel_begin, OMPT_event_parallel_begin),
-	 CALLBACK_ENTRY (ompt_event_parallel_end, OMPT_event_parallel_end),
-	 CALLBACK_ENTRY (ompt_event_barrier_begin, OMPT_event_barrier_begin),
-	 CALLBACK_ENTRY (ompt_event_barrier_end, OMPT_event_barrier_end),
-	 CALLBACK_ENTRY (ompt_event_wait_barrier_begin, OMPT_event_wait_barrier_begin),
-	 CALLBACK_ENTRY (ompt_event_wait_barrier_end, OMPT_event_wait_barrier_end),
-	 CALLBACK_ENTRY (ompt_event_master_begin, OMPT_event_master_begin),
-	 CALLBACK_ENTRY (ompt_event_master_end, OMPT_event_master_end),
-	 CALLBACK_ENTRY (ompt_event_sections_begin, OMPT_event_sections_begin), /* 10 */
-	 CALLBACK_ENTRY (ompt_event_sections_end, OMPT_event_sections_end),
-	 CALLBACK_ENTRY (ompt_event_single_others_begin, OMPT_event_single_others_begin),
-	 CALLBACK_ENTRY (ompt_event_single_others_end, OMPT_event_single_others_end),
-	 CALLBACK_ENTRY (ompt_event_single_in_block_begin, OMPT_event_single_in_block_begin),
-	 CALLBACK_ENTRY (ompt_event_single_in_block_end, OMPT_event_single_in_block_end),
-	 CALLBACK_ENTRY (ompt_event_task_begin, OMPT_event_task_begin),
-	 CALLBACK_ENTRY (ompt_event_task_end, OMPT_event_task_end),
-	 CALLBACK_ENTRY (ompt_event_wait_taskwait_begin, OMPT_event_wait_taskwait_begin),
-	 CALLBACK_ENTRY (ompt_event_wait_taskwait_end, OMPT_event_wait_taskwait_end),
-	 //CALLBACK_ENTRY (ompt_event_taskwait_begin, OMPT_event_taskwait_begin), /* 20 */
-	 //CALLBACK_ENTRY (ompt_event_taskwait_end, OMPT_event_taskwait_end),
-	 CALLBACK_ENTRY (ompt_event_wait_taskgroup_begin, OMPT_event_wait_taskgroup_begin),
-	 CALLBACK_ENTRY (ompt_event_wait_taskgroup_end, OMPT_event_wait_taskgroup_end),
-	 CALLBACK_ENTRY (ompt_event_taskgroup_begin, OMPT_event_taskgroup_begin),
-	 CALLBACK_ENTRY (ompt_event_taskgroup_end, OMPT_event_taskgroup_end),
-	 CALLBACK_ENTRY (ompt_event_workshare_begin, OMPT_event_workshare_begin),
-	 CALLBACK_ENTRY (ompt_event_workshare_end, OMPT_event_workshare_end),
-	 CALLBACK_ENTRY (ompt_event_idle_begin, OMPT_event_idle_begin),
-	 CALLBACK_ENTRY (ompt_event_idle_end, OMPT_event_idle_end),
-	 CALLBACK_ENTRY (ompt_event_release_lock, OMPT_event_release_lock), /* 30 */
-	 CALLBACK_ENTRY (ompt_event_release_nest_lock_last, OMPT_event_release_nest_lock_last),
-	 CALLBACK_ENTRY (ompt_event_release_critical, OMPT_event_release_critical),
-	 CALLBACK_ENTRY (ompt_event_release_ordered, OMPT_event_release_ordered),
-	 CALLBACK_ENTRY (ompt_event_release_atomic, OMPT_event_release_atomic),
-	 CALLBACK_ENTRY (ompt_event_implicit_task_begin, OMPT_event_implicit_task_begin),
-	 CALLBACK_ENTRY (ompt_event_implicit_task_end, OMPT_event_implicit_task_end),
-	 CALLBACK_ENTRY (ompt_event_initial_task_begin, OMPT_event_initial_task_begin),
-	 CALLBACK_ENTRY (ompt_event_initial_task_end, OMPT_event_initial_task_end),
-	 CALLBACK_ENTRY (ompt_event_task_switch, OMPT_event_task_switch),
-	 CALLBACK_ENTRY (ompt_event_wait_lock, OMPT_event_wait_lock), /* 40 */
-	 CALLBACK_ENTRY (ompt_event_acquired_lock, OMPT_event_acquired_lock),
-	 CALLBACK_ENTRY (ompt_event_wait_nest_lock, OMPT_event_wait_nest_lock),
-	 CALLBACK_ENTRY (ompt_event_acquired_nest_lock_first, OMPT_event_acquired_nest_lock_first),
-	 CALLBACK_ENTRY (ompt_event_release_nest_lock_prev, OMPT_event_release_nest_lock_prev),
-	 CALLBACK_ENTRY (ompt_event_acquired_nest_lock_next, OMPT_event_acquired_nest_lock_next),
-	 CALLBACK_ENTRY (ompt_event_wait_critical, OMPT_event_wait_critical),
-	 CALLBACK_ENTRY (ompt_event_acquired_critical, OMPT_event_acquired_critical),
-	 CALLBACK_ENTRY (ompt_event_wait_ordered, OMPT_event_wait_ordered),
-	 CALLBACK_ENTRY (ompt_event_acquired_ordered, OMPT_event_acquired_ordered),
-	 CALLBACK_ENTRY (ompt_event_wait_atomic, OMPT_event_wait_atomic), /* 50 */
-	 CALLBACK_ENTRY (ompt_event_acquired_atomic, OMPT_event_acquired_atomic),
-	 CALLBACK_ENTRY (ompt_event_thread_begin, OMPT_event_thread_begin),
-	 CALLBACK_ENTRY (ompt_event_thread_end, OMPT_event_thread_end),
-	 CALLBACK_ENTRY (ompt_event_control, OMPT_event_control),
+	CALLBACK_ENTRY (ompt_event_loop_begin, OMPT_event_loop_begin),
+	CALLBACK_ENTRY (ompt_event_loop_end, OMPT_event_loop_end),
+	CALLBACK_ENTRY (ompt_event_parallel_begin, OMPT_event_parallel_begin),
+	CALLBACK_ENTRY (ompt_event_parallel_end, OMPT_event_parallel_end),
+	CALLBACK_ENTRY (ompt_event_barrier_begin, OMPT_event_barrier_begin),
+	CALLBACK_ENTRY (ompt_event_barrier_end, OMPT_event_barrier_end),
+	CALLBACK_ENTRY (ompt_event_wait_barrier_begin, OMPT_event_wait_barrier_begin),
+	CALLBACK_ENTRY (ompt_event_wait_barrier_end, OMPT_event_wait_barrier_end),
+	CALLBACK_ENTRY (ompt_event_sections_begin, OMPT_event_sections_begin),
+	CALLBACK_ENTRY (ompt_event_sections_end, OMPT_event_sections_end),
+	CALLBACK_ENTRY (ompt_event_task_begin, OMPT_event_task_begin),
+	CALLBACK_ENTRY (ompt_event_task_end, OMPT_event_task_end),
+	// CALLBACK_ENTRY (ompt_event_wait_taskwait_begin, OMPT_event_wait_taskwait_begin),
+	// CALLBACK_ENTRY (ompt_event_wait_taskwait_end, OMPT_event_wait_taskwait_end),
+	CALLBACK_ENTRY (ompt_event_taskwait_begin, OMPT_event_taskwait_begin),
+	CALLBACK_ENTRY (ompt_event_taskwait_end, OMPT_event_taskwait_end),
+	CALLBACK_ENTRY (ompt_event_wait_taskgroup_begin, OMPT_event_wait_taskgroup_begin),
+	CALLBACK_ENTRY (ompt_event_wait_taskgroup_end, OMPT_event_wait_taskgroup_end),
+	CALLBACK_ENTRY (ompt_event_taskgroup_begin, OMPT_event_taskgroup_begin),
+	CALLBACK_ENTRY (ompt_event_taskgroup_end, OMPT_event_taskgroup_end),
+	CALLBACK_ENTRY (ompt_event_workshare_begin, OMPT_event_workshare_begin),
+	CALLBACK_ENTRY (ompt_event_workshare_end, OMPT_event_workshare_end),
+	CALLBACK_ENTRY (ompt_event_idle_begin, OMPT_event_idle_begin),
+	CALLBACK_ENTRY (ompt_event_idle_end, OMPT_event_idle_end),
+	CALLBACK_ENTRY (ompt_event_implicit_task_begin, OMPT_event_implicit_task_begin),
+	CALLBACK_ENTRY (ompt_event_implicit_task_end, OMPT_event_implicit_task_end),
+	CALLBACK_ENTRY (ompt_event_initial_task_begin, OMPT_event_initial_task_begin),
+	CALLBACK_ENTRY (ompt_event_initial_task_end, OMPT_event_initial_task_end),
+	CALLBACK_ENTRY (ompt_event_task_switch, OMPT_event_task_switch),
+	CALLBACK_ENTRY (ompt_event_wait_lock, OMPT_event_wait_lock),
+	CALLBACK_ENTRY (ompt_event_thread_begin, OMPT_event_thread_begin),
+	CALLBACK_ENTRY (ompt_event_thread_end, OMPT_event_thread_end),
+	CALLBACK_ENTRY (ompt_event_control, OMPT_event_control),
+ 	{ "empty,", (ompt_event_t) 0, 0 },
+ };
+ 
+struct OMPT_callbacks_st ompt_callbacks_locks[] =
+{
+	CALLBACK_ENTRY (ompt_event_master_begin, OMPT_event_master_begin),
+	CALLBACK_ENTRY (ompt_event_master_end, OMPT_event_master_end),
+	CALLBACK_ENTRY (ompt_event_single_others_begin, OMPT_event_single_others_begin),
+	CALLBACK_ENTRY (ompt_event_single_others_end, OMPT_event_single_others_end),
+	CALLBACK_ENTRY (ompt_event_single_in_block_begin, OMPT_event_single_in_block_begin),
+	CALLBACK_ENTRY (ompt_event_single_in_block_end, OMPT_event_single_in_block_end),
+	CALLBACK_ENTRY (ompt_event_release_lock, OMPT_event_release_lock),
+	CALLBACK_ENTRY (ompt_event_release_nest_lock_last, OMPT_event_release_nest_lock_last),
+	CALLBACK_ENTRY (ompt_event_release_critical, OMPT_event_release_critical),
+	CALLBACK_ENTRY (ompt_event_release_ordered, OMPT_event_release_ordered),
+	CALLBACK_ENTRY (ompt_event_release_atomic, OMPT_event_release_atomic),
+	CALLBACK_ENTRY (ompt_event_acquired_lock, OMPT_event_acquired_lock),
+	CALLBACK_ENTRY (ompt_event_wait_nest_lock, OMPT_event_wait_nest_lock),
+	CALLBACK_ENTRY (ompt_event_acquired_nest_lock_first, OMPT_event_acquired_nest_lock_first),
+	CALLBACK_ENTRY (ompt_event_release_nest_lock_prev, OMPT_event_release_nest_lock_prev),
+	CALLBACK_ENTRY (ompt_event_acquired_nest_lock_next, OMPT_event_acquired_nest_lock_next),
+	CALLBACK_ENTRY (ompt_event_wait_critical, OMPT_event_wait_critical),
+	CALLBACK_ENTRY (ompt_event_acquired_critical, OMPT_event_acquired_critical),
+	CALLBACK_ENTRY (ompt_event_wait_ordered, OMPT_event_wait_ordered),
+	CALLBACK_ENTRY (ompt_event_acquired_ordered, OMPT_event_acquired_ordered),
+	CALLBACK_ENTRY (ompt_event_wait_atomic, OMPT_event_wait_atomic),
+	CALLBACK_ENTRY (ompt_event_acquired_atomic, OMPT_event_acquired_atomic),
 	{ "empty,", (ompt_event_t) 0, 0 },
 };
+ 
+typedef enum {
+	OMPT_RTE_IBM,
+	OMPT_RTE_INTEL,
+	OMPT_RTE_OMPSS,
+	OMPT_UNKNOWN
+} ompt_runtime_t;
 
 typedef enum { OMPT_RTE_IBM, OMPT_RTE_INTEL, OMPT_UNKNOWN } ompt_runtime_t;
 
@@ -725,6 +736,8 @@ int ompt_initialize(
 		ompt_rte = OMPT_RTE_INTEL;
 	else if (strstr (runtime_version_string, "ibm") != NULL)
 		ompt_rte = OMPT_RTE_IBM;
+	else if (strstr (runtime_version_string, "nanos") != NULL)
+		ompt_rte = OMPT_RTE_OMPSS;
 
 #if defined(DEBUG)
 	printf ("OMPTOOL: ompt_rte = %d\n", ompt_rte);
@@ -736,14 +749,10 @@ int ompt_initialize(
 	ompt_get_thread_id_fn = (ompt_thread_id_t(*)(void)) lookup("ompt_get_thread_id");
 	assert (ompt_get_thread_id_fn != NULL);
 
-	ompt_get_task_frame_fn = (ompt_frame_t*(*)(int)) lookup ("ompt_get_task_frame");
-	assert (ompt_get_task_frame_fn != NULL);
-
 #if defined(DEBUG)
 	printf ("OMPTOOL: Recovered addresses for:\n");
 	printf ("OMPTOOL: ompt_set_callback  = %p\n", ompt_set_callback_fn);
 	printf ("OMPTOOL: ompt_get_thread_id = %p\n", ompt_get_thread_id_fn);
-	printf ("OMPTOOL: ompt_get_task_frame_fn = %p\n", ompt_get_task_frame_fn);
 #endif
 
 	i = 0;
@@ -774,6 +783,28 @@ int ompt_initialize(
 #endif
 		}
 		i++;
+	}
+
+	if (getTrace_OMPLocks())
+	{
+#if defined(DEBUG)
+		printf ("OMPTOOL: processing callbacks for locks\n");
+#endif	
+		i = 0;
+		while (ompt_callbacks_locks[i].evt != (ompt_event_t) 0)
+		{
+			r = ompt_set_callback_fn (ompt_callbacks_locks[i].evt, ompt_callbacks_locks[i].cbk);
+#if defined(DEBUG)
+			printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks_locks[i].evt_name, r);
+#endif
+			i++;
+		}
+	}
+	else
+	{
+#if defined(DEBUG)
+		printf ("OMPTOOL: NOT processing callbacks for locks\n");
+#endif
 	}
 
 	Extrae_set_threadid_function (Extrae_OMPT_threadid);
