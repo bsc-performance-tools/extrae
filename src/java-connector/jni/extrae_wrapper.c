@@ -46,6 +46,10 @@ int NUMTHREADS = 1;
 int TASKID = 0;
 int NUMTASKS = 1;
 
+JavaVM* javaVM = NULL;
+jclass activityClass;
+jobject activityObj;
+
 static unsigned int get_thread_id(void)
 { return THREADID; }
 
@@ -58,13 +62,14 @@ static unsigned int get_task_id(void)
 static unsigned int get_num_tasks(void)
 { return NUMTASKS; }
 
+
 JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetTaskID(
 	JNIEnv *env, jclass jc, jint id)
 {
 	UNREFERENCED(env);
 	UNREFERENCED(jc);
 
-	THREADID = id;
+	TASKID = id;
 	Extrae_set_taskid_function (get_task_id);
 }
 
@@ -102,7 +107,7 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetThreadID(
 	UNREFERENCED(env);
 	UNREFERENCED(jc);
 
-	TASKID = id;
+	THREADID = id;
 	Extrae_set_threadid_function (get_thread_id);
 }
 
@@ -295,4 +300,28 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_defineEventType
 
 		(*env)->ReleaseStringUTFChars(env, description, cDescr);
 	}
+}
+
+JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_resumeVirtualThread
+  (JNIEnv * env, jclass jc, jlong vthread)
+{
+	UNREFERENCED(env);
+	UNREFERENCED(jc);
+
+	Extrae_resume_virtual_thread((unsigned) vthread);
+}
+
+/*
+ * Class:     es_bsc_cepbatools_extrae_Wrapper
+ * Method:    SuspendVirtualThread
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_suspendVirtualThread
+  (JNIEnv * env, jclass jc)
+{
+	
+	UNREFERENCED(env);
+	UNREFERENCED(jc);
+
+	Extrae_suspend_virtual_thread();
 }

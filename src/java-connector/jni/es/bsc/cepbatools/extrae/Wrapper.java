@@ -80,5 +80,8 @@ public class Wrapper
 	public static native void SetNumThreads(int num);
 	public static native int GetThreadID();
 	public static native int GetNumThreads();
+
+	public static native void resumeVirtualThread(long vthread);
+	public static native void suspendVirtualThread();
 }
 
