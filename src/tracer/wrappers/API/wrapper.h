@@ -105,6 +105,9 @@ extern int mpitrace_on;
 
 int EXTRAE_ON (void);
 
+int  EXTRAE_INITIALIZED (void);
+void EXTRAE_SET_INITIALIZED (int);
+
 /****** Variable global per coneixer el nom del l'aplicacio *******/
 // Serveix per poder donar als fitxers generats el nom del programa
 #define TMP_DIR 1024

@@ -325,7 +325,15 @@ static void Extrae_getExecutableInfo (void);
 int MergeAfterTracing = FALSE;
 #endif
 
+static int extrae_initialized = FALSE;
+
 int EXTRAE_ON (void) { return mpitrace_on; }
+
+int EXTRAE_INITIALIZED(void)
+{ return extrae_initialized; }
+
+void EXTRAE_SET_INITIALIZED(int init)
+{ extrae_initialized = init; }
 
 static unsigned get_maximum_NumOfThreads (void)
 {
@@ -1803,52 +1811,58 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 {
 	unsigned new_num_threads = numberofthreads;
 
-	/* If we aren't tracing, just skip everything! */
-	if (!mpitrace_on)
-		return FALSE;
-
-	/* Just modify things if there are more threads */
-	if (new_num_threads > get_maximum_NumOfThreads())
+	if (EXTRAE_INITIALIZED())
 	{
-		unsigned u;
-
-		/* Reallocate InInstrumentation structures */
-		Backend_ChangeNumberOfThreads_InInstrumentation (new_num_threads);
-		/* We leave... so, we're no longer in instrumentatin from this point */
-		for (u = get_maximum_NumOfThreads(); u < new_num_threads; u++)
-			Backend_setInInstrumentation (u, FALSE);
-
-		/* Reallocate clock structures */
-		Clock_AllocateThreads (new_num_threads);
-
-		/* Reallocate the buffers and trace files */
-		Reallocate_buffers_and_files (new_num_threads);
-
-		/* Reallocate trace mode */
-		Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads, TRUE);
-
+		/* Just modify things if there are more threads */
+		if (new_num_threads > get_maximum_NumOfThreads())
+		{
+			unsigned u;
+	
+			/* Reallocate InInstrumentation structures */
+			Backend_ChangeNumberOfThreads_InInstrumentation (new_num_threads);
+			/* We leave... so, we're no longer in instrumentatin from this point */
+			for (u = get_maximum_NumOfThreads(); u < new_num_threads; u++)
+				Backend_setInInstrumentation (u, FALSE);
+	
+			/* Reallocate clock structures */
+			Clock_AllocateThreads (new_num_threads);
+	
+			/* Reallocate the buffers and trace files */
+			Reallocate_buffers_and_files (new_num_threads);
+	
+			/* Reallocate trace mode */
+			Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads, TRUE);
+	
 #if USE_HARDWARE_COUNTERS
-		/* Reallocate and start reading counters for these threads */
-		HWC_Restart_Counters (get_maximum_NumOfThreads(), new_num_threads);
+			/* Reallocate and start reading counters for these threads */
+			HWC_Restart_Counters (get_maximum_NumOfThreads(), new_num_threads);
 #endif
-
-		/* Allocate thread info structure */
-		Extrae_reallocate_thread_info (get_maximum_NumOfThreads(), new_num_threads);
-
+	
+			/* Allocate thread info structure */
+			Extrae_reallocate_thread_info (get_maximum_NumOfThreads(), new_num_threads);
+	
 #if defined(CUDA_SUPPORT)
-		/* Allocate thread info for CUDA execs */
-		Extrae_reallocate_CUDA_info (new_num_threads);
+			/* Allocate thread info for CUDA execs */
+			Extrae_reallocate_CUDA_info (new_num_threads);
 #endif
-
+	
 #if defined(PTHREAD_SUPPORT)
-		/* Allocate thread info for pthread execs */
-		Extrae_reallocate_pthread_info (new_num_threads);
+			/* Allocate thread info for pthread execs */
+			Extrae_reallocate_pthread_info (new_num_threads);
 #endif
-
-		maximum_NumOfThreads = current_NumOfThreads = new_num_threads;
+	
+			maximum_NumOfThreads = current_NumOfThreads = new_num_threads;
+		}
+		else
+			current_NumOfThreads = new_num_threads;
 	}
 	else
+	{
+		if (new_num_threads > get_maximum_NumOfThreads())
+			maximum_NumOfThreads = new_num_threads;
+
 		current_NumOfThreads = new_num_threads;
+	}
 
 	return TRUE;
 }
@@ -1983,7 +1997,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 		Extrae_shutdown_Wrapper();
 	}
 
-
 	/* Enable dynamic memory instrumentation if requested */
 	if (requestedDynamicMemoryInstrumentation)
 		Extrae_set_trace_malloc (TRUE);
@@ -1998,6 +2011,8 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	/* We leave... so, we're no longer in instrumentatin from this point */
 	for (i = 0; i < get_maximum_NumOfThreads(); i++)
 		Backend_setInInstrumentation (i, FALSE);
+
+	EXTRAE_SET_INITIALIZED(TRUE);
 
 	return TRUE;
 }

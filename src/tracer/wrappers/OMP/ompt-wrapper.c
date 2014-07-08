@@ -62,6 +62,7 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 #include "ompt-helper.h"
 
 // #define DEBUG
+// #define DEBUG_THREAD
 
 //*****************************************************************************
 // interface operations
@@ -74,6 +75,7 @@ typedef struct omptthid_threadid_st
 {
 	ompt_thread_id_t thid;
 	unsigned threadid;
+	int in_use;
 } omptthid_threadid_t;
 
 static omptthid_threadid_t *ompt_thids = NULL;
@@ -82,6 +84,54 @@ static pthread_mutex_t mutex_thids = PTHREAD_MUTEX_INITIALIZER;
 
 void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid, unsigned threadid)
 {
+	int found_empty = FALSE;
+	unsigned u;
+	unsigned free_slot = 0;
+
+	pthread_mutex_lock (&mutex_thids);
+
+	/* Search for an empty slot, if any */
+	for (u = 0; u < n_ompt_thids; u++)
+		if (!ompt_thids[u].in_use)
+		{
+			found_empty = TRUE;
+			free_slot = u;
+			break;
+		}
+
+#if defined(DEBUG)
+	printf ("REGISTER_THREAD[] => { found_empty = %d, free_slot = %u }\n", found_empty, free_slot);
+#endif
+
+	/* If not empty, allocate space for a new entry */
+	if (!found_empty)
+	{
+		ompt_thids = (omptthid_threadid_t*) realloc (ompt_thids,
+		  (n_ompt_thids+1)*sizeof(omptthid_threadid_t));
+		assert (ompt_thids != NULL);
+		free_slot = n_ompt_thids;
+		n_ompt_thids++;
+	}
+
+#if defined(DEBUG)
+	if (!found_empty)
+		printf ("REGISTERING-new(slot=%u) { ompt_thid=%llu, threadid=%u }\n", free_slot, ompt_thid, threadid);
+	else
+		printf ("REGISTERING-reused(slot=%u) { ompt_thid=%llu, threadid=%u }\n", free_slot, ompt_thid, threadid);
+#endif
+
+	/* Set slot info on 'free_slot' */
+	ompt_thids[free_slot].thid     = ompt_thid;
+	ompt_thids[free_slot].threadid = threadid;
+	ompt_thids[free_slot].in_use   = TRUE;
+
+	pthread_mutex_unlock (&mutex_thids);
+}
+
+void Extrae_OMPT_unregister_ompt_thread_id (ompt_thread_id_t ompt_thid)
+{
+	unsigned u;
+
 	pthread_mutex_lock (&mutex_thids);
 
 	ompt_thids = (omptthid_threadid_t*) realloc (ompt_thids,
@@ -89,12 +139,15 @@ void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid, unsigned t
 	assert (ompt_thids != NULL);
 
 #if defined(DEBUG)
-	printf ("REGISTERING(%u) { %llu, %u }\n", n_ompt_thids, ompt_thid, threadid);
+	printf ("UNREGISTERING(ompt_thid%llu)\n", ompt_thid);
 #endif
 
-	ompt_thids[n_ompt_thids].thid     = ompt_thid;
-	ompt_thids[n_ompt_thids].threadid = threadid;
-	n_ompt_thids++;
+	for (u = 0; u < n_ompt_thids; u++)
+		if (ompt_thids[u].thid == ompt_thid && ompt_thids[u].in_use)
+		{
+			ompt_thids[u].in_use = FALSE;
+			break;
+		}
 
 	pthread_mutex_unlock (&mutex_thids);
 }
@@ -115,14 +168,15 @@ unsigned Extrae_OMPT_threadid (void)
 
 	for (u = 0; u < n_ompt_thids; u++)
 	{
-#if defined(DEBUG)
-		printf ("SEARCHING (%llu) [%u] { %llu, %u }\n", thd, u, ompt_thids[u].thid, ompt_thids[u].threadid);
+#if defined(DEBUG_THREAD)
+		printf ("SEARCHING (thread=%llu) [slot=%u/%u] {ompt_thid=%llu,in_use=%d,threadid=%u}\n",
+		 thd, u, n_ompt_thids, ompt_thids[u].thid, ompt_thids[u].in_use, ompt_thids[u].threadid);
 #endif
-		if (ompt_thids[u].thid == thd)
+		if (ompt_thids[u].thid == thd && ompt_thids[u].in_use)
 		{
 			pthread_mutex_unlock (&mutex_thids);
-#if defined(DEBUG)
-			printf ("RETURNING %u\n",  ompt_thids[u].threadid);
+#if defined(DEBUG_THREAD)
+			printf ("RETURNING %u\n", ompt_thids[u].threadid);
 #endif
 			return ompt_thids[u].threadid;
 		}
@@ -137,24 +191,21 @@ unsigned Extrae_OMPT_threadid (void)
 
 #if defined(DEBUG)
 # define PROTOTYPE_MESSAGE_NOTHREAD(fmt, ...) \
-   printf ("THREAD=??/?? TIME=%llu %s" fmt "\n", \
-    0ull, \
+   printf ("THREAD=??/?? %s" fmt "\n", \
     __func__, \
     ## __VA_ARGS__)
 # if defined(__INTEL_COMPILER)
 #  define PROTOTYPE_MESSAGE(fmt, ...) \
-    printf ("THREAD=%u/%llu TIME=%llu %s" fmt "\n", \
+    printf ("THREAD=%u/%llu %s" fmt "\n", \
      0u, \
-     0ull, \
      0ull, \
      __func__, \
      ## __VA_ARGS__)
 # else
 #  define PROTOTYPE_MESSAGE(fmt, ...) \
-    printf ("THREAD=%u/%llu TIME=%llu %s" fmt "\n", \
+    printf ("THREAD=%u/%llu %s" fmt "\n", \
      Extrae_OMPT_threadid(), \
      ompt_get_thread_id_fn(), \
-     0, \
      __func__, \
      ## __VA_ARGS__)
 # endif
@@ -162,8 +213,6 @@ unsigned Extrae_OMPT_threadid (void)
 # define PROTOTYPE_MESSAGE(...)
 # define PROTOTYPE_MESSAGE_NOTHREAD(...)
 #endif
-
-extern int mpitrace_on;
 
 static pthread_mutex_t mutex_init_threads = PTHREAD_MUTEX_INITIALIZER;
 
@@ -191,9 +240,20 @@ void OMPT_event_thread_begin (ompt_thread_type_t type, ompt_thread_id_t thid)
 
 void OMPT_event_thread_end (ompt_thread_type_t type, ompt_thread_id_t thid)
 {
-	UNREFERENCED_PARAMETER(type);
+	pthread_mutex_lock (&mutex_init_threads);
+
+	/* Get last thread id in instrumentation rte */
+	unsigned threads = Backend_getNumberOfThreads();
 
 	PROTOTYPE_MESSAGE(" TYPE %d THID %ld", type, thid);
+
+	if (type == ompt_thread_worker)
+	{
+		Extrae_OMPT_unregister_ompt_thread_id (thid);
+		Backend_ChangeNumberOfThreads (threads-1);
+	}
+
+	pthread_mutex_unlock (&mutex_init_threads);
 }
 
 void OMPT_event_loop_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
@@ -340,14 +400,9 @@ void OMPT_event_task_begin (ompt_task_id_t ptid, ompt_frame_t *ptf, ompt_task_id
 	//Extrae_OpenMP_TaskUF_Entry (ntf); NOTE: Task does not start running here (HSG, for IBM)!
 }
 
-void OMPT_event_task_end (ompt_task_id_t ptid, ompt_frame_t *ptf, ompt_task_id_t tid, void *ntf)
+void OMPT_event_task_end (ompt_task_id_t tid)
 {
-	UNREFERENCED_PARAMETER(ptid);
-	UNREFERENCED_PARAMETER(ptf);
-	UNREFERENCED_PARAMETER(tid);
-	UNREFERENCED_PARAMETER(ntf);
-
-	PROTOTYPE_MESSAGE(" (%ld, %p, %ld, %p)", ptid, ptf, tid, ntf);
+	PROTOTYPE_MESSAGE(" (%ld)", tid);
 	Extrae_OpenMP_TaskUF_Exit (); // NOTE: Task does not start running here (HSG, for IBM)!
 	Extrae_OMPT_unregister_ompt_task_id_tf (tid);
 }
