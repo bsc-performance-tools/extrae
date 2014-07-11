@@ -167,6 +167,7 @@ static void callme_par (void *p1)
 	Extrae_OpenMP_UF_Exit ();
 }
 
+static void (*GOMP_parallel_real)(void*,void*,unsigned,unsigned) = NULL;
 static void (*GOMP_parallel_start_real)(void*,void*,unsigned) = NULL;
 static void (*GOMP_parallel_end_real)(void) = NULL;
 static void (*GOMP_barrier_real)(void) = NULL;
@@ -214,6 +215,11 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 	int count = 0;
 
 	UNREFERENCED_PARAMETER(rank);
+
+	/* Obtain @ for GOMP_parallel */
+	GOMP_parallel_real =
+		(void(*)(void*,void*,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel");
+	INC_IF_NOT_NULL(GOMP_parallel_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_start */
 	GOMP_parallel_start_real =
@@ -1002,7 +1008,33 @@ int GOMP_loop_dynamic_next (long *p1, long *p2)
 	return res;
 }
 
-extern int omp_get_thread_num();
+void GOMP_parallel (void *p1, void *p2, unsigned p3, unsigned p4)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel is at %p\n", THREADID, GOMP_parallel_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel params %p %p %u %u\n", THREADID, p1, p2, p3, p4);
+#endif
+
+	if (GOMP_parallel_real != NULL && mpitrace_on)
+	{
+		Extrae_OpenMP_ParRegion_Entry();
+
+		/* Set the pointer to the correct PARALLEL user function */
+		par_uf = (void(*)(void*))p1;
+		GOMP_parallel_real (callme_par, p2, p3, p4);
+
+		Extrae_OpenMP_ParRegion_Exit();
+	}
+	else if (GOMP_parallel_real != NULL && !mpitrace_on)
+	{
+		GOMP_parallel_real (p1, p2, p3, p4);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_start is not hooked! exiting!!\n");
+		exit (0);
+	}
+}
 
 void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 {

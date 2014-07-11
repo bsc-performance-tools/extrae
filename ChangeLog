@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 11Jul2014 GOMP_parallel support (appeared in libgomp for GCC 4.9)
  * 24Jun2014 More fixes to OMPT support
  * 04Jun2014 Fixed bug in MPI statistics in burst mode: the resets were missing, and the timestamp of the events was wrong.
  + 04Jun2014 Preliminary OMPT support (tested with IBM OpenMP rte).
