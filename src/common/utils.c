@@ -495,9 +495,9 @@ int mkdir_recursive (char *path)
 #endif
 
 		if ((strcmp (dir, ".") != 0) && (strcmp (dir, "/") != 0))
-			result = mkdir_recursive(dir)?mkdir (path, 0744) == 0 : 0;
+			result = mkdir_recursive(dir)?mkdir (path, 0755) == 0 : 0;
 		else
-			result = mkdir (path, 0744) == 0;
+			result = mkdir (path, 0755) == 0;
 
 		free (original_path);
 
