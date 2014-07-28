@@ -229,7 +229,7 @@ static int Critical_Event (
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-	if (EvType == NAMEDCRIT_EV && (EvValue == LOCK_VAL || EvValue == UNLOCK_VAL))
+	if (EvType == NAMEDCRIT_EV && (EvValue == LOCKED_VAL || EvValue == UNLOCKED_VAL))
 	{
 		/* At the entry of lock and unlock of a named critical, emit also the address */
 		trace_paraver_event (cpu, ptask, task, thread, current_time, NAMEDCRIT_NAME_EV, Get_EvParam(current_event));
