@@ -181,8 +181,22 @@ static int OpenMP_Function_Event (
 #endif
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+#if 0
+	if (Get_EvEvent(current_event) == OMPFUNC_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_LINE_EV, EvValue);
+	}
+	else if (Get_EvEvent(current_event) == TASKFUNC_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_LINE_EV, EvValue);
+	}
+#else
 	trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_EV, EvValue);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_LINE_EV, EvValue);
+#endif
 
 	return 0;
 }

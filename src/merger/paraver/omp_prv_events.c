@@ -65,42 +65,42 @@ static char UNUSED rcsid[] = "$Id$";
 
 static int inuse[MAX_OMP_INDEX] = { FALSE };
 
-void Enable_OMP_Operation (int tipus)
+void Enable_OMP_Operation (int type)
 {
-	if (tipus == PAR_EV)
+	if (type == PAR_EV)
 		inuse[PAR_OMP_INDEX] = TRUE;
-	else if (tipus == WSH_EV)
+	else if (type == WSH_EV)
 		inuse[WSH_OMP_INDEX] = TRUE;
-	else if (tipus == OMPFUNC_EV)
+	else if (type == OMPFUNC_EV || type == TASKFUNC_EV)
 		inuse[FNC_OMP_INDEX] = TRUE;
-	else if (tipus == UNNAMEDCRIT_EV)
+	else if (type == UNNAMEDCRIT_EV)
 		inuse[ULCK_OMP_INDEX] = TRUE;
-	else if (tipus == NAMEDCRIT_EV)
+	else if (type == NAMEDCRIT_EV)
 		inuse[LCK_OMP_INDEX] = TRUE;
-	else if (tipus == WORK_EV)
+	else if (type == WORK_EV)
 		inuse[WRK_OMP_INDEX] = TRUE;
-	else if (tipus == JOIN_EV)
+	else if (type == JOIN_EV)
 		inuse[JOIN_OMP_INDEX] = TRUE;
-	else if (tipus == BARRIEROMP_EV)
+	else if (type == BARRIEROMP_EV)
 		inuse[BARRIER_OMP_INDEX] = TRUE;
-	else if (tipus == OMPGETNUMTHREADS_EV || tipus == OMPSETNUMTHREADS_EV)
+	else if (type == OMPGETNUMTHREADS_EV || type == OMPSETNUMTHREADS_EV)
 		inuse[GETSETNUMTHREADS_INDEX] = TRUE;
-	else if (tipus == TASK_EV)
+	else if (type == TASK_EV)
 		inuse[TASK_INDEX] = TRUE;
-	else if (tipus == TASKWAIT_EV)
+	else if (type == TASKWAIT_EV)
 		inuse[TASKWAIT_INDEX] = TRUE;
 
 #define ENABLE_TYPE_IF(x,type,v) \
 	if (x ## _EV == type) \
 		v[x ## _INDEX] = TRUE;
 
-	ENABLE_TYPE_IF(OMPT_CRITICAL, tipus, inuse);
-	ENABLE_TYPE_IF(OMPT_ATOMIC, tipus, inuse);
-	ENABLE_TYPE_IF(OMPT_LOOP, tipus, inuse);
-	ENABLE_TYPE_IF(OMPT_WORKSHARE, tipus, inuse);
-	ENABLE_TYPE_IF(OMPT_SECTIONS, tipus, inuse);
-	ENABLE_TYPE_IF(OMPT_SINGLE, tipus, inuse);
-	ENABLE_TYPE_IF(OMPT_MASTER, tipus, inuse);
+	ENABLE_TYPE_IF(OMPT_CRITICAL, type, inuse);
+	ENABLE_TYPE_IF(OMPT_ATOMIC, type, inuse);
+	ENABLE_TYPE_IF(OMPT_LOOP, type, inuse);
+	ENABLE_TYPE_IF(OMPT_WORKSHARE, type, inuse);
+	ENABLE_TYPE_IF(OMPT_SECTIONS, type, inuse);
+	ENABLE_TYPE_IF(OMPT_SINGLE, type, inuse);
+	ENABLE_TYPE_IF(OMPT_MASTER, type, inuse);
 }
 
 #if defined(PARALLEL_MERGE)
