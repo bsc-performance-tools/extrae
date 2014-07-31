@@ -180,6 +180,9 @@ AC_CHECK_FUNC(sysconf, [AC_DEFINE([HAVE_SYSCONF],[1],[Define if have sysconf])])
 ## Check if we have MPI
 AX_PROG_MPI
 
+## Check if we have OpenSHMEM
+AX_PROG_OPENSHMEM
+
 # Search for libtool support
 AC_LIBTOOL_DLOPEN
 #if test "${MPI_SHARED_LIB_FOUND}" != "yes" ; then

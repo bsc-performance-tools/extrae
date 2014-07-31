@@ -22,83 +22,16 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/mpi_prv_semantics.h $
+ | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (mar, 26 oct 2010) $
+ | @version:     $Revision: 476 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef EXTRAE_TYPES_INCLUDED
-#define EXTRAE_TYPES_INCLUDED
+#ifndef __OPENSHMEM_PRV_SEMANTICS_H__
+#define __OPENSHMEM_PRV_SEMANTICS_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "semantics.h"
 
-enum extrae_INIT_TYPE
-{
-	EXTRAE_NOT_INITIALIZED = 0,
-	EXTRAE_INITIALIZED_EXTRAE_INIT,
-	EXTRAE_INITIALIZED_MPI_INIT,
-	EXTRAE_INITIALIZED_PACX_INIT,
-	EXTRAE_INITIALIZED_SHMEM_INIT
-};
+extern SingleEv_Handler_t PRV_OPENSHMEM_Event_Handlers[]; 
 
-typedef enum extrae_INIT_TYPE extrae_init_type_t;
-
-enum extrae_USER_COMMUNICATION_TYPES
-{
-	EXTRAE_USER_SEND = 0,
-	EXTRAE_USER_RECV
-};
-
-enum extrae_USER_FUNCTION
-{
-	EXTRAE_USER_FUNCTION_NONE = -1,
-	EXTRAE_USER_FUNCTION_LEAVE = 0,
-	EXTRAE_USER_FUNCTION_ENTER
-};
-
-typedef enum extrae_USER_FUNCTION  extrae_user_function_t;
-typedef enum extrae_USER_COMMUNICATION_TYPES  extrae_user_communication_types_t;
-
-typedef unsigned extrae_comm_tag_t;
-typedef unsigned extrae_comm_partner_t;
-typedef long long extrae_comm_id_t;
-typedef unsigned extrae_type_t;
-typedef unsigned long long extrae_value_t;
-
-#define EXTRAE_COMM_PARTNER_MYSELF ((extrae_comm_partner_t) 0xFFFFFFFF)
-
-struct extrae_UserCommunication
-{
-	extrae_user_communication_types_t type;
-	extrae_comm_tag_t tag;
-	unsigned size;
-	extrae_comm_partner_t partner;
-	extrae_comm_id_t id;
-};
-
-typedef struct extrae_UserCommunication  extrae_user_communication_t;
-
-struct extrae_CombinedEvents
-{
-	/* These are used as boolean values */
-	int HardwareCounters;
-	int Callers;
-	int UserFunction;
-	/* These are intended for N events */
-	unsigned nEvents;
-	extrae_type_t  *Types;
-	extrae_value_t *Values;
-	/* These are intended for user communication records */
-	unsigned nCommunications;
-	extrae_user_communication_t *Communications;
-};
-
-typedef struct extrae_CombinedEvents  extrae_combined_events_t;
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* __OPENSHMEM_PRV_SEMANTICS_H__ */

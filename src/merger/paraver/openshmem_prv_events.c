@@ -22,83 +22,49 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/mpi_prv_events.c $
+ | @last_commit: $Date: 2014-06-18 12:53:30 +0200 (mié, 18 jun 2014) $
+ | @version:     $Revision: 2760 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef EXTRAE_TYPES_INCLUDED
-#define EXTRAE_TYPES_INCLUDED
+static char UNUSED rcsid[] = "$Id: mpi_prv_events.c 2760 2014-06-18 10:53:30Z harald $";
 
-#ifdef __cplusplus
-extern "C" {
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
 #endif
 
-enum extrae_INIT_TYPE
+#include "openshmem_prv_events.h"
+#include "openshmem_events.h"
+#include "labels.h"
+
+int OPENSHMEM_Present = FALSE;
+
+/******************************************************************************
+ **      Function name : Enable_OPENSHMEM_Operation
+ **      
+ **      Description : 
+ ******************************************************************************/
+
+void Enable_OPENSHMEM_Operation (int Op)
 {
-	EXTRAE_NOT_INITIALIZED = 0,
-	EXTRAE_INITIALIZED_EXTRAE_INIT,
-	EXTRAE_INITIALIZED_MPI_INIT,
-	EXTRAE_INITIALIZED_PACX_INIT,
-	EXTRAE_INITIALIZED_SHMEM_INIT
-};
-
-typedef enum extrae_INIT_TYPE extrae_init_type_t;
-
-enum extrae_USER_COMMUNICATION_TYPES
-{
-	EXTRAE_USER_SEND = 0,
-	EXTRAE_USER_RECV
-};
-
-enum extrae_USER_FUNCTION
-{
-	EXTRAE_USER_FUNCTION_NONE = -1,
-	EXTRAE_USER_FUNCTION_LEAVE = 0,
-	EXTRAE_USER_FUNCTION_ENTER
-};
-
-typedef enum extrae_USER_FUNCTION  extrae_user_function_t;
-typedef enum extrae_USER_COMMUNICATION_TYPES  extrae_user_communication_types_t;
-
-typedef unsigned extrae_comm_tag_t;
-typedef unsigned extrae_comm_partner_t;
-typedef long long extrae_comm_id_t;
-typedef unsigned extrae_type_t;
-typedef unsigned long long extrae_value_t;
-
-#define EXTRAE_COMM_PARTNER_MYSELF ((extrae_comm_partner_t) 0xFFFFFFFF)
-
-struct extrae_UserCommunication
-{
-	extrae_user_communication_types_t type;
-	extrae_comm_tag_t tag;
-	unsigned size;
-	extrae_comm_partner_t partner;
-	extrae_comm_id_t id;
-};
-
-typedef struct extrae_UserCommunication  extrae_user_communication_t;
-
-struct extrae_CombinedEvents
-{
-	/* These are used as boolean values */
-	int HardwareCounters;
-	int Callers;
-	int UserFunction;
-	/* These are intended for N events */
-	unsigned nEvents;
-	extrae_type_t  *Types;
-	extrae_value_t *Values;
-	/* These are intended for user communication records */
-	unsigned nCommunications;
-	extrae_user_communication_t *Communications;
-};
-
-typedef struct extrae_CombinedEvents  extrae_combined_events_t;
-
-#ifdef __cplusplus
+  OPENSHMEM_Present = TRUE;
 }
-#endif
 
-#endif
+void WriteEnabled_OPENSHMEM_Operations (FILE * fd)
+{
+	unsigned u = 0;
+
+        if (OPENSHMEM_Present)
+        {
+                fprintf (fd, "EVENT_TYPE\n");
+                fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_EVENT_TYPE, "OpenSHMEM calls");
+                fprintf (fd, "VALUES\n");
+                fprintf (fd, "0 Outside OpenSHMEM\n");
+
+                for (u = 0; u < COUNT_OPENSHMEM_EVENTS; u++)
+                                fprintf (fd, "%d %s\n", u+1, GetOPENSHMEMLabel( u ));
+                LET_SPACES(fd);
+        }
+}
+

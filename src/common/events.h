@@ -884,7 +884,8 @@ typedef enum
 	PACX_TYPE,
 	PACX_COMM_ALIAS_TYPE,
 	CUDA_TYPE,
-	OPENCL_TYPE
+	OPENCL_TYPE,
+	OPENSHMEM_TYPE
 } EventType_t;
 
 EventType_t getEventType (unsigned EvType, unsigned *Type);

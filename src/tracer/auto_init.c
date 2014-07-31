@@ -43,6 +43,12 @@ static char UNUSED rcsid[] = "$Id$";
 
 static int Extrae_automatically_loaded = FALSE;
 
+__attribute__((destructor))
+void Gateway_to_Extrae_auto_library_fini (void)
+{
+  Extrae_auto_library_fini();
+}
+
 __attribute__((constructor))
 void Extrae_auto_library_init (void)
 {
@@ -58,7 +64,7 @@ void Extrae_auto_library_init (void)
 		/* We have experienced issues with __attribute__(destructor).
 		   If it fails, give another chance to close instrumentation
 		   through atexit(3) */
-		atexit (Extrae_auto_library_fini);
+		atexit (Gateway_to_Extrae_auto_library_fini);
 	}
 }
 

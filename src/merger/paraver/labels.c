@@ -1062,10 +1062,11 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_Clustering_Labels (fd);
 	Write_Spectral_Labels (fd);
 	WriteEnabled_OpenCL_Operations (fd);
+	WriteEnabled_OPENSHMEM_Operations (fd);
 
 	Write_UserDefined_Labels(fd);
 
-    Write_BasickBlock_Labels(fd);
+	Write_BasickBlock_Labels(fd);
     
 	Concat_User_Labels (fd);
 

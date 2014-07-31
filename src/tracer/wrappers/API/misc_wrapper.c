@@ -361,6 +361,8 @@ void Extrae_init_Wrapper (void)
 			previous = "MPI";
 		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
 			previous = "PACX";
+		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_SHMEM_INIT)
+			previous = "SHMEM";
 
 		fprintf (stderr, PACKAGE_NAME": Warning! API tries to initialize more than once\n");
 		fprintf (stderr, PACKAGE_NAME":          Previous initialization was done by %s\n", previous);
@@ -375,7 +377,7 @@ void Extrae_fini_Wrapper (void)
 #if !defined(IS_CELL_MACHINE)
 		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
 		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX())
+		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX() && !Extrae_get_ApplicationIsSHMEM())
 			if (getenv ("EXTRAE_APPEND_PID") == NULL)
 				Generate_Task_File_List();
 #endif
@@ -403,7 +405,7 @@ void Extrae_fini_last_chance_Wrapper (void)
 #if !defined(IS_CELL_MACHINE)
 		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
 		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX())
+		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX() && !Extrae_get_ApplicationIsSHMEM())
 			Generate_Task_File_List();
 #endif
 

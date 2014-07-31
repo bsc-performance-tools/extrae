@@ -3,6 +3,7 @@ include $(top_srcdir)/PATHS
 common_SRCS = \
  utils.c utils.h \
  events.c events.h \
+ openshmem_events.c openshmem_events.h \
  timesync.c timesync.h \
  new-queue.c new-queue.h \
  extrae_vector.c extrae_vector.h \

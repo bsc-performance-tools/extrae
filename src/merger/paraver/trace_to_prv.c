@@ -444,7 +444,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
 			    Type == MPI_TYPE || Type == PACX_TYPE || Type == TRT_TYPE ||
-			    Type == CUDA_TYPE || Type == OPENCL_TYPE)
+			    Type == CUDA_TYPE || Type == OPENCL_TYPE || Type == OPENSHMEM_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
 
@@ -470,9 +470,13 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_CUDA_Operation (EvType);
 					else if (OPENCL_TYPE == Type)
 						Enable_OpenCL_Operation (EvType);
+					else if (OPENSHMEM_TYPE == Type)
+						Enable_OPENSHMEM_Operation (EvType);
 				}
-				else
+				else	
+				{
 					fprintf (stderr, "mpi2prv: Error! unregistered event type %d in %s\n", EvType, __func__);
+				}
 
 				/* Deal with Nanos Task View if we have registered stacked values
 				   and if we have seen a resume/suspend thread */

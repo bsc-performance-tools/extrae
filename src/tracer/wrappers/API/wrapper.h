@@ -187,8 +187,10 @@ void Extrae_set_is_initialized (extrae_init_type_t type);
 
 int Extrae_get_ApplicationIsMPI (void);
 int Extrae_get_ApplicationIsPACX (void);
+int Extrae_get_ApplicationIsSHMEM (void);
 void Extrae_set_ApplicationIsMPI (int isMPI);
 void Extrae_set_ApplicationIsPACX (int isPACX);
+void Extrae_set_ApplicationIsSHMEM (int isSHMEM);
 
 void Extrae_AnnotateCPU (UINT64 timestamp);
 

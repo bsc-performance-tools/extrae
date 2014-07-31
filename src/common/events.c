@@ -262,7 +262,6 @@ static unsigned opencl_events[] = {
 	OPENCL_CLRETAINPROGRAM_EV, OPENCL_CLRELEASEPROGRAM_EV
 };
 
-
 /******************************************************************************
  ***  IsOpenCL
  ******************************************************************************/
@@ -273,6 +272,17 @@ unsigned IsOpenCL (unsigned EvType)
 
   for (evt = 0; evt < OPENCL_EVENTS; evt++)
     if (opencl_events[evt] == EvType)
+      return TRUE;
+  return FALSE;
+}
+
+/******************************************************************************
+ ***  IsOPENSHMEM
+ ******************************************************************************/
+
+unsigned IsOPENSHMEM (unsigned EvType)
+{
+  if (EvType == OPENSHMEM_TYPE) 
       return TRUE;
   return FALSE;
 }
@@ -395,6 +405,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (IsOpenCL(EvType))
 	{
 		*Type = OPENCL_TYPE;
+		return TRUE;
+	}
+	else if (IsOPENSHMEM(EvType))
+	{
+		*Type = OPENSHMEM_TYPE;
 		return TRUE;
 	}
 	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)

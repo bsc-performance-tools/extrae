@@ -412,6 +412,7 @@ char * Get_ApplName (void)
  ******************************************************************************/
 static int Extrae_Application_isMPI = FALSE;
 static int Extrae_Application_isPACX = FALSE;
+static int Extrae_Application_isSHMEM = FALSE;
 
 int Extrae_get_ApplicationIsMPI (void)
 {
@@ -432,6 +433,17 @@ void Extrae_set_ApplicationIsPACX (int b)
 {
 	Extrae_Application_isPACX = b;
 }
+
+int Extrae_get_ApplicationIsSHMEM (void)
+{
+        return Extrae_Application_isSHMEM;
+}
+
+void Extrae_set_ApplicationIsSHMEM (int b)
+{
+        Extrae_Application_isSHMEM = b;
+}
+
 
 /******************************************************************************
  *** Store the first mechanism to initialize the tracing 
@@ -1954,7 +1966,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	}
 #endif
 
-	if (!appending)
+	if ((!appending) && (init_event != 0))
 	{
 		/* Add initialization begin and end events */
 		TRACE_MPIINITEV (InitTime, init_event, EVT_BEGIN,

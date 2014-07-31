@@ -99,6 +99,10 @@ if HAVE_MPI
 endif
 endif
 
+if WANT_OPENSHMEM
+  lib_LTLIBRARIES += libopenshmemtrace.la
+endif
+
 if GENERATE_LOAD_BALANCING
 if HAVE_MPI
   lib_LTLIBRARIES += libmpitrace-lb.la libmpitracef-lb.la
@@ -173,8 +177,7 @@ WRAPPERS_OMP = probes/OMP/omp_probe.c probes/OMP/omp_probe.h \
 EXTRA_OMP_CFLAGS =
 
 if WANT_OPENMP_OMPT
-WRAPPERS_OMP += wrappers/OMP/ompt-wrapper.c \
- wrappers/OMP/ompt-helper-defs.h wrappers/OMP/ompt-helper.h wrappers/OMP/ompt-helper.c 
+WRAPPERS_OMP += wrappers/OMP/ompt-wrapper.c wrappers/OMP/ompt-helper-defs.h wrappers/OMP/ompt-helper.h wrappers/OMP/ompt-helper.c 
 EXTRA_OMP_CFLAGS += -DOMPT_OPENMP
 
 else
@@ -211,6 +214,14 @@ WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c wrappers/TRT/trt_wrapper.h \
 # Wrappers for pthreads instrumentation
 WRAPPERS_PTHREAD = wrappers/pthread/pthread_wrapper.c wrappers/pthread/pthread_wrapper.h \
  probes/pthread/pthread_probe.c probes/pthread/pthread_probe.h
+
+if WANT_OPENSHMEM
+WRAPPERS_OPENSHMEM = \
+  wrappers/openshmem/openshmem_wrappers.c \
+  wrappers/openshmem/openshmem_wrappers.h \
+  probes/openshmem/openshmem_probes.c     \
+  probes/openshmem/openshmem_probes.h
+endif
 
 if IS_CELL_MACHINE
 WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c wrappers/CELL/cell_wrapper.h
@@ -290,6 +301,9 @@ libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) mpif.h
 # pthreads & TRT
 libpttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PTHREAD) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+
+# OpenSHMEM
+libopenshmemtrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OPENSHMEM) $(auto_fini_instr_SRCS)
 
 # LoadBalancing
 libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
@@ -392,6 +406,8 @@ libnanosmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)
 libpttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(SEQUENTIAL_MERGE_LIB)
 libtrttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 
+libopenshmemtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
+
 libmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 libmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 libompitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
@@ -422,6 +438,7 @@ core_INCLUDES = \
  -I$(WRAPPERS_DIR)/fork -I$(PROBES_DIR)/fork \
  -I$(WRAPPERS_DIR)/MALLOC -I$(PROBES_DIR)/MALLOC \
  -I$(WRAPPERS_DIR)/IO -I$(PROBES_DIR)/IO \
+ -I$(WRAPPERS_DIR)/openshmem \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_DIR) $(UNWIND_CFLAGS)
 
 if IS_CELL_MACHINE
@@ -452,6 +469,9 @@ if WANT_OPENCL
 endif
 if WANT_CUPTI
   core_INCLUDES += -I$(CUPTI_DIR)/include
+endif
+if WANT_OPENSHMEM
+  core_INCLUDES += -I$(PROBES_DIR)/openshmem
 endif
 
 if HAVE_PAPI
@@ -541,6 +561,8 @@ libnanosmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DNAN
 libpttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DPTHREAD_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 libtrttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DTRT_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
+libopenshmemtrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @OPENSHMEM_CFLAGS@ -DOPENSHMEM_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
+
 libmpitrace_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 libmpitracef_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ -DFORTRAN_SYMBOLS -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
 libompitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DOMP_SUPPORT -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB)
@@ -624,6 +646,8 @@ libnanosmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
 
 libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(LIBPTHREAD)
 libtrttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+
+libopenshmemtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(OPENSHMEM_LDFLAGS)
 
 libmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libmpitracef_lb_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) # -static
