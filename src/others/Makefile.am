@@ -11,12 +11,19 @@ reducempit_SOURCES = reducempit.c
 reducempit_CFLAGS = -I../.. -I../common
 
 papi_best_set_SOURCES = papi_best_set.c
-papi_best_set_CFLAGS  = -I. -I../common -DPAPI_HOME='"$(PAPI_HOME)"' @PAPI_CFLAGS@
+papi_best_set_CFLAGS  = -I. -I../common @PAPI_CFLAGS@
+if !HAVE_PAPI_EMBEDDED
+  papi_best_set_CFLAGS += -DPAPI_HOME='"$(PAPI_HOME)"'
+else
+  papi_best_set_CFLAGS += -DPAPI_HOME='"embedded"'
+endif
 papi_best_set_LDFLAGS = @PAPI_LDFLAGS@ @PAPI_LIBS@
 if IS_BG_MACHINE
 papi_best_set_LDFLAGS += -all-static
 else
+if !HAVE_PAPI_EMBEDDED
 papi_best_set_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+endif
 endif
 
 PYTHON_MODULE = pyextrae.py

@@ -165,6 +165,8 @@ AC_DEFUN([AX_CHECK_POINTER_SIZE],
       POINTER_SIZE=64
    elif test "${IS_ARM_MACHINE}" = "yes" ; then
       POINTER_SIZE=32
+   elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
+      POINTER_SIZE=64
    else
       AC_TRY_RUN(
          [
@@ -871,8 +873,10 @@ AC_DEFUN([AX_PROG_PAPI],
       [papi_paths="not_set"] dnl List of possible default paths
    )
 
-   if test -z "${papi_paths}" ; then
-      AC_MSG_ERROR([Error PAPI was not found but was enabled at configure time!])
+   if test "${IS_SPARC64_MACHINE}" = "yes" ; then
+      if test -z "${papi_paths}" ; then
+         AC_MSG_ERROR([Error PAPI was not found but was enabled at configure time!])
+      fi
    fi
 
    AC_ARG_ENABLE(sampling,
@@ -884,10 +888,19 @@ AC_DEFUN([AX_PROG_PAPI],
       [enable_sampling="yes"]
    )
 
-   dnl Search for PAPI installation
-   AX_FIND_INSTALLATION([PAPI], [$papi_paths], [papi])
+   dnl Search for PAPI installation, except for SPARC64 which is autoembedded
+   if test "${IS_SPARC64_MACHINE}" != "yes" ; then
+      AX_FIND_INSTALLATION([PAPI], [$papi_paths], [papi])
+      PAPI_ENABLED="${PAPI_INSTALLED}"
+   else
+      papi_paths="/usr"
+      PAPI_ENABLED="yes"
+      PAPI_HOME=${papi_paths}
+      AC_SUBST(PAPI_HOME)
+   fi
 
-   PAPI_ENABLED="${PAPI_INSTALLED}"
+   AM_CONDITIONAL(HAVE_PAPI_EMBEDDED, test "${IS_SPARC64_MACHINE}" = "yes")
+
    if test "${PAPI_ENABLED}" = "yes" ; then
       AC_CHECK_HEADERS([papi.h], [], [papi_h_notfound="yes"])
 
@@ -901,6 +914,8 @@ AC_DEFUN([AX_PROG_PAPI],
          LIBS="-lpapi -L${BG_HOME}/runtime/SPI -lSPI.cna"
       elif test "${IS_BGQ_MACHINE}" = "yes" ; then
          LIBS="-lpapi -L${BG_HOME}/spi/lib -lSPI -lSPI_cnk -lstdc++ -lrt"
+      elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
+         LIBS=""
       else
          if test "${OperatingSystem}" = "freebsd" ; then
             LIBS="-lpapi -lpmc"

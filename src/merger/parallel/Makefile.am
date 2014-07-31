@@ -109,8 +109,10 @@ if HAVE_ZLIB
 endif
 
 if HAVE_PAPI
+if !HAVE_PAPI_EMBEDDED
   libmpimpi2prv_la_CFLAGS += @PAPI_CFLAGS@
   mpimpi2prv_CFLAGS += @PAPI_CFLAGS@
+endif
 endif
 
 if HAVE_PMAPI

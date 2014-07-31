@@ -164,7 +164,7 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	pc = (caddr_t)UCONTEXT_REG(uc, PPC_REG_PC);
 #elif defined(OS_LINUX) || defined(OS_ANDROID)
 # if defined(ARCH_IA32) && !defined(ARCH_IA32_x64)
-  pc = (caddr_t)sc->eip;
+	pc = (caddr_t)sc->eip;
 # elif defined(ARCH_IA32) && defined(ARCH_IA32_x64)
 	pc = (caddr_t)sc->rip;
 # elif defined(ARCH_IA64)
@@ -173,6 +173,11 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	pc = (caddr_t)sc->regs->nip;
 # elif defined(ARCH_ARM)
 	pc = (caddr_t)sc->arm_pc;
+# elif defined(ARCH_SPARC64)
+    //pc = (caddr_t)sc->sigc_regs->tpc;
+    //pc = (caddr_t)sc->mc_gregs->tpc;
+    //pc = (caddr_t)sc->mc_gregs[MC_PC];
+	pc = 0;
 # else
 #  error "Don't know how to get the PC for this architecture in Linux!"
 # endif

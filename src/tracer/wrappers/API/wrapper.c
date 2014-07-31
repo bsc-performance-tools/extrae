@@ -203,8 +203,6 @@ void setRequestedIOInstrumentation (int b)
 
 static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append);
 
-#warning "Control variables below (tracejant, tracejant_mpi, tracejant_hwc_mpi...) should be moved to mode.c and indexed per mode"
-
 /***** Variable global per saber si en un moment donat cal tracejar ******/
 int tracejant = TRUE;
 
@@ -1896,7 +1894,6 @@ static int GetTraceOptions (void)
 
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list)
 {
-#warning "Aixo caldria separar-ho en mes events (mpi_init no hi fa res aqui!!) -- synchro + options"
 	int i;
 	unsigned long long *StartingTimes=NULL, *SynchronizationTimes=NULL;
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
@@ -2349,13 +2346,20 @@ void Backend_Enter_Instrumentation (unsigned Nevents)
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= Nevents)
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
 
-	/* Record the time when this is happening */
+	/* Record the time when this is happening
+	   we need this for subsequent calls to TIME, as this is being cached in
+	   clock routines */
 	current_time = TIME;
 
+#if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS)
 	/* Must change counters? check only at detail tracing, at bursty
      tracing it is leveraged to the mpi macros at BURSTS_MODE_TRACE_MPIEVENT */
 	if (CURRENT_TRACE_MODE(thread) == TRACE_MODE_DETAIL)
 		HARDWARE_COUNTERS_CHANGE(current_time, thread);
+#else
+	/* Otherwise, get rid of a warning about "set but unused" */
+	UNREFERENCED_PARAMETER(current_time);
+#endif
 }
 
 void Backend_Leave_Instrumentation (void)

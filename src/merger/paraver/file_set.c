@@ -1014,7 +1014,6 @@ static event_t *GetNextEvent_FS_prv (FileSet_t * fset, unsigned int *cpu,
 static event_t *GetNextEvent_FS_trf (FileSet_t * fset, unsigned int *cpu,
   unsigned int *ptask, unsigned int *task, unsigned int *thread)
 {
-#warning "We could close unused files so as to free mem!"
 	event_t *current = NULL;
 	FileItem_t *sfile; 
 

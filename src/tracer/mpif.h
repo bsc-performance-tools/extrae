@@ -40,6 +40,8 @@
 
 void CtoF77 (mpi_init) (MPI_Fint *ierror);
 
+void CtoF77 (mpi_init_thread) (MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror);
+
 void CtoF77 (mpi_finalize) (MPI_Fint *ierror);
 
 void CtoF77 (mpi_get_processor_name) (char *, int *, int *);
@@ -289,6 +291,8 @@ void CtoF77 (mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset, void* buf
 
 /* PMPI Fortran interface */
 void CtoF77 (pmpi_init) (MPI_Fint *ierror);
+
+void CtoF77 (pmpi_init_thread) (MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_finalize) (MPI_Fint *ierror);
 

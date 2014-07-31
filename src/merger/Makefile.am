@@ -100,8 +100,10 @@ if HAVE_ZLIB
 endif
 
 if HAVE_PAPI
-  libmpi2prv_la_CFLAGS += @PAPI_CFLAGS@
-  mpi2prv_CFLAGS += @PAPI_CFLAGS@
+if !HAVE_PAPI_EMBEDDED
+    libmpi2prv_la_CFLAGS += @PAPI_CFLAGS@
+    mpi2prv_CFLAGS += @PAPI_CFLAGS@
+endif
 endif
 
 if HAVE_PMAPI

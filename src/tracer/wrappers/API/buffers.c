@@ -57,6 +57,9 @@ static char UNUSED rcsid[] = "$Id$";
 #  include <pthread.h>
 # endif
 #endif
+#ifdef HAVE_SYS_UIO_H
+# include <sys/uio.h>
+#endif
 
 #include "buffers.h"
 #include "utils.h"
@@ -375,7 +378,8 @@ static ssize_t writev_wrapper (int fd, const struct iovec *iov, int iovcnt)
 		tmp = 0;
 		while (tmp < iov->iov_len)
 		{
-			written = write (fd, (iov->iov_base) + tmp, iov->iov_len - tmp);
+			written = write (fd,
+				(const void *)((int *)(iov->iov_base) + tmp), iov->iov_len - tmp);
 			if (written < 0)  
 				return written;
 			tmp += written;
@@ -474,28 +478,40 @@ int Buffer_Flush(Buffer_t *buffer)
 	DataBlocks_t *db = new_DataBlocks (buffer);
 	event_t *head = NULL, *tail = NULL;
 	int num_flushed, overflow;
+#if defined(ARCH_SPARC64)
+	ssize_t r;
+#endif
 
 	if ((Buffer_IsEmpty(buffer)) || (Buffer_IsClosed(buffer))) return 0;
-
 
 	head = Buffer_GetHead(buffer);
 	tail = head;
 	num_flushed = Buffer_GetFillCount(buffer);
 	CIRCULAR_STEP (tail, num_flushed, buffer->FirstEvt, buffer->LastEvt, &overflow);
 
-#if defined(HAVE_ONLINE)
+#if !defined(ARCH_SPARC64)
+
+# if defined(HAVE_ONLINE)
 	/* Select events depending on the mask */
 	Filter_Buffer(buffer, head, tail, db);
-#else
+# else
 	/* Select all events from head to tail */
 	DataBlocks_Add (db, head, tail);
-#endif
+# endif
 
 	/* Write to disk */
 	dump_buffer (buffer->fd, db->NumBlocks, db->BlocksList);
 
 	/* Free resources */
 	DataBlocks_Free(db);
+
+#else /* ARCH_SPARC64 */
+
+	r = write (buffer->fd, head, buffer->FillCount*sizeof(event_t));
+	if (r != buffer->FillCount*sizeof(event_t))
+		fprintf (stderr, "ERROR! Wrote %ld bytes instead of %ld bytes\n", r, buffer->FillCount*sizeof(event_t));
+
+#endif
 
 	//Do not call DiscardAll. This allows one thread to flush another thread's buffer that is not locked.
 	//Buffer_DiscardAll(buffer);
@@ -623,8 +639,10 @@ static void DataBlocks_AddSorted (DataBlocks_t *blocks, void *ini_address, void 
 
         xrealloc (blocks->BlocksList, blocks->BlocksList, sizeof(struct iovec) * blocks->MaxBlocks);
     }
-    blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_base = (void *)ini_address;
-    blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_len  = end_address - ini_address;
+    blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_base = 
+	  (void *)ini_address;
+    blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_len  =
+	  (size_t)((int*)end_address - (int*)ini_address);
 }
 
 static void DataBlocks_Add (DataBlocks_t *blocks, void *ini_address, void *end_address)

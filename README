@@ -14,7 +14,7 @@ on the left navigation frame.
 Package dependencies (and comments)
 --
 * libxml2 (>=2.5.0) 
-  http://http://www.xmlsoft.org (or look for libxml2-dev or libxml2-devel packages for your OS)
+  http://www.xmlsoft.org (or look for libxml2-dev or libxml2-devel packages for your OS)
   Parse XML configuration files (optional)
 
   libxml2 is used to parse the configuration of the instrumentation package. It is highly recommendable because the XML configuration file is more flexible than using environment variables.

@@ -30,20 +30,26 @@
 #ifndef DEFINES_DEFINED
 #define DEFINES_DEFINED 
 
-#if defined(PMPI_SINGLE_UNDERSCORE)
-# define CtoF77(x) x ## _
-#else
-# if defined(PMPI_NO_UNDERSCORES)
-#  define CtoF77(x) x
-# else
-#  define CtoF77(x) x ## __
-# endif
-#endif
+#if defined(HAVE_MPI)
 
-#if defined(MPICH_NAME)
-# define MPICH
-#elif defined(OPEN_MPI)
-# define OPENMPI
-#endif
+# if defined(PMPI_SINGLE_UNDERSCORE)
+#  define CtoF77(x) x ## _
+# elif defined(PMPI_DOUBLE_UNDERSCORES)
+#  define CtoF77(x) x ## __
+# elif defined(PMPI_NO_UNDERSCORES)
+#  define CtoF77(x) x
+# elif defined(PMPI_UNDERSCORE_F_SUFFIX)
+#  define CtoF77(x) x ## _f
+# else
+#  error Do not know how to define CtoF77!
+# endif
+
+# if defined(MPICH_NAME)
+#  define MPICH
+# elif defined(OPEN_MPI)
+#  define OPENMPI
+# endif
+
+#endif /* HAVE_MPI */
 
 #endif

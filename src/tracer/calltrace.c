@@ -140,7 +140,6 @@ UINT64 get_caller (int offset)
 
 # if defined(OS_LINUX) || defined(OS_FREEBSD) || defined(OS_DARWIN)
 #  if !defined(ARCH_IA64)
-  /* En arquitecturas IA32, se encuentran en la GLIBC y declaradas en <execinfo.h> */
 #   ifdef HAVE_EXECINFO_H
 #    include <execinfo.h>
 #   endif
@@ -229,7 +228,7 @@ UINT64 get_caller (int offset)
 
 # endif /* LINUX IA32 */
 
-# if (defined(OS_LINUX) && defined(ARCH_IA64))
+# if defined(OS_LINUX) && defined(ARCH_IA64)
 void trace_callers (iotimer_t time, int offset, int type)
 {
 	UNREFERENCED_PARAMETER(time);

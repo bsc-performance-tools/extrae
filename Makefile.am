@@ -94,10 +94,10 @@ if IS_BGP_MACHINE
 MPI_EXAMPLE_FILES= example/BGP/ll_merge.sh \
  example/BGP/ll_parmerge.sh \
  example/BGP/Makefile \
- example/BGP/papi_bgp_avail.txt \
  example/BGP/ll_papi.sh \
  example/BGP/ll_trace.sh \
  example/BGP/mpi_ping.f \
+ example/BGP/papi_bgp_avail.txt \
  example/BGP/papi_bgp_native_avail.txt
 endif
 if IS_BGQ_MACHINE

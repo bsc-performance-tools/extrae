@@ -111,7 +111,7 @@ AC_DEFUN([AX_PROG_MPI],
          AC_MSG_ERROR([Cannot find MPI libraries file in the MPI specified path])
       fi
 
-			AC_MSG_CHECKING([for shared MPI library])
+      AC_MSG_CHECKING([for shared MPI library])
       if test -f "${MPI_LIBSDIR}/libmpi.so" -o -f "${MPI_LIBSDIR}/libmpich.so" -o \
          -f "${MPI_LIBSDIR}/shared/libmpi.so" -o -f "${MPI_LIBSDIR}/shared/libmpich.so" -o \
          -f "${MPI_LIBSDIR}/libmpi_ibm.so" -o -f "${MPI_LIBSDIR}/libmpich.cnk.so" -o \
@@ -121,7 +121,7 @@ AC_DEFUN([AX_PROG_MPI],
       else
          MPI_SHARED_LIB_FOUND="not found"
       fi
-			AC_MSG_RESULT([${MPI_SHARED_LIB_FOUND}])
+      AC_MSG_RESULT([${MPI_SHARED_LIB_FOUND}])
 
       if test "${MPI_LIBSDIR}" = "not found" ; then
          MPI_INSTALLED="no"
@@ -131,7 +131,7 @@ AC_DEFUN([AX_PROG_MPI],
          AC_SUBST(MPI_LIBS)
       fi
 
-			AC_MSG_CHECKING([for fortran MPI library])
+      AC_MSG_CHECKING([for fortran MPI library])
       if test -f "${MPI_LIBSDIR}/libmpi_f77.a" -o -f "${MPI_LIBSDIR}/libmpi_f77.so" -o -f "${MPI_LIBSDIR}/shared/libmpi_f77.so" ; then
          MPI_F_LIB_FOUND="yes"
          MPI_F_LIB="-lmpi_f77"
@@ -150,7 +150,8 @@ AC_DEFUN([AX_PROG_MPI],
       else
          MPI_F_LIB_FOUND="not found"
       fi
-			AC_MSG_RESULT([${MPI_F_LIB_FOUND}])
+      AC_MSG_RESULT([${MPI_F_LIB_FOUND}, ${MPI_F_LIB}])
+      AC_SUBST(MPI_F_LIB)
 
       if test "${MPI_LIBSDIR}" = "not found" ; then
          MPI_INSTALLED="no"
@@ -163,7 +164,7 @@ AC_DEFUN([AX_PROG_MPI],
       dnl If $MPICC is not set, check for mpicc under $MPI_HOME/bin. We don't want to mix multiple MPI installations.
       AC_MSG_CHECKING([for MPI C compiler])
       if test "${MPICC}" = "" ; then
-         mpicc_compilers="mpicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc"
+         mpicc_compilers="mpicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
          for mpicc in [$mpicc_compilers]; do
             if test -f "${MPI_HOME}/bin/${mpicc}" ; then
                MPICC="${MPI_HOME}/bin/${mpicc}"
@@ -183,11 +184,11 @@ AC_DEFUN([AX_PROG_MPI],
          if test -x ${MPICC} ; then
             AC_MSG_RESULT([${MPICC}])
          else
-						if test -x `which ${MPICC}` ; then
+            if test -x `which ${MPICC}` ; then
             	AC_MSG_RESULT([${MPICC}])
-						else
+            else
  	          	AC_MSG_ERROR([Cannot find given \${MPICC}. Please give the full path for the MPI C compiler])
-						fi
+            fi
          fi
       fi
    fi
@@ -248,6 +249,8 @@ AC_DEFUN([AX_CHECK_MPI_STATUS_SIZE],
 
    if test "${IS_MIC_MACHINE}" = "yes" ; then
      SIZEOF_MPI_STATUS=5
+   elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
+     SIZEOF_MPI_STATUS=5
    else
    AC_TRY_RUN(
       [
@@ -280,6 +283,8 @@ AC_DEFUN([AX_CHECK_MPI_SOURCE_OFFSET],
    AC_MSG_CHECKING([for offset of SOURCE field in MPI_Status])
    if test "${IS_MIC_MACHINE}" = "yes" ; then
      MPI_SOURCE_OFFSET=2
+   elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
+     MPI_SOURCE_OFFSET=0
    else
    AC_TRY_RUN(
       [
@@ -316,6 +321,8 @@ AC_DEFUN([AX_CHECK_MPI_TAG_OFFSET],
    AC_MSG_CHECKING([for offset of TAG field in MPI_Status])
    if test "${IS_MIC_MACHINE}" = "yes" ; then
      MPI_TAG_OFFSET=3
+   elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
+     MPI_TAG_OFFSET=1
    else
    AC_TRY_RUN(
       [
@@ -353,8 +360,13 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
       [name_mangling="auto"]
    )
 
-   if test "$name_mangling" != "0u" -a "$name_mangling" != "1u" -a "$name_mangling" != "2u" -a "$name_mangling" != "upcase" -a "$name_mangling" != "auto" ; then
-      AC_MSG_ERROR([--with-name-mangling: Invalid argument '$name_mangling'. Valid options are: 0u, 1u, 2u, upcase, auto.])
+   if test "$name_mangling" != "0u" -a \
+           "$name_mangling" != "1u" -a \
+           "$name_mangling" != "2u" -a \
+           "$name_mangling" != "_f" -a \
+           "$name_mangling" != "upcase" -a \
+           "$name_mangling" != "auto" ; then
+      AC_MSG_ERROR([--with-name-mangling: Invalid argument '$name_mangling'. Valid options are: 0u, 1u, 2u, _f, upcase, auto.])
    fi
 
    AC_MSG_CHECKING(for Fortran PMPI symbols name decoration scheme)
@@ -372,6 +384,9 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
       elif test "$name_mangling" = "0u" ; then
          AC_DEFINE([PMPI_NO_UNDERSCORES], 1, [Defined if name decoration scheme is of type pmpi_routine])
          FORTRAN_DECORATION="0 underscores"
+      elif test "$name_mangling" = "_f" ; then
+         AC_DEFINE([PMPI_UNDERSCORE_F_SUFFIX], 1, [Defined if name decoration scheme is of type pmpi_routine_f])
+         FORTRAN_DECORATION="_f suffix"
       fi
       AC_MSG_RESULT([${FORTRAN_DECORATION}])
    else
@@ -384,7 +399,7 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
       dnl Add the default includes and libraries
       if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
          CFLAGS="${MPI_CFLAGS}"
-         LIBS="${MPI_LIBS} ${MPI_F_LIB}"
+         LIBS="${MPI_LIBS}"
          LDFLAGS="${MPI_LDFLAGS}"
       fi
 
@@ -397,10 +412,11 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
          PMPI_SINGLE_UNDERSCORE \
          PMPI_DOUBLE_UNDERSCORE \
          PMPI_UPPERCASE \
+         PMPI_UNDERSCORE_F_SUFFIX \
          PMPI_NO_UNDERSCORES ;
       do
          CFLAGS="-D$ac_cv_name_mangling"
-         dnl LIBS="${MPI_F_LIB}"
+         LIBS="${LIBS} ${MPI_F_LIB}" dnl We need to append fortran libraries if they exist
    
          AC_TRY_LINK(
             [#include <mpi.h>], 
@@ -413,6 +429,8 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
                #define MY_ROUTINE pmpi_finalize_
                #elif defined(PMPI_DOUBLE_UNDERSCORE)
                #define MY_ROUTINE pmpi_finalize__
+               #elif defined(PMPI_UNDERSCORE_F_SUFFIX)
+               #define MY_ROUTINE pmpi_finalize_f
                #endif
    
                int ierror;
@@ -439,6 +457,9 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
       elif test "$ac_cv_name_mangling" = "PMPI_NO_UNDERSCORES" ; then
          AC_DEFINE([PMPI_NO_UNDERSCORES], 1, [Defined if name decoration scheme is of type pmpi_routine])
          FORTRAN_DECORATION="0 underscores"
+      elif test "${ac_cv_name_mangling}" = "PMPI_UNDERSCORE_F_SUFFIX" ; then
+         AC_DEFINE([PMPI_UNDERSCORE_F_SUFFIX], 1, [Defined if name decoration scheme is of type pmpi_routine_f])
+         FORTRAN_DECORATION="_f suffix"
       else
          FORTRAN_DECORATION="[unknown]"
          AC_MSG_NOTICE([Can not determine the name decoration scheme for external Fortran symbols in MPI library])
@@ -619,10 +640,12 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_F],
 	if test "${MPI_F_LIB_FOUND}" = "yes" ; then
 		if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
 			CFLAGS="${MPI_CFLAGS}"
-			LIBS="${MPI_LIBS} ${MPI_F_LIB}"
+			LIBS="${MPI_LIBS}"
 			LDFLAGS="${MPI_LDFLAGS}"
 		fi
+
 		CC="${MPICC}"
+        LIBS="${LIBS} ${MPI_F_LIB}" dnl We need to append fortran libraries if they exist
 
 		AC_MSG_CHECKING([if MPI library supports threads using MPI_Init_thread (Fortran)])
 		AC_TRY_LINK(
