@@ -699,7 +699,7 @@ struct OMPT_callbacks_st
 
 #define CALLBACK_ENTRY(x,y) { #x, x, (ompt_callback_t) y }
 
-struct OMPT_callbacks_st ompt_callbacks[] =
+static struct OMPT_callbacks_st ompt_callbacks[] =
 {
 	CALLBACK_ENTRY (ompt_event_loop_begin, OMPT_event_loop_begin),
 	CALLBACK_ENTRY (ompt_event_loop_end, OMPT_event_loop_end),
