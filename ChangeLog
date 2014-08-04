@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 04Aug2014 Disable instrumetation of mpi_file_open in fortran
  + 31Jul2014 Added instrumentation support for OpenSHMEM
  * 14Jul2014 Fix permissions for files/directories in set-X
  * 11Jul2014 GOMP_parallel support (appeared in libgomp for GCC 4.9)

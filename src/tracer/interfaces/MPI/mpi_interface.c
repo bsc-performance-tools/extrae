@@ -2282,6 +2282,9 @@ void NAME_ROUTINE_C2F(mpi_sendrecv_replace) (void *buf, MPI_Fint *count,
 /******************************************************************************
  ***  MPI_File_open
  ******************************************************************************/
+#if 0 
+/* Instrumentation of mpi_file_open is buggy because conversion from Fortran/string
+into C/string is non-direct. ATM, this routine is not instrumented */
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_file_open__,mpi_file_open_,MPI_FILE_OPEN,mpi_file_open, (MPI_Fint *comm, char *filename, MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len))
 
@@ -2303,6 +2306,7 @@ void NAME_ROUTINE_C2F(mpi_file_open) (MPI_Fint *comm, char *filename,
 	else
 		CtoF77 (pmpi_file_open) (comm, filename, amode, info, fh, len);
 }
+#endif /* Buggy mpi_file_open */
 
 /******************************************************************************
  ***  MPI_File_close
