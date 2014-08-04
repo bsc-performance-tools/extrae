@@ -2127,6 +2127,14 @@ void Flush_Thread(int thread_id)
   Extrae_Flush_Wrapper( TRACING_BUFFER(thread_id) );
 }
 
+static int __Extrae_Flush_Wrapper_getCounters = TRUE;
+
+int Extrae_Flush_Wrapper_getCounters(void)
+{ return __Extrae_Flush_Wrapper_getCounters; }
+
+void Extrae_Flush_Wrapper_setCounters (int c)
+{ __Extrae_Flush_Wrapper_getCounters = c; }
+
 /**
  * Flushes the buffer to disk and marks this I/O in trace.
  * \param buffer The buffer to be flushed.
@@ -2143,14 +2151,16 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 		FlushEv_Begin.time = TIME;
 		FlushEv_Begin.event = FLUSH_EV;
 		FlushEv_Begin.value = EVT_BEGIN;
-		HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, TRUE);
+		HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin,
+		  Extrae_Flush_Wrapper_getCounters());
 
 		Buffer_Flush (buffer);
 
 		FlushEv_End.time = TIME;
 		FlushEv_End.event = FLUSH_EV;
 		FlushEv_End.value = EVT_END;
-		HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, TRUE);
+		HARDWARE_COUNTERS_READ (THREADID, FlushEv_End,
+		  Extrae_Flush_Wrapper_getCounters());
 
 		BUFFER_INSERT (THREADID, buffer, FlushEv_Begin);
 #if !defined(IS_BG_MACHINE)
@@ -2225,6 +2235,11 @@ void Backend_Finalize (void)
 
 		/* Final write files to disk, include renaming of the filenames */
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+		{
+			/* Prevent writing performance counters from another thread */
+			if (thread != THREADID)
+				Extrae_Flush_Wrapper_setCounters (FALSE);
+
 			if (TRACING_BUFFER(thread) != NULL)
 			{
 				TRACE_EVENT (TIME, APPL_EV, EVT_END);
@@ -2235,6 +2250,8 @@ void Backend_Finalize (void)
 				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
 			}
 
+			Extrae_Flush_Wrapper_setCounters (TRUE);
+		}
 	
 		/* Free allocated memory */
 		{
