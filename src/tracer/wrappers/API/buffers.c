@@ -74,8 +74,10 @@ static int Mask_Get (Buffer_t *buffer, event_t *event, int mask_id);
 static void dump_buffer (int fd, int n_blocks, struct iovec *blocks);
 
 static DataBlocks_t * new_DataBlocks (Buffer_t *buffer);
+#if !defined(ARCH_SPARC64)
 static void DataBlocks_AddSorted (DataBlocks_t *blocks, void *ini_address, void *end_address);
 static void DataBlocks_Add (DataBlocks_t *blocks, void *ini_address, void *end_address);
+#endif
 static void DataBlocks_Free (DataBlocks_t *blocks);
 
 Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
@@ -380,6 +382,7 @@ static ssize_t writev_wrapper (int fd, const struct iovec *iov, int iovcnt)
 		{
 			written = write (fd,
 				(const void *)((int *)(iov->iov_base) + tmp), iov->iov_len - tmp);
+
 			if (written < 0)  
 				return written;
 			tmp += written;
@@ -530,6 +533,7 @@ int Buffer_FlushCache(Buffer_t *buffer)
   return 0;
 }
 
+#if !defined(ARCH_SPARC64)
 void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, DataBlocks_t *io_db)
 {
     void *ini_addr = NULL;
@@ -563,6 +567,7 @@ void Filter_Buffer(Buffer_t *buffer, event_t *first_event, event_t *last_event, 
         DataBlocks_Add(io_db, ini_addr, (void *)current);
     }
 }
+#endif
 
 int Buffer_DiscardOldest (Buffer_t *buffer)
 {
@@ -630,6 +635,7 @@ static DataBlocks_t * new_DataBlocks (Buffer_t *buffer)
     return blocks;
 }
 
+#if !defined(ARCH_SPARC64)
 static void DataBlocks_AddSorted (DataBlocks_t *blocks, void *ini_address, void *end_address)
 {
     blocks->NumBlocks ++;
@@ -639,12 +645,12 @@ static void DataBlocks_AddSorted (DataBlocks_t *blocks, void *ini_address, void 
 
         xrealloc (blocks->BlocksList, blocks->BlocksList, sizeof(struct iovec) * blocks->MaxBlocks);
     }
-    blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_base = 
-	  (void *)ini_address;
-    blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_len  =
-	  (size_t)((int*)end_address - (int*)ini_address);
+    blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_base = (void *)ini_address;
+	blocks->BlocksList[ blocks->NumBlocks - 1 ].iov_len  = end_address - ini_address;
 }
+#endif
 
+#if !defined(ARCH_SPARC64)
 static void DataBlocks_Add (DataBlocks_t *blocks, void *ini_address, void *end_address)
 {
     if (blocks != NULL)
@@ -660,6 +666,7 @@ static void DataBlocks_Add (DataBlocks_t *blocks, void *ini_address, void *end_a
         }
     }
 }
+#endif
 
 static void DataBlocks_Free (DataBlocks_t *blocks)
 {
