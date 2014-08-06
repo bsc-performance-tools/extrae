@@ -284,6 +284,11 @@ OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/run_ldpreload.sh \
  example/LINUX/OMP/run_instrumented.sh
 
+MPIOMP_EXAMPLE_FILES=\
+ example/LINUX/MPI+OMP/extrae.xml \
+ example/LINUX/MPI+OMP/README \
+ example/LINUX/MPI+OMP/ld-preload
+
 SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/extrae.xml \
  example/LINUX/SEQ/function-list \
