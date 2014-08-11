@@ -779,7 +779,7 @@ void NAME_ROUTINE_C2F(mpi_probe) (MPI_Fint *source, MPI_Fint *tag,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_Probe_Wrapper (source, tag, comm, status, ierror);
+		PMPI_Probe_Wrapper (source, tag, comm, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
@@ -797,15 +797,17 @@ void NAME_ROUTINE_F(mpi_request_get_status) (MPI_Request request, int *flag, MPI
 void NAME_ROUTINE_C2F(mpi_request_get_status) (MPI_Request request, int *flag, MPI_Status *status)
 #endif
 {
+#if 0
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
-    PMPI_Request_get_status_Wrapper (request, flag, status);
+		PMPI_Request_get_status_Wrapper (request, flag, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
+#endif
     CtoF77 (pmpi_request_get_status) (request, flag, status);
 }
 
