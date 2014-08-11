@@ -41,6 +41,7 @@ static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 1696 2013-04-30 13:15:24Z hara
 #endif
 
 #include "opencl_common.h"
+#include "opencl_wrapper.h"
 #include "taskid.h"
 #include "threadinfo.h"
 #include "wrapper.h"
@@ -64,13 +65,26 @@ typedef struct RegisteredCommandQueue_st
 	cl_event ocl_event[MAX_OPENCL_EVENTS];
 	unsigned prv_event[MAX_OPENCL_EVENTS];
 	cl_kernel k_event[MAX_OPENCL_EVENTS]; /* For those events that are accompanied by kernels */
+	size_t size[MAX_OPENCL_EVENTS]; /* For those events that are accompanied by a size */
 } RegisteredCommandQueue_t;
 
 static unsigned nCommandQueues = 0;
 static RegisteredCommandQueue_t *CommandQueues;
 
 static unsigned nKernels = 0;
-static cl_kernel *Kernels;
+typedef struct
+{
+	char *KernelName;
+	cl_kernel Kernel;
+} AnnotatedKernel_st;
+static AnnotatedKernel_st *Kernels;
+//static cl_kernel *Kernels;
+
+static unsigned __last_tag = 0x0C31; /* Fixed tag */
+unsigned Extrae_OpenCL_tag_generator (void)
+{
+	return __last_tag;
+}
 
 static int Extrae_OpenCL_lookForOpenCLQueue (cl_command_queue q, unsigned *position)
 {
@@ -96,15 +110,23 @@ int Extrae_OpenCL_Queue_OoO (cl_command_queue q)
 		return FALSE;
 }
 
+static int Extrae_OpenCL_lookForKernelName (const char *kernel_name)
+{
+	unsigned u;
+	for (u = 0; u < nKernels; u++)
+		if (!strcmp (kernel_name, Kernels[u].KernelName))
+			return TRUE;
+	return FALSE;
+}
+
 int Extrae_OpenCL_lookForKernel (cl_kernel k, unsigned *position)
 {
 	unsigned u;
 
 	for (u = 0; u < nKernels; u++)
-		if (Kernels[u] == k)
+		if (Kernels[u].Kernel == k)
 		{
-			if (position != NULL)
-				*position = u;
+			*position = u;
 			return TRUE;
 		}
 
@@ -233,8 +255,34 @@ void Extrae_OpenCL_addEventToQueue (cl_command_queue queue, cl_event ocl_evt,
 	CommandQueues[idx].ocl_event[idx2] = ocl_evt;
 	CommandQueues[idx].prv_event[idx2] = prv_evt;
 	CommandQueues[idx].k_event[idx2] = NULL;
+	CommandQueues[idx].size[idx2] = 0;
 	CommandQueues[idx].nevents++;
-	clRetainEvent (ocl_evt);
+	Extrae_clRetainEvent_real (ocl_evt);
+}
+
+void Extrae_OpenCL_addEventToQueueWithSize (cl_command_queue queue, cl_event ocl_evt, 
+	unsigned prv_evt, size_t size)
+{
+	unsigned idx, idx2;
+
+	if (!Extrae_OpenCL_lookForOpenCLQueue (queue, &idx))
+	{
+		fprintf (stderr, PACKAGE_NAME": Fatal Error! Cannot find OpenCL command queue!\n");
+		exit (-1);
+	}
+	if (CommandQueues[idx].nevents >= MAX_OPENCL_EVENTS)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! OpenCL tracing buffer overrun! Execute clFinish more frequently or ncrease MAX_OPENCL_EVENTS in "__FILE__);
+		return;
+	}
+
+	idx2 = CommandQueues[idx].nevents;
+	CommandQueues[idx].ocl_event[idx2] = ocl_evt;
+	CommandQueues[idx].prv_event[idx2] = prv_evt;
+	CommandQueues[idx].k_event[idx2] = NULL;
+	CommandQueues[idx].size[idx2] = size;
+	CommandQueues[idx].nevents++;
+	Extrae_clRetainEvent_real (ocl_evt);
 }
 
 void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
@@ -257,21 +305,76 @@ void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
 	CommandQueues[idx].ocl_event[idx2] = ocl_evt;
 	CommandQueues[idx].prv_event[idx2] = prv_evt;
 	CommandQueues[idx].k_event[idx2] = k;
+	CommandQueues[idx].size[idx2] = 0;
 	CommandQueues[idx].nevents++;
-	clRetainEvent (ocl_evt);
+	Extrae_clRetainEvent_real (ocl_evt);
 }
 
-static void Extrae_OpenCL_real_clQueueFlush (unsigned idx)
+static void Extrae_OpenCL_comm_at_OpenCL (RegisteredCommandQueue_t * cq, unsigned pos,
+	unsigned long long t, int entry)
+{
+	if (entry)
+	{
+		if (cq->prv_event[pos] == OPENCL_CLENQUEUEREADBUFFER_ACC_EV ||
+		    cq->prv_event[pos] == OPENCL_CLENQUEUEREADBUFFER_ASYNC_ACC_EV)
+		{
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(cq->threadid, t,
+			  USER_SEND_EV, TASKID, cq->size[pos],
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
+		}
+		else if (cq->prv_event[pos] == OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV ||
+		    cq->prv_event[pos] == OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_ACC_EV)
+		{
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(cq->threadid, t,
+			  USER_SEND_EV, TASKID, 0,
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
+		}
+	}
+	else
+	{
+		if (cq->prv_event[pos] == OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV ||
+		    cq->prv_event[pos] == OPENCL_CLENQUEUETASK_ACC_EV ||
+		    cq->prv_event[pos] == OPENCL_CLENQUEUENATIVEKERNEL_ACC_EV)
+		{
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(cq->threadid, t,
+			  USER_RECV_EV, TASKID, 0,
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
+		}
+		else if (cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV ||
+		    cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_ACC_EV)
+		{
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(cq->threadid, t,
+			  USER_RECV_EV, TASKID, cq->size[pos],
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
+		}
+		else if (cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV ||
+		    cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV)
+		{
+			THREAD_TRACE_USER_COMMUNICATION_EVENT(cq->threadid, t,
+			  USER_RECV_EV, TASKID, 0,
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
+		}
+	}
+}
+
+
+static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 {
 	unsigned u;
 	int threadid = CommandQueues[idx].threadid;
 	unsigned remainingevts = Buffer_RemainingEvents(TracingBuffer[threadid]);
+	cl_ulong last_time = 0;
 
 	cl_long delta_time = ((cl_long) CommandQueues[idx].host_reference_time) - 
 		((cl_long) CommandQueues[idx].device_reference_time);
 
 	/* Check whether we will fill the buffer soon (or now) */
-	if (remainingevts <= 2*CommandQueues[idx].nevents)
+	if (remainingevts <= 2*CommandQueues[idx].nevents+2)
 		Buffer_ExecuteFlushCallback (TracingBuffer[threadid]);
 
 	/* Flush events into thread buffer */
@@ -291,22 +394,41 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx)
 
 		utmp = utmp + delta_time; /* Correct timing between Host & Accel */
 
-		if (CommandQueues[idx].k_event[u] != NULL)
+		if (CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEREADBUFFER_ACC_EV ||
+		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV ||
+		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV ||
+		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV ||
+		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEREADBUFFER_ASYNC_ACC_EV ||
+		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_ACC_EV ||
+		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_ACC_EV ||
+		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV)
 		{
-			unsigned val;
-			if (Extrae_OpenCL_lookForKernel (CommandQueues[idx].k_event[u], &val))
-			{
-				THREAD_TRACE_MISCEVENT (threadid, utmp,
-				  CommandQueues[idx].prv_event[u], EVT_BEGIN, val+1);
-			}
-			else
-				fprintf (stderr, PACKAGE_NAME": Error! Cannot retrieve kernel info name!\n");
+			THREAD_TRACE_MISCEVENT (threadid, utmp,
+			  CommandQueues[idx].prv_event[u], EVT_BEGIN,
+			  CommandQueues[idx].size[u]);
 		}
 		else
 		{
-			THREAD_TRACE_MISCEVENT (threadid, utmp,
-			  CommandQueues[idx].prv_event[u], EVT_BEGIN, 0);
+			if (CommandQueues[idx].k_event[u] != NULL)
+			{
+				unsigned val;
+				if (Extrae_OpenCL_lookForKernel (CommandQueues[idx].k_event[u], &val))
+				{
+					THREAD_TRACE_MISCEVENT (threadid, utmp,
+					  CommandQueues[idx].prv_event[u], EVT_BEGIN, val+1);
+				}
+				else
+					fprintf (stderr, PACKAGE_NAME": Error! Cannot retrieve kernel info name!\n");
+			}
+			else
+			{
+				THREAD_TRACE_MISCEVENT (threadid, utmp,
+				  CommandQueues[idx].prv_event[u], EVT_BEGIN, 0);
+			}
 		}
+
+		Extrae_OpenCL_comm_at_OpenCL (&CommandQueues[idx], u, utmp,
+		  TRUE);
 
 		err = clGetEventProfilingInfo (evt, CL_PROFILING_COMMAND_END,
 			sizeof(utmp), &utmp, NULL);
@@ -321,13 +443,25 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx)
 		THREAD_TRACE_MISCEVENT (threadid, utmp,
 		  CommandQueues[idx].prv_event[u], EVT_END, 0);
 
-		clReleaseEvent (evt);
+		Extrae_OpenCL_comm_at_OpenCL (&CommandQueues[idx], u, utmp, FALSE);
+
+		Extrae_clReleaseEvent_real (evt);
+
+		last_time = utmp;
+	}
+
+	if (addFinish && CommandQueues[idx].nevents > 0)
+	{
+		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV, TASKID,
+			0, Extrae_OpenCL_tag_generator(), OPENCL_CLFINISH_EV);
+		THREAD_TRACE_USER_COMMUNICATION_EVENT(threadid, last_time,
+		  USER_SEND_EV, TASKID, 0, Extrae_OpenCL_tag_generator(), OPENCL_CLFINISH_EV);
 	}
 
 	CommandQueues[idx].nevents = 0;
 }
 
-void Extrae_OpenCL_clQueueFlush (cl_command_queue queue)
+void Extrae_OpenCL_clQueueFlush (cl_command_queue queue, int addFinish)
 {
 	unsigned idx;
 
@@ -337,7 +471,7 @@ void Extrae_OpenCL_clQueueFlush (cl_command_queue queue)
 		exit (-1);
 	}
 
-	Extrae_OpenCL_real_clQueueFlush (idx);
+	Extrae_OpenCL_real_clQueueFlush (idx, addFinish);
 }
 
 void Extrae_OpenCL_clQueueFlush_All (void)
@@ -345,23 +479,26 @@ void Extrae_OpenCL_clQueueFlush_All (void)
 	unsigned u;
 
 	for (u = 0; u < nCommandQueues; u++)
-		Extrae_OpenCL_real_clQueueFlush (u);
+		Extrae_OpenCL_real_clQueueFlush (u, FALSE);
 }
 
-void Extrae_OpenCL_annotateKernelName (cl_kernel k, char *kname)
+void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname)
 {
-	if (!Extrae_OpenCL_lookForKernel (k, NULL))
+	if (!Extrae_OpenCL_lookForKernelName (kname))
 	{
 		unsigned long long v;
+	
+		Kernels = (AnnotatedKernel_st*) realloc (Kernels,
+		  sizeof(AnnotatedKernel_st)*(nKernels+1));
 
-		Kernels = (cl_kernel*) realloc (Kernels, sizeof(cl_kernel)*(nKernels+1));
 		if (CommandQueues == NULL)
 		{
 			fprintf (stderr, PACKAGE_NAME": Fatal error! Failed to allocate memory for OpenCL Kernels\n");
 			exit (-1);
 		}
 
-		Kernels[nKernels] = k;
+		Kernels[nKernels].Kernel = k;
+		Kernels[nKernels].KernelName = strdup (kname);
 		v = nKernels+1;
 
 		Extrae_AddTypeValuesEntryToLocalSYM ('D', OPENCL_KERNEL_NAME_EV,
@@ -369,4 +506,6 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, char *kname)
 
 		nKernels++;
 	}
+	else
+		fprintf (stderr, "kernel %s is already in the map\n");
 }

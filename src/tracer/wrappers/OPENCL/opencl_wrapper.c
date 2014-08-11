@@ -446,7 +446,7 @@ cl_kernel clCreateKernel (cl_program p, const char *k, cl_int *e)
 	{
 		Extrae_Probe_clCreateKernel_Enter ();
 		r = real_clCreateKernel (p, k, e);
-		Extrae_OpenCL_annotateKernelName (r, (char*) k);
+		Extrae_OpenCL_annotateKernelName (r, k);
 		Extrae_Probe_clCreateKernel_Exit ();
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateKernel != NULL)
@@ -739,6 +739,11 @@ cl_int clEnqueueNDRangeKernel (cl_command_queue c, cl_kernel k, cl_uint n,
 			kid++;
 		
 		Extrae_Probe_clEnqueueNDRangeKernel_Enter (kid);
+
+		TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV,
+		  TASKID, 0, Extrae_OpenCL_tag_generator(),
+		  Extrae_OpenCL_tag_generator());
+
 		r = real_clEnqueueNDRangeKernel (c, k, n, gwo, gws, lws, ne, ewl, &evt);
 		Extrae_OpenCL_addEventToQueueWithKernel (c, evt, OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV, k);
 		if (e != NULL)
@@ -777,6 +782,11 @@ cl_int clEnqueueTask (cl_command_queue c, cl_kernel k, cl_uint n,
 			kid++;
 
 		Extrae_Probe_clEnqueueTask_Enter (kid);
+
+		TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV,
+		  TASKID, 0, Extrae_OpenCL_tag_generator(),
+		  Extrae_OpenCL_tag_generator());
+
 		r = real_clEnqueueTask (c, k, n, ewl, &evt);
 		Extrae_OpenCL_addEventToQueueWithKernel (c, evt, OPENCL_CLENQUEUETASK_ACC_EV, k);
 		if (e != NULL)
@@ -812,6 +822,11 @@ cl_int clEnqueueNativeKernel (cl_command_queue c,
 		cl_event evt;
 
 		Extrae_Probe_clEnqueueNativeKernel_Enter ();
+
+		TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV,
+		  TASKID, 0, Extrae_OpenCL_tag_generator(),
+		  Extrae_OpenCL_tag_generator());
+
 		r = real_clEnqueueNativeKernel (c, ptr, args, cb, nmo, ml, aml, newl, ewl, &evt);
 		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUENATIVEKERNEL_ACC_EV);
 		if (e != NULL)
@@ -844,14 +859,23 @@ cl_int clEnqueueReadBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 	{
 		cl_event evt;
 
-		Extrae_Probe_clEnqueueReadBuffer_Enter ();
+		Extrae_Probe_clEnqueueReadBuffer_Enter (b, s);
 		r = real_clEnqueueReadBuffer (c, m, b, o, s, p, u, e, &evt);
-		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEREADBUFFER_ACC_EV);
+
+		Extrae_OpenCL_addEventToQueueWithSize (c, evt,
+		  b?OPENCL_CLENQUEUEREADBUFFER_ACC_EV:OPENCL_CLENQUEUEREADBUFFER_ASYNC_ACC_EV,
+		  s);
+
 		if (ev != NULL)
 			*ev = evt;
 		if (b && !Extrae_OpenCL_Queue_OoO (c))
-			Extrae_OpenCL_clQueueFlush (c);
-		Extrae_Probe_clEnqueueReadBuffer_Exit ();
+			Extrae_OpenCL_clQueueFlush (c, FALSE);
+
+		Extrae_Probe_clEnqueueReadBuffer_Exit (b);
+		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
+			  USER_RECV_EV, TASKID, s,
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueReadBuffer != NULL)
 	{
@@ -881,15 +905,22 @@ cl_int clEnqueueReadBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 	{
 		cl_event evt;
 
-		Extrae_Probe_clEnqueueReadBufferRect_Enter ();
+		Extrae_Probe_clEnqueueReadBufferRect_Enter (b);
 		res = real_clEnqueueReadBufferRect (c, m, b, bo, ho, r, brp, bsp, hrp,
 		  hsp, ptr, n, ewl, &evt);
-		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV);
+		Extrae_OpenCL_addEventToQueue (c, evt,
+		  b?OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV:OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_ACC_EV);
+
 		if (e != NULL)
 			*e = evt;
 		if (b && !Extrae_OpenCL_Queue_OoO (c))
-			Extrae_OpenCL_clQueueFlush (c);
-		Extrae_Probe_clEnqueueReadBufferRect_Exit ();
+			Extrae_OpenCL_clQueueFlush (c, FALSE);
+
+		Extrae_Probe_clEnqueueReadBufferRect_Exit (b);
+		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
+			  USER_RECV_EV, TASKID, 0,
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueReadBufferRect != NULL)
 	{
@@ -918,9 +949,17 @@ cl_int clEnqueueWriteBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 	{
 		cl_event evt;
 
-		Extrae_Probe_clEnqueueWriteBuffer_Enter ();
+		Extrae_Probe_clEnqueueWriteBuffer_Enter (b, s);
+		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
+			  USER_SEND_EV, TASKID, s,
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
+
 		r = real_clEnqueueWriteBuffer (c, m, b, o, s, p, u, e, &evt);
-		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV);
+
+		Extrae_OpenCL_addEventToQueueWithSize (c, evt,
+		  b?OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV:OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_ACC_EV,
+		  s);
 		if (ev != NULL)
 			*ev = evt;
 /*
@@ -930,7 +969,7 @@ cl_int clEnqueueWriteBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 		if (b && !Extrae_OpenCL_Queue_OoO (c))
 			Extrae_OpenCL_clQueueFlush (c);
 */
-		Extrae_Probe_clEnqueueWriteBuffer_Exit ();
+		Extrae_Probe_clEnqueueWriteBuffer_Exit (b);
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueWriteBuffer != NULL)
 	{
@@ -960,10 +999,17 @@ cl_int clEnqueueWriteBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 	{
 		cl_event evt;
 
-		Extrae_Probe_clEnqueueWriteBufferRect_Enter ();
+		Extrae_Probe_clEnqueueWriteBufferRect_Enter (b);
+		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME,
+			  USER_SEND_EV, TASKID, 0,
+			  Extrae_OpenCL_tag_generator(),
+			  Extrae_OpenCL_tag_generator());
+
 		res = real_clEnqueueWriteBufferRect (c, m, b, bo, ho, r, brp, bsp,
 		  hrp, hsp, ptr, n, ewl, &evt);
-		Extrae_OpenCL_addEventToQueue (c, evt, OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV);
+
+		Extrae_OpenCL_addEventToQueue (c, evt,
+		  b?OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV:OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV);
 		if (e != NULL)
 			*e = evt;
 /*
@@ -973,7 +1019,7 @@ cl_int clEnqueueWriteBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 		if (b && !Extrae_OpenCL_Queue_OoO (c))
 			Extrae_OpenCL_clQueueFlush (c);
 */
-		Extrae_Probe_clEnqueueWriteBufferRect_Exit ();
+		Extrae_Probe_clEnqueueWriteBufferRect_Exit (b);
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueWriteBufferRect != NULL)
 	{
@@ -1091,10 +1137,12 @@ cl_int clFinish (cl_command_queue q)
 	{
 		if (!Extrae_Prepare_CommandQueue)
 			Extrae_Probe_clFinish_Enter ();
+
 		r = real_clFinish (q);
+
 		if (!Extrae_Prepare_CommandQueue)
 		{
-			Extrae_OpenCL_clQueueFlush (q);
+			Extrae_OpenCL_clQueueFlush (q, TRUE);
 			Extrae_Probe_clFinish_Exit ();
 		}
 	}
@@ -1198,7 +1246,9 @@ cl_int clEnqueueMarkerWithWaitList (cl_command_queue q, cl_uint n,
 
 	return r;
 }
+#endif
 
+#ifdef CL_VERSION_1_2
 cl_int clEnqueueBarrierWithWaitList (cl_command_queue q, cl_uint n,
 	const cl_event *ewl, cl_event *e)
 {
@@ -1332,7 +1382,7 @@ void *clEnqueueMapBuffer (cl_command_queue q, cl_mem m, cl_bool b,
 		if (e != NULL)
 			*e = evt;
 		if (b && !Extrae_OpenCL_Queue_OoO (q))
-			Extrae_OpenCL_clQueueFlush (q);
+			Extrae_OpenCL_clQueueFlush (q, FALSE);
 		Extrae_Probe_clEnqueueMapBuffer_Exit ();
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueMapBuffer != NULL)
@@ -1616,6 +1666,7 @@ cl_int Extrae_clReleaseEvent_real (cl_event e)
 
 	return r;
 }
+
 cl_int clRetainEvent (cl_event e)
 {
 	cl_int r;

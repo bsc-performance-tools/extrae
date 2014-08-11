@@ -116,6 +116,21 @@ static int OpenCL_Acc_Call (event_t * event, unsigned long long time,
 		  OPENCL_KERNEL_NAME_EV, EvParam);
 	}
 
+	if (EvType == OPENCL_CLENQUEUEREADBUFFER_ACC_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV ||
+	    EvType == OPENCL_CLENQUEUEREADBUFFERRECT_ACC_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV ||
+	    EvType == OPENCL_CLENQUEUEREADBUFFER_ASYNC_ACC_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_ACC_EV ||
+	    EvType == OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_ACC_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV)
+	{
+		unsigned long long EvParam;
+		EvParam = Get_EvParam (event);
+		trace_paraver_event (cpu, ptask, task, thread, time,
+		  OPENCL_CLMEMOP_SIZE_EV, EvParam);
+	}
+
 	return 0;
 }
 
@@ -176,13 +191,34 @@ static int OpenCL_Host_Call (event_t * event, unsigned long long time,
 		  OPENCL_KERNEL_NAME_EV, EvParam);
 	}
 
+	if (EvType == OPENCL_CLENQUEUEREADBUFFER_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFER_EV ||
+	    EvType == OPENCL_CLENQUEUEREADBUFFERRECT_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFERRECT_EV ||
+	    EvType == OPENCL_CLENQUEUEREADBUFFER_ASYNC_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_EV ||
+	    EvType == OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_EV ||
+	    EvType == OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_EV)
+	{
+		unsigned long long EvParam;
+		EvParam = Get_EvParam (event);
+		trace_paraver_event (cpu, ptask, task, thread, time,
+		  OPENCL_CLMEMOP_SIZE_EV, EvParam);
+	}
+
 	return 0;
 }
 
 RangeEv_Handler_t PRV_OpenCL_Event_Handlers[] = {
+	/* Host side */
 	{ OPENCL_CLCREATEBUFFER_EV, OPENCL_CLRELEASEPROGRAM_EV, OpenCL_Host_Call },
+	{ OPENCL_CLENQUEUEREADBUFFER_ASYNC_EV, OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_EV, OpenCL_Host_Call },
+
+	/* Accelerator-side */
 	{ OPENCL_CLENQUEUEFILLBUFFER_ACC_EV, OPENCL_CLENQUEUEWRITEBUFFERRECT_ACC_EV, OpenCL_Acc_Call },
 	{ OPENCL_CLENQUEUEMARKERWITHWAITLIST_ACC_EV, OPENCL_CLENQUEUEBARRIER_ACC_EV, OpenCL_Acc_Call },
+	{ OPENCL_CLENQUEUEREADBUFFER_ASYNC_ACC_EV, OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV, OpenCL_Acc_Call },
+
 	{ NULL_EV, NULL_EV, NULL }
 };
 

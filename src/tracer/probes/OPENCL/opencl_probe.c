@@ -406,85 +406,101 @@ void Extrae_Probe_clEnqueueNativeKernel_Exit (void)
 }
 
 
-void Extrae_Probe_clEnqueueReadBuffer_Enter (void)
+void Extrae_Probe_clEnqueueReadBuffer_Enter (int sync, size_t size)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
 		Backend_Enter_Instrumentation (2);
-		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEREADBUFFER_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME,
+		  sync?OPENCL_CLENQUEUEREADBUFFER_EV:OPENCL_CLENQUEUEREADBUFFER_ASYNC_EV,
+		  EVT_BEGIN, size);
 	}
 }
 
-void Extrae_Probe_clEnqueueReadBuffer_Exit (void)
+void Extrae_Probe_clEnqueueReadBuffer_Exit (int sync)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
-		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEREADBUFFER_EV, EVT_END, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (TIME,
+		  sync?OPENCL_CLENQUEUEREADBUFFER_EV:OPENCL_CLENQUEUEREADBUFFER_ASYNC_EV,
+		  EVT_END, EMPTY);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
 
-void Extrae_Probe_clEnqueueReadBufferRect_Enter (void)
+void Extrae_Probe_clEnqueueReadBufferRect_Enter (int sync)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
 		Backend_Enter_Instrumentation (2);
-		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEREADBUFFERRECT_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME,
+		  sync?OPENCL_CLENQUEUEREADBUFFERRECT_EV:OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_EV,
+		  EVT_BEGIN, EMPTY);
 	}
 }
 
-void Extrae_Probe_clEnqueueReadBufferRect_Exit (void)
+void Extrae_Probe_clEnqueueReadBufferRect_Exit (int sync)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
-		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEREADBUFFERRECT_EV, EVT_END, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (TIME,
+		  sync?OPENCL_CLENQUEUEREADBUFFERRECT_EV:OPENCL_CLENQUEUEREADBUFFERRECT_EV,
+		  EVT_END, EMPTY);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
 
-void Extrae_Probe_clEnqueueWriteBuffer_Enter (void)
+void Extrae_Probe_clEnqueueWriteBuffer_Enter (int sync, size_t size)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
 		Backend_Enter_Instrumentation (2);
-		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEWRITEBUFFER_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME,
+		  sync?OPENCL_CLENQUEUEWRITEBUFFER_EV:OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_EV,
+		  EVT_BEGIN, size);
 	}
 }
 
-void Extrae_Probe_clEnqueueWriteBuffer_Exit (void)
+void Extrae_Probe_clEnqueueWriteBuffer_Exit (int sync)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
-		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEWRITEBUFFER_EV, EVT_END, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (TIME,
+		  sync?OPENCL_CLENQUEUEWRITEBUFFER_EV:OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_EV,
+		  EVT_END, EMPTY);
 		Backend_Leave_Instrumentation ();
 	}
 }
 
 
-void Extrae_Probe_clEnqueueWriteBufferRect_Enter (void)
+void Extrae_Probe_clEnqueueWriteBufferRect_Enter (int sync)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
 		Backend_Enter_Instrumentation (2);
-		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME, OPENCL_CLENQUEUEWRITEBUFFERRECT_EV, EVT_BEGIN, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (LAST_READ_TIME,
+		  sync?OPENCL_CLENQUEUEWRITEBUFFERRECT_EV:OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_EV,
+		  EVT_BEGIN, EMPTY);
 	}
 }
 
-void Extrae_Probe_clEnqueueWriteBufferRect_Exit (void)
+void Extrae_Probe_clEnqueueWriteBufferRect_Exit (int sync)
 {
 	DEBUG
 	if (EXTRAE_ON() && trace_opencl)
 	{
-		TRACE_MISCEVENTANDCOUNTERS (TIME, OPENCL_CLENQUEUEWRITEBUFFERRECT_EV, EVT_END, EMPTY);
+		TRACE_MISCEVENTANDCOUNTERS (TIME,
+		  sync?OPENCL_CLENQUEUEWRITEBUFFERRECT_EV:OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_EV,
+		  EVT_END, EMPTY);
 		Backend_Leave_Instrumentation ();
 	}
 }

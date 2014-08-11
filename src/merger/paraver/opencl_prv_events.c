@@ -72,7 +72,7 @@ struct OpenCL_event_presency_label_st
 	int eventval;
 }; 
 
-#define MAX_OPENCL_TYPE_ENTRIES 48
+#define MAX_OPENCL_TYPE_ENTRIES 52
 
 static struct OpenCL_event_presency_label_st
  OpenCL_event_presency_label_host[MAX_OPENCL_TYPE_ENTRIES] = 
@@ -124,7 +124,11 @@ static struct OpenCL_event_presency_label_st
  { OPENCL_CLRETAINMEMOBJECT_EV, FALSE, "clRetainMemObject", 45 },
  { OPENCL_CLRELEASEMEMOBJECT_EV, FALSE, "clReleaseMemObject", 46 },
  { OPENCL_CLRETAINPROGRAM_EV, FALSE, "clRetainProgram", 47 },
- { OPENCL_CLRELEASEPROGRAM_EV, FALSE, "clReleaseProgram", 48 }
+ { OPENCL_CLRELEASEPROGRAM_EV, FALSE, "clReleaseProgram", 48 },
+ { OPENCL_CLENQUEUEREADBUFFER_ASYNC_EV, FALSE, "clEnqueueReadBuffer (async)", 49 },
+ { OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_EV, FALSE, "clEnqueueReadBufferRect (async)", 50 },
+ { OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_EV, FALSE, "clEnqueueWriteBuffer (async)", 51 },
+ { OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_EV, FALSE, "clEnqueueWriteBufferRect (async)", 52 }
 };
 
 static struct OpenCL_event_presency_label_st
@@ -177,7 +181,11 @@ static struct OpenCL_event_presency_label_st
  { 0, FALSE, "clRetainMemObject", 45 },
  { 0, FALSE, "clReleaseMemObject", 46 },
  { 0, FALSE, "clRetainProgram", 47 },
- { 0, FALSE, "clReleaseProgram", 48 }
+ { 0, FALSE, "clReleaseProgram", 48 },
+ { OPENCL_CLENQUEUEREADBUFFER_ASYNC_ACC_EV, FALSE, "clEnqueueReadBuffer (async)", 49 },
+ { OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_ACC_EV, FALSE, "clEnqueueReadBufferRect (async)", 50 },
+ { OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_ACC_EV, FALSE, "clEnqueueWriteBuffer (async)", 51 },
+ { OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV, FALSE, "clEnqueueWriteBufferRect (async)", 52 }
 };
 
 
@@ -268,9 +276,20 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 {
 	unsigned u;
 	int anypresent = FALSE;
+	int memtransfersizepresent = FALSE;
 
-	for (u = 0; u < MAX_OPENCL_TYPE_ENTRIES && !anypresent; u++)
-		anypresent = OpenCL_event_presency_label_host[u].present;
+	for (u = 0; u < MAX_OPENCL_TYPE_ENTRIES; u++)
+	{
+		anypresent = OpenCL_event_presency_label_host[u].present || anypresent;
+
+		if (OpenCL_event_presency_label_host[u].present && (
+		      OpenCL_event_presency_label_host[u].eventtype == OPENCL_CLENQUEUEREADBUFFER_EV ||
+		      OpenCL_event_presency_label_host[u].eventtype == OPENCL_CLENQUEUEREADBUFFERRECT_EV ||
+		      OpenCL_event_presency_label_host[u].eventtype == OPENCL_CLENQUEUEWRITEBUFFER_EV ||
+		      OpenCL_event_presency_label_host[u].eventtype == OPENCL_CLENQUEUEWRITEBUFFERRECT_EV )
+		   )
+			memtransfersizepresent = TRUE;
+	}
 
 	if (anypresent)
 	{
@@ -285,10 +304,19 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 					OpenCL_event_presency_label_host[u].eventval,
 					OpenCL_event_presency_label_host[u].description);
 		LET_SPACES(fd);
+
+		if (memtransfersizepresent)
+		{
+			fprintf (fd, "EVENT_TYPE\n"
+		              "%d   %d    OpenCL transfer size\n"
+		              "\n",
+		              0, OPENCL_CLMEMOP_SIZE_EV);
+		}
 	}
 
-	for (u = 0; u < MAX_OPENCL_TYPE_ENTRIES && !anypresent; u++)
-		anypresent = OpenCL_event_presency_label_acc[u].present;
+	anypresent = FALSE;
+	for (u = 0; u < MAX_OPENCL_TYPE_ENTRIES; u++)
+		anypresent = OpenCL_event_presency_label_acc[u].present || anypresent;
 
 	if (anypresent)
 	{
@@ -298,7 +326,8 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 		fprintf (fd, "VALUES\n");
 		fprintf (fd, "0 Outside OpenCL\n");
 		for (u = 0; u < MAX_OPENCL_TYPE_ENTRIES; u++)
-			if (OpenCL_event_presency_label_acc[u].present)
+			if (OpenCL_event_presency_label_acc[u].present &&
+			    OpenCL_event_presency_label_acc[u].eventtype != 0)
 				fprintf (fd, "%d %s\n", 
 					OpenCL_event_presency_label_acc[u].eventval,
 					OpenCL_event_presency_label_acc[u].description);

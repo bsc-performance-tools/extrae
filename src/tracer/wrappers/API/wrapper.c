@@ -2151,16 +2151,14 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 		FlushEv_Begin.time = TIME;
 		FlushEv_Begin.event = FLUSH_EV;
 		FlushEv_Begin.value = EVT_BEGIN;
-		HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin,
-		  Extrae_Flush_Wrapper_getCounters());
+		HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin, TRUE);
 
 		Buffer_Flush (buffer);
 
 		FlushEv_End.time = TIME;
 		FlushEv_End.event = FLUSH_EV;
 		FlushEv_End.value = EVT_END;
-		HARDWARE_COUNTERS_READ (THREADID, FlushEv_End,
-		  Extrae_Flush_Wrapper_getCounters());
+		HARDWARE_COUNTERS_READ (THREADID, FlushEv_End, TRUE);
 
 		BUFFER_INSERT (THREADID, buffer, FlushEv_Begin);
 #if !defined(IS_BG_MACHINE)

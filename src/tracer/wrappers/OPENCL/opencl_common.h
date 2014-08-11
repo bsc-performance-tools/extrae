@@ -37,15 +37,19 @@ void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
 
 int Extrae_OpenCL_Queue_OoO (cl_command_queue q);
 
-void Extrae_OpenCL_clQueueFlush (cl_command_queue queue);
+void Extrae_OpenCL_clQueueFlush (cl_command_queue queue, int addFinish);
 void Extrae_OpenCL_clQueueFlush_All (void);
 
 void Extrae_OpenCL_addEventToQueue (cl_command_queue queue, cl_event ocl_evt, 
 	unsigned prv_evt);
 void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
 	cl_event ocl_evt, unsigned prv_evt, cl_kernel k);
+void Extrae_OpenCL_addEventToQueueWithSize (cl_command_queue queue, cl_event ocl_evt, 
+	unsigned prv_evt, size_t size);
 
 int Extrae_OpenCL_lookForKernel (cl_kernel k, unsigned *position);
-void Extrae_OpenCL_annotateKernelName (cl_kernel k, char *kname);
+void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname);
+
+unsigned Extrae_OpenCL_tag_generator (void);
 
 #endif /* OPENCL_WRAPPER_H_INCLUDED */

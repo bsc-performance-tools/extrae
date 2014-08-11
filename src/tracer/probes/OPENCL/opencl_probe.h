@@ -81,17 +81,17 @@ void Extrae_Probe_clEnqueueTask_Exit (void);
 void Extrae_Probe_clEnqueueNativeKernel_Enter (void);
 void Extrae_Probe_clEnqueueNativeKernel_Exit (void);
 
-void Extrae_Probe_clEnqueueReadBuffer_Enter (void);
-void Extrae_Probe_clEnqueueReadBuffer_Exit (void);
+void Extrae_Probe_clEnqueueReadBuffer_Enter (int sync, size_t size);
+void Extrae_Probe_clEnqueueReadBuffer_Exit (int sync);
 
-void Extrae_Probe_clEnqueueReadBufferRect_Enter (void);
-void Extrae_Probe_clEnqueueReadBufferRect_Exit (void);
+void Extrae_Probe_clEnqueueReadBufferRect_Enter (int sync);
+void Extrae_Probe_clEnqueueReadBufferRect_Exit (int sync);
 
-void Extrae_Probe_clEnqueueWriteBuffer_Enter (void);
-void Extrae_Probe_clEnqueueWriteBuffer_Exit (void);
+void Extrae_Probe_clEnqueueWriteBuffer_Enter (int sync, size_t size);
+void Extrae_Probe_clEnqueueWriteBuffer_Exit (int sync);
 
-void Extrae_Probe_clEnqueueWriteBufferRect_Enter (void);
-void Extrae_Probe_clEnqueueWriteBufferRect_Exit (void);
+void Extrae_Probe_clEnqueueWriteBufferRect_Enter (int sync);
+void Extrae_Probe_clEnqueueWriteBufferRect_Exit (int sync);
 
 void Extrae_Probe_clBuildProgram_Enter (void);
 void Extrae_Probe_clBuildProgram_Exit (void);
