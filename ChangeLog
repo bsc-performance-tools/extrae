@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 27Aug2014 Fixed configure/compilation bugs in the OpenSHMEM instrumentation.
  * 11Aug2014 Extensions to OpenCL instrumentation
  * 04Aug2014 Disable instrumetation of mpi_file_open in fortran
              Don't emit counters for a thread when flushing at the end if the

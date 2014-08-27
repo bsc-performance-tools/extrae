@@ -60,7 +60,7 @@ if test ${cross_compiling} == "no"; then
 fi
 
 # Initialize automake
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 
 dnl Enable silent rules (if these exist), use with make V=0  or V=1
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])

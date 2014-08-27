@@ -10,10 +10,10 @@ AC_DEFUN([AX_PROG_OPENSHMEM],
          [specify where to find OpenSHMEM libraries and includes]
       ),
       [openshmem_paths=${withval}],
-      [openshmem_paths="not_set"]
+      [openshmem_paths="no"]
    )
    
-   if test "$openshmem_paths" != "not_set" ; then
+   if test "$openshmem_paths" != "no" ; then
       dnl Search for OpenSHMEM installation
       AX_FIND_INSTALLATION([OPENSHMEM], [$openshmem_paths], [openshmem])
 
@@ -52,11 +52,24 @@ AC_DEFUN([AX_PROG_OPENSHMEM],
          else
             AC_MSG_ERROR([Cannot link OpenSHMEM test. Check that --with-openshmem points to the appropriate OpenSHMEM directory.])
          fi
+      else
+         AC_MSG_ERROR([Cannot find the OpenSHMEM installation. Check that --with-openshmem points to the appropriate OpenSHMEM directory.])
       fi
-   else
-      AC_MSG_ERROR([Cannot find the OpenSHMEM installation. Check that --with-openshmem points to the appropriate OpenSHMEM directory.])
    fi 
    AX_FLAGS_RESTORE()
 
    AM_CONDITIONAL(WANT_OPENSHMEM, test "${OPENSHMEM_INSTALLED}" = "yes" -a "${openshmem_lib_works}" = "yes" )
 ])
+
+# AX_OPENSHMEM_SHOW_CONFIGURATION
+# -------------------------------
+AC_DEFUN([AX_OPENSHMEM_SHOW_CONFIGURATION],
+[
+  if test "${openshmem_lib_works}" = "yes" ; then
+    echo OpenSHMEM instrumentation: yes
+    echo -e \\\tOpenSHMEM home:            ${OPENSHMEM_HOME}
+  else
+    echo OpenSHMEM instrumentation: no
+  fi
+])
+
