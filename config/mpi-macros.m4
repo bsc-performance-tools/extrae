@@ -211,6 +211,37 @@ AC_DEFUN([AX_PROG_MPI],
    AX_FLAGS_RESTORE()
 ])
 
+# AX_CHECK_MPI3_VERSION
+# ---------------------
+AC_DEFUN([AX_CHECK_MPI3_VERSION],
+[
+   AX_FLAGS_SAVE()
+   CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
+   AC_LANG_SAVE()
+   AC_LANG([C])
+   AC_TRY_COMPILE(
+      [#include <mpi.h>],
+      [
+         #if MPI_VERSION == 3
+            return 1;
+         #else
+             #error "MPI version different to 3"
+         #endif
+      ],
+      [mpi3_version="yes"],
+      [mpi3_version="no"]
+   )
+   if test "${mpi3_version}" = "yes"; then
+       AC_DEFINE([MPI3], [1], [Define if we are using a MPI3 implementation])
+   fi
+   AX_FLAGS_RESTORE()
+   AC_LANG_RESTORE()
+   AC_MSG_RESULT([${mpi3_version}])
+   AX_FLAGS_RESTORE()
+])
+
+
+
 # AX_CHECK_MPI_F_STATUS_IGNORE
 # ---------------------
 AC_DEFUN([AX_CHECK_MPI_F_STATUS_IGNORE],

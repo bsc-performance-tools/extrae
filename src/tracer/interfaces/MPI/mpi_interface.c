@@ -30,6 +30,18 @@
 
 static char UNUSED rcsid[] = "$Id$";
 
+#if defined(MPI3)
+#define MPI3_CONST const
+#define MPI3_VOID_P_CAST (void *)
+#define MPI3_F_INT_P_CAST (MPI_Fint *)
+#define MPI3_C_INT_P_CAST (int *)
+#else
+#define MPI3_CONST
+#define MPI3_VOID_P_CAST
+#define MPI3_F_INT_P_CAST
+#define MPI3_C_INT_P_CAST
+#endif
+
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -265,25 +277,25 @@ void NAME_ROUTINE_C2F(mpi_finalize) (MPI_Fint *ierror)
  ***  MPI_BSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_bsend__,mpi_bsend_,MPI_BSEND,mpi_bsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_bsend__,mpi_bsend_,MPI_BSEND,mpi_bsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_bsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_bsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror) 
 #else
-void NAME_ROUTINE_C2F(mpi_bsend) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_bsend) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_bsend_enter (buf, count, datatype, dest, tag, comm, ierror);
+	DLB_mpi_bsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_BSend_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		PMPI_BSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -299,28 +311,28 @@ void NAME_ROUTINE_C2F(mpi_bsend) (void *buf, MPI_Fint *count,
  ***  MPI_SSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_ssend__,mpi_ssend_,MPI_SSEND,mpi_ssend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_ssend__,mpi_ssend_,MPI_SSEND,mpi_ssend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_ssend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_ssend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_ssend_enter (buf, count, datatype, dest, tag, comm, ierror);
+	DLB_mpi_ssend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 #endif
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_SSend_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		PMPI_SSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_ssend) (buf, count, datatype, dest, tag, comm, ierror);
+		CtoF77 (pmpi_ssend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_ssend_leave ();
 #endif
@@ -331,29 +343,29 @@ void NAME_ROUTINE_C2F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
  ***  MPI_RSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_rsend__,mpi_rsend_,MPI_RSEND,mpi_rsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_rsend__,mpi_rsend_,MPI_RSEND,mpi_rsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_rsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_rsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_rsend) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_rsend) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_rsend_enter (buf, count, datatype, dest, tag, comm, ierror);
+	DLB_mpi_rsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 #endif
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_RSend_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		PMPI_RSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
- 		CtoF77 (pmpi_rsend) (buf, count, datatype, dest, tag, comm, ierror);
+ 		CtoF77 (pmpi_rsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_rsend_leave ();
 #endif
@@ -363,29 +375,29 @@ void NAME_ROUTINE_C2F(mpi_rsend) (void *buf, MPI_Fint *count,
  ***  MPI_Send
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_send__,mpi_send_,MPI_SEND,mpi_send,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_send__,mpi_send_,MPI_SEND,mpi_send,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_send) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_send) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_send) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_send) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_send_enter (buf, count, datatype, dest, tag, comm, ierror);
+	DLB_mpi_send_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 #endif
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Send_Wrapper (buf, count, datatype, dest, tag, comm, ierror);
+		PMPI_Send_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_send) (buf, count, datatype, dest, tag, comm, ierror);
+		CtoF77 (pmpi_send) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_send_leave ();
 #endif
@@ -396,31 +408,31 @@ void NAME_ROUTINE_C2F(mpi_send) (void *buf, MPI_Fint *count,
  ***  MPI_IBSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_ibsend__,mpi_ibsend_,MPI_IBSEND,mpi_ibsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_ibsend__,mpi_ibsend_,MPI_IBSEND,mpi_ibsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_ibsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_ibsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_ibsend_enter (buf, count, datatype, dest, tag, comm, request, ierror);
+	DLB_mpi_ibsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 #endif
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_IBSend_Wrapper (buf, count, datatype, dest, tag, comm, request,
+		PMPI_IBSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
                          ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_ibsend) (buf, count, datatype, dest, tag, comm, request,
+		CtoF77 (pmpi_ibsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
                           ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_ibsend_leave ();
@@ -431,31 +443,31 @@ void NAME_ROUTINE_C2F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
  ***  MPI_ISend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_isend__,mpi_isend_,MPI_ISEND,mpi_isend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_isend__,mpi_isend_,MPI_ISEND,mpi_isend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_isend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_isend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_isend_enter (buf, count, datatype, dest, tag, comm, request, ierror);
+	DLB_mpi_isend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 #endif
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_ISend_Wrapper (buf, count, datatype, dest, tag, comm, request,
+		PMPI_ISend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_isend) (buf, count, datatype, dest, tag, comm, request,
+		CtoF77 (pmpi_isend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_isend_leave ();
@@ -466,31 +478,31 @@ void NAME_ROUTINE_C2F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
  ***  MPI_ISSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_issend__,mpi_issend_,MPI_ISSEND,mpi_issend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_issend__,mpi_issend_,MPI_ISSEND,mpi_issend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_issend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_issend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_issend) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_issend) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_issend_enter (buf, count, datatype, dest, tag, comm, request, ierror);
+	DLB_mpi_issend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 #endif
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_ISSend_Wrapper (buf, count, datatype, dest, tag, comm, request,
+		PMPI_ISSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_issend) (buf, count, datatype, dest, tag, comm, request,
+		CtoF77 (pmpi_issend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_issend_leave ();
@@ -501,31 +513,31 @@ void NAME_ROUTINE_C2F(mpi_issend) (void *buf, MPI_Fint *count,
  ***  MPI_IRSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_irsend__,mpi_irsend_,MPI_IRSEND,mpi_irsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_irsend__,mpi_irsend_,MPI_IRSEND,mpi_irsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_irsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_irsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_irsend_enter (buf, count, datatype, dest, tag, comm, request, ierror);
+	DLB_mpi_irsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
 #endif
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_IRSend_Wrapper (buf, count, datatype, dest, tag, comm, request,
+		PMPI_IRSend_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_irsend) (buf, count, datatype, dest, tag, comm, request,
+		CtoF77 (pmpi_irsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_irsend_leave ();
@@ -607,13 +619,13 @@ void NAME_ROUTINE_C2F(mpi_irecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
  ***  MPI_Reduce
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_reduce__,mpi_reduce_,MPI_REDUCE,mpi_reduce,(void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_reduce__,mpi_reduce_,MPI_REDUCE,mpi_reduce,(MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_reduce) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_reduce) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
@@ -622,7 +634,7 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_reduce_enter (sendbuf, recvbuf, count, datatype, op, root, comm, ierror);
+	DLB_mpi_reduce_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -641,13 +653,13 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Reduce_Wrapper (sendbuf, recvbuf, count, datatype, op, root, comm,
+		PMPI_Reduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                          ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_reduce) (sendbuf, recvbuf, count, datatype, op, root, comm,
+		CtoF77 (pmpi_reduce) (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                           ierror);
 
 #if defined(ENABLE_LOAD_BALANCING)
@@ -659,13 +671,13 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
  ***  MPI_Reduce_scatter
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_reduce_scatter__,mpi_reduce_scatter_,MPI_REDUCE_SCATTER,mpi_reduce_scatter,(void *sendbuf, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_reduce_scatter__,mpi_reduce_scatter_,MPI_REDUCE_SCATTER,mpi_reduce_scatter,(MPI3_CONST void *sendbuf, void *recvbuf, MPI3_CONST MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf, MPI_Fint *recvcounts,
+void NAME_ROUTINE_F(mpi_reduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf, MPI3_CONST MPI_Fint *recvcounts,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
-	MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+void NAME_ROUTINE_C2F(mpi_reduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf,
+	MPI3_CONST MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
 {
@@ -673,7 +685,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_reduce_scatter_enter (sendbuf, recvbuf, recvcounts, datatype, op, comm, ierror);
+	DLB_mpi_reduce_scatter_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -692,13 +704,13 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Reduce_Scatter_Wrapper (sendbuf, recvbuf, recvcounts, datatype, op,
+		PMPI_Reduce_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (pmpi_reduce_scatter) (sendbuf, recvbuf, recvcounts, datatype, op,
+		CtoF77 (pmpi_reduce_scatter) (sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, ierror);
 
 #if defined(ENABLE_LOAD_BALANCING)
@@ -710,13 +722,13 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
  ***  MPI_AllReduce
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_allreduce__,mpi_allreduce_,MPI_ALLREDUCE,mpi_allreduce,(void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_allreduce__,mpi_allreduce_,MPI_ALLREDUCE,mpi_allreduce,(MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_allreduce) (void *sendbuf, void *recvbuf,
+void NAME_ROUTINE_F(mpi_allreduce) (MPI3_CONST void *sendbuf, void *recvbuf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
+void NAME_ROUTINE_C2F(mpi_allreduce) (MPI3_CONST void *sendbuf, void *recvbuf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
@@ -726,7 +738,7 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_allreduce_enter (sendbuf, recvbuf, count, datatype, op, comm, ierror);
+	DLB_mpi_allreduce_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -749,7 +761,7 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_AllReduce_Wrapper (sendbuf, recvbuf, count, datatype, op, comm,
+    PMPI_AllReduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm,
                             ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1239,13 +1251,13 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
  ***  MPI_AllToAll
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_alltoall__,mpi_alltoall_,MPI_ALLTOALL,mpi_alltoall, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_alltoall__,mpi_alltoall_,MPI_ALLTOALL,mpi_alltoall, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_alltoall) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_alltoall) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1254,7 +1266,7 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_alltoall_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
+	DLB_mpi_alltoall_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1273,13 +1285,13 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_AllToAll_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+    PMPI_AllToAll_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount,
                            recvtype, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
-    CtoF77 (pmpi_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+    CtoF77 (pmpi_alltoall) (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount,
                             recvtype, comm, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_mpi_alltoall_leave ();
@@ -1291,22 +1303,22 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
  ***  MPI_AllToAllV
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_alltoallv__,mpi_alltoallv_,MPI_ALLTOALLV,mpi_alltoallv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_alltoallv__,mpi_alltoallv_,MPI_ALLTOALLV,mpi_alltoallv, (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount, MPI3_CONST MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
-	MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
+void NAME_ROUTINE_F(mpi_alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
+	MPI3_CONST MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount,
+	MPI3_CONST MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
-	MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
+void NAME_ROUTINE_C2F(mpi_alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
+	MPI3_CONST MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount,
+	MPI3_CONST MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
 	int result;
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_alltoallv_enter (sendbuf, sendcount, sdispls, sendtype, recvbuf, recvcount, rdispls, recvtype, comm, ierror);
+	DLB_mpi_alltoallv_enter (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1325,8 +1337,8 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_AllToAllV_Wrapper (sendbuf, sendcount, sdispls, sendtype, recvbuf,
-                            recvcount, rdispls, recvtype, comm, ierror);
+    PMPI_AllToAllV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf,
+                            MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
@@ -1343,13 +1355,13 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
  ***  MPI_Allgather
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_allgather__,mpi_allgather_,MPI_ALLGATHER,mpi_allgather, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_allgather__,mpi_allgather_,MPI_ALLGATHER,mpi_allgather, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_allgather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_allgather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1358,7 +1370,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_allgather_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
+	DLB_mpi_allgather_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1377,7 +1389,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_Allgather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+    PMPI_Allgather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount,
                             recvtype, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1395,14 +1407,14 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
  ***  MPI_Allgatherv
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_allgatherv__,mpi_allgatherv_,MPI_ALLGATHERV,mpi_allgatherv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_allgatherv__,mpi_allgatherv_,MPI_ALLGATHERV,mpi_allgatherv, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
+void NAME_ROUTINE_F(mpi_allgatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
+void NAME_ROUTINE_C2F(mpi_allgatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -1410,7 +1422,7 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_allgatherv_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, displs, recvtype, comm, ierror);
+	DLB_mpi_allgatherv_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1429,8 +1441,8 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_Allgatherv_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-                             displs, recvtype, comm, ierror);
+    PMPI_Allgatherv_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount,
+                             MPI3_F_INT_P_CAST displs, recvtype, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
@@ -1447,13 +1459,13 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
  ***  MPI_Gather
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_gather__,mpi_gather_,MPI_GATHER,mpi_gather, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_gather__,mpi_gather_,MPI_GATHER,mpi_gather, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_gather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_gather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1462,7 +1474,7 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_gather_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
+	DLB_mpi_gather_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1481,7 +1493,7 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_Gather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+    PMPI_Gather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount,
                          recvtype, root, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1498,14 +1510,14 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
  ***  MPI_GatherV
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_gatherv__,mpi_gatherv_,MPI_GATHERV,mpi_gatherv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_gatherv__,mpi_gatherv_,MPI_GATHERV,mpi_gatherv, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
+void NAME_ROUTINE_F(mpi_gatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
+void NAME_ROUTINE_C2F(mpi_gatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, MPI3_CONST void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -1513,7 +1525,7 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_gatherv_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, displs, recvtype, root, comm, ierror);
+	DLB_mpi_gatherv_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, root, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1532,8 +1544,8 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_GatherV_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
-                          displs, recvtype, root, comm, ierror);
+    PMPI_GatherV_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount,
+                          MPI3_F_INT_P_CAST displs, recvtype, root, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
@@ -1549,13 +1561,13 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
  ***  MPI_Scatter
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_scatter__,mpi_scatter_,MPI_SCATTER,mpi_scatter,(void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_scatter__,mpi_scatter_,MPI_SCATTER,mpi_scatter,(MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_scatter) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_scatter) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1564,7 +1576,7 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_scatter_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
+	DLB_mpi_scatter_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1583,7 +1595,7 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-    PMPI_Scatter_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount,
+    PMPI_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount,
                           recvtype, root, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1600,14 +1612,14 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
  ***  MPI_ScatterV
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_scatterv__,mpi_scatterv_,MPI_SCATTERV,mpi_scatterv,(void *sendbuf, MPI_Fint *sendcount, MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_scatterv__,mpi_scatterv_,MPI_SCATTERV,mpi_scatterv,(MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount, MPI3_CONST MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
+void NAME_ROUTINE_F(mpi_scatterv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
+	MPI3_CONST MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
+void NAME_ROUTINE_C2F(mpi_scatterv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
+	MPI3_CONST MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -1615,7 +1627,7 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_scatterv_enter (sendbuf, sendcount, displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
+	DLB_mpi_scatterv_enter (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -1634,7 +1646,7 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_ScatterV_Wrapper (sendbuf, sendcount, displs, sendtype, recvbuf,
+		PMPI_ScatterV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf,
                            recvcount, recvtype, root, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1886,14 +1898,14 @@ void NAME_ROUTINE_C2F(mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_
  *** MPI_Cart_create
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_cart_create__,mpi_cart_create_,MPI_CART_CREATE,mpi_cart_create, (MPI_Fint *comm_old, MPI_Fint *ndims, MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_cart_create__,mpi_cart_create_,MPI_CART_CREATE,mpi_cart_create, (MPI_Fint *comm_old, MPI_Fint *ndims, MPI3_CONST MPI_Fint *dims, MPI3_CONST MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
-	MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
+	MPI3_CONST MPI_Fint *dims, MPI3_CONST MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
 	MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
-	MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
+	MPI3_CONST MPI_Fint *dims, MPI3_CONST MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
 	MPI_Fint *ierror)
 #endif
 {
@@ -1901,7 +1913,7 @@ void NAME_ROUTINE_C2F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
-		PMPI_Cart_create_Wrapper (comm_old, ndims, dims, periods, reorder,
+		PMPI_Cart_create_Wrapper (comm_old, ndims, MPI3_F_INT_P_CAST dims, MPI3_F_INT_P_CAST periods, reorder,
                               comm_cart, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1915,12 +1927,12 @@ void NAME_ROUTINE_C2F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
  *** MPI_Cart_sub
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_cart_sub__,mpi_cart_sub_,MPI_CART_SUB,mpi_cart_sub, (MPI_Fint *comm, MPI_Fint *remain_dims, MPI_Fint *comm_new, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_cart_sub__,mpi_cart_sub_,MPI_CART_SUB,mpi_cart_sub, (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain_dims, MPI_Fint *comm_new, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
+void NAME_ROUTINE_F(mpi_cart_sub) (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
+void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror)
 #endif
 {
@@ -1928,7 +1940,7 @@ void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
-		PMPI_Cart_sub_Wrapper (comm, remain_dims, comm_new, ierror);
+		PMPI_Cart_sub_Wrapper (comm, MPI3_F_INT_P_CAST remain_dims, comm_new, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
@@ -2040,13 +2052,13 @@ void NAME_ROUTINE_C2F(mpi_recv_init) (void *buf, MPI_Fint *count,
  ***  MPI_Send_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_send_init__,mpi_send_init_,MPI_SEND_INIT,mpi_send_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_send_init__,mpi_send_init_,MPI_SEND_INIT,mpi_send_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_send_init) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_send_init) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_send_init) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
@@ -2055,7 +2067,7 @@ void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Send_init_Wrapper (buf, count, datatype, dest, tag,
+		PMPI_Send_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag,
                             comm, request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -2069,13 +2081,13 @@ void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
  ***  MPI_Bsend_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_bsend_init__,mpi_bsend_init_,MPI_BSEND_INIT,mpi_bsend_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_bsend_init__,mpi_bsend_init_,MPI_BSEND_INIT,mpi_bsend_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_bsend_init) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_bsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_bsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
@@ -2084,7 +2096,7 @@ void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Bsend_init_Wrapper (buf, count, datatype, dest, tag,
+		PMPI_Bsend_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag,
                              comm, request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -2098,13 +2110,13 @@ void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
  ***  MPI_Rsend_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_rsend_init__,mpi_rsend_init_,MPI_RSEND_INIT,mpi_rsend_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_rsend_init__,mpi_rsend_init_,MPI_RSEND_INIT,mpi_rsend_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_rsend_init) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_rsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_rsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
@@ -2113,7 +2125,7 @@ void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Rsend_init_Wrapper (buf, count, datatype, dest, tag,
+		PMPI_Rsend_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag,
                              comm, request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -2127,13 +2139,13 @@ void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
  ***  MPI_Ssend_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_ssend_init__,mpi_ssend_init_,MPI_SSEND_INIT,mpi_ssend_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_ssend_init__,mpi_ssend_init_,MPI_SSEND_INIT,mpi_ssend_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_ssend_init) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_ssend_init) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
@@ -2142,7 +2154,7 @@ void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *dat
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Ssend_init_Wrapper (buf, count, datatype, dest, tag,
+		PMPI_Ssend_init_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag,
                              comm, request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -2156,12 +2168,12 @@ void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *dat
  ***  MPI_Scan
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_scan__,mpi_scan_,MPI_SCAN,mpi_scan, (void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_scan__,mpi_scan_,MPI_SCAN,mpi_scan, (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_scan) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_scan) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -2169,7 +2181,7 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_scan_enter (sendbuf, recvbuf, count, datatype, op, comm, ierror);
+	DLB_mpi_scan_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, ierror);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, c, &result);
@@ -2188,7 +2200,7 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_Scan_Wrapper (sendbuf, recvbuf, count, datatype, op, comm, ierror);
+		PMPI_Scan_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
@@ -2203,21 +2215,21 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
  ***  MPI_Sendrecv
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_sendrecv__,mpi_sendrecv_,MPI_SENDRECV,mpi_sendrecv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr))
+MPI_F_SYMS(mpi_sendrecv__,mpi_sendrecv_,MPI_SENDRECV,mpi_sendrecv, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr))
 
-void NAME_ROUTINE_F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_sendrecv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf,
 	MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
 #else
-void NAME_ROUTINE_C2F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_sendrecv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf,
 	MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_mpi_sendrecv_enter (sendbuf, sendcount, sendtype, dest, sendtag,
+	DLB_mpi_sendrecv_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 		recvbuf, recvcount, recvtype, source, recvtag, comm, status);
 #endif
 
@@ -2225,7 +2237,7 @@ void NAME_ROUTINE_C2F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		MPI_Sendrecv_Fortran_Wrapper (sendbuf, sendcount, sendtype, dest, sendtag,
+		MPI_Sendrecv_Fortran_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
     	recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -2387,12 +2399,12 @@ void NAME_ROUTINE_C2F(mpi_file_read_all) (MPI_File *fh, void *buf,
  ***  MPI_File_write
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write__,mpi_file_write_,MPI_FILE_WRITE,mpi_file_write, (MPI_File *fh, void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write__,mpi_file_write_,MPI_FILE_WRITE,mpi_file_write, (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_file_write) (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #endif
 {
@@ -2400,7 +2412,7 @@ void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_File_write_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
+		PMPI_File_write_Fortran_Wrapper (fh, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2412,12 +2424,12 @@ void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
  ***  MPI_File_write_all
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write_all__,mpi_file_write_all_,MPI_FILE_WRITE_ALL,mpi_file_write_all, (MPI_File *fh, void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_all__,mpi_file_write_all_,MPI_FILE_WRITE_ALL,mpi_file_write_all, (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_file_write_all) (MPI_File *fh, void *buf,
+void NAME_ROUTINE_F(mpi_file_write_all) (MPI_File *fh, MPI3_CONST void *buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, void *buf,
+void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, MPI3_CONST void *buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #endif
 {
@@ -2425,7 +2437,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, void *buf,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_File_write_all_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
+		PMPI_File_write_all_Fortran_Wrapper (fh, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2491,14 +2503,14 @@ void NAME_ROUTINE_C2F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
  ***  MPI_file_write_at
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write_at__,mpi_file_write_at_,MPI_FILE_WRITE_AT,mpi_file_write_at, (MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_at__,mpi_file_write_at_,MPI_FILE_WRITE_AT,mpi_file_write_at, (MPI_File *fh, MPI_Offset *offset, MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #endif
 {
@@ -2506,7 +2518,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_File_write_at_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		PMPI_File_write_at_Fortran_Wrapper (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2518,14 +2530,14 @@ void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
  ***  MPI_File_write_at_all
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write_at_all__,mpi_file_write_at_all_,MPI_FILE_WRITE_AT_ALL,mpi_file_write_at_all,(MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_at_all__,mpi_file_write_at_all_,MPI_FILE_WRITE_AT_ALL,mpi_file_write_at_all,(MPI_File *fh, MPI_Offset *offset, MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #endif
 {
@@ -2533,7 +2545,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		PMPI_File_write_at_all_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
+		PMPI_File_write_at_all_Fortran_Wrapper (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2572,13 +2584,14 @@ void NAME_ROUTINE_C2F(mpi_get)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_put__,mpi_put_,MPI_PUT,mpi_put,(MPI_Fint *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror))
+/* FIXME: origin_addr is defined as void * in MPI3 and previous versions, it must be reviewed!!! */
+MPI_F_SYMS(mpi_put__,mpi_put_,MPI_PUT,mpi_put,(MPI3_CONST void *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_put)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
+void NAME_ROUTINE_F(mpi_put)(MPI3_CONST void *origin_addr, MPI_Fint *origin_count,
 	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
 	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_put)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
+void NAME_ROUTINE_C2F(mpi_put)(MPI3_CONST void *origin_addr, MPI_Fint *origin_count,
 	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
 	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
 #endif
@@ -2587,7 +2600,7 @@ void NAME_ROUTINE_C2F(mpi_put)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		MPI_Put_Fortran_Wrapper (origin_addr, origin_count, origin_datatype,
+		MPI_Put_Fortran_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -2693,20 +2706,20 @@ int NAME_ROUTINE_C(MPI_Finalize) (void)
 /******************************************************************************
  ***  MPI_Bsend
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Bsend) (void* buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Bsend) (MPI3_CONST void* buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_enter (buf, count, datatype, dest, tag, comm);
+	DLB_MPI_Bsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Bsend_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		res = MPI_Bsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2723,20 +2736,20 @@ int NAME_ROUTINE_C(MPI_Bsend) (void* buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Ssend
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Ssend) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Ssend) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_enter (buf, count, datatype, dest, tag, comm);
+	DLB_MPI_Ssend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Ssend_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		res = MPI_Ssend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2753,20 +2766,20 @@ int NAME_ROUTINE_C(MPI_Ssend) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Rsend
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Rsend) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Rsend) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_enter (buf, count, datatype, dest, tag, comm);
+	DLB_MPI_Rsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Rsend_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		res = MPI_Rsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2783,20 +2796,20 @@ int NAME_ROUTINE_C(MPI_Rsend) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Send
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Send) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Send) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_enter (buf, count, datatype, dest, tag, comm);
+	DLB_MPI_Send_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Send_C_Wrapper (buf, count, datatype, dest, tag, comm);
+		res = MPI_Send_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2813,20 +2826,20 @@ int NAME_ROUTINE_C(MPI_Send) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Ibsend
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Ibsend) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Ibsend) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibsend_enter (buf, count, datatype, dest, tag, comm, request);
+	DLB_MPI_Ibsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Ibsend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		res = MPI_Ibsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2843,20 +2856,20 @@ int NAME_ROUTINE_C(MPI_Ibsend) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Isend
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Isend) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Isend) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Isend_enter (buf, count, datatype, dest, tag, comm, request);
+	DLB_MPI_Isend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Isend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		res = MPI_Isend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2873,20 +2886,20 @@ int NAME_ROUTINE_C(MPI_Isend) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Issend
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Issend) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Issend) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Issend_enter (buf, count, datatype, dest, tag, comm, request);
+	DLB_MPI_Issend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Issend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		res = MPI_Issend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2903,20 +2916,20 @@ int NAME_ROUTINE_C(MPI_Issend) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Irsend
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Irsend) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Irsend) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irsend_enter (buf, count, datatype, dest, tag, comm, request);
+	DLB_MPI_Irsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 #endif
 
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Irsend_C_Wrapper (buf, count, datatype, dest, tag, comm, request);
+		res = MPI_Irsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -2993,13 +3006,13 @@ int NAME_ROUTINE_C(MPI_Irecv) (void* buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Reduce
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Reduce) (void *sendbuf, void *recvbuf, int count,
+int NAME_ROUTINE_C(MPI_Reduce) (MPI3_CONST void *sendbuf, void *recvbuf, int count,
 	MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Reduce_enter (sendbuf, recvbuf, count, datatype, op, root, comm);
+	DLB_MPI_Reduce_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3019,7 +3032,7 @@ int NAME_ROUTINE_C(MPI_Reduce) (void *sendbuf, void *recvbuf, int count,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Reduce_C_Wrapper 
-			(sendbuf, recvbuf, count, datatype, op, root, comm);
+			(MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -3036,13 +3049,13 @@ int NAME_ROUTINE_C(MPI_Reduce) (void *sendbuf, void *recvbuf, int count,
 /******************************************************************************
  ***  MPI_Reduce_scatter
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Reduce_scatter) (void *sendbuf, void *recvbuf,
-	int *recvcounts, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
+int NAME_ROUTINE_C(MPI_Reduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf,
+	MPI3_CONST int *recvcounts, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Reduce_scatter_enter (sendbuf, recvbuf, recvcounts, datatype, op, comm);
+	DLB_MPI_Reduce_scatter_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_C_INT_P_CAST recvcounts, datatype, op, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3061,7 +3074,7 @@ int NAME_ROUTINE_C(MPI_Reduce_scatter) (void *sendbuf, void *recvbuf,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Reduce_Scatter_C_Wrapper (sendbuf, recvbuf, recvcounts, datatype,
+		res = MPI_Reduce_Scatter_C_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_C_INT_P_CAST recvcounts, datatype,
 			op, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3080,14 +3093,14 @@ int NAME_ROUTINE_C(MPI_Reduce_scatter) (void *sendbuf, void *recvbuf,
 /******************************************************************************
  ***  MPI_Allreduce
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Allreduce) (void *sendbuf, void *recvbuf, int count,
+int NAME_ROUTINE_C(MPI_Allreduce) (MPI3_CONST void *sendbuf, void *recvbuf, int count,
 	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {
 	int trace_it = mpitrace_on;
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allreduce_enter (sendbuf, recvbuf, count, datatype, op, comm);
+	DLB_MPI_Allreduce_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3110,7 +3123,7 @@ int NAME_ROUTINE_C(MPI_Allreduce) (void *sendbuf, void *recvbuf, int count,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Allreduce_C_Wrapper (sendbuf, recvbuf, count, datatype, op, comm);
+		res = MPI_Allreduce_C_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -3525,14 +3538,14 @@ int NAME_ROUTINE_C(MPI_Bcast) (void *buffer, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Alltoall
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Alltoall) (void *sendbuf, int sendcount,
+int NAME_ROUTINE_C(MPI_Alltoall) (MPI3_CONST void *sendbuf, int sendcount,
 	MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Alltoall_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+	DLB_MPI_Alltoall_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3552,7 +3565,7 @@ int NAME_ROUTINE_C(MPI_Alltoall) (void *sendbuf, int sendcount,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Alltoall_C_Wrapper
-		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+		  (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -3570,14 +3583,14 @@ int NAME_ROUTINE_C(MPI_Alltoall) (void *sendbuf, int sendcount,
 /******************************************************************************
  ***  MPI_Alltoallv
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Alltoallv) (void *sendbuf, int *sendcounts, int *sdispls,
-	MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *rdispls,
+int NAME_ROUTINE_C(MPI_Alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST int *sendcounts, MPI3_CONST int *sdispls,
+	MPI_Datatype sendtype, void *recvbuf, MPI3_CONST int *recvcounts, MPI3_CONST int *rdispls,
 	MPI_Datatype recvtype, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Alltoallv_enter (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm);
+	DLB_MPI_Alltoallv_enter (MPI3_VOID_P_CAST sendbuf, MPI3_VOID_P_CAST sendcounts, MPI3_VOID_P_CAST sdispls, sendtype, recvbuf, MPI3_VOID_P_CAST recvcounts, MPI3_VOID_P_CAST rdispls, recvtype, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3597,8 +3610,8 @@ int NAME_ROUTINE_C(MPI_Alltoallv) (void *sendbuf, int *sendcounts, int *sdispls,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Alltoallv_C_Wrapper
-		  (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts,
-		  rdispls, recvtype, comm);
+		  (MPI3_VOID_P_CAST sendbuf, MPI3_VOID_P_CAST sendcounts, MPI3_VOID_P_CAST sdispls, sendtype, recvbuf, MPI3_VOID_P_CAST recvcounts,
+		  MPI3_VOID_P_CAST rdispls, recvtype, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -3617,14 +3630,14 @@ int NAME_ROUTINE_C(MPI_Alltoallv) (void *sendbuf, int *sendcounts, int *sdispls,
 /******************************************************************************
  ***  MPI_Allgather
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Allgather) (void *sendbuf, int sendcount,
+int NAME_ROUTINE_C(MPI_Allgather) (MPI3_CONST void *sendbuf, int sendcount,
 	MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allgather_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+	DLB_MPI_Allgather_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3644,7 +3657,7 @@ int NAME_ROUTINE_C(MPI_Allgather) (void *sendbuf, int sendcount,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Allgather_C_Wrapper
-		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype,
+		  (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype,
 		  comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3664,14 +3677,14 @@ int NAME_ROUTINE_C(MPI_Allgather) (void *sendbuf, int sendcount,
 /******************************************************************************
  ***  MPI_Allgatherv
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Allgatherv) (void *sendbuf, int sendcount,
-	MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *displs,
+int NAME_ROUTINE_C(MPI_Allgatherv) (MPI3_CONST void *sendbuf, int sendcount,
+	MPI_Datatype sendtype, void *recvbuf, MPI3_CONST int *recvcounts, MPI3_CONST int *displs,
 	MPI_Datatype recvtype, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allgatherv_enter (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm);
+	DLB_MPI_Allgatherv_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_C_INT_P_CAST recvcounts,MPI3_C_INT_P_CAST  displs, recvtype, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3691,7 +3704,7 @@ int NAME_ROUTINE_C(MPI_Allgatherv) (void *sendbuf, int sendcount,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  MPI_Allgatherv_C_Wrapper
-		  (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs,
+		  (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_C_INT_P_CAST recvcounts, MPI3_C_INT_P_CAST displs,
 		  recvtype, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3711,14 +3724,14 @@ int NAME_ROUTINE_C(MPI_Allgatherv) (void *sendbuf, int sendcount,
 /******************************************************************************
  ***  MPI_Gather
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Gather) (void *sendbuf, int sendcount,
+int NAME_ROUTINE_C(MPI_Gather) (MPI3_CONST void *sendbuf, int sendcount,
 	MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	int root, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Gather_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+	DLB_MPI_Gather_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3738,7 +3751,7 @@ int NAME_ROUTINE_C(MPI_Gather) (void *sendbuf, int sendcount,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  MPI_Gather_C_Wrapper
-		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root,
+		  (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root,
 		  comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3758,14 +3771,14 @@ int NAME_ROUTINE_C(MPI_Gather) (void *sendbuf, int sendcount,
 /******************************************************************************
  ***  MPI_Gatherv
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Gatherv) (void *sendbuf, int sendcount,
-	MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *displs,
+int NAME_ROUTINE_C(MPI_Gatherv) (MPI3_CONST void *sendbuf, int sendcount,
+	MPI_Datatype sendtype, void *recvbuf, MPI3_CONST int *recvcounts, MPI3_CONST int *displs,
 	MPI_Datatype recvtype, int root, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Gatherv_enter (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm);
+	DLB_MPI_Gatherv_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcounts, MPI3_C_INT_P_CAST displs, recvtype, root, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3785,7 +3798,7 @@ int NAME_ROUTINE_C(MPI_Gatherv) (void *sendbuf, int sendcount,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  MPI_Gatherv_C_Wrapper
-            (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs,
+            (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_C_INT_P_CAST recvcounts, MPI3_C_INT_P_CAST displs,
              recvtype, root, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3805,14 +3818,14 @@ int NAME_ROUTINE_C(MPI_Gatherv) (void *sendbuf, int sendcount,
 /******************************************************************************
  ***  MPI_Scatter
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Scatter) (void *sendbuf, int sendcount,
+int NAME_ROUTINE_C(MPI_Scatter) (MPI3_CONST void *sendbuf, int sendcount,
 	MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	int root, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scatter_enter (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+	DLB_MPI_Scatter_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3832,7 +3845,7 @@ int NAME_ROUTINE_C(MPI_Scatter) (void *sendbuf, int sendcount,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res =  MPI_Scatter_C_Wrapper
-		  (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root,
+		  (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root,
 		  comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -3852,14 +3865,14 @@ int NAME_ROUTINE_C(MPI_Scatter) (void *sendbuf, int sendcount,
 /******************************************************************************
  ***  MPI_Scatterv
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Scatterv) (void *sendbuf, int *sendcounts, int *displs, 
+int NAME_ROUTINE_C(MPI_Scatterv) (MPI3_CONST void *sendbuf, MPI3_CONST int *sendcounts, MPI3_CONST int *displs, 
 	MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	int root, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scatterv_enter (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
+	DLB_MPI_Scatterv_enter (MPI3_VOID_P_CAST sendbuf, MPI3_C_INT_P_CAST sendcounts, MPI3_C_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -3879,7 +3892,7 @@ int NAME_ROUTINE_C(MPI_Scatterv) (void *sendbuf, int *sendcounts, int *displs,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Scatterv_C_Wrapper
-            (sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount,
+            (MPI3_VOID_P_CAST sendbuf, MPI3_C_INT_P_CAST sendcounts, MPI3_C_INT_P_CAST displs, sendtype, recvbuf, recvcount,
              recvtype, root, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -4108,15 +4121,15 @@ int NAME_ROUTINE_C(MPI_Comm_spawn_multiple) (
 /******************************************************************************
  *** MPI_Cart_create
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Cart_create) (MPI_Comm comm_old, int ndims, int *dims,
-	int *periods, int reorder, MPI_Comm *comm_cart)
+int NAME_ROUTINE_C(MPI_Cart_create) (MPI_Comm comm_old, int ndims, MPI3_CONST int *dims,
+	MPI3_CONST int *periods, int reorder, MPI_Comm *comm_cart)
 {
 	int res;
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
-		res = MPI_Cart_create_C_Wrapper (comm_old, ndims, dims, periods, reorder,
+		res = MPI_Cart_create_C_Wrapper (comm_old, ndims, MPI3_C_INT_P_CAST dims, MPI3_C_INT_P_CAST periods, reorder,
                                       comm_cart);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -4130,7 +4143,7 @@ int NAME_ROUTINE_C(MPI_Cart_create) (MPI_Comm comm_old, int ndims, int *dims,
 /******************************************************************************
  *** MPI_Cart_sub
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Cart_sub) (MPI_Comm comm, int *remain_dims,
+int NAME_ROUTINE_C(MPI_Cart_sub) (MPI_Comm comm, MPI3_CONST int *remain_dims,
 	MPI_Comm *comm_new)
 {
 	int res;
@@ -4138,7 +4151,7 @@ int NAME_ROUTINE_C(MPI_Cart_sub) (MPI_Comm comm, int *remain_dims,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
-		res =  MPI_Cart_sub_C_Wrapper (comm, remain_dims, comm_new);
+		res =  MPI_Cart_sub_C_Wrapper (comm, MPI3_C_INT_P_CAST remain_dims, comm_new);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4229,7 +4242,7 @@ int NAME_ROUTINE_C(MPI_Recv_init) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Send_init
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Send_init) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Send_init) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
@@ -4238,7 +4251,7 @@ int NAME_ROUTINE_C(MPI_Send_init) (void *buf, int count, MPI_Datatype datatype,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Send_init_C_Wrapper
-		  (buf, count, datatype, dest, tag, comm, request);
+		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4250,7 +4263,7 @@ int NAME_ROUTINE_C(MPI_Send_init) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Bsend_init
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Bsend_init) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Bsend_init) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
@@ -4259,7 +4272,7 @@ int NAME_ROUTINE_C(MPI_Bsend_init) (void *buf, int count, MPI_Datatype datatype,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Bsend_init_C_Wrapper
-		  (buf, count, datatype, dest, tag, comm, request);
+		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4272,7 +4285,7 @@ int NAME_ROUTINE_C(MPI_Bsend_init) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Rsend_init
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Rsend_init) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Rsend_init) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
@@ -4281,7 +4294,7 @@ int NAME_ROUTINE_C(MPI_Rsend_init) (void *buf, int count, MPI_Datatype datatype,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Rsend_init_C_Wrapper
-		  (buf, count, datatype, dest, tag, comm, request);
+		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4293,7 +4306,7 @@ int NAME_ROUTINE_C(MPI_Rsend_init) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Ssend_init
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Ssend_init) (void *buf, int count, MPI_Datatype datatype,
+int NAME_ROUTINE_C(MPI_Ssend_init) (MPI3_CONST void *buf, int count, MPI_Datatype datatype,
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
@@ -4302,7 +4315,7 @@ int NAME_ROUTINE_C(MPI_Ssend_init) (void *buf, int count, MPI_Datatype datatype,
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
 		res = MPI_Ssend_init_C_Wrapper
-		  (buf, count, datatype, dest, tag, comm, request);
+		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4314,13 +4327,13 @@ int NAME_ROUTINE_C(MPI_Ssend_init) (void *buf, int count, MPI_Datatype datatype,
 /******************************************************************************
  ***  MPI_Scan
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Scan) (void *sendbuf, void *recvbuf, int count,
+int NAME_ROUTINE_C(MPI_Scan) (MPI3_CONST void *sendbuf, void *recvbuf, int count,
 	MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
 {
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scan_enter (sendbuf, recvbuf, count, datatype, op, comm);
+	DLB_MPI_Scan_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm);
 #endif
 
 	PMPI_Comm_compare (MPI_COMM_WORLD, comm, &res);
@@ -4339,7 +4352,7 @@ int NAME_ROUTINE_C(MPI_Scan) (void *sendbuf, void *recvbuf, int count,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Scan_C_Wrapper (sendbuf, recvbuf, count, datatype, op, comm);
+		res = MPI_Scan_C_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -4356,7 +4369,7 @@ int NAME_ROUTINE_C(MPI_Scan) (void *sendbuf, void *recvbuf, int count,
 /******************************************************************************
  ***  MPI_Sendrecv
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_Sendrecv) (void *sendbuf, int sendcount,
+int NAME_ROUTINE_C(MPI_Sendrecv) (MPI3_CONST void *sendbuf, int sendcount,
 	MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount,
 	MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm,
 	MPI_Status * status) 
@@ -4364,7 +4377,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv) (void *sendbuf, int sendcount,
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_enter (sendbuf, sendcount, sendtype, dest, sendtag,
+	DLB_MPI_Sendrecv_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 		recvbuf, recvcount, recvtype, source, recvtag, comm, status);
 #endif
 
@@ -4372,7 +4385,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv) (void *sendbuf, int sendcount,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Sendrecv_C_Wrapper (sendbuf, sendcount, sendtype, dest, sendtag,
+		res = MPI_Sendrecv_C_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 		  recvbuf, recvcount, recvtype, source, recvtag, comm, status); 
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -4427,7 +4440,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv_replace) (void *buf, int count, MPI_Datatype typ
 /******************************************************************************
  ***  MPI_File_open
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, char * filename, int amode,
+int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, MPI3_CONST char * filename, int amode,
 	MPI_Info info, MPI_File *fh)
 {
 	int res;
@@ -4435,7 +4448,7 @@ int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, char * filename, int amode,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_File_open_C_Wrapper (comm, filename, amode, info, fh);
+		res = MPI_File_open_C_Wrapper (comm, (char *)filename, amode, info, fh);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4464,7 +4477,7 @@ int NAME_ROUTINE_C(MPI_File_close) (MPI_File* fh)
 }
 
 /******************************************************************************
- ***  MPI_File_read_all
+ ***  MPI_File_read
  ******************************************************************************/
 int NAME_ROUTINE_C(MPI_File_read) (MPI_File fh, void* buf, int count,
 	MPI_Datatype datatype, MPI_Status* status)
@@ -4506,7 +4519,7 @@ int NAME_ROUTINE_C(MPI_File_read_all) (MPI_File fh, void* buf, int count,
 /******************************************************************************
  ***  MPI_File_write
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_File_write) (MPI_File fh, void * buf, int count,
+int NAME_ROUTINE_C(MPI_File_write) (MPI_File fh, MPI3_CONST void * buf, int count,
 	MPI_Datatype datatype, MPI_Status* status)
 {
 	int res;
@@ -4514,7 +4527,7 @@ int NAME_ROUTINE_C(MPI_File_write) (MPI_File fh, void * buf, int count,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_File_write_C_Wrapper (fh, buf, count, datatype, status);
+		res = MPI_File_write_C_Wrapper (fh, MPI3_VOID_P_CAST buf, count, datatype, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4526,7 +4539,7 @@ int NAME_ROUTINE_C(MPI_File_write) (MPI_File fh, void * buf, int count,
 /******************************************************************************
  ***  MPI_File_write_all
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_File_write_all) (MPI_File fh, void* buf, int count, 
+int NAME_ROUTINE_C(MPI_File_write_all) (MPI_File fh, MPI3_CONST void* buf, int count, 
 	MPI_Datatype datatype, MPI_Status* status)
 {
 	int res;
@@ -4534,7 +4547,7 @@ int NAME_ROUTINE_C(MPI_File_write_all) (MPI_File fh, void* buf, int count,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_File_write_all_C_Wrapper (fh, buf, count, datatype, status);
+		res = MPI_File_write_all_C_Wrapper (fh, MPI3_VOID_P_CAST buf, count, datatype, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4586,7 +4599,7 @@ int NAME_ROUTINE_C(MPI_File_read_at_all) (MPI_File fh, MPI_Offset offset,
 /******************************************************************************
  ***  MPI_File_write_at
  ******************************************************************************/
-int NAME_ROUTINE_C(MPI_File_write_at) (MPI_File fh, MPI_Offset offset, void * buf,
+int NAME_ROUTINE_C(MPI_File_write_at) (MPI_File fh, MPI_Offset offset, MPI3_CONST void * buf,
 	int count, MPI_Datatype datatype, MPI_Status* status)
 {
 	int res;
@@ -4594,7 +4607,7 @@ int NAME_ROUTINE_C(MPI_File_write_at) (MPI_File fh, MPI_Offset offset, void * bu
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_File_write_at_C_Wrapper (fh, offset, buf, count, datatype, status);
+		res = MPI_File_write_at_C_Wrapper (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4608,14 +4621,14 @@ int NAME_ROUTINE_C(MPI_File_write_at) (MPI_File fh, MPI_Offset offset, void * bu
  ***  MPI_File_write_at_all
  ******************************************************************************/
 int NAME_ROUTINE_C(MPI_File_write_at_all) (MPI_File fh, MPI_Offset offset,
-	void* buf, int count, MPI_Datatype datatype, MPI_Status* status)
+	MPI3_CONST void* buf, int count, MPI_Datatype datatype, MPI_Status* status)
 {
 	int res;
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_File_write_at_all_C_Wrapper (fh, offset, buf, count, datatype, status);	
+		res = MPI_File_write_at_all_C_Wrapper (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status);	
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
 		return res;
@@ -4648,7 +4661,7 @@ int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 			target_disp, target_count, target_datatype, win);
 }
 
-int MPI_Put (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 	int target_rank, MPI_Aint target_disp, int target_count,
 	MPI_Datatype target_datatype, MPI_Win win)
 {
@@ -4657,7 +4670,7 @@ int MPI_Put (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
-		res = MPI_Put_C_Wrapper (origin_addr, origin_count, origin_datatype,
+		res = MPI_Put_C_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
