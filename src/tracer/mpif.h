@@ -196,9 +196,9 @@ void CtoF77 (mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 void CtoF77 (mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
 
-void CtoF77 (mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
+void CtoF77 (mpi_comm_spawn) (MPI3_CONST char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
 
-void CtoF77 (mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
+void CtoF77 (mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI3_CONST MPI_Fint *array_of_maxprocs, MPI3_CONST MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
 
 void CtoF77 (mpi_comm_get_parent) (MPI_Fint *parent, MPI_Fint *ierror);
 
@@ -448,9 +448,9 @@ void CtoF77 (pmpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 void CtoF77 (pmpi_comm_split) (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
 
-void CtoF77 (pmpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
+void CtoF77 (pmpi_comm_spawn) (MPI3_CONST char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
 
-void CtoF77 (pmpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
+void CtoF77 (pmpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI3_CONST MPI_Fint *array_of_maxprocs, MPI3_CONST MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_comm_get_parent) (MPI_Fint *parent, MPI_Fint *ierror);
 

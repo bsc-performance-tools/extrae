@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 28Aug2014 Fixed support for MPI-3 for MPI_Comm_spawn* calls
  * 27Aug2014 Upgraded version to 3.0 release. TA-DA!
  + 27Aug2014 Added support for MPI-3
  * 27Aug2014 Fixed configure/compilation bugs in the OpenSHMEM instrumentation.
