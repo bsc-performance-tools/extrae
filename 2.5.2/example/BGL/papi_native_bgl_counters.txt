@@ -1,0 +1,351 @@
+Available native events and hardware information.
+-------------------------------------------------------------------------
+Vendor string and code   :  (1312)
+Model string and code    : PVR=0x5202:0x1891  Serial=R00-M1-N1-C:J16-U01 (1375869073)
+CPU Revision             : 20994.062500
+CPU Megahertz            : 700.000000
+CPU's in this Node       : 1
+Nodes in this System     : 8
+Total CPU's              : 8
+Number Hardware Counters : 52
+Max Multiplex Counters   : 32
+-------------------------------------------------------------------------
+The following correspond to fields in the PAPI_event_info_t structure.
+
+Symbol                           Event Code   Long Description
+ Register Name[n]
+ Register Value[n]
+
+BGL_FPU_ARITH_ADD_SUBTRACT       0x40000000   Add and subtract, fadd, fadds, fsub, fsubs (Book E add, subtract)
+BGL_FPU_ARITH_MULT_DIV           0x40000001   Multiplication and divisions, fmul, fmuls, fdiv, fdivs (Book E mul, div)
+BGL_FPU_ARITH_OEDIPUS_OP         0x40000002   Oedipus operations, All symmetric, asymmetric, and complex Oedipus multiply-add instructions
+BGL_FPU_ARITH_TRINARY_OP         0x40000003   Trinary operations, fmadd, fmadds, fnmadd, fnmadds, fmsub, fmsubs, fnmsub, fnmsubs (Book E fmadd)
+BGL_FPU_LDST_DBL_LD              0x40000004   Double loads, lfd, lfdx, lfdu, lfdux, lfsdx, lfsdux (double word loads, no Single precision)
+BGL_FPU_LDST_DBL_ST              0x40000005   Double store, stfd, stfdx, stfdu, stfdux, stfsdx, stfsdux (double word stores, no Single precision)
+BGL_FPU_LDST_QUAD_LD             0x40000006   Quad loads, lfpdx, lfpdux, lfxdx, lfxdux (quad word loads)
+BGL_FPU_LDST_QUAD_ST             0x40000007   Quad store, stfpdx, stfpdux, stfxdx, stfxdux (quad word stores)
+BGL_2NDFPU_ARITH_ADD_SUBTRACT    0x40000008   2nd FPU Add and subtract, fadd, fadds, fsub, fsubs (Book E add, subtract)
+BGL_2NDFPU_ARITH_MULT_DIV        0x40000009   2nd FPU Multiplication and divisions, fmul, fmuls, fdiv, fdivs (Book E mul, div)
+BGL_2NDFPU_ARITH_OEDIPUS_OP      0x4000000a   2nd FPU Oedipus operations, All symmetric, asymmetric, and complex Oedipus multiply-add instructions
+BGL_2NDFPU_ARITH_TRINARY_OP      0x4000000b   2nd FPU Trinary operations, fmadd, fmadds, fnmadd, fnmadds, fmsub, fmsubs, fnmsub, fnmsubs (Book E fmadd)
+BGL_2NDFPU_LDST_DBL_LD           0x4000000c   2nd FPU Double loads, lfd, lfdx, lfdu, lfdux, lfsdx, lfsdux (double word loads, no Single precision)
+BGL_2NDFPU_LDST_DBL_ST           0x4000000d   2nd FPU Double store, stfd, stfdx, stfdu, stfdux, stfsdx, stfsdux (double word stores, no Single precision)
+BGL_2NDFPU_LDST_QUAD_LD          0x4000000e   2nd FPU Quad loads, lfpdx, lfpdux, lfxdx, lfxdux (quad word loads)
+BGL_2NDFPU_LDST_QUAD_ST          0x4000000f   2nd FPU Quad store, stfpdx, stfpdux, stfxdx, stfxdux (quad word stores)
+BGL_UPC_L3_CACHE_HIT             0x40000010   Cache hit
+BGL_UPC_L3_CACHE_MISS_DATA_ALRDY_WAY_DDR 0x40000011   Cache miss; data already on the way from DDR
+BGL_UPC_L3_CACHE_MISS_DATA_WILL_BE_REQED_DDR 0x40000012   Cache miss; data will be requested from DDR
+BGL_UPC_L3_EDRAM_ACCESS_CYCLE    0x40000013   EDRAM access cycle
+BGL_UPC_L3_EDRAM_RFR_CYCLE       0x40000014   EDRAM refresh cycle
+BGL_UPC_L3_LINE_STARTS_EVICT_LINE_NUM_PRESSURE 0x40000015   Line starts to evict due to line numb pressure
+BGL_UPC_L3_MISS_DIR_SET_DISBL    0x40000016   Miss; but this directory set is disabled
+BGL_UPC_L3_MISS_NO_WAY_SET_AVAIL 0x40000017   Miss and no way in this set is available
+BGL_UPC_L3_MISS_REQUIRING_CASTOUT 0x40000018   Miss requiring a castout
+BGL_UPC_L3_MISS_REQUIRING_REFILL_NO_WR_ALLOC 0x40000019   Miss requiring a refill (no write allocation)
+BGL_UPC_L3_MSHNDLR_TOOK_REQ      0x4000001a   Miss Handler took request
+BGL_UPC_L3_MSHNDLR_TOOK_REQ_PLB_RDQ 0x4000001b   Miss Handler took request from PLB read queue
+BGL_UPC_L3_MSHNDLR_TOOK_REQ_RDQ0 0x4000001c   Miss Handler took request from read queue 0
+BGL_UPC_L3_MSHNDLR_TOOK_REQ_RDQ1 0x4000001d   Miss Handler took request from read queue 1
+BGL_UPC_L3_MSHNDLR_TOOK_REQ_WRBUF 0x4000001e   Miss Handler took request from write buffer
+BGL_UPC_L3_PAGE_CLOSE            0x4000001f   Page close occurred
+BGL_UPC_L3_PAGE_OPEN             0x40000020   Page open occurred
+BGL_UPC_L3_PLB_WRQ_DEP_DBUF      0x40000021   PLB write queue deposits data into buffer
+BGL_UPC_L3_PLB_WRQ_DEP_DBUF_HIT  0x40000022   PLB write queue deposits data into buffer (hit)
+BGL_UPC_L3_PREF_REINS_PULL_OUT_NEXT_LINE 0x40000023   Prefetch reinserted to pull out next line
+BGL_UPC_L3_PREF_REQ_ACC_BY_PREF_UNIT 0x40000024   Prefetch request accepted by prefetch unit
+BGL_UPC_L3_RD_BURST_1024B_LINE_RD 0x40000025   Read burst (1024b line read) occurred
+BGL_UPC_L3_RD_EDR__ALL_KINDS_OF_RD 0x40000026   Read from EDR occurred (all kinds of read)
+BGL_UPC_L3_RD_MODIFY_WR_CYCLE_EDR 0x40000027   Read-modify-write cycle to EDR occurred
+BGL_UPC_L3_REQ_TKN_CACHE_INHIB_RD_REQ 0x40000028   Request taken is a cache inhibited read request
+BGL_UPC_L3_REQ_TKN_CACHE_INHIB_WR 0x40000029   Request taken is a cache inhibited write
+BGL_UPC_L3_REQ_TKN_NEEDS_CASTOUT 0x4000002a   Request taken needs castout
+BGL_UPC_L3_REQ_TKN_NEEDS_REFILL  0x4000002b   Request taken needs refill
+BGL_UPC_L3_WRBUF_LINE_ALLOC      0x4000002c   Write buffer line was allocated
+BGL_UPC_L3_WRQ0_DEP_DBUF         0x4000002d   Write queue 0 deposits data into buffer
+BGL_UPC_L3_WRQ0_DEP_DBUF_HIT     0x4000002e   Write queue 0 deposits data into buffer (hit)
+BGL_UPC_L3_WRQ1_DEP_DBUF         0x4000002f   Write queue 1 deposits data into buffer
+BGL_UPC_L3_WRQ1_DEP_DBUF_HIT     0x40000030   Write queue 1 deposits data into buffer (hit)
+BGL_UPC_L3_WR_EDRAM__INCLUDING_RMW 0x40000031   Write to EDRAM occurred (including RMW)
+BGL_UPC_PU0_DCURD_1_RD_PEND      0x40000032   DCURD 1 read pending
+BGL_UPC_PU0_DCURD_2_RD_PEND      0x40000033   DCURD 2 reads pending
+BGL_UPC_PU0_DCURD_3_RD_PEND      0x40000034   DCURD 3 reads pending
+BGL_UPC_PU0_DCURD_BLIND_REQ      0x40000035   DCURD BLIND request
+BGL_UPC_PU0_DCURD_COHERENCY_STALL_WAR 0x40000036   DCURD coherency stall (WAR)
+BGL_UPC_PU0_DCURD_L3_REQ         0x40000037   DCURD L3 request
+BGL_UPC_PU0_DCURD_L3_REQ_PEND    0x40000038   DCURD L3 request pending
+BGL_UPC_PU0_DCURD_LINK_REQ       0x40000039   DCURD LINK request
+BGL_UPC_PU0_DCURD_LINK_REQ_PEND  0x4000003a   DCURD LINK request pending
+BGL_UPC_PU0_DCURD_LOCK_REQ       0x4000003b   DCURD LOCK request
+BGL_UPC_PU0_DCURD_LOCK_REQ_PEND  0x4000003c   DCURD LOCK request pending
+BGL_UPC_PU0_DCURD_PLB_REQ        0x4000003d   DCURD PLB request
+BGL_UPC_PU0_DCURD_PLB_REQ_PEND   0x4000003e   DCURD PLB request pending
+BGL_UPC_PU0_DCURD_RD_REQ         0x4000003f   DCURD read request
+BGL_UPC_PU0_DCURD_SRAM_REQ       0x40000040   DCURD SRAM request
+BGL_UPC_PU0_DCURD_SRAM_REQ_PEND  0x40000041   DCURD SRAM request pending
+BGL_UPC_PU0_DCURD_WAIT_L3        0x40000042   DCURD wait for L3
+BGL_UPC_PU0_DCURD_WAIT_LINK      0x40000043   DCURD wait for LINK
+BGL_UPC_PU0_DCURD_WAIT_LOCK      0x40000044   DCURD wait for LOCK
+BGL_UPC_PU0_DCURD_WAIT_PLB       0x40000045   DCURD wait for PLB
+BGL_UPC_PU0_DCURD_WAIT_SRAM      0x40000046   DCURD wait for SRAM
+BGL_UPC_PU0_PREF_FILTER_HIT      0x40000047   Prefetch filter hit
+BGL_UPC_PU0_PREF_PREF_PEND       0x40000048   Prefetch prefetch pending
+BGL_UPC_PU0_PREF_REQ_VALID       0x40000049   Prefetch request valid
+BGL_UPC_PU0_PREF_SELF_HIT        0x4000004a   Prefetch self hit
+BGL_UPC_PU0_PREF_SNOOP_HIT_OTHER 0x4000004b   Prefetch snoop hit other
+BGL_UPC_PU0_PREF_SNOOP_HIT_PLB   0x4000004c   Prefetch snoop hit PLB
+BGL_UPC_PU0_PREF_SNOOP_HIT_SAME  0x4000004d   Prefetch snoop hit same
+BGL_UPC_PU0_PREF_STREAM_HIT      0x4000004e   Prefetch stream hit
+BGL_UPC_PU1_DCURD_1_RD_PEND      0x4000004f   DCURD 1 read pending
+BGL_UPC_PU1_DCURD_2_RD_PEND      0x40000050   DCURD 2 reads pending
+BGL_UPC_PU1_DCURD_3_RD_PEND      0x40000051   DCURD 3 reads pending
+BGL_UPC_PU1_DCURD_BLIND_REQ      0x40000052   DCURD BLIND request
+BGL_UPC_PU1_DCURD_COHERENCY_STALL_WAR 0x40000053   DCURD coherency stall (WAR)
+BGL_UPC_PU1_DCURD_L3_REQ         0x40000054   DCURD L3 request
+BGL_UPC_PU1_DCURD_L3_REQ_PEND    0x40000055   DCURD L3 request pending
+BGL_UPC_PU1_DCURD_LINK_REQ       0x40000056   DCURD LINK request
+BGL_UPC_PU1_DCURD_LINK_REQ_PEND  0x40000057   DCURD LINK request pending
+BGL_UPC_PU1_DCURD_LOCK_REQ       0x40000058   DCURD LOCK request
+BGL_UPC_PU1_DCURD_LOCK_REQ_PEND  0x40000059   DCURD LOCK request pending
+BGL_UPC_PU1_DCURD_PLB_REQ        0x4000005a   DCURD PLB request
+BGL_UPC_PU1_DCURD_PLB_REQ_PEND   0x4000005b   DCURD PLB request pending
+BGL_UPC_PU1_DCURD_RD_REQ         0x4000005c   DCURD read request
+BGL_UPC_PU1_DCURD_SRAM_REQ       0x4000005d   DCURD SRAM request
+BGL_UPC_PU1_DCURD_SRAM_REQ_PEND  0x4000005e   DCURD SRAM request pending
+BGL_UPC_PU1_DCURD_WAIT_L3        0x4000005f   DCURD wait for L3
+BGL_UPC_PU1_DCURD_WAIT_LINK      0x40000060   DCURD wait for LINK
+BGL_UPC_PU1_DCURD_WAIT_LOCK      0x40000061   DCURD wait for LOCK
+BGL_UPC_PU1_DCURD_WAIT_PLB       0x40000062   DCURD wait for PLB
+BGL_UPC_PU1_DCURD_WAIT_SRAM      0x40000063   DCURD wait for SRAM
+BGL_UPC_PU1_PREF_FILTER_HIT      0x40000064   Prefetch filter hit
+BGL_UPC_PU1_PREF_PREF_PEND       0x40000065   Prefetch prefetch pending
+BGL_UPC_PU1_PREF_REQ_VALID       0x40000066   Prefetch request valid
+BGL_UPC_PU1_PREF_SELF_HIT        0x40000067   Prefetch self hit
+BGL_UPC_PU1_PREF_SNOOP_HIT_OTHER 0x40000068   Prefetch snoop hit other
+BGL_UPC_PU1_PREF_SNOOP_HIT_PLB   0x40000069   Prefetch snoop hit PLB
+BGL_UPC_PU1_PREF_SNOOP_HIT_SAME  0x4000006a   Prefetch snoop hit same
+BGL_UPC_PU1_PREF_STREAM_HIT      0x4000006b   Prefetch stream hit
+BGL_UPC_TI_TESTINT_ERR_EVENT     0x4000006c   Testint Error Event
+BGL_UPC_TR_ARB_CH2_VC0_HAVE      0x4000006d   Arbiter ch2_vc0_have
+BGL_UPC_TR_ARB_CH1_VC0_HAVE      0x4000006e   Arbiter ch1_vc0_have
+BGL_UPC_TR_ARB_CH0_VC0_HAVE      0x4000006f   Arbiter ch0_vc0_have
+BGL_UPC_TR_ARB_INJ_VC0_HAVE      0x40000070   Arbiter inj_vc0_have
+BGL_UPC_TR_ARB_CH2_VC1_HAVE      0x40000071   Arbiter ch2_vc1_have
+BGL_UPC_TR_ARB_CH1_VC1_HAVE      0x40000072   Arbiter ch1_vc1_have
+BGL_UPC_TR_ARB_CH0_VC1_HAVE      0x40000073   Arbiter ch0_vc1_have
+BGL_UPC_TR_ARB_INJ_VC1_HAVE      0x40000074   Arbiter inj_vc1_have
+BGL_UPC_TR_ARB_CORE_CH2_VC0_MATURE 0x40000075   Arbiter_core ch2_vc0_mature
+BGL_UPC_TR_ARB_CORE_CH1_VC0_MATURE 0x40000076   Arbiter_core ch1_vc0_mature
+BGL_UPC_TR_ARB_CORE_CH0_VC0_MATURE 0x40000077   Arbiter_core ch0_vc0_mature
+BGL_UPC_TR_ARB_CORE_INJ_VC0_MATURE 0x40000078   Arbiter_core inj_vc0_mature
+BGL_UPC_TR_ARB_CORE_CH2_VC1_MATURE 0x40000079   Arbiter_core ch2_vc1_mature
+BGL_UPC_TR_ARB_CORE_CH1_VC1_MATURE 0x4000007a   Arbiter_core ch1_vc1_mature
+BGL_UPC_TR_ARB_CORE_CH0_VC1_MATURE 0x4000007b   Arbiter_core ch0_vc1_mature
+BGL_UPC_TR_ARB_CORE_INJ_VC1_MATURE 0x4000007c   Arbiter_core inj_vc1_mature
+BGL_UPC_TR_ARB_CORE_GREEDY_MODE  0x4000007d   Arbiter_core greedy_mode
+BGL_UPC_TR_ARB_CORE_REQ_PEND     0x4000007e   Arbiter_core requests pending
+BGL_UPC_TR_ARB_CORE_REQ_WAITING_RDY_GO 0x4000007f   Arbiter_core requests waiting (ready to go)
+BGL_UPC_TR_ARB_CLASS0_WINS       0x40000080   Arbiter class 0 wins
+BGL_UPC_TR_ARB_CLASS1_WINS       0x40000081   Arbiter class 1 wins
+BGL_UPC_TR_ARB_CLASS2_WINS       0x40000082   Arbiter class 2 wins
+BGL_UPC_TR_ARB_CLASS3_WINS       0x40000083   Arbiter class 3 wins
+BGL_UPC_TR_ARB_CLASS4_WINS       0x40000084   Arbiter class 4 wins
+BGL_UPC_TR_ARB_CLASS5_WINS       0x40000085   Arbiter class 5 wins
+BGL_UPC_TR_ARB_CLASS6_WINS       0x40000086   Arbiter class 6 wins
+BGL_UPC_TR_ARB_CLASS7_WINS       0x40000087   Arbiter class 7 wins
+BGL_UPC_TR_ARB_CLASS8_WINS       0x40000088   Arbiter class 8 wins
+BGL_UPC_TR_ARB_CLASS9_WINS       0x40000089   Arbiter class 9 wins
+BGL_UPC_TR_ARB_CLASS10_WINS      0x4000008a   Arbiter class 10 wins
+BGL_UPC_TR_ARB_CLASS11_WINS      0x4000008b   Arbiter class 11 wins
+BGL_UPC_TR_ARB_CLASS12_WINS      0x4000008c   Arbiter class 12 wins
+BGL_UPC_TR_ARB_CLASS13_WINS      0x4000008d   Arbiter class 13 wins
+BGL_UPC_TR_ARB_CLASS14_WINS      0x4000008e   Arbiter class 14 wins
+BGL_UPC_TR_ARB_CLASS15_WINS      0x4000008f   Arbiter class 15 wins
+BGL_UPC_TR_ARB_SNDR2_BUSY        0x40000090   Arbiter sender 2 busy
+BGL_UPC_TR_ARB_SNDR1_BUSY        0x40000091   Arbiter sender 1 busy
+BGL_UPC_TR_ARB_SNDR0_BUSY        0x40000092   Arbiter sender 0 busy
+BGL_UPC_TR_ARB_LOCAL_CLIENT_BUSY_REC 0x40000093   Arbiter local client busy (reception)
+BGL_UPC_TR_ARB_RCV2_BUSY         0x40000094   Arbiter receiver 2 busy
+BGL_UPC_TR_ARB_RCV1_BUSY         0x40000095   Arbiter receiver 1 busy
+BGL_UPC_TR_ARB_RCV0_BUSY         0x40000096   Arbiter receiver 0 busy
+BGL_UPC_TR_ARB_LOCAL_CLIENT_BUSY_INJ 0x40000097   Arbiter local client busy (injection)
+BGL_UPC_TR_ARB_ALU_BUSY          0x40000098   Arbiter alu busy
+BGL_UPC_TR_ARB_RCV2_ABORT        0x40000099   Arbiter receiver 2 abort
+BGL_UPC_TR_ARB_RCV1_ABORT        0x4000009a   Arbiter receiver 1 abort
+BGL_UPC_TR_ARB_RCV0_ABORT        0x4000009b   Arbiter receiver 0 abort
+BGL_UPC_TR_ARB_LOCAL_CLIENT_ABORT 0x4000009c   Arbiter local client abort
+BGL_UPC_TR_ARB_RCV2_PKT_TKN      0x4000009d   Arbiter receiver 2 packet taken
+BGL_UPC_TR_ARB_RCV1_PKT_TKN      0x4000009e   Arbiter receiver 1 packet taken
+BGL_UPC_TR_ARB_RCV0_PKT_TKN      0x4000009f   Arbiter receiver 0 packet taken
+BGL_UPC_TR_ARB_LOCAL_CLIENT_PKT_TKN 0x400000a0   Arbiter local client packet taken
+BGL_UPC_TR_RCV_0_VC0_DPKT_RCV    0x400000a1   Receiver 0 vc0 data packet received
+BGL_UPC_TR_RCV_0_VC1_DPKT_RCV    0x400000a2   Receiver 0 vc1 data packet received
+BGL_UPC_TR_RCV_0_VC0_EMPTY_PKT   0x400000a3   Receiver 0 vc0 empty packet
+BGL_UPC_TR_RCV_0_VC1_EMPTY_PKT   0x400000a4   Receiver 0 vc1 empty packet
+BGL_UPC_TR_RCV_0_IDLPKT          0x400000a5   Receiver 0 IDLE packet
+BGL_UPC_TR_RCV_0_KNOWN_BAD_PKT_MARKER 0x400000a6   Receiver 0 known-bad-packet marker
+BGL_UPC_TR_RCV_0_VC0_CUT_THROUGH 0x400000a7   Receiver 0 vc0 cut-through
+BGL_UPC_TR_RCV_0_VC1_CUT_THROUGH 0x400000a8   Receiver 0 vc1 cut-through
+BGL_UPC_TR_RCV_0_VC0_FULL        0x400000a9   Receiver 0 vc0 full
+BGL_UPC_TR_RCV_0_VC1_FULL        0x400000aa   Receiver 0 vc1 full
+BGL_UPC_TR_RCV_0_HDR_PARITY_ERR  0x400000ab   Receiver 0 header parity error
+BGL_UPC_TR_RCV_0_CRC_ERR         0x400000ac   Receiver 0 CRC error
+BGL_UPC_TR_RCV_0_UNEXPCT_HDR_ERR 0x400000ad   Receiver 0 unexpected header error
+BGL_UPC_TR_RCV_0_RESYNCH_MODE_AFTER_ERR 0x400000ae   Receiver 0 resynch-mode (after error)
+BGL_UPC_TR_RCV_0_SRAM_ERR_CORR   0x400000af   Receiver 0 sram error corrected
+BGL_UPC_TR_RCV_1_VC0_DPKT_RCV    0x400000b0   Receiver 1 vc0 data packet received
+BGL_UPC_TR_RCV_1_VC1_DPKT_RCV    0x400000b1   Receiver 1 vc1 data packet received
+BGL_UPC_TR_RCV_1_VC0_EMPTY_PKT   0x400000b2   Receiver 1 vc0 empty packet
+BGL_UPC_TR_RCV_1_VC1_EMPTY_PKT   0x400000b3   Receiver 1 vc1 empty packet
+BGL_UPC_TR_RCV_1_IDLPKT          0x400000b4   Receiver 1 IDLE packet
+BGL_UPC_TR_RCV_1_KNOWN_BAD_PKT_MARKER 0x400000b5   Receiver 1 known-bad-packet marker
+BGL_UPC_TR_RCV_1_VC0_CUT_THROUGH 0x400000b6   Receiver 1 vc0 cut-through
+BGL_UPC_TR_RCV_1_VC1_CUT_THROUGH 0x400000b7   Receiver 1 vc1 cut-through
+BGL_UPC_TR_RCV_1_VC0_FULL        0x400000b8   Receiver 1 vc0 full
+BGL_UPC_TR_RCV_1_VC1_FULL        0x400000b9   Receiver 1 vc1 full
+BGL_UPC_TR_RCV_1_HDR_PARITY_ERR  0x400000ba   Receiver 1 header parity error
+BGL_UPC_TR_RCV_1_CRC_ERR         0x400000bb   Receiver 1 CRC error
+BGL_UPC_TR_RCV_1_UNEXPCT_HDR_ERR 0x400000bc   Receiver 1 unexpected header error
+BGL_UPC_TR_RCV_1_RESYNCH_MODE_AFTER_ERR 0x400000bd   Receiver 1 resynch-mode (after error)
+BGL_UPC_TR_RCV_1_SRAM_ERR_CORR   0x400000be   Receiver 1 sram error corrected
+BGL_UPC_TR_RCV_2_VC0_DPKT_RCV    0x400000bf   Receiver 2 vc0 data packet received
+BGL_UPC_TR_RCV_2_VC1_DPKT_RCV    0x400000c0   Receiver 2 vc1 data packet received
+BGL_UPC_TR_RCV_2_VC0_EMPTY_PKT   0x400000c1   Receiver 2 vc0 empty packet
+BGL_UPC_TR_RCV_2_VC1_EMPTY_PKT   0x400000c2   Receiver 2 vc1 empty packet
+BGL_UPC_TR_RCV_2_IDLPKT          0x400000c3   Receiver 2 IDLE packet
+BGL_UPC_TR_RCV_2_KNOWN_BAD_PKT_MARKER 0x400000c4   Receiver 2 known-bad-packet marker
+BGL_UPC_TR_RCV_2_VC0_CUT_THROUGH 0x400000c5   Receiver 2 vc0 cut-through
+BGL_UPC_TR_RCV_2_VC1_CUT_THROUGH 0x400000c6   Receiver 2 vc1 cut-through
+BGL_UPC_TR_RCV_2_VC0_FULL        0x400000c7   Receiver 2 vc0 full
+BGL_UPC_TR_RCV_2_VC1_FULL        0x400000c8   Receiver 2 vc1 full
+BGL_UPC_TR_RCV_2_HDR_PARITY_ERR  0x400000c9   Receiver 2 header parity error
+BGL_UPC_TR_RCV_2_CRC_ERR         0x400000ca   Receiver 2 CRC error
+BGL_UPC_TR_RCV_2_UNEXPCT_HDR_ERR 0x400000cb   Receiver 2 unexpected header error
+BGL_UPC_TR_RCV_2_RESYNCH_MODE_AFTER_ERR 0x400000cc   Receiver 2 resynch-mode (after error)
+BGL_UPC_TR_RCV_2_SRAM_ERR_CORR   0x400000cd   Receiver 2 sram error corrected
+BGL_UPC_TR_SNDR_0_VC0_EMPTY      0x400000ce   Sender 0 vc0 empty
+BGL_UPC_TR_SNDR_0_VC1_EMPTY      0x400000cf   Sender 0 vc1 empty
+BGL_UPC_TR_SNDR_0_VC0_CUT_THROUGH 0x400000d0   Sender 0 vc0 cut-through
+BGL_UPC_TR_SNDR_0_VC1_CUT_THROUGH 0x400000d1   Sender 0 vc1 cut-through
+BGL_UPC_TR_SNDR_0_VC0_PKT_SENT_TOTAL 0x400000d2   Sender 0 vc0 packet sent (total)
+BGL_UPC_TR_SNDR_0_VC1_PKT_SENT_TOTAL 0x400000d3   Sender 0 vc1 packet sent (total)
+BGL_UPC_TR_SNDR_0_VC0_DPKTS_SENT 0x400000d4   Sender 0 vc0 DATA packets sent
+BGL_UPC_TR_SNDR_0_VC1_DPKTS_SENT 0x400000d5   Sender 0 vc1 DATA packets sent
+BGL_UPC_TR_SNDR_0_IDLPKTS_SENT   0x400000d6   Sender 0 IDLE packets sent
+BGL_UPC_TR_SNDR_0_RESEND_ATTS    0x400000d7   Sender 0 resend attempts
+BGL_UPC_TR_SNDR_0_SRAM_ERR_CORR  0x400000d8   Sender 0 sram error corrected
+BGL_UPC_TR_SNDR_1_VC0_EMPTY      0x400000d9   Sender 1 vc0 empty
+BGL_UPC_TR_SNDR_1_VC1_EMPTY      0x400000da   Sender 1 vc1 empty
+BGL_UPC_TR_SNDR_1_VC0_CUT_THROUGH 0x400000db   Sender 1 vc0 cut-through
+BGL_UPC_TR_SNDR_1_VC1_CUT_THROUGH 0x400000dc   Sender 1 vc1 cut-through
+BGL_UPC_TR_SNDR_1_VC0_PKT_SENT_TOTAL 0x400000dd   Sender 1 vc0 packet sent (total)
+BGL_UPC_TR_SNDR_1_VC1_PKT_SENT_TOTAL 0x400000de   Sender 1 vc1 packet sent (total)
+BGL_UPC_TR_SNDR_1_VC0_DPKTS_SENT 0x400000df   Sender 1 vc0 DATA packets sent
+BGL_UPC_TR_SNDR_1_VC1_DPKTS_SENT 0x400000e0   Sender 1 vc1 DATA packets sent
+BGL_UPC_TR_SNDR_1_IDLPKTS_SENT   0x400000e1   Sender 1 IDLE packets sent
+BGL_UPC_TR_SNDR_1_RESEND_ATTS    0x400000e2   Sender 1 resend attempts
+BGL_UPC_TR_SNDR_1_SRAM_ERR_CORR  0x400000e3   Sender 1 sram error corrected
+BGL_UPC_TR_SNDR_2_VC0_EMPTY      0x400000e4   Sender 2 vc0 empty
+BGL_UPC_TR_SNDR_2_VC1_EMPTY      0x400000e5   Sender 2 vc1 empty
+BGL_UPC_TR_SNDR_2_VC0_CUT_THROUGH 0x400000e6   Sender 2 vc0 cut-through
+BGL_UPC_TR_SNDR_2_VC1_CUT_THROUGH 0x400000e7   Sender 2 vc1 cut-through
+BGL_UPC_TR_SNDR_2_VC0_PKT_SENT_TOTAL 0x400000e8   Sender 2 vc0 packet sent (total)
+BGL_UPC_TR_SNDR_2_VC1_PKT_SENT_TOTAL 0x400000e9   Sender 2 vc1 packet sent (total)
+BGL_UPC_TR_SNDR_2_VC0_DPKTS_SENT 0x400000ea   Sender 2 vc0 DATA packets sent
+BGL_UPC_TR_SNDR_2_VC1_DPKTS_SENT 0x400000eb   Sender 2 vc1 DATA packets sent
+BGL_UPC_TR_SNDR_2_IDLPKTS_SENT   0x400000ec   Sender 2 IDLE packets sent
+BGL_UPC_TR_SNDR_2_RESEND_ATTS    0x400000ed   Sender 2 resend attempts
+BGL_UPC_TR_SNDR_2_SRAM_ERR_CORR  0x400000ee   Sender 2 sram error corrected
+BGL_UPC_TR_INJ_VC0_HDR_ADDED     0x400000ef   Injection vc0 header added
+BGL_UPC_TR_INJ_VC1_HDR_ADDED     0x400000f0   Injection vc1 header added
+BGL_UPC_TR_INJ_VC0_PYLD_ADDED    0x400000f1   Injection vc0 payload added
+BGL_UPC_TR_INJ_VC1_PYLD_ADDED    0x400000f2   Injection vc1 payload added
+BGL_UPC_TR_INJ_VC0_PKT_TKN       0x400000f3   Injection vc0 packet taken
+BGL_UPC_TR_INJ_VC1_PKT_TKN       0x400000f4   Injection vc1 packet taken
+BGL_UPC_TR_INJ_SRAM_ERR_CORR     0x400000f5   Injection sram error corrected
+BGL_UPC_TR_REC_VC0_PKT_ADDED     0x400000f6   Reception vc0 packet added
+BGL_UPC_TR_REC_VC1_PKT_ADDED     0x400000f7   Reception vc1 packet added
+BGL_UPC_TR_REC_VC0_HDR_TKN       0x400000f8   Reception vc0 header taken
+BGL_UPC_TR_REC_VC1_HDR_TKN       0x400000f9   Reception vc1 header taken
+BGL_UPC_TR_REC_VC0_PYLD_TKN      0x400000fa   Reception vc0 payload taken
+BGL_UPC_TR_REC_VC1_PYLD_TKN      0x400000fb   Reception vc1 payload taken
+BGL_UPC_TR_REC_VC0_PKT_DISC      0x400000fc   Reception vc0 packet discarded
+BGL_UPC_TR_REC_VC1_PKT_DISC      0x400000fd   Reception vc1 packet discarded
+BGL_UPC_TR_REC_SRAM_ERR_CORR     0x400000fe   Reception sram error corrected
+BGL_UPC_TS_XM_32B_CHUNKS         0x400000ff   XM 32 B chunks
+BGL_UPC_TS_XM_ACKS               0x40000100   XM acks
+BGL_UPC_TS_XM_LINK_AVAIL_NO_VCBN_TOKENS 0x40000101   XM link avail; no vcbn tokens
+BGL_UPC_TS_XM_LINK_AVAIL_NO_VCBP_TOKENS 0x40000102   XM link avail; no vcbp tokens
+BGL_UPC_TS_XM_LINK_AVAIL_NO_VCD0_VCD1_TOKENS 0x40000103   XM link avail; no vcd0 vcd1 tokens
+BGL_UPC_TS_XM_LINK_AVAIL_NO_VCD0_VCD_VCBN_TOKENS 0x40000104   XM link avail;no vcd0 vcd; vcbn tokens
+BGL_UPC_TS_XM_PKTS               0x40000105   XM packets
+BGL_UPC_TS_XM_TOKEN_ACKS         0x40000106   XM token/acks
+BGL_UPC_TS_XM_VCBN_CHUNKS        0x40000107   XM vcbn chunks
+BGL_UPC_TS_XM_VCBP_CHUNKS        0x40000108   XM vcbp chunks
+BGL_UPC_TS_XM_VCD0_CHUNKS        0x40000109   XM vcd0 chunks
+BGL_UPC_TS_XM_VCD1_CHUNKS        0x4000010a   XM vcd1 chunks
+BGL_UPC_TS_XP_32B_CHUNKS         0x4000010b   XP 32 B chunks
+BGL_UPC_TS_XP_ACKS               0x4000010c   XP acks
+BGL_UPC_TS_XP_LINK_AVAIL_NO_VCBN_TOKENS 0x4000010d   XP link avail; no vcbn tokens
+BGL_UPC_TS_XP_LINK_AVAIL_NO_VCBP_TOKENS 0x4000010e   XP link avail; no vcbp tokens
+BGL_UPC_TS_XP_LINK_AVAIL_NO_VCD0_VCD1_TOKENS 0x4000010f   XP link avail; no vcd0 vcd1 tokens
+BGL_UPC_TS_XP_LINK_AVAIL_NO_VCD0_VCD_VCBN_TOKENS 0x40000110   XP link avail;no vcd0 vcd; vcbn tokens
+BGL_UPC_TS_XP_PKTS               0x40000111   XP packets
+BGL_UPC_TS_XP_TOKEN_ACKS         0x40000112   XP token/acks
+BGL_UPC_TS_XP_VCBN_CHUNKS        0x40000113   XP vcbn chunks
+BGL_UPC_TS_XP_VCBP_CHUNKS        0x40000114   XP vcbp chunks
+BGL_UPC_TS_XP_VCD0_CHUNKS        0x40000115   XP vcd0 chunks
+BGL_UPC_TS_XP_VCD1_CHUNKS        0x40000116   XP vcd1 chunks
+BGL_UPC_TS_YM_32B_CHUNKS         0x40000117   YM 32 B chunks
+BGL_UPC_TS_YM_ACKS               0x40000118   YM acks
+BGL_UPC_TS_YM_LINK_AVAIL_NO_VCBN_TOKENS 0x40000119   YM link avail; no vcbn tokens
+BGL_UPC_TS_YM_LINK_AVAIL_NO_VCBP_TOKENS 0x4000011a   YM link avail; no vcbp tokens
+BGL_UPC_TS_YM_LINK_AVAIL_NO_VCD0_VCD1_TOKENS 0x4000011b   YM link avail; no vcd0 vcd1 tokens
+BGL_UPC_TS_YM_LINK_AVAIL_NO_VCD0_VCD_VCBN_TOKENS 0x4000011c   YM link avail;no vcd0 vcd; vcbn tokens
+BGL_UPC_TS_YM_PKTS               0x4000011d   YM packets
+BGL_UPC_TS_YM_TOKEN_ACKS         0x4000011e   YM token/acks
+BGL_UPC_TS_YM_VCBN_CHUNKS        0x4000011f   YM vcbn chunks
+BGL_UPC_TS_YM_VCBP_CHUNKS        0x40000120   YM vcbp chunks
+BGL_UPC_TS_YM_VCD0_CHUNKS        0x40000121   YM vcd0 chunks
+BGL_UPC_TS_YM_VCD1_CHUNKS        0x40000122   YM vcd1 chunks
+BGL_UPC_TS_YP_32B_CHUNKS         0x40000123   YP 32 B chunks
+BGL_UPC_TS_YP_ACKS               0x40000124   YP acks
+BGL_UPC_TS_YP_LINK_AVAIL_NO_VCBN_TOKENS 0x40000125   YP link avail; no vcbn tokens
+BGL_UPC_TS_YP_LINK_AVAIL_NO_VCBP_TOKENS 0x40000126   YP link avail; no vcbp tokens
+BGL_UPC_TS_YP_LINK_AVAIL_NO_VCD0_VCD1_TOKENS 0x40000127   YP link avail; no vcd0 vcd1 tokens
+BGL_UPC_TS_YP_LINK_AVAIL_NO_VCD0_VCD_VCBN_TOKENS 0x40000128   YP link avail;no vcd0 vcd; vcbn tokens
+BGL_UPC_TS_YP_PKTS               0x40000129   YP packets
+BGL_UPC_TS_YP_TOKEN_ACKS         0x4000012a   YP token/acks
+BGL_UPC_TS_YP_VCBN_CHUNKS        0x4000012b   YP vcbn chunks
+BGL_UPC_TS_YP_VCBP_CHUNKS        0x4000012c   YP vcbp chunks
+BGL_UPC_TS_YP_VCD0_CHUNKS        0x4000012d   YP vcd0 chunks
+BGL_UPC_TS_YP_VCD1_CHUNKS        0x4000012e   YP vcd1 chunks
+BGL_UPC_TS_ZM_32B_CHUNKS         0x4000012f   ZM 32 B chunks
+BGL_UPC_TS_ZM_ACKS               0x40000130   ZM acks
+BGL_UPC_TS_ZM_LINK_AVAIL_NO_VCBN_TOKENS 0x40000131   ZM link avail; no vcbn tokens
+BGL_UPC_TS_ZM_LINK_AVAIL_NO_VCBP_TOKENS 0x40000132   ZM link avail; no vcbp tokens
+BGL_UPC_TS_ZM_LINK_AVAIL_NO_VCD0_VCD1_TOKENS 0x40000133   ZM link avail; no vcd0 vcd1 tokens
+BGL_UPC_TS_ZM_LINK_AVAIL_NO_VCD0_VCD_VCBN_TOKENS 0x40000134   ZM link avail;no vcd0 vcd; vcbn tokens
+BGL_UPC_TS_ZM_PKTS               0x40000135   ZM packets
+BGL_UPC_TS_ZM_TOKEN_ACKS         0x40000136   ZM token/acks
+BGL_UPC_TS_ZM_VCBN_CHUNKS        0x40000137   ZM vcbn chunks
+BGL_UPC_TS_ZM_VCBP_CHUNKS        0x40000138   ZM vcbp chunks
+BGL_UPC_TS_ZM_VCD0_CHUNKS        0x40000139   ZM vcd0 chunks
+BGL_UPC_TS_ZM_VCD1_CHUNKS        0x4000013a   ZM vcd1 chunks
+BGL_UPC_TS_ZP_32B_CHUNKS         0x4000013b   ZP 32 B chunks
+BGL_UPC_TS_ZP_ACKS               0x4000013c   ZP acks
+BGL_UPC_TS_ZP_LINK_AVAIL_NO_VCBN_TOKENS 0x4000013d   ZP link avail; no vcbn tokens
+BGL_UPC_TS_ZP_LINK_AVAIL_NO_VCBP_TOKENS 0x4000013e   ZP link avail; no vcbp tokens
+BGL_UPC_TS_ZP_LINK_AVAIL_NO_VCD0_VCD1_TOKENS 0x4000013f   ZP link avail; no vcd0 vcd1 tokens
+BGL_UPC_TS_ZP_LINK_AVAIL_NO_VCD0_VCD_VCBN_TOKENS 0x40000140   ZP link avail;no vcd0 vcd; vcbn tokens
+BGL_UPC_TS_ZP_PKTS               0x40000141   ZP packets
+BGL_UPC_TS_ZP_TOKEN_ACKS         0x40000142   ZP token/acks
+BGL_UPC_TS_ZP_VCBN_CHUNKS        0x40000143   ZP vcbn chunks
+BGL_UPC_TS_ZP_VCBP_CHUNKS        0x40000144   ZP vcbp chunks
+BGL_UPC_TS_ZP_VCD0_CHUNKS        0x40000145   ZP vcd0 chunks
+BGL_UPC_TS_ZP_VCD1_CHUNKS        0x40000146   ZP vcd1 chunks
+BGL_PERFCTR_NULL_EVENT           0x40000147   Null Event
+BGL_PAPI_TIMEBASE                0x40000148   special event for getting the timebase reg
+
+-------------------------------------------------------------------------
+Total events reported: 329
+native_avail.c                           PASSED

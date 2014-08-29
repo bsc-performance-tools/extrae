@@ -1,0 +1,92 @@
+/* Century Schoolbook font is very similar to Computer Modern Math: cmmi */
+.MATH    { font-family: "Century Schoolbook", serif; }
+.MATH I  { font-family: "Century Schoolbook", serif; font-style: italic }
+.BOLDMATH { font-family: "Century Schoolbook", serif; font-weight: bold }
+
+/* implement both fixed-size and relative sizes */
+SMALL.XTINY		{ font-size : xx-small }
+SMALL.TINY		{ font-size : x-small  }
+SMALL.SCRIPTSIZE	{ font-size : smaller  }
+SMALL.FOOTNOTESIZE	{ font-size : small    }
+SMALL.SMALL		{  }
+BIG.LARGE		{  }
+BIG.XLARGE		{ font-size : large    }
+BIG.XXLARGE		{ font-size : x-large  }
+BIG.HUGE		{ font-size : larger   }
+BIG.XHUGE		{ font-size : xx-large }
+
+/* heading styles */
+H1		{  }
+H2		{  }
+H3		{  }
+H4		{  }
+H5		{  }
+
+/* mathematics styles */
+DIV.displaymath		{ }	/* math displays */
+TD.eqno			{ }	/* equation-number cells */
+
+
+/* document-specific styles come next */
+PRE.preform		{   }
+DIV.centerline		{   }
+SPAN.sf		{   }
+DIV.center		{   }
+DIV.navigation		{   }
+SPAN.tt		{   }
+SPAN.bf		{   }
+SPAN.arabic		{   }
+#cbox1531		{ background-color: #bfbfbf;  }
+#cbox1597		{ background-color: #bfbfbf;  }
+#cbox1633		{ background-color: #bfbfbf;  }
+#cbox1671		{ background-color: #bfbfbf;  }
+#cbox1714		{ background-color: #bfbfbf;  }
+#cbox1760		{ background-color: #bfbfbf;  }
+#cbox1802		{ background-color: #bfbfbf;  }
+#cbox1885		{ background-color: #bfbfbf;  }
+#cbox2044		{ background-color: #bfbfbf;  }
+#cbox2171		{ background-color: #bfbfbf;  }
+#cbox2227		{ background-color: #bfbfbf;  }
+#cbox2283		{ background-color: #bfbfbf;  }
+#cbox2379		{ background-color: #bfbfbf;  }
+#cbox2460		{ background-color: #bfbfbf;  }
+#cbox247		{ background-color: #bfbfbf;  }
+#cbox2689		{ background-color: #bfbfbf;  }
+#cbox3819		{ background-color: #bfbfbf;  }
+#cbox3836		{ background-color: #bfbfbf;  }
+#cbox786		{ background-color: #bfbfbf;  }
+#cbox792		{ background-color: #bfbfbf;  }
+#cbox798		{ background-color: #bfbfbf;  }
+#cbox804		{ background-color: #bfbfbf;  }
+#cbox810		{ background-color: #bfbfbf;  }
+#cbox818		{ background-color: #bfbfbf;  }
+#cbox824		{ background-color: #bfbfbf;  }
+#cbox830		{ background-color: #bfbfbf;  }
+#cbox836		{ background-color: #bfbfbf;  }
+#cbox842		{ background-color: #bfbfbf;  }
+#cbox848		{ background-color: #bfbfbf;  }
+#cbox854		{ background-color: #bfbfbf;  }
+#cbox860		{ background-color: #bfbfbf;  }
+#cbox866		{ background-color: #bfbfbf;  }
+#cbox872		{ background-color: #bfbfbf;  }
+#cbox878		{ background-color: #bfbfbf;  }
+#cbox884		{ background-color: #bfbfbf;  }
+#cbox890		{ background-color: #bfbfbf;  }
+#cbox896		{ background-color: #bfbfbf;  }
+#cbox902		{ background-color: #bfbfbf;  }
+#cbox908		{ background-color: #bfbfbf;  }
+#cbox914		{ background-color: #bfbfbf;  }
+#cbox920		{ background-color: #bfbfbf;  }
+#cbox926		{ background-color: #bfbfbf;  }
+#cbox932		{ background-color: #bfbfbf;  }
+#cbox938		{ background-color: #bfbfbf;  }
+#cbox944		{ background-color: #bfbfbf;  }
+#cbox950		{ background-color: #bfbfbf;  }
+#cbox956		{ background-color: #bfbfbf;  }
+#cbox962		{ background-color: #bfbfbf;  }
+#cbox968		{ background-color: #bfbfbf;  }
+#cbox974		{ background-color: #bfbfbf;  }
+#cbox980		{ background-color: #bfbfbf;  }
+#cbox988		{ background-color: #bfbfbf;  }
+#par7995		{   }
+#par8281		{   }
