@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 01Sep2014 Fixed bug in the gremlins initial configuration that crashed
+ Extrae when not doing gremlins analysis
  * 28Aug2014 Fixed support for MPI-3 for MPI_Comm_spawn* calls
  * 27Aug2014 Upgraded version to 3.0 release. TA-DA!
  + 27Aug2014 Added support for MPI-3

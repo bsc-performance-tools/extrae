@@ -48,24 +48,26 @@ void GremlinsWorker::Setup()
   Register_Stream(stGremlins);
 
   char *env_max_gremlins = getenv("N_CONTS");
-  
-  MinGremlins      = 0;
-  MaxGremlins      = atoi((const char *)env_max_gremlins);
-  NumberOfGremlins = Online_GetGremlinsStartCount();
-  TargetGremlins   = (Online_GetGremlinsIncrement() > 0 ? MaxGremlins : MinGremlins );
-  Roundtrip        = (TargetGremlins > MinGremlins ? 1 : -1);
-
-  if (NumberOfGremlins > MaxGremlins)
+  if (env_max_gremlins != NULL)
   {
-    NumberOfGremlins = MaxGremlins;
-  }
+    MinGremlins      = 0;
+    MaxGremlins      = atoi((const char *)env_max_gremlins);
+    NumberOfGremlins = Online_GetGremlinsStartCount();
+    TargetGremlins   = (Online_GetGremlinsIncrement() > 0 ? MaxGremlins : MinGremlins );
+    Roundtrip        = (TargetGremlins > MinGremlins ? 1 : -1);
 
-  TRACE_ONLINE_EVENT(TIME, GREMLIN_EV, NumberOfGremlins);
+    if (NumberOfGremlins > MaxGremlins)
+    {
+      NumberOfGremlins = MaxGremlins;
+    }
+
+    TRACE_ONLINE_EVENT(TIME, GREMLIN_EV, NumberOfGremlins);
   
-  fprintf(stderr, "GremlinsWorker:: StartingGremlins=%d\n", NumberOfGremlins);
-  SwitchSome( NumberOfGremlins );
-
-  Loops = 0;
+    fprintf(stderr, "GremlinsWorker:: StartingGremlins=%d\n", NumberOfGremlins);
+    SwitchSome( NumberOfGremlins );
+    Loops = 0;
+    GremlinsInitialized = true;
+  }
 }
 
 /**
@@ -73,6 +75,12 @@ void GremlinsWorker::Setup()
  */
 int GremlinsWorker::Run()
 {
+  if (!GremlinsInitialized)
+  {
+    fprintf(stderr, "WARNING! Gremlins not initiliazed. Please review all the necessary environment variables are set!\n");
+    return 0;
+  }
+
   int CurrentGremlins = NumberOfGremlins;
 
   if ((CurrentGremlins == TargetGremlins) && (Online_GetGremlinsRoundtrip()))

@@ -47,6 +47,7 @@ class GremlinsWorker : public BackProtocol
     int Loops;
     int Roundtrip;
     int TargetGremlins;
+    bool GremlinsInitialized;
 
     void SwitchSome(int GremlinsToChange);
 
