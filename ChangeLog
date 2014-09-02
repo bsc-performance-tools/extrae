@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 02Sep2014 Fixed bug in the buffers management. Need to forward to the
+ SEEK_END of the file before writing to disk, due to the interactions between
+ the normal tracing buffer and the cache.
  * 01Sep2014 Fixed bug in the gremlins initial configuration that crashed
  Extrae when not doing gremlins analysis
  * 28Aug2014 Fixed support for MPI-3 for MPI_Comm_spawn* calls

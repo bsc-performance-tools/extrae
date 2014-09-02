@@ -502,6 +502,11 @@ int Buffer_Flush(Buffer_t *buffer)
 	DataBlocks_Add (db, head, tail);
 # endif
 
+	/* Forward to the end of the file. This is necessary because of the interactions between the normal tracing buffer and its cache. When 
+         * one of these buffers flush, the other buffer's pointer does not get updated to the end of the file, and so if it flushes next, data may get 
+         * overwritten */
+        lseek(buffer->fd, 0, SEEK_END);
+
 	/* Write to disk */
 	dump_buffer (buffer->fd, db->NumBlocks, db->BlocksList);
 
