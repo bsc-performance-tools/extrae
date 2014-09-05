@@ -120,6 +120,9 @@ void PMPI_AllReduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 void PMPI_Probe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *status, MPI_Fint *ierror);
 
+void PMPI_Request_get_status_Wrapper(MPI_Fint *request, int *flag,
+    MPI_Fint *status, MPI_Fint *ierror);
+
 void PMPI_IProbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
 

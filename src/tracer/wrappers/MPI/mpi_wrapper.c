@@ -2001,6 +2001,91 @@ void PMPI_Probe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 }
 
 /******************************************************************************
+ ***  PMPI_Request_get_status_Wrapper
+ ******************************************************************************/
+
+void Bursts_PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
+	MPI_Fint *ierror)
+{
+     /*
+      *   event : MPI_REQUEST_GET_STATUS_EV     value : EVT_BEGIN
+      *   target : ---                          size  : ---
+      *   tag : ---
+      */
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, request, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	CtoF77 (pmpi_request_get_status) (request, flag, status, ierror);
+
+     /*
+      *   event : MPI_REQUEST_GET_STATUS_EV    value : EVT_END
+      *   target : ---                         size  : ---
+      *   tag : ---
+      */
+	TRACE_MPIEVENT (TIME, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+}
+
+void Normal_PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
+    MPI_Fint *ierror)
+{
+  static int PMPI_Request_get_status_counter = 0;
+  iotimer_t begin_time, end_time;
+  static iotimer_t elapsed_time_outside_PMPI_Request_get_status = 0, last_PMPI_Request_get_status_exit_time = 0;
+
+
+  begin_time = LAST_READ_TIME;
+
+  if (PMPI_Request_get_status_counter == 0) {
+    /* First request */
+    elapsed_time_outside_PMPI_Request_get_status = 0;
+  }
+  else {
+    elapsed_time_outside_PMPI_Request_get_status += (begin_time - last_PMPI_Request_get_status_exit_time);
+  }
+
+  CtoF77 (pmpi_request_get_status) (request, flag, status, ierror);
+
+  end_time = TIME; 
+  last_PMPI_Request_get_status_exit_time = end_time;
+
+	if (tracejant_mpi)
+  {
+    if (*flag)
+    {
+      if (PMPI_Request_get_status_counter != 0) {
+        TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, elapsed_time_outside_PMPI_Request_get_status);
+        TRACE_EVENT (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, PMPI_Request_get_status_counter);
+      }
+      TRACE_MPIEVENT (begin_time, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+      TRACE_MPIEVENT (end_time, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+      PMPI_Request_get_status_counter = 0;
+    }
+    else
+    {
+      if (PMPI_Request_get_status_counter == 0)
+      {
+        /* First request fail */
+        TRACE_EVENTANDCOUNTERS (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, 0, TRUE);
+      }
+      PMPI_Request_get_status_counter ++;
+    }
+  }
+}
+
+void PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
+{
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	{
+		Bursts_PMPI_Request_get_status_Wrapper (request, flag, status, ierror);
+	}
+	else
+	{
+		Normal_PMPI_Request_get_status_Wrapper (request, flag, status, ierror);
+	}
+}
+
+
+/******************************************************************************
  ***  PMPI_IProbe_Wrapper
  ******************************************************************************/
 
@@ -5453,7 +5538,7 @@ int MPI_Probe_C_Wrapper (int source, int tag, MPI_Comm comm, MPI_Status *status)
 }
 
 /******************************************************************************
- ***  MPI_Request_get_status_Wrapper
+ ***  MPI_Request_get_status_C_Wrapper
  ******************************************************************************/
 int Bursts_MPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *status)
 {
@@ -5472,7 +5557,7 @@ int Bursts_MPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *st
 	*   tag : ---
 	*/
     TRACE_MPIEVENT (TIME, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
+    return ierror;
 }
 
 int Normal_MPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *status)
@@ -5539,7 +5624,7 @@ int MPI_Request_get_status_C_Wrapper(MPI_Request request, int *flag, MPI_Status 
     {
         ret = Normal_MPI_Request_get_status(request, flag, status);
     }
-
+    return ret;
 }
 
 

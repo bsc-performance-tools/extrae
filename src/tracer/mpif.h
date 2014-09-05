@@ -111,8 +111,8 @@ void CtoF77 (mpi_allreduce) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *
 void CtoF77 (mpi_probe) (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *status, MPI_Fint *ierror);
    
-void CtoF77 (mpi_request_get_status) (MPI_Request request, int *flag,
-    MPI_Status *status);
+void CtoF77 (mpi_request_get_status) (MPI_Fint *request, int *flag,
+    MPI_Fint *status, MPI_Fint *ierror);
 
 void CtoF77 (mpi_iprobe) (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
@@ -360,8 +360,8 @@ void CtoF77 (pmpi_reduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf,
 void CtoF77 (pmpi_allreduce) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror);
 
-void CtoF77 (pmpi_request_get_status) (MPI_Request request, int *flag,
-    MPI_Status *status);
+void CtoF77 (pmpi_request_get_status) (MPI_Fint *request, int *flag,
+    MPI_Fint *status, MPI_Fint *ierror);
    
 void CtoF77 (pmpi_probe) (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *status, MPI_Fint *ierror);

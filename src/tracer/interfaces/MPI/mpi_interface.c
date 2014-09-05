@@ -806,25 +806,23 @@ void NAME_ROUTINE_C2F(mpi_probe) (MPI_Fint *source, MPI_Fint *tag,
  ***  MPI_Request_get_status
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_request_get_status__,mpi_request_get_status_,MPI_REQUEST_GET_STATUS,mpi_request_get_status,(MPI_Request request, int *flag, MPI_Status *status))
+MPI_F_SYMS(mpi_request_get_status__,mpi_request_get_status_,MPI_REQUEST_GET_STATUS,mpi_request_get_status,(MPI_Fint *request, int *flag, MPI_Fint *status, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_request_get_status) (MPI_Request request, int *flag, MPI_Status *status)
+void NAME_ROUTINE_F(mpi_request_get_status) (MPI_Fint *request, int *flag, MPI_Fint *status, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_request_get_status) (MPI_Request request, int *flag, MPI_Status *status)
+void NAME_ROUTINE_C2F(mpi_request_get_status) (MPI_Fint *request, int *flag, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
-#if 0
   if (mpitrace_on)
   {
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
-		PMPI_Request_get_status_Wrapper (request, flag, status);
+		PMPI_Request_get_status_Wrapper (request, flag, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
   }
   else
-#endif
-    CtoF77 (pmpi_request_get_status) (request, flag, status);
+    CtoF77 (pmpi_request_get_status) (request, flag, status, ierror);
 }
 
 
