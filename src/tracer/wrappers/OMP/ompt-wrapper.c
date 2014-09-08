@@ -771,8 +771,6 @@ typedef enum {
 	OMPT_UNKNOWN
 } ompt_runtime_t;
 
-typedef enum { OMPT_RTE_IBM, OMPT_RTE_INTEL, OMPT_UNKNOWN } ompt_runtime_t;
-
 int ompt_initialize(
 	ompt_function_lookup_t lookup,
 	const char *runtime_version_string, 
