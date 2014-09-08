@@ -5,7 +5,7 @@ include Makefile.inc
 noinst_LTLIBRARIES = libextractors.la libcontainers-fe.la libcontainers-cp.la libcontainers-be.la
 
 EXTRACTORS_SRCS  = \
-  BufferExtractor.cpp BufferExtractor.h \
+  BufferParser.cpp    BufferParser.h    \
   BurstsExtractor.cpp BurstsExtractor.h \
   Chopper.cpp         Chopper.h
 

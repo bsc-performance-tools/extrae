@@ -590,11 +590,15 @@ lib_dyn_oclmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(
 if HAVE_ONLINE
 libmpitrace_la_LIBADD       += $(ONLINE_DIR)/libonline.la
 libmpitracef_la_LIBADD      += $(ONLINE_DIR)/libonline.la
+libompitrace_la_LIBADD      += $(ONLINE_DIR)/libonline.la
+libompitracef_la_LIBADD     += $(ONLINE_DIR)/libonline.la
 lib_dyn_mpitracec_la_LIBADD += $(ONLINE_DIR)/libonline.la
 lib_dyn_mpitracef_la_LIBADD += $(ONLINE_DIR)/libonline.la
 
 libmpitrace_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_DIR)
 libmpitracef_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_DIR)
+libompitrace_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_DIR)
+libompitracef_la_CFLAGS     += -DHAVE_ONLINE -I$(ONLINE_DIR)
 lib_dyn_mpitracec_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
 lib_dyn_mpitracef_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
 endif

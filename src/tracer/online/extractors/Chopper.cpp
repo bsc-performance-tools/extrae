@@ -35,230 +35,120 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdlib.h>
 #endif
 #include "Chopper.h"
-#include "events.h"
+#include <stdio.h>
 
-/**
- * Constructor. Creates a new forward iterator for the extraction buffer.
- */
 Chopper::Chopper()
 {
-  ExtractionIterator = BIT_NewForward(ExtractionBuffer);
+  ChopAt    = NULL;
+  ChopTime  = 0;
+  ChopType  = KEEP_ONGOING_STATE;
 }
 
-
-/**
- * Destructor. Frees the iterator.
- */
-Chopper::~Chopper()
+event_t * Chopper::FindCloserRunning(int thread_id, unsigned long long time_to_chop, int chop_type, bool use_checkpoint)
 {
-  BIT_Free(ExtractionIterator);
+  ChopAt   = NULL;
+  ChopTime = time_to_chop;
+  ChopType = chop_type;
+
+  PrevRunningBeginEv = PrevRunningEndEv = LastRunningBeginEv = LastRunningEndEv = NULL;
+ 
+  ParseBuffer(thread_id, use_checkpoint);
+
+  return ChopAt;
 }
 
-/**
- * Selects the event closest to the specified timestamp. 
- *
- * \param time_to_find  The timestamp we're looking for.
- * \param inclusively   If there's no event in that exact timestamp and set to true, 
- *                      returns the previous event before the given time; and the next otherwise.
- * \return The iterator pointing to the event that is closer to the given timestamp.
- */
-BufferIterator_t * Chopper::DontBreakStates(unsigned long long time_to_find, bool inclusively)
+unsigned long long Chopper::FindCloserRunningTime(int thread_id, unsigned long long time_to_chop, int chop_type, bool use_checkpoint)
 {
-  BufferIterator_t *found=NULL, *prev=NULL;
-  event_t *curEvt = NULL;
-  
-  while ((!BIT_OutOfBounds(ExtractionIterator)) && (found == NULL))
+  FindCloserRunning( thread_id, time_to_chop, chop_type, use_checkpoint );
+
+  if (ChopAt == NULL)
   {
-    curEvt = BIT_GetEvent(ExtractionIterator);
+    return time_to_chop;
+  }
+  else
+  {
+    return Get_EvTime(ChopAt);
+  }
+}
 
-    /* Select the begin time inclusively (don't break states) */
-    if (Get_EvTime(curEvt) < time_to_find)
+int Chopper::ParseEvent(int thread_id, event_t *current_event)
+{
+  unsigned long long current_time = Get_EvTime(current_event);
+
+  if (isRunningBegin(thread_id, current_event))
+  {
+    if (LastRunningEndEv != NULL)
     {
-      if ((prev == NULL) || (Get_EvTime(curEvt) > Get_EvTime(BIT_GetEvent(prev))))
+      PrevRunningBeginEv = LastRunningBeginEv;
+      PrevRunningEndEv   = LastRunningEndEv;
+    }
+    LastRunningBeginEv = current_event;
+    LastRunningEndEv = NULL;
+  }
+  else if (isRunningEnd(thread_id, current_event) && LastRunningBeginEv != NULL)
+  {
+    LastRunningEndEv = current_event;
+
+    if (Get_EvTime( LastRunningEndEv ) >= ChopTime)
+    {
+      if (ChopType == KEEP_ONGOING_STATE)
       {
-        BIT_Free(prev);
-        prev = BIT_Copy(ExtractionIterator);
+        ChopAt = LastRunningBeginEv;
       }
-      BIT_Next(ExtractionIterator);
-    }
-    else if (Get_EvTime(curEvt) == time_to_find) found = BIT_Copy(ExtractionIterator);
-    else
-    {
-      if (prev != NULL)
+      else if (ChopType == DISCARD_ONGOING_STATE)
       {
-#if 0
-        /* Decide whether we move to the next or previous state, depending on which is closer */
-        if ((Get_EvTime(curEvt) - time_to_find) < (time_to_find - Get_EvTime(BIT_GetEvent(prev))))
-          found = BIT_Copy(ExtractionIterator);
-        else
-          found = prev;
-#endif
-        if (inclusively)
-          found = prev;
-        else
-          found = BIT_Copy(ExtractionIterator);
+        ChopAt = PrevRunningEndEv;
       }
-      else found = BIT_Copy(ExtractionIterator);
+      return STOP_PARSING;
     }
   }
-  return found;
+  return CONTINUE_PARSING;
 }
-
-/*
-unsigned long long Chopper::DontBreakStates(unsigned long long time_to_find, bool inclusively)
-{
-  BufferIterator_t *it = DontBreakStates(time_to_find, inclusively);
-  if (!BIT_OutOfBounds(it))
-  {
-    return Get_EvTime( BIT_GetEvent(it) );  
-  }
-  else return time_to_find;
-}
-*/
-
-/**
- * Select the event before the specified timestamp. 
- * \param time_to_find  The timestamp we're looking for.
- * \return The iterator pointing to the event that is closer to the given timestamp.
- */
-BufferIterator_t * Chopper::RemoveLastState(unsigned long long time_to_find)
-{
-  BufferIterator_t *found=NULL, *prev=NULL;
-  event_t *curEvt=NULL;
-
-  while ((!BIT_OutOfBounds(ExtractionIterator)) && (found == NULL))
-  {
-    curEvt = BIT_GetEvent(ExtractionIterator);
-
-    /* Select the end time exclusively (remove last state) */
-    if (Get_EvTime(curEvt) <= time_to_find) BIT_Next(ExtractionIterator);
-    else found = prev;
-
-    BIT_Free(prev);
-    prev = BIT_Copy(ExtractionIterator);
-  }
-  return found;
-}
-
-BufferIterator_t * Chopper::FindCloserRunning(unsigned long long time_to_find)
-{
-  BufferIterator_t *last_running_start = NULL, *next_running_start = NULL;
-
-  while (!BIT_OutOfBounds(ExtractionIterator))
-  {
-    event_t *current_event = BIT_GetEvent( ExtractionIterator );
-    unsigned long long current_time = Get_EvTime(current_event);
-
-    if (isBurstEnd(current_event)) 
-    {
-      BIT_Free( last_running_start );
-      last_running_start = BIT_Copy( ExtractionIterator );
-    }
-
-    if (current_time >= time_to_find)
-    {
-      return last_running_start;
-    }
-
-    BIT_Next( ExtractionIterator );
-  }
-  return NULL;
-}
-
-event_t *Chopper::EventCloserRunning( unsigned long long time_to_find )
-{
-  BufferIterator_t *it = FindCloserRunning( time_to_find );
-  if (!BIT_OutOfBounds( it ))
-  {
-    return BIT_GetEvent( it );
-  }
-  else return NULL;
-}
-
-unsigned long long Chopper::TimeCloserRunning( unsigned long long time_to_find )
-{
-  BufferIterator_t *it = FindCloserRunning( time_to_find );
-  if (!BIT_OutOfBounds( it ))
-  {
-    return Get_EvTime( BIT_GetEvent( it ) );
-  }
-  else return time_to_find;
-}
-
-
-/*
-unsigned long long Chopper::RemoveLastState(unsigned long long time_to_find)
-{
-  BufferIterator_t *it = RemoveLastState(time_to_find);
-  if (!BIT_OutOfBounds(it))
-  {
-    return Get_EvTime( BIT_GetEvent(it) );
-  }
-  else return time_to_find;
-}
-*/
 
 #if 0
-
-Rewind()
+int Chopper::ParseEvent(int thread_id, event_t *current_event)
 {
-  pon el iter al principio
-}
+  unsigned long long current_time = Get_EvTime(current_event);
 
-CHOP(from, to)
-{
-  busca la primera salida de mpi
-  y coge de ahi hasta la ultima salida de mpi
-
-  retorna los eventos de esos puntos
-
-  conforme avanzas por los eventos, que pasa con los contadores???
-
-}
-
-#endif
-
-
-/** 
- * Select a region in the buffer between two given times. The iterator is never rewound, so 
- * subsequent calls to Chop() with progressive, non-overlapping time intervals, do not 
- * start parsing the buffer from the beginning. 
- *
- * \param fromTime The starting timestamp.
- * \param toTime   The ending timestamp.
- *
- * @return firstEv The event at the starting timestamp.
- * @return lastEv  The event at the ending timestamp.
- */
-void Chopper::Chop(unsigned long long fromTime, unsigned long long toTime, event_t *&firstEv, event_t *&lastEv)
-{
-  BufferIterator_t *firstIt = NULL;
-  BufferIterator_t *lastIt  = NULL;
-
-  /* Find the first event of the region */
-  firstIt = DontBreakStates(fromTime, true);
-  if (!BIT_OutOfBounds(firstIt))
+  if (((thread_id == 0) && (isBurstEnd(current_event))) ||
+      ((thread_id > 0)  && (isBurstEndInAuxThreads(current_event))))
   {
-    firstEv = BIT_GetEvent(firstIt);
+    ChopAt = current_event; 
+  }
 
-#if USE_HARDWARE_COUNTERS
-    /* Look for the first event that emits counters in the chopped region */
-    event_t *first_with_hwcs = firstEv;
-    while ((!Get_EvHWCRead(first_with_hwcs)) && (!BIT_OutOfBounds(firstIt)))
-    {
-      BIT_Next(firstIt);
-      first_with_hwcs = BIT_GetEvent(firstIt);
-    }
-    Reset_EvHWCs(first_with_hwcs); /* The first event that reads counters after the chop sets them to 0 */
+  if (current_time >= ChopTime)
+  {
+    return STOP_PARSING;
+  }
+  return CONTINUE_PARSING;
+}
 #endif
 
-    /* Find the last event of the region */
-    lastIt = RemoveLastState(toTime);
-//    lastIt = DontBreakStates(toTime, true);
-    lastEv = BIT_GetEvent(lastIt);
-  
-    BIT_Free(firstIt);
-    BIT_Free(lastIt);
+void Chopper::MaskAll()
+{
+  for (int i=0; i<GetNumberOfThreads(); i++)
+  {
+    Buffer_t *buffer = GetBuffer(i);
+
+    Mask_SetRegion (buffer, Buffer_GetHead(buffer), Buffer_GetTail(buffer), MASK_NOFLUSH);
+  }
+}
+
+void Chopper::UnmaskAll(unsigned long long from_time, unsigned long long to_time)
+{
+  for (int i=0; i<GetNumberOfThreads(); i++)
+  {
+    Buffer_t *buffer    = GetBuffer(i);
+    event_t  *ChopFrom  = NULL;
+    event_t  *ChopUntil = NULL;
+
+    ChopFrom  = FindCloserRunning(i, from_time, KEEP_ONGOING_STATE, false);
+    ChopUntil = FindCloserRunning(i, to_time, DISCARD_ONGOING_STATE, true);
+
+    if (ChopFrom != NULL && ChopUntil != NULL && ChopFrom != ChopUntil)
+    {
+      Mask_UnsetRegion (buffer, ChopFrom, ChopUntil, MASK_NOFLUSH);
+    }
   }
 }
 

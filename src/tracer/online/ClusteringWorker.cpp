@@ -48,7 +48,8 @@ static void ClusteringDataExtractor(libDistributedClustering *libClustering)
   /* Extract all bursts since the last analysis */
   BurstsExtractor *extBursts = new BurstsExtractor(0, false);
 
-  extBursts->Extract(
+  extBursts->ParseBuffer(
+    0,
     Online_GetAppResumeTime(),
     Online_GetAppPauseTime()
   );

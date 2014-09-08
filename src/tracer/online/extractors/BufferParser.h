@@ -22,34 +22,54 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/online/extractors/BufferParser.h $
+ | @last_commit: $Date: 2014-01-31 14:13:36 +0100 (vie, 31 ene 2014) $
+ | @version:     $Revision: 2459 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef __BUFFER_EXTRACTOR_H__
-#define __BUFFER_EXTRACTOR_H__
+#ifndef __BUFFER_PARSER_H__
+#define __BUFFER_PARSER_H__
+
+#include <vector>
 
 #include "events.h"
 #include "record.h"
 #include "buffers.h"
 
-class BufferExtractor
+using std::vector;
+
+#define CONTINUE_PARSING 0
+#define STOP_PARSING    -1
+
+class BufferParser
 {
   public:
-    BufferExtractor();
+    BufferParser();
+    ~BufferParser();
+
+    int       GetNumberOfThreads();
+    Buffer_t *GetBuffer( void );
+    Buffer_t *GetBuffer( int thread_id );
+
+    void         ParseBuffer( bool continue_from_checkpoint = false );
+    void         ParseBuffer( int thread_id, bool continue_from_checkpoint = false );
+    virtual void ParseBuffer( int thread_id, unsigned long long from, unsigned long long to, bool continue_from_checkpoint = false );
+
+    virtual int  ParseEvent ( int thread_id, event_t *evt );
 
     bool isBurstBegin( event_t *evt );
-    bool isBurstEnd( event_t *evt );
-    Buffer_t *GetBuffer( void );
+    bool isBurstEnd  ( event_t *evt );
+    bool isRunningBegin(int thread_id, event_t *evt);
+    bool isRunningEnd  (int thread_id, event_t *evt);
 
-    virtual void Extract( unsigned long long from, unsigned long long to );
-    void ExtractAll( void );
 
-    virtual void ProcessEvent( event_t *evt );
+  private:
+    int               TotalThreads;
+    BufferIterator_t *Checkpoint;
 
-    Buffer_t         *ExtractionBuffer;
-    BufferIterator_t *ExtractionIterator; 
+    BufferIterator_t *Get_Checkpoint();
+    void Set_Checkpoint(BufferIterator_t *);
+    void Clear_Checkpoint();
 };
 
-#endif /* __BUFFER_EXTRACTOR_H__ */
+#endif /* __BUFFER_PARSER_H__ */

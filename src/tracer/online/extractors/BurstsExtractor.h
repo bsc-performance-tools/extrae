@@ -30,7 +30,7 @@
 #ifndef __BURSTS_EXTRACTOR_H__
 #define __BURSTS_EXTRACTOR_H__
 
-#include "BufferExtractor.h"
+#include "BufferParser.h"
 #include "Bursts.h"
 
 #if USE_HARDWARE_COUNTERS
@@ -45,13 +45,13 @@
 #endif /* USE_HARDWARE_COUNTERS */
 
 
-class BurstsExtractor : public BufferExtractor
+class BurstsExtractor : public BufferParser
 {
   public:
     BurstsExtractor(unsigned long long min_duration, bool sync_times = true);
     ~BurstsExtractor();
 
-    void ProcessEvent(event_t *evt);
+    int ParseEvent(int thread_id, event_t *evt);
 
     Bursts * GetBursts();
 

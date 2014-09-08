@@ -30,10 +30,34 @@
 #ifndef __CHOPPER_H__
 #define __CHOPPER_H__
 
-#include "BufferExtractor.h"
+#include "BufferParser.h"
 
-class Chopper : public BufferExtractor
+#define KEEP_ONGOING_STATE    0
+#define DISCARD_ONGOING_STATE 1
+
+class Chopper : public BufferParser
 {
+  public:
+    Chopper();
+
+    event_t * FindCloserRunning(int thread_id, unsigned long long time_to_chop, int chop_type = KEEP_ONGOING_STATE, bool use_checkpoint = false);
+    unsigned long long FindCloserRunningTime(int thread_id, unsigned long long time_to_chop, int chop_type = KEEP_ONGOING_STATE, bool use_checkpoint = false);
+
+    void MaskAll();
+    void UnmaskAll(unsigned long long from_time, unsigned long long to_time);
+
+  private:
+    unsigned long long ChopTime;
+    int                ChopType;
+    event_t           *ChopAt;
+    event_t           *LastRunningBeginEv, *LastRunningEndEv;
+    event_t           *PrevRunningBeginEv, *PrevRunningEndEv;
+
+    int ParseEvent(int thread_id, event_t *current_event);
+
+
+
+#if 0
   public:
     Chopper();
     ~Chopper();
@@ -54,6 +78,7 @@ class Chopper : public BufferExtractor
     unsigned long long GetDontBreakStates(unsigned long long time_to_find, bool inclusively);
     unsigned long long RemoveLastState(unsigned long long time_to_find);
 */
+#endif
 };
 
 #endif /* __CHOPPER_H__ */

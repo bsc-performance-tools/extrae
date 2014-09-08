@@ -55,7 +55,7 @@ class SpectralWorker : public BackProtocol
     void ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor *ExtractedBursts);
     void ProcessPeriod(Bursts *AllBursts, Period_t *CurrentPeriod, int trace_this_period, int rep_period_id, unsigned long long PrevNonPeriodicZoneStartTime, unsigned long long &NextNonPeriodicZoneStartTime);
     void Trace_Period(Period_t *CurrentPeriod, unsigned long long *best_ini_out, unsigned long long *best_end_out);
-    void Trace_Period(Buffer_t *buffer, event_t *start_ev, event_t *end_ev);
+    void Trace_Period(BurstsExtractor *buffers, event_t *start_ev, event_t *end_ev);
     void Summarize(unsigned long long NonPeriodZoneStart, unsigned long long NonPeriodZoneEnd, unsigned long long DurationThreshold, int LevelAtNonPeriodZone, Bursts *BurstsData, unsigned long long BurstsThreshold);
 
 };

@@ -485,7 +485,10 @@ int Buffer_Flush(Buffer_t *buffer)
 	ssize_t r;
 #endif
 
-	if ((Buffer_IsEmpty(buffer)) || (Buffer_IsClosed(buffer))) return 0;
+	if ((Buffer_IsEmpty(buffer)) || (Buffer_IsClosed(buffer))) 
+	{
+		return 0;
+	}
 
 	head = Buffer_GetHead(buffer);
 	tail = head;

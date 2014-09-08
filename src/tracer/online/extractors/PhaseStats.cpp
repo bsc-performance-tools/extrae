@@ -498,7 +498,7 @@ void PhaseStats::Dump()
     for (it=HWC_Stats.begin(); it!=HWC_Stats.end(); ++it)
     {
       unsigned long long hwc_ts  = it->first;
-      fprintf(stderr, "[DEBUG] HWC %d ts=%llu global_ts=%llu\n", count, hwc_ts, TIMESYNC(0, TASKID, hwc_ts));
+      fprintf(stderr, "[DEBUG] HWC %d ts=%llu global_ts=%lu\n", count, hwc_ts, TIMESYNC(0, TASKID, hwc_ts));
       count ++;
     }
 }

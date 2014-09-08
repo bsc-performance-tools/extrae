@@ -66,7 +66,7 @@ BurstsExtractor::~BurstsExtractor()
  */
 /* XXX Information in burst mode not supported -- Take into account MPI_STATS_EV because there will not be MPI_EVs */
 #if 1
-void BurstsExtractor::ProcessEvent(event_t *evt)
+int BurstsExtractor::ParseEvent(UNUSED int thread_id, event_t *evt)
 {
   if (isBurstBegin(evt))
   {
@@ -112,6 +112,7 @@ void BurstsExtractor::ProcessEvent(event_t *evt)
     CurrentPhase->UpdateMPI( evt );
     CurrentPhase->UpdateHWC( evt );
   }
+  return 0;
 }
 #endif
 

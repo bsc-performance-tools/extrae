@@ -71,7 +71,8 @@ int SpectralWorker::Run()
   /* Extract all bursts since the last analysis */
   BurstsExtractor *ExtractedBursts = new BurstsExtractor(0); 
 
-  ExtractedBursts->Extract(
+  ExtractedBursts->ParseBuffer(
+    0,
     Online_GetAppResumeTime(),
     Online_GetAppPauseTime()
   ); 
@@ -135,13 +136,13 @@ void SpectralWorker::ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor 
   unsigned long long AutomaticBurstThreshold  = 100000;
   int                NumDetectedPeriods       = AllPeriods.size();
   Bursts            *BurstsData               = ExtractedBursts->GetBursts();
-  Chopper           *EventFinder              = new Chopper();
+  Chopper           *Chop                     = new Chopper();
 
   if (FirstEvtTime < Online_GetAppResumeTime()) FirstEvtTime = Online_GetAppResumeTime();
   if (LastEvtTime  > Online_GetAppPauseTime())  LastEvtTime  = Online_GetAppPauseTime();
 
   /* Mask out all traced data */
-  Mask_SetRegion (buffer, Buffer_GetHead(buffer), Buffer_GetTail(buffer), MASK_NOFLUSH);
+  Chop->MaskAll();
 
   /* Compute the burst threshold that keeps the configured percentage of computations */
   if (LevelAtNonPeriodZone == BURST_MODE)
@@ -165,8 +166,6 @@ void SpectralWorker::ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor 
     int                        DetailedItersLeft  = DetailedIters;
     unsigned long long         CurrentTime        = 0;
     unsigned long long         CurrentTimeFitted  = 0;
-    event_t                   *BestItersFirstEvt  = NULL;
-    event_t                   *BestItersLastEvt   = NULL;
     vector<unsigned long long> ItersStartingTimes;
     vector<bool>               ItersInDetail;
     unsigned long long         NonPeriodZoneStart = 0;
@@ -186,20 +185,16 @@ void SpectralWorker::ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor 
     /* Adjust the starting time of the iteration to the closest running burst starting time */
     for (int count = 0; count <= AllIters; count ++)
     {
-      event_t *ClosestRunningEvt = EventFinder->EventCloserRunning( CurrentTime );
-
-      CurrentTimeFitted = (ClosestRunningEvt != NULL ? Get_EvTime(ClosestRunningEvt) : CurrentTime);
+      CurrentTimeFitted = Chop->FindCloserRunningTime(0, CurrentTime );
       ItersStartingTimes.push_back( CurrentTimeFitted );
 
       if ( (CurrentTime >= BestItersIni) && (DetailedItersLeft > 0) )
       {
-        if (BestItersFirstEvt == NULL) BestItersFirstEvt = ClosestRunningEvt;
         ItersInDetail.push_back( true );
         DetailedItersLeft --;
       }
       else
       {
-        if ( (BestItersLastEvt == NULL) && (DetailedItersLeft == 0) ) BestItersLastEvt = ClosestRunningEvt;
         ItersInDetail.push_back( false );
       }
       CurrentTime += PeriodLength;
@@ -232,7 +227,6 @@ void SpectralWorker::ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor 
       {
         /* Mark NOT TRACING from the last analysis */ 
         TRACE_ONLINE_EVENT(Online_GetAppResumeTime(), DETAIL_LEVEL_EV, NOT_TRACING);
-        TRACE_ONLINE_EVENT(Online_GetAppResumeTime(), 12345, 1);
       }
       /* NON-PERIODIC zone from the first event in the buffer until the start of the first periodic zone */
       NonPeriodZoneStart    = FirstEvtTime;
@@ -283,12 +277,11 @@ void SpectralWorker::ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor 
       Summarize( NonPeriodZoneStart, NonPeriodZoneEnd, NonPeriodZoneMinDuration, LevelAtNonPeriodZone, BurstsData, AutomaticBurstThreshold );
 
       TRACE_ONLINE_EVENT( NonPeriodZoneEnd, DETAIL_LEVEL_EV, NOT_TRACING );
-      TRACE_ONLINE_EVENT(NonPeriodZoneEnd, 12345, 2);
     }
 
     if (CurrentPeriod->traced)
     {
-      Trace_Period(buffer, BestItersFirstEvt, BestItersLastEvt);
+      Chop->UnmaskAll( BestItersIni, BestItersEnd );
     }
 
     /* DEBUG -- Raw values returned by the spectral analysis 
@@ -298,7 +291,7 @@ void SpectralWorker::ProcessPeriods(vector<Period> &AllPeriods, BurstsExtractor 
     TRACE_ONLINE_EVENT(BestItersEnd, RAW_BEST_ITERS_EV, 0); */
 
   }
-  delete EventFinder;
+  delete Chop;
 }
 
 void SpectralWorker::Summarize(unsigned long long NonPeriodZoneStart, unsigned long long NonPeriodZoneEnd, unsigned long long DurationThreshold, int LevelAtNonPeriodZone, Bursts *BurstsData, unsigned long long BurstsThreshold)
@@ -322,24 +315,6 @@ void SpectralWorker::Summarize(unsigned long long NonPeriodZoneStart, unsigned l
   {
     /* The NON-PERIODIC zone is short, discard it */
     TRACE_ONLINE_EVENT( NonPeriodZoneStart, DETAIL_LEVEL_EV, NOT_TRACING );
-  }
-}
-
-
-/**
- * Unsets the NO_FLUSH mask of all the events between the given times, that represent
- * the best iterations of a period. 
- *
- * @param CurrentPeriod The period to trace.
- *
- * @return best_ini_out The local timestamp for the first event of the traced region.
- * @return best_end_out The local timestamp for the last event of the traced region.
- */
-void SpectralWorker::Trace_Period(Buffer_t *buffer, event_t *start_ev, event_t *end_ev)
-{
-  if (start_ev != NULL && end_ev != NULL && start_ev != end_ev)
-  {
-    Mask_UnsetRegion(buffer, start_ev, end_ev, MASK_NOFLUSH);
   }
 }
 
