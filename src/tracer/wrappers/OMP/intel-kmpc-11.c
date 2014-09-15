@@ -721,6 +721,7 @@ static void __extrae_kmpc_task_substitute (int p1, void *p2)
 	if (__kmpc_task_substituted_func != NULL)
 	{
 		Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
+		Backend_Leave_Instrumentation();
 		__kmpc_task_substituted_func (p1, p2); /* Original code execution */
 		Extrae_OpenMP_TaskUF_Exit ();
 	}
@@ -774,6 +775,7 @@ void __kmpc_omp_task_begin_if0 (void *p1, int p2, void *p3)
 		if (__kmpc_omp_task_begin_if0_real != NULL)
 		{
 			Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
+			Backend_Leave_Instrumentation();
 			__kmpc_omp_task_begin_if0_real (p1, p2, p3);
 		}
 		else
