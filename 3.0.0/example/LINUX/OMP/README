@@ -1,0 +1,12 @@
+If you have installed Extrae with DynInst support you can use automatic instrumentation of uninstrumented binaries as shown in the script:
+
+  run_dyninst.sh
+
+Otherwise, you can dynamically preload the tracing library by defining the environment variable LD_PRELOAD as shown in the script:
+
+  run_ldpreload.sh
+
+Also, you can manually instrument the source code (i.e., adding calls to Extrae_init and Extrae_fini) and statically link with the tracing library and run the application like in:
+
+  run_instrumented.sh
+
