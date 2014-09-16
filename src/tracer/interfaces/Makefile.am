@@ -1,9 +1,0 @@
-SUBDIRS  = API
-
-if HAVE_MPI
-SUBDIRS += MPI
-endif
-
-if HAVE_PACX
-SUBDIRS += PACX
-endif
