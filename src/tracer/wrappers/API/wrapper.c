@@ -452,7 +452,7 @@ static extrae_init_type_t Extrae_Init_Type = EXTRAE_NOT_INITIALIZED;
 
 extrae_init_type_t Extrae_is_initialized_Wrapper (void)
 {
-	return Extrae_Init_Type;
+	return EXTRAE_INITIALIZED()?Extrae_Init_Type:EXTRAE_NOT_INITIALIZED;
 }
 
 void Extrae_set_is_initialized (extrae_init_type_t type)
