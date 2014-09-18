@@ -34,8 +34,14 @@
   - use buildfarm/inject-user-guide.sh to add use guide into tar.bz2s like
        inject-user-guide.sh extrae-user-guide.pdf *.tar.bz2
 
-7) Email & celebrate
-  7.a) Addresses
+7) Upload binary packages to:
+   http://www.bsc.es/ssl/apps/performanceTools/admin/index.php
+
+   Upload Extrae documentation (in both HTML & PDF formats) to:
+   http://www.bsc.es/computer-sciences/performance-tools/documentation
+
+8) Email & celebrate
+  8.a) Addresses
          tools@bsc.es
          support@bsc.es
          pm-tools@bsc.es
