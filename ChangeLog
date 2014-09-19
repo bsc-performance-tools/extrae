@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 19Sep2014 Fixed minor version from 3.01 to 3.0.1 
  + 08Sep2014 Added support for OpenMP threads in the on-line analysis.
              Upgraded version to 3.01.
  + 05Sep2014 Added instrumentation for mpi_request_get_status/fortran
