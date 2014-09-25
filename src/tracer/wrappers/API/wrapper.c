@@ -2116,7 +2116,16 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 		unlink (tmp_name);
 	}
 #endif
-
+    /* Copy or move SYM file, if it exists */
+    FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, pid,
+        initialTASKID, thread, EXT_SYM);
+    if (file_exists(tmp_name)){
+        FileName_PTT(trace, Get_FinalDir(initialTASKID), appl_name, pid,
+            initialTASKID, thread, EXT_SYM);
+        rename_or_copy(tmp_name, trace);
+    	fprintf (stdout,
+    	  PACKAGE_NAME": Intermediate raw sym file created : %s\n", trace);
+    }
 }
 
 /**
