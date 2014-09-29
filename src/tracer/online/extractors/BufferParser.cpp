@@ -31,6 +31,8 @@
 
 static char UNUSED rcsid[] = "$Id: BufferParser.cpp 2459 2014-01-31 13:13:36Z gllort $";
 
+#include <cstdlib>
+
 #include "BufferParser.h"
 #include "trace_buffers.h"
 #include "threadid.h"

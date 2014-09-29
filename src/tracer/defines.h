@@ -45,9 +45,13 @@
 # endif
 
 # if defined(MPICH_NAME)
-#  define MPICH
+#  if !defined(MPICH)
+#   define MPICH
+#  endif
 # elif defined(OPEN_MPI)
-#  define OPENMPI
+#  if !defined(OPENMPI)
+#   define OPENMPI
+#  endif
 # endif
 
 #endif /* HAVE_MPI */
