@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 04Oct2014 Fix request for bfd_demangle (reported by David Clarke)
  + 25Sep2014 Move .sym file from $temporal_dir to $final_dir
  * 19Sep2014 Fixed minor version from 3.01 to 3.0.1 
  + 08Sep2014 Added support for OpenMP threads in the on-line analysis.
