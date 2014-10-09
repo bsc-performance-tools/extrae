@@ -260,7 +260,13 @@ void Extrae_OpenMP_init(int me)
   if (!hooked)
   {
     fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with IBM XL OpenMP runtime!\n");
+# if defined(GNU_OPENMP_4_2)
     hooked = gnu_libgomp_4_2_hook_points(0);
+# elif defined(GNU_OPENMP_4_9)
+    hooked = gnu_libgomp_4_9_hook_points(0);
+# else
+#  error "Unsupported version of libgomp!"
+# endif 
   }
 # endif /* OS_LINUX && ARCH_PPC && IBM_OPENMP */
 
@@ -278,7 +284,13 @@ void Extrae_OpenMP_init(int me)
 # if defined(GNU_OPENMP)
   if (!hooked)
   {
+# if defined(GNU_OPENMP_4_2)
     hooked = gnu_libgomp_4_2_hook_points(0);
+# elif defined(GNU_OPENMP_4_9)
+    hooked = gnu_libgomp_4_9_hook_points(0);
+# else
+#  error "Unsupported version of libgomp!"
+# endif 
     if (!hooked)
     {
       fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");

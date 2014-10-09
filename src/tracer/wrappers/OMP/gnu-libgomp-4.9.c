@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/OMP/gnu-libgomp-4.2.c $
+ | @last_commit: $Date: 2014-07-11 12:38:09 +0200 (vie, 11 jul 2014) $
+ | @version:     $Revision: 2824 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+static char UNUSED rcsid[] = "$Id: gnu-libgomp-4.2.c 2824 2014-07-11 10:38:09Z harald $";
 
 #ifdef HAVE_DLFCN_H
 # define __USE_GNU
@@ -58,6 +58,7 @@ struct openmp_task_st
 	long p5;
 	int p6;
 	unsigned p7;
+	void **p8;
 };
 
 /*
@@ -196,7 +197,7 @@ static unsigned (*GOMP_sections_next_real)(void) = NULL;
 static void (*GOMP_sections_end_real)(void) = NULL;
 static void (*GOMP_sections_end_nowait_real)(void) = NULL;
 static void (*GOMP_parallel_sections_start_real)(void*,void*,unsigned,unsigned) = NULL;
-static void (*GOMP_task_real)(void*,void*,void*,long,long,int,unsigned) = NULL;
+static void (*GOMP_task_real)(void*,void*,void*,long,long,int,unsigned,void**) = NULL;
 static void (*GOMP_taskwait_real)(void) = NULL;
 static int (*GOMP_loop_ordered_static_start_real)(long, long, long, long, long *, long *) = NULL;
 static int (*GOMP_loop_ordered_runtime_start_real)(long, long, long, long, long *, long *) = NULL;
@@ -210,7 +211,7 @@ static void (*GOMP_ordered_end_real)(void) = NULL;
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 
-static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
+static int gnu_libgomp_4_9_GetOpenMPHookPoints (int rank)
 {
 	int count = 0;
 
@@ -218,7 +219,7 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 
 	/* Obtain @ for GOMP_parallel */
 	GOMP_parallel_real =
-		(void(*)(void*,void*,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel");
+		(void(*)(void*,void*,unsigned,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel");
 	INC_IF_NOT_NULL(GOMP_parallel_start_real,count);
 
 	/* Obtain @ for GOMP_parallel_start */
@@ -363,7 +364,7 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 
 	/* Obtain @ for GOMP_task */
 	GOMP_task_real =
-		(void(*)(void*,void*,void*,long,long,int,unsigned)) dlsym (RTLD_NEXT, "GOMP_task");
+		(void(*)(void*,void*,void*,long,long,int,unsigned,void**)) dlsym (RTLD_NEXT, "GOMP_task");
 	INC_IF_NOT_NULL(GOMP_task_real,count);
 
 	/* Obtain @ for GOMP_taskwait */
@@ -411,7 +412,7 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 
 static void callme_task (void *helper_ptr)
 {
-	struct openmp_task_st *helper = (* (struct openmp_task_st**)helper_ptr);
+	struct openmp_task_st *helper = (* (struct openmp_task_st **)helper_ptr);
 	void (*task_uf)(void*) = (void(*)(void*)) helper->p1;
 
 	Extrae_OpenMP_TaskUF_Entry (helper->p1);
@@ -434,7 +435,7 @@ static void callme_task (void *helper_ptr)
 
 	if (helper->p3 != NULL)
 		GOMP_task_real (helper->p1, helper->p2, helper->p3, helper->p4, helper->p5,
-			FALSE, helper->p7);
+			FALSE, helper->p7, helper->p8);
 	else
 		task_uf (helper->p2);
 
@@ -446,11 +447,12 @@ static void callme_task (void *helper_ptr)
 	Extrae_OpenMP_TaskUF_Exit ();
 }
 
-void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned p7)
+#if 0
+void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned p7, void **p8)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task is at %p\n", THREADID, GOMP_task_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %d %u\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %d %u %p\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8);
 #endif
 
 	if (GOMP_task_real != NULL && mpitrace_on)
@@ -464,14 +466,15 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 		helper->p5 = p5;
 		helper->p6 = p6;
 		helper->p7 = p7;
+		helper->p8 = p8;
 
 		Extrae_OpenMP_Task_Entry (p1);
-		GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7);
+		GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7, p8);
 		Extrae_OpenMP_Task_Exit ();
 	}
 	else if (GOMP_task_real != NULL && !mpitrace_on)
 	{
-		GOMP_task_real (p1, p2, p3, p4, p5, p6, p7);
+		GOMP_task_real (p1, p2, p3, p4, p5, p6, p7, p8);
 	}
 	else
 	{
@@ -479,6 +482,7 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 		exit (0);
 	}
 }
+#endif
 
 void GOMP_taskwait (void)
 {
@@ -1385,12 +1389,12 @@ void GOMP_ordered_end (void)
 
 extern int omp_get_max_threads();
 
-int gnu_libgomp_4_2_hook_points (int ntask)
+int gnu_libgomp_4_9_hook_points (int ntask)
 {
 	int hooked;
 	int max_threads;
 
-	hooked = gnu_libgomp_4_2_GetOpenMPHookPoints (ntask);
+	hooked = gnu_libgomp_4_9_GetOpenMPHookPoints (ntask);
    
 	max_threads = omp_get_max_threads();
 	if (max_threads > MAX_THD)

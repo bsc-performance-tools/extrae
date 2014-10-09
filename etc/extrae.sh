@@ -61,6 +61,7 @@ if test "${EXTRAE_HOME}" != "" ; then
 			echo "Unable to find LIBERTY library directory!"
 		else
 			export LD_LIBRARY_PATH=${LIBERTY_HOME}/lib:${LD_LIBRARY_PATH}
+			export PATH=${LIBERTY_HOME}/bin:${PATH}
 		fi
 	fi
 
@@ -69,6 +70,7 @@ if test "${EXTRAE_HOME}" != "" ; then
 			echo "Unable to find BFD library directory!"
 		else
 			export LD_LIBRARY_PATH=${BFD_HOME}/lib:${LD_LIBRARY_PATH}
+			export PATH=${BFD_HOME}/bin:${PATH}
 		fi
 	fi
 

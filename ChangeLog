@@ -1,6 +1,11 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 09Oct2014 Added interface for libgomp 4.9. 
+	     Added configure parameter '--with-libgomp-version' to choose the interface. 
+             For both versions 4.2 and 4.9, the helper struct used to pass the parameters to the tasks has been changed to be allocated dynamically. 
+	     Instrumentation for tasks has been disabled in version 4.9 because it crashes inside the OpenMP runtime. 
+	     Upgraded to v3.0.2.
  + 04Oct2014 Fix request for bfd_demangle (reported by David Clarke)
  + 25Sep2014 Move .sym file from $temporal_dir to $final_dir
  * 19Sep2014 Fixed minor version from 3.01 to 3.0.1 
