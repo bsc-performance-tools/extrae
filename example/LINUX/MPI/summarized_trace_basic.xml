@@ -23,8 +23,12 @@
 
   <counters enabled="yes">
     <cpu enabled="yes" starting-set-distribution="1">
-      <set enabled="yes" domain="all">
-        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM
+      <set enabled="yes" domain="all" changeat-time="0">
+        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM,PAPI_L2_DCM,PAPI_L3_TCM,PAPI_FP_INS,PAPI_BR_MSP
+      </set>
+      <set enabled="yes" domain="all" changeat-time="0">
+        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_LD_INS,PAPI_SR_INS,PAPI_BR_UCN,PAPI_BR_CN,PAPI_VEC_SP,RESOURCE_STALLS
+        <sampling enabled="no" period="1000000000">PAPI_TOT_CYC</sampling>
       </set>
     </cpu>
 

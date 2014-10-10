@@ -85,13 +85,12 @@
            changeat-time=numTime -> choose the next set after num Time
                        (for example 5s, 15m (for ms), 10M (for minutes),..)
       -->
-      <set enabled="yes" domain="all" changeat-globalops="5">
-        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM
-        <!-- Samples the application based on a frequency on a selected HWC  -->
-        <sampling enabled="yes" frequency="100000000">PAPI_TOT_CYC</sampling>
+      <set enabled="yes" domain="all" changeat-time="0">
+        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM,PAPI_L2_DCM,PAPI_L3_TCM,PAPI_FP_INS,PAPI_BR_MSP
       </set>
-      <set enabled="yes" domain="user" changeat-globalops="5">
-        PAPI_TOT_INS,PAPI_FP_INS,PAPI_TOT_CYC
+      <set enabled="yes" domain="all" changeat-time="0">
+        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_LD_INS,PAPI_SR_INS,PAPI_BR_UCN,PAPI_BR_CN,PAPI_VEC_SP,RESOURCE_STALLS
+        <sampling enabled="no" period="1000000000">PAPI_TOT_CYC</sampling>
       </set>
     </cpu>
 
