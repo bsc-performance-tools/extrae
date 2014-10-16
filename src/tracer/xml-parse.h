@@ -139,6 +139,7 @@
 #define GREMLINS_START                  ((xmlChar*) "start")
 #define GREMLINS_INCREMENT              ((xmlChar*) "increment")
 #define GREMLINS_ROUNDTRIP              ((xmlChar*) "roundtrip")
+#define GREMLINS_LOOP                   ((xmlChar*) "loop")
 
 #define TRACE_MERGE                     ((xmlChar*) "merge")
 #define TRACE_MERGE_SYNCHRONIZATION     ((xmlChar*) "synchronization")
