@@ -44,13 +44,13 @@ class GremlinsWorker : public BackProtocol
     int NumberOfGremlins;
     int MinGremlins;
     int MaxGremlins;
-    int Loops;
+    int Sweeps;
+    int LastSweep;
     int Roundtrip;
     int TargetGremlins;
-    bool GremlinsInitialized;
 
     void SwitchSome(int GremlinsToChange);
-
+    void SetInitialConditions(void);
 };
 
 #endif /* __GREMLINS_WORKER_H__ */

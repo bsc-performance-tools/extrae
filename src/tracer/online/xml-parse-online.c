@@ -221,6 +221,7 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
       xmlChar *start_str     = xmlGetProp(tag, GREMLINS_START);
       xmlChar *increment_str = xmlGetProp(tag, GREMLINS_INCREMENT);
       xmlChar *roundtrip_str = xmlGetProp(tag, GREMLINS_ROUNDTRIP);
+      xmlChar *loop_str      = xmlGetProp(tag, GREMLINS_LOOP);
 
       if (start_str != NULL)
       {
@@ -235,6 +236,13 @@ void Parse_XML_Online (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
         if (strcmp((const char *)roundtrip_str, "yes") == 0)
         {
           Online_SetGremlinsRoundtrip ( 1 );
+        }
+      }
+      if (loop_str != NULL)
+      {
+        if (strcmp((const char *)loop_str, "yes") == 0)
+        {
+          Online_SetGremlinsLoop( 1 );
         }
       }
     }

@@ -97,13 +97,16 @@ void   Online_SetClusteringConfig( char *clustering_config_xml );
 #define DEFAULT_GREMLINS_START_COUNT 0
 #define DEFAULT_GREMLINS_INCREMENT   1
 #define DEFAULT_GREMLINS_ROUNDTRIP   0
+#define DEFAULT_GREMLINS_LOOP        0
 
 int                Online_GetGremlinsStartCount( void );
 int                Online_GetGremlinsIncrement( void );
 int                Online_GetGremlinsRoundtrip( void );
+int                Online_GetGremlinsLoop( void );
 void               Online_SetGremlinsStartCount( int start_count );
 void               Online_SetGremlinsIncrement( int increment );
 void               Online_SetGremlinsRoundtrip( int enabled );
+void               Online_SetGremlinsLoop( int enabled );
 
 #if defined(__cplusplus)
 }

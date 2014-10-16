@@ -75,6 +75,7 @@ static char *cfgClusteringConfig = (char *)DEFAULT_CLUSTERING_CONFIG; /* The clu
 static int cfgGremlinsStartCount = DEFAULT_GREMLINS_START_COUNT;
 static int cfgGremlinsIncrement  = DEFAULT_GREMLINS_INCREMENT;
 static int cfgGremlinsRoundtrip  = DEFAULT_GREMLINS_ROUNDTRIP;
+static int cfgGremlinsLoop       = DEFAULT_GREMLINS_LOOP;
 
 /**
  * Enables the online module.
@@ -359,5 +360,15 @@ void Online_SetGremlinsRoundtrip( int enabled )
 int Online_GetGremlinsRoundtrip( void )
 {
   return cfgGremlinsRoundtrip;
+}
+
+void Online_SetGremlinsLoop( int enabled )
+{
+  cfgGremlinsLoop = enabled;
+}
+
+int Online_GetGremlinsLoop( void )
+{
+  return cfgGremlinsLoop;
 }
 
