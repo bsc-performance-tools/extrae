@@ -1123,9 +1123,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
-	if (*required == MPI_THREAD_MULTIPLE || *required == MPI_THREAD_SERIALIZED)
-		fprintf (stderr, PACKAGE_NAME": WARNING! Instrumentation library does not support MPI_THREAD_MULTIPLE and MPI_THREAD_SERIALIZED modes\n");
-
 	CtoF77 (pmpi_init_thread) (required, provided, ierror);
 
 	Extrae_set_ApplicationIsMPI (TRUE);
@@ -4739,9 +4736,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
-
-	if (required == MPI_THREAD_MULTIPLE || required == MPI_THREAD_SERIALIZED)
-		fprintf (stderr, PACKAGE_NAME": WARNING! Instrumentation library does not support MPI_THREAD_MULTIPLE and MPI_THREAD_SERIALIZED modes\n");
 
 	val = PMPI_Init_thread (argc, argv, required, provided);
 
