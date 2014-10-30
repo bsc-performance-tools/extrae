@@ -1016,7 +1016,7 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 
 	if (all_tasks < num_processors)
 	{
-		fprintf (stderr, "mpi2prv: FATAL ERROR! You are using more tasks for merging than tasks instrumented! Please use less than %d tasks to merge.\n", all_tasks);
+		fprintf (stderr, "mpi2prv: FATAL ERROR! You are using more tasks for merging than tasks were traced! Please use less than %d tasks to merge.\n", all_tasks);
 		exit(-1);
 	}
 
