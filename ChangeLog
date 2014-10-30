@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 30Oct2014 Fixed the DistributeWork routine to support dynamic threads per task.
+             Fixed the Search_Synchronization_Point routine to support the different distribution methods (block, cyclic, size...)
+             Upgraded to v3.0.3.
  * 16Oct2014 Added configuration options for the gremlins analysis. 
 	     Also changed the initialization of the gremlins.
  * 09Oct2014 Added interface for libgomp 4.9. 

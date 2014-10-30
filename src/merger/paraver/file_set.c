@@ -439,6 +439,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 		if (IFiles[file].InputForWorker == idtask)
 		{
 			fitem = &(fset->files[fset->nfiles]);
+			fitem->mpit_id = file;
 			if (AddFile_FS (fitem, &(IFiles[file]), idtask) != 0)
 			{
 				perror ("AddFile_FS");
@@ -1307,6 +1308,8 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 			current = Current_FS (&(fset->files[i]));
 			if (current != NULL)
 			{
+				FileItem_t *fi = &(fset->files[i]);
+
 				UINT64 mpi_init_end_time, pacx_init_end_time, trace_init_end_time;
 				int found_mpi_init_end_time, found_pacx_init_end_time, found_trace_init_end_time;
 
@@ -1314,7 +1317,7 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 				mpi_init_end_time = pacx_init_end_time = trace_init_end_time = 0;
 
 				/* Save the starting tracing time of this task */
-				StartingTimes[i] = current->time;
+				StartingTimes[fi->mpit_id] = current->time;
 
 				/* Locate MPI_INIT_EV, PACX_INIT_EV and/or TRACE_INIT_EV
 				   Be careful not to stop on TRACE_INIT_EV because a MPI_INIT_EV/PACX_INIT_EV may
@@ -1341,66 +1344,20 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 				}
 
 				if (found_mpi_init_end_time)
-					SynchronizationTimes[i] = mpi_init_end_time;
+					SynchronizationTimes[fi->mpit_id] = mpi_init_end_time;
 				else if (found_pacx_init_end_time)
-					SynchronizationTimes[i] = pacx_init_end_time;
+					SynchronizationTimes[fi->mpit_id] = pacx_init_end_time;
 				else if (found_trace_init_end_time)
-					SynchronizationTimes[i] = trace_init_end_time;
+					SynchronizationTimes[fi->mpit_id] = trace_init_end_time;
 			}
 		}
 	}
 
+
 #if defined(PARALLEL_MERGE)
 	/* Share information among all tasks */
-	xmalloc(*io_StartingTimes, total_mpits * sizeof(UINT64));
-	memset (*io_StartingTimes, 0, total_mpits * sizeof(UINT64));
-
-	xmalloc(*io_SynchronizationTimes, total_mpits * sizeof(UINT64));
-	memset (*io_SynchronizationTimes, 0, total_mpits * sizeof(UINT64));
-
-	if (taskid == 0)
-	{
-		for (i = 0; i < fset->nfiles; i++)
-		{
-			tmp_StartingTimes[i] = StartingTimes[i];
-			tmp_SynchronizationTimes[i] = SynchronizationTimes[i];
-		}
-		pos = fset->nfiles;
-	}
-	for (i = 1; i < ntasks; i++)
-	{
-		if (taskid == 0)
-		{
-			MPI_Status s;
-			unsigned tmp;
-			rc = MPI_Recv (&tmp, 1, MPI_UNSIGNED, i, NUMBER_SYNC_TIMES_TAG, MPI_COMM_WORLD, &s);
-			MPI_CHECK(rc, MPI_Recv, "Sharing (recv) number of sync times");
-			rc = MPI_Recv (&tmp_StartingTimes[pos], tmp, MPI_LONG_LONG_INT, i, SYNC_TIMES_TAG, MPI_COMM_WORLD, &s);
-			MPI_CHECK(rc, MPI_Recv, "Sharing (recv) starting times");
-			rc = MPI_Recv (&tmp_SynchronizationTimes[pos], tmp, MPI_LONG_LONG_INT, i, START_TIMES_TAG, MPI_COMM_WORLD, &s);
-			MPI_CHECK(rc, MPI_Recv, "Sharing (recv) synchronization times");
-
-			pos += tmp;
-		}
-		else if (taskid == i)
-		{
-			rc = MPI_Send (&(fset->nfiles), 1, MPI_UNSIGNED, 0, NUMBER_SYNC_TIMES_TAG, MPI_COMM_WORLD);
-			MPI_CHECK(rc, MPI_Send, "Sharing (send) number of sync times");
-			rc = MPI_Send (StartingTimes, fset->nfiles, MPI_LONG_LONG_INT, 0, SYNC_TIMES_TAG, MPI_COMM_WORLD);
-			MPI_CHECK(rc, MPI_Send, "Sharing (send) starting times");
-			rc = MPI_Send (SynchronizationTimes, fset->nfiles, MPI_LONG_LONG_INT, 0, START_TIMES_TAG, MPI_COMM_WORLD);
-			MPI_CHECK(rc, MPI_Send, "Sharing (send) synchronization times");
-		}
-		rc = MPI_Barrier (MPI_COMM_WORLD);
-		MPI_CHECK(rc, MPI_Barrier, "Synchronization of sync times");
-	}
-
-	rc = MPI_Bcast (&total_mpits, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_CHECK(rc, MPI_Bcast, "Sharing count of io_StartingTimes/io_SynchronizationTimes");
-	rc = MPI_Bcast (tmp_StartingTimes, total_mpits, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
-	MPI_CHECK(rc, MPI_Bcast, "Sharing io_StartingTimes");
-	rc = MPI_Bcast (tmp_SynchronizationTimes, total_mpits, MPI_LONG_LONG_INT, 0, MPI_COMM_WORLD);
-	MPI_CHECK(rc, MPI_Bcast, "Sharing io_SynchronizationTimes");
+	MPI_Allreduce( StartingTimes, tmp_StartingTimes, total_mpits, MPI_LONG_LONG_INT, MPI_MAX, MPI_COMM_WORLD);
+	MPI_Allreduce( SynchronizationTimes, tmp_SynchronizationTimes, total_mpits, MPI_LONG_LONG_INT, MPI_MAX, MPI_COMM_WORLD);
 
 	*io_StartingTimes = tmp_StartingTimes;
 	*io_SynchronizationTimes = tmp_SynchronizationTimes;

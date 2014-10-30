@@ -91,6 +91,7 @@ typedef struct
 	unsigned long size;
 	unsigned int cpu, ptask, task, thread;
 	unsigned long long num_of_events;
+	unsigned mpit_id;
 
 	event_t *current;
 	event_t *next_cpu_burst;
