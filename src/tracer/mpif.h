@@ -549,6 +549,14 @@ void CtoF77 (pmpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset, MPI3_CON
 
 #if MPI_SUPPORTS_MPI_1SIDED
 
+void CtoF77(pmpi_win_create)(void *base, void *size, void *disp_unit, void *info, void *comm, void *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_start)(void *group, void *assert, void *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_free)(void *win, MPI_Fint *ierror);
+
 void CtoF77(pmpi_get) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror);

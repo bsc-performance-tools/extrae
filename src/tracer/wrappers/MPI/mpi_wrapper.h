@@ -298,6 +298,15 @@ void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset,
 
 #if MPI_SUPPORTS_MPI_1SIDED
 
+void MPI_Win_create_Fortran_Wrapper (void *base, void* size, void* disp_unit,
+	void* info, void* comm, void *win, void *ierror);
+
+void MPI_Win_fence_Fortran_Wrapper (MPI_Fint* assert, void* win, void *ierror);
+
+void MPI_Win_start_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, void *ierror);
+
+void MPI_Win_free_Fortran_Wrapper (void *win, MPI_Fint *ierror);
+
 void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror);
@@ -506,6 +515,15 @@ int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
 #endif /* MPI_SUPPORTS_MPI_IO */
 
 #if MPI_SUPPORTS_MPI_1SIDED
+
+int MPI_Win_create_C_Wrapper (void *base, MPI_Aint size, int disp_unit,
+	MPI_Info info, MPI_Comm comm, MPI_Win *win);
+
+int MPI_Win_fence_C_Wrapper (int assert, MPI_Win win);
+
+int MPI_Win_start_C_Wrapper (MPI_Group group, int assert, MPI_Win win);
+
+int MPI_Win_free_C_Wrapper (MPI_Win *win);
 
 int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
   int target_rank, MPI_Aint target_disp, int target_count,

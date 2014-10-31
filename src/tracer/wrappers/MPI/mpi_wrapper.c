@@ -188,16 +188,6 @@ static MPI_Fint grup_global_F;  /* Group attached to the MPI_COMM_WORLD (Fortran
 static int BGL_disable_barrier_inside = 0;
 #endif
 
-/* MPI Stats */
-static int P2P_Bytes_Sent        = 0;      /* Sent bytes by point to point MPI operations */
-static int P2P_Bytes_Recv        = 0;      /* Recv bytes by point to point MPI operations */
-static int GLOBAL_Bytes_Sent     = 0;      /* Sent "bytes" by MPI global operations */
-static int GLOBAL_Bytes_Recv     = 0;      /* Recv "bytes" by MPI global operations */
-static int P2P_Communications    = 0;      /* Number of point to point communications */
-static int GLOBAL_Communications = 0;      /* Number of global operations */
-static int MPI_Others_count      = 0;      /* Number of global operations */
-static int Elapsed_Time_In_MPI   = 0;      /* Time inside MPI calls */
-
 /******************************************************************************
  *** CheckGlobalOpsTracingIntervals()
  ******************************************************************************/
@@ -364,6 +354,7 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 	TRACE_MPIEVENT_NOHWC (temps, MPI_PERSIST_REQ_EV, p_request->tipus,
 	  src_world, size, p_request->tag, p_request->comm, p_request->req);
 
+#if 0
 	/* MPI Stats */
 	P2P_Communications ++;
 	if (p_request->tipus == MPI_IRECV_EV)
@@ -372,6 +363,7 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 	}
 	else if (p_request->tipus == MPI_ISEND_EV)
 		P2P_Bytes_Sent += size;
+#endif
 }
 
 
@@ -4538,6 +4530,51 @@ void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset, v
 
 #if MPI_SUPPORTS_MPI_1SIDED
 
+void MPI_Win_create_Fortran_Wrapper (void *base, void* size, void* disp_unit,
+	void* info, void* comm, void *win, void *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_create)(base, size, disp_unit, info, comm, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_CREATE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void MPI_Win_fence_Fortran_Wrapper (MPI_Fint* assert, void* win, void *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_FENCE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_fence)(assert, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_FENCE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void MPI_Win_start_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, void *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_START_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_start)(group, assert, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_START_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void MPI_Win_free_Fortran_Wrapper (void *win, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_free)(win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_FREE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
 void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror)
@@ -8039,6 +8076,55 @@ int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf,
 #endif /* MPI_SUPPORTS_MPI_IO */
 
 #if MPI_SUPPORTS_MPI_1SIDED
+
+int MPI_Win_create_C_Wrapper (void *base, MPI_Aint size, int disp_unit,
+	MPI_Info info, MPI_Comm comm, MPI_Win *win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_create (base, size, disp_unit, info, comm, win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_CREATE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
+int MPI_Win_fence_C_Wrapper (int assert, MPI_Win win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_FENCE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_fence (assert, win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_FENCE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
+int MPI_Win_start_C_Wrapper (MPI_Group group, int assert, MPI_Win win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_START_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_start (group, assert, win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_START_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
+int MPI_Win_free_C_Wrapper (MPI_Win *win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_free (win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_FREE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
 
 int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
   int target_rank, MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype,

@@ -26,6 +26,10 @@ $key = q/cha:Examples/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionCUDA/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/sec:EnvVars_in_XML/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -54,6 +58,10 @@ $key = q/subsec:Examples_DynInst_Intermediate_MPI/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:OPENCLinstrumentedroutines/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:Examples_static_link/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -71,6 +79,10 @@ $ref_files{$key} = "$dir".q|user-guide.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/tab:EnvironmentVariables_continued/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:JavaBindings/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -134,6 +146,10 @@ $key = q/tab:EnvironmentVariables/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionOPENCL/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/sec:XMLSectionMerge/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -166,6 +182,10 @@ $key = q/cha:InstrumentedRoutines/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionIO/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:RunningTraceNOTDynInst/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -187,6 +207,10 @@ $ref_files{$key} = "$dir".q|user-guide.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/cha:wholeXML/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionDynamicMemory/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -215,6 +239,10 @@ $ref_files{$key} = "$dir".q|user-guide.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/cha:EnvVar/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:CUDAinstrumentedroutines/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 

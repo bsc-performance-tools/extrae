@@ -73,6 +73,37 @@ int ComparaTraces (struct input_t *t1, struct input_t *t2)
 	}
 }
 
+int SortByObject (const void *t1, const void *t2)
+{
+	struct input_t *trace1 = (struct input_t*) t1;
+	struct input_t *trace2 = (struct input_t*) t2;
+
+	if (trace1->ptask > trace2->ptask)
+	{
+		return 1;
+	}
+	else if (trace1->ptask == trace2->ptask)
+	{
+		if (trace1->task > trace2->task)
+		{
+			return 1;
+		}
+		else if (trace1->task == trace2->task)
+		{
+			if (trace1->thread > trace2->thread)
+				return 1;
+			else if (trace1->thread == trace2->thread)
+				return 0;
+			else
+				return -1;
+		}
+		else
+			return -1;
+	}
+	else
+		return -1;
+}
+
 int SortByHost (const void *t1, const void *t2)
 {
 	struct input_t *trace1 = (struct input_t*) t1;
@@ -304,10 +335,11 @@ int GenerateROWfile (char *name, struct Pair_NodeCPU *info, int nfiles, struct i
 
 	if (!get_option_merge_NanosTaskView())
 	{
+		qsort (files, nfiles, sizeof(input_t), SortByObject);
 		fprintf (fd, "\nLEVEL THREAD SIZE %d\n", numCPUs);
 		for (i = 0; i < nfiles; i++)
 			fprintf (fd, "%s\n", files[i].threadname);
-		
+		qsort (files, nfiles, sizeof(input_t), SortByOrder);
 	}
 	else
 	{

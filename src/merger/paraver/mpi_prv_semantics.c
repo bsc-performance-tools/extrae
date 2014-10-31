@@ -88,6 +88,9 @@ static int Get_State (unsigned int EvType)
 		case MPI_FILE_WRITE_AT_ALL_EV:
 			state = STATE_IO;
 		break;
+		case MPI_WIN_CREATE_EV:
+		case MPI_WIN_FREE_EV:
+		case MPI_WIN_START_EV:
 		case MPI_REQUEST_FREE_EV:
 		case MPI_COMM_RANK_EV:
 		case MPI_COMM_SIZE_EV:
@@ -100,7 +103,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_CART_CREATE_EV:
 		case MPI_CART_SUB_EV:
 		case MPI_CANCEL_EV:
-        case MPI_REQUEST_GET_STATUS_EV:
+	        case MPI_REQUEST_GET_STATUS_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:
@@ -147,6 +150,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_SCAN_EV:
 			state = STATE_BCAST;
 		break;
+		case MPI_WIN_FENCE_EV:
 		case MPI_GET_EV:
 		case MPI_PUT_EV:
 			state = STATE_MEMORY_XFER;
@@ -1132,8 +1136,8 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_COMM_DUP_EV, Other_MPI_Event },
 	{ MPI_CART_CREATE_EV, Other_MPI_Event },
 	{ MPI_CART_SUB_EV, Other_MPI_Event },
-    { MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_SoftwareCounter_Event },
-    { MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, MPI_ElapsedTimeOutsideRequest_get_status_Event },
+	{ MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_SoftwareCounter_Event },
+	{ MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, MPI_ElapsedTimeOutsideRequest_get_status_Event },
 	{ MPI_IPROBE_COUNTER_EV, MPI_IProbeSoftwareCounter_Event },
 	{ MPI_TIME_OUTSIDE_IPROBES_EV, MPI_ElapsedTimeOutsideIProbes_Event },
 	{ MPI_TEST_COUNTER_EV, MPI_TestSoftwareCounter_Event },
@@ -1149,5 +1153,9 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_FILE_WRITE_AT_ALL_EV, Other_MPI_Event },
 	{ MPI_PUT_EV, MPI_RMA_Event},
 	{ MPI_GET_EV, MPI_RMA_Event},
+	{ MPI_WIN_CREATE_EV, MPI_RMA_Event},
+	{ MPI_WIN_FENCE_EV, MPI_RMA_Event},
+	{ MPI_WIN_START_EV, MPI_RMA_Event},
+	{ MPI_WIN_FREE_EV, MPI_RMA_Event},
 	{ NULL_EV, NULL }
 };

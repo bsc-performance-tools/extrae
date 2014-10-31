@@ -47,6 +47,7 @@ int ComparaTraces (struct input_t *t1, struct input_t *t2);
 int SortByHost (const void *t1, const void *t2);
 int SortByOrder (const void *t1, const void *t2);
 int SortBySize (const void *t1, const void *t2);
+int SortByObject (const void *t1, const void *t2);
 
 
 #endif

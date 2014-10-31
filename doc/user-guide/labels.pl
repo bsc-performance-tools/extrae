@@ -26,6 +26,10 @@ $key = q/cha:Examples/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionCUDA/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/sec:EnvVars_in_XML/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -54,6 +58,10 @@ $key = q/subsec:Examples_DynInst_Intermediate_MPI/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:OPENCLinstrumentedroutines/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:Examples_static_link/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -71,6 +79,10 @@ $external_labels{$key} = "$URL/" . q|user-guide.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/tab:EnvironmentVariables_continued/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:JavaBindings/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -134,6 +146,10 @@ $key = q/tab:EnvironmentVariables/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionOPENCL/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/sec:XMLSectionMerge/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -166,6 +182,10 @@ $key = q/cha:InstrumentedRoutines/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionIO/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:RunningTraceNOTDynInst/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -187,6 +207,10 @@ $external_labels{$key} = "$URL/" . q|user-guide.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/cha:wholeXML/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionDynamicMemory/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -215,6 +239,10 @@ $external_labels{$key} = "$URL/" . q|user-guide.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/cha:EnvVar/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:CUDAinstrumentedroutines/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -249,8 +277,12 @@ $key = q/cha:Examples/;
 $external_latex_labels{$key} = q|7|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionCUDA/;
+$external_latex_labels{$key} = q|4.16|; 
+$noresave{$key} = "$nosave";
+
 $key = q/sec:EnvVars_in_XML/;
-$external_latex_labels{$key} = q|4.17|; 
+$external_latex_labels{$key} = q|4.21|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:Examples_DynInst/;
@@ -277,6 +309,10 @@ $key = q/subsec:Examples_DynInst_Intermediate_MPI/;
 $external_latex_labels{$key} = q|7.1.2|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:OPENCLinstrumentedroutines/;
+$external_latex_labels{$key} = q|D.5|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:Examples_static_link/;
 $external_latex_labels{$key} = q|7.3.1|; 
 $noresave{$key} = "$nosave";
@@ -291,6 +327,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/subsec:Examples_CUDA/;
 $external_latex_labels{$key} = q|7.2.2|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:JavaBindings/;
+$external_latex_labels{$key} = q|5.4|; 
 $noresave{$key} = "$nosave";
 
 $key = q/tab:EnvironmentVariables_continued/;
@@ -353,12 +393,16 @@ $key = q/sec:XMLSectionTraceControl/;
 $external_latex_labels{$key} = q|4.12|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionOPENCL/;
+$external_latex_labels{$key} = q|4.17|; 
+$noresave{$key} = "$nosave";
+
 $key = q/tab:EnvironmentVariables/;
 $external_latex_labels{$key} = q|B.1|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:XMLSectionMerge/;
-$external_latex_labels{$key} = q|4.16|; 
+$external_latex_labels{$key} = q|4.20|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:XMLSectionTraceConfiguration/;
@@ -385,6 +429,10 @@ $key = q/sec:XMLSectionBursts/;
 $external_latex_labels{$key} = q|4.13|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLSectionIO/;
+$external_latex_labels{$key} = q|4.18|; 
+$noresave{$key} = "$nosave";
+
 $key = q/cha:InstrumentedRoutines/;
 $external_latex_labels{$key} = q|D|; 
 $noresave{$key} = "$nosave";
@@ -403,6 +451,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/cha:Introduction/;
 $external_latex_labels{$key} = q|2|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionDynamicMemory/;
+$external_latex_labels{$key} = q|4.19|; 
 $noresave{$key} = "$nosave";
 
 $key = q/tab:MergerDescription/;
@@ -439,6 +491,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/cha:EnvVar/;
 $external_latex_labels{$key} = q|B|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:CUDAinstrumentedroutines/;
+$external_latex_labels{$key} = q|D.4|; 
 $noresave{$key} = "$nosave";
 
 1;

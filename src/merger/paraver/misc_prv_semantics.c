@@ -831,7 +831,7 @@ static int HWC_Change_Ev (
 	   reports in hwctype[0] the counter group identifier */
 	for (i = 0; i < MAX_HWC+1; i++)
 	{
-		if (NO_COUNTER != hwctype[i])
+		if (NO_COUNTER != hwctype[i] && Sthread->HWCChange_count > 1)
 		{
 			int found = FALSE, k = 0;
 
@@ -840,7 +840,7 @@ static int HWC_Change_Ev (
 			 * right after the last valid emission of counters with the previous set, at the same timestamp.
 			 */
 
-			while ((!found) && (k < MAX_HWC))
+			while (!found && k < MAX_HWC)
 			{
 				if (hwctype[i] == prev_hwctype[k])
 					found = TRUE;
@@ -851,6 +851,10 @@ static int HWC_Change_Ev (
 			{
 				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
 			}
+		}
+		else if (NO_COUNTER != hwctype[i] && Sthread->HWCChange_count == 1)
+		{
+			trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], 0);
 		}
 	}
 	return 0;

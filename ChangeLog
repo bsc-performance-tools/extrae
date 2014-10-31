@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 31Oct2014 Added instrumentation for:
+               MPI_Win_create, MPI_Win_free, MPI_Win_start, MPI_Win_fence
+             Fix ordering in ROW file / objects in .prv
  * 30Oct2014 Fixed the DistributeWork routine to support dynamic threads per task.
              Fixed the Search_Synchronization_Point routine to support the different distribution methods (block, cyclic, size...)
              Upgraded to v3.0.3.
