@@ -310,6 +310,10 @@ enum {
 #define MPI_WIN_FENCE_EV             50000203
 #define MPI_WIN_START_EV             50000204
 #define MPI_WIN_FREE_EV              50000205
+#define MPI_WIN_POST_EV              50000206
+#define MPI_WIN_COMPLETE_EV          50000207
+#define MPI_WIN_WAIT_EV              50000208
+
 
 #define MPI_IPROBE_COUNTER_EV        50000300
 #define MPI_TIME_OUTSIDE_IPROBES_EV  50000301

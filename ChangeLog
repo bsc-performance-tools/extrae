@@ -2,6 +2,8 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 03Nov2014 Fix capturing >1k function names through binutils
+             Added instrumentation for:
+               MPI_Win_post, MPI_Win_complete, MPI_Win_wait
  + 31Oct2014 Added instrumentation for:
                MPI_Win_create, MPI_Win_free, MPI_Win_start, MPI_Win_fence
              Fix ordering in ROW file / objects in .prv

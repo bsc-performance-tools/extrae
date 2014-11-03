@@ -4564,12 +4564,45 @@ void MPI_Win_start_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, vo
 	updateStats_OTHER(global_mpi_stats);
 }
 
+void MPI_Win_post_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, void *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_POST_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_post)(group, assert, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_POST_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
 void MPI_Win_free_Fortran_Wrapper (void *win, MPI_Fint *ierror)
 {
 	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_FREE_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77 (pmpi_win_free)(win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_WIN_FREE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void MPI_Win_complete_Fortran_Wrapper (void *win, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_COMPLETE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_complete)(win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_COMPLETE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+void MPI_Win_wait_Fortran_Wrapper (void *win, MPI_Fint *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_wait)(win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_WAIT_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
@@ -8114,6 +8147,18 @@ int MPI_Win_start_C_Wrapper (MPI_Group group, int assert, MPI_Win win)
 	return res;
 }
 
+int MPI_Win_post_C_Wrapper (MPI_Group group, int assert, MPI_Win win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_POST_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_post (group, assert, win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_POST_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
 int MPI_Win_free_C_Wrapper (MPI_Win *win)
 {
 	int res;
@@ -8121,6 +8166,30 @@ int MPI_Win_free_C_Wrapper (MPI_Win *win)
 	  EMPTY, EMPTY, EMPTY);
 	res = PMPI_Win_free (win);
 	TRACE_MPIEVENT(TIME, MPI_WIN_FREE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
+int MPI_Win_complete_C_Wrapper (MPI_Win win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_COMPLETE_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_complete (win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_COMPLETE_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
+int MPI_Win_wait_C_Wrapper (MPI_Win win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_wait (win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_WAIT_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	updateStats_OTHER(global_mpi_stats);
 	return res;

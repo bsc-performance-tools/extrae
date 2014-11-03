@@ -557,9 +557,15 @@ void CtoF77(pmpi_win_start)(void *group, void *assert, void *win, MPI_Fint *ierr
 
 void CtoF77(pmpi_win_free)(void *win, MPI_Fint *ierror);
 
+void CtoF77(pmpi_win_post)(void *group, void *assert, void *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_complete)(void *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_wait)(void *win, MPI_Fint *ierror);
+
 void CtoF77(pmpi_get) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
-  MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
-	MPI_Fint* win, MPI_Fint* ierror);
+	MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count,
+	MPI_Fint*target_datatype, MPI_Fint* win, MPI_Fint* ierror);
 
 void CtoF77(pmpi_put) (MPI3_CONST void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,

@@ -305,7 +305,13 @@ void MPI_Win_fence_Fortran_Wrapper (MPI_Fint* assert, void* win, void *ierror);
 
 void MPI_Win_start_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, void *ierror);
 
+void MPI_Win_post_Fortran_Wrapper (void* group, MPI_Fint* assert, void *win, void *ierror);
+
 void MPI_Win_free_Fortran_Wrapper (void *win, MPI_Fint *ierror);
+
+void MPI_Win_complete_Fortran_Wrapper (void *win, MPI_Fint *ierror);
+
+void MPI_Win_wait_Fortran_Wrapper (void *win, MPI_Fint *ierror);
 
 void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
@@ -523,7 +529,13 @@ int MPI_Win_fence_C_Wrapper (int assert, MPI_Win win);
 
 int MPI_Win_start_C_Wrapper (MPI_Group group, int assert, MPI_Win win);
 
+int MPI_Win_post_C_Wrapper (MPI_Group group, int assert, MPI_Win win);
+
 int MPI_Win_free_C_Wrapper (MPI_Win *win);
+
+int MPI_Win_complete_C_Wrapper (MPI_Win win);
+
+int MPI_Win_wait_C_Wrapper (MPI_Win win);
 
 int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
   int target_rank, MPI_Aint target_disp, int target_count,

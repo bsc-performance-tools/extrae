@@ -24,14 +24,14 @@ endif
 # they should contain symbols for both languages.
 #
 
-lib_LTLIBRARIES = libseqtrace.la libextrae-core.la 
-if HAVE_MPI
-  lib_LTLIBRARIES += libextrae-mpi.la
-endif
-if WANT_OPENMP
-  lib_LTLIBRARIES += libextrae-openmp.la
-endif
-
+lib_LTLIBRARIES = libseqtrace.la 
+#lib_LTLIBRARIES = libseqtrace.la libextrae-core.la 
+#if HAVE_MPI
+#  lib_LTLIBRARIES += libextrae-mpi.la
+#endif
+#if WANT_OPENMP
+#  lib_LTLIBRARIES += libextrae-openmp.la
+#endif
 
 if WANT_TRT
   lib_LTLIBRARIES += libtrttrace.la
@@ -760,21 +760,21 @@ endif
 ###                               SEPARATE MODULES                                 ###
 ######################################################################################
 
-libextrae_core_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
-libextrae_core_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
-libextrae_core_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DSTANDALONE
-libextrae_core_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-
-libextrae_mpi_la_SOURCES = $(WRAPPERS_MPI) $(core_MPI_SRCS)
-libextrae_mpi_la_LIBADD  = $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libextrae_mpi_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DSTANDALONE
-if HAVE_ONLINE
-libextrae_mpi_la_LIBADD += $(ONLINE_DIR)/libonline.la
-libextrae_mpi_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
-endif
-libextrae_mpi_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
-
-libextrae_openmp_la_SOURCES = $(WRAPPERS_OMP) 
-libextrae_openmp_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS) -DOMP_SUPPORT -DSTANDALONE
-libextrae_openmp_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+#libextrae_core_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+#libextrae_core_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
+#libextrae_core_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DSTANDALONE
+#libextrae_core_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+#
+#libextrae_mpi_la_SOURCES = $(WRAPPERS_MPI) $(core_MPI_SRCS)
+#libextrae_mpi_la_LIBADD  = $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+#libextrae_mpi_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DSTANDALONE
+#if HAVE_ONLINE
+#libextrae_mpi_la_LIBADD += $(ONLINE_DIR)/libonline.la
+#libextrae_mpi_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
+#endif
+#libextrae_mpi_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
+#
+#libextrae_openmp_la_SOURCES = $(WRAPPERS_OMP) 
+#libextrae_openmp_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(EXTRA_OMP_CFLAGS) -DOMP_SUPPORT -DSTANDALONE
+#libextrae_openmp_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 

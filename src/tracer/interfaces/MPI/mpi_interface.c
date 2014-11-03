@@ -2640,6 +2640,66 @@ void NAME_ROUTINE_C2F(mpi_win_free)(void *win, MPI_Fint *ierror)
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_win_complete__,mpi_win_complete_,MPI_WIN_COMPLETE,mpi_win_complete,(void *win, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_win_complete)(void *win, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_win_complete)(void *win, MPI_Fint *ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		MPI_Win_complete_Fortran_Wrapper (win, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77(pmpi_win_complete)(win, ierror);
+}
+
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_win_wait__,mpi_win_wait_,MPI_WIN_WAIT,mpi_win_wait,(void *win, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_win_wait)(void *win, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_win_wait)(void *win, MPI_Fint *ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		MPI_Win_wait_Fortran_Wrapper (win, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77(pmpi_win_wait)(win, ierror);
+}
+
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_win_post__,mpi_win_post_,MPI_WIN_POST,mpi_win_post,(void *group, void *assert, void *win, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fint *ierror)
+#endif
+{
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		MPI_Win_post_Fortran_Wrapper (group, assert, win, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77(pmpi_win_post)(group, assert, win, ierror);
+}
+
+#if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_get__,mpi_get_,MPI_GET,mpi_get,(MPI_Fint *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_get)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
@@ -4737,6 +4797,7 @@ int MPI_Win_create (void *base, MPI_Aint size, int disp_unit, MPI_Info info,
 	}
 	else
 		res = PMPI_Win_create (base, size, disp_unit, info, comm, win);
+
 	return res;
 }
 
@@ -4753,6 +4814,7 @@ int MPI_Win_fence (int assert, MPI_Win win)
 	}
 	else
 		res = PMPI_Win_fence (assert, win);
+
 	return res;
 }
 
@@ -4769,6 +4831,7 @@ int MPI_Win_start (MPI_Group group, int assert, MPI_Win win)
 	}
 	else
 		res = PMPI_Win_start (group, assert, win);
+
 	return res;
 }
 
@@ -4785,6 +4848,58 @@ int MPI_Win_free (MPI_Win *win)
 	}
 	else
 		res = PMPI_Win_free (win);
+
+	return res;
+}
+
+int MPI_Win_complete (MPI_Win win)
+{
+	int res;
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Win_complete_C_Wrapper (win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Win_complete (win);
+
+	return res;
+}
+
+int MPI_Win_wait (MPI_Win win)
+{
+	int res;
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Win_wait_C_Wrapper (win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Win_wait (win);
+
+	return res;
+}
+
+int MPI_Win_post (MPI_Group group, int assert, MPI_Win win)
+{
+	int res;
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Win_post_C_Wrapper (group, assert, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Win_post (group, assert, win);
+
 	return res;
 }
 
