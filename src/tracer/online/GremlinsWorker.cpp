@@ -48,21 +48,24 @@ void GremlinsWorker::SetInitialConditions()
 {
   char *env_max_gremlins = getenv("N_CONTS");
 
-  MinGremlins      = 0;
-  MaxGremlins      = atoi((const char *)env_max_gremlins);
-  NumberOfGremlins = Online_GetGremlinsStartCount();
-  TargetGremlins   = (Online_GetGremlinsIncrement() > 0 ? MaxGremlins : MinGremlins );
-  Roundtrip        = (TargetGremlins > MinGremlins ? 1 : -1);
-
-  if (NumberOfGremlins > MaxGremlins)
+  if (env_max_gremlins != NULL)
   {
-    NumberOfGremlins = MaxGremlins;
+    MinGremlins      = 0;
+    MaxGremlins      = atoi((const char *)env_max_gremlins);
+    NumberOfGremlins = Online_GetGremlinsStartCount();
+    TargetGremlins   = (Online_GetGremlinsIncrement() > 0 ? MaxGremlins : MinGremlins );
+    Roundtrip        = (TargetGremlins > MinGremlins ? 1 : -1);
+
+    if (NumberOfGremlins > MaxGremlins)
+    {
+      NumberOfGremlins = MaxGremlins;
+    }
+
+    TRACE_ONLINE_EVENT(TIME, GREMLIN_EV, NumberOfGremlins);
+
+    fprintf(stderr, "GremlinsWorker:: StartingGremlins=%d\n", NumberOfGremlins);
+    SwitchSome( NumberOfGremlins );
   }
-
-  TRACE_ONLINE_EVENT(TIME, GREMLIN_EV, NumberOfGremlins);
-
-  fprintf(stderr, "GremlinsWorker:: StartingGremlins=%d\n", NumberOfGremlins);
-  SwitchSome( NumberOfGremlins );
 }
 
 void GremlinsWorker::Setup()
