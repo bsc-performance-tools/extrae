@@ -308,6 +308,7 @@ int BFDmanager_translateAddress (bfd *bfdImage, asymbol **bfdSymbols,
 #if defined(HAVE_BFD_DEMANGLE)
 			if (syminfo.function)
 				demangled = bfd_demangle (bfdImage, syminfo.function, 0);
+
 			if (demangled)
 				*function = demangled;
 			else

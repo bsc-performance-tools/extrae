@@ -569,10 +569,10 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	char **module, char ** funcname, char ** filename, int * line)
 {
 	binary_object_t *obj;
-	int found;
-	char *translated_function;
-	char *translated_filename;
-	int translated_line;
+	int found = FALSE;
+	char *translated_function = NULL;
+	char *translated_filename = NULL;
+	int translated_line = 0;
 
 	*funcname = ADDR_UNRESOLVED;
 	*filename = ADDR_UNRESOLVED;
@@ -600,14 +600,18 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 		   library. Substract base address and retry.
 		   If we found it, just ensure we don't get the module name for the main binary */
 		if (!found)
+		{
 			found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
 			  (void*) (address - obj->start_address), &translated_function,
 			  &translated_filename, &translated_line);
+		}
 	}
 	else
+	{
 		found = BFDmanager_translateAddress (BFDmanager_getDefaultImage(),
 		  BFDmanager_getDefaultSymbols(), (void*) address, &translated_function,
 		  &translated_filename, &translated_line);
+	}
 
 	if (!found) 
 	{
@@ -637,11 +641,12 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 				}
 				/* Add +1 in the translated_function name for additional \0 in C */
 				snprintf (buffer, MIN(count+1,sizeof(buffer)), "%s", ptr);
+				COPY_STRING(buffer, *funcname);
 			}
 			else
-				sprintf (buffer, "%s", translated_function);
-
-			COPY_STRING(buffer, *funcname);
+			{
+				COPY_STRING(translated_function, *funcname);
+			}
 		}
 		else
 			*funcname = ADDR_UNRESOLVED;
