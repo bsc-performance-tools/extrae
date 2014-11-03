@@ -215,6 +215,7 @@ AC_DEFUN([AX_PROG_MPI],
 # ---------------------
 AC_DEFUN([AX_CHECK_MPI3_VERSION],
 [
+   AC_MSG_CHECKING([if given MPI implementation supports MPI3 standard])
    AX_FLAGS_SAVE()
    CFLAGS="${CFLAGS} -I${MPI_INCLUDES}"
    AC_LANG_SAVE()
@@ -222,7 +223,7 @@ AC_DEFUN([AX_CHECK_MPI3_VERSION],
    AC_TRY_COMPILE(
       [#include <mpi.h>],
       [
-         #if MPI_VERSION == 3
+         #if MPI_VERSION >= 3
             return 1;
          #else
              #error "MPI version different to 3"
