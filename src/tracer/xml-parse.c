@@ -619,7 +619,7 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			tracejant_hwc_omp = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, PACKAGE_NAME": OpenMP routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT");
+			mfprintf (stdout, PACKAGE_NAME": OpenMP routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT ");
 #else
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <OpenMP> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
 			tracejant_hwc_omp = FALSE;

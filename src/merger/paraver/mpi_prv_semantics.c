@@ -1157,5 +1157,8 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_WIN_FENCE_EV, MPI_RMA_Event},
 	{ MPI_WIN_START_EV, MPI_RMA_Event},
 	{ MPI_WIN_FREE_EV, MPI_RMA_Event},
+	{ MPI_WIN_POST_EV, MPI_RMA_Event},
+	{ MPI_WIN_COMPLETE_EV, MPI_RMA_Event},
+	{ MPI_WIN_WAIT_EV, MPI_RMA_Event},
 	{ NULL_EV, NULL }
 };
