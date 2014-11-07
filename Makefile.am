@@ -26,10 +26,27 @@ dist-hook:
 #
 # Create EXAMPLE directory and copy there the example
 #
-
+MPI_EXAMPLE_FILES=/dev/null
+MPICUDA_EXAMPLE_FILES=/dev/null
+OMP_EXAMPLE_FILES=/dev/null
+MPIOMP_EXAMPLE_FILES=/dev/null
+SEQ_EXAMPLE_FILES=/dev/null
+ONLINE_EXAMPLE_FILES=/dev/null
+PYTHON_EXAMPLE_FILES=/dev/null
+PTHREAD_EXAMPLE_FILES=/dev/null
+PACX_EXAMPLE_FILES=/dev/null
+CUDA_EXAMPLE_FILES=/dev/null
+OPENCL_EXAMPLE_FILES=/dev/null
+MPIOPENCL_EXAMPLE_FILES=/dev/null
+OMPSS_EXAMPLE_FILES=/dev/null
+MPIOMPSS_EXAMPLE_FILES=/dev/null
+JAVA_EXAMPLE_FILES=/dev/null
+FORK_EXAMPLE_FILES=/dev/null
+UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 if IS_CELL_MACHINE
-SEQ_EXAMPLE_FILES=example/CELL/SEQ/worker.c \
+SEQ_EXAMPLE_FILES+=\
+ example/CELL/SEQ/worker.c \
  example/CELL/SEQ/run.sh \
  example/CELL/SEQ/merge.sh \
  example/CELL/SEQ/master.c \
@@ -40,7 +57,8 @@ SEQ_EXAMPLE_FILES=example/CELL/SEQ/worker.c \
  example/CELL/SEQ/README \
  example/CELL/SEQ/Makefile
 
-MPI_EXAMPLE_FILES=example/CELL/MPI/worker.c \
+MPI_EXAMPLE_FILES+=\
+ example/CELL/MPI/worker.c \
  example/CELL/MPI/run.sh \
  example/CELL/MPI/merge.sh \
  example/CELL/MPI/master.c \
@@ -52,7 +70,7 @@ MPI_EXAMPLE_FILES=example/CELL/MPI/worker.c \
  example/CELL/MPI/trace-xml.sh \
  example/CELL/MPI/Makefile
 
-OMPSS_EXAMPLE_FILES=\
+OMPSS_EXAMPLE_FILES+=\
  example/LINUX/OMPSS/extrae.xml \
  example/LINUX/OMPSS/heat.h \
  example/LINUX/OMPSS/heat-ompss.c \
@@ -63,7 +81,7 @@ OMPSS_EXAMPLE_FILES=\
  example/LINUX/OMPSS/job.lsf \
  example/LINUX/OMPSS/test.dat
 
-MPIOMPSS_EXAMPLE_FILES=\
+MPIOMPSS_EXAMPLE_FILES+=\
  example/LINUX/MPI+OMPSS/extrae.xml \
  example/LINUX/MPI+OMPSS/heat.h \
  example/LINUX/MPI+OMPSS/heat-mpi-ompss.c \
@@ -73,17 +91,12 @@ MPIOMPSS_EXAMPLE_FILES=\
  example/LINUX/MPI+OMPSS/trace.sh \
  example/LINUX/MPI+OMPSS/job.lsf \
  example/LINUX/MPI+OMPSS/test.dat
+endif
 
-PTHREAD_EXAMPLE_FILES=/dev/null
-OMP_EXAMPLE_FILES=/dev/null
-PACX_EXAMPLE_FILES=/dev/null
-ONLINE_EXAMPLE_FILES=/dev/null
-FORK_EXAMPLE_FILES=/dev/null
-PYTHON_EXAMPLE_FILES=/dev/null
-else
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
-MPI_EXAMPLE_FILES= example/BGL/mpi_ping.f \
+MPI_EXAMPLE_FILES+=\
+ example/BGL/mpi_ping.f \
  example/BGL/Makefile \
  example/BGL/ll_merge.sh \
  example/BGL/ll_trace.sh \
@@ -91,7 +104,8 @@ MPI_EXAMPLE_FILES= example/BGL/mpi_ping.f \
  example/BGL/papi_native_bgl_counters.txt
 endif
 if IS_BGP_MACHINE
-MPI_EXAMPLE_FILES= example/BGP/ll_merge.sh \
+MPI_EXAMPLE_FILES+=\
+ example/BGP/ll_merge.sh \
  example/BGP/ll_parmerge.sh \
  example/BGP/Makefile \
  example/BGP/ll_papi.sh \
@@ -101,25 +115,20 @@ MPI_EXAMPLE_FILES= example/BGP/ll_merge.sh \
  example/BGP/papi_bgp_native_avail.txt
 endif
 if IS_BGQ_MACHINE
-MPI_EXAMPLE_FILES= example/BGQ/ll_merge.sh \
+MPI_EXAMPLE_FILES+=\
+ example/BGQ/ll_merge.sh \
  example/BGQ/ll_parmerge.sh \
  example/BGQ/ll_trace.sh \
  example/BGQ/Makefile example/BGQ/mpi_ping.f \
  example/BGQ/papi_bgq_avail.txt \
  example/BGQ/papi_bgq_native_avail.txt \
  example/BGQ/extrae.xml
-
-PTHREAD_EXAMPLE_FILES=/dev/null
-OMP_EXAMPLE_FILES=/dev/null
-SEQ_EXAMPLE_FILES=/dev/null
-PACX_EXAMPLE_FILES=/dev/null
-ONLINE_EXAMPLE_FILES=/dev/null
-FORK_EXAMPLE_FILES=/dev/null
-PYTHON_EXAMPLE_FILES=/dev/null
 endif
-else
+endif
+
 if OS_AIX
-MPI_EXAMPLE_FILES=example/AIX/Makefile \
+MPI_EXAMPLE_FILES+=\
+ example/AIX/Makefile \
  example/AIX/merge.sh \
  example/AIX/script.ll \
  example/AIX/mpi_ping.f \
@@ -127,19 +136,10 @@ MPI_EXAMPLE_FILES=example/AIX/Makefile \
  example/AIX/extrae.xml \
  example/AIX/detailed_trace_basic.xml \
  example/AIX/summarized_trace_basic.xml
-
-PTHREAD_EXAMPLE_FILES=/dev/null
-OMP_EXAMPLE_FILES=/dev/null
-SEQ_EXAMPLE_FILES=/dev/null
-PACX_EXAMPLE_FILES=/dev/null
-ONLINE_EXAMPLE_FILES=/dev/null
-FORK_EXAMPLE_FILES=/dev/null
-PYTHON_EXAMPLE_FILES=/dev/null
-else
+endif
 
 if OS_FREEBSD
-
-MPI_EXAMPLE_FILES=\
+MPI_EXAMPLE_FILES+=\
  example/FREEBSD/MPI/detailed_trace_basic.xml \
  example/FREEBSD/MPI/summarized_trace_basic.xml \
  example/FREEBSD/MPI/static/slurm_parallel_merge.sh \
@@ -160,7 +160,7 @@ MPI_EXAMPLE_FILES=\
  example/FREEBSD/MPI/ld-preload/trace.sh \
  example/FREEBSD/MPI/ld-preload/slurm_trace.sh 
 
-OMP_EXAMPLE_FILES=\
+OMP_EXAMPLE_FILES+=\
  example/FREEBSD/OMP/pi.c \
  example/FREEBSD/OMP/pi_instrumented.c \
  example/FREEBSD/OMP/README \
@@ -170,7 +170,7 @@ OMP_EXAMPLE_FILES=\
  example/FREEBSD/OMP/run_dyninst.sh \
  example/FREEBSD/OMP/merge.sh
 
-SEQ_EXAMPLE_FILES=\
+SEQ_EXAMPLE_FILES+=\
  example/FREEBSD/SEQ/pi.c \
  example/FREEBSD/SEQ/pi_instrumented.c \
  example/FREEBSD/SEQ/pi_instrumented.f90 \
@@ -182,20 +182,16 @@ SEQ_EXAMPLE_FILES=\
  example/FREEBSD/SEQ/function-list \
  example/FREEBSD/SEQ/run_dyninst.sh
 
-PTHREAD_EXAMPLE_FILES=\
+PTHREAD_EXAMPLE_FILES+=\
  example/FREEBSD/PTHREAD/pthread-example.c \
  example/FREEBSD/PTHREAD/README \
  example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/extrae.xml \
  example/FREEBSD/PTHREAD/user-comms.c
-
-FORK_EXAMPLE_FILES=/dev/null
-
-else
+endif
 
 if OS_DARWIN
-
-MPI_EXAMPLE_FILES=\
+MPI_EXAMPLE_FILES+=\
  example/FREEBSD/MPI/detailed_trace_basic.xml \
  example/FREEBSD/MPI/summarized_trace_basic.xml \
  example/FREEBSD/MPI/static/slurm_parallel_merge.sh \
@@ -216,7 +212,7 @@ MPI_EXAMPLE_FILES=\
  example/FREEBSD/MPI/ld-preload/trace.sh \
  example/FREEBSD/MPI/ld-preload/slurm_trace.sh 
 
-OMP_EXAMPLE_FILES=\
+OMP_EXAMPLE_FILES+=\
  example/FREEBSD/OMP/pi.c \
  example/FREEBSD/OMP/pi_instrumented.c \
  example/FREEBSD/OMP/README \
@@ -226,7 +222,7 @@ OMP_EXAMPLE_FILES=\
  example/FREEBSD/OMP/run_dyninst.sh \
  example/FREEBSD/OMP/merge.sh
 
-SEQ_EXAMPLE_FILES=\
+SEQ_EXAMPLE_FILES+=\
  example/FREEBSD/SEQ/pi.c \
  example/FREEBSD/SEQ/pi_instrumented.c \
  example/FREEBSD/SEQ/README \
@@ -236,30 +232,28 @@ SEQ_EXAMPLE_FILES=\
  example/FREEBSD/SEQ/function-list \
  example/FREEBSD/SEQ/run_dyninst.sh
 
-PTHREAD_EXAMPLE_FILES=\
+PTHREAD_EXAMPLE_FILES+=\
  example/FREEBSD/PTHREAD/pthread-example.c \
  example/FREEBSD/PTHREAD/README \
  example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/extrae.xml \
  example/FREEBSD/PTHREAD/user-comms.c
 
-FORK_EXAMPLE_FILES=/dev/null
-
-OPENCL_EXAMPLE_FILES=\
+OPENCL_EXAMPLE_FILES+=\
  example/LINUX/OPENCL/README \
  example/LINUX/OPENCL/C++ \
  example/LINUX/OPENCL/C
 
-MPIOPENCL_EXAMPLE_FILES=\
+MPIOPENCL_EXAMPLE_FILES+=\
  example/LINUX/MPI+OPENCL/extrae.xml \
  example/LINUX/MPI+OPENCL/Makefile \
  example/LINUX/MPI+OPENCL/trace.sh \
  example/LINUX/MPI+OPENCL/README \
  example/LINUX/MPI+OPENCL/mpi-vadd.c
+endif
 
-else 
-
-MPI_EXAMPLE_FILES=\
+if OS_LINUX
+MPI_EXAMPLE_FILES+=\
  example/LINUX/MPI/README \
  example/LINUX/MPI/extrae.xml \
  example/LINUX/MPI/detailed_trace_basic.xml \
@@ -269,12 +263,12 @@ MPI_EXAMPLE_FILES=\
  example/LINUX/MPI/ld-preload \
  example/LINUX/MPI/dyninst
 
-MPICUDA_EXAMPLE_FILES=\
+MPICUDA_EXAMPLE_FILES+=\
  example/LINUX/MPI+CUDA/ld-preload \
  example/LINUX/MPI+CUDA/dyninst \
  example/LINUX/MPI+CUDA/extrae.xml
 
-OMP_EXAMPLE_FILES=\
+OMP_EXAMPLE_FILES+=\
  example/LINUX/OMP/extrae.xml \
  example/LINUX/OMP/README \
  example/LINUX/OMP/Makefile \
@@ -284,12 +278,12 @@ OMP_EXAMPLE_FILES=\
  example/LINUX/OMP/run_ldpreload.sh \
  example/LINUX/OMP/run_instrumented.sh
 
-MPIOMP_EXAMPLE_FILES=\
+MPIOMP_EXAMPLE_FILES+=\
  example/LINUX/MPI+OMP/extrae.xml \
  example/LINUX/MPI+OMP/README \
  example/LINUX/MPI+OMP/ld-preload
 
-SEQ_EXAMPLE_FILES=\
+SEQ_EXAMPLE_FILES+=\
  example/LINUX/SEQ/extrae.xml \
  example/LINUX/SEQ/function-list \
  example/LINUX/SEQ/Makefile \
@@ -301,7 +295,7 @@ SEQ_EXAMPLE_FILES=\
  example/LINUX/SEQ/run_instrumentedf.sh \
  example/LINUX/SEQ/README
 
-ONLINE_EXAMPLE_FILES=\
+ONLINE_EXAMPLE_FILES+=\
  example/LINUX/ONLINE/Makefile \
  example/LINUX/ONLINE/ping.c \
  example/LINUX/ONLINE/extrae_online.xml \
@@ -313,24 +307,24 @@ ONLINE_EXAMPLE_FILES=\
  example/LINUX/ONLINE/merge_parallel_mt.sh \
  example/LINUX/ONLINE/README
 
-PYTHON_EXAMPLE_FILES=\
+PYTHON_EXAMPLE_FILES+=\
  example/LINUX/PYTHON/test.py \
  example/LINUX/PYTHON/extrae.xml \
  example/LINUX/PYTHON/function-list \
  example/LINUX/PYTHON/run.sh 
 
-PTHREAD_EXAMPLE_FILES=\
+PTHREAD_EXAMPLE_FILES+=\
  example/LINUX/PTHREAD/Makefile \
  example/LINUX/PTHREAD/pthread-example.c \
  example/LINUX/PTHREAD/user-comms.c \
  example/LINUX/PTHREAD/extrae.xml \
  example/LINUX/PTHREAD/README
 
-PACX_EXAMPLE_FILES=\
+PACX_EXAMPLE_FILES+=\
  example/LINUX/PACX/example.c \
  example/LINUX/PACX/Makefile
 
-CUDA_EXAMPLE_FILES=\
+CUDA_EXAMPLE_FILES+=\
  example/LINUX/CUDA/extrae.xml \
  example/LINUX/CUDA/hello.cu \
  example/LINUX/CUDA/hello_instrumented.cu \
@@ -340,19 +334,19 @@ CUDA_EXAMPLE_FILES=\
  example/LINUX/CUDA/run_dyninst.sh \
  example/LINUX/CUDA/run_instrumented.sh
 
-OPENCL_EXAMPLE_FILES=\
+OPENCL_EXAMPLE_FILES+=\
  example/LINUX/OPENCL/README \
  example/LINUX/OPENCL/C++ \
  example/LINUX/OPENCL/C
 
-MPIOPENCL_EXAMPLE_FILES=\
+MPIOPENCL_EXAMPLE_FILES+=\
  example/LINUX/MPI+OPENCL/extrae.xml \
  example/LINUX/MPI+OPENCL/Makefile \
  example/LINUX/MPI+OPENCL/trace.sh \
  example/LINUX/MPI+OPENCL/README \
  example/LINUX/MPI+OPENCL/mpi-vadd.c
 
-OMPSS_EXAMPLE_FILES=\
+OMPSS_EXAMPLE_FILES+=\
  example/LINUX/OMPSS/extrae.xml \
  example/LINUX/OMPSS/heat.h \
  example/LINUX/OMPSS/heat-ompss.c \
@@ -363,7 +357,7 @@ OMPSS_EXAMPLE_FILES=\
  example/LINUX/OMPSS/job.lsf \
  example/LINUX/OMPSS/test.dat
 
-MPIOMPSS_EXAMPLE_FILES=\
+MPIOMPSS_EXAMPLE_FILES+=\
  example/LINUX/MPI+OMPSS/extrae.xml \
  example/LINUX/MPI+OMPSS/heat.h \
  example/LINUX/MPI+OMPSS/heat-mpi-ompss.c \
@@ -374,27 +368,20 @@ MPIOMPSS_EXAMPLE_FILES=\
  example/LINUX/MPI+OMPSS/job.lsf \
  example/LINUX/MPI+OMPSS/test.dat
 
-JAVA_EXAMPLE_FILES=\
+JAVA_EXAMPLE_FILES+=\
  example/LINUX/JAVA/extrae.xml \
  example/LINUX/JAVA/Makefile \
  example/LINUX/JAVA/pi.java
 
-FORK_EXAMPLE_FILES=\
+FORK_EXAMPLE_FILES+=\
  example/LINUX/FORK/extrae.xml \
  example/LINUX/FORK/function-list \
  example/LINUX/FORK/Makefile \
  example/LINUX/FORK/pi_forked.c \
  example/LINUX/FORK/README \
  example/LINUX/FORK/run_dyninst.sh 
-
-endif
 endif
 
-endif
-endif
-endif
-
-UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 install-data-hook:
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example
