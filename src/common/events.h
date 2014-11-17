@@ -30,6 +30,8 @@
 #ifndef __EVENTS_H_INCLUDED__
 #define __EVENTS_H_INCLUDED__
 
+#include "openshmem_events.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

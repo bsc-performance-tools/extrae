@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 17Nov2014 Fixed time synchronization and running states in shmem traces 
  + 14Nov2014 Added 'wrapgen' script to generate lists of wrappers/probes automatically
  * 03Nov2014 Fix capturing >1k function names through binutils
              Added instrumentation for:

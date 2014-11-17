@@ -31,7 +31,6 @@
 #define __OPENSHMEM_EVENTS_H__
 
 #include "common.h"
-#include "events.h"
 
 #define OPENSHMEM_EVENT_TYPE 52000000
 

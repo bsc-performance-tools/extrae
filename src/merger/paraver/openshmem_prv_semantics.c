@@ -76,7 +76,7 @@ static int Other_OPENSHMEM_Event (event_t * current_event,
 	else
 	  EvValue = 0;
 
-        Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
+        Switch_State (Get_State(EvType), (EvValue != EVT_END), ptask, task, thread);
 
         trace_paraver_state (cpu, ptask, task, thread, current_time);
         trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);

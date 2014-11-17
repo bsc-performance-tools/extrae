@@ -1310,11 +1310,11 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 			{
 				FileItem_t *fi = &(fset->files[i]);
 
-				UINT64 mpi_init_end_time, pacx_init_end_time, trace_init_end_time;
-				int found_mpi_init_end_time, found_pacx_init_end_time, found_trace_init_end_time;
+				UINT64 mpi_init_end_time, pacx_init_end_time, trace_init_end_time, shmem_init_end_time;
+				int found_mpi_init_end_time, found_pacx_init_end_time, found_trace_init_end_time, found_shmem_init_end_time;
 
-				found_mpi_init_end_time = found_pacx_init_end_time = found_trace_init_end_time = FALSE;
-				mpi_init_end_time = pacx_init_end_time = trace_init_end_time = 0;
+				found_mpi_init_end_time = found_pacx_init_end_time = found_trace_init_end_time = found_shmem_init_end_time = FALSE;
+				mpi_init_end_time = pacx_init_end_time = trace_init_end_time = shmem_init_end_time = 0;
 
 				/* Save the starting tracing time of this task */
 				StartingTimes[fi->mpit_id] = current->time;
@@ -1339,6 +1339,11 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 						trace_init_end_time = Get_EvTime(current);
 						found_trace_init_end_time = TRUE;
 					}
+					else if ((Get_EvEvent(current) == OPENSHMEM_TYPE) && (Get_EvValue(current) == START_PES_EV) && (Get_EvMiscParam(current) == EVT_END))
+					{
+						shmem_init_end_time = Get_EvTime(current);
+						found_shmem_init_end_time = TRUE;
+					}
 					StepOne_FS (&(fset->files[i]));
 					current = Current_FS (&(fset->files[i]));
 				}
@@ -1349,6 +1354,8 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 					SynchronizationTimes[fi->mpit_id] = pacx_init_end_time;
 				else if (found_trace_init_end_time)
 					SynchronizationTimes[fi->mpit_id] = trace_init_end_time;
+				else if (found_shmem_init_end_time)
+					SynchronizationTimes[fi->mpit_id] = shmem_init_end_time;
 			}
 		}
 	}

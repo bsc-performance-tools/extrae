@@ -14,7 +14,7 @@
     evt.time = (evttime);                                                     \
     evt.event = (OPENSHMEM_TYPE);                                             \
     evt.value = (evttype);                                                    \
-    evt.param.omp_param.param = (evtvalue);                                   \
+    evt.param.misc_param.param = (evtvalue);                                  \
     HARDWARE_COUNTERS_READ(thread_id, evt, 1);                                \
     BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                 \
   }                                                                           \
@@ -38,7 +38,7 @@
     evt.time = (evttime);                                                     \
     evt.event = (OPENSHMEM_TYPE);                                             \
     evt.value = (evttype);                                                    \
-    evt.param.omp_param.param = (evtvalue);                                   \
+    evt.param.misc_param.param = (evtvalue);                                  \
     HARDWARE_COUNTERS_READ(thread_id, evt, 0);                                \
     BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                 \
   }                                                                           \
