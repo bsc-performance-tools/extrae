@@ -12,6 +12,24 @@ AC_DEFUN([AX_PROG_OPENSHMEM],
       [openshmem_paths=${withval}],
       [openshmem_paths="no"]
    )
+
+   AC_ARG_WITH(openshmem-deps-libsdir,
+      AC_HELP_STRING(
+         [--with-openshmem-deps-libsdir<:@=DIR@:>@],
+         [specify the directories where dependant libs are installed (e.g. -L/path/to/GASNet/lib)] 
+      ),
+      [openshmem_deps_libsdir=${withval}],
+      [openshmem_deps_libsdir=""]
+   )
+
+   AC_ARG_WITH(openshmem-deps-libs,
+      AC_HELP_STRING(
+         [--with-openshmem-deps-libs<:@=LIBS@:>@],
+         [specify OpenSHMEM dependant libraries (e.g. "-lgasnet-mpi-par -lammpi")] 
+      ),
+      [openshmem_deps_libs=${withval}],
+      [openshmem_deps_libs=""]
+   )
    
    if test "$openshmem_paths" != "no" ; then
       dnl Search for OpenSHMEM installation
@@ -20,7 +38,7 @@ AC_DEFUN([AX_PROG_OPENSHMEM],
       if test "${OPENSHMEM_INSTALLED}" = "yes" ; then
 
          OPENSHMEM_CFLAGS="-I$OPENSHMEM_INCLUDES"
-         OPENSHMEM_LDFLAGS="-L$OPENSHMEM_LIBSDIR -lopenshmem -L/home/gllort/Apps/GASNet/1.22.4/lib -lgasnet-mpi-par -lammpi"
+         OPENSHMEM_LDFLAGS="-L$OPENSHMEM_LIBSDIR -lopenshmem ${openshmem_deps_libsdir} ${openshmem_deps_libs}"
          CFLAGS="$OPENSHMEM_CFLAGS $CFLAGS"
          LDFLAGS="$OPENSHMEM_LDFLAGS $LDFLAGS"
          LIBOPENSHMEM="-lopenshmem"
