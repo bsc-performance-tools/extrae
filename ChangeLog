@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 18Nov2014 Fixed bug in *Distribute_XML routines that caused sporadic crashes
  * 17Nov2014 Fixed time synchronization and running states in shmem traces 
              Added configure parameters to specify the OpenSHMEM dependencies
 	     --with-openshmem-deps-libsdir and --with-openshmem-deps-libs

@@ -8689,13 +8689,14 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen)
 		/* Build the temporal file pattern */
 		if (getenv("TMPDIR"))
 		{
+                        int len = 14 + strlen(getenv("TMPDIR")) + 1;
 			/* If TMPDIR exists but points to non-existent directory, create it */
 			if (!directory_exists (getenv("TMPDIR")))
 				mkdir_recursive (getenv("TMPDIR"));
 
 			/* 14 is the length from /XMLFileXXXXXX */
-			result_file = (char*) malloc (14+strlen(getenv("TMPDIR")+1)*sizeof(char));
-			sprintf (result_file, "%s/XMLFileXXXXXX", getenv ("TMPDIR"));
+			result_file = (char*) malloc (len * sizeof(char));
+			snprintf (result_file, len, "%s/XMLFileXXXXXX", getenv ("TMPDIR"));
 		}
 		else
 		{
