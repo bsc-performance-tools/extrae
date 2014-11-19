@@ -5,19 +5,27 @@
 
 #if USE_HARDWARE_COUNTERS
 
+#define TRACE_OPENSHMEM_CALLERS(evttime, evtvalue)           \
+{                                                            \
+  if ( evtvalue == EVT_BEGIN )                               \
+  {                                                          \
+    trace_callers (evttime, FOUR_CALLS_AGO, CALLER_MPI);     \
+  }                                                          \
+}
+
 #define TRACE_OPENSHMEM_EVENT_AND_COUNTERS(evttime,evttype,evtvalue,evtsize) \
 {                                                                            \
   int thread_id = THREADID;                                                  \
   event_t evt;                                                               \
   if (tracejant)                                                             \
   {                                                                          \
-    fprintf(stderr, "[DEBUG] type=%d val=%d\n", evttype, evtvalue); \
     evt.time = (evttime);                                                    \
     evt.event = (evttype);                                                   \
     evt.value = (evtvalue);                                                  \
     evt.param.mpi_param.size = (evtsize);                                    \
     HARDWARE_COUNTERS_READ(thread_id, evt, 1);                               \
     BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                \
+    TRACE_OPENSHMEM_CALLERS(evttime, evtvalue);                              \
   }                                                                          \
 }
 
@@ -36,13 +44,13 @@
   event_t evt;                                                               \
   if (tracejant)                                                             \
   {                                                                          \
-    fprintf(stderr, "[DEBUG] type=%d val=%d\n", evttype, evtvalue); \
     evt.time = (evttime);                                                    \
     evt.event = (evttype);                                                   \
     evt.value = (evtvalue);                                                  \
     evt.param.mpi_param.size = (evtsize);                                    \
     HARDWARE_COUNTERS_READ(thread_id, evt, 0);                               \
     BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                \
+    TRACE_OPENSHMEM_CALLERS(evttime, evtvalue);                              \
   }                                                                          \
 }
 

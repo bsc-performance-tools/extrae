@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  + 19Nov2014 Recorded events for bytes sent/received via SHMEM calls
              Added new states for SHMEM operations
+	     Now emmitting callers at the entry of SHMEM calls
  * 18Nov2014 Fixed bug in *Distribute_XML routines that caused sporadic crashes
  * 17Nov2014 Fixed time synchronization and running states in shmem traces 
              Added configure parameters to specify the OpenSHMEM dependencies
