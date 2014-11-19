@@ -238,10 +238,26 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define STATE19_LBL          "On-line analysis"
 #define STATE19_COLOR        {169, 0, 0}
 
+#define STATE_20             20
+#define STATE20_LBL          "Remote memory access"
+#define STATE20_COLOR        {   0, 109, 255 }
+
+#define STATE_21             21
+#define STATE21_LBL          "Atomic memory operation"
+#define STATE21_COLOR        { 200,  61,  68 }
+
+#define STATE_22             22
+#define STATE22_LBL          "Memory ordering operation"
+#define STATE22_COLOR        { 200,  66,   0 }
+
+#define STATE_23             23
+#define STATE23_LBL          "Distributed locking"
+#define STATE23_COLOR        {   0,  41,   0 }
+
 #define STATES_LBL           "STATES"
 #define STATES_COLOR_LBL     "STATES_COLOR"
 
-#define STATES_NUMBER        20
+#define STATES_NUMBER        24
 extern struct color_t states_inf[STATES_NUMBER];
 
 /******************************************************************************

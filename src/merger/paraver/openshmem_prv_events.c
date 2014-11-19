@@ -58,7 +58,7 @@ void WriteEnabled_OPENSHMEM_Operations (FILE * fd)
         if (OPENSHMEM_Present)
         {
                 fprintf (fd, "EVENT_TYPE\n");
-                fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_EVENT_TYPE, "OpenSHMEM calls");
+                fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_BASE_EVENT, "OpenSHMEM calls");
                 fprintf (fd, "VALUES\n");
                 fprintf (fd, "0 Outside OpenSHMEM\n");
 
@@ -66,5 +66,12 @@ void WriteEnabled_OPENSHMEM_Operations (FILE * fd)
                                 fprintf (fd, "%d %s\n", u+1, GetOPENSHMEMLabel( u ));
                 LET_SPACES(fd);
         }
+	fprintf(fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_SENDBYTES_EV, "OpenSHMEM outgoing bytes");
+	LET_SPACES(fd);
+
+	fprintf(fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_RECVBYTES_EV, "OpenSHMEM incoming bytes");
+	LET_SPACES(fd);
 }
 

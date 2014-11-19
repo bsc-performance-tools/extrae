@@ -698,6 +698,14 @@ enum {
 #define STATE_MEMORY_XFER        17
 #define STATE_PROFILING          18
 #define STATE_ONLINE_ANALYSIS    19
+/* Added for SHMEM */
+#define STATE_REMOTE_MEM_ACCESS  20
+#define STATE_ATOMIC_MEM_OP      21
+#define STATE_MEM_ORDERING       22
+#define STATE_LOCKING            23
+
+
+
 
 #if defined(DEAD_CODE)
 /* ==========================================================================

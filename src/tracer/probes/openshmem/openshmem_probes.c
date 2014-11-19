@@ -34,6 +34,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "openshmem_events.h"
 #include "openshmem_probes.h"
 #include "openshmem_trace_macros.h"
+#include "taskid.h"
 #include "wrapper.h"
 
 void PROBE_start_pes_ENTRY (int npes)
@@ -257,7 +258,7 @@ void PROBE_shmem_double_put_ENTRY (double *target, const double *source, size_t 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_PUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_PUT_EV, EVT_BEGIN, (len * sizeof(double)));
   }
 }
 
@@ -275,7 +276,7 @@ void PROBE_shmem_float_put_ENTRY (float *target, const float *source, size_t len
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_PUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_PUT_EV, EVT_BEGIN, (len * sizeof(float)));
   }
 }
 
@@ -293,7 +294,7 @@ void PROBE_shmem_int_put_ENTRY (int *target, const int *source, size_t len, int 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_PUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_PUT_EV, EVT_BEGIN, (len * sizeof(int)));
   }
 }
 
@@ -311,7 +312,7 @@ void PROBE_shmem_long_put_ENTRY (long *target, const long *source, size_t len, i
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_PUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_PUT_EV, EVT_BEGIN, (len * sizeof(long)));
   }
 }
 
@@ -324,12 +325,12 @@ void PROBE_shmem_long_put_EXIT (void)
   }
 }
 
-void PROBE_shmem_longdouble_put_ENTRY (long double *target, const long double *source, size_t len,int pe)
+void PROBE_shmem_longdouble_put_ENTRY (long double *target, const long double *source, size_t len, int pe)
 {
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_PUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_PUT_EV, EVT_BEGIN, (len * sizeof(long double)));
   }
 }
 
@@ -347,7 +348,7 @@ void PROBE_shmem_longlong_put_ENTRY (long long *target, const long long *source,
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_PUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_PUT_EV, EVT_BEGIN, (len * sizeof(long long)));
   }
 }
 
@@ -365,7 +366,7 @@ void PROBE_shmem_put32_ENTRY (void *target, const void *source, size_t len, int 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUT32_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUT32_EV, EVT_BEGIN, (len * 4));
   }
 }
 
@@ -383,7 +384,7 @@ void PROBE_shmem_put64_ENTRY (void *target, const void *source, size_t len, int 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUT64_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUT64_EV, EVT_BEGIN, (len * 8));
   }
 }
 
@@ -401,7 +402,7 @@ void PROBE_shmem_put128_ENTRY (void *target, const void *source, size_t len, int
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUT128_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUT128_EV, EVT_BEGIN, (len * 16));
   }
 }
 
@@ -419,7 +420,7 @@ void PROBE_shmem_putmem_ENTRY (void *target, const void *source, size_t len, int
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUTMEM_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_PUTMEM_EV, EVT_BEGIN, len);
   }
 }
 
@@ -432,12 +433,12 @@ void PROBE_shmem_putmem_EXIT (void)
   }
 }
 
-void PROBE_shmem_short_put_ENTRY (short*target, const short*source, size_t len, int pe)
+void PROBE_shmem_short_put_ENTRY (short *target, const short *source, size_t len, int pe)
 {
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_PUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_PUT_EV, EVT_BEGIN, (len * sizeof(short)));
   }
 }
 
@@ -455,7 +456,7 @@ void PROBE_shmem_char_p_ENTRY (char *addr, char value, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_CHAR_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_CHAR_P_EV, EVT_BEGIN, sizeof(char));
   }
 }
 
@@ -473,7 +474,7 @@ void PROBE_shmem_short_p_ENTRY (short *addr, short value, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_P_EV, EVT_BEGIN, sizeof(short));
   }
 }
 
@@ -491,7 +492,7 @@ void PROBE_shmem_int_p_ENTRY (int *addr, int value, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_P_EV, EVT_BEGIN, sizeof(int));
   }
 }
 
@@ -509,7 +510,7 @@ void PROBE_shmem_long_p_ENTRY (long *addr, long value, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_P_EV, EVT_BEGIN, sizeof(long));
   }
 }
 
@@ -527,7 +528,7 @@ void PROBE_shmem_longlong_p_ENTRY (long long *addr, long long value, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_P_EV, EVT_BEGIN, sizeof(long long));
   }
 }
 
@@ -545,7 +546,7 @@ void PROBE_shmem_float_p_ENTRY (float *addr, float value, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_P_EV, EVT_BEGIN, sizeof(float));
   }
 }
 
@@ -563,7 +564,7 @@ void PROBE_shmem_double_p_ENTRY (double *addr, double value, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_P_EV, EVT_BEGIN, sizeof(double));
   }
 }
 
@@ -581,7 +582,7 @@ void PROBE_shmem_longdouble_p_ENTRY (long double *addr, long double value, int p
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_P_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_P_EV, EVT_BEGIN, sizeof(long double));
   }
 }
 
@@ -599,7 +600,7 @@ void PROBE_shmem_double_iput_ENTRY (double *target, const double *source, ptrdif
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_IPUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_IPUT_EV, EVT_BEGIN, (nelems * sizeof(double)));
   }
 }
 
@@ -617,7 +618,7 @@ void PROBE_shmem_float_iput_ENTRY (float *target, const float *source, ptrdiff_t
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_IPUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_IPUT_EV, EVT_BEGIN, (nelems * sizeof(float)));
   }
 }
 
@@ -635,7 +636,7 @@ void PROBE_shmem_int_iput_ENTRY (int *target, const int *source, ptrdiff_t tst, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_IPUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_IPUT_EV, EVT_BEGIN, (nelems * sizeof(int)));
   }
 }
 
@@ -653,7 +654,7 @@ void PROBE_shmem_iput32_ENTRY (void *target, const void *source, ptrdiff_t tst, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IPUT32_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IPUT32_EV, EVT_BEGIN, (nelems * 4));
   }
 }
 
@@ -671,7 +672,7 @@ void PROBE_shmem_iput64_ENTRY (void *target, const void *source, ptrdiff_t tst, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IPUT64_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IPUT64_EV, EVT_BEGIN, (nelems * 8));
   }
 }
 
@@ -689,7 +690,7 @@ void PROBE_shmem_iput128_ENTRY (void *target, const void *source, ptrdiff_t tst,
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IPUT128_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IPUT128_EV, EVT_BEGIN, (nelems * 16));
   }
 }
 
@@ -707,7 +708,7 @@ void PROBE_shmem_long_iput_ENTRY (long *target, const long *source, ptrdiff_t ts
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_IPUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_IPUT_EV, EVT_BEGIN, (nelems * sizeof(long)));
   }
 }
 
@@ -725,7 +726,7 @@ void PROBE_shmem_longdouble_iput_ENTRY (long double *target, const long double *
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_IPUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_IPUT_EV, EVT_BEGIN, (nelems * sizeof(long double)));
   }
 }
 
@@ -743,7 +744,7 @@ void PROBE_shmem_longlong_iput_ENTRY (long long *target, const long long *source
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_IPUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_IPUT_EV, EVT_BEGIN, (nelems * sizeof(long long)));
   }
 }
 
@@ -761,7 +762,7 @@ void PROBE_shmem_short_iput_ENTRY (short *target, const short *source, ptrdiff_t
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_IPUT_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_IPUT_EV, EVT_BEGIN, (nelems * sizeof(short)));
   }
 }
 
@@ -779,7 +780,7 @@ void PROBE_shmem_double_get_ENTRY (double *target, const double *source, size_t 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_GET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_GET_EV, EVT_BEGIN, (nelems * sizeof(double)));
   }
 }
 
@@ -797,7 +798,7 @@ void PROBE_shmem_float_get_ENTRY (float *target, const float *source, size_t nel
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_GET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_GET_EV, EVT_BEGIN, (nelems * sizeof(float)));
   }
 }
 
@@ -815,7 +816,7 @@ void PROBE_shmem_get32_ENTRY (void *target, const void *source, size_t nelems, i
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GET32_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GET32_EV, EVT_BEGIN, (nelems * 4));
   }
 }
 
@@ -833,7 +834,7 @@ void PROBE_shmem_get64_ENTRY (void *target, const void *source, size_t nelems, i
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GET64_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GET64_EV, EVT_BEGIN, (nelems * 8));
   }
 }
 
@@ -851,7 +852,7 @@ void PROBE_shmem_get128_ENTRY (void *target, const void *source, size_t nelems, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GET128_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GET128_EV, EVT_BEGIN, (nelems * 16));
   }
 }
 
@@ -869,7 +870,7 @@ void PROBE_shmem_getmem_ENTRY (void *target, const void *source, size_t nelems, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GETMEM_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_GETMEM_EV, EVT_BEGIN, nelems);
   }
 }
 
@@ -887,7 +888,7 @@ void PROBE_shmem_int_get_ENTRY (int *target, const int *source, size_t nelems, i
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_GET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_GET_EV, EVT_BEGIN, (nelems * sizeof(int)));
   }
 }
 
@@ -905,7 +906,7 @@ void PROBE_shmem_long_get_ENTRY (long *target, const long *source, size_t nelems
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_GET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_GET_EV, EVT_BEGIN, (nelems * sizeof(long)));
   }
 }
 
@@ -923,7 +924,7 @@ void PROBE_shmem_longdouble_get_ENTRY (long double *target, const long double *s
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_GET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_GET_EV, EVT_BEGIN, (nelems * sizeof(long double)));
   }
 }
 
@@ -941,7 +942,7 @@ void PROBE_shmem_longlong_get_ENTRY (long long *target, const long long *source,
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_GET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_GET_EV, EVT_BEGIN, (nelems * sizeof(long long)));
   }
 }
 
@@ -959,7 +960,7 @@ void PROBE_shmem_short_get_ENTRY (short *target, const short *source, size_t nel
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_GET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_GET_EV, EVT_BEGIN, (nelems * sizeof(short)));
   }
 }
 
@@ -977,7 +978,7 @@ void PROBE_shmem_char_g_ENTRY (char *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_CHAR_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_CHAR_G_EV, EVT_BEGIN, sizeof(char));
   }
 }
 
@@ -995,7 +996,7 @@ void PROBE_shmem_short_g_ENTRY (short *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_G_EV, EVT_BEGIN, sizeof(short));
   }
 }
 
@@ -1013,7 +1014,7 @@ void PROBE_shmem_int_g_ENTRY (int *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_G_EV, EVT_BEGIN, sizeof(int));
   }
 }
 
@@ -1031,7 +1032,7 @@ void PROBE_shmem_long_g_ENTRY (long *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_G_EV, EVT_BEGIN, sizeof(long));
   }
 }
 
@@ -1049,7 +1050,7 @@ void PROBE_shmem_longlong_g_ENTRY (long long *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_G_EV, EVT_BEGIN, sizeof(long long));
   }
 }
 
@@ -1067,7 +1068,7 @@ void PROBE_shmem_float_g_ENTRY (float *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_G_EV, EVT_BEGIN, sizeof(float));
   }
 }
 
@@ -1085,7 +1086,7 @@ void PROBE_shmem_double_g_ENTRY (double *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_G_EV, EVT_BEGIN, sizeof(double));
   }
 }
 
@@ -1103,7 +1104,7 @@ void PROBE_shmem_longdouble_g_ENTRY (long double *addr, int pe)
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_G_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_G_EV, EVT_BEGIN, sizeof(long double));
   }
 }
 
@@ -1121,7 +1122,7 @@ void PROBE_shmem_double_iget_ENTRY (double *target, const double *source, ptrdif
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_IGET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_IGET_EV, EVT_BEGIN, (nelems * sizeof(double)));
   }
 }
 
@@ -1139,7 +1140,7 @@ void PROBE_shmem_float_iget_ENTRY (float *target, const float *source, ptrdiff_t
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_IGET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_IGET_EV, EVT_BEGIN, (nelems * sizeof(float)));
   }
 }
 
@@ -1157,7 +1158,7 @@ void PROBE_shmem_iget32_ENTRY (void *target, const void *source, ptrdiff_t tst, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IGET32_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IGET32_EV, EVT_BEGIN, (nelems * 4));
   }
 }
 
@@ -1175,7 +1176,7 @@ void PROBE_shmem_iget64_ENTRY (void *target, const void *source, ptrdiff_t tst, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IGET64_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IGET64_EV, EVT_BEGIN, (nelems * 8));
   }
 }
 
@@ -1193,7 +1194,7 @@ void PROBE_shmem_iget128_ENTRY (void *target, const void *source, ptrdiff_t tst,
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IGET128_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_IGET128_EV, EVT_BEGIN, (nelems * 16));
   }
 }
 
@@ -1211,7 +1212,7 @@ void PROBE_shmem_int_iget_ENTRY (int *target, const int *source, ptrdiff_t tst, 
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_IGET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_IGET_EV, EVT_BEGIN, (nelems * sizeof(int)));
   }
 }
 
@@ -1229,7 +1230,7 @@ void PROBE_shmem_long_iget_ENTRY (long *target, const long *source, ptrdiff_t ts
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_IGET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_IGET_EV, EVT_BEGIN, (nelems * sizeof(long)));
   }
 }
 
@@ -1247,7 +1248,7 @@ void PROBE_shmem_longdouble_iget_ENTRY (long double *target, const long double *
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_IGET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_IGET_EV, EVT_BEGIN, (nelems * sizeof(long double)));
   }
 }
 
@@ -1265,7 +1266,7 @@ void PROBE_shmem_longlong_iget_ENTRY (long long *target, const long long *source
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_IGET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_IGET_EV, EVT_BEGIN, (nelems * sizeof(long long)));
   }
 }
 
@@ -1283,7 +1284,7 @@ void PROBE_shmem_short_iget_ENTRY (short *target, const short *source, ptrdiff_t
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_IGET_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_IGET_EV, EVT_BEGIN, (nelems * sizeof(short)));
   }
 }
 
@@ -1715,7 +1716,8 @@ void PROBE_shmem_broadcast32_ENTRY (void *target, const void *source, size_t nlo
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_BROADCAST32_EV, EVT_BEGIN, EMPTY);
+    int bytes = ((TASKID == PE_root) ? (nlong * 4 * (PE_size / (1 << logPE_stride))) : 0);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_BROADCAST32_EV, EVT_BEGIN, bytes);
   }
 }
 
@@ -1733,7 +1735,8 @@ void PROBE_shmem_broadcast64_ENTRY (void *target, const void *source, size_t nlo
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_BROADCAST64_EV, EVT_BEGIN, EMPTY);
+    int bytes = ((TASKID == PE_root) ? (nlong * 8 * (PE_size / (1 << logPE_stride))) : 0);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_BROADCAST64_EV, EVT_BEGIN, bytes);
   }
 }
 
@@ -1751,7 +1754,7 @@ void PROBE_shmem_collect32_ENTRY (void *target, const void *source, size_t nelem
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_COLLECT32_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_COLLECT32_EV, EVT_BEGIN, (nelems * 4 * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1769,7 +1772,7 @@ void PROBE_shmem_collect64_ENTRY (void *target, const void *source, size_t nelem
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_COLLECT64_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_COLLECT64_EV, EVT_BEGIN, (nelems * 8 * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1787,7 +1790,7 @@ void PROBE_shmem_fcollect32_ENTRY (void *target, const void *source, size_t nele
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FCOLLECT32_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FCOLLECT32_EV, EVT_BEGIN, (nelems * 4 * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1805,7 +1808,7 @@ void PROBE_shmem_fcollect64_ENTRY (void *target, const void *source, size_t nele
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FCOLLECT64_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FCOLLECT64_EV, EVT_BEGIN, (nelems * 8 * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1823,7 +1826,7 @@ void PROBE_shmem_int_and_to_all_ENTRY (int *target, int *source, int nreduce, in
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_AND_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_AND_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(int) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1841,7 +1844,7 @@ void PROBE_shmem_long_and_to_all_ENTRY (long *target, long *source, int nreduce,
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_AND_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_AND_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(long) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1859,7 +1862,7 @@ void PROBE_shmem_longlong_and_to_all_ENTRY (long long *target, long long *source
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_AND_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_AND_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(long long) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1877,7 +1880,7 @@ void PROBE_shmem_short_and_to_all_ENTRY (short *target, short *source, int nredu
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_AND_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_AND_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(short) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1895,7 +1898,7 @@ void PROBE_shmem_double_max_to_all_ENTRY (double *target, double *source, int nr
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_MAX_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_MAX_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(double) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1913,7 +1916,7 @@ void PROBE_shmem_float_max_to_all_ENTRY (float *target, float *source, int nredu
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_MAX_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_FLOAT_MAX_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(float) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1931,7 +1934,7 @@ void PROBE_shmem_int_max_to_all_ENTRY (int *target, int *source, int nreduce, in
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_MAX_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_INT_MAX_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(int) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1949,7 +1952,7 @@ void PROBE_shmem_long_max_to_all_ENTRY (long *target, long *source, int nreduce,
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_MAX_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONG_MAX_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(long) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1967,7 +1970,7 @@ void PROBE_shmem_longdouble_max_to_all_ENTRY (long double *target, long double *
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_MAX_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGDOUBLE_MAX_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(long double) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -1985,7 +1988,7 @@ void PROBE_shmem_longlong_max_to_all_ENTRY (long long *target, long long *source
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_MAX_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_LONGLONG_MAX_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(long long) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -2003,7 +2006,7 @@ void PROBE_shmem_short_max_to_all_ENTRY (short *target, short *source, int nredu
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_MAX_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_SHORT_MAX_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(short) * (PE_size / (1 << logPE_stride))));
   }
 }
 
@@ -2021,7 +2024,7 @@ void PROBE_shmem_double_min_to_all_ENTRY (double *target, double *source, int nr
   DEBUG_PROBES();
   if (EXTRAE_ON())
   {
-    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_MIN_TO_ALL_EV, EVT_BEGIN, EMPTY);
+    TRACE_OPENSHMEM_EVENT_AND_COUNTERS(LAST_READ_TIME, SHMEM_DOUBLE_MIN_TO_ALL_EV, EVT_BEGIN, (nreduce * sizeof(double) * (PE_size / (1 << logPE_stride))));
   }
 }
 

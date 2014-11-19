@@ -1339,7 +1339,7 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 						trace_init_end_time = Get_EvTime(current);
 						found_trace_init_end_time = TRUE;
 					}
-					else if ((Get_EvEvent(current) == OPENSHMEM_TYPE) && (Get_EvValue(current) == START_PES_EV) && (Get_EvMiscParam(current) == EVT_END))
+					else if (Get_EvEvent(current) == START_PES_EV && Get_EvValue(current) == EVT_END)
 					{
 						shmem_init_end_time = Get_EvTime(current);
 						found_shmem_init_end_time = TRUE;
