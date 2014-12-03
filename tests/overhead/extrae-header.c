@@ -124,6 +124,8 @@ int main (int argc, char *argv[])
 	printf ("powerpc with 64 bit extensions");
 #elif defined(__arm__)
 	printf ("ARM");
+#elif defined(__aarch64__)
+	printf ("ARM64");
 #else
 	printf ("unknown");
 #endif

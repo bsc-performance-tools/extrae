@@ -219,12 +219,11 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 
 		if test "$Default_Binary_Type" != "32" -a "$Default_Binary_Type" != 64 ; then
 			[]_AC_LANG_PREFIX[]_PRESENT="no"
-                        msg="language compiler '$_AC_LANG_PREFIX[]_compiler' seems not to be installed in the system.
-Please verify there is a working installation of the language compiler '$_AC_LANG_PREFIX[]_compiler'."
+			msg="language compiler '$_AC_LANG_PREFIX[]_compiler' seems not to be installed in the system.  Please verify there is a working installation of the language compiler '$_AC_LANG_PREFIX[]_compiler'."
 			if test "language" == "C" ; then
 				AC_MSG_ERROR($msg)
 			else 
-                        	AC_MSG_WARN($msg)
+				AC_MSG_WARN($msg)
 			fi
 		else
 			[]_AC_LANG_PREFIX[]_PRESENT="yes"
@@ -433,6 +432,8 @@ AC_DEFUN([AX_PROG_BINUTILS],
       AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed. Also, if you want to generate shared libraries check for the existance of the libbfd.so library])
    fi
 
+   UNAME_M=`uname -m`
+
    if test "${binutils_paths}" != "no" ; then
       AC_MSG_CHECKING([for binutils])
       for binutils_home_dir in [${binutils_paths} "notfound"]; do
@@ -471,16 +472,18 @@ AC_DEFUN([AX_PROG_BINUTILS],
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
          elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib/x86_64-linux-gnu/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/x86_64-linux/gnu"
-         elif test -r "${binutils_home_dir}/lib/x86_64/libiberty.a" ; then  # dnl Special handle for MacOSx
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/x86_64"
          elif test -r "${binutils_home_dir}/lib/arm-linux-gnueabihf/libiberty.a" ; then # dnl Special case for Linux ARM/HF
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib/arm-linux-gnueabihf"
          elif test -r "${binutils_home_dir}/lib/libiberty.so" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
+         elif test -r "${binutils_home_dir}/lib/${UNAME_M}/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}"
+         elif test -r "${binutils_home_dir}/lib/${UNAME_M}-linux/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}-linux"
+         elif test -r "${binutils_home_dir}/lib/${UNAME_M}-linux-gnu/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}-linux-gnu"
          fi
    
          if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then

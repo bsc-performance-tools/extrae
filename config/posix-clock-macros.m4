@@ -2,7 +2,12 @@
 # -------------------
 AC_DEFUN([AX_CHECK_POSIX_CLOCK],
 [
-   USE_POSIX_CLOCK="no"
+   if test "${Architecture}" = "arm" -o "${Architecture}" = "arm64" ; then
+      USE_POSIX_CLOCK="yes"
+   else
+      USE_POSIX_CLOCK="no"
+   fi
+
    AC_ARG_ENABLE(posix-clock,
       AC_HELP_STRING(
          [--enable-posix-clock],

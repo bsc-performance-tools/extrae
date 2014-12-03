@@ -89,6 +89,8 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	case "${target_cpu}" in
 	  arm*)      Architecture="arm"
 	             AC_DEFINE([ARCH_ARM], [1], [Define if architecture is ARM]) ;;
+	  aarch64*)  Architecture="arm64"
+	             AC_DEFINE([ARCH_ARM64], [1], [Define if architecture is ARM64/AARCH64]) ;;
 	  i*86|x86_64|amd64)
 	             Architecture="ia32"
 	             AC_DEFINE([ARCH_IA32], [1], [Define if architecture is IA32])

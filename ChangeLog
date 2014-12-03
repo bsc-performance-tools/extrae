@@ -2,6 +2,8 @@
 ChangeLog
  [ + added, - removed, * changed ]
  + 03Dec2014 Adding list-functions DynInst based tool (not installed)
+             Improve detection for libiberty & libbfd within binutils package
+             Add minimal support for aarch64 (ARM64)
  + 19Nov2014 Recorded events for bytes sent/received via SHMEM calls
              Added new states for SHMEM operations
 	     Now emmitting callers at the entry of SHMEM calls

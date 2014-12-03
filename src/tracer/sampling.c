@@ -173,6 +173,8 @@ static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 	pc = (caddr_t)sc->regs->nip;
 # elif defined(ARCH_ARM)
 	pc = (caddr_t)sc->arm_pc;
+# elif defined(ARCH_ARM64)
+	pc = (caddr_t)sc->pc;
 # elif defined(ARCH_SPARC64)
     //pc = (caddr_t)sc->sigc_regs->tpc;
     //pc = (caddr_t)sc->mc_gregs->tpc;
