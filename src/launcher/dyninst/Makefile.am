@@ -2,7 +2,7 @@ include $(top_srcdir)/PATHS
 
 bin_PROGRAMS = extrae
 
-noinst_PROGRAMS = load-module demo-launcher
+noinst_PROGRAMS = load-module demo-launcher list-functions
 
 DYNINST_EXTRA_LIBS=
 
@@ -46,3 +46,11 @@ if NEED_BOOST_HOME
 demo_launcher_CXXFLAGS += -I@BOOST_HOME@/include
 endif
 demo_launcher_LDFLAGS = @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
+
+list_functions_SOURCES = list-functions.C
+list_functions_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@
+if NEED_BOOST_HOME
+list_functions_CXXFLAGS += -I@BOOST_HOME@/include
+endif
+list_functions_LDFLAGS = @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf
+
