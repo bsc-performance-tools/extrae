@@ -65,13 +65,13 @@ void WriteEnabled_OPENSHMEM_Operations (FILE * fd)
                 for (u = 0; u < COUNT_OPENSHMEM_EVENTS; u++)
                                 fprintf (fd, "%d %s\n", u+1, GetOPENSHMEMLabel( u ));
                 LET_SPACES(fd);
-        }
-	fprintf(fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_SENDBYTES_EV, "OpenSHMEM outgoing bytes");
-	LET_SPACES(fd);
+		fprintf(fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_SENDBYTES_EV, "OpenSHMEM outgoing bytes");
+		LET_SPACES(fd);
 
-	fprintf(fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_RECVBYTES_EV, "OpenSHMEM incoming bytes");
-	LET_SPACES(fd);
+		fprintf(fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d    %d    %s\n", 0, OPENSHMEM_RECVBYTES_EV, "OpenSHMEM incoming bytes");
+		LET_SPACES(fd);
+        }
 }
 
