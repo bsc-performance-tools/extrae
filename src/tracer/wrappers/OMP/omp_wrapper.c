@@ -52,7 +52,11 @@ static char UNUSED rcsid[] = "$Id$";
 #include "omp_wrapper.h"
 
 #include "ibm-xlsmp-1.6.h"
-#include "gnu-libgomp-4.2.h"
+#if defined(GNU_OPENMP_4_2)
+# include "gnu-libgomp-4.2.h"
+#elif defined(GNU_OPENMP_4_9)
+# include "gnu-libgomp-4.9.h"
+#endif
 #include "intel-kmpc-11.h"
 
 //#define DEBUG
