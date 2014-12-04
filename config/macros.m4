@@ -433,6 +433,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
    fi
 
    UNAME_M=`uname -m`
+   IFS='-' read -a TARGET_CPU <<< ${target_cpu}
 
    if test "${binutils_paths}" != "no" ; then
       AC_MSG_CHECKING([for binutils])
@@ -484,6 +485,12 @@ AC_DEFUN([AX_PROG_BINUTILS],
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}-linux"
          elif test -r "${binutils_home_dir}/lib/${UNAME_M}-linux-gnu/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}-linux-gnu"
+         elif test -r "${binutils_home_dir}/lib/${TARGET_CPU}/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${TARGET_CPU}"
+         elif test -r "${binutils_home_dir}/lib/${TARGET_CPU}-linux/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${TARGET_CPU}-linux"
+         elif test -r "${binutils_home_dir}/lib/${TARGET_CPU}-linux-gnu/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${TARGET_CPU}-linux-gnu"
          fi
    
          if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then

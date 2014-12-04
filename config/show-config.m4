@@ -62,13 +62,13 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 
 	echo
 	if test "${BFD_INSTALLED}" = "yes" ; then
-		echo libbfd available: yes \(${BFD_HOME}\)
+		echo libbfd available: yes \(${BFD_LIBSDIR}\)
     else
 		echo libbfd available: no
 	fi
 
 	if test "${LIBERTY_INSTALLED}" = "yes" ; then
-		echo libiberty available: yes \(${LIBERTY_HOME}\)
+		echo libiberty available: yes \(${LIBERTY_LIBSDIR}\)
 	else
 		echo libiberty available: no
 	fi
