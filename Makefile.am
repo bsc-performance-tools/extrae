@@ -26,22 +26,22 @@ dist-hook:
 #
 # Create EXAMPLE directory and copy there the example
 #
-MPI_EXAMPLE_FILES=/dev/null
-MPICUDA_EXAMPLE_FILES=/dev/null
-OMP_EXAMPLE_FILES=/dev/null
-MPIOMP_EXAMPLE_FILES=/dev/null
-SEQ_EXAMPLE_FILES=/dev/null
-ONLINE_EXAMPLE_FILES=/dev/null
-PYTHON_EXAMPLE_FILES=/dev/null
-PTHREAD_EXAMPLE_FILES=/dev/null
-PACX_EXAMPLE_FILES=/dev/null
-CUDA_EXAMPLE_FILES=/dev/null
-OPENCL_EXAMPLE_FILES=/dev/null
-MPIOPENCL_EXAMPLE_FILES=/dev/null
-OMPSS_EXAMPLE_FILES=/dev/null
-MPIOMPSS_EXAMPLE_FILES=/dev/null
-JAVA_EXAMPLE_FILES=/dev/null
-FORK_EXAMPLE_FILES=/dev/null
+MPI_EXAMPLE_FILES=null
+MPICUDA_EXAMPLE_FILES=null
+OMP_EXAMPLE_FILES=null
+MPIOMP_EXAMPLE_FILES=null
+SEQ_EXAMPLE_FILES=null
+ONLINE_EXAMPLE_FILES=null
+PYTHON_EXAMPLE_FILES=null
+PTHREAD_EXAMPLE_FILES=null
+PACX_EXAMPLE_FILES=null
+CUDA_EXAMPLE_FILES=null
+OPENCL_EXAMPLE_FILES=null
+MPIOPENCL_EXAMPLE_FILES=null
+OMPSS_EXAMPLE_FILES=null
+MPIOMPSS_EXAMPLE_FILES=null
+JAVA_EXAMPLE_FILES=null
+FORK_EXAMPLE_FILES=null
 UNICORE_EXAMPLE_FILES= example/UNICORE/*
 
 if IS_CELL_MACHINE
@@ -384,6 +384,7 @@ endif
 
 
 install-data-hook:
+	touch null # To ease the installation rules
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example
 	cp -f example/Makefile.inc $(DESTDIR)$(datadir)/example
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/SEQ
@@ -482,5 +483,7 @@ if OS_FREEBSD
 else
 	./substitute $(SED) "@sub_libexecinfo_libs@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
+	rm null
 # SVN installations may have some subversion control files
-	rm -fr `find $(DESTDIR)$(datadir)/example -name .svn`
+	find $(DESTDIR)$(datadir)/example -name .svn -delete
+	find $(DESTDIR)$(datadir)/example -name null -delete
