@@ -1959,7 +1959,7 @@ AC_DEFUN([AX_CHECK_LOAD_BALANCING],
    )
    if test "${lb_path}" != "none" ; then
       AC_MSG_CHECKING([for load-balancing installation])
-      if test -r "${lb_path}/include/MPI_interface.h" ; then
+      if test -r "${lb_path}/include/MPI_interface.h" -a "${lb_path}/include/MPI_interfaceF.h"; then
          AC_MSG_RESULT([$lb_path])
          LOAD_BALANCING_HOME=${lb_path}
          AC_SUBST([LOAD_BALANCING_HOME])
