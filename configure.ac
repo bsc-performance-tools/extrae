@@ -129,7 +129,11 @@ AC_PROG_SED
 AC_PROG_AWK
 
 if test "${GCC}" = "yes" ; then
-  CFLAGS="${CFLAGS} -fno-optimize-sibling-calls"
+	CFLAGS="${CFLAGS} -fno-optimize-sibling-calls"
+	if test "${Architecture}" = "arm" ; then
+		CFLAGS="${CFLAGS} -funwind-tables"
+		CXXFLAGS="${CXXFLAGS} -funwind-tables"
+	fi
 fi
 
 # Automake 1.10 reports a problem if this is not defined

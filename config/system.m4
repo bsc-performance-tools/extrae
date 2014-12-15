@@ -87,10 +87,12 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 
 	# Write defines in the output header file for the architecture and operating system
 	case "${target_cpu}" in
-	  arm*)      Architecture="arm"
-	             AC_DEFINE([ARCH_ARM], [1], [Define if architecture is ARM]) ;;
-	  aarch64*)  Architecture="arm64"
-	             AC_DEFINE([ARCH_ARM64], [1], [Define if architecture is ARM64/AARCH64]) ;;
+	  arm*|aarch64*) Architecture="arm"
+	             AC_DEFINE([ARCH_ARM], [1], [Define if architecture is ARM])
+                 if test "${target_cpu}" == "aarch64" ; then
+	                AC_DEFINE([ARCH_ARM64], [1], [Define if architecture is ARM64/AARCH64])
+                 fi
+                 ;;
 	  i*86|x86_64|amd64)
 	             Architecture="ia32"
 	             AC_DEFINE([ARCH_IA32], [1], [Define if architecture is IA32])
@@ -145,7 +147,8 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	AM_CONDITIONAL(OS_FREEBSD,   test "${OperatingSystem}" = "freebsd" )
 	AM_CONDITIONAL(OS_DARWIN,    test "${OperatingSystem}" = "darwin" )
 	AM_CONDITIONAL(OS_SOLARIS,   test "${OperatingSystem}" = "solaris" )
-	
+
+	# Special flags for specific systems or architectures	
 	if test "${OperatingSystem}" = "freebsd" ; then
 		CFLAGS="${CFLAGS} -I/usr/local/include"
 	fi

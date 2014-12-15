@@ -68,13 +68,17 @@ void trace_callers (iotimer_t time, int offset, int type)
 	if (Trace_Caller[type] == NULL)
 		return;
   
-	unw_getcontext(&uc);
-	unw_init_local(&cursor, &uc);
+	if (unw_getcontext(&uc) < 0)
+		return;
+
+	if (unw_init_local(&cursor, &uc) < 0)
+		return;
 
 	offset --; /* Don't compute call to unw_getcontext */
 	while ((unw_step(&cursor) > 0) && (current_deep < Caller_Deepness[type]+offset))
 	{
-		unw_get_reg(&cursor, UNW_REG_IP, &ip);
+		if (unw_get_reg(&cursor, UNW_REG_IP, &ip) < 0)
+			break;
 
 #if defined(MPICALLER_DEBUG)
 		if (current_deep >= offset)
@@ -113,13 +117,17 @@ UINT64 get_caller (int offset)
 	unw_context_t uc;
 	unw_word_t ip;
 
-	unw_getcontext(&uc);
-	unw_init_local(&cursor, &uc);
+	if (unw_getcontext(&uc) < 0)
+		return 0;
+
+	if (unw_init_local(&cursor, &uc))
+		return 0;
 
 	offset --; /* Don't compute call to unw_getcontext */
 	while (current_deep <= offset)
 	{
-		unw_get_reg(&cursor, UNW_REG_IP, &ip);
+		if (unw_get_reg(&cursor, UNW_REG_IP, &ip) < 0)
+			break;
 
 #if defined(DEBUG)
 		fprintf (stderr, "DEBUG: offset %d depth %d address %08llx %c\n", offset, current_deep, ip, (offset == current_deep)?'*':' ');
