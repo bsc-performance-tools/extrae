@@ -66,13 +66,22 @@ AC_DEFUN([AX_CUPTI],
 	enable_cupti="no"
 
 	if test "${cupti_path}" != "none" ; then
-		AC_MSG_CHECKING([for CUPTI])
+		AC_MSG_CHECKING([for CUPTI directory])
 		if test -d "${cupti_path}" ; then
-			if test -r ${cupti_path}/lib/libcupti.so -a -r ${cupti_path}/include/cupti.h -a -r ${cupti_path}/include/cupti_events.h ; then
-				AC_MSG_RESULT(${cupti_path})
-				enable_cupti="yes"
+			AC_MSG_RESULT(found)
+			AC_MSG_CHECKING([for CUPTI header files])
+			if test -r ${cupti_path}/include/cupti.h -a -r ${cupti_path}/include/cupti_events.h ; then
+				AC_MSG_RESULT(found)
+				AC_MSG_CHECKING([for CUPTI header files])
+				if test -r ${cupti_path}/lib/libcupti.so -o \
+				        -r ${cupti_path}/lib${BITS}/libcupti.so ; then
+					AC_MSG_RESULT(found)
+					enable_cupti="yes"
+				else
+					AC_MSG_ERROR([Cannot locate library files in the CUPTI specified directory])
+				fi
 			else
-				AC_MSG_ERROR([Cannot locate CUPTI in the specified directory])
+				AC_MSG_ERROR([Cannot locate header files in the CUPTI specified directory])
 			fi
 		else
 			AC_MSG_ERROR([The specified path for CUPTI does not exist])
