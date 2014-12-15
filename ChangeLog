@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 15Dec2014 Fix CUDA+MPI+OpenMP instrumentation library
+             Improve location for libbfd & libiberty from the binutils package
  * 12Dec2014 Upgraded DLB support
  * 04Dec2014 Fixed PCF labels regarding OpenSHMEM, they don't appear now if
              there's no SHMEM events in the trace
