@@ -70,12 +70,23 @@ void Extrae_malloctrace_init (void)
 # endif
 }
 
+//#define DEBUG
+
 /*
 
    INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
    INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
 
 */
+
+#define TRACE_DYNAMIC_MEMORY_CALLER_IS_ENABLED \
+ (Trace_Caller_Enabled[CALLER_DYNAMIC_MEMORY])
+
+#define TRACE_DYNAMIC_MEMORY_CALLER(evttime,offset) \
+{ \
+	if (TRACE_DYNAMIC_MEMORY_CALLER_IS_ENABLED) \
+		trace_callers (evttime, offset, CALLER_DYNAMIC_MEMORY); \
+}
 
 # if defined(PIC) /* This is only available for .so libraries */
 void *malloc (size_t s)
@@ -89,14 +100,18 @@ void *malloc (size_t s)
 		Extrae_malloctrace_init ();
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": malloc is at %p\n", real_malloc);
-	fprintf (stderr, PACKAGE_NAME": malloc params %u\n", s);
+	if (canInstrument)
+	{
+		fprintf (stderr, PACKAGE_NAME": malloc is at %p\n", real_malloc);
+		fprintf (stderr, PACKAGE_NAME": malloc params %lu\n", s);
+	}
 #endif
 
 	if (real_malloc != NULL && canInstrument)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_Malloc_Entry (s);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_malloc (s);
 		Probe_Malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -114,6 +129,9 @@ void *malloc (size_t s)
     return res;
 }
 
+#if defined(DEBUG)
+static int __in_free = FALSE;
+#endif
 void free (void *p)
 {
 	int canInstrument = !Backend_inInstrumentation(THREADID) && 
@@ -124,8 +142,13 @@ void free (void *p)
 		Extrae_malloctrace_init ();
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": free is at %p\n", real_free);
-	fprintf (stderr, PACKAGE_NAME": free params %p\n", p);
+	if (canInstrument && !__in_free) // fprintf() seems to call free()!
+	{
+		__in_free = TRUE;
+		fprintf (stderr, PACKAGE_NAME": free is at %p\n", real_free);
+		fprintf (stderr, PACKAGE_NAME": free params %p\n", p);
+		__in_free = FALSE;
+	}
 #endif
 
 	if (real_free != NULL && canInstrument)
@@ -198,8 +221,11 @@ void *realloc (void *p, size_t s)
 		Extrae_malloctrace_init ();
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": realloc is at %p\n", real_realloc);
-	fprintf (stderr, PACKAGE_NAME": realloc params %p %u\n", p, s);
+	if (canInstrument)
+	{
+		fprintf (stderr, PACKAGE_NAME": realloc is at %p\n", real_realloc);
+		fprintf (stderr, PACKAGE_NAME": realloc params %p %lu\n", p, s);
+	}
 #endif
 
 	if (real_realloc != NULL && canInstrument)

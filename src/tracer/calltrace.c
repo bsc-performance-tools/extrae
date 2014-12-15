@@ -37,16 +37,16 @@ static char UNUSED rcsid[] = "$Id$";
 #include "common_hwc.h"
 
 /* -- El usuario ha desactivado el traceo de MPI callers? -------- */
-int Trace_Caller_Enabled[COUNT_CALLER_TYPES] = { 1, 1 };
+int Trace_Caller_Enabled[COUNT_CALLER_TYPES] = { TRUE, TRUE, TRUE };
 
 /* -- Que MPI callers se tracean? -------------------------------- */
-int * Trace_Caller[COUNT_CALLER_TYPES] = { NULL, NULL }; 
+int * Trace_Caller[COUNT_CALLER_TYPES] = { NULL, NULL, NULL }; 
 
 /* -- Profundidad maxima que necesitamos de la pila de llamadas -- */
-int Caller_Deepness[COUNT_CALLER_TYPES] = { 0, 0 };
+int Caller_Deepness[COUNT_CALLER_TYPES] = { 0, 0, 0 };
 
 /* -- Cuantos MPI callers traceamos? ----------------------------- */
-int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0 }; 
+int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0, 0 }; 
 
 #if defined(UNWIND_SUPPORT)
 
@@ -55,16 +55,14 @@ int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0 };
 #  include <libunwind.h>
 # endif
 
+//#define MPICALLER_DEBUG
+
 void trace_callers (iotimer_t time, int offset, int type)
 {
 	int current_deep = 1;
 	unw_cursor_t cursor;
 	unw_context_t uc;
 	unw_word_t ip;
-
-	/* Check for valid CALLER types */
-	if (type != CALLER_MPI && type != CALLER_SAMPLING)
-		return;
 
 	/* Leave if they aren't initialized (asked by user!) */
 	if (Trace_Caller[type] == NULL)
@@ -87,17 +85,17 @@ void trace_callers (iotimer_t time, int offset, int type)
     
 		if (current_deep >= offset)
 		{
-			if (type == CALLER_MPI)
+			if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY)
 			{
-				if (Trace_Caller[CALLER_MPI][current_deep-offset])
+				if (Trace_Caller[type][current_deep-offset])
 				{
-					TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(current_deep-offset+1), (UINT64)ip);
+					TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_deep-offset+1), (UINT64)ip);
 				}
 			}
 #if defined(SAMPLING_SUPPORT)
 			else if (type == CALLER_SAMPLING)
 			{
-				if (Trace_Caller[CALLER_SAMPLING][current_deep-offset])
+				if (Trace_Caller[type][current_deep-offset])
 				{
 					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_deep-offset+1, (UINT64) ip);
 				}
@@ -106,9 +104,6 @@ void trace_callers (iotimer_t time, int offset, int type)
 		}
 		current_deep ++;
 	}
-	UNREFERENCED_PARAMETER(time);
-	UNREFERENCED_PARAMETER(offset);
-	UNREFERENCED_PARAMETER(type);
 }
 
 UINT64 get_caller (int offset)
@@ -156,10 +151,6 @@ void trace_callers (iotimer_t time, int offset, int type) {
 	char **strings; 
 #endif
 
-	/* Check for valid CALLER types */
-	if (type != CALLER_MPI && type != CALLER_SAMPLING)
-		return;
-
 	/* Leave if they aren't initialized (asked by user!) */
 	if (Trace_Caller[type] == NULL)
 		return;
@@ -187,10 +178,12 @@ void trace_callers (iotimer_t time, int offset, int type) {
 		fprintf (stderr, "i = %d p-callstack=%d ip = %lx\n", i, i+offset-1, callstack[i+offset-1]);
 #endif
 
-		if (type == CALLER_MPI)
+		if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY)
 		{
-			if (Trace_Caller[CALLER_MPI][i])
-				TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(i+1), (UINT64) callstack[i+offset-1]);
+			if (Trace_Caller[type][current_deep-offset])
+			{
+				TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_deep-offset+1), (UINT64)ip);
+			}
 		}
 #if defined(SAMPLING_SUPPORT)
 		else if (type == CALLER_SAMPLING)
@@ -259,7 +252,9 @@ UINT64 get_caller (int offset)
 # include <pdsc.h>
 #endif
 
-void trace_mpi_callers(iotimer_t time, int offset)
+#error "This code is unmantained! If you reach this, contact with tools@bsc.es"
+
+void trace_mpi_callers(iotimer_t time, int offset, int type)
 {
    CONTEXT contexto;
    int rc = 0, actual_deep = 1;
@@ -295,6 +290,8 @@ void trace_mpi_callers(iotimer_t time, int offset)
 #ifdef HAVE_UCONTEXT_H
 # include <ucontext.h>
 #endif
+
+#error "This code is unmantained! If you reach this, contact with tools@bsc.es"
 
 void trace_callers(iotimer_t time, int offset, int type)
 {
@@ -361,7 +358,7 @@ UINT64 get_caller (int offset)
    return 0;
 }
 
-#ifdef MPI_CALLER_DEBUG
+#if defined(MPI_CALLER_DEBUG)
 static int ValidAddress (void * Addr) {
 	return (access((char *) Addr, F_OK) && (errno == EFAULT))?0:1;
 }

@@ -1046,9 +1046,6 @@ void Parse_Callers (int me, char * mpi_callers, int type)
    char * callers, * caller, * error;
    int from, to, i, tmp;
 
-   if (CALLER_MPI != type && CALLER_SAMPLING != type)
-      return;
-
    callers = (char *)malloc(sizeof(char)*(strlen(mpi_callers)+1));
    strcpy(callers, mpi_callers);
 

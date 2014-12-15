@@ -53,10 +53,14 @@
    
 #define MPI_CALLER_EVENT_TYPE(deepness) (Caller_Count[CALLER_MPI] > 1 ? CALLER_EV+deepness : CALLER_EV)
 
+#define CALLER_EVENT_TYPE(type,deepness) \
+	(Caller_Count[type] > 1 ? CALLER_EV+deepness : CALLER_EV)
+
 enum 
 {
 	CALLER_MPI = 0,
 	CALLER_SAMPLING,
+	CALLER_DYNAMIC_MEMORY,
 	COUNT_CALLER_TYPES
 };
 
