@@ -188,9 +188,9 @@ void trace_callers (iotimer_t time, int offset, int type) {
 
 		if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY)
 		{
-			if (Trace_Caller[type][current_deep-offset])
+			if (Trace_Caller[type][i+offset-1])
 			{
-				TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_deep-offset+1), (UINT64)ip);
+				TRACE_EVENT(time, CALLER_EVENT_TYPE(type, i+offset+1), (UINT64) callstack[i+offset-1]);
 			}
 		}
 #if defined(SAMPLING_SUPPORT)
