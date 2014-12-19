@@ -188,6 +188,11 @@ PTHREAD_EXAMPLE_FILES+=\
  example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/extrae.xml \
  example/FREEBSD/PTHREAD/user-comms.c
+
+JAVA_EXAMPLE_FILES+=\
+ example/FREEBSD/JAVA/extrae.xml \
+ example/FREEBSD/JAVA/Makefile \
+ example/FREEBSD/JAVA/pi.java
 endif
 
 if OS_DARWIN
@@ -238,6 +243,11 @@ PTHREAD_EXAMPLE_FILES+=\
  example/FREEBSD/PTHREAD/Makefile \
  example/FREEBSD/PTHREAD/extrae.xml \
  example/FREEBSD/PTHREAD/user-comms.c
+
+JAVA_EXAMPLE_FILES+=\
+ example/FREEBSD/JAVA/extrae.xml \
+ example/FREEBSD/JAVA/Makefile \
+ example/FREEBSD/JAVA/pi.java
 
 OPENCL_EXAMPLE_FILES+=\
  example/LINUX/OPENCL/README \

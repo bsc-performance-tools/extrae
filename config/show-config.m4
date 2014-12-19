@@ -15,8 +15,8 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 			CROSSC="${host} with BG/Q system support"
 		elif test "${IS_CELL_MACHINE}" = "yes" ; then
 			CROSSC="${host} with Cell Broadband Engine support - SDK ${CELL_SDK}.x"
-    elif test "${IS_CRAY_XT}" = "yes" ; then
-      CROSSC="${host} with Cray XT system support"
+		elif test "${IS_CRAY_XT}" = "yes" ; then
+			CROSSC="${host} with Cray XT system support"
 		else
 			CROSSC="no"
 		fi
@@ -33,17 +33,11 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo 
 
 	AX_MPI_SHOW_CONFIGURATION
-
 	AX_PACX_SHOW_CONFIGURATION
-
 	AX_OPENMP_SHOW_CONFIGURATION
-
         AX_OPENSHMEM_SHOW_CONFIGURATION
-
-	echo pThread instrumentation: ${enable_pthread}
-
+	AX_PTHREAD_SHOW_CONFIGURATION
 	AX_CUDA_SHOW_CONFIGURATION
-
 	AX_OPENCL_SHOW_CONFIGURATION
 
 	echo
@@ -63,7 +57,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo
 	if test "${BFD_INSTALLED}" = "yes" ; then
 		echo libbfd available: yes \(${BFD_LIBSDIR}\)
-    else
+	else
 		echo libbfd available: no
 	fi
 
@@ -72,9 +66,9 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	else
 		echo libiberty available: no
 	fi
-    if test "${BFD_INSTALLED}" != "yes" -o "${LIBERTY_INSTALLED}" != "yes" ; then
-        echo Warning! Source code addresses cannot be translated due to lack of libbfd/libiberty
-    fi
+	if test "${BFD_INSTALLED}" != "yes" -o "${LIBERTY_INSTALLED}" != "yes" ; then
+		echo Warning! Source code addresses cannot be translated due to lack of libbfd/libiberty
+	fi
 
 	if test "${zhome_dir}" != "not found" ; then
 		echo zlib available: yes \(${LIBZ_HOME}\)
@@ -127,19 +121,19 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo -e \\\tSpectral analysis available: ${SPECTRAL_INSTALLED}
         fi
 
-  if test "${USE_GETTIMEOFDAY_CLOCK}" = "yes" ; then
-    echo Clock routine: gettimeofday
-  else
-    if test "${USE_POSIX_CLOCK}" = "yes" ; then
-      if test "${NEED_POSIX_CLOCK_LIB}" = "no" ; then
-        echo Clock routine: POSIX / clock_gettime, but don\'t need posix clock lib explicitly
-      else
-        echo Clock routine: POSIX / clock_gettime, library in ${POSIX_CLOCK_LIB}
-      fi
-    else
-      echo Clock routine: low-level / architecture dependant
-    fi
-  fi
+	if test "${USE_GETTIMEOFDAY_CLOCK}" = "yes" ; then
+		echo Clock routine: gettimeofday
+	else
+		if test "${USE_POSIX_CLOCK}" = "yes" ; then
+			if test "${NEED_POSIX_CLOCK_LIB}" = "no" ; then
+				echo Clock routine: POSIX / clock_gettime, but don\'t need posix clock lib explicitly
+			else
+				echo Clock routine: POSIX / clock_gettime, library in ${POSIX_CLOCK_LIB}
+			fi
+		else
+			echo Clock routine: low-level / architecture dependant
+		fi
+	fi
 
  	echo Heterogeneous support: ${enable_hetero}
 	if test "${MPI_INSTALLED}" = "yes" -a "${enable_parallel_merge}" = "yes" ; then

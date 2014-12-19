@@ -54,6 +54,11 @@
 #  endif
 # endif
 
+#else /* HAVE_MPI */
+
+/* If we don't have MPI, rely on FC_FUNC detected at configure time! */
+# define CtoF77(x) FC_FUNC(x,x)
+
 #endif /* HAVE_MPI */
 
 #endif

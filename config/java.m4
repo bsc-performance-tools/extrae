@@ -16,8 +16,6 @@ AC_DEFUN([AX_JAVA],
 	fi
 
 	if test "${java_path}" != "none" ; then
-		JAVA_look="yes"
-
 		AC_MSG_CHECKING([for Java directory])
 		if test -d "${java_path}" ; then
 			AC_MSG_RESULT([found])
@@ -53,16 +51,23 @@ AC_DEFUN([AX_JAVA],
 			if test ! -d "${java_path}/include" ; then
 				AC_MSG_ERROR([Cannot find include directory])
 			fi
-			if test ! -d "${java_path}/include/linux" ; then
-				AC_MSG_ERROR([Cannot find linux/linux directory])
+			if test "${OperatingSystem}" = "linux" ; then
+				if test ! -d "${java_path}/include/linux" ; then
+					AC_MSG_ERROR([Cannot find linux/linux directory])
+				fi
 			fi
 			AC_MSG_RESULT(found)
 		fi
 
 		JAVA_found="yes"
 		JAVA_path=${java_path}
-		JAVA_INCLUDES="-I${JAVA_path}/include -I${JAVA_path}/include/linux"
+		JAVA_INCLUDES="-I${JAVA_path}/include"
 
+		if test "${OperatingSystem}" = "linux" ; then
+			JAVA_INCLUDES="${JAVA_INCLUDES} -I${JAVA_path}/include/linux"
+		elif test "${OperatingSystem}" = "darwin" ; then
+			JAVA_INCLUDES="${JAVA_INCLUDES} -I/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers"
+		fi
 	fi
 
 	AM_CONDITIONAL(WANT_JAVA, test "${JAVA_found}" = "yes")

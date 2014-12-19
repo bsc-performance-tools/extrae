@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 19Dec2014 Improve Java examples for Darwin & Linux
+             Improve support for Darwin
  * 18Dec2014 Fix installation script (substitute) to work on AIX & Darwin
  * 15Dec2014 Fix CUDA+MPI+OpenMP instrumentation library
              Improve location for libbfd & libiberty from the binutils package

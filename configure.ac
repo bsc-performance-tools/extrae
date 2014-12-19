@@ -123,6 +123,7 @@ AC_PROG_CC(${wanted_C_Compilers})
 AC_PROG_CXX(${wanted_CXX_Compilers})
 AC_PROG_CPP
 AC_PROG_FC(${wanted_F_Compilers})
+AC_FC_WRAPPERS
 AX_JAVA
 AC_PROG_INSTALL
 AC_PROG_SED
@@ -315,16 +316,7 @@ AX_CHECK_OPENMP
 AX_CUDA
 AX_CUPTI
 AX_OPENCL
-
-AC_ARG_ENABLE(pthread-support-in-all-libs,
-   AC_HELP_STRING(
-      [--enable-pthread-support-in-all-libs],
-      [Allows all the instrumentation libraries to work with pthreads. Caution! May add dependencies with pthread library (disabled by default)]
-   ),
-   [enable_pthread_in_all_libs="${enableval}"],
-   [enable_pthread_in_all_libs="no"]
-)
-AM_CONDITIONAL(PTHREAD_SUPPORT_IN_ALL_LIBS, test "${enable_pthread_in_all_libs}" = "yes" )
+AX_PTHREAD
 
 AC_ARG_ENABLE(smpss,
    AC_HELP_STRING(
@@ -365,19 +357,6 @@ AC_ARG_ENABLE(trt,
    [enable_trt="no"]
 )
 AM_CONDITIONAL(WANT_TRT, test "${enable_trt}" = "yes" )
-
-AC_ARG_ENABLE(pthread,
-   AC_HELP_STRING(
-      [--enable-pthread],
-      [Enable support for tracing pthread library (enabled by default)]
-   ),
-   [enable_pthread="${enableval}"],
-   [enable_pthread="yes"]
-)
-if test "${enable_pthread}" = "yes" ; then
-	ACX_PTHREAD([],[AC_MSG_ERROR([Unable to determine pthread library support])])
-fi
-AM_CONDITIONAL(WANT_PTHREAD, test "${enable_pthread}" = "yes" )
 
 AC_ARG_ENABLE(heterogeneous,
    AC_HELP_STRING(
