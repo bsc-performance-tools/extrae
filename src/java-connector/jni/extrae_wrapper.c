@@ -30,6 +30,9 @@
 
 static char UNUSED rcsid[] = "$Id: wrapper.c 2336 2013-11-26 09:30:20Z harald $";
 
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif

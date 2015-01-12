@@ -11,13 +11,7 @@ VALUE=$3
 FILE=$4
 
 ## Some OS don't have mktemp, AIX 5.3 for instance :S
-#if [ ! -f /bin/mktemp ] ; then
-#	TMPFILE=substitute-$$
-#else
-#	TMPFILE=`/bin/mktemp substitute-XXXXXX`
-#fi
-#
-
+## Some OS don't support sed -i , Darwin for instance :S
 UNAME=`uname`
 if [ "${UNAME}" = "Darwin" -o "${UNAME}" = "AIX" ] ; then
 	TMPFILE=substitute-$$
