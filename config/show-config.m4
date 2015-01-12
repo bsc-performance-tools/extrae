@@ -42,7 +42,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 
 	echo
 	if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" ; then
-		echo Performance counters at instrumentation: yes
+		echo Performance counters: yes
 		if test "${PMAPI_ENABLED}" = "yes" ; then
 			echo -e \\\tPerformance API:  PMAPI
 		else
@@ -51,7 +51,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 			echo -e \\\tSampling support: ${PAPI_SAMPLING_ENABLED}
 		fi
 	else
-		echo Performance counters at instrumentation: no
+		echo Performance counters: no
 	fi
 
 	echo

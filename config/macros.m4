@@ -500,8 +500,8 @@ AC_DEFUN([AX_PROG_BINUTILS],
            break
          fi
 
-         unset BFD_LIBSDIR
-         unset LIBERTY_LIBSDIR
+         dnl unset BFD_LIBSDIR
+         dnl unset LIBERTY_LIBSDIR
 
       done
       AC_MSG_RESULT(${binutils_home_dir})
