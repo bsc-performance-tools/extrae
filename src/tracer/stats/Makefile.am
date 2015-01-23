@@ -1,9 +1,9 @@
 include $(top_srcdir)/PATHS
 
-lib_LTLIBRARIES  = 
+noinst_LTLIBRARIES  = 
 
 if HAVE_MPI
-lib_LTLIBRARIES += libmpistats.la
+noinst_LTLIBRARIES += libmpistats.la
 endif
 
 # MPI stats

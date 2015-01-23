@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 23Jan2015 Changed primary lib_LTLIBRARIES to noinst_LTLIBRARIES at
+ src/tracer/stats/Makefile.am to fix a bug in K computer.
  * 19Dec2014 Improve Java examples for Darwin & Linux
              Improve support for Darwin
  * 18Dec2014 Fix installation script (substitute) to work on AIX & Darwin
