@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 26Jan2015 Fixed bug in calltrace.h that made that the label of the caller
+ events when is a single level of the stack requested to be always 70000000,
+ despite the level requested.
  * 23Jan2015 Changed primary lib_LTLIBRARIES to noinst_LTLIBRARIES at
  src/tracer/stats/Makefile.am to fix a bug in K computer.
  * 19Dec2014 Improve Java examples for Darwin & Linux

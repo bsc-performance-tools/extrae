@@ -51,10 +51,10 @@
 #define MAX_USER_FUNCTION_OFFSET FIVE_CALLS_AGO
 #define MAX_STACK_DEEPNESS       (MAX_CALLERS + MAX_USER_FUNCTION_OFFSET)
    
-#define MPI_CALLER_EVENT_TYPE(deepness) (Caller_Count[CALLER_MPI] > 1 ? CALLER_EV+deepness : CALLER_EV)
+#define MPI_CALLER_EVENT_TYPE(deepness) (Caller_Count[CALLER_MPI] >= 1 ? CALLER_EV+deepness : CALLER_EV)
 
 #define CALLER_EVENT_TYPE(type,deepness) \
-	(Caller_Count[type] > 1 ? CALLER_EV+deepness : CALLER_EV)
+	(Caller_Count[type] >= 1 ? CALLER_EV+deepness : CALLER_EV)
 
 enum 
 {
