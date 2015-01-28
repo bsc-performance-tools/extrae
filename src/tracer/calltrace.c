@@ -36,6 +36,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #include "common_hwc.h"
 
+//#define DEBUG
+//#define MPICALLER_DEBUG
+
 /* -- El usuario ha desactivado el traceo de MPI callers? -------- */
 int Trace_Caller_Enabled[COUNT_CALLER_TYPES] = { TRUE, TRUE, TRUE };
 
@@ -54,8 +57,6 @@ int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0, 0 };
 # ifdef HAVE_LIBUNWIND_H
 #  include <libunwind.h>
 # endif
-
-//#define MPICALLER_DEBUG
 
 void trace_callers (iotimer_t time, int offset, int type)
 {
@@ -175,32 +176,40 @@ void trace_callers (iotimer_t time, int offset, int type) {
 	/* To print the name of the function, compile with -rdynamic */
 	strings = backtrace_symbols (callstack, size);
 
-	printf ("%d calls in the callstack.\n", size);
+	fprintf (stderr, "%d calls in the callstack.\n", size);
 	for (i = 0; i < size; i++)
 		printf ("%s\n", strings[i]);
 #endif
 
-	for (i=0; (i<Caller_Deepness[type] && (i+offset-1)<size); i++)
-	{
-#ifdef MPICALLER_DEBUG
-		fprintf (stderr, "i = %d p-callstack=%d ip = %lx\n", i, i+offset-1, callstack[i+offset-1]);
-#endif
+        int frame = 0;
+	for (frame = 0; ((frame < Caller_Deepness[type]+offset-1) && (frame < size)); frame ++)
+        {
+	  int current_caller = frame - offset + 2;          
 
-		if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY)
-		{
-			if (Trace_Caller[type][i+offset-1])
-			{
-				TRACE_EVENT(time, CALLER_EVENT_TYPE(type, i+offset+1), (UINT64) callstack[i+offset-1]);
-			}
-		}
-#if defined(SAMPLING_SUPPORT)
-		else if (type == CALLER_SAMPLING)
-		{
-			if (Trace_Caller[CALLER_SAMPLING][i])
-				SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+i+1, (UINT64) callstack[i+offset-1]);
-		}
+#ifdef MPICALLER_DEBUG
+	  fprintf(stderr, "#%d ip=%lx", frame, (long)callstack[frame]);
+	  if (current_caller > 0)
+	    fprintf(stderr, " current_caller=%d trace_this_caller?=%d", current_caller, Trace_Caller[type][current_caller - 1]);
+	  fprintf(stderr, "\n");
 #endif
-	}	  
+          if (current_caller > 0)
+          {
+	    if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY)
+            {
+              if (Trace_Caller[type][current_caller - 1])
+              {
+                TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_caller), (UINT64) callstack[frame]);
+              }
+            }
+#if defined(SAMPLING_SUPPORT)
+            else if (type == CALLER_SAMPLING)
+            {
+              if (Trace_Caller[CALLER_SAMPLING][current_caller - 1])
+                SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_caller, (UINT64) callstack[frame]);
+            }
+#endif
+          }
+        }
 }
 
 UINT64 get_caller (int offset)

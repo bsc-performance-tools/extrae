@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 28Jan2015 Fixed bug in calltrace.c that made wrong caller levels to be traced
+ when using backtrace instead of libunwind.
  * 26Jan2015 Fixed bug in calltrace.h that made that the label of the caller
  events when is a single level of the stack requested to be always 70000000,
  despite the level requested.
