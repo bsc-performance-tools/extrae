@@ -64,12 +64,12 @@ int look_for_symbol(void *handle, char *symbol)
   symbol_ptr = dlsym(handle, symbol); 
   if ((error = dlerror()) != NULL)
   {
-    fprintf(stderr, "no\n", error);
+    fprintf(stderr, "no (%s)\n", error);
     return 0;
   }
   else
   {
-    fprintf(stderr, "yes\n", error);
+    fprintf(stderr, "yes\n");
     return 1;
   }
 }
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
   if (child_pid == 0) 
   {
     /* This is done by the child process. */
-    execv("/home/bsc41/bsc41127/tests/single-lib-extrae/app", NULL);
+    execv ("/home/bsc41/bsc41127/tests/single-lib-extrae/app", NULL);
     /* If execv returns, it must have failed. */
     fprintf(stderr, "Unknown command\n");
     exit(0);
