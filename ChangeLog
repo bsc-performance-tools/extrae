@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 13Feb2015 Extend malloc-related instrumentation 
  * 28Jan2015 Fixed bug in calltrace.c that made wrong caller levels to be traced
  when using backtrace instead of libunwind.
  * 26Jan2015 Fixed bug in calltrace.h that made that the label of the caller
