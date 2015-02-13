@@ -97,6 +97,7 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(PTHREAD_SUPPORT)
 # include "pthread_probe.h"
 #endif
+#include "malloc_probe.h"
 
 /* Some global (but local in the module) variables */
 static char *temporal_d = NULL, *final_d = NULL;
@@ -620,6 +621,58 @@ static void Parse_XML_UF (int rank, xmlNodePtr current_tag)
 
 		tag = tag->next;
 	}
+}
+
+static void Parse_XML_DynamicMemory (int rank, xmlNodePtr current_tag)
+{
+	int alloc_enabled = TRUE, free_enabled = FALSE;
+	unsigned long long alloc_threshold = 0;
+
+	xmlNodePtr tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
+		{
+		}
+		/* Should we instrument malloc/realloc calls? with threshold? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_DYNAMIC_MEMORY_ALLOC))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			alloc_enabled = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+			if (alloc_enabled)
+			{
+				xmlChar *threshold = xmlGetProp_env (rank, tag, TRACE_DYNAMIC_MEMORY_ALLOC_THRESHOLD);
+				alloc_threshold = atoll (threshold);
+				XML_FREE(threshold);
+				mfprintf (stdout, PACKAGE_NAME": Memory allocation routines (malloc/realloc) will be instrumented when they allocate more than %llu bytes.\n", alloc_threshold);
+			}
+			else
+			{
+				mfprintf (stdout, PACKAGE_NAME": Memory allocation routines (malloc/realloc) won't be instrumented.\n");
+			}
+			XML_FREE(enabled);
+		}
+		/* Should we instrument free */
+		else if (!xmlStrcasecmp (tag->name, TRACE_DYNAMIC_MEMORY_FREE))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			free_enabled = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+			mfprintf (stdout, PACKAGE_NAME": Memory freeing routines (malloc/realloc) will %sbe instrumented.\n", 
+			  free_enabled?"":"not ");
+			XML_FREE(enabled);
+		}
+		else
+		{
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <UserFunctions> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+
+	Extrae_set_trace_malloc_allocate (alloc_enabled);
+	Extrae_set_trace_malloc_free (free_enabled);
+	Extrae_set_trace_malloc_allocate_threshold (alloc_threshold);
 }
 
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
@@ -1780,7 +1833,10 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 					{
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
+							Parse_XML_DynamicMemory (rank, current_tag);
 							DynamicMemoryInstrumentation = TRUE;
+						}
 						XML_FREE(enabled);
 					}
 					/* Check for basic I/O instrumentation */

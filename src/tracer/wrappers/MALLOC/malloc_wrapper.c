@@ -94,7 +94,9 @@ void *malloc (size_t s)
 	void *res;
 	int canInstrument = !Backend_inInstrumentation(THREADID) && 
 	  mpitrace_on &&
-	  Extrae_get_trace_malloc();
+	  Extrae_get_trace_malloc() &&
+	  Extrae_get_trace_malloc_allocate() &&
+	  s >= Extrae_get_trace_malloc_allocate_threshold();
 
 	if (real_malloc == NULL)
 		Extrae_malloctrace_init ();
@@ -116,7 +118,7 @@ void *malloc (size_t s)
 		Probe_Malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
-	else if (real_malloc != NULL && !canInstrument)
+	else if (real_malloc != NULL)
 	{
 		res = real_malloc (s);
 	}
@@ -151,7 +153,7 @@ void free (void *p)
 	}
 #endif
 
-	if (real_free != NULL && canInstrument)
+	if (Extrae_get_trace_malloc_free() && real_free != NULL && canInstrument)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_Free_Entry (p);
@@ -159,7 +161,7 @@ void free (void *p)
 		Probe_Free_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
-	else if (real_free != NULL && !canInstrument)
+	else if (real_free != NULL)
 	{
 		real_free (p);
 	}
@@ -215,7 +217,9 @@ void *realloc (void *p, size_t s)
 	void *res;
 	int canInstrument = !Backend_inInstrumentation(THREADID) && 
 	  mpitrace_on &&
-	  Extrae_get_trace_malloc();
+	  Extrae_get_trace_malloc() &&
+	  Extrae_get_trace_malloc_allocate() &&
+	  s >= Extrae_get_trace_malloc_allocate_threshold();
 
 	if (real_realloc == NULL)
 		Extrae_malloctrace_init ();
@@ -236,7 +240,7 @@ void *realloc (void *p, size_t s)
 		Probe_Realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
-	else if (real_realloc != NULL && !canInstrument)
+	else if (real_realloc != NULL)
 	{
 		res = real_realloc (p, s);
 	}

@@ -36,6 +36,27 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2098 2013-09-06 12:39:32Z haral
 #include "malloc_probe.h"
 
 static int trace_malloc = FALSE;
+static int trace_malloc_allocate = TRUE;
+static int trace_malloc_free     = FALSE;
+static unsigned long long trace_malloc_allocate_threshold = 1024;
+
+void Extrae_set_trace_malloc_allocate (int b)
+{ trace_malloc_allocate = b; }
+
+int Extrae_get_trace_malloc_allocate (void)
+{ return trace_malloc_allocate; }
+
+void Extrae_set_trace_malloc_allocate_threshold (unsigned long long t)
+{ trace_malloc_allocate_threshold = t; }
+
+unsigned long long Extrae_get_trace_malloc_allocate_threshold (void)
+{ return trace_malloc_allocate_threshold; }
+
+void Extrae_set_trace_malloc_free (int b)
+{ trace_malloc_free = b; }
+
+int Extrae_get_trace_malloc_free (void)
+{ return trace_malloc_free; }
 
 void Extrae_set_trace_malloc (int b)
 { trace_malloc = b; }

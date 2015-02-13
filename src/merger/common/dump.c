@@ -125,6 +125,11 @@ static void show_current (event_t * c, UINT64 max_time)
 	{
 		fprintf (stdout, "NAMED CRITICAL ADDRESS: %llu [0x%llx]\n", c->param.omp_param.param, c->param.omp_param.param);
 	}
+	else if (c->event == MALLOC_EV || c->event == REALLOC_EV)
+	{
+		fprintf (stdout, "%s SIZE: %llu\n", c->event==MALLOC_EV?"malloc()":"realloc()",
+		  c->param.misc_param.param);
+	}
 #if USE_HARDWARE_COUNTERS
 	else if (c->event == HWC_DEF_EV)
 	{

@@ -36,6 +36,12 @@
 
 void Extrae_set_trace_malloc (int b);
 int Extrae_get_trace_malloc (void);
+void Extrae_set_trace_malloc_allocate (int b);
+int Extrae_get_trace_malloc_allocate (void);
+void Extrae_set_trace_malloc_allocate_threshold (unsigned long long t);
+unsigned long long Extrae_get_trace_malloc_allocate_threshold (void);
+void Extrae_set_trace_malloc_free (int b);
+int Extrae_get_trace_malloc_free (void);
 
 void Probe_Malloc_Entry (size_t s);
 void Probe_Malloc_Exit (void *p);
