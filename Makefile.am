@@ -263,6 +263,8 @@ MPIOPENCL_EXAMPLE_FILES+=\
 endif
 
 if OS_LINUX
+if !IS_BG_MACHINE
+if !IS_CELL_MACHINE
 MPI_EXAMPLE_FILES+=\
  example/LINUX/MPI/README \
  example/LINUX/MPI/extrae.xml \
@@ -389,7 +391,9 @@ FORK_EXAMPLE_FILES+=\
  example/LINUX/FORK/Makefile \
  example/LINUX/FORK/pi_forked.c \
  example/LINUX/FORK/README \
- example/LINUX/FORK/run_dyninst.sh 
+ example/LINUX/FORK/run_dyninst.sh
+endif
+endif
 endif
 
 
