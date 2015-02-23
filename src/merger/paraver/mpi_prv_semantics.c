@@ -1136,6 +1136,8 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_COMM_DUP_EV, Other_MPI_Event },
 	{ MPI_CART_CREATE_EV, Other_MPI_Event },
 	{ MPI_CART_SUB_EV, Other_MPI_Event },
+	{ MPI_INTERCOMM_CREATE_EV, Other_MPI_Event },
+	{ MPI_INTERCOMM_MERGE_EV, Other_MPI_Event },
 	{ MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_SoftwareCounter_Event },
 	{ MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, MPI_ElapsedTimeOutsideRequest_get_status_Event },
 	{ MPI_IPROBE_COUNTER_EV, MPI_IProbeSoftwareCounter_Event },

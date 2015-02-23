@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 23Feb2015 Instrumentation of MPI_intercomm_[create|merge]
  + 13Feb2015 Extend malloc-related instrumentation 
  * 28Jan2015 Fixed bug in calltrace.c that made wrong caller levels to be traced
  when using backtrace instead of libunwind.

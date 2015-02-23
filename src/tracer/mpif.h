@@ -477,6 +477,13 @@ void CtoF77 (pmpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
 void CtoF77 (pmpi_cart_sub) (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror);
 
+void CtoF77(mpi_intercomm_create)(MPI_Fint *local_comm,
+	MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader,
+	MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror);
+
+void CtoF77 (mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
+	MPI_Fint *newintracomm, MPI_Fint *ierror);
+
 void CtoF77 (pmpi_start) (MPI_Fint *request, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_startall) (MPI_Fint *count, MPI_Fint array_of_requests[],

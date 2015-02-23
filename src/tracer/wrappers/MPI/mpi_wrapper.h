@@ -243,12 +243,19 @@ void PMPI_Ssend_init_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror);
 
-void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
-	MPI_Fint *comm_new, MPI_Fint *ierror);
-
 void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 	MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
 	MPI_Fint *ierror);
+
+void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
+	MPI_Fint *comm_new, MPI_Fint *ierror);
+
+void PMPI_Intercomm_create_F_Wrapper (MPI_Fint *local_comm, MPI_Fint *local_leader,
+	MPI_Fint *peer_comm, MPI_Fint *remote_leader, MPI_Fint *tag,
+	MPI_Fint *newintercomm, MPI_Fint *ierror);
+
+void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
+	MPI_Fint *newintracomm, MPI_Fint *ierror);
 
 void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf,
@@ -457,6 +464,12 @@ int MPI_Cart_create_C_Wrapper (MPI_Comm comm_old, int ndims, int *dims,
   int *periods, int reorder, MPI_Comm *comm_cart);
 
 int MPI_Cart_sub_C_Wrapper (MPI_Comm comm, int *remain_dims, MPI_Comm *comm_new);
+
+int MPI_Intercomm_create_C_Wrapper (MPI_Comm local_comm, int local_leader,
+	MPI_Comm peer_comm, int remote_leader, int tag, MPI_Comm *newintercomm);
+
+int MPI_Intercomm_merge_C_Wrapper (MPI_Comm intercomm, int high,
+	MPI_Comm *newintracomm);
 
 int MPI_Start_C_Wrapper (MPI_Request* request);
 

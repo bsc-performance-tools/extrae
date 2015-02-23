@@ -81,7 +81,7 @@ static char UNUSED rcsid[] = "$Id$";
 #define ENTER	TRUE
 #define LEAVE	FALSE
 
-//#define DEBUG_MPITRACE
+#define DEBUG_MPITRACE
 
 #if defined(DEBUG_MPITRACE)
 #	define DEBUG_INTERFACE(enter) \
@@ -2043,6 +2043,75 @@ void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain
 	DLB_MPI_Cart_sub_F_leave ();
 #endif
 }
+
+
+/******************************************************************************
+ *** MPI_Intercomm_create
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_intercomm_create__,mpi_intercomm_create_,MPI_INTERCOMM_CREATE,mpi_intercomm_create, (MPI_Fint * local_comm, MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader, MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_intercomm_create) (MPI_Fint * local_comm,
+	MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader,
+	MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_intercomm_create) (MPI_Fint *local_comm
+	MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader,
+	MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror)
+#endif
+{
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_create_F_enter (local_comm, local_leader, peer_comm,
+	  remote_leader, tag, new_intercomm, ierror);
+#endif
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		PMPI_Intercomm_create_F_Wrapper (local_comm, local_leader, peer_comm,
+		  remote_leader, tag, new_intercomm, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (mpi_intercomm_create) (local_comm, local_leader, peer_comm, 
+		  remote_leader, tag, new_intercomm, ierror);
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_create_F_leave ();
+#endif
+}
+
+/******************************************************************************
+ *** MPI_Intercomm_merge
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_intercomm_merge__,mpi_intercomm_merge_,MPI_INTERCOMM_MERGE,mpi_intercomm_merge, (MPI_Fint *intercomm, MPI_Fint *high, MPI_Fint *newintracomm, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
+	MPI_Fint *newintracomm, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
+	MPI_Fint *newintracomm, MPI_Fint *ierror)
+#endif
+{
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_merge_F_enter (intercomm, high, newintracomm, ierror);
+#endif
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		PMPI_Intercomm_merge_F_Wrapper (intercomm, high, newintracomm, ierror);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		CtoF77 (mpi_intercomm_merge) (intercomm, high, newintracomm, ierror);
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_merge_F_leave ();
+#endif
+}
+
 
 /******************************************************************************
  ***  MPI_Start
@@ -4698,6 +4767,67 @@ int NAME_ROUTINE_C(MPI_Cart_sub) (MPI_Comm comm, MPI3_CONST int *remain_dims,
 
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_MPI_Cart_sub_leave ();
+#endif
+	return res;
+}
+
+/******************************************************************************
+ *** MPI_Intercom_create
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Intercomm_create) (MPI_Comm local_comm, int local_leader,
+	MPI_Comm peer_comm, int remote_leader, int tag, MPI_Comm *newintercomm)
+{
+	int res;
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_create_enter (local_comm, local_leader, peer_comm,
+	  remote_leader, tag, newintercomm);
+#endif
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		res = MPI_Intercomm_create_C_Wrapper (local_comm, local_leader, peer_comm,
+		  remote_leader, tag, newintercomm);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res =  PMPI_Intercomm_create (local_comm, local_leader, peer_comm,
+		  remote_leader, tag, newintercomm);
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_create_leave ();
+#endif
+	return res;
+}
+
+/******************************************************************************
+ *** MPI_Intercom_merge
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Intercomm_merge) (MPI_Comm intercomm, int high,
+	MPI_Comm *newintracomm)
+{
+	int res;
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_merge_enter (intercomm, high, newintracomm);
+#endif
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		res = MPI_Intercomm_merge_C_Wrapper (intercomm, high, newintracomm);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res =  PMPI_Intercomm_merge (intercomm, high, newintracomm);
+
+#if defined(ENABLE_LOAD_BALANCING)
+	DLB_MPI_Intercomm_merge_leave ();
 #endif
 	return res;
 }

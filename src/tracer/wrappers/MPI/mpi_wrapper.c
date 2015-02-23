@@ -4301,6 +4301,52 @@ void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 	updateStats_OTHER(global_mpi_stats);
 }
 
+void PMPI_Intercomm_create_F_Wrapper (MPI_Fint *local_comm, MPI_Fint *local_leader,
+	MPI_Fint *peer_comm, MPI_Fint *remote_leader, MPI_Fint *tag,
+	MPI_Fint *newintercomm, MPI_Fint *ierror)
+{
+	MPI_Fint comm_null;
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_INTERCOMM_CREATE_EV, EVT_BEGIN,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	CtoF77(mpi_intercomm_create) (local_comm, local_leader, peer_comm,
+	  remote_leader, tag, newintercomm, ierror);
+
+	if (*ierror == MPI_SUCCESS && *newintercomm != comm_null)
+	{
+		MPI_Comm comm_id = MPI_Comm_f2c (*newintercomm);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
+
+	TRACE_MPIEVENT(TIME, MPI_INTERCOMM_CREATE_EV, EVT_END,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+}
+
+void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
+	MPI_Fint *newintracomm, MPI_Fint *ierror)
+{
+	MPI_Fint comm_null;
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_INTERCOMM_MERGE_EV, EVT_BEGIN,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	CtoF77(mpi_intercomm_merge) (intercomm, high, newintracomm, ierror);
+
+	if (*ierror == MPI_SUCCESS && *newintracomm != comm_null)
+	{
+		MPI_Comm comm_id = MPI_Comm_f2c (*newintracomm);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
+
+	TRACE_MPIEVENT(TIME, MPI_INTERCOMM_MERGE_EV, EVT_END,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+}
+
 void MPI_Sendrecv_Fortran_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf,
 	MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag,
@@ -7505,6 +7551,50 @@ int MPI_Cart_sub_C_Wrapper (MPI_Comm comm, int *remain_dims, MPI_Comm *comm_new)
 	return ierror;
 }
 
+/* -------------------------------------------------------------------------
+   MPI_Intercomm_create
+   ------------------------------------------------------------------------- */
+int MPI_Intercomm_create_C_Wrapper (MPI_Comm local_comm, int local_leader,
+	MPI_Comm peer_comm, int remote_leader, int tag, MPI_Comm *newintercomm)
+{
+	int ierror;
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_INTERCOMM_MERGE_EV, EVT_BEGIN,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	ierror = PMPI_Intercomm_create (local_comm, local_leader, peer_comm,
+	  remote_leader, tag, newintercomm);
+
+	if (ierror == MPI_SUCCESS && *newintercomm != MPI_COMM_NULL)
+		Trace_MPI_Communicator (*newintercomm, LAST_READ_TIME, TRUE);
+
+	TRACE_MPIEVENT(TIME, MPI_INTERCOMM_MERGE_EV, EVT_END,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	return ierror;
+}
+
+/* -------------------------------------------------------------------------
+   MPI_Intercomm_merge
+   ------------------------------------------------------------------------- */
+int MPI_Intercomm_merge_C_Wrapper (MPI_Comm intercomm, int high,
+	MPI_Comm *newintracomm)
+{
+	int ierror;
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_INTERCOMM_MERGE_EV, EVT_BEGIN,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	ierror = PMPI_Intercomm_merge (intercomm, high, newintracomm);
+
+	if (ierror == MPI_SUCCESS && *newintracomm != MPI_COMM_NULL)
+		Trace_MPI_Communicator (*newintracomm, LAST_READ_TIME, TRUE);
+
+	TRACE_MPIEVENT(TIME, MPI_INTERCOMM_MERGE_EV, EVT_END,
+	  EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	return ierror;
+}
 
 
 /******************************************************************************
@@ -8737,7 +8827,6 @@ static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 	*/
 	int i, num_tasks, ierror;
 	int result, is_comm_world, is_comm_self;
-	MPI_Group group;
 
 	/* First check if the communicators are duplicates of comm_world or
 	   comm_self */
@@ -8749,35 +8838,98 @@ static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 
 	if (!is_comm_world && !is_comm_self)
 	{
-		/* Obtain the group of the communicator */
-		ierror = PMPI_Comm_group (newcomm, &group);
-		MPI_CHECK(ierror, PMPI_Comm_group);
+		int intercomm;
 
-		/* Calculate the number of involved tasks */
-		ierror = PMPI_Group_size (group, &num_tasks);
-		MPI_CHECK(ierror, PMPI_Group_size);
+		ierror = MPI_Comm_test_inter (newcomm, &intercomm);
 
+		if (intercomm)
 		{
-			int ranks_aux[num_tasks];
+			MPI_Group l_group, r_group;
+			int l_size, r_size;
+			
+            ierror = PMPI_Comm_remote_group (newcomm, &r_group);
+			MPI_CHECK(ierror, PMPI_Comm_remote_group);
 
-			/* Obtain task id of each element */
-			ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
-			MPI_CHECK(ierror, PMPI_Group_translate_ranks);
+            ierror = PMPI_Comm_remote_size (newcomm, &r_size);
+			MPI_CHECK(ierror, PMPI_Comm_remote_size);
 
-			FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, trace);
+			ierror = PMPI_Comm_group (newcomm, &l_group);
+			MPI_CHECK(ierror, PMPI_Comm_group);
+	
+			ierror = PMPI_Group_size (l_group, &l_size);
+			MPI_CHECK(ierror, PMPI_Group_size);
 
-			/* Dump each of the task ids */
-			for (i = 0; i < num_tasks; i++)
-				FORCE_TRACE_MPIEVENT (time, MPI_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
-					EMPTY, EMPTY, EMPTY, EMPTY);
+			{
+				int l_ranks_aux[l_size];
+				int r_ranks_aux[r_size];
+
+				ierror = PMPI_Group_translate_ranks (r_group, r_size, ranks_global, grup_global,
+				  r_ranks_aux);
+				MPI_CHECK(ierror, PMPI_Group_translate_ranks);
+
+				ierror = PMPI_Group_translate_ranks (l_group, l_size, ranks_global, grup_global,
+				  l_ranks_aux);
+				MPI_CHECK(ierror, PMPI_Group_translate_ranks);
+
+				FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, EMPTY,
+				  r_size+l_size, EMPTY, newcomm, trace);
+
+				/* Dump each of the task ids */
+				for (i = 0; i < l_size; i++)
+					FORCE_TRACE_MPIEVENT (time, MPI_RANK_CREACIO_COMM_EV, l_ranks_aux[i], EMPTY,
+						EMPTY, EMPTY, EMPTY, EMPTY);
+				for (i = 0; i < r_size; i++)
+					FORCE_TRACE_MPIEVENT (time, MPI_RANK_CREACIO_COMM_EV, r_ranks_aux[i], EMPTY,
+						EMPTY, EMPTY, EMPTY, EMPTY);
+			}
+
+			/* Free the group */
+			if (l_group != MPI_GROUP_NULL)
+			{
+				ierror = PMPI_Group_free (&l_group);
+				MPI_CHECK(ierror, PMPI_Group_free);
+			}
+			if (r_group != MPI_GROUP_NULL)
+			{
+				ierror = PMPI_Group_free (&r_group);
+				MPI_CHECK(ierror, PMPI_Group_free);
+			}
+		}
+		else
+		{
+			MPI_Group group;
+
+			/* Obtain the group of the communicator */
+			ierror = PMPI_Comm_group (newcomm, &group);
+			MPI_CHECK(ierror, PMPI_Comm_group);
+	
+			/* Calculate the number of involved tasks */
+			ierror = PMPI_Group_size (group, &num_tasks);
+			MPI_CHECK(ierror, PMPI_Group_size);
+
+			{
+				int ranks_aux[num_tasks];
+	
+				/* Obtain task id of each element */
+				ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
+				MPI_CHECK(ierror, PMPI_Group_translate_ranks);
+	
+				FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, trace);
+	
+				/* Dump each of the task ids */
+				for (i = 0; i < num_tasks; i++)
+					FORCE_TRACE_MPIEVENT (time, MPI_RANK_CREACIO_COMM_EV, ranks_aux[i], EMPTY,
+						EMPTY, EMPTY, EMPTY, EMPTY);
+			}
+
+			/* Free the group */
+			if (group != MPI_GROUP_NULL)
+			{
+				ierror = PMPI_Group_free (&group);
+				MPI_CHECK(ierror, PMPI_Group_free);
+			}
 		}
 
-		/* Free the group */
-		if (group != MPI_GROUP_NULL)
-		{
-			ierror = PMPI_Group_free (&group);
-			MPI_CHECK(ierror, PMPI_Group_free);
-		}
 	}
 	else if (is_comm_world)
 	{

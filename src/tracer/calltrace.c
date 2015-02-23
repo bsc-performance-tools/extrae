@@ -155,8 +155,9 @@ UINT64 get_caller (int offset)
 
 void trace_callers (iotimer_t time, int offset, int type) {
 	void * callstack[MAX_STACK_DEEPNESS];
-	int i, size;
+	int size;
 #ifdef MPICALLER_DEBUG
+	int i;
 	char **strings; 
 #endif
 
