@@ -81,7 +81,7 @@ static char UNUSED rcsid[] = "$Id$";
 #define ENTER	TRUE
 #define LEAVE	FALSE
 
-#define DEBUG_MPITRACE
+//#define DEBUG_MPITRACE
 
 #if defined(DEBUG_MPITRACE)
 #	define DEBUG_INTERFACE(enter) \

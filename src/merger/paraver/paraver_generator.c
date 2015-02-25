@@ -463,7 +463,8 @@ static int paraver_multi_event (struct fdz_fitxer fdz, unsigned int cpu,
 	unsigned length;
 #endif
   char buffer[1024];
-  int i, ret;
+	unsigned i;
+	int ret;
 
   /*
    * Format event line is :
@@ -779,7 +780,7 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 	char Header[1024];
 	unsigned threads, task, ptask, node;
 	TipusComunicador com;
-	int i, final;
+	int final;
 
 	UNREFERENCED_PARAMETER(numtasks);
 #if !defined(PARALLEL_MERGE)
@@ -888,18 +889,38 @@ static int Paraver_WriteHeader (FileSet_t *fset, int numtasks, int taskid,
 			final = (primer_comunicador (&com) < 0);
 			while (!final)
 			{
+				unsigned u;
+
 				/* Write this communicator */
-				sprintf (Header, "c:%d:%d:%d", ptask, com.id, com.num_tasks);
+				sprintf (Header, "c:%d:%lu:%d", ptask, com.id, com.num_tasks);
 				PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
-				for (i = 0; i < com.num_tasks; i++)
+				for (u = 0; u < com.num_tasks; u++)
 				{
-					sprintf (Header, ":%d", com.tasks[i] + 1);
+					sprintf (Header, ":%d", com.tasks[u] + 1);
 					PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
 				}
 				PRVWRITECNTL (FDZ_WRITE (prv_fd, "\n"));
 
-			/* Get the next communicator */
-			final = (seguent_comunicador (&com) < 0);
+				/* Get the next communicator */
+				final = (seguent_comunicador (&com) < 0);
+			}
+
+			unsigned pos = 0, hasdata = TRUE;
+			while (hasdata)
+			{
+				uintptr_t intercomm, intracomm1, intracomm2;
+				int leader1, leader2;
+
+				hasdata = getInterCommunicatorInfo (pos, &intercomm,
+				  &intracomm1, &leader1, &intracomm2, &leader2);
+
+				if (hasdata)
+				{
+					sprintf (Header, "i:%d:%lu:%lu:%d:%lu:%d\n", ptask, intercomm, intracomm1,
+					  leader1, intracomm2, leader2);
+					PRVWRITECNTL (FDZ_WRITE (prv_fd, Header));
+					pos++;
+				}
 			}
 		}
 	}
@@ -1294,7 +1315,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 			gettimeofday (&time_end, NULL);
 
 			delta = time_end.tv_sec - time_begin.tv_sec;
-			fprintf (stdout, "mpi2prv: Elapsed time on tree step %d: %d hours %d minutes %d seconds\n", current_depth+1, delta / 3600, (delta % 3600)/60, (delta % 60));
+			fprintf (stdout, "mpi2prv: Elapsed time on tree step %d: %ld hours %ld minutes %ld seconds\n", current_depth+1, delta / 3600, (delta % 3600)/60, (delta % 60));
 		}
 
 		Flush_Paraver_Files_binary (prvfset, taskid, current_depth, tree_fan_out);
@@ -1311,7 +1332,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 	gettimeofday (&time_end, NULL);
 	delta = time_end.tv_sec - time_begin.tv_sec;
-	fprintf (stdout, "mpi2prv: Elapsed time merge step: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+	fprintf (stdout, "mpi2prv: Elapsed time merge step: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 
 #endif /* PARALLEL_MERGE */
 
@@ -1340,7 +1361,7 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 		fprintf (stdout, "done\n");
 		fflush (stdout);
 		delta = time_end.tv_sec - time_begin.tv_sec;
-		fprintf (stdout, "mpi2prv: Elapsed time removing temporal files: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+		fprintf (stdout, "mpi2prv: Elapsed time removing temporal files: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 	}
 
 #if defined(IS_BG_MACHINE)

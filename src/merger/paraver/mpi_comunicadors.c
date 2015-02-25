@@ -42,11 +42,32 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 
 #include "debug.h"
 #include "queue.h"
 #include "mpi_comunicadors.h"
 #include "trace_to_prv.h"
+
+typedef struct
+{
+	uintptr_t comms[2];
+	int leaders[2];
+	uintptr_t commid;
+	uintptr_t alias;
+} InterCommInfo_t;
+static InterCommInfo_t *InterComm_global = NULL;
+static unsigned num_InterCommunicators = 0;
+
+typedef struct
+{
+	uintptr_t commid;
+	uintptr_t alias;
+} InterCommInfoAlias_t;
+static InterCommInfoAlias_t ***Intercomm_ptask_task = NULL;
+static unsigned **num_InterCommunicatorAlias = NULL;
 
 static unsigned int num_comunicadors = 0;
 
@@ -80,23 +101,43 @@ static void afegir_alies (TipusComunicador * comm, CommInfo_t * info_com, int pt
  *******************************************************************/
 void initialize_comunicadors (int n_ptasks)
 {
-	int ii, jj;
+	int ii;
+	unsigned jj;
 
+	/* Init intra-communicator */
 	INIT_QUEUE (&comunicadors);
 
+#if defined(DEBUG_COMMUNICATORS)
+	fprintf (stderr, "DEBUG: Initializing communicators\n");
+#endif
+
 	alies_comunicadors = (CommAliasInfo_t **) malloc (n_ptasks * sizeof (CommAliasInfo_t *));
-	ASSERT(alies_comunicadors!=NULL, "Not enough memory for communicators alias");
+	ASSERT(alies_comunicadors!=NULL, "Not enough memory for intra-communicators alias");
 
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
 		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
 		alies_comunicadors[ii] = (CommAliasInfo_t *) malloc (ptask_info->ntasks * sizeof (CommAliasInfo_t));
-		ASSERT(alies_comunicadors[ii]!=NULL, "Not enough memory for communicators alias");
+		ASSERT(alies_comunicadors[ii]!=NULL, "Not enough memory for intra-communicators alias");
 	}
 
-#if defined(DEBUG_COMMUNICATORS)
-	fprintf (stderr, "DEBUG: Initializing communicators\n");
-#endif
+	/* Init inter-communicator */
+	Intercomm_ptask_task = (InterCommInfoAlias_t ***) malloc (n_ptasks * sizeof (InterCommInfoAlias_t **));
+	ASSERT(Intercomm_ptask_task!=NULL, "Not enough memory for inter-communicators alias");
+	num_InterCommunicatorAlias = (unsigned **) malloc (n_ptasks * sizeof (unsigned *));
+	ASSERT(num_InterCommunicatorAlias!=NULL, "Not enough memory for inter-communicators alias");
+	for (ii = 0; ii < n_ptasks; ii++)
+	{
+		ptask_t *ptask_info = GET_PTASK_INFO(ii+1);
+
+		Intercomm_ptask_task[ii] = (InterCommInfoAlias_t**) malloc (ptask_info->ntasks * sizeof (InterCommInfoAlias_t *));
+		ASSERT(Intercomm_ptask_task[ii]!=NULL, "Not enough memory for inter-communicators alias");
+		memset (Intercomm_ptask_task[ii], 0, ptask_info->ntasks*sizeof(InterCommInfoAlias_t*));
+
+		num_InterCommunicatorAlias[ii] = (unsigned*) malloc (ptask_info->ntasks * sizeof(unsigned));
+		ASSERT(num_InterCommunicatorAlias[ii]!=NULL, "Not enough memory for inter-communicators alias");
+		memset (num_InterCommunicatorAlias[ii], 0, ptask_info->ntasks*sizeof(unsigned));
+	}
 
 	for (ii = 0; ii < n_ptasks; ii++)
 	{
@@ -114,10 +155,11 @@ void initialize_comunicadors (int n_ptasks)
  *******************************************************************/
 uintptr_t alies_comunicador (uintptr_t comid, int ptask, int task)
 {
-  CommAliasInfo_t *info;
+	unsigned u;
+	CommAliasInfo_t *info;
 
-  ptask--;
-  task--;
+	ptask--;
+	task--;
 
 	for (info = GET_HEAD_ITEM (&(alies_comunicadors[ptask][task]));
 		info != NULL;
@@ -125,9 +167,13 @@ uintptr_t alies_comunicador (uintptr_t comid, int ptask, int task)
 		if (info->commid_de_la_task == comid)
 			return info->alies;
 
-  printf ("mpi2prv: Error: Cannot find : comid = %d, ptask = %d, task = %d\n", comid, ptask, task);
+	for (u = 0; u < num_InterCommunicatorAlias[ptask][task]; u++)
+		if (Intercomm_ptask_task[ptask][task][u].commid == comid)
+			return Intercomm_ptask_task[ptask][task][u].alias;
 
-  return 0;                    /* No hauria de poder passar mai */
+	printf ("mpi2prv: Error: Cannot find : comid = %lu, ptask = %d, task = %d\n", comid, ptask, task);
+
+	return 0;
 }
 
 
@@ -139,7 +185,7 @@ uintptr_t alies_comunicador (uintptr_t comid, int ptask, int task)
  *******************************************************************/
 int compara_comunicadors (TipusComunicador * comm1, TipusComunicador * comm2)
 {
-  int i, iguals;
+  unsigned i, iguals;
 
   if (comm1->num_tasks != comm2->num_tasks)
     return 0;
@@ -157,6 +203,82 @@ int compara_comunicadors (TipusComunicador * comm1, TipusComunicador * comm2)
   return iguals;
 }
 
+static void addInterCommunicatorAlias (uintptr_t InterCommID, uintptr_t alias,
+	int ptask, int task)
+{
+	int found = FALSE;
+	unsigned u, found_pos;
+
+	for (u = 0; u < num_InterCommunicatorAlias[ptask][task]; u++)
+	{
+		found = Intercomm_ptask_task[ptask][task][u].commid = InterCommID;
+		if (found)
+		{
+			found_pos = u;
+			break;
+		}
+	}
+
+	if (!found)
+	{
+		found_pos = num_InterCommunicatorAlias[ptask][task];
+		num_InterCommunicatorAlias[ptask][task]++;
+		Intercomm_ptask_task[ptask][task] = (InterCommInfoAlias_t*) realloc (
+		  Intercomm_ptask_task[ptask][task],
+		  sizeof(InterCommInfoAlias_t)*num_InterCommunicatorAlias[ptask][task]);
+		ASSERT(NULL != Intercomm_ptask_task[ptask][task],
+		  "Not enough memory for inter-communicators alias");
+
+		Intercomm_ptask_task[ptask][task][found_pos].commid = InterCommID;
+	}
+
+	Intercomm_ptask_task[ptask][task][found_pos].alias = alias;
+}
+
+void addInterCommunicator (uintptr_t InterCommID,
+	uintptr_t CommID1, int leader1, uintptr_t CommID2, int leader2,
+	int ptask, int task)
+{
+	unsigned u, found_pos;
+	int found = FALSE;
+
+	CommID1 = alies_comunicador (CommID1, ptask, task);
+	CommID2 = alies_comunicador (CommID2, ptask, task);
+
+	ptask--;
+	task--;
+
+	for (u = 0; u < num_InterCommunicators; ++u)
+	{
+		found =  (InterComm_global[u].comms[0] == CommID1 && InterComm_global[u].comms[1] == CommID2)
+		      || (InterComm_global[u].comms[1] == CommID1 && InterComm_global[u].comms[0] == CommID2);
+		if (found)
+		{
+			found_pos = u;
+			break;
+		}
+	}
+
+	if (!found) 
+	{
+		found_pos = num_InterCommunicators;
+		num_InterCommunicators++;
+		InterComm_global = (InterCommInfo_t *) realloc (InterComm_global,
+		  sizeof(InterCommInfo_t)*num_InterCommunicators);
+		ASSERT(NULL != InterComm_global, "Not enough memory for inter-communicators alias");
+		InterComm_global[found_pos].comms[0] = CommID1;
+		InterComm_global[found_pos].comms[1] = CommID2;
+		InterComm_global[found_pos].leaders[0] = leader1;
+		InterComm_global[found_pos].leaders[1] = leader2;
+		InterComm_global[found_pos].commid = InterCommID;
+		InterComm_global[found_pos].alias = num_comunicadors + ID_MINIM;
+		num_comunicadors++;
+	}
+
+	addInterCommunicatorAlias (InterCommID, InterComm_global[found_pos].alias,
+	  ptask, task);
+}
+
 
 /*******************************************************************
  * afegir_comunicador
@@ -165,7 +287,7 @@ int compara_comunicadors (TipusComunicador * comm1, TipusComunicador * comm2)
  *******************************************************************/
 void afegir_comunicador (TipusComunicador * comm, int ptask, int task)
 {
-	int i;
+	unsigned i;
   int trobat;
   CommInfo_t *info_com;
 
@@ -313,6 +435,22 @@ int seguent_comunicador (TipusComunicador * comm)
     return 0;
   }
   return -1;
+}
+
+int getInterCommunicatorInfo (unsigned pos, uintptr_t *AliasInterComm,
+	uintptr_t *AliasIntraComm1, int *leaderComm1,
+	uintptr_t *AliasIntraComm2, int *leaderComm2)
+{
+	if (pos >= num_InterCommunicators)
+		return 0;
+
+	*AliasInterComm = InterComm_global[pos].alias;
+	*AliasIntraComm1 = InterComm_global[pos].comms[0];
+	*leaderComm1 = 1+InterComm_global[pos].leaders[0];
+	*AliasIntraComm2 = InterComm_global[pos].comms[1];
+	*leaderComm2 = 1+InterComm_global[pos].leaders[1];
+
+	return 1;
 }
 
 

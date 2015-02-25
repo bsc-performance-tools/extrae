@@ -349,7 +349,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	} while ((current_event != NULL) && !error);
 
 #if defined(PARALLEL_MERGE)
-	BuildCommunicators (numtasks, taskid);
+	BuildIntraCommunicators (numtasks, taskid);
 #endif
 
 	if (1 == numtasks)

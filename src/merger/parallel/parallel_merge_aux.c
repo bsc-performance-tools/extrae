@@ -61,54 +61,86 @@ static struct ForeignRecv_t **myForeignRecvs;
 static int *myForeignRecvs_count;
 static char **myForeignRecvs_used;
 
-struct Communicators_t Communicators;
+struct IntraCommunicator_t
+{
+	int *tasks;
+	int type;
+	int task;
+	int ptask;
+	int id;
+	int ntasks;
+};
+struct IntraCommunicators_t
+{
+	struct IntraCommunicator_t *comms;
+	int count, size;
+};
+struct InterCommunicator_t
+{
+	int task;
+	int ptask;
+	int id;
+	int group1;
+	int group2;
+};
+struct InterCommunicators_t
+{
+	struct InterCommunicator *comms;
+	int count, size;
+};
+static struct IntraCommunicators_t IntraCommunicators;
+static struct InterCommunicators_t InterCommunicators;
+
 struct PendingComms_t PendingComms;
 struct ForeignRecvs_t *ForeignRecvs;
 
 #define FOREIGN_RECV_RESIZE_STEP ((1024*1024)/sizeof(struct ForeignRecv_t))
-#define COMMUNICATORS_RESIZE_STEP ((1024*1024)/sizeof(struct Communicator_t))
+#define INTRA_COMMUNICATORS_RESIZE_STEP ((1024*1024)/sizeof(struct IntraCommunicator_t))
+#define INTER_COMMUNICATORS_RESIZE_STEP ((1024*1024)/sizeof(struct InterCommunicator_t))
 #define PENDING_COMM_RESIZE_STEP ((1024*1024)/sizeof(struct PendingCommunication_t))
 
-void AddCommunicator (int ptask, int task, int type, int id, int ntasks, int *tasks)
+void AddIntraCommunicator (int ptask, int task, int type, int id, int ntasks, int *tasks)
 {
-	int count = Communicators.count;
+	int count = IntraCommunicators.count;
 
-	if (Communicators.count == Communicators.size)
+	if (IntraCommunicators.count == IntraCommunicators.size)
 	{
-		Communicators.size += COMMUNICATORS_RESIZE_STEP;
-		Communicators.comms = (struct Communicator_t*)
-			realloc (Communicators.comms,
-			Communicators.size*sizeof(struct Communicator_t));
+		IntraCommunicators.size += INTRA_COMMUNICATORS_RESIZE_STEP;
+		IntraCommunicators.comms = (struct IntraCommunicator_t*)
+			realloc (IntraCommunicators.comms,
+			IntraCommunicators.size*sizeof(struct IntraCommunicator_t));
 	}
-	Communicators.comms[count].ptask = ptask;
-	Communicators.comms[count].task = task;
-	Communicators.comms[count].type = type;
-	Communicators.comms[count].id = id;
-	Communicators.comms[count].ntasks = ntasks;
+	IntraCommunicators.comms[count].ptask = ptask;
+	IntraCommunicators.comms[count].task = task;
+	IntraCommunicators.comms[count].type = type;
+	IntraCommunicators.comms[count].id = id;
+	IntraCommunicators.comms[count].ntasks = ntasks;
 	if (MPI_COMM_WORLD_ALIAS != type && MPI_COMM_SELF_ALIAS != type)
 	{
 		int i;
 
-		Communicators.comms[count].tasks = (int*) malloc (sizeof(int)*ntasks);
-		if (NULL == Communicators.comms[count].tasks)
+		IntraCommunicators.comms[count].tasks = (int*) malloc (sizeof(int)*ntasks);
+		if (NULL == IntraCommunicators.comms[count].tasks)
 		{
 			fprintf (stderr, "mpi2prv: ERROR! Unable to store communicator information\n");
 			fflush (stderr);
 			exit (-1);
 		}
 		for (i = 0; i < ntasks; i++)
-			Communicators.comms[count].tasks[i] = tasks[i];
+			IntraCommunicators.comms[count].tasks[i] = tasks[i];
 	}
 	else
-		Communicators.comms[count].tasks = NULL;
+		IntraCommunicators.comms[count].tasks = NULL;
 
-	Communicators.count++;
+	IntraCommunicators.count++;
 }
 
 void InitCommunicators(void)
 {
-	Communicators.size = Communicators.count = 0;
-	Communicators.comms = NULL;
+	IntraCommunicators.size = IntraCommunicators.count = 0;
+	IntraCommunicators.comms = NULL;
+	InterCommunicators.size = InterCommunicators.count = 0;
+	InterCommunicators.comms = NULL;
 }
 
 void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
@@ -475,13 +507,14 @@ void NewDistributePendingComms (int numtasks, int taskid, int match)
 }
 
 
-static void BuildCommunicator (struct Communicator_t *new_comm)
+static void BuildIntraCommunicator (struct IntraCommunicator_t *new_comm)
 {
 	unsigned j;
 	TipusComunicador com;
 
 #if defined(DEBUG_COMMUNICATORS)
-	fprintf (stdout, "mpi2prv: DEBUG Adding communicator type = %d ptask = %d task = %d\n", new_comm->type, new_comm->ptask, new_comm->task);
+	fprintf (stdout, "mpi2prv: DEBUG Adding intra-communicator type = %d ptask = %d task = %d\n",
+	  new_comm->type, new_comm->ptask, new_comm->task);
 	if (new_comm->type != MPI_COMM_WORLD_ALIAS && new_comm->type != MPI_COMM_SELF_ALIAS)
 	{
 		fprintf (stdout, "mpi2prv: tasks:");
@@ -515,28 +548,28 @@ static void BuildCommunicator (struct Communicator_t *new_comm)
 	free (com.tasks);
 }
 
-static void BroadCastCommunicator (int id, struct Communicator_t *new_comm)
+static void BroadCastIntraCommunicator (int id, struct IntraCommunicator_t *new_comm)
 {
 	int res;
 
-	res = MPI_Bcast (new_comm, sizeof(struct Communicator_t), MPI_BYTE, id, MPI_COMM_WORLD);
-	MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated communicators");
+	res = MPI_Bcast (new_comm, sizeof(struct IntraCommunicator_t), MPI_BYTE, id, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated intra-communicators");
 
 	/* If comm isn't a predefined, send the involved tasks */
 	if (MPI_COMM_SELF_ALIAS != new_comm->type && MPI_COMM_WORLD_ALIAS != new_comm->type)
 	{
 		res = MPI_Bcast (new_comm->tasks, new_comm->ntasks, MPI_INT, id, MPI_COMM_WORLD);
-		MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated communicators");
+		MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated intra-communicators");
 	}
 }
 
-static void ReceiveCommunicator (int id)
+static void ReceiveIntraCommunicator (int id)
 {
 	int res;
-	struct Communicator_t tmp;
+	struct IntraCommunicator_t tmp;
 
-	res = MPI_Bcast (&tmp, sizeof(struct Communicator_t), MPI_BYTE, id, MPI_COMM_WORLD);
-	MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated communicators");
+	res = MPI_Bcast (&tmp, sizeof(struct IntraCommunicator_t), MPI_BYTE, id, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated intra-communicators");
 
 	/* If comm isn't a predefined, receive the involved tasks */
 	if (MPI_COMM_SELF_ALIAS != tmp.type && MPI_COMM_WORLD_ALIAS != tmp.type)
@@ -544,21 +577,21 @@ static void ReceiveCommunicator (int id)
 		tmp.tasks = (int*) malloc (sizeof(int)*tmp.ntasks);
 		if (NULL == tmp.tasks)
 		{
-			fprintf (stderr, "mpi2prv: ERROR! Failed to allocate memory for a new communicator body\n");
+			fprintf (stderr, "mpi2prv: ERROR! Failed to allocate memory for a new intra-communicator body\n");
 			fflush (stderr);
 			exit (0);
 		}
 		res = MPI_Bcast (tmp.tasks, tmp.ntasks, MPI_INT, id, MPI_COMM_WORLD);
 		MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated communicators");
 	}
-	BuildCommunicator (&tmp);
+	BuildIntraCommunicator (&tmp);
 
 	/* Free data structures */
 	if (tmp.tasks != NULL)
 		free (tmp.tasks);
 }
 
-void BuildCommunicators (int num_tasks, int taskid)
+void BuildIntraCommunicators (int num_tasks, int taskid)
 {
 	int i, j;
 	int res, count;
@@ -567,27 +600,27 @@ void BuildCommunicators (int num_tasks, int taskid)
 	{
 		if (i == taskid)
 		{
-			for (j = 0; j < Communicators.count; j++)
-				BuildCommunicator (&(Communicators.comms[j]));
+			for (j = 0; j < IntraCommunicators.count; j++)
+				BuildIntraCommunicator (&(IntraCommunicators.comms[j]));
 
-			res = MPI_Bcast (&Communicators.count, 1, MPI_INT, i, MPI_COMM_WORLD);
-			MPI_CHECK(res, MPI_Bcast, "Failed to broadcast number of generated communicators");
+			res = MPI_Bcast (&IntraCommunicators.count, 1, MPI_INT, i, MPI_COMM_WORLD);
+			MPI_CHECK(res, MPI_Bcast, "Failed to broadcast number of generated intra-communicators");
 
-			for (j = 0; j < Communicators.count; j++)
-				BroadCastCommunicator (i, &(Communicators.comms[j]));
+			for (j = 0; j < IntraCommunicators.count; j++)
+				BroadCastIntraCommunicator (i, &(IntraCommunicators.comms[j]));
 
 			/* Free data structures */
-			for (j = 0; j < Communicators.count; j++)
-				if (Communicators.comms[j].tasks != NULL)
-					free (Communicators.comms[j].tasks);
-			free (Communicators.comms);
+			for (j = 0; j < IntraCommunicators.count; j++)
+				if (IntraCommunicators.comms[j].tasks != NULL)
+					free (IntraCommunicators.comms[j].tasks);
+			free (IntraCommunicators.comms);
 		}
 		else
 		{
 			res = MPI_Bcast (&count, 1, MPI_INT, i, MPI_COMM_WORLD);
 			MPI_CHECK(res, MPI_Bcast, "Failed to broadcast number of generated communicators");
 			for (j = 0; j < count; j++)
-				ReceiveCommunicator (i);
+				ReceiveIntraCommunicator (i);
 		}
 	}
 }

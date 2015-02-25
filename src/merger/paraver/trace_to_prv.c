@@ -660,7 +660,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	if (taskid == 0)
 		gettimeofday (&time_begin, NULL);
 
-	BuildCommunicators (numtasks, taskid);
+	BuildIntraCommunicators (numtasks, taskid);
 
 	/* In the parallel merge we have to */
 	if (numtasks > 1)

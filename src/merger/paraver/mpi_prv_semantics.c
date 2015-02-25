@@ -103,7 +103,9 @@ static int Get_State (unsigned int EvType)
 		case MPI_CART_CREATE_EV:
 		case MPI_CART_SUB_EV:
 		case MPI_CANCEL_EV:
-	        case MPI_REQUEST_GET_STATUS_EV:
+		case MPI_REQUEST_GET_STATUS_EV:
+		case MPI_INTERCOMM_CREATE_EV:
+		case MPI_INTERCOMM_MERGE_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:

@@ -42,6 +42,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "record.h"
 #include "file_set.h"
 #include "HardwareCounters.h"
+#include "mpi_comunicadors.h"
 
 #if USE_HARDWARE_COUNTERS
 static int num_counters = 0;
@@ -102,6 +103,30 @@ static void show_current (event_t * c, UINT64 max_time)
 	else if (c->event == MPI_INIT_EV && c->value == EVT_END)
 	{
 		fprintf (stdout, "OPTIONS: 0x%08llx\n", c->param.mpi_param.aux);
+	}
+	else if (c->event == MPI_ALIAS_COMM_CREATE_EV)
+	{
+		if (c->param.mpi_param.target == MPI_NEW_INTERCOMM_ALIAS)
+		{
+			if (c->value == EVT_BEGIN)
+				fprintf (stdout, "InterCommunicator Alias: input id=%d [0x%08x] (part %d, leader %d)\n",
+				  c->param.mpi_param.comm, c->param.mpi_param.comm, c->param.mpi_param.size, c->param.mpi_param.tag);
+			else
+				fprintf (stdout, "InterCommunicator Alias: output id=%d [0x%08x]\n",
+				  c->param.mpi_param.comm, c->param.mpi_param.comm);
+		}
+		else
+			fprintf (stdout, "Communicator Alias: id=%d [0x%08x] ", c->param.mpi_param.comm, c->param.mpi_param.comm);
+
+		if (c->param.mpi_param.target != MPI_NEW_INTERCOMM_ALIAS)
+		{
+			if (c->param.mpi_param.target == MPI_COMM_WORLD_ALIAS)
+				fprintf (stdout, "MPI_COMM_WORLD alias\n");
+			else if (c->param.mpi_param.target == MPI_COMM_SELF_ALIAS)
+				fprintf (stdout, "MPI_COMM_SELF alias\n");
+			else
+				fprintf (stdout, "partners=%d\n",  c->param.mpi_param.size);
+		}
 	}
 	else if (c->event == USER_EV)
 	{

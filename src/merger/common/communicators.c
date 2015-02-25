@@ -47,8 +47,56 @@ static char UNUSED rcsid[] = "$Id$";
 #include "paraver_generator.h"
 #include "dimemas_generator.h"
 
+//#define DEBUG_COMMUNICATORS
+
 /******************************************************************************
- ***  BuildCommunicator
+ ***  BuildInterCommunicatorFromFile
+ ******************************************************************************/
+static unsigned int BuildInterCommunicatorFromFile (event_t *current_event,
+  unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+  unsigned int task, unsigned int thread, FileSet_t * fset)
+{
+	unsigned foo;
+	unsigned nevents = 1;
+	uintptr_t comm1 = Get_EvComm (current_event);
+	int leader1 = Get_EvTag (current_event);
+
+	UNREFERENCED_PARAMETER(current_time);
+	UNREFERENCED_PARAMETER(cpu);
+
+	current_event = GetNextEvent_FS (fset, &foo, &ptask, &task, &thread);
+	if (current_event != NULL)
+	{
+		uintptr_t comm2 = Get_EvComm (current_event);
+		int leader2 = Get_EvTag (current_event);
+		nevents++;
+
+		current_event = GetNextEvent_FS (fset, &foo, &ptask, &task, &thread);
+
+		if (current_event != NULL)
+		{
+			uintptr_t intercomm = Get_EvComm (current_event);
+			nevents++;
+
+#if defined(DEBUG_COMMUNICATORS)
+			fprintf (stderr, "[DEBUG] Creating intercommunicator %lu from <%lu,%lu>\n",
+			  intercomm, comm1, comm2);
+#endif
+
+#if defined(PARALLEL_MERGE)
+#else
+			addInterCommunicator (intercomm, comm1, leader1, comm2, leader2,
+			  ptask, task);
+#endif
+		}
+	}
+
+	return nevents;
+}
+
+
+/******************************************************************************
+ ***  BuildCommunicatorFromFile
  ******************************************************************************/
 static unsigned int BuildCommunicatorFromFile (event_t *current_event,
   unsigned long long current_time, unsigned int cpu, unsigned int ptask,
@@ -72,7 +120,7 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 		exit (-1);
 	}
 #if defined(DEBUG_COMMUNICATORS)
-	fprintf (stderr, "DEBUG: New comm: id=%d, num_tasks=%d\n", new_comm.id, new_comm.num_tasks);
+	fprintf (stderr, "DEBUG: New comm: id=%lu, num_tasks=%u\n", new_comm.id, new_comm.num_tasks);
 #endif
 
 	/* Process each communicator member */
@@ -113,7 +161,7 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 	else
 	{
 #if defined(PARALLEL_MERGE)
-		AddCommunicator (ptask, task, 0, new_comm.id, new_comm.num_tasks, new_comm.tasks);
+		AddIntraCommunicator (ptask, task, 0, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
 		afegir_comunicador (&new_comm, ptask, task);
 #endif
@@ -173,7 +221,7 @@ int GenerateAliesComunicator (
 			for (i = 0; i < new_comm.num_tasks; i++)
 				new_comm.tasks[i] = i;
 #if defined(PARALLEL_MERGE)
-			AddCommunicator (ptask, task, MPI_COMM_WORLD_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
+			AddIntraCommunicator (ptask, task, MPI_COMM_WORLD_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
 			afegir_comunicador (&new_comm, ptask, task);
 #endif
@@ -199,11 +247,18 @@ int GenerateAliesComunicator (
 			}
 			new_comm.tasks[0] = task-1;
 #if defined(PARALLEL_MERGE)
-			AddCommunicator (ptask, task, MPI_COMM_SELF_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
+			AddIntraCommunicator (ptask, task, MPI_COMM_SELF_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
 			afegir_comunicador (&new_comm, ptask, task);
 #endif
 			free (new_comm.tasks);
+		}
+		else if (MPI_NEW_INTERCOMM_ALIAS == EvCommType)
+		{
+#if defined(DEBUG_COMMUNICATORS)
+			fprintf (stderr, "DEBUG: defining new INTERCOMM\n");
+#endif
+			i = BuildInterCommunicatorFromFile (current_event, current_time, cpu, ptask, task, thread, fset);
 		}
 		else
 		{

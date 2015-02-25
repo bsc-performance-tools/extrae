@@ -137,7 +137,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020:
 			{
 				if (cbinfo->callbackSite == CUPTI_API_EXIT)
-					Extrea_cudaDeviceReset_Exit();
+					Extrae_cudaDeviceReset_Exit();
 				else
 					Extrae_cudaDeviceReset_Enter();
 			}
@@ -146,7 +146,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			case CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020:
 			{
 				if (cbinfo->callbackSite == CUPTI_API_EXIT)
-					Extrea_cudaThreadExit_Exit();
+					Extrae_cudaThreadExit_Exit();
 				else
 					Extrae_cudaThreadExit_Enter();
 			}

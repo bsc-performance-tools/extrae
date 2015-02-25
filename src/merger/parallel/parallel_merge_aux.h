@@ -39,21 +39,7 @@
 #include "common.h"
 #include "file_set.h"
 
-struct Communicator_t
-{
-	int *tasks;
-	int type;
-	int task;
-	int ptask;
-	int id;
-	int ntasks;
-};
-struct Communicators_t
-{
-	struct Communicator_t *comms;
-	int count, size;
-};
-extern struct Communicators_t Communicators;
+// extern struct Communicators_t Communicators;
 
 struct PendingCommunication_t
 {
@@ -93,8 +79,8 @@ void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
 void InitPendingCommunication (void);
 
 void InitCommunicators(void);
-void AddCommunicator (int ptask, int task, int type, int id, int ntasks, int *tasks);
-void BuildCommunicators (int num_tasks, int taskid);
+void AddIntraCommunicator (int ptask, int task, int type, int id, int ntasks, int *tasks);
+void BuildIntraCommunicators (int num_tasks, int taskid);
 
 void ShareNodeNames (int numtasks, char ***nodenames);
 

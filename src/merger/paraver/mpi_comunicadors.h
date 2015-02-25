@@ -34,6 +34,7 @@
 
 #define MPI_COMM_WORLD_ALIAS 1
 #define MPI_COMM_SELF_ALIAS  2
+#define MPI_NEW_INTERCOMM_ALIAS  3
 
 typedef struct
 {
@@ -49,5 +50,12 @@ int primer_comunicador (TipusComunicador * comm);
 int seguent_comunicador (TipusComunicador * comm);
 uintptr_t alies_comunicador (uintptr_t comid, int ptask, int task);
 int numero_comunicadors (void);
+
+void addInterCommunicator (uintptr_t InterCommID,
+	uintptr_t CommID1, int leader1, uintptr_t CommID2, int leader2,
+	int ptask, int task);
+int getInterCommunicatorInfo (unsigned pos, uintptr_t *AliasInterComm,
+	uintptr_t *AliasIntraComm1, int *leader1,
+	uintptr_t *AliasIntraComm2, int *leader2);
 
 #endif
