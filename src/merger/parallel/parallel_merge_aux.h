@@ -78,9 +78,12 @@ void AddPendingCommunication (int descriptor, off_t offset, int tag, int task_r,
 	int task_s, int mz);
 void InitPendingCommunication (void);
 
-void InitCommunicators(void);
-void AddIntraCommunicator (int ptask, int task, int type, int id, int ntasks, int *tasks);
-void BuildIntraCommunicators (int num_tasks, int taskid);
+void ParallelMerge_InitCommunicators(void);
+void ParallelMerge_AddIntraCommunicator (int ptask, int task, int type, int id,
+	int ntasks, int *tasks);
+void ParallelMerge_AddInterCommunicator (int ptask, int task, int id, int comm1,
+	int leader1, int comm2, int leader2);
+void ParallelMerge_BuildCommunicators (int num_tasks, int taskid);
 
 void ShareNodeNames (int numtasks, char ***nodenames);
 

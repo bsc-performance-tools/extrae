@@ -84,6 +84,8 @@ static unsigned int BuildInterCommunicatorFromFile (event_t *current_event,
 #endif
 
 #if defined(PARALLEL_MERGE)
+			ParallelMerge_AddInterCommunicator (ptask, task, intercomm, comm1, leader1,
+			  comm2, leader2);
 #else
 			addInterCommunicator (intercomm, comm1, leader1, comm2, leader2,
 			  ptask, task);
@@ -161,7 +163,8 @@ static unsigned int BuildCommunicatorFromFile (event_t *current_event,
 	else
 	{
 #if defined(PARALLEL_MERGE)
-		AddIntraCommunicator (ptask, task, 0, new_comm.id, new_comm.num_tasks, new_comm.tasks);
+		ParallelMerge_AddIntraCommunicator (ptask, task, 0, new_comm.id,
+		  new_comm.num_tasks, new_comm.tasks);
 #else
 		afegir_comunicador (&new_comm, ptask, task);
 #endif
@@ -221,7 +224,7 @@ int GenerateAliesComunicator (
 			for (i = 0; i < new_comm.num_tasks; i++)
 				new_comm.tasks[i] = i;
 #if defined(PARALLEL_MERGE)
-			AddIntraCommunicator (ptask, task, MPI_COMM_WORLD_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
+			ParallelMerge_AddIntraCommunicator (ptask, task, MPI_COMM_WORLD_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
 			afegir_comunicador (&new_comm, ptask, task);
 #endif
@@ -247,7 +250,7 @@ int GenerateAliesComunicator (
 			}
 			new_comm.tasks[0] = task-1;
 #if defined(PARALLEL_MERGE)
-			AddIntraCommunicator (ptask, task, MPI_COMM_SELF_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
+			ParallelMerge_AddIntraCommunicator (ptask, task, MPI_COMM_SELF_ALIAS, new_comm.id, new_comm.num_tasks, new_comm.tasks);
 #else
 			afegir_comunicador (&new_comm, ptask, task);
 #endif

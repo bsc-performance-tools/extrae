@@ -80,12 +80,12 @@ struct InterCommunicator_t
 	int task;
 	int ptask;
 	int id;
-	int group1;
-	int group2;
+	int commids[2];
+	int leaders[2];
 };
 struct InterCommunicators_t
 {
-	struct InterCommunicator *comms;
+	struct InterCommunicator_t *comms;
 	int count, size;
 };
 static struct IntraCommunicators_t IntraCommunicators;
@@ -99,7 +99,7 @@ struct ForeignRecvs_t *ForeignRecvs;
 #define INTER_COMMUNICATORS_RESIZE_STEP ((1024*1024)/sizeof(struct InterCommunicator_t))
 #define PENDING_COMM_RESIZE_STEP ((1024*1024)/sizeof(struct PendingCommunication_t))
 
-void AddIntraCommunicator (int ptask, int task, int type, int id, int ntasks, int *tasks)
+void ParallelMerge_AddIntraCommunicator (int ptask, int task, int type, int id, int ntasks, int *tasks)
 {
 	int count = IntraCommunicators.count;
 
@@ -135,7 +135,31 @@ void AddIntraCommunicator (int ptask, int task, int type, int id, int ntasks, in
 	IntraCommunicators.count++;
 }
 
-void InitCommunicators(void)
+void ParallelMerge_AddInterCommunicator (int ptask, int task, int id, int comm1,
+	int leader1, int comm2, int leader2)
+{
+	int count = InterCommunicators.count;
+
+	if (InterCommunicators.count == InterCommunicators.size)
+	{
+		InterCommunicators.size += INTER_COMMUNICATORS_RESIZE_STEP;
+		InterCommunicators.comms = (struct InterCommunicator_t*)
+			realloc (InterCommunicators.comms,
+			InterCommunicators.size*sizeof(struct InterCommunicator_t));
+	}
+
+	InterCommunicators.comms[count].id = id;
+	InterCommunicators.comms[count].task  = task;
+	InterCommunicators.comms[count].ptask = ptask;
+	InterCommunicators.comms[count].commids[0] = comm1;
+	InterCommunicators.comms[count].commids[1] = comm2;
+	InterCommunicators.comms[count].leaders[0] = leader1;
+	InterCommunicators.comms[count].leaders[1] = leader2;
+
+	InterCommunicators.count++;
+}
+
+void ParallelMerge_InitCommunicators(void)
 {
 	IntraCommunicators.size = IntraCommunicators.count = 0;
 	IntraCommunicators.comms = NULL;
@@ -591,7 +615,7 @@ static void ReceiveIntraCommunicator (int id)
 		free (tmp.tasks);
 }
 
-void BuildIntraCommunicators (int num_tasks, int taskid)
+static void ParallelMerge_BuildIntraCommunicators (int num_tasks, int taskid)
 {
 	int i, j;
 	int res, count;
@@ -618,11 +642,74 @@ void BuildIntraCommunicators (int num_tasks, int taskid)
 		else
 		{
 			res = MPI_Bcast (&count, 1, MPI_INT, i, MPI_COMM_WORLD);
-			MPI_CHECK(res, MPI_Bcast, "Failed to broadcast number of generated communicators");
+			MPI_CHECK(res, MPI_Bcast, "Failed to broadcast number of generated intra-communicators");
 			for (j = 0; j < count; j++)
 				ReceiveIntraCommunicator (i);
 		}
 	}
+}
+
+static void BroadCastInterCommunicator (int id, struct InterCommunicator_t *new_comm)
+{
+	int res;
+	res = MPI_Bcast (new_comm, sizeof(struct InterCommunicator_t), MPI_BYTE, id, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated inter-communicators");
+}
+
+static void BuildInterCommunicator (struct InterCommunicator_t *new_comm)
+{
+	addInterCommunicator (new_comm->id,
+	  new_comm->commids[0], new_comm->leaders[0],
+	  new_comm->commids[1], new_comm->leaders[1],
+	  new_comm->ptask, new_comm->task);
+}
+
+static void ReceiveInterCommunicator (int id)
+{
+	int res;
+	struct InterCommunicator_t tmp;
+
+	res = MPI_Bcast (&tmp, sizeof(struct InterCommunicator_t), MPI_BYTE, id, MPI_COMM_WORLD);
+	MPI_CHECK(res, MPI_Bcast, "Failed to broadcast generated inter-communicators");
+
+	BuildInterCommunicator (&tmp);
+}
+
+static void ParallelMerge_BuildInterCommunicators (int num_tasks, int taskid)
+{
+	int i, j;
+	int res, count;
+
+	for (i = 0; i < num_tasks; i++)
+	{
+		if (i == taskid)
+		{
+			for (j = 0; j < InterCommunicators.count; j++)
+				BuildInterCommunicator (&(InterCommunicators.comms[j]));
+
+			res = MPI_Bcast (&InterCommunicators.count, 1, MPI_INT, i, MPI_COMM_WORLD);
+			MPI_CHECK(res, MPI_Bcast, "Failed to broadcast number of generated inter-communicators");
+
+			for (j = 0; j < InterCommunicators.count; j++)
+				BroadCastInterCommunicator (i, &(InterCommunicators.comms[j]));
+
+			/* Free data structures */
+			free (InterCommunicators.comms);
+		}
+		else
+		{
+			res = MPI_Bcast (&count, 1, MPI_INT, i, MPI_COMM_WORLD);
+			MPI_CHECK(res, MPI_Bcast, "Failed to broadcast number of generated inter-communicators");
+			for (j = 0; j < count; j++)
+				ReceiveInterCommunicator (i);
+		}
+	}
+}
+
+void ParallelMerge_BuildCommunicators (int num_tasks, int taskid)
+{
+	ParallelMerge_BuildIntraCommunicators (num_tasks, taskid);
+	ParallelMerge_BuildInterCommunicators (num_tasks, taskid);
 }
 
 void ShareTraceInformation (int numtasks, int taskid)

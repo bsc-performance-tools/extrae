@@ -194,7 +194,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	InitializeObjectTable (num_appl, files, nfiles);
 
 #if defined(PARALLEL_MERGE)
-	InitCommunicators();
+	ParallelMerge_InitCommunicators();
 #endif
 	Semantics_Initialize (TRF_SEMANTICS);
 
@@ -349,7 +349,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	} while ((current_event != NULL) && !error);
 
 #if defined(PARALLEL_MERGE)
-	BuildIntraCommunicators (numtasks, taskid);
+	ParallelMerge_BuildCommunicators (numtasks, taskid);
 #endif
 
 	if (1 == numtasks)

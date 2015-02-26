@@ -250,7 +250,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		num_appl_tasks[i] = (GET_PTASK_INFO(i+1))->ntasks;
 
 #if defined(PARALLEL_MERGE)
-	InitCommunicators();
+	ParallelMerge_InitCommunicators();
 	InitPendingCommunication ();
 	InitForeignRecvs (numtasks);
 #endif
@@ -660,7 +660,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	if (taskid == 0)
 		gettimeofday (&time_begin, NULL);
 
-	BuildIntraCommunicators (numtasks, taskid);
+	ParallelMerge_BuildCommunicators (numtasks, taskid);
 
 	/* In the parallel merge we have to */
 	if (numtasks > 1)

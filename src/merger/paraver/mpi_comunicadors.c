@@ -99,6 +99,9 @@ static void afegir_alies (TipusComunicador * comm, CommInfo_t * info_com, int pt
  * initialize_comunicadors
  * -----------------
  *******************************************************************/
+
+// #define DEBUG_COMMUNICATORS
+
 void initialize_comunicadors (int n_ptasks)
 {
 	int ii;
@@ -158,14 +161,20 @@ uintptr_t alies_comunicador (uintptr_t comid, int ptask, int task)
 	unsigned u;
 	CommAliasInfo_t *info;
 
+#if defined(DEBUG_COMMUNICATORS)
+	fprintf (stderr, "[DEBUG] alies_comunicador (%lu, %d, %d)\n", comid, ptask, task);
+#endif
+
 	ptask--;
 	task--;
 
 	for (info = GET_HEAD_ITEM (&(alies_comunicadors[ptask][task]));
 		info != NULL;
 		info = GET_NEXT_ITEM (&(alies_comunicadors[ptask][task]), info))
+	{
 		if (info->commid_de_la_task == comid)
 			return info->alies;
+	}
 
 	for (u = 0; u < num_InterCommunicatorAlias[ptask][task]; u++)
 		if (Intercomm_ptask_task[ptask][task][u].commid == comid)
@@ -295,7 +304,7 @@ void afegir_comunicador (TipusComunicador * comm, int ptask, int task)
   task--;
 
 #if defined (DEBUG_COMMUNICATORS)
-  fprintf (stderr, "%d,%d: Adding com id  %d\n", ptask, task, comm->id);
+  fprintf (stderr, "%d,%d: Adding com id %lu\n", ptask, task, comm->id);
 #endif
 
   trobat = 0;
@@ -316,6 +325,9 @@ void afegir_comunicador (TipusComunicador * comm, int ptask, int task)
 				__FILE__,__LINE__);
       exit (1);
     }
+#if defined (DEBUG_COMMUNICATORS)
+	fprintf (stderr, "%d,%d: info_comm = %p\n", ptask, task, info_com);
+#endif
 
 		info_com->info.num_tasks = comm->num_tasks;
 		info_com->info.tasks = (int *) malloc (info_com->info.num_tasks*sizeof(int));
@@ -394,7 +406,7 @@ static void afegir_alies (TipusComunicador * comm, CommInfo_t * info_com,
     ENQUEUE_ITEM (&(alies_comunicadors[ptask][task]), info_alies);
   }
 #if defined(DEBUG_COMMUNICATORS)
-  fprintf (stderr, "      id %d -> %d\n", comm->id, info_alies->alies);
+  fprintf (stderr, "      id %lu -> %d\n", comm->id, info_alies->alies);
 #endif
 }
 
