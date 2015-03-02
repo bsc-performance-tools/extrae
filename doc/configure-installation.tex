@@ -282,6 +282,17 @@ Build and installation commands:
 \graybox{{\tt MP\_COMPILER=gcc make\\
 make install}}
 
+\subsubsection{Compiling in Hornet / Cray XC40 system}
+
+Configuration command, enabling MPI, PAPI and online analysis over MRNet.
+
+\graybox{{\tt./configure --prefix=/zhome/academic/HLRS/xhp/xhpgl/tools/extrae/intel --with-mpi=/opt/cray/mpt/7.1.2/gni/mpich2-intel/140\\--with-unwind=/zhome/academic/HLRS/xhp/xhpgl/tools/libunwind --without-dyninst --with-papi=/opt/cray/papi/5.3.2.1 --enable-online --with-mrnet=/zhome/academic/HLRS/xhp/xhpgl/tools/mrnet/4.1.0 --with-spectral=/zhome/academic/HLRS/xhp/xhpgl/tools/spectral/3.1 --with-mrnetapp=/zhome/academic/HLRS/xhp/xhpgl/tools/libmrnetapp/1.0.4}}
+
+Build and installation commands:
+
+\graybox{{\tt make\\
+make install}}
+
 \section{Knowing how a package was configured}
 
 If you are interested on knowing how an \TRACE package was configured execute the following command after setting {\tt EXTRAE\_HOME} to the base location of an installation
