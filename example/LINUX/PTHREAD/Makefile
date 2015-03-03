@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-LIBS = -L$(EXTRAE_HOME)/lib -lpttrace -lpthread
+LIBS = -L$(EXTRAE_HOME)/lib -lpttrace -pthread
 CFLAGS = -O -g -I$(EXTRAE_HOME)/include
 
 targets: user-comms pthread-example
