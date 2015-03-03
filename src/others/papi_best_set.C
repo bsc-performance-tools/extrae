@@ -267,6 +267,7 @@ int main (int argc, char *argv[])
 		     "Check " << PAPI_HOME << "/bin/papi_avail or" << endl <<
 		     "      " << PAPI_HOME << "/bin/papi_native_avail" << endl <<
 		     "to get a list from the available counters in the system." << endl;
+		exit (-2);
 	}
 	cout << endl;
 
