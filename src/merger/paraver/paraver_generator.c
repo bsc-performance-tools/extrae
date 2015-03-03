@@ -1238,9 +1238,13 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 			}
 		}
 #else
-		/*
-		* Open normal handle for the file, and mark GZ handle as unused! 
-		*/
+
+		/* If the user requested .prv.gz but it is not supported, change into .prv */
+		if (strlen (outName) >= 7 &&
+		strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
+			outName[strlen(outName)-3] = (char) 0;
+
+		/* Open normal handle for the file, and mark GZ handle as unused!  */
 #if HAVE_FOPEN64
 		prv_fd.handle = fopen64 (outName, "w");
 #else
@@ -1371,15 +1375,11 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 	{
 		strcpy (envName, get_OutputTraceName());
 
-#ifdef HAVE_ZLIB
 		if (strlen (outName) >= 7 &&
 			strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
 			tmpName = &(envName[strlen (envName) - 7]);
 		else
 			tmpName = &(envName[strlen (envName) - 4]);
-#else
-		tmpName = &(envName[strlen (envName) - 4]);
-#endif
 
 		strcpy (tmpName, ".crd");
 		if ((crd_fd = fopen (envName, "w")) == NULL)
