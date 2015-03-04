@@ -111,14 +111,19 @@ void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 	cout << "max combination bits: " << mystring << endl;
 #else
 
+	/* Show selected counters  */
+	cout << "<!-- counter set " << neventset << " -->" << endl;
+	cout << "<set enabled=\"yes\" domain=\"all\" changeat-time=\"500000us\">" << endl
+	     << "  ";
+
+	for (size_t i = 0; i < omnicounters.size()-1; i++)
+		cout << omnicounters[i] << ",";
+	cout << omnicounters[omnicounters.size()-1];
+	
 	if (max_combination.count() > 0)
 	{
-		/* Show selected counters  */
-		cout << "EventSet " << neventset << ": ";
-	
-		for (size_t i = 0; i < omnicounters.size(); i++)
-			cout << omnicounters[i] << ",";
-	
+		cout << ",";
+
 		bitset<MAXBITSET> max = max_combination;
 		size_t i = 0;
 		while (i < max.size() && max.count() > 0)
@@ -133,7 +138,6 @@ void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 			}
 			i++;
 		}
-		cout << endl;
 	
 		/* Remove already used counters from the counter list */
 		max = max_combination;
@@ -148,6 +152,7 @@ void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 				break;
 		}
 	}
+	cout << endl << "</set>" << endl;
 #endif
 }
 
@@ -221,7 +226,12 @@ int main (int argc, char *argv[])
 
 	if (argc < 2)
 	{
-		cerr << "Error: You must provide a set of PAPI counters" << endl;
+		cerr << "Usage for " << basename (argv[0]) << endl << endl
+		     << "{omnipresent ctr}          ensures that ctr appears in every resulting group" << endl
+		     << "{omnipresent ctr1,..,ctrN} ensures that ctr1-ctrN appear in every resulting group" << endl
+			 << "ctr                        requests that ctr appears in 1 resulting group" << endl
+			 << "ctr1,..,ctrN               requests that ctr1-ctrN appear in 1 resultign group" << endl;
+
 		return -1;
 	}
 
@@ -278,7 +288,7 @@ int main (int argc, char *argv[])
 		CheckMaxEventSet (neventset++, omnipresentCounters, Counters);
 		ncounters = Counters.size();
 
-		if (prevncounters == ncounters)
+		if (prevncounters == ncounters && prevncounters > 0)
 		{
 			cout << endl <<
 			  "Caution, for some reason the following hardware counters cannot be added in an eventset." << endl;
