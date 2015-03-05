@@ -69,6 +69,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "pthread_prv_events.h"
 #include "misc_prv_events.h"
 #include "misc_prv_semantics.h"
+#include "openshmem_prv_events.h"
 #include "trace_mode.h"
 #include "addr2info.h" 
 #include "options.h"
