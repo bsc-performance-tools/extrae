@@ -29,7 +29,12 @@
 
 #include "mpi_stats.h"
 #include "utils.h"
-#include <stdio.h>
+
+#ifndef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+
+#include <mpi.h>
 
 mpi_stats_t *global_mpi_stats = NULL;
 

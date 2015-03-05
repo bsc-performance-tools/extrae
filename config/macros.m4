@@ -81,6 +81,12 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 			$1_CFLAGS="-I$$1_INCLUDES"
 			$1_CXXFLAGS="-I$$1_INCLUDES"
 			$1_CPPFLAGS="-I$$1_INCLUDES"
+			
+			if test ! -z "${multiarch_triplet}" ; then
+				$1_CFLAGS="${$1_CFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
+				$1_CXXFLAGS="${$1_CXXFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
+				$1_CPPFLAGS="${$1_CPPFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
+			fi
 		fi
 
 		dnl Did the user passed a headers directory to check first?
@@ -120,6 +126,16 @@ AC_DEFUN([AX_FIND_INSTALLATION],
        else
           $1_SHAREDLIBSDIR=$$1_LIBSDIR
        fi
+		fi
+		
+		if test ! -z "${multiarch_triplet}" ; then
+			AC_MSG_CHECKING([for multiarch $1 libraries directory])
+			if test -d "$$1_HOME/lib/${multiarch_triplet}" ; then
+				AC_MSG_RESULT([$$1_HOME/lib/${multiarch_triplet}])
+				$1_LIBSDIR_MULTIARCH="$$1_HOME/lib/${multiarch_triplet}"
+			else
+				AC_MSG_RESULT([not found])
+			fi
 		fi
 	fi
 
@@ -216,6 +232,17 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 				[]_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type="$Default_Binary_Type""-bit"
 			]
 		)
+
+		which dpkg-architecture 2> /dev/null
+		if test "$?" -eq "0"; then
+			if test "${Selected_Binary_Type}" = "default" ; then
+				AC_MSG_CHECKING([the multiarch triplet through dpkg-architecture])
+				multiarch_triplet=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+				AC_MSG_RESULT([$multiarch_triplet])
+			fi
+		else
+			AC_MSG_NOTICE([cannot locate multiarch triplet])
+		fi
 
 		if test "$Default_Binary_Type" != "32" -a "$Default_Binary_Type" != 64 ; then
 			[]_AC_LANG_PREFIX[]_PRESENT="no"
@@ -376,8 +403,12 @@ AC_DEFUN([AX_PROG_XML2],
    XML2_CXXFLAGS=${XML2_CFLAGS}
 
    XML2_LIBS="-lxml2"
-   if test -f ${XML2_HOME}/lib${BITS}/libxml2.so -o -f ${XML2_HOME}/lib${BITS}/libxml2.a ; then
+   if test -f ${XML2_HOME}/lib${BITS}/libxml2.so -o \
+           -f ${XML2_HOME}/lib${BITS}/libxml2.a ; then
       XML2_LIBSDIR="${XML2_HOME}/lib${BITS}"
+   elif test -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.so -o \
+             -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.a ; then
+		XML2_LIBSDIR="${XML2_HOME}/lib/${multiarch_triplet}"
    else
       XML2_LIBSDIR="${XML2_HOME}/lib"
    fi
@@ -445,11 +476,18 @@ AC_DEFUN([AX_PROG_BINUTILS],
    
          if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.so" ; then
+            BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
          elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib"
-         elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
+         elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a
+		              "${binutils_require_shared}" = "no" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib/libbfd.a" -a "${binutils_require_shared}" = "no" ; then
+         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.a" -a \
+                      "${binutils_require_shared}" = "no" ; then
+            BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
+         elif test -r "${binutils_home_dir}/lib/libbfd.a" -a \
+		              "${binutils_require_shared}" = "no" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib"
          else
             dnl If we were unable to find, try this. This works if the library is named like
@@ -459,14 +497,21 @@ AC_DEFUN([AX_PROG_BINUTILS],
             else
                shlibs1=0
             fi
-            if test -d ${binutils_home_dir}/lib ; then
-               shlibs2=`find ${binutils_home_dir}/lib -maxdepth 1 -name libbfd\*.so | wc -l`
+            if test -d ${binutils_home_dir}/lib/${multiarch_triplet} ; then
+               shlibs2=`find ${binutils_home_dir}/lib/${multiarch_triplet} -maxdepth 1 -name libbfd\*.so | wc -l`
             else
                shlibs2=0
             fi
+            if test -d ${binutils_home_dir}/lib ; then
+               shlibs3=`find ${binutils_home_dir}/lib -maxdepth 1 -name libbfd\*.so | wc -l`
+            else
+               shlibs3=0
+            fi
             if test ${shlibs1} -ge 1 ; then
                BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-            elif test ${shlibs2} -ge 1 ; then 
+            elif test ${shlibs2} -ge 1 ; then
+               BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
+            elif test ${shlibs3} -ge 1 ; then 
                BFD_LIBSDIR="${binutils_home_dir}/lib"
             fi
          fi
@@ -475,24 +520,14 @@ AC_DEFUN([AX_PROG_BINUTILS],
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
          elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib/arm-linux-gnueabihf/libiberty.a" ; then # dnl Special case for Linux ARM/HF
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/arm-linux-gnueabihf"
+         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.a" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
+         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.so" ; then
+            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
          elif test -r "${binutils_home_dir}/lib/libiberty.so" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
-         elif test -r "${binutils_home_dir}/lib/${UNAME_M}/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}"
-         elif test -r "${binutils_home_dir}/lib/${UNAME_M}-linux/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}-linux"
-         elif test -r "${binutils_home_dir}/lib/${UNAME_M}-linux-gnu/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${UNAME_M}-linux-gnu"
-         elif test -r "${binutils_home_dir}/lib/${TARGET_CPU}/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${TARGET_CPU}"
-         elif test -r "${binutils_home_dir}/lib/${TARGET_CPU}-linux/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${TARGET_CPU}-linux"
-         elif test -r "${binutils_home_dir}/lib/${TARGET_CPU}-linux-gnu/libiberty.a" ; then
-            LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${TARGET_CPU}-linux-gnu"
          fi
    
          if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then
@@ -1339,6 +1374,13 @@ AC_DEFUN([AX_CHECK_LIBZ],
             LIBZ_LIBSDIR="${zhome_dir}/lib${BITS}"
             break
          fi
+         if test -f "${zhome_dir}/lib/${multiarch_triplet}/libz.a" -o \
+                 -f "${zhome_dir}/lib/${multiarch_triplet}/libz.so" -o \
+                 -f "${zhome_dir}/lib/${multiarch_triplet}/libz.dylib" ; then
+            LIBZ_HOME="${zhome_dir}"
+            LIBZ_LIBSDIR="${zhome_dir}/lib/${multiarch_triplet}"
+            break
+         fi
          if test -f "${zhome_dir}/lib/libz.a" -o \
                  -f "${zhome_dir}/lib/libz.so" -o \
                  -f "${zhome_dir}/lib/libz.dylib" ; then
@@ -1469,6 +1511,19 @@ AC_DEFUN([AX_PROG_LIBDWARF],
            else
               AC_MSG_ERROR([Cannot find DWARF header files in ${dwarf_paths}/include])
            fi
+        elif test -f ${DWARF_LIBSDIR_MULTIARCH}}/libdwarf.a -o \
+                -f ${DWARF_LIBSDIR_MULTIARCH}}/libdwarf.so ; then
+           if test -f ${DWARF_HOME}/include/libdwarf.h -a \
+                   -f ${DWARF_HOME}/include/dwarf.h ; then
+              libdwarf_found="yes"
+              DWARF_LIBSDIR="${DWARF_LIBSDIR_MULTIARCH}"
+           elif test -f ${DWARF_HOME}/include/libdwarf/libdwarf.h -a \
+                     -f ${DWARF_HOME}/include/libdwarf/dwarf.h ; then
+              libdwarf_found="yes"
+              DWARF_LIBSDIR="${DWARF_LIBSDIR_MULTIARCH}"
+           else
+              AC_MSG_ERROR([Cannot find DWARF header files in ${dwarf_paths}/include])
+           fi
         else
            AC_MSG_ERROR([Cannot find DWARF library files in ${dwarf_paths}/lib])
         fi
@@ -1504,8 +1559,18 @@ AC_DEFUN([AX_PROG_LIBELF],
       if test "${ELF_INSTALLED}" = "yes" ; then
         if test -f ${ELF_LIBSDIR}/libelf.a -o \
                 -f ${ELF_LIBSDIR}/libelf.so ; then
-           if test -f ${ELF_INCLUDES}/libelf/libelf.h -o ${ELF_INCLUDES}/libelf.h  ; then
+           if test -f ${ELF_INCLUDES}/libelf/libelf.h -o \
+                   -f ${ELF_INCLUDES}/libelf.h  ; then
               libelf_found="yes"
+           else
+              AC_MSG_ERROR([Cannot find ELF header files neither in ${ELF_INCLUDES} nor in ${ELF_INCLUDES}/libelf])
+           fi
+        elif test -f ${ELF_LIBSDIR_MULTIARCH}/libelf.a -o \
+                  -f ${ELF_LIBSDIR_MULTIARCH}/libelf.so ; then
+           if test -f ${ELF_INCLUDES}/libelf/libelf.h -o \
+                   -f ${ELF_INCLUDES}/libelf.h  ; then
+              libelf_found="yes"
+              ELF_LIBSDIR="${ELF_LIBSDIR_MULTIARCH}"
            else
               AC_MSG_ERROR([Cannot find ELF header files neither in ${ELF_INCLUDES} nor in ${ELF_INCLUDES}/libelf])
            fi
@@ -1551,7 +1616,10 @@ AC_DEFUN([AX_PROG_DYNINST],
 
    dnl Search for Dyninst installation
    AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
-
+	if test -f "${DYNINST_LIBSDIR_MULTIARCH}/libdyninstAPI.so" ; then
+		DYNINST_LIBSDIR="${DYNINST_LIBSDIR_MULTIARCH}"
+	fi
+	
    if test "${DYNINST_INSTALLED}" = "yes" ; then
       AX_ENSURE_CXX_PRESENT([dyninst])
 

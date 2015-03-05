@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 05Mar2015 Fixed pthread support (missing pthread_id for master pthred)
+             Use multiarch triplet where available (thanks to JM Perez)
  * 03Mar2015 Revamped papi_best_set
  * 26Feb2015 Completed MPI_Intercomm_create support (serial & parallel mergers)
  + 23Feb2015 Instrumentation of MPI_intercomm_[create|merge]

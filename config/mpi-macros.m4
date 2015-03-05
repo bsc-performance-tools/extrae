@@ -40,10 +40,10 @@ AC_DEFUN([AX_PROG_MPI],
 
    if test "${MPI_INSTALLED}" = "yes" ; then
 
-      if test -d "$MPI_INCLUDES/mpi" ; then
-         MPI_INCLUDES="$MPI_INCLUDES/mpi"
-         MPI_CFLAGS="-I$MPI_INCLUDES"
-         CFLAGS="$MPI_CFLAGS $CFLAGS"
+      if test -d "${MPI_INCLUDES}/mpi" ; then
+         MPI_INCLUDES="${MPI_INCLUDES}/mpi"
+         MPI_CFLAGS="-I${MPI_INCLUDES}"
+         CPPFLAGS="${MPI_CFLAGS} ${CPPFLAGS}"
       fi
 
       dnl This check is for POE over linux -- libraries are installed in /opt/ibmhpc/ppe.poe/lib/libmpi{64}/libmpi_ibm.so
@@ -77,6 +77,11 @@ AC_DEFUN([AX_PROG_MPI],
       dnl We won't use neither AC_CHECK_LIB nor AC_TRY_LINK because this library may have unresolved references to other libs (i.e: libgm).
       AC_MSG_CHECKING([for MPI library])
 
+		if test -f "${MPI_LIBSDIR_MULTIARCH}/libmpi.a" -o \
+                -f "${MPI_LIBSDIR_MULTIARCH}/libmpi.so" ; then
+			MPI_LIBSDIR="${MPI_LIBSDIR_MULTIARCH}"
+		fi
+		
       if test "${mpi_lib_name}" != "not_set"; then
          MPI_LIBS="-l${mpi_lib_name}"
       else

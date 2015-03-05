@@ -1422,12 +1422,14 @@ static int getnumProcessors (void)
 */
 
 static pthread_t *pThreads = NULL;
+static unsigned numpThreads = 0;
 static pthread_key_t pThreadIdentifier;
 static pthread_mutex_t pThreadIdentifier_mtx;
 
 static void Extrae_reallocate_pthread_info (int new_num_threads)
 {
 	xrealloc(pThreads, pThreads, new_num_threads * sizeof(pthread_t));
+	numpThreads = new_num_threads;
 }
 
 void Backend_SetpThreadID (pthread_t *t, int threadid)
@@ -1551,6 +1553,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 
 #if defined(PTHREAD_SUPPORT)
 	Backend_CreatepThreadIdentifier ();
+
+	/* Annotate myself */
+	Extrae_reallocate_pthread_info (1);
+	Backend_SetpThreadID (pthread_self(), 0);
 #endif
 
 #if defined(DEBUG)

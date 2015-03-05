@@ -263,12 +263,15 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 	int res;
 	struct pthread_create_info i;
 
+	if (pthread_create_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_create (%p, %p, %p, %p)\n", p1, p2, p3, p4);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_create_real at %p\n", pthread_create_real);
 #endif
 
-	if (pthread_create_real != NULL && mpitrace_on)
+	if (pthread_create_real != NULL && EXTRAE_INITIALIZED())
 	{
 		/* This is a bit tricky.
 		   Some OSes (like FreeBSD) delegates the pthread library initialization
@@ -324,7 +327,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 		/* Stop protecting the region, more pthread creations can enter */
 		pthread_mutex_unlock_real (&extrae_pthread_create_mutex);
 	}
-	else if (pthread_create_real != NULL && !mpitrace_on)
+	else if (pthread_create_real != NULL && !EXTRAE_INITIALIZED())
 	{
 		res = pthread_create_real (p1, p2, p3, p4);
 	}
@@ -341,11 +344,14 @@ int pthread_join (pthread_t p1, void **p2)
 {
 	int res;
 
+	if (pthread_join_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join (%p, %p)\n", p1, p2);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join_real at %p\n", pthread_join_real);
 #endif
-	if (pthread_join_real != NULL && mpitrace_on)
+	if (pthread_join_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_pthread_Join_Entry ();
@@ -356,7 +362,7 @@ int pthread_join (pthread_t p1, void **p2)
 		Probe_pthread_Join_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
-	else if (pthread_join_real != NULL && !mpitrace_on)
+	else if (pthread_join_real != NULL && !EXTRAE_INITIALIZED())
 	{
 		res = pthread_join_real (p1, p2);
 	}
@@ -370,23 +376,29 @@ int pthread_join (pthread_t p1, void **p2)
 
 void pthread_exit (void *p1)
 {
+	if (pthread_exit_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_exit (%p)\n", p1);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_exit_real at %p\n", pthread_exit_real);
 #endif
 
-	if (pthread_exit_real != NULL && mpitrace_on)
+	if (pthread_exit_real != NULL && EXTRAE_INITIALIZED())
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_pthread_Function_Exit();
-		Probe_pthread_Exit_Entry();
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (2);
+			Probe_pthread_Function_Exit();
+			Probe_pthread_Exit_Entry();
+			Backend_Leave_Instrumentation ();
 
-		Backend_Flush_pThread (pthread_self());
+			Backend_Flush_pThread (pthread_self());
+		}
 
 		pthread_exit_real (p1);
 	}
-	else if (pthread_exit_real != NULL && !mpitrace_on)
+	else if (pthread_exit_real != NULL && !EXTRAE_INITIALIZED())
 	{
 		pthread_exit_real (p1);
 	}
@@ -401,20 +413,26 @@ int pthread_detach (pthread_t p1)
 {
 	int res;
 
+	if (pthread_detach_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_detach (%p)\n", p1);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_detach_real at %p\n", pthread_detach_real);
 #endif
 
-	if (pthread_detach_real != NULL && mpitrace_on)
+	if (pthread_detach_real != NULL && EXTRAE_INITIALIZED())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_Detach_Entry ();
-		res = pthread_detach_real (p1);
-		Probe_pthread_Detach_Exit ();
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_Detach_Entry ();
+			res = pthread_detach_real (p1);
+			Probe_pthread_Detach_Exit ();
+			Backend_Leave_Instrumentation ();
+		}
 	}
-	else if (pthread_detach_real != NULL && !mpitrace_on)
+	else if (pthread_detach_real != NULL && !EXTRAE_INITIALIZED())
 	{
 		res = pthread_detach_real (p1);
 	}
@@ -430,19 +448,25 @@ int pthread_mutex_lock (pthread_mutex_t *m)
 {
 	int res;
 
+	if (pthread_mutex_lock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_lock (%p)\n", m);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_lock_real at %p\n", pthread_mutex_lock_real);
 #endif
 
 	/* Caution! pthread_exit() seems to call pthread_mutex_lock */
-	if (pthread_mutex_lock_real != NULL && mpitrace_on && !Backend_ispThreadFinished(THREADID) && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_lock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_mutex_lock_Entry (m);
-		res = pthread_mutex_lock_real (m);
-		Probe_pthread_mutex_lock_Exit (m);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_mutex_lock_Entry (m);
+			res = pthread_mutex_lock_real (m);
+			Probe_pthread_mutex_lock_Exit (m);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_mutex_lock_real != NULL)
 	{
@@ -460,18 +484,24 @@ int pthread_mutex_trylock (pthread_mutex_t *m)
 {
 	int res;
 
+	if (pthread_mutex_trylock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_trylock (%p)\n", m);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_trylock_real at %p\n", pthread_mutex_trylock_real);
 #endif
 
-	if (pthread_mutex_trylock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_trylock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_mutex_lock_Entry (m);
-		res = pthread_mutex_trylock_real (m);
-		Probe_pthread_mutex_lock_Exit (m);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_mutex_lock_Entry (m);
+			res = pthread_mutex_trylock_real (m);
+			Probe_pthread_mutex_lock_Exit (m);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_mutex_trylock_real != NULL)
 	{
@@ -490,18 +520,24 @@ int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *t)
 {
 	int res;
 
+	if (pthread_mutex_timedlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_timedlock (%p,%p)\n", m,t);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_timedlock_real at %p\n", pthread_mutex_timedlock_real);
 #endif
 
-	if (pthread_mutex_timedlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_timedlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_mutex_lock_Entry (m);
-		res = pthread_mutex_timedlock_real (m, t);
-		Probe_pthread_mutex_lock_Exit (m);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_mutex_lock_Entry (m);
+			res = pthread_mutex_timedlock_real (m, t);
+			Probe_pthread_mutex_lock_Exit (m);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_mutex_timedlock_real != NULL)
 	{
@@ -520,19 +556,25 @@ int pthread_mutex_unlock (pthread_mutex_t *m)
 {
 	int res;
 
+	if (pthread_mutex_unlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_unlock (%p)\n", m);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_unlock_real at %p\n", pthread_mutex_unlock_real);
 #endif
 
 	/* Caution! pthread_exit() seems to call pthread_mutex_lock */
-	if (pthread_mutex_unlock_real != NULL && mpitrace_on && !Backend_ispThreadFinished(THREADID) && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_unlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_mutex_unlock_Entry (m);
-		res = pthread_mutex_unlock_real (m);
-		Probe_pthread_mutex_unlock_Exit (m);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_mutex_unlock_Entry (m);
+			res = pthread_mutex_unlock_real (m);
+			Probe_pthread_mutex_unlock_Exit (m);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_mutex_unlock_real != NULL)
 	{
@@ -553,18 +595,24 @@ int pthread_cond_signal (pthread_cond_t *c)
 {
 	int res;
 
+	if (pthread_cond_signal_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_signal (%p)\n", c);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_signal_real at %p\n", pthread_cond_signal_real);
 #endif
 
-	if (pthread_cond_signal_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_signal_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_cond_signal_Entry (c);
-		res = pthread_cond_signal_real (c);
-		Probe_pthread_cond_signal_Exit (c);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_cond_signal_Entry (c);
+			res = pthread_cond_signal_real (c);
+			Probe_pthread_cond_signal_Exit (c);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_cond_signal_real != NULL)
 	{
@@ -583,18 +631,24 @@ int pthread_cond_broadcast (pthread_cond_t *c)
 {
 	int res;
 
+	if (pthread_cond_broadcast_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_broadcast (%p)\n", c);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_broadcast_real at %p\n", pthread_cond_broadcast_real);
 #endif
 
-	if (pthread_cond_broadcast_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_broadcast_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_cond_broadcast_Entry (c);
-		res = pthread_cond_broadcast_real (c);
-		Probe_pthread_cond_broadcast_Exit (c);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_cond_broadcast_Entry (c);
+			res = pthread_cond_broadcast_real (c);
+			Probe_pthread_cond_broadcast_Exit (c);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_cond_broadcast_real != NULL)
 	{
@@ -612,18 +666,24 @@ int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m)
 {
 	int res;
 
+	if (pthread_cond_wait_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_wait (%p, %p)\n", c, m);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_wait_real at %p\n", pthread_cond_wait_real);
 #endif
 
-	if (pthread_cond_wait_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_wait_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_cond_wait_Entry (c);
-		res = pthread_cond_wait_real (c, m);
-		Probe_pthread_cond_wait_Exit (c);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_cond_wait_Entry (c);
+			res = pthread_cond_wait_real (c, m);
+			Probe_pthread_cond_wait_Exit (c);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_cond_wait_real != NULL)
 	{
@@ -641,18 +701,24 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 {
 	int res;
 
+	if (pthread_cond_timedwait_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_timedwait (%p,%p,%p)\n", c, m, t);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_wait_real at %p\n", pthread_cond_wait_real);
 #endif
 
-	if (pthread_cond_timedwait_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_timedwait_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_cond_wait_Entry (c);
-		res = pthread_cond_timedwait_real (c,m,t);
-		Probe_pthread_cond_wait_Exit (c);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_cond_wait_Entry (c);
+			res = pthread_cond_timedwait_real (c,m,t);
+			Probe_pthread_cond_wait_Exit (c);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_cond_timedwait_real != NULL)
 	{
@@ -672,18 +738,24 @@ int pthread_rwlock_rdlock (pthread_rwlock_t *l)
 {
 	int res;
 
+	if (pthread_rwlock_rdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_rdlock (%p)\n", l);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_rdlock_real at %p\n", pthread_rwlock_rdlock_real);
 #endif
 
-	if (pthread_rwlock_rdlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_rdlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_rwlock_lockrd_Entry (l);
-		res = pthread_rwlock_rdlock_real (l);
-		Probe_pthread_rwlock_lockrd_Exit (l);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_rwlock_lockrd_Entry (l);
+			res = pthread_rwlock_rdlock_real (l);
+			Probe_pthread_rwlock_lockrd_Exit (l);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_rwlock_rdlock_real != NULL)
 	{
@@ -702,18 +774,24 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *l)
 {
 	int res;
 
+	if (pthread_rwlock_tryrdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_tryrdlock (%p)\n", l);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_tryrdlock_real at %p\n", pthread_rwlock_tryrdlock_real);
 #endif
 
-	if (pthread_rwlock_tryrdlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_tryrdlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_rwlock_lockrd_Entry (l);
-		res = pthread_rwlock_tryrdlock_real (l);
-		Probe_pthread_rwlock_lockrd_Exit (l);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_rwlock_lockrd_Entry (l);
+			res = pthread_rwlock_tryrdlock_real (l);
+			Probe_pthread_rwlock_lockrd_Exit (l);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_rwlock_tryrdlock_real != NULL)
 	{
@@ -732,18 +810,24 @@ int pthread_rwlock_timedrdlock(pthread_rwlock_t *l, const struct timespec *t)
 {
 	int res;
 
+	if (pthread_rwlock_timedrdlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_timedrdlock (%p, %p)\n", l, t);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_timedrdlock_real at %p\n", pthread_rwlock_timedrdlock_real);
 #endif
 
-	if (pthread_rwlock_timedrdlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_timedrdlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_rwlock_lockrd_Entry (l);
-		res = pthread_rwlock_timedrdlock_real (l, t);
-		Probe_pthread_rwlock_lockrd_Exit (l);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_rwlock_lockrd_Entry (l);
+			res = pthread_rwlock_timedrdlock_real (l, t);
+			Probe_pthread_rwlock_lockrd_Exit (l);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_rwlock_timedrdlock_real != NULL)
 	{
@@ -762,18 +846,24 @@ int pthread_rwlock_wrlock(pthread_rwlock_t *l)
 {
 	int res;
 
+	if (pthread_rwlock_wrlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_wrlock (%p)\n", l);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_wrlock_real at %p\n", pthread_rwlock_wrlock_real);
 #endif
 
-	if (pthread_rwlock_wrlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_wrlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_rwlock_lockwr_Entry (l);
-		res = pthread_rwlock_wrlock_real (l);
-		Probe_pthread_rwlock_lockwr_Exit (l);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_rwlock_lockwr_Entry (l);
+			res = pthread_rwlock_wrlock_real (l);
+			Probe_pthread_rwlock_lockwr_Exit (l);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_rwlock_wrlock_real != NULL)
 	{
@@ -791,18 +881,24 @@ int pthread_rwlock_trywrlock(pthread_rwlock_t *l)
 {
 	int res;
 
+	if (pthread_rwlock_trywrlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_trywrlock (%p)\n", l);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_trywrlock_real at %p\n", pthread_rwlock_trywrlock_real);
 #endif
 
-	if (pthread_rwlock_trywrlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_trywrlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_rwlock_lockwr_Entry (l);
-		res = pthread_rwlock_trywrlock_real (l);
-		Probe_pthread_rwlock_lockwr_Exit (l);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_rwlock_lockwr_Entry (l);
+			res = pthread_rwlock_trywrlock_real (l);
+			Probe_pthread_rwlock_lockwr_Exit (l);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_rwlock_trywrlock_real != NULL)
 	{
@@ -820,18 +916,24 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *l, const struct timespec *t)
 {
 	int res;
 
+	if (pthread_rwlock_timedwrlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_timedwrlock (%p)\n", l);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_timedwrlock_real at %p\n", pthread_rwlock_timedwrlock_real);
 #endif
 
-	if (pthread_rwlock_timedwrlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_timedwrlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_rwlock_lockwr_Entry (l);
-		res = pthread_rwlock_timedwrlock_real (l, t);
-		Probe_pthread_rwlock_lockwr_Exit (l);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_rwlock_lockwr_Entry (l);
+			res = pthread_rwlock_timedwrlock_real (l, t);
+			Probe_pthread_rwlock_lockwr_Exit (l);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_rwlock_timedwrlock_real != NULL)
 	{
@@ -850,18 +952,24 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 {
 	int res;
 
+	if (pthread_rwlock_unlock_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG) && defined(DEBUG_MUTEX)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_unlock (%p)\n", l);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_unlock_real at %p\n", pthread_rwlock_unlock_real);
 #endif
 
-	if (pthread_rwlock_unlock_real != NULL && mpitrace_on && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_unlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
 	{
-		Backend_Enter_Instrumentation (1);
-		Probe_pthread_rwlock_unlock_Entry (l);
-		res = pthread_rwlock_unlock_real (l);
-		Probe_pthread_rwlock_unlock_Exit (l);
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (1);
+			Probe_pthread_rwlock_unlock_Entry (l);
+			res = pthread_rwlock_unlock_real (l);
+			Probe_pthread_rwlock_unlock_Exit (l);
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_rwlock_unlock_real != NULL)
 	{
@@ -881,21 +989,25 @@ int pthread_barrier_wait (pthread_barrier_t *barrier)
 {
 	int res;
 
+	if (pthread_barrier_wait_real == NULL)
+		GetpthreadHookPoints(0);
+
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_barrier_wait (%p)\n", barrier);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_barrier_wait_real at %p\n", pthread_barrier_wait_real);
 #endif
-	if (pthread_barrier_wait_real != NULL && mpitrace_on)
+	if (pthread_barrier_wait_real != NULL && EXTRAE_INITIALIZED())
 	{
-		Backend_Enter_Instrumentation (2);
-		Probe_pthread_Barrier_Wait_Entry ();
-
-		res = pthread_barrier_wait_real (barrier);
-
-		Probe_pthread_Barrier_Wait_Exit ();
-		Backend_Leave_Instrumentation ();
+		if (!Backend_ispThreadFinished(THREADID))
+		{
+			Backend_Enter_Instrumentation (2);
+			Probe_pthread_Barrier_Wait_Entry ();
+			res = pthread_barrier_wait_real (barrier);
+			Probe_pthread_Barrier_Wait_Exit ();
+			Backend_Leave_Instrumentation ();
+		}
 	}
-	else if (pthread_barrier_wait_real != NULL && !mpitrace_on)
+	else if (pthread_barrier_wait_real != NULL && !EXTRAE_INITIALIZED())
 	{
 		res = pthread_barrier_wait_real (barrier);
 	}
