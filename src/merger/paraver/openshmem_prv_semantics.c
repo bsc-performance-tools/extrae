@@ -40,6 +40,7 @@ static char UNUSED rcsid[] = "$Id: mpi_prv_semantics.c 2760 2014-06-18 10:53:30Z
 #include "openshmem_events.h"
 #include "openshmem_prv_semantics.h"
 #include "paraver_state.h"
+#include "paraver_generator.h"
 
 //#define DEBUG
 
@@ -196,6 +197,8 @@ static int Other_OPENSHMEM_Event (event_t * current_event,
 
         trace_paraver_state (cpu, ptask, task, thread, current_time);
         trace_paraver_event (cpu, ptask, task, thread, current_time, OPENSHMEM_BASE_EVENT, EvValue);
+
+	return 0;
 }
 
 
@@ -217,6 +220,8 @@ static int Any_Outgoing_OPENSHMEM_Event (event_t * current_event,
         trace_paraver_state (cpu, ptask, task, thread, current_time);
         trace_paraver_event (cpu, ptask, task, thread, current_time, OPENSHMEM_BASE_EVENT, EvValue);
         trace_paraver_event (cpu, ptask, task, thread, current_time, OPENSHMEM_SENDBYTES_EV, EvSize);
+
+	return 0;
 }
 
 
@@ -239,6 +244,8 @@ static int Any_Incoming_OPENSHMEM_Event (event_t * current_event,
         trace_paraver_state (cpu, ptask, task, thread, current_time);
         trace_paraver_event (cpu, ptask, task, thread, current_time, OPENSHMEM_BASE_EVENT, EvValue);
         trace_paraver_event (cpu, ptask, task, thread, current_time, OPENSHMEM_RECVBYTES_EV, EvSize);
+
+	return 0;
 }
 
 
