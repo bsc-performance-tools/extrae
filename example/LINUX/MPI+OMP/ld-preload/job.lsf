@@ -5,5 +5,5 @@
 #BSUB -eo trace.err
 #BSUB -W 00:10
 
-mpirun ./trace.sh ./mpi_ping
+mpirun ./trace.sh ./pi
 

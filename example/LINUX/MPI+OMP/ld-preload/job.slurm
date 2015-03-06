@@ -7,5 +7,5 @@
 # @ tasks_per_node = 4
 # @ wall_clock_limit = 00:10:00
 
-srun ./trace.sh ./mpi_ping
+srun ./trace.sh ./pi
 
