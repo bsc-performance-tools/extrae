@@ -76,7 +76,6 @@ int Translate_pthread_Operation (unsigned in_evttype,
 	unsigned long long *out_evtvalue)
 {
 	unsigned u;
-	unsigned out_type;
 
 	for (u = 0; u < MAX_PTHREAD_TYPE_ENTRIES; u++)
 		if (pthread_event_presency_label[u].eventtype == in_evttype)
