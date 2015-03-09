@@ -131,6 +131,8 @@ void Extrae_counters_at_Time_Wrapper (UINT64 time)
 {
 #if USE_HARDWARE_COUNTERS
 	TRACE_EVENTANDCOUNTERS (time, HWC_EV, 0, TRUE);
+#else
+	UNREFERENCED_PARAMETER(time);
 #endif
 }
 
