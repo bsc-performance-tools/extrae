@@ -101,6 +101,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpi_prv_events.h"
 #include "pacx_prv_events.h"
 #include "pthread_prv_events.h"
+#include "openshmem_prv_events.h"
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
 #include "trt_prv_events.h"
