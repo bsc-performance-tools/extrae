@@ -233,7 +233,7 @@ static void * pthread_create_hook (void *p1)
 	struct pthread_create_info *i = (struct pthread_create_info*)p1;
 	void *(*routine)(void*) = i->routine;
 	void *arg = i->arg;
-	void *res;
+	void *res = 0;
 
 	Backend_SetpThreadIdentifier (i->pthreadID);
 
@@ -260,7 +260,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 	void *(*p3) (void *), void* p4)
 {
 	static int pthread_library_depth = 0;
-	int res;
+	int res = 0;
 	struct pthread_create_info i;
 
 	if (pthread_create_real == NULL)
@@ -342,7 +342,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 
 int pthread_join (pthread_t p1, void **p2)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_join_real == NULL)
 		GetpthreadHookPoints(0);
@@ -411,7 +411,7 @@ void pthread_exit (void *p1)
 
 int pthread_detach (pthread_t p1)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_detach_real == NULL)
 		GetpthreadHookPoints(0);
@@ -446,7 +446,7 @@ int pthread_detach (pthread_t p1)
 
 int pthread_mutex_lock (pthread_mutex_t *m)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_mutex_lock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -482,7 +482,7 @@ int pthread_mutex_lock (pthread_mutex_t *m)
 
 int pthread_mutex_trylock (pthread_mutex_t *m)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_mutex_trylock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -518,7 +518,7 @@ int pthread_mutex_trylock (pthread_mutex_t *m)
 
 int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *t)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_mutex_timedlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -554,7 +554,7 @@ int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *t)
 
 int pthread_mutex_unlock (pthread_mutex_t *m)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_mutex_unlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -593,7 +593,7 @@ int pthread_mutex_unlock (pthread_mutex_t *m)
 #if 0
 int pthread_cond_signal (pthread_cond_t *c)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_cond_signal_real == NULL)
 		GetpthreadHookPoints(0);
@@ -629,7 +629,7 @@ int pthread_cond_signal (pthread_cond_t *c)
 
 int pthread_cond_broadcast (pthread_cond_t *c)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_cond_broadcast_real == NULL)
 		GetpthreadHookPoints(0);
@@ -664,7 +664,7 @@ int pthread_cond_broadcast (pthread_cond_t *c)
 
 int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_cond_wait_real == NULL)
 		GetpthreadHookPoints(0);
@@ -699,7 +699,7 @@ int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m)
 
 int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct timespec *t)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_cond_timedwait_real == NULL)
 		GetpthreadHookPoints(0);
@@ -736,7 +736,7 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 
 int pthread_rwlock_rdlock (pthread_rwlock_t *l)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_rwlock_rdlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -772,7 +772,7 @@ int pthread_rwlock_rdlock (pthread_rwlock_t *l)
 
 int pthread_rwlock_tryrdlock(pthread_rwlock_t *l)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_rwlock_tryrdlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -808,7 +808,7 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *l)
 
 int pthread_rwlock_timedrdlock(pthread_rwlock_t *l, const struct timespec *t)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_rwlock_timedrdlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -844,7 +844,7 @@ int pthread_rwlock_timedrdlock(pthread_rwlock_t *l, const struct timespec *t)
 
 int pthread_rwlock_wrlock(pthread_rwlock_t *l)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_rwlock_wrlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -879,7 +879,7 @@ int pthread_rwlock_wrlock(pthread_rwlock_t *l)
 
 int pthread_rwlock_trywrlock(pthread_rwlock_t *l)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_rwlock_trywrlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -914,7 +914,7 @@ int pthread_rwlock_trywrlock(pthread_rwlock_t *l)
 
 int pthread_rwlock_timedwrlock(pthread_rwlock_t *l, const struct timespec *t)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_rwlock_timedwrlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -950,7 +950,7 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *l, const struct timespec *t)
 
 int pthread_rwlock_unlock(pthread_rwlock_t *l)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_rwlock_unlock_real == NULL)
 		GetpthreadHookPoints(0);
@@ -987,7 +987,7 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 #if defined(HAVE_PTHREAD_BARRIER_WAIT)
 int pthread_barrier_wait (pthread_barrier_t *barrier)
 {
-	int res;
+	int res = 0;
 
 	if (pthread_barrier_wait_real == NULL)
 		GetpthreadHookPoints(0);
