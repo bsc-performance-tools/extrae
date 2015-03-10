@@ -31,5 +31,8 @@
 #define OMP_WRAPPER_H_
 
 void Extrae_OpenMP_init (int me);
+void Extrae_omp_init_lock (void *l);
+void Extrae_omp_set_lock (void *l);
+void Extrae_omp_unset_lock (void *l);
 
 #endif

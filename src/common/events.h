@@ -462,12 +462,16 @@ enum {
 #define USRFUNC_EV               60000019
 #define USRFUNC_LINE_EV          60000119
 #define USRFUNC_EV_BB            60000219
+#define TASKID_EV                60000028
 #define TASK_EV                  60000021
 #define TASKWAIT_EV              60000022
 #define TASKFUNC_EV              60000023
 #define TASKFUNC_LINE_EV         60000123
 #define TASKFUNC_INST_EV         60000024 /* Task func instantiation */
 #define TASKFUNC_INST_LINE_EV    60000124 /* at #pragma omp task */
+#define TASKGROUP_START_EV       60000025
+#define TASKGROUP_END_EV         60000026
+#define TASKGROUP_INGROUP_DEEP_EV 60000027
 #define OMPSETNUMTHREADS_EV      60000030
 #define OMPGETNUMTHREADS_EV      60000031
 #define NAMEDCRIT_NAME_EV        60000032 /* Critical address name */
@@ -478,6 +482,7 @@ enum {
 #define OMPT_SECTIONS_EV         60000054
 #define OMPT_SINGLE_EV           60000055
 #define OMPT_MASTER_EV           60000056
+#define OMPT_TASKGROUP_IN_EV     60000057
 
 /******************************************************************************
  *   User events to trace Pthread/TRT parallel execution.

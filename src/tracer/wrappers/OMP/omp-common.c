@@ -250,6 +250,11 @@ void Extrae_OpenMP_SetNumThreads_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
+void Extrae_OpenMP_TaskID (long long id)
+{
+	Probe_OpenMP_TaskID (id);
+}
+
 void Extrae_OpenMP_Task_Entry (void* uf)
 {
 	Backend_Enter_Instrumentation (2);
@@ -283,6 +288,30 @@ void Extrae_OpenMP_Taskwait_Entry (void)
 void Extrae_OpenMP_Taskwait_Exit (void)
 {
 	Probe_OpenMP_Taskwait_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OpenMP_Taskgroup_start_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OpenMP_Taskgroup_start_Entry ();
+}
+
+void Extrae_OpenMP_Taskgroup_start_Exit (void)
+{
+	Probe_OpenMP_Taskgroup_start_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OpenMP_Taskgroup_end_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OpenMP_Taskgroup_end_Entry ();
+}
+
+void Extrae_OpenMP_Taskgroup_end_Exit (void)
+{
+	Probe_OpenMP_Taskgroup_end_Exit ();
 	Backend_Leave_Instrumentation ();
 }
 
@@ -372,6 +401,18 @@ void Extrae_OMPT_Master_Exit (void)
 {
 	Probe_OMPT_Master_Exit ();
 	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_OMPT_Taskgroup_Entry (void)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_Taskgroup_Entry ();
+}
+
+void Extrae_OMPT_Taskgroup_Exit (void)
+{
+	Probe_OMPT_Taskgroup_Exit();
+	Backend_Leave_Instrumentation();
 }
 
 

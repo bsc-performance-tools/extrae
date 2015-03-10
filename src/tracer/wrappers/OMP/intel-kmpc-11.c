@@ -253,7 +253,9 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 #include "intel-kmpc-11-intermediate-switch.c"
 
 			default:
-				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n", p2);
+				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n"
+				                 PACKAGE_NAME":        Recompile Extrae to support this quantity of arguments!\n"
+						         PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so and change params[] variable\n", p2);
 				exit (-1);
 				break;
 		}
@@ -276,7 +278,9 @@ void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 #include "intel-kmpc-11-intermediate-switch.c"
 
 			default:
-				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n", p2);
+				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n"
+				                 PACKAGE_NAME":        Recompile Extrae to support this quantity of arguments!\n"
+						         PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so and change params[] variable\n", p2);
 				exit (-1);
 				break;
 		}
@@ -319,7 +323,9 @@ void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 #include "intel-kmpc-11-intermediate-switch.c"
 
 			default:
-				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n", p2);
+				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n"
+				                 PACKAGE_NAME":        Recompile Extrae to support this quantity of arguments!\n"
+						         PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so and change params[] variable\n", p2);
 				exit (-1);
 				break;
 		}

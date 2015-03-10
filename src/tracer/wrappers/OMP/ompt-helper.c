@@ -143,7 +143,8 @@ typedef struct ompt_task_id_pf_st
 {
 	ompt_task_id_t tid;  /* Task ID */
 	void *tf;            /* Task function */
-	int implicit;   /* is implicit ? */
+	long long task_ctr;  /* Task counter */
+	int implicit;        /* is implicit ? */
 } ompt_task_id_tf_t;
 
 static ompt_task_id_tf_t *ompt_tids_tf = NULL;
@@ -151,6 +152,7 @@ static unsigned n_ompt_tids_tf = 0;
 static unsigned n_allocated_ompt_tids_tf = 0;
 #define N_ALLOCATE_OMPT_TIDS 128
 static pthread_mutex_t mutex_tid_tf = PTHREAD_MUTEX_INITIALIZER;
+static long long __task_ctr = 1;
 
 void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, int implicit)
 {
@@ -186,6 +188,7 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, in
 			ompt_tids_tf[n_ompt_tids_tf].tid = ompt_tid;
 			ompt_tids_tf[n_ompt_tids_tf].tf = tf;
 			ompt_tids_tf[n_ompt_tids_tf].implicit = implicit;
+			ompt_tids_tf[n_ompt_tids_tf].task_ctr = __task_ctr++;
 			n_ompt_tids_tf++;
 #if defined(DEBUG)
 			fprintf (stdout, "OMPT: registered tid = %lld to tf = %p in slot %u, n_ompt_tids_tf = %u\n", ompt_tid, tf, u, n_ompt_tids_tf);
@@ -218,7 +221,7 @@ void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 	}
 }
 
-void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid)
+void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid, long long *taskctr)
 {
 	unsigned u;
 	void *ptr = NULL;
@@ -228,6 +231,8 @@ void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid)
 		if (ompt_tids_tf[u].tid == ompt_tid)
 		{
 			ptr = ompt_tids_tf[u].tf;
+			if (taskctr != NULL)
+				*taskctr = ompt_tids_tf[u].task_ctr;
 			break;
 		}
 	pthread_mutex_unlock (&mutex_tid_tf);

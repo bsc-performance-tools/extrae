@@ -41,6 +41,11 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#if !defined(HAVE__SYNC_FETCH_AND_ADD)
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
+#endif
 
 #include "wrapper.h"
 #include "omp-common.h"
@@ -54,10 +59,7 @@ struct openmp_task_st
 	void *p1;
 	void *p2;
 	void *p3;
-	long p4;
-	long p5;
-	int p6;
-	unsigned p7;
+	long long task_ctr; /* assigned task counter */
 };
 
 /*
@@ -397,7 +399,7 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 	
 	/* Obtain @ for GOMP_ordered_end */
 	GOMP_ordered_end_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_ordered_end");
-	INC_IF_NOT_NULL(GOMP_taskwait_real,count);
+	INC_IF_NOT_NULL(GOMP_ordered_end_real,count);
 #endif
 		
 	/* Any hook point? */
@@ -414,62 +416,75 @@ static void callme_task (void *helper_ptr)
 	struct openmp_task_st *helper = (* (struct openmp_task_st**)helper_ptr);
 	void (*task_uf)(void*) = (void(*)(void*)) helper->p1;
 
-	Extrae_OpenMP_TaskUF_Entry (helper->p1);
-
-	/* Extremely hack:
-
-	  Look at http://gcc.gnu.org/svn/gcc/branches/cilkplus/libgomp/task.c first 
-		It's very hard to pass the routine in the arguments (change of args_size and
-		copyfn).
-
-	  There are two ways of calling this:
-
-	  1) We call again GOMP_task BUT we do not let the GOMP runtime to execute
-	  in a deferred way.
-		2) Something like: helper->p1(helper->p2) may work.
-
-		As 2) seems less costly, we choose it for now except if the copyfn is given,
-	  then we rely on 1)
-	*/
-
-	if (helper->p3 != NULL)
-		GOMP_task_real (helper->p1, helper->p2, helper->p3, helper->p4, helper->p5,
-			FALSE, helper->p7);
-	else
-		task_uf (helper->p2);
-
 	if (helper != NULL)
 	{
-		free(helper);
-	}
+		Extrae_OpenMP_TaskUF_Entry (helper->p1);
+		Extrae_OpenMP_TaskID (helper->task_ctr);
 
-	Extrae_OpenMP_TaskUF_Exit ();
+		task_uf (helper->p2);
+		if (helper->p3 != NULL)
+			free(helper->p3);
+		free(helper);
+
+        Extrae_OpenMP_TaskUF_Exit ();
+	}
 }
 
+static volatile long long __GOMP_task_ctr = 1;
+#if !defined(HAVE__SYNC_FETCH_AND_ADD)
+static pthread_mutex_t __GOMP_task_ctr_lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
 void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned p7)
 {
+	void (*task_cpy)(void*,void*) = (void(*)(void*,void*)) p3;
+
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task is at %p\n", THREADID, GOMP_task_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %d %u\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %d %u %p\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8);
 #endif
 
-	if (GOMP_task_real != NULL && mpitrace_on)
+	if (GOMP_task_real != NULL && EXTRAE_INITIALIZED())
 	{
+		Extrae_OpenMP_Task_Entry (p1);
+
 		struct openmp_task_st *helper = NULL;
 		helper = (struct openmp_task_st *) malloc(sizeof(struct openmp_task_st));
 		helper->p1 = p1;
 		helper->p2 = p2;
-		helper->p3 = p3;
-		helper->p4 = p4;
-		helper->p5 = p5;
-		helper->p6 = p6;
-		helper->p7 = p7;
 
-		Extrae_OpenMP_Task_Entry (p1);
+		if (p3 != NULL)
+		{
+			char *buf =  malloc(sizeof(char) * (p4 + p5 - 1));
+			char *arg = (char *) (((uintptr_t) buf + p5 - 1)
+			            & ~(uintptr_t) (p5 - 1));
+			task_cpy (arg, helper->p2);
+			helper->p2 = arg;
+			// saved for deallocation purposes, arg is not valid since includes offset
+			helper->p3 = buf; 
+		}
+		else
+		{
+			char * buf =  malloc(sizeof(char) * (p4 + p5 - 1));
+			memcpy (buf, p2, p4);
+			helper->p2 = buf;
+			// saved for deallocation purposes, arg is not valid since includes offset
+			helper->p3 = buf;
+		}
+
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+		helper->task_ctr = __sync_fetch_and_add(&__GOMP_task_ctr,1);
+#else
+		pthread_mutex_lock (&__GOMP_task_ctr_lock);
+		helper->task_ctr = __GOMP_task_ctr++;
+		pthread_mutex_unlock (&__GOMP_task_ctr_lock);
+#endif
+
+		Extrae_OpenMP_TaskID (helper->task_ctr);
+
 		GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7);
 		Extrae_OpenMP_Task_Exit ();
 	}
-	else if (GOMP_task_real != NULL && !mpitrace_on)
+	else if (GOMP_task_real != NULL)
 	{
 		GOMP_task_real (p1, p2, p3, p4, p5, p6, p7);
 	}
@@ -486,13 +501,13 @@ void GOMP_taskwait (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_taskwait is at %p\n", THREADID, GOMP_taskwait_real);
 #endif
 
-	if (GOMP_taskwait_real != NULL && mpitrace_on)
+	if (GOMP_taskwait_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Taskwait_Entry();
 		GOMP_taskwait_real ();
 		Extrae_OpenMP_Taskwait_Exit();
 	}
-	else if (GOMP_taskwait_real != NULL && !mpitrace_on)
+	else if (GOMP_taskwait_real != NULL)
 	{
 		GOMP_taskwait_real ();
 	}
@@ -510,7 +525,7 @@ void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_sections params %p %p %u %u \n", THREADID, p1, p2, p3, p4);
 #endif
 
-	if (GOMP_parallel_sections_start_real != NULL && mpitrace_on)
+	if (GOMP_parallel_sections_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		parsection_uf = (void(*)(void*))p1;
 
@@ -523,7 +538,7 @@ void GOMP_parallel_sections_start (void *p1, void *p2, unsigned p3, unsigned p4)
 
 		/* Extrae_OpenMP_ParSections_Exit(); */
 	}
-	else if (GOMP_parallel_sections_start_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_sections_start_real != NULL)
 	{
 		GOMP_parallel_sections_start_real (p1, p2, p3, p4);
 	}
@@ -542,13 +557,13 @@ unsigned GOMP_sections_start (unsigned p1)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections params %u\n", THREADID, p1);
 #endif
 
-	if (GOMP_sections_start_real != NULL && mpitrace_on)
+	if (GOMP_sections_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Section_Entry();
 		res = GOMP_sections_start_real (p1);
 		Extrae_OpenMP_Section_Exit();
 	}
-	else if (GOMP_sections_start_real != NULL && !mpitrace_on)
+	else if (GOMP_sections_start_real != NULL)
 	{
 		res = GOMP_sections_start_real (p1);
 	}
@@ -567,13 +582,13 @@ unsigned GOMP_sections_next (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections_next is at %p\n", THREADID, GOMP_sections_next_real);
 #endif
 
-	if (GOMP_sections_next_real != NULL && mpitrace_on)
+	if (GOMP_sections_next_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Work_Entry();
 		res = GOMP_sections_next_real();
 		Extrae_OpenMP_Work_Exit();
 	}
-	else if (GOMP_sections_next_real != NULL && !mpitrace_on)
+	else if (GOMP_sections_next_real != NULL)
 	{
 		res = GOMP_sections_next_real();
 	}
@@ -591,13 +606,13 @@ void GOMP_sections_end (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections_end is at %p\n", THREADID, GOMP_sections_end_real);
 #endif
 
-	if (GOMP_sections_end_real != NULL && mpitrace_on)
+	if (GOMP_sections_end_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Join_Wait_Entry();
 		GOMP_sections_end_real();
 		Extrae_OpenMP_Join_Wait_Exit();
 	}
-	else if (GOMP_sections_end_real != NULL && !mpitrace_on)
+	else if (GOMP_sections_end_real != NULL)
 	{
 		GOMP_sections_end_real();
 	}
@@ -614,13 +629,13 @@ void GOMP_sections_end_nowait (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_sections_end_nowait is at %p\n", THREADID, GOMP_sections_end_nowait_real);
 #endif
 
-	if (GOMP_sections_end_nowait_real != NULL && mpitrace_on)
+	if (GOMP_sections_end_nowait_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Join_NoWait_Entry();
 		GOMP_sections_end_nowait_real();
 		Extrae_OpenMP_Join_NoWait_Exit();
 	}
-	else if (GOMP_sections_end_nowait_real != NULL && !mpitrace_on)
+	else if (GOMP_sections_end_nowait_real != NULL)
 	{
 		GOMP_sections_end_nowait_real();
 	}
@@ -637,7 +652,7 @@ void GOMP_loop_end (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_end is at %p\n", THREADID, GOMP_loop_end_real);
 #endif
 
-	if (GOMP_loop_end_real != NULL && mpitrace_on)
+	if (GOMP_loop_end_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Join_Wait_Entry();
 		GOMP_loop_end_real();
@@ -645,7 +660,7 @@ void GOMP_loop_end (void)
 		Extrae_OpenMP_UF_Exit ();
 		Extrae_OpenMP_DO_Exit ();	
 	}
-	else if (GOMP_loop_end_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_end_real != NULL)
 	{
 		GOMP_loop_end_real();
 	}
@@ -662,7 +677,7 @@ void GOMP_loop_end_nowait (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_end_nowait is at %p\n", THREADID, GOMP_loop_end_nowait_real);
 #endif
 
-	if (GOMP_loop_end_nowait_real != NULL && mpitrace_on)
+	if (GOMP_loop_end_nowait_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Join_NoWait_Entry();
 		GOMP_loop_end_nowait_real();
@@ -670,7 +685,7 @@ void GOMP_loop_end_nowait (void)
 		Extrae_OpenMP_UF_Exit ();
 		Extrae_OpenMP_DO_Exit ();	
 	}
-	else if (GOMP_loop_end_nowait_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_end_nowait_real != NULL)
 	{
 		GOMP_loop_end_nowait_real();
 	}
@@ -690,13 +705,13 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
-	if (GOMP_loop_static_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_static_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_static_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_static_start_real != NULL)
 	{
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
 	}
@@ -716,13 +731,13 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
-	if (GOMP_loop_runtime_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_runtime_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_runtime_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_runtime_start_real != NULL)
 	{
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
 	}
@@ -742,13 +757,13 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
-	if (GOMP_loop_guided_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_guided_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_guided_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_guided_start_real != NULL)
 	{
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
 	}
@@ -768,13 +783,13 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %ld %ld %ld %ld %p %p\n", THREADID, p1, p2, p3, p4, p5, p6);
 #endif
 
-	if (GOMP_loop_dynamic_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_dynamic_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_dynamic_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_dynamic_start_real != NULL)
 	{
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
 	}
@@ -793,7 +808,7 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
-	if (GOMP_parallel_loop_static_start_real != NULL && mpitrace_on)
+	if (GOMP_parallel_loop_static_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
@@ -806,7 +821,7 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 		if (THREADID == 0)
 			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
-	else if (GOMP_parallel_loop_static_start_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_loop_static_start_real != NULL)
 	{
 		GOMP_parallel_loop_static_start_real (p1, p2, p3, p4, p5, p6, p7);
 	}
@@ -824,7 +839,7 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
-	if (GOMP_parallel_loop_runtime_start_real != NULL && mpitrace_on)
+	if (GOMP_parallel_loop_runtime_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
@@ -837,7 +852,7 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 		if (THREADID == 0)
 			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
-	else if (GOMP_parallel_loop_runtime_start_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_loop_runtime_start_real != NULL)
 	{
 		GOMP_parallel_loop_runtime_start_real (p1, p2, p3, p4, p5, p6, p7);
 	}
@@ -855,7 +870,7 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
-	if (GOMP_parallel_loop_static_start_real != NULL && mpitrace_on)
+	if (GOMP_parallel_loop_static_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
@@ -868,7 +883,7 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 		if (THREADID == 0)
 			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
-	else if (GOMP_parallel_loop_static_start_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_loop_static_start_real != NULL)
 	{
 		GOMP_parallel_loop_guided_start_real (p1, p2, p3, p4, p5, p6, p7);
 	}
@@ -886,7 +901,7 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p %u %ld %ld %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
-	if (GOMP_parallel_loop_dynamic_start_real != NULL && mpitrace_on)
+	if (GOMP_parallel_loop_dynamic_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		/* Set the pointer to the correct PARALLEL DO user function */
 		pardo_uf = (void(*)(void*))p1;
@@ -899,7 +914,7 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 		if (THREADID == 0)
 			Extrae_OpenMP_UF_Entry (pardo_uf);
 	}
-	else if (GOMP_parallel_loop_dynamic_start_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_loop_dynamic_start_real != NULL)
 	{
 		GOMP_parallel_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6, p7);
 	}
@@ -918,13 +933,13 @@ int GOMP_loop_static_next (long *p1, long *p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
-	if (GOMP_loop_static_next_real != NULL && mpitrace_on)
+	if (GOMP_loop_static_next_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Work_Entry();
 		res = GOMP_loop_static_next_real (p1, p2);
 		Extrae_OpenMP_Work_Exit();
 	}
-	else if (GOMP_loop_static_next_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_static_next_real != NULL)
 	{
 		res = GOMP_loop_static_next_real (p1, p2);
 	}
@@ -944,13 +959,13 @@ int GOMP_loop_runtime_next (long *p1, long *p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
-	if (GOMP_loop_runtime_next_real != NULL && mpitrace_on)
+	if (GOMP_loop_runtime_next_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Work_Entry();
 		res = GOMP_loop_runtime_next_real (p1, p2);
 		Extrae_OpenMP_Work_Exit();
 	}
-	else if (GOMP_loop_runtime_next_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_runtime_next_real != NULL)
 	{
 		res = GOMP_loop_runtime_next_real (p1, p2);
 	}
@@ -970,13 +985,13 @@ int GOMP_loop_guided_next (long *p1, long *p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
-	if (GOMP_loop_guided_next_real != NULL && mpitrace_on)
+	if (GOMP_loop_guided_next_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Work_Entry();
 		res = GOMP_loop_guided_next_real (p1, p2);
 		Extrae_OpenMP_Work_Exit();
 	}
-	else if (GOMP_loop_guided_next_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_guided_next_real != NULL)
 	{
 		res = GOMP_loop_guided_next_real (p1, p2);
 	}
@@ -996,13 +1011,13 @@ int GOMP_loop_dynamic_next (long *p1, long *p2)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d params %p %p\n", THREADID, p1, p2);
 #endif
 
-	if (GOMP_loop_dynamic_next_real != NULL && mpitrace_on)
+	if (GOMP_loop_dynamic_next_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Work_Entry();
 		res = GOMP_loop_dynamic_next_real (p1, p2);
 		Extrae_OpenMP_Work_Exit();
 	}
-	else if (GOMP_loop_dynamic_next_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_dynamic_next_real != NULL)
 	{
 		res = GOMP_loop_dynamic_next_real (p1, p2);
 	}
@@ -1021,7 +1036,7 @@ void GOMP_parallel (void *p1, void *p2, unsigned p3, unsigned p4)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel params %p %p %u %u\n", THREADID, p1, p2, p3, p4);
 #endif
 
-	if (GOMP_parallel_real != NULL && mpitrace_on)
+	if (GOMP_parallel_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_ParRegion_Entry();
 
@@ -1031,7 +1046,7 @@ void GOMP_parallel (void *p1, void *p2, unsigned p3, unsigned p4)
 
 		Extrae_OpenMP_ParRegion_Exit();
 	}
-	else if (GOMP_parallel_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_real != NULL)
 	{
 		GOMP_parallel_real (p1, p2, p3, p4);
 	}
@@ -1049,7 +1064,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_start params %p %p %u\n", THREADID, p1, p2, p3);
 #endif
 
-	if (GOMP_parallel_start_real != NULL && mpitrace_on)
+	if (GOMP_parallel_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		/* Set the pointer to the correct PARALLEL user function */
 		par_uf = (void(*)(void*))p1;
@@ -1062,7 +1077,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 		   the required event here - call Backend to get a new time! */
 		Extrae_OpenMP_UF_Entry (p1);
 	}
-	else if (GOMP_parallel_start_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_start_real != NULL)
 	{
 		GOMP_parallel_start_real (p1, p2, p3);
 	}
@@ -1079,13 +1094,13 @@ void GOMP_parallel_end (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_end is at %p\n", THREADID, GOMP_parallel_end_real);
 #endif
 
-	if (GOMP_parallel_start_real != NULL && mpitrace_on)
+	if (GOMP_parallel_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_UF_Exit ();
 		GOMP_parallel_end_real ();
 		Extrae_OpenMP_ParRegion_Exit();
 	}
-	else if (GOMP_parallel_start_real != NULL && !mpitrace_on)
+	else if (GOMP_parallel_start_real != NULL)
 	{
 		GOMP_parallel_end_real ();
 	}
@@ -1102,13 +1117,13 @@ void GOMP_barrier (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_barrier is at %p\n", THREADID, GOMP_barrier_real);
 #endif
 
-	if (GOMP_barrier_real != NULL && mpitrace_on)
+	if (GOMP_barrier_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Barrier_Entry ();
 		GOMP_barrier_real ();
 		Extrae_OpenMP_Barrier_Exit ();
 	}
-	else if (GOMP_barrier_real != NULL && !mpitrace_on)
+	else if (GOMP_barrier_real != NULL)
 	{
 		GOMP_barrier_real ();
 	}
@@ -1126,13 +1141,13 @@ void GOMP_critical_name_start (void **p1)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_name_start params %p\n", THREADID, p1);
 #endif
 
-	if (GOMP_critical_name_start_real != NULL && mpitrace_on)
+	if (GOMP_critical_name_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Named_Lock_Entry();
 		GOMP_critical_name_start_real (p1);
 		Extrae_OpenMP_Named_Lock_Exit(p1);
 	}
-	else if (GOMP_critical_name_start_real != NULL && !mpitrace_on)
+	else if (GOMP_critical_name_start_real)
 	{
 		GOMP_critical_name_start_real (p1);
 	}
@@ -1150,13 +1165,13 @@ void GOMP_critical_name_end (void **p1)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_name_end params %p\n", THREADID, p1);
 #endif
 
-	if (GOMP_critical_name_end_real != NULL && mpitrace_on)
+	if (GOMP_critical_name_end_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Named_Unlock_Entry(p1);
 		GOMP_critical_name_end_real (p1);
 		Extrae_OpenMP_Named_Unlock_Exit();
 	}
-	else if (GOMP_critical_name_end_real != NULL && !mpitrace_on)
+	else if (GOMP_critical_name_end_real != NULL)
 	{
 		GOMP_critical_name_end_real (p1);
 	}
@@ -1174,13 +1189,13 @@ void GOMP_critical_start (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_start is at %p\n", THREADID, GOMP_critical_start_real);
 #endif
 
-	if (GOMP_critical_start_real != NULL && mpitrace_on)
+	if (GOMP_critical_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Unnamed_Lock_Entry();
 		GOMP_critical_start_real();
 		Extrae_OpenMP_Unnamed_Lock_Exit();
 	}
-	else if (GOMP_critical_start_real != NULL && !mpitrace_on)
+	else if (GOMP_critical_start_real != NULL)
 	{
 		GOMP_critical_start_real();
 	}
@@ -1197,13 +1212,13 @@ void GOMP_critical_end (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_critical_end is at %p\n", THREADID, GOMP_critical_end_real);
 #endif
 
-	if (GOMP_critical_end_real != NULL && mpitrace_on)
+	if (GOMP_critical_end_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Unnamed_Unlock_Entry();
 		GOMP_critical_end_real ();
 		Extrae_OpenMP_Unnamed_Unlock_Exit();
 	}
-	else if (GOMP_critical_end_real != NULL && !mpitrace_on)
+	else if (GOMP_critical_end_real != NULL)
 	{
 		GOMP_critical_end_real ();
 	}
@@ -1220,13 +1235,13 @@ void GOMP_atomic_start (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_atomic_start is at %p\n", THREADID, GOMP_atomic_start_real);
 #endif
 
-	if (GOMP_atomic_start_real != NULL && mpitrace_on)
+	if (GOMP_atomic_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Unnamed_Lock_Entry();
 		GOMP_atomic_start_real();
 		Extrae_OpenMP_Unnamed_Lock_Exit();
 	}
-	else if (GOMP_atomic_start_real != NULL && !mpitrace_on)
+	else if (GOMP_atomic_start_real != NULL)
 	{
 		GOMP_atomic_start_real();
 	}
@@ -1243,13 +1258,13 @@ void GOMP_atomic_end (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_atomic_end is at %p\n", THREADID, GOMP_atomic_end_real);
 #endif
 
-	if (GOMP_atomic_end_real != NULL && mpitrace_on)
+	if (GOMP_atomic_end_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Unnamed_Unlock_Entry();
 		GOMP_atomic_end_real ();
 		Extrae_OpenMP_Unnamed_Unlock_Exit();
 	}
-	else if (GOMP_atomic_end_real != NULL && !mpitrace_on)
+	else if (GOMP_atomic_end_real != NULL)
 	{
 		GOMP_atomic_end_real ();
 	}
@@ -1268,13 +1283,13 @@ int GOMP_loop_ordered_static_start (long start, long end, long incr,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_ordered_static_start %p\n", THREADID, GOMP_loop_ordered_static_start_real);
 #endif
 
-	if (GOMP_loop_ordered_static_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_ordered_static_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_static_start_real (start, end, incr, chunk_size, istart, iend);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_ordered_static_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_ordered_static_start_real != NULL)
 	{
 		res = GOMP_loop_ordered_static_start_real (start, end, incr, chunk_size, istart, iend);
 	}
@@ -1294,13 +1309,13 @@ int GOMP_loop_ordered_runtime_start (long start, long end, long incr,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_ordered_runtime_start %p\n", THREADID, GOMP_loop_ordered_runtime_start_real);
 #endif
 
-	if (GOMP_loop_ordered_runtime_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_ordered_runtime_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_runtime_start_real (start, end, incr, chunk_size, istart, iend);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_ordered_runtime_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_ordered_runtime_start_real != NULL)
 	{
 		res = GOMP_loop_ordered_runtime_start_real (start, end, incr, chunk_size, istart, iend);
 	}
@@ -1320,13 +1335,13 @@ int GOMP_loop_ordered_dynamic_start (long start, long end, long incr,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_ordered_dynamic_start %p\n", THREADID, GOMP_loop_ordered_dynamic_start_real);
 #endif
 
-	if (GOMP_loop_ordered_dynamic_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_ordered_dynamic_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_dynamic_start_real (start, end, incr, chunk_size, istart, iend);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_ordered_dynamic_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_ordered_dynamic_start_real != NULL)
 	{
 		res = GOMP_loop_ordered_dynamic_start_real (start, end, incr, chunk_size, istart, iend);
 	}
@@ -1346,13 +1361,13 @@ int GOMP_loop_ordered_guided_start (long start, long end, long incr,
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_loop_ordered_guided_start %p\n", THREADID, GOMP_loop_ordered_guided_start_real);
 #endif
 
-	if (GOMP_loop_ordered_guided_start_real != NULL && mpitrace_on)
+	if (GOMP_loop_ordered_guided_start_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_guided_start_real (start, end, incr, chunk_size, istart, iend);
 		Extrae_OpenMP_UF_Entry (par_uf);
 	}
-	else if (GOMP_loop_ordered_guided_start_real != NULL && !mpitrace_on)
+	else if (GOMP_loop_ordered_guided_start_real != NULL)
 	{
 		res = GOMP_loop_ordered_guided_start_real (start, end, incr, chunk_size, istart, iend);
 	}

@@ -45,7 +45,6 @@ static char UNUSED rcsid[] = "$Id$";
 # include <unistd.h>
 #endif
 
-
 #include "wrapper.h"
 #include "trace_macros.h"
 #include "omp_probe.h"
@@ -70,16 +69,9 @@ void __attribute__ ((constructor)) extrae_openmp_setup(void)
 #endif
 
 #if defined(PIC)
-
-static void (*omp_set_lock_real)(int *) = NULL;
-static void (*omp_unset_lock_real)(int *) = NULL;
+static void (*omp_set_lock_real)(void *) = NULL;
+static void (*omp_unset_lock_real)(void *) = NULL;
 static void (*omp_set_num_threads_real)(int) = NULL;
-#if 0 /* Don't instrument omp_get_num_threads
-         it is automatically called on #pragma omp for on gnu runtime (and possibly others?)
-         and will increase trace size */
-static int (*omp_get_num_threads_real)(void) = NULL;
-#endif
-
 #endif /* PIC */
 
 static void common_GetOpenMPHookPoints (int rank)
@@ -89,23 +81,15 @@ static void common_GetOpenMPHookPoints (int rank)
 #if defined(PIC)
 	/* Obtain @ for omp_set_lock */
 	omp_set_lock_real =
-		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_set_lock");
+		(void(*)(void*)) dlsym (RTLD_NEXT, "omp_set_lock");
 
 	/* Obtain @ for omp_unset_lock */
 	omp_unset_lock_real =
-		(void(*)(int*)) dlsym (RTLD_NEXT, "omp_unset_lock");
+		(void(*)(void*)) dlsym (RTLD_NEXT, "omp_unset_lock");
 
 	/* Obtain @ for omp_set_num_threads */
 	omp_set_num_threads_real =
 		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads");
-
-# if 0 /* Don't instrument omp_get_num_threads */
-	/* Obtain @ for omp_get_num_threads */
-	omp_get_num_threads_real =
-		(int(*)(void)) dlsym (RTLD_NEXT, "omp_get_num_threads");
-	if (omp_get_num_threads_real == NULL && rank == 0)
-		fprintf (stderr, PACKAGE_NAME": Unable to find omp_get_num_threads in DSOs!!\n");
-# endif
 #endif /* PIC */
 }
 
@@ -117,15 +101,14 @@ static void common_GetOpenMPHookPoints (int rank)
 */
 
 #if defined(PIC)
-
-void omp_set_lock (int *p1)
+void omp_set_lock (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": omp_set_lock is at %p\n", omp_set_lock);
+	fprintf (stderr, PACKAGE_NAME": omp_set_lock is at %p\n", omp_set_lock_real);
 	fprintf (stderr, PACKAGE_NAME": omp_set_lock params %p\n", p1);
 #endif
 
-	if (omp_set_lock_real != NULL && mpitrace_on)
+	if (omp_set_lock_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Lock_Entry();
@@ -133,7 +116,7 @@ void omp_set_lock (int *p1)
 		Probe_OpenMP_Named_Lock_Exit(p1);
 		Backend_Leave_Instrumentation ();
 	}
-	else if (omp_set_lock_real != NULL && !mpitrace_on)
+	else if (omp_set_lock_real != NULL)
 	{
 		omp_set_lock_real (p1);
 	}
@@ -151,7 +134,7 @@ void omp_unset_lock (int *p1)
 	fprintf (stderr, PACKAGE_NAME": omp_unset_lock params %p\n", p1);
 #endif
 
-	if (omp_unset_lock_real != NULL && mpitrace_on)
+	if (omp_unset_lock_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_OpenMP_Named_Unlock_Entry(p1);
@@ -159,7 +142,7 @@ void omp_unset_lock (int *p1)
 		Probe_OpenMP_Named_Unlock_Exit();
 		Backend_Leave_Instrumentation ();
 	}
-	else if (omp_unset_lock_real != NULL && !mpitrace_on)
+	else if (omp_unset_lock_real != NULL)
 	{
 		omp_unset_lock_real (p1);
 	}
@@ -177,7 +160,7 @@ void omp_set_num_threads (int p1)
 	fprintf (stderr, PACKAGE_NAME": omp_set_num_threads params %d\n", p1);
 #endif
 
-	if (omp_set_num_threads_real != NULL && mpitrace_on)
+	if (omp_set_num_threads_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Backend_ChangeNumberOfThreads (p1);
 
@@ -187,7 +170,7 @@ void omp_set_num_threads (int p1)
 		Probe_OpenMP_SetNumThreads_Exit ();
 		Backend_Leave_Instrumentation ();
 	}
-	else if (omp_set_num_threads_real != NULL && !mpitrace_on)
+	else if (omp_set_num_threads_real != NULL)
 	{
 		omp_set_num_threads_real (p1);
 	}
@@ -197,41 +180,9 @@ void omp_set_num_threads (int p1)
 		exit (0);
 	}
 }
-
-#if 0 /* Don't instrument omp_get_num_threads */
-int omp_get_num_threads (int p1)
-{
-	int res;
-
-#if defined(DEBUG)
-  fprintf (stderr, PACKAGE_NAME": omp_get_num_threads is at %p\n", omp_get_num_threads_real);
-  fprintf (stderr, PACKAGE_NAME": omp_get_num_threads params %d\n", p1);
-#endif
-
-  if (omp_get_num_threads_real != NULL && mpitrace_on)
-  {
-    Backend_Enter_Instrumentation (2);
-		Probe_OpenMP_GetNumThreads_Entry ();
-    res = omp_get_num_threads_real ();
-		Probe_OpenMP_GetNumThreads_Exit ();
-    Backend_Leave_Instrumentation ();
-  }
-  else if (omp_get_num_threads_real != NULL && !mpitrace_on)
-	{
-		res = omp_get_num_threads_real ();
-	}
-  else
-  {
-    fprintf (stderr, PACKAGE_NAME": omp_set_num_threads is not hooked! exiting!!\n");
-    exit (0);
-  }
-
-	return res;
-}
-#endif
-
 #endif /* PIC */
 
+#if defined(STANDALONE)
 static int getnumProcessors (void)
 {
   int numProcessors = 0;
@@ -249,9 +200,12 @@ static int getnumProcessors (void)
 
   return numProcessors;
 }
+#endif
 
 void Extrae_OpenMP_init(int me)
 {
+	UNREFERENCED_PARAMETER(me);
+
 #if defined(PIC)
   int hooked = 0;
 

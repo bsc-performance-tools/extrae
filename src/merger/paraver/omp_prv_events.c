@@ -60,8 +60,9 @@ static char UNUSED rcsid[] = "$Id$";
 #define OMPT_SECTIONS_INDEX     15
 #define OMPT_SINGLE_INDEX       16
 #define OMPT_MASTER_INDEX       17
+#define TASKGROUP_START_INDEX   18
 
-#define MAX_OMP_INDEX		18
+#define MAX_OMP_INDEX		    19
 
 static int inuse[MAX_OMP_INDEX] = { FALSE };
 
@@ -101,6 +102,9 @@ void Enable_OMP_Operation (int type)
 	ENABLE_TYPE_IF(OMPT_SECTIONS, type, inuse);
 	ENABLE_TYPE_IF(OMPT_SINGLE, type, inuse);
 	ENABLE_TYPE_IF(OMPT_MASTER, type, inuse);
+	ENABLE_TYPE_IF(TASKGROUP_START, type, inuse);
+	if (type == OMPT_TASKGROUP_IN_EV)
+		inuse[TASKGROUP_START_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -165,11 +169,14 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 #if defined(HAVE_BFD)
 	if (inuse[FNC_OMP_INDEX])
 	{
-		Address2Info_Write_OMP_Labels (fd, OMPFUNC_EV, "Parallel function",
-			OMPFUNC_LINE_EV, "Parallel function line and file",
+		Address2Info_Write_OMP_Labels (fd, OMPFUNC_EV, "Executed OpenMP parallel function",
+			OMPFUNC_LINE_EV, "Executed OpenMP parallel function line and file",
 			get_option_merge_UniqueCallerID());
-		Address2Info_Write_OMP_Labels (fd, TASKFUNC_INST_EV, "OMP Task function",
-			TASKFUNC_INST_LINE_EV, "OMP Task function line and file",
+		Address2Info_Write_OMP_Labels (fd, TASKFUNC_EV, "Executed OpenMP task function",
+			TASKFUNC_LINE_EV, "Executed OpenMP task function line and file",
+			get_option_merge_UniqueCallerID());
+		Address2Info_Write_OMP_Labels (fd, TASKFUNC_INST_EV, "Instantiated OpenMP task function",
+			TASKFUNC_INST_LINE_EV, "Instantiated OpenMP task function line and file",
 			get_option_merge_UniqueCallerID());
 	}
 #endif
@@ -202,9 +209,7 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d   %d OpenMP barrier\n", 0, BARRIEROMP_EV);
-		fprintf (fd, "VALUES\n"
-		             "0 End\n"
-		             "1 Begin\n");
+		fprintf (fd, "VALUES\n0 End\n1 Begin\n");
 	}
 	if (inuse[GETSETNUMTHREADS_INDEX])
 	{
@@ -215,69 +220,76 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 		             "0 End\n"
 		             "1 Begin\n");
 	}
-	if (inuse[TASK_INDEX])
-	{
-		fprintf (fd, "EVENT_TYPE\n");
-		fprintf (fd, "%d   %d OMP task creation\n", 0, TASK_EV);
-		fprintf (fd, "VALUES\n"
-		             "0 End\n"
-		             "1 Begin\n");
-	}
 	if (inuse[TASKWAIT_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d   %d OMP task wait\n", 0, TASKWAIT_EV);
-		fprintf (fd, "VALUES\n"
-		             "0 End\n"
-		             "1 Begin\n");
+		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
 	}
 	if (inuse[OMPT_CRITICAL_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d %d OMP critical\n"
-		             "VALUES\n0 End\n1 Begin\n",
+		             "VALUES\n0 End\n1 Begin\n\n",
 		         0, OMPT_CRITICAL_EV);
 	}
 	if (inuse[OMPT_ATOMIC_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d %d OMP atomic\n"
-		             "VALUES\n0 End\n1 Begin\n",
+		             "VALUES\n0 End\n1 Begin\n\n",
 		         0, OMPT_ATOMIC_EV);
 	}
 	if (inuse[OMPT_LOOP_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d %d OMP loop\n"
-		             "VALUES\n0 End\n1 Begin\n",
+		             "VALUES\n0 End\n1 Begin\n\n",
 		         0, OMPT_LOOP_EV);
 	}
 	if (inuse[OMPT_WORKSHARE_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d %d OMP workshare\n"
-		             "VALUES\n0 End\n1 Begin\n",
+		             "VALUES\n0 End\n1 Begin\n\n",
 		         0, OMPT_WORKSHARE_EV);
 	}
 	if (inuse[OMPT_SECTIONS_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d %d OMP sections\n"
-		             "VALUES\n0 End\n1 Begin\n",
+		             "VALUES\n0 End\n1 Begin\n\n",
 		         0, OMPT_SECTIONS_EV);
 	}
 	if (inuse[OMPT_SINGLE_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d %d OMP single\n"
-		             "VALUES\n0 End\n1 Begin\n",
+		             "VALUES\n0 End\n1 Begin\n\n",
 		         0, OMPT_SINGLE_EV);
 	}
 	if (inuse[OMPT_MASTER_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n"
 		             "%d %d OMP master\n"
-		             "VALUES\n0 End\n1 Begin\n",
+		             "VALUES\n0 End\n1 Begin\n\n",
 		         0, OMPT_MASTER_EV);
+	}
+	if (inuse[TASKGROUP_START_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		  "%d %d Taskgroup calls\n"
+		  "VALUES\n0 Outside\n1 Start\n2 End\n",
+		  0, TASKGROUP_START_EV);
+		fprintf (fd, "EVENT_TYPE\n"
+		  "%d %d Within Taskgroup region\n"
+		  "VALUES\n0 End\n1 Begin\n\n",
+		  0, TASKGROUP_INGROUP_DEEP_EV);
+	}
+	if (inuse[TASK_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		  "%d %d Task Identifier\n\n",
+		  0, TASKID_EV);
 	}
 }

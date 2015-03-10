@@ -66,12 +66,17 @@ void Extrae_OpenMP_GetNumThreads_Entry (void);
 void Extrae_OpenMP_GetNumThreads_Exit (void);
 void Extrae_OpenMP_SetNumThreads_Entry (int p1);
 void Extrae_OpenMP_SetNumThreads_Exit (void);
+void Extrae_OpenMP_TaskID (long long id);
 void Extrae_OpenMP_Task_Entry (void* uf);
 void Extrae_OpenMP_Task_Exit (void);
 void Extrae_OpenMP_TaskUF_Entry (void* uf);
 void Extrae_OpenMP_TaskUF_Exit (void);
 void Extrae_OpenMP_Taskwait_Entry (void);
 void Extrae_OpenMP_Taskwait_Exit (void);
+void Extrae_OpenMP_Taskgroup_start_Entry (void);
+void Extrae_OpenMP_Taskgroup_start_Exit (void);
+void Extrae_OpenMP_Taskgroup_end_Entry (void);
+void Extrae_OpenMP_Taskgroup_end_Exit (void);
 
 /* OMPT probes */
 
@@ -89,6 +94,8 @@ void Extrae_OMPT_Single_Entry (void);
 void Extrae_OMPT_Single_Exit (void);
 void Extrae_OMPT_Master_Entry (void);
 void Extrae_OMPT_Master_Exit (void);
+void Extrae_OMPT_Taskgroup_Entry (void);
+void Extrae_OMPT_Taskgroup_Exit (void);
 
 
 #endif /* #define OMP_COMMON_H_INCLUDED */

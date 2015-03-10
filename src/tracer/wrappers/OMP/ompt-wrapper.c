@@ -440,13 +440,13 @@ void OMPT_event_taskwait_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 void OMPT_event_taskgroup_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
-	// TODO: EXTRAE
+	Extrae_OMPT_Taskgroup_Entry();
 }
 
 void OMPT_event_taskgroup_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
-	// TODO: EXTRAE
+	Extrae_OMPT_Taskgroup_Exit ();
 }
 
 void OMPT_event_wait_taskgroup_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
@@ -569,21 +569,25 @@ void OMPT_event_initial_task_end (ompt_task_id_t tid)
 void OMPT_event_task_switch (ompt_task_id_t stid, ompt_task_id_t rtid)
 {
 	void *tf;
+	long long taskcounter;
 
 	/* This event denotes that the previous task was suspended and another resumed */
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", stid, rtid);
 
 	/* Leave a task function if it's not the implicit task. The implicit
 	   task is automatically instrumented elsewhere */
-	if ((tf = Extrae_OMPT_get_tf_task_id(stid)) &&
+	if ((tf = Extrae_OMPT_get_tf_task_id(stid, NULL)) &&
 	     !Extrae_OMPT_get_tf_task_id_is_implicit(stid))
 		Extrae_OpenMP_TaskUF_Exit ();
 
 	/* Enter a task function if it's not the implicit task. The implicit
 	   task is automatically instrumented elsewhere */
-	if ((tf = Extrae_OMPT_get_tf_task_id (rtid)) &&
+	if ((tf = Extrae_OMPT_get_tf_task_id (rtid, &taskcounter)) &&
 	     !Extrae_OMPT_get_tf_task_id_is_implicit(rtid))
+	{
 		Extrae_OpenMP_TaskUF_Entry (tf);
+		Extrae_OpenMP_TaskID (taskcounter);
+	}
 }
 
 void OMPT_event_wait_lock (ompt_wait_id_t wid)

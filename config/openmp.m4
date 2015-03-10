@@ -2,6 +2,8 @@
 # --------------------
 AC_DEFUN([AX_CHECK_OPENMP],
 [
+	AC_REQUIRE([AX_HAVE_SYNC_FETCH_AND_ADD])
+
 	AC_ARG_ENABLE(openmp,
 	   AC_HELP_STRING(
 	      [--enable-openmp],
@@ -96,6 +98,24 @@ AC_DEFUN([AX_CHECK_OPENMP],
 	AM_CONDITIONAL(WANT_OPENMP_GNU_4_9, test "${libgomp_version}" = "4.9" )
 ])
 
+AC_DEFUN([AX_HAVE_SYNC_FETCH_AND_ADD],
+[
+	AC_MSG_CHECKING([for __sync_fetch_and_add availability])
+	AC_TRY_LINK(
+		[ ], 
+		[ volatile int i; __sync_fetch_and_add(&i,1); ],
+		[ have_sync_fetch_and_add="yes" ]
+	)
+
+	if test "${have_sync_fetch_and_add}" = "yes" ; then
+		AC_DEFINE([HAVE__SYNC_FETCH_AND_ADD], 1, [Define if __sync_fetch_and_add is available])
+		AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
+])
+
+
 # AX_OPENMP_SHOW_CONFIGURATION
 # --------------------
 AC_DEFUN([AX_OPENMP_SHOW_CONFIGURATION],
@@ -110,3 +130,4 @@ AC_DEFUN([AX_OPENMP_SHOW_CONFIGURATION],
 		echo OpenMP instrumentation: no
   fi
 ])
+

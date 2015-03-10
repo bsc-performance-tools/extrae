@@ -1555,8 +1555,11 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	Backend_CreatepThreadIdentifier ();
 
 	/* Annotate myself */
-	Extrae_reallocate_pthread_info (1);
-	Backend_SetpThreadID (pthread_self(), 0);
+	{
+		pthread_t self = pthread_self();
+		Extrae_reallocate_pthread_info (1);
+		Backend_SetpThreadID (&self, 0);
+	}
 #endif
 
 #if defined(DEBUG)

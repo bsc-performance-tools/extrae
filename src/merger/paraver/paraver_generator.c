@@ -597,16 +597,10 @@ static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
 	else if (eventtype >= SAMPLING_LINE_EV && eventtype < SAMPLING_LINE_EV + MAX_CALLERS)
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2SAMPLE_LINE, get_option_merge_UniqueCallerID());
-	else if (eventtype == OMPFUNC_EV)
+	else if (eventtype == OMPFUNC_EV || eventtype == TASKFUNC_INST_EV || eventtype == TASKFUNC_EV)
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
-	else if (eventtype == OMPFUNC_LINE_EV)
-		return Address2Info_Translate (ptask, task, 
-		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
-	else if (eventtype == TASKFUNC_INST_EV)
-		return Address2Info_Translate (ptask, task, 
-		  eventvalue, ADDR2OMP_FUNCTION, get_option_merge_UniqueCallerID());
-	else if (eventtype == TASKFUNC_INST_LINE_EV)
+	else if (eventtype == OMPFUNC_LINE_EV || eventtype == TASKFUNC_INST_LINE_EV || eventtype == TASKFUNC_LINE_EV)
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2OMP_LINE, get_option_merge_UniqueCallerID());
 	else if (eventtype == PTHREAD_FUNC_EV)
@@ -688,6 +682,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				  (cur->event >= SAMPLING_EV && cur->event < SAMPLING_EV + MAX_CALLERS) ||
 				  (cur->event >= SAMPLING_LINE_EV && cur->event < SAMPLING_LINE_EV + MAX_CALLERS) ||
 				  cur->event == OMPFUNC_EV || cur->event == OMPFUNC_LINE_EV ||
+				  cur->event == TASKFUNC_EV || cur->event == TASKFUNC_LINE_EV ||
 				  cur->event == TASKFUNC_INST_EV || cur->event == TASKFUNC_INST_LINE_EV ||
 				  cur->event == PTHREAD_FUNC_EV || cur->event == PTHREAD_FUNC_LINE_EV ||
 				  cur->event == CUDAFUNC_EV || cur->event == CUDAFUNC_LINE_EV)

@@ -78,12 +78,17 @@ void Probe_OpenMP_SetNumThreads_Exit (void);
 void setTrace_OMPLocks (int value);
 int getTrace_OMPLocks (void);
 
+void Probe_OpenMP_TaskID (long long id);
 void Probe_OpenMP_Task_Entry (UINT64 uf);
 void Probe_OpenMP_Task_Exit (void);
 void Probe_OpenMP_TaskUF_Entry (UINT64 uf);
 void Probe_OpenMP_TaskUF_Exit (void);
 void Probe_OpenMP_Taskwait_Entry (void);
 void Probe_OpenMP_Taskwait_Exit (void);
+void Probe_OpenMP_Taskgroup_start_Entry (void);
+void Probe_OpenMP_Taskgroup_start_Exit (void);
+void Probe_OpenMP_Taskgroup_end_Entry (void);
+void Probe_OpenMP_Taskgroup_end_Exit (void);
 
 /* OMPT probes */
 

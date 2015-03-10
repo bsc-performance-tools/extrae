@@ -182,7 +182,6 @@ static int OpenMP_Function_Event (
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
-#if 0
 	if (Get_EvEvent(current_event) == OMPFUNC_EV)
 	{
 		trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_EV, EvValue);
@@ -190,13 +189,9 @@ static int OpenMP_Function_Event (
 	}
 	else if (Get_EvEvent(current_event) == TASKFUNC_EV)
 	{
-		trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_EV, EvValue);
-		trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_LINE_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_EV, EvValue);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_LINE_EV, EvValue);
 	}
-#else
-	trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_EV, EvValue);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, OMPFUNC_LINE_EV, EvValue);
-#endif
 
 	return 0;
 }
@@ -284,16 +279,16 @@ static int Task_Event (
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
 	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+	// Don't need to emit this, it is subsumed bt TASKFUNC_INST_EV
+	// trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
 	/* Add the instantiated task to the list of known addresses, and emit its
 	   reference for matching in final tracefile */
@@ -327,10 +322,53 @@ static int Taskwait_Event (
 	EvType  = Get_EvEvent (current_event);
 	EvValue = Get_EvValue (current_event);
 
-	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+	Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+static int TaskGroup_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask, 
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	if (EvType == TASKGROUP_START_EV)
+		Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
+	else if (EvType == TASKGROUP_END_EV)
+		Switch_State (STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+
+	if (EvType == TASKGROUP_START_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  TASKGROUP_START_EV, EvValue?1:0);
+		if (EvValue)
+			trace_paraver_event (cpu, ptask, task, thread, current_time,
+			  TASKGROUP_INGROUP_DEEP_EV, EVT_BEGIN);
+	}
+	else if (EvType == TASKGROUP_END_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  TASKGROUP_START_EV, EvValue?2:0);
+		if (!EvValue)
+			trace_paraver_event (cpu, ptask, task, thread, current_time,
+			  TASKGROUP_INGROUP_DEEP_EV, EVT_END);
+	}
+
 
 	return 0;
 }
@@ -365,6 +403,34 @@ static int OMPT_event (event_t * current_event,
 	return 0;
 }
 
+static int TaskID_Event (event_t * event,
+	unsigned long long current_time,
+	unsigned cpu,
+	unsigned ptask,
+	unsigned task,
+	unsigned thread,
+	FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, TASKID_EV,
+	  Get_EvParam(event));
+	return 0;
+}
+
+static int OMPT_TaskGroup_Event (event_t *event,
+	unsigned long long current_time,
+	unsigned cpu,
+	unsigned ptask,
+	unsigned task,
+	unsigned thread,
+	FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	  TASKGROUP_INGROUP_DEEP_EV, Get_EvValue (event));
+	return 0;
+}
+
 SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ WSH_EV, WorkSharing_Event },
 	{ PAR_EV, Parallel_Event },
@@ -386,6 +452,10 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ OMPT_SECTIONS_EV, OMPT_event },
 	{ OMPT_SINGLE_EV, OMPT_event },
 	{ OMPT_MASTER_EV, OMPT_event },
+	{ TASKGROUP_START_EV, TaskGroup_Event },
+	{ TASKGROUP_END_EV, TaskGroup_Event },
+	{ TASKID_EV, TaskID_Event },
+	{ OMPT_TASKGROUP_IN_EV, OMPT_TaskGroup_Event },
 	{ NULL_EV, NULL }
 };
 

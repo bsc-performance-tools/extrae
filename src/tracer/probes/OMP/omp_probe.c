@@ -353,6 +353,15 @@ void Probe_OpenMP_Task_Entry (UINT64 uf)
 	}
 }
 
+void Probe_OpenMP_TaskID (long long id)
+{
+	DEBUG
+	if (mpitrace_on)
+	{
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKID_EV, EVT_BEGIN, (UINT64) id);
+	}
+}
+
 void Probe_OpenMP_Task_Exit (void)
 {
 	DEBUG
@@ -395,6 +404,34 @@ void Probe_OpenMP_Taskwait_Exit (void)
 	DEBUG
 	if (mpitrace_on)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKWAIT_EV, EVT_END, EMPTY);
+}
+
+void Probe_OpenMP_Taskgroup_start_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKGROUP_START_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_OpenMP_Taskgroup_start_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKGROUP_START_EV, EVT_END, EMPTY);
+}
+
+void Probe_OpenMP_Taskgroup_end_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKGROUP_END_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_OpenMP_Taskgroup_end_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKGROUP_END_EV, EVT_END, EMPTY);
 }
 
 /*
@@ -500,3 +537,16 @@ void Probe_OMPT_Master_Exit (void)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_MASTER_EV, EVT_END, EMPTY);
 }
 
+void Probe_OMPT_Taskgroup_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKGROUP_IN_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_OMPT_Taskgroup_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKGROUP_IN_EV, EVT_END, EMPTY);
+}
