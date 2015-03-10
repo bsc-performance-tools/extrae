@@ -48,6 +48,7 @@ int OPENSHMEM_Present = FALSE;
 
 void Enable_OPENSHMEM_Operation (int Op)
 {
+	UNREFERENCED_PARAMETER(Op);
   OPENSHMEM_Present = TRUE;
 }
 
