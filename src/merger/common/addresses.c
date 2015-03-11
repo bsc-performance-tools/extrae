@@ -85,13 +85,13 @@ void AddressCollector_Add (struct address_collector_t *ac, unsigned ptask,
 				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
 				exit (-1);
 			}
-			ac->ptasks = (int*) realloc (ac->ptasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
+			ac->ptasks = (unsigned*) realloc (ac->ptasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
 			if (ac->ptasks == NULL)
 			{
 				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
 				exit (-1);
 			}
-			ac->tasks = (int*) realloc (ac->tasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
+			ac->tasks = (unsigned*) realloc (ac->tasks, (ac->count + AC_ALLOC_CHUNK)*sizeof(unsigned));
 			if (ac->tasks == NULL)
 			{
 				fprintf (stderr, "mpi2prv: Error when reallocating address_collector_t in AdressCollector_Add\n");
