@@ -422,7 +422,7 @@ static void callme_task (void *helper_ptr)
 			free(helper->p3);
 		free(helper);
 
-        Extrae_OpenMP_TaskUF_Exit ();
+		Extrae_OpenMP_TaskUF_Exit ();
 	}
 }
 

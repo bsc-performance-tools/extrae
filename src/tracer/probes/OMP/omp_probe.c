@@ -343,6 +343,15 @@ void Probe_OpenMP_SetNumThreads_Exit (void)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPSETNUMTHREADS_EV, EVT_END, EMPTY); 
 }
 
+void Probe_OpenMP_TaskID (long long id)
+{
+	DEBUG
+	if (mpitrace_on)
+	{
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKID_EV, EVT_BEGIN, (UINT64) id);
+	}
+}
+
 void Probe_OpenMP_Task_Entry (UINT64 uf)
 {
 	DEBUG
@@ -350,15 +359,6 @@ void Probe_OpenMP_Task_Entry (UINT64 uf)
 	{
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASK_EV, uf, EMPTY);
 		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
-	}
-}
-
-void Probe_OpenMP_TaskID (long long id)
-{
-	DEBUG
-	if (mpitrace_on)
-	{
-		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKID_EV, EVT_BEGIN, (UINT64) id);
 	}
 }
 
