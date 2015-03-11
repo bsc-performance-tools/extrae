@@ -79,10 +79,6 @@ Which of the callback pointers below have to be changed for an array of
 function pointers?  All of them, maybe? 
 */
 
-/* FIXME: Should we discover this dinamically? */ 
-#define MAX_THD 32
-
-
 /* Pointer to the user function called by a PARALLEL DO REGION */
 /* FIXME: Array of function pointers indexed by thread? (nowait issue) */
 static void (*pardo_uf)(void*) = NULL;
@@ -1458,22 +1454,7 @@ extern int omp_get_max_threads();
 
 int gnu_libgomp_4_9_hook_points (int ntask)
 {
-	int hooked;
-	int max_threads;
-
-	hooked = gnu_libgomp_4_9_GetOpenMPHookPoints (ntask);
-   
-	max_threads = omp_get_max_threads();
-	if (max_threads > MAX_THD)
-	{
-		/* Has this happened? */
-		/* a) Increase MAX_THD to be higher than omp_get_max_threads() */
-		/* b) Decrease OMP_NUM_THREADS in order to decrease omp_get_max_threads() */
-		fprintf (stderr, PACKAGE_NAME": omp_get_max_threads() > MAX_THD. Aborting...\nRecompile "PACKAGE_NAME" increasing MAX_THD or decrease OMP_NUM_THREADS\n");
-		exit (1);
-	}
-
-	return hooked;
+	return gnu_libgomp_4_9_GetOpenMPHookPoints (ntask);
 }
 
 #endif /* PIC */
