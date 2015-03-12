@@ -75,7 +75,7 @@ checkInPCF "cudaLaunch" hello.pcf
 checkInPCF "cudaConfigureCall" hello.pcf 
 checkInPCF "cudaMemcpy" hello.pcf 
 checkInPCF "cudaThreadSynchronize" hello.pcf 
-checkInPCF "cudaStreamSynchronize" hello.pcf 
+#checkInPCF "cudaStreamSynchronize" hello.pcf 
 checkInPCF "helloWorld" hello.pcf 
 
 checkInTrace "CUDA kernel" helloWorld hello.prv
