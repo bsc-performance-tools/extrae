@@ -106,5 +106,7 @@ void Probe_OMPT_Single_Entry (void);
 void Probe_OMPT_Single_Exit (void);
 void Probe_OMPT_Master_Entry (void);
 void Probe_OMPT_Master_Exit (void);
+void Probe_OMPT_Taskgroup_Entry (void)
+void Probe_OMPT_Taskgroup_Exit (void)
 
 #endif
