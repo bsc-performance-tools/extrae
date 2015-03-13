@@ -476,7 +476,6 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					unsigned int hwctype[2*MAX_HWC];
 					unsigned long long hwcvalue[2*MAX_HWC];
 
-#warning "Aixo es horrible, caldra retocar-ho" 
 					HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE);
 					for (i = 0; i < MAX_HWC; i++)
 						if (NO_COUNTER != hwctype[i])
