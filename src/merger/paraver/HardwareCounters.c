@@ -79,7 +79,6 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	unsigned long long time, event_t * Event, unsigned int *outtype,
 	unsigned long long *outvalue, int absolute)
 {
-#warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
 	int cnt;
 	thread_t *Sthread;
 	int set_id = HardwareCounters_GetCurrentSet(ptask, task, thread);
@@ -328,7 +327,6 @@ int HardwareCounters_GetCurrentSet(int ptask, int task, int thread)
 void HardwareCounters_Change (int ptask, int task, int thread,
 	int newSet, int *outtypes, unsigned long long *outvalues)
 {
-#warning "Aixo es forsa arriscat, cal que la crida tingui alocatat prou espai :S"
 	int cnt;
 	CntQueue *cItem;
 	thread_t *Sthread;

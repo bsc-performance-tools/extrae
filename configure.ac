@@ -123,7 +123,9 @@ AC_PROG_CC(${wanted_C_Compilers})
 AC_PROG_CXX(${wanted_CXX_Compilers})
 AC_PROG_CPP
 AC_PROG_FC(${wanted_F_Compilers})
-AC_FC_WRAPPERS
+if test "${IS_SPARC64_MACHINE}" != "yes" ; then
+	AC_FC_WRAPPERS
+fi
 AX_JAVA
 AC_PROG_INSTALL
 AC_PROG_SED

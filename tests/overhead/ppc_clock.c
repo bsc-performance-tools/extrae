@@ -22,29 +22,63 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/example/LINUX/SEQ/pi_instrumented.c $
+ | @last_commit: $Date: 2013-05-17 12:18:49 +0200 (Fri, 17 May 2013) $
+ | @version:     $Revision: 1734 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
-#include "extrae_user_events.h"
+unsigned long long proc_timebase_MHz = 2000; /* Assume a 2.0GHz machine, in fact, it does not matter */
 
-int main(int argc, char **argv)
+static inline unsigned long long cpu_time (void)
 {
-	unsigned long long t1, t2;
+#ifdef __powerpc64__
+	unsigned long long res;
+
+	asm volatile( "mftb  %0" : "=r"(res));
+
+	return res;
+#elif defined (__powerpc__) || defined (__POWERPC__)
+	unsigned int HighB, HighA, Low;
+
+	do
+	{
+		asm volatile( "mftbu %0" : "=r"(HighB) );
+		asm volatile( "mftb  %0" : "=r"(Low)	);
+		asm volatile( "mftbu %0" : "=r"(HighA) );
+	}
+	while (HighB != HighA);
+
+	return ((unsigned long long)HighA<<32) | ((unsigned long long)Low);
+#else
+# error "Cannot determine the ABI"
+#endif
+}
+
+unsigned long long ppc_getTime (void)
+{
+  return (cpu_time() * 1000) / proc_timebase_MHz; 
+}
+
+int main (int argc, char *argv[])
+{
 	struct timespec start, stop;
-	int n = 250000, i;
-	Extrae_init();
+	int i;
+	unsigned n = 1000000;
+	unsigned long long t1, t2, useless;
+
 	clock_gettime (CLOCK_MONOTONIC, &start);
 	for (i = 0; i < n; i++)
-		Extrae_event (1, i+1);
+		useless = ppc_getTime();
 	clock_gettime (CLOCK_MONOTONIC, &stop);
 	t1 = start.tv_nsec;
 	t1 += start.tv_sec * 1000000000;
 	t2 = stop.tv_nsec;
 	t2 += stop.tv_sec * 1000000000;
-	printf ("RESULT : Extrae_event() %Lu ns\n", (t2 - t1) / n);
-	Extrae_fini();
+	printf ("RESULT : clock_gettime() %Lu ns\n", (t2 - t1) / n);
+
+	return 0;
 }

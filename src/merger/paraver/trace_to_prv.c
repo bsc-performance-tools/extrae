@@ -515,7 +515,6 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						unsigned int hwctype[MAX_HWC];
 						unsigned long long hwcvalue[MAX_HWC];
 
-#warning "Aixo es horrible, caldra retocar-ho"
 						if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE))
 							for (i = 0; i < MAX_HWC; i++)
 								if (NO_COUNTER != hwctype[i])

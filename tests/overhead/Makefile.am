@@ -3,6 +3,7 @@ include $(top_srcdir)/PATHS
 EXTRA_DIST = \
  posix_clock.c \
  ia32_rdtsc_clock.c \
+ ppc_clock.c \
  extrae_eventandcounters.c \
  extrae_event.c \
  extrae_nevent4.c \
@@ -21,6 +22,7 @@ myPATH="$(top_srcdir)/tests/overhead"
 myFILES= \
  $(myPATH)/posix_clock.c \
  $(myPATH)/ia32_rdtsc_clock.c \
+ $(myPATH)/ppc_clock.c \
  $(myPATH)/extrae_eventandcounters.c \
  $(myPATH)/extrae_event.c \
  $(myPATH)/extrae_nevent4.c \

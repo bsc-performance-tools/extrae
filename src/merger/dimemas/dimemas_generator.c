@@ -377,7 +377,6 @@ int Dimemas_Communicator_Definition( FILE *fd,
                                      int Ntasks,
                                      int *TaskList )
 {
-#warning "Falta aixo"
 #if defined(DEAD_CODE)
   int ii;
   
