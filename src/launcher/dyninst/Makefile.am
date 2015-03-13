@@ -26,22 +26,22 @@ extrae_SOURCES = extrae.C \
  cpp_utils.C cpp_utils.h \
  applicationType.C applicationType.h \
  mini-xml-parse.c mini-xml-parse.h
-extrae_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@
+extrae_CXXFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@
 if NEED_BOOST_HOME
 extrae_CXXFLAGS += -I@BOOST_HOME@/include
 endif
-extrae_CFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@ @XML2_CFLAGS@
+extrae_CFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@ @XML2_CFLAGS@
 extrae_LDFLAGS =  @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
 
 load_module_SOURCES = load-module.C
-load_module_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@
+load_module_CXXFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@
 if NEED_BOOST_HOME
 load_module_CXXFLAGS += -I@BOOST_HOME@/include
 endif
 load_module_LDFLAGS = @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
 
 demo_launcher_SOURCES = demo-launcher.C
-demo_launcher_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@
+demo_launcher_CXXFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@
 if NEED_BOOST_HOME
 demo_launcher_CXXFLAGS += -I@BOOST_HOME@/include
 endif

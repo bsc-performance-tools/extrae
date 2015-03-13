@@ -640,6 +640,42 @@ AC_CONFIG_FILES([\
 AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
 ### TEMPORARILY_DISABLED
 ### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])
+
+#########################################
+#   Defines source and build path vars  #
+#########################################
+AC_SUBST( [INCLUDE_DIR], ['$(top_srcdir)/include'] )
+AC_SUBST( [SRC_DIR], ['$(top_srcdir)/src'] )
+
+AC_SUBST( [COMMON_INC], ['$(top_srcdir)/src/common'] )
+AC_SUBST( [TRACER_INC], ['$(top_srcdir)/src/tracer'] )
+AC_SUBST( [MERGER_INC], ['$(top_srcdir)/src/merger'] )
+AC_SUBST( [CLOCKS_INC], ['$(TRACER_INC)/clocks'] )
+AC_SUBST( [HWC_INC], ['$(TRACER_INC)/hwc'] )
+AC_SUBST( [STATS_INC], ['$(TRACER_INC)/stats'] )
+AC_SUBST( [WRAPPERS_INC], ['$(TRACER_INC)/wrappers'] )
+AC_SUBST( [INTERFACES_INC], ['$(TRACER_INC)/interfaces'] )
+AC_SUBST( [PROBES_INC], ['$(TRACER_INC)/probes'] )
+AC_SUBST( [ONLINE_INC], ['$(TRACER_INC)/online'] )
+AC_SUBST( [PRV_MERGER_INC], ['$(MERGER_INC)/paraver'] )
+AC_SUBST( [TRF_MERGER_INC], ['$(MERGER_INC)/dimemas'] )
+AC_SUBST( [BUFFERS_INC], ['$(WRAPPERS_INC)/API'] )
+
+AC_SUBST( [COMMON_LIB], ['$(top_builddir)/src/common'] )
+AC_SUBST( [TRACER_LIB], ['$(top_builddir)/src/tracer'] )
+AC_SUBST( [MERGER_LIB], ['$(top_builddir)/src/merger'] )
+AC_SUBST( [CLOCKS_LIB], ['$(TRACER_LIB)/clocks'] )
+AC_SUBST( [HWC_LIB], ['$(TRACER_LIB)/hwc'] )
+AC_SUBST( [STATS_LIB], ['$(TRACER_LIB)/stats'] )
+AC_SUBST( [WRAPPERS_LIB], ['$(TRACER_LIB)/wrappers'] )
+AC_SUBST( [INTERFACES_LIB], ['$(TRACER_LIB)/interfaces'] )
+AC_SUBST( [PROBES_LIB], ['$(TRACER_LIB)/probes'] )
+AC_SUBST( [ONLINE_LIB], ['$(TRACER_LIB)/online'] )
+AC_SUBST( [PRV_MERGER_LIB], ['$(MERGER_LIB)/paraver'] )
+AC_SUBST( [TRF_MERGER_LIB], ['$(MERGER_LIB)/dimemas'] )
+AC_SUBST( [BUFFERS_LIB], ['$(WRAPPERS_LIB)/API'] )
+
+
 AC_OUTPUT
 
 AX_SHOW_CONFIGURATION

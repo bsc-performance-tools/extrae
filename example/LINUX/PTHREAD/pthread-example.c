@@ -40,7 +40,7 @@ pthread_barrier_t barrier;
 void longExecution(long th_id)
 {
     Extrae_user_function (1);
-    printf ("Thread %d: Waiting 5 seconds\n", th_id);
+    printf ("Thread %08lx: Waiting 5 seconds\n", th_id);
     sleep(5);
     Extrae_user_function (0);
 }
@@ -54,7 +54,7 @@ void *routine1 (void *parameters)
 		printf ("routine1 thread 0 executing a long function\n");
 		longExecution(th_id);
 	}
-	printf ("routine1 stopped for barrier : (thread=%08x, param %p)\n", pthread_self(), parameters);
+	printf ("routine1 stopped for barrier : (thread=%08lx, param %p)\n", pthread_self(), parameters);
 	// Synchronization point
 	int rc = pthread_barrier_wait(&barrier);
 	if(rc != 0 && rc != PTHREAD_BARRIER_SERIAL_THREAD)
@@ -62,14 +62,14 @@ void *routine1 (void *parameters)
 		printf("Could not wait on barrier\n");
 		exit(-1);
 	}
-	printf ("routine1 exiting from barrier : (thread=%08x, param %p)\n", pthread_self(), parameters);
+	printf ("routine1 exiting from barrier : (thread=%08lx, param %p)\n", pthread_self(), parameters);
 	Extrae_event (1, 0);
 }
 
 void *routine2 (void *parameters)
 {
 	Extrae_event (2, 1);
-	printf ("routine 2 : (thread=%08x, param %p)\n", pthread_self(), parameters);
+	printf ("routine 2 : (thread=%08lx, param %p)\n", pthread_self(), parameters);
 	Extrae_event (2, 0);
 }
 

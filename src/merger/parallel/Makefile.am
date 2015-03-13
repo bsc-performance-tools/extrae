@@ -84,12 +84,12 @@ libmpimpi2prv_la_SOURCES = \
 mpimpi2prv_SOURCES = \
  ../merger.c
 
-libmpimpi2prv_la_CFLAGS = -DPARALLEL_MERGE -I.. -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+libmpimpi2prv_la_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
 libmpimpi2prv_la_LDFLAGS = -o libmpimpi2prv.la $(CFLAGS) 
 
-mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I.. -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_DIR)/common -I$(PRV_MERGER_DIR) -I$(TRF_MERGER_DIR) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_DIR)/libcommon.la -o mpimpi2prv @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@ @MPI_LDFLAGS@ 
-mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la $(COMMON_DIR)/libcommon.la
+mpimpi2prv_CFLAGS = -DPARALLEL_MERGE -I$(top_srcdir)/merger -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+mpimpi2prv_LDFLAGS = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la -o mpimpi2prv @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@ @MPI_LDFLAGS@ 
+mpimpi2prv_DEPENDENCIES = libmpimpi2prv.la $(COMMON_LIB)/libcommon.la
 
 if NEED_MPI_LIB_INCLUDE
   libmpimpi2prv_la_CFLAGS += @MPI_CFLAGS@
@@ -122,8 +122,8 @@ if HAVE_PMAPI
 endif
 
 # Online support
-mpimpi2prv_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
-libmpimpi2prv_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
+mpimpi2prv_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
+libmpimpi2prv_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
 
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) ; $(LN_S) -f mpimpi2prv$(EXEEXT) mpimpi2dim$(EXEEXT)

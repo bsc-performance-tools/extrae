@@ -15,7 +15,7 @@ common_SRCS = \
  extrae_version.h
 
 common_INCLUDES = \
-        -I$(COMMON_DIR)
+        -I$(COMMON_INC)
 
 noinst_LTLIBRARIES = libcommon.la
 libcommon_la_SOURCES = $(common_SRCS)

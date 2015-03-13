@@ -1,3 +1,7 @@
+12    Gradient 12
+13    Gradient 13
+14    Gradient 14
+
 
 EVENT_TYPE
 0    60000019    User function
@@ -6,8 +10,6 @@ VALUES
 1   Unresolved
 2   _NOT_Found
 3   main
-4   fA
-5   fB
 
 
 EVENT_TYPE
@@ -16,9 +18,7 @@ VALUES
 0   End
 1   0 (Unresolved)
 2   0 (_NOT_Found)
-3   8 (fA.c) [libfA.so]
-4   8 (fB.c) [libfB.so]
-5   10 (main.c)
+3   10 (main.c)
 
 
 EVENT_TYPE

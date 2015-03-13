@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Mar2015 Support to compile Extrae outside its src directory
+             (thanks to Jorge Bellon)
+             Fixed some Extrae tests
  * 10Mar2015 Improved/fixed support for task constructs in libgomp
              (thanks to Eduard Ayguade)
  * 05Mar2015 Fixed pthread support (missing pthread_id for master pthred)

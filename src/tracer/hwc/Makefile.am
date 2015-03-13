@@ -23,4 +23,4 @@ endif
 noinst_LTLIBRARIES = libhwc.la
 
 libhwc_la_SOURCES = $(HWC)
-libhwc_la_CFLAGS = -I. -I$(COMMON_DIR) -I$(CLOCKS_DIR) -I$(TRACER_DIR) -I$(INCLUDE_DIR) -I$(top_srcdir)/src/tracer/wrappers/API @PAPI_CFLAGS@
+libhwc_la_CFLAGS = -I$(HWC_INC) -I$(COMMON_INC) -I$(CLOCKS_INC) -I$(TRACER_INC) -I$(INCLUDE_DIR) -I$(top_srcdir)/src/tracer/wrappers/API @PAPI_CFLAGS@

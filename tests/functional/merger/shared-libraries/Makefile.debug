@@ -9,14 +9,17 @@ libfB.so: fB.c
 	gcc -g -fPIC -DPIC fB.c -o libfB.so -shared
 
 main: main.c libfA.so libfB.so
-	gcc -g main.c -L../../../../src/tracer/.libs -L. -lfA -lfB -lseqtrace -o main
+	gcc -g main.c -Wl,-rpath -Wl,../../../../src/tracer/.libs -Wl,-rpath -Wl,. -L ../../../../src/tracer/.libs -L . -lfA -lfB -lseqtrace -o main
+
+main_empty: main_empty.c
+	gcc -g main.c -Wl,-rpath -Wl,../../../../src/tracer/.libs -L../../../../src/tracer/.libs -o main
 
 run: main
-	LD_LIBRARY_PATH=.:../../../../src/tracer/.libs:$(LD_LIBRARY_PATH) EXTRAE_ON=1 ./main
+	EXTRAE_ON=1 ./main
 	../../../../src/merger/mpi2prv -f TRACE.mpits
 
 run-nomerge: main
-	LD_LIBRARY_PATH=.:../../../../src/tracer/.libs:$(LD_LIBRARY_PATH) EXTRAE_ON=1 ./main
+	EXTRAE_ON=1 ./main
 
 clean: 
 	rm -fr libfA.so libfB.so main set-0 TRACE.sym TRACE.mpits

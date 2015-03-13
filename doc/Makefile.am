@@ -33,10 +33,10 @@ endif
 
 install-exec-hook: $(manual_ug).ps $(manual_ug).pdf
 	$(MKDIR_P) $(DESTDIR)$(datadir)/doc
-	cp $(manual_ug).ps $(DESTDIR)$(datadir)/doc
-	cp $(manual_ug).pdf $(DESTDIR)$(datadir)/doc
+	cp $(top_srcdir)/doc/$(manual_ug).ps $(DESTDIR)$(datadir)/doc
+	cp $(top_srcdir)/doc/$(manual_ug).pdf $(DESTDIR)$(datadir)/doc
 	$(MKDIR_P) $(DESTDIR)$(datadir)/doc/html
-	cp user-guide/user-guide.html user-guide/user-guide.css user-guide/*.png $(DESTDIR)$(datadir)/doc/html
+	cp $(top_srcdir)/doc/user-guide/user-guide.html $(top_srcdir)/doc/user-guide/user-guide.css $(top_srcdir)/doc/user-guide/*.png $(DESTDIR)$(datadir)/doc/html
 	ln -f $(DESTDIR)$(datadir)/doc/html/user-guide.html $(DESTDIR)$(datadir)/doc/html/index.html
 
 clean:

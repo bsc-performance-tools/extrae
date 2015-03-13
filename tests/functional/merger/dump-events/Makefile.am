@@ -19,6 +19,6 @@ endif
 HWC_LINKER_FLAGS = $(PAPI_LINKER_FLAGS) $(PMAPI_LINKER_FLAGS)
 
 dump_events_SOURCES = dump-events.c
-dump_events_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
-dump_events_LDFLAGS = -L$(TRACER_DIR) -lseqtrace $(HWC_LINKER_FLAGS)
+dump_events_CFLAGS = -I$(INCLUDE_DIR) -I$(COMMON_INC)
+dump_events_LDFLAGS = -L$(TRACER_LIB) -lseqtrace $(HWC_LINKER_FLAGS)
 

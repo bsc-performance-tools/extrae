@@ -31,7 +31,7 @@ if HAVE_ONLINE
 	echo "export EXTRAE_ONLINE_SOURCES=$(DESTDIR)$(sysconfdir)/online_env.sh" >> $(SH_SCRIPT)
 endif
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.sh
-	cp extrae.sh $(DESTDIR)$(sysconfdir)
+	cp $(top_srcdir)/etc/extrae.sh $(DESTDIR)$(sysconfdir)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.sh
 
 CSHscripts:
@@ -54,7 +54,7 @@ CSHscripts:
 	echo "setenv EXTRAE_SVN_REVISION `cat ../SVN-revision`" >> $(CSH_SCRIPT)
 	echo "setenv EXTRAE_SVN_BRANCH `cat ../SVN-branch`" >> $(CSH_SCRIPT)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae-vars.csh
-	cp extrae.csh $(DESTDIR)$(sysconfdir)
+	cp $(top_srcdir)/etc/extrae.csh $(DESTDIR)$(sysconfdir)
 	chmod 0644 $(DESTDIR)$(sysconfdir)/extrae.csh
 
 CONFIGUREDscript:
@@ -66,7 +66,7 @@ CONFIGUREDscript:
 	echo "setenv PACKAGE_NAME ${PACKAGE_NAME}" >> $(CSH_SCRIPT)
 	echo "setenv PACKAGE_BUGREPORT ${PACKAGE_BUGREPORT}" >> $(CSH_SCRIPT)
 	echo "setenv CONFIGURE_LINE \"`head -7 ${top_srcdir}/config.log | tail -1`\"" >> $(CSH_SCRIPT)
-	cp configured.sh $(DESTDIR)$(sysconfdir)
+	cp $(top_srcdir)/etc/configured.sh $(DESTDIR)$(sysconfdir)
 	chmod 0755 $(DESTDIR)$(sysconfdir)/configured.sh
 
 install-data-hook: mkdirSHscripts SHscripts CSHscripts CONFIGUREDscript

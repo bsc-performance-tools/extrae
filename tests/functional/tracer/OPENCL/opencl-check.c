@@ -24,6 +24,8 @@
 #include "CL/cl.h"
 #endif
 
+#define UNREFERENCED_PARAMETER(a) ((a)=(a))
+
 //pick up device type from compiler command line or from 
 //the default type
 #ifndef DEVICE
@@ -82,7 +84,7 @@ static int output_device_info (cl_device_id device_id)
 //------------------------------------------------------------------------------
 
 #define TOL    (0.001)   // tolerance used in floating point comparisons
-#define LENGTH (1024)    // length of vectors a, b, and c
+#define LENGTH (65536)    // length of vectors a, b, and c
 
 //------------------------------------------------------------------------------
 //
@@ -133,7 +135,8 @@ int main(int argc, char** argv)
 	cl_mem d_c;                      // device memory used for the output c vector
     
 	// Fill vectors a and b with random float values
-	int i = 0;
+	int i;
+	cl_uint u;
 	int count = LENGTH;
 	for(i = 0; i < count; i++)
 	{
@@ -143,6 +146,9 @@ int main(int argc, char** argv)
     
 	// Set up platform 
 	cl_uint numPlatforms;
+
+	UNREFERENCED_PARAMETER(argc);
+	UNREFERENCED_PARAMETER(argv);
 
 	// Find number of platforms
 	err = clGetPlatformIDs(0, NULL, &numPlatforms);
@@ -161,10 +167,10 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	// Secure a GPU
-	for (i = 0; i < numPlatforms; i++)
+	// Secure an accelerator
+	for (u = 0; u < numPlatforms; u++)
 	{
-		err = clGetDeviceIDs(Platform[i], DEVICE, 1, &device_id, NULL);
+		err = clGetDeviceIDs(Platform[u], DEVICE, 1, &device_id, NULL);
 		if (err == CL_SUCCESS)
 			break;
 	}
@@ -275,7 +281,7 @@ int main(int argc, char** argv)
 	err = clEnqueueNDRangeKernel(commands, ko_vadd, 1, NULL, &global, &local, 0, NULL, NULL);
 	if (err)
 	{
-		printf("Error: Failed to execute kernel!\n");
+		printf("Error: Failed to execute kernel (%d)!\n", err);
 		return EXIT_FAILURE;
 	}
 

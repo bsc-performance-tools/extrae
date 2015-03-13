@@ -16,25 +16,27 @@ EXTRA_DIST = \
  run_overhead_tests.sh \
  extrae.xml
 
+myPATH="$(top_srcdir)/tests/overhead"
+
 myFILES= \
- posix_clock.c \
- ia32_rdtsc_clock.c \
- extrae_eventandcounters.c \
- extrae_event.c \
- extrae_nevent4.c \
- extrae_get_caller1.c \
- extrae_get_caller6.c \
- extrae_trace_callers.c \
- extrae_user_function.c \
- papi_read1.c \
- papi_read4.c \
- run_overhead_tests.sh \
- extrae.xml
+ $(myPATH)/posix_clock.c \
+ $(myPATH)/ia32_rdtsc_clock.c \
+ $(myPATH)/extrae_eventandcounters.c \
+ $(myPATH)/extrae_event.c \
+ $(myPATH)/extrae_nevent4.c \
+ $(myPATH)/extrae_get_caller1.c \
+ $(myPATH)/extrae_get_caller6.c \
+ $(myPATH)/extrae_trace_callers.c \
+ $(myPATH)/extrae_user_function.c \
+ $(myPATH)/papi_read1.c \
+ $(myPATH)/papi_read4.c \
+ $(myPATH)/run_overhead_tests.sh \
+ $(myPATH)/extrae.xml
 
 bin_PROGRAMS = extrae-header
 
 extrae_header_SOURCES = extrae-header.c
-extrae_header_CFLAGS = -g -O -Wall -I ../.. -I ../../src/common
+extrae_header_CFLAGS = -g -O -Wall -I$(top_srcdir) -I$(COMMON_INC)
 extrae_header_LDFLAGS = -g -O
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
@@ -55,7 +57,7 @@ endif
 install-data-hook:
 	$(MKDIR_P) $(DESTDIR)$(datadir)/tests/overhead
 	cp $(myFILES) $(DESTDIR)$(datadir)/tests/overhead
-	cp Makefile.tests.overhead $(DESTDIR)$(datadir)/tests/overhead/Makefile
+	cp $(myPATH)/Makefile.tests.overhead $(DESTDIR)$(datadir)/tests/overhead/Makefile
 	$(BASE_DIR)/substitute $(SED) "@sub_EXTRAE_HOME@" "$(prefix)" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
 	$(BASE_DIR)/substitute $(SED) "@sub_PAPI_SHAREDLIBSDIR@" "$(PAPI_SHAREDLIBSDIR)" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
 	$(BASE_DIR)/substitute $(SED) "@sub_UNWIND_SHAREDLIBSDIR@" "$(UNWIND_SHAREDLIBSDIR)" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh

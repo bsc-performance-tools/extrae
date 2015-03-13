@@ -2,15 +2,15 @@ include $(top_srcdir)/PATHS
 
 iface_MPI_SRCS     = mpi_interface.c mpi_interface.h
 iface_MPI_INCLUDES =     \
-   -I.                   \
-   -I$(COMMON_DIR)       \
-   -I$(TRACER_DIR)       \
-   -I$(CLOCKS_DIR)       \
-   -I$(HWC_DIR)          \
-   -I$(STATS_DIR)/MPI    \
-   -I$(WRAPPERS_DIR)/API \
-   -I$(WRAPPERS_DIR)/MPI \
-   -I$(INTERFACES_DIR)/API \
+   -I$(INTERFACES_INC)/MPI \
+   -I$(COMMON_INC)       \
+   -I$(TRACER_INC)       \
+   -I$(CLOCKS_INC)       \
+   -I$(HWC_INC)          \
+   -I$(STATS_INC)/MPI    \
+   -I$(WRAPPERS_INC)/API \
+   -I$(WRAPPERS_INC)/MPI \
+   -I$(INTERFACES_INC)/API \
    -I$(top_srcdir)/include \
    -I@MPI_INCLUDES@ @PAPI_CFLAGS@
 

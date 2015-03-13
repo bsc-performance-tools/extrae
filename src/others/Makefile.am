@@ -5,15 +5,15 @@ bin_PROGRAMS += papi_best_set_old papi_best_set
 endif
 
 genmpits_SOURCES = genmpits.c
-genmpits_CFLAGS = -I. -I../common
+genmpits_CFLAGS = -I$(COMMON_INC)
 
 reducempit_SOURCES = reducempit.c
-reducempit_CFLAGS = -I../.. -I../common
+reducempit_CFLAGS = -I$(COMMON_INC)
 
 papi_best_set_old_SOURCES = papi_best_set_old.c
-papi_best_set_old_CFLAGS  = -I. -I../common @PAPI_CFLAGS@
+papi_best_set_old_CFLAGS  = -I$(COMMON_INC) @PAPI_CFLAGS@
 papi_best_set_SOURCES = papi_best_set.C
-papi_best_set_CXXFLAGS  = -I. -I../common @PAPI_CFLAGS@
+papi_best_set_CXXFLAGS  = -I$(COMMON_INC) @PAPI_CFLAGS@
 if !HAVE_PAPI_EMBEDDED
   papi_best_set_old_CFLAGS += -DPAPI_HOME='"$(PAPI_HOME)"'
   papi_best_set_CXXFLAGS += -DPAPI_HOME='"$(PAPI_HOME)"'

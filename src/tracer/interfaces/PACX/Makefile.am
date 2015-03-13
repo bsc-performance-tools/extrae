@@ -2,14 +2,14 @@ include $(top_srcdir)/PATHS
 
 iface_PACX_SRCS = pacx_interface.c pacx_interface.h
 iface_PACX_INCLUDES =    \
-   -I.                   \
-   -I$(COMMON_DIR)       \
-   -I$(TRACER_DIR)       \
-   -I$(CLOCKS_DIR)       \
-   -I$(HWC_DIR)          \
-   -I$(WRAPPERS_DIR)/API \
-   -I$(WRAPPERS_DIR)/PACX \
-   -I$(INTERFACES_DIR)/API \
+   -I$(INTERFACES_INC)/PACX \
+   -I$(COMMON_INC)       \
+   -I$(TRACER_INC)       \
+   -I$(CLOCKS_INC)       \
+   -I$(HWC_INC)          \
+   -I$(WRAPPERS_INC)/API \
+   -I$(WRAPPERS_INC)/PACX \
+   -I$(INTERFACES_INC)/API \
    @PACX_CFLAGS@ @PAPI_CFLAGS@
 
 noinst_LTLIBRARIES = libiface_pacx.la libiface_pacxf.la

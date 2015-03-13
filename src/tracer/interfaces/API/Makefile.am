@@ -2,12 +2,12 @@ include $(top_srcdir)/PATHS
 
 iface_API_SRCS     = misc_interface.c misc_interface.h
 iface_API_INCLUDES = \
-   -I$(COMMON_DIR)   \
-   -I$(CLOCKS_DIR)   \
-   -I$(TRACER_DIR)   \
-   -I$(HWC_DIR)      \
+   -I$(COMMON_INC)   \
+   -I$(CLOCKS_INC)   \
+   -I$(TRACER_INC)   \
+   -I$(HWC_INC)      \
    -I$(top_srcdir)/include \
-   -I$(WRAPPERS_DIR)/API @PAPI_CFLAGS@
+   -I$(WRAPPERS_INC)/API @PAPI_CFLAGS@
 
 noinst_LTLIBRARIES = libiface_api.la
 if WANT_PTHREAD

@@ -29,9 +29,9 @@ online_root_bin_SOURCES = \
   xml-parse-online.c xml-parse-online.h \
   KnownProtocols.h
 online_root_bin_CFLAGS   = \
-  -I$(COMMON_DIR) -I$(TRACER_DIR) 
+  -I$(COMMON_INC) -I$(TRACER_INC) 
 online_root_bin_CXXFLAGS = \
-  -I$(COMMON_DIR) -I$(TRACER_DIR) \
+  -I$(COMMON_INC) -I$(TRACER_INC) \
   `@MRNETAPP_CONFIG@ --fe-cflags` $(CONTAINERS_INCLUDES)
 online_root_bin_LDFLAGS = \
   `@MRNETAPP_CONFIG@ --fe-libs` 
@@ -59,8 +59,8 @@ endif
 online_root_bin_SOURCES += \
   GremlinsRoot.cpp GremlinsRoot.h
 
-online_root_bin_LDADD        = extractors/libcontainers-fe.la $(STATS_DIR)/libmpistats.la $(COMMON_DIR)/libcommon.la
-online_root_bin_DEPENDENCIES = $(STATS_DIR)/libmpistats.la
+online_root_bin_LDADD        = extractors/libcontainers-fe.la $(STATS_LIB)/libmpistats.la $(COMMON_LIB)/libcommon.la
+online_root_bin_DEPENDENCIES = $(STATS_LIB)/libmpistats.la
 
 
 #########################
@@ -79,10 +79,10 @@ libonline_la_SOURCES  = \
   filter_defs.h      tags.h             \
   KnownProtocols.h
 
-libonline_la_CFLAGS    = -I$(COMMON_DIR) -I$(TRACER_DIR) @MPI_CFLAGS@
+libonline_la_CFLAGS    = -I$(COMMON_INC) -I$(TRACER_INC) @MPI_CFLAGS@
 
 libonline_la_CXXFLAGS  = \
-  -I$(COMMON_DIR) -I$(INCLUDE_DIR) -I$(CLOCKS_DIR) -I$(HWC_DIR) -I$(TRACER_DIR) -I$(BUFFERS_DIR) \
+  -I$(COMMON_INC) -I$(INCLUDE_DIR) -I$(CLOCKS_INC) -I$(HWC_INC) -I$(TRACER_INC) -I$(BUFFERS_INC) \
   $(EXTRACTORS_INCLUDES) \
   `@MRNETAPP_CONFIG@ --be-cflags`
 

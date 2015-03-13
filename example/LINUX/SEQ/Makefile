@@ -4,7 +4,7 @@ CC = gcc
 FC = gfortran
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include
 FFLAGS = -O -g -I $(EXTRAE_HOME)/include
-LFLAGS = -L$(EXTRAE_HOME)/lib -lseqtrace
+LFLAGS = -Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -L$(EXTRAE_HOME)/lib -lseqtrace
 
 TARGETS = pi pi_instrumented pi_instrumentedf
 

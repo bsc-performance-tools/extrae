@@ -28,18 +28,18 @@ endif
 
 if HAVE_SLEEP
  check_clock_sleep_SOURCES = check_clock_sleep.c
- check_clock_sleep_CFLAGS = -I$(CLOCKS_DIR) -I$(COMMON_DIR)
- check_clock_sleep_LDFLAGS = $(CLOCKS_DIR)/libclock.la $(EXTRA)
+ check_clock_sleep_CFLAGS = -I$(CLOCKS_INC) -I$(COMMON_INC) -I$(TRACER_INC)
+ check_clock_sleep_LDFLAGS = $(CLOCKS_LIB)/libclock.la $(EXTRA)
 endif
 
 if HAVE_USLEEP
  check_clock_usleep_SOURCES = check_clock_usleep.c
- check_clock_usleep_CFLAGS = -I$(CLOCKS_DIR) -I$(COMMON_DIR)
- check_clock_usleep_LDFLAGS = $(CLOCKS_DIR)/libclock.la $(EXTRA)
+ check_clock_usleep_CFLAGS = -I$(CLOCKS_INC) -I$(COMMON_INC) -I$(TRACER_INC)
+ check_clock_usleep_LDFLAGS = $(CLOCKS_LIB)/libclock.la $(EXTRA)
 endif
 
 if HAVE_NANOSLEEP
  check_clock_nanosleep_SOURCES = check_clock_nanosleep.c
- check_clock_nanosleep_CFLAGS = -I$(CLOCKS_DIR) -I$(COMMON_DIR)
- check_clock_nanosleep_LDFLAGS = $(CLOCKS_DIR)/libclock.la $(EXTRA)
+ check_clock_nanosleep_CFLAGS = -I$(CLOCKS_INC) -I$(COMMON_INC) -I$(TRACER_INC)
+ check_clock_nanosleep_LDFLAGS = $(CLOCKS_LIB)/libclock.la $(EXTRA)
 endif

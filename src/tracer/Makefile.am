@@ -250,10 +250,10 @@ core_SRCS = \
  threadid.h threadid.c                       \
  taskid.h taskid.c                           \
  defines.h                                   \
- $(COMMON_DIR)/events.h                      \
- $(COMMON_DIR)/record.h                      \
- $(COMMON_DIR)/queue.h                       \
- $(COMMON_DIR)/trace_mode.h                  \
+ $(COMMON_INC)/events.h                      \
+ $(COMMON_INC)/record.h                      \
+ $(COMMON_INC)/queue.h                       \
+ $(COMMON_INC)/trace_mode.h                  \
  $(WRAPPERS_CORE)
 
 # Auto instrumentation through constructor and destructors
@@ -334,15 +334,15 @@ lib_dyn_oclmpitracec_la_SOURCES = $(liboclmpitrace_la_SOURCES)
 lib_dyn_oclmpitracef_la_SOURCES = $(liboclmpitracef_la_SOURCES)
 
 core_MODULES = \
- $(COMMON_DIR)/libcommon.la \
- $(CLOCKS_DIR)/libclock.la \
- $(HWC_DIR)/libhwc.la
+ $(COMMON_LIB)/libcommon.la \
+ $(CLOCKS_LIB)/libclock.la \
+ $(HWC_LIB)/libhwc.la
 
-INTERFACE_API_PTHREAD = $(INTERFACES_DIR)/API/libiface_api_pthread.la
+INTERFACE_API_PTHREAD = $(INTERFACES_LIB)/API/libiface_api_pthread.la
 if PTHREAD_SUPPORT_IN_ALL_LIBS
  INTERFACE_API = $(INTERFACE_API_PTHREAD)
 else
- INTERFACE_API = $(INTERFACES_DIR)/API/libiface_api.la
+ INTERFACE_API = $(INTERFACES_LIB)/API/libiface_api.la
 endif
 
 # Apply these to BGQ and other non-BG machines
@@ -350,105 +350,105 @@ endif
 if IS_BG_MACHINE
 if IS_BGQ_MACHINE
 if WANT_MERGE_IN_TRACE
-SEQUENTIAL_MERGE_LIB = $(MERGER_DIR)/libmpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
-SEQUENTIAL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+SEQUENTIAL_MERGE_LIB = $(MERGER_LIB)/libmpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
+SEQUENTIAL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_INC)/common
 if HAVE_MPI
-PARALLEL_MERGE_LIB = $(MERGER_DIR)/parallel/libmpimpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
-PARALLEL_MERGE_LIB_AIX = $(MERGER_DIR)/parallel/.libs/libmpimpi2prv.a $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
-PARALLEL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+PARALLEL_MERGE_LIB = $(MERGER_LIB)/parallel/libmpimpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
+PARALLEL_MERGE_LIB_AIX = $(MERGER_INC)/parallel/.libs/libmpimpi2prv.a $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
+PARALLEL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_INC)/common
 endif
 endif
 endif
 else
 if WANT_MERGE_IN_TRACE
-SEQUENTIAL_MERGE_LIB = $(MERGER_DIR)/libmpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
-SEQUENTIAL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+SEQUENTIAL_MERGE_LIB = $(MERGER_LIB)/libmpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
+SEQUENTIAL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_INC)/common
 if HAVE_MPI
-PARALLEL_MERGE_LIB = $(MERGER_DIR)/parallel/libmpimpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
-PARALLEL_MERGE_LIB_AIX = $(MERGER_DIR)/parallel/.libs/libmpimpi2prv.a $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
-PARALLEL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_DIR)/common
+PARALLEL_MERGE_LIB = $(MERGER_LIB)/parallel/libmpimpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
+PARALLEL_MERGE_LIB_AIX = $(MERGER_INC)/parallel/.libs/libmpimpi2prv.a $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
+PARALLEL_CFLAGS_MERGE_LIB = -DEMBED_MERGE_IN_TRACE -I$(MERGER_INC)/common
 endif
 endif
 endif
 
 if HAVE_MPI
-MPI_STATS_LIB = $(STATS_DIR)/libmpistats.la
+MPI_STATS_LIB = $(STATS_LIB)/libmpistats.la
 endif
 
 libcudatrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
-libcudampitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libcudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libcudampitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libcudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
 libocltrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
-liboclmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-liboclmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+liboclmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+liboclmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
-libcudaompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la  $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libcudaompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libcudaompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi.la  $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libcudaompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
 libseqtrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
-libmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libptmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libptmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libptmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libptmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
 libupctrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API)
 
-libpacxtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX/libiface_pacx.la
-libpacxtracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/PACX/libiface_pacxf.la
+libpacxtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/PACX/libiface_pacx.la
+libpacxtracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/PACX/libiface_pacxf.la
 
-libompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libompitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 libomptrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 
-libsmpssmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libsmpssmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libsmpssmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libsmpssmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 libsmpsstrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 
 libnanostrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
-libnanosmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libnanosmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libnanosmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libnanosmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
 libpttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(SEQUENTIAL_MERGE_LIB)
 libtrttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 
 libopenshmemtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(SEQUENTIAL_MERGE_LIB)
 
-libmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libompitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libompitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libompitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libompitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
-libsmpssmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libsmpssmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
-libnanosmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-libnanosmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libnanosmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpi_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+libnanosmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/libiface_mpif_lb.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
-lib_dyn_mpitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-lib_dyn_mpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-lib_dyn_ompitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-lib_dyn_ompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-lib_dyn_cudampitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
-lib_dyn_cudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_DIR)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+lib_dyn_mpitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+lib_dyn_mpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+lib_dyn_ompitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+lib_dyn_ompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+lib_dyn_cudampitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpic.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+lib_dyn_cudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpif.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 
 #
 # Compilation flags
 #
 core_INCLUDES = \
- -I. -I$(HWC_DIR) -I$(CLOCKS_DIR) -I$(INTERFACES_DIR)/API -I$(INTERFACES_DIR)/MPI -I$(INTERFACES_DIR)/PACX \
- -I$(STATS_DIR)/MPI \
- -I$(WRAPPERS_DIR)/API -I$(WRAPPERS_DIR)/MPI -I$(WRAPPERS_DIR)/PACX \
- -I$(WRAPPERS_DIR)/OMP -I$(WRAPPERS_DIR)/pthread \
- -I$(WRAPPERS_DIR)/CUDA -I$(WRAPPERS_DIR)/OPENCL \
- -I$(WRAPPERS_DIR)/fork -I$(PROBES_DIR)/fork \
- -I$(WRAPPERS_DIR)/MALLOC -I$(PROBES_DIR)/MALLOC \
- -I$(WRAPPERS_DIR)/IO -I$(PROBES_DIR)/IO \
- -I$(WRAPPERS_DIR)/openshmem \
- -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_DIR) $(UNWIND_CFLAGS)
+ -I$(TRACER_INC) -I$(HWC_INC) -I$(CLOCKS_INC) -I$(INTERFACES_INC)/API -I$(INTERFACES_INC)/MPI -I$(INTERFACES_INC)/PACX \
+ -I$(STATS_INC)/MPI \
+ -I$(WRAPPERS_INC)/API -I$(WRAPPERS_INC)/MPI -I$(WRAPPERS_INC)/PACX \
+ -I$(WRAPPERS_INC)/OMP -I$(WRAPPERS_INC)/pthread \
+ -I$(WRAPPERS_INC)/CUDA -I$(WRAPPERS_INC)/OPENCL \
+ -I$(WRAPPERS_INC)/fork -I$(PROBES_INC)/fork \
+ -I$(WRAPPERS_INC)/MALLOC -I$(PROBES_INC)/MALLOC \
+ -I$(WRAPPERS_INC)/IO -I$(PROBES_INC)/IO \
+ -I$(WRAPPERS_INC)/openshmem \
+ -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)
 
 if IS_CELL_MACHINE
-  core_INCLUDES += -I$(WRAPPERS_DIR)/CELL -I$(TRACER_DIR)/spu
+  core_INCLUDES += -I$(WRAPPERS_INC)/CELL -I$(TRACER_INC)/spu
 endif
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
@@ -459,25 +459,25 @@ if HAVE_XML2
   core_INCLUDES += @XML2_CFLAGS@
 endif
 if WANT_OPENMP
-  core_INCLUDES += -I$(PROBES_DIR)/OMP
+  core_INCLUDES += -I$(PROBES_INC)/OMP
 endif
 if WANT_PTHREAD
-  core_INCLUDES += -I$(PROBES_DIR)/pthread
+  core_INCLUDES += -I$(PROBES_INC)/pthread
 endif
 if WANT_TRT
-  core_INCLUDES += -I$(PROBES_DIR)/TRT
+  core_INCLUDES += -I$(PROBES_INC)/TRT
 endif
 if WANT_CUDAorCUPTI
-  core_INCLUDES += -I$(PROBES_DIR)/CUDA
+  core_INCLUDES += -I$(PROBES_INC)/CUDA
 endif
 if WANT_OPENCL
-  core_INCLUDES += -I$(PROBES_DIR)/OPENCL
+  core_INCLUDES += -I$(PROBES_INC)/OPENCL
 endif
 if WANT_CUPTI
   core_INCLUDES += -I$(CUPTI_DIR)/include
 endif
 if WANT_OPENSHMEM
-  core_INCLUDES += -I$(PROBES_DIR)/openshmem
+  core_INCLUDES += -I$(PROBES_INC)/openshmem
 endif
 
 if HAVE_PAPI
@@ -594,19 +594,19 @@ lib_dyn_oclmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(
 # Online support is only activated for the MPI libraries
 # 
 if HAVE_ONLINE
-libmpitrace_la_LIBADD       += $(ONLINE_DIR)/libonline.la
-libmpitracef_la_LIBADD      += $(ONLINE_DIR)/libonline.la
-libompitrace_la_LIBADD      += $(ONLINE_DIR)/libonline.la
-libompitracef_la_LIBADD     += $(ONLINE_DIR)/libonline.la
-lib_dyn_mpitracec_la_LIBADD += $(ONLINE_DIR)/libonline.la
-lib_dyn_mpitracef_la_LIBADD += $(ONLINE_DIR)/libonline.la
+libmpitrace_la_LIBADD       += $(ONLINE_LIB)/libonline.la
+libmpitracef_la_LIBADD      += $(ONLINE_LIB)/libonline.la
+libompitrace_la_LIBADD      += $(ONLINE_LIB)/libonline.la
+libompitracef_la_LIBADD     += $(ONLINE_LIB)/libonline.la
+lib_dyn_mpitracec_la_LIBADD += $(ONLINE_LIB)/libonline.la
+lib_dyn_mpitracef_la_LIBADD += $(ONLINE_LIB)/libonline.la
 
-libmpitrace_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_DIR)
-libmpitracef_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_DIR)
-libompitrace_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_DIR)
-libompitracef_la_CFLAGS     += -DHAVE_ONLINE -I$(ONLINE_DIR)
-lib_dyn_mpitracec_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
-lib_dyn_mpitracef_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
+libmpitrace_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_INC)
+libmpitracef_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_INC)
+libompitrace_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_INC)
+libompitracef_la_CFLAGS     += -DHAVE_ONLINE -I$(ONLINE_INC)
+lib_dyn_mpitracec_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
+lib_dyn_mpitracef_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
 endif
 
 #
@@ -766,11 +766,11 @@ endif
 #libextrae_core_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 #
 #libextrae_mpi_la_SOURCES = $(WRAPPERS_MPI) $(core_MPI_SRCS)
-#libextrae_mpi_la_LIBADD  = $(INTERFACES_DIR)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
+#libextrae_mpi_la_LIBADD  = $(INTERFACES_LIB)/MPI/libiface_mpi.la $(PARALLEL_MERGE_LIB) $(MPI_STATS_LIB)
 #libextrae_mpi_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) @MPI_CFLAGS@ $(MPITRACE_SYMBOLS) -DMPI_SUPPORT $(PARALLEL_CFLAGS_MERGE_LIB) -DSTANDALONE
 #if HAVE_ONLINE
-#libextrae_mpi_la_LIBADD += $(ONLINE_DIR)/libonline.la
-#libextrae_mpi_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_DIR)
+#libextrae_mpi_la_LIBADD += $(ONLINE_LIm)/libonline.la
+#libextrae_mpi_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
 #endif
 #libextrae_mpi_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 #

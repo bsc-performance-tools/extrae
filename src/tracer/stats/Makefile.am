@@ -8,10 +8,10 @@ endif
 
 # MPI stats
 libmpistats_la_SOURCES = \
-  $(STATS_DIR)/MPI/mpi_stats.c \
-  $(STATS_DIR)/MPI/mpi_stats.h \
-  $(STATS_DIR)/MPI/mpi_utils.c \
-  $(STATS_DIR)/MPI/mpi_utils.h
+  $(STATS_INC)/MPI/mpi_stats.c \
+  $(STATS_INC)/MPI/mpi_stats.h \
+  $(STATS_INC)/MPI/mpi_utils.c \
+  $(STATS_INC)/MPI/mpi_utils.h
 
-libmpistats_la_CFLAGS  = -I$(COMMON_DIR) @MPI_CFLAGS@
+libmpistats_la_CFLAGS  = -I$(COMMON_INC) @MPI_CFLAGS@
 
