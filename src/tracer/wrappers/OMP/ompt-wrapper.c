@@ -55,6 +55,7 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 #endif
 
 #include "misc_wrapper.h"
+#include "wrapper.h"
 #include "threadid.h"
 
 #include "omp_probe.h"
