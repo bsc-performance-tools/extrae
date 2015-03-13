@@ -391,8 +391,8 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_DYNAMIC_MEMORY))
 		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 #if defined(INSTRUMENT_DYNAMIC_MEMORY)
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
 				char *callers = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);

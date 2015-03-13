@@ -629,6 +629,8 @@ static int Sampling_Address_MEM_TLB_Event (event_t * current,
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
 		  SAMPLING_ADDRESS_REFERENCE_COST_EV, EvValue);
 	}
+
+	return 0;
 }
 
 /******************************************************************************
@@ -805,6 +807,8 @@ static int HWC_Change_Ev (
 	thread_t * Sthread;
 	int oldSet = HardwareCounters_GetCurrentSet(ptask, task, thread);
 	int *oldIds = HardwareCounters_GetSetIds(ptask, task, thread, oldSet);
+
+	UNREFERENCED_PARAMETER(fset);
 
 	Sthread = GET_THREAD_INFO(ptask, task, thread);
 	Sthread->last_hw_group_change = current_time;
