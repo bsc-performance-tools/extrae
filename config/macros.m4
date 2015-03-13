@@ -480,7 +480,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
             BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
          elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib"
-         elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a
+         elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a \
 		              "${binutils_require_shared}" = "no" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
          elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.a" -a \
