@@ -13,6 +13,8 @@ EXTRA_DIST = \
  extrae_user_function.c \
  papi_read1.c \
  papi_read4.c \
+ mutex.c \
+ rwlock.c \
  Makefile.tests.overhead \
  run_overhead_tests.sh \
  extrae.xml
