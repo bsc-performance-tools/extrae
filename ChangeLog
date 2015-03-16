@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 16Mar2015 Support up to 512 params in Intel KMP OpenMP runtime
  * 13Mar2015 Support to compile Extrae outside its src directory
              (thanks to Jorge Bellon)
              Fixed some Extrae tests

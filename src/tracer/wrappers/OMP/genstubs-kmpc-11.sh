@@ -1,10 +1,16 @@
 #!/bin/bash
 
-MAXNUMBER=256
+MAXNUMBER=512
 INTERMEDIATE_FUNCS="intel-kmpc-11-intermediate.c"
 INTERMEDIATE_SWITCH="intel-kmpc-11-intermediate-switch.c"
+INTERMEDIATE_HEADER="intel-kmpc-11-intermediate.h"
 
 rm -f ${INTERMEDIATE_FUNCS} ${INTERMEDIATE_SWITCH}
+
+echo "/* Automagically generated file by $0 at `date` */" > ${INTERMEDIATE_HEADER}
+echo "#ifndef INTEL_OMP_FUNC_ENTRIES" >> ${INTERMEDIATE_HEADER}
+echo "# define INTEL_OMP_FUNC_ENTRIES ${MAXNUMBER}" >> ${INTERMEDIATE_HEADER}
+echo "#endif" >> ${INTERMEDIATE_HEADER}
 
 for number in `seq 0 ${MAXNUMBER}`
 do
