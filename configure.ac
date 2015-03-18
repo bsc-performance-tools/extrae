@@ -116,7 +116,7 @@ elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
 
 else
    wanted_C_Compilers="gcc xlc icc cc"
-   wanted_F_Compilers="gfortran xlf ifort f90"
+   wanted_F_Compilers="gfortran xlf ifort f90 ftn"
    wanted_CXX_Compilers="g++ xlC icpc CC"
 fi
 AC_PROG_CC(${wanted_C_Compilers})
