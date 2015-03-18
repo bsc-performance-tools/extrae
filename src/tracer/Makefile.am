@@ -186,7 +186,7 @@ else
 WRAPPERS_OMP += wrappers/OMP/omp_wrapper.c wrappers/OMP/omp_wrapper.h
 
 if WANT_OPENMP_INTEL
-WRAPPERS_OMP += wrappers/OMP/intel-kmpc-11.c wrappers/OMP/intel-kmpc-11.h
+WRAPPERS_OMP += wrappers/OMP/intel-kmpc-11.c wrappers/OMP/intel-kmpc-11.h wrappers/OMP/intel-kmpc-11-intermediate.h
 EXTRA_OMP_CFLAGS += -DINTEL_OPENMP
 endif # WANT_OPENMP_INTEL
 
