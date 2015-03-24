@@ -296,13 +296,13 @@ static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 		{
 			if (clocktype != NULL)
 			{
-				if (!xmlStrcasecmp(clocktype, "DEFAULT"))
+				if (!xmlStrcasecmp (clocktype, (const xmlChar*) "DEFAULT"))
 					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_DEFAULT);
-				else if (!xmlStrcasecmp (clocktype, "REAL"))
+				else if (!xmlStrcasecmp (clocktype, (const xmlChar*) "REAL"))
 					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_REAL);
-				else if (!xmlStrcasecmp (clocktype, "VIRTUAL"))
+				else if (!xmlStrcasecmp (clocktype, (const xmlChar*) "VIRTUAL"))
 					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_VIRTUAL);
-				else if (!xmlStrcasecmp (clocktype, "PROF"))
+				else if (!xmlStrcasecmp (clocktype, (const xmlChar*) "PROF"))
 					setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_PROF);
 				else 
 					mfprintf (stderr, "Extrae: Warning! Value '%s' <sampling type=\"..\" /> is unrecognized. Using default clock.\n", clocktype);					
@@ -952,7 +952,17 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 	if (num_sampling_hwc > 0)
 	{
 		t_counters = (char **) malloc (sizeof(char*) * num_sampling_hwc);
+		if (t_counters == NULL)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! cannot allocate information for the sampling counters\n");
+			exit (-1);
+		}
 		t_periods = (unsigned long long *) malloc (sizeof(unsigned long long) * num_sampling_hwc);
+		if (t_periods == NULL)
+		{
+			fprintf (stderr, PACKAGE_NAME": Error! cannot allocate information for the sampling periods\n");
+			exit (-1);
+		}
 	
 		/* Parse all HWC sets, and annotate them to use them later */
 		set_tag = current->xmlChildrenNode;
@@ -1168,12 +1178,12 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
         xmlChar *which = xmlGetProp_env (rank, tag,  RC_SIGNAL_WHICH);
         if (which != NULL)
         {
-          if ((xmlStrcasecmp (which, (xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (xmlChar*) "") == 0))
+          if ((xmlStrcasecmp (which, (const xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (const xmlChar*) "") == 0))
           {
             mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush buffers to disk and stop further tracing\n");
             Signals_SetupFlushAndTerminate (SIGUSR1);
           }
-          else if (xmlStrcasecmp (which, (xmlChar *) "USR2") == 0)
+          else if (xmlStrcasecmp (which, (const xmlChar *) "USR2") == 0)
           {
             mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush buffers to disk and stop further tracing\n");
             Signals_SetupFlushAndTerminate (SIGUSR2);

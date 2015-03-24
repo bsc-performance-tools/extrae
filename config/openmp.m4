@@ -74,7 +74,7 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		enable_openmp="no"
 	fi
 
-        if test "${enable_openmp}" = "yes" ; then
+	if test "${enable_openmp}" = "yes" -a "${enable_openmp_gnu}" = "yes"; then
 		AC_ARG_WITH([libgomp-version],
 			AC_HELP_STRING(
 				[--with-libgomp-version@<:@=ARG@:>@],
@@ -82,12 +82,12 @@ AC_DEFUN([AX_CHECK_OPENMP],
 			),
 			[libgomp_version="$withval"],
 			[libgomp_version="4.2"]
-                )
+		)
 		if test "${libgomp_version}" != "4.2" -a \
-			"${libgomp_version}" != "4.9" ; then
+		   "${libgomp_version}" != "4.9" ; then
 			AC_MSG_ERROR([Invalid libgomp version '$libgomp_version'. Valid values for --with-libgomp_version are: 4.2 (default), 4.9])
 		fi
-        fi
+	fi
 
 	AM_CONDITIONAL(WANT_OPENMP, test "${enable_openmp}" = "yes" )
 	AM_CONDITIONAL(WANT_OPENMP_INTEL, test "${enable_openmp_intel}" = "yes" )
@@ -122,7 +122,11 @@ AC_DEFUN([AX_OPENMP_SHOW_CONFIGURATION],
 [
 	if test "${enable_openmp}" = "yes" ; then
 		echo OpenMP instrumentation: yes, through LD_PRELOAD
-		echo -e \\\tGNU OpenMP: ${enable_openmp_gnu}
+		if  "${enable_openmp_gnu}" = "yes"; then
+			echo -e \\\tGNU OpenMP: yes, libgomp ${libgomp_version}
+		else
+			echo -e \\\tGNU OpenMP: no
+		fi
 		echo -e \\\tIBM OpenMP: ${enable_openmp_ibm}
 		echo -e \\\tIntel OpenMP: ${enable_openmp_intel}
 		echo -e \\\tOMPT: ${enable_openmp_ompt}
