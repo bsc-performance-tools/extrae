@@ -122,7 +122,7 @@ AC_DEFUN([AX_OPENMP_SHOW_CONFIGURATION],
 [
 	if test "${enable_openmp}" = "yes" ; then
 		echo OpenMP instrumentation: yes, through LD_PRELOAD
-		if  "${enable_openmp_gnu}" = "yes"; then
+		if test "${enable_openmp_gnu}" = "yes"; then
 			echo -e \\\tGNU OpenMP: yes, libgomp ${libgomp_version}
 		else
 			echo -e \\\tGNU OpenMP: no
