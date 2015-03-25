@@ -230,6 +230,10 @@ $key = q/sec:XMLSectionOpenMP/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:Configuration/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:Examples_AIX/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
