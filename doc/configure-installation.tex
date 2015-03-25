@@ -45,32 +45,38 @@ There are many options to be applied at configuration time for the instrumentati
 	Generates this documentation.
 	\item {\tt --prefix=DIR} \\
 	Location where the installation will be placed. After issuing {\tt make install} you will find under DIR the entries {\tt lib/}, {\tt include/}, {\tt share/} and {\tt bin/} containing everything needed to run the instrumentation package.
-	\item {\tt --with-mpi=DIR} \\
-	Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
+	\item {\tt --with-bfd=DIR} \\
+	Specify where to find the Binary File Descriptor package. In conjunction with libiberty, it is used to translate addresses into source code locations.
 	\item {\tt --with-binary-type=OPTION} \\
 	Available options are: 32, 64 and default. Specifies the type of memory address model when compiling (32bit or 64bit).
 	\item {\tt --with-boost=DIR} \\
 	Specify the location of the BOOST package. This package is required when using the DynInst instrumentation with versions newer than 7.0.1.
+	\item {\tt --with-binutils=DIR} \\
+	Specify the location for the binutils package. The binutils package is necessary to translate addresses into source code references.
+	\item {\tt --with-cuda=DIR} \\
+	Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the {\tt LD\_PRELOAD} mechanism. It is superseded by {\tt --with-cupti=DIR} which also supports instrmentation for static binaries.
+	\item {\tt --with-cupti=DIR} \\
+	Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --with-cuda}, although it still requires {\tt --with-cuda}.
+	\item {\tt --with-dyninst=DIR} \\
+	Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst. Also, newer versions of DynInst (versions after 7.0.1) require the BOOST package {\tt --with-boost}. This flag is mandatory. Requires a working installation of a C++ compiler.
+	\item {\tt --with-java=DIR} \\
+	Specify the location of JAVA development kit. This is necessary to create the connectors between \TRACE and Java applications.
+	\item {\tt --with-liberty=DIR} \\
+	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
+	\item {\tt --with-libgomp=\{4.2,4.9\}}\\
+	Determines which version of libgomp (4.2 or 4.9) is supported by the installation of Extrae. Since these versions of libgomp are incompatible, to support both versions \TRACE needs to be installed twice in separate directories.
+	\item {\tt --with-mpi=DIR} \\
+	Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
 	\item {\tt --with-mpi-name-mangling=OPTION} \\
 	Available options are: 0u, 1u, 2u, upcase and auto. Choose the Fortran name decoration (0, 1 or 2 underscores) for MPI symbols. Let OPTION be auto to automatically detect the name mangling.
+	\item {\tt --with-opencl=DIR} \\
+	Specify the location for the OpenCL package, including library and include directories.
 	\item {\tt --with-pacx=DIR} \\
 	Specify where PACX communication library can be find.
 	\item {\tt --with-unwind=DIR} \\
 	Specify where to find Unwind libraries and includes. This library is used to get callstack information on several architectures (including IA64 and Intel x86-64). This flag is mandatory.
 	\item {\tt --with-papi=DIR} \\
 	Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters. This flag is mandatory.
-	\item {\tt --with-bfd=DIR} \\
-	Specify where to find the Binary File Descriptor package. In conjunction with libiberty, it is used to translate addresses into source code locations.
-	\item {\tt --with-liberty=DIR} \\
-	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
-	\item {\tt --with-dyninst=DIR} \\
-	Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst. Also, newer versions of DynInst (versions after 7.0.1) require the BOOST package {\tt --with-boost}. This flag is mandatory. Requires a working installation of a C++ compiler.
-	\item {\tt --with-cuda=DIR} \\
-	Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the {\tt LD\_PRELOAD} mechanism. It is superseded by {\tt --with-cupti=DIR} which also supports instrmentation for static binaries.
-	\item {\tt --with-cupti=DIR} \\
-	Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --with-cuda}, although it still requires {\tt --with-cuda}.
-    \item {\tt --with-java=DIR} \\
-    Specify the location of JAVA development kit.
 \end{itemize}
 
 \section{Build}

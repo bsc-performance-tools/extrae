@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Extrae User guide manual for version 3.0.3</TITLE>
-<META NAME="description" CONTENT="Extrae User guide manual for version 3.0.3">
+<TITLE>Extrae User guide manual for version 3.0.3rc</TITLE>
+<META NAME="description" CONTENT="Extrae User guide manual for version 3.0.3rc">
 <META NAME="keywords" CONTENT="user-guide">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -44,7 +44,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BR>
 User guide manual
 <BR>
-for version 3.0.3</H1>
+for version 3.0.3rc</H1>
 <DIV CLASS="author_info">
 
 <P ALIGN="CENTER"><STRONG>tools@bsc.es
@@ -301,7 +301,7 @@ List of Tables</A>
 <LI>1.2. <A NAME="tex2html11"
   HREF="user-guide.html#190">Available libraries in Extrae. Their availability depends upon the configure process.</A>
 <LI>. <A NAME="tex2html20"
-  HREF="user-guide.html#3394">Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</A></UL>
+  HREF="user-guide.html#3411">Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</A></UL>
 <P>
 
 <P>
@@ -348,7 +348,7 @@ The unpacking process will create different directories on the current directory
 <CAPTION><STRONG>Table 1.1:</STRONG>
 Package contents description</CAPTION>
 <TR><TD>
-<DIV CLASS="centerline" ID="par8058" ALIGN="CENTER">
+<DIV CLASS="centerline" ID="par8075" ALIGN="CENTER">
 <TABLE CELLPADDING=3 BORDER="1">
 <TR><TD ALIGN="LEFT"><B>Directory</B></TD>
 <TD ALIGN="LEFT"><B>Contents</B></TD>
@@ -933,9 +933,9 @@ Generates this documentation.
 <BR>
 Location where the installation will be placed. After issuing <TT>make install</TT> you will find under DIR the entries <TT>lib/</TT>, <TT>include/</TT>, <TT>share/</TT> and <TT>bin/</TT> containing everything needed to run the instrumentation package.
 </LI>
-<LI><TT>-with-mpi=DIR</TT> 
+<LI><TT>-with-bfd=DIR</TT> 
 <BR>
-Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
+Specify where to find the Binary File Descriptor package. In conjunction with libiberty, it is used to translate addresses into source code locations.
 </LI>
 <LI><TT>-with-binary-type=OPTION</TT> 
 <BR>
@@ -945,9 +945,45 @@ Available options are: 32, 64 and default. Specifies the type of memory address 
 <BR>
 Specify the location of the BOOST package. This package is required when using the DynInst instrumentation with versions newer than 7.0.1.
 </LI>
+<LI><TT>-with-binutils=DIR</TT> 
+<BR>
+Specify the location for the binutils package. The binutils package is necessary to translate addresses into source code references.
+</LI>
+<LI><TT>-with-cuda=DIR</TT> 
+<BR>
+Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the <TT>LD_PRELOAD</TT> mechanism. It is superseded by <TT>-with-cupti=DIR</TT> which also supports instrmentation for static binaries.
+</LI>
+<LI><TT>-with-cupti=DIR</TT> 
+<BR>
+Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the <TT>-with-cuda</TT>, although it still requires <TT>-with-cuda</TT>.
+</LI>
+<LI><TT>-with-dyninst=DIR</TT> 
+<BR>
+Specify the installation location for the DynInst package. <I CLASS="sans">Extrae</I> also requires the DWARF package <TT>-with-dwarf=DIR</TT> when using DynInst. Also, newer versions of DynInst (versions after 7.0.1) require the BOOST package <TT>-with-boost</TT>. This flag is mandatory. Requires a working installation of a C++ compiler.
+</LI>
+<LI><TT>-with-java=DIR</TT> 
+<BR>
+Specify the location of JAVA development kit. This is necessary to create the connectors between <I CLASS="sans">Extrae</I> and Java applications.
+</LI>
+<LI><TT>-with-liberty=DIR</TT> 
+<BR>
+Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
+</LI>
+<LI><TT>-with-libgomp={4.2,4.9}</TT>
+<BR>
+Determines which version of libgomp (4.2 or 4.9) is supported by the installation of Extrae. Since these versions of libgomp are incompatible, to support both versions <I CLASS="sans">Extrae</I> needs to be installed twice in separate directories.
+</LI>
+<LI><TT>-with-mpi=DIR</TT> 
+<BR>
+Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
+</LI>
 <LI><TT>-with-mpi-name-mangling=OPTION</TT> 
 <BR>
 Available options are: 0u, 1u, 2u, upcase and auto. Choose the Fortran name decoration (0, 1 or 2 underscores) for MPI symbols. Let OPTION be auto to automatically detect the name mangling.
+</LI>
+<LI><TT>-with-opencl=DIR</TT> 
+<BR>
+Specify the location for the OpenCL package, including library and include directories.
 </LI>
 <LI><TT>-with-pacx=DIR</TT> 
 <BR>
@@ -960,30 +996,6 @@ Specify where to find Unwind libraries and includes. This library is used to get
 <LI><TT>-with-papi=DIR</TT> 
 <BR>
 Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters. This flag is mandatory.
-</LI>
-<LI><TT>-with-bfd=DIR</TT> 
-<BR>
-Specify where to find the Binary File Descriptor package. In conjunction with libiberty, it is used to translate addresses into source code locations.
-</LI>
-<LI><TT>-with-liberty=DIR</TT> 
-<BR>
-Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
-</LI>
-<LI><TT>-with-dyninst=DIR</TT> 
-<BR>
-Specify the installation location for the DynInst package. <I CLASS="sans">Extrae</I> also requires the DWARF package <TT>-with-dwarf=DIR</TT> when using DynInst. Also, newer versions of DynInst (versions after 7.0.1) require the BOOST package <TT>-with-boost</TT>. This flag is mandatory. Requires a working installation of a C++ compiler.
-</LI>
-<LI><TT>-with-cuda=DIR</TT> 
-<BR>
-Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the <TT>LD_PRELOAD</TT> mechanism. It is superseded by <TT>-with-cupti=DIR</TT> which also supports instrmentation for static binaries.
-</LI>
-<LI><TT>-with-cupti=DIR</TT> 
-<BR>
-Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the <TT>-with-cuda</TT>, although it still requires <TT>-with-cuda</TT>.
-</LI>
-<LI><TT>-with-java=DIR</TT> 
-<BR>
-Specify the location of JAVA development kit.
 </LI>
 </UL>
 
@@ -1036,7 +1048,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox794">
+  <SPAN ID="cbox801">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=/homec/jzam11/jzam1128/aplic/extrae/2.2.0 -with-papi=/homec/jzam11/jzam1128/aplic/papi/4.1.2.1 -with-bfd=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-linux-gnu/powerpc-bgp-linux -with-liberty=/bgsys/local/gcc/gnu-linux_4.3.2/powerpc-bgp-linux -with-mpi=/bgsys/drivers/ppcfloor/comm -without-unwind -without-dyninst</TT>
@@ -1050,7 +1062,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox800">
+  <SPAN ID="cbox807">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1075,7 +1087,7 @@ If you want to add libxml2 and binutils support into Extrae, your configuration 
 
 <P>
 <BR>
-  <SPAN ID="cbox806">
+  <SPAN ID="cbox813">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 -with-mpi=/bgsys/drivers/ppcfloor/comm/gcc -without-unwind -without-dyninst -disable-openmp -disable-pthread
@@ -1094,7 +1106,7 @@ Otherwise, if you do not want to add support for the libxml2 library, your confi
 
 <P>
 <BR>
-  <SPAN ID="cbox812">
+  <SPAN ID="cbox819">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 -with-mpi=/bgsys/drivers/ppcfloor/comm/gcc -without-unwind -without-dyninst -disable-openmp -disable-pthread
@@ -1110,7 +1122,7 @@ In any situation, the build and installation commands are:
 
 <P>
 <BR>
-  <SPAN ID="cbox818">
+  <SPAN ID="cbox825">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1141,7 +1153,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox826">
+  <SPAN ID="cbox833">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>CC=xlc CXX=xlC ./configure -prefix=PREFIX -disable-nanos -disable-smpss -disable-openmp -with-binary-type=32 -without-unwind -enable-pmapi -without-dyninst -with-mpi=/usr/lpp/ppe.poe</TT>
@@ -1155,7 +1167,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox832">
+  <SPAN ID="cbox839">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1177,7 +1189,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox838">
+  <SPAN ID="cbox845">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=PREFIX -disable-nanos -disable-smpss -disable-openmp -disable-parallel-merge -with-binary-type=64 -without-unwind -enable-pmapi -without-dyninst -with-mpi=/usr/lpp/ppe.poe</TT>
@@ -1191,7 +1203,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox844">
+  <SPAN ID="cbox851">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>OBJECT_MODE=64 make
@@ -1219,7 +1231,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox850">
+  <SPAN ID="cbox857">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=PREFIX -with-mpi=/home/harald/aplic/mpich/1.2.7 -with-papi=/usr/local/papi -enable-openmp -without-dyninst -without-unwind</TT>
@@ -1233,7 +1245,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox856">
+  <SPAN ID="cbox863">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1255,7 +1267,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox862">
+  <SPAN ID="cbox869">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=PREFIX -with-mpi=/opt/osshpc/mpich-mx -with-papi=/gpfs/apps/PAPI/3.6.2-970mp -with-binary-type=32 -with-unwind=$HOME/aplic/unwind/1.0.1/32 -with-elf=/usr -with-dwarf=/usr -with-dyninst=$HOME/aplic/dyninst/7.0.1/32</TT>
@@ -1269,7 +1281,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox868">
+  <SPAN ID="cbox875">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make 
@@ -1291,7 +1303,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox874">
+  <SPAN ID="cbox881">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=PREFIX -with-mpi=/opt/osshpc/mpich-mx -with-papi=/gpfs/apps/PAPI/3.6.2-970mp -with-binary-type=64  -with-unwind=$HOME/aplic/unwind/1.0.1/64 -with-elf=/usr -with-dwarf=/usr -with-dyninst=$HOME/aplic/dyninst/7.0.1/64</TT>
@@ -1305,7 +1317,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox880">
+  <SPAN ID="cbox887">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make 
@@ -1327,7 +1339,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox886">
+  <SPAN ID="cbox893">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=PREFIX -with-mpi=/home/harald/aplic/openmpi/1.3.1 -with-pacx=/home/harald/aplic/pacx/07.2009-openmpi -without-papi -without-unwind -without-dyninst</TT>
@@ -1341,7 +1353,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox892">
+  <SPAN ID="cbox899">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1363,7 +1375,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox898">
+  <SPAN ID="cbox905">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=PREFIX -with-mpi=/home/harald/aplic/openmpi/1.3.1 -with-dyninst=/home/harald/dyninst/7.0.1 -with-dwarf=/usr
@@ -1379,7 +1391,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox904">
+  <SPAN ID="cbox911">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1404,7 +1416,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox910">
+  <SPAN ID="cbox917">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' ./configure -with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu -with-binary-type=64 -with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1_gnu4.1.2 -disable-xmltest -with-bfd=/opt/cray/cce/7.1.5/cray-binutils -with-liberty=/opt/cray/cce/7.1.5/cray-binutils -enable-sampling -enable-shared=no -prefix=PREFIX -with-papi=/opt/xt-tools/papi/3.7.2/v23 -with-unwind=/ccs/home/user/lib -without-dyninst</TT>
@@ -1418,7 +1430,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox916">
+  <SPAN ID="cbox923">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1440,7 +1452,7 @@ The Intel MIC accelerators (also codenamed KnightsFerry - KNF and KnightsCorner 
 
 <P>
 <BR>
-  <SPAN ID="cbox922">
+  <SPAN ID="cbox929">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -with-mpi=/opt/intel/impi/4.1.0.024/mic -without-dyninst -without-papi -without-unwind -disable-xml -disable-posix-clock -with-libz=/opt/extrae/zlib-mic -host=x86_64-suse-linux-gnu -prefix=/home/Computational/harald/extrae-mic -enable-mic
@@ -1458,7 +1470,7 @@ To compile it, just issue:
 
 <P>
 <BR>
-  <SPAN ID="cbox928">
+  <SPAN ID="cbox935">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1480,7 +1492,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox934">
+  <SPAN ID="cbox941">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -with-mpi=/opt/openmpi/ppc32 -without-unwind -without-dyninst -without-papi -prefix=/gpfs/data/apps/CEPBATOOLS/extrae/2.2.0/openmpi/32 -with-binary-type=32</TT>
@@ -1494,7 +1506,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox940">
+  <SPAN ID="cbox947">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1519,7 +1531,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox946">
+  <SPAN ID="cbox953">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>CC=/gpfs/APPS/BIN/GCC-4.6.2/bin/gcc-4.6.2 ./configure -prefix=/gpfs/CEPBATOOLS/extrae/2.2.0
@@ -1535,7 +1547,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox952">
+  <SPAN ID="cbox959">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1557,7 +1569,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox958">
+  <SPAN ID="cbox965">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>export MP_IMPL=anl2 ./configure -prefix=PREFIX
@@ -1573,7 +1585,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox964">
+  <SPAN ID="cbox971">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1595,7 +1607,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox970">
+  <SPAN ID="cbox977">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>CC=xlc CXX=xlC ./configure -prefix=PREFIX -with-mpi=/opt/ibmhpc/ppe.poe -without-dyninst -without-unwind -without-papi</TT>
@@ -1609,7 +1621,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox976">
+  <SPAN ID="cbox983">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1631,7 +1643,7 @@ Configuration command:
 
 <P>
 <BR>
-  <SPAN ID="cbox982">
+  <SPAN ID="cbox989">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=PREFIX -with-mpi=/opt/ibmhpc/ppe.poe -without-dyninst -without-unwind -without-papi</TT>
@@ -1645,7 +1657,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox988">
+  <SPAN ID="cbox995">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>MP_COMPILER=gcc make
@@ -1667,7 +1679,7 @@ Configuration command, enabling MPI, PAPI and online analysis over MRNet.
 
 <P>
 <BR>
-  <SPAN ID="cbox994">
+  <SPAN ID="cbox1001">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=/zhome/academic/HLRS/xhp/xhpgl/tools/extrae/intel -with-mpi=/opt/cray/mpt/7.1.2/gni/mpich2-intel/140
@@ -1682,7 +1694,7 @@ Build and installation commands:
 
 <P>
 <BR>
-  <SPAN ID="cbox1000">
+  <SPAN ID="cbox1007">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>make
@@ -1704,7 +1716,7 @@ If you are interested on knowing how an <I CLASS="sans">Extrae</I> package was c
 
 <P>
 <BR>
-  <SPAN ID="cbox1008">
+  <SPAN ID="cbox1015">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>${EXTRAE_HOME}/etc/configured.sh</TT>
@@ -1806,7 +1818,7 @@ The <TT>&lt;?xml version='1.0'?&gt;</TT> is mandatory for all XML files. Don't t
 
 <P>
 <BR>
-  <SPAN ID="cbox1577">
+  <SPAN ID="cbox1594">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_ON</B>, <B>EXTRAE_HOME</B>, <B>EXTRAE_INITIAL_MODE</B> and <B>EXTRAE_TRACE_TYPE</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -1837,7 +1849,7 @@ MPI calls can gather performance information at the begin and end of MPI calls. 
 
 <P>
 <BR>
-  <SPAN ID="cbox1643">
+  <SPAN ID="cbox1660">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_DISABLE_MPI</B> and <B>EXTRAE_MPI_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -1868,7 +1880,7 @@ PACX calls can gather performance information at the begin and end of PACX calls
 
 <P>
 <BR>
-  <SPAN ID="cbox1679">
+  <SPAN ID="cbox1696">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_DISABLE_PACX</B> and <B>EXTRAE_PACX_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -1900,7 +1912,7 @@ The tracing package allows to gather information of some pthread routines. In ad
 
 <P>
 <BR>
-  <SPAN ID="cbox1717">
+  <SPAN ID="cbox1734">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_DISABLE_PTHREAD</B>, <B>EXTRAE_PTHREAD_LOCKS</B> and <B>EXTRAE_PTHREAD_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -1932,7 +1944,7 @@ The tracing package allows to gather information of some OpenMP runtimes and out
 
 <P>
 <BR>
-  <SPAN ID="cbox1760">
+  <SPAN ID="cbox1777">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_DISABLE_OMP</B>, <B>EXTRAE_OMP_LOCKS</B> and <B>EXTRAE_OMP_COUNTERS_ON</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -1973,7 +1985,7 @@ The Cell configuration part is only parsed for tracing packages suited for the C
 
 <P>
 <BR>
-  <SPAN ID="cbox1806">
+  <SPAN ID="cbox1823">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_SPU_FILE_SIZE</B>, <B>EXTRAE_SPU_BUFFER_SIZE</B> and <B>EXTRAE_SPU_DMA_CHANNEL</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2023,7 +2035,7 @@ The user can choose which addresses to save in the trace (starting from 1, which
 
 <P>
 <BR>
-  <SPAN ID="cbox1848">
+  <SPAN ID="cbox1865">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_MPI_CALLER</B> and <B>EXTRAE_PACX_CALLER</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2097,7 +2109,7 @@ Finally, in order to gather performance counters in these functions and also in 
 
 <P>
 <BR>
-  <SPAN ID="cbox1931">
+  <SPAN ID="cbox1948">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_FUNCTIONS</B> environment variable in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2118,8 +2130,8 @@ The instrumentation library can be compiled with support for collecting performa
 
 <UL>
 <LI>Processor performance counters. Such access is granted by PAPI<A NAME="tex2html13"
-  HREF="#foot1923"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> or PMAPI<A NAME="tex2html15"
-  HREF="#foot1918"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot1940"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> or PMAPI<A NAME="tex2html15"
+  HREF="#foot1935"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>Network performance counters. <EM>(Only available in systems with Myrinet GM/MX networks).</EM>
 </LI>
@@ -2151,7 +2163,7 @@ Here is an example of the counters section in the XML configuration file:
 
 <P>
 <BR>
-  <SPAN ID="cbox2090">
+  <SPAN ID="cbox2107">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_COUNTERS</B>, <B>EXTRAE_NETWORK_COUNTERS</B> and <B>EXTRAE_RUSAGE</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2183,8 +2195,8 @@ Processor performance counters are configured in the <TT>&lt;cpu&gt;</TT> nodes.
 
 <P>
 Each set contain a list of performance counters to be gathered at different instrumentation points (see sections <A HREF="#sec:XMLSectionMPI">4.2</A>, <A HREF="#sec:XMLSectionOpenMP">4.5</A> and <A HREF="#sec:XMLSectionUF">4.8</A>). If the tracing library is compiled to support PAPI, performance counters must be given using the canonical name (like PAPI_TOT_CYC and PAPI_L1_DCM), or the PAPI code in hexadecimal format (like 8000003b and 80000000, respectively)<A NAME="tex2html16"
-  HREF="#foot2058"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">3</SPAN></SUP></A>. If the tracing library is compiled to support PMAPI, only one group identifier can be given per set<A NAME="tex2html17"
-  HREF="#foot2059"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">4</SPAN></SUP></A> and can be either the group name (like pm_basic and pm_hpmcount1) or the group number (like 6 and 22, respectively). 
+  HREF="#foot2075"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">3</SPAN></SUP></A>. If the tracing library is compiled to support PMAPI, only one group identifier can be given per set<A NAME="tex2html17"
+  HREF="#foot2076"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">4</SPAN></SUP></A> and can be either the group name (like pm_basic and pm_hpmcount1) or the group number (like 6 and 22, respectively). 
 
 <P>
 In the given example (which refers to PAPI support in the tracing library) two sets are defined. First set will read PAPI_TOT_INS (total instructions), PAPI_TOT_CYC (total cycles) and PAPI_L1_DCM (1st level cache misses). Second set is configured to obtain PAPI_TOT_INS (total instructions), PAPI_TOT_CYC (total cycles) and PAPI_FP_INS (floating point instructions).
@@ -2263,7 +2275,7 @@ Such options refer to:
 <LI><TT>trace-prefix</TT> Sets the intermediate trace file prefix. Its default value is TRACE.
 </LI>
 <LI><TT>size</TT> Let the user restrict the maximum size (in megabytes) of each resulting intermediate trace file<A NAME="tex2html18"
-  HREF="#foot2214"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">5</SPAN></SUP></A>.
+  HREF="#foot2231"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">5</SPAN></SUP></A>.
 </LI>
 <LI><TT>temporal-directory</TT> Where the intermediate trace files will be stored during the execution of the application. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.
 <BR></LI>
@@ -2277,7 +2289,7 @@ Such options refer to:
 
 <P>
 <BR>
-  <SPAN ID="cbox2217">
+  <SPAN ID="cbox2234">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_PROGRAM_NAME</B>, <B>EXTRAE_FILE_SIZE</B>, <B>EXTRAE_DIR</B>, <B>EXTRAE_FINAL_DIR</B> and <B>EXTRAE_GATHER_MPITS</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2309,7 +2321,7 @@ By, default (even if the enabled attribute is "no") the tracing buffer is set to
 
 <P>
 <BR>
-  <SPAN ID="cbox2273">
+  <SPAN ID="cbox2290">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_BUFFER_SIZE</B> environment variable in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2395,7 +2407,7 @@ A signal can be used to terminate the tracing when using the remote control. Ava
 
 <P>
 <BR>
-  <SPAN ID="cbox2329">
+  <SPAN ID="cbox2346">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_CONTROL_FILE</B>, <B>EXTRAE_CONTROL_GLOPS</B>, <B>EXTRAE_CONTROL_TIME</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2428,7 +2440,7 @@ In addition to that, when the tracing library is running in burst mode, it compu
 
 <P>
 <BR>
-  <SPAN ID="cbox2425">
+  <SPAN ID="cbox2442">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_INITIAL_MODE</B>, <B>EXTRAE_BURST_THRESHOLD</B>, <B>EXTRAE_MPI_STATISTICS</B> and <B>EXTRAE_PACX_STATISTICS</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2483,7 +2495,7 @@ This section contains two attributes besides <TT>enabled</TT>. These are
 
 <P>
 <BR>
-  <SPAN ID="cbox2506">
+  <SPAN ID="cbox2523">
     <TABLE  WIDTH="95%">
 <TR><TD>
     See <B>EXTRAE_SAMPLING_PERIOD</B>, <B>EXTRAE_SAMPLING_VARIABILITY</B>, <B>EXTRAE_SAMPLING_CLOCKTYPE</B> and <B>EXTRAE_SAMPLING_CALLER</B> environment variables in appendix <A HREF="#cha:EnvVar">B</A>.
@@ -2632,7 +2644,7 @@ In Linux systems, the tracing package can take advantage of certain functionalit
 
 <P>
 <BR>
-  <SPAN ID="cbox2735">
+  <SPAN ID="cbox2752">
     <TABLE  WIDTH="95%">
 <TR><TD>
     For further references, see chapter <A HREF="#cha:Merging">6</A>.
@@ -3238,16 +3250,16 @@ In order to use Paraver, those intermediate files (<I>i.e.</I>, <TT>.mpit</TT> f
 
 <P>
 The target trace type is defined in the XML configuration file used at the instrumentation step (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters <TT>-paraver</TT> or <TT>-dimemas</TT><A NAME="tex2html19"
-  HREF="#foot3387"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
+  HREF="#foot3404"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="3394"></A>
+<DIV ALIGN="CENTER"><A NAME="3411"></A>
 <TABLE>
 <CAPTION><STRONG>Table:</STRONG>
 Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</CAPTION>
 <TR><TD>
-<DIV CLASS="centerline" ID="par8334" ALIGN="CENTER">
+<DIV CLASS="centerline" ID="par8351" ALIGN="CENTER">
 <TABLE CELLPADDING=3 BORDER="1">
 <TR><TD ALIGN="LEFT"><B>Binary</B></TD>
 <TD ALIGN="LEFT"><B>Description</B></TD>
@@ -3586,7 +3598,7 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 <P>
 DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures<A NAME="tex2html21"
-  HREF="#foot3767"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+  HREF="#foot3784"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
 
 <P>
 
@@ -3674,7 +3686,7 @@ Please note, this script is particularly adapted to the MOAB/Slurm queue systems
 
 <P>
 LD_PRELOAD (or LDR_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names<A NAME="tex2html22"
-  HREF="#foot3863"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>) they are not tested.
+  HREF="#foot3880"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>) they are not tested.
 
 <P>
 We show how this mechanism works on Linux (or similar environments) in subsection <A HREF="#subsec:Examples_Linux">7.2.1</A> and on AIX in subsection <A HREF="#subsec:Examples_AIX">7.2.3</A>.
@@ -3714,7 +3726,7 @@ Regarding the execution, if you run MPI applications from the command-line, you 
 
 <P>
 <BR>
-  <SPAN ID="cbox3865">
+  <SPAN ID="cbox3882">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>${MPI_HOME}/bin/mpirun -np N ./trace.sh mpi-app
@@ -3918,7 +3930,7 @@ To manually generate the final Paraver tracefile issue the following command:
 
 <P>
 <BR>
-  <SPAN ID="cbox3882">
+  <SPAN ID="cbox3899">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -e mpi-app -o trace.prv
@@ -4073,10 +4085,10 @@ This appendix presents the environment variables the <I CLASS="sans">Extrae</I> 
  WIDTH="990" HEIGHT="697" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="\begin{landscape}
-% latex2html id marker 4134\begin{table}
+% latex2html id marker 4151\begin{table}
 \centerline{
 \begin...
-...riables available to configure {\sf {E}xtrae} }
+...riables available to configure {\sf {E}xtrae}\ }
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -4087,11 +4099,11 @@ This appendix presents the environment variables the <I CLASS="sans">Extrae</I> 
  WIDTH="990" HEIGHT="635" ALIGN="BOTTOM" BORDER="0"
  SRC="img4.png"
  ALT="\begin{landscape}
-% latex2html id marker 4155\par
+% latex2html id marker 4172\par
 \begin{table}
 \centerline{
 \...
-... to configure {\sf {E}xtrae} ({\em continued})}
+... to configure {\sf {E}xtrae}\ ({\em continued})}
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -4370,7 +4382,7 @@ These are the instrumented MPI routines in the <I CLASS="sans">Extrae</I> packag
 <LI>MPI_Init
 </LI>
 <LI>MPI_Init_thread<A NAME="tex2html24"
-  HREF="#foot3767"><SUP>D.<SPAN CLASS="arabic">1</SPAN></SUP></A>
+  HREF="#foot3784"><SUP>D.<SPAN CLASS="arabic">1</SPAN></SUP></A>
 </LI>
 <LI>MPI_Finalize
 </LI>
@@ -4475,61 +4487,61 @@ These are the instrumented MPI routines in the <I CLASS="sans">Extrae</I> packag
 <LI>MPI_Sendrecv_replace
 </LI>
 <LI>MPI_File_open<A NAME="tex2html25"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_close<A NAME="tex2html26"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read<A NAME="tex2html27"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_all<A NAME="tex2html28"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write<A NAME="tex2html29"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_all<A NAME="tex2html30"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_at<A NAME="tex2html31"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_at_all<A NAME="tex2html32"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_at<A NAME="tex2html33"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_at_all<A NAME="tex2html34"
-  HREF="#foot3863"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot3880"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_Get<A NAME="tex2html35"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Put<A NAME="tex2html36"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Win_complete<A NAME="tex2html37"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Win_create<A NAME="tex2html38"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Win_fence<A NAME="tex2html39"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Win_free<A NAME="tex2html40"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Win_post<A NAME="tex2html41"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Win_start<A NAME="tex2html42"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 <LI>MPI_Win_wait<A NAME="tex2html43"
-  HREF="#foot2058"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
+  HREF="#foot2075"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
 </LI>
 </UL>
 
@@ -4564,10 +4576,10 @@ These are the instrument routines of the Intel OpenMP runtime functions using Dy
 <LI>__kmpc_invoke_task_func
 </LI>
 <LI>__kmpc_set_lock<A NAME="tex2html44"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>__kmpc_unset_lock<A NAME="tex2html45"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 </UL>
 
@@ -4598,16 +4610,16 @@ The instrumentation of the Intel OpenMP runtime for version 11.0 to 12.0 is avai
 <LI>__kmpc_end_single
 </LI>
 <LI>__kmpc_critical<A NAME="tex2html46"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>__kmpc_end_critical<A NAME="tex2html47"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>omp_set_lock<A NAME="tex2html48"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>omp_unset_lock<A NAME="tex2html49"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>__kmpc_omp_task_alloc
 </LI>
@@ -4647,10 +4659,10 @@ These are the instrumented routines of the IBM OpenMP runtime:
 <LI>_xlsmpWSSectSetup_TPO
 </LI>
 <LI>_xlsmpRelDefaultSLock<A NAME="tex2html50"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>_xlsmpGetDefaultSLock<A NAME="tex2html51"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 </UL>
 
@@ -4722,22 +4734,22 @@ These are the instrumented routines of the GNU OpenMP runtime:
 <LI>GOMP_barrier
 </LI>
 <LI>GOMP_critical_name_enter<A NAME="tex2html52"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>GOMP_critical_name_exit<A NAME="tex2html53"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>GOMP_critical_enter<A NAME="tex2html54"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>GOMP_critical_exit<A NAME="tex2html55"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>GOMP_atomic_enter<A NAME="tex2html56"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>GOMP_atomic_exit<A NAME="tex2html57"
-  HREF="#foot2059"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
+  HREF="#foot2076"><SUP>D.<SPAN CLASS="arabic">4</SPAN></SUP></A>
 </LI>
 <LI>GOMP_task
 </LI>
@@ -4920,7 +4932,7 @@ About this document ...</A>
 <BR>
 User guide manual
 <BR>
-for version 3.0.3</STRONG><P>
+for version 3.0.3rc</STRONG><P>
 This document was generated using the
 <A HREF="http://www.latex2html.org/"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A> translator Version 2008 (1.71)
 <P>
@@ -4935,7 +4947,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2015-03-02
+The translation was initiated by Harald Servat on 2015-03-25
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot216">... file</A><A
@@ -4947,43 +4959,43 @@ The translation was initiated by Harald Servat on 2015-03-02
 <DD>If the application is Fortran append an f to the library. For example, if you want to instrument a Fortran application that is using MPI, use <TT>libmpitracef</TT> instead of <TT>libmpitrace</TT>.
 
 </DD>
-<DT><A NAME="foot1923">... PAPI</A><A
+<DT><A NAME="foot1940">... PAPI</A><A
  HREF="user-guide.html#tex2html13"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>More information available on their website <TT><A NAME="tex2html14"
   HREF="http://icl.cs.utk.edu/papi">http://icl.cs.utk.edu/papi</A></TT>. <I CLASS="sans">Extrae</I> requires PAPI 3.x at least.
 
 </DD>
-<DT><A NAME="foot1918">... PMAPI</A><A
+<DT><A NAME="foot1935">... PMAPI</A><A
  HREF="user-guide.html#tex2html15"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
 <DD>PMAPI is only available for AIX operating system, and it is on the base operating system since AIX5.3. <I CLASS="sans">Extrae</I> requires AIX 5.3 at least.
 
 </DD>
-<DT><A NAME="foot2058">... respectively)</A><A
+<DT><A NAME="foot2075">... respectively)</A><A
  HREF="user-guide.html#tex2html16"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">3</SPAN></SUP></A></DT>
 <DD>Some architectures do not allow grouping some performance counters in the same set.
 
 </DD>
-<DT><A NAME="foot2059">... set</A><A
+<DT><A NAME="foot2076">... set</A><A
  HREF="user-guide.html#tex2html17"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">4</SPAN></SUP></A></DT>
 <DD>Each group contains several performance counters
 
 </DD>
-<DT><A NAME="foot2214">... file</A><A
+<DT><A NAME="foot2231">... file</A><A
  HREF="user-guide.html#tex2html18"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">5</SPAN></SUP></A></DT>
 <DD>This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section <A HREF="#sec:XMLSectionBuffer">4.11</A>).
 
 </DD>
-<DT><A NAME="foot3387">...<TT>-dimemas</TT></A><A
+<DT><A NAME="foot3404">...<TT>-dimemas</TT></A><A
  HREF="user-guide.html#tex2html19"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.
 
 </DD>
-<DT><A NAME="foot3767">... architectures</A><A
+<DT><A NAME="foot3784">... architectures</A><A
  HREF="user-guide.html#tex2html21"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>The IA-64 architecture support was dropped by DynInst 7.0
 
 </DD>
-<DT><A NAME="foot3863">... names</A><A
+<DT><A NAME="foot3880">... names</A><A
  HREF="user-guide.html#tex2html22"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
 <DD>Look at <TT><A NAME="tex2html23"
   HREF="http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html">http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html</A></TT> for further information.
@@ -5002,7 +5014,7 @@ The translation was initiated by Harald Servat on 2015-03-02
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2015-03-02
+2015-03-25
 </ADDRESS>
 </BODY>
 </HTML>
