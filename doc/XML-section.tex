@@ -330,7 +330,7 @@ This section indicates whether I/O calls ({\tt read} and {\tt write}) are meant 
 
 This section indicates whether dynamic memory calls ({\tt malloc}, {\tt free}, {\tt realloc}) are meant to be instrumented. If {\tt enabled} is set to yes, the aforementioned calls will be instrumented, otherwise they will not be instrumented.
 
-{\bf Note:} This is an experimental feature, and needs to be enabled at configure time usint the {\tt --enable-instrument-io} option.
+{\bf Note:} This is an experimental feature, and needs to be enabled at configure time usint the {\tt --enable-instrument-dynamic-memory} option.
 
 {\bf Warning:} This option seems to intefere with the instrumentation of the Intel OpenMP runtime, and the issues haven't been solved yet.
 

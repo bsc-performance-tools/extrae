@@ -28,19 +28,6 @@ frequency=''auto''
 topology=''auto''&gt;
 \end{lstlisting}">|; 
 
-$key = q/{landscape}%latex2htmlidmarker4332{par{table{{centerline{tabular{{|p{7cm}|p{14cmoconfigure{sf{E}xtrae}({emcontinued})}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
-$cached_env_img{$key} = q|<IMG
- WIDTH="990" HEIGHT="635" ALIGN="BOTTOM" BORDER="0"
- SRC="|."$dir".q|img8.png"
- ALT="\begin{landscape}
-% latex2html id marker 4332\par
-\begin{table}
-\centerline{
-\...
-... to configure {\sf {E}xtrae} ({\em continued})}
-\end{table}\par
-\end{landscape}">|; 
-
 $key = q/dollarast;MSF=1.6;LFS=11;AAT/;
 $cached_env_img{$key} = q|<IMG
  WIDTH="22" HEIGHT="36" ALIGN="MIDDLE" BORDER="0"
@@ -55,15 +42,28 @@ $cached_env_img{$key} = q|<IMG
 &lt;clustering config=''cl.I.IPC.xml''/&gt;
 \end{lstlisting}">|; 
 
-$key = q/{landscape}%latex2htmlidmarker4311table{{centerline{tabular{{|p{7cm}|p{14cm}|}hlablesavailabletoconfigure{sf{E}xtrae}}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
+$key = q/{landscape}%latex2htmlidmarker4318table{{centerline{tabular{{|p{7cm}|p{14cm}|}hlablesavailabletoconfigure{sf{E}xtrae}}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
 $cached_env_img{$key} = q|<IMG
  WIDTH="990" HEIGHT="697" ALIGN="BOTTOM" BORDER="0"
  SRC="|."$dir".q|img7.png"
  ALT="\begin{landscape}
-% latex2html id marker 4311\begin{table}
+% latex2html id marker 4318\begin{table}
 \centerline{
 \begin...
 ...riables available to configure {\sf {E}xtrae} }
+\end{table}\par
+\end{landscape}">|; 
+
+$key = q/{landscape}%latex2htmlidmarker4339{par{table{{centerline{tabular{{|p{7cm}|p{14cmoconfigure{sf{E}xtrae}({emcontinued})}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="990" HEIGHT="635" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img8.png"
+ ALT="\begin{landscape}
+% latex2html id marker 4339\par
+\begin{table}
+\centerline{
+\...
+... to configure {\sf {E}xtrae} ({\em continued})}
 \end{table}\par
 \end{landscape}">|; 
 

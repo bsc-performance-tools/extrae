@@ -5,6 +5,9 @@
 There are many options to be applied at configuration time for the instrumentation package. We point out here some of the relevant options, sorted alphabetically. To get the whole list run {\tt configure --help}. Options can be enabled or disabled. To enable them use --enable-X or --with-X= (depending on which option is available), to disable them use --disable-X or --without-X.
 
 \begin{itemize}
+
+    \item {\tt --enable-instrument-dynamic-memory} \\
+	Allows instrumentation of dynamic memory related calls (such as malloc, free, realloc).
 	\item {\tt --enable-merge-in-trace} \\
 	Embed the merging process in the tracing library so the final tracefile can be generated automatically from the application run.
 	\item {\tt --enable-parallel-merge} \\
@@ -77,6 +80,7 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify where to find Unwind libraries and includes. This library is used to get callstack information on several architectures (including IA64 and Intel x86-64). This flag is mandatory.
 	\item {\tt --with-papi=DIR} \\
 	Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters. This flag is mandatory.
+
 \end{itemize}
 
 \section{Build}
