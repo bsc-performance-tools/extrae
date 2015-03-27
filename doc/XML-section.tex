@@ -107,6 +107,7 @@ There are three points where the instrumentation can gather this information:
  \item Entry of MPI calls
  \item Entry of PACX calls
  \item Sampling points {\em (if sampling is available in the tracing package)}
+ \item Dynamic memory calls (malloc, free, realloc)
 \end{itemize}
 
 The user can choose which addresses to save in the trace (starting from 1, which is the closest point to the MPI call or sampling point) specifying several stack levels by separating them by commas or using the hyphen symbol.
@@ -329,6 +330,8 @@ This section indicates whether I/O calls ({\tt read} and {\tt write}) are meant 
 \input{XML/dynamic-memory.xml}
 
 This section indicates whether dynamic memory calls ({\tt malloc}, {\tt free}, {\tt realloc}) are meant to be instrumented. If {\tt enabled} is set to yes, the aforementioned calls will be instrumented, otherwise they will not be instrumented.
+This section allows deciding whether allocation and free-related memory calls shall be instrumented.
+Additionally, the configuration can also indicate whether allocation calls should be instrumented if the requested memory size surpasses a given threshold (32768 bytes, in the example).
 
 {\bf Note:} This is an experimental feature, and needs to be enabled at configure time usint the {\tt --enable-instrument-dynamic-memory} option.
 

@@ -84,12 +84,12 @@ characteristics of your program.
   found under \emph{trace-control > remote-control > online}. The default configuration is already 
   ready to use:  
 
-\begin{lstlisting}[language=XML,frame=single]
+\begin{verbatim}
 <online enabled="yes" 
         analysis="clustering" 
         frequency="auto" 
         topology="auto">
-\end{lstlisting}
+\end{verbatim}
 
   The available options for the <online> section are the following:
   
@@ -104,9 +104,9 @@ characteristics of your program.
 
 \subsection{Clustering analysis options}
 
-\begin{lstlisting}[language=XML,frame=single]
+\begin{verbatim}
 <clustering config="cl.I.IPC.xml"/>
-\end{lstlisting}
+\end{verbatim}
 
 \begin{itemize}
  \item \textbf{config}: Specify the path to the ClusteringSuite XML configuration file.
@@ -114,14 +114,14 @@ characteristics of your program.
 
 \subsection{Spectral analysis options}
 
-\begin{lstlisting}[language=XML,frame=single]
+\begin{verbatim}
 <spectral max_periods="0" num_iters="3" min_seen="0" min_likeness="85">
    <spectral_advanced enabled="no" burst_threshold="80">
       <periodic_zone     detail_level="profile"/>                 
       <non_periodic_zone detail_level="bursts" min_duration="3s"/> 
    </spectral_advanced>
 </spectral>
-\end{lstlisting}
+\end{verbatim}
 
 The basic configuration options for the spectral analysis are the following:
 
@@ -147,9 +147,9 @@ Also, some advanced settings are tunable in the <spectral\_advanced> section:
            
 \subsection{Gremlins analysis options}
 
-\begin{lstlisting}[language=XML,frame=single]
+\begin{verbatim}
 <gremlins start="0" increment="2" roundtrip="no" loop="no"/>
-\end{lstlisting}
+\end{verbatim}
 
 \begin{itemize} 
  \item \textbf{start}: Number of gremlins at the beginning of the execution.
