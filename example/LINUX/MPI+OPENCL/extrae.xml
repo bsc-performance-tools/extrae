@@ -21,11 +21,8 @@
         <sampling enabled="no" period="1000000000">PAPI_TOT_CYC</sampling>
       </set>
     </cpu>
-
     <network enabled="no" />
-
     <resource-usage enabled="no" />
-
     <memory-usage enabled="no" />
   </counters>
 
@@ -58,9 +55,10 @@
 
   <opencl enabled="yes" />
 
-  <dynamic-memory enabled="no" />
-
-  <input-output enabled="no" />
+  <dynamic-memory enabled="no">
+    <alloc enabled="yes" threshold="32768" />
+    <free  enabled="yes" />
+  </dynamic-memory>
 
   <merge enabled="yes" 
     synchronization="default"

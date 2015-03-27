@@ -24,6 +24,7 @@
   <callers enabled="yes">
     <mpi enabled="yes">1-3</mpi>
     <sampling enabled="yes">1-5</sampling>
+    <dynamic-memory enabled="no">1-3</dynamic-memory>
   </callers>
 
   <counters enabled="yes">
@@ -36,17 +37,17 @@
         <sampling enabled="no" period="1000000000">PAPI_TOT_CYC</sampling>
       </set>
     </cpu>
-
     <network enabled="no" />
-
     <resource-usage enabled="no" />
-
     <memory-usage enabled="no" />
   </counters>
 
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 
-  <dynamic-memory enabled="no" />
+  <dynamic-memory enabled="no">
+    <alloc enabled="yes" threshold="32768" />
+    <free  enabled="yes" />
+  </dynamic-memory>
 
   <input-output enabled="no" />
 
