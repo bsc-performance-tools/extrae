@@ -88,8 +88,8 @@ static char UNUSED rcsid[] = "$Id$";
 
 typedef enum {Block, Cyclic, Size, ConsecutiveSize} WorkDistribution_t;
 
-static struct input_t *InputTraces;
-static unsigned nTraces = 0;
+static struct input_t *InputTraces = NULL;
+unsigned nTraces = 0;
 static int AutoSincronitzaTasks = TRUE;
 static WorkDistribution_t WorkDistribution= Block;
 static char **MPITS_Files = NULL;
@@ -163,6 +163,14 @@ static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptas
 	int i;
 	int cur_ptask = *cptask;
 	char *tmp_name;
+
+        xrealloc(InputTraces, InputTraces, sizeof(struct input_t) * (nTraces + 1));
+        if (InputTraces == NULL)
+        {
+          perror ("realloc");
+          fprintf (stderr, "mpi2prv: Cannot allocate InputTraces memory for MPIT %d. Dying...\n", nTraces + 1);
+          exit (1);
+        }
 
 	InputTraces[nTraces].InputForWorker = -1;
 	InputTraces[nTraces].name = (char *) malloc (strlen (file) + 1);
@@ -1187,14 +1195,6 @@ void merger_pre (int numtasks)
 		exit (1);
 	}
 #endif
-
-	InputTraces = (struct input_t *) malloc (sizeof(struct input_t)*MAX_FILES);
-	if (InputTraces == NULL)
-	{
-	  perror ("malloc");
-	  fprintf (stderr, "mpi2prv: Cannot allocate InputTraces memory. Dying...\n");
-	  exit (1);
-	}
 }
 
 

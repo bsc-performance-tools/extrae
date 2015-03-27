@@ -434,6 +434,7 @@ FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask,
 	fset->input_files = IFiles;
 	fset->num_input_files = nfiles;
 	fset->traceformat = trace_format;
+	xmalloc(fset->files, nTraces * sizeof(FileItem_t));
 	fset->nfiles = 0;
 	for (file = 0; file < nfiles; file++)
 		if (IFiles[file].InputForWorker == idtask)
@@ -505,6 +506,8 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 	}
 
 	prvfset->fset = fset;
+
+        xmalloc(prvfset->files, nTraces * sizeof(PRVFileItem_t));
 	prvfset->nfiles = fset->nfiles;
 	prvfset->records_per_block = records_per_block / (fset->nfiles + tree_fan_out);
 
@@ -750,6 +753,8 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 	else
 		prvfset->nfiles = fset->nfiles;
 
+
+        xmalloc(prvfset->files, nTraces * sizeof(PRVFileItem_t));
 	/* Set local files first */
 	for (i = 0; i < fset->nfiles; i++)
 	{

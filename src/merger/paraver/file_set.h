@@ -42,8 +42,6 @@
 #include "mpi2out.h"
 #include "write_file_buffer.h"
 
-#define MAX_FILES 16*1024
-
 enum
 {
     CIRCULAR_SKIP_EVENTS,
@@ -103,7 +101,7 @@ FileItem_t;
 
 typedef struct
 {
-	FileItem_t files[MAX_FILES];    /* Files in the set */
+	FileItem_t  *files;             /* Files in the set */
 	unsigned int nfiles;            /* Number of files in the set */
 	unsigned int traceformat;       /* Output trace format */
 	unsigned int active_file;       /* Dimemas uses this in order to know which file is being translated */
@@ -133,7 +131,7 @@ PRVFileItem_t;
 
 typedef struct
 {
-	PRVFileItem_t files[MAX_FILES];
+	PRVFileItem_t *files;
 	unsigned long long records_per_block;
 	unsigned int nfiles;
 	FileSet_t *fset;

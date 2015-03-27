@@ -36,6 +36,8 @@
 # include <sys/types.h>
 #endif
 
+extern unsigned nTraces;
+
 typedef struct input_t
 {
 	off_t filesize;
