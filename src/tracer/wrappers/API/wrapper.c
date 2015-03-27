@@ -2246,6 +2246,10 @@ void Backend_Finalize (void)
 			Extrae_memusage_Wrapper ();
 		}
 
+#if !defined(IS_BG_MACHINE)
+		Extrae_AnnotateTopology (TRUE, TIME);
+#endif
+
 		/* Final write files to disk, include renaming of the filenames */
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 		{
@@ -2256,9 +2260,6 @@ void Backend_Finalize (void)
 			if (TRACING_BUFFER(thread) != NULL)
 			{
 				TRACE_EVENT (TIME, APPL_EV, EVT_END);
-#if !defined(IS_BG_MACHINE)
-				Extrae_AnnotateTopology (TRUE, LAST_READ_TIME);
-#endif
 				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
 			}
