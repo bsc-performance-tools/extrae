@@ -293,8 +293,10 @@ static int Task_Event (
 #if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
-		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_FUNCTION);
-		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2OMP_LINE);
+		AddressCollector_Add (&CollectedAddresses, ptask, task,
+		  Get_EvValue (event), ADDR2OMP_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, ptask, task,
+		  Get_EvValue (event), ADDR2OMP_LINE);
 	}
 #endif
 
