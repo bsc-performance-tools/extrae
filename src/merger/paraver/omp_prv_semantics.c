@@ -271,22 +271,19 @@ static int SetGetNumThreads_Event (
 }
 
 static int Task_Event (
-   event_t * current_event,
-   unsigned long long current_time,
+   event_t * event,
+   unsigned long long time,
    unsigned int cpu,
    unsigned int ptask, 
    unsigned int task,
    unsigned int thread,
    FileSet_t *fset )
 {
-	unsigned int EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvValue = Get_EvValue (current_event);
+	Switch_State (STATE_OVHD, (Get_EvValue (event) != EVT_END), ptask, task, thread);
 
-	Switch_State (STATE_OVHD, (EvValue != EVT_END), ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_state (cpu, ptask, task, thread, time);
 	// Don't need to emit this, it is subsumed bt TASKFUNC_INST_EV
 	// trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
 
@@ -301,8 +298,10 @@ static int Task_Event (
 	}
 #endif
 
-	trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_EV, EvValue);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, TASKFUNC_INST_LINE_EV, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_INST_EV,
+	  (Get_EvValue(event) == EVT_BEGIN) ? Get_EvParam(event) : 0);
+	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_INST_LINE_EV,
+	  (Get_EvValue(event) == EVT_BEGIN) ? Get_EvParam(event) : 0);
 
 	return 0;
 }
