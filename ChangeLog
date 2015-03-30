@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 30Mar2015 Create directory if target trace-file is in a directory that does not exist
  * 27Mar2015 Changed memory allocation for the InputTraces and FileSet structures in the merger: instead of allocating space for MAX_FILES, we allocate only for the maximum of mpits. MAX_FILES constant has been removed.
              Extended examples to support dynamic memory instrumentation.
  * 16Mar2015 Support up to 512 params in Intel KMP OpenMP runtime

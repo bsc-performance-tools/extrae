@@ -1364,6 +1364,24 @@ int merger_post (int numtasks, int taskid)
 			Labels_loadSYMfile (taskid, FALSE, 0, 0, get_merge_SymbolFileName(), TRUE);
 	}
 
+	{
+		fprintf (stdout, "mpi2prv: Checking for target directory existance...");
+		char *dirn = dirname(strdup(strip(get_merge_OutputTraceName())));
+		if (!directory_exists(dirn))
+		{
+			fprintf (stdout, " does not exist. Creating ...");
+			if (!mkdir_recursive(dirn))
+			{
+				fprintf (stdout, " failed to create (%s)!\n", dirn);
+				exit (-1);
+			}
+			else
+				fprintf (stdout, " done\n");
+		}
+		else
+			fprintf (stdout, " exists, ok!\n");
+	}
+
 	if (get_option_merge_ParaverFormat())
 		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
 			nTraces, InputTraces, get_option_merge_NumApplications(),

@@ -430,7 +430,7 @@ unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
  **      Author : HSG
  **      Description : Checks whether a file exists
  ******************************************************************************/
-int file_exists (char *fname)
+int file_exists (const char *fname)
 {
 #if defined(HAVE_ACCESS)
 	return access (fname, F_OK) == 0;
@@ -459,7 +459,7 @@ int file_exists (char *fname)
  **      Author : HSG
  **      Description : Checks whether a directory exists
  ******************************************************************************/
-int directory_exists (char *fname)
+int directory_exists (const char *fname)
 {
 #if defined(HAVE_STAT)
 	struct stat sb;
@@ -475,7 +475,7 @@ int directory_exists (char *fname)
  **      Author : HSG
  **      Description : make a recursive recursively
  ******************************************************************************/
-int mkdir_recursive (char *path)
+int mkdir_recursive (const char *path)
 {
 	struct stat sb;
 
@@ -488,11 +488,7 @@ int mkdir_recursive (char *path)
 		/* dirname may modify its parameter */
 		original_path = strdup (path);
 
-#if defined(OS_FREEBSD)
-		dir = dirname ((const char*) original_path);
-#else
 		dir = dirname (original_path);
-#endif
 
 		if ((strcmp (dir, ".") != 0) && (strcmp (dir, "/") != 0))
 			result = mkdir_recursive(dir)?mkdir (path, 0755) == 0 : 0;

@@ -73,9 +73,9 @@ void append_from_to_file (const char *source, const char *destination);
 void rename_or_copy (char *origen, char *desti);
 unsigned long long getTimeFromStr (char *time, char *envvar, int rank);
 unsigned long long getFactorValue (char *value, char *ref, int rank);
-int mkdir_recursive (char *path);
-int file_exists (char *file);
-int directory_exists (char *file);
+int mkdir_recursive (const char *path);
+int file_exists (const char *file);
+int directory_exists (const char *file);
 
 #if defined(__cplusplus)
 }
