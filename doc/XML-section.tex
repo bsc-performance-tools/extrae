@@ -143,7 +143,7 @@ The file contains a list of functions to be instrumented by \TRACE. There are di
     # nm -a pi | grep pi_kernel
     00000000004005ed T pi_kernel
   \end{verbatim}
-  and add {\tt 4005ed\#pi\_kernel} into the function list.
+  and add {\tt 00000000004005ed \# pi\_kernel} into the function list.
 \end{itemize}
 
 The {\tt exclude-automatic-functions} attribute is used only by the DynInst instrumenter. By setting this attribute to {\tt yes} the instrumenter will avoid automatically instrumenting the routines that either call OpenMP outlined routines (i.e. routines with OpenMP pragmas) or call CUDA kernels.
