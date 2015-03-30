@@ -292,7 +292,7 @@ Build and installation commands:
 \graybox{{\tt MP\_COMPILER=gcc make\\
 make install}}
 
-\subsubsection{Compiling in Hornet / Cray XC40 system}
+\subsubsection{Compiling Extrae 3.0 in Hornet / Cray XC40 system}
 
 Configuration command, enabling MPI, PAPI and online analysis over MRNet.
 
@@ -302,6 +302,23 @@ Build and installation commands:
 
 \graybox{{\tt make\\
 make install}}
+
+\subsubsection{Compiling Extrae 3.0 in Shaheen II / Cray XC40 system}
+
+With the following modules loaded
+
+\graybox{{\tt module swap PrgEnv-XXX/YYY PrgEnv-cray/5.2.40 \\
+module load cray-mpich}}
+
+Configuration command, enabling MPI, PAPI with the following modules loaded
+
+\graybox{{\tt./configure --prefix=\$\{PREFIX\} --with-mpi=/opt/cray/mpt/7.1.1/gni/mpich2-cray/83 --with-binary-type=64 --with-unwind=/home/markomg/lib--without-dyninst --disable-xmltest --with-bfd=/opt/cray/cce/default/cray-binutils --with-liberty=/opt/cray/cce/default/cray-binutils --enable-sampling --enable-shared=no --with-papi=/opt/cray/papi/5.3.2.1}}
+
+Build and installation commands:
+
+\graybox{{\tt make\\
+make install}}
+
 
 \section{Knowing how a package was configured}
 
