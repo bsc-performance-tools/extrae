@@ -1364,6 +1364,7 @@ int merger_post (int numtasks, int taskid)
 			Labels_loadSYMfile (taskid, FALSE, 0, 0, get_merge_SymbolFileName(), TRUE);
 	}
 
+	if (taskid == 0)
 	{
 		fprintf (stdout, "mpi2prv: Checking for target directory existance...");
 		char *dirn = dirname(strdup(strip(get_merge_OutputTraceName())));
