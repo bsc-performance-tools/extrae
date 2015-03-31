@@ -285,12 +285,12 @@ void NAME_ROUTINE_C2F(mpi_finalize) (MPI_Fint *ierror)
  ***  MPI_BSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_bsend__,mpi_bsend_,MPI_BSEND,mpi_bsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_bsend__,mpi_bsend_,MPI_BSEND,mpi_bsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_bsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_bsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror) 
 #else
-void NAME_ROUTINE_C2F(mpi_bsend) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_bsend) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
@@ -319,12 +319,12 @@ void NAME_ROUTINE_C2F(mpi_bsend) (MPI3_CONST void *buf, MPI_Fint *count,
  ***  MPI_SSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_ssend__,mpi_ssend_,MPI_SSEND,mpi_ssend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_ssend__,mpi_ssend_,MPI_SSEND,mpi_ssend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_ssend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_ssend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -351,12 +351,12 @@ void NAME_ROUTINE_C2F(mpi_ssend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fin
  ***  MPI_RSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_rsend__,mpi_rsend_,MPI_RSEND,mpi_rsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_rsend__,mpi_rsend_,MPI_RSEND,mpi_rsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_rsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_rsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_rsend) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_rsend) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
@@ -383,12 +383,12 @@ void NAME_ROUTINE_C2F(mpi_rsend) (MPI3_CONST void *buf, MPI_Fint *count,
  ***  MPI_Send
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_send__,mpi_send_,MPI_SEND,mpi_send,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_send__,mpi_send_,MPI_SEND,mpi_send,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_send) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_send) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_send) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_send) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
@@ -416,13 +416,13 @@ void NAME_ROUTINE_C2F(mpi_send) (MPI3_CONST void *buf, MPI_Fint *count,
  ***  MPI_IBSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_ibsend__,mpi_ibsend_,MPI_IBSEND,mpi_ibsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_ibsend__,mpi_ibsend_,MPI_IBSEND,mpi_ibsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_ibsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_ibsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
@@ -451,13 +451,13 @@ void NAME_ROUTINE_C2F(mpi_ibsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fi
  ***  MPI_ISend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_isend__,mpi_isend_,MPI_ISEND,mpi_isend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_isend__,mpi_isend_,MPI_ISEND,mpi_isend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_isend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_isend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
@@ -486,13 +486,13 @@ void NAME_ROUTINE_C2F(mpi_isend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fin
  ***  MPI_ISSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_issend__,mpi_issend_,MPI_ISSEND,mpi_issend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_issend__,mpi_issend_,MPI_ISSEND,mpi_issend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_issend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_issend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_issend) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_issend) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
@@ -521,13 +521,13 @@ void NAME_ROUTINE_C2F(mpi_issend) (MPI3_CONST void *buf, MPI_Fint *count,
  ***  MPI_IRSend
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_irsend__,mpi_irsend_,MPI_IRSEND,mpi_irsend,(MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_irsend__,mpi_irsend_,MPI_IRSEND,mpi_irsend,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_irsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_irsend) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
@@ -627,13 +627,13 @@ void NAME_ROUTINE_C2F(mpi_irecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
  ***  MPI_Reduce
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_reduce__,mpi_reduce_,MPI_REDUCE,mpi_reduce,(MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_reduce__,mpi_reduce_,MPI_REDUCE,mpi_reduce,(void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_reduce) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_reduce) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
@@ -679,13 +679,13 @@ void NAME_ROUTINE_C2F(mpi_reduce) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_
  ***  MPI_Reduce_scatter
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_reduce_scatter__,mpi_reduce_scatter_,MPI_REDUCE_SCATTER,mpi_reduce_scatter,(MPI3_CONST void *sendbuf, void *recvbuf, MPI3_CONST MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_reduce_scatter__,mpi_reduce_scatter_,MPI_REDUCE_SCATTER,mpi_reduce_scatter,(void *sendbuf, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_reduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf, MPI3_CONST MPI_Fint *recvcounts,
+void NAME_ROUTINE_F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf, MPI_Fint *recvcounts,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_reduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf,
-	MPI3_CONST MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
+	MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
 {
@@ -730,13 +730,13 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (MPI3_CONST void *sendbuf, void *recvb
  ***  MPI_AllReduce
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_allreduce__,mpi_allreduce_,MPI_ALLREDUCE,mpi_allreduce,(MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_allreduce__,mpi_allreduce_,MPI_ALLREDUCE,mpi_allreduce,(void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_allreduce) (MPI3_CONST void *sendbuf, void *recvbuf,
+void NAME_ROUTINE_F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_allreduce) (MPI3_CONST void *sendbuf, void *recvbuf,
+void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
 	MPI_Fint *ierror)
 #endif
@@ -1284,13 +1284,13 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
  ***  MPI_AllToAll
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_alltoall__,mpi_alltoall_,MPI_ALLTOALL,mpi_alltoall, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_alltoall__,mpi_alltoall_,MPI_ALLTOALL,mpi_alltoall, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_alltoall) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_alltoall) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1337,15 +1337,15 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (MPI3_CONST void *sendbuf, MPI_Fint *sendcou
  ***  MPI_AllToAllV
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_alltoallv__,mpi_alltoallv_,MPI_ALLTOALLV,mpi_alltoallv, (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount, MPI3_CONST MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_alltoallv__,mpi_alltoallv_,MPI_ALLTOALLV,mpi_alltoallv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
-	MPI3_CONST MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount,
-	MPI3_CONST MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
+void NAME_ROUTINE_F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
+	MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
-	MPI3_CONST MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount,
-	MPI3_CONST MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
+void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
+	MPI_Fint *rdispls, MPI_Fint *recvtype,	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
 	int result;
@@ -1389,13 +1389,13 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_F
  ***  MPI_Allgather
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_allgather__,mpi_allgather_,MPI_ALLGATHER,mpi_allgather, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_allgather__,mpi_allgather_,MPI_ALLGATHER,mpi_allgather, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_allgather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_allgather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1441,14 +1441,14 @@ void NAME_ROUTINE_C2F(mpi_allgather) (MPI3_CONST void *sendbuf, MPI_Fint *sendco
  ***  MPI_Allgatherv
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_allgatherv__,mpi_allgatherv_,MPI_ALLGATHERV,mpi_allgatherv, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_allgatherv__,mpi_allgatherv_,MPI_ALLGATHERV,mpi_allgatherv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_allgatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
+void NAME_ROUTINE_F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_allgatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
+void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -1495,13 +1495,13 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendc
  ***  MPI_Gather
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_gather__,mpi_gather_,MPI_GATHER,mpi_gather, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_gather__,mpi_gather_,MPI_GATHER,mpi_gather, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_gather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_gather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1547,14 +1547,14 @@ void NAME_ROUTINE_C2F(mpi_gather) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount
  ***  MPI_GatherV
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_gatherv__,mpi_gatherv_,MPI_GATHERV,mpi_gatherv, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_gatherv__,mpi_gatherv_,MPI_GATHERV,mpi_gatherv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_gatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
+void NAME_ROUTINE_F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_gatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, MPI3_CONST void *recvbuf, MPI3_CONST MPI_Fint *recvcount, MPI3_CONST MPI_Fint *displs,
+void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -1599,13 +1599,13 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcoun
  ***  MPI_Scatter
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_scatter__,mpi_scatter_,MPI_SCATTER,mpi_scatter,(MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_scatter__,mpi_scatter_,MPI_SCATTER,mpi_scatter,(void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_scatter) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_scatter) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
@@ -1651,14 +1651,14 @@ void NAME_ROUTINE_C2F(mpi_scatter) (MPI3_CONST void *sendbuf, MPI_Fint *sendcoun
  ***  MPI_ScatterV
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_scatterv__,mpi_scatterv_,MPI_SCATTERV,mpi_scatterv,(MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount, MPI3_CONST MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_scatterv__,mpi_scatterv_,MPI_SCATTERV,mpi_scatterv,(void *sendbuf, MPI_Fint *sendcount, MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_scatterv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
-	MPI3_CONST MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
+void NAME_ROUTINE_F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_scatterv) (MPI3_CONST void *sendbuf, MPI3_CONST MPI_Fint *sendcount,
-	MPI3_CONST MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
+void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
+	MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -1914,11 +1914,11 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
  ***  MPI_Comm_spawn
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_comm_spawn__,mpi_comm_spawn_,MPI_COMM_SPAWN,mpi_comm_spawn,(MPI3_CONST char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror ))
+MPI_F_SYMS(mpi_comm_spawn__,mpi_comm_spawn_,MPI_COMM_SPAWN,mpi_comm_spawn,(char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror ))
 
-void NAME_ROUTINE_F(mpi_comm_spawn) (MPI3_CONST char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+void NAME_ROUTINE_F(mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_comm_spawn) (MPI3_CONST char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+void NAME_ROUTINE_C2F(mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
 #endif
 {
 #if defined(ENABLE_LOAD_BALANCING)
@@ -1945,11 +1945,11 @@ void NAME_ROUTINE_C2F(mpi_comm_spawn) (MPI3_CONST char *command, char *argv, MPI
  ******************************************************************************/
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_comm_spawn_multiple__,mpi_comm_spawn_multiple_,MPI_COMM_SPAWN_MULTIPLE,mpi_comm_spawn_multiple,( MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI3_CONST MPI_Fint *array_of_maxprocs, MPI3_CONST MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror ))
+MPI_F_SYMS(mpi_comm_spawn_multiple__,mpi_comm_spawn_multiple_,MPI_COMM_SPAWN_MULTIPLE,mpi_comm_spawn_multiple,( MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror ))
 
-void NAME_ROUTINE_F(mpi_comm_spawn_multiple)   (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI3_CONST MPI_Fint *array_of_maxprocs, MPI3_CONST MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+void NAME_ROUTINE_F(mpi_comm_spawn_multiple)   (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI3_CONST MPI_Fint *array_of_maxprocs, MPI3_CONST MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
+void NAME_ROUTINE_C2F(mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)
 #endif
 {
 	int i, n_events = 0;
@@ -1981,14 +1981,14 @@ void NAME_ROUTINE_C2F(mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_
  *** MPI_Cart_create
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_cart_create__,mpi_cart_create_,MPI_CART_CREATE,mpi_cart_create, (MPI_Fint *comm_old, MPI_Fint *ndims, MPI3_CONST MPI_Fint *dims, MPI3_CONST MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_cart_create__,mpi_cart_create_,MPI_CART_CREATE,mpi_cart_create, (MPI_Fint *comm_old, MPI_Fint *ndims, MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
-	MPI3_CONST MPI_Fint *dims, MPI3_CONST MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
+	MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
 	MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
-	MPI3_CONST MPI_Fint *dims, MPI3_CONST MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
+	MPI_Fint *dims, MPI_Fint *periods, MPI_Fint *reorder, MPI_Fint *comm_cart,
 	MPI_Fint *ierror)
 #endif
 {
@@ -2017,12 +2017,12 @@ void NAME_ROUTINE_C2F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
  *** MPI_Cart_sub
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_cart_sub__,mpi_cart_sub_,MPI_CART_SUB,mpi_cart_sub, (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain_dims, MPI_Fint *comm_new, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_cart_sub__,mpi_cart_sub_,MPI_CART_SUB,mpi_cart_sub, (MPI_Fint *comm, MPI_Fint *remain_dims, MPI_Fint *comm_new, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_cart_sub) (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain_dims,
+void NAME_ROUTINE_F(mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI3_CONST MPI_Fint *remain_dims,
+void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror)
 #endif
 {
@@ -2242,13 +2242,13 @@ void NAME_ROUTINE_C2F(mpi_recv_init) (void *buf, MPI_Fint *count,
  ***  MPI_Send_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_send_init__,mpi_send_init_,MPI_SEND_INIT,mpi_send_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_send_init__,mpi_send_init_,MPI_SEND_INIT,mpi_send_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_send_init) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_send_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_send_init) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
@@ -2278,13 +2278,13 @@ void NAME_ROUTINE_C2F(mpi_send_init) (MPI3_CONST void *buf, MPI_Fint *count,
  ***  MPI_Bsend_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_bsend_init__,mpi_bsend_init_,MPI_BSEND_INIT,mpi_bsend_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_bsend_init__,mpi_bsend_init_,MPI_BSEND_INIT,mpi_bsend_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_bsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_bsend_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_bsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
@@ -2314,13 +2314,13 @@ void NAME_ROUTINE_C2F(mpi_bsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
  ***  MPI_Rsend_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_rsend_init__,mpi_rsend_init_,MPI_RSEND_INIT,mpi_rsend_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_rsend_init__,mpi_rsend_init_,MPI_RSEND_INIT,mpi_rsend_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_rsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_rsend_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_rsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
@@ -2350,13 +2350,13 @@ void NAME_ROUTINE_C2F(mpi_rsend_init) (MPI3_CONST void *buf, MPI_Fint *count,
  ***  MPI_Ssend_init
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_ssend_init__,mpi_ssend_init_,MPI_SSEND_INIT,mpi_ssend_init, (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_ssend_init__,mpi_ssend_init_,MPI_SSEND_INIT,mpi_ssend_init, (void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_ssend_init) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_ssend_init) (MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype,
+void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror)
 #endif
@@ -2386,12 +2386,12 @@ void NAME_ROUTINE_C2F(mpi_ssend_init) (MPI3_CONST void *buf, MPI_Fint *count, MP
  ***  MPI_Scan
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_scan__,mpi_scan_,MPI_SCAN,mpi_scan, (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_scan__,mpi_scan_,MPI_SCAN,mpi_scan, (void *sendbuf, void *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_scan) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_scan) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
@@ -2435,14 +2435,14 @@ void NAME_ROUTINE_C2F(mpi_scan) (MPI3_CONST void *sendbuf, void *recvbuf, MPI_Fi
  ***  MPI_Sendrecv
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_sendrecv__,mpi_sendrecv_,MPI_SENDRECV,mpi_sendrecv, (MPI3_CONST void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr))
+MPI_F_SYMS(mpi_sendrecv__,mpi_sendrecv_,MPI_SENDRECV,mpi_sendrecv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr))
 
-void NAME_ROUTINE_F(mpi_sendrecv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf,
 	MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
 #else
-void NAME_ROUTINE_C2F(mpi_sendrecv) (MPI3_CONST void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, void *recvbuf,
 	MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
@@ -2639,12 +2639,12 @@ void NAME_ROUTINE_C2F(mpi_file_read_all) (MPI_File *fh, void *buf,
  ***  MPI_File_write
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write__,mpi_file_write_,MPI_FILE_WRITE,mpi_file_write, (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write__,mpi_file_write_,MPI_FILE_WRITE,mpi_file_write, (MPI_File *fh, void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_file_write) (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #endif
 {
@@ -2670,12 +2670,12 @@ void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, MPI3_CONST void *buf, MPI_F
  ***  MPI_File_write_all
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write_all__,mpi_file_write_all_,MPI_FILE_WRITE_ALL,mpi_file_write_all, (MPI_File *fh, MPI3_CONST void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_all__,mpi_file_write_all_,MPI_FILE_WRITE_ALL,mpi_file_write_all, (MPI_File *fh, void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_file_write_all) (MPI_File *fh, MPI3_CONST void *buf,
+void NAME_ROUTINE_F(mpi_file_write_all) (MPI_File *fh, void *buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, MPI3_CONST void *buf,
+void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, void *buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)
 #endif
 {
@@ -2769,14 +2769,14 @@ void NAME_ROUTINE_C2F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
  ***  MPI_file_write_at
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write_at__,mpi_file_write_at_,MPI_FILE_WRITE_AT,mpi_file_write_at, (MPI_File *fh, MPI_Offset *offset, MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_at__,mpi_file_write_at_,MPI_FILE_WRITE_AT,mpi_file_write_at, (MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
-	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
-	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #endif
 {
@@ -2803,14 +2803,14 @@ void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
  ***  MPI_File_write_at_all
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
-MPI_F_SYMS(mpi_file_write_at_all__,mpi_file_write_at_all_,MPI_FILE_WRITE_AT_ALL,mpi_file_write_at_all,(MPI_File *fh, MPI_Offset *offset, MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_file_write_at_all__,mpi_file_write_at_all_,MPI_FILE_WRITE_AT_ALL,mpi_file_write_at_all,(MPI_File *fh, MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror))
 
 void NAME_ROUTINE_F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
-	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #else
 void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
-	MPI3_CONST void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror)
 #endif
 {
@@ -3055,13 +3055,13 @@ void NAME_ROUTINE_C2F(mpi_get)(MPI_Fint *origin_addr, MPI_Fint *origin_count,
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 /* FIXME: origin_addr is defined as void * in MPI3 and previous versions, it must be reviewed!!! */
-MPI_F_SYMS(mpi_put__,mpi_put_,MPI_PUT,mpi_put,(MPI3_CONST void *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror))
+MPI_F_SYMS(mpi_put__,mpi_put_,MPI_PUT,mpi_put,(void *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror))
 
-void NAME_ROUTINE_F(mpi_put)(MPI3_CONST void *origin_addr, MPI_Fint *origin_count,
+void NAME_ROUTINE_F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
 	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_put)(MPI3_CONST void *origin_addr, MPI_Fint *origin_count,
+void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 	MPI_Fint *origin_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
 	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
 #endif

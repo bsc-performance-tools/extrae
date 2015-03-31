@@ -703,12 +703,12 @@ static int MPI_Generate_Task_File_List (char **node_list)
 
 
 /******************************************************************************
- ***  MPI_Generate_Spawns_List ()
+ ***  MPI_Generate_Spawns_List (void)
  ***  Prepares the name of the .spawn list, and broadcast the name of the file
  ***  to all tasks. The file will be later open and written exclusively by any 
  ***  task that does a spawn.
  ******************************************************************************/
-static void MPI_Generate_Spawns_List ()
+static void MPI_Generate_Spawns_List (void)
 {
   int namelen = 0;
 
@@ -1081,7 +1081,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
-        MPI_Generate_Spawns_List ();
+	MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -1176,7 +1176,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
-        MPI_Generate_Spawns_List ();
+	MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -4820,7 +4820,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
-        MPI_Generate_Spawns_List ();
+	MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -4914,7 +4914,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 	MPI_Generate_Task_File_List (TasksNodes);
-        MPI_Generate_Spawns_List ();
+	MPI_Generate_Spawns_List ();
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
