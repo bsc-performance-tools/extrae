@@ -97,9 +97,14 @@ void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 	while (bitmask != max_value)
 	{
 		unsigned bitvalue = bitmask.to_ulong();
-		if (checkCounters (omnicounters, counters, bitmask))
-			if (bitmask.count() > max_combination.count())
-				max_combination = bitmask;
+		if (bitmask.count() <= 8-omnicounters.size()) /* Supported per Extrae */
+			if (checkCounters (omnicounters, counters, bitmask))
+				if (bitmask.count() > max_combination.count())
+					max_combination = bitmask;
+
+		/* If reached Extrae's limit, stop here */
+		if (max_combination.count() == 8-omnicounters.size())
+			break;
 #if 0
 		string mystring = bitmask.to_string<char,string::traits_type,string::allocator_type>();
 		cout << "bits: " << mystring << endl;
@@ -259,6 +264,12 @@ int main (int argc, char *argv[])
 			addCounters (argv[i], Counters);
 
 		i++;
+	}
+
+	if (omnipresentCounters.size() >= 8)
+	{
+		cerr << "Sorry, Extrae is limited to 8 performance counters and you have requested " << omnipresentCounters.size() << " omnipresent counters..." << endl;
+		exit (-1);
 	}
 
 	vector<string>::iterator it;
