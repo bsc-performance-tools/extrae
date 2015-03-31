@@ -6,12 +6,16 @@ CFLAGS = -O -g -I $(EXTRAE_HOME)/include
 FFLAGS = -O -g -I $(EXTRAE_HOME)/include
 LFLAGS = -Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -L$(EXTRAE_HOME)/lib -lseqtrace
 
-TARGETS = pi pi_instrumented pi_instrumentedf
+TARGETS = pi pi_instrumented pi_instrumentedf pi_instrumented_functions
 
 targets: $(TARGETS)
 
 pi:	pi.c
 	$(CC) $(CFLAGS) pi.c -o pi
+
+pi_instrumented_functions:	pi.c
+	$(CC) $(CFLAGS) -finstrument-functions pi.c -o pi_instrumented_functions
+	nm pi_instrumented_functions | grep pi_kernel | sed s/T/#/ > list-instrumented-functions
 
 pi_instrumented:	pi_instrumented.c
 	$(CC) $(CFLAGS) pi_instrumented.c -o pi_instrumented $(LFLAGS)
