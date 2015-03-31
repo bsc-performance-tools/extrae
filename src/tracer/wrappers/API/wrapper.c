@@ -1394,7 +1394,7 @@ int Extrae_Allocate_Task_Bitmap (int size)
 	return 0;
 }
 
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) && !defined(OMPT_INSTRUMENTATION)
 static int getnumProcessors (void)
 {
 	int numProcessors;
@@ -1412,7 +1412,7 @@ static int getnumProcessors (void)
 
 	return numProcessors;
 }
-#endif /* OMP_SUPPORT */
+#endif /* OMP_SUPPORT && !OMPT_INSTRUMENTATION */
 
 #if defined(PTHREAD_SUPPORT)
 
@@ -1518,10 +1518,10 @@ void Backend_setNumTentativeThreads (int numofthreads)
 
 int Backend_preInitialize (int me, int world_size, char *config_file, int forked)
 {
-	int i;
+	unsigned u;
 	int runningInDynInst = FALSE;
 	char trace_sym[TMP_DIR];
-#if defined(OMP_SUPPORT)
+#if defined(OMP_SUPPORT) && !defined(OMPT_INSTRUMENTATION)
 	char *omp_value;
 	char *new_num_omp_threads_clause;
 	int numProcessors;
@@ -1594,8 +1594,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #endif
 
 #if defined(OMP_SUPPORT)
+# if !defined(OMPT_INSTRUMENTATION)
 
-#if  !defined(OMPT_INSTRUMENTATION)
 	Extrae_OpenMP_init(me);
 
 	/* Obtain the number of runnable threads in this execution.
@@ -1645,7 +1645,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		putenv (new_num_omp_threads_clause);
 		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 	}
-# endif /* OMP_INSTRUMENTATION */
+# endif /* OMPT_INSTRUMENTATION */
 
 #elif defined(SMPSS_SUPPORT) || defined(NANOS_SUPPORT) || defined (UPC_SUPPORT)
 	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
@@ -1715,10 +1715,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	Backend_ChangeNumberOfThreads_InInstrumentation (get_maximum_NumOfThreads());
 
 	/* Remove the locals .sym file */
-	for (i = 0; i < get_maximum_NumOfThreads(); i++)
+	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 	{
 		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
-		  appl_name, getpid(), Extrae_get_initial_TASKID(), i, EXT_SYM);
+		  appl_name, getpid(), Extrae_get_initial_TASKID(), u, EXT_SYM);
 		if (file_exists (trace_sym))
 			unlink (trace_sym);
 	}
@@ -1747,7 +1747,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 			HWC_Definition_t *hwc_defs = HWCBE_GET_COUNTER_DEFINITIONS(&count);
 			if (hwc_defs != NULL)
 			{
-				unsigned u = 0;
+				u = 0;
 				while (u < count)
 				{
 					Extrae_AddTypeValuesEntryToGlobalSYM ('H', hwc_defs[u].event_code,
@@ -1912,6 +1912,7 @@ static int GetTraceOptions (void)
 
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list)
 {
+	unsigned u;
 	int i;
 	unsigned long long *StartingTimes=NULL, *SynchronizationTimes=NULL;
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
@@ -2024,8 +2025,8 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	setSamplingEnabled (TRUE);
 
 	/* We leave... so, we're no longer in instrumentatin from this point */
-	for (i = 0; i < get_maximum_NumOfThreads(); i++)
-		Backend_setInInstrumentation (i, FALSE);
+	for (u = 0; u < get_maximum_NumOfThreads(); u++)
+		Backend_setInInstrumentation (u, FALSE);
 
 	EXTRAE_SET_INITIALIZED(TRUE);
 
@@ -2063,12 +2064,10 @@ char *Get_TemporalDir (int task)
 
 void Backend_Finalize_close_files(void)
 {
-  int thread;
+	unsigned thread;
 
-  for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
-  {
-    Backend_Finalize_close_mpits( getpid(), thread, FALSE );
-  }	
+	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
+		Backend_Finalize_close_mpits( getpid(), thread, FALSE );
 }
 
 static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
@@ -2375,7 +2374,7 @@ void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 	}
 }
 
-void Backend_Enter_Instrumentation (unsigned Nevents)
+void Backend_Enter_Instrumentation (int Nevents)
 {
 	unsigned thread = THREADID;
 	UINT64 current_time;

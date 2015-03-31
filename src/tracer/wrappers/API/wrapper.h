@@ -228,7 +228,7 @@ void Backend_Flush_pThread (pthread_t t);
 
 iotimer_t Backend_Get_Last_Enter_Time (void);
 iotimer_t Backend_Get_Last_Leave_Time (void);
-void Backend_Enter_Instrumentation (unsigned Nevents);
+void Backend_Enter_Instrumentation (int Nevents);
 void Backend_Leave_Instrumentation (void);
 int Backend_inInstrumentation (unsigned thread);
 void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);
