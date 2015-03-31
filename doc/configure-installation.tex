@@ -36,6 +36,8 @@ There are many options to be applied at configuration time for the instrumentati
 	Enable support for tracing SMP-superscalar.
 	\item {\tt --enable-nanos} \\
 	Enable support for tracing Nanos run-time.
+        \item {\tt --enable-online} \\
+        Enables the on-line analysis module.
 	\item {\tt --enable-pthread} \\
 	Enable support for tracing pthread library calls.
 	\item {\tt --enable-upc} \\
@@ -56,12 +58,16 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify the location of the BOOST package. This package is required when using the DynInst instrumentation with versions newer than 7.0.1.
 	\item {\tt --with-binutils=DIR} \\
 	Specify the location for the binutils package. The binutils package is necessary to translate addresses into source code references.
+        \item {\tt --with-clustering} \\
+        If the on-line analysis module is enabled (see --enable-online), specify where to find ClusteringSuite libraries and includes. This package enables support for on-line clustering analysis.
 	\item {\tt --with-cuda=DIR} \\
 	Enable support for tracing CUDA calls on nVidia hardware and needs to point to the CUDA SDK installation path. This instrumentation is only valid in binaries that use the shared version of the CUDA library. Interposition has to be done through the {\tt LD\_PRELOAD} mechanism. It is superseded by {\tt --with-cupti=DIR} which also supports instrmentation for static binaries.
 	\item {\tt --with-cupti=DIR} \\
 	Specify the location of the CUPTI libraries. CUPTI is used to instrument CUDA calls, and supersedes the {\tt --with-cuda}, although it still requires {\tt --with-cuda}.
 	\item {\tt --with-dyninst=DIR} \\
 	Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst. Also, newer versions of DynInst (versions after 7.0.1) require the BOOST package {\tt --with-boost}. This flag is mandatory. Requires a working installation of a C++ compiler.
+        \item {\tt --with-fft} \\
+        If the spectral analysis module is enabled (see --with-spectral), specify where to find FFT libraries and includes. This library is a dependency of the Spectral libraries.
 	\item {\tt --with-java=DIR} \\
 	Specify the location of JAVA development kit. This is necessary to create the connectors between \TRACE and Java applications.
 	\item {\tt --with-liberty=DIR} \\
@@ -72,15 +78,20 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
 	\item {\tt --with-mpi-name-mangling=OPTION} \\
 	Available options are: 0u, 1u, 2u, upcase and auto. Choose the Fortran name decoration (0, 1 or 2 underscores) for MPI symbols. Let OPTION be auto to automatically detect the name mangling.
+        \item {\tt --with-mrnetapp} \\
+        If the on-line analysis module is enabled (see --enable-online), specify where to find libMRNetApp libraries and includes. This library is a front-end of the MRNet library. 
 	\item {\tt --with-opencl=DIR} \\
 	Specify the location for the OpenCL package, including library and include directories.
+        \item {\tt --with-openshmem} \\
+        Specify the location of the OpenSHMEM installation to be used for the instrumentation package. 
 	\item {\tt --with-pacx=DIR} \\
 	Specify where PACX communication library can be find.
-	\item {\tt --with-unwind=DIR} \\
-	Specify where to find Unwind libraries and includes. This library is used to get callstack information on several architectures (including IA64 and Intel x86-64). This flag is mandatory.
 	\item {\tt --with-papi=DIR} \\
 	Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters. This flag is mandatory.
-
+        \item {\tt --with-spectral} \\
+        If the on-line analysis module is enabled (see --enable-online), specify where to find Spectral libraries and includes. This package enables support for on-line spectral analysis.
+	\item {\tt --with-unwind=DIR} \\
+	Specify where to find Unwind libraries and includes. This library is used to get callstack information on several architectures (including IA64 and Intel x86-64). This flag is mandatory.
 \end{itemize}
 
 \section{Build}
