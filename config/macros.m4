@@ -233,7 +233,7 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 			]
 		)
 
-		which dpkg-architecture 2> /dev/null
+		which dpkg-architecture &> /dev/null
 		if test "$?" -eq "0"; then
 			if test "${Selected_Binary_Type}" = "default" ; then
 				AC_MSG_CHECKING([the multiarch triplet through dpkg-architecture])
