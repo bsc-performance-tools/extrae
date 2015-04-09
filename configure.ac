@@ -436,10 +436,10 @@ fi
 AC_ARG_ENABLE(bfd-generate-addresses,
 	AC_HELP_STRING(
 		[--enable-bfd-generate-addresses],
-		[Generates information for data objects found in binaries (experimental, disabled by default)]
+		[Generates information for data objects found in binaries (experimental, enabled if --enable-instrument-dynamic-memory is enabled)]
 	),
 	[enable_bfd_generate_addresses="${enableval}"],
-	[enable_bfd_generate_addresses="no"]
+	[enable_bfd_generate_addresses="${enable_instrument_dynamic_memory}"]
 )
 if test "${enable_bfd_generate_addresses}" = "yes" ; then
 	AC_DEFINE([BFD_MANAGER_GENERATE_ADDRESSES], [1], [Determine if BFD must generate information for data objects in binary])
