@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 10Apr2015 Fixed bug in Python instrumentation. The signature of the
+ Extrae_define_event_type receives parameters by reference.
  * 31Mar2015 Added configure options in the documentation regarding the on-line analysis and the instrumentation of OpenSHMEM.
  + 31Mar2014 Add SEQ example using -finstrument-functions
  * 30Mar2015 Create directory if target trace-file is in a directory that does not exist

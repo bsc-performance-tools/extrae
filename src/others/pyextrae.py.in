@@ -5,7 +5,7 @@ from xml.dom.minidom import parse
 import ctypes 
 from ctypes import cdll
 
-USRFUNC_EV = 60000019
+USRFUNC_EV = 60000100
 
 Initialized = False
 Traced_Functions = [] 
@@ -48,8 +48,11 @@ def pyEx_fini():
         values[i] = i
         description_values[i] = Traced_Functions[i-1]
 
-      Extrae.Extrae_define_event_type( USRFUNC_EV, description, nvalues, values, description_values )
-
+      Extrae.Extrae_define_event_type( ctypes.pointer(ctypes.c_uint(USRFUNC_EV)),
+                                       ctypes.c_char_p(description),
+                                       ctypes.pointer(ctypes.c_uint(nvalues)),
+                                       ctypes.pointer(values),
+                                       ctypes.pointer(description_values) )
     ### Finalize the tracing library
     Extrae.Extrae_fini()
 
