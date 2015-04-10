@@ -313,11 +313,17 @@ void Read_SPAWN_file (char *mpit_file, int current_ptask)
   if (file_exists(spawn_file_name))
   {
     /* Read the synchronization latency */
-    int i = 0;
-    FILE *fd = fopen(spawn_file_name, "r");
+    unsigned i;
+    FILE *fd;
     char line[256];
     unsigned long long SpawnSyncLatency = 0;
 
+    fd = fopen(spawn_file_name, "r");
+	if (fd == NULL)
+	{
+		fprintf (stderr, "mpi2prv: Fatal error! Cannot load spawn file '%s'\n", spawn_file_name);
+		exit (-1);
+	}
     fgets(line, sizeof(line), fd);
     sscanf(line, "%llu", &SpawnSyncLatency);
     fclose(fd);

@@ -96,7 +96,7 @@ unsigned Stack_Depth (mpi2prv_stack_t *s)
 	return s->count;
 }
 
-unsigned long long Stack_ValueAt (mpi2prv_stack_t *s, int pos)
+unsigned long long Stack_ValueAt (mpi2prv_stack_t *s, unsigned pos)
 {
 	if (pos < s->count)
 		return s->data[pos];

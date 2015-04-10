@@ -41,7 +41,7 @@ mpi2prv_stack_t * Stack_Init (void);
 void Stack_Push (mpi2prv_stack_t *s, unsigned long long v);
 void Stack_Pop (mpi2prv_stack_t *s);
 unsigned Stack_Depth (mpi2prv_stack_t *s);
-unsigned long long Stack_ValueAt (mpi2prv_stack_t *s, int pos);
+unsigned long long Stack_ValueAt (mpi2prv_stack_t *s, unsigned pos);
 unsigned long long Stack_Top (mpi2prv_stack_t *s);
 
 #endif /* MPI2PRV_STACK_H_INCLUDED */

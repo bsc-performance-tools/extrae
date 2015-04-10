@@ -157,7 +157,7 @@ int SortBySize (const void *t1, const void *t2)
   AssignCPUNode
 ***/
 
-struct Pair_NodeCPU *AssignCPUNode (int nfiles, struct input_t *files)
+struct Pair_NodeCPU *AssignCPUNode (unsigned nfiles, struct input_t *files)
 {
 	struct Pair_NodeCPU *result;
 	unsigned **nodefiles = NULL;

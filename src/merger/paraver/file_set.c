@@ -137,30 +137,21 @@ static int event_timing_sort (const void *e1, const void *e2)
 
 int isTaskInMyGroup (FileSet_t *fset, int ptask, int task)
 {
-	int i;
-
+	unsigned i;
 	
 	for (i = 0; i < fset->nfiles; i++)
-	{
 		if ((fset->files[i].ptask-1 == ptask) && (fset->files[i].task-1 == task))
-                {
 			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
 int inWhichGroup (int ptask, int task, FileSet_t *fset)
 {
-	int i;
+	unsigned i;
 
 	for (i = 0; i < fset->num_input_files; i++)
-	{
 		if ((fset->input_files[i].ptask-1 == ptask) && (fset->input_files[i].task-1 == task))
-		{
 			return fset->input_files[i].InputForWorker;
-		}
-	}
 	return -1;
 }
 
@@ -420,7 +411,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 
 FileSet_t *Create_FS (unsigned long nfiles, struct input_t * IFiles, int idtask, int trace_format)
 {
-	int file;
+	unsigned long file;
 	FileSet_t *fset;
 	FileItem_t *fitem;
 
@@ -730,7 +721,7 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 {
 	unsigned long long total = 0;
 	PRVFileSet_t *prvfset = NULL;
-	int i;
+	unsigned i;
 
 	*num_of_events = total;
 
@@ -1271,7 +1262,7 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 	UINT64 *tmp_StartingTimes = NULL;
 	UINT64 *tmp_SynchronizationTimes = NULL;
 #endif
-	int i = 0;
+	unsigned i = 0;
 	int total_mpits = 0;
 	UINT64 *StartingTimes = NULL;
 	UINT64 *SynchronizationTimes = NULL;
