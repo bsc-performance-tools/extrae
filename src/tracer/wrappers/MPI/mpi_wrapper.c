@@ -2522,7 +2522,7 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	temps_inicial = LAST_READ_TIME;
 
 	if (*count > MAX_WAIT_REQUESTS)
-		fprintf (stderr, "PANIC: too many requests in mpi_waitany\n");
+		fprintf (stderr, "PANIC: too many requests in mpi_testany\n");
 	else
 		for (i = 0; i < *count; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
@@ -2593,7 +2593,7 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	temps_inicial = LAST_READ_TIME;
 
 	if (*incount > MAX_WAIT_REQUESTS)
-		fprintf (stderr, "PANIC: too many requests in mpi_waitsome\n");
+		fprintf (stderr, "PANIC: too many requests in mpi_testsome\n");
 	else
 		for (i = 0; i < *incount; i++)
 			save_reqs[i] = MPI_Request_f2c(array_of_requests[i]);
@@ -6052,7 +6052,7 @@ int MPI_Testall_C_Wrapper (int count, MPI_Request *array_of_requests, int *flag,
 	temps_inicial = LAST_READ_TIME;
 
 	if (count > MAX_WAIT_REQUESTS)
-		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitall\n");
+		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_testall\n");
 	memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
 
 #if defined(DEBUG_MPITRACE)
@@ -6133,7 +6133,7 @@ int MPI_Testany_C_Wrapper (int count, MPI_Request *array_of_requests,
 	temps_inicial = LAST_READ_TIME;
 
 	if (count > MAX_WAIT_REQUESTS)
-		fprintf (stderr, PACKAGE_NAME ": PANIC! too many requests in mpi_waitany\n");
+		fprintf (stderr, PACKAGE_NAME ": PANIC! too many requests in mpi_testany\n");
 	memcpy (save_reqs, array_of_requests, count * sizeof (MPI_Request));
 
 #if defined(DEBUG_MPITRACE)
@@ -6210,7 +6210,7 @@ int MPI_Testsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 	temps_inicial = LAST_READ_TIME;
 
 	if (incount > MAX_WAIT_REQUESTS)
-		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_waitsome\n");
+		fprintf (stderr, PACKAGE_NAME": PANIC! too many requests in mpi_testsome\n");
 
 	memcpy (save_reqs, array_of_requests, incount * sizeof (MPI_Request));
 
