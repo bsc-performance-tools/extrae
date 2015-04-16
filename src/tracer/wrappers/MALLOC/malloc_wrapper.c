@@ -236,6 +236,7 @@ void *realloc (void *p, size_t s)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_Realloc_Entry (p, s);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
 		Probe_Realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
