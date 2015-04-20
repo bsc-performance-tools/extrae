@@ -68,7 +68,7 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 
 
 // # define EMPTY_OMPT_CALLBACKS /* For Benchmarking purposes */
- #define DEBUG
+//  #define DEBUG
 // #define DEBUG_THREAD
 
 //*****************************************************************************
@@ -159,7 +159,6 @@ void Extrae_OMPT_unregister_ompt_thread_id (ompt_thread_id_t ompt_thid)
 	pthread_mutex_unlock (&mutex_thids);
 }
 
-#if 0
 unsigned Extrae_OMPT_threadid (void)
 {
 	ompt_thread_id_t thd = ompt_get_thread_id_fn();
@@ -203,17 +202,6 @@ unsigned Extrae_OMPT_threadid (void)
 	assert (1 != 1);
 	return 0;
 }
-#else
-
-int omp_get_thread_num (void);
-
-unsigned Extrae_OMPT_threadid (void)
-{
-	int thread = omp_get_thread_num();
-	printf ("thread = %d\n", thread);
-	return thread;
-}
-#endif
 
 
 #if defined(DEBUG)
