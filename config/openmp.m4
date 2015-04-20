@@ -78,14 +78,30 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		AC_ARG_WITH([libgomp-version],
 			AC_HELP_STRING(
 				[--with-libgomp-version@<:@=ARG@:>@],
-				[Specify version compatibility with libgomp. Valid values are: 4.2 (default), 4.9]
+				[Specify version compatibility with libgomp. Valid values are: 4.2, 4.9, auto (default)]
 			),
 			[libgomp_version="$withval"],
-			[libgomp_version="4.2"]
+			[libgomp_version="auto"]
 		)
-		if test "${libgomp_version}" != "4.2" -a \
-		   "${libgomp_version}" != "4.9" ; then
-			AC_MSG_ERROR([Invalid libgomp version '$libgomp_version'. Valid values for --with-libgomp_version are: 4.2 (default), 4.9])
+		if test "${libgomp_version}" = "auto"; then
+			AC_MSG_CHECKING([for libgomp version based on the compiler version])
+			if test "${ax_cv_c_compiler_vendor}" != "gnu" ; then
+				AC_MSG_ERROR([Cannot detect libgomp version from C compiler ($CC)])
+			else
+				if test ${_ax_c_compiler_version_major} -ge 5; then
+				  libgomp_version="4.9"
+				elif test ${_ax_c_compiler_version_major} -eq 4 -a ${_ax_c_compiler_version_minor} -ge 9; then
+				  libgomp_version="4.9"
+				elif test ${_ax_c_compiler_version_major} -eq 4 -a ${_ax_c_compiler_version_minor} -ge 2; then
+				  libgomp_version="4.2"
+				else
+				  AC_MSG_ERROR([C compiler does not seem to include libgomp, version too old?])
+				fi
+				AC_MSG_RESULT([${libgomp_version}])
+			fi
+		elif test "${libgomp_version}" != "4.2" -a \
+		          "${libgomp_version}" != "4.9"; then
+			AC_MSG_ERROR([Invalid libgomp version '$libgomp_version'. Valid values for --with-libgomp_version are: 4.2, 4.9, auto (default)])
 		fi
 	fi
 
@@ -114,7 +130,6 @@ AC_DEFUN([AX_HAVE_SYNC_FETCH_AND_ADD],
 		AC_MSG_RESULT([no])
 	fi
 ])
-
 
 # AX_OPENMP_SHOW_CONFIGURATION
 # --------------------

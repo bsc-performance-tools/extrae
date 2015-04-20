@@ -41,6 +41,7 @@
 #include "HardwareCounters.h"
 #include "communication_queues.h"
 #include "stack.h"
+#include "thread_dependencies.h"
 
 #define MAX_STATES 128
 
@@ -139,6 +140,9 @@ typedef struct task_st
 	int match_zone;
 	NewQueue_t *recv_queue;
 	NewQueue_t *send_queue;
+
+	/* Arrangement of thread dependencies within the task level */
+	struct ThreadDependencies_st * thread_dependencies;
 
 	unsigned num_virtual_threads;
 	unsigned num_active_task_threads;

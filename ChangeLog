@@ -1,6 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 20Apr2015 --with-libgomp supports auto to determine the appropriate version from CC
+             Add OpenMP task-based statistics (instantiated, executed)
+             Add OMPT dependencies (MB project)
+             Freeing memory, reported from Valgrind
  * 10Apr2015 Fixed bug in Python instrumentation. The signature of the
  Extrae_define_event_type receives parameters by reference.
  * 31Mar2015 Added configure options in the documentation regarding the on-line analysis and the instrumentation of OpenSHMEM.

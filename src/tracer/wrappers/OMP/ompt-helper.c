@@ -43,6 +43,8 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 
 #include "ompt-helper.h"
 
+// #define NEED_MUTEX_TO_GET_TASKFUNCTION // This should not be necessary.
+
 /* Relation between parallel id and parallel function */
 typedef struct ompt_parallel_id_pf_st
 {
@@ -221,39 +223,28 @@ void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 	}
 }
 
-void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid, long long *taskctr)
+void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
+	int *is_implicit, long long *taskctr)
 {
 	unsigned u;
 	void *ptr = NULL;
 
+#if defined(NEED_MUTEX_TO_GET_TASKFUNCTION)
 	pthread_mutex_lock (&mutex_tid_tf);
+#endif
 	for (u = 0; u < n_allocated_ompt_tids_tf; u++)
 		if (ompt_tids_tf[u].tid == ompt_tid)
 		{
 			ptr = ompt_tids_tf[u].tf;
+			if (is_implicit != NULL)
+				*is_implicit = ompt_tids_tf[u].implicit;
 			if (taskctr != NULL)
 				*taskctr = ompt_tids_tf[u].task_ctr;
 			break;
 		}
+#if defined(NEED_MUTEX_TO_GET_TASKFUNCTION)
 	pthread_mutex_unlock (&mutex_tid_tf);
+#endif
 
 	return ptr;
 }
-
-int Extrae_OMPT_get_tf_task_id_is_implicit (ompt_task_id_t ompt_tid)
-{
-	unsigned u;
-	int res = (1 == 0);
-
-	pthread_mutex_lock (&mutex_tid_tf);
-	for (u = 0; u < n_allocated_ompt_tids_tf; u++)
-		if (ompt_tids_tf[u].tid == ompt_tid)
-		{
-			res = ompt_tids_tf[u].implicit;
-			break;
-		}
-	pthread_mutex_unlock (&mutex_tid_tf);
-
-	return res;
-}
-

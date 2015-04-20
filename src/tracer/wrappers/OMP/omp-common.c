@@ -34,6 +34,12 @@ static char UNUSED rcsid[] = "$Id$";
 #include "omp-common.h"
 #include "wrapper.h"
 
+#if !defined(HAVE__SYNC_ADD_AND_FETCH)
+# ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+# endif
+#endif
+
 void Extrae_OpenMP_Join_NoWait_Entry (void)
 {
 	Backend_Enter_Instrumentation (2);
@@ -415,4 +421,58 @@ void Extrae_OMPT_Taskgroup_Exit (void)
 	Backend_Leave_Instrumentation();
 }
 
+void Extrae_OMPT_OpenMP_TaskUF_Entry (UINT64 uf, UINT64 taskid)
+{
+	Backend_Enter_Instrumentation (2);
+	Probe_OMPT_OpenMP_TaskUF_Entry (uf, taskid);
+}
+
+void Extrae_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid)
+{
+	Probe_OMPT_OpenMP_TaskUF_Exit (taskid);
+	Backend_Leave_Instrumentation();
+}
+
+void Extrae_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id,
+	int type, void *data)
+{
+	Probe_OMPT_dependence (pred_task_id, succ_task_id, type, data);
+}
+
+static volatile unsigned Extrae_OpenMP_numInstantiatedTasks = 0;
+static volatile unsigned Extrae_OpenMP_numExecutedTasks = 0;
+#if !defined(HAVE__SYNC_FETCH_AND_ADD)
+static pthread_mutex_t Extrae_OpenMP_numInstantiatedTasks_mtx =
+	PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t Extrae_OpenMP_numExecutedTasks_mtx =
+	PTHREAD_MUTEX_INITIALIZER;
+#endif
+
+void Extrae_OpenMP_Notify_NewInstantiatedTask (void)
+{
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+	__sync_fetch_and_add (&Extrae_OpenMP_numInstantiatedTasks, 1);
+#else
+	pthread_mutex_lock (&Extrae_OpenMP_numInstantiatedTasks_mtx);
+	Extrae_OpenMP_numInstantiatedTasks++;
+	pthread_mutex_unlock (&Extrae_OpenMP_numInstantiatedTasks_mtx);
+#endif
+}
+
+void Extrae_OpenMP_Notify_NewExecutedTask (void)
+{
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+	__sync_fetch_and_add (&Extrae_OpenMP_numExecutedTasks, 1);
+#else
+	pthread_mutex_lock (&Extrae_OpenMP_numExecutedTasks_mtx);
+	Extrae_OpenMP_numExecutedTasks++;
+	pthread_mutex_unlock (&Extrae_OpenMP_numExecutedTasks_mtx);
+#endif
+}
+
+void Extrae_OpenMP_EmitTaskStatistics (void)
+{
+	Probe_OpenMP_Emit_numInstantiatedTasks (Extrae_OpenMP_numInstantiatedTasks);
+	Probe_OpenMP_Emit_numExecutedTasks (Extrae_OpenMP_numExecutedTasks);
+}
 

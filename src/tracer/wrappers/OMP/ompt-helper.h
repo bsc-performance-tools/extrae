@@ -44,8 +44,8 @@ void * Extrae_OMPT_get_pf_task_id (ompt_task_id_t ompt_tid);
 
 void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, int implicit);
 void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid);
-void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid, long long *taskctr);
-int Extrae_OMPT_get_tf_task_id_is_implicit (ompt_task_id_t ompt_tid);
+void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
+	int *is_implicit, long long *taskctr);
 
 #endif /* OMPT_HELPER_H_INCLUDED */
 

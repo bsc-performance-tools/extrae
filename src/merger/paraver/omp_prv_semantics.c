@@ -281,29 +281,25 @@ static int Task_Event (
 {
 	UNREFERENCED_PARAMETER(fset);
 
-	Switch_State (STATE_OVHD, (Get_EvValue (event) != EVT_END), ptask, task, thread);
-
-	trace_paraver_state (cpu, ptask, task, thread, time);
-	// Don't need to emit this, it is subsumed bt TASKFUNC_INST_EV
-	// trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-
+#if defined(HAVE_BFD)
 	/* Add the instantiated task to the list of known addresses, and emit its
 	   reference for matching in final tracefile */
 
-#if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
 		AddressCollector_Add (&CollectedAddresses, ptask, task,
-		  Get_EvValue (event), ADDR2OMP_FUNCTION);
+		  Get_EvValue(event),ADDR2OMP_FUNCTION);
 		AddressCollector_Add (&CollectedAddresses, ptask, task,
-		  Get_EvValue (event), ADDR2OMP_LINE);
+		  Get_EvValue(event), ADDR2OMP_LINE);
 	}
 #endif
 
+	Switch_State (STATE_OVHD, Get_EvValue(event) != EVT_END, ptask, task, thread);
+	trace_paraver_state (cpu, ptask, task, thread, time);
 	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_INST_EV,
-	  (Get_EvValue(event) == EVT_BEGIN) ? Get_EvParam(event) : 0);
+		Get_EvValue(event));
 	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_INST_LINE_EV,
-	  (Get_EvValue(event) == EVT_BEGIN) ? Get_EvParam(event) : 0);
+		Get_EvValue(event));
 
 	return 0;
 }
@@ -419,7 +415,7 @@ static int TaskID_Event (event_t * event,
 }
 
 static int OMPT_TaskGroup_Event (event_t *event,
-	unsigned long long current_time,
+	unsigned long long time,
 	unsigned cpu,
 	unsigned ptask,
 	unsigned task,
@@ -427,8 +423,181 @@ static int OMPT_TaskGroup_Event (event_t *event,
 	FileSet_t *fset)
 {
 	UNREFERENCED_PARAMETER(fset);
-	trace_paraver_event (cpu, ptask, task, thread, current_time,
+
+	trace_paraver_event (cpu, ptask, task, thread, time,
 	  TASKGROUP_INGROUP_DEEP_EV, Get_EvValue (event));
+
+	return 0;
+}
+
+static int OMPT_dependence_Event (event_t *event,
+	unsigned long long time,
+	unsigned cpu,
+	unsigned ptask,
+	unsigned task,
+	unsigned thread,
+	FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+	UNREFERENCED_PARAMETER(cpu);
+	UNREFERENCED_PARAMETER(time);
+	UNREFERENCED_PARAMETER(thread);
+
+	task_t *task_info = GET_TASK_INFO(ptask, task);
+
+	ThreadDependency_add (task_info->thread_dependencies, event);
+
+	return 0;
+}
+
+struct TaskFunction_Event_Info_SetPredecessor
+{
+	unsigned long long time;
+	unsigned cpu, ptask, task, thread;
+};
+
+struct TaskFunction_Event_Info_EmitDependencies
+{
+	unsigned long long time;
+	unsigned cpu, ptask, task, thread;
+	event_t *event;
+};
+
+static int TaskEvent_IfSetPredecessor (const void *dependency_event, void *userdata,
+	void **predecessordata)
+{
+	const event_t *depevent = (const event_t*) dependency_event;
+	struct TaskFunction_Event_Info_EmitDependencies *tfei =
+		(struct TaskFunction_Event_Info_EmitDependencies*) userdata;
+	event_t *checkevent = tfei->event;
+
+	if (Get_EvParam(checkevent) == Get_EvParam(depevent))
+	{
+		struct TaskFunction_Event_Info_SetPredecessor *tfeisp =
+		  (struct TaskFunction_Event_Info_SetPredecessor *)
+		    malloc (sizeof(struct TaskFunction_Event_Info_SetPredecessor));
+		if (tfeisp != NULL)
+		{
+			tfeisp->ptask = tfei->ptask;
+			tfeisp->task = tfei->task;
+			tfeisp->cpu = tfei->cpu;
+			tfeisp->thread = tfei->thread;
+			tfeisp->time = tfei->time;
+			*predecessordata = tfeisp;
+		}
+
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+static int TaskEvent_IfEmitDependencies (const void *dependency_event, 
+	const void *predecessor_data, const void *userdata)
+{
+	struct TaskFunction_Event_Info_EmitDependencies *tfei =
+		(struct TaskFunction_Event_Info_EmitDependencies*) userdata;
+	const event_t *depevent = (const event_t*) dependency_event;
+	const struct TaskFunction_Event_Info_SetPredecessor *preddata =
+	  (const struct TaskFunction_Event_Info_SetPredecessor *) predecessor_data;
+	event_t *checkevent = tfei->event;
+
+	if (Get_EvNParam(depevent, 1) == Get_EvNParam(checkevent, 0))
+	{
+		trace_paraver_communication (
+		  preddata->cpu, preddata->ptask, preddata->task,
+		  preddata->thread, preddata->thread, preddata->time, preddata->time,
+		  tfei->cpu, tfei->ptask, tfei->task, tfei->thread, tfei->thread,
+		  tfei->time, tfei->time,
+		  0, Get_EvValue(depevent),
+		  0, 0);
+	}
+
+	return 0;
+}
+
+static int OMPT_TaskFunction_Event (
+   event_t * event,
+   unsigned long long time,
+   unsigned int cpu,
+   unsigned int ptask, 
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	UNREFERENCED_PARAMETER(fset);
+
+#if defined(HAVE_BFD)
+	/* Add the instantiated task to the list of known addresses, and emit its
+	   reference for matching in final tracefile */
+
+	if (get_option_merge_SortAddresses())
+	{
+		AddressCollector_Add (&CollectedAddresses, ptask, task,
+		  Get_EvParam(event),ADDR2OMP_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, ptask, task,
+		  Get_EvParam(event), ADDR2OMP_LINE);
+	}
+#endif
+
+	Switch_State (STATE_RUNNING, Get_EvValue(event) != EVT_END, ptask, task, thread);
+
+	trace_paraver_state (cpu, ptask, task, thread, time);
+	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_EV,
+		Get_EvValue(event));
+	trace_paraver_event (cpu, ptask, task, thread, time, TASKFUNC_LINE_EV,
+		Get_EvValue(event));
+
+	if (Get_EvValue(event) == EVT_END)
+	{
+		task_t * task_info = GET_TASK_INFO(ptask, task);
+		struct TaskFunction_Event_Info_EmitDependencies data;
+		data.time = time;
+		data.cpu = cpu;
+		data.ptask = ptask;
+		data.task = task;
+		data.thread = thread;
+		data.event = event;
+
+		ThreadDependency_processAll_ifMatchSetPredecessor (
+		  task_info->thread_dependencies,
+		  TaskEvent_IfSetPredecessor,
+		  &data);
+	}
+	else
+	{
+		task_t * task_info = GET_TASK_INFO(ptask, task);
+		struct TaskFunction_Event_Info_EmitDependencies data;
+		data.time = time;
+		data.cpu = cpu;
+		data.ptask = ptask;
+		data.task = task;
+		data.thread = thread;
+		data.event = event;
+
+		ThreadDependency_processAll_ifMatchDelete (
+		  task_info->thread_dependencies,
+		  TaskEvent_IfEmitDependencies,
+		  &data);
+	}
+
+	return 0;
+}
+
+static int OMP_Stats_Event (
+   event_t * event,
+   unsigned long long time,
+   unsigned int cpu,
+   unsigned int ptask, 
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+	UNREFERENCED_PARAMETER(fset);
+
+	trace_paraver_event (cpu, ptask, task, thread, time,
+		OMP_STATS_BASE+Get_EvValue(event), Get_EvParam(event));
+
 	return 0;
 }
 
@@ -457,6 +626,9 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ TASKGROUP_END_EV, TaskGroup_Event },
 	{ TASKID_EV, TaskID_Event },
 	{ OMPT_TASKGROUP_IN_EV, OMPT_TaskGroup_Event },
+	{ OMPT_DEPENDENCE_EV, OMPT_dependence_Event },
+	{ OMPT_TASKFUNC_EV, OMPT_TaskFunction_Event },
+	{ OMP_STATS_EV, OMP_Stats_Event },
 	{ NULL_EV, NULL }
 };
 

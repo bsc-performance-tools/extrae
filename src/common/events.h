@@ -173,6 +173,13 @@ enum {
    MEMUSAGE_EVENTS_COUNT /* Total number of memusage events */
 };
 
+#define OMP_STATS_BASE           65000000
+enum {
+	OMP_NUM_TASKS_INSTANTIATED = 0,
+	OMP_NUM_TASKS_EXECUTED,
+	OMP_STATS_EVENTS_COUNT
+};
+
 #define MPI_STATS_BASE           54000000
 enum {
    /* Original stats */
@@ -483,6 +490,9 @@ enum {
 #define OMPT_SINGLE_EV           60000055
 #define OMPT_MASTER_EV           60000056
 #define OMPT_TASKGROUP_IN_EV     60000057
+#define OMPT_DEPENDENCE_EV       60000058
+#define OMPT_TASKFUNC_EV         60000059
+#define OMP_STATS_EV             60000060
 
 /******************************************************************************
  *   User events to trace Pthread/TRT parallel execution.

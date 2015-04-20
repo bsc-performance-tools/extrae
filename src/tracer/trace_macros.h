@@ -140,17 +140,17 @@
 	if (tracejant && TracingBitmap[TASKID]) \
 	{ \
 		unsigned i, thread_id=THREADID; \
-		event_t events_list[count]; \
+		event_t evts[count]; \
 \
 		for (i=0; i<count; i++) \
 		{ \
-			events_list[i].time = evttime; \
-			events_list[i].event = evttypes[i]; \
-			events_list[i].value = evtvalues[i]; \
-			events_list[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
-			HARDWARE_COUNTERS_READ(thread_id, events_list[i], FALSE); \
+			evts[i].time = evttime; \
+			evts[i].event = evttypes[i]; \
+			evts[i].value = evtvalues[i]; \
+			evts[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
+			HARDWARE_COUNTERS_READ(thread_id, evts[i], FALSE); \
 		} \
-		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), events_list, count); \
+		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count); \
 	} \
 }
 #else
@@ -159,17 +159,17 @@
 	if (tracejant && TracingBitmap[TASKID])                                          \
 	{                                                                                \
 		unsigned i, thread_id=THREADID;                                                \
-		event_t events_list[count];                                                    \
+		event_t evts[count];                                                    \
                                                                                    \
 		for (i=0; i<count; i++)                                                        \
 		{                                                                              \
-			events_list[i].time = evttime;                                               \
-			events_list[i].event = evttypes[i];                                          \
-			events_list[i].value = evtvalues[i];                                         \
-			events_list[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
-			HARDWARE_COUNTERS_READ(thread_id, events_list[i], FALSE);                    \
+			evts[i].time = evttime;                                               \
+			evts[i].event = evttypes[i];                                          \
+			evts[i].value = evtvalues[i];                                         \
+			evts[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
+			HARDWARE_COUNTERS_READ(thread_id, evts[i], FALSE);                    \
 		}                                                                              \
-		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), events_list, count);     \
+		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);     \
 	}                                                                                \
 }
 #endif
@@ -180,17 +180,17 @@
 	if (tracejant && TracingBitmap[TASKID] && count > 0)                             \
 	{                                                                                \
 		unsigned i, thread_id=THREADID;                                                \
-		event_t events_list[count];                                                    \
+		event_t evts[count];                                                    \
                                                                                    \
 		for (i=0; i<count; i++)                                                        \
 		{                                                                              \
-			events_list[i].time = evttime;                                               \
-			events_list[i].event = evttypes[i];                                          \
-			events_list[i].value = evtvalues[i];                                         \
-			events_list[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
-			HARDWARE_COUNTERS_READ(thread_id, events_list[i], i==0);                     \
+			evts[i].time = evttime;                                               \
+			evts[i].event = evttypes[i];                                          \
+			evts[i].value = evtvalues[i];                                         \
+			evts[i].param.misc_param.param = (unsigned long long) (evtparams[i]); \
+			HARDWARE_COUNTERS_READ(thread_id, evts[i], i==0);                     \
 		}                                                                              \
-		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), events_list, count);     \
+		BUFFER_INSERT_N(thread_id, TRACING_BUFFER(thread_id), evts, count);     \
 	}                                                                                \
 }
 #else
@@ -316,5 +316,19 @@
 		BUFFER_INSERT(thread, TRACING_BUFFER(thread), evt); \
 	} \
 }
+
+#define TRACE_COUNTER(evttime,evttype)                        \
+{                                                             \
+	int thread_id = THREADID;                                   \
+	event_t evt;                                                \
+	if (tracejant && TracingBitmap[TASKID] )                    \
+	{                                                           \
+		evt.time = evttime;                                       \
+		evt.event = evttype;                                      \
+		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);            \
+		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
+	}                                                           \
+}
+
 
 #endif

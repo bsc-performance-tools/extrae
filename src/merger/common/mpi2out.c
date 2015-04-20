@@ -467,7 +467,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 
 void ProcessArgs (int rank, int argc, char *argv[])
 {
-	char *BinaryName;
+	char *BinaryName, *bBinaryName;
 	int CurArg;
 	unsigned int cur_ptask = 1;   /* Ptask counter. Each -- the ptask number is
 	                               * incremented. */
@@ -483,17 +483,17 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		fprintf (stderr, "merger: Error! Unable to duplicate binary name!\n");
 		exit (-1);
 	}
-	BinaryName = basename (BinaryName);
+	bBinaryName = basename (BinaryName);
 
-	if ((strncmp (BinaryName, "mpi2prv", 7) == 0)
-	    || (strncmp (BinaryName, "mpimpi2prv", 10) == 0))
+	if ((strncmp (bBinaryName, "mpi2prv", 7) == 0)
+	    || (strncmp (bBinaryName, "mpimpi2prv", 10) == 0))
 	{
 		set_option_merge_ParaverFormat (TRUE);
 		set_option_merge_ForceFormat (FALSE);
 		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
-	else if ((strncmp (BinaryName, "mpi2dim", 7) == 0)
-	    || (strncmp (BinaryName, "mpimpi2dim", 10) == 0))
+	else if ((strncmp (bBinaryName, "mpi2dim", 7) == 0)
+	    || (strncmp (bBinaryName, "mpimpi2dim", 10) == 0))
 	{
 		set_option_merge_ParaverFormat (FALSE);
 		set_option_merge_ForceFormat (FALSE);
@@ -505,6 +505,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		set_option_merge_ForceFormat (FALSE);
 		set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
 	}
+	free (BinaryName);
 
 	for (CurArg = 1; CurArg < argc; CurArg++)
 	{
@@ -985,15 +986,15 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 	all_tasks_ids_t *all_tasks_ids = NULL;
 
 #if defined(DEBUG)
-        for (i = 0; i < nTraces; i ++)
-        {
+	for (i = 0; i < nTraces; i ++)
+	{
 		fprintf(stderr, "[DEBUG] InputTraces[%d] ptask=%u task=%u\n", i, InputTraces[i].ptask, InputTraces[i].task);
 	}
 #endif
 
 	for (i = 0; i < nTraces; i ++)
 	{
-          num_apps = MAX(num_apps, InputTraces[i].ptask);
+		num_apps = MAX(num_apps, InputTraces[i].ptask);
 	}	
 
 #if defined(DEBUG)
@@ -1014,7 +1015,7 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 	}
 
 	for (i = 0; i < num_apps; i++)
-        {
+	{
 #if defined(DEBUG)
 		fprintf(stderr, "[DEBUG] num_tasks_per_app[%d]=%d\n", i, num_tasks_per_app[i]);
 #endif
@@ -1039,30 +1040,30 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 		task_sizes_per_app[ InputTraces[i].ptask - 1 ][ InputTraces[i].task - 1 ] += InputTraces[i].filesize;
 	}
 
-        xmalloc(all_tasks_ids, all_tasks * sizeof(all_tasks_ids_t));
-        index = 0;
-        for (i = 0; i < num_apps; i ++)
-        {
-                for (j = 0; j < num_tasks_per_app[i]; j ++)
-                {
-                        all_tasks_ids[index].ptask = i+1;
-                        all_tasks_ids[index].task  = j+1;
-                        all_tasks_ids[index].task_size = task_sizes_per_app[i][j];
-                        index ++;
-                }
-        }
+	xmalloc(all_tasks_ids, all_tasks * sizeof(all_tasks_ids_t));
+	index = 0;
+	for (i = 0; i < num_apps; i ++)
+	{
+		for (j = 0; j < num_tasks_per_app[i]; j ++)
+		{
+			all_tasks_ids[index].ptask = i+1;
+			all_tasks_ids[index].task  = j+1;
+			all_tasks_ids[index].task_size = task_sizes_per_app[i][j];
+			index ++;
+		}
+	}
 
 #if defined(DEBUG)
 	fprintf(stderr, "[DEBUG] all_tasks=%d\n", all_tasks);
 	for (i = 0; i < all_tasks; i++)
 	{
 		fprintf(stderr, "[DEBUG] all_tasks[%d] ptask=%d task=%d task_size=%d\n", 
-			i+1, all_tasks_ids[i].ptask, all_tasks_ids[i].task, (int)all_tasks_ids[i].task_size);
+		  i+1, all_tasks_ids[i].ptask, all_tasks_ids[i].task, (int)all_tasks_ids[i].task_size);
 	}
 #endif
 
-        if (WorkDistribution == Block)
-        {
+	if (WorkDistribution == Block)
+	{
 		unsigned tasks_per_merger = (all_tasks + num_processors - 1) / num_processors;
 		for (i=0; i<num_processors; i++)
 		{
@@ -1074,14 +1075,14 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 			}
 		}
 	}
-        else if (WorkDistribution == Cyclic)
-        {
-                /* Files will be distributed in cycles */
-                for (i=0; i < all_tasks; i++)
-                        AssignFilesToWorker(i % num_processors, all_tasks_ids[i]);
-        }
-        else if (WorkDistribution == Size || WorkDistribution == ConsecutiveSize)
-        {
+	else if (WorkDistribution == Cyclic)
+	{
+		/* Files will be distributed in cycles */
+		for (i=0; i < all_tasks; i++)
+			AssignFilesToWorker(i % num_processors, all_tasks_ids[i]);
+	}
+	else if (WorkDistribution == Size || WorkDistribution == ConsecutiveSize)
+	{
 		off_t average_size_per_worker;
 		off_t remaining_size = 0;
 		off_t assigned_size[num_processors];
@@ -1128,57 +1129,69 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 		}
 	}
 
-        /* Check assigned traces... */
-        for (index = 0; index < nTraces; index++)
-                if (InputTraces[index].InputForWorker >= (int)num_processors ||
-                    InputTraces[index].InputForWorker < 0)
-                {
-                        fprintf (stderr, "mpi2prv: FATAL ERROR! Bad input assignament into processor namespace.\n");
-                        fprintf (stderr, "mpi2prv: FATAL ERROR! Input %d assigned to processor %d.\n", index, InputTraces[index].InputForWorker);
-                        exit (-1);
-                }
+	/* Check assigned traces... */
+	for (index = 0; index < nTraces; index++)
+		if (InputTraces[index].InputForWorker >= (int)num_processors ||
+		  InputTraces[index].InputForWorker < 0)
+		{
+			fprintf (stderr, "mpi2prv: FATAL ERROR! Bad input assignament into processor namespace.\n");
+			fprintf (stderr, "mpi2prv: FATAL ERROR! Input %d assigned to processor %d.\n", index, InputTraces[index].InputForWorker);
+			exit (-1);
+		}
 
-        /* Show information of sizes */
-        if (processor_id == 0)
-        {
-                fprintf (stdout, "mpi2prv: Assigned size per processor <");
-                for (index = 0; index < num_processors; index++)
-                {
-                        unsigned file;
-                        off_t size_assigned_to_task;
+	/* Show information of sizes */
+	if (processor_id == 0)
+	{
+		fprintf (stdout, "mpi2prv: Assigned size per processor <");
+		for (index = 0; index < num_processors; index++)
+		{
+			unsigned file;
+			off_t size_assigned_to_task;
 
-                        size_assigned_to_task = 0;
-                        for (file = 0; file < nTraces; file++)
-                                if (InputTraces[file].InputForWorker == (int)index)
-                                        size_assigned_to_task += InputTraces[file].filesize;
+			size_assigned_to_task = 0;
+			for (file = 0; file < nTraces; file++)
+			if (InputTraces[file].InputForWorker == (int)index)
+				size_assigned_to_task += InputTraces[file].filesize;
 
-                        if (size_assigned_to_task != 0)
-                        {
-                                if (size_assigned_to_task < 1024*1024)
-                                        fprintf (stdout, " <1 Mbyte");
-                                else
+			if (size_assigned_to_task != 0)
+			{
+				if (size_assigned_to_task < 1024*1024)
+					fprintf (stdout, " <1 Mbyte");
+				else
 #if SIZEOF_OFF_T == 8 && SIZEOF_LONG == 8
-                                        fprintf (stdout, " %ld Mbytes", size_assigned_to_task/(1024*1024));
+					fprintf (stdout, " %ld Mbytes", size_assigned_to_task/(1024*1024));
 #elif SIZEOF_OFF_T == 8 && SIZEOF_LONG == 4
-                                        fprintf (stdout, " %lld Mbytes", size_assigned_to_task/(1024*1024));
+					fprintf (stdout, " %lld Mbytes", size_assigned_to_task/(1024*1024));
 #elif SIZEOF_OFF_T == 4
-                                        fprintf (stdout, " %d Mbytes", size_assigned_to_task/(1024*1024));
+					fprintf (stdout, " %d Mbytes", size_assigned_to_task/(1024*1024));
 #endif
-                        }
-                        else
-                                fprintf (stdout, " 0 bytes");
-                        fprintf (stdout, "%c", (index!=num_processors-1)?',':' ');
-                }
-                fprintf (stdout, ">\n");
+			}
+			else
+				fprintf (stdout, " 0 bytes");
+			fprintf (stdout, "%c", (index!=num_processors-1)?',':' ');
+		}
+		fprintf (stdout, ">\n");
 
-                for (index = 0 ; index < nTraces; index++)
-                        fprintf (stdout,"mpi2prv: File %s is object %d.%d.%d on node %s assigned to processor %d\n",
-                                InputTraces[index].name, InputTraces[index].ptask,
-                                InputTraces[index].task, InputTraces[index].thread,
-                                InputTraces[index].node==NULL?"unknown":InputTraces[index].node,
-                                InputTraces[index].InputForWorker);
-                fflush (stdout);
-        }
+		for (index = 0 ; index < nTraces; index++)
+			fprintf (stdout,"mpi2prv: File %s is object %d.%d.%d on node %s assigned to processor %d\n",
+				InputTraces[index].name, InputTraces[index].ptask,
+				InputTraces[index].task, InputTraces[index].thread,
+				InputTraces[index].node==NULL?"unknown":InputTraces[index].node,
+				InputTraces[index].InputForWorker);
+			fflush (stdout);
+	}
+
+	if (task_sizes_per_app)
+	{
+		for (i = 0; i < num_apps; i++)
+			if (task_sizes_per_app[i])
+				free (task_sizes_per_app[i]);
+		free (task_sizes_per_app);
+	}
+	if (num_tasks_per_app)
+		free (num_tasks_per_app);
+	if (all_tasks_ids)
+		free (all_tasks_ids);
 }
 
 

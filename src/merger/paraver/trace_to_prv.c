@@ -279,6 +279,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			sprintf (prvfile, "%s.prv", basename(FirstBinaryName));
 			set_merge_OutputTraceName (prvfile);
 			set_merge_GivenTraceName (TRUE);
+			free (FirstBinaryName);
 		}
 	}
 

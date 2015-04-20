@@ -210,7 +210,7 @@ void Extrae_Probe_exec_v_Entry (char *newbinary, char *const argv[])
 
 	/* Dude!, we are changing the process image! Dump all the information
 	   generated into the tracefile */
-	pbuffer[0] = &buffer;
+	pbuffer[0] = buffer;
 	Extrae_define_event_type_Wrapper (EXEC_BIN_EV, "exec() binary name", 1, &v, pbuffer);
 	TRACE_MISCEVENT(LAST_READ_TIME, USER_EV, EXEC_BIN_EV, getpid());
 

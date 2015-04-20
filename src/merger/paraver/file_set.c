@@ -297,7 +297,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		rewind (fd_sample);
 #endif
 #if defined(HAVE_ONLINE)
-	if (fd_online != -1) lseek (fd_online, 0, SEEK_SET);
+	if (fd_online != -1)
+		lseek (fd_online, 0, SEEK_SET);
 #endif
 
 	{
@@ -378,7 +379,8 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		fclose (fd_sample);
 #endif
 #if defined(HAVE_ONLINE)
-	close (fd_online);
+	if (fd_online != -1)
+		close (fd_online);
 #endif
 
 	tmp = (char *) fitem->first;

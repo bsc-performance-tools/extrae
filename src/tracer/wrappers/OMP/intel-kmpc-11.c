@@ -309,6 +309,7 @@ void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 	if (__kmpc_fork_call_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_ParRegion_Entry ();
+		Extrae_OpenMP_EmitTaskStatistics();
 
 		/* Grab parameters */
 		va_start (ap, p3);
@@ -332,6 +333,7 @@ void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 		}
 
 		Extrae_OpenMP_ParRegion_Exit ();	
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (__kmpc_fork_call_real != NULL && !mpitrace_on)
 	{
@@ -732,6 +734,7 @@ static void __extrae_kmpc_task_substitute (int p1, void *p2)
 		Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
 		Backend_Leave_Instrumentation();
 		__kmpc_task_substituted_func (p1, p2); /* Original code execution */
+		Extrae_OpenMP_Notify_NewExecutedTask();
 		Extrae_OpenMP_TaskUF_Exit ();
 	}
 	else
@@ -753,6 +756,7 @@ void * __kmpc_omp_task_alloc (void *p1, int p2, int p3, size_t p4, size_t p5, vo
 	if (__kmpc_omp_task_alloc_real != NULL && mpitrace_on)
 	{
 		Extrae_OpenMP_Task_Entry (p6);
+		Extrae_OpenMP_Notify_NewInstantiatedTask();
 		res = __kmpc_omp_task_alloc_real (p1, p2, p3, p4, p5, __extrae_kmpc_task_substitute);
 		__extrae_add_kmpc_task_function (res, p6);
 		Extrae_OpenMP_Task_Exit ();
@@ -784,6 +788,7 @@ void __kmpc_omp_task_begin_if0 (void *p1, int p2, void *p3)
 		if (__kmpc_omp_task_begin_if0_real != NULL)
 		{
 			Extrae_OpenMP_TaskUF_Entry (__kmpc_task_substituted_func);
+			Extrae_OpenMP_Notify_NewInstantiatedTask();
 			Backend_Leave_Instrumentation();
 			__kmpc_omp_task_begin_if0_real (p1, p2, p3);
 		}
@@ -814,6 +819,7 @@ void __kmpc_omp_task_complete_if0 (void *p1, int p2, void *p3)
 	if (__kmpc_omp_task_complete_if0_real != NULL && mpitrace_on)
 	{
 		__kmpc_omp_task_complete_if0_real (p1, p2, p3);
+		Extrae_OpenMP_Notify_NewExecutedTask();
 		Extrae_OpenMP_TaskUF_Exit ();
 	}
 	else if (__kmpc_omp_task_complete_if0_real != NULL && !mpitrace_on)
@@ -839,8 +845,10 @@ int __kmpc_omp_taskwait (void *p1, int p2)
 	if (__kmpc_omp_taskwait_real != NULL)
 	{
 		Extrae_OpenMP_Taskwait_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
 		res = __kmpc_omp_taskwait_real (p1, p2);
 		Extrae_OpenMP_Taskwait_Exit();
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else
 	{

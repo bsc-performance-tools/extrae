@@ -22,7 +22,8 @@ common_FILES = \
  ../common/vector.c ../common/vector.h \
  ../common/stack.c ../common/stack.h \
  ../common/bfd_manager.c ../common/bfd_manager.h \
- ../common/bfd_manager_extra.h ../common/bfd_data_symbol.h
+ ../common/bfd_manager_extra.h ../common/bfd_data_symbol.h \
+ ../common/thread_dependencies.c ../common/thread_dependencies.h
 
 dimemas_FILES = \
  ../dimemas/dimemas_generator.c ../dimemas/dimemas_generator.h \

@@ -550,3 +550,50 @@ void Probe_OMPT_Taskgroup_Exit (void)
 	if (mpitrace_on)
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKGROUP_IN_EV, EVT_END, EMPTY);
 }
+
+void Probe_OMPT_OpenMP_TaskUF_Entry (UINT64 uf, UINT64 taskid)
+{
+	DEBUG
+	if (mpitrace_on)
+	{
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, OMPT_TASKFUNC_EV, uf, taskid);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+	}
+}
+
+void Probe_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid)
+{
+	DEBUG
+	if (mpitrace_on)
+	{
+		TRACE_OMPEVENTANDCOUNTERS(TIME, OMPT_TASKFUNC_EV, EVT_END, taskid);
+		/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+	}
+}
+
+void Probe_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id,
+	int type, void *data)
+{
+	UNREFERENCED_PARAMETER(data);
+
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENT2PARAM(TIME, OMPT_DEPENDENCE_EV, type,
+		  pred_task_id, succ_task_id);
+}
+
+void Probe_OpenMP_Emit_numInstantiatedTasks (unsigned n)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENT(LAST_READ_TIME, OMP_STATS_EV,
+		  OMP_NUM_TASKS_INSTANTIATED, n);
+}
+
+void Probe_OpenMP_Emit_numExecutedTasks (unsigned n)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_OMPEVENT(LAST_READ_TIME, OMP_STATS_EV,
+		  OMP_NUM_TASKS_EXECUTED, n);
+}

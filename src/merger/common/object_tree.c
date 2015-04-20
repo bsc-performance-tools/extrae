@@ -113,6 +113,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			task_info->match_zone = 0;
 			task_info->num_binary_objects = 0;
 			task_info->binary_objects = NULL;
+			task_info->thread_dependencies = ThreadDependency_create();
 
 			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{

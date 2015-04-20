@@ -36,6 +36,8 @@
 
 #else
 
+/* These are extracted from the OMPT spec see: http://openmp.org/mp-documents/ompt-tr2.pdf */
+
 typedef uint64_t ompt_thread_id_t;
 typedef uint64_t ompt_parallel_id_t;
 typedef uint64_t ompt_task_id_t;
@@ -148,8 +150,8 @@ typedef enum {
 	ompt_event_init_nest_lock = 58, /* nest lock init */
 	ompt_event_destroy_lock = 59, /* lock destruction */
 	ompt_event_destroy_nest_lock = 60, /* nest lock destruction */
-	ompt_event_flush = 61 /* after executing flush */
-
+	ompt_event_flush = 61, /* after executing flush */
+	ompt_event_dependence = 62 /* when a dependece is found, MB project */
 } ompt_event_t;
 
 typedef void (*ompt_interface_fn_t) (void);
@@ -216,6 +218,13 @@ ompt_task_id_t *ompt_get_task_id( /* identify a task */
 ompt_frame_t *ompt_get_task_frame(
 	int depth /* how many levels removed from the current task */
 );
+
+typedef enum {
+   ompt_dependence_raw = 1,
+   ompt_dependence_war = 2,
+   ompt_dependence_waw = 3 
+} ompt_dependence_type_t;
+
 
 #endif 
 

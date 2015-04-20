@@ -72,8 +72,8 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify the location of JAVA development kit. This is necessary to create the connectors between \TRACE and Java applications.
 	\item {\tt --with-liberty=DIR} \\
 	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
-	\item {\tt --with-libgomp=\{4.2,4.9\}}\\
-	Determines which version of libgomp (4.2 or 4.9) is supported by the installation of Extrae. Since these versions of libgomp are incompatible, to support both versions \TRACE needs to be installed twice in separate directories.
+	\item {\tt --with-libgomp=\{4.2,4.9,auto\}}\\
+	Determines which version of libgomp (4.2 or 4.9) is supported by the installation of Extrae. Since these versions of libgomp are incompatible, to support both versions \TRACE needs to be installed twice in separate directories. The user can provide the auto value which will use the C compiler to determine which version of libgomp is more adequate.
 	\item {\tt --with-mpi=DIR} \\
 	Specify the location of an MPI installation to be used for the instrumentation package. This flag is mandatory.
 	\item {\tt --with-mpi-name-mangling=OPTION} \\

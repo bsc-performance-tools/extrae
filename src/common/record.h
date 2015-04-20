@@ -35,7 +35,7 @@
 
 typedef struct omp_param_t
 {
-  UINT64 param;
+  UINT64 param[2];
 } omp_param_t;
 
 typedef struct misc_param_t
@@ -95,7 +95,8 @@ typedef struct
 #define Get_EvTag(ptr)           ((ptr)->param.mpi_param.tag)
 #define Get_EvComm(ptr)          ((ptr)->param.mpi_param.comm)
 #define Get_EvAux(ptr)           ((ptr)->param.mpi_param.aux)
-#define Get_EvParam(ptr)         ((ptr)->param.omp_param.param)
+#define Get_EvParam(ptr)         ((ptr)->param.omp_param.param[0])
+#define Get_EvNParam(ptr,i)      ((ptr)->param.omp_param.param[i])
 #define Get_EvMiscParam(ptr)     ((ptr)->param.misc_param.param)
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 # define Get_EvHWCRead(ptr)      (((ptr)->HWCReadSet != 0) ? 1 : 0) /* 0 = not read, >0 = set_id + 1 */

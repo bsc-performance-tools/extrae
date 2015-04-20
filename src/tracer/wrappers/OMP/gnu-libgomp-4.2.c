@@ -422,13 +422,14 @@ static void callme_task (void *helper_ptr)
 			free(helper->p3);
 		free(helper);
 
+		Extrae_OpenMP_Notify_NewExecutedTask();
 		Extrae_OpenMP_TaskUF_Exit ();
 	}
 }
 
 static volatile long long __GOMP_task_ctr = 1;
 #if !defined(HAVE__SYNC_FETCH_AND_ADD)
-static pthread_mutex_t __GOMP_task_ctr_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t __GOMP_task_ctr_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
 void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned p7)
 {
@@ -442,6 +443,7 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 	if (GOMP_task_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Task_Entry (p1);
+		Extrae_OpenMP_Notify_NewInstantiatedTask();
 
 		struct openmp_task_st *helper = NULL;
 		helper = (struct openmp_task_st *) malloc(sizeof(struct openmp_task_st));
@@ -470,13 +472,11 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 #if defined(HAVE__SYNC_FETCH_AND_ADD)
 		helper->task_ctr = __sync_fetch_and_add(&__GOMP_task_ctr,1);
 #else
-		pthread_mutex_lock (&__GOMP_task_ctr_lock);
+		pthread_mutex_lock (&__GOMP_task_ctr_mtx);
 		helper->task_ctr = __GOMP_task_ctr++;
-		pthread_mutex_unlock (&__GOMP_task_ctr_lock);
+		pthread_mutex_unlock (&__GOMP_task_ctr_mtx);
 #endif
-
 		Extrae_OpenMP_TaskID (helper->task_ctr);
-
 		GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7);
 		Extrae_OpenMP_Task_Exit ();
 	}
@@ -500,8 +500,10 @@ void GOMP_taskwait (void)
 	if (GOMP_taskwait_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_Taskwait_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
 		GOMP_taskwait_real ();
 		Extrae_OpenMP_Taskwait_Exit();
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (GOMP_taskwait_real != NULL)
 	{
@@ -1035,12 +1037,14 @@ void GOMP_parallel (void *p1, void *p2, unsigned p3, unsigned p4)
 	if (GOMP_parallel_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_ParRegion_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
 
 		/* Set the pointer to the correct PARALLEL user function */
 		par_uf = (void(*)(void*))p1;
 		GOMP_parallel_real (callme_par, p2, p3, p4);
 
 		Extrae_OpenMP_ParRegion_Exit();
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (GOMP_parallel_real != NULL)
 	{
@@ -1066,6 +1070,7 @@ void GOMP_parallel_start (void *p1, void *p2, unsigned p3)
 		par_uf = (void(*)(void*))p1;
 
 		Extrae_OpenMP_ParRegion_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
 
 		GOMP_parallel_start_real (callme_par, p2, p3);
 
@@ -1095,6 +1100,7 @@ void GOMP_parallel_end (void)
 		Extrae_OpenMP_UF_Exit ();
 		GOMP_parallel_end_real ();
 		Extrae_OpenMP_ParRegion_Exit();
+		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (GOMP_parallel_start_real != NULL)
 	{
