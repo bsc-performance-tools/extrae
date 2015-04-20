@@ -37,6 +37,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include <stdlib.h>
 #endif
 
+#ifndef HAVE_INTTYPES_H
+# error We need inttypes.h
+#endif
+
 #include "options.h"
 #include "events.h"
 #include "record.h"
@@ -55,30 +59,18 @@ static void show_current (event_t * c, UINT64 max_time)
 	if (c->time < max_time) /* Check whether this event is back in time */
 	{
 		if (dump_time)
-#if SIZEOF_LONG == 8
-			fprintf (stdout, "TIME: %lu (delta = %lu) EV: %d VAL: %lu [0x%lx] ", c->time, max_time-c->time, c->event, c->value, c->value);
+			fprintf (stdout, "TIME: %"PRIu64" (delta = %"PRIu64") EV: %d VAL: %"PRIu64" [0x%"PRIx64"] ", c->time, max_time-c->time, c->event, c->value, c->value);
 		else
-			fprintf (stdout, "TIME: - (delta = -) EV: %d VAL: %lu [0x%lx] ", c->event, c->value, c->value);
-#else
-			fprintf (stdout, "TIME: %lu (delta = %lu) EV: %d VAL: %llu [0x%llx] ", c->time, max_time-c->time, c->event, c->value, c->value);
-		else
-			fprintf (stdout, "TIME: - (delta = -) EV: %d VAL: %llu [0x%llx] ", c->event, c->value, c->value);
-#endif
+			fprintf (stdout, "TIME: - (delta = -) EV: %d VAL: %lu [0x%"PRIx64"] ", c->event, c->value, c->value);
 	}
 	else 
 	{
 		char *clock_append = (c->time==max_time)?"+ ":"";
 
 		if (dump_time)
-#if SIZEOF_LONG == 8
-			fprintf (stdout, "TIME: %lu %s EV: %d VAL: %lu [0x%lx] ", c->time, clock_append, c->event, c->value, c->value);
+			fprintf (stdout, "TIME: %"PRIu64" %s EV: %d VAL: %"PRIu64" [0x%"PRIx64"] ", c->time, clock_append, c->event, c->value, c->value);
 		else
-			fprintf (stdout, "TIME: - %s EV: %d VAL: %lu [0x%lx] ", clock_append, c->event, c->value, c->value);
-#else
-			fprintf (stdout, "TIME: %llu %s EV: %d VAL: %llu [0x%llx] ", c->time, clock_append, c->event, c->value, c->value);
-		else
-			fprintf (stdout, "TIME: - %s EV: %d VAL: %llu [0x%llx] ", clock_append, c->event, c->value, c->value);
-#endif
+			fprintf (stdout, "TIME: - %s EV: %d VAL: %"PRIu64" [0x%"PRIx64"] ", clock_append, c->event, c->value, c->value);
 	}
 
 	if (c->event == MPI_IRECV_EV || c->event == MPI_IRECVED_EV || c->event == MPI_RECV_EV ||
@@ -89,34 +81,34 @@ static void show_current (event_t * c, UINT64 max_time)
 	    c->event == MPI_BSEND_EV || c->event == MPI_IBSEND_EV ||
 	    c->event == MPI_RSEND_EV || c->event == MPI_IRSEND_EV)
 	{
-		fprintf (stdout, "TARGET:%u SIZE:%d TAG:%d COMM:%d AUX:%lld\n",
+		fprintf (stdout, "TARGET:%u SIZE:%d TAG:%d COMM:%d AUX:%"PRId64"\n",
 		  c->param.mpi_param.target,
 		  c->param.mpi_param.size, c->param.mpi_param.tag,
 		  c->param.mpi_param.comm, c->param.mpi_param.aux);
 	}
 	else if (c->event == USER_SEND_EV || c->event == USER_RECV_EV)
 	{
-		fprintf (stdout, "TARGET:%u SIZE:%d TAG:%d AUX:%lld\n",
+		fprintf (stdout, "TARGET:%u SIZE:%d TAG:%d AUX:%"PRId64"\n",
 		  c->param.mpi_param.target, c->param.mpi_param.size,
 			c->param.mpi_param.tag, c->param.mpi_param.aux);
 	}
 	else if (c->event == MPI_INIT_EV && c->value == EVT_END)
 	{
-		fprintf (stdout, "OPTIONS: 0x%08llx\n", c->param.mpi_param.aux);
+		fprintf (stdout, "OPTIONS: 0x%"PRIx64"\n", c->param.mpi_param.aux);
 	}
 	else if (c->event == MPI_ALIAS_COMM_CREATE_EV)
 	{
 		if (c->param.mpi_param.target == MPI_NEW_INTERCOMM_ALIAS)
 		{
 			if (c->value == EVT_BEGIN)
-				fprintf (stdout, "InterCommunicator Alias: input id=%d [0x%08x] (part %d, leader %d)\n",
+				fprintf (stdout, "InterCommunicator Alias: input id=%d [0x%x] (part %d, leader %d)\n",
 				  c->param.mpi_param.comm, c->param.mpi_param.comm, c->param.mpi_param.size, c->param.mpi_param.tag);
 			else
-				fprintf (stdout, "InterCommunicator Alias: output id=%d [0x%08x]\n",
+				fprintf (stdout, "InterCommunicator Alias: output id=%d [0x%x]\n",
 				  c->param.mpi_param.comm, c->param.mpi_param.comm);
 		}
 		else
-			fprintf (stdout, "Communicator Alias: id=%d [0x%08x] ", c->param.mpi_param.comm, c->param.mpi_param.comm);
+			fprintf (stdout, "Communicator Alias: id=%d [0x%x] ", c->param.mpi_param.comm, c->param.mpi_param.comm);
 
 		if (c->param.mpi_param.target != MPI_NEW_INTERCOMM_ALIAS)
 		{
@@ -130,30 +122,44 @@ static void show_current (event_t * c, UINT64 max_time)
 	}
 	else if (c->event == USER_EV)
 	{
-		fprintf (stdout, "USER EVENT value: %llu [0x%llx]\n", c->param.misc_param.param, c->param.misc_param.param);
+		fprintf (stdout, "USER EVENT value: %"PRIu64" [0x%"PRIx64"]\n", c->param.misc_param.param, c->param.misc_param.param);
 	}
 	else if (c->event == SAMPLING_ADDRESS_EV)
 	{
-		fprintf (stdout, "SAMPLING_ADDRESS EVENT value: %llu [0x%llx]\n", c->param.misc_param.param, c->param.misc_param.param);
+		fprintf (stdout, "SAMPLING_ADDRESS EVENT value: %"PRIu64" [0x%"PRIx64"]\n", c->param.misc_param.param, c->param.misc_param.param);
 	}
 	else if (c->event == SAMPLING_ADDRESS_MEM_LEVEL_EV)
 	{
-		fprintf (stdout, "SAMPLING_ADDRESS_MEM_LEVEL_EV EVENT value: %llu [0x%llx]\n",
+		fprintf (stdout, "SAMPLING_ADDRESS_MEM_LEVEL_EV EVENT value: %"PRIu64" [0x%"PRIx64"]\n",
 		  c->param.misc_param.param, c->param.misc_param.param);
 	}
 	else if (c->event == SAMPLING_ADDRESS_TLB_LEVEL_EV)
 	{
-		fprintf (stdout, "SAMPLING_ADDRESS_TLB_LEVEL_EV EVENT value: %llu [0x%llx]\n",
+		fprintf (stdout, "SAMPLING_ADDRESS_TLB_LEVEL_EV EVENT value: %"PRIu64" [0x%"PRIx64"]\n",
 		  c->param.misc_param.param, c->param.misc_param.param);
 	}
 	else if (c->event == NAMEDCRIT_EV && (c->value == LOCKED_VAL || c->value == UNLOCKED_VAL))
 	{
-		fprintf (stdout, "NAMED CRITICAL ADDRESS: %llu [0x%llx]\n", c->param.omp_param.param, c->param.omp_param.param);
+		fprintf (stdout, "NAMED CRITICAL ADDRESS: %"PRIu64" [0x%"PRIx64"]\n", c->param.omp_param.param[0], c->param.omp_param.param[0]);
 	}
 	else if (c->event == MALLOC_EV || c->event == REALLOC_EV)
 	{
-		fprintf (stdout, "%s SIZE: %llu\n", c->event==MALLOC_EV?"malloc()":"realloc()",
+		fprintf (stdout, "%s SIZE: %"PRIu64"\n", c->event==MALLOC_EV?"malloc()":"realloc()",
 		  c->param.misc_param.param);
+	}
+	else if (c->event == OMPT_TASKFUNC_EV)
+	{
+		fprintf (stdout, "OMPT TASK FUNCTION <%"PRIx64">\n",
+		  c->param.omp_param.param[0]);
+	}
+	else if (c->event == OMPT_DEPENDENCE_EV)
+	{
+		fprintf (stdout, "OMPT TASK DEPENDENCE <%"PRIx64",%"PRIx64">\n",
+		  c->param.omp_param.param[0], c->param.omp_param.param[1]);
+	}
+	else if (c->event == OMP_STATS_EV)
+	{	fprintf (stdout, "OMP STATS: category %"PRIu64", value %"PRIu64"\n",
+		  c->value, c->param.omp_param.param[0]);
 	}
 #if USE_HARDWARE_COUNTERS
 	else if (c->event == HWC_DEF_EV)
@@ -164,7 +170,7 @@ static void show_current (event_t * c, UINT64 max_time)
 		fprintf (stdout, "HWC definition { ");
 		for (i = 0; i < MAX_HWC; i++)
 		{
-			fprintf (stdout, "0x%llx ", c->HWCValues[i]);
+			fprintf (stdout, "0x%08llx ", c->HWCValues[i]);
 			if (c->HWCValues[i] != NO_COUNTER)
 				def_num_counters++;
 		}
