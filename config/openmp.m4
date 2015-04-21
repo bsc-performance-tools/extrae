@@ -7,7 +7,7 @@ AC_DEFUN([AX_CHECK_OPENMP],
 	AC_ARG_ENABLE(openmp,
 	   AC_HELP_STRING(
 	      [--enable-openmp],
-	      [Enable support for tracing OpenMP -Intel, IBM and GNU runtimes- (enabled by default, IBM only on PPC)]
+	      [Enable support for tracing OpenMP -Intel, IBM and GNU runtimes- (enabled by default)]
 	   ),
 	   [enable_openmp="${enableval}"],
 	   [enable_openmp="yes"]
@@ -26,16 +26,19 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		)
 
 		# OMP & other OpenMP instrumentations are not compatible
-
 		if test "${enable_openmp_ompt}" = "no" ; then
-
+			if test "${Architecture}" = "ia32"; then
+				enable_openmp_intel_default="yes"
+			else
+				enable_openmp_intel_default="no"
+			fi
 			AC_ARG_ENABLE(openmp-intel,
 			   AC_HELP_STRING(
 			      [--enable-openmp-intel],
-			      [Enable support for tracing OpenMP Intel]
+			      [Enable support for tracing OpenMP Intel (enabled by default on Intel systems)]
 			   ),
 			   [enable_openmp_intel="${enableval}"],
-			   [enable_openmp_intel="yes"]
+			   [enable_openmp_intel="${enable_openmp_intel_default}"]
 			)
 			AC_ARG_ENABLE(openmp-gnu,
 			   AC_HELP_STRING(
@@ -45,13 +48,18 @@ AC_DEFUN([AX_CHECK_OPENMP],
 			   [enable_openmp_gnu="${enableval}"],
 			   [enable_openmp_gnu="yes"]
 			)
+			if test "${Architecture}" = "powerpc"; then
+				enable_openmp_ibm_default="yes"
+			else
+				enable_openmp_ibm_default="no"
+			fi
 			AC_ARG_ENABLE(openmp-ibm,
 			   AC_HELP_STRING(
 			      [--enable-openmp-ibm],
-			      [Enable support for tracing OpenMP IBM (only on PPC)]
+			      [Enable support for tracing OpenMP IBM (enabled by default on PowerPC systems)]
 			   ),
 			   [enable_openmp_ibm="${enableval}"],
-			   [enable_openmp_ibm="yes"]
+			   [enable_openmp_ibm="${enable_openmp_ibm_default}"]
 			)
 
 		else
