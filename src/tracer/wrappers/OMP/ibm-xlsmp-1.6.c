@@ -180,43 +180,21 @@ static void callme_single(void)
 	acts as a trampoline to this call. Each thread runs the very same routine
 	with different params.
 */
-
-#if defined(OS_LINUX) && defined(ARCH_PPC)
-# ifdef HAVE_ARCH_POWERPC_INCLUDE_ASM_ATOMIC_H
-#  include <arch/powerpc/include/asm/atomic.h>
-# else
-#  if SIZEOF_VOIDP == 8
-#   ifdef HAVE_ASM_PPC64_ATOMIC_H
-#    define __KERNEL__  /* patch to workaround an #ifdef inside atomic.h */
-#    include <asm-ppc64/atomic.h>
-#    undef  __KERNEL__
-#   endif
-#  elif SIZEOF_VOIDP == 4
-#   ifdef HAVE_ASM_PPC_ATOMIC_H
-#    define __KERNEL__  /* patch to workaround an #ifdef inside atomic.h */
-#    include <asm-ppc/atomic.h>
-#    undef  __KERNEL__
-#   endif
-#  else
-#   error "Unknown memory model!"
-#  endif
-# endif
-#else
-# error "This file can only be compiled at linux/ppc nowadays!"
-#endif
-
-#ifdef __powerpc64__
-static atomic64_t atomic_index;
-#else
-static atomic_t atomic_index;
+static volatile long long __atomic_index;
+#if !defined(HAVE__SYNC_FETCH_AND_ADD)
+static pthread_mutex_t __atomic_index_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 static void callme_section(char *p1, unsigned p2)
 {
-#ifdef __powerpc64__
-	int index = atomic64_inc_return (&atomic_index)-1;
+	long long index;
+#if defined(HAVE__SYNC_FETCH_AND_ADD)
+	index = __sync_fetch_and_add(&__atomic_index,1);
 #else
-	int index = atomic_inc_return (&atomic_index)-1;
+	pthread_mutex_lock (&__atomic_index_mtx);
+	index = __atomic_index;
+	__atomic_index++;
+	pthread_mutex_unlock (&__atomic_index_mtx);
 #endif
 
 	if (index < num_real_sections[THREADID])
@@ -354,7 +332,7 @@ void _xlsmpParRegionSetup_TPO (int p1, void *p2, int p3, void* p4, void* p5, voi
 		par_uf = (void(*)(char*))p2;
 
 		/* Reset the counter of the sections to 0 */
-		atomic_index.counter = 0;
+		__atomic_index = 0;
 
 		Extrae_OpenMP_ParRegion_Entry();
 		_xlsmpParRegionSetup_TPO_real (p1, callme_par, p3, p4, p5, p6, p7, p8);
