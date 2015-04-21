@@ -506,6 +506,47 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
    fi
 ])
 
+# AX_CHECK_MPI_SUPPORTS_MPI_COMM_SPAWN
+# ---------
+AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_COMM_SPAWN],
+[
+	AC_LANG_SAVE()
+	AC_LANG([C])
+	AX_FLAGS_SAVE()
+
+	dnl If we've previously set MPICC to CC then we don't have MPICC
+	dnl Add the default includes and libraries
+	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
+		CFLAGS="${MPI_CFLAGS}"
+		LIBS="${MPI_LIBS}"
+		LDFLAGS="${MPI_LDFLAGS}"
+	fi
+	CC="${MPICC}"
+
+	AC_MSG_CHECKING([if MPI library supports MPI_Comm_spawn])
+	AC_TRY_LINK(
+		[#include <mpi.h>], 
+		[
+			int ierror;
+			int errcodes[1];
+			MPI_Comm c;
+			MPI_Info i;
+			char *argv[1];
+			ierror = MPI_Comm_spawn ("", argv, 1, i, 0, MPI_COMM_WORLD, &c, errcodes);
+		],
+		[mpi_lib_supports_mpi_comm_spawn="yes" ],
+		[mpi_lib_supports_mpi_comm_spawn="no" ]
+	)
+	AC_MSG_RESULT([${mpi_lib_supports_mpi_comm_spawn}])
+
+	if test "${mpi_lib_supports_mpi_comm_spawn}" = "yes" ; then
+		AC_DEFINE([MPI_SUPPORTS_MPI_COMM_SPAWN], 1, [Defined if MPI library supports MPI_Comm_spawn])
+	fi
+
+	AX_FLAGS_RESTORE()
+	AC_LANG_RESTORE()
+])
+
 # AX_CHECK_MPI_SUPPORTS_MPI_1SIDED
 # ---------
 AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_1SIDED],
@@ -844,13 +885,24 @@ AC_DEFUN([AX_MPI_SHOW_CONFIGURATION],
 [
 	echo MPI instrumentation: ${MPI_INSTALLED}
 	if test "${MPI_INSTALLED}" = "yes" ; then
+		MPI_EXTRA_CAPABILITIES=""
+		if test "${PERUSE_AVAILABILITY}" = "yes"; then
+			MPI_EXTRA_CAPABILITIES+=" peruse"
+		fi
+		if test "${mpi_lib_supports_mpi_1sided}" = "yes"; then
+			MPI_EXTRA_CAPABILITIES+=" 1-sided"
+		fi
+		if test "${mpi_lib_supports_mpi_io}" = "yes"; then
+			MPI_EXTRA_CAPABILITIES+=" I/O"
+		fi
+		if test "${mpi_lib_supports_mpi_comm_spawn}" = "yes"; then
+			MPI_EXTRA_CAPABILITIES+=" MPI_Comm_spawn"
+		fi
 		echo -e \\\tMPI home:             ${MPI_HOME}
 		echo -e \\\tFortran decoration:   ${FORTRAN_DECORATION}
-		echo -e \\\tperuse available?     ${PERUSE_AVAILABILITY}
 		echo -e \\\tmixed C/Fortran libraries? ${mpi_lib_contains_c_and_fortran}
 		echo -e \\\tshared libraries?     ${MPI_SHARED_LIB_FOUND}
-		echo -e \\\t1-sided operations?   ${mpi_lib_supports_mpi_1sided}
-		echo -e \\\tMPI I/O operations?   ${mpi_lib_supports_mpi_io}
+		echo -e \\\tMPI capabilities:     ${MPI_EXTRA_CAPABILITIES}
 		if test "${lb_found}" = "yes" ; then
 			echo -e \\\tLoad-Balancing hooks? yes, from ${LOAD_BALANCING_HOME}
 		else

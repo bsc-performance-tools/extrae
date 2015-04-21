@@ -302,7 +302,7 @@ static char *strip (char *buffer)
 	return &(buffer[min]);
 }
 
-
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 void Read_SPAWN_file (char *mpit_file, int current_ptask)
 {
   char spawn_file_name[PATH_MAX];
@@ -340,6 +340,7 @@ void Read_SPAWN_file (char *mpit_file, int current_ptask)
     intercommunicators_load (spawn_file_name, current_ptask);
   }
 }
+#endif /* MPI_SUPPORTS_MPI_COMM_SPAWN */
 
 
 
@@ -458,7 +459,9 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 
 	fclose (fd);
 
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	Read_SPAWN_file (file, *cptask);
+#endif
 }
 
 /******************************************************************************

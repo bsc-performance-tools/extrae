@@ -1910,6 +1910,7 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
 }
 
 
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
  ***  MPI_Comm_spawn
  ******************************************************************************/
@@ -1938,12 +1939,13 @@ void NAME_ROUTINE_C2F(mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxp
 	DLB_MPI_Comm_spawn_F_leave ();
 #endif
 }
+#endif
 
 
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
  ***  MPI_Comm_spawn_multiple
  ******************************************************************************/
-
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_comm_spawn_multiple__,mpi_comm_spawn_multiple_,MPI_COMM_SPAWN_MULTIPLE,mpi_comm_spawn_multiple,( MPI_Fint *count, char *array_of_commands, char *array_of_argv, MPI_Fint *array_of_maxprocs, MPI_Fint *array_of_info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror ))
 
@@ -1975,6 +1977,7 @@ void NAME_ROUTINE_C2F(mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_
 	DLB_MPI_Comm_spawn_multiple_F_leave ();
 #endif
 }
+#endif
 
 
 /******************************************************************************
@@ -4622,7 +4625,7 @@ int NAME_ROUTINE_C(MPI_Comm_split) (MPI_Comm comm, int color, int key,
 	return res;
 }
 
-
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
  ***  MPI_Comm_spawn
  ******************************************************************************/
@@ -4663,8 +4666,10 @@ int NAME_ROUTINE_C(MPI_Comm_spawn) (
 
 	return res;
 }
+#endif
 
 
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
  ***  MPI_Comm_spawn_multiple
  ******************************************************************************/
@@ -4711,6 +4716,7 @@ int NAME_ROUTINE_C(MPI_Comm_spawn_multiple) (
 
 	return res;
 }
+#endif
 
 /******************************************************************************
  *** MPI_Cart_create
