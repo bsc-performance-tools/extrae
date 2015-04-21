@@ -16,7 +16,7 @@ AC_INIT(Extrae, 3.0.3rc, tools@bsc.es)
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
 
-SVN=`which svn`
+SVN=`which svn 2> /dev/null`
 
 # If SVN command exists and .svn directory also exists, check for the versioning
 if test $? -eq 0 -a -d .svn ; then
