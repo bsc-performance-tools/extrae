@@ -484,7 +484,7 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 #else
 		pthread_mutex_lock (&__GOMP_task_ctr_mtx);
 		helper->task_ctr = __GOMP_task_ctr++;
-		pthread_mutex_lock (&__GOMP_task_ctr_mtx);
+		pthread_mutex_unlock (&__GOMP_task_ctr_mtx);
 #endif
 
 		Extrae_OpenMP_TaskID (helper->task_ctr);
