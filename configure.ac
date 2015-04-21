@@ -316,7 +316,6 @@ AX_CHECK_LOAD_BALANCING
 #######################################
 
 AX_CHECK_OPENMP
-AX_HAVE_SYNC_FETCH_AND_ADD
 
 AX_CUDA
 AX_CUPTI
