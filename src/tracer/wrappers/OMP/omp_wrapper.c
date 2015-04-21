@@ -69,6 +69,7 @@ void __attribute__ ((constructor)) extrae_openmp_setup(void)
 #endif
 
 #if defined(PIC)
+static int (*omp_get_thread_num_real)(void) = NULL;
 static void (*omp_set_lock_real)(void *) = NULL;
 static void (*omp_unset_lock_real)(void *) = NULL;
 static void (*omp_set_num_threads_real)(int) = NULL;
@@ -79,6 +80,10 @@ static void common_GetOpenMPHookPoints (int rank)
 	UNREFERENCED_PARAMETER(rank);
 
 #if defined(PIC)
+	/* Obtain @ for omp_set_lock */
+	omp_get_thread_num_real =
+		(int(*)(void)) dlsym (RTLD_NEXT, "omp_get_thread_num");
+
 	/* Obtain @ for omp_set_lock */
 	omp_set_lock_real =
 		(void(*)(void*)) dlsym (RTLD_NEXT, "omp_set_lock");
@@ -99,6 +104,36 @@ static void common_GetOpenMPHookPoints (int rank)
    INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
 
 */
+
+#if defined(PIC)
+int omp_get_thread_num (void)
+{
+	int res;
+	static int shown = FALSE;
+
+	if (omp_get_thread_num_real != NULL)
+	{
+		res = omp_get_thread_num_real();
+	}
+	else
+	{
+		if (!shown)
+		{
+			fprintf (stderr,
+			  PACKAGE_NAME": Caution! Caution! Caution! Caution! -------------------- \n"
+			  PACKAGE_NAME":\n"
+			  PACKAGE_NAME": You have ended executing Extrae's omp_get_thread_num weak symbol!\n"
+			  PACKAGE_NAME": That's likely to happen when you instrument your application using OpenMP\n"
+			  PACKAGE_NAME": instrumentation, but your application is not compiled/linked against OpenMP\n"
+			  PACKAGE_NAME":\n"
+			  PACKAGE_NAME": Caution! Caution! Caution! Caution! -------------------- \n");
+			shown = TRUE;
+		}
+		res = 0;
+	}
+	return res;
+}
+#endif
 
 #if defined(PIC)
 void omp_set_lock (void *p1)

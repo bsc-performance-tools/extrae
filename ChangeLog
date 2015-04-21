@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 21Apr2015 Add check for MPI_Comm_spawn
+             Add omp_get_thread_num default to 0 and message in Extrae
  + 20Apr2015 --with-libgomp supports auto to determine the appropriate version from CC
              Add OpenMP task-based statistics (instantiated, executed)
              Add OMPT dependencies (MB project)
