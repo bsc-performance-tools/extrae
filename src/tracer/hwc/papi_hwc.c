@@ -90,7 +90,7 @@ static void HWCBE_PAPI_AddDefinition (unsigned event_code, char *code, char *des
 		}
 		hwc_used[num_hwc_used].event_code = event_code;
 		snprintf (hwc_used[num_hwc_used].description,
-			MAX_HWC_DESCRIPTION_LENGTH, "%s (%s)", code, description);
+			MAX_HWC_DESCRIPTION_LENGTH, "%s [%s]", code, description);
 		num_hwc_used++;
 	}
 }
