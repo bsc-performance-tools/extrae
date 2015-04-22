@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 22Apr2015 Fix timings for first mode & hardware counter events
  + 21Apr2015 Add check for MPI_Comm_spawn
              Add omp_get_thread_num default to 0 and message in Extrae
              Automatically detect the system type to enable/disable openmp runtimes

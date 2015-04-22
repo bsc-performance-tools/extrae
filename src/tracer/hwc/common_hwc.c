@@ -369,7 +369,7 @@ void HWC_CleanUp (unsigned nthreads)
  * Starts reading counters.
  * \param num_threads Total number of threads.
  */
-void HWC_Start_Counters (int num_threads, int forked)
+void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 {
 	int i;
 
@@ -403,7 +403,7 @@ void HWC_Start_Counters (int num_threads, int forked)
 	}
 
 	/* Init counters for thread 0 */
-	HWCEnabled = HWCBE_START_COUNTERS_THREAD (TIME, 0, forked);
+	HWCEnabled = HWCBE_START_COUNTERS_THREAD (time, 0, forked);
 
 	/* Inherit hwc set change values from thread 0 */
 	for (i = 1; i < num_threads; i++)

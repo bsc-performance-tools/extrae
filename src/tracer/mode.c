@@ -41,8 +41,9 @@ static char UNUSED rcsid[] = "$Id$";
 
 int *MPI_Deepness              = NULL;
 int *Current_Trace_Mode        = NULL;
-int *Future_Trace_Mode         = NULL;
+static int *Future_Trace_Mode         = NULL;
 int *Pending_Trace_Mode_Change = NULL;
+static int *First_Trace_Mode          = NULL;
 
 /* Default configuration variables */
 int Starting_Trace_Mode = TRACE_MODE_DETAIL;
@@ -69,9 +70,10 @@ void Trace_Mode_CleanUp (void)
 	xfree (Current_Trace_Mode);
 	xfree (Future_Trace_Mode);
 	xfree (Pending_Trace_Mode_Change);
+	xfree (First_Trace_Mode);
 }
 
-int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads, int emitevent)
+int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads)
 {
 	int i, size;
 
@@ -105,23 +107,33 @@ int Trace_Mode_reInitialize (int old_num_threads, int new_num_threads, int emite
 		return FALSE;
 	}
 
+	First_Trace_Mode = (int *)realloc(First_Trace_Mode, size);
+	if (First_Trace_Mode == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": Cannot allocate memory for 'First_Trace_Mode'\n");
+		return FALSE;
+	}
+
 	for (i=old_num_threads; i<new_num_threads; i++)
 	{
 		MPI_Deepness[i] = 0;
 		Current_Trace_Mode[i] = Starting_Trace_Mode;
 		Future_Trace_Mode[i] = Starting_Trace_Mode;
 		Pending_Trace_Mode_Change[i] = FALSE;
+		First_Trace_Mode[i] = TRUE;
 	}
-
-	if (emitevent)
-		THREADS_TRACE_EVENT(old_num_threads, new_num_threads, TIME, TRACING_MODE_EV, Starting_Trace_Mode);
 
 	return TRUE;
 }
 
-int Trace_Mode_Initialize (int num_threads, int emitevent)
+int Trace_Mode_FirstMode (unsigned thread)
 {
-	int res = Trace_Mode_reInitialize (0, num_threads, emitevent);
+	return First_Trace_Mode[thread];
+}
+
+int Trace_Mode_Initialize (int num_threads)
+{
+	int res = Trace_Mode_reInitialize (0, num_threads);
 
 	/* Show configuration */
 	if (res && TASKID == 0)
@@ -148,24 +160,25 @@ int Trace_Mode_Initialize (int num_threads, int emitevent)
 
 void Trace_Mode_Change (int tid, iotimer_t time)
 {
-	Pending_Trace_Mode_Change[tid] = FALSE;
-
-	if (Future_Trace_Mode[tid] != Current_Trace_Mode[tid])
+	if (Pending_Trace_Mode_Change[tid] || First_Trace_Mode[tid])
 	{
-		switch(Future_Trace_Mode[tid])
+		if (Future_Trace_Mode[tid] != Current_Trace_Mode[tid] || First_Trace_Mode[tid])
 		{
-			case TRACE_MODE_DETAIL:
-				break;
-			case TRACE_MODE_BURSTS:
-				ACCUMULATED_COUNTERS_RESET(tid);
-				break;
-			default:
-				break;
+			switch(Future_Trace_Mode[tid])
+			{
+				case TRACE_MODE_DETAIL:
+					break;
+				case TRACE_MODE_BURSTS:
+					ACCUMULATED_COUNTERS_RESET(tid);
+					break;
+				default:
+					break;
+			}
+			Current_Trace_Mode[tid] = Future_Trace_Mode[tid];
+			TRACE_EVENT (time, TRACING_MODE_EV, Current_Trace_Mode[tid]);
 		}
-
-		Current_Trace_Mode[tid] = Future_Trace_Mode[tid];
-
-		TRACE_EVENT (time, TRACING_MODE_EV, Current_Trace_Mode[tid]);
+		Pending_Trace_Mode_Change[tid] = FALSE;
+		First_Trace_Mode[tid] = FALSE;
 	}
 }
 

@@ -58,7 +58,7 @@ extern "C" {
 int HWC_IsEnabled();
 void HWC_Initialize (int options);
 void HWC_CleanUp (unsigned nthreads);
-void HWC_Start_Counters (int num_threads, int forked);
+void HWC_Start_Counters (int num_threads, UINT64 time, int forked);
 void HWC_Restart_Counters (int old_num_threads, int new_num_threads);
 
 void HWC_Start_Next_Set (UINT64 glops, UINT64 time, int thread_id);

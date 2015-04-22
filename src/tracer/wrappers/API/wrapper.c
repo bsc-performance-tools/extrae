@@ -1739,6 +1739,14 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
 #endif
 
+	/* Initialize Tracing Mode related variables */
+	if (forked)
+		Trace_Mode_CleanUp();
+
+	Trace_Mode_Initialize (get_maximum_NumOfThreads());
+
+	Trace_Mode_Change (0, ApplBegin_Time);
+
 #if USE_HARDWARE_COUNTERS
 		/* Write hardware counter definitions into the .sym file */
 		if (me == 0 && !forked)
@@ -1769,15 +1777,9 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		}
 	
 		/* Start reading counters */
-		HWC_Start_Counters (get_maximum_NumOfThreads(), forked);
+		HWC_Start_Counters (get_maximum_NumOfThreads(), ApplBegin_Time, forked);
 #endif
 	}
-
-	/* Initialize Tracing Mode related variables */
-	if (forked)
-		Trace_Mode_CleanUp();
-
-	Trace_Mode_Initialize (get_maximum_NumOfThreads(), !appending);
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
@@ -1847,7 +1849,7 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 			Reallocate_buffers_and_files (new_num_threads);
 	
 			/* Reallocate trace mode */
-			Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads, TRUE);
+			Trace_Mode_reInitialize (get_maximum_NumOfThreads(), new_num_threads);
 	
 #if USE_HARDWARE_COUNTERS
 			/* Reallocate and start reading counters for these threads */
@@ -2392,6 +2394,9 @@ void Backend_Enter_Instrumentation (int Nevents)
 	   we need this for subsequent calls to TIME, as this is being cached in
 	   clock routines */
 	current_time = TIME;
+
+	if (Trace_Mode_FirstMode(thread))
+		Trace_Mode_Change (thread, current_time);
 
 #if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS)
 	/* Must change counters? check only at detail tracing, at bursty

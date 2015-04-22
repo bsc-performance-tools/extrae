@@ -1305,6 +1305,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
 	{
+        updateStats_OTHER(global_mpi_stats);
 		MPI_stats_Wrapper (LAST_READ_TIME);
 		Trace_mode_switch();
 		Trace_Mode_Change (THREADID, LAST_READ_TIME);
@@ -5064,7 +5065,7 @@ int MPI_Finalize_C_Wrapper (void)
 	BGL_disable_barrier_inside = 1;
 #endif
 
-  if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
+	if (CURRENT_TRACE_MODE(THREADID) == TRACE_MODE_BURSTS)
 	{
         updateStats_OTHER(global_mpi_stats);
 		MPI_stats_Wrapper (LAST_READ_TIME);
@@ -5088,8 +5089,8 @@ int MPI_Finalize_C_Wrapper (void)
 	PMPI_Comm_get_parent (&cparent);
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
-  /* Finalize only if its initialized by MPI_init call */
-  if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+	/* Finalize only if its initialized by MPI_init call */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
 		Backend_Finalize ();
 
