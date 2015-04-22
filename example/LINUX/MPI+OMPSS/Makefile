@@ -17,4 +17,4 @@ heat-mpi-ompss.o: heat-mpi-ompss.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm heatmpi-ompss-i *.o
+	rm -fr heatmpi-ompss-i *.o TRACE.* set-0

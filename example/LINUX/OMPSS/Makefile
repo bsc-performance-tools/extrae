@@ -18,4 +18,4 @@ heat-ompss.o: heat-ompss.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm heat-ompss-i *.o
+	rm -fr TRACE.* heat-ompss-i *.o set-0

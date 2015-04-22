@@ -10,5 +10,5 @@ mpi_ping: mpi_ping.f
 	$(F77) $(FFLAGS) mpi_ping.f $(FLIBS) -o mpi_ping
 
 clean:
-	rm -f mpi_ping *.o pingtmp? TRACE.* set-*
+	rm -fr mpi_ping *.o pingtmp? TRACE.* set-*
 

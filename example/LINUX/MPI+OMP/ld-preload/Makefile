@@ -9,5 +9,5 @@ pi: pi.c
 	$(MPICC) $(CFLAGS) pi.c -o pi
 
 clean:
-	rm -f pi TRACE.* set-?
+	rm -fr pi TRACE.* set-?
 
