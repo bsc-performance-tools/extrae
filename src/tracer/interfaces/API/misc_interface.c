@@ -199,7 +199,7 @@ EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_NEXT_HWC_SET)
 EXPAND_F_ROUTINE_WITH_PREFIXES(apifTRACE_SETOPTIONS)
 
 #define apifTRACE_USER_FUNCTION(x) \
-	void CtoF77(x##_user_function) (int *enter) \
+	void CtoF77(x##_user_function) (unsigned *enter) \
 	{ \
 		if (mpitrace_on) \
 		{ \
@@ -417,7 +417,7 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEXT_HWC_SET)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 
 #define apiTRACE_USER_FUNCTION(x) \
-	void x##_user_function (int enter) \
+	void x##_user_function (unsigned enter) \
 	{ \
 		if (mpitrace_on) \
 		{ \
@@ -699,8 +699,8 @@ void Extrae_set_options (int options)
 	}
 }
 
-INTERFACE_ALIASES_C(_user_function, Extrae_user_function,(int enter),void)
-void Extrae_user_function (int enter)
+INTERFACE_ALIASES_C(_user_function, Extrae_user_function,(unsigned enter),void)
+void Extrae_user_function (unsigned enter)
 {
 	if (mpitrace_on)
 	{
@@ -971,8 +971,8 @@ void extrae_set_options (int *options)
 	}
 }
 
-INTERFACE_ALIASES_F(_user_function,_USER_FUNCTION,extrae_user_function,(int *enter),void)
-void extrae_user_function (int *enter)
+INTERFACE_ALIASES_F(_user_function,_USER_FUNCTION,extrae_user_function,(unsigned *enter),void)
+void extrae_user_function (unsigned *enter)
 {
 	if (mpitrace_on)
 	{

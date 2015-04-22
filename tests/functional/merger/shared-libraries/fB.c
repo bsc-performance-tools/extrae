@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-extern void Extrae_user_function (int);
+extern void Extrae_user_function (unsigned);
 
 void fB(void)
 {

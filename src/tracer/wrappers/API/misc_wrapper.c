@@ -259,7 +259,7 @@ void Extrae_memusage_Wrapper (void)
 #endif
 }
 
-void Extrae_user_function_Wrapper (int enter)
+void Extrae_user_function_Wrapper (unsigned enter)
 {
 	UINT64 ip = (enter)?get_caller(4):EMPTY;
 	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, tracejant_hwc_uf);

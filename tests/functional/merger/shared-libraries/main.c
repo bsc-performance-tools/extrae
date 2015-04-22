@@ -2,7 +2,7 @@
 
 extern void fA(void);
 extern void fB(void);
-extern void Extrae_user_function (int);
+extern void Extrae_user_function (unsigned);
 
 int main (int argc, char *argv[])
 {
