@@ -605,7 +605,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 					else
 						sprintf (tmpname, "%s/%s.spawn", final_dir, appl_name);
 
-					if (file_exists(tmpanme)
+					if (file_exists(tmpname))
 						if (unlink (tmpname) != 0)
 							fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
 
