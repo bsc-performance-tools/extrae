@@ -1162,6 +1162,7 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
         /* Parse the on-line analysis configuration */
         Parse_XML_Online(rank, xmldoc, tag);
 #else
+		UNREFERENCED_PARAMETER(xmldoc);
         mfprintf(stdout, PACKAGE_NAME": XML Warning: Remote control mechanism set to \"On-line analysis\" but this library does not support it! Setting will be ignored...\n");
 #endif
       }

@@ -235,7 +235,7 @@ static int User_Event (event_t * current_event,
                        unsigned int thread,
                        FileSet_t *fset)
 {
-	unsigned EvType;
+	int EvType;
 	unsigned long long EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
@@ -1353,8 +1353,8 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	unsigned int EvFunction;
-	unsigned long long EvLine;
+	int EvFunction;
+	int EvLine;
 	Extrae_Addr2Type_t *cl_types;
 
 	UNREFERENCED_PARAMETER(current_time);

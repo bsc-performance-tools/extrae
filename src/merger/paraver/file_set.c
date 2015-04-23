@@ -1260,7 +1260,6 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 {
 #if defined(PARALLEL_MERGE)
 	int rc = 0;
-	int pos = 0;
 	UINT64 *tmp_StartingTimes = NULL;
 	UINT64 *tmp_SynchronizationTimes = NULL;
 #endif
@@ -1270,10 +1269,8 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 	UINT64 *SynchronizationTimes = NULL;
 	event_t *current = NULL;
 
-#if !defined(PARALLEL_MERGE)
-	UNREFERENCED_PARAMETER(taskid);
-	UNREFERENCED_PARAMETER(ntasks);
-#endif
+	UNREFERENCED_PARAMETER(taskid); /* May be used for debugging purposes */
+	UNREFERENCED_PARAMETER(ntasks); /* May be used for debugging purposes */
 
 	Rewind_FS (fset);
 

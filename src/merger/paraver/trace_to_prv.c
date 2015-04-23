@@ -509,7 +509,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 					if (Sthread->last_hw_group_change != current_time)
 					{
 						int i;
-						unsigned int hwctype[MAX_HWC];
+						int hwctype[MAX_HWC];
 						unsigned long long hwcvalue[MAX_HWC];
 
 						if (HardwareCounters_Emit (ptask, task, thread, current_time, current_event, hwctype, hwcvalue, FALSE))
@@ -597,7 +597,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		time_t delta;
 		gettimeofday (&time_end, NULL);
 		delta = time_end.tv_sec - time_begin.tv_sec;
-		fprintf (stdout, "mpi2prv: Elapsed time translating files: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+		fprintf (stdout, "mpi2prv: Elapsed time translating files: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 	}
 
 	if (error)
@@ -646,9 +646,9 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			gettimeofday (&time_end, NULL);
 			delta = time_end.tv_sec - time_begin.tv_sec;
 #if !defined(PARALLEL_MERGE)
-			fprintf (stdout, "mpi2prv: Elapsed time sorting addresses: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+			fprintf (stdout, "mpi2prv: Elapsed time sorting addresses: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 #else
-			fprintf (stdout, "mpi2prv: Elapsed time broadcasting and sorting addresses: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+			fprintf (stdout, "mpi2prv: Elapsed time broadcasting and sorting addresses: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 #endif
 		}
 	}
@@ -671,7 +671,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		time_t delta;
 		gettimeofday (&time_end, NULL);
 		delta = time_end.tv_sec - time_begin.tv_sec;
-		fprintf (stdout, "mpi2prv: Elapsed time sharing communications: %d hours %d minutes %d seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
+		fprintf (stdout, "mpi2prv: Elapsed time sharing communications: %ld hours %ld minutes %ld seconds\n", delta / 3600, (delta % 3600)/60, (delta % 60));
 	}
 #endif
 

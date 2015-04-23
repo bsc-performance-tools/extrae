@@ -54,10 +54,6 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 # undef __USE_GNU
 #endif
 
-#ifndef HAVE_INTTYPES_H
-# error We need inttypes.h
-#endif
-
 #include "misc_wrapper.h"
 #include "wrapper.h"
 #include "threadid.h"
@@ -122,9 +118,9 @@ void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid, unsigned t
 
 #if defined(DEBUG)
 	if (!found_empty)
-		printf ("REGISTERING-new(slot=%u) { ompt_thid=%" PRIu64 ", threadid=%u }\n", free_slot, ompt_thid, threadid);
+		printf ("REGISTERING-new(slot=%u) { ompt_thid=%lu, threadid=%u }\n", free_slot, ompt_thid, threadid);
 	else
-		printf ("REGISTERING-reused(slot=%u) { ompt_thid=%" PRIu64 ", threadid=%u }\n", free_slot, ompt_thid, threadid);
+		printf ("REGISTERING-reused(slot=%u) { ompt_thid=%lu, threadid=%u }\n", free_slot, ompt_thid, threadid);
 #endif
 
 	/* Set slot info on 'free_slot' */
@@ -146,7 +142,7 @@ void Extrae_OMPT_unregister_ompt_thread_id (ompt_thread_id_t ompt_thid)
 	assert (ompt_thids != NULL);
 
 #if defined(DEBUG)
-	printf ("UNREGISTERING(ompt_thid %" PRIu64 ")\n", ompt_thid);
+	printf ("UNREGISTERING(ompt_thid %lu)\n", ompt_thid);
 #endif
 
 	for (u = 0; u < n_ompt_thids; u++)
@@ -180,7 +176,7 @@ unsigned Extrae_OMPT_threadid (void)
 	for (u = 0; u < n_ompt_thids; u++)
 	{
 #if defined(DEBUG_THREAD)
-		printf ("SEARCHING (thread=%" PRIu64 ") [slot=%u/%u] {ompt_thid=%" PRIu64 ",in_use=%d,threadid=%u}\n",
+		printf ("SEARCHING (thread=%lu) [slot=%u/%u] {ompt_thid=%lu,in_use=%d,threadid=%u}\n",
 		 thd, u, n_ompt_thids, ompt_thids[u].thid, ompt_thids[u].in_use, ompt_thids[u].threadid);
 #endif
 		if (ompt_thids[u].thid == thd && ompt_thids[u].in_use)
@@ -198,7 +194,7 @@ unsigned Extrae_OMPT_threadid (void)
 #if defined(NEED_MUTEX_TO_GET_THREADID)
 	pthread_mutex_unlock (&mutex_thids);
 #endif
-	fprintf (stderr, "OMPTOOL: Failed to search OpenMP(T) thread %" PRIu64 "\n", thd);
+	fprintf (stderr, "OMPTOOL: Failed to search OpenMP(T) thread %lu\n", thd);
 	assert (1 != 1);
 	return 0;
 }
@@ -211,14 +207,14 @@ unsigned Extrae_OMPT_threadid (void)
     ## __VA_ARGS__)
 # if defined(__INTEL_COMPILER)
 #  define PROTOTYPE_MESSAGE(fmt, ...) \
-    printf ("THREAD=%u/%" PRIu64 " %s" fmt "\n", \
+    printf ("THREAD=%u/%lu %s" fmt "\n", \
      0u, \
      0ull, \
      __func__, \
      ## __VA_ARGS__)
 # else
 #  define PROTOTYPE_MESSAGE(fmt, ...) \
-    printf ("THREAD=%u/%" PRIu64 " %s" fmt "\n", \
+    printf ("THREAD=%u/%lu %s" fmt "\n", \
      Extrae_OMPT_threadid(), \
      ompt_get_thread_id_fn(), \
      __func__, \
@@ -239,7 +235,7 @@ void OMPT_event_thread_begin (ompt_thread_type_t type, ompt_thread_id_t thid)
 	/* Get last thread id in instrumentation rte */
 	unsigned threads = Backend_getNumberOfThreads();
 
-	PROTOTYPE_MESSAGE_NOTHREAD(" TYPE %d (worker == %d) THID %" PRIu64 " (threads=%u)", type, ompt_thread_worker, thid, threads);
+	PROTOTYPE_MESSAGE_NOTHREAD(" TYPE %d (worker == %d) THID %lu (threads=%u)", type, ompt_thread_worker, thid, threads);
 
 	if (type == ompt_thread_initial)
 	{
@@ -884,7 +880,7 @@ void OMPT_event_control (uint64_t command, uint64_t modifier)
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(modifier);
 
-	PROTOTYPE_MESSAGE(" (cmd = %" PRIu64 ", mod = %" PRIu64 ")", command, modifier);
+	PROTOTYPE_MESSAGE(" (cmd = %lu, mod = %lu)", command, modifier);
 
 	if (command == 1) /* API spec: start or restart monitoring */
 		Extrae_restart_Wrapper();
@@ -908,7 +904,7 @@ void OMPT_event_dependence( /* for new dependence instrumentation */
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(data);
 
-	PROTOTYPE_MESSAGE(" (pred_task_id = %" PRIx64 ", succ_task_id = %" PRIx64 ", type = %d, data = %p)", pred_task_id, succ_task_id, type, data);
+	PROTOTYPE_MESSAGE(" (pred_task_id = %lx, succ_task_id = %lx, type = %d, data = %p)", pred_task_id, succ_task_id, type, data);
 
 	Extrae_OMPT_dependence (pred_task_id, succ_task_id, type, data);
 #endif /* EMPTY_OMPT_CALLBACKS */

@@ -76,7 +76,7 @@ CntQueue CountersTraced;
  ******************************************************************************/
 
 int HardwareCounters_Emit (int ptask, int task, int thread,
-	unsigned long long time, event_t * Event, unsigned int *outtype,
+	unsigned long long time, event_t * Event, int *outtype,
 	unsigned long long *outvalue, int absolute)
 {
 	int cnt;

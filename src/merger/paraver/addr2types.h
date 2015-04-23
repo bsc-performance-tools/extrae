@@ -32,14 +32,14 @@
 
 typedef struct 
 {
-	unsigned FunctionType;
+	int FunctionType;
 	unsigned FunctionType_lbl;
-	unsigned LineType;
+	int LineType;
 	unsigned LineType_lbl;
 } Extrae_Addr2Type_t;
 
-Extrae_Addr2Type_t * Extrae_Addr2Type_New (unsigned FunctionType,
-	unsigned FunctionType_lbl, unsigned LineType, unsigned LineType_lbl);
+Extrae_Addr2Type_t * Extrae_Addr2Type_New (int FunctionType,
+	unsigned FunctionType_lbl, int LineType, unsigned LineType_lbl);
 
 #endif
 
