@@ -608,6 +608,7 @@ AC_CONFIG_FILES([
   src/launcher/dyninst/Makefile \
   scripts/Makefile \
   src/common/Makefile \
+  src/common/MPI/Makefile \
   src/tracer/Makefile \
   src/tracer/clocks/Makefile \
   src/tracer/interfaces/Makefile 
@@ -651,6 +652,7 @@ AC_SUBST( [INCLUDE_DIR], ['$(top_srcdir)/include'] )
 AC_SUBST( [SRC_DIR], ['$(top_srcdir)/src'] )
 
 AC_SUBST( [COMMON_INC], ['$(top_srcdir)/src/common'] )
+AC_SUBST( [COMMON_MPI_INC], ['$(top_srcdir)/src/common/MPI'] )
 AC_SUBST( [TRACER_INC], ['$(top_srcdir)/src/tracer'] )
 AC_SUBST( [MERGER_INC], ['$(top_srcdir)/src/merger'] )
 AC_SUBST( [CLOCKS_INC], ['$(TRACER_INC)/clocks'] )

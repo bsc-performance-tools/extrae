@@ -52,6 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 # ifdef HAVE_MPI_H
 #  include <mpi.h>
 # endif
+# include "utils_mpi.h"
 #endif
 #if defined(PACX_SUPPORT)
 # include <pacx.h>
@@ -304,9 +305,45 @@ static unsigned maximum_NumOfThreads = 1;
 char appl_name[APPL_NAME_LENGTH];
 char final_dir[TMP_DIR];
 char tmp_dir[TMP_DIR];
-#if defined(DEAD_CODE)
-char base_dir[TMP_DIR];
-char symbol[TRACE_FILE];
+
+/* HSG
+
+ MN GPFS optimal files per directories is 512.
+ 
+ Why blocking in 128 sets? Because each task may produce 2 files (mpit and
+ sample), and also the final directory and the temporal directory may be the
+ same. So on the worst case, there are 512 files in the directory at a time.
+
+*/
+
+static int Get_FinalDir_BlockSize(void)
+{ return 128; }
+static char _get_finaldir[TMP_DIR];
+char *Get_FinalDir (int task)
+{
+  sprintf (_get_finaldir, "%s/set-%d", final_dir, task/Get_FinalDir_BlockSize());
+  return _get_finaldir;
+}
+#if defined(MPI_SUPPORT)
+static char *Get_FinalDirNoTask (void)
+{
+	return final_dir;
+}
+#endif
+
+static int Get_TemporalDir_BlockSize(void)
+{ return 128; }
+static char _get_temporaldir[TMP_DIR];
+char *Get_TemporalDir (int task)
+{
+  sprintf (_get_temporaldir, "%s/set-%d", tmp_dir, task/Get_TemporalDir_BlockSize());
+  return _get_temporaldir;
+}
+#if defined(MPI_SUPPORT)
+static char *Get_TemporalDirNoTask (void)
+{
+	return tmp_dir;
+}
 #endif
 
 /* Know if the run is controlled by a creation of a file  */
@@ -464,7 +501,7 @@ void Extrae_set_is_initialized (extrae_init_type_t type)
  ***  Backend_createExtraeDirectory
  ***   creates extrae directories to store tracefiles
  ******************************************************************************/
-static void Backend_createExtraeDirectory (unsigned taskid, int Temporal)
+static void Backend_createExtraeDirectory (int taskid, int Temporal)
 {
 	int ret;
 	int attempts = 100;
@@ -1265,8 +1302,6 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	char tmp_file[TMP_NAME_LENGTH];
 	unsigned initialTASKID = Extrae_get_initial_TASKID();
 
-	Backend_createExtraeDirectory (initialTASKID, TRUE);
-
 	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
 
 	if (forked)
@@ -1723,6 +1758,67 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 			unlink (trace_sym);
 	}
 
+#if defined(MPI_SUPPORT)
+	/* If the directory is shared, then let task 0 create all
+	   directories. This proves a significant speedup in GPFS */
+	if (UtilsMPI_CheckSharedDisk (Get_TemporalDirNoTask()))
+	{
+		if (me == 0)
+			fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n",
+			  Get_TemporalDirNoTask());
+		if (me == 0)
+		{
+			int i;
+			for (i = 0; i < world_size; i+=Get_TemporalDir_BlockSize())
+				Backend_createExtraeDirectory (i, FALSE);
+		}
+	}
+	else
+	{
+		if (me == 0)
+			fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n",
+			  Get_TemporalDirNoTask());
+			Backend_createExtraeDirectory (me, FALSE);
+	}
+
+	/* Now, wait for every process to reach this point, so directories are
+	   created */
+	PMPI_Barrier (MPI_COMM_WORLD);
+	PMPI_Barrier (MPI_COMM_WORLD);
+	PMPI_Barrier (MPI_COMM_WORLD);
+
+	/* If the directory is shared, then let task 0 create al
+	   directories. This proves a significant speedup in GPFS */
+	if (UtilsMPI_CheckSharedDisk (Get_FinalDirNoTask()))
+	{
+		if (me == 0)
+			fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n",
+			  Get_FinalDirNoTask());
+		if (me == 0)
+		{
+			int i;
+			for (i = 0; i < world_size; i+=Get_FinalDir_BlockSize())
+				Backend_createExtraeDirectory (i, TRUE);
+		}
+	}
+	else
+	{
+		if (me == 0)
+			fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n",
+			  Get_FinalDirNoTask());
+		Backend_createExtraeDirectory (me, TRUE);
+	}
+
+	/* Now, wait for every process to reach this point, so directories are
+	   created */
+	PMPI_Barrier (MPI_COMM_WORLD);
+	PMPI_Barrier (MPI_COMM_WORLD);
+	PMPI_Barrier (MPI_COMM_WORLD);
+#else
+	Backend_createExtraeDirectory (me, FALSE);
+	Backend_createExtraeDirectory (me, TRUE);
+#endif
+
 	/* Allocate the buffers and trace files */
 	Allocate_buffers_and_files (world_size, get_maximum_NumOfThreads(), forked);
 
@@ -2036,30 +2132,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 }
 
 
-/* HSG
-
- MN GPFS optimal files per directories is 512.
- 
- Why blocking in 128 sets? Because each task may produce 2 files (mpit and
- sample), and also the final directory and the temporal directory may be the
- same. So on the worst case, there are 512 files in the directory at a time.
-
-*/
-
-static char _get_finaldir[TMP_DIR];
-char *Get_FinalDir (int task)
-{
-  sprintf (_get_finaldir, "%s/set-%d", final_dir, task/128);
-  return _get_finaldir;
-}
-
-static char _get_temporaldir[TMP_DIR];
-char *Get_TemporalDir (int task)
-{
-  sprintf (_get_temporaldir, "%s/set-%d", tmp_dir, task/128);
-  return _get_temporaldir;
-}
-
 /******************************************************************************
  ***  Backend_Finalize_close_mpits
  ******************************************************************************/
@@ -2084,8 +2156,6 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
 	   as that moment was 0, independently if MPI or PACX has run */
 	initialTASKID = Extrae_get_initial_TASKID();
-
-	Backend_createExtraeDirectory (TASKID, FALSE);
 
 	Buffer_Close(TRACING_BUFFER(thread));
 
@@ -2325,10 +2395,11 @@ void Backend_Finalize (void)
 			merger_pre (Extrae_get_num_tasks());
 
 #if defined(MPI_SUPPORT)
-			sprintf(tmp, "%s", Extrae_core_get_mpits_file_name());
+			sprintf (tmp, "%s", Extrae_core_get_mpits_file_name());
 #else
 			sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
 #endif
+
 			Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
 
 			if (TASKID == 0)
@@ -2631,9 +2702,6 @@ void Backend_updateTaskID (void)
 
 	if (Extrae_get_initial_TASKID() == TASKID)
 		return;
-
-	/* Make sure the directory exists */
-	Backend_createExtraeDirectory (TASKID, TRUE);
 
 	/* Rename SYM file, if it exists, per thread */
 	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)

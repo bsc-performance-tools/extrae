@@ -179,9 +179,9 @@ int  *ParentWorldRanks = NULL;    /* World ranks of the parent processes
 unsigned long long SpawnOffset = 0;
 #endif
 
-char *Extrae_core_get_mpits_file_name(void)
+char *Extrae_core_get_mpits_file_name (void)
 {
-  return MpitsFileName;
+	return MpitsFileName;
 }
 
 static hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
@@ -593,27 +593,28 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 					sprintf (tmpname, "%s/%s-%d.mpits", final_dir, appl_name, count);
 				else
 					sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
-				count++;
 
 				/* If the file exists, remove it and its associated .spawn file */
 				if (file_exists(tmpname))
 				{
 					if (unlink (tmpname) != 0)
-						fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file '%s'\n", tmpname);
+						fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
 
 					if (count > 1)
 						sprintf (tmpname, "%s/%s-%d.spawn", final_dir, appl_name, count);
 					else
 						sprintf (tmpname, "%s/%s.spawn", final_dir, appl_name);
 
-					if (unlink (tmpname) != 0)
-						fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file '%s'\n", tmpname);
+					if (file_exists(tmpanme)
+						if (unlink (tmpname) != 0)
+							fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
 
 					next = TRUE;
 				}
 				else
 					next = FALSE;
-				
+
+				count++;
 			} while (next);
 		}
 	}
@@ -742,16 +743,14 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	/* Pass the name of the .mpits file to all tasks (the embedded merger needs to know!) */
 	PMPI_Bcast(&SpawnGroup, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	if (TASKID != 0)
-	{
-		if (SpawnGroup > 1)
-			sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, SpawnGroup, EXT_MPITS);
-		else
-			sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
-	}
+	if (SpawnGroup > 1)
+		sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, SpawnGroup, EXT_MPITS);
+	else
+		sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 #else
 	sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 #endif
+
 	MpitsFileName = strdup( tmpname );
 
 	return 0;
@@ -1324,7 +1323,9 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 #endif
 
 	/* Generate the final file list */
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+#endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 	/* Finalize only if its initialized by MPI_init call */
@@ -4913,7 +4914,9 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+#endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
@@ -5015,7 +5018,9 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 		MPI_remove_file_list (TRUE);
 
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+#endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
@@ -5086,7 +5091,9 @@ int MPI_Finalize_C_Wrapper (void)
 #endif
 
 	/* Generate the final file list */
+#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+#endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
 	/* Finalize only if its initialized by MPI_init call */
@@ -8897,7 +8904,7 @@ static char * MPI_Distribute_XML_File (int rank, int world_size, char *origen)
 		/* Build the temporal file pattern */
 		if (getenv("TMPDIR"))
 		{
-                        int len = 14 + strlen(getenv("TMPDIR")) + 1;
+			int len = 14 + strlen(getenv("TMPDIR")) + 1;
 			/* If TMPDIR exists but points to non-existent directory, create it */
 			if (!directory_exists (getenv("TMPDIR")))
 				mkdir_recursive (getenv("TMPDIR"));

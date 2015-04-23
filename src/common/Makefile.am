@@ -1,3 +1,5 @@
+SUBDIRS = MPI
+
 include $(top_srcdir)/PATHS
 
 common_SRCS = \
@@ -14,8 +16,7 @@ common_SRCS = \
  hwc_version.h \
  extrae_version.h
 
-common_INCLUDES = \
-        -I$(COMMON_INC)
+common_INCLUDES = -I$(COMMON_INC)
 
 noinst_LTLIBRARIES = libcommon.la
 libcommon_la_SOURCES = $(common_SRCS)

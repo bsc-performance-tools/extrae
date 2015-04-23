@@ -359,6 +359,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 	char thdname[2048];
 	char path[2048];
 	FILE *fd = fopen (file, "r");
+
 	if (fd == NULL)
 	{
 		fprintf (stderr, "mpi2prv: Unable to open %s file.\n", file);
