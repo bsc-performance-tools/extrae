@@ -426,6 +426,10 @@ if WANT_NANOS
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMPSS
 	cp -fr $(MPIOMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMPSS
 endif
+if WANT_OPENMP
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMP
+	cp -f $(MPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
+endif
 endif
 if WANT_OPENMP
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMP
