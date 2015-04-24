@@ -5,7 +5,7 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CC)
 
 common_mpi_SRCS = \
   utils_mpi.c utils_mpi.h
-common_mpi_INCLUDES = -I$(COMMON_DIR) -I$(COMMON_MPI_DIR)
+common_mpi_INCLUDES = -I$(COMMON_DIR) -I$(COMMON_MPI_DIR) @MPI_CFLAGS@
 
 noinst_LTLIBRARIES = libcommon_mpi.la
 libcommon_mpi_la_SOURCES = $(common_mpi_SRCS)
