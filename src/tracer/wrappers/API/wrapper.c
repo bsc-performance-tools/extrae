@@ -1761,7 +1761,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #if defined(MPI_SUPPORT)
 	/* If the directory is shared, then let task 0 create all
 	   directories. This proves a significant speedup in GPFS */
-	if (UtilsMPI_CheckSharedDisk (Get_TemporalDirNoTask()))
+	if (ExtraeUtilsMPI_CheckSharedDisk (Get_TemporalDirNoTask()))
 	{
 		if (me == 0)
 			fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n",
@@ -1789,7 +1789,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 
 	/* If the directory is shared, then let task 0 create al
 	   directories. This proves a significant speedup in GPFS */
-	if (UtilsMPI_CheckSharedDisk (Get_FinalDirNoTask()))
+	if (ExtraeUtilsMPI_CheckSharedDisk (Get_FinalDirNoTask()))
 	{
 		if (me == 0)
 			fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n",

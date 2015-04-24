@@ -47,7 +47,7 @@
 /* Check whether a given directory exists for every process in
 	MPI_COMM_WORLD. All the processes receive the result */
 
-int UtilsMPI_CheckSharedDisk (const char *directory)
+int ExtraeUtilsMPI_CheckSharedDisk (const char *directory)
 {
 	int rank, size;
 	PMPI_Comm_rank (MPI_COMM_WORLD, &rank);

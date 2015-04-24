@@ -24,6 +24,6 @@
 #ifndef __UTILS_MPI_H__
 #define __UTILS_MPI_H__
 
-int UtilsMPI_CheckSharedDisk (const char *directory);
+int ExtraeUtilsMPI_CheckSharedDisk (const char *directory);
 
 #endif
