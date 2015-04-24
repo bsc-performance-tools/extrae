@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 23Apr2015 Upgrade to 3.1.0rc
+             Missing MPI+OpenMP example installation
              Improve directory construction on shared disks
              Shorten labels related to user source code references
              Change format for performance counters labels
