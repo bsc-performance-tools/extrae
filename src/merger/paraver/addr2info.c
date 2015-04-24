@@ -48,6 +48,12 @@ static char UNUSED rcsid[] = "$Id$";
 
 //#define DEBUG
 
+#define SHORT_STRING_PREFIX 8
+#define SHORT_STRING_SUFFIX 8
+#define SHORT_STRING_INFIX  ".."
+
+#include "utils.h"
+
 #if defined(NEED_ERRNO_LOCATION_PATCH)
 /* On some machines (BG/L for instance) this symbol is undefined but required by
    BFD library. */
@@ -709,6 +715,7 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
 	int i;
+	char short_label[1+SHORT_STRING_PREFIX+SHORT_STRING_SUFFIX+strlen(SHORT_STRING_INFIX)];
 
 	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:MPI_CALLER_TYPE];
 	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:MPI_CALLER_TYPE];
@@ -733,7 +740,12 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 		{
 			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i=0; i<FuncTab->num_functions; i++) 
-				fprintf(pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			{
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, FuncTab->function[i]);
+				fprintf(pcf_fd, "%d %s [%s]\n", i + 1, short_label, FuncTab->function[i]);
+			}
 			LET_SPACES(pcf_fd);
 		}
 
@@ -756,14 +768,19 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				if (AddrTab->address[i].module == NULL)
-					fprintf(pcf_fd, "%d   %d (%s)\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-				else
-					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
-					    AddrTab->address[i].module);
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d %d (%s) [%d (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+					    AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d %d (%s) [%d %s (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+						AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
 			}
 			LET_SPACES(pcf_fd);
 		}
@@ -777,6 +794,7 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
 	int i;
+	char short_label[1+SHORT_STRING_PREFIX+SHORT_STRING_SUFFIX+strlen(SHORT_STRING_INFIX)];
 
 	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE];
 	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:OUTLINED_OPENMP_TYPE];
@@ -790,7 +808,13 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
-				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			{
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, FuncTab->function[i]);
+				fprintf (pcf_fd, "%d %s [%s]\n", i + 1, short_label,
+				  FuncTab->function[i]);
+			}
 			LET_SPACES(pcf_fd);
 		}
 
@@ -803,14 +827,19 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				if (AddrTab->address[i].module == NULL)
-					fprintf(pcf_fd, "%d   %d (%s)\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-				else
-					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
-					    AddrTab->address[i].module);
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d %d (%s) [%d (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+					    AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d %d (%s) [%d %s (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+						AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
 			}
 			LET_SPACES(pcf_fd);
 		}
@@ -822,6 +851,7 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
 	int i;
+	char short_label[1+SHORT_STRING_PREFIX+SHORT_STRING_SUFFIX+strlen(SHORT_STRING_INFIX)];
 
 	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:CUDAKERNEL_TYPE];
 	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:CUDAKERNEL_TYPE];
@@ -836,7 +866,13 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 
 			for (i = 0; i < FuncTab->num_functions; i ++)
-				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			{
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, FuncTab->function[i]);
+				fprintf (pcf_fd, "%d %s [%s]\n", i + 1, short_label,
+				  FuncTab->function[i]);
+			}
 
 			LET_SPACES(pcf_fd);
 		}
@@ -850,14 +886,19 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				if (AddrTab->address[i].module == NULL)
-					fprintf(pcf_fd, "%d   %d (%s)\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-				else
-					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
-					    AddrTab->address[i].module);
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d %d (%s) [%d (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+					    AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d %d (%s) [%d %s (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+						AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
 			}
 			LET_SPACES(pcf_fd);
 		}
@@ -869,6 +910,7 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
 	int i;
+	char short_label[1+SHORT_STRING_PREFIX+SHORT_STRING_SUFFIX+strlen(SHORT_STRING_INFIX)];
 
 	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:USER_FUNCTION_TYPE];
 	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:USER_FUNCTION_TYPE];
@@ -883,7 +925,13 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
-				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			{
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, FuncTab->function[i]);
+				fprintf (pcf_fd, "%d %s [%s]\n", i + 1, short_label,
+				  FuncTab->function[i]);
+			}
 			LET_SPACES(pcf_fd);
 		}
 
@@ -896,14 +944,19 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				if (AddrTab->address[i].module == NULL)
-					fprintf(pcf_fd, "%d   %d (%s)\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-				else
-					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
-					    AddrTab->address[i].module);
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d %d (%s) [%d (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+					    AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d %d (%s) [%d %s (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+						AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
 			}
 			LET_SPACES(pcf_fd);
 		}
@@ -916,6 +969,7 @@ void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
 	int i;
+	char short_label[1+SHORT_STRING_PREFIX+SHORT_STRING_SUFFIX+strlen(SHORT_STRING_INFIX)];
 
 	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:OTHER_FUNCTION_TYPE];
 	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:OTHER_FUNCTION_TYPE];
@@ -932,7 +986,13 @@ void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
-				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			{
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, FuncTab->function[i]);
+				fprintf (pcf_fd, "%d %s [%s]\n", i + 1, short_label,
+				  FuncTab->function[i]);
+			}
 			LET_SPACES(pcf_fd);
 		}
 
@@ -947,14 +1007,19 @@ void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				if (AddrTab->address[i].module == NULL)
-					fprintf(pcf_fd, "%d   %d (%s)\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-				else
-					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
-					    AddrTab->address[i].module);
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d %d (%s) [%d (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+					    AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d %d (%s) [%d %s (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+						AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
 			}
 			LET_SPACES(pcf_fd);
 		}
@@ -966,6 +1031,7 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
 	int i;
+	char short_label[1+SHORT_STRING_PREFIX+SHORT_STRING_SUFFIX+strlen(SHORT_STRING_INFIX)];
 
 	AddrTab = AddressTable[uniqueid?UNIQUE_TYPE:SAMPLE_TYPE];
 	FuncTab = FunctionTable[uniqueid?UNIQUE_TYPE:SAMPLE_TYPE];
@@ -984,7 +1050,13 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 		{
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
-				fprintf (pcf_fd, "%d   %s\n", i + 1, FuncTab->function[i]);
+			{
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, FuncTab->function[i]);
+				fprintf (pcf_fd, "%d %s [%s]\n", i + 1, short_label,
+				  FuncTab->function[i]);
+			}
 			LET_SPACES(pcf_fd);
 		}
 
@@ -1001,14 +1073,19 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				if (AddrTab->address[i].module == NULL)
-					fprintf(pcf_fd, "%d   %d (%s)\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name);
-				else
-					fprintf(pcf_fd, "%d   %d (%s) [%s]\n", 
-						i + 1, AddrTab->address[i].line, AddrTab->address[i].file_name,
-					    AddrTab->address[i].module);
+				ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 
+				if (AddrTab->address[i].module == NULL)
+					fprintf(pcf_fd, "%d %d (%s) [%d (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+					    AddrTab->address[i].line, AddrTab->address[i].file_name);
+				else
+					fprintf(pcf_fd, "%d %d (%s) [%d %s (%s)]\n", 
+						i + 1, AddrTab->address[i].line, short_label,
+						AddrTab->address[i].line, AddrTab->address[i].file_name,
+					    AddrTab->address[i].module);
 			}
 			LET_SPACES(pcf_fd);
 		}

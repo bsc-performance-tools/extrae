@@ -1,7 +1,10 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
- * 23Apr2015 Improve directory construction on shared disks
+ * 23Apr2015 Upgrade to 3.1.0rc
+             Improve directory construction on shared disks
+             Shorten labels related to user source code references
+             Change format for performance counters labels
  * 22Apr2015 Fix timings for first mode & hardware counter events
              Fix compilation in IBM ppc when --disable-openmp-gnu is given
              Make Extrae_user_function use the same parameters

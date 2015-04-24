@@ -76,6 +76,8 @@ unsigned long long getFactorValue (char *value, char *ref, int rank);
 int mkdir_recursive (const char *path);
 int file_exists (const char *file);
 int directory_exists (const char *file);
+void ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
+	unsigned buffersize, char *buffer, const char *string);
 
 #if defined(__cplusplus)
 }

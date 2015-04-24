@@ -57,6 +57,9 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_LIBGEN_H
 # include <libgen.h>
 #endif
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 
 #include "utils.h"
 
@@ -503,106 +506,22 @@ int mkdir_recursive (const char *path)
 		return S_ISDIR(sb.st_mode);
 }
 
-#if defined(DEAD_CODE)
-/* Concatenates two strings, reallocating the size of the first string as required */
-static char * concat(char **prefix_ptr, char *suffix)
+void ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
+	unsigned buffersize, char *buffer, const char *string)
 {
-   char *prefix = *prefix_ptr;
-   char *ret    = NULL;
+	assert (buffersize >= nprefix+nsufix+strlen(infix)+1);
 
-   if ((prefix == NULL) && (suffix == NULL))
-   {
-      ret = NULL;
-   }
-   else if (suffix == NULL)
-   {
-      ret = prefix;
-   }
-   else if (prefix == NULL)
-   {
-      xmalloc(prefix, strlen(suffix) + 1);
-      strcpy (prefix, suffix);
-      ret = prefix;
-   }
-   else
-   {
-      xrealloc(prefix, prefix, strlen(prefix)+strlen(suffix)+1);
-      strcat(prefix, suffix);
-      ret = prefix;
-   }
-   return ret;
+	memset (buffer, 0, buffersize);
+
+	/* Split if it does not fit */
+	if (strlen(string) >= nprefix+nsufix+strlen(infix))
+	{
+		strncpy (buffer, string, nprefix);
+		strncpy (&buffer[nprefix], infix, strlen(infix));
+		strncpy (&buffer[nprefix+strlen(infix)], &string[strlen(string)-nsufix], nsufix);
+	}
+	else
+	/* Copy if it fits */
+		strncpy (buffer, string, strlen(string));
 }
-
-/* Replaces the text between start and end delimiters for the return value of the callback 'function' */
-static char * expand(char *input, const char *start_delim, const char *end_delim, char *(*function)(const char *))
-{
-   char *str = NULL;
-   char *token = NULL;
-   char *begin = NULL;
-   char *end = NULL;
-   char *expanded_str = NULL;
-
-   if ( (input == NULL) || ((input != NULL) && (strlen(input) <= 0)) )
-   {
-      return NULL;
-   }
-
-   /* Copy the original string, since we're going to modify it */
-   xmalloc(str, strlen(input)+1);
-   strcpy(str, input);
-
-   token = str;
-   /* Search for starting delimiters */
-   while ((begin = strstr(token, start_delim)) != NULL)
-   {
-      /* Search for ending delimiter */
-      if ((end = strstr (begin, end_delim)) != NULL)
-      {
-         int var_name_length = 0;
-
-         /* Append to the output everything between the last delimiter and the current one */
-         *begin = '\0';
-         expanded_str = concat(&expanded_str, token);
-
-         /* Get the variable name, between begin and end */
-         var_name_length = end - begin - strlen(start_delim);
-         if (var_name_length > 0)
-         {
-            char *var_name = NULL;
-
-            xmalloc(var_name, var_name_length+1);
-            memset(var_name, '\0', var_name_length+1);
-            strncpy(var_name, begin + strlen(start_delim), var_name_length);
-
-            if (function != NULL)
-            {
-               char *var_replace = NULL;
-
-               var_replace = function((const char *)var_name);
-               if ((var_replace != NULL) && (strlen(var_replace) > 0))
-               {
-                  expanded_str = concat(&expanded_str, var_replace);
-               }
-               /* FIXME: var_replace is not freed, because the return value of getenv can't be touched.
-                * This is a small memory leak. When invoking a callback such as getenv we should 
-                * write a wrapper which copies the result to our own memory and free always.
-                */
-            }
-            xfree(var_name);
-         }
-         token = end + strlen(end_delim);
-      }
-      else
-      {
-         /* Bad syntax. Throw error? */
-         break;
-      }
-   }
-   /* Append the last part of the string */
-   expanded_str = concat(&expanded_str, token);
-
-   xfree(str);
-   return expanded_str;
-}
-#endif
 
