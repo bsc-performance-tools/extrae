@@ -38,16 +38,101 @@
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
 
 #include <mpi.h>
 
 #include "utils.h"
 #include "utils_mpi.h"
 
-/* Check whether a given directory exists for every process in
-	MPI_COMM_WORLD. All the processes receive the result */
+static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
+{
+	int rank, size;
+	PMPI_Comm_rank (MPI_COMM_WORLD, &rank);
+	PMPI_Comm_size (MPI_COMM_WORLD, &size);
 
-int ExtraeUtilsMPI_CheckSharedDisk (const char *directory)
+	if (size > 1)
+	{
+		int result;
+		int howmany;
+		char name[MPI_MAX_PROCESSOR_NAME];
+		char name_master[MPI_MAX_PROCESSOR_NAME];
+		int len;
+
+		if (rank == 0)
+		{
+			PMPI_Get_processor_name(name, &len);
+			PMPI_Bcast (name, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, 0, MPI_COMM_WORLD);
+		}
+		else
+			PMPI_Bcast (name_master, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+		if (rank == 0)
+		{
+			struct stat s;
+			int ret;
+			unsigned res = 1;
+			unsigned length = strlen(directory)+strlen("/shared-disk-testXXXXXX")+1;
+			char *template = malloc (length*sizeof(char));
+			if (!template)
+			{
+				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
+				exit (-1);
+			}
+			sprintf (template, "%s/shared-disk-testXXXXXX", directory);
+			ret = mkstemp (template);
+			if (ret < 0)
+			{
+				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to create temporal file!\n", directory);
+				exit (-1);
+			}
+			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
+			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
+			ret = stat (template, &s);
+			PMPI_Bcast (&s, sizeof(struct stat), MPI_CHAR, 0, MPI_COMM_WORLD);
+			PMPI_Reduce (&res, &howmany, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD);
+			unlink (template);
+			free (template);
+			result = howmany == size;
+			PMPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		}
+		else
+		{
+			struct stat s, master_s;
+			int ret;
+			unsigned res = 0;
+			char *template;
+			unsigned length;
+			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
+			template = malloc (length*sizeof(char));
+			if (!template)
+			{
+				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
+				exit (-1);
+			}
+			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
+			PMPI_Bcast (&master_s, sizeof(struct stat), MPI_CHAR, 0, MPI_COMM_WORLD);
+			ret = stat (template, &s);
+			res = ret == 0 &&
+			  (master_s.st_uid == s.st_uid) &&
+			  (master_s.st_gid == s.st_gid) &&
+			  (master_s.st_ino == s.st_ino) &&
+			  (master_s.st_mode == s.st_mode);
+			PMPI_Reduce (&res, NULL, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD);
+			free (template);
+			PMPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		}
+		return result;
+	}
+	else
+		return directory_exists(directory);
+}
+
+/* A "slower" alternative? */
+#if 0
+static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
 {
 	int rank, size;
 	PMPI_Comm_rank (MPI_COMM_WORLD, &rank);
@@ -131,3 +216,13 @@ int ExtraeUtilsMPI_CheckSharedDisk (const char *directory)
 	else
 		return directory_exists(directory);
 }
+#endif
+
+/* Check whether a given directory exists for every process in
+	MPI_COMM_WORLD. All the processes receive the result */
+
+int ExtraeUtilsMPI_CheckSharedDisk (const char *directory)
+{
+	return ExtraeUtilsMPI_CheckSharedDisk_stat (directory);
+}
+
