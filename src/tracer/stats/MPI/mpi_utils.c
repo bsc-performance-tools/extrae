@@ -1,6 +1,29 @@
+/*****************************************************************************\
+ *                        ANALYSIS PERFORMANCE TOOLS                         *
+ *                                   Extrae                                  *
+ *              Instrumentation package for parallel applications            *
+ *****************************************************************************
+ *     ___     This library is free software; you can redistribute it and/or *
+ *    /  __         modify it under the terms of the GNU LGPL as published   *
+ *   /  /  _____    by the Free Software Foundation; either version 2.1      *
+ *  /  /  /     \   of the License, or (at your option) any later version.   *
+ * (  (  ( B S C )                                                           *
+ *  \  \  \_____/   This library is distributed in hope that it will be      *
+ *   \  \__         useful but WITHOUT ANY WARRANTY; without even the        *
+ *    \___          implied warranty of MERCHANTABILITY or FITNESS FOR A     *
+ *                  PARTICULAR PURPOSE. See the GNU LGPL for more details.   *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public License  *
+ * along with this library; if not, write to the Free Software Foundation,   *
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA          *
+ * The GNU LEsser General Public License is contained in the file COPYING.   *
+ *                                 ---------                                 *
+ *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
+\*****************************************************************************/
+
 #include "mpi_utils.h"
 
-unsigned MPI_P2P_EVENT_TYPES[NUM_MPI_P2P_EVENT_TYPES] = {
+static unsigned MPI_P2P_EVENT_TYPES[NUM_MPI_P2P_EVENT_TYPES] = {
     MPI_BSEND_EV,
     MPI_SSEND_EV,
     MPI_SEND_EV,
@@ -42,7 +65,7 @@ unsigned MPI_P2P_EVENT_TYPES[NUM_MPI_P2P_EVENT_TYPES] = {
     MPI_IRSEND_EV,
 };
 
-unsigned MPI_COLLECTIVE_EVENT_TYPES[NUM_MPI_COLLECTIVE_EVENT_TYPES] = {
+static unsigned MPI_COLLECTIVE_EVENT_TYPES[NUM_MPI_COLLECTIVE_EVENT_TYPES] = {
     MPI_BARRIER_EV,
     MPI_BCAST_EV,
     MPI_IRECV_EV,
@@ -64,7 +87,7 @@ unsigned MPI_COLLECTIVE_EVENT_TYPES[NUM_MPI_COLLECTIVE_EVENT_TYPES] = {
 };
 
 
-unsigned MPI_OTHER_EVENT_TYPES[NUM_MPI_OTHER_EVENT_TYPES] = {
+static unsigned MPI_OTHER_EVENT_TYPES[NUM_MPI_OTHER_EVENT_TYPES] = {
     MPI_INIT_EV,
     MPI_FINALIZE_EV,
     MPI_CANCEL_EV,
@@ -91,7 +114,6 @@ unsigned MPI_OTHER_EVENT_TYPES[NUM_MPI_OTHER_EVENT_TYPES] = {
     MPI_PUT_EV,
     MPI_TIME_OUTSIDE_IPROBES_EV,
 };
-
 
 unsigned isMPI_Global(unsigned EvtType)
 {
@@ -124,5 +146,4 @@ unsigned isMPI_Others(unsigned EvtType)
             return TRUE;
     }
     return FALSE;
-
 }

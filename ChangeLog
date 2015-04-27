@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 27Apr2015 Support for MPI_UNDEFINED in mpi_stats & filtering
  * 23Apr2015 Upgrade to 3.1.0rc
              Missing MPI+OpenMP example installation
              Improve directory construction on shared disks

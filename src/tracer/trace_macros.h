@@ -49,7 +49,7 @@
    ((evttype) == MPI_BSEND_EV || (evttype) == MPI_SSEND_EV || (evttype) == MPI_RSEND_EV || \
     (evttype) == MPI_SEND_EV  || (evttype) == MPI_IRECVED_EV || (evttype) == MPI_RECV_EV)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
-    (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
+    (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL && ((long)evtarget) != MPI_UNDEFINED) 
 # define COMM_STATS_WRAPPER(x) \
     MPI_stats_Wrapper (x);
 #elif defined(PACX_SUPPORT)

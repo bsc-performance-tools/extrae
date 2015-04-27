@@ -133,7 +133,7 @@ void mpi_stats_sum(mpi_stats_t * base, mpi_stats_t * extra)
 void updateStats_P2P(mpi_stats_t * mpi_stats, int partner, int inputSize, int outputSize)
 {
    /* Weird cases: MPI_Sendrecv_Fortran_Wrapper */
-   if (mpi_stats != NULL && partner != MPI_PROC_NULL)
+   if (mpi_stats != NULL && partner != MPI_PROC_NULL && partner != MPI_UNDEFINED)
    {
       if (partner >= mpi_stats->ntasks || partner < 0)
       {
