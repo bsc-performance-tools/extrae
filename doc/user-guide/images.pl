@@ -2,18 +2,6 @@
 # Associate images original text with physical files.
 
 
-$key = q/{landscape}%latex2htmlidmarker4384table{{centerline{tabular{{|p{7cm}|p{14cm}|}hlablesavailabletoconfigure{sf{E}xtrae}}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
-$cached_env_img{$key} = q|<IMG
- WIDTH="990" HEIGHT="697" ALIGN="BOTTOM" BORDER="0"
- SRC="|."$dir".q|img3.png"
- ALT="\begin{landscape}
-% latex2html id marker 4384\begin{table}
-\centerline{
-\begin...
-...riables available to configure {\sf {E}xtrae} }
-\end{table}\par
-\end{landscape}">|; 
-
 $key = q/{figure}{centering{{psfig{figure=imagesslashextrae-post-installation.eps,width=12cm}{{{{figure};LFS=11;FSF=1.6;AAT/;
 $cached_env_img{$key} = q|<IMG
  WIDTH="542" HEIGHT="364" BORDER="0"
@@ -27,12 +15,24 @@ $cached_env_img{$key} = q|<IMG
  SRC="|."$dir".q|img2.png"
  ALT="$\$\ast$">|; 
 
-$key = q/{landscape}%latex2htmlidmarker4405{par{table{{centerline{tabular{{|p{7cm}|p{14cmoconfigure{sf{E}xtrae}({emcontinued})}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
+$key = q/{landscape}%latex2htmlidmarker4416table{{centerline{tabular{{p{7cm}p{14cm}}hlineablesavailabletoconfigure{sf{E}xtrae}}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
 $cached_env_img{$key} = q|<IMG
- WIDTH="990" HEIGHT="635" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="990" HEIGHT="663" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img3.png"
+ ALT="\begin{landscape}
+% latex2html id marker 4416\begin{table}
+\centerline{
+\begin...
+...riables available to configure {\sf {E}xtrae} }
+\end{table}\par
+\end{landscape}">|; 
+
+$key = q/{landscape}%latex2htmlidmarker4512{par{table{{centerline{tabular{{p{7cm}p{14cm}}oconfigure{sf{E}xtrae}({emcontinued})}{table{{par{{landscape};LFS=11;FSF=1.6;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="990" HEIGHT="578" ALIGN="BOTTOM" BORDER="0"
  SRC="|."$dir".q|img4.png"
  ALT="\begin{landscape}
-% latex2html id marker 4405\par
+% latex2html id marker 4512\par
 \begin{table}
 \centerline{
 \...

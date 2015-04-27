@@ -20,7 +20,15 @@
 \usepackage{pdflscape}
 \usepackage{fancyvrb}
 \usepackage{amsfonts}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+
+
 \definecolor{lightgray}{rgb}{0.75,0.75,0.75}
+\definecolor{tabbg1}{rgb}{0.85,0.85,0.85}
+\definecolor{tabfg1}{rgb}{0.0,0.0,0.0}
+\definecolor{tabbg2}{rgb}{0.95,0.95,0.95}
+\definecolor{tabfg2}{rgb}{0.0,0.0,0.0}
 
 
 \urlstyle{leostyle}
@@ -50,10 +58,6 @@
 
 
 \makeatletter
-\AtBeginDocument{\makeatletter
-\input /home/harald/development/extrae/trunk/doc/user-guide.aux
-\makeatother
-}
 
 \makeatletter
 \count@=\the\catcode`\_ \catcode`\_=8 
@@ -276,132 +280,41 @@
 \stepcounter{chapter}
 \stepcounter{chapter}
 {\newpage\clearpage
-\lthtmlfigureA{landscape4384}%
+\lthtmlfigureA{landscape4512}%
 \begin{landscape}
-% latex2html id marker 4384
-
-\begin{table}
-\centerline{
-\begin{tabular}{| p{7cm} | p{14cm} |}
-  \hline
-  {\bf Environment variable} & {\bf Description}\\
-  \hline
-  EXTRAE\_BUFFER\_SIZE & Set the number of records that the instrumentation buffer can\\
-                        &  hold before flushing them.\\
-  \hline
-  EXTRAE\_CIRCULAR\_BUFFER & {\em (deprecated)} \\
-  \hline
-  EXTRAE\_COUNTERS & See section \ref{subsec:ProcessorPerformanceCounters}. Just one set can be defined. Counters (in PAPI)\\
-                    & groups (in PMAPI) are given separated by commas.\\
-  \hline
-  EXTRAE\_CONTROL\_FILE & The instrumentation will be enabled only when the file pointed exists.\\
-  \hline
-  EXTRAE\_CONTROL\_GLOPS & Starts the instrumentation when the specified number of global collectives\\
-                         & have been executed.\\
-  \hline
-  EXTRAE\_CONTROL\_TIME & Checks the file pointed by {\tt EXTRAE\_CONTROL\_FILE} at this period.\\
-  \hline
-  EXTRAE\_DIR  & Specifies where temporal files will be created during\\
-               & instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_MPI & Disable MPI instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_OMP & Disable OpenMP instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_PTHREAD & Disable pthread instrumentation.\\
-  \hline
-  EXTRAE\_DISABLE\_PACX & Disable PACX instrumentation.\\
-  \hline
-  EXTRAE\_FILE\_SIZE & Set the maximum size (in Mbytes) for the intermediate trace file.\\
-  \hline
-  EXTRAE\_FUNCTIONS & List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
-                    & GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
-                    & option at compile and link time. \\
-  \hline
-  EXTRAE\_FUNCTIONS\_COUNTERS\_ON & Specify if the performance counters should be collected when a\\
-                                   & user function event is emitted.\\
-  \hline
-  EXTRAE\_FINAL\_DIR & Specifies where files will be stored when the application ends.\\
-  \hline
-  EXTRAE\_GATHER\_MPITS & Gather intermediate trace files into a single directory\\
-                        & (\em{this is only available when instrumenting MPI applications}).\\
-  \hline
-  EXTRAE\_HOME & Points where the {\sf {E}xtrae}\ is installed.\\
-  \hline
-  EXTRAE\_INITIAL\_MODE & Choose whether the instrumentation runs in in {\tt detail} or\\
-                        & in {\tt bursts} mode.\\
-  \hline
-  EXTRAE\_BURST\_THRESHOLD & Specify the threshold time to filter running bursts.\\
-  \hline
-  EXTRAE\_MINIMUM\_TIME & Specify the minimum amount of instrumentation time.\\
-  \hline
-\end{tabular}
-}
-\caption{Set of environment variables available to configure {\sf {E}xtrae}\ }
-\end{table}
-\par
-\end{landscape}%
-\lthtmlfigureZ
-\lthtmlcheckvsize\clearpage}
-
-{\newpage\clearpage
-\lthtmlfigureA{landscape4405}%
-\begin{landscape}
-% latex2html id marker 4405
+% latex2html id marker 4512
 
 \par
 \begin{table}
 \centerline{
-\begin{tabular}{| p{7cm} | p{14cm} |}
+\begin{tabular}{p{7cm} p{14cm}}
   \hline
   {\bf Environment variable} & {\bf Description}\\
 	\hline
-  EXTRAE\_MPI\_CALLER  & Choose which MPI calling routines should be dumped into the\\
-                       & tracefile.\\
-  \hline
-  EXTRAE\_MPI\_COUNTERS\_ON & Set to 1 if MPI must report performace counter values.\\
-  \hline 
-  EXTRAE\_MPI\_STATISTICS & Set to 1 if basic MPI statistics must be collected in burst mode\\
-                              & {\em (Only available in systems with Myrinet GM/MX networks)}.\\
-  \hline
-  EXTRAE\_NETWORK\_COUNTERS & Set to 1 to dump network performance counters at flush points.\\
-  \hline
-  EXTRAE\_PTHREAD\_COUNTERS\_ON & Set to 1 if pthread must report performance counters values. \\
-  \hline
-  EXTRAE\_OMP\_COUNTERS\_ON & Set to 1 if OpenMP must report performance counters values. \\
-  \hline
-  EXTRAE\_PTHREAD\_LOCKS & Set to 1 if pthread locks have to be instrumented.\\
-  \hline
-  EXTRAE\_OMP\_LOCKS & Set to 1 if OpenMP locks have to be instrumented.\\
-  \hline 
-  EXTRAE\_ON & Enables instrumentation\\
-  \hline
-  EXTRAE\_PACX\_CALLER & Choose which PACX calling routines should be dumped into the\\
-                       & tracefile.\\
-  \hline
-  EXTRAE\_PACX\_COUNTERS\_ON & Set to 1 if PACX must report performace counter values.\\
-  \hline 
-  EXTRAE\_PACX\_STATISTICS & Set to 1 if basic PACX statistics must be collected in burst mode.\\
-  \hline
-  EXTRAE\_PROGRAM\_NAME & Specify the prefix of the resulting intermediate trace files.\\
-  \hline
-  EXTRAE\_SAMPLING\_CALLER & Determines the callstack segment stored through time-sampling capabilities.\\
-  \hline
-  EXTRAE\_SAMPLING\_CLOCKTYPE & Determines domain for sampling clock. Options are: DEFAULT, REAL, VIRTUAL and PROF.\\
-  \hline
-  EXTRAE\_SAMPLING\_PERIOD & Enable time-sampling capabilities with the indicated period.\\
-  \hline
-  EXTRAE\_SAMPLING\_VARIABILITY & Adds some variability to the sampling period.\\
-  \hline
-  EXTRAE\_RUSAGE & Instrumentation emits resource usage at flush points if set to 1.\\
-  \hline
-  EXTRAE\_SPU\_DMA\_CHANNEL & Choose the SPU-PPU dma communication channel.\\
-  \hline
-  EXTRAE\_SPU\_BUFFER\_SIZE & Set the buffer size of the SPU side.\\
-  \hline 
-  EXTRAE\_SPU\_FILE\_SIZE & Set the maximum size for the SPU side (default: 5Mbytes).\\
-  \hline
-  EXTRAE\_TRACE\_TYPE & Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
+  \cellcolor{tabbg2} EXTRAE\_MPI\_CALLER  & \cellcolor{tabbg2} Choose which MPI calling routines should be dumped into the tracefile.\\
+  \cellcolor{tabbg1} EXTRAE\_MPI\_COUNTERS\_ON & \cellcolor{tabbg1} Set to 1 if MPI must report performace counter values.\\
+  \cellcolor{tabbg2} & \cellcolor{tabbg2} Set to 1 if basic MPI statistics must be collected in burst mode\\
+  \cellcolor{tabbg2} \multirow{-2}{*}{EXTRAE\_MPI\_STATISTICS} & \cellcolor{tabbg2} {\em (Only available in systems with Myrinet GM/MX networks)}.\\
+  \cellcolor{tabbg1} EXTRAE\_NETWORK\_COUNTERS & \cellcolor{tabbg1}  Set to 1 to dump network performance counters at flush points.\\
+  \cellcolor{tabbg2} EXTRAE\_PTHREAD\_COUNTERS\_ON & \cellcolor{tabbg2} Set to 1 if pthread must report performance counters values. \\
+  \cellcolor{tabbg1} EXTRAE\_OMP\_COUNTERS\_ON & \cellcolor{tabbg1} Set to 1 if OpenMP must report performance counters values. \\
+  \cellcolor{tabbg2} EXTRAE\_PTHREAD\_LOCKS & \cellcolor{tabbg2} Set to 1 if pthread locks have to be instrumented.\\
+  \cellcolor{tabbg1} EXTRAE\_OMP\_LOCKS & \cellcolor{tabbg1} Set to 1 if OpenMP locks have to be instrumented.\\
+  \cellcolor{tabbg2} EXTRAE\_ON & \cellcolor{tabbg2} Enables instrumentation\\
+  \cellcolor{tabbg1} EXTRAE\_PACX\_CALLER & \cellcolor{tabbg1} Choose which PACX calling routines should be dumped into the tracefile.\\
+  \cellcolor{tabbg2} EXTRAE\_PACX\_COUNTERS\_ON & \cellcolor{tabbg2} Set to 1 if PACX must report performace counter values.\\
+  \cellcolor{tabbg1} EXTRAE\_PACX\_STATISTICS & \cellcolor{tabbg1} Set to 1 if basic PACX statistics must be collected in burst mode.\\
+  \cellcolor{tabbg2} EXTRAE\_PROGRAM\_NAME & \cellcolor{tabbg2} Specify the prefix of the resulting intermediate trace files.\\
+  \cellcolor{tabbg1} EXTRAE\_SAMPLING\_CALLER & \cellcolor{tabbg1} Determines the callstack segment stored through time-sampling capabilities.\\
+  \cellcolor{tabbg2} & \cellcolor{tabbg2} Determines domain for sampling clock.\\
+  \cellcolor{tabbg2} \multirow{-2}{*}{EXTRAE\_SAMPLING\_CLOCKTYPE} & \cellcolor{tabbg2} Options are: DEFAULT, REAL, VIRTUAL and PROF.\\
+  \cellcolor{tabbg1} EXTRAE\_SAMPLING\_PERIOD & \cellcolor{tabbg1} Enable time-sampling capabilities with the indicated period.\\
+  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_VARIABILITY & \cellcolor{tabbg2} Adds some variability to the sampling period.\\
+  \cellcolor{tabbg1} EXTRAE\_RUSAGE & \cellcolor{tabbg1} Instrumentation emits resource usage at flush points if set to 1.\\
+  \cellcolor{tabbg2} EXTRAE\_SPU\_DMA\_CHANNEL & \cellcolor{tabbg2} Choose the SPU-PPU dma communication channel.\\
+  \cellcolor{tabbg1} EXTRAE\_SPU\_BUFFER\_SIZE & \cellcolor{tabbg1} Set the buffer size of the SPU side.\\
+  \cellcolor{tabbg2} EXTRAE\_SPU\_FILE\_SIZE & \cellcolor{tabbg2} Set the maximum size for the SPU side (default: 5Mbytes).\\
+  \cellcolor{tabbg1} EXTRAE\_TRACE\_TYPE & \cellcolor{tabbg1} Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
   \hline
 \end{tabular}
 }

@@ -16,17 +16,15 @@ In order to use Paraver, those intermediate files ({\it i.e.}, {\tt .mpit} files
 The target trace type is defined in the XML configuration file used at the instrumentation step (see section \ref{sec:XMLSectionTraceConfiguration}), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters {\tt -paraver} or {\tt -dimemas}\footnote{The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.}.
 
 \begin{table}[ht]
+\rowcolors{2}{tabbg1}{tabbg2}
 \centerline {
-\begin{tabular}{| l | l |}
+\begin{tabular}{l l}
 \hline
 {\bf Binary} & {\bf Description} \\
 \hline
 mpi2prv      & Sequential version of the Paraver merger.\\
-\hline
 mpi2dim      & Sequential version of the Dimemas merger.\\
-\hline
 mpimpi2prv   & Parallel version of the Paraver merger.\\
-\hline
 mpimpi2dim   & Parallel version of the Dimemas merger.\\
 \hline
 \end{tabular}

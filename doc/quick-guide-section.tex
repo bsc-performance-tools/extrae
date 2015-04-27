@@ -18,22 +18,18 @@ The package is distributed in compressed tar format (e.g., extrae.tar.gz).  To u
 The unpacking process will create different directories on the current directory (see table \ref{tab:PackageDescription}).
 
 \begin{table}[!ht]
+\rowcolors{2}{tabbg1}{tabbg2}
 \centerline {
-\begin{tabular}{| l | l |}
+\begin{tabular}{l l}
 \hline
 {\bf Directory}     & {\bf Contents} \\
 \hline
 bin           & Contains the binary files of the \TRACE tool.\\
-\hline
 etc           & Contains some scripts to set up environment variables and the\\
               & \TRACE internal files.\\
-\hline
 lib           & Contains the \TRACE tool libraries.\\
-\hline
 share/man     & Contains the \TRACE manual entries.\\
-\hline
 share/doc     & Contains the \TRACE manuals (pdf, ps and html versions).\\
-\hline
 share/example & Contains examples to illustrate the \TRACE instrumentation.\\
 \hline
 \end{tabular}
@@ -131,43 +127,31 @@ If needed, set the application environment variables as usual (like {\tt OMP\_NU
 
 where {\tt <lib>} is one of those listed in Table \ref{tab:AvailableExtraeLIBS}. 
 
-\begin{table}[!ht]
+\begin{table}[!ht] \small
  \centering
-  \scalebox{0.80}{
-  \begin{tabular}{| l | c | c | c | c | c | c | c | c | c |}
+  \rowcolors{3}{tabbg1}{tabbg2}
+  \scalebox{0.85}{
+  \begin{tabular}{l c c c c c c c c c}
   \hline
-  {\bf Library}              & \multicolumn{9}{| c |}{{\bf Application type}} \\
+  {\bf Library}              & \multicolumn{9}{c}{{\bf Application type}} \\
   \hline
                              & {\bf Serial} & {\bf MPI} & {\bf OpenMP} & {\bf pthread} & {\bf SMPss} & {\bf nanos/OMPss} & {\bf CUDA} & {\bf OpenCL} & {\bf Java} \\
   \hline
   {\tt libseqtrace}          & Yes \checkmark & & & & & & & & \\
-  \hline
   {\tt libmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & & & \\
-  \hline
   {\tt libomptrace}          & & & Yes \checkmark & & & & & & \\
-  \hline
   {\tt libpttrace}           & & & & Yes \checkmark & & & & & \\
-  \hline
   {\tt libsmpsstrace}        & & & & & Yes \checkmark & & & & \\
-  \hline
   {\tt libnanostrace}        & & & & & & Yes \checkmark & & & \\
-  \hline
   {\tt libcudatrace}         & & & & & & & Yes \checkmark & & \\
-  \hline
   {\tt libocltrace}          & & & & & & & & Yes \checkmark & \\
-  \hline
   {\tt javaseqtrace.jar}     & & & & & & & & & Yes \checkmark \\
-  \hline
   {\tt libompitrace}\footnotemark[2] & & Yes \checkmark & Yes \checkmark & & & & & & \\
-  \hline
   {\tt libptmpitrace}\footnotemark[2] & & Yes \checkmark & & Yes \checkmark & & & & & \\
-  \hline
   {\tt libsmpssmpitrace}\footnotemark[2] & & Yes \checkmark & & & Yes \checkmark & & & & \\
-  \hline
   {\tt libnanosmpitrace}\footnotemark[2] & & Yes \checkmark & & & & Yes \checkmark & & & \\
-  \hline
   {\tt libcudampitrace}\footnotemark[2] & & Yes \checkmark & & & & & Yes \checkmark & & \\
-  \hline
+  {\tt libcudaompitrace}\footnotemark[2] & & Yes \checkmark & Yes \checkmark & & & & Yes \checkmark & & \\
   {\tt liboclmpitrace}\footnotemark[2] & & Yes \checkmark & & & & & & Yes \checkmark & \\
   \hline
   \end{tabular}
