@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+  * 27Apr2015 Fixed Makefile rules for the pyextrae script. It is now
+  installed in libexec instead of lib.
  * 27Apr2015 Support for MPI_UNDEFINED in mpi_stats & filtering
  * 23Apr2015 Upgrade to 3.1.0rc
              Missing MPI+OpenMP example installation

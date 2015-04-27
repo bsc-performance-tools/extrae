@@ -34,7 +34,7 @@ endif
 endif
 
 PYTHON_MODULE = pyextrae.py
-noinst_SCRIPTS = $(PYTHON_MODULE)
+nodist_libexec_SCRIPTS = $(PYTHON_MODULE)
 EXTRA_DIST = $(PYTHON_MODULE).in
 
 $(PYTHON_MODULE): $(PYTHON_MODULE).in
@@ -46,9 +46,5 @@ else
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_event $@
 endif
 
-install-data-hook:
-	$(MKDIR_P) $(prefix)/lib
-	cp $(PYTHON_MODULE) $(prefix)/lib
+CLEANFILES = $(PYTHON_MODULE)
 
-clean-local:
-	rm -f $(PYTHON_MODULE)
