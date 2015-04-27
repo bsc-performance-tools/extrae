@@ -543,17 +543,17 @@ AC_DEFUN([AX_PROG_BINUTILS],
    fi
 
    if test "${BFD_LIBSDIR}" = "" ; then
-      AC_MSG_NOTICE([Warning! Cannot find the libbfd library in the given binutils home. Please, make sure that the binutils packages is correctly installed.])
+      AC_MSG_NOTICE([Warning! Cannot find the libbfd library in the given binutils home. Please, make sure that the binutils packages is correctly installed. If you have installed the binutils package by hand from their source code, make sure to add --enable-shared in its configure execution.])
    else
       AC_MSG_NOTICE([libbfd library directory: ${BFD_LIBSDIR}])
    fi
    if test "${LIBERTY_LIBSDIR}" = "" ; then
-      AC_MSG_NOTICE([Warning! Cannot find the libiberty library in the given binutils home. Please, make sure that the binutils packages is correctly installed.])
+      AC_MSG_NOTICE([Warning! Cannot find the libiberty library in the given binutils home. Please, make sure that the binutils packages is correctly installed. If you have installed the binutils package by hand from their source code, make sure that libibert is installed. Some releases of the binutils package do not install the libibery even invoking make install. The library should be within the libiberty directory within the binutils source tree.])
    else
       AC_MSG_NOTICE([libiberty library directory: ${LIBERTY_LIBSDIR}])
    fi
-   if test "${binutils_paths}" != "${binutils_default_paths}" -a "${binutils_home_dir}" = "not found" ; then
-      AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed. Also, if you want to generate shared libraries check for the existance of the libbfd.so library])
+   if test "${binutils_paths}" != "${binutils_default_paths}" -a "${binutils_home_dir}" = "notfound" ; then
+      AC_MSG_ERROR([Error! Cannot find binutils home in the given path! Check for the previous warning messages. Check for the given path or whether the binutils development packages -binutils-dev or binutils-devel- are installed.])
    fi
 
    AX_FLAGS_SAVE()
