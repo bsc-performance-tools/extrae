@@ -428,7 +428,7 @@ if WANT_NANOS
 endif
 if WANT_OPENMP
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMP
-	cp -f $(MPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
+	cp -fr $(MPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
 endif
 endif
 if WANT_OPENMP
