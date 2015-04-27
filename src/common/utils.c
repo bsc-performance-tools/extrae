@@ -506,7 +506,7 @@ int mkdir_recursive (const char *path)
 		return S_ISDIR(sb.st_mode);
 }
 
-void ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
+int ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
 	unsigned buffersize, char *buffer, const char *string)
 {
 	assert (buffersize >= nprefix+nsufix+strlen(infix)+1);
@@ -519,9 +519,13 @@ void ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *
 		strncpy (buffer, string, nprefix);
 		strncpy (&buffer[nprefix], infix, strlen(infix));
 		strncpy (&buffer[nprefix+strlen(infix)], &string[strlen(string)-nsufix], nsufix);
+		return TRUE;
 	}
 	else
-	/* Copy if it fits */
+	{
+		/* Copy if it fits */
 		strncpy (buffer, string, strlen(string));
+		return 0;
+	}
 }
 
