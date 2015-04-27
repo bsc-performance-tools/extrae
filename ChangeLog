@@ -1,9 +1,11 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
-  * 27Apr2015 Fixed Makefile rules for the pyextrae script. It is now
+  *27Apr2015 Fixed Makefile rules for the pyextrae script. It is now
   installed in libexec instead of lib.
- * 27Apr2015 Support for MPI_UNDEFINED in mpi_stats & filtering
+             Support for MPI_UNDEFINED in mpi_stats & filtering
+             Promoted usage of stat instead of open+read to check for shared
+               dirs among MPI processes
  * 23Apr2015 Upgrade to 3.1.0rc
              Missing MPI+OpenMP example installation
              Improve directory construction on shared disks
