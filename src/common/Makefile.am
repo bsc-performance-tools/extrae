@@ -1,4 +1,6 @@
+if HAVE_MPI
 SUBDIRS = MPI
+endif
 
 include $(top_srcdir)/PATHS
 
