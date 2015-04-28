@@ -39,9 +39,11 @@ static char UNUSED rcsid[] = "$Id: papi_best_set.c 890 2011-11-30 10:58:56Z hara
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 
- #include <papi.h>
-
+#include <papi.h>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -90,8 +92,10 @@ bool checkCounters (const vector<string> &omnicounters,
 void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 	vector<string> &counters)
 {
+	assert (counters.size() < 64); // We cannot handle 64 or more counters
+
 	bitset<MAXBITSET> bitmask (0);
-	bitset<MAXBITSET> max_value ( 1 << counters.size() );
+	bitset<MAXBITSET> max_value ( 1ULL << counters.size() );
 	bitset<MAXBITSET> max_combination;
 
 	while (bitmask != max_value)
@@ -293,6 +297,14 @@ int main (int argc, char *argv[])
 	cout << endl;
 
 	size_t ncounters, prevncounters = Counters.size();
+
+	if (ncounters >= 64)
+	{
+		cerr << endl <<
+		  "Sorry, we cannot handle 64 or more performance counters at this moment." << endl;
+		exit (-3);
+	}
+
 	unsigned neventset = 1;
 	do
 	{
