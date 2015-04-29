@@ -44,6 +44,7 @@ static char UNUSED rcsid[] = "$Id: papi_best_set.c 890 2011-11-30 10:58:56Z hara
 #endif
 
 #include <papi.h>
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -92,10 +93,10 @@ bool checkCounters (const vector<string> &omnicounters,
 void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 	vector<string> &counters)
 {
-	assert (counters.size() < 64); // We cannot handle 64 or more counters
+	assert (counters.size() < 63); // We cannot handle values larger than 64 bits!
 
 	bitset<MAXBITSET> bitmask (0);
-	bitset<MAXBITSET> max_value ( 1ULL << counters.size() );
+	bitset<MAXBITSET> max_value (1ULL << counters.size());
 	bitset<MAXBITSET> max_combination;
 
 	while (bitmask != max_value)
@@ -125,13 +126,17 @@ void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 	cout << "<set enabled=\"yes\" domain=\"all\" changeat-time=\"500000us\">" << endl
 	     << "  ";
 
-	for (size_t i = 0; i < omnicounters.size()-1; i++)
-		cout << omnicounters[i] << ",";
-	cout << omnicounters[omnicounters.size()-1];
+	if (omnicounters.size() > 0)
+	{
+		for (size_t i = 0; i < omnicounters.size()-1; i++)
+			cout << omnicounters[i] << ",";
+		cout << omnicounters[omnicounters.size()-1];
+	}
 	
 	if (max_combination.count() > 0)
 	{
-		cout << ",";
+		if (omnicounters.size() > 0)
+			cout << ",";
 
 		bitset<MAXBITSET> max = max_combination;
 		size_t i = 0;
@@ -164,8 +169,6 @@ void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 	cout << endl << "</set>" << endl;
 #endif
 }
-
-
 
 void addCounters (char *ctr, vector<string> & counters)
 {
@@ -232,6 +235,7 @@ int main (int argc, char *argv[])
 {
 	int rc;
 	int i;
+	vector<string> omnipresentCounters_tmp, Counters_tmp;
 
 	if (argc < 2)
 	{
@@ -262,10 +266,10 @@ int main (int argc, char *argv[])
 		{
 			i++;
 			if (i < argc)
-				addCounters (argv[i], omnipresentCounters);
+				addCounters (argv[i], omnipresentCounters_tmp);
 		}
 		else
-			addCounters (argv[i], Counters);
+			addCounters (argv[i], Counters_tmp);
 
 		i++;
 	}
@@ -279,11 +283,19 @@ int main (int argc, char *argv[])
 	vector<string>::iterator it;
 	unsigned num_events = 0;
 	cout << endl << "** Checking the following omnipresent counters:" << endl;
-	for (it = omnipresentCounters.begin(); it != omnipresentCounters.end(); it++)
-		num_events += dumpEventCtrInfo ((*it).c_str());
+	for (it = omnipresentCounters_tmp.begin(); it != omnipresentCounters_tmp.end(); it++)
+		if (dumpEventCtrInfo ((*it).c_str()))
+		{
+			omnipresentCounters.push_back (*it);
+			num_events++;
+		}
 	cout << endl << "** Checking the following counters:" << endl;
-	for (it = Counters.begin(); it != Counters.end(); it++)
-		num_events += dumpEventCtrInfo ((*it).c_str());
+	for (it = Counters_tmp.begin(); it != Counters_tmp.end(); it++)
+		if (dumpEventCtrInfo ((*it).c_str()))
+		{
+			Counters.push_back (*it);
+			num_events++;
+		}
 
 	if (num_events == 0)
 	{
@@ -294,17 +306,16 @@ int main (int argc, char *argv[])
 		     "to get a list from the available counters in the system." << endl;
 		exit (-2);
 	}
-	cout << endl;
-
-	size_t ncounters, prevncounters = Counters.size();
-
-	if (ncounters >= 64)
+	else if (ncounters >= 64)
 	{
 		cerr << endl <<
 		  "Sorry, we cannot handle 64 or more performance counters at this moment." << endl;
 		exit (-3);
 	}
 
+	cout << endl;
+
+	size_t ncounters, prevncounters = Counters.size();
 	unsigned neventset = 1;
 	do
 	{
