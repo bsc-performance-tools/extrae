@@ -306,7 +306,7 @@ int main (int argc, char *argv[])
 		     "to get a list from the available counters in the system." << endl;
 		exit (-2);
 	}
-	else if (ncounters >= 64)
+	else if (num_events >= 64)
 	{
 		cerr << endl <<
 		  "Sorry, we cannot handle 64 or more performance counters at this moment." << endl;
