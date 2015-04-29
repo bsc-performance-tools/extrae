@@ -91,8 +91,8 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
 			ret = stat (template, &s);
-			PMPI_Bcast (&s, sizeof(struct stat), MPI_CHAR, 0, MPI_COMM_WORLD);
-			PMPI_Reduce (&res, &howmany, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD);
+			PMPI_Bcast (&s, sizeof(struct stat), MPI_BYTE, 0, MPI_COMM_WORLD);
+			PMPI_Reduce (&res, &howmany, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 			unlink (template);
 			free (template);
 			result = howmany == size;
@@ -101,8 +101,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 		else
 		{
 			struct stat s, master_s;
-			int ret;
-			unsigned res = 0;
+			int ret, res;
 			char *template;
 			unsigned length;
 			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
@@ -113,14 +112,14 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 				exit (-1);
 			}
 			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
-			PMPI_Bcast (&master_s, sizeof(struct stat), MPI_CHAR, 0, MPI_COMM_WORLD);
+			PMPI_Bcast (&master_s, sizeof(struct stat), MPI_BYTE, 0, MPI_COMM_WORLD);
 			ret = stat (template, &s);
 			res = ret == 0 &&
 			  (master_s.st_uid == s.st_uid) &&
 			  (master_s.st_gid == s.st_gid) &&
 			  (master_s.st_ino == s.st_ino) &&
 			  (master_s.st_mode == s.st_mode);
-			PMPI_Reduce (&res, NULL, 1, MPI_UNSIGNED, MPI_SUM, 0, MPI_COMM_WORLD);
+			PMPI_Reduce (&res, NULL, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 			free (template);
 			PMPI_Bcast (&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		}
