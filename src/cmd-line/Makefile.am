@@ -13,7 +13,12 @@ extrae_cmd_CFLAGS = -I$(INCLUDE_DIR) -I$(COMMON_INC) -I$(TRACER_INC) \
 
 extrae_cmd_LDADD = $(TRACER_LIB)/libseqtrace.la $(MERGER_LIB)/libmpi2prv.la $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS) -lm
 
+extrae_cmd_LDFLAGS = @PAPI_LDFLAGS@ @PAPI_LIBS@
 if IS_BG_MACHINE
+extrae_cmd_LDFLAGS += -all-static -L@PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
 extrae_cmd_LDADD += $(XML2_LDFLAGS) $(XML2_LIBS)
-extrae_cmd_LDFLAGS = -all-static
+else
+if !HAVE_PAPI_EMBEDDED
+extrae_cmd_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+endif
 endif
