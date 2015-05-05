@@ -42,6 +42,9 @@ static char UNUSED rcsid[] = "$Id: papi_best_set.c 890 2011-11-30 10:58:56Z hara
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_LIBGEN_H
+# include <libgen.h>
+#endif
 
 #include <papi.h>
 
@@ -56,7 +59,21 @@ using namespace std;
 
 static vector<string> omnipresentCounters, Counters;
 
-bool checkCounters (const vector<string> &omnicounters,
+#if PAPI_VERSION_MAJOR(PAPI_VERSION) < 5
+/* Provide our own PAPI_add_named_event if we're on PAPI pre-5 */
+static int PAPI_add_named_event (int EventSet, char *counter)
+{
+	int rc;
+	int EventCode;
+
+	if ((rc = PAPI_event_name_to_code (counter, &EventCode)) != PAPI_OK)
+		return rc;
+
+	return PAPI_add_event (EventSet, EventCode);
+}
+#endif
+
+static bool checkCounters (const vector<string> &omnicounters,
 	const vector<string> &counters, const bitset<MAXBITSET> &bitmask)
 {
 	unsigned i;
@@ -90,7 +107,7 @@ bool checkCounters (const vector<string> &omnicounters,
      Search the eventset with the maximum events added.
      Uses a bitmask to generate all the possible combinations.
 */
-void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
+static void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 	vector<string> &counters)
 {
 	assert (counters.size() < 63); // We cannot handle values larger than 64 bits!
@@ -170,7 +187,7 @@ void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicounters,
 #endif
 }
 
-void addCounters (char *ctr, vector<string> & counters)
+static void addCounters (char *ctr, vector<string> & counters)
 {
 	string s_ctr (ctr);
 
@@ -184,7 +201,7 @@ void addCounters (char *ctr, vector<string> & counters)
 	counters.push_back (s_ctr);
 }
 
-unsigned dumpEventCtrInfo (const char *ctr)
+static unsigned dumpEventCtrInfo (const char *ctr)
 {
 	PAPI_event_info_t info;
 	int Event;
