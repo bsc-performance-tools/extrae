@@ -120,7 +120,9 @@ else
    wanted_CXX_Compilers="g++ xlC icpc CC"
 fi
 AC_PROG_CC(${wanted_C_Compilers})
-AX_COMPILER_VERSION
+if test "${IS_SPARC64_MACHINE}" != "yes" ; then
+	AX_COMPILER_VERSION
+fi
 AC_PROG_CXX(${wanted_CXX_Compilers})
 AC_PROG_CPP
 AC_PROG_FC(${wanted_F_Compilers})
