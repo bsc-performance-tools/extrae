@@ -2058,7 +2058,7 @@ void NAME_ROUTINE_F(mpi_intercomm_create) (MPI_Fint * local_comm,
 	MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader,
 	MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_intercomm_create) (MPI_Fint *local_comm
+void NAME_ROUTINE_C2F(mpi_intercomm_create) (MPI_Fint *local_comm,
 	MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader,
 	MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror)
 #endif
