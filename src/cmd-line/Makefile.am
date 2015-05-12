@@ -15,10 +15,14 @@ extrae_cmd_LDADD = $(TRACER_LIB)/libseqtrace.la $(MERGER_LIB)/libmpi2prv.la $(BF
 
 extrae_cmd_LDFLAGS = @PAPI_LDFLAGS@ @PAPI_LIBS@
 if IS_BG_MACHINE
+if HAVE_PAPI
 extrae_cmd_LDFLAGS += -all-static -L@PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+endif
 extrae_cmd_LDADD += $(XML2_LDFLAGS) $(XML2_LIBS)
 else
+if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
 extrae_cmd_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+endif
 endif
 endif
