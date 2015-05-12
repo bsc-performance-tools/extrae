@@ -91,6 +91,8 @@
 
   <input-output enabled="no" />
 
+  <cuda enabled="yes" />
+
   <merge enabled="yes" 
     synchronization="default"
     tree-fan-out="16"
