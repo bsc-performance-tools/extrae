@@ -404,9 +404,11 @@ AC_DEFUN([AX_PROG_XML2],
 
    XML2_LIBS="-lxml2"
    if test -f ${XML2_HOME}/lib${BITS}/libxml2.so -o \
+           -f ${XML2_HOME}/lib${BITS}/libxml2.dylib -o \
            -f ${XML2_HOME}/lib${BITS}/libxml2.a ; then
-      XML2_LIBSDIR="${XML2_HOME}/lib${BITS}"
+		XML2_LIBSDIR="${XML2_HOME}/lib${BITS}"
    elif test -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.so -o \
+             -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.dylib -o \
              -f ${XML2_HOME}/lib/${multiarch_triplet}/libxml2.a ; then
 		XML2_LIBSDIR="${XML2_HOME}/lib/${multiarch_triplet}"
    else
@@ -474,9 +476,9 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
       for binutils_home_dir in [${binutils_paths} "notfound"]; do
    
-         if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" ; then
+         if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" -o -r "${binutils_home_dir}/lib${BITS}/libbfd.dylib" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.so" ; then
+         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.so" -o -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.dylib" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
          elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib"
@@ -516,15 +518,15 @@ AC_DEFUN([AX_PROG_BINUTILS],
             fi
          fi
    
-         if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" ; then
+         if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" -o -r "${binutils_home_dir}/lib${BITS}/libiberty.dylib" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
          elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
          elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.so" ; then
+         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.so" -o -r "${binutils_home_dir}/lib/${multiarch_triplet}/libiberty.dylib"; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-         elif test -r "${binutils_home_dir}/lib/libiberty.so" ; then
+         elif test -r "${binutils_home_dir}/lib/libiberty.so" -o -r "${binutils_home_dir}/lib/libiberty.dylib" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
