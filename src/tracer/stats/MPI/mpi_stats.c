@@ -133,25 +133,36 @@ void mpi_stats_sum(mpi_stats_t * base, mpi_stats_t * extra)
 void updateStats_P2P(mpi_stats_t * mpi_stats, int partner, int inputSize, int outputSize)
 {
    /* Weird cases: MPI_Sendrecv_Fortran_Wrapper */
-   if (mpi_stats != NULL && partner != MPI_PROC_NULL && partner != MPI_UNDEFINED)
+   if (mpi_stats != NULL)
    {
-      if (partner >= mpi_stats->ntasks || partner < 0)
-      {
-        fprintf(stderr, "[DEBUG] OUT_OF_SCOPE partner=%d/%d\n", partner, mpi_stats->ntasks);
-      }
-
       mpi_stats->P2P_Communications ++;
       if (inputSize)
       {    
           mpi_stats->P2P_Bytes_Recv += inputSize;
           mpi_stats->P2P_Communications_In ++;
-          mpi_stats->P2P_Partner_In[partner] ++;
+          if (partner != MPI_PROC_NULL && partner != MPI_ANY_SOURCE && 
+              partner != MPI_UNDEFINED)
+          {
+              if (partner < mpi_stats->ntasks)
+                  mpi_stats->P2P_Partner_In[partner] ++;
+              else
+                  fprintf(stderr, "[DEBUG] OUT_OF_RANGE partner=%d/%d\n",
+                    partner, mpi_stats->ntasks);
+          }
       }    
       if (outputSize)
       {    
           mpi_stats->P2P_Bytes_Sent += outputSize;
           mpi_stats->P2P_Communications_Out ++;
-          mpi_stats->P2P_Partner_Out[partner] ++;
+          if (partner != MPI_PROC_NULL && partner != MPI_ANY_SOURCE && 
+              partner != MPI_UNDEFINED)
+          {
+              if (partner < mpi_stats->ntasks)
+                  mpi_stats->P2P_Partner_Out[partner] ++;
+              else
+                  fprintf(stderr, "[DEBUG] OUT_OF_RANGE partner=%d/%d\n",
+                    partner, mpi_stats->ntasks);
+          }
       }    
    }
 }
