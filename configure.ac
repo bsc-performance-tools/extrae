@@ -579,10 +579,12 @@ AX_CHECK_ENDIANNESS
 AX_CHECK__FUNCTION__MACRO
 
 # Select compiler-specific flags to print warnings
-AX_CFLAGS_WARN_ALL
-AX_CXXFLAGS_WARN_ALL
-#AX_CFLAGS_WARN_ALL_ANSI
-#AX_CXXFLAGS_WARN_ALL_ANSI
+if test "${IS_SPARC64_MACHINE}" != "yes" ; then 
+	AX_CFLAGS_WARN_ALL
+	AX_CXXFLAGS_WARN_ALL
+	#AX_CFLAGS_WARN_ALL_ANSI
+	#AX_CXXFLAGS_WARN_ALL_ANSI
+fi
 
 # Test whether the compiler accepts function inlining
 AC_C_INLINE
