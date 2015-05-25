@@ -1,6 +1,11 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 25May2015 Extrae 3.1.0 released
+ * 25May2015 Fixes for bootstrapping, changed into autoreconf.
+             Added libxml2's m4 file into config/
+ * 20May2015 Fujitsu compiler does not have -Wall or similar flag 
+ * 05May2015 Fixes for K computer
  * 28Apr2015 papi_best_set cannot support 64 or more counters 
  * 27Apr2015 Fixed Makefile rules for the pyextrae script. It is now
              installed in libexec instead of lib.
