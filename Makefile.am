@@ -5,6 +5,7 @@ SUBDIRS += doc
 endif
 
 EXTRA_DIST = \
+  bootstrap \
   ChangeLog \
   example \
   INSTALL-examples \
