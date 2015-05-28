@@ -1,0 +1,9 @@
+If you have installed Extrae with DynInst support you can use automatic instrumentation of uninstrumented binaries as shown in the script
+
+  run_dyninst.sh
+
+When using DynInst-based instrumentation you can easily add instrumentation to the application. In the XML configuration file there is a reference to function-list file that points to routines within the application to be instrumented.
+
+If you don't use DynInst-based instrumentation, you need some code modifications (i.e., adding Extrae_init and Extrae_fini calls) and run the application like in
+
+  run_static.sh

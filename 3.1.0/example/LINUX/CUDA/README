@@ -1,0 +1,10 @@
+To execute this simple hello world test just,
+
+  a) make the binary issuing "make"
+
+  and then
+
+  b) execute the run-instrumented.sh command for non dyninst-based installations or run-dyninst.sh for dyninst-based installations.
+
+The latter command will run the application and merge the resulting intermediate tracefiles into a single Paraver tracefile.
+

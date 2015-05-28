@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#BSUB -n 1
+#BSUB -oo merge.out
+#BSUB -eo merge.err
+#BSUB -W 00:10
+
+export EXTRAE_HOME=@sub_PREFIXDIR@
+
+${EXTRAE_HOME}/bin/mpi2prv -syn -f TRACE.mpits -e ./mpi_ping -o trace.prv
+
