@@ -34,7 +34,7 @@ online_root_bin_CXXFLAGS = \
   -I$(COMMON_INC) -I$(TRACER_INC) \
   `@MRNETAPP_CONFIG@ --fe-cflags` $(CONTAINERS_INCLUDES)
 online_root_bin_LDFLAGS = \
-  `@MRNETAPP_CONFIG@ --fe-libs` 
+  `@MRNETAPP_CONFIG@ --fe-libs` `@MRNETAPP_CONFIG@ --rpath`
 
 if HAVE_XML2
 online_root_bin_CFLAGS   += @XML2_CFLAGS@
@@ -87,7 +87,7 @@ libonline_la_CXXFLAGS  = \
   `@MRNETAPP_CONFIG@ --be-cflags`
 
 libonline_la_LDFLAGS   = \
-  `@MRNETAPP_CONFIG@ --be-libs`
+  `@MRNETAPP_CONFIG@ --be-libs` `@MRNETAPP_CONFIG@ --rpath`
 
 if HAVE_XML2
 libonline_la_CFLAGS += @XML2_CFLAGS@
