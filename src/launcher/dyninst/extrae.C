@@ -817,6 +817,7 @@ int main (int argc, char *argv[])
 	set<string> UserFunctions;
 	set<string> ParallelFunctions;
     map<string, vector<string> > LoopLevels;
+	char *env_var;
 
 	int index;
 
@@ -825,6 +826,21 @@ int main (int argc, char *argv[])
 		cerr << PACKAGE_NAME << ": Environment variable EXTRAE_HOME is undefined" << endl;
 		exit (-1);
 	}
+
+	if ((env_var = getenv ("DYNINSTAPI_RT_LIB")) == NULL)
+	{
+		env_var = (char*) malloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
+		if (env_var == NULL)
+		{
+			cerr << PACKAGE_NAME << ": Cannot allocate memory to define DYNINSTAPI_RT_LIB!" << endl;
+			exit (-1);
+		}
+		sprintf (env_var, "DYNINSTAPI_RT_LIB=%s", DYNINST_RT_LIB);
+		putenv (env_var);
+	}
+	else
+		cout << PACKAGE_NAME << ": Warning, DYNINSTAPI_RT_LIB already set and pointing to " << 
+		  env_var << endl;
 
 	/* Parse the params */
 	index = processParams (argc, argv);

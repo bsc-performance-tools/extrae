@@ -50,7 +50,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #include "omp-common.h"
 
-//#define DEBUG
+#define DEBUG
 
 #if defined(PIC)
 
@@ -437,7 +437,7 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task is at %p\n", THREADID, GOMP_task_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %d %u %p\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %ld %d %u\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
 #endif
 
 	if (GOMP_task_real != NULL && EXTRAE_INITIALIZED())

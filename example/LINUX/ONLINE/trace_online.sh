@@ -3,7 +3,7 @@
 export EXTRAE_HOME=@sub_PREFIXDIR@
 
 # Load the online environment
-source ${EXTRAE_HOME}/etc/online_env.sh
+source ${EXTRAE_HOME}/etc/extrae_online.sh
 
 # Set the Extrae configuration
 export EXTRAE_CONFIG_FILE=./extrae_online.xml

@@ -10,7 +10,7 @@ lib_LTLIBRARIES =
 
 noinst_LTLIBRARIES = libonline.la
 
-SCRIPT_ONLINE_ENV  = online_env.sh
+SCRIPT_ONLINE_ENV  = extrae_online.sh
 SCRIPT_ONLINE_ROOT = online_root
 noinst_SCRIPTS     = $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
 

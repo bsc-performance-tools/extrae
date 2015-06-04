@@ -196,9 +196,27 @@ void Instrumentcall (BPatch_image *appImage, BPatch_process *appProcess)
 
 	cout << "insertion = " << insertion << endl;
 }
+
 int main (int argc, char *argv[], const char *envp[])
 {
 	int index;
+	char *env_var;
+
+	if ((env_var = getenv ("DYNINSTAPI_RT_LIB")) == NULL)
+	{
+		env_var = (char*) malloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
+		if (env_var == NULL)
+		{
+			cerr << PACKAGE_NAME << ": Cannot allocate memory to define DYNINSTAPI_RT_LIB!" << endl;
+			exit (-1);
+		}
+		sprintf (env_var, "DYNINSTAPI_RT_LIB=%s", DYNINST_RT_LIB);
+		putenv (env_var);
+	}
+	else
+		cout << PACKAGE_NAME << ": Warning, DYNINSTAPI_RT_LIB already set and pointing to " << 
+		  env_var << endl;
+	env_var = (char*) malloc ((1+strlen("DYNINSTAPI_RT_LIB=")+strlen(DYNINST_RT_LIB))*sizeof(char));
 
 	/* Parse the params */
 	index = processParams (argc, argv);

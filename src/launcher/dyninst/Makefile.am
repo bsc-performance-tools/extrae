@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-bin_PROGRAMS = extrae
+bin_PROGRAMS = extrae extrae-test-dyninst
 
 noinst_PROGRAMS = load-module demo-launcher list-functions
 
@@ -31,26 +31,45 @@ if NEED_BOOST_HOME
 extrae_CXXFLAGS += -I@BOOST_HOME@/include
 endif
 extrae_CFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@ @XML2_CFLAGS@
-extrae_LDFLAGS =  @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
+extrae_LDFLAGS =  @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
+  @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
+  @ELF_LDFLAGS@ -R @DWARF_LIBSDIR@ -lelf \
+  @XML2_LDFLAGS@ @XML2_LIBS@
 
 load_module_SOURCES = load-module.C
 load_module_CXXFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@
 if NEED_BOOST_HOME
 load_module_CXXFLAGS += -I@BOOST_HOME@/include
 endif
-load_module_LDFLAGS = @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
+load_module_LDFLAGS = @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
+  @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
+  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
 
 demo_launcher_SOURCES = demo-launcher.C
 demo_launcher_CXXFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@
 if NEED_BOOST_HOME
 demo_launcher_CXXFLAGS += -I@BOOST_HOME@/include
 endif
-demo_launcher_LDFLAGS = @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
+demo_launcher_LDFLAGS = @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
+  @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
+  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
 
 list_functions_SOURCES = list-functions.C
 list_functions_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@
 if NEED_BOOST_HOME
 list_functions_CXXFLAGS += -I@BOOST_HOME@/include
 endif
-list_functions_LDFLAGS = @DYNINST_LDFLAGS@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon @DWARF_LDFLAGS@ -ldwarf @ELF_LDFLAGS@ -lelf
+list_functions_LDFLAGS = @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
+  @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
+  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf
 
+extrae_test_dyninst_SOURCES = extrae-test-dyninst.C \
+ cpp_utils.C cpp_utils.h \
+ commonSnippets.C commonSnippets.h 
+extrae_test_dyninst_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@
+if NEED_BOOST_HOME
+extrae_test_dyninst_CXXFLAGS += -I@BOOST_HOME@/include
+endif
+extrae_test_dyninst_LDFLAGS = @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
+  @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
+  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf

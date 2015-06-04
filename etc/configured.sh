@@ -40,89 +40,89 @@ if test "${EXTRAE_HOME}" != "" ; then
 	echo CXXFLAGS was ${EXTRAE_CXXFLAGS}
 	echo
 
-	if test "${MPI_HOME}" != "" ; then
-		if test -d ${MPI_HOME} ; then
-			echo "MPI_HOME points to ${MPI_HOME} and the directory exists .. OK"
+	if test "${EXTRAE_MPI_HOME}" != "" ; then
+		if test -d ${EXTRAE_MPI_HOME} ; then
+			echo "MPI_HOME points to ${EXTRAE_MPI_HOME} and the directory exists .. OK"
 		else
-			echo "MPI_HOME points to ${MPI_HOME} and the directory does NOT exist .. FAILED"
+			echo "MPI_HOME points to ${EXTRAE_MPI_HOME} and the directory does NOT exist .. FAILED"
 		fi
 	else
 		echo "MPI support seems to be disabled"
 	fi
 
-	if test "${PACX_HOME}" != "" ; then
-		if test -d ${MPI_HOME} ; then
-			echo "PACX_HOME points to ${PACX_HOME} and the directory exists .. OK"
+	if test "${EXTRAE_PACX_HOME}" != "" ; then
+		if test -d ${EXTRAE_PACX_HOME} ; then
+			echo "PACX_HOME points to ${EXTRAE_PACX_HOME} and the directory exists .. OK"
 		else
-			echo "PACX_HOME points to ${PACX_HOME} and the directory does NOT exist .. FAILED"
+			echo "PACX_HOME points to ${EXTRAE_PACX_HOME} and the directory does NOT exist .. FAILED"
 		fi
 	else
 		echo "PACX support seems to be disabled"
 	fi
 
-	if test "${LIBXML2_HOME}" != "" ; then
-		if test -d ${LIBXML2_HOME} ; then
-			echo "LIBXML2_HOME points to ${LIBXML2_HOME} and the directory exists .. OK"
+	if test "${EXTRAE_LIBXML2_HOME}" != "" ; then
+		if test -d ${EXTRAE_LIBXML2_HOME} ; then
+			echo "LIBXML2_HOME points to ${EXTRAE_LIBXML2_HOME} and the directory exists .. OK"
 		else
-			echo "LIBXML2_HOME points to ${LIBXML2_HOME} and the directory does NOT exist .. FAILED"
+			echo "LIBXML2_HOME points to ${EXTRAE_LIBXML2_HOME} and the directory does NOT exist .. FAILED"
 		fi
 	else
 		echo "XML support seems to be disabled"
 	fi
 
-	if test "${PAPI_HOME}" != "" ; then
-		if test -d ${PAPI_HOME} ; then
-			echo "PAPI_HOME points to ${PAPI_HOME} and the directory exists .. OK"
+	if test "${EXTRAE_PAPI_HOME}" != "" ; then
+		if test -d ${EXTRAE_PAPI_HOME} ; then
+			echo "PAPI_HOME points to ${EXTRAE_PAPI_HOME} and the directory exists .. OK"
 		else
-			echo "PAPI_HOME points to ${PAPI_HOME} and the directory does NOT exist .. FAILED"
+			echo "PAPI_HOME points to ${EXTRAE_PAPI_HOME} and the directory does NOT exist .. FAILED"
 		fi
 	else
 		echo "PAPI support seems to be disabled"
 	fi
 
-	if test "${DYNINST_HOME}" != "" ; then
-		if test -d ${DYNINST_HOME} ; then
-			echo "DYNINST_HOME points to ${DYNINST_HOME} and the directory exists .. OK"
+	if test "${EXTRAE_DYNINST_HOME}" != "" ; then
+		if test -d ${EXTRAE_DYNINST_HOME} ; then
+			echo "DYNINST_HOME points to ${EXTRAE_DYNINST_HOME} and the directory exists .. OK"
 		else
-			echo "DYNINST_HOME points to ${DYNINST_HOME} and the directory does NOT exist .. FAILED"
+			echo "DYNINST_HOME points to ${EXTRAE_DYNINST_HOME} and the directory does NOT exist .. FAILED"
 		fi
-    # Dwarf is required by dyninst
-    if test -d ${DWARF_HOME} ; then
-      echo "DWARF_HOME points to ${DWARF_HOME} and the directory exists .. OK"
-    else
-      echo "DWARF_HOME points to ${DWARF_HOME} and the directory does NOT exist .. FAILED"
-    fi
+		# Dwarf is required by dyninst
+		if test -d ${EXTRAE_DWARF_HOME} ; then
+			echo "DWARF_HOME points to ${EXTRAE_DWARF_HOME} and the directory exists .. OK"
+		else
+			echo "DWARF_HOME points to ${EXTRAE_DWARF_HOME} and the directory does NOT exist .. FAILED"
+		fi
 	else
 		echo "DYNINST support seems to be disabled"
 	fi
 
-  if test "${UNWIND_HOME}" != "" ; then
-    if test -d ${UNWIND_HOME} ; then
-      echo "UNWIND_HOME points to ${UNWIND_HOME} and the directory exists .. OK"
-    else
-      echo "UNWIND_HOME points to ${UNWIND_HOME} and the directory does NOT exist .. FAILED"
-    fi
-  else
-    echo "UNWINDing support seems to be disabled (or not needed)"
-  fi
+	if test "${EXTRAE_UNWIND_HOME}" != "" ; then
+		if test -d ${EXTRAE_UNWIND_HOME} ; then
+			echo "UNWIND_HOME points to ${EXTRAE_UNWIND_HOME} and the directory exists .. OK"
+		else
+			echo "UNWIND_HOME points to ${EXTRAE_UNWIND_HOME} and the directory does NOT exist .. FAILED"
+		fi
+	else
+		echo "UNWINDing support seems to be disabled (or not needed)"
+	fi
 
-  if test "${LIBERTY_HOME}" != "" -a "${BFD_HOME}" != ""; then
-    if test -d ${LIBERTY_HOME} ; then
-      echo "LIBERTY_HOME points to ${LIBERTY_HOME} and the directory exists .. OK"
-    else
-      echo "LIBERTY_HOME points to ${LIBERTY_HOME} and the directory does NOT exist .. FAILED"
-    fi
-    if test -d ${BFD_HOME} ; then
-      echo "BFD_HOME points to ${BFD_HOME} and the directory exists .. OK"
-    else
-      echo "BFD_HOME points to ${BFD_HOME} and the directory does NOT exist .. FAILED"
-    fi
-  else
-    echo "Translating addresses into source code references seems to be disabled (or not needed)"
-  fi
-
+	if test "${EXTRAE_LIBERTY_HOME}" != "" -a "${EXTRAE_BFD_HOME}" != ""; then
+		if test -d ${EXTRAE_LIBERTY_HOME} ; then
+			echo "LIBERTY_HOME points to ${EXTRAE_LIBERTY_HOME} and the directory exists .. OK"
+		else
+			echo "LIBERTY_HOME points to ${EXTRAE_LIBERTY_HOME} and the directory does NOT exist .. FAILED"
+		fi
+		if test -d ${EXTRAE_BFD_HOME} ; then
+			echo "BFD_HOME points to ${EXTRAE_BFD_HOME} and the directory exists .. OK"
+		else
+			echo "BFD_HOME points to ${EXTRAE_BFD_HOME} and the directory does NOT exist .. FAILED"
+		fi
+	else
+		echo "Translating addresses into source code references seems to be disabled (or not needed)"
+	fi
 fi
 
 echo 
 echo "Please, report bugs to ${PACKAGE_BUGREPORT:-tools@bsc.es}"
+echo
 

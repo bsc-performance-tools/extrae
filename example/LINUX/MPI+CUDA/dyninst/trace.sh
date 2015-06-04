@@ -1,7 +1,6 @@
 #!/bin/bash
 
 export EXTRAE_HOME=@sub_PREFIXDIR@
-source ${EXTRAE_HOME}/etc/extrae.sh
 
 # Only show output for task 0, others task send output to /dev/null
 if test "${SLURM_PROCID}" == "0" ; then
