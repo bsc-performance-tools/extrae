@@ -86,6 +86,10 @@ $key = q/sec:JavaBindings/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/subsec:AdvancedJavaBindings/;
+$ref_files{$key} = "$dir".q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:ProcessorPerformanceCounters/;
 $ref_files{$key} = "$dir".q|user-guide.html|; 
 $noresave{$key} = "$nosave";

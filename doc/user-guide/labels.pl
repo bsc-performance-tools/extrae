@@ -86,6 +86,10 @@ $key = q/sec:JavaBindings/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/subsec:AdvancedJavaBindings/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:ProcessorPerformanceCounters/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
@@ -295,6 +299,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/subsec:Examples_CUDA/;
 $external_latex_labels{$key} = q|8.2.2|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:AdvancedJavaBindings/;
+$external_latex_labels{$key} = q|5.4.1|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:JavaBindings/;

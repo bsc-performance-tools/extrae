@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Extrae User guide manual for version 3.1.0</TITLE>
-<META NAME="description" CONTENT="Extrae User guide manual for version 3.1.0">
+<TITLE>Extrae User guide manual for version 3.1.1rc</TITLE>
+<META NAME="description" CONTENT="Extrae User guide manual for version 3.1.1rc">
 <META NAME="keywords" CONTENT="user-guide">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -44,7 +44,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BR>
 User guide manual
 <BR>
-for version 3.1.0</H1>
+for version 3.1.1rc</H1>
 <DIV CLASS="author_info">
 
 <P ALIGN="CENTER"><STRONG>tools@bsc.es
@@ -58,256 +58,260 @@ Contents</A>
 <!--Table of Contents-->
 
 <UL CLASS="TofC">
-<LI><A NAME="tex2html184"
-  HREF="user-guide.html#SECTION00200000000000000000">List of Figures</A>
 <LI><A NAME="tex2html185"
-  HREF="user-guide.html#SECTION00300000000000000000">List of Tables</A>
+  HREF="user-guide.html#SECTION00200000000000000000">List of Figures</A>
 <LI><A NAME="tex2html186"
+  HREF="user-guide.html#SECTION00300000000000000000">List of Tables</A>
+<LI><A NAME="tex2html187"
   HREF="user-guide.html#SECTION00400000000000000000">1. Quick start guide</A>
 <UL>
-<LI><A NAME="tex2html187"
+<LI><A NAME="tex2html188"
   HREF="user-guide.html#SECTION00410000000000000000">1.1 The instrumentation package</A>
 <UL>
-<LI><A NAME="tex2html188"
-  HREF="user-guide.html#SECTION00411000000000000000">1.1.1 Uncompressing the package</A>
 <LI><A NAME="tex2html189"
+  HREF="user-guide.html#SECTION00411000000000000000">1.1.1 Uncompressing the package</A>
+<LI><A NAME="tex2html190"
   HREF="user-guide.html#SECTION00412000000000000000">1.1.2 Post-configuring the package</A>
 </UL>
-<LI><A NAME="tex2html190"
+<LI><A NAME="tex2html191"
   HREF="user-guide.html#SECTION00420000000000000000">1.2 Quick running</A>
 <UL>
-<LI><A NAME="tex2html191"
-  HREF="user-guide.html#SECTION00421000000000000000">1.2.1 Quick running Extrae - based on DynInst</A>
 <LI><A NAME="tex2html192"
+  HREF="user-guide.html#SECTION00421000000000000000">1.2.1 Quick running Extrae - based on DynInst</A>
+<LI><A NAME="tex2html193"
   HREF="user-guide.html#SECTION00422000000000000000">1.2.2 Quick running Extrae - NOT based on DynInst</A>
 </UL>
-<LI><A NAME="tex2html193"
+<LI><A NAME="tex2html194"
   HREF="user-guide.html#SECTION00430000000000000000">1.3 Quick merging the intermediate traces</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html194"
-  HREF="user-guide.html#SECTION00500000000000000000">2. Introduction</A>
 <LI><A NAME="tex2html195"
+  HREF="user-guide.html#SECTION00500000000000000000">2. Introduction</A>
+<LI><A NAME="tex2html196"
   HREF="user-guide.html#SECTION00600000000000000000">3. Configuration, build and installation</A>
 <UL>
-<LI><A NAME="tex2html196"
-  HREF="user-guide.html#SECTION00610000000000000000">3.1 Configuration of the instrumentation package</A>
 <LI><A NAME="tex2html197"
-  HREF="user-guide.html#SECTION00620000000000000000">3.2 Build</A>
+  HREF="user-guide.html#SECTION00610000000000000000">3.1 Configuration of the instrumentation package</A>
 <LI><A NAME="tex2html198"
-  HREF="user-guide.html#SECTION00630000000000000000">3.3 Installation</A>
+  HREF="user-guide.html#SECTION00620000000000000000">3.2 Build</A>
 <LI><A NAME="tex2html199"
-  HREF="user-guide.html#SECTION00640000000000000000">3.4 Check</A>
+  HREF="user-guide.html#SECTION00630000000000000000">3.3 Installation</A>
 <LI><A NAME="tex2html200"
+  HREF="user-guide.html#SECTION00640000000000000000">3.4 Check</A>
+<LI><A NAME="tex2html201"
   HREF="user-guide.html#SECTION00650000000000000000">3.5 Examples of configuration on different machines</A>
 <UL>
-<LI><A NAME="tex2html201"
-  HREF="user-guide.html#SECTION00651000000000000000">3.5.1 Bluegene (L and P variants)</A>
 <LI><A NAME="tex2html202"
-  HREF="user-guide.html#SECTION00652000000000000000">3.5.2 BlueGene/Q</A>
+  HREF="user-guide.html#SECTION00651000000000000000">3.5.1 Bluegene (L and P variants)</A>
 <LI><A NAME="tex2html203"
-  HREF="user-guide.html#SECTION00653000000000000000">3.5.3 AIX</A>
+  HREF="user-guide.html#SECTION00652000000000000000">3.5.2 BlueGene/Q</A>
 <LI><A NAME="tex2html204"
+  HREF="user-guide.html#SECTION00653000000000000000">3.5.3 AIX</A>
+<LI><A NAME="tex2html205"
   HREF="user-guide.html#SECTION00654000000000000000">3.5.4 Linux</A>
 </UL>
-<LI><A NAME="tex2html205"
+<LI><A NAME="tex2html206"
   HREF="user-guide.html#SECTION00660000000000000000">3.6 Knowing how a package was configured</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html206"
+<LI><A NAME="tex2html207"
   HREF="user-guide.html#SECTION00700000000000000000">4. Extrae XML configuration file</A>
 <UL>
-<LI><A NAME="tex2html207"
-  HREF="user-guide.html#SECTION00710000000000000000">4.1 XML Section: Trace configuration</A>
 <LI><A NAME="tex2html208"
-  HREF="user-guide.html#SECTION00720000000000000000">4.2 XML Section: MPI</A>
+  HREF="user-guide.html#SECTION00710000000000000000">4.1 XML Section: Trace configuration</A>
 <LI><A NAME="tex2html209"
-  HREF="user-guide.html#SECTION00730000000000000000">4.3 XML Section: PACX</A>
+  HREF="user-guide.html#SECTION00720000000000000000">4.2 XML Section: MPI</A>
 <LI><A NAME="tex2html210"
-  HREF="user-guide.html#SECTION00740000000000000000">4.4 XML Section: pthread</A>
+  HREF="user-guide.html#SECTION00730000000000000000">4.3 XML Section: PACX</A>
 <LI><A NAME="tex2html211"
-  HREF="user-guide.html#SECTION00750000000000000000">4.5 XML Section: OpenMP</A>
+  HREF="user-guide.html#SECTION00740000000000000000">4.4 XML Section: pthread</A>
 <LI><A NAME="tex2html212"
-  HREF="user-guide.html#SECTION00760000000000000000">4.6 XML Section: CELL</A>
+  HREF="user-guide.html#SECTION00750000000000000000">4.5 XML Section: OpenMP</A>
 <LI><A NAME="tex2html213"
-  HREF="user-guide.html#SECTION00770000000000000000">4.7 XML Section: Callers</A>
+  HREF="user-guide.html#SECTION00760000000000000000">4.6 XML Section: CELL</A>
 <LI><A NAME="tex2html214"
-  HREF="user-guide.html#SECTION00780000000000000000">4.8 XML Section: User functions</A>
+  HREF="user-guide.html#SECTION00770000000000000000">4.7 XML Section: Callers</A>
 <LI><A NAME="tex2html215"
+  HREF="user-guide.html#SECTION00780000000000000000">4.8 XML Section: User functions</A>
+<LI><A NAME="tex2html216"
   HREF="user-guide.html#SECTION00790000000000000000">4.9 XML Section: Performance counters</A>
 <UL>
-<LI><A NAME="tex2html216"
-  HREF="user-guide.html#SECTION00791000000000000000">4.9.1 Processor performance counters</A>
 <LI><A NAME="tex2html217"
-  HREF="user-guide.html#SECTION00792000000000000000">4.9.2 Network performance counters</A>
+  HREF="user-guide.html#SECTION00791000000000000000">4.9.1 Processor performance counters</A>
 <LI><A NAME="tex2html218"
+  HREF="user-guide.html#SECTION00792000000000000000">4.9.2 Network performance counters</A>
+<LI><A NAME="tex2html219"
   HREF="user-guide.html#SECTION00793000000000000000">4.9.3 Operating system accounting</A>
 </UL>
-<LI><A NAME="tex2html219"
-  HREF="user-guide.html#SECTION007100000000000000000">4.10 XML Section: Storage management</A>
 <LI><A NAME="tex2html220"
-  HREF="user-guide.html#SECTION007110000000000000000">4.11 XML Section: Buffer management</A>
+  HREF="user-guide.html#SECTION007100000000000000000">4.10 XML Section: Storage management</A>
 <LI><A NAME="tex2html221"
-  HREF="user-guide.html#SECTION007120000000000000000">4.12 XML Section: Trace control</A>
+  HREF="user-guide.html#SECTION007110000000000000000">4.11 XML Section: Buffer management</A>
 <LI><A NAME="tex2html222"
-  HREF="user-guide.html#SECTION007130000000000000000">4.13 XML Section: Bursts</A>
+  HREF="user-guide.html#SECTION007120000000000000000">4.12 XML Section: Trace control</A>
 <LI><A NAME="tex2html223"
-  HREF="user-guide.html#SECTION007140000000000000000">4.14 XML Section: Others</A>
+  HREF="user-guide.html#SECTION007130000000000000000">4.13 XML Section: Bursts</A>
 <LI><A NAME="tex2html224"
-  HREF="user-guide.html#SECTION007150000000000000000">4.15 XML Section: Sampling</A>
+  HREF="user-guide.html#SECTION007140000000000000000">4.14 XML Section: Others</A>
 <LI><A NAME="tex2html225"
-  HREF="user-guide.html#SECTION007160000000000000000">4.16 XML Section: CUDA</A>
+  HREF="user-guide.html#SECTION007150000000000000000">4.15 XML Section: Sampling</A>
 <LI><A NAME="tex2html226"
-  HREF="user-guide.html#SECTION007170000000000000000">4.17 XML Section: OpenCL</A>
+  HREF="user-guide.html#SECTION007160000000000000000">4.16 XML Section: CUDA</A>
 <LI><A NAME="tex2html227"
-  HREF="user-guide.html#SECTION007180000000000000000">4.18 XML Section: Input/Output</A>
+  HREF="user-guide.html#SECTION007170000000000000000">4.17 XML Section: OpenCL</A>
 <LI><A NAME="tex2html228"
-  HREF="user-guide.html#SECTION007190000000000000000">4.19 XML Section: Dynamic memory</A>
+  HREF="user-guide.html#SECTION007180000000000000000">4.18 XML Section: Input/Output</A>
 <LI><A NAME="tex2html229"
-  HREF="user-guide.html#SECTION007200000000000000000">4.20 XML Section: Merge</A>
+  HREF="user-guide.html#SECTION007190000000000000000">4.19 XML Section: Dynamic memory</A>
 <LI><A NAME="tex2html230"
+  HREF="user-guide.html#SECTION007200000000000000000">4.20 XML Section: Merge</A>
+<LI><A NAME="tex2html231"
   HREF="user-guide.html#SECTION007210000000000000000">4.21 Using environment variables within the XML file</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html231"
+<LI><A NAME="tex2html232"
   HREF="user-guide.html#SECTION00800000000000000000">5. Extrae API</A>
 <UL>
-<LI><A NAME="tex2html232"
-  HREF="user-guide.html#SECTION00810000000000000000">5.1 Basic API</A>
 <LI><A NAME="tex2html233"
-  HREF="user-guide.html#SECTION00820000000000000000">5.2 Extended API</A>
+  HREF="user-guide.html#SECTION00810000000000000000">5.1 Basic API</A>
 <LI><A NAME="tex2html234"
+  HREF="user-guide.html#SECTION00820000000000000000">5.2 Extended API</A>
+<LI><A NAME="tex2html235"
   HREF="user-guide.html#SECTION00830000000000000000">5.3 Special considerations for Cell Broadband Engine tracing package</A>
 <UL>
-<LI><A NAME="tex2html235"
-  HREF="user-guide.html#SECTION00831000000000000000">5.3.1 PPE side</A>
 <LI><A NAME="tex2html236"
+  HREF="user-guide.html#SECTION00831000000000000000">5.3.1 PPE side</A>
+<LI><A NAME="tex2html237"
   HREF="user-guide.html#SECTION00832000000000000000">5.3.2 SPE side</A>
 </UL>
-<LI><A NAME="tex2html237"
-  HREF="user-guide.html#SECTION00840000000000000000">5.4 Java bindings</A>
-</UL>
-<BR>
 <LI><A NAME="tex2html238"
-  HREF="user-guide.html#SECTION00900000000000000000">6. Merging process</A>
+  HREF="user-guide.html#SECTION00840000000000000000">5.4 Java bindings</A>
 <UL>
 <LI><A NAME="tex2html239"
+  HREF="user-guide.html#SECTION00841000000000000000">5.4.1 Advanced Java bindings</A>
+</UL>
+</UL>
+<BR>
+<LI><A NAME="tex2html240"
+  HREF="user-guide.html#SECTION00900000000000000000">6. Merging process</A>
+<UL>
+<LI><A NAME="tex2html241"
   HREF="user-guide.html#SECTION00910000000000000000">6.1 Paraver merger</A>
 <UL>
-<LI><A NAME="tex2html240"
+<LI><A NAME="tex2html242"
   HREF="user-guide.html#SECTION00911000000000000000">6.1.1 Sequential Paraver merger</A>
-<LI><A NAME="tex2html241"
+<LI><A NAME="tex2html243"
   HREF="user-guide.html#SECTION00912000000000000000">6.1.2 Parallel Paraver merger</A>
 </UL>
-<LI><A NAME="tex2html242"
+<LI><A NAME="tex2html244"
   HREF="user-guide.html#SECTION00920000000000000000">6.2 Dimemas merger</A>
-<LI><A NAME="tex2html243"
+<LI><A NAME="tex2html245"
   HREF="user-guide.html#SECTION00930000000000000000">6.3 Environment variables</A>
 <UL>
-<LI><A NAME="tex2html244"
+<LI><A NAME="tex2html246"
   HREF="user-guide.html#SECTION00931000000000000000">6.3.1 Environment variables suitable to Paraver merger</A>
-<LI><A NAME="tex2html245"
+<LI><A NAME="tex2html247"
   HREF="user-guide.html#SECTION00932000000000000000">6.3.2 Environment variables suitable to Dimemas merger</A>
 </UL>
 </UL>
 <BR>
-<LI><A NAME="tex2html246"
+<LI><A NAME="tex2html248"
   HREF="user-guide.html#SECTION001000000000000000000">7. Extrae On-line User Guide</A>
 <UL>
-<LI><A NAME="tex2html247"
+<LI><A NAME="tex2html249"
   HREF="user-guide.html#SECTION001010000000000000000">7.1 Introduction</A>
-<LI><A NAME="tex2html248"
+<LI><A NAME="tex2html250"
   HREF="user-guide.html#SECTION001020000000000000000">7.2 Automatic analyses</A>
 <UL>
-<LI><A NAME="tex2html249"
-  HREF="user-guide.html#SECTION001021000000000000000">7.2.1 Structure detection</A>
-<LI><A NAME="tex2html250"
-  HREF="user-guide.html#SECTION001022000000000000000">7.2.2 Periodicity detection</A>
 <LI><A NAME="tex2html251"
+  HREF="user-guide.html#SECTION001021000000000000000">7.2.1 Structure detection</A>
+<LI><A NAME="tex2html252"
+  HREF="user-guide.html#SECTION001022000000000000000">7.2.2 Periodicity detection</A>
+<LI><A NAME="tex2html253"
   HREF="user-guide.html#SECTION001023000000000000000">7.2.3 Multi-experiment analysis</A>
 </UL>
-<LI><A NAME="tex2html252"
+<LI><A NAME="tex2html254"
   HREF="user-guide.html#SECTION001030000000000000000">7.3 Configuration</A>
 <UL>
-<LI><A NAME="tex2html253"
-  HREF="user-guide.html#SECTION001031000000000000000">7.3.1 Clustering analysis options</A>
-<LI><A NAME="tex2html254"
-  HREF="user-guide.html#SECTION001032000000000000000">7.3.2 Spectral analysis options</A>
 <LI><A NAME="tex2html255"
+  HREF="user-guide.html#SECTION001031000000000000000">7.3.1 Clustering analysis options</A>
+<LI><A NAME="tex2html256"
+  HREF="user-guide.html#SECTION001032000000000000000">7.3.2 Spectral analysis options</A>
+<LI><A NAME="tex2html257"
   HREF="user-guide.html#SECTION001033000000000000000">7.3.3 Gremlins analysis options</A>
 </UL>
 </UL>
 <BR>
-<LI><A NAME="tex2html256"
+<LI><A NAME="tex2html258"
   HREF="user-guide.html#SECTION001100000000000000000">8. Examples</A>
 <UL>
-<LI><A NAME="tex2html257"
+<LI><A NAME="tex2html259"
   HREF="user-guide.html#SECTION001110000000000000000">8.1 DynInst based examples</A>
 <UL>
-<LI><A NAME="tex2html258"
+<LI><A NAME="tex2html260"
   HREF="user-guide.html#SECTION001111000000000000000">8.1.1 Generating intermediate files for serial or OpenMP applications</A>
-<LI><A NAME="tex2html259"
+<LI><A NAME="tex2html261"
   HREF="user-guide.html#SECTION001112000000000000000">8.1.2 Generating intermediate files for MPI applications</A>
 </UL>
-<LI><A NAME="tex2html260"
+<LI><A NAME="tex2html262"
   HREF="user-guide.html#SECTION001120000000000000000">8.2 LD_PRELOAD based examples</A>
 <UL>
-<LI><A NAME="tex2html261"
-  HREF="user-guide.html#SECTION001121000000000000000">8.2.1 Linux</A>
-<LI><A NAME="tex2html262"
-  HREF="user-guide.html#SECTION001122000000000000000">8.2.2 CUDA</A>
 <LI><A NAME="tex2html263"
+  HREF="user-guide.html#SECTION001121000000000000000">8.2.1 Linux</A>
+<LI><A NAME="tex2html264"
+  HREF="user-guide.html#SECTION001122000000000000000">8.2.2 CUDA</A>
+<LI><A NAME="tex2html265"
   HREF="user-guide.html#SECTION001123000000000000000">8.2.3 AIX</A>
 </UL>
-<LI><A NAME="tex2html264"
+<LI><A NAME="tex2html266"
   HREF="user-guide.html#SECTION001130000000000000000">8.3 Statically linked based examples</A>
 <UL>
-<LI><A NAME="tex2html265"
+<LI><A NAME="tex2html267"
   HREF="user-guide.html#SECTION001131000000000000000">8.3.1 Linking the application</A>
-<LI><A NAME="tex2html266"
+<LI><A NAME="tex2html268"
   HREF="user-guide.html#SECTION001132000000000000000">8.3.2 Generating the intermediate files</A>
 </UL>
-<LI><A NAME="tex2html267"
+<LI><A NAME="tex2html269"
   HREF="user-guide.html#SECTION001140000000000000000">8.4 Generating the final tracefile</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html268"
-  HREF="user-guide.html#SECTION001200000000000000000">A. An example of Extrae XML configuration file</A>
-<LI><A NAME="tex2html269"
-  HREF="user-guide.html#SECTION001300000000000000000">B. Environment variables</A>
 <LI><A NAME="tex2html270"
+  HREF="user-guide.html#SECTION001200000000000000000">A. An example of Extrae XML configuration file</A>
+<LI><A NAME="tex2html271"
+  HREF="user-guide.html#SECTION001300000000000000000">B. Environment variables</A>
+<LI><A NAME="tex2html272"
   HREF="user-guide.html#SECTION001400000000000000000">C. Frequently Asked Questions</A>
 <UL>
-<LI><A NAME="tex2html271"
-  HREF="user-guide.html#SECTION001410000000000000000">C.1 Configure, compile and link FAQ</A>
-<LI><A NAME="tex2html272"
-  HREF="user-guide.html#SECTION001420000000000000000">C.2 Execution FAQ</A>
 <LI><A NAME="tex2html273"
-  HREF="user-guide.html#SECTION001430000000000000000">C.3 Performance monitoring counters FAQ</A>
+  HREF="user-guide.html#SECTION001410000000000000000">C.1 Configure, compile and link FAQ</A>
 <LI><A NAME="tex2html274"
+  HREF="user-guide.html#SECTION001420000000000000000">C.2 Execution FAQ</A>
+<LI><A NAME="tex2html275"
+  HREF="user-guide.html#SECTION001430000000000000000">C.3 Performance monitoring counters FAQ</A>
+<LI><A NAME="tex2html276"
   HREF="user-guide.html#SECTION001440000000000000000">C.4 Merging traces FAQ</A>
 </UL>
 <BR>
-<LI><A NAME="tex2html275"
+<LI><A NAME="tex2html277"
   HREF="user-guide.html#SECTION001500000000000000000">D. Instrumented run-times</A>
 <UL>
-<LI><A NAME="tex2html276"
+<LI><A NAME="tex2html278"
   HREF="user-guide.html#SECTION001510000000000000000">D.1 MPI</A>
-<LI><A NAME="tex2html277"
+<LI><A NAME="tex2html279"
   HREF="user-guide.html#SECTION001520000000000000000">D.2 OpenMP</A>
 <UL>
-<LI><A NAME="tex2html278"
-  HREF="user-guide.html#SECTION001521000000000000000">D.2.1 Intel compilers - icc, iCC, ifort</A>
-<LI><A NAME="tex2html279"
-  HREF="user-guide.html#SECTION001522000000000000000">D.2.2 IBM compilers - xlc, xlC, xlf</A>
 <LI><A NAME="tex2html280"
+  HREF="user-guide.html#SECTION001521000000000000000">D.2.1 Intel compilers - icc, iCC, ifort</A>
+<LI><A NAME="tex2html281"
+  HREF="user-guide.html#SECTION001522000000000000000">D.2.2 IBM compilers - xlc, xlC, xlf</A>
+<LI><A NAME="tex2html282"
   HREF="user-guide.html#SECTION001523000000000000000">D.2.3 GNU compilers - gcc, g++, gfortran</A>
 </UL>
-<LI><A NAME="tex2html281"
-  HREF="user-guide.html#SECTION001530000000000000000">D.3 pthread</A>
-<LI><A NAME="tex2html282"
-  HREF="user-guide.html#SECTION001540000000000000000">D.4 CUDA</A>
 <LI><A NAME="tex2html283"
+  HREF="user-guide.html#SECTION001530000000000000000">D.3 pthread</A>
+<LI><A NAME="tex2html284"
+  HREF="user-guide.html#SECTION001540000000000000000">D.4 CUDA</A>
+<LI><A NAME="tex2html285"
   HREF="user-guide.html#SECTION001550000000000000000">D.5 OpenCL</A>
 </UL></UL>
 <!--End of Table of Contents-->
@@ -328,7 +332,7 @@ List of Tables</A>
 <LI>1.2. <A NAME="tex2html12"
   HREF="user-guide.html#213">Available libraries in Extrae. Their availability depends upon the configure process.</A>
 <LI>. <A NAME="tex2html21"
-  HREF="user-guide.html#3517">Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</A></UL>
+  HREF="user-guide.html#3551">Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</A></UL>
 <P>
 
 <P>
@@ -375,7 +379,7 @@ The unpacking process will create different directories on the current directory
 <CAPTION><STRONG>Table 1.1:</STRONG>
 Package contents description</CAPTION>
 <TR><TD>2tabbg1tabbg2
-<DIV CLASS="centerline" ID="par8658" ALIGN="CENTER">
+<DIV CLASS="centerline" ID="par8724" ALIGN="CENTER">
 <TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
 <TR><TD ALIGN="LEFT"><B>Directory</B></TD>
 <TD ALIGN="LEFT"><B>Contents</B></TD>
@@ -3331,35 +3335,95 @@ If Java is enabled at configure time, a basic instrumentation library for serial
 <P>
 
 <UL>
-<LI><TT>void Init();</TT>
+<LI><TT>void Init ();</TT>
+<BR>
+Initializes the instrumentation package.
 
 <P>
 </LI>
-<LI><TT>void Fini();</TT>
+<LI><TT>void Fini ();</TT>
+<BR>
+Finalizes the instrumentation package.
 
 <P>
 </LI>
-<LI><TT>void Event(int id, long val);</TT>
+<LI><TT>void Event (int type, long value);</TT>
+<BR>
+Emits one event into the trace-file with the given pair type-value.
 
 <P>
 </LI>
-<LI><TT>void nEvent(int types[], long values[]);</TT>
+<LI><TT>void nEvent (int types[], long values[]);</TT>
+<BR>
+Emits a set of pair type-value at the same timestamp. Note that both arrays must be the same length to proceed correctly, otherwise the call ignores the call.
 
 <P>
 </LI>
-<LI><TT>void defineEventType(int type, String description, long nValues, long[] values, String[] descriptionValues);</TT>
+<LI><TT>void defineEventType (int type, String description, long nValues, long[] values, String[] descriptionValues);</TT>
+<BR>
+Adds a description for a given event type (through <TT>type</TT> and <TT>description</TT> parameters). The parameter <TT>nValues</TT> determines the size for the <TT>values</TT> and <TT>descriptionValues</TT> arrays. If <TT>nValues</TT> is non-zero, then it also adds the description for the given values.
 
 <P>
 </LI>
-<LI><TT>void SetOptions(int options);</TT>
+<LI><TT>void SetOptions (int options);</TT>
+<BR>
+This API call changes the behavior of the instrumentation package but none of the options currently apply to the Java instrumentation.
 
 <P>
 </LI>
 <LI><TT>void Shutdown();</TT>
+<BR>
+Disables the instrumentation until the next call to <TT>Restart()</TT>.
 
 <P>
 </LI>
 <LI><TT>void Restart();</TT>
+<BR>
+Resumes the instrumentation from the previous <TT>Shutdown()</TT> call.
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H2><A NAME="SECTION00841000000000000000"></A><A NAME="subsec:AdvancedJavaBindings"></A>
+<BR>
+<SPAN CLASS="arabic">5</SPAN>.<SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">1</SPAN> Advanced Java bindings
+</H2>
+
+<P>
+Since Extrae does not have features to automatically discover the thread identifier of the threads that run within the virtual machine, there are some calls that allows to do this manually.
+These calls are, however, intended for expert users and should be avoided whenever possible because their behavior may be highly modified, or even removed, in future releases.
+
+<P>
+
+<UL>
+<LI><TT>SetTaskID (int id);</TT>
+<BR>
+Tells Extrae that this process should be considered as task with identifier <TT>id</TT>. Use this call before invoking <TT>Init()</TT>.
+
+<P>
+</LI>
+<LI><TT>SetNumTasks (int num);</TT>
+<BR>
+Instructs Extrae to allocate the structures for <TT>num</TT> processes. Use this call before invoking <TT>Init()</TT>.
+</LI>
+<LI><TT>SetThreadID (int id);</TT>
+<BR>
+Instructs Extrae that this thread should be considered as thread with identifier <TT>id</TT>.
+
+<P>
+</LI>
+<LI><TT>SetNumThreads (int num);</TT>
+<BR>
+Tells Extrae that there are <TT>num</TT> threads active within this process. Use this call before invoking <TT>Init()</TT>.
+
+<P>
+</LI>
+<LI><TT>Comm (boolean send, int tag, int size, int partner, long id);</TT>
+<BR>
+Allows generating communications between two processes. The call emits one of the two-point communication part, so it is necessary to invoke it from both the sender and the receiver part. The <TT>send</TT> parameter determines whether this call will act as send or receive message. The <TT>tag</TT> and <TT>size</TT> parameters are used to match the communication and their parameters can be displayed in Paraver. The <TT>partner</TT> refers to the communication partner and it is identified by its TaskID. The <TT>id</TT> is meant for matching purposes but cannot be recovered during the analysis with Paraver.
 
 <P>
 </LI>
@@ -3396,16 +3460,16 @@ In order to use Paraver, those intermediate files (<I>i.e.</I>, <TT>.mpit</TT> f
 
 <P>
 The target trace type is defined in the XML configuration file used at the instrumentation step (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters <TT>-paraver</TT> or <TT>-dimemas</TT><A NAME="tex2html20"
-  HREF="#foot3507"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
+  HREF="#foot3541"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="3517"></A>
+<DIV ALIGN="CENTER"><A NAME="3551"></A>
 <TABLE>
 <CAPTION><STRONG>Table:</STRONG>
 Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</CAPTION>
 <TR><TD>2tabbg1tabbg2
-<DIV CLASS="centerline" ID="par8946" ALIGN="CENTER">
+<DIV CLASS="centerline" ID="par9013" ALIGN="CENTER">
 <TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
 <TR><TD ALIGN="LEFT"><B>Binary</B></TD>
 <TD ALIGN="LEFT"><B>Description</B></TD>
@@ -3780,7 +3844,7 @@ This mechanism aims at identifying the fine-grain structure of the computing reg
 Applying density-based clustering, this method is able to expose the main performance trends in the 
 computations, and this information is useful to focus the analysis on the zones of real interest. 
 To perform the cluster analysis, <I CLASS="sans">Extrae</I> On-line relies on the ClusteringSuite tool<A NAME="tex2html22"
-  HREF="#foot3936"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
+  HREF="#foot3970"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
 
 <P>
 At each phase of analysis, several outputs are produced:
@@ -3999,7 +4063,7 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 <P>
 DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures<A NAME="tex2html24"
-  HREF="#foot4049"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+  HREF="#foot4083"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
 
 <P>
 
@@ -4087,7 +4151,7 @@ Please note, this script is particularly adapted to the MOAB/Slurm queue systems
 
 <P>
 LD_PRELOAD (or LDR_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names<A NAME="tex2html25"
-  HREF="#foot4145"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>) they are not tested.
+  HREF="#foot4179"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>) they are not tested.
 
 <P>
 We show how this mechanism works on Linux (or similar environments) in subsection <A HREF="#subsec:Examples_Linux">8.2.1</A> and on AIX in subsection <A HREF="#subsec:Examples_AIX">8.2.3</A>.
@@ -4127,7 +4191,7 @@ Regarding the execution, if you run MPI applications from the command-line, you 
 
 <P>
 <BR>
-  <SPAN ID="cbox4147">
+  <SPAN ID="cbox4181">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>${MPI_HOME}/bin/mpirun -np N ./trace.sh mpi-app
@@ -4331,7 +4395,7 @@ To manually generate the final Paraver tracefile issue the following command:
 
 <P>
 <BR>
-  <SPAN ID="cbox4164">
+  <SPAN ID="cbox4198">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -e mpi-app -o trace.prv
@@ -4486,10 +4550,10 @@ This appendix presents the environment variables the <I CLASS="sans">Extrae</I> 
  WIDTH="990" HEIGHT="663" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="\begin{landscape}
-% latex2html id marker 4416\begin{table}
+% latex2html id marker 4450\begin{table}
 \centerline{
 \begin...
-...riables available to configure {\sf {E}xtrae} }
+...riables available to configure {\sf {E}xtrae}\ }
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -4500,7 +4564,7 @@ This appendix presents the environment variables the <I CLASS="sans">Extrae</I> 
  WIDTH="990" HEIGHT="578" ALIGN="BOTTOM" BORDER="0"
  SRC="img4.png"
  ALT="\begin{landscape}
-% latex2html id marker 4512\par
+% latex2html id marker 4546\par
 \begin{table}
 \centerline{
 \...
@@ -4783,7 +4847,7 @@ These are the instrumented MPI routines in the <I CLASS="sans">Extrae</I> packag
 <LI>MPI_Init
 </LI>
 <LI>MPI_Init_thread<A NAME="tex2html27"
-  HREF="#foot4049"><SUP>D.<SPAN CLASS="arabic">1</SPAN></SUP></A>
+  HREF="#foot4083"><SUP>D.<SPAN CLASS="arabic">1</SPAN></SUP></A>
 </LI>
 <LI>MPI_Finalize
 </LI>
@@ -4888,34 +4952,34 @@ These are the instrumented MPI routines in the <I CLASS="sans">Extrae</I> packag
 <LI>MPI_Sendrecv_replace
 </LI>
 <LI>MPI_File_open<A NAME="tex2html28"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_close<A NAME="tex2html29"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read<A NAME="tex2html30"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_all<A NAME="tex2html31"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write<A NAME="tex2html32"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_all<A NAME="tex2html33"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_at<A NAME="tex2html34"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_at_all<A NAME="tex2html35"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_at<A NAME="tex2html36"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_at_all<A NAME="tex2html37"
-  HREF="#foot4145"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_Get<A NAME="tex2html38"
   HREF="#foot2178"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
@@ -5333,7 +5397,7 @@ About this document ...</A>
 <BR>
 User guide manual
 <BR>
-for version 3.1.0</STRONG><P>
+for version 3.1.1rc</STRONG><P>
 This document was generated using the
 <A HREF="http://www.latex2html.org/"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A> translator Version 2008 (1.71)
 <P>
@@ -5348,7 +5412,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2015-05-25
+The translation was initiated by Harald Servat on 2015-06-04
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot239">... file</A><A
@@ -5386,23 +5450,23 @@ The translation was initiated by Harald Servat on 2015-05-25
 <DD>This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section <A HREF="#sec:XMLSectionBuffer">4.11</A>).
 
 </DD>
-<DT><A NAME="foot3507">...<TT>-dimemas</TT></A><A
+<DT><A NAME="foot3541">...<TT>-dimemas</TT></A><A
  HREF="user-guide.html#tex2html20"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.
 
 </DD>
-<DT><A NAME="foot3936">... tool</A><A
+<DT><A NAME="foot3970">... tool</A><A
  HREF="user-guide.html#tex2html22"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>You can download it from <TT><A NAME="tex2html23"
   HREF="http://www.bsc.es/computer-sciences/performance-tools/downloads">http://www.bsc.es/computer-sciences/performance-tools/downloads</A></TT>.
 
 </DD>
-<DT><A NAME="foot4049">... architectures</A><A
+<DT><A NAME="foot4083">... architectures</A><A
  HREF="user-guide.html#tex2html24"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>The IA-64 architecture support was dropped by DynInst 7.0
 
 </DD>
-<DT><A NAME="foot4145">... names</A><A
+<DT><A NAME="foot4179">... names</A><A
  HREF="user-guide.html#tex2html25"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
 <DD>Look at <TT><A NAME="tex2html26"
   HREF="http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html">http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html</A></TT> for further information.
@@ -5421,7 +5485,7 @@ The translation was initiated by Harald Servat on 2015-05-25
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2015-05-25
+2015-06-04
 </ADDRESS>
 </BODY>
 </HTML>

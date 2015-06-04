@@ -45,7 +45,7 @@
 %
 \providecommand{\TRACE}{{\sf {E}xtrae}\ }%
 \providecommand{\PARAVER}{{\sf Paraver}\ }%
-\providecommand{\TRACEVERSION}{3.1.0} 
+\providecommand{\TRACEVERSION}{3.1.1rc} 
 
 
 
@@ -58,6 +58,10 @@
 
 
 \makeatletter
+\AtBeginDocument{\makeatletter
+\input /home/harald/development/extrae/trunk/doc/user-guide.aux
+\makeatother
+}
 
 \makeatletter
 \count@=\the\catcode`\_ \catcode`\_=8 
@@ -243,6 +247,7 @@
 \stepcounter{subsection}
 \stepcounter{subsection}
 \stepcounter{section}
+\stepcounter{subsection}
 \stepcounter{chapter}
 \stepcounter{section}
 \stepcounter{subsection}
@@ -280,9 +285,58 @@
 \stepcounter{chapter}
 \stepcounter{chapter}
 {\newpage\clearpage
-\lthtmlfigureA{landscape4512}%
+\lthtmlfigureA{landscape4450}%
 \begin{landscape}
-% latex2html id marker 4512
+% latex2html id marker 4450
+
+\begin{table}
+\centerline{
+\begin{tabular}{p{7cm} p{14cm}}
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+  \hline
+  \cellcolor{tabbg2} & \cellcolor{tabbg2} Set the number of records that the instrumentation buffer can\\
+  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_BUFFER\_SIZE} & \cellcolor{tabbg2} hold before flushing them.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}See section \ref{subsec:ProcessorPerformanceCounters}. Just one set can be defined. Counters (in PAPI)\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_COUNTERS} & \cellcolor{tabbg1}groups (in PMAPI) are given separated by commas.\\
+  \cellcolor{tabbg2}EXTRAE\_CONTROL\_FILE & \cellcolor{tabbg2}The instrumentation will be enabled only when the file pointed exists.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Starts the instrumentation when the specified number of global collectives\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_CONTROL\_GLOPS} & \cellcolor{tabbg1}have been executed.\\
+  \cellcolor{tabbg2}EXTRAE\_CONTROL\_TIME & \cellcolor{tabbg2}Checks the file pointed by {\tt EXTRAE\_CONTROL\_FILE} at this period.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Specifies where temporal files will be created during\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_DIR} & \cellcolor{tabbg1}instrumentation.\\
+  \cellcolor{tabbg2}EXTRAE\_DISABLE\_MPI & \cellcolor{tabbg2}Disable MPI instrumentation.\\
+  \cellcolor{tabbg1}EXTRAE\_DISABLE\_OMP & \cellcolor{tabbg1}Disable OpenMP instrumentation.\\
+  \cellcolor{tabbg2}EXTRAE\_DISABLE\_PTHREAD & \cellcolor{tabbg2}Disable pthread instrumentation.\\
+  \cellcolor{tabbg1}EXTRAE\_DISABLE\_PACX & \cellcolor{tabbg1}Disable PACX instrumentation.\\
+  \cellcolor{tabbg2}EXTRAE\_FILE\_SIZE & \cellcolor{tabbg2}Set the maximum size (in Mbytes) for the intermediate trace file.\\
+  \cellcolor{tabbg1}                  & \cellcolor{tabbg1}List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
+  \cellcolor{tabbg1}EXTRAE\_FUNCTIONS & \cellcolor{tabbg1}GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
+  \cellcolor{tabbg1}                  & \cellcolor{tabbg1}option at compile and link time. \\
+  \cellcolor{tabbg2} & \cellcolor{tabbg2}Specify if the performance counters should be collected when a\\
+  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_FUNCTIONS\_COUNTERS\_ON} & \cellcolor{tabbg2}user function event is emitted.\\
+  \cellcolor{tabbg1}EXTRAE\_FINAL\_DIR & \cellcolor{tabbg1}Specifies where files will be stored when the application ends.\\
+  \cellcolor{tabbg2} & \cellcolor{tabbg2}Gather intermediate trace files into a single directory\\
+  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_GATHER\_MPITS} & (\em{this is only available when instrumenting MPI applications}).\\
+  \cellcolor{tabbg1}EXTRAE\_HOME & \cellcolor{tabbg1}Points where the {\sf {E}xtrae}\ is installed.\\
+  \cellcolor{tabbg2} & \cellcolor{tabbg2}Choose whether the instrumentation runs in in {\tt detail} or\\
+  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_INITIAL\_MODE} & \cellcolor{tabbg2}in {\tt bursts} mode.\\
+  \cellcolor{tabbg1}EXTRAE\_BURST\_THRESHOLD & \cellcolor{tabbg1}Specify the threshold time to filter running bursts.\\
+  \cellcolor{tabbg2}EXTRAE\_MINIMUM\_TIME & \cellcolor{tabbg2}Specify the minimum amount of instrumentation time.\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure {\sf {E}xtrae}\ }
+\end{table}
+\par
+\end{landscape}%
+\lthtmlfigureZ
+\lthtmlcheckvsize\clearpage}
+
+{\newpage\clearpage
+\lthtmlfigureA{landscape4546}%
+\begin{landscape}
+% latex2html id marker 4546
 
 \par
 \begin{table}

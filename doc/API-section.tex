@@ -297,21 +297,53 @@ If Java is enabled at configure time, a basic instrumentation library for serial
 
 \begin{itemize}
 
-  \item {\tt void Init();}
+  \item \texttt{void Init ();}\\
+  Initializes the instrumentation package.
 
-  \item {\tt void Fini();}
+  \item \texttt{void Fini ();}\\
+  Finalizes the instrumentation package.
 
-  \item {\tt void Event(int id, long val);}
+  \item \texttt{void Event (int type, long value);}\\
+  Emits one event into the trace-file with the given pair type-value.
 
-  \item {\tt void nEvent(int types[], long values[]);}
+  \item \texttt{void nEvent (int types[], long values[]);}\\
+  Emits a set of pair type-value at the same timestamp. Note that both arrays must be the same length to proceed correctly, otherwise the call ignores the call.
 
-  \item {\tt void defineEventType(int type, String description, long nValues, long[] values, String[] descriptionValues);}
+  \item \texttt{void defineEventType (int type, String description, long nValues, long[] values, String[] descriptionValues);}\\
+  Adds a description for a given event type (through \texttt{type} and \texttt{description} parameters). The parameter \texttt{nValues} determines the size for the \texttt{values} and \texttt{descriptionValues} arrays. If \texttt{nValues} is non-zero, then it also adds the description for the given values.
 
-  \item {\tt void SetOptions(int options);}
+  \item \texttt{void SetOptions (int options);}\\
+  This API call changes the behavior of the instrumentation package but none of the options currently apply to the Java instrumentation.
 
-  \item {\tt void Shutdown();}
+  \item \texttt{void Shutdown();}\\
+  Disables the instrumentation until the next call to \texttt{Restart()}.
 
-  \item {\tt void Restart();}
+  \item \texttt{void Restart();}\\
+  Resumes the instrumentation from the previous \texttt{Shutdown()} call.
+
+\end{itemize}
+
+\subsection{Advanced Java bindings}\label{subsec:AdvancedJavaBindings}
+
+Since Extrae does not have features to automatically discover the thread identifier of the threads that run within the virtual machine, there are some calls that allows to do this manually.
+These calls are, however, intended for expert users and should be avoided whenever possible because their behavior may be highly modified, or even removed, in future releases.
+
+\begin{itemize}
+
+  \item {\texttt{SetTaskID (int id);}}\\
+  Tells Extrae that this process should be considered as task with identifier \texttt{id}. Use this call before invoking \texttt{Init()}.
+
+  \item {\texttt{SetNumTasks (int num);}}\\
+  Instructs Extrae to allocate the structures for \texttt{num} processes. Use this call before invoking \texttt{Init()}.
+%
+  \item {\texttt{SetThreadID (int id);}}\\
+  Instructs Extrae that this thread should be considered as thread with identifier \texttt{id}.
+
+  \item {\texttt{SetNumThreads (int num);}}\\
+  Tells Extrae that there are \texttt{num} threads active within this process. Use this call before invoking \texttt{Init()}.
+
+  \item {\texttt{Comm (boolean send, int tag, int size, int partner, long id);}}\\
+  Allows generating communications between two processes. The call emits one of the two-point communication part, so it is necessary to invoke it from both the sender and the receiver part. The \texttt{send} parameter determines whether this call will act as send or receive message. The \texttt{tag} and \texttt{size} parameters are used to match the communication and their parameters can be displayed in Paraver. The \texttt{partner} refers to the communication partner and it is identified by its TaskID. The \texttt{id} is meant for matching purposes but cannot be recovered during the analysis with Paraver.
 
 \end{itemize}
 

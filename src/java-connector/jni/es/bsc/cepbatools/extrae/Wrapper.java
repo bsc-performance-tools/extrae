@@ -61,7 +61,7 @@ public class Wrapper
 
 	public static native void Init();
 	public static native void Fini();
-	public static native void Event(int id, long val);
+	public static native void Event(int type, long value);
 	public static native void nEvent(int types[], long values[]);
 	public static native void defineEventType(int type, String description,
 	  long nValues, long[] values, String[] descriptionValues);
