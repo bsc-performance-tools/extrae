@@ -532,7 +532,29 @@ AC_DEFUN([AX_PROG_BINUTILS],
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib/libiberty.a" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib"
+         else
+            dnl Try something more automatic using find command
+            libiberty_lib=""
+
+            if test -d ${binutils_home_dir}/lib${BITS} ; then
+               nlibiberty=`find ${binutils_home_dir}/lib${BITS} -name libiberty.a | wc -l`
+               if test ${nlibiberty} -ge 1 ; then
+                  libiberty_lib=`find ${binutils_home_dir}/lib${BITS} -name libiberty.a | head -1`
+               fi
+            fi
+
+            if test -d ${binutils_home_dir}/lib -a "${libiberty_lib}" = "" ; then
+               nlibiberty=`find ${binutils_home_dir}/lib -name libiberty.a | wc -l`
+               if test ${nlibiberty} -ge 1 ; then
+                  libiberty_lib=`find ${binutils_home_dir}/lib -name libiberty.a | head -1`
+               fi
+            fi
+
+            if test "${libiberty_lib}" != "" ; then
+               LIBERTY_LIBSDIR=`dirname ${libiberty_lib}`
+            fi
          fi
+         
    
          if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then
            # Both libraries are present
@@ -733,6 +755,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
       esac
    fi
 
+   AM_CONDITIONAL(HAVE_BINUTILS, test "${BFD_INSTALLED}" = "yes" -a "${LIBERTY_INSTALLED}" = "yes" )
    AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
    AM_CONDITIONAL(BFD_NEEDS_LINTL, test "${libbfd_needs_lintl}" = "yes")
 

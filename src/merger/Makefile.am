@@ -83,10 +83,17 @@ libmpi2prv_la_SOURCES = \
 mpi2prv_SOURCES = \
  merger.c
 
-libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+libmpi2prv_la_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
+if HAVE_BINUTILS
+libmpi2prv_la_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@ 
+endif
 
-mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@ @BFD_CFLAGS@ @LIBERTY_CFLAGS@
-mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_LIB)/libcommon.la @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
+mpi2prv_CFLAGS = -I$(top_srcdir)/src/common -I$(top_srcdir)/include -I$(MERGER_INC)/common -I$(PRV_MERGER_INC) -I$(TRF_MERGER_INC) @MPI_CFLAGS@
+mpi2prv_LDFLAGS = libmpi2prv.la $(COMMON_LIB)/libcommon.la
+if HAVE_BINUTILS
+mpi2prv_CFLAGS += @BFD_CFLAGS@ @LIBERTY_CFLAGS@
+mpi2prv_LDFLAGS += @BFD_LDFLAGS@ @BFD_LIBS@ @LIBERTY_LDFLAGS@ @LIBERTY_LIBS@
+endif
 mpi2prv_DEPENDENCIES = libmpi2prv.la $(COMMON_LIB)/libcommon.la
 
 if BFD_NEEDS_LDL
