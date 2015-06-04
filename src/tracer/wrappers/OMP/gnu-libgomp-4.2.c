@@ -50,7 +50,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "wrapper.h"
 #include "omp-common.h"
 
-#define DEBUG
+// #define DEBUG
 
 #if defined(PIC)
 
