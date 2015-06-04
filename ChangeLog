@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 04Jun2015 Sanitized environment variables, in particular LD_LIBRARY_PATH
              Added extrae-test-dyninst tool to check DynInst functionality
+             Annotate the node name in the .mpit file to avoid file collisions
  * 25May2015 Extrae 3.1.0 released
  * 25May2015 Fixes for bootstrapping, changed into autoreconf.
              Added libxml2's m4 file into config/

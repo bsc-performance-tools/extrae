@@ -82,13 +82,16 @@
 #define DIGITS_THREAD 6
 #define MPIT_ID_LENGTH (DIGITS_PID + DIGITS_TASK + DIGITS_THREAD + 1)
 
+#define TEMPLATE_NODE_SEPARATOR      "@"
+#define TEMPLATE_NODE_SEPARATOR_CHAR '@'
+
 #define TEMPLATE_DIGITS "%.10d%.6d%.6u"
-#define TEMPLATE_PTT    "%s/%s."TEMPLATE_DIGITS"%s"
+#define TEMPLATE_PTT    "%s/%s"TEMPLATE_NODE_SEPARATOR"%s."TEMPLATE_DIGITS"%s"  // dir/app@hostname.digits.ext
 #define TEMPLATE_P      "%s/%s%s"
 
 /* Uses pid, task id and thread id to generate the name of the file */
-#define FileName_PTT(name, path, prefix, pid, task, thread, ext) \
-	snprintf(name, sizeof(name), TEMPLATE_PTT, path, prefix, pid, task, thread, ext);
+#define FileName_PTT(name, path, prefix, hostname, pid, task, thread, ext) \
+	snprintf(name, sizeof(name), TEMPLATE_PTT, path, prefix, hostname, pid, task, thread, ext);
 
 /* Uses pid to generate the name of the file */
 #define FileName_P(name, path, prefix, ext) \

@@ -437,9 +437,14 @@ unsigned long long Online_GetAppResumeTime()
  */
 static void Online_GenerateOutputFiles()
 {
-  int initial_TASKID = Extrae_get_initial_TASKID();
-  FileName_PTT(tmpBufferFile, Get_TemporalDir(initial_TASKID), Get_ApplName(), getpid(), initial_TASKID, 0, EXT_TMP_ONLINE);
-  FileName_PTT(finalBufferFile, Get_FinalDir(TASKID), Get_ApplName(),  getpid(), TASKID, 0, EXT_ONLINE);
+	char hostname[1024];
+	int initial_TASKID = Extrae_get_initial_TASKID();
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
+	FileName_PTT(tmpBufferFile, Get_TemporalDir(initial_TASKID), Get_ApplName(),
+	  hostname, getpid(), initial_TASKID, 0, EXT_TMP_ONLINE);
+	FileName_PTT(finalBufferFile, Get_FinalDir(TASKID), Get_ApplName(), hostname,
+	  getpid(), TASKID, 0, EXT_ONLINE);
 }
 
 

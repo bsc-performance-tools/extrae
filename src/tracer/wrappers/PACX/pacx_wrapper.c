@@ -513,8 +513,10 @@ static int PACX_Generate_Task_File_List (int n_tasks, char **node_list)
 				/* If Im processing MASTER, I know my threads and their names */
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
-					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
-					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], Extrae_get_thread_name(thid));
+					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
+					  node_list[i], PID, TID, thid, EXT_MPIT);
+					sprintf (tmpline, "%s named %s\n", tmpname,
+					  Extrae_get_thread_name(thid));
 					ret = write (filedes, tmpline, strlen (tmpline));
 					if (ret != strlen (tmpline))
 					{
@@ -545,8 +547,10 @@ static int PACX_Generate_Task_File_List (int n_tasks, char **node_list)
 
 				for (thid = 0; thid < NTHREADS; thid++)
 				{
-					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, PID, TID, thid, EXT_MPIT);
-					sprintf (tmpline, "%s on %s named %s\n", tmpname, node_list[i], &tmp[thid*THREAD_INFO_NAME_LEN]);
+					FileName_PTT(tmpname, Get_FinalDir(TID), appl_name,
+					  node_list[i], PID, TID, thid, EXT_MPIT);
+					sprintf (tmpline, "%s named %s\n", tmpname,
+					  &tmp[thid*THREAD_INFO_NAME_LEN]);
 					ret = write (filedes, tmpline, strlen (tmpline));
 					if (ret != strlen (tmpline))
 					{
@@ -649,10 +653,12 @@ int PACX_generate_spu_file_list (int number_of_spus)
 
 			for (thid = 0; thid < buffer_numspus[i]; thid++)
 			{
-				/* Tracefile_Name (tmpname, final_dir, appl_name, buffer_pids[i], i, thid+buffer_threads[i]); */
-				FileName_PTT(tmpname, Get_FinalDir(i), appl_name, buffer_pids[i], i, thid+buffer_threads[i], EXT_MPIT);
+				FileName_PTT(tmpname, Get_FinalDir(i), appl_name,
+				  &buffer_names[i*MPI_MAX_PROCESSOR_NAME], buffer_pids[i], i,
+				  thid+buffer_threads[i], EXT_MPIT);
 
-				sprintf (tmp_line, "%s on %s-SPU%d\n", tmpname, &buffer_names[i*MPI_MAX_PROCESSOR_NAME], thid);
+				sprintf (tmp_line, "%s on %s-SPU%d\n", tmpname,
+				  &buffer_names[i*MPI_MAX_PROCESSOR_NAME], thid);
 
 				ret = write (filedes, tmp_line, strlen (tmp_line));
 				if (ret != strlen (tmp_line))

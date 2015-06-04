@@ -154,7 +154,7 @@ void Help (const char *ProgName)
  ***  Adds an MPIT file into the required structures.
  ******************************************************************************/
 
-static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptask,
+static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 	int taskid)
 {
 	int name_length;
@@ -163,14 +163,17 @@ static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptas
 	int i;
 	int cur_ptask = *cptask;
 	char *tmp_name;
+	size_t pos;
+	int has_node_separator;
+	int hostname_len;
 
-        xrealloc(InputTraces, InputTraces, sizeof(struct input_t) * (nTraces + 1));
-        if (InputTraces == NULL)
-        {
-          perror ("realloc");
-          fprintf (stderr, "mpi2prv: Cannot allocate InputTraces memory for MPIT %d. Dying...\n", nTraces + 1);
-          exit (1);
-        }
+	xrealloc(InputTraces, InputTraces, sizeof(struct input_t) * (nTraces + 1));
+	if (InputTraces == NULL)
+	{
+		perror ("realloc");
+		fprintf (stderr, "mpi2prv: Cannot allocate InputTraces memory for MPIT %d. Dying...\n", nTraces + 1);
+		exit (1);
+	}
 
 	InputTraces[nTraces].InputForWorker = -1;
 	InputTraces[nTraces].name = (char *) malloc (strlen (file) + 1);
@@ -182,18 +185,41 @@ static void Process_MPIT_File (char *file, char *node, char *thdname, int *cptas
 	}
 	strcpy (InputTraces[nTraces].name, file);
 
-	if (node != NULL)
+	pos = strlen(file)-strlen(EXT_MPIT)-DIGITS_PID-DIGITS_TASK
+	  -DIGITS_THREAD-1; // Last -1 is for extra .
+	has_node_separator = FALSE;
+	hostname_len = 0;
+	while (!has_node_separator)
 	{
-		InputTraces[nTraces].node = strdup (node);
-		if (InputTraces[nTraces].node == NULL)
+		has_node_separator = file[pos] == TEMPLATE_NODE_SEPARATOR_CHAR;
+		if (has_node_separator)
 		{
-			fprintf (stderr, "mpi2prv: Error cannot obtain memory for NODE information!\n");
-			fflush (stderr);
-			exit (1);
+			InputTraces[nTraces].node = (char*) malloc (
+			  (hostname_len+1)*sizeof(char));
+			if (InputTraces[nTraces].node == NULL)
+			{
+				fprintf (stderr, "mpi2prv: Error cannot obtain memory for NODE information!\n");
+				fflush (stderr);
+				exit (1);
+			}
+			snprintf (InputTraces[nTraces].node, hostname_len, "%s", &file[pos+1]);
+			break;
+		}
+		else
+		{
+			if (pos == 0)
+			{
+				fprintf (stderr, "merger: Could not find node separator in file '%s'\n", file);
+				InputTraces[nTraces].node = "(unknown)";
+				break;
+			}
+			else
+			{
+				hostname_len++;
+				pos--;
+			}
 		}
 	}
-	else 
-		InputTraces[nTraces].node = "(unknown)";
 
 	name_length = strlen (InputTraces[nTraces].name);
 	tmp_name = InputTraces[nTraces].name;
@@ -355,7 +381,6 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 {
 	int info;
 	char mybuffer[4096];
-	char host[2048];
 	char thdname[2048];
 	char path[2048];
 	FILE *fd = fopen (file, "r");
@@ -383,10 +408,11 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 		if (!feof(fd) && res != NULL)
 		{
 			char *stripped;
+			size_t pos;
 
-			path[0] = host[0] = thdname[0] = (char) 0;
+			path[0] = thdname[0] = (char) 0;
 
-			info = sscanf (mybuffer, "%s on %s named %s", path, host, thdname);
+			info = sscanf (mybuffer, "%s named %s", path, thdname);
 			stripped = strip (path);
 
 			if (strncmp (mybuffer, "--", 2) == 0)
@@ -413,22 +439,22 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 							char *directory = dirname (duplicate);
 
 							sprintf (dir_file, "%s%s", directory, stripped_basename);
-							Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
+							Process_MPIT_File (dir_file, (info==2)?thdname:NULL, cptask, taskid);
 
 							free (duplicate);
 						}
 						else
-							Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
+							Process_MPIT_File (&stripped_basename[1], (info==2)?thdname:NULL, cptask, taskid);
 					}
 					else
 						fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
 				}
 				else
-					Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
+					Process_MPIT_File (stripped, (info==2)?thdname:NULL, cptask, taskid);
 			}
 			else if (info >= 1 && opentype == FileOpen_Absolute)
 			{
-				Process_MPIT_File (stripped, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
+				Process_MPIT_File (stripped, (info==2)?thdname:NULL, cptask, taskid);
 			}
 			else if (info >= 1 && opentype == FileOpen_Relative)
 			{
@@ -444,12 +470,12 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 						char *directory = dirname (duplicate);
 
 						sprintf (dir_file, "%s%s", directory, stripped_basename);
-						Process_MPIT_File (dir_file, (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
+						Process_MPIT_File (dir_file, (info==2)?thdname:NULL, cptask, taskid);
 
 						free (duplicate);
 					}
 					else
-						Process_MPIT_File (&stripped_basename[1], (info>=2)?host:NULL, (info==3)?thdname:NULL, cptask, taskid);
+						Process_MPIT_File (&stripped_basename[1], (info==2)?thdname:NULL, cptask, taskid);
 				}
 				else
 					fprintf (stderr, "merger: Error cannot find 'set-' signature in filename %s\n", stripped);
@@ -899,7 +925,7 @@ void ProcessArgs (int rank, int argc, char *argv[])
 			continue;
 		}
 		else
-			Process_MPIT_File ((char *) (argv[CurArg]), NULL, NULL, &cur_ptask, rank);
+			Process_MPIT_File (argv[CurArg], NULL, &cur_ptask, rank);
 	}
 	set_option_merge_NumApplications (cur_ptask);
 

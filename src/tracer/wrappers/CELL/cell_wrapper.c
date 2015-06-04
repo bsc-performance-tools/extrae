@@ -84,12 +84,13 @@ static generate_spu_file_list (int nspus)
 	if (filedes < 0)
 		return -1;
 
-	if (gethostname (hostname, 1024 - 1) != 0)
+	if (gethostname (hostname, sizeof(hostname)) != 0)
  		sprintf (hostname, "localhost");
 
 	for (thid = 1; thid <= nspus; thid++)
 	{
-		FileName_PTT(tmpname, Get_FinalDir(0), appl_name, getpid(), 0, thid, EXT_MPIT);
+		FileName_PTT(tmpname, Get_FinalDir(0), appl_name, hostname, getpid(),
+		  0, thid, EXT_MPIT);
 
 		sprintf (tmp_line, "%s on %s-SPU%d\n", tmpname, hostname, thid);
 
@@ -184,6 +185,10 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 	char trace[512];
 	int linear_thread = Backend_getMaximumOfThreads();
 	int i;
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+ 		sprintf (hostname, "localhost");
 	
 	/*
 	   linear_thread allows converting SPU thread id into simple threads in
@@ -195,8 +200,10 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 
 	for (i = 0; i < nthreads; i++)
 	{
-		FileName_PTT (trace_tmp, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, i+linear_thread, EXT_TMP_MPIT);
-		FileName_PTT (trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
+		FileName_PTT (trace_tmp, Get_FinalDir(TASKID), appl_name, hostanme,
+		  getpid(), TASKID, i+linear_thread, EXT_TMP_MPIT);
+		FileName_PTT (trace, Get_FinalDir(TASKID), appl_name, hostname,
+		  getpid(), TASKID, i+linear_thread, EXT_MPIT);
 
 		rename_or_copy (trace_tmp, trace);
 
@@ -207,6 +214,10 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 	char trace[512];
 	int fd, res, i;
 	int linear_thread = Backend_getMaximumOfThreads();
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+ 		sprintf (hostname, "localhost");
 
 	/*
 	   linear_thread allows converting SPU thread id into simple threads in
@@ -219,7 +230,8 @@ static void flush_spu_buffers (unsigned THREAD, int nthreads, unsigned **prvbuff
 	fprintf (stdout, "\n");
 	for (i = 0; i < nthreads; i++)
 	{
-		FileName_PTT (trace, Get_FinalDir(TASKID), appl_name, getpid(), TASKID, i+linear_thread, EXT_MPIT);
+		FileName_PTT (trace, Get_FinalDir(TASKID), appl_name, hostname,
+		  getpid(), TASKID, i+linear_thread, EXT_MPIT);
 		fprintf (stdout, PACKAGE_NAME": Intermediate raw trace file created for SPU %d (in thread %d): %s\n", i+1, THREAD, trace);
 
 		fd = open (trace, O_WRONLY|O_CREAT|O_TRUNC, 0644);
@@ -252,6 +264,10 @@ int Extrae_CELL_init (int spus, spe_context_ptr_t * spe_id)
 	unsigned int i, TB_high, TB_low, all_spus_ok;
 	unsigned long long TB, spu_creation_time[spus];
 	unsigned THREAD = get_trace_thread_number();
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+ 		sprintf (hostname, "localhost");
 
 #ifdef SPU_USES_WRITE
 	if (!warning_message_shown)
@@ -323,7 +339,8 @@ int Extrae_CELL_init (int spus, spe_context_ptr_t * spe_id)
 #ifdef SPU_USES_WRITE
 
 		/* Create a temporal file for the SPU */
-		FileName_PTT (trace, final_dir, appl_name, getpid(), TASKID, i+linear_thread, EXT_TMP_MPIT);
+		FileName_PTT (trace, final_dir, appl_name, hostname, getpid(), TASKID,
+		  i+linear_thread, EXT_TMP_MPIT);
 		descriptor = open (trace, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 
 		/* If using 'write', just can ignore buffer limits */

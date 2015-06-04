@@ -1263,25 +1263,32 @@ int remove_temporal_files(void)
 	unsigned int thread;
 	char tmpname[TMP_NAME_LENGTH];
 	unsigned initialTASKID = Extrae_get_initial_TASKID();
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
 
 	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 	{
 		/* Remember .mpit and .sample intermediate files are allocated once and do
 	     NOT change even if the TASK changes during runtime, thus use initialTASKID
 		   instead of TASKID */
-		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
+		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name,
+		  hostname, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
 		if (file_exists(tmpname))
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing a temporal tracing file (%s)\n", tmpname);
 
 #if defined(SAMPLING_SUPPORT)
-		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread, EXT_TMP_SAMPLE);
+		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name,
+		  hostname, getpid(), initialTASKID, thread, EXT_TMP_SAMPLE);
 		if (file_exists(tmpname))
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing a temporal sampling file (%s)\n", tmpname);
 #endif
 
-		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID, thread, EXT_SYM);
+		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, hostname,
+		  getpid(), TASKID, thread, EXT_SYM);
 		if (file_exists (tmpname))
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing symbol file (%s)\n", tmpname);
@@ -1301,8 +1308,13 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 {
 	char tmp_file[TMP_NAME_LENGTH];
 	unsigned initialTASKID = Extrae_get_initial_TASKID();
+	char hostname[1024];
 
-	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
+
+	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name,
+	  hostname, getpid(), initialTASKID, thread_id, EXT_TMP_MPIT);
 
 	if (forked)
 		Buffer_Free (TracingBuffer[thread_id]);
@@ -1327,7 +1339,8 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	}
 
 #if defined(SAMPLING_SUPPORT)
-	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
+	FileName_PTT(tmp_file, Get_TemporalDir(initialTASKID), appl_name,
+	  hostname, getpid(), initialTASKID, thread_id, EXT_TMP_SAMPLE);
 
 	if (forked)
 		Buffer_Free (SamplingBuffer[thread_id]);
@@ -1565,6 +1578,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	int set;
 #endif
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
 
 #if defined(STANDALONE)
 	fprintf(stderr, "[DEBUG] NumberOfModules=%d\n", NumberOfModules);
@@ -1753,7 +1770,8 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 	{
 		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
-		  appl_name, getpid(), Extrae_get_initial_TASKID(), u, EXT_SYM);
+		  appl_name, hostname, getpid(), Extrae_get_initial_TASKID(), u,
+		  EXT_SYM);
 		if (file_exists (trace_sym))
 			unlink (trace_sym);
 	}
@@ -2149,9 +2167,13 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 	char trace[TMP_DIR];
 	char tmp_name[TMP_DIR];
 	unsigned initialTASKID;
+	char hostname[1024];
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread)))
 		return;
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
 
 	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
 	   as that moment was 0, independently if MPI or PACX has run */
@@ -2161,10 +2183,10 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 
 	/* Rename MPIT file (PID from origin is getpid(), PID from destination
 	   maybe different if append == TRUE */
-	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, getpid(),
-	  initialTASKID, thread, EXT_TMP_MPIT);
-	FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, pid, TASKID, thread,
-	  EXT_MPIT);
+	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
+	  getpid(), initialTASKID, thread, EXT_TMP_MPIT);
+	FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, pid, TASKID,
+	  thread, EXT_MPIT);
 	if (!append)
 		rename_or_copy (tmp_name, trace); 
 	else
@@ -2174,15 +2196,15 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 
 	/* Rename SAMPLE file, if it exists */
 #if defined(SAMPLING_SUPPORT)
-	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, pid,
-	  initialTASKID, thread, EXT_TMP_SAMPLE);
+	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
+	  pid, initialTASKID, thread, EXT_TMP_SAMPLE);
 	if (Buffer_GetFillCount(SAMPLING_BUFFER(thread)) > 0) 
 	{
 		Buffer_Flush(SAMPLING_BUFFER(thread));
 		Buffer_Close(SAMPLING_BUFFER(thread));
 
-		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, pid, TASKID,
-		  thread, EXT_SAMPLE);
+		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, pid,
+		  TASKID, thread, EXT_SAMPLE);
 		rename_or_copy (tmp_name, trace);
 		fprintf (stdout,
 		  PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
@@ -2194,11 +2216,11 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 	}
 #endif
     /* Copy or move SYM file, if it exists */
-    FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, pid,
-        initialTASKID, thread, EXT_SYM);
+    FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
+	  pid, initialTASKID, thread, EXT_SYM);
     if (file_exists(tmp_name)){
-        FileName_PTT(trace, Get_FinalDir(initialTASKID), appl_name, pid,
-            initialTASKID, thread, EXT_SYM);
+        FileName_PTT(trace, Get_FinalDir(initialTASKID), appl_name, hostname,
+		  pid, initialTASKID, thread, EXT_SYM);
         rename_or_copy(tmp_name, trace);
     	fprintf (stdout,
     	  PACKAGE_NAME": Intermediate raw sym file created : %s\n", trace);
@@ -2558,11 +2580,15 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 	char line[LINE_SIZE];
 	char trace_sym[TMP_DIR];
 	int fd;
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
 
 	ASSERT(strlen(description)<LINE_SIZE, "Description for type is too large");
 
-	FileName_PTT(trace_sym, Get_TemporalDir(TASKID),
-		appl_name, getpid(), TASKID, THREADID, EXT_SYM);
+	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname,
+	  getpid(), TASKID, THREADID, EXT_SYM);
 
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
@@ -2614,11 +2640,15 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 	char line[LINE_SIZE];
 	char trace_sym[TMP_DIR];
 	int fd;
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
 
 	ASSERT(strlen(functionname)+strlen(modulename)<LINE_SIZE, "Function name and module name are too large!");
 
-	FileName_PTT(trace_sym, Get_TemporalDir(TASKID),
-		appl_name, getpid(), TASKID, THREADID, EXT_SYM);
+	FileName_PTT(trace_sym, Get_TemporalDir(TASKID), appl_name, hostname,
+	  getpid(), TASKID, THREADID, EXT_SYM);
 
 	if ((fd = open(trace_sym, O_WRONLY | O_APPEND | O_CREAT, 0644)) >= 0)
 	{
@@ -2699,6 +2729,10 @@ void Backend_updateTaskID (void)
 {
 	char file1[TMP_DIR], file2[TMP_DIR];
 	unsigned thread;
+	char hostname[1024];
+
+	if (gethostname (hostname, sizeof(hostname)) != 0)
+		sprintf (hostname, "localhost");
 
 	if (Extrae_get_initial_TASKID() == TASKID)
 		return;
@@ -2706,12 +2740,13 @@ void Backend_updateTaskID (void)
 	/* Rename SYM file, if it exists, per thread */
 	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 	{
-		FileName_PTT(file1, Get_TemporalDir(Extrae_get_initial_TASKID()), appl_name,
-		  getpid(), Extrae_get_initial_TASKID(), thread, EXT_SYM);
+		FileName_PTT(file1, Get_TemporalDir(Extrae_get_initial_TASKID()),
+		  appl_name, hostname, getpid(), Extrae_get_initial_TASKID(), thread,
+		  EXT_SYM);
 		if (file_exists (file1))
 		{
-			FileName_PTT(file2, Get_TemporalDir(TASKID), appl_name, getpid(), TASKID,
-			  thread, EXT_SYM);
+			FileName_PTT(file2, Get_TemporalDir(TASKID), appl_name, hostname, 
+			  getpid(), TASKID, thread, EXT_SYM);
 
 			/* Remove file if it already exists, and then copy the "new" version */
 			if (file_exists (file2))

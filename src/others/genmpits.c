@@ -79,9 +79,9 @@ void DumpFiles (int pidlabel)
 			fprintf (stdout, "--\n");
 
 		if (pidlabel)
-			fprintf (stdout, "%s on unknown-node named process-%d\n", tmp, pid);
+			fprintf (stdout, "%s named process-%d\n", tmp, pid);
 		else
-			fprintf (stdout, "%s on unknown-node named\n", tmp);
+			fprintf (stdout, "%s named\n", tmp);
 	}
 }
 
