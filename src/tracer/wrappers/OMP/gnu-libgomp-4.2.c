@@ -825,7 +825,7 @@ void GOMP_parallel_loop_static_start (void *p1, void *p2, unsigned p3, long p4, 
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": GOMP_loop_static_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_static_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -856,7 +856,7 @@ void GOMP_parallel_loop_runtime_start (void *p1, void *p2, unsigned p3, long p4,
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": GOMP_loop_runtime_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_runtime_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -887,7 +887,7 @@ void GOMP_parallel_loop_guided_start (void *p1, void *p2, unsigned p3, long p4, 
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": GOMP_loop_guided_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_guided_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -918,7 +918,7 @@ void GOMP_parallel_loop_dynamic_start (void *p1, void *p2, unsigned p3, long p4,
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": GOMP_loop_dynamic_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_loop_dynamic_start is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
