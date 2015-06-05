@@ -708,6 +708,7 @@ int GOMP_loop_static_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
+		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_static_start_real != NULL)
 	{
@@ -734,6 +735,7 @@ int GOMP_loop_runtime_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
+		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_runtime_start_real != NULL)
 	{
@@ -760,6 +762,7 @@ int GOMP_loop_guided_start (long p1, long p2, long p3, long p4, long *p5, long *
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
+		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_guided_start_real != NULL)
 	{
@@ -786,6 +789,7 @@ int GOMP_loop_dynamic_start (long p1, long p2, long p3, long p4, long *p5, long 
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (p1, p2, p3, p4, p5, p6);
 		Extrae_OpenMP_UF_Entry (par_uf);
+		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_dynamic_start_real != NULL)
 	{
