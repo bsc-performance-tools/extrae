@@ -47,7 +47,7 @@ public class pi
 		long pi_prv_values[] = { entry_value[0], exit_value[0] };
 		String pi_prv_values_descriptions [] = { "Begin", "End" };
 		es.bsc.cepbatools.extrae.Wrapper.defineEventType (pi_prv_type,
-		  pi_prv_type_description, 2, pi_prv_values,
+		  pi_prv_type_description, pi_prv_values,
 		  pi_prv_values_descriptions);
 
 		// es.bsc.cepbatools.extrae.Wrapper.Fini();
