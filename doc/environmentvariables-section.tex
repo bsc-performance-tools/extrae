@@ -3,11 +3,12 @@
 Although \TRACE is configured through an XML file (which is pointed by the {\tt EXTRAE\_CONFIG\_FILE}), it also supports minimal configuration to be done via environment variables for those systems that do not have the library responsible for parsing the XML files ({\em i.e.,} libxml2).
 
 This appendix presents the environment variables the \TRACE package uses if {\tt EXTRAE\_CONFIG\_FILE} is not set and a description. For those environment variable that refer to XML 'enabled' attributes ({\em i.e.}, that can be set to "yes" or "no") are considered to be enabled if their value are defined to 1.
- 
+
 \begin{landscape}
 \begin{table}
 \centerline {
-\begin{tabular}{p{7cm} p{14cm}}
+\small
+\begin{tabular}{p{7.5cm} p{14cm}}
   \hline
   {\bf Environment variable} & {\bf Description}\\
   \hline
@@ -52,7 +53,8 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
 
 \begin{table}
 \centerline {
-\begin{tabular}{p{7cm} p{14cm}}
+\small
+\begin{tabular}{p{7.5cm} p{14cm}} 
   \hline
   {\bf Environment variable} & {\bf Description}\\
 	\hline
@@ -76,10 +78,11 @@ This appendix presents the environment variables the \TRACE package uses if {\tt
   \cellcolor{tabbg1} EXTRAE\_SAMPLING\_PERIOD & \cellcolor{tabbg1} Enable time-sampling capabilities with the indicated period.\\
   \cellcolor{tabbg2} EXTRAE\_SAMPLING\_VARIABILITY & \cellcolor{tabbg2} Adds some variability to the sampling period.\\
   \cellcolor{tabbg1} EXTRAE\_RUSAGE & \cellcolor{tabbg1} Instrumentation emits resource usage at flush points if set to 1.\\
-  \cellcolor{tabbg2} EXTRAE\_SPU\_DMA\_CHANNEL & \cellcolor{tabbg2} Choose the SPU-PPU dma communication channel.\\
-  \cellcolor{tabbg1} EXTRAE\_SPU\_BUFFER\_SIZE & \cellcolor{tabbg1} Set the buffer size of the SPU side.\\
-  \cellcolor{tabbg2} EXTRAE\_SPU\_FILE\_SIZE & \cellcolor{tabbg2} Set the maximum size for the SPU side (default: 5Mbytes).\\
-  \cellcolor{tabbg1} EXTRAE\_TRACE\_TYPE & \cellcolor{tabbg1} Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
+  \cellcolor{tabbg2} EXTRAE\_SKIP\_AUTO\_LIBRARY\_INITIALIZE & \cellcolor{tabbg2} Do not automatically init instrumentation in the main symbol.\\
+  \cellcolor{tabbg1} EXTRAE\_SPU\_DMA\_CHANNEL & \cellcolor{tabbg1} Choose the SPU-PPU dma communication channel.\\
+  \cellcolor{tabbg2} EXTRAE\_SPU\_BUFFER\_SIZE & \cellcolor{tabbg2} Set the buffer size of the SPU side.\\
+  \cellcolor{tabbg1} EXTRAE\_SPU\_FILE\_SIZE & \cellcolor{tabbg1} Set the maximum size for the SPU side (default: 5Mbytes).\\
+  \cellcolor{tabbg2} EXTRAE\_TRACE\_TYPE & \cellcolor{tabbg2} Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
   \hline
 \end{tabular}
 }

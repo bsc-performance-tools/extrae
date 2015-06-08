@@ -332,7 +332,7 @@ List of Tables</A>
 <LI>1.2. <A NAME="tex2html12"
   HREF="user-guide.html#213">Available libraries in Extrae. Their availability depends upon the configure process.</A>
 <LI>. <A NAME="tex2html21"
-  HREF="user-guide.html#3551">Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</A></UL>
+  HREF="user-guide.html#3550">Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</A></UL>
 <P>
 
 <P>
@@ -379,7 +379,7 @@ The unpacking process will create different directories on the current directory
 <CAPTION><STRONG>Table 1.1:</STRONG>
 Package contents description</CAPTION>
 <TR><TD>2tabbg1tabbg2
-<DIV CLASS="centerline" ID="par8724" ALIGN="CENTER">
+<DIV CLASS="centerline" ID="par8725" ALIGN="CENTER">
 <TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
 <TR><TD ALIGN="LEFT"><B>Directory</B></TD>
 <TD ALIGN="LEFT"><B>Contents</B></TD>
@@ -3359,9 +3359,9 @@ Emits a set of pair type-value at the same timestamp. Note that both arrays must
 
 <P>
 </LI>
-<LI><TT>void defineEventType (int type, String description, long nValues, long[] values, String[] descriptionValues);</TT>
+<LI><TT>void defineEventType (int type, String description, long[] values, String[] descriptionValues);</TT>
 <BR>
-Adds a description for a given event type (through <TT>type</TT> and <TT>description</TT> parameters). The parameter <TT>nValues</TT> determines the size for the <TT>values</TT> and <TT>descriptionValues</TT> arrays. If <TT>nValues</TT> is non-zero, then it also adds the description for the given values.
+Adds a description for a given event type (through <TT>type</TT> and <TT>description</TT> parameters). If the array <TT>values</TT> is non-null, then the array <TT>descriptionValues</TT> should be the an array of the same length and each entry should be a string describing each of the values given in <TT>values</TT>.
 
 <P>
 </LI>
@@ -3460,16 +3460,16 @@ In order to use Paraver, those intermediate files (<I>i.e.</I>, <TT>.mpit</TT> f
 
 <P>
 The target trace type is defined in the XML configuration file used at the instrumentation step (see section <A HREF="#sec:XMLSectionTraceConfiguration">4.1</A>), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters <TT>-paraver</TT> or <TT>-dimemas</TT><A NAME="tex2html20"
-  HREF="#foot3541"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
+  HREF="#foot3540"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
 
 <P>
 <BR><P></P>
-<DIV ALIGN="CENTER"><A NAME="3551"></A>
+<DIV ALIGN="CENTER"><A NAME="3550"></A>
 <TABLE>
 <CAPTION><STRONG>Table:</STRONG>
 Description of the available mergers in the <I CLASS="sans">Extrae</I> package.</CAPTION>
 <TR><TD>2tabbg1tabbg2
-<DIV CLASS="centerline" ID="par9013" ALIGN="CENTER">
+<DIV CLASS="centerline" ID="par9014" ALIGN="CENTER">
 <TABLE CELLPADDING=3 BORDER="1" ALIGN="CENTER">
 <TR><TD ALIGN="LEFT"><B>Binary</B></TD>
 <TD ALIGN="LEFT"><B>Description</B></TD>
@@ -3844,7 +3844,7 @@ This mechanism aims at identifying the fine-grain structure of the computing reg
 Applying density-based clustering, this method is able to expose the main performance trends in the 
 computations, and this information is useful to focus the analysis on the zones of real interest. 
 To perform the cluster analysis, <I CLASS="sans">Extrae</I> On-line relies on the ClusteringSuite tool<A NAME="tex2html22"
-  HREF="#foot3970"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
+  HREF="#foot3969"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A>.
 
 <P>
 At each phase of analysis, several outputs are produced:
@@ -4063,7 +4063,7 @@ We present here three different examples of generating a Paraver tracefile. Firs
 
 <P>
 DynInst is a third-party instrumentation library developed at UW Madison which can instrument in-memory binaries. It adds flexibility to add instrumentation to the application without modifying the source code. DynInst is ported to different systems (Linux, FreeBSD) and to different architectures<A NAME="tex2html24"
-  HREF="#foot4083"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
+  HREF="#foot4082"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> (x86, x86/64, PPC32, PPC64) but the functionality is common to all of them.
 
 <P>
 
@@ -4151,7 +4151,7 @@ Please note, this script is particularly adapted to the MOAB/Slurm queue systems
 
 <P>
 LD_PRELOAD (or LDR_PRELOAD[64] in AIX) interposition mechanism only works for binaries that are linked against shared libraries. This interposition is done by the runtime loader by substituting the original symbols by those provided by the instrumentation package. This mechanism is known to work on Linux, FreeBSD and AIX operating systems, although it may be available on other operating systems (even using different names<A NAME="tex2html25"
-  HREF="#foot4179"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>) they are not tested.
+  HREF="#foot4178"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A>) they are not tested.
 
 <P>
 We show how this mechanism works on Linux (or similar environments) in subsection <A HREF="#subsec:Examples_Linux">8.2.1</A> and on AIX in subsection <A HREF="#subsec:Examples_AIX">8.2.3</A>.
@@ -4191,7 +4191,7 @@ Regarding the execution, if you run MPI applications from the command-line, you 
 
 <P>
 <BR>
-  <SPAN ID="cbox4181">
+  <SPAN ID="cbox4180">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>${MPI_HOME}/bin/mpirun -np N ./trace.sh mpi-app
@@ -4395,7 +4395,7 @@ To manually generate the final Paraver tracefile issue the following command:
 
 <P>
 <BR>
-  <SPAN ID="cbox4198">
+  <SPAN ID="cbox4197">
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -e mpi-app -o trace.prv
@@ -4547,13 +4547,13 @@ This appendix presents the environment variables the <I CLASS="sans">Extrae</I> 
 <P>
 <BR>
 <A NAME="tab:EnvironmentVariables"></A><IMG
- WIDTH="990" HEIGHT="663" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="1013" HEIGHT="589" ALIGN="BOTTOM" BORDER="0"
  SRC="img3.png"
  ALT="\begin{landscape}
-% latex2html id marker 4450\begin{table}
+% latex2html id marker 4449\begin{table}
 \centerline{
-\begin...
-...riables available to configure {\sf {E}xtrae}\ }
+\small...
+...riables available to configure {\sf {E}xtrae} }
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -4561,14 +4561,14 @@ This appendix presents the environment variables the <I CLASS="sans">Extrae</I> 
 <P>
 <BR>
 <A NAME="tab:EnvironmentVariables_continued"></A><IMG
- WIDTH="990" HEIGHT="578" ALIGN="BOTTOM" BORDER="0"
+ WIDTH="1013" HEIGHT="534" ALIGN="BOTTOM" BORDER="0"
  SRC="img4.png"
  ALT="\begin{landscape}
-% latex2html id marker 4546\par
+% latex2html id marker 4545\par
 \begin{table}
 \centerline{
 \...
-... to configure {\sf {E}xtrae}\ ({\em continued})}
+... to configure {\sf {E}xtrae} ({\em continued})}
 \end{table}\par
 \end{landscape}">
 <BR>
@@ -4847,7 +4847,7 @@ These are the instrumented MPI routines in the <I CLASS="sans">Extrae</I> packag
 <LI>MPI_Init
 </LI>
 <LI>MPI_Init_thread<A NAME="tex2html27"
-  HREF="#foot4083"><SUP>D.<SPAN CLASS="arabic">1</SPAN></SUP></A>
+  HREF="#foot4082"><SUP>D.<SPAN CLASS="arabic">1</SPAN></SUP></A>
 </LI>
 <LI>MPI_Finalize
 </LI>
@@ -4952,34 +4952,34 @@ These are the instrumented MPI routines in the <I CLASS="sans">Extrae</I> packag
 <LI>MPI_Sendrecv_replace
 </LI>
 <LI>MPI_File_open<A NAME="tex2html28"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_close<A NAME="tex2html29"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read<A NAME="tex2html30"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_all<A NAME="tex2html31"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write<A NAME="tex2html32"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_all<A NAME="tex2html33"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_at<A NAME="tex2html34"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_read_at_all<A NAME="tex2html35"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_at<A NAME="tex2html36"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_File_write_at_all<A NAME="tex2html37"
-  HREF="#foot4179"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
+  HREF="#foot4178"><SUP>D.<SPAN CLASS="arabic">2</SPAN></SUP></A>
 </LI>
 <LI>MPI_Get<A NAME="tex2html38"
   HREF="#foot2178"><SUP>D.<SPAN CLASS="arabic">3</SPAN></SUP></A>
@@ -5412,7 +5412,7 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -show_section_numbers -nonumbered_footnotes user-guide</TT>
 <P>
-The translation was initiated by Harald Servat on 2015-06-04
+The translation was initiated by Harald Servat on 2015-06-08
 <BR><HR><H4>Footnotes</H4>
 <DL>
 <DT><A NAME="foot239">... file</A><A
@@ -5450,23 +5450,23 @@ The translation was initiated by Harald Servat on 2015-06-04
 <DD>This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section <A HREF="#sec:XMLSectionBuffer">4.11</A>).
 
 </DD>
-<DT><A NAME="foot3541">...<TT>-dimemas</TT></A><A
+<DT><A NAME="foot3540">...<TT>-dimemas</TT></A><A
  HREF="user-guide.html#tex2html20"><SUP><SPAN CLASS="arabic">6</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.
 
 </DD>
-<DT><A NAME="foot3970">... tool</A><A
+<DT><A NAME="foot3969">... tool</A><A
  HREF="user-guide.html#tex2html22"><SUP><SPAN CLASS="arabic">7</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>You can download it from <TT><A NAME="tex2html23"
   HREF="http://www.bsc.es/computer-sciences/performance-tools/downloads">http://www.bsc.es/computer-sciences/performance-tools/downloads</A></TT>.
 
 </DD>
-<DT><A NAME="foot4083">... architectures</A><A
+<DT><A NAME="foot4082">... architectures</A><A
  HREF="user-guide.html#tex2html24"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A></DT>
 <DD>The IA-64 architecture support was dropped by DynInst 7.0
 
 </DD>
-<DT><A NAME="foot4179">... names</A><A
+<DT><A NAME="foot4178">... names</A><A
  HREF="user-guide.html#tex2html25"><SUP><SPAN CLASS="arabic">8</SPAN>.<SPAN CLASS="arabic">2</SPAN></SUP></A></DT>
 <DD>Look at <TT><A NAME="tex2html26"
   HREF="http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html">http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html</A></TT> for further information.
@@ -5485,7 +5485,7 @@ The translation was initiated by Harald Servat on 2015-06-04
 <!--End of Navigation Panel-->
 <ADDRESS>
 Harald Servat
-2015-06-04
+2015-06-08
 </ADDRESS>
 </BODY>
 </HTML>

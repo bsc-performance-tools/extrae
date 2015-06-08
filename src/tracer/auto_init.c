@@ -52,7 +52,15 @@ void Gateway_to_Extrae_auto_library_fini (void)
 __attribute__((constructor))
 void Extrae_auto_library_init (void)
 {
-	if (!Extrae_automatically_loaded)
+	int skip_auto_library_init = FALSE;
+	char *skip_envvar = getenv ("EXTRAE_SKIP_AUTO_LIBRARY_INITIALIZE");
+	if (skip_envvar != NULL)
+		if (strncasecmp (skip_envvar, "yes", strlen("yes")) == 0 ||
+		    strncasecmp (skip_envvar, "true", strlen("true")) == 0 ||
+		    strncmp (skip_envvar, "1", strlen ("1")) == 0)
+			skip_auto_library_init = TRUE;
+
+	if (!Extrae_automatically_loaded && !skip_auto_library_init)
 	{
 		/* Do not automatically load if DynInst is orchestrating the tracing */
 		if (getenv("EXTRAE_DYNINST_RUN") != NULL)
