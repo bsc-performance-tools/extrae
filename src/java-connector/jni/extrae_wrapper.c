@@ -257,50 +257,66 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_nEvent (JNIEnv *env
 }
 
 JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_defineEventType
-	(JNIEnv *env, jclass jc, jint type, jstring description, jlong nvalues,
+	(JNIEnv *env, jclass jc, jint type, jstring description,
 	jlongArray values, jobjectArray descriptionValues)
 {
 	char *cDescr;
+	jint countValues, countDescriptionValues;
+
+	printf ("Called!!\n");
 
 	UNREFERENCED(jc);
+
+	if (values != NULL)
+		countValues = (*env)->GetArrayLength(env, values);
+	else
+		countValues = 0;
+
+	if (descriptionValues != NULL)
+		countDescriptionValues = (*env)->GetArrayLength(env, descriptionValues);
+	else
+		countDescriptionValues = 0;
 
 	cDescr = (char*)(*env)->GetStringUTFChars(env, description, NULL);
 	if (cDescr != NULL)
 	{
-		if (nvalues > 0)
+		if (countValues == countDescriptionValues && countValues > 0)
 		{
 			jlong *valuesArray = NULL;
-			char *valDesc[nvalues];
+			char *valDesc[countValues];
 
 			valuesArray = (*env)->GetLongArrayElements(env, values, NULL);
 			if (valuesArray != NULL)
 			{
 				jlong i;
-
-				for (i = 0; i < nvalues; i++)
+				for (i = 0; i < countValues; i++)
 				{
-					valDesc[i] = (char*)(*env)->GetStringUTFChars(env, (*env)->GetObjectArrayElement(env, descriptionValues, i), NULL);
+					valDesc[i] = (char*)(*env)->GetStringUTFChars(env,
+					  (*env)->GetObjectArrayElement(env, descriptionValues, i),
+					  NULL);
 					if (valDesc[i] == NULL)
 						return;
 				}
-			}
-			Extrae_define_event_type ((extrae_type_t *)&type, cDescr, (unsigned *) &nvalues, (extrae_value_t *)valuesArray, valDesc);
+				Extrae_define_event_type ((extrae_type_t *)&type, cDescr,
+				  (unsigned *) &countValues, (extrae_value_t *)valuesArray,
+			 	 valDesc);
 
-			if (nvalues > 0 && valuesArray != NULL)
-			{
-				jlong i;
-
-				(*env)->ReleaseLongArrayElements(env, values, valuesArray, JNI_ABORT);
-				for (i = 0; i < nvalues; i++)
+				(*env)->ReleaseLongArrayElements(env, values, valuesArray,
+				  JNI_ABORT);
+				for (i = 0; i < countValues; i++)
 				{
-					jstring elem = (jstring)(*env)->GetObjectArrayElement(env, descriptionValues, i);
+					jstring elem = (jstring)(*env)->GetObjectArrayElement (env,
+					  descriptionValues, i);
 					(*env)->ReleaseStringUTFChars(env, elem, valDesc[i]);
 				}
 			}
 		}
 		else
-			Extrae_define_event_type ((extrae_type_t*)&type, cDescr, (unsigned *) &nvalues, NULL, NULL);
-
+		{
+			unsigned zero = 0;
+			Extrae_define_event_type ((extrae_type_t*)&type, cDescr, &zero,
+			  NULL, NULL);
+		}
 		(*env)->ReleaseStringUTFChars(env, description, cDescr);
 	}
 }
