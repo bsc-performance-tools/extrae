@@ -58,6 +58,7 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "utils.h"
+#include "utils_mpi.h"
 #include "mpi_wrapper.h"
 #include "wrapper.h"
 #include "clock.h"
@@ -1141,7 +1142,10 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 		free (config_file);
 	}
 	else
+	{
+		Extrae_MPI_prepareDirectoryStructures (TASKID, Extrae_get_num_tasks());
 		Backend_updateTaskID ();
+	}
 
 	Gather_Nodes_Info ();
 
@@ -1246,7 +1250,10 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 		free (config_file);
 	}
 	else
+	{
+		Extrae_MPI_prepareDirectoryStructures (TASKID, Extrae_get_num_tasks());
 		Backend_updateTaskID ();
+	}
 
 	Gather_Nodes_Info ();
 
@@ -1267,7 +1274,8 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
 	
-	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
+	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END
+	   Three consecutive barriers for a better synchronization (J suggested) */
 	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
 	Extrae_barrier_tasks();
 	Extrae_barrier_tasks();
@@ -4911,7 +4919,10 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 		free (config_file);
 	}
 	else
+	{
+		Extrae_MPI_prepareDirectoryStructures (TASKID, Extrae_get_num_tasks());
 		Backend_updateTaskID ();
+	}
 
 	Gather_Nodes_Info ();
 
@@ -4927,7 +4938,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	MPI_Generate_Spawns_List ();
-#endif /* MPI_SUPPORTS_MPI_COMM_SPAWN */
+#endif 
 
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
@@ -5015,7 +5026,10 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 		free (config_file);
 	}
 	else
+	{
+		Extrae_MPI_prepareDirectoryStructures (TASKID, Extrae_get_num_tasks());
 		Backend_updateTaskID ();
+	}
 
 	Gather_Nodes_Info ();
 
@@ -5036,7 +5050,8 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	/* Take the time now, we can't put MPIINIT_EV before APPL_EV */
 	MPI_Init_start_time = TIME;
 
-	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END*/
+	/* Call a barrier in order to synchronize all tasks using MPIINIT_EV / END
+	   Three consecutive barriers for a better synchronization (J suggested) */
 	Extrae_barrier_tasks();  /* will default to MPI_BARRIER */
 	Extrae_barrier_tasks();
 	Extrae_barrier_tasks();
@@ -9057,4 +9072,74 @@ static void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
 
 	FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_END, MPI_NEW_INTERCOMM_ALIAS,
 	  EMPTY, EMPTY, newcomm, trace);
+}
+
+void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
+{
+	/* Before proceeding, check if it's ok to call MPI. We might support
+	   MPI but maybe it's not initialized at this moment (nanos+mpi e.g.) */
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT &&
+	    world_size > 1)
+	{
+		/* If the directory is shared, then let task 0 create all
+	  	 directories. This proves a significant speedup in GPFS */
+		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_TemporalDirNoTask()))
+		{
+			if (me == 0)
+				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n",
+				  Extrae_Get_TemporalDirNoTask());
+			if (me == 0)
+			{
+				int i;
+				for (i = 0; i < world_size; i+=Extrae_Get_TemporalDir_BlockSize())
+					Backend_createExtraeDirectory (i, FALSE);
+			}
+		}
+		else
+		{
+			if (me == 0)
+				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n",
+				  Extrae_Get_TemporalDirNoTask());
+				Backend_createExtraeDirectory (me, FALSE);
+		}
+	
+		/* Now, wait for every process to reach this point, so directories are
+		   created */
+		PMPI_Barrier (MPI_COMM_WORLD);
+		PMPI_Barrier (MPI_COMM_WORLD);
+		PMPI_Barrier (MPI_COMM_WORLD);
+	
+		/* If the directory is shared, then let task 0 create al
+		   directories. This proves a significant speedup in GPFS */
+		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_FinalDirNoTask()))
+		{
+			if (me == 0)
+				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n",
+				  Extrae_Get_FinalDirNoTask());
+			if (me == 0)
+			{
+				int i;
+				for (i = 0; i < world_size; i+=Extrae_Get_FinalDir_BlockSize())
+					Backend_createExtraeDirectory (i, TRUE);
+			}
+		}
+		else
+		{
+			if (me == 0)
+				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n",
+				  Extrae_Get_FinalDirNoTask());
+			Backend_createExtraeDirectory (me, TRUE);
+		}
+	
+		/* Now, wait for every process to reach this point, so directories are
+		   created */
+		PMPI_Barrier (MPI_COMM_WORLD);
+		PMPI_Barrier (MPI_COMM_WORLD);
+		PMPI_Barrier (MPI_COMM_WORLD);
+	}
+	else
+	{
+		Backend_createExtraeDirectory (me, FALSE);
+		Backend_createExtraeDirectory (me, TRUE);
+	}
 }

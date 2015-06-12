@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 12Jun2015 Do not invoke MPI_* routines when initializing Extrae but MPI
+             is not present (as in MPI+OmpSs).
  * 04Jun2015 Sanitized environment variables, in particular LD_LIBRARY_PATH
              Added extrae-test-dyninst tool to check DynInst functionality
              Annotate the node name in the .mpit file to avoid file collisions

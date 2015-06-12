@@ -50,7 +50,8 @@
 
 void gettopology (void);
 void configure_MPI_vars (void);
-unsigned long long CalculateNumOpsForPeriod (unsigned long long wannaPeriod, unsigned long long NumOfGlobals, unsigned long long runnedPeriod);
+unsigned long long CalculateNumOpsForPeriod (unsigned long long wannaPeriod,
+	unsigned long long NumOfGlobals, unsigned long long runnedPeriod);
 void CheckControlFile (void);
 void CheckGlobalOpsTracingIntervals (void);
 void MPI_remove_file_list (int all);
@@ -60,6 +61,7 @@ void Extrae_network_counters_Wrapper (void);
 void Extrae_network_routes_Wrapper (int mpi_rank);
 void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to);
 char *Extrae_core_get_mpits_file_name(void);
+void Extrae_MPI_prepareDirectoryStructures (int me, int world_size);
 
 /* Fortran Wrappers */
 

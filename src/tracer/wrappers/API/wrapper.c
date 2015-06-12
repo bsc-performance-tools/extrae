@@ -52,7 +52,6 @@ static char UNUSED rcsid[] = "$Id$";
 # ifdef HAVE_MPI_H
 #  include <mpi.h>
 # endif
-# include "utils_mpi.h"
 #endif
 #if defined(PACX_SUPPORT)
 # include <pacx.h>
@@ -316,31 +315,33 @@ char tmp_dir[TMP_DIR];
 
 */
 
-static int Get_FinalDir_BlockSize(void)
+int Extrae_Get_FinalDir_BlockSize(void)
 { return 128; }
 static char _get_finaldir[TMP_DIR];
 char *Get_FinalDir (int task)
 {
-  sprintf (_get_finaldir, "%s/set-%d", final_dir, task/Get_FinalDir_BlockSize());
-  return _get_finaldir;
+	sprintf (_get_finaldir, "%s/set-%d", final_dir,
+	  task/Extrae_Get_FinalDir_BlockSize());
+	return _get_finaldir;
 }
 #if defined(MPI_SUPPORT)
-static char *Get_FinalDirNoTask (void)
+char *Extrae_Get_FinalDirNoTask (void)
 {
 	return final_dir;
 }
 #endif
 
-static int Get_TemporalDir_BlockSize(void)
+int Extrae_Get_TemporalDir_BlockSize(void)
 { return 128; }
 static char _get_temporaldir[TMP_DIR];
 char *Get_TemporalDir (int task)
 {
-  sprintf (_get_temporaldir, "%s/set-%d", tmp_dir, task/Get_TemporalDir_BlockSize());
-  return _get_temporaldir;
+	sprintf (_get_temporaldir, "%s/set-%d", tmp_dir,
+	  task/Extrae_Get_TemporalDir_BlockSize());
+	return _get_temporaldir;
 }
 #if defined(MPI_SUPPORT)
-static char *Get_TemporalDirNoTask (void)
+char *Extrae_Get_TemporalDirNoTask (void)
 {
 	return tmp_dir;
 }
@@ -497,11 +498,12 @@ void Extrae_set_is_initialized (extrae_init_type_t type)
 	Extrae_Init_Type = type;
 }
 
+
 /******************************************************************************
  ***  Backend_createExtraeDirectory
  ***   creates extrae directories to store tracefiles
  ******************************************************************************/
-static void Backend_createExtraeDirectory (int taskid, int Temporal)
+void Backend_createExtraeDirectory (int taskid, int Temporal)
 {
 	int ret;
 	int attempts = 100;
@@ -1777,61 +1779,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	}
 
 #if defined(MPI_SUPPORT)
-	/* If the directory is shared, then let task 0 create all
-	   directories. This proves a significant speedup in GPFS */
-	if (ExtraeUtilsMPI_CheckSharedDisk (Get_TemporalDirNoTask()))
-	{
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n",
-			  Get_TemporalDirNoTask());
-		if (me == 0)
-		{
-			int i;
-			for (i = 0; i < world_size; i+=Get_TemporalDir_BlockSize())
-				Backend_createExtraeDirectory (i, FALSE);
-		}
-	}
-	else
-	{
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n",
-			  Get_TemporalDirNoTask());
-			Backend_createExtraeDirectory (me, FALSE);
-	}
-
-	/* Now, wait for every process to reach this point, so directories are
-	   created */
-	PMPI_Barrier (MPI_COMM_WORLD);
-	PMPI_Barrier (MPI_COMM_WORLD);
-	PMPI_Barrier (MPI_COMM_WORLD);
-
-	/* If the directory is shared, then let task 0 create al
-	   directories. This proves a significant speedup in GPFS */
-	if (ExtraeUtilsMPI_CheckSharedDisk (Get_FinalDirNoTask()))
-	{
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n",
-			  Get_FinalDirNoTask());
-		if (me == 0)
-		{
-			int i;
-			for (i = 0; i < world_size; i+=Get_FinalDir_BlockSize())
-				Backend_createExtraeDirectory (i, TRUE);
-		}
-	}
-	else
-	{
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n",
-			  Get_FinalDirNoTask());
-		Backend_createExtraeDirectory (me, TRUE);
-	}
-
-	/* Now, wait for every process to reach this point, so directories are
-	   created */
-	PMPI_Barrier (MPI_COMM_WORLD);
-	PMPI_Barrier (MPI_COMM_WORLD);
-	PMPI_Barrier (MPI_COMM_WORLD);
+	Extrae_MPI_prepareDirectoryStructures (me, world_size);
 #else
 	Backend_createExtraeDirectory (me, FALSE);
 	Backend_createExtraeDirectory (me, TRUE);
@@ -2045,16 +1993,19 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 	memset (SynchronizationTimes, 0, world_size * sizeof(UINT64));
 
 #if defined(MPI_SUPPORT)
-	if (world_size > 1)
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT &&
+	    world_size > 1)
 	{
 		int rc;
-		rc = PMPI_Allgather (&ApplBegin_Time, 1, MPI_LONG_LONG, StartingTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+		rc = PMPI_Allgather (&ApplBegin_Time, 1, MPI_LONG_LONG, StartingTimes,
+		  1, MPI_LONG_LONG, MPI_COMM_WORLD);
 		if (rc != MPI_SUCCESS)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Could not gather starting times!\n");
 			exit(1);
 		}
-		rc = PMPI_Allgather (&EndTime, 1, MPI_LONG_LONG, SynchronizationTimes, 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+		rc = PMPI_Allgather (&EndTime, 1, MPI_LONG_LONG, SynchronizationTimes,
+		  1, MPI_LONG_LONG, MPI_COMM_WORLD);
 		if (rc != MPI_SUCCESS)
 		{
 			fprintf (stderr, PACKAGE_NAME": Error! Could not gather synchronization times!\n");
@@ -2758,7 +2709,9 @@ void Backend_updateTaskID (void)
 	}
 	/* NOTE: we skip renaming the MPIT and the SAMPLE files because there are
 	   open handlers referring to this, and renaming the file would require
-	   closing the handler and reopening it again. */
+	   closing the handler and reopening it again.
+	   The ACTUAL renaming will happen at final flush time!
+	*/
 }
 
 unsigned long long getApplBeginTime()

@@ -233,6 +233,11 @@ void Backend_Leave_Instrumentation (void);
 int Backend_inInstrumentation (unsigned thread);
 void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads);
+void Backend_createExtraeDirectory (int taskid, int Temporal);
+int Extrae_Get_FinalDir_BlockSize(void);
+int Extrae_Get_TemporalDir_BlockSize(void);
+char *Extrae_Get_FinalDirNoTask (void);
+char *Extrae_Get_TemporalDirNoTask (void);
 
 void advance_current(int);
 extern int circular_buffering, circular_OVERFLOW;
