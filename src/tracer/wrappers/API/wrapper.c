@@ -1842,6 +1842,10 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		HWC_Start_Counters (get_maximum_NumOfThreads(), ApplBegin_Time, forked);
 #endif
 	}
+	else
+	{
+		Trace_Mode_Initialize (get_maximum_NumOfThreads());
+	}
 
 #if !defined(IS_BG_MACHINE) && defined(TEMPORARILY_DISABLED)
 	Myrinet_HWC_Initialize();
