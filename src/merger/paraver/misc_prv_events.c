@@ -88,7 +88,8 @@ void Enable_MISC_Operation (int type)
 		inuse[DYNAMIC_MEM_INDEX] = TRUE;
 	else if (type == SAMPLING_ADDRESS_MEM_LEVEL_EV ||
 	  type == SAMPLING_ADDRESS_TLB_LEVEL_EV ||
-	  type == SAMPLING_ADDRESS_EV || type == SAMPLING_ADDRESS_REFERENCE_COST_EV)
+	  type == SAMPLING_ADDRESS_LD_EV || type == SAMPLING_ADDRESS_ST_EV ||
+	  type == SAMPLING_ADDRESS_REFERENCE_COST_EV)
 		inuse[SAMPLING_MEM_INDEX] = TRUE;
 }
 
@@ -241,8 +242,10 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 	if (inuse[SAMPLING_MEM_INDEX])
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_EV,
-		  SAMPLING_ADDRESS_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_LD_EV,
+		  SAMPLING_ADDRESS_LD_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_ST_EV,
+		  SAMPLING_ADDRESS_ST_LBL);
 		LET_SPACES (fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);

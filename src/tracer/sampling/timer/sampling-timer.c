@@ -22,13 +22,13 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/sampling.c $
+ | @last_commit: $Date: 2014-12-15 17:39:59 +0100 (lun, 15 dic 2014) $
+ | @version:     $Revision: 3077 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+static char UNUSED rcsid[] = "$Id: sampling.c 3077 2014-12-15 16:39:59Z harald $";
 
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
@@ -55,7 +55,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <signal.h>
 #endif
 
-#include "sampling.h"
+#include "sampling-timer.h"
 #include "trace_macros.h"
 #include "threadid.h"
 #include "wrapper.h"

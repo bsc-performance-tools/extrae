@@ -556,10 +556,12 @@ static int Sampling_Address_Event (event_t * current,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
 	unsigned i;
+	int EvType;
 	UINT64 EvValue;
 	UINT64 EvParam;
 	UNREFERENCED_PARAMETER(fset);
 
+	EvType = Get_EvEvent (current);
 	EvValue = Get_EvValue (current);
 	EvParam = Get_EvMiscParam (current); /* Param is the sampled address */
 
@@ -591,7 +593,7 @@ static int Sampling_Address_Event (event_t * current,
 	}
 
 	if (EvParam != 0)
-		trace_paraver_event (cpu, ptask, task, thread, current_time, SAMPLING_ADDRESS_EV, EvParam);
+		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvParam);
 
 	return 0;
 }
@@ -1561,7 +1563,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ WAITPID_EV, ForkWaitSystem_Event },
 	{ EXEC_EV, Exec_Event },
 	{ GETCPU_EV, GetCPU_Event },
-	{ SAMPLING_ADDRESS_EV, Sampling_Address_Event },
+	{ SAMPLING_ADDRESS_LD_EV, Sampling_Address_Event },
+	{ SAMPLING_ADDRESS_ST_EV, Sampling_Address_Event },
 	{ SAMPLING_ADDRESS_MEM_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_TLB_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_REFERENCE_COST_EV, Sampling_Address_MEM_TLB_Event },

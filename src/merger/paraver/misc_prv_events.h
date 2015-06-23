@@ -61,10 +61,11 @@ void Share_MISC_Operations (void);
 #define DYNAMIC_MEM_POINTER_IN_LBL      "In pointer (free, realloc)"
 #define DYNAMIC_MEM_POINTER_OUT_LBL     "Out pointer (malloc, calloc, realloc)"
 
-#define SAMPLING_ADDRESS_LBL            "Sampled address"
-#define SAMPLING_ADDRESS_MEM_LEVEL_LBL  "Memory hierarchy location for sampled address"
+#define SAMPLING_ADDRESS_LD_LBL             "Sampled address (load)"
+#define SAMPLING_ADDRESS_ST_LBL             "Sampled address (store)"
+#define SAMPLING_ADDRESS_MEM_LEVEL_LBL      "Memory hierarchy location for sampled address"
 #define SAMPLING_ADDRESS_MEM_HITORMISS_LBL  "Memory hierarchy location for sampled address hit?"
-#define SAMPLING_ADDRESS_TLB_LEVEL_LBL  "TLB hierarchy location for sampled address"
+#define SAMPLING_ADDRESS_TLB_LEVEL_LBL      "TLB hierarchy location for sampled address"
 #define SAMPLING_ADDRESS_TLB_HITORMISS_LBL  "TLB hierarchy location for sampled address hit?"
 #define SAMPLING_ADDRESS_REFERENCE_COST_LBL "Memory reference cost in core cycles"
 

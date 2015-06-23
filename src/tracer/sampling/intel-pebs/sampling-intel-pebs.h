@@ -22,29 +22,25 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/sampling.c $
+ | @last_commit: $Date: 2014-12-15 17:39:59 +0100 (lun, 15 dic 2014) $
+ | @version:     $Revision: 3077 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _SAMPLING_H_INCLUDED_
-#define _SAMPLING_H_INCLUDED_
+/* Additional credis to Vince Weaver, vincent.weaver _at_ maine.edu 
+   For further reference see https://github.com/deater/perf_event_tests */
 
-enum
-{
-	SAMPLING_TIMING_REAL,
-	SAMPLING_TIMING_VIRTUAL,
-	SAMPLING_TIMING_PROF,
-	SAMPLING_TIMING_DEFAULT = SAMPLING_TIMING_REAL
-};
+#ifndef EXTRAE_INTEL_PEBS_H_INCLUDED
+#define EXTRAE_INTEL_PEBS_H_INCLUDED
 
-void setTimeSampling (unsigned long long period, unsigned long long variability, int sampling_type);
-void setTimeSampling_postfork (void);
-void Extrae_SamplingHandler (void* address);
-void Extrae_SamplingHandler_PAPI (void *address);
+int Extrae_enable_IntelPEBS (int loads);
+void Extrae_disable_IntelPEBS (void); 
 
-int isSamplingEnabled(void);
-void setSamplingEnabled (int enabled);
-void unsetTimeSampling (void);
+void Extrae_setLoadPeriod_IntelPEBS (int period);
+void Extrae_setStorePeriod_IntelPEBS (int period);
+void Extrae_setLoadSampling_IntelPEBS (int enabled);
+void Extrae_setStoreSampling_IntelPEBS (int enabled);
+
+void Extrae_nextSampling_IntelPEBS (void);
 
 #endif

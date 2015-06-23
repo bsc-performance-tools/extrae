@@ -99,6 +99,36 @@
 	}                                                              \
 }
 
+#define SAMPLE_EVENT_HWC_PARAM(evttime,evttype,evtvalue,evtparam)               \
+{                                                                \
+	event_t evt;                                                   \
+	int thread_id = THREADID;                                      \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
+	{                                                              \
+		evt.time = (evttime);                                        \
+		evt.event = (evttype);                                       \
+		evt.value = (evtvalue);                                      \
+		evt.param.misc_param.param = (unsigned long long) (evtparam); \
+		/* We don't read counters right now */                       \
+		HARDWARE_COUNTERS_READ(thread_id, evt, TRUE);                \
+		BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt);   \
+	}                                                              \
+}
+
+#define SAMPLE_EVENT_NOHWC_PARAM(evttime,evttype,evtvalue,evtparam)             \
+{                                                                \
+	event_t evt;                                                   \
+	int thread_id = THREADID;                                      \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
+	{                                                              \
+		evt.time = (evttime);                                        \
+		evt.event = (evttype);                                       \
+		evt.value = (evtvalue);                                      \
+		evt.param.misc_param.param = (unsigned long long) (evtparam); \
+		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);               \
+		BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt);   \
+	}                                                              \
+}
 
 #define TRACE_MISCEVENT(evttime,evttype,evtvalue,evtparam)        \
 {                                                                 \

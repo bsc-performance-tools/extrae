@@ -589,6 +589,8 @@ fi
 # Test whether the compiler accepts function inlining
 AC_C_INLINE
 
+AX_PEBS_SAMPLING
+
 AC_CHECK_PROGS(latex,[latex elatex lambda],no)
 AC_CHECK_PROGS(dvips,[dvips],no)
 AC_CHECK_PROGS(dvipdf,[dvipdf],no)
@@ -622,6 +624,9 @@ AC_CONFIG_FILES([
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/spu/Makefile \
+  src/tracer/sampling/Makefile \
+  src/tracer/sampling/timer/Makefile \
+  src/tracer/sampling/intel-pebs/Makefile \
   src/merger/Makefile \
   src/merger/parallel/Makefile \
   src/others/Makefile \

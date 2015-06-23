@@ -38,7 +38,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "fork_probe.h"
 #include "misc_wrapper.h"
-#include "sampling.h"
+#include "sampling-timer.h"
 
 static pid_t MYPID; /* Used to determin parent's PID and discern between parent & child */
 static int IamMasterOfAllProcesses = TRUE;

@@ -92,7 +92,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include "cuda_probe.h"
 #endif
 #if defined(SAMPLING_SUPPORT)
-# include "sampling.h"
+# include "sampling-timer.h"
+#endif
+#if defined(ENABLE_PEBS_SAMPLING)
+# include "sampling-intel-pebs.h"
 #endif
 #if defined(PTHREAD_SUPPORT)
 # include "pthread_probe.h"
@@ -674,6 +677,83 @@ static void Parse_XML_DynamicMemory (int rank, xmlNodePtr current_tag)
 	Extrae_set_trace_malloc_free (free_enabled);
 	Extrae_set_trace_malloc_allocate_threshold (alloc_threshold);
 }
+
+#if defined(ENABLE_PEBS_SAMPLING)
+/* Configure OpenMP related parameters */
+static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+	UNREFERENCED_PARAMETER(xmldoc);
+
+	/* Parse all TAGs, and annotate them to use them later */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
+		{
+		}
+		/* Is the user passing information related to sampling pebs loads? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_PEBS_SAMPLING_LOADS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+				int period_default = 1000000;
+				int iperiod = 0;
+				xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
+				if (speriod != NULL)
+					iperiod = atoi(speriod);
+
+				if (iperiod == 0)
+				{
+					mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
+					  tag->name, period_default);
+					iperiod = period_default;
+				}
+				Extrae_setLoadSampling_IntelPEBS (TRUE);
+				Extrae_setLoadPeriod_IntelPEBS (iperiod);
+				mfprintf (stdout, PACKAGE_NAME": Setting up PEBS sampling every %d loads\n",
+				  iperiod);
+				XML_FREE (speriod);
+			}
+			XML_FREE(enabled);
+		}
+		/* Is the user passing information related to sampling pebs stores? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_PEBS_SAMPLING_STORES))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+				int period_default = 1000000;
+				int iperiod = 0;
+				xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
+				if (speriod != NULL)
+					iperiod = atoi(speriod);
+
+				if (iperiod == 0)
+				{
+					mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
+					  tag->name, period_default);
+					iperiod = period_default;
+				}
+				Extrae_setStoreSampling_IntelPEBS (TRUE);
+				Extrae_setStorePeriod_IntelPEBS (iperiod);
+				mfprintf (stdout, PACKAGE_NAME": Setting up PEBS sampling every %d stores\n",
+				  iperiod);
+				XML_FREE (speriod);
+			}
+			XML_FREE(enabled);
+		}
+		else
+		{
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <OpenMP> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
 
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 /* Configure OpenMP related parameters */
@@ -1857,6 +1937,18 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							IOInstrumentation = TRUE;
 						XML_FREE(enabled);
+					}
+					/* Check for intel pebs sampling */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_PEBS_SAMPLING))
+					{
+#if defined(ENABLE_PEBS_SAMPLING)
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							Parse_XML_PEBS_Sampling (rank, xmldoc, current_tag);
+						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support PEBS sampling.\n", TRACE_MERGE);
+#endif
 					}
 					else
 					{

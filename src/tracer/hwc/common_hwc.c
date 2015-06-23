@@ -54,6 +54,9 @@ static char UNUSED rcsid[] = "$Id$";
 #include "xml-parse.h"
 #include "common_hwc.h"
 #include "misc_wrapper.h"
+#if defined(ENABLE_PEBS_SAMPLING)
+# include "sampling-intel-pebs.h"
+#endif
 
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
@@ -224,6 +227,7 @@ void HWC_Start_Current_Set (UINT64 countglops, UINT64 time, int thread_id)
  */
 void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 {
+
 	/* If there are less than 2 sets, don't do anything! */
 	if (HWC_num_sets > 1)
 	{
@@ -237,6 +241,10 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
+
+#if defined(ENABLE_PEBS_SAMPLING) 
+	Extrae_nextSampling_IntelPEBS();
+#endif
 }
 
 /** 
@@ -258,6 +266,10 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 
 		HWC_Start_Current_Set (countglops, time, thread_id);
 	}
+
+#if defined(ENABLE_PEBS_SAMPLING) 
+	Extrae_nextSampling_IntelPEBS();
+#endif
 }
 
 /** 

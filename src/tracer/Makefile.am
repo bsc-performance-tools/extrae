@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-SUBDIRS = clocks hwc interfaces stats
+SUBDIRS = clocks hwc interfaces stats sampling
 
 # Include this files/directories for the package generation
 EXTRA_DIST = external \
@@ -242,7 +242,6 @@ core_PACX_SRCS = $(core_MPI_SRCS)
 core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
- sampling.c sampling.h                       \
  xml-parse.c xml-parse.h                     \
  UF_gcc_instrument.c UF_gcc_instrument.h     \
  UF_xl_instrument.c UF_xl_instrument.h       \
@@ -337,6 +336,14 @@ core_MODULES = \
  $(COMMON_LIB)/libcommon.la \
  $(CLOCKS_LIB)/libclock.la \
  $(HWC_LIB)/libhwc.la
+
+#
+# Add sampling mechanisms
+#
+core_MODULES += sampling/timer/libsampling_timer.la
+if WANT_PEBS_SAMPLING
+core_MODULES += sampling/intel-pebs/libsampling_intel_pebs.la
+endif
 
 INTERFACE_API_PTHREAD = $(INTERFACES_LIB)/API/libiface_api_pthread.la
 if PTHREAD_SUPPORT_IN_ALL_LIBS
@@ -494,6 +501,10 @@ if WANT_CUPTI
 endif
 if WANT_OPENSHMEM
   core_INCLUDES += -I$(PROBES_INC)/openshmem
+endif
+core_INCLUDES += -I$(SAMPLING_DIR)/timer
+if WANT_PEBS_SAMPLING
+  core_INCLUDES += -I$(SAMPLING_DIR)/intel-pebs
 endif
 
 if HAVE_PAPI

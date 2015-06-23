@@ -23,4 +23,16 @@ endif
 noinst_LTLIBRARIES = libhwc.la
 
 libhwc_la_SOURCES = $(HWC)
-libhwc_la_CFLAGS = -I$(HWC_INC) -I$(COMMON_INC) -I$(CLOCKS_INC) -I$(TRACER_INC) -I$(INCLUDE_DIR) -I$(top_srcdir)/src/tracer/wrappers/API @PAPI_CFLAGS@
+libhwc_la_CFLAGS = \
+ -I$(HWC_INC) \
+ -I$(COMMON_INC) \
+ -I$(CLOCKS_INC) \
+ -I$(TRACER_INC) \
+ -I$(INCLUDE_DIR) \
+ -I$(top_srcdir)/src/tracer/wrappers/API \
+ -I$(SAMPLING_DIR)/timer \
+ @PAPI_CFLAGS@
+
+if WANT_PEBS_SAMPLING
+  libhwc_la_CFLAGS += -I$(SAMPLING_DIR)/intel-pebs
+endif

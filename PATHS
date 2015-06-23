@@ -5,6 +5,7 @@ COMMON_DIR           = $(SRC_DIR)/common
 COMMON_MPI_DIR       = $(SRC_DIR)/common/MPI
 TRACER_DIR           = $(SRC_DIR)/tracer
 CLOCKS_DIR           = $(TRACER_DIR)/clocks
+SAMPLING_DIR         = $(TRACER_DIR)/sampling
 HWC_DIR              = $(TRACER_DIR)/hwc
 STATS_DIR            = $(TRACER_DIR)/stats
 WRAPPERS_DIR         = $(TRACER_DIR)/wrappers

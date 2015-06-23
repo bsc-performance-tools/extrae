@@ -155,7 +155,10 @@ static char UNUSED rcsid[] = "$Id$";
 # include "options.h"
 #endif
 
-#include "sampling.h"
+#include "sampling-timer.h"
+#if defined(ENABLE_PEBS_SAMPLING)
+# include "sampling-intel-pebs.h"
+#endif
 #include "debug.h"
 #include "threadinfo.h"
 #if defined(PTHREAD_SUPPORT)
@@ -1145,12 +1148,26 @@ void Parse_Callers (int me, char * mpi_callers, int type)
          Caller_Count[type]++;
       }                                                                           
    }                                                                              
-   if (Caller_Count[type] > 0 && me == 0) {
-      fprintf(stdout, PACKAGE_NAME": Tracing %d level(s) of %s callers: [ ",
-				 	Caller_Count[type], (CALLER_MPI==type)?"MPI":"Sampling");
-      for (i=0; i<Caller_Deepness[type]; i++) {
-         if (Trace_Caller[type][i]) fprintf(stdout, "%d ", i+1);
-      }
+	if (Caller_Count[type] > 0 && me == 0)
+	{	
+		const char *s;
+		const char *s_mpi = "MPI";
+		const char *s_sampling = "Sampling";
+		const char *s_malloc = "Dynamic-Memory";
+
+		if (CALLER_MPI == type)
+			s = s_mpi;
+		else if (CALLER_SAMPLING == type)
+			s = s_sampling;
+		else if (CALLER_DYNAMIC_MEMORY == type)
+			s = s_malloc;
+
+		fprintf(stdout, PACKAGE_NAME": Tracing %d level(s) of %s callers: [ ",
+		  Caller_Count[type], s);
+
+		for (i=0; i<Caller_Deepness[type]; i++)
+			if (Trace_Caller[type][i])
+				fprintf(stdout, "%d ", i+1);
       fprintf(stdout, "]\n");
    }
 }
@@ -1978,7 +1995,8 @@ static int GetTraceOptions (void)
 	return options;
 }
 
-int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list)
+int Backend_postInitialize (int rank, int world_size, unsigned init_event,
+	unsigned long long InitTime, unsigned long long EndTime, char **node_list)
 {
 	unsigned u;
 	int i;
@@ -2094,6 +2112,10 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsig
 
 	/* Enable sampling capabilities */
 	setSamplingEnabled (TRUE);
+
+#if defined(ENABLE_PEBS_SAMPLING)
+	Extrae_enable_IntelPEBS(TRUE);
+#endif
 
 	/* We leave... so, we're no longer in instrumentatin from this point */
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
@@ -2254,6 +2276,10 @@ void Backend_Finalize (void)
 {
 	unsigned thread;
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
+
+#if defined(ENABLE_PEBS_SAMPLING)
+	Extrae_disable_IntelPEBS();
+#endif
 
 #if defined(CUDA_SUPPORT)
 	Extrae_CUDA_fini ();

@@ -158,6 +158,10 @@
 #define TRACE_MERGE_SORTADDRESSES       ((xmlChar*) "sort-addresses")
 #define TRACE_MERGE_OVERWRITE           ((xmlChar*) "overwrite")
 
+#define TRACE_PEBS_SAMPLING             ((xmlChar*) "pebs-sampling")
+#define TRACE_PEBS_SAMPLING_LOADS       ((xmlChar*) "loads")
+#define TRACE_PEBS_SAMPLING_STORES      ((xmlChar*) "stores")
+
 void Parse_XML_File (int rank, int world_size, char *filename);
 
 #endif

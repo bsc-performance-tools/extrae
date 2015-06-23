@@ -120,9 +120,13 @@ static void show_current (event_t * c, UINT64 max_time)
 	{
 		fprintf (stdout, "USER EVENT value: %lu [0x%lx]\n", c->param.misc_param.param, c->param.misc_param.param);
 	}
-	else if (c->event == SAMPLING_ADDRESS_EV)
+	else if (c->event == SAMPLING_ADDRESS_LD_EV)
 	{
-		fprintf (stdout, "SAMPLING_ADDRESS EVENT value: %lu [0x%lx]\n", c->param.misc_param.param, c->param.misc_param.param);
+		fprintf (stdout, "SAMPLING_ADDRESS EVENT (load) value: %lu [0x%lx]\n", c->param.misc_param.param, c->param.misc_param.param);
+	}
+	else if (c->event == SAMPLING_ADDRESS_ST_EV)
+	{
+		fprintf (stdout, "SAMPLING_ADDRESS EVENT (store) value: %lu [0x%lx]\n", c->param.misc_param.param, c->param.misc_param.param);
 	}
 	else if (c->event == SAMPLING_ADDRESS_MEM_LEVEL_EV)
 	{
