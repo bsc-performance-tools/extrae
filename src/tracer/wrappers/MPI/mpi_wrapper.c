@@ -523,7 +523,7 @@ static void Gather_Nodes_Info (void)
 		exit (-1);
 	}
 	rc = PMPI_Allgather (hostname, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, buffer_names, MPI_MAX_PROCESSOR_NAME, MPI_CHAR, MPI_COMM_WORLD);
-	MPI_CHECK(rc, PMPI_Gather);
+	MPI_CHECK(rc, PMPI_Allgather);
 
 	/* Store the information in a global array */
 	TasksNodes = (char **)malloc (Extrae_get_num_tasks() * sizeof(char *));
