@@ -1798,8 +1798,11 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #if defined(MPI_SUPPORT)
 	Extrae_MPI_prepareDirectoryStructures (me, world_size);
 #else
-	Backend_createExtraeDirectory (me, FALSE);
+	/* Create temporal directory */
 	Backend_createExtraeDirectory (me, TRUE);
+
+	/* Create final directory */
+	Backend_createExtraeDirectory (me, FALSE);
 #endif
 
 	/* Allocate the buffers and trace files */

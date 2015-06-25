@@ -9078,10 +9078,9 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 {
 	/* Before proceeding, check if it's ok to call MPI. We might support
 	   MPI but maybe it's not initialized at this moment (nanos+mpi e.g.) */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT &&
-	    world_size > 1)
+	if (world_size > 1)
 	{
-		/* If the directory is shared, then let task 0 create all
+		/* If the directory is shared, then let task 0 create all temporal
 	  	 directories. This proves a significant speedup in GPFS */
 		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_TemporalDirNoTask()))
 		{
@@ -9092,7 +9091,7 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 			{
 				int i;
 				for (i = 0; i < world_size; i+=Extrae_Get_TemporalDir_BlockSize())
-					Backend_createExtraeDirectory (i, FALSE);
+					Backend_createExtraeDirectory (i, TRUE);
 			}
 		}
 		else
@@ -9100,7 +9099,7 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 			if (me == 0)
 				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n",
 				  Extrae_Get_TemporalDirNoTask());
-				Backend_createExtraeDirectory (me, FALSE);
+				Backend_createExtraeDirectory (me, TRUE);
 		}
 	
 		/* Now, wait for every process to reach this point, so directories are
@@ -9109,7 +9108,7 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
 	
-		/* If the directory is shared, then let task 0 create al
+		/* If the directory is shared, then let task 0 create all final
 		   directories. This proves a significant speedup in GPFS */
 		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_FinalDirNoTask()))
 		{
@@ -9120,7 +9119,7 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 			{
 				int i;
 				for (i = 0; i < world_size; i+=Extrae_Get_FinalDir_BlockSize())
-					Backend_createExtraeDirectory (i, TRUE);
+					Backend_createExtraeDirectory (i, FALSE);
 			}
 		}
 		else
@@ -9128,7 +9127,7 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 			if (me == 0)
 				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n",
 				  Extrae_Get_FinalDirNoTask());
-			Backend_createExtraeDirectory (me, TRUE);
+			Backend_createExtraeDirectory (me, FALSE);
 		}
 	
 		/* Now, wait for every process to reach this point, so directories are
@@ -9139,7 +9138,8 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 	}
 	else
 	{
-		Backend_createExtraeDirectory (me, FALSE);
+		/* If process is alone, create temporal and final directories */
 		Backend_createExtraeDirectory (me, TRUE);
+		Backend_createExtraeDirectory (me, FALSE);
 	}
 }
