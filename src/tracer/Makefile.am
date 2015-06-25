@@ -394,7 +394,7 @@ endif
 
 if HAVE_MPI
 MPI_STATS_LIB = $(STATS_LIB)/libmpistats.la
-UTILS_MPI_LIB = $(COMMON_MPI_DIR)/libcommon_mpi.la
+UTILS_MPI_LIB = $(COMMON_MPI_LIB)/libcommon_mpi.la
 ADDITIONAL_MPI_LIBS = $(MPI_STATS_LIB) $(UTILS_MPI_LIB)
 endif
 

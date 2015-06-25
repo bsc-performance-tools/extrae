@@ -676,6 +676,7 @@ AC_SUBST( [TRF_MERGER_INC], ['$(MERGER_INC)/dimemas'] )
 AC_SUBST( [BUFFERS_INC], ['$(WRAPPERS_INC)/API'] )
 
 AC_SUBST( [COMMON_LIB], ['$(top_builddir)/src/common'] )
+AC_SUBST( [COMMON_MPI_LIB], ['$(top_builddir)/src/common/MPI'] )
 AC_SUBST( [TRACER_LIB], ['$(top_builddir)/src/tracer'] )
 AC_SUBST( [MERGER_LIB], ['$(top_builddir)/src/merger'] )
 AC_SUBST( [CLOCKS_LIB], ['$(TRACER_LIB)/clocks'] )
