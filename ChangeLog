@@ -4,6 +4,7 @@ ChangeLog
  * 25Jun2015 Fix crash when temporal dir != final dir and their shared
                characteristics differ.
              Fix compilation into a separate directory.
+             Fix installation from a separate building directory.
  * 23Jun2015 Add initial PEBS sampling support
              Split sampling files into src/tracer/sampling
  * 17Jun2015 Fix extrae command line, lack of thread init

@@ -496,7 +496,7 @@ else
 endif
 	$(top_srcdir)/substitute $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
-	$(top_srcdir)/substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
+	$(top_srcdir)/substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD
 	$(top_srcdir)/substitute $(SED) "@sub_libexecinfo_libs@" "${libexecinfo_LDFLAGS} -lexecinfo" $(DESTDIR)$(datadir)/example/Makefile.inc

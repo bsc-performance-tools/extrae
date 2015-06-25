@@ -1,7 +1,13 @@
 #!/bin/sh
 
 if [ $# -ne 4 ] ; then
-  echo "Invalid parameters. Pass SED location, KEY, VALUE and PATH"
+	echo "Invalid parameters. Pass SED location, KEY, VALUE and PATH"
+	exit 0
+fi
+
+SCRIPT_LOCATION=`dirname $0`/substitute
+if [ ! -x "${SCRIPT_LOCATION}" ] ; then
+	echo "Cannot determine location for the substitute script"
 	exit 0
 fi
 
@@ -17,5 +23,5 @@ fi
 
 echo "Applying modification in ${PATHTOCHANGE} - Key = ${KEY} for value = ${VALUE}"
 
-/usr/bin/find ${PATHTOCHANGE} -type f -exec ${PWD}/substitute "${SED}" "${KEY}" "${VALUE}" {} \;
+/usr/bin/find ${PATHTOCHANGE} -type f -exec ${SCRIPT_LOCATION} "${SED}" "${KEY}" "${VALUE}" {} \;
 
