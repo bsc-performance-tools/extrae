@@ -16,15 +16,15 @@ all:
 build-documentation: $(manual_ug).tex API-section.tex common-macros.tex configure-installation.tex environmentvariables-section.tex examples-section.tex FAQ-section.tex instrumented-routines-section.tex merge-section.tex quick-guide-section.tex wholeXML-section.tex XML-section.tex
 	@echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
 if BUILD_DOCS_PS
-	$(latex) $(manual_ug)
-	$(latex) $(manual_ug)
+	$(latex) $(top_srcdir)/doc/$(manual_ug)
+	$(latex) $(top_srcdir)/doc/$(manual_ug)
 	$(dvips) $(manual_ug).dvi -o $(manual_ug).ps
 if BUILD_DOCS_PDF
 	$(dvipdf) $(manual_ug)
 endif
 endif
 if BUILD_HTML_DOCS
-	$(latex2html) -split 0 -show_section_numbers -nonumbered_footnotes $(manual_ug)
+	$(latex2html) -split 0 -show_section_numbers -nonumbered_footnotes $(top_srcdir)/doc/$(manual_ug)
 	sed s/HREF=\"user-guide.html/HREF=\"/ < user-guide/index.html > user-guide/index.2.html
 	sed s/SRC=\"img/SRC=\"http:\\/\\/www.bsc.es\\/sites\\/default\\/files\\/public\\/computer_science\\/performance_tools\\/img/ < user-guide/index.2.html > user-guide/index.bsc.html
 	rm -fr user-guide/index.2.html
