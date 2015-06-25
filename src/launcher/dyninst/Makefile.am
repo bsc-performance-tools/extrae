@@ -1,5 +1,7 @@
 include $(top_srcdir)/PATHS
 
+EXTRA_DIST = test.C
+
 bin_PROGRAMS = extrae extrae-test-dyninst
 
 noinst_PROGRAMS = load-module demo-launcher list-functions
