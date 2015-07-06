@@ -321,7 +321,7 @@ This section indicates whether the OpenCL calls should be instrumented or not. I
 
 This section indicates whether I/O calls ({\tt read} and {\tt write}) are meant to be instrumented. If {\tt enabled} is set to yes, the aforementioned calls will be instrumented, otherwise they will not be instrumented.
 
-{\bf Note:} This is an experimental feature, and needs to be enabled at configure time usint the {\tt --enable-instrument-io} option.
+{\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-instrument-io} option.
 
 {\bf Warning:} This option seems to intefere with the instrumentation of the GNU and Intel OpenMP runtimes, and the issues haven't been solved yet.
 
@@ -333,9 +333,18 @@ This section indicates whether dynamic memory calls ({\tt malloc}, {\tt free}, {
 This section allows deciding whether allocation and free-related memory calls shall be instrumented.
 Additionally, the configuration can also indicate whether allocation calls should be instrumented if the requested memory size surpasses a given threshold (32768 bytes, in the example).
 
-{\bf Note:} This is an experimental feature, and needs to be enabled at configure time usint the {\tt --enable-instrument-dynamic-memory} option.
+{\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-instrument-dynamic-memory} option.
 
 {\bf Warning:} This option seems to intefere with the instrumentation of the Intel OpenMP runtime, and the issues haven't been solved yet.
+
+\section{XML Section: Memory references through Intel PEBS sampling}\label{sec:XMLIntelPEBS}
+
+\input{XML/intel-pebs.xml}
+
+This section tells \TRACE to use the PEBS feature from recent Intel processors\footnote{Check for availability on your system by looking for pebs in /proc/cpuinfo.} to sample memory references. These memory references capture the linear address referenced, the component of the memory hierarchy that solved the reference and the number of cycles to solve the reference.
+In the example above, PEBS monitors one out of every million load instructions and only grabs those that require at least 10 cycles to be solved.
+
+{\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-pebs-sampling} option.
 
 \section{XML Section: Merge}\label{sec:XMLSectionMerge}
 
