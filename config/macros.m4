@@ -945,7 +945,6 @@ AC_DEFUN([AX_PROG_PMAPI],
    fi
 ])
 
-
 # AX_PROG_PAPI
 # ------------
 AC_DEFUN([AX_PROG_PAPI],

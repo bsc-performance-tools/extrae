@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 08Jul2015 Imported first bits for sionlib
  * 25Jun2015 Fix crash when temporal dir != final dir and their shared
                characteristics differ.
              Fix compilation into a separate directory.

@@ -43,6 +43,9 @@
 #endif
 
 #include <mpi.h>
+#ifdef HAVE_SIONLIB
+# include "sion.h"
+#endif
 
 #include "utils.h"
 #include "utils_mpi.h"
@@ -129,6 +132,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 		return directory_exists(directory);
 }
 
+
 /* A "slower" alternative? */
 #if 0
 static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
@@ -214,6 +218,142 @@ static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
 	}
 	else
 		return directory_exists(directory);
+}
+#endif
+
+#ifdef HAVE_SIONLIB
+#define FNAMELEN 255
+#define BUFSIZE (1024*1024)
+
+void rename_or_copy_sionlib (const char *origen, const char *desti)
+{
+	int rank, size, globalrank, sid, numFiles;
+	char fname[FNAMELEN], *newfname=NULL;
+	MPI_Comm gComm, lComm;
+	sion_int64 chunksize,left;
+	sion_int32 fsblksize;
+	size_t btoread, bread, bwrote;
+	char *localbuffer;
+	FILE *fileptr;
+
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	/* inital parameters */
+	strcpy(fname, "data.mpit");
+
+	numFiles   = 1;
+	gComm      = lComm = MPI_COMM_WORLD;
+ 	chunksize  = 10*1024*1024;
+	fsblksize  = 1*1024*1024;
+	globalrank = rank;
+
+	char buffer[65536];
+	int fd_o, fd_d;
+	ssize_t res;
+
+	/* Open the files */
+	fd_o = open (origen, O_RDONLY);
+	if (fd_o == -1)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", origen);
+		fflush (stderr);
+		return;
+        }
+
+	sid = sion_paropen_mpi(fname, "bw", &numFiles, gComm, &lComm,
+	  &chunksize, &fsblksize, &globalrank, &fileptr, &newfname);  
+
+	/* Copy the file */
+	res = read (fd_o, buffer, sizeof (buffer));
+	int elems_written;
+	int tmp1 = 0;
+	while (res != 0 && res != -1)
+	{
+		elems_written = fwrite(buffer, 1, res, fileptr);
+		tmp1 += elems_written;
+		if (elems_written == -1)
+			break;
+		res = read (fd_o, buffer, sizeof (buffer));
+	}
+                        
+	/* If failed, just close!  */
+	if (res == -1)
+	{
+		close (fd_o);
+		fprintf (stderr, PACKAGE_NAME": Error while trying to move files %s to %s\n", origen, desti);
+		fflush (stderr);
+		return;
+	}
+
+	/* Close the files */
+	close (fd_o);
+	sion_parclose_mpi(sid);
+	
+	/* Remove the files */
+	unlink (origen);
+}
+
+void append_from_to_file_sionlib (const char *source, const char *destination)
+{
+	int rank, size, globalrank, sid, i, numFiles;
+	MPI_Comm gComm, lComm;
+	sion_int64 chunksize, left;
+	sion_int32 fsblksize;
+
+	char fname[1000], *newfname = NULL;
+	strcpy(fname, "parfile.sion");
+	numFiles   = 1;
+	gComm      = lComm = MPI_COMM_WORLD;
+	chunksize  = 10*1024*1024;
+	fsblksize  = 1*1024*1024;
+	FILE *fileptr;
+
+	PMPI_Comm_rank (MPI_COMM_WORLD, &rank);
+	PMPI_Comm_size (MPI_COMM_WORLD, &size);
+	globalrank = rank;
+
+	char buffer[65536];
+	int fd_o, fd_d;
+	ssize_t res;
+
+	/* Open the files */
+	fd_o = open (source, O_RDONLY);
+	if (fd_o == -1)
+	{
+		fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", source);
+		fflush (stderr);
+		return;
+	}
+
+	sid = sion_paropen_mpi(fname, "bw", &numFiles, gComm, &lComm,
+	  &chunksize, &fsblksize, &globalrank, &fileptr, &destination);
+
+	/* Copy the file */
+	int bytes_written;
+	res = read (fd_o, buffer, sizeof (buffer));
+	while (res > 0)
+	{
+		bytes_written = fwrite(buffer, 1, res, fileptr);
+		if (bytes_written == -1)
+			break;
+		res = read (fd_o, buffer, sizeof (buffer)); 	
+	}
+
+	sion_parclose_mpi(sid);
+
+	/* If failed, just close!  */
+	if (res == -1)
+	{
+		close (fd_d);
+		unlink (destination);
+		fprintf (stderr, PACKAGE_NAME": Error while trying to move files %s to %s\n", source, destination);
+		fflush (stderr);
+		return;
+	}
+
+	/* Close the files */
+	close (fd_o);
 }
 #endif
 

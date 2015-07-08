@@ -129,6 +129,12 @@ if HAVE_PMAPI
   mpimpi2prv_LDFLAGS += -lpmapi
 endif
 
+if HAVE_SIONLIB
+  libmpimpi2prv_la_CFLAGS += @SIONLIB_CFLAGS@
+  mpimpi2prv_CFLAGS += @SIONLIB_CFLAGS@
+  mpimpi2prv_LDFLAGS += -R @SIONLIB_LIBSDIR@ @SIONLIB_LDFLAGS@ -lsionmpi_64 -lsionser_64 -lsioncom_64 -lsioncom_64_lock_none
+endif
+
 # Online support
 mpimpi2prv_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
 libmpimpi2prv_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)

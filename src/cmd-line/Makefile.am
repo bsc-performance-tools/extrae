@@ -15,6 +15,9 @@ extrae_cmd_LDADD = $(TRACER_LIB)/libseqtrace.la $(MERGER_LIB)/libmpi2prv.la -lm
 if HAVE_BINUTILS
 extrae_cmd_LDADD += $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
 endif
+if HAVE_SIONLIB
+extrae_cmd_LDADD += @SIONLIB_LIBS@
+endif
 
 extrae_cmd_LDFLAGS =
 if IS_BG_MACHINE
@@ -22,10 +25,13 @@ if HAVE_PAPI
 extrae_cmd_LDFLAGS += -all-static -L@PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
 endif
 extrae_cmd_LDADD += $(XML2_LDFLAGS) $(XML2_LIBS)
-else
+else !IS_BG_MACHINE
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
 extrae_cmd_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
 endif
+if HAVE_SIONLIB
+extrae_cmd_LDFLAGS += @SIONLIB_LDFLAGS@
 endif
 endif
+endif !IS_BG_MACHINE

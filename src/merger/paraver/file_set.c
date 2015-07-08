@@ -27,6 +27,7 @@
  | @version:     $Revision$
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
+#include <errno.h>
 
 static char UNUSED rcsid[] = "$Id$";
 
@@ -65,6 +66,9 @@ static char UNUSED rcsid[] = "$Id$";
 # include "mpi-tags.h"
 # include "mpi-aux.h"
 # include "tree-logistics.h"
+#endif
+#if defined(HAVE_SIONLIB)
+# include "sion.h"
 #endif
 #include "labels.h"
 #include "utils.h"
@@ -227,6 +231,44 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 	event_t *ptr_last = NULL;
 
 	strcpy (trace_file_name, IFile->name);
+#if defined(HAVE_SIONLIB)
+	int rc, sid;
+	int ntasks, nfiles;
+	FILE *fp;
+	sion_int64 *chunksizes = NULL; 
+	sion_int32 fsblksize;
+	int *globalranks = NULL; // allocated by sion_open
+
+	// default is ANSI-C
+	sid = sion_open("data.mpit", "rb", &ntasks, &nfiles, &chunksizes,
+		&fsblksize, &globalranks, &fp);
+	if (sid == -1)
+	{
+		perror ("sion_open");
+		fprintf (stderr, "mpi2prv Error: Failed to open trace-file\n");
+	}
+
+	int size, block;
+	sion_int64 globalskip;
+	sion_int64 start_of_varheader;
+	sion_int64 *sion_chunksizes;
+	sion_int64 *sion_globalranks;
+	sion_int64 *sion_blockcount;
+	sion_int64 *sion_blocksizes;
+
+	sion_get_locations(sid, &size, &block, &globalskip, &start_of_varheader,
+	  &sion_chunksizes, &sion_globalranks, &sion_blockcount, &sion_blocksizes);
+
+	int rank; 
+	int blksize; 
+	int blknum;
+
+	for (blknum = 0; blknum < sion_blockcount[taskid]; blknum++)
+		blksize = sion_blocksizes[size * blknum + IFile->task -1];
+	//fprintf(stdout, "rank %d byes %d\n", IFile->task - 1, blksize);
+
+	fd_trace = fp;
+#else
 	fd_trace = fopen (trace_file_name, "r");
 	if (NULL == fd_trace)
 	{
@@ -234,6 +276,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		fprintf (stderr, "mpi2prv Error: Opening trace file %s\n", trace_file_name);
 		return (-1);
 	}
+#endif
 
 #if defined(SAMPLING_SUPPORT)
 	strcpy (sample_file_name, IFile->name);
@@ -249,7 +292,9 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 
 	fd_online = open (online_file_name, O_RDONLY);
 #endif
-
+#if defined(HAVE_SIONLIB)
+	trace_file_size = blksize;
+#else
 	ret = fseeko (fd_trace, 0, SEEK_END);
 	if (0 != ret)
 	{
@@ -257,7 +302,7 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 		exit (1);
 	}
 	trace_file_size = ftello (fd_trace);
-
+#endif
 #if defined(SAMPLING_SUPPORT)
 	if (NULL != fd_sample)
 	{
@@ -291,7 +336,10 @@ static int AddFile_FS (FileItem_t * fitem, struct input_t *IFile, int taskid)
 #endif
 	fitem->num_of_events = (fitem->size>0)?fitem->size/sizeof(event_t):0;
 
+#if !defined(HAVE_SIONLIB)
 	rewind (fd_trace);
+#endif
+
 #if defined(SAMPLING_SUPPORT)
 	if (NULL != fd_sample)
 		rewind (fd_sample);
