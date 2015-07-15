@@ -1640,6 +1640,10 @@ AC_DEFUN([AX_PROG_DYNINST],
       AC_MSG_ERROR([Cannot add DynInst support without libdwarf. Check for --with-dwarf option])
    fi
 
+   if test "${libelf}" != "yes" -a "${dyninst_paths}" != "no" ; then
+      AC_MSG_ERROR([Cannot add DynInst support without libelf. Check for --with-elf option])
+   fi
+
    dnl Search for Dyninst installation
    AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
 
