@@ -47,18 +47,11 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
-pthread_mutex_t pr_lock;
+pthread_mutex_t pr_lock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 void PR_queue_init (PR_Queue_t * cua)
 {
-#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
-  if (pthread_mutex_init(&pr_lock, NULL) != 0)
-  {
-    fprintf (stderr, PACKAGE_NAME": PR_queue_init: Mutex initialization failed.\n");
-    exit(-1);
-  }
-#endif
   INIT_QUEUE (cua);
 }
 
@@ -91,7 +84,12 @@ void PR_Elimina_request (PR_Queue_t * cua, MPI_Request* reqid)
 #endif
   element_cua = PR_QueueSearch (cua, reqid);
   if (element_cua == NULL)
+  {
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+  pthread_mutex_unlock(&pr_lock);
+#endif
     return;
+  }
   free (element_cua->request);
   REMOVE_ITEM (element_cua);
   free (element_cua);
@@ -117,6 +115,9 @@ void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
 	if (nova_pr == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot allocate memory for a new persistent request!\n");
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+        pthread_mutex_unlock(&pr_lock);
+#endif
 		return;
 	}
 
@@ -138,6 +139,9 @@ void PR_NewRequest (int tipus, int count, MPI_Datatype datatype, int task,
 	if (nou_element_cua == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": ERROR! Cannot add a new persistent request to the queue of requests!\n");
+#if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
+        pthread_mutex_unlock(&pr_lock);
+#endif
 		return;
 	}
   nou_element_cua->request = nova_pr;
