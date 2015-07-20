@@ -35,7 +35,7 @@ endif
 extrae_CFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@ @XML2_CFLAGS@
 extrae_LDFLAGS =  @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
   @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
-  @ELF_LDFLAGS@ -R @DWARF_LIBSDIR@ -lelf \
+  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf \
   @XML2_LDFLAGS@ @XML2_LIBS@
 
 load_module_SOURCES = load-module.C
@@ -45,7 +45,8 @@ load_module_CXXFLAGS += -I@BOOST_HOME@/include
 endif
 load_module_LDFLAGS = @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
   @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
-  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
+  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf \
+  @XML2_LDFLAGS@ @XML2_LIBS@
 
 demo_launcher_SOURCES = demo-launcher.C
 demo_launcher_CXXFLAGS = -I$(COMMON_INC) -I@DYNINST_INCLUDES@
@@ -54,7 +55,8 @@ demo_launcher_CXXFLAGS += -I@BOOST_HOME@/include
 endif
 demo_launcher_LDFLAGS = @DYNINST_LDFLAGS@ -R @DYNINST_LIBSDIR@ -ldyninstAPI @UNWIND_LDFLAGS@ @UNWIND_LIBS@ -lparseAPI -lsymtabAPI -linstructionAPI $(DYNINST_EXTRA_LIBS) -lcommon \
   @DWARF_LDFLAGS@ -R @DWARF_LIBSDIR@ -ldwarf \
-  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf @XML2_LDFLAGS@ @XML2_LIBS@
+  @ELF_LDFLAGS@ -R @ELF_LIBSDIR@ -lelf \
+  @XML2_LDFLAGS@ @XML2_LIBS@
 
 list_functions_SOURCES = list-functions.C
 list_functions_CXXFLAGS = -I$(COMMON_DIR) -I@DYNINST_INCLUDES@
