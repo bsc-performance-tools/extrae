@@ -2,15 +2,7 @@
 # Associate labels original text with physical files.
 
 
-$key = q/sec:XMLSectionOthers/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/subsec:Examples_DynInst_Intermediate/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:FAQ/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -19,6 +11,146 @@ $external_labels{$key} = "$URL/" . q|user-guide.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/sec:BasicAPI/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:Examples_static_Intermediate/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cha:Merging/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cha:XML/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:OPENCLinstrumentedroutines/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:Examples_static_link/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionPACX/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:Examples_CUDA/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:AdvancedJavaBindings/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:JavaBindings/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:Examples_LDPRELOAD/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cha:QuickStart/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:Examples_Linux/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionUF/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionOPENCL/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/tab:EnvironmentVariables/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:SPEside/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionCallers/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:MPIinstrumentedroutines/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionBursts/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionSampling/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionIO/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cha:InstrumentedRoutines/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:RunningTraceNOTDynInst/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLIntelPEBS/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionDynamicMemory/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cha:wholeXML/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionPerformanceCounters/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/tab:PackageDescription/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:Configuration/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionOpenMP/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:Examples_AIX/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:Examples_static/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/cha:EnvVar/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionOthers/;
+$external_labels{$key} = "$URL/" . q|user-guide.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:FAQ/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -38,19 +170,7 @@ $key = q/sec:Examples_DynInst/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/subsec:Examples_static_Intermediate/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/subsec:NetworkPerformanceCounters/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/cha:XML/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/cha:Merging/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -58,35 +178,11 @@ $key = q/subsec:Examples_DynInst_Intermediate_MPI/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/sec:OPENCLinstrumentedroutines/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/subsec:Examples_static_link/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/sec:XMLcell/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/sec:XMLSectionPACX/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/subsec:Examples_CUDA/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/tab:EnvironmentVariables_continued/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:JavaBindings/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/subsec:AdvancedJavaBindings/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -102,27 +198,11 @@ $key = q/sec:ExtendedAPI/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/cha:QuickStart/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/subsec:PPEside/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/sec:Examples_LDPRELOAD/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/sec:XMLSectionStorage/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/subsec:Examples_Linux/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionUF/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -146,51 +226,11 @@ $key = q/sec:XMLSectionTraceControl/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/tab:EnvironmentVariables/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionOPENCL/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/sec:XMLSectionMerge/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:XMLSectionTraceConfiguration/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/subsec:SPEside/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionCallers/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:MPIinstrumentedroutines/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionSampling/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionBursts/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/cha:InstrumentedRoutines/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionIO/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/subsec:RunningTraceNOTDynInst/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -210,43 +250,7 @@ $key = q/tab:MergerDescription/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/cha:wholeXML/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionDynamicMemory/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionPerformanceCounters/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/subsec:OperatingSystemAccounting/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/tab:PackageDescription/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:XMLSectionOpenMP/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:Configuration/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/subsec:Examples_AIX/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/sec:Examples_static/;
-$external_labels{$key} = "$URL/" . q|user-guide.html|; 
-$noresave{$key} = "$nosave";
-
-$key = q/cha:EnvVar/;
 $external_labels{$key} = "$URL/" . q|user-guide.html|; 
 $noresave{$key} = "$nosave";
 
@@ -365,6 +369,10 @@ $key = q/subsec:RunningTraceNOTDynInst/;
 $external_latex_labels{$key} = q|1.2.2|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:XMLIntelPEBS/;
+$external_latex_labels{$key} = q|4.20|; 
+$noresave{$key} = "$nosave";
+
 $key = q/cha:wholeXML/;
 $external_latex_labels{$key} = q|A|; 
 $noresave{$key} = "$nosave";
@@ -377,16 +385,16 @@ $key = q/sec:XMLSectionPerformanceCounters/;
 $external_latex_labels{$key} = q|4.9|; 
 $noresave{$key} = "$nosave";
 
+$key = q/tab:PackageDescription/;
+$external_latex_labels{$key} = q|1.1|; 
+$noresave{$key} = "$nosave";
+
 $key = q/sec:Configuration/;
 $external_latex_labels{$key} = q|7.3|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:XMLSectionOpenMP/;
 $external_latex_labels{$key} = q|4.5|; 
-$noresave{$key} = "$nosave";
-
-$key = q/tab:PackageDescription/;
-$external_latex_labels{$key} = q|1.1|; 
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:Examples_AIX/;
@@ -418,7 +426,7 @@ $external_latex_labels{$key} = q|4.16|;
 $noresave{$key} = "$nosave";
 
 $key = q/sec:EnvVars_in_XML/;
-$external_latex_labels{$key} = q|4.21|; 
+$external_latex_labels{$key} = q|4.22|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:Examples_DynInst/;
@@ -481,12 +489,12 @@ $key = q/sec:XMLSectionTraceControl/;
 $external_latex_labels{$key} = q|4.12|; 
 $noresave{$key} = "$nosave";
 
-$key = q/sec:XMLSectionMerge/;
-$external_latex_labels{$key} = q|4.20|; 
-$noresave{$key} = "$nosave";
-
 $key = q/sec:XMLSectionTraceConfiguration/;
 $external_latex_labels{$key} = q|4.1|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:XMLSectionMerge/;
+$external_latex_labels{$key} = q|4.21|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:XMLSectionBuffer/;
