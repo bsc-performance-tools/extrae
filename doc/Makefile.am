@@ -15,7 +15,7 @@ all:
 
 build-documentation: $(manual_ug).tex API-section.tex common-macros.tex configure-installation.tex environmentvariables-section.tex examples-section.tex FAQ-section.tex instrumented-routines-section.tex merge-section.tex quick-guide-section.tex wholeXML-section.tex XML-section.tex
 	@echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
-	cp -r $(top_srcdir)/doc/*.tex $(top_srcdir)/doc/XML $(top_srcdir)/doc/images .
+	./copy_tex_files_from_to.sh $(top_srcdir)/doc .
 if BUILD_DOCS_PS
 	$(latex) $(manual_ug)
 	$(latex) $(manual_ug)
