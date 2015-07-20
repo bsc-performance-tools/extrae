@@ -2117,7 +2117,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	setSamplingEnabled (TRUE);
 
 #if defined(ENABLE_PEBS_SAMPLING)
-	Extrae_enable_IntelPEBS(TRUE);
+	Extrae_IntelPEBS_enable(TRUE);
 #endif
 
 	/* We leave... so, we're no longer in instrumentatin from this point */
@@ -2281,7 +2281,7 @@ void Backend_Finalize (void)
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
 #if defined(ENABLE_PEBS_SAMPLING)
-	Extrae_disable_IntelPEBS();
+	Extrae_IntelPEBS_disable();
 #endif
 
 #if defined(CUDA_SUPPORT)

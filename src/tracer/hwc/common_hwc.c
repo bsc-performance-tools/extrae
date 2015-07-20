@@ -243,7 +243,7 @@ void HWC_Start_Next_Set (UINT64 countglops, UINT64 time, int thread_id)
 	}
 
 #if defined(ENABLE_PEBS_SAMPLING) 
-	Extrae_nextSampling_IntelPEBS();
+	Extrae_IntelPEBS_nextSampling();
 #endif
 }
 
@@ -268,7 +268,7 @@ void HWC_Start_Previous_Set (UINT64 countglops, UINT64 time, int thread_id)
 	}
 
 #if defined(ENABLE_PEBS_SAMPLING) 
-	Extrae_nextSampling_IntelPEBS();
+	Extrae_IntelPEBS_nextSampling();
 #endif
 }
 

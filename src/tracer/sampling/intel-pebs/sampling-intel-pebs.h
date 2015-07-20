@@ -33,14 +33,15 @@
 #ifndef EXTRAE_INTEL_PEBS_H_INCLUDED
 #define EXTRAE_INTEL_PEBS_H_INCLUDED
 
-int Extrae_enable_IntelPEBS (int loads);
-void Extrae_disable_IntelPEBS (void); 
+int Extrae_IntelPEBS_enable (int loads);
+void Extrae_IntelPEBS_disable (void); 
 
-void Extrae_setLoadPeriod_IntelPEBS (int period);
-void Extrae_setStorePeriod_IntelPEBS (int period);
-void Extrae_setLoadSampling_IntelPEBS (int enabled);
-void Extrae_setStoreSampling_IntelPEBS (int enabled);
+void Extrae_IntelPEBS_setLoadPeriod (int period);
+void Extrae_IntelPEBS_setStorePeriod (int period);
+void Extrae_IntelPEBS_setLoadSampling (int enabled);
+void Extrae_IntelPEBS_setMinimumLoadLatency (int numcycles);
+void Extrae_IntelPEBS_setStoreSampling (int enabled);
 
-void Extrae_nextSampling_IntelPEBS (void);
+void Extrae_IntelPEBS_nextSampling (void);
 
 #endif

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 20Jul2015 Support for minimum number of cycles of reference in PEBS
  * 16Jul2015 Fix missing pthread_mutex_unlock in persistent request
  + 08Jul2015 Imported first bits for sionlib
  * 25Jun2015 Fix crash when temporal dir != final dir and their shared

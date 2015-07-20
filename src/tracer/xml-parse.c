@@ -699,22 +699,38 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
+				int min_mem_latency = 3;
+				int mem_latency = 0;
 				int period_default = 1000000;
 				int iperiod = 0;
+
+				xmlChar *slatency = xmlGetProp_env (rank, tag, TRACE_PEBS_MIN_MEM_LATENCY);
+				if (slatency != NULL)
+					mem_latency = atoi(slatency);
+				if (mem_latency < min_mem_latency)
+				{
+					mfprintf (stderr, PACKAGE_NAME": Invalid memory latency for tag '%s'. Setting it to %d\n",
+					  tag->name, min_mem_latency);
+					mem_latency = min_mem_latency;
+				}
+
 				xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
 				if (speriod != NULL)
 					iperiod = atoi(speriod);
-
 				if (iperiod == 0)
 				{
 					mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
 					  tag->name, period_default);
 					iperiod = period_default;
 				}
-				Extrae_setLoadSampling_IntelPEBS (TRUE);
-				Extrae_setLoadPeriod_IntelPEBS (iperiod);
-				mfprintf (stdout, PACKAGE_NAME": Setting up PEBS sampling every %d loads\n",
-				  iperiod);
+
+				Extrae_IntelPEBS_setLoadSampling (TRUE);
+				Extrae_IntelPEBS_setLoadPeriod (iperiod);
+				Extrae_IntelPEBS_setMinimumLoadLatency (mem_latency);
+				mfprintf (stdout, PACKAGE_NAME": Setting up PEBS sampling every %d loads with a minimum latency of %d cycles\n",
+				  iperiod, mem_latency);
+
+				XML_FREE (slatency);
 				XML_FREE (speriod);
 			}
 			XML_FREE(enabled);
@@ -737,8 +753,8 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 					  tag->name, period_default);
 					iperiod = period_default;
 				}
-				Extrae_setStoreSampling_IntelPEBS (TRUE);
-				Extrae_setStorePeriod_IntelPEBS (iperiod);
+				Extrae_IntelPEBS_setStoreSampling (TRUE);
+				Extrae_IntelPEBS_setStorePeriod (iperiod);
 				mfprintf (stdout, PACKAGE_NAME": Setting up PEBS sampling every %d stores\n",
 				  iperiod);
 				XML_FREE (speriod);

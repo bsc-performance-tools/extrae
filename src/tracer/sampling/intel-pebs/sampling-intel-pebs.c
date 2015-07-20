@@ -253,15 +253,15 @@ static int detect_processor_cpuinfo(void)
 }
 
 
-int detect_processor(void) {
-	if (processor_type==-2) {
+int detect_processor(void)
+{
+	if (processor_type==-2)
 		detect_processor_cpuinfo();
-	}
+
 	return processor_type;
 }
 
 int get_latency_load_event(unsigned long long *config,
-			unsigned long long *config1,
 			int *precise_ip,
 			char *name)
 {
@@ -272,42 +272,37 @@ int get_latency_load_event(unsigned long long *config,
 	case PROCESSOR_SANDYBRIDGE:
 	case PROCESSOR_SANDYBRIDGE_EP:
 		*config=0x1cd;
-		*config1=0x3;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
 		break;
 	case PROCESSOR_IVYBRIDGE:
 	case PROCESSOR_IVYBRIDGE_EP:
 		*config=0x1cd;
-		*config1=0x3;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
 		break;
 	case PROCESSOR_HASWELL:
 	case PROCESSOR_HASWELL_EP:
 		*config=0x1cd;
-		*config1=0x3;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
 		break;
 	case PROCESSOR_BROADWELL:
 		*config=0x1cd;
-		*config1=0x3;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
 		break;
 	default:
 		*config=0x0;
-		*config1=0x0;
 		*precise_ip=0;
 		strcpy(name,"UNKNOWN");
 		processor_notfound=-1;
+		break;
 	}
 	return processor_notfound;
 }
 
 int get_latency_store_event(unsigned long long *config,
-			unsigned long long *config1,
 			int *precise_ip,
 			char *name)
 {
@@ -317,36 +312,32 @@ int get_latency_store_event(unsigned long long *config,
 	case PROCESSOR_SANDYBRIDGE:
 	case PROCESSOR_SANDYBRIDGE_EP:
 		*config=0x2cd;
-		*config1=0x0;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
 		break;
 	case PROCESSOR_IVYBRIDGE:
 	case PROCESSOR_IVYBRIDGE_EP:
 		*config=0x2cd;
-		*config1=0x0;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
 		break;
 	case PROCESSOR_HASWELL:
 	case PROCESSOR_HASWELL_EP:
 		*config=0x2cd;
-		*config1=0x0;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
 		break;
 	case PROCESSOR_BROADWELL:
 		*config=0x2cd;
-		*config1=0x0;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
 		break;
 	default:
 		*config=0x0;
-		*config1=0x0;
 		*precise_ip=0;
 		strcpy(name,"UNKNOWN");
 		processor_notfound=-1;
+		break;
 	}
 	return processor_notfound;
 }
@@ -356,17 +347,21 @@ static int PEBS_load_period  = 1000000;
 static int PEBS_store_period = 1000000;
 static int PEBS_load_enabled = FALSE;
 static int PEBS_store_enabled = FALSE;
+static int PEBS_minimumLoadLatency = 3;
 
-void Extrae_setLoadPeriod_IntelPEBS (int period)
+void Extrae_IntelPEBS_setLoadPeriod(int period)
 { PEBS_load_period = period; }
 
-void Extrae_setStorePeriod_IntelPEBS (int period)
+void Extrae_IntelPEBS_setStorePeriod (int period)
 { PEBS_store_period = period; }
 
-void Extrae_setLoadSampling_IntelPEBS (int enabled)
+void Extrae_IntelPEBS_setLoadSampling (int enabled)
 { PEBS_load_enabled = enabled; }
 
-void Extrae_setStoreSampling_IntelPEBS (int enabled)
+void Extrae_IntelPEBS_setMinimumLoadLatency (int numcycles)
+{ PEBS_minimumLoadLatency = numcycles; }
+
+void Extrae_IntelPEBS_setStoreSampling (int enabled)
 { PEBS_store_enabled = enabled; }
 
 #define MMAP_DATA_SIZE 8
@@ -771,7 +766,7 @@ static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 	(void) ret;
 }
 
-int Extrae_enable_IntelPEBS (int loads)
+int Extrae_IntelPEBS_enable (int loads)
 {
 	int ret;
 	int result,precise_ip;
@@ -803,22 +798,24 @@ int Extrae_enable_IntelPEBS (int loads)
 	memset (&pe,0,sizeof(struct perf_event_attr));
 
 	if (loads)
-		result = get_latency_load_event (&pe.config, &pe.config1, &precise_ip,
-		  event_name);
+	{
+		result = get_latency_load_event (&pe.config, &precise_ip, event_name);
+		pe.config1 = PEBS_minimumLoadLatency;
+	}
 	else
-		result = get_latency_store_event (&pe.config, &pe.config1, &precise_ip,
-		  event_name);
+	{
+		result = get_latency_store_event (&pe.config, &precise_ip, event_name);
+		pe.config1 = 0;
+	}
 
 	if (result<0)
 	{
-		fprintf (stderr, PACKAGE_NAME": Cannot get latency load event for PEBS\n");
+		fprintf (stderr, PACKAGE_NAME": Cannot get latency %s event for PEBS\n",
+		  loads?"load":"store");
 		return -1;
 	}
 	else
-	{
-		fprintf (stdout, PACKAGE_NAME": Intel PEBS sampling through counter %s\n", event_name); 
 		pe.type = PERF_TYPE_RAW;
-	}
 
 	pe.size = sizeof(struct perf_event_attr);
 	pe.precise_ip = precise_ip;
@@ -868,7 +865,7 @@ int Extrae_enable_IntelPEBS (int loads)
 	return 0;
 }
 
-void Extrae_disable_IntelPEBS (void)
+void Extrae_IntelPEBS_disable (void)
 {
 	ioctl(perf_pebs_fd, PERF_EVENT_IOC_REFRESH, 0);
 	munmap (extrae_intel_pebs_mmap, mmap_pages*sysconf(_SC_PAGESIZE));
@@ -876,16 +873,16 @@ void Extrae_disable_IntelPEBS (void)
 }
 
 static int PEBS_current_sampling_load = TRUE;
-void Extrae_nextSampling_IntelPEBS (void)
+void Extrae_IntelPEBS_nextSampling (void)
 {
 	/* Alternate if both are enabled */
 	if (PEBS_load_enabled && PEBS_store_enabled)
 	{
-		Extrae_disable_IntelPEBS();
+		Extrae_IntelPEBS_disable();
 		if (PEBS_current_sampling_load)
 			PEBS_current_sampling_load = FALSE;
 		else
 			PEBS_current_sampling_load = TRUE;
-		Extrae_enable_IntelPEBS(PEBS_current_sampling_load);
+		Extrae_IntelPEBS_enable (PEBS_current_sampling_load);
 	}
 }
