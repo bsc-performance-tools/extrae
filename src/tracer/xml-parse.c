@@ -61,6 +61,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(PACX_SUPPORT)
 # include <pacx.h>
 #endif
+#ifdef HAVE_MALLOC_H
+# include <malloc.h>
+#endif
 
 #include "utils.h"
 #include "hwc.h"
