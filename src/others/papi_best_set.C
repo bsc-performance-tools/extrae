@@ -45,9 +45,16 @@ static char UNUSED rcsid[] = "$Id: papi_best_set.c 890 2011-11-30 10:58:56Z hara
 #ifdef HAVE_LIBGEN_H
 # include <libgen.h>
 #endif
+#ifdef HAVE_MATH_H
+# include <math.h>
+#endif
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 
 #include <papi.h>
 
+#include <map>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -58,6 +65,36 @@ using namespace std;
 #define MAXBITSET 128 // Increase this if you want to allow more than this value of variable counters
 
 static vector<string> omnipresentCounters, Counters;
+static map<string,bool> CounterZero;
+
+static bool miniKernels (void)
+{
+#define KERNEL_LENGTH  16384
+	double d[KERNEL_LENGTH];
+	double s[KERNEL_LENGTH];
+	double accum[KERNEL_LENGTH];
+	unsigned a[KERNEL_LENGTH];
+	unsigned u;
+
+	for (u = 0; u < KERNEL_LENGTH; u++)
+	{
+		a[u] = u;
+		d[u] = (double) u;
+		s[u] = sqrt (d[u]);
+	}
+
+	for (u = 0; u < KERNEL_LENGTH; u++)
+		accum[u] = d[u] + a[u]*s[u];
+
+	assert (a[0] == 0);
+	assert (a[KERNEL_LENGTH-1] == KERNEL_LENGTH-1);
+	assert (d[0] == 0.);
+	assert (d[KERNEL_LENGTH-1] == (double) KERNEL_LENGTH-1);
+
+	memcpy (d, s, KERNEL_LENGTH*sizeof(double));
+
+	return accum[0] == 0.0f+sqrt(0.0f);
+}
 
 #if PAPI_VERSION_MAJOR(PAPI_VERSION) < 5
 /* Provide our own PAPI_add_named_event if we're on PAPI pre-5 */
@@ -79,12 +116,17 @@ static bool checkCounters (const vector<string> &omnicounters,
 	unsigned i;
 	bool valid = true;
 	int EventSet = PAPI_NULL;
+	long long ctrs[32];
+	vector<string> CtrsInEventSet;
 
 	if (PAPI_create_eventset(&EventSet) != PAPI_OK)
 		return false;
 
 	for (i = 0; i < omnicounters.size() && valid; i++)
+	{
 		valid = PAPI_add_named_event (EventSet, (char*)omnicounters[i].c_str()) == PAPI_OK;
+		CtrsInEventSet.push_back (omnicounters[i]);
+	}
 
 	if (!valid)
 	{
@@ -94,7 +136,23 @@ static bool checkCounters (const vector<string> &omnicounters,
 
 	for (i = 0; i < counters.size() && valid; i++)
 		if (bitmask.test(i))
+		{
 			valid = PAPI_add_named_event (EventSet, (char*)counters[i].c_str()) == PAPI_OK;
+			CtrsInEventSet.push_back (counters[i]);
+		}
+
+	PAPI_start (EventSet);
+	miniKernels();
+	PAPI_stop (EventSet, ctrs);
+
+	/* Careful, check whether the counter can be zero or not.
+	   We dismiss groups if the counter was not zero in test, but is in this
+	   eventset */
+	for (i = 0; i < CtrsInEventSet.size(); i++)
+		if (CounterZero.count(CtrsInEventSet[i]))
+			if (!CounterZero[CtrsInEventSet[i]])
+				if (ctrs[i] == 0)
+					valid = false;
 
 	PAPI_cleanup_eventset (EventSet);
 	PAPI_destroy_eventset (&EventSet);
@@ -207,6 +265,8 @@ static unsigned dumpEventCtrInfo (const char *ctr)
 	int Event;
 	int rc;
 	char EventName[PAPI_MAX_STR_LEN];
+	int EventSet = PAPI_NULL;
+	long long values;
 
 	rc = PAPI_event_name_to_code ((char*)ctr, &Event);
 	if (rc != PAPI_OK)
@@ -242,8 +302,40 @@ static unsigned dumpEventCtrInfo (const char *ctr)
 			cout << "derived";
 		if (!(Event&PAPI_NATIVE_MASK))
 			cout << " (depends on " << info.count << " native counters)";
-		cout << endl;
 	}
+
+	values = 0;
+	bool created = false, added = false, started = false;
+	if (PAPI_create_eventset(&EventSet) == PAPI_OK)
+	{
+		created = true;
+		if (PAPI_add_named_event (EventSet, (char*)ctr) == PAPI_OK)
+		{
+			added = true;
+			if (PAPI_start (EventSet) == PAPI_OK)
+			{
+				started = true;
+				miniKernels();
+				PAPI_stop (EventSet, &values);
+				PAPI_cleanup_eventset (EventSet);
+				PAPI_destroy_eventset (&EventSet);
+			}
+		}
+	}
+
+	if (!created)
+		cout << " -- cannot create eventset!" << endl;
+	else if (!added)
+		cout << " -- cannot add event!" << endl;
+	else if (!started)
+		cout << " -- cannot add start eventset!" << endl;
+	else if (values == 0)
+		cout << " -- warning, 0 value from kernel test!" << endl;
+	else if (values > 0)
+		cout << " -- nonzero value, correct!" << endl;
+
+	CounterZero[ctr] = (values == 0);
+		
 	return 1;
 }
 
