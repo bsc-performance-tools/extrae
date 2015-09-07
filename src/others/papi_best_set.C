@@ -59,6 +59,7 @@ static char UNUSED rcsid[] = "$Id: papi_best_set.c 890 2011-11-30 10:58:56Z hara
 #include <string>
 #include <iostream>
 #include <bitset>
+#include <algorithm>
 
 using namespace std;
 
@@ -84,7 +85,10 @@ static bool miniKernels (void)
 	}
 
 	for (u = 0; u < KERNEL_LENGTH; u++)
-		accum[u] = d[u] + a[u]*s[u];
+		accum[u] = d[u] + a[u];
+
+	for (u = 0; u < KERNEL_LENGTH; u++)
+		accum[u] = accum[u]+ (d[u] + a[u]*s[u]);
 
 	assert (a[0] == 0);
 	assert (a[KERNEL_LENGTH-1] == KERNEL_LENGTH-1);
@@ -252,11 +256,14 @@ static void addCounters (char *ctr, vector<string> & counters)
 	size_t position = s_ctr.find (',');
 	while (string::npos != position)
 	{
-		counters.push_back (s_ctr.substr (0, position));
+		string stmp = s_ctr.substr (0, position);
+		if (find (counters.begin(), counters.end(), stmp) == counters.end())
+			counters.push_back (stmp);
 		s_ctr = s_ctr.substr (position+1);
 		position  = s_ctr.find (',');
 	}
-	counters.push_back (s_ctr);
+	if (find (counters.begin(), counters.end(), s_ctr) == counters.end())
+		counters.push_back (s_ctr);
 }
 
 static unsigned dumpEventCtrInfo (const char *ctr)
@@ -332,7 +339,7 @@ static unsigned dumpEventCtrInfo (const char *ctr)
 	else if (values == 0)
 		cout << " -- warning, 0 value from kernel test!" << endl;
 	else if (values > 0)
-		cout << " -- nonzero value, correct!" << endl;
+		cout << endl;
 
 	CounterZero[ctr] = (values == 0);
 		
