@@ -150,6 +150,8 @@ The {\tt exclude-automatic-functions} attribute is used only by the DynInst inst
 
 Finally, in order to gather performance counters in these functions and also in those instrumented using the {\tt extrae\_user\_function} API call, the node {\tt counters} has to be enabled.
 
+\textbf{Warning!} Note that you need to compile your application binary with debugging information (typically the \texttt{-g} compiler flag) in order to translate the captured addresses into valuable information such as: function name, file name and line number.
+
 \graybox{See {\bf EXTRAE\_FUNCTIONS} environment variable in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Performance counters}\label{sec:XMLSectionPerformanceCounters}
@@ -323,7 +325,7 @@ This section indicates whether I/O calls ({\tt read} and {\tt write}) are meant 
 
 {\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-instrument-io} option.
 
-{\bf Warning:} This option seems to intefere with the instrumentation of the GNU and Intel OpenMP runtimes, and the issues haven't been solved yet.
+\textbf{Warning!} This option seems to intefere with the instrumentation of the GNU and Intel OpenMP runtimes, and the issues haven't been solved yet.
 
 \section{XML Section: Dynamic memory}\label{sec:XMLSectionDynamicMemory}
 
@@ -335,7 +337,7 @@ Additionally, the configuration can also indicate whether allocation calls shoul
 
 {\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-instrument-dynamic-memory} option.
 
-{\bf Warning:} This option seems to intefere with the instrumentation of the Intel OpenMP runtime, and the issues haven't been solved yet.
+\textbf{Warning!} This option seems to intefere with the instrumentation of the Intel OpenMP runtime, and the issues haven't been solved yet.
 
 \section{XML Section: Memory references through Intel PEBS sampling}\label{sec:XMLIntelPEBS}
 

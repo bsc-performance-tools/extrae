@@ -134,7 +134,10 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
       Extrae_user_function (0);
      }
    \end{verbatim}
+
    In order to gather performance counters during the execution of these calls, the {\tt user-functions} tag in the XML configuration and its {\tt counters} have to be both enabled.
+
+	\textbf{Warning!} Note that you need to compile your application binary with debugging information (typically the \texttt{-g} compiler flag) in order to translate the captured addresses into valuable information such as: function name, file name and line number.
 
  \item {\tt void Extrae\_flush (void)}\\
   Forces the calling thread to write the events stored in the tracing buffers to disk.
