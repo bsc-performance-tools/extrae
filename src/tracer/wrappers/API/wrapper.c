@@ -2087,12 +2087,12 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	if (mpitrace_on && !CheckForControlFile && !CheckForGlobalOpsTracingIntervals)
 	{
 		if (rank == 0)
-			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks\n\n", world_size);
+			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads\n\n", world_size, Backend_getNumberOfThreads());
 	}
 	else if (mpitrace_on && CheckForControlFile && !CheckForGlobalOpsTracingIntervals)
 	{
 		if (rank == 0)
-			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks BUT disabled by EXTRAE_CONTROL_FILE\n\n", world_size);
+			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads BUT disabled by EXTRAE_CONTROL_FILE\n\n", world_size, Backend_getNumberOfThreads());
 
 		/* Just disable the tracing until the control file is created */
 		Extrae_shutdown_Wrapper();
@@ -2101,7 +2101,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	else if (mpitrace_on && !CheckForControlFile && CheckForGlobalOpsTracingIntervals)
 	{
 		if (rank == 0)
-			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size);
+			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size, Backend_getNumberOfThreads());
 		Extrae_shutdown_Wrapper();
 	}
 
