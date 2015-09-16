@@ -146,6 +146,9 @@ AC_DEFUN([AX_PROG_MPI],
       elif test -f "${MPI_LIBSDIR}/libmpif.a" -o -f "${MPI_LIBSDIR}/libmpif.so" -o -f "${MPI_LIBSDIR}/shared/libmpif.so"; then
          MPI_F_LIB_FOUND="yes"
          MPI_F_LIB="-lmpif"
+      elif test -f "${MPI_LIBSDIR}/libmpifort.a" -o -f "${MPI_LIBSDIR}/libmpifort.so" -o -f "${MPI_LIBSDIR}/shared/libmpifort.so"; then
+         MPI_F_LIB_FOUND="yes"
+         MPI_F_LIB="-lmpifort"
       elif test -f "${MPI_LIBSDIR}/libmpichf77-gcc.legacy.a" ; then
          MPI_F_LIB_FOUND="yes"
          MPI_F_LIB="-lmpif77-gcc.legacy"

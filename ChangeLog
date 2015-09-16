@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 16Sep2015 Fixed configure check to look for MPI Fortran libraries named like "libmpifort"
  * 05Aug2015 papi_best_set now checks whether counters and created eventsets
                are 0 or not
  + 20Jul2015 Support for minimum number of cycles of reference in PEBS
