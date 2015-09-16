@@ -582,14 +582,13 @@ void OMPT_event_workshare_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, voi
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_workshare_end (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
+void OMPT_event_workshare_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
-	UNREFERENCED_PARAMETER(wf);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, wf);
+	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid);
 	Extrae_OMPT_Workshare_Exit();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
