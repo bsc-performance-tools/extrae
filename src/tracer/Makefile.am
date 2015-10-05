@@ -141,16 +141,16 @@ WRAPPERS_CORE = \
  trace_hwc.h
 
 
-# Wrappers for PACX instrumentation
-WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
-
-# Wrappers for TRT instrumentation (experimental)
-WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c wrappers/TRT/trt_wrapper.h \
- probes/TRT/trt_probe.c probes/TRT/trt_probe.h
-
-if IS_CELL_MACHINE
-WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c wrappers/CELL/cell_wrapper.h
-endif
+## # Wrappers for PACX instrumentation
+## WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
+## 
+## # Wrappers for TRT instrumentation (experimental)
+## WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c wrappers/TRT/trt_wrapper.h \
+##  probes/TRT/trt_probe.c probes/TRT/trt_probe.h
+## 
+## if IS_CELL_MACHINE
+## WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c wrappers/CELL/cell_wrapper.h
+## endif
 
 core_MPI_SRCS =
 
