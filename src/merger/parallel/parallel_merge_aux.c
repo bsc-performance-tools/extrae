@@ -50,7 +50,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "pthread_prv_events.h"
 #include "omp_prv_events.h"
 #include "misc_prv_events.h"
-#include "trt_prv_events.h"
 #include "cuda_prv_events.h"
 #include "addr2info.h"
 #include "options.h"
@@ -739,11 +738,6 @@ void ShareTraceInformation (int numtasks, int taskid)
 		fprintf (stdout, " pthread");
 	fflush (stdout);
 	Share_pthread_Operations ();
-
-	if (0 == taskid)
-		fprintf (stdout, " TRT");
-	fflush (stdout);
-	Share_TRT_Operations ();
 
 	if (0 == taskid)
 		fprintf (stdout, " CUDA");

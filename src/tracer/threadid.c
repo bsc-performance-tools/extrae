@@ -77,9 +77,6 @@ extern int css_get_max_threads();
 # include <pthread.h>
 # include "pthread_wrapper.h"
 # include "wrapper.h"
-#elif defined(TRT_SUPPORT)
-# include <pthread.h>
-extern int threadGetID(void);
 #elif defined(UPC_SUPPORT)
 # include <external/upc.h>
 #endif
@@ -95,8 +92,6 @@ unsigned Extrae_get_thread_number (void)
 	return get_thread_num();
 #elif defined(PTHREAD_SUPPORT)
 	return Backend_GetpThreadIdentifier();
-#elif defined(TRT_SUPPORT)
-	return threadGetID();
 #elif defined(UPC_SUPPORT)
 	return GetUPCthreadID();
 #else
@@ -115,9 +110,6 @@ void * Extrae_get_thread_number_function (void)
 	return (void*) get_thread_num;
 #elif defined(PTHREAD_SUPPORT)
 	return (void*) pthread_self;
-#elif defined(TRT_SUPPORT)
-	/* TRT is based on pthreads */
-	return (void*) pthread_self; 
 #elif defined(UPC_SUPPORT)
 	return (void*) GetUPCthreadID;
 #else
@@ -135,8 +127,6 @@ unsigned Extrae_get_num_threads (void)
 	return get_num_threads();
 #elif defined(PTHREAD_SUPPORT)
 	return Backend_getNumberOfThreads();
-#elif defined(TRT_SUPPORT)
-	return 1;
 #elif defined(UPC_SUPPORT)
 	return GetNumUPCthreads();
 #else

@@ -189,23 +189,6 @@ unsigned IsPthread (unsigned EvType)
   return FALSE;
 }
 
-#define TRT_EVENTS 3
-static unsigned trt_events[] = { TRT_SPAWN_EV, TRT_READ_EV, TRT_USRFUNC_EV };
-
-/******************************************************************************
- ***  IsTRT
- ******************************************************************************/
-
-unsigned IsTRT (unsigned EvType)
-{
-  unsigned evt;
-
-  for (evt = 0; evt < TRT_EVENTS; evt++)
-    if (trt_events[evt] == EvType)
-      return TRUE;
-  return FALSE;
-}
-
 #define CUDA_EVENTS 14
 static unsigned cuda_events[] = {
 	/* Host events */
@@ -433,11 +416,6 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (IsPthread (EvType))
 	{
 		*Type = PTHREAD_TYPE;
-		return TRUE;
-	}
-	else if (IsTRT (EvType))
-	{
-		*Type = TRT_TYPE;
 		return TRUE;
 	}
 	else if (IsPACX(EvType))

@@ -38,7 +38,6 @@ static char UNUSED rcsid[] = "$Id$";
 #endif
 
 #include "events.h"
-#include "trt_prv_events.h"
 #include "mpi2out.h"
 #include "options.h"
 

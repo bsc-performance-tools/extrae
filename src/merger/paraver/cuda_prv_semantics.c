@@ -40,7 +40,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "file_set.h"
 #include "object_tree.h"
 #include "trace_to_prv.h"
-#include "trt_prv_events.h"
 #include "semantics.h"
 #include "paraver_state.h"
 #include "paraver_generator.h"

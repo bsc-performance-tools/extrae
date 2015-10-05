@@ -39,7 +39,6 @@ unsigned IsMPI (unsigned EvType);
 unsigned IsPACX (unsigned EvType);
 unsigned IsOpenMP (unsigned EvType);
 unsigned IsMISC (unsigned EvType);
-unsigned IsTRT (unsigned EvType);
 
 unsigned IsBurst (unsigned EvType);
 unsigned IsHwcChange (unsigned EvType);
@@ -512,7 +511,7 @@ enum {
 #define OMP_STATS_EV             60000060
 
 /******************************************************************************
- *   User events to trace Pthread/TRT parallel execution.
+ *   User events to trace Pthread parallel execution.
  ******************************************************************************/
 #define PTHREAD_BASE_EV            61000000
 #define PTHREAD_EXIT_EV            61000001
@@ -531,11 +530,6 @@ enum {
 
 #define PTHREAD_FUNC_EV          60000020
 #define PTHREAD_FUNC_LINE_EV     60000120
-
-#define TRT_SPAWN_EV             62000001
-#define TRT_READ_EV              62000002
-#define TRT_USRFUNC_EV           62000003
-#define TRT_USRFUNC_LINE_EV      62000003
 
 #define CUDACALL_EV              63000001
 #define CUDAMEMCPY_SIZE_EV       63000002
@@ -944,7 +938,6 @@ typedef enum
 	MISC_TYPE,
 	OPENMP_TYPE,
 	PTHREAD_TYPE,
-	TRT_TYPE,
 	PACX_TYPE,
 	PACX_COMM_ALIAS_TYPE,
 	CUDA_TYPE,

@@ -63,7 +63,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "mpi_prv_events.h"
 #include "pacx_prv_events.h"
 #include "omp_prv_events.h"
-#include "trt_prv_events.h"
 #include "cuda_prv_events.h"
 #include "opencl_prv_events.h"
 #include "pthread_prv_events.h"
@@ -1036,7 +1035,6 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	OMPEvent_WriteEnabledOperations (fd);
 	WriteEnabled_pthread_Operations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
-	TRTEvent_WriteEnabledOperations (fd);
 	CUDAEvent_WriteEnabledOperations (fd);
 
 #if USE_HARDWARE_COUNTERS

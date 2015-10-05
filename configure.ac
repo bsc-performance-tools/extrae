@@ -335,16 +335,6 @@ AC_ARG_ENABLE(smpss,
 )
 AM_CONDITIONAL(WANT_SMPSS, test "${enable_smpss}" = "yes" )
 
-AC_ARG_ENABLE(upc, 
-   AC_HELP_STRING(
-      [--enable-upc],
-      [Enable support for tracing UPC run-time (disabled by default)]
-   ),
-   [enable_upc="${enableval}"],
-   [enable_upc="no"]
-)
-AM_CONDITIONAL(WANT_UPC, test "${enable_upc}" = "yes" )
-
 AC_ARG_ENABLE(nanos, 
    AC_HELP_STRING(
       [--enable-nanos],
@@ -354,16 +344,6 @@ AC_ARG_ENABLE(nanos,
    [enable_nanos="yes"]
 )
 AM_CONDITIONAL(WANT_NANOS, test "${enable_nanos}" = "yes" )
-
-AC_ARG_ENABLE(trt,
-   AC_HELP_STRING(
-      [--enable-trt],
-      [Enable support for tracing Intel TRT library (disabled by default)]
-   ),
-   [enable_trt="${enableval}"],
-   [enable_trt="no"]
-)
-AM_CONDITIONAL(WANT_TRT, test "${enable_trt}" = "yes" )
 
 AC_ARG_ENABLE(heterogeneous,
    AC_HELP_STRING(

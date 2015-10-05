@@ -2,9 +2,6 @@ include $(top_srcdir)/PATHS
 
 SUBDIRS = clocks hwc interfaces wrappers stats sampling
 
-# Include this files/directories for the package generation
-EXTRA_DIST = external
-
 if HAVE_ONLINE
   SUBDIRS += online
 endif
@@ -30,10 +27,6 @@ lib_LTLIBRARIES = libseqtrace.la
 #if WANT_OPENMP
 #  lib_LTLIBRARIES += libextrae-openmp.la
 #endif
-
-if WANT_TRT
-  lib_LTLIBRARIES += libtrttrace.la
-endif
 
 if WANT_CUDAorCUPTI
   lib_LTLIBRARIES += libcudatrace.la
@@ -73,10 +66,6 @@ endif
 endif
 endif
 
-
-if WANT_UPC
-  lib_LTLIBRARIES += libupctrace.la
-endif
 
 if WANT_OPENMP
   lib_LTLIBRARIES += libomptrace.la
@@ -140,22 +129,6 @@ WRAPPERS_CORE = \
  trace_macros.h trace_macros_mpi.h trace_macros_omp.h trace_macros_pacx.h \
  trace_hwc.h
 
-
-## # Wrappers for PACX instrumentation
-## WRAPPERS_PACX = wrappers/PACX/pacx_wrapper.c wrappers/PACX/pacx_wrapper.h
-## 
-## # Wrappers for TRT instrumentation (experimental)
-## WRAPPERS_TRT = wrappers/TRT/trt_wrapper.c wrappers/TRT/trt_wrapper.h \
-##  probes/TRT/trt_probe.c probes/TRT/trt_probe.h
-## 
-## if IS_CELL_MACHINE
-## WRAPPERS_CORE += wrappers/CELL/cell_wrapper.c wrappers/CELL/cell_wrapper.h
-## endif
-
-core_MPI_SRCS =
-
-core_PACX_SRCS = $(core_MPI_SRCS)
-
 core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
@@ -198,9 +171,6 @@ libseqtrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_
 libptmpitrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 libptmpitracef_la_SOURCES = $(libptmpitrace_la_SOURCES) extrae_mpif.h
 
-# UPC (only C?)
-libupctrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
-
 # PACXtrace 
 libpacxtrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_PACX) $(core_PACX_SRCS)
 libpacxtracef_la_SOURCES = $(libpacxtrace_la_SOURCES)
@@ -222,7 +192,6 @@ libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) extrae_mpif.h
 
 # pthreads
 libpttrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
-libtrttrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_TRT) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
 # OpenSHMEM
 libopenshmemtrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
@@ -373,8 +342,6 @@ libmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_
 libptmpitrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_PTHREAD_LIBS) $(ADDITIONAL_MPI_LIBS_C) $(PARALLEL_MERGE_LIB)
 libptmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_PTHREAD_LIBS) $(ADDITIONAL_MPI_LIBS_F) $(PARALLEL_MERGE_LIB)
 
-libupctrace_la_LIBADD  = $(core_MODULES) $(INTERFACE_API)
-
 libpacxtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/PACX/libiface_pacx.la
 libpacxtracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(INTERFACES_LIB)/PACX/libiface_pacxf.la
 
@@ -391,7 +358,6 @@ libnanosmpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_L
 libnanosmpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F) $(PARALLEL_MERGE_LIB)
 
 libpttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_PTHREAD_LIBS) $(SEQUENTIAL_MERGE_LIB)
-libtrttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_PTHREAD_LIBS) $(SEQUENTIAL_MERGE_LIB)
 
 libopenshmemtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_OPENSHMEM_LIBS) $(SEQUENTIAL_MERGE_LIB)
 
@@ -500,8 +466,6 @@ libcudaompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MP
 
 libseqtrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
-libupctrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DUPC_SUPPORT
-
 libmpitrace_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 libmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 
@@ -524,7 +488,6 @@ libnanosmpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DNANOS_SUPPORT -DM
 libnanosmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DNANOS_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
 
 libpttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DPTHREAD_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
-libtrttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DTRT_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
 libopenshmemtrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @OPENSHMEM_CFLAGS@ -DOPENSHMEM_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
@@ -595,8 +558,6 @@ libcudaompitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libseqtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
-libupctrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
-
 libmpitrace_la_LDFLAGS = $(NEW_MPI_LIBS) $(COMMON_LINKER_FLAGS)
 libmpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) # -static 
 
@@ -627,7 +588,6 @@ libnanosmpitrace_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 libnanosmpitracef_la_LDFLAGS = $(libmpitracef_la_LDFLAGS)
 
 libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(LIBPTHREAD)
-libtrttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libopenshmemtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(OPENSHMEM_LDFLAGS)
 

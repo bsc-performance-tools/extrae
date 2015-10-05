@@ -4,6 +4,7 @@ ChangeLog
  * 05Oct2015 Adding support for MPI3 immediate collectives
              Revamping source code structure, each wrapper generates its
                intermediate lib_wrap_*
+             Removed support for TRT, UPC(unfinished)
  * 16Sep2015 Fixed configure check to look for MPI Fortran libraries named like "libmpifort"
  * 05Aug2015 papi_best_set now checks whether counters and created eventsets
                are 0 or not
