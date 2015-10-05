@@ -901,6 +901,9 @@ AC_DEFUN([AX_MPI_SHOW_CONFIGURATION],
 		if test "${mpi_lib_supports_mpi_comm_spawn}" = "yes"; then
 			MPI_EXTRA_CAPABILITIES+=" MPI_Comm_spawn"
 		fi
+		if test "${mpi3_version}" = "yes"; then
+			MPI_EXTRA_CAPABILITIES+=" MPI3"
+		fi
 		echo -e \\\tMPI home:             ${MPI_HOME}
 		echo -e \\\tFortran decoration:   ${FORTRAN_DECORATION}
 		echo -e \\\tmixed C/Fortran libraries? ${mpi_lib_contains_c_and_fortran}

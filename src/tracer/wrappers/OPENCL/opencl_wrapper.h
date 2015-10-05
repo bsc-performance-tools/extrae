@@ -30,12 +30,13 @@
 #ifndef OPENCL_WRAPPER_H_INCLUDED
 #define OPENCL_WRAPPER_H_INCLUDED
 
-#include <CL/cl.h>
-
 void Extrae_OpenCL_init (unsigned rank);
 void Extrae_OpenCL_fini (void);
 
+#if defined(OPENCL_COMMON_H_INCLUDED)
+/* These symbols are only visible to opencl_common.{c,h} */
 cl_int Extrae_clRetainEvent_real (cl_event e);
 cl_int Extrae_clReleaseEvent_real (cl_event e);
+#endif
 
 #endif /* OPENCL_WRAPPER_H_INCLUDED */

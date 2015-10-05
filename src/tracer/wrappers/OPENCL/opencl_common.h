@@ -32,6 +32,8 @@
 
 #include <CL/cl.h>
 
+#include <opencl_wrapper.h>
+
 void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
 	cl_device_id device, cl_command_queue_properties properties);
 

@@ -288,10 +288,9 @@ void Extrae_OpenMP_init(int me)
 	 * If we hooked any compiler-specific routines, just hook for the 
 	 * common OpenMP routines 
 	 */
+
 	if (hooked)
-	{
 		common_GetOpenMPHookPoints(0);
-	}
 
 #else  /* PIC */
 

@@ -48,11 +48,6 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
-#if defined(MPI_SUPPORT)
-# ifdef HAVE_MPI_H
-#  include <mpi.h>
-# endif
-#endif
 #if defined(PACX_SUPPORT)
 # include <pacx.h>
 #endif
@@ -351,9 +346,35 @@ char *Extrae_Get_TemporalDirNoTask (void)
 #endif
 
 /* Know if the run is controlled by a creation of a file  */
-char ControlFileName[TMP_DIR];
-int CheckForControlFile = FALSE;
-int CheckForGlobalOpsTracingIntervals = FALSE;
+static char ControlFileName[TMP_DIR];
+static int CheckForControlFile = FALSE;
+static int CheckForGlobalOpsTracingIntervals = FALSE;
+
+int Extrae_getCheckControlFile (void)
+{
+	return CheckForControlFile;
+}
+char *Extrae_getCheckControlFileName (void)
+{
+	return ControlFileName;
+}
+int Extrae_getCheckForGlobalOpsTracingIntervals (void)
+{
+	return CheckForGlobalOpsTracingIntervals;
+}
+
+void Extrae_setCheckControlFile (int b)
+{
+	CheckForControlFile = b;
+}
+void Extrae_setCheckControlFileName (const char *f)
+{
+	strcpy (ControlFileName, f);
+}
+void Extrae_setCheckForGlobalOpsTracingIntervals (int b)
+{
+	CheckForGlobalOpsTracingIntervals = b;
+}
 
 int circular_buffering = 0;
 event_t *circular_HEAD;
@@ -682,18 +703,18 @@ static int read_environment_variables (int me)
 	/* EXTRAE_CONTROL_FILE, activates the tracing when this file is created */
 	if ((file = getenv ("EXTRAE_CONTROL_FILE")) != NULL)
 	{
-		CheckForControlFile = TRUE;
-		strcpy (ControlFileName, file);
+		Extrae_setCheckControlFile (TRUE);
+		Extrae_setCheckControlFileName (file);
 		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": Control file is %s.\n          Tracing will be disabled until the file exists\n", ControlFileName);
+			fprintf (stdout, PACKAGE_NAME": Control file is %s.\n          Tracing will be disabled until the file exists\n", file);
 	}
 	else
-		CheckForControlFile = FALSE;
+		Extrae_setCheckControlFile (FALSE);
 
 	/* EXTRAE_CONTROL_GLOPS, activates the tracing on a global op series */
 	if ((str = getenv ("EXTRAE_CONTROL_GLOPS")) != NULL)
 	{
-		CheckForGlobalOpsTracingIntervals = TRUE;
+		Extrae_setCheckForGlobalOpsTracingIntervals(TRUE);
 		Parse_GlobalOps_Tracing_Intervals (str);
 	}
 
@@ -1154,6 +1175,7 @@ void Parse_Callers (int me, char * mpi_callers, int type)
 		const char *s_mpi = "MPI";
 		const char *s_sampling = "Sampling";
 		const char *s_malloc = "Dynamic-Memory";
+		const char *s_unknown = "unknown?";
 
 		if (CALLER_MPI == type)
 			s = s_mpi;
@@ -1161,6 +1183,8 @@ void Parse_Callers (int me, char * mpi_callers, int type)
 			s = s_sampling;
 		else if (CALLER_DYNAMIC_MEMORY == type)
 			s = s_malloc;
+		else
+			s = s_unknown;
 
 		fprintf(stdout, PACKAGE_NAME": Tracing %d level(s) of %s callers: [ ",
 		  Caller_Count[type], s);
@@ -1516,9 +1540,9 @@ int Backend_ispThreadFinished (int threadid)
 
 void Backend_Flush_pThread (pthread_t t)
 {
-	unsigned u, max = Backend_getNumberOfThreads();
+	unsigned u;
 
-	for (u = 0; u < max; u++)
+	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 	{
 		if (pThreads[u] == t)
 		{
@@ -1686,7 +1710,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		exit (-1);
 	}
 
-	sprintf (new_num_omp_threads_clause, "OMP_NUM_THREADS=%d\n", numProcessors);
+	sprintf (new_num_omp_threads_clause, "OMP_NUM_THREADS=%d", numProcessors);
 	omp_value = getenv ("OMP_NUM_THREADS");
 	if (omp_value)
 	{
@@ -1716,6 +1740,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 		putenv (new_num_omp_threads_clause);
 		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 	}
+
 # endif /* OMPT_INSTRUMENTATION */
 
 #elif defined(SMPSS_SUPPORT) || defined(NANOS_SUPPORT) || defined (UPC_SUPPORT)
@@ -2084,12 +2109,16 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	/* HSG force a write to disk! */
 	Buffer_Flush(TRACING_BUFFER(THREADID));
 
-	if (mpitrace_on && !CheckForControlFile && !CheckForGlobalOpsTracingIntervals)
+	if (mpitrace_on &&
+	  !Extrae_getCheckControlFile() &&
+	  !Extrae_getCheckForGlobalOpsTracingIntervals())
 	{
 		if (rank == 0)
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads\n\n", world_size, Backend_getNumberOfThreads());
 	}
-	else if (mpitrace_on && CheckForControlFile && !CheckForGlobalOpsTracingIntervals)
+	else if (mpitrace_on &&
+	  Extrae_getCheckControlFile() &&
+	  !Extrae_getCheckForGlobalOpsTracingIntervals())
 	{
 		if (rank == 0)
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads BUT disabled by EXTRAE_CONTROL_FILE\n\n", world_size, Backend_getNumberOfThreads());
@@ -2098,7 +2127,9 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 		Extrae_shutdown_Wrapper();
 		mpitrace_on = 0;		/* Disable full tracing. It will allow us to know if files must be deleted or kept */
 	}
-	else if (mpitrace_on && !CheckForControlFile && CheckForGlobalOpsTracingIntervals)
+	else if (mpitrace_on &&
+	  !Extrae_getCheckControlFile() &&
+	  Extrae_getCheckForGlobalOpsTracingIntervals())
 	{
 		if (rank == 0)
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size, Backend_getNumberOfThreads());

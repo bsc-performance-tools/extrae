@@ -22,32 +22,97 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/probes/fork/fork_probe.c $
+ | @last_commit: $Date: 2013-05-13 18:42:21 +0200 (Mon, 13 May 2013) $
+ | @version:     $Revision: 1722 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef CUDA_PROBE_H_INCLUDED
-#define CUDA_PROBE_H_INCLUDED
+static char UNUSED rcsid[] = "$Id: fork_probe.c 1722 2013-05-13 16:42:21Z harald $";
 
-void Probe_Cuda_Launch_Entry (UINT64 p1);
-void Probe_Cuda_Launch_Exit (void);
-void Probe_Cuda_ConfigureCall_Entry (void);
-void Probe_Cuda_ConfigureCall_Exit (void);
-void Probe_Cuda_Memcpy_Entry (size_t size);
-void Probe_Cuda_Memcpy_Exit (void);
-void Probe_Cuda_MemcpyAsync_Entry (size_t size);
-void Probe_Cuda_MemcpyAsync_Exit (void);
-void Probe_Cuda_ThreadBarrier_Entry (void);
-void Probe_Cuda_ThreadBarrier_Exit (void);
-void Probe_Cuda_StreamBarrier_Entry (unsigned thread);
-void Probe_Cuda_StreamBarrier_Exit (void);
-void Probe_Cuda_DeviceReset_Enter (void);
-void Probe_Cuda_DeviceReset_Exit (void);
-void Probe_Cuda_ThreadExit_Enter (void);
-void Probe_Cuda_ThreadExit_Exit (void);
-
-void Extrae_set_trace_CUDA (int b);
-int Extrae_get_trace_CUDA (void);
-
+#if HAVE_UNISTD_H
+# include <unistd.h>
 #endif
+#include "threadid.h"
+#include "wrapper.h"
+#include "trace_macros.h"
+#include "fork_probe.h"
+
+#if 0
+# define DEBUG fprintf (stdout, "PID: %d THREAD %d: %s\n", getpid(), THREADID, __FUNCTION__);
+#else
+# define DEBUG
+#endif
+
+void Probe_fork_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, FORK_EV, EVT_BEGIN, TRUE);
+}
+
+void Probe_fork_parent_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENT (TIME, FORK_EV, EVT_END);
+}
+
+void Probe_wait_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, WAIT_EV, EVT_BEGIN, TRUE);
+}
+
+void Probe_wait_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(TIME, WAIT_EV, EVT_END, TRUE);
+}
+
+void Probe_waitpid_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, WAITPID_EV, EVT_BEGIN, TRUE);
+}
+
+void Probe_waitpid_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(TIME, WAITPID_EV, EVT_END, TRUE);
+}
+
+void Probe_exec_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, EXEC_EV, EVT_BEGIN, TRUE);
+}
+
+void Probe_exec_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(TIME, EXEC_EV, EVT_END, TRUE);
+}
+
+void Probe_system_Entry (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, SYSTEM_EV, EVT_BEGIN, TRUE);
+}
+
+void Probe_system_Exit (void)
+{
+	DEBUG
+	if (mpitrace_on)
+		TRACE_EVENTANDCOUNTERS(TIME, SYSTEM_EV, EVT_END, TRUE);
+}
+
+
+

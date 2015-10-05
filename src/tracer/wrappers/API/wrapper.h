@@ -136,10 +136,12 @@ void Backend_Finalize_close_files (void);
 #endif /* __cplusplus */
 
 // Know if the run is controlled by a creation of a file 
-extern char ControlFileName[TMP_DIR];
-extern int CheckForControlFile;
-int remove_temporal_files(void);
-extern int CheckForGlobalOpsTracingIntervals;
+int Extrae_getCheckControlFile (void);
+char *Extrae_getCheckControlFileName (void);
+int Extrae_getCheckForGlobalOpsTracingIntervals (void);
+void Extrae_setCheckControlFile (int b);
+void Extrae_setCheckControlFileName (const char *f);
+void Extrae_setCheckForGlobalOpsTracingIntervals (int b);
 
 /* Are HWC enabled? */
 extern int Trace_HWC_Enabled;  
@@ -244,6 +246,8 @@ extern int circular_buffering, circular_OVERFLOW;
 extern event_t *circular_HEAD;
 
 void Parse_Callers (int, char *, int);
+
+int remove_temporal_files (void);
 
 enum {
    KEEP,

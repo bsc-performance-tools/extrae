@@ -22,28 +22,55 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/MPI/mpi_wrapper.h $
+ | @last_commit: $Date: 2015-06-12 11:13:16 +0200 (Fri, 12 Jun 2015) $
+ | @version:     $Revision: 3359 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef PTHREAD_FORK_H_INCLUDED
-#define PTHREAD_FORK_H_INCLUDED
+#ifndef MPI_WRAPPER_1SIDED_C_DEFINED
+#define MPI_WRAPPER_1SIDED_C_DEFINED
 
-void Probe_fork_Entry (void);
-void Probe_fork_parent_Exit (void);
+#if !defined(MPI_SUPPORT)
+# error "This should not be included"
+#endif
 
-void Probe_wait_Entry (void);
-void Probe_wait_Exit (void);
+#include <config.h>
 
-void Probe_waitpid_Entry (void);
-void Probe_waitpid_Exit (void);
+#ifdef HAVE_MPI_H
+# include <mpi.h>
+#endif
 
-void Probe_exec_Entry (void);
-void Probe_exec_Exit (void);
+/* C Wrappers */
+#if defined(C_SYMBOLS)
 
-void Probe_system_Entry (void);
-void Probe_system_Exit (void);
+#if MPI_SUPPORTS_MPI_1SIDED
 
-#endif /* PTHREAD_FORK_H_INCLUDED */
+int MPI_Win_create_C_Wrapper (void *base, MPI_Aint size, int disp_unit,
+	MPI_Info info, MPI_Comm comm, MPI_Win *win);
+
+int MPI_Win_fence_C_Wrapper (int assert, MPI_Win win);
+
+int MPI_Win_start_C_Wrapper (MPI_Group group, int assert, MPI_Win win);
+
+int MPI_Win_post_C_Wrapper (MPI_Group group, int assert, MPI_Win win);
+
+int MPI_Win_free_C_Wrapper (MPI_Win *win);
+
+int MPI_Win_complete_C_Wrapper (MPI_Win win);
+
+int MPI_Win_wait_C_Wrapper (MPI_Win win);
+
+int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+  int target_rank, MPI_Aint target_disp, int target_count,
+  MPI_Datatype target_datatype, MPI_Win win);
+
+int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+  int target_rank, MPI_Aint target_disp, int target_count,
+  MPI_Datatype target_datatype, MPI_Win win);
+
+#endif /* MPI_SUPPORTS_MPI_1SIDED */
+
+#endif /* C_SYMBOLS */
+
+#endif /* MPI_WRAPPER_DEFINED */
 

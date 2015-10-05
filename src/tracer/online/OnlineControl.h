@@ -46,24 +46,22 @@ typedef struct
   int  parent_rank;
 } BE_data_t;
 
-#if defined(__cplusplus)
-extern "C" 
-{
 int  Online_Init(int rank, int world_size);
 int  Online_Start(char **node_list);
 void Online_Stop(void);
+void Online_CleanTemporaries(void);
+
+#if defined(__cplusplus)
 void Online_PauseApp(bool emit_events = true);
 void Online_ResumeApp(bool emit_events = true);
 unsigned long long Online_GetAppPauseTime();
 unsigned long long Online_GetAppResumeTime();
 
 void Online_Flush(void);
-void Online_CleanTemporaries(void);
 char * Online_GetTmpBufferName(void);
 char * Online_GetFinalBufferName(void);
 
 void * BE_main_loop(void *context);
-}
 #endif /* __cplusplus */
 
 #endif /* __ONLINE_CONTROL_H__ */

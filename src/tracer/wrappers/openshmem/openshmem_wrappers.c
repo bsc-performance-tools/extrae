@@ -531,7 +531,7 @@ int OPENSHMEM_Generate_Task_File_list( char **node_list )
                                 /* If Im processing MASTER, I know my threads and their names */
                                 for (thid = 0; thid < NTHREADS; thid++)
                                 {
-                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, node_lit[i], PID, TID, thid, EXT_MPIT);
+                                        FileName_PTT(tmpname, Get_FinalDir(TID), appl_name, node_list[i], PID, TID, thid, EXT_MPIT);
                                         sprintf (tmpline, "%s named %s\n", tmpname, Extrae_get_thread_name(thid));
                                         ret = write (fd, tmpline, strlen (tmpline));
                                         if (ret != strlen (tmpline))

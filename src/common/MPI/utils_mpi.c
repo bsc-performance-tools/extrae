@@ -365,3 +365,128 @@ int ExtraeUtilsMPI_CheckSharedDisk (const char *directory)
 	return ExtraeUtilsMPI_CheckSharedDisk_stat (directory);
 }
 
+/* Share the XML configuration file across processes */
+char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
+{
+	char hostname[1024];
+	char *result_file = NULL;
+	off_t file_size;
+	int fd;
+	char *storage;
+	int has_hostname = FALSE;
+
+	has_hostname = gethostname(hostname, 1024 - 1) == 0;
+
+	/* If no other tasks are running, just return the same file */
+	if (world_size == 1)
+	{
+		/* Copy the filename */
+		result_file = strdup (file);
+		if (result_file == NULL)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML file!\n");
+			exit (0);
+		}
+		return result_file;
+	}
+
+	if (rank == 0)
+	{
+		/* Copy the filename */
+		result_file = (char*) malloc ((strlen(file)+1)*sizeof(char));
+		if (result_file == NULL)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML file!\n");
+			exit (0);
+		}
+		memset (result_file, 0, (strlen(file)+1)*sizeof(char));
+		strncpy (result_file, file, strlen(file));
+
+		/* Open the file */
+		fd = open (result_file, O_RDONLY);
+
+		/* If open fails, just return the same fail... XML parsing will fail too! */
+		if (fd < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot open XML configuration file (%s)!\n", result_file);
+			exit (0);
+		}
+
+		file_size = lseek (fd, 0, SEEK_END);
+		lseek (fd, 0, SEEK_SET);
+
+		/* Send the size */
+		PMPI_Bcast (&file_size, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+
+		/* Allocate & Read the file */
+		storage = (char*) malloc ((file_size)*sizeof(char));
+		if (storage == NULL)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML distribution!\n");
+			exit (0);
+		}
+		if (file_size != read (fd, storage, file_size))
+		{
+			fprintf (stderr, PACKAGE_NAME": Unable to read XML file for its distribution on host %s\n", has_hostname?hostname:"unknown");
+			exit (0);
+		}
+
+		/* Send the file */
+		PMPI_Bcast (storage, file_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+		/* Close the file */
+		close (fd);
+		free (storage);
+
+		return result_file;
+	}
+	else
+	{
+		/* Receive the size */
+		PMPI_Bcast (&file_size, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+		storage = (char*) malloc ((file_size)*sizeof(char));
+		if (storage == NULL)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot obtain memory for the XML distribution!\n");
+			exit (0);
+		}
+
+		/* Build the temporal file pattern */
+		if (getenv("TMPDIR"))
+		{
+			int len = 14 + strlen(getenv("TMPDIR")) + 1;
+			/* If TMPDIR exists but points to non-existent directory, create it */
+			if (!directory_exists (getenv("TMPDIR")))
+				mkdir_recursive (getenv("TMPDIR"));
+
+			/* 14 is the length from /XMLFileXXXXXX */
+			result_file = (char*) malloc (len * sizeof(char));
+			snprintf (result_file, len, "%s/XMLFileXXXXXX", getenv ("TMPDIR"));
+		}
+		else
+		{
+			/* 13 is the length from XMLFileXXXXXX */
+			result_file = (char*) malloc ((13+1)*sizeof(char));
+			sprintf (result_file, "XMLFileXXXXXX");
+		}
+
+		/* Create the temporal file */
+		fd = mkstemp (result_file);
+
+		/* Receive the file */
+		PMPI_Bcast (storage, file_size, MPI_BYTE, 0, MPI_COMM_WORLD);
+
+		if (file_size != write (fd, storage, file_size))
+		{
+			fprintf (stderr, PACKAGE_NAME": Unable to write XML file for its distribution (%s) - host %s\n", result_file, has_hostname?hostname:"unknown");
+			perror("write");
+			exit (0);
+		}
+
+		/* Close the file, free and return it! */
+		close (fd);
+		free (storage);
+
+		return result_file;
+	}
+}

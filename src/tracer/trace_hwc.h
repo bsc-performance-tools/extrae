@@ -84,7 +84,7 @@
 
 
 #if defined(MPI_SUPPORT)
-# define COUNT_GLOBAL_OPS get_MPI_NumOpsGlobals()
+# define COUNT_GLOBAL_OPS Extrae_MPI_getNumOpsGlobals()
 #elif defined(PACX_SUPPORT)
 # define COUNT_GLOBAL_OPS get_PACX_NumOpsGlobals()
 #else

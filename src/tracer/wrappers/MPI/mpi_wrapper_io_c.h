@@ -22,97 +22,62 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/MPI/mpi_wrapper.h $
+ | @last_commit: $Date: 2015-06-12 11:13:16 +0200 (Fri, 12 Jun 2015) $
+ | @version:     $Revision: 3359 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-#include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+#ifndef MPI_WRAPPER_IO_C_DEFINED
+#define MPI_WRAPPER_IO_C_DEFINED
 
-#if HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-#include "threadid.h"
-#include "wrapper.h"
-#include "trace_macros.h"
-#include "fork_probe.h"
-
-#if 0
-# define DEBUG fprintf (stdout, "PID: %d THREAD %d: %s\n", getpid(), THREADID, __FUNCTION__);
-#else
-# define DEBUG
+#if !defined(MPI_SUPPORT)
+# error "This should not be included"
 #endif
 
-void Probe_fork_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, FORK_EV, EVT_BEGIN, TRUE);
-}
+#include <config.h>
 
-void Probe_fork_parent_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENT (TIME, FORK_EV, EVT_END);
-}
+#ifdef HAVE_MPI_H
+# include <mpi.h>
+#endif
 
-void Probe_wait_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, WAIT_EV, EVT_BEGIN, TRUE);
-}
+/* C Wrappers */
 
-void Probe_wait_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(TIME, WAIT_EV, EVT_END, TRUE);
-}
+#if defined(C_SYMBOLS)
 
-void Probe_waitpid_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, WAITPID_EV, EVT_BEGIN, TRUE);
-}
+#if MPI_SUPPORTS_MPI_IO
 
-void Probe_waitpid_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(TIME, WAITPID_EV, EVT_END, TRUE);
-}
+int MPI_File_open_C_Wrapper (MPI_Comm comm, char *filename, int amode,
+  MPI_Info info, MPI_File *fh);
 
-void Probe_exec_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, EXEC_EV, EVT_BEGIN, TRUE);
-}
+int MPI_File_close_C_Wrapper (MPI_File *fh);
 
-void Probe_exec_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(TIME, EXEC_EV, EVT_END, TRUE);
-}
+int MPI_File_read_C_Wrapper (MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status);
 
-void Probe_system_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, SYSTEM_EV, EVT_BEGIN, TRUE);
-}
+int MPI_File_read_all_C_Wrapper (MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status);
 
-void Probe_system_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_EVENTANDCOUNTERS(TIME, SYSTEM_EV, EVT_END, TRUE);
-}
+int MPI_File_write_C_Wrapper (MPI_File fh, void *buf, int count,
+	MPI_Datatype datatype, MPI_Status *status);
 
+int MPI_File_write_all_C_Wrapper (MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status);
 
+int MPI_File_read_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf, 
+  int count, MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_read_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
+  int count, MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_write_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
+  int count, MPI_Datatype datatype, MPI_Status *status);
+
+int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void *buf,
+  int count, MPI_Datatype datatype, MPI_Status *status);
+
+#endif /* MPI_SUPPORTS_MPI_IO */
+
+#endif /* C_SYMBOLS */
+
+#endif /* MPI_WRAPPER_DEFINED */
 

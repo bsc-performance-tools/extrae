@@ -25,5 +25,6 @@
 #define __UTILS_MPI_H__
 
 int ExtraeUtilsMPI_CheckSharedDisk (const char *directory);
+char * MPI_Distribute_XML_File (int rank, int world_size, const char *file);
 
 #endif

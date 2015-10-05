@@ -22,49 +22,32 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/probes/CUDA/cuda_probe.h $
+ | @last_commit: $Date: 2014-05-05 11:21:12 +0200 (Mon, 05 May 2014) $
+ | @version:     $Revision: 2670 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-#include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
+#ifndef CUDA_PROBE_H_INCLUDED
+#define CUDA_PROBE_H_INCLUDED
 
-#include "threadid.h"
-#include "wrapper.h"
-#include "trace_macros.h"
-#include "trt_probe.h"
+void Probe_Cuda_Launch_Entry (UINT64 p1);
+void Probe_Cuda_Launch_Exit (void);
+void Probe_Cuda_ConfigureCall_Entry (void);
+void Probe_Cuda_ConfigureCall_Exit (void);
+void Probe_Cuda_Memcpy_Entry (size_t size);
+void Probe_Cuda_Memcpy_Exit (void);
+void Probe_Cuda_MemcpyAsync_Entry (size_t size);
+void Probe_Cuda_MemcpyAsync_Exit (void);
+void Probe_Cuda_ThreadBarrier_Entry (void);
+void Probe_Cuda_ThreadBarrier_Exit (void);
+void Probe_Cuda_StreamBarrier_Entry (unsigned thread);
+void Probe_Cuda_StreamBarrier_Exit (void);
+void Probe_Cuda_DeviceReset_Enter (void);
+void Probe_Cuda_DeviceReset_Exit (void);
+void Probe_Cuda_ThreadExit_Enter (void);
+void Probe_Cuda_ThreadExit_Exit (void);
 
-#if 0
-# define DEBUG fprintf (stdout, "THREAD %d: %s\n", THREADID, __FUNCTION__);
-#else
-# define DEBUG
+void Extrae_set_trace_CUDA (int b);
+int Extrae_get_trace_CUDA (void);
+
 #endif
-
-void Probe_threadSpawn_Entry (void *p)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADCREATE_EV, (UINT64) p, EMPTY);
-}
-
-void Probe_threadSpawn_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADCREATE_EV, EVT_END, EMPTY);
-}
-
-void Probe_threadRead_Entry (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADJOIN_EV, EVT_BEGIN, EMPTY);
-}
-
-void Probe_threadRead_Exit (void)
-{
-	DEBUG
-	if (mpitrace_on)
-		TRACE_OMPEVENTANDCOUNTERS(TIME, PTHREADJOIN_EV, EVT_END, EMPTY);
-}

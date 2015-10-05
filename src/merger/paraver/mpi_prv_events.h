@@ -52,11 +52,6 @@ void Enable_MPI_Soft_Counter(unsigned int EvType);
 
 #define NUM_MPI_BLOCK_GROUPS  8     /* Dels 12, de moment nomes 8 son diferents */
 
-#if 0
-extern struct t_event_mpit2prv event_mpit2prv[];
-extern struct t_prv_type_info prv_block_groups[];
-#endif
-
 void SoftCountersEvent_WriteEnabled_MPI_Operations(FILE *fd);
 void MPITEvent_WriteEnabled_MPI_Operations (FILE * fd);
 void Enable_MPI_Operation (int tmpit);
@@ -67,15 +62,5 @@ void Share_MPI_Operations (void);
 #endif
 
 void Translate_MPI_MPIT2PRV (int typempit, UINT64 valuempit, int *typeprv, UINT64 *valueprv);
-
-#if 0
-/* MACRO per obtenir facilment un tipus de block (i=[0..NUM_BLOCK_GROUPS-1])*/
-#define PRV_BLOCK_TYPE(i)  prv_block_groups[i].type
-/* MACRO per obtenir facilment una etiqueta de block (i=[0..NUM_BLOCK_GROUPS-1])*/
-#define PRV_BLOCK_LABEL(i) prv_block_groups[i].label
-/* MACRO per obtenir facilment el color d'un block (i=[0..NUM_BLOCK_GROUPS-1])*/
-#define PRV_BLOCK_COLOR(i) prv_block_groups[i].flag_color
-#endif
-
 
 #endif

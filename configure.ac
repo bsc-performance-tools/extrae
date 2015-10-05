@@ -7,7 +7,7 @@
 
 # Initialize autoconf & define package name, version and bug-report address 
 #  -- keep version in sync with src/common/extrae_version.h
-AC_INIT(Extrae, 3.1.1rc, tools@bsc.es)
+AC_INIT(Extrae, 3.2.0rc, tools@bsc.es)
 
 # Safety check to ensure that the directory told with `--srcdir` contains the source code
 #AC_CONFIG_SRCDIR(src/mpitrace.c)
@@ -622,6 +622,16 @@ AC_CONFIG_FILES([
   src/tracer/interfaces/API/Makefile \
   src/tracer/interfaces/MPI/Makefile \
   src/tracer/interfaces/PACX/Makefile \
+  src/tracer/wrappers/Makefile 
+  src/tracer/wrappers/MPI/Makefile \
+  src/tracer/wrappers/OMP/Makefile \
+  src/tracer/wrappers/CUDA/Makefile \
+  src/tracer/wrappers/OPENCL/Makefile \
+  src/tracer/wrappers/pthread/Makefile \
+  src/tracer/wrappers/openshmem/Makefile \
+  src/tracer/wrappers/MALLOC/Makefile \
+  src/tracer/wrappers/IO/Makefile \
+  src/tracer/wrappers/fork/Makefile \
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/spu/Makefile \
@@ -651,6 +661,7 @@ AC_CONFIG_FILES([\
   tests/functional/merger/dump-events/Makefile \
   tests/functional/merger/shared-libraries/Makefile \
   tests/overhead/Makefile])
+
 AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
 ### TEMPORARILY_DISABLED
 ### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])

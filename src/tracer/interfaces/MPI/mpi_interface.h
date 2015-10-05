@@ -30,9 +30,6 @@
 #ifndef __MPI_INTERFACE_H__
 #define __MPI_INTERFACE_H__
 
-extern unsigned int MPI_NumOpsGlobals;
-extern unsigned int MPI_CurrentOpGlobal;
-
-unsigned int get_MPI_NumOpsGlobals();
+#include "mpi_interface_coll_helper.h"
 
 #endif /* __MPI_INTERFACE_H__ */

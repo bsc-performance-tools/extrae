@@ -214,7 +214,21 @@ typedef enum
   MPI_FILE_WRITE_AT_ALL_VAL, /* 150 */
   MPI_COMM_SPAWN_VAL,
   MPI_COMM_SPAWN_MULTIPLE_VAL,
-  MPI_REQUEST_GET_STATUS_VAL
+  MPI_REQUEST_GET_STATUS_VAL,
+  MPI_IREDUCE_VAL,
+  MPI_IALLREDUCE_VAL, /* 155 */
+  MPI_IBARRIER_VAL,
+  MPI_IBCAST_VAL,
+  MPI_IALLTOALL_VAL,
+  MPI_IALLTOALLV_VAL,
+  MPI_IALLGATHER_VAL, /* 160 */
+  MPI_IALLGATHERV_VAL,
+  MPI_IGATHER_VAL,
+  MPI_IGATHERV_VAL,
+  MPI_ISCATTER_VAL,
+  MPI_ISCATTERV_VAL, /* 165 */
+  MPI_IREDUCESCAT_VAL,
+  MPI_ISCAN_VAL
 }
 MPIVal;
 
@@ -230,21 +244,35 @@ MPIVal;
 #define  MPI_WAIT_LABEL                    "MPI_Wait"
 #define  MPI_WAITALL_LABEL                 "MPI_Waitall"
 
-#define  MPI_BCAST_LABEL                   "MPI_Bcast"
-#define  MPI_BARRIER_LABEL                 "MPI_Barrier"
 #define  MPI_REDUCE_LABEL                  "MPI_Reduce"
 #define  MPI_ALLREDUCE_LABEL               "MPI_Allreduce"
-
+#define  MPI_BARRIER_LABEL                 "MPI_Barrier"
+#define  MPI_BCAST_LABEL                   "MPI_Bcast"
 #define  MPI_ALLTOALL_LABEL                "MPI_Alltoall"
 #define  MPI_ALLTOALLV_LABEL               "MPI_Alltoallv"
+#define  MPI_ALLGATHER_LABEL               "MPI_Allgather"
+#define  MPI_ALLGATHERV_LABEL              "MPI_Allgatherv"
 #define  MPI_GATHER_LABEL                  "MPI_Gather"
 #define  MPI_GATHERV_LABEL                 "MPI_Gatherv"
 #define  MPI_SCATTER_LABEL                 "MPI_Scatter"
 #define  MPI_SCATTERV_LABEL                "MPI_Scatterv"
-#define  MPI_ALLGATHER_LABEL               "MPI_Allgather"
-#define  MPI_ALLGATHERV_LABEL              "MPI_Allgatherv"
-
+#define  MPI_REDUCE_SCATTER_LABEL          "MPI_Reduce_scatter"
 #define  MPI_SCAN_LABEL                    "MPI_Scan"
+
+#define  MPI_IREDUCE_LABEL                 "MPI_Ireduce"
+#define  MPI_IALLREDUCE_LABEL              "MPI_Iallreduce"
+#define  MPI_IBARRIER_LABEL                "MPI_Ibcast"
+#define  MPI_IBCAST_LABEL                  "MPI_Ibcast"
+#define  MPI_IALLTOALL_LABEL               "MPI_Ialltoall"
+#define  MPI_IALLTOALLV_LABEL              "MPI_Ialltoallv"
+#define  MPI_IALLGATHER_LABEL              "MPI_Iallgather"
+#define  MPI_IALLGATHERV_LABEL             "MPI_Iallgatherv"
+#define  MPI_IGATHER_LABEL                 "MPI_Igather"
+#define  MPI_IGATHERV_LABEL                "MPI_Igatherv"
+#define  MPI_ISCATTER_LABEL                "MPI_Iscatter"
+#define  MPI_ISCATTERV_LABEL               "MPI_Iscatterv"
+#define  MPI_IREDUCESCAT_LABEL             "MPI_Ireduce_scatter"
+#define  MPI_ISCAN_LABEL                   "MPI_Iscan"
 
 #define  MPI_INIT_LABEL                    "MPI_Init"
 #define  MPI_FINALIZE_LABEL                "MPI_Finalize"
@@ -298,7 +326,6 @@ MPIVal;
 
 #define  MPI_OP_CREATE_LABEL               "MPI_Op_create"
 #define  MPI_OP_FREE_LABEL                 "MPI_Op_free"
-#define  MPI_REDUCE_SCATTER_LABEL          "MPI_Reduce_scatter"
 
 #define  MPI_ATTR_DELETE_LABEL             "MPI_Attr_delete"
 #define  MPI_ATTR_GET_LABEL                "MPI_Attr_get"

@@ -32,7 +32,7 @@
 
 #include "extrae_user_events.h"
 
-#define MAX_THREADS 32
+#define MAX_THREADS 8
 
 /* Barrier variable */
 pthread_barrier_t barrier;

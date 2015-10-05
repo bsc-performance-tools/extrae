@@ -1331,8 +1331,9 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 				{
 					char *tmp;
 
-					CheckForControlFile = TRUE;
-					strcpy (ControlFileName, c_file);
+					Extrae_setCheckControlFile (TRUE);
+					Extrae_setCheckControlFileName (c_file);
+
 					mfprintf (stdout, PACKAGE_NAME": Control file is '%s'. Tracing will be disabled until the file exists.\n", c_file);
 
 					/* Let the user tune how often will be checked the existence of the control file */
@@ -1365,7 +1366,7 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 				char *trace_intervals = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (trace_intervals != NULL)
 				{
-					CheckForGlobalOpsTracingIntervals = TRUE;
+					Extrae_setCheckForGlobalOpsTracingIntervals (TRUE);
 					Parse_GlobalOps_Tracing_Intervals (trace_intervals);
 					XML_FREE(trace_intervals);
 				}

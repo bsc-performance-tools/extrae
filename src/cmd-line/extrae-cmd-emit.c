@@ -92,14 +92,14 @@ static void Extrae_CMD_Emit_get_info (void)
 			if (read (fd, buffer, sizeof(buffer)) > 0)
 			{
 				if (3 != sscanf (buffer, "%u\n%u\n%u\n", &pid, &_TASKID, &_NTHREADS))
-					fprintf (stderr, CMD_EMIT " Error! Faild to parse temporary file\n");	
+					fprintf (stderr, CMD_EMIT " Error! Faild to parse temporary file (%s)\n", TMPFILE);
 			}
 			else
-				fprintf (stderr, CMD_EMIT " Error! Failed to read from temporary file\n");
+				fprintf (stderr, CMD_EMIT " Error! Failed to read from temporary file (%s)\n", TMPFILE);
 			close (fd);
 		}
 		else
-			fprintf (stderr, CMD_INIT " Error! Failed to open temporary file\n");
+			fprintf (stderr, CMD_INIT " Error! Failed to open temporary file (%s)\n", TMPFILE);
 	}
 }
 

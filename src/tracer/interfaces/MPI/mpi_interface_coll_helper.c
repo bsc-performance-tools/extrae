@@ -22,49 +22,47 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/interfaces/MPI/mpi_interface.c $
+ | @last_commit: $Date: 2015-05-05 13:59:18 +0200 (Tue, 05 May 2015) $
+ | @version:     $Revision: 3297 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+#include "common.h"
 
-#ifndef PTHREAD_PROBE_H_INCLUDED
-#define PTHREAD_PROBE_H_INCLUDED
+static char UNUSED rcsid[] = "$Id: mpi_interface.c 3297 2015-05-05 11:59:18Z harald $";
 
-void Extrae_pthread_instrument_locks (int value);
-int Extrae_get_pthread_instrument_locks (void);
+#include "wrapper.h"
+#include "mpi_wrapper.h"
+#include "mpi_interface_coll_helper.h"
 
-void Probe_pthread_Create_Entry (void *p);
-void Probe_pthread_Create_Exit (void);
-void Probe_pthread_Join_Entry (void);
-void Probe_pthread_Join_Exit (void);
-void Probe_pthread_Detach_Entry (void);
-void Probe_pthread_Detach_Exit (void);
+static unsigned MPI_CurrentOpGlobal = 0;
+static unsigned MPI_NumOpsGlobals   = 0;
 
-void Probe_pthread_Function_Entry (void *p);
-void Probe_pthread_Function_Exit (void);
+unsigned Extrae_MPI_getCurrentOpGlobal (void)
+{
+	return MPI_CurrentOpGlobal;
+}
 
-void Probe_pthread_Exit_Entry(void);
+unsigned Extrae_MPI_getNumOpsGlobals (void)
+{
+	return MPI_NumOpsGlobals;
+}
 
-void Probe_pthread_rwlock_lockwr_Entry (void *p);
-void Probe_pthread_rwlock_lockwr_Exit (void *p);
-void Probe_pthread_rwlock_lockrd_Entry (void *p);
-void Probe_pthread_rwlock_lockrd_Exit (void *p);
-void Probe_pthread_rwlock_unlock_Entry (void *p);
-void Probe_pthread_rwlock_unlock_Exit (void *p);
+void Extrae_MPI_ProcessCollectiveCommunicator (MPI_Comm c)
+{
+	int res;
 
-void Probe_pthread_mutex_lock_Entry (void *p);
-void Probe_pthread_mutex_lock_Exit (void *p);
-void Probe_pthread_mutex_unlock_Entry (void *p);
-void Probe_pthread_mutex_unlock_Exit (void *p);
+	PMPI_Comm_compare (MPI_COMM_WORLD, c, &res);
 
-void Probe_pthread_cond_signal_Entry (void *p);
-void Probe_pthread_cond_signal_Exit (void *p);
-void Probe_pthread_cond_broadcast_Entry (void *p);
-void Probe_pthread_cond_broadcast_Exit (void *p);
-void Probe_pthread_cond_wait_Entry (void *p);
-void Probe_pthread_cond_wait_Exit (void *p);
+	if (res == MPI_IDENT || res == MPI_CONGRUENT)
+	{
+		MPI_CurrentOpGlobal = ++MPI_NumOpsGlobals;
 
-void Probe_pthread_Barrier_Wait_Entry (void);
-void Probe_pthread_Barrier_Wait_Exit (void);
+		if (Extrae_getCheckControlFile())
+			CheckControlFile();
+		if (Extrae_getCheckForGlobalOpsTracingIntervals())
+			CheckGlobalOpsTracingIntervals();
+	}
+	else
+		MPI_CurrentOpGlobal = 0;
+}
 
-#endif

@@ -394,18 +394,25 @@ static unsigned int Get_GlobalOP_isRoot (event_t *current, int task)
 	switch (Get_EvEvent(current))
 	{
 		case MPI_REDUCE_EV:
+		case MPI_IREDUCE_EV:
 			res = Get_EvAux(current) == Get_EvTag(current);
 		break;
 		case MPI_BCAST_EV:
+		case MPI_IBCAST_EV:
 			res = Get_EvTarget(current) == Get_EvTag(current);
 		break;
 		case MPI_GATHER_EV:
+		case MPI_IGATHER_EV:
 		case MPI_GATHERV_EV:
+		case MPI_IGATHERV_EV:
 		case MPI_SCATTER_EV:
+		case MPI_ISCATTER_EV:
 		case MPI_SCATTERV_EV:
+		case MPI_ISCATTERV_EV:
 			res = Get_EvTarget(current) == task-1;
 		break;
 		case MPI_REDUCESCAT_EV:
+		case MPI_IREDUCESCAT_EV:
 			res = Get_EvTarget(current) == 0;
 		break;
 	}
@@ -418,12 +425,15 @@ static unsigned int Get_GlobalOP_SendSize (event_t *current, int is_root)
 	switch (Get_EvEvent(current))
 	{
 		case MPI_BARRIER_EV:
+		case MPI_IBARRIER_EV:
 			res = 0;
 		break;
 		case MPI_REDUCE_EV:
+		case MPI_IREDUCE_EV:
 			res = (is_root)?0:Get_EvSize(current);
 		break;
 		case MPI_BCAST_EV:
+		case MPI_IBCAST_EV:
 			res = (!is_root)?0:Get_EvSize(current);
 		break;
 		default:
@@ -439,19 +449,25 @@ static unsigned int Get_GlobalOP_RecvSize (event_t *current, int is_root)
 	switch (Get_EvEvent(current))
 	{
 		case MPI_BARRIER_EV:
+		case MPI_IBARRIER_EV:
 			res = 0;
 		break;
 		case MPI_REDUCE_EV:
+		case MPI_IREDUCE_EV:
 			res = (!is_root)?0:Get_EvSize(current);
 		break;
 		case MPI_BCAST_EV:
+		case MPI_IBCAST_EV:
 			res = (is_root)?0:Get_EvSize(current);
 		break;
 		case MPI_REDUCESCAT_EV:
+		case MPI_IREDUCESCAT_EV:
 			res = (is_root)?Get_EvSize(current):Get_EvAux(current);
 		break;
 		case MPI_SCAN_EV:
+		case MPI_ISCAN_EV:
 		case MPI_ALLREDUCE_EV:
+		case MPI_IALLREDUCE_EV:
 			res = Get_EvSize(current);
 		break;
 		default:
@@ -1164,5 +1180,19 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_WIN_POST_EV, MPI_RMA_Event},
 	{ MPI_WIN_COMPLETE_EV, MPI_RMA_Event},
 	{ MPI_WIN_WAIT_EV, MPI_RMA_Event},
+	{ MPI_IREDUCE_EV, GlobalOP_event},
+	{ MPI_IALLREDUCE_EV, GlobalOP_event},
+	{ MPI_IBARRIER_EV, GlobalOP_event},
+	{ MPI_IBCAST_EV, GlobalOP_event},
+	{ MPI_IALLTOALL_EV, GlobalOP_event},
+	{ MPI_IALLTOALLV_EV, GlobalOP_event},
+	{ MPI_IALLGATHER_EV, GlobalOP_event},
+	{ MPI_IALLGATHERV_EV, GlobalOP_event},
+	{ MPI_IGATHER_EV, GlobalOP_event},
+	{ MPI_IGATHERV_EV, GlobalOP_event},
+	{ MPI_ISCATTER_EV, GlobalOP_event},
+	{ MPI_ISCATTERV_EV, GlobalOP_event},
+	{ MPI_IREDUCESCAT_EV, GlobalOP_event},
+	{ MPI_ISCAN_EV, GlobalOP_event},
 	{ NULL_EV, NULL }
 };

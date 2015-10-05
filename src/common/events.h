@@ -326,6 +326,22 @@ enum {
 #define MPI_WIN_COMPLETE_EV          50000207
 #define MPI_WIN_WAIT_EV              50000208
 
+#define MPI_IREDUCE_EV               50000210
+#define MPI_IALLREDUCE_EV            50000211
+#define MPI_IBARRIER_EV              50000212
+#define MPI_IBCAST_EV                50000213
+#define MPI_IALLTOALL_EV             50000214
+#define MPI_IALLTOALLV_EV            50000215
+#define MPI_IALLGATHER_EV            50000216
+#define MPI_IALLGATHERV_EV           50000217
+#define MPI_IGATHER_EV               50000218
+#define MPI_IGATHERV_EV              50000219
+#define MPI_ISCATTER_EV              50000220
+#define MPI_ISCATTERV_EV             50000221
+#define MPI_IREDUCESCAT_EV           50000222
+#define MPI_ISCAN_EV                 50000223
+
+
 
 #define MPI_IPROBE_COUNTER_EV        50000300
 #define MPI_TIME_OUTSIDE_IPROBES_EV  50000301

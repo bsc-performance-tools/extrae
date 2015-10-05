@@ -1,6 +1,11 @@
 include $(top_srcdir)/PATHS
 
-iface_MPI_SRCS     = mpi_interface.c mpi_interface.h
+iface_MPI_SRCS     = mpi_interface.c mpi_interface.h \
+                     mpi_interface_coll_c.c mpi_interface_coll_f.c \
+                     mpi_interface_1sided_c.c mpi_interface_1sided_f.c \
+                     mpi_interface_io_c.c mpi_interface_io_f.c \
+                     mpi_interface_coll_helper.c mpi_interface_coll_helper.h
+
 iface_MPI_INCLUDES =     \
    -I$(INTERFACES_INC)/MPI \
    -I$(COMMON_INC)       \
