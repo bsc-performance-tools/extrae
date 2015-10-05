@@ -6,10 +6,6 @@ if HAVE_ONLINE
   SUBDIRS += online
 endif
 
-if IS_CELL_MACHINE
-  SUBDIRS += spu
-endif
-
 if ! OS_ANDROID
 	LIBPTHREAD = -lpthread
 endif
@@ -386,9 +382,6 @@ core_INCLUDES = \
  -I$(WRAPPERS_INC)/openshmem \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)
 
-if IS_CELL_MACHINE
-  core_INCLUDES += -I$(WRAPPERS_INC)/CELL -I$(TRACER_INC)/spu
-endif
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
   core_INCLUDES += @PAPI_CFLAGS@
@@ -598,12 +591,6 @@ lib_dyn_cudampitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) # inherits -s
 ## -R flag works like -Wl,-rpath
 ## -no-undefined could be interesting for AIX?
 ##   check http://www.andamooka.org/reader.pl?pgid=autobookautobook_89
-
-install-exec-hook:
-if IS_CELL_MACHINE
-	cd $(libdir); $(LN_S) -f libseqtrace.a libpputrace.a
-endif
-
 ## These are the options of the previous Makefile (from Imakefile) which are
 ## not still ported to the configure system!
 

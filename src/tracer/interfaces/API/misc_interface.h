@@ -34,55 +34,28 @@
 
 /**** Create synonims of the very same routine using replication of code! ****/
 
-#if !defined(IS_CELL_MACHINE)
-# define EXPAND_ROUTINE_WITH_PREFIXES(x) \
+#define EXPAND_ROUTINE_WITH_PREFIXES(x) \
    x(Extrae); \
    x(OMPItrace); \
    x(MPItrace); \
    x(OMPtrace); \
    x(SEQtrace);
-# define EXPAND_F_ROUTINE_WITH_PREFIXES(x) \
+#define EXPAND_F_ROUTINE_WITH_PREFIXES(x) \
    x(extrae); \
    x(ompitrace); \
    x(mpitrace); \
    x(omptrace); \
    x(seqtrace);
-#else
-# define EXPAND_ROUTINE_WITH_PREFIXES(x) \
-   x(Extrae); \
-   x(OMPItrace); \
-   x(MPItrace); \
-   x(OMPtrace); \
-   x(SEQtrace); \
-   x(PPUtrace);
-# define EXPAND_F_ROUTINE_WITH_PREFIXES(x) \
-   x(extrae); \
-   x(ompitrace); \
-   x(mpitrace); \
-   x(omptrace); \
-   x(seqtrace); \
-   x(pputrace);
-#endif
 
 /**** Create synonims of the very same routine using 'alias' of the same routine (preferred) ****/
 
-#if !defined(IS_CELL_MACHINE)
-# define INTERFACE_ALIASES_C(base,orig,params,rettype) \
+#define INTERFACE_ALIASES_C(base,orig,params,rettype) \
 	rettype MPItrace##base params  __attribute__ ((alias (#orig))); \
 	rettype OMPtrace##base params  __attribute__ ((alias (#orig))); \
 	rettype OMPItrace##base params __attribute__ ((alias (#orig))); \
 	rettype SEQtrace##base params  __attribute__ ((alias (#orig)));
-#else
-# define INTERFACE_ALIASES_C(base,orig,params,rettype) \
-	rettype MPItrace##base params  __attribute__ ((alias (#orig))); \
-	rettype OMPtrace##base params  __attribute__ ((alias (#orig))); \
-	rettype OMPItrace##base params __attribute__ ((alias (#orig))); \
-	rettype SEQtrace##base params  __attribute__ ((alias (#orig))); \
-	rettype PPUtrace##base params  __attribute__ ((alias (#orig))); 
-#endif
 
-#if !defined(IS_CELL_MACHINE)
-# define INTERFACE_ALIASES_F(base_lo,base_up,orig,params,rettype) \
+#define INTERFACE_ALIASES_F(base_lo,base_up,orig,params,rettype) \
 	rettype extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
 	rettype mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
 	rettype omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
@@ -102,7 +75,7 @@
 	rettype OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
 	rettype OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
 	rettype SEQTRACE##base_up params  __attribute__ ((alias (#orig)));
-# define INTERFACE_ALIASES_F_REUSE_C(base_lo,base_up,orig,params,rettype) \
+#define INTERFACE_ALIASES_F_REUSE_C(base_lo,base_up,orig,params,rettype) \
 	rettype extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
 	rettype mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
 	rettype omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
@@ -123,57 +96,6 @@
 	rettype OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
 	rettype SEQTRACE##base_up params  __attribute__ ((alias (#orig))); \
 	rettype extrae##base_lo params  __attribute__ ((alias (#orig)));  /* This is the extra to reuse C */
-#else
-# define INTERFACE_ALIASES_F(base_lo,base_up,orig,params,rettype) \
-	rettype extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
-	rettype seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype pputrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
-	rettype seqtrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype pputrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype mpitrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype omptrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype ompitrace##base_lo params __attribute__ ((alias (#orig))); \
-	rettype seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype pputrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
-	rettype SEQTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype PPUTRACE##base_up params  __attribute__ ((alias (#orig)));
-# define INTERFACE_ALIASES_F_REUSE_C(base_lo,base_up,orig,params,rettype) \
-	rettype extrae##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype mpitrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype omptrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype ompitrace##base_lo##__ params __attribute__ ((alias (#orig))); \
-	rettype seqtrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype pputrace##base_lo##__ params  __attribute__ ((alias (#orig))); \
-	rettype extrae##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype mpitrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype omptrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype ompitrace##base_lo##_ params __attribute__ ((alias (#orig))); \
-	rettype seqtrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype pputrace##base_lo##_ params  __attribute__ ((alias (#orig))); \
-	rettype mpitrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype omptrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype ompitrace##base_lo params __attribute__ ((alias (#orig))); \
-	rettype seqtrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype pputrace##base_lo params  __attribute__ ((alias (#orig))); \
-	rettype EXTRAE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype MPITRACE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype OMPTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype OMPITRACE##base_up params __attribute__ ((alias (#orig))); \
-	rettype SEQTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype PPUTRACE##base_up params  __attribute__ ((alias (#orig))); \
-	rettype extrae##base_lo params  __attribute__ ((alias (#orig)));  /* This is the extra to reuse C */
-#endif
 
 void Extrae_init (void);
 void Extrae_fini (void);

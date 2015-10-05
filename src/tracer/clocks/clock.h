@@ -38,10 +38,6 @@ enum
   USER_CLOCK
 };
 
-/* 
- * In Cell/64, the PPU is compiled in 64-bit, but the SPU is always compiled in 32-bit.
- * We need iotimer_t to be mapped into a 64-bit type both in the PPU and SPU, so we try to use unsigned long long first.
- */
 #if SIZEOF_LONG_LONG == 8 
 typedef unsigned long long iotimer_t;
 #elif SIZEOF_LONG == 8

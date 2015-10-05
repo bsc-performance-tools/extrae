@@ -604,7 +604,6 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/fork/Makefile \
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
-  src/tracer/spu/Makefile \
   src/tracer/sampling/Makefile \
   src/tracer/sampling/timer/Makefile \
   src/tracer/sampling/intel-pebs/Makefile \

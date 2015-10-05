@@ -16,8 +16,6 @@ There are many options to be applied at configuration time for the instrumentati
 	Use POSIX clock (clock\_gettime call) instead of low level timing routines. Use this option if the system where you install the instrumentation package modifies the frequency of its processors at runtime.
 	\item {\tt --enable-single-mpi-lib} \\
 	Produces a single instrumentation library for MPI that contains both Fortran and C wrappers. Applications that call the MPI library from both C and Fortran languages need this flag to be enabled.
-	\item {\tt --enable-spu-write} \\
-	Enable direct write operations to disk from SPUs in CELL machines avoiding the usage of DMA transfers. The write mechanism is very slow compared with the original behavior.
 	\item {\tt --enable-sampling} \\
 	Enable PAPI sampling support.
 	\item {\tt --enable-pmapi} \\
@@ -227,17 +225,6 @@ The Intel MIC accelerators (also codenamed KnightsFerry - KNF and KnightsCorner 
 \graybox{{\tt ./configure --with-mpi=/opt/intel/impi/4.1.0.024/mic --without-dyninst --without-papi --without-unwind --disable-xml --disable-posix-clock --with-libz=/opt/extrae/zlib-mic --host=x86\_64-suse-linux-gnu --prefix=/home/Computational/harald/extrae-mic --enable-mic\\CFLAGS="-O -mmic -I/usr/include" CC=icc CXX=icpc\\MPICC=/opt/intel/impi/4.1.0.024/mic/bin/mpiicc}}
 
 To compile it, just issue:
-
-\graybox{{\tt make\\
-make install}}
-
-\subsubsection{Compiling on a Power CELL processor using Linux}
-
-Configuration command:
-
-\graybox{{\tt ./configure --with-mpi=/opt/openmpi/ppc32 --without-unwind --without-dyninst --without-papi --prefix=/gpfs/data/apps/CEPBATOOLS/extrae/2.2.0/openmpi/32 --with-binary-type=32}}
-
-Build and installation commands:
 
 \graybox{{\tt make\\
 make install}}

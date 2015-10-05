@@ -44,55 +44,6 @@ JAVA_EXAMPLE_FILES=null
 FORK_EXAMPLE_FILES=null
 UNICORE_EXAMPLE_FILES= $(top_srcdir)/example/UNICORE/*
 
-if IS_CELL_MACHINE
-SEQ_EXAMPLE_FILES+=\
- $(top_srcdir)/example/CELL/SEQ/worker.c \
- $(top_srcdir)/example/CELL/SEQ/run.sh \
- $(top_srcdir)/example/CELL/SEQ/merge.sh \
- $(top_srcdir)/example/CELL/SEQ/master.c \
- $(top_srcdir)/example/CELL/SEQ/mapa.pnm \
- $(top_srcdir)/example/CELL/SEQ/chroma.pnm \
- $(top_srcdir)/example/CELL/SEQ/bitmap.c \
- $(top_srcdir)/example/CELL/SEQ/bitmap.h \
- $(top_srcdir)/example/CELL/SEQ/README \
- $(top_srcdir)/example/CELL/SEQ/Makefile
-
-MPI_EXAMPLE_FILES+=\
- $(top_srcdir)/example/CELL/MPI/worker.c \
- $(top_srcdir)/example/CELL/MPI/run.sh \
- $(top_srcdir)/example/CELL/MPI/merge.sh \
- $(top_srcdir)/example/CELL/MPI/master.c \
- $(top_srcdir)/example/CELL/MPI/mapa.pnm \
- $(top_srcdir)/example/CELL/MPI/chroma.pnm \
- $(top_srcdir)/example/CELL/MPI/bitmap.c \
- $(top_srcdir)/example/CELL/MPI/bitmap.h \
- $(top_srcdir)/example/CELL/MPI/README \
- $(top_srcdir)/example/CELL/MPI/trace-xml.sh \
- $(top_srcdir)/example/CELL/MPI/Makefile
-
-OMPSS_EXAMPLE_FILES+=\
- $(top_srcdir)/example/LINUX/OMPSS/extrae.xml \
- $(top_srcdir)/example/LINUX/OMPSS/heat.h \
- $(top_srcdir)/example/LINUX/OMPSS/heat-ompss.c \
- $(top_srcdir)/example/LINUX/OMPSS/Makefile \
- $(top_srcdir)/example/LINUX/OMPSS/misc.c \
- $(top_srcdir)/example/LINUX/OMPSS/solver-ompss.c \
- $(top_srcdir)/example/LINUX/OMPSS/trace.sh \
- $(top_srcdir)/example/LINUX/OMPSS/job.lsf \
- $(top_srcdir)/example/LINUX/OMPSS/test.dat
-
-MPIOMPSS_EXAMPLE_FILES+=\
- $(top_srcdir)/example/LINUX/MPI+OMPSS/extrae.xml \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/heat.h \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/heat-mpi-ompss.c \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/Makefile \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/misc.c \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/solver-mpi-ompss.c \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/trace.sh \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/job.lsf \
- $(top_srcdir)/example/LINUX/MPI+OMPSS/test.dat
-endif
-
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
 MPI_EXAMPLE_FILES+=\
@@ -264,7 +215,6 @@ endif
 
 if OS_LINUX
 if !IS_BG_MACHINE
-if !IS_CELL_MACHINE
 MPI_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/MPI/README \
  $(top_srcdir)/example/LINUX/MPI/extrae.xml \
@@ -388,7 +338,6 @@ FORK_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/FORK/pi_forked.c \
  $(top_srcdir)/example/LINUX/FORK/README \
  $(top_srcdir)/example/LINUX/FORK/run_dyninst.sh
-endif
 endif
 endif
 

@@ -1112,50 +1112,6 @@ AC_DEFUN([AX_HAVE_MMTIMER_DEVICE],
    fi
 ])
 
-# AX_IS_CELL_MACHINE
-# --------------------
-AC_DEFUN([AX_IS_CELL_MACHINE],
-[
-   AC_MSG_CHECKING([if this is a CELL machine])
-   AC_ARG_ENABLE(check-cell,
-      AC_HELP_STRING(
-         [--enable-check-cell],
-         [Enable check to known if this is a Cell BE machine (enabled by default)]
-      ),
-      [enable_check_cell="${enableval}"],
-      [enable_check_cell="yes"]
-   )
-   grep "Cell Broadband Engine" /proc/cpuinfo 2> /dev/null > /dev/null
-   IS_CELL_MACHINE=$?
-   if test "${enable_check_cell}" = "yes" -a "${IS_CELL_MACHINE}" = "0" ; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([IS_CELL_MACHINE], 1, [Defined if this machine is a CELL machine])
-      if test -f /usr/include/libspe2.h ; then
-         AC_DEFINE([CELL_SDK], 2, [Defined if this machine has SDK x installed])
-         CELL_SDK="2"
-      elif test -f /usr/include/libspe.h ; then
-         AC_DEFINE([CELL_SDK], 1, [Defined if this machine has SDK x installed])
-         CELL_SDK="1"
-      else
-         AC_MSG_ERROR([Cannot determine which CELL SDK is installed])
-         CELL_SDK="0"
-      fi
-      IS_CELL_MACHINE="yes"
-   else
-      AC_MSG_RESULT([no])
-      IS_CELL_MACHINE="no"
-   fi
-   AM_CONDITIONAL(IS_CELL_MACHINE, test "${IS_CELL_MACHINE}" = "yes")
-   AM_CONDITIONAL(CELL_SDK_2, test "${CELL_SDK}" = "2")
-   AM_CONDITIONAL(CELL_SDK_1, test "${CELL_SDK}" = "1")
-
-   if test "${CELL_SDK}" = "1" ; then
-      AC_MSG_NOTICE([CBEA SDK installed support 1.x])
-   elif test "${CELL_SDK}" = "2" ; then
-      AC_MSG_NOTICE([CBEA SDK installed support 2.x/3.x])
-   fi
-])
-
 # AX_IS_CRAY_XT
 # ---------------------
 AC_DEFUN([AX_IS_CRAY_XT],

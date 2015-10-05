@@ -13,8 +13,6 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 			CROSSC="${host} with BG/P system support"
 		elif test "${IS_BGQ_MACHINE}" = "yes" ; then
 			CROSSC="${host} with BG/Q system support"
-		elif test "${IS_CELL_MACHINE}" = "yes" ; then
-			CROSSC="${host} with Cell Broadband Engine support - SDK ${CELL_SDK}.x"
 		elif test "${IS_CRAY_XT}" = "yes" ; then
 			CROSSC="${host} with Cray XT system support"
 		else
@@ -33,9 +31,8 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	echo 
 
 	AX_MPI_SHOW_CONFIGURATION
-	AX_PACX_SHOW_CONFIGURATION
 	AX_OPENMP_SHOW_CONFIGURATION
-        AX_OPENSHMEM_SHOW_CONFIGURATION
+	AX_OPENSHMEM_SHOW_CONFIGURATION
 	AX_PTHREAD_SHOW_CONFIGURATION
 	AX_CUDA_SHOW_CONFIGURATION
 	AX_OPENCL_SHOW_CONFIGURATION

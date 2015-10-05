@@ -22,7 +22,7 @@ The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae
   No major problems should occur if the library is initialized twice, only a warning appears in the terminal output noticing the intent of double initialization.
 
  \item {\tt extrae\_init\_type\_t Extrae\_is\_initialized (void)}\\
- This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API, MPI or PACX initialization).
+ This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API or MPI initialization).
 
  \item {\tt void Extrae\_fini (void)}\\
  Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
@@ -250,48 +250,6 @@ The extended API contains the following routines:
 	Defines the routine that will count all the executing tasks inside the tracing facility.
 	\item {\tt void Extrae\_set\_barrier\_tasks\_function (void (*barriertasks\_function)(void))}\\
 	Establishes the barrier routine among tasks. It is needed for synchronization purposes.
-\end{itemize}
-
-\section{Special considerations for Cell Broadband Engine tracing package}
-
-Instead of including {\tt \$\{EXTRAE\_HOME\}/include/extrae\_user\_events.h} include:
-\begin{itemize}
- \item {\tt \$\{EXTRAE\_HOME\}/include/ppu\_trace\_sdk2.h} on the PPE side, and,
- \item {\tt \$\{EXTRAE\_HOME\}/include/sputrace\_user\_events.h} on the SPE side.
-\end{itemize}
-
-\subsection{PPE side}\label{subsec:PPEside}
-
-The routines shown on section \ref{sec:BasicAPI} are available for the PPE element. In addition, two additional routines are available to control the creation and finalization of the SPE threads. These routines are:
-
-\begin{itemize}
-
- \item {\tt int  CELLtrace\_init (int spus, spe\_context\_ptr\_t * spe\_ids)}\\
- Contacts with the SPE thread to initialize once the SPE tracing environment. Such call has to be synchronized with the invocation of {\tt SPUtrace\_init} (see \ref{subsec:SPEside}) call on the SPE side due to the presence of message passing using the mailboxes. The routine receives the total number of contexts created by the Cell SDK {\tt spe\_context\_create} and a vector pointing to those contexts. Each of those contexts will reference to a single SPE thread created by a call to {\tt pthread\_create}.
-
- \item {\tt void CELLtrace\_fini (void)}\\
- Waits for the finalization of all the threads registered in {\tt CELLtrace\_init} and dumps their intermediate tracing buffers.
-
-\end{itemize}
-
-\subsection{SPE side}\label{subsec:SPEside}
-
-Due to the lack of parallel paradigms and hardware counters inside the SPE element, the SPE tracing library is a subset of the typical tracing library. The following API calls are available for the SPE element:
-
-\begin{itemize}
-
- \item {\tt void SPUtrace\_init (void)}\\
- Initializes the tracing package in the SPE side. It has to be synchronized with {\tt CELLtrace\_init} due to the message passing using mailboxes.
-
- \item {\tt void SPUtrace\_fini (void)}\\
- Notifies the finalization of the work performed in the SPE thread and transfers the tracing buffer to the PPE element.
-
- \item {\tt void SPUtrace\_event (unsigned event, unsigned value)}\\
- Has the same semantics as {\tt Extrae\_event}.
-
- \item {\tt void SPUtrace\_nevent (unsigned count, unsigned *types, unsigned *values)}\\
- Has the same semantics as {\tt Extrae\_nevent}.
-
 \end{itemize}
 
 \section{Java bindings}\label{sec:JavaBindings}

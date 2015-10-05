@@ -79,16 +79,11 @@ static char UNUSED rcsid[] = "$Id$";
 # define  GET_CLOCK    ia64_getTime()
 # define  INIT_CLOCK   ia64_Initialize()
 # define  INIT_CLOCK_T ia64_Initialize_thread()
-#elif (defined(OS_LINUX) || defined(OS_AIX)) && defined(ARCH_PPC) && !defined(__SPU__)
+#elif (defined(OS_LINUX) || defined(OS_AIX)) && defined(ARCH_PPC)
 # include <ppc_clock.h>
 # define  GET_CLOCK    ppc_getTime()
 # define  INIT_CLOCK   ppc_Initialize()
 # define  INIT_CLOCK_T ppc_Initialize_thread()
-#elif (defined(OS_LINUX) || defined(OS_AIX)) && defined(ARCH_PPC) && defined(__SPU__)
-#include <spu_clock.h>
-# define  GET_CLOCK    get_spu_time()
-# define  INIT_CLOCK   
-# define  INIT_CLOCK_T 
 #else
 # error "Unhandled clock type"
 #endif
@@ -127,7 +122,6 @@ UINT64 Clock_getCurrentTime_nstore (void)
 	}
 	else
 	{
-#if !defined(__SPU__)
 		struct rusage aux;
 
 		if (getrusage(RUSAGE_SELF,&aux) >= 0)
@@ -141,9 +135,6 @@ UINT64 Clock_getCurrentTime_nstore (void)
 			tmp = 0;
 
 		tmp = tmp * 1000;
-#else
-		tmp = GET_CLOCK;
-#endif
 	}
 
 

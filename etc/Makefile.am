@@ -10,7 +10,6 @@ mkdirSHscripts:
 SHscripts:
 	echo "Configure the shell scripts (SH)"
 	echo "export EXTRAE_MPI_HOME=${MPI_HOME}" >> $(SH_SCRIPT)
-	echo "export EXTRAE_PACX_HOME=${PACX_HOME}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_PAPI_HOME=${PAPI_HOME}" >> $(SH_SCRIPT) 
 	echo "export EXTRAE_LIBXML2_HOME=${XML2_HOME}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_DYNINST_HOME=${DYNINST_HOME}" >> $(SH_SCRIPT)

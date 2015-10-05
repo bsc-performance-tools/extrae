@@ -73,9 +73,6 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(OMP_SUPPORT)
 # include "omp_wrapper.h"
 #endif
-#if defined(IS_CELL_MACHINE)
-# include "cell_wrapper.h"
-#endif
 #include "UF_gcc_instrument.h"
 #include "UF_xl_instrument.h"
 #if defined(HAVE_ONLINE)
@@ -378,97 +375,6 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		tag = tag->next;
 	}
 }
-
-#if defined(IS_CELL_MACHINE)
-/* Configure SPU related parameters */
-static void Parse_XML_CELL (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
-{
-	xmlNodePtr tag;
-
-	/* Parse all TAGs, and annotate them to use them later */
-	tag = current_tag->xmlChildrenNode;
-	while (tag != NULL)
-	{
-		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
-		{
-		}
-		/* Buffer size of the SPU tracing unit  */
-		else if (!xmlStrcasecmp (tag->name, TRACE_SPU_BUFFERSIZE))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-			{
-				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
-				spu_buffer_size = (str!=NULL)?atoi (str):-1;
-				if (spu_buffer_size < 10)
-				{
-					mfprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_buffer_size, DEFAULT_SPU_BUFFER_SIZE);
-					spu_buffer_size = DEFAULT_SPU_BUFFER_SIZE;
-				}
-				else
-				{
-					mfprintf (stdout, PACKAGE_NAME": SPU tracing buffer size is %d events.\n", spu_buffer_size);
-				}
-				XML_FREE(str);
-			}
-			XML_FREE(enabled); 
-		}
-		/* DMA tag configuration for bulk transferences */
-		else if (!xmlStrcasecmp (tag->name, TRACE_SPU_DMATAG))
-		{
-#ifndef SPU_USES_WRITE
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-			{
-				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
-				spu_dma_channel = (str!=NULL)?atoi (str):-1;
-				if ((spu_dma_channel < 0) || (spu_dma_channel > 31))
-				{
-					mfprintf (stderr, PACKAGE_NAME": Invalid DMA channel '%s'. Using default channel.\n", str);
-					spu_dma_channel = DEFAULT_DMA_CHANNEL;
-				}
-				else
-				{
-					mfprintf (stdout, PACKAGE_NAME": Using DMA channel %d for memory transferences.\n", spu_dma_channel);
-				}
-				XML_FREE(str);
-			}
-			XML_FREE(enabled); 
-#else
-			mfprintf (stdout, PACKAGE_NAME": SPUs will write directly to disk. Ignoring tag %s\n", TRACE_SPU_DMATAG);
-#endif
-		}
-		/* SPU hosted file size limit */
-		else if (!xmlStrcasecmp (tag->name, TRACE_SPU_FILESIZE))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-			{
-				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
-				spu_file_size = (str!=NULL)?atoi (str):-1;
-				if (spu_file_size < 1)
-				{
-					mfprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d' mbytes.\n", spu_file_size, DEFAULT_SPU_FILE_SIZE); 
-					spu_file_size = DEFAULT_SPU_FILE_SIZE;
-				}
-				else
-				{
-					mfprintf (stdout, PACKAGE_NAME": SPU tracing file size limit is %d mbytes.\n", spu_file_size);
-				}
-				XML_FREE(str);
-			}
-			XML_FREE(enabled); 
-		}
-		else
-		{
-			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <CELL> level\n", tag->name);
-		}
-
-		tag = tag->next;
-	}
-}
-#endif /* IS_CELL_MACHINE */
 
 /* Configure Bursts related parameters */
 static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
@@ -1772,27 +1678,6 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support sampling.\n", TRACE_SAMPLING);
 #endif
 						}
-						XML_FREE(enabled);
-					}
-					/* SPU related configuration*/
-					else if (!xmlStrcasecmp (current_tag->name, TRACE_CELL))
-					{
-						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-						{
-#if defined(IS_CELL_MACHINE)
-							cell_tracing_enabled = TRUE;
-#if 0 /* unimplemented right now */
-							Parse_XML_SPU (rank, xmldoc, current_tag);
-#endif
-#else
-							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support Cell BE processors.\n", TRACE_CELL);
-#endif
-						}
-#if defined(IS_CELL_MACHINE)
-						else
-							cell_tracing_enabled = FALSE;
-#endif
 						XML_FREE(enabled);
 					}
 					/* Storage related configuration */

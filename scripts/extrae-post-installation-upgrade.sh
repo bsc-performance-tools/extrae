@@ -56,7 +56,6 @@ function generate_extrae_vars_csh
 
 	rm -f ${EXTRAE_HOME}/etc/extrae-vars.csh ; touch ${EXTRAE_HOME}/etc/extrae-vars.csh
 	echo "setenv MPI_HOME ${new_MPI_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.csh
-	echo "setenv PACX_HOME ${new_PACX_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.csh
 	echo "setenv PAPI_HOME ${new_PAPI_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.csh
 	echo "setenv LIBXML2_HOME ${new_LIBXML2_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.csh
 	echo "setenv DYNINST_HOME ${new_DYNINST_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.csh
@@ -81,7 +80,6 @@ function generate_extrae_vars_sh
 
 	rm -f ${EXTRAE_HOME}/etc/extrae-vars.sh ; touch ${EXTRAE_HOME}/etc/extrae-vars.sh
 	echo "export MPI_HOME=${new_MPI_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.sh
-	echo "export PACX_HOME=${new_PACX_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.sh
 	echo "export PAPI_HOME=${new_PAPI_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.sh
 	echo "export LIBXML2_HOME=${new_LIBXML2_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.sh
 	echo "export DYNINST_HOME=${new_DYNINST_HOME}" >> ${EXTRAE_HOME}/etc/extrae-vars.sh
@@ -118,7 +116,6 @@ function generate_extrae_Makefile_inc
 
 	echo "EXTRAE_HOME=${EXTRAE_HOME}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	echo "MPI_HOME=${new_MPI_HOME}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
-	echo "PACX_HOME=${new_PACX_HOME}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	echo "PAPI_HOME=${new_PAPI_HOME}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	echo "XML2_HOME=${new_LIBXML2_HOME}" >> ${EXTRAE_HOME}/share/example/Makefile.inc
 	if test -x ${new_LIBXML2_HOME}/bin/xml2-config ; then
@@ -178,7 +175,6 @@ echo
 ##
 
 replace_var_dir MPI_HOME ${EXTRAE_HOME}/etc/extrae-vars.sh ; new_MPI_HOME=${replace_var_res} ; echo
-replace_var_dir PACX_HOME ${EXTRAE_HOME}/etc/extrae-vars.sh ; new_PACX_HOME=${replace_var_res} ; echo
 replace_var_dir PAPI_HOME ${EXTRAE_HOME}/etc/extrae-vars.sh ; new_PAPI_HOME=${replace_var_res} ; echo
 replace_var_dir UNWIND_HOME ${EXTRAE_HOME}/etc/extrae-vars.sh ; new_UNWIND_HOME=${replace_var_res} ; echo
 replace_var_dir LIBXML2_HOME ${EXTRAE_HOME}/etc/extrae-vars.sh ; new_LIBXML2_HOME=${replace_var_res} ; echo
@@ -207,7 +203,6 @@ look_for_var CONFIGURE_LINE ${EXTRAE_HOME}/etc/extrae-vars.sh ; new_CONFIGURE_LI
 echo Extrae post configuration summary:
 echo --
 echo MPI_HOME=${new_MPI_HOME}
-echo PACX_HOME=${new_PACX_HOME}
 echo PAPI_HOME=${new_UNWIND_HOME}
 echo LIBXML2_HOME=${new_LIBXML2_HOME}
 echo DYNINST_HOME=${new_DYNINST_HOME}

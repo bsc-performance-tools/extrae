@@ -50,16 +50,6 @@ if test "${EXTRAE_HOME}" != "" ; then
 		echo "MPI support seems to be disabled"
 	fi
 
-	if test "${EXTRAE_PACX_HOME}" != "" ; then
-		if test -d ${EXTRAE_PACX_HOME} ; then
-			echo "PACX_HOME points to ${EXTRAE_PACX_HOME} and the directory exists .. OK"
-		else
-			echo "PACX_HOME points to ${EXTRAE_PACX_HOME} and the directory does NOT exist .. FAILED"
-		fi
-	else
-		echo "PACX support seems to be disabled"
-	fi
-
 	if test "${EXTRAE_LIBXML2_HOME}" != "" ; then
 		if test -d ${EXTRAE_LIBXML2_HOME} ; then
 			echo "LIBXML2_HOME points to ${EXTRAE_LIBXML2_HOME} and the directory exists .. OK"

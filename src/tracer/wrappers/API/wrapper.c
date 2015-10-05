@@ -48,9 +48,6 @@ static char UNUSED rcsid[] = "$Id$";
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
-#if defined(PACX_SUPPORT)
-# include <pacx.h>
-#endif
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -100,17 +97,9 @@ static char UNUSED rcsid[] = "$Id$";
 	extern int sched_getcpu(void);
 #endif 
 
-#if defined(IS_CELL_MACHINE)
-# include "defaults.h"
-# include "cell_wrapper.h"
-#endif
-
 #include "wrapper.h"
 #if defined(MPI_SUPPORT)
 # include "mpi_wrapper.h"
-#endif
-#if defined(PACX_SUPPORT)
-# include "pacx_wrapper.h"
 #endif
 #include "misc_wrapper.h"
 #include "fork_wrapper.h"
@@ -210,12 +199,6 @@ int tracejant_mpi = TRUE;
 /***** Variable global per saber si MPI s'ha de tracejar amb hwc *********/
 int tracejant_hwc_mpi = TRUE;
 
-/***** Global variable to control whether PACX must be instrumented ******/
-int tracejant_pacx = TRUE;
-
-/***** Global variable to control whether HWC must be gathered at PACX ***/
-int tracejant_hwc_pacx = FALSE;
-
 /***** Variable global per saber si OpenMP s'ha de tracejar **************/
 int tracejant_omp = TRUE;
 
@@ -265,8 +248,6 @@ char PROGRAM_NAME[256];
 
 unsigned long long last_mpi_exit_time = 0;
 unsigned long long last_mpi_begin_time = 0;
-unsigned long long last_pacx_exit_time = 0;
-unsigned long long last_pacx_begin_time = 0;
 
 /* Control del temps de traceig */
 unsigned long long initTracingTime = 0;
@@ -470,10 +451,9 @@ char * Get_ApplName (void)
 }
 
 /******************************************************************************
- *** Store whether the app is MPI and/or PACX
+ *** Store whether the app is MPI
  ******************************************************************************/
 static int Extrae_Application_isMPI = FALSE;
-static int Extrae_Application_isPACX = FALSE;
 static int Extrae_Application_isSHMEM = FALSE;
 
 int Extrae_get_ApplicationIsMPI (void)
@@ -481,19 +461,9 @@ int Extrae_get_ApplicationIsMPI (void)
 	return Extrae_Application_isMPI;
 }
 
-int Extrae_get_ApplicationIsPACX (void)
-{
-	return Extrae_Application_isPACX;
-}
-
 void Extrae_set_ApplicationIsMPI (int b)
 {
 	Extrae_Application_isMPI = b;
-}
-
-void Extrae_set_ApplicationIsPACX (int b)
-{
-	Extrae_Application_isPACX = b;
 }
 
 int Extrae_get_ApplicationIsSHMEM (void)
@@ -556,7 +526,7 @@ void Backend_createExtraeDirectory (int taskid, int Temporal)
 
 static int read_environment_variables (int me)
 {
-#if defined(MPI_SUPPORT) || defined(PACX_SUPPORT)
+#if defined(MPI_SUPPORT)
 	char *mpi_callers;
 #endif
   char *dir, *str, *res_cwd;
@@ -637,19 +607,6 @@ static int read_environment_variables (int me)
 #if defined(MPI_SUPPORT)
 	/* Collect MPI statistics in the library? */
 	if ((str = getenv ("EXTRAE_MPI_STATISTICS")) != NULL)
-	{
-		if (strcmp(str, "1") == 0)
-		{
-			TMODE_setBurstsStatistics (ENABLED);
-		}
-		else
-		{
-			TMODE_setBurstsStatistics (DISABLED);
-		}
-	}
-#elif defined(PACX_SUPPORT)
-	/* Collect MPI statistics in the library? */
-	if ((str = getenv ("EXTRAE_PACX_STATISTICS")) != NULL)
 	{
 		if (strcmp(str, "1") == 0)
 		{
@@ -773,10 +730,6 @@ static int read_environment_variables (int me)
 	/* Control if the user wants to add information about MPI caller routines */
 	mpi_callers = getenv ("EXTRAE_MPI_CALLER");
 	if (mpi_callers != NULL) Parse_Callers (me, mpi_callers, CALLER_MPI);
-#elif defined(PACX_SUPPORT)
-	/* Control if the user wants to add information about MPI caller routines */
-	mpi_callers = getenv ("EXTRAE_PACX_CALLER");
-	if (mpi_callers != NULL) Parse_Callers (me, mpi_callers, CALLER_MPI);
 #endif
 
 #if defined(MPI_SUPPORT)
@@ -816,15 +769,6 @@ static int read_environment_variables (int me)
 			fprintf (stdout, PACKAGE_NAME": MPI calls are NOT traced.\n");
   	tracejant_mpi = FALSE;
 	}
-#elif defined(PACX_SUPPORT)
-	/* Check if the PACX must be disabled */
-	str = getenv ("EXTRAE_DISABLE_PACX");
-	if (str != NULL && (strcmp (str, "1") == 0))
-	{
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": PACX calls are NOT traced.\n");
-  	tracejant_mpi = FALSE;
-	}
 #endif
 
 #if defined(MPI_SUPPORT)
@@ -838,15 +782,6 @@ static int read_environment_variables (int me)
 	}
 	else
 		tracejant_hwc_mpi = FALSE;
-#elif defined(PACX_SUPPORT)
-	/* HWC must be gathered at PACX? */
-	str = getenv ("EXTRAE_PACX_COUNTERS_ON");
-	if (str != NULL && (strcmp (str, "1") == 0))
-	{
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": HWC reported in the PACX calls.\n");
-		tracejant_hwc_mpi = TRUE;
-	}
 #endif
 
 	/* Enable rusage information? */
@@ -1026,71 +961,6 @@ static int read_environment_variables (int me)
 	if (getenv ("EXTRAE_SAMPLING_CALLER") != NULL)
 		Parse_Callers (me, getenv("EXTRAE_SAMPLING_CALLER"), CALLER_SAMPLING);
 #endif
-
-#if defined(IS_CELL_MACHINE)
-
-# ifndef SPU_USES_WRITE
-	/* Configure DMA channel for the transferences */
-	str = getenv("EXTRAE_SPU_DMA_CHANNEL");
-	if (str == (char *)NULL) {
-		spu_dma_channel = DEFAULT_DMA_CHANNEL;
-	}
-	else {
-		spu_dma_channel = atoi(str);
-	}
-	if ((spu_dma_channel < 0) || (spu_dma_channel > 31))
-	{
-		if (TASKID == 0)
-			fprintf (stderr, PACKAGE_NAME": Invalid DMA channel '%d'. Using default channel '%d'.\n", spu_dma_channel, DEFAULT_DMA_CHANNEL);
-		spu_dma_channel = DEFAULT_DMA_CHANNEL;
-	}
-# else
-	if (getenv("EXTRAE_SPU_DMA_CHANNEL") != NULL)
-		if (TASKID == 0)
-			fprintf (stdout, PACKAGE_NAME": SPUs will write directly to disk. Ignoring EXTRAE_SPU_DMA_CHANNEL\n");
-# endif /* SPU_USES_WRITE */
-
-	/* Configure the buffer size for each SPU */
-	str = getenv("EXTRAE_SPU_BUFFER_SIZE");
-	if (str == (char *)NULL) {
-		spu_buffer_size = DEFAULT_SPU_BUFFER_SIZE;
-	}
-	else {
-		spu_buffer_size = atoi(str);
-	}
-	if (spu_buffer_size < 10)
-	{
-		if (TASKID == 0)
-			fprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_buffer_size, DEFAULT_SPU_BUFFER_SIZE);
-		spu_buffer_size = DEFAULT_SPU_BUFFER_SIZE;
-	}
-	else
-	{
-		if (TASKID == 0)
-			fprintf (stdout, PACKAGE_NAME": SPU tracing buffer size is %d events.\n", spu_buffer_size);
-	}
-
-	/* Limit the total size of tracing of each spu */
-	str = getenv ("EXTRAE_SPU_FILE_SIZE");
-	if (str == (char *)NULL) {
-		spu_file_size = DEFAULT_SPU_FILE_SIZE;
-	}
-	else {
-	spu_file_size = atoi(str);
-	}
-	if (spu_file_size < 1)
-	{
-		if (TASKID == 0)
-			fprintf (stderr, PACKAGE_NAME": SPU tracing buffer size '%d' too small. Using default SPU buffer size '%d'.\n", spu_file_size, DEFAULT_SPU_FILE_SIZE);
-		spu_file_size = DEFAULT_SPU_FILE_SIZE;
-	}
-	else
-	{
-		if (TASKID == 0)
-			fprintf (stdout, PACKAGE_NAME": SPU tracing file size limit is %d mbytes.\n", spu_file_size);
-	}
-
-#endif /* IS_CELL_MACHINE */
 
 	return 1;
 }
@@ -1757,10 +1627,6 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 	}
 #endif
 
-#if defined(IS_CELL_MACHINE)
-	prepare_CELLTrace_init (get_maximum_NumOfThreads());
-#endif
-
 #endif /* STANDALONE */
 
 	/* Initialize the clock */
@@ -2187,7 +2053,7 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 		sprintf (hostname, "localhost");
 
 	/* Note! If the instrumentation was initialized by Extrae_init, the TASKID
-	   as that moment was 0, independently if MPI or PACX has run */
+	   as that moment was 0, independently if MPI has run */
 	initialTASKID = Extrae_get_initial_TASKID();
 
 	Buffer_Close(TRACING_BUFFER(thread));

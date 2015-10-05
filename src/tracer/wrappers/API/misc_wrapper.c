@@ -376,13 +376,11 @@ void Extrae_fini_Wrapper (void)
 	/* Finalize only if its initialized by Extrae_init call */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 	{
-#if !defined(IS_CELL_MACHINE)
 		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
 			if (getenv ("EXTRAE_APPEND_PID") == NULL)
 				Generate_Task_File_List();
-#endif
 
 		/* Finalize tracing library */
 		Backend_Finalize ();
@@ -404,12 +402,10 @@ void Extrae_fini_last_chance_Wrapper (void)
 		if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 			fprintf (stderr, PACKAGE_NAME": Warning! MPI task %d application did not terminate using MPI_Finalize! Review your application code.\n", TASKID);
 
-#if !defined(IS_CELL_MACHINE)
 		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
 			Generate_Task_File_List();
-#endif
 
 		/* Finalize tracing library */
 		Backend_Finalize ();

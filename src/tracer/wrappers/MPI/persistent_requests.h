@@ -32,8 +32,8 @@
 #define _PERSISTENT_REQUESTS
 #include "queue.h"
 
-#if !defined(MPI_SUPPORT) && !defined(PACX_SUPPORT) /* This shouldn't be compiled if MPI or PACX are not used */
-# error "This should not be compiled outside MPI/PACX bounds"
+#if !defined(MPI_SUPPORT) /* This shouldn't be compiled if MPI are not used */
+# error "This should not be compiled outside MPI bounds"
 #endif
 
 #ifdef HAVE_MPI_H
