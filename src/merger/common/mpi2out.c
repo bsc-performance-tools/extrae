@@ -408,7 +408,6 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 		if (!feof(fd) && res != NULL)
 		{
 			char *stripped;
-			size_t pos;
 
 			path[0] = thdname[0] = (char) 0;
 

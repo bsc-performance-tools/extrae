@@ -126,6 +126,8 @@ sigset_t pause_set, resume_set;
 
 void SigHandler_PauseApplication (int signum)
 {
+	UNREFERENCED_PARAMETER(signum);
+
 #if defined(DBG_SIGNALS)
 	fprintf(stderr, "[SigHandler_PauseApplication] Application PAUSED\n");
 #endif
@@ -138,6 +140,8 @@ void SigHandler_PauseApplication (int signum)
 
 void SigHandler_ResumeApplication (int signum)
 {
+	UNREFERENCED_PARAMETER(signum);
+
 #if defined(DBG_SIGNALS)
 	fprintf(stderr, "[SigHandler_ResumeApplication] Application RESUMED\n");
 #endif

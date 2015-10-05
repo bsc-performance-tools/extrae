@@ -84,7 +84,9 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 {
 	Buffer_t *buffer = NULL;
 #if defined(HAVE_ONLINE)
+#if 0
 	pthread_mutexattr_t attr;
+#endif
 	int rc;
 #endif
 
