@@ -1159,27 +1159,6 @@ event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * 
 	return NULL;
 }
 
-/******************************************************************************
- ***  Search_PACX_IRECVED
- ******************************************************************************/
-event_t *Search_PACX_IRECVED (event_t * current, long long request, FileItem_t * freceive)
-{
-	event_t *irecved = current;
-
-	freceive->tmp = irecved;
-	/* freceive->tmp = freceive->first; */
-
-	if (Get_EvEvent (irecved) == PACX_IRECVED_EV)
-		if (Get_EvAux (irecved) == request)
-			return irecved;
-
-	while ((irecved = NextRecvG_FS (freceive)) != NULL)
-		if (Get_EvEvent (irecved) == PACX_IRECVED_EV)
-			if (Get_EvAux (irecved) == request)
-				return irecved;
-	return NULL;
-}
-
 void Rewind_FS (FileSet_t * fs)
 {
 	unsigned int i;
@@ -1353,29 +1332,24 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 			{
 				FileItem_t *fi = &(fset->files[i]);
 
-				UINT64 mpi_init_end_time, pacx_init_end_time, trace_init_end_time, shmem_init_end_time;
-				int found_mpi_init_end_time, found_pacx_init_end_time, found_trace_init_end_time, found_shmem_init_end_time;
+				UINT64 mpi_init_end_time, trace_init_end_time, shmem_init_end_time;
+				int found_mpi_init_end_time, found_trace_init_end_time, found_shmem_init_end_time;
 
-				found_mpi_init_end_time = found_pacx_init_end_time = found_trace_init_end_time = found_shmem_init_end_time = FALSE;
-				mpi_init_end_time = pacx_init_end_time = trace_init_end_time = shmem_init_end_time = 0;
+				found_mpi_init_end_time = found_trace_init_end_time = found_shmem_init_end_time = FALSE;
+				mpi_init_end_time = trace_init_end_time = shmem_init_end_time = 0;
 
 				/* Save the starting tracing time of this task */
 				StartingTimes[fi->mpit_id] = current->time;
 
-				/* Locate MPI_INIT_EV, PACX_INIT_EV and/or TRACE_INIT_EV
-				   Be careful not to stop on TRACE_INIT_EV because a MPI_INIT_EV/PACX_INIT_EV may
+				/* Locate MPI_INIT_EV or TRACE_INIT_EV
+				   Be careful not to stop on TRACE_INIT_EV because a MPI_INIT_EV may
 				   appear in future and they're always synchronized, not as TRACE_INIT_EV */
-				while (current != NULL && !found_mpi_init_end_time && !found_pacx_init_end_time)
+				while (current != NULL && !found_mpi_init_end_time)
 				{
 					if (Get_EvEvent(current) == MPI_INIT_EV && Get_EvValue(current) == EVT_END)
 					{
 						mpi_init_end_time = Get_EvTime(current);
 						found_mpi_init_end_time = TRUE;
-					}
-					else if (Get_EvEvent(current) == PACX_INIT_EV && Get_EvValue(current) == EVT_END)
-					{
-						pacx_init_end_time = Get_EvTime(current);
-						found_pacx_init_end_time = TRUE;
 					}
 					else if (Get_EvEvent(current) == TRACE_INIT_EV && Get_EvValue(current) == EVT_END)
 					{
@@ -1393,8 +1367,6 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 
 				if (found_mpi_init_end_time)
 					SynchronizationTimes[fi->mpit_id] = mpi_init_end_time;
-				else if (found_pacx_init_end_time)
-					SynchronizationTimes[fi->mpit_id] = pacx_init_end_time;
 				else if (found_trace_init_end_time)
 					SynchronizationTimes[fi->mpit_id] = trace_init_end_time;
 				else if (found_shmem_init_end_time)
@@ -1659,7 +1631,6 @@ long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid)
 	while (current != NULL)
 	{
 		if ((Get_EvEvent (current) == MPI_INIT_EV && Get_EvValue (current) == EVT_END) ||
-		    (Get_EvEvent (current) == PACX_INIT_EV && Get_EvValue (current) == EVT_END) ||
 		    (Get_EvEvent (current) == TRACE_INIT_EV && Get_EvValue (current) == EVT_END))
 		{
 			options = Get_EvAux(current);

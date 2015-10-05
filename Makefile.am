@@ -35,7 +35,6 @@ SEQ_EXAMPLE_FILES=null
 ONLINE_EXAMPLE_FILES=null
 PYTHON_EXAMPLE_FILES=null
 PTHREAD_EXAMPLE_FILES=null
-PACX_EXAMPLE_FILES=null
 CUDA_EXAMPLE_FILES=null
 OPENCL_EXAMPLE_FILES=null
 MPIOPENCL_EXAMPLE_FILES=null
@@ -333,10 +332,6 @@ PTHREAD_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/PTHREAD/extrae.xml \
  $(top_srcdir)/example/LINUX/PTHREAD/README
 
-PACX_EXAMPLE_FILES+=\
- $(top_srcdir)/example/LINUX/PACX/example.c \
- $(top_srcdir)/example/LINUX/PACX/Makefile
-
 CUDA_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/CUDA/extrae.xml \
  $(top_srcdir)/example/LINUX/CUDA/hello.cu \
@@ -408,10 +403,6 @@ install-data-hook:
 	cp -f $(FORK_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/FORK
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PYTHON
 	cp -f $(PYTHON_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PYTHON
-if HAVE_PACX
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PACX
-	cp -f $(PACX_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PACX
-endif
 if HAVE_MPI
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI
 	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
@@ -468,7 +459,6 @@ endif
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_CFLAGS@" "${MPI_CFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_LDFLAGS@" "${MPI_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_LIBS@" "${MPI_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
-	$(top_srcdir)/substitute $(SED) "@sub_PACX_HOME@" "${PACX_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_PAPI_HOME@" "${PAPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_PAPI_LIBS@" "${PAPI_LIBS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_UNWIND_HOME@" "${UNWIND_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc

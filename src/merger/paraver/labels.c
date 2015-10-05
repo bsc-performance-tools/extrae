@@ -61,7 +61,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "events.h"
 #include "labels.h"
 #include "mpi_prv_events.h"
-#include "pacx_prv_events.h"
 #include "omp_prv_events.h"
 #include "cuda_prv_events.h"
 #include "opencl_prv_events.h"
@@ -248,16 +247,6 @@ struct mpi_stats_evt_t mpi_stats_evt_labels[MPI_STATS_EVENTS_COUNT] = {
    { MPI_STATS_TIME_IN_P2P_EV, MPI_STATS_TIME_IN_P2P_LBL },
    { MPI_STATS_TIME_IN_GLOBAL_EV, MPI_STATS_TIME_IN_GLOBAL_LBL },
    { MPI_STATS_OTHER_COUNT_EV, MPI_STATS_OTHER_COUNT_LBL } 
-};
-
-struct pacx_stats_evt_t pacx_stats_evt_labels[PACX_STATS_EVENTS_COUNT] = {
-   { PACX_STATS_P2P_COMMS_EV, PACX_STATS_P2P_COMMS_LBL },
-   { PACX_STATS_P2P_BYTES_SENT_EV, PACX_STATS_P2P_BYTES_SENT_LBL },
-   { PACX_STATS_P2P_BYTES_RECV_EV, PACX_STATS_P2P_BYTES_RECV_LBL },
-   { PACX_STATS_GLOBAL_COMMS_EV, PACX_STATS_GLOBAL_COMMS_LBL },
-   { PACX_STATS_GLOBAL_BYTES_SENT_EV, PACX_STATS_GLOBAL_BYTES_SENT_LBL },
-   { PACX_STATS_GLOBAL_BYTES_RECV_EV, PACX_STATS_GLOBAL_BYTES_RECV_LBL },
-   { PACX_STATS_TIME_IN_PACX_EV, PACX_STATS_TIME_IN_PACX_LBL }
 };
 
 /******************************************************************************
@@ -561,36 +550,6 @@ static void Write_MPI_Stats_Labels (FILE * pcf_fd)
       for (i=0; i<MPI_STATS_EVENTS_COUNT; i++) {
          if (MPI_Stats_Labels_Used[i]) {
             fprintf(pcf_fd, "0    %d    %s\n", MPI_STATS_BASE+i, MPI_Stats_Event_Label(i));
-         }
-      }
-      LET_SPACES (pcf_fd);
-   }
-}
-
-static char * PACX_Stats_Event_Label (int pacx_stats_evt)
-{
-   int i;
-
-   for (i=0; i<MPI_STATS_EVENTS_COUNT; i++)
-   {
-      if (pacx_stats_evt_labels[i].evt_type == pacx_stats_evt) {
-         return pacx_stats_evt_labels[i].label;
-      }
-   }
-   return "Unknown PACX stats event";
-}
-
-static void Write_PACX_Stats_Labels (FILE * pcf_fd)
-{
-   int i;
-
-   if (PACX_Stats_Events_Found)
-   {
-      fprintf (pcf_fd, "%s\n", TYPE_LABEL);
-
-      for (i=0; i<PACX_STATS_EVENTS_COUNT; i++) {
-         if (PACX_Stats_Labels_Used[i]) {
-            fprintf(pcf_fd, "0    %d    %s\n", PACX_STATS_BASE+i, PACX_Stats_Event_Label(i));
          }
       }
       LET_SPACES (pcf_fd);
@@ -1029,9 +988,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Paraver_state_colors (fd);
 
 	MPITEvent_WriteEnabled_MPI_Operations (fd);
-	MPITEvent_WriteEnabled_PACX_Operations (fd);
 	SoftCountersEvent_WriteEnabled_MPI_Operations (fd);
-	SoftCountersEvent_WriteEnabled_PACX_Operations (fd);
 	OMPEvent_WriteEnabledOperations (fd);
 	WriteEnabled_pthread_Operations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
@@ -1060,7 +1017,6 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_rusage_Labels (fd);
 	Write_memusage_Labels (fd);
 	Write_MPI_Stats_Labels (fd);
-	Write_PACX_Stats_Labels (fd);
 	Write_Trace_Mode_Labels (fd);
 	Write_Clustering_Labels (fd);
 	Write_Spectral_Labels (fd);

@@ -184,7 +184,6 @@ int SearchSendEvent_FS (FileSet_t *fset, unsigned int ptask,
 	unsigned int sender, unsigned int receiver, unsigned int tag,
 	event_t ** send_begin, event_t ** send_end);
 event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * freceive);
-event_t *Search_PACX_IRECVED (event_t * current, long long request, FileItem_t * freceive);
 
 long long GetTraceOptions (FileSet_t * fset, int numtasks, int taskid);
 int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset, UINT64 **io_StartingTimes, UINT64 **io_SynchronizationTimes);

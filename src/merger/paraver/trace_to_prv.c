@@ -99,7 +99,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "dimemas_generator.h"
 
 #include "mpi_prv_events.h"
-#include "pacx_prv_events.h"
 #include "pthread_prv_events.h"
 #include "openshmem_prv_events.h"
 #include "omp_prv_events.h"
@@ -444,8 +443,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 #endif
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
-			    Type == MPI_TYPE || Type == PACX_TYPE || Type == CUDA_TYPE ||
-			    Type == OPENCL_TYPE || Type == OPENSHMEM_TYPE)
+			    Type == MPI_TYPE || Type == CUDA_TYPE || Type == OPENCL_TYPE ||
+			    Type == OPENSHMEM_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
 
@@ -463,8 +462,6 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_OMP_Operation (EvType);
 					else if (MPI_TYPE == Type)
 						Enable_MPI_Operation (EvType);
-					else if (PACX_TYPE == Type)
-						Enable_PACX_Operation (EvType);
 					else if (CUDA_TYPE == Type)
 						Enable_CUDA_Operation (EvType);
 					else if (OPENCL_TYPE == Type)
@@ -528,11 +525,6 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			{
 				error = GenerateAliesComunicator (current_event, current_time, cpu, ptask, task, thread, fset, &tmp_nevents, PRV_SEMANTICS);
 				Enable_MPI_Operation (EvType);
-			}
-			else if (Type == PACX_COMM_ALIAS_TYPE)
-			{
-				error = GenerateAliesComunicator (current_event, current_time, cpu, ptask, task, thread, fset, &tmp_nevents, PRV_SEMANTICS);
-				Enable_PACX_Operation (EvType);
 			}
 		}
 		else

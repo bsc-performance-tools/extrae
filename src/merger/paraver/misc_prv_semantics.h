@@ -49,9 +49,6 @@ extern int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
 extern int MPI_Stats_Events_Found;
 extern int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
 
-extern int PACX_Stats_Events_Found;
-extern int PACX_Stats_Labels_Used[PACX_STATS_EVENTS_COUNT];
-
 extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
 extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];
 

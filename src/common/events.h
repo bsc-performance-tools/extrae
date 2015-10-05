@@ -36,7 +36,6 @@
 extern "C" {
 #endif
 unsigned IsMPI (unsigned EvType);
-unsigned IsPACX (unsigned EvType);
 unsigned IsOpenMP (unsigned EvType);
 unsigned IsMISC (unsigned EvType);
 
@@ -109,7 +108,6 @@ unsigned IsMPICollective (unsigned EvType);
 #define RUSAGE_EV                40000016
 #define MPI_STATS_EV             40000017
 #define TRACING_MODE_EV          40000018
-#define PACX_STATS_EV            40000019
 #define MEMUSAGE_EV              40000020
 #define USER_SEND_EV             40000021
 #define USER_RECV_EV             40000022
@@ -201,18 +199,6 @@ enum {
    MPI_STATS_OTHER_COUNT_EV, 
 
    MPI_STATS_EVENTS_COUNT /* Total number of MPI statistics */
-};
-
-#define PACX_STATS_BASE           55000000
-enum {
-   PACX_STATS_P2P_COMMS_EV = 0,
-   PACX_STATS_P2P_BYTES_SENT_EV,
-   PACX_STATS_P2P_BYTES_RECV_EV,
-   PACX_STATS_GLOBAL_COMMS_EV,
-   PACX_STATS_GLOBAL_BYTES_SENT_EV,
-   PACX_STATS_GLOBAL_BYTES_RECV_EV,
-   PACX_STATS_TIME_IN_PACX_EV, 
-   PACX_STATS_EVENTS_COUNT /* Total number of PACX statistics */
 };
 
 #define FUNCT_BASE               41000000
@@ -346,96 +332,6 @@ enum {
 #define MPI_TIME_OUTSIDE_IPROBES_EV  50000301
 #define MPI_REQUEST_GET_STATUS_COUNTER_EV               50000302
 #define MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV      50000303
-
-/******************************************************************************
- *   User events to trace several MPI functions.
- *   MUST be between 50000001 - 50999999
- ******************************************************************************/
-#define PACX_MIN_EV                   PACX_INIT_EV
-#define PACX_MAX_EV                   51999999
-
-#define PACX_INIT_EV                  51000001
-#define PACX_BSEND_EV                 51000002
-#define PACX_SSEND_EV                 51000003
-#define PACX_BARRIER_EV               51000004
-#define PACX_BCAST_EV                 51000005
-#define PACX_SEND_EV                  51000018
-#define PACX_SENDRECV_EV              51000017
-#define PACX_SENDRECV_REPLACE_EV      51000081
-#define PACX_RECV_EV                  51000019
-#define PACX_IBSEND_EV                51000020
-#define PACX_ISSEND_EV                51000021
-#define PACX_ISEND_EV                 51000022
-#define PACX_IRECV_EV                 51000023
-#define PACX_IRCV_EV                  51000025
-#define PACX_TEST_EV                  51000026
-#define PACX_TESTALL_EV               51000082
-#define PACX_TESTANY_EV               51000083
-#define PACX_TESTSOME_EV              51000084
-#define PACX_TEST_COUNTER_EV          51000080
-#define PACX_WAIT_EV                  51000027
-#define PACX_CANCEL_EV                51000030
-#define PACX_RSEND_EV                 51000031
-#define PACX_IRSEND_EV                51000032
-#define PACX_ALLTOALL_EV              51000033
-#define PACX_ALLTOALLV_EV             51000034
-#define PACX_ALLREDUCE_EV             51000035
-#define PACX_REDUCE_EV                51000038
-#define PACX_WAITALL_EV               51000039
-#define PACX_WAITANY_EV               51000068
-#define PACX_WAITSOME_EV              51000069
-#define PACX_IRECVED_EV               51000040
-#define PACX_GATHER_EV                51000041
-#define PACX_GATHERV_EV               51000042
-#define PACX_SCATTER_EV               51000043
-#define PACX_SCATTERV_EV              51000044
-#define PACX_FINALIZE_EV              51000045
-#define PACX_COMM_RANK_EV             51000046
-#define PACX_COMM_SIZE_EV             51000047
-#define PACX_COMM_CREATE_EV           51000048
-#define PACX_COMM_DUP_EV              51000049
-#define PACX_COMM_SPLIT_EV            51000050
-#define PACX_RANK_CREACIO_COMM_EV     51000051      /* Used to define communicators */
-#define PACX_ALIAS_COMM_CREATE_EV     50000061      /* Used to define communicators */
-#define PACX_ALLGATHER_EV             51000052
-#define PACX_ALLGATHERV_EV            51000053
-#define PACX_CART_CREATE_EV           51000058
-#define PACX_CART_SUB_EV              51000059
-#define PACX_CART_COORDS_EV           51000060
-#define PACX_REDUCESCAT_EV            51000062
-#define PACX_SCAN_EV                  51000063
-#define PACX_PROBE_EV                 51000065
-#define PACX_IPROBE_EV                51000066
-#define PACX_COMM_FREE_EV             51000067
-
-#define PACX_PERSIST_REQ_EV           51000070
-#define PACX_START_EV                 51000071
-#define PACX_STARTALL_EV              51000072
-#define PACX_REQUEST_FREE_EV          51000073
-#define PACX_RECV_INIT_EV             51000074
-#define PACX_SEND_INIT_EV             51000075
-#define PACX_BSEND_INIT_EV            51000076
-#define PACX_RSEND_INIT_EV            51000077
-#define PACX_SSEND_INIT_EV            51000078
-
-#define PACX_GLOBAL_OP_SENDSIZE       (PACX_INIT_EV+100000)
-#define PACX_GLOBAL_OP_RECVSIZE       (PACX_INIT_EV+100001)
-#define PACX_GLOBAL_OP_ROOT           (PACX_INIT_EV+100002)
-#define PACX_GLOBAL_OP_COMM           (PACX_INIT_EV+100003)
-
-#define PACX_FILE_OPEN_EV             51000100
-#define PACX_FILE_CLOSE_EV            51000101
-#define PACX_FILE_READ_EV             51000102
-#define PACX_FILE_READ_ALL_EV         51000103
-#define PACX_FILE_WRITE_EV            51000104
-#define PACX_FILE_WRITE_ALL_EV        51000105
-#define PACX_FILE_READ_AT_EV          51000106
-#define PACX_FILE_READ_AT_ALL_EV      51000107
-#define PACX_FILE_WRITE_AT_EV         51000108
-#define PACX_FILE_WRITE_AT_ALL_EV     51000109
-
-#define PACX_IPROBE_COUNTER_EV        51000300
-#define PACX_TIME_OUTSIDE_IPROBES_EV  51000301
 
 /******************************************************************************
  *   User events for BG PERSONALITY
@@ -938,8 +834,6 @@ typedef enum
 	MISC_TYPE,
 	OPENMP_TYPE,
 	PTHREAD_TYPE,
-	PACX_TYPE,
-	PACX_COMM_ALIAS_TYPE,
 	CUDA_TYPE,
 	OPENCL_TYPE,
 	OPENSHMEM_TYPE

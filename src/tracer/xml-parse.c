@@ -58,9 +58,6 @@ static char UNUSED rcsid[] = "$Id$";
 #  include <mpi.h>
 # endif
 #endif
-#if defined(PACX_SUPPORT)
-# include <pacx.h>
-#endif
 #ifdef HAVE_MALLOC_H
 # include <malloc.h>
 #endif
@@ -245,44 +242,6 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 }
 #endif
 
-#if defined(PACX_SUPPORT)
-/* Configure PACX related parameters */
-static void Parse_XML_PACX (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
-{
-	xmlNodePtr tag;
-
-	/* Parse all TAGs, and annotate them to use them later */
-	tag = current_tag->xmlChildrenNode;
-	while (tag != NULL)
-	{
-		/* Skip coments */
-		if (!xmlStrcasecmp (tag->name, xmlCOMMENT) || !xmlStrcasecmp (tag->name, xmlTEXT))
-		{
-		}
-		/* Shall we gather counters in the PACX calls? */
-		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_pacx = enabled != NULL && !xmlStrcasecmp (enabled, xmlYES);
-#if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, PACKAGE_NAME": PACX routines will %scollect HW counters information.\n", tracejant_hwc_pacx?"":"NOT ");
-#else
-			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <PACX> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
-			tracejant_hwc_pacx = FALSE;
-#endif
-			XML_FREE(enabled);
-		}
-		else
-		{
-			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <PACX> level\n", tag->name);
-		}
-
-		tag = tag->next;
-	}
-}
-#endif
-
-
 #if defined(SAMPLING_SUPPORT)
 static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 {
@@ -376,23 +335,6 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
                         XML_FREE(enabled);
 #else
                         mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support SHMEM.\n", TRACE_SHMEM);
-#endif
-		}
-		/* Must the tracing facility obtain information about PACX callers? */
-		else if (!xmlStrcasecmp (tag->name, TRACE_PACX))
-		{
-#if defined(PACX_SUPPORT)
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-			{
-				char *callers = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
-				if (callers != NULL)
-					Parse_Callers (rank, callers, CALLER_MPI);
-				XML_FREE(callers);
-			}
-			XML_FREE(enabled);
-#else
-			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support PACX.\n", TRACE_PACX);
 #endif
 		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_DYNAMIC_MEMORY))
@@ -564,16 +506,6 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 			XML_FREE(enabled);
 #else
 			mfprintf (stderr, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support MPI.\n", TRACE_MPI_STATISTICS, TRACE_BURSTS);
-#endif
-		}
-		else if (!xmlStrcasecmp (tag->name, TRACE_PACX_STATISTICS))
-		{
-#if defined(PACX_SUPPORT)
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			TMODE_setBurstsStatistics (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES));
-			XML_FREE(enabled);
-#else
-			mfprintf (stderr, PACKAGE_NAME": <%s> tag at <%s> level will be ignored. This library does not support PACX.\n", TRACE_PACX_STATISTICS, TRACE_BURSTS);
 #endif
 		}
 		else
@@ -1780,23 +1712,6 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						}
 						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
 							tracejant_mpi = FALSE;
-						XML_FREE(enabled);
-					}
-					/* PACX related configuration */
-					else if (!xmlStrcasecmp (current_tag->name, TRACE_PACX))
-					{
-						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
-						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-						{
-#if defined(PACX_SUPPORT)
-							tracejant_pacx = TRUE;
-							Parse_XML_PACX (rank, xmldoc, current_tag);
-#else
-							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support PACX.\n", TRACE_PACX);
-#endif
-						}
-						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
-							tracejant_pacx = FALSE;
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */

@@ -266,15 +266,6 @@ fi
 AX_ENABLE_SINGLE_MPI_LIBRARY
 AX_CHECK_MPI_LIB_HAS_C_AND_FORTRAN_SYMBOLS
 
-AX_PROG_PACX
-if test "${PACX_INSTALLED}" = "yes" ; then
-#   PACX and fortran?
-#   AX_CHECK_PPACX_NAME_MANGLING 
-   AX_CHECK_PACX_STATUS_SIZE
-   AX_CHECK_PACX_SOURCE_OFFSET
-   AX_CHECK_PACX_TAG_OFFSET
-fi
-
 AC_ARG_ENABLE(parallel-merge,
    AC_HELP_STRING(
       [--enable-parallel-merge],
@@ -601,7 +592,6 @@ AC_CONFIG_FILES([
   src/tracer/interfaces/Makefile 
   src/tracer/interfaces/API/Makefile \
   src/tracer/interfaces/MPI/Makefile \
-  src/tracer/interfaces/PACX/Makefile \
   src/tracer/wrappers/Makefile 
   src/tracer/wrappers/MPI/Makefile \
   src/tracer/wrappers/OMP/Makefile \

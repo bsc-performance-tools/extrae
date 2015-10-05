@@ -42,8 +42,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include "persistent_requests.h"
 #include "wrapper.h"
 
-#if !defined(MPI_SUPPORT) && !defined(PACX_SUPPORT) /* This shouldn't be compiled if MPI or PACX are not used */
-# error "This should not be compiled outside MPI/PACX bounds"
+#if !defined(MPI_SUPPORT) /* This shouldn't be compiled if MPI is not used */
+# error "This should not be compiled outside MPI bounds"
 #endif
 
 #if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)

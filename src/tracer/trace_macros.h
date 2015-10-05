@@ -52,22 +52,13 @@
     (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL && ((long)evttarget) != MPI_UNDEFINED) 
 # define COMM_STATS_WRAPPER(x) \
     Extrae_MPI_stats_Wrapper (x);
-#elif defined(PACX_SUPPORT)
-# define TRACING_BITMAP_VALID_EVTYPE(evttype) \
-   ((evttype) == PACX_BSEND_EV || (evttype) == PACX_SSEND_EV || (evttype) == PACX_RSEND_EV || \
-    (evttype) == PACX_SEND_EV  || (evttype) == PACX_IRECVED_EV || (evttype) == PACX_RECV_EV)
-# define TRACING_BITMAP_VALID_EVTARGET(evttarget)                              \
-    (((long)evttarget) != MPI_ANY_SOURCE && ((long)evttarget) != MPI_PROC_NULL) 
-# define COMM_STATS_WRAPPER(x) \
-    PACX_stats_Wrapper (x);
 #else
 # define TRACING_BITMAP_VALID_EVTYPE(evttype)     (TRUE)
 # define TRACING_BITMAP_VALID_EVTARGET(evttarget) (TRUE)
 # define COMM_STATS_WRAPPER(x)
-#endif /* MPI_SUPPORT, PACX_SUPPORT */
+#endif /* MPI_SUPPORT */
 
 #include "trace_macros_mpi.h"
-#include "trace_macros_pacx.h"
 #include "trace_macros_omp.h"
 
 #define SAMPLE_EVENT_HWC(evttime,evttype,evtvalue)               \

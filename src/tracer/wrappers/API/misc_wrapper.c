@@ -363,8 +363,6 @@ void Extrae_init_Wrapper (void)
 			previous = "API";
 		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 			previous = "MPI";
-		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_PACX_INIT)
-			previous = "PACX";
 		else if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_SHMEM_INIT)
 			previous = "SHMEM";
 
@@ -379,9 +377,9 @@ void Extrae_fini_Wrapper (void)
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 	{
 #if !defined(IS_CELL_MACHINE)
-		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
+		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX() && !Extrae_get_ApplicationIsSHMEM())
+		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
 			if (getenv ("EXTRAE_APPEND_PID") == NULL)
 				Generate_Task_File_List();
 #endif
@@ -390,7 +388,7 @@ void Extrae_fini_Wrapper (void)
 		Backend_Finalize ();
 
 		/* Call additional code to finalize the task including
-	     MPI_Finalize, PACX_Finalize,... */
+	     MPI_Finalize,... */
 		Extrae_finalize_task();
 
 		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
@@ -407,9 +405,9 @@ void Extrae_fini_last_chance_Wrapper (void)
 			fprintf (stderr, PACKAGE_NAME": Warning! MPI task %d application did not terminate using MPI_Finalize! Review your application code.\n", TASKID);
 
 #if !defined(IS_CELL_MACHINE)
-		/* If the application is MPI/PACX the MPI/PACX wrappers are responsible
+		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
-		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsPACX() && !Extrae_get_ApplicationIsSHMEM())
+		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
 			Generate_Task_File_List();
 #endif
 
@@ -417,7 +415,7 @@ void Extrae_fini_last_chance_Wrapper (void)
 		Backend_Finalize ();
 
 		/* Call additional code to finalize the task including
-		MPI_Finalize, PACX_Finalize,... */
+		MPI_Finalize, ... */
 		Extrae_finalize_task();
 
 		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);

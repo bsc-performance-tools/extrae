@@ -56,8 +56,6 @@
 #define MAX_FUNCTION_NAME 450
 #define MAX_FUNCTIONS 300
 
-extern unsigned long long last_pacx_exit_time;
-extern unsigned long long last_pacx_begin_time;
 extern unsigned long long last_mpi_exit_time;
 extern unsigned long long last_mpi_begin_time;
 extern unsigned long long CPU_Burst_Threshold;
@@ -86,9 +84,6 @@ extern int tracejant;
 
 // Serveix per tracejar una aplicacio sense contar res de MPI
 extern int tracejant_mpi;
-
-// Serveix per tracejar una aplicacio sense contar res de PACX
-extern int tracejant_pacx;
 
 // Serveix per tracejar una aplicacio sense contar res de OpenMP
 extern int tracejant_omp;
@@ -151,10 +146,6 @@ extern int Trace_HWC_Enabled;
 extern int tracejant_hwc_mpi;
 #define TRACING_HWC_MPI (tracejant_hwc_mpi)
 
-/* Must we collect HWC on the PACX calls */
-extern int tracejant_hwc_pacx;
-#define TRACING_HWC_PACX (tracejant_hwc_pacx)
-
 /* Must we collect HWC on the OpenMP runtime calls */
 extern int tracejant_hwc_omp;
 #define TRACING_HWC_OMP (tracejant_hwc_omp)
@@ -188,10 +179,8 @@ extrae_init_type_t Extrae_is_initialized_Wrapper (void);
 void Extrae_set_is_initialized (extrae_init_type_t type);
 
 int Extrae_get_ApplicationIsMPI (void);
-int Extrae_get_ApplicationIsPACX (void);
 int Extrae_get_ApplicationIsSHMEM (void);
 void Extrae_set_ApplicationIsMPI (int isMPI);
-void Extrae_set_ApplicationIsPACX (int isPACX);
 void Extrae_set_ApplicationIsSHMEM (int isSHMEM);
 
 void Extrae_AnnotateCPU (UINT64 timestamp);

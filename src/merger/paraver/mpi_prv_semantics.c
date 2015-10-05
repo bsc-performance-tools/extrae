@@ -515,7 +515,7 @@ static int GlobalOP_event (event_t * current_event,
 		send_size = Get_GlobalOP_SendSize (current_event, is_root);
 		receive_size = Get_GlobalOP_RecvSize (current_event, is_root);
 		trace_enter_global_op (cpu, ptask, task, thread, current_time, comm_id,
-		  send_size, receive_size, is_root?1:0, TRUE);
+		  send_size, receive_size, is_root?1:0);
 
 		Enable_MPI_Soft_Counter (EvType);
 	}

@@ -311,11 +311,10 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 void Share_MISC_Operations (void)
 {
 	int res, i, max;
-	int tmp2[4], tmp[4] = { Rusage_Events_Found, MPI_Stats_Events_Found, PACX_Stats_Events_Found, Memusage_Events_Found };
+	int tmp2[3], tmp[3] = { Rusage_Events_Found, MPI_Stats_Events_Found, Memusage_Events_Found };
 	int tmp_in[RUSAGE_EVENTS_COUNT], tmp_out[RUSAGE_EVENTS_COUNT];
 	int tmp2_in[MPI_STATS_EVENTS_COUNT], tmp2_out[MPI_STATS_EVENTS_COUNT];
-	int tmp3_in[PACX_STATS_EVENTS_COUNT], tmp3_out[PACX_STATS_EVENTS_COUNT];
-	int tmp4_in[MEMUSAGE_EVENTS_COUNT], tmp4_out[MEMUSAGE_EVENTS_COUNT];
+	int tmp3_in[MEMUSAGE_EVENTS_COUNT], tmp3_out[MEMUSAGE_EVENTS_COUNT];
 	int tmp_misc[MAX_MISC_INDEX];
 
 	res = MPI_Reduce (inuse, tmp_misc, MAX_MISC_INDEX, MPI_INT, MPI_BOR, 0,
@@ -328,8 +327,7 @@ void Share_MISC_Operations (void)
 	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #2");
 	Rusage_Events_Found = tmp2[0];
 	MPI_Stats_Events_Found = tmp2[1];
-	PACX_Stats_Events_Found = tmp2[2];
-	Memusage_Events_Found = tmp2[3];
+	Memusage_Events_Found = tmp2[2];
 
 	for (i = 0; i < RUSAGE_EVENTS_COUNT; i++)
 		tmp_in[i] = GetRusage_Labels_Used[i];
@@ -345,19 +343,12 @@ void Share_MISC_Operations (void)
 	for (i = 0; i < MPI_STATS_EVENTS_COUNT; i++)
 		MPI_Stats_Labels_Used[i] = tmp2_out[i];
 
-	for (i = 0; i < PACX_STATS_EVENTS_COUNT; i++)
-		tmp3_in[i] = PACX_Stats_Labels_Used[i];
-	res = MPI_Reduce (tmp3_in, tmp3_out, PACX_STATS_EVENTS_COUNT, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
-	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #5");
-	for (i = 0; i < PACX_STATS_EVENTS_COUNT; i++)
-		PACX_Stats_Labels_Used[i] = tmp3_out[i];
-
 	for (i = 0; i < MEMUSAGE_EVENTS_COUNT; i++)
-		tmp4_in[i] = Memusage_Labels_Used[i];
-	res = MPI_Reduce (tmp4_in, tmp4_out, MEMUSAGE_EVENTS_COUNT, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
+		tmp3_in[i] = Memusage_Labels_Used[i];
+	res = MPI_Reduce (tmp3_in, tmp3_out, MEMUSAGE_EVENTS_COUNT, MPI_INT, MPI_BOR, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #6");
 	for (i = 0; i < MEMUSAGE_EVENTS_COUNT; i++)
-		Memusage_Labels_Used[i] = tmp4_out[i];
+		Memusage_Labels_Used[i] = tmp3_out[i];
 
 	res = MPI_Reduce (&MaxClusterId, &max, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
 	MPI_CHECK(res, MPI_Reduce, "Sharing MISC operations #7");

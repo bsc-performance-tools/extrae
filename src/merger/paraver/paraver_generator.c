@@ -89,7 +89,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "options.h"
 
 #include "mpi_prv_events.h"
-#include "pacx_prv_events.h"
 #include "addr2info.h"
 
 #if USE_HARDWARE_COUNTERS
@@ -225,10 +224,6 @@ void trace_paraver_event (
 	if (type >= MPI_MIN_EV && type <= MPI_MAX_EV)
 	{
 		Translate_MPI_MPIT2PRV (type, value, &tipus, &valor);
-	}
-	else if (type >= PACX_MIN_EV && type <= PACX_MAX_EV)
-	{
-		Translate_PACX_MPIT2PRV (type, value, &tipus, &valor);
 	}
 	else
 	{
@@ -372,24 +367,13 @@ int trace_paraver_pending_communication (unsigned int cpu_s,
 void trace_enter_global_op (unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, unsigned long long time,
 	unsigned int com_id, unsigned int send_size, unsigned int recv_size,
-	unsigned int is_root, unsigned isMPI)
+	unsigned int is_root)
 {
-	if (isMPI)
-	{
-		trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_SENDSIZE, send_size);
-		trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_RECVSIZE, recv_size);
-		trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_COMM, com_id);
-		if (is_root)
-			trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_ROOT, is_root);
-	}
-	else
-	{
-		trace_paraver_event (cpu, ptask, task, thread, time, PACX_GLOBAL_OP_SENDSIZE, send_size);
-		trace_paraver_event (cpu, ptask, task, thread, time, PACX_GLOBAL_OP_RECVSIZE, recv_size);
-		trace_paraver_event (cpu, ptask, task, thread, time, PACX_GLOBAL_OP_COMM, com_id);
-		if (is_root)
-			trace_paraver_event (cpu, ptask, task, thread, time, PACX_GLOBAL_OP_ROOT, is_root);
-	}
+	trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_SENDSIZE, send_size);
+	trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_RECVSIZE, recv_size);
+	trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_COMM, com_id);
+	if (is_root)
+		trace_paraver_event (cpu, ptask, task, thread, time, MPI_GLOBAL_OP_ROOT, is_root);
 }
 
 #if defined(NEW_PRINTF)

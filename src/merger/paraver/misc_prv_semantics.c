@@ -80,8 +80,6 @@ int Memusage_Events_Found = FALSE;
 int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
 int MPI_Stats_Events_Found = FALSE;
 int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
-int PACX_Stats_Events_Found = FALSE;
-int PACX_Stats_Labels_Used[PACX_STATS_EVENTS_COUNT];
 
 unsigned int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
 
@@ -448,42 +446,6 @@ static int MPI_Stats_Event (
 	return 0;
 }
 
-
-/******************************************************************************
- ***  PACX_Stats_Event
- ******************************************************************************/
-static int PACX_Stats_Event (
-   event_t * current_event,
-   unsigned long long current_time,
-   unsigned int cpu,
-   unsigned int ptask,
-   unsigned int task,
-   unsigned int thread,
-   FileSet_t *fset )
-{
-	int i;
-	unsigned int EvType;
-	unsigned long long EvValue;
-	UNREFERENCED_PARAMETER(fset);
-
-	EvType  = Get_EvValue (current_event);     /* Value is the event type.  */
-	EvValue = Get_EvMiscParam (current_event); /* Param is the event value. */
-
-	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, PACX_STATS_BASE+EvType, EvValue);
-
-	if (!PACX_Stats_Events_Found)
-	{
-		PACX_Stats_Events_Found = TRUE;
-		for (i=0; i<PACX_STATS_EVENTS_COUNT; i++)
-		{
-			PACX_Stats_Labels_Used[i] = FALSE;
-		}
-	}
-	PACX_Stats_Labels_Used[EvType] = TRUE;
-
-	return 0;
-}
 
 /******************************************************************************
  ***  InitTracing_Event
@@ -1547,7 +1509,6 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ RUSAGE_EV, GetRusage_Event },
 	{ MEMUSAGE_EV, Memusage_Event },
 	{ MPI_STATS_EV, MPI_Stats_Event },
-	{ PACX_STATS_EV, PACX_Stats_Event },
 	{ USRFUNC_EV, USRFunction_Event },
 	{ TRACING_MODE_EV, Tracing_Mode_Event },
 	{ ONLINE_EV, Online_Event },

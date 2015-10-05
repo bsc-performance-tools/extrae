@@ -49,16 +49,6 @@ MPI calls can gather performance information at the begin and end of MPI calls. 
 
 \graybox{See {\bf EXTRAE\_DISABLE\_MPI} and {\bf EXTRAE\_MPI\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
 
-\section{XML Section: PACX}\label{sec:XMLSectionPACX}
-
-The PACX configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
-
-\input{XML/pacx.xml}
-
-PACX calls can gather performance information at the begin and end of PACX calls. To activate this behavior, just set to yes the attribute of the nested {\tt <counters>} node.
-
-\graybox{See {\bf EXTRAE\_DISABLE\_PACX} and {\bf EXTRAE\_PACX\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
-
 \section{XML Section: pthread}\label{sec:XMLSectionOpenMP}
 
 The pthread configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:

@@ -78,42 +78,6 @@ unsigned IsMPI (unsigned EvType)
   return FALSE;
 }
 
-#define PACX_EVENTS 67
-static unsigned pacx_events[] = {
-	PACX_BSEND_EV, PACX_SSEND_EV, PACX_BARRIER_EV, PACX_BCAST_EV, PACX_SEND_EV,
-	PACX_RECV_EV, PACX_SENDRECV_EV, PACX_SENDRECV_REPLACE_EV, PACX_IBSEND_EV,
-	PACX_ISSEND_EV, PACX_ISEND_EV, PACX_IRECV_EV, PACX_TEST_EV, PACX_WAIT_EV,
-	PACX_CANCEL_EV, PACX_RSEND_EV, PACX_IRSEND_EV, PACX_ALLTOALL_EV,
-	PACX_ALLTOALLV_EV, PACX_ALLREDUCE_EV, PACX_REDUCE_EV, PACX_WAITALL_EV,
-	PACX_PROBE_EV, PACX_IPROBE_EV, PACX_GATHER_EV, PACX_GATHERV_EV,
-	PACX_SCATTER_EV, PACX_SCATTERV_EV, PACX_REDUCESCAT_EV, PACX_SCAN_EV,
-	PACX_WAITANY_EV, PACX_WAITSOME_EV, PACX_FINALIZE_EV, PACX_INIT_EV,
-	PACX_ALLGATHER_EV, PACX_ALLGATHERV_EV, PACX_PERSIST_REQ_EV, PACX_START_EV,
-	PACX_STARTALL_EV, PACX_REQUEST_FREE_EV, PACX_RECV_INIT_EV, PACX_SEND_INIT_EV,
-	PACX_BSEND_INIT_EV, PACX_RSEND_INIT_EV, PACX_SSEND_INIT_EV, PACX_COMM_RANK_EV,
-	PACX_COMM_SIZE_EV, PACX_IPROBE_COUNTER_EV, PACX_TIME_OUTSIDE_IPROBES_EV,
-	PACX_TEST_COUNTER_EV, PACX_FILE_OPEN_EV, PACX_FILE_CLOSE_EV, PACX_FILE_READ_EV,
-	PACX_FILE_READ_ALL_EV, PACX_FILE_WRITE_EV, PACX_FILE_WRITE_ALL_EV, 
-	PACX_FILE_READ_AT_EV, PACX_FILE_READ_AT_ALL_EV, PACX_FILE_WRITE_AT_EV,
-	PACX_FILE_WRITE_AT_ALL_EV, PACX_IRECVED_EV,
-	PACX_COMM_CREATE_EV, PACX_COMM_DUP_EV, PACX_COMM_SPLIT_EV,
-	PACX_CART_CREATE_EV, PACX_CART_SUB_EV, PACX_COMM_FREE_EV };
-
-/******************************************************************************
- ***  IsMPI
- ******************************************************************************/
-
-unsigned IsPACX (unsigned EvType)
-{
-  unsigned evt;
-
-  for (evt = 0; evt < PACX_EVENTS; evt++)
-    if (pacx_events[evt] == EvType)
-      return TRUE;
-  return FALSE;
-}
-
-
 #define MISC_EVENTS 42
 static unsigned misc_events[] = {FLUSH_EV, READ_EV, WRITE_EV, APPL_EV, USER_EV,
 	HWC_DEF_EV, HWC_CHANGE_EV, HWC_EV, TRACING_EV, SET_TRACE_EV, CALLER_EV,
@@ -362,35 +326,6 @@ unsigned IsMPICollective(unsigned EvType)
    return FALSE;
 }
 
-/******************************************************************************
- ***  IsPACXCollective
- ******************************************************************************/
-unsigned IsPACXCollective(unsigned EvType)
-{
-   switch (EvType)
-   {
-      case PACX_BARRIER_EV:
-      case PACX_BCAST_EV:
-      case PACX_ALLTOALL_EV:
-      case PACX_ALLTOALLV_EV:
-      case PACX_REDUCE_EV:
-      case PACX_ALLREDUCE_EV:
-      case PACX_GATHER_EV:
-      case PACX_GATHERV_EV:
-      case PACX_ALLGATHER_EV:
-      case PACX_ALLGATHERV_EV:
-      case PACX_SCATTER_EV:
-      case PACX_SCATTERV_EV:
-      case PACX_REDUCESCAT_EV:
-      case PACX_SCAN_EV:
-         return TRUE;
-      default:
-         return FALSE;
-   }
-   return FALSE;
-}
-
-
 
 /******************************************************************************
  ***  getEventType
@@ -418,11 +353,6 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 		*Type = PTHREAD_TYPE;
 		return TRUE;
 	}
-	else if (IsPACX(EvType))
-	{
-		*Type = PACX_TYPE;
-		return TRUE;
-	}
 	else if (IsCUDA(EvType))
 	{
 		*Type = CUDA_TYPE;
@@ -441,11 +371,6 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)
 	{
 		*Type = MPI_COMM_ALIAS_TYPE;
-		return TRUE;
-	}
-	else if (EvType == PACX_ALIAS_COMM_CREATE_EV)
-	{
-		*Type = PACX_COMM_ALIAS_TYPE;
 		return TRUE;
 	}
 	return FALSE;

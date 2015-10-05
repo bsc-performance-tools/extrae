@@ -38,7 +38,6 @@ paraver_FILES = \
  ../paraver/paraver_state.c ../paraver/paraver_state.h \
  ../paraver/trace_to_prv.c ../paraver/trace_to_prv.h \
  ../paraver/mpi_prv_semantics.c ../paraver/mpi_prv_semantics.h \
- ../paraver/pacx_prv_semantics.c ../paraver/pacx_prv_semantics.h \
  ../paraver/omp_prv_semantics.c ../paraver/omp_prv_semantics.h \
  ../paraver/misc_prv_semantics.c ../paraver/misc_prv_semantics.h \
  ../paraver/pthread_prv_semantics.c ../paraver/pthread_prv_semantics.h \
@@ -46,7 +45,6 @@ paraver_FILES = \
  ../paraver/opencl_prv_semantics.c ../paraver/opencl_prv_semantics.h \
  ../paraver/openshmem_prv_semantics.c ../paraver/openshmem_prv_semantics.h \
  ../paraver/mpi_prv_events.c ../paraver/mpi_prv_events.h \
- ../paraver/pacx_prv_events.c ../paraver/pacx_prv_events.h \
  ../paraver/omp_prv_events.c ../paraver/omp_prv_events.h \
  ../paraver/pthread_prv_events.c ../paraver/pthread_prv_events.h \
  ../paraver/misc_prv_events.c ../paraver/misc_prv_events.h \
@@ -55,8 +53,7 @@ paraver_FILES = \
  ../paraver/openshmem_prv_events.c ../paraver/openshmem_prv_events.h \
  ../paraver/write_file_buffer.c ../paraver/write_file_buffer.h \
  ../paraver/paraver_nprintf.c ../paraver/paraver_nprintf.h \
- ../paraver/MPI_EventEncoding.h \
- ../paraver/PACX_EventEncoding.h
+ ../paraver/MPI_EventEncoding.h
 
 parallel_FILES = \
  mpi-aux.h mpi-tags.h \

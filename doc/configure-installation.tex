@@ -40,8 +40,6 @@ There are many options to be applied at configuration time for the instrumentati
         Enables the on-line analysis module.
 	\item {\tt --enable-pthread} \\
 	Enable support for tracing pthread library calls.
-	\item {\tt --enable-upc} \\
-	Enable support for tracing UPC run-time.
 	\item {\tt --enable-xml} \\
 	Enable support for XML configuration (not available on BG/L, BG/P and BG/Q systems).
 	\item {\tt --enable-xmltest} \\
@@ -84,8 +82,6 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify the location for the OpenCL package, including library and include directories.
         \item {\tt --with-openshmem} \\
         Specify the location of the OpenSHMEM installation to be used for the instrumentation package. 
-	\item {\tt --with-pacx=DIR} \\
-	Specify where PACX communication library can be find.
 	\item {\tt --with-papi=DIR} \\
 	Specify where to find PAPI libraries and includes. PAPI is used to gather performance counters. This flag is mandatory.
         \item {\tt --with-spectral} \\
@@ -198,17 +194,6 @@ Configuration command:
 Build and installation commands:
 
 \graybox{{\tt make \\
-make install}}
-
-\subsubsection{Compiling using default binary type using OpenMPI and PACX}
-
-Configuration command:
-
-\graybox{{\tt ./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/openmpi/1.3.1 --with-pacx=/home/harald/aplic/pacx/07.2009-openmpi --without-papi --without-unwind --without-dyninst}}
-
-Build and installation commands:
-
-\graybox{{\tt make\\
 make install}}
 
 \subsubsection{Compiling using default binary type, using OpenMPI, DynInst and libunwind}
