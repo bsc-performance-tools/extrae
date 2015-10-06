@@ -1,7 +1,7 @@
 include Makefile.inc
 
 NVCCFLAGS=-O -g --cudart shared -I../../../include
-LDFLAGS=-Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -L$(EXTRAE_HOME)/lib -lcudatrace
+LDFLAGS=-L$(EXTRAE_HOME)/lib -lcudatrace -Xlinker -rpath -Xlinker $(EXTRAE_HOME)/lib
 
 all: hello hello_instrumented
 
