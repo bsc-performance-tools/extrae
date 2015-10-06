@@ -477,7 +477,9 @@ void OMPT_event_task_end (ompt_task_id_t tid)
 #ifndef EMPTY_OMPT_CALLBACKS
 	PROTOTYPE_MESSAGE(" (%ld)", tid);
 	Extrae_OpenMP_Notify_NewExecutedTask();
-	Extrae_OMPT_OpenMP_TaskUF_Exit (tid);
+	if (Extrae_OMPT_tf_task_id_is_running(tid))
+		// If this task was not marked at switch, mark it here
+		Extrae_OMPT_OpenMP_TaskUF_Exit (tid);
 	Extrae_OMPT_unregister_ompt_task_id_tf (tid);
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
@@ -722,35 +724,23 @@ void OMPT_event_task_switch (ompt_task_id_t stid, ompt_task_id_t rtid)
 
 	/* Leave a task function if it's not the implicit task. The implicit
 	   task is automatically instrumented elsewhere */
-# if 0
-	if (stid > 0)
-		if ((tf = Extrae_OMPT_get_tf_task_id(stid, NULL)) &&
-	    	 !Extrae_OMPT_get_tf_task_id_is_implicit(stid))
-		Extrae_OMPT_OpenMP_TaskUF_Exit (stid);
-# else
 	if (stid > 0)
 		if ((tf = Extrae_OMPT_get_tf_task_id(stid, &implicit, NULL)))
 			if (!implicit)
+			{
 				Extrae_OMPT_OpenMP_TaskUF_Exit (stid);
-# endif
+				Extrae_OMPT_tf_task_id_set_running (stid, FALSE);
+			}
 
 	/* Enter a task function if it's not the implicit task. The implicit
 	   task is automatically instrumented elsewhere */
-# if 0
-	if ((tf = Extrae_OMPT_get_tf_task_id (rtid, &taskcounter)) &&
-	     !Extrae_OMPT_get_tf_task_id_is_implicit(rtid))
-	{
-		Extrae_OMPT_OpenMP_TaskUF_Entry (tf, rtid);
-		Extrae_OpenMP_TaskID (taskcounter);
-	}
-# else
 	if ((tf = Extrae_OMPT_get_tf_task_id (rtid, &implicit, &taskcounter)))
 		if (!implicit)
 		{
 			Extrae_OMPT_OpenMP_TaskUF_Entry ((UINT64)tf, rtid);
+			Extrae_OMPT_tf_task_id_set_running (rtid, TRUE);
 			Extrae_OpenMP_TaskID (taskcounter);
 		}
-# endif
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 

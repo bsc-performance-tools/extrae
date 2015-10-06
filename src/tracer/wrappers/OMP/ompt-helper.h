@@ -46,6 +46,8 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, in
 void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid);
 void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 	int *is_implicit, long long *taskctr);
+void Extrae_OMPT_tf_task_id_set_running (ompt_task_id_t ompt_tid, int b);
+int Extrae_OMPT_tf_task_id_is_running (ompt_task_id_t ompt_tid);
 
 #endif /* OMPT_HELPER_H_INCLUDED */
 

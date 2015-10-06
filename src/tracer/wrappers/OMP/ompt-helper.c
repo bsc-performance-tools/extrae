@@ -147,6 +147,7 @@ typedef struct ompt_task_id_pf_st
 	void *tf;            /* Task function */
 	long long task_ctr;  /* Task counter */
 	int implicit;        /* is implicit ? */
+	int is_running;      /* is currently running? */
 } ompt_task_id_tf_t;
 
 static ompt_task_id_tf_t *ompt_tids_tf = NULL;
@@ -177,6 +178,7 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, in
 			ompt_tids_tf[u].tid = (ompt_task_id_t) 0;
 			ompt_tids_tf[u].tf = NULL;
 			ompt_tids_tf[u].implicit = FALSE;
+			ompt_tids_tf[u].is_running = FALSE;
 		}
 
 		/* Set new limit */
@@ -191,6 +193,7 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, in
 			ompt_tids_tf[n_ompt_tids_tf].tf = tf;
 			ompt_tids_tf[n_ompt_tids_tf].implicit = implicit;
 			ompt_tids_tf[n_ompt_tids_tf].task_ctr = __task_ctr++;
+			ompt_tids_tf[u].is_running = FALSE;
 			n_ompt_tids_tf++;
 #if defined(DEBUG)
 			fprintf (stdout, "OMPT: registered tid = %lld to tf = %p in slot %u, n_ompt_tids_tf = %u\n", ompt_tid, tf, u, n_ompt_tids_tf);
@@ -213,6 +216,7 @@ void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 			{
 				ompt_tids_tf[u].tid = (ompt_task_id_t) 0;
 				ompt_tids_tf[u].tf = NULL;
+				ompt_tids_tf[u].is_running = FALSE;
 				n_ompt_tids_tf--;
 #if defined(DEBUG)
 				fprintf (stdout, "OMPT: unregistered tid = %lld from slot %u, n_ompt_tids_tf = %u\n", ompt_tid, u, n_ompt_tids_tf);
@@ -248,3 +252,48 @@ void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 
 	return ptr;
 }
+
+void Extrae_OMPT_tf_task_id_set_running (ompt_task_id_t ompt_tid, int b)
+{
+	unsigned u;
+
+#if defined(NEED_MUTEX_TO_GET_TASKFUNCTION)
+	pthread_mutex_lock (&mutex_tid_tf);
+#endif
+
+	for (u = 0; u < n_allocated_ompt_tids_tf; u++)
+		if (ompt_tids_tf[u].tid == ompt_tid)
+		{
+			ompt_tids_tf[u].is_running = b;
+			break;
+		}
+
+#if defined(NEED_MUTEX_TO_GET_TASKFUNCTION)
+	pthread_mutex_unlock (&mutex_tid_tf);
+#endif
+}
+
+
+int Extrae_OMPT_tf_task_id_is_running (ompt_task_id_t ompt_tid)
+{
+	unsigned u;
+	int res = FALSE;
+
+#if defined(NEED_MUTEX_TO_GET_TASKFUNCTION)
+	pthread_mutex_lock (&mutex_tid_tf);
+#endif
+
+	for (u = 0; u < n_allocated_ompt_tids_tf; u++)
+		if (ompt_tids_tf[u].tid == ompt_tid)
+		{
+			res = ompt_tids_tf[u].is_running;
+			break;
+		}
+
+#if defined(NEED_MUTEX_TO_GET_TASKFUNCTION)
+	pthread_mutex_unlock (&mutex_tid_tf);
+#endif
+
+	return res;
+}
+
