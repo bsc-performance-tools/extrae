@@ -55,19 +55,19 @@ int get_option_merge_VerboseLevel (void);
 void set_option_merge_VerboseLevel (int l);
 
 char * get_merge_OutputTraceName (void);
-void set_merge_OutputTraceName (char* s);
+void set_merge_OutputTraceName (const char* s);
 
 int get_merge_GivenTraceName (void);
 void set_merge_GivenTraceName (int b);
 
 char * get_merge_CallbackFileName (void);
-void set_merge_CallbackFileName (char* s);
+void set_merge_CallbackFileName (const char* s);
 
 char * get_merge_SymbolFileName (void);
-void set_merge_SymbolFileName (char* s);
+void set_merge_SymbolFileName (const char* s);
 
 char * get_merge_ExecutableFileName (void);
-void set_merge_ExecutableFileName (char* s);
+void set_merge_ExecutableFileName (const char* s);
 
 int get_option_merge_TreeFanOut (void);
 void set_option_merge_TreeFanOut (int tfo);

@@ -64,7 +64,7 @@ void set_option_merge_VerboseLevel (int l) { option_merge_VerboseLevel = l; }
 
 static char OutputTraceName[1024] = "";
 char * get_merge_OutputTraceName (void) { return OutputTraceName; }
-void set_merge_OutputTraceName (char* s) { strcpy (OutputTraceName, s); }
+void set_merge_OutputTraceName (const char* s) { strcpy (OutputTraceName, s); }
 
 static int option_merge_GivenTraceName = FALSE;
 int get_merge_GivenTraceName (void) { return option_merge_GivenTraceName; }
@@ -72,15 +72,15 @@ void set_merge_GivenTraceName (int b) { option_merge_GivenTraceName = b; }
 
 static char callback_file[1024] = "";
 char * get_merge_CallbackFileName (void) { return callback_file; }
-void set_merge_CallbackFileName (char* s) { strcpy (callback_file, s); }
+void set_merge_CallbackFileName (const char* s) { strcpy (callback_file, s); }
 
 static char symbol_file[1024] = "";
 char * get_merge_SymbolFileName (void) { return symbol_file; }
-void set_merge_SymbolFileName (char* s) { strcpy (symbol_file, s); }
+void set_merge_SymbolFileName (const char* s) { strcpy (symbol_file, s); }
 
 static char executable_file[1024] = ""; 
 char * get_merge_ExecutableFileName (void) { return executable_file; }
-void set_merge_ExecutableFileName (char* s) { strcpy (executable_file, s); }
+void set_merge_ExecutableFileName (const char* s) { strcpy (executable_file, s); }
 
 static int option_merge_TreeFanOut = 0;
 int get_option_merge_TreeFanOut (void) { return option_merge_TreeFanOut; }

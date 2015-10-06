@@ -292,7 +292,7 @@ void rename_or_copy (char *origen, char *desti)
 	}
 }
 
-unsigned long long getFactorValue (char *value, char *ref, int rank)
+unsigned long long getFactorValue (const char *value, const char *ref, int rank)
 {
 	unsigned long long Factor;
 	char tmp_buff[256];
@@ -348,7 +348,7 @@ unsigned long long getFactorValue (char *value, char *ref, int rank)
 		return atoll (tmp_buff) * Factor;
 }
 
-unsigned long long getTimeFromStr (char *time, char *envvar, int rank)
+unsigned long long getTimeFromStr (const char *time, const char *envvar, int rank)
 {
 	unsigned long long MinTimeFactor;
 	char tmp_buff[256];

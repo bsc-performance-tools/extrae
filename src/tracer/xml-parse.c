@@ -143,7 +143,7 @@ static xmlChar * deal_xmlChar_env (int rank, xmlChar *str)
 		{
 			char tmp2[sublen];
 			memset (tmp2, 0, sublen);
-			strncpy (tmp2, &tmp[1], sublen-2);
+			strncpy (tmp2, (const char*) &tmp[1], sublen-2);
 
 			if (getenv (tmp2) == NULL)
 			{
@@ -248,11 +248,14 @@ static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 
 	if (period != NULL)
 	{
-		unsigned long long sampling_period = getTimeFromStr (period,
-			"<sampling period=\"..\" />", rank);
+		unsigned long long sampling_period = getTimeFromStr ((const char*)period,
+			"<sampling period=\"..\" />",
+		    rank);
 		unsigned long long sampling_variability = 0;
 		if (variability != NULL)
-			sampling_variability = getTimeFromStr (variability, "<sampling variability=\"..\" />", rank);
+			sampling_variability = getTimeFromStr ((const char*) variability,
+			  "<sampling variability=\"..\" />",
+			  rank);
 
 		if (sampling_period != 0)
 		{
@@ -398,7 +401,9 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (str != NULL)
 				{
-					TMODE_setBurstsThreshold (getTimeFromStr (str, TRACE_THRESHOLD, rank));
+					TMODE_setBurstsThreshold (getTimeFromStr ((const char*) str,
+					  (const char *) TRACE_THRESHOLD,
+					  rank));
 				}
 				XML_FREE(str);
 			}
@@ -487,7 +492,7 @@ static void Parse_XML_DynamicMemory (int rank, xmlNodePtr current_tag)
 			if (alloc_enabled)
 			{
 				xmlChar *threshold = xmlGetProp_env (rank, tag, TRACE_DYNAMIC_MEMORY_ALLOC_THRESHOLD);
-				alloc_threshold = atoll (threshold);
+				alloc_threshold = atoll ((char*)threshold);
 				XML_FREE(threshold);
 				mfprintf (stdout, PACKAGE_NAME": Memory allocation routines (malloc/realloc) will be instrumented when they allocate more than %llu bytes.\n", alloc_threshold);
 			}
@@ -547,7 +552,7 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 
 				xmlChar *slatency = xmlGetProp_env (rank, tag, TRACE_PEBS_MIN_MEM_LATENCY);
 				if (slatency != NULL)
-					mem_latency = atoi(slatency);
+					mem_latency = atoi((char*)slatency);
 				if (mem_latency < min_mem_latency)
 				{
 					mfprintf (stderr, PACKAGE_NAME": Invalid memory latency for tag '%s'. Setting it to %d\n",
@@ -557,7 +562,7 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 
 				xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
 				if (speriod != NULL)
-					iperiod = atoi(speriod);
+					iperiod = atoi((char*)speriod);
 				if (iperiod == 0)
 				{
 					mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
@@ -586,7 +591,7 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 				int iperiod = 0;
 				xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
 				if (speriod != NULL)
-					iperiod = atoi(speriod);
+					iperiod = atoi((char*)speriod);
 
 				if (iperiod == 0)
 				{
@@ -727,7 +732,7 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 				char *fsize = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (fsize != NULL)
 				{
-					file_size = atoi(fsize);
+					file_size = atoi((char*)fsize);
 					if (file_size <= 0)
 					{
 						mfprintf (stderr, PACKAGE_NAME": Invalid file size value.\n");
@@ -817,7 +822,7 @@ static void Parse_XML_Buffer (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 				char *bsize = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (bsize != NULL)
 				{
-					int size = atoi(bsize);
+					int size = atoi((char*)bsize);
 					buffer_size = (size<=0)?EVT_NUM:size;
 					mfprintf (stdout, PACKAGE_NAME": Tracing buffer can hold %d events\n", buffer_size);
 				}
@@ -878,7 +883,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 				if (tmp == NULL)
 					tmp = (char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY);
 
-				if (atoll (tmp) > 0)
+				if (atoll ((char*)tmp) > 0)
 					num_sampling_hwc++;
 			}
 			XML_FREE(enabled);
@@ -1178,7 +1183,9 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 					tmp = (char*) xmlGetProp_env (rank, tag, TRACE_FREQUENCY);
 					if (tmp != NULL)
 					{
-						WantedCheckControlPeriod = getTimeFromStr (tmp, TRACE_FREQUENCY, rank);
+						WantedCheckControlPeriod = getTimeFromStr ((const char*) tmp,
+						  (const char*) TRACE_FREQUENCY,
+						  rank);
 						if (WantedCheckControlPeriod >= 1000000000)
 						{
 							mfprintf (stdout, PACKAGE_NAME": Control file will be checked every %llu seconds\n", WantedCheckControlPeriod / 1000000000);
@@ -1302,13 +1309,13 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	maxmemory = xmlGetProp_env (rank, current_tag, TRACE_MERGE_MAX_MEMORY);
 	if (maxmemory != NULL)
 	{
-		if (atoi(maxmemory) <= 0)
+		if (atoi((char*)maxmemory) <= 0)
 		{
 			mfprintf (stderr, PACKAGE_NAME": Warning! Invalid value '%s' for property <%s> in tag <%s>. Setting to 512Mbytes.\n",
 				maxmemory, TRACE_MERGE, TRACE_MERGE_MAX_MEMORY);
 			set_option_merge_MaxMem (16);
 		}
-		else if (atoi(maxmemory) <= 16)
+		else if (atoi((char*)maxmemory) <= 16)
 		{
 			mfprintf (stderr, PACKAGE_NAME": Warning! Low value '%s' for property <%s> in tag <%s>. Setting to 16Mbytes.\n",
 				maxmemory, TRACE_MERGE, TRACE_MERGE_MAX_MEMORY);
@@ -1316,7 +1323,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		}
 		else
 		{
-			set_option_merge_MaxMem (atoi(maxmemory));
+			set_option_merge_MaxMem (atoi((char*)maxmemory));
 		}
 	}
 
@@ -1324,9 +1331,9 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	treefanout = xmlGetProp_env (rank, current_tag, TRACE_MERGE_TREE_FAN_OUT);
 	if (treefanout != NULL)
 	{
-		if (atoi(treefanout) > 1)
+		if (atoi((char*)treefanout) > 1)
 		{
-			set_option_merge_TreeFanOut (atoi(treefanout));
+			set_option_merge_TreeFanOut (atoi((char*)treefanout));
 		}
 		else
 		{
@@ -1338,7 +1345,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 
 	binary = xmlGetProp_env (rank, current_tag, TRACE_MERGE_BINARY);
 	if (binary != NULL)	
-		set_merge_ExecutableFileName (binary);
+		set_merge_ExecutableFileName ((const char*)binary);
 
 	jointstates = xmlGetProp_env (rank, current_tag, TRACE_MERGE_JOINT_STATES);
 	if (jointstates != NULL && !xmlStrcasecmp (jointstates, xmlNO))
@@ -1346,8 +1353,7 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	else
 		set_option_merge_JointStates (TRUE);
 
-
-	filename = xmlNodeListGetString_env (rank, xmldoc, current_tag->xmlChildrenNode, 1);
+	filename = (char*) xmlNodeListGetString_env (rank, xmldoc, current_tag->xmlChildrenNode, 1);
 	if (filename == NULL || strlen(filename) == 0)
 	{
 		if (get_option_merge_ParaverFormat())
@@ -1396,7 +1402,9 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (str != NULL)
 				{
-					MinimumTracingTime = getTimeFromStr (str, TRACE_MINIMUM_TIME, rank);
+					MinimumTracingTime = getTimeFromStr ((const char*)str,
+					  (const char*) TRACE_MINIMUM_TIME,
+					  rank);
 					hasMinimumTracingTime = ( MinimumTracingTime != 0);
 					if (MinimumTracingTime >= 1000000000)
 					{
@@ -1470,7 +1478,7 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 				else
 				{
 					/* Where is the tracing located? If defined, copy to the correct buffer! */
-					if (xmlStrcasecmp (&rcsid[1], xmlparserid)) /* Skip first $ char */
+					if (xmlStrcasecmp ((xmlChar*) &rcsid[1], xmlparserid)) /* Skip first $ char */
 					{
 						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
 						mfprintf (stderr, PACKAGE_NAME": WARNING! XML parser version and property '%s' do not match. Check the XML file. Trying to proceed...\n", TRACE_PARSER_ID);
