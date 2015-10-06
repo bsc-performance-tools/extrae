@@ -348,53 +348,66 @@ install-data-hook:
 	cp -f $(top_srcdir)/example/Makefile.inc $(DESTDIR)$(datadir)/example
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/SEQ
 	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
+	cd $(DESTDIR)$(datadir)/example/SEQ ; $(LN_S) -f ../Makefile.inc .
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/FORK
 	cp -f $(FORK_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/FORK
+	cd $(DESTDIR)$(datadir)/example/FORK ; $(LN_S) -f ../Makefile.inc .
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PYTHON
 	cp -f $(PYTHON_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PYTHON
 if HAVE_MPI
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI
 	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
+	cd $(DESTDIR)$(datadir)/example/MPI ; $(LN_S) -f ../Makefile.inc .
 if WANT_CUDAorCUPTI
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+CUDA
 	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
+	cd $(DESTDIR)$(datadir)/example/MPI+CUDA ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_OPENCL
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OPENCL
 	cp -fr $(MPIOPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OPENCL
+	cd $(DESTDIR)$(datadir)/example/MPI+OPENCL ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_NANOS
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMPSS
 	cp -fr $(MPIOMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMPSS
+	cd $(DESTDIR)$(datadir)/example/MPI+OMPSS ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_OPENMP
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMP
 	cp -fr $(MPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMP
+	cd $(DESTDIR)$(datadir)/example/MPI+OMP ; $(LN_S) -f ../Makefile.inc .
 endif
 endif
 if WANT_OPENMP
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMP
 	cp -f $(OMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
+	cd $(DESTDIR)$(datadir)/example/OMP ; $(LN_S) -f ../Makefile.inc .
 endif
 if HAVE_ONLINE
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/ONLINE
 	cp -f $(ONLINE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/ONLINE
+	cd $(DESTDIR)$(datadir)/example/ONLINE ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_PTHREAD
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PTHREAD
 	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
+	cd $(DESTDIR)$(datadir)/example/PTHREAD ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_CUDAorCUPTI
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/CUDA
 	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
+	cd $(DESTDIR)$(datadir)/example/CUDA ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_OPENCL
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OPENCL
 	cp -fr $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
+	cd $(DESTDIR)$(datadir)/example/OPENCL ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_NANOS
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMPSS
 	cp -fr $(OMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMPSS
+	cd $(DESTDIR)$(datadir)/example/OMPSS ; $(LN_S) -f ../Makefile.inc .
 endif
 if WANT_JAVA
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/JAVA

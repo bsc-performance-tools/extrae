@@ -1,4 +1,4 @@
-include ../../Makefile.inc
+include ../Makefile.inc
 
 NVCC = nvcc
 CFLAGS = -O2 -g $(MPI_CFLAGS)

@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include Makefile.inc
 
 BGL_HOME = /bgl/BlueLight/ppcfloor
 XML2_LIBS = -L/bgl/local/packages/libxml2-2.6.20/lib -lxml2 -L/bgl/BlueLight/ppcfloor/blrts-gnu/powerpc-bgl-blrts-gnu/lib -lc -lnss_dns -lnss_files -lresolv

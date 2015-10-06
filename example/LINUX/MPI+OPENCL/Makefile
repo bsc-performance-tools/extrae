@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include Makefile.inc
 
 CC=$(MPI_HOME)/bin/mpicc
 

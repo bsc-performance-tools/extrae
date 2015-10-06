@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include Makefile.inc
 
 NVCCFLAGS=-O -g --cudart shared -I../../../include
 LDFLAGS=-Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -L$(EXTRAE_HOME)/lib -lcudatrace

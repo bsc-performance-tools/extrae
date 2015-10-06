@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include Makefile.inc
 
 BG_HOME = /bgsys/drivers/ppcfloor
 

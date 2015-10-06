@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include Makefile.inc
 
 LIBS = -Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -L$(EXTRAE_HOME)/lib -lpttrace
 CFLAGS = -O -g -I$(EXTRAE_HOME)/include -pthread

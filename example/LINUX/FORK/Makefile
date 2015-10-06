@@ -1,4 +1,4 @@
-include ../Makefile.inc
+include Makefile.inc
 
 CC = gcc
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include

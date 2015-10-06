@@ -1,5 +1,4 @@
-
-include ../Makefile.inc
+include Makefile.inc
 
 XMLHOME = $(HOME)/libxml2/2.6.31/32
 FFLAGS  = -O2 -bmaxdata:0x7fffffff
