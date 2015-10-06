@@ -542,9 +542,10 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 			pct = ((double) parsed_events)/((double) num_of_events)*100.0f;
 			if (pct > last_pct + 5.0 && pct <= 100.0f)
 			{
-				fprintf (stdout, "%.1lf%% ", pct);
+				fprintf (stdout, "%d%% ", (int) pct);
 				fflush (stdout);
-				last_pct += 5.0;
+				while (last_pct + 5.0 < pct)
+					last_pct += 5.0;
 			}
 		}
 

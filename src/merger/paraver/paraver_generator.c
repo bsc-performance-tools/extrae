@@ -1031,9 +1031,10 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 
 		if (pct > last_pct + 5.0 && pct <= 100.0)
 		{
-			fprintf (stdout, "%.1lf%% ", pct);
+			fprintf (stdout, "%d%% ", (int) pct);
 			fflush (stdout);
-			last_pct += 5.0;
+			while (last_pct + 5.0 < pct)
+				last_pct += 5.0;
 		}
 	}
 	while (current != NULL && !error);
