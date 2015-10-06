@@ -1,5 +1,6 @@
 include $(top_srcdir)/PATHS
 
+# Wrappers for opencl instrumentation
 WRAPPERS_OPENCL = \
  opencl_wrapper.c opencl_wrapper.h \
  opencl_common.c opencl_common.h \

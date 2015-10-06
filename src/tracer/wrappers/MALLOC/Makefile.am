@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-# Wrappers for pthread instrumentation
+# Wrappers for malloc instrumentation
 WRAPPERS_MALLOC = \
  malloc_wrapper.c malloc_wrapper.h \
  malloc_probe.c malloc_probe.h 

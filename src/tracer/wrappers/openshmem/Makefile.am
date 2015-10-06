@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-# Wrappers for pthread instrumentation
+# Wrappers for openshmem instrumentation
 WRAPPERS_OPENSHMEM = \
   openshmem_wrappers.c openshmem_wrappers.h \
   openshmem_probes.c openshmem_probes.h \

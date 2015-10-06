@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-# Wrappers for pthread instrumentation
+# Wrappers for IO instrumentation
 WRAPPERS_IO = \
  io_wrapper.c io_wrapper.h \
  io_probe.c io_probe.h 
