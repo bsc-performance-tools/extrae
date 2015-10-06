@@ -62,6 +62,8 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 #include "omp-common.h"
 #include "ompt-helper.h"
 
+#define NEW_OMPT_DEPS
+
 
 // # define EMPTY_OMPT_CALLBACKS /* For Benchmarking purposes */
 //  #define DEBUG
@@ -588,7 +590,7 @@ void OMPT_event_workshare_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid);
+	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
 	Extrae_OMPT_Workshare_Exit();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
@@ -893,6 +895,8 @@ void OMPT_event_control (uint64_t command, uint64_t modifier)
 }
 
 
+#if !defined(NEW_OMPT_DEPS)
+
 void OMPT_event_dependence( /* for new dependence instrumentation */         
 	ompt_task_id_t pred_task_id, /* ID of predecessor task */
 	ompt_task_id_t succ_task_id, /* ID of successor task */
@@ -908,6 +912,45 @@ void OMPT_event_dependence( /* for new dependence instrumentation */
 	Extrae_OMPT_dependence (pred_task_id, succ_task_id, type, data);
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
+
+#else
+
+void OMPT_event_task_blocking_dependence ( /* for new dependence instrumentation */
+	ompt_task_id_t pred_task_id, /* ID of predecessor task */
+	ompt_task_id_t succ_task_id, /* ID of successor task */
+	ompt_task_dependence_t dependence /* dependence information */
+)
+{
+#ifndef EMPTY_OMPT_CALLBACKS
+	PROTOTYPE_MESSAGE(" (pred_task_id = %lx, succ_task_id = %lx, flags = %d, data = %p, len = %d)", pred_task_id, succ_task_id, dependence.flags, dependence.variable_addr, dependence.len);
+
+	Extrae_OMPT_dependence (pred_task_id, succ_task_id, dependence.flags, dependence.variable_addr);
+#endif /* EMPTY_OMPT_CALLBACKS */
+}
+
+void OMPT_event_task_dependences ( /* for new dependence instrumentation */
+	ompt_task_id_t task_id,        /* ID of task */
+	ompt_task_dependence_t *deps,  /* vector of task dependences */
+	int ndeps
+)
+{
+#ifndef EMPTY_OMPT_CALLBACKS
+	UNREFERENCED_PARAMETER(task_id);
+	UNREFERENCED_PARAMETER(deps);
+	UNREFERENCED_PARAMETER(ndeps);
+
+	PROTOTYPE_MESSAGE(" (task_id = %d, deps = %p, ndeps = %d)", task_id, deps, ndeps);
+#if defined(DEBUG)
+	int i;
+
+	for (i = 0; i < ndeps; i++)
+		printf ("dependence [%d/%d] : variable @ %p, len = %u, flags = %d\n", i+1, ndeps, deps[i].variable_addr, deps[i].len, deps[i].flags);
+#endif
+
+#endif /* EMPTY_OMPT_CALLBACKS */
+}
+
+#endif
 
 //*****************************************************************************
 // interface operations
@@ -957,7 +1000,12 @@ static struct OMPT_callbacks_st ompt_callbacks[] =
 	CALLBACK_ENTRY (ompt_event_thread_begin, OMPT_event_thread_begin),
 	CALLBACK_ENTRY (ompt_event_thread_end, OMPT_event_thread_end),
 	CALLBACK_ENTRY (ompt_event_control, OMPT_event_control),
+#if !defined(NEW_OMPT_DEPS)
 	CALLBACK_ENTRY (ompt_event_dependence, OMPT_event_dependence),
+#else
+	CALLBACK_ENTRY (ompt_event_task_dependences, OMPT_event_task_dependences),
+	CALLBACK_ENTRY (ompt_event_task_blocking_dependence, OMPT_event_task_blocking_dependence),
+#endif
  	{ "empty,", (ompt_event_t) 0, 0 },
  };
  

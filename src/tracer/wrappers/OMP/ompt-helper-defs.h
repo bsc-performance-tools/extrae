@@ -38,6 +38,8 @@
 
 /* These are extracted from the OMPT spec see: http://openmp.org/mp-documents/ompt-tr2.pdf */
 
+#define NEW_OMPT_DEPS /* for new dependences */
+
 typedef uint64_t ompt_thread_id_t;
 typedef uint64_t ompt_parallel_id_t;
 typedef uint64_t ompt_task_id_t;
@@ -151,7 +153,12 @@ typedef enum {
 	ompt_event_destroy_lock = 59, /* lock destruction */
 	ompt_event_destroy_nest_lock = 60, /* nest lock destruction */
 	ompt_event_flush = 61, /* after executing flush */
+#if !defined(NEW_OMPT_DEPS)
 	ompt_event_dependence = 62 /* when a dependece is found, MB project */
+#else
+	ompt_event_task_dependences = 70, /* new task-dependences */
+	ompt_event_task_blocking_dependence = 71 /* blocking task due to dependence */
+#endif
 } ompt_event_t;
 
 typedef void (*ompt_interface_fn_t) (void);
@@ -219,12 +226,29 @@ ompt_frame_t *ompt_get_task_frame(
 	int depth /* how many levels removed from the current task */
 );
 
+#if !defined(NEW_OMPT_DEPS)
+
 typedef enum {
    ompt_dependence_raw = 1,
    ompt_dependence_war = 2,
    ompt_dependence_waw = 3 
 } ompt_dependence_type_t;
 
+#else
+
+typedef enum ompt_task_dependence_flag_e {
+	ompt_task_dependence_type_out   = 1,
+	ompt_task_dependence_type_in    = 2,
+	ompt_task_dependence_type_inout = 3
+} ompt_task_dependence_flag_t;
+
+typedef struct {
+	void * variable_addr;
+	size_t len;
+	uint32_t flags;
+} ompt_task_dependence_t;
+
+#endif
 
 #endif 
 
