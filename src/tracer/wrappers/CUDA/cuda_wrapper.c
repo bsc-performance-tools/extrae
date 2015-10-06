@@ -68,6 +68,8 @@ static cudaError_t (*real_cudaThreadExit)(void) = NULL;
 
 void Extrae_CUDA_init (int rank)
 {
+	UNREFERENCED_PARAMETER(rank);
+
 #if defined(PIC)
 	real_cudaLaunch = (cudaError_t(*)(const char*)) dlsym (RTLD_NEXT, "cudaLaunch");
 
