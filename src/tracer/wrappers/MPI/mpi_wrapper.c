@@ -1231,11 +1231,12 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	/* Finalize only if its initialized by MPI_init call */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
+		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
+
 		Backend_Finalize ();
 
 		CtoF77(pmpi_finalize) (ierror);
 
-		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 		mpitrace_on = FALSE;
 	}
 	else
@@ -2193,11 +2194,12 @@ int MPI_Finalize_C_Wrapper (void)
 	/* Finalize only if its initialized by MPI_init call */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
+		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
+
 		Backend_Finalize ();
 
 		ierror = PMPI_Finalize();
 
-		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 		mpitrace_on = FALSE;
 	}
 	else
