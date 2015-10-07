@@ -174,8 +174,12 @@ AC_DEFUN([AX_PROG_MPI],
       if test "${MPICC}" = "" ; then
          mpicc_compilers="mpicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
          for mpicc in [$mpicc_compilers]; do
-            if test -f "${MPI_HOME}/bin/${mpicc}" ; then
+            if test -x "${MPI_HOME}/bin/${mpicc}" ; then
                MPICC="${MPI_HOME}/bin/${mpicc}"
+               AC_MSG_RESULT([${MPICC}])
+               break
+            elif test -x "${MPI_HOME}/bin64/${mpicc}" ; then
+               MPICC="${MPI_HOME}/bin64/${mpicc}"
                AC_MSG_RESULT([${MPICC}])
                break
             fi
@@ -200,6 +204,7 @@ AC_DEFUN([AX_PROG_MPI],
          fi
       fi
    fi
+
    dnl AC_SUBST(MPICC)
    AC_ARG_VAR([MPICC],[Alternate MPI C compiler - use if the MPI C compiler in the MPI installation should not be used])
 
