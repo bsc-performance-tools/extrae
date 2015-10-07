@@ -263,8 +263,6 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_defineEventType
 	char *cDescr;
 	jint countValues, countDescriptionValues;
 
-	printf ("Called!!\n");
-
 	UNREFERENCED(jc);
 
 	if (values != NULL)
