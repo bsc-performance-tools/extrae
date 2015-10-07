@@ -275,7 +275,7 @@ static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 			else	
 				setTimeSampling (sampling_period, sampling_variability, SAMPLING_TIMING_DEFAULT);
 
-			fprintf (stdout, "Extrae: Sampling enabled with a period of %lld microseconds and a variability of %lld microseconds.\n", sampling_period/1000, sampling_variability/1000);
+			mfprintf (stdout, "Extrae: Sampling enabled with a period of %lld microseconds and a variability of %lld microseconds.\n", sampling_period/1000, sampling_variability/1000);
 		}
 		else
 		{
