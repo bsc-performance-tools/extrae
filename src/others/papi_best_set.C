@@ -200,22 +200,20 @@ static void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicoun
 	cout << "max combination bits: " << mystring << endl;
 #else
 
-	/* Show selected counters  */
-	cout << "<!-- counter set " << neventset << " -->" << endl;
-	cout << "<set enabled=\"yes\" domain=\"all\" changeat-time=\"500000us\">" << endl
-	     << "  ";
-
-	if (omnicounters.size() > 0)
-	{
-		for (size_t i = 0; i < omnicounters.size()-1; i++)
-			cout << omnicounters[i] << ",";
-		cout << omnicounters[omnicounters.size()-1];
-	}
-	
 	if (max_combination.count() > 0)
 	{
+		/* Show selected counters  */
+		cout << "<!-- counter set " << neventset << " -->" << endl;
+		cout << "<set enabled=\"yes\" domain=\"all\" changeat-time=\"500000us\">" << endl
+		     << "  ";
+
+		// Prepend omnicounters to the max_combination
 		if (omnicounters.size() > 0)
-			cout << ",";
+		{
+			for (size_t i = 0; i < omnicounters.size()-1; i++)
+				cout << omnicounters[i] << ",";
+			cout << omnicounters[omnicounters.size()-1] << ",";
+		}
 
 		bitset<MAXBITSET> max = max_combination;
 		size_t i = 0;
@@ -244,8 +242,9 @@ static void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicoun
 			else
 				break;
 		}
+
+		cout << endl << "</set>" << endl;
 	}
-	cout << endl << "</set>" << endl;
 #endif
 }
 
@@ -443,7 +442,7 @@ int main (int argc, char *argv[])
 			cout << endl <<
 			  "Caution, for some reason the following hardware counters cannot be added in an eventset." << endl;
 			for (size_t s = 0; s < Counters.size(); s++)
-				cout << Counters[i] << " ";
+				cout << Counters[s] << " ";
 			cout << endl;
 			break;
 		}
