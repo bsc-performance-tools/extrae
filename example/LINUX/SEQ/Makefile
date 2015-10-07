@@ -1,7 +1,5 @@
 include Makefile.inc
 
-CC = gcc
-FC = gfortran
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include
 FFLAGS = -O -g -I $(EXTRAE_HOME)/include
 LFLAGS = -Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -L$(EXTRAE_HOME)/lib -lseqtrace

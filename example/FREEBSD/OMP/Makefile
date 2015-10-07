@@ -1,6 +1,5 @@
 include Makefile.inc
 
-CC = gcc
 CFLAGS = -O -fopenmp -g -I$(EXTRAE_HOME)/include
 CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace  $(UNWIND_LIBS) $(PAPI_LIBS) $(BFD_LIBS) $(XML2_LIBS) $(POSIX_CLOCK_LIBS) $(LIBEXECINFO_LIBS)
 

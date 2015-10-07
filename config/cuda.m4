@@ -17,10 +17,16 @@ AC_DEFUN([AX_CUDA],
 		AC_MSG_ERROR([Cannot find CUDA])
 	fi
 
+	NVCC=""
 	if test "${cuda_path}" != "none" ; then
 		AC_MSG_CHECKING([for CUDA])
 		if test -d "${cuda_path}" ; then
 			if test -x ${cuda_path}/bin/nvcc ; then
+				NVCC=${cuda_path}/bin/nvcc
+			elif test -x ${cuda_path}/bin64/nvcc ; then
+				NVCC=${cuda_path}/bin64/nvcc
+			fi
+			if test "${NVCC}" != ""; then
 				if test -r ${cuda_path}/include/cuda_runtime_api.h ; then
 					enable_cuda="yes"
 					AC_MSG_RESULT(${cuda_path})
@@ -37,7 +43,7 @@ AC_DEFUN([AX_CUDA],
 		AX_FIND_INSTALLATION([CUDA], [${cuda_path}], [cuda])
 		AX_FLAGS_RESTORE()
 	fi
-
+	AC_SUBST(NVCC)
 ])
 
 # AX_CUPTI

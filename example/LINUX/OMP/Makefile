@@ -1,6 +1,5 @@
 include Makefile.inc
 
-CC = gcc
 CFLAGS = -O -fopenmp -g -I$(EXTRAE_HOME)/include
 CLIBS = -L$(EXTRAE_HOME)/lib -lomptrace
 

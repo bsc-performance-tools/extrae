@@ -157,6 +157,7 @@ AC_DEFUN([AX_PROG_MPI],
          MPI_F_LIB="-lmpif77-xl.legacy"
       else
          MPI_F_LIB_FOUND="not found"
+         MPI_F_LIB=""
       fi
       AC_MSG_RESULT([${MPI_F_LIB_FOUND}, ${MPI_F_LIB}])
       AC_SUBST(MPI_F_LIB)
@@ -205,8 +206,80 @@ AC_DEFUN([AX_PROG_MPI],
       fi
    fi
 
+   dnl check for mpif77 under $MPI_HOME/bin
+   AC_MSG_CHECKING([for MPI F77 compiler])
+   if test "${MPIF77}" = "" ; then
+      mpif77_compilers="mpif77 mpxlf_r mpxlf"
+      for mpif77 in [$mpif77_compilers]; do
+         if test -x "${MPI_HOME}/bin/${mpif77}" ; then
+            MPIF77="${MPI_HOME}/bin/${mpif77}"
+            AC_MSG_RESULT([${MPIF77}])
+            break
+         elif test -x "${MPI_HOME}/bin64/${mpif77}" ; then
+            MPIF77="${MPI_HOME}/bin64/${mpif77}"
+            AC_MSG_RESULT([${MPIF77}])
+            break
+         fi
+      done
+      if test "${MPIF77}" = "" ; then
+         AC_MSG_RESULT([not found])
+         AC_MSG_NOTICE([Cannot find \${MPI_HOME}/bin/mpif77 -or similar- using \${CC} instead])
+         MPIF77_DOES_NOT_EXIST="yes"
+         MPIF77=${CC}
+      else
+         MPIF77_DOES_NOT_EXIST="no"
+      fi
+   else
+      if test -x ${MPIF77} ; then
+         AC_MSG_RESULT([${MPIF77}])
+      else
+         if test -x `which ${MPIF77}` ; then
+         	AC_MSG_RESULT([${MPIF77}])
+         else
+         	AC_MSG_ERROR([Cannot find given \${MPIF77}. Please give the full path for the MPI F77 compiler])
+         fi
+      fi
+   fi
+
+   dnl check for mpif90 under $MPI_HOME/bin
+   AC_MSG_CHECKING([for MPI F90 compiler])
+   if test "${MPIF90}" = "" ; then
+      mpif90_compilers="mpif90 mpxlf_r mpxlf"
+      for mpif90 in [$mpif90_compilers]; do
+         if test -x "${MPI_HOME}/bin/${mpif90}" ; then
+            MPIF90="${MPI_HOME}/bin/${mpif90}"
+            AC_MSG_RESULT([${MPIF90}])
+            break
+         elif test -x "${MPI_HOME}/bin64/${mpif90}" ; then
+            MPIF90="${MPI_HOME}/bin64/${mpif90}"
+            AC_MSG_RESULT([${MPIF90}])
+            break
+         fi
+      done
+      if test "${MPIF90}" = "" ; then
+         AC_MSG_RESULT([not found])
+         AC_MSG_NOTICE([Cannot find \${MPI_HOME}/bin/mpif90 -or similar- using \${CC} instead])
+         MPIF90_DOES_NOT_EXIST="yes"
+         MPIF90=${CC}
+      else
+         MPIF90_DOES_NOT_EXIST="no"
+      fi
+   else
+      if test -x ${MPIF90} ; then
+         AC_MSG_RESULT([${MPIF90}])
+      else
+         if test -x `which ${MPIF90}` ; then
+         	AC_MSG_RESULT([${MPIF90}])
+         else
+         	AC_MSG_ERROR([Cannot find given \${MPIF90}. Please give the full path for the MPI F90 compiler])
+         fi
+      fi
+   fi
+
    dnl AC_SUBST(MPICC)
    AC_ARG_VAR([MPICC],[Alternate MPI C compiler - use if the MPI C compiler in the MPI installation should not be used])
+   AC_SUBST(MPIF77)
+   AC_SUBST(MPIF90)
 
    dnl If the system do not have MPICC (or similar) be sure to add -lmpi and -Impi
    AM_CONDITIONAL(NEED_MPI_LIB_INCLUDE, test "${CC}" = "${MPICC}" )

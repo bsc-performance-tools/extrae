@@ -1,6 +1,5 @@
 include Makefile.inc
 
-CC = gcc
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include
 LFLAGS = -L$(EXTRAE_HOME)/lib -lseqtrace $(UNWIND_LIBS) $(XML2_LIBS) $(POSIX_CLOCK_LIBS) $(LIBEXECINFO_LIBS)
 

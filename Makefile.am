@@ -412,6 +412,7 @@ endif
 if WANT_JAVA
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/JAVA
 	cp -fr $(JAVA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/JAVA
+	cd $(DESTDIR)$(datadir)/example/JAVA ; $(LN_S) -f ../Makefile.inc .
 endif
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example/UNICORE
 	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
@@ -447,6 +448,14 @@ else
 	$(top_srcdir)/substitute $(SED) "@sub_OPENCL_LDFLAGS@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
 	$(top_srcdir)/substitute $(SED) "@sub_POSIX_CLOCK@" "${POSIX_CLOCK_LIB}" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_CC@" "`which ${CC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_CXX@" "`which ${CXX}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_FC@" "`which ${FC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_MPICC@" "`which ${MPICC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_MPIF77@" "`which ${MPIF77}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_MPIF90@" "`which ${MPIF90}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_NVCC@" "`which ${NVCC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_JAVAC@" "`which ${JAVAC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
 	$(top_srcdir)/substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
 # Apply post-installation modifications (FreeBSD specific)

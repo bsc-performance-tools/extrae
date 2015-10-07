@@ -1,6 +1,5 @@
 include ../Makefile.inc
 
-NVCC = nvcc
 CFLAGS = -O2 -g --cudart shared $(MPI_CFLAGS)
 CLIBS  = -O2 -g --cudart shared $(MPI_LDFLAGS) $(MPI_LIBS)
 

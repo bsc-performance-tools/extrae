@@ -1,7 +1,5 @@
 include ../Makefile.inc
 
-CC=gcc
-
 CFLAGS= -g -I$(OPENCL_HOME)/include -O3 -lm -Wall
 
 PLATFORM = $(shell uname -s)

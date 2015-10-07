@@ -6,10 +6,10 @@ LDFLAGS=-L$(EXTRAE_HOME)/lib -lcudatrace -Xlinker -rpath -Xlinker $(EXTRAE_HOME)
 all: hello hello_instrumented
 
 hello_instrumented: hello_instrumented.cu
-	nvcc $(NVCCFLAGS) hello_instrumented.cu -o hello_instrumented $(LDFLAGS)
+	$(NVCC) $(NVCCFLAGS) hello_instrumented.cu -o hello_instrumented $(LDFLAGS)
 
 hello: hello.cu
-	nvcc $(NVCCFLAGS) hello.cu -o hello
+	$(NVCC) $(NVCCFLAGS) hello.cu -o hello
 
 clean:
 	rm -fr hello hello_instrumented TRACE.mpits TRACE.sym set-0

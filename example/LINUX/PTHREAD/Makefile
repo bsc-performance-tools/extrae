@@ -6,10 +6,10 @@ CFLAGS = -O -g -I$(EXTRAE_HOME)/include -pthread
 targets: user-comms pthread-example
 
 user-comms: user-comms.c
-	gcc $< $(CFLAGS) $(LIBS) -o $@ 
+	$(CC) $< $(CFLAGS) $(LIBS) -o $@ 
 
 pthread-example: pthread-example.c
-	gcc $< $(CFLAGS) $(LIBS) -o $@ 
+	$(CC) $< $(CFLAGS) $(LIBS) -o $@ 
 
 run-user-comms:
 	EXTRAE_CONFIG_FILE=extrae.xml ./user-comms

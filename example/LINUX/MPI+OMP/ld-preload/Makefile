@@ -1,6 +1,5 @@
 include ../Makefile.inc
 
-MPICC = $(MPI_HOME)/bin/mpicc
 CFLAGS = -O2 -g -fopenmp
 
 all: pi
