@@ -123,7 +123,7 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	else
 		if test "${USE_POSIX_CLOCK}" = "yes" ; then
 			if test "${NEED_POSIX_CLOCK_LIB}" = "no" ; then
-				echo Clock routine: POSIX / clock_gettime, but don\'t need posix clock lib explicitly
+				echo Clock routine: POSIX / clock_gettime, but don\'t need to link against posix clock library explicitly
 			else
 				echo Clock routine: POSIX / clock_gettime, library in ${POSIX_CLOCK_LIB}
 			fi
