@@ -200,7 +200,7 @@ static void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicoun
 	cout << "max combination bits: " << mystring << endl;
 #else
 
-	if (max_combination.count() > 0)
+	if (max_combination.count() > 0 || counters.size() == 0)
 	{
 		/* Show selected counters  */
 		cout << "<!-- counter set " << neventset << " -->" << endl;
@@ -212,35 +212,41 @@ static void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicoun
 		{
 			for (size_t i = 0; i < omnicounters.size()-1; i++)
 				cout << omnicounters[i] << ",";
-			cout << omnicounters[omnicounters.size()-1] << ",";
+			cout << omnicounters[omnicounters.size()-1];
 		}
 
-		bitset<MAXBITSET> max = max_combination;
-		size_t i = 0;
-		while (i < max.size() && max.count() > 0)
+		if (max_combination.count() > 0)
 		{
-			if (max.test(i))
+			cout << ",";
+
+			bitset<MAXBITSET> max = max_combination;
+			size_t i = 0;
+			while (i < max.size() && max.count() > 0)
 			{
-				max.flip (i);
-				if (max.count() > 0)
-					cout << counters[i] << ",";
-				else
-					cout << counters[i];
+				if (max.test(i))
+				{
+					max.flip (i);
+					if (max.count() > 0)
+						cout << counters[i] << ",";
+					else
+						cout << counters[i];
+				}
+				i++;
 			}
-			i++;
-		}
-	
-		/* Remove already used counters from the counter list */
-		max = max_combination;
-		i = MAXBITSET-1;
-		while (1)
-		{
-			if (max.test(i))
-				counters.erase (counters.begin()+i);
-			if (i > 0)
-				i--;
-			else
-				break;
+		
+			/* Remove already used counters from the counter list */
+			max = max_combination;
+			i = MAXBITSET-1;
+			while (1)
+			{
+				if (max.test(i))
+					counters.erase (counters.begin()+i);
+				if (i > 0)
+					i--;
+				else
+					break;
+			}
+
 		}
 
 		cout << endl << "</set>" << endl;
@@ -384,7 +390,13 @@ int main (int argc, char *argv[])
 				addCounters (argv[i], omnipresentCounters_tmp);
 		}
 		else
-			addCounters (argv[i], Counters_tmp);
+		{
+			// Add to regular list if it is not already in omnipresent
+			if (find (omnipresentCounters_tmp.begin(),
+			    omnipresentCounters_tmp.end(),
+			    argv[i]) == omnipresentCounters_tmp.end())
+				addCounters (argv[i], Counters_tmp);
+		}
 
 		i++;
 	}
