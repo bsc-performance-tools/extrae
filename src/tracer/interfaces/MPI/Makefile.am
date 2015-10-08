@@ -1,6 +1,7 @@
 include $(top_srcdir)/PATHS
 
 iface_MPI_SRCS     = mpi_interface.c mpi_interface.h \
+                     mpi_interface_p2p_c.c mpi_interface_p2p_f.c \
                      mpi_interface_coll_c.c mpi_interface_coll_f.c \
                      mpi_interface_1sided_c.c mpi_interface_1sided_f.c \
                      mpi_interface_io_c.c mpi_interface_io_f.c \

@@ -141,15 +141,6 @@ static char UNUSED rcsid[] = "$Id: mpi_interface.c 3297 2015-05-05 11:59:18Z har
  
 #endif
 
-/* Some C libraries do not contain the mpi_init symbol (fortran)
-	 When compiling the combined (C+Fortran) dyninst module, the resulting
-	 module CANNOT be loaded if mpi_init is not found. The top #if def..
-	 is a workaround for this situation
-
-   NOTE: Some C libraries (mpich 1.2.x) use the C initialization and do not
-   offer mpi_init (fortran).
-*/
-
 #if defined(FORTRAN_SYMBOLS)
 
 #if MPI_SUPPORTS_MPI_IO
