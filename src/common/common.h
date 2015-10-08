@@ -37,9 +37,13 @@
 #include "types.h"
 
 #ifdef HAVE_UNUSED_ATTRIBUTE
-# define UNUSED __attribute__ ((unused))
+# ifndef UNUSED
+#  define UNUSED __attribute__ ((unused))
+# endif
 #else
-# define UNUSED 
+# ifndef UNUSED
+#  define UNUSED 
+# endif
 #endif
 
 #define UNREFERENCED_PARAMETER(a) {(void) (a);}
