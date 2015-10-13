@@ -462,7 +462,7 @@ cl_kernel clCreateKernel (cl_program p, const char *k, cl_int *e)
 	return r;
 }
 
-cl_int clCreateKernelsInProgram (cl_program p, cl_uint n, cl_kernel *ks, cl_uint *e)
+cl_int clCreateKernelsInProgram (cl_program p, cl_uint n, cl_kernel *ks, cl_uint *nks)
 {
 	cl_int r;
 
@@ -474,26 +474,30 @@ cl_int clCreateKernelsInProgram (cl_program p, cl_uint n, cl_kernel *ks, cl_uint
 	{
 		cl_uint i;
 		Extrae_Probe_clCreateKernelsInProgram_Enter ();
-		r = real_clCreateKernelsInProgram (p, n, ks, e);
-		for (i = 0; i < n; ++i)
+		r = real_clCreateKernelsInProgram (p, n, ks, nks);
+		if (CL_SUCCESS == r && ks != NULL)
 		{
-			cl_int ret = 0;
-			size_t len = 0;
-
-			ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, 0, NULL, &len);
-			if (CL_SUCCESS == ret)
+			cl_uint upperbound = (nks == NULL)?n:*nks;
+			for (i = 0; i < upperbound ; ++i)
 			{
-				char k[len+1];
-				ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, len, k, NULL);
+				cl_int ret = 0;
+				size_t len = 0;
+	
+				ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, 0, NULL, &len);
 				if (CL_SUCCESS == ret)
-					Extrae_OpenCL_annotateKernelName (ks[i], k);
+				{
+					char k[len+1];
+					ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, len, k, NULL);
+					if (CL_SUCCESS == ret)
+						Extrae_OpenCL_annotateKernelName (ks[i], k);
+				}
 			}
 		}
 		Extrae_Probe_clCreateKernelsInProgram_Exit ();
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateKernelsInProgram != NULL)
 	{
-		r = real_clCreateKernelsInProgram (p, n, ks, e);
+		r = real_clCreateKernelsInProgram (p, n, ks, nks);
 	}
 	else
 	{

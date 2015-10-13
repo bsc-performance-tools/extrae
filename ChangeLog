@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Oct2015 Fix parametrization of clCreateKernelsInProgram
  * 05Oct2015 Adding support for MPI3 immediate collectives
              Revamping source code structure, each wrapper generates its
                intermediate lib_wrap_*

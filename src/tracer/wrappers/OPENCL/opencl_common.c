@@ -484,6 +484,7 @@ void Extrae_OpenCL_clQueueFlush_All (void)
 
 void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname)
 {
+	/* Add a new entry if the kernel name does not exist */
 	if (!Extrae_OpenCL_lookForKernelName (kname))
 	{
 		unsigned long long v;
@@ -506,6 +507,4 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname)
 
 		nKernels++;
 	}
-	else
-		fprintf (stderr, "kernel %s is already in the map\n");
 }
