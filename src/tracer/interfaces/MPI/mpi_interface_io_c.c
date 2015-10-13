@@ -125,7 +125,9 @@ int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, MPI3_CONST char * filename, in
 	int res;
 
 #if defined(ENABLE_LOAD_BALANCING)
+/*  Do not call DLB as Fortran does not call it, agreed with Victor Oct13th,2015
 	DLB_MPI_File_open_enter (comm, filename, amode, info, fh);
+*/
 #endif
 
 	if (mpitrace_on)
@@ -140,7 +142,9 @@ int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, MPI3_CONST char * filename, in
 		res = PMPI_File_open (comm, filename, amode, info, fh);
 
 #if defined(ENABLE_LOAD_BALANCING)
+/*  Do not call DLB as Fortran does not call it, agreed with Victor Oct13th,2015
 	DLB_MPI_File_open_leave ();
+*/
 #endif
 
 	return res;
