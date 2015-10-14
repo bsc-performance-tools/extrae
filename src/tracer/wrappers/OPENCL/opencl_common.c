@@ -484,7 +484,7 @@ static char *Extrae_OpenCL_getKernelName (cl_kernel k)
 			return strdup (name);
 	}
 
-	return "Unknown";
+	return "unnamed";
 }
 
 void Extrae_OpenCL_annotateKernelName (cl_kernel k, unsigned *pos)
