@@ -492,7 +492,7 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname)
 		Kernels = (AnnotatedKernel_st*) realloc (Kernels,
 		  sizeof(AnnotatedKernel_st)*(nKernels+1));
 
-		if (CommandQueues == NULL)
+		if (Kernels == NULL)
 		{
 			fprintf (stderr, PACKAGE_NAME": Fatal error! Failed to allocate memory for OpenCL Kernels\n");
 			exit (-1);
