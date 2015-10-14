@@ -75,7 +75,6 @@ static unsigned nKernels = 0;
 typedef struct
 {
 	char *KernelName;
-	cl_kernel Kernel;
 } AnnotatedKernel_st;
 static AnnotatedKernel_st *Kernels;
 //static cl_kernel *Kernels;
@@ -110,26 +109,19 @@ int Extrae_OpenCL_Queue_OoO (cl_command_queue q)
 		return FALSE;
 }
 
-static int Extrae_OpenCL_lookForKernelName (const char *kernel_name)
+static int Extrae_OpenCL_lookForKernelName (const char *kernel_name, unsigned *position)
 {
 	unsigned u;
+
+	if (position)
+		*position = 0;
 	for (u = 0; u < nKernels; u++)
 		if (!strcmp (kernel_name, Kernels[u].KernelName))
-			return TRUE;
-	return FALSE;
-}
-
-int Extrae_OpenCL_lookForKernel (cl_kernel k, unsigned *position)
-{
-	unsigned u;
-
-	for (u = 0; u < nKernels; u++)
-		if (Kernels[u].Kernel == k)
 		{
-			*position = u;
+			if (position != NULL)
+				*position = u;
 			return TRUE;
 		}
-
 	return FALSE;
 }
 
@@ -412,13 +404,9 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 			if (CommandQueues[idx].k_event[u] != NULL)
 			{
 				unsigned val;
-				if (Extrae_OpenCL_lookForKernel (CommandQueues[idx].k_event[u], &val))
-				{
-					THREAD_TRACE_MISCEVENT (threadid, utmp,
-					  CommandQueues[idx].prv_event[u], EVT_BEGIN, val+1);
-				}
-				else
-					fprintf (stderr, PACKAGE_NAME": Error! Cannot retrieve kernel info name!\n");
+				Extrae_OpenCL_annotateKernelName (CommandQueues[idx].k_event[u], &val);
+				THREAD_TRACE_MISCEVENT (threadid, utmp,
+				  CommandQueues[idx].prv_event[u], EVT_BEGIN, val+1);
 			}
 			else
 			{
@@ -482,10 +470,29 @@ void Extrae_OpenCL_clQueueFlush_All (void)
 		Extrae_OpenCL_real_clQueueFlush (u, FALSE);
 }
 
-void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname)
+static char *Extrae_OpenCL_getKernelName (cl_kernel k)
+{
+	cl_int ret;
+	size_t len;
+
+	ret = clGetKernelInfo (k, CL_KERNEL_FUNCTION_NAME, 0, NULL, &len);
+	if (CL_SUCCESS == ret)
+	{
+		char name[len+1];
+		ret = clGetKernelInfo (k, CL_KERNEL_FUNCTION_NAME, len, name, NULL);
+		if (CL_SUCCESS == ret)
+			return strdup (name);
+	}
+
+	return "Unknown";
+}
+
+void Extrae_OpenCL_annotateKernelName (cl_kernel k, unsigned *pos)
 {
 	/* Add a new entry if the kernel name does not exist */
-	if (!Extrae_OpenCL_lookForKernelName (kname))
+	char *kname = Extrae_OpenCL_getKernelName (k);
+
+	if (!Extrae_OpenCL_lookForKernelName (kname, pos))
 	{
 		unsigned long long v;
 	
@@ -498,8 +505,8 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname)
 			exit (-1);
 		}
 
-		Kernels[nKernels].Kernel = k;
 		Kernels[nKernels].KernelName = strdup (kname);
+		*pos = nKernels;
 		v = nKernels+1;
 
 		Extrae_AddTypeValuesEntryToLocalSYM ('D', OPENCL_KERNEL_NAME_EV,
@@ -507,4 +514,8 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname)
 
 		nKernels++;
 	}
+
+	/* Free allocated kernel name */
+	free (kname);
 }
+

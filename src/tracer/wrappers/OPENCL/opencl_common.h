@@ -49,8 +49,7 @@ void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
 void Extrae_OpenCL_addEventToQueueWithSize (cl_command_queue queue, cl_event ocl_evt, 
 	unsigned prv_evt, size_t size);
 
-int Extrae_OpenCL_lookForKernel (cl_kernel k, unsigned *position);
-void Extrae_OpenCL_annotateKernelName (cl_kernel k, const char *kname);
+void Extrae_OpenCL_annotateKernelName (cl_kernel k, unsigned *pos);
 
 unsigned Extrae_OpenCL_tag_generator (void);
 

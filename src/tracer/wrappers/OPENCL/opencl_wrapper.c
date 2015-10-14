@@ -446,7 +446,6 @@ cl_kernel clCreateKernel (cl_program p, const char *k, cl_int *e)
 	{
 		Extrae_Probe_clCreateKernel_Enter ();
 		r = real_clCreateKernel (p, k, e);
-		Extrae_OpenCL_annotateKernelName (r, k);
 		Extrae_Probe_clCreateKernel_Exit ();
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateKernel != NULL)
@@ -472,27 +471,8 @@ cl_int clCreateKernelsInProgram (cl_program p, cl_uint n, cl_kernel *ks, cl_uint
 
 	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateKernelsInProgram != NULL)
 	{
-		cl_uint i;
 		Extrae_Probe_clCreateKernelsInProgram_Enter ();
 		r = real_clCreateKernelsInProgram (p, n, ks, nks);
-		if (CL_SUCCESS == r && ks != NULL)
-		{
-			cl_uint upperbound = (nks == NULL)?n:*nks;
-			for (i = 0; i < upperbound ; ++i)
-			{
-				cl_int ret = 0;
-				size_t len = 0;
-	
-				ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, 0, NULL, &len);
-				if (CL_SUCCESS == ret)
-				{
-					char k[len+1];
-					ret = clGetKernelInfo (ks[i], CL_KERNEL_FUNCTION_NAME, len, k, NULL);
-					if (CL_SUCCESS == ret)
-						Extrae_OpenCL_annotateKernelName (ks[i], k);
-				}
-			}
-		}
 		Extrae_Probe_clCreateKernelsInProgram_Exit ();
 	}
 	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateKernelsInProgram != NULL)
@@ -736,11 +716,8 @@ cl_int clEnqueueNDRangeKernel (cl_command_queue c, cl_kernel k, cl_uint n,
 	{
 		cl_event evt;
 		unsigned kid = 0;
-
-		if (!Extrae_OpenCL_lookForKernel (k, &kid))
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot retrieve kernel name!\n");
-		else
-			kid++;
+		Extrae_OpenCL_annotateKernelName (k, &kid);
+		kid++;
 		
 		Extrae_Probe_clEnqueueNDRangeKernel_Enter (kid);
 
@@ -779,11 +756,8 @@ cl_int clEnqueueTask (cl_command_queue c, cl_kernel k, cl_uint n,
 	{
 		cl_event evt;
 		unsigned kid = 0;
-
-		if (!Extrae_OpenCL_lookForKernel (k, &kid))
-			fprintf (stderr, PACKAGE_NAME": Error! Cannot retrieve kernel name!\n");
-		else
-			kid++;
+		Extrae_OpenCL_annotateKernelName (k, &kid);
+		kid++;
 
 		Extrae_Probe_clEnqueueTask_Enter (kid);
 
