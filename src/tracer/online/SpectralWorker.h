@@ -35,6 +35,8 @@
 #include "BurstsExtractor.h"
 #include "Bursts.h"
 
+using namespace Synapse;
+
 typedef struct
 {
   Period_t info;

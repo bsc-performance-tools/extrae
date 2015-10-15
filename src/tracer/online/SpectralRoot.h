@@ -36,6 +36,7 @@
 #include "tags.h"
 
 using std::vector;
+using namespace Synapse;
 
 typedef struct
 {

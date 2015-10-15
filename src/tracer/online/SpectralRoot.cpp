@@ -34,6 +34,8 @@ static char UNUSED rcsid[] = "$Id$";
 #include <iostream>
 #include <sstream>
 
+using std::cerr;
+using std::endl;
 using std::stringstream;
 
 #include "utils.h"

@@ -80,7 +80,7 @@ using std::endl;
  *** Global variables ***
 \************************/
 
-FrontEnd *FE = NULL;                   /* Front-end handler for the MRNetApp library */
+FrontEnd *FE = NULL;                   /* Front-end handler for the Synapse front-end library */
 
 pthread_t       TerminationThread;     /* Thread listening for termination signals from the main back-end */
 

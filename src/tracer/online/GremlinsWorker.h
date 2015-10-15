@@ -32,6 +32,8 @@
 
 #include "BackProtocol.h"
 
+using namespace Synapse;
+
 class GremlinsWorker : public BackProtocol
 {
   public:

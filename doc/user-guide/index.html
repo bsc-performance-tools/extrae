@@ -1061,9 +1061,9 @@ Specify the location of an MPI installation to be used for the instrumentation p
 <BR>
 Available options are: 0u, 1u, 2u, upcase and auto. Choose the Fortran name decoration (0, 1 or 2 underscores) for MPI symbols. Let OPTION be auto to automatically detect the name mangling.
 </LI>
-<LI><TT>-with-mrnetapp</TT> 
+<LI><TT>-with-synapse</TT> 
 <BR>
-If the on-line analysis module is enabled (see -enable-online), specify where to find libMRNetApp libraries and includes. This library is a front-end of the MRNet library. 
+If the on-line analysis module is enabled (see -enable-online), specify where to find Synapse libraries and includes. This library is a front-end of the MRNet library. 
 </LI>
 <LI><TT>-with-opencl=DIR</TT> 
 <BR>
@@ -1775,7 +1775,7 @@ Configuration command, enabling MPI, PAPI and online analysis over MRNet.
     <TABLE  WIDTH="95%">
 <TR><TD>
     <TT>./configure -prefix=/zhome/academic/HLRS/xhp/xhpgl/tools/extrae/intel -with-mpi=/opt/cray/mpt/7.1.2/gni/mpich2-intel/140
-<BR>-with-unwind=/zhome/academic/HLRS/xhp/xhpgl/tools/libunwind -without-dyninst -with-papi=/opt/cray/papi/5.3.2.1 -enable-online -with-mrnet=/zhome/academic/HLRS/xhp/xhpgl/tools/mrnet/4.1.0 -with-spectral=/zhome/academic/HLRS/xhp/xhpgl/tools/spectral/3.1 -with-mrnetapp=/zhome/academic/HLRS/xhp/xhpgl/tools/libmrnetapp/1.0.4</TT>
+<BR>-with-unwind=/zhome/academic/HLRS/xhp/xhpgl/tools/libunwind -without-dyninst -with-papi=/opt/cray/papi/5.3.2.1 -enable-online -with-mrnet=/zhome/academic/HLRS/xhp/xhpgl/tools/mrnet/4.1.0 -with-spectral=/zhome/academic/HLRS/xhp/xhpgl/tools/spectral/3.1 -with-synapse=/zhome/academic/HLRS/xhp/xhpgl/tools/synapse/2.0</TT>
     </TD></TR>
 </TABLE></SPAN>
 

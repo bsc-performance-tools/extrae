@@ -32,9 +32,9 @@ online_root_bin_CFLAGS   = \
   -I$(COMMON_INC) -I$(TRACER_INC) 
 online_root_bin_CXXFLAGS = \
   -I$(COMMON_INC) -I$(TRACER_INC) \
-  `@MRNETAPP_CONFIG@ --fe-cflags` $(CONTAINERS_INCLUDES)
+  `@SYNAPSE_CONFIG@ --fe-cflags` $(CONTAINERS_INCLUDES)
 online_root_bin_LDFLAGS = \
-  `@MRNETAPP_CONFIG@ --fe-libs` `@MRNETAPP_CONFIG@ --rpath`
+  `@SYNAPSE_CONFIG@ --fe-libs` `@SYNAPSE_CONFIG@ --rpath`
 
 if HAVE_XML2
 online_root_bin_CFLAGS   += @XML2_CFLAGS@
@@ -84,10 +84,10 @@ libonline_la_CFLAGS    = -I$(COMMON_INC) -I$(TRACER_INC) @MPI_CFLAGS@
 libonline_la_CXXFLAGS  = \
   -I$(COMMON_INC) -I$(INCLUDE_DIR) -I$(CLOCKS_INC) -I$(HWC_INC) -I$(TRACER_INC) -I$(BUFFERS_INC) \
   $(EXTRACTORS_INCLUDES) \
-  `@MRNETAPP_CONFIG@ --be-cflags`
+  `@SYNAPSE_CONFIG@ --be-cflags`
 
 libonline_la_LDFLAGS   = \
-  `@MRNETAPP_CONFIG@ --be-libs` `@MRNETAPP_CONFIG@ --rpath`
+  `@SYNAPSE_CONFIG@ --be-libs` `@SYNAPSE_CONFIG@ --rpath`
 
 if HAVE_XML2
 libonline_la_CFLAGS += @XML2_CFLAGS@
@@ -125,7 +125,7 @@ lib_LTLIBRARIES += libfilterOnlineSpectral.la
 
 libfilterOnlineSpectral_la_SOURCES  = \
   SpectralFilter.cpp SpectralFilter.h 
-libfilterOnlineSpectral_la_CXXFLAGS = `@MRNETAPP_CONFIG@ --cp-cflags` $(CONTAINERS_INCLUDES) @SPECTRAL_CXXFLAGS@
+libfilterOnlineSpectral_la_CXXFLAGS = `@SYNAPSE_CONFIG@ --cp-cflags` $(CONTAINERS_INCLUDES) @SPECTRAL_CXXFLAGS@
 libfilterOnlineSpectral_la_LDFLAGS  = @SPECTRAL_LDFLAGS@ @SPECTRAL_LIBS@
 libfilterOnlineSpectral_la_LIBADD   = extractors/libcontainers-cp.la
 endif
@@ -138,8 +138,8 @@ endif
 $(SCRIPT_ONLINE_ENV): $(SCRIPT_ONLINE_ENV).in
 	cp $^ $@
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} $@
-	$(top_srcdir)/substitute $(SED) "@sub_MRNETAPP_HOME@" @MRNETAPP_HOME@ $@
-	$(top_srcdir)/substitute $(SED) "@sub_MRNETAPP_LIBSDIR@" @MRNETAPP_LIBSDIR@ $@
+	$(top_srcdir)/substitute $(SED) "@sub_SYNAPSE_HOME@" @SYNAPSE_HOME@ $@
+	$(top_srcdir)/substitute $(SED) "@sub_SYNAPSE_LIBSDIR@" @SYNAPSE_LIBSDIR@ $@
 	$(top_srcdir)/substitute $(SED) "@sub_CLUSTERING_HOME@" @CLUSTERING_HOME@ $@
 
 $(SCRIPT_ONLINE_ROOT): $(SCRIPT_ONLINE_ROOT).in

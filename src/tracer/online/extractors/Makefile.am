@@ -21,10 +21,10 @@ libextractors_la_SOURCES  = $(EXTRACTORS_SRCS)
 libextractors_la_CXXFLAGS = $(EXTRACTORS_INCLUDES)
 
 libcontainers_fe_la_SOURCES  = $(CONTAINERS_SRCS)
-libcontainers_fe_la_CXXFLAGS = $(CONTAINERS_INCLUDES) `@MRNAPP_CONFIG@ --fe-cflags`
+libcontainers_fe_la_CXXFLAGS = $(CONTAINERS_INCLUDES) `@SYNAPSE_CONFIG@ --fe-cflags`
 
 libcontainers_cp_la_SOURCES  = $(CONTAINERS_SRCS)
-libcontainers_cp_la_CXXFLAGS = $(CONTAINERS_INCLUDES) `@MRNAPP_CONFIG@ --cp-cflags`
+libcontainers_cp_la_CXXFLAGS = $(CONTAINERS_INCLUDES) `@SYNAPSE_CONFIG@ --cp-cflags`
 
 libcontainers_be_la_SOURCES  = $(CONTAINERS_SRCS)
-libcontainers_be_la_CXXFLAGS = $(CONTAINERS_INCLUDES) `@MRNAPP_CONFIG@ --be-cflags`
+libcontainers_be_la_CXXFLAGS = $(CONTAINERS_INCLUDES) `@SYNAPSE_CONFIG@ --be-cflags`

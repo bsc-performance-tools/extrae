@@ -32,6 +32,8 @@
 
 #include "FrontProtocol.h"
 
+using namespace Synapse;
+
 class GremlinsRoot : public FrontProtocol
 {
   public:

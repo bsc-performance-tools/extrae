@@ -82,7 +82,7 @@ Messaging *Msgs = NULL;
 Binder *BindToRoot = NULL;
 
 /* Backend running in this process */
-BackEnd  *BE = NULL;                  // Handler for the MRNetApp library
+BackEnd  *BE = NULL;                  // Handler for the Synapse back-end library
 pthread_t BE_thread;                  // Thread running the back-end analysis loop
 bool      BE_thread_started  = false; // 1 if the BE thread is spawned successfully
 bool      FE_process_started = false; // true if the FE process is spawned successfully
