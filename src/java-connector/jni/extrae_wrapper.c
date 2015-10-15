@@ -130,6 +130,7 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetNumThreads(
 	UNREFERENCED(jc);
 
 	NUMTHREADS = numthreads;
+	Backend_ChangeNumberOfThreads (numthreads);
 	Extrae_set_numthreads_function (get_num_threads);
 }
 
