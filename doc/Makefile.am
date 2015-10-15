@@ -1,8 +1,24 @@
 
+TEX_FILES = \
+ $(manual_ug).tex \
+ API-section.tex \
+ common-macros.tex \
+ configure-installation.tex \
+ environmentvariables-section.tex \
+ examples-section.tex \
+ FAQ-section.tex \
+ instrumented-routines-section.tex \
+ merge-section.tex \
+ quick-guide-section.tex \
+ wholeXML-section.tex \
+ XML-section.tex \
+ XML
+
 EXTRA_DIST = \
  user-guide.ps \
  user-guide.pdf \
- user-guide
+ user-guide \
+ $(TEX_FILES)
 
 manual_ug = user-guide
 
@@ -13,7 +29,7 @@ manual_ug = user-guide
 all:
 	@echo Nothing to be done by default. If you want to build the documentation issue make build-documentation.
 
-build-documentation: $(manual_ug).tex API-section.tex common-macros.tex configure-installation.tex environmentvariables-section.tex examples-section.tex FAQ-section.tex instrumented-routines-section.tex merge-section.tex quick-guide-section.tex wholeXML-section.tex XML-section.tex
+build-documentation: $(TEX_FILES)
 	@echo "\newcommand{\TRACEVERSION}{$(PACKAGE_VERSION)}" > version.tex
 	./copy_tex_files_from_to.sh $(top_srcdir)/doc .
 if BUILD_DOCS_PS
