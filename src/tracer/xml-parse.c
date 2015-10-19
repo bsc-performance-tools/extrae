@@ -1502,7 +1502,8 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						{
 							TMODE_setInitial (TRACE_MODE_DETAIL);
 						}
-						else if (!xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURSTS))
+						else if (!xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURSTS) ||
+						  !xmlStrcasecmp (traceinitialmode, TRACE_INITIAL_MODE_BURST))
 						{
 							TMODE_setInitial (TRACE_MODE_BURSTS);
 						}

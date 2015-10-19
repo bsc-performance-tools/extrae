@@ -53,6 +53,7 @@
 #define TRACE_INITIAL_MODE              ((xmlChar*) "initial-mode")
 #define TRACE_INITIAL_MODE_DETAIL       ((xmlChar*) "detail")
 #define TRACE_INITIAL_MODE_BURSTS       ((xmlChar*) "bursts")
+#define TRACE_INITIAL_MODE_BURST        ((xmlChar*) "burst")
 #define TRACE_COUNTERS                  ((xmlChar*) "counters")
 #define TRACE_CALLERS                   ((xmlChar*) "callers")
 #define TRACE_CPU                       ((xmlChar*) "cpu")
