@@ -221,6 +221,7 @@ MPI_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/MPI/detailed_trace_basic.xml \
  $(top_srcdir)/example/LINUX/MPI/summarized_trace_basic.xml \
  $(top_srcdir)/example/LINUX/MPI/extrae_explained.xml \
+ $(top_srcdir)/example/LINUX/MPI/extrae_bursts_10ms.xml \
  $(top_srcdir)/example/LINUX/MPI/static \
  $(top_srcdir)/example/LINUX/MPI/ld-preload \
  $(top_srcdir)/example/LINUX/MPI/dyninst

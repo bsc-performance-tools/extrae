@@ -10,6 +10,7 @@ iface_API_INCLUDES = \
    -I$(TRACER_INC)   \
    -I$(HWC_INC)      \
    -I$(top_srcdir)/include \
+   -I$(SAMPLING_DIR)/common \
    -I$(WRAPPERS_INC)/API @PAPI_CFLAGS@
 
 noinst_LTLIBRARIES = libsampling_intel_pebs.la

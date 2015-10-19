@@ -214,7 +214,9 @@ core_MODULES = \
 #
 # Add sampling mechanisms
 #
-core_MODULES += sampling/timer/libsampling_timer.la
+core_MODULES += \
+ sampling/common/libsampling_common.la \
+ sampling/timer/libsampling_timer.la
 if WANT_PEBS_SAMPLING
 core_MODULES += sampling/intel-pebs/libsampling_intel_pebs.la
 endif
@@ -380,6 +382,7 @@ core_INCLUDES = \
  -I$(WRAPPERS_INC)/MALLOC \
  -I$(WRAPPERS_INC)/IO \
  -I$(WRAPPERS_INC)/openshmem \
+ -I$(SAMPLING_DIR)/common \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)
 
 if HAVE_PAPI

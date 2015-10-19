@@ -22,27 +22,34 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/sampling.h $
- | @last_commit: $Date: 2014-05-28 13:01:35 +0200 (mié, 28 may 2014) $
- | @version:     $Revision: 2706 $
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/sampling.c $
+ | @last_commit: $Date: 2014-12-15 17:39:59 +0100 (lun, 15 dic 2014) $
+ | @version:     $Revision: 3077 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _SAMPLING_H_INCLUDED_
-#define _SAMPLING_H_INCLUDED_
+#include "common.h"
 
-enum
+static char UNUSED rcsid[] = "$Id: sampling.c 3077 2014-12-15 16:39:59Z harald $";
+
+#include "sampling-common.h"
+
+static int EnabledSampling = FALSE;
+
+int isSamplingEnabled(void)
 {
-	SAMPLING_TIMING_REAL,
-	SAMPLING_TIMING_VIRTUAL,
-	SAMPLING_TIMING_PROF,
-	SAMPLING_TIMING_DEFAULT = SAMPLING_TIMING_REAL
-};
-
-void setTimeSampling (unsigned long long period, unsigned long long variability, int sampling_type);
-void setTimeSampling_postfork (void);
-void Extrae_SamplingHandler (void* address);
-void Extrae_SamplingHandler_PAPI (void *address);
-
-void unsetTimeSampling (void);
-
+#if defined(SAMPLING_SUPPORT)
+	return EnabledSampling;
+#else
+	return FALSE;
 #endif
+}
+
+void setSamplingEnabled (int enabled)
+{
+#if !defined(SAMPLING_SUPPORT)
+	UNREFERENCED_PARAMETER(enabled);
+#else
+	EnabledSampling = (enabled != FALSE);
+#endif
+}
+

@@ -139,6 +139,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "options.h"
 #endif
 
+#include "sampling-common.h"
 #include "sampling-timer.h"
 #if defined(ENABLE_PEBS_SAMPLING)
 # include "sampling-intel-pebs.h"

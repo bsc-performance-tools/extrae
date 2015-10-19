@@ -55,6 +55,7 @@ static char UNUSED rcsid[] = "$Id: sampling.c 3077 2014-12-15 16:39:59Z harald $
 # include <signal.h>
 #endif
 
+#include "sampling-common.h"
 #include "sampling-timer.h"
 #include "trace_macros.h"
 #include "threadid.h"
@@ -62,30 +63,10 @@ static char UNUSED rcsid[] = "$Id: sampling.c 3077 2014-12-15 16:39:59Z harald $
 
 #if defined(SAMPLING_SUPPORT)
 int SamplingSupport = FALSE;
-int SamplingRunning = FALSE;
-int EnabledSampling = FALSE;
+static int SamplingRunning = FALSE;
 #endif
 
 static struct sigaction signalaction;
-
-int isSamplingEnabled(void)
-{
-#if defined(SAMPLING_SUPPORT)
-	return EnabledSampling;
-#else
-	return FALSE;
-#endif
-}
-
-void setSamplingEnabled (int enabled)
-{
-#if !defined(SAMPLING_SUPPORT)
-	UNREFERENCED_PARAMETER(enabled);
-#else
-	EnabledSampling = (enabled != FALSE);
-#endif
-}
-
 
 void Extrae_SamplingHandler (void* address)
 {
@@ -290,7 +271,7 @@ void setTimeSampling_postfork (void)
 	int signum;
 	int ret;
 
-	if (EnabledSampling)
+	if (isSamplingEnabled())
 	{
 		memset (&signalaction, 0, sizeof(signalaction));
 

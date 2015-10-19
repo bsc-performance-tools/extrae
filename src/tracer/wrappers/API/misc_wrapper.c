@@ -74,6 +74,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_wrapper.h"
 #include "common_hwc.h"
 #include "threadinfo.h"
+#include "sampling-common.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>

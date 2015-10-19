@@ -1,3 +1,4 @@
+
 /*****************************************************************************\
  *                        ANALYSIS PERFORMANCE TOOLS                         *
  *                                   Extrae                                  *
@@ -22,27 +23,15 @@
 \*****************************************************************************/
 
 /* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/sampling.h $
- | @last_commit: $Date: 2014-05-28 13:01:35 +0200 (mié, 28 may 2014) $
- | @version:     $Revision: 2706 $
+ | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/sampling.c $
+ | @last_commit: $Date: 2014-12-15 17:39:59 +0100 (lun, 15 dic 2014) $
+ | @version:     $Revision: 3077 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef _SAMPLING_H_INCLUDED_
-#define _SAMPLING_H_INCLUDED_
+#ifndef SAMPLING_COMMON_H_INCLUDED
+#define SAMPLING_COMMON_H_INCLUDED
 
-enum
-{
-	SAMPLING_TIMING_REAL,
-	SAMPLING_TIMING_VIRTUAL,
-	SAMPLING_TIMING_PROF,
-	SAMPLING_TIMING_DEFAULT = SAMPLING_TIMING_REAL
-};
+int isSamplingEnabled(void);
+void setSamplingEnabled (int enabled);
 
-void setTimeSampling (unsigned long long period, unsigned long long variability, int sampling_type);
-void setTimeSampling_postfork (void);
-void Extrae_SamplingHandler (void* address);
-void Extrae_SamplingHandler_PAPI (void *address);
-
-void unsetTimeSampling (void);
-
-#endif
+#endif /* SAMPLING_COMMON_H_INCLUDED */

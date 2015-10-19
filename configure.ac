@@ -605,6 +605,7 @@ AC_CONFIG_FILES([
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \
+  src/tracer/sampling/common/Makefile \
   src/tracer/sampling/timer/Makefile \
   src/tracer/sampling/intel-pebs/Makefile \
   src/merger/Makefile \
