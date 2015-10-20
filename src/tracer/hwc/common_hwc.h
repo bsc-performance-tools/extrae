@@ -31,6 +31,7 @@
 #define __COMMON_HWC_H__
 
 #include <config.h>
+#include "sampling-common.h"
 #include "sampling-timer.h"
 #include "num_hwc.h"
 #include "hwc_version.h"

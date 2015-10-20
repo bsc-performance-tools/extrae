@@ -30,6 +30,7 @@ libhwc_la_CFLAGS = \
  -I$(TRACER_INC) \
  -I$(INCLUDE_DIR) \
  -I$(top_srcdir)/src/tracer/wrappers/API \
+ -I$(SAMPLING_DIR)/common \
  -I$(SAMPLING_DIR)/timer \
  @PAPI_CFLAGS@
 
