@@ -46,10 +46,16 @@ typedef struct
   int  parent_rank;
 } BE_data_t;
 
+#if defined(__cplusplus)
+extern "C" {
+#endif /* __cplusplus */
 int  Online_Init(int rank, int world_size);
 int  Online_Start(char **node_list);
 void Online_Stop(void);
 void Online_CleanTemporaries(void);
+#if defined(__cplusplus)
+}
+#endif /* __cplusplus */
 
 #if defined(__cplusplus)
 void Online_PauseApp(bool emit_events = true);
