@@ -345,80 +345,14 @@ endif
 
 install-data-hook:
 	touch null # To ease the installation rules
+#
+# Apply post-installation modifications
+#
 	$(MKDIR_P) $(DESTDIR)$(datadir)/example
 	cp -f $(top_srcdir)/example/Makefile.inc $(DESTDIR)$(datadir)/example
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/SEQ
-	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
-	cd $(DESTDIR)$(datadir)/example/SEQ ; $(LN_S) -f ../Makefile.inc .
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/FORK
-	cp -f $(FORK_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/FORK
-	cd $(DESTDIR)$(datadir)/example/FORK ; $(LN_S) -f ../Makefile.inc .
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PYTHON
-	cp -f $(PYTHON_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PYTHON
-if HAVE_MPI
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI
-	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
-	cd $(DESTDIR)$(datadir)/example/MPI ; $(LN_S) -f ../Makefile.inc .
-if WANT_CUDAorCUPTI
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+CUDA
-	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
-	cd $(DESTDIR)$(datadir)/example/MPI+CUDA ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_OPENCL
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OPENCL
-	cp -fr $(MPIOPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OPENCL
-	cd $(DESTDIR)$(datadir)/example/MPI+OPENCL ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_NANOS
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMPSS
-	cp -fr $(MPIOMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMPSS
-	cd $(DESTDIR)$(datadir)/example/MPI+OMPSS ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_OPENMP
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMP
-	cp -fr $(MPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMP
-	cd $(DESTDIR)$(datadir)/example/MPI+OMP ; $(LN_S) -f ../Makefile.inc .
-endif
-endif
-if WANT_OPENMP
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMP
-	cp -f $(OMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
-	cd $(DESTDIR)$(datadir)/example/OMP ; $(LN_S) -f ../Makefile.inc .
-endif
-if HAVE_ONLINE
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/ONLINE
-	cp -f $(ONLINE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/ONLINE
-	cd $(DESTDIR)$(datadir)/example/ONLINE ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_PTHREAD
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PTHREAD
-	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
-	cd $(DESTDIR)$(datadir)/example/PTHREAD ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_CUDAorCUPTI
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/CUDA
-	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
-	cd $(DESTDIR)$(datadir)/example/CUDA ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_OPENCL
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OPENCL
-	cp -fr $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
-	cd $(DESTDIR)$(datadir)/example/OPENCL ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_NANOS
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMPSS
-	cp -fr $(OMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMPSS
-	cd $(DESTDIR)$(datadir)/example/OMPSS ; $(LN_S) -f ../Makefile.inc .
-endif
-if WANT_JAVA
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/JAVA
-	cp -fr $(JAVA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/JAVA
-	cd $(DESTDIR)$(datadir)/example/JAVA ; $(LN_S) -f ../Makefile.inc .
-endif
-	$(MKDIR_P) $(DESTDIR)$(datadir)/example/UNICORE
-	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
-	rm null # Remove null file created at the beginning
-# Apply post-installation modifications
+#
+# Apply substitutions
+#
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_HOME@" "${MPI_HOME}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_CFLAGS@" "${MPI_CFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPI_LDFLAGS@" "${MPI_LDFLAGS}" $(DESTDIR)$(datadir)/example/Makefile.inc
@@ -471,14 +405,91 @@ if WANT_JAVA
 else
 	$(top_srcdir)/substitute $(SED) "@sub_JAVAC@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
-	$(top_srcdir)/substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
-	$(top_srcdir)/substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD
 	$(top_srcdir)/substitute $(SED) "@sub_libexecinfo_libs@" "${libexecinfo_LDFLAGS} -lexecinfo" $(DESTDIR)$(datadir)/example/Makefile.inc
 else
 	$(top_srcdir)/substitute $(SED) "@sub_libexecinfo_libs@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
+#
+# Now copy examples
+#
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/SEQ
+	cp -f $(SEQ_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/SEQ
+	cd $(DESTDIR)$(datadir)/example/SEQ ; cp ../Makefile.inc .
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/FORK
+	cp -f $(FORK_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/FORK
+	cd $(DESTDIR)$(datadir)/example/FORK ; cp ../Makefile.inc .
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PYTHON
+	cp -f $(PYTHON_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PYTHON
+if HAVE_MPI
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI
+	cp -fr $(MPI_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI
+	cd $(DESTDIR)$(datadir)/example/MPI ; cp ../Makefile.inc .
+if WANT_CUDAorCUPTI
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+CUDA
+	cp -fr $(MPICUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+CUDA
+	cd $(DESTDIR)$(datadir)/example/MPI+CUDA ; cp ../Makefile.inc .
+endif
+if WANT_OPENCL
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OPENCL
+	cp -fr $(MPIOPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OPENCL
+	cd $(DESTDIR)$(datadir)/example/MPI+OPENCL ; cp ../Makefile.inc .
+endif
+if WANT_NANOS
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMPSS
+	cp -fr $(MPIOMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMPSS
+	cd $(DESTDIR)$(datadir)/example/MPI+OMPSS ; cp ../Makefile.inc .
+endif
+if WANT_OPENMP
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/MPI+OMP
+	cp -fr $(MPIOMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/MPI+OMP
+	cd $(DESTDIR)$(datadir)/example/MPI+OMP ; cp ../Makefile.inc .
+endif
+endif
+if WANT_OPENMP
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMP
+	cp -f $(OMP_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMP
+	cd $(DESTDIR)$(datadir)/example/OMP ; cp ../Makefile.inc .
+endif
+if HAVE_ONLINE
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/ONLINE
+	cp -f $(ONLINE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/ONLINE
+	cd $(DESTDIR)$(datadir)/example/ONLINE ; cp ../Makefile.inc .
+endif
+if WANT_PTHREAD
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/PTHREAD
+	cp -f $(PTHREAD_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/PTHREAD
+	cd $(DESTDIR)$(datadir)/example/PTHREAD ; cp ../Makefile.inc .
+endif
+if WANT_CUDAorCUPTI
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/CUDA
+	cp -f $(CUDA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/CUDA
+	cd $(DESTDIR)$(datadir)/example/CUDA ; cp ../Makefile.inc .
+endif
+if WANT_OPENCL
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OPENCL
+	cp -fr $(OPENCL_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OPENCL
+	cd $(DESTDIR)$(datadir)/example/OPENCL ; cp ../Makefile.inc .
+endif
+if WANT_NANOS
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/OMPSS
+	cp -fr $(OMPSS_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/OMPSS
+	cd $(DESTDIR)$(datadir)/example/OMPSS ; cp ../Makefile.inc .
+endif
+if WANT_JAVA
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/JAVA
+	cp -fr $(JAVA_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/JAVA
+	cd $(DESTDIR)$(datadir)/example/JAVA ; cp ../Makefile.inc .
+endif
+	$(MKDIR_P) $(DESTDIR)$(datadir)/example/UNICORE
+	cp -fr $(UNICORE_EXAMPLE_FILES) $(DESTDIR)$(datadir)/example/UNICORE
+#
+# Apply modifications to all directories installed
+#
+	$(top_srcdir)/substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
+	$(top_srcdir)/substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
+	rm null # Remove null file created at the beginning
 # SVN installations may have some subversion control files
 	find $(DESTDIR)$(datadir)/example -name .svn -delete
 	find $(DESTDIR)$(datadir)/example -name null -delete
