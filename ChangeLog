@@ -4,6 +4,7 @@ ChangeLog
  * 21Oct2015 Fixed visibility of the on-line API routines that are called from the wrappers
              Fix example installation. Use cp instead of ln -s.
              Fix Java compilation in other place rather than extract dir
+             Fix configured.sh when building in a directory other than extraction dir
  * 15Oct2015 Code adapted to use Synapse libraries v2.0 instead of the older version libMRNetApp
  * 13Oct2015 Fix parametrization of clCreateKernelsInProgram
  * 05Oct2015 Adding support for MPI3 immediate collectives

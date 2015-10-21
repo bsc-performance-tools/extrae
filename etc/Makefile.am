@@ -36,7 +36,7 @@ CONFIGUREDscript:
 	echo "Preparing configured script for SH"
 	echo "export PACKAGE_NAME=${PACKAGE_NAME}" >> $(SH_SCRIPT)
 	echo "export PACKAGE_BUGREPORT=${PACKAGE_BUGREPORT}" >> $(SH_SCRIPT)
-	echo "export CONFIGURE_LINE=\"`head -7 ${top_srcdir}/config.log | tail -1`\"" >> $(SH_SCRIPT)
+	echo "export CONFIGURE_LINE=\"`head -7 ${top_builddir}/config.log | tail -1`\"" >> $(SH_SCRIPT)
 	cp $(top_srcdir)/etc/configured.sh $(DESTDIR)$(sysconfdir)
 	chmod 0755 $(DESTDIR)$(sysconfdir)/configured.sh
 
