@@ -141,23 +141,23 @@ EVENT_TYPE
 0    2000    Function-F
 VALUES
 0   End
-1   Unresolved
-2   _NOT_Found
-3   pi_kernel
-4   sleep_kernel
-5   fake_kernel
+1 Unresolved
+2 _NOT_Found
+3 pi_kernel
+4 sleep_kernel
+5 fake_kernel
 
 
 EVENT_TYPE
 0    2020    Line-Source-F
 VALUES
 0   End
-1   0 (Unresolved)
-2   0 (_NOT_Found)
-3   44 (ompss-codelocation-2.c)
-4   72 (ompss-codelocation-2.c)
-5   96 (ompss-codelocation-2.c)
-6   118 (ompss-codelocation-2.c)
+1 0 (Unresolved)
+2 0 (_NOT_Found)
+3 44 (ompss-co..tion-2.c) [44 (ompss-codelocation-2.c)]
+4 72 (ompss-co..tion-2.c) [72 (ompss-codelocation-2.c)]
+5 96 (ompss-co..tion-2.c) [96 (ompss-codelocation-2.c)]
+6 118 (ompss-co..tion-2.c) [118 (ompss-codelocation-2.c)]
 
 
 EVENT_TYPE

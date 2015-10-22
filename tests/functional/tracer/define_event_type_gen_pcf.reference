@@ -141,18 +141,18 @@ EVENT_TYPE
 0    60000019    User function
 VALUES
 0   End
-1   Unresolved
-2   _NOT_Found
-3   pi_kernel
+1 Unresolved
+2 _NOT_Found
+3 pi_kernel
 
 
 EVENT_TYPE
 0    60000119    User function line
 VALUES
 0   End
-1   0 (Unresolved)
-2   0 (_NOT_Found)
-3   42 (define_event_type_gen_pcf.c) [lt-define_event_type_gen_pcf]
+1 0 (Unresolved)
+2 0 (_NOT_Found)
+3 42 (define_e..en_pcf.c) [42 (define_event_type_gen_pcf.c, lt-define_event_type_gen_pcf)]
 
 
 EVENT_TYPE
