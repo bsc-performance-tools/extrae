@@ -122,6 +122,10 @@ static int option_dump_Time = TRUE;
 int get_option_dump_Time (void) { return option_dump_Time; }
 void set_option_dump_Time (int b) { option_dump_Time = b; }
 
+static int option_dump_Address = TRUE;
+int get_option_dump_Addresses (void) { return option_dump_Address; }
+void set_option_dump_Addresses (int b) { option_dump_Address = b; }
+
 #if defined(IS_BG_MACHINE)
 static int option_merge_BG_XYZT = FALSE;
 int get_option_merge_BG_XYZT (void) { return option_merge_BG_XYZT; }

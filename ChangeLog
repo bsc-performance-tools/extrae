@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 22Oct2015 Improved "make check". Added -without-addresses to mpi2prv to ignore addresses
  * 21Oct2015 Fixed visibility of the on-line API routines that are called from the wrappers
              Fix example installation. Use cp instead of ln -s.
              Fix Java compilation in other place rather than extract dir

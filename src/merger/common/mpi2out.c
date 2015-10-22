@@ -134,7 +134,7 @@ void Help (const char *ProgName)
 #endif
 		  "    -s file              Indicates the symbol (*.sym) file attached to the *.mpit files.\n"
 		  "    -d/-dump             Sequentially dumps the contents of every *.mpit file.\n"
-		  "    -dump-without-time   Do not show event time in when dumping events.\n"
+		  "    -dump-without-time   Do not show event time in when dumping events (valuable for test purposes).\n"
 		  "    -remove-files        Remove intermediate files after processing them.\n"
 		  "    -split-states        Do not merge consecutives states that are the same.\n"
 		  "    -skip-sendrecv       Do not emit communication for SendReceive operations.\n"
@@ -144,6 +144,7 @@ void Help (const char *ProgName)
 		  "    -emit-library-events Emit library information for unknown references if possible.\n"
 		  "    -sort-addresses      Sort file name, line events in information linked with source code.\n"
 		  "    -task-view           Swap the thread level in Paraver timeline to show Nanos Tasks.\n"
+          "    -without-addresses   Do not emit address information into PCF (valuable for test purposes).\n"
 		  "    --                   Take the next trace files as a diferent parallel task.\n"
 		  "\n",
           ProgName, ProgName, ProgName);
@@ -825,6 +826,16 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		if (!strcmp (argv[CurArg], "-dump-with-time"))
 		{
 			set_option_dump_Time (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-with-addresses"))
+		{
+			set_option_dump_Addresses (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-without-addresses"))
+		{
+			set_option_dump_Addresses (FALSE);
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-maxmem"))

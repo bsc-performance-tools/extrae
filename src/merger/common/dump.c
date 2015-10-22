@@ -61,12 +61,13 @@ static void show_current (event_t * c, UINT64 max_time)
 	}
 	else 
 	{
-		char *clock_append = (c->time==max_time)?"+ ":"";
-
 		if (dump_time)
+		{
+			char *clock_append = (c->time==max_time)?"+ ":"";
 			fprintf (stdout, "TIME: %lu %s EV: %d VAL: %lu [0x%lx] ", c->time, clock_append, c->event, c->value, c->value);
+		}
 		else
-			fprintf (stdout, "TIME: - %s EV: %d VAL: %lu [0x%lx] ", clock_append, c->event, c->value, c->value);
+			fprintf (stdout, "TIME: - EV: %d VAL: %lu [0x%lx] ", c->event, c->value, c->value);
 	}
 
 	if (c->event == MPI_IRECV_EV || c->event == MPI_IRECVED_EV || c->event == MPI_RECV_EV ||

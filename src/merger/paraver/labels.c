@@ -1010,7 +1010,8 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Address2Info_Write_OTHERS_Labels (fd, get_option_merge_UniqueCallerID(),
 		num_labels_codelocation, labels_codelocation);
 # if defined(BFD_MANAGER_GENERATE_ADDRESSES)
-	ObjectTable_dumpAddresses (fd, ADDRESSES_FOR_BINARY_EV);
+	if (get_option_dump_Addresses())
+		ObjectTable_dumpAddresses (fd, ADDRESSES_FOR_BINARY_EV);
 # endif
 #endif
 
