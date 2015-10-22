@@ -13,7 +13,7 @@ main: main.c libfA.so libfB.so
 
 run: main
 	EXTRAE_ON=1 ./main
-	../../../../src/merger/mpi2prv -f TRACE.mpits -e main
+	../../../../src/merger/mpi2prv -without-addresses -f TRACE.mpits -e main
 
 clean: 
 	rm -fr libfA.so libfB.so main TRACE.sym TRACE.mpits set-0
