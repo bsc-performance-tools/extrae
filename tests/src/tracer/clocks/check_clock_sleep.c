@@ -27,7 +27,10 @@ int main (int argc, char *argv[])
 
 		if ( n != d )
 		{
-			printf ("sleep(%u) => clocked = %lu nanoseconds (%lu)\n", u, end-begin, d);
+			printf ("Executed sleep (%u) but we measured %lu nanoseconds\n",
+			  u, end-begin);
+			printf ("Comparison of timing in microseconds do not match! (%lu != %lu)\n",
+			  n, d);
 			return 1;
 		}
 	}

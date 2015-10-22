@@ -17,6 +17,7 @@ int main (int argc, char *argv[])
 	for (u = 1 ; u < 5; u++)
 	{
 		UINT64 d;
+		UINT64 n = u * 1000;
 		useconds_t us = ((useconds_t) u) * 1000000;
 
 		begin = Clock_getCurrentTime(0);
@@ -25,9 +26,12 @@ int main (int argc, char *argv[])
 
 		d = (end - begin) / 1000000;
 
-		if ( u * 1000 != d )
+		if ( n != d )
 		{
-			printf ("usleep(%u) => clocked = %lu nanoseconds (%lu)\n", us, end-begin, d);
+			printf ("Executed usleep (%u) but we measured %lu nanoseconds\n",
+			  us, end-begin);
+			printf ("Comparison of timing in microseconds do not match! (%lu != %lu)\n",
+			  n, d);
 			return 1;
 		}
 	}
