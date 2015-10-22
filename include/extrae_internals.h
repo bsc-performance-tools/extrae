@@ -30,6 +30,8 @@
 #ifndef __EXTRAE_INTERNALS_H_INCLUDED__
 #define __EXTRAE_INTERNALS_H_INCLUDED__
 
+#include "extrae_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,6 +45,7 @@ void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void));
 void Extrae_set_finalize_task_function (void (*finalizetask_function)(void));
 
 void Extrae_set_thread_name (unsigned thread, char *name);
+void Extrae_function_from_address (extrae_type_t type, void *address);
 
 #ifdef __cplusplus
 }
