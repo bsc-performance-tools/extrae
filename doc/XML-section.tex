@@ -1,11 +1,12 @@
 \chapter{\TRACE XML configuration file}\label{cha:XML}
 
-\TRACE is configured through a XML file that is set through the {\tt EXTRAE\_CONFIG\_FILE} environment variable. The included examples provide several XML files to serve as a basis for the end user. There are four XML files:
+\TRACE is configured through a XML file that is set through the {\tt EXTRAE\_CONFIG\_FILE} environment variable. The included examples provide several XML files to serve as a basis for the end user. For instance, the MPI examples provide four XML configuration files:
 \begin{itemize}
  \item {\tt extrae.xml} Exemplifies all the options available to set up in the configuration file. We will discuss below all the sections and options available. It is also available on this document on appendix \ref{cha:wholeXML}.
  \item {\tt extrae\_explained.xml} The same as the above with some comments on each section.
  \item {\tt summarized\_trace\_basic.xml} A small example for gathering information of MPI and OpenMP information with some performace counters and calling information at each MPI call.
  \item {\tt detailed\_trace\_basic.xml} A small example for gathering a summarized information of MPI and OpenMP parallel paradigms.
+ \item {\tt extrae\_bursts\_1ms.xml} An XML configuration example to setup the bursts tracing mode. This XML file will only capture the regions in between MPI calls that last more than the given threshold (1ms in this example).
 \end{itemize}
 
 Please note that most of the nodes present in the XML file have an {\tt enabled} attribute that allows turning on and off some parts of the instrumentation mechanism. For example, {\tt <mpi enabled="yes">} means MPI instrumentation is enabled and process all the contained XML subnodes, if any; whether {\tt <mpi enabled="no">} means to skip gathering MPI information and do not process XML subnodes.
