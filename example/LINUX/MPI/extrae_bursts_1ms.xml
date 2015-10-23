@@ -72,7 +72,7 @@
   </others>
 
   <bursts enabled="yes">
-    <threshold enabled="yes">10000u</threshold>
+    <threshold enabled="yes">1000u</threshold>
     <mpi-statistics enabled="yes" />
   </bursts>
 
