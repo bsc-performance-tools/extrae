@@ -25,7 +25,8 @@ int main (int argc, char *argv[])
 
 		d = (end - begin) / 1000000;
 
-		if ( n != d )
+		/* Allow +- 5 microsecond credit */
+		if (!( n-5 <= d && d <= n+5))
 		{
 			printf ("Executed sleep (%u) but we measured %lu nanoseconds\n",
 			  u, end-begin);
