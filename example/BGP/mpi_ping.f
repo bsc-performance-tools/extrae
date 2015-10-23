@@ -10,6 +10,7 @@ C  Ping-pong with MPI + I/O
       dimension foo(1)
       dimension sndmsg(MSGSIZE)
       dimension rcvmsg(MSGSIZE)
+      real*8 r
 
       call MPI_Init(error)
 c      call MPI_Pcontrol(0)
@@ -27,27 +28,33 @@ c      call MPI_Pcontrol(0)
 
       if (MOD(rank,2) .eq. 0) then
 
-         do 101 i=1, NITERS
+         do i=1, NITERS
             call MakeIO(IOSIZE, rank)
+            call WasteCPU(IOSIZE, rank, r)
+            call MPI_Bsend(r, 1, MPI_REAL8, rank+1, rank, MPI_COMM_WORLD, 
+     1           error)
             call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, rank+1, rank,
      1           MPI_COMM_WORLD, error)
             call MakeIO(IOSIZE, rank)
             call MPI_Recv(rcvmsg, MSGSIZE, MPI_INTEGER1, MPI_ANY_SOURCE,
      1           MPI_ANY_TAG, MPI_COMM_WORLD, status, error)
             call MPI_Barrier(MPI_COMM_WORLD, error)
- 101     continue
+         end do
 
       else
 
-         do 102 i=1, NITERS
+         do i=1, NITERS
             call MakeIO(IOSIZE, rank)
+            call MPI_Recv(r, 1, MPI_REAL8, MPI_ANY_SOURCE, MPI_ANY_TAG,
+     1           MPI_COMM_WORLD, status, error)
             call MPI_Recv(rcvmsg, MSGSIZE, MPI_INTEGER1, MPI_ANY_SOURCE,
      1           MPI_ANY_TAG, MPI_COMM_WORLD, status, error)
             call MakeIO(IOSIZE, rank)
+            call WasteCPU(IOSIZE, rank, r)
             call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, rank-1, rank,
      1           MPI_COMM_WORLD, error)
             call MPI_Barrier(MPI_COMM_WORLD, error)
- 102     continue
+         end do
 
       end if
 
@@ -68,5 +75,25 @@ C   This function performs some I/O
      1        file='pingtmp'//char(ichar('0') + rank))
          write (10) buffer
          close (10)
+         return
+      end
+
+C   This function wastes some CPU
+C   This is useful to play with bursts mode
+      subroutine WasteCPU(size, rank, r)
+         integer :: size, rank
+         real*8 :: r
+
+         integer :: n, i
+         real*8 :: h, tmp
+
+         tmp = 0
+         n = 500*1000
+         do i=1, n
+             x = h * (i - 0.5)
+             tmp = tmp + (4.0 / (1.0 + x*x))
+         end do
+         r = tmp
+
          return
       end
