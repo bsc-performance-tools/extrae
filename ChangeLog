@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 23Oct2015 Waste some CPU time in mpi_ping example for use with extrae_bursts_1ms.xml
+             Fix timing Extrae check
  * 22Oct2015 Improved "make check". Added -without-addresses to mpi2prv to ignore addresses
  * 21Oct2015 Fixed visibility of the on-line API routines that are called from the wrappers
              Fix example installation. Use cp instead of ln -s.
