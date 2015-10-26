@@ -172,28 +172,36 @@ AC_DEFUN([AX_PROG_MPI],
 
       dnl If $MPICC is not set, check for mpicc under $MPI_HOME/bin. We don't want to mix multiple MPI installations.
       AC_MSG_CHECKING([for MPI C compiler])
-      if test "${MPICC}" = "" ; then
-         mpicc_compilers="mpicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
-         for mpicc in [$mpicc_compilers]; do
-            if test -x "${MPI_HOME}/bin/${mpicc}" ; then
-               MPICC="${MPI_HOME}/bin/${mpicc}"
-               AC_MSG_RESULT([${MPICC}])
-               break
-            elif test -x "${MPI_HOME}/bin64/${mpicc}" ; then
-               MPICC="${MPI_HOME}/bin64/${mpicc}"
-               AC_MSG_RESULT([${MPICC}])
-               break
-            fi
-         done
-         if test "${MPICC}" = "" ; then
-            AC_MSG_RESULT([not found])
-            AC_MSG_NOTICE([Cannot find \${MPI_HOME}/bin/mpicc -or similar- using \${CC} instead])
-            MPICC_DOES_NOT_EXIST="yes"
-            MPICC=${CC}
-         else
-            MPICC_DOES_NOT_EXIST="no"
+      mpicc_compilers="mpicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
+      for mpicc in [$mpicc_compilers]; do
+         if test -x "${MPI_HOME}/bin/${mpicc}" ; then
+            MPICC_COMPILER="${MPI_HOME}/bin/${mpicc}"
+            AC_MSG_RESULT([${MPICC_COMPILER}])
+            break
+         elif test -x "${MPI_HOME}/bin64/${mpicc}" ; then
+            MPICC_COMPILER="${MPI_HOME}/bin64/${mpicc}"
+            AC_MSG_RESULT([${MPICC_COMPILER}])
+            break
          fi
+      done
+
+      if test "${MPICC_COMPILER}" = "" ; then
+         AC_MSG_RESULT([not found])
+         AC_MSG_NOTICE([Cannot find \${MPI_HOME}/bin/mpicc -or similar- using \${CC} instead])
+         MPICC_DOES_NOT_EXIST="yes"
       else
+         MPICC_DOES_NOT_EXIST="no"
+      fi
+  
+      dnl MPICC will point to the MPI C compiler used by Extrae to compile itself
+      dnl and can be different from MPICC_COMPILER which was automatically found
+      dnl in MPI installation and will be used for examples 
+
+      dnl if MPICC is not given, use MPICC_COMPILER
+      if test "${MPICC}" = "" ; then
+         MPICC=${MPICC_COMPILER}
+      else
+         AC_MSG_CHECKING([for given MPI C compiler -MPICC-])
          if test -x ${MPICC} ; then
             AC_MSG_RESULT([${MPICC}])
          else
@@ -278,6 +286,7 @@ AC_DEFUN([AX_PROG_MPI],
 
    dnl AC_SUBST(MPICC)
    AC_ARG_VAR([MPICC],[Alternate MPI C compiler - use if the MPI C compiler in the MPI installation should not be used])
+   AC_SUBST(MPICC_COMPILER)
    AC_SUBST(MPIF77)
    AC_SUBST(MPIF90)
 
