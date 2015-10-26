@@ -221,7 +221,7 @@ MPI_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/MPI/detailed_trace_basic.xml \
  $(top_srcdir)/example/LINUX/MPI/summarized_trace_basic.xml \
  $(top_srcdir)/example/LINUX/MPI/extrae_explained.xml \
- $(top_srcdir)/example/LINUX/MPI/extrae_bursts_10ms.xml \
+ $(top_srcdir)/example/LINUX/MPI/extrae_bursts_1ms.xml \
  $(top_srcdir)/example/LINUX/MPI/static \
  $(top_srcdir)/example/LINUX/MPI/ld-preload \
  $(top_srcdir)/example/LINUX/MPI/dyninst
@@ -387,7 +387,7 @@ endif
 	$(top_srcdir)/substitute $(SED) "@sub_CXX@" "`which ${CXX}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_FC@" "`which ${FC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 if HAVE_MPI
-	$(top_srcdir)/substitute $(SED) "@sub_MPICC@" "`which ${MPICC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_MPICC@" "`which ${MPICC_COMPILER}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF77@" "`which ${MPIF77}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF90@" "`which ${MPIF90}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 else
