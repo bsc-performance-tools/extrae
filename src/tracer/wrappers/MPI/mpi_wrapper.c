@@ -1216,8 +1216,6 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY); 
 
-	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 0;
 #endif
@@ -1227,6 +1225,8 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	PMPI_Comm_get_parent (&cparent);
 #endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+
+	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Finalize only if its initialized by MPI_init call */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
@@ -2179,8 +2179,6 @@ int MPI_Finalize_C_Wrapper (void)
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FINALIZE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-
 #if defined(IS_BGL_MACHINE)
 	BGL_disable_barrier_inside = 0;
 #endif
@@ -2190,6 +2188,8 @@ int MPI_Finalize_C_Wrapper (void)
 	PMPI_Comm_get_parent (&cparent);
 #endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
+
+	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Finalize only if its initialized by MPI_init call */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)

@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 27Oct2015 Free buffer when pthread routine finishes, not at pthread_join time
+             Move MPI_FINALIZE_EV so that it covers instrumentation code
  * 23Oct2015 Waste some CPU time in mpi_ping example for use with extrae_bursts_1ms.xml
              Fix timing Extrae check
  * 22Oct2015 Improved "make check". Added -without-addresses to mpi2prv to ignore addresses
