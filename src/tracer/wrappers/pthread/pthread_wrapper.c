@@ -253,6 +253,8 @@ static void * pthread_create_hook (void *p1)
 	Probe_pthread_Function_Exit ();
 	Backend_Leave_Instrumentation ();
 
+	Backend_Flush_pThread (pthread_self());
+
 	return res;
 }
 
@@ -357,7 +359,6 @@ int pthread_join (pthread_t p1, void **p2)
 		Probe_pthread_Join_Entry ();
 
 		res = pthread_join_real (p1, p2);
-		Backend_Flush_pThread (p1);
 
 		Probe_pthread_Join_Exit ();
 		Backend_Leave_Instrumentation ();
