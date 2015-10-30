@@ -29,6 +29,11 @@
 
 5) Generate binary packages using the buildfarm script
   - this makes sure that the package will compile at least on our environment -
+  - also compile for:
+      MN3 (need to upgrade module)
+      MT  (need to upgrade module)
+      bscpower8n1
+      MB
 
 6) Copy the documentation and add it to the buildfarm output to publish it in the webpage
 
