@@ -1,7 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
- * 30Oct2015 Fix compilation of extrae-cmd in BG/* if PAPI is not set
+ * 30Oct2015 Extrae 3.2.0 released!
+             Fix compilation of extrae-cmd in BG/* if PAPI is not set
              Fix compilation in an other directory rather than $top_src_dir
  * 27Oct2015 Free buffer when pthread routine finishes, not at pthread_join time
              Move MPI_FINALIZE_EV so that it covers instrumentation code
