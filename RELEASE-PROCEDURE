@@ -15,23 +15,22 @@
  2.c) bootstrap & configure to rebuild documentation (1.c)
  2.d) commit the documentation
  2.e) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
- 2.f) svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
-       OR
-      svn copy https://svn.bsc.es/repos/ptools/extrae/branches/2.3 https://svn.bsc.es/repos/ptools/extrae/tags/2.3.5
+
+3) Tag the release in the SVN
+ 3.a) If it is a new release (x.y.z version) with z = 0, make directory for it
+      E.g. for 3.4.0: svn mkdir https://svn.bsc.es/repos/ptools/extrae/tags/3.4
+ 3.b) Actually tag:
+      E.g. for 3.4.0: svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/3.4/3.4.0
 
 ** If this wasn't done at the previous release step.
 
-3) Specific issues:
+4) Specific issues:
     - Make sure the nanos/mercurium team tests the package if applies.
 
-4) Generate binary packages using the buildfarm script
+5) Generate binary packages using the buildfarm script
   - this makes sure that the package will compile at least on our environment -
 
-5) Copy the documentation (pdf format) and add it to the buildfarm output to publish it in the webpage
-
-6) Make sure that the documentation in pdf format is within the binary packages.
-  - use buildfarm/inject-user-guide.sh to add use guide into tar.bz2s like
-       inject-user-guide.sh extrae-user-guide.pdf *.tar.bz2
+6) Copy the documentation and add it to the buildfarm output to publish it in the webpage
 
 7) Upload binary packages to:
    http://www.bsc.es/ssl/apps/performanceTools/admin/index.php
@@ -41,9 +40,9 @@
 
 8) Email & celebrate
   8.a) Addresses
-         tools@bsc.es
-         support@bsc.es
-         pm-tools@bsc.es
-         hca.sysadmin@bsc.es
-         distributed_computing@bsc.es
+       Ourselves    :  tools@bsc.es
+       BSC support  :  support@bsc.es
+       OmpSs people :  pm-tools@bsc.es
+       MB support   :  hca.sysadmin@bsc.es
+       CompSs people:  distributed_computing@bsc.es
 
