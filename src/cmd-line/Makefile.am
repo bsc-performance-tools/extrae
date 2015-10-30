@@ -19,10 +19,15 @@ if HAVE_SIONLIB
 extrae_cmd_LDADD += @SIONLIB_LIBS@
 endif
 
-extrae_cmd_LDFLAGS =
+extrae_cmd_LDFLAGS = 
+
+if IS_BG_MACHINE
+extrae_cmd_LDFLAGS += -all-static
+endif 
+
 if IS_BG_MACHINE
 if HAVE_PAPI
-extrae_cmd_LDFLAGS += -all-static -L@PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
+extrae_cmd_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ @PAPI_LIBS@
 endif
 extrae_cmd_LDADD += $(XML2_LDFLAGS) $(XML2_LIBS)
 else !IS_BG_MACHINE
