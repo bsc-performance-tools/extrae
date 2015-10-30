@@ -9,14 +9,13 @@
    1.c.ii)  Invoke make build-documentation
    1.c.iii) Commit all the latex, pdf/ps and html files into the SVN
 
-2) Change the version if necessary **
+2) Change the version if necessary - let's do this from a new checkout **
  2.a) in the configure.ac (see AC_INIT)
  2.b) in src/common/extrae_version.h
- 2.c) download from the new tag
- 2.d) bootstrap & configure to rebuild documentation (1.c)
- 2.e) commit the documentation
- 2.f) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
- 2.g) svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
+ 2.c) bootstrap & configure to rebuild documentation (1.c)
+ 2.d) commit the documentation
+ 2.e) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
+ 2.f) svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/VERSION
        OR
       svn copy https://svn.bsc.es/repos/ptools/extrae/branches/2.3 https://svn.bsc.es/repos/ptools/extrae/tags/2.3.5
 
