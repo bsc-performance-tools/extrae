@@ -1,0 +1,4 @@
+SUBDIRS = \
+ launcher \
+ tracer \
+ merger

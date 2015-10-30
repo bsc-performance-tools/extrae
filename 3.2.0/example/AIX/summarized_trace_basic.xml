@@ -1,0 +1,59 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="@sub_PREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="@sub_XMLID@"
+>
+
+  <mpi enabled="yes">
+    <counters enabled="yes" />
+  </mpi>
+
+  <openmp enabled="yes">
+    <locks enabled="no" />
+    <counters enabled="yes" />
+  </openmp>
+
+  <pthread enabled="no">
+    <locks enabled="no" />
+    <counters enabled="yes" />
+  </pthread>
+
+  <counters enabled="yes">
+    <cpu enabled="yes" starting-set-distribution="1">
+      <set enabled="yes" domain="all">
+        145
+      </set>
+    </cpu>
+
+    <network enabled="no" />
+
+    <resource-usage enabled="no" />
+
+    <memory-usage enabled="no" />
+  </counters>
+
+  <bursts enabled="yes">
+    <threshold enabled="yes">500u</threshold>
+    <mpi-statistics enabled="yes" />
+  </bursts>
+
+  <sampling enabled="no" type="default" period="50m" variability="10m" />
+
+  <merge enabled="yes" 
+    synchronization="default"
+    binary="mpi_ping"
+    tree-fan-out="16"
+    max-memory="512"
+    joint-states="yes"
+    keep-mpits="yes"
+    sort-addresses="yes"
+    overwrite="yes"
+  >
+    mpi_ping_bursts.prv
+  </merge>
+
+
+</trace>

@@ -1,0 +1,191 @@
+
+\chapter{Merging process}\label{cha:Merging}
+
+Once the application has finished, and if the automatic merge process is not setup, the merge must be executed manually. Here we detail how to run the merge process manually.
+
+The inserted probes in the instrumented binary are responsible for gathering performance metrics of each task/thread and for each of them several files are created where the XML configuration file specified (see section \ref{sec:XMLSectionStorage}). Such files are:
+
+\begin{itemize}
+ \item As many {\tt .mpit} files as tasks and threads where running the target application. Each file contains information gathered by the specified task/thread in raw binary format.
+ \item A single {\tt .mpits} file that contain a list of related {\tt .mpit} files.
+ \item If the DynInst based instrumentation package was used, an addition {\tt .sym} file that contains some symbolic information gathered by the DynInst library.
+\end{itemize}
+
+In order to use Paraver, those intermediate files ({\it i.e.}, {\tt .mpit} files) must be merged and translated into Paraver trace file format. The same applies if the user wants to use the Dimemas simulator. To proceed with any of these translation all the intermediate trace files must be merged into a single trace file using one of the available mergers in the {\tt bin} directory (see table \ref{tab:MergerDescription}).
+
+The target trace type is defined in the XML configuration file used at the instrumentation step (see section \ref{sec:XMLSectionTraceConfiguration}), and it has match with the merger used (mpi2prv and mpimpi2prv for Paraver and mpi2dim and mpimpi2dim for Dimemas). However, it is possible to force the format nevertheless the selection done in the XML file using the parameters {\tt -paraver} or {\tt -dimemas}\footnote{The timing mechanism differ in Paraver/Dimemas at the instrumentation level. If the output trace format does not correspond with that selected in the XML some timing inaccuracies may be present in the final tracefile. Such inaccuracies are known to be higher due to clock granularity if the XML is set to obtain Dimemas tracefiles but the resulting tracefile is forced to be in Paraver format.}.
+
+\begin{table}[ht]
+\rowcolors{2}{tabbg1}{tabbg2}
+\centerline {
+\begin{tabular}{l l}
+\hline
+{\bf Binary} & {\bf Description} \\
+\hline
+mpi2prv      & Sequential version of the Paraver merger.\\
+mpi2dim      & Sequential version of the Dimemas merger.\\
+mpimpi2prv   & Parallel version of the Paraver merger.\\
+mpimpi2dim   & Parallel version of the Dimemas merger.\\
+\hline
+\end{tabular}
+}
+\caption{Description of the available mergers in the \TRACE package.}
+\label{tab:MergerDescription}
+\end{table}
+
+\section{Paraver merger}
+
+As stated before, there are two Paraver mergers: {\tt mpi2prv} and {\tt mpimpi2prv}. The former is for use in a single processor mode while the latter is meant to be used with multiple processors using MPI (and cannot be run using one MPI task).
+
+Paraver merger receives a set of intermediate trace files and generates three files with the same name (which is set with the {\tt -o} option) but differ in the extension. The Paraver trace itself (.prv file) that contains timestamped records that represent the  information gathered during the execution of the instrumented application. It also generates the Paraver Configuration File (.pcf file), which is responsible for translating values contained in the Paraver trace into a more human readable values. Finally, it also generates a file containing the distribution of the application across the cluster computation resources (.row file).
+
+The following sections describe the available options for the Paraver mergers. Typically, options available for single processor mode are also available in the parallel version, unless specified.
+
+\subsection{Sequential Paraver merger}
+
+These are the available options for the sequential Paraver merger:
+
+\begin{itemize}
+ \item {\tt -d} or {\tt -dump}\\
+ Dumps the information stored in the intermediate trace files.
+ \item {\tt -dump-without-time}\\
+ The information dumped with {\tt -d} (or {\tt -dump}) does not show the timestamp.
+ \item {\tt -e BINARY}\\
+ Uses the given BINARY to translate addresses that are stored in the intermediate trace files into useful information (including function name, source file and line). The application has to be compiled with {\tt -g} flag so as to obtain valuable information.\\
+ {\bf NOTE:} Since \TRACE version 2.4.0 this flag is superseded in Linux systems where {\tt /proc/self/maps} is readable. The instrumentation part will annotate the binaries and shared libraries in use and will try to use them before using BINARY. This flag is still available in Linux systems as a default case just in case the binaries and libraries pointed by {\tt /proc/self/maps} are not available.
+ \item {\tt -emit-library-events}\\
+ Emit additional events for the source code references that belong to a separate shared library that cannot be translated. Only add information with respect to the shared library name. This option is disabled by default.
+ \item {\tt -evtnum N}\\
+ Partially processes (up to N events) the intermediate trace files to generate the Dimemas tracefile.
+ \item {\tt -f FILE.mpits} {\em (where {\tt FILE.mpits} file is generated by the instrumentation)}\\
+ The merger uses the given file (which contains a list of intermediate trace files of a single executions) instead of giving set of intermediate trace files.\\
+ This option looks first for each file listed in the parameter file. Each contained file is searched in the absolute given path, if it does not exist, then it's searched in the current directory.
+ \item {\tt -f-relative FILE.mpits} {\em (where {\tt FILE.mpits} file is generated by the instrumentation)}\\
+ This options behaves like the -f options but looks for the intermediate files in the current directory.
+ \item {\tt -f-absolute FILE.mpits} {\em (where {\tt FILE.mpits} file is generated by the instrumentation)}\\
+ This options behaves like the -f options but uses the full path of every intermediate file so as to locate them.
+ \item {\tt -h}\\
+ Provides minimal help about merger options.
+ \item {\tt -keep-mpits} (or inversely, {\tt -no-keep-mpits})\\
+ Tells the merger to keep (or remove) the intermediate tracefiles after the trace generation.
+ \item {\tt -maxmem M}\\
+ The last step of the merging process will be limited to use {\em M} megabytes of memory. By default, M is 512.
+ \item {\tt -s FILE.sym} {\em (where {\tt FILE.sym} file is generated with the DynInst instrumentator)}\\
+ Passes information regarding instrumented symbols into the merger to aid the Paraver analysis. If {\tt -f}, {\tt -f-relative} or {\tt -f-absolute} paramters are given, the merge process will try to automatically load the symbol file associated to that FILE.mpits file.
+ \item {\tt -no-syn}\\
+ If set, the merger will not attempt to synchronize the different tasks. This is useful when merging intermediate files obtained from a single node (and thus, share a single clock).
+ \item {\tt -o FILE.prv}\\
+ Choose the name of the target Paraver tracefile. If {\tt -o} is not given, the merging process will automatically name the tracefile using the application binary name, if possible.
+ \item {\tt -o FILE.prv.gz}\\
+ Choose the name of the target Paraver tracefile compressed using the libz library.
+ \item {\tt -remove-files}\\
+ The merging process removes the intermediate tracefiles when succesfully generating the Paraver tracefile.
+ \item {\tt -skip-sendrecv}\\
+ Do not match point to point communications issued by {\tt MPI\_Sendrecv} or {\tt MPI\_Sendrecv\_replace}.
+ \item {\tt -sort-addresses}\\
+ Sort event values that reference source code locations so as the values are sorted by file name first and then line number (enabled by default).
+ \item {\tt -split-states}\\
+ Do not join consecutive states that are the same into a single one.
+ \item {\tt -syn}\\
+ If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI\_Init call. This will usually lead to "synchronized" tasks, but it will depend on how the clocks advance in time.
+ \item {\tt -syn-node}\\
+ If different nodes are used in the execution of a tracing run, there can exist some clock differences on all the nodes. This option makes mpi2prv to recalculate all the timings based on the end of the MPI\_Init call and the node where they ran. This will usually lead to better synchronized tasks than using -syn, but, again, it will depend on how the clocks advance in time.
+ \item {\tt -translate-addresses} (or inversely, {\tt -no-translate-addresses})\\
+ The merger process tries to translate the code reference addresses into source code references (including routine name, file name, line number, and if outside the main module, the shared library where the reference belongs). This option is enabled by default.
+ \item {\tt -trace-overwrite} (or inversely, {\tt -no-trace-overwrite})\\
+ Tells the merger to overwrite (or not) the final tracefile if it already exists. If the tracefile exists and {\tt -no-trace-overwrite} is given, the tracefile name will have an increasing numbering in addition to the name given by the user.
+ \item {\tt -unique-caller-id}\\
+ Choose whether use a unique value identifier for different callers locations (MPI calling routines, user routines, OpenMP outlined routines andpthread routines).
+\end{itemize}
+
+\subsection{Parallel Paraver merger}
+
+These options are specific to the parallel version of the Paraver merger:
+
+\begin{itemize}
+ \item {\tt -block}\\
+  Intermediate trace files will be distributed in a block fashion instead of a cyclic fashion to the merger.
+ \item {\tt -cyclic}\\
+	Intermediate trace files will be distributed in a cyclic fashion instead of a block fashion to the merger.
+ \item {\tt -size}\\
+	The intermediate trace files will be sorted by size and then assigned to processors in a such manner that each processor receives approximately the same size.
+ \item {\tt -consecutive-size}\\
+	Intermediate trace files will be distributed consecutively to processors but trying to distribute the overall size equally among processors.
+ \item {\tt -use-disk-for-comms}\\
+ Use this option if your memory resources are limited. This option uses an alternative matching communication algorithm that saves memory but uses intensively the disk.
+ \item{\tt -tree-fan-out N}\\
+  Use this option to instruct the merger to generate the tracefile using a tree-based topology. This should improve the performance when using a large number of processes at the merge step. Depending on the combination of processes and the width of the tree, the merger will need to run several stages to generate the final tracefile.\\
+  The number of processes used in the merge process must be equal or greater than the {\em N} parameter. If it is not, the merger itself will automatically set the width of the tree to the number of processes used.
+\end{itemize}
+
+\section{Dimemas merger}
+
+As stated before, there are two Dimemas mergers: {\tt mpi2dim} and {\tt mpimpi2dim}. The former is for use in a single processor mode while the latter is meant to be used with multiple processors using MPI.
+
+In contrast with Paraver merger, Dimemas mergers generate a single output file with the .dim extension that is suitable for the Dimemas simulator from the given intermediate trace files..
+
+These are the available options for both Dimemas mergers:
+
+\begin{itemize}
+ \item {\tt -evtnum N}\\
+ Partially processes (up to N events) the intermediate trace files to generate the Dimemas tracefile.
+ \item {\tt -f FILE.mpits} {\em (where {\tt FILE.mpits} file is generated by the instrumentation)}\\
+ The merger uses the given file (which contains a list of intermediate trace files of a single executions) instead of giving set of intermediate trace files.\\
+ This option takes only the file name of every intermediate file so as to locate them.
+ \item {\tt -f-relative FILE.mpits} {\em (where {\tt FILE.mpits} file is generated by the instrumentation)}\\
+ This options works exactly as the -f option.
+ \item {\tt -f-absolute FILE.mpits} {\em (where {\tt FILE.mpits} file is generated by the instrumentation)}\\
+ This options behaves like the -f options but uses the full path of every intermediate file so as to locate them.
+ \item {\tt -h}\\
+ Provides minimal help about merger options.
+ \item {\tt -maxmem M}\\
+ The last step of the merging process will be limited to use {\em M} megabytes of memory. By default, M is 512.
+ \item {\tt -o FILE.dim}\\
+ Choose the name of the target Dimemas tracefile.
+\end{itemize}
+
+\section{Environment variables}
+
+There are some environment variables that are related Two environment variables 
+
+\subsection{Environment variables suitable to Paraver merger}
+
+\subsubsection{EXTRAE\_LABELS}
+
+This environment variable lets the user add custom information to the generated Paraver Configuration File ({\tt .pcf}). Just set this variable to point to a file containing labels for the unknown (user) events.
+
+The format for the file is:
+
+\begin{verbatim}
+  EVENT_TYPE
+  0 [type1] [label1]
+  0 [type2] [label2]
+  ...
+  0 [typeK] [labelK]
+\end{verbatim}
+
+Where {\tt [typeN]} is the event value and {\tt [labelN]} is the description for the event with value [typeN].
+It is also possible to link both type and value of an event:
+
+\begin{verbatim}
+  EVENT_TYPE
+  0 [type] [label]
+  VALUES
+  [value1] [label1]
+  [value2] [label2]
+  ...
+  [valueN] [labelN]
+\end{verbatim}
+
+With this information, Paraver can deal with both type and  value when giving textual information to the end user. If Paraver does not find any information for an event/type it will shown it in numerical form.
+
+\subsubsection{MPI2PRV\_TMP\_DIR}
+
+Points to a directory where all intermediate temporary files will be stored. These files will be removed as soon the application ends.
+
+\subsection{Environment variables suitable to Dimemas merger}
+
+\subsubsection{MPI2DIM\_TMP\_DIR}
+
+Points to a directory where all intermediate temporary files will be stored. These files will be removed as soon the application ends.
+
