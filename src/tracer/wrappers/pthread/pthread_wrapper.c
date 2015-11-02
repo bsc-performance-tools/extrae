@@ -52,7 +52,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "trace_macros.h"
 #include "pthread_probe.h"
 
-//#define DEBUG
+// #define DEBUG
 //#define DEBUG_MUTEX
 
 #if defined(PIC)
@@ -353,6 +353,7 @@ int pthread_join (pthread_t p1, void **p2)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join (%p, %p)\n", p1, p2);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join_real at %p\n", pthread_join_real);
 #endif
+
 	if (pthread_join_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Backend_Enter_Instrumentation (2);
@@ -360,8 +361,14 @@ int pthread_join (pthread_t p1, void **p2)
 
 		res = pthread_join_real (p1, p2);
 
-		Probe_pthread_Join_Exit ();
-		Backend_Leave_Instrumentation ();
+		/* Careful, initialized state may have changed after join! */
+		if (Extrae_is_initialized_Wrapper())
+		{
+			Backend_Flush_pThread (p1);
+
+			Probe_pthread_Join_Exit ();
+			Backend_Leave_Instrumentation ();
+		}
 	}
 	else if (pthread_join_real != NULL && !EXTRAE_INITIALIZED())
 	{

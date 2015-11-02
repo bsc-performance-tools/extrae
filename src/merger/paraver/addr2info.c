@@ -46,7 +46,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include <libgen.h>
 #endif
 
-//#define DEBUG
+// #define DEBUG
 
 #define SHORT_STRING_PREFIX 8
 #define SHORT_STRING_SUFFIX 8
@@ -307,6 +307,11 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 	UINT64 result;
 	int found;
 
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": Address2Info_Translate (%u, %u, %lx, %d, %d);\n",
+	  ptask, task, address, query, uniqueID);
+#endif
+
 /* address es la direccion de retorno por donde continuara ejecutandose el
  * codigo despues de cada CALL a una rutina MPI. En arquitecturas x86, despues
  * de la llamada se desapilan los parametros y se recogen los resultados. Asi
@@ -511,6 +516,11 @@ static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
 	struct address_table  * AddrTab;
 	struct function_table * FuncTab;
 	int function_id = 0;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": AddressTable_Insert (%lx, %d, %s, %s, %s, %d)\n",
+	  address, addr_type, module, funcname, filename, line);
+#endif
 
 	AddrTab = AddressTable[addr_type];
 	FuncTab = FunctionTable[addr_type];

@@ -141,9 +141,12 @@ PTHREAD_EXAMPLE_FILES+=\
  $(top_srcdir)/example/FREEBSD/PTHREAD/user-comms.c
 
 JAVA_EXAMPLE_FILES+=\
- $(top_srcdir)/example/FREEBSD/JAVA/extrae.xml \
- $(top_srcdir)/example/FREEBSD/JAVA/Makefile \
- $(top_srcdir)/example/FREEBSD/JAVA/pi.java
+ $(top_srcdir)/example/FREEBSD/JAVA/manual
+
+if WANT_JAVA_WITH_ASPECTJ
+JAVA_EXAMPLE_FILES+=\
+ $(top_srcdir)/example/FREEBSD/JAVA/automatic 
+endif
 endif
 
 if OS_DARWIN
@@ -196,9 +199,12 @@ PTHREAD_EXAMPLE_FILES+=\
  $(top_srcdir)/example/FREEBSD/PTHREAD/user-comms.c
 
 JAVA_EXAMPLE_FILES+=\
- $(top_srcdir)/example/FREEBSD/JAVA/extrae.xml \
- $(top_srcdir)/example/FREEBSD/JAVA/Makefile \
- $(top_srcdir)/example/FREEBSD/JAVA/pi.java
+ $(top_srcdir)/example/FREEBSD/JAVA/manual
+
+if WANT_JAVA_WITH_ASPECTJ
+JAVA_EXAMPLE_FILES+=\
+ $(top_srcdir)/example/FREEBSD/JAVA/automatic 
+endif
 
 OPENCL_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/OPENCL/README \
@@ -328,9 +334,11 @@ MPIOMPSS_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/MPI+OMPSS/test.dat
 
 JAVA_EXAMPLE_FILES+=\
- $(top_srcdir)/example/LINUX/JAVA/extrae.xml \
- $(top_srcdir)/example/LINUX/JAVA/Makefile \
- $(top_srcdir)/example/LINUX/JAVA/pi.java
+ $(top_srcdir)/example/LINUX/JAVA/manual
+if WANT_JAVA_WITH_ASPECTJ
+JAVA_EXAMPLE_FILES+=\
+ $(top_srcdir)/example/LINUX/JAVA/automatic
+endif
 
 FORK_EXAMPLE_FILES+=\
  $(top_srcdir)/example/LINUX/FORK/extrae.xml \
@@ -402,8 +410,10 @@ else
 endif
 if WANT_JAVA
 	$(top_srcdir)/substitute $(SED) "@sub_JAVAC@" "`which ${JAVAC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_JAR@" "`which ${JAR}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 else
 	$(top_srcdir)/substitute $(SED) "@sub_JAVAC@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_JAR@" "" $(DESTDIR)$(datadir)/example/Makefile.inc
 endif
 # Apply post-installation modifications (FreeBSD specific)
 if OS_FREEBSD

@@ -383,9 +383,6 @@ void Extrae_fini_Wrapper (void)
 			if (getenv ("EXTRAE_APPEND_PID") == NULL)
 				Generate_Task_File_List();
 
-		/* Mark as already finalized, thus avoiding further deinits */
-		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
-
 		/* Finalize tracing library */
 		Backend_Finalize ();
 
@@ -415,8 +412,6 @@ void Extrae_fini_last_chance_Wrapper (void)
 		/* Call additional code to finalize the task including
 		MPI_Finalize, ... */
 		Extrae_finalize_task();
-
-		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 	}
 }
 

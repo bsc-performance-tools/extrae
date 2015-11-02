@@ -33,6 +33,10 @@ static char UNUSED rcsid[] = "$Id$";
 #include "events.h"
 
 #define MPI_EVENTS 100
+
+/******************************************************************************
+ ***  IsMPI
+ ******************************************************************************/
 static unsigned mpi_events[] = {
 	MPI_BSEND_EV, MPI_SSEND_EV, MPI_BARRIER_EV, MPI_BCAST_EV, MPI_SEND_EV,
 	MPI_RECV_EV, MPI_SENDRECV_EV, MPI_SENDRECV_REPLACE_EV, MPI_IBSEND_EV,
@@ -64,10 +68,6 @@ static unsigned mpi_events[] = {
 	MPI_IREDUCESCAT_EV, MPI_ISCAN_EV
  };
 
-/******************************************************************************
- ***  IsMPI
- ******************************************************************************/
-
 unsigned IsMPI (unsigned EvType)
 {
   unsigned evt;
@@ -78,6 +78,9 @@ unsigned IsMPI (unsigned EvType)
   return FALSE;
 }
 
+/******************************************************************************
+ ***  IsMISC
+ ******************************************************************************/
 #define MISC_EVENTS 42
 static unsigned misc_events[] = {FLUSH_EV, READ_EV, WRITE_EV, APPL_EV, USER_EV,
 	HWC_DEF_EV, HWC_CHANGE_EV, HWC_EV, TRACING_EV, SET_TRACE_EV, CALLER_EV,
@@ -90,10 +93,6 @@ static unsigned misc_events[] = {FLUSH_EV, READ_EV, WRITE_EV, APPL_EV, USER_EV,
 	REGISTER_STACKED_TYPE_EV, REGISTER_CODELOCATION_TYPE_EV,
 	FORK_EV, WAIT_EV, WAITPID_EV, EXEC_EV, GETCPU_EV, SYSTEM_EV,
 	MALLOC_EV, FREE_EV, CALLOC_EV, REALLOC_EV };
-
-/******************************************************************************
- ***  IsMISC
- ******************************************************************************/
 
 unsigned IsMISC (unsigned EvType)
 {
@@ -109,6 +108,9 @@ unsigned IsMISC (unsigned EvType)
 	return FALSE;
 }
 
+/******************************************************************************
+ ***  IsOpenMP
+ ******************************************************************************/
 #define OMP_EVENTS 28
 static unsigned omp_events[] = { OMPFUNC_EV, PAR_EV, WSH_EV, BARRIEROMP_EV,
 	UNNAMEDCRIT_EV, NAMEDCRIT_EV, WORK_EV, JOIN_EV, OMPSETNUMTHREADS_EV,
@@ -117,10 +119,6 @@ static unsigned omp_events[] = { OMPFUNC_EV, PAR_EV, WSH_EV, BARRIEROMP_EV,
 	OMPT_SECTIONS_EV, OMPT_SINGLE_EV, OMPT_MASTER_EV, TASKGROUP_START_EV,
 	TASKGROUP_END_EV, TASKID_EV, OMPT_TASKGROUP_IN_EV, OMPT_DEPENDENCE_EV,
 	OMPT_TASKFUNC_EV, OMP_STATS_EV };
-
-/******************************************************************************
- ***  IsOpenMP
- ******************************************************************************/
 
 unsigned IsOpenMP (unsigned EvType)
 {
@@ -132,16 +130,15 @@ unsigned IsOpenMP (unsigned EvType)
   return FALSE;
 }
 
+/******************************************************************************
+ ***  IsPthread
+ ******************************************************************************/
 #define PTHREAD_EVENTS 14
 static unsigned pthread_events[] = { PTHREAD_CREATE_EV, PTHREAD_JOIN_EV,
 	PTHREAD_DETACH_EV, PTHREAD_FUNC_EV, PTHREAD_RWLOCK_WR_EV, PTHREAD_RWLOCK_RD_EV,
 	PTHREAD_RWLOCK_UNLOCK_EV, PTHREAD_MUTEX_LOCK_EV, PTHREAD_MUTEX_UNLOCK_EV,
 	PTHREAD_COND_SIGNAL_EV, PTHREAD_COND_BROADCAST_EV, PTHREAD_COND_WAIT_EV,
 	PTHREAD_EXIT_EV, PTHREAD_BARRIER_WAIT_EV };
-
-/******************************************************************************
- ***  IsPthread
- ******************************************************************************/
 
 unsigned IsPthread (unsigned EvType)
 {
@@ -153,6 +150,30 @@ unsigned IsPthread (unsigned EvType)
   return FALSE;
 }
 
+/******************************************************************************
+ ***  IsJava
+ ******************************************************************************/
+#define JAVA_EVENTS 4
+static unsigned java_events[] = {
+	JAVA_JVMTI_GARBAGECOLLECTOR_EV,
+	JAVA_JVMTI_EXCEPTION_EV,
+	JAVA_JVMTI_OBJECT_ALLOC_EV,
+	JAVA_JVMTI_OBJECT_FREE_EV
+};
+
+unsigned IsJava (unsigned EvType)
+{
+  unsigned evt;
+
+  for (evt = 0; evt < JAVA_EVENTS; evt++)
+    if (java_events[evt] == EvType)
+      return TRUE;
+  return FALSE;
+}
+
+/******************************************************************************
+ ***  IsCUDA
+ ******************************************************************************/
 #define CUDA_EVENTS 14
 static unsigned cuda_events[] = {
 	/* Host events */
@@ -164,10 +185,6 @@ static unsigned cuda_events[] = {
     CUDAKERNEL_GPU_EV, CUDACONFIGKERNEL_GPU_EV, CUDAMEMCPY_GPU_EV,
 	CUDAMEMCPYASYNC_GPU_EV, CUDATHREADBARRIER_GPU_EV };
 
-/******************************************************************************
- ***  IsCUDA
- ******************************************************************************/
-
 unsigned IsCUDA (unsigned EvType)
 {
   unsigned evt;
@@ -178,6 +195,9 @@ unsigned IsCUDA (unsigned EvType)
   return FALSE;
 }
 
+/******************************************************************************
+ ***  IsOpenCL
+ ******************************************************************************/
 #define OPENCL_EVENTS 73
 static unsigned opencl_events[] = {
 	OPENCL_CLCREATEBUFFER_EV, OPENCL_CLCREATECOMMANDQUEUE_EV, 
@@ -227,10 +247,6 @@ static unsigned opencl_events[] = {
 	OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV,
 };
 
-/******************************************************************************
- ***  IsOpenCL
- ******************************************************************************/
-
 unsigned IsOpenCL (unsigned EvType)
 {
   unsigned evt;
@@ -241,7 +257,9 @@ unsigned IsOpenCL (unsigned EvType)
   return FALSE;
 }
 
-
+/******************************************************************************
+ ***  IsOPENSHMEM
+ ******************************************************************************/
 #define OPENSHMEM_EVENTS COUNT_OPENSHMEM_EVENTS
 static unsigned openshmem_events[] = {
   START_PES_EV, SHMEM_MY_PE_EV, _MY_PE_EV, SHMEM_N_PES_EV, _NUM_PES_EV, SHMEM_PE_ACCESSIBLE_EV, SHMEM_ADDR_ACCESSIBLE_EV,
@@ -265,11 +283,6 @@ static unsigned openshmem_events[] = {
   SHMEM_FENCE_EV, SHMEM_QUIET_EV, SHMEM_CLEAR_LOCK_EV, SHMEM_SET_LOCK_EV, SHMEM_TEST_LOCK_EV, SHMEM_CLEAR_CACHE_INV_EV, SHMEM_SET_CACHE_INV_EV,
   SHMEM_CLEAR_CACHE_LINE_INV_EV, SHMEM_SET_CACHE_LINE_INV_EV, SHMEM_UDCFLUSH_EV, SHMEM_UDCFLUSH_LINE_EV,
 };
-
-
-/******************************************************************************
- ***  IsOPENSHMEM
- ******************************************************************************/
 
 unsigned IsOPENSHMEM (unsigned EvType)
 {
@@ -366,6 +379,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (IsOPENSHMEM(EvType))
 	{
 		*Type = OPENSHMEM_TYPE;
+		return TRUE;
+	}
+	else if (IsJava(EvType))
+	{
+		*Type = JAVA_TYPE;
 		return TRUE;
 	}
 	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)

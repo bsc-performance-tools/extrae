@@ -24,3 +24,6 @@ if WANT_OPENSHMEM
 SUBDIRS += openshmem
 endif
 
+if WANT_JAVA_JVMTI
+SUBDIRS += JAVA
+endif

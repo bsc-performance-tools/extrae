@@ -444,7 +444,7 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
 			    Type == MPI_TYPE || Type == CUDA_TYPE || Type == OPENCL_TYPE ||
-			    Type == OPENSHMEM_TYPE)
+			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
 
@@ -468,6 +468,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 						Enable_OpenCL_Operation (EvType);
 					else if (OPENSHMEM_TYPE == Type)
 						Enable_OPENSHMEM_Operation (EvType);
+					else if (JAVA_TYPE == Type)
+						Enable_Java_Operation (EvType);
 				}
 				else	
 				{

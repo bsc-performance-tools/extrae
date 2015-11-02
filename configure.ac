@@ -130,6 +130,7 @@ if test "${IS_SPARC64_MACHINE}" != "yes" ; then
 	AC_FC_WRAPPERS
 fi
 AX_JAVA
+AX_JAVA_ASPECTJ
 AC_PROG_INSTALL
 AC_PROG_SED
 AC_PROG_AWK
@@ -584,6 +585,7 @@ AC_CONFIG_FILES([
   src/launcher/Makefile \
   src/launcher/static/Makefile \
   src/launcher/dyninst/Makefile \
+  src/launcher/java/Makefile \
   scripts/Makefile \
   src/common/Makefile \
   src/common/MPI/Makefile \
@@ -602,6 +604,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/MALLOC/Makefile \
   src/tracer/wrappers/IO/Makefile \
   src/tracer/wrappers/fork/Makefile \
+  src/tracer/wrappers/JAVA/Makefile \
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \
@@ -614,6 +617,7 @@ AC_CONFIG_FILES([
   src/cmd-line/Makefile \
   src/java-connector/Makefile \
   src/java-connector/jni/Makefile \
+  src/java-connector/jvmti-agent/Makefile \
   doc/Makefile etc/Makefile ])
 
 AC_CONFIG_FILES([\

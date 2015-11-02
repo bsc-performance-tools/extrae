@@ -220,6 +220,9 @@ core_MODULES += \
 if WANT_PEBS_SAMPLING
 core_MODULES += sampling/intel-pebs/libsampling_intel_pebs.la
 endif
+if WANT_JAVA_JVMTI
+core_MODULES += $(WRAPPERS_LIB)/JAVA/libwrap_java.la
+endif
 
 INTERFACE_API_PTHREAD = $(INTERFACES_LIB)/API/libiface_api_pthread.la
 if PTHREAD_SUPPORT_IN_ALL_LIBS

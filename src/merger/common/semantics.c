@@ -45,6 +45,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "cuda_prv_semantics.h"
 #include "opencl_prv_semantics.h"
 #include "openshmem_prv_semantics.h"
+#include "java_prv_semantics.h"
 
 #include "mpi_trf_semantics.h"
 #include "misc_trf_semantics.h"
@@ -89,6 +90,7 @@ void Semantics_Initialize (int output_format)
 			Register_Event_Handlers (PRV_CUDA_Event_Handlers);
 			Register_Range_Handlers (PRV_OpenCL_Event_Handlers);
 			Register_Event_Handlers (PRV_OPENSHMEM_Event_Handlers);
+			Register_Event_Handlers (PRV_Java_Event_Handlers);
 			break;
 	}
 }

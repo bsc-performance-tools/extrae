@@ -1,6 +1,11 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 02Nov2015 Extended Java instrumentation through AspectJ and JVMTI
+             Added $EXTRAE_HOME/bin/extreaj launcher for Java apps
+             Added new examples in JAVA directory
+                manual/  --> instrumentation without AspectJ
+                automatic/-> instrumentation with AspectJ
  * 30Oct2015 Extrae 3.2.0 released!
              Fix compilation of extrae-cmd in BG/* if PAPI is not set
              Fix compilation in an other directory rather than $top_src_dir

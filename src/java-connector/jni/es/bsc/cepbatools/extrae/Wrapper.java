@@ -28,13 +28,9 @@
 //\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 package es.bsc.cepbatools.extrae;
 
-public class Wrapper
+public final class Wrapper
 {
-
-	static
-	{
-		System.loadLibrary("javaseqtrace");
-	}
+	static { System.loadLibrary("javatrace"); }
 
 	public static int EXTRAE_DISABLE_ALL_OPTIONS = 0;
 	public static int EXTRAE_CALLER_OPTION       = 1 << 0;
@@ -61,27 +57,29 @@ public class Wrapper
 
 	public static native void Init();
 	public static native void Fini();
-	public static native void Event(int type, long value);
-	public static native void nEvent(int types[], long values[]);
-	public static native void defineEventType(int type, String description,
+	public static native void Event (int type, long value);
+	public static native void Eventandcounters (int type, long value);
+	public static native void nEvent (int types[], long values[]);
+	public static native void nEventandcounters (int types[], long values[]);
+	public static native void defineEventType (int type, String description,
 	  long[] values, String[] descriptionValues);
-	public static native void SetOptions(int options);
-	public static native void Shutdown();
-	public static native void Restart();
-
-	public static native void Comm(boolean send, int tag, int size,
+	public static native void SetOptions (int options);
+	public static native void Shutdown ();
+	public static native void Restart ();
+	public static native void Comm (boolean send, int tag, int size,
 	  int partner, long id);
-	public static native int GetPID();
-	public static native void SetTaskID(int id);
-	public static native void SetNumTasks(int num);
-	public static native int GetTaskID();
-	public static native int GetNumTasks();
-	public static native void SetThreadID(int id);
-	public static native void SetNumThreads(int num);
-	public static native int GetThreadID();
-	public static native int GetNumThreads();
 
-	public static native void resumeVirtualThread(long vthread);
-	public static native void suspendVirtualThread();
+	public static native int GetPID ();
+	public static native void SetTaskID (int id);
+	public static native void SetNumTasks (int num);
+	public static native int GetTaskID ();
+	public static native int GetNumTasks ();
+
+	public static native void resumeVirtualThread (long vthread);
+	public static native void suspendVirtualThread ();
+
+	public static native void registerFunctionAddres (long address,
+	  String funcname, String modname, int line);
+	public static native void functionEventFromAddress (long address);
 }
 

@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 {
 	unsigned long long t1, t2;
 	struct timespec start, stop;
-	int n = 250000, i;
+	int n = 1000000, i;
 	Extrae_init();
 	clock_gettime (CLOCK_MONOTONIC, &start);
 	for (i = 0; i < n; i++)

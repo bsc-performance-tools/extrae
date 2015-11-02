@@ -39,31 +39,23 @@ static char UNUSED rcsid[] = "$Id: wrapper.c 2336 2013-11-26 09:30:20Z harald $"
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+#include <wrapper.h>
 
-#include <es_bsc_cepbatools_extrae_Wrapper.h>
-#include <extrae_user_events.h>
-#include <extrae_types.h>
+#include "es_bsc_cepbatools_extrae_Wrapper.h"
+#include "extrae_user_events.h"
 
-int THREADID = 0;
-int NUMTHREADS = 1;
-int TASKID = 0;
-int NUMTASKS = 1;
+static int __TASKID = 0;
+static int __NUMTASKS = 1;
 
 JavaVM* javaVM = NULL;
 jclass activityClass;
 jobject activityObj;
 
-static unsigned int get_thread_id(void)
-{ return THREADID; }
-
-static unsigned int get_num_threads(void)
-{ return NUMTHREADS; }
-
 static unsigned int get_task_id(void)
-{ return TASKID; }
+{ return __TASKID; }
 
 static unsigned int get_num_tasks(void)
-{ return NUMTASKS; }
+{ return __NUMTASKS; }
 
 
 JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetTaskID(
@@ -72,7 +64,7 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetTaskID(
 	UNREFERENCED(env);
 	UNREFERENCED(jc);
 
-	TASKID = id;
+	__TASKID = id;
 	Extrae_set_taskid_function (get_task_id);
 }
 
@@ -86,12 +78,12 @@ JNIEXPORT jint JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_GetTaskID(
 }
 
 JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetNumTasks(
-	JNIEnv *env, jclass jc, jint numthreads)
+	JNIEnv *env, jclass jc, jint numtasks)
 {
 	UNREFERENCED(env);
 	UNREFERENCED(jc);
 
-	NUMTHREADS = numthreads;
+	__NUMTASKS = numtasks;
 	Extrae_set_numtasks_function (get_num_tasks);
 }
 
@@ -102,45 +94,6 @@ JNIEXPORT jint JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_GetNumTasks(
 	UNREFERENCED(jc);
 
 	return get_num_tasks();
-}
-
-JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetThreadID(
-	JNIEnv *env, jclass jc, jint id)
-{
-	UNREFERENCED(env);
-	UNREFERENCED(jc);
-
-	THREADID = id;
-	Extrae_set_threadid_function (get_thread_id);
-}
-
-JNIEXPORT jint JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_GetThreadID(
-	JNIEnv *env, jclass jc)
-{
-	UNREFERENCED(env);
-	UNREFERENCED(jc);
-
-	return get_thread_id();
-}
-
-JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetNumThreads(
-	JNIEnv *env, jclass jc, jint numthreads)
-{
-	UNREFERENCED(env);
-	UNREFERENCED(jc);
-
-	NUMTHREADS = numthreads;
-	Backend_ChangeNumberOfThreads (numthreads);
-	Extrae_set_numthreads_function (get_num_threads);
-}
-
-JNIEXPORT jint JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_GetNumThreads(
-	JNIEnv *env, jclass jc)
-{
-	UNREFERENCED(env);
-	UNREFERENCED(jc);
-
-	return get_num_threads();
 }
 
 JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_Init(JNIEnv *env,
@@ -178,6 +131,62 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_Event (JNIEnv *env,
 
 	Extrae_event ((extrae_type_t)id, (extrae_value_t)val);
 }
+
+JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_Eventandcounters (
+	JNIEnv *env, jclass jc, jint id, jlong val)
+{
+	UNREFERENCED(env);
+	UNREFERENCED(jc);
+
+	Extrae_eventandcounters ((extrae_type_t)id, (extrae_value_t)val);
+}
+
+JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_nEvent (JNIEnv *env,
+	jclass jc, jintArray types, jlongArray values)
+{
+	jint countTypes = 0;
+	jint countValues = 0;
+
+	UNREFERENCED(jc);
+
+	jint *typesArray = (*env)->GetIntArrayElements(env, types, NULL);
+	jlong *valuesArray = (*env)->GetLongArrayElements(env, values, NULL);
+
+	if (typesArray != NULL && valuesArray != NULL)
+	{
+		countTypes = (*env)->GetArrayLength(env, types);
+		countValues = (*env)->GetArrayLength(env, values);
+		if (countTypes == countValues)
+			Extrae_nevent (countTypes,
+			  (extrae_type_t *)typesArray, (extrae_value_t *)valuesArray);
+		(*env)->ReleaseIntArrayElements(env, types, typesArray, JNI_ABORT);
+		(*env)->ReleaseLongArrayElements(env, values, valuesArray, JNI_ABORT);
+	}
+}
+
+JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_nEventandcounters (
+	JNIEnv *env, jclass jc, jintArray types, jlongArray values)
+{
+	jint countTypes = 0;
+	jint countValues = 0;
+
+	UNREFERENCED(jc);
+
+	jint *typesArray = (*env)->GetIntArrayElements(env, types, NULL);
+	jlong *valuesArray = (*env)->GetLongArrayElements(env, values, NULL);
+
+	if (typesArray != NULL && valuesArray != NULL)
+	{
+		countTypes = (*env)->GetArrayLength(env, types);
+		countValues = (*env)->GetArrayLength(env, values);
+		if (countTypes == countValues)
+			Extrae_neventandcounters (countTypes,
+			  (extrae_type_t *)typesArray, (extrae_value_t *)valuesArray);
+		(*env)->ReleaseIntArrayElements(env, types, typesArray, JNI_ABORT);
+		(*env)->ReleaseLongArrayElements(env, values, valuesArray, JNI_ABORT);
+	}
+}
+
 
 JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_Comm (JNIEnv *env,
 	jclass jc, jboolean send, jint tag, jint size, jint partner, jlong id)
@@ -233,28 +242,6 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_Restart (JNIEnv *en
 	UNREFERENCED(jc);
 
 	Extrae_restart();
-}
-
-JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_nEvent (JNIEnv *env,
-	jclass jc, jintArray types, jlongArray values)
-{
-	jint countTypes = 0;
-	jint countValues = 0;
-
-	UNREFERENCED(jc);
-
-	jint *typesArray = (*env)->GetIntArrayElements(env, types, NULL);
-	jlong *valuesArray = (*env)->GetLongArrayElements(env, values, NULL);
-
-	if (typesArray != NULL && valuesArray != NULL)
-	{
-		countTypes = (*env)->GetArrayLength(env, types);
-		countValues = (*env)->GetArrayLength(env, values);
-		if (countTypes == countValues)
-			Extrae_nevent (countTypes, (extrae_type_t *)typesArray, (extrae_value_t *)valuesArray);
-		(*env)->ReleaseIntArrayElements(env, types, typesArray, JNI_ABORT);
-		(*env)->ReleaseLongArrayElements(env, values, valuesArray, JNI_ABORT);
-	}
 }
 
 JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_defineEventType
@@ -343,3 +330,28 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_suspendVirtualThrea
 
 	Extrae_suspend_virtual_thread();
 }
+
+JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_registerFunctionAddres (
+  JNIEnv *env, jclass jc, jlong id, jstring funcname, jstring modname, jint line)
+{
+	UNREFERENCED(jc);
+
+	char *fname = (char*) (*env)->GetStringUTFChars (env, funcname, NULL) ;
+	char *mname = (char*) (*env)->GetStringUTFChars (env, modname, NULL) ;
+
+	Extrae_register_function_address ((void*) id, fname, mname, (unsigned) line);
+
+	(*env)->ReleaseStringUTFChars(env, modname, mname);
+	(*env)->ReleaseStringUTFChars(env, funcname, fname);
+}
+
+
+JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_functionEventFromAddress (
+	JNIEnv *env, jclass jc, jlong address)
+{
+	UNREFERENCED(env);
+	UNREFERENCED(jc);
+
+	Extrae_function_from_address (USRFUNC_EV, (void*) address);
+}
+

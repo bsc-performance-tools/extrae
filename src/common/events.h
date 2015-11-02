@@ -171,6 +171,11 @@ enum {
    MEMUSAGE_EVENTS_COUNT /* Total number of memusage events */
 };
 
+#define JAVA_JVMTI_GARBAGECOLLECTOR_EV     48000001
+#define JAVA_JVMTI_EXCEPTION_EV            48000002
+#define JAVA_JVMTI_OBJECT_ALLOC_EV         48000003
+#define JAVA_JVMTI_OBJECT_FREE_EV          48000004
+
 #define OMP_STATS_BASE           65000000
 enum {
 	OMP_NUM_TASKS_INSTANTIATED = 0,
@@ -836,7 +841,8 @@ typedef enum
 	PTHREAD_TYPE,
 	CUDA_TYPE,
 	OPENCL_TYPE,
-	OPENSHMEM_TYPE
+	OPENSHMEM_TYPE,
+	JAVA_TYPE
 } EventType_t;
 
 EventType_t getEventType (unsigned EvType, unsigned *Type);

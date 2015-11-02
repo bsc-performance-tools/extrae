@@ -31,4 +31,5 @@ MPIF77=@sub_MPIF77@
 MPIF90=@sub_MPIF90@
 NVCC=@sub_NVCC@
 JAVAC=@sub_JAVAC@
+JAR=@sub_JAR@
 

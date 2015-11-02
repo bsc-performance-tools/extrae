@@ -7,9 +7,14 @@
  xml-parser-id="Id: xml-parse.c 2327 2013-11-22 11:47:07Z harald $"
 >
 
-  <user-functions enabled="yes" list="function-list" exclude-automatic-functions="no">
+  <user-functions enabled="no" list="" exclude-automatic-functions="no">
     <counters enabled="yes" />
   </user-functions>
+
+  <pthread enabled="yes">
+    <locks enabled="no" />
+    <counters enabled="yes" />
+  </pthread>
 
   <counters enabled="yes">
     <cpu enabled="yes" starting-set-distribution="1">
@@ -68,6 +73,7 @@
     keep-mpits="yes"
     sort-addresses="yes"
     overwrite="yes"
-  />
+  > PiExample.prv </merge>
+  
 
 </trace>

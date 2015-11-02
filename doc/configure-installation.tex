@@ -64,8 +64,12 @@ There are many options to be applied at configuration time for the instrumentati
 	Specify the installation location for the DynInst package. \TRACE also requires the DWARF package {\tt --with-dwarf=DIR} when using DynInst. Also, newer versions of DynInst (versions after 7.0.1) require the BOOST package {\tt --with-boost}. This flag is mandatory. Requires a working installation of a C++ compiler.
         \item {\tt --with-fft} \\
         If the spectral analysis module is enabled (see --with-spectral), specify where to find FFT libraries and includes. This library is a dependency of the Spectral libraries.
-	\item {\tt --with-java=DIR} \\
-	Specify the location of JAVA development kit. This is necessary to create the connectors between \TRACE and Java applications.
+	\item \texttt{--with-java-jdk=DIR} \\
+	Specify the location of JAVA development kit (JDK). This is necessary to create the connectors between \TRACE and Java applications.
+    \item \texttt{--with-java-aspectj=DIR} \\
+    Specify the location of the AspectJ infrastructure. AspectJ is used to give support to dynamically instrumented Java applications.
+    \item \texttt{--with-java-aspectj-weaver=<path/to/aspectjweaver.jar>} \\
+    AspectJ includes the \texttt{aspectweaver.jar} file that is responsible for the execution of dynamically instrumented Java applications. If \texttt{--with-java-aspectj} cannot locate this file, use this option to tell \TRACE where to find it.
 	\item {\tt --with-liberty=DIR} \\
 	Specify where to find the libiberty package. In conjunction with Binary File Descriptor, it is used to translate addresses into source code locations.
 	\item {\tt --with-libgomp=\{4.2,4.9,auto\}}\\

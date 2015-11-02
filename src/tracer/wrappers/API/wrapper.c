@@ -1414,7 +1414,6 @@ void Backend_Flush_pThread (pthread_t t)
 	unsigned u;
 
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
-	{
 		if (pThreads[u] == t)
 		{
 			Buffer_Flush(TRACING_BUFFER(u));
@@ -1430,7 +1429,6 @@ void Backend_Flush_pThread (pthread_t t)
 			pThreads[u] = (pthread_t)0;
 			break;
 		}
-	}
 }
 
 void Backend_CreatepThreadIdentifier (void)
@@ -2220,7 +2218,6 @@ void Backend_Finalize (void)
 		Extrae_AnnotateTopology (TRUE, TIME);
 #endif
 
-
 		/* Write files back to disk , 1st part will include flushing events*/
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
 		{
@@ -2281,6 +2278,9 @@ void Backend_Finalize (void)
 			fprintf (stdout, PACKAGE_NAME": Application has ended. Tracing has been terminated.\n");
 
 		mpitrace_on = FALSE; /* Turn off tracing now */
+
+		/* Mark as already finalized, thus avoiding further deinits */
+		Extrae_set_is_initialized (EXTRAE_NOT_INITIALIZED);
 
 #if defined(EMBED_MERGE_IN_TRACE)
 		/* Launch the merger */

@@ -62,6 +62,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "labels.h"
 #include "mpi_prv_events.h"
 #include "omp_prv_events.h"
+#include "java_prv_events.h"
 #include "cuda_prv_events.h"
 #include "opencl_prv_events.h"
 #include "pthread_prv_events.h"
@@ -74,7 +75,6 @@ static char UNUSED rcsid[] = "$Id$";
 #include "object_tree.h"
 #include "utils.h"
 #include "online_events.h"
-
 #include "HardwareCounters.h"
 #include "queue.h"
 
@@ -993,6 +993,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	WriteEnabled_pthread_Operations (fd);
 	MISCEvent_WriteEnabledOperations (fd, options);
 	CUDAEvent_WriteEnabledOperations (fd);
+	JavaEvent_WriteEnabledOperations (fd);
 
 #if USE_HARDWARE_COUNTERS
 	HWC_PARAVER_Labels (fd);
