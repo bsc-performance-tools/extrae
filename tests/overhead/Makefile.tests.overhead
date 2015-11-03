@@ -1,8 +1,7 @@
 include ../../example/Makefile.inc
 
 CFLAGS = -O -g -I $(EXTRAE_HOME)/include -I $(PAPI_HOME)/include
-LFLAGS = -L$(EXTRAE_HOME)/lib -Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -lseqtrace \
-         $(UNWIND_LIBS) $(XML2_LIBS) $(POSIX_CLOCK_LIBS) -lrt
+LFLAGS = -L$(EXTRAE_HOME)/lib -Wl,-rpath -Wl,$(EXTRAE_HOME)/lib -lseqtrace
 
 TARGETS = posix_clock ia32_rdtsc_clock extrae_event extrae_nevent4 extrae_eventandcounters extrae_user_function extrae_get_caller1 extrae_get_caller6 extrae_trace_callers papi_read1 papi_read4
 
