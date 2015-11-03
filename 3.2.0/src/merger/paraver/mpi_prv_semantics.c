@@ -88,7 +88,6 @@ static int Get_State (unsigned int EvType)
 		case MPI_FILE_WRITE_AT_ALL_EV:
 			state = STATE_IO;
 		break;
-		case MPI_WIN_CREATE_EV:
 		case MPI_WIN_FREE_EV:
 		case MPI_WIN_START_EV:
 		case MPI_REQUEST_FREE_EV:
@@ -106,6 +105,8 @@ static int Get_State (unsigned int EvType)
 		case MPI_REQUEST_GET_STATUS_EV:
 		case MPI_INTERCOMM_CREATE_EV:
 		case MPI_INTERCOMM_MERGE_EV:
+		case MPI_WIN_POST_EV:
+		case MPI_WIN_COMPLETE_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:
@@ -120,6 +121,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_WAITALL_EV:
 		case MPI_WAITSOME_EV:
 		case MPI_WAITANY_EV:
+		case MPI_WIN_WAIT_EV:
 			state = STATE_TWRECV;
 		break;
 		case MPI_SEND_EV:
@@ -135,6 +137,7 @@ static int Get_State (unsigned int EvType)
 			state = STATE_ISEND;
 		break;
 		case MPI_BARRIER_EV:
+		case MPI_IBARRIER_EV:
 			state = STATE_BARRIER;
 		break;
 		case MPI_REDUCE_EV:
@@ -150,6 +153,19 @@ static int Get_State (unsigned int EvType)
 		case MPI_SCATTERV_EV:
 		case MPI_REDUCESCAT_EV:
 		case MPI_SCAN_EV:
+		case MPI_IREDUCE_EV:
+		case MPI_IALLREDUCE_EV:
+		case MPI_IBCAST_EV:
+		case MPI_IALLTOALL_EV:
+		case MPI_IALLTOALLV_EV:
+		case MPI_IALLGATHER_EV:
+		case MPI_IALLGATHERV_EV:
+		case MPI_IGATHER_EV:
+		case MPI_IGATHERV_EV:
+		case MPI_ISCATTER_EV:
+		case MPI_ISCATTERV_EV:
+		case MPI_IREDUCESCAT_EV:
+		case MPI_ISCAN_EV:
 			state = STATE_BCAST;
 		break;
 		case MPI_WIN_FENCE_EV:
