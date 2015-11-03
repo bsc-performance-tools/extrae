@@ -1,0 +1,61 @@
+Extrae 2.3.5rc SVN revision 1945 based on extrae/branches/2.3
+CPU info: Intel(R) Xeon(R) CPU           E5649  @ 2.53GHz
+Using libunwind v1.1 from /apps/LIBUNWIND/1.1
+Using PAPI v5.0.1 from /apps/PAPI/5.0.1-nocuda
+Running on: linux running on x86 with 64 bit extensions processor
+
+Test posix_clock - 10 executions taking the 3 best runs
+35 ns
+35 ns
+35 ns
+
+Test ia32_rdtsc_clock - 10 executions taking the 3 best runs
+18 ns
+18 ns
+18 ns
+
+Test extrae_event - 10 executions taking the 3 best runs
+178 ns
+178 ns
+179 ns
+
+Test extrae_nevent4 - 10 executions taking the 3 best runs
+397 ns
+398 ns
+398 ns
+
+Test extrae_eventandcounters - 10 executions taking the 3 best runs
+5460 ns
+5476 ns
+5480 ns
+
+Test papi_read1 - 10 executions taking the 3 best runs
+2655 ns
+2658 ns
+2661 ns
+
+Test papi_read4 - 10 executions taking the 3 best runs
+5058 ns
+5059 ns
+5059 ns
+
+Test extrae_user_function - 10 executions taking the 3 best runs
+7710 ns
+7710 ns
+7721 ns
+
+Test extrae_get_caller1 - 10 executions taking the 3 best runs
+1051 ns
+1053 ns
+1053 ns
+
+Test extrae_get_caller6 - 10 executions taking the 3 best runs
+3375 ns
+3375 ns
+3375 ns
+
+Test extrae_trace_callers - 10 executions taking the 3 best runs
+2697 ns
+2710 ns
+2720 ns
+

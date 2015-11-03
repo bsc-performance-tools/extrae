@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rm -f .extrae-online-*
+rm -f .tmp-extrae-online-*
+
+source @sub_PREFIX@/etc/extrae_online.sh
+
+@sub_PREFIX@/bin/online_root.bin

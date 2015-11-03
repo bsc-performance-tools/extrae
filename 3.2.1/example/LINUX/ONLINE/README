@@ -1,0 +1,72 @@
+
+* 1. Introduction ............................. [INTRO]
+* 2. Compilation of the test program .......... [COMPILE]
+* 3. Run the application ...................... [RUN]
+** 3.1 MinoTauro .............................. [RUNMT]
+** 3.2 MareNostrum 3 .......................... [RUNMN]
+* 4. Generate the Paraver trace ............... [MERGE]
+* 5. Adapt the example to your own application  [ADAPT]
+* 6. Results .................................. [RESULT]
+
+=======================
+1. Introduction [INTRO]
+=======================
+
+This tracing setup is tailored towards long MPI executions that are producing large traces. Using spectral analysis techniques, the application is repeatedly analyzed in order to find its main periods. Then, a detailed trace for a few representative iterations of every different period is automatically produced.
+
+Please note that:
+- Applying this system to a very short execution, or if no periodicity can be detected in the application, may result in an empty trace.
+- The resulting trace does not represent the whole execution, but the representative iterations only. 
+
+============================================
+2. Compilation of the test program [COMPILE]
+============================================
+
+Simply issue:
+> gmake
+
+============================
+3. Run the application [RUN]
+============================
+
+----------------------
+3.1. MinoTauro [RUNMT]
+----------------------
+Submit the following job:
+> mnsubmit run_mt.sh
+
+--------------------------
+3.2. MareNostrum 3 [RUNMN]
+--------------------------
+Submit the following job:
+> bsub <run_mn.sh
+
+=====================================
+4. Generate the Paraver trace [MERGE]
+=====================================
+
+Extrae is configured to merge the files automatically at the end of the execution. If you disable this option, or if there's any problem in the execution, you can still merge the files manually using the merge.sh (sequential) and merge_par_* (parallel) scripts as usual.
+
+====================================================
+5. Adapt the example to your own application [ADAPT]
+====================================================
+
+These are the basic steps you have to follow in order to use your own application:
+
+1. Edit the submission script (run_mt.sh for MinoTauro; run_mn.sh for MareNostrum 3) and change as appropriate:
+
+   1.1 The application binary (APPL_NAME). If your binary takes parameters, you can add them next to the binary name. 
+   1.2 The number of processes to run with, the wallclock time, etc.
+
+2. Advanced users might want to tune the tracing and spectral analysis configuration, editing extrae_online.xml. 
+   Some relevant parameters can be set under section 'trace-control > remote-control > online'. See the xml in 
+   this directory for an explanation of the different configuration options.
+
+3. The path in the variable EXTRAE_HOME, that points to the installation of the tracing package, might need to be updated in the different scripts to select between the 32/64-bit version of the package or a different installation path.
+
+====================
+6. Results [RESULTS]
+====================
+
+The execution produces a single Paraver trace comprising selected representative iterations for the different periodic patterns detected in the application. 
+

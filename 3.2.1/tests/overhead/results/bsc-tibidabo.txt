@@ -1,0 +1,60 @@
+Extrae 2.3.5rc SVN revision 1945 based on extrae/branches/2.3
+CPU info(null)Using libunwind v1.1 from /gpfs/CEPBATOOLS/libunwind/1.1
+Using PAPI v5.0.1 from /gpfs/CEPBATOOLS/papi/5.0.1
+Running on: linux running on ARM processor
+
+Test posix_clock - 10 executions taking the 3 best runs
+579 ns
+581 ns
+582 ns
+
+Test ia32_rdtsc_clock - 10 executions taking the 3 best runs
+1 ns
+1 ns
+1 ns
+
+Test extrae_event - 10 executions taking the 3 best runs
+1767 ns
+1769 ns
+1772 ns
+
+Test extrae_nevent4 - 10 executions taking the 3 best runs
+3234 ns
+3242 ns
+3257 ns
+
+Test extrae_eventandcounters - 10 executions taking the 3 best runs
+3169 ns
+3170 ns
+3232 ns
+
+Test papi_read1 - 10 executions taking the 3 best runs
+1841 ns
+1841 ns
+1844 ns
+
+Test papi_read4 - 10 executions taking the 3 best runs
+226 ns
+230 ns
+233 ns
+
+Test extrae_user_function - 10 executions taking the 3 best runs
+1600 ns
+1782 ns
+2116 ns
+
+Test extrae_get_caller1 - 10 executions taking the 3 best runs
+2424 ns
+2466 ns
+2514 ns
+
+Test extrae_get_caller6 - 10 executions taking the 3 best runs
+3854 ns
+3906 ns
+3981 ns
+
+Test extrae_trace_callers - 10 executions taking the 3 best runs
+4079 ns
+4342 ns
+4355 ns
+

@@ -1,0 +1,53 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="@sub_PREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="@sub_XMLID@"
+>
+
+  <user-functions enabled="yes" list="" exclude-automatic-functions="no">
+    <counters enabled="yes" />
+  </user-functions>
+
+  <counters enabled="yes">
+    <cpu enabled="yes" starting-set-distribution="1">
+      <set enabled="yes" domain="all" changeat-globalops="5">
+        PAPI_TOT_INS,PAPI_TOT_CYC,PAPI_L1_DCM
+        <sampling enabled="no" frequency="100000000">PAPI_TOT_CYC</sampling>
+      </set>
+      <set enabled="yes" domain="user" changeat-globalops="5">
+        PAPI_TOT_INS,PAPI_FP_INS,PAPI_TOT_CYC
+      </set>
+    </cpu>
+
+    <network enabled="no" />
+
+    <resource-usage enabled="no" />
+
+    <memory-usage enabled="no" />
+  </counters>
+
+  <buffer enabled="yes">
+    <size enabled="yes">500000</size>
+    <circular enabled="no" />
+  </buffer>
+
+  <sampling enabled="no" type="default" period="50m" variability="10m" />
+
+  <merge enabled="yes" 
+    synchronization="default"
+    binary="$UNICORE_BINARY$"
+    tree-fan-out="16"
+    max-memory="512"
+    joint-states="yes"
+    keep-mpits="yes"
+    sort-addresses="yes"
+    overwrite="yes"
+  >
+    $UNICORE_PRV$
+  </merge>
+
+</trace>
+
