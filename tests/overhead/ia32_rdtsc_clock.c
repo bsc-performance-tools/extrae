@@ -92,9 +92,9 @@ int main (int argc, char *argv[])
 		useless = ia32_getTime();
 	clock_gettime (CLOCK_MONOTONIC, &stop);
 	t1 = start.tv_nsec;
-	t1 += start.tv_sec * 1000000000;
+	t1 += start.tv_sec * 1000000000ULL;
 	t2 = stop.tv_nsec;
-	t2 += stop.tv_sec * 1000000000;
+	t2 += stop.tv_sec * 1000000000ULL;
 	printf ("RESULT : clock_gettime() %Lu ns\n", (t2 - t1) / n);
 
 	return 0;

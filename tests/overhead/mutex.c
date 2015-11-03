@@ -19,10 +19,10 @@ int main (int argc, char *argv[])
 	}
 	clock_gettime( CLOCK_REALTIME, &end);
 
-	t = ((end.tv_sec * 1000 * 1000 * 1000) + end.tv_nsec)
-	    -((start.tv_sec * 1000 * 1000 * 1000) + start.tv_nsec);
+	t = ((end.tv_sec * 1000000000ULL) + end.tv_nsec)
+	    -((start.tv_sec * 1000000000ULL) + start.tv_nsec);
 
-	printf ("time %llu ns aggregated, %llu per loop iteration\n", t, t/10000000);
+	printf ("time %llu ns aggregated, %llu per loop iteration\n", t, t/10000000ULL);
 
 	return 0;
 }
