@@ -1,0 +1,67 @@
+Checking for existing binaries, and compiling if necessary ...
+
+
+------ CUT HERE ------
+
+
+Extrae 3.3.0rc SVN revision 3532 based on extrae/trunk
+CPU info: Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
+Using libunwind v1.1 from /homec/jzam11/jzam1128/aplic/jureca/libunwind/1.1
+Using PAPI v5.4.1 from /homec/jzam11/jzam1128/aplic/jureca/papi/5.4.1
+Running on: linux running on x86 with 64 bit extensions processor
+
+Test posix_clock - 10 executions
+min: 22 ns
+avg: 24 ns
+max: 29 ns
+
+Test ia32_rdtsc_clock - 10 executions
+min: 12 ns
+avg: 12 ns
+max: 13 ns
+
+Test extrae_event - 10 executions
+min: 125 ns
+avg: 130 ns
+max: 147 ns
+
+Test extrae_nevent4 - 10 executions
+min: 243 ns
+avg: 266 ns
+max: 323 ns
+
+Test extrae_eventandcounters - 10 executions
+min: 777 ns
+avg: 821 ns
+max: 862 ns
+
+Test papi_read1 - 10 executions
+min: 249 ns
+avg: 254 ns
+max: 271 ns
+
+Test papi_read4 - 10 executions
+min: 585 ns
+avg: 593 ns
+max: 636 ns
+
+Test extrae_user_function - 10 executions
+min: 1406 ns
+avg: 1470 ns
+max: 1564 ns
+
+Test extrae_get_caller1 - 10 executions
+min: 648 ns
+avg: 670 ns
+max: 714 ns
+
+Test extrae_get_caller6 - 10 executions
+min: 2313 ns
+avg: 2338 ns
+max: 2413 ns
+
+Test extrae_trace_callers - 10 executions
+min: 1723 ns
+avg: 1765 ns
+max: 1931 ns
+

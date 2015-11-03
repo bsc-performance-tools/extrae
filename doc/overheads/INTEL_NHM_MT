@@ -1,0 +1,67 @@
+Checking for existing binaries, and compiling if necessary ...
+
+
+------ CUT HERE ------
+
+
+Extrae 3.2.1 SVN revision 0 based on unknown
+CPU info: Intel(R) Xeon(R) CPU           E5649  @ 2.53GHz
+Using libunwind v1.1 from /apps/LIBUNWIND/1.1
+Using PAPI v5.0.1 from /apps/PAPI/5.0.1-nocuda
+Running on: linux running on x86 with 64 bit extensions processor
+
+Test posix_clock - 10 executions
+min: 35 ns
+avg: 35 ns
+max: 36 ns
+
+Test ia32_rdtsc_clock - 10 executions
+min: 16 ns
+avg: 16 ns
+max: 17 ns
+
+Test extrae_event - 10 executions
+min: 194 ns
+avg: 196 ns
+max: 201 ns
+
+Test extrae_nevent4 - 10 executions
+min: 418 ns
+avg: 425 ns
+max: 433 ns
+
+Test extrae_eventandcounters - 10 executions
+min: 5097 ns
+avg: 5138 ns
+max: 5243 ns
+
+Test papi_read1 - 10 executions
+min: 2399 ns
+avg: 2412 ns
+max: 2426 ns
+
+Test papi_read4 - 10 executions
+min: 4632 ns
+avg: 4640 ns
+max: 4652 ns
+
+Test extrae_user_function - 10 executions
+min: 6886 ns
+avg: 6933 ns
+max: 6975 ns
+
+Test extrae_get_caller1 - 10 executions
+min: 833 ns
+avg: 839 ns
+max: 844 ns
+
+Test extrae_get_caller6 - 10 executions
+min: 2607 ns
+avg: 2635 ns
+max: 2691 ns
+
+Test extrae_trace_callers - 10 executions
+min: 2150 ns
+avg: 2178 ns
+max: 2207 ns
+
