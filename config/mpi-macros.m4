@@ -284,11 +284,30 @@ AC_DEFUN([AX_PROG_MPI],
       fi
    fi
 
+	dnl check for mpif90 under $MPI_HOME/bin
+	AC_MSG_CHECKING([for MPI launcher])
+	MPIRUN=""
+	for mpix in [ "mpirun" "mpiexec" ]; do
+		if test -x "${MPI_HOME}/bin/${mpix}" ; then
+			MPIRUN="${MPI_HOME}/bin/${mpix}"
+			break
+		elif test -x "${MPI_HOME}/bin64/${mpix}" ; then
+			MPIRUN="${MPI_HOME}/bin64/${mpix}"
+			break
+		fi
+	done
+	if test "${MPIRUN}" != "" ; then
+		AC_MSG_RESULT([${MPIRUN}])
+	else
+		AC_MSG_RESULT([not found! -- It is not needed to compile Extrae but it is necessary to execute regression tests])
+	fi
+
    dnl AC_SUBST(MPICC)
    AC_ARG_VAR([MPICC],[Alternate MPI C compiler - use if the MPI C compiler in the MPI installation should not be used])
    AC_SUBST(MPICC_COMPILER)
    AC_SUBST(MPIF77)
    AC_SUBST(MPIF90)
+   AC_SUBST(MPIRUN)
 
    dnl If the system do not have MPICC (or similar) be sure to add -lmpi and -Impi
    AM_CONDITIONAL(NEED_MPI_LIB_INCLUDE, test "${CC}" = "${MPICC}" )
@@ -298,6 +317,9 @@ AC_DEFUN([AX_PROG_MPI],
 
    dnl If the system has MPI & shared libraries
    AM_CONDITIONAL(HAVE_MPI_WITH_SHARED_LIBS, test "${MPI_INSTALLED}" = "yes" -a "${MPI_SHARED_LIB_FOUND}" = "yes")
+
+   dnl If we have detected the MPI launcher
+   AM_CONDITIONAL(HAVE_MPIRUN, test "${MPIRUN}" != "")
 
    if test "${MPI_INSTALLED}" = "yes" ; then
       AC_DEFINE([HAVE_MPI], 1, [Determine if MPI in installed])
@@ -992,6 +1014,11 @@ AC_DEFUN([AX_MPI_SHOW_CONFIGURATION],
 			MPI_EXTRA_CAPABILITIES+=" MPI3"
 		fi
 		echo -e \\\tMPI home:             ${MPI_HOME}
+		if test "${MPIRUN}" != ""; then
+		echo -e \\\tMPI launcher:         ${MPIRUN}
+		else
+		echo -e \\\tMPI launcher was not found. It is NOT necessary to compile Extrae but it is necessary to execute the regression tests.
+		fi
 		echo -e \\\tFortran decoration:   ${FORTRAN_DECORATION}
 		echo -e \\\tmixed C/Fortran libraries? ${mpi_lib_contains_c_and_fortran}
 		echo -e \\\tshared libraries?     ${MPI_SHARED_LIB_FOUND}
