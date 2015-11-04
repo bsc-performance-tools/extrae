@@ -200,7 +200,6 @@ execute_java () {
 #
 
 # global variables 
-tmpdir=`mktemp -d extraej.XXXXXX`
 extrae_function_list_file=""
 extrae_function_list_enabled=""
 MemberArray=()
@@ -270,6 +269,9 @@ if [[ -x "${AJC}" ]]; then
 		parse_xml ${EXTRAE_CONFIG_FILE}
 
 		if [[ ${#MemberArray[@]} -gt 0 ]]; then
+
+			tmpdir=`mktemp -d extraej.XXXXXX`
+
 			generate_aspects
 		
 			if [[ "${verbose}" = "yes" ]]; then
