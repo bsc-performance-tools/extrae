@@ -1,6 +1,7 @@
 include $(top_srcdir)/PATHS
 
 SUBDIRS = \
+  MPI \
   OPENCL \
   CUDA
 
