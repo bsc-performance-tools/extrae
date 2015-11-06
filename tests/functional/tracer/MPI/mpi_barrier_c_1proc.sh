@@ -8,7 +8,7 @@ fi
 
 rm -fr TRACE.* *.mpits set-0
 
-TRACE=mpi_initfini_c_linked_1proc
+TRACE=mpi_barrier_c
 
 EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 1 ./trace-ldpreload.sh ./mpi_barrier_c
 

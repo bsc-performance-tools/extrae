@@ -10,3 +10,10 @@ make -f Makefile.debug clean
 
 # Do test
 diff test-shared-library-without-libraries.reference main.pcf
+
+if [[ $? -eq 0 ]]; then
+	rm -fr main.prv main.pcf main.row set-0 TRACE.*
+	exit 0
+else
+	exit 1
+fi

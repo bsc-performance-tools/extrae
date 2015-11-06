@@ -7,3 +7,10 @@ EXTRAE_ON=1 ./define_event_type_gen_pcf
 
 # Actual comparison
 diff define_event_type_gen_pcf.reference define_event_type_gen_pcf.pcf
+
+if [[ $? -eq 0 ]]; then
+	rm -fr define_event_type_gen_pcf.pcf define_event_type_gen_pcf.prv define_event_type_gen_pcf.row TRACE.* set-0
+	exit 0
+else
+	exit 1
+fi
