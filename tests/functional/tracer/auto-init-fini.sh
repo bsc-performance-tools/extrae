@@ -13,3 +13,10 @@ rm -f OUTPUT OUTPUT-1 OUTPUT-2
 
 # Actual comparison
 diff auto-init-fini.reference OUTPUT-3
+
+if [[ $? -eq 0 ]]; then
+	rm OUTPUT-3
+	exit 0
+else
+	exit 1
+fi
