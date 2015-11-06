@@ -1603,10 +1603,13 @@ AC_DEFUN([AX_PROG_DYNINST],
    dnl Search for Dyninst installation
    AX_FIND_INSTALLATION([DYNINST], [${dyninst_paths}], [dyninst])
 
-   if test -z "${DYNINST_LIBSDIR_MULTIARCH}" -a "${dyninst_paths}" != "no" ; then
+   if test "${dyninst_paths}" != "no" ; then
       if test -d "${DYNINST_LIBSDIR}" ; then
          AC_MSG_CHECKING([for DynInst shared library])
          if test -f "${DYNINST_LIBSDIR}/libdyninstAPI.so" ; then
+            AC_MSG_RESULT([found])
+         elif test -f "${DYNINST_LIBSDIR_MULTIARCH}/libdyninstAPI.so" ; then
+            DYNINST_LIBSDIR=${DYNINST_LIBSDIR_MULTIARCH}
             AC_MSG_RESULT([found])
          else
             AC_MSG_RESULT([not found])
@@ -1616,24 +1619,7 @@ AC_DEFUN([AX_PROG_DYNINST],
          if test -f "${DYNINST_LIBSDIR}/libdyninstAPI_RT.so" ; then
             AC_MSG_RESULT([found])
             DYNINST_RT_LIB="${DYNINST_LIBSDIR}/libdyninstAPI_RT.so"
-         else
-            AC_MSG_RESULT([not found])
-            AC_MSG_ERROR([Failed to check for the DynInst shared library - libdyninstAPI_RT.so])
-         fi
-      else
-         AC_MSG_ERROR([Failed to check for the DynInst directory])
-      fi
-   elif test ! -z "${DYNINST_LIBSDIR_MULTIARCH}" -a "${dyninst_paths}" != "no" ; then
-      if test -d "${DYNINST_LIBSDIR_MULTIARCH}" ; then
-         AC_MSG_CHECKING([for DynInst shared library])
-         if test -f "${DYNINST_LIBSDIR_MULTIARCH}/libdyninstAPI.so" ; then
-            AC_MSG_RESULT([found])
-         else
-            AC_MSG_RESULT([not found])
-            AC_MSG_ERROR([Failed to check for the DynInst shared library - libdyninstAPI.so])
-         fi
-         AC_MSG_CHECKING([for DynInst shared RT library])
-         if test -f "${DYNINST_LIBSDIR_MULTIARCH}/libdyninstAPI_RT.so" ; then
+         elif test -f "${DYNINST_LIBSDIR_MULTIARCH}/libdyninstAPI_RT.so" ; then
             AC_MSG_RESULT([found])
             DYNINST_RT_LIB="${DYNINST_LIBSDIR_MULTIARCH}/libdyninstAPI_RT.so"
          else
