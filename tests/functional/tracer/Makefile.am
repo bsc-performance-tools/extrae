@@ -1,6 +1,10 @@
 SUBDIRS = \
   OTHER
 
+if WANT_PTHREAD
+SUBDIRS += PTHREAD
+endif
+
 if HAVE_MPI
 SUBDIRS += MPI
 endif
