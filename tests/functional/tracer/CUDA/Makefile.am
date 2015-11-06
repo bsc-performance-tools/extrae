@@ -6,11 +6,5 @@ EXTRA_DIST = \
  hello.cu \
  test-cuda-simple.sh 
 
-
-if WANT_CUDAorCUPTI
-
 TESTS = \
  test-cuda-simple.sh
-
-endif
-

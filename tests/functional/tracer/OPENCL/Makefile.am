@@ -5,8 +5,6 @@ EXTRA_DIST = \
  opencl-check.sh \
  extrae.xml
 
-if WANT_OPENCL
-
 check_PROGRAMS = \
  opencl-check
 
@@ -26,5 +24,3 @@ HWC_LINKER_FLAGS = $(PAPI_LINKER_FLAGS) $(PMAPI_LINKER_FLAGS)
 opencl_check_SOURCES = opencl-check.c
 opencl_check_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common @OPENCL_CFLAGS@
 opencl_check_LDFLAGS = -L$(TRACER_LIB) -locltrace $(HWC_LINKER_FLAGS) -L@OPENCL_SHAREDLIBSDIR@ -R @OPENCL_SHAREDLIBSDIR@ -lOpenCL
-
-endif

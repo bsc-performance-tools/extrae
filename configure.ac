@@ -267,6 +267,9 @@ fi
 AX_ENABLE_SINGLE_MPI_LIBRARY
 AX_CHECK_MPI_LIB_HAS_C_AND_FORTRAN_SYMBOLS
 
+dnl If MPI installation supports MPI3
+AM_CONDITIONAL(HAVE_MPI3, test "${mpi3_version}" = "yes")
+
 AC_ARG_ENABLE(parallel-merge,
    AC_HELP_STRING(
       [--enable-parallel-merge],
@@ -629,6 +632,8 @@ AC_CONFIG_FILES([\
   tests/functional/Makefile \
   tests/functional/launcher/Makefile \
   tests/functional/tracer/Makefile \
+  tests/functional/tracer/OTHER/Makefile \
+  tests/functional/tracer/MPI/Makefile \
   tests/functional/tracer/OPENCL/Makefile \
   tests/functional/tracer/CUDA/Makefile \
   tests/functional/merger/Makefile \
