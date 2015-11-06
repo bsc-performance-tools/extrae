@@ -108,6 +108,26 @@ The \TRACE package contains some consistency checks. The aim of such checks is t
 
 All commands given here are given as an example to configure and install the package, you may need to tune them properly (i.e., choose the appropriate directories for packages and so).  These examples assume that you are using a sh/bash shell, you must adequate them if you use other shells (like csh/tcsh).
 
+\subsection{Cray XC 40 - Extrae 3.2.1}
+
+Before issuing the configure command, the following modules were loaded:
+
+\begin{itemize}
+\item PrgEnv-gnu/5.2.40
+\item cray-mpich/7.2.2
+\item cudatoolkit6.5/6.5.14-1.0502.9613.6.1
+\item libunwind/1.1-CrayGNU-5.2.4
+\end{itemize}
+
+Configuration command:
+
+\graybox{\texttt{./configure --with-papi=/opt/cray/papi/5.4.1.1\\--with-mpi=/opt/cray/mpt/7.2.2/gni/mpich2-gnu/48\\--with-unwind=/apps/daint/5.2.UP02/easybuild/software/libunwind/1.1-CrayGNU-5.2.40 --with-cuda=/opt/nvidia/cudatoolkit6.5/6.5.14-1.0502.9613.6.1 --enable-sampling --without-dyninst --with-binary-type=64 CC=gcc CXX=g++ MPICC=cc}}
+
+Build and installation commands:
+
+\graybox{\texttt{make \\
+make install}}
+
 \subsection{Bluegene (L and P variants)}
 
 Configuration command:
