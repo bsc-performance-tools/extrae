@@ -199,7 +199,8 @@ void make_dump (FileSet_t *fset)
 	while (i < fset->nfiles)
 	{
 		last_time = max_time = 0;
-		fprintf (stdout, "File %d\n", i);
+		fprintf (stdout, "File %d (object %u.%u.%u)\n", i, fset->files[i].ptask,
+		   fset->files[i].task, fset->files[i].thread);
 		e = Current_FS (&fset->files[i]);
 		while (e != NULL)
 		{
