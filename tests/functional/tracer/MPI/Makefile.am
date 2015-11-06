@@ -7,12 +7,14 @@ check_PROGRAMS = \
  mpi_initfini_f \
  mpi_ranksize_f \
  mpi_barrier_c \
- mpi_bcast_c
+ mpi_bcast_c \
+ mpi_reduce_c
 
 if HAVE_MPI3
 check_PROGRAMS += \
  mpi_ibarrier_c \
- mpi_ibcast_c 
+ mpi_ibcast_c \
+ mpi_ireduce_c 
 endif
 
 CC=$(MPICC_COMPILER)
@@ -25,12 +27,14 @@ TESTS = \
   mpi_initfini_c_nolinked_1proc.sh \
   mpi_initfini_f_nolinked_1proc.sh \
   mpi_barrier_c_1proc.sh \
-  mpi_bcast_c_1proc.sh
+  mpi_bcast_c_1proc.sh \
+  mpi_reduce_c_1proc.sh
 
 if HAVE_MPI3
 TESTS += \
   mpi_ibarrier_c_1proc.sh \
-  mpi_ibcast_c_1proc.sh
+  mpi_ibcast_c_1proc.sh \
+  mpi_ireduce_c_1proc.sh
 endif
 
 pass_argument_MPIRUN_SOURCES = pass_argument_MPIRUN.c
@@ -50,3 +54,5 @@ mpi_ibarrier_c_SOURCES = mpi_ibarrier_c.c
 mpi_bcast_c_SOURCES = mpi_bcast_c.c
 mpi_ibcast_c_SOURCES = mpi_ibcast_c.c
 
+mpi_reduce_c_SOURCES = mpi_reduce_c.c
+mpi_ireduce_c_SOURCES = mpi_ireduce_c.c
