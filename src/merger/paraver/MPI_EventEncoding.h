@@ -261,7 +261,7 @@ MPIVal;
 
 #define  MPI_IREDUCE_LABEL                 "MPI_Ireduce"
 #define  MPI_IALLREDUCE_LABEL              "MPI_Iallreduce"
-#define  MPI_IBARRIER_LABEL                "MPI_Ibcast"
+#define  MPI_IBARRIER_LABEL                "MPI_Ibarrier"
 #define  MPI_IBCAST_LABEL                  "MPI_Ibcast"
 #define  MPI_IALLTOALL_LABEL               "MPI_Ialltoall"
 #define  MPI_IALLTOALLV_LABEL              "MPI_Ialltoallv"
