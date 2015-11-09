@@ -25,9 +25,9 @@ NumberEntriesInPRV ()
 }
 
 #
-# NumberEntriesInPCF (file.pcf, string)
+# CheckEntryIn (file.pcf, string)
 #
-NumberEntriesInPCF ()
+CheckEntryInPCF ()
 {
 	if [[ $# -ne 2 ]]; then
 		die "Error! Invalid number of parameters in NumberEntriesInPCF"
@@ -40,7 +40,9 @@ NumberEntriesInPCF ()
 		n=0
 	fi
 
-	return $n
+	if [[ ${n} -ne 1 ]]; then
+		die "Error! Looking for ${2}. Found ${n} matches."
+	fi
 }
 
 
