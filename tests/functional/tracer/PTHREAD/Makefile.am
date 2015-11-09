@@ -1,5 +1,7 @@
 include $(top_srcdir)/PATHS
 
+EXTRA_DIST= pthread.sh
+
 check_PROGRAMS = \
  pthread
 
