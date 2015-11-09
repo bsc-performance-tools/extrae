@@ -29,7 +29,7 @@ function run_test_java {
 	for ex in `seq $2`
 	do
 		# Ignore stderr!
-		timing[${ex}]=`EXTRAE_CONFIG_FILE=extrae.xml ${EXTRAE_HOME}/bin/extraej $1 2> /dev/null | grep "^RESULT :" | cut -d " " -f 4`
+		timing[${ex}]=`EXTRAE_CONFIG_FILE=extrae.xml ${EXTRAE_HOME}/bin/extraej -- $1 2> /dev/null | grep "^RESULT :" | cut -d " " -f 4`
 		echo ${timing[${ex}]} >> tmp.$$
 		let total=${total}+${timing[${ex}]} 
 		rm -fr set-0 TRACE.mpits TRACE.sym
@@ -51,7 +51,7 @@ function run_test_java_extraej {
 	for ex in `seq $2`
 	do
 		# Ignore stderr!
-		timing[${ex}]=`EXTRAE_CONFIG_FILE=extraej.xml ${EXTRAE_HOME}/bin/extraej $1 2> /dev/null | grep "^RESULT :" | cut -d " " -f 4`
+		timing[${ex}]=`EXTRAE_CONFIG_FILE=extraej.xml ${EXTRAE_HOME}/bin/extraej -- $1 2> /dev/null | grep "^RESULT :" | cut -d " " -f 4`
 		echo ${timing[${ex}]} >> tmp.$$
 		let total=${total}+${timing[${ex}]} 
 		rm -fr set-0 TRACE.mpits TRACE.sym
