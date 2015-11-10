@@ -14,7 +14,10 @@
  2.b) in src/common/extrae_version.h
  2.c) bootstrap & configure to rebuild documentation (1.c)
  2.d) commit the documentation
- 2.e) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
+ 2.e) Prepare a package (e.g. make dist-bzip2) and install from /tmp
+    2.e.1) run make check
+    2.e.2) run the overhead tests
+ 2.f) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
 
 3) Tag the release in the SVN
  3.a) If it is a new release (x.y.z version) with z = 0, make directory for it
