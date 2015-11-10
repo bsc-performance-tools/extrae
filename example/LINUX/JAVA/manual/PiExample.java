@@ -28,6 +28,7 @@ public class PiExample
 		end = System.currentTimeMillis();
 		System.out.println ("Threaded PI (" + steps + " steps, 1 thread)  = " + pit1.result()
 		  + " took " + (end - begin) + " ms");
+
 		PiThreaded pit2 = new PiThreaded (steps, 2);
 		begin = System.currentTimeMillis();
 		pit2.calculate ();
