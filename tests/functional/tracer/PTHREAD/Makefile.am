@@ -1,6 +1,9 @@
 include $(top_srcdir)/PATHS
 
-EXTRA_DIST= pthread.sh
+EXTRA_DIST= \
+ pthread.sh \
+ trace-ldpreload.sh \
+ extrae.xml
 
 check_PROGRAMS = \
  pthread

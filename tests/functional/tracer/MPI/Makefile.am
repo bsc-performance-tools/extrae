@@ -1,5 +1,25 @@
 include $(top_srcdir)/PATHS
 
+EXTRA_DIST = \
+ mpi_barrier_c_1proc.sh \
+ mpi_bcast_c_1proc.sh \
+ mpi_commranksize_c_1proc.sh \
+ mpi_commranksize_f_1proc.sh \
+ mpi_ibarrier_c_1proc.sh \
+ mpi_ibcast_c_1proc.sh \
+ mpi_initfini_c_linked_1proc.sh \
+ mpi_initfini_c_linked_2proc.sh \
+ mpi_initfini_c_linked_4proc.sh \
+ mpi_initfini_c_nolinked_1proc.sh \
+ mpi_initfini_f_nolinked_1proc.sh \
+ mpi_ireduce_c_1proc.sh \
+ mpi_reduce_c_1proc.sh \
+ trace-ldpreload.sh \
+ trace-ldpreloadf.sh \
+ trace-static.sh \
+ extrae.xml \
+ extrae-callers.xml
+
 check_PROGRAMS = \
  pass_argument_MPIRUN \
  mpi_initfini_c_nolinked \
@@ -18,7 +38,7 @@ check_PROGRAMS += \
  mpi_ireduce_c 
 endif
 
-CC=$(MPICC_COMPILER)
+CC=$(MPICC)
 FC=$(MPIF90)
 
 TESTS = \
