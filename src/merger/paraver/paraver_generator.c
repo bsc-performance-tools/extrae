@@ -136,16 +136,59 @@ static void trace_paraver_recordAt (WriteFileBuffer_t *wfb,
 }
 
 /******************************************************************************
+ ***  trace_paraver_state_noahead
+ ******************************************************************************/
+void trace_paraver_state_noahead (
+   unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
+   unsigned long long current_time)
+{
+	thread_t * thread_info = GET_THREAD_INFO (ptask, task, thread);
+	WriteFileBuffer_t *wfb = thread_info->file->wfb;
+	unsigned current_state = Top_State(ptask, task, thread);
+
+#if 0
+	fprintf (stderr, "trace_paraver_state (..)\n");
+	fprintf (stderr, "thread_info->incomplete_state_offset = %u\n", thread_info->incomplete_state_offset);
+#endif
+
+	/* Complete the previous state */
+	if (thread_info->incomplete_state_offset != (off_t)-1) /* This isn't the first state */
+	{
+#if 0
+		fprintf (stderr, "get_option_merge_JointStates() = %d Get_Last_State() = %d\n", get_option_merge_JointStates(), Get_Last_State());
+		fprintf (stderr, "thread_info->incomplete_state_record.value = %d == current_state = %d\n", thread_info->incomplete_state_record.value, current_state);
+#endif
+
+		/* Do not split states whether appropriate */
+		if (get_option_merge_JointStates() && !Get_Last_State())
+			if (thread_info->incomplete_state_record.value == current_state)
+				return;
+
+		/* Write the record into the *.tmp file if the state isn't excluded */
+#if defined(DEBUG_STATES)
+		fprintf(stderr, "mpi2prv: DEBUG [T:%d] Closing state %u at %llu\n", task,  
+		(unsigned int)thread_info->incomplete_state_record.value, current_time);
+		fprintf (stderr, "Excluded? %d\n", State_Excluded(thread_info->incomplete_state_record.value));
+#endif
+
+		if (!State_Excluded(thread_info->incomplete_state_record.value))
+		{
+			thread_info->incomplete_state_record.end_time = current_time;
+			WriteFileBuffer_writeAt (wfb, &(thread_info->incomplete_state_record), thread_info->incomplete_state_offset);
+		}
+	}
+}
+
+/******************************************************************************
  ***  trace_paraver_state
  ******************************************************************************/
 void trace_paraver_state (
    unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
    unsigned long long current_time)
 {
-	unsigned int current_state;
 	thread_t * thread_info = GET_THREAD_INFO (ptask, task, thread);
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
-	current_state = Top_State(ptask, task, thread);
+	unsigned current_state = Top_State(ptask, task, thread);
 
 #if 0
 	fprintf (stderr, "trace_paraver_state (..)\n");
@@ -194,7 +237,11 @@ void trace_paraver_state (
 	if (!State_Excluded(current_state))
 	{
 		paraver_rec_t fake_record;
-		fake_record.type = UNFINISHED_STATE;
+		fake_record.type   = UNFINISHED_STATE;
+		fake_record.ptask  = ptask;
+		fake_record.task   = task;
+		fake_record.thread = thread;
+		fake_record.time   = current_time;
 		thread_info->incomplete_state_offset = WriteFileBuffer_getPosition (wfb);
 		trace_paraver_record (wfb, &fake_record);
 	}
@@ -975,7 +1022,9 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 		{
 			case UNFINISHED_STATE:
 			if (num_incomplete_state == 0)
-				fprintf (stderr, "mpi2prv: Error! Found an unfinished state! Continuing...\n");
+				fprintf (stderr, "mpi2prv: Error! Found an unfinished state in object %d.%d.%d at time %llu (event %llu out of %llu)! Continuing...\n",
+				current->ptask, current->task, current->thread, current->time,
+				current_event, num_of_events);
 			num_incomplete_state++;
 			current = GetNextParaver_Rec (prvfset);
 			current_event++;

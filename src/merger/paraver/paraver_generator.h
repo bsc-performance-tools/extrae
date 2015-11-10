@@ -37,6 +37,10 @@ void trace_paraver_state (unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, 
 	unsigned long long current_time);
 
+void trace_paraver_state_noahead (unsigned int cpu, unsigned int ptask, 
+	unsigned int task, unsigned int thread, 
+	unsigned long long current_time);
+
 void trace_paraver_event (unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, unsigned long long time, 
 	unsigned int type, UINT64 value);

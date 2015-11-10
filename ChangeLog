@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 10Nov2015 Fix unfinished states due to the last event/state and improve
+               messaging
  * 09Nov2015 Fix label for MPI_Ibarrier (shown as MPI_Ibcast)
  * 03Nov2015 Fix state generation for several new MPI calls (backported from 3.2.1)
  * 02Nov2015 Extended Java instrumentation through AspectJ and JVMTI

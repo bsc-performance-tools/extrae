@@ -333,6 +333,6 @@ void Finalize_States (FileSet_t * fset, unsigned long long current_time)
       GetNextObj_FS (fset, obj, &cpu, &ptask, &task, &thread);
 
       /* Complete the state record started by the APPL_EV end */
-      trace_paraver_state (cpu, ptask, task, thread, current_time);
+      trace_paraver_state_noahead (cpu, ptask, task, thread, current_time);
    }
 }
