@@ -27,8 +27,8 @@
  | @version:     $Revision: 690 $
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 
-#ifndef CUDA_PRV_EVENTS_H
-#define CUDA_PRV_EVENTS_H
+#ifndef JAVA_PRV_EVENTS_H
+#define JAVA_PRV_EVENTS_H
 
 #include <config.h>
 
