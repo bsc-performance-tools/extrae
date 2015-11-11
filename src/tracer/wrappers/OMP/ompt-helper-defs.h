@@ -226,6 +226,12 @@ ompt_frame_t *ompt_get_task_frame(
 	int depth /* how many levels removed from the current task */
 );
 
+typedef void (*ompt_initialize_fn_t) (
+	ompt_function_lookup_t lookup,
+	const char *runtime_version,
+	unsigned int ompt_version
+);
+
 #if !defined(NEW_OMPT_DEPS)
 
 typedef enum {

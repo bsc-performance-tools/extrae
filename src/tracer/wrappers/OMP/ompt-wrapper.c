@@ -1132,3 +1132,8 @@ int ompt_initialize(
 	return 1;
 }
 
+ompt_initialize_fn_t ompt_tool (void)
+{
+	return ompt_initialize;
+}
+
