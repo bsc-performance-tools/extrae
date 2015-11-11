@@ -1,8 +1,8 @@
 
-EXTRA_DIST = extraej.bash
+EXTRA_DIST = extraej.bash.skeleton
 
 install-data-hook:
-	cp -v $(top_srcdir)/src/launcher/java/extraej.bash $(prefix)/bin
+	cp -v $(top_srcdir)/src/launcher/java/extraej.bash.skeleton $(prefix)/bin/extraej.bash
 	$(top_srcdir)/substitute $(SED) "@sub_JAVA@" "${JAVA}" $(prefix)/bin/extraej.bash
 	$(top_srcdir)/substitute $(SED) "@sub_AJC@" "${AJC}" $(prefix)/bin/extraej.bash
 	$(top_srcdir)/substitute $(SED) "@sub_ASPECTWEAVER_JAR@" "${ASPECT_WEAVER_JAR}" $(prefix)/bin/extraej.bash
