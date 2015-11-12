@@ -35,13 +35,13 @@ CheckEntryInPCF ()
 
 	local n
 	if [[ -f ${1} ]]; then
-		n=`grep ${2} ${1} | wc -l`
+		n=`grep "${2}" ${1} | wc -l`
 	else
 		n=0
 	fi
 
 	if [[ ${n} -ne 1 ]]; then
-		die "Error! Looking for ${2}. Found ${n} matches."
+		die "Error! Looking for '${2}'. Found ${n} matches."
 	fi
 }
 
