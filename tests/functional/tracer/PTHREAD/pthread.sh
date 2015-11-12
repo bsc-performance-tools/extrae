@@ -14,23 +14,19 @@ NB_PTHREAD_FUNC=`grep pthread_func ${TRACE}.pcf | wc -l`
 NB_PTHREAD_FUNC_EVTS=`grep :60000020: ${TRACE}.prv | wc -l`
 
 if [[ "${NB_PTHREAD_CREATE}" -ne 1 ]]; then
-	echo "Number of pthread_create in PCF should be 1"
-	exit 1
+	die "Number of pthread_create in PCF should be 1"
 fi
 
 if [[ "${NB_PTHREAD_JOIN}" -ne 1 ]]; then
-	echo "Number of pthread_join in PCF should be 1"
-	exit 1
+	die "Number of pthread_join in PCF should be 1"
 fi
 
 if [[ "${NB_PTHREAD_FUNC}" -ne 1 ]]; then
-	echo "Number of pthread_func in PCF should be 1"
-	exit 1
+	die "Number of pthread_func in PCF should be 1"
 fi
 
 if [[ "${NB_PTHREAD_FUNC_EVTS}" -ne 4 ]]; then
-	echo "Number of pthread_func events in PCF should be 4 (2 entries, 2 exits)"
-	exit 1
+	die "Number of pthread_func events in PCF should be 4 (2 entries, 2 exits)"
 fi
 
 rm -fr TRACE.* set-0 pthread.prv pthread.pcf pthread.row
