@@ -16,3 +16,7 @@ endif
 if WANT_OPENCL
 SUBDIRS += OPENCL
 endif
+
+if WANT_JAVA
+SUBDIRS += JAVA
+endif

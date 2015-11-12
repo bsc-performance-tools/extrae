@@ -27,32 +27,27 @@ CheckEntryInPCF ${TRACE}.pcf MPI_Comm_size
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 31
 if [[ "${?}" -ne 1 ]] ; then
-	echo "There must be only one entry to MPI_Init"
-	exit 1
+	die "There must be only one entry to MPI_Init"
 fi
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 32
 if [[ "${?}" -ne 1 ]] ; then
-	echo "There must be only one entry to MPI_Finalize"
-	exit 1
+	die "There must be only one entry to MPI_Finalize"
 fi
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 19
 if [[ "${?}" -ne 1 ]] ; then
-	echo "There must be only one entry to MPI_Comm_rank"
-	exit 1
+	die "There must be only one entry to MPI_Comm_rank"
 fi
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 20
 if [[ "${?}" -ne 1 ]] ; then
-	echo "There must be only one entry to MPI_Comm_size"
-	exit 1
+	die "There must be only one entry to MPI_Comm_size"
 fi
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 0
 if [[ "${?}" -ne 4 ]] ; then
-	echo "There must be only two exits (one per MPI_Init and another per MPI_Finalize)"
-	exit 1
+	die "There must be only two exits (one per MPI_Init and another per MPI_Finalize)"
 fi
 
 rm -fr ${TRACE}.??? set-0 TRACE.*
