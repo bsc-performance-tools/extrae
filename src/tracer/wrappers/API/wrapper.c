@@ -229,8 +229,6 @@ int tracejant_memusage = FALSE;
 /**** no generen trasa ***************************************************/
 int *TracingBitmap = NULL;
 
-int mpit_gathering_enabled;
-
 /*************************************************************************/
 
 /** Variable global per saber si en general cal interceptar l'aplicacio **/
@@ -731,17 +729,6 @@ static int read_environment_variables (int me)
 	/* Control if the user wants to add information about MPI caller routines */
 	mpi_callers = getenv ("EXTRAE_MPI_CALLER");
 	if (mpi_callers != NULL) Parse_Callers (me, mpi_callers, CALLER_MPI);
-#endif
-
-#if defined(MPI_SUPPORT)
-	/* Check if we must gather all the MPIT files into one target (MASTER) node */
-	str = getenv("EXTRAE_GATHER_MPITS");
-	if ((str != NULL) && (strcmp(str, "1") == 0))
-	{
-		mpit_gathering_enabled = TRUE;
-		if (me == 0)
-			fprintf (stdout, PACKAGE_NAME": All MPIT files will be gathered at the end of the execution.\n");
-	}
 #endif
 
 	/* Check if the buffer must be treated as a circular buffer instead a linear buffer with many flushes */

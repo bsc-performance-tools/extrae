@@ -57,7 +57,6 @@ unsigned long long CalculateNumOpsForPeriod (unsigned long long wannaPeriod,
 void CheckControlFile (void);
 void CheckGlobalOpsTracingIntervals (void);
 void MPI_remove_file_list (int all);
-extern int mpit_gathering_enabled;
 
 void Extrae_network_counters_Wrapper (void);
 void Extrae_network_routes_Wrapper (int mpi_rank);

@@ -197,7 +197,6 @@ Such options refer to:
  \item {\tt size} Let the user restrict the maximum size (in megabytes) of each resulting intermediate trace file\footnote{This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section \ref{sec:XMLSectionBuffer}).}.
  \item {\tt temporal-directory} Where the intermediate trace files will be stored during the execution of the application. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.\\
  \item {\tt final-directory} Where the intermediate trace files will be stored once the execution has been finished. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.\\
- \item {\tt gather-mpits} If the system does not provide a global filesystem the resulting trace files will be distributed among the computation nodes. Turning on this option will use the underlying communication mechanism ({MPI}) to gather all the intermediate trace files into the root node.
 \end{itemize}
 
 \graybox{See {\bf EXTRAE\_PROGRAM\_NAME}, {\bf EXTRAE\_FILE\_SIZE}, {\bf EXTRAE\_DIR}, {\bf EXTRAE\_FINAL\_DIR} and {\bf EXTRAE\_GATHER\_MPITS} environment variables in appendix \ref{cha:EnvVar}.}

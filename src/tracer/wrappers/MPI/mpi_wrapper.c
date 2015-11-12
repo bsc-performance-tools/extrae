@@ -159,8 +159,6 @@ static void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
 
-/* int mpit_gathering_enabled = FALSE; */
-
 char *MpitsFileName    = NULL;    /* Name of the .mpits file (only significant at rank 0) */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 char *SpawnsFileName   = NULL;    /* Name of the .spawn file (all tasks have it defined)  */

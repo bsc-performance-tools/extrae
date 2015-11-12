@@ -762,16 +762,6 @@ static void Parse_XML_Storage (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 				final_d = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 			XML_FREE(enabled);
 		}
-#if defined(MPI_SUPPORT)
-		/* Must the tracing gather the MPITs into one process? */
-		else if (!xmlStrcasecmp (tag->name, TRACE_GATHER_MPITS))
-		{
-			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			mpit_gathering_enabled = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
-			mfprintf (stdout, PACKAGE_NAME": All MPIT files will %s be gathered at the end of the execution!\n", mpit_gathering_enabled?"":"NOT");
-			XML_FREE(enabled);
-		}
-#endif
 		/* Obtain the MPIT prefix */
 		else if (!xmlStrcasecmp (tag->name, TRACE_PREFIX))
 		{
