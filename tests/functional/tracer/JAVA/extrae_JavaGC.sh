@@ -23,8 +23,7 @@ fi
 NumberEntriesInPRV ${TRACE}.prv 48000001 0
 NEXITS=${?}
 if [[ "${NEXITS}" -ne "${NENTRIES}" ]] ; then
-	echo "There must be the same number of entries to exits in Java Garbage collector (${NEXITS} / ${NENTRIES})"
-	exit 1
+	die "There must be the same number of entries to exits in Java Garbage collector (${NEXITS} / ${NENTRIES})"
 fi
 
 if [[ -r ${TRACE}.prv &&  -r ${TRACE}.pcf && -r ${TRACE}.row ]]; then
