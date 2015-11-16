@@ -635,6 +635,7 @@ AC_CONFIG_FILES([\
   tests/functional/tracer/OTHER/Makefile \
   tests/functional/tracer/PTHREAD/Makefile \
   tests/functional/tracer/MPI/Makefile \
+  tests/functional/tracer/JAVA/Makefile \
   tests/functional/tracer/OPENCL/Makefile \
   tests/functional/tracer/CUDA/Makefile \
   tests/functional/merger/Makefile \
