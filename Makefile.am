@@ -395,7 +395,7 @@ endif
 	$(top_srcdir)/substitute $(SED) "@sub_CXX@" "`which ${CXX}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_FC@" "`which ${FC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 if HAVE_MPI
-	$(top_srcdir)/substitute $(SED) "@sub_MPICC@" "`which ${MPICC_COMPILER}`" $(DESTDIR)$(datadir)/example/Makefile.inc
+	$(top_srcdir)/substitute $(SED) "@sub_MPICC@" "`which ${MPICC}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF77@" "`which ${MPIF77}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 	$(top_srcdir)/substitute $(SED) "@sub_MPIF90@" "`which ${MPIF90}`" $(DESTDIR)$(datadir)/example/Makefile.inc
 else

@@ -172,46 +172,32 @@ AC_DEFUN([AX_PROG_MPI],
 
       dnl If $MPICC is not set, check for mpicc under $MPI_HOME/bin. We don't want to mix multiple MPI installations.
       AC_MSG_CHECKING([for MPI C compiler])
-      mpicc_compilers="mpicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
-      for mpicc in [$mpicc_compilers]; do
-         if test -x "${MPI_HOME}/bin/${mpicc}" ; then
-            MPICC_COMPILER="${MPI_HOME}/bin/${mpicc}"
+      if test "${MPICC}" != "" ; then
+         IFS=' ' read -ra MPICC_parts <<< "${MPICC}"
+         if test -x ${MPICC_parts[0]} ; then
+            MPICC_COMPILER=${MPICC}
             AC_MSG_RESULT([${MPICC_COMPILER}])
-            break
-         elif test -x "${MPI_HOME}/bin64/${mpicc}" ; then
-            MPICC_COMPILER="${MPI_HOME}/bin64/${mpicc}"
-            AC_MSG_RESULT([${MPICC_COMPILER}])
-            break
-         fi
-      done
-
-      if test "${MPICC_COMPILER}" = "" ; then
-         AC_MSG_RESULT([not found])
-         AC_MSG_NOTICE([Cannot find \${MPI_HOME}/bin/mpicc -or similar- using \${CC} instead])
-         MPICC_DOES_NOT_EXIST="yes"
-      else
-         MPICC_DOES_NOT_EXIST="no"
-      fi
-  
-      dnl MPICC will point to the MPI C compiler used by Extrae to compile itself
-      dnl and can be different from MPICC_COMPILER which was automatically found
-      dnl in MPI installation and will be used for examples 
-
-      dnl if MPICC is not given, use MPICC_COMPILER
-      if test "${MPICC}" = "" ; then
-         MPICC=${MPICC_COMPILER}
-      else
-         AC_MSG_CHECKING([for given MPI C compiler -MPICC-])
-         if test -x ${MPICC} ; then
-            AC_MSG_RESULT([${MPICC}])
          else
-            if test -x `which ${MPICC}` ; then
-            	AC_MSG_RESULT([${MPICC}])
-            else
- 	          	AC_MSG_ERROR([Cannot find given \${MPICC}. Please give the full path for the MPI C compiler])
+            AC_MSG_ERROR([Cannot find MPI C compiler ${MPICC}])
+         fi
+      else
+         mpicc_compilers="mpicc mpiicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
+         for mpicc in [$mpicc_compilers]; do
+            if test -x "${MPI_HOME}/bin/${mpicc}" ; then
+               MPICC_COMPILER="${MPI_HOME}/bin/${mpicc}"
+               AC_MSG_RESULT([${MPICC_COMPILER}])
+               break
+            elif test -x "${MPI_HOME}/bin64/${mpicc}" ; then
+               MPICC_COMPILER="${MPI_HOME}/bin64/${mpicc}"
+               AC_MSG_RESULT([${MPICC_COMPILER}])
+               break
             fi
+         done
+         if test "${MPICC_COMPILER}" = "" ; then
+            AC_MSG_ERROR([Cannot find \${MPI_HOME}/bin/mpicc. You can pass an alternate through MPICC environment variable.])
          fi
       fi
+      MPICC=${MPICC_COMPILER}
    fi
 
    dnl check for mpif77 under $MPI_HOME/bin
@@ -304,7 +290,6 @@ AC_DEFUN([AX_PROG_MPI],
 
    dnl AC_SUBST(MPICC)
    AC_ARG_VAR([MPICC],[Alternate MPI C compiler - use if the MPI C compiler in the MPI installation should not be used])
-   AC_SUBST(MPICC_COMPILER)
    AC_SUBST(MPIF77)
    AC_SUBST(MPIF90)
    AC_SUBST(MPIRUN)
@@ -544,14 +529,6 @@ AC_DEFUN([AX_CHECK_PMPI_NAME_MANGLING],
       AC_LANG([C])
       AX_FLAGS_SAVE()
 
-      dnl If we've previously set MPICC to CC then we don't have MPICC
-      dnl Add the default includes and libraries
-      if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-         CFLAGS="${MPI_CFLAGS}"
-         LIBS="${MPI_LIBS}"
-         LDFLAGS="${MPI_LDFLAGS}"
-      fi
-
       CC="${MPICC}"
 
       dnl PMPI_NO_UNDERSCORES appears twice for libraries that do not support
@@ -626,15 +603,6 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_COMM_SPAWN],
 	AC_LANG([C])
 	AX_FLAGS_SAVE()
 
-	dnl If we've previously set MPICC to CC then we don't have MPICC
-	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-		CFLAGS="${MPI_CFLAGS}"
-		LIBS="${MPI_LIBS}"
-		LDFLAGS="${MPI_LDFLAGS}"
-	fi
-	CC="${MPICC}"
-
 	AC_MSG_CHECKING([if MPI library supports MPI_Comm_spawn])
 	AC_TRY_LINK(
 		[#include <mpi.h>], 
@@ -667,13 +635,6 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_1SIDED],
 	AC_LANG([C])
 	AX_FLAGS_SAVE()
 
-	dnl If we've previously set MPICC to CC then we don't have MPICC
-	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-		CFLAGS="${MPI_CFLAGS}"
-		LIBS="${MPI_LIBS}"
-		LDFLAGS="${MPI_LDFLAGS}"
-	fi
 	CC="${MPICC}"
 
 	AC_MSG_CHECKING([if MPI library supports MPI 1-sided operations])
@@ -705,13 +666,6 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_IO],
 	AC_LANG([C])
 	AX_FLAGS_SAVE()
 
-	dnl If we've previously set MPICC to CC then we don't have MPICC
-	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-		CFLAGS="${MPI_CFLAGS}"
-		LIBS="${MPI_LIBS}"
-		LDFLAGS="${MPI_LDFLAGS}"
-	fi
 	CC="${MPICC}"
 
 	AC_MSG_CHECKING([if MPI library supports MPI I/O])
@@ -744,13 +698,6 @@ AC_DEFUN([AX_CHECK_MPI_C_HAS_FORTRAN_MPI_INIT],
 	AC_LANG([C])
 	AX_FLAGS_SAVE()
 
-	dnl If we've previously set MPICC to CC then we don't have MPICC
-	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-		CFLAGS="${MPI_CFLAGS}"
-		LIBS="${MPI_LIBS}"
-		LDFLAGS="${MPI_LDFLAGS}"
-	fi
 	CC="${MPICC}"
 
 	AC_MSG_CHECKING([if MPI C library contains Fortran MPI_Init symbol])
@@ -781,13 +728,6 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_C],
 	AC_LANG([C])
 	AX_FLAGS_SAVE()
 
-	dnl If we've previously set MPICC to CC then we don't have MPICC
-	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-		CFLAGS="${MPI_CFLAGS}"
-		LIBS="${MPI_LIBS}"
-		LDFLAGS="${MPI_LDFLAGS}"
-	fi
 	CC="${MPICC}"
 
 	AC_MSG_CHECKING([if MPI library supports threads using MPI_Init_thread (C)])
@@ -830,11 +770,6 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_F],
 	AC_MSG_CHECKING([if MPI library supports threads using MPI_Init_thread (Fortran)])
 
 	if test "${MPI_F_LIB_FOUND}" = "yes" ; then
-		if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-			CFLAGS="${MPI_CFLAGS}"
-			LIBS="${MPI_LIBS}"
-			LDFLAGS="${MPI_LDFLAGS}"
-		fi
 
 		CC="${MPICC}"
         LIBS="${LIBS} ${MPI_F_LIB}" dnl We need to append fortran libraries if they exist
@@ -889,13 +824,6 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_C_AND_FORTRAN_SYMBOLS],
 	AC_LANG([C])
 	AX_FLAGS_SAVE()
 
-	dnl If we've previously set MPICC to CC then we don't have MPICC
-	dnl Add the default includes and libraries
-	if test "${MPICC_DOES_NOT_EXIST}" = "yes" -o "${MPICC}" = "gcc" ; then
-		CFLAGS="${MPI_CFLAGS}"
-		LIBS="${MPI_LIBS}"
-		LDFLAGS="${MPI_LDFLAGS}"
-	fi
 	CC="${MPICC}"
 
 	if test ${MPI_INSTALLED} = "yes" ; then
