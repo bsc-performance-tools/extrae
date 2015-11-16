@@ -562,7 +562,7 @@ void GOMP_taskgroup_end (void)
 	{
 		Extrae_OpenMP_Taskgroup_end_Entry();
 		GOMP_taskgroup_end_real ();
-		Extrae_OpenMP_Taskgroup_end_Entry();
+		Extrae_OpenMP_Taskgroup_end_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
 	}
 	else if (GOMP_taskgroup_end_real != NULL)
