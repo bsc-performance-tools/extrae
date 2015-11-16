@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 16Nov2015 Fix extra comma in papi_best_set
  * 10Nov2015 Fix unfinished states due to the last event/state and improve
                messaging
  * 09Nov2015 Fix label for MPI_Ibarrier (shown as MPI_Ibcast)

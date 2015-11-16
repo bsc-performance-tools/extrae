@@ -217,7 +217,8 @@ static void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicoun
 
 		if (max_combination.count() > 0)
 		{
-			cout << ",";
+			if (omnicounters.size() > 0)
+				cout << ",";
 
 			bitset<MAXBITSET> max = max_combination;
 			size_t i = 0;
