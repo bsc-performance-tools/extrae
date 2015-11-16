@@ -98,8 +98,7 @@ void Extrae_OMPT_Taskgroup_Entry (void);
 void Extrae_OMPT_Taskgroup_Exit (void);
 void Extrae_OMPT_OpenMP_TaskUF_Entry (UINT64 uf, UINT64 taskid);
 void Extrae_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid);
-void Extrae_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id,
-	int type, void *data);
+void Extrae_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id);
 
 void Extrae_OpenMP_Notify_NewInstantiatedTask (void);
 void Extrae_OpenMP_Notify_NewExecutedTask (void);

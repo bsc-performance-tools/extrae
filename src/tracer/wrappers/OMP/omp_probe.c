@@ -571,15 +571,12 @@ void Probe_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid)
 	}
 }
 
-void Probe_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id,
-	int type, void *data)
+void Probe_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id)
 {
-	UNREFERENCED_PARAMETER(data);
-
 	DEBUG
 	if (mpitrace_on)
-		TRACE_OMPEVENT2PARAM(TIME, OMPT_DEPENDENCE_EV, type,
-		  pred_task_id, succ_task_id);
+		TRACE_OMPEVENT2PARAM(TIME, OMPT_DEPENDENCE_EV, 0, pred_task_id,
+		  succ_task_id);
 }
 
 void Probe_OpenMP_Emit_numInstantiatedTasks (unsigned n)

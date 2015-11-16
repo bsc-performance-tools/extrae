@@ -32,7 +32,7 @@
 
 #include "common.h"
 
-#include "ompt-helper-defs.h"
+#include "ompt.h"
 
 void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid, void *pf);
 void Extrae_OMPT_unregister_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid);

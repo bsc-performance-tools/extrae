@@ -62,8 +62,6 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 #include "omp-common.h"
 #include "ompt-helper.h"
 
-#define NEW_OMPT_DEPS
-
 
 // # define EMPTY_OMPT_CALLBACKS /* For Benchmarking purposes */
 //  #define DEBUG
@@ -884,37 +882,16 @@ void OMPT_event_control (uint64_t command, uint64_t modifier)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-
-#if !defined(NEW_OMPT_DEPS)
-
-void OMPT_event_dependence( /* for new dependence instrumentation */         
+void OMPT_event_task_dependence_pair ( /* for new dependence instrumentation */
 	ompt_task_id_t pred_task_id, /* ID of predecessor task */
-	ompt_task_id_t succ_task_id, /* ID of successor task */
-	ompt_dependence_type_t type, /* Type of dependence */
-	void *data                   /* Pointer to related data */
+	ompt_task_id_t succ_task_id  /* ID of successor task */
 )
 {
 #ifndef EMPTY_OMPT_CALLBACKS
-	UNREFERENCED_PARAMETER(data);
+	PROTOTYPE_MESSAGE(" (pred_task_id = %lx, succ_task_id = %lx)", pred_task_id,
+		succ_task_id);
 
-	PROTOTYPE_MESSAGE(" (pred_task_id = %lx, succ_task_id = %lx, type = %d, data = %p)", pred_task_id, succ_task_id, type, data);
-
-	Extrae_OMPT_dependence (pred_task_id, succ_task_id, type, data);
-#endif /* EMPTY_OMPT_CALLBACKS */
-}
-
-#else
-
-void OMPT_event_task_blocking_dependence ( /* for new dependence instrumentation */
-	ompt_task_id_t pred_task_id, /* ID of predecessor task */
-	ompt_task_id_t succ_task_id, /* ID of successor task */
-	ompt_task_dependence_t dependence /* dependence information */
-)
-{
-#ifndef EMPTY_OMPT_CALLBACKS
-	PROTOTYPE_MESSAGE(" (pred_task_id = %lx, succ_task_id = %lx, flags = %d, data = %p, len = %d)", pred_task_id, succ_task_id, dependence.flags, dependence.variable_addr, dependence.len);
-
-	Extrae_OMPT_dependence (pred_task_id, succ_task_id, dependence.flags, dependence.variable_addr);
+	Extrae_OMPT_dependence (pred_task_id, succ_task_id);
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
@@ -939,8 +916,6 @@ void OMPT_event_task_dependences ( /* for new dependence instrumentation */
 
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
-
-#endif
 
 //*****************************************************************************
 // interface operations
@@ -990,12 +965,8 @@ static struct OMPT_callbacks_st ompt_callbacks[] =
 	CALLBACK_ENTRY (ompt_event_thread_begin, OMPT_event_thread_begin),
 	CALLBACK_ENTRY (ompt_event_thread_end, OMPT_event_thread_end),
 	CALLBACK_ENTRY (ompt_event_control, OMPT_event_control),
-#if !defined(NEW_OMPT_DEPS)
-	CALLBACK_ENTRY (ompt_event_dependence, OMPT_event_dependence),
-#else
 	CALLBACK_ENTRY (ompt_event_task_dependences, OMPT_event_task_dependences),
-	CALLBACK_ENTRY (ompt_event_task_blocking_dependence, OMPT_event_task_blocking_dependence),
-#endif
+	CALLBACK_ENTRY (ompt_event_task_dependence_pair, OMPT_event_task_dependence_pair),
  	{ "empty,", (ompt_event_t) 0, 0 },
  };
  
@@ -1033,7 +1004,7 @@ typedef enum {
 	OMPT_UNKNOWN
 } ompt_runtime_t;
 
-int ompt_initialize(
+void ompt_initialize(
 	ompt_function_lookup_t lookup,
 	const char *runtime_version_string, 
 	unsigned ompt_version)
@@ -1127,9 +1098,6 @@ int ompt_initialize(
 	Extrae_set_threadid_function (Extrae_OMPT_threadid);
 
 	UNREFERENCED_PARAMETER(r);
-
-
-	return 1;
 }
 
 ompt_initialize_fn_t ompt_tool (void)

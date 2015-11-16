@@ -433,10 +433,9 @@ void Extrae_OMPT_OpenMP_TaskUF_Exit (UINT64 taskid)
 	Backend_Leave_Instrumentation();
 }
 
-void Extrae_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id,
-	int type, void *data)
+void Extrae_OMPT_dependence (uint64_t pred_task_id, uint64_t succ_task_id)
 {
-	Probe_OMPT_dependence (pred_task_id, succ_task_id, type, data);
+	Probe_OMPT_dependence (pred_task_id, succ_task_id);
 }
 
 static volatile unsigned Extrae_OpenMP_numInstantiatedTasks = 0;

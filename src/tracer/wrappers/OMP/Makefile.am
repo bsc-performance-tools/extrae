@@ -2,7 +2,8 @@ include $(top_srcdir)/PATHS
 
 EXTRA_DIST = \
  intel-kmpc-11-intermediate-switch.c \
- intel-kmpc-11-intermediate.c
+ intel-kmpc-11-intermediate.c \
+ ompt-headers
 
 WRAPPERS_OPENMP = \
  omp_probe.c omp_probe.h \
@@ -13,10 +14,9 @@ EXTRA_OPENMP_CFLAGS =
 if WANT_OPENMP_OMPT
 WRAPPERS_OPENMP += \
  ompt-wrapper.c \
- ompt-helper-defs.h \
  ompt-helper.h ompt-helper.c 
 
-EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP
+EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -Iompt-headers
 
 else
 
