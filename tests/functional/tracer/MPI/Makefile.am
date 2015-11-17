@@ -1,19 +1,29 @@
 include $(top_srcdir)/PATHS
 
+ALL_TESTS = \
+  mpi_initfini_c_linked_1proc.sh \
+  mpi_initfini_c_linked_2proc.sh \
+  mpi_initfini_c_linked_4proc.sh \
+  mpi_initfini_c_nolinked_1proc.sh \
+  mpi_initfini_f_nolinked_1proc.sh \
+  mpi_commranksize_c_1proc.sh \
+  mpi_commranksize_f_1proc.sh \
+  mpi_barrier_c_1proc.sh \
+  mpi_bcast_c_1proc.sh \
+  mpi_reduce_c_1proc.sh \
+  mpi_sendirecv_c.sh \
+  mpi_isendirecv_c.sh \
+  mpi_isendirecvwaitall_c.sh \
+  mpi_sendirecviprobewait_c_2proc.sh
+
+ALL_TESTS_MPI3 = \
+  mpi_ibarrier_c_1proc.sh \
+  mpi_ibcast_c_1proc.sh \
+  mpi_ireduce_c_1proc.sh
+
 EXTRA_DIST = \
- mpi_barrier_c_1proc.sh \
- mpi_bcast_c_1proc.sh \
- mpi_commranksize_c_1proc.sh \
- mpi_commranksize_f_1proc.sh \
- mpi_ibarrier_c_1proc.sh \
- mpi_ibcast_c_1proc.sh \
- mpi_initfini_c_linked_1proc.sh \
- mpi_initfini_c_linked_2proc.sh \
- mpi_initfini_c_linked_4proc.sh \
- mpi_initfini_c_nolinked_1proc.sh \
- mpi_initfini_f_nolinked_1proc.sh \
- mpi_ireduce_c_1proc.sh \
- mpi_reduce_c_1proc.sh \
+ $(ALL_TESTS) \
+ $(ALL_TESTS_MPI3) \
  trace-ldpreload.sh \
  trace-ldpreloadf.sh \
  trace-static.sh \
@@ -32,7 +42,8 @@ check_PROGRAMS = \
  mpi_reduce_c \
  mpi_sendirecv_c \
  mpi_isendirecv_c \
- mpi_isendirecvwaitall_c
+ mpi_isendirecvwaitall_c \
+ mpi_sendirecviprobewait_c
 
 if HAVE_MPI3
 check_PROGRAMS += \
@@ -44,26 +55,10 @@ endif
 CC=$(MPICC)
 FC=$(MPIF90)
 
-TESTS = \
-  mpi_initfini_c_linked_1proc.sh \
-  mpi_initfini_c_linked_2proc.sh \
-  mpi_initfini_c_linked_4proc.sh \
-  mpi_initfini_c_nolinked_1proc.sh \
-  mpi_initfini_f_nolinked_1proc.sh \
-  mpi_commranksize_c_1proc.sh \
-  mpi_commranksize_f_1proc.sh \
-  mpi_barrier_c_1proc.sh \
-  mpi_bcast_c_1proc.sh \
-  mpi_reduce_c_1proc.sh \
-  mpi_sendirecv_c.sh \
-  mpi_isendirecv_c.sh \
-  mpi_isendirecvwaitall_c.sh
+TESTS = $(ALL_TESTS)
 
 if HAVE_MPI3
-TESTS += \
-  mpi_ibarrier_c_1proc.sh \
-  mpi_ibcast_c_1proc.sh \
-  mpi_ireduce_c_1proc.sh
+TESTS += $(ALL_TESTS_MPI3)
 endif
 
 pass_argument_MPIRUN_SOURCES = pass_argument_MPIRUN.c
@@ -90,3 +85,4 @@ mpi_ireduce_c_SOURCES = mpi_ireduce_c.c
 mpi_isendirecvwaitall_c_SOURCES = mpi_isendirecvwaitall_c.c
 mpi_isendirecv_c_SOURCES = mpi_isendirecv_c.c
 mpi_sendirecv_c_SOURCES = mpi_sendirecv_c.c
+mpi_sendirecviprobewait_c_SOURCES = mpi_sendirecviprobewait_c.c
