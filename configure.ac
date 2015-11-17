@@ -209,7 +209,7 @@ AM_CONDITIONAL(HAVE_LIBDL, test "${have_dl}" = "yes" )
 # Search for headers
 AC_CHECK_HEADERS(
  [stdint.h netdb.h errno.h string.h strings.h unistd.h rts.h \
-  byteswap.h limits.h malloc.h stdint.h stdio.h stdlib.h values.h assert.h \
+  byteswap.h limits.h malloc.h stdio.h stdlib.h values.h assert.h \
   bgl_perfctr.h bgl_perfctr_events.h ctype.h dlfcn.h excpt.h fcntl.h getopt.h \
   libgen.h libspe.h libspe2.h pdsc.h signal.h stdarg.h math.h inttypes.h time.h \
   ucontext.h pthread.h semaphore.h execinfo.h dirent.h]
