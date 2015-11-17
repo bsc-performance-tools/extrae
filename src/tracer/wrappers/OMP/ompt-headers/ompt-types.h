@@ -24,13 +24,13 @@ typedef uint32_t ompt_lock_hint_t;          /* as described in the OpenMP langua
 
 typedef uint32_t ompt_bool;                 /* takes the values 0 (false) or 1 (true)        */
 
-typedef void * ompt_target_device_t;        /* opaque object representing a target device    */
+typedef void ompt_target_device_t;          /* opaque object representing a target device    */
 
 typedef uint64_t ompt_target_time_t;        /* raw time value on a device                    */
 
-typedef void * ompt_target_buffer_t;        /* opaque handle for a target buffer             */ 
+typedef void ompt_target_buffer_t;          /* opaque handle for a target buffer             */ 
 
-typedef void * ompt_target_buffer_cursor_t; /* opaque handle for a position in target buffer */ 
+typedef uint64_t ompt_target_buffer_cursor_t;/* opaque handle for a position in target buffer*/ 
 
 typedef enum ompt_thread_type_e {
   ompt_thread_initial  = 1,

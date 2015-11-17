@@ -1,8 +1,14 @@
 #ifndef OMPT_H_INCLUDED
 #define OMPT_H_INCLUDED
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <config.h>
+
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 
 #include "ompt-types.h"
 #include "ompt-events.h"
