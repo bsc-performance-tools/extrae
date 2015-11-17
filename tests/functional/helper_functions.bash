@@ -40,8 +40,8 @@ CheckEntryInPCF ()
 		n=0
 	fi
 
-	if [[ ${n} -ne 1 ]]; then
-		die "Error! Looking for '${2}'. Found ${n} matches."
+	if [[ ${n} -eq 0 ]]; then
+		die "Error! Could not find '${2}'."
 	fi
 }
 
