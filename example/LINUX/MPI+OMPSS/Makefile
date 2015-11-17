@@ -1,9 +1,9 @@
 include Makefile.inc
 
-CC	= imcc --ompss
+CC	= imcc
 
 LDFLAGS = -g -O $(MPI_LDFLAGS) $(MPI_LIBS)
-CFLAGS =  -g -O -instrument $(MPI_CFLAGS)
+CFLAGS =  --ompss -g -O -instrument $(MPI_CFLAGS)
 
 OBJECTS = misc.o solver-mpi-ompss.o heat-mpi-ompss.o
 

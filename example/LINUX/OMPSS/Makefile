@@ -1,8 +1,8 @@
 include Makefile.inc
 
-CC	= imcc --ompss
+CC	= imcc
 LDFLAGS = -ldl -lrt -lpthread 
-CFLAGS  = --instrument
+CFLAGS  = --ompss --instrument
 OBJECTS = misc.o solver-ompss.o heat-ompss.o
 
 heat-ompss-i: $(OBJECTS)
