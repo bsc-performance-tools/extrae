@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 18Nov2015 Changed calls to MPI_Comm_compare in Trace_MPI_Communicator (mpi_wrapper.c) into PMPI_Comm_compare so as not to intercept those calls
  * 16Nov2015 Fix extra comma in papi_best_set
              Upgrade OMPT instrumentation
              Fix #pragma omp taskgroup instrumentation
