@@ -15,15 +15,10 @@ TESTS = \
  ompss-codelocation-2.sh
 
 EXTRA_DIST = \
- auto-init-fini.reference \
  auto-init-fini.sh \
- define_event_type_gen_pcf.reference \
  define_event_type_gen_pcf.sh \
- define_event_type_gen_pcf_f.reference \
  define_event_type_gen_pcf_f.sh \
- ompss-codelocation-2.reference \
  ompss-codelocation-2.sh \
- ompss-codelocation.reference \
  ompss-codelocation.sh
 
 if HAVE_PAPI
