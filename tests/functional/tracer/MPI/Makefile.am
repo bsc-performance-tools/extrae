@@ -11,6 +11,8 @@ ALL_TESTS = \
   mpi_barrier_c_1proc.sh \
   mpi_bcast_c_1proc.sh \
   mpi_reduce_c_1proc.sh \
+  mpi_gather_c_1proc.sh \
+  mpi_scatter_c_1proc.sh \
   mpi_sendirecv_c.sh \
   mpi_isendirecv_c.sh \
   mpi_isendirecvwaitall_c.sh \
@@ -42,6 +44,8 @@ check_PROGRAMS = \
  mpi_barrier_c \
  mpi_bcast_c \
  mpi_reduce_c \
+ mpi_gather_c \
+ mpi_scatter_c \
  mpi_sendirecv_c \
  mpi_isendirecv_c \
  mpi_isendirecvwaitall_c \
@@ -85,6 +89,8 @@ mpi_ibcast_c_SOURCES = mpi_ibcast_c.c
 
 mpi_reduce_c_SOURCES = mpi_reduce_c.c
 mpi_ireduce_c_SOURCES = mpi_ireduce_c.c
+mpi_gather_c_SOURCES = mpi_gather_c.c
+mpi_scatter_c_SOURCES = mpi_scatter_c.c
 
 mpi_isendirecvwaitall_c_SOURCES = mpi_isendirecvwaitall_c.c
 mpi_isendirecv_c_SOURCES = mpi_isendirecv_c.c
