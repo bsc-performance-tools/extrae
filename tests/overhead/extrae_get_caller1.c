@@ -28,10 +28,11 @@
 \* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include <stdio.h>
 #include <time.h>
+#include <stdint.h>
 
 #include "extrae_user_events.h"
 
-extern void * get_caller (int);
+extern uint64_t get_caller (int);
 
 int main(int argc, char **argv)
 {
