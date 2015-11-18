@@ -2893,7 +2893,7 @@ static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 }
 
 /******************************************************************************
- ***  Trace_MPI_Communicator
+ ***  Trace_MPI_InterCommunicator
  ******************************************************************************/
 static void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm, 
 	int local_leader, MPI_Comm remote_comm, int remote_leader, UINT64 time,
