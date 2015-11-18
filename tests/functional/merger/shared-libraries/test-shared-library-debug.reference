@@ -154,9 +154,9 @@ VALUES
 0   End
 1 0 (Unresolved)
 2 0 (_NOT_Found)
-3 8 (fA.c, libfA.so)
-4 8 (fB.c, libfB.so)
-5 10 (main.c, main)
+3 31 (fA.c, libfA.so)
+4 31 (fB.c, libfB.so)
+5 33 (main.c, main)
 
 
 EVENT_TYPE
