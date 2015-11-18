@@ -14,6 +14,7 @@ ALL_TESTS = \
   mpi_sendirecv_c.sh \
   mpi_isendirecv_c.sh \
   mpi_isendirecvwaitall_c.sh \
+  mpi_sendirecvprobewait_c_2proc.sh \
   mpi_sendirecviprobewait_c_2proc.sh
 
 ALL_TESTS_MPI3 = \
@@ -43,6 +44,7 @@ check_PROGRAMS = \
  mpi_sendirecv_c \
  mpi_isendirecv_c \
  mpi_isendirecvwaitall_c \
+ mpi_sendirecvprobewait_c \
  mpi_sendirecviprobewait_c
 
 if HAVE_MPI3
@@ -85,4 +87,5 @@ mpi_ireduce_c_SOURCES = mpi_ireduce_c.c
 mpi_isendirecvwaitall_c_SOURCES = mpi_isendirecvwaitall_c.c
 mpi_isendirecv_c_SOURCES = mpi_isendirecv_c.c
 mpi_sendirecv_c_SOURCES = mpi_sendirecv_c.c
+mpi_sendirecvprobewait_c_SOURCES = mpi_sendirecvprobewait_c.c
 mpi_sendirecviprobewait_c_SOURCES = mpi_sendirecviprobewait_c.c
