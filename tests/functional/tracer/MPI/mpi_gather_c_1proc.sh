@@ -10,7 +10,7 @@ fi
 
 rm -fr TRACE.* *.mpits set-0
 
-TRACE=${0/\.sh/\.prv}
+TRACE=${0/\.sh/}
 
 EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 1 ./trace-ldpreload.sh ./mpi_gather_c
 

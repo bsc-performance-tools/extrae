@@ -10,7 +10,7 @@ fi
 
 rm -fr TRACE.* *.mpits set-0
 
-TRACE=${0/\.sh/\.prv}
+TRACE=${0/\.sh/}
 
 EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 1 ./trace-ldpreload.sh ./mpi_commranksize_c
 
@@ -18,11 +18,8 @@ EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 1 ./trace-ldpreload.sh ./mpi_commran
 
 # Actual comparison
 CheckEntryInPCF ${TRACE}.pcf MPI_Init
-
 CheckEntryInPCF ${TRACE}.pcf MPI_Finalize
-
 CheckEntryInPCF ${TRACE}.pcf MPI_Comm_rank
-
 CheckEntryInPCF ${TRACE}.pcf MPI_Comm_size
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 31

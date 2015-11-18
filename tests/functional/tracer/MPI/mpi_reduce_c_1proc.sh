@@ -10,7 +10,7 @@ fi
 
 rm -fr TRACE.* *.mpits set-0
 
-TRACE=${0/\.sh/\.prv}
+TRACE=${0/\.sh/}
 
 EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 1 ./trace-ldpreload.sh ./mpi_reduce_c
 
@@ -18,9 +18,7 @@ EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 1 ./trace-ldpreload.sh ./mpi_reduce_
 
 # Actual comparison
 CheckEntryInPCF ${TRACE}.pcf MPI_Init
-
 CheckEntryInPCF ${TRACE}.pcf MPI_Reduce
-
 CheckEntryInPCF ${TRACE}.pcf MPI_Finalize
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 31
