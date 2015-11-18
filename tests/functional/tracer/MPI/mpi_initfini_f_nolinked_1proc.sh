@@ -10,7 +10,7 @@ fi
 
 rm -fr TRACE.* *.mpits set-0
 
-TRACE=mpi_initfini_f_nolinked_1proc
+TRACE=${0/\.sh/\.prv}
 
 EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 1 ./trace-ldpreloadf.sh ./mpi_initfini_f
 

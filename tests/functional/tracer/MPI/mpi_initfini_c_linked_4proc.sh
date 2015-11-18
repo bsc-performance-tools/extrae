@@ -10,7 +10,7 @@ fi
 
 rm -fr TRACE.* *.mpits set-0
 
-TRACE=mpi_initfini_c_linked_4proc
+TRACE=${0/\.sh/\.prv}
 
 EXTRAE_CONFIG_FILE=extrae.xml ${MPIRUN} -np 4 ./trace-static.sh ./mpi_initfini_c_linked
 
