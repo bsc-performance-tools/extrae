@@ -1,16 +1,18 @@
 #!/bin/bash
 
+source ../../helper_functions.bash
+
 rm -fr *.sym *.mpits set-0
 
+TRACE=${0/\.sh/}
+
 EXTRAE_ON=1 ./define_event_type_gen_pcf
-../../../../src/merger/mpi2prv -without-addresses -f TRACE.mpits -e .libs/define_event_type_gen_pcf -o define_event_type_gen_pcf.prv
+../../../../src/merger/mpi2prv -f TRACE.mpits -e .libs/define_event_type_gen_pcf -o ${TRACE}.prv
 
 # Actual comparison
-diff define_event_type_gen_pcf.reference define_event_type_gen_pcf.pcf
+CheckEntryInPCF ${TRACE}.pcf "Kernel execution"
+CheckEntryInPCF ${TRACE}.pcf "Kernel execution_2"
+CheckEntryInPCF ${TRACE}.pcf "Phase1"
+CheckEntryInPCF ${TRACE}.pcf "Phase2"
 
-if [[ $? -eq 0 ]]; then
-	rm -fr define_event_type_gen_pcf.pcf define_event_type_gen_pcf.prv define_event_type_gen_pcf.row TRACE.* set-0
-	exit 0
-else
-	exit 1
-fi
+rm -fr ${TRACE}.prv ${TRACE}.pcf ${TRACE}.row set-0 TRACE.*

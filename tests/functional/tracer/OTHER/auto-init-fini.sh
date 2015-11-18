@@ -1,22 +1,26 @@
 #!/bin/bash
 
+source ../../helper_functions.bash
+
 rm -fr *.sym *.mpits set-0
 
-EXTRAE_ON=1 ./auto-init-fini
-../../../../src/merger/mpi2prv -f TRACE.mpits -dump -dump-without-time >& OUTPUT
+TRACE=${0/\.sh/}
 
-# Remove headers for mpi2prv dump
-grep -v ^mpi2prv OUTPUT   > OUTPUT-1
-grep -v ^merger  OUTPUT-1 > OUTPUT-2
-grep -v "EV: 40000033" OUTPUT-2 > OUTPUT-3
-rm -f OUTPUT OUTPUT-1 OUTPUT-2
+EXTRAE_ON=1 ./auto-init-fini
+../../../../src/merger/mpi2prv -f TRACE.mpits -o ${TRACE}.prv
 
 # Actual comparison
-diff auto-init-fini.reference OUTPUT-3
 
-if [[ $? -eq 0 ]]; then
-	rm OUTPUT-3
-	exit 0
-else
-	exit 1
+NumberEntriesInPRV ${TRACE}.prv 1234 1
+if [[ "${?}" -ne 1 ]] ; then
+	die "There must be only one :1234:1"
 fi
+
+NumberEntriesInPRV ${TRACE}.prv 1234 0
+if [[ "${?}" -ne 1 ]] ; then
+	die "There must be only one :1234:0"
+fi
+
+rm -fr ${TRACE}.??? set-0 TRACE.*
+
+exit 0

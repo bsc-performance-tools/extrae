@@ -57,7 +57,7 @@ int main(void)
 	double pi, h, area;
 	extrae_type_t t1 = 1000, t2 = 2000;
 	unsigned nvalues1 = 4, nvalues2 = 0;
-	extrae_value_t values[4] = {0, 1, 2, 2};
+	extrae_value_t values[4] = {0, 1, 2, 3};
 	char * description_values[4] = {"End", "Begin", "Phase1", "Phase2" };
 
 	Extrae_init();
