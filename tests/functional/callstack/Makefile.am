@@ -1,10 +1,16 @@
 include $(top_srcdir)/PATHS
 
-check_PROGRAMS = \
-	check_Extrae_getcaller_depth2
+allTESTS = \
+    check_Extrae_getcaller_depth2.sh
+
+EXTRA_DIST = \
+    $(allTESTS)
 
 TESTS = \
-    check_Extrae_getcaller_depth2.sh
+    $(allTESTS)
+
+check_PROGRAMS = \
+	check_Extrae_getcaller_depth2
 
 check_Extrae_getcaller_depth2_SOURCES = check_Extrae_getcaller_depth2.c
 check_Extrae_getcaller_depth2_CFLAGS = -I$(INCLUDE_DIR) -g
