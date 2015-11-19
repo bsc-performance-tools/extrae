@@ -641,6 +641,7 @@ AC_CONFIG_FILES([\
   tests/functional/merger/Makefile \
   tests/functional/merger/dump-events/Makefile \
   tests/functional/merger/shared-libraries/Makefile \
+  tests/functional/callstack/Makefile \
   tests/overhead/Makefile])
 
 AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
