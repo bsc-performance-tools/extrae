@@ -1,0 +1,13 @@
+Test;Intel Xeon E5649@2.53GHz;Intel Xeon E5-2670@2.60GHz;Intel Xeon CPU E5-2680v3@2.50GHz;IBM Power8E@2.79GHz;Cortex-A15@1.7GHz
+posix_clock;36;20;22;33;485
+extrae_event;195;147;116;180;917
+extrae_nevent4;415;342;234;334;1299
+extrae_eventandcounters;5105;854;772;1363;5363
+papi_read1;2414;263;249;506;1404
+papi_read4;4616;640;588;1091;3753
+extrae_user_function;1762;1226;1394;7434;11348
+extrae_get_caller1;840;566;653;4137;5148
+extrae_get_caller6;2626;1865;2304;9798;18145
+extrae_trace_callers;2163;1569;1734;10205;19290
+extrae_event/java;;235;139;;
+extrae_event4/java;;4155;633;;

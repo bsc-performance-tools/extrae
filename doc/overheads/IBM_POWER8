@@ -1,0 +1,60 @@
+Extrae 3.3.0rc SVN revision 0 based on unknown
+CPU info(null)Using libunwind v1.1 from /apps/CEPBATOOLS/deps/libunwind/git
+Using PAPI v5.4.0 from /apps/PAPI/5.4.0/GCC/4.9.1
+Running on: linux running on powerpc processor
+
+Test posix_clock - 10 executions
+min: 33 ns
+avg: 37 ns
+max: 42 ns
+
+Test ia32_rdtsc_clock - 10 executions
+min: 2 ns
+avg: 2 ns
+max: 3 ns
+
+Test extrae_event - 10 executions
+min: 180 ns
+avg: 182 ns
+max: 188 ns
+
+Test extrae_nevent4 - 10 executions
+min: 334 ns
+avg: 337 ns
+max: 343 ns
+
+Test extrae_eventandcounters - 10 executions
+min: 1363 ns
+avg: 1436 ns
+max: 1518 ns
+
+Test papi_read1 - 10 executions
+min: 506 ns
+avg: 538 ns
+max: 611 ns
+
+Test papi_read4 - 10 executions
+min: 1091 ns
+avg: 1201 ns
+max: 1367 ns
+
+Test extrae_user_function - 10 executions
+min: 7434 ns
+avg: 7910 ns
+max: 8492 ns
+
+Test extrae_get_caller1 - 10 executions
+min: 4137 ns
+avg: 4306 ns
+max: 4434 ns
+
+Test extrae_get_caller6 - 10 executions
+min: 9798 ns
+avg: 10229 ns
+max: 10975 ns
+
+Test extrae_trace_callers - 10 executions
+min: 10181 ns
+avg: 10205 ns
+max: 10226 ns
+

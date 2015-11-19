@@ -1,18 +1,12 @@
-Checking for existing binaries, and compiling if necessary ...
-
-
------- CUT HERE ------
-
-
-Extrae 3.2.1 SVN revision 0 based on unknown
+Extrae 3.3.0rc SVN revision 0 based on unknown
 CPU info: Intel(R) Xeon(R) CPU           E5649  @ 2.53GHz
 Using libunwind v1.1 from /apps/LIBUNWIND/1.1
 Using PAPI v5.0.1 from /apps/PAPI/5.0.1-nocuda
 Running on: linux running on x86 with 64 bit extensions processor
 
 Test posix_clock - 10 executions
-min: 35 ns
-avg: 35 ns
+min: 36 ns
+avg: 36 ns
 max: 36 ns
 
 Test ia32_rdtsc_clock - 10 executions
@@ -21,47 +15,47 @@ avg: 16 ns
 max: 17 ns
 
 Test extrae_event - 10 executions
-min: 194 ns
+min: 195 ns
 avg: 196 ns
-max: 201 ns
+max: 199 ns
 
 Test extrae_nevent4 - 10 executions
-min: 418 ns
-avg: 425 ns
-max: 433 ns
+min: 415 ns
+avg: 422 ns
+max: 429 ns
 
 Test extrae_eventandcounters - 10 executions
-min: 5097 ns
-avg: 5138 ns
-max: 5243 ns
+min: 5105 ns
+avg: 5154 ns
+max: 5309 ns
 
 Test papi_read1 - 10 executions
-min: 2399 ns
-avg: 2412 ns
-max: 2426 ns
+min: 2414 ns
+avg: 2437 ns
+max: 2541 ns
 
 Test papi_read4 - 10 executions
-min: 4632 ns
-avg: 4640 ns
-max: 4652 ns
+min: 4616 ns
+avg: 4645 ns
+max: 4686 ns
 
 Test extrae_user_function - 10 executions
-min: 6886 ns
-avg: 6933 ns
-max: 6975 ns
+min: 1762 ns
+avg: 1790 ns
+max: 1905 ns
 
 Test extrae_get_caller1 - 10 executions
-min: 833 ns
-avg: 839 ns
-max: 844 ns
+min: 840 ns
+avg: 852 ns
+max: 871 ns
 
 Test extrae_get_caller6 - 10 executions
-min: 2607 ns
-avg: 2635 ns
-max: 2691 ns
+min: 2626 ns
+avg: 2648 ns
+max: 2679 ns
 
 Test extrae_trace_callers - 10 executions
-min: 2150 ns
-avg: 2178 ns
-max: 2207 ns
+min: 2163 ns
+avg: 2194 ns
+max: 2227 ns
 
