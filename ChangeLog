@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 19Nov2015 Added overhead section in the user guide using the overhead
+               tests in a variety of systems.
  * 18Nov2015 Changed calls to MPI_Comm_compare in Trace_MPI_Communicator (mpi_wrapper.c) into PMPI_Comm_compare so as not to intercept those calls
  * 16Nov2015 Fix extra comma in papi_best_set
              Upgrade OMPT instrumentation
