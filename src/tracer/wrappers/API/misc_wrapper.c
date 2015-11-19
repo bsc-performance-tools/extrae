@@ -260,10 +260,11 @@ void Extrae_memusage_Wrapper (void)
 #endif
 }
 
-void Extrae_user_function_Wrapper (unsigned enter)
+UINT64 Extrae_user_function_Wrapper (unsigned enter)
 {
 	UINT64 ip = (enter)?Extrae_get_caller(4):EMPTY;
 	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
+	return ip;
 }
 
 void Extrae_function_from_address_Wrapper (extrae_type_t type, void *address)

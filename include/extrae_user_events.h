@@ -62,11 +62,11 @@ void MPItrace_flush (void);
 void OMPtrace_flush (void);
 void SEQtrace_flush (void);
 
-void Extrae_user_function (unsigned enter);
-void OMPItrace_user_function (unsigned enter);
-void MPItrace_user_function (unsigned enter);
-void OMPtrace_user_function (unsigned enter);
-void SEQtrace_user_function (unsigned enter);
+unsigned long long Extrae_user_function (unsigned enter);
+unsigned long long OMPItrace_user_function (unsigned enter);
+unsigned long long MPItrace_user_function (unsigned enter);
+unsigned long long OMPtrace_user_function (unsigned enter);
+unsigned long long SEQtrace_user_function (unsigned enter);
 
 void Extrae_event (extrae_type_t type, extrae_value_t value);
 void OMPItrace_event (extrae_type_t type, extrae_value_t value);

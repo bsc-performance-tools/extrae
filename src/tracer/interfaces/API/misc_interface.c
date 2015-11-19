@@ -417,14 +417,16 @@ EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_NEXT_HWC_SET)
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_SETOPTIONS);
 
 #define apiTRACE_USER_FUNCTION(x) \
-	void x##_user_function (unsigned enter) \
+	UINT64 x##_user_function (unsigned enter) \
 	{ \
+		UINT64 r = 0; \
 		if (mpitrace_on) \
 		{ \
 			Backend_Enter_Instrumentation (1); \
-			Extrae_user_function_Wrapper (enter); \
+			r = Extrae_user_function_Wrapper (enter); \
 			Backend_Leave_Instrumentation (); \
 		} \
+		return r; \
 	}
 EXPAND_ROUTINE_WITH_PREFIXES(apiTRACE_USER_FUNCTION);
 
@@ -699,15 +701,17 @@ void Extrae_set_options (int options)
 	}
 }
 
-INTERFACE_ALIASES_C(_user_function, Extrae_user_function,(unsigned enter),void)
-void Extrae_user_function (unsigned enter)
+INTERFACE_ALIASES_C(_user_function, Extrae_user_function,(unsigned enter),UINT64)
+UINT64 Extrae_user_function (unsigned enter)
 {
+	UINT64 r = 0;
 	if (mpitrace_on)
 	{
 		Backend_Enter_Instrumentation (1);
-		Extrae_user_function_Wrapper (enter);
+		r = Extrae_user_function_Wrapper (enter);
 		Backend_Leave_Instrumentation ();
 	}
+	return r;
 }
 
 INTERFACE_ALIASES_C(_function_from_address,Extrae_function_from_address,(extrae_type_t type, void *address),void)

@@ -101,9 +101,7 @@ void Extrae_trace_callers (iotimer_t time, int offset, int type)
 			else if (type == CALLER_SAMPLING)
 			{
 				if (Trace_Caller[type][current_deep-offset])
-				{
 					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_deep-offset+1, (UINT64) ip);
-				}
 			} 
 #endif
 		}
@@ -156,6 +154,7 @@ UINT64 Extrae_get_caller (int offset)
 void Extrae_trace_callers (iotimer_t time, int offset, int type) {
 	void * callstack[MAX_STACK_DEEPNESS];
 	int size;
+	int frame;
 #ifdef MPICALLER_DEBUG
 	int i;
 	char **strings; 
@@ -182,35 +181,34 @@ void Extrae_trace_callers (iotimer_t time, int offset, int type) {
 		printf ("%s\n", strings[i]);
 #endif
 
-        int frame = 0;
 	for (frame = 0; ((frame < Caller_Deepness[type]+offset-1) && (frame < size)); frame ++)
-        {
+	{
 	  int current_caller = frame - offset + 2;          
 
 #ifdef MPICALLER_DEBUG
-	  fprintf(stderr, "#%d ip=%lx", frame, (long)callstack[frame]);
-	  if (current_caller > 0)
-	    fprintf(stderr, " current_caller=%d trace_this_caller?=%d", current_caller, Trace_Caller[type][current_caller - 1]);
-	  fprintf(stderr, "\n");
+		fprintf(stderr, "#%d ip=%lx", frame, (long)callstack[frame]);
+		if (current_caller > 0)
+			fprintf(stderr, " current_caller=%d trace_this_caller?=%d", current_caller, Trace_Caller[type][current_caller - 1]);
+		fprintf(stderr, "\n");
 #endif
-          if (current_caller > 0)
-          {
-	    if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY)
-            {
-              if (Trace_Caller[type][current_caller - 1])
-              {
-                TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_caller), (UINT64) callstack[frame]);
-              }
-            }
+		if (current_caller > 0)
+		{
+			if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY)
+			{
+				if (Trace_Caller[type][current_caller - 1])
+					TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_caller),
+					  (UINT64) callstack[frame]);
+			}
 #if defined(SAMPLING_SUPPORT)
-            else if (type == CALLER_SAMPLING)
-            {
-              if (Trace_Caller[CALLER_SAMPLING][current_caller - 1])
-                SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_caller, (UINT64) callstack[frame]);
-            }
+			else if (type == CALLER_SAMPLING)
+			{
+				if (Trace_Caller[CALLER_SAMPLING][current_caller - 1])
+					SAMPLE_EVENT_NOHWC(time, SAMPLING_EV+current_caller,
+					  (UINT64) callstack[frame]);
+			}
 #endif
-          }
-        }
+		}
+	}
 }
 
 UINT64 Extrae_get_caller (int offset)
@@ -274,31 +272,30 @@ UINT64 Extrae_get_caller (int offset)
 
 void trace_mpi_callers(iotimer_t time, int offset, int type)
 {
-   CONTEXT contexto;
-   int rc = 0, actual_deep = 1;
+	CONTEXT ctx;
+	int rc = 0, actual_deep = 1;
 
 	/* Leave if they aren't initialized (asked by user!) */
 	if (Trace_Caller[CALLER_MPI] == NULL)
 		return;
   
-   exc_capture_context (&contexto);
-   /* Unwind de la pila*/
-   while (!rc && contexto.sc_pc && actual_deep <= Caller_Deepness[type]+offset)  {
+	exc_capture_context (&ctx);
+	/* Unwind de la pila*/
+	while (!rc && ctx.sc_pc && actual_deep <= Caller_Deepness[type]+offset)
+	{
 	  
 #ifdef MPICALLER_DEBUG                                                                           
-       /* Tampoco tenemos backtrace_symbols. Solo printamos las direcciones. */                   
-       fprintf(stderr, "[%d] 0x%012lx\n", actual_deep, contexto.sc_pc);                              
+		/* Tampoco tenemos backtrace_symbols. Solo printamos las direcciones. */                   
+		fprintf(stderr, "[%d] 0x%012lx\n", actual_deep, ctx.sc_pc);                              
 #endif        
 
-       if (actual_deep >= offset)
-          if (Trace_MPI_Caller[actual_deep-offset])
-          {
-            TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(actual_deep-offset+1), (UINT64)contexto.sc_pc);
-          }
-      
-       rc = exc_virtual_unwind(0, &contexto);
-       actual_deep ++;
-   }	    
+		if (actual_deep >= offset)
+			if (Trace_MPI_Caller[actual_deep-offset])
+				TRACE_EVENT(time, MPI_CALLER_EVENT_TYPE(actual_deep-offset+1),
+				  (UINT64)ctx.sc_pc);
+		rc = exc_virtual_unwind(0, &ctx);
+		actual_deep ++;
+	}	    
 }
 
 #endif /* DEC */
