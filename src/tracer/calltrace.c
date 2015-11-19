@@ -58,7 +58,7 @@ int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0, 0 };
 #  include <libunwind.h>
 # endif
 
-void trace_callers (iotimer_t time, int offset, int type)
+void Extrae_trace_callers (iotimer_t time, int offset, int type)
 {
 	int current_deep = 1;
 	unw_cursor_t cursor;
@@ -111,7 +111,7 @@ void trace_callers (iotimer_t time, int offset, int type)
 	}
 }
 
-UINT64 get_caller (int offset)
+UINT64 Extrae_get_caller (int offset)
 {
 	int current_deep = 0;
 	unw_cursor_t cursor;
@@ -153,7 +153,7 @@ UINT64 get_caller (int offset)
 /* LINUX IA32/PPC o BGL*/
 # if (defined(OS_LINUX) && !defined(ARCH_IA64)) || defined(OS_FREEBSD) || defined(OS_DARWIN) || defined(IS_BG_MACHINE)
 
-void trace_callers (iotimer_t time, int offset, int type) {
+void Extrae_trace_callers (iotimer_t time, int offset, int type) {
 	void * callstack[MAX_STACK_DEEPNESS];
 	int size;
 #ifdef MPICALLER_DEBUG
@@ -166,7 +166,7 @@ void trace_callers (iotimer_t time, int offset, int type) {
 		return;
 
 #if (defined(OS_DARWIN) || defined(OS_FREEBSD)) && defined (HAVE_EXECINFO_H)
-	callstack[0] = (void*) trace_callers;
+	callstack[0] = (void*) Extrae_trace_callers;
 	size = backtrace (&callstack[1], Caller_Deepness[type]+offset-1);
 	size++;
 #else
@@ -213,7 +213,7 @@ void trace_callers (iotimer_t time, int offset, int type) {
         }
 }
 
-UINT64 get_caller (int offset)
+UINT64 Extrae_get_caller (int offset)
 {
 	void * callstack[MAX_STACK_DEEPNESS];
 	int size;
@@ -222,7 +222,7 @@ UINT64 get_caller (int offset)
 #endif
 
 #if (defined(OS_DARWIN) || defined(OS_FREEBSD)) && defined(HAVE_EXECINFO_H)
-	callstack[0] = (void*) get_caller;
+	callstack[0] = (void*) Extrae_get_caller;
 	size = backtrace (&callstack[1], offset-1);
 	size++;
 #else
@@ -240,7 +240,7 @@ UINT64 get_caller (int offset)
 # endif /* LINUX IA32 */
 
 # if defined(OS_LINUX) && defined(ARCH_IA64)
-void trace_callers (iotimer_t time, int offset, int type)
+void Extrae_trace_callers (iotimer_t time, int offset, int type)
 {
 	UNREFERENCED_PARAMETER(time);
 	UNREFERENCED_PARAMETER(offset);
@@ -251,7 +251,7 @@ void trace_callers (iotimer_t time, int offset, int type)
 	return;
 }
 
-UINT64 get_caller (int offset)
+UINT64 Extrae_get_caller (int offset)
 {
 	UNREFERENCED_PARAMETER(offset);
 
@@ -311,7 +311,7 @@ void trace_mpi_callers(iotimer_t time, int offset, int type)
 
 #error "This code is unmantained! If you reach this, contact with tools@bsc.es"
 
-void trace_callers(iotimer_t time, int offset, int type)
+void Extrae_trace_callers(iotimer_t time, int offset, int type)
 {
 	ucontext_t Contexto;
 	void *  InstructionPointer;
@@ -367,7 +367,7 @@ void trace_callers(iotimer_t time, int offset, int type)
 	}
 }
 
-UINT64 get_caller (int offset)
+UINT64 Extrae_get_caller (int offset)
 {
 	UNREFERENCED_PARAMETER(offset);
 
@@ -385,7 +385,7 @@ static int ValidAddress (void * Addr) {
 #endif /* OS_AIX */
 
 #if defined (OS_SOLARIS)
-void trace_callers (iotimer_t time, int offset, int type)
+void Extrae_trace_callers (iotimer_t time, int offset, int type)
 {
 	/* TODO */
 	/* Solaris walkcontext */
@@ -395,7 +395,7 @@ void trace_callers (iotimer_t time, int offset, int type)
 	UNREFERENCED_PARAMETER(type);
 }
 
-UINT64 get_caller (int offset)
+UINT64 Extrae_get_caller (int offset)
 {
 	UNREFERENCED_PARAMETER(offset);
 

@@ -38,7 +38,7 @@
 {                                                            \
   if ( evtvalue == EVT_BEGIN )                               \
   {                                                          \
-    trace_callers (evttime, FOUR_CALLS_AGO, CALLER_MPI);     \
+    Extrae_trace_callers (evttime, FOUR_CALLS_AGO, CALLER_MPI); \
   }                                                          \
 }
 

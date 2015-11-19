@@ -68,7 +68,7 @@ void __func_trace_enter (const char *const function_name,
 	{
 		if (LookForUF (function_name))
 		{
-			UINT64 ip = get_caller(3);
+			UINT64 ip = Extrae_get_caller(3);
 			TRACE_EVENTANDCOUNTERS (TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
 		}
 	}

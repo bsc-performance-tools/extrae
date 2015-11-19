@@ -731,7 +731,7 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 	  tlblevel);
 	SAMPLE_EVENT_NOHWC(t, SAMPLING_ADDRESS_REFERENCE_COST_EV, weight);
 
-	trace_callers (t, 5, CALLER_SAMPLING); 
+	Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
 
 	ret = ioctl (fd, PERF_EVENT_IOC_REFRESH, 1);
 
@@ -759,7 +759,7 @@ static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 
 	SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_ST_EV, ip, addr);
 
-	trace_callers (t, 5, CALLER_SAMPLING); 
+	Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
 
 	ret = ioctl (fd, PERF_EVENT_IOC_REFRESH, 1);
 

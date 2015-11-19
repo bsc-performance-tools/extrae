@@ -1,6 +1,7 @@
 SUBDIRS = \
  launcher \
  tracer \
- merger
+ merger \
+ callstack
 
 EXTRA_DIST = helper_functions.bash

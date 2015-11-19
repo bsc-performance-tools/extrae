@@ -33,14 +33,14 @@
 
 #define CALLER_SAMPLING 1
 
-extern void trace_callers (unsigned long long T, int offset, int type);
+extern void Extrae_trace_callers (unsigned long long T, int offset, int type);
 
 void fakeMPI (int n)
 {
 	int i;
 
 	for (i = 0; i < n; i++)
-		trace_callers (0ULL, 3, CALLER_SAMPLING);
+		Extrae_trace_callers (0ULL, 3, CALLER_SAMPLING);
 }
 
 void bar (int n)

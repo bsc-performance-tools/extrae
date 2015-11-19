@@ -32,7 +32,7 @@
 
 #include "extrae_user_events.h"
 
-extern uint64_t get_caller (int);
+extern uint64_t Extrae_get_caller (int);
 
 int main(int argc, char **argv)
 {
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	Extrae_init();
 	clock_gettime (CLOCK_MONOTONIC, &start);
 	for (i = 0; i < n; i++)
-		get_caller (2);
+		Extrae_get_caller (2);
 	clock_gettime (CLOCK_MONOTONIC, &stop);
 	t1 = start.tv_nsec;
 	t1 += start.tv_sec * 1000000000ULL;

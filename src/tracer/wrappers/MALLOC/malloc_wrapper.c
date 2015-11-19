@@ -85,7 +85,7 @@ void Extrae_malloctrace_init (void)
 #define TRACE_DYNAMIC_MEMORY_CALLER(evttime,offset) \
 { \
 	if (TRACE_DYNAMIC_MEMORY_CALLER_IS_ENABLED) \
-		trace_callers (evttime, offset, CALLER_DYNAMIC_MEMORY); \
+		Extrae_trace_callers (evttime, offset, CALLER_DYNAMIC_MEMORY); \
 }
 
 # if defined(PIC) /* This is only available for .so libraries */

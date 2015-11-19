@@ -69,7 +69,7 @@ extern int *Trace_Caller[COUNT_CALLER_TYPES];
 extern int Caller_Deepness[COUNT_CALLER_TYPES];
 extern int Caller_Count[COUNT_CALLER_TYPES];
 
-void trace_callers (iotimer_t temps, int deep, int type);
-UINT64 get_caller (int deep);
+void Extrae_trace_callers (iotimer_t temps, int deep, int type);
+UINT64 Extrae_get_caller (int deep);
 
 #endif

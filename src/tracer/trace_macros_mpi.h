@@ -38,7 +38,7 @@
 	     ( Caller_Count[CALLER_MPI]>0 )  &&          \
 	     ( evtvalue == EVT_BEGIN ) )                 \
 	{                                                \
-		trace_callers (evttime, offset, CALLER_MPI); \
+		Extrae_trace_callers (evttime, offset, CALLER_MPI); \
 	}                                                \
 }
 

@@ -74,7 +74,7 @@ void Extrae_SamplingHandler (void* address)
 	{
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
-		trace_callers (temps, 6, CALLER_SAMPLING);
+		Extrae_trace_callers (temps, 6, CALLER_SAMPLING);
 	}
 }
 
@@ -84,7 +84,7 @@ void Extrae_SamplingHandler_PAPI (void* address)
 	{
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
-		trace_callers (temps, 8, CALLER_SAMPLING);
+		Extrae_trace_callers (temps, 8, CALLER_SAMPLING);
 	}
 }
 

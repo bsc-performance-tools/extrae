@@ -32,13 +32,13 @@
 
 #include "extrae_user_events.h"
 
-extern uint64_t get_caller (int);
+extern uint64_t Extrae_get_caller (int);
 
 void deeper (int n)
 {
 	int i;
 	for (i = 0; i < n; i++)
-		get_caller (7);
+		Extrae_get_caller (7);
 }
 
 void abc (int n)

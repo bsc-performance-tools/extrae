@@ -262,7 +262,7 @@ void Extrae_memusage_Wrapper (void)
 
 void Extrae_user_function_Wrapper (unsigned enter)
 {
-	UINT64 ip = (enter)?get_caller(4):EMPTY;
+	UINT64 ip = (enter)?Extrae_get_caller(4):EMPTY;
 	TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, tracejant_hwc_uf);
 }
 
@@ -452,7 +452,7 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 	*/
 	if (ptr->UserFunction != EXTRAE_USER_FUNCTION_NONE)
 	{
-		UINT64 ip = (ptr->UserFunction == EXTRAE_USER_FUNCTION_ENTER)?get_caller(4):EMPTY;
+		UINT64 ip = (ptr->UserFunction == EXTRAE_USER_FUNCTION_ENTER)?Extrae_get_caller(4):EMPTY;
 #if USE_HARDWARE_COUNTERS
 		int EmitHWC = (!ptr->HardwareCounters && tracejant_hwc_uf);
 		TRACE_EVENTANDCOUNTERS (LAST_READ_TIME, USRFUNC_EV, ip, EmitHWC);
@@ -464,7 +464,7 @@ void Extrae_emit_CombinedEvents_Wrapper (struct extrae_CombinedEvents *ptr)
 	/* Now emit the callers */
 	if (ptr->Callers)
 	{
-		trace_callers (LAST_READ_TIME, 4, CALLER_MPI);
+		Extrae_trace_callers (LAST_READ_TIME, 4, CALLER_MPI);
 	}
 
 	/* Finally emit user communications */
