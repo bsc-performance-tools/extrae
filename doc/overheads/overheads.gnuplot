@@ -1,4 +1,5 @@
-set term pdfcairo font ",12" linewidth 2
+# set term pdfcairo font ",12" linewidth 2
+set term eps font ",12"
 
 set style data histogram
 set style histogram cluster gap 1
