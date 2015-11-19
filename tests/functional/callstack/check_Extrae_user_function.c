@@ -23,14 +23,13 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-
-extern uint64_t Extrae_get_caller (int);
+#include "extrae_user_events.h"
 
 void bar (void)
 {
 	uint64_t v;
 	bar_begin:
-	v = Extrae_get_caller (2);
+	v = Extrae_user_function (1);
 	printf ("begin = %p v = %p end = %p\n", &&bar_begin, v, &&bar_end);
 	if (v >= (uint64_t) &&bar_begin && v <= (uint64_t) &&bar_end)
 	{
@@ -45,7 +44,7 @@ void foo (void)
 {
 	uint64_t v;
 	foo_begin:
-	v = Extrae_get_caller (2);
+	v = Extrae_user_function (1);
 	printf ("begin = %p v = %p end = %p\n", &&foo_begin, v, &&foo_end);
 	if (v >= (uint64_t) &&foo_begin && v <= (uint64_t) &&foo_end)
 	{
@@ -60,9 +59,9 @@ void foo (void)
 int main (int argc, char *argv[])
 {
 	uint64_t v;
-	argc = argc; argv = argv; /* Prevent unused warnings */
+	argc = argc; argv = argv; /* Prevent unused warning */
 	main_begin:
-	v = Extrae_get_caller (2);
+	v = Extrae_user_function (1);
 	printf ("begin = %p v = %p end = %p\n", &&main_begin, v, &&main_end);
 	if (v >= (uint64_t) &&main_begin && v <= (uint64_t) &&main_end)
 	{
