@@ -5,6 +5,7 @@ EXTRA_DIST = \
  extrae_JavaGC.sh \
  extrae_JavaException.sh \
  extrae_JavaThreads.sh \
+ extrae_JavaAspectJ.sh \
  extrae.xml \
  extrae-function.xml \
  JavaException.java \
