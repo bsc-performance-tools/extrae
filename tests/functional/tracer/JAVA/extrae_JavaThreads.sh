@@ -28,7 +28,7 @@ CheckEntryInPCF ${TRACE2}.pcf "pthread_create"
 CheckEntryInPCF ${TRACE4}.pcf "pthread_create"
 CheckEntryInPCF ${TRACE1}.pcf "pthread_join"
 CheckEntryInPCF ${TRACE2}.pcf "pthread_join"
-CheckEntryInPCF ${TRACE3}.pcf "pthread_join"
+CheckEntryInPCF ${TRACE4}.pcf "pthread_join"
 
 NumberEntriesInPRV ${TRACE0}.prv 61000000 2
 NTHREADS0=${?}
