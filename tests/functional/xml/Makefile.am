@@ -1,17 +1,17 @@
 include $(top_srcdir)/PATHS
 
-allTESTS = \
+ALLTESTS = \
 	check_Extrae_xml.sh \
 	check_Extrae_xml_envvar_merge.sh \
 	check_Extrae_xml_envvar_counters.sh
 
 EXTRA_DIST = \
-    $(allTESTS)
+    $(ALLTESTS) \
 	extrae_envvar_counters.xml \
 	extrae_envvar_merge.xml
 
 TESTS = \
-    $(allTESTS)
+    $(ALLTESTS)
 
 check_PROGRAMS = \
 	check_Extrae_xml
