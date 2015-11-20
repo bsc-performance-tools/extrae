@@ -45,8 +45,11 @@
 #include <sys/ioctl.h>
 #include <asm/unistd.h>
 #include <sys/prctl.h>
+
+#include "sampling-common.h"
 #include "sampling-intel-pebs.h"
 
+#include "wrapper.h"
 #include "trace_macros.h"
 
 #ifndef __NR_perf_event_open
@@ -658,80 +661,82 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
 	  &ip, &addr, &weight, &data_src);
 
-	/* see linux/perf_event.h perf_mem_data_src */
-
-	if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
-		memhitormiss = 1;
-	else if (data_src.mem_lvl & PERF_MEM_LVL_MISS)
-		memhitormiss = 2;
-	else
-		memhitormiss = 0;
-
-	if (data_src.mem_dtlb & PERF_MEM_TLB_HIT)
-		tlbhitormiss = 1;
-	else if (data_src.mem_dtlb & PERF_MEM_TLB_MISS)
-		tlbhitormiss = 2;
-	else
-		tlbhitormiss = 0;
-
-	if (data_src.mem_lvl & PERF_MEM_LVL_L1)
-		memlevel = 1; /* l1 */
-	else if (data_src.mem_lvl & PERF_MEM_LVL_LFB)
-		memlevel = 2; /* lfb: line fill buffer */
-	else if (data_src.mem_lvl & PERF_MEM_LVL_L2)
-		memlevel = 3; /* l2 */
-	else if (data_src.mem_lvl & PERF_MEM_LVL_L3)
-		memlevel = 4; /* l3 */
-	else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE1 ||
-	         data_src.mem_lvl & PERF_MEM_LVL_REM_CCE2)
-		memlevel = 5; /* cache, remote */
-	else if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM ||
-	         data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
-		     data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
-		memlevel = 6; /* dram, either local or remote */
-	else
-		memlevel = 0; /* other: uncacheable or i/o */
-
-	/* PATCH #0 if data comes from dram, it can't be a hit! */
-	/* Seems unclear, but from table 18-19:
-	   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
-	*/
-	if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM ||
-	    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
-	    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
+	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
-		memhitormiss = 2;
-		memlevel = 6;
+		/* see linux/perf_event.h perf_mem_data_src */
+		if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
+			memhitormiss = 1;
+		else if (data_src.mem_lvl & PERF_MEM_LVL_MISS)
+			memhitormiss = 2;
+		else
+			memhitormiss = 0;
+	
+		if (data_src.mem_dtlb & PERF_MEM_TLB_HIT)
+			tlbhitormiss = 1;
+		else if (data_src.mem_dtlb & PERF_MEM_TLB_MISS)
+			tlbhitormiss = 2;
+		else
+			tlbhitormiss = 0;
+	
+		if (data_src.mem_lvl & PERF_MEM_LVL_L1)
+			memlevel = 1; /* l1 */
+		else if (data_src.mem_lvl & PERF_MEM_LVL_LFB)
+			memlevel = 2; /* lfb: line fill buffer */
+		else if (data_src.mem_lvl & PERF_MEM_LVL_L2)
+			memlevel = 3; /* l2 */
+		else if (data_src.mem_lvl & PERF_MEM_LVL_L3)
+			memlevel = 4; /* l3 */
+		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE1 ||
+		         data_src.mem_lvl & PERF_MEM_LVL_REM_CCE2)
+			memlevel = 5; /* cache, remote */
+		else if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM ||
+		         data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
+			     data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
+			memlevel = 6; /* dram, either local or remote */
+		else
+			memlevel = 0; /* other: uncacheable or i/o */
+	
+		/* PATCH #0 if data comes from dram, it can't be a hit! */
+		/* Seems unclear, but from table 18-19:
+		   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
+		*/
+		if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM ||
+		    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
+		    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
+		{
+			memhitormiss = 2;
+			memlevel = 6;
+		}
+	
+		/* PATCH #1 if data l3 & miss == data served by dram */
+		/* Seems unclear, but from table 18-19:
+		   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
+		*/
+		if (data_src.mem_lvl & PERF_MEM_LVL_MISS &&
+		    data_src.mem_lvl & PERF_MEM_LVL_L3)
+		{
+			memhitormiss = 2;
+			memlevel = 6;
+		}
+	
+		if (data_src.mem_dtlb & PERF_MEM_TLB_L1)
+			tlblevel = 1;
+		else if (data_src.mem_dtlb & PERF_MEM_TLB_L2)
+			tlblevel = 2;
+		else
+			tlblevel = 0; /* other: hw walker, os fault handler */
+	
+		t = Clock_getCurrentTime_nstore();
+	
+		SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_LD_EV, ip, addr);
+		SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_MEM_LEVEL_EV, memhitormiss,
+		  memlevel);
+		SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_TLB_LEVEL_EV, tlbhitormiss,
+		  tlblevel);
+		SAMPLE_EVENT_NOHWC(t, SAMPLING_ADDRESS_REFERENCE_COST_EV, weight);
+	
+		Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
 	}
-
-	/* PATCH #1 if data l3 & miss == data served by dram */
-	/* Seems unclear, but from table 18-19:
-	   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
-	*/
-	if (data_src.mem_lvl & PERF_MEM_LVL_MISS &&
-	    data_src.mem_lvl & PERF_MEM_LVL_L3)
-	{
-		memhitormiss = 2;
-		memlevel = 6;
-	}
-
-	if (data_src.mem_dtlb & PERF_MEM_TLB_L1)
-		tlblevel = 1;
-	else if (data_src.mem_dtlb & PERF_MEM_TLB_L2)
-		tlblevel = 2;
-	else
-		tlblevel = 0; /* other: hw walker, os fault handler */
-
-	t = Clock_getCurrentTime_nstore();
-
-	SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_LD_EV, ip, addr);
-	SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_MEM_LEVEL_EV, memhitormiss,
-	  memlevel);
-	SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_TLB_LEVEL_EV, tlbhitormiss,
-	  tlblevel);
-	SAMPLE_EVENT_NOHWC(t, SAMPLING_ADDRESS_REFERENCE_COST_EV, weight);
-
-	Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
 
 	ret = ioctl (fd, PERF_EVENT_IOC_REFRESH, 1);
 
@@ -755,11 +760,14 @@ static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
 	  &ip, &addr, NULL, NULL);
 
-	t = Clock_getCurrentTime_nstore();
-
-	SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_ST_EV, ip, addr);
-
-	Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
+	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	{
+		t = Clock_getCurrentTime_nstore();
+	
+		SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_ST_EV, ip, addr);
+	
+		Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
+	}
 
 	ret = ioctl (fd, PERF_EVENT_IOC_REFRESH, 1);
 
