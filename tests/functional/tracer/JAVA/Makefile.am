@@ -6,7 +6,12 @@ EXTRA_DIST = \
  extrae_JavaException.sh \
  extrae_JavaThreads.sh \
  extrae.xml \
- extrae-function.xml
+ extrae-function.xml \
+ JavaException.java \
+ JavaFunction.java \
+ JavaGC.java \
+ JavaSimple.java \
+ JavaThreads.java
 
 check_PROGRAMS = \
  JavaSimple.class \
