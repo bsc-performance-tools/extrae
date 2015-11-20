@@ -641,6 +641,7 @@ AC_CONFIG_FILES([\
   tests/functional/merger/Makefile \
   tests/functional/merger/dump-events/Makefile \
   tests/functional/merger/shared-libraries/Makefile \
+  tests/functional/hw-counters/Makefile \
   tests/functional/callstack/Makefile \
   tests/overhead/Makefile])
 
