@@ -6,7 +6,10 @@ allTESTS = \
 	check_Extrae_PAPI_TOT_INS_CYC.sh
 
 EXTRA_DIST = \
-    $(allTESTS)
+    $(allTESTS) \
+    extrae-PAPI_TOT_CYC.xml \
+    extrae-PAPI_TOT_INS.xml \
+    extrae-PAPI_TOT_INS_CYC.xml
 
 TESTS = \
     $(allTESTS)
