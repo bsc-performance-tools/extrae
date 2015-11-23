@@ -36,15 +36,13 @@ typedef enum {
   ompt_event_task_end                 = 4,  /* task destroy               */
 
   ompt_event_target_task_begin        = 62, /* target task launch         */
-  ompt_event_target_task_end_sync     = 63, /* target task end (sync)     */
+  ompt_event_target_task_end          = 63, /* target task end (sync)     */
 
   ompt_event_control                  = 7,  /* support control calls      */
 
   ompt_event_runtime_shutdown         = 8,  /* runtime shutdown           */
 
   /*--- Optional Events (blame shifting) ---*/  	
-  ompt_event_target_task_end_async    = 64, /* target task end (sync)     */
-	    
   ompt_event_idle_begin	              = 9,  /* begin idle state           */ 
   ompt_event_idle_end                 = 10, /* end idle state             */ 
 
