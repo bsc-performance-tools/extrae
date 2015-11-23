@@ -5,7 +5,7 @@
 
 
 
-\usepackage{hyperref}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 \usepackage{fontenc}
 \usepackage[latin9]{inputenc}
 \usepackage{url}
@@ -45,7 +45,7 @@
 %
 \providecommand{\TRACE}{{\sf {E}xtrae}\ }%
 \providecommand{\PARAVER}{{\sf Paraver}\ }%
-\providecommand{\TRACEVERSION}{3.1.1rc} 
+\providecommand{\TRACEVERSION}{3.3.0rc} 
 
 
 
@@ -59,7 +59,7 @@
 
 \makeatletter
 \AtBeginDocument{\makeatletter
-\input /home/harald/development/extrae/trunk/doc/user-guide.aux
+\input /home/harald/src/extrae/trunk/doc/user-guide.aux
 \makeatother
 }
 
@@ -183,6 +183,15 @@
 \stepcounter{section}
 \stepcounter{subsection}
 \stepcounter{subsection}
+{\newpage\clearpage
+\lthtmlfigureA{figure132}%
+\begin{figure}\centering
+  \psfig{figure=images/extrae-post-installation.eps, width=12cm}
+
+\end{figure}%
+\lthtmlfigureZ
+\lthtmlcheckvsize\clearpage}
+
 \stepcounter{section}
 \stepcounter{subsection}
 \stepcounter{subsection}
@@ -197,11 +206,10 @@
 \stepcounter{subsection}
 \stepcounter{subsection}
 \stepcounter{subsection}
-\stepcounter{subsubsection}
-\stepcounter{subsubsection}
 \stepcounter{subsection}
 \stepcounter{subsubsection}
 \stepcounter{subsubsection}
+\stepcounter{subsection}
 \stepcounter{subsubsection}
 \stepcounter{subsubsection}
 \stepcounter{subsubsection}
@@ -223,8 +231,6 @@
 \stepcounter{section}
 \stepcounter{section}
 \stepcounter{section}
-\stepcounter{section}
-\stepcounter{section}
 \stepcounter{subsection}
 \stepcounter{subsection}
 \stepcounter{subsection}
@@ -244,9 +250,6 @@
 \stepcounter{chapter}
 \stepcounter{section}
 \stepcounter{section}
-\stepcounter{section}
-\stepcounter{subsection}
-\stepcounter{subsection}
 \stepcounter{section}
 \stepcounter{subsection}
 \stepcounter{chapter}
@@ -276,6 +279,12 @@
 \stepcounter{subsection}
 \stepcounter{section}
 \stepcounter{subsection}
+{\newpage\clearpage
+\lthtmlinlinemathA{tex2html_wrap_inline4006}%
+$\$\ast$%
+\lthtmlinlinemathZ
+\lthtmlcheckvsize\clearpage}
+
 \stepcounter{subsection}
 \stepcounter{subsection}
 \stepcounter{section}
@@ -286,9 +295,9 @@
 \stepcounter{chapter}
 \stepcounter{chapter}
 {\newpage\clearpage
-\lthtmlfigureA{landscape4474}%
+\lthtmlfigureA{landscape4254}%
 \begin{landscape}
-% latex2html id marker 4474
+% latex2html id marker 4254
 
 \begin{table}
 \centerline{
@@ -310,21 +319,20 @@
   \cellcolor{tabbg2}EXTRAE\_DISABLE\_MPI & \cellcolor{tabbg2}Disable MPI instrumentation.\\
   \cellcolor{tabbg1}EXTRAE\_DISABLE\_OMP & \cellcolor{tabbg1}Disable OpenMP instrumentation.\\
   \cellcolor{tabbg2}EXTRAE\_DISABLE\_PTHREAD & \cellcolor{tabbg2}Disable pthread instrumentation.\\
-  \cellcolor{tabbg1}EXTRAE\_DISABLE\_PACX & \cellcolor{tabbg1}Disable PACX instrumentation.\\
-  \cellcolor{tabbg2}EXTRAE\_FILE\_SIZE & \cellcolor{tabbg2}Set the maximum size (in Mbytes) for the intermediate trace file.\\
-  \cellcolor{tabbg1}                  & \cellcolor{tabbg1}List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
-  \cellcolor{tabbg1}EXTRAE\_FUNCTIONS & \cellcolor{tabbg1}GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
-  \cellcolor{tabbg1}                  & \cellcolor{tabbg1}option at compile and link time. \\
-  \cellcolor{tabbg2} & \cellcolor{tabbg2}Specify if the performance counters should be collected when a\\
-  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_FUNCTIONS\_COUNTERS\_ON} & \cellcolor{tabbg2}user function event is emitted.\\
-  \cellcolor{tabbg1}EXTRAE\_FINAL\_DIR & \cellcolor{tabbg1}Specifies where files will be stored when the application ends.\\
-  \cellcolor{tabbg2} & \cellcolor{tabbg2}Gather intermediate trace files into a single directory\\
-  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_GATHER\_MPITS} & (\em{this is only available when instrumenting MPI applications}).\\
-  \cellcolor{tabbg1}EXTRAE\_HOME & \cellcolor{tabbg1}Points where the {\sf {E}xtrae}\ is installed.\\
-  \cellcolor{tabbg2} & \cellcolor{tabbg2}Choose whether the instrumentation runs in in {\tt detail} or\\
-  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_INITIAL\_MODE} & \cellcolor{tabbg2}in {\tt bursts} mode.\\
-  \cellcolor{tabbg1}EXTRAE\_BURST\_THRESHOLD & \cellcolor{tabbg1}Specify the threshold time to filter running bursts.\\
-  \cellcolor{tabbg2}EXTRAE\_MINIMUM\_TIME & \cellcolor{tabbg2}Specify the minimum amount of instrumentation time.\\
+  \cellcolor{tabbg1}EXTRAE\_FILE\_SIZE & \cellcolor{tabbg1}Set the maximum size (in Mbytes) for the intermediate trace file.\\
+  \cellcolor{tabbg2}                  & \cellcolor{tabbg2}List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
+  \cellcolor{tabbg2}EXTRAE\_FUNCTIONS & \cellcolor{tabbg2}GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
+  \cellcolor{tabbg2}                  & \cellcolor{tabbg2}option at compile and link time. \\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Specify if the performance counters should be collected when a\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_FUNCTIONS\_COUNTERS\_ON} & \cellcolor{tabbg1}user function event is emitted.\\
+  \cellcolor{tabbg2}EXTRAE\_FINAL\_DIR & \cellcolor{tabbg2}Specifies where files will be stored when the application ends.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Gather intermediate trace files into a single directory\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_GATHER\_MPITS} & (\em{this is only available when instrumenting MPI applications}).\\
+  \cellcolor{tabbg2}EXTRAE\_HOME & \cellcolor{tabbg2}Points where the {\sf {E}xtrae}\ is installed.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Choose whether the instrumentation runs in in {\tt detail} or\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_INITIAL\_MODE} & \cellcolor{tabbg1}in {\tt bursts} mode.\\
+  \cellcolor{tabbg2}EXTRAE\_BURST\_THRESHOLD & \cellcolor{tabbg2}Specify the threshold time to filter running bursts.\\
+  \cellcolor{tabbg1}EXTRAE\_MINIMUM\_TIME & \cellcolor{tabbg1}Specify the minimum amount of instrumentation time.\\
   \hline
 \end{tabular}
 }
@@ -336,9 +344,9 @@
 \lthtmlcheckvsize\clearpage}
 
 {\newpage\clearpage
-\lthtmlfigureA{landscape4570}%
+\lthtmlfigureA{landscape4348}%
 \begin{landscape}
-% latex2html id marker 4570
+% latex2html id marker 4348
 
 \par
 \begin{table}
@@ -358,20 +366,14 @@
   \cellcolor{tabbg2} EXTRAE\_PTHREAD\_LOCKS & \cellcolor{tabbg2} Set to 1 if pthread locks have to be instrumented.\\
   \cellcolor{tabbg1} EXTRAE\_OMP\_LOCKS & \cellcolor{tabbg1} Set to 1 if OpenMP locks have to be instrumented.\\
   \cellcolor{tabbg2} EXTRAE\_ON & \cellcolor{tabbg2} Enables instrumentation\\
-  \cellcolor{tabbg1} EXTRAE\_PACX\_CALLER & \cellcolor{tabbg1} Choose which PACX calling routines should be dumped into the tracefile.\\
-  \cellcolor{tabbg2} EXTRAE\_PACX\_COUNTERS\_ON & \cellcolor{tabbg2} Set to 1 if PACX must report performace counter values.\\
-  \cellcolor{tabbg1} EXTRAE\_PACX\_STATISTICS & \cellcolor{tabbg1} Set to 1 if basic PACX statistics must be collected in burst mode.\\
-  \cellcolor{tabbg2} EXTRAE\_PROGRAM\_NAME & \cellcolor{tabbg2} Specify the prefix of the resulting intermediate trace files.\\
-  \cellcolor{tabbg1} EXTRAE\_SAMPLING\_CALLER & \cellcolor{tabbg1} Determines the callstack segment stored through time-sampling capabilities.\\
-  \cellcolor{tabbg2} & \cellcolor{tabbg2} Determines domain for sampling clock.\\
-  \cellcolor{tabbg2} \multirow{-2}{*}{EXTRAE\_SAMPLING\_CLOCKTYPE} & \cellcolor{tabbg2} Options are: DEFAULT, REAL, VIRTUAL and PROF.\\
-  \cellcolor{tabbg1} EXTRAE\_SAMPLING\_PERIOD & \cellcolor{tabbg1} Enable time-sampling capabilities with the indicated period.\\
-  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_VARIABILITY & \cellcolor{tabbg2} Adds some variability to the sampling period.\\
-  \cellcolor{tabbg1} EXTRAE\_RUSAGE & \cellcolor{tabbg1} Instrumentation emits resource usage at flush points if set to 1.\\
-  \cellcolor{tabbg2} EXTRAE\_SKIP\_AUTO\_LIBRARY\_INITIALIZE & \cellcolor{tabbg2} Do not automatically init instrumentation in the main symbol.\\
-  \cellcolor{tabbg1} EXTRAE\_SPU\_DMA\_CHANNEL & \cellcolor{tabbg1} Choose the SPU-PPU dma communication channel.\\
-  \cellcolor{tabbg2} EXTRAE\_SPU\_BUFFER\_SIZE & \cellcolor{tabbg2} Set the buffer size of the SPU side.\\
-  \cellcolor{tabbg1} EXTRAE\_SPU\_FILE\_SIZE & \cellcolor{tabbg1} Set the maximum size for the SPU side (default: 5Mbytes).\\
+  \cellcolor{tabbg1} EXTRAE\_PROGRAM\_NAME & \cellcolor{tabbg1} Specify the prefix of the resulting intermediate trace files.\\
+  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_CALLER & \cellcolor{tabbg2} Determines the callstack segment stored through time-sampling capabilities.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1} Determines domain for sampling clock.\\
+  \cellcolor{tabbg1} \multirow{-2}{*}{EXTRAE\_SAMPLING\_CLOCKTYPE} & \cellcolor{tabbg1} Options are: DEFAULT, REAL, VIRTUAL and PROF.\\
+  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_PERIOD & \cellcolor{tabbg2} Enable time-sampling capabilities with the indicated period.\\
+  \cellcolor{tabbg1} EXTRAE\_SAMPLING\_VARIABILITY & \cellcolor{tabbg1} Adds some variability to the sampling period.\\
+  \cellcolor{tabbg2} EXTRAE\_RUSAGE & \cellcolor{tabbg2} Instrumentation emits resource usage at flush points if set to 1.\\
+  \cellcolor{tabbg1} EXTRAE\_SKIP\_AUTO\_LIBRARY\_INITIALIZE & \cellcolor{tabbg1} Do not automatically init instrumentation in the main symbol.\\
   \cellcolor{tabbg2} EXTRAE\_TRACE\_TYPE & \cellcolor{tabbg2} Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
   \hline
 \end{tabular}
@@ -388,6 +390,16 @@
 \stepcounter{section}
 \stepcounter{section}
 \stepcounter{section}
+\stepcounter{chapter}
+{\newpage\clearpage
+\lthtmlfigureA{figure5005}%
+\begin{figure}\centering
+  \psfig{figure=overheads/overheads, width=\textwidth}
+
+\end{figure}%
+\lthtmlfigureZ
+\lthtmlcheckvsize\clearpage}
+
 \stepcounter{chapter}
 \stepcounter{section}
 \stepcounter{section}
