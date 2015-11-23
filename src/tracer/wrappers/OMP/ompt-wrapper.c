@@ -227,7 +227,8 @@ unsigned Extrae_OMPT_threadid (void)
 
 static pthread_mutex_t mutex_init_threads = PTHREAD_MUTEX_INITIALIZER;
 
-void OMPT_event_thread_begin (ompt_thread_type_t type, ompt_thread_id_t thid)
+void Extrae_OMPT_event_thread_begin (ompt_thread_type_t type,
+	ompt_thread_id_t thid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	pthread_mutex_lock (&mutex_init_threads);
@@ -251,7 +252,8 @@ void OMPT_event_thread_begin (ompt_thread_type_t type, ompt_thread_id_t thid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_thread_end (ompt_thread_type_t type, ompt_thread_id_t thid)
+void Extrae_OMPT_event_thread_end (ompt_thread_type_t type,
+	ompt_thread_id_t thid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	pthread_mutex_lock (&mutex_init_threads);
@@ -271,7 +273,8 @@ void OMPT_event_thread_end (ompt_thread_type_t type, ompt_thread_id_t thid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_loop_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
+void Extrae_OMPT_event_loop_begin (ompt_parallel_id_t pid, ompt_task_id_t tid,
+	const void *wf)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -283,7 +286,7 @@ void OMPT_event_loop_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_loop_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_loop_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -294,12 +297,15 @@ void OMPT_event_loop_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_parallel_begin (ompt_task_id_t tid, ompt_frame_t *ptf, ompt_parallel_id_t pid, uint32_t req_team_size, void *pf)
+void Extrae_OMPT_event_parallel_begin (ompt_task_id_t tid, ompt_frame_t *ptf,
+	ompt_parallel_id_t pid, uint32_t req_team_size, const void *pf,
+	ompt_invoker_t invoker)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(ptf);
 	UNREFERENCED_PARAMETER(tid);
 	UNREFERENCED_PARAMETER(req_team_size);
+	UNREFERENCED_PARAMETER(invoker);
 
 	PROTOTYPE_MESSAGE(" (%ld, %p, %ld, %u, %p)", tid, ptf, pid, req_team_size, pf);
 	Extrae_OMPT_register_ompt_parallel_id_pf (pid, pf);
@@ -308,10 +314,12 @@ void OMPT_event_parallel_begin (ompt_task_id_t tid, ompt_frame_t *ptf, ompt_para
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_parallel_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_parallel_end (ompt_parallel_id_t pid, ompt_task_id_t tid,
+	ompt_invoker_t invoker)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(tid);
+	UNREFERENCED_PARAMETER(invoker);
 
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
 	Extrae_OMPT_unregister_ompt_parallel_id_pf (pid);
@@ -320,18 +328,20 @@ void OMPT_event_parallel_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_barrier_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_barrier_begin (ompt_parallel_id_t pid, ompt_task_id_t tid,
+	const void *codeptr_ra)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
+	UNREFERENCED_PARAMETER(codeptr_ra);
 
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
 	Extrae_OpenMP_Barrier_Entry ();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_barrier_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_barrier_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -342,7 +352,8 @@ void OMPT_event_barrier_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_barrier_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_wait_barrier_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -353,7 +364,8 @@ void OMPT_event_wait_barrier_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_barrier_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_wait_barrier_end (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -364,18 +376,20 @@ void OMPT_event_wait_barrier_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_master_begin(ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_master_begin(ompt_parallel_id_t pid, ompt_task_id_t tid,
+	const void *codeptr_ra)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
+	UNREFERENCED_PARAMETER(codeptr_ra);
 
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
 	Extrae_OMPT_Master_Entry ();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_master_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_master_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -386,31 +400,32 @@ void OMPT_event_master_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_sections_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
+void Extrae_OMPT_event_sections_begin (ompt_parallel_id_t pid, ompt_task_id_t tid,
+	const void *codeptr_ra)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
-	UNREFERENCED_PARAMETER(wf);
+	UNREFERENCED_PARAMETER(codeptr_ra);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, wf);
+	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, codeptr_ra);
 	Extrae_OMPT_Sections_Entry();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_sections_end (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
+void Extrae_OMPT_event_sections_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
-	UNREFERENCED_PARAMETER(wf);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, wf);
+	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid);
 	Extrae_OMPT_Sections_Exit();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_single_others_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_single_others_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -421,7 +436,8 @@ void OMPT_event_single_others_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_single_others_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_single_others_end (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -432,31 +448,33 @@ void OMPT_event_single_others_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_single_in_block_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
+void Extrae_OMPT_event_single_in_block_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid, const void *codeptr_ra)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
-	UNREFERENCED_PARAMETER(wf);
+	UNREFERENCED_PARAMETER(codeptr_ra);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, wf);
+	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, codeptr_ra);
 	Extrae_OMPT_Single_Entry ();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_single_in_block_end (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
+void Extrae_OMPT_event_single_in_block_end (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
-	UNREFERENCED_PARAMETER(wf);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, wf);
+	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid);
 	Extrae_OMPT_Single_Exit ();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_task_begin (ompt_task_id_t ptid, ompt_frame_t *ptf, ompt_task_id_t tid, void *ntf)
+void Extrae_OMPT_event_task_begin (ompt_task_id_t ptid, const ompt_frame_t *ptf,
+	ompt_task_id_t tid, const void *ntf)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(ptid);
@@ -470,7 +488,7 @@ void OMPT_event_task_begin (ompt_task_id_t ptid, ompt_frame_t *ptf, ompt_task_id
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_task_end (ompt_task_id_t tid)
+void Extrae_OMPT_event_task_end (ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	PROTOTYPE_MESSAGE(" (%ld)", tid);
@@ -482,7 +500,8 @@ void OMPT_event_task_end (ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_taskwait_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_wait_taskwait_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -493,7 +512,8 @@ void OMPT_event_wait_taskwait_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_taskwait_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_wait_taskwait_end (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -504,11 +524,13 @@ void OMPT_event_wait_taskwait_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_taskwait_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_taskwait_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid, const void *codeptr_ra)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
+	UNREFERENCED_PARAMETER(codeptr_ra);
 
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
 	Extrae_OpenMP_Taskwait_Entry ();
@@ -516,7 +538,7 @@ void OMPT_event_taskwait_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_taskwait_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_taskwait_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -528,7 +550,8 @@ void OMPT_event_taskwait_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_taskgroup_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_taskgroup_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -539,7 +562,7 @@ void OMPT_event_taskgroup_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_taskgroup_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_taskgroup_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -550,7 +573,8 @@ void OMPT_event_taskgroup_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_taskgroup_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_wait_taskgroup_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -561,7 +585,8 @@ void OMPT_event_wait_taskgroup_begin (ompt_parallel_id_t pid, ompt_task_id_t tid
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_taskgroup_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_wait_taskgroup_end (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -572,19 +597,20 @@ void OMPT_event_wait_taskgroup_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_workshare_begin (ompt_parallel_id_t pid, ompt_task_id_t tid, void *wf)
+void Extrae_OMPT_event_workshare_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid, const void *codeptr_ra)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
-	UNREFERENCED_PARAMETER(wf);
+	UNREFERENCED_PARAMETER(codeptr_ra);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, wf);
+	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid, codeptr_ra);
 	Extrae_OMPT_Workshare_Entry();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_workshare_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_workshare_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -595,7 +621,7 @@ void OMPT_event_workshare_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_idle_begin (ompt_thread_id_t thid)
+void Extrae_OMPT_event_idle_begin (ompt_thread_id_t thid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(thid);
@@ -605,7 +631,7 @@ void OMPT_event_idle_begin (ompt_thread_id_t thid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_idle_end (ompt_thread_id_t thid)
+void Extrae_OMPT_event_idle_end (ompt_thread_id_t thid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(thid);
@@ -615,7 +641,7 @@ void OMPT_event_idle_end (ompt_thread_id_t thid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_release_lock (ompt_wait_id_t wid)
+void Extrae_OMPT_event_release_lock (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -625,7 +651,7 @@ void OMPT_event_release_lock (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_release_nest_lock_last (ompt_wait_id_t wid)
+void Extrae_OMPT_event_release_nest_lock_last (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -635,7 +661,7 @@ void OMPT_event_release_nest_lock_last (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_release_critical (ompt_wait_id_t wid)
+void Extrae_OMPT_event_release_critical (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -646,7 +672,7 @@ void OMPT_event_release_critical (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_release_ordered (ompt_wait_id_t wid)
+void Extrae_OMPT_event_release_ordered (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -656,7 +682,7 @@ void OMPT_event_release_ordered (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_release_atomic (ompt_wait_id_t wid)
+void Extrae_OMPT_event_release_atomic (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -667,7 +693,8 @@ void OMPT_event_release_atomic (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_implicit_task_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_implicit_task_begin (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(tid);
@@ -678,7 +705,8 @@ void OMPT_event_implicit_task_begin (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_implicit_task_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
+void Extrae_OMPT_event_implicit_task_end (ompt_parallel_id_t pid,
+	ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(pid);
@@ -690,7 +718,7 @@ void OMPT_event_implicit_task_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_initial_task_begin (ompt_task_id_t tid)
+void Extrae_OMPT_event_initial_task_begin (ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(tid);
@@ -700,7 +728,7 @@ void OMPT_event_initial_task_begin (ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_initial_task_end (ompt_task_id_t tid)
+void Extrae_OMPT_event_initial_task_end (ompt_task_id_t tid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(tid);
@@ -710,10 +738,10 @@ void OMPT_event_initial_task_end (ompt_task_id_t tid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_task_switch (ompt_task_id_t stid, ompt_task_id_t rtid)
+void Extrae_OMPT_event_task_switch (ompt_task_id_t stid, ompt_task_id_t rtid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
-	void *tf;
+	const void *tf;
 	long long taskcounter;
 	int implicit;
 
@@ -742,7 +770,7 @@ void OMPT_event_task_switch (ompt_task_id_t stid, ompt_task_id_t rtid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_lock (ompt_wait_id_t wid)
+void Extrae_OMPT_event_wait_lock (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -752,7 +780,7 @@ void OMPT_event_wait_lock (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_acquired_lock (ompt_wait_id_t wid)
+void Extrae_OMPT_event_acquired_lock (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -762,7 +790,7 @@ void OMPT_event_acquired_lock (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_nest_lock (ompt_wait_id_t wid)
+void Extrae_OMPT_event_wait_nest_lock (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -772,7 +800,7 @@ void OMPT_event_wait_nest_lock (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_acquired_nest_lock_first (ompt_wait_id_t wid)
+void Extrae_OMPT_event_acquired_nest_lock_first (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -782,7 +810,7 @@ void OMPT_event_acquired_nest_lock_first (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_release_nest_lock_prev (ompt_wait_id_t wid)
+void Extrae_OMPT_event_release_nest_lock_prev (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -792,7 +820,7 @@ void OMPT_event_release_nest_lock_prev (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_acquired_nest_lock_next (ompt_wait_id_t wid)
+void Extrae_OMPT_event_acquired_nest_lock_next (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -802,7 +830,7 @@ void OMPT_event_acquired_nest_lock_next (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_critical (ompt_wait_id_t wid)
+void Extrae_OMPT_event_wait_critical (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -812,7 +840,7 @@ void OMPT_event_wait_critical (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_acquired_critical (ompt_wait_id_t wid)
+void Extrae_OMPT_event_acquired_critical (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -823,7 +851,7 @@ void OMPT_event_acquired_critical (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_ordered (ompt_wait_id_t wid)
+void Extrae_OMPT_event_wait_ordered (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -833,7 +861,7 @@ void OMPT_event_wait_ordered (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_acquired_ordered (ompt_wait_id_t wid)
+void Extrae_OMPT_event_acquired_ordered (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -843,7 +871,7 @@ void OMPT_event_acquired_ordered (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_wait_atomic (ompt_wait_id_t wid)
+void Extrae_OMPT_event_wait_atomic (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -853,7 +881,7 @@ void OMPT_event_wait_atomic (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_acquired_atomic (ompt_wait_id_t wid)
+void Extrae_OMPT_event_acquired_atomic (ompt_wait_id_t wid)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(wid);
@@ -864,7 +892,7 @@ void OMPT_event_acquired_atomic (ompt_wait_id_t wid)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_control (uint64_t command, uint64_t modifier)
+void Extrae_OMPT_event_control (uint64_t command, uint64_t modifier)
 {
 #ifndef EMPTY_OMPT_CALLBACKS
 	UNREFERENCED_PARAMETER(modifier);
@@ -882,7 +910,7 @@ void OMPT_event_control (uint64_t command, uint64_t modifier)
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_task_dependence_pair ( /* for new dependence instrumentation */
+void Extrae_OMPT_event_task_dependence_pair ( /* for new dependence */
 	ompt_task_id_t pred_task_id, /* ID of predecessor task */
 	ompt_task_id_t succ_task_id  /* ID of successor task */
 )
@@ -895,7 +923,7 @@ void OMPT_event_task_dependence_pair ( /* for new dependence instrumentation */
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
 
-void OMPT_event_task_dependences ( /* for new dependence instrumentation */
+void Extrae_OMPT_event_task_dependences ( /* for new dependences */
 	ompt_task_id_t task_id,        /* ID of task */
 	ompt_task_dependence_t *deps,  /* vector of task dependences */
 	int ndeps
@@ -932,68 +960,68 @@ struct OMPT_callbacks_st
 
 static struct OMPT_callbacks_st ompt_callbacks[] =
 {
-	CALLBACK_ENTRY (ompt_event_loop_begin, OMPT_event_loop_begin),
-	CALLBACK_ENTRY (ompt_event_loop_end, OMPT_event_loop_end),
-	CALLBACK_ENTRY (ompt_event_parallel_begin, OMPT_event_parallel_begin),
-	CALLBACK_ENTRY (ompt_event_parallel_end, OMPT_event_parallel_end),
-	CALLBACK_ENTRY (ompt_event_barrier_begin, OMPT_event_barrier_begin),
-	CALLBACK_ENTRY (ompt_event_barrier_end, OMPT_event_barrier_end),
-	CALLBACK_ENTRY (ompt_event_wait_barrier_begin, OMPT_event_wait_barrier_begin),
-	CALLBACK_ENTRY (ompt_event_wait_barrier_end, OMPT_event_wait_barrier_end),
-	CALLBACK_ENTRY (ompt_event_sections_begin, OMPT_event_sections_begin),
-	CALLBACK_ENTRY (ompt_event_sections_end, OMPT_event_sections_end),
-	CALLBACK_ENTRY (ompt_event_task_begin, OMPT_event_task_begin),
-	CALLBACK_ENTRY (ompt_event_task_end, OMPT_event_task_end),
-	// CALLBACK_ENTRY (ompt_event_wait_taskwait_begin, OMPT_event_wait_taskwait_begin),
-	// CALLBACK_ENTRY (ompt_event_wait_taskwait_end, OMPT_event_wait_taskwait_end),
-	CALLBACK_ENTRY (ompt_event_taskwait_begin, OMPT_event_taskwait_begin),
-	CALLBACK_ENTRY (ompt_event_taskwait_end, OMPT_event_taskwait_end),
-	CALLBACK_ENTRY (ompt_event_wait_taskgroup_begin, OMPT_event_wait_taskgroup_begin),
-	CALLBACK_ENTRY (ompt_event_wait_taskgroup_end, OMPT_event_wait_taskgroup_end),
-	CALLBACK_ENTRY (ompt_event_taskgroup_begin, OMPT_event_taskgroup_begin),
-	CALLBACK_ENTRY (ompt_event_taskgroup_end, OMPT_event_taskgroup_end),
-	CALLBACK_ENTRY (ompt_event_workshare_begin, OMPT_event_workshare_begin),
-	CALLBACK_ENTRY (ompt_event_workshare_end, OMPT_event_workshare_end),
-	CALLBACK_ENTRY (ompt_event_idle_begin, OMPT_event_idle_begin),
-	CALLBACK_ENTRY (ompt_event_idle_end, OMPT_event_idle_end),
-	CALLBACK_ENTRY (ompt_event_implicit_task_begin, OMPT_event_implicit_task_begin),
-	CALLBACK_ENTRY (ompt_event_implicit_task_end, OMPT_event_implicit_task_end),
-	CALLBACK_ENTRY (ompt_event_initial_task_begin, OMPT_event_initial_task_begin),
-	CALLBACK_ENTRY (ompt_event_initial_task_end, OMPT_event_initial_task_end),
-	CALLBACK_ENTRY (ompt_event_task_switch, OMPT_event_task_switch),
-	CALLBACK_ENTRY (ompt_event_wait_lock, OMPT_event_wait_lock),
-	CALLBACK_ENTRY (ompt_event_thread_begin, OMPT_event_thread_begin),
-	CALLBACK_ENTRY (ompt_event_thread_end, OMPT_event_thread_end),
-	CALLBACK_ENTRY (ompt_event_control, OMPT_event_control),
-	CALLBACK_ENTRY (ompt_event_task_dependences, OMPT_event_task_dependences),
-	CALLBACK_ENTRY (ompt_event_task_dependence_pair, OMPT_event_task_dependence_pair),
+	CALLBACK_ENTRY (ompt_event_loop_begin, Extrae_OMPT_event_loop_begin),
+	CALLBACK_ENTRY (ompt_event_loop_end, Extrae_OMPT_event_loop_end),
+	CALLBACK_ENTRY (ompt_event_parallel_begin, Extrae_OMPT_event_parallel_begin),
+	CALLBACK_ENTRY (ompt_event_parallel_end, Extrae_OMPT_event_parallel_end),
+	CALLBACK_ENTRY (ompt_event_barrier_begin, Extrae_OMPT_event_barrier_begin),
+	CALLBACK_ENTRY (ompt_event_barrier_end, Extrae_OMPT_event_barrier_end),
+	CALLBACK_ENTRY (ompt_event_wait_barrier_begin, Extrae_OMPT_event_wait_barrier_begin),
+	CALLBACK_ENTRY (ompt_event_wait_barrier_end, Extrae_OMPT_event_wait_barrier_end),
+	CALLBACK_ENTRY (ompt_event_sections_begin, Extrae_OMPT_event_sections_begin),
+	CALLBACK_ENTRY (ompt_event_sections_end, Extrae_OMPT_event_sections_end),
+	CALLBACK_ENTRY (ompt_event_task_begin, Extrae_OMPT_event_task_begin),
+	CALLBACK_ENTRY (ompt_event_task_end, Extrae_OMPT_event_task_end),
+	// CALLBACK_ENTRY (ompt_event_wait_taskwait_begin, Extrae_OMPT_event_wait_taskwait_begin),
+	// CALLBACK_ENTRY (ompt_event_wait_taskwait_end, Extrae_OMPT_event_wait_taskwait_end),
+	CALLBACK_ENTRY (ompt_event_taskwait_begin, Extrae_OMPT_event_taskwait_begin),
+	CALLBACK_ENTRY (ompt_event_taskwait_end, Extrae_OMPT_event_taskwait_end),
+	CALLBACK_ENTRY (ompt_event_wait_taskgroup_begin, Extrae_OMPT_event_wait_taskgroup_begin),
+	CALLBACK_ENTRY (ompt_event_wait_taskgroup_end, Extrae_OMPT_event_wait_taskgroup_end),
+	CALLBACK_ENTRY (ompt_event_taskgroup_begin, Extrae_OMPT_event_taskgroup_begin),
+	CALLBACK_ENTRY (ompt_event_taskgroup_end, Extrae_OMPT_event_taskgroup_end),
+	CALLBACK_ENTRY (ompt_event_workshare_begin, Extrae_OMPT_event_workshare_begin),
+	CALLBACK_ENTRY (ompt_event_workshare_end, Extrae_OMPT_event_workshare_end),
+	CALLBACK_ENTRY (ompt_event_idle_begin, Extrae_OMPT_event_idle_begin),
+	CALLBACK_ENTRY (ompt_event_idle_end, Extrae_OMPT_event_idle_end),
+	CALLBACK_ENTRY (ompt_event_implicit_task_begin, Extrae_OMPT_event_implicit_task_begin),
+	CALLBACK_ENTRY (ompt_event_implicit_task_end, Extrae_OMPT_event_implicit_task_end),
+	CALLBACK_ENTRY (ompt_event_initial_task_begin, Extrae_OMPT_event_initial_task_begin),
+	CALLBACK_ENTRY (ompt_event_initial_task_end, Extrae_OMPT_event_initial_task_end),
+	CALLBACK_ENTRY (ompt_event_task_switch, Extrae_OMPT_event_task_switch),
+	CALLBACK_ENTRY (ompt_event_wait_lock, Extrae_OMPT_event_wait_lock),
+	CALLBACK_ENTRY (ompt_event_thread_begin, Extrae_OMPT_event_thread_begin),
+	CALLBACK_ENTRY (ompt_event_thread_end, Extrae_OMPT_event_thread_end),
+	CALLBACK_ENTRY (ompt_event_control, Extrae_OMPT_event_control),
+	CALLBACK_ENTRY (ompt_event_task_dependences, Extrae_OMPT_event_task_dependences),
+	CALLBACK_ENTRY (ompt_event_task_dependence_pair, Extrae_OMPT_event_task_dependence_pair),
  	{ "empty,", (ompt_event_t) 0, 0 },
  };
  
 struct OMPT_callbacks_st ompt_callbacks_locks[] =
 {
-	CALLBACK_ENTRY (ompt_event_master_begin, OMPT_event_master_begin),
-	CALLBACK_ENTRY (ompt_event_master_end, OMPT_event_master_end),
-	CALLBACK_ENTRY (ompt_event_single_others_begin, OMPT_event_single_others_begin),
-	CALLBACK_ENTRY (ompt_event_single_others_end, OMPT_event_single_others_end),
-	CALLBACK_ENTRY (ompt_event_single_in_block_begin, OMPT_event_single_in_block_begin),
-	CALLBACK_ENTRY (ompt_event_single_in_block_end, OMPT_event_single_in_block_end),
-	CALLBACK_ENTRY (ompt_event_release_lock, OMPT_event_release_lock),
-	CALLBACK_ENTRY (ompt_event_release_nest_lock_last, OMPT_event_release_nest_lock_last),
-	CALLBACK_ENTRY (ompt_event_release_critical, OMPT_event_release_critical),
-	CALLBACK_ENTRY (ompt_event_release_ordered, OMPT_event_release_ordered),
-	CALLBACK_ENTRY (ompt_event_release_atomic, OMPT_event_release_atomic),
-	CALLBACK_ENTRY (ompt_event_acquired_lock, OMPT_event_acquired_lock),
-	CALLBACK_ENTRY (ompt_event_wait_nest_lock, OMPT_event_wait_nest_lock),
-	CALLBACK_ENTRY (ompt_event_acquired_nest_lock_first, OMPT_event_acquired_nest_lock_first),
-	CALLBACK_ENTRY (ompt_event_release_nest_lock_prev, OMPT_event_release_nest_lock_prev),
-	CALLBACK_ENTRY (ompt_event_acquired_nest_lock_next, OMPT_event_acquired_nest_lock_next),
-	CALLBACK_ENTRY (ompt_event_wait_critical, OMPT_event_wait_critical),
-	CALLBACK_ENTRY (ompt_event_acquired_critical, OMPT_event_acquired_critical),
-	CALLBACK_ENTRY (ompt_event_wait_ordered, OMPT_event_wait_ordered),
-	CALLBACK_ENTRY (ompt_event_acquired_ordered, OMPT_event_acquired_ordered),
-	CALLBACK_ENTRY (ompt_event_wait_atomic, OMPT_event_wait_atomic),
-	CALLBACK_ENTRY (ompt_event_acquired_atomic, OMPT_event_acquired_atomic),
+	CALLBACK_ENTRY (ompt_event_master_begin, Extrae_OMPT_event_master_begin),
+	CALLBACK_ENTRY (ompt_event_master_end, Extrae_OMPT_event_master_end),
+	CALLBACK_ENTRY (ompt_event_single_others_begin, Extrae_OMPT_event_single_others_begin),
+	CALLBACK_ENTRY (ompt_event_single_others_end, Extrae_OMPT_event_single_others_end),
+	CALLBACK_ENTRY (ompt_event_single_in_block_begin, Extrae_OMPT_event_single_in_block_begin),
+	CALLBACK_ENTRY (ompt_event_single_in_block_end, Extrae_OMPT_event_single_in_block_end),
+	CALLBACK_ENTRY (ompt_event_release_lock, Extrae_OMPT_event_release_lock),
+	CALLBACK_ENTRY (ompt_event_release_nest_lock_last, Extrae_OMPT_event_release_nest_lock_last),
+	CALLBACK_ENTRY (ompt_event_release_critical, Extrae_OMPT_event_release_critical),
+	CALLBACK_ENTRY (ompt_event_release_ordered, Extrae_OMPT_event_release_ordered),
+	CALLBACK_ENTRY (ompt_event_release_atomic, Extrae_OMPT_event_release_atomic),
+	CALLBACK_ENTRY (ompt_event_acquired_lock, Extrae_OMPT_event_acquired_lock),
+	CALLBACK_ENTRY (ompt_event_wait_nest_lock, Extrae_OMPT_event_wait_nest_lock),
+	CALLBACK_ENTRY (ompt_event_acquired_nest_lock_first, Extrae_OMPT_event_acquired_nest_lock_first),
+	CALLBACK_ENTRY (ompt_event_release_nest_lock_prev, Extrae_OMPT_event_release_nest_lock_prev),
+	CALLBACK_ENTRY (ompt_event_acquired_nest_lock_next, Extrae_OMPT_event_acquired_nest_lock_next),
+	CALLBACK_ENTRY (ompt_event_wait_critical, Extrae_OMPT_event_wait_critical),
+	CALLBACK_ENTRY (ompt_event_acquired_critical, Extrae_OMPT_event_acquired_critical),
+	CALLBACK_ENTRY (ompt_event_wait_ordered, Extrae_OMPT_event_wait_ordered),
+	CALLBACK_ENTRY (ompt_event_acquired_ordered, Extrae_OMPT_event_acquired_ordered),
+	CALLBACK_ENTRY (ompt_event_wait_atomic, Extrae_OMPT_event_wait_atomic),
+	CALLBACK_ENTRY (ompt_event_acquired_atomic, Extrae_OMPT_event_acquired_atomic),
 	{ "empty,", (ompt_event_t) 0, 0 },
 };
  

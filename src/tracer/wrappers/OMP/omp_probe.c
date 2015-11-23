@@ -266,14 +266,14 @@ void Probe_OpenMP_Named_Lock_Entry (void)
 		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, NAMEDCRIT_EV, LOCK_VAL, EMPTY);
 }
 
-void Probe_OpenMP_Named_Lock_Exit (void *name)
+void Probe_OpenMP_Named_Lock_Exit (const void *name)
 {
 	DEBUG
 	if (TraceOMPLocks && mpitrace_on)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, NAMEDCRIT_EV, LOCKED_VAL, (UINT64) name);
 }
 
-void Probe_OpenMP_Named_Unlock_Entry (void *name)
+void Probe_OpenMP_Named_Unlock_Entry (const void *name)
 {
 	DEBUG
 	if (TraceOMPLocks && mpitrace_on)

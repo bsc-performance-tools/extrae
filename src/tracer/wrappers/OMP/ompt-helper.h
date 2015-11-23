@@ -34,17 +34,20 @@
 
 #include "ompt.h"
 
-void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid, void *pf);
+void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid,
+	const void *pf);
 void Extrae_OMPT_unregister_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid);
-void * Extrae_OMPT_get_pf_parallel_id (ompt_parallel_id_t ompt_pid);
+const void * Extrae_OMPT_get_pf_parallel_id (ompt_parallel_id_t ompt_pid);
 
-void Extrae_OMPT_register_ompt_task_id_pf (ompt_task_id_t ompt_tid, void *pf);
+void Extrae_OMPT_register_ompt_task_id_pf (ompt_task_id_t ompt_tid,
+	const void *pf);
 void Extrae_OMPT_unregister_ompt_task_id_pf (ompt_task_id_t ompt_tid);
-void * Extrae_OMPT_get_pf_task_id (ompt_task_id_t ompt_tid);
+const void * Extrae_OMPT_get_pf_task_id (ompt_task_id_t ompt_tid);
 
-void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, int implicit);
+void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid,
+	const void *tf, int implicit);
 void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid);
-void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
+const void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 	int *is_implicit, long long *taskctr);
 void Extrae_OMPT_tf_task_id_set_running (ompt_task_id_t ompt_tid, int b);
 int Extrae_OMPT_tf_task_id_is_running (ompt_task_id_t ompt_tid);

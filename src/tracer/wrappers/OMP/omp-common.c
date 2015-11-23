@@ -64,7 +64,7 @@ void Extrae_OpenMP_Join_Wait_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_UF_Entry (void *uf)
+void Extrae_OpenMP_UF_Entry (const void *uf)
 {
 	Backend_Enter_Instrumentation (2);
 	Probe_OpenMP_UF_Entry ((UINT64) uf);
@@ -190,13 +190,13 @@ void Extrae_OpenMP_Named_Lock_Entry (void)
 	Probe_OpenMP_Named_Lock_Entry ();
 }
 
-void Extrae_OpenMP_Named_Lock_Exit (void *name)
+void Extrae_OpenMP_Named_Lock_Exit (const void *name)
 {
 	Probe_OpenMP_Named_Lock_Exit (name);
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_Named_Unlock_Entry (void *name)
+void Extrae_OpenMP_Named_Unlock_Entry (const void *name)
 {
 	Backend_Enter_Instrumentation (2);
 	Probe_OpenMP_Named_Unlock_Entry (name);
@@ -261,7 +261,7 @@ void Extrae_OpenMP_TaskID (long long id)
 	Probe_OpenMP_TaskID (id);
 }
 
-void Extrae_OpenMP_Task_Entry (void* uf)
+void Extrae_OpenMP_Task_Entry (const void* uf)
 {
 	Backend_Enter_Instrumentation (2);
 	Probe_OpenMP_Task_Entry ((UINT64) uf);
@@ -273,7 +273,7 @@ void Extrae_OpenMP_Task_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_OpenMP_TaskUF_Entry (void* uf)
+void Extrae_OpenMP_TaskUF_Entry (const void* uf)
 {
 	Backend_Enter_Instrumentation (2);
 	Probe_OpenMP_TaskUF_Entry ((UINT64) uf);

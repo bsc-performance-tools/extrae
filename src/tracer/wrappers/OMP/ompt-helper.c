@@ -49,7 +49,7 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 typedef struct ompt_parallel_id_pf_st
 {
 	ompt_parallel_id_t pid;	 /* Parallel ID */
-	void *pf;                /* Parallel function */
+	const void *pf;          /* Parallel function */
 } ompt_parallel_id_pf_t;
 
 static ompt_parallel_id_pf_t *ompt_pids_pf = NULL;
@@ -58,7 +58,8 @@ static unsigned n_allocated_ompt_pids_pf = 0;
 #define N_ALLOCATE_OMPT_PIDS 128
 static pthread_mutex_t mutex_id_pf = PTHREAD_MUTEX_INITIALIZER;
 
-void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid, void *pf)
+void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid,
+	const void *pf)
 {
 	unsigned u;
 
@@ -123,10 +124,10 @@ void Extrae_OMPT_unregister_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid)
 	}
 }
 
-void * Extrae_OMPT_get_pf_parallel_id (ompt_parallel_id_t ompt_pid)
+const void * Extrae_OMPT_get_pf_parallel_id (ompt_parallel_id_t ompt_pid)
 {
 	unsigned u;
-	void *ptr = NULL;
+	const void *ptr = NULL;
 
 	pthread_mutex_lock (&mutex_id_pf);
 	for (u = 0; u < n_allocated_ompt_pids_pf; u++)
@@ -144,7 +145,7 @@ void * Extrae_OMPT_get_pf_parallel_id (ompt_parallel_id_t ompt_pid)
 typedef struct ompt_task_id_pf_st
 {
 	ompt_task_id_t tid;  /* Task ID */
-	void *tf;            /* Task function */
+	const void *tf;      /* Task function */
 	long long task_ctr;  /* Task counter */
 	int implicit;        /* is implicit ? */
 	int is_running;      /* is currently running? */
@@ -157,7 +158,8 @@ static unsigned n_allocated_ompt_tids_tf = 0;
 static pthread_mutex_t mutex_tid_tf = PTHREAD_MUTEX_INITIALIZER;
 static long long __task_ctr = 1;
 
-void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid, void *tf, int implicit)
+void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid,
+	const void *tf, int implicit)
 {
 	unsigned u;
 
@@ -227,11 +229,11 @@ void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 	}
 }
 
-void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
+const void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 	int *is_implicit, long long *taskctr)
 {
 	unsigned u;
-	void *ptr = NULL;
+	const void *ptr = NULL;
 
 #if defined(NEED_MUTEX_TO_GET_TASKFUNCTION)
 	pthread_mutex_lock (&mutex_tid_tf);

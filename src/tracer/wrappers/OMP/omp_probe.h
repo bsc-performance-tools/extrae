@@ -62,8 +62,8 @@ void Probe_OpenMP_Barrier_Entry (void);
 void Probe_OpenMP_Barrier_Exit (void);
 
 void Probe_OpenMP_Named_Lock_Entry (void);
-void Probe_OpenMP_Named_Lock_Exit (void *name);
-void Probe_OpenMP_Named_Unlock_Entry (void *name);
+void Probe_OpenMP_Named_Lock_Exit (const void *name);
+void Probe_OpenMP_Named_Unlock_Entry (const void *name);
 void Probe_OpenMP_Named_Unlock_Exit (void);
 void Probe_OpenMP_Unnamed_Lock_Entry (void);
 void Probe_OpenMP_Unnamed_Lock_Exit (void);
