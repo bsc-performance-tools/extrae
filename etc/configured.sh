@@ -11,8 +11,15 @@ if test "${EXTRAE_HOME}" != "" ; then
 		echo "EXTRAE_HOME points to ${EXTRAE_HOME} and the directory does NOT exist .. FAILED"
 	fi
 else
-	echo "EXTRAE_HOME is undefined... Cannot proceed much more!"
-	echo "Please, define EXTRAE_HOME environment variable to a Extrae package installation"
+	SCRIPT_PATH=`readlink -f $0`
+	EXTRAE_HOME_ETC=`dirname ${SCRIPT_PATH}` # This script is installed in $EXTRAE_HOME/etc
+	EXTRAE_HOME=`dirname ${EXTRAE_HOME_ETC}`
+	echo "EXTRAE_HOME is not set. Guessing from the script invoked that Extrae was installed in ${EXTRAE_HOME}"
+	if test -d ${EXTRAE_HOME} ; then
+		echo "The directory exists .. OK"
+	else
+		echo "The directory does NOT exist .. FAILED"
+	fi
 fi
 
 if test "${EXTRAE_HOME}" != "" ; then
