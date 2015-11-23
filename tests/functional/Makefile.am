@@ -12,4 +12,4 @@ if HAVE_XML2
 SUBDIRS += xml
 endif
 
-EXTRA_DIS  = helper_functions.bash
+EXTRA_DIST = helper_functions.bash
