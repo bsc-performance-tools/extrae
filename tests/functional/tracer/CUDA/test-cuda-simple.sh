@@ -64,7 +64,12 @@ function checkInPCF() {
 }
 
 # The compilation part of the check is inserted here due to the difficulties of change the compiler to nvcc
-nvcc -g hello.cu -o hello
+
+# Try first with -cudart shared (recent nvcc compilers requires this)
+nvcc -g -cudart shared hello.cu -o hello
+if [[ ! -x hello ]]; then
+	nvcc -g hello.cu -o hello
+fi
 
 ./trace.sh ./hello
 
