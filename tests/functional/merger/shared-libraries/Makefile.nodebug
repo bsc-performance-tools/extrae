@@ -16,4 +16,4 @@ run: main
 	../../../../src/merger/mpi2prv -f TRACE.mpits -e main
 
 clean: 
-	rm -fr libfA.so libfB.so main TRACE.sym TRACE.mpits set-0
+	rm -fr libfA.so libfB.so main TRACE.sym TRACE.mpits set-0 main.prv main.pcf main.row

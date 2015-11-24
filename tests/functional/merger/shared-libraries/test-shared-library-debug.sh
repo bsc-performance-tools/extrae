@@ -4,9 +4,11 @@ source ../../helper_functions.bash
 
 TRACE=main
 
-make -f Makefile.debug run
+make -f Makefile.debug clean run
 
 # Do actual checks
+CheckEntryInPCF ${TRACE}.pcf "0 (Unresolved)"
+CheckEntryInPCF ${TRACE}.pcf "0 (_NOT_Found)"
 CheckEntryInPCF ${TRACE}.pcf "fA.c, libfA.so"
 CheckEntryInPCF ${TRACE}.pcf "fB.c, libfB.so"
 CheckEntryInPCF ${TRACE}.pcf "main.c, main"
