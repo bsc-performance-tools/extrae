@@ -1,3 +1,4 @@
+manual_ug = user-guide
 
 TEX_FILES = \
  $(manual_ug).tex \
@@ -9,18 +10,22 @@ TEX_FILES = \
  FAQ-section.tex \
  instrumented-routines-section.tex \
  merge-section.tex \
+ online.tex \
+ overhead.tex \
  quick-guide-section.tex \
+ regression-tests.tex \
+ submit-bug.tex \
+ user-guide.tex \
  wholeXML-section.tex \
  XML-section.tex \
  XML
+
 
 EXTRA_DIST = \
  user-guide.ps \
  user-guide.pdf \
  user-guide \
  $(TEX_FILES)
-
-manual_ug = user-guide
 
 #
 # Aquesta combinacio de params pot ser interessant per a generar un single HTML

@@ -2,6 +2,8 @@
 
 \TRACE includes a set of tests to evaluate the overhead imposed to the application by different components.
 These tests are installed in \texttt{\$\{EXTRAE\_HOME\}/share/tests/overhead} and can be run by executing the \texttt{run\_overhead\_tests.sh} script within this directory.
+Note that this script compiles and executes the generated binaries on the same system, so this script will require some tuning to run in a system that uses a batch-queuing system and/or needs cross-compiling.
+
 Currently there are the following tests the evaluate the necessary time to perform certain operations:
 \begin{itemize}
 \item \textit{posix\_clock} grab the current time using the posix clock. Even the simpler emitted event requires gathering a timestamp.
