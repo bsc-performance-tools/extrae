@@ -1,10 +1,9 @@
 #!/bin/bash
 
+source ../../helper_functions.bash
+
 make -f Makefile.nodebug run
 
-#tail -25 main.pcf > OUTPUT
+exit 1
 
 make -f Makefile.nodebug clean
-
-# Do test
-diff test-shared-library-nodebug.reference main.pcf

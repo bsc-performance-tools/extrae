@@ -16,10 +16,10 @@ main_empty: main_empty.c
 
 run: main
 	EXTRAE_ON=1 ./main
-	../../../../src/merger/mpi2prv -without-addresses -f TRACE.mpits
+	../../../../src/merger/mpi2prv -f TRACE.mpits
 
 run-nomerge: main
 	EXTRAE_ON=1 ./main
 
 clean: 
-	rm -fr libfA.so libfB.so main set-0 TRACE.sym TRACE.mpits
+	rm -fr libfA.so libfB.so main set-0 TRACE.sym TRACE.mpits main.prv main.pcf main.row
