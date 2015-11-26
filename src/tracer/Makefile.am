@@ -209,7 +209,10 @@ lib_dyn_oclmpitracef_la_SOURCES = $(liboclmpitracef_la_SOURCES)
 core_MODULES = \
  $(COMMON_LIB)/libcommon.la \
  $(CLOCKS_LIB)/libclock.la \
- $(HWC_LIB)/libhwc.la
+ $(HWC_LIB)/libhwc.la \
+ $(WRAPPERS_LIB)/MALLOC/libwrap_malloc.la \
+ $(WRAPPERS_LIB)/IO/libwrap_io.la \
+ $(WRAPPERS_LIB)/fork/libwrap_fork.la
 
 #
 # Add sampling mechanisms
@@ -532,10 +535,7 @@ COMMON_LINKER_FLAGS = \
  $(XML2_LINKER_FLAGS) \
  $(LDL)\
  $(LIBZ_LINKER_FLAGS) \
- $(MRNET_LINKER_FLAGS) \
- $(WRAPPERS_LIB)/MALLOC/libwrap_malloc.la \
- $(WRAPPERS_LIB)/IO/libwrap_io.la \
- $(WRAPPERS_LIB)/fork/libwrap_fork.la
+ $(MRNET_LINKER_FLAGS)
 
 libcudaompitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libcudaompitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
