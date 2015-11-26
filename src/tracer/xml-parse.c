@@ -494,11 +494,11 @@ static void Parse_XML_DynamicMemory (int rank, xmlNodePtr current_tag)
 				xmlChar *threshold = xmlGetProp_env (rank, tag, TRACE_DYNAMIC_MEMORY_ALLOC_THRESHOLD);
 				alloc_threshold = atoll ((char*)threshold);
 				XML_FREE(threshold);
-				mfprintf (stdout, PACKAGE_NAME": Memory allocation routines (malloc/realloc) will be instrumented when they allocate more than %llu bytes.\n", alloc_threshold);
+				mfprintf (stdout, PACKAGE_NAME": Dynamic memory allocation routines (malloc/realloc) will be instrumented when they allocate more than %llu bytes.\n", alloc_threshold);
 			}
 			else
 			{
-				mfprintf (stdout, PACKAGE_NAME": Memory allocation routines (malloc/realloc) won't be instrumented.\n");
+				mfprintf (stdout, PACKAGE_NAME": Dynamic memory allocation routines (malloc/realloc) won't be instrumented.\n");
 			}
 			XML_FREE(enabled);
 		}
@@ -507,7 +507,7 @@ static void Parse_XML_DynamicMemory (int rank, xmlNodePtr current_tag)
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			free_enabled = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
-			mfprintf (stdout, PACKAGE_NAME": Memory freeing routines (malloc/realloc) will %sbe instrumented.\n", 
+			mfprintf (stdout, PACKAGE_NAME": Dynamic memory freeing routines (free) will %sbe instrumented.\n", 
 			  free_enabled?"":"not ");
 			XML_FREE(enabled);
 		}
