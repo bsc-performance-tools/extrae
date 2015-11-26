@@ -41,10 +41,15 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2098 2013-09-06 12:39:32Z haral
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 
 #include "wrapper.h"
 #include "trace_macros.h"
 #include "malloc_probe.h"
+
+// #define DEBUG
 
 #if defined(INSTRUMENT_DYNAMIC_MEMORY)
 
@@ -70,7 +75,57 @@ void Extrae_malloctrace_init (void)
 # endif
 }
 
-//#define DEBUG
+
+static void ** mallocentries = NULL;
+static unsigned nmallocentries_allocated = 0;
+static unsigned nmallocentries = 0;
+#define NMALLOCENTRIES_MALLOC 16*1024
+
+static void Extrae_malloctrace_add (void *p)
+{
+	if (p != NULL)
+	{
+		unsigned u;
+		assert (real_realloc != NULL);
+	
+		if (nmallocentries == nmallocentries_allocated)
+		{
+			mallocentries = real_realloc (mallocentries,
+			  (nmallocentries_allocated+NMALLOCENTRIES_MALLOC) * sizeof(void*));
+			assert (mallocentries != NULL);
+			for (u = nmallocentries_allocated;
+			     u < nmallocentries_allocated+NMALLOCENTRIES_MALLOC;
+			     u++)
+				mallocentries[u] = NULL;
+			nmallocentries_allocated += NMALLOCENTRIES_MALLOC;
+		}
+	
+		for (u = 0; u < nmallocentries_allocated; u++)
+			if (mallocentries[u] == NULL)
+			{
+				mallocentries[u] = p;
+				nmallocentries++;
+				break;
+			}
+	}
+}
+
+static int Extrae_malloctrace_remove (const void *p)
+{
+	if (p != NULL)
+	{
+		unsigned u;
+		for (u = 0; u < nmallocentries_allocated; u++)
+			if (mallocentries[u] == p)
+			{
+				mallocentries[u] = NULL;
+				nmallocentries--;
+				return TRUE;
+			}
+	}
+	return FALSE;
+}
+
 
 /*
 
@@ -115,6 +170,7 @@ void *malloc (size_t s)
 		Probe_Malloc_Entry (s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_malloc (s);
+		Extrae_malloctrace_add (res);
 		Probe_Malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -153,7 +209,10 @@ void free (void *p)
 	}
 #endif
 
-	if (Extrae_get_trace_malloc_free() && real_free != NULL && canInstrument)
+	int present = Extrae_malloctrace_remove (p);
+
+	if (Extrae_get_trace_malloc_free() && real_free != NULL && canInstrument
+	    && present)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_Free_Entry (p);
@@ -238,6 +297,8 @@ void *realloc (void *p, size_t s)
 		Probe_Realloc_Entry (p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
+		Extrae_malloctrace_remove (p);
+		Extrae_malloctrace_add (res);
 		Probe_Realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
