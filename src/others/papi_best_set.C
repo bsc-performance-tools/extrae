@@ -255,7 +255,7 @@ static void CheckMaxEventSet (unsigned neventset, const vector<string> &omnicoun
 #endif
 }
 
-static void addCounters (char *ctr, vector<string> & counters)
+static void addCounters (const char *ctr, vector<string> & counters)
 {
 	string s_ctr (ctr);
 
@@ -263,13 +263,15 @@ static void addCounters (char *ctr, vector<string> & counters)
 	while (string::npos != position)
 	{
 		string stmp = s_ctr.substr (0, position);
-		if (find (counters.begin(), counters.end(), stmp) == counters.end())
-			counters.push_back (stmp);
+		if (stmp.length() > 0)
+			if (find (counters.begin(), counters.end(), stmp) == counters.end())
+				counters.push_back (stmp);
 		s_ctr = s_ctr.substr (position+1);
 		position  = s_ctr.find (',');
 	}
-	if (find (counters.begin(), counters.end(), s_ctr) == counters.end())
-		counters.push_back (s_ctr);
+	if (s_ctr.length() > 0)
+		if (find (counters.begin(), counters.end(), s_ctr) == counters.end())
+			counters.push_back (s_ctr);
 }
 
 static unsigned dumpEventCtrInfo (const char *ctr)
