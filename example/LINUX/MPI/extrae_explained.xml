@@ -119,8 +119,6 @@
     <temporal-directory enabled="yes">/scratch</temporal-directory>
     <!-- Where must we store the MPIT files once the app ends? -->
     <final-directory enabled="yes">/gpfs/scratch/bsc41/bsc41273</final-directory>
-    <!-- Must the MPITs be gathered once the app ends into a single node? -->
-    <gather-mpits enabled="no" />
   </storage>
 
   <!-- Buffer configuration -->
