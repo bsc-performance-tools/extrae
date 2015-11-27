@@ -145,8 +145,16 @@ static void show_current (event_t * c, UINT64 max_time)
 	}
 	else if (c->event == MALLOC_EV || c->event == REALLOC_EV)
 	{
-		fprintf (stdout, "%s SIZE: %lu\n", c->event==MALLOC_EV?"malloc()":"realloc()",
-		  c->param.misc_param.param);
+		if (c->value == EVT_BEGIN)
+			fprintf (stdout, "%s SIZE: %lu\n", c->event==MALLOC_EV?"malloc()":"realloc()",
+			  c->param.misc_param.param);
+		else if (c->value == EVT_END)
+			fprintf (stdout, "%s ADDRESS: %lu\n", c->event==MALLOC_EV?"malloc()":"realloc()",
+			  c->param.misc_param.param);
+	}
+	else if (c->event == FREE_EV && c->value == EVT_BEGIN)
+	{
+		fprintf (stdout, "free() ADDRESS: %lu\n", c->param.misc_param.param);
 	}
 	else if (c->event == OMPT_TASKFUNC_EV)
 	{
