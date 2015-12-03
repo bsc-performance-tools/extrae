@@ -911,19 +911,22 @@ void Gather_Dimemas_Offsets (int numtasks, int taskid, int count,
 void ShareNodeNames (int numtasks, char ***nodenames)
 {
 	int i, rc;
+	size_t s;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
-	int hostname_length;
 	char *buffer_names = NULL;
 	char **TasksNodes;
 
 	/* Get processor name */
-	rc = MPI_Get_processor_name (hostname, &hostname_length);
-	MPI_CHECK(rc, MPI_Get_processor_name, "Cannot get processor name");
+	if (gethostname (hostname, sizeof(hostname)) == -1)
+	{
+		fprintf (stderr, "Error! Cannot get hostname!\n");
+		exit (-1);
+	}
 
 	/* Change spaces " " into underscores "_" (BGL nodes use to have spaces in their names) */
-	for (i = 0; i < hostname_length; i++)
-		if (' ' == hostname[i])
-			hostname[i] = '_';
+	for (s = 0; s < strlen(hostname); s++)
+		if (' ' == hostname[s])
+			hostname[s] = '_';
 
 	/* Share information among all tasks */
 	buffer_names = (char*) malloc (sizeof(char) * numtasks * MPI_MAX_PROCESSOR_NAME);

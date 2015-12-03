@@ -478,19 +478,22 @@ char **TasksNodes = NULL;
 static void Gather_Nodes_Info (void)
 {
 	unsigned u;
-	int i, rc;
+	int rc;
+	size_t s;
 	char hostname[MPI_MAX_PROCESSOR_NAME];
-	int hostname_length;
 	char *buffer_names = NULL;
 
 	/* Get processor name */
-	rc = PMPI_Get_processor_name (hostname, &hostname_length);
-	MPI_CHECK(rc, PMPI_Get_processor_name);
+	if (gethostname (hostname, sizeof(hostname)) == -1)
+	{
+		fprintf (stderr, "Error! Cannot get hostname!\n");
+		exit (-1);
+	}
 
 	/* Change spaces " " into underscores "_" (BLG nodes use to have spaces in their names) */
-	for (i = 0; i < hostname_length; i++)
-		if (' ' == hostname[i])
-			hostname[i] = '_';
+	for (s = 0; s < strlen(hostname); s++)
+		if (' ' == hostname[s])
+			hostname[s] = '_';
 
 	/* Share information among all tasks */
 	buffer_names = (char*) malloc (sizeof(char) * Extrae_get_num_tasks() * MPI_MAX_PROCESSOR_NAME);

@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 03Dec2015 In BG/Q MPI_get_processor_name != gethostame -> fails when matching
+               the contents of .mpits and each of the .mpit files
  * 23Nov2015 Guess location for EXTRAE_HOME based on the configured.sh script
              Further OMPT upgrades to latest spec
  * 19Nov2015 Added overhead section in the user guide using the overhead
