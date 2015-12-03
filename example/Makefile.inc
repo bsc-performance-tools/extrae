@@ -33,3 +33,12 @@ NVCC=@sub_NVCC@
 JAVAC=@sub_JAVAC@
 JAR=@sub_JAR@
 
+# For statically linked apps or systems
+
+EXTRAE_LDFLAGS_LIBSEQTRACE=-L$(EXTRAE_HOME)/lib -lseqtrace -L$(ZLIB_HOME)/lib -lz -L$(PAPI_HOME)/lib -lpapi -L$(XML2_HOME)/lib -lxml2 -L$(BFD_HOME)/lib -lbfd -liberty
+
+EXTRAE_LDFLAGS_LIBMPITRACE=-L$(EXTRAE_HOME)/lib -lmpitrace -L$(ZLIB_HOME)/lib -lz -L$(PAPI_HOME)/lib -lpapi -L$(XML2_HOME)/lib -lxml2 -L$(BFD_HOME)/lib -lbfd -liberty
+
+EXTRAE_LDFLAGS_LIBMPITRACEF=-L$(EXTRAE_HOME)/lib -lmpitracef -L$(ZLIB_HOME)/lib -lz -L$(PAPI_HOME)/lib -lpapi -L$(XML2_HOME)/lib -lxml2 -L$(BFD_HOME)/lib -lbfd -liberty
+
+
