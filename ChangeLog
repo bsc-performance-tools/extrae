@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 11Dec2015 Added documentation for use on top of PnMPI
  * 03Dec2015 In BG/Q MPI_get_processor_name != gethostame -> fails when matching
                the contents of .mpits and each of the .mpit files
  * 23Nov2015 Guess location for EXTRAE_HOME based on the configured.sh script

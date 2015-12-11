@@ -13,6 +13,7 @@ TEX_FILES = \
  online.tex \
  overhead.tex \
  quick-guide-section.tex \
+ pnmpi-section.tex \
  regression-tests.tex \
  submit-bug.tex \
  user-guide.tex \
