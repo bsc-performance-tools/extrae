@@ -623,6 +623,8 @@ PRVFileSet_t * Map_Paraver_files (FileSet_t * fset,
 
 	*num_of_events = total;
 
+	prvfset->SkipAsMasterOfSubtree = FALSE;
+
 	return prvfset;
 }
 

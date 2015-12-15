@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 15Dec2015 Fixed bug in Map_Paraver_Files at file_set.c. Field SkipAsMasterOfSubtree of PRVFileSet_t was not initialized, leading to undeterministic problems where this would randomly take garbage values ending in a later race condition in the parallel merge. 
  + 11Dec2015 Added documentation for use on top of PnMPI
  * 03Dec2015 In BG/Q MPI_get_processor_name != gethostame -> fails when matching
                the contents of .mpits and each of the .mpit files
