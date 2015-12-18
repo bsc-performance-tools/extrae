@@ -267,6 +267,8 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 	InputTraces[nTraces].thread++;
 	InputTraces[nTraces].ptask = cur_ptask;
 	InputTraces[nTraces].order = nTraces;
+	/* This will be changed latter if Read_SPAWN_file is applied */
+	InputTraces[nTraces].SpawnOffset = 0;
 
 	if (thdname != NULL)
 	{
