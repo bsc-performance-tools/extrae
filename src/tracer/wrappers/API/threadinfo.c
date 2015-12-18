@@ -75,11 +75,18 @@ void Extrae_reallocate_thread_info (unsigned prevnthreads, unsigned nthreads)
 
 void Extrae_set_thread_name (unsigned thread, char *name)
 {
+	size_t i;
+
 	/* Clear space */
 	memset (thread_info[thread].ThreadName, 0, THREAD_INFO_NAME_LEN);
 
 	/* Copy name */
 	snprintf (thread_info[thread].ThreadName, THREAD_INFO_NAME_LEN, "%s", name);
+
+	/* Remove spaces */
+	for (i = 0; i < strlen(thread_info[thread].ThreadName); i++)
+		if (thread_info[thread].ThreadName[i] == ' ')
+			thread_info[thread].ThreadName[i] = '_';
 
 	/* Set last char to empty */
 	thread_info[thread].ThreadName[THREAD_INFO_NAME_LEN-1] = (char) 0;

@@ -9,6 +9,8 @@ libextrae_jvmti_agent_la_CFLAGS  = $(JAVA_INCLUDES)\
  -I$(INCLUDE_DIR) \
  -I$(COMMON_INC) \
  -I$(WRAPPERS_DIR)/JAVA \
+ -I$(WRAPPERS_DIR)/API \
+ -I$(TRACER_DIR) \
  -I$(COMMON_DIR) \
  $(CFLAGS)
 libextrae_jvmti_agent_la_LIBADD  = $(TRACER_LIB)/libpttrace.la

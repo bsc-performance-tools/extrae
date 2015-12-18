@@ -38,6 +38,8 @@
 #include <jni.h>
 #include <jvmti.h>
 
+#include "threadid.h"
+#include "threadinfo.h"
 #include "java_probe.h"
 
 #define CHECK_JVMTI_ERROR(x,call) \
@@ -117,6 +119,18 @@ static void JNICALL Extraej_cb_ExceptionCatch (jvmtiEnv *jvmti_env,
 	Extrae_Java_Exception_end();
 }
 
+static void JNICALL Extraej_cb_ThreadStart (jvmtiEnv *jvmti_env,
+	JNIEnv* jni_env, jthread thread)
+{
+	jvmtiThreadInfo ti;
+	jvmtiError r;
+	UNREFERENCED_PARAMETER(jni_env);
+
+	r = (*jvmti_env)->GetThreadInfo(jvmti_env, thread, &ti);
+	CHECK_JVMTI_ERROR(r, AddCapabilities);
+	Extrae_set_thread_name (THREADID, ti.name);
+}
+
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved)
 {
     jint                rc;
@@ -157,6 +171,8 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved)
     callbacks.VMObjectAlloc           = &Extraej_cb_ObjectAlloc;
     callbacks.ObjectFree              = &Extreaj_cb_ObjectFree;
 #endif
+	callbacks.ThreadStart             = &Extraej_cb_ThreadStart;
+
     r = (*jvmti)->SetEventCallbacks(jvmti, &callbacks, sizeof(callbacks));
 	CHECK_JVMTI_ERROR(r, SetEventCallbacks);
 
@@ -184,6 +200,11 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved)
     CHECK_JVMTI_ERROR(r, SetEventNotificationMode);
     r = (*jvmti)->SetEventNotificationMode(jvmti, JVMTI_ENABLE, 
 	  JVMTI_EVENT_EXCEPTION_CATCH, NULL);
+    CHECK_JVMTI_ERROR(r, SetEventNotificationMode);
+
+	/* Thread start */
+	r = (*jvmti)->SetEventNotificationMode(jvmti, JVMTI_ENABLE,
+	  JVMTI_EVENT_THREAD_START, NULL);
     CHECK_JVMTI_ERROR(r, SetEventNotificationMode);
 
     /* Create the necessary raw monitor ?? really, necessary? */
