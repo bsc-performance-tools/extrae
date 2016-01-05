@@ -653,10 +653,12 @@ void Extrae_cudaMemcpy_Exit (void)
 	if (Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyHostToDevice ||
 	  Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyDeviceToDevice)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_EV, EVT_END, tag, 0);
+		  CUDAMEMCPY_GPU_EV, EVT_END, tag,
+		  Extrae_CUDA_saved_params[THREADID].cm.size);
 	else
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0,
-		  CUDAMEMCPY_GPU_EV, EVT_END, 0, 0);
+		  CUDAMEMCPY_GPU_EV, EVT_END, 0,
+		  Extrae_CUDA_saved_params[THREADID].cm.size);
 
 	for (i = 0; i < devices[devid].nstreams; i++)
 	{

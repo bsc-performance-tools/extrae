@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 05Jan2015 Fixed bug when generating communications between Memcpy commands
+               in CUDA applications
  * 18Dec2015 Fixed bug in Time Synchronization due to uninit Spawn time if MPI_Comm_spawn was not used
              Emit Java thread name in Java thread start
  * 15Dec2015 Fixed bug in Map_Paraver_Files at file_set.c. Field SkipAsMasterOfSubtree of PRVFileSet_t was not initialized, leading to undeterministic problems where this would randomly take garbage values ending in a later race condition in the parallel merge. 
