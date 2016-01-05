@@ -362,14 +362,28 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		fprintf (stdout, "mpi2prv: Searching synchronization points...");
 		fflush (stdout);
 	}
-	Search_Synchronization_Times (taskid, numtasks, fset, &StartingTimes, &SynchronizationTimes);
+	Search_Synchronization_Times (taskid, numtasks, fset, &StartingTimes,
+	  &SynchronizationTimes);
 	if (0 == taskid)
 		fprintf (stdout, " done\n");
+
+#if defined(DEBUG)
+	for (i = 0; i < nfiles; i++)
+	{
+		fprintf (stderr, "[DEBUG] SynchronizationTimes[%d] = %llu "
+		                 " files[%d].SpawnOffset = %llu\n",
+		  i, SynchronizationTimes[i], i, files[i].SpawnOffset);
+	}
+#endif
 
 	TimeSync_Initialize (num_appl, num_appl_tasks);
 	for (i = 0; i < nfiles; i++)
 		if (files[i].thread-1 == 0)
-			TimeSync_SetInitialTime (files[i].ptask-1, files[i].task-1, StartingTimes[i], SynchronizationTimes[i] - files[i].SpawnOffset, files[i].node);
+			TimeSync_SetInitialTime (files[i].ptask-1,
+			  files[i].task-1,
+			  StartingTimes[i],
+			  SynchronizationTimes[i] - files[i].SpawnOffset,
+			  files[i].node);
 
 	if (get_option_merge_SincronitzaTasks_byNode())
 	{
