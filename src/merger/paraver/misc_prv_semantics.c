@@ -216,7 +216,10 @@ static int Appl_Event (event_t * current_event,
 		Pop_State (STATE_ANY, ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType,
+	  EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	  CLOCK_FROM_SYSTEM_EV, Get_EvTime (current_event));
 
 	return 0;
 }

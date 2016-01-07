@@ -156,6 +156,9 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
 		fprintf (fd, "%d      %s\n", EVT_BEGIN, EVT_BEGIN_LBL);
 		LET_SPACES (fd);
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, CLOCK_FROM_SYSTEM_EV,
+		  CLOCK_FROM_SYSTEM_LBL);
 	}
 	if (inuse[FLUSH_INDEX])
 	{

@@ -1,7 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
- * 05Jan2015 Fixed bug when generating communications between Memcpy commands
+ * 07Jan2016 Emit raw system time at APPL_EV events for synchronization purposes
+               with other tools
+ * 05Jan2016 Fixed bug when generating communications between Memcpy commands
                in CUDA applications
  * 18Dec2015 Fixed bug in Time Synchronization due to uninit Spawn time if MPI_Comm_spawn was not used
              Emit Java thread name in Java thread start

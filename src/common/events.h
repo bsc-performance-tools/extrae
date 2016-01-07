@@ -137,6 +137,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define DYNAMIC_MEM_REQUESTED_SIZE_EV      DYNAMIC_MEM_EV+1  /* Used in merger only */
 #define DYNAMIC_MEM_POINTER_IN_EV          DYNAMIC_MEM_EV+2  /* Used in merger only, free input, realloc in */
 #define DYNAMIC_MEM_POINTER_OUT_EV         DYNAMIC_MEM_EV+3  /* Used in merger only, malloc output, calloc output, realloc out */
+#define CLOCK_FROM_SYSTEM_EV     40000050
 
 #define ADDRESSES_FOR_BINARY_EV  41000000
 
