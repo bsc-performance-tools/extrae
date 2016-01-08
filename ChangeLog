@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 08Jan2016 Improved boost search in configure
  * 07Jan2016 Emit raw system time at APPL_EV events for synchronization purposes
                with other tools
  * 05Jan2016 Fixed bug when generating communications between Memcpy commands
