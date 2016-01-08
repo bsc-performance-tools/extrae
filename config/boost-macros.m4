@@ -50,7 +50,8 @@ AC_DEFUN([AX_PROG_BOOST],
 			BOOST_enabled="yes"
 			BOOST_default="yes"
 			BOOST_HOME=""
-		AC_SUBST(BOOST_HOME)
+			AC_SUBST(BOOST_HOME)
+			AC_MSG_RESULT([works])
 		else
 			AC_MSG_ERROR([Cannot find BOOST. Check for --with-boost option])
 		fi
