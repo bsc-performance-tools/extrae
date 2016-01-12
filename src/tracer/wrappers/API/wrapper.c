@@ -1514,7 +1514,7 @@ int Backend_preInitialize (int me, int world_size, char *config_file, int forked
 #endif
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_preInitialize (rank=%d, size=%d, config_file=\n", THREADID, me, world_size, config_file);
+	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_preInitialize (rank=%d, size=%d, config_file=%s)\n", THREADID, me, world_size, config_file);
 #endif
 
 	if (getenv("EXTRAE_DYNINST_RUN") != NULL)
