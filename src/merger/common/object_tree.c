@@ -114,6 +114,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 			task_info->num_binary_objects = 0;
 			task_info->binary_objects = NULL;
 			task_info->thread_dependencies = ThreadDependency_create();
+			task_info->AddressSpace = AddressSpace_create();
 
 			for (thread = 0; thread < nthreads[ptask][task]; thread++)
 			{
@@ -134,6 +135,7 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 				thread_info->nStates = 0;
 				thread_info->First_Event = TRUE;
 				thread_info->HWCChange_count = 0;
+				thread_info->AddressSpace_hascaller = FALSE;
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
 				thread_info->HWCSets_types = NULL;
@@ -247,6 +249,27 @@ binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, U
 			return &(task_info->binary_objects[u]);
 
 	return NULL;
+}
+
+int ObjectTable_GetSymbolFromAddress (unsigned ptask, unsigned task,
+	UINT64 address, char **symbol)
+{
+	unsigned a;
+	task_t *task_info = GET_TASK_INFO(ptask, task);
+
+	/* For now, emit only data symbols for binary object 0 */
+	for (a = 0; a < task_info->binary_objects[0].nDataSymbols; a++)
+	{
+		data_symbol_t *d = &task_info->binary_objects[0].dataSymbols[a];
+		uint64_t addr_begin = (uint64_t) d->address;
+		uint64_t addr_end = addr_begin + d->size;
+		if (addr_begin <= address && address < addr_end)
+		{
+			*symbol = d->name;
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 #if defined(BFD_MANAGER_GENERATE_ADDRESSES)

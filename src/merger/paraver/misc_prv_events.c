@@ -159,6 +159,7 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, CLOCK_FROM_SYSTEM_EV,
 		  CLOCK_FROM_SYSTEM_LBL);
+		LET_SPACES (fd);
 	}
 	if (inuse[FLUSH_INDEX])
 	{
@@ -295,6 +296,8 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_REFERENCE_COST_EV,
 		  SAMPLING_ADDRESS_REFERENCE_COST_LBL);
 		LET_SPACES (fd);
+
+		Address2Info_Write_MemReferenceCaller_Labels (fd, get_option_merge_UniqueCallerID());
 	}
 
 	/* These events are always emitted */

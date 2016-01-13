@@ -301,7 +301,8 @@ static int MPI_Caller_Event (event_t * current_event,
                              unsigned int thread,
                              FileSet_t *fset)
 {
-	int i, deepness;	
+	thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
+	unsigned i, deepness;	
 	UINT64 EvValue = Get_EvValue(current_event);
 	UNREFERENCED_PARAMETER(fset);
 
@@ -335,6 +336,21 @@ static int MPI_Caller_Event (event_t * current_event,
 
 	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_EV+deepness, EvValue);
 	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_LINE_EV+deepness, EvValue);
+
+	if (thread_info->AddressSpace_hascaller)
+	{
+		if (thread_info->AddressSpace_callertype > CALLER_LINE_EV+deepness)
+		{
+			thread_info->AddressSpace_calleraddress = EvValue;
+			thread_info->AddressSpace_callertype    = CALLER_LINE_EV+deepness;
+		}
+	}
+	else
+	{
+		thread_info->AddressSpace_calleraddress = EvValue;
+		thread_info->AddressSpace_callertype    = CALLER_LINE_EV+deepness;
+		thread_info->AddressSpace_hascaller     = TRUE;
+	}
 
 	return 0;
 }
@@ -519,10 +535,12 @@ static int Sampling_Address_Event (event_t * current,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
+	uint64_t CallerAddress;
 	unsigned i;
 	int EvType;
 	UINT64 EvValue;
 	UINT64 EvParam;
+	task_t *task_info = GET_TASK_INFO(ptask, task);
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType = Get_EvEvent (current);
@@ -558,6 +576,13 @@ static int Sampling_Address_Event (event_t * current,
 
 	if (EvParam != 0)
 		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvParam);
+
+	if (AddressSpace_search (task_info->AddressSpace, EvParam, &CallerAddress, NULL))
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV, CallerAddress);
+	else
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+		  SAMPLING_ADDRESS_STATIC_OBJECT_EV, EvParam);
 
 	return 0;
 }
@@ -1427,6 +1452,8 @@ static int DynamicMemory_Event (event_t * event,
 	unsigned long long time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
+	task_t *task_info = GET_TASK_INFO(ptask, task);
+	thread_t *thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UNREFERENCED_PARAMETER(fset);
 
 	unsigned EvType = Get_EvEvent (event);
@@ -1446,42 +1473,93 @@ static int DynamicMemory_Event (event_t * event,
 	{
 		/* Malloc: in size, out pointer */
 		if (isBegin)
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
+
+			thread_info->AddressSpace_size = EvParam;
+		}
 		else
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
+
+			AddressSpace_add (task_info->AddressSpace, EvParam,
+			  EvParam+thread_info->AddressSpace_size,
+			  thread_info->AddressSpace_calleraddress,
+			  thread_info->AddressSpace_callertype);
+
+			thread_info->AddressSpace_hascaller = FALSE;
+		}
 	}
 	else if (EvType == FREE_EV)
 	{
 		/* Free: in pointer */
 		if (isBegin)
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_IN_EV, EvParam);
+
+			AddressSpace_remove (task_info->AddressSpace, EvParam);
+
+			thread_info->AddressSpace_hascaller = FALSE;
+		}
 	}
 	else if (EvType == REALLOC_EV)
 	{
 		/* Realloc: in size, in pointer (in EVT_BEGIN+1), out ptr*/
 		if (EvValue == EVT_BEGIN)
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_IN_EV, EvParam);
+
+			thread_info->AddressSpace_size = EvParam;
+		}
 		else if (EvValue == EVT_BEGIN+1)
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
+
+			AddressSpace_remove (task_info->AddressSpace, EvParam);
+
+			thread_info->AddressSpace_hascaller = FALSE;
+		}
 		else
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
+
+			AddressSpace_add (task_info->AddressSpace, EvParam,
+			  EvParam+thread_info->AddressSpace_size,
+			  thread_info->AddressSpace_calleraddress,
+			  thread_info->AddressSpace_callertype);
+
+			thread_info->AddressSpace_hascaller = FALSE;
+		}
 	
 	}
 	else if (EvType == CALLOC_EV)
 	{
 		/* Calloc: in size, out pointer */
 		if (isBegin)
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
+
+			thread_info->AddressSpace_size = EvParam;
+		}
 		else
+		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
+
+			AddressSpace_add (task_info->AddressSpace, EvParam,
+			  EvParam+thread_info->AddressSpace_size,
+			  thread_info->AddressSpace_calleraddress,
+			  thread_info->AddressSpace_callertype);
+
+			thread_info->AddressSpace_hascaller = FALSE;
+		}
 	}
 	return 0;
 }

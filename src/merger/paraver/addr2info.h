@@ -60,6 +60,8 @@ void Address2Info_Initialize (char * binary);
 int Address2Info_Initialized (void);
 UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 	int event_type, int uniqueID);
+UINT64 Address2Info_Translate_MemReference (unsigned ptask, unsigned task,
+	UINT64 address, int event_type);
 void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
@@ -69,6 +71,7 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 	codelocation_label_t *labels);
 void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid);
+void Address2Info_Write_MemReferenceCaller_Labels (FILE * pcf_fd);
 void Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
   char * filename, int line);
 void Address2Info_Sort (int unique_ids);
@@ -91,7 +94,9 @@ enum
 	ADDR2OTHERS_FUNCTION,
 	ADDR2OTHERS_LINE,
 	ADDR2_FUNCTION_UNIQUE,
-	ADDR2_LINE_UNIQUE
+	ADDR2_LINE_UNIQUE,
+	MEM_REFERENCE_DYNAMIC,
+	MEM_REFERENCE_STATIC,
 };
 
 enum
@@ -109,16 +114,31 @@ enum
 struct address_info
 {
 	UINT64 address;
+	int line;
 	int function_id;
 	char * file_name;
 	char * module;
-	int line;
 };
 
 struct address_table
 {
 	struct address_info * address;
 	int num_addresses;
+};
+
+struct address_object_info_st
+{
+	int is_static;
+	int line;
+	const char * file_name;
+	const char * module;
+	const char * name;
+};
+
+struct address_object_table_st
+{
+	struct address_object_info_st * objects;
+	int num_objects;
 };
 
 struct function_table

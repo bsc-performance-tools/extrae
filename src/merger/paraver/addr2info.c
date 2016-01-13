@@ -75,13 +75,19 @@ int *__errno_location(void)
 static void AddressTable_Initialize (void);
 static int  AddressTable_Insert (UINT64 address, int event_type,
 	char *module, char *funcname, char *filename, int line);
+static int AddressTable_Insert_MemReference (int addr_type,
+	const char *module, const char *staticname, const char *filename, int line);
 #if defined(HAVE_BFD)
 static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	char **module, char ** funcname, char ** filename, int * line);
+static void Translate_Address_Data (UINT64 address, unsigned ptask, unsigned task,
+	char **symbol);
 #endif
 
-struct address_table  * AddressTable  [COUNT_ADDRESS_TYPES]; /* Addresses translation table     */
-struct function_table * FunctionTable [COUNT_ADDRESS_TYPES]; /* Function name translation table */
+static struct address_table  * AddressTable  [COUNT_ADDRESS_TYPES]; /* Addresses translation table     */
+static struct function_table * FunctionTable [COUNT_ADDRESS_TYPES]; /* Function name translation table */
+
+static struct address_object_table_st AddressObjectInfo;
 
 /* Addresses will be translated into function, file and line if set to TRUE */
 static int Tables_Initialized = FALSE;
@@ -211,6 +217,11 @@ void Address2Info_Initialize (char * binary)
 
 	if (binary != NULL)
 		BFDmanager_loadDefaultBinary (binary);
+
+	AddressTable_Insert_MemReference (MEM_REFERENCE_DYNAMIC, "", "",
+	  ADDR_UNRESOLVED, 0);
+	AddressTable_Insert_MemReference (MEM_REFERENCE_STATIC, "", ADDR_UNRESOLVED,
+	  "", 0);
 #else
 	UNREFERENCED_PARAMETER(binary);
 #endif
@@ -253,6 +264,10 @@ static void AddressTable_Initialize (void)
 		FunctionTable[type]->address_id = NULL;
 		FunctionTable[type]->num_functions = 0;
 	}
+
+	AddressObjectInfo.objects = NULL;
+	AddressObjectInfo.num_objects = 0;
+
 	Tables_Initialized = TRUE;
 }
 
@@ -272,6 +287,60 @@ void Address2Info_AddSymbol (UINT64 address, int addr_type, char * funcname,
 
 	if (!found)
 		AddressTable_Insert (address, addr_type, NULL, strdup(funcname), strdup(filename), line);
+}
+
+/** Address2Info_Translate_MemReference
+ *
+ * 
+ * Si l'adreca demanada no estava ja a la taula d'adreces, la tradueix pel nom
+ * de la funcio i el numero de linea de codi corresponents, li assigna un nou
+ * identificador i afegeix una nova entrada a la taula
+ * 
+ * @param address
+ * @param query
+ *
+ * @return
+ */
+UINT64 Address2Info_Translate_MemReference (unsigned ptask, unsigned task, UINT64 address,
+	int query)
+{
+#if !defined(HAVE_BFD)
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(address);
+	UNREFERENCED_PARAMETER(query);
+
+	return address;
+#else
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": Address2Info_TranslateMemreference (%u, %u, %lx, %d);\n",
+	  ptask, task, address, query);
+#endif
+
+	if (query == MEM_REFERENCE_DYNAMIC)
+	{
+		int line;
+		char * sname;
+		char * filename;
+		char * module;
+
+		Translate_Address (address, ptask, task, &module, &sname, &filename, &line);
+
+		return 1+AddressTable_Insert_MemReference (query, module, "", filename,
+		  line);
+	}
+	else if (query == MEM_REFERENCE_STATIC)
+	{
+		char *varname;
+		Translate_Address_Data (address, ptask, task, &varname);
+
+		return 1+AddressTable_Insert_MemReference (query, "", varname, "", 0);
+	}
+	else
+		return address;
+
+#endif
 }
 
 /** Address2Info_Translate
@@ -425,13 +494,12 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 		char * filename;
 		char * module;
 
-		/* Translate address into function, file and number line */
 		Translate_Address (caller_address, ptask, task, &module, &funcname, &filename, &line);
 
 		/* Samples can be taken anywhere in the code. It can happen that two
 		   samples at the different addresses refer to the same combination of
 		   function/file/line... We search again if this combination has been
-		   already translated */
+		   already translated. */
 		if (ADDR2SAMPLE_FUNCTION == query || ADDR2SAMPLE_LINE == query)
 			for (i = 0; i < AddressTable[addr_type]->num_addresses; i++)
 				if (AddressTable[addr_type]->address[i].line == line &&
@@ -449,13 +517,15 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 			line_id = UNRESOLVED_ID;
 			already_translated = TRUE;
 		}
-		else if (!strcmp (ADDR_UNRESOLVED, funcname) || !strcmp (ADDR_UNRESOLVED, filename))
+		else if (!strcmp (ADDR_UNRESOLVED, funcname) ||
+		         !strcmp (ADDR_UNRESOLVED, filename))
 		{
 			function_id = UNRESOLVED_ID;
 			line_id = UNRESOLVED_ID;
 			already_translated = TRUE;
 		}
-		else if (!strcmp(ADDR_NOT_FOUND, funcname) || !strcmp (ADDR_NOT_FOUND, filename))
+		else if (!strcmp(ADDR_NOT_FOUND, funcname) ||
+		         !strcmp (ADDR_NOT_FOUND, filename))
 		{
 			function_id = NOT_FOUND_ID;
 			line_id = NOT_FOUND_ID;
@@ -465,7 +535,8 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 		/* Again, if not found, insert into the translation table */
 		if (!already_translated)
 		{
-			line_id = AddressTable_Insert (address, addr_type, module, funcname, filename, line);
+			line_id = AddressTable_Insert (address, addr_type, module, funcname,
+			  filename, line);
 			function_id = AddressTable[addr_type]->address[line_id].function_id;
 		}
 	}
@@ -490,12 +561,81 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 		case ADDR2SAMPLE_LINE:
 		case ADDR2OMP_LINE:
 		case ADDR2MPI_LINE:
+		case MEM_REFERENCE_DYNAMIC:
+		case MEM_REFERENCE_STATIC:
 			result = line_id + 1;
 			break;
 	}
 
 	return result;
 #endif /* HAVE_BFD */
+}
+
+/** AddressTable_Insert_MemReference
+ *
+ * @param address
+ * @param funcname
+ * @param filename
+ * @param line
+ * 
+ * @return 
+ */
+static int AddressTable_Insert_MemReference (int addr_type,
+	const char *module, const char *staticname, const char *filename, int line) 
+{
+	int i; 
+	int found;
+
+#if defined(DEBUG) 
+	fprintf (stderr, PACKAGE_NAME": AddressTable_Insert_MemReference (%d, %s, %s, %s, %d)\n",
+	  addr_type, module, staticname, filename, line);
+#endif
+
+	int nObjects = AddressObjectInfo.num_objects;
+
+	/* Search if it exists */
+	for (i = 0; i < nObjects; i++)
+	{
+		struct address_object_info_st * object = &(AddressObjectInfo.objects[i]);
+		if (addr_type == MEM_REFERENCE_STATIC && object->is_static)
+			found = !strcmp (staticname, object->name);
+		else if (addr_type == MEM_REFERENCE_DYNAMIC && !object->is_static)
+			found = !strcmp (module, object->module) &&
+			        !strcmp (filename, object->file_name);
+		if (found)
+		{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": AddressTable_Insert_MemReference (%d, %s, %s, %s, %d) -> %d\n",
+	  addr_type, module, staticname, filename, line, i);
+#endif
+			return i;
+		}
+	}
+
+	/* If we're here, we haven't find it! */
+	AddressObjectInfo.objects = (struct address_object_info_st*) realloc (
+	  AddressObjectInfo.objects,
+	  (AddressObjectInfo.num_objects+1)*sizeof(struct address_object_info_st));
+	if (NULL == AddressObjectInfo.objects)
+	{
+		fprintf (stderr, "mpi2prv: Error! Cannot reallocate memory for memory object identifiers\n");
+		exit (-1);
+	}
+
+	i = AddressObjectInfo.num_objects;
+	AddressObjectInfo.objects[i].is_static = addr_type == MEM_REFERENCE_STATIC;
+	AddressObjectInfo.objects[i].line = line;
+	AddressObjectInfo.objects[i].file_name = filename;
+	AddressObjectInfo.objects[i].name = staticname;
+	AddressObjectInfo.objects[i].module = module;
+	AddressObjectInfo.num_objects++;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": AddressTable_Insert_MemReference (%d, %s, %s, %s, %d) -> %d\n",
+	  addr_type, module, staticname, filename, line, i);
+#endif
+
+	return i;
 }
 
 /** AddressTable_Insert
@@ -581,6 +721,19 @@ static int AddressTable_Insert (UINT64 address, int addr_type, char *module,
 }
 
 #if defined(HAVE_BFD)
+static void Translate_Address_Data (UINT64 address, unsigned ptask, unsigned task,
+	char **symbol)
+{
+	*symbol = ADDR_UNRESOLVED;
+
+	if (!Translate_Addresses) 
+		return;
+
+	ObjectTable_GetSymbolFromAddress (ptask, task, address, symbol);
+}
+#endif /* HAVE_BFD */
+
+#if defined(HAVE_BFD)
 static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	char **module, char ** funcname, char ** filename, int * line)
 {
@@ -598,6 +751,7 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 		return;
 
 	obj = ObjectTable_GetBinaryObjectAt (ptask, task, address);
+
 # if defined(DEBUG)
 	if (obj)
 	{
@@ -607,6 +761,7 @@ static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	else
 		printf ("obj = NULL for address %llx\n", address);
 # endif
+
 	if (obj)
 	{
 		found = BFDmanager_translateAddress (obj->bfdImage, obj->bfdSymbols,
@@ -809,6 +964,53 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 			}
 			LET_SPACES(pcf_fd);
 		}
+	}
+}
+
+void Address2Info_Write_MemReferenceCaller_Labels (FILE * pcf_fd)
+{
+	int i;
+	char short_label[1+SHORT_STRING_PREFIX+SHORT_STRING_SUFFIX+strlen(SHORT_STRING_INFIX)];
+
+	if (Address2Info_Initialized())
+	{
+		fprintf(pcf_fd, "%s\n", TYPE_LABEL);
+		fprintf(pcf_fd, "0    %d    %s\n", SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV,
+		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_LBL);
+
+		if (AddressObjectInfo.num_objects > 0)
+			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
+
+		for (i = 0; i < AddressObjectInfo.num_objects; i++)
+		{
+			struct address_object_info_st *obj = &(AddressObjectInfo.objects[i]);
+
+			if (obj->is_static)
+			{
+				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, obj->name);
+				if (!shortened)
+					fprintf (pcf_fd, "%d %s\n", i+1, obj->name);
+				else
+					fprintf (pcf_fd, "%d %s [%s]\n", i+1, short_label, obj->name);
+			}
+			else
+			{
+				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
+				  sizeof(short_label), short_label, obj->file_name);
+				if (!shortened)
+					fprintf (pcf_fd, "%d %d (%s)\n", i+1, obj->line,
+					  obj->file_name);
+				else
+					fprintf (pcf_fd, "%d %d (%s) [%d (%s)]\n", i+1, obj->line,
+					  short_label, obj->line, obj->file_name);
+			}
+		}
+
+		if (AddressObjectInfo.num_objects > 0)
+			LET_SPACES(pcf_fd);
 	}
 }
 

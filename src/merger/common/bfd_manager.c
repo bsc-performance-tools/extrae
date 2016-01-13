@@ -319,6 +319,12 @@ int BFDmanager_translateAddress (bfd *bfdImage, asymbol **bfdSymbols,
 		}
 	}
 
+#if defined(DEBUG)
+	printf ("DEBUG: BFDmanager_translateAddress found? %d\n", syminfo.found);
+	if (syminfo.found)
+		printf ("DEBUG: BFDmanager_translateAddress file = %s function = %s line = %d\n", *file, *function, *line);
+#endif
+
 	return syminfo.found;
 }
 

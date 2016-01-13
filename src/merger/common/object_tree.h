@@ -42,6 +42,7 @@
 #include "communication_queues.h"
 #include "stack.h"
 #include "thread_dependencies.h"
+#include "address_space.h"
 
 #define MAX_STATES 128
 
@@ -96,6 +97,12 @@ typedef struct thread_st
 
 	unsigned virtual_thread;         /* if so, which virtual thread is? */
 	unsigned active_task_thread;     /* if so, which active task has been resumed? */
+
+	/* Address space preparation */
+	uint64_t AddressSpace_size;
+	uint64_t AddressSpace_calleraddress;
+	uint32_t AddressSpace_callertype;
+	uint8_t  AddressSpace_hascaller;
 } thread_t;
 
 typedef struct active_task_thread_stack_type_st
@@ -144,6 +151,9 @@ typedef struct task_st
 	/* Arrangement of thread dependencies within the task level */
 	struct ThreadDependencies_st * thread_dependencies;
 
+	/* Address space variables & preparation info*/
+	struct AddressSpace_st *AddressSpace;
+
 	unsigned num_virtual_threads;
 	unsigned num_active_task_threads;
 	active_task_thread_t *active_task_threads;
@@ -169,7 +179,10 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
 	unsigned long long start, unsigned long long end, unsigned long long offset,
 	char *binary);
-binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, UINT64 address);
+binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task,
+	UINT64 address);
+int ObjectTable_GetSymbolFromAddress (unsigned ptask, unsigned task,
+	UINT64 address, char **symbol);
 char * ObjectTable_GetBinaryObjectName (unsigned ptask, unsigned task);
 
 # if defined(BFD_MANAGER_GENERATE_ADDRESSES)

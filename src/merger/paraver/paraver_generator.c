@@ -646,6 +646,12 @@ static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
 	else if (eventtype == CUDAFUNC_LINE_EV)
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
+	else if (eventtype == SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV)
+		return Address2Info_Translate_MemReference (ptask, task,
+		  eventvalue, MEM_REFERENCE_DYNAMIC);
+	else if (eventtype == SAMPLING_ADDRESS_STATIC_OBJECT_EV)
+		return Address2Info_Translate_MemReference (ptask, task,
+		  eventvalue, MEM_REFERENCE_STATIC);
 	else
 	{
 		if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -719,6 +725,16 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				  cur->event == CUDAFUNC_EV || cur->event == CUDAFUNC_LINE_EV)
 				{
 					values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+				}
+
+				if (cur->event == SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV)
+				{
+					values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+				}
+				else if (cur->event == SAMPLING_ADDRESS_STATIC_OBJECT_EV)
+				{
+					values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+					events[i]  = SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV;
 				}
 
 				if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)

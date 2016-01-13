@@ -146,6 +146,10 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define CALLER_LVL_LBL      "Caller at level" 
 #define CALLER_LINE_LVL_LBL "Caller line at level" 
 
+
+/* Caller of the referenced address */ 
+#define SAMPLING_ADDRESS_ALLOCATED_OBJECT_LBL "Memory object referenced by sampled address"
+
 #define MPI_GRADIENT   1
 
 /******************************************************************************

@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Jan2016 Memory reference samples point to the variable (either static or
+               dynamically allocated)
  * 08Jan2016 Improved boost search in configure
  * 07Jan2016 Emit raw system time at APPL_EV events for synchronization purposes
                with other tools
