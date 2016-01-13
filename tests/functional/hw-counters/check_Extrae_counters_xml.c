@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "extrae_user_events.h"
 
-int main (int argc, char *argv[])
+int main (void)
 {
 	Extrae_init();
 	Extrae_eventandcounters (1, 1);
