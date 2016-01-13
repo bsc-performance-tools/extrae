@@ -63,7 +63,7 @@ struct ThreadDependencies_st * ThreadDependency_create (void)
 }
 
 void ThreadDependency_add (struct ThreadDependencies_st *td,
-	void *dependency_data)
+	const void *dependency_data)
 {
 	unsigned u;
 	if (td->nDependencies == td->aDependencies)

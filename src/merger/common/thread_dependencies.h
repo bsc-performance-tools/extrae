@@ -27,7 +27,8 @@
 struct ThreadDependencies_st;
 
 struct ThreadDependencies_st * ThreadDependency_create (void);
-void ThreadDependency_add (struct ThreadDependencies_st *td, void *dependency_event);
+void ThreadDependency_add (struct ThreadDependencies_st *td,
+	const void *dependency_data);
 
 typedef int (*ThreadDepedendencyProcessor_ifMatchSetPredecessor)(
 	const void *dependency_event, void *userdata, void **predecessordata);
