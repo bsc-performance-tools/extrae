@@ -1463,9 +1463,11 @@ static int DynamicMemory_Event (event_t * event,
 
 	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
 	{
+		// Do not change the state in MALLOC related calls
+		// Switch_State (STATE_OTHERS, EvValue == EVT_BEGIN, ptask, task, thread);
+		// trace_paraver_state (cpu, ptask, task, thread, time);
+
 		unsigned PRVValue = isBegin?MISC_event_GetValueForDynamicMemory(EvType):0;
-		Switch_State (STATE_OTHERS, EvValue == EVT_BEGIN, ptask, task, thread);
-		trace_paraver_state (cpu, ptask, task, thread, time);
 		trace_paraver_event (cpu, ptask, task, thread, time, DYNAMIC_MEM_EV, PRVValue);
 	}
 
