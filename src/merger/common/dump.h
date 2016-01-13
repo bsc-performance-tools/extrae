@@ -30,6 +30,6 @@
 #ifndef DUMP_H_INCLUDED
 #define DUMP_H_INCLUDED
 
-void make_dump (FileSet_t *fset);
+void make_dump (const FileSet_t *fset);
 
 #endif /* DUMP_H_INCLUDED */

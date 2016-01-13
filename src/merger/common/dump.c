@@ -48,7 +48,7 @@ static char UNUSED rcsid[] = "$Id$";
 static int num_counters = 0;
 #endif
 
-static void show_current (event_t * c, UINT64 max_time)
+static void show_current (const event_t * c, UINT64 max_time)
 {
 	int dump_time = get_option_dump_Time();
 
@@ -197,7 +197,7 @@ static void show_current (event_t * c, UINT64 max_time)
 #endif
 }
 
-void make_dump (FileSet_t *fset)
+void make_dump (const FileSet_t *fset)
 {
 	UINT64 max_time;
 	UINT64 last_time;

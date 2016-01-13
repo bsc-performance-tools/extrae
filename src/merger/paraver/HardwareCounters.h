@@ -86,8 +86,8 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	unsigned long long time, event_t * Event,
 	int *outtype, unsigned long long *outvalue,
 	int absolute);
-void HardwareCounters_Show (event_t * Event, int ncounters);
-void HardwareCounters_Get (event_t *Event, unsigned long long *buffer);
+void HardwareCounters_Show (const event_t * Event, int ncounters);
+void HardwareCounters_Get (const event_t *Event, unsigned long long *buffer);
 void HardwareCounters_NewSetDefinition (int ptask, int task, int thread, int newSet, long long *HWCIds);
 int * HardwareCounters_GetSetIds(int ptask, int task, int thread, int set_id);
 int HardwareCounters_GetCurrentSet(int ptask, int task, int thread);

@@ -207,7 +207,8 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	return TRUE;
 }
 
-static int HardwareCounters_Compare (int *HWC1, int *used1, int *HWC2, int *used2)
+static int HardwareCounters_Compare (const int *HWC1, const int *used1,
+	const int *HWC2, const int *used2)
 {
 	int i;
 
@@ -218,7 +219,7 @@ static int HardwareCounters_Compare (int *HWC1, int *used1, int *HWC2, int *used
 	return TRUE;
 }
 
-static int HardwareCounters_Exist (int *HWC, int *used)
+static int HardwareCounters_Exist (const int *HWC, const int *used)
 {
 	CntQueue *queue, *ptmp;
 
@@ -230,7 +231,7 @@ static int HardwareCounters_Exist (int *HWC, int *used)
 	return FALSE;
 }
 
-void HardwareCounters_Show (event_t * Event, int ncounters)
+void HardwareCounters_Show (const event_t * Event, int ncounters)
 {
   int cnt;
   fprintf (stdout, "COUNTERS: ");
@@ -239,7 +240,7 @@ void HardwareCounters_Show (event_t * Event, int ncounters)
   fprintf (stdout, "\n");
 }
 
-void HardwareCounters_Get (event_t *Event, unsigned long long *buffer)
+void HardwareCounters_Get (const event_t *Event, unsigned long long *buffer)
 {
 	int cnt;
 	for (cnt = 0; cnt < MAX_HWC; cnt++)
