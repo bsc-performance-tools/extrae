@@ -157,10 +157,10 @@ void Extrae_set_options_Wrapper (int options)
 	Trace_HWC_Enabled = options & EXTRAE_HWC_OPTION;
 	tracejant_mpi     = options & EXTRAE_MPI_OPTION;   
 	tracejant_omp     = options & EXTRAE_OMP_OPTION;   
-	tracejant_pthread = options & EXTRAE_PTHREAD_OPTION;
+	Extrae_set_pthread_tracing (options & EXTRAE_PTHREAD_OPTION);
 	tracejant_hwc_mpi = options & EXTRAE_MPI_HWC_OPTION;
 	tracejant_hwc_omp = options & EXTRAE_OMP_HWC_OPTION;   
-	tracejant_hwc_pthread = options & EXTRAE_PTHREAD_HWC_OPTION;
+	Extrae_set_pthread_hwc_tracing (options & EXTRAE_PTHREAD_HWC_OPTION);
 	tracejant_hwc_uf  = options & EXTRAE_UF_HWC_OPTION;
 	setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
 }

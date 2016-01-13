@@ -273,7 +273,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_create_real at %p\n", pthread_create_real);
 #endif
 
-	if (pthread_create_real != NULL && EXTRAE_INITIALIZED())
+	if (pthread_create_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_tracing())
 	{
 		/* This is a bit tricky.
 		   Some OSes (like FreeBSD) delegates the pthread library initialization
@@ -329,7 +329,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 		/* Stop protecting the region, more pthread creations can enter */
 		pthread_mutex_unlock_real (&extrae_pthread_create_mutex);
 	}
-	else if (pthread_create_real != NULL && !EXTRAE_INITIALIZED())
+	else if (pthread_create_real != NULL)
 	{
 		res = pthread_create_real (p1, p2, p3, p4);
 	}
@@ -354,7 +354,7 @@ int pthread_join (pthread_t p1, void **p2)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_join_real at %p\n", pthread_join_real);
 #endif
 
-	if (pthread_join_real != NULL && EXTRAE_INITIALIZED())
+	if (pthread_join_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_tracing())
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_pthread_Join_Entry ();
@@ -370,7 +370,7 @@ int pthread_join (pthread_t p1, void **p2)
 			Backend_Leave_Instrumentation ();
 		}
 	}
-	else if (pthread_join_real != NULL && !EXTRAE_INITIALIZED())
+	else if (pthread_join_real != NULL)
 	{
 		res = pthread_join_real (p1, p2);
 	}
@@ -392,7 +392,7 @@ void pthread_exit (void *p1)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_exit_real at %p\n", pthread_exit_real);
 #endif
 
-	if (pthread_exit_real != NULL && EXTRAE_INITIALIZED())
+	if (pthread_exit_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_tracing())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -406,7 +406,7 @@ void pthread_exit (void *p1)
 
 		pthread_exit_real (p1);
 	}
-	else if (pthread_exit_real != NULL && !EXTRAE_INITIALIZED())
+	else if (pthread_exit_real != NULL)
 	{
 		pthread_exit_real (p1);
 	}
@@ -429,7 +429,7 @@ int pthread_detach (pthread_t p1)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_detach_real at %p\n", pthread_detach_real);
 #endif
 
-	if (pthread_detach_real != NULL && EXTRAE_INITIALIZED())
+	if (pthread_detach_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_tracing())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -440,7 +440,7 @@ int pthread_detach (pthread_t p1)
 			Backend_Leave_Instrumentation ();
 		}
 	}
-	else if (pthread_detach_real != NULL && !EXTRAE_INITIALIZED())
+	else if (pthread_detach_real != NULL)
 	{
 		res = pthread_detach_real (p1);
 	}
@@ -465,7 +465,8 @@ int pthread_mutex_lock (pthread_mutex_t *m)
 #endif
 
 	/* Caution! pthread_exit() seems to call pthread_mutex_lock */
-	if (pthread_mutex_lock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_lock_real != NULL && EXTRAE_INITIALIZED()
+	  && Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -500,7 +501,8 @@ int pthread_mutex_trylock (pthread_mutex_t *m)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_trylock_real at %p\n", pthread_mutex_trylock_real);
 #endif
 
-	if (pthread_mutex_trylock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_trylock_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -536,7 +538,8 @@ int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *t)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_mutex_timedlock_real at %p\n", pthread_mutex_timedlock_real);
 #endif
 
-	if (pthread_mutex_timedlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_timedlock_real != NULL && EXTRAE_INITIALIZED() && 
+	 Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -573,7 +576,8 @@ int pthread_mutex_unlock (pthread_mutex_t *m)
 #endif
 
 	/* Caution! pthread_exit() seems to call pthread_mutex_lock */
-	if (pthread_mutex_unlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_mutex_unlock_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -611,7 +615,8 @@ int pthread_cond_signal (pthread_cond_t *c)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_signal_real at %p\n", pthread_cond_signal_real);
 #endif
 
-	if (pthread_cond_signal_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_signal_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -647,7 +652,8 @@ int pthread_cond_broadcast (pthread_cond_t *c)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_broadcast_real at %p\n", pthread_cond_broadcast_real);
 #endif
 
-	if (pthread_cond_broadcast_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_broadcast_real != NULL && EXTRAE_INITIALIZED() &&
+	   Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -682,7 +688,8 @@ int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_wait_real at %p\n", pthread_cond_wait_real);
 #endif
 
-	if (pthread_cond_wait_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_wait_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -717,7 +724,8 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_cond_wait_real at %p\n", pthread_cond_wait_real);
 #endif
 
-	if (pthread_cond_timedwait_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_cond_timedwait_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -754,7 +762,8 @@ int pthread_rwlock_rdlock (pthread_rwlock_t *l)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_rdlock_real at %p\n", pthread_rwlock_rdlock_real);
 #endif
 
-	if (pthread_rwlock_rdlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_rdlock_real != NULL && EXTRAE_INITIALIZED() &&
+	 Extrae_get_pthread_tracing() &&  Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -790,7 +799,8 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *l)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_tryrdlock_real at %p\n", pthread_rwlock_tryrdlock_real);
 #endif
 
-	if (pthread_rwlock_tryrdlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_tryrdlock_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -826,7 +836,8 @@ int pthread_rwlock_timedrdlock(pthread_rwlock_t *l, const struct timespec *t)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_timedrdlock_real at %p\n", pthread_rwlock_timedrdlock_real);
 #endif
 
-	if (pthread_rwlock_timedrdlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_timedrdlock_real != NULL && EXTRAE_INITIALIZED() &&
+	 Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -862,7 +873,8 @@ int pthread_rwlock_wrlock(pthread_rwlock_t *l)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_wrlock_real at %p\n", pthread_rwlock_wrlock_real);
 #endif
 
-	if (pthread_rwlock_wrlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_wrlock_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -897,7 +909,8 @@ int pthread_rwlock_trywrlock(pthread_rwlock_t *l)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_trywrlock_real at %p\n", pthread_rwlock_trywrlock_real);
 #endif
 
-	if (pthread_rwlock_trywrlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_trywrlock_real != NULL && EXTRAE_INITIALIZED() &&
+	 Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -932,7 +945,8 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *l, const struct timespec *t)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_timedwrlock_real at %p\n", pthread_rwlock_timedwrlock_real);
 #endif
 
-	if (pthread_rwlock_timedwrlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_timedwrlock_real != NULL && EXTRAE_INITIALIZED() &&
+	 Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -968,7 +982,8 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_rwlock_unlock_real at %p\n", pthread_rwlock_unlock_real);
 #endif
 
-	if (pthread_rwlock_unlock_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_instrument_locks())
+	if (pthread_rwlock_unlock_real != NULL && EXTRAE_INITIALIZED() &&
+	 Extrae_get_pthread_tracing() && Extrae_get_pthread_instrument_locks())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -1004,7 +1019,8 @@ int pthread_barrier_wait (pthread_barrier_t *barrier)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_barrier_wait (%p)\n", barrier);
 	fprintf (stderr, PACKAGE_NAME": DEBUG: pthread_barrier_wait_real at %p\n", pthread_barrier_wait_real);
 #endif
-	if (pthread_barrier_wait_real != NULL && EXTRAE_INITIALIZED())
+	if (pthread_barrier_wait_real != NULL && EXTRAE_INITIALIZED() &&
+	  Extrae_get_pthread_tracing())
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
@@ -1015,7 +1031,7 @@ int pthread_barrier_wait (pthread_barrier_t *barrier)
 			Backend_Leave_Instrumentation ();
 		}
 	}
-	else if (pthread_barrier_wait_real != NULL && !EXTRAE_INITIALIZED())
+	else if (pthread_barrier_wait_real != NULL)
 	{
 		res = pthread_barrier_wait_real (barrier);
 	}

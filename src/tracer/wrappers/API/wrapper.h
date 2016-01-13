@@ -88,8 +88,11 @@ extern int tracejant_mpi;
 // Serveix per tracejar una aplicacio sense contar res de OpenMP
 extern int tracejant_omp;
 
-// Serveix per tracejar una aplicacio sense contar res de pthread
-extern int tracejant_pthread;
+void Extrae_set_pthread_tracing (int b);
+int Extrae_get_pthread_tracing (void);
+
+void Extrae_set_pthread_hwc_tracing (int b);
+int Extrae_get_pthread_hwc_tracing (void);
 
 // Serveix per tracejar una subconjunt de tasks
 extern int *TracingBitmap;
@@ -149,10 +152,6 @@ extern int tracejant_hwc_mpi;
 /* Must we collect HWC on the OpenMP runtime calls */
 extern int tracejant_hwc_omp;
 #define TRACING_HWC_OMP (tracejant_hwc_omp)
-
-/* Must we collect HWC on the pthread runtime calls */
-extern int tracejant_hwc_pthread;
-#define TRACING_HWC_PTHREAD (tracejant_hwc_pthread)
 
 /* Must we collect HWC on the UF calls */
 extern int tracejant_hwc_uf;

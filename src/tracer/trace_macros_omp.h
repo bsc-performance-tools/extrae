@@ -103,7 +103,7 @@
 {                                                             \
 	int thread_id = THREADID;                                   \
 	event_t evt;                                                \
-	if (tracejant && TracingBitmap[TASKID] && tracejant_pthread)\
+	if (tracejant && TracingBitmap[TASKID] && Extrae_get_pthread_tracing())\
 	{                                                           \
 		evt.time = evttime;                                       \
 		evt.event = evttype;                                      \
@@ -119,13 +119,13 @@
 {                                                             \
 	int thread_id = THREADID;                                   \
 	event_t evt;                                                \
-	if (tracejant && TracingBitmap[TASKID] && tracejant_pthread)\
+	if (tracejant && TracingBitmap[TASKID] && Extrae_get_pthread_tracing())\
 	{                                                           \
 		evt.time = (evttime);                                     \
 		evt.event = (evttype);                                    \
 		evt.value = (evtvalue);                                   \
 		evt.param.omp_param.param[0] = (evtparam);                   \
-		HARDWARE_COUNTERS_READ(thread_id, evt, TRACING_HWC_PTHREAD);  \
+		HARDWARE_COUNTERS_READ(thread_id, evt, Extrae_get_pthread_hwc_tracing());  \
 		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
 	}                                                           \
 }

@@ -690,12 +690,13 @@ static void Parse_XML_PTHREAD (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 		else if (!xmlStrcasecmp (tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-			tracejant_hwc_pthread = ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+			Extrae_set_pthread_hwc_tracing (
+			  (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 #if USE_HARDWARE_COUNTERS
-			mfprintf (stdout, PACKAGE_NAME": pthread routines will %scollect HW counters information.\n", tracejant_hwc_omp?"":"NOT ");
+			mfprintf (stdout, PACKAGE_NAME": pthread routines will %scollect HW counters information.\n", Extrae_get_pthread_hwc_tracing()?"":"NOT ");
 #else
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <pthread> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
-			tracejant_hwc_omp = FALSE;
+			Extrae_set_pthread_hwc_tracing (FALSE);
 #endif
 			XML_FREE(enabled);
 		}
@@ -1654,15 +1655,15 @@ void Parse_XML_File (int rank, int world_size, char *filename)
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
 #if defined(PTHREAD_SUPPORT)
-							tracejant_pthread = TRUE;
+							Extrae_set_pthread_tracing (TRUE);
 							Parse_XML_PTHREAD (rank, xmldoc, current_tag);
 #else
-							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support pthread.\n", TRACE_OMP);
-							tracejant_pthread = FALSE;
+							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support pthread.\n", TRACE_PTHREAD);
+							Extrae_set_pthread_tracing (FALSE);
 #endif
 						}
 						else
-							tracejant_pthread = FALSE;
+							Extrae_set_pthread_tracing (FALSE);
 						XML_FREE(enabled);
 					}
 					/* time-based sampling configuration */

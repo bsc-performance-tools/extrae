@@ -209,8 +209,20 @@ int tracejant_hwc_omp = TRUE;
 /***** Variable global per saber si pthread s'ha de tracejar **************/
 int tracejant_pthread = TRUE;
 
+void Extrae_set_pthread_tracing (int b)
+{ tracejant_pthread = b; }
+
+int Extrae_get_pthread_tracing (void)
+{ return tracejant_pthread; }
+
 /***** Variable global per saber si pthread s'ha de tracejar amb hwc ******/
 int tracejant_hwc_pthread = TRUE;
+
+void Extrae_set_pthread_hwc_tracing (int b)
+{ tracejant_hwc_pthread = b; }
+
+int Extrae_get_pthread_hwc_tracing (void)
+{ return tracejant_hwc_pthread; }
 
 /***** Variable global per saber si UFs s'han de tracejar amb hwc ********/
 int tracejant_hwc_uf = TRUE;
