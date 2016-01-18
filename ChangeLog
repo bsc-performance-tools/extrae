@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ - 18Jan2016 Remove extrae-post-installation.sh. It was broken.
  * 13Jan2016 Memory reference samples point to the variable (either static or
                dynamically allocated)
  * 08Jan2016 Improved boost search in configure
