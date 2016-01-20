@@ -708,6 +708,11 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 			values[i] = cur->value;
 			events[i] = cur->event;
 
+#if defined(DEBUG)
+			fprintf (stderr, "mpi2prv: paraver_build_multi_event %d:%d:%d <%d,%llu> @ %llu\n",
+			  prev_ptask, prev_task, prev_thread, events[i], values[i], prev_time);
+#endif
+
 			if (cur->event == MPI_GLOBAL_OP_COMM)
 				values[i] = (UINT64)alies_comunicador ((int) cur->value, cur->ptask, cur->task);
 #if defined(HAVE_BFD)

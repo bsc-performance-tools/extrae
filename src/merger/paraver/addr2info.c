@@ -333,6 +333,7 @@ UINT64 Address2Info_Translate_MemReference (unsigned ptask, unsigned task, UINT6
 	else if (query == MEM_REFERENCE_STATIC)
 	{
 		char *varname;
+
 		Translate_Address_Data (address, ptask, task, &varname);
 
 		return 1+AddressTable_Insert_MemReference (query, "", varname, "", 0);
@@ -728,6 +729,11 @@ static void Translate_Address_Data (UINT64 address, unsigned ptask, unsigned tas
 
 	if (!Translate_Addresses) 
 		return;
+
+#if defined(DEBUG)
+	fprintf (stderr, "mpi2prv: DEBUG: Translate_Address_Data (%llx, %u, %u, %p)\n",
+	  address, ptask, task, symbol);
+#endif
 
 	ObjectTable_GetSymbolFromAddress (ptask, task, address, symbol);
 }

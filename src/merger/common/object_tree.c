@@ -200,6 +200,8 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 		task_info->binary_objects[last_index].end_address = end;
 		task_info->binary_objects[last_index].offset = offset;
 		task_info->binary_objects[last_index].index = last_index+1;
+		task_info->binary_objects[last_index].nDataSymbols = 0;
+		task_info->binary_objects[last_index].dataSymbols = NULL;
 
 #if defined(HAVE_BFD)
 		BFDmanager_loadBinary (binary,
@@ -256,6 +258,11 @@ int ObjectTable_GetSymbolFromAddress (unsigned ptask, unsigned task,
 {
 	unsigned a;
 	task_t *task_info = GET_TASK_INFO(ptask, task);
+
+#if defined(DEBUG)
+	fprintf (stderr, "mpi2prv: DEBUG: ObjectTable_GetSymbolFromAddress (%u, %u, %llx, %p)\n",
+	  ptask, task, address, symbol);
+#endif
 
 	/* For now, emit only data symbols for binary object 0 */
 	for (a = 0; a < task_info->binary_objects[0].nDataSymbols; a++)
