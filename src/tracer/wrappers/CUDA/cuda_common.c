@@ -471,6 +471,45 @@ void Extrae_cudaConfigureCall_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
+void Extrae_cudaDeviceSynchronize_Enter (void)
+{
+	int devid;
+	int i;
+
+	cudaGetDevice (&devid);
+	Extrae_CUDA_Initialize (devid);
+
+	Backend_Enter_Instrumentation (2);
+	Probe_Cuda_ThreadBarrier_Entry ();
+
+	/* Emit one thread synchronize per stream (begin event) */
+	for (i = 0; i < devices[devid].nstreams; i++)
+		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, i,
+		  CUDATHREADBARRIER_GPU_EV, EVT_BEGIN, 0, 0);
+}
+
+void Extrae_cudaDeviceSynchronize_Exit (void)
+{
+	int devid;
+	int i;
+
+	cudaGetDevice (&devid);
+
+	/* Emit one thread synchronize per stream (end event)*/
+	for (i = 0; i < devices[devid].nstreams; i++)
+		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, i,
+		  CUDATHREADBARRIER_GPU_EV, EVT_END, 0, 0);
+
+	for (i = 0; i < devices[devid].nstreams; i++)
+	{
+		Extrae_CUDA_FlushStream (devid, i);
+		Extrae_CUDA_SynchronizeStream (devid, i);
+	}
+
+	Probe_Cuda_ThreadBarrier_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
 void Extrae_cudaThreadSynchronize_Enter (void)
 {
 	int devid;

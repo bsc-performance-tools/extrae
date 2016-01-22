@@ -156,6 +156,8 @@ void Extrae_cudaConfigureCall_Enter (dim3, dim3, size_t, cudaStream_t);
 void Extrae_cudaConfigureCall_Exit (void);
 void Extrae_cudaThreadSynchronize_Enter (void);
 void Extrae_cudaThreadSynchronize_Exit (void);
+void Extrae_cudaDeviceSynchronize_Enter (void);
+void Extrae_cudaDeviceSynchronize_Exit (void);
 void Extrae_cudaStreamCreate_Enter (cudaStream_t*);
 void Extrae_cudaStreamCreate_Exit (void);
 void Extrae_cudaStreamSynchronize_Enter (cudaStream_t);

@@ -121,7 +121,7 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 			fprintf (fd, "%d cudaMemcpy\n", CUDAMEMCPY_EV - CUDABASE_EV);
 
 		if (inuse[CUDATHREADBARRIER_INDEX])
-			fprintf (fd, "%d cudaThreadSynchronize\n", CUDATHREADBARRIER_EV - CUDABASE_EV);
+			fprintf (fd, "%d cudaThreadSynchronize/cudaDeviceSynchronize\n", CUDATHREADBARRIER_EV - CUDABASE_EV);
 
 		if (inuse[CUDASTREAMBARRIER_INDEX])
 			fprintf (fd, "%d cudaStreamSynchronize\n", CUDASTREAMBARRIER_EV - CUDABASE_EV);

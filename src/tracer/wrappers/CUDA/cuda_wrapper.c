@@ -58,6 +58,7 @@ static char UNUSED rcsid[] = "$Id$";
 static cudaError_t (*real_cudaLaunch)(const char*) = NULL;
 static cudaError_t (*real_cudaConfigureCall)(dim3, dim3, size_t, cudaStream_t) = NULL;
 static cudaError_t (*real_cudaThreadSynchronize)(void) = NULL;
+static cudaError_t (*real_cudaDeviceSynchronize)(void) = NULL;
 static cudaError_t (*real_cudaStreamSynchronize)(cudaStream_t) = NULL;
 static cudaError_t (*real_cudaMemcpy)(void*,const void*,size_t,enum cudaMemcpyKind) = NULL;
 static cudaError_t (*real_cudaMemcpyAsync)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t) = NULL;
@@ -76,6 +77,8 @@ void Extrae_CUDA_init (int rank)
 	real_cudaConfigureCall = (cudaError_t(*)(dim3, dim3, size_t, cudaStream_t)) dlsym (RTLD_NEXT, "cudaConfigureCall");
 
 	real_cudaThreadSynchronize = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaThreadSynchronize");
+
+	real_cudaDeviceSynchronize = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceSynchronize");
 
 	real_cudaStreamSynchronize = (cudaError_t(*)(cudaStream_t)) dlsym (RTLD_NEXT, "cudaStreamSynchronize");
 
@@ -265,6 +268,33 @@ cudaError_t cudaThreadSynchronize (void)
 	else
 	{
 		fprintf (stderr, "Unable to find cudaThreadSynchronize in DSOs!! Dying...\n");
+		exit (0);
+	}
+
+	return res;
+}
+
+cudaError_t cudaDeviceSynchronize (void)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaDeviceSynchronize is at %p\n", THREADID, real_cudaThreadSynchronize);
+#endif
+
+	if (real_cudaDeviceSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaThreadSynchronize_Enter ();
+		res = real_cudaDeviceSynchronize ();
+		Extrae_cudaThreadSynchronize_Exit ();
+	}
+	else if (real_cudaDeviceSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaDeviceSynchronize ();
+	}
+	else
+	{
+		fprintf (stderr, "Unable to find cudaDeviceSynchronize in DSOs!! Dying...\n");
 		exit (0);
 	}
 
