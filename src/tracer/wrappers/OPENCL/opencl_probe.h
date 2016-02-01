@@ -102,7 +102,7 @@ void Extrae_Probe_clCompileProgram_Exit (void);
 void Extrae_Probe_clLinkProgram_Enter (void);
 void Extrae_Probe_clLinkProgram_Exit (void);
 
-void Extrae_Probe_clFinish_Enter (void);
+void Extrae_Probe_clFinish_Enter (unsigned threadid);
 void Extrae_Probe_clFinish_Exit (void);
 
 void Extrae_Probe_clFlush_Enter (void);

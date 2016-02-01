@@ -293,13 +293,13 @@ cl_mem clCreateBuffer (cl_context c, cl_mem_flags m, size_t s, void *p,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateBuffer (real at %p)\n", real_clCreateBuffer);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateBuffer != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateBuffer != NULL)
 	{
 		Extrae_Probe_clCreateBuffer_Enter();
 		r = real_clCreateBuffer (c, m, s, p, e);
 		Extrae_Probe_clCreateBuffer_Exit();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateBuffer != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateBuffer != NULL)
 	{
 		r = real_clCreateBuffer (c, m, s, p, e);
 	}
@@ -324,7 +324,7 @@ cl_command_queue clCreateCommandQueue (cl_context c, cl_device_id d,
 	/* Force profiling! */
 	p |= CL_QUEUE_PROFILING_ENABLE;
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateCommandQueue != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateCommandQueue != NULL)
 	{
 		Extrae_Probe_clCreateCommandQueue_Enter ();
 		Extrae_Prepare_CommandQueue = TRUE;
@@ -333,7 +333,7 @@ cl_command_queue clCreateCommandQueue (cl_context c, cl_device_id d,
 		Extrae_Prepare_CommandQueue = FALSE;
 		Extrae_Probe_clCreateCommandQueue_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateCommandQueue != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateCommandQueue != NULL)
 	{
 		r = real_clCreateCommandQueue (c, d, p, e);
 	}
@@ -357,13 +357,13 @@ cl_context clCreateContext (const cl_context_properties *p, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateContext (real at %p)\n", real_clCreateContext);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateContext != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateContext != NULL)
 	{
 		Extrae_Probe_clCreateContext_Enter();
 		r = real_clCreateContext (p, n, d, pfn, udata, e);
 		Extrae_Probe_clCreateContext_Exit();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateContext != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateContext != NULL)
 	{
 		r = real_clCreateContext (p, n, d, pfn, udata, e);
 	}
@@ -387,13 +387,13 @@ cl_context clCreateContextFromType (const cl_context_properties *p,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateContextFromType (real at %p)\n", real_clCreateContextFromType);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateContextFromType != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateContextFromType != NULL)
 	{
 		Extrae_Probe_clCreateContextFromType_Enter ();
 		r = real_clCreateContextFromType (p, dt, pfn, udata, e);
 		Extrae_Probe_clCreateContextFromType_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateContextFromType != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateContextFromType != NULL)
 	{
 		r = real_clCreateContextFromType (p, dt, pfn, udata, e);
 	}
@@ -415,13 +415,13 @@ cl_mem clCreateSubBuffer (cl_mem m, cl_mem_flags mf, cl_buffer_create_type bct,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateSubBuffer (real at %p)\n", real_clCreateSubBuffer);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateSubBuffer != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateSubBuffer != NULL)
 	{
 		Extrae_Probe_clCreateSubBuffer_Enter ();
 		r = real_clCreateSubBuffer (m, mf, bct, b, e);
 		Extrae_Probe_clCreateSubBuffer_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateSubBuffer != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateSubBuffer != NULL)
 	{
 		r = real_clCreateSubBuffer (m, mf, bct, b, e);
 	}
@@ -442,13 +442,13 @@ cl_kernel clCreateKernel (cl_program p, const char *k, cl_int *e)
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateKernel (%s) (real at %p)\n", k, real_clCreateKernel);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateKernel != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateKernel != NULL)
 	{
 		Extrae_Probe_clCreateKernel_Enter ();
 		r = real_clCreateKernel (p, k, e);
 		Extrae_Probe_clCreateKernel_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateKernel != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateKernel != NULL)
 	{
 		r = real_clCreateKernel (p, k, e);
 	}
@@ -469,13 +469,13 @@ cl_int clCreateKernelsInProgram (cl_program p, cl_uint n, cl_kernel *ks, cl_uint
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateKernelsInProgram (%p)\n", real_clCreateKernelsInProgram);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateKernelsInProgram != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateKernelsInProgram != NULL)
 	{
 		Extrae_Probe_clCreateKernelsInProgram_Enter ();
 		r = real_clCreateKernelsInProgram (p, n, ks, nks);
 		Extrae_Probe_clCreateKernelsInProgram_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateKernelsInProgram != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateKernelsInProgram != NULL)
 	{
 		r = real_clCreateKernelsInProgram (p, n, ks, nks);
 	}
@@ -496,13 +496,13 @@ cl_int clSetKernelArg (cl_kernel k, cl_uint a, size_t as, const void *av)
 	fprintf (stderr, PACKAGE_NAME": Debug : clSetKernelArg (real at %p)\n", real_clSetKernelArg);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clSetKernelArg != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clSetKernelArg != NULL)
 	{
 		Extrae_Probe_clSetKernelArg_Enter ();
 		r = real_clSetKernelArg (k, a, as, av);
 		Extrae_Probe_clSetKernelArg_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clSetKernelArg != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clSetKernelArg != NULL)
 	{
 		r = real_clSetKernelArg (k, a, as, av);
 	}
@@ -524,13 +524,13 @@ cl_program clCreateProgramWithSource (cl_context c, cl_uint u, const char **s,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateProgramWithSource (real at %p)\n", real_clCreateProgramWithSource);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateProgramWithSource != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateProgramWithSource != NULL)
 	{
 		Extrae_Probe_clCreateProgramWithSource_Enter ();
 		r = real_clCreateProgramWithSource (c, u, s, l, e);
 		Extrae_Probe_clCreateProgramWithSource_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateProgramWithSource != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateProgramWithSource != NULL)
 	{
 		r = real_clCreateProgramWithSource (c, u, s, l, e);
 	}
@@ -553,13 +553,13 @@ cl_program clCreateProgramWithBinary (cl_context c, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateProgramWithBinary (real at %p)\n", real_clCreateProgramWithBinary);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateProgramWithBinary != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateProgramWithBinary != NULL)
 	{
 		Extrae_Probe_clCreateProgramWithBinary_Enter ();
 		r = real_clCreateProgramWithBinary (c, n, dl, l, b, bs, e);
 		Extrae_Probe_clCreateProgramWithBinary_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateProgramWithBinary != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateProgramWithBinary != NULL)
 	{
 		r = real_clCreateProgramWithBinary (c, n, dl, l, b, bs, e);
 	}
@@ -581,13 +581,13 @@ cl_program clCreateProgramWithBuiltInKernels (cl_context c, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCreateProgramWithBuiltInKernels (real at %p)\n", real_clCreateProgramWithBuiltInKernels);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCreateProgramWithBuiltInKernels != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCreateProgramWithBuiltInKernels != NULL)
 	{
 		Extrae_Probe_clCreateProgramWithBuiltInKernels_Enter ();
 		r = real_clCreateProgramWithBuiltInKernels (c, n, dl, kn, e);
 		Extrae_Probe_clCreateProgramWithBuiltInKernels_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCreateProgramWithBuiltInKernels != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCreateProgramWithBuiltInKernels != NULL)
 	{
 		r = real_clCreateProgramWithBuiltInKernels (c, n, dl, kn, e);
 	}
@@ -609,7 +609,7 @@ cl_int clEnqueueFillBuffer (cl_command_queue c, cl_mem m, const void *ptr,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueFillBuffer (real at %p)\n", real_clEnqueueFillBuffer);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueFillBuffer != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueFillBuffer != NULL)
 	{
 		cl_event evt;
 
@@ -620,7 +620,7 @@ cl_int clEnqueueFillBuffer (cl_command_queue c, cl_mem m, const void *ptr,
 			*e = evt;
 		Extrae_Probe_clEnqueueFillBuffer_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueFillBuffer != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueFillBuffer != NULL)
 	{
 		r = real_clEnqueueFillBuffer (c, m, ptr, ps, o, s, n, ewl, e);
 	}
@@ -642,7 +642,7 @@ cl_int clEnqueueCopyBuffer (cl_command_queue c, cl_mem src, cl_mem dst,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueCopyBuffer (real at %p)\n", real_clEnqueueCopyBuffer);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueCopyBuffer != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueCopyBuffer != NULL)
 	{
 		cl_event evt;
 
@@ -653,7 +653,7 @@ cl_int clEnqueueCopyBuffer (cl_command_queue c, cl_mem src, cl_mem dst,
 			*ev = evt;
 		Extrae_Probe_clEnqueueCopyBuffer_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueCopyBuffer != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueCopyBuffer != NULL)
 	{
 		r = real_clEnqueueCopyBuffer (c, src, dst, so, dso, s, n, e, ev);
 	}
@@ -676,7 +676,7 @@ cl_int clEnqueueCopyBufferRect (cl_command_queue c, cl_mem src, cl_mem dst,
 	fprintf (stderr, PACKAGE_NAME": Debug clEnqueueCopyBufferRect (real at %p)\n", real_clEnqueueCopyBufferRect);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueCopyBufferRect != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueCopyBufferRect != NULL)
 	{
 		cl_event evt;
 
@@ -688,7 +688,7 @@ cl_int clEnqueueCopyBufferRect (cl_command_queue c, cl_mem src, cl_mem dst,
 			*e = evt;
 		Extrae_Probe_clEnqueueCopyBufferRect_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueCopyBufferRect != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueCopyBufferRect != NULL)
 	{
 		res = real_clEnqueueCopyBufferRect (c, src, dst, s, d, r, srp, ssp,
 		  drp, dsp, n, ewl, e);
@@ -712,7 +712,7 @@ cl_int clEnqueueNDRangeKernel (cl_command_queue c, cl_kernel k, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueNDRangeKernel (real at %p)\n", real_clEnqueueNDRangeKernel);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueNDRangeKernel != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueNDRangeKernel != NULL)
 	{
 		cl_event evt;
 		unsigned kid = 0;
@@ -731,7 +731,7 @@ cl_int clEnqueueNDRangeKernel (cl_command_queue c, cl_kernel k, cl_uint n,
 			*e = evt;
 		Extrae_Probe_clEnqueueNDRangeKernel_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueNDRangeKernel != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueNDRangeKernel != NULL)
 	{
 		r = real_clEnqueueNDRangeKernel (c, k, n, gwo, gws, lws, ne, ewl, e);
 	}
@@ -752,7 +752,7 @@ cl_int clEnqueueTask (cl_command_queue c, cl_kernel k, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueTask (real at %p)\n", real_clEnqueueTask);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueTask != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueTask != NULL)
 	{
 		cl_event evt;
 		unsigned kid = 0;
@@ -771,7 +771,7 @@ cl_int clEnqueueTask (cl_command_queue c, cl_kernel k, cl_uint n,
 			*e = evt;
 		Extrae_Probe_clEnqueueTask_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueTask != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueTask != NULL)
 	{
 		r = real_clEnqueueTask (c, k, n, ewl, e);
 	}
@@ -795,7 +795,7 @@ cl_int clEnqueueNativeKernel (cl_command_queue c,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEqneueNativeKernel (real at %p)\n", real_clEnqueueNativeKernel);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueNativeKernel != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueNativeKernel != NULL)
 	{
 		cl_event evt;
 
@@ -811,7 +811,7 @@ cl_int clEnqueueNativeKernel (cl_command_queue c,
 			*e = evt;
 		Extrae_Probe_clEnqueueNativeKernel_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueNativeKernel != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueNativeKernel != NULL)
 	{
 		r = real_clEnqueueNativeKernel (c, ptr, args, cb, nmo, ml, aml, newl, ewl, e);
 	}
@@ -833,7 +833,7 @@ cl_int clEnqueueReadBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueReadBuffer (real at %p)\n", real_clEnqueueReadBuffer);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueReadBuffer != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueReadBuffer != NULL)
 	{
 		cl_event evt;
 
@@ -855,7 +855,7 @@ cl_int clEnqueueReadBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 			  Extrae_OpenCL_tag_generator(),
 			  Extrae_OpenCL_tag_generator());
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueReadBuffer != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueReadBuffer != NULL)
 	{
 		r = real_clEnqueueReadBuffer (c, m, b, o, s, p, u, e, ev);
 	}
@@ -879,7 +879,7 @@ cl_int clEnqueueReadBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueReadBufferRect (real at %p)\n", real_clEnqueueReadBufferRect);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueReadBufferRect != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueReadBufferRect != NULL)
 	{
 		cl_event evt;
 
@@ -900,7 +900,7 @@ cl_int clEnqueueReadBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 			  Extrae_OpenCL_tag_generator(),
 			  Extrae_OpenCL_tag_generator());
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueReadBufferRect != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueReadBufferRect != NULL)
 	{
 		res = real_clEnqueueReadBufferRect (c, m, b, bo, ho, r, brp, bsp, hrp,
 		  hsp, ptr, n, ewl ,e);
@@ -923,7 +923,7 @@ cl_int clEnqueueWriteBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueWriteBuffer (real at %p)\n", real_clEnqueueWriteBuffer);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueWriteBuffer != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueWriteBuffer != NULL)
 	{
 		cl_event evt;
 
@@ -949,7 +949,7 @@ cl_int clEnqueueWriteBuffer (cl_command_queue c, cl_mem m, cl_bool b, size_t o,
 */
 		Extrae_Probe_clEnqueueWriteBuffer_Exit (b);
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueWriteBuffer != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueWriteBuffer != NULL)
 	{
 		r = real_clEnqueueWriteBuffer (c, m, b, o, s, p, u, e, ev);
 	}
@@ -973,7 +973,7 @@ cl_int clEnqueueWriteBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueWriteBufferRect (real at %p)\n", real_clEnqueueWriteBufferRect);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueWriteBufferRect != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueWriteBufferRect != NULL)
 	{
 		cl_event evt;
 
@@ -999,7 +999,7 @@ cl_int clEnqueueWriteBufferRect (cl_command_queue c, cl_mem m, cl_bool b,
 */
 		Extrae_Probe_clEnqueueWriteBufferRect_Exit (b);
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueWriteBufferRect != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueWriteBufferRect != NULL)
 	{
 		res = real_clEnqueueWriteBufferRect (c, m, b, bo, ho, r, brp, bsp,
 		  hrp, hsp, ptr, n, ewl, e);
@@ -1024,13 +1024,13 @@ cl_int clBuildProgram (cl_program p, cl_uint n, const cl_device_id *dl,
 	fprintf (stderr, PACKAGE_NAME": Debug : clBuildProgram (real at %p)\n", real_clBuildProgram);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clBuildProgram != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clBuildProgram != NULL)
 	{
 		Extrae_Probe_clBuildProgram_Enter ();
 		r = real_clBuildProgram (p, n, dl, o, cbk, ud);
 		Extrae_Probe_clBuildProgram_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clBuildProgram != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clBuildProgram != NULL)
 	{
 		r = real_clBuildProgram (p, n, dl, o, cbk, ud);
 	}
@@ -1054,13 +1054,13 @@ cl_int clCompileProgram (cl_program p, cl_uint n, const cl_device_id *dl,
 	fprintf (stderr, PACKAGE_NAME": Debug : clCompileProgram (real at %p)\n", real_clCompileProgram);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clCompileProgram != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clCompileProgram != NULL)
 	{
 		Extrae_Probe_clCompileProgram_Enter ();
 		r = real_clCompileProgram (p, n, dl, o, nih, ih, hin, cbk, ud);
 		Extrae_Probe_clCompileProgram_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clCompileProgram != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clCompileProgram != NULL)
 	{
 		r = real_clCompileProgram (p, n, dl, o, nih, ih, hin, cbk, ud);
 	}
@@ -1084,13 +1084,13 @@ cl_program clLinkProgram (cl_context c, cl_uint n, const cl_device_id *dl,
 	fprintf (stderr, PACKAGE_NAME": Debug : clLinkProgram (real at %p)\n", real_clLinkProgram);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clLinkProgram != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clLinkProgram != NULL)
 	{
 		Extrae_Probe_clLinkProgram_Enter ();
 		r = real_clLinkProgram (c, n, dl, o, nip, ip, cbk, ud, e);
 		Extrae_Probe_clLinkProgram_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clLinkProgram != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clLinkProgram != NULL)
 	{
 		r = real_clLinkProgram (c, n, dl, o, nip, ip, cbk, ud, e);
 	}
@@ -1111,10 +1111,11 @@ cl_int clFinish (cl_command_queue q)
 	fprintf (stderr, PACKAGE_NAME": Debug : clFinish (real at %p)\n", real_clFinish);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clFinish != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clFinish != NULL)
 	{
 		if (!Extrae_Prepare_CommandQueue)
-			Extrae_Probe_clFinish_Enter ();
+			Extrae_Probe_clFinish_Enter (
+			  Extrae_OpenCL_lookForOpenCLQueueToThreadID (q));
 
 		r = real_clFinish (q);
 
@@ -1124,7 +1125,7 @@ cl_int clFinish (cl_command_queue q)
 			Extrae_Probe_clFinish_Exit ();
 		}
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clFinish != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clFinish != NULL)
 	{
 		r = real_clFinish (q);
 	}
@@ -1145,13 +1146,13 @@ cl_int clFlush (cl_command_queue q)
 	fprintf (stderr, PACKAGE_NAME": Debug : clFlush (real at %p)\n", real_clFlush);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clFlush != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clFlush != NULL)
 	{
 		Extrae_Probe_clFlush_Enter ();
 		r = real_clFlush (q);
 		Extrae_Probe_clFlush_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clFlush != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clFlush != NULL)
 	{
 		r = real_clFlush (q);
 	}
@@ -1172,13 +1173,13 @@ cl_int clWaitForEvents (cl_uint n, const cl_event *el)
 	fprintf (stderr, PACKAGE_NAME": Debug : clWaitForEvents (real at %p)\n", real_clWaitForEvents);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clWaitForEvents != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clWaitForEvents != NULL)
 	{
 		Extrae_Probe_clWaitForEvents_Enter ();
 		r = real_clWaitForEvents (n, el);
 		Extrae_Probe_clWaitForEvents_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clWaitForEvents != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clWaitForEvents != NULL)
 	{
 		r = real_clWaitForEvents (n, el);
 	}
@@ -1201,7 +1202,7 @@ cl_int clEnqueueMarkerWithWaitList (cl_command_queue q, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueMarkerWithWaitList (real at %p)\n", real_clEnqueueMarkerWithWaitList);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueMarkerWithWaitList != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueMarkerWithWaitList != NULL)
 	{
 		cl_event evt;
 
@@ -1212,7 +1213,7 @@ cl_int clEnqueueMarkerWithWaitList (cl_command_queue q, cl_uint n,
 			*e = evt;
 		Extrae_Probe_clEnqueueMarkerWithWaitList_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueMarkerWithWaitList != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueMarkerWithWaitList != NULL)
 	{
 		r = real_clEnqueueMarkerWithWaitList (q, n, ewl, e);
 	}
@@ -1236,7 +1237,7 @@ cl_int clEnqueueBarrierWithWaitList (cl_command_queue q, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueBarrierWithWaitList (real at %p)\n", real_clEnqueueBarrierWithWaitList);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueBarrierWithWaitList != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueBarrierWithWaitList != NULL)
 	{
 		cl_event evt;
 
@@ -1256,7 +1257,7 @@ cl_int clEnqueueBarrierWithWaitList (cl_command_queue q, cl_uint n,
 				*e = evt;
 		}
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueBarrierWithWaitList != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueBarrierWithWaitList != NULL)
 	{
 		r = real_clEnqueueBarrierWithWaitList (q, n, ewl, e);
 	}
@@ -1278,7 +1279,7 @@ cl_int clEnqueueMarker (cl_command_queue q, cl_event *e)
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueMarker (real at %p)\n", real_clEnqueueMarker);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueMarker != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueMarker != NULL)
 	{
 		cl_event evt;
 
@@ -1298,7 +1299,7 @@ cl_int clEnqueueMarker (cl_command_queue q, cl_event *e)
 				*e = evt;
 		}
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueMarker != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueMarker != NULL)
 	{
 		r = real_clEnqueueMarker (q, e);
 	}
@@ -1319,7 +1320,7 @@ cl_int clEnqueueBarrier (cl_command_queue q)
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueBarrier (real at %p)\n", real_clEnqueueBarrier);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueBarrier != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueBarrier != NULL)
 	{
 		if (!Extrae_Prepare_CommandQueue)
 			Extrae_Probe_clEnqueueBarrier_Enter ();
@@ -1327,7 +1328,7 @@ cl_int clEnqueueBarrier (cl_command_queue q)
 		if (!Extrae_Prepare_CommandQueue)
 			Extrae_Probe_clEnqueueBarrier_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueBarrier != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueBarrier != NULL)
 	{
 		r = real_clEnqueueBarrier (q);
 	}
@@ -1350,7 +1351,7 @@ void *clEnqueueMapBuffer (cl_command_queue q, cl_mem m, cl_bool b,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueMapBuffer (real at %p)\n", real_clEnqueueMapBuffer);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueMapBuffer != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueMapBuffer != NULL)
 	{
 		cl_event evt;
 
@@ -1363,7 +1364,7 @@ void *clEnqueueMapBuffer (cl_command_queue q, cl_mem m, cl_bool b,
 			Extrae_OpenCL_clQueueFlush (q, FALSE);
 		Extrae_Probe_clEnqueueMapBuffer_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueMapBuffer != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueMapBuffer != NULL)
 	{
 		r = real_clEnqueueMapBuffer (q, m, b, mf, o, s, n, ewl, e, err);
 	}
@@ -1385,7 +1386,7 @@ cl_int clEnqueueUnmapMemObject (cl_command_queue q, cl_mem m, void *p,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueUnmapMemObject (real at %p)\n", real_clEnqueueUnmapMemObject);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueUnmapMemObject != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueUnmapMemObject != NULL)
 	{
 		cl_event evt;
 
@@ -1396,7 +1397,7 @@ cl_int clEnqueueUnmapMemObject (cl_command_queue q, cl_mem m, void *p,
 			*e = evt;
 		Extrae_Probe_clEnqueueUnmapMemObject_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueUnmapMemObject != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueUnmapMemObject != NULL)
 	{
 		r = real_clEnqueueUnmapMemObject (q, m, p, n, ewl, e);
 	}
@@ -1420,7 +1421,7 @@ cl_int clEnqueueMigrateMemObjects (cl_command_queue q, cl_uint n,
 	fprintf (stderr, PACKAGE_NAME": Debug : clEnqueueUnmapMemObject (real at %p)\n", real_clEnqueueUnmapMemObject);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clEnqueueMigrateMemObjects != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clEnqueueMigrateMemObjects != NULL)
 	{
 		cl_event evt;
 
@@ -1431,7 +1432,7 @@ cl_int clEnqueueMigrateMemObjects (cl_command_queue q, cl_uint n,
 			*e = evt;
 		Extrae_Probe_clEnqueueMigrateMemObjects_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clEnqueueMigrateMemObjects != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clEnqueueMigrateMemObjects != NULL)
 	{
 		r = real_clEnqueueMigrateMemObjects (q, n, mo, f, ne, ewl, e);
 	}
@@ -1453,13 +1454,13 @@ cl_int clRetainCommandQueue (cl_command_queue cq)
 	fprintf (stderr, PACKAGE_NAME": Debug : clRetainCommandQueue (real at %p)\n", real_clRetainCommandQueue);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clRetainCommandQueue != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clRetainCommandQueue != NULL)
 	{
 		Extrae_Probe_clRetainCommandQueue_Enter ();
 		r = real_clRetainCommandQueue (cq);
 		Extrae_Probe_clRetainCommandQueue_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clRetainCommandQueue != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clRetainCommandQueue != NULL)
 	{
 		r = real_clRetainCommandQueue (cq);
 	}
@@ -1480,13 +1481,13 @@ cl_int clReleaseCommandQueue (cl_command_queue cq)
 	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseCommandQueue (real at %p)\n", real_clReleaseCommandQueue);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clReleaseCommandQueue != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clReleaseCommandQueue != NULL)
 	{
 		Extrae_Probe_clReleaseCommandQueue_Enter ();
 		r = real_clReleaseCommandQueue (cq);
 		Extrae_Probe_clReleaseCommandQueue_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clReleaseCommandQueue != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clReleaseCommandQueue != NULL)
 	{
 		r = real_clReleaseCommandQueue (cq);
 	}
@@ -1507,13 +1508,13 @@ cl_int clRetainContext (cl_context c)
 	fprintf (stderr, PACKAGE_NAME": Debug : clRetainContext (real at %p)\n", real_clRetainContext);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clRetainContext != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clRetainContext != NULL)
 	{
 		Extrae_Probe_clRetainContext_Enter ();
 		r = real_clRetainContext (c);
 		Extrae_Probe_clRetainContext_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clRetainContext != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clRetainContext != NULL)
 	{
 		r = real_clRetainContext (c);
 	}
@@ -1534,13 +1535,13 @@ cl_int clReleaseContext (cl_context c)
 	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseContext (real at %p)\n", real_clRetainContext);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clReleaseContext != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clReleaseContext != NULL)
 	{
 		Extrae_Probe_clReleaseContext_Enter ();
 		r = real_clReleaseContext (c);
 		Extrae_Probe_clReleaseContext_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clReleaseContext != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clReleaseContext != NULL)
 	{
 		r = real_clReleaseContext (c);
 	}
@@ -1561,13 +1562,13 @@ cl_int clRetainDevice (cl_device_id d)
 	fprintf (stderr, PACKAGE_NAME": Debug : clRetainDevice (real at %p)\n", real_clRetainDevice);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clRetainDevice != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clRetainDevice != NULL)
 	{
 		Extrae_Probe_clRetainDevice_Enter ();
 		r = real_clRetainDevice (d);
 		Extrae_Probe_clRetainDevice_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clRetainDevice != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clRetainDevice != NULL)
 	{
 		r = real_clRetainDevice (d);
 	}
@@ -1588,13 +1589,13 @@ cl_int clReleaseDevice (cl_device_id d)
 	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseDevice (real at %p)\n", real_clReleaseDevice);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clReleaseDevice != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clReleaseDevice != NULL)
 	{
 		Extrae_Probe_clReleaseDevice_Enter ();
 		r = real_clReleaseDevice (d);
 		Extrae_Probe_clReleaseDevice_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clReleaseDevice != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clReleaseDevice != NULL)
 	{
 		r = real_clReleaseDevice (d);
 	}
@@ -1653,13 +1654,13 @@ cl_int clRetainEvent (cl_event e)
 	fprintf (stderr, PACKAGE_NAME": Debug : clRetainEvent (real at %p)\n", real_clRetainEvent);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clRetainEvent != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clRetainEvent != NULL)
 	{
 		Extrae_Probe_clRetainEvent_Enter ();
 		r = real_clRetainEvent (e);
 		Extrae_Probe_clRetainEvent_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clRetainEvent != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clRetainEvent != NULL)
 	{
 		r = real_clRetainEvent (e);
 	}
@@ -1680,13 +1681,13 @@ cl_int clReleaseEvent (cl_event e)
 	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseEvent (real at %p)\n", real_clReleaseEvent);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clReleaseEvent != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clReleaseEvent != NULL)
 	{
 		Extrae_Probe_clReleaseEvent_Enter ();
 		r = real_clReleaseEvent (e);
 		Extrae_Probe_clReleaseEvent_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clReleaseEvent != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clReleaseEvent != NULL)
 	{
 		r = real_clReleaseEvent (e);
 	}
@@ -1707,13 +1708,13 @@ cl_int clRetainKernel (cl_kernel k)
 	fprintf (stderr, PACKAGE_NAME": Debug : clRetainKernel (real at %p)\n", real_clRetainKernel);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clRetainKernel != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clRetainKernel != NULL)
 	{
 		Extrae_Probe_clRetainKernel_Enter ();
 		r = real_clRetainKernel (k);
 		Extrae_Probe_clRetainKernel_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clRetainKernel != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clRetainKernel != NULL)
 	{
 		r = real_clRetainKernel (k);
 	}
@@ -1734,13 +1735,13 @@ cl_int clReleaseKernel (cl_kernel k)
 	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseKernel (real at %p)\n", real_clReleaseKernel);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clReleaseKernel != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clReleaseKernel != NULL)
 	{
 		Extrae_Probe_clReleaseKernel_Enter ();
 		r = real_clReleaseKernel (k);
 		Extrae_Probe_clReleaseKernel_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clReleaseKernel != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clReleaseKernel != NULL)
 	{
 		r = real_clReleaseKernel (k);
 	}
@@ -1761,13 +1762,13 @@ cl_int clRetainMemObject (cl_mem m)
 	fprintf (stderr, PACKAGE_NAME": Debug : clRetainMemObject (real at %p)\n", real_clRetainMemObject);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clRetainMemObject != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clRetainMemObject != NULL)
 	{
 		Extrae_Probe_clRetainMemObject_Enter ();
 		r = real_clRetainMemObject (m);
 		Extrae_Probe_clRetainMemObject_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clRetainMemObject != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clRetainMemObject != NULL)
 	{
 		r = real_clRetainMemObject (m);
 	}
@@ -1788,13 +1789,13 @@ cl_int clReleaseMemObject (cl_mem m)
 	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseMemObject (real at %p)\n", real_clReleaseMemObject);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clReleaseMemObject != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clReleaseMemObject != NULL)
 	{
 		Extrae_Probe_clReleaseMemObject_Enter ();
 		r = real_clReleaseMemObject (m);
 		Extrae_Probe_clReleaseMemObject_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clReleaseMemObject != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clReleaseMemObject != NULL)
 	{
 		r = real_clReleaseMemObject (m);
 	}
@@ -1815,13 +1816,13 @@ cl_int clRetainProgram (cl_program p)
 	fprintf (stderr, PACKAGE_NAME": Debug : clRetainProgram (real at %p)\n", real_clRetainProgram);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clRetainProgram != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clRetainProgram != NULL)
 	{
 		Extrae_Probe_clRetainProgram_Enter ();
 		r = real_clRetainProgram (p);
 		Extrae_Probe_clRetainProgram_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clRetainProgram != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clRetainProgram != NULL)
 	{
 		r = real_clRetainProgram (p);
 	}
@@ -1842,13 +1843,13 @@ cl_int clReleaseProgram (cl_program p)
 	fprintf (stderr, PACKAGE_NAME": Debug : clReleaseProgram (real at %p)\n", real_clReleaseProgram);
 #endif
 
-	if (mpitrace_on && Extrae_get_trace_OpenCL() && real_clReleaseProgram != NULL)
+	if (EXTRAE_ON() && Extrae_get_trace_OpenCL() && real_clReleaseProgram != NULL)
 	{
 		Extrae_Probe_clReleaseProgram_Enter ();
 		r = real_clReleaseProgram (p);
 		Extrae_Probe_clReleaseProgram_Exit ();
 	}
-	else if (!(mpitrace_on && Extrae_get_trace_OpenCL()) && real_clReleaseProgram != NULL)
+	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clReleaseProgram != NULL)
 	{
 		r = real_clReleaseProgram (p);
 	}

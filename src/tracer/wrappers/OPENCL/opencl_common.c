@@ -59,7 +59,7 @@ typedef struct RegisteredCommandQueue_st
 	
 	UINT64 host_reference_time;
 	cl_ulong device_reference_time;
-	int threadid; /* In Paraver sense */
+	unsigned threadid; /* In Paraver sense */
 
 	unsigned nevents;
 	cl_event ocl_event[MAX_OPENCL_EVENTS];
@@ -98,6 +98,17 @@ static int Extrae_OpenCL_lookForOpenCLQueue (cl_command_queue q, unsigned *posit
 		}
 
 	return FALSE;
+}
+
+unsigned Extrae_OpenCL_lookForOpenCLQueueToThreadID (cl_command_queue q)
+{
+	unsigned u;
+
+	for (u = 0; u < nCommandQueues; u++)
+		if (CommandQueues[u].queue == q)
+			return CommandQueues[u].threadid;
+
+	return 0;
 }
 
 int Extrae_OpenCL_Queue_OoO (cl_command_queue q)

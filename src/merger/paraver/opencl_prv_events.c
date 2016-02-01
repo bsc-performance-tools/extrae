@@ -277,6 +277,7 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 	unsigned u;
 	int anypresent = FALSE;
 	int memtransfersizepresent = FALSE;
+	int clfinishpresent = FALSE;
 
 	for (u = 0; u < MAX_OPENCL_TYPE_ENTRIES; u++)
 	{
@@ -289,6 +290,10 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 		      OpenCL_event_presency_label_host[u].eventtype == OPENCL_CLENQUEUEWRITEBUFFERRECT_EV )
 		   )
 			memtransfersizepresent = TRUE;
+
+		if (OpenCL_event_presency_label_host[u].present && (
+		     OpenCL_event_presency_label_host[u].eventtype == OPENCL_CLFINISH_EV))
+			clfinishpresent = TRUE;
 	}
 
 	if (anypresent)
@@ -332,6 +337,14 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 					OpenCL_event_presency_label_acc[u].eventval,
 					OpenCL_event_presency_label_acc[u].description);
 		LET_SPACES(fd);
+	}
+
+	if (clfinishpresent)
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		             "%d    %d    Synchronized command queue (on thread)\n"
+                     "\n",
+                     0, OPENCL_CLFINISH_THID_EV);
 	}
 }
 

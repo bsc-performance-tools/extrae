@@ -53,4 +53,7 @@ void Extrae_OpenCL_annotateKernelName (cl_kernel k, unsigned *pos);
 
 unsigned Extrae_OpenCL_tag_generator (void);
 
+unsigned Extrae_OpenCL_lookForOpenCLQueueToThreadID (cl_command_queue q);
+
+
 #endif /* OPENCL_WRAPPER_H_INCLUDED */
