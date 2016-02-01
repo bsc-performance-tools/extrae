@@ -43,8 +43,6 @@ else
 fi
 echo Configuring package ${PACKAGE_STRING} based on ${SVN_branch} revision ${SVN_revision}
 
-exit 0
-
 AC_DEFINE_UNQUOTED([EXTRAE_SVN_REVISION], [${SVN_revision}], [Define SVN version for this Extrae])
 AC_DEFINE_UNQUOTED([EXTRAE_SVN_BRANCH], ["${SVN_branch}"], [Define SVN branch for this Extrae])
 
