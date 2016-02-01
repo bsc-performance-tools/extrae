@@ -93,10 +93,7 @@ void AddressSpace_add (struct AddressSpace_st *as, uint64_t AddressBegin,
 			as->Regions[u].AddressEnd = AddressEnd;
 			as->Regions[u].CallerType = CallerType;
 			for (v = 0; v < MAX_CALLERS; v++)
-			{
-				printf ("AddressSpace_add (%d) --> %llx\n", v, CallerAddresses[v]);
 				as->Regions[u].CallerAddresses[v] = CallerAddresses[v];
-			}
 			as->Regions[u].in_use = TRUE;
 			as->nRegions++;
 			break;
@@ -133,12 +130,7 @@ int AddressSpace_search (struct AddressSpace_st *as, uint64_t Address,
 			    Address <= as->Regions[u].AddressEnd)
 		{
 			if (CallerAddresses)
-			{
 				*CallerAddresses = as->Regions[u].CallerAddresses;
-				int v;
-				for (v = 0; v < MAX_CALLERS; v++)
-					printf ("AddressSpace_search(%d) --> %llx\n", v, (*CallerAddresses)[v]);
-			}
 			if (CallerType)
 				*CallerType = as->Regions[u].CallerType;
 			return TRUE;

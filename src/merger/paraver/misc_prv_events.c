@@ -39,6 +39,7 @@ static char UNUSED rcsid[] = "$Id$";
 #include "misc_prv_events.h"
 #include "misc_prv_semantics.h"
 #include "labels.h"
+#include "addr2info.h"
 
 #define PRV_FORK_VALUE          1
 #define PRV_WAIT_VALUE          2
@@ -297,7 +298,7 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		  SAMPLING_ADDRESS_REFERENCE_COST_LBL);
 		LET_SPACES (fd);
 
-		Address2Info_Write_MemReferenceCaller_Labels (fd, get_option_merge_UniqueCallerID());
+		Address2Info_Write_MemReferenceCaller_Labels (fd);
 	}
 
 	/* These events are always emitted */

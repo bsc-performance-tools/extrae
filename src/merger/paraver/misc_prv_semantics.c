@@ -309,7 +309,7 @@ static int MPI_Caller_Event (event_t * current_event,
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 
 	deepness = Get_EvEvent(current_event) - CALLER_EV;
-	if (deepness > 0) 
+	if (deepness > 0 && deepness < MAX_CALLERS) 
 	{
 		MPI_Caller_Multiple_Levels_Traced = TRUE;	
 		if (MPI_Caller_Labels_Used == NULL) 
@@ -329,28 +329,20 @@ static int MPI_Caller_Event (event_t * current_event,
 #if defined(HAVE_BFD)
 	if (get_option_merge_SortAddresses())
 	{
-		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2MPI_FUNCTION);
-		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue, ADDR2MPI_LINE);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue,
+		  ADDR2MPI_FUNCTION);
+		AddressCollector_Add (&CollectedAddresses, ptask, task, EvValue,
+		  ADDR2MPI_LINE);
 	}
 #endif
 
-	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_EV+deepness, EvValue);
-	trace_paraver_event (cpu, ptask, task, thread, current_time, CALLER_LINE_EV+deepness, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	  CALLER_EV+deepness, EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	  CALLER_LINE_EV+deepness, EvValue);
 
-	if (thread_info->AddressSpace_hascaller)
-	{
-		if (thread_info->AddressSpace_callertype > CALLER_LINE_EV+deepness)
-		{
-			thread_info->AddressSpace_calleraddress = EvValue;
-			thread_info->AddressSpace_callertype    = CALLER_LINE_EV+deepness;
-		}
-	}
-	else
-	{
-		thread_info->AddressSpace_calleraddress = EvValue;
-		thread_info->AddressSpace_callertype    = CALLER_LINE_EV+deepness;
-		thread_info->AddressSpace_hascaller     = TRUE;
-	}
+	if (deepness > 0 && deepness < MAX_CALLERS)
+		thread_info->AddressSpace_calleraddresses[deepness] = EvValue;
 
 	return 0;
 }
@@ -535,7 +527,7 @@ static int Sampling_Address_Event (event_t * current,
 	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
 	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-	uint64_t CallerAddress;
+	uint64_t *CallerAddresses;
 	unsigned i;
 	int EvType;
 	UINT64 EvValue;
@@ -577,9 +569,21 @@ static int Sampling_Address_Event (event_t * current,
 	if (EvParam != 0)
 		trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvParam);
 
-	if (AddressSpace_search (task_info->AddressSpace, EvParam, &CallerAddress, NULL))
+	if (AddressSpace_search (task_info->AddressSpace, EvParam, &CallerAddresses,
+	    NULL))
+	{
+		unsigned u;
+		for (u = 0; u < MAX_CALLERS; u++)
+		{
+			if (CallerAddresses[u] != 0)
+				trace_paraver_event (cpu, ptask, task, thread, current_time,
+				  SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+u,
+				  CallerAddresses[u]);
+		}
+
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV, CallerAddress);
+		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV, CallerAddresses);
+	}
 	else
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
 		  SAMPLING_ADDRESS_STATIC_OBJECT_EV, EvParam);
@@ -1488,10 +1492,8 @@ static int DynamicMemory_Event (event_t * event,
 
 			AddressSpace_add (task_info->AddressSpace, EvParam,
 			  EvParam+thread_info->AddressSpace_size,
-			  thread_info->AddressSpace_calleraddress,
+			  thread_info->AddressSpace_calleraddresses,
 			  thread_info->AddressSpace_callertype);
-
-			thread_info->AddressSpace_hascaller = FALSE;
 		}
 	}
 	else if (EvType == FREE_EV)
@@ -1503,8 +1505,6 @@ static int DynamicMemory_Event (event_t * event,
 			  DYNAMIC_MEM_POINTER_IN_EV, EvParam);
 
 			AddressSpace_remove (task_info->AddressSpace, EvParam);
-
-			thread_info->AddressSpace_hascaller = FALSE;
 		}
 	}
 	else if (EvType == REALLOC_EV)
@@ -1523,8 +1523,6 @@ static int DynamicMemory_Event (event_t * event,
 			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
 
 			AddressSpace_remove (task_info->AddressSpace, EvParam);
-
-			thread_info->AddressSpace_hascaller = FALSE;
 		}
 		else
 		{
@@ -1533,10 +1531,8 @@ static int DynamicMemory_Event (event_t * event,
 
 			AddressSpace_add (task_info->AddressSpace, EvParam,
 			  EvParam+thread_info->AddressSpace_size,
-			  thread_info->AddressSpace_calleraddress,
+			  thread_info->AddressSpace_calleraddresses,
 			  thread_info->AddressSpace_callertype);
-
-			thread_info->AddressSpace_hascaller = FALSE;
 		}
 	
 	}
@@ -1557,12 +1553,18 @@ static int DynamicMemory_Event (event_t * event,
 
 			AddressSpace_add (task_info->AddressSpace, EvParam,
 			  EvParam+thread_info->AddressSpace_size,
-			  thread_info->AddressSpace_calleraddress,
+			  thread_info->AddressSpace_calleraddresses,
 			  thread_info->AddressSpace_callertype);
-
-			thread_info->AddressSpace_hascaller = FALSE;
 		}
 	}
+
+	if (!isBegin)
+	{
+		unsigned u;
+		for (u = 0; u < MAX_CALLERS; u++)
+			thread_info->AddressSpace_calleraddresses[u] = 0;
+	}
+
 	return 0;
 }
 

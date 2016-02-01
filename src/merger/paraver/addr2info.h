@@ -61,7 +61,7 @@ int Address2Info_Initialized (void);
 UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
 	int event_type, int uniqueID);
 UINT64 Address2Info_Translate_MemReference (unsigned ptask, unsigned task,
-	UINT64 address, int event_type);
+	UINT64 address, int event_type, UINT64 *calleraddresses);
 void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid);
 void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,

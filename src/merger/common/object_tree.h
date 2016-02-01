@@ -44,7 +44,9 @@
 #include "thread_dependencies.h"
 #include "address_space.h"
 
-#define MAX_STATES 128
+
+#define MAX_STATES  128
+#define MAX_CALLERS 100
 
 #define GET_NUM_TASKS(ptask) \
     (ApplicationTable.ptasks[ptask - 1].ntasks)
@@ -100,9 +102,8 @@ typedef struct thread_st
 
 	/* Address space preparation */
 	uint64_t AddressSpace_size;
-	uint64_t AddressSpace_calleraddress;
+	uint64_t AddressSpace_calleraddresses[MAX_CALLERS];
 	uint32_t AddressSpace_callertype;
-	uint8_t  AddressSpace_hascaller;
 } thread_t;
 
 typedef struct active_task_thread_stack_type_st
@@ -181,8 +182,8 @@ void ObjectTable_AddBinaryObject (int allobjects, unsigned ptask, unsigned task,
 	char *binary);
 binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task,
 	UINT64 address);
-int ObjectTable_GetSymbolFromAddress (unsigned ptask, unsigned task,
-	UINT64 address, char **symbol);
+int ObjectTable_GetSymbolFromAddress (UINT64 address, unsigned ptask,
+	unsigned task, char **symbol);
 char * ObjectTable_GetBinaryObjectName (unsigned ptask, unsigned task);
 
 # if defined(BFD_MANAGER_GENERATE_ADDRESSES)

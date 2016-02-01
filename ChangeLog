@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 01Feb2016 Improve memory reference samples point to the variable
  + 01Feb2016 Emit event OpenCL thread id for command queue in clFinish
  + 22Jan2016 Add instrumentation for cudaDeviceSynchronize
  - 18Jan2016 Remove extrae-post-installation.sh. It was broken.

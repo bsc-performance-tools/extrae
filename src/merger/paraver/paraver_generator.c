@@ -146,6 +146,8 @@ void trace_paraver_state_noahead (
 	WriteFileBuffer_t *wfb = thread_info->file->wfb;
 	unsigned current_state = Top_State(ptask, task, thread);
 
+	UNREFERENCED_PARAMETER(cpu);
+
 #if 0
 	fprintf (stderr, "trace_paraver_state (..)\n");
 	fprintf (stderr, "thread_info->incomplete_state_offset = %u\n", thread_info->incomplete_state_offset);
@@ -646,12 +648,6 @@ static UINT64 paraver_translate_bfd_event (unsigned ptask, unsigned task,
 	else if (eventtype == CUDAFUNC_LINE_EV)
 		return Address2Info_Translate (ptask, task, 
 		  eventvalue, ADDR2CUDA_LINE, get_option_merge_UniqueCallerID());
-	else if (eventtype == SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV)
-		return Address2Info_Translate_MemReference (ptask, task,
-		  eventvalue, MEM_REFERENCE_DYNAMIC);
-	else if (eventtype == SAMPLING_ADDRESS_STATIC_OBJECT_EV)
-		return Address2Info_Translate_MemReference (ptask, task,
-		  eventvalue, MEM_REFERENCE_STATIC);
 	else
 	{
 		if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -687,6 +683,11 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 	unsigned long long prev_time;
 	paraver_rec_t *cur;
 	int i = 0;
+	UINT64 CallerAddresses[MAX_CALLERS];
+
+	// Here we store the caller addresses for a reference to a dynamic mem object
+	// Set to 0 initially
+	memset (CallerAddresses, 0, sizeof(CallerAddresses));
 
 	cur = *current;
 
@@ -729,17 +730,36 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				  cur->event == PTHREAD_FUNC_EV || cur->event == PTHREAD_FUNC_LINE_EV ||
 				  cur->event == CUDAFUNC_EV || cur->event == CUDAFUNC_LINE_EV)
 				{
-					values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+					values[i] = paraver_translate_bfd_event (cur->ptask,
+					  cur->task, cur->event, cur->value);
+				}
+
+				if (cur->event >= SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV &&
+				    cur->event < SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+MAX_CALLERS)
+				{
+					CallerAddresses[cur->event-SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV] =
+					  values[i];
 				}
 
 				if (cur->event == SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV)
 				{
-					values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+					values[i] = Address2Info_Translate_MemReference (cur->ptask,
+					  cur->task, cur->value, MEM_REFERENCE_DYNAMIC,
+					  CallerAddresses);
+
+					// Set to 0 again after emitting the information
+					for (i = 0; i < MAX_CALLERS; i++)
+						CallerAddresses[i] = 0;
 				}
 				else if (cur->event == SAMPLING_ADDRESS_STATIC_OBJECT_EV)
 				{
-					values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+					values[i] = Address2Info_Translate_MemReference (cur->ptask,
+					  cur->task, cur->value, MEM_REFERENCE_STATIC, NULL);
 					events[i]  = SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV;
+
+					// Set to 0 again after emitting the information
+					for (i = 0; i < MAX_CALLERS; i++)
+						CallerAddresses[i] = 0;
 				}
 
 				if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -751,8 +771,10 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 						Extrae_Addr2Type_t *element = 
 							Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
 
-						if (element->FunctionType == cur->event || element->LineType == cur->event)
-							values[i] = paraver_translate_bfd_event (cur->ptask, cur->task, cur->event, cur->value);
+						if (element->FunctionType == cur->event ||
+						    element->LineType == cur->event)
+							values[i] = paraver_translate_bfd_event (cur->ptask,
+							  cur->task, cur->event, cur->value);
 					}
 				}
 

@@ -46,7 +46,7 @@ appl_t ApplicationTable;
 void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 	unsigned long nfiles)
 {
-	unsigned int ptask, task, thread, i, j;
+	unsigned int ptask, task, thread, i, j, v;
 	unsigned int ntasks[num_appl], **nthreads = NULL;
 
 	/* First step, collect number of applications, number of tasks per application and
@@ -135,7 +135,8 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 				thread_info->nStates = 0;
 				thread_info->First_Event = TRUE;
 				thread_info->HWCChange_count = 0;
-				thread_info->AddressSpace_hascaller = FALSE;
+				for (v = 0; v < MAX_CALLERS; v++)
+					thread_info->AddressSpace_calleraddresses[v] = 0;
 #if USE_HARDWARE_COUNTERS || defined(HETEROGENEOUS_SUPPORT)
 				thread_info->HWCSets = NULL;
 				thread_info->HWCSets_types = NULL;
@@ -253,15 +254,15 @@ binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, U
 	return NULL;
 }
 
-int ObjectTable_GetSymbolFromAddress (unsigned ptask, unsigned task,
-	UINT64 address, char **symbol)
+int ObjectTable_GetSymbolFromAddress (UINT64 address, unsigned ptask,
+	unsigned task, char **symbol)
 {
 	unsigned a;
 	task_t *task_info = GET_TASK_INFO(ptask, task);
 
 #if defined(DEBUG)
-	fprintf (stderr, "mpi2prv: DEBUG: ObjectTable_GetSymbolFromAddress (%u, %u, %llx, %p)\n",
-	  ptask, task, address, symbol);
+	fprintf (stderr, "mpi2prv: DEBUG: ObjectTable_GetSymbolFromAddress (%llx, %u, %u, %p)\n",
+	  address, ptask, task, symbol);
 #endif
 
 	/* For now, emit only data symbols for binary object 0 */
