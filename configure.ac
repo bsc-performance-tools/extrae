@@ -33,14 +33,17 @@ if test $? -eq 0 -a -d .svn ; then
 	fi
 fi
 
-if test -f SVN-branch -a -f SVN-revision ; then
-	SVN_branch=`cat SVN-branch`
-	SVN_revision=`cat SVN-revision`
+TOPDIR=`dirname ${0}`
+if test -f ${TOPDIR}/SVN-branch -a -f ${TOPDIR}/SVN-revision ; then
+	SVN_branch=`cat ${TOPDIR}/SVN-branch`
+	SVN_revision=`cat ${TOPDIR}/SVN-revision`
 else
 	SVN_branch=unknown
 	SVN_revision=0
 fi
 echo Configuring package ${PACKAGE_STRING} based on ${SVN_branch} revision ${SVN_revision}
+
+exit 0
 
 AC_DEFINE_UNQUOTED([EXTRAE_SVN_REVISION], [${SVN_revision}], [Define SVN version for this Extrae])
 AC_DEFINE_UNQUOTED([EXTRAE_SVN_BRANCH], ["${SVN_branch}"], [Define SVN branch for this Extrae])
