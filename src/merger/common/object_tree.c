@@ -201,10 +201,11 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 		task_info->binary_objects[last_index].end_address = end;
 		task_info->binary_objects[last_index].offset = offset;
 		task_info->binary_objects[last_index].index = last_index+1;
+
+#if defined(HAVE_BFD)
 		task_info->binary_objects[last_index].nDataSymbols = 0;
 		task_info->binary_objects[last_index].dataSymbols = NULL;
 
-#if defined(HAVE_BFD)
 		BFDmanager_loadBinary (binary,
 		  &(task_info->binary_objects[last_index].bfdImage),
 		  &(task_info->binary_objects[last_index].bfdSymbols),
@@ -257,6 +258,13 @@ binary_object_t* ObjectTable_GetBinaryObjectAt (unsigned ptask, unsigned task, U
 int ObjectTable_GetSymbolFromAddress (UINT64 address, unsigned ptask,
 	unsigned task, char **symbol)
 {
+#if !defined(HAVE_BFD)
+	UNREFERENCED_PARAMETER(address);
+	UNREFERENCED_PARAMETER(ptask);
+	UNREFERENCED_PARAMETER(task);
+	UNREFERENCED_PARAMETER(symbol);
+	return FALSE;
+#else
 	unsigned a;
 	task_t *task_info = GET_TASK_INFO(ptask, task);
 
@@ -278,6 +286,7 @@ int ObjectTable_GetSymbolFromAddress (UINT64 address, unsigned ptask,
 		}
 	}
 	return FALSE;
+#endif
 }
 
 #if defined(BFD_MANAGER_GENERATE_ADDRESSES)

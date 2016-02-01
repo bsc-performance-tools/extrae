@@ -75,8 +75,10 @@ int *__errno_location(void)
 static void AddressTable_Initialize (void);
 static int  AddressTable_Insert (UINT64 address, int event_type,
 	char *module, char *funcname, char *filename, int line);
+#if defined(HAVE_BFD)
 static int AddressTable_Insert_MemReference (int addr_type,
 	const char *module, const char *staticname, const char *filename, int line);
+#endif
 #if defined(HAVE_BFD)
 static void Translate_Address (UINT64 address, unsigned ptask, unsigned task,
 	char **module, char ** funcname, char ** filename, int * line);
@@ -621,6 +623,7 @@ UINT64 Address2Info_Translate (unsigned ptask, unsigned task, UINT64 address,
  * 
  * @return 
  */
+#if defined(HAVE_BFD)
 static int AddressTable_Insert_MemReference (int addr_type,
 	const char *module, const char *staticname, const char *filename, int line) 
 {
@@ -677,6 +680,7 @@ static int AddressTable_Insert_MemReference (int addr_type,
 
 	return i;
 }
+#endif /* HAVE_DEFINED(BFD) */
 
 /** AddressTable_Insert
  *
