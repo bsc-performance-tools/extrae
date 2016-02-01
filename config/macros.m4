@@ -574,7 +574,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
       AC_MSG_NOTICE([libbfd library directory: ${BFD_LIBSDIR}])
    fi
    if test "${LIBERTY_LIBSDIR}" = "" ; then
-      AC_MSG_NOTICE([Warning! Cannot find the libiberty library in the given binutils home. Please, make sure that the binutils packages is correctly installed. If you have installed the binutils package by hand from their source code, make sure that libibert is installed. Some releases of the binutils package do not install the libibery even invoking make install. The library should be within the libiberty directory within the binutils source tree.])
+      AC_MSG_NOTICE([Warning! Cannot find the libiberty library in the given binutils home. Please, make sure that the binutils packages is correctly installed. If you have installed the binutils package by hand from their source code, make sure that libiberty is installed. Some releases of the binutils package do not install the libibery even invoking make install. The library should be within the libiberty directory within the binutils source tree.])
    else
       AC_MSG_NOTICE([libiberty library directory: ${LIBERTY_LIBSDIR}])
    fi
