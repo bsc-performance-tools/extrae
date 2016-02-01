@@ -89,6 +89,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define SAMPLING_ADDRESS_REFERENCE_COST_EV   32000006
 #define SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV 32000007
 #define SAMPLING_ADDRESS_STATIC_OBJECT_EV    32000008
+#define SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV 32000100 /* internal purposes, not emitted into paraver tracefile */
 
 #define APPL_EV                  40000001
 #define TRACE_INIT_EV            40000002
@@ -455,6 +456,7 @@ enum {
 #define CUDAMEMCPY_GPU_EV        63200003
 #define CUDATHREADBARRIER_GPU_EV 63200004
 #define CUDAMEMCPYASYNC_GPU_EV   63200007
+/* To associate stream with Paraver thread */
 #define CUDASTREAMBARRIER_THID_EV 63300000
 
 #define OPENCL_KERNEL_NAME_EV                         64200000
@@ -538,6 +540,9 @@ enum {
 #define OPENCL_CLENQUEUEREADBUFFERRECT_ASYNC_ACC_EV   64100050
 #define OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_ACC_EV      64100051
 #define OPENCL_CLENQUEUEWRITEBUFFERRECT_ASYNC_ACC_EV  64100052
+/* To associate command queue with Paraver thread */
+#define OPENCL_CLFINISH_THID_EV                       64300000
+
 
 #define CALLER_EV                70000000
 #define CALLER_LINE_EV           80000000
