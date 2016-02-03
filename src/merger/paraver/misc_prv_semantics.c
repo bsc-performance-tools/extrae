@@ -576,13 +576,14 @@ static int Sampling_Address_Event (event_t * current,
 		for (u = 0; u < MAX_CALLERS; u++)
 		{
 			if (CallerAddresses[u] != 0)
+			{
 				trace_paraver_event (cpu, ptask, task, thread, current_time,
 				  SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+u,
 				  CallerAddresses[u]);
+			}
 		}
-
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
-		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV, CallerAddresses);
+		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV, 0);
 	}
 	else
 		trace_paraver_event (cpu, ptask, task, thread, current_time,

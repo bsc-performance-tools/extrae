@@ -682,8 +682,8 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 	int prev_cpu, prev_ptask, prev_task, prev_thread;
 	unsigned long long prev_time;
 	paraver_rec_t *cur;
-	int i = 0;
 	UINT64 CallerAddresses[MAX_CALLERS];
+	unsigned nevents = 0;
 
 	// Here we store the caller addresses for a reference to a dynamic mem object
 	// Set to 0 initially
@@ -703,19 +703,19 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 		if (prev_cpu == cur->cpu && prev_ptask == cur->ptask &&
 		prev_task == cur->task && prev_thread == cur->thread &&
 		prev_time == cur->time && cur->type == 2 &&
-		i < MAX_EVENT_COUNT_IN_MULTI_EVENT)
+		nevents < MAX_EVENT_COUNT_IN_MULTI_EVENT)
 		{
 			/* Copy the value by default... we'll change it if needed */
-			values[i] = cur->value;
-			events[i] = cur->event;
+			values[nevents] = cur->value;
+			events[nevents] = cur->event;
 
 #if defined(DEBUG)
 			fprintf (stderr, "mpi2prv: paraver_build_multi_event %d:%d:%d <%d,%llu> @ %llu\n",
-			  prev_ptask, prev_task, prev_thread, events[i], values[i], prev_time);
+			  prev_ptask, prev_task, prev_thread, events[nevents], values[nevents], prev_time);
 #endif
 
 			if (cur->event == MPI_GLOBAL_OP_COMM)
-				values[i] = (UINT64)alies_comunicador ((int) cur->value, cur->ptask, cur->task);
+				values[nevents] = (UINT64)alies_comunicador ((int) cur->value, cur->ptask, cur->task);
 #if defined(HAVE_BFD)
 			else
 			{
@@ -730,7 +730,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				  cur->event == PTHREAD_FUNC_EV || cur->event == PTHREAD_FUNC_LINE_EV ||
 				  cur->event == CUDAFUNC_EV || cur->event == CUDAFUNC_LINE_EV)
 				{
-					values[i] = paraver_translate_bfd_event (cur->ptask,
+					values[nevents] = paraver_translate_bfd_event (cur->ptask,
 					  cur->task, cur->event, cur->value);
 				}
 
@@ -738,28 +738,26 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				    cur->event < SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+MAX_CALLERS)
 				{
 					CallerAddresses[cur->event-SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV] =
-					  values[i];
+					  cur->value;
 				}
 
 				if (cur->event == SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV)
 				{
-					values[i] = Address2Info_Translate_MemReference (cur->ptask,
+					values[nevents] = Address2Info_Translate_MemReference (cur->ptask,
 					  cur->task, cur->value, MEM_REFERENCE_DYNAMIC,
 					  CallerAddresses);
 
 					// Set to 0 again after emitting the information
-					for (i = 0; i < MAX_CALLERS; i++)
-						CallerAddresses[i] = 0;
+					memset (CallerAddresses, 0, sizeof(CallerAddresses));
 				}
 				else if (cur->event == SAMPLING_ADDRESS_STATIC_OBJECT_EV)
 				{
-					values[i] = Address2Info_Translate_MemReference (cur->ptask,
+					values[nevents] = Address2Info_Translate_MemReference (cur->ptask,
 					  cur->task, cur->value, MEM_REFERENCE_STATIC, NULL);
-					events[i]  = SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV;
+					events[nevents]  = SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV;
 
 					// Set to 0 again after emitting the information
-					for (i = 0; i < MAX_CALLERS; i++)
-						CallerAddresses[i] = 0;
+					memset (CallerAddresses, 0, sizeof(CallerAddresses));
 				}
 
 				if (Extrae_Vector_Count (&RegisteredCodeLocationTypes) > 0)
@@ -773,7 +771,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 
 						if (element->FunctionType == cur->event ||
 						    element->LineType == cur->event)
-							values[i] = paraver_translate_bfd_event (cur->ptask,
+							values[nevents] = paraver_translate_bfd_event (cur->ptask,
 							  cur->task, cur->event, cur->value);
 					}
 				}
@@ -786,11 +784,11 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					  cur->event == OMPFUNC_EV || cur->event == TASKFUNC_INST_EV ||
 					  cur->event == PTHREAD_FUNC_EV || cur->event == CUDAFUNC_EV)
 					{
-						if (values[i] == UNRESOLVED_ID+1 || values[i] == NOT_FOUND_ID+1)
+						if (cur->value == UNRESOLVED_ID+1 || cur->value == NOT_FOUND_ID+1)
 						{
-							i++;
-							events[i] = LIBRARY_EV;
-							values[i] = Address2Info_GetLibraryID (cur->ptask, cur->task, cur->value);
+							nevents++;
+							events[nevents] = LIBRARY_EV;
+							values[nevents] = Address2Info_GetLibraryID (cur->ptask, cur->task, cur->value);
 						}
 					}
 					else
@@ -805,11 +803,11 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 									Extrae_Vector_Get (&RegisteredCodeLocationTypes, u);
 	
 								if (element->FunctionType == cur->event || element->LineType == cur->event)
-									if (values[i] == UNRESOLVED_ID+1 || values[i] == NOT_FOUND_ID+1)
+									if (cur->value == UNRESOLVED_ID+1 || cur->value == NOT_FOUND_ID+1)
 									{
-										i++;
-										events[i] = LIBRARY_EV;
-										values[i] = Address2Info_GetLibraryID (cur->ptask, cur->task, cur->value);
+										nevents++;
+										events[nevents] = LIBRARY_EV;
+										values[nevents] = Address2Info_GetLibraryID (cur->ptask, cur->task, cur->value);
 									}
 							}
 						}
@@ -817,7 +815,11 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 				}
 			}
 #endif
-			i++;
+
+			/* These events don't go into final tracefile */
+			if (!(cur->event >= SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV &&
+			    cur->event < SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+MAX_CALLERS))
+				nevents++;
 		}
 		else
 			break;
@@ -827,11 +829,11 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 	}
 
 	paraver_multi_event (fdz, prev_cpu, prev_ptask, prev_task, prev_thread,
-	  prev_time, i, events, values);
+	  prev_time, nevents, events, values);
 
 	*current = cur;
 	if (num_events != NULL)
-		*num_events = i;
+		*num_events = nevents;
 	return 0;
 #undef MAX_EVENT_COUNT_IN_MULTI_EVENT
 }
