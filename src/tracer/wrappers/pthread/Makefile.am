@@ -18,6 +18,6 @@ libwrap_pthread_la_CFLAGS = \
  -I$(top_srcdir) \
  -I$(top_srcdir)/include \
  -I$(COMMON_INC) \
- $(UNWIND_CFLAGS)
+ $(UNWIND_CFLAGS) $(PTHREAD_CFLAGS)
 libwrap_pthread_la_SOURCES = $(WRAPPERS_PTHREAD)
 
