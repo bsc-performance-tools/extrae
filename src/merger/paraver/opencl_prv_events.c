@@ -325,7 +325,6 @@ void WriteEnabled_OpenCL_Operations (FILE * fd)
 
 	if (anypresent)
 	{
-
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n", 0, OPENCL_BASE_TYPE_ACC_EV, "Accelerator OpenCL call");
 		fprintf (fd, "VALUES\n");

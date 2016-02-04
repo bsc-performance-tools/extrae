@@ -131,10 +131,6 @@ static int OpenCL_Acc_Call (event_t * event, unsigned long long time,
 		  OPENCL_CLMEMOP_SIZE_EV, EvParam);
 	}
 
-	if (EvType == OPENCL_CLFINISH_EV)
-		trace_paraver_event (cpu, ptask, task, thread, time,
-		  OPENCL_CLFINISH_THID_EV, 1+Get_EvMiscParam(event));
-
 	return 0;
 }
 
@@ -209,6 +205,10 @@ static int OpenCL_Host_Call (event_t * event, unsigned long long time,
 		trace_paraver_event (cpu, ptask, task, thread, time,
 		  OPENCL_CLMEMOP_SIZE_EV, EvParam);
 	}
+
+	if (EvType == OPENCL_CLFINISH_EV)
+		trace_paraver_event (cpu, ptask, task, thread, time,
+		  OPENCL_CLFINISH_THID_EV, 1+Get_EvMiscParam(event));
 
 	return 0;
 }
