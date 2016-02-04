@@ -31,8 +31,8 @@ c      call MPI_Pcontrol(0)
          do i=1, NITERS
             call MakeIO(IOSIZE, rank)
             call WasteCPU(IOSIZE, rank, r)
-            call MPI_Bsend(r, 1, MPI_REAL8, rank+1, rank, MPI_COMM_WORLD, 
-     1           error)
+            call MPI_Bsend(r, 1, MPI_REAL8, rank+1, rank,
+     1           MPI_COMM_WORLD, error)
             call MPI_Bsend(sndmsg, MSGSIZE, MPI_INTEGER1, rank+1, rank,
      1           MPI_COMM_WORLD, error)
             call MakeIO(IOSIZE, rank)
