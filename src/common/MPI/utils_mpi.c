@@ -81,14 +81,14 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 			char *template = malloc (length*sizeof(char));
 			if (!template)
 			{
-				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
+				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
 				exit (-1);
 			}
 			sprintf (template, "%s/shared-disk-testXXXXXX", directory);
 			ret = mkstemp (template);
 			if (ret < 0)
 			{
-				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to create temporal file!\n", directory);
+				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to create temporal file!\n", directory);
 				exit (-1);
 			}
 			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
@@ -111,7 +111,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 			template = malloc (length*sizeof(char));
 			if (!template)
 			{
-				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
+				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
 				exit (-1);
 			}
 			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -164,20 +164,20 @@ static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
 			char *template = malloc (length*sizeof(char));
 			if (!template)
 			{
-				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
+				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
 				exit (-1);
 			}
 			sprintf (template, "%s/shared-disk-testXXXXXX", directory);
 			int ret = mkstemp (template);
 			if (ret < 0)
 			{
-				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to create temporal file!\n", directory);
+				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to create temporal file!\n", directory);
 				exit (-1);
 			}
 			ssize_t r = write (ret, name, strlen(name)+1);
 			if (r != (ssize_t) (strlen(name)+1))
 			{
-				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to write to temporal file!\n", directory);
+				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to write to temporal file!\n", directory);
 				exit (-1);
 			}
 			PMPI_Bcast (&length, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
@@ -198,7 +198,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
 			template = malloc (length*sizeof(char));
 			if (!template)
 			{
-				fprintf (stderr, PACKAGE_NAME":Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
+				fprintf (stderr, PACKAGE_NAME": Error! cannot determine whether %s is a shared disk. Failed to allocate memory!\n", directory);
 				exit (-1);
 			}
 			PMPI_Bcast (template, length, MPI_CHAR, 0, MPI_COMM_WORLD);
