@@ -178,9 +178,11 @@ void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
 
 		/* Was the thread created before (i.e. did we executed a cudadevicereset?) */
 		if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-			sprintf (_threadname, "OpenCL-%s-CQ%d-%s", _device_type, 1, _hostname);
+			sprintf (_threadname, "OpenCL-%s-CQ%d-%s", _device_type, 1+idx,
+			  _hostname);
 		else
-			sprintf (_threadname, "OpenCL-%s-CQ%d-%s", _device_type, 1, "unknown-host");
+			sprintf (_threadname, "OpenCL-%s-CQ%d-%s", _device_type, 1+idx,
+			  "unknown-host");
 
 		prev_threadid = Extrae_search_thread_name (_threadname, &found);
 
@@ -334,10 +336,7 @@ static void Extrae_OpenCL_comm_at_OpenCL (RegisteredCommandQueue_t * cq, unsigne
 			  Extrae_OpenCL_tag_generator(),
 			  Extrae_OpenCL_tag_generator());
 		}
-	}
-	else
-	{
-		if (cq->prv_event[pos] == OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV ||
+		else if (cq->prv_event[pos] == OPENCL_CLENQUEUENDRANGEKERNEL_ACC_EV ||
 		    cq->prv_event[pos] == OPENCL_CLENQUEUETASK_ACC_EV ||
 		    cq->prv_event[pos] == OPENCL_CLENQUEUENATIVEKERNEL_ACC_EV)
 		{
@@ -346,7 +345,10 @@ static void Extrae_OpenCL_comm_at_OpenCL (RegisteredCommandQueue_t * cq, unsigne
 			  Extrae_OpenCL_tag_generator(),
 			  Extrae_OpenCL_tag_generator());
 		}
-		else if (cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV ||
+	}
+	else
+	{
+		if (cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV ||
 		    cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFER_ASYNC_ACC_EV)
 		{
 			THREAD_TRACE_USER_COMMUNICATION_EVENT(cq->threadid, t,

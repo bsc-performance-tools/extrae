@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 10Feb2016 OpenCL fixes: ClFinish communication to reach end,
+              emit OpenCL synchro at the ClFinish begin,
+              communication of executing kernel goes to beginning
  * 04Feb2016 Fix MPI/F77 examples. Neither IBM/Intel compilers liked the
                extra space.
  * 03Feb2015 Sanitized memory reference samples point to the variable

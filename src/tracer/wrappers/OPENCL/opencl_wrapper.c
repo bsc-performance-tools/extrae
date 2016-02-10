@@ -1121,8 +1121,8 @@ cl_int clFinish (cl_command_queue q)
 
 		if (!Extrae_Prepare_CommandQueue)
 		{
-			Extrae_OpenCL_clQueueFlush (q, TRUE);
 			Extrae_Probe_clFinish_Exit ();
+			Extrae_OpenCL_clQueueFlush (q, TRUE);
 		}
 	}
 	else if (!(EXTRAE_ON() && Extrae_get_trace_OpenCL()) && real_clFinish != NULL)
