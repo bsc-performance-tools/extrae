@@ -70,7 +70,8 @@ MPI_EXAMPLE_FILES+=\
  $(top_srcdir)/example/BGQ/ll_merge.sh \
  $(top_srcdir)/example/BGQ/ll_parmerge.sh \
  $(top_srcdir)/example/BGQ/ll_trace.sh \
- $(top_srcdir)/example/BGQ/Makefile example/BGQ/mpi_ping.f \
+ $(top_srcdir)/example/BGQ/Makefile \
+ $(top_srcdir)/example/BGQ/mpi_ping.f \
  $(top_srcdir)/example/BGQ/papi_bgq_avail.txt \
  $(top_srcdir)/example/BGQ/papi_bgq_native_avail.txt \
  $(top_srcdir)/example/BGQ/extrae.xml
