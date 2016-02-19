@@ -306,31 +306,6 @@ static void Process_MPIT_File (char *file, char *thdname, int *cptask,
 	nTraces++;
 }
 
-/******************************************************************************
- **      Function name : strip
- **      Author : HSG
- **      Description : Removes spaces and control characters from a string.
- ******************************************************************************/
-
-static char *strip (char *buffer)
-{
-	int l = strlen (buffer);
-	int min = 0, max = l - 1;
-
-	if (min == max)
-		return NULL;
-
-	while (isspace (buffer[min]) || iscntrl (buffer[min]))
-		min++;
-
-	while (isspace (buffer[max]) || iscntrl (buffer[min]))
-		max--;
-
-	buffer[max + 1] = (char) 0;
-
-	return &(buffer[min]);
-}
-
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 void Read_SPAWN_file (char *mpit_file, int current_ptask)
 {
@@ -415,7 +390,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 			path[0] = thdname[0] = (char) 0;
 
 			info = sscanf (mybuffer, "%s named %s", path, thdname);
-			stripped = strip (path);
+			stripped = trim (path);
 
 			if (strncmp (mybuffer, "--", 2) == 0)
 			{
@@ -1428,7 +1403,7 @@ int merger_post (int numtasks, int taskid)
 	if (taskid == 0)
 	{
 		fprintf (stdout, "mpi2prv: Checking for target directory existance...");
-		char *dirn = dirname(strdup(strip(get_merge_OutputTraceName())));
+		char *dirn = dirname(strdup(trim(get_merge_OutputTraceName())));
 		if (!directory_exists(dirn))
 		{
 			fprintf (stdout, " does not exist. Creating ...");
@@ -1445,11 +1420,11 @@ int merger_post (int numtasks, int taskid)
 	}
 
 	if (get_option_merge_ParaverFormat())
-		error = Paraver_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
+		error = Paraver_ProcessTraceFiles (trim(get_merge_OutputTraceName()),
 			nTraces, InputTraces, get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 	else
-		error = Dimemas_ProcessTraceFiles (strip(get_merge_OutputTraceName()),
+		error = Dimemas_ProcessTraceFiles (trim(get_merge_OutputTraceName()),
 			nTraces, InputTraces, get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 

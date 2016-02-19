@@ -86,7 +86,7 @@ int is_Alphabetic(char c)
 }
 
 /* Supress the spaces at both sides of the string sourceStr */
-static char *trim (char *sourceStr)
+char *trim (char *sourceStr)
 { 
   int sourceLen = 0;
   int left = 0, right = 0;

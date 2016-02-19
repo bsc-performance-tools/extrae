@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 19Feb2016 Fixed bug preparing the output trace name
  * 10Feb2016 OpenCL fixes: ClFinish communication to reach end,
               emit OpenCL synchro at the ClFinish begin,
               communication of executing kernel goes to beginning
