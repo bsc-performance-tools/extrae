@@ -47,7 +47,6 @@ static char UNUSED rcsid[] = "$Id: wrapper.c 2336 2013-11-26 09:30:20Z harald $"
 static int __TASKID = 0;
 static int __NUMTASKS = 1;
 
-JavaVM* javaVM = NULL;
 jclass activityClass;
 jobject activityObj;
 
@@ -85,6 +84,7 @@ JNIEXPORT void JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_SetNumTasks(
 
 	__NUMTASKS = numtasks;
 	Extrae_set_numtasks_function (get_num_tasks);
+	Extrae_Allocate_Task_Bitmap (numtasks);
 }
 
 JNIEXPORT jint JNICALL Java_es_bsc_cepbatools_extrae_Wrapper_GetNumTasks(
