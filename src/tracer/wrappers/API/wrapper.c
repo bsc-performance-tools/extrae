@@ -2257,7 +2257,7 @@ void Backend_Finalize (void)
 				SAMPLING_BUFFER(thread) = NULL;
 #endif
 #if defined(PTHREAD_SUPPORT)
-				pThreads[u] = (pthread_t)0;
+				pThreads[thread] = (pthread_t)0;
 #endif
 			}
 			xfree(TracingBuffer);
