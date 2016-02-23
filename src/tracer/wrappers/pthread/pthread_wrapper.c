@@ -237,8 +237,6 @@ static void * pthread_create_hook (void *p1)
 
 	Backend_SetpThreadIdentifier (i->pthreadID);
 
-	/* incialitzar hwc, mode (detail/burst), primers events (tempsinit?) */
-
 	/* Notify the calling thread */
 	pthread_mutex_lock_real (&(i->lock));
 	pthread_cond_signal (&(i->wait));
@@ -250,10 +248,14 @@ static void * pthread_create_hook (void *p1)
 
 	res = routine (arg);
 
-	Probe_pthread_Function_Exit ();
-	Backend_Leave_Instrumentation ();
-
-	Backend_Flush_pThread (pthread_self());
+	/* Another thread may have called Extrae_fini() while executing
+	   the routine thread */
+	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
+	{
+		Probe_pthread_Function_Exit ();
+		Backend_Leave_Instrumentation ();
+		Backend_Flush_pThread (pthread_self());
+	}
 
 	return res;
 }
@@ -400,7 +402,6 @@ void pthread_exit (void *p1)
 			Probe_pthread_Function_Exit();
 			Probe_pthread_Exit_Entry();
 			Backend_Leave_Instrumentation ();
-
 			Backend_Flush_pThread (pthread_self());
 		}
 
