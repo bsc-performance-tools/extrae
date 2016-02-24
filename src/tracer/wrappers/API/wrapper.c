@@ -1415,6 +1415,8 @@ void Backend_Flush_pThread (pthread_t t)
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 		if (pThreads[u] == t)
 		{
+			pThreads[u] = (pthread_t)0; // This slot won't be used in the future
+
 			Buffer_Flush(TRACING_BUFFER(u));
 			Backend_Finalize_close_mpits (getpid(), u, FALSE);
 
@@ -1424,8 +1426,6 @@ void Backend_Flush_pThread (pthread_t t)
 			Buffer_Free (SAMPLING_BUFFER(u));
 			SAMPLING_BUFFER(u) = NULL;
 #endif
-
-			pThreads[u] = (pthread_t)0;
 			break;
 		}
 }
@@ -2250,14 +2250,14 @@ void Backend_Finalize (void)
 
 			for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 			{
+#if defined(PTHREAD_SUPPORT)
+				pThreads[thread] = (pthread_t)0;
+#endif
 				Buffer_Free (TRACING_BUFFER(thread));
 				TRACING_BUFFER(thread) = NULL;
 #if defined(SAMPLING_SUPPORT)
 				Buffer_Free (SAMPLING_BUFFER(thread));
 				SAMPLING_BUFFER(thread) = NULL;
-#endif
-#if defined(PTHREAD_SUPPORT)
-				pThreads[thread] = (pthread_t)0;
 #endif
 			}
 			xfree(TracingBuffer);
