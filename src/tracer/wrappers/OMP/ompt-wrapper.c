@@ -64,7 +64,7 @@ static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2487 2014-02-20 15:48:43Z haral
 
 
 // # define EMPTY_OMPT_CALLBACKS /* For Benchmarking purposes */
-//  #define DEBUG
+// #define DEBUG
 // #define DEBUG_THREAD
 
 //*****************************************************************************
@@ -195,6 +195,11 @@ unsigned Extrae_OMPT_threadid (void)
 	pthread_mutex_unlock (&mutex_thids);
 #endif
 	fprintf (stderr, "OMPTOOL: Failed to search OpenMP(T) thread %lu\n", thd);
+	fprintf (stderr, "OMPTOOL: Registered threads are (%u): ", n_ompt_thids);
+	for (u = 0; u < n_ompt_thids; u++)
+		fprintf (stderr, "ompt thid %lu valid %d ", ompt_thids[u].thid, ompt_thids[u].in_use);
+	fprintf (stderr, "\n");
+
 	assert (1 != 1);
 	return 0;
 }
@@ -419,7 +424,7 @@ void Extrae_OMPT_event_sections_end (ompt_parallel_id_t pid, ompt_task_id_t tid)
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid);
+	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
 	Extrae_OMPT_Sections_Exit();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
@@ -468,7 +473,7 @@ void Extrae_OMPT_event_single_in_block_end (ompt_parallel_id_t pid,
 	UNREFERENCED_PARAMETER(pid);
 	UNREFERENCED_PARAMETER(tid);
 
-	PROTOTYPE_MESSAGE(" (%ld, %ld, %p)", pid, tid);
+	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
 	Extrae_OMPT_Single_Exit ();
 #endif /* EMPTY_OMPT_CALLBACKS */
 }
@@ -939,7 +944,7 @@ void Extrae_OMPT_event_task_dependences ( /* for new dependences */
 	int i;
 
 	for (i = 0; i < ndeps; i++)
-		printf ("dependence [%d/%d] : variable @ %p, len = %u, flags = %d\n", i+1, ndeps, deps[i].variable_addr, deps[i].len, deps[i].flags);
+		printf ("dependence [%d/%d] : variable @ %p, len = %u, flags = %d\n", i+1, ndeps, deps[i].variable_addr);
 #endif
 
 #endif /* EMPTY_OMPT_CALLBACKS */
