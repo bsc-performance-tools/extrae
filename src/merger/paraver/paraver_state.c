@@ -60,7 +60,7 @@ int Get_Last_State (void)
 	return Last_State;
 }
 
-unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned int task, unsigned int thread)
+unsigned Push_State (unsigned new_state, unsigned ptask, unsigned task, unsigned thread)
 {	
 	unsigned int top_state;
 	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
@@ -85,12 +85,21 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 		}
 	}
 
-	if (thread_info->nStates + 1 >= MAX_STATES)
+	/* Do we have space to inser the state? If not, allocate it! */
+	if (thread_info->nStates == thread_info->nStates_Allocated)
 	{
-		fprintf(stderr, "mpi2prv: Error! MAX states stack reached (%d:%d:%d)\n", ptask, task, thread);
-		Dump_States_Stack(ptask, task, thread);
-		exit(-1);
+		thread_info->State_Stack = (int*) realloc (thread_info->State_Stack,
+		  (thread_info->nStates_Allocated + MAX_STATES_ALLOCATION)*sizeof(int));
+
+		if (thread_info->State_Stack == NULL)
+		{
+			fprintf (stderr, "mpi2prv: Error! Cannot reallocate state stack for object %d:%d:%d\n", ptask, task, thread);
+			exit (-1);
+		}
+		else
+			thread_info->nStates_Allocated += MAX_STATES_ALLOCATION;
 	}
+
 	thread_info->State_Stack[thread_info->nStates++] = new_state;
 
 #if defined(DEBUG_STATES)
@@ -100,7 +109,7 @@ unsigned int Push_State (unsigned int new_state, unsigned int ptask, unsigned in
 	return new_state;
 }
 
-unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int task, unsigned int thread)
+unsigned Pop_State (unsigned old_state, unsigned ptask, unsigned task, unsigned thread)
 {
    unsigned int top_state;
    thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
@@ -149,7 +158,7 @@ unsigned int Pop_State (unsigned int old_state, unsigned int ptask, unsigned int
    return top_state;
 }
 
-static unsigned int Pop_State_On_Top(unsigned int ptask, unsigned int task, unsigned int thread)
+static unsigned Pop_State_On_Top(unsigned ptask, unsigned task, unsigned thread)
 {
    unsigned int top_state;
    thread_t * thread_info;
@@ -167,7 +176,7 @@ static unsigned int Pop_State_On_Top(unsigned int ptask, unsigned int task, unsi
    return top_state;
 }
 
-unsigned int Pop_Until (unsigned int until_state, unsigned int ptask, unsigned int task, unsigned int thread)
+unsigned Pop_Until (unsigned until_state, unsigned ptask, unsigned task, unsigned thread)
 {
    unsigned int top_state;
    thread_t * thread_info;
@@ -183,7 +192,8 @@ unsigned int Pop_Until (unsigned int until_state, unsigned int ptask, unsigned i
 }
 
 
-unsigned int Switch_State (unsigned int state, int condition, unsigned int ptask, unsigned int task, unsigned int thread)
+unsigned Switch_State (unsigned state, int condition, unsigned ptask, unsigned task,
+	unsigned thread)
 {
    if (condition)
    {
@@ -195,7 +205,7 @@ unsigned int Switch_State (unsigned int state, int condition, unsigned int ptask
    }
 }
 
-unsigned int Top_State (unsigned int ptask, unsigned int task, unsigned int thread)
+unsigned Top_State (unsigned ptask, unsigned task, unsigned thread)
 {
    thread_t * thread_info;
   
@@ -210,7 +220,7 @@ unsigned int Top_State (unsigned int ptask, unsigned int task, unsigned int thre
    }
 }
 
-int State_Excluded (unsigned int state)
+int State_Excluded (unsigned state)
 {
    int i, excluded = FALSE;
 
@@ -228,7 +238,8 @@ int State_Excluded (unsigned int state)
    return excluded;
 }
 
-void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread, int mode)
+void Initialize_Trace_Mode_States (unsigned cpu, unsigned ptask, unsigned task,
+	unsigned thread, int mode)
 {
 	thread_t * thread_info; 
 
@@ -273,7 +284,7 @@ void Initialize_Trace_Mode_States (unsigned int cpu, unsigned int ptask, unsigne
 	}
 }
 
-void Dump_States_Stack (unsigned int ptask, unsigned int task, unsigned int thread)
+void Dump_States_Stack (unsigned ptask, unsigned task, unsigned thread)
 {
   int i = 0;
   thread_t *thread_info = NULL;
@@ -294,6 +305,11 @@ void Initialize_States (FileSet_t * fset)
 
    num_excluded_states = 1;
    excluded_states = (int *)malloc(sizeof(int) * num_excluded_states);
+	if (excluded_states == NULL)
+	{
+		fprintf(stderr, "mpi2prv: Fatal error! Cannot allocate memory for excluded_states\n");
+		exit (-1);
+	}
    excluded_states[0] = STATE_IDLE;
 
    for (obj = 0; obj < num_Files_FS (fset); obj++)

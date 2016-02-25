@@ -45,8 +45,8 @@
 #include "address_space.h"
 
 
-#define MAX_STATES  128
-#define MAX_CALLERS 100
+#define MAX_STATES_ALLOCATION  128
+#define MAX_CALLERS            100
 
 #define GET_NUM_TASKS(ptask) \
     (ApplicationTable.ptasks[ptask - 1].ntasks)
@@ -72,8 +72,9 @@ typedef struct thread_st
 	unsigned int HWCChange_count;
 
 	/* Information of the stack */
-	int State_Stack[MAX_STATES];
+	int *State_Stack;
 	int nStates;
+	int nStates_Allocated;
 
 	/* Stores the time of the last event */
 	UINT64 Previous_Event_Time;

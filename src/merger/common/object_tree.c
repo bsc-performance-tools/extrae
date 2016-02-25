@@ -132,7 +132,9 @@ void InitializeObjectTable (unsigned num_appl, struct input_t * files,
 
 				thread_info->dimemas_size = 0;
 				thread_info->virtual_thread = thread+1;
+				thread_info->State_Stack = NULL;
 				thread_info->nStates = 0;
+				thread_info->nStates_Allocated = 0;
 				thread_info->First_Event = TRUE;
 				thread_info->HWCChange_count = 0;
 				for (v = 0; v < MAX_CALLERS; v++)
