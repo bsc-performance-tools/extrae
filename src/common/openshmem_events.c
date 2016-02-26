@@ -21,16 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $File$
- | @last_commit: $Date$
- | @version: $Revision$
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id$";
-
 #include "openshmem_events.h"
 
 char *openshmem_events_labels[COUNT_OPENSHMEM_EVENTS] = {

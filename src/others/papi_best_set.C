@@ -21,34 +21,27 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/others/papi_best_set.c $
- | @last_commit: $Date: 2011-11-30 11:58:56 +0100 (mié, 30 nov 2011) $
- | @version:     $Revision: 890 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id: papi_best_set.c 890 2011-11-30 10:58:56Z harald $";
-
-#ifdef HAVE_STDIO_H
+#if HAVE_STDIO_H
 # include <stdio.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
-#ifdef HAVE_STRING_H
+#if HAVE_STRING_H
 # include <string.h>
 #endif
-#ifdef HAVE_ASSERT_H
+#if HAVE_ASSERT_H
 # include <assert.h>
 #endif
-#ifdef HAVE_LIBGEN_H
+#if HAVE_LIBGEN_H
 # include <libgen.h>
 #endif
-#ifdef HAVE_MATH_H
+#if HAVE_MATH_H
 # include <math.h>
 #endif
-#ifdef HAVE_ASSERT_H
+#if HAVE_ASSERT_H
 # include <assert.h>
 #endif
 

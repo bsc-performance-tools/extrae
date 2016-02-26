@@ -23,8 +23,6 @@
 
 #include "common.h"
 
-static char UNUSED rcsid[] = "$Id$";
-
 #if HAVE_STDLIB_H
 # include <stdlib.h>
 #endif

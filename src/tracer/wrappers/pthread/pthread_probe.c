@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/probes/pthread/pthread_probe.c $
- | @last_commit: $Date: 2013-07-19 10:37:38 +0200 (Fri, 19 Jul 2013) $
- | @version:     $Revision: 1946 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: pthread_probe.c 1946 2013-07-19 08:37:38Z harald $";
 
 #include "threadid.h"
 #include "wrapper.h"

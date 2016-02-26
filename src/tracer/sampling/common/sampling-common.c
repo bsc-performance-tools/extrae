@@ -20,16 +20,7 @@
  *                                 ---------                                 *
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
-
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/sampling.c $
- | @last_commit: $Date: 2014-12-15 17:39:59 +0100 (lun, 15 dic 2014) $
- | @version:     $Revision: 3077 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: sampling.c 3077 2014-12-15 16:39:59Z harald $";
 
 #include "sampling-common.h"
 

@@ -21,21 +21,15 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #ifndef MPI_AUX_H_INCLUDED
 #define MPI_AUX_H_INCLUDED
 
 #define MPI_CHECK(mpi_error, routine, reason) \
 	if (MPI_SUCCESS != mpi_error) \
 	{ \
-		fprintf (stderr, "mpi2prv: Error in %s (file %s, line %d, routine %s, rcsid: %s)\n"\
+		fprintf (stderr, "mpi2prv: Error in %s (file %s, line %d, routine %s)\n"\
 		                 "Reason: %s\n", \
-			#routine, __FILE__, __LINE__, __func__, rcsid, reason ); \
+			#routine, __FILE__, __LINE__, __func__, reason ); \
 		fflush (stderr); \
 		exit (1); \
 	}

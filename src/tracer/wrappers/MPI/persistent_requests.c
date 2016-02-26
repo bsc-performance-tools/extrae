@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/persistent_requests.c $
- | @last_commit: $Date: 2015-07-16 15:52:02 +0200 (Thu, 16 Jul 2015) $
- | @version:     $Revision: 3383 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: persistent_requests.c 3383 2015-07-16 13:52:02Z harald $";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>

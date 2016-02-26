@@ -21,12 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL$
- | @last_commit: $Date$
- | @version:     $Revision$
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #include <common.h>
 
 #ifdef HAVE_STDLIB_H
@@ -42,8 +36,6 @@
 #include "addresses.h"
 
 #define AC_ALLOC_CHUNK 256
-
-static char UNUSED rcsid[] = "$Id$";
 
 void AddressCollector_Initialize (struct address_collector_t *ac)
 {

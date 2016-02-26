@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/MPI/mpi_wrapper.c $
- | @last_commit: $Date: 2015-06-25 12:32:34 +0200 (Thu, 25 Jun 2015) $
- | @version:     $Revision: 3370 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: mpi_wrapper.c 3370 2015-06-25 10:32:34Z harald $";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

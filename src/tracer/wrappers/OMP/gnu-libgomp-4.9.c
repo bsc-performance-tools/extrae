@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/OMP/gnu-libgomp-4.2.c $
- | @last_commit: $Date: 2014-07-11 12:38:09 +0200 (vie, 11 jul 2014) $
- | @version:     $Revision: 2824 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: gnu-libgomp-4.2.c 2824 2014-07-11 10:38:09Z harald $";
 
 #ifdef HAVE_DLFCN_H
 # define __USE_GNU

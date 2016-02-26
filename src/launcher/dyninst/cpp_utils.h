@@ -21,12 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/basic-blocks/src/launcher/dyninst/cpp_utils.h $
- | @last_commit: $Date: 2013-07-03 17:52:21 +0200 (Wed, 03 Jul 2013) $
- | @version:     $Revision: 1864 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #ifndef _UTILS_H_INCLUDED_
 #define _UTILS_H_INCLUDED_
 #include <vector>

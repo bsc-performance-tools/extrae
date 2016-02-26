@@ -21,19 +21,10 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/online/SpectralWorker.cpp $
- | @last_commit: $Date: 2014-01-31 14:13:36 +0100 (vie, 31 ene 2014) $
- | @version:     $Revision: 2459 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #include "common.h"
 #include <sys/types.h>
 #include <signal.h>
 #include <unistd.h>
-
-
-static char UNUSED rcsid[] = "$Id: GremlinsWorker.cpp 2459 2014-01-31 13:13:36Z gllort $";
 
 #include "GremlinsWorker.h"
 #include "clock.h"

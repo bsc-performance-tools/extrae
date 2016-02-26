@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/probes/CUDA/cuda_probe.c $
- | @last_commit: $Date: 2014-05-30 11:31:50 +0200 (Fri, 30 May 2014) $
- | @version:     $Revision: 2710 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: cuda_probe.c 2710 2014-05-30 09:31:50Z harald $";
 
 #include "threadid.h"
 #include "wrapper.h"

@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/common/mpi2out.c $
- | @last_commit: $Date: 2013-06-17 11:52:32 +0200 (lun, 17 jun 2013) $
- | @version:     $Revision: 1841 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: mpi2out.c 1841 2013-06-17 09:52:32Z harald $";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

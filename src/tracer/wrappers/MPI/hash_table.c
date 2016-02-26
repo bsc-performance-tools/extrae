@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/hash_table.c $
- | @last_commit: $Date: 2014-04-17 13:54:14 +0200 (Thu, 17 Apr 2014) $
- | @version:     $Revision: 2619 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: hash_table.c 2619 2014-04-17 11:54:14Z gllort $";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

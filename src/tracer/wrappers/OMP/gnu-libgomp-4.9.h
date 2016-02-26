@@ -21,12 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/OMP/gnu-libgomp-4.2.h $
- | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (mar, 26 oct 2010) $
- | @version:     $Revision: 476 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #ifndef GNU_LIBGOMP_4_9_WRAPPER_H_
 #define GNU_LIBGOMP_4_9_WRAPPER_H_
 

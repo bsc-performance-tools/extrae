@@ -21,14 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/basic-blocks/src/launcher/dyninst/cpp_utils.C $
- | @last_commit: $Date: 2013-07-03 17:52:21 +0200 (Wed, 03 Jul 2013) $
- | @version:     $Revision: 1864 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
-
-
 #include "cpp_utils.h"
 
 void split(vector<string> &tokens, const string &text, char sep) {

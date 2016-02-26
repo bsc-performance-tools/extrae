@@ -21,12 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/tracer/wrappers/CUDA/cuda_wrapper.c $
- | @last_commit: $Date: 2013-04-30 15:15:24 +0200 (dt, 30 abr 2013) $
- | @version:     $Revision: 1696 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #ifndef OPENCL_WRAPPER_H_INCLUDED
 #define OPENCL_WRAPPER_H_INCLUDED
 

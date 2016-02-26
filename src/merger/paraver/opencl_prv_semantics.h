@@ -21,12 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/merger/paraver/mpi_prv_semantics.h $
- | @last_commit: $Date: 2010-10-26 14:58:30 +0200 (dt, 26 oct 2010) $
- | @version:     $Revision: 476 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #ifndef OPENCL_PRV_SEMANTICS_H
 #define OPENCL_PRV_SEMANTICS_H
 

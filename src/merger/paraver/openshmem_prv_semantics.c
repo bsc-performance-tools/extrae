@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/mpi_prv_semantics.c $
- | @last_commit: $Date: 2014-06-18 12:53:30 +0200 (mié, 18 jun 2014) $
- | @version:     $Revision: 2760 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: mpi_prv_semantics.c 2760 2014-06-18 10:53:30Z harald $";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>

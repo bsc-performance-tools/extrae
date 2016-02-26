@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/merger/paraver/cuda_prv_semantics.c $
- | @last_commit: $Date: 2015-10-05 13:18:26 +0200 (Mon, 05 Oct 2015) $
- | @version:     $Revision: 3417 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: cuda_prv_semantics.c 3417 2015-10-05 11:18:26Z harald $";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>

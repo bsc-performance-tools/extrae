@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/interfaces/MPI/mpi_interface.c $
- | @last_commit: $Date: 2015-05-05 13:59:18 +0200 (Tue, 05 May 2015) $
- | @version:     $Revision: 3297 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: mpi_interface.c 3297 2015-05-05 11:59:18Z harald $";
 
 #if defined(MPI3)
 #define MPI3_CONST const

@@ -21,12 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/merger/common/object_tree.h $
- | @last_commit: $Date: 2013-11-22 12:47:07 +0100 (Fri, 22 Nov 2013) $
- | @version:     $Revision: 2327 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #ifndef BFD_DATA_SYMBOL_H_INCLUDED
 #define BFD_DATA_SYMBOL_H_INCLUDED
 

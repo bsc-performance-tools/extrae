@@ -21,12 +21,6 @@ C*                                 ---------                                 *
 C*   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 C*****************************************************************************
 
-C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-C| @file: $HeadURL$
-C| @last_commit: $Date$
-C| @version:     $Revision$
-C* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 
-
 	INTEGER EXTRAE_DISABLE_ALL_OPTIONS 
 	PARAMETER (EXTRAE_DISABLE_ALL_OPTIONS=0)
 

@@ -22,14 +22,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/merger/common/vector.c $
- | @last_commit: $Date: 2012-04-19 10:31:02 +0200 (Thu, 19 Apr 2012) $
- | @version:     $Revision: 1060 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: vector.c 1060 2012-04-19 08:31:02Z harald $";
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>

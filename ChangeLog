@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 26Feb2016 States per thread are no longer allocated statically but
               reallocated on demand.
+             Remove SVN keywords for most of the files.
  * 19Feb2016 Fixed bug preparing the output trace name
  * 10Feb2016 OpenCL fixes: ClFinish communication to reach end,
               emit OpenCL synchro at the ClFinish begin,

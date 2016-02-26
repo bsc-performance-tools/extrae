@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.3/src/tracer/wrappers/CUDA/cuda_wrapper.c $
- | @last_commit: $Date: 2013-04-30 15:15:24 +0200 (dt, 30 abr 2013) $
- | @version:     $Revision: 1696 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: cuda_wrapper.c 1696 2013-04-30 13:15:24Z harald $";
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>

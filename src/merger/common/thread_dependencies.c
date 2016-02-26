@@ -22,7 +22,6 @@
 \*****************************************************************************/
 
 #include "common.h"
-
 #include "thread_dependencies.h"
 
 #ifdef HAVE_STDIO_H

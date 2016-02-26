@@ -21,14 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/branches/2.4/src/tracer/wrappers/OMP/omp_wrapper.c $
- | @last_commit: $Date: 2013-09-06 14:39:32 +0200 (Fri, 06 Sep 2013) $
- | @version:     $Revision: 2098 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 #include "common.h"
-
-static char UNUSED rcsid[] = "$Id: omp_wrapper.c 2098 2013-09-06 12:39:32Z harald $";
 
 #include "threadid.h"
 #include "wrapper.h"

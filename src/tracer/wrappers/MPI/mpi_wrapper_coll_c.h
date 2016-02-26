@@ -21,12 +21,6 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
- | @file: $HeadURL: https://svn.bsc.es/repos/ptools/extrae/trunk/src/tracer/wrappers/MPI/mpi_wrapper.h $
- | @last_commit: $Date: 2015-06-12 11:13:16 +0200 (Fri, 12 Jun 2015) $
- | @version:     $Revision: 3359 $
-\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-
 #ifndef MPI_WRAPPER_COLLECTIVES_C_DEFINED
 #define MPI_WRAPPER_COLLECTIVES_C_DEFINED
 
