@@ -267,8 +267,15 @@ If Java is enabled at configure time, a basic instrumentation library for serial
   \item \texttt{void Event (int type, long value);}\\
   Emits one event into the trace-file with the given pair type-value.
 
+  \item \texttt{void Eventandcounters (int type, long value);}\\
+  Emits one event into the trace-file with the given pair type-value as well as read the performance counters.
+
   \item \texttt{void nEvent (int types[], long values[]);}\\
   Emits a set of pair type-value at the same timestamp. Note that both arrays must be the same length to proceed correctly, otherwise the call ignores the call.
+
+  \item \texttt{void nEventandcounters (int types[], long values[]);}\\
+  Emits a set of pair type-value at the same timestamp as well as read the performance counters. Note that both arrays must be the same length to proceed correctly, otherwise the call ignores the call.
+
 
   \item \texttt{void defineEventType (int type, String description, long[] values, String[] descriptionValues);}\\
   Adds a description for a given event type (through \texttt{type} and \texttt{description} parameters). If the array \texttt{values} is non-null, then the array \texttt{descriptionValues} should be the an array of the same length and each entry should be a string describing each of the values given in \texttt{values}.
