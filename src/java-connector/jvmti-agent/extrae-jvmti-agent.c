@@ -127,7 +127,7 @@ static void JNICALL Extraej_cb_ThreadStart (jvmtiEnv *jvmti_env,
 	UNREFERENCED_PARAMETER(jni_env);
 
 	r = (*jvmti_env)->GetThreadInfo(jvmti_env, thread, &ti);
-	CHECK_JVMTI_ERROR(r, AddCapabilities);
+	CHECK_JVMTI_ERROR(r, GetThreadInfo);
 	Extrae_set_thread_name (THREADID, ti.name);
 }
 
