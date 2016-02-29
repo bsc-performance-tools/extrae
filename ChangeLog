@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 29Feb2016 Included the size of MPI-IO operations in the trace 
  * 26Feb2016 States per thread are no longer allocated statically but
               reallocated on demand.
              Remove SVN keywords for most of the files.

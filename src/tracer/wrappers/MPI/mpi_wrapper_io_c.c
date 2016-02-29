@@ -115,10 +115,13 @@ int MPI_File_close_C_Wrapper (MPI_File *fh)
 int MPI_File_read_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	int ierror;
+        int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_READ_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_READ_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
@@ -128,10 +131,13 @@ int MPI_File_read_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype da
 int MPI_File_read_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	int ierror;
+	int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_ALL_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_all (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_READ_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_READ_ALL_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
@@ -141,10 +147,13 @@ int MPI_File_read_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatyp
 int MPI_File_write_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	int ierror;
+	int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
@@ -154,10 +163,13 @@ int MPI_File_write_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype d
 int MPI_File_write_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	int ierror;
+	int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_ALL_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_all (fh, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_ALL_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
@@ -167,10 +179,13 @@ int MPI_File_write_all_C_Wrapper (MPI_File fh, void * buf, int count, MPI_Dataty
 int MPI_File_read_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	int ierror;
+	int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_at (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
@@ -180,10 +195,13 @@ int MPI_File_read_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int 
 int MPI_File_read_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int count, MPI_Datatype datatype, MPI_Status *status)
 {
 	int ierror;
+	int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_READ_AT_ALL_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_read_at_all (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_READ_AT_ALL_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
@@ -193,10 +211,13 @@ int MPI_File_read_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, 
 int MPI_File_write_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int count, MPI_Datatype datatype, MPI_Status* status)
 {
 	int ierror;
+	int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_at (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
@@ -206,10 +227,13 @@ int MPI_File_write_at_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int
 int MPI_File_write_at_all_C_Wrapper (MPI_File fh, MPI_Offset offset, void * buf, int count, MPI_Datatype datatype, MPI_Status* status)
 {
 	int ierror;
+	int size;
 
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+        PMPI_Type_size(datatype, &size);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_BEGIN, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_File_write_at_all (fh, offset, buf, count, datatype, status);
-	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (TIME, MPI_FILE_WRITE_AT_ALL_EV, EVT_END, EMPTY, count * size, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 

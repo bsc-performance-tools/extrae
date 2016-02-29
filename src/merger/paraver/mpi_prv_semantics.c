@@ -577,6 +577,31 @@ static int Other_MPI_Event (event_t * current_event,
 }
 
 /******************************************************************************
+ ***  MPIIO_Event:
+ ******************************************************************************/
+
+static int MPIIO_Event (event_t * current_event,
+        unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+        unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+        unsigned int EvType, EvValue;
+        UNREFERENCED_PARAMETER(fset);
+
+        EvType  = Get_EvEvent (current_event);
+        EvValue = Get_EvValue (current_event);
+
+        Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
+
+        trace_paraver_state (cpu, ptask, task, thread, current_time);
+        trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+        trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_IO_SIZE_EV, Get_EvSize( current_event ));
+
+        Enable_MPI_Soft_Counter (EvType);
+
+	return 0;
+}
+
+/******************************************************************************
  ***  Recv_Event
  ******************************************************************************/
 
@@ -1172,14 +1197,14 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_TEST_COUNTER_EV, MPI_TestSoftwareCounter_Event },
 	{ MPI_FILE_OPEN_EV, Other_MPI_Event },
 	{ MPI_FILE_CLOSE_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_ALL_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_ALL_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_AT_EV, Other_MPI_Event },
-	{ MPI_FILE_READ_AT_ALL_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_AT_EV, Other_MPI_Event },
-	{ MPI_FILE_WRITE_AT_ALL_EV, Other_MPI_Event },
+	{ MPI_FILE_READ_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_READ_AT_EV, MPIIO_Event },
+	{ MPI_FILE_READ_AT_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_AT_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_AT_ALL_EV, MPIIO_Event },
 	{ MPI_PUT_EV, MPI_RMA_Event},
 	{ MPI_GET_EV, MPI_RMA_Event},
 	{ MPI_WIN_CREATE_EV, MPI_RMA_Event},

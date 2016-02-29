@@ -303,6 +303,7 @@ enum {
 #define MPI_FILE_READ_AT_ALL_EV      50000107
 #define MPI_FILE_WRITE_AT_EV         50000108
 #define MPI_FILE_WRITE_AT_ALL_EV     50000109
+#define MPI_IO_SIZE_EV               50000110
 
 #define MPI_GET_EV                   50000200
 #define MPI_PUT_EV                   50000201
