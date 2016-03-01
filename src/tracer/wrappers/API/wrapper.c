@@ -1468,7 +1468,7 @@ void Backend_setNumTentativeThreads (int numofthreads)
  * Backend_preInitialize :
  ******************************************************************************/
 
-int Backend_preInitialize (int me, int world_size, char *config_file, int forked)
+int Backend_preInitialize (int me, int world_size, const char *config_file, int forked)
 {
 	unsigned u;
 	int runningInDynInst = FALSE;

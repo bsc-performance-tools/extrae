@@ -1414,7 +1414,7 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	}
 }
 
-void Parse_XML_File (int rank, int world_size, char *filename)
+void Parse_XML_File (int rank, int world_size, const char *filename)
 {
 	xmlNodePtr current_tag;
 	xmlDocPtr  xmldoc;

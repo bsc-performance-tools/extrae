@@ -192,7 +192,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 void setRequestedDynamicMemoryInstrumentation (int b);
 void setRequestedIOInstrumentation (int b);
 
-int Backend_preInitialize (int rank, int world_size, char *config_file, int forked);
+int Backend_preInitialize (int rank, int world_size, const char *config_file, int forked);
 int Backend_postInitialize (int rank, int world_size, unsigned init_event, unsigned long long InitTime, unsigned long long EndTime, char **node_list);
 void Backend_updateTaskID (void);
 

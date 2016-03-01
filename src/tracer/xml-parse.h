@@ -151,6 +151,6 @@
 #define TRACE_PEBS_SAMPLING_STORES      ((xmlChar*) "stores")
 #define TRACE_PEBS_MIN_MEM_LATENCY      ((xmlChar*) "minimum-latency")
 
-void Parse_XML_File (int rank, int world_size, char *filename);
+void Parse_XML_File (int rank, int world_size, const char *filename);
 
 #endif
