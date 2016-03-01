@@ -49,6 +49,18 @@
 
 //#define DEBUG
 
+struct PendingCommunication_t
+{
+	int sender, recver, tag, descriptor, match, match_zone;
+	off_t offset;
+};
+struct PendingComms_t 
+{
+	struct PendingCommunication_t *data;
+	int count, size;
+};
+
+
 static struct ForeignRecv_t **myForeignRecvs;
 static int *myForeignRecvs_count;
 static char **myForeignRecvs_used;
@@ -83,8 +95,8 @@ struct InterCommunicators_t
 static struct IntraCommunicators_t IntraCommunicators;
 static struct InterCommunicators_t InterCommunicators;
 
-struct PendingComms_t PendingComms;
-struct ForeignRecvs_t *ForeignRecvs;
+static struct PendingComms_t PendingComms;
+static struct ForeignRecvs_t *ForeignRecvs;
 
 #define FOREIGN_RECV_RESIZE_STEP ((1024*1024)/sizeof(struct ForeignRecv_t))
 #define INTRA_COMMUNICATORS_RESIZE_STEP ((1024*1024)/sizeof(struct IntraCommunicator_t))

@@ -33,20 +33,6 @@
 #include "common.h"
 #include "file_set.h"
 
-// extern struct Communicators_t Communicators;
-
-struct PendingCommunication_t
-{
-	int sender, recver, tag, descriptor, match, match_zone;
-	off_t offset;
-};
-struct PendingComms_t 
-{
-	struct PendingCommunication_t *data;
-	int count, size;
-};
-extern struct PendingComms_t PendingComms;
-
 struct ForeignRecv_t
 {
 	UINT64 physic, logic;
@@ -58,7 +44,6 @@ struct ForeignRecvs_t
 	int count, size;
 	struct ForeignRecv_t *data;
 };
-extern struct ForeignRecvs_t *ForeignRecvs;
 
 void InitForeignRecvs (int numtasks);
 void AddForeignRecv (UINT64 physic, UINT64 logic, int tag, int ptask_r, int task_r,
