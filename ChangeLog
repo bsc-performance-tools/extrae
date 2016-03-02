@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 02Mar2016 Add code reference to memory allocated object
  + 29Feb2016 Included the size of MPI-IO operations in the trace 
  * 26Feb2016 States per thread are no longer allocated statically but
               reallocated on demand.

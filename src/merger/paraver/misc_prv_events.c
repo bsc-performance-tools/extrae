@@ -290,9 +290,10 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_REFERENCE_COST_EV,
 		  SAMPLING_ADDRESS_REFERENCE_COST_LBL);
 		LET_SPACES (fd);
-
-		Address2Info_Write_MemReferenceCaller_Labels (fd);
 	}
+
+	if (inuse[DYNAMIC_MEM_INDEX] ||inuse[SAMPLING_MEM_INDEX])
+		Address2Info_Write_MemReferenceCaller_Labels (fd);
 
 	/* These events are always emitted */
 	fprintf (fd, "%s\n", TYPE_LABEL);

@@ -97,6 +97,7 @@ typedef struct thread_st
 
 	/* Address space preparation */
 	uint64_t AddressSpace_size;
+	uint64_t AddressSpace_timeCreation;
 	uint64_t AddressSpace_calleraddresses[MAX_CALLERS];
 	uint32_t AddressSpace_callertype;
 } thread_t;
