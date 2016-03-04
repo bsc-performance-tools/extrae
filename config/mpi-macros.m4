@@ -769,36 +769,23 @@ AC_DEFUN([AX_CHECK_MPI_LIB_HAS_MPI_INIT_THREAD_F],
 
 	AC_MSG_CHECKING([if MPI library supports threads using MPI_Init_thread (Fortran)])
 
-	if test "${MPI_F_LIB_FOUND}" = "yes" ; then
-
-		CC="${MPICC}"
-        LIBS="${LIBS} ${MPI_F_LIB}" dnl We need to append fortran libraries if they exist
-
-		AC_TRY_LINK(
-			[#include <mpi.h>], 
-			[
-					#if defined(PMPI_NO_UNDERSCORES)
-					# define MY_ROUTINE mpi_init_thread
-					#elif defined(PMPI_UPPERCASE)
-					# define MY_ROUTINE MPI_INIT_THREAD
-					#elif defined(PMPI_SINGLE_UNDERSCORE)
-					# define MY_ROUTINE mpi_init_thread_
-					#elif defined(PMPI_DOUBLE_UNDERSCORE)
-					# define MY_ROUTINE mpi_init_thread__
-					#endif
-					int required, provided, ierror;
-					MY_ROUTINE (&required, &provided, &ierror);
-			],
-			[mpi_flib_contains_mpi_init_thread="yes" ],
-			[mpi_flib_contains_mpi_init_thread="no" ]
-		)
-		guessed=""
-	else
+	if test "${MPIF90_DOES_NOT_EXIST}" = "yes" ; then
 		dnl If we can't compile the fortran app, just guess from C library
 		mpi_flib_contains_mpi_init_thread=${mpi_clib_contains_mpi_init_thread}
 		guessed=" (guessed from C library)"
+	else
+		FC="${MPIF90}"
+		AC_LANG_PUSH([Fortran])
+		AC_LINK_IFELSE(
+			[        program test
+	         call mpi_init_thread()
+	         end],
+			[mpi_flib_contains_mpi_init_thread="yes" ],
+			[mpi_flib_contains_mpi_init_thread="no" ]
+		)
+		AC_LANG_POP([Fortran])
+		guessed=""
 	fi
-
 	AC_MSG_RESULT([${mpi_flib_contains_mpi_init_thread}${guessed}])
 
 	if test "${mpi_flib_contains_mpi_init_thread}" = "yes" ; then

@@ -1413,8 +1413,8 @@ int merger_post (int numtasks, int taskid)
 	}
 
 	if (get_option_merge_ParaverFormat())
-		error = Paraver_ProcessTraceFiles (trim(get_merge_OutputTraceName()),
-			nTraces, InputTraces, get_option_merge_NumApplications(),
+		error = Paraver_ProcessTraceFiles (nTraces, InputTraces,
+		    get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 	else
 		error = Dimemas_ProcessTraceFiles (trim(get_merge_OutputTraceName()),

@@ -213,7 +213,7 @@ static void HandleStackedType (unsigned ptask, unsigned task, unsigned thread,
  ***  Paraver_ProcessTraceFiles
  ******************************************************************************/
 
-int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
+int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	struct input_t *files, unsigned int num_appl,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int taskid)
 {
@@ -675,12 +675,13 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 	}
 #endif
 
-	Paraver_JoinFiles (num_appl, outName, fset, current_time, NodeCPUinfo, numtasks,
-		taskid, records_per_task, get_option_merge_TreeFanOut());
+	Paraver_JoinFiles (num_appl, get_merge_OutputTraceName(),
+	  fset, current_time, NodeCPUinfo, numtasks,
+	  taskid, records_per_task, get_option_merge_TreeFanOut());
 
-	strcpy (envName, outName);
+	strcpy (envName, get_merge_OutputTraceName());
 #ifdef HAVE_ZLIB
-	if (strlen (outName) >= 7 && strncmp (&(outName[strlen (outName) - 7]), ".prv.gz", 7) == 0)
+	if (strlen (envName) >= 7 && strncmp (&(envName[strlen (envName) - 7]), ".prv.gz", 7) == 0)
 	{
 		tmp = &(envName[strlen (envName) - 7]);
 	}
@@ -705,7 +706,8 @@ int Paraver_ProcessTraceFiles (char *outName, unsigned long nfiles,
 
 	if (0 == taskid)
 	{
-		fprintf (stdout, "mpi2prv: Congratulations! %s has been generated.\n", outName);
+		fprintf (stdout, "mpi2prv: Congratulations! %s has been generated.\n",
+		  get_merge_OutputTraceName());
 		fflush (stdout);
 	}
 

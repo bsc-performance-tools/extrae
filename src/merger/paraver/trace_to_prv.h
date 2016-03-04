@@ -35,7 +35,7 @@
 #include "cpunode.h"
 #include "fdz.h"
 
-int Paraver_ProcessTraceFiles (char *prvName, unsigned long nfiles,
+int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	struct input_t *files, unsigned int num_appl,
 	struct Pair_NodeCPU *NodeCPUinfo, int numtasks, int idtask);
 

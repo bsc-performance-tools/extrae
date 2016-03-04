@@ -1342,10 +1342,6 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	filename = (char*) xmlNodeListGetString_env (rank, xmldoc, current_tag->xmlChildrenNode, 1);
 	if (filename == NULL || strlen(filename) == 0)
 	{
-		if (get_option_merge_ParaverFormat())
-			set_merge_OutputTraceName (DEFAULT_PRV_OUTPUT_NAME);
-		else
-			set_merge_OutputTraceName (DEFAULT_DIM_OUTPUT_NAME);
 	}
 	else
 	{
