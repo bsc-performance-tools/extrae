@@ -94,11 +94,13 @@ unsigned Clock_getType (void)
 	return ClockType;
 }
 
+/* We obtain the last read time */
 UINT64 Clock_getLastReadTime (unsigned thread)
 {
 	return _extrae_last_read_clock[thread];
 }
 
+/* We obtain the current time, but we don't store it in the last read time */
 UINT64 Clock_getCurrentTime_nstore (void)
 {
 	UINT64 tmp;
@@ -134,6 +136,8 @@ UINT64 Clock_getCurrentTime_nstore (void)
 	return tmp;
 }
 
+/* We obtain the current time and we store it in the last read time,
+   for future reads of the same timestamp */
 UINT64 Clock_getCurrentTime (unsigned thread)
 {
 	UINT64 tmp = Clock_getCurrentTime_nstore ();
