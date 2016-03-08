@@ -1459,16 +1459,6 @@ static int DynamicMemory_Event (event_t * event,
 	unsigned long long EvValue = Get_EvValue (event);
 	int isBegin = EvValue == EVT_BEGIN;
 
-	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
-	{
-		// Do not change the state in MALLOC related calls
-		// Switch_State (STATE_OTHERS, EvValue == EVT_BEGIN, ptask, task, thread);
-		// trace_paraver_state (cpu, ptask, task, thread, time);
-
-		unsigned PRVValue = isBegin?MISC_event_GetValueForDynamicMemory(EvType):0;
-		trace_paraver_event (cpu, ptask, task, thread, time, DYNAMIC_MEM_EV, PRVValue);
-	}
-
 	if (EvType == MALLOC_EV)
 	{
 		/* Malloc: in size, out pointer */
@@ -1569,6 +1559,16 @@ static int DynamicMemory_Event (event_t * event,
 			  thread_info->AddressSpace_calleraddresses,
 			  thread_info->AddressSpace_callertype);
 		}
+	}
+
+	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
+	{
+		// Do not change the state in MALLOC related calls
+		// Switch_State (STATE_OTHERS, EvValue == EVT_BEGIN, ptask, task, thread);
+		// trace_paraver_state (cpu, ptask, task, thread, time);
+
+		unsigned PRVValue = isBegin?MISC_event_GetValueForDynamicMemory(EvType):0;
+		trace_paraver_event (cpu, ptask, task, thread, time, DYNAMIC_MEM_EV, PRVValue);
 	}
 
 	if (!isBegin)
