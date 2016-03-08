@@ -1733,6 +1733,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 					/* Check for dynamic memory instrumentation */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_DYNAMIC_MEMORY))
 					{
+#if defined(INSTRUMENT_DYNAMIC_MEMORY)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 						{
@@ -1740,14 +1741,21 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 							DynamicMemoryInstrumentation = TRUE;
 						}
 						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting dynamic memory calls.\n", TRACE_DYNAMIC_MEMORY);
+#endif
 					}
 					/* Check for basic I/O instrumentation */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_IO))
 					{
+#if defined(INSTRUMENT_IO)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							IOInstrumentation = TRUE;
 						XML_FREE(enabled);
+#else
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting I/O calls.\n", TRACE_IO);
+#endif
 					}
 					/* Check for intel pebs sampling */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_PEBS_SAMPLING))
@@ -1758,7 +1766,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 							Parse_XML_PEBS_Sampling (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 #else
-						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support PEBS sampling.\n", TRACE_MERGE);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support PEBS sampling.\n", TRACE_PEBS_SAMPLING);
 #endif
 					}
 					else
