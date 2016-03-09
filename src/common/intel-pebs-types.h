@@ -21,23 +21,36 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-/* Additional credis to Vince Weaver, vincent.weaver _at_ maine.edu 
-   For further reference see https://github.com/deater/perf_event_tests */
+#ifndef EXTRAE_INTEL_PEBS_TYPES_H_INCLUDED
+#define EXTRAE_INTEL_PEBS_TYPES_H_INCLUDED
 
-#ifndef EXTRAE_INTEL_PEBS_H_INCLUDED
-#define EXTRAE_INTEL_PEBS_H_INCLUDED
+typedef enum e_PEBS_MemoryHierarchy_Level
+{
+	PEBS_MEMORYHIERARCHY_UNCACHEABLE_IO = 0,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_L1 = 1,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_LFB = 2,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_L2 = 3,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_L3 = 4,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_1HOP = 5,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_2HOP = 6,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM = 7,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_1HOP = 8,
+	PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_2HOP = 9
+} PEBS_MemoryHierarchy_Level;
 
-#include <intel-pebs-types.h>
+typedef enum e_PEBS_MemoryTLB_Level
+{
+	PEBS_MEMORYHIERARCHY_TLB_OTHER = 0,
+	PEBS_MEMORYHIERARCHY_TLB_L1 = 1,
+	PEBS_MEMORYHIERARCHY_TLB_L2 = 2
+} PEBS_MemoryTLB_Level;
 
-int Extrae_IntelPEBS_enable (int loads);
-void Extrae_IntelPEBS_disable (void); 
+typedef enum e_PEBS_MemoryHierarchy_HitOrMiss
+{
+	PEBS_MEMORYHIERARCHY_UNKNOWN = 0,
+	PEBS_MEMORYHIERARCHY_HIT = 1,
+	PEBS_MEMORYHIERARCHY_MISS = 2
+} PEBS_MemoryHierarchy_HitOrMiss;
 
-void Extrae_IntelPEBS_setLoadPeriod (int period);
-void Extrae_IntelPEBS_setStorePeriod (int period);
-void Extrae_IntelPEBS_setLoadSampling (int enabled);
-void Extrae_IntelPEBS_setMinimumLoadLatency (int numcycles);
-void Extrae_IntelPEBS_setStoreSampling (int enabled);
+#endif /* EXTRAE_INTEL_PEBS_TYPES_H_INCLUDED */
 
-void Extrae_IntelPEBS_nextSampling (void);
-
-#endif

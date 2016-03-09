@@ -659,36 +659,39 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 	{
 		/* see linux/perf_event.h perf_mem_data_src */
 		if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
-			memhitormiss = 1;
+			memhitormiss = PEBS_MEMORYHIERARCHY_HIT;
 		else if (data_src.mem_lvl & PERF_MEM_LVL_MISS)
-			memhitormiss = 2;
+			memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
 		else
-			memhitormiss = 0;
+			memhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
 	
 		if (data_src.mem_dtlb & PERF_MEM_TLB_HIT)
-			tlbhitormiss = 1;
+			tlbhitormiss = PEBS_MEMORYHIERARCHY_HIT;
 		else if (data_src.mem_dtlb & PERF_MEM_TLB_MISS)
-			tlbhitormiss = 2;
+			tlbhitormiss = PEBS_MEMORYHIERARCHY_MISS;
 		else
-			tlbhitormiss = 0;
-	
+			tlbhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
+
 		if (data_src.mem_lvl & PERF_MEM_LVL_L1)
-			memlevel = 1; /* l1 */
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L1;
 		else if (data_src.mem_lvl & PERF_MEM_LVL_LFB)
-			memlevel = 2; /* lfb: line fill buffer */
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LFB;
 		else if (data_src.mem_lvl & PERF_MEM_LVL_L2)
-			memlevel = 3; /* l2 */
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L2;
 		else if (data_src.mem_lvl & PERF_MEM_LVL_L3)
-			memlevel = 4; /* l3 */
-		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE1 ||
-		         data_src.mem_lvl & PERF_MEM_LVL_REM_CCE2)
-			memlevel = 5; /* cache, remote */
-		else if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM ||
-		         data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
-			     data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
-			memlevel = 6; /* dram, either local or remote */
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L3;
+		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE1)
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_1HOP;
+		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE2)
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_2HOP;
+		else if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM)
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM;
+		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1)
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_1HOP;
+		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_2HOP;
 		else
-			memlevel = 0; /* other: uncacheable or i/o */
+			memlevel = PEBS_MEMORYHIERARCHY_UNCACHEABLE_IO;
 	
 		/* PATCH #0 if data comes from dram, it can't be a hit! */
 		/* Seems unclear, but from table 18-19:
@@ -698,8 +701,7 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 		    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
 		    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
 		{
-			memhitormiss = 2;
-			memlevel = 6;
+			memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
 		}
 	
 		/* PATCH #1 if data l3 & miss == data served by dram */
@@ -709,16 +711,16 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 		if (data_src.mem_lvl & PERF_MEM_LVL_MISS &&
 		    data_src.mem_lvl & PERF_MEM_LVL_L3)
 		{
-			memhitormiss = 2;
-			memlevel = 6;
+			memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM;
 		}
 	
 		if (data_src.mem_dtlb & PERF_MEM_TLB_L1)
-			tlblevel = 1;
+			tlblevel = PEBS_MEMORYHIERARCHY_TLB_L1;
 		else if (data_src.mem_dtlb & PERF_MEM_TLB_L2)
-			tlblevel = 2;
+			tlblevel = PEBS_MEMORYHIERARCHY_TLB_L2;
 		else
-			tlblevel = 0; /* other: hw walker, os fault handler */
+			tlblevel = PEBS_MEMORYHIERARCHY_TLB_OTHER;
 	
 		t = Clock_getCurrentTime_nstore();
 	

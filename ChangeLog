@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 09Mar2016 Increase classification of memory hierarchy in PEBS samples
  * 04Mar2016 Fix trace-file naming (sometimes failed to guess the binary name)
  + 02Mar2016 Add code reference to memory allocated object
  + 29Feb2016 Included the size of MPI-IO operations in the trace 

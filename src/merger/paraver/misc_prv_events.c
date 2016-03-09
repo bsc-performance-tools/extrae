@@ -31,6 +31,7 @@
 
 #include "misc_prv_events.h"
 #include "misc_prv_semantics.h"
+#include "intel-pebs-types.h"
 #include "labels.h"
 #include "addr2info.h"
 
@@ -250,40 +251,43 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_MEM_LEVEL_EV,
 		  SAMPLING_ADDRESS_MEM_LEVEL_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
-		fprintf (fd, "0 other (uncacheable or I/O)\n");
-		fprintf (fd, "1 L1 cache\n");
-		fprintf (fd, "2 Line Fill Buffer (LFB)\n");
-		fprintf (fd, "3 L2 cache\n");
-		fprintf (fd, "4 L3 cache\n");
-		fprintf (fd, "5 Remote (1 or 2 hop) cache\n");
-		fprintf (fd, "6 DRAM (either local or remote)\n");
+		fprintf (fd, "%d other (uncacheable or I/O)\n", PEBS_MEMORYHIERARCHY_UNCACHEABLE_IO);
+		fprintf (fd, "%d L1 cache\n", PEBS_MEMORYHIERARCHY_MEM_LVL_L1);
+		fprintf (fd, "%d Line Fill Buffer (LFB)\n", PEBS_MEMORYHIERARCHY_MEM_LVL_LFB);
+		fprintf (fd, "%d L2 cache\n", PEBS_MEMORYHIERARCHY_MEM_LVL_L2);
+		fprintf (fd, "%d L3 cache\n", PEBS_MEMORYHIERARCHY_MEM_LVL_L3);
+		fprintf (fd, "%d Remote cache (1 hop)\n", PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_1HOP);
+		fprintf (fd, "%d Remote cache (2 hops)\n", PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_2HOP);
+		fprintf (fd, "%d DRAM (local)\n", PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM);
+		fprintf (fd, "%d DRAM (remote, 1 hop)\n", PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_1HOP);
+		fprintf (fd, "%d DRAM (remote, 2 hops)\n", PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_2HOP);
 		LET_SPACES(fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_MEM_HITORMISS_EV,
 		  SAMPLING_ADDRESS_MEM_HITORMISS_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
-		fprintf (fd, "0 N/A\n");
-		fprintf (fd, "1 hit\n");
-		fprintf (fd, "2 miss\n");
+		fprintf (fd, "%d N/A\n", PEBS_MEMORYHIERARCHY_UNKNOWN);
+		fprintf (fd, "%d hit\n", PEBS_MEMORYHIERARCHY_HIT);
+		fprintf (fd, "%d miss\n", PEBS_MEMORYHIERARCHY_MISS);
 		LET_SPACES (fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_TLB_LEVEL_EV,
 		  SAMPLING_ADDRESS_TLB_LEVEL_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
-		fprintf (fd, "0 other (hw walker or OS fault handler)\n");
-		fprintf (fd, "1 L1 TLB\n");
-		fprintf (fd, "2 L2 TLB\n");
+		fprintf (fd, "%d other (hw walker or OS fault handler)\n", PEBS_MEMORYHIERARCHY_TLB_OTHER);
+		fprintf (fd, "%d L1 TLB\n", PEBS_MEMORYHIERARCHY_TLB_L1);
+		fprintf (fd, "%d L2 TLB\n", PEBS_MEMORYHIERARCHY_TLB_L2);
 		LET_SPACES (fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SAMPLING_ADDRESS_TLB_HITORMISS_EV,
 		  SAMPLING_ADDRESS_TLB_HITORMISS_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
-		fprintf (fd, "0 N/A\n");
-		fprintf (fd, "1 hit\n");
-		fprintf (fd, "2 miss\n");
+		fprintf (fd, "%d N/A\n", PEBS_MEMORYHIERARCHY_UNKNOWN);
+		fprintf (fd, "%d hit\n", PEBS_MEMORYHIERARCHY_HIT);
+		fprintf (fd, "%d miss\n", PEBS_MEMORYHIERARCHY_MISS);
 		LET_SPACES (fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);
