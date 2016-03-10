@@ -61,13 +61,16 @@
   <trace-control enabled="no">
     <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
     <global-ops enabled="no"></global-ops>
-    <remote-control enabled="no">
-      <signal enabled="no" which="USR1"/>
-    </remote-control>
   </trace-control>
 
-  <others enabled="no">
+  <others enabled="yes">
     <minimum-time enabled="no">10M</minimum-time>
+    <finalize-on-signal enabled="yes" 
+      SIGUSR1="no" SIGUSR2="no" SIGINT="yes"
+      SIGQUIT="yes" SIGTERM="yes" SIGXCPU="yes"
+      SIGFPE="yes" SIGSEGV="yes" SIGABRT="yes"
+    />
+    <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
 
   <bursts enabled="yes">

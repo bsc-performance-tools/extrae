@@ -143,20 +143,22 @@
     <!-- 
     -->
     <global-ops enabled="no"></global-ops>
-    <!-- A signal can be used to terminate the tracing. Available values can be
-         only USR1/USR2 Some MPI implementations handle one of those, so check
-         first which is available to you. -->
-    <remote-control enabled="no">
-      <signal enabled="no" which="USR1"/>
-    </remote-control>
   </trace-control>
 
-  <!-- Other options -->
-  <others enabled="no">
+  <others enabled="yes">
     <!-- Want to force a minimum amount of time of tracing? Here we force 10
          minutes -->
     <minimum-time enabled="no">10M</minimum-time>
+	<!-- Capture the following signals to finish cleanly -->
+    <finalize-on-signal enabled="yes" 
+      SIGUSR1="no" SIGUSR2="no" SIGINT="yes"
+      SIGQUIT="yes" SIGTERM="yes" SIGXCPU="yes"
+      SIGFPE="yes" SIGSEGV="yes" SIGABRT="yes"
+    />
+	<!-- Use instrumentation poitns to flush sampling buffer -->
+    <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
+
 
   <!-- Bursts library enabled? This requires an special library! -->
   <bursts enabled="no">

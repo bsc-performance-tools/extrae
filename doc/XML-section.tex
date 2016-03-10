@@ -267,7 +267,7 @@ This section contains other configuration details that do not fit in the previou
 
 \item The \texttt{minimum-time} option indicates the instrumentation package the minimum instrumentation time. To enable it, set {\tt enabled} to "yes" and set the minimum time within the {\tt minimum-time} tag.
 
-\item The option labeled as \texttt{finalize-on-signal} instructs the instrumentation package to listen for different types of signals\footnote{See \texttt{man 2 signal} and \texttt{man 7 signal} for more details.} and dump and finalize the execution whenever they occur. If a signal occurs but it is not configured, then the execution may finish without generating the trace-file.
+\item The option labeled as \texttt{finalize-on-signal} instructs the instrumentation package to listen for different types of signals\footnote{See \texttt{man 2 signal} and \texttt{man 7 signal} for more details.} and dump and finalize the execution whenever they occur. If a signal occurs but it is not configured, then the execution may finish without generating the trace-file. \textit{Caveat:} Some MPI implementations use \texttt{SIGUSR1} and/or \texttt{SIGUSR2}, so if you want to capture those signals check first that enabling them do not alter with the application execution.
 
 \item The \texttt{flush-sampling-buffer-at-instrumentation-point} lets the user decide whether the sampling buffer should be checked for flushing at instrumentation points. If this option is not enabled, then the buffer will only be dumped once at the end of the application execution.
 
