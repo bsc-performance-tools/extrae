@@ -31,6 +31,9 @@
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #include "signals.h"
 #include "utils.h"
 #include "wrapper.h"
@@ -69,21 +72,28 @@ int Deferred_Signal_FlushAndTerminate = FALSE;
 void SigHandler_FlushAndTerminate (int signum)
 {
 	/* We don't need to reprogram the signal, it must happen only once! */
-
 	if (!Signals_Inhibited())
 	{
 		/* Flush buffer to disk */
-		fprintf (stderr, "SIGNAL %d received: Flushing buffer to disk\n", signum);
-
+#if _XOPEN_SOURCE >= 700 || _POSIX_C_SOURCE >= 200809L
+		fprintf (stderr, PACKAGE_NAME": Attention! Signal %d (%s) caugth. Flushing buffer to disk and terminating\n",
+		  signum, strsignal (signum));
+#else
+		fprintf (stderr, PACKAGE_NAME": Attention! Signal %d caugth. Flushing buffer to disk and terminating\n",
+		  signum);
+#endif
 		Backend_Finalize ();
-
-		/* Disable further tracing */
-		fprintf (stderr, "TASK %d has flushed the buffer.\n", TASKID);
-		mpitrace_on = 0;
+		exit (0);
 	}
 	else
 	{
-		fprintf (stderr, "SIGNAL %d received... notifying to flush buffers\n", signum);
+#if _XOPEN_SOURCE >= 700 || _POSIX_C_SOURCE >= 200809L
+		fprintf (stderr, PACKAGE_NAME": Attention! Signal %d (%s) caught. Notifying to flush buffers whenever possible.\n",
+		  signum, strsignal (signum));
+#else
+		fprintf (stderr, PACKAGE_NAME": Attention! Signal %d caught. Notifying to flush buffers whenever possible.\n",
+		  signum);
+#endif
 		Deferred_Signal_FlushAndTerminate = 1;
 	}
 }

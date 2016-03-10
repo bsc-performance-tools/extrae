@@ -1096,37 +1096,6 @@ static void Parse_XML_RemoteControl (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
       }
       XML_FREE(enabled);
     }
-    else if (!xmlStrcasecmp (tag->name, REMOTE_CONTROL_METHOD_SIGNAL))
-    {
-      xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
-      if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
-      {
-        ActiveRemoteControls++;
-
-        /* Which SIGNAL will we use to interrupt the tracing */
-        xmlChar *which = xmlGetProp_env (rank, tag,  RC_SIGNAL_WHICH);
-        if (which != NULL)
-        {
-          if ((xmlStrcasecmp (which, (const xmlChar*) "USR1") == 0) || (xmlStrcmp (which, (const xmlChar*) "") == 0))
-          {
-            mfprintf (stdout, PACKAGE_NAME": Signal USR1 will flush buffers to disk and stop further tracing\n");
-            Signals_SetupFlushAndTerminate (SIGUSR1);
-          }
-          else if (xmlStrcasecmp (which, (const xmlChar *) "USR2") == 0)
-          {
-            mfprintf (stdout, PACKAGE_NAME": Signal USR2 will flush buffers to disk and stop further tracing\n");
-            Signals_SetupFlushAndTerminate (SIGUSR2);
-          }
-          else
-          {
-            mfprintf (stderr, PACKAGE_NAME": XML Error: Value '%s' is not valid for property '<%s>%s'\n", 
-            which, REMOTE_CONTROL_METHOD_SIGNAL, RC_SIGNAL_WHICH);
-          }
-        }
-        XML_FREE(which);
-      }
-      XML_FREE(enabled);
-    }
     tag = tag->next;
   }
   if (ActiveRemoteControls > 1)
@@ -1398,6 +1367,50 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 					}
 				}
 				XML_FREE(str);
+			}
+			XML_FREE(enabled);
+		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_FINALIZE_ON_SIGNAL))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+				xmlChar *v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_USR1);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGUSR1);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_USR2);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGUSR2);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_INT);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGINT);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_QUIT);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGQUIT);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_TERM);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGTERM);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_XCPU);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGXCPU);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_FPE);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGFPE);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_SEGV);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGSEGV);
+				XML_FREE(v);
+				v = xmlGetProp_env (rank, tag, TRACE_FINALIZE_ON_SIGNAL_ABRT);
+				if (v != NULL && !xmlStrcasecmp (v, xmlYES))
+					Signals_SetupFlushAndTerminate (SIGABRT);
+				XML_FREE(v);
 			}
 			XML_FREE(enabled);
 		}
