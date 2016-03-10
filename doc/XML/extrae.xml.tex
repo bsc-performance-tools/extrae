@@ -66,12 +66,17 @@
         <clustering max_tasks="26" max_points="8000"/>
         <spectral min_seen="1" max_periods="0" num_iters="3" signals="DurBurst,InMPI"/>
       </mrnet>
-      <signal enabled="no" which="USR1"/>
     </remote-control>
   </trace-control> 
 
   <others enabled="yes">
-    <minimum-time enabled="no">10m</minimum-time>
+    <minimum-time enabled="no">10M</minimum-time>
+    <finalize-on-signal enabled="yes" 
+      SIGUSR1="yes" SIGUSR2="yes" SIGINT="yes"
+      SIGQUIT="yes" SIGTERM="yes" SIGXCPU="yes"
+      SIGFPE="yes" SIGSEGV="yes" SIGABRT="yes"
+    />
+    <flush-sampling-buffer-at-instrumentation-point enabled="yes" />
   </others>
 
   <bursts enabled="no">

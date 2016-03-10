@@ -245,8 +245,6 @@ The {\tt spectral} tag section configures the spectral analysis parameters:
  \item {signals}: performance signals used to analyze the application. If not specified, {\tt DurBurst} is used by default.
 \end{itemize}
 
-A signal can be used to terminate the tracing when using the remote control. Available values can be only USR1/USR2 Some MPI implementations handle one of those, so check first which is available to you. Set in tag {\tt signal} the signal code you want to use.
-
 \graybox{See {\bf EXTRAE\_CONTROL\_FILE}, {\bf EXTRAE\_CONTROL\_GLOPS}, {\bf EXTRAE\_CONTROL\_TIME} environment variables in appendix \ref{cha:EnvVar}.}
 
 \section{XML Section: Bursts}\label{sec:XMLSectionBursts}
@@ -263,7 +261,17 @@ In addition to that, when the tracing library is running in burst mode, it compu
 
 \input{XML/others.xml}
 
-This section contains other configuration details that do not fit in the previous sections. Right now, there is only one option available and it is devoted to tell the instrumentation package the minimum instrumentation time. To enable it, set {\tt enabled} to "yes" and set the minimum time within the {\tt minimum-time} tag.
+This section contains other configuration details that do not fit in the previous sections. At the moment, there are three options to be configured. 
+
+\begin{itemize}
+
+\item The \texttt{minimum-time} option indicates the instrumentation package the minimum instrumentation time. To enable it, set {\tt enabled} to "yes" and set the minimum time within the {\tt minimum-time} tag.
+
+\item The option labeled as \texttt{finalize-on-signal} instructs the instrumentation package to listen for different types of signals\footnote{See \texttt{man 2 signal} and \texttt{man 7 signal} for more details.} and dump and finalize the execution whenever they occur. If a signal occurs but it is not configured, then the execution may finish without generating the trace-file.
+
+\item The \texttt{flush-sampling-buffer-at-instrumentation-point} lets the user decide whether the sampling buffer should be checked for flushing at instrumentation points. If this option is not enabled, then the buffer will only be dumped once at the end of the application execution.
+
+\end{itemize}
 
 \section{XML Section: Sampling}\label{sec:XMLSectionSampling}
 
