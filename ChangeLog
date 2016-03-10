@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 10Mar2016 Add support to capture different signal types
+             Add <flush-sampling-buffer-at-instrumentation-point> option
  * 09Mar2016 Increase classification of memory hierarchy in PEBS samples
  * 04Mar2016 Fix trace-file naming (sometimes failed to guess the binary name)
  + 02Mar2016 Add code reference to memory allocated object

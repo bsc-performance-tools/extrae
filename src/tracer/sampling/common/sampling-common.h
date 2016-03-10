@@ -25,7 +25,10 @@
 #ifndef SAMPLING_COMMON_H_INCLUDED
 #define SAMPLING_COMMON_H_INCLUDED
 
-int isSamplingEnabled(void);
-void setSamplingEnabled (int enabled);
+int Extrae_isSamplingEnabled(void);
+void Extrae_setSamplingEnabled (int enabled);
+
+int Extrae_get_DumpBuffersAtInstrumentation (void);
+void Extrae_set_DumpBuffersAtInstrumentation (int enabled);
 
 #endif /* SAMPLING_COMMON_H_INCLUDED */

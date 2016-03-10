@@ -655,7 +655,7 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
 	  &ip, &addr, &weight, &data_src);
 
-	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
 		/* see linux/perf_event.h perf_mem_data_src */
 		if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
@@ -756,7 +756,7 @@ static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
 	  &ip, &addr, NULL, NULL);
 
-	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
 		t = Clock_getCurrentTime_nstore();
 	

@@ -84,6 +84,7 @@ static char UNUSED rcsid[] = "$Id$";
 # include "cuda_probe.h"
 #endif
 #if defined(SAMPLING_SUPPORT)
+# include "sampling-common.h"
 # include "sampling-timer.h"
 #endif
 #if defined(ENABLE_PEBS_SAMPLING)
@@ -1412,6 +1413,23 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 					Signals_SetupFlushAndTerminate (SIGABRT);
 				XML_FREE(v);
 			}
+			XML_FREE(enabled);
+		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_FLUSH_SAMPLE_BUFFER_AT_INST_POINT))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+#if defined(SAMPLING_SUPPORT)
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+				mfprintf (stdout, PACKAGE_NAME": Sampling buffers will be written at instrumentation points\n");
+				Extrae_set_DumpBuffersAtInstrumentation (TRUE);
+			}
+			else
+			{
+				mfprintf (stdout, PACKAGE_NAME": Sampling buffers will NOT be written at instrumentation points\n");
+				Extrae_set_DumpBuffersAtInstrumentation (FALSE);
+			}
+#endif
 			XML_FREE(enabled);
 		}
 		else

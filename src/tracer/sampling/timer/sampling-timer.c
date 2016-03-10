@@ -63,7 +63,7 @@ static struct sigaction signalaction;
 
 void Extrae_SamplingHandler (void* address)
 {
-	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
@@ -73,7 +73,7 @@ void Extrae_SamplingHandler (void* address)
 
 void Extrae_SamplingHandler_PAPI (void* address)
 {
-	if (tracejant && isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
@@ -264,7 +264,7 @@ void setTimeSampling_postfork (void)
 	int signum;
 	int ret;
 
-	if (isSamplingEnabled())
+	if (Extrae_isSamplingEnabled())
 	{
 		memset (&signalaction, 0, sizeof(signalaction));
 

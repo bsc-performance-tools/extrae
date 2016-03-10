@@ -155,7 +155,7 @@ void Extrae_set_options_Wrapper (int options)
 	tracejant_hwc_omp = options & EXTRAE_OMP_HWC_OPTION;   
 	Extrae_set_pthread_hwc_tracing (options & EXTRAE_PTHREAD_HWC_OPTION);
 	tracejant_hwc_uf  = options & EXTRAE_UF_HWC_OPTION;
-	setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
+	Extrae_setSamplingEnabled (options & EXTRAE_SAMPLING_OPTION);
 }
 
 void Extrae_getrusage_set_to_0_Wrapper (UINT64 time)

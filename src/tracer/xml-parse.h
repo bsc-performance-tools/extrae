@@ -107,6 +107,7 @@
 #define TRACE_FINALIZE_ON_SIGNAL_FPE    ((xmlChar*) "SIGFPE")
 #define TRACE_FINALIZE_ON_SIGNAL_SEGV   ((xmlChar*) "SIGSEGV")
 #define TRACE_FINALIZE_ON_SIGNAL_ABRT   ((xmlChar*) "SIGABRT")
+#define TRACE_FLUSH_SAMPLE_BUFFER_AT_INST_POINT ((xmlChar*) "flush-sampling-buffer-at-instrumentation-point")
 
 #define TRACE_CONTROL                   ((xmlChar*) "trace-control")
 #define TRACE_CONTROL_FILE              ((xmlChar*) "file")

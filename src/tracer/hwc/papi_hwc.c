@@ -419,11 +419,11 @@ int HWCBE_PAPI_Start_Set (UINT64 countglops, UINT64 time, int numset, int thread
 			  HWC_sets[numset].OverflowValue[i], 0, PAPI_sampling_handler);
 			if (rc < 0)
 			{
-				setSamplingEnabled (FALSE);
+				Extrae_setSamplingEnabled (FALSE);
 				fprintf (stderr, PACKAGE_NAME": PAPI_overflow failed for thread %d - counter %x!\n", threadid, HWC_sets[numset].OverflowCounter[i]);
 			}
 			else
-				setSamplingEnabled (TRUE);
+				Extrae_setSamplingEnabled (TRUE);
 		}
 	}
 #endif

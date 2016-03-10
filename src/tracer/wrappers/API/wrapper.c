@@ -2002,7 +2002,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 		Extrae_set_trace_io (TRUE);
 
 	/* Enable sampling capabilities */
-	setSamplingEnabled (TRUE);
+	Extrae_setSamplingEnabled (TRUE);
 
 #if defined(ENABLE_PEBS_SAMPLING)
 	Extrae_IntelPEBS_enable(TRUE);
@@ -2197,7 +2197,7 @@ void Backend_Finalize (void)
 		Extrae_set_trace_malloc (FALSE);
 
 		/* Stop sampling right now */
-		setSamplingEnabled (FALSE);
+		Extrae_setSamplingEnabled (FALSE);
 		unsetTimeSampling ();
 
 		if (THREADID == 0) 
@@ -2360,6 +2360,43 @@ void Backend_Enter_Instrumentation (int Nevents)
 		return;
 
 	Backend_setInInstrumentation (thread, TRUE);
+
+	/* Check if we have to fill the sampling buffer */
+#if defined(SAMPLING_SUPPORT)
+	if (Extrae_get_DumpBuffersAtInstrumentation())
+		if (Buffer_IsFull (SAMPLING_BUFFER(THREADID)))
+		{
+			event_t FlushEv_Begin, FlushEv_End;
+
+			/* Disable sampling first, and then reestablish whether it was set */
+			int prev = Extrae_isSamplingEnabled();
+			Extrae_setSamplingEnabled (FALSE);
+
+			/* Get time now, to mark in the instrumentation buffer the begin of the flush */
+			FlushEv_Begin.time = TIME;
+			FlushEv_Begin.event = FLUSH_EV;
+			FlushEv_Begin.value = EVT_BEGIN;
+			HARDWARE_COUNTERS_READ (THREADID, FlushEv_Begin,
+			  Extrae_Flush_Wrapper_getCounters());
+
+			/* Actually flush buffer */
+			Buffer_Flush(SAMPLING_BUFFER(THREADID));
+
+			/* Get time now, to mark in the instrumentation buffer the end of the flush */
+			FlushEv_End.time = TIME;
+			FlushEv_End.event = FLUSH_EV;
+			FlushEv_End.value = EVT_END;
+			HARDWARE_COUNTERS_READ (THREADID, FlushEv_End,
+			  Extrae_Flush_Wrapper_getCounters());
+
+			/* Add events into instrumentation buffer */
+			BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_Begin);
+			BUFFER_INSERT (THREADID, TRACING_BUFFER(THREADID), FlushEv_End);
+
+			/* Reestablish sampling */
+			Extrae_setSamplingEnabled (prev);
+		}
+#endif
 
 	/* Check whether we will fill the buffer soon (or now) */
 	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= Nevents)

@@ -25,8 +25,9 @@
 #include "sampling-common.h"
 
 static int EnabledSampling = FALSE;
+static int DumpBuffersAtInstrumentation = FALSE;
 
-int isSamplingEnabled(void)
+int Extrae_isSamplingEnabled(void)
 {
 #if defined(SAMPLING_SUPPORT)
 	return EnabledSampling;
@@ -35,12 +36,26 @@ int isSamplingEnabled(void)
 #endif
 }
 
-void setSamplingEnabled (int enabled)
+void Extrae_setSamplingEnabled (int enabled)
 {
 #if !defined(SAMPLING_SUPPORT)
 	UNREFERENCED_PARAMETER(enabled);
 #else
 	EnabledSampling = (enabled != FALSE);
+#endif
+}
+
+int Extrae_get_DumpBuffersAtInstrumentation (void)
+{
+	return DumpBuffersAtInstrumentation;
+}
+
+void Extrae_set_DumpBuffersAtInstrumentation (int enabled)
+{
+#if !defined(SAMPLING_SUPPORT)
+	UNREFERENCED_PARAMETER(enabled);
+#else
+	DumpBuffersAtInstrumentation = (enabled != FALSE);
 #endif
 }
 
