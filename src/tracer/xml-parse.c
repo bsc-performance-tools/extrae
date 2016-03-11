@@ -468,6 +468,7 @@ static void Parse_XML_UF (int rank, xmlNodePtr current_tag)
 	}
 }
 
+#if defined(INSTRUMENT_DYNAMIC_MEMORY)
 static void Parse_XML_DynamicMemory (int rank, xmlNodePtr current_tag)
 {
 	int alloc_enabled = TRUE, free_enabled = FALSE;
@@ -519,6 +520,7 @@ static void Parse_XML_DynamicMemory (int rank, xmlNodePtr current_tag)
 	Extrae_set_trace_malloc_free (free_enabled);
 	Extrae_set_trace_malloc_allocate_threshold (alloc_threshold);
 }
+#endif
 
 #if defined(ENABLE_PEBS_SAMPLING)
 /* Configure OpenMP related parameters */
