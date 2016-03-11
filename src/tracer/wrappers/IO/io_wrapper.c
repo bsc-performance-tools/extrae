@@ -23,15 +23,15 @@
 
 #include "common.h"
 
-#ifdef HAVE_STDIO_H
+#if HAVE_STDIO_H
 # include <stdio.h>
 #endif
-#ifdef HAVE_DLFCN_H
+#if HAVE_DLFCN_H
 # define __USE_GNU
 # include <dlfcn.h>
 # undef __USE_GNU
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
@@ -68,6 +68,16 @@ void Extrae_iotrace_init (void)
 
 */
 
+#define TRACE_IO_CALLER_IS_ENABLED \
+ (Trace_Caller_Enabled[CALLER_IO])
+
+#define TRACE_IO_CALLER(evttime,offset) \
+{ \
+	if (TRACE_IO_CALLER_IS_ENABLED) \
+		Extrae_trace_callers (evttime, offset, CALLER_IO); \
+}
+
+
 
 # if defined(PIC) /* This is only available through .so libraries */
 ssize_t read (int f, void *b, size_t s)
@@ -92,6 +102,7 @@ ssize_t read (int f, void *b, size_t s)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_IO_read_Entry (f, s);
+		TRACE_IO_CALLER(LAST_READ_TIME, 3);
 		res = real_read (f, b, s);
 		Probe_IO_read_Exit ();
 		Backend_Leave_Instrumentation ();
@@ -131,6 +142,7 @@ ssize_t write (int f, const void *b, size_t s)
 	{
 		Backend_Enter_Instrumentation (2);
 		Probe_IO_write_Entry (f, s);
+		TRACE_IO_CALLER(LAST_READ_TIME, 3);
 		res = real_write (f, b, s);
 		Probe_IO_write_Exit ();
 		Backend_Leave_Instrumentation ();

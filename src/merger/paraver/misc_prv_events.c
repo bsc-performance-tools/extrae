@@ -200,6 +200,16 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_DESCRIPTOR_EV, IO_DESCRIPTOR_LBL);
 		LET_SPACES (fd);
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_DESCRIPTOR_TYPE_EV,
+		  IO_DESCRIPTOR_TYPE_LBL);
+		fprintf (fd, "%s\n", VALUES_LABEL);
+		fprintf (fd, "%d    Unknown type\n", DESCRIPTOR_TYPE_UNKNOWN);
+		fprintf (fd, "%d    Regular file\n", DESCRIPTOR_TYPE_REGULARFILE);
+		fprintf (fd, "%d    Socket\n", DESCRIPTOR_TYPE_SOCKET);
+		fprintf (fd, "%d    FIFO or PIPE\n", DESCRIPTOR_TYPE_FIFO_PIPE);
+		fprintf (fd, "%d    Terminal\n", DESCRIPTOR_TYPE_ATTY);
+		LET_SPACES(fd);
 	}
 	if (inuse[FORK_SYSCALL_INDEX])
 	{

@@ -349,6 +349,22 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support dynamic memory instrumentation.\n", TRACE_DYNAMIC_MEMORY);
 #endif
 		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_IO))
+		{
+#if defined(INSTRUMENT_IO)
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+				char *callers = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
+				if (callers != NULL)
+					Parse_Callers (rank, callers, CALLER_IO);
+				XML_FREE(callers);
+			}
+			XML_FREE(enabled);
+#else
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support I/O instrumentation.\n", TRACE_IO);
+#endif
+		}
 		/* Must the tracing facility obtain information about callers at sample points? */
 		else if (!xmlStrcasecmp (tag->name, TRACE_SAMPLING))
 		{

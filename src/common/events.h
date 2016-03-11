@@ -99,6 +99,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define HWC_EV                   40000009
 #define IO_DESCRIPTOR_EV         40000010
 #define IO_SIZE_EV               40000011
+#define IO_DESCRIPTOR_TYPE_EV    40000013
 #define TRACING_EV               40000012
 #define SET_TRACE_EV             40000014
 #define CPU_BURST_EV             40000015
@@ -847,6 +848,18 @@ typedef enum
 	OPENSHMEM_TYPE,
 	JAVA_TYPE
 } EventType_t;
+
+
+/* File descriptor classifications */
+
+typedef enum
+{
+	DESCRIPTOR_TYPE_UNKNOWN = 0, /* unknown */
+	DESCRIPTOR_TYPE_REGULARFILE, /* regular file */
+	DESCRIPTOR_TYPE_SOCKET,      /* socket */
+	DESCRIPTOR_TYPE_FIFO_PIPE,   /* fifo or pipe */
+	DESCRIPTOR_TYPE_ATTY         /* connected to the terminal? */
+} ExtraeDescriptorType_t;
 
 EventType_t getEventType (unsigned EvType, unsigned *Type);
 

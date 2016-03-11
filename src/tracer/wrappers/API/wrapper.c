@@ -1038,6 +1038,7 @@ void Parse_Callers (int me, char * mpi_callers, int type)
 		const char *s_mpi = "MPI";
 		const char *s_sampling = "Sampling";
 		const char *s_malloc = "Dynamic-Memory";
+		const char *s_io = "Input/Output";
 		const char *s_unknown = "unknown?";
 
 		if (CALLER_MPI == type)
@@ -1046,6 +1047,8 @@ void Parse_Callers (int me, char * mpi_callers, int type)
 			s = s_sampling;
 		else if (CALLER_DYNAMIC_MEMORY == type)
 			s = s_malloc;
+		else if (CALLER_IO == type)
+			s = s_io;
 		else
 			s = s_unknown;
 
@@ -1483,6 +1486,9 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 #endif
 	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 	char hostname[1024];
+
+	/* Mark the initialization as if we're in instrumentation */
+	Backend_setInInstrumentation (THREADID, TRUE);
 
 	if (gethostname (hostname, sizeof(hostname)) != 0)
 		sprintf (hostname, "localhost");
@@ -2013,6 +2019,9 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 		Backend_setInInstrumentation (u, FALSE);
 
 	EXTRAE_SET_INITIALIZED(TRUE);
+
+	/* Mark the finalization of init as if we're not in instrumentation */
+	Backend_setInInstrumentation (THREADID, FALSE);
 
 	return TRUE;
 }

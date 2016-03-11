@@ -106,7 +106,7 @@ static int Flush_Event (event_t * current_event,
 }
 
 /******************************************************************************
- ***  Read_Event
+ ***  ReadWrite_Event
  ******************************************************************************/
 
 static int ReadWrite_Event (event_t * event, unsigned long long time,
@@ -134,12 +134,16 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 			case EVT_BEGIN:
 			trace_paraver_event (cpu, ptask, task, thread, time, IO_EV,
 		  	  EvType==READ_EV?READ_VAL_EV:WRITE_VAL_EV);
-			trace_paraver_event (cpu, ptask, task, thread, time, IO_DESCRIPTOR_EV,
-			  EvParam);
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  IO_DESCRIPTOR_EV, EvParam);
 			break;
 			case EVT_BEGIN+1:
 			trace_paraver_event (cpu, ptask, task, thread, time, IO_SIZE_EV,
 			  EvParam);
+			break;
+			case EVT_BEGIN+2:
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  IO_DESCRIPTOR_TYPE_EV, EvParam);
 			break;
 			default:
 			break;

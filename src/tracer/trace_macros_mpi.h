@@ -143,6 +143,9 @@
 
 #if defined(SAMPLING_SUPPORT)
 
+/* If sampling is supported, we don't use PAPI_reset each time that the
+   counters are read, so counters are always accumulating */
+
 # define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
 { \
 	event_t burst_begin, burst_end;           \

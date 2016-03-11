@@ -68,6 +68,7 @@ void Share_MISC_Operations (void);
 #define WRITE_LBL                       "write()"
 #define IO_DESCRIPTOR_LBL               "I/O descriptor"
 #define IO_SIZE_LBL                     "I/O size"
+#define IO_DESCRIPTOR_TYPE_LBL          "I/O descriptor type"
 
 #define CLOCK_FROM_SYSTEM_LBL           "RAW clock() value from system"
 

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 11Mar2016 read()/write() now emit callstack & descriptor type
  * 10Mar2016 Add support to capture different signal types
              Add <flush-sampling-buffer-at-instrumentation-point> option
  * 09Mar2016 Increase classification of memory hierarchy in PEBS samples
