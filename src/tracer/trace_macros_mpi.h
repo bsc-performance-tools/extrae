@@ -157,6 +157,8 @@
 	burst_end.value = 0;                      \
 	if (evtvalue == EVT_BEGIN)                \
 	{ \
+        /* If we enter into MPI, we check whether the given threshold has occurred \
+        last MPI exit. If so, dump a burst record and its metrics */ \
 		if ((burst_end.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION) \
 		{ \
 			COPY_ACCUMULATED_COUNTERS_HERE(thread_id, burst_begin); \
@@ -177,7 +179,12 @@
 	} \
 }
 
-#else /* SAMPLING_SUPPORT */
+#else
+
+/*
+   SAMPLING_SUPPORT not supported! Be careful, this is not the default case.
+   configure typically enables SAMPLING_SUPPORt by default
+ */
 
 # define BURSTS_MODE_TRACE_MPIEVENT(thread_id, evttime, evtvalue, offset)  \
 { \
@@ -190,6 +197,8 @@
 	burst_end.value = 0;                      \
 	if (evtvalue == EVT_BEGIN)                \
 	{ \
+        /* If we enter into MPI, we check whether the given threshold has occurred \
+        last MPI exit. If so, dump a burst record and its metrics */ \
 		if ((burst_end.time - last_mpi_exit_time) > MINIMUM_BURST_DURATION) \
 		{ \
 			if (ACCUMULATED_COUNTERS_INITIALIZED(thread_id)) \
