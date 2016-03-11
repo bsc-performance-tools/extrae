@@ -308,9 +308,16 @@ void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
 	Extrae_clRetainEvent_real (ocl_evt);
 }
 
+/* Emit the part of the communication record needed in OpenCL.
+   That is for the entry points for clEnqueueReadBuffer*, and
+   clEnqueueRangeKernel/Task/NativeKernel. That is also for the
+   exit points for clEnqueueWrite* */
+
 static void Extrae_OpenCL_comm_at_OpenCL (RegisteredCommandQueue_t * cq, unsigned pos,
 	unsigned long long t, int entry)
 {
+	/* We emit comm records for entry points when something (mem transfer, kernel call)
+	   needs to occur before the execution */
 	if (entry)
 	{
 		if (cq->prv_event[pos] == OPENCL_CLENQUEUEREADBUFFER_ACC_EV ||
@@ -339,6 +346,8 @@ static void Extrae_OpenCL_comm_at_OpenCL (RegisteredCommandQueue_t * cq, unsigne
 			  Extrae_OpenCL_tag_generator());
 		}
 	}
+	/* We emit comm records for exit points when something (mem transfer, kernel call)
+	   is released in the host after calling, such as clEnqueueWrite* */
 	else
 	{
 		if (cq->prv_event[pos] == OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV ||
@@ -360,7 +369,11 @@ static void Extrae_OpenCL_comm_at_OpenCL (RegisteredCommandQueue_t * cq, unsigne
 	}
 }
 
+/* Extrae_OpenCL_real_clQueueFlush
 
+   Flushes the contents of the particular buffer of a given command queue (idx)
+   into the instrumentation buffer allocated for that command queue.
+*/
 static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 {
 	unsigned u;
@@ -368,6 +381,7 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 	unsigned remainingevts = Buffer_RemainingEvents(TracingBuffer[threadid]);
 	cl_ulong last_time = 0;
 
+	/* Calculate the difference in time between the host & accelerator */
 	cl_long delta_time = ((cl_long) CommandQueues[idx].host_reference_time) - 
 		((cl_long) CommandQueues[idx].device_reference_time);
 
@@ -375,13 +389,14 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 	if (remainingevts <= 2*CommandQueues[idx].nevents+2)
 		Buffer_ExecuteFlushCallback (TracingBuffer[threadid]);
 
-	/* Flush events into thread buffer */
+	/* Flush events into thread buffer, one by one */
 	for (u = 0; u < CommandQueues[idx].nevents; u++)
 	{
 		cl_int err;
 		cl_ulong utmp;
 		cl_event evt = CommandQueues[idx].ocl_event[u];
 
+		/* Get start time for the event */
 		err = clGetEventProfilingInfo (evt, CL_PROFILING_COMMAND_START,
 			sizeof(utmp), &utmp, NULL);
 		if (err != CL_SUCCESS)
@@ -391,6 +406,9 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 		}
 
 		utmp = utmp + delta_time; /* Correct timing between Host & Accel */
+
+		/* Dump the event into the instrumentation buffer.
+		   Kernels, particularly, need to be annotated with a kernel identifier */
 
 		if (CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEREADBUFFER_ACC_EV ||
 		    CommandQueues[idx].prv_event[u] == OPENCL_CLENQUEUEWRITEBUFFER_ACC_EV ||
@@ -421,9 +439,11 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 			}
 		}
 
+		/* If appropriate, check if we have to emit a portion of a communication */
 		Extrae_OpenCL_comm_at_OpenCL (&CommandQueues[idx], u, utmp,
 		  TRUE);
 
+		/* Get end time for the event */
 		err = clGetEventProfilingInfo (evt, CL_PROFILING_COMMAND_END,
 			sizeof(utmp), &utmp, NULL);
 		if (err != CL_SUCCESS)
@@ -434,16 +454,21 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 
 		utmp = utmp + delta_time; /* Correct timing between Host & Accel */
 
+		/* Emit end event */
 		THREAD_TRACE_MISCEVENT (threadid, utmp,
 		  CommandQueues[idx].prv_event[u], EVT_END, 0);
 
+		/* If appropriate, check if we have to emit a portion of a communication */
 		Extrae_OpenCL_comm_at_OpenCL (&CommandQueues[idx], u, utmp, FALSE);
 
+		/* We can now release the evt, so OpenCL can actually free it! */
 		Extrae_clReleaseEvent_real (evt);
 
 		last_time = utmp;
 	}
 
+	/* If we want to add the Finish, emit the appropiate event to generate a communication
+	   for the finish -- we need two events (one in accel, one in host) */
 	if (addFinish && CommandQueues[idx].nevents > 0)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_RECV_EV, TASKID,
@@ -455,6 +480,9 @@ static void Extrae_OpenCL_real_clQueueFlush (unsigned idx, int addFinish)
 	CommandQueues[idx].nevents = 0;
 }
 
+/* Extrae_OpenCL_clQueueFlush
+   Calls to Extrae_OpenCL_real_clQueueFlush but translating the command queue
+   into the appropriate index to the event buffers */
 void Extrae_OpenCL_clQueueFlush (cl_command_queue queue, int addFinish)
 {
 	unsigned idx;
@@ -468,6 +496,9 @@ void Extrae_OpenCL_clQueueFlush (cl_command_queue queue, int addFinish)
 	Extrae_OpenCL_real_clQueueFlush (idx, addFinish);
 }
 
+/* Extrae_OpenCL_clQueueFlush_All
+   Calls to Extrae_OpenCL_real_clQueueFlush for every command queue created and
+   translating into the appropriate index to the event buffers */
 void Extrae_OpenCL_clQueueFlush_All (void)
 {
 	unsigned u;
