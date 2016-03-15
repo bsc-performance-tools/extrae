@@ -33,10 +33,10 @@
 5) Generate binary packages using the buildfarm script
   - this makes sure that the package will compile at least on our environment -
   - also compile for:
-      MN3 (need to upgrade module)
-      MT  (need to upgrade module)
-      bscpower8n1
-      MB
+      MN3 (need to upgrade module, use scripts from /apps/CEPBATOOLS/scripts)
+      MT  (need to upgrade module, use scripts from /apps/CEPBATOOLS/scripts)
+      bscpower8n1 (installation in /apps/CEPBATOOLS/extrae, use $EXTRAE_HOME/etc/configured.sh as reference)
+      MB (MB sysadmins handle this)
 
 6) Copy the documentation and add it to the buildfarm output to publish it in the webpage
 
