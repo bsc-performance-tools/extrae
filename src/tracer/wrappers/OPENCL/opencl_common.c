@@ -78,6 +78,10 @@ unsigned Extrae_OpenCL_tag_generator (void)
 	return __last_tag;
 }
 
+
+/* Extrae_OpenCL_lookForOpenCLQueue
+   given a command-queue, return the position where it is allocated into the
+   CommandQueues array through position as well as it is located */
 static int Extrae_OpenCL_lookForOpenCLQueue (cl_command_queue q, unsigned *position)
 {
 	unsigned u;
@@ -93,6 +97,8 @@ static int Extrae_OpenCL_lookForOpenCLQueue (cl_command_queue q, unsigned *posit
 	return FALSE;
 }
 
+/* Extrae_OpenCL_lookForOpenCLQueueToThreadID
+   given a command-queue, returns the assigned thread identifier */
 unsigned Extrae_OpenCL_lookForOpenCLQueueToThreadID (cl_command_queue q)
 {
 	unsigned u;
@@ -104,6 +110,8 @@ unsigned Extrae_OpenCL_lookForOpenCLQueueToThreadID (cl_command_queue q)
 	return 0;
 }
 
+/* Extrae_OpenCL_Queue_OoO
+   is the command queue configured as OutOfOrder? */
 int Extrae_OpenCL_Queue_OoO (cl_command_queue q)
 {
 	unsigned idx;
@@ -113,6 +121,9 @@ int Extrae_OpenCL_Queue_OoO (cl_command_queue q)
 		return FALSE;
 }
 
+/* Extrae_OpenCL_lookForKernelName
+   returns the position (identifier) for the given kernel named kernel_name within the
+   Kernels table. The routine returns whether the kernel name was found or not */
 static int Extrae_OpenCL_lookForKernelName (const char *kernel_name, unsigned *position)
 {
 	unsigned u;
@@ -128,6 +139,12 @@ static int Extrae_OpenCL_lookForKernelName (const char *kernel_name, unsigned *p
 		}
 	return FALSE;
 }
+
+/* Extrae_OpenCL_clCreateCommandQueue
+   Registers an OpenCL command queue and all the related information required to track it.
+   This information includes: adding it to CommandQueues vector, getting a thread id for it,
+   getting the type (CPU/GPU/Other)+set the thread name, calculate the gap between the
+   host and accelartor clocks  */
 
 void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
 	cl_device_id device, cl_command_queue_properties properties)
@@ -233,6 +250,11 @@ void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
 	}
 }
 
+/* Extrae_OpenCL_addEventToQueue
+   Records the cl_event so that it is correlated later with the Paraver prv_evt type.
+   Note the Extrae_clRetainEvent_real call at the end, it ensures that the event won't
+   be destroyed until clReleaseEvent is called. Otherwise, the event may be destroyed
+   when the kernel finalizes  */
 void Extrae_OpenCL_addEventToQueue (cl_command_queue queue, cl_event ocl_evt, 
 	unsigned prv_evt)
 {
@@ -258,6 +280,11 @@ void Extrae_OpenCL_addEventToQueue (cl_command_queue queue, cl_event ocl_evt,
 	Extrae_clRetainEvent_real (ocl_evt);
 }
 
+/* Extrae_OpenCL_addEventToQueueWithSize
+   Records the cl_event so that it is correlated later with the Paraver prv_evt type.
+   Note the Extrae_clRetainEvent_real call at the end, it ensures that the event won't
+   be destroyed until clReleaseEvent is called. Otherwise, the event may be destroyed
+   when the kernel finalizes. It has an additional parameter size.  */
 void Extrae_OpenCL_addEventToQueueWithSize (cl_command_queue queue, cl_event ocl_evt, 
 	unsigned prv_evt, size_t size)
 {
@@ -283,6 +310,11 @@ void Extrae_OpenCL_addEventToQueueWithSize (cl_command_queue queue, cl_event ocl
 	Extrae_clRetainEvent_real (ocl_evt);
 }
 
+/* Extrae_OpenCL_addEventToQueueWithKernel
+   Records the cl_event so that it is correlated later with the Paraver prv_evt type.
+   Note the Extrae_clRetainEvent_real call at the end, it ensures that the event won't
+   be destroyed until clReleaseEvent is called. Otherwise, the event may be destroyed
+   when the kernel finalizes. It has an additional parameter kernel (k).  */
 void Extrae_OpenCL_addEventToQueueWithKernel (cl_command_queue queue,
 	cl_event ocl_evt, unsigned prv_evt, cl_kernel k)
 {
