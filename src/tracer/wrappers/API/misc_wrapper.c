@@ -282,7 +282,7 @@ static void Generate_Task_File_List (void)
 	char hostname[1024];
 	char tmp_line[1024];
 
-	sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+	sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 
 	filedes = open (tmpname, O_RDWR | O_CREAT | O_TRUNC, 0644);
 	if (filedes < 0)
@@ -323,8 +323,9 @@ void Extrae_init_tracing (int forked)
 	if (!Backend_preInitialize (TASKID, Extrae_get_num_tasks(), config_file, forked))
 		return;
 
-	/* Generate a tentative file list if we don't reuse a previous execution */
-	if (getenv ("EXTRAE_APPEND_PID") == NULL)
+	/* Generate a tentative file list if we don't reuse a previous execution through
+	   Extrae cmd commands */
+	if (!Extrae_getAppendingEventsToGivenPID(NULL))
 		Generate_Task_File_List();
 
 	/* Take the time */
@@ -374,7 +375,9 @@ void Extrae_fini_Wrapper (void)
 		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
-			if (getenv ("EXTRAE_APPEND_PID") == NULL)
+			/* If we are appending into the file (i.e. using the cmd-line) don't
+			   change the already existing .mpits file */
+			if (!Extrae_getAppendingEventsToGivenPID(NULL))
 				Generate_Task_File_List();
 
 		/* Finalize tracing library */
@@ -386,6 +389,8 @@ void Extrae_fini_Wrapper (void)
 	}
 }
 
+/* This will be called by the atexit() hook. If this happens and the app is MPI we
+   warn about a finalization that does not occur through MPI_Finalize */
 void Extrae_fini_last_chance_Wrapper (void)
 {
 	/* Finalize independently from who did the initialization ! */
@@ -398,7 +403,10 @@ void Extrae_fini_last_chance_Wrapper (void)
 		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
-			Generate_Task_File_List();
+			/* If we are appending into the file (i.e. using the cmd-line) don't
+			   change the already existing .mpits file */
+			if (!Extrae_getAppendingEventsToGivenPID(NULL))
+				Generate_Task_File_List();
 
 		/* Finalize tracing library */
 		Backend_Finalize ();

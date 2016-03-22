@@ -370,6 +370,22 @@ static void Extrae_getExecutableInfo (void);
 int MergeAfterTracing = FALSE;
 #endif
 
+static int AppendingEventsToGivenPID = FALSE;
+static int AppendingEventsToGivenPID_PID = 0;
+
+void Extrae_setAppendingEventsToGivenPID (int pid)
+{
+	AppendingEventsToGivenPID = TRUE;
+	AppendingEventsToGivenPID_PID = pid;
+}
+
+int Extrae_getAppendingEventsToGivenPID (int *pid)
+{
+	if (pid != NULL)
+		*pid = AppendingEventsToGivenPID_PID;
+	return AppendingEventsToGivenPID;
+}
+
 static int extrae_initialized = FALSE;
 
 int EXTRAE_ON (void) { return mpitrace_on; }
@@ -1484,8 +1500,10 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 #if USE_HARDWARE_COUNTERS
 	int set;
 #endif
-	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 	char hostname[1024];
+
+	if (getenv("EXTRAE_APPEND_PID") != NULL)
+		Extrae_setAppendingEventsToGivenPID (atoi(getenv("EXTRAE_APPEND_PID")));
 
 	/* Mark the initialization as if we're in instrumentation */
 	Backend_setInInstrumentation (THREADID, TRUE);
@@ -1701,7 +1719,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	Extrae_reallocate_CUDA_info (get_maximum_NumOfThreads());
 #endif
 
-	if (!appending)
+	if (!Extrae_getAppendingEventsToGivenPID(NULL))
 	{
 		ApplBegin_Time = TIME;
 		TRACE_EVENT (ApplBegin_Time, APPL_EV, EVT_BEGIN);
@@ -1892,7 +1910,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	unsigned u;
 	int i;
 	unsigned long long *StartingTimes=NULL, *SynchronizationTimes=NULL;
-	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": DEBUG: THID=%d Backend_postInitialize (rank=%d, size=%d, syn_init_time=%llu, syn_fini_time=%llu\n", THREADID, rank, world_size, InitTime, EndTime);
@@ -1953,7 +1970,7 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	}
 #endif
 
-	if ((!appending) && (init_event != 0))
+	if ((!Extrae_getAppendingEventsToGivenPID(NULL)) && (init_event != 0))
 	{
 		/* Add initialization begin and end events */
 		TRACE_MPIINITEV (InitTime, init_event, EVT_BEGIN,
@@ -2036,11 +2053,12 @@ void Backend_Finalize_close_files(void)
 	unsigned thread;
 
 	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
-		Backend_Finalize_close_mpits( getpid(), thread, FALSE );
+		Backend_Finalize_close_mpits (getpid(), thread, FALSE);
 }
 
 static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 {
+	int r;
 	char trace[TMP_DIR];
 	char tmp_name[TMP_DIR];
 	unsigned initialTASKID;
@@ -2060,16 +2078,34 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 
 	/* Rename MPIT file (PID from origin is getpid(), PID from destination
 	   maybe different if append == TRUE */
-	FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
-	  getpid(), initialTASKID, thread, EXT_TMP_MPIT);
-	FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, pid, TASKID,
-	  thread, EXT_MPIT);
-	if (!append)
-		rename_or_copy (tmp_name, trace); 
+	if (append)
+	{
+		/* When appending, we add information into an .mpit rather than into a .ttmp */
+		/* In this case, we have to honor the original PID (given by param) */
+		FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
+		  getpid(), initialTASKID, thread, EXT_TMP_MPIT);
+		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, pid,
+		  TASKID, thread, EXT_MPIT);
+	}
 	else
-		append_from_to_file (tmp_name, trace);
-	fprintf (stdout,
-	  PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
+	{
+		/* When in default (not appending) we create a .ttmp and then rename into .mpit */
+		FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
+		  getpid(), initialTASKID, thread, EXT_TMP_MPIT);
+		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, getpid(),
+		  TASKID, thread, EXT_MPIT);
+	}
+	if (!append)
+		r = rename_or_copy (tmp_name, trace); 
+	else
+		r = append_from_to_file (tmp_name, trace);
+
+	if (r == 0)
+		fprintf (stdout,
+		  PACKAGE_NAME": Intermediate raw trace file created : %s\n", trace);
+	else
+		fprintf (stdout,
+		  PACKAGE_NAME": Intermediate raw trace was NOT created : %s\n", trace);
 
 	/* Rename SAMPLE file, if it exists */
 #if defined(SAMPLING_SUPPORT)
@@ -2082,9 +2118,14 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 
 		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, pid,
 		  TASKID, thread, EXT_SAMPLE);
-		rename_or_copy (tmp_name, trace);
-		fprintf (stdout,
-		  PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
+		r = rename_or_copy (tmp_name, trace);
+
+		if (r == 0)
+			fprintf (stdout,
+			  PACKAGE_NAME": Intermediate raw sample file created : %s\n", trace);
+		else
+			fprintf (stdout,
+			  PACKAGE_NAME": Intermediate raw sample was NOT created : %s\n", trace);
 	}
 	else
 	{
@@ -2098,9 +2139,14 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
     if (file_exists(tmp_name)){
         FileName_PTT(trace, Get_FinalDir(initialTASKID), appl_name, hostname,
 		  pid, initialTASKID, thread, EXT_SYM);
-        rename_or_copy(tmp_name, trace);
-    	fprintf (stdout,
-    	  PACKAGE_NAME": Intermediate raw sym file created : %s\n", trace);
+        r = rename_or_copy(tmp_name, trace);
+
+		if (r == 0)
+	    	fprintf (stdout,
+	    	  PACKAGE_NAME": Intermediate raw sym file created : %s\n", trace);
+		else
+  	  		fprintf (stdout,
+   	 		  PACKAGE_NAME": Intermediate raw sym was NOT created : %s\n", trace);
     }
 }
 
@@ -2175,7 +2221,6 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 void Backend_Finalize (void)
 {
 	unsigned thread;
-	int appending = getenv ("EXTRAE_APPEND_PID") != NULL;
 
 #if defined(ENABLE_PEBS_SAMPLING)
 	Extrae_IntelPEBS_disable();
@@ -2189,7 +2234,7 @@ void Backend_Finalize (void)
 	Extrae_OpenCL_fini ();
 #endif
 
-	if (!appending)
+	if (!Extrae_getAppendingEventsToGivenPID(NULL))
 	{
 #if defined(HAVE_ONLINE)
 		/* Stop the analysis threads and flush the online buffers */
@@ -2310,7 +2355,7 @@ void Backend_Finalize (void)
 #if defined(MPI_SUPPORT)
 			sprintf (tmp, "%s", Extrae_core_get_mpits_file_name());
 #else
-			sprintf (tmp, "%s/%s.mpits", final_dir, appl_name);
+			sprintf (tmp, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 #endif
 
 			Read_MPITS_file (tmp, &ptask, FileOpen_Default, TASKID);
@@ -2324,8 +2369,11 @@ void Backend_Finalize (void)
 	}
 	else
 	{
+		int pid;
+		Extrae_getAppendingEventsToGivenPID (&pid);
 		Buffer_Flush(TRACING_BUFFER(THREADID));
-		Backend_Finalize_close_mpits (atoi(getenv("EXTRAE_APPEND_PID")), THREADID, TRUE);
+		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
+			Backend_Finalize_close_mpits (pid, thread, TRUE);
 		remove_temporal_files ();
 	}
 }
@@ -2668,6 +2716,8 @@ void Backend_updateTaskID (void)
 	/* Rename SYM file, if it exists, per thread */
 	for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 	{
+		int r;
+
 		FileName_PTT(file1, Get_TemporalDir(Extrae_get_initial_TASKID()),
 		  appl_name, hostname, getpid(), Extrae_get_initial_TASKID(), thread,
 		  EXT_SYM);
@@ -2679,9 +2729,11 @@ void Backend_updateTaskID (void)
 			/* Remove file if it already exists, and then copy the "new" version */
 			if (file_exists (file2))
 				if (!unlink (file2) == 0)
-					fprintf (stderr, PACKAGE_NAME": Cannot unlink file: %s, symbols will be corrupted!\n", file2);
+					fprintf (stderr, PACKAGE_NAME": Cannot unlink symbolic file: %s, symbols will be corrupted!\n", file2);
 
-			rename_or_copy (file1, file2); 
+			r = rename_or_copy (file1, file2); 
+			if (r < 0)
+				fprintf (stderr, PACKAGE_NAME": Error copying symbolicfile %s into %s!\n", file1, file2);
 		}
 	}
 	/* NOTE: we skip renaming the MPIT and the SAMPLE files because there are

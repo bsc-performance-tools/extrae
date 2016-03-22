@@ -457,7 +457,7 @@ void MPI_remove_file_list (int all)
 
 	if (all || (!all && TASKID == 0))
 	{
-		sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+		sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 		unlink (tmpname);
 	}
 }
@@ -564,9 +564,9 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 			do
 			{
 				if (count > 1)
-					sprintf (tmpname, "%s/%s-%d.mpits", final_dir, appl_name, count);
+					sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, count, EXT_MPITS);
 				else
-					sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+					sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 
 				/* If the file exists, remove it and its associated .spawn file */
 				if (file_exists(tmpname))
@@ -575,9 +575,9 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 						fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
 
 					if (count > 1)
-						sprintf (tmpname, "%s/%s-%d.spawn", final_dir, appl_name, count);
+						sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, count, EXT_SPAWN);
 					else
-						sprintf (tmpname, "%s/%s.spawn", final_dir, appl_name);
+						sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_SPAWN);
 
 					if (file_exists(tmpname))
 						if (unlink (tmpname) != 0)
@@ -602,14 +602,14 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 			{
 				SpawnGroup ++;
 				if (SpawnGroup > 1)
-					sprintf (tmpname, "%s/%s-%d.mpits", final_dir, appl_name, SpawnGroup);
+					sprintf (tmpname, "%s/%s-%d%s", final_dir, appl_name, SpawnGroup, EXT_MPITS);
 				else
-					sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+					sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 
 				filedes = open (tmpname, O_RDWR | O_CREAT | O_EXCL | O_TRUNC, 0644);
 			} while (filedes == -1);
 #else
-			sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+			sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 			filedes = open (tmpname, O_RDWR | O_CREAT | O_TRUNC, 0644);
 			if (filedes == -1)
 			{

@@ -162,7 +162,7 @@ int explode (char *sourceStr, const char *delimiter, char ***tokenArray)
  **  Description : Appends contents of source into destination
  ******************************************************************************/
 
-void append_from_to_file (const char *source, const char *destination)
+int append_from_to_file (const char *source, const char *destination)
 {
 	char buffer[65536];
 	int fd_o, fd_d;
@@ -174,7 +174,7 @@ void append_from_to_file (const char *source, const char *destination)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", source);
 		fflush (stderr);
-		return;
+		return -1;
 	}
 	fd_d = open (destination, O_WRONLY | O_APPEND, 0644);
 	if (fd_d == -1)
@@ -182,7 +182,7 @@ void append_from_to_file (const char *source, const char *destination)
 		close (fd_d);
 		fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", destination);
 		fflush (stderr);
-		return;
+		return -1;
 	}
 
 	/* Copy the file */
@@ -203,7 +203,7 @@ void append_from_to_file (const char *source, const char *destination)
 		unlink (destination);
 		fprintf (stderr, PACKAGE_NAME": Error while trying to move files %s to %s\n", source, destination);
 		fflush (stderr);
-		return;
+		return -1;
 	}
 
 	/* Close the files */
@@ -212,6 +212,8 @@ void append_from_to_file (const char *source, const char *destination)
 
 	/* Remove the files */
 	unlink (source);
+
+	return 0;
 }
 
 /******************************************************************************
@@ -220,7 +222,7 @@ void append_from_to_file (const char *source, const char *destination)
  **  Description : Tries to rename (if in the same /dev/) or moves the file.
  ******************************************************************************/
 
-void rename_or_copy (char *origen, char *desti)
+int rename_or_copy (char *origen, char *desti)
 {
 	if (rename (origen, desti) == -1)
 	{
@@ -236,7 +238,7 @@ void rename_or_copy (char *origen, char *desti)
 			{
 				fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", origen);
 				fflush (stderr);
-				return;
+				return -1;
 			}
 			fd_d = open (desti, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 			if (fd_d == -1)
@@ -244,7 +246,7 @@ void rename_or_copy (char *origen, char *desti)
 				close (fd_d);
 				fprintf (stderr, PACKAGE_NAME": Error while trying to open %s \n", desti);
 				fflush (stderr);
-				return;
+				return -1;
 			}
 
 			/* Copy the file */
@@ -265,7 +267,7 @@ void rename_or_copy (char *origen, char *desti)
 				unlink (desti);
 				fprintf (stderr, PACKAGE_NAME": Error while trying to move files %s to %s\n", origen, desti);
 				fflush (stderr);
-				return;
+				return -1;
 			}
 
 			/* Close the files */
@@ -280,8 +282,12 @@ void rename_or_copy (char *origen, char *desti)
 			perror("rename");
 			fprintf (stderr, PACKAGE_NAME": Error while trying to move %s to %s\n", origen, desti);
 			fflush (stderr);
+
+			return -1;
 		}
 	}
+
+	return 0;
 }
 
 unsigned long long getFactorValue (const char *value, const char *ref, int rank)

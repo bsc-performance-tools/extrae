@@ -123,6 +123,9 @@ unsigned Backend_getMaximumOfThreads (void);
 void Backend_Finalize (void);
 void Backend_Finalize_close_files (void);
 
+void Extrae_setAppendingEventsToGivenPID (int pid);
+int Extrae_getAppendingEventsToGivenPID (int *pid);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

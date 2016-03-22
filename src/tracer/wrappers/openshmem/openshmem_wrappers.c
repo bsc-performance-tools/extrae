@@ -436,7 +436,7 @@ void OPENSHMEM_remove_file_list (int all)
 
         if (all || (!all && TASKID == 0))
         {
-                sprintf (tmpname, "%s/%s.mpits", final_dir, appl_name);
+                sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
                 unlink (tmpname);
         }
 }

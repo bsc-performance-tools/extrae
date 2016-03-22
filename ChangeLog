@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 22Mar2016 Fixes in extrae-cmd 
  * 11Mar2016 read()/write() now emit callstack & descriptor type
  * 10Mar2016 Add support to capture different signal types
              Add <flush-sampling-buffer-at-instrumentation-point> option
