@@ -55,5 +55,17 @@ int main (int argc, char *argv[])
 		i += advance+1;
 	}
 
+	if (argc == 1)
+	{
+		fprintf (stdout, PACKAGE_NAME": extrae-cmd Extrae command line version\n"
+		                 "Available commands are:\n"
+		                 " - init TASKID numThreads\n"
+		                 "   Initializes the instrumentation package.\n"
+		                 " - emit THREADID TYPE VALUE\n"
+		                 "   Emits into the thread THREADID an event with a given pair <TYPE,VALUE>\n"
+		                 " - fini\n"
+		                 "   Finalizes the instrumentation package.\n");
+	}
+
 	return 0;
 }
