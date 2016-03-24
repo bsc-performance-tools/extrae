@@ -24,16 +24,18 @@
 #ifndef MPI2PRV_VECTOR_H_INCLUDED
 #define MPI2PRV_VECTOR_H_INCLUDED
 
-typedef struct mpi2prvvector_st
-{
-	unsigned long long *data;
-	unsigned count;
-	unsigned allocated;
-} mpi2prv_vector_t;
+typedef struct mpi2prvvector_st mpi2prv_vector_t;
 
+/* Initialize vector, return the new structure */
 mpi2prv_vector_t * Vector_Init (void);
+
+/* Search within vec the element v, return TRUE if found, else FALSE */
 int Vector_Search (mpi2prv_vector_t *vec, unsigned long long v);
+
+/* Add v into the vector. We don't check for duplicates. */
 void Vector_Add (mpi2prv_vector_t *vec, unsigned long long v);
+
+/* Number of elements within the vector vec */
 unsigned Vector_Count (mpi2prv_vector_t *vec);
 
 #endif /* MPI2PRV_VECTOR_H_INCLUDED */

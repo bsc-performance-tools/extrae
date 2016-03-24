@@ -1332,7 +1332,8 @@ static int Register_Stacked_Type_Event (event_t * current_event,
 	UNREFERENCED_PARAMETER(thread);
 	UNREFERENCED_PARAMETER(fset);
 
-	Vector_Add (RegisteredStackValues, Get_EvValue(current_event));
+	if (!Vector_Search (RegisteredStackValues, Get_EvValue(current_event)))
+		Vector_Add (RegisteredStackValues, Get_EvValue(current_event));
 
 	return 0;
 }
@@ -1363,7 +1364,11 @@ static int Register_CodeLocation_Type_Event (event_t * current_event,
 	cl_types = Extrae_Addr2Type_New (EvFunction, ADDR2OTHERS_FUNCTION,
 		EvLine, ADDR2OTHERS_LINE);
 
-	Extrae_Vector_Append (&RegisteredCodeLocationTypes, cl_types);
+	if (!Extrae_Vector_Search (&RegisteredCodeLocationTypes, cl_types,
+	     Extrae_Addr2Type_Compare))
+	{
+		Extrae_Vector_Append (&RegisteredCodeLocationTypes, cl_types);
+	}
 
 	return 0;
 }

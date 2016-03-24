@@ -24,7 +24,7 @@
 #ifndef __ADDR2TYPES_H__
 #define __ADDR2TYPES_H__
 
-typedef struct 
+typedef struct Extrae_Addr2Type_st
 {
 	int FunctionType;
 	unsigned FunctionType_lbl;
@@ -34,6 +34,8 @@ typedef struct
 
 Extrae_Addr2Type_t * Extrae_Addr2Type_New (int FunctionType,
 	unsigned FunctionType_lbl, int LineType, unsigned LineType_lbl);
+
+int Extrae_Addr2Type_Compare (const void *e1, const void* e2);
 
 #endif
 

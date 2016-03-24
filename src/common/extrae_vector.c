@@ -77,3 +77,12 @@ void * Extrae_Vector_Get (Extrae_Vector_t *v, unsigned position)
 	return v->data[position];
 }
 
+int Extrae_Vector_Search (Extrae_Vector_t *v, const void *element,
+	int(*comparison)(const void *, const void *))
+{
+	unsigned u;
+	for (u = 0; u < v->count; u++)
+		if (comparison (element, v->data[u]))
+			return TRUE;
+	return FALSE;
+}

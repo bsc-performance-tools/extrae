@@ -25,18 +25,31 @@
 
 #define _EXTRAE_VECTOR_H_
 
-typedef struct
+typedef struct Extrae_Vector_st
 {
 	void **data;
 	unsigned count;
 	unsigned allocated;
 } Extrae_Vector_t;
 
+/* Initialize vector structure */
 void Extrae_Vector_Init (Extrae_Vector_t *v);
+
+/* Destroy vector structure */
 void Extrae_Vector_Destroy (Extrae_Vector_t *v);
+
+/* Add a new element to the structure */
 void Extrae_Vector_Append (Extrae_Vector_t *v, void *element);
+
+/* Get the number of elements within the structure */
 unsigned Extrae_Vector_Count (Extrae_Vector_t *v);
+
+/* Get the element at requested position */
 void * Extrae_Vector_Get (Extrae_Vector_t *v, unsigned position);
+
+/* Search for a given element which is found via callback */
+int Extrae_Vector_Search (Extrae_Vector_t *v, const void *element,
+	int(*comparison)(const void *, const void *));
 
 #endif /* _EXTRAE_VECTOR_H_ */
 

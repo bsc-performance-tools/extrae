@@ -33,6 +33,13 @@
 
 #include "vector.h"
 
+typedef struct mpi2prvvector_st
+{
+	unsigned long long *data;
+	unsigned count;
+	unsigned allocated;
+} mpi2prv_vector_t;
+
 #define ALLOC_SIZE 32
 
 mpi2prv_vector_t * Vector_Init (void)

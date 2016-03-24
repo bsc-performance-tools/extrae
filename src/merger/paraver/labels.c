@@ -87,7 +87,26 @@ static Extrae_Vector_t defined_basic_block_labels;
 
 static void Labels_Add_CodeLocation_Label (int eventcode, codelocation_type_t type, char *description)
 {
-	labels_codelocation = (codelocation_label_t*) realloc (labels_codelocation, (num_labels_codelocation+1)*sizeof(codelocation_label_t));
+	unsigned u;
+
+	/* Check first if this label is already included */
+	for (u = 0; u < num_labels_codelocation; u++)
+	{
+		/* If already exists, produce a warning if labels are different */
+		if (labels_codelocation[u].eventcode == eventcode &&
+		    labels_codelocation[u].type == type)
+		{
+			if (strcmp (labels_codelocation[u].description, description))
+			{
+				fprintf (stderr, PACKAGE_NAME": mpi2prv Warning! Already existing definition for event %d with a different description\n", eventcode);
+			}
+
+			return;
+		}
+	}
+
+	labels_codelocation = (codelocation_label_t*) realloc (labels_codelocation,
+	  (num_labels_codelocation+1)*sizeof(codelocation_label_t));
 	if (labels_codelocation == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME": mpi2prv Error! Cannot allocate memory to add a new code location label\n");

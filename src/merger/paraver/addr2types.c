@@ -51,3 +51,12 @@ Extrae_Addr2Type_t * Extrae_Addr2Type_New (int FunctionType,
 	return r;	
 }
 
+int Extrae_Addr2Type_Compare (const void *p1, const void* p2)
+{
+	const Extrae_Addr2Type_t *e1 = (const Extrae_Addr2Type_t *) p1;
+	const Extrae_Addr2Type_t *e2 = (const Extrae_Addr2Type_t *) p2;
+
+	return e1->FunctionType == e2->FunctionType &&
+	       e1->LineType == e2->LineType;
+}
+
