@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 29Mar2016 Fix trace.sh within DynInst examples (CUDA+MPI and MPI)
  * 24Mar2016 Emit only once types associated to Extrae_register_codelocation_type & Extrae_register_function_address
  * 22Mar2016 Fixes in extrae-cmd / Added documentation for Extrae-cmd
  * 11Mar2016 read()/write() now emit callstack & descriptor type
