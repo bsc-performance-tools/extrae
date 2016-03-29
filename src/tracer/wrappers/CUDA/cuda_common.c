@@ -323,21 +323,29 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 		UINT64 utmp;
 		float ftmp;
 
+		/* Translate time from GPU to CPU using .device_reference_time and .host_reference_time
+		   from the RegisteredStreams_t structure */
 		err = cudaEventSynchronize (devices[devid].Stream[streamid].ts_events[i]);
 		CHECK_CU_ERROR(err, cudaEventSynchronize);
 
 		if (devices[devid].Stream[streamid].timetype[i] == EXTRAE_CUDA_NEW_TIME)
 		{
+			/* Computes the elapsed time between two events (in ms  with a resolution of
+			  around 0.5 microseconds) -- according to
+              https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html */
 			err = cudaEventElapsedTime (&ftmp,
 			  devices[devid].Stream[streamid].device_reference_time,
 			  devices[devid].Stream[streamid].ts_events[i]);
 			CHECK_CU_ERROR(err, cudaEventElapsedTime);
 			ftmp *= 1000000;
+			/* Time correction between CPU & GPU */
 			utmp = devices[devid].Stream[streamid].host_reference_time + (UINT64) (ftmp);
 		}
 		else
 			utmp = last_time;
 
+		/* Emit events into the tracing buffer.
+		    CUDAMEMCPY_GPU_EV & CUDAMEMCPYASYNC_GPU_EV use the size field in THREAD_TRACE_MISCEVENT */
 		if (devices[devid].Stream[streamid].events[i] == CUDAMEMCPY_GPU_EV ||
 		    devices[devid].Stream[streamid].events[i] == CUDAMEMCPYASYNC_GPU_EV)
 		{
@@ -353,6 +361,7 @@ static void Extrae_CUDA_FlushStream (int devid, int streamid)
 			  devices[devid].Stream[streamid].values[i], 0);
 		}
 
+		/* Emit communication records for memory transfer, kernel setup and kernel execution */
 		if (devices[devid].Stream[streamid].events[i] == CUDAMEMCPY_GPU_EV ||
 		    devices[devid].Stream[streamid].events[i] == CUDAMEMCPYASYNC_GPU_EV)
 		{
@@ -654,12 +663,17 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 
 	tag = Extrae_CUDA_tag_generator();
 
+	/* Emit communication from the host side if memcpykind refers to host to {host,device} */
 	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
 		  TASKID, p3, tag, tag);
 	}
 
+	/* If the memcpy is started at host, we use tag = 0 to indicate that we don't want
+	   a communication at this point (this will occur at _Exit point).
+	   If the memcpy was started at the accelerator, we pass a tag != 0 to indicate that
+	   the communication starts at this point. */
 	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0,
 		  CUDAMEMCPY_GPU_EV, EVT_BEGIN, 0, p3);
@@ -681,6 +695,11 @@ void Extrae_cudaMemcpy_Exit (void)
 
 	tag = Extrae_CUDA_tag_generator();
 
+	/* THIS IS SYMMETRIC TO Extrae_cudaMemcpy_Enter */
+	/* If the memcpy is started at device, we use tag = 0 to indicate that we don't want
+	   a communication at this point (this will occur at _Enter point).
+	   If the memcpy was started at the accelerator, we pass a tag != 0 to indicate that
+	   the communication arrives at this point. */
 	if (Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyHostToDevice ||
 	  Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyDeviceToDevice)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, 0,
@@ -691,6 +710,7 @@ void Extrae_cudaMemcpy_Exit (void)
 		  CUDAMEMCPY_GPU_EV, EVT_END, 0,
 		  Extrae_CUDA_saved_params[THREADID].cm.size);
 
+	/* This is a safe point because cudaMemcpy is a synchronization point */
 	for (i = 0; i < devices[devid].nstreams; i++)
 	{
 		Extrae_CUDA_FlushStream (devid, i);
@@ -699,6 +719,7 @@ void Extrae_cudaMemcpy_Exit (void)
 
 	Probe_Cuda_Memcpy_Exit ();
 
+	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
 	if (Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyDeviceToHost ||
 	  Extrae_CUDA_saved_params[THREADID].cm.kind == cudaMemcpyHostToHost)
 	{
@@ -732,6 +753,7 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 
 	tag = Extrae_CUDA_tag_generator();
 
+	/* Emit communication from the host side if memcpykind refers to host to {host,device} */
 	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 	{
 		TRACE_USER_COMMUNICATION_EVENT(LAST_READ_TIME, USER_SEND_EV,
@@ -745,6 +767,10 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 		exit (-1);
 	}
 
+	/* If the memcpy is started at host, we use tag = 0 to indicate that we don't want
+	   a communication at this point (this will occur at _Exit point).
+	   If the memcpy was started at the accelerator, we pass a tag != 0 to indicate that
+	   the communication starts at this point. */
 	if (p4 == cudaMemcpyHostToDevice || p4 == cudaMemcpyHostToHost)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, strid,
 		  CUDAMEMCPYASYNC_GPU_EV, EVT_BEGIN, 0, p3);
@@ -774,6 +800,11 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 		exit (-1);
 	}
 
+	/* THIS IS SYMMETRIC TO Extrae_cudaMemcpyAsync_Enter */
+	/* If the memcpy is started at device, we use tag = 0 to indicate that we don't want
+	   a communication at this point (this will occur at _Enter point).
+	   If the memcpy was started at the accelerator, we pass a tag != 0 to indicate that
+	   the communication arrives at this point. */
 	if (Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyHostToDevice ||
 	   Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyDeviceToDevice)
 		Extrae_CUDA_AddEventToStream (EXTRAE_CUDA_NEW_TIME, devid, strid,
@@ -784,6 +815,7 @@ void Extrae_cudaMemcpyAsync_Exit (void)
 
 	Probe_Cuda_MemcpyAsync_Exit ();
 
+	/* Emit communication to the host side if memcpykind refers to {host,device} to host */
 	if (Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyDeviceToHost ||
 	  Extrae_CUDA_saved_params[THREADID].cma.kind == cudaMemcpyHostToHost)
 	{

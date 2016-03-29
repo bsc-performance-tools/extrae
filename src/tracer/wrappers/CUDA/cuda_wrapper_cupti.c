@@ -50,8 +50,14 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 
 	UNREFERENCED_PARAMETER(udata);
 
+	/* We process only CUDA runtime calls */
 	if (domain == CUPTI_CB_DOMAIN_RUNTIME_API)
 	{
+
+		/* Check which event we have been subscribed. If we find a match through the switch,
+		   we will call the hooks within the cuda_common.c providing the parameters from
+		   the callback info parameter cbinfo->functionParams. The parameters are specific
+		   to the routine that has been invoked. */
 		switch (cbid)
 		{
 			case CUPTI_RUNTIME_TRACE_CBID_cudaLaunch_v3020:
@@ -155,16 +161,39 @@ void Extrae_CUDA_init (int rank)
 
 	UNREFERENCED_PARAMETER(rank);
 
+	/* Create a subscriber. All the routines will be handled at Extrae_CUPTI_callback */
 	cuptiSubscribe (&subscriber, (CUpti_CallbackFunc) Extrae_CUPTI_callback, NULL);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaLaunch_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaThreadSynchronize_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaMemcpy_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyAsync_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020);
-	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API, CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020);
+
+	/* Activate callbacks for the following API calls:
+	  CUPTI_RUNTIME_TRACE_CBID_cudaLaunch_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaThreadSynchronize_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaMemcpy_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyAsync_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020 */
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaLaunch_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaThreadSynchronize_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaMemcpy_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyAsync_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020);
 }
 
