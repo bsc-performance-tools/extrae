@@ -24,7 +24,13 @@
 #ifndef MPI2PRV_VECTOR_H_INCLUDED
 #define MPI2PRV_VECTOR_H_INCLUDED
 
-typedef struct mpi2prvvector_st mpi2prv_vector_t;
+typedef struct mpi2prvvector_st
+{
+	unsigned long long *data;
+	unsigned count;
+	unsigned allocated;
+} mpi2prv_vector_t;
+
 
 /* Initialize vector, return the new structure */
 mpi2prv_vector_t * Vector_Init (void);
