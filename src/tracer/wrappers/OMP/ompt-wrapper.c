@@ -78,7 +78,11 @@ static omptthid_threadid_t *ompt_thids = NULL;
 static unsigned n_ompt_thids = 0;
 static pthread_mutex_t mutex_thids = PTHREAD_MUTEX_INITIALIZER;
 
-void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid, unsigned threadid)
+/* Extrae_OMPT_register_ompt_thread_id
+   registers a OMPT thread ompt_thread_id_t and assign it a Paraver thread with
+   an identifier threadid */
+static void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid,
+	unsigned threadid)
 {
 	int found_empty = FALSE;
 	unsigned u;
@@ -124,15 +128,14 @@ void Extrae_OMPT_register_ompt_thread_id (ompt_thread_id_t ompt_thid, unsigned t
 	pthread_mutex_unlock (&mutex_thids);
 }
 
-void Extrae_OMPT_unregister_ompt_thread_id (ompt_thread_id_t ompt_thid)
+/* Extrae_OMPT_unregister_ompt_thread_id
+   unregisters the OMPT thread with identifier ompt_thid
+*/
+static void Extrae_OMPT_unregister_ompt_thread_id (ompt_thread_id_t ompt_thid)
 {
 	unsigned u;
 
 	pthread_mutex_lock (&mutex_thids);
-
-	ompt_thids = (omptthid_threadid_t*) realloc (ompt_thids,
-	  (n_ompt_thids+1)*sizeof(omptthid_threadid_t));
-	assert (ompt_thids != NULL);
 
 #if defined(DEBUG)
 	printf ("UNREGISTERING(ompt_thid %lu)\n", ompt_thid);
@@ -148,7 +151,10 @@ void Extrae_OMPT_unregister_ompt_thread_id (ompt_thread_id_t ompt_thid)
 	pthread_mutex_unlock (&mutex_thids);
 }
 
-unsigned Extrae_OMPT_threadid (void)
+/* Extrae_OMPT_threadid
+   queries to OMPT for the OMPT thread id and then returns for the Paraver
+   registered thread identifier.  */
+static unsigned Extrae_OMPT_threadid (void)
 {
 	ompt_thread_id_t thd = ompt_get_thread_id_fn();
 	unsigned u;
@@ -238,10 +244,13 @@ void Extrae_OMPT_event_thread_begin (ompt_thread_type_t type,
 
 	if (type == ompt_thread_initial)
 	{
+		/* If I'm the initial thread, I'm thread 0 on the Paraver trace */
 		Extrae_OMPT_register_ompt_thread_id (thid, 0);
 	}
 	else
 	{
+		/* If I'm not the initial thread, then look for how many threads are
+		   there and then give it the next id */
 		Extrae_OMPT_register_ompt_thread_id (thid, threads);
 		Backend_ChangeNumberOfThreads (threads + 1);
 	}
@@ -306,6 +315,10 @@ void Extrae_OMPT_event_parallel_begin (ompt_task_id_t tid, ompt_frame_t *ptf,
 	UNREFERENCED_PARAMETER(invoker);
 
 	PROTOTYPE_MESSAGE(" (%ld, %p, %ld, %u, %p)", tid, ptf, pid, req_team_size, pf);
+
+	/* At this point we need to register the parallel region with identifier (pid)
+	   to the outlined code (pointed by pf). This is necessary because there won't
+	   be any further reference to pf but to pid */
 	Extrae_OMPT_register_ompt_parallel_id_pf (pid, pf);
 	Extrae_OpenMP_ParRegion_Entry ();
 	Extrae_OpenMP_EmitTaskStatistics();
@@ -320,6 +333,8 @@ void Extrae_OMPT_event_parallel_end (ompt_parallel_id_t pid, ompt_task_id_t tid,
 	UNREFERENCED_PARAMETER(invoker);
 
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
+
+	/* At this point we can unregister the association between pid - pf */
 	Extrae_OMPT_unregister_ompt_parallel_id_pf (pid);
 	Extrae_OpenMP_ParRegion_Exit();
 	Extrae_OpenMP_EmitTaskStatistics();
@@ -480,6 +495,11 @@ void Extrae_OMPT_event_task_begin (ompt_task_id_t ptid, const ompt_frame_t *ptf,
 	UNREFERENCED_PARAMETER(tid);
 
 	PROTOTYPE_MESSAGE(" (%ld, %p, %ld, %p)", ptid, ptf, tid, ntf);
+
+	/* Similar to Extrae_OMPT_event_parallel_begin, ntf won't be available
+	   whenever additional activity to task tid occurs. We need to store the
+	   relation between tid and its code (ntf). In this case, the task is NOT
+	   implicit. */
 	Extrae_OMPT_register_ompt_task_id_tf (tid, ntf, FALSE);
 	Extrae_OpenMP_Notify_NewInstantiatedTask();
 	//Extrae_OpenMP_TaskUF_Entry (ntf); NOTE: Task does not start running here (HSG, for IBM)!
@@ -492,7 +512,7 @@ void Extrae_OMPT_event_task_end (ompt_task_id_t tid)
 	PROTOTYPE_MESSAGE(" (%ld)", tid);
 	Extrae_OpenMP_Notify_NewExecutedTask();
 	if (Extrae_OMPT_tf_task_id_is_running(tid))
-		// If this task was not marked at switch, mark it here
+		// If this task was not marked as running at switch, mark it here
 		Extrae_OMPT_OpenMP_TaskUF_Exit (tid);
 	Extrae_OMPT_unregister_ompt_task_id_tf (tid);
 #endif /* EMPTY_OMPT_CALLBACKS */
@@ -698,6 +718,10 @@ void Extrae_OMPT_event_implicit_task_begin (ompt_parallel_id_t pid,
 	UNREFERENCED_PARAMETER(tid);
 
 	PROTOTYPE_MESSAGE(" (%ld, %ld)", pid, tid);
+	/* Similar to Extrae_OMPT_event_task_begin but in this case two things differ:
+	   1) we don't have the code associated to the function, so it is derived from the
+	   code associated to the parallel function. 2) We need to mark this task as
+	   implicit task */
 	Extrae_OMPT_register_ompt_task_id_tf (tid, Extrae_OMPT_get_pf_parallel_id(pid), TRUE);
 	Extrae_OpenMP_UF_Entry (Extrae_OMPT_get_pf_parallel_id(pid));
 #endif /* EMPTY_OMPT_CALLBACKS */
@@ -1055,11 +1079,13 @@ void ompt_initialize(
 
 #if defined(DEBUG)
 	printf ("OMPTOOL: ompt_rte = %d\n", ompt_rte);
-#endif
+#endif 
 
+	/* Ask OMPT for the routine ompt_set_callback */
 	ompt_set_callback_fn = (int(*)(ompt_event_t, ompt_callback_t)) lookup("ompt_set_callback");
 	assert (ompt_set_callback_fn != NULL);
 
+	/* Ask OMPT for the routine ompt_get_thread_id */
 	ompt_get_thread_id_fn = (ompt_thread_id_t(*)(void)) lookup("ompt_get_thread_id");
 	assert (ompt_get_thread_id_fn != NULL);
 
@@ -1072,6 +1098,7 @@ void ompt_initialize(
 	i = 0;
 	while (ompt_callbacks[i].evt != (ompt_event_t) 0)
 	{
+		/* What happens to IBM runtime? */
 		if (ompt_rte == OMPT_RTE_IBM)
 		{
 			if (ompt_callbacks[i].evt != ompt_event_master_begin

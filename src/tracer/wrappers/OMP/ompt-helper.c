@@ -50,6 +50,9 @@ static unsigned n_allocated_ompt_pids_pf = 0;
 #define N_ALLOCATE_OMPT_PIDS 128
 static pthread_mutex_t mutex_id_pf = PTHREAD_MUTEX_INITIALIZER;
 
+/* Extrae_OMPT_register_ompt_parallel_id_pf
+   Records the relation between a OMPT parallel id region and its parallel
+   function */
 void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid,
 	const void *pf)
 {
@@ -92,6 +95,9 @@ void Extrae_OMPT_register_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid,
 	pthread_mutex_unlock (&mutex_id_pf);
 }
 
+/* Extrae_OMPT_unregister_ompt_parallel_id_pf
+   Removes the relation between a OMPT parallel id region and its parallel
+   function */
 void Extrae_OMPT_unregister_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid)
 {
 	/* Extract ompt_pid - pf relation if it exists within the container */
@@ -116,6 +122,8 @@ void Extrae_OMPT_unregister_ompt_parallel_id_pf (ompt_parallel_id_t ompt_pid)
 	}
 }
 
+/* Extrae_OMPT_get_pf_parallel_id
+   gets the outlined code pointer for a parallel region id */
 const void * Extrae_OMPT_get_pf_parallel_id (ompt_parallel_id_t ompt_pid)
 {
 	unsigned u;
@@ -150,6 +158,10 @@ static unsigned n_allocated_ompt_tids_tf = 0;
 static pthread_mutex_t mutex_tid_tf = PTHREAD_MUTEX_INITIALIZER;
 static long long __task_ctr = 1;
 
+/* Extrae_OMPT_register_ompt_task_id_tf
+   establishes a relation between an OMPT task id and the code associated
+   to the task code. The internal structures also require to know if this
+   task is implicit. */
 void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid,
 	const void *tf, int implicit)
 {
@@ -197,6 +209,8 @@ void Extrae_OMPT_register_ompt_task_id_tf (ompt_task_id_t ompt_tid,
 	pthread_mutex_unlock (&mutex_tid_tf);
 }
 
+/* Extrae_OMPT_unregister_ompt_task_id_tf
+   removes the relation between a ompt task id and its outlined code */
 void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 {
 	/* Extract ompt_tid - tf relation if it exists within the container */
@@ -221,6 +235,8 @@ void Extrae_OMPT_unregister_ompt_task_id_tf (ompt_task_id_t ompt_tid)
 	}
 }
 
+/* Extrae_OMPT_get_tf_task_id
+   looks for the outlined code for a ompt task id */
 const void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 	int *is_implicit, long long *taskctr)
 {
@@ -247,6 +263,8 @@ const void * Extrae_OMPT_get_tf_task_id (ompt_task_id_t ompt_tid,
 	return ptr;
 }
 
+/* Extrae_OMPT_tf_task_id_set_running
+   Annotates whether a ompt task is running or not. */
 void Extrae_OMPT_tf_task_id_set_running (ompt_task_id_t ompt_tid, int b)
 {
 	unsigned u;
@@ -268,6 +286,9 @@ void Extrae_OMPT_tf_task_id_set_running (ompt_task_id_t ompt_tid, int b)
 }
 
 
+/* Extrae_OMPT_tf_task_id_is_running
+   Queries whether a given ompt task id is running or not, as set by
+   Extrae_OMPT_tf_task_id_set_running */
 int Extrae_OMPT_tf_task_id_is_running (ompt_task_id_t ompt_tid)
 {
 	unsigned u;
