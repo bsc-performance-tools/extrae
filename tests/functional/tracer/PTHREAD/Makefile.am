@@ -5,11 +5,16 @@ EXTRA_DIST= \
  trace-ldpreload.sh \
  extrae.xml
 
-check_PROGRAMS = \
+check_PROGRAMS =
+TESTS =
+
+if HAVE_BINUTILS
+check_PROGRAMS += \
  pthread
 
-TESTS = \
+TESTS += \
   pthread.sh
+endif
 
 pthread_SOURCES = pthread.c
 pthread_CFLAGS = -g -pthread
