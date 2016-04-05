@@ -122,13 +122,18 @@ static void JNICALL Extraej_cb_ExceptionCatch (jvmtiEnv *jvmti_env,
 static void JNICALL Extraej_cb_ThreadStart (jvmtiEnv *jvmti_env,
 	JNIEnv* jni_env, jthread thread)
 {
+/*
 	jvmtiThreadInfo ti;
 	jvmtiError r;
 	UNREFERENCED_PARAMETER(jni_env);
 
-	r = (*jvmti_env)->GetThreadInfo(jvmti_env, thread, &ti);
-	if (r == JVMTI_ERROR_NONE)
-		Extrae_set_thread_name (THREADID, ti.name);
+	if (thread != NULL)
+	{
+		r = (*jvmti_env)->GetThreadInfo(jvmti_env, thread, &ti);
+		if (r == JVMTI_ERROR_NONE)
+			Extrae_set_thread_name (THREADID, ti.name);
+	}
+*/
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved)
