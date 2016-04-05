@@ -16,7 +16,7 @@ WRAPPERS_OPENMP += \
  ompt-wrapper.c \
  ompt-helper.h ompt-helper.c 
 
-EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -Iompt-headers
+EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -I$(WRAPPERS_DIR)/OMP/ompt-headers
 
 else
 
