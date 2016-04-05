@@ -69,11 +69,18 @@ void Extrae_malloctrace_init (void)
 }
 
 
+/* Note on the implementation!
+   We will only instrument those malloc(), realloc() that are larger than
+   a given threshold. Therefore, we will only instrument the free() associted to
+   those allocations. To this end, we store in mallocentries a vector of pointers
+   returned by malloc/realloc that surpass the threshold and that may need later
+   instrumentation of their respective free. */
 static void ** mallocentries = NULL;
 static unsigned nmallocentries_allocated = 0;
 static unsigned nmallocentries = 0;
 #define NMALLOCENTRIES_MALLOC 16*1024
 
+/* Registers a new address to be tracked for future free() calls */
 static void Extrae_malloctrace_add (void *p)
 {
 	if (p != NULL)
@@ -103,6 +110,7 @@ static void Extrae_malloctrace_add (void *p)
 	}
 }
 
+/* Removes an entry from the list of registered addresses */
 static int Extrae_malloctrace_remove (const void *p)
 {
 	if (p != NULL)
@@ -159,6 +167,8 @@ void *malloc (size_t s)
 
 	if (real_malloc != NULL && canInstrument)
 	{
+		/* If we can instrument, simply capture everything we need 
+		   and add the pointer to the list of recorded pointers */
 		Backend_Enter_Instrumentation (2);
 		Probe_Malloc_Entry (s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
@@ -169,6 +179,7 @@ void *malloc (size_t s)
 	}
 	else if (real_malloc != NULL)
 	{
+		/* Otherwise, call the original */
 		res = real_malloc (s);
 	}
 	else
@@ -207,6 +218,8 @@ void free (void *p)
 	if (Extrae_get_trace_malloc_free() && real_free != NULL && canInstrument
 	    && present)
 	{
+		/* If we can instrument, simply capture everything we need and
+		   remove the pointer from the list */
 		Backend_Enter_Instrumentation (2);
 		Probe_Free_Entry (p);
 		real_free (p);
@@ -215,6 +228,7 @@ void free (void *p)
 	}
 	else if (real_free != NULL)
 	{
+		/* Otherwise, call the original */
 		real_free (p);
 	}
 	else
@@ -252,6 +266,7 @@ void *calloc (size_t s1, size_t s2)
 	}
 	else if (real_calloc != NULL && !canInstrument)
 	{
+		/* Otherwise, call the original */
 		res = real_calloc (s1, s2);
 	}
 	else
@@ -286,6 +301,8 @@ void *realloc (void *p, size_t s)
 
 	if (real_realloc != NULL && canInstrument)
 	{
+		/* If we can instrument, simply capture everything we need 
+		   and remove and add the pointers to the list of recorded pointers */
 		Backend_Enter_Instrumentation (2);
 		Probe_Realloc_Entry (p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
@@ -297,6 +314,7 @@ void *realloc (void *p, size_t s)
 	}
 	else if (real_realloc != NULL)
 	{
+		/* Otherwise, call the original */
 		res = real_realloc (p, s);
 	}
 	else

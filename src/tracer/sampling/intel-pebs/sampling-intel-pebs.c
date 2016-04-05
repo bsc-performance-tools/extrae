@@ -22,7 +22,8 @@
 \*****************************************************************************/
 
 /* Additional credis to Vince Weaver, vincent.weaver _at_ maine.edu 
-   For further reference see https://github.com/deater/perf_event_tests */
+   For further reference see https://github.com/deater/perf_event_tests
+   particularly sample_weight.c and sample_data_src.c */
 
 #define _GNU_SOURCE 1
 
@@ -376,6 +377,8 @@ static int mmap_pages=1+MMAP_DATA_SIZE;
 unsigned char *data = NULL;
 #endif
 
+/* This function extracts PEBS entries from the previously allocated buffer 
+   in data ptr. At this moment, we only should have 1 event in the buffer */
 static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap,
 	int mmap_size, long long prev_head, int sample_type, int *events_read,
 	long long *ip, long long *addr, long long *weight,
@@ -635,6 +638,10 @@ static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap,
 	return head;
 }
 
+/* This handler will deal with the PEBS buffer when it monitors LOADS
+   and the buffer is full (1 entry only). It emits everythin Extrae needs
+   timestamp, reference to memory, portion of the memory hierarchy that
+   provides it, the access cost. */
 static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 	void *uc)
 {
@@ -739,6 +746,9 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 	(void) ret;
 }
 
+/* This handler will deal with the PEBS buffer when it monitors STORES
+   and the buffer is full (1 entry only). It emits everythin Extrae needs
+   timestamp  and reference to memory. */
 static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 	void *uc)
 {
@@ -770,6 +780,10 @@ static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 	(void) ret;
 }
 
+/* Extrae_IntelPEBS_enable (int loads).
+   initializes the sampling based on PEBS. If loads is TRUE, then the PEBS is
+   setup to monitor LOAD instructions, otherwise it monitors STORE instructions.
+*/
 int Extrae_IntelPEBS_enable (int loads)
 {
 	int ret;
@@ -869,12 +883,18 @@ int Extrae_IntelPEBS_enable (int loads)
 	return 0;
 }
 
+/*  Extrae_IntelPEBS_disable
+    Stops using PEBS. It stops the sampling mechanism */
 void Extrae_IntelPEBS_disable (void)
 {
 	ioctl(perf_pebs_fd, PERF_EVENT_IOC_REFRESH, 0);
 	munmap (extrae_intel_pebs_mmap, mmap_pages*sysconf(_SC_PAGESIZE));
 	close (perf_pebs_fd);
 }
+
+/* Extrae_IntelPEBS_nextSampling
+   Alternates between sampling loads and stores if multiplexing is requested
+   by the user. It simply stops the sampling and starts it again. */
 
 static int PEBS_current_sampling_load = TRUE;
 void Extrae_IntelPEBS_nextSampling (void)
