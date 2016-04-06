@@ -183,12 +183,12 @@ AC_DEFUN([AX_PROG_MPI],
       else
          mpicc_compilers="mpicc mpiicc hcc mpxlc_r mpxlc mpcc mpcc_r cmpicc mpifccpx"
          for mpicc in [$mpicc_compilers]; do
-            if test -x "${MPI_HOME}/bin/${mpicc}" ; then
-               MPICC_COMPILER="${MPI_HOME}/bin/${mpicc}"
+            if test -x "${MPI_HOME}/bin${BITS}/${mpicc}" ; then
+               MPICC_COMPILER="${MPI_HOME}/bin${BITS}/${mpicc}"
                AC_MSG_RESULT([${MPICC_COMPILER}])
                break
-            elif test -x "${MPI_HOME}/bin64/${mpicc}" ; then
-               MPICC_COMPILER="${MPI_HOME}/bin64/${mpicc}"
+            elif test -x "${MPI_HOME}/bin/${mpicc}" ; then
+               MPICC_COMPILER="${MPI_HOME}/bin/${mpicc}"
                AC_MSG_RESULT([${MPICC_COMPILER}])
                break
             fi
@@ -205,12 +205,12 @@ AC_DEFUN([AX_PROG_MPI],
    if test "${MPIF77}" = "" ; then
       mpif77_compilers="mpif77 mpxlf_r mpxlf"
       for mpif77 in [$mpif77_compilers]; do
-         if test -x "${MPI_HOME}/bin/${mpif77}" ; then
-            MPIF77="${MPI_HOME}/bin/${mpif77}"
+         if test -x "${MPI_HOME}/bin${BITS}/${mpif77}" ; then
+            MPIF77="${MPI_HOME}/bin${BITS}/${mpif77}"
             AC_MSG_RESULT([${MPIF77}])
             break
-         elif test -x "${MPI_HOME}/bin64/${mpif77}" ; then
-            MPIF77="${MPI_HOME}/bin64/${mpif77}"
+         elif test -x "${MPI_HOME}/bin/${mpif77}" ; then
+            MPIF77="${MPI_HOME}/bin/${mpif77}"
             AC_MSG_RESULT([${MPIF77}])
             break
          fi
@@ -240,12 +240,12 @@ AC_DEFUN([AX_PROG_MPI],
    if test "${MPIF90}" = "" ; then
       mpif90_compilers="mpif90 mpxlf_r mpxlf"
       for mpif90 in [$mpif90_compilers]; do
-         if test -x "${MPI_HOME}/bin/${mpif90}" ; then
-            MPIF90="${MPI_HOME}/bin/${mpif90}"
+         if test -x "${MPI_HOME}/bin${BITS}/${mpif90}" ; then
+            MPIF90="${MPI_HOME}/bin${BITS}/${mpif90}"
             AC_MSG_RESULT([${MPIF90}])
             break
-         elif test -x "${MPI_HOME}/bin64/${mpif90}" ; then
-            MPIF90="${MPI_HOME}/bin64/${mpif90}"
+         elif test -x "${MPI_HOME}/bin/${mpif90}" ; then
+            MPIF90="${MPI_HOME}/bin/${mpif90}"
             AC_MSG_RESULT([${MPIF90}])
             break
          fi
@@ -274,11 +274,11 @@ AC_DEFUN([AX_PROG_MPI],
 	AC_MSG_CHECKING([for MPI launcher])
 	MPIRUN=""
 	for mpix in [ "mpirun" "mpiexec" ]; do
-		if test -x "${MPI_HOME}/bin/${mpix}" ; then
-			MPIRUN="${MPI_HOME}/bin/${mpix}"
+		if test -x "${MPI_HOME}/bin${BITS}/${mpix}" ; then
+			MPIRUN="${MPI_HOME}/bin${BITS}/${mpix}"
 			break
-		elif test -x "${MPI_HOME}/bin64/${mpix}" ; then
-			MPIRUN="${MPI_HOME}/bin64/${mpix}"
+		elif test -x "${MPI_HOME}/bin/${mpix}" ; then
+			MPIRUN="${MPI_HOME}/bin/${mpix}"
 			break
 		fi
 	done

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 06Apr2016 Priorize the search for mpicc family of compilers under bin64 before bin
  * 29Mar2016 Fix trace.sh within DynInst examples (CUDA+MPI and MPI)
  * 24Mar2016 Emit only once types associated to Extrae_register_codelocation_type & Extrae_register_function_address
  * 22Mar2016 Fixes in extrae-cmd / Added documentation for Extrae-cmd
