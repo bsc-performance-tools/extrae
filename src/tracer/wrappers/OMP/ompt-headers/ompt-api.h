@@ -82,6 +82,16 @@ OMPT_API int ompt_target_get_device_id(         /* return active target device I
   void
 );
 
+OMPT_API int ompt_get_num_devices(void);
+
+OMPT_API int ompt_target_get_device_info(
+  int device_id,
+  const char **type,
+  ompt_target_device_t **device,
+  ompt_function_lookup_t *lookup,
+  const char *documentation
+);
+
 OMPT_TARG_API ompt_target_time_t ompt_target_get_time( /* return current time on device  */
   ompt_target_device_t *device   /* target device handle                                 */
 );
@@ -150,4 +160,5 @@ OMPT_TARG_API ompt_record_native_abstract_t *
 ompt_target_buffer_get_record_native_abstract(
   void *native_record                  /* pointer to native trace record                 */
 );
+
 #endif /* OMPT_API_H_INCLUDED */

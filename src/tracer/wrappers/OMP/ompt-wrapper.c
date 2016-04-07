@@ -1150,6 +1150,10 @@ void ompt_initialize(
 
 	Extrae_set_threadid_function (Extrae_OMPT_threadid);
 
+
+	/* This point starts support for OMPT accelerators. At this moment of the SPEC, we assume there's only 1 accelerator */
+	ompt_target_initialize(lookup);
+		
 	UNREFERENCED_PARAMETER(r);
 }
 

@@ -14,7 +14,8 @@ EXTRA_OPENMP_CFLAGS =
 if WANT_OPENMP_OMPT
 WRAPPERS_OPENMP += \
  ompt-wrapper.c \
- ompt-helper.h ompt-helper.c 
+ ompt-helper.h ompt-helper.c \
+ ompt-target.c ompt-target.h 
 
 EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -I$(WRAPPERS_DIR)/OMP/ompt-headers
 
