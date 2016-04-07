@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="@sub_PREFIXDIR@"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="@sub_XMLID@"
+>
+
+  <counters enabled="yes">
+    <cpu enabled="yes" starting-set-distribution="1">
+      <set enabled="yes" domain="all" changeat-time="0">
+        PAPI_TOT_CYC
+      </set>
+    </cpu>
+  </counters>
+
+</trace>

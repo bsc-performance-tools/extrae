@@ -1,0 +1,61 @@
+Extrae 3.3.0rc SVN revision 3634 based on extrae/trunk
+CPU info: ARMv7 Processor rev 4 (v7l)
+Using libunwind v1.1 from /apps/extrae/deps/libunwind/git
+Using PAPI v5.4.1 from /apps/papi/5.4.1
+Running on: linux running on ARM processor
+
+Test posix_clock - 10 executions
+min: 485 ns
+avg: 487 ns
+max: 490 ns
+
+Test ia32_rdtsc_clock - 10 executions
+min: 1 ns
+avg: 1 ns
+max: 1 ns
+
+Test extrae_event - 10 executions
+min: 917 ns
+avg: 937 ns
+max: 960 ns
+
+Test extrae_nevent4 - 10 executions
+min: 1299 ns
+avg: 1362 ns
+max: 1418 ns
+
+Test extrae_eventandcounters - 10 executions
+min: 5363 ns
+avg: 5446 ns
+max: 5567 ns
+
+Test papi_read1 - 10 executions
+min: 1404 ns
+avg: 1470 ns
+max: 1515 ns
+
+Test papi_read4 - 10 executions
+min: 3753 ns
+avg: 3840 ns
+max: 3932 ns
+
+Test extrae_user_function - 10 executions
+min: 11348 ns
+avg: 11452 ns
+max: 11618 ns
+
+Test extrae_get_caller1 - 10 executions
+min: 5148 ns
+avg: 5196 ns
+max: 5232 ns
+
+Test extrae_get_caller6 - 10 executions
+min: 18145 ns
+avg: 18322 ns
+max: 18446 ns
+
+Test extrae_trace_callers - 10 executions
+min: 19290 ns
+avg: 19477 ns
+max: 19621 ns
+

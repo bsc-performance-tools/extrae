@@ -1,0 +1,144 @@
+
+Configuration & Installation of the package at several machines:
+******
+
+All commands given here are given as an example to configure and install the package, you may need to tune them properly.
+These examples assume that you are using a sh/bash shell, you must adequate them if you use other shells.
+
+
+Jugene (Bluegene/P)
+--
+NOTES:
+Bluegene/{L,P,Q} only support static libraries.
+
+COMMAND for BG/P:
+./configure --prefix=/homec/jzam11/jzam1128/aplic/extrae/2.2.0 --with-papi=/homec/jzam11/jzam1128/aplic/papi/4.1.2.1 --with-bfd=/bgsys/local/gcc/gnu-linux 4.3.2/powerpc-linux-gnu/powerpc-bgp-linux --with-liberty=/bgsys/local/gcc/gnu-linux 4.3.2/powerpc-bgp-linux --with-mpi=/bgsys/drivers/ppcfloor/comm --without-unwind --without-dyninst
+make
+make install
+
+COMMAND for BG/Q (without libxml2 support and without binutils):
+./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --disable-xml
+make
+make install
+
+COMMAND for BG/Q (with libxml2 support and binutils):
+** Please note this may need to compile libxml2 and binutils using the GNU cross-compiler for BG/Q (/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-gcc) **
+
+./configure --prefix=/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1 --with-mpi=/bgsys/drivers/ppcfloor/comm/gcc --without-unwind --without-dyninst --disable-openmp --disable-pthread --with-libz=/bgsys/local/zlib/v1.2.5 --with-papi=/usr/local/UNITE/packages/papi/5.0.1 --with-xml-prefix=/homec/jzam11/jzam1128/aplic/juqueen/libxml2-gcc --enable-merge-in-trace --with-binutils=/homec/jzam11/jzam1128/aplic/juqueen/binutils-gcc
+make
+make install
+
+Linux
+--
+NOTES:
+
+COMMAND:
+Example 1 - MPICH, OpenMP and PAPI
+./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp
+
+Example 2 - Forcing 32bit package in a 32/64bit mixed environment. Also DynInst and libunwind.
+./configure --prefix=PREFIX --with-mpi=/home/harald/aplic/mpich/1.2.7 --with-papi=/usr/local/papi --enable-openmp --without-dyninst --without-unwind
+make
+make install
+
+Example 3 - Forcing 64bit package in a 32/64bit mixed environment. Also DynInst and libunwind.
+./configure --prefix=PREFIX --with-mpi=/opt/osshpc/mpich-mx --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64 --with-unwind=$HOME/aplic/unwind/1.0.1/64 --with-elf=/usr --with-dwarf=/usr --with-dyninst=$HOME/aplic/dyninst/7.0.1/64
+make
+make install
+
+Example 4 - MPICH2 (+ Slurm/MOAB) in a 32/64bit mixed environment. Also use libunwind, but no DynInst.
+export MP_IMPL=anl2 ./configure --prefix=PREFIX --with-mpi=/gpfs/apps/MPICH2/mx/1.0.8p1..3/32 --with-papi=/gpfs/apps/PAPI/3.6.2-970mp --with-binary-type=64 --with-unwind=$HOME/aplic/unwind/1.0.1/64 --without-dyninst
+make
+make install
+
+Example 5 - Linux with Power Processor in a environment with IBM compilers & GNU compilers, using PMAPI instead of PAPI
+ a) Using IBM compilers
+ CC=xlc CXX=xlC ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe --without-dyninst --without--unwind --without-papi
+ make
+ make install
+
+ b) Using GNU compilers (and forcing when using MPCC in parallel merge)
+ ./configure --prefix=PREFIX --with-mpi=/opt/ibmhpc/ppe.poe --enable-pmapi --without-unwind --without-dyninst
+ MP_COMPILER=gcc make
+ make install
+
+Example 6 - Linux on CRAY XT5 for 64bit package and adding sampling. Notice the "--disable-xmltest". As the backends programs cannot be run in the frontent, we skip running the XML test. Also using a local installation of libunwind.
+
+./configure \
+  --with-mpi=/opt/cray/mpt/4.0.0/xt/seastar/mpich2-gnu
+  --with-binary-type=64 \
+  --with-xml-prefix=/sw/xt5/libxml2/2.7.6/sles10.1_gnu4.1.2
+  --disable-xmltest \
+  --with-bfd=/opt/cray/cce/7.1.5/cray-binutils \
+  --with-liberty=/opt/cray/cce/7.1.5/cray-binutils \
+  --enable-sampling \
+  --enable-shared=no \
+  --prefix=PREFIX \
+  --with-papi=/opt/xt-tools/papi/3.7.2/v23 \
+  --with-unwind=/ccs/home/khuck/lib \
+  CC=cc CFLAGS='-O3 -g' LDFLAGS='-O3 -g' CXX=CC CXXFLAGS='-O3 -g' F77=ftn FFLAGS='-O3 -g'
+
+Example 7 - Compiling on a ARM based processor machine using Linux
+
+If using the GNU toolchain to compile the library, we suggest at least using version 4.6.2 because of its enhaced in this architecture.
+
+Configuration command:
+
+CC=/gpfs/APPS/BIN/GCC-4.6.2/bin/gcc-4.6.2 ./configure --prefix=/gpfs/CEPBATOOLS/extrae/2.2.0 --with-unwind=/gpfs/CEPBATOOLS/libunwind/1.0.1-git --with-papi=/gpfs/CEPBATOOLS/papi/4.2.0 --with-mpi=/usr --enable-posix-clock --without-dyninst
+make
+make install
+
+Intel MIC accelerators support (KNF and KNC):
+--
+The Intel MIC accelerators are not binary compatible with the host (even if it is a x86 chip), thus the Extrae package must be compiled twice, one for the host and one for the accelerator. While the host configuration and installation has been shown before, in order to compile Extrae for the accelerator you must configure Extrae like:
+
+./configure --with-mpi=/opt/intel/impi/4.1.0.024/mic --without-dyninst --without-papi --without-unwind --disable-xml --disable-posix-clock --with-libz=/opt/extrae/zlib-mic --host=x86_64-suse-linux-gnu --prefix=/home/Computational/harald/extrae-mic CFLAGS="-O -mmic -I/usr/include" --enable-mic CC=icc CXX=icpc MPICC=/opt/intel/impi/4.1.0.024/mic/bin/mpiicc
+
+To compile it, just issue
+make 
+make install
+
+
+AIX
+--
+NOTES:
+Some extensions of Extrae do not work properly (nanos, SMPss and OpenMP).
+In addition, if using IBM MPI (aka POE) the make will complain when generating the parallel merge if the main compiler is not xlc/xlC. So, you can change the compiler or disable the parallel merge at compile step.
+Command ar can complain if 64bit binaries are generated. It's a good idea to run make with OBJECT_MODE=64 set to avoid this.
+
+
+Example 2 - Compiling the 64bit package without the parallel merge
+./configure --prefix=PREFIX --disable-nanos --disable-smpss --disable-openmp --disable-parallel-merge --with-binary-type=64 --without-unwind --enable-pmapi --without-dyninst --with-mpi=/usr/lpp/ppe.poe
+OBJECT_MODE=64 make
+make install
+
+
+MAC OS X
+--
+NOTES:
+This platform is not supported
+
+./configure --prefix=/Users/bsccns/T --with-mpi=/Users/bsccns/aplic/openmpi/1.4.4 --without-dyninst --without-papi --without-unwind --with-execinfo=/usr --with-bfd=/opt/local --with-liberty=/opt/local
+make
+make install
+
+
+ANDROID OS (Cross Compiling)
+--
+CFLAGS="--sysroot=${NDK_SROOT}" LDFLAGS="--sysroot=${NDK_SROOT}" ./configure \
+--host=arm-linux-androideabi \
+--prefix=... \
+--without-mpi \
+--with-papi=.../papi/ \
+--without-dyninst \
+--with-binutils=.../binutils/ \
+--with-unwind=.../libunwind/ \
+--without-boost \
+--with-xml-exec-prefix=.../xml/ \
+--with-libz=${NDK_SROOT}/usr/ \
+--disable-posix-clock \
+--enable-gettimeofday-clock \
+--enable-openmp \
+--with-opencl=${NDK_SROOT}/usr/
+
+make && make install

@@ -1,0 +1,29 @@
+SUBDIRS  = MALLOC IO fork
+
+if WANT_PTHREAD
+SUBDIRS += pthread
+endif
+
+if WANT_OPENMP
+SUBDIRS += OMP
+endif
+
+if HAVE_MPI
+SUBDIRS += MPI
+endif
+
+if WANT_CUDAorCUPTI
+SUBDIRS += CUDA
+endif
+
+if WANT_OPENCL
+SUBDIRS += OPENCL
+endif
+
+if WANT_OPENSHMEM
+SUBDIRS += openshmem
+endif
+
+if WANT_JAVA_JVMTI
+SUBDIRS += JAVA
+endif

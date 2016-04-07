@@ -1,0 +1,76 @@
+Extrae 3.3.0rc SVN revision 3634 based on extrae/trunk
+CPU info: Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz
+Using libunwind v1.1 from /homec/jzam11/jzam1128/aplic/jureca/libunwind/1.1
+Using PAPI v5.4.1 from /homec/jzam11/jzam1128/aplic/jureca/papi/5.4.1
+Running on: linux running on x86 with 64 bit extensions processor
+
+Test posix_clock - 10 executions
+min: 22 ns
+avg: 23 ns
+max: 25 ns
+
+Test ia32_rdtsc_clock - 10 executions
+min: 12 ns
+avg: 12 ns
+max: 13 ns
+
+Test extrae_event - 10 executions
+min: 116 ns
+avg: 121 ns
+max: 139 ns
+
+Test extrae_nevent4 - 10 executions
+min: 234 ns
+avg: 248 ns
+max: 256 ns
+
+Test extrae_eventandcounters - 10 executions
+min: 772 ns
+avg: 790 ns
+max: 825 ns
+
+Test papi_read1 - 10 executions
+min: 249 ns
+avg: 254 ns
+max: 266 ns
+
+Test papi_read4 - 10 executions
+min: 588 ns
+avg: 598 ns
+max: 652 ns
+
+Test extrae_user_function - 10 executions
+min: 1394 ns
+avg: 1439 ns
+max: 1503 ns
+
+Test extrae_get_caller1 - 10 executions
+min: 653 ns
+avg: 678 ns
+max: 713 ns
+
+Test extrae_get_caller6 - 10 executions
+min: 2304 ns
+avg: 2434 ns
+max: 2732 ns
+
+Test extrae_trace_callers - 10 executions
+min: 1734 ns
+avg: 1938 ns
+max: 3214 ns
+
+Test JavaEvent - 10 executions
+min: 139 ns
+avg: 145 ns
+max: 162 ns
+
+Test JavaNEvent4 - 10 executions
+min: 633 ns
+avg: 691 ns
+max: 754 ns
+
+Test JavaFakeRoutine - 10 executions
+min: 8 ns
+avg: 9 ns
+max: 10 ns
+

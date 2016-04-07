@@ -1,0 +1,39 @@
+\chapter{Overhead}\label{cha:Overhead}
+
+\TRACE includes a set of tests to evaluate the overhead imposed to the application by different components.
+These tests are installed in \texttt{\$\{EXTRAE\_HOME\}/share/tests/overhead} and can be run by executing the \texttt{run\_overhead\_tests.sh} script within this directory.
+Note that this script compiles and executes the generated binaries on the same system, so this script will require some tuning to run in a system that uses a batch-queuing system and/or needs cross-compiling.
+
+Currently there are the following tests the evaluate the necessary time to perform certain operations:
+\begin{itemize}
+\item \textit{posix\_clock} grab the current time using the posix clock. Even the simpler emitted event requires gathering a timestamp.
+\item \textit{extrae\_event} emit one event (without performance counters) into the tracing buffer using the \texttt{Extrae\_event} API call.
+\item \textit{extrae\_nevent4} emit four events (without performance counters) into the tracing buffer using the \texttt{Extrae\_nevent} API call.
+\item \textit{extrae\_eventandcounters} emit one event (and reading 4 peformance counters) into the tracing buffer through the \texttt{Extrae\_eventandcounters} call.
+\item \textit{papi\_read1} capture the value of one performance counter through PAPI.
+\item \textit{papi\_read4} capture the value of four performance counters through PAPI.
+\item \textit{extrae\_user\_function} involves traversing the processor call-stack while searching the frame that points to the current routine (as the \texttt{Extrae\_user\_function} API call).
+\item \textit{extrae\_get\_caller1} traverses one level of the processor call-stack.
+\item \textit{extrae\_get\_caller6} traverses six levels of the processor call-stack.
+\item \textit{extrae\_trace\_callers} collects three frames from the processor call-stack.
+\item \textit{extrae\_event/Java} measures the time required to emit one event (without performance counters) from Java through the JNI connector.
+\item \textit{extrae\_nevent4/Java} needed time to emit four events (without performance counters) from Java through the JNI connector.
+\end{itemize}
+
+Figure~\ref{fig:Overhead_Extrae_3_3_0} depicts the overhead of the \TRACE 3.3.0 in the following systems:
+\begin{itemize}
+\item System based on \textit{Intel Xeon E5649} (\textit{Nehalem}) processors. \TRACE was compiled with support for libunwind 1.1 and PAPI 5.0.1.
+\item System based on \textit{Intel Xeon E5-2670} (\textit{SanyBridge}) processors. \TRACE was compiled with support for libunwind 1.1, PAPI 5.4.1 and IBM's Java7.
+\item System based on \textit{Intel Xeon E5-2680} (\textit{Haswell}) processors. \TRACE was compiled with support for libunwind 1.1 and PAPI 5.4.1 and OpenJDK's Java 1.8.
+\item System based on \textit{IBM Power8}. \TRACE was compiled with support for libunwind (downloaded from GIT) and PAPI 5.4.1.
+\item System based on \textit{Cortex-A15} (\textit{Samsung Exynos 5}). \TRACE was compiled with support for libunwind (downloaded from GIT) and PAPI 5.4.1.
+\end{itemize}
+The reader may notice that the ARM processor requires more time to execute the tests than the rest, even for the simpler cases (\textit{posix\_clock} and \textit{extrae\_event}). The Power8-based system takes a similar amount of time than Intel-based systems except for the call-stack traversal. Within Intel-based systems, the \textit{SandyBridge} processor reduced the time significantly from the \textit{Nehalem} processor but the \textit{Haswell} does not show a great reduction from \textit{SandyBridge}.
+
+\begin{figure}
+\centering
+  \psfig{figure=overheads/overheads, width=\textwidth}
+\label{fig:Overhead_Extrae_3_3_0}
+\caption{Overhead result in a variety of systems for \TRACE 3.3.0}
+\end{figure}
+

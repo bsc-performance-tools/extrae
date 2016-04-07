@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#BSUB -n 4
+#BSUB -oo trace.out
+#BSUB -eo trace.err
+#BSUB -W 00:10
+
+mpirun ./trace.sh ./mpi_ping
+

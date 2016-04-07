@@ -1,0 +1,75 @@
+Extrae 3.3.0rc SVN revision 0 based on unknown
+CPU info: Intel(R) Xeon(R) CPU E5-2670 0 @ 2.60GHz
+Using libunwind v1.1 from /apps/CEPBATOOLS/deps/libunwind/1.1
+Using PAPI v5.4.1 from /apps/CEPBATOOLS/deps/papi/5.4.1
+Running on: linux running on x86 with 64 bit extensions processor
+
+Test posix_clock - 10 executions
+min: 20 ns
+avg: 20 ns
+max: 21 ns
+
+Test ia32_rdtsc_clock - 10 executions
+min: 15 ns
+avg: 15 ns
+max: 15 ns
+
+Test extrae_event - 10 executions
+min: 147 ns
+avg: 149 ns
+max: 154 ns
+
+Test extrae_nevent4 - 10 executions
+min: 342 ns
+avg: 351 ns
+max: 358 ns
+
+Test extrae_eventandcounters - 10 executions
+min: 854 ns
+avg: 892 ns
+max: 955 ns
+
+Test papi_read1 - 10 executions
+min: 263 ns
+avg: 274 ns
+max: 292 ns
+
+Test papi_read4 - 10 executions
+min: 640 ns
+avg: 668 ns
+max: 699 ns
+
+Test extrae_user_function - 10 executions
+min: 1226 ns
+avg: 1251 ns
+max: 1269 ns
+
+Test extrae_get_caller1 - 10 executions
+min: 566 ns
+avg: 580 ns
+max: 646 ns
+
+Test extrae_get_caller6 - 10 executions
+min: 1865 ns
+avg: 1897 ns
+max: 1937 ns
+
+Test extrae_trace_callers - 10 executions
+min: 1569 ns
+avg: 1636 ns
+max: 1738 ns
+
+Test JavaEvent - 10 executions
+min: 235 ns
+avg: 252 ns
+max: 293 ns
+
+Test JavaNEvent4 - 10 executions
+min: 4155 ns
+avg: 4332 ns
+max: 4813 ns
+
+Test JavaFakeRoutine - 10 executions
+min: 40 ns
+avg: 41 ns
+max: 44 ns

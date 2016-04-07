@@ -1,0 +1,57 @@
+
+1) Develop, code, fix, add and test new functionalities as wanted/needed.
+ 1.a) Make sure that all files have:
+      - License text on top
+      - SVN keywords (command svn propset svn:keywords "Date Revision Author HeadURL Id" [-R] [directories/files])
+ 1.b) Keep ChangeLog file up-to-date
+ 1.c) Keep the documentation up-to-date
+   1.c.i)   Modify the latex files
+   1.c.ii)  Invoke make build-documentation
+   1.c.iii) Commit all the latex, pdf/ps and html files into the SVN
+
+2) Change the version if necessary - let's do this from a new checkout **
+ 2.a) in the configure.ac (see AC_INIT)
+ 2.b) in src/common/extrae_version.h
+ 2.c) bootstrap & configure to rebuild documentation (1.c)
+ 2.d) commit the documentation
+ 2.e) Prepare a package (e.g. make dist-bzip2) and install from /tmp
+    2.e.1) run make check
+    2.e.2) run the overhead tests
+ 2.f) add entry in ChangeLog (for the trunk or branch, in addition to the new tag)
+
+3) Tag the release in the SVN
+ 3.a) If it is a new release (x.y.z version) with z = 0, make directory for it
+      E.g. for 3.4.0: svn mkdir https://svn.bsc.es/repos/ptools/extrae/tags/3.4
+ 3.b) Actually tag:
+      E.g. for 3.4.0: svn copy https://svn.bsc.es/repos/ptools/extrae/trunk https://svn.bsc.es/repos/ptools/extrae/tags/3.4/3.4.0
+
+** If this wasn't done at the previous release step.
+
+4) Specific issues:
+    - Make sure the nanos/mercurium team tests the package if applies.
+
+5) Generate binary packages using the buildfarm script
+  - this makes sure that the package will compile at least on our environment -
+  - also compile for:
+      MN3 (need to upgrade module, use scripts from /apps/CEPBATOOLS/scripts)
+      MT  (need to upgrade module, use scripts from /apps/CEPBATOOLS/scripts)
+      bscpower8n1 (installation in /apps/CEPBATOOLS/extrae, use $EXTRAE_HOME/etc/configured.sh as reference)
+      MB (MB sysadmins handle this)
+
+6) Copy the documentation and add it to the buildfarm output to publish it in the webpage
+
+7) Upload binary packages to:
+   http://www.bsc.es/ssl/apps/performanceTools/admin/index.php
+
+   Upload Extrae documentation (in both HTML & PDF formats) to:
+   http://www.bsc.es/computer-sciences/performance-tools/documentation
+
+8) Email & celebrate
+  8.a) Addresses
+       Ourselves    :  tools@bsc.es
+       BSC support  :  support@bsc.es
+       OmpSs people :  pm-tools@bsc.es
+       MB support   :  hca.sysadmin@bsc.es
+       CompSs people:  distributed_computing@bsc.es
+       CASE dept    :  bsc-case@bsc.es
+

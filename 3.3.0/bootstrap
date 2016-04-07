@@ -1,0 +1,8 @@
+#!/bin/sh
+
+autoreconf -fvi
+
+if test `basename ${0}` = "bootstrap-and-dist" ; then
+	./configure --without-mpi --without-papi --without-dyninst --without-unwind --without-binutils
+	make dist-bzip2
+fi

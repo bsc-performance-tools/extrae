@@ -1,0 +1,338 @@
+\chapter{\TRACE API}\label{cha:API}
+
+There are two levels of the API in the \TRACE instrumentation package. Basic API refers to the basic functionality provided and includes emitting events, source code tracking, changing instrumentation mode and so. Extended API is an {\em experimental} addition to provide several of the basic API within single and powerful calls using specific data structures.
+
+\section{Basic API}\label{sec:BasicAPI}
+
+The following routines are defined in the {\tt \$\{EXTRAE\_HOME\}/include/extrae.h}. These routines are intended to be called by C/C++ programs. The instrumentation package also provides bindings for Fortran applications. The Fortran API bindings have the same name as the C API but honoring the Fortran compiler function name mangling scheme. To use the API in Fortran applications you must use the module provided in {\tt \${EXTRAE\_HOME}/include/extrae\_module.f} by using the language clause {\tt use}. This module which provides the appropriate function and constant declarations for \TRACE.
+
+\begin{itemize}
+
+ \item {\tt void Extrae\_get\_version (unsigned *major, unsigned *minor, unsigned *revision)}\\
+ Returns the version of the underlying \TRACE package. Although an application may be compiled to a specific \TRACE library, by using the appropriate shared library commands, the application may use a different \TRACE library.
+
+ \item {\tt void Extrae\_init (void)}\\
+ Initializes the tracing library.\\
+ {\bf NOTE:} This routine is called automatically in different circumstances, which include:
+    \begin{itemize}
+      \item Call to MPI\_Init when the appropriate instrumentation library is linked or preload with the application.
+      \item Usage of the DynInst launcher.
+      \item If either the {\tt libseqtrace.so}, {\tt libomptrace.so} or {\tt libpttrace.so} are linked dynamically or preloaded with the application.
+    \end{itemize}
+  No major problems should occur if the library is initialized twice, only a warning appears in the terminal output noticing the intent of double initialization.
+
+ \item {\tt extrae\_init\_type\_t Extrae\_is\_initialized (void)}\\
+ This routine tells whether the instrumentation has been initialized, and if so, also which mechanism was the first to initialize it (regular API or MPI initialization).
+
+ \item {\tt void Extrae\_fini (void)}\\
+ Finalizes the tracing library and dumps the intermediate tracing buffers onto disk.\\
+ {\bf NOTE:} As it happened by using {\tt Extrae\_init}, this routine is automatically called in the same circumstances (but on call to MPI\_Finalize in the first case).
+
+ \item {\tt void Extrae\_event (extrae\_type\_t type, extrae\_value\_t value)}\\
+ The Extrae\_event adds a single timestamped event into the tracefile. The event has two arguments: type and value.
+
+ Some common use of events are:
+  \begin{itemize}
+   \item Identify loop iterations (or any code block): Given a loop, the user can set a unique type for the loop and a value related to the iterator value of the loop. For example:
+    \begin{verbatim}
+     for (i = 1; i <= MAX_ITERS; i++)
+     {
+       Extrae_event (1000, i);
+       [original loop code]
+     }
+     Extrae_event (1000, 0);
+    \end{verbatim}
+   The last added call to Extrae\_event marks the end of the loop setting the event value to 0, which facilitates the analysis with Paraver.
+   \item Identify user routines: Choosing a constant type (6000019 in this example) and different values for different routines (set to 0 to mark a "leave" event) 
+    \begin{verbatim}
+     void routine1 (void)
+     {
+      Extrae_event (6000019, 1);
+      [routine 1 code]
+      Extrae_event (6000019, 0);
+     }
+
+     void routine2 (void)
+     {
+      Extrae_event (6000019, 2);
+      [routine 2 code]
+      Extrae_event (6000019, 0);
+     }
+   \end{verbatim}
+   \item Identify any point in the application using a unique combination of type and value.
+  \end{itemize}
+
+ \item {\tt void Extrae\_nevent (unsigned count, extrae\_type\_t *types, extrae\_value\_t *values)}\\
+  Allows the user to place {\em count} events with the same timestamp at the given position.
+
+ \item {\tt void Extrae\_counters (void)}\\
+  Emits the value of the active hardware counters set. See chapter \ref{cha:XML} for further information.
+
+ \item {\tt void Extrae\_eventandcounters (extrae\_type\_t event, extrae\_value\_t value)}\\
+  This routine lets the user add an event and obtain the performance counters with one call and a single timestamp.
+
+ \item {\tt void Extrae\_neventandcounters (unsigned count, extrae\_type\_t *types, extrae\_value\_t *values)}\\
+  This routine lets the user add several events and obtain the performance counters with one call and a single timestamp.
+
+ \item {\tt void Extrae\_define\_event\_type (extrae\_type\_t *type, char *description, unsigned *nvalues, extrae\_value\_t *values, char **description\_values)}\\
+ This routine adds to the Paraver Configuration File human readable information regarding type {\tt type} and its values {\tt values}. If no values needs to be decribed set {\tt nvalues} to 0 and also set {\tt values} and {\tt description\_values} to NULL.
+
+ \item {\tt void Extrae\_shutdown (void)}\\
+  Turns off the instrumentation.
+
+ \item {\tt void Extrae\_restart (void)}\\
+  Turns on the instrumentation.
+
+ \item {\tt void Extrae\_previous\_hwc\_set (void)}\\
+  Makes the previous hardware counter set defined in the XML file to be the active set (see section \ref{sec:XMLSectionMPI} for further information).
+
+ \item {\tt void Extrae\_next\_hwc\_set (void)}\\
+  Makes the following hardware counter set defined in the XML file to be the active set (see section \ref{sec:XMLSectionMPI} for further information).
+
+ \item {\tt void Extrae\_set\_tracing\_tasks (int from, int to)}\\
+  Allows the user to choose from which tasks (not {\em threads}!) store informartion in the tracefile
+
+ \item {\tt void Extrae\_set\_options (int options)}\\
+  Permits configuring several tracing options at runtime. The {\tt options} parameter has to be a bitwise or combination of the following options, depending on the user's needs:
+  \begin{itemize}
+   \item {\tt EXTRAE\_CALLER\_OPTION}\\
+    Dumps caller information at each entry or exit point of the MPI routines. Caller levels need to be configured at XML (see chapter \ref{cha:XML}).
+   \item {\tt EXTRAE\_HWC\_OPTION}\\
+    Activates hardware counter gathering.
+   \item {\tt EXTRAE\_MPI\_OPTION}\\
+    Activates tracing of MPI calls.
+   \item {\tt EXTRAE\_MPI\_HWC\_OPTION}\\
+    Activates hardware counter gathering in MPI routines.
+   \item {\tt EXTRAE\_OMP\_OPTION}\\
+    Activates tracing of OpenMP runtime or outlined routines.
+   \item {\tt EXTRAE\_OMP\_HWC\_OPTION}\\
+    Activates hardware counter gathering in OpenMP runtime or outlined routines.
+   \item {\tt EXTRAE\_UF\_HWC\_OPTION}\\
+    Activates hardware counter gathering in the user functions.
+  \end{itemize}
+
+ \item {\tt void Extrae\_network\_counters (void)}\\
+  Emits the value of the network counters if the system has this capability. {\em (Only available for systems with Myrinet GM/MX networks).}
+
+ \item {\tt void Extrae\_network\_routes (int task)}\\
+  Emits the network routes for an specific {\tt task}. {\em (Only available for systems with Myrinet GM/MX networks).}
+
+ \item {\tt unsigned long long Extrae\_user\_function (unsigned enter)}\\
+  Emits an event into the tracefile which references the source code (data includes: source line number, file name and function name). If {\tt enter} is 0 it marks an end (i.e., leaving the function), otherwise it marks the beginning of the routine. The user must be careful to place the call of this routine in places where the code is always executed, being careful not to place them inside {\tt if} and {\tt return} statements. The function returns the address of the reference.
+    \begin{verbatim}
+     void routine1 (void)
+     {
+      Extrae_user_function (1);
+      [routine 1 code]
+      Extrae_user_function (0);
+     }
+
+     void routine2 (void)
+     {
+      Extrae_user_function (1);
+      [routine 2 code]
+      Extrae_user_function (0);
+     }
+   \end{verbatim}
+
+   In order to gather performance counters during the execution of these calls, the {\tt user-functions} tag in the XML configuration and its {\tt counters} have to be both enabled.
+
+	\textbf{Warning!} Note that you need to compile your application binary with debugging information (typically the \texttt{-g} compiler flag) in order to translate the captured addresses into valuable information such as: function name, file name and line number.
+
+ \item {\tt void Extrae\_flush (void)}\\
+  Forces the calling thread to write the events stored in the tracing buffers to disk.
+
+\end{itemize}
+
+\section{Extended API}\label{sec:ExtendedAPI}
+
+{\em {\bf NOTE:} This API is in experimental stage and it is only available in C. Use it at your own risk!}
+
+The extended API makes use of two special structures located in {\tt \$\{PREFIX\}/include/extrae\_types.h}. The structures are {\tt extrae\_UserCommunication} and {\tt extrae\_CombinedEvents}. The former is intended to encode an event that will be converted into a Paraver communication when its partner equivalent event has found. The latter is used to generate events containing multiple kinds of information at the same time.
+
+\begin{verbatim}
+struct extrae_UserCommunication
+{
+  extrae_user_communication_types_t type;
+  extrae_comm_tag_t tag;
+  unsigned size; /* size_t? */
+  extrae_comm_partner_t partner;
+  extrae_comm_id_t id;
+};
+\end{verbatim}
+
+The structure {\tt extrae\_UserCommunication} contains the following fields:
+\begin{itemize}
+	\item {\tt type}\\
+	Available options are:
+	\begin{itemize}
+		\item {\tt EXTRAE\_USER\_SEND}, if this event represents a send point.
+		\item {\tt EXTRAE\_USER\_RECV}, if this event represents a receive point.
+	\end{itemize}
+	\item {\tt tag}\\
+	The tag information in the communication record. 
+	\item {\tt size}\\
+	The size information in the communication record.
+	\item {\tt partner}\\
+	The partner of this communication (receive if this is a send or send if this is a receive). Partners (ranging from 0 to N-1) are considered across tasks whereas all threads share a single communication queue.
+	\item {\tt id}\\
+	An identifier that is used to match communications between partners.
+\end{itemize}
+
+\begin{verbatim}
+struct extrae_CombinedEvents
+{
+  /* These are used as boolean values */
+  int HardwareCounters;
+  int Callers;
+  int UserFunction;
+  /* These are intended for N events */
+  unsigned nEvents;
+  extrae_type_t  *Types;
+  extrae_value_t *Values;
+  /* These are intended for user communication records */
+  unsigned nCommunications;
+  extrae_user_communication_t *Communications;
+};
+\end{verbatim}
+
+The structure {\tt extrae\_CombinedEvents} contains the following fields:
+\begin{itemize}
+	\item {\tt HardwareCounters}\\
+	Set to non-zero if this event has to gather hardware performance counters.
+	\item {\tt Callers}\\
+	Set to non-zero if this event has to emit callstack information.
+	\item {\tt UserFunction}\\
+	Available options are:
+	\begin{itemize}
+		\item {\tt EXTRAE\_USER\_FUNCTION\_NONE}, if this event should not provide information about user routines.
+		\item {\tt EXTRAE\_USER\_FUNCTION\_ENTER}, if this event represents the starting point of a user routine.
+		\item {\tt EXTRAE\_USER\_FUNCTION\_LEAVE}, if this event represents the ending point of a user routine.
+	\end{itemize}
+	\item {\tt nEvents}\\
+	Set the number of events given in the {\tt Types} and {\tt Values} fields.
+	\item {\tt Types}\\
+	A pointer containing {\tt nEvents} type that will be stored in the trace.
+	\item {\tt Values}\\
+	A pointer containing {\tt nEvents} values that will be stored in the trace.
+	\item {\tt nCommunications}\\
+	Set the number of communications given in the {\tt Communications} field.
+	\item {\tt Communications}\\
+	A pointer to {\tt extrae\_UserCommunication} structures containing {\tt nCommunications} elements that represent the involved communications.
+\end{itemize}
+
+The extended API contains the following routines:
+\begin{itemize}
+
+	\item {\tt void Extrae\_init\_UserCommunication (struct extrae\_UserCommunication *)}\\
+	Use this routine to initialize an extrae\_UserCommunication structure.
+	\item {\tt void Extrae\_init\_CombinedEvents (struct extrae\_CombinedEvents *)}\\
+	Use this routine to initialize an extrae\_CombinedEvents structure.
+	\item {\tt void Extrae\_emit\_CombinedEvents (struct extrae\_CombinedEvents *)}\\
+	Use this routine to emit to the tracefile the events set in the extrae\_CombinedEvents given.
+	\item {\tt void Extrae\_resume\_virtual\_thread (unsigned vthread)}\\
+	This routine changes the thread identifier so as to be vthread in the final tracefile. {\em Improper use of this routine may result in corrupt tracefiles.}
+	\item {\tt void Extrae\_suspend\_virtual\_thread (void)}\\
+	This routine recovers the original thread identifier (given by routines like pthread\_self or omp\_get\_thread\_num, for instance).
+	\item {\tt void Extrae\_register\_codelocation\_type (extrae\_type\_t t1, extrae\_type\_t t2, const char* s1, const char *s2)}\\
+	Registers type {\tt t2} to reference user source code location by using its address. During the merge phase the \texttt{mpi2prv} command will assign type {\tt t1} to the event type that references the user function and to the event {\tt t2} to the event that references the file name and line location. The strings {\tt s1} and {\tt s2} refers, respectively, to the description of {\tt t1} and {\tt t2}
+	\item {\tt void Extrae\_register\_function\_address (void *ptr, const char *funcname, const char *modname, unsigned line);}\\
+	By default, the \texttt{mpi2prv} process uses the binary debugging information to translate program addresses into information that contains function name, the module name and line. The Extrae\_register\_function\_address allows providing such information by hand during the execution of the instrumented application. This function must provide the function name ({\tt funcname}), module name ({\tt modname}) and line number for a given address.
+	\item {\tt void Extrae\_register\_stacked\_type (extrae\_type\_t type)}\\
+	Registers which event types are required to be managed in a stack way whenever {\tt void Extrae\_resume\_virtual\_thread} or {\tt void Extrae\_suspend\_virtual\_thread} are called.
+	\item {\tt void Extrae\_set\_threadid\_function (unsigned (*threadid\_function)(void))}\\
+	Defines the routine that will be used as a thread identifier inside the tracing facility.
+	\item {\tt void Extrae\_set\_numthreads\_function (unsigned (*numthreads\_function)(void))}\\
+	Defines the routine that will count all the executing threads inside the tracing facility.
+	\item {\tt void Extrae\_set\_taskid\_function (unsigned (*taskid\_function)(void))}\\
+	Defines the routine that will be used as a task identifier inside the tracing facility.
+	\item {\tt void Extrae\_set\_numtasks\_function (unsigned (*numtasks\_function)(void))}\\
+	Defines the routine that will count all the executing tasks inside the tracing facility.
+	\item {\tt void Extrae\_set\_barrier\_tasks\_function (void (*barriertasks\_function)(void))}\\
+	Establishes the barrier routine among tasks. It is needed for synchronization purposes.
+\end{itemize}
+
+\section{Java bindings}\label{sec:JavaBindings}
+
+If Java is enabled at configure time, a basic instrumentation library for serial application based on JNI bindings to Extrae will be installed. The current bindings are within the package {\tt es.bsc.cepbatools.extrae} and the following bindings are provided:
+
+\begin{itemize}
+
+  \item \texttt{void Init ();}\\
+  Initializes the instrumentation package.
+
+  \item \texttt{void Fini ();}\\
+  Finalizes the instrumentation package.
+
+  \item \texttt{void Event (int type, long value);}\\
+  Emits one event into the trace-file with the given pair type-value.
+
+  \item \texttt{void Eventandcounters (int type, long value);}\\
+  Emits one event into the trace-file with the given pair type-value as well as read the performance counters.
+
+  \item \texttt{void nEvent (int types[], long values[]);}\\
+  Emits a set of pair type-value at the same timestamp. Note that both arrays must be the same length to proceed correctly, otherwise the call ignores the call.
+
+  \item \texttt{void nEventandcounters (int types[], long values[]);}\\
+  Emits a set of pair type-value at the same timestamp as well as read the performance counters. Note that both arrays must be the same length to proceed correctly, otherwise the call ignores the call.
+
+
+  \item \texttt{void defineEventType (int type, String description, long[] values, String[] descriptionValues);}\\
+  Adds a description for a given event type (through \texttt{type} and \texttt{description} parameters). If the array \texttt{values} is non-null, then the array \texttt{descriptionValues} should be the an array of the same length and each entry should be a string describing each of the values given in \texttt{values}.
+
+  \item \texttt{void SetOptions (int options);}\\
+  This API call changes the behavior of the instrumentation package but none of the options currently apply to the Java instrumentation.
+
+  \item \texttt{void Shutdown();}\\
+  Disables the instrumentation until the next call to \texttt{Restart()}.
+
+  \item \texttt{void Restart();}\\
+  Resumes the instrumentation from the previous \texttt{Shutdown()} call.
+
+\end{itemize}
+
+\subsection{Advanced Java bindings}\label{subsec:AdvancedJavaBindings}
+
+Since Extrae does not have features to automatically discover the thread identifier of the threads that run within the virtual machine, there are some calls that allows to do this manually.
+These calls are, however, intended for expert users and should be avoided whenever possible because their behavior may be highly modified, or even removed, in future releases.
+
+\begin{itemize}
+
+  \item {\texttt{SetTaskID (int id);}}\\
+  Tells Extrae that this process should be considered as task with identifier \texttt{id}. Use this call before invoking \texttt{Init()}.
+
+  \item {\texttt{SetNumTasks (int num);}}\\
+  Instructs Extrae to allocate the structures for \texttt{num} processes. Use this call before invoking \texttt{Init()}.
+%
+  \item {\texttt{SetThreadID (int id);}}\\
+  Instructs Extrae that this thread should be considered as thread with identifier \texttt{id}.
+
+  \item {\texttt{SetNumThreads (int num);}}\\
+  Tells Extrae that there are \texttt{num} threads active within this process. Use this call before invoking \texttt{Init()}.
+
+  \item {\texttt{Comm (boolean send, int tag, int size, int partner, long id);}}\\
+  Allows generating communications between two processes. The call emits one of the two-point communication part, so it is necessary to invoke it from both the sender and the receiver part. The \texttt{send} parameter determines whether this call will act as send or receive message. The \texttt{tag} and \texttt{size} parameters are used to match the communication and their parameters can be displayed in Paraver. The \texttt{partner} refers to the communication partner and it is identified by its TaskID. The \texttt{id} is meant for matching purposes but cannot be recovered during the analysis with Paraver.
+
+\end{itemize}
+
+\section{Command-line version}\label{sec:ExtraeCmdLine}
+
+\TRACE incorporates a mechanism to generate trace-files from the command-line in a very na\"ive way in order to instrument executions driven by shell-scripted applications.
+The command-line binary is installed in \texttt{\${EXTRAE\_HOME}/bin/extrae-cmd} and supports the following commands:
+
+\begin{itemize}
+
+  \item {\texttt{init TASKID THREADS}}\\
+  This command initializes the tracing on the node that executed the command. The initialization command receives two parameters (TASKID, THREADS). The TASKID parameter gives an task identifier to the following forthcoming events. The THREADS parameter indicates how many threads should the task contain.
+
+  \item {\texttt{emit THREAD-SLOT TYPE VALUE}}\\
+  This command emits an event with the pair TYPE, VALUE into the the thread THREAD at the timestamp when the command is invoked.
+
+  \item {\texttt{fini}}\\
+  This command finalizes the instrumentation using the command-line version. Note that this finalization does not automatically call the merge process (\texttt{mpi2prv}).
+
+\end{itemize}
+
+Warning: In order to use these commands, \textbf{do not} export neither \texttt{EXTRAE\_ON} nor \texttt{EXTRAE\_CONFIG\_FILE}, otherwise the behavior of these commands is undefined.
+The initialization can be executed only once per node, so if you want to represent multiple tasks you need different tasks.
+

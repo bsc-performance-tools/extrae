@@ -1,0 +1,1060 @@
+
+ChangeLog
+ [ + added, - removed, * changed ]
+ * 07Apr2016 Extrae version 3.3.0 final release
+ * 07Apr2016 Added initial support for tracing of OMPT target devices (accelerators, FPGAs, etc)
+ * 06Apr2016 Priorize the search for mpicc family of compilers under bin64 before bin
+ * 29Mar2016 Fix trace.sh within DynInst examples (CUDA+MPI and MPI)
+ * 24Mar2016 Emit only once types associated to Extrae_register_codelocation_type & Extrae_register_function_address
+ * 22Mar2016 Fixes in extrae-cmd / Added documentation for Extrae-cmd
+ * 11Mar2016 read()/write() now emit callstack & descriptor type
+ * 10Mar2016 Add support to capture different signal types
+             Add <flush-sampling-buffer-at-instrumentation-point> option
+ * 09Mar2016 Increase classification of memory hierarchy in PEBS samples
+ * 04Mar2016 Fix trace-file naming (sometimes failed to guess the binary name)
+ + 02Mar2016 Add code reference to memory allocated object
+ + 29Feb2016 Included the size of MPI-IO operations in the trace 
+ * 26Feb2016 States per thread are no longer allocated statically but
+              reallocated on demand.
+             Remove SVN keywords for most of the files.
+ * 19Feb2016 Fixed bug preparing the output trace name
+ * 10Feb2016 OpenCL fixes: ClFinish communication to reach end,
+              emit OpenCL synchro at the ClFinish begin,
+              communication of executing kernel goes to beginning
+ * 04Feb2016 Fix MPI/F77 examples. Neither IBM/Intel compilers liked the
+               extra space.
+ * 03Feb2015 Sanitized memory reference samples point to the variable
+             Fix compilation with -lpthread/-pthread when building
+               pthread instrumentation libraries
+ * 01Feb2016 Improve memory reference samples point to the variable
+ + 01Feb2016 Emit event OpenCL thread id for command queue in clFinish
+ + 22Jan2016 Add instrumentation for cudaDeviceSynchronize
+ - 18Jan2016 Remove extrae-post-installation.sh. It was broken.
+ * 13Jan2016 Memory reference samples point to the variable (either static or
+               dynamically allocated)
+ * 08Jan2016 Improved boost search in configure
+ * 07Jan2016 Emit raw system time at APPL_EV events for synchronization purposes
+               with other tools
+ * 05Jan2016 Fixed bug when generating communications between Memcpy commands
+               in CUDA applications
+ * 18Dec2015 Fixed bug in Time Synchronization due to uninit Spawn time if MPI_Comm_spawn was not used
+             Emit Java thread name in Java thread start
+ * 15Dec2015 Fixed bug in Map_Paraver_Files at file_set.c. Field SkipAsMasterOfSubtree of PRVFileSet_t was not initialized, leading to undeterministic problems where this would randomly take garbage values ending in a later race condition in the parallel merge. 
+ + 11Dec2015 Added documentation for use on top of PnMPI
+ * 03Dec2015 In BG/Q MPI_get_processor_name != gethostame -> fails when matching
+               the contents of .mpits and each of the .mpit files
+ * 23Nov2015 Guess location for EXTRAE_HOME based on the configured.sh script
+             Further OMPT upgrades to latest spec
+ * 19Nov2015 Added overhead section in the user guide using the overhead
+               tests in a variety of systems.
+ * 18Nov2015 Changed calls to MPI_Comm_compare in Trace_MPI_Communicator (mpi_wrapper.c) into PMPI_Comm_compare so as not to intercept those calls
+ * 16Nov2015 Fix extra comma in papi_best_set
+             Upgrade OMPT instrumentation
+             Fix #pragma omp taskgroup instrumentation
+ * 10Nov2015 Fix unfinished states due to the last event/state and improve
+               messaging
+ * 09Nov2015 Fix label for MPI_Ibarrier (shown as MPI_Ibcast)
+ * 03Nov2015 Fix state generation for several new MPI calls (backported from 3.2.1)
+ * 02Nov2015 Extended Java instrumentation through AspectJ and JVMTI
+             Added $EXTRAE_HOME/bin/extreaj launcher for Java apps
+             Added new examples in JAVA directory
+                manual/  --> instrumentation without AspectJ
+                automatic/-> instrumentation with AspectJ
+ * 30Oct2015 Extrae 3.2.0 released!
+             Fix compilation of extrae-cmd in BG/* if PAPI is not set
+             Fix compilation in an other directory rather than $top_src_dir
+ * 27Oct2015 Free buffer when pthread routine finishes, not at pthread_join time
+             Move MPI_FINALIZE_EV so that it covers instrumentation code
+ * 23Oct2015 Waste some CPU time in mpi_ping example for use with extrae_bursts_1ms.xml
+             Fix timing Extrae check
+ * 22Oct2015 Improved "make check". Added -without-addresses to mpi2prv to ignore addresses
+ * 21Oct2015 Fixed visibility of the on-line API routines that are called from the wrappers
+             Fix example installation. Use cp instead of ln -s.
+             Fix Java compilation in other place rather than extract dir
+             Fix configured.sh when building in a directory other than extraction dir
+ * 15Oct2015 Code adapted to use Synapse libraries v2.0 instead of the older version libMRNetApp
+ * 13Oct2015 Fix parametrization of clCreateKernelsInProgram
+ * 05Oct2015 Adding support for MPI3 immediate collectives
+             Revamping source code structure, each wrapper generates its
+               intermediate lib_wrap_*
+             Removed support for TRT, UPC(unfinished), PACX, CELL
+ * 16Sep2015 Fixed configure check to look for MPI Fortran libraries named like "libmpifort"
+ * 05Aug2015 papi_best_set now checks whether counters and created eventsets
+               are 0 or not
+ + 20Jul2015 Support for minimum number of cycles of reference in PEBS
+ * 16Jul2015 Fix missing pthread_mutex_unlock in persistent request
+ + 08Jul2015 Imported first bits for sionlib
+ * 25Jun2015 Fix crash when temporal dir != final dir and their shared
+               characteristics differ.
+             Fix compilation into a separate directory.
+             Fix installation from a separate building directory.
+ * 23Jun2015 Add initial PEBS sampling support
+             Split sampling files into src/tracer/sampling
+ * 17Jun2015 Fix extrae command line, lack of thread init
+ * 12Jun2015 Do not invoke MPI_* routines when initializing Extrae but MPI
+             is not present (as in MPI+OmpSs).
+ * 04Jun2015 Sanitized environment variables, in particular LD_LIBRARY_PATH
+             Added extrae-test-dyninst tool to check DynInst functionality
+             Annotate the node name in the .mpit file to avoid file collisions
+             Extend Java documentation
+ * 25May2015 Extrae 3.1.0 released
+ * 25May2015 Fixes for bootstrapping, changed into autoreconf.
+             Added libxml2's m4 file into config/
+ * 20May2015 Fujitsu compiler does not have -Wall or similar flag 
+ * 05May2015 Fixes for K computer
+ * 28Apr2015 papi_best_set cannot support 64 or more counters 
+ * 27Apr2015 Fixed Makefile rules for the pyextrae script. It is now
+             installed in libexec instead of lib.
+             Support for MPI_UNDEFINED in mpi_stats & filtering
+             Promoted usage of stat instead of open+read to check for shared
+               dirs among MPI processes
+ * 23Apr2015 Upgrade to 3.1.0rc
+             Missing MPI+OpenMP example installation
+             Improve directory construction on shared disks
+             Shorten labels related to user source code references
+             Change format for performance counters labels
+ * 22Apr2015 Fix timings for first mode & hardware counter events
+             Fix compilation in IBM ppc when --disable-openmp-gnu is given
+             Make Extrae_user_function use the same parameters
+ + 21Apr2015 Add check for MPI_Comm_spawn
+             Add omp_get_thread_num default to 0 and message in Extrae
+             Automatically detect the system type to enable/disable openmp runtimes
+             Rebirth IBM xlsmp instrumentation (requires further testing)
+ + 20Apr2015 --with-libgomp supports auto to determine the appropriate version from CC
+             Add OpenMP task-based statistics (instantiated, executed)
+             Add OMPT dependencies (MB project)
+             Freeing memory, reported from Valgrind
+ * 10Apr2015 Fixed bug in Python instrumentation. The signature of the
+ Extrae_define_event_type receives parameters by reference.
+ * 31Mar2015 Added configure options in the documentation regarding the on-line analysis and the instrumentation of OpenSHMEM.
+ + 31Mar2014 Add SEQ example using -finstrument-functions
+ * 30Mar2015 Create directory if target trace-file is in a directory that does not exist
+ * 27Mar2015 Changed memory allocation for the InputTraces and FileSet structures in the merger: instead of allocating space for MAX_FILES, we allocate only for the maximum of mpits. MAX_FILES constant has been removed.
+             Extended examples to support dynamic memory instrumentation.
+ * 16Mar2015 Support up to 512 params in Intel KMP OpenMP runtime
+ * 13Mar2015 Support to compile Extrae outside its src directory
+             (thanks to Jorge Bellon)
+             Fixed some Extrae tests
+ * 10Mar2015 Improved/fixed support for task constructs in libgomp
+             (thanks to Eduard Ayguade)
+ * 05Mar2015 Fixed pthread support (missing pthread_id for master pthred)
+             Use multiarch triplet where available
+             (thanks to JM Perez)
+ * 03Mar2015 Revamped papi_best_set
+ * 26Feb2015 Completed MPI_Intercomm_create support (serial & parallel mergers)
+ + 23Feb2015 Instrumentation of MPI_intercomm_[create|merge]
+ + 13Feb2015 Extend malloc-related instrumentation 
+ * 28Jan2015 Fixed bug in calltrace.c that made wrong caller levels to be traced
+ when using backtrace instead of libunwind.
+ * 26Jan2015 Fixed bug in calltrace.h that made that the label of the caller
+ events when is a single level of the stack requested to be always 70000000,
+ despite the level requested.
+ * 23Jan2015 Changed primary lib_LTLIBRARIES to noinst_LTLIBRARIES at
+ src/tracer/stats/Makefile.am to fix a bug in K computer.
+ * 19Dec2014 Improve Java examples for Darwin & Linux
+             Improve support for Darwin
+ * 18Dec2014 Fix installation script (substitute) to work on AIX & Darwin
+ * 15Dec2014 Fix CUDA+MPI+OpenMP instrumentation library
+             Improve location for libbfd & libiberty from the binutils package
+             Capture callstack at dynamic memory instrumentation points
+             Improve support for AARCH64 architectures
+ * 12Dec2014 Upgraded DLB support
+ * 04Dec2014 Fixed PCF labels regarding OpenSHMEM, they don't appear now if
+             there's no SHMEM events in the trace
+ + 03Dec2014 Adding list-functions DynInst based tool (not installed)
+             Improve detection for libiberty & libbfd within binutils package
+             Add minimal support for aarch64 (ARM64)
+ + 19Nov2014 Recorded events for bytes sent/received via SHMEM calls
+             Added new states for SHMEM operations
+	     Now emmitting callers at the entry of SHMEM calls
+ * 18Nov2014 Fixed bug in *Distribute_XML routines that caused sporadic crashes
+ * 17Nov2014 Fixed time synchronization and running states in shmem traces 
+             Added configure parameters to specify the OpenSHMEM dependencies
+	     --with-openshmem-deps-libsdir and --with-openshmem-deps-libs
+ + 14Nov2014 Added 'wrapgen' script to generate lists of wrappers/probes automatically
+ * 03Nov2014 Fix capturing >1k function names through binutils
+             Added instrumentation for:
+               MPI_Win_post, MPI_Win_complete, MPI_Win_wait
+	     Fixed bug in the initialization of the on-line gremlins   
+ + 31Oct2014 Added instrumentation for:
+               MPI_Win_create, MPI_Win_free, MPI_Win_start, MPI_Win_fence
+             Fix ordering in ROW file / objects in .prv
+ * 30Oct2014 Fixed the DistributeWork routine to support dynamic threads per task.
+             Fixed the Search_Synchronization_Point routine to support the different distribution methods (block, cyclic, size...)
+             Upgraded to v3.0.3.
+ * 16Oct2014 Added configuration options for the gremlins analysis. 
+	     Also changed the initialization of the gremlins.
+ * 09Oct2014 Added interface for libgomp 4.9. 
+	     Added configure parameter '--with-libgomp-version' to choose the interface. 
+             For both versions 4.2 and 4.9, the helper struct used to pass the parameters to the tasks has been changed to be allocated dynamically. 
+	     Instrumentation for tasks has been disabled in version 4.9 because it crashes inside the OpenMP runtime. 
+	     Upgraded to v3.0.2.
+ + 04Oct2014 Fix request for bfd_demangle (reported by David Clarke)
+ + 25Sep2014 Move .sym file from $temporal_dir to $final_dir
+ * 19Sep2014 Fixed minor version from 3.01 to 3.0.1 
+ + 08Sep2014 Added support for OpenMP threads in the on-line analysis.
+             Upgraded version to 3.01.
+ + 05Sep2014 Added instrumentation for mpi_request_get_status/fortran
+ * 02Sep2014 Fixed bug in the buffers management. Need to forward to the
+ SEEK_END of the file before writing to disk, due to the interactions between
+ the normal tracing buffer and the cache.
+ * 01Sep2014 Fixed bug in the gremlins initial configuration that crashed
+ Extrae when not doing gremlins analysis
+ * 28Aug2014 Fixed support for MPI-3 for MPI_Comm_spawn* calls
+ * 27Aug2014 Upgraded version to 3.0 release. TA-DA!
+ + 27Aug2014 Added support for MPI-3
+ * 27Aug2014 Fixed configure/compilation bugs in the OpenSHMEM instrumentation.
+ * 11Aug2014 Extensions to OpenCL instrumentation
+ * 04Aug2014 Disable instrumetation of mpi_file_open in fortran
+             Don't emit counters for a thread when flushing at the end if the
+              calling thread is not the exec thread.
+ + 31Jul2014 Added instrumentation support for OpenSHMEM
+ * 14Jul2014 Fix permissions for files/directories in set-X
+ * 11Jul2014 GOMP_parallel support (appeared in libgomp for GCC 4.9)
+ * 24Jun2014 More fixes to OMPT support
+ * 04Jun2014 Fixed bug in MPI statistics in burst mode: the resets were missing, and the timestamp of the events was wrong.
+ + 04Jun2014 Preliminary OMPT support (tested with IBM OpenMP rte).
+ + 14May2014 Added support for activating/pausing gremlins at run-time and options in the xml file to configure a repetitive pattern
+ * 05May2014 Fixes for additional CUDA/Dimemas simulations
+ * 25Apr2014 Changed the synchronization point for spawned processes from the start of the spawn call to the end.
+ * 17Apr2014 MPI_Comm_spawn*: added time synchronization, fixed communications from child to parent.
+             Online clustering: pass all counters to the clustering library, not only the common ones.
+             Added online gremlins. 
+             Added mock-up for standalone libraries and a binary loader.
+             Removed debug messages.
+ * 16Apr2014 Emit additional CUDA information for future Dimemas simulations
+ * 14Apr2014 Bring libcudaompitrace to life
+ * 03Apr2014 Fix improper access to MPI_STATUS_IGNORE in mpi_sendrecv, mpi_sendrecv_replace and MPI_Sendrecv_replace
+             MFB 2.5 
+               small fixes in documentation
+               missing OpenCL bits
+ * 27Mar2014 Reverted prototype of API call Extrae_define_event_type to receive parameters by reference to be compatible with Fortran
+ * 19Mar2014 Sanitize examples' Makefiles (MPI basically) 
+             Fix unmatched persistent requests with parallel merge.
+ * 13Mar2014 Ensure DYNINSTAPI_RT_LIB is correctly set in extrae.sh/csh
+ * 27Feb2014 Added option to run the on-line analysis at the end of the execution instead of periodically.
+             Fixed bug in the Makefiles that caused that the online_env.sh script was not reinstalled after a reconfigure.
+             Added routine to dump the states stack in the merger when the MAX_STATES limit is reached.
+             The extrae.sh sources the necessary environment for the online analysis (no support for csh yet).
+             Online examples updated.
+             Updated version to 3.0rc6.
+ + 17Feb2014 Splitted --enable-openmp for the several supported runtimes
+             Extrae_suspend/resume_virtual thread no longer captures HWCs
+ * 07Feb2014 Fixed missing include 'stats/MPI/mpi_utils.h' in the distribution 
+ + 05Feb2014 Added API call Extrae_flush to force flushing of the calling thread
+ * 31Jan2014 Fixed bug that stalled the on-line analysis (on-line root running in double-background was killed by garbage collector)
+             Removed unnecessary recursive mutexes.
+             Refactored the way the spectral worker emits online events
+             Fixed bug in the call to Extrae_define_event_type
+             Updated version to 3.0rc5
+ * 23Jan2014 Nanos examples for BG/Q
+ * 20Jan2014 Added initialization of mutex in the on-line root that went missing in the previous update
+             Updated version to 3.0rc4
+ + 13Jan2014 Added advanced functionalities in the on-line mode (automatic threshold, conversion from detail to burst, phase profiling)
+             Added new MPI statistics
+             Changed the management of the HWC_CHANGE_EV
+             Updated version to 3.0rc3
+ * 09Jan2014 Extended sampling addresses support
+ * 07Jan2014 Support up to 256 parameters for Intel OMP/runtime.
+ * 18Dec2013 Improved support to instrument OpenCL in Apple machines
+ + 04Dec2013 Added example of OpenMP using LD_PRELOAD in Linux
+ + 03Dec2013 Added a new configure flag (--with-mpi-lib-name) to force the specific name of the MPI library to link with.
+             Changed the mallinfo() wrapper (Extrae_memusage_Wrapper) to emit absolute values instead of deltas.
+             Removed the initialization calls to Extrae_memusage_set_to_0_Wrapper().
+ * 29Nov2013 Added initial Java instrumentation (--with-java at configure)
+             Added initial Extrae command line instrumentation
+             Added gettimeofday clock
+             Added flag for David Carrera's Hadoop instrumentation (--enable-dcarrera-hadoop)
+             Bring MPI I/O instrumentation back to life
+ * 22Nov2013 Honor <cuda enabled> and <opencl enabled>
+             MFB missing OpenCL probes
+             Experimental support for isntrumenting I/O & dynamic memory calls
+ * 21Nov2013 Added improved support to instrument nanos+MPI apps including
+               examples for OmpSs and MPI+OmpSs
+             In Linux, merging process automatically uses binary name as
+               default trace file name and no longer requires -e neither in xml.
+             Add checkers for PIC/noPIC code in instrumentation libraries that use dlsym
+ * 07Nov2013 Disallow --with-X= in the configure line
+ * 05Nov2013 Added -rpath to the used MPI library to all lib*mpi*so libraries
+             Fix segfault when no performance counters are given to Extrae
+             Create TMPDIR directory if it does not exist
+ * 09Oct2013 Fixed bug in merger when processing HWC_CHANGE_EV: counters shared by the old and the new set appeared twice.
+ + 26Sep2013 Fix missing header in merger files
+             BFD compilation in cross-compiled environments
+             Autodetection of librt using gcc --print-file-name=librt.so
+             New --with-librt to pass the location of librt
+ * 17Sep2013 Improved instrumentation support for MPI_Comm_spawn. Now supports concurrent spawns from different process of the parent application.
+ + 09Sep2013 Added a quicksort algorithm for files 
+ * 09Sep2013 Revamped pthread event types so as all calls are only one type
+             Prepare scripts for LSF & slurm (MPI)
+ * 06Sep2013 Fixed some warnings
+             Read /proc/self/maps to know which binaries & libraries are used
+             Create tests to test the usage of binaries & libraries
+             Additional location for MPI libraries / includes / binaries in BG/Q
+             Many minor bugfixes
+             Fixed minor configure/compilation issues
+             Protected includes of system headers by their appropriate #ifdef's
+             Added missing licensing headers
+ * 05Sep2013 Upgraded to version 3.0rc2
+             Major changes to the on-line analysis. The front-end is now launched as a separate process.
+ + 05Sep2013 Added a new control (matching_zone) to the communications matching algorithm, so as not to make matches that cross areas where the tracing was disabled.
+ * 02Sep2013 Fixing OpenCL instrumentation (added clRetain & clRelease calls)
+             Fixed some event mismatches in the OpenCL accelerator side
+             Added OpenCL C++ example
+ * 30Jul2013 Added overwrite option in <merge> section
+             Removed unused 'remove-files' in favor of 'keep-mpits'
+             Fix fortran declarations on API
+             Fix MPI interfaces declarations
+ * 29Jul2013 Fixed generation of codelocation & user function in nanos stacked
+ + 19Jul2013 Add CPU information at begin & end of
+               - routine executing pthread_create
+               - OpenMP worksharing, function, ... *
+             Add multiple overhead tests
+ + 17Jul2013 Added overhead tests
+ * 15Jul2013 Fixed OpenCL timing issues, added MPI+OpenCL example
+ * 09Jul2013 Fix sampling handler callstack level
+ * 08Jul2013 Allow OpenMP user code to generate samples again
+             Moved Extrae_set_initial_taskid at the very beginning
+ * 04Jul2013 Fix compilation of papi_best_set for PAPI when using CUDA
+             Move Extrae_CUDA_fini to cuda_common.c
+ * 02Jul2013 Fixed compilation flags for the merger to enable the online support.
+             Fixed which events are cached to keep the communicators definitions in the online analysis. 
+             The first spectral analysis now applies windowing to the first 10% of the data.
+             Fixed missing dependencies in the online libraries.
+             Fixed report message for the circular buffer when parsing the XML configuration.
+ * 25Jun2013 Fixed bug in the cpu IDs of unmatched communications through different tasks of the parallel merge.
+             Removed extra debug messages.
+             Added instrumentation support for MPI_comm_spawn and MPI_comm_spawn_multiple
+ + 17Jun2013 Add instrumentation for routines that call fork/wait/...
+             Fix bug that malformed communication records in mpi2prv serial
+ + 12Jun2013 Add check for CUDA
+ + 07Jun2013 Add CUDA fini to flush all streams just in case some did
+               not get flushed
+ + 06Jun2013 Added check for Extrae fortran API / define_event_type
+             Additional bits for instrumenting OpenCL
+ + 30May2013 First part of the OpenCL instrumentation
+             Added tests to check clock resolution
+ + 23May2013 Emitted pid(), ppid() and fork depth in the tracefile
+             getrusage and mallinfo are emitted to 0 at the beginning
+             Fixed make check
+             Dyninst/fork instrumentation, free parent's buffer
+             Trace initialization state / delimited even for Extrae_init
+ * 21May2013 Get performance counters at flushes
+ + 17May2013 Added extrae_define_event_type to be callable by Fortran
+             Added sequential example of pi, including the above call.
+ * 16May2013 Restart sampling once leaving the fork call as child
+             Renamed devices and streams in CUDA traces so that their
+               numbering goes from 1 to N instead of 0 to N-1.
+             Support for time suffixes ns, ms, and us.
+             Instrumented MPI_Comm_free.
+ * 13May2013 Added instrumentation for #pragma omp for ordered in GNU
+             Removed useless warnings when instrumenting OpenMP using preload
+ * 10May2013 Improved support for fork+wait+waitpid+system+exec calls
+               using dyninst launcher
+ * 09May2013 Require binutils if using unwind or compiling in linuxos
+               (provides backtrace)
+ * 07May2013 Multiple small fixes in the bursty tracing
+               Avoided problems when Extrae_shutdown was called
+               Emission of MPI others statistics
+               MPI communicators minor refactoring
+             Removed erroneous emission of hardware counters when a set is
+               about to start
+             Added installation of extrae_module.f
+             OpenMP snippets were misused in DynInst, use the appropriate
+             Add cross-compiled librt for ARM architectures if available
+ + 02May2013 Added support for CUDA5+CUPTI
+             Changed substitute script to use sed -i
+ + 30Apr2013 Added support for cudaDeviceReset.
+             Honor --with-cuda instead of adding /opt/cuda/4.0 in Makefile
+             Look for specific intel mpi libs
+ * 29Apr2013 Do not require -e to import symbols
+             Added 'random' starting-set-distribution for performance counter
+             sets
+ + 11Apr2013 Instrumented pthread_barrier_wait
+ + 20Mar2013 Added example for Python instrumentation 
+ * 20Mar2013 Fixed paths in pyextrae.py
+ + 20Mar2013 Added pyextrae.py module in src/others to instrument python programs
+ * 15Mar2013 Added Fortran module with Extrae constant and function
+                declarations
+ * 12Mar2013 Modified SVN propset using
+              svn propset svn:keywords "Date Revision Author HeadURL Id"
+ * 12Mar2013 Code restructuring.
+ * 11Mar2013 Changed the automatic generation of topologies for small online executions
+ * 11Mar2013 Fixed Makefiles to distribute some missing files
+ * 08Mar2013 Fixed minor compilation issues.
+ * 08Mar2013 Extrae version 3.0rc1
+ * 08Mar2013 Fixed compilation issues (made on-line support only available to the MPI tracing libraries).
+             Fixed XML parse to skip comments.
+             Hardware counters are no longer a requirement for the on-line spectral analysis.
+             Enable sampling by default
+ * 07Mar2013 Fixed minor compilation issues and changed the default configuration of the online example.
+             Extrae version 3.0
+             Added on-line spectral analysis.
+ + 01Mar2013 Emit CPU through sched_getcpu at Init and Flushes.
+             Removed MN specific code that no longer has sense.
+ + 27Feb2013 Emit lock address when instrumenting named locks (MFB 2.3)
+             Allow environment variables when parsing the XML file through the
+               DynInst mutator (MFB 2.3).
+             Add exclude-automatic-functions in the <user-functions> tag (MFB
+               2.3).
+             Allow cross-compiling for ARM through --enable-arm (MFB 2.3)
+             Cleaned obj_table and changed into ApplicationTable (MFB 2.3)
+ + 26Feb2013 Initial fork+wait+waitpid instrumentation under dyninst (MFB 2.3)
+             Improved detection of binutils package (uses find)
+ * 22Feb2013 Fixed bad instrumentation of GOMP_*_next using dyninst (MFB 2.3)
+ * 20Feb2013 Added instrumentation for Intel omp_set_num_threads (which is
+               named ompc_set_num_threads) (MFB 2.3)
+              Added support for Intel fortran compiler with F90 code to
+                instrument using dyninst (MFB 2.3)
+ * 15Feb2013 Improve detection of libbfd*.so (MFB 2.3)
+ * 14Feb2013 Removes all temporal files at the end of the merge process (MFB
+               2.3)
+             Don't require MPI to generate the MPI communicators within the
+               PRV file (MFB 2.3)
+             MPI statistics (burst mode) were calculated incorrectly, 1 missing
+             Add variability to the sampling period
+ * 13Feb2013 Removes duplicate creation of temporal files (MFB 2.3)
+             Actually Fixed SendRecv communication (refixes 06Feb2013) (MFB
+               2.3)
+ - 11Feb2013 Support for freq_table in pair with freqtable to determine
+               whether to use the posix clock routines.
+             Removed auto instrumentation of libpttrace anb libtrtrace because
+               pthread_mutex was issued before starting and was not hooked
+               (MF-tag-2.3.2)
+ * 06Feb2013 Fixed SendRecv communication matching error (MF-tag-2.3.2)
+ * 01Feb2013 Removed useless lib dependencies for MN3 (MF-tag-2.3.2)
+ * 25Jan2013 Fixed configure checks to link with the spectral analysis toolkit
+ + 25Jan2013 Added base code for on-line support
+ * 24Jan2013 Extrae version 2.3.2
+ * 24Jan2013 Fixed Paraver header generation when number of threads differs
+               across tasks.
+             Release resources (files and memory) as soon as pthreads terminate
+               (only through pthread_exit() or pthread_join())
+ + 14Jan2012 Extrae version 2.3.1
+ * 14Jan2013 Fixed typo in MPI_Testall wrapper for Fortran
+             Fixed error when generating .sym files. Now creating also local
+             .sym files
+             Fixed locating binutils package when --enable-shared is set
+ * 03Jan2013 Added -lintl in some OSes
+ * 18Dec2012 Added instrumentation for MPI_Testany/all/some
+             Fixed issues when renaming *.ttmp into *.mpit tracefiles for MPI apps
+ * 14Dec2012 Fixed bug in the generation of the ROW file, where the threads appeared disordered.
+ * 05Dec2012 Fixed problems with trace names when using omp_set_num_threads
+     with OmpSs.
+     Added -lb libraries to nanos+mpi.
+ +`04Dec2012 Added libz to dependencies when generating the shared libraries
+ * 13Nov2012 Added checks for the C++ compiler only when it is required by 
+   other functionalities like Dyninst or MRNet. Updated documentation.
+ + 03Nov2012 Extrae version 2.3
+ * 24Oct2012 Sampling support for pthreads/openmp -> change type from default
+   to virtual or prof.
+ + 23Oct2012 Added support for binary rewriting using DynInst
+ * 22Oct2012 DynInst compilation changed and broke into different components.
+   Now sports pcontrol, stackwalk, dynelf/dwarf and symlite. 
+ * 18Oct2012 Fixes for DynInst launch
+             CUDA applications instrumented with DynInst now instruments
+						 routines that call kernels.
+ * 17Oct2012 Added Intel OpenMP runtime instrumentation when using Dyninst.
+   Also, some minor enhacenements done when using DynInst.
+ * 16Oct2012 Do not use -lrt if the system automatically adds clock_gettime
+ * 11Oct2012 Improved support for Intel MIC KNC/KNF, now with support for
+   Intel MPI 
+ * 10Oct2012 Changed --enable-cuda for --with-cuda=DIR in the configure script
+ + 09Oct2012 Improved support for BG/Q systems. Improved example for this
+   architecture using libxml2 and binutils.
+ + 04Oct2012 Added void Extrae_define_event_type (extrae_type_t type, char
+ *type_description, unsigned nvalues, extrae_value_t *values, char
+ **values_description); into the API
+ + 04Oct2012 Added void Extrae_register_function_address (void *ptr, char
+ *funcname, char *modname, unsigned line); into the API
+ + 04Oct2012 Added additional checks for Extrae_register_function_address call
+ + 01Oct2012 Added two additional checks tests/functional/dump-events and
+   tests/functional/auto-init-fini. The former checks the basic API to emit
+   events whereas the second checks for the instrumentation auto
+   initialization and finalization.
+ * 01Oct2012 Extrae API calls now honor extre_type_t / extrae_value_t instead
+   of basic types (unsigned/unsigned long).
+ * 28Sep2012 Turned 
+   void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char
+	 *s2) 
+	 into
+	 void Extrae_register_codelocation_type (extrae_type_t t1, extrae_type_t t2,
+	 char* s1, char *s2)
+ + 28Sep2012 Added make check capability into Extrae. Currently there is only
+    one check
+ + 21Sep2012 Added instrumentation call
+    void Extrae_register_codelocation_type (extrae_type_t t, char* s1, char *s2)
+ + 14Aug2012 Added -remove-files to the mpi2prv (and to the xml) so as to
+     remove the related .mpit .mpits .sym file related to an execution. These
+		 files are removed if the .prv generations is satisfactory.
+ * 21Jun2012 Fixed instrumentation of cudaStreamCreate
+ * 18Jun2012 Combined the configure options --with-bfd and --with-liberty into --with-binutils
+ + 15Jun2012 Automatically load instrumentation with:
+     - libseqtrace
+     - libomptrace
+     - libpttrace
+   When these libraries are LD_PRELOADed or linked dynamically with the application.
+ * 08May2012 Refactored and simplified examples. Usage of Makefile.inc
+             extrae-post-installation-upgrade.sh gets alive!
+             Check whether all timings are in us instead of ns.
+ * 04May2012 Support for NANOS distributed
+ + 19Apr2012 Add functionality -task-view -no-task-view in mpi2prv to generate
+               traces specially for OMPSs.
+             Add Extrae_get_version API call.
+             Updated documentation.
+ + 18Apr2012 Build of shared libraries on BG/{P,Q}
+ + 13Apr2012 Instrumentation of CUDA runtime through DynInst
+               Also, support for CUDA+MPI using DynInst. Added an example.
+               Removed lib_dyn_omptrace. Using libomptrace instead.
+               Minor changes in documentation
+ * 02Apr2012 Generation of the PCF file. Static entries now only appear if
+               they are present in the tracefile.
+ + 30Mar2012 Documented new instrumentation of OpenMP tasks
+             Documented alternative libraries to use during instrumentation
+               at the quick guide.
+ + 30Mar2012 Support to do Extrae_init + MPI_Init (and also MPI_Finalize +
+               Extrae_fini)
+ + 27Mar2012 Instrumentation of Intel/GNU #pragma omp task
+ * 15Mar2012 Fixed versioning number for lib MPI+OMP when using dyninst
+             Fixed nesting creation of pthreads.
+ + 13Mar2012 Instrumentation for pthread_exit
+ * 09Mar2012 Fixes in the #pragma omp parallel sections constructs in icc/gcc.
+ * 06Mar2012 First parallel event when thread > 1 was missing its HWC.
+             XML parser was looking for sort-address instead of sort-addresses
+             within <merge> block.
+             Several exit cleanups.
+             Documentation is no longer generated at make, but distributed
+               in its PS/PDF/HTML forms. This allows having the user-guide
+               without needing latex/dvi2ps/dvipdf/latex2html
+ * 27Feb2012 Fixes in the instrumentation of worksharings for Intel/OpenMP
+ * 24Feb2012 Extrae 2.2.1 is released!
+ * 24Feb2012 Fixed a bug in the name of the nodes in the row file
+ * 24Feb2012 Fixes in the instrumentation of GNU/OpenMP
+ * 01Feb2012 Added CUDA instrumentation through CUPTI
+ + 27Jan2012 Support for BG/Q machines
+ * 23Jan2012 Fix when handling MPI_ANY_TAG in MPI calls (also for mpimpi2prv)
+ * 19Jan2012 Improved support for Intel OpenMP rte. Some files autogenerated.
+ + 03Jan2012 Support to instrument Intel OpenMP rte v11/v12 through LD_PRELOAD.
+ * 01Dec2011 Improved support for DynInst (C&Fortran bugs in MT)
+ * 01Dec2011 Improved support for instrumenting NANOS+MPI
+ * 30Nov2011 Increased verbosity of papi_best_set
+ * 28Nov2011 Fixed a bug that appeared when creating communicators
+ * 14Nov2011 Added support to MAC OS X and improved support to FreeBSD
+ * 07Nov2011 Extrae 2.2.0 is released!
+ * 07Nov2011 Made --with-unwind, --with-papi, --with-mpi, --with-dyninst mandatory.
+             Can be avoided through the respective --without.
+ * 07Nov2011 Autodetect whether --enable-posix-clock is needed.
+ * 25Oct2011 Adding thread names, starting by CUDA
+ + 19Oct2011 Support for MPI+OpenMP applications using Dyninst launcher
+ * 17Oct2011 Translation of @ of CUDA kernels into kernel names
+ * 14Oct2011 Updating PACX instrumentation
+ * 13Oct2011 Several OpenMP bugfixes. Added instrumentation for set/get num
+             threads. Fixed hwc counts at openmp when counter set changes.
+             Fixed timing routines when using multiple threads.
+ * 08Sep2011 Several OpenMP bugfixes
+ * 26Aug2011 Modified code to support virtual_thread (from nanos) to view
+             nanos tasks as threads in paraver.
+ * 23Aug2011 Updated examples and added DynInst examples to the user-guide.
+ * 23Aug2011 Fixed LINUX/{SEQ,OMP} examples to use either DynInst or static
+             instrumentation.
+ * 23Aug2011 Fixed emitting HWC when HWC_CHANGE_EV also occurs. HWC values
+             are 0 for the new set and also the HWC counters are not emitted
+             at the same timestamp.
+ * 23Aug2011 Added example for CUDA instrumentation
+ * 01Aug2011 Added instrumentation of MPI_Get and MPI_Put
+ * 29Jun2011 Modified SVN propset using
+              svn propset svn:keywords "Date Revision Author HeadURL Id"
+
+   * (29/Jun/2011) Added extrae_version.h to track in extrae_user_events.h the
+                   current version of the instrumentation package
+   * (23/Jun/2011) mpi_ping examples now accept > 2 processes 
+   * (20/Jun/2011) Optimized initialization of mpimpi2prv when loading a large
+                   number of files using a large number of processes.
+   * (10/Jun/2011) Improved CUDA support
+   * (07/Jun/2011) BG/P fails to execute PAPI_read in PAPI_read when using time
+                   sampling (fixed by additional logic & avoiding read inside).
+   * (07/Jun/2011) --sort-addresses is enabled by default
+   * (07/Jun/2011) Fixed emitting flush events in between multiple events
+                   through routines Backend_Enter_Instrumentation and
+                   Backend_Leave_Instrumentation. This should avoid most
+                   Skipping state with negative duration messages at mpi2prv.
+   * (07/Jun/2011) Fixed hwc set change when mixing changeat-time and
+                   changeat-globalops within the XML config file
+   * (07/Jun/2011) Linux/amd64 can rely on libc to call backtrace instead of
+                   requiring libunwind
+   + (02/Jun/2011) Added initial (& very limited) CUDA instrumentation (through --enable-cuda)
+   * (30/May/2011) Added time sampling capabilities (doc, xml, and source changes)
+   * (02/May/2011) Honor $DESTDIR in make install
+   + (15/Apr/2011) Import initial sampling support based on alarm (2).
+   + (05/Apr/2011) Additional support for pthread library
+   * (31/Mar/2011) Fix for matching user communications in merger.
+   * (28/Mar/2011) Support for XL -qdebug=function_trace
+   * (23/Mar/2011) Several fixes to revive CBEA support
+   * (22/Mar/2011) Increase buffer size to 500k elements
+   * (03/Mar/2011) Fix communication between threads (i.e. task != 1 is sending
+                     or receiving)
+                   Differentiate MPI_Init_thread per C/Fortran (Fortran
+                     implementation may be missing but C available)
+   * (24/Feb/2011) Fix typo in Extrae_fini that prevented tracing applications in fortran
+   + (02/Feb/2011) Added example of dynamic load instrumentation in AIX
+   * (01/Feb/2011) Bug solved: looking for hw signals in PAPI 4.x
+                   Change at global operations now uses MPI_Comm_compare
+                   Honor -f/-f-relative with the new MPIT file distribution in set-* directories
+                   Fix sampled address translation. The address that was 
+                     obtained by the overflow was pointing to the incorrect line no
+                     after a fix in revision 425.
+   * (21/Jan/2011) AIX support to generate libmpitrace.so without libtool
+                   (libtool in AIX does not allow generating shared libraries)
+   + (19/Nov/2010) FreeBSD support (examples & --with-libexecinfo)
+                   Simplification of example install rules in Makefile.am
+                   Change bash  to sh in substitute/substitute-all
+   * (18/Nov/2010) Fix: when sorting addresses wipe the address2info cache.
+   * (12/Nov/2010) Fixes compilation when struct mallinfo is not available.
+                   Fixes compilation if BFD&liberty are not available in the system.
+                   Put the EXTRAE_LABELS content at the end of the PCF file.
+   * (09/Nov/2010) Tagged Extrae 2.1.1
+   * (09/Nov/2010) Bugfix, mpi2prv triead *always* to generate dimemas traces.
+                   New -sort-addresses functionality in merger, to sort addresses of
+                     MPI callers, user functions and so.
+                   Improved XML parsing (env vars & case insensitive)
+                   Added aliases to Extrae_* API/fortran
+                   Added -fno-optimize-sibling call to avoid unexpected
+                     optimizations (we found that sometimes some routines were
+                     called directly skipping routines: for example,
+                     misc_interface calls did not appear)
+                   Simplified behavior with/without -e and with/without BFD
+                     support:
+                     * no bfd support / no -e / -e and invalid binary,
+                       addresses are left unchanged in the trace
+                     * -e binary translates addresses to source code through
+                       dictionary
+   * (20/Oct/2010) added -with-dwarf for dyninst
+                   support for upcoming dyninst (post 6.1)
+   + (18/Oct/2010) .sym file is automatically loaded based on the .mpits files given through -f at merge step
+   + (15/Oct/2010) Added automatic merge in the tracing libraries (see --enable-merge-in-trace in configure)
+                   Improved documentation: examples, XML, FAQ
+   + (16/Jul/2010) Now parallel merge works in a tree-based topology (must be run with NP >= 2)
+   + (13/Apr/2010) Added support for IBM POE on Linux.
+   + (08/Apr/2010) Intermediate files are stored in separated directories instead of a single one.
+   + (10/Jan/2010) Instrumentation library in bursts mode can gather MPI calls.
+   + (07/Jan/2010) Initial tracing of PACX
+                   Removed license code.
+   * (07/Dec/2009) Force mkdir of the storage directory. So make-dir are no longer needed in the XML files.
+                   Improve -f on merger. First try on absolute path, then in relative.
+   * (03/Dec/2009) Fixed a bug in 64bit systems where MPI_Request is a pointer. May produce mismatching communications.
+                   Added MPItrace_user_function (int) into the headers.
+   * (26/Nov/2009) Fixed conversion of caller lines (sampling or MPI)
+   * (25/Nov/2009) Fixed access to ptr_statuses which caused to segfault when calling mpi_waitall/mpi_waitsome
+   + (04/Nov/2009) Added DLB support for MPI & SMPss applications.
+   * (03/Nov/2009) Support of using MPI_STATUS_IGNORE in MPI_Status parameters (MPI_Wait, MPI_Recv, ...)
+   * (03/Sep/2009) Fixed matching communications in mpi2prv that made mpi_sendrecv fail.
+   * (17/Aug/2009) Fixed MPItrace_nevents to put all events to the same timestamp
+                   Changed number of events in buffer in CELL (from 64 to 256).
+                   Reduced clock-skew between CPU/SPU in CELL machine.
+   * (28/May/2009) Fixed configure checking of mpi fortran decoration type.
+   * (28/May/2009) Reverted status of libmpitrace.*. Now contains C & Fortran symbols because some MPI
+                    implementations rely their MPI fortran symbols to C symbols (MN/MPICH) and others do
+                    not (AIX/POE).
+   * (28/May/2009) Changes in calltrace (and similar information). Uniformization of routines and lines:
+                    MPI callers, OpenMP outlined routines, pthread called routines, user functions, sampled points
+   * (26/May/2009) Fixed Dimemas translation problems related with communicators.
+   * (25/May/2009) Fixed a problem with a call to fstat that delays the next event after a flush.
+   * (25/May/2009) Fixed problems with the timestamp where the HWC_CHANGE events appeared
+   * (25/May/2009) Fixed problems with make-dir in XML parsing. Also added full path to *.mpits file.
+   * (25/May/2009) Parallel merge improvements
+   * (20/May/2009) IBM MPI implementation does not support calling MPI_Get_count with MPI_STATUS_IGNORE, fix.
+   * (23/Feb/2009) Improved support for SMPss+CELLss.
+   + (18/Feb/2009) Bluegene/P examples imported. Support for PAPI 3.9.0 (BG/P).
+   * (09/Feb/2009) Bluegene/P support.
+   * (05/Jan/2009) Basic OpenMP instrumentation.
+   * (12/Dec/2008) Basic API instrumentation performed by the DynInst launcher.
+   * (11/Dec/2008) Splitted MPI instrumentation libraries (C/Fortran) and unifinied in a single one.
+   * (24/Oct/2008) Improved time reading for Linux/PPC 64bits
+   + (24/Oct/2008) MPItrace dyninst-based instrumentation is working
+   + (22/Oct/2008) XML files automatically uses the xml-parser.c rcsid variable.
+   + (20/Oct/2008) XML Example files use the $PREFIX$
+   + (20/Oct/2008) Added support for SMPss
+
+   *** CVS Branch STABLE-1.2
+
+   * (25/Jun/2008) Basic OpenMP instrumentation for GNU OpenMP library (aka GOMP)
+   * (30/May/2008) Improved the IBM XL openmp support (now with reductions)
+   * (21/May/2008) Patch to workaround an #ifdef inside atomic.h /* linux - ppc32bits - openmp */
+   * (19/May/2008) Changes ifndef USE_HARDWARE_COUNTERS-> if !USE_HARDWARE_COUNTERS
+   * (19/May/2008) Updated the timestamp routine for the CBEA.
+   * (03/Mar/2008) Modified the timestamp routine on x86/64
+   + (28/Feb/2008) Added -syn-node option to the mpi2prv.
+   + (11/Feb/2008) Added caller support for FreeBSD.
+   + (28/Jan/2008) Added "xml-parser-id" to the XML in order to add a versioning system for the config file.
+                   Added MPItrace_next_hwc_set / MPItrace_previous_hwc_set
+                   Fixed MPItrace_counters
+                   Fixed handling of large intermediate files when merging.
+                   Imported Load Balancing into the tracing package
+   + (21/Jan/2008) Added initial parallel merge for Dimemas traces (lacks 'caller' support)
+                   Updated mpi2prv.1 manual file
+                   Added mpimpi2prv.1, mpi2dim and mpimpi2dim manual file
+                   XML can be used to support Dimemas/Paraver MPIT files.
+   * (17/Jan/2008) Added initial support to generate Dimemas trace files.
+                   Reduced the sizeof(paraver_rec_t) on 64bit systems by 10%
+   * (03/Jan/2008) OpenMP instrumentation ignored "MPITRACE_ON", fixed.
+                   Pthread instrumentation.
+   + (21/Dec/2007) Added initial support for multiple output semantics in the merger. It currently generates PRV semantics only.
+   *               Fixed an undefined reference in the calltrace module on AIX.
+   * (19/Dec/2007) Improved verbosity of HWC output things.
+   + (18/Dec/2007) New utility under bin/ called papi_best_set that searchs for groups of PAPI counters.
+   * (17/Dec/2007) Solved a bug in makedir_recursive that failed when depth > 1
+   * (10/Dec/2007) Modified the Fortran header file -- it contained some typos.
+   * (29/Nov/2007) Trace package can be compiled without MPI.
+                   Added more verbose information on HWC that cannot be added.
+   * (28/Nov/2007) Package compiles for CELL & SDK 3.0 -- minor changes in send/receive from mailboxes --.
+   * (13/Nov/2007) Fixed a link problem of the libmpitrace (included the MPI library inside)
+
+
+Version 1.X
+Thu 25/Oct/2007
+
+List of changes
+   [ + added, - removed, * changed ]
+   + Minimal support for DynInst instrumentation package (now just builds on IA64).
+   * Fixed a bug when calling MPI_Test. Tracing was unable to remove the request from the hash_table.
+   * Fixed a bug that ignored make-dir in the final-directory.
+
+Version 1.X
+Wed 10/Oct/2007
+
+List of changes
+   [ + added, - removed, * changed ]
+   + Added MPItrace wizard script
+
+Version 1.X
+Mon 28/Sep/2007
+
+List of changes
+   [ + added, - removed, * changed ]
+   + Added MPI statistic: Time elapsed in MPI 
+
+
+Version 1.X
+Mon 24/Sep/2007
+
+List of changes
+   [ + added, - removed, * changed ]
+   * Joined burst library / normal tracing library in one.
+   - Static structures to hold Ptasks/Tasks/Threads information (MAX_PTASKS, MAX_TASKS, MAX_THREADS) are removed and computed on runtime.
+
+
+Version 1.X
+Mon 10/Sep/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+   + -syn is automatically set to on/off depending on the nodes where the instrumented application ran
+
+Version 1.X
+Mon 09/Jul/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   * Clock timing on Linux/IA32 has been changed in order to support different Linuxes.
+
+Version 1.X
+Mon 25/Jun/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + Added (initial) sampling support
+   + New MPItrace_user_function routine to gather automatically where is happening the action.
+   + Burst library is automatically generated in the same configure/make process.
+   - Removed useless secondary call to AX_PROG_MPI in configure script
+   * Set to 0 counters when HWC group changes
+
+Version 1.X
+Mon 14/May/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + calltrace implementation under AIX/ppc
+
+
+Version 1.X
+Mon 07/May/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   * (bugfix) 64bit machines put an invalid unit time in the paraver header.
+
+Version 1.X
+Mon 23/Apr/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   * Heterogeneous support emits HWC information to the PRV.
+   + Support for AIX/ppc environments.
+   + Support for Solaris/x86 environments.
+   - Zlib does not need to be included in the package. Take the system library.
+   * Support for SDK 2.1 @ CBEA.
+   + Tracing supports sequential trace (lost when the migration to configure happened).
+
+Version 1.X
+Mon 16/Apr/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + CELL tracing adds node information on the .MPITs file.
+   * Caller translation is disabled if configure does not find BFD.
+   * (bugfix) MPI_Init (fortran) used MPI_Comm_f2c before calling MPI_Init and OpenMPI 1.2 does not allow this.
+
+Version 1.X
+Mon 09/Apr/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + Fully functional configure stuff (although some functionalities aren't still there [see src/Makefile.am]). Covers Linux/BG-L/Altix/CELL machines.
+   * (bugfix) Identifying PAPI counters when their IDs start with A-F chars failed.
+   * (bugfix) File *.mpit were not correctly created when running with NTasks>1 on CELL.
+
+Version 1.X
+Mon 12/Mar/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + Changes to use MMTimer (SGI Altix (IA64) "global clock").
+   + Experimental heterogeneous support.
+   * MPI_Barrier emits collective size (0)
+
+Version 1.1
+Mon 5/Mar/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + New XML tags make-dir allows the user to create the directories at the tracing stage.
+   * OpenMP + PAPI bug solved in the initialization step (openMP only).
+   + HWC are emitted at the suspend/restart tracing point.
+   + Trace control directed by a list of MPI collectives (on the MPI_COMM_WORLD).
+   * XML/man are updated.
+   * IA64 clock updated. Read ITC MHz entries instead CPU MHz.
+
+Version 1.1
+Mon 26/Feb/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + OpenMPI support
+
+Version 1.1
+Mon 12/Feb/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   + Fixed a bug in *trace_neventandcounters (C version)
+   * MN PAPI version is updated (changed directory, now in /gpfs/apps/PAPI/3.2.1-970mp/)
+   + Added support to instrument -finstrument-function with GCC
+   + Added UFlist.sh (script that provides pairs of @ - routine to be used in conjuction with User Function instrumentation)
+   * MPI_Iprobe should not trace when user wants not to trace any MPI routine.
+   * Paraver header now contains information about CPUs and NODEs, and also, a .ROW file containing such information (serial & parallel support).
+
+Version 1.1
+Thu 18/Jan/2007
+
+List of changes:
+   [ + added, - removed, * changed ]
+
+   * Tracer & Merger gathers information on where MPI processes were running. Merger also writes .ROW file.
+
+Version 1.1
+Thu 11/Jan/2007
+
+List of changes:
+   [ + added, - removed, * changed]
+
+   * Merger sorts the CPU bursts records that appeared out of order.
+
+Version 1.1
+Mon 07/Jan/2007
+
+List of changes:
+   [ + added, - removed, * changed]
+
+   + Added CELL BE example
+   * Tracing can be disabled/enabled at runtime with control file (not only enabled)
+
+Version 1.1
+Thu 28/Dec/2006
+
+List of changes:
+   [+ added, - removed, * changed]
+
+   * States management changed
+
+Version 1.1
+Mon 11/Dec/2006
+
+List of changes:
+   [+ added, - removed, * changed]
+
+   - Removed useless cancel test for wait* routines.
+   - Removed useless group creation/destruction on rank gathering.
+
+Version 1.1
+Mon 04/Dec/2006
+
+List of changes:
+   [+ added, - removed, * changed]
+
+   * Sequential merger uses ${TMPDIR} instead of current directory to create temporal files.
+   * C MPI library no longer requires Fortran symbols.
+   * Interfaces/Wrappers conforming to MPI.H
+
+
+Version 1.1
+Mon 27/Nov/2006
+
+List of changes:
+   [+ added, - removed, * changed]
+
+   * Interfaces/Wrappers conforms to mpi.h datatypes.
+   * Other minor bugfixes.
+   + CPU Hardware counters can be different (and tunneable) for all the tasks.
+   + Distribution of the XML using MPI (instead of multiple simultaneous reads)
+   * Intermediate files used by mpi2prv (serial) are stored on $TMPDIR.
+
+
+Version 1.1
+Thu 23/Nov/2006 (Last major update 12:00:00 CET)
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + MPI I/O functions are now traced.
+
+Version 1.1
+Tue 21/Nov/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + Myrinet counters support added.
+
+Version 1.1
+Mon 20/Nov/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    * Changed the identifiers of MPI_Probe & MPI_Iprobe because they collided with others.
+
+Version 1.1
+Thu 16/Nov/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + CELL BE support embedded in the default tracing library.
+
+Version 1.1
+Fri 10/Nov/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + MPI statistics and network counters are controlled by the XML.
+    * Modified the mpitrace XML example.
+    * Modified the structure of the MPIT (event_t structure) so as every event_t uses 112 bytes instead 120 in MN.
+
+Version 1.1
+Fri 03/Nov/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + added MPI statistics (soft counters) when tracing CPU bursts
+
+
+Version 1.1
+Wed 24/Oct/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + added buffer-size, file-size, MPI callers, final-directory, temporal-directory, control-file, control-time, minimum-time into the XML configuration file.
+
+Version 1.1
+Wed 18/Oct/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + New feature to gather the mpits in the master node when the application executes MPI_Finalize
+    + added MPItrace_Nevent / MPItrace_Neventandcounters
+
+Version 1.1
+Mon 16/Oct/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    * changed a fixed structure based on MAX_TASKS into a malloc
+    + added more info at the header (BURSTS & ENDIAN)
+
+
+Version 1.1
+Fri 06/Oct/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + Added RUsage information
+
+
+Version 1.1
+Wed 04/Oct/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + Introduced some XML configuration (right now, only HWC)
+    + Added a minimal XML configuration file into the example.
+    + Better identification of HWC (those inexistent and string formatted)
+    + Change HWC sets every some MPI global ops / amount of time.
+
+
+Version 1.1
+Tue 02/Oct/2006
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    * Fixed a bug when translating MPI_PROC_NULL ranks in P2P operations.
+
+Version 1.1
+Wed 20/Sep/2006 (Last major update 16:00:00 CET)
+
+Important notes:
+    * Tracing a Fortran application with the shared library requires +1 level to each MPI caller
+    * OpenMP tracing requires the target application to be MPI
+    * MPIT files are incompatible with previous versions
+
+List of changes:
+    [+ added, - removed, * changed ]
+
+    + NUM_OF_STATE_COLOR added to the PCF file
+    + MPI callers and HWC are correctly written by the parallel merger
+    + OpenMP tracing support (parallel, parallel for, sections constructs)
+    + Identification of the OpenMP outlined routines (using -e flag)
+    + Activation of the tracing with a file (see MPTRACE_CONTROL_FILE and MPTRACE_CONTROL_TIME in manual)
+    + Native Hardware Counters support
+    + Extra information in the MPIT files to ensure that the merger can join them (check for HWC)
+    + Shared library generation for Linux/{PPC/IA32} machines
+    + Updated manuals
+    + Updated examples

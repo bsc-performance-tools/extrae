@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -f @sub_CLUSTERING_HOME@/etc/TDBSCAN_env.sh ]; then
+  source @sub_CLUSTERING_HOME@/etc/TDBSCAN_env.sh
+fi
+
+source @sub_SYNAPSE_HOME@/etc/sourceme.sh
+
+export EXTRAE_HOME=@sub_PREFIX@
+export SYNAPSE_FILTER_PATH=$EXTRAE_HOME/lib:@sub_CLUSTERING_HOME@/lib:$SYNAPSE_FILTER_PATH
+export LD_LIBRARY_PATH=@sub_SYNAPSE_LIBSDIR@:$LD_LIBRARY_PATH
+

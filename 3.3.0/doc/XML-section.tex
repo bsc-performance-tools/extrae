@@ -1,0 +1,364 @@
+\chapter{\TRACE XML configuration file}\label{cha:XML}
+
+\TRACE is configured through a XML file that is set through the {\tt EXTRAE\_CONFIG\_FILE} environment variable. The included examples provide several XML files to serve as a basis for the end user. For instance, the MPI examples provide four XML configuration files:
+\begin{itemize}
+ \item {\tt extrae.xml} Exemplifies all the options available to set up in the configuration file. We will discuss below all the sections and options available. It is also available on this document on appendix \ref{cha:wholeXML}.
+ \item {\tt extrae\_explained.xml} The same as the above with some comments on each section.
+ \item {\tt summarized\_trace\_basic.xml} A small example for gathering information of MPI and OpenMP information with some performace counters and calling information at each MPI call.
+ \item {\tt detailed\_trace\_basic.xml} A small example for gathering a summarized information of MPI and OpenMP parallel paradigms.
+ \item {\tt extrae\_bursts\_1ms.xml} An XML configuration example to setup the bursts tracing mode. This XML file will only capture the regions in between MPI calls that last more than the given threshold (1ms in this example).
+\end{itemize}
+
+Please note that most of the nodes present in the XML file have an {\tt enabled} attribute that allows turning on and off some parts of the instrumentation mechanism. For example, {\tt <mpi enabled="yes">} means MPI instrumentation is enabled and process all the contained XML subnodes, if any; whether {\tt <mpi enabled="no">} means to skip gathering MPI information and do not process XML subnodes.
+
+Each section points which environment variables could be used if the tracing package lacks XML support. See appendix \ref{cha:EnvVar} for the entire list.
+
+Sometimes the XML tags are used for time selection (duration, for instance). In such tags, the following postfixes can be used: n or ns for nanoseconds, u or us for microseconds, m or ms for milliseconds, s for seconds, M for minutes, H for hours and D for days.
+
+\section{XML Section: Trace configuration}\label{sec:XMLSectionTraceConfiguration}
+
+The basic trace behavior is determined in the first part of the XML and {\bf contains} all of the remaining options. It looks like:
+
+\input{XML/config.xml}
+
+The {\tt <?xml version='1.0'?>} is mandatory for all XML files. Don't touch this. The available tunable options are under the {\tt <trace>} node:
+\begin{itemize}
+ \item {\tt enabled} Set to {\tt "yes"} if you want to generate tracefiles.
+ \item {\tt home} Set to where the instrumentation package is installed. Usually it points to the same location that {\tt EXTRAE\_HOME} environment variable.
+ \item {\tt initial-mode} Available options
+  \begin{itemize}
+   \item {\tt detail} Provides detailed information of the tracing.
+   \item {\tt bursts} Provides summarized information of the tracing. This mode removes most of the information present in the detailed traces (like OpenMP and MPI calls among others) and only produces information for computation bursts.
+  \end{itemize} 
+ \item {\tt type} Available options
+  \begin{itemize}
+   \item {\tt paraver} The intermediate files are meant to generate Paraver tracefiles.
+   \item {\tt dimemas} The intermediate files are meant to generate Dimemas tracefiles.
+  \end{itemize}
+ \item {\tt xml-parser-id} This is used to check whether the XML parsing scheme and the file scheme match or not.
+\end{itemize}
+
+\graybox{See {\bf EXTRAE\_ON}, {\bf EXTRAE\_HOME}, {\bf EXTRAE\_INITIAL\_MODE} and {\bf EXTRAE\_TRACE\_TYPE} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: MPI}\label{sec:XMLSectionMPI}
+
+The MPI configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
+
+\input{XML/mpi.xml}
+
+MPI calls can gather performance information at the begin and end of MPI calls. To activate this behavior, just set to yes the attribute of the nested {\tt <counters>} node.
+
+\graybox{See {\bf EXTRAE\_DISABLE\_MPI} and {\bf EXTRAE\_MPI\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: pthread}\label{sec:XMLSectionOpenMP}
+
+The pthread configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
+
+\input{XML/pthread.xml}
+
+The tracing package allows to gather information of some pthread routines. In addition to that, the user can also enable gathering information of locks and also gathering performance counters in all of these routines. This is achieved by modifying the enabled attribute of the {\tt <locks>} and {\tt <counters>}, respectively.
+
+\graybox{See {\bf EXTRAE\_DISABLE\_PTHREAD}, {\bf EXTRAE\_PTHREAD\_LOCKS} and {\bf EXTRAE\_PTHREAD\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: OpenMP}\label{sec:XMLSectionOpenMP}
+
+The OpenMP configuration part is nested in the config file (see section \ref{sec:XMLSectionTraceConfiguration}) and its nodes are the following:
+
+\input{XML/openmp.xml}
+
+The tracing package allows to gather information of some OpenMP runtimes and outlined routines. In addition to that, the user can also enable gathering information of locks and also gathering performance counters in all of these routines. This is achieved by modifying the enabled attribute of the {\tt <locks>} and {\tt <counters>}, respectively.
+
+\graybox{See {\bf EXTRAE\_DISABLE\_OMP}, {\bf EXTRAE\_OMP\_LOCKS} and {\bf EXTRAE\_OMP\_COUNTERS\_ON} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: Callers}\label{sec:XMLSectionCallers}
+
+\input{XML/callers.xml}
+
+Callers are the routine addresses present in the process stack at any given moment during the application run. Callers can be used to link the tracefile with the source code of the application.
+
+The instrumentation library can collect a partial view of those addresses during the instrumentation. Such collected addresses are translated by the merging process if the correspondent parameter is given and the application has been compiled and linked with debug information.
+
+There are three points where the instrumentation can gather this information:
+
+\begin{itemize}
+ \item Entry of MPI calls
+ \item Sampling points {\em (if sampling is available in the tracing package)}
+ \item Dynamic memory calls (malloc, free, realloc)
+\end{itemize}
+
+The user can choose which addresses to save in the trace (starting from 1, which is the closest point to the MPI call or sampling point) specifying several stack levels by separating them by commas or using the hyphen symbol.
+
+\graybox{See {\bf EXTRAE\_MPI\_CALLER} environment variable in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: User functions}\label{sec:XMLSectionUF}
+
+\input{XML/userfunctions.xml.tex}
+
+The file contains a list of functions to be instrumented by \TRACE. There are different alternatives to instrument application functions, and some alternatives provides additional flexibility, as a result, the format of the list varies depending of the instrumentation mechanism used:
+
+\begin{itemize}
+
+ \item DynInst\\
+  Supports instrumentation of  user functions, outer loops, loops and basic blocks.
+  The given list contains the desired function names to be instrumented. After each function name, optionally you can define different basic blocks or loops inside the desired function always by providing different suffixes that are provided after the {\tt +} character. For instance:\\
+  \begin{itemize}
+  \item To instrument the entry and exit points of foo function just provide the function name ({\tt foo}).
+  \item To instrument the entry and exit points of foo function plus the entry and exit points of its outer loop, suffix the function name with {\tt outerloops} ({\em i.e.} {\tt foo+outerloops}).
+  \item To instrument the entry and exit points of foo function plus the entry and exit points of its N-th loop function you have to suffix it as {\tt loop\_N}, for instance {\tt foo+loop\_3}.
+  \item To instrument the entry and exit points of foo function plus the entry and exit points of its N-th basic block inside the function you have to use the suffix {\tt bb\_N}, for instqance {\tt foo+bb\_5}. In this case, it is also possible to specifically ask for the entry or exit point of the basic block by additionally suffixing {\tt \_s} or {\tt \_e}, respectively.
+  \end{itemize}
+  Additionally, these options can be added by using comas, as in:\\
+  {\tt foo+outerloops,loop\_3,bb\_3\_e,bb\_4\_s,bb\_5}.
+
+  To discover the instrumentable loops and basic blocks of a certain function you can execute the command {\tt \${EXTRAE\_HOME}/bin/extrae -config extrae.xml -decodeBB}, where {\tt extrae.xml} is an \TRACE configuration file that provides a list on the user functions attribute that you want to get the information.
+  \item GCC and ICC (through {\tt -finstrument-functions})\\
+  GNU and Intel compiler provides a compile and link flag named {\tt -finstrument-functions} that instruments the routines of a source code file that \TRACE can use. To take advantage of this functionality the list of routines must point to a list with the format:
+	{\tt hexadecimal address\#function name}
+  where hexadecimal address refers to the hexadecimal address of the function in the binary file (obtained throug the {\tt nm binary} and function name is the name of the function to be instrumented. For instance to instrument the routine {\tt pi\_kernel} from the {\tt pi} binary we execute nm as follows:
+  \begin{verbatim}
+    # nm -a pi | grep pi_kernel
+    00000000004005ed T pi_kernel
+  \end{verbatim}
+  and add {\tt 00000000004005ed \# pi\_kernel} into the function list.
+\end{itemize}
+
+The {\tt exclude-automatic-functions} attribute is used only by the DynInst instrumenter. By setting this attribute to {\tt yes} the instrumenter will avoid automatically instrumenting the routines that either call OpenMP outlined routines (i.e. routines with OpenMP pragmas) or call CUDA kernels.
+
+Finally, in order to gather performance counters in these functions and also in those instrumented using the {\tt extrae\_user\_function} API call, the node {\tt counters} has to be enabled.
+
+\textbf{Warning!} Note that you need to compile your application binary with debugging information (typically the \texttt{-g} compiler flag) in order to translate the captured addresses into valuable information such as: function name, file name and line number.
+
+\graybox{See {\bf EXTRAE\_FUNCTIONS} environment variable in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: Performance counters}\label{sec:XMLSectionPerformanceCounters}
+
+The instrumentation library can be compiled with support for collecting performance metrics of different components available on the system. These components include:
+
+\begin{itemize}
+ \item Processor performance counters. Such access is granted by PAPI\footnote{More information available on their website \url{http://icl.cs.utk.edu/papi}. \TRACE requires PAPI 3.x at least.} or PMAPI\footnote{PMAPI is only available for AIX operating system, and it is on the base operating system since AIX5.3. \TRACE requires AIX 5.3 at least.}
+ \item Network performance counters. {\em (Only available in systems with Myrinet GM/MX networks).}
+ \item Operating system accounts.
+\end{itemize}
+
+Here is an example of the counters section in the XML configuration file:
+
+\input{XML/counters.xml}
+
+\graybox{See {\bf EXTRAE\_COUNTERS}, {\bf EXTRAE\_NETWORK\_COUNTERS} and {\bf EXTRAE\_RUSAGE} environment variables in appendix \ref{cha:EnvVar}.}
+
+\subsection{Processor performance counters}\label{subsec:ProcessorPerformanceCounters}
+
+Processor performance counters are configured in the {\tt <cpu>} nodes. The user can configure many sets in the {\tt <cpu>} node using the {\tt <set>} node, but just one set will be used at any given time in a specific task. The {\tt <cpu>} node supports the {\tt starting-set-distribution} attribute with the following accepted values:
+
+\begin{itemize}
+ \item {\tt number} ({\em in range 1..N, where N is the number of configured sets}) All tasks will start using the set specified by number.
+ \item {\tt block} Each task will start using the given sets distributed in blocks ({\em i.e.}, if two sets are defined and there are four running tasks: tasks 1 and 2 will use set 1, and tasks 3 and 4 will use set 2).
+ \item {\tt cyclic} Each task will start using the given sets distributed cyclically ({\em i.e.}, if two sets are defined and there are four running tasks: tasks 1 and 3 will use, and tasks 2 and 4 will use set 2).
+ \item {\tt random} Each task will start using a random set, and also calls either to {\tt Extrae\_next\_hwc\_set} or {\tt Extrae\_previous\_hwc\_set} will change to a random set.
+\end{itemize}
+
+Each set contain a list of performance counters to be gathered at different instrumentation points (see sections \ref{sec:XMLSectionMPI}, \ref{sec:XMLSectionOpenMP} and \ref{sec:XMLSectionUF}). If the tracing library is compiled to support PAPI, performance counters must be given using the canonical name (like PAPI\_TOT\_CYC and PAPI\_L1\_DCM), or the PAPI code in hexadecimal format (like 8000003b and 80000000, respectively)\footnote{Some architectures do not allow grouping some performance counters in the same set.}. If the tracing library is compiled to support PMAPI, only one group identifier can be given per set\footnote{Each group contains several performance counters} and can be either the group name (like pm\_basic and pm\_hpmcount1) or the group number (like 6 and 22, respectively). 
+
+In the given example (which refers to PAPI support in the tracing library) two sets are defined. First set will read {PAPI\_TOT\_INS} (total instructions), {PAPI\_TOT\_CYC} (total cycles) and {PAPI\_L1\_DCM} (1st level cache misses). Second set is configured to obtain {PAPI\_TOT\_INS} (total instructions), {PAPI\_TOT\_CYC} (total cycles) and {PAPI\_FP\_INS} (floating point instructions).
+
+Additionally, if the underlying performance library supports sampling mechanisms, each set can be configured to gather information (see section \ref{sec:XMLSectionCallers}) each time the specified counter reaches a specific value. The counter that is used for sampling must be present in the set. In the given example, the first set is enabled to gather sampling information every 100M cycles.
+
+Furthermore, performance counters can be configured to report accounting on different basis depending on the {\tt domain} attribute specified on each set. Available options are
+\begin{itemize}
+ \item {\tt kernel} Only counts events ocurred when the application is running in kernel mode.
+ \item {\tt user} Only counts events ocurred when the application is running in user-space mode.
+ \item {\tt all} Counts events independently of the application running mode.
+\end{itemize}
+
+In the given example, first set is configured to count all the events ocurred, while the second one only counts those events ocurred when the application is running in user-space mode.
+
+Finally, the instrumentation can change the active set in a manual and an automatic fashion. To change the active set manually see {\tt Extrae\_previous\_hwc\_set} and {\tt Extrae\_next\_hwc\_set} API calls in \ref{sec:BasicAPI}. To change automatically the active set two options are allowed: based on time and based on application code. The former mechanism requires adding the attribute {\tt changeat-time} and specify the minimum time to hold the set. The latter requires adding the attribute {\tt changeat-globalops} with a value. The tracing library will automatically change the active set when the application has executed as many MPI global operations as selected in that attribute. When In any case, if either attribute is set to zero, then the set will not me changed automatically.
+
+\subsection{Network performance counters}\label{subsec:NetworkPerformanceCounters}
+
+Network performance counters are only available on systems with Myrinet GM/MX networks and they are fixed depending on the firmware used. Other systems, like BG/* may provide some network performance counters, but they are accessed through the PAPI interface (see section \ref{sec:XMLSectionPerformanceCounters} and {PAPI} documentation).
+
+If {\tt <network>} is enabled the network performance counters appear at the end of the application run, giving a summary for the whole run.
+
+\subsection{Operating system accounting}\label{subsec:OperatingSystemAccounting}
+
+Operating system accounting is obtained through the getrusage(2) system call when {\tt <resource-usage>} is enabled. As network performance counters, they appear at the end of the application run, giving a summary for the whole run.
+
+\section{XML Section: Storage management}\label{sec:XMLSectionStorage}
+
+The instrumentation packages can be instructed on what/where/how produce the intermediate trace files. These are the available options:
+
+\input{XML/storage.xml}
+
+Such options refer to:
+
+\begin{itemize}
+ \item {\tt trace-prefix} Sets the intermediate trace file prefix. Its default value is {TRACE}.
+ \item {\tt size} Let the user restrict the maximum size (in megabytes) of each resulting intermediate trace file\footnote{This check is done each time the buffer is flushed, so the resulting size of the intermediate trace file depends also on the number of elements contained in the tracing buffer (see section \ref{sec:XMLSectionBuffer}).}.
+ \item {\tt temporal-directory} Where the intermediate trace files will be stored during the execution of the application. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.\\
+ \item {\tt final-directory} Where the intermediate trace files will be stored once the execution has been finished. By default they are stored in the current directory. If the directory does not exist, the instrumentation will try to make it.\\
+\end{itemize}
+
+\graybox{See {\bf EXTRAE\_PROGRAM\_NAME}, {\bf EXTRAE\_FILE\_SIZE}, {\bf EXTRAE\_DIR}, {\bf EXTRAE\_FINAL\_DIR} and {\bf EXTRAE\_GATHER\_MPITS} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: Buffer management}\label{sec:XMLSectionBuffer}
+
+Modify the buffer management entry to tune the tracing buffer behavior.
+
+\input{XML/buffer.xml}
+
+By, default (even if the enabled attribute is "no") the tracing buffer is set to 500k events. If {\tt <size>} is enabled the tracing buffer will be set to the number of events indicated by this node. If the circular option is enabled, the buffer will be created as a circular buffer and the buffer will be dumped only once with the last events generated by the tracing package.
+
+\graybox{See {\bf EXTRAE\_BUFFER\_SIZE} environment variable in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: Trace control}\label{sec:XMLSectionTraceControl}
+
+\input{XML/trace-control.xml}
+
+This section groups together a set of options to limit/reduce the final trace size. There are three mechanisms which are based on file existance, global operations executed and external remote control procedures.
+
+Regarding the {\tt file}, the application starts with the tracing disabled, and it is turned on when a control file is created. Use the property {\tt frequency} to choose at which frequency this check must be done. If not supplied, it will be checked every 100 global operations on MPI\_COMM\_WORLD.
+
+If the {\tt global-ops} tag is enabled, the instrumentation package begins disabled and starts the tracing when the given number of global operations on MPI\_COMM\_WORLD has been executed.
+
+The {\tt remote-control} tag section allows to configure some external mechanisms to automatically control the tracing. Currently, there is only one option which is built on top of MRNet and it is based on clustering and spectral analysis to generate a small yet representative trace.
+
+These are the options in the {\tt mrnet} tag:
+
+\begin{itemize}
+ \item {\bf target}: the approximate requested size for the final trace (in Mb).
+ \item {\bf analysis}: one between {\tt clustering} and {\tt spectral}.
+ \item {\bf start-after}: number of seconds before the first analysis starts.
+\end{itemize}
+
+The {\tt clustering} tag configures the clustering analysis parameters:
+\begin{itemize}
+ \item {\bf max\_tasks}: maximum number of tasks to get samples from.
+ \item {\bf max\_points}: maximum number of points to cluster.
+\end{itemize}
+
+The {\tt spectral} tag section configures the spectral analysis parameters:
+\begin{itemize}
+ \item {\bf min\_seen}: minimum times a given type of period has to be seen to trace a sample
+ \item {\bf max\_periods}: maximum number of representative periods to trace. 0 equals to unlimited.
+ \item {\bf num\_iters}: number of iterations to trace for every representative period found.
+ \item {signals}: performance signals used to analyze the application. If not specified, {\tt DurBurst} is used by default.
+\end{itemize}
+
+\graybox{See {\bf EXTRAE\_CONTROL\_FILE}, {\bf EXTRAE\_CONTROL\_GLOPS}, {\bf EXTRAE\_CONTROL\_TIME} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: Bursts}\label{sec:XMLSectionBursts}
+
+\input{XML/bursts.xml}
+
+If the user enables this option, the instrumentation library will just emit information of computation bursts ({\em i.e.}, not does not trace {MPI} calls, {OpenMP} runtime, and so on) when the current mode (through initial-mode in \ref{sec:XMLSectionTraceConfiguration}) is set to {\tt bursts}. The library will discard all those computation bursts that last less than the selected threshold.
+
+In addition to that, when the tracing library is running in burst mode, it computes some statistics of MPI activity. Such statistics can be dumped in the tracefile by enabling {\tt mpi-statistics}.
+
+\graybox{See {\bf EXTRAE\_INITIAL\_MODE}, {\bf EXTRAE\_BURST\_THRESHOLD} and {\bf EXTRAE\_MPI\_STATISTICS} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: Others}\label{sec:XMLSectionOthers}
+
+\input{XML/others.xml}
+
+This section contains other configuration details that do not fit in the previous sections. At the moment, there are three options to be configured. 
+
+\begin{itemize}
+
+\item The \texttt{minimum-time} option indicates the instrumentation package the minimum instrumentation time. To enable it, set {\tt enabled} to "yes" and set the minimum time within the {\tt minimum-time} tag.
+
+\item The option labeled as \texttt{finalize-on-signal} instructs the instrumentation package to listen for different types of signals\footnote{See \texttt{man 2 signal} and \texttt{man 7 signal} for more details.} and dump and finalize the execution whenever they occur. If a signal occurs but it is not configured, then the execution may finish without generating the trace-file. \textit{Caveat:} Some MPI implementations use \texttt{SIGUSR1} and/or \texttt{SIGUSR2}, so if you want to capture those signals check first that enabling them do not alter with the application execution.
+
+\item The \texttt{flush-sampling-buffer-at-instrumentation-point} lets the user decide whether the sampling buffer should be checked for flushing at instrumentation points. If this option is not enabled, then the buffer will only be dumped once at the end of the application execution.
+
+\end{itemize}
+
+\section{XML Section: Sampling}\label{sec:XMLSectionSampling}
+
+\input{XML/sampling.xml}
+
+This section configures the time-based sampling capabilities. Every sample contains processor performance counters (if enabled in section \ref{subsec:ProcessorPerformanceCounters} and either PAPI or PMAPI are referred at configure time) and callstack information (if enabled in section \ref{sec:XMLSectionCallers} and proper dependencies are set at configure time).
+
+This section contains two attributes besides {\tt enabled}. These are
+\begin{itemize}
+ \item {\bf type}: determines which timer domain is used (see {\tt man 2 setitimer} or {\tt man 3p setitimer} for further information on time domains). Available options are: {\tt real} (which is also the {\tt default} value, {\tt virtual} and {\tt prof} (which use the SIGALRM, SIGVTALRM and SIGPROF respectively). The default timing accumulates real time, but only issues samples at master thread. To let all the threads to collect samples, the type must be {\tt virtual} or {\tt prof}.
+ \item {\bf period}: specifies the sampling periodicity. In the example above, samples are gathered every 50ms.
+ \item {\bf variability}: specifies the variability to the sampling periodicity. Such variability is calculated through the {\tt random()} system call and then is added to the periodicity. In the given example, the variability is set to 10ms, thus the final sampling period ranges from 45 to 55ms.
+\end{itemize}
+
+\graybox{See {\bf EXTRAE\_SAMPLING\_PERIOD}, {\bf EXTRAE\_SAMPLING\_VARIABILITY}, {\bf EXTRAE\_SAMPLING\_CLOCKTYPE} and {\bf EXTRAE\_SAMPLING\_CALLER} environment variables in appendix \ref{cha:EnvVar}.}
+
+\section{XML Section: CUDA}\label{sec:XMLSectionCUDA}
+
+\input{XML/cuda.xml}
+
+This section indicates whether the CUDA calls should be instrumented or not. If {\tt enabled} is set to yes, CUDA calls will be instrumented, otherwise they will not be instrumented.
+
+\section{XML Section: OpenCL}\label{sec:XMLSectionOPENCL}
+
+\input{XML/opencl.xml}
+
+This section indicates whether the OpenCL calls should be instrumented or not. If {\tt enabled} is set to yes, Opencl calls will be instrumented, otherwise they will not be instrumented.
+
+\section{XML Section: Input/Output}\label{sec:XMLSectionIO}
+
+\input{XML/input-output.xml}
+
+This section indicates whether I/O calls ({\tt read} and {\tt write}) are meant to be instrumented. If {\tt enabled} is set to yes, the aforementioned calls will be instrumented, otherwise they will not be instrumented.
+
+{\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-instrument-io} option.
+
+\textbf{Warning!} This option seems to intefere with the instrumentation of the GNU and Intel OpenMP runtimes, and the issues haven't been solved yet.
+
+\section{XML Section: Dynamic memory}\label{sec:XMLSectionDynamicMemory}
+
+\input{XML/dynamic-memory.xml}
+
+This section indicates whether dynamic memory calls ({\tt malloc}, {\tt free}, {\tt realloc}) are meant to be instrumented. If {\tt enabled} is set to yes, the aforementioned calls will be instrumented, otherwise they will not be instrumented.
+This section allows deciding whether allocation and free-related memory calls shall be instrumented.
+Additionally, the configuration can also indicate whether allocation calls should be instrumented if the requested memory size surpasses a given threshold (32768 bytes, in the example).
+
+{\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-instrument-dynamic-memory} option.
+
+\textbf{Warning!} This option seems to intefere with the instrumentation of the Intel OpenMP runtime, and the issues haven't been solved yet.
+
+\section{XML Section: Memory references through Intel PEBS sampling}\label{sec:XMLIntelPEBS}
+
+\input{XML/intel-pebs.xml}
+
+This section tells \TRACE to use the PEBS feature from recent Intel processors\footnote{Check for availability on your system by looking for pebs in /proc/cpuinfo.} to sample memory references. These memory references capture the linear address referenced, the component of the memory hierarchy that solved the reference and the number of cycles to solve the reference.
+In the example above, PEBS monitors one out of every million load instructions and only grabs those that require at least 10 cycles to be solved.
+
+{\bf Note:} This is an experimental feature, and needs to be enabled at configure time using the {\tt --enable-pebs-sampling} option.
+
+\section{XML Section: Merge}\label{sec:XMLSectionMerge}
+
+\input{XML/merge.xml}
+
+If this section is enabled and the instrumentation packaged is configured to support this, the merge process will be automatically invoked after the application run. The merge process will use all the resources devoted to run the application.
+
+In the example given, the leaf of this node will be used as the tracefile name ({\tt mpi\_ping.prv} in this example). Current available options for the merge process are given as attribute of the {\tt <merge>} node and they are:
+
+\begin{itemize}
+ \item {\tt synchronization}: which can be set to {\tt default}, {\tt node}, {\tt task}, {\tt no}. This determines how task clocks will be synchronized ({\em default is node}).
+ \item {\tt binary}: points to the binary that is being executed. It will be used to translate gathered addresses (MPI callers, sampling points and user functions) into source code references.
+ \item {\tt tree-fan-out}: {\em only for MPI executions} sets the tree-based topology to run the merger in a parallel fashion.
+ \item {\tt max-memory}: limits the intermediate merging process to run up to the specified limit (in MBytes).
+ \item {\tt joint-states}: which can be set to {\tt yes}, {\tt no}. Determines if the resulting Paraver tracefile will split or join equal consecutive states ({\em default is yes}).
+ \item {\tt keep-mpits}: whether to keep the intermediate tracefiles after performing the merge.
+ \item {\tt sort-addresses}: whether to sort all addresses that refer to the source code (enabled by default).
+ \item {\tt overwrite}: set to yes if the new tracefile can overwrite an existing tracefile with the same name. If set to no, then the tracefile will be given a new name using a consecutive id.
+\end{itemize}
+
+In Linux systems, the tracing package can take advantage of certain functionalities from the system and can guess the binary name, and from it the tracefile name. In such systems, you can use the following reduced XML section replacing the earlier section.
+
+\input{XML/merge-reduced.xml}
+
+\graybox{For further references, see chapter \ref{cha:Merging}.}
+
+\section{Using environment variables within the XML file}\label{sec:EnvVars_in_XML}
+
+XML tags and attributes can refer to environment variables that are defined in the environment during the application run. If you want to refer to an environment variable within the XML file, just enclose the name of the variable using the dollar symbol ({\tt \$}), for example: {\tt \$FOO\$}.
+
+Note that the user has to put an specific value or a reference to an environment variable which means that expanding environment variables in text is not allowed as in a regular shell (i.e., the instrumentation package will not convert the follwing text {\tt bar\$FOO\$bar}).
+

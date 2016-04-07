@@ -1,0 +1,4 @@
+Here reside the MPI+OpenMP examples for Extrae. At this moment, there is only
+one example of instrumentation and it relies on LD_PRELOAD techniques. Simply
+go into ld-preload and submit the job the queue system (or check the job
+contents to run it interactively).

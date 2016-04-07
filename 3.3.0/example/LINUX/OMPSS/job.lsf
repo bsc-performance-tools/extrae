@@ -1,0 +1,12 @@
+#!/bin/bash
+#BSUB -n 1
+#BSUB -oo heat.%J.out
+#BSUB -eo heat.%J.err
+#BSUB -J heat
+#BSUB -W 00:09
+#BSUB -R "span[ptile=1]"
+#BSUB -q debug
+
+export OMP_NUM_THREADS=2
+export NX_ARGS="--threads $OMP_NUM_THREADS "
+./trace.sh ./heat-ompss-i test.dat test.ppm

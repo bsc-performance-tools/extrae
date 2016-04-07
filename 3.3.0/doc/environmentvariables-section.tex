@@ -1,0 +1,86 @@
+\chapter{Environment variables}\label{cha:EnvVar}
+
+Although \TRACE is configured through an XML file (which is pointed by the {\tt EXTRAE\_CONFIG\_FILE}), it also supports minimal configuration to be done via environment variables for those systems that do not have the library responsible for parsing the XML files ({\em i.e.,} libxml2).
+
+This appendix presents the environment variables the \TRACE package uses if {\tt EXTRAE\_CONFIG\_FILE} is not set and a description. For those environment variable that refer to XML 'enabled' attributes ({\em i.e.}, that can be set to "yes" or "no") are considered to be enabled if their value are defined to 1.
+
+\begin{landscape}
+\begin{table}
+\centerline {
+\small
+\begin{tabular}{p{7.5cm} p{14cm}}
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+  \hline
+  \cellcolor{tabbg2} & \cellcolor{tabbg2} Set the number of records that the instrumentation buffer can\\
+  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_BUFFER\_SIZE} & \cellcolor{tabbg2} hold before flushing them.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}See section \ref{subsec:ProcessorPerformanceCounters}. Just one set can be defined. Counters (in PAPI)\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_COUNTERS} & \cellcolor{tabbg1}groups (in PMAPI) are given separated by commas.\\
+  \cellcolor{tabbg2}EXTRAE\_CONTROL\_FILE & \cellcolor{tabbg2}The instrumentation will be enabled only when the file pointed exists.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Starts the instrumentation when the specified number of global collectives\\ 
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_CONTROL\_GLOPS} & \cellcolor{tabbg1}have been executed.\\
+  \cellcolor{tabbg2}EXTRAE\_CONTROL\_TIME & \cellcolor{tabbg2}Checks the file pointed by {\tt EXTRAE\_CONTROL\_FILE} at this period.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Specifies where temporal files will be created during\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_DIR} & \cellcolor{tabbg1}instrumentation.\\
+  \cellcolor{tabbg2}EXTRAE\_DISABLE\_MPI & \cellcolor{tabbg2}Disable MPI instrumentation.\\
+  \cellcolor{tabbg1}EXTRAE\_DISABLE\_OMP & \cellcolor{tabbg1}Disable OpenMP instrumentation.\\
+  \cellcolor{tabbg2}EXTRAE\_DISABLE\_PTHREAD & \cellcolor{tabbg2}Disable pthread instrumentation.\\
+  \cellcolor{tabbg1}EXTRAE\_FILE\_SIZE & \cellcolor{tabbg1}Set the maximum size (in Mbytes) for the intermediate trace file.\\
+  \cellcolor{tabbg2}                  & \cellcolor{tabbg2}List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
+  \cellcolor{tabbg2}EXTRAE\_FUNCTIONS & \cellcolor{tabbg2}GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
+  \cellcolor{tabbg2}                  & \cellcolor{tabbg2}option at compile and link time. \\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Specify if the performance counters should be collected when a\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_FUNCTIONS\_COUNTERS\_ON} & \cellcolor{tabbg1}user function event is emitted.\\
+  \cellcolor{tabbg2}EXTRAE\_FINAL\_DIR & \cellcolor{tabbg2}Specifies where files will be stored when the application ends.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Gather intermediate trace files into a single directory\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_GATHER\_MPITS} & (\em{this is only available when instrumenting MPI applications}).\\
+  \cellcolor{tabbg2}EXTRAE\_HOME & \cellcolor{tabbg2}Points where the \TRACE is installed.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Choose whether the instrumentation runs in in {\tt detail} or\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_INITIAL\_MODE} & \cellcolor{tabbg1}in {\tt bursts} mode.\\
+  \cellcolor{tabbg2}EXTRAE\_BURST\_THRESHOLD & \cellcolor{tabbg2}Specify the threshold time to filter running bursts.\\
+  \cellcolor{tabbg1}EXTRAE\_MINIMUM\_TIME & \cellcolor{tabbg1}Specify the minimum amount of instrumentation time.\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure \TRACE}
+\label{tab:EnvironmentVariables}
+\end{table}
+
+\end{landscape}
+
+\begin{landscape}
+
+\begin{table}
+\centerline {
+\small
+\begin{tabular}{p{7.5cm} p{14cm}} 
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+	\hline
+  \cellcolor{tabbg2} EXTRAE\_MPI\_CALLER  & \cellcolor{tabbg2} Choose which MPI calling routines should be dumped into the tracefile.\\
+  \cellcolor{tabbg1} EXTRAE\_MPI\_COUNTERS\_ON & \cellcolor{tabbg1} Set to 1 if MPI must report performace counter values.\\
+  \cellcolor{tabbg2} & \cellcolor{tabbg2} Set to 1 if basic MPI statistics must be collected in burst mode\\
+  \cellcolor{tabbg2} \multirow{-2}{*}{EXTRAE\_MPI\_STATISTICS} & \cellcolor{tabbg2} {\em (Only available in systems with Myrinet GM/MX networks)}.\\
+  \cellcolor{tabbg1} EXTRAE\_NETWORK\_COUNTERS & \cellcolor{tabbg1}  Set to 1 to dump network performance counters at flush points.\\
+  \cellcolor{tabbg2} EXTRAE\_PTHREAD\_COUNTERS\_ON & \cellcolor{tabbg2} Set to 1 if pthread must report performance counters values. \\
+  \cellcolor{tabbg1} EXTRAE\_OMP\_COUNTERS\_ON & \cellcolor{tabbg1} Set to 1 if OpenMP must report performance counters values. \\
+  \cellcolor{tabbg2} EXTRAE\_PTHREAD\_LOCKS & \cellcolor{tabbg2} Set to 1 if pthread locks have to be instrumented.\\
+  \cellcolor{tabbg1} EXTRAE\_OMP\_LOCKS & \cellcolor{tabbg1} Set to 1 if OpenMP locks have to be instrumented.\\
+  \cellcolor{tabbg2} EXTRAE\_ON & \cellcolor{tabbg2} Enables instrumentation\\
+  \cellcolor{tabbg1} EXTRAE\_PROGRAM\_NAME & \cellcolor{tabbg1} Specify the prefix of the resulting intermediate trace files.\\ 
+  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_CALLER & \cellcolor{tabbg2} Determines the callstack segment stored through time-sampling capabilities.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1} Determines domain for sampling clock.\\
+  \cellcolor{tabbg1} \multirow{-2}{*}{EXTRAE\_SAMPLING\_CLOCKTYPE} & \cellcolor{tabbg1} Options are: DEFAULT, REAL, VIRTUAL and PROF.\\
+  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_PERIOD & \cellcolor{tabbg2} Enable time-sampling capabilities with the indicated period.\\
+  \cellcolor{tabbg1} EXTRAE\_SAMPLING\_VARIABILITY & \cellcolor{tabbg1} Adds some variability to the sampling period.\\
+  \cellcolor{tabbg2} EXTRAE\_RUSAGE & \cellcolor{tabbg2} Instrumentation emits resource usage at flush points if set to 1.\\
+  \cellcolor{tabbg1} EXTRAE\_SKIP\_AUTO\_LIBRARY\_INITIALIZE & \cellcolor{tabbg1} Do not automatically init instrumentation in the main symbol.\\
+  \cellcolor{tabbg2} EXTRAE\_TRACE\_TYPE & \cellcolor{tabbg2} Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure \TRACE ({\em continued})}
+\label{tab:EnvironmentVariables_continued}
+\end{table}
+
+\end{landscape}

@@ -1,0 +1,404 @@
+\batchmode
+\documentclass[twoside,a4,english,11pt]{book}
+\RequirePackage{ifthen}
+
+
+
+
+\usepackage[pdfborder={0 0 0}]{hyperref}
+\usepackage{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{url}
+\usepackage{epsfig} 
+\usepackage{subfigure} 
+\usepackage{setspace} 
+\usepackage{tocbibind} 
+\usepackage{a4wide}
+\usepackage{fullpage}
+\usepackage{verbatim}
+\usepackage{color,calc}
+\usepackage{pdflscape}
+\usepackage{fancyvrb}
+\usepackage{amsfonts}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+
+
+\definecolor{lightgray}{rgb}{0.75,0.75,0.75}
+\definecolor{tabbg1}{rgb}{0.85,0.85,0.85}
+\definecolor{tabfg1}{rgb}{0.0,0.0,0.0}
+\definecolor{tabbg2}{rgb}{0.95,0.95,0.95}
+\definecolor{tabfg2}{rgb}{0.0,0.0,0.0}
+
+
+\urlstyle{leostyle}
+
+
+\makeatletter
+
+\usepackage{babel}
+\makeatother
+
+
+\pagestyle{plain}
+
+%
+\providecommand{\TRACE}{{\sf {E}xtrae}\ }%
+\providecommand{\PARAVER}{{\sf Paraver}\ }%
+\providecommand{\TRACEVERSION}{3.3.0rc} 
+
+
+
+
+
+\pagecolor[gray]{.7}
+
+\usepackage[latin9]{inputenc}
+
+
+
+\makeatletter
+\AtBeginDocument{\makeatletter
+\input /home/harald/src/extrae/trunk.sampling/doc/user-guide.aux
+\makeatother
+}
+
+\makeatletter
+\count@=\the\catcode`\_ \catcode`\_=8 
+\newenvironment{tex2html_wrap}{}{}%
+\catcode`\<=12\catcode`\_=\count@
+\newcommand{\providedcommand}[1]{\expandafter\providecommand\csname #1\endcsname}%
+\newcommand{\renewedcommand}[1]{\expandafter\providecommand\csname #1\endcsname{}%
+  \expandafter\renewcommand\csname #1\endcsname}%
+\newcommand{\newedenvironment}[1]{\newenvironment{#1}{}{}\renewenvironment{#1}}%
+\let\newedcommand\renewedcommand
+\let\renewedenvironment\newedenvironment
+\makeatother
+\let\mathon=$
+\let\mathoff=$
+\ifx\AtBeginDocument\undefined \newcommand{\AtBeginDocument}[1]{}\fi
+\newbox\sizebox
+\setlength{\hoffset}{0pt}\setlength{\voffset}{0pt}
+\addtolength{\textheight}{\footskip}\setlength{\footskip}{0pt}
+\addtolength{\textheight}{\topmargin}\setlength{\topmargin}{0pt}
+\addtolength{\textheight}{\headheight}\setlength{\headheight}{0pt}
+\addtolength{\textheight}{\headsep}\setlength{\headsep}{0pt}
+\setlength{\textwidth}{349pt}
+\newwrite\lthtmlwrite
+\makeatletter
+\let\realnormalsize=\normalsize
+\global\topskip=2sp
+\def\preveqno{}\let\real@float=\@float \let\realend@float=\end@float
+\def\@float{\let\@savefreelist\@freelist\real@float}
+\def\liih@math{\ifmmode$\else\bad@math\fi}
+\def\end@float{\realend@float\global\let\@freelist\@savefreelist}
+\let\real@dbflt=\@dbflt \let\end@dblfloat=\end@float
+\let\@largefloatcheck=\relax
+\let\if@boxedmulticols=\iftrue
+\def\@dbflt{\let\@savefreelist\@freelist\real@dbflt}
+\def\adjustnormalsize{\def\normalsize{\mathsurround=0pt \realnormalsize
+ \parindent=0pt\abovedisplayskip=0pt\belowdisplayskip=0pt}%
+ \def\phantompar{\csname par\endcsname}\normalsize}%
+\def\lthtmltypeout#1{{\let\protect\string \immediate\write\lthtmlwrite{#1}}}%
+\newcommand\lthtmlhboxmathA{\adjustnormalsize\setbox\sizebox=\hbox\bgroup\kern.05em }%
+\newcommand\lthtmlhboxmathB{\adjustnormalsize\setbox\sizebox=\hbox to\hsize\bgroup\hfill }%
+\newcommand\lthtmlvboxmathA{\adjustnormalsize\setbox\sizebox=\vbox\bgroup %
+ \let\ifinner=\iffalse \let\)\liih@math }%
+\newcommand\lthtmlboxmathZ{\@next\next\@currlist{}{\def\next{\voidb@x}}%
+ \expandafter\box\next\egroup}%
+\newcommand\lthtmlmathtype[1]{\gdef\lthtmlmathenv{#1}}%
+\newcommand\lthtmllogmath{\dimen0\ht\sizebox \advance\dimen0\dp\sizebox
+  \ifdim\dimen0>.95\vsize
+   \lthtmltypeout{%
+*** image for \lthtmlmathenv\space is too tall at \the\dimen0, reducing to .95 vsize ***}%
+   \ht\sizebox.95\vsize \dp\sizebox\z@ \fi
+  \lthtmltypeout{l2hSize %
+:\lthtmlmathenv:\the\ht\sizebox::\the\dp\sizebox::\the\wd\sizebox.\preveqno}}%
+\newcommand\lthtmlfigureA[1]{\let\@savefreelist\@freelist
+       \lthtmlmathtype{#1}\lthtmlvboxmathA}%
+\newcommand\lthtmlpictureA{\bgroup\catcode`\_=8 \lthtmlpictureB}%
+\newcommand\lthtmlpictureB[1]{\lthtmlmathtype{#1}\egroup
+       \let\@savefreelist\@freelist \lthtmlhboxmathB}%
+\newcommand\lthtmlpictureZ[1]{\hfill\lthtmlfigureZ}%
+\newcommand\lthtmlfigureZ{\lthtmlboxmathZ\lthtmllogmath\copy\sizebox
+       \global\let\@freelist\@savefreelist}%
+\newcommand\lthtmldisplayA{\bgroup\catcode`\_=8 \lthtmldisplayAi}%
+\newcommand\lthtmldisplayAi[1]{\lthtmlmathtype{#1}\egroup\lthtmlvboxmathA}%
+\newcommand\lthtmldisplayB[1]{\edef\preveqno{(\theequation)}%
+  \lthtmldisplayA{#1}\let\@eqnnum\relax}%
+\newcommand\lthtmldisplayZ{\lthtmlboxmathZ\lthtmllogmath\lthtmlsetmath}%
+\newcommand\lthtmlinlinemathA{\bgroup\catcode`\_=8 \lthtmlinlinemathB}
+\newcommand\lthtmlinlinemathB[1]{\lthtmlmathtype{#1}\egroup\lthtmlhboxmathA
+  \vrule height1.5ex width0pt }%
+\newcommand\lthtmlinlineA{\bgroup\catcode`\_=8 \lthtmlinlineB}%
+\newcommand\lthtmlinlineB[1]{\lthtmlmathtype{#1}\egroup\lthtmlhboxmathA}%
+\newcommand\lthtmlinlineZ{\egroup\expandafter\ifdim\dp\sizebox>0pt %
+  \expandafter\centerinlinemath\fi\lthtmllogmath\lthtmlsetinline}
+\newcommand\lthtmlinlinemathZ{\egroup\expandafter\ifdim\dp\sizebox>0pt %
+  \expandafter\centerinlinemath\fi\lthtmllogmath\lthtmlsetmath}
+\newcommand\lthtmlindisplaymathZ{\egroup %
+  \centerinlinemath\lthtmllogmath\lthtmlsetmath}
+\def\lthtmlsetinline{\hbox{\vrule width.1em \vtop{\vbox{%
+  \kern.1em\copy\sizebox}\ifdim\dp\sizebox>0pt\kern.1em\else\kern.3pt\fi
+  \ifdim\hsize>\wd\sizebox \hrule depth1pt\fi}}}
+\def\lthtmlsetmath{\hbox{\vrule width.1em\kern-.05em\vtop{\vbox{%
+  \kern.1em\kern0.8 pt\hbox{\hglue.17em\copy\sizebox\hglue0.8 pt}}\kern.3pt%
+  \ifdim\dp\sizebox>0pt\kern.1em\fi \kern0.8 pt%
+  \ifdim\hsize>\wd\sizebox \hrule depth1pt\fi}}}
+\def\centerinlinemath{%
+  \dimen1=\ifdim\ht\sizebox<\dp\sizebox \dp\sizebox\else\ht\sizebox\fi
+  \advance\dimen1by.5pt \vrule width0pt height\dimen1 depth\dimen1 
+ \dp\sizebox=\dimen1\ht\sizebox=\dimen1\relax}
+
+\def\lthtmlcheckvsize{\ifdim\ht\sizebox<\vsize 
+  \ifdim\wd\sizebox<\hsize\expandafter\hfill\fi \expandafter\vfill
+  \else\expandafter\vss\fi}%
+\providecommand{\selectlanguage}[1]{}%
+\makeatletter \tracingstats = 1 
+
+
+\begin{document}
+\pagestyle{empty}\thispagestyle{empty}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength hsize=\the\hsize}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength vsize=\the\vsize}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength hoffset=\the\hoffset}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength voffset=\the\voffset}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength topmargin=\the\topmargin}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength topskip=\the\topskip}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength headheight=\the\headheight}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength headsep=\the\headsep}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength parskip=\the\parskip}\lthtmltypeout{}%
+\lthtmltypeout{latex2htmlLength oddsidemargin=\the\oddsidemargin}\lthtmltypeout{}%
+\makeatletter
+\if@twoside\lthtmltypeout{latex2htmlLength evensidemargin=\the\evensidemargin}%
+\else\lthtmltypeout{latex2htmlLength evensidemargin=\the\oddsidemargin}\fi%
+\lthtmltypeout{}%
+\makeatother
+\setcounter{page}{1}
+\onecolumn
+
+% !!! IMAGES START HERE !!!
+
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{chapter}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{section}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsubsection}
+\stepcounter{subsubsection}
+\stepcounter{subsection}
+\stepcounter{subsubsection}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\appendix
+\stepcounter{chapter}
+\stepcounter{chapter}
+{\newpage\clearpage
+\lthtmlfigureA{landscape4227}%
+\begin{landscape}
+% latex2html id marker 4227
+
+\begin{table}
+\centerline{
+\small
+\begin{tabular}{p{7.5cm} p{14cm}}
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+  \hline
+  \cellcolor{tabbg2} & \cellcolor{tabbg2} Set the number of records that the instrumentation buffer can\\
+  \cellcolor{tabbg2}\multirow{-2}{*}{EXTRAE\_BUFFER\_SIZE} & \cellcolor{tabbg2} hold before flushing them.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}See section \ref{subsec:ProcessorPerformanceCounters}. Just one set can be defined. Counters (in PAPI)\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_COUNTERS} & \cellcolor{tabbg1}groups (in PMAPI) are given separated by commas.\\
+  \cellcolor{tabbg2}EXTRAE\_CONTROL\_FILE & \cellcolor{tabbg2}The instrumentation will be enabled only when the file pointed exists.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Starts the instrumentation when the specified number of global collectives\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_CONTROL\_GLOPS} & \cellcolor{tabbg1}have been executed.\\
+  \cellcolor{tabbg2}EXTRAE\_CONTROL\_TIME & \cellcolor{tabbg2}Checks the file pointed by {\tt EXTRAE\_CONTROL\_FILE} at this period.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Specifies where temporal files will be created during\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_DIR} & \cellcolor{tabbg1}instrumentation.\\
+  \cellcolor{tabbg2}EXTRAE\_DISABLE\_MPI & \cellcolor{tabbg2}Disable MPI instrumentation.\\
+  \cellcolor{tabbg1}EXTRAE\_DISABLE\_OMP & \cellcolor{tabbg1}Disable OpenMP instrumentation.\\
+  \cellcolor{tabbg2}EXTRAE\_DISABLE\_PTHREAD & \cellcolor{tabbg2}Disable pthread instrumentation.\\
+  \cellcolor{tabbg1}EXTRAE\_FILE\_SIZE & \cellcolor{tabbg1}Set the maximum size (in Mbytes) for the intermediate trace file.\\
+  \cellcolor{tabbg2}                  & \cellcolor{tabbg2}List of routine to be instrumented, as described in \ref{sec:XMLSectionUF} using the\\
+  \cellcolor{tabbg2}EXTRAE\_FUNCTIONS & \cellcolor{tabbg2}GNU C {\tt -finstrument-functions} or the IBM XL {\tt -qdebug=function\_trace}\\
+  \cellcolor{tabbg2}                  & \cellcolor{tabbg2}option at compile and link time. \\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Specify if the performance counters should be collected when a\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_FUNCTIONS\_COUNTERS\_ON} & \cellcolor{tabbg1}user function event is emitted.\\
+  \cellcolor{tabbg2}EXTRAE\_FINAL\_DIR & \cellcolor{tabbg2}Specifies where files will be stored when the application ends.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Gather intermediate trace files into a single directory\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_GATHER\_MPITS} & (\em{this is only available when instrumenting MPI applications}).\\
+  \cellcolor{tabbg2}EXTRAE\_HOME & \cellcolor{tabbg2}Points where the {\sf {E}xtrae}\ is installed.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1}Choose whether the instrumentation runs in in {\tt detail} or\\
+  \cellcolor{tabbg1}\multirow{-2}{*}{EXTRAE\_INITIAL\_MODE} & \cellcolor{tabbg1}in {\tt bursts} mode.\\
+  \cellcolor{tabbg2}EXTRAE\_BURST\_THRESHOLD & \cellcolor{tabbg2}Specify the threshold time to filter running bursts.\\
+  \cellcolor{tabbg1}EXTRAE\_MINIMUM\_TIME & \cellcolor{tabbg1}Specify the minimum amount of instrumentation time.\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure {\sf {E}xtrae}\ }
+\end{table}
+\par
+\end{landscape}%
+\lthtmlfigureZ
+\lthtmlcheckvsize\clearpage}
+
+{\newpage\clearpage
+\lthtmlfigureA{landscape4321}%
+\begin{landscape}
+% latex2html id marker 4321
+
+\par
+\begin{table}
+\centerline{
+\small
+\begin{tabular}{p{7.5cm} p{14cm}} 
+  \hline
+  {\bf Environment variable} & {\bf Description}\\
+	\hline
+  \cellcolor{tabbg2} EXTRAE\_MPI\_CALLER  & \cellcolor{tabbg2} Choose which MPI calling routines should be dumped into the tracefile.\\
+  \cellcolor{tabbg1} EXTRAE\_MPI\_COUNTERS\_ON & \cellcolor{tabbg1} Set to 1 if MPI must report performace counter values.\\
+  \cellcolor{tabbg2} & \cellcolor{tabbg2} Set to 1 if basic MPI statistics must be collected in burst mode\\
+  \cellcolor{tabbg2} \multirow{-2}{*}{EXTRAE\_MPI\_STATISTICS} & \cellcolor{tabbg2} {\em (Only available in systems with Myrinet GM/MX networks)}.\\
+  \cellcolor{tabbg1} EXTRAE\_NETWORK\_COUNTERS & \cellcolor{tabbg1}  Set to 1 to dump network performance counters at flush points.\\
+  \cellcolor{tabbg2} EXTRAE\_PTHREAD\_COUNTERS\_ON & \cellcolor{tabbg2} Set to 1 if pthread must report performance counters values. \\
+  \cellcolor{tabbg1} EXTRAE\_OMP\_COUNTERS\_ON & \cellcolor{tabbg1} Set to 1 if OpenMP must report performance counters values. \\
+  \cellcolor{tabbg2} EXTRAE\_PTHREAD\_LOCKS & \cellcolor{tabbg2} Set to 1 if pthread locks have to be instrumented.\\
+  \cellcolor{tabbg1} EXTRAE\_OMP\_LOCKS & \cellcolor{tabbg1} Set to 1 if OpenMP locks have to be instrumented.\\
+  \cellcolor{tabbg2} EXTRAE\_ON & \cellcolor{tabbg2} Enables instrumentation\\
+  \cellcolor{tabbg1} EXTRAE\_PROGRAM\_NAME & \cellcolor{tabbg1} Specify the prefix of the resulting intermediate trace files.\\
+  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_CALLER & \cellcolor{tabbg2} Determines the callstack segment stored through time-sampling capabilities.\\
+  \cellcolor{tabbg1} & \cellcolor{tabbg1} Determines domain for sampling clock.\\
+  \cellcolor{tabbg1} \multirow{-2}{*}{EXTRAE\_SAMPLING\_CLOCKTYPE} & \cellcolor{tabbg1} Options are: DEFAULT, REAL, VIRTUAL and PROF.\\
+  \cellcolor{tabbg2} EXTRAE\_SAMPLING\_PERIOD & \cellcolor{tabbg2} Enable time-sampling capabilities with the indicated period.\\
+  \cellcolor{tabbg1} EXTRAE\_SAMPLING\_VARIABILITY & \cellcolor{tabbg1} Adds some variability to the sampling period.\\
+  \cellcolor{tabbg2} EXTRAE\_RUSAGE & \cellcolor{tabbg2} Instrumentation emits resource usage at flush points if set to 1.\\
+  \cellcolor{tabbg1} EXTRAE\_SKIP\_AUTO\_LIBRARY\_INITIALIZE & \cellcolor{tabbg1} Do not automatically init instrumentation in the main symbol.\\
+  \cellcolor{tabbg2} EXTRAE\_TRACE\_TYPE & \cellcolor{tabbg2} Choose whether the resulting tracefiles are intended for Paraver or Dimemas.\\
+  \hline
+\end{tabular}
+}
+\caption{Set of environment variables available to configure {\sf {E}xtrae}\ ({\em continued})}
+\end{table}
+\par
+\end{landscape}%
+\lthtmlfigureZ
+\lthtmlcheckvsize\clearpage}
+
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{chapter}
+\stepcounter{chapter}
+{\newpage\clearpage
+\lthtmlfigureA{figure4542}%
+\begin{figure}\centering
+  \psfig{figure=overheads/overheads, width=\textwidth}
+
+\end{figure}%
+\lthtmlfigureZ
+\lthtmlcheckvsize\clearpage}
+
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{chapter}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{subsection}
+\stepcounter{section}
+\stepcounter{section}
+\stepcounter{section}
+
+\end{document}

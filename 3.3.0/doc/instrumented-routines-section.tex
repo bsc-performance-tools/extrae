@@ -1,0 +1,288 @@
+\chapter{Instrumented run-times}\label{cha:InstrumentedRoutines}
+
+\section{MPI}\label{sec:MPIinstrumentedroutines}
+
+These are the instrumented MPI routines in the \TRACE package:
+
+\begin{itemize}
+\item MPI\_Init
+\item MPI\_Init\_thread\footnotemark[1]
+\item MPI\_Finalize
+\item MPI\_Bsend
+\item MPI\_Ssend
+\item MPI\_Rsend
+\item MPI\_Send
+\item MPI\_Bsend\_init
+\item MPI\_Ssend\_init
+\item MPI\_Rsend\_init
+\item MPI\_Send\_init
+\item MPI\_Ibsend
+\item MPI\_Issend
+\item MPI\_Irsend
+\item MPI\_Isend
+\item MPI\_Recv
+\item MPI\_Irecv
+\item MPI\_Recv\_init
+\item MPI\_Reduce
+\item MPI\_Ireduce
+\item MPI\_Reduce\_scatter
+\item MPI\_Ireduce\_scatter
+\item MPI\_Allreduce
+\item MPI\_Iallreduce
+\item MPI\_Barrier
+\item MPI\_Ibarrier
+\item MPI\_Cancel
+\item MPI\_Test
+\item MPI\_Wait
+\item MPI\_Waitall
+\item MPI\_Waitany
+\item MPI\_Waitsome
+\item MPI\_Bcast
+\item MPI\_Ibcast
+\item MPI\_Alltoall
+\item MPI\_Ialltoall
+\item MPI\_Alltoallv
+\item MPI\_Ialltoallv
+\item MPI\_Allgather
+\item MPI\_Iallgather
+\item MPI\_Allgatherv
+\item MPI\_Iallgatherv
+\item MPI\_Gather
+\item MPI\_Igather
+\item MPI\_Gatherv
+\item MPI\_Igatherv
+\item MPI\_Scatter
+\item MPI\_Iscatter
+\item MPI\_Scatterv
+\item MPI\_Iscatterv
+\item MPI\_Comm\_rank
+\item MPI\_Comm\_size
+\item MPI\_Comm\_create
+\item MPI\_Comm\_free
+\item MPI\_Comm\_dup
+\item MPI\_Comm\_split
+\item MPI\_Comm\_spawn
+\item MPI\_Comm\_spawn\_multiple
+\item MPI\_Cart\_create
+\item MPI\_Cart\_sub
+\item MPI\_Start
+\item MPI\_Startall
+\item MPI\_Request\_free
+\item MPI\_Scan
+\item MPI\_Iscan
+\item MPI\_Sendrecv
+\item MPI\_Sendrecv\_replace
+\item MPI\_File\_open\footnotemark[2]
+\item MPI\_File\_close\footnotemark[2]
+\item MPI\_File\_read\footnotemark[2]
+\item MPI\_File\_read\_all\footnotemark[2]
+\item MPI\_File\_write\footnotemark[2]
+\item MPI\_File\_write\_all\footnotemark[2]
+\item MPI\_File\_read\_at\footnotemark[2]
+\item MPI\_File\_read\_at\_all\footnotemark[2]
+\item MPI\_File\_write\_at\footnotemark[2]
+\item MPI\_File\_write\_at\_all\footnotemark[2]
+\item MPI\_Get\footnotemark[3]
+\item MPI\_Put\footnotemark[3]
+\item MPI\_Win\_complete\footnotemark[3]
+\item MPI\_Win\_create\footnotemark[3]
+\item MPI\_Win\_fence\footnotemark[3]
+\item MPI\_Win\_free\footnotemark[3]
+\item MPI\_Win\_post\footnotemark[3]
+\item MPI\_Win\_start\footnotemark[3]
+\item MPI\_Win\_wait\footnotemark[3]
+\end{itemize}
+
+\footnotetext[1]{The MPI library must support this routine}
+\footnotetext[2]{The MPI library must support MPI/IO routines}
+\footnotetext[3]{The MPI library must support 1-sided (or RMA -remote memory address-) routines}
+
+\section{OpenMP}\label{sec:OpenMPruntimesinstrumented}
+
+\subsection{Intel compilers - icc, iCC, ifort}
+
+The instrumentation of the Intel OpenMP runtime for versions 8.1 to 10.1 is only available using the \TRACE package based on DynInst library.
+
+These are the instrument routines of the Intel OpenMP runtime functions using DynInst:
+
+\begin{itemize}
+\item \_\_kmpc\_fork\_call
+\item \_\_kmpc\_barrier
+\item \_\_kmpc\_invoke\_task\_func
+\item \_\_kmpc\_set\_lock\footnotemark[4]
+\item \_\_kmpc\_unset\_lock\footnotemark[4]
+\end{itemize}
+\footnotetext[4]{The instrumentation of OpenMP locks can be enabled/disabled}
+
+The instrumentation of the Intel OpenMP runtime for version 11.0 to 12.0 is available using the \TRACE package based on the {\tt LD\_PRELOAD} and also the DynInst mechanisms. The instrumented routines include:
+
+\begin{itemize}
+\item \_\_kmpc\_fork\_call
+\item \_\_kmpc\_barrier
+\item \_\_kmpc\_dispatch\_init\_4
+\item \_\_kmpc\_dispatch\_init\_8
+\item \_\_kmpc\_dispatch\_next\_4
+\item \_\_kmpc\_dispatch\_next\_8
+\item \_\_kmpc\_dispatch\_fini\_4
+\item \_\_kmpc\_dispatch\_fini\_8
+\item \_\_kmpc\_single
+\item \_\_kmpc\_end\_single
+\item \_\_kmpc\_critical\footnotemark[4]
+\item \_\_kmpc\_end\_critical\footnotemark[4]
+\item omp\_set\_lock\footnotemark[4]
+\item omp\_unset\_lock\footnotemark[4]
+\item \_\_kmpc\_omp\_task\_alloc
+\item \_\_kmpc\_omp\_task\_begin\_if0
+\item \_\_kmpc\_omp\_task\_complete\_if0
+\item \_\_kmpc\_omp\_taskwait
+\end{itemize}
+
+\subsection{IBM compilers - xlc, xlC, xlf}
+
+\TRACE supports IBM OpenMP runtime 1.6.
+
+These are the instrumented routines of the IBM OpenMP runtime:
+
+\begin{itemize}
+\item \_xlsmpParallelDoSetup\_TPO
+\item \_xlsmpParRegionSetup\_TPO
+\item \_xlsmpWSDoSetup\_TPO
+\item \_xlsmpBarrier\_TPO
+\item \_xlsmpSingleSetup\_TPO
+\item \_xlsmpWSSectSetup\_TPO
+\item \_xlsmpRelDefaultSLock\footnotemark[4]
+\item \_xlsmpGetDefaultSLock\footnotemark[4]
+\end{itemize}
+
+\subsection{GNU compilers - gcc, g++, gfortran}
+
+\TRACE supports GNU OpenMP runtime 4.2.
+
+These are the instrumented routines of the GNU OpenMP runtime:
+
+\begin{itemize}
+\item GOMP\_parallel\_start
+\item GOMP\_parallel\_sections\_start
+\item GOMP\_parallel\_end
+\item GOMP\_sections\_start
+\item GOMP\_sections\_next
+\item GOMP\_sections\_end
+\item GOMP\_sections\_end\_nowait
+\item GOMP\_loop\_end
+\item GOMP\_loop\_end\_nowait
+\item GOMP\_loop\_static\_start
+\item GOMP\_loop\_dynamic\_start
+\item GOMP\_loop\_guided\_start
+\item GOMP\_loop\_runtime\_start
+\item GOMP\_loop\_ordered\_static\_start
+\item GOMP\_loop\_ordered\_dynamic\_start
+\item GOMP\_loop\_ordered\_guided\_start
+\item GOMP\_loop\_ordered\_runtime\_start
+\item GOMP\_parallel\_loop\_static\_start
+\item GOMP\_parallel\_loop\_dynamic\_start
+\item GOMP\_parallel\_loop\_guided\_start
+\item GOMP\_parallel\_loop\_runtime\_start
+\item GOMP\_loop\_static\_next
+\item GOMP\_loop\_dynamic\_next
+\item GOMP\_loop\_guided\_next
+\item GOMP\_loop\_runtime\_next
+\item GOMP\_barrier
+\item GOMP\_critical\_name\_enter\footnotemark[4]
+\item GOMP\_critical\_name\_exit\footnotemark[4]
+\item GOMP\_critical\_enter\footnotemark[4]
+\item GOMP\_critical\_exit\footnotemark[4]
+\item GOMP\_atomic\_enter\footnotemark[4]
+\item GOMP\_atomic\_exit\footnotemark[4]
+\item GOMP\_task
+\item GOMP\_taskwait
+\end{itemize}
+
+\section{pthread}\label{sec:OpenMPruntimesinstrumented}
+
+These are the instrumented routines of the pthread runtime:
+
+\begin{itemize}
+\item pthread\_create
+\item pthread\_detach
+\item pthread\_join
+\item pthread\_barrier\_wait
+\item pthread\_mutex\_lock
+\item pthread\_mutex\_trylock
+\item pthread\_mutex\_timedlock
+\item pthread\_mutex\_unlock
+% pthread_cond_* routines seem to be not instrumentable. the application hangs when instrumenting them
+%\item pthread\_cond\_signal
+%\item pthread\_cond\_broadcast
+%\item pthread\_cond\_wait
+%\item pthread\_cond\_timedwait
+\item pthread\_rwlock\_rdlock
+\item pthread\_rwlock\_tryrdlock
+\item pthread\_rwlock\_timedrdlock
+\item pthread\_rwlock\_wrlock
+\item pthread\_rwlock\_trywrlock
+\item pthread\_rwlock\_timedwrlock
+\item pthread\_rwlock\_unlock
+\end{itemize}
+
+\section{CUDA}\label{sec:CUDAinstrumentedroutines}
+
+These are the instrumented CUDA routines in the \TRACE package:
+
+\begin{itemize}
+\item cudaLaunch
+\item cudaConfigureCall
+\item cudaThreadSynchronize
+\item cudaStreamCreate
+\item cudaStreamSynchronize
+\item cudaMemcpy
+\item cudaMemcpyAsync
+\item cudaDeviceReset
+\end{itemize}
+
+The CUDA accelerators do not have memory for the tracing buffers, so the tracing buffer resides in the host side.
+Typically, the CUDA tracing buffer is flushed at {\tt cudaThreadSynchronize}, {\tt cudaStreamSynchronize} and {\tt cudaMemcpy} calls, so it is possible that the tracing buffer for the device gets filled if no calls to this routines are executed.
+
+\section{OpenCL}\label{sec:OPENCLinstrumentedroutines}
+
+These are the instrumented OpenCL routines in the \TRACE package:
+
+\begin{itemize}
+\item clBuildProgram
+\item clCompileProgram
+\item clCreateBuffer
+\item clCreateCommandQueue
+\item clCreateContext
+\item clCreateContextFromType
+\item clCreateKernel
+\item clCreateKernelsInProgram
+\item clCreateProgramWithBinary
+\item clCreateProgramWithBuiltInKernels
+\item clCreateProgramWithSource
+\item clCreateSubBuffer
+\item clEnqueueBarrierWithWaitList
+\item clEnqueueCopyBuffer
+\item clEnqueueCopyBufferRect
+\item clEnqueueFillBuffer
+\item clEnqueueMarkerWithWaitList
+\item clEnqueueMapBuffer
+\item clEnqueueMigrateMemObjects
+\item clEnqueueNativeKernel
+\item clEnqueueNDRangeKernel
+\item clEnqueueReadBuffer
+\item clEnqueueReadBufferRect
+\item clEnqueueTask
+\item clEnqueueUnmapMemObject
+\item clEnqueueWriteBuffer
+\item clEnqueueWriteBufferRect
+\item clFinish
+\item clFlush
+\item clLinkProgram
+\item clSetKernelArg
+\item clWaitForEvents
+\end{itemize}
+
+The OpenCL accelerators have small amounts of memory, so the tracing buffer resides in the host side.
+Typically, the accelerator tracing buffer is flushed at each {\tt cl\_Finish} call, so it is possible that the tracing buffer for the accelerator gets filled if no calls to this routine are executed.
+However if the operated OpenCL command queue is tagged as not Out-of-Order, then flushes will also happen at {\tt clEnqueueReadBuffer}, {\tt clEnqueueReadBufferRect} and {\tt clEnqueueMapBuffer} if their corresponding blocking parameter is set to true.
+
+

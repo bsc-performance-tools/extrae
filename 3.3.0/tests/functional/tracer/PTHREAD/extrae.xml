@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<trace enabled="yes"
+ home="/home/harald/aplic/extrae/3.3.0rc"
+ initial-mode="detail"
+ type="paraver"
+ xml-parser-id="Id: xml-parse.c 3465 2015-10-19 10:14:17Z harald $"
+>
+
+  <pthread enabled="yes">
+    <counters enabled="no" />
+  </pthread>
+
+</trace>
