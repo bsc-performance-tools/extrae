@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 07Apr2016 Extrae version 3.3.0 final release
  * 07Apr2016 Added initial support for tracing of OMPT target devices (accelerators, FPGAs, etc)
  * 06Apr2016 Priorize the search for mpicc family of compilers under bin64 before bin
  * 29Mar2016 Fix trace.sh within DynInst examples (CUDA+MPI and MPI)
