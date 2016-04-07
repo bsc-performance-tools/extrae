@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 07Apr2016 Removed flag -shared from the lib_dyn_mpitracec_la_LDFLAGS and lib_dyn_mpitracef_la_LDFLAGS, which was set to tell libtool just to generate shared libs (no .a's), but this generated .so's with two dependencies to MRNet, one resolved and one unresolved.
  * 07Apr2016 Extrae version 3.3.0 final release
  * 07Apr2016 Added initial support for tracing of OMPT target devices (accelerators, FPGAs, etc)
  * 06Apr2016 Priorize the search for mpicc family of compilers under bin64 before bin

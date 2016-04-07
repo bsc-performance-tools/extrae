@@ -579,12 +579,12 @@ libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
 libnanosmpitrace_lb_la_LDFLAGS = $(libnanosmpitrace_la_LDFLAGS)
 libnanosmpitracef_lb_la_LDFLAGS = $(libnanosmpitracef_la_LDFLAGS)
 
-lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared
-lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS) -shared
-lib_dyn_ompitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) # inherits -shared
-lib_dyn_ompitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) # inherits -shared
-lib_dyn_cudampitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) # inherits -shared
-lib_dyn_cudampitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) # inherits -shared
+lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+lib_dyn_ompitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) 
+lib_dyn_ompitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) 
+lib_dyn_cudampitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) 
+lib_dyn_cudampitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) 
 
 ## -static tells libtool to generate ONLY the static library (we don't want
 ##   the libmpitracef.so because it don't preloads fine with programs)
