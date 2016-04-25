@@ -203,6 +203,9 @@ is something like `gnu-as' or `x' (for the X Window System).  The
 `README' should mention any `--enable-' and `--with-' options that the
 package recognizes.
 
+   For some packages the system-wide installation of the package may be 
+ignored by default but can be used by including `--with-XX=/usr'.
+
    For packages that use the X Window System, `configure' can usually
 find the X include and library files automatically, but if it doesn't,
 you can use the `configure' options `--x-includes=DIR' and

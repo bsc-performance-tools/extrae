@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 21Apr2016 Update m4 macro to look in lib/x86_64-linux-gnu (support Ubuntu)
  * 08Apr2016 Changed the default PAPI counters in LINUX examples to avoid errors with the latest versions of PAPI and PAPI_BR_MSP
  * 07Apr2016 Removed flag -shared from the lib_dyn_mpitracec_la_LDFLAGS and lib_dyn_mpitracef_la_LDFLAGS, which was set to tell libtool just to generate shared libs (no .a's), but this generated .so's with two dependencies to MRNet, one resolved and one unresolved.
  * 07Apr2016 Extrae version 3.3.0 final release

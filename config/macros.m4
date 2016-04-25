@@ -102,7 +102,7 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 		dnl Search for libs directory
 		AC_MSG_CHECKING([for $1 libraries directory])
 		if test "${ForcedLibs}" = "" ; then
-			for libs_dir in [$$1_HOME/lib$BITS $$1_HOME/lib "not found"] ; do
+			for libs_dir in [$$1_HOME/lib$BITS $$1_HOME/lib $$1_HOME/lib/x86_64-linux-gnu "not found"] ; do
 				if test -d "$libs_dir" ; then
 					break
 				fi
