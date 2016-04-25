@@ -21,9 +21,19 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef IO_WRAPPER_H_INCLUDED
-#define IO_WRAPPER_H_INCLUDED
+#ifndef __IO_WRAPPER_H__
+#define __IO_WRAPPER_H__
+
+#include "calltrace.h"
+
+#define TRACE_IO_CALLER_IS_ENABLED (Trace_Caller_Enabled[CALLER_IO])
+
+#define TRACE_IO_CALLER(evttime,offset)                \
+{                                                      \
+  if (TRACE_IO_CALLER_IS_ENABLED)                      \
+    Extrae_trace_callers (evttime, offset, CALLER_IO); \
+}
 
 void Extrae_iotrace_init (void);
 
-#endif /* IO_WRAPPER_H_INCLUDED */
+#endif /* __IO_WRAPPER_H__ */

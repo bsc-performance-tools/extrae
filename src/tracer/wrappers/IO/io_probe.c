@@ -38,69 +38,379 @@
 #include "trace_macros.h"
 #include "io_probe.h"
 
-static int trace_io = FALSE;
+/***********************************************************************************************\
+ * This file contains the probes to record the begin/end events for instrumented I/O routines. *
+ * As usual, the probes are separate for begin and end events to be able to be injected before *
+ * and after the call site or at the entry and exit points of the instrumented routine with    *
+ * Dyninst. Despite the support, the I/O calls are not intercepted with Dyninst at the moment. *
+\***********************************************************************************************/
 
-void Extrae_set_trace_io (int b)
-{ trace_io = b; }
+/* Global variable to control whether the tracing for I/O calls is enabled */
+static int trace_io_enabled = FALSE;
 
+/** 
+ * Extrae_set_trace_io
+ * 
+ * \param enable Set the tracing for I/O calls enabled or disabled.
+ */
+void Extrae_set_trace_io (int enable)
+{
+  trace_io_enabled = enable; 
+}
+
+/** 
+ * Extrae_get_trace_io_status
+ *
+ * \return true if the tracing for I/O calls is enabled; false otherwise.
+ */
 int Extrae_get_trace_io (void)
-{ return trace_io; }
+{ 
+  return trace_io_enabled; 
+}
 
+/** 
+ * Extrae_get_descriptor_type
+ * 
+ * \param fd A file descriptor
+ * \return whether fd is an open file descriptor referring to a terminal, a regular file, a socket or a FIFO pipe.
+ */
 static unsigned Extrae_get_descriptor_type (int fd)
 {
-	if (isatty(fd))
-	{
-		return DESCRIPTOR_TYPE_ATTY;
-	}
-	else
-	{
-		struct stat buf;
-		fstat (fd, &buf);
-		if (S_ISREG(buf.st_mode))
-			return DESCRIPTOR_TYPE_REGULARFILE;
-		else if (S_ISSOCK(buf.st_mode))
-			return DESCRIPTOR_TYPE_SOCKET;
-		else if (S_ISFIFO(buf.st_mode))
-			return DESCRIPTOR_TYPE_FIFO_PIPE;
-		else
-			return DESCRIPTOR_TYPE_UNKNOWN;
-	}
+  if (isatty(fd))
+  {
+    return DESCRIPTOR_TYPE_ATTY;
+  }
+  else
+  {
+    struct stat buf;
+
+    fstat (fd, &buf);
+    if (S_ISREG(buf.st_mode))
+    {
+      return DESCRIPTOR_TYPE_REGULARFILE;
+    }
+    else if (S_ISSOCK(buf.st_mode))
+    {
+      return DESCRIPTOR_TYPE_SOCKET;
+    }
+    else if (S_ISFIFO(buf.st_mode))
+    {
+      return DESCRIPTOR_TYPE_FIFO_PIPE;
+    }
+    else
+    {
+      return DESCRIPTOR_TYPE_UNKNOWN; 
+    }
+  }
 }
 
-void Probe_IO_write_Entry (int f, size_t s)
+/**
+ * Probe_IO_read_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'read' 
+ * \param fd A file descriptor
+ * \param size The number of bytes read
+ */
+void Probe_IO_read_Entry (int fd, ssize_t size)
 {
-	if (mpitrace_on && trace_io)
-	{
-		unsigned type = Extrae_get_descriptor_type (f);
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, WRITE_EV, EVT_BEGIN, f);
-		TRACE_MISCEVENT(LAST_READ_TIME, WRITE_EV, EVT_BEGIN+1, s);
-		TRACE_MISCEVENT(LAST_READ_TIME, WRITE_EV, EVT_BEGIN+2, type);
-	}
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, READ_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, READ_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, READ_EV, EVT_BEGIN+2, type);
+  }
 }
 
-void Probe_IO_write_Exit (void)
-{
-	if (mpitrace_on && trace_io)
-	{
-		TRACE_MISCEVENTANDCOUNTERS(TIME, WRITE_EV, EVT_END, EMPTY);
-	}
-}
-
-void Probe_IO_read_Entry (int f, size_t s)
-{
-	if (mpitrace_on && trace_io)
-	{
-		unsigned type = Extrae_get_descriptor_type (f);
-		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, READ_EV, EVT_BEGIN, f);
-		TRACE_MISCEVENT(LAST_READ_TIME, READ_EV, EVT_BEGIN+1, s);
-		TRACE_MISCEVENT(LAST_READ_TIME, READ_EV, EVT_BEGIN+2, type);
-	}
-}
-
+/**
+ * Probe_IO_read_Exit
+ *
+ * Probe injected at the end of the I/O call 'read' 
+ */
 void Probe_IO_read_Exit (void)
 {
-	if (mpitrace_on && trace_io)
-	{
-		TRACE_MISCEVENTANDCOUNTERS(TIME, READ_EV, EVT_END, EMPTY);
-	}
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, READ_EV, EVT_END, EMPTY);
+  }
 }
+
+/**
+ * Probe_IO_write_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'write' 
+ * \param fd A file descriptor
+ * \param size The number of bytes written
+ */
+void Probe_IO_write_Entry (int fd, ssize_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, WRITE_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, WRITE_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, WRITE_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_write_Exit
+ *
+ * Probe injected at the end of the I/O call 'write' 
+ */
+void Probe_IO_write_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, WRITE_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_fread_Entry 
+ * 
+ * Probe injected at the beginning of the I/O call 'fread'
+ * \param fd A file descriptor
+ * \param size The number of bytes read
+ */
+void Probe_IO_fread_Entry (int fd, size_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, FREAD_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, FREAD_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, FREAD_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_fread_Exit
+ *
+ * Probe injected at the end of the I/O call 'fread' 
+ */
+void Probe_IO_fread_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, FREAD_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_fwrite_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'fwrite' 
+ * \param fd A file descriptor
+ * \param size The number of bytes written
+ */
+void Probe_IO_fwrite_Entry (int fd, size_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, FWRITE_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, FWRITE_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, FWRITE_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_fwrite_Exit
+ *
+ * Probe injected at the end of the I/O call 'fwrite' 
+ */
+void Probe_IO_fwrite_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, FWRITE_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_pread_Entry 
+ * 
+ * Probe injected at the beginning of the I/O call 'pread'
+ * \param fd A file descriptor
+ * \param size The number of bytes read
+ */
+void Probe_IO_pread_Entry (int fd, ssize_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, PREAD_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, PREAD_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, PREAD_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_pread_Exit
+ *
+ * Probe injected at the end of the I/O call 'pread' 
+ */
+void Probe_IO_pread_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, PREAD_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_pwrite_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'pwrite' 
+ * \param fd A file descriptor
+ * \param size The number of bytes written
+ */
+void Probe_IO_pwrite_Entry (int fd, ssize_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, PWRITE_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, PWRITE_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, PWRITE_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_pwrite_Exit
+ *
+ * Probe injected at the end of the I/O call 'pwrite' 
+ */
+void Probe_IO_pwrite_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, PWRITE_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_readv_Entry 
+ * 
+ * Probe injected at the beginning of the I/O call 'readv'
+ * \param fd A file descriptor
+ * \param size The number of bytes read
+ */
+void Probe_IO_readv_Entry (int fd, ssize_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, READV_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, READV_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, READV_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_readv_Exit
+ *
+ * Probe injected at the end of the I/O call 'readv' 
+ */
+void Probe_IO_readv_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, READV_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_writev_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'writev' 
+ * \param fd A file descriptor
+ * \param size The number of bytes written
+ */
+void Probe_IO_writev_Entry (int fd, ssize_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, WRITEV_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, WRITEV_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, WRITEV_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_writev_Exit
+ *
+ * Probe injected at the end of the I/O call 'writev' 
+ */
+void Probe_IO_writev_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, WRITEV_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_preadv_Entry 
+ * 
+ * Probe injected at the beginning of the I/O call 'preadv'
+ * \param fd A file descriptor
+ * \param size The number of bytes read
+ */
+void Probe_IO_preadv_Entry (int fd, ssize_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, PREAD_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, PREAD_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, PREAD_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_preadv_Exit
+ *
+ * Probe injected at the end of the I/O call 'preadv' 
+ */
+void Probe_IO_preadv_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, PREAD_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_pwritev_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'pwritev' 
+ * \param fd A file descriptor
+ * \param size The number of bytes written
+ */
+void Probe_IO_pwritev_Entry (int fd, ssize_t size)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, PWRITEV_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, PWRITEV_EV, EVT_BEGIN+1, size);
+    TRACE_MISCEVENT(LAST_READ_TIME, PWRITEV_EV, EVT_BEGIN+2, type);
+  }
+}
+
+/**
+ * Probe_IO_pwritev_Exit
+ *
+ * Probe injected at the end of the I/O call 'pwritev' 
+ */
+void Probe_IO_pwritev_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, PWRITEV_EV, EVT_END, EMPTY);
+  }
+}
+

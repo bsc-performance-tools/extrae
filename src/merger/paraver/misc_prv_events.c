@@ -193,6 +193,14 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
 		fprintf (fd, "%d      %s\n", READ_VAL_EV, READ_LBL);
 		fprintf (fd, "%d      %s\n", WRITE_VAL_EV, WRITE_LBL);
+		fprintf (fd, "%d      %s\n", FREAD_VAL_EV, FREAD_LBL);
+		fprintf (fd, "%d      %s\n", FWRITE_VAL_EV, FWRITE_LBL);
+		fprintf (fd, "%d      %s\n", PREAD_VAL_EV, PREAD_LBL);
+		fprintf (fd, "%d      %s\n", PWRITE_VAL_EV, PWRITE_LBL);
+		fprintf (fd, "%d      %s\n", READV_VAL_EV, READV_LBL);
+		fprintf (fd, "%d      %s\n", WRITEV_VAL_EV, WRITEV_LBL);
+		fprintf (fd, "%d      %s\n", PREADV_VAL_EV, PREADV_LBL);
+		fprintf (fd, "%d      %s\n", PWRITEV_VAL_EV, PWRITEV_LBL);
 		LET_SPACES (fd);
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_SIZE_EV, IO_SIZE_LBL);

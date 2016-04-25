@@ -72,8 +72,9 @@ unsigned IsMPI (unsigned EvType)
 /******************************************************************************
  ***  IsMISC
  ******************************************************************************/
-#define MISC_EVENTS 42
-static unsigned misc_events[] = {FLUSH_EV, READ_EV, WRITE_EV, APPL_EV, USER_EV,
+#define MISC_EVENTS 50
+static unsigned misc_events[] = {FLUSH_EV, READ_EV, WRITE_EV, FREAD_EV, FWRITE_EV, 
+        PREAD_EV, PWRITE_EV, READV_EV, WRITEV_EV, PREADV_EV, PWRITEV_EV, APPL_EV, USER_EV,
 	HWC_DEF_EV, HWC_CHANGE_EV, HWC_EV, TRACING_EV, SET_TRACE_EV, CALLER_EV,
 	CPU_BURST_EV, RUSAGE_EV, MEMUSAGE_EV, MPI_STATS_EV, USRFUNC_EV,
 	SAMPLING_EV, SAMPLING_ADDRESS_LD_EV, SAMPLING_ADDRESS_ST_EV,

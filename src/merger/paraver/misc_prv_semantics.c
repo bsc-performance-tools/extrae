@@ -129,24 +129,58 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 
 	if (EvValue != EVT_END)
 	{
+		int io_type;
+
 		switch (Get_EvValue(event))
 		{
 			case EVT_BEGIN:
-			trace_paraver_event (cpu, ptask, task, thread, time, IO_EV,
-		  	  EvType==READ_EV?READ_VAL_EV:WRITE_VAL_EV);
-			trace_paraver_event (cpu, ptask, task, thread, time,
-			  IO_DESCRIPTOR_EV, EvParam);
-			break;
+				switch(EvType)
+				{
+					case READ_EV:
+						io_type = READ_VAL_EV;
+						break;
+					case WRITE_EV:
+						io_type = WRITE_VAL_EV;
+						break;
+					case FREAD_EV:
+						io_type = FREAD_VAL_EV;
+						break;
+					case FWRITE_EV:
+						io_type = FWRITE_VAL_EV;
+						break;
+					case PREAD_EV:
+						io_type = PREAD_VAL_EV;
+						break;
+					case PWRITE_EV:
+						io_type = PWRITE_VAL_EV;
+						break;
+					case READV_EV:
+						io_type = READV_VAL_EV;
+						break;
+					case WRITEV_EV:
+						io_type = WRITEV_VAL_EV;
+						break;
+					case PREADV_EV:
+						io_type = PREADV_VAL_EV;
+						break;
+					case PWRITEV_EV:
+						io_type = PWRITE_VAL_EV;
+						break;
+					default:
+						io_type = 0;
+						break;
+				}
+				trace_paraver_event (cpu, ptask, task, thread, time, IO_EV, io_type);
+				trace_paraver_event (cpu, ptask, task, thread, time, IO_DESCRIPTOR_EV, EvParam);
+				break;
 			case EVT_BEGIN+1:
-			trace_paraver_event (cpu, ptask, task, thread, time, IO_SIZE_EV,
-			  EvParam);
-			break;
+				trace_paraver_event (cpu, ptask, task, thread, time, IO_SIZE_EV, EvParam);
+				break;
 			case EVT_BEGIN+2:
-			trace_paraver_event (cpu, ptask, task, thread, time,
-			  IO_DESCRIPTOR_TYPE_EV, EvParam);
-			break;
+				trace_paraver_event (cpu, ptask, task, thread, time, IO_DESCRIPTOR_TYPE_EV, EvParam);
+				break;
 			default:
-			break;
+				break;
 		}
 	}
 	else
@@ -1596,6 +1630,14 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
 	{ READ_EV, ReadWrite_Event },
 	{ WRITE_EV, ReadWrite_Event },
+	{ FREAD_EV, ReadWrite_Event },
+	{ FWRITE_EV, ReadWrite_Event },
+	{ PREAD_EV, ReadWrite_Event },
+	{ PWRITE_EV, ReadWrite_Event },
+	{ READV_EV, ReadWrite_Event },
+	{ PREADV_EV, ReadWrite_Event },
+	{ WRITEV_EV, ReadWrite_Event },
+	{ PWRITEV_EV, ReadWrite_Event },
 	{ APPL_EV, Appl_Event },
 	{ TRACE_INIT_EV, InitTracing_Event },
 	{ USER_EV, User_Event },

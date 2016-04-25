@@ -93,6 +93,14 @@ unsigned IsMPICollective (unsigned EvType);
 #define WRITE_EV                 40000005
 #define READ_VAL_EV                     1 /* Used in merger, with IO_EV */
 #define WRITE_VAL_EV                    2 /* Used in merger, with IO_EV */
+#define FREAD_VAL_EV                    3 /* Used in merger, with IO_EV */
+#define FWRITE_VAL_EV                   4 /* Used in merger, with IO_EV */
+#define PREAD_VAL_EV                    5 /* Used in merger, with IO_EV */
+#define PWRITE_VAL_EV                   6 /* Used in merger, with IO_EV */
+#define READV_VAL_EV                    7 /* Used in merger, with IO_EV */
+#define WRITEV_VAL_EV                   8 /* Used in merger, with IO_EV */
+#define PREADV_VAL_EV                   9 /* Used in merger, with IO_EV */
+#define PWRITEV_VAL_EV                 10 /* Used in merger, with IO_EV */
 #define USER_EV                  40000006
 #define HWC_DEF_EV               40000007
 #define HWC_CHANGE_EV            40000008
@@ -136,6 +144,14 @@ unsigned IsMPICollective (unsigned EvType);
 #define DYNAMIC_MEM_POINTER_IN_EV          DYNAMIC_MEM_EV+2  /* Used in merger only, free input, realloc in */
 #define DYNAMIC_MEM_POINTER_OUT_EV         DYNAMIC_MEM_EV+3  /* Used in merger only, malloc output, calloc output, realloc out */
 #define CLOCK_FROM_SYSTEM_EV     40000050
+#define FREAD_EV                 40000051
+#define FWRITE_EV                40000052
+#define PREAD_EV                 40000053
+#define PWRITE_EV                40000054
+#define READV_EV                 40000055
+#define WRITEV_EV                40000056
+#define PREADV_EV                40000057
+#define PWRITEV_EV               40000058
 
 #define ADDRESSES_FOR_BINARY_EV  41000000
 

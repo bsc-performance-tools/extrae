@@ -246,10 +246,34 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define STATE23_LBL          "Distributed locking"
 #define STATE23_COLOR        {   0,  41,   0 }
 
+#define STATE_24             24 
+#define STATE_24_LBL         "Overhead"
+#define STATE_24_COLOR       { 139, 121, 177 }
+
+#define STATE_25             25 
+#define STATE_25_LBL         "One-sided op"
+#define STATE_25_COLOR       { 116, 116, 116 }
+
+#define STATE_26             26 
+#define STATE_26_LBL         "Startup latency"
+#define STATE_26_COLOR       { 200,  50,  89 }
+
+#define STATE_27             27 
+#define STATE_27_LBL         "Waiting links"
+#define STATE_27_COLOR       { 255, 171,  98 }
+
+#define STATE_28             28 
+#define STATE_28_LBL         "Data copy"
+#define STATE_28_COLOR       {   0,  68, 189 }
+
+#define STATE_29             29 
+#define STATE_29_LBL         "RTT"
+#define STATE_29_COLOR       {  52,  43,   0 }
+
 #define STATES_LBL           "STATES"
 #define STATES_COLOR_LBL     "STATES_COLOR"
 
-#define STATES_NUMBER        24
+#define STATES_NUMBER        30
 extern struct color_t states_inf[STATES_NUMBER];
 
 /******************************************************************************
