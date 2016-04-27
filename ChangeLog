@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 27Apr2016 Add support for IBM Platform MPI
  * 27Apr2016 Bug fixes in the instrumentation of OMPT target devices
  + 25Apr2016 Added instrumentation for the following IO calls: fread, fwrite, pread, pwrite, readv, writev, preadv, pwritev
  * 21Apr2016 Update m4 macro to look in lib/x86_64-linux-gnu (support Ubuntu)
