@@ -47,6 +47,7 @@
 # undef __USE_GNU
 #endif
 
+#include "misc_interface.h"
 #include "misc_wrapper.h"
 #include "wrapper.h"
 #include "threadid.h"
@@ -54,6 +55,7 @@
 #include "omp_probe.h"
 #include "omp-common.h"
 #include "ompt-helper.h"
+#include "ompt-target.h"
 
 
 // # define EMPTY_OMPT_CALLBACKS /* For Benchmarking purposes */
@@ -77,6 +79,8 @@ typedef struct omptthid_threadid_st
 static omptthid_threadid_t *ompt_thids = NULL;
 static unsigned n_ompt_thids = 0;
 static pthread_mutex_t mutex_thids = PTHREAD_MUTEX_INITIALIZER;
+
+static int ompt_targets_initialized = 0;
 
 /* Extrae_OMPT_register_ompt_thread_id
    registers a OMPT thread ompt_thread_id_t and assign it a Paraver thread with
@@ -1065,6 +1069,8 @@ void ompt_initialize(
 
 	UNREFERENCED_PARAMETER(ompt_version);
 
+	Extrae_init();
+
 #if defined(DEBUG) 
 	printf("OMPT IS INITIALIZING: lookup functions with runtime version %s and ompt version %d\n",
 	  runtime_version_string, ompt_version);
@@ -1151,11 +1157,28 @@ void ompt_initialize(
 	Extrae_set_threadid_function (Extrae_OMPT_threadid);
 
 
-	/* This point starts support for OMPT accelerators. At this moment of the SPEC, we assume there's only 1 accelerator */
-	ompt_target_initialize(lookup);
+	/* This point starts support for OMPT accelerators. */
+	ompt_targets_initialized = ompt_target_initialize(lookup);
 		
 	UNREFERENCED_PARAMETER(r);
 }
+
+/**
+ * ompt_finalize
+ *
+ * Called from Backend_Finalize when there's support for OpenMP and OMPT enabled to 
+ * make the final flush of the devices' buffers. The finalization has to be started 
+ * by Extrae, because when the OmpSs/OMPT runtime finalizes, Extrae has already closed, 
+ * and it is too late to flush the buffers.
+ */
+void ompt_finalize()
+{
+  /* Check whether the tracing for devices has been enabled */
+  if (ompt_targets_initialized) 
+  {
+    ompt_target_finalize();
+  }
+} 
 
 ompt_initialize_fn_t ompt_tool (void)
 {

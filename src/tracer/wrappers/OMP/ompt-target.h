@@ -37,6 +37,8 @@ typedef struct
   long long latency;                  // Latency that has to be applied to the timestamps of the records produced by this device
 } extrae_device_info_t;
 
-void ompt_target_initialize(ompt_function_lookup_t lookup);
+int ompt_target_initialize(ompt_function_lookup_t lookup);
+
+void ompt_target_finalize();
 
 #endif /* __OMPT_TARGET_H__ */

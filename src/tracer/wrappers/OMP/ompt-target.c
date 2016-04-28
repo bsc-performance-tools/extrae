@@ -257,8 +257,9 @@ void Extrae_ompt_target_buffer_complete( int device_id,
  * so the tracing of the OMPT devices is started right after activating the tracing for the host.
  *
  * \param lookup The lookup pointer used to retrieve the OMPT API functions.
+ * \return 1 if the initializations were successful; 0 otherwise.
  */
-void ompt_target_initialize(ompt_function_lookup_t lookup)
+int ompt_target_initialize(ompt_function_lookup_t lookup)
 {
   int device_id = 0;
 
@@ -316,7 +317,7 @@ void ompt_target_initialize(ompt_function_lookup_t lookup)
     current_device_time_raw = ompt_target_get_time_fn( device_ptr );
     current_host_time       = Clock_getCurrentTime_nstore();
     current_device_time     = ompt_target_translate_time_fn (device_ptr, current_device_time_raw);
-    latency                 = (long long)current_device_time - (long long)current_host_time;
+    latency                 = (long long)current_host_time - (long long)current_device_time;
 #if defined(DEBUG)
     fprintf(stderr, "[DEBUG] device_id=%d device_name=%s host_time=%llu device_time=%lf host_time_casted=%lld device_time_casted=%lld latency=%lld\n",
       device_id, device_name, current_host_time, current_device_time, (long long)current_host_time, (long long)current_device_time, latency);
@@ -368,4 +369,38 @@ void ompt_target_initialize(ompt_function_lookup_t lookup)
 
   } /* End of the loop that iterates through all the devices */
 
+  return 1;
 }
+
+
+/** 
+ * ompt_target_finalize
+ * 
+ * Calls to ompt_target_stop_trace for each target device, which makes an
+ * implicit request to flush their buffers if they have any events left.
+ */
+void ompt_target_finalize()
+{
+  int i = 0;
+
+  /* Declare a function pointers to the OMPT API function ompt_target_stop_trace */
+  int (*ompt_target_stop_trace_fn)(ompt_target_device_t *) = NULL;
+
+  /* Iterate through the devices */
+  for (i = 0; i < ompt_get_num_devices_fn(); i ++)
+  {
+    ompt_target_device_t  *device_ptr = NULL;
+    ompt_function_lookup_t device_lookup;
+  
+    /* Retrieve the device and its lookup */
+    device_ptr    = List_of_Devices[i].device_ptr;
+    device_lookup = List_of_Devices[i].lookup;
+      
+    /* Retrieve the ompt_target_stop_trace API function through the device lookup */
+    ompt_target_stop_trace_fn = (int(*)(ompt_target_device_t *)) device_lookup("ompt_target_stop_trace");
+
+    /* Make the implicit request to flush the device's buffers */
+    ompt_target_stop_trace_fn( device_ptr );
+  }
+}
+

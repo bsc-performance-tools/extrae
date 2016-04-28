@@ -109,6 +109,9 @@
 #if defined(OMP_SUPPORT)
 # include "omp_probe.h"
 # include "omp_wrapper.h"
+# if defined(OMPT_INSTRUMENTATION)
+#  include "ompt-wrapper.h"
+# endif
 #endif
 #include "trace_buffers.h"
 #include "timesync.h"
@@ -2232,6 +2235,10 @@ void Backend_Finalize (void)
 
 #if defined(OPENCL_SUPPORT)
 	Extrae_OpenCL_fini ();
+#endif
+
+#if defined(OMP_SUPPORT) && defined(OMPT_INSTRUMENTATION)
+        ompt_finalize ();
 #endif
 
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))
