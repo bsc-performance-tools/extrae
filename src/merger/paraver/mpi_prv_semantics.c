@@ -100,6 +100,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_INTERCOMM_MERGE_EV:
 		case MPI_WIN_POST_EV:
 		case MPI_WIN_COMPLETE_EV:
+		case MPI_WIN_CREATE_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:

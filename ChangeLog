@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 04May2016 Added the missing case MPI_WIN_CREATE_EV in the Get_State function 
  * 29Apr2016 Added check for POE environments in the launcher of the online_root 
  + 28Apr2016 Added tracing finalization mechanism for the OMPT target devices, started by Extrae at Backend_Finalization using calls to ompt_target_stop_trace.
  + 27Apr2016 Add support for IBM Platform MPI
