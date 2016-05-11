@@ -16,35 +16,7 @@ AC_INIT(Extrae, 3.3.0, tools@bsc.es)
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
 
-SVN=`which svn 2> /dev/null`
-
-# If SVN command exists and .svn directory also exists, check for the versioning
-if test $? -eq 0 -a -d .svn ; then
-	${SVN} info . >& /dev/null
-	if test $? -eq 0 ; then
-		SVN_branch=`${SVN} info . | grep URL | cut -d/ -f 6-`
-		SVN_branch_res=$?
-		SVN_revision=`${SVN} info . | grep "Last Changed Rev:"  | cut -d: -f 2`
-		SVN_revision_res=$?
-		if test ${SVN_branch_res} -eq 0 -a ${SVN_revision_res} -eq 0 ; then
-			echo ${SVN_branch} > SVN-branch
-			echo ${SVN_revision} > SVN-revision
-		fi
-	fi
-fi
-
-TOPDIR=`dirname ${0}`
-if test -f ${TOPDIR}/SVN-branch -a -f ${TOPDIR}/SVN-revision ; then
-	SVN_branch=`cat ${TOPDIR}/SVN-branch`
-	SVN_revision=`cat ${TOPDIR}/SVN-revision`
-else
-	SVN_branch=unknown
-	SVN_revision=0
-fi
-echo Configuring package ${PACKAGE_STRING} based on ${SVN_branch} revision ${SVN_revision}
-
-AC_DEFINE_UNQUOTED([EXTRAE_SVN_REVISION], [${SVN_revision}], [Define SVN version for this Extrae])
-AC_DEFINE_UNQUOTED([EXTRAE_SVN_BRANCH], ["${SVN_branch}"], [Define SVN branch for this Extrae])
+echo Configuring package ${PACKAGE_STRING}
 
 # Loads some shell variables like host_cpu and host_os, to get the host information 
 AC_CANONICAL_SYSTEM

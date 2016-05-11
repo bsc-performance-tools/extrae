@@ -1272,8 +1272,7 @@ int merger_post (int numtasks, int taskid)
 	struct Pair_NodeCPU *NodeCPUinfo;
 
 	if (taskid == 0)
-		fprintf (stdout, "merger: "PACKAGE_STRING" (revision %d based on %s)\n",
-		  EXTRAE_SVN_REVISION, EXTRAE_SVN_BRANCH);
+		fprintf (stdout, "merger: %s\n", PACKAGE_STRING);
 
 	if (0 == nTraces)
 	{

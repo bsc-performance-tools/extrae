@@ -23,8 +23,6 @@ SHscripts:
 	echo "export EXTRAE_CFLAGS=\"${CFLAGS}\"" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CXX=${CXX}" >> $(SH_SCRIPT)
 	echo "export EXTRAE_CXXFLAGS=\"${CXXFLAGS}\"" >> $(SH_SCRIPT)
-	echo "export EXTRAE_SVN_REVISION=`cat ../SVN-revision`" >> $(SH_SCRIPT)
-	echo "export EXTRAE_SVN_BRANCH=`cat ../SVN-branch`" >> $(SH_SCRIPT)
 if HAVE_ONLINE
 	echo "export EXTRAE_ONLINE_SOURCES=$(DESTDIR)$(sysconfdir)/extrae_online.sh" >> $(SH_SCRIPT)
 endif

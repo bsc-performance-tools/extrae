@@ -372,8 +372,7 @@ int main (int argc, char *argv[])
 	/* Don't check recursion in snippets */
 	bpatch->setTrampRecursive (true);
 
-	cout << "Welcome to " << PACKAGE_STRING  << " revision " << EXTRAE_SVN_REVISION
-	  << " based on " << EXTRAE_SVN_BRANCH << " launcher using DynInst "
+	cout << "Welcome to " << PACKAGE_STRING << " launcher using DynInst "
 	  << DYNINST_MAJOR << "." << DYNINST_MINOR << "." << DYNINST_SUBMINOR << endl;
 
 	int i = 1;

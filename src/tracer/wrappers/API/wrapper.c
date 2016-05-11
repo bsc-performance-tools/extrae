@@ -1561,7 +1561,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	else
 	{
 		if (me == 0 && !forked)
-			fprintf (stdout, "Welcome to "PACKAGE_STRING" (revision %d based on %s)\n", EXTRAE_SVN_REVISION, EXTRAE_SVN_BRANCH);
+			fprintf (stdout, "Welcome to %s\n", PACKAGE_STRING);
 	}
 
 	/* Allocate a bitmap to know which tasks are tracing */

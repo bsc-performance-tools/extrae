@@ -35,8 +35,6 @@ if test "${EXTRAE_HOME}" != "" ; then
 	fi
 
 	echo
-	echo Extrae SVN branch ${EXTRAE_SVN_BRANCH} at revision ${EXTRAE_SVN_REVISION}
-	echo
 
 	echo ${PACKAGE_NAME} was configured with:
 	echo ${CONFIGURE_LINE}

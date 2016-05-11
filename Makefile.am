@@ -10,9 +10,7 @@ EXTRA_DIST = \
   example \
   INSTALL-examples \
   substitute \
-  substitute-all \
-  SVN-branch \
-  SVN-revision
+  substitute-all
 
 VPATH=@srcdir@
 SRCDIR=@srcdir@

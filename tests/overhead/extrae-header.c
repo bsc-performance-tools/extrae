@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
 	UNREFERENCED_PARAMETER(argv);
 	char *cpuinfo;
 
-	printf (PACKAGE_STRING" SVN revision %d based on " EXTRAE_SVN_BRANCH"\n", EXTRAE_SVN_REVISION);
+	printf ("%s\n", PACKAGE_STRING);
 	cpuinfo = search_in_cpu_info ("model name");
 	if (cpuinfo == NULL)
 		cpuinfo = search_in_cpu_info ("Processor");
