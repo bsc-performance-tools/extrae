@@ -164,7 +164,7 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 						io_type = PREADV_VAL_EV;
 						break;
 					case PWRITEV_EV:
-						io_type = PWRITE_VAL_EV;
+						io_type = PWRITEV_VAL_EV;
 						break;
 					default:
 						io_type = 0;

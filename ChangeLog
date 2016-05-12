@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 12May2016 Added wrappers to instrument both 32 and 64-bit I/O calls preadv, pwritev, preadv64, pwritev64
  * 11May2016 Remove SVN revision and branch check and creation of SVN-branch and
              SVN-revision files
  * 04May2016 Added the missing case MPI_WIN_CREATE_EV in the Get_State function 

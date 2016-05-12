@@ -23,6 +23,22 @@
 
 #include "common.h"
 
+/*
+ * __USE_FILE_OFFSET64
+ * 
+ * Extrae is compiled by default with this flag to support large files. 
+ * When defined, some I/O calls such as preadv, pwritev... are renamed 
+ * automatically by the compiler to their 64-bit versions preadv64, pwritev64... 
+ * 
+ * This file needs to be compiled without this flag in order to be able to 
+ * write both wrappers without the compiler changing their names automatically 
+ * from the 32-bit version into the 64-bit. 
+ *
+ */
+#ifdef __USE_FILE_OFFSET64
+# undef __USE_FILE_OFFSET64
+#endif
+
 #if HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -58,19 +74,21 @@
 \***************************************************************************************/
 
 /* Global pointers to the real implementation of the OS I/O calls */
-static ssize_t (*real_read)(int fd, void *buf, size_t count)                              = NULL;
-static ssize_t (*real_write)(int fd, const void *buf, size_t count)                       = NULL;
+static ssize_t (*real_read)(int fd, void *buf, size_t count)                                    = NULL;
+static ssize_t (*real_write)(int fd, const void *buf, size_t count)                             = NULL;
 
-static size_t  (*real_fread)(void *ptr, size_t size, size_t nmemb, FILE *stream)          = NULL;
-static size_t  (*real_fwrite)(const void *ptr, size_t size, size_t nmemb, FILE *stream)   = NULL;
+static size_t  (*real_fread)(void *ptr, size_t size, size_t nmemb, FILE *stream)                = NULL;
+static size_t  (*real_fwrite)(const void *ptr, size_t size, size_t nmemb, FILE *stream)         = NULL;
 
-static ssize_t (*real_pread)(int fd, void *buf, size_t count, off_t offset)               = NULL;
-static ssize_t (*real_pwrite)(int fd, const void *buf, size_t count, off_t offset)        = NULL;
+static ssize_t (*real_pread)(int fd, void *buf, size_t count, off_t offset)                     = NULL;
+static ssize_t (*real_pwrite)(int fd, const void *buf, size_t count, off_t offset)              = NULL;
 
-static ssize_t (*real_readv)(int fd, const struct iovec *iov, int iovcnt)                 = NULL;
-static ssize_t (*real_writev)(int fd, const struct iovec *iov, int iovcnt)                = NULL;
-static ssize_t (*real_preadv)(int fd, const struct iovec *iov, int iovcnt, off_t offset)  = NULL;
-static ssize_t (*real_pwritev)(int fd, const struct iovec *iov, int iovcnt, off_t offset) = NULL;
+static ssize_t (*real_readv)(int fd, const struct iovec *iov, int iovcnt)                       = NULL;
+static ssize_t (*real_writev)(int fd, const struct iovec *iov, int iovcnt)                      = NULL;
+static ssize_t (*real_preadv)(int fd, const struct iovec *iov, int iovcnt, off_t offset)        = NULL;
+static ssize_t (*real_preadv64)(int fd, const struct iovec *iov, int iovcnt, off_t offset)      = NULL;
+static ssize_t (*real_pwritev)(int fd, const struct iovec *iov, int iovcnt, off_t offset)       = NULL;
+static ssize_t (*real_pwritev64)(int fd, const struct iovec *iov, int iovcnt, __off64_t offset) = NULL;
 
 /** 
  * Extrae_iotrace_init
@@ -88,19 +106,37 @@ void Extrae_iotrace_init (void)
    * after the current library. Not finding any of the symbols doesn't throw an error 
    * unless the application tries to use it later. 
    */
-  real_read    = (ssize_t(*)(int, void*, size_t)) dlsym (RTLD_NEXT, "read");
-  real_write   = (ssize_t(*)(int, const void*, size_t)) dlsym (RTLD_NEXT, "write");
+  real_read      = (ssize_t(*)(int, void*, size_t)) dlsym (RTLD_NEXT, "read");
+  real_write     = (ssize_t(*)(int, const void*, size_t)) dlsym (RTLD_NEXT, "write");
 
-  real_fread   = (size_t(*)(void *, size_t, size_t, FILE *)) dlsym (RTLD_NEXT, "fread");
-  real_fwrite  = (size_t(*)(const void *, size_t, size_t, FILE *)) dlsym (RTLD_NEXT, "fwrite");
+  real_fread     = (size_t(*)(void *, size_t, size_t, FILE *)) dlsym (RTLD_NEXT, "fread");
+  real_fwrite    = (size_t(*)(const void *, size_t, size_t, FILE *)) dlsym (RTLD_NEXT, "fwrite");
 
-  real_pread   = (ssize_t(*)(int fd, void *buf, size_t count, off_t offset)) dlsym (RTLD_NEXT, "pread");
-  real_pwrite  = (ssize_t(*)(int fd, const void *buf, size_t count, off_t offset)) dlsym (RTLD_NEXT, "pwrite");
+  real_pread     = (ssize_t(*)(int fd, void *buf, size_t count, off_t offset)) dlsym (RTLD_NEXT, "pread");
+  real_pwrite    = (ssize_t(*)(int fd, const void *buf, size_t count, off_t offset)) dlsym (RTLD_NEXT, "pwrite");
 
-  real_readv   = (ssize_t(*)(int, const struct iovec *, int)) dlsym (RTLD_NEXT, "readv");
-  real_writev  = (ssize_t(*)(int, const struct iovec *, int)) dlsym (RTLD_NEXT, "writev");
-  real_preadv  = (ssize_t(*)(int, const struct iovec *, int, off_t)) dlsym (RTLD_NEXT, "preadv");
-  real_pwritev = (ssize_t(*)(int, const struct iovec *, int, off_t)) dlsym (RTLD_NEXT, "pwritev");
+  real_readv     = (ssize_t(*)(int, const struct iovec *, int)) dlsym (RTLD_NEXT, "readv");
+  real_writev    = (ssize_t(*)(int, const struct iovec *, int)) dlsym (RTLD_NEXT, "writev");
+  real_preadv    = (ssize_t(*)(int, const struct iovec *, int, off_t)) dlsym (RTLD_NEXT, "preadv");
+  real_preadv64  = (ssize_t(*)(int, const struct iovec *, int, __off64_t)) dlsym (RTLD_NEXT, "preadv64");
+  real_pwritev   = (ssize_t(*)(int, const struct iovec *, int, off_t)) dlsym (RTLD_NEXT, "pwritev");
+  real_pwritev64 = (ssize_t(*)(int, const struct iovec *, int, __off64_t)) dlsym (RTLD_NEXT, "pwritev64");
+
+#  if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Extrae installed the following I/O hooks:\n");
+  fprintf(stderr, "[DEBUG] read hooked at %p\n", real_read);
+  fprintf(stderr, "[DEBUG] write hooked at %p\n", real_write);
+  fprintf(stderr, "[DEBUG] fread hooked at %p\n", real_fread);
+  fprintf(stderr, "[DEBUG] fwrite hooked at %p\n", real_fwrite);
+  fprintf(stderr, "[DEBUG] pread hooked at %p\n", real_pread);
+  fprintf(stderr, "[DEBUG] pwrite hooked at %p\n", real_pwrite);
+  fprintf(stderr, "[DEBUG] readv hooked at %p\n", real_readv);
+  fprintf(stderr, "[DEBUG] writev hooked at %p\n", real_writev);
+  fprintf(stderr, "[DEBUG] preadv hooked at %p\n", real_preadv);
+  fprintf(stderr, "[DEBUG] preadv64 hooked at %p\n", real_preadv64);
+  fprintf(stderr, "[DEBUG] pwritev hooked at %p\n", real_pwritev);
+  fprintf(stderr, "[DEBUG] pwritev64 hooked at %p\n", real_pwritev64);
+#  endif
 
 # else
 
@@ -660,6 +696,73 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 }
 
 /**
+ * preadv64
+ * 
+ * Wrapper for the system call 'preadv64' 
+ */
+ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
+{
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_io();
+  ssize_t res;
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_preadv64 == NULL)
+  {
+    Extrae_iotrace_init();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": preadv64 is at %p\n", real_preadv64);
+    fprintf (stderr, PACKAGE_NAME": preadv64 params %d %p %d %ld\n", fd, iov, iovcnt, offset);
+  }
+#endif
+
+  if (real_preadv64 != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    int i;
+    ssize_t size = 0;
+
+    Backend_Enter_Instrumentation (2);
+
+    for (i=0; i<iovcnt; i++)
+    {
+      size += iov[i].iov_len;
+    }
+
+    Probe_IO_preadv_Entry (fd, size);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+    res = real_preadv64 (fd, iov, iovcnt, offset);
+    Probe_IO_preadv_Exit ();
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_preadv64 != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_preadv64 (fd, iov, iovcnt, offset);
+  }
+  else
+  {
+    /*
+     * An error is thrown if the application uses this symbol but during the initialization 
+     * we couldn't find the real implementation. This kind of situation could happen in the 
+     * very strange case where, by the time this symbol is first called, the libc (where the 
+     * real implementation is) has not been loaded yet. One suggestion if we see this error
+     * is to try to prepend the libc.so to the LD_PRELOAD to force to load it first. 
+     */
+    fprintf (stderr, PACKAGE_NAME": preadv64 is not hooked! exiting!!\n");
+    abort();
+  }
+
+  return res;
+}
+
+/**
  * pwritev
  * 
  * Wrapper for the system call 'pwritev' 
@@ -725,6 +828,76 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 
   return res;
 }
+
+/**
+ * pwritev64
+ * 
+ * Wrapper for the system call 'pwritev64' 
+ */
+ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
+{
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_io();
+  ssize_t res;
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_pwritev64 == NULL)
+  {
+    Extrae_iotrace_init();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": pwritev64 is at %p\n", real_pwritev64);
+    fprintf (stderr, PACKAGE_NAME": pwritev64 params %d %p %d %ld\n", fd, iov, iovcnt, offset);
+  }
+#endif
+
+  if (real_pwritev64 != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    int i;
+    ssize_t size = 0;
+
+    Backend_Enter_Instrumentation (2);
+
+    for (i=0; i<iovcnt; i++)
+    {
+      size += iov[i].iov_len;
+    }
+
+    Probe_IO_pwritev_Entry (fd, size);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+    res = real_pwritev64 (fd, iov, iovcnt, offset);
+    Probe_IO_pwritev_Exit ();
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_pwritev64 != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_pwritev64 (fd, iov, iovcnt, offset);
+  }
+  else
+  {
+    /*
+     * An error is thrown if the application uses this symbol but during the initialization 
+     * we couldn't find the real implementation. This kind of situation could happen in the 
+     * very strange case where, by the time this symbol is first called, the libc (where the 
+     * real implementation is) has not been loaded yet. One suggestion if we see this error
+     * is to try to prepend the libc.so to the LD_PRELOAD to force to load it first. 
+     */
+    fprintf (stderr, PACKAGE_NAME": pwritev64 is not hooked! exiting!!\n");
+    abort();
+  }
+
+  return res;
+
+}
+
+
 
 # endif /* -DPIC */
 
