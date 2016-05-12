@@ -170,6 +170,9 @@ AX_PROG_MPI
 ## Check if we have OpenSHMEM
 AX_PROG_OPENSHMEM
 
+## Check how we hook PMPI
+AX_PMPI_HOOK
+
 # Search for libtool support
 AC_LIBTOOL_DLOPEN
 #if test "${MPI_SHARED_LIB_FOUND}" != "yes" ; then
@@ -181,6 +184,9 @@ AC_PROG_LIBTOOL
 
 AC_CHECK_LIB(dl, dlopen, have_dl=yes, have_dl=no)
 AM_CONDITIONAL(HAVE_LIBDL, test "${have_dl}" = "yes" )
+if test "${have_dl}" = "yes"; then
+	AC_SUBST([DL_LIBS], ["-ldl"])
+fi
 
 # Search for headers
 AC_CHECK_HEADERS(

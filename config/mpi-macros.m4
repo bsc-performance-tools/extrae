@@ -945,3 +945,17 @@ AC_DEFUN([AX_MPI_SHOW_CONFIGURATION],
 		fi
 	fi
 ])
+
+# AX_PMPI_HOOK
+# ------------
+AC_DEFUN([AX_PMPI_HOOK],
+[
+   AX_FLAGS_SAVE()
+
+   AC_ARG_WITH([pmpi-hook],
+   	AS_HELP_STRING([--with-pmpi-hook], [Choose method to call PMPI (dlsym or pmpi)]))
+   AS_IF([test "x$with_pmpi_hook" == "xdlsym"],
+   	[AC_DEFINE([WITH_PMPI_HOOK], [1], [Use dlsym instead of PMPI])])
+
+   AX_FLAGS_RESTORE()
+])

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 12May2016 Add configure option to use dlsym as PMPI hook
  * 12May2016 Fixed table of states colors with missing states
  + 12May2016 Added wrappers to instrument both 32 and 64-bit I/O calls preadv, pwritev, preadv64, pwritev64
  * 11May2016 Remove SVN revision and branch check and creation of SVN-branch and

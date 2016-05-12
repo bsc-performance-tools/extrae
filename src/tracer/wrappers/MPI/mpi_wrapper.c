@@ -21,6 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
+#define _GNU_SOURCE
 #include "common.h"
 
 //#define DEBUG_SPAWN
@@ -48,6 +49,9 @@
 #endif
 #ifdef HAVE_STRING_H
 # include <string.h>
+#endif
+#ifdef WITH_PMPI_HOOK
+# include <dlfcn.h>
 #endif
 
 #include "utils.h"
@@ -980,7 +984,17 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
-	CtoF77 (pmpi_init) (ierror);
+#ifdef WITH_PMPI_HOOK
+        int (*real_mpi_init)(MPI_Fint *ierror) = NULL;
+        real_mpi_init = dlsym(RTLD_NEXT, STRINGIFY(CtoF77 (mpi_init)));
+
+        if (real_mpi_init != NULL) {
+                CtoF77 (real_mpi_init) (ierror);
+        } else
+#endif
+        {
+                CtoF77 (pmpi_init) (ierror);
+        }
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());
@@ -1088,7 +1102,17 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
-	CtoF77 (pmpi_init_thread) (required, provided, ierror);
+#ifdef WITH_PMPI_HOOK
+        int (*real_mpi_init_thread)(MPI_Fint *required, MPI_Fint *provided, MPI_Fint *ierror) = NULL;
+        real_mpi_init_thread = dlsym(RTLD_NEXT, STRINGIFY(CtoF77 (mpi_init_thread)));
+
+        if (real_mpi_init_thread != NULL) {
+                CtoF77 (real_mpi_init_thread) (required, provided, ierror);
+        } else
+#endif
+        {
+		CtoF77 (pmpi_init_thread) (required, provided, ierror);
+        }
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());
@@ -1943,7 +1967,16 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
-	val = PMPI_Init (argc, argv);
+#ifdef WITH_PMPI_HOOK
+	int (*real_mpi_init)(int *argc, char ***argv) = NULL;
+	real_mpi_init = dlsym(RTLD_NEXT, "MPI_Init");
+	if (real_mpi_init != NULL) {
+		val = real_mpi_init(argc, argv);
+	} else
+#endif
+	{
+		val = PMPI_Init (argc, argv);
+	}
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());
@@ -2050,7 +2083,16 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
-	val = PMPI_Init_thread (argc, argv, required, provided);
+#ifdef WITH_PMPI_HOOK
+	int (*real_mpi_init_thread)(int *argc, char ***argv, int required, int *provided) = NULL;
+	real_mpi_init_thread = dlsym(RTLD_NEXT, "MPI_Init_thread");
+	if (real_mpi_init_thread != NULL) {
+		val = real_mpi_init_thread(argc, argv, required, provided);
+	} else
+#endif
+	{
+		val = PMPI_Init_thread (argc, argv, required, provided);
+	}
 
 	Extrae_set_ApplicationIsMPI (TRUE);
 	Extrae_Allocate_Task_Bitmap (Extrae_MPI_NumTasks());

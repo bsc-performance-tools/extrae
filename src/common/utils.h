@@ -78,4 +78,6 @@ int ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *i
 }
 #endif
 
+#define STRINGIFY(s) #s
+
 #endif /* __UTILS_H__ */
