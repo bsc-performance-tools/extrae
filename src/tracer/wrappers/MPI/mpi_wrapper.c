@@ -1251,7 +1251,16 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	{
 		Backend_Finalize ();
 
-		CtoF77(pmpi_finalize) (ierror);
+#ifdef WITH_PMPI_HOOK
+		int (*real_mpi_finalize)(MPI_Fint *ierror) = NULL;
+		real_mpi_finalize = dlsym(RTLD_NEXT, STRINGIFY(CtoF77 (mpi_finalize)));
+		if (real_mpi_finalize != NULL) {
+			CtoF77 (real_mpi_finalize) (ierror);
+		} else
+#endif
+		{
+			CtoF77 (pmpi_finalize) (ierror);
+		}
 
 		mpitrace_on = FALSE;
 	}
@@ -1971,7 +1980,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	int (*real_mpi_init)(int *argc, char ***argv) = NULL;
 	real_mpi_init = dlsym(RTLD_NEXT, "MPI_Init");
 	if (real_mpi_init != NULL) {
-		val = real_mpi_init(argc, argv);
+		val = real_mpi_init (argc, argv);
 	} else
 #endif
 	{
@@ -2087,7 +2096,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	int (*real_mpi_init_thread)(int *argc, char ***argv, int required, int *provided) = NULL;
 	real_mpi_init_thread = dlsym(RTLD_NEXT, "MPI_Init_thread");
 	if (real_mpi_init_thread != NULL) {
-		val = real_mpi_init_thread(argc, argv, required, provided);
+		val = real_mpi_init_thread (argc, argv, required, provided);
 	} else
 #endif
 	{
@@ -2230,7 +2239,16 @@ int MPI_Finalize_C_Wrapper (void)
 	{
 		Backend_Finalize ();
 
-		ierror = PMPI_Finalize();
+#ifdef WITH_PMPI_HOOK
+		int (*real_mpi_finalize)() = NULL;
+		real_mpi_finalize = dlsym(RTLD_NEXT, "MPI_Finalize");
+		if (real_mpi_finalize != NULL) {
+			ierror = real_mpi_finalize();
+		} else
+#endif
+		{
+			ierror = PMPI_Finalize();
+		}
 
 		mpitrace_on = FALSE;
 	}
