@@ -101,6 +101,8 @@ unsigned IsMPICollective (unsigned EvType);
 #define WRITEV_VAL_EV                   8 /* Used in merger, with IO_EV */
 #define PREADV_VAL_EV                   9 /* Used in merger, with IO_EV */
 #define PWRITEV_VAL_EV                 10 /* Used in merger, with IO_EV */
+#define OPEN_VAL_EV                    11 /* Used in merger, with IO_EV */
+#define FOPEN_VAL_EV                   12 /* Used in merger, with IO_EV */
 #define USER_EV                  40000006
 #define HWC_DEF_EV               40000007
 #define HWC_CHANGE_EV            40000008
@@ -152,6 +154,9 @@ unsigned IsMPICollective (unsigned EvType);
 #define WRITEV_EV                40000056
 #define PREADV_EV                40000057
 #define PWRITEV_EV               40000058
+#define FILE_NAME_EV             40000059
+#define OPEN_EV                  40000060
+#define FOPEN_EV                 40000061
 
 #define ADDRESSES_FOR_BINARY_EV  41000000
 

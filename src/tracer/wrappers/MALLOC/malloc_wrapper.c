@@ -148,11 +148,12 @@ static int Extrae_malloctrace_remove (const void *p)
 void *malloc (size_t s)
 {
 	void *res;
-	int canInstrument = !Backend_inInstrumentation(THREADID) && 
-	  mpitrace_on &&
-	  Extrae_get_trace_malloc() &&
-	  Extrae_get_trace_malloc_allocate() &&
-	  s >= Extrae_get_trace_malloc_allocate_threshold();
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+                            !Backend_inInstrumentation(THREADID) && 
+                            mpitrace_on                          &&
+                            Extrae_get_trace_malloc()            &&
+                            Extrae_get_trace_malloc_allocate()   &&
+                            s >= Extrae_get_trace_malloc_allocate_threshold();
 
 	if (real_malloc == NULL)
 		Extrae_malloctrace_init ();
@@ -196,9 +197,10 @@ static int __in_free = FALSE;
 #endif
 void free (void *p)
 {
-	int canInstrument = !Backend_inInstrumentation(THREADID) && 
-	  mpitrace_on &&
-	  Extrae_get_trace_malloc();
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+                            !Backend_inInstrumentation(THREADID) && 
+                            mpitrace_on                          &&
+                            Extrae_get_trace_malloc();
 
 	if (real_free == NULL)
 		Extrae_malloctrace_init ();
@@ -244,9 +246,10 @@ an infinite loop of recursive calls to calloc */
 void *calloc (size_t s1, size_t s2)
 {
 	void *res;
-	int canInstrument = !Backend_inInstrumentation(THREADID) && 
-	  mpitrace_on &&
-	  Extrae_get_trace_malloc();
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+                            !Backend_inInstrumentation(THREADID) && 
+                            mpitrace_on                          &&
+                            Extrae_get_trace_malloc();
 
 	if (real_calloc == NULL)
 		Extrae_malloctrace_init ();
@@ -282,11 +285,12 @@ void *calloc (size_t s1, size_t s2)
 void *realloc (void *p, size_t s)
 {
 	void *res;
-	int canInstrument = !Backend_inInstrumentation(THREADID) && 
-	  mpitrace_on &&
-	  Extrae_get_trace_malloc() &&
-	  Extrae_get_trace_malloc_allocate() &&
-	  s >= Extrae_get_trace_malloc_allocate_threshold();
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+                            !Backend_inInstrumentation(THREADID) && 
+                            mpitrace_on                          &&
+                            Extrae_get_trace_malloc()            &&
+                            Extrae_get_trace_malloc_allocate()   &&
+                            s >= Extrae_get_trace_malloc_allocate_threshold();
 
 	if (real_realloc == NULL)
 		Extrae_malloctrace_init ();

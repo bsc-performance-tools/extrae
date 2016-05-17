@@ -32,6 +32,9 @@
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#if HAVE_PTHREAD_H
+# include <pthread.h>
+#endif
 
 #include "threadid.h"
 #include "wrapper.h"
@@ -47,6 +50,15 @@
 
 /* Global variable to control whether the tracing for I/O calls is enabled */
 static int trace_io_enabled = FALSE;
+
+/* Mutex to synchronize multiple threads recording in the *.SYM file the name of the opened files */
+pthread_mutex_t record_open_file_in_sym;
+
+/* We keep a global counter of the opened files to assign an unique id to each open() call. 
+ * This id is then associated with the name of the opened file in the *.SYM. 
+ * In this way we don't have to keep track of the close() calls and deal with the reused fd's.
+ */
+static int open_counter = 0;
 
 /** 
  * Extrae_set_trace_io
@@ -101,6 +113,90 @@ static unsigned Extrae_get_descriptor_type (int fd)
     {
       return DESCRIPTOR_TYPE_UNKNOWN; 
     }
+  }
+}
+
+/**
+ * Probe_IO_open_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'open' 
+ * \param fd A file descriptor
+ * \param pathname Name of the opened file 
+ */
+void Probe_IO_open_Entry (int fd, const char *pathname)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, OPEN_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, OPEN_EV, EVT_BEGIN+2, type);
+
+    pthread_mutex_lock(&record_open_file_in_sym);
+    /* 
+     * Register the current open id and file name in the *.SYM inside a mutex because
+     * there might be multiple threads trying to do this and the *.SYM is per task.
+     */
+    open_counter ++;
+    Extrae_AddTypeValuesEntryToLocalSYM ('F', open_counter, (char *)pathname, (char )0, 0, NULL, NULL);
+    TRACE_MISCEVENT(LAST_READ_TIME, OPEN_EV, EVT_BEGIN+3, open_counter);
+
+    pthread_mutex_unlock(&record_open_file_in_sym);
+  }
+}
+
+/**
+ * Probe_IO_open_Exit
+ *
+ * Probe injected at the end of the I/O call 'open' 
+ */
+void Probe_IO_open_Exit ()
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, OPEN_EV, EVT_END, EMPTY);
+  }
+}
+
+/**
+ * Probe_IO_fopen_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'fopen' 
+ * \param fd A file descriptor
+ * \param pathname Name of the opened file 
+ */
+void Probe_IO_fopen_Entry (int fd, const char *pathname)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, FOPEN_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, FOPEN_EV, EVT_BEGIN+2, type);
+
+    pthread_mutex_lock(&record_open_file_in_sym);
+    /* 
+     * Register the current open id and file name in the *.SYM inside a mutex because
+     * there might be multiple threads trying to do this and the *.SYM is per task.
+     */
+    open_counter ++;
+    Extrae_AddTypeValuesEntryToLocalSYM ('F', open_counter, (char *)pathname, (char )0, 0, NULL, NULL);
+    TRACE_MISCEVENT(LAST_READ_TIME, FOPEN_EV, EVT_BEGIN+3, open_counter);
+
+    pthread_mutex_unlock(&record_open_file_in_sym);
+  }
+}
+
+/**
+ * Probe_IO_fopen_Exit
+ *
+ * Probe injected at the end of the I/O call 'fopen' 
+ */
+void Probe_IO_fopen_Exit ()
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, FOPEN_EV, EVT_END, EMPTY);
   }
 }
 

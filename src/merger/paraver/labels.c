@@ -51,6 +51,10 @@
 # include <sys/mman.h>
 #endif
 
+#if defined(PARALLEL_MERGE)
+# include <mpi.h>
+#endif
+
 #include "events.h"
 #include "labels.h"
 #include "mpi_prv_events.h"
@@ -645,6 +649,86 @@ static void Write_Spectral_Labels (FILE * pcf_fd)
         }
 }
 
+/**
+ * Translation of the local identifiers of each task's open
+ * files into a global identifier that is unique for all tasks 
+ * in the application
+ */
+typedef struct
+{
+  unsigned ptask;
+  unsigned task;
+  int      local_file_id;
+  int      global_file_id;
+} open_file_t;
+
+open_file_t *OpenFilesPerTask = NULL; /* List of all open files    */
+int NumberOfOpenFiles = 0;            /* Counter of all open files */
+
+char **GlobalFiles = NULL;            /* Vector of unique file names, indexed by their global identifier (see open_file_t) */
+int NumberOfGlobalFiles = 0;          /* Counter of all file names (no repetitions) */
+
+/**
+ * Unify_File_Id 
+ * 
+ * Transforms a task's local file id into a global id 
+ *
+ * \param ptask   The application identifier
+ * \param task    The task identifier
+ * \param file_id The local file identifier in specified task 
+ * \return A global file identifier that is unique for each file pathname 
+ */
+int Unify_File_Id(unsigned ptask, unsigned task, int file_id)
+{
+  int i = 0;
+
+  /* Search in the list of open files */
+  for (i=0; i<NumberOfOpenFiles; i++)
+  {
+    /* Check for a matching application/task/id */
+    if ((OpenFilesPerTask[i].ptask == ptask) && (OpenFilesPerTask[i].task == task) && (OpenFilesPerTask[i].local_file_id == file_id))
+    {
+      /* If found, return the previously assigned global id */
+      return OpenFilesPerTask[i].global_file_id;
+    }
+  }
+  /* Not found? This should not happen */
+  return 0;
+}
+
+/**
+ * Assign_File_Global_Id
+ * 
+ * Search in the list of unique filenames if we've seen this file before and return its global identifer; 
+ * otherwise, store this file and assign a new id
+ * 
+ * \param file_name The name of a file opened by this application
+ * \return A unique identifier for the given file
+ */
+int Assign_File_Global_Id(char *file_name)
+{
+  int i = 0;
+
+  /* Search in the list of unique filenames for the given file */
+  for (i=0; i<NumberOfGlobalFiles; i++)
+  {
+    if (strcmp(GlobalFiles[i], file_name) == 0)
+    {
+      /* If found, return the index of the vector as the global id (from 1 to N) */
+      return i+1;
+    }
+  }
+  
+  /* If not found, store this file in the array and return the new index (from 1 to N) */
+  GlobalFiles = (char **)realloc(GlobalFiles, sizeof(char *) * (NumberOfGlobalFiles + 1));
+  GlobalFiles[NumberOfGlobalFiles] = strdup(file_name);
+ 
+  NumberOfGlobalFiles ++;
+
+  return NumberOfGlobalFiles;
+}
+
+
 
 /******************************************************************************
  *** Labels_loadSYMfile
@@ -915,6 +999,27 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
                         }
                     }
                     break;
+			/* The 'F' entries in the *.SYM represent open files */
+			case 'F':
+			{
+				int open_counter = 0;
+				char pathname[4096];
+				int res = sscanf (LINE, "%d \"%[^\n\"]\"\"", &open_counter, pathname);
+				if (res == 2)
+				{
+					/* Store this entry in the list of open files per task */
+					OpenFilesPerTask = (open_file_t *)realloc(OpenFilesPerTask, sizeof(open_file_t) * (NumberOfOpenFiles + 1));
+
+					OpenFilesPerTask[NumberOfOpenFiles].ptask          = ptask;
+					OpenFilesPerTask[NumberOfOpenFiles].task           = task;
+					OpenFilesPerTask[NumberOfOpenFiles].local_file_id  = open_counter; // The local file identifier 
+                                        OpenFilesPerTask[NumberOfOpenFiles].global_file_id = Assign_File_Global_Id(pathname); // Assign the global identifier for this file
+
+					NumberOfOpenFiles ++;
+				}
+
+
+			}	break;
 				default:
 					fprintf (stderr, PACKAGE_NAME" mpi2prv: Error! Task %d found unexpected line in symbol file '%s'\n", taskid, LINE);
 					break;
@@ -931,6 +1036,25 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 
 	fclose (FD);
 }
+
+void Write_OpenFiles_Labels(FILE * pcf_fd)
+{
+  int i = 0;
+
+  if (NumberOfGlobalFiles > 0)
+  {
+    fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+    fprintf (pcf_fd, "0    %d    %s\n", FILE_NAME_EV, FILE_NAME_LBL);
+    fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+    fprintf (pcf_fd, "%d      %s\n", 0, "Unknown");
+
+    for (i = 0; i < NumberOfGlobalFiles; i ++)
+    {
+      fprintf (pcf_fd, "%d      %s\n", i+1, GlobalFiles[i]);
+    }
+  }
+}
+
 
 void Write_UserDefined_Labels(FILE * pcf_fd)
 {
@@ -1035,6 +1159,8 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_UserDefined_Labels(fd);
 
 	Write_BasickBlock_Labels(fd);
+
+	Write_OpenFiles_Labels(fd);
     
 	Concat_User_Labels (fd);
 
@@ -1061,3 +1187,71 @@ void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
 	}
 }
 
+#if defined(PARALLEL_MERGE)
+
+/**
+ * Share_File_Names
+ * 
+ * Broadcast the list of open files from merger's task 0 (this is the only that parses the *.SYM files)
+ * to all other merger tasks so that all tasks know how to translate the local file ids into the global
+ * ids. 
+ *
+ * \param taskid The merger's task rank
+ */
+void Share_File_Names(int taskid)
+{
+  int i = 0;
+  unsigned *ptask_array     = NULL;
+  unsigned *task_array      = NULL;
+  int *local_file_id_array  = NULL;
+  int *global_file_id_array = NULL;
+
+  /* Send the number of open files */
+  MPI_Bcast ( &NumberOfOpenFiles, 1, MPI_INT, 0, MPI_COMM_WORLD );
+
+  /* Allocate arrays to serialize the translation table (well, it's a list not a table, see open_file_t) */
+  ptask_array          = (unsigned *)malloc(sizeof(unsigned) * NumberOfOpenFiles);
+  task_array           = (unsigned *)malloc(sizeof(unsigned) * NumberOfOpenFiles);
+  local_file_id_array  = (int *)malloc(sizeof(int) * NumberOfOpenFiles);
+  global_file_id_array = (int *)malloc(sizeof(int) * NumberOfOpenFiles);
+
+  if (taskid == 0)
+  {
+    /* Merger's master task serializes the table (this is the only task that has the information loaded from the *.SYM) */
+    for (i=0; i<NumberOfOpenFiles; i++)
+    {
+      ptask_array[i]          = OpenFilesPerTask[i].ptask;
+      task_array[i]           = OpenFilesPerTask[i].task;
+      local_file_id_array[i]  = OpenFilesPerTask[i].local_file_id;
+      global_file_id_array[i] = OpenFilesPerTask[i].global_file_id;
+    }
+  }
+
+  /* Broadcast the serialized arrays to all merger's tasks */
+  MPI_Bcast ( ptask_array, NumberOfOpenFiles, MPI_UNSIGNED, 0, MPI_COMM_WORLD );
+  MPI_Bcast ( task_array, NumberOfOpenFiles, MPI_UNSIGNED, 0, MPI_COMM_WORLD );
+  MPI_Bcast ( local_file_id_array, NumberOfOpenFiles, MPI_INT, 0, MPI_COMM_WORLD );
+  MPI_Bcast ( global_file_id_array, NumberOfOpenFiles, MPI_INT, 0, MPI_COMM_WORLD );
+
+  if (taskid > 0)
+  {
+    /* All the other tasks reconstruct their local translation table */
+    OpenFilesPerTask = (open_file_t *)malloc(sizeof(open_file_t) * NumberOfOpenFiles);
+
+    for (i=0; i<NumberOfOpenFiles; i++)
+    { 
+      OpenFilesPerTask[i].ptask          = ptask_array[i];
+      OpenFilesPerTask[i].task           = task_array[i];
+      OpenFilesPerTask[i].local_file_id  = local_file_id_array[i];
+      OpenFilesPerTask[i].global_file_id = global_file_id_array[i];
+    }
+  }
+
+  /* Free resources */
+  xfree(ptask_array);
+  xfree(task_array);
+  xfree(local_file_id_array);
+  xfree(global_file_id_array);
+}
+
+#endif

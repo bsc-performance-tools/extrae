@@ -136,6 +136,12 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 			case EVT_BEGIN:
 				switch(EvType)
 				{
+					case OPEN_EV:
+						io_type = OPEN_VAL_EV;
+						break;
+					case FOPEN_EV:
+						io_type = FOPEN_VAL_EV;
+						break;
 					case READ_EV:
 						io_type = READ_VAL_EV;
 						break;
@@ -174,11 +180,23 @@ static int ReadWrite_Event (event_t * event, unsigned long long time,
 				trace_paraver_event (cpu, ptask, task, thread, time, IO_DESCRIPTOR_EV, EvParam);
 				break;
 			case EVT_BEGIN+1:
+				/* This event refers to the size of the read/write operation */
 				trace_paraver_event (cpu, ptask, task, thread, time, IO_SIZE_EV, EvParam);
 				break;
 			case EVT_BEGIN+2:
+				/* This event refers to the type of file descriptor */
 				trace_paraver_event (cpu, ptask, task, thread, time, IO_DESCRIPTOR_TYPE_EV, EvParam);
 				break;
+			case EVT_BEGIN+3:
+				/* This event refers to the name of the file (only for open calls).
+                                 * EvParam is the task's local file identifier. At this point we're in the 1st
+                                 * stage of the merger, so we don't know how to translate the local id into 
+                                 * an unified one because the translation information has not been shared yet. 
+                                 * At the end of phase 1 the information is shared, and during phase 2 we will
+                                 * change the local ids into the unifieds (see paraver_build_multi_event in paraver_generator.c)
+                                 */
+                                trace_paraver_event (cpu, ptask, task, thread, time, FILE_NAME_EV, EvParam);
+                                break;
 			default:
 				break;
 		}
@@ -1628,6 +1646,8 @@ static int DynamicMemory_Event (event_t * event,
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ FLUSH_EV, Flush_Event },
+        { OPEN_EV, ReadWrite_Event },
+        { FOPEN_EV, ReadWrite_Event },
 	{ READ_EV, ReadWrite_Event },
 	{ WRITE_EV, ReadWrite_Event },
 	{ FREAD_EV, ReadWrite_Event },

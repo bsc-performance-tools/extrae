@@ -727,6 +727,14 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					  cur->task, cur->event, cur->value);
 				}
 
+				if (cur->event == FILE_NAME_EV)
+				{
+					/* Unify the file identifiers. Each task stored local identifiers for the open files,
+                                         * and after the first merge phase, we shared all the ids and we change them now 
+                                         * for a global id, so that each file pathname has an unique id */
+					values[nevents] = Unify_File_Id(cur->ptask, cur->task, cur->value);
+				}
+
 				if (cur->event >= SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV &&
 				    cur->event < SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+MAX_CALLERS)
 				{

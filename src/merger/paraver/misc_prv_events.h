@@ -64,6 +64,8 @@ void Share_MISC_Operations (void);
 #define SAMPLING_ADDRESS_REFERENCE_COST_LBL "Memory reference cost in core cycles"
 
 #define IO_LBL                          "I/O calls"
+#define OPEN_LBL                        "open()"
+#define FOPEN_LBL                       "fopen()"
 #define READ_LBL                        "read()"
 #define WRITE_LBL                       "write()"
 #define FREAD_LBL                       "fread()"
@@ -77,6 +79,7 @@ void Share_MISC_Operations (void);
 #define IO_DESCRIPTOR_LBL               "I/O descriptor"
 #define IO_SIZE_LBL                     "I/O size"
 #define IO_DESCRIPTOR_TYPE_LBL          "I/O descriptor type"
+#define FILE_NAME_LBL                   "Filename"
 
 #define CLOCK_FROM_SYSTEM_LBL           "RAW clock() value from system"
 

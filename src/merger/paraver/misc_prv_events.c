@@ -69,7 +69,12 @@ void Enable_MISC_Operation (int type)
 		inuse[FLUSH_INDEX] = TRUE;
 	else if (type == TRACING_EV)
 		inuse[TRACING_INDEX] = TRUE;
-	else if (type == READ_EV || type == WRITE_EV)
+	else if (type == READ_EV   || type == WRITE_EV   ||
+                 type == FREAD_EV  || type == FWRITE_EV  ||
+                 type == PREAD_EV  || type == PWRITE_EV  ||
+                 type == READV_EV  || type == WRITEV_EV  ||
+                 type == PREADV_EV || type == PWRITEV_EV ||
+                 type == OPEN_EV   || type == FOPEN_EV)
 		inuse[INOUT_INDEX] = TRUE;
 	else if (type == FORK_EV || type == WAIT_EV || type == WAITPID_EV ||
 	  type == EXEC_EV || type == SYSTEM_EV)
@@ -201,6 +206,8 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", WRITEV_VAL_EV, WRITEV_LBL);
 		fprintf (fd, "%d      %s\n", PREADV_VAL_EV, PREADV_LBL);
 		fprintf (fd, "%d      %s\n", PWRITEV_VAL_EV, PWRITEV_LBL);
+                fprintf (fd, "%d      %s\n", OPEN_VAL_EV, OPEN_LBL);
+                fprintf (fd, "%d      %s\n", FOPEN_VAL_EV, FOPEN_LBL);
 		LET_SPACES (fd);
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_SIZE_EV, IO_SIZE_LBL);

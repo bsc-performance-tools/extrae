@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 17May2016 Add wrappers and merger support to instrument open, fopen and the string name of the opened files
  * 13May2016 Add MPI_Finalize to dlsym PMPI hook
  + 12May2016 Add configure option to use dlsym as PMPI hook
  * 12May2016 Fixed table of states colors with missing states

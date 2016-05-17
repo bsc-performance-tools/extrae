@@ -448,6 +448,8 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
 	struct input_t * IFiles);
 int Labels_LookForHWCCounter (int eventcode, unsigned *position, char **description);
+void Share_File_Names(int taskid);
+int Unify_File_Id(unsigned ptask, unsigned task, int file_id);
 
 #endif
 

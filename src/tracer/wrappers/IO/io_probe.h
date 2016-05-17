@@ -31,6 +31,12 @@
 void Extrae_set_trace_io (int enable);
 int  Extrae_get_trace_io (void);
 
+void Probe_IO_open_Entry (int fd, const char *pathname);
+void Probe_IO_open_Exit  (void);
+
+void Probe_IO_fopen_Entry (int fd, const char *pathname);
+void Probe_IO_fopen_Exit  (void);
+
 void Probe_IO_read_Entry (int fd, ssize_t size);
 void Probe_IO_read_Exit  (void);
 

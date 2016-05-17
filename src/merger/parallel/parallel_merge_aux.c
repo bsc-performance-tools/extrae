@@ -769,6 +769,11 @@ void ShareTraceInformation (int numtasks, int taskid)
 #endif
 
 	if (0 == taskid)
+		fprintf (stdout, " files");
+	fflush (stdout);
+	Share_File_Names (taskid);
+
+	if (0 == taskid)
 		fprintf (stdout, " >\n");
 	fflush (stdout);
 }
