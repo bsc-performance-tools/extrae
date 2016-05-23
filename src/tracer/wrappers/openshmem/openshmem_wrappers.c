@@ -235,6 +235,9 @@ static char * OPENSHMEM_Distribute_XML_File (int rank, int world_size, char *ori
   file_size_source = (int *) shmalloc_real( sizeof(int) );
   file_size_target = (int *) shmalloc_real( sizeof(int) );
 
+  *file_size_source = 0;
+  *file_size_target = 0;
+
   has_hostname = gethostname(hostname, 1024 - 1) == 0;
 
   /* If no other tasks are running, just return the same file */
@@ -272,18 +275,21 @@ static char * OPENSHMEM_Distribute_XML_File (int rank, int world_size, char *ori
                 /* Open the file */
                 fd = open (result_file, O_RDONLY);
 
-                /* If open fails, just return the same fail... XML parsing will fail too! */
-                if (fd < 0)
-                {
-                        fprintf (stderr, PACKAGE_NAME": Cannot open XML configuration file (%s)!\n", result_file);
-                        exit (0);
-                }
-
-                *file_size_source = lseek (fd, 0, SEEK_END);
-                lseek (fd, 0, SEEK_SET);
+                /* If open succeeds, read the size of the file */
+		if (fd != -1)
+		{
+		    *file_size_source = lseek (fd, 0, SEEK_END);
+		    lseek (fd, 0, SEEK_SET);
+		}
 
                 /* Send the size */
                 shmem_broadcast32_real(file_size_target, file_size_source, 1, 0, 0, 0, world_size, pSync);
+
+		if (fd < 0 || *file_size_source == 0)
+		{
+		    fprintf (stderr, PACKAGE_NAME": Cannot open XML configuration file (%s)!\n", result_file);
+		    exit (0);
+		}
 
                 storage_size = sizeof(int) * (int)(ceil( (float)*file_size_source / (float)sizeof(int) ));
 
@@ -314,6 +320,11 @@ static char * OPENSHMEM_Distribute_XML_File (int rank, int world_size, char *ori
   {
                 /* Receive the size */
                 shmem_broadcast32_real(file_size_target, file_size_source, 1, 0, 0, 0, world_size, pSync);
+
+		if (*file_size_target <= 0)
+		{
+		    exit (0);
+		}
 
                 storage_size = sizeof(int) * (int)(ceil( (float)*file_size_target / (float)sizeof(int) ));
                 storage = (char*) shmalloc_real (storage_size * sizeof(char));

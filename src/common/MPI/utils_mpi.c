@@ -370,7 +370,7 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 {
 	char hostname[1024];
 	char *result_file = NULL;
-	off_t file_size;
+	off_t file_size = 0;
 	int fd;
 	char *storage;
 	int has_hostname = FALSE;
@@ -406,17 +406,20 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 		fd = open (result_file, O_RDONLY);
 
 		/* If open fails, just return the same fail... XML parsing will fail too! */
-		if (fd < 0)
+		if (fd != -1)
 		{
-			fprintf (stderr, PACKAGE_NAME": Cannot open XML configuration file (%s)!\n", result_file);
-			exit (0);
+		    file_size = lseek (fd, 0, SEEK_END);
+		    lseek (fd, 0, SEEK_SET);
 		}
-
-		file_size = lseek (fd, 0, SEEK_END);
-		lseek (fd, 0, SEEK_SET);
 
 		/* Send the size */
 		PMPI_Bcast (&file_size, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+
+		if (fd < 0 || file_size == 0)
+		{
+		    fprintf (stderr, PACKAGE_NAME": Cannot open XML configuration file (%s)!\n", result_file);
+		    exit (0);
+		}
 
 		/* Allocate & Read the file */
 		storage = (char*) malloc ((file_size)*sizeof(char));
@@ -444,6 +447,12 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 	{
 		/* Receive the size */
 		PMPI_Bcast (&file_size, 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+
+		if (file_size <= 0)
+		{
+		    exit (0);
+		}
+
 		storage = (char*) malloc ((file_size)*sizeof(char));
 		if (storage == NULL)
 		{
