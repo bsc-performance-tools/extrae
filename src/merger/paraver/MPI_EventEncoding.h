@@ -33,6 +33,7 @@
 
 #define MPITYPE_OTHER              50000003
 #define MPITYPE_RMA                50000004
+#define MPITYPE_RMA_SIZE           50001000
 #define MPITYPE_COMM               MPITYPE_OTHER
 #define MPITYPE_GROUP              MPITYPE_OTHER
 #define MPITYPE_TOPOLOGIES         MPITYPE_OTHER
@@ -44,6 +45,7 @@
 
 #define MPITYPE_OTHER_LABEL        "MPI Other"
 #define MPITYPE_RMA_LABEL          "MPI One-sided"
+#define MPITYPE_RMA_SIZE_LABEL     "MPI One-sided size"
 #define MPITYPE_COMM_LABEL         MPITYPE_OTHER_LABEL
 #define MPITYPE_GROUP_LABEL        MPITYPE_OTHER_LABEL
 #define MPITYPE_TOPOLOGIES_LABEL   MPITYPE_OTHER_LABEL

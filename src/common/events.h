@@ -336,6 +336,7 @@ enum {
 #define MPI_WIN_POST_EV              50000206
 #define MPI_WIN_COMPLETE_EV          50000207
 #define MPI_WIN_WAIT_EV              50000208
+#define MPI_RMA_SIZE                 50001000
 
 #define MPI_IREDUCE_EV               50000210
 #define MPI_IALLREDUCE_EV            50000211

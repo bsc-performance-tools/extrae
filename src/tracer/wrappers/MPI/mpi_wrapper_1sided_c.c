@@ -176,7 +176,12 @@ int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	MPI_Win win)
 {
 	int ierror;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	int datatype_size;
+
+	ierror = PMPI_Type_size(origin_datatype, &datatype_size);
+	MPI_CHECK(ierror, PMPI_Type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, datatype_size * origin_count, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_Get (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
 	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -191,7 +196,12 @@ int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	MPI_Win win)
 {
 	int ierror;
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	int datatype_size;
+
+	ierror = PMPI_Type_size(origin_datatype, &datatype_size);
+	MPI_CHECK(ierror, PMPI_Type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, datatype_size * origin_count, EMPTY, EMPTY, EMPTY);
 	ierror = PMPI_Put (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
 	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);

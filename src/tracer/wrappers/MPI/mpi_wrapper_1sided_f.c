@@ -170,7 +170,12 @@ void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror)
 {
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	int datatype_size;
+
+	CtoF77(pmpi_type_size) (origin_datatype, &datatype_size, ierror);
+	MPI_CHECK(*ierror, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, datatype_size * (*origin_count), EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_get) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -182,7 +187,12 @@ void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint *ierror)
 {
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+	int datatype_size;
+
+	CtoF77(pmpi_type_size) (origin_datatype, &datatype_size, ierror);
+	MPI_CHECK(*ierror, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, datatype_size * (*origin_count), EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_put) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);

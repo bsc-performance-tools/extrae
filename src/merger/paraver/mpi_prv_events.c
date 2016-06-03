@@ -609,6 +609,13 @@ void MPITEvent_WriteEnabled_MPI_Operations (FILE * fd)
 		  }
 		  fprintf (fd, "%d   %s\n", 0, "Outside MPI");
 		  fprintf (fd, "\n\n");
+
+		  if (prv_block_groups[ii].type == MPITYPE_RMA) //&& ((event_mpit2prv[130].utilitzada) || (event_mpit2prv[131].utilitzada)))
+		  {
+		  	fprintf (fd, "%s\n", "EVENT_TYPE");
+			fprintf (fd, "%d   %d    %s\n\n\n", prv_block_groups[ii].flag_color,
+				MPITYPE_RMA_SIZE, MPITYPE_RMA_SIZE_LABEL);
+		  }
 		}
 	}
 }
