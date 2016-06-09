@@ -25,17 +25,6 @@ check_PROGRAMS += \
  JavaFunction.class
 endif
 
-TESTS = \
-  extrae_JavaSimple.sh \
-  extrae_JavaGC.sh \
-  extrae_JavaException.sh \
-  extrae_JavaThreads.sh
-
-if WANT_JAVA_WITH_ASPECTJ
-TESTS += \
- extrae_JavaAspectJ.sh
-endif
-
 JavaSimple.class$(EXEEXT): JavaSimple.java
 	$(JAVAC) JavaSimple.java
 
@@ -51,4 +40,13 @@ JavaThreads.class$(EXEEXT): JavaThreads.java
 if WANT_JAVA_WITH_ASPECTJ
 JavaFunction.class$(EXEEXT): JavaFunction.java
 	$(JAVAC) JavaFunction.java
+endif
+
+installcheck-local:
+	./extrae_JavaSimple.sh
+	./extrae_JavaGC.sh
+	./extrae_JavaException.sh
+	./extrae_JavaThreads.sh
+if WANT_JAVA_WITH_ASPECTJ
+	./extrae_JavaAspectJ.sh
 endif

@@ -1,6 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 09Jun2016 JAVA tracer tests now run after installation.
+             Fix ompss tests reference files.
+	     Fix MPI Iprobe_wait test.
  + 03May2016 Add recording of MPI one-sided operations' size
  * 23May2016 Rank 0 was exiting if XML file couldn't be opened, leaving the others stalled in a collective
  + 17May2016 Add wrappers and merger support to instrument open, fopen and the string name of the opened files

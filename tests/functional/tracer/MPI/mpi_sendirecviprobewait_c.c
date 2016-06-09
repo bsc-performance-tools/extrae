@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 		return 1;
 	if (rank == 0)
 	{
+		sleep(5);
 		MPI_Send (&v, 1, MPI_INT, 1, 1234, MPI_COMM_WORLD);
 	}
 	else
