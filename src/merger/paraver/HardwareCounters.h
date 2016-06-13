@@ -29,6 +29,7 @@
 #include "num_hwc.h"
 #include "hwc_version.h"
 #include "record.h"
+#include "papiStdEventDefs.h"
 
 #if !USE_HARDWARE_COUNTERS
   /* Little things to have configured if PAPI cannot be used */

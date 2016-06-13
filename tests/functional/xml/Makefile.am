@@ -2,8 +2,11 @@ include $(top_srcdir)/PATHS
 
 ALLTESTS = \
 	check_Extrae_xml.sh \
-	check_Extrae_xml_envvar_merge.sh \
-	check_Extrae_xml_envvar_counters.sh
+	check_Extrae_xml_envvar_merge.sh
+
+if HAVE_PAPI
+ALLTESTS += check_Extrae_xml_envvar_counters.sh
+endif
 
 EXTRA_DIST = \
     $(ALLTESTS) \

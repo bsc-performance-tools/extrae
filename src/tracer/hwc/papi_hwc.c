@@ -48,6 +48,7 @@
 #include "common_hwc.h"
 #include "papi_hwc.h"
 #include "hwc_version.h"
+#include "papi.h"
 
 #if defined(IS_BGL_MACHINE)
 # define COUNTERS_INFO
