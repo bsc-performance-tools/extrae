@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 15Jun2016 Consider callers when computing buffer size for IO calls
  * 13Jun2016 Fix compilation error when enabling heterogeneous.
  * 09Jun2016 JAVA tracer tests now run after installation.
              Fix ompss tests reference files.
