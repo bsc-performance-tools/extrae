@@ -41,10 +41,16 @@
 #define PRV_EXEC_VALUE          4
 #define PRV_SYSTEM_VALUE        5
 
-#define PRV_MALLOC_VALUE        1
-#define PRV_FREE_VALUE          2
-#define PRV_REALLOC_VALUE       3
-#define PRV_CALLOC_VALUE        4
+#define PRV_MALLOC_VALUE                 1
+#define PRV_FREE_VALUE                   2
+#define PRV_REALLOC_VALUE                3
+#define PRV_CALLOC_VALUE                 4
+#define PRV_POSIX_MEMALIGN_VALUE         5
+#define PRV_MEMKIND_MALLOC_VALUE         6
+#define PRV_MEMKIND_CALLOC_VALUE         7
+#define PRV_MEMKIND_REALLOC_VALUE        8
+#define PRV_MEMKIND_POSIX_MEMALIGN_VALUE 9
+#define PRV_MEMKIND_FREE_VALUE           10
 
 #define APPL_INDEX              0
 #define FLUSH_INDEX             1
@@ -84,7 +90,9 @@ void Enable_MISC_Operation (int type)
 	else if (type == TRACE_INIT_EV)
 		inuse[TRACE_INIT_INDEX] = TRUE;
 	else if (type == MALLOC_EV || type == REALLOC_EV || type == FREE_EV ||
-	  type == CALLOC_EV)
+	         type == CALLOC_EV || type == POSIX_MEMALIGN_EV || type == MEMKIND_MALLOC_EV || 
+		 type == MEMKIND_CALLOC_EV || type == MEMKIND_REALLOC_EV || type == MEMKIND_POSIX_MEMALIGN_EV || 
+                 type == MEMKIND_FREE_EV)
 		inuse[DYNAMIC_MEM_INDEX] = TRUE;
 	else if (type == SAMPLING_ADDRESS_MEM_LEVEL_EV ||
 	  type == SAMPLING_ADDRESS_TLB_LEVEL_EV ||
@@ -124,6 +132,18 @@ unsigned MISC_event_GetValueForDynamicMemory (unsigned type)
 			return PRV_REALLOC_VALUE;
 		case CALLOC_EV:
 			return PRV_CALLOC_VALUE;
+		case POSIX_MEMALIGN_EV:
+			return PRV_POSIX_MEMALIGN_VALUE;
+		case MEMKIND_MALLOC_EV:
+			return PRV_MEMKIND_MALLOC_VALUE;
+		case MEMKIND_CALLOC_EV:
+			return PRV_MEMKIND_CALLOC_VALUE;
+		case MEMKIND_REALLOC_EV:
+			return PRV_MEMKIND_REALLOC_VALUE;
+		case MEMKIND_POSIX_MEMALIGN_EV:
+			return PRV_MEMKIND_POSIX_MEMALIGN_VALUE;
+		case MEMKIND_FREE_EV:
+			return PRV_MEMKIND_FREE_VALUE;
 		default:
 			return 0;
 	}
@@ -249,6 +269,12 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", PRV_FREE_VALUE, FREE_LBL);
 		fprintf (fd, "%d      %s\n", PRV_REALLOC_VALUE, REALLOC_LBL);
 		fprintf (fd, "%d      %s\n", PRV_CALLOC_VALUE, CALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_POSIX_MEMALIGN_VALUE, POSIX_MEMALIGN_LBL);
+		fprintf (fd, "%d      %s\n", PRV_MEMKIND_MALLOC_VALUE, MEMKIND_MALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_MEMKIND_CALLOC_VALUE, MEMKIND_CALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_MEMKIND_REALLOC_VALUE, MEMKIND_REALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_MEMKIND_POSIX_MEMALIGN_VALUE, MEMKIND_POSIX_MEMALIGN_LBL);
+		fprintf (fd, "%d      %s\n", PRV_MEMKIND_FREE_VALUE, MEMKIND_FREE_LBL);
 		LET_SPACES (fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);

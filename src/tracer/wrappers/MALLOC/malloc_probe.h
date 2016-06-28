@@ -49,4 +49,22 @@ void Probe_Calloc_Exit (void *p);
 void Probe_Realloc_Entry (void *p, size_t s);
 void Probe_Realloc_Exit (void *p);
 
+void Probe_posix_memalign_Entry(size_t size);
+void Probe_posix_memalign_Exit(void *ptr);
+
+void Probe_memkind_malloc_Entry(size_t size);
+void Probe_memkind_malloc_Exit(void *ptr);
+
+void Probe_memkind_calloc_Entry(size_t num, size_t size);
+void Probe_memkind_calloc_Exit(void *ptr);
+
+void Probe_memkind_realloc_Entry(void *ptr, size_t size);
+void Probe_memkind_realloc_Exit(void *ptr);
+
+void Probe_memkind_posix_memalign_Entry(size_t size);
+void Probe_memkind_posix_memalign_Exit(void *ptr);
+
+void Probe_memkind_free_Entry(void *ptr);
+void Probe_memkind_free_Exit();
+
 #endif /* PROBE_MALLOC_H_INCLUDED */

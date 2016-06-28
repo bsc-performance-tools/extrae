@@ -18,5 +18,10 @@ libwrap_malloc_la_CFLAGS = \
  -I$(top_srcdir)/include \
  -I$(COMMON_INC) \
  $(UNWIND_CFLAGS)
+
+if HAVE_MEMKIND
+libwrap_malloc_la_CFLAGS += ${MEMKIND_CFLAGS}
+endif
+
 libwrap_malloc_la_SOURCES = $(WRAPPERS_MALLOC)
 

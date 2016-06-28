@@ -123,3 +123,102 @@ void Probe_Realloc_Exit (void *p)
 		TRACE_MISCEVENTANDCOUNTERS(TIME, REALLOC_EV, EVT_END, (UINT64) p);
 	}
 }
+
+void Probe_posix_memalign_Entry(size_t size)
+{
+        if (mpitrace_on && trace_malloc)
+        {
+                TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, POSIX_MEMALIGN_EV, EVT_BEGIN, size);
+        }
+}
+
+void Probe_posix_memalign_Exit(void *ptr)
+{
+        if (mpitrace_on && trace_malloc)
+        {
+                TRACE_MISCEVENTANDCOUNTERS(TIME, POSIX_MEMALIGN_EV, EVT_END, ptr);
+        }
+}
+
+void Probe_memkind_malloc_Entry(size_t size)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_MALLOC_EV, EVT_BEGIN, size);
+	}
+}
+
+void Probe_memkind_malloc_Exit(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_MALLOC_EV, EVT_END, (UINT64) ptr);
+	}
+}
+
+void Probe_memkind_calloc_Entry(size_t num, size_t size)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_CALLOC_EV, EVT_BEGIN, num*size);
+	}
+}
+
+void Probe_memkind_calloc_Exit(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_CALLOC_EV, EVT_END, (UINT64) ptr);
+	}
+}
+
+void Probe_memkind_realloc_Entry(void *ptr, size_t size)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		/* Split ptr & size in two events. There's no need to read counters for the second event */
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_REALLOC_EV, EVT_BEGIN, (UINT64) ptr);
+		TRACE_MISCEVENT(LAST_READ_TIME, MEMKIND_REALLOC_EV, EVT_BEGIN+1, size);
+	}
+}
+
+void Probe_memkind_realloc_Exit(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_REALLOC_EV, EVT_END, (UINT64) ptr);
+	}
+}
+
+void Probe_memkind_posix_memalign_Entry(size_t size)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_POSIX_MEMALIGN_EV, EVT_BEGIN, size);
+	}
+}
+
+void Probe_memkind_posix_memalign_Exit(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_POSIX_MEMALIGN_EV, EVT_END, ptr);
+	}
+}
+
+void Probe_memkind_free_Entry(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, MEMKIND_FREE_EV, EVT_BEGIN, (UINT64) ptr);
+	}
+}
+
+void Probe_memkind_free_Exit()
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, MEMKIND_FREE_EV, EVT_END, EMPTY);
+	}
+}
+

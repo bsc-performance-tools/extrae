@@ -2106,3 +2106,28 @@ AC_DEFUN([AX_CHECK_GETCPU],
 	AC_CHECK_HEADERS([sched.h])
 	AC_CHECK_FUNC(sched_getcpu, [AC_DEFINE([HAVE_SCHED_GETCPU],[1],[Define if have sched_getcpu])])
 ])
+
+AC_DEFUN([AX_PROG_MEMKIND],
+[
+  AC_ARG_WITH(memkind,
+    AC_HELP_STRING(
+      [--with-memkind@<:@=DIR@:>@],
+      [specify where to find memkind libraries and includes]
+    ),
+    [memkind_paths="$withval"],
+    [memkind_paths="not_set"] dnl List of possible default paths
+  )
+
+  dnl Search for Spectral Analysis installation
+  AX_FIND_INSTALLATION([MEMKIND], [$memkind_paths], [memkind])
+
+  if test "x${MEMKIND_INSTALLED}" = "xyes" ; then
+    AX_FLAGS_SAVE()
+    CFLAGS="${MEMKIND_CFLAGS}"
+    AC_CHECK_HEADERS([memkind.h], [MEMKIND_H_FOUND="yes"], [MEMKIND_H_FOUND="no"])
+    AX_FLAGS_RESTORE()
+    AC_DEFINE([HAVE_MEMKIND], 1, [Define to 1 if MEMKIND is installed in the system])
+  fi
+
+  AM_CONDITIONAL(HAVE_MEMKIND, test "x${MEMKIND_H_FOUND}" = "xyes" )
+])

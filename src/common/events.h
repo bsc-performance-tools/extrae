@@ -141,6 +141,13 @@ unsigned IsMPICollective (unsigned EvType);
 #define FREE_EV                  40000041
 #define CALLOC_EV                40000042
 #define REALLOC_EV               40000043
+#define POSIX_MEMALIGN_EV	 40000044
+#define MEMKIND_MALLOC_EV         40000045
+#define MEMKIND_CALLOC_EV         40000046
+#define MEMKIND_REALLOC_EV        40000047
+#define MEMKIND_POSIX_MEMALIGN_EV 40000048
+#define MEMKIND_FREE_EV           40000049
+
 #define DYNAMIC_MEM_EV                     MALLOC_EV         /* Used in merger only */
 #define DYNAMIC_MEM_REQUESTED_SIZE_EV      DYNAMIC_MEM_EV+1  /* Used in merger only */
 #define DYNAMIC_MEM_POINTER_IN_EV          DYNAMIC_MEM_EV+2  /* Used in merger only, free input, realloc in */

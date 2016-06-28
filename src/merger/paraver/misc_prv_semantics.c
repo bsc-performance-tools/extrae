@@ -1520,7 +1520,7 @@ static int DynamicMemory_Event (event_t * event,
 	unsigned long long EvValue = Get_EvValue (event);
 	int isBegin = EvValue == EVT_BEGIN;
 
-	if (EvType == MALLOC_EV)
+	if ((EvType == MALLOC_EV) || (EvType == MEMKIND_MALLOC_EV) || (EvType == MEMKIND_POSIX_MEMALIGN_EV) || (EvType == POSIX_MEMALIGN_EV))
 	{
 		/* Malloc: in size, out pointer */
 		if (isBegin)
@@ -1560,7 +1560,7 @@ static int DynamicMemory_Event (event_t * event,
 			  thread_info->AddressSpace_callertype);
 		}
 	}
-	else if (EvType == FREE_EV)
+	else if ((EvType == FREE_EV) || (EvType == MEMKIND_FREE_EV))
 	{
 		/* Free: in pointer */
 		if (isBegin)
@@ -1571,7 +1571,7 @@ static int DynamicMemory_Event (event_t * event,
 			AddressSpace_remove (task_info->AddressSpace, EvParam);
 		}
 	}
-	else if (EvType == REALLOC_EV)
+	else if ((EvType == REALLOC_EV) || (EvType == MEMKIND_REALLOC_EV))
 	{
 		/* Realloc: in size, in pointer (in EVT_BEGIN+1), out ptr*/
 		if (EvValue == EVT_BEGIN)
@@ -1600,7 +1600,7 @@ static int DynamicMemory_Event (event_t * event,
 		}
 	
 	}
-	else if (EvType == CALLOC_EV)
+	else if ((EvType == CALLOC_EV) || (EvType == MEMKIND_CALLOC_EV))
 	{
 		/* Calloc: in size, out pointer */
 		if (isBegin)
@@ -1701,6 +1701,12 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ CALLOC_EV, DynamicMemory_Event },
 	{ FREE_EV, DynamicMemory_Event },
 	{ REALLOC_EV, DynamicMemory_Event },
+	{ POSIX_MEMALIGN_EV, DynamicMemory_Event },
+	{ MEMKIND_MALLOC_EV, DynamicMemory_Event },
+	{ MEMKIND_CALLOC_EV, DynamicMemory_Event },
+	{ MEMKIND_REALLOC_EV, DynamicMemory_Event },
+	{ MEMKIND_POSIX_MEMALIGN_EV, DynamicMemory_Event },
+	{ MEMKIND_FREE_EV, DynamicMemory_Event },
 	{ NULL_EV, NULL }
 };
 

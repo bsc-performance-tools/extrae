@@ -37,6 +37,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_MEMKIND_H
+# include <memkind.h>
+#endif
 
 #include "wrapper.h"
 #include "trace_macros.h"
@@ -55,6 +58,15 @@ static void* (*real_malloc)(size_t) = NULL;
 static void (*real_free)(void *) = NULL;
 /* static void* (*real_calloc)(size_t, size_t) = NULL; */
 static void* (*real_realloc)(void*, size_t) = NULL;
+static int   (*real_posix_memalign)(void **, size_t, size_t) = NULL;
+
+# if HAVE_MEMKIND
+static void* (*real_memkind_malloc)(memkind_t, size_t) = NULL;
+static void* (*real_memkind_calloc)(memkind_t, size_t, size_t) = NULL;
+static void* (*real_memkind_realloc)(memkind_t, void *, size_t) = NULL;
+static int   (*real_memkind_posix_memalign)(memkind_t, void **, size_t, size_t) = NULL;
+static void  (*real_memkind_free)(memkind_t, void *) = NULL; 
+# endif
 
 void Extrae_malloctrace_init (void)
 {
@@ -63,6 +75,15 @@ void Extrae_malloctrace_init (void)
 	real_malloc = (void*(*)(size_t)) dlsym (RTLD_NEXT, "malloc");
 	/* real_calloc = (void*(*)(size_t, size_t)) dlsym (RTLD_NEXT, "calloc"); */
 	real_realloc = (void*(*)(void*, size_t)) dlsym (RTLD_NEXT, "realloc");
+	real_posix_memalign = (int(*)(void **, size_t, size_t)) dlsym (RTLD_NEXT, "posix_memalign");
+	
+#  if HAVE_MEMKIND
+	real_memkind_malloc = (void*(*)(memkind_t, size_t)) dlsym (RTLD_NEXT, "memkind_malloc");
+	real_memkind_calloc = (void*(*)(memkind_t, size_t, size_t)) dlsym (RTLD_NEXT, "memkind_calloc");
+	real_memkind_realloc = (void*(*)(memkind_t, void *, size_t)) dlsym (RTLD_NEXT, "memkind_realloc");
+	real_memkind_posix_memalign = (int(*)(memkind_t, void **, size_t, size_t)) dlsym (RTLD_NEXT, "memkind_posix_memalign");
+	real_memkind_free = (void(*)(memkind_t, void *)) dlsym (RTLD_NEXT, "memkind_free");
+#  endif
 # else
 	fprintf (stderr, PACKAGE_NAME": Warning! dynamic memory instrumentation requires linking with shared library!\n");
 # endif
@@ -71,8 +92,8 @@ void Extrae_malloctrace_init (void)
 
 /* Note on the implementation!
    We will only instrument those malloc(), realloc() that are larger than
-   a given threshold. Therefore, we will only instrument the free() associted to
-   those allocations. To this end, we store in mallocentries a vector of pointers
+   a given threshold. Therefore, we will only instrument the free() associated to
+   those allocations. To this end, we store in malloc entries a vector of pointers
    returned by malloc/realloc that surpass the threshold and that may need later
    instrumentation of their respective free. */
 static void ** mallocentries = NULL;
@@ -174,7 +195,10 @@ void *malloc (size_t s)
 		Probe_Malloc_Entry (s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_malloc (s);
-		Extrae_malloctrace_add (res);
+		if (res != NULL)
+		{
+			Extrae_malloctrace_add (res);
+		}
 		Probe_Malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -311,8 +335,11 @@ void *realloc (void *p, size_t s)
 		Probe_Realloc_Entry (p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
-		Extrae_malloctrace_remove (p);
-		Extrae_malloctrace_add (res);
+		if (res != NULL)
+		{
+			Extrae_malloctrace_remove (p);
+			Extrae_malloctrace_add (res);
+		}
 		Probe_Realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -329,6 +356,294 @@ void *realloc (void *p, size_t s)
 
     return res;
 }
+
+int posix_memalign(void **memptr, size_t alignment, size_t size)
+{
+  int res = 0;
+  int canInstrument = EXTRAE_INITIALIZED()                 &&
+                      !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_malloc()            &&
+                      Extrae_get_trace_malloc_allocate()   &&
+                      size >= Extrae_get_trace_malloc_allocate_threshold();
+
+  if (real_posix_memalign == NULL)
+  {
+    Extrae_malloctrace_init ();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf(stderr, PACKAGE_NAME": posix_memalign is at %p\n", real_posix_memalign);
+    fprintf(stderr, PACKAGE_NAME": posix_memalign params %p %lu %lu\n", memptr, alignment, size);
+  }
+#endif
+
+  if (real_posix_memalign != NULL && canInstrument)
+  {
+    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Probe_posix_memalign_Entry (size);
+    TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+    res = real_posix_memalign(memptr, alignment, size);
+    if (res == 0)
+    {
+      Extrae_malloctrace_add (*memptr);
+    }
+    Probe_memkind_malloc_Exit (*memptr);
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_posix_memalign != NULL)
+  {
+    res = real_posix_memalign(memptr, alignment, size);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": posix_memalign is not hooked! exiting!!\n");
+    abort();
+  }
+  return res;
+}
+
+#  if HAVE_MEMKIND
+
+void *memkind_malloc(memkind_t kind, size_t size)
+{
+  void *res = NULL;
+  int canInstrument = EXTRAE_INITIALIZED()                 &&
+                      !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_malloc()            &&
+                      Extrae_get_trace_malloc_allocate()   &&
+                      size >= Extrae_get_trace_malloc_allocate_threshold();
+
+  if (real_memkind_malloc == NULL)
+  {
+    Extrae_malloctrace_init ();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf(stderr, PACKAGE_NAME": memkind_malloc is at %p\n", real_memkind_malloc);
+    fprintf(stderr, PACKAGE_NAME": memkind_malloc params %p %lu\n", kind, size);
+  } 
+#endif
+
+  if (real_memkind_malloc != NULL && canInstrument)
+  {
+    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Probe_memkind_malloc_Entry (size);
+    TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+    res = real_memkind_malloc(kind, size);
+    if (res != NULL)
+    {
+      Extrae_malloctrace_add (res);
+    }
+    Probe_memkind_malloc_Exit (res);
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_memkind_malloc != NULL)
+  {
+    res = real_memkind_malloc(kind, size);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": memkind_malloc is not hooked! exiting!!\n");
+    abort();
+  }
+  return res;
+}
+
+void *memkind_calloc(memkind_t kind, size_t num, size_t size)
+{
+  void *res = NULL;
+  int canInstrument = EXTRAE_INITIALIZED()                 &&
+                      !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_malloc()            &&
+                      Extrae_get_trace_malloc_allocate()   &&
+                      size >= Extrae_get_trace_malloc_allocate_threshold();
+
+  if (real_memkind_calloc == NULL)
+  {
+    Extrae_malloctrace_init ();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf(stderr, PACKAGE_NAME": memkind_calloc is at %p\n", real_memkind_calloc);
+    fprintf(stderr, PACKAGE_NAME": memkind_calloc params %p %lu %lu\n", kind, num, size);
+  }
+#endif
+
+  if (real_memkind_calloc != NULL && canInstrument)
+  {
+    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Probe_memkind_calloc_Entry (num, size);
+    TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+    res = real_memkind_calloc(kind, num, size);
+    if (res != NULL)
+    {
+      Extrae_malloctrace_add (res); 
+    }
+    Probe_memkind_calloc_Exit (res);
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_memkind_calloc != NULL)
+  {
+    res = real_memkind_calloc(kind, num, size);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": memkind_calloc is not hooked! exiting!!\n");
+    abort();
+  }
+  return res;
+}
+
+void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
+{
+  void *res = NULL;
+  int canInstrument = EXTRAE_INITIALIZED()                 &&
+                      !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_malloc()            &&
+                      Extrae_get_trace_malloc_allocate()   &&
+                      size >= Extrae_get_trace_malloc_allocate_threshold();
+
+  if (real_memkind_realloc == NULL)
+  {
+    Extrae_malloctrace_init ();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf(stderr, PACKAGE_NAME": memkind_realloc is at %p\n", real_memkind_realloc);
+    fprintf(stderr, PACKAGE_NAME": memkind_realloc params %p %p %lu\n", kind, ptr, size);
+  }
+#endif
+
+  if (real_memkind_realloc != NULL && canInstrument)
+  {
+    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Probe_memkind_realloc_Entry (ptr, size);
+    TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+    res = real_memkind_realloc(kind, ptr, size);
+    if (res != NULL)
+    {
+      Extrae_malloctrace_remove (ptr);
+      Extrae_malloctrace_add (res);
+    }
+    Probe_memkind_realloc_Exit (res);
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_memkind_realloc != NULL)
+  {
+    res = real_memkind_realloc(kind, ptr, size);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": memkind_realloc is not hooked! exiting!!\n");
+    abort();
+  }
+  return res;
+}
+
+int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size_t size)
+{
+  int res = 0;
+  int canInstrument = EXTRAE_INITIALIZED()                 &&
+                      !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_malloc()            &&
+                      Extrae_get_trace_malloc_allocate()   &&
+                      size >= Extrae_get_trace_malloc_allocate_threshold();
+
+  if (real_memkind_posix_memalign == NULL)
+  {
+    Extrae_malloctrace_init ();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf(stderr, PACKAGE_NAME": memkind_posix_memalign is at %p\n", real_memkind_posix_memalign);
+    fprintf(stderr, PACKAGE_NAME": memkind_posix_memalign params %p %p %lu %lu\n", kind, memptr, alignment, size);
+  } 
+#endif
+
+  if (real_memkind_posix_memalign != NULL && canInstrument)
+  {
+    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Probe_memkind_posix_memalign_Entry (size);
+    TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+    res = real_memkind_posix_memalign(kind, memptr, alignment, size);
+    if (res == 0)
+    {
+      Extrae_malloctrace_add (*memptr);
+    }
+    Probe_memkind_posix_memalign_Exit (*memptr);
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_memkind_posix_memalign != NULL)
+  {
+    res = real_memkind_posix_memalign(kind, memptr, alignment, size);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": memkind_posix_memalign is not hooked! exiting!!\n");
+    abort();
+  }
+  return res;
+}
+
+void memkind_free(memkind_t kind, void *ptr)
+{
+  int canInstrument = EXTRAE_INITIALIZED()                 &&
+                      !Backend_inInstrumentation(THREADID) &&
+                      mpitrace_on                          &&
+                      Extrae_get_trace_malloc();
+
+  if (real_memkind_free == NULL)
+  {
+    Extrae_malloctrace_init ();
+  }
+
+#if defined(DEBUG)
+  if (canInstrument && !__in_free) // fprintf() seems to call free()!
+  {
+    __in_free = TRUE;
+    fprintf (stderr, PACKAGE_NAME": memkind_free is at %p\n", real_memkind_free);
+    fprintf (stderr, PACKAGE_NAME": memkind_free params %p %p\n", kind, ptr);
+    __in_free = FALSE;
+  }
+#endif
+  
+  int present = Extrae_malloctrace_remove (ptr);
+  
+  if (Extrae_get_trace_malloc_free() && real_memkind_free != NULL && canInstrument && present)
+  {
+    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Probe_memkind_free_Entry (ptr);
+    real_memkind_free (kind, ptr);
+    Probe_memkind_free_Exit ();
+    Backend_Leave_Instrumentation ();
+  }
+  else if (real_memkind_free != NULL)
+  {
+    real_memkind_free (kind, ptr);
+  }
+  else
+  {
+    fprintf (stderr, PACKAGE_NAME": memkind_free is not hooked! exiting!!\n");
+    abort();
+  }
+}
+
+#  endif /* HAVE_MEMKIND */
 
 # endif /* -DPIC */
 

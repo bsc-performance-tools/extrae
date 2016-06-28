@@ -1,10 +1,12 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 06Jul2016 Added posix_memalign to the list of memory wrappers 
  + 05Jul2016 Always enable POSIX clock and control it via EXTRAE_USE_POSIX_CLOCK
  environment variable.
  * 04Jul2016 Enable peps sampling by default
  + 28Jun2016 Adds .gitignore with build generated files
+ + 28Jun2016 Added instrumentation wrappers for memkind_malloc* routines
  * 28Jun2016 Fixes tests that fail when Extrae is built from within a folder
  * 15Jun2016 Consider callers when computing buffer size for IO calls
  * 13Jun2016 Fix compilation error when enabling heterogeneous
