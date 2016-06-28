@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 28Jun2016 Adds .gitignore with build generated files
  * 28Jun2016 Fixes tests that fail when Extrae is built from within a folder
  * 15Jun2016 Consider callers when computing buffer size for IO calls
  * 13Jun2016 Fix compilation error when enabling heterogeneous
