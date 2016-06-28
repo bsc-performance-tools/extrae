@@ -13,10 +13,10 @@ EXTRAE_ON=1 ./ompss-codelocation-2
 CheckEntryInPCF ${TRACE}.pcf "pi_kernel"
 CheckEntryInPCF ${TRACE}.pcf "sleep_kernel"
 CheckEntryInPCF ${TRACE}.pcf "fake_kernel"
-CheckEntryInPCF ${TRACE}.pcf "39 (ompss-codelocation-2.c"
-CheckEntryInPCF ${TRACE}.pcf "67 (ompss-codelocation-2.c"
-CheckEntryInPCF ${TRACE}.pcf "91 (ompss-codelocation-2.c"
-CheckEntryInPCF ${TRACE}.pcf "113 (ompss-codelocation-2.c"
+CheckEntryInPCF ${TRACE}.pcf "39.*ompss-codelocation-2.c"
+CheckEntryInPCF ${TRACE}.pcf "67.*ompss-codelocation-2.c"
+CheckEntryInPCF ${TRACE}.pcf "91.*ompss-codelocation-2.c"
+CheckEntryInPCF ${TRACE}.pcf "113.*ompss-codelocation-2.c"
 
 NumberEntriesInPRV ${TRACE}.prv 2000 3
 if [[ "${?}" -ne 1 ]] ; then

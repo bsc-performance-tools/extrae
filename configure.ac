@@ -632,6 +632,26 @@ AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefil
 ### TEMPORARILY_DISABLED
 ### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])
 
+AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_functions.bash] \
+		[tests/functional/tracer/MPI/trace-static.sh:tests/functional/tracer/MPI/trace-static.sh] \
+		[tests/functional/tracer/MPI/trace-ldpreload.sh:tests/functional/tracer/MPI/trace-ldpreload.sh] \
+		[tests/functional/tracer/MPI/trace-ldpreloadf.sh:tests/functional/tracer/MPI/trace-ldpreloadf.sh] \
+		[tests/functional/tracer/MPI/extrae.xml:tests/functional/tracer/MPI/extrae.xml] \
+		[tests/functional/tracer/PTHREAD/trace-ldpreload.sh:tests/functional/tracer/PTHREAD/trace-ldpreload.sh] \
+		[tests/functional/tracer/PTHREAD/extrae.xml:tests/functional/tracer/PTHREAD/extrae.xml] \
+		[tests/functional/merger/dump-events/dump-events.reference:tests/functional/merger/dump-events/dump-events.reference] \
+		[tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml:tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml] \
+		[tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml:tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml] \
+		[tests/functional/hw-counters/extrae-PAPI_TOT_INS_CYC.xml:tests/functional/hw-counters/extrae-PAPI_TOT_INS_CYC.xml] \
+		[tests/functional/xml/extrae_envvar_merge.xml:tests/functional/xml/extrae_envvar_merge.xml] \
+		[tests/functional/xml/extrae_envvar_counters.xml:tests/functional/xml/extrae_envvar_counters.xml] \
+		[example/LINUX/MPI/detailed_trace_basic.xml:example/LINUX/MPI/detailed_trace_basic.xml] \
+		[example/LINUX/MPI/extrae.xml:example/LINUX/MPI/extrae.xml] \
+		[example/LINUX/MPI/extrae_bursts_1ms.xml:example/LINUX/MPI/extrae_bursts_1ms.xml] \
+		[example/LINUX/MPI/extrae_explained.xml:example/LINUX/MPI/extrae_explained.xml] \
+		[example/LINUX/MPI/summarized_trace_basic.xml:example/LINUX/MPI/summarized_trace_basic.xml] \
+	)
+
 #########################################
 #   Defines source and build path vars  #
 #########################################

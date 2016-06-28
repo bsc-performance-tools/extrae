@@ -1,8 +1,9 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 28Jun2016 Fixes tests that fail when Extrae is built from within a folder
  * 15Jun2016 Consider callers when computing buffer size for IO calls
- * 13Jun2016 Fix compilation error when enabling heterogeneous.
+ * 13Jun2016 Fix compilation error when enabling heterogeneous
  * 09Jun2016 JAVA tracer tests now run after installation.
              Fix ompss tests reference files.
 	     Fix MPI Iprobe_wait test.
