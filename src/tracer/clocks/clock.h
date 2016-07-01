@@ -41,7 +41,6 @@ typedef unsigned long iotimer_t;
 #define TIME (Clock_getCurrentTime(THREADID))
 #define LAST_READ_TIME (Clock_getLastReadTime(THREADID))
 #define CLOCK_INIT(x) (Clock_Initialize(x))
-#define CLOCK_INIT_THREAD (Clock_Initialize())
 
 #if defined(__cplusplus)
 extern "C" {
@@ -54,7 +53,6 @@ UINT64 Clock_getCurrentTime (unsigned thread);
 UINT64 Clock_getLastReadTime (unsigned thread);
 void Clock_AllocateThreads (unsigned numthreads);
 void Clock_Initialize (unsigned numthreads);
-void Clock_Initialize_thread (void);
 void Clock_CleanUp (void);
 #if defined(__cplusplus)
 }

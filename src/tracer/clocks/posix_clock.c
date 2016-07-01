@@ -45,11 +45,6 @@ void posix_Initialize (void)
 	/* Do nothing */
 }
 
-void posix_Initialize_thread (void)
-{
-	/* Do nothing */
-}
-
 iotimer_t posix_getTime (void)
 {
 	iotimer_t t_sec, t_nsec;

@@ -142,11 +142,6 @@ void ia32_Initialize (void)
 }
 #endif /* OS_FREEBSD || OS_LINUX || OS_DARWIN */
 
-void ia32_Initialize_thread (void)
-{
-	/* Do nothing */
-}
-
 iotimer_t ia32_getTime (void)
 {
 #if defined(OS_FREEBSD) || defined(OS_LINUX) || defined(OS_DARWIN)

@@ -97,11 +97,6 @@ void ppc_Initialize (void)
 	proc_timebase_MHz = proc_timebase() / 1000000;
 }
 
-void ppc_Initialize_thread (void)
-{
-}
-
-
 #elif defined(OS_AIX) && defined(ARCH_PPC)
 
 #ifdef HAVE_SYS_TIME_H
@@ -149,10 +144,6 @@ void ppc_Initialize (void)
 {
 	read_real_time (&initial, TIMEBASE_SZ);
 	time_base_to_time (&initial, TIMEBASE_SZ);
-}
-
-void ppc_Initialize_thread (void)
-{
 }
 
 #endif /* PPC & LINUX */

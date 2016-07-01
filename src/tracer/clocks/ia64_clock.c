@@ -142,8 +142,4 @@ iotimer_t ia64_getTime (void)
 
 #endif /* !defined(HAVE_LINUX_MMTIMER_H) && !defined(HAVE_MMTIMER_DEVICE) */
 
-void ia64_Initialize_thread (void)
-{
-}
-
 #endif

@@ -75,11 +75,6 @@ void bgq_Initialize (void)
 	factor = (1000ULL * CYCLES_FACTOR / freqMHz) + 1;
 }
 
-
-void bgq_Initialize_thread (void)
-{
-}
-
 iotimer_t bgq_getTime (void)
 {
 	return (_bgq_GetTimeBase() * factor) >> BITS_FOR_CYCLES_FACTOR;

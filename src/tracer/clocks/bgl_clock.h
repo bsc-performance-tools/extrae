@@ -27,6 +27,5 @@
 
 iotimer_t bgl_getTime (void);
 void bgl_Initialize (void);
-void bgl_Initialize_thread (void);
 
 #endif

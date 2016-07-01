@@ -21,35 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#include "common.h"
+#include "clock.h"
 
-#if defined(IS_BGL_MACHINE)
-
-#ifdef HAVE_RTS_H
-# include <rts.h>
-#endif
-#ifdef HAVE_STDIO_H
-# include <stdio.h>
-#endif
-#include "bgl_clock.h"
-
-#define BITS_FOR_CYCLES_FACTOR 	14
-#define CYCLES_FACTOR          	(1ULL<<BITS_FOR_CYCLES_FACTOR)
-
-static unsigned long long factor;
-
-void bgl_Initialize (void)
-{
-	BGLPersonality personality;
-	unsigned personality_size = sizeof (personality);
-
-	rts_get_personality (&personality, personality_size);
-	factor = (1000000000ULL * CYCLES_FACTOR / personality.clockHz) + 1;
-}
-
-iotimer_t bgl_getTime (void)
-{
-	return (rts_get_timebase() * factor) >> BITS_FOR_CYCLES_FACTOR;
-}
-
-#endif /* IS_BGL_MACHINE */
+iotimer_t rusage_getTime (void);
+void rusage_Initialize (void);

@@ -28,7 +28,6 @@
 
 iotimer_t posix_getTime (void);
 void posix_Initialize (void);
-void posix_Initialize_thread (void);
 
 #endif
 

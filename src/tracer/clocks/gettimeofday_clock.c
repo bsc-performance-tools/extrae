@@ -42,11 +42,6 @@ void gettimeofday_Initialize (void)
 	/* Do nothing */
 }
 
-void gettimeofday_Initialize_thread (void)
-{
-	/* Do nothing */
-}
-
 iotimer_t gettimeofday_getTime (void)
 {
 	struct timeval tv;

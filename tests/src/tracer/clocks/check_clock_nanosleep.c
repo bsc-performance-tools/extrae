@@ -36,7 +36,6 @@ int main (int argc, char *argv[])
 	UNREFERENCED_PARAMETER(argv);
 
 	Clock_Initialize (1);
-	Clock_Initialize_thread ();
 	
 	for (u = 1 ; u < 5; u++)
 	{

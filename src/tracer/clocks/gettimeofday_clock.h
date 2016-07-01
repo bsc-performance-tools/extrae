@@ -28,7 +28,6 @@
 
 iotimer_t gettimeofday_getTime (void);
 void gettimeofday_Initialize (void);
-void gettimeofday_Initialize_thread (void);
 
 #endif
 

@@ -73,10 +73,6 @@ void bgp_Initialize (void)
 	factor = (1000000000ULL * CYCLES_FACTOR / (1000000ULL * BGP_Personality_clockMHz(&personality))) + 1;
 }
 
-void bgp_Initialize_thread (void)
-{
-}
-
 iotimer_t bgp_getTime (void)
 {
 	return (_bgp_GetTimeBase() * factor) >> BITS_FOR_CYCLES_FACTOR;

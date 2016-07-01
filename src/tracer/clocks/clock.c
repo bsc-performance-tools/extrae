@@ -26,63 +26,55 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
-#ifdef HAVE_SYS_RESOURCE_H
-# include <sys/resource.h>
-#endif
+
+/* Needed by getenv() */
+#include <string.h>
 
 #include "utils.h"
 
 #include "clock.h"
 
+#include <posix_clock.h>
+#include <rusage_clock.h>
+
 #if defined(USE_GETTIMEOFDAY_CLOCK)
 # include <gettimeofday_clock.h>
-# define  GET_CLOCK    gettimeofday_getTime()
-# define  INIT_CLOCK   gettimeofday_Initialize()
-# define  INIT_CLOCK_T gettimeofday_Initialize_thread()
+# define  GET_CLOCK    gettimeofday_getTime
+# define  INIT_CLOCK   gettimeofday_Initialize
 #elif defined(USE_POSIX_CLOCK)
-# include <posix_clock.h>
-# define  GET_CLOCK    posix_getTime()
-# define  INIT_CLOCK   posix_Initialize()
-# define  INIT_CLOCK_T posix_Initialize_thread()
+# define  GET_CLOCK    posix_getTime
+# define  INIT_CLOCK   posix_Initialize
 #elif defined(IS_BGL_MACHINE)
 # include <bgl_clock.h>
-# define  GET_CLOCK    bgl_getTime()
-# define  INIT_CLOCK   bgl_Initialize()
-# define  INIT_CLOCK_T bgl_Initialize_thread()
+# define  GET_CLOCK    bgl_getTime
+# define  INIT_CLOCK   bgl_Initialize
 #elif defined(IS_BGP_MACHINE)
 # include <bgp_clock.h>
-# define  GET_CLOCK    bgp_getTime()
-# define  INIT_CLOCK   bgp_Initialize()
-# define  INIT_CLOCK_T bgp_Initialize_thread()
+# define  GET_CLOCK    bgp_getTime
+# define  INIT_CLOCK   bgp_Initialize
 #elif defined(IS_BGQ_MACHINE)
 # include <bgq_clock.h>
-# define  GET_CLOCK    bgq_getTime()
-# define  INIT_CLOCK   bgq_Initialize()
-# define  INIT_CLOCK_T bgq_Initialize_thread()
+# define  GET_CLOCK    bgq_getTime
+# define  INIT_CLOCK   bgq_Initialize
 #elif (defined (OS_LINUX) || defined(OS_FREEBSD) || defined(OS_DARWIN) || defined(OS_SOLARIS)) && defined (ARCH_IA32)
 # include <ia32_clock.h>
-# define  GET_CLOCK    ia32_getTime()
-# define  INIT_CLOCK   ia32_Initialize()
-# define  INIT_CLOCK_T ia32_Initialize_thread()
+# define  GET_CLOCK    ia32_getTime
+# define  INIT_CLOCK   ia32_Initialize
 #elif defined(OS_LINUX) && defined(ARCH_IA64)
 # include <ia64_clock.h>
-# define  GET_CLOCK    ia64_getTime()
-# define  INIT_CLOCK   ia64_Initialize()
-# define  INIT_CLOCK_T ia64_Initialize_thread()
+# define  GET_CLOCK    ia64_getTime
+# define  INIT_CLOCK   ia64_Initialize
 #elif (defined(OS_LINUX) || defined(OS_AIX)) && defined(ARCH_PPC)
 # include <ppc_clock.h>
-# define  GET_CLOCK    ppc_getTime()
-# define  INIT_CLOCK   ppc_Initialize()
-# define  INIT_CLOCK_T ppc_Initialize_thread()
+# define  GET_CLOCK    ppc_getTime
+# define  INIT_CLOCK   ppc_Initialize
 #else
 # error "Unhandled clock type"
 #endif
 
 static UINT64 *_extrae_last_read_clock = NULL;
 static unsigned ClockType = REAL_CLOCK;
+iotimer_t (*get_clock)();
 
 void Clock_setType (unsigned type)
 {
@@ -103,37 +95,7 @@ UINT64 Clock_getLastReadTime (unsigned thread)
 /* We obtain the current time, but we don't store it in the last read time */
 UINT64 Clock_getCurrentTime_nstore (void)
 {
-	UINT64 tmp;
-
-	if (ClockType == REAL_CLOCK)
-	{
-		tmp = GET_CLOCK;
-
-/*  if no "nanosecond" clock is available 
-		struct timeval aux;
-		gettimeofday (&aux, NULL);
-		return (((UINT64) aux.tv_sec) * 1000000 + aux.tv_usec);
-*/
-	}
-	else
-	{
-		struct rusage aux;
-
-		if (getrusage(RUSAGE_SELF,&aux) >= 0)
-		{
-			/* Get user time */
-			tmp =  aux.ru_utime.tv_sec*1000000 + aux.ru_utime.tv_usec;
-			/* Accumulate system time */
-			tmp += aux.ru_stime.tv_sec*1000000 + aux.ru_stime.tv_usec;
-		}
-		else
-			tmp = 0;
-
-		tmp = tmp * 1000;
-	}
-
-
-	return tmp;
+	return (UINT64)get_clock();
 }
 
 /* We obtain the current time and we store it in the last read time,
@@ -163,12 +125,38 @@ void Clock_CleanUp (void)
 
 void Clock_Initialize (unsigned numthreads)
 {
+	void (*init_clock)();
+
 	Clock_AllocateThreads (numthreads);
+	if (ClockType == REAL_CLOCK)
+	{
+		char *use_posix_clock = NULL;
 
-	INIT_CLOCK;
-}
+		use_posix_clock = getenv("EXTRAE_USE_POSIX_CLOCK");
+		if (use_posix_clock != NULL && strcmp(use_posix_clock, "1") == 0)
+		{
+			init_clock = posix_Initialize;
+			get_clock = posix_getTime;
+		} else
+		{
+			init_clock = INIT_CLOCK;
+			get_clock = GET_CLOCK;
+		}
 
-void Clock_Initialize_thread (void)
-{
-	INIT_CLOCK_T;
+/*  if no "nanosecond" clock is available 
+		struct timeval aux;
+		gettimeofday (&aux, NULL);
+		return (((UINT64) aux.tv_sec) * 1000000 + aux.tv_usec);
+*/
+	} else if (ClockType == USER_CLOCK)
+	{
+		init_clock = rusage_Initialize;
+		get_clock = rusage_getTime;
+	} else
+	{
+		fprintf (stderr, PACKAGE_NAME": Couldn't get clock type\n");
+		exit (-1);
+	}
+
+	init_clock();
 }

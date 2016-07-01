@@ -1,12 +1,10 @@
 include $(top_srcdir)/PATHS
 
-CLOCKS = clock.c clock.h
+CLOCKS = clock.c clock.h posix_clock.c posix_clock.h rusage_clock.c rusage_clock.h
 if USE_GETTIMEOFDAY_CLOCK
   CLOCKS += gettimeofday_clock.c gettimeofday_clock.h
 else
-if USE_POSIX_CLOCK
-  CLOCKS += posix_clock.c posix_clock.h
-else
+if !USE_POSIX_CLOCK
 if IS_BG_MACHINE
 if IS_BGL_MACHINE
   CLOCKS += bgl_clock.c bgl_clock.h

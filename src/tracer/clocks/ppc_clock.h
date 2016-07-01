@@ -29,6 +29,5 @@ unsigned long long proc_timebase(void);
 
 iotimer_t ppc_getTime (void);
 void ppc_Initialize (void);
-void ppc_Initialize_thread (void);
 
 #endif

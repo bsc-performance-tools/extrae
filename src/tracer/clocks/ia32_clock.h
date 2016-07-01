@@ -27,6 +27,5 @@
 
 iotimer_t ia32_getTime (void);
 void ia32_Initialize (void);
-void ia32_Initialize_thread (void);
 
 #endif

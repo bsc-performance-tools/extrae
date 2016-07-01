@@ -27,6 +27,5 @@
 
 iotimer_t bgp_getTime (void);
 void bgp_Initialize (void);
-void bgp_Initialize_thread (void);
 
 #endif

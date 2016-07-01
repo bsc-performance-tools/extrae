@@ -27,6 +27,5 @@
 
 iotimer_t ia64_getTime (void);
 void ia64_Initialize (void);
-void ia64_Initialize_thread (void);
 
 #endif

@@ -27,6 +27,5 @@
 
 iotimer_t bgq_getTime (void);
 void bgq_Initialize (void);
-void bgq_Initialize_thread (void);
 
 #endif

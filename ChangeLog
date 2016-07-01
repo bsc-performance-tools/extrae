@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 05Jul2016 Always enable POSIX clock and control it via EXTRAE_USE_POSIX_CLOCK
+ environment variable.
  * 04Jul2016 Enable peps sampling by default
  + 28Jun2016 Adds .gitignore with build generated files
  * 28Jun2016 Fixes tests that fail when Extrae is built from within a folder
