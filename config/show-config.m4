@@ -52,6 +52,13 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo Performance counters: no
 	fi
 
+        echo
+	if test "${enable_pebs_sampling}" = "yes" ; then
+		echo PEBS sampling: yes
+	else
+		echo PEBS sampling: no
+	fi
+
 	echo
 	if test "${BFD_INSTALLED}" = "yes" ; then
 		echo libbfd available: yes \(${BFD_LIBSDIR}\)
