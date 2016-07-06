@@ -647,6 +647,9 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[tests/functional/hw-counters/extrae-PAPI_TOT_INS_CYC.xml:tests/functional/hw-counters/extrae-PAPI_TOT_INS_CYC.xml] \
 		[tests/functional/xml/extrae_envvar_merge.xml:tests/functional/xml/extrae_envvar_merge.xml] \
 		[tests/functional/xml/extrae_envvar_counters.xml:tests/functional/xml/extrae_envvar_counters.xml] \
+		[tests/functional/merger/shared-libraries/main.c:tests/functional/merger/shared-libraries/main.c] \
+		[tests/functional/merger/shared-libraries/fA.c:tests/functional/merger/shared-libraries/fA.c] \
+		[tests/functional/merger/shared-libraries/fB.c:tests/functional/merger/shared-libraries/fB.c] \
 		[example/LINUX/MPI/detailed_trace_basic.xml:example/LINUX/MPI/detailed_trace_basic.xml] \
 		[example/LINUX/MPI/extrae.xml:example/LINUX/MPI/extrae.xml] \
 		[example/LINUX/MPI/extrae_bursts_1ms.xml:example/LINUX/MPI/extrae_bursts_1ms.xml] \
