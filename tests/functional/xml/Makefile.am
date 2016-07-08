@@ -9,9 +9,11 @@ ALLTESTS += check_Extrae_xml_envvar_counters.sh
 endif
 
 EXTRA_DIST = \
-    $(ALLTESTS) \
-	extrae_envvar_counters.xml \
-	extrae_envvar_merge.xml
+        check_Extrae_xml.sh \
+        check_Extrae_xml_envvar_merge.sh \
+        check_Extrae_xml_envvar_counters.sh \
+        extrae_envvar_counters.xml \
+        extrae_envvar_merge.xml
 
 TESTS = \
     $(ALLTESTS)
