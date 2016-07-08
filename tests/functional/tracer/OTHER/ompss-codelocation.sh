@@ -14,9 +14,10 @@ CheckEntryInPCF ${TRACE}.pcf "pi_kernel"
 CheckEntryInPCF ${TRACE}.pcf "sleep_kernel"
 CheckEntryInPCF ${TRACE}.pcf "my_function"
 CheckEntryInPCF ${TRACE}.pcf "fake_kernel"
+CheckEntryInPCF ${TRACE}.pcf "10.*my_file.c"
 CheckEntryInPCF ${TRACE}.pcf "32.*ompss-codelocation.c"
 CheckEntryInPCF ${TRACE}.pcf "41.*ompss-codelocation.c"
-CheckEntryInPCF ${TRACE}.pcf "69.*ompss-codelocation.c"
+CheckEntryInPCF ${TRACE}.pcf "64.*ompss-codelocation.c"
 CheckEntryInPCF ${TRACE}.pcf "69.*ompss-codelocation.c"
 CheckEntryInPCF ${TRACE}.pcf "86.*ompss-codelocation.c"
 
@@ -36,11 +37,11 @@ NumberEntriesInPRV ${TRACE}.prv 2000 0
 if [[ "${?}" -ne 3 ]] ; then
 	die "There must be only one :2000:0"
 fi
-NumberEntriesInPRV ${TRACE}.prv 2020 6
+NumberEntriesInPRV ${TRACE}.prv 2020 4
 if [[ "${?}" -ne 1 ]] ; then
 	die "There must be only one :2020:6"
 fi
-NumberEntriesInPRV ${TRACE}.prv 2020 7
+NumberEntriesInPRV ${TRACE}.prv 2020 6
 if [[ "${?}" -ne 1 ]] ; then
 	die "There must be only one :2020:7"
 fi
