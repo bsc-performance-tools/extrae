@@ -16,7 +16,7 @@ libfA_nodebug.so: fA.c
 libfB_nodebug.so: fB.c
 	gcc -fPIC -DPIC fB.c -o libfB_nodebug.so -shared
 
-main_nodebug: main.c libfA_nodebug.so libfB_nodebug.so
+main_nodebug$(EXEEXT): main.c libfA_nodebug.so libfB_nodebug.so
 	gcc -g main.c -Wl,-rpath -Wl,../../../../src/tracer/.libs -Wl,-rpath -Wl,. -L ../../../../src/tracer/.libs -L . -lfA_nodebug -lfB_nodebug -lseqtrace -o main_nodebug
 
 libfA_debug.so: fA.c
@@ -25,7 +25,7 @@ libfA_debug.so: fA.c
 libfB_debug.so: fB.c
 	gcc -g -fPIC -DPIC fB.c -o libfB_debug.so -shared
 
-main_debug: main.c libfA_debug.so libfB_debug.so
+main_debug$(EXEEXT): main.c libfA_debug.so libfB_debug.so
 	gcc -g main.c -Wl,-rpath -Wl,../../../../src/tracer/.libs -Wl,-rpath -Wl,. -L ../../../../src/tracer/.libs -L . -lfA_debug -lfB_debug -lseqtrace -o main_debug
 
 clean-local:

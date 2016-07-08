@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 08Jul2016 Removes bootstrap warning due to shared-libraries test Makefile.am
+ debug rules.
  * 06Jul2016 Fixes shared-libraries test
  + 06Jul2016 Added posix_memalign to the list of memory wrappers 
  + 05Jul2016 Always enable POSIX clock and control it via EXTRAE_USE_POSIX_CLOCK
