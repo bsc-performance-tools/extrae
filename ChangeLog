@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 14Jul2016 Fixed bug in malloc wrappers of null THREADID in combination with OpenMP 
  * 08Jul2016 Removes bootstrap warning due to shared-libraries test Makefile.am
  debug rules.
  * 06Jul2016 Fixes shared-libraries test

@@ -104,6 +104,11 @@ int omp_get_thread_num (void)
 	int res;
 	static int shown = FALSE;
 
+        if (omp_get_thread_num_real == NULL)
+	{
+		common_GetOpenMPHookPoints(0);
+	}
+
 	if (omp_get_thread_num_real != NULL)
 	{
 		res = omp_get_thread_num_real();

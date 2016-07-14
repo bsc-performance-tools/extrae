@@ -170,11 +170,12 @@ void *malloc (size_t s)
 {
 	void *res;
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            !Backend_inInstrumentation(THREADID) && 
                             mpitrace_on                          &&
                             Extrae_get_trace_malloc()            &&
                             Extrae_get_trace_malloc_allocate()   &&
                             s >= Extrae_get_trace_malloc_allocate_threshold();
+	/* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_malloc == NULL)
 		Extrae_malloctrace_init ();
@@ -222,9 +223,10 @@ static int __in_free = FALSE;
 void free (void *p)
 {
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            !Backend_inInstrumentation(THREADID) && 
                             mpitrace_on                          &&
                             Extrae_get_trace_malloc();
+        /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+        if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_free == NULL)
 		Extrae_malloctrace_init ();
@@ -271,9 +273,10 @@ void *calloc (size_t s1, size_t s2)
 {
 	void *res;
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            !Backend_inInstrumentation(THREADID) && 
                             mpitrace_on                          &&
                             Extrae_get_trace_malloc();
+        /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+        if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_calloc == NULL)
 		Extrae_malloctrace_init ();
@@ -310,11 +313,12 @@ void *realloc (void *p, size_t s)
 {
 	void *res;
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            !Backend_inInstrumentation(THREADID) && 
                             mpitrace_on                          &&
                             Extrae_get_trace_malloc()            &&
                             Extrae_get_trace_malloc_allocate()   &&
                             s >= Extrae_get_trace_malloc_allocate_threshold();
+        /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+        if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_realloc == NULL)
 		Extrae_malloctrace_init ();
@@ -361,11 +365,12 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 {
   int res = 0;
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_posix_memalign == NULL)
   {
@@ -411,11 +416,12 @@ void *memkind_malloc(memkind_t kind, size_t size)
 {
   void *res = NULL;
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_malloc == NULL)
   {
@@ -459,11 +465,12 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
 {
   void *res = NULL;
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_calloc == NULL)
   {
@@ -507,11 +514,12 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 {
   void *res = NULL;
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_realloc == NULL)
   {
@@ -556,11 +564,12 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
 {
   int res = 0;
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc()            &&
                       Extrae_get_trace_malloc_allocate()   &&
                       size >= Extrae_get_trace_malloc_allocate_threshold();
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_posix_memalign == NULL)
   {
@@ -603,9 +612,10 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
 void memkind_free(memkind_t kind, void *ptr)
 {
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_malloc();
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
   if (real_memkind_free == NULL)
   {
