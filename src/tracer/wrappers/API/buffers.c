@@ -95,12 +95,26 @@ Buffer_t * new_Buffer (int n_events, char *file, int enable_cache)
 	{
 		buffer->fd = -1;
 	}
-	else if ((buffer->fd = open (file, O_CREAT | O_TRUNC | O_RDWR, 0644)) == -1)
+	else 
 	{
-		fprintf(stderr, "new_Buffer: Error opening file '%s'.\n", file);
-		perror("open");
-		exit(1);
-	}
+          /*
+           * We found a system where the mpirun seems to close the stdin, 
+           * then this open assigns the fd 0, and later writes trigger an 
+           * error of invalid fd. If the fd assigned is 0, repeat the open. 
+           */
+          do
+          {
+            buffer->fd = open (file, O_CREAT | O_TRUNC | O_RDWR, 0644);
+          }
+          while (buffer->fd == 0);
+
+          if (buffer->fd == -1)
+          {
+                fprintf(stderr, "new_Buffer: Error opening file '%s'.\n", file);
+                perror("open");
+                exit(1);
+          }
+        } 
 
 #if defined(HAVE_ONLINE) 
 #if 0
