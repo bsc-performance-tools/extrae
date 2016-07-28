@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 28Jul2016 Adds XML option (cpu-events) to specify the emission frequency of CPU events
+ * 26Jul2016 Repeat file open if the assigned fd for the trace file is 0
  * 14Jul2016 Fixed bug in malloc wrappers of null THREADID in combination with OpenMP 
  * 08Jul2016 Removes bootstrap warning due to shared-libraries test Makefile.am
  debug rules.

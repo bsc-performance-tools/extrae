@@ -169,6 +169,9 @@ extern int tracejant_memusage;
 extern unsigned long long MinimumTracingTime;
 extern int hasMinimumTracingTime;
 
+extern unsigned long long MinimumCPUEventTime;
+extern unsigned short AlwaysEmitCPUEvent;
+
 extern unsigned long long WantedCheckControlPeriod;
 
 extrae_init_type_t Extrae_is_initialized_Wrapper (void);

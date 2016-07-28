@@ -1350,6 +1350,59 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 }
 #endif
 
+static void Parse_XML_CPU_Events (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+	UNREFERENCED_PARAMETER(xmldoc);
+
+	/* Parse all TAGs, and annotate them to use them later */
+	tag = current_tag;
+	while (tag != NULL)
+	{
+		/* Skip coments */
+		if (!xmlStrcasecmp (tag->name, xmlTEXT) || !xmlStrcasecmp (tag->name, xmlCOMMENT))
+		{
+		}
+		/* When do we have to emit a CPU event */
+		else if (!xmlStrcasecmp (tag->name, TRACE_CPU_EVENTS))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+
+				xmlChar *frequency = xmlGetProp_env (rank, tag, TRACE_CPU_EVENTS_FREQUENCY);
+				if (frequency != NULL)
+				{
+					if (atoi((char*)frequency) > 0)
+					{
+						MinimumCPUEventTime = getTimeFromStr ((const char*)frequency, (const char*) TRACE_CPU_EVENTS_FREQUENCY, rank);
+						mfprintf(stdout, PACKAGE_NAME": CPU events will be emitted every %s.\n", frequency);
+					} else
+					{
+						mfprintf (stderr, "Extrae: Warning! Value '%s' in <cpu-events [..] frequency=\"..\" /> is not recognized. Using '1's.\n", frequency);
+					}
+				}
+				XML_FREE(frequency);
+
+				xmlChar *changeOnly = xmlGetProp_env (rank, tag, TRACE_CPU_EVENTS_EMIT_ALWAYS);
+				if (changeOnly != NULL && !xmlStrcasecmp (changeOnly, xmlYES))
+				{
+					AlwaysEmitCPUEvent = 1;
+					mfprintf(stdout, PACKAGE_NAME": CPU events will always be emitted.\n");
+
+				} else
+				{
+					AlwaysEmitCPUEvent = 0;
+					mfprintf(stdout, PACKAGE_NAME": CPU events will only be emitted if CPU has changed.\n");
+				}
+				XML_FREE(changeOnly);
+			}
+			XML_FREE(enabled);
+		}
+		tag = tag->next;
+	}
+}
+
 /* Configure <others> related parameters */
 static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 {
@@ -1734,6 +1787,14 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 							Parse_XML_Buffer (rank, xmldoc, current_tag);
+						XML_FREE(enabled);
+					}
+					/* Check for CPU event emission control */
+					else if (!xmlStrcasecmp (current_tag->name, TRACE_CPU_EVENTS))
+					{
+						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+							Parse_XML_CPU_Events (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 					}
 					/* Check if some other configuration info must be gathered */

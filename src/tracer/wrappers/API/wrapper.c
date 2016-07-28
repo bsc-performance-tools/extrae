@@ -261,6 +261,12 @@ unsigned long long initTracingTime = 0;
 unsigned long long MinimumTracingTime;
 int hasMinimumTracingTime = FALSE;
 
+/* CPU events emission frequency */
+unsigned long long MinimumCPUEventTime = 0;
+unsigned short AlwaysEmitCPUEvent = 0;
+iotimer_t *LastCPUEmissionTime = NULL;
+int *LastCPUEvent = NULL;
+
 unsigned long long WantedCheckControlPeriod = 0;
 
 /******* Variable amb l'estructura que a SGI es guarda al PRDA *******/
@@ -290,6 +296,26 @@ static unsigned maximum_NumOfThreads = 1;
 char appl_name[APPL_NAME_LENGTH];
 char final_dir[TMP_DIR];
 char tmp_dir[TMP_DIR];
+
+
+/* Checks if there is a CPU event waiting to be emitted */
+int PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
+{
+	if (MinimumCPUEventTime > 0)
+	{
+		if (LastCPUEmissionTime[thread_id] == 0)
+		{
+			LastCPUEmissionTime[thread_id] = current_time;
+		}
+		else if ((current_time - LastCPUEmissionTime[thread_id]) >  MinimumCPUEventTime)
+		{
+			LastCPUEmissionTime[thread_id] = current_time;
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
 /* HSG
 
@@ -452,7 +478,13 @@ static void Extrae_BG_gettopology (int enter, UINT64 timestamp)
 void Extrae_AnnotateCPU (UINT64 timestamp)
 {
 #if defined(HAVE_SCHED_GETCPU)
-    TRACE_EVENT (timestamp, GETCPU_EV, sched_getcpu());
+    int cpu = sched_getcpu();
+
+    if (cpu != LastCPUEvent[THREADID] || AlwaysEmitCPUEvent)
+    {
+        LastCPUEvent[THREADID] = cpu;
+        TRACE_EVENT (timestamp, GETCPU_EV, cpu);
+    }
 #else
     UNREFERENCED_PARAMETER(timestamp);
 #endif
@@ -1247,6 +1279,8 @@ static int Allocate_buffer_and_file (int thread_id, int forked)
 	if (forked)
 		Buffer_Free (TracingBuffer[thread_id]);
 
+	LastCPUEmissionTime[thread_id] = 0;
+	LastCPUEvent[thread_id] = 0;
 	TracingBuffer[thread_id] = new_Buffer (buffer_size, tmp_file, TRUE);
 	if (TracingBuffer[thread_id] == NULL)
 	{
@@ -1316,6 +1350,8 @@ static int Allocate_buffers_and_files (int world_size, int num_threads, int fork
 	if (!forked)
 	{
 		xmalloc(TracingBuffer, num_threads * sizeof(Buffer_t *));
+		xmalloc(LastCPUEmissionTime, num_threads * sizeof(iotimer_t));
+		xmalloc(LastCPUEvent, num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
 		xmalloc(SamplingBuffer, num_threads * sizeof(Buffer_t *));
 #endif
@@ -1337,6 +1373,8 @@ static int Reallocate_buffers_and_files (int new_num_threads)
 	int i;
 
 	xrealloc(TracingBuffer, TracingBuffer, new_num_threads * sizeof(Buffer_t *));
+	xrealloc(LastCPUEmissionTime, LastCPUEmissionTime, new_num_threads * sizeof(iotimer_t));
+	xrealloc(LastCPUEvent, LastCPUEvent, new_num_threads * sizeof(int));
 #if defined(SAMPLING_SUPPORT)
 	xrealloc(SamplingBuffer, SamplingBuffer, new_num_threads * sizeof(Buffer_t *));
 #endif
@@ -2314,6 +2352,8 @@ void Backend_Finalize (void)
 				SAMPLING_BUFFER(thread) = NULL;
 #endif
 			}
+			xfree(LastCPUEmissionTime);
+			xfree(LastCPUEvent);
 			xfree(TracingBuffer);
 #if defined(SAMPLING_SUPPORT)
 			xfree(SamplingBuffer);
@@ -2491,6 +2531,11 @@ void Backend_Leave_Instrumentation (void)
 
 	if (!mpitrace_on)
 		return;
+
+	if (PENDING_TRACE_CPU_EVENT(thread, LAST_READ_TIME))
+	{
+		Extrae_AnnotateCPU(LAST_READ_TIME);
+	}
 
 	/* Change trace mode? (issue from API) */
 	if (PENDING_TRACE_MODE_CHANGE(thread) && MPI_Deepness[thread] == 0)

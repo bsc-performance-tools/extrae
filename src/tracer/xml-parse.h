@@ -160,6 +160,10 @@
 #define TRACE_PEBS_SAMPLING_STORES      ((xmlChar*) "stores")
 #define TRACE_PEBS_MIN_MEM_LATENCY      ((xmlChar*) "minimum-latency")
 
+#define TRACE_CPU_EVENTS		((xmlChar*) "cpu-events")
+#define TRACE_CPU_EVENTS_FREQUENCY	((xmlChar*) "frequency")
+#define TRACE_CPU_EVENTS_EMIT_ALWAYS    ((xmlChar*) "emit-always")
+
 void Parse_XML_File (int rank, int world_size, const char *filename);
 
 #endif
