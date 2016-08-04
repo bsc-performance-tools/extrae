@@ -2,30 +2,30 @@
 # --------------------
 AC_DEFUN([AX_PEBS_SAMPLING],
 [
-	AC_REQUIRE([AX_SYSTEM_TYPE])
+        AC_REQUIRE([AX_SYSTEM_TYPE])
 
-	AC_ARG_ENABLE(pebs-sampling,
-		AC_HELP_STRING(
-			[--disable-pebs-sampling],
-			[Disable PEBS sampling (enabled by default)]
-		),
-		[enable_pebs_sampling="${enableval}"],
-		[enable_pebs_sampling="yes"]
-	)
+        AC_ARG_ENABLE(pebs-sampling,
+                AC_HELP_STRING(
+                        [--disable-pebs-sampling],
+                        [Disable PEBS sampling (enabled by default)]
+                ),
+                [enable_pebs_sampling="${enableval}"],
+                [enable_pebs_sampling="yes"]
+        )
 
-	if test "${enable_pebs_sampling}" = "yes" ; then
-		if test "${target_cpu}" != "amd64" -a "${target_cpu}" != "x86_64" ; then
-			AC_MSG_WARN([PEBS sampling is only available on Intel64 processors])
-		        AC_DEFINE([ENABLE_PEBS_SAMPLING], 0, [Define if PEBS sampling must be used])
+        if test "${enable_pebs_sampling}" = "yes" ; then
+                if test "${target_cpu}" != "amd64" -a "${target_cpu}" != "x86_64" ; then
+                        AC_MSG_WARN([PEBS sampling is only available on Intel64 processors])
                         enable_pebs_sampling="no"
-		fi
-		if test "${OperatingSystem}" != "linux" ; then
-			AC_MSG_WARN([PEBS sampling is only available on Linux systems])
-		        AC_DEFINE([ENABLE_PEBS_SAMPLING], 0, [Define if PEBS sampling must be used])
+                fi
+                if test "${OperatingSystem}" != "linux" ; then
+                        AC_MSG_WARN([PEBS sampling is only available on Linux systems])
                         enable_pebs_sampling="no"
-		fi
-		AC_DEFINE([ENABLE_PEBS_SAMPLING], 1, [Define if PEBS sampling must be used])
-	fi
+                fi
+        fi
 
-	AM_CONDITIONAL(WANT_PEBS_SAMPLING, test "${enable_pebs_sampling}" = "yes")
+        if test "${enable_pebs_sampling}" = "yes" ; then
+                AC_DEFINE([ENABLE_PEBS_SAMPLING], 1, [Define if PEBS sampling must be used])
+        fi
+        AM_CONDITIONAL(WANT_PEBS_SAMPLING, test "${enable_pebs_sampling}" = "yes")
 ])

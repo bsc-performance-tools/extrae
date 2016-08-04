@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 04Aug2016 Fixed bug in configure macro to check for pebs sampling
  * 29Jul2016 Upgraded to v3.4.0
  * 28Jul2016 Adds XML option (cpu-events) to specify the emission frequency of CPU events
  * 26Jul2016 Repeat file open if the assigned fd for the trace file is 0
