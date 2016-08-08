@@ -18,3 +18,5 @@ install-data-local: javatrace.jar
 	$(MKDIR_P) $(libdir)
 	cp javatrace.jar $(libdir)
 
+uninstall-local:
+	rm $(libdir)/javatrace.jar

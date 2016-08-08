@@ -87,3 +87,25 @@ endif
 	$(top_srcdir)/substitute $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" extrae.xml
 	$(top_srcdir)/substitute $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" extraej.xml
 
+uninstall-local:
+	rm $(DESTDIR)$(datadir)/tests/overhead/Makefile \
+	   $(DESTDIR)$(datadir)/tests/overhead/posix_clock.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/ia32_rdtsc_clock.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/ppc_clock.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae_eventandcounters.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae_event.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae_nevent4.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae_get_caller1.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae_get_caller6.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae_trace_callers.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae_user_function.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/papi_read1.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/papi_read4.c \
+	   $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh \
+	   $(DESTDIR)$(datadir)/tests/overhead/extrae.xml \
+	   $(DESTDIR)$(datadir)/tests/overhead/JavaEvent.java \
+	   $(DESTDIR)$(datadir)/tests/overhead/JavaNEvent4.java \
+	   $(DESTDIR)$(datadir)/tests/overhead/JavaFakeRoutine.java \
+	   $(DESTDIR)$(datadir)/tests/overhead/extraej.xml \
+	   $(DESTDIR)$(datadir)/tests/overhead/extraej_functionlist
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(datadir)/tests/overhead

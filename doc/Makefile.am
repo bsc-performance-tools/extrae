@@ -62,6 +62,16 @@ install-exec-hook: $(manual_ug).ps $(manual_ug).pdf
 	cp $(top_srcdir)/doc/user-guide/user-guide.html $(top_srcdir)/doc/user-guide/user-guide.css $(top_srcdir)/doc/user-guide/*.png $(DESTDIR)$(datadir)/doc/html
 	ln -f $(DESTDIR)$(datadir)/doc/html/user-guide.html $(DESTDIR)$(datadir)/doc/html/index.html
 
+uninstall-local:
+	rm $(DESTDIR)$(datadir)/doc/html/index.html \
+	   $(DESTDIR)$(datadir)/doc/html/*.png \
+	   $(DESTDIR)$(datadir)/doc/html/user-guide.css \
+	   $(DESTDIR)$(datadir)/doc/html/user-guide.html
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(datadir)/doc/html
+	rm $(DESTDIR)$(datadir)/doc/$(manual_ug).pdf \
+	   $(DESTDIR)$(datadir)/doc/$(manual_ug).ps
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(datadir)/doc
+
 clean:
 	@echo Nothing to be done by default. If you want to clean the documentation issue make clean-documentation.
 

@@ -33,7 +33,10 @@ install-exec-hook:
 uninstall-local:
 	rm -f $(DESTDIR)$(mandir)/man1/mpimpi2prv.1 \
         $(DESTDIR)$(mandir)/man1/mpimpi2dim.1 \
-        $(DESTDIR)$(mandir)/man1/mpi2dim.1
+        $(DESTDIR)$(mandir)/man1/mpi2dim.1 \
+	$(DESTDIR)$(mandir)/man1/UFlist.1 \
+	$(DESTDIR)$(mandir)/man1/extrae.1 \
+	$(DESTDIR)$(mandir)/man1/mpi2prv.1
 	rm -f $(DESTDIR)$(mandir)/man3/extrae_event.3 \
         $(DESTDIR)$(mandir)/man3/extrae_counters.3 \
         $(DESTDIR)$(mandir)/man3/extrae_eventandcounters.3 \
@@ -42,11 +45,14 @@ uninstall-local:
         $(DESTDIR)$(mandir)/man3/extrae_set_tracing_tasks.3 \
         $(DESTDIR)$(mandir)/man3/extrae_next_hwc_set.3 \
         $(DESTDIR)$(mandir)/man3/extrae_previous_hwc_set.3 \
-	    $(DESTDIR)$(mandir)/man3/mpitrace_event.3 \
-	    $(DESTDIR)$(mandir)/man3/mpitrace_counters.3 \
+        $(DESTDIR)$(mandir)/man3/mpitrace_event.3 \
+	$(DESTDIR)$(mandir)/man3/mpitrace_counters.3 \
         $(DESTDIR)$(mandir)/man3/mpitrace_eventandcounters.3 \
         $(DESTDIR)$(mandir)/man3/mpitrace_restart.3 \
         $(DESTDIR)$(mandir)/man3/mpitrace_shutdown.3 \
         $(DESTDIR)$(mandir)/man3/mpitrace_set_tracing_tasks.3 \
         $(DESTDIR)$(mandir)/man3/mpitrace_next_hwc_set.3 \
         $(DESTDIR)$(mandir)/man3/mpitrace_previous_hwc_set.3
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(mandir)/man1 \
+					 $(DESTDIR)$(mandir)/man3 \
+					 $(DESTDIR)$(mandir)

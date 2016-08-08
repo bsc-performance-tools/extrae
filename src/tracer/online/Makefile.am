@@ -158,3 +158,6 @@ install-data-hook:
 clean-local:
 	rm -f $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
 
+uninstall-local:
+	rm $(prefix)/etc/$(SCRIPT_ONLINE_ROOT)
+	rm $(prefix)/bin/$(SCRIPT_ONLINE_ENV)

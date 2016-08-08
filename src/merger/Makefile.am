@@ -131,3 +131,5 @@ libmpi2prv_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) ; $(LN_S) -f mpi2prv$(EXEEXT) mpi2dim$(EXEEXT)
 
+uninstall-local:
+	rm $(DESTDIR)$(bindir)/mpi2dim$(EXEEXT)

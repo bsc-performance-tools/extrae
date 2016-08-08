@@ -503,3 +503,52 @@ endif
 # SVN installations may have some subversion control files
 	find $(DESTDIR)$(datadir)/example -name .svn -delete
 	find $(DESTDIR)$(datadir)/example -name null -delete
+
+uninstall-local:
+	rm -r $(DESTDIR)$(datadir)/example/SEQ \
+	      $(DESTDIR)$(datadir)/example/FORK \
+	      $(DESTDIR)$(datadir)/example/PYTHON
+if HAVE_MPI
+	rm -r $(DESTDIR)$(datadir)/example/MPI
+if WANT_CUDAorCUPTI
+	rm -r $(DESTDIR)$(datadir)/example/MPI+CUDA
+endif
+if WANT_OPENCL
+	rm -r $(DESTDIR)$(datadir)/example/MPI+OPENCL
+endif
+if WANT_NANOS
+	rm -r $(DESTDIR)$(datadir)/example/MPI+OMPSS
+endif
+if WANT_OPENMP
+	rm -r $(DESTDIR)$(datadir)/example/MPI+OMP
+endif
+endif
+if WANT_OPENMP
+	rm -r $(DESTDIR)$(datadir)/example/OMP
+endif
+if HAVE_ONLINE
+	rm -r $(DESTDIR)$(datadir)/example/ONLINE
+endif
+if WANT_PTHREAD
+	rm -r $(DESTDIR)$(datadir)/example/PTHREAD
+endif
+if WANT_CUDAorCUPTI
+	rm -r $(DESTDIR)$(datadir)/example/CUDA
+endif
+if WANT_OPENCL
+	rm -r $(DESTDIR)$(datadir)/example/OPENCL
+endif
+if WANT_NANOS
+	rm -r $(DESTDIR)$(datadir)/example/OMPSS
+endif
+if WANT_JAVA
+	rm -r $(DESTDIR)$(datadir)/example/JAVA
+endif
+	rm -r $(DESTDIR)$(datadir)/example/UNICORE
+	rm    $(DESTDIR)$(datadir)/example/Makefile.inc
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(datadir)/example
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(bindir)
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(libdir)
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(libexecdir)
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(datadir)
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(prefix)

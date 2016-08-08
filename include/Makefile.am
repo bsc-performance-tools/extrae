@@ -10,3 +10,11 @@ install-data-hook:
 	cd $(DESTDIR)$(includedir); $(LN_S) -f extrae_user_events.h extrae.h
 	cd $(DESTDIR)$(includedir); $(LN_S) -f extraef_user_events.h mpitracef_user_events.h
 	cd $(DESTDIR)$(includedir); $(LN_S) -f extraef_user_events.h extraef.h
+
+uninstall-local:
+	rm $(DESTDIR)$(includedir)/extrae_version.h \
+	   $(DESTDIR)$(includedir)/mpitrace_user_events.h \
+	   $(DESTDIR)$(includedir)/extrae.h \
+	   $(DESTDIR)$(includedir)/mpitracef_user_events.h \
+	   $(DESTDIR)$(includedir)/extraef.h
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(includedir)

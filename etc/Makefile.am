@@ -40,3 +40,8 @@ CONFIGUREDscript:
 
 install-data-hook: mkdirSHscripts SHscripts CONFIGUREDscript
 
+uninstall-local:
+	rm $(DESTDIR)/$(sysconfdir)/extrae-vars.sh \
+	   $(DESTDIR)$(sysconfdir)/extrae.sh \
+	   $(DESTDIR)$(sysconfdir)/configured.sh
+	rmdir --ignore-fail-on-non-empty $(DESTDIR)/$(sysconfdir)

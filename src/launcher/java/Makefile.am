@@ -9,3 +9,7 @@ install-data-hook: extraej.bash.skeleton
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $(top_srcdir)/src/launcher/java/extraej.bash
 	cp -v $(top_srcdir)/src/launcher/java/extraej.bash $(prefix)/bin/extraej.bash
 	cd $(prefix)/bin; $(LN_S) -f extraej.bash extraej; cd -
+
+uninstall-local:
+	rm $(prefix)/bin/extraej
+	rm $(prefix)/bin/extraej.bash
