@@ -10,7 +10,6 @@
  home="@sub_PREFIXDIR@"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="@sub_XMLID@"
 >
 
   <!-- Configuration of some MPI dependant values -->

@@ -84,8 +84,6 @@ if WANT_JAVA
 else
 	$(top_srcdir)/substitute $(SED) "@sub_JAVA@" "" $(DESTDIR)$(datadir)/tests/overhead/run_overhead_tests.sh
 endif
-	$(top_srcdir)/substitute $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" extrae.xml
-	$(top_srcdir)/substitute $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" extraej.xml
 
 uninstall-local:
 	rm $(DESTDIR)$(datadir)/tests/overhead/Makefile \

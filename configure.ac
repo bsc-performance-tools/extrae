@@ -655,6 +655,67 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[example/LINUX/MPI/extrae_bursts_1ms.xml:example/LINUX/MPI/extrae_bursts_1ms.xml] \
 		[example/LINUX/MPI/extrae_explained.xml:example/LINUX/MPI/extrae_explained.xml] \
 		[example/LINUX/MPI/summarized_trace_basic.xml:example/LINUX/MPI/summarized_trace_basic.xml] \
+		[doc/copy_tex_files_from_to.sh:doc/copy_tex_files_from_to.sh] \
+		[doc/API-section.tex:doc/API-section.tex] \
+		[doc/FAQ-section.tex:doc/FAQ-section.tex] \
+		[doc/XML-section.tex:doc/XML-section.tex] \
+		[doc/common-macros.tex:doc/common-macros.tex] \
+		[doc/configure-installation.tex:doc/configure-installation.tex] \
+		[doc/environmentvariables-section.tex:doc/environmentvariables-section.tex] \
+		[doc/examples-section.tex:doc/examples-section.tex] \
+		[doc/instrumented-routines-section.tex:doc/instrumented-routines-section.tex] \
+		[doc/merge-section.tex:doc/merge-section.tex] \
+		[doc/online.tex:doc/online.tex] \
+		[doc/overhead.tex:doc/overhead.tex] \
+		[doc/pnmpi-section.tex:doc/pnmpi-section.tex] \
+		[doc/quick-guide-section.tex:doc/quick-guide-section.tex] \
+		[doc/regression-tests.tex:doc/regression-tests.tex] \
+		[doc/submit-bug.tex:doc/submit-bug.tex] \
+		[doc/user-guide.tex:doc/user-guide.tex] \
+		[doc/wholeXML-section.tex:doc/wholeXML-section.tex] \
+		[doc/XML/buffer.xml.tex:doc/XML/buffer.xml.tex] \
+		[doc/XML/bursts.xml.tex:doc/XML/bursts.xml.tex] \
+		[doc/XML/callers.xml.tex:doc/XML/callers.xml.tex] \
+		[doc/XML/config.xml.tex:doc/XML/config.xml.tex] \
+		[doc/XML/counters.xml.tex:doc/XML/counters.xml.tex] \
+		[doc/XML/cuda.xml.tex:doc/XML/cuda.xml.tex] \
+		[doc/XML/dynamic-memory.xml.tex:doc/XML/dynamic-memory.xml.tex] \
+		[doc/XML/extrae.xml.tex:doc/XML/extrae.xml.tex] \
+		[doc/XML/input-output.xml.tex:doc/XML/input-output.xml.tex] \
+		[doc/XML/intel-pebs.xml.tex:doc/XML/intel-pebs.xml.tex] \
+		[doc/XML/merge-reduced.xml.tex:doc/XML/merge-reduced.xml.tex] \
+		[doc/XML/merge.xml.tex:doc/XML/merge.xml.tex] \
+		[doc/XML/mpi.xml.tex:doc/XML/mpi.xml.tex] \
+		[doc/XML/opencl.xml.tex:doc/XML/opencl.xml.tex] \
+		[doc/XML/openmp.xml.tex:doc/XML/openmp.xml.tex] \
+		[doc/XML/others.xml.tex:doc/XML/others.xml.tex] \
+		[doc/XML/pthread.xml.tex:doc/XML/pthread.xml.tex] \
+		[doc/XML/sampling.xml.tex:doc/XML/sampling.xml.tex] \
+		[doc/XML/storage.xml.tex:doc/XML/storage.xml.tex] \
+		[doc/XML/trace-control.xml.tex:doc/XML/trace-control.xml.tex] \
+		[doc/XML/userfunctions.xml.tex:doc/XML/userfunctions.xml.tex] \
+		[doc/images/extrae-post-installation.eps:doc/images/extrae-post-installation.eps] \
+		[doc/images/extrae-post-installation.png:doc/images/extrae-post-installation.png] \
+		[doc/overheads/ARMv7l-MB:doc/overheads/ARMv7l-MB] \
+		[doc/overheads/IBM_POWER8:doc/overheads/IBM_POWER8] \
+		[doc/overheads/INTEL_HSW_JURECA:doc/overheads/INTEL_HSW_JURECA] \
+		[doc/overheads/INTEL_NHM_MT:doc/overheads/INTEL_NHM_MT] \
+		[doc/overheads/INTEL_SNB_MN3:doc/overheads/INTEL_SNB_MN3] \
+		[doc/overheads/overheads.2parts.gnuplot:doc/overheads/overheads.2parts.gnuplot] \
+		[doc/overheads/overheads.dat:doc/overheads/overheads.dat] \
+		[doc/overheads/overheads.eps:doc/overheads/overheads.eps] \
+		[doc/overheads/overheads.gnuplot:doc/overheads/overheads.gnuplot] \
+		[doc/user-guide/WARNINGS:doc/user-guide/WARNINGS] \
+		[doc/user-guide/images.pl:doc/user-guide/images.pl] \
+		[doc/user-guide/images.tex:doc/user-guide/images.tex] \
+		[doc/user-guide/img1.png:doc/user-guide/img1.png] \
+		[doc/user-guide/img2.png:doc/user-guide/img2.png] \
+		[doc/user-guide/img3.png:doc/user-guide/img3.png] \
+		[doc/user-guide/index.html:doc/user-guide/index.html] \
+		[doc/user-guide/internals.pl:doc/user-guide/internals.pl] \
+		[doc/user-guide/labels.pl:doc/user-guide/labels.pl] \
+		[doc/user-guide/user-guide.css:doc/user-guide/user-guide.css] \
+		[doc/user-guide/user-guide.html:doc/user-guide/user-guide.html]
 	)
 
 #########################################

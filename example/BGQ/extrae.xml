@@ -4,7 +4,6 @@
 	home="/homec/jzam11/jzam1128/aplic/juqueen/extrae/2.2.1"
 	initial-mode="detail"
 	type="paraver"
-	xml-parser-id="Id: xml-parse.c 1160 2012-08-14 10:36:40Z harald $"
 >
 
 	<mpi enabled="yes">

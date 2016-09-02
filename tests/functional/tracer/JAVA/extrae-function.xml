@@ -4,7 +4,6 @@
  home="/home/harald/development/testing/pkg-b-2.4-compss"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="Id: xml-parse.c 2327 2013-11-22 11:47:07Z harald $"
 >
 
   <user-functions enabled="yes" list="user-functions" exclude-automatic-functions="no">

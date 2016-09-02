@@ -498,7 +498,6 @@ endif
 # Apply modifications to all directories installed
 #
 	$(top_srcdir)/substitute-all $(SED) "@sub_PREFIXDIR@" "${prefix}" $(DESTDIR)$(datadir)/example
-	$(top_srcdir)/substitute-all $(SED) "@sub_XMLID@" "`grep 'rcsid\[\]' $(top_srcdir)/src/tracer/xml-parse.c | $(AWK) -F'$$' '{ print $$2"$$" }'`" $(DESTDIR)$(datadir)/example
 	rm null # Remove null file created at the beginning
 # SVN installations may have some subversion control files
 	find $(DESTDIR)$(datadir)/example -name .svn -delete

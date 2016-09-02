@@ -4,7 +4,6 @@
  home="@sub_PREFIXDIR@"
  initial-mode="bursts"
  type="paraver"
- xml-parser-id="@sub_XMLID@"
 >
 
   <mpi enabled="yes">

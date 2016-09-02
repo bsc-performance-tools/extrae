@@ -1549,7 +1549,6 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 
 				/* Full tracing control */
 				char *tracehome = (char*) xmlGetProp_env (rank, root_tag, TRACE_HOME);
-				xmlChar *xmlparserid = xmlGetProp_env (rank,root_tag, TRACE_PARSER_ID);
 				xmlChar *traceenabled = xmlGetProp_env (rank, root_tag, TRACE_ENABLED);
 				xmlChar *traceinitialmode = xmlGetProp_env (rank, root_tag, TRACE_INITIAL_MODE);
 				xmlChar *tracetype = xmlGetProp_env (rank, root_tag, TRACE_TYPE);
@@ -1561,15 +1560,6 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 				}
 				else
 				{
-					/* Where is the tracing located? If defined, copy to the correct buffer! */
-					if (xmlStrcasecmp ((xmlChar*) &rcsid[1], xmlparserid)) /* Skip first $ char */
-					{
-						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
-						mfprintf (stderr, PACKAGE_NAME": WARNING! XML parser version and property '%s' do not match. Check the XML file. Trying to proceed...\n", TRACE_PARSER_ID);
-						mfprintf (stderr, PACKAGE_NAME": WARNING!\n");
-						mfprintf (stderr, PACKAGE_NAME": %s found '%s' when expecting '%s'.\n", TRACE_PARSER_ID, xmlparserid, &rcsid[1]);
-					}
-
 					if (tracehome != NULL)
 					{
 						strncpy (trace_home, tracehome, TMP_DIR);
@@ -1627,7 +1617,6 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 						Clock_setType (REAL_CLOCK);
 					}
 				}
-				XML_FREE(xmlparserid);
 				XML_FREE(tracetype);
 				XML_FREE(traceinitialmode);
 				XML_FREE(traceenabled);

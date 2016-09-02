@@ -4,7 +4,6 @@
  home="/home/harald/P-clock"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="Id: xml-parse.c 1768 2013-05-30 10:22:13Z harald $"
 >
 
   <user-functions enabled="yes" list="function-list" exclude-automatic-functions="no">

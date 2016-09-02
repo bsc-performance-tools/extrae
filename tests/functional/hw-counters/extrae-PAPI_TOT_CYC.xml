@@ -4,7 +4,6 @@
  home="@sub_PREFIXDIR@"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="@sub_XMLID@"
 >
 
   <counters enabled="yes">

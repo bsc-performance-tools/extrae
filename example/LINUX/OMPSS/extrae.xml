@@ -4,7 +4,6 @@
  home="/apps/CEPBATOOLS/extrae/2.4.3rc3/openmpi/64"
  initial-mode="detail"
  type="paraver"
- xml-parser-id="Id: xml-parse.c 2014 2013-07-30 08:13:03Z harald $"
 >
 
   <openmp enabled="yes">

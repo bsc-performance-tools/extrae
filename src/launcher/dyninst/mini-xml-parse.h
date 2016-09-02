@@ -27,7 +27,6 @@
 #define TRACE_TAG                       ((xmlChar*) "trace")
 #define TRACE_HOME                      ((xmlChar*) "home")
 #define TRACE_TYPE                      ((xmlChar*) "type")
-#define TRACE_PARSER_ID                 ((xmlChar*) "xml-parser-id")
 #define TRACE_TYPE_PARAVER              ((xmlChar*) "paraver")
 #define TRACE_TYPE_DIMEMAS              ((xmlChar*) "dimemas")
 #define TRACE_INITIAL_MODE              ((xmlChar*) "initial-mode")
