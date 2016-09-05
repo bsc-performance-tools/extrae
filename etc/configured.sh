@@ -4,6 +4,9 @@
 # DO NOT EDIT!
 #
 
+EXTRAE_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+export EXTRAE_HOME=${EXTRAE_HOME}
+
 if test "${EXTRAE_HOME}" != "" ; then
 	if test -d ${EXTRAE_HOME} ; then
 		echo "EXTRAE_HOME points to ${EXTRAE_HOME} and the directory exists .. OK"

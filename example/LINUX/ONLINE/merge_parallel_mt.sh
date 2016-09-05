@@ -7,7 +7,7 @@
 # @ tasks_per_node = 4
 # @ wall_clock_limit = 00:30:00
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
 
 APPL_NAME=./ping
 OUTPUT_TRACE=ping_online.prv

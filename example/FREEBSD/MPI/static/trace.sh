@@ -1,6 +1,7 @@
 #!/bin/sh
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
+
 export EXTRAE_CONFIG_FILE=../extrae.xml
 
 ## Run the desired program

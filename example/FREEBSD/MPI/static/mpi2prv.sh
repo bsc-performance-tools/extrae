@@ -1,4 +1,5 @@
 #!/bin/sh
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
+
 ${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits -o mpi_ping.prv

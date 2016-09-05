@@ -3,6 +3,9 @@
 # Edit with caution
 #
 
+EXTRAE_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+export EXTRAE_HOME=${EXTRAE_HOME}
+
 if test "${EXTRAE_HOME}" != "" ; then
 
 	# Read configuration variables if available!

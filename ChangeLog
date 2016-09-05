@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 08Sep2016 Changed environment scripts extrae.sh and configured.sh to locate the EXTRAE_HOME path automatically
  * 08Sep2016 Fixes BFD configure check
  * 02Sep2016 Removes strict XML version check
  * 08Ago2016 Fixes make uninstall

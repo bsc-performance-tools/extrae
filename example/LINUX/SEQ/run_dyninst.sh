@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
+
 export EXECUTABLE=./pi
 
 ${EXTRAE_HOME}/bin/extrae -config extrae.xml ${EXECUTABLE}

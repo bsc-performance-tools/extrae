@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
 
 # Load the online environment
 source ${EXTRAE_HOME}/etc/extrae_online.sh

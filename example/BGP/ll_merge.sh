@@ -8,7 +8,7 @@
 # @ bg_size = 32
 # @ queue
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
 
 /usr/local/bin/mpirun -np 1 ${EXTRAE_HOME}/bin/mpi2prv -f TRACE.mpits
 

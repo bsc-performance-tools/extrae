@@ -9,7 +9,7 @@
 
 module load intel openmpi
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
 
 APPL_NAME=./ping
 OUTPUT_TRACE=ping_online.prv

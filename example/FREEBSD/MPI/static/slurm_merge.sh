@@ -7,7 +7,7 @@
 # @ tasks_per_node = 4
 # @ wall_clock_limit = 01:00:00
 
-export EXTRAE_HOME=@sub_PREFIXDIR@
+source @sub_PREFIXDIR@/etc/extrae.sh
 
 ${EXTRAE_HOME}/bin/mpi2prv -syn -f TRACE.mpits -e ./mpi_ping -o trace.prv
 
