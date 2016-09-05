@@ -755,7 +755,10 @@ AC_DEFUN([AX_PROG_BINUTILS],
       esac
    fi
 
-   AM_CONDITIONAL(HAVE_BINUTILS, test "${BFD_INSTALLED}" = "yes" -a "${LIBERTY_INSTALLED}" = "yes" )
+   if test "${BFD_INSTALLED}" = "yes" -a "${LIBERTY_INSTALLED}" = "yes" ; then
+	   have_binutils="yes"
+   fi
+   AM_CONDITIONAL(HAVE_BINUTILS, test "${have_binutils}" = "yes")
    AM_CONDITIONAL(BFD_NEEDS_LDL, test "${libbfd_needs_ldl}" = "yes")
    AM_CONDITIONAL(BFD_NEEDS_LINTL, test "${libbfd_needs_lintl}" = "yes")
 

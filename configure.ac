@@ -291,6 +291,8 @@ AX_PROG_SIONLIB
 
 AX_CHECK_LOAD_BALANCING
 
+AX_PROG_BINUTILS
+
 #######################################
 # Enable/Disable some tracing options #
 #######################################
@@ -402,7 +404,11 @@ AC_ARG_ENABLE(bfd-generate-addresses,
 		[Generates information for data objects found in binaries (experimental, enabled if --enable-instrument-dynamic-memory is enabled)]
 	),
 	[enable_bfd_generate_addresses="${enableval}"],
-	[enable_bfd_generate_addresses="${enable_instrument_dynamic_memory}"]
+	[
+		if test "${enable_instrument_dynamic_memory}" = "yes" -a "${have_binutils}" = "yes" ; then
+      enable_bfd_generate_addresses="yes"
+    fi
+	]
 )
 if test "${enable_bfd_generate_addresses}" = "yes" ; then
 	AC_DEFINE([BFD_MANAGER_GENERATE_ADDRESSES], [1], [Determine if BFD must generate information for data objects in binary])
@@ -425,12 +431,6 @@ fi
 #################################
 
 AX_PROG_ONLINE
-
-#################################
-#    External library checks    #
-#################################
-
-AX_PROG_BINUTILS
 
 ######################################################################
 #    Checks for typedefs, structures and compiler characteristics    #
