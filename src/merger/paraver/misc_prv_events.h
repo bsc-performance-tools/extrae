@@ -89,4 +89,6 @@ void Share_MISC_Operations (void);
 
 #define CLOCK_FROM_SYSTEM_LBL           "RAW clock() value from system"
 
+#define CPU_EVENT_INTERVAL_LBL          "CPU-Event sampling interval"
+
 #endif

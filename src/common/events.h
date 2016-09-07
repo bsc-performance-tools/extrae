@@ -131,6 +131,7 @@ unsigned IsMPICollective (unsigned EvType);
 #define EXEC_EV                  40000031
 #define EXEC_BIN_EV              40000032
 #define GETCPU_EV                40000033
+#define CPU_EVENT_INTERVAL_EV    40000133
 #define SYSTEM_EV                40000034
 #define SYSTEM_BIN_EV            40000035
 #define PID_EV                   40000036

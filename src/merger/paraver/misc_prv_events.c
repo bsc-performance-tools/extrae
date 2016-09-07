@@ -166,6 +166,7 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, GETCPU_EV, GETCPU_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, CPU_EVENT_INTERVAL_EV, CPU_EVENT_INTERVAL_LBL);
 		LET_SPACES(fd);
 	}
 	if (inuse[APPL_INDEX])

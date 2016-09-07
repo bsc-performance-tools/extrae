@@ -274,6 +274,30 @@ static int Appl_Event (event_t * current_event,
 }
 
 /******************************************************************************
+ ***  CPUEventInterval_Event
+ ******************************************************************************/
+
+static int CPUEventInterval_Event (event_t * current_event,
+                       unsigned long long current_time,
+                       unsigned int cpu,
+                       unsigned int ptask,
+                       unsigned int task,
+                       unsigned int thread,
+                       FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType,
+	  EvValue);
+}
+
+
+
+/******************************************************************************
  ***  User_Event
  ******************************************************************************/
 
@@ -1692,6 +1716,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ WAITPID_EV, ForkWaitSystem_Event },
 	{ EXEC_EV, Exec_Event },
 	{ GETCPU_EV, GetCPU_Event },
+	{ CPU_EVENT_INTERVAL_EV, CPUEventInterval_Event },
 	{ SAMPLING_ADDRESS_LD_EV, Sampling_Address_Event },
 	{ SAMPLING_ADDRESS_ST_EV, Sampling_Address_Event },
 	{ SAMPLING_ADDRESS_MEM_LEVEL_EV, Sampling_Address_MEM_TLB_Event },

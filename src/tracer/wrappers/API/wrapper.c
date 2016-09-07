@@ -1767,6 +1767,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 #if !defined(IS_BG_MACHINE)
 		Extrae_AnnotateTopology (TRUE, ApplBegin_Time);
 #endif
+		TRACE_EVENT (TIME, CPU_EVENT_INTERVAL_EV, MinimumCPUEventTime);
 
 	/* Initialize Tracing Mode related variables */
 	if (forked)
