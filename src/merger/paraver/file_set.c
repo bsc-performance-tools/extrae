@@ -1141,16 +1141,27 @@ event_t *Search_MPI_IRECVED (event_t * current, long long request, FileItem_t * 
 	event_t *irecved = current;
 
 	freceive->tmp = irecved;
-	/* freceive->tmp = freceive->first; */
 
-	if (Get_EvEvent (irecved) == MPI_IRECVED_EV)
-		if (Get_EvAux (irecved) == request)
-			return irecved;
-
-	while ((irecved = NextRecvG_FS (freceive)) != NULL)
+	do
+	{
 		if (Get_EvEvent (irecved) == MPI_IRECVED_EV)
+		{
 			if (Get_EvAux (irecved) == request)
-				return irecved;
+			{
+				int cancelled = Get_EvValue(irecved);
+				if (cancelled)
+				{
+					return NULL;
+				}
+				else
+				{
+					return irecved;
+				}
+			}
+	        }
+	}
+        while ((irecved = NextRecvG_FS (freceive)) != NULL);
+
 	return NULL;
 }
 

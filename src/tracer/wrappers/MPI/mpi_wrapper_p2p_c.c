@@ -360,7 +360,7 @@ int MPI_Isend_C_Wrapper (void *buf, int count, MPI_Datatype datatype, int dest,
 	TRACE_MPIEVENT (TIME, MPI_ISEND_EV, EVT_END, receiver, size, tag, comm, EMPTY);
 
 	/* MPI Stats */
-    updateStats_P2P(global_mpi_stats, receiver, 0, size);
+	updateStats_P2P(global_mpi_stats, receiver, 0, size);
 
 	return ret;
 }
@@ -737,8 +737,8 @@ int MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int * flag, MPI_St
 int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
 {
 	MPI_Request req;
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ierror;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ierror;
 	iotimer_t temps_final;
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY,
@@ -750,20 +750,25 @@ int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 
 	temps_final = TIME;
 
-	if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
+        if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
 	{
-		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
-			return ret;
-		if (hash_req->group != MPI_GROUP_NULL)
-		{
-			ret = PMPI_Group_free (&hash_req->group);
-			MPI_CHECK(ret, PMPI_Group_free);
+		int cancelled = 0;
+
+		PMPI_Test_cancelled( status, &cancelled );
+		if (!cancelled)
+        	{
+			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
+				return ret;
+			if (hash_req->group != MPI_GROUP_NULL)
+			{
+				ret = PMPI_Group_free (&hash_req->group);
+				MPI_CHECK(ret, PMPI_Group_free);
+			}
+
+			/* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
+			updateStats_P2P(global_mpi_stats, src_world, size, 0);
 		}
-
-        /* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
-        updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, req);
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, req);
 		hash_remove (&requests, req);
 	}
 	TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -774,8 +779,8 @@ int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
 {
 	MPI_Request req;
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ierror;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ierror;
 	iotimer_t temps_inicial, temps_final;
 	static int Test_C_Software_Counter = 0;
 
@@ -787,25 +792,31 @@ int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 
 	temps_final = TIME;
 
-	if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
+        if (ierror == MPI_SUCCESS && *flag && ((hash_req = hash_search (&requests, req)) != NULL))
 	{
+		int cancelled = 0;
+
 		if (Test_C_Software_Counter != 0)
 			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_C_Software_Counter);
 
 		TRACE_MPIEVENT (temps_inicial, MPI_TEST_EV, EVT_BEGIN, hash_req->key, EMPTY, EMPTY, EMPTY, EMPTY);
 		Test_C_Software_Counter = 0;
 
-		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
-			return ret;
-
-		if (hash_req->group != MPI_GROUP_NULL)
+		PMPI_Test_cancelled( status, &cancelled );
+     		if (!cancelled)
 		{
-			ret = PMPI_Group_free (&hash_req->group);
-			MPI_CHECK(ret, PMPI_Group_free);
-		}
+			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, status)) != MPI_SUCCESS)
+				return ret;
 
-		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+			if (hash_req->group != MPI_GROUP_NULL)
+			{
+				ret = PMPI_Group_free (&hash_req->group);
+				MPI_CHECK(ret, PMPI_Group_free);
+			}
+		}
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
 		hash_remove (&requests, req);
+
 		TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	}
 	else
@@ -844,8 +855,8 @@ int MPI_Testall_C_Wrapper (int count, MPI_Request *array_of_requests, int *flag,
 {
 	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ireq, ierror;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ireq, ierror;
 	iotimer_t temps_final, temps_inicial;
 #if defined(DEBUG_MPITRACE)
 	int index;
@@ -888,19 +899,24 @@ int MPI_Testall_C_Wrapper (int count, MPI_Request *array_of_requests, int *flag,
 		{
 			if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
 			{
-				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ireq]))) != MPI_SUCCESS)
-					return ret;
+				int cancelled = 0;
 
-				if (hash_req->group != MPI_GROUP_NULL)
-				{
-					ret = PMPI_Group_free (&hash_req->group);
-					MPI_CHECK(ret, PMPI_Group_free);
+		                PMPI_Test_cancelled(&(ptr_array_of_statuses[ireq]), &cancelled);
+                		if (!cancelled)
+                		{
+					if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ireq]))) != MPI_SUCCESS)
+						return ret;
+
+					if (hash_req->group != MPI_GROUP_NULL)
+					{
+						ret = PMPI_Group_free (&hash_req->group);
+						MPI_CHECK(ret, PMPI_Group_free);
+					}
+
+             				/* MPI Stats get_Irank_obj_C above returns size (number of bytes received) */
+            				updateStats_P2P(global_mpi_stats, src_world, size, 0);
 				}
-
-                /* MPI Stats get_Irank_obj_C above returns size (number of bytes received) */
-                updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
 				hash_remove (&requests, save_reqs[ireq]);
 			}
 		}
@@ -925,8 +941,8 @@ int MPI_Testany_C_Wrapper (int count, MPI_Request *array_of_requests,
 {
 	MPI_Status my_status, *ptr_status;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ierror;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ierror;
 #if defined(DEBUG_MPITRACE)
 	int i;
 #endif
@@ -957,6 +973,7 @@ int MPI_Testany_C_Wrapper (int count, MPI_Request *array_of_requests,
 
 	if (*index != MPI_UNDEFINED && ierror == MPI_SUCCESS && *flag)
 	{
+
 		TRACE_MPIEVENT (temps_inicial, MPI_TESTANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 		if (Test_C_Software_Counter != 0)
@@ -966,18 +983,23 @@ int MPI_Testany_C_Wrapper (int count, MPI_Request *array_of_requests,
 
 		if ((hash_req = hash_search (&requests, save_reqs[*index])) != NULL)
 		{
-			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
-				return ret;
-			if (hash_req->group != MPI_GROUP_NULL)
+			int cancelled = 0;
+
+			PMPI_Test_cancelled( ptr_status, &cancelled );
+			if (!cancelled)
 			{
-				ret = PMPI_Group_free (&hash_req->group);
-				MPI_CHECK(ret, PMPI_Group_free);
+				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
+					return ret;
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					ret = PMPI_Group_free (&hash_req->group);
+					MPI_CHECK(ret, PMPI_Group_free);
+				}
+
+				/* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
+				updateStats_P2P(global_mpi_stats, src_world, size, 0);
 			}
-
-            /* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
-            updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
 			hash_remove (&requests, save_reqs[*index]);
 		}
 		TRACE_MPIEVENT (temps_final, MPI_TESTANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1002,8 +1024,8 @@ int MPI_Testsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 {
 	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ierror, ii;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ierror, ii;
 	iotimer_t temps_final, temps_inicial;
 #if defined(DEBUG_MPITRACE)
 	int index;
@@ -1046,18 +1068,23 @@ int MPI_Testsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 		{
 			if ((hash_req = hash_search (&requests, save_reqs[array_of_indices[ii]])) != NULL)
 			{
-				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
-					return ret;
-				if (hash_req->group != MPI_GROUP_NULL)
-				{
-					ret = PMPI_Group_free (&hash_req->group);
-					MPI_CHECK(ret, PMPI_Group_free);
+				int cancelled = 0;
+
+				PMPI_Test_cancelled(&(ptr_array_of_statuses[ii]), &cancelled);
+                		if (!cancelled)
+                		{
+					if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
+						return ret;
+					if (hash_req->group != MPI_GROUP_NULL)
+					{
+						ret = PMPI_Group_free (&hash_req->group);
+						MPI_CHECK(ret, PMPI_Group_free);
+					}
+
+					/* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
+					updateStats_P2P(global_mpi_stats, src_world, size, 0);
 				}
-
-                /* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
-                updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
 				hash_remove (&requests, save_reqs[array_of_indices[ii]]);
 			}
 		}
@@ -1083,8 +1110,8 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 {
 	MPI_Status my_status, *ptr_status;
 	MPI_Request req;
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ierror;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ierror;
 	iotimer_t temps_final;
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1099,18 +1126,23 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 
 	if (ierror == MPI_SUCCESS && ((hash_req = hash_search (&requests, req)) != NULL))
 	{
-		if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
-			return ret;
-		if (hash_req->group != MPI_GROUP_NULL)
+		int cancelled = 0;
+
+		PMPI_Test_cancelled( ptr_status, &cancelled );
+		if (!cancelled)
 		{
-			ret = PMPI_Group_free (&hash_req->group);
-			MPI_CHECK(ret,PMPI_Group_free);
+			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
+				return ret;
+			if (hash_req->group != MPI_GROUP_NULL)
+			{
+				ret = PMPI_Group_free (&hash_req->group);
+				MPI_CHECK(ret,PMPI_Group_free);
+			}
+
+			/* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
+			updateStats_P2P(global_mpi_stats, src_world, size, 0);
 		}
-
-        /* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
-        updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
 		hash_remove (&requests, req);
 	}
 	TRACE_MPIEVENT (temps_final, MPI_WAIT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1129,8 +1161,8 @@ int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
 {
 	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ireq, ierror;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ireq, ierror;
 	iotimer_t temps_final;
 #if defined(DEBUG_MPITRACE)
 	int index;
@@ -1165,18 +1197,23 @@ int MPI_Waitall_C_Wrapper (int count, MPI_Request *array_of_requests,
 		{
 			if ((hash_req = hash_search (&requests, save_reqs[ireq])) != NULL)
 			{
-				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ireq]))) != MPI_SUCCESS)
-					return ret;
-				if (hash_req->group != MPI_GROUP_NULL)
+				int cancelled = 0;
+
+				PMPI_Test_cancelled(&(ptr_array_of_statuses[ireq]), &cancelled);
+				if (!cancelled)
 				{
-					ret = PMPI_Group_free (&hash_req->group);
-					MPI_CHECK(ret, PMPI_Group_free);
+					if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ireq]))) != MPI_SUCCESS)
+						return ret;
+					if (hash_req->group != MPI_GROUP_NULL)
+					{
+						ret = PMPI_Group_free (&hash_req->group);
+						MPI_CHECK(ret, PMPI_Group_free);
+					}
+
+					/* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
+					updateStats_P2P(global_mpi_stats, src_world, size, 0);
 				}
-
-                /* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
-                updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
 				hash_remove (&requests, save_reqs[ireq]);
 			}
 		}
@@ -1196,8 +1233,8 @@ int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
 {
 	MPI_Status my_status, *ptr_status;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ierror;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ierror;
 #if defined(DEBUG_MPITRACE)
 	int i;
 #endif
@@ -1230,18 +1267,23 @@ int MPI_Waitany_C_Wrapper (int count, MPI_Request *array_of_requests,
 	{
 		if ((hash_req = hash_search (&requests, save_reqs[*index])) != NULL)
 		{
-			if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
-				return ret;
-			if (hash_req->group != MPI_GROUP_NULL)
+			int cancelled = 0;
+
+			PMPI_Test_cancelled( ptr_status, &cancelled );
+			if (!cancelled)
 			{
-				ret = PMPI_Group_free (&hash_req->group);
-				MPI_CHECK(ret, PMPI_Group_free);
+				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, ptr_status)) != MPI_SUCCESS)
+					return ret;
+				if (hash_req->group != MPI_GROUP_NULL)
+				{
+					ret = PMPI_Group_free (&hash_req->group);
+					MPI_CHECK(ret, PMPI_Group_free);
+				}
+
+				/* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
+				updateStats_P2P(global_mpi_stats, src_world, size, 0);
 			}
-
-            /* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
-            updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
+			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, hash_req->key);
 			hash_remove (&requests, save_reqs[*index]);
 		}
 	}
@@ -1260,8 +1302,8 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 {
 	MPI_Status my_statuses[MAX_WAIT_REQUESTS], *ptr_array_of_statuses;
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
-	hash_data_t *hash_req;
-	int src_world, size, tag, ret, ierror, ii;
+	hash_data_t *hash_req = NULL;
+	int src_world = -1, size = 0, tag = 0, ret, ierror, ii;
 	iotimer_t temps_final;
 #if defined(DEBUG_MPITRACE)
 	int index;
@@ -1297,18 +1339,23 @@ int MPI_Waitsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 		{
 			if ((hash_req = hash_search (&requests, save_reqs[array_of_indices[ii]])) != NULL)
 			{
-				if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
-					return ret;
-				if (hash_req->group != MPI_GROUP_NULL)
-				{
-					ret = PMPI_Group_free (&hash_req->group);
-					MPI_CHECK(ret, PMPI_Group_free);
+				int cancelled = 0;
+
+				PMPI_Test_cancelled(&(ptr_array_of_statuses[ii]), &cancelled);
+				if (!cancelled)
+                		{
+					if ((ret = get_Irank_obj_C (hash_req, &src_world, &size, &tag, &(ptr_array_of_statuses[ii]))) != MPI_SUCCESS)
+						return ret;
+					if (hash_req->group != MPI_GROUP_NULL)
+					{
+						ret = PMPI_Group_free (&hash_req->group);
+						MPI_CHECK(ret, PMPI_Group_free);
+					}
+
+					/* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
+					updateStats_P2P(global_mpi_stats, src_world, size, 0);
 				}
-
-                /* MPI Stats, get_Irank_obj_C above returns size (number of bytes received) */
-                updateStats_P2P(global_mpi_stats, src_world, size, 0);
-
-				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, EMPTY, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
+				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, save_reqs[array_of_indices[ii]]);
 				hash_remove (&requests, save_reqs[array_of_indices[ii]]);
 			}
 		}

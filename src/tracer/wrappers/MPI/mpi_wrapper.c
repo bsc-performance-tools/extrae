@@ -1451,9 +1451,6 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
   TRACE_MPIEVENT (LAST_READ_TIME, MPI_CANCEL_EV, EVT_BEGIN, req, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
-	if (hash_search (&requests, req) != NULL)
-		hash_remove (&requests, req);
-
   CtoF77 (pmpi_cancel) (request, ierror);
 
   /*
@@ -2363,9 +2360,6 @@ int MPI_Cancel_C_Wrapper (MPI_Request *request)
    *   tag : ---
    */
   TRACE_MPIEVENT (LAST_READ_TIME, MPI_CANCEL_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
-
-	if (hash_search (&requests, *request) != NULL)
-		hash_remove (&requests, *request);
 
   ierror = PMPI_Cancel (request);
 
