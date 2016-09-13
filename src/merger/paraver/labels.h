@@ -270,10 +270,18 @@ extern struct value_t MISC_values[MISC_VALUES];
 #define STATE_29_LBL         "RTT"
 #define STATE_29_COLOR       {  52,  43,   0 }
 
+#define STATE_30             30
+#define STATE_30_LBL         "Allocating memory"
+#define STATE_30_COLOR       { 255, 46, 0 }
+
+#define STATE_31             31
+#define STATE_31_LBL         "Freeing memory"
+#define STATE_31_COLOR       { 100, 216, 32 }
+
 #define STATES_LBL           "STATES"
 #define STATES_COLOR_LBL     "STATES_COLOR"
 
-#define STATES_NUMBER        30
+#define STATES_NUMBER        32
 extern struct color_t states_inf[STATES_NUMBER];
 
 /******************************************************************************

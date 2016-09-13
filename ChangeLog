@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 12Sep2016 Adds states for memory allocation calls
  * 08Sep2016 Changed management of MPI_Cancel calls
  + 07Sep2016 Adds event marking the periodicity of CPU events emission
  * 06Sep2016 Changed environment scripts extrae.sh and configured.sh to locate the EXTRAE_HOME path automatically

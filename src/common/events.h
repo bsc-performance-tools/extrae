@@ -666,6 +666,16 @@ enum {
 #define STATE_ATOMIC_MEM_OP      21
 #define STATE_MEM_ORDERING       22
 #define STATE_LOCKING            23
+/* Added for Dimemas */
+#define STATE_OVERHEAD           24
+#define STATE_1SIDED             25
+#define STATE_STARTUP_LATENCY    26
+#define STATE_WAIT_LINKS         27
+#define STATE_DATA_COPY          28
+#define STATE_RTT                29
+/* Added for malloc calls */
+#define STATE_ALLOCMEM           30
+#define STATE_FREEMEM            31
 
 
 

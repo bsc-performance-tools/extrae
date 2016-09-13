@@ -79,6 +79,36 @@ unsigned int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the m
 unsigned int MaxRepresentativePeriod = 0;
 unsigned int HaveSpectralEvents = FALSE;
 
+static int Get_State (unsigned int EvType)
+{
+	int state = 0;
+
+	switch (EvType)
+	{
+		case MALLOC_EV:
+		case MEMKIND_MALLOC_EV:
+		case MEMKIND_POSIX_MEMALIGN_EV:
+		case POSIX_MEMALIGN_EV:
+		case REALLOC_EV:
+		case MEMKIND_REALLOC_EV:
+		case CALLOC_EV:
+		case MEMKIND_CALLOC_EV:
+			state = STATE_ALLOCMEM;
+	  break;
+		case FREE_EV:
+		case MEMKIND_FREE_EV:
+			state = STATE_FREEMEM;
+		break;
+		default:
+			fprintf (stderr, "mpi2prv: Error! Unknown MPI event %d parsed at %s (%s:%d)\n",
+			  EvType, __func__, __FILE__, __LINE__);
+			fflush (stderr);
+			exit (-1);
+		break;
+	}
+	return state;
+}
+
 /******************************************************************************
  ***  Flush_Event
  ******************************************************************************/
@@ -1653,6 +1683,9 @@ static int DynamicMemory_Event (event_t * event,
 		// trace_paraver_state (cpu, ptask, task, thread, time);
 
 		unsigned PRVValue = isBegin?MISC_event_GetValueForDynamicMemory(EvType):0;
+		Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
+		trace_paraver_state (cpu, ptask, task, thread, time);
+
 		trace_paraver_event (cpu, ptask, task, thread, time, DYNAMIC_MEM_EV, PRVValue);
 	}
 
