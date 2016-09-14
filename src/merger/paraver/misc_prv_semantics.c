@@ -955,9 +955,23 @@ static int HWC_Change_Ev (
 				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], hwcvalue[i]);
 			}
 		}
+		/*
+		 * The first time we read the counters we cannot rely on their value, so
+		 * we set them to 0.
+		 */
 		else if (NO_COUNTER != hwctype[i] && Sthread->HWCChange_count == 1)
 		{
-			trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], 0);
+			if (i > 0)
+			{
+				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[i], 0);
+			}
+			else
+			{
+				/* Index [0] contains the active set, not a counter. We always have to
+				 * emit its actual value.
+				 */
+				trace_paraver_event (cpu, ptask, task, thread, current_time, hwctype[0], hwcvalue[0]);
+			}
 		}
 	}
 	return 0;

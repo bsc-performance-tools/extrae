@@ -413,7 +413,12 @@ void HWC_Start_Counters (int num_threads, UINT64 time, int forked)
 	/* Inherit hwc set change values from thread 0 */
 	for (i = 1; i < num_threads; i++)
 	{
+/*
+ * XXX This used to be uncommented. Sets the same counter set to all the threads
+ * of a task. Commented to allow every thread to have a different set.
+
 		HWC_current_set[i] = HWC_current_set[0];
+*/
 		HWC_current_timebegin[i] = HWC_current_timebegin[0];
 		HWC_current_glopsbegin[i] = HWC_current_glopsbegin[0];
 	}
@@ -512,6 +517,20 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 
 			if (task_id == 0)
 				fprintf (stdout, PACKAGE_NAME": Starting distribution hardware counters set is established to 'cyclic'\n");
+		}
+		else if (strncasecmp (distribution, "thread-cyclic", 13) == 0)
+		{
+			int maxThreads;
+			/* Sets are distributed among threads like:
+			0 1 2 3 .. n-1 0 1 2 3 .. n-1  0 1 2 3 ... */
+			maxThreads = Backend_getMaximumOfThreads();
+			for(threadid=0; threadid<maxThreads; threadid++)
+			{
+				HWC_current_set[threadid] = (maxThreads * task_id + threadid) % HWC_num_sets;
+			}
+
+			if (task_id == 0)
+				fprintf (stdout, PACKAGE_NAME": Starting distribution hardware counters set is established to 'thread_cyclic'\n");
 		}
 		else if (strncasecmp (distribution, "block", 5) == 0)
 		{
