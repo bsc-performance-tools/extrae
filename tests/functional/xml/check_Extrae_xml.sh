@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ../helper_functions.bash
+source ../../../etc/extrae.sh 
 
 FILES=`echo ../../../example/LINUX/MPI/*xml`
 

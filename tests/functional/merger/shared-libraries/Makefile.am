@@ -4,9 +4,13 @@ bin_PROGRAMS = main_nodebug main_debug
 main_nodebug_SOURCES = fA.c fB.c main.c
 main_debug_SOURCES = fA.c fB.c main.c
 
-TESTS = \
+TESTS = 
+
+if HAVE_BINUTILS
+TESTS += \
  test-shared-library-nodebug.sh \
  test-shared-library-debug.sh
+endif
 
 EXTRA_DIST = $(TESTS)
 

@@ -168,7 +168,7 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 	*symbols = bfdSymbols;
 
 #if defined(DEBUG)
-	printf ("BFD file=%s bfdImage = %p bfdSymbols = %p\n",
+	fprintf (stderr, "BFD file=%s bfdImage = %p bfdSymbols = %p\n",
 	  file, bfdImage, bfdSymbols);
 #endif
 

@@ -3,16 +3,16 @@ include $(top_srcdir)/PATHS
 check_PROGRAMS = \
  auto-init-fini \
  define_event_type_gen_pcf \
- define_event_type_gen_pcf_f \
- ompss-codelocation \
- ompss-codelocation-2
+ define_event_type_gen_pcf_f
+# ompss-codelocation \
+# ompss-codelocation-2
 
 TESTS = \
  auto-init-fini.sh \
  define_event_type_gen_pcf.sh \
- define_event_type_gen_pcf_f.sh \
- ompss-codelocation.sh \
- ompss-codelocation-2.sh
+ define_event_type_gen_pcf_f.sh
+# ompss-codelocation.sh \
+# ompss-codelocation-2.sh
 
 EXTRA_DIST = \
  auto-init-fini.sh \
@@ -43,11 +43,13 @@ define_event_type_gen_pcf_f_SOURCES = $(INCLUDE_DIR)/extrae_module.f90 define_ev
 define_event_type_gen_pcf_f_FCFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
 define_event_type_gen_pcf_f_LDFLAGS = -L$(TRACER_LIB) -lseqtrace $(HWC_LINKER_FLAGS)
 
-ompss_codelocation_SOURCES = ompss-codelocation.c
-ompss_codelocation_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
-ompss_codelocation_LDFLAGS = -L$(TRACER_LIB) -lseqtrace $(HWC_LINKER_FLAGS)
-
-ompss_codelocation_2_SOURCES = ompss-codelocation-2.c
-ompss_codelocation_2_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
-ompss_codelocation_2_LDFLAGS = -L$(TRACER_LIB) -lseqtrace $(HWC_LINKER_FLAGS)
-
+# These 2 are disabled because they produce different results in different machines
+#
+#ompss_codelocation_SOURCES = ompss-codelocation.c
+#ompss_codelocation_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
+#ompss_codelocation_LDFLAGS = -L$(TRACER_LIB) -lseqtrace $(HWC_LINKER_FLAGS)
+#
+#ompss_codelocation_2_SOURCES = ompss-codelocation-2.c
+#ompss_codelocation_2_CFLAGS = -I$(INCLUDE_DIR) -I$(SRC_DIR)/common
+#ompss_codelocation_2_LDFLAGS = -L$(TRACER_LIB) -lseqtrace $(HWC_LINKER_FLAGS)
+#

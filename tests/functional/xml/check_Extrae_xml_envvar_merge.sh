@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ../helper_functions.bash
+source ../../../etc/extrae.sh
 
 TRACENAME=trace.prv EXTRAE_CONFIG_FILE=extrae_envvar_merge.xml ./check_Extrae_xml
 

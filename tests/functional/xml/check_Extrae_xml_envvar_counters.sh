@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ../helper_functions.bash
+source ../../../etc/extrae.sh
 
 rm -fr TRACE* set-0
 

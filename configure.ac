@@ -650,6 +650,7 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[tests/functional/merger/shared-libraries/main.c:tests/functional/merger/shared-libraries/main.c] \
 		[tests/functional/merger/shared-libraries/fA.c:tests/functional/merger/shared-libraries/fA.c] \
 		[tests/functional/merger/shared-libraries/fB.c:tests/functional/merger/shared-libraries/fB.c] \
+		[etc/extrae.sh:etc/extrae.sh] \
 		[example/LINUX/MPI/detailed_trace_basic.xml:example/LINUX/MPI/detailed_trace_basic.xml] \
 		[example/LINUX/MPI/extrae.xml:example/LINUX/MPI/extrae.xml] \
 		[example/LINUX/MPI/extrae_bursts_1ms.xml:example/LINUX/MPI/extrae_bursts_1ms.xml] \
