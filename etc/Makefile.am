@@ -26,6 +26,8 @@ $(VARS_SCRIPT):
 	echo "export EXTRAE_BFD_LIBSDIR=${BFD_LIBSDIR}" >> $(VARS_SCRIPT)
 	echo "export EXTRAE_UNWIND_HOME=${UNWIND_HOME}" >> $(VARS_SCRIPT)
 	echo "export EXTRAE_UNWIND_LIBSDIR=${UNWIND_LIBSDIR}" >> $(VARS_SCRIPT)
+	echo "export EXTRAE_BOOST_HOME=${BOOST_HOME}" >> $(VARS_SCRIPT)
+	echo "export EXTRAE_BOOST_LIBSDIR=${BOOST_HOME}/lib" >> $(VARS_SCRIPT)
 	echo "export EXTRAE_CC=${CC}" >> $(VARS_SCRIPT)
 	echo "export EXTRAE_CFLAGS=\"${CFLAGS}\"" >> $(VARS_SCRIPT)
 	echo "export EXTRAE_CXX=${CXX}" >> $(VARS_SCRIPT)
