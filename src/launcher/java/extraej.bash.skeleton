@@ -1,5 +1,17 @@
 #!/bin/bash
 
+EXTRAE_HOME=@sub_PREFIXDIR@
+
+if [[ "${EXTRAEJ_LIBPTTRACE_PATH}" = "" ]]; then
+	EXTRAEJ_LIBPTTRACE_PATH=${EXTRAE_HOME}/lib/libpttrace.so
+fi
+if [[ "${EXTRAEJ_JAVATRACE_PATH}" = "" ]]; then
+        EXTRAEJ_JAVATRACE_PATH=${EXTRAE_HOME}/lib/javatrace.jar
+fi
+if [[ "${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}" = "" ]]; then
+        EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH=${EXTRAE_HOME}/lib/libextrae-jvmti-agent.so
+fi
+
 die() { echo "$@" 1>&2 ; exit 1; }
 
 #
@@ -165,32 +177,32 @@ parse_parameters () {
 #
 
 execute_java () {
-	local cp=${EXTRAE_HOME}/lib/javatrace.jar:$1
+	local cp=${EXTRAEJ_JAVATRACE_PATH}:$1
 	shift
 	local preload=$1
 	shift
 
 	# Check whether Extrae supported JVMTI
-	if [[ ! -r ${EXTRAE_HOME}/lib/libextrae-jvmti-agent.so ]]; then
+	if [[ ! -r ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ]]; then
 		if [[ "${verbose}" = "yes" ]]; then
-			echo "Executing: LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} ${@}"
+			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} ${@}"
 		fi
 
-		LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:${LD_LIBRARY_PATH} \
+		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
 		LD_PRELOAD=${preload} \
 		CLASSPATH=${cp} \
 		  ${JAVA} ${@}
 	else
-		local agent=${EXTRAE_HOME}/lib/libextrae-jvmti-agent.so
+		local agent=${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}
 
 		if [[ "${verbose}" = "yes" ]]; then
-			echo "Executing: LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} -agentpath:${EXTRAE_HOME}/lib/libjavajvmtitrace.so ${@}"
+			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}"
 		fi
 
-		LD_LIBRARY_PATH=${EXTRAE_HOME}/lib:${LD_LIBRARY_PATH} \
+		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
 		LD_PRELOAD=${preload} \
 		CLASSPATH=${cp} \
-		  ${JAVA} -agentpath:${EXTRAE_HOME}/lib/libextrae-jvmti-agent.so ${@}
+		  ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}
 	fi
 }
 
@@ -213,7 +225,6 @@ application_separator_found="no"
 JAVA=@sub_JAVA@
 AJC=@sub_AJC@
 ASPECTWEAVER_JAR=@sub_ASPECTWEAVER_JAR@
-EXTRAE_HOME=@sub_PREFIXDIR@
 
 # Check existance for config file pointed by EXTRAE_CONFIG_FILE
 
@@ -263,10 +274,6 @@ done
 # Do we support AspectJ?
 if [[ -x "${AJC}" ]]; then
 
-	if [[ "${EXTRAE_LIBDIR}" = "" ]]; then
-		EXTRAE_LIBDIR=${EXTRAE_HOME}/lib
-	fi
-
 	# Do we have to reuse a previous existing instrumented package?
 	if [[ "${reuse_dir}" = "" ]]; then
 
@@ -279,10 +286,10 @@ if [[ -x "${AJC}" ]]; then
 			generate_aspects
 		
 			if [[ "${verbose}" = "yes" ]]; then
-				echo "Executing: CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAE_HOME}/lib/javatrace.jar:${CLASPATH} ${AJC} -inpath . -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
+				echo "Executing: CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} ${AJC} -inpath . -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
 			fi
 		
-			CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAE_HOME}/lib/javatrace.jar:${CLASPATH} \
+			CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
 			${AJC} \
 			 -inpath . \
 			 -sourceroots ${tmpdir}/aspects \
@@ -292,12 +299,12 @@ if [[ -x "${AJC}" ]]; then
 			fi
 
 			execute_java ${tmpdir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
-				${EXTRAE_LIBDIR}/libpttrace.so \
+				${EXTRAEJ_LIBPTTRACE_PATH} \
 				"$@"
 		else
 
 			execute_java "${CLASSPATH}" \
-				${EXTRAE_LIBDIR}/libpttrace.so \
+				${EXTRAEJ_LIBPTTRACE_PATH} \
 				"$@"
 		fi
 	else
@@ -314,14 +321,14 @@ if [[ -x "${AJC}" ]]; then
 
 		# Let's execute the code with Extrae support
 		execute_java ${reuse_dir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
-			${EXTRAE_LIBDIR}/libpttrace.so \
+			${EXTRAEJ_LIBPTTRACE_PATH} \
 			"$@"
 	fi
 else
 
 	# We don't support AJC. Let's execute the code with Extrae support
 	execute_java "${CLASSPATH}" \
-		${EXTRAE_LIBDIR}/libpttrace.so \
+		${EXTRAEJ_LIBPTTRACE_PATH} \
 		"$@"
 fi
 

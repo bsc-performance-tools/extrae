@@ -2,26 +2,30 @@
 
 source ../../helper_functions.bash
 
-export EXTRAE_LIBDIR=../../../../src/tracer/.libs
+BUILD_DIR=../../../..
+EXTRAEJ=${BUILD_DIR}/src/launcher/java/extraej.bash
+export EXTRAEJ_LIBPTTRACE_PATH=${BUILD_DIR}/src/tracer/.libs/libpttrace.so
+export EXTRAEJ_JAVATRACE_PATH=${BUILD_DIR}/src/java-connector/jni/javatrace.jar
+export EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH=${BUILD_DIR}/src/java-connector/jvmti-agent/.libs/libextrae-jvmti-agent.so
 
 TRACE0=JavaThreads0
 rm -fr TRACE.* *.mpits set-0
-EXTRAE_CONFIG_FILE=extrae.xml ../../../../src/launcher/java/extraej.bash -- JavaThreads 0
+EXTRAE_CONFIG_FILE=extrae.xml ${EXTRAEJ} -- JavaThreads 0
 ../../../../src/merger/mpi2prv -f TRACE.mpits -o ${TRACE0}.prv
 
 TRACE1=JavaThreads1
 rm -fr TRACE.* *.mpits set-0
-EXTRAE_CONFIG_FILE=extrae.xml ../../../../src/launcher/java/extraej.bash -- JavaThreads 1
+EXTRAE_CONFIG_FILE=extrae.xml ${EXTRAEJ} -- JavaThreads 1
 ../../../../src/merger/mpi2prv -f TRACE.mpits -o ${TRACE1}.prv
 
 TRACE2=JavaThreads2
 rm -fr TRACE.* *.mpits set-0
-EXTRAE_CONFIG_FILE=extrae.xml ../../../../src/launcher/java/extraej.bash -- JavaThreads 2
+EXTRAE_CONFIG_FILE=extrae.xml ${EXTRAEJ} -- JavaThreads 2
 ../../../../src/merger/mpi2prv -f TRACE.mpits -o ${TRACE2}.prv
 
 TRACE4=JavaThreads4
 rm -fr TRACE.* *.mpits set-0
-EXTRAE_CONFIG_FILE=extrae.xml ../../../../src/launcher/java/extraej.bash -- JavaThreads 4
+EXTRAE_CONFIG_FILE=extrae.xml ${EXTRAEJ} -- JavaThreads 4
 ../../../../src/merger/mpi2prv -f TRACE.mpits -o ${TRACE4}.prv
 
 # Actual checks

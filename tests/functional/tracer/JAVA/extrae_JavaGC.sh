@@ -6,9 +6,13 @@ TRACE=JavaGC
 
 rm -fr TRACE.* *.mpits set-0
 
-export EXTRAE_LIBDIR=../../../../src/tracer/.libs
+BUILD_DIR=../../../..
+EXTRAEJ=${BUILD_DIR}/src/launcher/java/extraej.bash
+export EXTRAEJ_LIBPTTRACE_PATH=${BUILD_DIR}/src/tracer/.libs/libpttrace.so
+export EXTRAEJ_JAVATRACE_PATH=${BUILD_DIR}/src/java-connector/jni/javatrace.jar
+export EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH=${BUILD_DIR}/src/java-connector/jvmti-agent/.libs/libextrae-jvmti-agent.so
 
-EXTRAE_CONFIG_FILE=extrae.xml ../../../../src/launcher/java/extraej.bash -- JavaGC
+EXTRAE_CONFIG_FILE=extrae.xml ${EXTRAEJ} -- JavaGC
 
 ../../../../src/merger/mpi2prv -f TRACE.mpits -o ${TRACE}.prv
 
