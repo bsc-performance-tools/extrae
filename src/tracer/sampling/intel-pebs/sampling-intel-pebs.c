@@ -104,6 +104,7 @@ static int processor_vendor=-2;
 #define PROCESSOR_ATOM_SILVERMONT	27
 #define PROCESSOR_BROADWELL		28
 #define PROCESSOR_HASWELL_EP		29
+#define PROCESSOR_KNIGHTS_LANDING       30
 
 
 static int detect_processor_cpuinfo(void)
@@ -226,8 +227,12 @@ static int detect_processor_cpuinfo(void)
 				case 79:
 					processor_type=PROCESSOR_BROADWELL;
 					break;
+				case 87:
+					processor_type=PROCESSOR_KNIGHTS_LANDING;
+					break;
 				default:
 					processor_type=PROCESSOR_UNKNOWN;
+					break;
 			}
 			return 0;
 		}
@@ -290,6 +295,14 @@ int get_latency_load_event(unsigned long long *config,
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
 		break;
+	case PROCESSOR_KNIGHTS_LANDING:
+	/* KNL Performance Counters
+	 * https://software.intel.com/en-us/articles/intel-xeon-phi-x200-family-processor-performance-monitoring-reference-manual
+	 */
+		*config=0x0404; /* Use 0x0204 for "MEM_UOPS_RETIRED:L2_HIT_LOADS; 0x0404 for "MEM_UOPS_RETIRED:L2_MISS_LOADS */
+		*precise_ip=2;
+		strcpy(name,"MEM_UOPS_RETIRED:L2_MISS_LOADS");
+		break;
 	default:
 		*config=0x0;
 		*precise_ip=0;
@@ -330,6 +343,7 @@ int get_latency_store_event(unsigned long long *config,
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
 		break;
+        case PROCESSOR_KNIGHTS_LANDING:
 	default:
 		*config=0x0;
 		*precise_ip=0;
