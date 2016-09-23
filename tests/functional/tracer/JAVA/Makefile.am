@@ -42,11 +42,11 @@ JavaFunction.class$(EXEEXT): JavaFunction.java
 	$(JAVAC) JavaFunction.java
 endif
 
-installcheck-local:
-	./extrae_JavaSimple.sh
-	./extrae_JavaGC.sh
-	./extrae_JavaException.sh
+TESTS = \
+	./extrae_JavaSimple.sh \
+	./extrae_JavaGC.sh \
+	./extrae_JavaException.sh \
 	./extrae_JavaThreads.sh
 if WANT_JAVA_WITH_ASPECTJ
-	./extrae_JavaAspectJ.sh
+TESTS += ./extrae_JavaAspectJ.sh
 endif

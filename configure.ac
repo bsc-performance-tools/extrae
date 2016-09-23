@@ -641,6 +641,15 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[tests/functional/tracer/MPI/extrae.xml:tests/functional/tracer/MPI/extrae.xml] \
 		[tests/functional/tracer/PTHREAD/trace-ldpreload.sh:tests/functional/tracer/PTHREAD/trace-ldpreload.sh] \
 		[tests/functional/tracer/PTHREAD/extrae.xml:tests/functional/tracer/PTHREAD/extrae.xml] \
+		[tests/functional/tracer/JAVA/JavaSimple.java:tests/functional/tracer/JAVA/JavaSimple.java] \
+		[tests/functional/tracer/JAVA/extrae_JavaSimple.sh:tests/functional/tracer/JAVA/extrae_JavaSimple.sh] \
+		[tests/functional/tracer/JAVA/JavaGC.java:tests/functional/tracer/JAVA/JavaGC.java] \
+		[tests/functional/tracer/JAVA/extrae_JavaGC.sh:tests/functional/tracer/JAVA/extrae_JavaGC.sh] \
+		[tests/functional/tracer/JAVA/JavaException.java:tests/functional/tracer/JAVA/JavaException.java] \
+		[tests/functional/tracer/JAVA/extrae_JavaException.sh:tests/functional/tracer/JAVA/extrae_JavaException.sh] \
+		[tests/functional/tracer/JAVA/JavaThreads.java:tests/functional/tracer/JAVA/JavaThreads.java] \
+		[tests/functional/tracer/JAVA/extrae_JavaThreads.sh:tests/functional/tracer/JAVA/extrae_JavaThreads.sh] \
+		[tests/functional/tracer/JAVA/extrae.xml:tests/functional/tracer/JAVA/extrae.xml] \
 		[tests/functional/merger/dump-events/dump-events.reference:tests/functional/merger/dump-events/dump-events.reference] \
 		[tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml:tests/functional/hw-counters/extrae-PAPI_TOT_CYC.xml] \
 		[tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml:tests/functional/hw-counters/extrae-PAPI_TOT_INS.xml] \

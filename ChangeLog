@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 23Sep2016 Run JAVA checks with make check instead of with make installcheck
  * 22Sep2016 Fixes for make check 
  + 14Sep2016 Adds XML counter distribution (thread-cyclic) to allow each thread to read a different counter set
  + 12Sep2016 Adds states for memory allocation calls

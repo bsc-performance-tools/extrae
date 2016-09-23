@@ -263,6 +263,10 @@ done
 # Do we support AspectJ?
 if [[ -x "${AJC}" ]]; then
 
+	if [[ "${EXTRAE_LIBDIR}" = "" ]]; then
+		EXTRAE_LIBDIR=${EXTRAE_HOME}/lib
+	fi
+
 	# Do we have to reuse a previous existing instrumented package?
 	if [[ "${reuse_dir}" = "" ]]; then
 
@@ -288,12 +292,12 @@ if [[ -x "${AJC}" ]]; then
 			fi
 
 			execute_java ${tmpdir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
-				${EXTRAE_HOME}/lib/libpttrace.so \
+				${EXTRAE_LIBDIR}/libpttrace.so \
 				"$@"
 		else
 
 			execute_java "${CLASSPATH}" \
-				${EXTRAE_HOME}/lib/libpttrace.so \
+				${EXTRAE_LIBDIR}/libpttrace.so \
 				"$@"
 		fi
 	else
@@ -310,14 +314,14 @@ if [[ -x "${AJC}" ]]; then
 
 		# Let's execute the code with Extrae support
 		execute_java ${reuse_dir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
-			${EXTRAE_HOME}/lib/libpttrace.so \
+			${EXTRAE_LIBDIR}/libpttrace.so \
 			"$@"
 	fi
 else
 
 	# We don't support AJC. Let's execute the code with Extrae support
 	execute_java "${CLASSPATH}" \
-		${EXTRAE_HOME}/lib/libpttrace.so \
+		${EXTRAE_LIBDIR}/libpttrace.so \
 		"$@"
 fi
 

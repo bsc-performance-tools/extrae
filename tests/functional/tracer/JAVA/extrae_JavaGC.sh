@@ -6,6 +6,8 @@ TRACE=JavaGC
 
 rm -fr TRACE.* *.mpits set-0
 
+export EXTRAE_LIBDIR=../../../../src/tracer/.libs
+
 EXTRAE_CONFIG_FILE=extrae.xml ../../../../src/launcher/java/extraej.bash -- JavaGC
 
 ../../../../src/merger/mpi2prv -f TRACE.mpits -o ${TRACE}.prv

@@ -2,6 +2,8 @@
 
 source ../../helper_functions.bash
 
+export EXTRAE_LIBDIR=../../../../src/tracer/.libs
+
 TRACE0=JavaThreads0
 rm -fr TRACE.* *.mpits set-0
 EXTRAE_CONFIG_FILE=extrae.xml ../../../../src/launcher/java/extraej.bash -- JavaThreads 0
