@@ -342,13 +342,19 @@ FILE * fopen(const char *path, const char *mode)
 
   if (real_fopen != NULL && canInstrument)
   {
+		int fd = -1;
     /* Instrumentation is enabled, emit events and invoke the real call */
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     f = real_fopen (path, mode);
-    Probe_IO_fopen_Entry (fileno(f), path);
-    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+		if (f != NULL)
+		{
+			fd = fileno(f);
+		}
 
-    Probe_IO_fopen_Exit ();
+		Probe_IO_fopen_Entry (fd, path);
+		TRACE_IO_CALLER(LAST_READ_TIME, 3);
+
+		Probe_IO_fopen_Exit ();
     Backend_Leave_Instrumentation ();
   }
   else if (real_fopen != NULL && !canInstrument)
@@ -402,11 +408,16 @@ FILE * fopen64(const char *path, const char *mode)
 
   if (real_fopen64 != NULL && canInstrument)
   {
+		int fd = -1;
     /* Instrumentation is enabled, emit events and invoke the real call */
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     f = real_fopen64 (path, mode);
-    Probe_IO_fopen_Entry (fileno(f), path);
-    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+		if (f != NULL)
+		{
+			fd = fileno(f);
+		}
+		Probe_IO_fopen_Entry (fd, path);
+		TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
     Probe_IO_fopen_Exit ();
     Backend_Leave_Instrumentation ();

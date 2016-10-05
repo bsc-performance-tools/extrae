@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 11Oct2016 Fixes online and dyninst tests
+ * 10Oct2016 Fixes IO segfault when opening non-existing file and enables it by default
  * 23Sep2016 Upgraded to v3.4.1
  * 23Sep2016 Fixed Java and MPI checks 
  * 23Sep2016 Run JAVA checks with make check instead of with make installcheck

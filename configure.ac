@@ -374,11 +374,11 @@ AM_CONDITIONAL(GENERATE_DOCUMENTATION, test "${enable_doc}" = "yes" )
 
 AC_ARG_ENABLE(instrument-io,
 	AC_HELP_STRING(
-		[--enable-instrument-io],
-		[Enables instrumentation for basic I/O (read, write) calls  (experimental, disabled by default)]
+		[--disable-instrument-io],
+		[Disables instrumentation for basic I/O (read, write) calls (experimental, enabled by default)]
 	),
 	[enable_instrument_io="${enableval}"],
-	[enable_instrument_io="no"]
+	[enable_instrument_io="yes"]
 )
 if test "${enable_instrument_io}" = "yes" ; then
 	AC_DEFINE([INSTRUMENT_IO], [1], [Determine whether read/write are meant to be instrumented])
@@ -386,11 +386,11 @@ fi
 
 AC_ARG_ENABLE(instrument-dynamic-memory,
 	AC_HELP_STRING(
-		[--enable-instrument-dynamic-memory],
-		[Enables instrumentation for dynamic memory (malloc, free, realloc) calls (experimental, disabled by default)]
+		[--disable-instrument-dynamic-memory],
+		[Disables instrumentation for dynamic memory (malloc, free, realloc) calls (experimental, enabled by defaultl)]
 	),
 	[enable_instrument_dynamic_memory="${enableval}"],
-	[enable_instrument_dynamic_memory="no"]
+	[enable_instrument_dynamic_memory="yes"]
 )
 
 if test "${enable_instrument_dynamic_memory}" = "yes" ; then
