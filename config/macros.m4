@@ -1134,6 +1134,8 @@ AC_DEFUN([AX_IS_CRAY_XT],
       if test -d /opt/cray ; then
          if test `which cc | grep xt-asyncpe | wc -l` != "0" ; then
            IS_CXT_MACHINE="yes"
+         elif test `which cc | grep craype | wc -l` != "0" ; then
+           IS_CXT_MACHINE="yes"
          fi
       fi
    fi
