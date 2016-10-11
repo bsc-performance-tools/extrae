@@ -12,7 +12,9 @@ TESTS += \
  test-shared-library-debug.sh
 endif
 
-EXTRA_DIST = $(TESTS)
+EXTRA_DIST = \
+ test-shared-library-nodebug.sh \
+ test-shared-library-debug.sh
 
 libfA_nodebug.so: fA.c
 	gcc -fPIC -DPIC fA.c -o libfA_nodebug.so -shared

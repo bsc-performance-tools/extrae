@@ -635,6 +635,8 @@ AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefil
 ### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])
 
 AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_functions.bash] \
+		[tests/functional/launcher/extrae.xml:tests/functional/launcher/extrae.xml] \
+		[tests/functional/launcher/extrae-nothing-to-instrument.xml:tests/functional/launcher/extrae-nothing-to-instrument.xml] \
 		[tests/functional/tracer/MPI/trace-static.sh:tests/functional/tracer/MPI/trace-static.sh] \
 		[tests/functional/tracer/MPI/trace-ldpreload.sh:tests/functional/tracer/MPI/trace-ldpreload.sh] \
 		[tests/functional/tracer/MPI/trace-ldpreloadf.sh:tests/functional/tracer/MPI/trace-ldpreloadf.sh] \

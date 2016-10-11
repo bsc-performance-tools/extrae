@@ -33,7 +33,7 @@ $(VARS_SCRIPT):
 	echo "export EXTRAE_CXX=${CXX}" >> $(VARS_SCRIPT)
 	echo "export EXTRAE_CXXFLAGS=\"${CXXFLAGS}\"" >> $(VARS_SCRIPT)
 if HAVE_ONLINE
-	echo "export EXTRAE_ONLINE_SOURCES=$(DESTDIR)$(sysconfdir)/extrae_online.sh" >> $(VARS_SCRIPT)
+	echo "export EXTRAE_ONLINE_SOURCES=$(abs_builddir)/extrae_online.sh" >> $(VARS_SCRIPT)
 endif
 
 mkdirSHscripts:
@@ -55,6 +55,7 @@ CONFIGUREDscript:
 	chmod 0755 $(DESTDIR)$(sysconfdir)/configured.sh
 
 install-data-hook: mkdirSHscripts SHscripts CONFIGUREDscript
+	$(top_srcdir)/substitute $(SED) "export EXTRAE_ONLINE_SOURCES=$(abs_builddir)/extrae_online.sh" "export EXTRAE_ONLINE_SOURCES=$(DESTDIR)$(sysconfdir)/extrae_online.sh" $(VARS_SCRIPT)
 
 uninstall-local:
 	rm $(DESTDIR)/$(sysconfdir)/extrae-vars.sh \

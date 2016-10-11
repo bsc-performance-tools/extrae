@@ -17,7 +17,7 @@ if test "${EXTRAE_HOME}" != "" ; then
 		source ${EXTRAE_HOME}/etc/extrae-vars.sh
 	fi
 
-	if test -f "${EXTRAE_ONLINE_SOURCES}"; then
+	if test -f "${EXTRAE_ONLINE_SOURCES}" ; then
 		source ${EXTRAE_ONLINE_SOURCES}
 	fi
 
