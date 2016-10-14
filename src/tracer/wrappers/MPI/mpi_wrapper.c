@@ -1880,7 +1880,7 @@ void PMPI_Intercomm_create_F_Wrapper (MPI_Fint *local_comm, MPI_Fint *local_lead
 
 	comm_null = MPI_Comm_c2f(MPI_COMM_NULL);
 
-	CtoF77(mpi_intercomm_create) (local_comm, local_leader, peer_comm,
+	CtoF77(pmpi_intercomm_create) (local_comm, local_leader, peer_comm,
 	  remote_leader, tag, newintercomm, ierror);
 
 	if (*ierror == MPI_SUCCESS && *newintercomm != comm_null)

@@ -703,7 +703,7 @@ void NAME_ROUTINE_C2F(mpi_intercomm_create) (MPI_Fint *local_comm,
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-		CtoF77 (mpi_intercomm_create) (local_comm, local_leader, peer_comm, 
+		CtoF77 (pmpi_intercomm_create) (local_comm, local_leader, peer_comm, 
 		  remote_leader, tag, new_intercomm, ierror);
 #if defined(ENABLE_LOAD_BALANCING)
 	DLB_MPI_Intercomm_create_F_leave ();

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 14Oct2016 Fixed interface and wrapper for MPI_Intercomm_create that had a recursion 
  * 14Oct2016 Added event for memkind partition
  * 11Oct2016 Fixes online and dyninst tests
  * 10Oct2016 Fixes IO segfault when opening non-existing file and enables it by default
