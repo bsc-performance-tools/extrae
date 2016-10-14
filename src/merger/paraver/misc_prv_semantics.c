@@ -1713,6 +1713,16 @@ static int DynamicMemory_Event (event_t * event,
 	return 0;
 }
 
+static int DynamicMemory_Partition_Event (event_t * event,
+        unsigned long long time, unsigned int cpu, unsigned int ptask,
+        unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+        unsigned EvType = Get_EvEvent (event);
+        unsigned long long EvValue = Get_EvValue (event);
+
+	trace_paraver_event (cpu, ptask, task, thread, time, MEMKIND_PARTITION_EV, EvValue);
+}
+
 /*****************************************************************************/
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
@@ -1779,6 +1789,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ MEMKIND_REALLOC_EV, DynamicMemory_Event },
 	{ MEMKIND_POSIX_MEMALIGN_EV, DynamicMemory_Event },
 	{ MEMKIND_FREE_EV, DynamicMemory_Event },
+	{ MEMKIND_PARTITION_EV, DynamicMemory_Partition_Event },
 	{ NULL_EV, NULL }
 };
 

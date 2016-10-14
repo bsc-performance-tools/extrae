@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 14Oct2016 Added event for memkind partition
  * 11Oct2016 Fixes online and dyninst tests
  * 10Oct2016 Fixes IO segfault when opening non-existing file and enables it by default
  * 10Oct2016 Updated configure check for newer Cray XT systems 

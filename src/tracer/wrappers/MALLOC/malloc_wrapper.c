@@ -60,7 +60,7 @@ static void (*real_free)(void *) = NULL;
 static void* (*real_realloc)(void*, size_t) = NULL;
 static int   (*real_posix_memalign)(void **, size_t, size_t) = NULL;
 
-# if HAVE_MEMKIND
+# if defined(HAVE_MEMKIND)
 static void* (*real_memkind_malloc)(memkind_t, size_t) = NULL;
 static void* (*real_memkind_calloc)(memkind_t, size_t, size_t) = NULL;
 static void* (*real_memkind_realloc)(memkind_t, void *, size_t) = NULL;
@@ -77,7 +77,7 @@ void Extrae_malloctrace_init (void)
 	real_realloc = (void*(*)(void*, size_t)) dlsym (RTLD_NEXT, "realloc");
 	real_posix_memalign = (int(*)(void **, size_t, size_t)) dlsym (RTLD_NEXT, "posix_memalign");
 	
-#  if HAVE_MEMKIND
+#  if defined(HAVE_MEMKIND)
 	real_memkind_malloc = (void*(*)(memkind_t, size_t)) dlsym (RTLD_NEXT, "memkind_malloc");
 	real_memkind_calloc = (void*(*)(memkind_t, size_t, size_t)) dlsym (RTLD_NEXT, "memkind_calloc");
 	real_memkind_realloc = (void*(*)(memkind_t, void *, size_t)) dlsym (RTLD_NEXT, "memkind_realloc");
@@ -410,7 +410,35 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
   return res;
 }
 
-#  if HAVE_MEMKIND
+#  if defined(HAVE_MEMKIND)
+
+static int get_memkind_partition(memkind_t kind)
+{
+	if (kind == MEMKIND_DEFAULT)
+		return MEMKIND_PARTITION_DEFAULT_VAL;
+	else if (kind == MEMKIND_HBW)
+		return MEMKIND_PARTITION_HBW_VAL;
+	else if (kind == MEMKIND_HBW_HUGETLB)
+		return MEMKIND_PARTITION_HBW_HUGETLB_VAL;
+	else if (kind == MEMKIND_HBW_PREFERRED)
+		return MEMKIND_PARTITION_HBW_PREFERRED_VAL;
+	else if (kind == MEMKIND_HBW_PREFERRED_HUGETLB)
+		return MEMKIND_PARTITION_HBW_PREFERRED_HUGETLB_VAL;
+	else if (kind == MEMKIND_HUGETLB)
+		return MEMKIND_PARTITION_HUGETLB_VAL;
+	else if (kind == MEMKIND_HBW_GBTLB)
+		return MEMKIND_PARTITION_HBW_GBTLB_VAL;
+	else if (kind == MEMKIND_HBW_PREFERRED_GBTLB)
+		return MEMKIND_PARTITION_HBW_PREFERRED_GBTLB_VAL;
+	else if (kind == MEMKIND_GBTLB)
+		return MEMKIND_PARTITION_GBTLB_VAL;
+	else if (kind == MEMKIND_HBW_INTERLEAVE)
+		return MEMKIND_PARTITION_HBW_INTERLEAVE_VAL;
+	else if (kind == MEMKIND_INTERLEAVE)
+		return MEMKIND_PARTITION_INTERLEAVE_VAL;
+
+	return MEMKIND_PARTITION_OTHER_VAL;
+}
 
 void *memkind_malloc(memkind_t kind, size_t size)
 {
@@ -439,7 +467,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
   if (real_memkind_malloc != NULL && canInstrument)
   {
     Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
-    Probe_memkind_malloc_Entry (size);
+    Probe_memkind_malloc_Entry (get_memkind_partition( kind ), size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_malloc(kind, size);
     if (res != NULL)
@@ -488,7 +516,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
   if (real_memkind_calloc != NULL && canInstrument)
   {
     Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
-    Probe_memkind_calloc_Entry (num, size);
+    Probe_memkind_calloc_Entry (get_memkind_partition( kind ), num, size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_calloc(kind, num, size);
     if (res != NULL)
@@ -537,7 +565,7 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
   if (real_memkind_realloc != NULL && canInstrument)
   {
     Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
-    Probe_memkind_realloc_Entry (ptr, size);
+    Probe_memkind_realloc_Entry (get_memkind_partition( kind ), ptr, size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_realloc(kind, ptr, size);
     if (res != NULL)
@@ -587,7 +615,7 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
   if (real_memkind_posix_memalign != NULL && canInstrument)
   {
     Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
-    Probe_memkind_posix_memalign_Entry (size);
+    Probe_memkind_posix_memalign_Entry (get_memkind_partition( kind ), size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_posix_memalign(kind, memptr, alignment, size);
     if (res == 0)
@@ -637,7 +665,7 @@ void memkind_free(memkind_t kind, void *ptr)
   if (Extrae_get_trace_malloc_free() && real_memkind_free != NULL && canInstrument && present)
   {
     Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
-    Probe_memkind_free_Entry (ptr);
+    Probe_memkind_free_Entry (get_memkind_partition( kind ), ptr);
     real_memkind_free (kind, ptr);
     Probe_memkind_free_Exit ();
     Backend_Leave_Instrumentation ();

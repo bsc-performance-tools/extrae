@@ -2089,7 +2089,7 @@ AC_DEFUN([AX_CHECK_PROC_CPUINFO],
 	AC_MSG_CHECKING(for /proc/cpuinfo)
 	if test -r /proc/cpuinfo ; then
 		AC_MSG_RESULT([found])
-		AC_DEFINE([HAVE_PROC_CPUINFO], 1, [Define to 1 the OS has /proc/cpuinfo])
+		AC_DEFINE([HAVE_PROC_CPUINFO], 1, [Define to 1 if the OS has /proc/cpuinfo])
 	else
 		AC_MSG_RESULT([not found])
 	fi
@@ -2100,7 +2100,7 @@ AC_DEFUN([AX_CHECK_PROC_MEMINFO],
 	AC_MSG_CHECKING(for /proc/meminfo)
 	if test -r /proc/meminfo ; then
 		AC_MSG_RESULT([found])
-		AC_DEFINE([HAVE_PROC_MEMINFO], 1, [Define to 1 the OS has /proc/meminfo])
+		AC_DEFINE([HAVE_PROC_MEMINFO], 1, [Define to 1 if the OS has /proc/meminfo])
 	else
 		AC_MSG_RESULT([not found])
 	fi
@@ -2109,7 +2109,7 @@ AC_DEFUN([AX_CHECK_PROC_MEMINFO],
 AC_DEFUN([AX_CHECK_GETCPU],
 [
 	AC_CHECK_HEADERS([sched.h])
-	AC_CHECK_FUNC(sched_getcpu, [AC_DEFINE([HAVE_SCHED_GETCPU],[1],[Define if have sched_getcpu])])
+	AC_CHECK_FUNC(sched_getcpu, [AC_DEFINE([HAVE_SCHED_GETCPU],[1],[Define to 1 if have sched_getcpu])])
 ])
 
 AC_DEFUN([AX_PROG_MEMKIND],
@@ -2131,7 +2131,10 @@ AC_DEFUN([AX_PROG_MEMKIND],
     CFLAGS="${MEMKIND_CFLAGS}"
     AC_CHECK_HEADERS([memkind.h], [MEMKIND_H_FOUND="yes"], [MEMKIND_H_FOUND="no"])
     AX_FLAGS_RESTORE()
-    AC_DEFINE([HAVE_MEMKIND], 1, [Define to 1 if MEMKIND is installed in the system])
+
+    MEMKIND_LIBS="-lmemkind"
+    AC_SUBST(MEMKIND_LIBS)
+    AC_DEFINE([HAVE_MEMKIND], 1, [Define to 1 if MEMKIND is available])
   fi
 
   AM_CONDITIONAL(HAVE_MEMKIND, test "x${MEMKIND_H_FOUND}" = "xyes" )
