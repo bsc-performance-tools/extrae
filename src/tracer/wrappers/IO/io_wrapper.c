@@ -185,9 +185,12 @@ int open(const char *pathname, int flags, ...)
 
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses,
+	 * and THREADID calls a null callback if Extrae is not yet initialized */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   if (flags & O_CREAT)
   {
@@ -254,10 +257,13 @@ int open64(const char *pathname, int flags, ...)
 
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
 
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
+		
   if (flags & O_CREAT)
   {     
     va_list arg;
@@ -322,9 +328,12 @@ FILE * fopen(const char *path, const char *mode)
 
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen == NULL)
@@ -388,9 +397,12 @@ FILE * fopen64(const char *path, const char *mode)
 
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen64 == NULL)
@@ -452,10 +464,13 @@ ssize_t read (int fd, void *buf, size_t count)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) && 
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_read == NULL)
@@ -511,10 +526,13 @@ ssize_t write (int fd, const void *buf, size_t count)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) && 
                       mpitrace_on &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_write == NULL)
@@ -570,10 +588,13 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   size_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fread == NULL)
@@ -629,10 +650,13 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   size_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   if (real_fwrite == NULL)
   {
@@ -687,10 +711,13 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pread == NULL)
@@ -746,10 +773,13 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwrite == NULL)
@@ -805,10 +835,13 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_readv == NULL)
@@ -873,10 +906,13 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_writev == NULL)
@@ -941,10 +977,13 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
   
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv == NULL)
@@ -1009,10 +1048,13 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv64 == NULL)
@@ -1077,11 +1119,14 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
   
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
+
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev == NULL)
   {
@@ -1145,10 +1190,13 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) &&
                       mpitrace_on                          &&
                       Extrae_get_trace_io();
   ssize_t res;
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses, 
+	 * and THREADID calls a null callback if Extrae is not yet initialized */     
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);      
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev64 == NULL)
