@@ -1027,7 +1027,7 @@ int GOMP_loop_dynamic_next (long *p1, long *p2)
 void GOMP_parallel (void *p1, void *p2, unsigned p3, unsigned p4)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel is at %p\n", THREADID, GOMP_parallel_start_real);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel is at %p\n", THREADID, GOMP_parallel_real);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel params %p %p %u %u\n", THREADID, p1, p2, p3, p4);
 #endif
 
@@ -1049,7 +1049,7 @@ void GOMP_parallel (void *p1, void *p2, unsigned p3, unsigned p4)
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": GOMP_parallel_start is not hooked! exiting!!\n");
+		fprintf (stderr, PACKAGE_NAME": GOMP_parallel is not hooked! exiting!!\n");
 		exit (0);
 	}
 }
@@ -1092,14 +1092,14 @@ void GOMP_parallel_end (void)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_parallel_end is at %p\n", THREADID, GOMP_parallel_end_real);
 #endif
 
-	if (GOMP_parallel_start_real != NULL && EXTRAE_INITIALIZED())
+	if (GOMP_parallel_end_real != NULL && EXTRAE_INITIALIZED())
 	{
 		Extrae_OpenMP_UF_Exit ();
 		GOMP_parallel_end_real ();
 		Extrae_OpenMP_ParRegion_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
 	}
-	else if (GOMP_parallel_start_real != NULL)
+	else if (GOMP_parallel_end_real != NULL)
 	{
 		GOMP_parallel_end_real ();
 	}
@@ -1146,7 +1146,7 @@ void GOMP_critical_name_start (void **p1)
 		GOMP_critical_name_start_real (p1);
 		Extrae_OpenMP_Named_Lock_Exit(p1);
 	}
-	else if (GOMP_critical_name_start_real)
+	else if (GOMP_critical_name_start_real != NULL)
 	{
 		GOMP_critical_name_start_real (p1);
 	}
