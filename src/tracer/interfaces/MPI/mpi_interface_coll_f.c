@@ -710,7 +710,7 @@ void NAME_ROUTINE_F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *req, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count,
+void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm,
 	MPI_Fint *req, MPI_Fint *ierror)
 #endif
@@ -1200,7 +1200,7 @@ void NAME_ROUTINE_F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 #else
-void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
+void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount,
 	MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 #endif
