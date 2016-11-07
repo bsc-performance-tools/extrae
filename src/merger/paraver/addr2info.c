@@ -621,7 +621,7 @@ static int AddressTable_Insert_MemReference (int addr_type,
 	const char *module, const char *staticname, const char *filename, int line) 
 {
 	int i; 
-	int found;
+	int found = FALSE;
 
 #if defined(DEBUG) 
 	fprintf (stderr, PACKAGE_NAME": AddressTable_Insert_MemReference (%d, %s, %s, %s, %d)\n",

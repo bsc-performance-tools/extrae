@@ -256,7 +256,7 @@ static int detect_processor_cpuinfo(void)
 }
 
 
-int detect_processor(void)
+static int detect_processor(void)
 {
 	if (processor_type==-2)
 		detect_processor_cpuinfo();
@@ -264,7 +264,7 @@ int detect_processor(void)
 	return processor_type;
 }
 
-int get_latency_load_event(unsigned long long *config,
+static int get_latency_load_event(unsigned long long *config,
 			int *precise_ip,
 			char *name)
 {
@@ -313,7 +313,7 @@ int get_latency_load_event(unsigned long long *config,
 	return processor_notfound;
 }
 
-int get_latency_store_event(unsigned long long *config,
+static int get_latency_store_event(unsigned long long *config,
 			int *precise_ip,
 			char *name)
 {
@@ -388,7 +388,7 @@ static int mmap_pages=1+MMAP_DATA_SIZE;
 
 #if defined(MALLOC_ONCE)
 #define ALLOCATED_SIZE MMAP_DATA_SIZE*4096
-unsigned char *data = NULL;
+static unsigned char *data = NULL;
 #endif
 
 /* This function extracts PEBS entries from the previously allocated buffer 
