@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ - 08Nov2016 Removed flag -Wall from tests/overhead
+ * 08Nov2016 Patched IO calls to save/restore the value of errno at entry/exit of the wrappers
  * 07Nov2016 Fixes PEBS memory translations
  * 27Oct2016 Fixes Fortran interfaces for MPI3 non-blocking collective calls
  * 21Oct2016 Changed checks in IO wrappers to ensure the compiler doesn't optimize the conditions and tests for an invalid THREADID

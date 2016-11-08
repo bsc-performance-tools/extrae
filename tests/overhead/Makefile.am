@@ -50,7 +50,7 @@ myFILES= \
 bin_PROGRAMS = extrae-header
 
 extrae_header_SOURCES = extrae-header.c
-extrae_header_CFLAGS = -g -O -Wall -I$(top_srcdir) -I$(COMMON_INC)
+extrae_header_CFLAGS = -g -O -I$(top_srcdir) -I$(COMMON_INC)
 extrae_header_LDFLAGS = -g -O
 if HAVE_PAPI
 if !HAVE_PAPI_EMBEDDED
