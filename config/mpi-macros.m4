@@ -857,7 +857,7 @@ AC_DEFUN([AX_ENABLE_SINGLE_MPI_LIBRARY],
          [Produces a single instrumentation library for MPI that contains both Fortran and C wrappers]
       ),
       [enable_single_mpi_lib="${enableval}"],
-      [enable_single_mpi_lib="no"]
+      [enable_single_mpi_lib="yes"]
    )
 
    AM_CONDITIONAL(SINGLE_MPI_LIBRARY, test "${enable_single_mpi_lib}" = "yes")

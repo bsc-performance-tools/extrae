@@ -45,6 +45,3 @@ libwrap_mpi_f_la_SOURCES = $(WRAPPERS_MPI_ALL)
 
 libwrap_mpi_cf_la_CFLAGS = -DC_SYMBOLS -DFORTRAN_SYMBOLS $(EXTRA_MPI_CFLAGS)
 libwrap_mpi_cf_la_SOURCES = $(WRAPPERS_MPI_ALL)
-
-
-
