@@ -117,10 +117,6 @@ WRAPPERS_CORE = \
  trace_macros.h trace_macros_mpi.h trace_macros_omp.h \
  trace_hwc.h
 
-# Auto instrumentation through constructor and destructors
-auto_init_instr_SRCS = auto_init.c
-auto_fini_instr_SRCS = auto_fini.c auto_fini.h
-
 core_SRCS = \
  calltrace.c calltrace.h                     \
  signals.c signals.h                         \
@@ -135,18 +131,20 @@ core_SRCS = \
  $(COMMON_INC)/record.h                      \
  $(COMMON_INC)/queue.h                       \
  $(COMMON_INC)/trace_mode.h                  \
- $(auto_init_instr_SRCS)                     \
- $(auto_fini_instr_SRCS)                     \
  $(WRAPPERS_CORE)
 
+# Auto instrumentation through constructor and destructors
+auto_init_instr_SRCS = auto_init.c
+auto_fini_instr_SRCS = auto_fini.c auto_fini.h
+
 # CUDA trace
-libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
-libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
+libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(auto_fini_instr_SRCS)
 libcudampitracef_la_SOURCES = $(libcudampitrace_la_SOURCES) extrae_mpif.h
 
 # OpenCL trace
-libocltrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL)
-liboclmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL)
+libocltrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+liboclmpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_OCL) $(auto_fini_instr_SRCS)
 liboclmpitracef_la_SOURCES = $(liboclmpitrace_la_SOURCES) extrae_mpif.h
 
 # CUDA trace & MPItrace & OpenMP
@@ -154,20 +152,20 @@ libcudaompitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
 libcudaompitracef_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
 
 # MPItrace & Sequential trace
-libmpitrace_la_SOURCES = $(core_SRCS)
+libmpitrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 libmpitracef_la_SOURCES = $(libmpitrace_la_SOURCES) extrae_mpif.h
-libseqtrace_la_SOURCES = $(core_SRCS)
+libseqtrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
-libptmpitrace_la_SOURCES = $(core_SRCS)
+libptmpitrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 libptmpitracef_la_SOURCES = $(libptmpitrace_la_SOURCES) extrae_mpif.h
 
 # OpenMP & OpenMP + MPI
 libompitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
 libompitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
-libomptrace_la_SOURCES = $(core_SRCS)
+libomptrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
 # SMPSS & SMPSS + MPI
-libsmpsstrace_la_SOURCES = $(core_SRCS)
+libsmpsstrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 libsmpssmpitrace_la_SOURCES = $(libmpitrace_la_SOURCES)
 libsmpssmpitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
 
@@ -177,10 +175,10 @@ libnanosmpitrace_la_SOURCES = $(core_SRCS)
 libnanosmpitracef_la_SOURCES = $(libnanosmpitrace_la_SOURCES) extrae_mpif.h
 
 # pthreads
-libpttrace_la_SOURCES = $(core_SRCS)
+libpttrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
 
 # OpenSHMEM
-libopenshmemtrace_la_SOURCES = $(core_SRCS)
+libopenshmemtrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 
 # LoadBalancing
 libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
