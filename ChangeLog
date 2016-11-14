@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 14Nov2016 Fixes MPI_Ialltoallv label
  - 08Nov2016 Removed flag -Wall from tests/overhead
  * 08Nov2016 Patched IO calls to save/restore the value of errno at entry/exit of the wrappers
  * 07Nov2016 Fixes PEBS memory translations
