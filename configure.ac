@@ -5,12 +5,12 @@
 #    Initializations    #
 #########################
 
-m4_define([extrae_major_version], [3])
-m4_define([extrae_minor_version], [5])
-m4_define([extrae_micro_version], [0rc5])
+m4_define([extrae_major], [3])
+m4_define([extrae_minor], [5])
+m4_define([extrae_micro], [0])
 
 m4_define([extrae_version],
-					      [extrae_major_version.extrae_minor_version.extrae_micro_version])
+					      [extrae_major.extrae_minor.extrae_micro])
 
 # Initialize autoconf & define package name, version and bug-report address 
 AC_INIT(Extrae, [extrae_version], tools@bsc.es)
@@ -372,10 +372,10 @@ AM_CONDITIONAL(HAVE_XML2, test "${XML_enabled}" = "yes" )
 AC_ARG_ENABLE(doc,
    AC_HELP_STRING(
       [--enable-doc],
-      [Generates the documentation of this instrumentation package (enabled by default)]
+      [Generates the documentation of this instrumentation package (requires sphinx-doc)]
    ),
    [enable_doc="${enableval}"],
-   [enable_doc="yes"]
+   [enable_doc="no"]
 )
 AM_CONDITIONAL(GENERATE_DOCUMENTATION, test "${enable_doc}" = "yes" )
 
@@ -590,7 +590,7 @@ AM_CONDITIONAL(BUILD_HTML_DOCS, test "${latex}" != "no" -a "${latex2html}" != "n
 AC_CONFIG_FILES([
   Makefile \
   src/Makefile \
-  include/Makefile manuals/Makefile \
+  include/Makefile \
   src/loader/Makefile \
   src/launcher/Makefile \
   src/launcher/static/Makefile \
@@ -630,7 +630,7 @@ AC_CONFIG_FILES([
   src/java-connector/Makefile \
   src/java-connector/jni/Makefile \
   src/java-connector/jvmti-agent/Makefile \
-  doc/Makefile etc/Makefile ])
+  etc/Makefile])
 
 AC_CONFIG_FILES([\
   tests/Makefile
@@ -658,6 +658,8 @@ AC_CONFIG_FILES([\
 AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefile])
 ### TEMPORARILY_DISABLED
 ### AC_CONFIG_FILES([src/tracer/hwc/myrinet_hwc/Makefile src/tracer/hwc/myrinet_hwc/GM/Makefile src/tracer/hwc/myrinet_hwc/MX/Makefile])
+
+AC_CONFIG_FILES([docs/Makefile])
 
 AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_functions.bash] \
 		[tests/functional/launcher/extrae.xml:tests/functional/launcher/extrae.xml] \
@@ -695,73 +697,56 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[example/LINUX/MPI/extrae_bursts_1ms.xml:example/LINUX/MPI/extrae_bursts_1ms.xml] \
 		[example/LINUX/MPI/extrae_explained.xml:example/LINUX/MPI/extrae_explained.xml] \
 		[example/LINUX/MPI/summarized_trace_basic.xml:example/LINUX/MPI/summarized_trace_basic.xml] \
-		[doc/copy_tex_files_from_to.sh:doc/copy_tex_files_from_to.sh] \
-		[doc/API-section.tex:doc/API-section.tex] \
-		[doc/FAQ-section.tex:doc/FAQ-section.tex] \
-		[doc/XML-section.tex:doc/XML-section.tex] \
-		[doc/common-macros.tex:doc/common-macros.tex] \
-		[doc/configure-installation.tex:doc/configure-installation.tex] \
-		[doc/environmentvariables-section.tex:doc/environmentvariables-section.tex] \
-		[doc/examples-section.tex:doc/examples-section.tex] \
-		[doc/instrumented-routines-section.tex:doc/instrumented-routines-section.tex] \
-		[doc/merge-section.tex:doc/merge-section.tex] \
-		[doc/online.tex:doc/online.tex] \
-		[doc/overhead.tex:doc/overhead.tex] \
-		[doc/pnmpi-section.tex:doc/pnmpi-section.tex] \
-		[doc/quick-guide-section.tex:doc/quick-guide-section.tex] \
-		[doc/regression-tests.tex:doc/regression-tests.tex] \
-		[doc/submit-bug.tex:doc/submit-bug.tex] \
-		[doc/user-guide.tex:doc/user-guide.tex] \
-		[doc/wholeXML-section.tex:doc/wholeXML-section.tex] \
-		[doc/XML/buffer.xml.tex:doc/XML/buffer.xml.tex] \
-		[doc/XML/bursts.xml.tex:doc/XML/bursts.xml.tex] \
-		[doc/XML/callers.xml.tex:doc/XML/callers.xml.tex] \
-		[doc/XML/config.xml.tex:doc/XML/config.xml.tex] \
-		[doc/XML/counters.xml.tex:doc/XML/counters.xml.tex] \
-		[doc/XML/cuda.xml.tex:doc/XML/cuda.xml.tex] \
-		[doc/XML/dynamic-memory.xml.tex:doc/XML/dynamic-memory.xml.tex] \
-		[doc/XML/extrae.xml.tex:doc/XML/extrae.xml.tex] \
-		[doc/XML/input-output.xml.tex:doc/XML/input-output.xml.tex] \
-		[doc/XML/intel-pebs.xml.tex:doc/XML/intel-pebs.xml.tex] \
-		[doc/XML/merge-reduced.xml.tex:doc/XML/merge-reduced.xml.tex] \
-		[doc/XML/merge.xml.tex:doc/XML/merge.xml.tex] \
-		[doc/XML/mpi.xml.tex:doc/XML/mpi.xml.tex] \
-		[doc/XML/opencl.xml.tex:doc/XML/opencl.xml.tex] \
-		[doc/XML/openmp.xml.tex:doc/XML/openmp.xml.tex] \
-		[doc/XML/others.xml.tex:doc/XML/others.xml.tex] \
-		[doc/XML/pthread.xml.tex:doc/XML/pthread.xml.tex] \
-		[doc/XML/sampling.xml.tex:doc/XML/sampling.xml.tex] \
-		[doc/XML/storage.xml.tex:doc/XML/storage.xml.tex] \
-		[doc/XML/trace-control.xml.tex:doc/XML/trace-control.xml.tex] \
-		[doc/XML/userfunctions.xml.tex:doc/XML/userfunctions.xml.tex] \
-		[doc/images/extrae-post-installation.eps:doc/images/extrae-post-installation.eps] \
-		[doc/images/extrae-post-installation.png:doc/images/extrae-post-installation.png] \
-		[doc/overheads/ARMv7l-MB:doc/overheads/ARMv7l-MB] \
-		[doc/overheads/IBM_POWER8:doc/overheads/IBM_POWER8] \
-		[doc/overheads/INTEL_HSW_JURECA:doc/overheads/INTEL_HSW_JURECA] \
-		[doc/overheads/INTEL_NHM_MT:doc/overheads/INTEL_NHM_MT] \
-		[doc/overheads/INTEL_SNB_MN3:doc/overheads/INTEL_SNB_MN3] \
-		[doc/overheads/overheads.2parts.gnuplot:doc/overheads/overheads.2parts.gnuplot] \
-		[doc/overheads/overheads.dat:doc/overheads/overheads.dat] \
-		[doc/overheads/overheads.eps:doc/overheads/overheads.eps] \
-		[doc/overheads/overheads.gnuplot:doc/overheads/overheads.gnuplot] \
-		[doc/user-guide/WARNINGS:doc/user-guide/WARNINGS] \
-		[doc/user-guide/images.pl:doc/user-guide/images.pl] \
-		[doc/user-guide/images.tex:doc/user-guide/images.tex] \
-		[doc/user-guide/img1.png:doc/user-guide/img1.png] \
-		[doc/user-guide/img2.png:doc/user-guide/img2.png] \
-		[doc/user-guide/img3.png:doc/user-guide/img3.png] \
-		[doc/user-guide/index.html:doc/user-guide/index.html] \
-		[doc/user-guide/internals.pl:doc/user-guide/internals.pl] \
-		[doc/user-guide/labels.pl:doc/user-guide/labels.pl] \
-		[doc/user-guide/user-guide.css:doc/user-guide/user-guide.css] \
-		[doc/user-guide/user-guide.html:doc/user-guide/user-guide.html] \
-    [src/others/pyextrae/multiprocessing/__init__.py:src/others/pyextrae/multiprocessing/__init__.py:] \
-    [src/others/pyextrae/__init__.py:src/others/pyextrae/__init__.py] \
-    [src/others/pyextrae/sequential/__init__.py:src/others/pyextrae/sequential/__init__.py] \
-    [src/others/pyextrae/mpi/__init__.py:src/others/pyextrae/mpi/__init__.py] \
-    [src/others/pyextrae/common/extrae.py.in:src/others/pyextrae/common/extrae.py.in] \
-    [src/others/pyextrae/common/__init__.py:src/others/pyextrae/common/__init__.py]
+		[src/others/pyextrae/multiprocessing/__init__.py:src/others/pyextrae/multiprocessing/__init__.py:] \
+		[src/others/pyextrae/__init__.py:src/others/pyextrae/__init__.py] \
+		[src/others/pyextrae/sequential/__init__.py:src/others/pyextrae/sequential/__init__.py] \
+		[src/others/pyextrae/mpi/__init__.py:src/others/pyextrae/mpi/__init__.py] \
+		[src/others/pyextrae/common/extrae.py.in:src/others/pyextrae/common/extrae.py.in] \
+		[src/others/pyextrae/common/__init__.py:src/others/pyextrae/common/__init__.py]
+		[docs/source/conf.py:docs/source/conf.py] \
+		[docs/source/index.rst:docs/source/index.rst] \
+		[docs/source/quick-guide.rst:docs/source/quick-guide.rst] \
+		[docs/source/introduction.rst:docs/source/introduction.rst] \
+		[docs/source/configure-installation.rst:docs/source/configure-installation.rst] \
+		[docs/source/xml.rst:docs/source/xml.rst] \
+		[docs/source/api.rst:docs/source/api.rst] \
+		[docs/source/merge.rst:docs/source/merge.rst] \
+		[docs/source/online.rst:docs/source/online.rst] \
+		[docs/source/examples.rst:docs/source/examples.rst] \
+		[docs/source/wholeXML.rst:docs/source/wholeXML.rst] \
+		[docs/source/envvars.rst:docs/source/envvars.rst] \
+		[docs/source/pnmpi.rst:docs/source/pnmpi.rst] \
+		[docs/source/regression-tests.rst:docs/source/regression-tests.rst] \
+		[docs/source/overhead.rst:docs/source/overhead.rst] \
+		[docs/source/FAQ.rst:docs/source/FAQ.rst] \
+		[docs/source/submit-bug.rst:docs/source/submit-bug.rst] \
+		[docs/source/instrumented-routines.rst:docs/source/instrumented-routines.rst] \
+		[docs/source/see-also.rst:docs/source/see-also.rst] \
+		[docs/source/man/UFlist.sh.1.rst:docs/source/man/UFlist.sh.1.rst] \
+		[docs/source/man/extrae_event.3.rst:docs/source/man/extrae_event.3.rst] \
+		[docs/source/man/mpi2prv.1.rst:docs/source/man/mpi2prv.1.rst] \
+		[docs/source/xml/config.xml:docs/source/xml/config.xml] \
+		[docs/source/xml/mpi.xml:docs/source/xml/mpi.xml] \
+		[docs/source/xml/pthread.xml:docs/source/xml/pthread.xml] \
+		[docs/source/xml/openmp.xml:docs/source/xml/openmp.xml] \
+		[docs/source/xml/callers.xml:docs/source/xml/callers.xml] \
+		[docs/source/xml/userfunctions.xml:docs/source/xml/userfunctions.xml] \
+		[docs/source/xml/counters.xml:docs/source/xml/counters.xml] \
+		[docs/source/xml/storage.xml:docs/source/xml/storage.xml] \
+		[docs/source/xml/buffer.xml:docs/source/xml/buffer.xml] \
+		[docs/source/xml/trace-control.xml:docs/source/xml/trace-control.xml] \
+		[docs/source/xml/bursts.xml:docs/source/xml/bursts.xml] \
+		[docs/source/xml/others.xml:docs/source/xml/others.xml] \
+		[docs/source/xml/sampling.xml:docs/source/xml/sampling.xml] \
+		[docs/source/xml/cuda.xml:docs/source/xml/cuda.xml] \
+		[docs/source/xml/opencl.xml:docs/source/xml/opencl.xml] \
+		[docs/source/xml/input-output.xml:docs/source/xml/input-output.xml] \
+		[docs/source/xml/dynamic-memory.xml:docs/source/xml/dynamic-memory.xml] \
+		[docs/source/xml/intel-pebs.xml:docs/source/xml/intel-pebs.xml] \
+		[docs/source/xml/merge.xml:docs/source/xml/merge.xml] \
+		[docs/source/xml/merge-reduced.xml:docs/source/xml/merge-reduced.xml] \
+		[docs/source/xml/extrae.xml:docs/source/xml/extrae.xml] \
+		[docs/source/overheads/overheads.eps:docs/source/overheads/overheads.eps]
 	)
 
 #########################################

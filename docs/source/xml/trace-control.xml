@@ -1,0 +1,10 @@
+<trace-control enabled="yes">
+  <file enabled="no" frequency="5M">/gpfs/scratch/bsc41/bsc41273/control</file>
+  <global-ops enabled="no">10</global-ops>
+  <remote-control enabled="yes">
+    <mrnet enabled="yes" target="150" analysis="spectral" start-after="30">
+      <clustering max_tasks="26" max_points="8000"/>
+      <spectral min_seen="1" max_periods="0" num_iters="3" signals="DurBurst,InMPI"/>
+    </mrnet>
+  </remote-control>
+</trace-control>

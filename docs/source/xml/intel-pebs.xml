@@ -1,0 +1,4 @@
+<pebs-sampling enabled="yes">
+  <loads  enabled="yes" period="1000000" minimum-latency="10" />
+  <stores enabled="no"  period="1000000" />
+</pebs-sampling>

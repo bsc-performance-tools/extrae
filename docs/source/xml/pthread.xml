@@ -1,0 +1,4 @@
+<pthread enabled="yes">
+  <locks enabled="no" />
+  <counters enabled="yes" />
+</pthread>

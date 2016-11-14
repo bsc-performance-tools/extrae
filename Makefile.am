@@ -1,7 +1,7 @@
 
-SUBDIRS = src include manuals scripts etc tests
+SUBDIRS = src include scripts etc tests
 if GENERATE_DOCUMENTATION
-SUBDIRS += doc
+SUBDIRS += docs
 endif
 
 EXTRA_DIST = \
