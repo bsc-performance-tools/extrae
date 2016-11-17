@@ -188,6 +188,9 @@ void Extrae_iotrace_init (void)
  */
 int open(const char *pathname, int flags, ...)
 {
+#ifdef HAVE_ERRNO_H
+  int errno_real = errno;
+#endif
   int mode = 0;
   int fd = -1;
 
@@ -225,11 +228,11 @@ int open(const char *pathname, int flags, ...)
   if (real_open != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
-    fd = real_open (pathname, flags, mode);
+#ifdef HAVE_ERRNO_H                                                             
+	  errno = errno_real;                                                         
+#endif                                                                          
+		fd = real_open (pathname, flags, mode);
 #ifdef HAVE_ERRNO_H
   	errno_real = errno;
 #endif
@@ -269,6 +272,9 @@ int open(const char *pathname, int flags, ...)
  */
 int open64(const char *pathname, int flags, ...)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif
   int mode = 0;
   int fd = -1;
 
@@ -306,10 +312,10 @@ int open64(const char *pathname, int flags, ...)
   if (real_open64 != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-  	int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+#ifdef HAVE_ERRNO_H
+  	errno = errno_real;
+#endif
     fd = real_open64 (pathname, flags, mode);
 #ifdef HAVE_ERRNO_H
   	errno_real = errno;
@@ -350,6 +356,9 @@ int open64(const char *pathname, int flags, ...)
  */
 FILE * fopen(const char *path, const char *mode)
 {
+#ifdef HAVE_ERRNO_H
+ 	int errno_real = errno;
+#endif
   FILE *f = NULL;
 
   /* Check whether IO instrumentation is enabled */
@@ -378,11 +387,11 @@ FILE * fopen(const char *path, const char *mode)
   if (real_fopen != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-   	int errno_real;
-#endif
 		int fd = -1;
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+#ifdef HAVE_ERRNO_H
+  	errno = errno_real;
+#endif
     f = real_fopen (path, mode);
 #ifdef HAVE_ERRNO_H
    	errno_real = errno;
@@ -428,6 +437,9 @@ FILE * fopen(const char *path, const char *mode)
  */
 FILE * fopen64(const char *path, const char *mode)
 {
+#ifdef HAVE_ERRNO_H
+	int errno_real = errno;
+#endif
   FILE *f = NULL;
 
   /* Check whether IO instrumentation is enabled */
@@ -456,11 +468,11 @@ FILE * fopen64(const char *path, const char *mode)
   if (real_fopen64 != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-  	int errno_real;
-#endif
 		int fd = -1;
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+#ifdef HAVE_ERRNO_H
+	  errno = errno_real;
+#endif
     f = real_fopen64 (path, mode);
 #ifdef HAVE_ERRNO_H
     errno_real = errno;
@@ -506,6 +518,9 @@ FILE * fopen64(const char *path, const char *mode)
  */
 ssize_t read (int fd, void *buf, size_t count)
 {
+#ifdef HAVE_ERRNO_H
+	int errno_real = errno;
+#endif
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -533,12 +548,12 @@ ssize_t read (int fd, void *buf, size_t count)
   if (real_read != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     Probe_IO_read_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_read (fd, buf, count);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -576,6 +591,9 @@ ssize_t read (int fd, void *buf, size_t count)
  */
 ssize_t write (int fd, const void *buf, size_t count)
 {
+#ifdef HAVE_ERRNO_H
+	int errno_real = errno;
+#endif
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on &&
@@ -603,12 +621,12 @@ ssize_t write (int fd, const void *buf, size_t count)
   if (real_write != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     Probe_IO_write_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_write (fd, buf, count);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -646,6 +664,9 @@ ssize_t write (int fd, const void *buf, size_t count)
  */
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -673,12 +694,12 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     Probe_IO_fread_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_fread (ptr, size, nmemb, stream);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -716,6 +737,9 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
  */
 size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
+#ifdef HAVE_ERRNO_H                                                             
+  int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -742,12 +766,12 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     Probe_IO_fwrite_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_fwrite (ptr, size, nmemb, stream);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -785,6 +809,9 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
  */
 ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 {
+#ifdef HAVE_ERRNO_H                                                             
+  int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -812,12 +839,12 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
   if (real_pread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     Probe_IO_pread_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_pread (fd, buf, count, offset);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -855,6 +882,9 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
  */
 ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -882,12 +912,12 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
   if (real_pwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
     Probe_IO_pwrite_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_pwrite (fd, buf, count, offset);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -925,6 +955,9 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
  */
 ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -952,9 +985,6 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
   if (real_readv != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     int i;
     ssize_t size = 0;
 
@@ -967,6 +997,9 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 
     Probe_IO_readv_Entry (fd, size);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_readv (fd, iov, iovcnt);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -1004,6 +1037,9 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
  */
 ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -1031,9 +1067,6 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
   if (real_writev != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     int i;
     ssize_t size = 0;
 
@@ -1046,6 +1079,9 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 
     Probe_IO_writev_Entry (fd, size);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_writev (fd, iov, iovcnt);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -1083,6 +1119,9 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
  */
 ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -1110,9 +1149,6 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   if (real_preadv != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     int i;
     ssize_t size = 0;
 
@@ -1125,6 +1161,9 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 
     Probe_IO_preadv_Entry (fd, size);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_preadv (fd, iov, iovcnt, offset);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -1162,6 +1201,9 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
  */
 ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -1189,9 +1231,6 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   if (real_preadv64 != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     int i;
     ssize_t size = 0;
 
@@ -1204,6 +1243,9 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 
     Probe_IO_preadv_Entry (fd, size);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_preadv64 (fd, iov, iovcnt, offset);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -1241,6 +1283,9 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
  */
 ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -1268,9 +1313,6 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   if (real_pwritev != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     int i;
     ssize_t size = 0;
 
@@ -1283,6 +1325,9 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 
     Probe_IO_pwritev_Entry (fd, size);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_pwritev (fd, iov, iovcnt, offset);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
@@ -1320,6 +1365,9 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
  */
 ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
+#ifdef HAVE_ERRNO_H                                                             
+	int errno_real = errno;                                                       
+#endif                                                                          
   /* Check whether IO instrumentation is enabled */
   int canInstrument = EXTRAE_INITIALIZED()                 &&
                       mpitrace_on                          &&
@@ -1347,9 +1395,6 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   if (real_pwritev64 != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-#ifdef HAVE_ERRNO_H
-		int errno_real;
-#endif
     int i;
     ssize_t size = 0;
 
@@ -1362,6 +1407,9 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 
     Probe_IO_pwritev_Entry (fd, size);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+		errno = errno_real;
+#endif
     res = real_pwritev64 (fd, iov, iovcnt, offset);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
