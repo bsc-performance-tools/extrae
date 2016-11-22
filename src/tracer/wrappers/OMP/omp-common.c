@@ -358,8 +358,6 @@ static int getnumProcessors (void)
  */
 void Extrae_OpenMP_init(int me)
 {
-	UNREFERENCED_PARAMETER(me);
-
 #if defined(PIC)
 	int ibm_hooked = FALSE;
 	int intel_hooked = FALSE;
@@ -387,10 +385,13 @@ void Extrae_OpenMP_init(int me)
 	hooked = ibm_hooked + intel_hooked + gnu_hooked;
 
 	if (hooked > 0) {
-		fprintf (stdout, PACKAGE_NAME": Detected and hooked OpenMP runtime:%s%s%s\n",
-		         ibm_hooked?" [IBM XLSMP]":"",
-		         intel_hooked?" [Intel KMPC]":"",
-		         gnu_hooked?" [GNU GOMP]":"");
+		if (me == 0)
+		{
+			fprintf (stdout, PACKAGE_NAME": Detected and hooked OpenMP runtime:%s%s%s\n",
+			  ibm_hooked?" [IBM XLSMP]":"",
+		      intel_hooked?" [Intel KMPC]":"",
+		      gnu_hooked?" [GNU GOMP]":"");
+		}
 
 		/* 
 		* If we hooked any compiler-specific routines, just hook for the 
@@ -403,8 +404,10 @@ void Extrae_OpenMP_init(int me)
 	}
 
 #else  /* PIC */
-
-	fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
+	if (me == 0)
+	{
+		fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
+	}
 
 #endif /* PIC */
 

@@ -1538,6 +1538,7 @@ static void Initialize_Extrae_Stuff()
     }
     
     Extrae_set_initial_TASKID (TASKID);
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
     Extrae_set_is_initialized (EXTRAE_INITIALIZED_SHMEM_INIT);
     
     if (config_file != NULL)

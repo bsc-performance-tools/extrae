@@ -32,9 +32,12 @@
 
 #include <misc_wrapper.h>
 
+#include <stdio.h>
+
 __attribute__((destructor))
 void Extrae_auto_library_fini (void)
 {
+	fprintf(stdout, "In destructor\n");
 	Extrae_fini_last_chance_Wrapper ();
 }
 
