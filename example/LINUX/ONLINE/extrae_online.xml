@@ -55,7 +55,7 @@
 
   <buffer enabled="yes">
     <!-- Circular buffer has to be enabled and be rather big -->
-    <size enabled="yes">1000000</size>
+    <size enabled="yes">10000000</size>
     <circular enabled="yes" />
   </buffer>
 

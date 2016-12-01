@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 01Dec2016 Increases default buffer size in the examples by x10
  * 17Nov2016 Patched IO calls again to save/restore the value of errno twice, before and after calling the real I/O symbol
  * 14Nov2016 Builds additional C/Fortran tracing library by default
  * 14Nov2016 Fixes MPI_Ialltoallv label

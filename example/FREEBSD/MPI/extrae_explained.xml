@@ -124,7 +124,7 @@
   <!-- Buffer configuration -->
   <buffer enabled="yes">
     <!-- How many events can we handle before any flush -->
-    <size enabled="yes">500000</size>
+    <size enabled="yes">5000000</size>
     <!-- Use the event buffer in a circular manner? You can use this option to
          trace the last set of events. Needs MPI global routines operating on
          MPI_COMM_WORLD communicator to be merged
