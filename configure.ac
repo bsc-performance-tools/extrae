@@ -383,6 +383,7 @@ AC_ARG_ENABLE(instrument-io,
 if test "${enable_instrument_io}" = "yes" ; then
 	AC_DEFINE([INSTRUMENT_IO], [1], [Determine whether read/write are meant to be instrumented])
 fi
+AM_CONDITIONAL(INSTRUMENT_IO, test "${enable_instrument_io}" = "yes" )
 
 AC_ARG_ENABLE(instrument-dynamic-memory,
 	AC_HELP_STRING(
@@ -396,6 +397,8 @@ AC_ARG_ENABLE(instrument-dynamic-memory,
 if test "${enable_instrument_dynamic_memory}" = "yes" ; then
 	AC_DEFINE([INSTRUMENT_DYNAMIC_MEMORY], [1], [Determine whether dynamic memory calls are meant to be instrumented])
 fi
+AM_CONDITIONAL(INSTRUMENT_DYNAMIC_MEMORY, test "${enable_instrument_dynamic_memory}" = "yes" )
+
 AX_PROG_MEMKIND
 
 AC_ARG_ENABLE(bfd-generate-addresses,

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Dec2016 Adds new build information into configured.sh script
  * 13Dec2016 Adds tracing of MPI IO size in Fortran
  * 01Dec2016 Increases default buffer size in the examples by x10
  * 17Nov2016 Patched IO calls again to save/restore the value of errno twice, before and after calling the real I/O symbol

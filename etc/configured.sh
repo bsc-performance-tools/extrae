@@ -118,6 +118,19 @@ if test "${EXTRAE_HOME}" != "" ; then
 	else
 		echo "Translating addresses into source code references seems to be disabled (or not needed)"
 	fi
+
+	echo
+
+	if test "${EXTRAE_INSTRUMENT_IO}" == 1; then
+		echo "IO instrumentation is: ENABLED"
+	else
+		echo "IO instrumentation is: DISABLED"
+	fi
+	if test "${EXTRAE_INSTRUMENT_DYNAMIC_MEMORY}" == 1; then
+		echo "Dynamic memory instrumentation is: ENABLED"
+	else
+		echo "Dynamic memory instrumentation is: DISABLED"
+	fi
 fi
 
 echo 

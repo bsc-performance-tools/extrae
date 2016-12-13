@@ -35,6 +35,12 @@ $(VARS_SCRIPT):
 if HAVE_ONLINE
 	echo "export EXTRAE_ONLINE_SOURCES=$(abs_builddir)/extrae_online.sh" >> $(VARS_SCRIPT)
 endif
+if INSTRUMENT_IO
+	echo "export EXTRAE_INSTRUMENT_IO=1" >> $(VARS_SCRIPT)
+endif
+if INSTRUMENT_DYNAMIC_MEMORY
+	echo "export EXTRAE_INSTRUMENT_DYNAMIC_MEMORY=1" >> $(VARS_SCRIPT)
+endif
 
 mkdirSHscripts:
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)
