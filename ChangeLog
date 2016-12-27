@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 27Dec2016 Added support for Python MPI and multiprocessing tracing
  * 13Dec2016 Adds new build information into configured.sh script
  * 13Dec2016 Adds tracing of MPI IO size in Fortran
  * 01Dec2016 Increases default buffer size in the examples by x10

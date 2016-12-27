@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 ### Load the Extrae python module in your own python application
-import pyextrae
+import pyextrae.sequential as pyextrae
 
 def a():
     print 'Called function a()!'

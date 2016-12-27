@@ -33,18 +33,30 @@ papi_best_set_LDFLAGS += -L@PAPI_SHAREDLIBSDIR@ -R @PAPI_SHAREDLIBSDIR@ @PAPI_LI
 endif
 endif
 
-PYTHON_MODULE = pyextrae.py
-nodist_libexec_SCRIPTS = $(PYTHON_MODULE)
-EXTRA_DIST = $(PYTHON_MODULE).in
 
-$(PYTHON_MODULE): $(PYTHON_MODULE).in
-	cp $^ $@
-	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} $@
-if HAVE_PAPI
-	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_eventandcounters $@
-else
-	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_event $@
-endif
+################
+### pyextrae ###
+################
 
-CLEANFILES = $(PYTHON_MODULE)
+EXTRA_DIST = \
+  pyextrae/__init__.py \
+  pyextrae/sequential/__init__.py \
+  pyextrae/mpi/__init__.py \
+  pyextrae/multiprocessing/__init__.py \
+  pyextrae/common/__init__.py \
+  pyextrae/common/extrae.py.in
+
+install-data-hook: 
+	cp pyextrae/common/extrae.py.in pyextrae/common/extrae.py
+	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} pyextrae/common/extrae.py
+#if HAVE_PAPI
+	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_eventandcounters pyextrae/common/extrae.py
+#else
+	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_event pyextrae/common/extrae.py
+#endif
+	mkdir -p $(libexecdir)/pyextrae
+	cp -r pyextrae/* $(libexecdir)/pyextrae
+	rm $(libexecdir)/pyextrae/common/extrae.py.in
+
+CLEANFILES = pyextrae/common/extrae.py
 
