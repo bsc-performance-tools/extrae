@@ -59,7 +59,11 @@
   <dynamic-memory enabled="no">
     <alloc enabled="yes" threshold="32768" />
     <free  enabled="yes" />
-  </dynamic-memory>
+	</dynamic-memory>
+
+	<input-output enabled="no" />
+
+	<syscall enabled="no" />
 
   <merge enabled="yes" 
     synchronization="default"

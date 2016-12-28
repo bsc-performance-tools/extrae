@@ -33,16 +33,16 @@
 //#define MPICALLER_DEBUG
 
 /* -- El usuario ha desactivado el traceo de MPI callers? -------- */
-int Trace_Caller_Enabled[COUNT_CALLER_TYPES] = { TRUE, TRUE, TRUE, TRUE };
+int Trace_Caller_Enabled[COUNT_CALLER_TYPES] = { TRUE, TRUE, TRUE, TRUE, TRUE };
 
 /* -- Que MPI callers se tracean? -------------------------------- */
-int * Trace_Caller[COUNT_CALLER_TYPES] = { NULL, NULL, NULL, NULL }; 
+int * Trace_Caller[COUNT_CALLER_TYPES] = { NULL, NULL, NULL, NULL, NULL }; 
 
 /* -- Profundidad maxima que necesitamos de la pila de llamadas -- */
-int Caller_Deepness[COUNT_CALLER_TYPES] = { 0, 0, 0, 0 };
+int Caller_Deepness[COUNT_CALLER_TYPES] = { 0, 0, 0, 0, 0 };
 
 /* -- Cuantos MPI callers traceamos? ----------------------------- */
-int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0, 0, 0 }; 
+int Caller_Count[COUNT_CALLER_TYPES] = { 0, 0, 0, 0, 0 }; 
 
 #if defined(UNWIND_SUPPORT)
 
@@ -83,7 +83,7 @@ void Extrae_trace_callers (iotimer_t time, int offset, int type)
     
 		if (current_deep >= offset)
 		{
-			if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY || type == CALLER_IO)
+			if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY || type == CALLER_IO || type == CALLER_SYSCALL)
 			{
 				if (Trace_Caller[type][current_deep-offset])
 				{
@@ -186,7 +186,7 @@ void Extrae_trace_callers (iotimer_t time, int offset, int type) {
 #endif
 		if (current_caller > 0)
 		{
-			if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY || type == CALLER_IO)
+			if (type == CALLER_MPI || type == CALLER_DYNAMIC_MEMORY || type == CALLER_IO || type == CALLER_SYSCALL)
 			{
 				if (Trace_Caller[type][current_caller - 1])
 					TRACE_EVENT(time, CALLER_EVENT_TYPE(type, current_caller),

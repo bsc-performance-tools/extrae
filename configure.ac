@@ -388,7 +388,7 @@ AC_ARG_ENABLE(instrument-io,
 	[enable_instrument_io="yes"]
 )
 if test "${enable_instrument_io}" = "yes" ; then
-	AC_DEFINE([INSTRUMENT_IO], [1], [Determine whether read/write are meant to be instrumented])
+	AC_DEFINE([INSTRUMENT_IO], [1], [Determine whether I/O calls are instrumented])
 fi
 AM_CONDITIONAL(INSTRUMENT_IO, test "${enable_instrument_io}" = "yes" )
 
@@ -402,11 +402,24 @@ AC_ARG_ENABLE(instrument-dynamic-memory,
 )
 
 if test "${enable_instrument_dynamic_memory}" = "yes" ; then
-	AC_DEFINE([INSTRUMENT_DYNAMIC_MEMORY], [1], [Determine whether dynamic memory calls are meant to be instrumented])
+	AC_DEFINE([INSTRUMENT_DYNAMIC_MEMORY], [1], [Determine whether dynamic memory calls are instrumented])
 fi
 AM_CONDITIONAL(INSTRUMENT_DYNAMIC_MEMORY, test "${enable_instrument_dynamic_memory}" = "yes" )
 
 AX_PROG_MEMKIND
+
+AC_ARG_ENABLE(instrument-syscall,
+  AC_HELP_STRING(
+    [--disable-instrument-syscall],
+    [Disables instrumentation for system calls (other than I/O and mallocs) (experimental, enabled by default)]
+  ),
+  [enable_instrument_syscall="${enableval}"],
+  [enable_instrument_syscall="yes"]
+)
+if test "${enable_instrument_syscall}" = "yes" ; then
+  AC_DEFINE([INSTRUMENT_SYSCALL], [1], [Determine whether system calls (other than I/O and mallocs) are instrumented])
+fi
+AM_CONDITIONAL(INSTRUMENT_SYSCALL, test "${enable_instrument_syscall}" = "yes" )
 
 AC_ARG_ENABLE(bfd-generate-addresses,
 	AC_HELP_STRING(
@@ -600,6 +613,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/openshmem/Makefile \
   src/tracer/wrappers/MALLOC/Makefile \
   src/tracer/wrappers/IO/Makefile \
+  src/tracer/wrappers/SYSCALL/Makefile \
   src/tracer/wrappers/fork/Makefile \
   src/tracer/wrappers/JAVA/Makefile \
   src/tracer/stats/Makefile \

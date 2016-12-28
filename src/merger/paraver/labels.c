@@ -273,6 +273,10 @@ struct mpi_stats_evt_t mpi_stats_evt_labels[MPI_STATS_EVENTS_COUNT] = {
    { MPI_STATS_OTHER_COUNT_EV, MPI_STATS_OTHER_COUNT_LBL } 
 };
 
+struct syscall_evt_t syscall_evt_labels[SYSCALL_EVENTS_COUNT] = {
+   { SYSCALL_SCHED_YIELD_EV, SYSCALL_SCHED_YIELD_LBL }
+};
+
 /******************************************************************************
  ***  state_labels
  ******************************************************************************/
@@ -1054,9 +1058,29 @@ void Write_OpenFiles_Labels(FILE * pcf_fd)
     {
       fprintf (pcf_fd, "%d      %s\n", i+1, GlobalFiles[i]);
     }
+    LET_SPACES (pcf_fd);
   }
 }
 
+static void Write_syscall_Labels (FILE * pcf_fd)
+{
+   int i;
+
+	 if (Syscall_Events_Found) {
+		 fprintf (pcf_fd, "%s\n", TYPE_LABEL);
+	   fprintf (pcf_fd, "9    %d    %s\n", SYSCALL_EV, "System call");
+	   fprintf (pcf_fd, "%s\n", VALUES_LABEL);
+
+     fprintf(pcf_fd, "%d     %s\n", 0, "End");
+		 for (i=0; i<SYSCALL_EVENTS_COUNT; i++) {
+			 if (Syscall_Labels_Used[i])
+			 {
+				 fprintf(pcf_fd, "%d     %s\n", i+1, syscall_evt_labels[i].label);
+			 }
+		 }
+     LET_SPACES (pcf_fd);
+	 }
+}
 
 void Write_UserDefined_Labels(FILE * pcf_fd)
 {
@@ -1163,6 +1187,8 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_BasickBlock_Labels(fd);
 
 	Write_OpenFiles_Labels(fd);
+
+  Write_syscall_Labels(fd);
     
 	Concat_User_Labels (fd);
 

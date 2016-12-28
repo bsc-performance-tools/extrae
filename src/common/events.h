@@ -89,6 +89,13 @@ unsigned IsMPICollective (unsigned EvType);
 #define SAMPLING_ADDRESS_STATIC_OBJECT_EV    32000008
 #define SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV 32000100 /* internal purposes, not emitted into paraver tracefile */
 
+#define SYSCALL_EV               40000000
+
+enum {
+  SYSCALL_SCHED_YIELD_EV,
+	SYSCALL_EVENTS_COUNT
+};
+
 #define APPL_EV                  40000001
 #define TRACE_INIT_EV            40000002
 #define FLUSH_EV                 40000003

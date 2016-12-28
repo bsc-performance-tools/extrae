@@ -61,7 +61,9 @@
 
   <dynamic-memory enabled="no" />
 
-  <input-output enabled="no" />
+	<input-output enabled="no" />
+
+  <syscall enabled="no" />
 
   <merge enabled="yes" 
     synchronization="default"

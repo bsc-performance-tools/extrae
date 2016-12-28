@@ -413,6 +413,14 @@ typedef struct mpi_stats_evt_t
 #define MPI_STATS_TIME_IN_GLOBAL_LBL               "Elapsed time in GLOBAL MPI calls"
 #define MPI_STATS_OTHER_COUNT_LBL                  "Number of OTHER MPI calls"
 
+typedef struct syscall_evt_t
+{
+	int evt_type;
+	char * label;
+} syscall_evt_t;
+
+#define SYSCALL_SCHED_YIELD_LBL "sched_yield()"
+
 extern struct mpi_stats_evt_t mpistats_evt_labels[MPI_STATS_EVENTS_COUNT];
 
 /* Clustering events labels */

@@ -73,6 +73,8 @@ int Memusage_Events_Found = FALSE;
 int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
 int MPI_Stats_Events_Found = FALSE;
 int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
+int Syscall_Events_Found = FALSE;
+int Syscall_Labels_Used[SYSCALL_EVENTS_COUNT];
 
 unsigned int MaxClusterId = 0; /* Marks the maximum cluster id assigned in the mpits */
 
@@ -1723,6 +1725,30 @@ static int DynamicMemory_Partition_Event (event_t * event,
 	trace_paraver_event (cpu, ptask, task, thread, time, MEMKIND_PARTITION_EV, EvValue);
 }
 
+static int SystemCall_Event (event_t * event,                      
+	unsigned long long time, unsigned int cpu, unsigned int ptask,          
+	unsigned int task, unsigned int thread, FileSet_t *fset)                
+{                                                                               
+	int i = 0;
+	unsigned EvType = Get_EvEvent (event);                                  
+	unsigned long long EvValue = Get_EvValue (event);
+	unsigned long long SysCallID = Get_EvMiscParam (event);
+
+  if (!Syscall_Events_Found)                                                  
+	{                                                                             
+	  Syscall_Events_Found = TRUE;                                              
+		for (i=0; i<SYSCALL_EVENTS_COUNT; i++)                                    
+		{                                                                           
+			Syscall_Labels_Used[i] = FALSE;                                         
+		}                                                                           
+  }                                                                             
+	Syscall_Labels_Used[SysCallID] = TRUE;
+
+	trace_paraver_event (cpu, ptask, task, thread, time, 
+	 SYSCALL_EV, (EvValue == EVT_BEGIN ? SysCallID+1 : 0));
+}                                                                               
+
+
 /*****************************************************************************/
 
 SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
@@ -1790,6 +1816,7 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ MEMKIND_POSIX_MEMALIGN_EV, DynamicMemory_Event },
 	{ MEMKIND_FREE_EV, DynamicMemory_Event },
 	{ MEMKIND_PARTITION_EV, DynamicMemory_Partition_Event },
+	{ SYSCALL_EV, SystemCall_Event },
 	{ NULL_EV, NULL }
 };
 

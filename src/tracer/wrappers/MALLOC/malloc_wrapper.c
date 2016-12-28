@@ -192,7 +192,7 @@ void *malloc (size_t s)
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
 		Probe_Malloc_Entry (s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_malloc (s);
@@ -248,7 +248,7 @@ void free (void *p)
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
 		Probe_Free_Entry (p);
 		real_free (p);
 		Probe_Free_Exit ();
@@ -335,7 +335,7 @@ void *realloc (void *p, size_t s)
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and remove and add the pointers to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
 		Probe_Realloc_Entry (p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);

@@ -283,6 +283,7 @@ core_MODULES = \
  $(HWC_LIB)/libhwc.la \
  $(WRAPPERS_LIB)/MALLOC/libwrap_malloc.la \
  $(WRAPPERS_LIB)/IO/libwrap_io.la \
+ $(WRAPPERS_LIB)/SYSCALL/libwrap_syscall.la \
  $(WRAPPERS_LIB)/fork/libwrap_fork.la
 
 #
@@ -501,6 +502,7 @@ core_INCLUDES = \
  -I$(WRAPPERS_INC)/fork \
  -I$(WRAPPERS_INC)/MALLOC \
  -I$(WRAPPERS_INC)/IO \
+ -I$(WRAPPERS_INC)/SYSCALL \
  -I$(WRAPPERS_INC)/openshmem \
  -I$(SAMPLING_DIR)/common \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)

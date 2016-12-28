@@ -21,32 +21,17 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef __MISC_PRV_SEMANTICS_H__
-#define __MISC_PRV_SEMANTICS_H__
+#ifndef __SYSCALL_PROBE_H__
+#define __SYSCALL_PROBE_H__
 
-#include "record.h"
-#include "semantics.h"
-#include "file_set.h"
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
 
-extern int MPI_Caller_Multiple_Levels_Traced;
-extern int *MPI_Caller_Labels_Used;
+void Extrae_set_trace_syscall (int enable);
+int  Extrae_get_trace_syscall (void);
 
-extern int Sample_Caller_Multiple_Levels_Traced;
-extern int *Sample_Caller_Labels_Used;
+void Probe_SYSCALL_sched_yield_Entry (void);
+void Probe_SYSCALL_sched_yield_Exit  (void);
 
-extern int Rusage_Events_Found;
-extern int GetRusage_Labels_Used[RUSAGE_EVENTS_COUNT];
-
-extern int Memusage_Events_Found;
-extern int Memusage_Labels_Used[MEMUSAGE_EVENTS_COUNT];
-
-extern int MPI_Stats_Events_Found;
-extern int MPI_Stats_Labels_Used[MPI_STATS_EVENTS_COUNT];
-
-extern int Syscall_Events_Found;
-extern int Syscall_Labels_Used[SYSCALL_EVENTS_COUNT];
-
-extern SingleEv_Handler_t PRV_MISC_Event_Handlers[];
-extern RangeEv_Handler_t PRV_MISC_Range_Handlers[];
-
-#endif /* __MISC_PRV_SEMANTICS_H__ */
+#endif /* __SYSCALL_PROBE_H__ */

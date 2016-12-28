@@ -365,6 +365,22 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
 			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support I/O instrumentation.\n", TRACE_IO);
 #endif
 		}
+		else if (!xmlStrcasecmp (tag->name, TRACE_SYSCALL))
+		{
+#if defined(INSTRUMENT_SYSCALL)
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+				char *callers = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
+				if (callers != NULL)
+					Parse_Callers (rank, callers, CALLER_SYSCALL);
+				XML_FREE(callers);
+			}
+			XML_FREE(enabled);
+#else
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support system calls instrumentation.\n", TRACE_SYSCALL);
+#endif
+	  }
 		/* Must the tracing facility obtain information about callers at sample points? */
 		else if (!xmlStrcasecmp (tag->name, TRACE_SAMPLING))
 		{
@@ -1520,6 +1536,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 	char cwd[TMP_DIR];
 	int DynamicMemoryInstrumentation = FALSE;
 	int IOInstrumentation = FALSE;
+  int SysCallInstrumentation = FALSE;
 
 	/*
 	* This initialize the library and check potential ABI mismatches
@@ -1856,6 +1873,18 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting I/O calls.\n", TRACE_IO);
 #endif
 					}
+          /* Check for syscall instrumentation */                             
+          else if (!xmlStrcasecmp (current_tag->name, TRACE_SYSCALL))                
+          {                                                                     
+#if defined(INSTRUMENT_SYSCALL)                                                      
+            xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
+            if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))            
+              SysCallInstrumentation = TRUE;                                         
+            XML_FREE(enabled);                                                  
+#else                                                                           
+            mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting system calls.\n", TRACE_SYSCALL);
+#endif                                                                          
+          }                                                                     
 					/* Check for intel pebs sampling */
 					else if (!xmlStrcasecmp (current_tag->name, TRACE_PEBS_SAMPLING))
 					{
@@ -1897,12 +1926,19 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 	mfprintf (stdout, PACKAGE_NAME": Basic I/O memory instrumentation is %s.\n",
 	  IOInstrumentation?"enabled":"disabled");
 	setRequestedIOInstrumentation (IOInstrumentation);
+
+  mfprintf (stdout, PACKAGE_NAME": System calls instrumentation is %s.\n",  
+    SysCallInstrumentation?"enabled":"disabled");                                    
+  setRequestedSysCallInstrumentation (SysCallInstrumentation);                            
 #else
 	if (DynamicMemoryInstrumentation)
 		mfprintf (stdout, PACKAGE_NAME": Dynamic memory instrumentation cannot be enabled using static version of the instrumentation library.\n");
 
 	if (IOInstrumentation)
 		mfprintf (stdout, PACKAGE_NAME": I/O instrumentation cannot be enabled using static version of the instrumentation library.\n");
+
+  if (SysCallInstrumentation)                                                        
+    mfprintf (stdout, PACKAGE_NAME": System calls instrumentation cannot be enabled using static version of the instrumentation library.\n");
 #endif
 
 	mfprintf (stdout, PACKAGE_NAME": Parsing the configuration file (%s) has ended\n", filename);   
