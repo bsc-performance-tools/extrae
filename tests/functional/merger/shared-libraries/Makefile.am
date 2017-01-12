@@ -1,6 +1,6 @@
 include $(top_srcdir)/PATHS
 
-bin_PROGRAMS = main_nodebug main_debug
+check_PROGRAMS = main_nodebug main_debug
 main_nodebug_SOURCES = fA.c fB.c main.c
 main_debug_SOURCES = fA.c fB.c main.c
 

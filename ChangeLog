@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 12Jan2017 Fixes shared-libraries tests being compiled during 'make' instead
+ of during 'make check'
  + 27Dec2016 Added support for Python MPI and multiprocessing tracing
  * 13Dec2016 Adds new build information into configured.sh script
  * 13Dec2016 Adds tracing of MPI IO size in Fortran
