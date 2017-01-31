@@ -1498,8 +1498,8 @@ AC_DEFUN([AX_PROG_LIBDWARF],
            else
               AC_MSG_ERROR([Cannot find DWARF header files in ${dwarf_paths}/include])
            fi
-        elif test -f ${DWARF_LIBSDIR_MULTIARCH}}/libdwarf.a -o \
-                -f ${DWARF_LIBSDIR_MULTIARCH}}/libdwarf.so ; then
+        elif test -f ${DWARF_LIBSDIR_MULTIARCH}/libdwarf.a -o \
+                -f ${DWARF_LIBSDIR_MULTIARCH}/libdwarf.so ; then
            if test -f ${DWARF_HOME}/include/libdwarf.h -a \
                    -f ${DWARF_HOME}/include/dwarf.h ; then
               libdwarf_found="yes"

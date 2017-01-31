@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 31Jan2017 Fixes bug in libdwarf detection macro
  * 12Jan2017 Fixes shared-libraries tests being compiled during 'make' instead
  of during 'make check'
  + 28Dec2016 Add instrumentation support for sched_yield syscall and others
