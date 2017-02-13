@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Feb2017 Fixed critical bug in __kmpc_fork_call due to the use of the non-reentrant par_func variable to store the user task pointer 
  * 13Feb2017 Upgraded Dyninst compabitility to series 9.x 
  * 31Jan2017 Fixes bug in libdwarf detection macro
  * 12Jan2017 Fixes shared-libraries tests being compiled during 'make' instead

@@ -1,8 +1,11 @@
 include $(top_srcdir)/PATHS
 
+SUBDIRS = 
+if WANT_OPENMP_INTEL
+SUBDIRS += intel-kmpc-11-intermediate
+endif
+
 EXTRA_DIST = \
- intel-kmpc-11-intermediate-switch.c \
- intel-kmpc-11-intermediate.c \
  ompt-headers
 
 WRAPPERS_OPENMP = \
@@ -25,8 +28,9 @@ else
 WRAPPERS_OPENMP += omp_wrapper.c omp_wrapper.h
 
 if WANT_OPENMP_INTEL
-WRAPPERS_OPENMP += intel-kmpc-11.c intel-kmpc-11.h intel-kmpc-11-intermediate.h
+WRAPPERS_OPENMP += intel-kmpc-11.c intel-kmpc-11.h intel-kmpc-11-intermediate/intel-kmpc-11-intermediate.h
 EXTRA_OPENMP_CFLAGS += -DINTEL_OPENMP
+WRAPPERS_INTEL_KMPC_11 = intel-kmpc-11-intermediate/libintel-kpmc-11-intermediate.la
 endif # WANT_OPENMP_INTEL
 
 if WANT_OPENMP_GNU
@@ -67,4 +71,4 @@ libwrap_openmp_la_CFLAGS = \
  -I$(COMMON_INC) \
  $(UNWIND_CFLAGS)
 libwrap_openmp_la_SOURCES = $(WRAPPERS_OPENMP)
-
+libwrap_openmp_la_LIBADD = $(WRAPPERS_INTEL_KMPC_11)

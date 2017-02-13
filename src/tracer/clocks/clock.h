@@ -25,6 +25,7 @@
 #define CLOCK_H
 
 #include "threadid.h"
+#include "common.h"
 
 enum
 {

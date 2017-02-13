@@ -607,6 +607,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/Makefile 
   src/tracer/wrappers/MPI/Makefile \
   src/tracer/wrappers/OMP/Makefile \
+  src/tracer/wrappers/OMP/intel-kmpc-11-intermediate/Makefile \
   src/tracer/wrappers/CUDA/Makefile \
   src/tracer/wrappers/OPENCL/Makefile \
   src/tracer/wrappers/pthread/Makefile \
@@ -751,7 +752,8 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[doc/user-guide/internals.pl:doc/user-guide/internals.pl] \
 		[doc/user-guide/labels.pl:doc/user-guide/labels.pl] \
 		[doc/user-guide/user-guide.css:doc/user-guide/user-guide.css] \
-		[doc/user-guide/user-guide.html:doc/user-guide/user-guide.html]
+		[doc/user-guide/user-guide.html:doc/user-guide/user-guide.html] \
+		[src/others/pyextrae/common/extrae.py.in:src/others/pyextrae/common/extrae.py.in]
 	)
 
 #########################################

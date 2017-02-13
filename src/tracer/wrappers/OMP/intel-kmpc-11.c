@@ -44,7 +44,7 @@
 #include "wrapper.h"
 #include "omp_probe.h"
 #include "omp-common.h"
-#include "intel-kmpc-11-intermediate.h"
+#include "intel-kmpc-11-intermediate/intel-kmpc-11-intermediate.h"
 
 //#define DEBUG
 
@@ -70,7 +70,7 @@ struct __kmp_task_t
 
 static pthread_mutex_t extrae_map_kmpc_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void (*__kmpc_fork_call_real)(void*,int,void*,...) = NULL;
+void (*__kmpc_fork_call_real)(void*,int,void*,...) = NULL;
 static void (*__kmpc_barrier_real)(void*,int) = NULL;
 static void (*__kmpc_critical_real)(void*,int,void*) = NULL;
 static void (*__kmpc_end_critical_real)(void*,int,void*) = NULL;
@@ -81,7 +81,7 @@ static void (*__kmpc_end_single_real)(void*,int) = NULL;
 static void (*__kmpc_dispatch_init_4_real)(void*,int,int,int,int,int,int) = NULL;
 static void (*__kmpc_dispatch_init_8_real)(void*,int,int,long long,long long,long long,long long) = NULL;
 static void (*__kmpc_dispatch_fini_4_real)(void*,int) = NULL;
-static void (*__kmpc_dispatch_fini_8_real)(void*,long long) = NULL; /* Don't sure about this! */
+static void (*__kmpc_dispatch_fini_8_real)(void*,int) = NULL; /* Not sure about this! */
 
 static void* (*__kmpc_omp_task_alloc_real)(void*,int,int,size_t,size_t,void*) = NULL;
 static void (*__kmpc_omp_task_begin_if0_real)(void*,int,void*) = NULL;
@@ -164,7 +164,7 @@ int intel_kmpc_11_hook_points (int rank)
 
 	/* Obtain @ for __kmpc_dispatch_fini_8 */
 	__kmpc_dispatch_fini_8_real =
-		(void(*)(void*,long long)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_8");
+		(void(*)(void*,int)) dlsym (RTLD_NEXT, "__kmpc_dispatch_fini_8");
 	INC_IF_NOT_NULL(__kmpc_dispatch_fini_8_real,count);
 
 	/* Obtain @ for __kmpc_omp_task_alloc */
@@ -195,9 +195,12 @@ int intel_kmpc_11_hook_points (int rank)
 	return count > 0;
 }
 
-static void *par_func;
-
-#include "intel-kmpc-11-intermediate.c"
+/* The par_func variable was used to store the pointer to the task, 
+ * but this global variable is not reentrant! So when there are multiple
+ * threads, the behavior of the program may change due to threads retrieving
+ * an incorrect task.
+ * static void *par_func;
+ */
 
 void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
 {
@@ -220,78 +223,89 @@ void Extrae_intel_kmpc_runtime_init_dyninst (void *fork_call)
  */
 void __kmpc_fork_call (void *p1, int p2, void *p3, ...)
 {
-	void *params[INTEL_OMP_FUNC_ENTRIES];
+	void  *args[INTEL_OMP_FUNC_ENTRIES];
+	char   kmpc_parallel_wrap_name[1024];
+	char   kmpc_parallel_sched_name[1024];
+	void (*kmpc_parallel_sched_ptr)(void*,int,void*,void*,void **) = NULL;
+	void  *wrap_ptr = NULL;
+	void  *task_ptr = p3;
 	va_list ap;
-	int i;
+	int     i = 0;
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call is at %p\n", THREADID, __kmpc_fork_call_real);
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
 #endif
 
-	if (__kmpc_fork_call_real != NULL && mpitrace_on)
+	if (__kmpc_fork_call_real == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call is not hooked! exiting!!\n");
+		exit (-1);
+	}
+
+	/* Grab parameters */
+	memset(args, 0, sizeof(args));
+
+	va_start (ap, p3);
+	for (i=0; i<p2; i++)
+	{
+		args[i] = va_arg(ap, void *);
+	}
+	va_end (ap);
+
+	/* Retrieve handler to the scheduling routine that will call __kmpc_fork_call_real with the correct number of arguments */
+	snprintf(kmpc_parallel_sched_name, sizeof(kmpc_parallel_sched_name), "__kmpc_parallel_sched_%d_args", p2);
+	kmpc_parallel_sched_ptr = (void(*)(void*,int,void*,void*,void **)) dlsym(RTLD_DEFAULT, kmpc_parallel_sched_name);
+	if (kmpc_parallel_sched_ptr == NULL)
+	{
+    fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
+		                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
+										 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+		                 kmpc_parallel_sched_name, p2);
+		exit (-1);                                                                  
+
+	}
+
+	if (mpitrace_on)
 	{
 		Extrae_OpenMP_ParRegion_Entry ();
 
-		/* Grab parameters */
-		va_start (ap, p3);
-		for (i = 0; i < p2; i++)
-			params[i] = va_arg (ap, void*);
-		va_end (ap);
-
-		par_func = p3;
-
-		switch (p2)
+		snprintf(kmpc_parallel_wrap_name, sizeof(kmpc_parallel_wrap_name), "__kmpc_parallel_wrap_%d_args", p2);
+		wrap_ptr = dlsym(RTLD_DEFAULT, kmpc_parallel_wrap_name);
+		if (wrap_ptr == NULL)
 		{
-			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
-#include "intel-kmpc-11-intermediate-switch.c"
-
-			default:
-				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n"
-				                 PACKAGE_NAME":        Recompile Extrae to support this quantity of arguments!\n"
-						         PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so\n", p2);
-				exit (-1);
-				break;
+			fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
+		 	                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
+											 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+			                 kmpc_parallel_wrap_name, p2);
+			exit (-1);                                                                  
 		}
+	}                      
 
+	/* Call the scheduling routine. 
+	 * If wrap_ptr is not NULL, it will interpose a call to wrap_ptr with an extra
+	 * parameter with the real task_ptr, in order to instrument when the task
+	 * starts executing.
+	 */
+	kmpc_parallel_sched_ptr(p1, p2, task_ptr, wrap_ptr, args); 
+
+	if (mpitrace_on)
+	{
 		Extrae_OpenMP_ParRegion_Exit ();	
-	}
-	else if (__kmpc_fork_call_real != NULL && !mpitrace_on)
-	{
-		/* Grab parameters */
-		va_start (ap, p3);
-		for (i = 0; i < p2; i++)
-			params[i] = va_arg (ap, void*);
-		va_end (ap);
-
-		par_func = p3;
-
-		switch (p2)
-		{
-			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
-#include "intel-kmpc-11-intermediate-switch.c"
-
-			default:
-				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n"
-				                 PACKAGE_NAME":        Recompile Extrae to support this quantity of arguments!\n"
-						         PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so\n", p2);
-				exit (-1);
-				break;
-		}
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call is not hooked! exiting!!\n");
-		exit (0);
 	}
 }
 
 
 void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 {
-	void *params[INTEL_OMP_FUNC_ENTRIES];
+	void   *args[INTEL_OMP_FUNC_ENTRIES];
+	char    kmpc_parallel_wrap_name[1024];
+	char    kmpc_parallel_sched_name[1024];
+	void  (*kmpc_parallel_sched_ptr)(void*,int,void*,void*,void **) = NULL;
+	void   *wrap_ptr = NULL;
+	void   *task_ptr = p3;
 	va_list ap;
-	int i;
+	int     i = 0;
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call_extrae_dyninst is at %p\n", THREADID, __kmpc_fork_call_extrae_dyninst);
@@ -299,62 +313,63 @@ void __kmpc_fork_call_extrae_dyninst (void *p1, int p2, void *p3, ...)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_fork_call params %p %d %p (and more to come ... )\n", THREADID, p1, p2, p3);
 #endif
 
-	if (__kmpc_fork_call_real != NULL && mpitrace_on)
+	if (__kmpc_fork_call_real == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call is not hooked! exiting!!\n");
+		exit (0);
+	}
+
+	/* Grab parameters */
+	memset(args, 0, sizeof(args));
+
+	va_start (ap, p3);
+  for (i=0; i<p2; i++)
+	{
+		args[i] = va_arg(ap, void *);
+	}
+	va_end (ap);
+
+	/* Retrieve handler to the scheduling routine that will call __kmpc_fork_call_real with the correct number of arguments */
+
+	snprintf(kmpc_parallel_sched_name, sizeof(kmpc_parallel_sched_name), "__kmpc_parallel_sched_%d_args", p2);
+  kmpc_parallel_sched_ptr = (void(*)(void*,int,void*,void*,void **)) dlsym(RTLD_DEFAULT, kmpc_parallel_sched_name);
+	if (kmpc_parallel_sched_ptr == NULL)                                          
+	{
+    fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
+		                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
+										 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+		                 kmpc_parallel_sched_name, p2);
+		exit (-1);                                                                  
+	}
+
+	if (mpitrace_on)
 	{
 		Extrae_OpenMP_ParRegion_Entry ();
 		Extrae_OpenMP_EmitTaskStatistics();
 
-		/* Grab parameters */
-		va_start (ap, p3);
-		for (i = 0; i < p2; i++)
-			params[i] = va_arg (ap, void*);
-		va_end (ap);
-
-		par_func = p3;
-
-		switch (p2)
+		snprintf(kmpc_parallel_wrap_name, sizeof(kmpc_parallel_wrap_name), "__kmpc_parallel_wrap_%d_args", p2);
+		wrap_ptr = dlsym(RTLD_DEFAULT, kmpc_parallel_wrap_name);
+		if (wrap_ptr == NULL)
 		{
-			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
-#include "intel-kmpc-11-intermediate-switch.c"
-
-			default:
-				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n"
-				                 PACKAGE_NAME":        Recompile Extrae to support this quantity of arguments!\n"
-						         PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so\n", p2);
-				exit (-1);
-				break;
+			fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
+		 	                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
+											 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+			                 kmpc_parallel_wrap_name, p2);
+			exit (-1);                                                                  
 		}
+	}
 
+	/* Call the scheduling routine. 
+	 * If wrap_ptr is not NULL, it will interpose a call to wrap_ptr with an extra
+	 * parameter with the real task_ptr, in order to instrument when the task
+	 * starts executing.
+	 */
+	kmpc_parallel_sched_ptr(p1, p2, task_ptr, wrap_ptr, args); 
+
+	if (mpitrace_on)
+	{
 		Extrae_OpenMP_ParRegion_Exit ();	
 		Extrae_OpenMP_EmitTaskStatistics();
-	}
-	else if (__kmpc_fork_call_real != NULL && !mpitrace_on)
-	{
-		/* Grab parameters */
-		va_start (ap, p3);
-		for (i = 0; i < p2; i++)
-			params[i] = va_arg (ap, void*);
-		va_end (ap);
-
-		par_func = p3;
-
-		switch (p2)
-		{
-			/* This big switch is handled by this file generated automatically by  genstubs-kmpc-11.sh */
-#include "intel-kmpc-11-intermediate-switch.c"
-
-			default:
-				fprintf (stderr, PACKAGE_NAME": Error! Unhandled __kmpc_fork_call with %d arguments! Quitting!\n"
-				                 PACKAGE_NAME":        Recompile Extrae to support this quantity of arguments!\n"
-						         PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so\n", p2);
-				exit (-1);
-				break;
-		}
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": __kmpc_fork_call is not hooked! exiting!!\n");
-		exit (0);
 	}
 }
 
@@ -569,9 +584,18 @@ void __kmpc_dispatch_init_4 (void *p1, int p2, int p3, int p4, int p5, int p6,
 
 	if (__kmpc_dispatch_init_4_real != NULL && mpitrace_on)
 	{
+		struct __kmpv_location_t *loc = (struct __kmpv_location_t*) p1;
+
 		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_4_real (p1, p2, p3, p4, p5, p6, p7);
-		Extrae_OpenMP_UF_Entry (par_func /*p1*/); /* p1 cannot be translated with bfd? */
+		/*
+		 * Originally the argument here was p1, but this cannot be translated with
+		 * bfd. Then it was changed to par_func, but this variable was not reentrant
+		 * and could point to another thread's task, so we removed it. Now we use
+		 * loc->location, copied from the __kmpc_single wrapper.
+		 */
+		// printf ("loc->location = %s\n", loc->location);
+		Extrae_OpenMP_UF_Entry (loc->location);
 	}
 	else if (__kmpc_dispatch_init_4_real != NULL && !mpitrace_on)
 	{
@@ -594,9 +618,18 @@ void __kmpc_dispatch_init_8 (void *p1, int p2, int p3, long long p4,
 
 	if (__kmpc_dispatch_init_8_real != NULL && mpitrace_on)
 	{
+		struct __kmpv_location_t *loc = (struct __kmpv_location_t*) p1;
+
 		Extrae_OpenMP_DO_Entry ();
 		__kmpc_dispatch_init_8_real (p1, p2, p3, p4, p5, p6, p7);
-		Extrae_OpenMP_UF_Entry (par_func /*p1*/); /* p1 cannot be translated with bfd? */
+		/*
+		 * Originally the argument here was p1, but this cannot be translated with
+		 * bfd. Then it was changed to par_func, but this variable was not reentrant
+		 * and could point to another thread's task, so we removed it. Now we use
+		 * loc->location, copied from the __kmpc_single wrapper.
+		 */
+		// printf ("loc->location = %s\n", loc->location);
+		Extrae_OpenMP_UF_Entry (loc->location);
 	}
 	else if (__kmpc_dispatch_init_8_real != NULL && !mpitrace_on)
 	{
@@ -633,11 +666,11 @@ void __kmpc_dispatch_fini_4 (void *p1, int p2)
 	}
 }
 
-void __kmpc_dispatch_fini_8 (void *p1, long long p2)
+void __kmpc_dispatch_fini_8 (void *p1, int p2)
 {
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_8 is at %p\n", THREADID, __kmpc_dispatch_fini_8_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_8 params are %p %lld\n", THREADID, p1, p2);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d: __kmpc_dispatch_fini_8 params are %p %d\n", THREADID, p1, p2);
 #endif
 
 	if (__kmpc_dispatch_fini_8_real != NULL && mpitrace_on)

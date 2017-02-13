@@ -24,6 +24,8 @@
 #ifndef INTEL_KMPC_11_WRAPPER_H_
 #define INTEL_KMPC_11_WRAPPER_H_
 
+extern void (*__kmpc_fork_call_real)(void*,int,void*,...);
+
 int intel_kmpc_11_hook_points (int rank);
 
 #endif
