@@ -132,14 +132,26 @@ endif
 if HAVE_DYNINST
 if HAVE_MPI
   lib_LTLIBRARIES += lib_dyn_mpitracec.la lib_dyn_mpitracef.la
+if SINGLE_MPI_LIBRARY
+  lib_LTLIBRARIES += lib_dyn_mpitracecf.la
+endif
 if WANT_OPENMP
   lib_LTLIBRARIES += lib_dyn_ompitracec.la lib_dyn_ompitracef.la
+if SINGLE_MPI_LIBRARY
+  lib_LTLIBRARIES += lib_dyn_ompitracecf.la
+endif
 endif
 if WANT_CUDAorCUPTI
   lib_LTLIBRARIES += lib_dyn_cudampitracec.la lib_dyn_cudampitracef.la
+if SINGLE_MPI_LIBRARY
+  lib_LTLIBRARIES += lib_dyn_cudampitracecf.la
+endif
 endif
 if WANT_OPENCL
   lib_LTLIBRARIES += lib_dyn_oclmpitracec.la lib_dyn_oclmpitracef.la
+if SINGLE_MPI_LIBRARY
+  lib_LTLIBRARIES += lib_dyn_oclmpitracecf.la
+endif
 endif
 endif
 endif
@@ -268,14 +280,19 @@ endif
 # For DynInst instrumentation
 lib_dyn_mpitracec_la_SOURCES = $(libmpitrace_la_SOURCES)
 lib_dyn_mpitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
+lib_dyn_mpitracecf_la_SOURCES = $(libmpitracecf_la_SOURCES)
+
 lib_dyn_ompitracec_la_SOURCES = $(libompitrace_la_SOURCES)
 lib_dyn_ompitracef_la_SOURCES = $(libompitracef_la_SOURCES)
+lib_dyn_ompitracecf_la_SOURCES = $(libompitracecf_la_SOURCES)
 
 lib_dyn_cudampitracec_la_SOURCES = $(libcudampitrace_la_SOURCES)
 lib_dyn_cudampitracef_la_SOURCES = $(libcudampitracef_la_SOURCES)
+lib_dyn_cudampitracecf_la_SOURCES = $(libcudampitracecf_la_SOURCES)
 
 lib_dyn_oclmpitracec_la_SOURCES = $(liboclmpitrace_la_SOURCES)
 lib_dyn_oclmpitracef_la_SOURCES = $(liboclmpitracef_la_SOURCES)
+lib_dyn_oclmpitracecf_la_SOURCES = $(liboclmpitracecf_la_SOURCES)
 
 core_MODULES = \
  $(COMMON_LIB)/libcommon.la \
@@ -357,6 +374,10 @@ ADDITIONAL_MPI_LIBS_CF_LB = $(INTERFACES_LIB)/MPI/libiface_mpicf_lb.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_cf.la \
  $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
+ADDITIONAL_MPI_DYNLIBS_CF = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpicf.la \
+ $(WRAPPERS_LIB)/MPI/libwrap_mpi_cf.la \
+ $(STATS_LIB)/libmpistats.la \
+ $(COMMON_MPI_LIB)/libcommon_mpi.la
 endif
 
 ADDITIONAL_MPI_LIBS_C = $(INTERFACES_LIB)/MPI/libiface_mpi.la \
@@ -367,7 +388,6 @@ ADDITIONAL_MPI_LIBS_C_LB = $(INTERFACES_LIB)/MPI/libiface_mpi_lb.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_c.la \
  $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
-
 ADDITIONAL_MPI_DYNLIBS_C = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpic.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_c.la \
  $(STATS_LIB)/libmpistats.la \
@@ -482,10 +502,13 @@ endif
 
 lib_dyn_mpitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_C) $(PARALLEL_MERGE_LIB)
 lib_dyn_mpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_F) $(PARALLEL_MERGE_LIB)
+lib_dyn_mpitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_CF) $(PARALLEL_MERGE_LIB)
 lib_dyn_ompitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_C) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
 lib_dyn_ompitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_F) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
+lib_dyn_ompitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_CF) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
 lib_dyn_cudampitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_C) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 lib_dyn_cudampitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_F) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
+lib_dyn_cudampitracecf_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_CF) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
 
 #
 # Compilation flags
@@ -652,38 +675,43 @@ endif
 
 lib_dyn_mpitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE
 lib_dyn_mpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE
+lib_dyn_mpitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE
 lib_dyn_ompitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DOMP_SUPPORT
 lib_dyn_ompitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DOMP_SUPPORT
+lib_dyn_ompitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DOMP_SUPPORT
 lib_dyn_cudampitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 lib_dyn_cudampitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
-
+lib_dyn_cudampitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 lib_dyn_oclmpitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DOPENCL_SUPPORT $(WRAPPERS_OCL_CFLAGS)
 lib_dyn_oclmpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DOPENCL_SUPPORT $(WRAPPERS_OCL_CFLAGS)
+lib_dyn_oclmpitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE -DOPENCL_SUPPORT $(WRAPPERS_OCL_CFLAGS)
 
 #
 # Online support is only activated for the MPI libraries
 # 
 if HAVE_ONLINE
-libmpitrace_la_LIBADD       += $(ONLINE_LIB)/libonline.la
-libmpitracef_la_LIBADD      += $(ONLINE_LIB)/libonline.la
-libompitrace_la_LIBADD      += $(ONLINE_LIB)/libonline.la
-libompitracef_la_LIBADD     += $(ONLINE_LIB)/libonline.la
-lib_dyn_mpitracec_la_LIBADD += $(ONLINE_LIB)/libonline.la
-lib_dyn_mpitracef_la_LIBADD += $(ONLINE_LIB)/libonline.la
+libmpitrace_la_LIBADD        += $(ONLINE_LIB)/libonline.la
+libmpitracef_la_LIBADD       += $(ONLINE_LIB)/libonline.la
+libompitrace_la_LIBADD       += $(ONLINE_LIB)/libonline.la
+libompitracef_la_LIBADD      += $(ONLINE_LIB)/libonline.la
+lib_dyn_mpitracec_la_LIBADD  += $(ONLINE_LIB)/libonline.la
+lib_dyn_mpitracef_la_LIBADD  += $(ONLINE_LIB)/libonline.la
+lib_dyn_mpitracecf_la_LIBADD += $(ONLINE_LIB)/libonline.la
 
-libmpitrace_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_INC)
-libmpitracef_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_INC)
-libompitrace_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_INC)
-libompitracef_la_CFLAGS     += -DHAVE_ONLINE -I$(ONLINE_INC)
-lib_dyn_mpitracec_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
-lib_dyn_mpitracef_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
+libmpitrace_la_CFLAGS        += -DHAVE_ONLINE -I$(ONLINE_INC)
+libmpitracef_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_INC)
+libompitrace_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_INC)
+libompitracef_la_CFLAGS      += -DHAVE_ONLINE -I$(ONLINE_INC)
+lib_dyn_mpitracec_la_CFLAGS  += -DHAVE_ONLINE -I$(ONLINE_INC)
+lib_dyn_mpitracef_la_CFLAGS  += -DHAVE_ONLINE -I$(ONLINE_INC)
+lib_dyn_mpitracecf_la_CFLAGS += -DHAVE_ONLINE -I$(ONLINE_INC)
 
 if SINGLE_MPI_LIBRARY
-  libmpitracecf_la_LIBADD       += $(ONLINE_LIB)/libonline.la
-  libompitracecf_la_LIBADD     += $(ONLINE_LIB)/libonline.la
+  libmpitracecf_la_LIBADD    += $(ONLINE_LIB)/libonline.la
+  libompitracecf_la_LIBADD   += $(ONLINE_LIB)/libonline.la
 
-  libmpitracecf_la_CFLAGS       += -DHAVE_ONLINE -I$(ONLINE_INC)
-  libompitracecf_la_CFLAGS     += -DHAVE_ONLINE -I$(ONLINE_INC)
+  libmpitracecf_la_CFLAGS    += -DHAVE_ONLINE -I$(ONLINE_INC)
+  libompitracecf_la_CFLAGS   += -DHAVE_ONLINE -I$(ONLINE_INC)
 endif
 
 endif
@@ -800,10 +828,13 @@ endif
 
 lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
+lib_dyn_mpitracecf_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 lib_dyn_ompitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) 
 lib_dyn_ompitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) 
-lib_dyn_cudampitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) 
+lib_dyn_ompitracecf_la_LDFLAGS = $(lib_dyn_mpitracecf_la_LDFLAGS) 
 lib_dyn_cudampitracec_la_LDFLAGS = $(lib_dyn_mpitracec_la_LDFLAGS) 
+lib_dyn_cudampitracef_la_LDFLAGS = $(lib_dyn_mpitracef_la_LDFLAGS) 
+lib_dyn_cudampitracecf_la_LDFLAGS = $(lib_dyn_mpitracecf_la_LDFLAGS) 
 
 ## -static tells libtool to generate ONLY the static library (we don't want
 ##   the libmpitracef.so because it don't preloads fine with programs)

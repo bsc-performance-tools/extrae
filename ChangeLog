@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Feb2017 Upgraded Dyninst compabitility to series 9.x 
  * 31Jan2017 Fixes bug in libdwarf detection macro
  * 12Jan2017 Fixes shared-libraries tests being compiled during 'make' instead
  of during 'make check'

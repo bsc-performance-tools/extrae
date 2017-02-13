@@ -60,6 +60,7 @@ using namespace std;
 
 #include <BPatch_statement.h>
 #include <BPatch_point.h>
+#include <BPatch_object.h>
 
 #define SPLIT_CHAR '+'
 void discoverInstrumentationLevel(set<string> & UserFunctions, map<string, vector<string> > & LoopLevels);
@@ -392,10 +393,12 @@ static void ShowFunctions (BPatch_image *appImage)
 
 			if (f->isSharedLib())
 			{
-				char sharedlibname[1024];
-				BPatch_module *mod = f->getModule();
+				//Old Dyninst API < 9.x
+				//char sharedlibname[1024];
+				//mod->getFullName (sharedlibname, 1024);
 
-				mod->getFullName (sharedlibname, 1024);
+				BPatch_module *mod = f->getModule();
+				string sharedlibname = mod->getObject()->name();
 				cout << "    Full library name: " << sharedlibname << endl;
 				
 			}
@@ -415,7 +418,7 @@ static void printCallingSites (int id, int total, char *name, string sharedlibna
 	if (vpoints->size() > 0)
 	{
 		unsigned j = 0;
-		cout << id << " of " << total << " - Calling sites for " << name << " within " << sharedlibname << " (num = " << vpoints->size() << "):" << endl;
+		cout << endl << id << " of " << total << " - Calling sites for " << name << " within " << sharedlibname << " (num = " << vpoints->size() << "):" << endl;
 		while (j < vpoints->size())
 		{
 			BPatch_function *called = ((*vpoints)[j])->getCalledFunction();
@@ -523,25 +526,30 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 	i = 0;
 	while (i < vfunctions->size())
 	{
-		char name[1024], sharedlibname_c[1024];
+		char name[1024], modulename_c[1024];
 
 		BPatch_function *f = (*vfunctions)[i];
-		(f->getModule())->getFullName (sharedlibname_c, sizeof(sharedlibname_c));
+
 		f->getName (name, sizeof(name));
 
-		string sharedlibname = sharedlibname_c;
+		(f->getModule())->getFullName (modulename_c, sizeof(modulename_c));
+		string modulename = modulename_c;
 
-		string sharedlibname_ext;
-		if (sharedlibname.rfind('.') != string::npos)
-			sharedlibname_ext = sharedlibname.substr (sharedlibname.rfind('.'));
+		string sharedlibname = f->getModule()->getObject()->name();
+
+		string modulename_ext;
+		if (modulename.rfind('.') != string::npos)
+			modulename_ext = modulename.substr (modulename.rfind('.'));
 		else
-			sharedlibname_ext = "";
+			modulename_ext = "";
 
+		string loadedmodulename = loadedModule.substr( loadedModule.rfind('/') + 1 );
+		
 		/* For OpenMP apps, if the application has been linked with Extrae, just need to
 		   instrument the function calls that have #pragma omp in them. The outlined
 			 routines will be instrumented by the library attached to the binary */
 		if (!BinaryLinkedWithInstrumentation &&
-		    instrumentOMP && appType->get_isOpenMP() && loadedModule != sharedlibname)
+		    instrumentOMP && appType->get_isOpenMP() && loadedmodulename != sharedlibname)
 		{
 			/* OpenMP instrumentation (just for OpenMP apps) */
 			if (appType->isMangledOpenMProutine (name))
@@ -575,16 +583,21 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 			}
 		}
 
-		if (sharedlibname_ext == ".f" || sharedlibname_ext == ".F" ||   /* fortran */
-		  sharedlibname_ext == ".for" || sharedlibname_ext == ".FOR" || /* fortran */
-		  sharedlibname_ext == ".f90" || sharedlibname_ext == ".F90" || /* fortran 90 */
-		  sharedlibname_ext == ".i90" ||                                /* fortran 90 through ifort */
-		  sharedlibname_ext == ".f77" || sharedlibname_ext == ".F77" || /* fortran 77 */
-		  sharedlibname_ext == ".c" || sharedlibname_ext == ".C" ||     /* C */
-		  sharedlibname_ext == ".cxx" || sharedlibname_ext == ".cpp" || /* c++ */
-		  sharedlibname_ext == ".c++" || /* c++ */
-		  sharedlibname_ext == ".i" || /* some compilers generate this extension in intermediate files */ 
-		  sharedlibname == "DEFAULT_MODULE" /* Dyninst specific container that represents the executable */
+		string objname, objpath;
+		objname = f->getModule()->getObject()->name();
+		objpath = f->getModule()->getObject()->pathName();
+
+		if ((strncmp(objname.c_str(), "lib_dyn_", 8) != 0) &&
+		    (modulename_ext == ".f" || modulename_ext == ".F" ||   /* fortran */
+         modulename_ext == ".for" || modulename_ext == ".FOR" || /* fortran */
+         modulename_ext == ".f90" || modulename_ext == ".F90" || /* fortran 90 */
+         modulename_ext == ".i90" ||                                /* fortran 90 through ifort */
+         modulename_ext == ".f77" || modulename_ext == ".F77" || /* fortran 77 */
+         modulename_ext == ".c" || modulename_ext == ".C" ||     /* C */
+         modulename_ext == ".cxx" || modulename_ext == ".cpp" || /* c++ */
+         modulename_ext == ".c++" || /* c++ */
+         modulename_ext == ".i" || /* some compilers generate this extension in intermediate files */ 
+         modulename_ext == "DEFAULT_MODULE") /* Dyninst specific container that represents the executable */ 
 		)
 		{
 			/* API instrumentation (for any kind of apps)
@@ -597,7 +610,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 				break;
 
 			if (VerboseLevel >= 2)
-				printCallingSites (i, vfunctions->size(), name, sharedlibname, vpoints);
+				printCallingSites (i, vfunctions->size(), name, modulename, vpoints);
 
 			unsigned j = 0;
 			while (j < vpoints->size())
@@ -616,7 +629,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 						{
 							APIinsertion++;
 							if (VerboseLevel)
-								cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << sharedlibname << ")" << endl;
+								cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << modulename << ")" << endl;
 						}
 						else
 							cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
@@ -624,9 +637,12 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 
 					/* Check MPI calls */
 					if (!BinaryLinkedWithInstrumentation &&
-					    instrumentMPI && appType->get_isMPI() && (
-					    strncmp (calledname, PMPI_C_prefix, 5) == 0 || strncmp (calledname, MPI_C_prefix, 4) == 0 ||
-					    strncmp (calledname, PMPI_F_prefix, 5) == 0 || strncmp (calledname, MPI_F_prefix, 4) == 0))
+					    instrumentMPI && appType->get_isMPI() && 
+					    (strncmp (calledname, PMPI_C_prefix, 5) == 0 || strncmp (calledname, MPI_C_prefix, 4) == 0 ||
+					     strncmp (calledname, PMPI_F_prefix, 5) == 0 || strncmp (calledname, MPI_F_prefix, 4) == 0) &&
+				  	    (strncmp (name, PMPI_C_prefix, 5) != 0 && strncmp (name, MPI_C_prefix, 4) != 0 &&
+					     strncmp (name, PMPI_F_prefix, 5) != 0 && strncmp (name, MPI_F_prefix, 4) != 0)
+					   ) 
 					{
 						BPatch_function *patch_mpi = getMPIPatch (calledname);
 						if (patch_mpi != NULL)
@@ -635,7 +651,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 							{
 								MPIinsertion++;
 								if (VerboseLevel)
-									cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << sharedlibname << ")" << endl;
+									cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << modulename << ") with " << patch_mpi->getName() << endl;
 							}
 							else
 								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
@@ -656,7 +672,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 							{
 								OMPreplacement_intel_v11++;
 								if (VerboseLevel)
-									cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << sharedlibname << ")" << endl;
+									cout << PACKAGE_NAME << ": Replaced call " << calledname << " in routine " << name << " (" << modulename << ")" << endl;
 							}
 							else
 								cerr << PACKAGE_NAME << ": Cannot replace " << calledname << " routine" << endl;
@@ -1016,10 +1032,13 @@ int main (int argc, char *argv[])
 			/* Check for the correct library to be loaded */
 			if (appType->get_isMPI())
 			{
+				/* XXX: We still need to fix the detection of application type to support mixed C/F!!! */ 
 				if (appType->get_isOpenMP())
 				{
 					if (appType->get_MPI_type() == ApplicationType::MPI_C)
 						sprintf (buffer, "%s/lib/lib_dyn_ompitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					else if (appType->get_MPI_type() == ApplicationType::MPI_CF)
+						sprintf (buffer, "%s/lib/lib_dyn_ompitracecf-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 					else
 						sprintf (buffer, "%s/lib/lib_dyn_ompitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 				}
@@ -1027,6 +1046,8 @@ int main (int argc, char *argv[])
 				{
 					if (appType->get_MPI_type() == ApplicationType::MPI_C)
 						sprintf (buffer, "%s/lib/lib_dyn_cudampitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					else if (appType->get_MPI_type() == ApplicationType::MPI_CF)
+						sprintf (buffer, "%s/lib/lib_dyn_cudampitracecf-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 					else
 						sprintf (buffer, "%s/lib/lib_dyn_cudampitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 				}
@@ -1034,7 +1055,9 @@ int main (int argc, char *argv[])
 				{
 					if (appType->get_MPI_type() == ApplicationType::MPI_C)
 						sprintf (buffer, "%s/lib/lib_dyn_mpitracec-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
-					else
+					else if (appType->get_MPI_type() == ApplicationType::MPI_CF)
+						sprintf (buffer, "%s/lib/lib_dyn_mpitracecf-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
+					else 
 						sprintf (buffer, "%s/lib/lib_dyn_mpitracef-%s.so", getenv("EXTRAE_HOME"), PACKAGE_VERSION);
 				}
 			}

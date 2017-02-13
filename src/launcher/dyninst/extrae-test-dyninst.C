@@ -60,6 +60,8 @@ using namespace std;
 
 #include <BPatch_statement.h>
 #include <BPatch_point.h>
+#include <BPatch_object.h>
+
 
 static bool ListFunctions = false;
 static bool showErrors = true;
@@ -210,12 +212,15 @@ static void ShowFunctions (BPatch_image *appImage)
 
 		if (f->isSharedLib())
 		{
-			char sharedlibname[1024];
+			//Old Dyninst API < 9.x
+			//char sharedlibname[1024];
+			//mod->getFullName (sharedlibname, 1024);
+
 			BPatch_module *mod = f->getModule();
 
-			mod->getFullName (sharedlibname, 1024);
+			string sharedlibname;
+			sharedlibname = mod->getObject()->name();
 			cout << "    Full library name: " << sharedlibname << endl;
-			
 		}
 		cout << endl;
 

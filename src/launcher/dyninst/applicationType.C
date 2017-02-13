@@ -234,9 +234,9 @@ void ApplicationType::dumpApplicationType (void)
 			cout << "(C language) ";
 		else if (MPI_type == MPI_Fortran_0u)
 			cout << "(Fortran language with 0 underscores) ";
-		else if (MPI_type == MPI_Fortran_0u)
+		else if (MPI_type == MPI_Fortran_1u)
 			cout << "(Fortran language with 1 underscore) ";
-		else if (MPI_type == MPI_Fortran_0u)
+		else if (MPI_type == MPI_Fortran_2u)
 			cout << "(Fortran language with 2 underscores) ";
 		else if (MPI_type == MPI_Fortran_ucase)
 			cout << "(Fortran language in uppercase) ";

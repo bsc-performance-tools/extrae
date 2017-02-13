@@ -10,6 +10,15 @@ WRAPPERS_MPI_C_ONLY = \
  persistent_requests.c persistent_requests.h \
  hash_table.c hash_table.h
 
+WRAPPERS_MPI_F_ONLY = \
+ mpi_wrapper.c mpi_wrapper.h \
+ mpi_wrapper_p2p_f.c mpi_wrapper_p2p_f.h \
+ mpi_wrapper_coll_f.c mpi_wrapper_coll_f.h \
+ mpi_wrapper_1sided_f.c mpi_wrapper_1sided_f.h \
+ mpi_wrapper_io_f.c mpi_wrapper_io_f.h \
+ persistent_requests.c persistent_requests.h \
+ hash_table.c hash_table.h
+
 WRAPPERS_MPI_ALL = \
  mpi_wrapper.c mpi_wrapper.h \
  mpi_wrapper_p2p_c.c mpi_wrapper_p2p_c.h \
@@ -41,7 +50,7 @@ libwrap_mpi_c_la_CFLAGS = -DC_SYMBOLS $(EXTRA_MPI_CFLAGS)
 libwrap_mpi_c_la_SOURCES = $(WRAPPERS_MPI_C_ONLY)
 
 libwrap_mpi_f_la_CFLAGS = -DFORTRAN_SYMBOLS $(EXTRA_MPI_CFLAGS)
-libwrap_mpi_f_la_SOURCES = $(WRAPPERS_MPI_ALL)
+libwrap_mpi_f_la_SOURCES = $(WRAPPERS_MPI_F_ONLY)
 
 libwrap_mpi_cf_la_CFLAGS = -DC_SYMBOLS -DFORTRAN_SYMBOLS $(EXTRA_MPI_CFLAGS)
 libwrap_mpi_cf_la_SOURCES = $(WRAPPERS_MPI_ALL)

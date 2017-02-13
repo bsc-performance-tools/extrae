@@ -1643,10 +1643,20 @@ AC_DEFUN([AX_PROG_DYNINST],
 
       AC_LANG_PUSH([C++])
 
+      dnl Dyninst >= 9.3.x requires c++11
+      DYNINST_CXXFLAGS="-std=c++11"
+      DYNINST_CPPFLAGS="-std=c++11"
+
+      CXXFLAGS="${CXXFLAGS} ${DYNINST_CXXFLAGS} -I${DYNINST_INCLUDES} -I${BOOST_HOME}/include"
+      CPPFLAGS="${CPPFLAGS} ${DYNINST_CPPFLAGS} -I${DYNINST_INCLUDES} -I${BOOST_HOME}/include"
+
       dnl Check for Dyninst header files.
       CXXFLAGS="${CXXFLAGS} -I${DYNINST_INCLUDES} -I${BOOST_HOME}/include"
       CPPFLAGS="${CPPFLAGS} -I${DYNINST_INCLUDES} -I${BOOST_HOME}/include"
       AC_CHECK_HEADERS([BPatch.h], [], [DYNINST_INSTALLED="no"])
+
+      AC_SUBST(DYNINST_CXXFLAGS)
+      AC_SUBST(DYNINST_CPPFLAGS)
 
       AC_LANG_RESTORE()
    fi
