@@ -2444,15 +2444,21 @@ void Backend_Finalize (void)
 
 //static int Extrae_inInstrumentation = FALSE;
 static int *Extrae_inInstrumentation = NULL;
+static int *Extrae_inSampling = NULL;
 
 int Backend_inInstrumentation (unsigned thread)
 {
-	if (Extrae_inInstrumentation != NULL)
-		return Extrae_inInstrumentation[thread];
+	if ((Extrae_inInstrumentation != NULL) && (Extrae_inSampling != NULL))
+		return (Extrae_inInstrumentation[thread] || Extrae_inSampling[thread]);
 	else
 		return FALSE;
-	/* return Extrae_inInstrumentation; */
 }
+
+void Backend_setInSampling (unsigned thread, int insampling)      
+{                                                                               
+	  if (Extrae_inSampling != NULL)                                         
+			    Extrae_inSampling[thread] = insampling;                       
+}                                                                               
 
 void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
 {
@@ -2462,12 +2468,18 @@ void Backend_setInInstrumentation (unsigned thread, int ininstrumentation)
 
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 {
-	Extrae_inInstrumentation = (int*) realloc (Extrae_inInstrumentation,
-	  sizeof(int)*nthreads);
+	Extrae_inInstrumentation = (int*) realloc (Extrae_inInstrumentation, sizeof(int)*nthreads);
 	if (Extrae_inInstrumentation == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME
 		  ": Failed to allocate memory for inInstrumentation structure\n");
+		exit (-1);
+	}
+	Extrae_inSampling = (int*) realloc (Extrae_inSampling, sizeof(int)*nthreads);
+	if (Extrae_inSampling == NULL)
+	{
+		fprintf (stderr, PACKAGE_NAME
+		  ": Failed to allocate memory for inSampling structure\n");
 		exit (-1);
 	}
 }

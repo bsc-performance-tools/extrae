@@ -223,6 +223,7 @@ void Backend_Enter_Instrumentation (int Nevents);
 void Backend_Leave_Instrumentation (void);
 int Backend_inInstrumentation (unsigned thread);
 void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);
+void Backend_setInSampling (unsigned thread, int insampling);
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads);
 void Backend_createExtraeDirectory (int taskid, int Temporal);
 int Extrae_Get_FinalDir_BlockSize(void);

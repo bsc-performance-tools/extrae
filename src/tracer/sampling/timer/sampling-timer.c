@@ -65,9 +65,11 @@ void Extrae_SamplingHandler (void* address)
 {
 	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
+		Backend_setInSampling(THREADID, TRUE);
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
 		Extrae_trace_callers (temps, 6, CALLER_SAMPLING);
+		Backend_setInSampling(THREADID, FALSE);
 	}
 }
 
@@ -75,9 +77,11 @@ void Extrae_SamplingHandler_PAPI (void* address)
 {
 	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
 	{
+		Backend_setInSampling(THREADID, TRUE);
 		UINT64 temps = Clock_getCurrentTime_nstore();
 		SAMPLE_EVENT_HWC (temps, SAMPLING_EV, (unsigned long long) address);
 		Extrae_trace_callers (temps, 8, CALLER_SAMPLING);
+		Backend_setInSampling(THREADID, FALSE);
 	}
 }
 
