@@ -55,7 +55,7 @@ install-data-hook:
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_event pyextrae/common/extrae.py
 #endif
 	mkdir -p $(libexecdir)/pyextrae
-	cp -r pyextrae/* $(libexecdir)/pyextrae
+	cp -rL pyextrae/* $(libexecdir)/pyextrae
 	rm $(libexecdir)/pyextrae/common/extrae.py.in
 
 CLEANFILES = pyextrae/common/extrae.py

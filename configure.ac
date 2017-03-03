@@ -753,7 +753,12 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[doc/user-guide/labels.pl:doc/user-guide/labels.pl] \
 		[doc/user-guide/user-guide.css:doc/user-guide/user-guide.css] \
 		[doc/user-guide/user-guide.html:doc/user-guide/user-guide.html] \
-		[src/others/pyextrae/common/extrae.py.in:src/others/pyextrae/common/extrae.py.in]
+    [src/others/pyextrae/multiprocessing/__init__.py:src/others/pyextrae/multiprocessing/__init__.py:] \
+    [src/others/pyextrae/__init__.py:src/others/pyextrae/__init__.py] \
+    [src/others/pyextrae/sequential/__init__.py:src/others/pyextrae/sequential/__init__.py] \
+    [src/others/pyextrae/mpi/__init__.py:src/others/pyextrae/mpi/__init__.py] \
+    [src/others/pyextrae/common/extrae.py.in:src/others/pyextrae/common/extrae.py.in] \
+    [src/others/pyextrae/common/__init__.py:src/others/pyextrae/common/__init__.py]
 	)
 
 #########################################
