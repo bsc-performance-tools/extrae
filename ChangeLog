@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 22Mar2017 Fixed configure checks for Java instrumentation support
  * 15Mar2017 pyextrae no longer requires a list of functions to instrument to activate the tracing
  * 03Mar2017 Fixed missing python scripts after make install
  * 14Feb2017 Fixed conflict between sampling and I/O tracing where we would capture I/O calls inside the sampling handler

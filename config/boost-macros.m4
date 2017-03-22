@@ -11,13 +11,15 @@ AC_DEFUN([AX_PROG_BOOST],
 			[--with-boost@<:@=ARG@:>@],
 			[Specify where boost library was installed]
 		),
-		[BoostDir="$withval"],
-		[BoostDir="none"]
-	)
-
-	if test "${BoostDir}" != "none" ; then
-		dnl Boost directory was given. Give it a try.
-		if test ! -d ${BoostDir}/include/boost ; then
+    [BoostDir="$withval"],                                                                                                                                                                                       
+    [BoostDir="no"]                                                                                                                                                                                              
+  )                                                                                                                                                                                                              
+                                                                                                                                                                                                                 
+  if test "${BoostDir}" = "no"; then                                                                                                                                                                             
+    AC_MSG_WARN([Boost support has been disabled])                                                                                                                                                               
+  elif test ! -z "${BoostDir}" ; then                                                                                                                                                                            
+    dnl Boost directory was given. Give it a try.                                                                                                                                                                
+    if test ! -d ${BoostDir}/include/boost ; then
 			AC_MSG_ERROR([Could not find BOOST directory. Check for --with-boost option])
 		else
 			if test ! -r ${BoostDir}/include/boost/version.hpp ; then
