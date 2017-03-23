@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 23Mar2017 Added missing initialization of control variables to keep track when we're in instrumentation or sampling that prevented PEBS sampling to trigger
  * 22Mar2017 Fixed configure checks for Java instrumentation support
  * 15Mar2017 pyextrae no longer requires a list of functions to instrument to activate the tracing
  * 03Mar2017 Fixed missing python scripts after make install

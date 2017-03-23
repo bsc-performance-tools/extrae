@@ -1747,6 +1747,9 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	/* Remove the locals .sym file */
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 	{
+		Backend_setInInstrumentation (u, FALSE);
+		Backend_setInSampling (u, FALSE);
+		
 		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
 		  appl_name, hostname, getpid(), Extrae_get_initial_TASKID(), u,
 		  EXT_SYM);
@@ -1886,7 +1889,10 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 			Backend_ChangeNumberOfThreads_InInstrumentation (new_num_threads);
 			/* We leave... so, we're no longer in instrumentatin from this point */
 			for (u = get_maximum_NumOfThreads(); u < new_num_threads; u++)
+			{
 				Backend_setInInstrumentation (u, FALSE);
+				Backend_setInSampling (u, FALSE);
+			}
 	
 			/* Reallocate clock structures */
 			Clock_AllocateThreads (new_num_threads);
