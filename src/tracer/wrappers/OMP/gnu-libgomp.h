@@ -21,9 +21,9 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef GNU_LIBGOMP_4_9_WRAPPER_H_
-#define GNU_LIBGOMP_4_9_WRAPPER_H_
+#ifndef GNU_LIBGOMP_WRAPPER_H_
+#define GNU_LIBGOMP_WRAPPER_H_
 
-int gnu_libgomp_4_9_hook_points (int rank);
+int gnu_libgomp_hook_points (int rank);
 
 #endif

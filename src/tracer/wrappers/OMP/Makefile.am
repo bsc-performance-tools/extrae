@@ -34,14 +34,8 @@ WRAPPERS_INTEL_KMPC_11 = intel-kmpc-11-intermediate/libintel-kpmc-11-intermediat
 endif # WANT_OPENMP_INTEL
 
 if WANT_OPENMP_GNU
-if WANT_OPENMP_GNU_4_2
-WRAPPERS_OPENMP += gnu-libgomp-4.2.c gnu-libgomp-4.2.h
-EXTRA_OPENMP_CFLAGS += -DGNU_OPENMP -DGNU_OPENMP_4_2
-endif # WANT_OPENMP_GNU_4_2
-if WANT_OPENMP_GNU_4_9
-WRAPPERS_OPENMP += gnu-libgomp-4.9.c gnu-libgomp-4.9.h
-EXTRA_OPENMP_CFLAGS += -DGNU_OPENMP -DGNU_OPENMP_4_9
-endif # WANT_OPENMP_GNU_4_9
+WRAPPERS_OPENMP += gnu-libgomp.c gnu-libgomp.h
+EXTRA_OPENMP_CFLAGS += -DGNU_OPENMP
 endif # WANT_OPENMP_GNU
 
 if ARCH_POWERPC

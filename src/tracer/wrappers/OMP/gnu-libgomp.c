@@ -40,10 +40,17 @@
 # endif
 #endif
 
+#include <stdarg.h>
+
 #include "wrapper.h"
 #include "omp-common.h"
 
-// #define DEBUG
+//#define DEBUG
+#define GOMP_API_3_1 "3.1"
+#define GOMP_API_4_0 "4.0"
+#define GOMP_API_4_5 "4.5"
+
+char *gomp_version = NULL;
 
 #if defined(PIC)
 
@@ -158,84 +165,106 @@ static void callme_par (void *p1)
 	Extrae_OpenMP_UF_Exit ();
 }
 
-static void (*GOMP_parallel_real)(void*,void*,unsigned,unsigned) = NULL;
-static void (*GOMP_parallel_start_real)(void*,void*,unsigned) = NULL;
-static void (*GOMP_parallel_end_real)(void) = NULL;
+/**********************/
+/***** OpenMP 3.1 *****/
+/**********************/
 static void (*GOMP_barrier_real)(void) = NULL;
-static void (*GOMP_critical_name_start_real)(void**) = NULL;
-static void (*GOMP_critical_name_end_real)(void**) = NULL;
+
 static void (*GOMP_critical_start_real)(void) = NULL;
 static void (*GOMP_critical_end_real)(void) = NULL;
+static void (*GOMP_critical_name_start_real)(void**) = NULL;
+static void (*GOMP_critical_name_end_real)(void**) = NULL;
 static void (*GOMP_atomic_start_real)(void) = NULL;
 static void (*GOMP_atomic_end_real)(void) = NULL;
-static void (*GOMP_parallel_loop_static_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
-static void (*GOMP_parallel_loop_runtime_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
-static void (*GOMP_parallel_loop_dynamic_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
-static void (*GOMP_parallel_loop_guided_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
-static int (*GOMP_loop_static_next_real)(long*,long*) = NULL;
-static int (*GOMP_loop_runtime_next_real)(long*,long*) = NULL;
-static int (*GOMP_loop_dynamic_next_real)(long*,long*) = NULL;
-static int (*GOMP_loop_guided_next_real)(long*,long*) = NULL;
+
 static int (*GOMP_loop_static_start_real)(long,long,long,long,long*,long*) = NULL;
-static int (*GOMP_loop_runtime_start_real)(long,long,long,long,long*,long*) = NULL;
-static int (*GOMP_loop_guided_start_real)(long,long,long,long,long*,long*) = NULL;
 static int (*GOMP_loop_dynamic_start_real)(long,long,long,long,long*,long*) = NULL;
-static void (*GOMP_loop_end_real)(void) = NULL;
-static void (*GOMP_loop_end_nowait_real)(void) = NULL;
-static unsigned (*GOMP_sections_start_real)(unsigned) = NULL;
-static unsigned (*GOMP_sections_next_real)(void) = NULL;
-static void (*GOMP_sections_end_real)(void) = NULL;
-static void (*GOMP_sections_end_nowait_real)(void) = NULL;
-static void (*GOMP_parallel_sections_start_real)(void*,void*,unsigned,unsigned) = NULL;
-static void (*GOMP_task_real)(void*,void*,void*,long,long,int,unsigned) = NULL;
-static void (*GOMP_taskwait_real)(void) = NULL;
+static int (*GOMP_loop_guided_start_real)(long,long,long,long,long*,long*) = NULL;
+static int (*GOMP_loop_runtime_start_real)(long,long,long,long,long*,long*) = NULL;
+
 static int (*GOMP_loop_ordered_static_start_real)(long, long, long, long, long *, long *) = NULL;
-static int (*GOMP_loop_ordered_runtime_start_real)(long, long, long, long, long *, long *) = NULL;
 static int (*GOMP_loop_ordered_dynamic_start_real)(long, long, long, long, long *, long *) = NULL;
 static int (*GOMP_loop_ordered_guided_start_real)(long, long, long, long, long *, long *) = NULL;
+static int (*GOMP_loop_ordered_runtime_start_real)(long, long, long, long, long *, long *) = NULL;
+
+static int (*GOMP_loop_static_next_real)(long*,long*) = NULL;
+static int (*GOMP_loop_dynamic_next_real)(long*,long*) = NULL;
+static int (*GOMP_loop_guided_next_real)(long*,long*) = NULL;
+static int (*GOMP_loop_runtime_next_real)(long*,long*) = NULL;
+
+static void (*GOMP_parallel_loop_static_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
+static void (*GOMP_parallel_loop_dynamic_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
+static void (*GOMP_parallel_loop_guided_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
+static void (*GOMP_parallel_loop_runtime_start_real)(void*,void*,unsigned, long, long, long, long) = NULL;
+
+static void (*GOMP_loop_end_real)(void) = NULL;
+static void (*GOMP_loop_end_nowait_real)(void) = NULL;
 #if 0
 /* These seem unnecessary */
 static void (*GOMP_ordered_start_real)(void) = NULL;
 static void (*GOMP_ordered_end_real)(void) = NULL;
 #endif
+static void (*GOMP_parallel_start_real)(void*,void*,unsigned) = NULL;
+static void (*GOMP_parallel_end_real)(void) = NULL;
+
+static unsigned (*GOMP_sections_start_real)(unsigned) = NULL;
+static unsigned (*GOMP_sections_next_real)(void) = NULL;
+static void (*GOMP_parallel_sections_start_real)(void*,void*,unsigned,unsigned) = NULL;
+static void (*GOMP_sections_end_real)(void) = NULL;
+static void (*GOMP_sections_end_nowait_real)(void) = NULL;
+
+static void (*GOMP_taskwait_real)(void) = NULL;
+
+
+/**********************/
+/***** OpenMP 4.0 *****/
+/**********************/
+static void (*GOMP_parallel_real)(void*,void*,unsigned,unsigned) = NULL;
+
+static void (*GOMP_taskgroup_start_real)(void) = NULL;
+static void (*GOMP_taskgroup_end_real)(void) = NULL;
+
+
+/**********************/
+/***** OpenMP 4.5 *****/
+/**********************/
+// Appeared in OpenMP 3.1 but increased the #parameters in 4.0 and later in 4.5
+static void (*GOMP_task_real)(void*,void*,void*,long,long,int,unsigned,...) = NULL;
+
 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
 
-static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
+static int gnu_libgomp_GetOpenMPHookPoints (int rank)
 {
 	int count = 0;
 
 	UNREFERENCED_PARAMETER(rank);
 
-	/* Obtain @ for GOMP_parallel */
-	GOMP_parallel_real =
-		(void(*)(void*,void*,unsigned,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel");
-	INC_IF_NOT_NULL(GOMP_parallel_start_real,count);
+	// Detect the OpenMP version supported by the runtime
+	if ((gomp_version = getenv("EXTRAE_GOMP_VERSION")) != NULL) {
+		if ((strcmp(gomp_version, GOMP_API_4_5) != 0) &&
+		    (strcmp(gomp_version, GOMP_API_4_0) != 0) &&
+		    (strcmp(gomp_version, GOMP_API_3_1) != 0)) {
+			fprintf(stderr, PACKAGE_NAME": Unsupported GOMP version (%s). Valid versions are: 3.1, 4.0 and 4.5. Exiting ...\n", gomp_version);
+			exit (0);
+		}
+	} else if (dlsym(RTLD_NEXT, "GOMP_taskloop") != NULL) {
+		gomp_version = GOMP_API_4_5;
+	} else if (dlsym(RTLD_NEXT, "GOMP_taskgroup_start") != NULL) {
+		gomp_version = GOMP_API_4_0;
+	} else {
+		gomp_version = GOMP_API_3_1;
+	}
 
-	/* Obtain @ for GOMP_parallel_start */
-	GOMP_parallel_start_real =
-		(void(*)(void*,void*,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_start");
-	INC_IF_NOT_NULL(GOMP_parallel_start_real,count);
+	fprintf (stdout, PACKAGE_NAME": Detected GOMP version is %s\n", gomp_version);
 
-	/* Obtain @ for GOMP_parallel_end */
-	GOMP_parallel_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_parallel_end");
-	INC_IF_NOT_NULL(GOMP_parallel_end_real,count);
-
+	/**********************/
+	/***** OpenMP 3.1 *****/
+	/**********************/
 	/* Obtain @ for GOMP_barrier */
 	GOMP_barrier_real =
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_barrier");
 	INC_IF_NOT_NULL(GOMP_barrier_real,count);
-
-	/* Obtain @ for GOMP_atomic_start */
-	GOMP_atomic_start_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_start");
-	INC_IF_NOT_NULL(GOMP_atomic_start_real,count);
-
-	/* Obtain @ for GOMP_atomic_end */
-	GOMP_atomic_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_end");
-	INC_IF_NOT_NULL(GOMP_atomic_end_real,count);
 
 	/* Obtain @ for GOMP_critical_enter */
 	GOMP_critical_start_real =
@@ -257,65 +286,95 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 		(void(*)(void**)) dlsym (RTLD_NEXT, "GOMP_critical_name_end");
 	INC_IF_NOT_NULL(GOMP_critical_name_end_real,count);
 
-	/* Obtain @ for GOMP_parallel_loop_static_start */
-	GOMP_parallel_loop_static_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_static_start");
-	INC_IF_NOT_NULL(GOMP_parallel_loop_static_start_real,count);
+	/* Obtain @ for GOMP_atomic_start */
+	GOMP_atomic_start_real =
+		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_start");
+	INC_IF_NOT_NULL(GOMP_atomic_start_real,count);
 
-	/* Obtain @ for GOMP_parallel_loop_runtime_start */
-	GOMP_parallel_loop_runtime_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_runtime_start");
-	INC_IF_NOT_NULL(GOMP_parallel_loop_runtime_start_real,count);
-
-	/* Obtain @ for GOMP_parallel_loop_guided_start */
-	GOMP_parallel_loop_guided_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_guided_start");
-	INC_IF_NOT_NULL(GOMP_parallel_loop_guided_start_real,count);
-
-	/* Obtain @ for GOMP_parallel_loop_dynamic_start */
-	GOMP_parallel_loop_dynamic_start_real =
-		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_dynamic_start");
-	INC_IF_NOT_NULL(GOMP_parallel_loop_dynamic_start_real,count);
-
-	/* Obtain @ for GOMP_loop_static_next */
-	GOMP_loop_static_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_static_next");
-	INC_IF_NOT_NULL(GOMP_loop_static_next_real,count);
-
-	/* Obtain @ for GOMP_loop_runtime_next */
-	GOMP_loop_runtime_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_next");
-	INC_IF_NOT_NULL(GOMP_loop_runtime_next_real,count);
-
-	/* Obtain @ for GOMP_loop_guided_next */
-	GOMP_loop_guided_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_guided_next");
-	INC_IF_NOT_NULL(GOMP_loop_guided_next_real,count);
-
-	/* Obtain @ for GOMP_loop_dynamic_next */
-	GOMP_loop_dynamic_next_real =
-		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_next");
-	INC_IF_NOT_NULL(GOMP_loop_dynamic_next_real,count);
+	/* Obtain @ for GOMP_atomic_end */
+	GOMP_atomic_end_real =
+		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_atomic_end");
+	INC_IF_NOT_NULL(GOMP_atomic_end_real,count);
 
 	/* Obtain @ for GOMP_loop_static_start */
 	GOMP_loop_static_start_real =
 		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_static_start");
 	INC_IF_NOT_NULL(GOMP_loop_static_start_real,count);
 
-	/* Obtain @ for GOMP_loop_runtime_start */
-	GOMP_loop_runtime_start_real =
-		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_start");
-	INC_IF_NOT_NULL(GOMP_loop_runtime_start_real,count);
+	/* Obtain @ for GOMP_loop_dynamic_start */
+	GOMP_loop_dynamic_start_real =
+		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_start");
+	INC_IF_NOT_NULL(GOMP_loop_dynamic_start_real,count);
 
 	/* Obtain @ for GOMP_loop_guided_start */
 	GOMP_loop_guided_start_real =
 		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_guided_start");
 	INC_IF_NOT_NULL(GOMP_loop_guided_start_real,count);
 
-	/* Obtain @ for GOMP_loop_dynamic_start */
-	GOMP_loop_dynamic_start_real =
-		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_start");
-	INC_IF_NOT_NULL(GOMP_loop_dynamic_start_real,count);
+	/* Obtain @ for GOMP_loop_runtime_start */
+	GOMP_loop_runtime_start_real =
+		(int(*)(long,long,long,long,long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_start");
+	INC_IF_NOT_NULL(GOMP_loop_runtime_start_real,count);
+
+	/* Obtain @ for GOMP_loop_ordered_static_start */
+	GOMP_loop_ordered_static_start_real =
+		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_static_start");
+	INC_IF_NOT_NULL(GOMP_loop_ordered_static_start_real, count);
+
+	/* Obtain @ for GOMP_loop_ordered_dynamic_start */
+	GOMP_loop_ordered_dynamic_start_real =
+		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_dynamic_start");
+	INC_IF_NOT_NULL(GOMP_loop_ordered_dynamic_start_real, count);
+
+	/* Obtain @ for GOMP_loop_ordered_guided_start */
+	GOMP_loop_ordered_guided_start_real =
+		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_guided_start");
+	INC_IF_NOT_NULL(GOMP_loop_ordered_guided_start_real, count);
+
+	/* Obtain @ for GOMP_loop_ordered_runtime_start */
+	GOMP_loop_ordered_runtime_start_real =
+		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_runtime_start");
+	INC_IF_NOT_NULL(GOMP_loop_ordered_runtime_start_real, count);
+
+	/* Obtain @ for GOMP_loop_static_next */
+	GOMP_loop_static_next_real =
+		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_static_next");
+	INC_IF_NOT_NULL(GOMP_loop_static_next_real,count);
+
+	/* Obtain @ for GOMP_loop_dynamic_next */
+	GOMP_loop_dynamic_next_real =
+		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_dynamic_next");
+	INC_IF_NOT_NULL(GOMP_loop_dynamic_next_real,count);
+
+	/* Obtain @ for GOMP_loop_guided_next */
+	GOMP_loop_guided_next_real =
+		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_guided_next");
+	INC_IF_NOT_NULL(GOMP_loop_guided_next_real,count);
+
+	/* Obtain @ for GOMP_loop_runtime_next */
+	GOMP_loop_runtime_next_real =
+		(int(*)(long*,long*)) dlsym (RTLD_NEXT, "GOMP_loop_runtime_next");
+	INC_IF_NOT_NULL(GOMP_loop_runtime_next_real,count);
+
+	/* Obtain @ for GOMP_parallel_loop_static_start */
+	GOMP_parallel_loop_static_start_real =
+		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_static_start");
+	INC_IF_NOT_NULL(GOMP_parallel_loop_static_start_real,count);
+
+	/* Obtain @ for GOMP_parallel_loop_dynamic_start */
+	GOMP_parallel_loop_dynamic_start_real =
+		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_dynamic_start");
+	INC_IF_NOT_NULL(GOMP_parallel_loop_dynamic_start_real,count);
+
+	/* Obtain @ for GOMP_parallel_loop_guided_start */
+	GOMP_parallel_loop_guided_start_real =
+		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_guided_start");
+	INC_IF_NOT_NULL(GOMP_parallel_loop_guided_start_real,count);
+
+	/* Obtain @ for GOMP_parallel_loop_runtime_start */
+	GOMP_parallel_loop_runtime_start_real =
+		(void(*)(void*,void*,unsigned, long, long, long, long)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_runtime_start");
+	INC_IF_NOT_NULL(GOMP_parallel_loop_runtime_start_real,count);
 
 	/* Obtain @ for GOMP_loop_end */
 	GOMP_loop_end_real =
@@ -327,15 +386,25 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_loop_end_nowait");
 	INC_IF_NOT_NULL(GOMP_loop_end_nowait_real,count);
 
-	/* Obtain @ for GOMP_sections_end */
-	GOMP_sections_end_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end");
-	INC_IF_NOT_NULL(GOMP_sections_end_real,count);
+#if 0
+	/* Obtain @ for GOMP_ordered_start */
+	GOMP_ordered_start_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_ordered_start");
+	INC_IF_NOT_NULL(GOMP_ordered_start_real,count);
 
-	/* Obtain @ for GOMP_sections_end_nowait */
-	GOMP_sections_end_nowait_real =
-		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end_nowait");
-	INC_IF_NOT_NULL(GOMP_sections_end_nowait_real,count);
+	/* Obtain @ for GOMP_ordered_end */
+	GOMP_ordered_end_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_ordered_end");
+	INC_IF_NOT_NULL(GOMP_ordered_end_real,count);
+#endif
+
+	/* Obtain @ for GOMP_parallel_start */
+	GOMP_parallel_start_real =
+		(void(*)(void*,void*,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_start");
+	INC_IF_NOT_NULL(GOMP_parallel_start_real,count);
+
+	/* Obtain @ for GOMP_parallel_end */
+	GOMP_parallel_end_real =
+		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_parallel_end");
+	INC_IF_NOT_NULL(GOMP_parallel_end_real,count);
 
 	/* Obtain @ for GOMP_sections_start */
 	GOMP_sections_start_real =
@@ -352,45 +421,49 @@ static int gnu_libgomp_4_2_GetOpenMPHookPoints (int rank)
 		(void(*)(void*,void*,unsigned,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_sections_start");
 	INC_IF_NOT_NULL(GOMP_parallel_sections_start_real,count);
 
-	/* Obtain @ for GOMP_task */
-	GOMP_task_real =
-		(void(*)(void*,void*,void*,long,long,int,unsigned)) dlsym (RTLD_NEXT, "GOMP_task");
-	INC_IF_NOT_NULL(GOMP_task_real,count);
+	/* Obtain @ for GOMP_sections_end */
+	GOMP_sections_end_real =
+		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end");
+	INC_IF_NOT_NULL(GOMP_sections_end_real,count);
+
+	/* Obtain @ for GOMP_sections_end_nowait */
+	GOMP_sections_end_nowait_real =
+		(void(*)(void)) dlsym (RTLD_NEXT, "GOMP_sections_end_nowait");
+	INC_IF_NOT_NULL(GOMP_sections_end_nowait_real,count);
 
 	/* Obtain @ for GOMP_taskwait */
 	GOMP_taskwait_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskwait");
 	INC_IF_NOT_NULL(GOMP_taskwait_real,count);
 
-	/* Obtain @ for GOMP_loop_ordered_static_start */
-	GOMP_loop_ordered_static_start_real = 
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_static_start");
-	INC_IF_NOT_NULL(GOMP_loop_ordered_static_start_real, count);
 
-	/* Obtain @ for GOMP_loop_ordered_runtime_start */
-	GOMP_loop_ordered_runtime_start_real = 
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_runtime_start");
-	INC_IF_NOT_NULL(GOMP_loop_ordered_runtime_start_real, count);
+	/**********************/
+	/***** OpenMP 4.0 *****/
+	/**********************/
 
-	/* Obtain @ for GOMP_loop_ordered_dynamic_start */
-	GOMP_loop_ordered_dynamic_start_real = 
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_dynamic_start");
-	INC_IF_NOT_NULL(GOMP_loop_ordered_dynamic_start_real, count);
+	/* Obtain @ for GOMP_parallel */
+	GOMP_parallel_real =
+		(void(*)(void*,void*,unsigned,unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel");
+	INC_IF_NOT_NULL(GOMP_parallel_real,count);
 
-	/* Obtain @ for GOMP_loop_ordered_guided_start */
-	GOMP_loop_ordered_guided_start_real = 
-		(int(*)(long, long, long, long, long *, long *)) dlsym (RTLD_NEXT, "GOMP_loop_ordered_guided_start");
-	INC_IF_NOT_NULL(GOMP_loop_ordered_guided_start_real, count);
+	/* Obtain @ for GOMP_taskgroup_start */
+	GOMP_taskgroup_start_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskgroup_start");
+	INC_IF_NOT_NULL(GOMP_taskgroup_start_real,count);
 
-#if 0
-	/* Obtain @ for GOMP_ordered_start */
-	GOMP_ordered_start_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_ordered_start");
-	INC_IF_NOT_NULL(GOMP_ordered_start_real,count);
-	
-	/* Obtain @ for GOMP_ordered_end */
-	GOMP_ordered_end_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_ordered_end");
-	INC_IF_NOT_NULL(GOMP_ordered_end_real,count);
-#endif
-		
+	/* Obtain @ for GOMP_taskgroup_end */
+	GOMP_taskgroup_end_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskgroup_end");
+	INC_IF_NOT_NULL(GOMP_taskgroup_end_real,count);
+
+
+	/**********************/
+	/***** OpenMP 4.5 *****/
+	/**********************/
+
+	/* Obtain @ for GOMP_task */
+	GOMP_task_real =
+		(void(*)(void*,void*,void*,long,long,int,unsigned,...)) dlsym (RTLD_NEXT, "GOMP_task");
+	INC_IF_NOT_NULL(GOMP_task_real,count);
+
+
 	/* Any hook point? */
 	return count > 0;
 }
@@ -416,7 +489,7 @@ static void callme_task (void *helper_ptr)
 		free(helper);
 
 		Extrae_OpenMP_Notify_NewExecutedTask();
-		Extrae_OpenMP_TaskUF_Exit ();
+        Extrae_OpenMP_TaskUF_Exit ();
 	}
 }
 
@@ -424,13 +497,19 @@ static volatile long long __GOMP_task_ctr = 1;
 #if !defined(HAVE__SYNC_FETCH_AND_ADD)
 static pthread_mutex_t __GOMP_task_ctr_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
-void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned p7)
+void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned p7, ...)
 {
+	va_list ap;
+	void **p8 = NULL;
+	int p9 = 0;
+	va_start (ap, p7);
+
+
 	void (*task_cpy)(void*,void*) = (void(*)(void*,void*)) p3;
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task is at %p\n", THREADID, GOMP_task_real);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %ld %d %u\n", THREADID, p1, p2, p3, p4, p5, p6, p7);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_task params %p %p %p %ld %ld %d %u (GOMP version: %s)\n", THREADID, p1, p2, p3, p4, p5, p6, p7, gomp_version);
 #endif
 
 	if (GOMP_task_real != NULL && EXTRAE_INITIALIZED())
@@ -469,19 +548,42 @@ void GOMP_task (void *p1, void *p2, void *p3, long p4, long p5, int p6, unsigned
 		helper->task_ctr = __GOMP_task_ctr++;
 		pthread_mutex_unlock (&__GOMP_task_ctr_mtx);
 #endif
+
 		Extrae_OpenMP_TaskID (helper->task_ctr);
-		GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7);
+
+		if (strcmp(gomp_version, GOMP_API_3_1) == 0) {
+			GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7);
+		} else if (strcmp(gomp_version, GOMP_API_4_0) == 0) {
+			p8 = va_arg(ap, void **);
+			GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7, p8);
+		} else if (strcmp(gomp_version, GOMP_API_4_5) == 0) {
+			p8 = va_arg(ap, void **);
+			p9 = va_arg(ap, int);
+			GOMP_task_real (callme_task, &helper, NULL, sizeof(helper), p5, p6, p7, p8, p9);
+		}
+
 		Extrae_OpenMP_Task_Exit ();
 	}
 	else if (GOMP_task_real != NULL)
 	{
-		GOMP_task_real (p1, p2, p3, p4, p5, p6, p7);
+		if (strcmp(gomp_version, GOMP_API_3_1) == 0) {
+			GOMP_task_real (p1, p2, p3, p4, p5, p6, p7);
+		} else if (strcmp(gomp_version, GOMP_API_4_0) == 0) {
+			p8 = va_arg(ap, void **);
+			GOMP_task_real (p1, p2, p3, p4, p5, p6, p7, p8);
+		} else if (strcmp(gomp_version, GOMP_API_4_5) == 0) {
+			p8 = va_arg(ap, void **);
+			p9 = va_arg(ap, int);
+			GOMP_task_real (p1, p2, p3, p4, p5, p6, p7, p8, p9);
+		}
 	}
 	else
 	{
 		fprintf (stderr, PACKAGE_NAME": GOMP_task is not hooked! Exiting!!\n");
 		exit (0);
 	}
+
+	va_end(ap);
 }
 
 void GOMP_taskwait (void)
@@ -505,6 +607,54 @@ void GOMP_taskwait (void)
 	else
 	{
 		fprintf (stderr, PACKAGE_NAME": GOMP_taskwait is not hooked! Exiting!!\n");
+		exit (0);
+	}
+}
+
+void GOMP_taskgroup_start (void)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_taskgroup_start is at %p\n", THREADID, GOMP_taskgroup_start_real);
+#endif
+
+	if (GOMP_taskgroup_start_real != NULL && EXTRAE_INITIALIZED())
+	{
+		Extrae_OpenMP_Taskgroup_start_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
+		GOMP_taskgroup_start_real ();
+		Extrae_OpenMP_Taskgroup_start_Exit();
+	}
+	else if (GOMP_taskgroup_start_real != NULL)
+	{
+		GOMP_taskgroup_start_real ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": GOMP_taskgroup_start is not hooked! Exiting!!\n");
+		exit (0);
+	}
+}
+
+void GOMP_taskgroup_end (void)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d GOMP_taskgroup_end is at %p\n", THREADID, GOMP_taskgroup_end_real);
+#endif
+
+	if (GOMP_taskgroup_end_real != NULL && EXTRAE_INITIALIZED())
+	{
+		Extrae_OpenMP_Taskgroup_end_Entry();
+		GOMP_taskgroup_end_real ();
+		Extrae_OpenMP_Taskgroup_end_Exit();
+		Extrae_OpenMP_EmitTaskStatistics();
+	}
+	else if (GOMP_taskgroup_end_real != NULL)
+	{
+		GOMP_taskgroup_end_real ();
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": GOMP_taskgroup_end is not hooked! Exiting!!\n");
 		exit (0);
 	}
 }
@@ -1399,9 +1549,9 @@ void GOMP_ordered_end (void)
 
 extern int omp_get_max_threads();
 
-int gnu_libgomp_4_2_hook_points (int ntask)
+int gnu_libgomp_hook_points (int ntask)
 {
-	return gnu_libgomp_4_2_GetOpenMPHookPoints (ntask);
+	return gnu_libgomp_GetOpenMPHookPoints (ntask);
 }
 
 #endif /* PIC */

@@ -44,11 +44,7 @@
 #include "omp_wrapper.h"
 
 #include "ibm-xlsmp-1.6.h"
-#if defined(GNU_OPENMP_4_2)
-# include "gnu-libgomp-4.2.h"
-#elif defined(GNU_OPENMP_4_9)
-# include "gnu-libgomp-4.9.h"
-#endif
+#include "gnu-libgomp.h"
 #include "intel-kmpc-11.h"
 
 //#define DEBUG
@@ -240,6 +236,9 @@ void Extrae_OpenMP_init(int me)
 	UNREFERENCED_PARAMETER(me);
 
 #if defined(PIC)
+	int ibm_hooked = FALSE;
+	int intel_hooked = FALSE;
+	int gnu_hooked = FALSE;
 	int hooked = FALSE;
 
 # if defined(OS_LINUX) && defined(ARCH_PPC) && defined(IBM_OPENMP)
@@ -247,48 +246,38 @@ void Extrae_OpenMP_init(int me)
 	 * On PPC systems, check first for IBM XL runtime, if we don't find any
 	 * symbol, check for GNU then 
 	 */
-	hooked = ibm_xlsmp_1_6_hook_points(0);
-	if (!hooked)
-	{
-		fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with IBM XL OpenMP runtime!\n");
-	}
+	ibm_hooked = ibm_xlsmp_1_6_hook_points(0);
 # endif /* OS_LINUX && ARCH_PPC && IBM_OPENMP */
 
 # if defined(INTEL_OPENMP)
-	if (!hooked)
-	{
-		hooked = intel_kmpc_11_hook_points(0);
-		if (!hooked)
-		{
-			fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with Intel KAP OpenMP runtime!\n");
-		}
-	}
+	intel_hooked = intel_kmpc_11_hook_points(0);
 # endif /* INTEL_OPENMP */
 
 # if defined(GNU_OPENMP)
-	if (!hooked)
-	{
-# if defined(GNU_OPENMP_4_2)
-		hooked = gnu_libgomp_4_2_hook_points(0);
-# elif defined(GNU_OPENMP_4_9)
-		hooked = gnu_libgomp_4_9_hook_points(0);
-# else
-#  error "Unsupported version of libgomp!"
-# endif 
-		if (!hooked)
-		{
-			fprintf (stdout, PACKAGE_NAME": ATTENTION! Application seems not to be linked with GNU OpenMP runtime!\n");
-		}
-	}
+	gnu_hooked = gnu_libgomp_hook_points(0);
 # endif /* GNU_OPENMP */
 
-	/* 
-	 * If we hooked any compiler-specific routines, just hook for the 
-	 * common OpenMP routines 
-	 */
+	hooked = ibm_hooked + intel_hooked + gnu_hooked;
 
-	if (hooked)
+	if (hooked > 0) {
+			fprintf (stdout, PACKAGE_NAME": Detected and hooked OpenMP runtime:%s%s%s\n",
+			                 ibm_hooked?" [IBM XLSMP]":"",
+											 intel_hooked?" [Intel KMPC]":"",
+											 gnu_hooked?" [GNU GOMP]":"");
+		if (hooked > 1) {
+			fprintf (stderr, PACKAGE_NAME": ERROR! More than one (%d) OpenMP runtimes detected! This is not supported. Exiting ...\n", hooked);
+			exit (1);
+		}
+
+		/* 
+		 * If we hooked any compiler-specific routines, just hook for the 
+		 * common OpenMP routines 
+		 */
+
 		common_GetOpenMPHookPoints(0);
+	} else {
+		fprintf (stdout, PACKAGE_NAME": Warning! You have loaded an OpenMP tracing library but the application seems not to be linked with an OpenMP runtime. Did you compile with the proper flags? (-fopenmp, -openmp, ...).\n");
+	}
 
 #else  /* PIC */
 
