@@ -29,7 +29,7 @@
 #define EXTRAE_VERSION_MINOR(x)            (((x)>>8) & 0xff)
 #define EXTRAE_VERSION_REVISION(x)         ((x) & 0xff)
 
-#define EXTRAE_VERSION                     EXTRAE_VERSION_NUMBER(3,4,3)
+#define EXTRAE_VERSION                     EXTRAE_VERSION_NUMBER(3,5,0)
 
 /* These macros can be used as:
 

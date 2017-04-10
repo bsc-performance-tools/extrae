@@ -6,6 +6,14 @@ if HAVE_ONLINE
   SUBDIRS += online
 endif
 
+if WANT_CUDA
+WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@
+endif
+
+if WANT_CUPTI
+WRAPPERS_CUDA_CFLAGS = @CUDA_CFLAGS@ @CUPTI_CFLAGS@
+endif
+
 #
 # Libraries ending with c/f are for C/Fortran libraries. If not specified, 
 # they should contain symbols for both languages.
@@ -186,8 +194,8 @@ auto_init_instr_SRCS = auto_init.c
 auto_fini_instr_SRCS = auto_fini.c auto_fini.h
 
 # CUDA trace
-libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
-libcudampitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA) $(auto_fini_instr_SRCS)
+libcudatrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_SRCS)
+libcudampitrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 libcudampitracef_la_SOURCES = $(libcudampitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY
@@ -204,7 +212,7 @@ if SINGLE_MPI_LIBRARY
 endif
 
 # CUDA trace & MPItrace & OpenMP
-libcudaompitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
+libcudaompitrace_la_SOURCES = $(core_SRCS)
 libcudaompitracef_la_SOURCES = $(libcudaompitrace_la_SOURCES) extrae_mpif.h
 
 if SINGLE_MPI_LIBRARY

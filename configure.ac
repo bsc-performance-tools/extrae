@@ -6,8 +6,8 @@
 #########################
 
 m4_define([extrae_major_version], [3])
-m4_define([extrae_minor_version], [4])
-m4_define([extrae_micro_version], [3])
+m4_define([extrae_minor_version], [5])
+m4_define([extrae_micro_version], [0-rc1])
 
 m4_define([extrae_version],
 					      [extrae_major_version.extrae_minor_version.extrae_micro_version])
@@ -662,6 +662,9 @@ AC_CONFIG_FILES([src/tracer/online/Makefile src/tracer/online/extractors/Makefil
 AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_functions.bash] \
 		[tests/functional/launcher/extrae.xml:tests/functional/launcher/extrae.xml] \
 		[tests/functional/launcher/extrae-nothing-to-instrument.xml:tests/functional/launcher/extrae-nothing-to-instrument.xml] \
+		[tests/functional/tracer/CUDA/trace.sh:tests/functional/tracer/CUDA/trace.sh] \
+		[tests/functional/tracer/CUDA/extrae.xml:tests/functional/tracer/CUDA/extrae.xml] \
+		[tests/functional/tracer/CUDA/hello.cu:tests/functional/tracer/CUDA/hello.cu] \
 		[tests/functional/tracer/MPI/trace-static.sh:tests/functional/tracer/MPI/trace-static.sh] \
 		[tests/functional/tracer/MPI/trace-ldpreload.sh:tests/functional/tracer/MPI/trace-ldpreload.sh] \
 		[tests/functional/tracer/MPI/trace-ldpreloadf.sh:tests/functional/tracer/MPI/trace-ldpreloadf.sh] \
