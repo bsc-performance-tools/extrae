@@ -2091,10 +2091,6 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	/* Enable sampling capabilities */
 	Extrae_setSamplingEnabled (TRUE);
 
-#if defined(ENABLE_PEBS_SAMPLING)
-	Extrae_IntelPEBS_enable(TRUE);
-#endif
-
 	/* We leave... so, we're no longer in instrumentatin from this point */
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
 		Backend_setInInstrumentation (u, FALSE);

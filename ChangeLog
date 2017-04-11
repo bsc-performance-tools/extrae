@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 11Apr2017 Changed PEBS initialization to activate in all the threads
  * 04Apr2017 Unifies GNU OpenMP APIs in a single library
  * 23Mar2017 Added missing initialization of control variables to keep track when we're in instrumentation or sampling that prevented PEBS sampling to trigger
  * 22Mar2017 Fixed configure checks for Java instrumentation support

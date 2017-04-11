@@ -59,6 +59,10 @@
 #  include <bgl_perfctr_events.h>
 # endif
 #endif
+#if defined(ENABLE_PEBS_SAMPLING)                                               
+# include "sampling-intel-pebs.h"                                               
+#endif                                                                          
+
 
 /*------------------------------------------------ Static Variables ---------*/
 
@@ -652,6 +656,10 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 	} /* forked */ 
 
 	HWC_Thread_Initialized[threadid] = HWCBE_PAPI_Start_Set (0, time, HWC_current_set[threadid], threadid);
+
+#if defined(ENABLE_PEBS_SAMPLING)                                               
+	    Extrae_IntelPEBS_enable(TRUE);                                              
+#endif                                                                          
 
 	return HWC_Thread_Initialized[threadid];
 }

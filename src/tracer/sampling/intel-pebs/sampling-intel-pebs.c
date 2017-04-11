@@ -40,6 +40,7 @@
 #include <sys/ioctl.h>
 #include <asm/unistd.h>
 #include <sys/prctl.h>
+#include <sys/syscall.h>
 
 #include "sampling-common.h"
 #include "sampling-intel-pebs.h"
@@ -378,35 +379,33 @@ void Extrae_IntelPEBS_setStoreSampling (int enabled)
 
 #define MMAP_DATA_SIZE 8
 
-static char *extrae_intel_pebs_mmap;
+static char **extrae_intel_pebs_mmap = NULL;
 static long long prev_head;
 static long long global_sample_type;
 static int perf_pebs_fd;
 static int mmap_pages=1+MMAP_DATA_SIZE;
 
-#define MALLOC_ONCE
+#define MALLOC_ONCE /* Define this or there's a free that gets instrumented */
 
 #if defined(MALLOC_ONCE)
 #define ALLOCATED_SIZE MMAP_DATA_SIZE*4096
-static unsigned char *data = NULL;
+static unsigned char **data_thread_buffer = NULL;
 #endif
 
 /* This function extracts PEBS entries from the previously allocated buffer 
    in data ptr. At this moment, we only should have 1 event in the buffer */
-static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap,
+static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap_thread,
 	int mmap_size, long long prev_head, int sample_type, int *events_read,
 	long long *ip, long long *addr, long long *weight,
 	union perf_mem_data_src *data_src)
 {
 
-	struct perf_event_mmap_page *control_page = extrae_intel_pebs_mmap;
+	struct perf_event_mmap_page *control_page = extrae_intel_pebs_mmap_thread;
 	long long head,offset;
 	int size;
 	long long bytesize,prev_head_wrap;
-#if !defined(MALLOC_ONCE)
 	unsigned char *data;
-#endif
-	void *data_mmap=extrae_intel_pebs_mmap+sysconf(_SC_PAGESIZE);
+	void *data_mmap=extrae_intel_pebs_mmap_thread+sysconf(_SC_PAGESIZE);
 
 	if (mmap_size==0)
 		return 0;
@@ -432,6 +431,7 @@ static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap,
 	if (data == NULL)
 		return -1;
 #else
+	data = data_thread_buffer[THREADID];
 	if (bytesize > ALLOCATED_SIZE)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! overflow in the allocated size for PEBS buffer\n");
@@ -670,9 +670,11 @@ static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
 	UNREFERENCED_PARAMETER(signum);
 	UNREFERENCED_PARAMETER(uc);
 
+	if (extrae_intel_pebs_mmap[THREADID] == NULL) return;
+
 	ret = ioctl (fd, PERF_EVENT_IOC_DISABLE, 0);
 
-	prev_head = extrae_perf_mmap_read_pebs (extrae_intel_pebs_mmap,
+	prev_head = extrae_perf_mmap_read_pebs (extrae_intel_pebs_mmap[THREADID],
 	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
 	  &ip, &addr, &weight, &data_src);
 
@@ -774,9 +776,11 @@ static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 	UNREFERENCED_PARAMETER(signum);
 	UNREFERENCED_PARAMETER(uc);
 
+	if (extrae_intel_pebs_mmap[THREADID] == NULL) return;
+
 	ret = ioctl (fd, PERF_EVENT_IOC_DISABLE, 0);
 
-	prev_head = extrae_perf_mmap_read_pebs (extrae_intel_pebs_mmap,
+	prev_head = extrae_perf_mmap_read_pebs (extrae_intel_pebs_mmap[THREADID],
 	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
 	  &ip, &addr, NULL, NULL);
 
@@ -794,6 +798,9 @@ static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
 	(void) ret;
 }
 
+static unsigned int pebs_init_threads = 0;
+static pthread_mutex_t pebs_init_lock;
+
 /* Extrae_IntelPEBS_enable (int loads).
    initializes the sampling based on PEBS. If loads is TRUE, then the PEBS is
    setup to monitor LOAD instructions, otherwise it monitors STORE instructions.
@@ -809,11 +816,32 @@ int Extrae_IntelPEBS_enable (int loads)
 	if (!PEBS_load_enabled && !PEBS_store_enabled)
 		return 0;
 
+	/* Need a lock as different threads may be initializing, thus, allocating structures simultaneously */
+	pthread_mutex_lock(&pebs_init_lock);
+	if (THREADID >= pebs_init_threads)
+	{
+		unsigned int i = 0;
+
+		/* Extend the data structures to the maximum number of threads seen so far */
+		extrae_intel_pebs_mmap = (char **)realloc(extrae_intel_pebs_mmap, (THREADID+1) * sizeof(char *));
+		for (i=pebs_init_threads; i<(THREADID+1); i++)
+		{
+			extrae_intel_pebs_mmap[i] = NULL;
+		}
+
 #if defined(MALLOC_ONCE)
-	data = malloc (ALLOCATED_SIZE);
-	if (data == NULL)
-		fprintf (stderr, PACKAGE_NAME": Error! overflow in the allocated size for PEBS buffer\n");
+		data_thread_buffer = (unsigned char **)realloc(data_thread_buffer, (THREADID+1) * sizeof(unsigned char *));
+		for (i=pebs_init_threads; i<(THREADID+1); i++)
+		{
+			data_thread_buffer[i] = malloc (ALLOCATED_SIZE);
+			if (data_thread_buffer[i] == NULL)
+				fprintf (stderr, PACKAGE_NAME": Error! overflow in the allocated size for PEBS buffer\n");
+		}
 #endif
+
+		pebs_init_threads = THREADID+1;
+	}
+	pthread_mutex_unlock(&pebs_init_lock);
 
 	memset(&sa, 0, sizeof(struct sigaction));
 	sa.sa_sigaction = loads?
@@ -873,18 +901,23 @@ int Extrae_IntelPEBS_enable (int loads)
 		return -1;
 	}
 
-	extrae_intel_pebs_mmap = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
+	extrae_intel_pebs_mmap[THREADID] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
 	  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd, 0);
-	if (extrae_intel_pebs_mmap == MAP_FAILED)
+	if (extrae_intel_pebs_mmap[THREADID] == MAP_FAILED)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot mmap to the perf_event\n");
 		close (perf_pebs_fd);
 		return -1;
 	}
 
+	struct f_owner_ex owner;
+	owner.type = F_OWNER_TID;
+	owner.pid = syscall(SYS_gettid);
+
 	ret = fcntl(perf_pebs_fd, F_SETFL, O_RDWR|O_NONBLOCK|O_ASYNC);
 	ret = fcntl(perf_pebs_fd, F_SETSIG, SIGIO);
-	ret = fcntl(perf_pebs_fd, F_SETOWN,getpid());
+	ret = fcntl(perf_pebs_fd, F_SETOWN, getpid());
+	ret = fcntl(perf_pebs_fd, F_SETOWN_EX, &owner);
 	ret = ioctl(perf_pebs_fd, PERF_EVENT_IOC_RESET, 0);
 
 	ret = ioctl(perf_pebs_fd, PERF_EVENT_IOC_ENABLE,0);
@@ -902,7 +935,8 @@ int Extrae_IntelPEBS_enable (int loads)
 void Extrae_IntelPEBS_disable (void)
 {
 	ioctl(perf_pebs_fd, PERF_EVENT_IOC_REFRESH, 0);
-	munmap (extrae_intel_pebs_mmap, mmap_pages*sysconf(_SC_PAGESIZE));
+	munmap (extrae_intel_pebs_mmap[THREADID], mmap_pages*sysconf(_SC_PAGESIZE));
+	extrae_intel_pebs_mmap[THREADID] = NULL;
 	close (perf_pebs_fd);
 }
 
