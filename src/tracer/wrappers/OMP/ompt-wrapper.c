@@ -52,8 +52,8 @@
 #include "wrapper.h"
 #include "threadid.h"
 
-#include "omp_probe.h"
-#include "omp-common.h"
+#include "omp-probe.h"
+#include "omp-events.h"
 #include "ompt-helper.h"
 #include "ompt-target.h"
 
@@ -65,6 +65,8 @@
 //*****************************************************************************
 // interface operations
 //*****************************************************************************
+
+int ompt_enabled = FALSE;
 
 int (*ompt_set_callback_fn)(ompt_event_t, ompt_callback_t) = NULL;
 ompt_thread_id_t (*ompt_get_thread_id_fn)(void) = NULL;
@@ -1069,98 +1071,101 @@ void ompt_initialize(
 
 	UNREFERENCED_PARAMETER(ompt_version);
 
-	Extrae_init();
+  if (ompt_enabled) 
+	{
+		Extrae_init();
 
 #if defined(DEBUG) 
-	printf("OMPT IS INITIALIZING: lookup functions with runtime version %s and ompt version %d\n",
-	  runtime_version_string, ompt_version);
+		printf("OMPT IS INITIALIZING: lookup functions with runtime version %s and ompt version %d\n",
+		 runtime_version_string, ompt_version);
 #endif
 
-	if (strstr (runtime_version_string, "Intel") != NULL)
-		ompt_rte = OMPT_RTE_INTEL;
-	else if (strstr (runtime_version_string, "ibm") != NULL)
-		ompt_rte = OMPT_RTE_IBM;
-	else if (strstr (runtime_version_string, "nanos") != NULL)
-		ompt_rte = OMPT_RTE_OMPSS;
+		if (strstr (runtime_version_string, "Intel") != NULL)
+			ompt_rte = OMPT_RTE_INTEL;
+		else if (strstr (runtime_version_string, "ibm") != NULL)
+			ompt_rte = OMPT_RTE_IBM;
+		else if (strstr (runtime_version_string, "nanos") != NULL)
+			ompt_rte = OMPT_RTE_OMPSS;
 
 #if defined(DEBUG)
-	printf ("OMPTOOL: ompt_rte = %d\n", ompt_rte);
+		printf ("OMPTOOL: ompt_rte = %d\n", ompt_rte);
 #endif 
 
-	/* Ask OMPT for the routine ompt_set_callback */
-	ompt_set_callback_fn = (int(*)(ompt_event_t, ompt_callback_t)) lookup("ompt_set_callback");
-	assert (ompt_set_callback_fn != NULL);
+		/* Ask OMPT for the routine ompt_set_callback */
+		ompt_set_callback_fn = (int(*)(ompt_event_t, ompt_callback_t)) lookup("ompt_set_callback");
+		assert (ompt_set_callback_fn != NULL);
 
-	/* Ask OMPT for the routine ompt_get_thread_id */
-	ompt_get_thread_id_fn = (ompt_thread_id_t(*)(void)) lookup("ompt_get_thread_id");
-	assert (ompt_get_thread_id_fn != NULL);
+		/* Ask OMPT for the routine ompt_get_thread_id */
+		ompt_get_thread_id_fn = (ompt_thread_id_t(*)(void)) lookup("ompt_get_thread_id");
+		assert (ompt_get_thread_id_fn != NULL);
 
 #if defined(DEBUG)
-	printf ("OMPTOOL: Recovered addresses for:\n");
-	printf ("OMPTOOL: ompt_set_callback  = %p\n", ompt_set_callback_fn);
-	printf ("OMPTOOL: ompt_get_thread_id = %p\n", ompt_get_thread_id_fn);
+		printf ("OMPTOOL: Recovered addresses for:\n");
+		printf ("OMPTOOL: ompt_set_callback  = %p\n", ompt_set_callback_fn);
+		printf ("OMPTOOL: ompt_get_thread_id = %p\n", ompt_get_thread_id_fn);
 #endif
 
-	i = 0;
-	while (ompt_callbacks[i].evt != (ompt_event_t) 0)
-	{
-		/* What happens to IBM runtime? */
-		if (ompt_rte == OMPT_RTE_IBM)
+		i = 0;
+		while (ompt_callbacks[i].evt != (ompt_event_t) 0)
 		{
-			if (ompt_callbacks[i].evt != ompt_event_master_begin
-			    && ompt_callbacks[i].evt != ompt_event_master_end)
+			/* What happens to IBM runtime? */
+			if (ompt_rte == OMPT_RTE_IBM)
+			{
+				if (ompt_callbacks[i].evt != ompt_event_master_begin
+				 && ompt_callbacks[i].evt != ompt_event_master_end)
+				{
+					r = ompt_set_callback_fn (ompt_callbacks[i].evt, ompt_callbacks[i].cbk);
+#if defined(DEBUG)
+					printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks[i].evt_name, r);
+#endif
+				}
+#if defined(DEBUG)
+				else
+				{
+					printf ("OMPTOOL: Ignoring ompt_event_master_begin/end in IBM rte.\n");
+				}
+#endif
+			}
+			else
 			{
 				r = ompt_set_callback_fn (ompt_callbacks[i].evt, ompt_callbacks[i].cbk);
-#if defined(DEBUG)
+#if defined(DEBUG) 
 				printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks[i].evt_name, r);
 #endif
 			}
+			i++;
+		}
+
+		if (getTrace_OMPLocks())
+		{
 #if defined(DEBUG)
-			else
+			printf ("OMPTOOL: processing callbacks for locks\n");
+#endif	
+			i = 0;
+			while (ompt_callbacks_locks[i].evt != (ompt_event_t) 0)
 			{
-				printf ("OMPTOOL: Ignoring ompt_event_master_begin/end in IBM rte.\n");
-			}
+				r = ompt_set_callback_fn (ompt_callbacks_locks[i].evt, ompt_callbacks_locks[i].cbk);
+#if defined(DEBUG)
+				printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks_locks[i].evt_name, r);
 #endif
+				i++;
+			}
 		}
 		else
 		{
-			r = ompt_set_callback_fn (ompt_callbacks[i].evt, ompt_callbacks[i].cbk);
-#if defined(DEBUG) 
-			printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks[i].evt_name, r);
+#if defined(DEBUG)
+			printf ("OMPTOOL: NOT processing callbacks for locks\n");
 #endif
 		}
-		i++;
+
+		Extrae_set_threadid_function (Extrae_OMPT_threadid);
+
+
+		/* This point starts support for OMPT accelerators. */
+		ompt_targets_initialized = ompt_target_initialize(lookup);
+
+		UNREFERENCED_PARAMETER(r);
 	}
-
-	if (getTrace_OMPLocks())
-	{
-#if defined(DEBUG)
-		printf ("OMPTOOL: processing callbacks for locks\n");
-#endif	
-		i = 0;
-		while (ompt_callbacks_locks[i].evt != (ompt_event_t) 0)
-		{
-			r = ompt_set_callback_fn (ompt_callbacks_locks[i].evt, ompt_callbacks_locks[i].cbk);
-#if defined(DEBUG)
-			printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks_locks[i].evt_name, r);
-#endif
-			i++;
-		}
-	}
-	else
-	{
-#if defined(DEBUG)
-		printf ("OMPTOOL: NOT processing callbacks for locks\n");
-#endif
-	}
-
-	Extrae_set_threadid_function (Extrae_OMPT_threadid);
-
-
-	/* This point starts support for OMPT accelerators. */
-	ompt_targets_initialized = ompt_target_initialize(lookup);
-		
-	UNREFERENCED_PARAMETER(r);
 }
 
 /**

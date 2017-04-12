@@ -6,8 +6,53 @@ INTERMEDIATE_PATH="intel-kmpc-11-intermediate"
 INTERMEDIATE_WRAPPERS_BASENAME="intel-kmpc-11-intermediate-part"
 INTERMEDIATE_WRAPPERS_SUFFIX=".c"
 INTERMEDIATE_HEADER="${INTERMEDIATE_PATH}/intel-kmpc-11-intermediate.h"
+MAX_TASKLOOP_HELPERS=1024
+TASKLOOP_HELPERS_BASENAME="intel-kmpc-11-taskloop-helpers"
+TASKLOOP_HELPERS_C="${INTERMEDIATE_PATH}/${TASKLOOP_HELPERS_BASENAME}.c"
+TASKLOOP_HELPERS_H="${INTERMEDIATE_PATH}/${TASKLOOP_HELPERS_BASENAME}.h"
 
-rm -f ${INTERMEDIATE_PATH}/${INTERMEDIATE_WRAPPERS_BASENAME}* ${INTERMEDIATE_HEADER}
+rm -f ${INTERMEDIATE_PATH}/${INTERMEDIATE_WRAPPERS_BASENAME}* ${INTERMEDIATE_HEADER} ${TASKLOOP_HELPERS_C} ${TASKLOOP_HELPERS_H}
+
+echo "/* Automagically generated file by $0 at `date` */" > ${TASKLOOP_HELPERS_H}
+echo "#ifndef __TASKLOOP_HELPERS_H__" >> ${TASKLOOP_HELPERS_H}
+echo "#define __TASKLOOP_HELPERS_H__" >> ${TASKLOOP_HELPERS_H}
+echo "" >> ${TASKLOOP_HELPERS_H}
+echo "#include \"omp-common.h\"" >> ${TASKLOOP_HELPERS_H}
+echo "" >> ${TASKLOOP_HELPERS_H}
+echo "#define MAX_TASKLOOP_HELPERS ${MAX_TASKLOOP_HELPERS}" >> ${TASKLOOP_HELPERS_H}
+echo "void *get_taskloop_helper_fn_ptr(int taskloop_helper_id);" >> ${TASKLOOP_HELPERS_H}
+echo "" >> ${TASKLOOP_HELPERS_H}
+
+echo "/* Automagically generated file by $0 at `date` */" > ${TASKLOOP_HELPERS_C}
+echo "#include \"`basename ${TASKLOOP_HELPERS_H}`\"" >> ${TASKLOOP_HELPERS_C}
+echo "#include \"intel-kmpc-11.h\"" >> ${TASKLOOP_HELPERS_C}
+echo "" >> ${TASKLOOP_HELPERS_C}
+echo "void *taskloop_helper_fn[${MAX_TASKLOOP_HELPERS}] = {" >> ${TASKLOOP_HELPERS_C}
+for id in `seq 1 ${MAX_TASKLOOP_HELPERS}`
+do
+	let id=id-1
+	echo -e "\ttaskloop_helper_fn_${id}," >> ${TASKLOOP_HELPERS_C}
+done
+echo "};" >> ${TASKLOOP_HELPERS_C}
+echo "" >> ${TASKLOOP_HELPERS_C}
+echo "void *get_taskloop_helper_fn_ptr(int taskloop_helper_id)" >> ${TASKLOOP_HELPERS_C}
+echo "{" >> ${TASKLOOP_HELPERS_C}
+echo -e "\treturn taskloop_helper_fn[taskloop_helper_id];" >> ${TASKLOOP_HELPERS_C}
+echo "}" >> ${TASKLOOP_HELPERS_C}
+echo "" >> ${TASKLOOP_HELPERS_C}
+
+for id in `seq 1 ${MAX_TASKLOOP_HELPERS}`
+do
+	let id=id-1
+	echo "void taskloop_helper_fn_${id}(int arg, void *wrap_task);" >> ${TASKLOOP_HELPERS_H}
+	echo "void taskloop_helper_fn_${id}(int arg, void *wrap_task)" >> ${TASKLOOP_HELPERS_C}
+	echo -e "{" >> ${TASKLOOP_HELPERS_C}
+	echo -e "\thelper__kmpc_taskloop_substitute(arg, wrap_task, ${id});" >> ${TASKLOOP_HELPERS_C}
+	echo -e "}" >> ${TASKLOOP_HELPERS_C}
+	echo "" >> ${TASKLOOP_HELPERS_C}
+done
+echo "" >> ${TASKLOOP_HELPERS_H}
+echo "#endif /* __TASKLOOP_HELPERS_H__ */" >> ${TASKLOOP_HELPERS_H}
 
 echo "/* Automagically generated file by $0 at `date` */" > ${INTERMEDIATE_HEADER}
 echo "#ifndef INTEL_OMP_FUNC_ENTRIES" >> ${INTERMEDIATE_HEADER}
@@ -22,9 +67,10 @@ do
 	INTERMEDIATE_WRAPPERS="${INTERMEDIATE_PATH}/${INTERMEDIATE_WRAPPERS_BASENAME}${PART}${INTERMEDIATE_WRAPPERS_SUFFIX}"
 
 	if [ ! -f ${INTERMEDIATE_WRAPPERS} ]; then
+		echo "/* Automagically generated file by $0 at `date` */" > ${INTERMEDIATE_WRAPPERS}
 		echo "#include <stdarg.h>" >> ${INTERMEDIATE_WRAPPERS}
 		echo "#include <wrapper.h>" >> ${INTERMEDIATE_WRAPPERS}
-		echo "#include <omp-common.h>" >> ${INTERMEDIATE_WRAPPERS}
+		echo "#include <omp-events.h>" >> ${INTERMEDIATE_WRAPPERS}
 		echo "#include \"intel-kmpc-11.h\"" >> ${INTERMEDIATE_WRAPPERS}
 		echo "" >> ${INTERMEDIATE_WRAPPERS}
 	fi

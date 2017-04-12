@@ -52,10 +52,10 @@ void InstrumentOMPruntime_Intel (BPatch_image *appImage, BPatch_process *appProc
 {
 	/* Gather information for all the instrumented calls */
 	BPatch_function *function = getRoutine (
-		"Extrae_intel_kmpc_runtime_init_dyninst", appImage, false);
+		"_extrae_intel_kmpc_init_dyninst", appImage, false);
 	if (function == NULL)
 	{
-		cerr << PACKAGE_NAME << ": Fatal error! Cannot find Extrae_intel_kmpc_runtime_init_dyninst! Dying..." << endl;
+		cerr << PACKAGE_NAME << ": Fatal error! Cannot find _extrae_intel_kmpc_init_dyninst! Dying..." << endl;
 		exit (-1);
 	}
 

@@ -24,6 +24,34 @@
 #ifndef GNU_LIBGOMP_WRAPPER_H_
 #define GNU_LIBGOMP_WRAPPER_H_
 
-int gnu_libgomp_hook_points (int rank);
+/*
+ * Several data helpers to temporarily store the pointers to the real 
+ * outlined functions or tasks, and the real data arguments, while we inject 
+ * a fake task that will replace the original one to emit instrumentation 
+ * events, and then retrieve the original pointers through the helpers to 
+ * end up calling the real functions.
+ */
+struct parallel_helper_t                                                        
+{                                                                               
+  void (*fn)(void *);                                                           
+  void *data;                                                                   
+};                                                                              
+                                                                                
+struct task_helper_t                                                            
+{                                                                               
+  void (*fn)(void *);                                                           
+  void *data;                                                                   
+  void *buf;                                                                    
+  long long counter;                                                            
+};                                                                              
+                                                                                
+struct helpers_queue_t                                                          
+{                                                                               
+  struct parallel_helper_t *queue;                                              
+  int current_helper;                                                             
+  int max_helpers;                                                                
+};                                                                              
 
-#endif
+int _extrae_gnu_libgomp_init (int rank);
+
+#endif /* GNU_LIBGOMP_WRAPPER_H_ */

@@ -26,7 +26,7 @@
 #include "threadid.h"
 #include "wrapper.h"
 #include "trace_macros.h"
-#include "omp_probe.h"
+#include "omp-probe.h"
 
 #if 0
 # define DEBUG fprintf (stdout, "THREAD %d: %s\n", THREADID, __FUNCTION__);
@@ -35,6 +35,7 @@
 #endif
 
 static int TraceOMPLocks = FALSE;
+static int TraceOMPTaskloop = FALSE;
 
 void setTrace_OMPLocks (int value)
 {
@@ -44,6 +45,16 @@ void setTrace_OMPLocks (int value)
 int getTrace_OMPLocks (void)
 {
 	return TraceOMPLocks;
+}
+
+void setTrace_OMPTaskloop (int value)
+{
+	TraceOMPTaskloop = value;
+}
+
+int getTrace_OMPTaskloop (void)
+{
+	return TraceOMPTaskloop;
 }
 
 void Probe_OpenMP_Join_NoWait_Entry (void)
@@ -345,6 +356,15 @@ void Probe_OpenMP_TaskID (long long id)
 	}
 }
 
+void Probe_OpenMP_TaskLoopID (long long id)
+{
+	DEBUG
+	if (mpitrace_on)
+	{
+		TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKLOOPID_EV, EVT_BEGIN, (UINT64) id);
+	}
+}
+
 void Probe_OpenMP_Task_Entry (UINT64 uf)
 {
 	DEBUG
@@ -425,6 +445,54 @@ void Probe_OpenMP_Taskgroup_end_Exit (void)
 	DEBUG
 	if (mpitrace_on)
 		TRACE_OMPEVENTANDCOUNTERS(TIME, TASKGROUP_END_EV, EVT_END, EMPTY);
+}
+
+void Probe_OpenMP_TaskLoop_Entry (void)
+{
+		DEBUG
+		if (mpitrace_on)
+		{
+					TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, TASKLOOP_EV, EVT_BEGIN, EMPTY);
+					/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		}
+}
+
+void Probe_OpenMP_TaskLoop_Exit (void)
+{
+		DEBUG
+		if (mpitrace_on)
+		{
+					TRACE_OMPEVENTANDCOUNTERS(TIME, TASKLOOP_EV, EVT_END, EMPTY);
+					/*Extrae_AnnotateCPU (LAST_READ_TIME);*/
+		}
+}
+
+void Probe_OpenMP_Ordered_Wait_Entry (void)
+{
+		DEBUG
+		if (TraceOMPLocks && mpitrace_on)
+					TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, ORDERED_EV, WAITORDERED_VAL, EMPTY);
+}
+
+void Probe_OpenMP_Ordered_Wait_Exit (void)
+{
+		DEBUG
+		if (TraceOMPLocks && mpitrace_on)
+					TRACE_OMPEVENTANDCOUNTERS(TIME, ORDERED_EV, INORDERED_VAL, EMPTY);
+}
+
+void Probe_OpenMP_Ordered_Post_Entry (void)
+{
+		DEBUG
+		if (TraceOMPLocks && mpitrace_on)
+					TRACE_OMPEVENTANDCOUNTERS(LAST_READ_TIME, ORDERED_EV, POSTORDERED_VAL, EMPTY);
+}
+
+void Probe_OpenMP_Ordered_Post_Exit (void)
+{
+		DEBUG
+		if (TraceOMPLocks && mpitrace_on)
+					TRACE_OMPEVENTANDCOUNTERS(TIME, ORDERED_EV, OUTORDERED_VAL, EMPTY);
 }
 
 /*

@@ -65,17 +65,16 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(MPI_SUPPORT)
 # include "mpi_wrapper.h"
 #endif
-#if defined(OMP_SUPPORT)
-# include "omp_wrapper.h"
+#if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
+# include "omp-common.h"
+# include "omp-probe.h"
+# include "ompt-wrapper.h"
 #endif
 #include "UF_gcc_instrument.h"
 #include "UF_xl_instrument.h"
 #if defined(HAVE_ONLINE)
 # include "OnlineConfig.h"
 # include "xml-parse-online.h"
-#endif
-#if defined(OMP_SUPPORT)
-# include "omp_probe.h"
 #endif
 #if defined(OPENCL_SUPPORT)
 # include "opencl_probe.h"
@@ -668,6 +667,15 @@ static void Parse_XML_OMP (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #if defined(OMP_SUPPORT)
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			setTrace_OMPLocks ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
+			XML_FREE(enabled);
+#endif
+		}
+		/* Shall we instrument openmp taskloop? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_OMP_TASKLOOP))
+		{
+#if defined(OMP_SUPPORT)
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			setTrace_OMPTaskloop ((enabled != NULL && !xmlStrcasecmp (enabled, xmlYES)));
 			XML_FREE(enabled);
 #endif
 		}
@@ -1738,13 +1746,25 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 							tracejant_omp = TRUE;
 							Parse_XML_OMP (rank, xmldoc, current_tag);
+
+							xmlChar *ompt = xmlGetProp_env (rank, current_tag, TRACE_OMP_OMPT);
+							if (ompt != NULL && !xmlStrcasecmp (ompt, xmlYES))
+							{
+								ompt_enabled = TRUE;
+
+								mfprintf (stdout, PACKAGE_NAME": OMPT activated for OpenMP instrumentation.");
+							}
+							XML_FREE (ompt);
 #else
 							mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OpenMP.\n", TRACE_OMP);
 							tracejant_omp = FALSE;
 #endif
 						}
 						else
+						{
 							tracejant_omp = FALSE;
+						}
+
 						XML_FREE(enabled);
 					}
 					/* pthread related configuration */

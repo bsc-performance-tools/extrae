@@ -407,6 +407,20 @@ static int TaskID_Event (event_t * event,
 	return 0;
 }
 
+static int TaskLoopID_Event (event_t * event,
+	unsigned long long current_time,
+	unsigned cpu,
+	unsigned ptask,
+	unsigned task,
+	unsigned thread,
+	FileSet_t *fset)
+{
+	UNREFERENCED_PARAMETER(fset);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, TASKLOOPID_EV,
+	  Get_EvParam(event));
+	return 0;
+}
+
 static int OMPT_TaskGroup_Event (event_t *event,
 	unsigned long long time,
 	unsigned cpu,
@@ -594,6 +608,46 @@ static int OMP_Stats_Event (
 	return 0;
 }
 
+static int TaskLoop_Event (
+   event_t * event,
+   unsigned long long time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+        UNREFERENCED_PARAMETER(fset);
+
+        trace_paraver_event (cpu, ptask, task, thread, time,
+          TASKLOOP_EV, Get_EvValue (event));
+
+        return 0;
+}
+
+static int Ordered_Event (
+   event_t * current_event,
+   unsigned long long current_time,
+   unsigned int cpu,
+   unsigned int ptask,
+   unsigned int task,
+   unsigned int thread,
+   FileSet_t *fset )
+{
+        unsigned int EvType, EvValue;
+        UNREFERENCED_PARAMETER(fset);
+
+        EvType  = Get_EvEvent (current_event);
+        EvValue = Get_EvValue (current_event);
+
+        Switch_State (STATE_SYNC, ((EvValue == WAITORDERED_VAL) || (EvValue == POSTORDERED_VAL)), ptask, task, thread);
+
+        trace_paraver_state (cpu, ptask, task, thread, current_time);
+        trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+        return 0;
+}
+
 SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ WSH_EV, WorkSharing_Event },
 	{ PAR_EV, Parallel_Event },
@@ -618,10 +672,13 @@ SingleEv_Handler_t PRV_OMP_Event_Handlers[] = {
 	{ TASKGROUP_START_EV, TaskGroup_Event },
 	{ TASKGROUP_END_EV, TaskGroup_Event },
 	{ TASKID_EV, TaskID_Event },
+	{ TASKLOOPID_EV, TaskLoopID_Event },
 	{ OMPT_TASKGROUP_IN_EV, OMPT_TaskGroup_Event },
 	{ OMPT_DEPENDENCE_EV, OMPT_dependence_Event },
 	{ OMPT_TASKFUNC_EV, OMPT_TaskFunction_Event },
 	{ OMP_STATS_EV, OMP_Stats_Event },
+	{ TASKLOOP_EV, TaskLoop_Event },
+	{ ORDERED_EV, Ordered_Event },
 	{ NULL_EV, NULL }
 };
 

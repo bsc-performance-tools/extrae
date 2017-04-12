@@ -24,8 +24,26 @@
 #ifndef INTEL_KMPC_11_WRAPPER_H_
 #define INTEL_KMPC_11_WRAPPER_H_
 
+struct __kmpv_location_t                                                        
+{                                                                               
+  int reserved_1;                                                               
+  int flags;                                                                    
+  int reserved_2;                                                               
+  int reserved_3;                                                               
+  char *location;                                                               
+};                                                                              
+                                                                                
+struct __kmp_task_t                                                             
+{                                                                               
+  void *shareds;                                                                
+  void *routine;                                                                
+  int part_id;                                                                  
+};                                                                              
+
+void helper__kmpc_taskloop_substitute(int arg, void *wrap_task, int helper_id);
+
 extern void (*__kmpc_fork_call_real)(void*,int,void*,...);
 
-int intel_kmpc_11_hook_points (int rank);
+int _extrae_intel_kmpc_init (int rank);
 
 #endif

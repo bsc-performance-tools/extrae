@@ -99,22 +99,26 @@ unsigned IsMISC (unsigned EvType)
     if (EvType>=SAMPLING_EV && EvType<=SAMPLING_EV+MAX_CALLERS)
         return TRUE;
     for (evt = 0; evt < MISC_EVENTS; evt++)
+		{
         if (misc_events[evt] == EvType)
+				{
             return TRUE;
+				}
+		}
 	return FALSE;
 }
 
 /******************************************************************************
  ***  IsOpenMP
  ******************************************************************************/
-#define OMP_EVENTS 28
+#define OMP_EVENTS 31
 static unsigned omp_events[] = { OMPFUNC_EV, PAR_EV, WSH_EV, BARRIEROMP_EV,
 	UNNAMEDCRIT_EV, NAMEDCRIT_EV, WORK_EV, JOIN_EV, OMPSETNUMTHREADS_EV,
 	OMPGETNUMTHREADS_EV, TASK_EV, TASKWAIT_EV, TASKFUNC_EV, TASKFUNC_LINE_EV,
 	OMPT_CRITICAL_EV, OMPT_ATOMIC_EV, OMPT_LOOP_EV, OMPT_WORKSHARE_EV,
 	OMPT_SECTIONS_EV, OMPT_SINGLE_EV, OMPT_MASTER_EV, TASKGROUP_START_EV,
-	TASKGROUP_END_EV, TASKID_EV, OMPT_TASKGROUP_IN_EV, OMPT_DEPENDENCE_EV,
-	OMPT_TASKFUNC_EV, OMP_STATS_EV };
+	TASKGROUP_END_EV, TASKID_EV, TASKLOOPID_EV, OMPT_TASKGROUP_IN_EV, OMPT_DEPENDENCE_EV,
+	OMPT_TASKFUNC_EV, OMP_STATS_EV, TASKLOOP_EV, ORDERED_EV };
 
 unsigned IsOpenMP (unsigned EvType)
 {

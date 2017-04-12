@@ -55,8 +55,10 @@
 #define OMPT_MASTER_INDEX       17
 #define TASKGROUP_START_INDEX   18
 #define OMP_STATS_INDEX         19
+#define TASKLOOP_INDEX          20 /* Taskloop event */
+#define ORDERED_INDEX						21 /* Ordered section in ordered or doacross loops */
 
-#define MAX_OMP_INDEX		    20
+#define MAX_OMP_INDEX		    22
 
 static int inuse[MAX_OMP_INDEX] = { FALSE };
 
@@ -84,6 +86,10 @@ void Enable_OMP_Operation (int type)
 		inuse[TASK_INDEX] = TRUE;
 	else if (type == TASKWAIT_EV)
 		inuse[TASKWAIT_INDEX] = TRUE;
+	else if (type == TASKLOOP_EV) 
+		inuse[TASKLOOP_INDEX] = TRUE;
+	else if (type == ORDERED_EV)
+		inuse[ORDERED_INDEX] = TRUE;
 
 #define ENABLE_TYPE_IF(x,type,v) \
 	if (x ## _EV == type) \
@@ -218,8 +224,29 @@ void OMPEvent_WriteEnabledOperations (FILE * fd)
 	if (inuse[TASKWAIT_INDEX])
 	{
 		fprintf (fd, "EVENT_TYPE\n");
-		fprintf (fd, "0 %d OMP task wait\n", TASKWAIT_EV);
+		fprintf (fd, "0 %d OMP taskwait\n", TASKWAIT_EV);
 		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
+	}
+	if (inuse[TASKLOOP_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n"
+		  "0 %d Taskloop Identifier\n\n",
+		  TASKLOOPID_EV);
+
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "0 %d OMP taskloop\n", TASKLOOP_EV);
+		fprintf (fd, "VALUES\n0 End\n1 Begin\n\n");
+	}
+	if (inuse[ORDERED_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "0 %d OpenMP ordered section\n", ORDERED_EV);
+		fprintf (fd, "VALUES\n"
+						     "%d Outside ordered\n"
+						     "%d Waiting to enter\n"
+						     "%d Signaling the exit\n"
+						     "%d Inside ordered\n\n",
+						     OUTORDERED_VAL, WAITORDERED_VAL, POSTORDERED_VAL, INORDERED_VAL);
 	}
 	if (inuse[OMPT_CRITICAL_INDEX])
 	{

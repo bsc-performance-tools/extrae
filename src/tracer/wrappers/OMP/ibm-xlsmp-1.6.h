@@ -24,6 +24,6 @@
 #ifndef IBM_XLSMP_1_6_WRAPPER_H_
 #define IBM_XLSMP_1_6_WRAPPER_H_
 
-int ibm_xlsmp_1_6_hook_points (int rank);
+int _extrae_ibm_xlsmp_init (int rank);
 
 #endif

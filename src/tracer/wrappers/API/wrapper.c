@@ -107,8 +107,8 @@
 #include "mode.h"
 #include "events.h"
 #if defined(OMP_SUPPORT)
-# include "omp_probe.h"
-# include "omp_wrapper.h"
+# include "omp-probe.h"
+# include "omp-common.h"
 # if defined(OMPT_INSTRUMENTATION)
 #  include "ompt-wrapper.h"
 # endif

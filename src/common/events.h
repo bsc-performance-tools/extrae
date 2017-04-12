@@ -441,8 +441,8 @@ enum {
 #define WORK_EV                  60000011
 #define ENTERGATE_EV             60000012
 #define EXITGATE_EV              60000013
-#define ORDBEGIN_EV              60000014
-#define ORDEND_EV                60000015
+#define ORDBEGIN_EV              60000014 /* Not used, actually replaced by ORDERED_EV */
+#define ORDEND_EV                60000015 /* Not used, actually replaced by ORDERED_EV */
 #define JOIN_EV                  60000016
 #define DESCMARK_EV              60000017
 #define OMPFUNC_EV               60000018
@@ -450,7 +450,6 @@ enum {
 #define USRFUNC_EV               60000019
 #define USRFUNC_LINE_EV          60000119
 #define USRFUNC_EV_BB            60000219
-#define TASKID_EV                60000028
 #define TASK_EV                  60000021
 #define TASKWAIT_EV              60000022
 #define TASKFUNC_EV              60000023
@@ -460,9 +459,13 @@ enum {
 #define TASKGROUP_START_EV       60000025
 #define TASKGROUP_END_EV         60000026
 #define TASKGROUP_INGROUP_DEEP_EV 60000027
+#define TASKID_EV                60000028
+#define TASKLOOP_EV              60000029
+#define TASKLOOPID_EV            60010029
 #define OMPSETNUMTHREADS_EV      60000030
 #define OMPGETNUMTHREADS_EV      60000031
 #define NAMEDCRIT_NAME_EV        60000032 /* Critical address name */
+#define ORDERED_EV               60000033 /* Ordered section in ordered or doacross loop */
 #define OMPT_CRITICAL_EV         60000050
 #define OMPT_ATOMIC_EV           60000051
 #define OMPT_LOOP_EV             60000052
@@ -649,6 +652,14 @@ enum {
 #define LOCK_VAL                 3 /* Inside an acquire lock function. */
 #define UNLOCK_VAL               5 /* Inside a release lock function. */
 #define LOCKED_VAL               6 /* Locked Status. Mutex is locked. */
+
+/* 
+ * Ordered Values.
+ */
+#define OUTORDERED_VAL           0 /* Outside ordered section in ordered or doacross loop. */
+#define WAITORDERED_VAL          3 /* Waiting to enter ordered section in ordered or doacross loop */
+#define POSTORDERED_VAL          5 /* Signaling the exit from ordered section in ordered or doacross loop */
+#define INORDERED_VAL            6 /* Inside ordered section in ordered or doacross loop. */
 
 #if defined(DEAD_CODE)
 /* 

@@ -10,8 +10,9 @@
     <counters enabled="yes" />
   </mpi>
 
-  <openmp enabled="yes">
+  <openmp enabled="yes" ompt="no">
     <locks enabled="no" />
+		<taskloop enabled="no" />
     <counters enabled="yes" />
   </openmp>
 

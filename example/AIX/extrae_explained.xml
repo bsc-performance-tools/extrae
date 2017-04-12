@@ -27,11 +27,13 @@
   </callers>
 
   <!-- Configuration of some OpenMP dependant values -->
-  <openmp enabled="yes">
+  <openmp enabled="yes" ompt="no">
     <!-- If the library instruments OpenMP, shall we gather info about locks?
          Obtaining such information can make the final trace quite large.
     -->
-    <locks enabled="no" />
+		<locks enabled="no" />
+		<!-- Gather info about taskloops? -->
+		<taskloop enabled="no" />
     <!-- Gather counters in the OpenMP routines? -->
     <counters enabled="yes" />
   </openmp>

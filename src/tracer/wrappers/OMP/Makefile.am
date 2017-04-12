@@ -7,37 +7,32 @@ endif
 
 EXTRA_DIST = \
  ompt-headers
+if WANT_OPENMP_GNU
+EXTRA_DIST += \
+ gnu-libgomp-intermediate/libgomp-doacross-intermediate-switch.c
+endif
 
 WRAPPERS_OPENMP = \
- omp_probe.c omp_probe.h \
- omp-common.c omp-common.h 
+ omp-common.c omp-common.h \
+ omp-probe.c omp-probe.h   \
+ omp-events.c omp-events.h 
 
 EXTRA_OPENMP_CFLAGS =
 
-if WANT_OPENMP_OMPT
-WRAPPERS_OPENMP += \
- ompt-wrapper.c ompt-wrapper.h \
- ompt-helper.h ompt-helper.c \
- ompt-target.c ompt-target.h 
+# GNU GOMP instrumentation
+if WANT_OPENMP_GNU
+WRAPPERS_OPENMP += gnu-libgomp.c gnu-libgomp.h
+EXTRA_OPENMP_CFLAGS += -DGNU_OPENMP
+endif # WANT_OPENMP_GNU
 
-EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -I$(WRAPPERS_DIR)/OMP/ompt-headers
-
-else
-
-# These files are needed by intel/ibm/gnu openmp instrumentation, but not by OMPT
-WRAPPERS_OPENMP += omp_wrapper.c omp_wrapper.h
-
+# Intel KMP instrumentation
 if WANT_OPENMP_INTEL
 WRAPPERS_OPENMP += intel-kmpc-11.c intel-kmpc-11.h intel-kmpc-11-intermediate/intel-kmpc-11-intermediate.h
 EXTRA_OPENMP_CFLAGS += -DINTEL_OPENMP
 WRAPPERS_INTEL_KMPC_11 = intel-kmpc-11-intermediate/libintel-kmpc-11-intermediate.la
 endif # WANT_OPENMP_INTEL
 
-if WANT_OPENMP_GNU
-WRAPPERS_OPENMP += gnu-libgomp.c gnu-libgomp.h
-EXTRA_OPENMP_CFLAGS += -DGNU_OPENMP
-endif # WANT_OPENMP_GNU
-
+# IBM XL SMP instrumentation
 if ARCH_POWERPC
 if OS_LINUX
 if WANT_OPENMP_IBM
@@ -47,8 +42,15 @@ endif # ARCH_POWERPC
 endif # OS_LINUX
 endif # WANT_OPENMP_IBM
 
-endif # WANT_OPENMP_OMPT
+# OMPT support
+if WANT_OPENMP_OMPT
+WRAPPERS_OPENMP += \
+ ompt-wrapper.c ompt-wrapper.h \
+ ompt-helper.h ompt-helper.c \
+ ompt-target.c ompt-target.h 
 
+EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -I$(WRAPPERS_DIR)/OMP/ompt-headers
+endif # WANT_OPENMP_OMPT
 
 noinst_LTLIBRARIES  = libwrap_openmp.la
 

@@ -24,6 +24,12 @@
 #ifndef OMP_PROBE_H_INCLUDED
 #define OMP_PROBE_H_INCLUDED
 
+void setTrace_OMPLocks (int value);
+int getTrace_OMPLocks (void);
+
+void setTrace_OMPTaskloop (int value);
+int getTrace_OMPTaskloop (void);
+
 void Probe_OpenMP_UF_Entry (UINT64 uf);
 void Probe_OpenMP_UF_Exit (void);
 void Probe_OpenMP_Work_Entry (void);
@@ -69,10 +75,8 @@ void Probe_OpenMP_GetNumThreads_Exit (void);
 void Probe_OpenMP_SetNumThreads_Entry (int);
 void Probe_OpenMP_SetNumThreads_Exit (void);
 
-void setTrace_OMPLocks (int value);
-int getTrace_OMPLocks (void);
-
 void Probe_OpenMP_TaskID (long long id);
+void Probe_OpenMP_TaskLoopID (long long id);
 void Probe_OpenMP_Task_Entry (UINT64 uf);
 void Probe_OpenMP_Task_Exit (void);
 void Probe_OpenMP_TaskUF_Entry (UINT64 uf);
@@ -83,6 +87,13 @@ void Probe_OpenMP_Taskgroup_start_Entry (void);
 void Probe_OpenMP_Taskgroup_start_Exit (void);
 void Probe_OpenMP_Taskgroup_end_Entry (void);
 void Probe_OpenMP_Taskgroup_end_Exit (void);
+void Probe_OpenMP_TaskLoop_Entry (void);
+void Probe_OpenMP_TaskLoop_Exit (void);
+
+void Probe_OpenMP_Ordered_Wait_Entry (void);
+void Probe_OpenMP_Ordered_Wait_Exit (void);
+void Probe_OpenMP_Ordered_Post_Entry (void);
+void Probe_OpenMP_Ordered_Post_Exit (void);
 
 /* OMPT probes */
 

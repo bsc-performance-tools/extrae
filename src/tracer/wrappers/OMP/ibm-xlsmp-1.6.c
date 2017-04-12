@@ -36,6 +36,7 @@
 #endif
 
 #include "wrapper.h"
+#include "omp-events.h"
 #include "omp-common.h"
 
 #if defined(PIC)
@@ -96,8 +97,8 @@ static void callme_pardo (char *ptr, long lbnd, long ubnd, unsigned thid)
 	void *p = *((void**) pardo_uf);
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": callme_pardo: ptr=%p lbnd=%ld ubnd=%ld thid=%u\n", ptr, lbnd, ubnd, thid);
-	fprintf (stderr, PACKAGE_NAME": callme_pardo: pardo_uf=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_pardo: ptr=%p lbnd=%ld ubnd=%ld thid=%u\n", THREAD_LEVEL_VAR, ptr, lbnd, ubnd, thid);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_pardo: pardo_uf=%p\n", THREAD_LEVEL_VAR, p);
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
@@ -117,8 +118,8 @@ static void callme_do (char *ptr, long lbnd, long ubnd)
 	void *p = *((void**) do_uf[THREADID]);
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": callme_do: ptr=%p lbnd=%ld ubnd=%ld\n", ptr, lbnd, ubnd);
-	fprintf (stderr, PACKAGE_NAME": callme_do: do_uf=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_do: ptr=%p lbnd=%ld ubnd=%ld\n", THREAD_LEVEL_VAR, ptr, lbnd, ubnd);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_do: do_uf=%p\n", THREAD_LEVEL_VAR, p);
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
@@ -137,8 +138,8 @@ static void callme_par (char *ptr)
 	void *p = *((void**) par_uf);
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": callme_par: ptr=%p\n", ptr);
-	fprintf (stderr, PACKAGE_NAME": callme_par: par_uf=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_par: ptr=%p\n", THREAD_LEVEL_VAR, ptr);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_par: par_uf=%p\n", THREAD_LEVEL_VAR, p);
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
@@ -158,7 +159,7 @@ static void callme_single(void)
 	void *p = *((void**) par_single);
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": callme_single: par_single=%p\n", p);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_single: par_single=%p\n", THREAD_LEVEL_VAR, p);
 #endif
 
 	Extrae_OpenMP_UF_Entry (p);
@@ -212,11 +213,247 @@ static void (*_xlsmpRelDefaultSLock_real)(void*) = NULL;
 static void (*_xlsmpGetSLock_real)(void*) = NULL;
 static void (*_xlsmpRelSLock_real)(void*) = NULL;
 
-extern int omp_get_max_threads();
+/*
+	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
+	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
+*/
 
-#define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)
+void _xlsmpParallelDoSetup_TPO(int p1, void *p2, long p3, long p4, long p5, long p6, void *p7, void *p8, void **p9, long p10, long p11, void *p12, long p13)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpParallelDoSetup_TPO enter: @=%p args=(%d %p %ld %ld %ld %ld %p %p %p %ld %ld %p %ld)\n", THREAD_LEVEL_VAR, _xlsmpParallelDoSetup_TPO_real, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
+#endif
 
-static int ibm_xlsmp_1_6_GetOpenMPHookPoints (int rank)
+	if (_xlsmpParallelDoSetup_TPO_real != NULL && mpitrace_on)
+	{
+		/* Set the pointer to the correct PARALLEL DO user function */
+		pardo_uf = (void(*)(char*, long, long, unsigned))p2;
+
+		Extrae_OpenMP_ParDO_Entry ();
+		_xlsmpParallelDoSetup_TPO_real (p1, (void**)callme_pardo, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
+		Extrae_OpenMP_ParDO_Exit ();	
+	}
+	else if (_xlsmpParallelDoSetup_TPO_real != NULL && !mpitrace_on)
+	{
+		_xlsmpParallelDoSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpParallelDoSetup_TPO: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+void _xlsmpParRegionSetup_TPO (int p1, void *p2, int p3, void* p4, void* p5, void** p6, long p7, long p8)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpParRegionSetup_TPO enter: @=%p args=(%d %p %d %p %p %p %ld %ld)\n", THREAD_LEVEL_VAR, _xlsmpParRegionSetup_TPO_real, p1, p2, p3, p4, p5, p6, p7, p8);
+#endif
+
+	if (_xlsmpParRegionSetup_TPO_real != NULL && mpitrace_on)
+	{
+		/* Set the pointer to the correct PARALLEL user function */
+		par_uf = (void(*)(char*))p2;
+
+		/* Reset the counter of the sections to 0 */
+		__atomic_index = 0;
+
+		Extrae_OpenMP_ParRegion_Entry();
+		_xlsmpParRegionSetup_TPO_real (p1, callme_par, p3, p4, p5, p6, p7, p8);
+		Extrae_OpenMP_ParRegion_Exit();
+  }
+	else if (_xlsmpParRegionSetup_TPO_real != NULL && !mpitrace_on)
+	{
+		_xlsmpParRegionSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpParRegionSetup_TPO: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+void _xlsmpWSDoSetup_TPO (int p1, void *p2, long p3, long p4, long p5, long p6, void* p7, void* p8, void** p9, long p10)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpWSDoSetup_TPO enter: @=%p args=(%d %p %ld %ld %ld %ld %p %p %p %ld)\n", THREAD_LEVEL_VAR, _xlsmpWSDoSetup_TPO_real, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
+#endif
+
+	if (_xlsmpWSDoSetup_TPO_real != NULL && mpitrace_on)
+	{
+		/* Set the pointer to the correct DO user function */
+		do_uf[THREADID] = (void(*)(char*, long, long))p2;
+
+		Extrae_OpenMP_DO_Entry ();
+		_xlsmpWSDoSetup_TPO_real
+			(p1, callme_do, p3, p4, p5, p6, p7, p8, p9, p10);
+		Extrae_OpenMP_DO_Exit();
+	}
+	else if (_xlsmpWSDoSetup_TPO_real != NULL && !mpitrace_on)
+	{
+		_xlsmpWSDoSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpWSDoSetup_TPO: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+void _xlsmpBarrier_TPO (int p1, int *p2)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpBarrier_TPO enter: @=%p args=(%d %p)\n", THREAD_LEVEL_VAR, _xlsmpBarrier_TPO_real, p1, p2);
+#endif
+
+	if (_xlsmpBarrier_TPO_real != NULL && mpitrace_on)
+	{
+		Extrae_OpenMP_Barrier_Entry ();
+		_xlsmpBarrier_TPO_real (p1, p2);
+		Extrae_OpenMP_Barrier_Exit ();
+	}
+	else if (_xlsmpBarrier_TPO_real != NULL && !mpitrace_on)
+	{
+		_xlsmpBarrier_TPO_real (p1, p2);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpBarrier_TPO: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+ 
+void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpSingleSetup_TPO enter: @=%p args=(%d %p %d %p)\n", THREAD_LEVEL_VAR, _xlsmpBarrier_TPO_real, p1, p2, p3, p4);
+#endif
+
+	if (_xlsmpSingleSetup_TPO_real != NULL && mpitrace_on)
+	{
+		/* Set the pointer to the correct SINGLE user function */
+		par_single = (void(*)(void))p2;
+
+		Extrae_OpenMP_Single_Entry();
+		_xlsmpSingleSetup_TPO_real (p1, callme_single, p3, p4);
+		Extrae_OpenMP_Single_Exit();
+	}
+	else if (_xlsmpSingleSetup_TPO_real != NULL && !mpitrace_on)
+	{
+		_xlsmpSingleSetup_TPO_real (p1, p2, p3, p4);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpSingleSetup_TPO: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+void _xlsmpWSSectSetup_TPO (int p1, void *p2, long p3, void *p4, void *p5, void** p6, long p7, long p8)
+{
+	long index = 0;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpWSSectSetup_TPO enter: @=%p args=(%d %p %ld %p %p %p %ld %ld)\n", THREAD_LEVEL_VAR, _xlsmpWSSectSetup_TPO_real, p1, p2, p3, p4, p5, p6, p7, p8);
+#endif
+
+	if (_xlsmpWSSectSetup_TPO_real != NULL && mpitrace_on)
+	{
+		/* Just intercept the @ of the routines representing all the sections to
+		   call our routine and run them from inside! ( see callme_section ) */
+
+		void (*callme_sections[p3])(char*,unsigned);
+		for (index = 0; index < p3; index++)
+			callme_sections[index] = callme_section;
+
+		real_sections[THREADID] = (_xlsmp_sections) p2;
+		num_real_sections[THREADID] = p3;
+
+		Extrae_OpenMP_Section_Entry();
+		_xlsmpWSSectSetup_TPO_real (p1, callme_sections, p3, p4, p5, p6, p7, p8);
+		Extrae_OpenMP_Section_Exit();
+	}
+	else if (_xlsmpWSSectSetup_TPO_real != NULL && !mpitrace_on)
+	{
+		_xlsmpWSSectSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpWSSectSetup_TPO: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+void _xlsmpRelDefaultSLock (void *p1)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpRelDefaultSLock enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, _xlsmpRelDefaultSLock_real, p1);
+#endif
+
+	if (_xlsmpRelDefaultSLock_real != NULL && mpitrace_on)
+	{
+		Extrae_OpenMP_Unnamed_Unlock_Entry();
+		_xlsmpRelDefaultSLock_real(p1);
+		Extrae_OpenMP_Unnamed_Unlock_Exit();
+	}
+	else if (_xlsmpRelDefaultSLock_real != NULL && !mpitrace_on)
+	{
+		_xlsmpRelDefaultSLock_real(p1);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpRelDefaultSLock: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+void _xlsmpRelSLock (void *p1)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpRelSLock enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, _xlsmpRelSLock_real, p1);
+#endif
+
+	if (_xlsmpRelSLock_real != NULL && mpitrace_on)
+	{
+		Extrae_OpenMP_Named_Unlock_Entry(p1);
+		_xlsmpRelSLock_real(p1);
+		Extrae_OpenMP_Named_Unlock_Exit();
+	}
+	else if (_xlsmpRelSLock_real != NULL && mpitrace_on)
+	{
+		_xlsmpRelSLock_real(p1);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpRelSLock: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+void _xlsmpGetDefaultSLock (void *p1)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpGetDefaultSLock enter: @=%p args=(%p)\n", THREAD_LEVEL_VAR, _xlsmpGetDefaultSLock_real, p1);
+#endif
+
+	if (_xlsmpGetDefaultSLock_real != NULL && mpitrace_on)
+	{
+		Extrae_OpenMP_Unnamed_Lock_Entry();
+		_xlsmpGetDefaultSLock_real (p1);
+		Extrae_OpenMP_Unnamed_Lock_Exit();
+	}
+	else if (_xlsmpGetDefaultSLock_real != NULL && !mpitrace_on)
+	{
+		_xlsmpGetDefaultSLock_real (p1);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpGetDefaultSLock: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+}
+
+static int ibm_xlsmp_get_hook_points (int rank)
 {
 	int count = 0;
 
@@ -280,256 +517,10 @@ static int ibm_xlsmp_1_6_GetOpenMPHookPoints (int rank)
 	return count > 0;
 }
 
-/*
-	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
-	INJECTED CODE -- INJECTED CODE -- INJECTED CODE -- INJECTED CODE
-*/
-
-void _xlsmpParallelDoSetup_TPO(int p1, void *p2, long p3, long p4, long p5, long p6, void *p7, void *p8, void **p9, long p10, long p11, void *p12, long p13)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpParallelDoSetup_TPO is at %p\n", _xlsmpParallelDoSetup_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": _xlsmpParallelDoSetup_TPO are %d %p %ld %ld %ld %ld %p %p %p %ld %ld %p %ld\n", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
-#endif
-
-	if (_xlsmpParallelDoSetup_TPO_real != NULL && mpitrace_on)
-	{
-		/* Set the pointer to the correct PARALLEL DO user function */
-		pardo_uf = (void(*)(char*, long, long, unsigned))p2;
-
-		Extrae_OpenMP_ParDO_Entry ();
-		_xlsmpParallelDoSetup_TPO_real (p1, (void**)callme_pardo, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
-		Extrae_OpenMP_ParDO_Exit ();	
-	}
-	else if (_xlsmpParallelDoSetup_TPO_real != NULL && !mpitrace_on)
-	{
-		_xlsmpParallelDoSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpParallelDoSetup_TPO is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void _xlsmpParRegionSetup_TPO (int p1, void *p2, int p3, void* p4, void* p5, void** p6, long p7, long p8)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpParRegionSetup_TPO is at %p\n", _xlsmpParRegionSetup_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": _xlsmpParRegionSetup_TPO params %d %p %d %p %p %p %ld %ld\n", p1, p2, p3, p4, p5, p6, p7, p8);
-#endif
-
-	if (_xlsmpParRegionSetup_TPO_real != NULL && mpitrace_on)
-	{
-		/* Set the pointer to the correct PARALLEL user function */
-		par_uf = (void(*)(char*))p2;
-
-		/* Reset the counter of the sections to 0 */
-		__atomic_index = 0;
-
-		Extrae_OpenMP_ParRegion_Entry();
-		_xlsmpParRegionSetup_TPO_real (p1, callme_par, p3, p4, p5, p6, p7, p8);
-		Extrae_OpenMP_ParRegion_Exit();
-  }
-	else if (_xlsmpParRegionSetup_TPO_real != NULL && !mpitrace_on)
-	{
-		_xlsmpParRegionSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpParRegionSetup_TPO is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void _xlsmpWSDoSetup_TPO (int p1, void *p2, long p3, long p4, long p5, long p6, void* p7, void* p8, void** p9, long p10)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpWSDoSetup_TPO is at %p\n", _xlsmpWSDoSetup_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": _xlsmpWSDoSetup_TPO params %d %p %ld %ld %ld %ld %p %p %p %ld\n", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
-#endif
-
-	if (_xlsmpWSDoSetup_TPO_real != NULL && mpitrace_on)
-	{
-		/* Set the pointer to the correct DO user function */
-		do_uf[THREADID] = (void(*)(char*, long, long))p2;
-
-		Extrae_OpenMP_DO_Entry ();
-		_xlsmpWSDoSetup_TPO_real
-			(p1, callme_do, p3, p4, p5, p6, p7, p8, p9, p10);
-		Extrae_OpenMP_DO_Exit();
-	}
-	else if (_xlsmpWSDoSetup_TPO_real != NULL && !mpitrace_on)
-	{
-		_xlsmpWSDoSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpWSDoSetup_TPO is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void _xlsmpBarrier_TPO (int p1, int *p2)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpBarrier_TPO is at %p\n", _xlsmpBarrier_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": _xlsmpBarrier_TPO params %d %p\n", p1, p2);
-#endif
-
-	if (_xlsmpBarrier_TPO_real != NULL && mpitrace_on)
-	{
-		Extrae_OpenMP_Barrier_Entry ();
-		_xlsmpBarrier_TPO_real (p1, p2);
-		Extrae_OpenMP_Barrier_Exit ();
-	}
-	else if (_xlsmpBarrier_TPO_real != NULL && !mpitrace_on)
-	{
-		_xlsmpBarrier_TPO_real (p1, p2);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpBarrier_TPO is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
- 
-void _xlsmpSingleSetup_TPO (int p1, void *p2, int p3, void *p4)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO is at %p\n", _xlsmpBarrier_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO params %d %p %d %p\n", p1, p2, p3, p4);
-#endif
-
-	if (_xlsmpSingleSetup_TPO_real != NULL && mpitrace_on)
-	{
-		/* Set the pointer to the correct SINGLE user function */
-		par_single = (void(*)(void))p2;
-
-		Extrae_OpenMP_Single_Entry();
-		_xlsmpSingleSetup_TPO_real (p1, callme_single, p3, p4);
-		Extrae_OpenMP_Single_Exit();
-	}
-	else if (_xlsmpSingleSetup_TPO_real != NULL && !mpitrace_on)
-	{
-		_xlsmpSingleSetup_TPO_real (p1, p2, p3, p4);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpSingleSetup_TPO is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void _xlsmpWSSectSetup_TPO (int p1, void *p2, long p3, void *p4, void *p5, void** p6, long p7, long p8)
-{
-	long index = 0;
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREADID %u _xlsmpWSSectSetup_TPO is at %p\n", THREADID, _xlsmpWSSectSetup_TPO_real);
-	fprintf (stderr, PACKAGE_NAME": THREADID %u _xlsmpWSSectSetup_TPO params %d %p %ld %p %p %p %ld %ld\n", THREADID, p1, p2, p3, p4, p5, p6, p7, p8);
-#endif
-
-	if (_xlsmpWSSectSetup_TPO_real != NULL && mpitrace_on)
-	{
-		/* Just intercept the @ of the routines representing all the sections to
-		   call our routine and run them from inside! ( see callme_section ) */
-
-		void (*callme_sections[p3])(char*,unsigned);
-		for (index = 0; index < p3; index++)
-			callme_sections[index] = callme_section;
-
-		real_sections[THREADID] = (_xlsmp_sections) p2;
-		num_real_sections[THREADID] = p3;
-
-		Extrae_OpenMP_Section_Entry();
-		_xlsmpWSSectSetup_TPO_real (p1, callme_sections, p3, p4, p5, p6, p7, p8);
-		Extrae_OpenMP_Section_Exit();
-	}
-	else if (_xlsmpWSSectSetup_TPO_real != NULL && !mpitrace_on)
-	{
-		_xlsmpWSSectSetup_TPO_real (p1, p2, p3, p4, p5, p6, p7, p8);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpWSSectSetup_TPO is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void _xlsmpRelDefaultSLock (void *p1)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpRelDefaultSLock is at %p\n", _xlsmpRelDefaultSLock_real);
-#endif
-
-	if (_xlsmpRelDefaultSLock_real != NULL && mpitrace_on)
-	{
-		Extrae_OpenMP_Unnamed_Unlock_Entry();
-		_xlsmpRelDefaultSLock_real(p1);
-		Extrae_OpenMP_Unnamed_Unlock_Exit();
-	}
-	else if (_xlsmpRelDefaultSLock_real != NULL && !mpitrace_on)
-	{
-		_xlsmpRelDefaultSLock_real(p1);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpRelDefaultSLock is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void _xlsmpRelSLock (void *p1)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpRelSLock is at %p\n", _xlsmpRelSLock_real);
-#endif
-
-	if (_xlsmpRelSLock_real != NULL && mpitrace_on)
-	{
-		Extrae_OpenMP_Named_Unlock_Entry(p1);
-		_xlsmpRelSLock_real(p1);
-		Extrae_OpenMP_Named_Unlock_Exit();
-	}
-	else if (_xlsmpRelSLock_real != NULL && mpitrace_on)
-	{
-		_xlsmpRelSLock_real(p1);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpRelSLock is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
-void _xlsmpGetDefaultSLock (void *p1)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpGetDefaultSLock is at %p\n", _xlsmpGetDefaultSLock_real);
-#endif
-
-	if (_xlsmpGetDefaultSLock_real != NULL && mpitrace_on)
-	{
-		Extrae_OpenMP_Unnamed_Lock_Entry();
-		_xlsmpGetDefaultSLock_real (p1);
-		Extrae_OpenMP_Unnamed_Lock_Exit();
-	}
-	else if (_xlsmpGetDefaultSLock_real != NULL && !mpitrace_on)
-	{
-		_xlsmpGetDefaultSLock_real (p1);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpGetDefaultSLock is not hooked! exiting!!\n");
-		exit (0);
-	}
-}
-
 void _xlsmpGetSLock (void *p1)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": _xlsmpGetSLock is at %p\n", _xlsmpGetSLock_real);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpGetSLock enter: @=%p\n", THREAD_LEVEL_VAR, _xlsmpGetSLock_real);
 #endif
 
 	if (_xlsmpGetSLock_real != NULL && mpitrace_on)
@@ -544,27 +535,25 @@ void _xlsmpGetSLock (void *p1)
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": _xlsmpGetSLock is not hooked! exiting!!\n");
-		exit (0);
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "_xlsmpGetSLock: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
+		exit (-1);
 	}
 }
 
-extern int omp_get_max_threads();
-
-int ibm_xlsmp_1_6_hook_points (int ntask)
+int _extrae_ibm_xlsmp_init (int rank)
 {
 	int hooked;
 	int max_threads;
 
-	hooked = ibm_xlsmp_1_6_GetOpenMPHookPoints (ntask);
+	hooked = ibm_xlsmp_get_hook_points (rank);
    
 	max_threads = omp_get_max_threads();
-	if (max_threads > MAX_THD)
+	if (max_threads > MAX_THD) /* XXX */
 	{
 		/* Has this happened? */
 		/* a) Increase MAX_THD to be higher than omp_get_max_threads() */
 		/* b) Decrease OMP_NUM_THREADS in order to decrease omp_get_max_threads() */
-		fprintf (stderr, PACKAGE_NAME": omp_get_max_threads() > MAX_THD. Aborting...\nRecompile "PACKAGE_NAME" increasing MAX_THD or decrease OMP_NUM_THREADS\n");
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "omp_get_max_threads() > MAX_THD. Aborting...\nRecompile "PACKAGE_NAME" increasing MAX_THD or decrease OMP_NUM_THREADS\n", THREAD_LEVEL_VAR);
 		exit (1);
 	}
 

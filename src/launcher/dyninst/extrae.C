@@ -665,7 +665,7 @@ static void InstrumentCalls (BPatch_image *appImage, BPatch_addressSpace *appPro
 					    strncmp (calledname, "__kmpc_fork_call", strlen("__kmpc_fork_call")) == 0)
 					{
 						BPatch_function *patch_openmp = getRoutine (
-							"__kmpc_fork_call_extrae_dyninst", appImage, false);
+							"__kmpc_fork_call_dyninst", appImage, false);
 						if (patch_openmp != NULL)
 						{
 							if (appProcess->replaceFunctionCall (*((*vpoints)[j]), *patch_openmp))

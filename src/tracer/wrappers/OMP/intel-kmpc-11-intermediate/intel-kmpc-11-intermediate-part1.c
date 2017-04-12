@@ -1,6 +1,7 @@
+/* Automagically generated file by ./genstubs-kmpc-11.sh at mar jun 27 13:14:13 CEST 2017 */
 #include <stdarg.h>
 #include <wrapper.h>
-#include <omp-common.h>
+#include <omp-events.h>
 #include "intel-kmpc-11.h"
 
 void __kmpc_parallel_sched_0_args (void *p1, int p2, void *task_ptr, void *wrap_ptr, void **args)
