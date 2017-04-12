@@ -31,4 +31,5 @@ endif
 
 noinst_LTLIBRARIES = libclock.la
 libclock_la_SOURCES = $(CLOCKS)
-libclock_la_CFLAGS = -I$(CLOCKS_INC) -I$(COMMON_INC) -I$(TRACER_INC)
+libclock_la_CFLAGS  = -I$(CLOCKS_INC) -I$(COMMON_INC) -I$(TRACER_INC)
+libclock_la_LDFLAGS = -lrt

@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 20Apr2017 Fixes typo in the convenience library for Intel KMPC wrappers
  * 12Apr2017 Fixes CUDA tracing when using CUPTI
+ * 12Apr2017 Fixed missing dependency with librt in clocks module
  * 11Apr2017 Changed PEBS initialization to activate in all the threads
  * 04Apr2017 Unifies GNU OpenMP APIs in a single library
  * 23Mar2017 Added missing initialization of control variables to keep track when we're in instrumentation or sampling that prevented PEBS sampling to trigger
