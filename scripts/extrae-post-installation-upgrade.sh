@@ -154,11 +154,6 @@ if test ! -d ${EXTRAE_HOME} ; then
  exit -1
 fi
 
-if test ! -f ${EXTRAE_HOME}/include/extrae_version.h ; then
- echo Error! EXTRAE_HOME environment variable is not pointing to a valid installation of Extrae.
- exit -1
-fi
-
 echo
 echo "**** Welcome to Extrae post-installation script"
 echo 

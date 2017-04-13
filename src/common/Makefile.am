@@ -16,8 +16,7 @@ common_SRCS = \
  common.h \
  num_hwc.h \
  types.h \
- hwc_version.h \
- extrae_version.h
+ hwc_version.h
 
 common_INCLUDES = -I$(COMMON_INC)
 

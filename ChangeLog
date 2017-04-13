@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 27Apr2017 Extrae_get_version API call now relies on the configure.ac value instead of using a separate include file
  * 26Apr2017 Initializes a different PEBS fd for every thread
  * 26Apr2017 Don't exit when the binary is linked against multiple OpenMP runtimes
  * 24Apr2017 Applied patch to emit a different event for the allocation id events

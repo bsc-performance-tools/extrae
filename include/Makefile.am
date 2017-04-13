@@ -5,15 +5,13 @@ include_HEADERS = extrae_user_events.h extrae_types.h extrae_internals.h extraef
 #
 
 install-data-hook:
-	cp $(COMMON_INC)/extrae_version.h $(DESTDIR)$(includedir)
 	cd $(DESTDIR)$(includedir); $(LN_S) -f extrae_user_events.h mpitrace_user_events.h
 	cd $(DESTDIR)$(includedir); $(LN_S) -f extrae_user_events.h extrae.h
 	cd $(DESTDIR)$(includedir); $(LN_S) -f extraef_user_events.h mpitracef_user_events.h
 	cd $(DESTDIR)$(includedir); $(LN_S) -f extraef_user_events.h extraef.h
 
 uninstall-local:
-	rm $(DESTDIR)$(includedir)/extrae_version.h \
-	   $(DESTDIR)$(includedir)/mpitrace_user_events.h \
+	rm $(DESTDIR)$(includedir)/mpitrace_user_events.h \
 	   $(DESTDIR)$(includedir)/extrae.h \
 	   $(DESTDIR)$(includedir)/mpitracef_user_events.h \
 	   $(DESTDIR)$(includedir)/extraef.h

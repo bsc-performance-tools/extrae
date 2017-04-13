@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "common.h"
+#include "utils.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -508,9 +509,22 @@ void Extrae_register_stacked_type_Wrapper (extrae_type_t type)
 void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
   unsigned *revision)
 {
-	*major    = EXTRAE_VERSION_MAJOR(EXTRAE_VERSION);
-	*minor    = EXTRAE_VERSION_MINOR(EXTRAE_VERSION);
-	*revision = EXTRAE_VERSION_REVISION(EXTRAE_VERSION);
+	int tokens = 0;
+	char *version = VERSION;
+	char **tokenArray = NULL;
+  char *endptr;
+
+	tokens = explode(version, ".", &tokenArray);
+
+	if (tokens > 0) {
+		*major    = strtoul(tokenArray[0], &endptr, 10);
+	}
+	if (tokens > 1) {
+		*minor    = strtoul(tokenArray[1], &endptr, 10);
+	}
+	if (tokens > 2) {
+		*revision = strtoul(tokenArray[2], &endptr, 10);
+	}
 }
 
 /**************************************************************************
