@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 20Apr2017 Fixes typo in the convenience library for Intel KMPC wrappers
  * 12Apr2017 Fixes CUDA tracing when using CUPTI
  * 11Apr2017 Changed PEBS initialization to activate in all the threads
  * 04Apr2017 Unifies GNU OpenMP APIs in a single library
