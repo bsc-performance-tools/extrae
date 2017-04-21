@@ -239,7 +239,7 @@ void Extrae_OpenMP_init(int me)
 	int ibm_hooked = FALSE;
 	int intel_hooked = FALSE;
 	int gnu_hooked = FALSE;
-	int hooked = FALSE;
+	int hooked = 0;
 
 # if defined(OS_LINUX) && defined(ARCH_PPC) && defined(IBM_OPENMP)
 	/*
@@ -260,19 +260,15 @@ void Extrae_OpenMP_init(int me)
 	hooked = ibm_hooked + intel_hooked + gnu_hooked;
 
 	if (hooked > 0) {
-			fprintf (stdout, PACKAGE_NAME": Detected and hooked OpenMP runtime:%s%s%s\n",
-			                 ibm_hooked?" [IBM XLSMP]":"",
-											 intel_hooked?" [Intel KMPC]":"",
-											 gnu_hooked?" [GNU GOMP]":"");
-		if (hooked > 1) {
-			fprintf (stderr, PACKAGE_NAME": ERROR! More than one (%d) OpenMP runtimes detected! This is not supported. Exiting ...\n", hooked);
-			exit (1);
-		}
+		fprintf (stdout, PACKAGE_NAME": Detected and hooked OpenMP runtime:%s%s%s\n",
+		         ibm_hooked?" [IBM XLSMP]":"",
+		         intel_hooked?" [Intel KMPC]":"",
+		         gnu_hooked?" [GNU GOMP]":"");
 
 		/* 
-		 * If we hooked any compiler-specific routines, just hook for the 
-		 * common OpenMP routines 
-		 */
+		* If we hooked any compiler-specific routines, just hook for the 
+		* common OpenMP routines 
+		*/
 
 		common_GetOpenMPHookPoints(0);
 	} else {
