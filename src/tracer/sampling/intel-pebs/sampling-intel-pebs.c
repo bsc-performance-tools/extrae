@@ -382,7 +382,7 @@ void Extrae_IntelPEBS_setStoreSampling (int enabled)
 static char **extrae_intel_pebs_mmap = NULL;
 static long long prev_head;
 static long long global_sample_type;
-static int perf_pebs_fd;
+static int *perf_pebs_fd = NULL;
 static int mmap_pages=1+MMAP_DATA_SIZE;
 
 #define MALLOC_ONCE /* Define this or there's a free that gets instrumented */
@@ -824,9 +824,11 @@ int Extrae_IntelPEBS_enable (int loads)
 
 		/* Extend the data structures to the maximum number of threads seen so far */
 		extrae_intel_pebs_mmap = (char **)realloc(extrae_intel_pebs_mmap, (THREADID+1) * sizeof(char *));
+		perf_pebs_fd = (int *)realloc(perf_pebs_fd, (THREADID+1) * sizeof(int));
 		for (i=pebs_init_threads; i<(THREADID+1); i++)
 		{
 			extrae_intel_pebs_mmap[i] = NULL;
+			perf_pebs_fd[i] = -1;
 		}
 
 #if defined(MALLOC_ONCE)
@@ -894,19 +896,19 @@ int Extrae_IntelPEBS_enable (int loads)
 	pe.exclude_hv = 1;
 	pe.wakeup_events = 1;
 
-	perf_pebs_fd = perf_event_open(&pe,0,-1,-1,0);
-	if (perf_pebs_fd < 0)
+	perf_pebs_fd[THREADID] = perf_event_open(&pe,0,-1,-1,0);
+	if (perf_pebs_fd[THREADID] < 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor\n");
 		return -1;
 	}
 
 	extrae_intel_pebs_mmap[THREADID] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
-	  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd, 0);
+	  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[THREADID], 0);
 	if (extrae_intel_pebs_mmap[THREADID] == MAP_FAILED)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot mmap to the perf_event\n");
-		close (perf_pebs_fd);
+		close (perf_pebs_fd[THREADID]);
 		return -1;
 	}
 
@@ -914,13 +916,13 @@ int Extrae_IntelPEBS_enable (int loads)
 	owner.type = F_OWNER_TID;
 	owner.pid = syscall(SYS_gettid);
 
-	ret = fcntl(perf_pebs_fd, F_SETFL, O_RDWR|O_NONBLOCK|O_ASYNC);
-	ret = fcntl(perf_pebs_fd, F_SETSIG, SIGIO);
-	ret = fcntl(perf_pebs_fd, F_SETOWN, getpid());
-	ret = fcntl(perf_pebs_fd, F_SETOWN_EX, &owner);
-	ret = ioctl(perf_pebs_fd, PERF_EVENT_IOC_RESET, 0);
+	ret = fcntl(perf_pebs_fd[THREADID], F_SETFL, O_RDWR|O_NONBLOCK|O_ASYNC);
+	ret = fcntl(perf_pebs_fd[THREADID], F_SETSIG, SIGIO);
+	ret = fcntl(perf_pebs_fd[THREADID], F_SETOWN, getpid());
+	ret = fcntl(perf_pebs_fd[THREADID], F_SETOWN_EX, &owner);
+	ret = ioctl(perf_pebs_fd[THREADID], PERF_EVENT_IOC_RESET, 0);
 
-	ret = ioctl(perf_pebs_fd, PERF_EVENT_IOC_ENABLE,0);
+	ret = ioctl(perf_pebs_fd[THREADID], PERF_EVENT_IOC_ENABLE,0);
 	if (ret < 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot enable the PEBS sampling file descriptor\n");
@@ -934,10 +936,19 @@ int Extrae_IntelPEBS_enable (int loads)
     Stops using PEBS. It stops the sampling mechanism */
 void Extrae_IntelPEBS_disable (void)
 {
-	ioctl(perf_pebs_fd, PERF_EVENT_IOC_REFRESH, 0);
-	munmap (extrae_intel_pebs_mmap[THREADID], mmap_pages*sysconf(_SC_PAGESIZE));
-	extrae_intel_pebs_mmap[THREADID] = NULL;
-	close (perf_pebs_fd);
+	unsigned int i = 0;
+
+	for (i=0; i<pebs_init_threads; i++) {
+		if (perf_pebs_fd[i] != NULL) {
+			ioctl(perf_pebs_fd[i], PERF_EVENT_IOC_REFRESH, 0);
+			close (perf_pebs_fd[i]);
+		}
+
+		if (extrae_intel_pebs_mmap[i] != NULL) {
+			munmap (extrae_intel_pebs_mmap[i], mmap_pages*sysconf(_SC_PAGESIZE));
+			extrae_intel_pebs_mmap[i] = NULL;
+		}
+	}
 }
 
 /* Extrae_IntelPEBS_nextSampling
