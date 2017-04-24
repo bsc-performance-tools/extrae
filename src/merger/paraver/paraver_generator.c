@@ -742,7 +742,8 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 					  cur->value;
 				}
 
-				if (cur->event == SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV)
+				if (cur->event == SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV ||
+				    cur->event == SAMPLING_ADDRESS_ALLOCATED_OBJECT_ALLOC_EV)
 				{
 					values[nevents] = Address2Info_Translate_MemReference (cur->ptask,
 					  cur->task, cur->value, MEM_REFERENCE_DYNAMIC,

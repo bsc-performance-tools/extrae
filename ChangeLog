@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 24Apr2017 Applied patch to emit a different event for the allocation id events
  * 20Apr2017 Fixes typo in the convenience library for Intel KMPC wrappers
  * 12Apr2017 Fixes CUDA tracing when using CUPTI
  * 12Apr2017 Fixed missing dependency with librt in clocks module

@@ -143,6 +143,7 @@ extern struct value_t MISC_values[MISC_VALUES];
 
 /* Caller of the referenced address */ 
 #define SAMPLING_ADDRESS_ALLOCATED_OBJECT_LBL "Memory object referenced by sampled address"
+#define SAMPLING_ADDRESS_ALLOCATED_OBJECT_ALLOC_LBL "Allocation memory object"
 
 #define MPI_GRADIENT   1
 

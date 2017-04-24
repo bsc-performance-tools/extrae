@@ -1615,11 +1615,12 @@ static int DynamicMemory_Event (event_t * event,
 					  SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+u,
 					  thread_info->AddressSpace_calleraddresses[u]);
 			}
+
 			/* Emit event that will be replaced by the ID of the 
 			   location of structure allocation */
 			trace_paraver_event (cpu, ptask, task, thread,
 			  thread_info->AddressSpace_timeCreation,
-			  SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV, 0);
+			  SAMPLING_ADDRESS_ALLOCATED_OBJECT_ALLOC_EV, 0);
 
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);

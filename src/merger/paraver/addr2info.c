@@ -1014,6 +1014,8 @@ void Address2Info_Write_MemReferenceCaller_Labels (FILE * pcf_fd)
 		fprintf(pcf_fd, "%s\n", TYPE_LABEL);
 		fprintf(pcf_fd, "0    %d    %s\n", SAMPLING_ADDRESS_ALLOCATED_OBJECT_EV,
 		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_LBL);
+		fprintf(pcf_fd, "0    %d    %s\n", SAMPLING_ADDRESS_ALLOCATED_OBJECT_ALLOC_EV,
+		  SAMPLING_ADDRESS_ALLOCATED_OBJECT_ALLOC_LBL);
 
 		if (AddressObjectInfo.num_objects > 0)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
