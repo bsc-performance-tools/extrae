@@ -68,6 +68,14 @@ static int   (*real_memkind_posix_memalign)(memkind_t, void **, size_t, size_t) 
 static void  (*real_memkind_free)(memkind_t, void *) = NULL; 
 # endif
 
+# if defined(HAVE_OPENMP)
+static void* (*real_kmpc_malloc)(size_t) = NULL;
+static void* (*real_kmpc_aligned_malloc)(size_t, size_t) = NULL;
+static void* (*real_kmpc_calloc)(size_t, size_t) = NULL;
+static void* (*real_kmpc_realloc)(void *, size_t) = NULL;
+static void (*real_kmpc_free)(void *) = NULL;
+# endif
+
 void Extrae_malloctrace_init (void)
 {
 # if defined(PIC) /* This is only available for .so libraries */
@@ -83,6 +91,14 @@ void Extrae_malloctrace_init (void)
 	real_memkind_realloc = (void*(*)(memkind_t, void *, size_t)) dlsym (RTLD_NEXT, "memkind_realloc");
 	real_memkind_posix_memalign = (int(*)(memkind_t, void **, size_t, size_t)) dlsym (RTLD_NEXT, "memkind_posix_memalign");
 	real_memkind_free = (void(*)(memkind_t, void *)) dlsym (RTLD_NEXT, "memkind_free");
+#  endif
+
+#  if defined(HAVE_OPENMP)
+	real_kmpc_malloc = (void *(*)(size_t)) dlsym (RTLD_NEXT, "kmpc_malloc");
+	real_kmpc_aligned_malloc = (void *(*)(size_t, size_t)) dlsym (RTLD_NEXT, "kmpc_aligned_malloc");
+	real_kmpc_calloc = (void *(*)(size_t, size_t)) dlsym (RTLD_NEXT, "kmpc_calloc");
+	real_kmpc_realloc = (void *(*)(void *, size_t)) dlsym (RTLD_NEXT, "kmpc_realloc");
+	real_kmpc_free = (void (*)(void *)) dlsym (RTLD_NEXT, "kmpc_free");
 #  endif
 # else
 	fprintf (stderr, PACKAGE_NAME": Warning! dynamic memory instrumentation requires linking with shared library!\n");
@@ -268,7 +284,7 @@ void free (void *p)
 
 #if 0
 /* Unfortunately, calloc seems to be invoked if dlsym fails and generates an
-an infinite loop of recursive calls to calloc */
+infinite loop of recursive calls to calloc */
 void *calloc (size_t s1, size_t s2)
 {
 	void *res;
@@ -682,6 +698,274 @@ void memkind_free(memkind_t kind, void *ptr)
 }
 
 #  endif /* HAVE_MEMKIND */
+
+#  if defined(HAVE_OPENMP)
+void *
+kmpc_malloc( size_t size )
+{
+	void *res;
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+	                    mpitrace_on                          &&
+	                    Extrae_get_trace_malloc()            &&
+	                    Extrae_get_trace_malloc_allocate()   &&
+	                    size >= Extrae_get_trace_malloc_allocate_threshold();
+	/* Can't be evaluated before because the compiler optimizes the if's clauses,
+	 * and THREADID calls a null callback if Extrae is not yet initialized */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+
+	if (real_kmpc_malloc == NULL)
+		Extrae_malloctrace_init ();
+
+#if defined(DEBUG)
+	if (canInstrument)
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_malloc is at %p\n", real_kmpc_malloc);
+		fprintf (stderr, PACKAGE_NAME": kmpc_malloc params %lu\n", size);
+	}
+#endif
+
+	if (real_kmpc_malloc != NULL && canInstrument)
+	{
+		/* If we can instrument, simply capture everything we need 
+		   and add the pointer to the list of recorded pointers */
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Probe_kmpc_malloc_Entry (size);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+		res = real_kmpc_malloc (size);
+		if (res != NULL)
+		{
+			Extrae_malloctrace_add (res);
+		}
+		Probe_kmpc_malloc_Exit (res);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_kmpc_malloc != NULL)
+	{
+		/* Otherwise, call the original */
+		res = real_kmpc_malloc (size);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_malloc is not hooked! exiting!!\n");
+		abort();
+	}
+
+    return res;
+
+}
+
+void *
+kmpc_aligned_malloc( size_t size, size_t alignment )
+{
+	void *res;
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+	                    mpitrace_on                          &&
+	                    Extrae_get_trace_malloc()            &&
+	                    Extrae_get_trace_malloc_allocate()   &&
+	                    size >= Extrae_get_trace_malloc_allocate_threshold();
+	/* Can't be evaluated before because the compiler optimizes the if's clauses,
+	 * and THREADID calls a null callback if Extrae is not yet initialized */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+
+	if (real_kmpc_aligned_malloc == NULL)
+		Extrae_malloctrace_init ();
+
+#if defined(DEBUG)
+	if (canInstrument)
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_aligned_malloc is at %p\n", real_kmpc_aligned_malloc);
+		fprintf (stderr, PACKAGE_NAME": kmpc_aligned_malloc params %lu\n", size);
+	}
+#endif
+
+	if (real_kmpc_aligned_malloc != NULL && canInstrument)
+	{
+		/* If we can instrument, simply capture everything we need 
+		   and add the pointer to the list of recorded pointers */
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Probe_kmpc_aligned_malloc_Entry (size, alignment);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+		res = real_kmpc_aligned_malloc (size, alignment);
+		if (res != NULL)
+		{
+			Extrae_malloctrace_add (res);
+		}
+		Probe_kmpc_aligned_malloc_Exit (res);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_kmpc_aligned_malloc != NULL)
+	{
+		/* Otherwise, call the original */
+		res = real_kmpc_aligned_malloc (size, alignment);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_malloc is not hooked! exiting!!\n");
+		abort();
+	}
+
+    return res;
+
+}
+
+void *
+kmpc_calloc( size_t nelem, size_t elsize )
+{
+	void *res;
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+	                    mpitrace_on                          &&
+	                    Extrae_get_trace_malloc()            &&
+	                    Extrae_get_trace_malloc_allocate()   &&
+	                    elsize >= Extrae_get_trace_malloc_allocate_threshold();
+	/* Can't be evaluated before because the compiler optimizes the if's clauses,
+	 * and THREADID calls a null callback if Extrae is not yet initialized */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+
+	if (real_kmpc_calloc == NULL)
+		Extrae_malloctrace_init ();
+
+#if defined(DEBUG)
+	if (canInstrument)
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_calloc is at %p\n", real_kmpc_calloc);
+		fprintf (stderr, PACKAGE_NAME": kmpc_calloc params %lu, %lu\n", nelem, elsize);
+	}
+#endif
+
+	if (real_kmpc_calloc != NULL && canInstrument)
+	{
+		/* If we can instrument, simply capture everything we need 
+		   and add the pointer to the list of recorded pointers */
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Probe_kmpc_calloc_Entry (nelem, elsize);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+		res = real_kmpc_calloc (nelem, elsize);
+		if (res != NULL)
+		{
+			Extrae_malloctrace_add (res);
+		}
+		Probe_kmpc_calloc_Exit (res);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_kmpc_calloc != NULL)
+	{
+		/* Otherwise, call the original */
+		res = real_kmpc_calloc (nelem, elsize);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_calloc is not hooked! exiting!!\n");
+		abort();
+	}
+
+    return res;
+
+}
+
+void *
+kmpc_realloc( void *ptr, size_t size )
+{
+	void *res;
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+	                    mpitrace_on                          &&
+	                    Extrae_get_trace_malloc()            &&
+	                    Extrae_get_trace_malloc_allocate()   &&
+	                    size >= Extrae_get_trace_malloc_allocate_threshold();
+	/* Can't be evaluated before because the compiler optimizes the if's clauses,
+	 * and THREADID calls a null callback if Extrae is not yet initialized */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+
+	if (real_kmpc_realloc == NULL)
+		Extrae_malloctrace_init ();
+
+#if defined(DEBUG)
+	if (canInstrument)
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_realloc is at %p\n", real_kmpc_realloc);
+		fprintf (stderr, PACKAGE_NAME": kmpc_realloc params %p, %lu\n", ptr, size);
+	}
+#endif
+
+	if (real_kmpc_realloc != NULL && canInstrument)
+	{
+		/* If we can instrument, simply capture everything we need 
+		   and add the pointer to the list of recorded pointers */
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Probe_kmpc_realloc_Entry (ptr, size);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
+		res = real_kmpc_realloc (ptr, size);
+		if (res != NULL)
+		{
+			Extrae_malloctrace_add (res);
+		}
+		Probe_kmpc_realloc_Exit (res);
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_kmpc_realloc != NULL)
+	{
+		/* Otherwise, call the original */
+		res = real_kmpc_realloc (ptr, size);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_realloc is not hooked! exiting!!\n");
+		abort();
+	}
+
+    return res;
+
+}
+
+void
+kmpc_free ( void *ptr )
+{
+	int canInstrument = EXTRAE_INITIALIZED()                 &&
+	                    mpitrace_on                          &&
+	                    Extrae_get_trace_malloc();
+	/* Can't be evaluated before because the compiler optimizes the if's clauses,
+	 * and THREADID calls a null callback if Extrae is not yet initialized */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+
+	if (real_kmpc_free == NULL)
+		Extrae_malloctrace_init ();
+
+#if defined(DEBUG)
+	if (canInstrument && !__in_free) // fprintf() seems to call free()!
+	{
+		__in_free = TRUE;
+		fprintf (stderr, PACKAGE_NAME": kmpc_free is at %p\n", real_kmpc_free);
+		fprintf (stderr, PACKAGE_NAME": kmpc_free params %p\n", ptr);
+		__in_free = FALSE;
+	}
+#endif
+
+	int present = Extrae_malloctrace_remove (ptr);
+
+	if (Extrae_get_trace_malloc_free() &&
+	    real_kmpc_free != NULL         &&
+			canInstrument                  &&
+			present)
+	{
+		/* If we can instrument, simply capture everything we need and
+		   remove the pointer from the list */
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Probe_kmpc_free_Entry (ptr);
+		real_kmpc_free (ptr);
+		Probe_kmpc_free_Exit ();
+		Backend_Leave_Instrumentation ();
+	}
+	else if (real_kmpc_free != NULL)
+	{
+		/* Otherwise, call the original */
+		real_kmpc_free (ptr);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": kmpc_free is not hooked! exiting!!\n");
+		abort();
+	}
+}
+#  endif /* HAVE_OPENMP */
 
 # endif /* -DPIC */
 

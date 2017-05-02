@@ -51,6 +51,11 @@
 #define PRV_MEMKIND_REALLOC_VALUE        8
 #define PRV_MEMKIND_POSIX_MEMALIGN_VALUE 9
 #define PRV_MEMKIND_FREE_VALUE           10
+#define PRV_KMPC_MALLOC_VALUE            11
+#define PRV_KMPC_FREE_VALUE              12
+#define PRV_KMPC_REALLOC_VALUE           13
+#define PRV_KMPC_CALLOC_VALUE            14
+#define PRV_KMPC_ALIGNED_MALLOC_VALUE    15
 
 #define APPL_INDEX              0
 #define FLUSH_INDEX             1
@@ -89,10 +94,21 @@ void Enable_MISC_Operation (int type)
 		inuse[GETCPU_INDEX] = TRUE;
 	else if (type == TRACE_INIT_EV)
 		inuse[TRACE_INIT_INDEX] = TRUE;
-	else if (type == MALLOC_EV || type == REALLOC_EV || type == FREE_EV ||
-	         type == CALLOC_EV || type == POSIX_MEMALIGN_EV || type == MEMKIND_MALLOC_EV || 
-		 type == MEMKIND_CALLOC_EV || type == MEMKIND_REALLOC_EV || type == MEMKIND_POSIX_MEMALIGN_EV || 
-                 type == MEMKIND_FREE_EV)
+	else if (type == MALLOC_EV                 ||
+	         type == REALLOC_EV                ||
+	         type == FREE_EV                   ||
+	         type == CALLOC_EV                 ||
+	         type == POSIX_MEMALIGN_EV         ||
+	         type == MEMKIND_MALLOC_EV         ||
+	         type == MEMKIND_CALLOC_EV         ||
+	         type == MEMKIND_REALLOC_EV        ||
+	         type == MEMKIND_POSIX_MEMALIGN_EV ||
+	         type == MEMKIND_FREE_EV           ||
+	         type == KMPC_MALLOC_EV            ||
+	         type == KMPC_CALLOC_EV            ||
+	         type == KMPC_REALLOC_EV           ||
+	         type == KMPC_FREE_EV              ||
+	         type == KMPC_ALIGNED_MALLOC_EV)
 		inuse[DYNAMIC_MEM_INDEX] = TRUE;
 	else if (type == SAMPLING_ADDRESS_MEM_LEVEL_EV ||
 	  type == SAMPLING_ADDRESS_TLB_LEVEL_EV ||
@@ -144,13 +160,23 @@ unsigned MISC_event_GetValueForDynamicMemory (unsigned type)
 			return PRV_MEMKIND_POSIX_MEMALIGN_VALUE;
 		case MEMKIND_FREE_EV:
 			return PRV_MEMKIND_FREE_VALUE;
+		case KMPC_MALLOC_EV:
+			return PRV_KMPC_MALLOC_VALUE;
+		case KMPC_CALLOC_EV:
+			return PRV_KMPC_CALLOC_VALUE;
+		case KMPC_REALLOC_EV:
+			return PRV_KMPC_REALLOC_VALUE;
+		case KMPC_FREE_EV:
+			return PRV_KMPC_FREE_VALUE;
+		case KMPC_ALIGNED_MALLOC_EV:
+			return PRV_KMPC_ALIGNED_MALLOC_VALUE;
 		default:
 			return 0;
 	}
 }
 
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
-{	
+{
 	if (options & TRACEOPTION_BG_ARCH)
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
@@ -276,6 +302,11 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", PRV_MEMKIND_REALLOC_VALUE, MEMKIND_REALLOC_LBL);
 		fprintf (fd, "%d      %s\n", PRV_MEMKIND_POSIX_MEMALIGN_VALUE, MEMKIND_POSIX_MEMALIGN_LBL);
 		fprintf (fd, "%d      %s\n", PRV_MEMKIND_FREE_VALUE, MEMKIND_FREE_LBL);
+		fprintf (fd, "%d      %s\n", PRV_KMPC_MALLOC_VALUE, KMPC_MALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_KMPC_FREE_VALUE, KMPC_FREE_LBL);
+		fprintf (fd, "%d      %s\n", PRV_KMPC_REALLOC_VALUE, KMPC_REALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_KMPC_CALLOC_VALUE, KMPC_CALLOC_LBL);
+		fprintf (fd, "%d      %s\n", PRV_KMPC_ALIGNED_MALLOC_VALUE, KMPC_ALIGNED_MALLOC_LBL);
 		LET_SPACES (fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);

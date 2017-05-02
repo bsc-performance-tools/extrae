@@ -67,4 +67,15 @@ void Probe_memkind_posix_memalign_Exit(void *ptr);
 void Probe_memkind_free_Entry(int kind_partition, void *ptr);
 void Probe_memkind_free_Exit();
 
+void Probe_kmpc_malloc_Entry(size_t size);
+void Probe_kmpc_malloc_Exit(void *ptr);
+void Probe_kmpc_aligned_malloc_Entry(size_t size, size_t alignment);
+void Probe_kmpc_aligned_malloc_Exit(void *ptr);
+void Probe_kmpc_calloc_Entry(size_t nelem, size_t elsize);
+void Probe_kmpc_calloc_Exit(void *ptr);
+void Probe_kmpc_realloc_Entry(void *ptr, size_t size);
+void Probe_kmpc_realloc_Exit(void *ptr);
+void Probe_kmpc_free_Entry(void * ptr);
+void Probe_kmpc_free_Exit();
+
 #endif /* PROBE_MALLOC_H_INCLUDED */

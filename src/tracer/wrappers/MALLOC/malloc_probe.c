@@ -232,3 +232,83 @@ void Probe_memkind_free_Exit()
 	}
 }
 
+void Probe_kmpc_malloc_Entry(size_t size)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_MALLOC_EV, EVT_BEGIN, size);
+	}
+}
+
+void Probe_kmpc_malloc_Exit(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_MALLOC_EV, EVT_END, (UINT64) ptr);
+	}
+}
+
+void Probe_kmpc_aligned_malloc_Entry(size_t size, size_t alignment)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_ALIGNED_MALLOC_EV, EVT_BEGIN, size);
+	}
+}
+
+void Probe_kmpc_aligned_malloc_Exit(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_ALIGNED_MALLOC_EV, EVT_END, (UINT64) ptr);
+	}
+}
+
+void Probe_kmpc_calloc_Entry(size_t nelem, size_t elsize)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_CALLOC_EV, EVT_BEGIN, nelem*elsize);
+	}
+}
+
+void Probe_kmpc_calloc_Exit(void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_CALLOC_EV, EVT_END, (UINT64) ptr);
+	}
+}
+
+void Probe_kmpc_realloc_Entry (void *ptr, size_t size)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_REALLOC_EV, EVT_BEGIN, (UINT64) ptr);
+		TRACE_MISCEVENT(LAST_READ_TIME, KMPC_REALLOC_EV, EVT_BEGIN+1, size);
+	}
+}
+
+void Probe_kmpc_realloc_Exit (void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_REALLOC_EV, EVT_END, (UINT64) ptr);
+	}
+}
+
+void Probe_kmpc_free_Entry (void *ptr)
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_FREE_EV, EVT_BEGIN, (UINT64) ptr);
+	}
+}
+
+void Probe_kmpc_free_Exit ()
+{
+	if (mpitrace_on && trace_malloc)
+	{
+		TRACE_MISCEVENTANDCOUNTERS(TIME, KMPC_FREE_EV, EVT_END, EMPTY);
+	}
+}

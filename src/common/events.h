@@ -154,13 +154,18 @@ enum {
 #define FREE_EV                  40000041
 #define CALLOC_EV                40000042
 #define REALLOC_EV               40000043
-#define POSIX_MEMALIGN_EV	 40000044
+#define POSIX_MEMALIGN_EV        40000044
 #define MEMKIND_MALLOC_EV         40000045
 #define MEMKIND_CALLOC_EV         40000046
 #define MEMKIND_REALLOC_EV        40000047
 #define MEMKIND_POSIX_MEMALIGN_EV 40000048
 #define MEMKIND_FREE_EV           40000049
 #define MEMKIND_PARTITION_EV      40001000
+#define KMPC_MALLOC_EV            40000062
+#define KMPC_FREE_EV              40000063
+#define KMPC_CALLOC_EV            40000064
+#define KMPC_REALLOC_EV           40000065
+#define KMPC_ALIGNED_MALLOC_EV    40000066
 
 enum
 {
