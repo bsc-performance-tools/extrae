@@ -103,14 +103,37 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			}
 			break;
 
+			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithFlags_v5000:
+			{
+			cudaStreamCreateWithFlags_v5000_params *p = (cudaStreamCreateWithFlags_v5000_params*)cbinfo->functionParams;
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaStreamCreate_Enter (p->pStream);
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaStreamCreate_Exit ();
+			}
+			break;
+
+			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithPriority_v5050:
+			{
+			cudaStreamCreateWithPriority_v5050_params *p = (cudaStreamCreateWithPriority_v5050_params*)cbinfo->functionParams;
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaStreamCreate_Enter (p->pStream);
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaStreamCreate_Exit ();
+			}
+			break;
+
 			case CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020:
 			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020:
 			{
-			cudaStreamSynchronize_v3020_params *p = (cudaStreamSynchronize_v3020_params *)cbinfo->functionParams;
-			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamSynchronize_Enter (p->stream);
-			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
-				Extrae_cudaStreamSynchronize_Exit ();
+				cudaStreamSynchronize_v3020_params *p = (cudaStreamSynchronize_v3020_params *)cbinfo->functionParams;
+				if (p != NULL)
+				{
+					if (cbinfo->callbackSite == CUPTI_API_ENTER)
+						Extrae_cudaStreamSynchronize_Enter (p->stream);
+					else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+						Extrae_cudaStreamSynchronize_Exit ();
+				}
 			}
 			break;
 
@@ -169,6 +192,8 @@ void Extrae_CUDA_init (int rank)
 	  CUPTI_RUNTIME_TRACE_CBID_cudaConfigureCall_v3020
 	  CUPTI_RUNTIME_TRACE_CBID_cudaThreadSynchronize_v3020
 	  CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020
+          CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithFlags_v5000
+          CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithPriority_v5050
 	  CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020
 	  CUPTI_RUNTIME_TRACE_CBID_cudaDeviceSynchronize_v3020
 	  CUPTI_RUNTIME_TRACE_CBID_cudaMemcpy_v3020
@@ -183,6 +208,10 @@ void Extrae_CUDA_init (int rank)
 		CUPTI_RUNTIME_TRACE_CBID_cudaThreadSynchronize_v3020);
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
 		CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreate_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithFlags_v5000);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaStreamCreateWithPriority_v5050);
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
 		CUPTI_RUNTIME_TRACE_CBID_cudaStreamSynchronize_v3020);
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
