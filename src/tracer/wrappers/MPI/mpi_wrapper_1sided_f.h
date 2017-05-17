@@ -64,6 +64,12 @@ void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror);
 
+void MPI_Win_lock_Fortran_Wrapper (MPI_Fint* lock_type, MPI_Fint* rank, MPI_Fint* assert, void *win, void *ierror);
+void MPI_Win_unlock_Fortran_Wrapper (MPI_Fint* rank, void *win, void *ierror);
+
+void MPI_Get_accumulate_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror);
+
+
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* defined(FORTRAN_SYMBOLS) */

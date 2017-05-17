@@ -7,6 +7,7 @@ ChangeLog
  * 6Jun2017 Make DLB available by default
  * 30May2017 Compiles and distributes a Fortran module to use the Extrae API
  with Fortran programs
+ + 17May2017 Added instrumentation support for mpi_reduce_scatter_block, mpi_ireduce_scatter_block, mpi_alltoallw, mpi_ialltoallw, mpi_win_lock, mpi_win_unlock, mpi_get_accumulate
  + 12May2017 Added compatibility with new events in CUPTI 5 for stream creation
  * 10May2017 Upgraded pyextrae support for Python 3 and added submodule for CUDA tracing
  + 02May2017 Adds intrumentation for kmpc dynamic memory routines

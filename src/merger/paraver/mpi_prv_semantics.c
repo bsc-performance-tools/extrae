@@ -101,6 +101,8 @@ static int Get_State (unsigned int EvType)
 		case MPI_WIN_POST_EV:
 		case MPI_WIN_COMPLETE_EV:
 		case MPI_WIN_CREATE_EV:
+		case MPI_WIN_LOCK_EV:
+		case MPI_WIN_UNLOCK_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:
@@ -160,11 +162,16 @@ static int Get_State (unsigned int EvType)
 		case MPI_ISCATTERV_EV:
 		case MPI_IREDUCESCAT_EV:
 		case MPI_ISCAN_EV:
+		case MPI_IREDUCE_SCATTER_BLOCK_EV:
+		case MPI_REDUCE_SCATTER_BLOCK_EV:
+		case MPI_ALLTOALLW_EV:
+		case MPI_IALLTOALLW_EV:
 			state = STATE_BCAST;
 		break;
 		case MPI_WIN_FENCE_EV:
 		case MPI_GET_EV:
 		case MPI_PUT_EV:
+		case MPI_GET_ACCUMULATE_EV:
 			state = STATE_MEMORY_XFER;
 		break;
 		default:
@@ -423,6 +430,8 @@ static unsigned int Get_GlobalOP_isRoot (event_t *current, int task)
 		break;
 		case MPI_REDUCESCAT_EV:
 		case MPI_IREDUCESCAT_EV:
+		case MPI_REDUCE_SCATTER_BLOCK_EV:
+		case MPI_IREDUCE_SCATTER_BLOCK_EV:
 			res = Get_EvTarget(current) == 0;
 		break;
 	}
@@ -472,6 +481,8 @@ static unsigned int Get_GlobalOP_RecvSize (event_t *current, int is_root)
 		break;
 		case MPI_REDUCESCAT_EV:
 		case MPI_IREDUCESCAT_EV:
+		case MPI_REDUCE_SCATTER_BLOCK_EV:
+		case MPI_IREDUCE_SCATTER_BLOCK_EV:
 			res = (is_root)?Get_EvSize(current):Get_EvAux(current);
 		break;
 		case MPI_SCAN_EV:
@@ -1110,16 +1121,19 @@ int MPI_TestSoftwareCounter_Event (event_t * current_event,
 int MPI_RMA_Event (event_t * current_event, unsigned long long current_time,
 	unsigned int cpu, unsigned int ptask, unsigned int task, unsigned int thread,
 	FileSet_t *fset)
-{
-	unsigned int EvSize;
+{	
+	unsigned int EvSize, EvType;
 	UNREFERENCED_PARAMETER(fset);
 
+	EvType  = Get_EvEvent (current_event);
+	
 	Switch_State (Get_State(Get_EvEvent(current_event)),
 		Get_EvValue(current_event) == EVT_BEGIN, ptask, task, thread);
 
 	trace_paraver_state (cpu, ptask, task, thread, current_time);
 	trace_paraver_event (cpu, ptask, task, thread, current_time,
 		Get_EvEvent(current_event), Get_EvValue (current_event));
+
 
 	EvSize = Get_EvSize (current_event);
 	if (EvSize != 0)
@@ -1128,6 +1142,25 @@ int MPI_RMA_Event (event_t * current_event, unsigned long long current_time,
 			MPI_RMA_SIZE, EvSize);
 	}
 
+	if(EvType == MPI_GET_EV || EvType == MPI_PUT_EV || EvType == MPI_GET_ACCUMULATE_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+			MPI_RMA_TARGET_RANK, Get_EvTarget(current_event));
+		
+                trace_paraver_event(cpu, ptask, task, thread, current_time,
+                        MPI_RMA_ORIGIN_ADDR, Get_EvAux(current_event));
+
+		trace_paraver_event(cpu, ptask, task, thread, current_time,
+			MPI_RMA_TARGET_DISP, Get_EvComm (current_event));
+		
+	}
+	
+	if(EvType == MPI_WIN_LOCK_EV || EvType == MPI_WIN_UNLOCK_EV)
+	{
+		trace_paraver_event (cpu, ptask, task, thread, current_time,
+			MPI_RMA_TARGET_RANK, Get_EvTarget(current_event));
+	}
+	
 	return 0;
 }
 
@@ -1237,5 +1270,12 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_ISCATTERV_EV, GlobalOP_event},
 	{ MPI_IREDUCESCAT_EV, GlobalOP_event},
 	{ MPI_ISCAN_EV, GlobalOP_event},
+	{ MPI_REDUCE_SCATTER_BLOCK_EV, GlobalOP_event},
+	{ MPI_IREDUCE_SCATTER_BLOCK_EV, GlobalOP_event},
+	{ MPI_ALLTOALLW_EV, GlobalOP_event},
+	{ MPI_IALLTOALLW_EV, GlobalOP_event},
+	{ MPI_GET_ACCUMULATE_EV, MPI_RMA_Event},
+	{ MPI_WIN_LOCK_EV, MPI_RMA_Event},
+	{ MPI_WIN_UNLOCK_EV, MPI_RMA_Event},
 	{ NULL_EV, NULL }
 };

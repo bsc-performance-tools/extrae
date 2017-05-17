@@ -34,6 +34,9 @@
 #define MPITYPE_OTHER              50000003
 #define MPITYPE_RMA                50000004
 #define MPITYPE_RMA_SIZE           50001000
+#define MPITYPE_RMA_TARGET_RANK           50001001
+#define MPITYPE_RMA_ORIGIN_ADDR    50001002
+#define MPITYPE_RMA_TARGET_DISP    50001003
 #define MPITYPE_COMM               MPITYPE_OTHER
 #define MPITYPE_GROUP              MPITYPE_OTHER
 #define MPITYPE_TOPOLOGIES         MPITYPE_OTHER
@@ -46,6 +49,9 @@
 #define MPITYPE_OTHER_LABEL        "MPI Other"
 #define MPITYPE_RMA_LABEL          "MPI One-sided"
 #define MPITYPE_RMA_SIZE_LABEL     "MPI One-sided size"
+#define MPITYPE_RMA_TARGET_RANK_LABEL     "MPI One-sided target rank"
+#define MPITYPE_RMA_ORIGIN_ADDR_LABEL  "MPI One-sided origin address"
+#define MPITYPE_RMA_TARGET_DISP_LABEL  "MPI One-sided target displacement"
 #define MPITYPE_COMM_LABEL         MPITYPE_OTHER_LABEL
 #define MPITYPE_GROUP_LABEL        MPITYPE_OTHER_LABEL
 #define MPITYPE_TOPOLOGIES_LABEL   MPITYPE_OTHER_LABEL
@@ -224,7 +230,12 @@ typedef enum
   MPI_ISCATTER_VAL,
   MPI_ISCATTERV_VAL, /* 165 */
   MPI_IREDUCESCAT_VAL,
-  MPI_ISCAN_VAL
+  MPI_ISCAN_VAL,
+  MPI_REDUCE_SCATTER_BLOCK_VAL,
+  MPI_IREDUCE_SCATTER_BLOCK_VAL,
+  MPI_ALLTOALLW_VAL, /* 170 */
+  MPI_IALLTOALLW_VAL,
+  MPI_GET_ACCUMULATE_VAL
 }
 MPIVal;
 
@@ -254,6 +265,8 @@ MPIVal;
 #define  MPI_SCATTERV_LABEL                "MPI_Scatterv"
 #define  MPI_REDUCE_SCATTER_LABEL          "MPI_Reduce_scatter"
 #define  MPI_SCAN_LABEL                    "MPI_Scan"
+#define  MPI_REDUCE_SCATTER_BLOCK_LABEL    "MPI_Reduce_scatter_block"
+#define  MPI_ALLTOALLW_LABEL		   	   "MPI_Alltoallw"
 
 #define  MPI_IREDUCE_LABEL                 "MPI_Ireduce"
 #define  MPI_IALLREDUCE_LABEL              "MPI_Iallreduce"
@@ -269,6 +282,8 @@ MPIVal;
 #define  MPI_ISCATTERV_LABEL               "MPI_Iscatterv"
 #define  MPI_IREDUCESCAT_LABEL             "MPI_Ireduce_scatter"
 #define  MPI_ISCAN_LABEL                   "MPI_Iscan"
+#define  MPI_IREDUCE_SCATTER_BLOCK_LABEL   "MPI_Ireduce_scatter_block"
+#define  MPI_IALLTOALLW_LABEL		   	   "MPI_Ialltoallw"
 
 #define  MPI_INIT_LABEL                    "MPI_Init"
 #define  MPI_FINALIZE_LABEL                "MPI_Finalize"
@@ -316,6 +331,7 @@ MPIVal;
 #define  MPI_WIN_TEST_LABEL                "MPI_Win_test"
 #define  MPI_WIN_LOCK_LABEL                "MPI_Win_lock"
 #define  MPI_WIN_UNLOCK_LABEL              "MPI_Win_unlock"
+#define  MPI_GET_ACCUMULATE_LABEL	   "MPI_Get_accumulate"
 
 #define  MPI_PACK_LABEL                    "MPI_Pack"
 #define  MPI_UNPACK_LABEL                  "MPI_Unpack"
@@ -410,6 +426,5 @@ MPIVal;
 #define  MPI_FILE_WRITE_AT_LABEL           "MPI_File_write_at"
 #define  MPI_FILE_WRITE_AT_ALL_LABEL       "MPI_File_write_at_all"
 #define  MPI_REQUEST_GET_STATUS_LABEL      "MPI_Request_get_status"
-
 
 #endif /* _MPI_EVENTENCODING_H */

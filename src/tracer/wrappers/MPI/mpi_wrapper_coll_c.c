@@ -1755,5 +1755,227 @@ int MPI_Iscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
 	return ierror;
 }
 
+/******************************************************************************
+ ***  MPI_Reduce_Scatter_Block_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
+	int recvcount, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
+{
+	int me, size, ierror;
+	int sendcount = 0;
+	int csize;
+
+	ierror = PMPI_Comm_rank (comm, &me);
+	MPI_CHECK(ierror, PMPI_Comm_rank);
+
+	if (recvcount != 0)
+	{
+		ierror = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ierror, PMPI_Type_size);
+	}
+
+	ierror = PMPI_Comm_size (comm, &csize);
+	MPI_CHECK(ierror, PMPI_Comm_size);
+
+	/*
+	*   type : REDUCE_SCATTER_BLOCK_EV      value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : Bytes sent per process in the reduce phase
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : Bytes received per process after the scatter phase
+	*/
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
+
+	ierror = PMPI_Reduce_scatter_block (sendbuf, recvbuf, recvcount, datatype,
+	  op, comm);
+
+	/*
+	*   event : REDUCE_SCATTER_BLOCK_EV      value : EVT_END
+	*   target : ---                         size  : size of the communicator
+	*   tag : ---                            comm : communicator id
+	*   aux : global op counter
+	*/
+	TRACE_MPIEVENT (TIME, MPI_REDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+
+	/* MPI Stats */
+    updateStats_COLLECTIVE(global_mpi_stats, recvcount * size, sendcount * size);
+
+	return ierror;
+}
+
+/******************************************************************************
+ ***  MPI_Ireduce_Scatter_Block_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Ireduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf,
+	int recvcount, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm,
+	MPI_Request *req)
+{
+	int me, size, ierror;
+	int sendcount = 0;
+	int csize;
+
+	ierror = PMPI_Comm_rank (comm, &me);
+	MPI_CHECK(ierror, PMPI_Comm_rank);
+
+	if (recvcount != 0)
+	{
+		ierror = PMPI_Type_size (datatype, &size);
+		MPI_CHECK(ierror, PMPI_Type_size);
+	}
+
+	ierror = PMPI_Comm_size (comm, &csize);
+	MPI_CHECK(ierror, PMPI_Comm_size);
+
+	/*
+	*   type : IREDUCE_SCATTER_BLOCK_EV     value : EVT_BEGIN
+	*   target : reduce operation ident.    size  : Bytes sent per process in the reduce phase
+	*   tag : whoami (comm rank)            comm : communicator id
+	*   aux : Bytes received per process after the scatter phase
+	*/
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IREDUCE_SCATTER_BLOCK_EV, EVT_BEGIN, op, sendcount * size, me, comm, recvcount * size);
+
+	ierror = PMPI_Ireduce_scatter_block (sendbuf, recvbuf, recvcount, datatype,
+	  op, comm, req);
+
+	/*
+	*   event : IREDUCE_SCATTER_BLOCK_EV     value : EVT_END
+	*   target : ---                         size  : size of the communicator
+	*   tag : ---                            comm : communicator id
+	*   aux : global op counter
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IREDUCE_SCATTER_BLOCK_EV, EVT_END, EMPTY, csize, EMPTY, comm, Extrae_MPI_getCurrentOpGlobal());
+
+	/* MPI Stats */
+	updateStats_COLLECTIVE(global_mpi_stats, recvcount * size, sendcount * size);
+
+	return ierror;
+}
+
+/******************************************************************************
+ ***  MPI_Alltoallw_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
+	MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, int *rdispls,
+    MPI_Datatype *recvtypes, MPI_Comm comm)
+{
+	int me, ret, csize;
+	int proc, sendbytes = 0, recvbytes = 0;
+
+	
+
+	ret = PMPI_Comm_size (comm, &csize);
+	MPI_CHECK(ret, PMPI_Comm_size);
+
+	ret = PMPI_Comm_rank (comm, &me);
+	MPI_CHECK(ret, PMPI_Comm_rank);
+
+	for (proc = 0; proc < csize; proc++)
+	{
+		int sendsize;
+		ret = PMPI_Type_size (sendtypes[proc], &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+		
+		int recvsize;
+		ret = PMPI_Type_size (recvtypes[proc], &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+						
+		if (sendcounts != NULL)
+			sendbytes += sendcounts[proc] * sendsize;			
+		if (recvcounts != NULL)
+			recvbytes += recvcounts[proc] * recvsize;
+	}
+
+	/*
+	*   event : ALLTOALLW_EV                  value : EVT_BEGIN
+	*   target : received size               size  : sent size
+	*   tag : rank                           commid: communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALLW_EV, EVT_BEGIN, recvbytes,
+	  sendbytes, me, comm, EMPTY);
+
+	ret = PMPI_Alltoallw (sendbuf, sendcounts, sdispls, sendtypes,
+	  recvbuf, recvcounts, rdispls, recvtypes, comm);
+
+	/*
+	*   event : ALLTOALLW_EV                  value : EVT_END
+	*   target : ---                         size  : size of the communicator
+	*   tag : ---                            commid: communicator id
+	*   aux : global op counter
+	*/
+	TRACE_MPIEVENT (TIME, MPI_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm,
+	  Extrae_MPI_getCurrentOpGlobal());
+
+	/* MPI Stats */
+    updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+
+	return ret;
+}
+
+/******************************************************************************
+ ***  MPI_Ialltoallw_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Ialltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
+	MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, int *rdispls,
+    MPI_Datatype *recvtypes, MPI_Comm comm, MPI_Request *req)
+{
+	int me, ret, csize;
+	int proc, sendbytes = 0, recvbytes = 0;
+
+
+	ret = PMPI_Comm_size (comm, &csize);
+	MPI_CHECK(ret, PMPI_Comm_size);
+
+	ret = PMPI_Comm_rank (comm, &me);
+	MPI_CHECK(ret, PMPI_Comm_rank);
+
+	for (proc = 0; proc < csize; proc++)
+	{
+		int sendsize;
+		ret = PMPI_Type_size (sendtypes[proc], &sendsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+		
+		int recvsize;
+		ret = PMPI_Type_size (recvtypes[proc], &recvsize);
+		MPI_CHECK(ret, PMPI_Type_size);
+						
+		if (sendcounts != NULL)
+			sendbytes += sendcounts[proc] * sendsize;			
+		if (recvcounts != NULL)
+			recvbytes += recvcounts[proc] * recvsize;
+	}
+
+	/*
+	*   event : IALLTOALLW_EV                  value : EVT_BEGIN
+	*   target : received size               size  : sent size
+	*   tag : rank                           commid: communicator id
+	*   aux : ---
+	*/
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALLW_EV, EVT_BEGIN, recvbytes,
+	  sendbytes, me, comm, EMPTY);
+
+	ret = PMPI_Ialltoallw (sendbuf, sendcounts, sdispls, sendtypes,
+	  recvbuf, recvcounts, rdispls, recvtypes, comm, req);
+
+	/*
+	*   event : IALLTOALLW_EV                  value : EVT_END
+	*   target : ---                         size  : size of the communicator
+	*   tag : ---                            commid: communicator id
+	*   aux : global op counter
+	*/
+	TRACE_MPIEVENT (TIME, MPI_IALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, comm,
+	  Extrae_MPI_getCurrentOpGlobal());
+
+	/* MPI Stats */
+    updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+
+	return ret;
+}
+
+
+
 #endif /* MPI3 */
 

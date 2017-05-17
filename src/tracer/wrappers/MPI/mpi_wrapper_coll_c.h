@@ -78,6 +78,15 @@ int MPI_Reduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf, int *recvcounts,
 
 int MPI_Scan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
   MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
+  
+int MPI_Reduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf, int recvcount,
+  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
+  
+int MPI_Alltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
+	MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, int *rdispls,
+    MPI_Datatype *recvtypes, MPI_Comm comm);
+
+
 
 #if defined(MPI3)
 
@@ -121,6 +130,13 @@ int MPI_Ireduce_Scatter_C_Wrapper (void *sendbuf, void *recvbuf, int *recvcounts
 
 int MPI_Iscan_C_Wrapper (void *sendbuf, void *recvbuf, int count,
   MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req);
+  
+int MPI_Ireduce_Scatter_Block_C_Wrapper (void *sendbuf, void *recvbuf, int recvcount, 
+  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm, MPI_Request *req);
+
+int MPI_Ialltoallw_C_Wrapper (void *sendbuf, int *sendcounts, int *sdispls,
+	MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, int *rdispls,
+    MPI_Datatype *recvtypes, MPI_Comm comm, MPI_Request *req);
 
 #endif /* MPI3 */
 

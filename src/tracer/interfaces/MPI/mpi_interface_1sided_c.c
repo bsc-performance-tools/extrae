@@ -295,6 +295,86 @@ int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin
 	return res;
 }
 
+int MPI_Win_lock (int lock_type, int rank, int assert, MPI_Win win)
+{
+
+	int res;
+
+	DLB(DLB_MPI_Win_lock_enter, lock_type, rank, assert, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Win_lock_C_Wrapper (lock_type, rank, assert, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Win_lock (lock_type, rank, assert, win);
+
+	DLB(DLB_MPI_Win_lock_leave);
+	return res;
+
+}
+
+
+int MPI_Win_unlock (int rank, MPI_Win win)
+{
+
+	int res;
+
+	DLB(DLB_MPI_Win_unlock_enter, rank, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Win_unlock_C_Wrapper (rank, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Win_unlock (rank, win);
+
+	DLB(DLB_MPI_Win_unlock_leave);
+	return res;
+
+}
+
+
+int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+        void *result_addr, int result_count, MPI_Datatype result_datatype,
+	int target_rank, MPI_Aint target_disp, int target_count,
+	MPI_Datatype target_datatype, MPI_Op op, MPI_Win win)
+{
+	int res;
+
+	DLB(DLB_MPI_Get_accumulate_enter, MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype, result_addr,
+		result_count, result_datatype, target_rank, target_disp, target_count,
+                target_datatype, op, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		res = MPI_Get_accumulate_C_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
+			result_addr, result_count, result_datatype,
+			target_rank, target_disp, target_count, target_datatype, op, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+		res = PMPI_Get_accumulate (origin_addr, origin_count, origin_datatype,
+			result_addr, result_count, result_datatype,
+			target_rank, target_disp, target_count, target_datatype, op, win);
+
+	DLB(DLB_MPI_Get_accumulate_leave);
+
+	return res;
+}
+
+
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* C_SYMBOLS */

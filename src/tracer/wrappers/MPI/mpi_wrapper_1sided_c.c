@@ -81,7 +81,6 @@
 		fflush (stderr); \
 		exit (1); \
 	}
-
 #if defined(C_SYMBOLS)
 
 #if MPI_SUPPORTS_MPI_1SIDED
@@ -92,10 +91,11 @@ int MPI_Win_create_C_Wrapper (void *base, MPI_Aint size, int disp_unit,
 	int res;
 	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
-	res = PMPI_Win_create (base, size, disp_unit, info, comm, win);
+	res = PMPI_Win_create (base, size, disp_unit, info, comm, win);	
 	TRACE_MPIEVENT(TIME, MPI_WIN_CREATE_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	updateStats_OTHER(global_mpi_stats);
+	
 	return res;
 }
 
@@ -176,12 +176,15 @@ int MPI_Get_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	MPI_Win win)
 {
 	int ierror;
-	int datatype_size;
+	int origin_datatype_size, target_datatype_size;
 
-	ierror = PMPI_Type_size(origin_datatype, &datatype_size);
+	ierror = PMPI_Type_size(origin_datatype, &origin_datatype_size);
+	MPI_CHECK(ierror, PMPI_Type_size);
+	
+	ierror = PMPI_Type_size(target_datatype, &target_datatype_size);
 	MPI_CHECK(ierror, PMPI_Type_size);
 
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, datatype_size * origin_count, EMPTY, EMPTY, EMPTY);
+TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, target_rank, origin_datatype_size * origin_count, EMPTY, target_disp * target_datatype_size, origin_addr);
 	ierror = PMPI_Get (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
 	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -196,12 +199,16 @@ int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	MPI_Win win)
 {
 	int ierror;
-	int datatype_size;
 
-	ierror = PMPI_Type_size(origin_datatype, &datatype_size);
+	int origin_datatype_size, target_datatype_size;
+
+	ierror = PMPI_Type_size(origin_datatype, &origin_datatype_size);
+	MPI_CHECK(ierror, PMPI_Type_size);
+	
+	ierror = PMPI_Type_size(target_datatype, &target_datatype_size);
 	MPI_CHECK(ierror, PMPI_Type_size);
 
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, datatype_size * origin_count, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, target_rank, target_datatype_size * target_count, EMPTY, target_disp * target_datatype_size, origin_addr);
 	ierror = PMPI_Put (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win);
 	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -211,6 +218,54 @@ int MPI_Put_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_
 	return ierror;
 }
 
+int MPI_Win_lock_C_Wrapper (int lock_type, int rank, int assert, MPI_Win win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_LOCK_EV, EVT_BEGIN, rank, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_lock (lock_type, rank, assert, win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_LOCK_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
+int MPI_Win_unlock_C_Wrapper (int rank, MPI_Win win)
+{
+	int res;
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_UNLOCK_EV, EVT_BEGIN, rank, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	res = PMPI_Win_unlock (rank, win);
+	TRACE_MPIEVENT(TIME, MPI_WIN_UNLOCK_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	updateStats_OTHER(global_mpi_stats);
+	return res;
+}
+
+int MPI_Get_accumulate_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype, 	   void *result_addr, int result_count, MPI_Datatype result_datatype, int target_rank, 
+	MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype, MPI_Op op,
+	MPI_Win win)
+{
+	int ierror;
+	int origin_datatype_size, result_datatype_size, target_datatype_size;
+
+	ierror = PMPI_Type_size(origin_datatype, &origin_datatype_size);
+	MPI_CHECK(ierror, PMPI_Type_size);
+	
+	ierror = PMPI_Type_size(result_datatype, &result_datatype_size);
+	MPI_CHECK(ierror, PMPI_Type_size);
+	
+	ierror = PMPI_Type_size(target_datatype, &target_datatype_size);
+	MPI_CHECK(ierror, PMPI_Type_size);
+	
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_ACCUMULATE_EV, EVT_BEGIN, target_rank, ((origin_datatype_size * origin_count) + (target_datatype_size * target_count)), EMPTY, target_datatype_size * target_disp, origin_addr);
+	ierror = PMPI_Get_accumulate (origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win);
+	TRACE_MPIEVENT(TIME, MPI_GET_ACCUMULATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+
+	return ierror;
+}
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 

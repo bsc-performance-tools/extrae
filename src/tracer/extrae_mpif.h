@@ -295,6 +295,24 @@ void CtoF77 (mpi_sendrecv_replace) (void *buf, MPI_Fint *count, MPI_Fint *type,
 	MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
 
+void CtoF77 (mpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
+	MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+	MPI_Fint *ierror);
+
+void CtoF77 (mpi_ireduce_scatter_block) (void *sendbuf, void *recvbuf,
+	MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+	MPI_Fint *req, MPI_Fint *ierror);
+
+void CtoF77 (mpi_alltoallw) (void *sendbuf, MPI_Fint *sendcounts,
+	MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
+	MPI_Fint *rdispls, MPI_Fint *recvtypes,	MPI_Fint *comm, MPI_Fint *ierror);
+
+void CtoF77 (mpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
+	MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
+	MPI_Fint *rdispls, MPI_Fint *recvtypes,	MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);
+
+
+
 #if defined(MPI_SUPPORTS_MPI_IO)
 void CtoF77 (mpi_file_open) (MPI_Fint *comm, char *filename, MPI_Fint *amode,
 	MPI_Fint *info, MPI_File *fh, MPI_Fint *len);
@@ -349,6 +367,14 @@ void CtoF77(mpi_get) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origi
 void CtoF77(mpi_put) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror);
+
+void CtoF77(mpi_win_lock) (MPI_Fint* lock_type, MPI_Fint* rank, MPI_Fint* assert, MPI_Fint* win, MPI_Fint* ierror);
+
+void CtoF77(mpi_win_unlock) (MPI_Fint* rank, MPI_Fint* win, MPI_Fint* ierror);
+
+void CtoF77(mpi_get_accumulate) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror);
+
+
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
@@ -634,6 +660,24 @@ void CtoF77 (pmpi_sendrecv_replace) (void *buf, MPI_Fint *count, MPI_Fint *type,
 	MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *source, MPI_Fint *recvtag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
 
+void CtoF77 (pmpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
+	MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+	MPI_Fint *ierror);
+
+void CtoF77 (pmpi_ireduce_scatter_block) (void *sendbuf, void *recvbuf,
+	MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+	MPI_Fint *req, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_alltoallw) (void *sendbuf, MPI_Fint *sendcounts,
+	MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
+	MPI_Fint *rdispls, MPI_Fint *recvtypes,	MPI_Fint *comm, MPI_Fint *ierror);
+
+void CtoF77 (pmpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
+	MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
+	MPI_Fint *rdispls, MPI_Fint *recvtypes,	MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);
+
+
+
 #if (MPI_SUPPORTS_MPI_IO)
 void CtoF77 (pmpi_file_open) (MPI_Fint *comm, char *filename, MPI_Fint *amode,
 	MPI_Fint *info, MPI_File *fh, MPI_Fint *len);
@@ -688,6 +732,16 @@ void CtoF77(pmpi_get) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* orig
 void CtoF77(pmpi_put) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype,
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror);
+
+
+void CtoF77(pmpi_win_lock) (MPI_Fint* lock_type, MPI_Fint* rank, MPI_Fint* assert, MPI_Fint* win, MPI_Fint* ierror);
+
+void CtoF77(pmpi_win_unlock) (MPI_Fint* rank, MPI_Fint* win, MPI_Fint* ierror);
+
+void CtoF77(pmpi_get_accumulate) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror);
+
+
+
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 

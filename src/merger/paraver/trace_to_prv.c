@@ -455,7 +455,6 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
-
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
 				if (handler != NULL)
 				{

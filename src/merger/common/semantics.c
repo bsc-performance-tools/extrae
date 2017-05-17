@@ -125,7 +125,7 @@ Ev_Handler_t * Semantics_getEventHandler (int event)
 	int i = 0;
 
 	while (i < num_Registered_Handlers)
-	{
+	{	
 		if ((event >= Event_Handlers[i].range_min) && (event <= Event_Handlers[i].range_max))
 		{
 			return Event_Handlers[i].handler;

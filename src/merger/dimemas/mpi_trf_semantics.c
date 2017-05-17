@@ -117,6 +117,7 @@ static int Get_GlobalOP_RootRank (event_t *current)
 	{
 		case MPI_REDUCE_EV:
 		case MPI_REDUCESCAT_EV:
+		case MPI_REDUCE_SCATTER_BLOCK_EV:
 		case MPI_SCAN_EV:
 			res = Get_EvAux(current);
 		break;
@@ -135,6 +136,7 @@ static int Get_GlobalOP_RootRank (event_t *current)
 		case MPI_ALLREDUCE_EV:
 		case MPI_ALLTOALL_EV:
 		case MPI_ALLTOALLV_EV:
+		case MPI_ALLTOALLW_EV:
 		default:
 			res = 0;
 		break;
@@ -169,6 +171,7 @@ static UINT64 Get_GlobalOP_SendSize (event_t *current)
 		break;
 
 		case MPI_REDUCESCAT_EV:
+		case MPI_REDUCE_SCATTER_BLOCK_EV:
 		case MPI_SCAN_EV:
 		case MPI_ALLGATHER_EV:
 		case MPI_ALLGATHERV_EV:
@@ -179,6 +182,7 @@ static UINT64 Get_GlobalOP_SendSize (event_t *current)
 		case MPI_ALLREDUCE_EV:
 		case MPI_ALLTOALL_EV:
 		case MPI_ALLTOALLV_EV:
+		case MPI_ALLTOALLW_EV:
 			res = Get_EvSize(current);
 		break;
 
@@ -211,6 +215,7 @@ static UINT64 Get_GlobalOP_RecvSize (event_t *current)
 		break;
 
 		case MPI_REDUCESCAT_EV:
+		case MPI_REDUCE_SCATTER_BLOCK_EV:
 		case MPI_SCAN_EV:
 		case MPI_ALLREDUCE_EV:
 			res = Get_EvSize(current);
@@ -227,6 +232,7 @@ static UINT64 Get_GlobalOP_RecvSize (event_t *current)
 
 		case MPI_ALLTOALL_EV:
 		case MPI_ALLTOALLV_EV:
+		case MPI_ALLTOALLW_EV:
 			res = Get_EvTarget(current);
 		break;
 
@@ -270,7 +276,10 @@ static int Get_GlobalOP_ID (int type)
 		res = GLOP_ID_MPI_Scatter;
 	else if (MPI_SCATTERV_EV == type)
 		res = GLOP_ID_MPI_Scatterv;
-
+	else if (MPI_REDUCE_SCATTER_BLOCK_EV == type)
+		res = GLOP_ID_MPI_Reduce_scatter_block;
+	else if (MPI_ALLTOALLW_EV == type)
+		res = GLOP_ID_MPI_Alltoallw;	
 	return res;
 }
 
@@ -647,6 +656,8 @@ SingleEv_Handler_t TRF_MPI_Event_Handlers[] = {
 	{ MPI_FILE_READ_AT_ALL_EV, NULL },
 	{ MPI_FILE_WRITE_AT_EV, NULL },
 	{ MPI_FILE_WRITE_AT_ALL_EV, NULL },
+	{ MPI_REDUCE_SCATTER_BLOCK_EV, GlobalOP_Event },
+	{ MPI_ALLTOALLW_EV, GlobalOP_Event },
 	{ NULL_EV, NULL }
 };
 

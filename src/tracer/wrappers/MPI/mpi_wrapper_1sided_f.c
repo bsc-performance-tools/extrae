@@ -170,12 +170,14 @@ void MPI_Get_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint* ierror)
 {
-	int datatype_size;
+	int origin_datatype_size, target_datatype_size;
 
-	CtoF77(pmpi_type_size) (origin_datatype, &datatype_size, ierror);
+	CtoF77(pmpi_type_size) (origin_datatype, &origin_datatype_size, ierror);
+	MPI_CHECK(*ierror, pmpi_type_size);
+	CtoF77(pmpi_type_size) (target_datatype, &target_datatype_size, ierror);
 	MPI_CHECK(*ierror, pmpi_type_size);
 
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, datatype_size * (*origin_count), EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_EV, EVT_BEGIN, EMPTY, origin_datatype_size * (*origin_count), target_datatype_size * (*target_disp), EMPTY, origin_addr);
 	CtoF77(pmpi_get) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_GET_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -187,18 +189,66 @@ void MPI_Put_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fin
   MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype,
 	MPI_Fint* win, MPI_Fint *ierror)
 {
-	int datatype_size;
+	int origin_datatype_size, target_datatype_size;
 
-	CtoF77(pmpi_type_size) (origin_datatype, &datatype_size, ierror);
+	CtoF77(pmpi_type_size) (origin_datatype, &origin_datatype_size, ierror);
 	MPI_CHECK(*ierror, pmpi_type_size);
-
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, EMPTY, datatype_size * (*origin_count), EMPTY, EMPTY, EMPTY);
+	CtoF77(pmpi_type_size) (target_datatype, &target_datatype_size, ierror);
+	MPI_CHECK(*ierror, pmpi_type_size);
+	
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_PUT_EV, EVT_BEGIN, target_rank, target_datatype_size * (*target_count), EMPTY, target_datatype_size * (*target_disp), origin_addr);
 	CtoF77(pmpi_put) (origin_addr, origin_count, origin_datatype, target_rank,
 		target_disp, target_count, target_datatype, win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_PUT_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 }
+
+
+void MPI_Win_lock_Fortran_Wrapper (MPI_Fint* lock_type, MPI_Fint* rank, MPI_Fint* assert, void *win, void *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_LOCK_EV, EVT_BEGIN, *rank, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_lock)(lock_type, rank, assert, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_LOCK_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+
+void MPI_Win_unlock_Fortran_Wrapper (MPI_Fint* rank, void *win, void *ierror)
+{
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_WIN_UNLOCK_EV, EVT_BEGIN, *rank, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+	CtoF77 (pmpi_win_unlock)(rank, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_WIN_UNLOCK_EV, EVT_END, EMPTY, EMPTY,
+	  EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
+
+void MPI_Get_accumulate_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror)
+{
+	int origin_datatype_size, result_datatype_size, target_datatype_size;
+
+	CtoF77(pmpi_type_size) (origin_datatype, &origin_datatype_size, ierror);
+	MPI_CHECK(*ierror, pmpi_type_size);
+
+	CtoF77(pmpi_type_size) (result_datatype, &result_datatype_size, ierror);
+	MPI_CHECK(*ierror, pmpi_type_size);
+
+	CtoF77(pmpi_type_size) (target_datatype, &target_datatype_size, ierror);
+	MPI_CHECK(*ierror, pmpi_type_size);
+
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_ACCUMULATE_EV, EVT_BEGIN, *target_rank, origin_datatype_size * (*origin_count) + result_datatype_size * (*result_count), EMPTY, target_datatype_size * (*target_disp), origin_addr);
+	CtoF77(pmpi_get_accumulate) (origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win, ierror);
+	TRACE_MPIEVENT(TIME, MPI_GET_ACCUMULATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 

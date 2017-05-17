@@ -125,6 +125,7 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
     
       case MPI_ALLTOALL_EV:
       case MPI_ALLTOALLV_EV:
+      case MPI_IALLTOALLW_EV:
         updateStats_COLLECTIVE( MPI_Stats, Get_EvTarget(MPIBeginEv), Get_EvSize(MPIBeginEv) );
         break;
   

@@ -379,6 +379,9 @@ enum {
 #define MPI_WIN_COMPLETE_EV          50000207
 #define MPI_WIN_WAIT_EV              50000208
 #define MPI_RMA_SIZE                 50001000
+#define MPI_RMA_TARGET_RANK          50001001
+#define MPI_RMA_ORIGIN_ADDR          50001002
+#define MPI_RMA_TARGET_DISP          50001003
 
 #define MPI_IREDUCE_EV               50000210
 #define MPI_IALLREDUCE_EV            50000211
@@ -394,7 +397,13 @@ enum {
 #define MPI_ISCATTERV_EV             50000221
 #define MPI_IREDUCESCAT_EV           50000222
 #define MPI_ISCAN_EV                 50000223
-
+#define MPI_REDUCE_SCATTER_BLOCK_EV  50000224
+#define MPI_IREDUCE_SCATTER_BLOCK_EV 50000225
+#define MPI_ALLTOALLW_EV	     50000226
+#define MPI_IALLTOALLW_EV	     50000227
+#define MPI_WIN_LOCK_EV              50000228
+#define MPI_WIN_UNLOCK_EV	     50000229
+#define MPI_GET_ACCUMULATE_EV	     50000230
 
 
 #define MPI_IPROBE_COUNTER_EV        50000300
@@ -889,6 +898,9 @@ typedef enum
 /* 153 */   BLOCK_ID_LAPI_Amsend,
 /* 154 */   BLOCK_ID_LAPI_Rmw,
 /* 155 */   BLOCK_ID_LAPI_Waitcntr
+/* 156 */   BLOCK_ID_MPI_Reduce_scatter_block,
+/* 157 */   BLOCK_ID_MPI_Alltoallw,
+/* 158 */   BLOCK_ID_MPI_Get_accumulate
   
 } DimBlock;
 #endif
@@ -913,7 +925,9 @@ typedef enum
   GLOP_ID_MPI_Reduce         = 10,
   GLOP_ID_MPI_Allreduce      = 11,
   GLOP_ID_MPI_Reduce_scatter = 12,
-  GLOP_ID_MPI_Scan           = 13
+  GLOP_ID_MPI_Scan           = 13,
+  GLOP_ID_MPI_Reduce_scatter_block = 14,
+  GLOP_ID_MPI_Alltoallw		 = 15
 
 } DimCollectiveOp;
 

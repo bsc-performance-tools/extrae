@@ -23,7 +23,7 @@
 #include "common.h"
 #include "events.h"
 
-#define MPI_EVENTS 100
+#define MPI_EVENTS 107  /*Last added MPI_GET_ACCUMULATE_EV*/
 
 /******************************************************************************
  ***  IsMPI
@@ -56,7 +56,9 @@ static unsigned mpi_events[] = {
 	MPI_IREDUCE_EV, MPI_IALLREDUCE_EV, MPI_IBARRIER_EV, MPI_IBCAST_EV,
 	MPI_IALLTOALL_EV, MPI_IALLTOALLV_EV, MPI_IALLGATHER_EV, MPI_IALLGATHERV_EV,
 	MPI_IGATHER_EV, MPI_IGATHERV_EV, MPI_ISCATTER_EV, MPI_ISCATTERV_EV,
-	MPI_IREDUCESCAT_EV, MPI_ISCAN_EV
+	MPI_IREDUCESCAT_EV, MPI_ISCAN_EV, MPI_REDUCE_SCATTER_BLOCK_EV, MPI_IREDUCE_SCATTER_BLOCK_EV,
+	MPI_ALLTOALLW_EV, MPI_IALLTOALLW_EV, MPI_WIN_LOCK_EV, MPI_WIN_UNLOCK_EV,
+	MPI_GET_ACCUMULATE_EV
  };
 
 unsigned IsMPI (unsigned EvType)
@@ -332,6 +334,10 @@ unsigned IsMPICollective(unsigned EvType)
       case MPI_SCATTERV_EV:
       case MPI_REDUCESCAT_EV:
       case MPI_SCAN_EV:
+      case MPI_REDUCE_SCATTER_BLOCK_EV:
+      case MPI_IREDUCE_SCATTER_BLOCK_EV:
+      case MPI_ALLTOALLW_EV:
+      case MPI_IALLTOALLW_EV:
          return TRUE;
       default:
          return FALSE;
