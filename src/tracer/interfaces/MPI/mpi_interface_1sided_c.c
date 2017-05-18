@@ -23,22 +23,6 @@
 
 #include "common.h"
 
-#if defined(MPI3)
-#define MPI3_CONST const
-#define MPI3_VOID_P_CAST (void *)
-#define MPI3_CHAR_P_CAST (char *)
-#define MPI3_F_INT_P_CAST (MPI_Fint *)
-#define MPI3_C_INT_P_CAST (int *)
-#define MPI3_MPI_INFO_P_CAST (MPI_Info *)
-#else
-#define MPI3_CONST
-#define MPI3_VOID_P_CAST
-#define MPI3_CHAR_P_CAST
-#define MPI3_F_INT_P_CAST
-#define MPI3_C_INT_P_CAST
-#define MPI3_MPI_INFO_P_CAST
-#endif
-
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -58,17 +42,8 @@
 #include "wrapper.h"
 #include "mpi_wrapper.h"
 #include "mpi_interface_coll_helper.h"
-
-#if defined(ENABLE_LOAD_BALANCING)
-# if defined(FORTRAN_SYMBOLS)
-#  include "MPI_interfaceF.h"
-# endif
-# if defined(C_SYMBOLS)
-#  include "MPI_interface.h"
-# endif
-#endif
-
-#include "mpi_interface_coll_helper.h"
+#include "mpi_interface.h"
+#include "dlb.h"
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -114,9 +89,7 @@ int MPI_Win_create (void *base, MPI_Aint size, int disp_unit, MPI_Info info,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_create_enter (base, size, disp_unit, info, comm, win);
-#endif
+	DLB(DLB_MPI_Win_create_enter, base, size, disp_unit, info, comm, win);
 
 	if (mpitrace_on)
 	{
@@ -129,9 +102,7 @@ int MPI_Win_create (void *base, MPI_Aint size, int disp_unit, MPI_Info info,
 	else
 		res = PMPI_Win_create (base, size, disp_unit, info, comm, win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_create_leave ();
-#endif
+	DLB(DLB_MPI_Win_create_leave);
 
 	return res;
 }
@@ -140,9 +111,7 @@ int MPI_Win_fence (int assert, MPI_Win win)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_fence_enter (assert, win);
-#endif
+	DLB(DLB_MPI_Win_fence_enter, assert, win);
 
 	if (mpitrace_on)
 	{
@@ -155,9 +124,7 @@ int MPI_Win_fence (int assert, MPI_Win win)
 	else
 		res = PMPI_Win_fence (assert, win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_fence_leave ();
-#endif
+	DLB(DLB_MPI_Win_fence_leave);
 
 	return res;
 }
@@ -166,9 +133,7 @@ int MPI_Win_start (MPI_Group group, int assert, MPI_Win win)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_start_enter (group, assert, win);
-#endif
+	DLB(DLB_MPI_Win_start_enter, group, assert, win);
 
 	if (mpitrace_on)
 	{
@@ -181,9 +146,7 @@ int MPI_Win_start (MPI_Group group, int assert, MPI_Win win)
 	else
 		res = PMPI_Win_start (group, assert, win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_start_leave ();
-#endif
+	DLB(DLB_MPI_Win_start_leave);
 
 	return res;
 }
@@ -192,9 +155,7 @@ int MPI_Win_free (MPI_Win *win)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_free_enter (win);
-#endif
+	DLB(DLB_MPI_Win_free_enter, win);
 
 	if (mpitrace_on)
 	{
@@ -207,9 +168,7 @@ int MPI_Win_free (MPI_Win *win)
 	else
 		res = PMPI_Win_free (win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_free_leave ();
-#endif
+	DLB(DLB_MPI_Win_free_leave);
 
 	return res;
 }
@@ -218,9 +177,7 @@ int MPI_Win_complete (MPI_Win win)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_complete_enter (win);
-#endif
+	DLB(DLB_MPI_Win_complete_enter, win);
 
 	if (mpitrace_on)
 	{
@@ -233,9 +190,7 @@ int MPI_Win_complete (MPI_Win win)
 	else
 		res = PMPI_Win_complete (win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_complete_leave ();
-#endif
+	DLB(DLB_MPI_Win_complete_leave);
 
 	return res;
 }
@@ -244,9 +199,7 @@ int MPI_Win_wait (MPI_Win win)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_wait_enter (win);
-#endif
+	DLB(DLB_MPI_Win_wait_enter, win);
 
 	if (mpitrace_on)
 	{
@@ -259,9 +212,7 @@ int MPI_Win_wait (MPI_Win win)
 	else
 		res = PMPI_Win_wait (win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_wait_leave ();
-#endif
+	DLB(DLB_MPI_Win_wait_leave);
 
 	return res;
 }
@@ -270,9 +221,7 @@ int MPI_Win_post (MPI_Group group, int assert, MPI_Win win)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_post_enter (group, assert, win);
-#endif
+	DLB(DLB_MPI_Win_post_enter, group, assert, win);
 
 	if (mpitrace_on)
 	{
@@ -285,9 +234,7 @@ int MPI_Win_post (MPI_Group group, int assert, MPI_Win win)
 	else
 		res = PMPI_Win_post (group, assert, win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_post_leave ();
-#endif
+	DLB(DLB_MPI_Win_post_leave);
 
 	return res;
 }
@@ -298,10 +245,8 @@ int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Get_enter (origin_addr, origin_count, origin_datatype,
+	DLB(DLB_MPI_Get_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win);
-#endif
 
 	if (mpitrace_on)
 	{
@@ -317,9 +262,7 @@ int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 			target_rank, target_disp, target_count, target_datatype,
 			win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Get_leave ();
-#endif
+	DLB(DLB_MPI_Get_leave);
 
 	return res;
 }
@@ -330,10 +273,8 @@ int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Put_enter (origin_addr, origin_count, origin_datatype,
+	DLB(DLB_MPI_Put_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win);
-#endif
 
 	if (mpitrace_on)
 	{
@@ -349,9 +290,8 @@ int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin
 			target_rank, target_disp, target_count, target_datatype,
 			win);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Put_leave ();
-#endif
+	DLB(DLB_MPI_Put_leave);
+	
 	return res;
 }
 

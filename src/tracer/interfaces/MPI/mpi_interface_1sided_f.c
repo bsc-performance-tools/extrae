@@ -23,22 +23,6 @@
 
 #include "common.h"
 
-#if defined(MPI3)
-#define MPI3_CONST const
-#define MPI3_VOID_P_CAST (void *)
-#define MPI3_CHAR_P_CAST (char *)
-#define MPI3_F_INT_P_CAST (MPI_Fint *)
-#define MPI3_C_INT_P_CAST (int *)
-#define MPI3_MPI_INFO_P_CAST (MPI_Info *)
-#else
-#define MPI3_CONST
-#define MPI3_VOID_P_CAST
-#define MPI3_CHAR_P_CAST
-#define MPI3_F_INT_P_CAST
-#define MPI3_C_INT_P_CAST
-#define MPI3_MPI_INFO_P_CAST
-#endif
-
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -58,15 +42,8 @@
 #include "wrapper.h"
 #include "mpi_wrapper.h"
 #include "mpi_interface_coll_helper.h"
-
-#if defined(ENABLE_LOAD_BALANCING)
-# if defined(FORTRAN_SYMBOLS)
-#  include "MPI_interfaceF.h"
-# endif
-# if defined(C_SYMBOLS)
-#  include "MPI_interface.h"
-# endif
-#endif
+#include "mpi_interface.h"
+#include "dlb.h"
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -115,22 +92,22 @@
 /* This macro defines r1, r2 and r3 to be aliases to "orig" routine.
    params are the same parameters received by "orig" */
 
-# if defined(DYNINST_MODULE)
+#if defined(DYNINST_MODULE)
 
 /* MPI_F_SYMS define different Fortran synonymous using the __attribute__ 
 	 compiler constructor. Use r3 in the UPPERCASE VERSION of the MPI call. */
 
-#  define MPI_F_SYMS(r1,r2,r3,orig,params) \
+#define MPI_F_SYMS(r1,r2,r3,orig,params) \
     void NAME_ROUTINE_F(r1) params __attribute__ ((alias ("patch_p"#orig))); \
     void NAME_ROUTINE_F(r2) params __attribute__ ((alias ("patch_p"#orig))); \
     void NAME_ROUTINE_FU(r3) params __attribute__ ((alias ("patch_p"#orig)));
-# else
-#  define MPI_F_SYMS(r1,r2,r3,orig,params) \
+#else
+#define MPI_F_SYMS(r1,r2,r3,orig,params) \
     void r1 params __attribute__ ((alias (#orig))); \
     void r2 params __attribute__ ((alias (#orig))); \
     void r3 params __attribute__ ((alias (#orig)));
 
-# endif
+#endif
  
 #endif
 
@@ -146,9 +123,7 @@ void NAME_ROUTINE_F(mpi_win_create)(void *base, void *size, MPI_Fint *disp_unit,
 void NAME_ROUTINE_C2F(mpi_win_create)(void *base, void *size, MPI_Fint *disp_unit, void *info, MPI_Fint *comm, void *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_create_F_enter (base, size, disp_unit, info, comm, win, ierror);
-#endif
+	DLB(DLB_MPI_Win_create_F_enter, base, size, disp_unit, info, comm, win, ierror);
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -159,9 +134,8 @@ void NAME_ROUTINE_C2F(mpi_win_create)(void *base, void *size, MPI_Fint *disp_uni
 	}
 	else
 		CtoF77(pmpi_win_create)(base, size, disp_unit, info, comm, win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_create_F_leave ();
-#endif
+	
+	DLB(DLB_MPI_Win_create_F_leave);
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -172,9 +146,8 @@ void NAME_ROUTINE_F(mpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierror
 void NAME_ROUTINE_C2F(mpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_fence_F_enter (assert, win, ierror);
-#endif
+	DLB(DLB_MPI_Win_fence_F_enter, assert, win, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -185,9 +158,8 @@ void NAME_ROUTINE_C2F(mpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierr
 	}
 	else
 		CtoF77(pmpi_win_fence)(assert, win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_fence_F_leave ();
-#endif
+		
+	DLB(DLB_MPI_Win_fence_F_leave);
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -198,9 +170,8 @@ void NAME_ROUTINE_F(mpi_win_start)(void *group, void *assert, void *win, MPI_Fin
 void NAME_ROUTINE_C2F(mpi_win_start)(void *group, void *assert, void *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_start_F_enter (group, assert, win, ierror);
-#endif
+	DLB(DLB_MPI_Win_start_F_enter, group, assert, win, ierror);
+	
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -211,9 +182,8 @@ void NAME_ROUTINE_C2F(mpi_win_start)(void *group, void *assert, void *win, MPI_F
 	}
 	else
 		CtoF77(pmpi_win_start)(group, assert, win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_start_F_leave ();
-#endif
+		
+	DLB(DLB_MPI_Win_start_F_leave);
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -224,9 +194,8 @@ void NAME_ROUTINE_F(mpi_win_free)(void *win, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_win_free)(void *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_free_F_enter (win, ierror);
-#endif
+	DLB(DLB_MPI_Win_free_F_enter, win, ierror);
+	
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -237,9 +206,9 @@ void NAME_ROUTINE_C2F(mpi_win_free)(void *win, MPI_Fint *ierror)
 	}
 	else
 		CtoF77(pmpi_win_free)(win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_free_F_leave ();
-#endif
+		
+	DLB(DLB_MPI_Win_free_F_leave);
+
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -250,9 +219,9 @@ void NAME_ROUTINE_F(mpi_win_complete)(void *win, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_win_complete)(void *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_complete_F_enter (win, ierror);
-#endif
+
+	DLB(DLB_MPI_Win_complete_F_enter, win, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -263,9 +232,9 @@ void NAME_ROUTINE_C2F(mpi_win_complete)(void *win, MPI_Fint *ierror)
 	}
 	else
 		CtoF77(pmpi_win_complete)(win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_complete_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Win_complete_F_leave);
+
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -276,9 +245,9 @@ void NAME_ROUTINE_F(mpi_win_wait)(void *win, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_win_wait)(void *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_wait_F_enter (win, ierror);
-#endif
+
+	DLB(DLB_MPI_Win_wait_F_enter, win, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -289,9 +258,9 @@ void NAME_ROUTINE_C2F(mpi_win_wait)(void *win, MPI_Fint *ierror)
 	}
 	else
 		CtoF77(pmpi_win_wait)(win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_wait_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Win_wait_F_leave);
+
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -302,9 +271,9 @@ void NAME_ROUTINE_F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fint
 void NAME_ROUTINE_C2F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_post_F_enter (group, assert, win, ierror);
-#endif
+
+	DLB(DLB_MPI_Win_post_F_enter, group, assert, win, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -315,9 +284,9 @@ void NAME_ROUTINE_C2F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fi
 	}
 	else
 		CtoF77(pmpi_win_post)(group, assert, win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Win_post_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Win_post_F_leave);
+
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -332,11 +301,11 @@ void NAME_ROUTINE_C2F(mpi_get)(void *origin_addr, MPI_Fint *origin_count,
 	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Get_F_enter (origin_addr, origin_count, origin_datatype,
+
+	DLB(DLB_MPI_Get_F_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win,
 		ierror);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -349,9 +318,9 @@ void NAME_ROUTINE_C2F(mpi_get)(void *origin_addr, MPI_Fint *origin_count,
 	else
 		CtoF77(pmpi_get)(origin_addr, origin_count, origin_datatype, target_rank,
 			target_disp, target_count, target_datatype, win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Get_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Get_F_leave);
+
 }
 
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -367,11 +336,10 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 	MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *win, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Put_F_enter (origin_addr, origin_count, origin_datatype,
+	DLB(DLB_MPI_Put_F_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win,
 		ierror);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -384,9 +352,9 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 	else
 		CtoF77(pmpi_put)(origin_addr, origin_count, origin_datatype, target_rank,
 			target_disp, target_count, target_datatype, win, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Put_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Put_F_leave);
+
 }
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */

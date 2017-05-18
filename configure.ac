@@ -298,8 +298,6 @@ AX_PROG_DYNINST
 AX_PROG_COUNTERS # Check for PAPI and/or PMAPI
 AX_PROG_SIONLIB
 
-AX_CHECK_LOAD_BALANCING
-
 AX_PROG_BINUTILS
 
 #######################################

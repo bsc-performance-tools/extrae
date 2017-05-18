@@ -5,7 +5,8 @@ iface_MPI_SRCS     = mpi_interface.c mpi_interface.h \
                      mpi_interface_coll_c.c mpi_interface_coll_f.c \
                      mpi_interface_1sided_c.c mpi_interface_1sided_f.c \
                      mpi_interface_io_c.c mpi_interface_io_f.c \
-                     mpi_interface_coll_helper.c mpi_interface_coll_helper.h
+                     mpi_interface_coll_helper.c mpi_interface_coll_helper.h \
+		     dlb.h
 
 iface_MPI_INCLUDES =     \
    -I$(INTERFACES_INC)/MPI \
@@ -23,12 +24,6 @@ iface_MPI_INCLUDES =     \
 noinst_LTLIBRARIES    = libiface_mpif.la libiface_mpi.la
 if SINGLE_MPI_LIBRARY
   noinst_LTLIBRARIES += libiface_mpicf.la
-endif
-if GENERATE_LOAD_BALANCING
-  noinst_LTLIBRARIES += libiface_mpif_lb.la libiface_mpi_lb.la
-if SINGLE_MPI_LIBRARY
-  noinst_LTLIBRARIES += libiface_mpicf_lb.la
-endif
 endif
 if HAVE_DYNINST
   noinst_LTLIBRARIES += lib_dyn_iface_mpic.la lib_dyn_iface_mpif.la 
@@ -66,17 +61,3 @@ if SINGLE_MPI_LIBRARY
 lib_dyn_iface_mpicf_la_SOURCES = $(iface_MPI_SRCS)
 lib_dyn_iface_mpicf_la_CFLAGS  = $(iface_MPI_INCLUDES)  $(CF_SYMBOLS) -DMPI_SUPPORT -DDYNINST_MODULE
 endif
-
-## LoadBalancing Libraries
-
-libiface_mpi_lb_la_SOURCES = $(iface_MPI_SRCS)
-libiface_mpi_lb_la_CFLAGS  = $(iface_MPI_INCLUDES) $(C_SYMBOLS) -I$(LOAD_BALANCING_HOME)/include -DENABLE_LOAD_BALANCING -DMPI_SUPPORT
-
-libiface_mpif_lb_la_SOURCES = $(iface_MPI_SRCS)
-libiface_mpif_lb_la_CFLAGS  = $(iface_MPI_INCLUDES) $(F_SYMBOLS) -I$(LOAD_BALANCING_HOME)/include -DENABLE_LOAD_BALANCING -DMPI_SUPPORT
-
-if SINGLE_MPI_LIBRARY
-libiface_mpicf_lb_la_SOURCES = $(iface_MPI_SRCS)
-libiface_mpicf_lb_la_CFLAGS  = $(iface_MPI_INCLUDES) $(CF_SYMBOLS) -I$(LOAD_BALANCING_HOME)/include -DENABLE_LOAD_BALANCING -DMPI_SUPPORT
-endif
-

@@ -23,22 +23,6 @@
 
 #include "common.h"
 
-#if defined(MPI3)
-#define MPI3_CONST const
-#define MPI3_VOID_P_CAST (void *)
-#define MPI3_CHAR_P_CAST (char *)
-#define MPI3_F_INT_P_CAST (MPI_Fint *)
-#define MPI3_C_INT_P_CAST (int *)
-#define MPI3_MPI_INFO_P_CAST (MPI_Info *)
-#else
-#define MPI3_CONST
-#define MPI3_VOID_P_CAST
-#define MPI3_CHAR_P_CAST
-#define MPI3_F_INT_P_CAST
-#define MPI3_C_INT_P_CAST
-#define MPI3_MPI_INFO_P_CAST
-#endif
-
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -58,17 +42,10 @@
 #include "wrapper.h"
 #include "mpi_wrapper.h"
 #include "mpi_interface_coll_helper.h"
+#include "mpi_interface.h"
+#include "dlb.h"
 
-#if defined(ENABLE_LOAD_BALANCING)
-# if defined(FORTRAN_SYMBOLS)
-#  include "MPI_interfaceF.h"
-# endif
-# if defined(C_SYMBOLS)
-#  include "MPI_interface.h"
-# endif
-#endif
 
-#include "mpi_interface_coll_helper.h"
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -117,11 +94,9 @@ int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, MPI3_CONST char * filename, in
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
 /*  Do not call DLB as Fortran does not call it, agreed with Victor Oct13th,2015
-	DLB_MPI_File_open_enter (comm, filename, amode, info, fh);
+	DLB(DLB_MPI_File_open_enter, comm, filename, amode, info, fh);
 */
-#endif
 
 	if (mpitrace_on)
 	{
@@ -134,11 +109,9 @@ int NAME_ROUTINE_C(MPI_File_open) (MPI_Comm comm, MPI3_CONST char * filename, in
 	else
 		res = PMPI_File_open (comm, filename, amode, info, fh);
 
-#if defined(ENABLE_LOAD_BALANCING)
 /*  Do not call DLB as Fortran does not call it, agreed with Victor Oct13th,2015
-	DLB_MPI_File_open_leave ();
+	DLB(DLB_MPI_File_open_leave);
 */
-#endif
 
 	return res;
 }
@@ -150,9 +123,9 @@ int NAME_ROUTINE_C(MPI_File_close) (MPI_File* fh)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_close_enter (fh);
-#endif
+	DLB(DLB_MPI_File_close_enter, fh);
+
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -164,9 +137,8 @@ int NAME_ROUTINE_C(MPI_File_close) (MPI_File* fh)
 	else
 		res = PMPI_File_close (fh);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_close_leave ();
-#endif
+	DLB(DLB_MPI_File_close_leave);
+
 	return res;
 }
 
@@ -178,9 +150,7 @@ int NAME_ROUTINE_C(MPI_File_read) (MPI_File fh, void* buf, int count,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_enter (fh, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_read_enter, fh, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -193,9 +163,7 @@ int NAME_ROUTINE_C(MPI_File_read) (MPI_File fh, void* buf, int count,
 	else
 		res = PMPI_File_read (fh, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_leave ();
-#endif
+	DLB(DLB_MPI_File_read_leave);
 
 	return res;
 }
@@ -208,9 +176,7 @@ int NAME_ROUTINE_C(MPI_File_read_all) (MPI_File fh, void* buf, int count,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_all_enter (fh, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_read_all_enter, fh, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -223,9 +189,7 @@ int NAME_ROUTINE_C(MPI_File_read_all) (MPI_File fh, void* buf, int count,
 	else
 		res = PMPI_File_read_all (fh, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_all_leave ();
-#endif
+	DLB(DLB_MPI_File_read_all_leave);
 
 	return res;
 }
@@ -238,9 +202,7 @@ int NAME_ROUTINE_C(MPI_File_write) (MPI_File fh, MPI3_CONST void * buf, int coun
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_enter (fh, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_write_enter, fh, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -253,9 +215,7 @@ int NAME_ROUTINE_C(MPI_File_write) (MPI_File fh, MPI3_CONST void * buf, int coun
 	else
 		res = PMPI_File_write (fh, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_leave ();
-#endif
+	DLB(DLB_MPI_File_write_leave);
 
 	return res;
 }
@@ -268,9 +228,7 @@ int NAME_ROUTINE_C(MPI_File_write_all) (MPI_File fh, MPI3_CONST void* buf, int c
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_all_enter (fh, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_write_all_enter, fh, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -283,9 +241,7 @@ int NAME_ROUTINE_C(MPI_File_write_all) (MPI_File fh, MPI3_CONST void* buf, int c
 	else
 		res = PMPI_File_write_all (fh, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_all_leave ();
-#endif
+	DLB(DLB_MPI_File_write_all_leave);
 
 	return res;
 }
@@ -298,9 +254,7 @@ int NAME_ROUTINE_C(MPI_File_read_at) (MPI_File fh, MPI_Offset offset, void* buf,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_at_enter (fh, offset, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_read_at_enter, fh, offset, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -313,9 +267,7 @@ int NAME_ROUTINE_C(MPI_File_read_at) (MPI_File fh, MPI_Offset offset, void* buf,
 	else
 		res = PMPI_File_read_at (fh, offset, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_at_leave ();
-#endif
+	DLB(DLB_MPI_File_read_at_leave);
 
 	return res;
 }
@@ -328,9 +280,7 @@ int NAME_ROUTINE_C(MPI_File_read_at_all) (MPI_File fh, MPI_Offset offset,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_at_all_enter (fh, offset, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_read_at_all_enter, fh, offset, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -343,9 +293,8 @@ int NAME_ROUTINE_C(MPI_File_read_at_all) (MPI_File fh, MPI_Offset offset,
 	else
 		res = PMPI_File_read_at_all (fh, offset, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_read_at_all_leave ();
-#endif
+	DLB(DLB_MPI_File_read_at_all_leave);
+	
 	return res;
 }
 
@@ -357,9 +306,7 @@ int NAME_ROUTINE_C(MPI_File_write_at) (MPI_File fh, MPI_Offset offset, MPI3_CONS
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_at_enter (fh, offset, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_write_at_enter, fh, offset, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -372,9 +319,8 @@ int NAME_ROUTINE_C(MPI_File_write_at) (MPI_File fh, MPI_Offset offset, MPI3_CONS
 	else
 		res = PMPI_File_write_at (fh, offset, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_at_leave ();
-#endif
+	DLB(DLB_MPI_File_write_at_leave);
+
 	return res;
 }
 
@@ -387,9 +333,7 @@ int NAME_ROUTINE_C(MPI_File_write_at_all) (MPI_File fh, MPI_Offset offset,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_at_all_enter (fh, offset, buf, count, datatype, status);
-#endif
+	DLB(DLB_MPI_File_write_at_all_enter, fh, offset, buf, count, datatype, status);
 
 	if (mpitrace_on)
 	{
@@ -402,9 +346,7 @@ int NAME_ROUTINE_C(MPI_File_write_at_all) (MPI_File fh, MPI_Offset offset,
 	else
 		res = PMPI_File_write_at_all (fh, offset, buf, count, datatype, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_File_write_at_all_leave ();
-#endif
+	DLB(DLB_MPI_File_write_at_all_leave);
 
 	return res;
 }

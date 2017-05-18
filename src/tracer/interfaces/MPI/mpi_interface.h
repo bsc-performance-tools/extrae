@@ -26,4 +26,23 @@
 
 #include "mpi_interface_coll_helper.h"
 
+#if defined(MPI3)
+#define MPI3_CONST const
+#define MPI3_VOID_P_CAST (void *)
+#define MPI3_CHAR_P_CAST (char *)
+#define MPI3_F_INT_P_CAST (MPI_Fint *)
+#define MPI3_C_INT_P_CAST (int *)
+#define MPI3_MPI_INFO_P_CAST (MPI_Info *)
+#define MPI3_MPI_DATATYPE_P_CAST (MPI_Datatype *)
+#else
+#define MPI3_CONST
+#define MPI3_VOID_P_CAST
+#define MPI3_CHAR_P_CAST
+#define MPI3_F_INT_P_CAST
+#define MPI3_C_INT_P_CAST
+#define MPI3_MPI_INFO_P_CAST
+#define MPI3_MPI_DATATYPE_P_CAST
+#endif
+
+
 #endif /* __MPI_INTERFACE_H__ */

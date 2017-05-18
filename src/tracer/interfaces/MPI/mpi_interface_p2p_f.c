@@ -23,22 +23,6 @@
 
 #include "common.h"
 
-#if defined(MPI3)
-#define MPI3_CONST const
-#define MPI3_VOID_P_CAST (void *)
-#define MPI3_CHAR_P_CAST (char *)
-#define MPI3_F_INT_P_CAST (MPI_Fint *)
-#define MPI3_C_INT_P_CAST (int *)
-#define MPI3_MPI_INFO_P_CAST (MPI_Info *)
-#else
-#define MPI3_CONST
-#define MPI3_VOID_P_CAST
-#define MPI3_CHAR_P_CAST
-#define MPI3_F_INT_P_CAST
-#define MPI3_C_INT_P_CAST
-#define MPI3_MPI_INFO_P_CAST
-#endif
-
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -58,15 +42,9 @@
 #include "wrapper.h"
 #include "mpi_wrapper.h"
 #include "mpi_interface_coll_helper.h"
+#include "mpi_interface.h"
+#include "dlb.h"
 
-#if defined(ENABLE_LOAD_BALANCING)
-# if defined(FORTRAN_SYMBOLS)
-#  include "MPI_interfaceF.h"
-# endif
-# if defined(C_SYMBOLS)
-#  include "MPI_interface.h"
-# endif
-#endif
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -150,9 +128,8 @@ void NAME_ROUTINE_C2F(mpi_bsend) (void *buf, MPI_Fint *count,
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-#endif
+
+	DLB(DLB_MPI_Bsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
 
 	if (mpitrace_on)
 	{
@@ -165,9 +142,7 @@ void NAME_ROUTINE_C2F(mpi_bsend) (void *buf, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_bsend) (buf, count, datatype, dest, tag, comm, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_F_leave ();
-#endif
+	DLB(DLB_MPI_Bsend_F_leave);
 }
 
 /******************************************************************************
@@ -183,9 +158,9 @@ void NAME_ROUTINE_C2F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 	MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-#endif
+	
+	DLB(DLB_MPI_Ssend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
+	
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -196,9 +171,9 @@ void NAME_ROUTINE_C2F(mpi_ssend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 	}
 	else
 		CtoF77 (pmpi_ssend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Ssend_F_leave);
+
 }
 
 
@@ -216,9 +191,9 @@ void NAME_ROUTINE_C2F(mpi_rsend) (void *buf, MPI_Fint *count,
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-#endif
+
+	DLB(DLB_MPI_Rsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -229,9 +204,9 @@ void NAME_ROUTINE_C2F(mpi_rsend) (void *buf, MPI_Fint *count,
 	}
 	else
  		CtoF77 (pmpi_rsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Rsend_F_leave);
+
 }
 
 /******************************************************************************
@@ -248,9 +223,9 @@ void NAME_ROUTINE_C2F(mpi_send) (void *buf, MPI_Fint *count,
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-#endif
+
+	DLB(DLB_MPI_Send_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -261,9 +236,9 @@ void NAME_ROUTINE_C2F(mpi_send) (void *buf, MPI_Fint *count,
 	}
 	else
 		CtoF77 (pmpi_send) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Send_F_leave);
+
 }
 
 
@@ -282,9 +257,9 @@ void NAME_ROUTINE_C2F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibsend_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-#endif
+
+	DLB(DLB_MPI_Ibsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -297,9 +272,9 @@ void NAME_ROUTINE_C2F(mpi_ibsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
 	else
 		CtoF77 (pmpi_ibsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
                           ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibsend_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Ibsend_F_leave);
+
 }
 
 /******************************************************************************
@@ -317,9 +292,9 @@ void NAME_ROUTINE_C2F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Isend_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-#endif
+
+	DLB(DLB_MPI_Isend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -332,9 +307,9 @@ void NAME_ROUTINE_C2F(mpi_isend) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 	else
 		CtoF77 (pmpi_isend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Isend_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Isend_F_leave);
+
 }
 
 /******************************************************************************
@@ -352,9 +327,9 @@ void NAME_ROUTINE_C2F(mpi_issend) (void *buf, MPI_Fint *count,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Issend_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-#endif
+
+	DLB(DLB_MPI_Issend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -367,9 +342,9 @@ void NAME_ROUTINE_C2F(mpi_issend) (void *buf, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_issend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Issend_F_leave ();
-#endif
+			
+	DLB(DLB_MPI_Issend_F_leave);
+
 }
 
 /******************************************************************************
@@ -387,9 +362,9 @@ void NAME_ROUTINE_C2F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irsend_F_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
-#endif
+
+	DLB(DLB_MPI_Irsend_F_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -402,9 +377,9 @@ void NAME_ROUTINE_C2F(mpi_irsend) (void *buf, MPI_Fint *count, MPI_Fint *datatyp
 	else
 		CtoF77 (pmpi_irsend) (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request,
 			ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irsend_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Irsend_F_leave);
+
 }
 
 /******************************************************************************
@@ -422,9 +397,9 @@ void NAME_ROUTINE_C2F(mpi_recv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_F_enter (buf, count, datatype, source, tag, comm, status, ierror);
-#endif
+
+	DLB(DLB_MPI_Recv_F_enter, buf, count, datatype, source, tag, comm, status, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -437,9 +412,9 @@ void NAME_ROUTINE_C2F(mpi_recv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	else
 		CtoF77 (pmpi_recv) (buf, count, datatype, source, tag, comm, status,
                         ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Recv_F_leave);
+
 }
 
 /******************************************************************************
@@ -457,9 +432,9 @@ void NAME_ROUTINE_C2F(mpi_irecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irecv_F_enter (buf, count, datatype, source, tag, comm, request, ierror);
-#endif
+
+	DLB(DLB_MPI_Irecv_F_enter, buf, count, datatype, source, tag, comm, request, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -472,9 +447,9 @@ void NAME_ROUTINE_C2F(mpi_irecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 	else
 		CtoF77 (pmpi_irecv) (buf, count, datatype, source, tag, comm, request,
                          ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irecv_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Irecv_F_leave);
+
 }
 
 /******************************************************************************
@@ -490,9 +465,9 @@ void NAME_ROUTINE_C2F(mpi_probe) (MPI_Fint *source, MPI_Fint *tag,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Probe_F_enter(source, tag, comm, status, ierror);
-#endif
+
+	DLB(DLB_MPI_Probe_F_enter, source, tag, comm, status, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -503,9 +478,9 @@ void NAME_ROUTINE_C2F(mpi_probe) (MPI_Fint *source, MPI_Fint *tag,
 	}
 	else
 		CtoF77 (pmpi_probe) (source, tag, comm, status, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Probe_F_leave();
-#endif
+
+	DLB(DLB_MPI_Probe_F_leave);
+
 }
 
 /******************************************************************************
@@ -521,9 +496,9 @@ void NAME_ROUTINE_C2F(mpi_iprobe) (MPI_Fint *source, MPI_Fint *tag,
 	MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iprobe_F_enter (source, tag, comm, flag, status, ierror);
-#endif
+
+	DLB(DLB_MPI_Iprobe_F_enter, source, tag, comm, flag, status, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -534,9 +509,9 @@ void NAME_ROUTINE_C2F(mpi_iprobe) (MPI_Fint *source, MPI_Fint *tag,
 	}
 	else
 		CtoF77 (pmpi_iprobe) (source, tag, comm, flag, status, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iprobe_F_leave();
-#endif
+
+	DLB(DLB_MPI_Iprobe_F_leave);
+
 }
 
 /******************************************************************************
@@ -552,9 +527,9 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
 	MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Test_F_enter (request, flag, status, ierror);
-#endif
+
+	DLB(DLB_MPI_Test_F_enter, request, flag, status, ierror);
+
 
 	if (mpitrace_on)
 	{
@@ -567,9 +542,8 @@ void NAME_ROUTINE_C2F(mpi_test) (MPI_Fint *request, MPI_Fint *flag,
 	else
 		CtoF77 (pmpi_test) (request, flag, status, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Test_F_leave ();
-#endif
+	DLB(DLB_MPI_Test_F_leave);
+
 }
 
 /******************************************************************************
@@ -589,9 +563,9 @@ void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
 	MPI_Fint * ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testall_F_enter (count, array_of_requests, flag, (MPI_Fint*) array_of_statuses, ierror);
-#endif
+
+	DLB(DLB_MPI_Testall_F_enter, count, array_of_requests, flag, (MPI_Fint*) array_of_statuses, ierror);
+
 
 	if (mpitrace_on)
 	{
@@ -605,9 +579,7 @@ void NAME_ROUTINE_C2F(mpi_testall) (MPI_Fint * count,
 	CtoF77 (pmpi_testall) (count, array_of_requests, flag,
 		array_of_statuses, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testall_F_leave ();
-#endif
+	DLB(DLB_MPI_Testall_F_leave);
 }
 
 
@@ -624,9 +596,9 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[
 	MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testany_F_enter (count, array_of_requests, index, flag, status, ierror);
-#endif
+
+	DLB(DLB_MPI_Testany_F_enter, count, array_of_requests, index, flag, status, ierror);
+
 
 	if (mpitrace_on)
 	{
@@ -639,9 +611,7 @@ void NAME_ROUTINE_C2F(mpi_testany) (MPI_Fint *count, MPI_Fint array_of_requests[
 	else
 		CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, status, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testany_F_leave ();
-#endif
+	DLB(DLB_MPI_Testany_F_leave);
 }
 
 
@@ -660,10 +630,9 @@ void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_reques
 	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testsome_F_enter (incount, array_of_requests, outcount,
+	DLB(DLB_MPI_Testsome_F_enter, incount, array_of_requests, outcount,
 		array_of_indices, (MPI_Fint*) array_of_statuses, ierror);
-#endif
+		
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -676,9 +645,9 @@ void NAME_ROUTINE_C2F(mpi_testsome) (MPI_Fint *incount, MPI_Fint array_of_reques
 	else
 		CtoF77 (pmpi_testsome) (incount, array_of_requests, outcount,
                             array_of_indices, array_of_statuses, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testsome_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Testsome_F_leave);
+
 }
 
 /******************************************************************************
@@ -694,9 +663,9 @@ void NAME_ROUTINE_C2F(mpi_wait) (MPI_Fint *request, MPI_Fint *status,
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Wait_F_enter (request, status, ierror);
-#endif
+
+	DLB(DLB_MPI_Wait_F_enter, request, status, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -707,9 +676,9 @@ void NAME_ROUTINE_C2F(mpi_wait) (MPI_Fint *request, MPI_Fint *status,
 	}
 	else
 		CtoF77 (pmpi_wait) (request, status, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Wait_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Wait_F_leave);
+
 }
 
 /******************************************************************************
@@ -727,9 +696,9 @@ void NAME_ROUTINE_C2F(mpi_waitall) (MPI_Fint * count,
 	MPI_Fint * ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitall_F_enter (count, array_of_requests, (MPI_Fint*) array_of_statuses, ierror);
-#endif
+
+	DLB(DLB_MPI_Waitall_F_enter, count, array_of_requests, (MPI_Fint*) array_of_statuses, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -742,9 +711,8 @@ void NAME_ROUTINE_C2F(mpi_waitall) (MPI_Fint * count,
 	else
 		CtoF77 (pmpi_waitall) (count, array_of_requests, array_of_statuses,
 		  ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitall_F_leave ();
-#endif
+		  
+	DLB(DLB_MPI_Waitall_F_leave);
 }
 
 
@@ -761,9 +729,9 @@ void NAME_ROUTINE_C2F(mpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[
 	MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitany_F_enter (count, array_of_requests, index, status, ierror);
-#endif
+
+	DLB(DLB_MPI_Waitany_F_enter, count, array_of_requests, index, status, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -774,9 +742,9 @@ void NAME_ROUTINE_C2F(mpi_waitany) (MPI_Fint *count, MPI_Fint array_of_requests[
 	}
 	else
 	    CtoF77 (pmpi_waitany) (count, array_of_requests, index, status, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitany_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Waitany_F_leave);
+
 }
 
 
@@ -795,10 +763,10 @@ void NAME_ROUTINE_C2F(mpi_waitsome) (MPI_Fint *incount, MPI_Fint array_of_reques
 	MPI_Fint array_of_statuses[][SIZEOF_MPI_STATUS], MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitsome_F_enter (incount, array_of_requests, outcount,
-		array_of_indices, (int*)array_of_statuses, ierror);
-#endif
+
+	DLB(DLB_MPI_Waitsome_F_enter, incount, array_of_requests, outcount,
+		array_of_indices, (MPI_Fint*) array_of_statuses, ierror);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -811,9 +779,9 @@ void NAME_ROUTINE_C2F(mpi_waitsome) (MPI_Fint *incount, MPI_Fint array_of_reques
 	else
 		CtoF77 (pmpi_waitsome) (incount, array_of_requests, outcount,
 		  array_of_indices, array_of_statuses, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitsome_F_leave ();
-#endif
+		  
+	DLB(DLB_MPI_Waitsome_F_leave);
+
 }
 
 /******************************************************************************
@@ -831,10 +799,10 @@ void NAME_ROUTINE_C2F(mpi_recv_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_init_F_enter (buf, count, datatype, source, tag, comm,
+
+	DLB(DLB_MPI_Recv_init_F_enter, buf, count, datatype, source, tag, comm,
 	  request, ierror);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -847,9 +815,9 @@ void NAME_ROUTINE_C2F(mpi_recv_init) (void *buf, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_recv_init) (buf, count, datatype, source, tag,
                              comm, request, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_init_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Recv_init_F_leave);
+
 }
 
 /******************************************************************************
@@ -867,10 +835,10 @@ void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_init_F_enter (buf, count, datatype, dest, tag, comm,
+
+	DLB(DLB_MPI_Send_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -883,9 +851,9 @@ void NAME_ROUTINE_C2F(mpi_send_init) (void *buf, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_send_init) (buf, count, datatype, dest, tag, comm,
 			request, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_init_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Send_init_F_leave);
+
 }
 
 /******************************************************************************
@@ -903,10 +871,10 @@ void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_init_F_enter (buf, count, datatype, dest, tag, comm,
+
+	DLB(DLB_MPI_Bsend_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -919,9 +887,9 @@ void NAME_ROUTINE_C2F(mpi_bsend_init) (void *buf, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_bsend_init) (buf, count, datatype, dest, tag,
                               comm, request, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_init_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Bsend_init_F_leave);
+
 }
 
 /******************************************************************************
@@ -939,10 +907,10 @@ void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
 	MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_init_F_enter (buf, count, datatype, dest, tag, comm,
+
+	DLB(DLB_MPI_Rsend_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -955,9 +923,9 @@ void NAME_ROUTINE_C2F(mpi_rsend_init) (void *buf, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_rsend_init) (buf, count, datatype, dest, tag, comm,
 			request, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_init_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Rsend_init_F_leave);
+
 }
 
 /******************************************************************************
@@ -975,10 +943,10 @@ void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *dat
 	MPI_Fint *ierror)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_init_F_enter (buf, count, datatype, dest, tag, comm,
+
+	DLB(DLB_MPI_Ssend_init_F_enter, buf, count, datatype, dest, tag, comm,
 	  request, ierror);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -991,9 +959,9 @@ void NAME_ROUTINE_C2F(mpi_ssend_init) (void *buf, MPI_Fint *count, MPI_Fint *dat
 	else
 		CtoF77 (pmpi_ssend_init) (buf, count, datatype, dest, tag, comm,
 			request, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_init_F_leave ();
-#endif
+
+	DLB(DLB_MPI_Ssend_init_F_leave);
+
 }
 
 /******************************************************************************
@@ -1013,10 +981,10 @@ void NAME_ROUTINE_C2F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
+
+	DLB(DLB_MPI_Sendrecv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 		recvbuf, recvcount, recvtype, source, recvtag, comm, status, ierr);
-#endif
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -1031,9 +999,9 @@ void NAME_ROUTINE_C2F(mpi_sendrecv) (void *sendbuf, MPI_Fint *sendcount,
   		CtoF77(pmpi_sendrecv) (sendbuf, sendcount, sendtype, dest,
 			sendtag, recvbuf, recvcount, recvtype, source, recvtag,
 			comm, status, ierr);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_F_leave();
-#endif
+
+	DLB(DLB_MPI_Sendrecv_F_leave);
+
 }
 
 /******************************************************************************
@@ -1051,10 +1019,10 @@ void NAME_ROUTINE_C2F(mpi_sendrecv_replace) (void *buf, MPI_Fint *count,
 	MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)
 #endif
 {
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_replace_F_enter (buf, count, type, dest, sendtag, source,
+
+	DLB(DLB_MPI_Sendrecv_replace_F_enter, buf, count, type, dest, sendtag, source,
 		recvtag, comm, status, ierr);
-#endif
+
 
 	if (mpitrace_on)
 	{
@@ -1069,9 +1037,8 @@ void NAME_ROUTINE_C2F(mpi_sendrecv_replace) (void *buf, MPI_Fint *count,
 		CtoF77(pmpi_sendrecv_replace) (buf, count, type, dest, sendtag,
 			source, recvtag, comm, status, ierr);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_replace_F_leave ();
-#endif
+	DLB(DLB_MPI_Sendrecv_replace_F_leave);
+
 }
 
 #endif /* defined(FORTRAN_SYMBOLS) */

@@ -110,33 +110,6 @@ if WANT_OPENSHMEM
   lib_LTLIBRARIES += libopenshmemtrace.la
 endif
 
-if GENERATE_LOAD_BALANCING
-if HAVE_MPI
-  lib_LTLIBRARIES += libmpitrace-lb.la libmpitracef-lb.la
-if SINGLE_MPI_LIBRARY
-  lib_LTLIBRARIES += libmpitracecf-lb.la
-endif
-if WANT_OPENMP
-  lib_LTLIBRARIES += libompitrace-lb.la libompitracef-lb.la
-if SINGLE_MPI_LIBRARY
-  lib_LTLIBRARIES += libompitracecf-lb.la
-endif
-endif
-if WANT_SMPSS
-  lib_LTLIBRARIES += libsmpssmpitrace-lb.la libsmpssmpitracef-lb.la
-if SINGLE_MPI_LIBRARY
-  lib_LTLIBRARIES += libsmpssmpitracecf-lb.la
-endif
-endif
-if WANT_NANOS
-  lib_LTLIBRARIES += libnanosmpitrace-lb.la libnanosmpitracef-lb.la
-if SINGLE_MPI_LIBRARY
-  lib_LTLIBRARIES += libnanosmpitracecf-lb.la
-endif
-endif
-endif
-endif
-
 if HAVE_DYNINST
 if HAVE_MPI
   lib_LTLIBRARIES += lib_dyn_mpitracec.la lib_dyn_mpitracef.la
@@ -268,23 +241,6 @@ libpttrace_la_SOURCES = $(core_SRCS) $(auto_init_instr_SRCS) $(auto_fini_instr_S
 # OpenSHMEM
 libopenshmemtrace_la_SOURCES = $(core_SRCS) $(auto_fini_instr_SRCS)
 
-# LoadBalancing
-libmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
-libmpitracef_lb_la_SOURCES = $(libmpitracef_la_SOURCES)
-libompitrace_lb_la_SOURCES = $(libompitrace_la_SOURCES)
-libompitracef_lb_la_SOURCES = $(libompitracef_la_SOURCES)
-libsmpssmpitrace_lb_la_SOURCES = $(libmpitrace_la_SOURCES)
-libsmpssmpitracef_lb_la_SOURCES = $(libmpitracef_la_SOURCES)
-libnanosmpitrace_lb_la_SOURCES = $(libnanosmpitrace_la_SOURCES)
-libnanosmpitracef_lb_la_SOURCES = $(libnanosmpitracef_la_SOURCES)
-
-if SINGLE_MPI_LIBRARY
-  libmpitracecf_lb_la_SOURCES = $(libmpitracecf_la_SOURCES)
-  libompitracecf_lb_la_SOURCES = $(libompitracecf_la_SOURCES)
-  libsmpssmpitracecf_lb_la_SOURCES = $(libmpitracecf_la_SOURCES)
-  libnanosmpitracecf_lb_la_SOURCES = $(libnanosmpitracecf_la_SOURCES)
-endif
-
 # For DynInst instrumentation
 lib_dyn_mpitracec_la_SOURCES = $(libmpitrace_la_SOURCES)
 lib_dyn_mpitracef_la_SOURCES = $(libmpitracef_la_SOURCES)
@@ -378,10 +334,6 @@ ADDITIONAL_MPI_LIBS_CF = $(INTERFACES_LIB)/MPI/libiface_mpicf.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_cf.la \
  $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
-ADDITIONAL_MPI_LIBS_CF_LB = $(INTERFACES_LIB)/MPI/libiface_mpicf_lb.la \
- $(WRAPPERS_LIB)/MPI/libwrap_mpi_cf.la \
- $(STATS_LIB)/libmpistats.la \
- $(COMMON_MPI_LIB)/libcommon_mpi.la
 ADDITIONAL_MPI_DYNLIBS_CF = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpicf.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_cf.la \
  $(STATS_LIB)/libmpistats.la \
@@ -392,10 +344,6 @@ ADDITIONAL_MPI_LIBS_C = $(INTERFACES_LIB)/MPI/libiface_mpi.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_c.la \
  $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
-ADDITIONAL_MPI_LIBS_C_LB = $(INTERFACES_LIB)/MPI/libiface_mpi_lb.la \
- $(WRAPPERS_LIB)/MPI/libwrap_mpi_c.la \
- $(STATS_LIB)/libmpistats.la \
- $(COMMON_MPI_LIB)/libcommon_mpi.la
 ADDITIONAL_MPI_DYNLIBS_C = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpic.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_c.la \
  $(STATS_LIB)/libmpistats.la \
@@ -403,10 +351,6 @@ ADDITIONAL_MPI_DYNLIBS_C = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpic.la \
 
 
 ADDITIONAL_MPI_LIBS_F = $(INTERFACES_LIB)/MPI/libiface_mpif.la \
- $(WRAPPERS_LIB)/MPI/libwrap_mpi_f.la \
- $(STATS_LIB)/libmpistats.la \
- $(COMMON_MPI_LIB)/libcommon_mpi.la
-ADDITIONAL_MPI_LIBS_F_LB = $(INTERFACES_LIB)/MPI/libiface_mpif_lb.la \
  $(WRAPPERS_LIB)/MPI/libwrap_mpi_f.la \
  $(STATS_LIB)/libmpistats.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
@@ -483,30 +427,6 @@ endif
 libpttrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_PTHREAD_LIBS) $(SEQUENTIAL_MERGE_LIB)
 
 libopenshmemtrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_OPENSHMEM_LIBS) $(SEQUENTIAL_MERGE_LIB)
-
-libmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C_LB) $(PARALLEL_MERGE_LIB)
-libmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F_LB) $(PARALLEL_MERGE_LIB)
-libompitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C_LB) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
-libompitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F_LB) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
-
-if SINGLE_MPI_LIBRARY
-  libmpitracecf_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF_LB) $(PARALLEL_MERGE_LIB)
-  libompitracecf_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF_LB) $(ADDITIONAL_OPENMP_LIBS) $(PARALLEL_MERGE_LIB)
-endif
-
-libsmpssmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C_LB) $(PARALLEL_MERGE_LIB)
-libsmpssmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F_LB) $(PARALLEL_MERGE_LIB)
-
-if SINGLE_MPI_LIBRARY
-  libsmpssmpitracecf_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF_LB) $(PARALLEL_MERGE_LIB)
-endif
-
-libnanosmpitrace_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C_LB) $(PARALLEL_MERGE_LIB)
-libnanosmpitracef_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_F_LB) $(PARALLEL_MERGE_LIB)
-
-if SINGLE_MPI_LIBRARY
-  libnanosmpitracecf_lb_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_CF_LB) $(PARALLEL_MERGE_LIB)
-endif
 
 lib_dyn_mpitracec_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_C) $(PARALLEL_MERGE_LIB)
 lib_dyn_mpitracef_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_DYNLIBS_F) $(PARALLEL_MERGE_LIB)
@@ -657,30 +577,6 @@ libpttrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DPTHREAD_SUPPORT $(SEQUE
 
 libopenshmemtrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) @OPENSHMEM_CFLAGS@ -DOPENSHMEM_SUPPORT $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
-libmpitrace_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-libmpitracef_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-libompitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-libompitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-
-if SINGLE_MPI_LIBRARY
-  libmpitracecf_lb_la_CFLAGS  = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-  libompitracecf_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DOMP_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-endif
-
-libsmpssmpitrace_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DSMPSS_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-libsmpssmpitracef_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DSMPSS_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-
-if SINGLE_MPI_LIBRARY
-  libsmpssmpitracecf_lb_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DSMPSS_SUPPORT -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-endif
-
-libnanosmpitrace_lb_la_CFLAGS = $(libnanosmpitrace_la_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-libnanosmpitracef_lb_la_CFLAGS = $(libnanosmpitracef_la_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-
-if SINGLE_MPI_LIBRARY
-  libnanosmpitracecf_lb_la_CFLAGS = $(libnanosmpitracecf_la_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB)
-endif
-
 lib_dyn_mpitracec_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE
 lib_dyn_mpitracef_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE
 lib_dyn_mpitracecf_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DDYNINST_MODULE
@@ -809,30 +705,6 @@ endif
 libpttrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(PTHREAD_LIBS)
 
 libopenshmemtrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(OPENSHMEM_LDFLAGS)
-
-libmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libmpitracef_lb_la_LDFLAGS = $(libmpitracef_la_LDFLAGS) # -static
-libompitrace_lb_la_LDFLAGS = $(libompitrace_la_LDFLAGS)
-libompitracef_lb_la_LDFLAGS = $(libompitracef_la_LDFLAGS)
-
-if SINGLE_MPI_LIBRARY
-  libmpitracecf_lb_la_LDFLAGS = $(libmpitracecf_la_LDFLAGS) # -static
-  libompitracecf_lb_la_LDFLAGS = $(libompitracecf_la_LDFLAGS)
-endif
-
-libsmpssmpitrace_lb_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
-libsmpssmpitracef_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
-
-if SINGLE_MPI_LIBRARY
-  libsmpssmpitracecf_lb_la_LDFLAGS = $(libmpitrace_lb_la_LDFLAGS) # -static
-endif
-
-libnanosmpitrace_lb_la_LDFLAGS = $(libnanosmpitrace_la_LDFLAGS)
-libnanosmpitracef_lb_la_LDFLAGS = $(libnanosmpitracef_la_LDFLAGS)
-
-if SINGLE_MPI_LIBRARY
-  libnanosmpitracecf_lb_la_LDFLAGS = $(libnanosmpitracecf_la_LDFLAGS)
-endif
 
 lib_dyn_mpitracec_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)
 lib_dyn_mpitracef_la_LDFLAGS = $(libmpitrace_la_LDFLAGS)

@@ -23,22 +23,6 @@
 
 #include "common.h"
 
-#if defined(MPI3)
-#define MPI3_CONST const
-#define MPI3_VOID_P_CAST (void *)
-#define MPI3_CHAR_P_CAST (char *)
-#define MPI3_F_INT_P_CAST (MPI_Fint *)
-#define MPI3_C_INT_P_CAST (int *)
-#define MPI3_MPI_INFO_P_CAST (MPI_Info *)
-#else
-#define MPI3_CONST
-#define MPI3_VOID_P_CAST
-#define MPI3_CHAR_P_CAST
-#define MPI3_F_INT_P_CAST
-#define MPI3_C_INT_P_CAST
-#define MPI3_MPI_INFO_P_CAST
-#endif
-
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -58,17 +42,8 @@
 #include "wrapper.h"
 #include "mpi_wrapper.h"
 #include "mpi_interface_coll_helper.h"
-
-#if defined(ENABLE_LOAD_BALANCING)
-# if defined(FORTRAN_SYMBOLS)
-#  include "MPI_interfaceF.h"
-# endif
-# if defined(C_SYMBOLS)
-#  include "MPI_interface.h"
-# endif
-#endif
-
-#include "mpi_interface_coll_helper.h"
+#include "mpi_interface.h"
+#include "dlb.h"
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -115,9 +90,7 @@ int NAME_ROUTINE_C(MPI_Bsend) (MPI3_CONST void* buf, int count, MPI_Datatype dat
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
-#endif
+	DLB(DLB_MPI_Bsend_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 
 	if (mpitrace_on)
 	{
@@ -130,9 +103,7 @@ int NAME_ROUTINE_C(MPI_Bsend) (MPI3_CONST void* buf, int count, MPI_Datatype dat
 	else
 		res = PMPI_Bsend (buf, count, datatype, dest, tag, comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_leave ();
-#endif
+	DLB(DLB_MPI_Bsend_leave);
 
 	return res;
 }
@@ -145,9 +116,7 @@ int NAME_ROUTINE_C(MPI_Ssend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
-#endif
+	DLB(DLB_MPI_Ssend_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 
 	if (mpitrace_on)
 	{
@@ -160,9 +129,7 @@ int NAME_ROUTINE_C(MPI_Ssend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 	else
 		res = PMPI_Ssend (buf, count, datatype, dest, tag, comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_leave ();
-#endif
+	DLB(DLB_MPI_Ssend_leave);
 
 	return res;
 }
@@ -175,9 +142,7 @@ int NAME_ROUTINE_C(MPI_Rsend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
-#endif
+	DLB(DLB_MPI_Rsend_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 
 	if (mpitrace_on)
 	{
@@ -190,9 +155,7 @@ int NAME_ROUTINE_C(MPI_Rsend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 	else
 		res = PMPI_Rsend (buf, count, datatype, dest, tag, comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_leave ();
-#endif
+	DLB(DLB_MPI_Rsend_leave);
 
 	return res;
 }
@@ -205,9 +168,7 @@ int NAME_ROUTINE_C(MPI_Send) (MPI3_CONST void *buf, int count, MPI_Datatype data
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
-#endif
+	DLB(DLB_MPI_Send_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 
 	if (mpitrace_on)
 	{
@@ -220,9 +181,7 @@ int NAME_ROUTINE_C(MPI_Send) (MPI3_CONST void *buf, int count, MPI_Datatype data
 	else
 		res = PMPI_Send (buf, count, datatype, dest, tag, comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_leave ();
-#endif
+	DLB(DLB_MPI_Send_leave);
 
 	return res;
 }
@@ -235,9 +194,7 @@ int NAME_ROUTINE_C(MPI_Ibsend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
-#endif
+	DLB(DLB_MPI_Ibsend_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 
 	if (mpitrace_on)
 	{
@@ -250,9 +207,7 @@ int NAME_ROUTINE_C(MPI_Ibsend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 	else
 		res = PMPI_Ibsend (buf, count, datatype, dest, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibsend_leave ();
-#endif
+	DLB(DLB_MPI_Ibsend_leave);
 
 	return res;
 }
@@ -265,9 +220,7 @@ int NAME_ROUTINE_C(MPI_Isend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Isend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
-#endif
+	DLB(DLB_MPI_Isend_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 
 	if (mpitrace_on)
 	{
@@ -280,9 +233,7 @@ int NAME_ROUTINE_C(MPI_Isend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 	else
 		res = PMPI_Isend (buf, count, datatype, dest, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Isend_leave ();
-#endif
+	DLB(DLB_MPI_Isend_leave);
 
 	return res;
 }
@@ -295,9 +246,7 @@ int NAME_ROUTINE_C(MPI_Issend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Issend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
-#endif
+	DLB(DLB_MPI_Issend_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 
 	if (mpitrace_on)
 	{
@@ -310,9 +259,7 @@ int NAME_ROUTINE_C(MPI_Issend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 	else
 		res = PMPI_Issend (buf, count, datatype, dest, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Issend_leave ();
-#endif
+	DLB(DLB_MPI_Issend_leave);
 
 	return res;
 }
@@ -325,9 +272,7 @@ int NAME_ROUTINE_C(MPI_Irsend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irsend_enter (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
-#endif
+	DLB(DLB_MPI_Irsend_enter, MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 
 	if (mpitrace_on)
 	{
@@ -340,9 +285,7 @@ int NAME_ROUTINE_C(MPI_Irsend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 	else
 		res = PMPI_Irsend (buf, count, datatype, dest, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irsend_leave ();
-#endif
+	DLB(DLB_MPI_Irsend_leave);
 
 	return res;
 }
@@ -355,9 +298,7 @@ int NAME_ROUTINE_C(MPI_Recv) (void* buf, int count, MPI_Datatype datatype,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_enter (buf, count, datatype, source, tag, comm, status);
-#endif
+	DLB(DLB_MPI_Recv_enter, buf, count, datatype, source, tag, comm, status);
 
 	if (mpitrace_on)
 	{
@@ -370,9 +311,7 @@ int NAME_ROUTINE_C(MPI_Recv) (void* buf, int count, MPI_Datatype datatype,
 	else
 		res = PMPI_Recv (buf, count, datatype, source, tag, comm, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_leave ();
-#endif
+	DLB(DLB_MPI_Recv_leave);
 
 	return res;
 }
@@ -385,9 +324,7 @@ int NAME_ROUTINE_C(MPI_Irecv) (void* buf, int count, MPI_Datatype datatype,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irecv_enter (buf, count, datatype, source, tag, comm, request);
-#endif
+	DLB(DLB_MPI_Irecv_enter, buf, count, datatype, source, tag, comm, request);
 
 	if (mpitrace_on)
 	{
@@ -400,9 +337,7 @@ int NAME_ROUTINE_C(MPI_Irecv) (void* buf, int count, MPI_Datatype datatype,
 	else
 		res = PMPI_Irecv (buf, count, datatype, source, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Irecv_leave ();
-#endif
+	DLB(DLB_MPI_Irecv_leave);
 
 	return res;
 }
@@ -415,9 +350,7 @@ int NAME_ROUTINE_C(MPI_Probe) (int source, int tag, MPI_Comm comm,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Probe_enter (source, tag, comm, status);
-#endif
+	DLB(DLB_MPI_Probe_enter, source, tag, comm, status);
 
 	if (mpitrace_on)
 	{
@@ -430,9 +363,7 @@ int NAME_ROUTINE_C(MPI_Probe) (int source, int tag, MPI_Comm comm,
 	else
 		res = PMPI_Probe (source, tag, comm, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Probe_leave ();
-#endif
+	DLB(DLB_MPI_Probe_leave);
 
 	return res;
 }
@@ -445,9 +376,7 @@ int NAME_ROUTINE_C(MPI_Iprobe) (int source, int tag, MPI_Comm comm, int *flag,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iprobe_enter (source, tag, comm, flag, status);
-#endif
+	DLB(DLB_MPI_Iprobe_enter, source, tag, comm, flag, status);
 
 	if (mpitrace_on)
 	{
@@ -460,9 +389,8 @@ int NAME_ROUTINE_C(MPI_Iprobe) (int source, int tag, MPI_Comm comm, int *flag,
 	else
 		return PMPI_Iprobe (source, tag, comm, flag, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iprobe_leave ();
-#endif
+	DLB(DLB_MPI_Iprobe_leave);
+	
 	return res;
 }
 
@@ -473,9 +401,7 @@ int NAME_ROUTINE_C(MPI_Test) (MPI_Request *request, int *flag, MPI_Status *statu
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Test_enter (request, flag, status);
-#endif
+	DLB(DLB_MPI_Test_enter, request, flag, status);
 
 	if (mpitrace_on)
 	{
@@ -488,9 +414,8 @@ int NAME_ROUTINE_C(MPI_Test) (MPI_Request *request, int *flag, MPI_Status *statu
 	else
 		res = PMPI_Test (request, flag, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Test_leave ();
-#endif
+	DLB(DLB_MPI_Test_leave);
+	
 	return res;
 }
 
@@ -502,9 +427,7 @@ int NAME_ROUTINE_C(MPI_Testall) (int count, MPI_Request *requests,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testall_enter (count, requests, flag, statuses);
-#endif
+	DLB(DLB_MPI_Testall_enter, count, requests, flag, statuses);
 
 	if (mpitrace_on)
 	{
@@ -517,9 +440,7 @@ int NAME_ROUTINE_C(MPI_Testall) (int count, MPI_Request *requests,
 	else
 		res = PMPI_Testall (count, requests, flag, statuses);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testall_leave ();
-#endif
+	DLB(DLB_MPI_Testall_leave);
 
 	return res;
 }
@@ -532,9 +453,7 @@ int NAME_ROUTINE_C(MPI_Testany) (int count, MPI_Request *requests, int *index,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testany_enter (count, requests, index, flag, status);
-#endif
+	DLB(DLB_MPI_Testany_enter, count, requests, index, flag, status);
 
 	if (mpitrace_on)
 	{
@@ -547,9 +466,7 @@ int NAME_ROUTINE_C(MPI_Testany) (int count, MPI_Request *requests, int *index,
 	else
 		res = PMPI_Testany (count, requests, index, flag, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testany_leave ();
-#endif
+	DLB(DLB_MPI_Testany_leave);
 
 	return res;
 }
@@ -562,9 +479,7 @@ int NAME_ROUTINE_C(MPI_Testsome) (int incount, MPI_Request * requests,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testsome_enter (incount, requests, outcount, indices, statuses);
-#endif
+	DLB(DLB_MPI_Testsome_enter, incount, requests, outcount, indices, statuses);
 
 	if (mpitrace_on)
 	{
@@ -577,9 +492,7 @@ int NAME_ROUTINE_C(MPI_Testsome) (int incount, MPI_Request * requests,
 	else
 		res = PMPI_Testsome (incount, requests, outcount, indices, statuses);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Testsome_leave ();
-#endif
+	DLB(DLB_MPI_Testsome_leave);
 
 	return res;
 }
@@ -591,9 +504,7 @@ int NAME_ROUTINE_C(MPI_Wait) (MPI_Request *request, MPI_Status *status)
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Wait_enter (request, status);
-#endif
+	DLB(DLB_MPI_Wait_enter, request, status);
 
 	if (mpitrace_on)
 	{
@@ -606,9 +517,7 @@ int NAME_ROUTINE_C(MPI_Wait) (MPI_Request *request, MPI_Status *status)
 	else
 		res = PMPI_Wait (request, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Wait_leave ();
-#endif
+	DLB(DLB_MPI_Wait_leave);
 
 	return res;
 }
@@ -621,9 +530,7 @@ int NAME_ROUTINE_C(MPI_Waitall) (int count, MPI_Request *requests,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitall_enter (count, requests, statuses);
-#endif
+	DLB(DLB_MPI_Waitall_enter, count, requests, statuses);
 
 	if (mpitrace_on)
 	{
@@ -636,9 +543,7 @@ int NAME_ROUTINE_C(MPI_Waitall) (int count, MPI_Request *requests,
 	else
 		res = PMPI_Waitall (count, requests, statuses);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitall_leave ();
-#endif
+	DLB(DLB_MPI_Waitall_leave);
 
 	return res;
 }
@@ -651,9 +556,7 @@ int NAME_ROUTINE_C(MPI_Waitany) (int count, MPI_Request *requests, int *index,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitany_enter (count, requests, index, status);
-#endif
+	DLB(DLB_MPI_Waitany_enter, count, requests, index, status);
 
 	if (mpitrace_on)
 	{
@@ -666,9 +569,7 @@ int NAME_ROUTINE_C(MPI_Waitany) (int count, MPI_Request *requests, int *index,
 	else
 		res = (PMPI_Waitany (count, requests, index, status));
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitany_leave ();
-#endif
+	DLB(DLB_MPI_Waitany_leave);
 
 	return res;
 }
@@ -681,9 +582,7 @@ int NAME_ROUTINE_C(MPI_Waitsome) (int incount, MPI_Request * requests,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitsome_enter (incount, requests, outcount, indices, statuses);
-#endif
+	DLB(DLB_MPI_Waitsome_enter, incount, requests, outcount, indices, statuses);
 
 	if (mpitrace_on)
 	{
@@ -697,9 +596,8 @@ int NAME_ROUTINE_C(MPI_Waitsome) (int incount, MPI_Request * requests,
 	else
 		res = PMPI_Waitsome (incount, requests, outcount, indices, statuses);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Waitsome_leave ();
-#endif
+	DLB(DLB_MPI_Waitsome_leave);
+	
 	return res;
 }
 
@@ -711,10 +609,8 @@ int NAME_ROUTINE_C(MPI_Recv_init) (void *buf, int count, MPI_Datatype datatype,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_init_enter (buf, count, datatype, source, tag, comm,
+	DLB(DLB_MPI_Recv_init_enter, buf, count, datatype, source, tag, comm,
 		request);
-#endif
 
 	if (mpitrace_on)
 	{
@@ -729,9 +625,8 @@ int NAME_ROUTINE_C(MPI_Recv_init) (void *buf, int count, MPI_Datatype datatype,
 		res =  PMPI_Recv_init
 		  (buf, count, datatype, source, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Recv_init_leave ();
-#endif
+	DLB(DLB_MPI_Recv_init_leave);
+	
 	return res;
 }
 
@@ -743,10 +638,7 @@ int NAME_ROUTINE_C(MPI_Send_init) (MPI3_CONST void *buf, int count, MPI_Datatype
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_init_enter (buf, count, datatype, dest, tag, comm,
-		request);
-#endif
+	DLB(DLB_MPI_Send_init_enter, buf, count, datatype, dest, tag, comm, request);
 
 	if (mpitrace_on)
 	{
@@ -761,9 +653,8 @@ int NAME_ROUTINE_C(MPI_Send_init) (MPI3_CONST void *buf, int count, MPI_Datatype
 		res = PMPI_Send_init (buf, count, datatype, dest, tag, comm,
 			request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Send_init_leave ();
-#endif
+	DLB(DLB_MPI_Send_init_leave);
+
 	return res;
 }
 
@@ -775,10 +666,8 @@ int NAME_ROUTINE_C(MPI_Bsend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_init_enter (buf, count, datatype, dest, tag, comm,
-		request);
-#endif
+	DLB(DLB_MPI_Bsend_init_enter, buf, count, datatype, dest, tag, comm, request);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -791,9 +680,8 @@ int NAME_ROUTINE_C(MPI_Bsend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 	else
 		res = PMPI_Bsend_init (buf, count, datatype, dest, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bsend_init_leave ();
-#endif
+	DLB(DLB_MPI_Bsend_init_leave);
+	
 	return res;
 }
 
@@ -806,10 +694,8 @@ int NAME_ROUTINE_C(MPI_Rsend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_init_enter (buf, count, datatype, dest, tag, comm,
-		request);
-#endif
+	DLB(DLB_MPI_Rsend_init_enter, buf, count, datatype, dest, tag, comm, request);
+	
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -822,9 +708,8 @@ int NAME_ROUTINE_C(MPI_Rsend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 	else
 		res = PMPI_Rsend_init (buf, count, datatype, dest, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Rsend_init_leave ();
-#endif
+	DLB(DLB_MPI_Rsend_init_leave);
+	
 	return res;
 }
 
@@ -835,10 +720,9 @@ int NAME_ROUTINE_C(MPI_Ssend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 	int dest, int tag, MPI_Comm comm, MPI_Request *request)
 {
 	int res;
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_init_enter (buf, count, datatype, dest, tag, comm,
-		request);
-#endif
+
+	DLB(DLB_MPI_Ssend_init_enter, buf, count, datatype, dest, tag, comm, request);
+
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
@@ -851,9 +735,8 @@ int NAME_ROUTINE_C(MPI_Ssend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 	else
 		res = PMPI_Ssend_init (buf, count, datatype, dest, tag, comm, request);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ssend_init_leave ();
-#endif
+	DLB(DLB_MPI_Ssend_init_leave);
+
 	return res;
 }
 
@@ -867,10 +750,8 @@ int NAME_ROUTINE_C(MPI_Sendrecv) (MPI3_CONST void *sendbuf, int sendcount,
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
+	DLB(DLB_MPI_Sendrecv_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 		recvbuf, recvcount, recvtype, source, recvtag, comm, status);
-#endif
 
 	if (mpitrace_on)
 	{
@@ -885,9 +766,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv) (MPI3_CONST void *sendbuf, int sendcount,
 		res = PMPI_Sendrecv (sendbuf, sendcount, sendtype, dest, sendtag,
 		  recvbuf, recvcount, recvtype, source, recvtag, comm, status); 
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_leave ();
-#endif
+	DLB(DLB_MPI_Sendrecv_leave);
 
 	return res;
 }
@@ -901,10 +780,8 @@ int NAME_ROUTINE_C(MPI_Sendrecv_replace) (void *buf, int count, MPI_Datatype typ
 {
 	int res;
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_replace_enter (buf, count, type, dest, sendtag, source,
+	DLB(DLB_MPI_Sendrecv_replace_enter, buf, count, type, dest, sendtag, source,
 		recvtag, comm, status);
-#endif
 
 	if (mpitrace_on)
 	{
@@ -919,9 +796,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv_replace) (void *buf, int count, MPI_Datatype typ
 		res = PMPI_Sendrecv_replace (buf, count, type, dest, sendtag, source,
 		  recvtag, comm, status);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Sendrecv_replace_leave ();
-#endif
+	DLB(DLB_MPI_Sendrecv_replace_leave);
 
 	return res;
 }

@@ -23,22 +23,6 @@
 
 #include "common.h"
 
-#if defined(MPI3)
-#define MPI3_CONST const
-#define MPI3_VOID_P_CAST (void *)
-#define MPI3_CHAR_P_CAST (char *)
-#define MPI3_F_INT_P_CAST (MPI_Fint *)
-#define MPI3_C_INT_P_CAST (int *)
-#define MPI3_MPI_INFO_P_CAST (MPI_Info *)
-#else
-#define MPI3_CONST
-#define MPI3_VOID_P_CAST
-#define MPI3_CHAR_P_CAST
-#define MPI3_F_INT_P_CAST
-#define MPI3_C_INT_P_CAST
-#define MPI3_MPI_INFO_P_CAST
-#endif
-
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -58,15 +42,8 @@
 #include "wrapper.h"
 #include "mpi_wrapper.h"
 #include "mpi_interface_coll_helper.h"
-
-#if defined(ENABLE_LOAD_BALANCING)
-# if defined(FORTRAN_SYMBOLS)
-#  include "MPI_interfaceF.h"
-# endif
-# if defined(C_SYMBOLS)
-#  include "MPI_interface.h"
-# endif
-#endif
+#include "mpi_interface.h"
+#include "dlb.h"
 
 #if defined(C_SYMBOLS) && defined(FORTRAN_SYMBOLS)
 # define COMBINED_SYMBOLS
@@ -153,9 +130,7 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Reduce_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm, ierror);
-#endif
+	DLB(DLB_MPI_Reduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -172,9 +147,7 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 		CtoF77 (pmpi_reduce) (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                           ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Reduce_F_leave ();
-#endif
+	DLB(DLB_MPI_Reduce_F_leave);
 }
 
 /******************************************************************************
@@ -193,9 +166,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Reduce_scatter_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op, comm, ierror);
-#endif
+	DLB(DLB_MPI_Reduce_scatter_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -212,9 +183,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 		CtoF77 (pmpi_reduce_scatter) (sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Reduce_scatter_F_leave ();
-#endif
+        DLB(DLB_MPI_Reduce_scatter_F_leave);
 }
 
 /******************************************************************************
@@ -234,10 +203,8 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allreduce_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
+	DLB(DLB_MPI_Allreduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 		datatype, op, comm, ierror);
-#endif
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -253,9 +220,7 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	else
 		CtoF77 (pmpi_allreduce) (sendbuf, recvbuf, count, datatype, op,
 			comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allreduce_F_leave ();
-#endif
+	DLB(DLB_MPI_Allreduce_F_leave);
 }
 
 /******************************************************************************
@@ -271,9 +236,7 @@ void NAME_ROUTINE_C2F(mpi_barrier) (MPI_Fint *comm, MPI_Fint *ierror)
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Barrier_F_enter (comm, ierror);
-#endif
+	DLB(DLB_MPI_Barrier_F_enter, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
     
@@ -288,9 +251,7 @@ void NAME_ROUTINE_C2F(mpi_barrier) (MPI_Fint *comm, MPI_Fint *ierror)
 	else
 		CtoF77 (pmpi_barrier) (comm, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Barrier_F_leave ();
-#endif
+	DLB(DLB_MPI_Barrier_F_leave);
 }
 
 /******************************************************************************
@@ -308,9 +269,7 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bcast_F_enter (buffer, count, datatype, root, comm, ierror);
-#endif
+	DLB(DLB_MPI_Bcast_F_enter, buffer, count, datatype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -325,9 +284,7 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_bcast) (buffer, count, datatype, root, comm, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Bcast_F_leave ();
-#endif
+	DLB(DLB_MPI_Bcast_F_leave);
 }
 
 /******************************************************************************
@@ -347,9 +304,7 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Alltoall_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
-#endif
+	DLB(DLB_MPI_Alltoall_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -366,9 +321,7 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_alltoall) (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Alltoall_F_leave ();
-#endif
+	DLB(DLB_MPI_Alltoall_F_leave);
 }
 
 
@@ -389,9 +342,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Alltoallv_F_enter (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, ierror);
-#endif
+	DLB(DLB_MPI_Alltoallv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -407,9 +358,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_alltoallv) (sendbuf, sendcount, sdispls, sendtype,
 			recvbuf, recvcount, rdispls, recvtype, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Alltoallv_F_leave ();
-#endif
+	DLB(DLB_MPI_Alltoallv_F_leave);
 }
 
 
@@ -430,9 +379,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allgather_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
-#endif
+	DLB(DLB_MPI_Allgather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -448,9 +395,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_allgather) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allgather_F_leave ();
-#endif
+	DLB(DLB_MPI_Allgather_F_leave);
 }
 
 
@@ -471,9 +416,7 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allgatherv_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, comm, ierror);
-#endif
+	DLB(DLB_MPI_Allgatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -491,9 +434,7 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_allgatherv) (sendbuf, sendcount, sendtype, recvbuf,
                               recvcount, displs, recvtype, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Allgatherv_F_leave ();
-#endif
+	DLB(DLB_MPI_Allgatherv_F_leave);
 }
 
 
@@ -514,9 +455,7 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Gather_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
-#endif
+	DLB(DLB_MPI_Gather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -533,9 +472,7 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_gather) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, root, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Gather_F_leave ();
-#endif
+	DLB(DLB_MPI_Gather_F_leave);
 }
 
 /******************************************************************************
@@ -555,9 +492,7 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Gatherv_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, root, comm, ierror);
-#endif
+	DLB(DLB_MPI_Gatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -574,9 +509,8 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_gatherv) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, displs, recvtype, root, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Gatherv_F_leave ();
-#endif
+			
+	DLB(DLB_MPI_Gatherv_F_leave);
 }
 
 /******************************************************************************
@@ -596,9 +530,7 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scatter_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
-#endif
+	DLB(DLB_MPI_Scatter_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -615,9 +547,7 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_scatter) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, root, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scatter_F_leave ();
-#endif
+	DLB(DLB_MPI_Scatter_F_leave);
 }
 
 /******************************************************************************
@@ -637,9 +567,7 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scatterv_F_enter (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
-#endif
+	DLB(DLB_MPI_Scatterv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -655,9 +583,7 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 	else
 		CtoF77 (pmpi_scatterv) (sendbuf, sendcount, displs, sendtype,
 			recvbuf, recvcount, recvtype, root, comm, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scatterv_F_leave ();
-#endif
+	DLB(DLB_MPI_Scatterv_F_leave);
 }
 
 /******************************************************************************
@@ -675,9 +601,7 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scan_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, ierror);
-#endif
+	DLB(DLB_MPI_Scan_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -693,9 +617,8 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_scan) (sendbuf, recvbuf, count, datatype, op, comm,
 			ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Scan_F_leave ();
-#endif
+			
+	DLB(DLB_MPI_Scan_F_leave);
 }
 
 
@@ -717,9 +640,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ireduce_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Ireduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -736,9 +657,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 		CtoF77 (pmpi_ireduce) (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                           req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ireduce_F_leave ();
-#endif
+	DLB(DLB_MPI_Ireduce_F_leave);
 }
 
 /******************************************************************************
@@ -757,9 +676,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ireduce_scatter_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Ireduce_scatter_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -776,9 +693,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter) (void *sendbuf, void *recvbuf,
 		CtoF77 (pmpi_ireduce_scatter) (sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ireduce_scatter_F_leave ();
-#endif
+	DLB(DLB_MPI_Ireduce_scatter_F_leave);
 }
 
 /******************************************************************************
@@ -798,10 +713,8 @@ void NAME_ROUTINE_C2F(mpi_iallreduce) (void *sendbuf, void *recvbuf,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iallreduce_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
+	DLB(DLB_MPI_Iallreduce_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 		datatype, op, comm, req, ierror);
-#endif
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -817,9 +730,8 @@ void NAME_ROUTINE_C2F(mpi_iallreduce) (void *sendbuf, void *recvbuf,
 	else
 		CtoF77 (pmpi_iallreduce) (sendbuf, recvbuf, count, datatype, op,
 			comm, req, ierror);
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iallreduce_F_leave ();
-#endif
+			
+	DLB(DLB_MPI_Iallreduce_F_leave);
 }
 
 /******************************************************************************
@@ -835,9 +747,7 @@ void NAME_ROUTINE_C2F(mpi_ibarrier) (MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ie
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibarrier_F_enter (comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Ibarrier_F_enter, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
     
@@ -852,9 +762,7 @@ void NAME_ROUTINE_C2F(mpi_ibarrier) (MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ie
 	else
 		CtoF77 (pmpi_ibarrier) (comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibarrier_F_leave ();
-#endif
+	DLB(DLB_MPI_Ibarrier_F_leave);
 }
 
 /******************************************************************************
@@ -872,9 +780,7 @@ void NAME_ROUTINE_C2F(mpi_ibcast) (void *buffer, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibcast_F_enter (buffer, count, datatype, root, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Ibcast_F_enter, buffer, count, datatype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -889,9 +795,7 @@ void NAME_ROUTINE_C2F(mpi_ibcast) (void *buffer, MPI_Fint *count,
 	else
 		CtoF77 (pmpi_ibcast) (buffer, count, datatype, root, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ibcast_F_leave ();
-#endif
+	DLB(DLB_MPI_Ibcast_F_leave);
 }
 
 /******************************************************************************
@@ -911,9 +815,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ialltoall_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Ialltoall_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -931,9 +833,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_ialltoall) (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ialltoall_F_leave ();
-#endif
+	DLB(DLB_MPI_Ialltoall_F_leave);
 }
 
 
@@ -954,9 +854,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ialltoallv_F_enter (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Ialltoallv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -972,9 +870,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_ialltoallv) (sendbuf, sendcount, sdispls, sendtype,
 			recvbuf, recvcount, rdispls, recvtype, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Ialltoallv_F_leave ();
-#endif
+	DLB(DLB_MPI_Ialltoallv_F_leave);
 }
 
 
@@ -995,9 +891,7 @@ void NAME_ROUTINE_C2F(mpi_iallgather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iallgather_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Iallgather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -1014,9 +908,7 @@ void NAME_ROUTINE_C2F(mpi_iallgather) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_iallgather) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iallgather_F_leave ();
-#endif
+	DLB(DLB_MPI_Iallgather_F_leave);
 }
 
 
@@ -1037,9 +929,7 @@ void NAME_ROUTINE_C2F(mpi_iallgatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iallgatherv_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Iallgatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, MPI3_VOID_P_CAST recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -1058,9 +948,7 @@ void NAME_ROUTINE_C2F(mpi_iallgatherv) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_iallgatherv) (sendbuf, sendcount, sendtype, recvbuf,
                               recvcount, displs, recvtype, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iallgatherv_F_leave ();
-#endif
+	DLB(DLB_MPI_Iallgatherv_F_leave);
 }
 
 
@@ -1081,9 +969,7 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Igather_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Igather_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -1101,9 +987,7 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_igather) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, root, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Igather_F_leave ();
-#endif
+	DLB(DLB_MPI_Igather_F_leave);
 }
 
 /******************************************************************************
@@ -1123,9 +1007,7 @@ void NAME_ROUTINE_C2F(mpi_igatherv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Igatherv_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, root, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Igatherv_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -1143,9 +1025,7 @@ void NAME_ROUTINE_C2F(mpi_igatherv) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_igatherv) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, displs, recvtype, root, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Igatherv_F_leave ();
-#endif
+	DLB(DLB_MPI_Igatherv_F_leave);
 }
 
 /******************************************************************************
@@ -1165,9 +1045,7 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iscatter_F_enter (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Iscatter_F_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -1185,9 +1063,7 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_iscatter) (sendbuf, sendcount, sendtype, recvbuf,
 			recvcount, recvtype, root, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iscatter_F_leave ();
-#endif
+	DLB(DLB_MPI_Iscatter_F_leave);
 }
 
 /******************************************************************************
@@ -1207,9 +1083,7 @@ void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iscatterv_F_enter (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Iscatterv_F_enter, MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -1225,9 +1099,7 @@ void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 		CtoF77 (pmpi_iscatterv) (sendbuf, sendcount, displs, sendtype,
 			recvbuf, recvcount, recvtype, root, comm, req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iscatterv_F_leave ();
-#endif
+	DLB(DLB_MPI_Iscatterv_F_leave);
 }
 
 /******************************************************************************
@@ -1245,9 +1117,7 @@ void NAME_ROUTINE_C2F(mpi_iscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 {
 	MPI_Comm c = MPI_Comm_f2c(*comm);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iscan_F_enter (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, req, ierror);
-#endif
+	DLB(DLB_MPI_Iscan_F_enter, MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, comm, req, ierror);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
@@ -1264,9 +1134,7 @@ void NAME_ROUTINE_C2F(mpi_iscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 		CtoF77 (pmpi_iscan) (sendbuf, recvbuf, count, datatype, op, comm,
 			req, ierror);
 
-#if defined(ENABLE_LOAD_BALANCING)
-	DLB_MPI_Iscan_F_leave ();
-#endif
+	DLB(DLB_MPI_Iscan_F_leave);
 }
 #endif /* MPI3 */
 

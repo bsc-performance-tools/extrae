@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 12Jul2017 Fixes configure check for without-cuda and without-cupti
  + 14Jun2017 Added instrumentation support for OpenMP taskloop and ordered directives
+ * 6Jun2017 Make DLB available by default
  * 30May2017 Compiles and distributes a Fortran module to use the Extrae API
  with Fortran programs
  + 12May2017 Added compatibility with new events in CUPTI 5 for stream creation

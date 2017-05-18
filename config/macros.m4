@@ -2056,31 +2056,6 @@ AC_DEFUN([AX_CHECK_UNUSED_ATTRIBUTE],
   ])
 ])
 
-AC_DEFUN([AX_CHECK_LOAD_BALANCING],
-[
-   AC_ARG_WITH(load-balancing,
-   AC_HELP_STRING(
-      [--with-load-balancing@<:@=DIR@:>@],
-      [specify where to find "load balancing" libraries and includes]
-      ),
-      [lb_path="$withval"],
-      [lb_path="none"] dnl List of possible default paths
-   )
-   if test "${lb_path}" != "none" ; then
-      AC_MSG_CHECKING([for load-balancing installation])
-      if test -r "${lb_path}/include/MPI_interface.h" -a "${lb_path}/include/MPI_interfaceF.h"; then
-         AC_MSG_RESULT([$lb_path])
-         LOAD_BALANCING_HOME=${lb_path}
-         AC_SUBST([LOAD_BALANCING_HOME])
-         lb_found="yes"
-      else
-         AC_MSG_ERROR([load balancing headers not found])
-         lb_found="no"
-      fi
-   fi
-   AM_CONDITIONAL(GENERATE_LOAD_BALANCING, test "${lb_found}" = "yes" )
-])
-
 AC_DEFUN([AX_OFF_T_64BIT],
 [
 	AC_MSG_CHECKING([how to get 64-bit off_t])
