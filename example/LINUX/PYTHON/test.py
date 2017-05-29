@@ -1,18 +1,20 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+
 ### Load the Extrae python module in your own python application
 import pyextrae.sequential as pyextrae
 
 def a():
-    print 'Called function a()!'
+    print ("Called function a()!")
     return 1
 
 def b():
-    print 'Called function b()!'
+    print ("Called function b()!")
     return 1
 
 def c():
-    print 'Called function c()!'
+    print ("Called function c()!")
     return 1
 
 ### To automatically instrument your user functions, enable 

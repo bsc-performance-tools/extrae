@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import atexit
 import os
@@ -6,6 +7,7 @@ import glob
 from xml.dom.minidom import parse
 import ctypes 
 from ctypes import cdll
+from collections import defaultdict
 
 USRFUNC_EV = 60000100
 
@@ -18,19 +20,20 @@ Traced_Functions = []
 Number_of_Traced_Functions = 0
 MPITS = "./TRACE.mpits"
 MultiprocessingEnabled = False
+CallsProfile = defaultdict(int)
 
 ### Load the sequential tracing library
 def LoadExtrae(Library):
   return cdll.LoadLibrary(Library)
 
-### Called when a profiling event triggers
+### Called when a profiling event triggers (tracing mode)
 def pyEx_trace_hook(frame, event, arg):
   global Extrae
 
   if ((event == "call") or (event == "c_call") or (event == "return") or (event == "c_return")):
     function = frame.f_code.co_name
     file = frame.f_code.co_filename
-    # print "EV:", event, "; FUNC:", frame.f_code.co_name, "; LINE:", frame.f_lineno, "; FILE:", file, "; PID:", os.getpid()  #, "; ARG:", arg
+    #print ("EV:", event, "; FUNC:", frame.f_code.co_name, "; LINE:", frame.f_lineno, "; FILE:", file, "; PID:", os.getpid())  #, "; ARG:", arg
 
     ### Detect a process spawn from the multiprocessing module
     if (MultiprocessingEnabled) and (function == "run") and ('/'.join(file.split('/')[-2:]) == "multiprocessing/process.py"):
@@ -39,15 +42,15 @@ def pyEx_trace_hook(frame, event, arg):
         Extrae[os.getpid()] = LoadExtrae(LibrarySubProc)
       elif (event == "return"):
         ### The subprocesses call the exit handler manually (atexit doesn't work for them)
-        pyEx_fini()
+        pyEx_trace_fini()
 
     ### Detect the call to a traced function
     if Extrae and (os.getpid() in Extrae) and function and Traced_Functions and function in Traced_Functions:   
-#      caller = frame.f_back
-#      if caller:
-#        caller_line_no  = caller.f_lineno
-#        caller_filename = caller.f_code.co_filename
-#        print "-> called from "+caller_filename+" line "+str(caller_line_no);
+      #caller = frame.f_back
+      #if caller:
+      #  caller_line_no  = caller.f_lineno
+      #  caller_filename = caller.f_code.co_filename
+      #  print ("-> called from "+caller_filename+" line "+str(caller_line_no))
 
        ### Get the function identifier
        function_id = Traced_Functions.index(function) + 1
@@ -57,8 +60,19 @@ def pyEx_trace_hook(frame, event, arg):
        ### Emit an event into the trace
        Extrae[os.getpid()].@sub_Extrae_eventandcounters@( USRFUNC_EV, function_id )
 
-### Called when the program terminates
-def pyEx_fini(Master=False):
+### Called when a profiling event triggers (profiling mode)
+def pyEx_profile_hook(frame, event, arg):
+  global CallsProfile
+
+  if ((event == "call") or (event == "c_call")):
+    function = frame.f_code.co_name
+    try:
+      CallsProfile[function] += 1
+    except:
+      pass
+
+### Called when the program terminates (tracing mode)
+def pyEx_trace_fini(Master=False):
   global Extrae
   global MultiprocessingEnabled
   global Number_of_Traced_Functions
@@ -96,16 +110,28 @@ def pyEx_fini(Master=False):
           fo.write( "--\n" )
       os.unlink(LibrarySubProc)
 
+### Called when the program terminates (profiling mode)
+def pyEx_profile_fini():
+  global CallsProfile
+
+  print ('%-12s%-s' % ('Count', 'Function'))
+  print ('====================')
+  for call in sorted(CallsProfile.items(), key=lambda kv:kv[1], reverse=True):
+    func   = call[0]
+    ncount = call[1]
+    print ('%-12i%-s' % (ncount, func))
 
 #############################
 ###  EXTRAE API WRAPPERS  ###
 #############################
 
 def event(type, value):
-  Extrae[os.getpid()].Extrae_event(type, value)
+  if (Extrae):
+    Extrae[os.getpid()].Extrae_event(type, value)
 
 def eventandcounters(type, value):
-  Extrae[os.getpid()].@sub_Extrae_eventandcounters@(type, value)
+  if (Extrae):
+    Extrae[os.getpid()].@sub_Extrae_eventandcounters@(type, value)
 
 
 #############################
@@ -141,7 +167,7 @@ def startTracing(SelectedLibrary, Multiproc=False):
     shutil.copy(LibrarySeq, LibrarySubProc)
 
   ### Load Extrae in the parent process
-  print "pyextrae: Loading tracing library '" + SelectedLibrary + "'"
+  print ("pyextrae: Loading tracing library '" + SelectedLibrary + "'")
   Extrae[os.getpid()] = LoadExtrae(ExtraeHome + "/lib/" + SelectedLibrary)
 
   ### Parse the configuration file to look for the user-functions configuration
@@ -162,5 +188,11 @@ def startTracing(SelectedLibrary, Multiproc=False):
       sys.setprofile( pyEx_trace_hook )
 
   ### Register the exit handler for the parent process
-  atexit.register(pyEx_fini, Master=True)
+  atexit.register(pyEx_trace_fini, Master=True)
+
+def startProfiling():
+  sys.setprofile( pyEx_profile_hook )
+  atexit.register( pyEx_profile_fini )
+   
+
 

@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  + 12May2017 Added compatibility with new events in CUPTI 5 for stream creation
+ * 10May2017 Upgraded pyextrae support for Python 3 and added submodule for CUDA tracing
  * 27Apr2017 Extrae_get_version API call now relies on the configure.ac value instead of using a separate include file
  * 26Apr2017 Initializes a different PEBS fd for every thread
  * 26Apr2017 Don't exit when the binary is linked against multiple OpenMP runtimes
