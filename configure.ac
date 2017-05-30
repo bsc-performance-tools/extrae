@@ -105,6 +105,9 @@ fi
 AC_PROG_CXX(${wanted_CXX_Compilers})
 AC_PROG_CPP
 AC_PROG_FC(${wanted_F_Compilers})
+
+AM_CONDITIONAL(HAVE_FC, test "$FC" != "")
+
 if test "${IS_SPARC64_MACHINE}" != "yes" ; then
 	AC_FC_WRAPPERS
 fi
