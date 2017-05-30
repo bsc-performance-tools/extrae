@@ -481,7 +481,8 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
  * \param num_tasks Total number of tasks.
  * \param distribution The user defined distribution scheme.
  */
-void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
+void
+HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 {
 	unsigned threadid = 0;
 
@@ -520,7 +521,7 @@ void HWC_Parse_XML_Config (int task_id, int num_tasks, char *distribution)
 		}
 		else if (strncasecmp (distribution, "thread-cyclic", 13) == 0)
 		{
-			int maxThreads;
+			unsigned maxThreads;
 			/* Sets are distributed among threads like:
 			0 1 2 3 .. n-1 0 1 2 3 .. n-1  0 1 2 3 ... */
 			maxThreads = Backend_getMaximumOfThreads();

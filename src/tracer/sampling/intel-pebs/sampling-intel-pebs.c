@@ -939,7 +939,7 @@ void Extrae_IntelPEBS_disable (void)
 	unsigned int i = 0;
 
 	for (i=0; i<pebs_init_threads; i++) {
-		if (perf_pebs_fd[i] != NULL) {
+		if (perf_pebs_fd[i] < 0) {
 			ioctl(perf_pebs_fd[i], PERF_EVENT_IOC_REFRESH, 0);
 			close (perf_pebs_fd[i]);
 		}

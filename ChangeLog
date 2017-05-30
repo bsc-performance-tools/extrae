@@ -7,6 +7,7 @@ ChangeLog
  + 14Jun2017 Added instrumentation support for OpenMP taskloop and ordered directives
  * 6Jun2017 Make DLB available by default
  + 01Jun2017 Emits cpu_event for each OpenMP thread at least once
+ * 30May2017 Clears compilation warnings and MPI_HAS_MPI_F_STATUS_IGNORE bug
  * 30May2017 Compiles and distributes a Fortran module to use the Extrae API
  with Fortran programs
  + 17May2017 Added instrumentation support for mpi_reduce_scatter_block, mpi_ireduce_scatter_block, mpi_alltoallw, mpi_ialltoallw, mpi_win_lock, mpi_win_unlock, mpi_get_accumulate

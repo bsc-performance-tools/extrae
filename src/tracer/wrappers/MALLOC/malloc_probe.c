@@ -248,8 +248,11 @@ void Probe_kmpc_malloc_Exit(void *ptr)
 	}
 }
 
-void Probe_kmpc_aligned_malloc_Entry(size_t size, size_t alignment)
+void
+Probe_kmpc_aligned_malloc_Entry(size_t size, size_t alignment)
 {
+	UNREFERENCED_PARAMETER(alignment);
+
 	if (mpitrace_on && trace_malloc)
 	{
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, KMPC_ALIGNED_MALLOC_EV, EVT_BEGIN, size);

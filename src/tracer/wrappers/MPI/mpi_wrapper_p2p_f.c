@@ -65,12 +65,9 @@
 
 #include "hash_table.h"
 
-#if !defined(MPI_F_STATUS_IGNORE)
-#warning MPI_F_STATUS_IGNORE definition not found in mpi.h. Assuming a 4-byte integer pointer data type. We have detected this situation only in IBM Platform MPI on top of MPICH 1.2, please verify that in your current MPI implementation the datatype is compliant. 
+#if !defined(MPI_HAS_MPI_F_STATUS_IGNORE)
+#warning MPI_F_STATUS_IGNORE and MPI_F_STATUSES_IGNORE definitions not found in mpi.h. Assuming an integer pointer data type. We have detected this situation only in IBM Platform MPI on top of MPICH 1.2, please verify that in your current MPI implementation the datatype is compliant.
 MPI_Fint * MPI_F_STATUS_IGNORE = 0;
-#endif
-#if !defined(MPI_F_STATUSES_IGNORE)                                                                     
-#warning MPI_F_STATUSES_IGNORE definition not found in mpi.h. Assuming a 4-byte integer pointer data type. We have detected this situation only in IBM Platform MPI on top of MPICH 1.2, please verify that in your current MPI implementation the datatype is compliant. 
 MPI_Fint * MPI_F_STATUSES_IGNORE = 0;
 #endif
 
