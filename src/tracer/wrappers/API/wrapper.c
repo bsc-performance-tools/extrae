@@ -307,20 +307,17 @@ char final_dir[TMP_DIR];
 char tmp_dir[TMP_DIR];
 
 
-/* Checks if there is a CPU event waiting to be emitted */
-int PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
+/*
+ * Checks if there is a CPU event waiting to be emitted.
+ * Returns 1 if the thread never emitted a CPU event or if the user specified
+ * timer goes off.
+*/
+int
+PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
 {
-	if (MinimumCPUEventTime > 0)
-	{
-		if (LastCPUEmissionTime[thread_id] == 0)
-		{
-			LastCPUEmissionTime[thread_id] = current_time;
-		}
-		else if ((current_time - LastCPUEmissionTime[thread_id]) >  MinimumCPUEventTime)
-		{
-			LastCPUEmissionTime[thread_id] = current_time;
-			return 1;
-		}
+	if ((LastCPUEmissionTime[thread_id] == 0) || (((current_time - LastCPUEmissionTime[thread_id]) >  MinimumCPUEventTime) && MinimumCPUEventTime > 0)) {
+		LastCPUEmissionTime[thread_id] = current_time;
+		return 1;
 	}
 
 	return 0;
