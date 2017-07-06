@@ -799,28 +799,38 @@ void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 	MPI_Request req;
 	hash_data_t *hash_req = NULL;
 	int src_world = -1, size = 0, tag = 0, ret;
-	iotimer_t temps_inicial, temps_final;
-	static int Test_Software_Counter = 0;
+	iotimer_t begin_time, end_time;
+	static int Test_F_Software_Counter = 0;
+	static iotimer_t elapsed_time_outside_tests = 0, last_test_exit_time = 0;
 
-	temps_inicial = LAST_READ_TIME;
+	begin_time = LAST_READ_TIME;
+
+	if (Test_F_Software_Counter == 0) {
+		/* First MPI_Test */
+    		elapsed_time_outside_tests = 0;
+  	}
+  	else {
+    		elapsed_time_outside_tests += (begin_time - last_test_exit_time);
+  	}
 
 	req = MPI_Request_f2c(*request);
 
 	CtoF77 (pmpi_test) (request, flag, status, ierror);
 
-	temps_final = TIME;
+	end_time = TIME;
 
 	if (*flag && ((hash_req = hash_search (&requests, req)) != NULL))
 	{
                 int cancelled = 0;
 
-		if (Test_Software_Counter != 0)
+		if (Test_F_Software_Counter != 0)
 		{
-			TRACE_EVENT (temps_inicial, MPI_TEST_COUNTER_EV, Test_Software_Counter);
+			TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_TESTS_EV, elapsed_time_outside_tests);
+			TRACE_EVENT (begin_time, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
 		}
-		Test_Software_Counter = 0;
+		Test_F_Software_Counter = 0;
 
-		TRACE_MPIEVENT (temps_inicial, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+		TRACE_MPIEVENT (begin_time, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
                 CtoF77 (pmpi_test_cancelled) (status, &cancelled, ierror);
                 if (!cancelled)
@@ -838,16 +848,19 @@ void Normal_PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *stat
 				MPI_CHECK (ret, pmpi_group_free);
 			}
 		}
-		TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, req);
+		TRACE_MPIEVENT_NOHWC (begin_time, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, req);
 		hash_remove (&requests, req);
 
-		TRACE_MPIEVENT (temps_final, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+		TRACE_MPIEVENT (end_time, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	}
 	else
 	{
-		if (Test_Software_Counter == 0)
-			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
-		Test_Software_Counter ++;
+		if (Test_F_Software_Counter == 0)
+		{
+			/* First failed MPI_Test */
+			TRACE_EVENTANDCOUNTERS (begin_time, MPI_TEST_COUNTER_EV, 0, TRUE);
+		}
+		Test_F_Software_Counter ++;
 	}
 }
 
@@ -876,11 +889,20 @@ void PMPI_TestAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[], MPI_F
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
 	hash_data_t *hash_req = NULL;
 	int src_world = -1, size = 0, tag = 0, ret, ireq;
-	iotimer_t temps_final, temps_inicial;
+	iotimer_t begin_time, end_time;
 	int i;
 	static int Test_F_Software_Counter = 0;
+	static iotimer_t elapsed_time_outside_tests = 0, last_test_exit_time = 0;
 
-	temps_inicial = LAST_READ_TIME;
+	begin_time = LAST_READ_TIME;
+
+        if (Test_F_Software_Counter == 0) {
+                /* First MPI_Testall */
+                elapsed_time_outside_tests = 0;
+        }
+        else {
+                elapsed_time_outside_tests += (begin_time - last_test_exit_time);
+        }
 
 	if (*count > MAX_WAIT_REQUESTS)
 		fprintf (stderr, "PANIC: too many requests in mpi_testtall\n");
@@ -892,14 +914,17 @@ void PMPI_TestAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[], MPI_F
 
 	CtoF77 (pmpi_testall) (count, array_of_requests, flag, ptr_statuses, ierror);
 
-	temps_final = TIME;
+	end_time = TIME;
 	if (*ierror == MPI_SUCCESS && *flag)
 	{
 		TRACE_MPIEVENT (LAST_READ_TIME, MPI_TESTALL_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
 		if (Test_F_Software_Counter != 0)
-			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		{
+			TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_TESTS_EV, elapsed_time_outside_tests);
+			TRACE_EVENT(begin_time, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		}
 		Test_F_Software_Counter = 0;
 
 		for (ireq = 0; ireq < *count; ireq++)
@@ -926,16 +951,19 @@ void PMPI_TestAll_Wrapper (MPI_Fint * count, MPI_Fint array_of_requests[], MPI_F
 					/* MPI Stats, get_Irank_obj above returns size (the number of bytes received) */
 					updateStats_P2P(global_mpi_stats, src_world, size, 0);
 				}
-				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, save_reqs[ireq]);
+				TRACE_MPIEVENT_NOHWC (end_time, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, save_reqs[ireq]);
 				hash_remove (&requests, save_reqs[ireq]);
 			}
 		}
-		TRACE_MPIEVENT (temps_final, MPI_TESTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+		TRACE_MPIEVENT (end_time, MPI_TESTALL_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	}
 	else
 	{
 		if (Test_F_Software_Counter == 0)
-			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		{
+			/* First failed MPI_TestAll */
+			TRACE_EVENTANDCOUNTERS (begin_time, MPI_TEST_COUNTER_EV, 0, TRUE);
+		}
 		Test_F_Software_Counter ++;
 	}
 }
@@ -952,10 +980,20 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
 	hash_data_t *hash_req = NULL;
 	int src_world = -1, size = 0, tag = 0, ret, i;
-	iotimer_t temps_final, temps_inicial;
+	iotimer_t begin_time, end_time;
 	static int Test_F_Software_Counter = 0;
+	static iotimer_t elapsed_time_outside_tests = 0, last_test_exit_time = 0;
 
-	temps_inicial = LAST_READ_TIME;
+	begin_time = LAST_READ_TIME;
+
+	if (Test_F_Software_Counter == 0) {
+                /* First MPI_Testany */
+                elapsed_time_outside_tests = 0;
+        }
+        else {
+                elapsed_time_outside_tests += (begin_time - last_test_exit_time);
+        }
+
 
 	if (*count > MAX_WAIT_REQUESTS)
 		fprintf (stderr, "PANIC: too many requests in mpi_testany\n");
@@ -967,15 +1005,18 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 
 	CtoF77 (pmpi_testany) (count, array_of_requests, index, flag, ptr_status, ierror);
 
-	temps_final = TIME;
+	end_time = TIME;
 
 	if (*index != MPI_UNDEFINED && *ierror == MPI_SUCCESS && *flag)
 	{
-		TRACE_MPIEVENT (temps_inicial, MPI_TESTANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+		TRACE_MPIEVENT (begin_time, MPI_TESTANY_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
 		if (Test_F_Software_Counter != 0)
-			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		{
+			TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_TESTS_EV, elapsed_time_outside_tests);
+			TRACE_EVENT(begin_time, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		}
 		Test_F_Software_Counter = 0;
 
 		MPI_Request req = save_reqs[*index-1];
@@ -1002,15 +1043,18 @@ void PMPI_TestAny_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
 				/* MPI Stats, get_Irank_obj above returns size (the number of bytes received) */
 				updateStats_P2P(global_mpi_stats, src_world, size, 0);
 			}
-			TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, req);
+			TRACE_MPIEVENT_NOHWC (end_time, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, req);
 			hash_remove (&requests, req);
 		}
-		TRACE_MPIEVENT (temps_final, MPI_TESTANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+		TRACE_MPIEVENT (end_time, MPI_TESTANY_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	}
 	else
 	{
 		if (Test_F_Software_Counter == 0)
-			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		{
+			/* First failed MPI_Testany */
+			TRACE_EVENTANDCOUNTERS (begin_time, MPI_TEST_COUNTER_EV, 0, TRUE);
+		}
 		Test_F_Software_Counter ++;
 	}
 }
@@ -1027,10 +1071,20 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	MPI_Request save_reqs[MAX_WAIT_REQUESTS];
 	hash_data_t *hash_req = NULL;
 	int src_world = -1, size = 0, tag = 0, ret, i;
-	iotimer_t temps_final, temps_inicial;
+	iotimer_t begin_time, end_time;
 	static int Test_F_Software_Counter = 0;
+	static iotimer_t elapsed_time_outside_tests = 0, last_test_exit_time = 0;
 
-	temps_inicial = LAST_READ_TIME;
+        begin_time = LAST_READ_TIME;
+
+        if (Test_F_Software_Counter == 0) {
+                /* First MPI_Testsome */
+                elapsed_time_outside_tests = 0;
+        }
+        else {
+                elapsed_time_outside_tests += (begin_time - last_test_exit_time);
+        }
+
 
 	if (*incount > MAX_WAIT_REQUESTS)
 		fprintf (stderr, "PANIC: too many requests in mpi_testsome\n");
@@ -1043,15 +1097,18 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 	CtoF77(pmpi_testsome) (incount, array_of_requests, outcount, array_of_indices,
 	  ptr_statuses, ierror);
 
-	temps_final = TIME;
+	end_time = TIME;
 
 	if (*ierror == MPI_SUCCESS && *outcount > 0)
 	{
-		TRACE_MPIEVENT (temps_inicial, MPI_TESTSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
+		TRACE_MPIEVENT (begin_time, MPI_TESTSOME_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY,
                   EMPTY);
 
 		if (Test_F_Software_Counter != 0)
-			TRACE_EVENT(temps_inicial, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		{
+			TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_TESTS_EV, elapsed_time_outside_tests);
+			TRACE_EVENT(begin_time, MPI_TEST_COUNTER_EV, Test_F_Software_Counter);
+		}
 		Test_F_Software_Counter = 0;
 
 		for (i = 0; i < *outcount; i++)
@@ -1079,16 +1136,19 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 					/* MPI Stats. get_Irank_obj above returns size (the number of bytes received) */
 					updateStats_P2P(global_mpi_stats, src_world, size, 0);
 				}
-				TRACE_MPIEVENT_NOHWC (temps_final, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, req);
+				TRACE_MPIEVENT_NOHWC (end_time, MPI_IRECVED_EV, cancelled, src_world, size, hash_req->tag, hash_req->commid, req);
 				hash_remove (&requests, req);
 			}
 		}
-		TRACE_MPIEVENT (temps_final, MPI_TESTSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+		TRACE_MPIEVENT (end_time, MPI_TESTSOME_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 	}
 	else
 	{
 		if (Test_F_Software_Counter == 0)
-			TRACE_EVENTANDCOUNTERS (temps_inicial, MPI_TEST_COUNTER_EV, 0, TRUE);
+		{
+			/* First failed MPI_Testsome */
+			TRACE_EVENTANDCOUNTERS (begin_time, MPI_TEST_COUNTER_EV, 0, TRUE);
+		}
 		Test_F_Software_Counter ++;
 	}
 }

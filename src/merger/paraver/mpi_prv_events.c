@@ -434,8 +434,9 @@ static struct t_prv_val_label mpi_prv_val_label[NUM_MPI_PRV_ELEMENTS] = {
 #define MPI_REQUEST_GET_STATUS_CNT_INDEX                    4
 #define TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_INDEX           5
 #define IO_INDEX                                            6
+#define TIME_OUTSIDE_TESTS_INDEX			    7
 
-#define MAX_SOFTCNT                                         7
+#define MAX_SOFTCNT                                         8
 
 int MPI_SoftCounters_used[MAX_SOFTCNT] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 
@@ -445,6 +446,8 @@ void Enable_MPI_Soft_Counter (unsigned int EvType)
 		MPI_SoftCounters_used[IPROBE_CNT_INDEX] = TRUE;
 	else if (EvType == MPI_TIME_OUTSIDE_IPROBES_EV)
 		MPI_SoftCounters_used[TIME_OUTSIDE_IPROBES_INDEX] = TRUE;
+	else if (EvType == MPI_TIME_OUTSIDE_TESTS_EV)
+		MPI_SoftCounters_used[TIME_OUTSIDE_TESTS_INDEX] = TRUE;
 	else if (EvType == MPI_TEST_COUNTER_EV)
 		MPI_SoftCounters_used[TEST_CNT_INDEX] = TRUE;
 	else if (EvType == MPI_REQUEST_GET_STATUS_COUNTER_EV)
@@ -649,6 +652,7 @@ void MPITEvent_WriteEnabled_MPI_Operations (FILE * fd)
 
 #define IPROBE_COUNTER_LBL                          "MPI_Iprobe misses"
 #define TIME_OUTSIDE_IPROBES_LBL                    "Elapsed time outside MPI_Iprobe"
+#define TIME_OUTSIDE_TESTS_LBL                      "Elapsed time outside MPI_Test"
 #define TEST_COUNTER_LBL                            "MPI_Test misses"
 #define MPI_REQUEST_GET_STATUS_COUNTER_LBL          "MPI_Request_get_status counter"
 #define TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_LBL     "Elapsed time outside MPI_Request_get_status"
@@ -668,6 +672,13 @@ void SoftCountersEvent_WriteEnabled_MPI_Operations (FILE * fd)
 		fprintf (fd, "EVENT_TYPE\n");
 		fprintf (fd, "%d    %d    %s\n\n", 0, 
 			MPI_TIME_OUTSIDE_IPROBES_EV, TIME_OUTSIDE_IPROBES_LBL);
+		LET_SPACES(fd);
+	}
+	if (MPI_SoftCounters_used[TIME_OUTSIDE_TESTS_INDEX])
+	{
+		fprintf (fd, "EVENT_TYPE\n");
+		fprintf (fd, "%d    %d    %s\n\n", 0, 
+			MPI_TIME_OUTSIDE_TESTS_EV, TIME_OUTSIDE_TESTS_LBL);
 		LET_SPACES(fd);
 	}
 	if (MPI_SoftCounters_used[TEST_CNT_INDEX])

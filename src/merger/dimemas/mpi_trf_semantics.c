@@ -658,6 +658,7 @@ SingleEv_Handler_t TRF_MPI_Event_Handlers[] = {
 	{ MPI_FILE_WRITE_AT_ALL_EV, NULL },
 	{ MPI_REDUCE_SCATTER_BLOCK_EV, GlobalOP_Event },
 	{ MPI_ALLTOALLW_EV, GlobalOP_Event },
+	{ MPI_TIME_OUTSIDE_TESTS_EV, NULL },
 	{ NULL_EV, NULL }
 };
 

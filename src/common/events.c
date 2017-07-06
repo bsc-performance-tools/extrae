@@ -23,7 +23,7 @@
 #include "common.h"
 #include "events.h"
 
-#define MPI_EVENTS 107  /*Last added MPI_GET_ACCUMULATE_EV*/
+#define MPI_EVENTS 108  /*Last added MPI_TIME_OUTSIDE_TESTS*/
 
 /******************************************************************************
  ***  IsMPI
@@ -58,7 +58,7 @@ static unsigned mpi_events[] = {
 	MPI_IGATHER_EV, MPI_IGATHERV_EV, MPI_ISCATTER_EV, MPI_ISCATTERV_EV,
 	MPI_IREDUCESCAT_EV, MPI_ISCAN_EV, MPI_REDUCE_SCATTER_BLOCK_EV, MPI_IREDUCE_SCATTER_BLOCK_EV,
 	MPI_ALLTOALLW_EV, MPI_IALLTOALLW_EV, MPI_WIN_LOCK_EV, MPI_WIN_UNLOCK_EV,
-	MPI_GET_ACCUMULATE_EV
+	MPI_GET_ACCUMULATE_EV, MPI_TIME_OUTSIDE_TESTS_EV
  };
 
 unsigned IsMPI (unsigned EvType)

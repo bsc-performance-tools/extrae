@@ -410,6 +410,7 @@ enum {
 #define MPI_TIME_OUTSIDE_IPROBES_EV  50000301
 #define MPI_REQUEST_GET_STATUS_COUNTER_EV               50000302
 #define MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV      50000303
+#define MPI_TIME_OUTSIDE_TESTS_EV    50000304
 
 /******************************************************************************
  *   User events for BG PERSONALITY

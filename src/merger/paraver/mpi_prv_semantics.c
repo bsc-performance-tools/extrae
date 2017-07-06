@@ -1092,6 +1092,30 @@ int MPI_ElapsedTimeOutsideIProbes_Event (event_t * current_event,
 	return 0;
 }
 
+/******************************************************************************
+ ***  MPI_ElapsedTimeOutsideTests_Event
+ ******************************************************************************/
+
+int MPI_ElapsedTimeOutsideTests_Event (event_t * current_event,
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
+{
+	unsigned int EvType;
+	unsigned long long EvValue;
+	UINT64  elapsed_time;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	elapsed_time = Get_EvValue (current_event);
+	EvValue = (unsigned long long) (elapsed_time);
+
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	Enable_MPI_Soft_Counter (EvType);
+
+	return 0;
+}
 
 /******************************************************************************
  ***  MPI_TestSoftwareCounter_Event
@@ -1277,5 +1301,6 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_GET_ACCUMULATE_EV, MPI_RMA_Event},
 	{ MPI_WIN_LOCK_EV, MPI_RMA_Event},
 	{ MPI_WIN_UNLOCK_EV, MPI_RMA_Event},
+	{ MPI_TIME_OUTSIDE_TESTS_EV, MPI_ElapsedTimeOutsideTests_Event },
 	{ NULL_EV, NULL }
 };
