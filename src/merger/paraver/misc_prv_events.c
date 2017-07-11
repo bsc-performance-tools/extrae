@@ -69,6 +69,102 @@
 
 #define MAX_MISC_INDEX	        9
 
+#define NUM_MISC_PRV_ELEMENTS  12
+
+struct t_event_misc2prv
+{
+        int misc_type;
+        int prv_value;
+        int used;
+};
+
+struct t_prv_val_label
+{
+        int value;
+        char *label;
+};
+
+static struct t_event_misc2prv event_misc2prv[NUM_MISC_PRV_ELEMENTS] = {
+        {READ_EV, READ_VAL_EV, FALSE},
+        {WRITE_EV, WRITE_VAL_EV, FALSE},
+        {FREAD_EV, FREAD_VAL_EV, FALSE},
+        {FWRITE_EV, FWRITE_VAL_EV, FALSE},
+        {PREAD_EV, PREAD_VAL_EV, FALSE},
+        {PWRITE_EV, PWRITE_VAL_EV, FALSE},
+        {READV_EV, READV_VAL_EV, FALSE},
+        {WRITEV_EV, WRITEV_VAL_EV, FALSE},
+        {PREADV_EV, PREADV_VAL_EV, FALSE},
+        {PWRITEV_EV, PWRITE_VAL_EV, FALSE},
+        {OPEN_EV, OPEN_VAL_EV, FALSE},
+        {FOPEN_EV, FOPEN_VAL_EV, FALSE}
+};
+
+static struct t_prv_val_label misc_prv_val_label[NUM_MISC_PRV_ELEMENTS] = {
+        {READ_VAL_EV, READ_LBL},
+        {WRITE_VAL_EV, WRITE_LBL},
+        {FREAD_VAL_EV, FREAD_LBL},
+        {FWRITE_VAL_EV, FWRITE_LBL},
+        {PREAD_VAL_EV, PREAD_LBL},
+        {PWRITE_VAL_EV, PWRITE_LBL},
+        {READV_VAL_EV, READV_LBL},
+        {WRITEV_VAL_EV, WRITEV_LBL},
+        {PREADV_VAL_EV, PREADV_LBL},
+        {PWRITEV_VAL_EV, PWRITEV_LBL},
+        {OPEN_VAL_EV, OPEN_LBL},
+        {FOPEN_VAL_EV, FOPEN_LBL}
+};
+
+/******************************************************************************
+ **      Function name : search_misc_event
+ **      
+ **      Description : 
+ ******************************************************************************/
+
+static int search_misc_event (int type)
+{
+        int i;
+
+        for (i = 0; i < NUM_MISC_PRV_ELEMENTS; i++)
+                if (event_misc2prv[i].misc_type == type)
+                        break;
+        if (i < NUM_MISC_PRV_ELEMENTS)
+                return i;
+        return -1;
+}
+
+/******************************************************************************
+ **      Function name : Used_MISC_Operation
+ **      
+ **      Description : Mark I/O operation as used in event_misc2prv
+ ******************************************************************************/
+
+void Used_MISC_Operation (int Op)
+{
+        int index;
+
+        index = search_misc_event (Op);
+        if (index >= 0)
+                event_misc2prv[index].used = TRUE;
+}
+
+/******************************************************************************
+ **      Function name : get_misc_prv_val_label
+ **      
+ **      Description : 
+ ******************************************************************************/
+
+static char *get_misc_prv_val_label (int val)
+{
+        int i;
+
+        for (i = 0; i < NUM_MISC_PRV_ELEMENTS; i++)
+                if (misc_prv_val_label[i].value == val)
+                        break;
+        if (i < NUM_MISC_PRV_ELEMENTS)
+                return misc_prv_val_label[i].label;
+        return NULL;
+}
+
 static int inuse[MAX_MISC_INDEX] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
 	FALSE, FALSE };
 
@@ -86,7 +182,10 @@ void Enable_MISC_Operation (int type)
                  type == READV_EV  || type == WRITEV_EV  ||
                  type == PREADV_EV || type == PWRITEV_EV ||
                  type == OPEN_EV   || type == FOPEN_EV)
-		inuse[INOUT_INDEX] = TRUE;
+		{
+			inuse[INOUT_INDEX] = TRUE;
+			Used_MISC_Operation(type);
+		}
 	else if (type == FORK_EV || type == WAIT_EV || type == WAITPID_EV ||
 	  type == EXEC_EV || type == SYSTEM_EV)
 		inuse[FORK_SYSCALL_INDEX] = TRUE;
@@ -177,6 +276,9 @@ unsigned MISC_event_GetValueForDynamicMemory (unsigned type)
 
 void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 {
+	int jj;
+	char *label;	
+
 	if (options & TRACEOPTION_BG_ARCH)
 	{
 		fprintf (fd, "%s\n", TYPE_LABEL);
@@ -242,19 +344,16 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_EV, IO_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
-		fprintf (fd, "%d      %s\n", EVT_END, EVT_END_LBL);
-		fprintf (fd, "%d      %s\n", READ_VAL_EV, READ_LBL);
-		fprintf (fd, "%d      %s\n", WRITE_VAL_EV, WRITE_LBL);
-		fprintf (fd, "%d      %s\n", FREAD_VAL_EV, FREAD_LBL);
-		fprintf (fd, "%d      %s\n", FWRITE_VAL_EV, FWRITE_LBL);
-		fprintf (fd, "%d      %s\n", PREAD_VAL_EV, PREAD_LBL);
-		fprintf (fd, "%d      %s\n", PWRITE_VAL_EV, PWRITE_LBL);
-		fprintf (fd, "%d      %s\n", READV_VAL_EV, READV_LBL);
-		fprintf (fd, "%d      %s\n", WRITEV_VAL_EV, WRITEV_LBL);
-		fprintf (fd, "%d      %s\n", PREADV_VAL_EV, PREADV_LBL);
-		fprintf (fd, "%d      %s\n", PWRITEV_VAL_EV, PWRITEV_LBL);
-                fprintf (fd, "%d      %s\n", OPEN_VAL_EV, OPEN_LBL);
-                fprintf (fd, "%d      %s\n", FOPEN_VAL_EV, FOPEN_LBL);
+		
+		for (jj = 0; jj < NUM_MISC_PRV_ELEMENTS; jj++)
+                {
+                        if(event_misc2prv[jj].used)
+                        {
+                                label = get_misc_prv_val_label (event_misc2prv[jj].prv_value);
+                                fprintf (fd, "%d   %s\n", event_misc2prv[jj].prv_value, label);
+                        }
+		}
+
 		LET_SPACES (fd);
 		fprintf (fd, "%s\n", TYPE_LABEL);
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_SIZE_EV, IO_SIZE_LBL);
