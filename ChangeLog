@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 12Jul2017 Fixes configure check for without-cuda and without-cupti
  + 14Jun2017 Added instrumentation support for OpenMP taskloop and ordered directives
  + 12May2017 Added compatibility with new events in CUPTI 5 for stream creation
  * 10May2017 Upgraded pyextrae support for Python 3 and added submodule for CUDA tracing

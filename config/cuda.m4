@@ -8,7 +8,7 @@ AC_DEFUN([AX_CUDA],
 			[Enable support for tracing CUDA - may be superseded and still necessary by CUPTI if the latter is enabled]
 		),
 		[cuda_path="${withval}"],
-		[cuda_path="none"]
+		[cuda_path="no"]
 	)
 
 	enable_cuda="no"
@@ -18,7 +18,7 @@ AC_DEFUN([AX_CUDA],
 	fi
 
 	NVCC=""
-	if test "${cuda_path}" != "none" ; then
+	if test "${cuda_path}" != "no" ; then
 		AC_MSG_CHECKING([for CUDA])
 		if test -d "${cuda_path}" ; then
 			if test -x ${cuda_path}/bin/nvcc ; then
@@ -58,20 +58,20 @@ AC_DEFUN([AX_CUPTI],
 		[specify where to find CUPTI libraries and includes]
 	),
 		[cupti_path="${withval}"],
-		[cupti_path="none"]
+		[cupti_path="no"]
 	)
 
 	if test -z "${cupti_path}" ; then
 		AC_MSG_ERROR([Cannot find CUPTI])
 	fi
 
-	if test "${cupti_path}" != "none" -a "${enable_cuda}" = "no" ; then
+	if test "${cupti_path}" != "no" -a "${enable_cuda}" = "no" ; then
 		AC_MSG_ERROR([In order to use --with-cupti, you should pass also --with-cuda])
 	fi
 
 	enable_cupti="no"
 
-	if test "${cupti_path}" != "none" ; then
+	if test "${cupti_path}" != "no" ; then
 		AC_MSG_CHECKING([for CUPTI directory])
 		if test -d "${cupti_path}" ; then
 			AC_MSG_RESULT(found)
