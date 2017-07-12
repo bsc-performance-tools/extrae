@@ -22,6 +22,8 @@
 \*****************************************************************************/
 
 
+#if !defined _DLB_H
+#define _DLB_H
 
 #define DLB(func, args...) if ( func ) func( args );
 
@@ -650,6 +652,22 @@ void DLB_MPI_Put_F_enter (void *origin_addr, MPI_Fint *origin_count,
 void DLB_MPI_Put_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Win_lock_F_enter (MPI_Fint *lock_type, MPI_Fint *rank, MPI_Fint *assert, MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Win_lock_F_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_unlock_F_enter (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Win_unlock_F_leave (void)__attribute__((weak));
+
+void DLB_MPI_Get_accumulate_F_enter (void *origin_addr, MPI_Fint *origin_count,
+	                             MPI_Fint *origin_datatype, void *result_addr,
+				     MPI_Fint *result_count, MPI_Fint *result_datatype,
+				     MPI_Fint *target_rank, MPI_Fint *target_disp,
+				     MPI_Fint *target_count, MPI_Fint *target_datatype,
+				     MPI_Fint *op, MPI_Fint *win,
+				     MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Get_accumulate_F_leave (void)__attribute__((weak));
+
+
 /***  C  ***/
 
 void DLB_MPI_Win_create_enter (void *base, MPI_Aint size, int disp_unit, MPI_Info info,
@@ -691,6 +709,23 @@ void DLB_MPI_Put_enter (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 	int target_rank, MPI_Aint target_disp, int target_count,
 	MPI_Datatype target_datatype, MPI_Win win)__attribute__((weak));
 void DLB_MPI_Put_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Win_lock_enter (int lock_type, int rank, int assert, MPI_Win win)__attribute__((weak));
+void DLB_MPI_Win_lock_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Win_unlock_enter (int rank, MPI_Win win)__attribute__((weak));
+void DLB_MPI_Win_unlock_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Get_accumulate_enter (MPI3_CONST void *origin_addr, int origin_count,
+                                   MPI_Datatype origin_datatype, void *result_addr,
+			           int result_count, MPI_Datatype result_datatype,
+	                           int target_rank, MPI_Aint target_disp,
+			           int target_count, MPI_Datatype target_datatype,
+			           MPI_Op op, MPI_Win win)__attribute__((weak));
+void DLB_MPI_Get_accumulate_leave (void)__attribute__((weak));
 
 
 /******************************************************************************
@@ -857,6 +892,32 @@ void DLB_MPI_Iscan_F_enter (void *sendbuf, void *recvbuf, MPI_Fint *count,
 void DLB_MPI_Iscan_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Reduce_scatter_block_F_enter (void *sendbuf, void *recvbuf,
+    MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+    MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Reduce_scatter_block_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ireduce_scatter_block_F_enter (void *sendbuf, void *recvbuf,
+    MPI_Fint *recvcount, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
+    MPI_Fint *req, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Ireduce_scatter_block_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Alltoallw_F_enter (void *sendbuf, MPI_Fint *sendcounts,
+    MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
+    MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierror)
+    __attribute__((weak));
+void DLB_MPI_Alltoallw_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ialltoallw_F_enter (void *sendbuf, MPI_Fint *sendcounts,
+    MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
+    MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *req,
+    MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Ialltoallw_F_leave (void)__attribute__((weak));
+
+
 /***  C  ***/
 
 void DLB_MPI_Reduce_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
@@ -1009,3 +1070,30 @@ void DLB_MPI_Iscan_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
 void DLB_MPI_Iscan_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Reduce_scatter_block_enter (MPI3_CONST void *sendbuf, void *recvbuf,
+    int recvcount, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Reduce_scatter_block_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ireduce_scatter_block_enter (MPI3_CONST void *sendbuf, void *recvbuf,
+    int recvcount, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm,
+    MPI_Request *req)__attribute__((weak));
+void DLB_MPI_Ireduce_scatter_block_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Alltoallw_enter (MPI3_CONST void *sendbuf, MPI3_CONST int *sendcounts,
+    MPI3_CONST int *sdispls, MPI3_CONST MPI_Datatype *sendtypes, void *recvbuf,
+    MPI3_CONST int *recvcounts, MPI3_CONST int *rdispls,
+    MPI3_CONST MPI_Datatype *recvtypes, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Alltoallw_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ialltoallw_enter (MPI3_CONST void *sendbuf, MPI3_CONST int *sendcounts,
+    MPI3_CONST int *sdispls, MPI3_CONST MPI_Datatype *sendtypes, void *recvbuf,
+    MPI3_CONST int *recvcounts, MPI3_CONST int *rdispls,
+    MPI3_CONST MPI_Datatype *recvtypes, MPI_Comm comm,
+    MPI_Request *req)__attribute__((weak));
+void DLB_MPI_Ialltoallw_leave (void)__attribute__((weak));
+
+
+#endif
