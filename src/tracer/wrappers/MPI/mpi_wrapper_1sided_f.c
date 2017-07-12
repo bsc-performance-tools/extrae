@@ -242,7 +242,7 @@ void MPI_Get_accumulate_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_cou
 	CtoF77(pmpi_type_size) (target_datatype, &target_datatype_size, ierror);
 	MPI_CHECK(*ierror, pmpi_type_size);
 
-	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_ACCUMULATE_EV, EVT_BEGIN, *target_rank, origin_datatype_size * (*origin_count) + result_datatype_size * (*result_count), EMPTY, target_datatype_size * (*target_disp), origin_addr);
+	TRACE_MPIEVENT(LAST_READ_TIME, MPI_GET_ACCUMULATE_EV, EVT_BEGIN, *target_rank, origin_datatype_size * (*origin_count) + target_datatype_size * (*target_count), EMPTY, target_datatype_size * (*target_disp), origin_addr);
 	CtoF77(pmpi_get_accumulate) (origin_addr, origin_count, origin_datatype, result_addr, result_count, result_datatype, target_rank, target_disp, target_count, target_datatype, op, win, ierror);
 	TRACE_MPIEVENT(TIME, MPI_GET_ACCUMULATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
