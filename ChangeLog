@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Jul2017 Upgrade to v3.5.0
  + 12Jul2017 New documentation using sphinx-doc
  * 12Jul2017 Fixes configure check for without-cuda and without-cupti
  * 10Jul2017 Make the I/O labels appear in the PCF only if each specific call has been used during the run
