@@ -109,7 +109,7 @@
 #if defined(OMP_SUPPORT)
 # include "omp-probe.h"
 # include "omp-common.h"
-# if defined(OMPT_INSTRUMENTATION)
+# if defined(OMPT_SUPPORT)
 #  include "ompt-wrapper.h"
 # endif
 #endif
@@ -1417,7 +1417,7 @@ int Extrae_Allocate_Task_Bitmap (int size)
 	return 0;
 }
 
-#if defined(OMP_SUPPORT) && !defined(OMPT_INSTRUMENTATION)
+#if defined(OMP_SUPPORT) 
 static int getnumProcessors (void)
 {
 	int numProcessors;
@@ -1435,7 +1435,7 @@ static int getnumProcessors (void)
 
 	return numProcessors;
 }
-#endif /* OMP_SUPPORT && !OMPT_INSTRUMENTATION */
+#endif /* OMP_SUPPORT */
 
 #if defined(PTHREAD_SUPPORT)
 
@@ -1542,7 +1542,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	unsigned u;
 	int runningInDynInst = FALSE;
 	char trace_sym[TMP_DIR];
-#if defined(OMP_SUPPORT) && !defined(OMPT_INSTRUMENTATION)
+#if defined(OMP_SUPPORT) 
 	char *omp_value;
 	char *new_num_omp_threads_clause;
 	int numProcessors;
@@ -1624,37 +1624,50 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 #endif
 
 #if defined(OMP_SUPPORT)
-# if !defined(OMPT_INSTRUMENTATION)
 
-	Extrae_OpenMP_init(me);
-
-	/* Obtain the number of runnable threads in this execution.
-	   Just check for OMP_NUM_THREADS env var (if this compilation
-	   allows instrumenting OpenMP */
-	numProcessors = getnumProcessors();
-
-	new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
-	if (NULL == new_num_omp_threads_clause)
+# if defined(OMPT_SUPPORT)
+	if (!ompt_enabled)
+# endif /* OMPT_SUPPORT */
 	{
-		fprintf (stderr, PACKAGE_NAME": Unable to allocate memory for tentative OMP_NUM_THREADS\n");
-		exit (-1);
-	}
-	if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
-	{
-		fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
-		exit (-1);
-	}
+		Extrae_OpenMP_init(me);
 
-	sprintf (new_num_omp_threads_clause, "OMP_NUM_THREADS=%d", numProcessors);
-	omp_value = getenv ("OMP_NUM_THREADS");
-	if (omp_value)
-	{
-		int num_of_threads = atoi (omp_value);
-		if (num_of_threads != 0)
+		/* Obtain the number of runnable threads in this execution.
+		   Just check for OMP_NUM_THREADS env var (if this compilation
+		   allows instrumenting OpenMP */
+		numProcessors = getnumProcessors();
+
+		new_num_omp_threads_clause = (char*) malloc ((strlen("OMP_NUM_THREADS=xxxx")+1)*sizeof(char));
+		if (NULL == new_num_omp_threads_clause)
 		{
-			current_NumOfThreads = maximum_NumOfThreads = num_of_threads;
-			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": OMP_NUM_THREADS set to %d\n", num_of_threads);
+			fprintf (stderr, PACKAGE_NAME": Unable to allocate memory for tentative OMP_NUM_THREADS\n");
+			exit (-1);
+		}
+		if (numProcessors >= 10000) /* xxxx in new_omp_threads_clause -> max 9999 */
+		{
+			fprintf (stderr, PACKAGE_NAME": Insufficient memory allocated for tentative OMP_NUM_THREADS\n");
+			exit (-1);
+		}
+
+		sprintf (new_num_omp_threads_clause, "OMP_NUM_THREADS=%d", numProcessors);
+		omp_value = getenv ("OMP_NUM_THREADS");
+		if (omp_value)
+		{
+			int num_of_threads = atoi (omp_value);
+			if (num_of_threads != 0)
+			{
+				current_NumOfThreads = maximum_NumOfThreads = num_of_threads;
+				if (me == 0)
+					fprintf (stdout, PACKAGE_NAME": OMP_NUM_THREADS set to %d\n", num_of_threads);
+			}
+			else
+			{
+				if (me == 0)
+					fprintf (stderr,
+						PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
+						PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
+				putenv (new_num_omp_threads_clause);
+				current_NumOfThreads = maximum_NumOfThreads = numProcessors;
+			}
 		}
 		else
 		{
@@ -1666,21 +1679,13 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 			current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 		}
 	}
-	else
-	{
-		if (me == 0)
-			fprintf (stderr,
-				PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
-				PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
-		putenv (new_num_omp_threads_clause);
-		current_NumOfThreads = maximum_NumOfThreads = numProcessors;
-	}
-
-# endif /* OMPT_INSTRUMENTATION */
 
 #elif defined(SMPSS_SUPPORT) || defined(NANOS_SUPPORT) || defined (UPC_SUPPORT)
+
 	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
+
 #else
+
 	/* If we don't support OpenMP we still have this running thread :) */
 	current_NumOfThreads = maximum_NumOfThreads = Extrae_get_num_threads();
 
@@ -1690,7 +1695,8 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 			fprintf (stderr,
 				PACKAGE_NAME": Warning! OMP_NUM_THREADS is set but OpenMP is not supported!\n");
 	}
-#endif
+
+#endif /* OMP_SUPPORT */
 
 #endif /* STANDALONE */
 
@@ -2291,8 +2297,11 @@ void Backend_Finalize (void)
 	Extrae_OpenCL_fini ();
 #endif
 
-#if defined(OMP_SUPPORT) && defined(OMPT_INSTRUMENTATION)
-        ompt_finalize ();
+#if defined(OMP_SUPPORT) && defined(OMPT_SUPPORT)
+	if (ompt_enabled)
+	{
+		ompt_finalize ();
+	}
 #endif
 
 	if (!Extrae_getAppendingEventsToGivenPID(NULL))

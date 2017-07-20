@@ -50,7 +50,7 @@
 #include "wrapper.h"
 #include <omp.h>
 
-#define DEBUG
+//#define DEBUG
 #define GOMP_API_3_1 "3.1"
 #define GOMP_API_4_0 "4.0"
 #define GOMP_API_4_5 "4.5"
@@ -68,7 +68,7 @@ char *__GOMP_version = NULL;
     fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL                 \
 		                 "%s: WARNING! %s is a NULL pointer. "             \
                      "Did the initialization of this module trigger? " \
-                     "Retrying initialization...",                     \
+                     "Retrying initialization...\n",                   \
 		                 THREAD_LEVEL_VAR, __func__, #real_fn_ptr);        \
     gnu_libgomp_get_hook_points(TASKID);                               \
   }                                                                    \
@@ -649,9 +649,6 @@ void GOMP_barrier (void)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_barrier exit\n", THREAD_LEVEL_VAR);
 #endif
 }
-
-
-#define TRACE(func) ((func != NULL) && (EXTRAE_INITIALIZED()) && (EXTRAE_ON()) && (!ompt_enabled))
 
 void GOMP_critical_start (void)
 {

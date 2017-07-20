@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 20Jul2017 Fixed wrong dependencies with OMPT in OpenMP libraries
  * 13Jul2017 Upgrade to v3.5.0
  + 12Jul2017 New documentation using sphinx-doc
  * 12Jul2017 Fixes configure check for without-cuda and without-cupti

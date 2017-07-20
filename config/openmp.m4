@@ -16,16 +16,17 @@ AC_DEFUN([AX_CHECK_OPENMP],
 	if test "${enable_openmp}" = "yes" ; then
 		AX_OPENMP()
 
-		AC_ARG_ENABLE(openmp-ompt,
+		# Enable GNU support
+		AC_ARG_ENABLE(openmp-gnu,
 		   AC_HELP_STRING(
-		      [--enable-openmp-ompt],
-		      [Enable support for tracing OpenMP through OMPT interface]
+		      [--enable-openmp-gnu],
+		      [Enable support for tracing OpenMP GNU (enabled by default)]
 		   ),
-		   [enable_openmp_ompt="${enableval}"],
-		   [enable_openmp_ompt="no"]
+		   [enable_openmp_gnu="${enableval}"],
+		   [enable_openmp_gnu="yes"]
 		)
-
-		# OMP & other OpenMP instrumentations are not compatible
+	
+		# Enable Intel support
 		if test "${Architecture}" = "ia32"; then
 			enable_openmp_intel_default="yes"
 		else
@@ -39,14 +40,8 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		   [enable_openmp_intel="${enableval}"],
 		   [enable_openmp_intel="${enable_openmp_intel_default}"]
 		)
-		AC_ARG_ENABLE(openmp-gnu,
-		   AC_HELP_STRING(
-		      [--enable-openmp-gnu],
-		      [Enable support for tracing OpenMP GNU]
-		   ),
-		   [enable_openmp_gnu="${enableval}"],
-		   [enable_openmp_gnu="yes"]
-		)
+
+		# Enable IBM support
 		if test "${Architecture}" = "powerpc"; then
 			enable_openmp_ibm_default="yes"
 		else
@@ -61,7 +56,19 @@ AC_DEFUN([AX_CHECK_OPENMP],
 		   [enable_openmp_ibm="${enable_openmp_ibm_default}"]
 		)
 
-		AC_DEFINE([OMPT_INSTRUMENTATION], [1], [Define if OpenMP is instrumented through OMPT])
+		# Enable OMPT support
+		AC_ARG_ENABLE(openmp-ompt,
+		   AC_HELP_STRING(
+		      [--enable-openmp-ompt],
+		      [Enable support for tracing OpenMP through OMPT interface (enabled by default)]
+		   ),
+		   [enable_openmp_ompt="${enableval}"],
+		   [enable_openmp_ompt="yes"]
+		)
+
+		if test "$enable_openmp_ompt" = "yes"; then
+			AC_DEFINE([OMPT_SUPPORT], [1], [Define if OMPT support is enabled])
+		fi
 	fi
 
 	if test "${enable_openmp_intel}" = "yes" -o \

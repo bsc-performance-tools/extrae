@@ -68,7 +68,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(OMP_SUPPORT) || defined(SMPSS_SUPPORT)
 # include "omp-common.h"
 # include "omp-probe.h"
-# include "ompt-wrapper.h"
+# if defined(OMPT_SUPPORT)
+#  include "ompt-wrapper.h"
+# endif /* OMPT_SUPPORT */
 #endif
 #include "UF_gcc_instrument.h"
 #include "UF_xl_instrument.h"
@@ -1750,9 +1752,12 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 							xmlChar *ompt = xmlGetProp_env (rank, current_tag, TRACE_OMP_OMPT);
 							if (ompt != NULL && !xmlStrcasecmp (ompt, xmlYES))
 							{
+# if defined(OMPT_SUPPORT)							
 								ompt_enabled = TRUE;
-
 								mfprintf (stdout, PACKAGE_NAME": OMPT activated for OpenMP instrumentation.");
+# else 
+								mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OMPT.\n", TRACE_OMP_OMPT);
+# endif /* OMPT_SUPPORT */
 							}
 							XML_FREE (ompt);
 #else

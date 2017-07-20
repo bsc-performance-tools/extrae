@@ -48,9 +48,9 @@ WRAPPERS_OPENMP += \
  ompt-wrapper.c ompt-wrapper.h \
  ompt-helper.h ompt-helper.c \
  ompt-target.c ompt-target.h 
+endif # WANT_OPENMP_OMPT
 
 EXTRA_OPENMP_CFLAGS += -DOMPT_OPENMP -I$(WRAPPERS_DIR)/OMP/ompt-headers
-endif # WANT_OPENMP_OMPT
 
 noinst_LTLIBRARIES  = libwrap_openmp.la
 

@@ -38,7 +38,7 @@
 #include "ompt-helper.h"
 #include "ompt-target.h"
 
-#define DEBUG
+//#define DEBUG
 
 /* List storing information about all the OMPT devices */
 static extrae_device_info_t *List_of_Devices = NULL;

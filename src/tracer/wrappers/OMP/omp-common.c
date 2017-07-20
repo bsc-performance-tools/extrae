@@ -60,7 +60,7 @@
   {                                                                    \
     fprintf (stderr, PACKAGE_NAME": WARNING! %s is a NULL pointer. "   \
                      "Did the initialization of this module trigger? " \
-                     "Retrying initialization...", #real_fn_ptr);      \
+                     "Retrying initialization...\n", #real_fn_ptr);    \
     omp_common_get_hook_points(TASKID);                                \
   }                                                                    \
 }                                                                                
@@ -100,7 +100,6 @@ static void allocate_nested_helpers()
 {
 	int i = 0, j = 0;
 
-	fprintf(stderr, "[DEBUG] omp_get_max_threads=%d\n", omp_get_max_threads());
 	__omp_nested_storage = (struct thread_helper_t **)malloc(omp_get_max_threads() * sizeof(struct thread_helper_t *));
 	for (i=0; i<omp_get_max_threads(); i++)
 	{

@@ -49,7 +49,7 @@
 #include "intel-kmpc-11-intermediate/intel-kmpc-11-intermediate.h"
 #include "intel-kmpc-11-intermediate/intel-kmpc-11-taskloop-helpers.h"
 
-#define DEBUG
+//#define DEBUG
 
 /*                                                                              
  * In case the constructor initialization didn't trigger                        
@@ -62,7 +62,7 @@
     fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL                 \
 		                 "%s: WARNING! %s is a NULL pointer. "             \
                      "Did the initialization of this module trigger? " \
-                     "Retrying initialization...",                     \
+                     "Retrying initialization...\n",                   \
 										 THREAD_LEVEL_VAR, __func__, #real_fn_ptr);        \
     intel_kmpc_get_hook_points(TASKID);                                \
   }                                                                    \
