@@ -677,6 +677,7 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 	paraver_rec_t *cur;
 	UINT64 CallerAddresses[MAX_CALLERS];
 	unsigned nevents = 0;
+	int ret = 0;
 
 	// Here we store the caller addresses for a reference to a dynamic mem object
 	// Set to 0 initially
@@ -830,13 +831,13 @@ static int paraver_build_multi_event (struct fdz_fitxer fdz, paraver_rec_t ** cu
 		cur = GetNextParaver_Rec (fset);
 	}
 
-	paraver_multi_event (fdz, prev_cpu, prev_ptask, prev_task, prev_thread,
+	ret = paraver_multi_event (fdz, prev_cpu, prev_ptask, prev_task, prev_thread,
 	  prev_time, nevents, events, values);
 
 	*current = cur;
 	if (num_events != NULL)
 		*num_events = nevents;
-	return 0;
+	return ret;
 #undef MAX_EVENT_COUNT_IN_MULTI_EVENT
 }
 
@@ -1039,7 +1040,7 @@ static void DumpUnmatchedCommunication (paraver_rec_t *r)
 }
 #endif
 
-static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
+static int Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 	struct fdz_fitxer prv_fd, unsigned long long num_of_events)
 {
 	/* Master-side. Master will ask all slaves for their parts as needed */
@@ -1146,6 +1147,8 @@ static void Paraver_JoinFiles_Master (int numtasks, PRVFileSet_t *prvfset,
 		fprintf (stderr, "mpi2prv: Error! Found %d unmatched communications. Resulting tracefile may be inconsistent.\n", num_unmatched_comm);
 	if (num_pending_comm > 0)
 		fprintf (stderr, "mpi2prv: Error! Found %d pending communications. Resulting tracefile may be inconsistent.\n", num_pending_comm);
+
+	return error;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -1378,7 +1381,12 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 				if (current_depth < tree_max_depth-1)
 					Paraver_JoinFiles_Master_Subtree (prvfset);
 				else
-					Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
+				{
+					if ((Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events)) != 0)
+					{
+						return -1;
+					}
+				}
 			}
 
 			Free_Map_Paraver_Files (prvfset);
@@ -1408,7 +1416,10 @@ int Paraver_JoinFiles (unsigned num_appl, char *outName, FileSet_t * fset,
 
 	prvfset = Map_Paraver_files (fset, &num_of_events, numtasks, taskid, records_per_task);
 
-	Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events);
+	if ((Paraver_JoinFiles_Master (numtasks, prvfset, prv_fd, num_of_events)) != 0)
+	{
+		return -1;
+	}
 
 	gettimeofday (&time_end, NULL);
 	delta = time_end.tv_sec - time_begin.tv_sec;

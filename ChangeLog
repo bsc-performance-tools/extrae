@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 10Aug2017 Fixes confusing error message when merger reaches quota limit
  * 20Jul2017 Fixed wrong dependencies with OMPT in OpenMP libraries
  * 13Jul2017 Upgrade to v3.5.0
  + 12Jul2017 New documentation using sphinx-doc
