@@ -31,25 +31,26 @@ pdf:
 
 man:
 	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
+	$(MKDIR_P) $(BUILDDIR)/man/man1
+	$(MKDIR_P) $(BUILDDIR)/man/man3
+	mv $(BUILDDIR)/man/extrae.1 $(BUILDDIR)/man/man1/
+	mv $(BUILDDIR)/man/mpi2prv.1 $(BUILDDIR)/man/man1/
+	mv $(BUILDDIR)/man/UFlist.sh.1 $(BUILDDIR)/man/man1/
+	mv $(BUILDDIR)/man/extrae_event.3 $(BUILDDIR)/man/man3/
+	cd $(BUILDDIR)/man/man1 && ln -sn mpi2prv.1 mpimpi2prv.1
+	cd $(BUILDDIR)/man/man1 && ln -sn mpi2prv.1 mpi2dim.1
+	cd $(BUILDDIR)/man/man1 && ln -sn mpi2prv.1 mpimpi2dim.1
 	@echo
 	@echo "Build finished. The manual pages are in $(BUILDDIR)/man."
 
 install-exec-hook:
 	$(MKDIR_P) $(datadir)/docs
-	$(MKDIR_P) $(datadir)/man/man1
-	$(MKDIR_P) $(datadir)/man/man3
 	cp -r $(BUILDDIR)/html $(datadir)/docs/
-	cp -r $(BUILDDIR)/man/extrae.1 $(datadir)/man/man1/
-	cp -r $(BUILDDIR)/man/mpi2prv.1 $(datadir)/man/man1/
-	cp -r $(BUILDDIR)/man/UFlist.sh.1 $(datadir)/man/man1/
-	cp -r $(BUILDDIR)/man/extrae_event.3 $(datadir)/man/man3/
+	cp -r $(BUILDDIR)/man $(datadir)/
 	cp $(BUILDDIR)/latex/user-guide.pdf $(datadir)/docs/
-	ln -sn $(datadir)/man/man1/mpi2prv.1 $(datadir)/man/man1/mpimpi2prv.1 
-	ln -sn $(datadir)/man/man1/mpi2prv.1 $(datadir)/man/man1/mpi2dim.1 
-	ln -sn $(datadir)/man/man1/mpi2prv.1 $(datadir)/man/man1/mpimpi2dim.1 
 
 uninstall-local:
 	rm -r $(datadir)/docs/html
-	rm -r $(datadir)/docs/man
+	rm -r $(datadir)/man
 	rm $(datadir)/docs/user-guide.pdf
 	rmdir --ignore-fail-on-non-empty $(datadir)/docs
