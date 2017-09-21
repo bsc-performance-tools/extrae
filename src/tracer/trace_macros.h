@@ -59,7 +59,7 @@
 {                                                                \
 	event_t evt;                                                   \
 	int thread_id = THREADID;                                      \
-	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)) && TracingBitmap[TASKID])               \
 	{                                                              \
 		evt.time = (evttime);                                        \
 		evt.event = (evttype);                                       \
@@ -74,7 +74,7 @@
 {                                                                \
 	event_t evt;                                                   \
 	int thread_id = THREADID;                                      \
-	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)) && TracingBitmap[TASKID])               \
 	{                                                              \
 		evt.time = (evttime);                                        \
 		evt.event = (evttype);                                       \
@@ -88,7 +88,7 @@
 {                                                                \
 	event_t evt;                                                   \
 	int thread_id = THREADID;                                      \
-	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)) && TracingBitmap[TASKID])               \
 	{                                                              \
 		evt.time = (evttime);                                        \
 		evt.event = (evttype);                                       \
@@ -104,7 +104,7 @@
 {                                                                \
 	event_t evt;                                                   \
 	int thread_id = THREADID;                                      \
-	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)))               \
+	if (!Buffer_IsFull (SAMPLING_BUFFER(thread_id)) && TracingBitmap[TASKID])               \
 	{                                                              \
 		evt.time = (evttime);                                        \
 		evt.event = (evttype);                                       \
