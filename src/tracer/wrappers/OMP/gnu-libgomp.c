@@ -292,6 +292,30 @@ void *__GOMP_new_helper(void (*fn)(void *), void *data)
 }
 
 /*
+ * When we enter a GOMP_parallel we have to store the par_uf later used in the
+ * loop and loop_ordered calls after opening parallelism (current level + 1).
+ * FIXME: This doesn't support nested because multiple threads can open a 2nd
+ * level of parallelism, and they would all overwrite the same position of the
+ * array as they're all in the same nesting level. Can we index by thread id?
+ * Previously, this was just a global variable.
+ */
+static void * __GOMP_parallel_uf[MAX_NESTING_LEVEL];
+
+void SAVE_PARALLEL_UF(void *par_uf)
+{
+  int level = omp_get_level();
+  CHECK_NESTING_LEVEL(level);
+  __GOMP_parallel_uf[level] = par_uf;
+}
+
+void * RETRIEVE_PARALLEL_UF()
+{
+  int level = omp_get_level();
+  CHECK_NESTING_LEVEL(level-1);
+  return __GOMP_parallel_uf[level-1];
+}
+
+/*
  * Counter to enumerate tasks executed from GOMP_task 
  */
 static volatile long long __GOMP_task_ctr = 1;
@@ -780,6 +804,7 @@ int GOMP_loop_static_start (long start, long end, long incr, long chunk_size, lo
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_static_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_static_start_real != NULL)
@@ -812,6 +837,7 @@ int GOMP_loop_dynamic_start (long start, long end, long incr, long chunk_size, l
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_dynamic_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_dynamic_start_real != NULL)
@@ -844,6 +870,7 @@ int GOMP_loop_guided_start (long start, long end, long incr, long chunk_size, lo
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_guided_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_guided_start_real != NULL)
@@ -876,6 +903,7 @@ int GOMP_loop_runtime_start (long start, long end, long incr, long chunk_size, l
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_runtime_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 		Backend_Leave_Instrumentation();
 	}
 	else if (GOMP_loop_runtime_start_real != NULL)
@@ -1036,6 +1064,7 @@ int GOMP_loop_ordered_static_start (long start, long end, long incr, long chunk_
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_static_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_static_start_real != NULL)
 	{
@@ -1067,6 +1096,7 @@ int GOMP_loop_ordered_dynamic_start (long start, long end, long incr, long chunk
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_dynamic_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_dynamic_start_real != NULL)
 	{
@@ -1098,6 +1128,7 @@ int GOMP_loop_ordered_guided_start (long start, long end, long incr, long chunk_
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_guided_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_guided_start_real != NULL)
 	{
@@ -1129,6 +1160,7 @@ int GOMP_loop_ordered_runtime_start (long start, long end, long incr, long chunk
 	{
 		Extrae_OpenMP_DO_Entry ();
 		res = GOMP_loop_ordered_runtime_start_real (start, end, incr, chunk_size, istart, iend);
+		Extrae_OpenMP_UF_Entry (RETRIEVE_PARALLEL_UF());
 	}
 	else if (GOMP_loop_ordered_runtime_start_real != NULL)
 	{
@@ -1540,6 +1572,8 @@ void GOMP_parallel_start (void (*fn)(void *), void *data, unsigned num_threads)
 
 	if (TRACE(GOMP_parallel_start_real))
 	{
+		SAVE_PARALLEL_UF(fn);
+		
 		void *par_helper = __GOMP_new_helper(fn, data);
 
 		Extrae_OpenMP_ParRegion_Entry();
@@ -1831,6 +1865,8 @@ void GOMP_parallel (void (*fn)(void *), void *data, unsigned num_threads, unsign
 
 	if (TRACE(GOMP_parallel_real))
 	{
+		SAVE_PARALLEL_UF(fn);
+
 		/* GOMP_parallel has an implicit join, so when we return, the helpers can be
 		 * freed, so rather than using the static array of active helpers, we
 		 * statically declare a private helper and pass it by reference.

@@ -43,17 +43,17 @@
 #define MAX_NESTING_LEVEL             64                                        
 #define MAX_DOACROSS_ARGS             64                                        
                                                                                 
-#define CHECK_NESTING_LEVEL(level)                                                           \
-{                                                                                            \
-	  if (level > MAX_NESTING_LEVEL)                                                           \
-	  {                                                                                        \
-			    fprintf (stderr, PACKAGE_NAME": ERROR! Current nesting level (%d) "                \
-					                      "higher than the maximum supported (%d). Please recompile "  \
-					                      PACKAGE_NAME" increasing the value of MAX_NESTING_LEVEL in " \
-					                      "src/tracer/wrappers/OMP/omp-common.h\n",                    \
-					                      level, MAX_NESTING_LEVEL);                                   \
-			    exit (0);                                                                          \
-			    }                                                                                  \
+#define CHECK_NESTING_LEVEL(level)                                                               \
+{                                                                                                \
+	  if ((level < 0) || (level > MAX_NESTING_LEVEL))                                              \
+	  {                                                                                            \
+			    fprintf (stderr, PACKAGE_NAME": ERROR! Current nesting level (%d) "                    \
+					                      "is out of bounds (maximum supported is %d). Please recompile "  \
+					                      PACKAGE_NAME" increasing the value of MAX_NESTING_LEVEL in "     \
+					                      "src/tracer/wrappers/OMP/omp-common.h\n",                        \
+					                      level, MAX_NESTING_LEVEL);                                       \
+			    exit (0);                                                                              \
+			    }                                                                                      \
 }                                                                               
                                                                                 
 #define INC_IF_NOT_NULL(ptr,cnt) (cnt = (ptr == NULL)?cnt:cnt+1)                
