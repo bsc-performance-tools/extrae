@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 29Sep2017 Fixes invalid reference to task_helper in GOMP_task and callme_task
  * 21Sep2017 Sampling macros now check if task events have to be stored
  * 10Aug2017 Fixes confusing error message when merger reaches quota limit
  * 20Jul2017 Fixed wrong dependencies with OMPT in OpenMP libraries

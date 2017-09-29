@@ -430,7 +430,7 @@ static void callme_par (void *par_helper_ptr)
 
 static void callme_task (void *task_helper_ptr)
 {
-	struct task_helper_t *task_helper = task_helper_ptr;
+	struct task_helper_t *task_helper = *(struct task_helper_t **)task_helper_ptr;
 
 #if defined(DEBUG)
 	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "callme_task enter: task_helper_ptr=%p\n", THREAD_LEVEL_VAR, task_helper_ptr);
@@ -1975,7 +1975,7 @@ void GOMP_task (void (*fn)(void *), void *data, void (*cpyfn)(void *, void *), l
 			memcpy (buf, data, arg_size);
 			task_helper->data = buf;
 			// Saved for deallocation purposes, arg is not valid since includes offset
-			task_helper->data = buf;
+			task_helper->buf = buf;
 		}
 
 #if defined(HAVE__SYNC_FETCH_AND_ADD)
