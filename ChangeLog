@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 10Oct2017 Changes RECHECK_INIT macro so it also allocates nested helpers
  * 29Sep2017 Fixes missing OMP user functions in parallel loops
  * 29Sep2017 Fixes invalid reference to task_helper in GOMP_task and callme_task
  * 21Sep2017 Sampling macros now check if task events have to be stored

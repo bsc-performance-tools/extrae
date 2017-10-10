@@ -96,17 +96,20 @@ struct thread_helper_t **__omp_nested_storage = NULL;
  * threads can store helper data that needs to be later retrieved by worker 
  * threads in a deeper nesting level.
  */
-static void allocate_nested_helpers()
+void allocate_nested_helpers()
 {
 	int i = 0, j = 0;
 
-	__omp_nested_storage = (struct thread_helper_t **)malloc(omp_get_max_threads() * sizeof(struct thread_helper_t *));
-	for (i=0; i<omp_get_max_threads(); i++)
+	if (__omp_nested_storage == NULL)
 	{
-		__omp_nested_storage[i] = (struct thread_helper_t *)malloc(MAX_NESTING_LEVEL * sizeof(struct thread_helper_t));
-		for (j=0; j<MAX_NESTING_LEVEL; j++)
+		__omp_nested_storage = (struct thread_helper_t **)malloc(omp_get_max_threads() * sizeof(struct thread_helper_t *));
+		for (i=0; i<omp_get_max_threads(); i++)
 		{
-			__omp_nested_storage[i][j].par_uf = NULL;
+			__omp_nested_storage[i] = (struct thread_helper_t *)malloc(MAX_NESTING_LEVEL * sizeof(struct thread_helper_t));
+			for (j=0; j<MAX_NESTING_LEVEL; j++)
+			{
+				__omp_nested_storage[i][j].par_uf = NULL;
+			}
 		}
 	}
 }
@@ -119,7 +122,7 @@ static void allocate_nested_helpers()
  */
 struct thread_helper_t * get_thread_helper()
 {
-  int thread_id = THREADID;
+	int thread_id = THREADID;
 	int nesting_level = omp_get_level();
 
 	return &(__omp_nested_storage[thread_id][nesting_level]);
@@ -470,5 +473,3 @@ void Extrae_OpenMP_init(int me)
 	}
 #endif /* STANDALONE */
 }
-
-

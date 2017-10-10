@@ -80,4 +80,6 @@ struct thread_helper_t * get_parent_thread_helper();
 
 void Extrae_OpenMP_init(int me);
 
+void allocate_nested_helpers();
+
 #endif /* OMP_COMMON_H_ */

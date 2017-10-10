@@ -67,10 +67,10 @@ char *__GOMP_version = NULL;
   {                                                                    \
     fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL                 \
 		                 "%s: WARNING! %s is a NULL pointer. "             \
-                     "Did the initialization of this module trigger? " \
-                     "Retrying initialization...\n",                   \
+		                 "Did the initialization of this module trigger? " \
+		                 "Retrying initialization...\n",                   \
 		                 THREAD_LEVEL_VAR, __func__, #real_fn_ptr);        \
-    gnu_libgomp_get_hook_points(TASKID);                               \
+		_extrae_gnu_libgomp_init (TASKID);                                 \
   }                                                                    \
 }
 
@@ -2674,6 +2674,8 @@ static int gnu_libgomp_get_hook_points (int rank)
 int _extrae_gnu_libgomp_init (int rank)
 {
 	preallocate_GOMP_helpers();
+
+	allocate_nested_helpers();
 
 	return gnu_libgomp_get_hook_points (rank);
 }

@@ -57,16 +57,16 @@
  */                                                                             
 #define RECHECK_INIT(real_fn_ptr)                                      \
 {                                                                      \
-  if (real_fn_ptr == NULL)                                             \
-  {                                                                    \
-    fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL                 \
+	if (real_fn_ptr == NULL)                                             \
+	{                                                                    \
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL                 \
 		                 "%s: WARNING! %s is a NULL pointer. "             \
-                     "Did the initialization of this module trigger? " \
-                     "Retrying initialization...\n",                   \
-										 THREAD_LEVEL_VAR, __func__, #real_fn_ptr);        \
-    intel_kmpc_get_hook_points(TASKID);                                \
+		                 "Did the initialization of this module trigger? " \
+		                 "Retrying initialization...\n",                   \
+		                 THREAD_LEVEL_VAR, __func__, #real_fn_ptr);        \
+		_extrae_intel_kmpc_init(TASKID);                                   \
   }                                                                    \
-}                                                                                
+}
 
 #if defined(PIC)
 
@@ -1382,6 +1382,8 @@ void _extrae_intel_kmpc_init_dyninst(void *fork_call_ptr)
 int _extrae_intel_kmpc_init(int rank)
 {
 	preallocate_kmpc_helpers();
+
+	allocate_nested_helpers();
 
   return intel_kmpc_get_hook_points(rank);
 }
