@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 13Oct2017 Added fallback mechanism for taskloop instrumentation that recovers from runtime internal copies of the instrumented parameters
  * 10Oct2017 Changes RECHECK_INIT macro so it also allocates nested helpers
  * 29Sep2017 Fixes missing OMP user functions in parallel loops
  * 29Sep2017 Fixes invalid reference to task_helper in GOMP_task and callme_task
