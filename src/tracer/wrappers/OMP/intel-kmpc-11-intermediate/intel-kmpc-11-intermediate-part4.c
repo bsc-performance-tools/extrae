@@ -1,4 +1,4 @@
-/* Automagically generated file by ./genstubs-kmpc-11.sh at mar jun 27 13:14:16 CEST 2017 */
+/* Automagically generated file by ./genstubs-kmpc-11.sh at dl oct 16 15:52:42 CEST 2017 */
 #include <stdarg.h>
 #include <wrapper.h>
 #include <omp-events.h>
