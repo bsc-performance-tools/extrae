@@ -231,6 +231,8 @@ AC_CHECK_HEADERS(
    spi/include/kernel/location.h]
 )
 
+AX_CHECK_UCONTEXT
+
 ##
 ## Check for clock routines
 ##

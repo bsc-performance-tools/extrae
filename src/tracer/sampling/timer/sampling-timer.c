@@ -128,10 +128,16 @@ static void PrepareNextAlarm (void)
 static void TimeSamplingHandler (int sig, siginfo_t *siginfo, void *context)
 {
 	caddr_t pc;
-#if defined(OS_FREEBSD) || defined(OS_DARWIN)
-	ucontext_t *uc = (ucontext_t *) context;
-#else
-	struct ucontext *uc = (struct ucontext *) context;
+
+	/* 
+	 * This macro is subsituted by the definition of the struct ucontext as
+	 * found by the configure macro AX_CHECK_UCONTEXT. We found that in
+	 * newer versions of glibc the type changes from struct ucontext to
+	 * ucontext_t
+	 */
+	STRUCT_UCONTEXT *uc = (STRUCT_UCONTEXT *) context;
+
+#if defined(OS_LINUX) || defined(OS_ANDROID)
 	struct sigcontext *sc = (struct sigcontext *) &uc->uc_mcontext;
 #endif
 
