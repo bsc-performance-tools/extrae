@@ -3,6 +3,6 @@
 autoreconf -fvi
 
 if test `basename ${0}` = "bootstrap-and-dist" ; then
-	./configure --without-mpi --without-papi --without-dyninst --without-unwind --without-binutils
+	./configure --without-mpi --without-papi --without-dyninst --without-unwind --without-binutils --disable-xml
 	make dist-bzip2
 fi

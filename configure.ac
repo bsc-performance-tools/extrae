@@ -9,8 +9,7 @@ m4_define([extrae_major], [3])
 m4_define([extrae_minor], [5])
 m4_define([extrae_micro], [2])
 
-m4_define([extrae_version],
-					      [extrae_major.extrae_minor.extrae_micro])
+m4_define([extrae_version], [extrae_major.extrae_minor.extrae_micro])
 
 # Initialize autoconf & define package name, version and bug-report address 
 AC_INIT(Extrae, [extrae_version], tools@bsc.es)
@@ -748,7 +747,8 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[docs/source/xml/merge.xml:docs/source/xml/merge.xml] \
 		[docs/source/xml/merge-reduced.xml:docs/source/xml/merge-reduced.xml] \
 		[docs/source/xml/extrae.xml:docs/source/xml/extrae.xml] \
-		[docs/source/overheads/overheads.eps:docs/source/overheads/overheads.eps]
+		[docs/source/overheads/overheads.eps:docs/source/overheads/overheads.eps] \
+		[include/extrae_version.h.in:include/extrae_version.h.in]
 	)
 
 #########################################
@@ -787,6 +787,9 @@ AC_SUBST( [PRV_MERGER_LIB], ['$(MERGER_LIB)/paraver'] )
 AC_SUBST( [TRF_MERGER_LIB], ['$(MERGER_LIB)/dimemas'] )
 AC_SUBST( [BUFFERS_LIB], ['$(WRAPPERS_LIB)/API'] )
 
+AC_SUBST( [EXTRAE_MAJOR], extrae_major )
+AC_SUBST( [EXTRAE_MINOR], extrae_minor )
+AC_SUBST( [EXTRAE_MICRO], extrae_micro )
 
 AC_OUTPUT
 

@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 26Oct2017 Added header file extrae_version.h
  * 25Oct2017 Fixes compatibility issue accessing struct ucontext
  * 16Oct2017 Reduces maximum number of arguments in intel-kmpc wrappers
  + 13Oct2017 Added fallback mechanism for taskloop instrumentation that recovers from runtime internal copies of the instrumented parameters
