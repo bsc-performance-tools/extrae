@@ -1662,20 +1662,14 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 			else
 			{
 				if (me == 0)
-					fprintf (stderr,
-						PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
-						PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
-				putenv (new_num_omp_threads_clause);
+					fprintf (stderr, PACKAGE_NAME": OMP_NUM_THREADS is not set, allocating buffers for %d thread(s)\n", numProcessors);
 				current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 			}
 		}
 		else
 		{
 			if (me == 0)
-				fprintf (stderr,
-					PACKAGE_NAME": OMP_NUM_THREADS is mandatory for this tracing library!\n"\
-					PACKAGE_NAME": Setting OMP_NUM_THREADS to %d\n", numProcessors);
-			putenv (new_num_omp_threads_clause);
+				fprintf (stderr, PACKAGE_NAME": OMP_NUM_THREADS is not set, allocating buffers for %d thread(s)\n", numProcessors);
 			current_NumOfThreads = maximum_NumOfThreads = numProcessors;
 		}
 	}
