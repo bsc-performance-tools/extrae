@@ -121,6 +121,7 @@ def pyEx_profile_fini():
     ncount = call[1]
     print ('%-12i%-s' % (ncount, func))
 
+
 #############################
 ###  EXTRAE API WRAPPERS  ###
 #############################
@@ -129,9 +130,29 @@ def event(type, value):
   if (Extrae):
     Extrae[os.getpid()].Extrae_event(type, value)
 
+def nevent(array_of_types, array_of_values):
+  if (Extrae):
+    nevents = min(len(array_of_types), len(array_of_values))
+    types = (ctypes.c_int * nevents)()
+    values = (ctypes.c_ulonglong * nevents)()
+    for i in range(0, nevents):
+      types[i] = array_of_types[i]
+      values[i] = array_of_values[i]
+    Extrae[os.getpid()].Extrae_nevent(nevents, ctypes.pointer(types), ctypes.pointer(values))
+
 def eventandcounters(type, value):
   if (Extrae):
     Extrae[os.getpid()].@sub_Extrae_eventandcounters@(type, value)
+
+def neventandcounters(array_of_types, array_of_values):
+  if (Extrae):
+    nevents = min(len(array_of_types), len(array_of_values))
+    types = (ctypes.c_int * nevents)()
+    values = (ctypes.c_ulonglong * nevents)()
+    for i in range(0, nevents):
+      types[i] = array_of_types[i]
+      values[i] = array_of_values[i]
+    Extrae[os.getpid()].@sub_Extrae_neventandcounters@(nevents, ctypes.pointer(types), ctypes.pointer(values))
 
 
 #############################

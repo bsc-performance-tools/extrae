@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 09Nov2017 Extended pyextrae API with calls to nevent and neventandcounters
  * 27Oct2017 No longer set a value for OMP_NUM_THREADS if it was not defined by the user to avoid conflicts with schedulers that assign threads through omp_set_num_threads
  + 26Oct2017 Added header file extrae_version.h
  * 25Oct2017 Fixes compatibility issue accessing struct ucontext
