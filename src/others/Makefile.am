@@ -48,7 +48,7 @@ EXTRA_DIST = \
   pyextrae/common/__init__.py \
   pyextrae/common/extrae.py.in
 
-install-data-hook: 
+install-data-hook:
 	cp pyextrae/common/extrae.py.in pyextrae/common/extrae.py
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} pyextrae/common/extrae.py
 #if HAVE_PAPI
@@ -58,9 +58,8 @@ install-data-hook:
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_event pyextrae/common/extrae.py
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_neventandcounters@" Extrae_nevent pyextrae/common/extrae.py
 #endif
-	mkdir -p $(libexecdir)/pyextrae
-	cp -rL pyextrae/* $(libexecdir)/pyextrae
-	rm $(libexecdir)/pyextrae/common/extrae.py.in
+	mkdir -p $(DESTDIR)$(libexecdir)/pyextrae
+	cp -rL pyextrae/* $(DESTDIR)$(libexecdir)/pyextrae
+	rm $(DESTDIR)$(libexecdir)/pyextrae/common/extrae.py.in
 
 CLEANFILES = pyextrae/common/extrae.py
-

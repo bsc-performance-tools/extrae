@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 29May2018 Add $DESTDIR to src/others/Makefile.am to be able to create RPM's
  + 22May2018 Adds instrumentation support for MPI_Fetch_and_op, MPI_Compare_and_swap and MPI_Win_flush* routines (closes #2)
  * 18May2018 Fixed wrong format of tag in the prv trace that resulted in negative comm tags
  * 17May2018 Adds extrae_module.f90 to distribution
