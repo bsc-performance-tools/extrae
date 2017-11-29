@@ -379,7 +379,7 @@ void CheckControlFile(void)
 	{
 		if (TASKID == 0)
 		{
-			wannatrace = file_exists (Extrae_getCheckControlFileName());
+			wannatrace = __Extrae_Utils_file_exists (Extrae_getCheckControlFileName());
 			if (wannatrace != prevtracejant)
 			{
 				fprintf (stdout, PACKAGE_NAME": Tracing is %s via control file\n", (wannatrace)?"activated":"deactivated");
@@ -573,7 +573,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 					sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_MPITS);
 
 				/* If the file exists, remove it and its associated .spawn file */
-				if (file_exists(tmpname))
+				if (__Extrae_Utils_file_exists(tmpname))
 				{
 					if (unlink (tmpname) != 0)
 						fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
@@ -583,7 +583,7 @@ static int MPI_Generate_Task_File_List (char **node_list, int isSpawned)
 					else
 						sprintf (tmpname, "%s/%s%s", final_dir, appl_name, EXT_SPAWN);
 
-					if (file_exists(tmpname))
+					if (__Extrae_Utils_file_exists(tmpname))
 						if (unlink (tmpname) != 0)
 							fprintf (stderr, PACKAGE_NAME": Warning! Could not clean previous file %s\n", tmpname);
 

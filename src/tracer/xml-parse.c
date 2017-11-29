@@ -121,11 +121,11 @@ static xmlChar * deal_xmlChar_env (int rank, xmlChar *str)
 
 	/* First get rid of the leading and trailing white spaces */
 	for (i = 0; i < length; i++)
-		if (!is_Whitespace (str[i]))
+		if (!__Extrae_Utils_is_Whitespace (str[i]))
 			break;
 	initial = i;
 	for (; final-1 >= i; final--)
-		if (!is_Whitespace (str[final-1]))
+		if (!__Extrae_Utils_is_Whitespace (str[final-1]))
 			break;
 
 	sublen = final - initial;
@@ -245,12 +245,12 @@ static void Parse_XML_Sampling (int rank, xmlNodePtr current_tag)
 
 	if (period != NULL)
 	{
-		unsigned long long sampling_period = getTimeFromStr ((const char*)period,
+		unsigned long long sampling_period = __Extrae_Utils_getTimeFromStr ((const char*)period,
 			"<sampling period=\"..\" />",
 		    rank);
 		unsigned long long sampling_variability = 0;
 		if (variability != NULL)
-			sampling_variability = getTimeFromStr ((const char*) variability,
+			sampling_variability = __Extrae_Utils_getTimeFromStr ((const char*) variability,
 			  "<sampling variability=\"..\" />",
 			  rank);
 
@@ -430,7 +430,7 @@ static void Parse_XML_Bursts (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (str != NULL)
 				{
-					TMODE_setBurstsThreshold (getTimeFromStr ((const char*) str,
+					TMODE_setBurstsThreshold (__Extrae_Utils_getTimeFromStr ((const char*) str,
 					  (const char *) TRACE_THRESHOLD,
 					  rank));
 				}
@@ -956,7 +956,7 @@ static void Parse_XML_Counters_CPU_Sampling (int rank, xmlDocPtr xmldoc, xmlNode
 						tmp = (char*) xmlGetProp_env (rank, set_tag, TRACE_FREQUENCY);
 
 					t_counters[i] = (char*) xmlNodeListGetString_env (rank, xmldoc, set_tag->xmlChildrenNode, 1);
-					t_periods[i] = getFactorValue (tmp, "XML:: sampling <period property> (or <frequency>)", rank);
+					t_periods[i] = __Extrae_Utils_getFactorValue (tmp, "XML:: sampling <period property> (or <frequency>)", rank);
 
 					if (t_periods[i] <= 0)
 					{
@@ -1014,7 +1014,7 @@ static void Parse_XML_Counters_CPU (int rank, xmlDocPtr xmldoc, xmlNodePtr curre
 				changeat_glops = (char*) xmlGetProp_env (rank, set_tag, TRACE_HWCSET_CHANGEAT_GLOBALOPS);
 				changeat_time = (char*) xmlGetProp_env (rank, set_tag, TRACE_HWCSET_CHANGEAT_TIME);
 
-				numofcounters = explode (counters, ",", &setofcounters);
+				numofcounters = __Extrae_Utils_explode (counters, ",", &setofcounters);
 
 				Parse_XML_Counters_CPU_Sampling (rank, xmldoc, set_tag, &OvfNum, &OvfCounters, &OvfPeriods);
 
@@ -1183,7 +1183,7 @@ static void Parse_XML_TraceControl (int rank, int world_size, xmlDocPtr xmldoc, 
 					tmp = (char*) xmlGetProp_env (rank, tag, TRACE_FREQUENCY);
 					if (tmp != NULL)
 					{
-						WantedCheckControlPeriod = getTimeFromStr ((const char*) tmp,
+						WantedCheckControlPeriod = __Extrae_Utils_getTimeFromStr ((const char*) tmp,
 						  (const char*) TRACE_FREQUENCY,
 						  rank);
 						if (WantedCheckControlPeriod >= 1000000000)
@@ -1401,7 +1401,7 @@ static void Parse_XML_CPU_Events (int rank, xmlDocPtr xmldoc, xmlNodePtr current
 				{
 					if (atoi((char*)frequency) > 0)
 					{
-						MinimumCPUEventTime = getTimeFromStr ((const char*)frequency, (const char*) TRACE_CPU_EVENTS_FREQUENCY, rank);
+						MinimumCPUEventTime = __Extrae_Utils_getTimeFromStr ((const char*)frequency, (const char*) TRACE_CPU_EVENTS_FREQUENCY, rank);
 						mfprintf(stdout, PACKAGE_NAME": CPU events will be emitted every %s.\n", frequency);
 					} else
 					{
@@ -1451,7 +1451,7 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 				char *str = (char*) xmlNodeListGetString_env (rank, xmldoc, tag->xmlChildrenNode, 1);
 				if (str != NULL)
 				{
-					MinimumTracingTime = getTimeFromStr ((const char*)str,
+					MinimumTracingTime = __Extrae_Utils_getTimeFromStr ((const char*)str,
 					  (const char*) TRACE_MINIMUM_TIME,
 					  rank);
 					hasMinimumTracingTime = ( MinimumTracingTime != 0);
@@ -1989,7 +1989,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 				temporal_d = ".";
 		strcpy (tmp_dir, temporal_d);
 		/* Force mkdir */
-		mkdir_recursive (tmp_dir);
+		__Extrae_Utils_mkdir_recursive (tmp_dir);
 
 		/* Final directory must be checked against the configuration of the XML, 
   	    the temporal_directory and, finally, the current directory */
@@ -2007,7 +2007,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 			strcpy (final_dir, final_d);
 
 		/* Force mkdir */
-		mkdir_recursive (final_dir);
+		__Extrae_Utils_mkdir_recursive (final_dir);
 
 		if (strcmp (final_dir, tmp_dir) != 0)
 		{

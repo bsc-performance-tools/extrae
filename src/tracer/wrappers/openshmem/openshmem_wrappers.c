@@ -340,8 +340,8 @@ static char * OPENSHMEM_Distribute_XML_File (int rank, int world_size, char *ori
                         int len = 14 + strlen(getenv("TMPDIR")) + 1;
 
                         /* If TMPDIR exists but points to non-existent directory, create it */
-                        if (!directory_exists (getenv("TMPDIR")))
-                                mkdir_recursive (getenv("TMPDIR"));
+                        if (!__Extrae_Utils_directory_exists (getenv("TMPDIR")))
+                                __Extrae_Utils_mkdir_recursive (getenv("TMPDIR"));
 
                         /* 14 is the length from /XMLFileXXXXXX */
                         result_file = (char*) malloc (len * sizeof(char));

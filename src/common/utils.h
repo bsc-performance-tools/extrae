@@ -60,19 +60,19 @@
 extern "C" {
 #endif
 
-int is_Whitespace (char c);
-int is_Alphabetic (char c);
-char *trim (char *sourceStr);
-int explode (char *sourceStr, const char *delimiter, char ***tokenArray);
-int append_from_to_file (const char *source, const char *destination);
-int rename_or_copy (char *origen, char *desti);
-unsigned long long getTimeFromStr (const char *time, const char *envvar, int rank);
-unsigned long long getFactorValue (const char *value, const char *ref, int rank);
-int mkdir_recursive (const char *path);
-int file_exists (const char *file);
-int directory_exists (const char *file);
-int ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
-	unsigned buffersize, char *buffer, const char *string);
+int __Extrae_Utils_is_Whitespace (char c);
+int __Extrae_Utils_is_Alphabetic (char c);
+char *__Extrae_Utils_trim (char *sourceStr);
+int __Extrae_Utils_explode (char *sourceStr, const char *delimiter, char ***tokenArray);
+int __Extrae_Utils_append_from_to_file (const char *source, const char *destination);
+int __Extrae_Utils_rename_or_copy (char *origen, char *desti);
+unsigned long long __Extrae_Utils_getTimeFromStr (const char *time, const char *envvar, int rank);
+unsigned long long __Extrae_Utils_getFactorValue (const char *value, const char *ref, int rank);
+int __Extrae_Utils_mkdir_recursive (const char *path);
+int __Extrae_Utils_file_exists (const char *file);
+int __Extrae_Utils_directory_exists (const char *file);
+int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
+	unsigned __Extrae_Utils_buffersize, char *buffer, const char *string);
 
 #if defined(__cplusplus)
 }

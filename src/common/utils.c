@@ -55,7 +55,7 @@
 
 #include "utils.h"
 
-int is_Whitespace(char c)
+int __Extrae_Utils_is_Whitespace(char c)
 {
   /* Avoid using isspace() and iscntrl() to remove internal dependency with ctype_b/ctype_b_loc.
    * This symbol name depends on the glibc version; newer versions define ctype_b_loc and compat 
@@ -66,7 +66,7 @@ int is_Whitespace(char c)
    return c == ' ' || c == '\t' || c == '\v' || c == '\f' || c == '\n';
 }
 
-int is_Alphabetic(char c)
+int __Extrae_Utils_is_Alphabetic(char c)
 {
 	/* Avoid using isspace() and iscntrl() to remove internal dependency with ctype_b/ctype_b_loc.
 	 * This symbol name depends on the glibc version; newer versions define ctype_b_loc and compat 
@@ -78,7 +78,7 @@ int is_Alphabetic(char c)
 }
 
 /* Supress the spaces at both sides of the string sourceStr */
-char *trim (char *sourceStr)
+char *__Extrae_Utils_trim (char *sourceStr)
 { 
   int sourceLen = 0;
   int left = 0, right = 0;
@@ -93,11 +93,11 @@ char *trim (char *sourceStr)
   right = sourceLen - 1;
 
   /* Find first non-whitespace character */
-  while ((left < sourceLen) && (is_Whitespace(sourceStr[left])))
+  while ((left < sourceLen) && (__Extrae_Utils_is_Whitespace(sourceStr[left])))
     left ++;
 
   /* Find last character before whitespaces */
-  while ((right > left) && (is_Whitespace(sourceStr[right])))
+  while ((right > left) && (__Extrae_Utils_is_Whitespace(sourceStr[right])))
     right --;
 
   /* Create a new string */
@@ -111,14 +111,14 @@ char *trim (char *sourceStr)
 
 /**
  * Builds an array where each element is a token from 'sourceStr' separated by 'delimiter'
- * @param[in]     sourceStr  The string to explode
+ * @param[in]     sourceStr  The string to __Extrae_Utils_explode
  * @param[in]     delimiter  The delimiting character 
  * @param[in,out] tokenArray The resulting vector
  *
  * @return Returns the number of tokens in the resulting array 
  */
 
-int explode (char *sourceStr, const char *delimiter, char ***tokenArray)
+int __Extrae_Utils_explode (char *sourceStr, const char *delimiter, char ***tokenArray)
 {
    int num_tokens = 0;
    char **retArray = NULL;
@@ -138,7 +138,7 @@ int explode (char *sourceStr, const char *delimiter, char ***tokenArray)
          while ((token = strtok(backupStr, delimiter)) != NULL)
          {
             backupStr = NULL;
-            trimmed_token = trim (token);
+            trimmed_token = __Extrae_Utils_trim (token);
             if (trimmed_token != NULL)
             {
                /* Save the token in a new position of the resulting vector */
@@ -157,12 +157,12 @@ int explode (char *sourceStr, const char *delimiter, char ***tokenArray)
 }
 
 /******************************************************************************
- **  Function name : append_from_to_file
+ **  Function name : __Extrae_Utils_append_from_to_file
  **  Author : HSG
  **  Description : Appends contents of source into destination
  ******************************************************************************/
 
-int append_from_to_file (const char *source, const char *destination)
+int __Extrae_Utils_append_from_to_file (const char *source, const char *destination)
 {
 	char buffer[65536];
 	int fd_o, fd_d;
@@ -217,12 +217,12 @@ int append_from_to_file (const char *source, const char *destination)
 }
 
 /******************************************************************************
- **  Function name : rename_or_copy (char *, char *)
+ **  Function name : __Extrae_Utils_rename_or_copy (char *, char *)
  **  Author : HSG
  **  Description : Tries to rename (if in the same /dev/) or moves the file.
  ******************************************************************************/
 
-int rename_or_copy (char *origen, char *desti)
+int __Extrae_Utils_rename_or_copy (char *origen, char *desti)
 {
 	if (rename (origen, desti) == -1)
 	{
@@ -290,7 +290,7 @@ int rename_or_copy (char *origen, char *desti)
 	return 0;
 }
 
-unsigned long long getFactorValue (const char *value, const char *ref, int rank)
+unsigned long long __Extrae_Utils_getFactorValue (const char *value, const char *ref, int rank)
 {
 	unsigned long long Factor;
 	char tmp_buff[256];
@@ -346,7 +346,7 @@ unsigned long long getFactorValue (const char *value, const char *ref, int rank)
 		return atoll (tmp_buff) * Factor;
 }
 
-unsigned long long getTimeFromStr (const char *time, const char *envvar, int rank)
+unsigned long long __Extrae_Utils_getTimeFromStr (const char *time, const char *envvar, int rank)
 {
 	unsigned long long MinTimeFactor;
 	char tmp_buff[256];
@@ -359,7 +359,7 @@ unsigned long long getTimeFromStr (const char *time, const char *envvar, int ran
 
 	strl = strlen(tmp_buff);
 
-	if (strl > 2 && is_Alphabetic(tmp_buff[strl-2]) && tmp_buff[strl-1] == 's')
+	if (strl > 2 && __Extrae_Utils_is_Alphabetic(tmp_buff[strl-2]) && tmp_buff[strl-1] == 's')
 	{
 		tmp_buff[strl-1] = 0x0; // Strip the last 's' of ms/ns/us
 	}
@@ -427,11 +427,11 @@ unsigned long long getTimeFromStr (const char *time, const char *envvar, int ran
 }
 
 /******************************************************************************
- **      Function name : file_exists (char*)
+ **      Function name : __Extrae_Utils_file_exists (char*)
  **      Author : HSG
  **      Description : Checks whether a file exists
  ******************************************************************************/
-int file_exists (const char *fname)
+int __Extrae_Utils_file_exists (const char *fname)
 {
 #if defined(HAVE_ACCESS)
 	return access (fname, F_OK) == 0;
@@ -456,11 +456,11 @@ int file_exists (const char *fname)
 }
 
 /******************************************************************************
- **      Function name : directory_exists (char*)
+ **      Function name : __Extrae_Utils_directory_exists (char*)
  **      Author : HSG
  **      Description : Checks whether a directory exists
  ******************************************************************************/
-int directory_exists (const char *fname)
+int __Extrae_Utils_directory_exists (const char *fname)
 {
 #if defined(HAVE_STAT)
 	struct stat sb;
@@ -472,11 +472,11 @@ int directory_exists (const char *fname)
 }
 
 /******************************************************************************
- **      Function name : mkdir_recursive (char*)
+ **      Function name : __Extrae_Utils_mkdir_recursive (char*)
  **      Author : HSG
  **      Description : make a recursive recursively
  ******************************************************************************/
-int mkdir_recursive (const char *path)
+int __Extrae_Utils_mkdir_recursive (const char *path)
 {
 	struct stat sb;
 
@@ -492,7 +492,7 @@ int mkdir_recursive (const char *path)
 		dir = dirname (original_path);
 
 		if ((strcmp (dir, ".") != 0) && (strcmp (dir, "/") != 0))
-			result = mkdir_recursive(dir)?mkdir (path, 0755) == 0 : 0;
+			result = __Extrae_Utils_mkdir_recursive(dir)?mkdir (path, 0755) == 0 : 0;
 		else
 			result = mkdir (path, 0755) == 0;
 
@@ -504,12 +504,12 @@ int mkdir_recursive (const char *path)
 		return S_ISDIR(sb.st_mode);
 }
 
-int ExtraeUtils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
-	unsigned buffersize, char *buffer, const char *string)
+int __Extrae_Utils_shorten_string (unsigned nprefix, unsigned nsufix, const char *infix,
+	unsigned __Extrae_Utils_buffersize, char *buffer, const char *string)
 {
-	assert (buffersize >= nprefix+nsufix+strlen(infix)+1);
+	assert (__Extrae_Utils_buffersize >= nprefix+nsufix+strlen(infix)+1);
 
-	memset (buffer, 0, buffersize);
+	memset (buffer, 0, __Extrae_Utils_buffersize);
 
 	/* Split if it does not fit */
 	if (strlen(string) >= nprefix+nsufix+strlen(infix))

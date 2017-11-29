@@ -102,7 +102,7 @@ int XML_have_UFlist (void)
 int XML_excludeAutomaticFunctions (void)
 { return ExcludeAutomaticFunctions; }
 
-#define is_Whitespace(c) \
+#define __Extrae_Utils_is_Whitespace(c) \
    ((c) == ' ' || (c) == '\t' || (c) == '\v' || (c) == '\f' || (c) == '\n')
 
 /* Free memory if not null */
@@ -120,11 +120,11 @@ static xmlChar * deal_xmlChar_env (xmlChar *str)
 
 	/* First get rid of the leading and trailing white spaces */
 	for (i = 0; i < length; i++)
-		if (!is_Whitespace (str[i]))
+		if (!__Extrae_Utils_is_Whitespace (str[i]))
 			break;
 	initial = i;
 	for (; final-1 >= i; final--)
-		if (!is_Whitespace (str[final-1]))
+		if (!__Extrae_Utils_is_Whitespace (str[final-1]))
 			break;
 
 	sublen = final - initial;

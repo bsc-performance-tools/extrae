@@ -129,7 +129,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_stat (const char *directory)
 		return result;
 	}
 	else
-		return directory_exists(directory);
+		return __Extrae_Utils_directory_exists(directory);
 }
 
 
@@ -217,7 +217,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
 		return result;
 	}
 	else
-		return directory_exists(directory);
+		return __Extrae_Utils_directory_exists(directory);
 }
 #endif
 
@@ -225,7 +225,7 @@ static int ExtraeUtilsMPI_CheckSharedDisk_openread (const char *directory)
 #define FNAMELEN 255
 #define BUFSIZE (1024*1024)
 
-void rename_or_copy_sionlib (const char *origen, const char *desti)
+void __Extrae_Utils_rename_or_copy_sionlib (const char *origen, const char *desti)
 {
 	int rank, size, globalrank, sid, numFiles;
 	char fname[FNAMELEN], *newfname=NULL;
@@ -294,7 +294,7 @@ void rename_or_copy_sionlib (const char *origen, const char *desti)
 	unlink (origen);
 }
 
-void append_from_to_file_sionlib (const char *source, const char *destination)
+void __Extrae_Utils_append_from_to_file_sionlib (const char *source, const char *destination)
 {
 	int rank, size, globalrank, sid, i, numFiles;
 	MPI_Comm gComm, lComm;
@@ -465,8 +465,8 @@ char * MPI_Distribute_XML_File (int rank, int world_size, const char *file)
 		{
 			int len = 14 + strlen(getenv("TMPDIR")) + 1;
 			/* If TMPDIR exists but points to non-existent directory, create it */
-			if (!directory_exists (getenv("TMPDIR")))
-				mkdir_recursive (getenv("TMPDIR"));
+			if (!__Extrae_Utils_directory_exists (getenv("TMPDIR")))
+				__Extrae_Utils_mkdir_recursive (getenv("TMPDIR"));
 
 			/* 14 is the length from /XMLFileXXXXXX */
 			result_file = (char*) malloc (len * sizeof(char));

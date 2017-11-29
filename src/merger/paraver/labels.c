@@ -761,7 +761,7 @@ void Labels_loadSYMfile (int taskid, int allobjects, unsigned ptask,
 	if (strlen(name) == 0)
 		return;
 
-	if (!file_exists(name))
+	if (!__Extrae_Utils_file_exists(name))
 		return;
 
 	FD = (FILE *) fopen (name, "r");
@@ -1209,7 +1209,7 @@ void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
 		strcpy (symbol_file_name, IFiles[file].name);
 		symbol_file_name[strlen(symbol_file_name)-strlen(EXT_MPIT)] = (char) 0; /* remove ".mpit" extension */
 		strcat (symbol_file_name, EXT_SYM); /* add ".sym" */
-		if (file_exists(symbol_file_name))
+		if (__Extrae_Utils_file_exists(symbol_file_name))
 			Labels_loadSYMfile (taskid, FALSE, IFiles[file].ptask, 
 			  IFiles[file].task, symbol_file_name, FALSE);
 	}

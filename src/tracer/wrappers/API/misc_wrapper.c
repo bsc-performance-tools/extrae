@@ -514,7 +514,7 @@ void Extrae_get_version_Wrapper (unsigned *major, unsigned *minor,
 	char **tokenArray = NULL;
   char *endptr;
 
-	tokens = explode(version, ".", &tokenArray);
+	tokens = __Extrae_Utils_explode(version, ".", &tokenArray);
 
 	if (tokens > 0) {
 		*major    = strtoul(tokenArray[0], &endptr, 10);

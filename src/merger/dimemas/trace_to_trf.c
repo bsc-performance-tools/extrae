@@ -207,7 +207,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 		}
 	}
 
-	if (file_exists(get_merge_OutputTraceName()) &&
+	if (__Extrae_Utils_file_exists(get_merge_OutputTraceName()) &&
 	    !get_option_merge_TraceOverwrite())
 	{
 		unsigned lastid = 0;
@@ -228,7 +228,7 @@ int Dimemas_ProcessTraceFiles (char *outName, unsigned long nfiles,
 				sprintf (extra, ".%04d.dim", lastid);
 				strncpy (&tmp[strlen(tmp)-strlen(".dim")], extra, strlen(extra));
 			}
-		} while (file_exists (tmp));
+		} while (__Extrae_Utils_file_exists (tmp));
 		set_merge_OutputTraceName (tmp);
 		set_merge_GivenTraceName (TRUE);
 	}

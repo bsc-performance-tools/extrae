@@ -579,7 +579,7 @@ void HWC_Parse_Env_Config (int task_id)
     int numofcounters;
     char **setofcounters;
 
-    numofcounters = explode (getenv("EXTRAE_COUNTERS"), ",", &setofcounters);
+    numofcounters = __Extrae_Utils_explode (getenv("EXTRAE_COUNTERS"), ",", &setofcounters);
     HWC_Add_Set (1, task_id, numofcounters, setofcounters, getenv("EXTRAE_COUNTERS_DOMAIN"), 0, 0, 0, NULL, 0);
 }
 

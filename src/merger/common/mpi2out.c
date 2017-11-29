@@ -307,7 +307,7 @@ void Read_SPAWN_file (char *mpit_file, int current_ptask)
   spawn_file_name[strlen(spawn_file_name)-strlen(EXT_MPITS)] = (char) 0; /* remove ".mpit" extension */
   strcat (spawn_file_name, EXT_SPAWN);
 
-  if (file_exists(spawn_file_name))
+  if (__Extrae_Utils_file_exists(spawn_file_name))
   {
     /* Read the synchronization latency */
     unsigned i;
@@ -383,7 +383,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 			path[0] = thdname[0] = (char) 0;
 
 			info = sscanf (mybuffer, "%s named %s", path, thdname);
-			stripped = trim (path);
+			stripped = __Extrae_Utils_trim (path);
 
 			if (strncmp (mybuffer, "--", 2) == 0)
 			{
@@ -395,14 +395,14 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 				/* If mode is not forced, check first if the absolute path exists,
 				   if not, try to open in the current directory */
 
-				if (!file_exists(stripped))
+				if (!__Extrae_Utils_file_exists(stripped))
 				{
 					/* Look for /set- in string, and then use set- (thus +1) */
 					char * stripped_basename = strstr (stripped, "/set-");
 					if (stripped_basename != NULL)
 					{
 						/* Look in current directory, if not use list file directory */
-						if (!file_exists(&stripped_basename[1]))
+						if (!__Extrae_Utils_file_exists(&stripped_basename[1]))
 						{
 							char dir_file[2048];
 							char *duplicate = strdup (file);
@@ -433,7 +433,7 @@ void Read_MPITS_file (const char *file, int *cptask, FileOpen_t opentype, int ta
 				if (stripped_basename != NULL)
 				{
 					/* Look in current directory, if not use list file directory */
-					if (!file_exists(&stripped_basename[1]))
+					if (!__Extrae_Utils_file_exists(&stripped_basename[1]))
 					{
 						char dir_file[2048];
 						char *duplicate = strdup (file);
@@ -1395,11 +1395,11 @@ int merger_post (int numtasks, int taskid)
 	if (taskid == 0)
 	{
 		fprintf (stdout, "mpi2prv: Checking for target directory existance...");
-		char *dirn = dirname(strdup(trim(get_merge_OutputTraceName())));
-		if (!directory_exists(dirn))
+		char *dirn = dirname(strdup(__Extrae_Utils_trim(get_merge_OutputTraceName())));
+		if (!__Extrae_Utils_directory_exists(dirn))
 		{
 			fprintf (stdout, " does not exist. Creating ...");
-			if (!mkdir_recursive(dirn))
+			if (!__Extrae_Utils_mkdir_recursive(dirn))
 			{
 				fprintf (stdout, " failed to create (%s)!\n", dirn);
 				exit (-1);
@@ -1416,7 +1416,7 @@ int merger_post (int numtasks, int taskid)
 		    get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 	else
-		error = Dimemas_ProcessTraceFiles (trim(get_merge_OutputTraceName()),
+		error = Dimemas_ProcessTraceFiles (__Extrae_Utils_trim(get_merge_OutputTraceName()),
 			nTraces, InputTraces, get_option_merge_NumApplications(),
 			NodeCPUinfo, numtasks, taskid);
 

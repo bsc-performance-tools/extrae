@@ -445,7 +445,7 @@ static void Online_GenerateOutputFiles()
  */
 void Online_CleanTemporaries()
 {
-  if (file_exists (tmpBufferFile))
+  if (__Extrae_Utils_file_exists (tmpBufferFile))
     if (unlink(tmpBufferFile) == -1)
       fprintf (stderr, PACKAGE_NAME": Error removing online file (%s)\n", tmpBufferFile);
 }
@@ -496,9 +496,9 @@ void Online_Flush()
   Buffer_Close(OnlineBuffer);
 
   /* Rename the temporary file into the final online buffer */
-  if (file_exists (tmpBufferFile))
+  if (__Extrae_Utils_file_exists (tmpBufferFile))
   {
-    rename_or_copy (tmpBufferFile, finalBufferFile);
+    __Extrae_Utils_rename_or_copy (tmpBufferFile, finalBufferFile);
     fprintf (stdout, PACKAGE_NAME": Online trace file created : %s\n", finalBufferFile);
     fflush(stdout);
   }

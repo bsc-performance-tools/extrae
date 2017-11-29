@@ -174,7 +174,7 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 	task_t *task_info = GET_TASK_INFO(ptask, task);
 	unsigned found = FALSE, u;
 
-	if (!file_exists(binary))
+	if (!__Extrae_Utils_file_exists(binary))
 		return;
 
 	for (u = 0; u < task_info->num_binary_objects && !found; u++)

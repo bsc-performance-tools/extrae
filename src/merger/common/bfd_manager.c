@@ -387,10 +387,10 @@ int system_call_to_addr2line (char *binary, void *address,
 	read (fd[0], addr2line_result, sizeof(addr2line_result));
 	wait(&status);
 
-	matches = explode(addr2line_result, "\n", &tmp1);
+	matches = __Extrae_Utils_explode(addr2line_result, "\n", &tmp1);
 	if (matches < 2)
 		return FALSE;
-	matches = explode(tmp1[1], ":", &tmp2);
+	matches = __Extrae_Utils_explode(tmp1[1], ":", &tmp2);
 	if (matches < 2)
 		return FALSE;
 

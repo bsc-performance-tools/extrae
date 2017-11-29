@@ -52,7 +52,7 @@ using namespace std;
 
 BPatch *bpatch;
 
-static int file_exists (char *fitxer)
+static int __Extrae_Utils_file_exists (char *fitxer)
 {
 	return access (fitxer, F_OK) == 0;
 }
@@ -93,7 +93,7 @@ int main (int argc, char *argv[])
 	}
 
 	/* Does the binary exists? */
-	if (!file_exists(argv[1]))
+	if (!__Extrae_Utils_file_exists(argv[1]))
 	{
 		cout << PACKAGE_NAME << ": Executable " << argv[1] << " cannot be found!" << endl;
 		exit (-1);
@@ -120,7 +120,7 @@ int main (int argc, char *argv[])
 		exit (-1);
 	}
 
-	if (!file_exists (argv[2]))
+	if (!__Extrae_Utils_file_exists (argv[2]))
 	{
 		/* If the library does not exist, terminate the mutatee and exit */
 		cerr << PACKAGE_NAME << ": Cannot find the library " << argv[2] << endl;

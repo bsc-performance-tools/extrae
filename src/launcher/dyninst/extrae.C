@@ -84,11 +84,11 @@ static string loadedModule;
 #define DYNINST_NO_ERROR -1
 
 /******************************************************************************
- **      Function name : file_exists (char*)
+ **      Function name : __Extrae_Utils_file_exists (char*)
  **      Author : HSG
  **      Description : Checks whether a file exists
  ******************************************************************************/
-static int file_exists (char *fname)
+static int __Extrae_Utils_file_exists (char *fname)
 {
 #if defined(HAVE_ACCESS)
 	return access (fname, F_OK) == 0;
@@ -886,7 +886,7 @@ int main (int argc, char *argv[])
 			configXML = getenv ("EXTRAE_CONFIG_FILE");
 		}
 
-		if (!file_exists(configXML))
+		if (!__Extrae_Utils_file_exists(configXML))
 		{
 			cerr << PACKAGE_NAME << ": Error! Unable to locate " << configXML << endl;	
 			exit (-1);
@@ -896,7 +896,7 @@ int main (int argc, char *argv[])
 	}
 
 	/* Does the binary exists? */
-	if (!file_exists(argv[index]))
+	if (!__Extrae_Utils_file_exists(argv[index]))
 	{
 		cout << PACKAGE_NAME << ": Executable " << argv[index] << " cannot be found!" << endl;
 		exit (-1);
@@ -1081,7 +1081,7 @@ int main (int argc, char *argv[])
 			/* Load the module into the mutattee */
 			cout << PACKAGE_NAME << ": Loading " << loadedModule << " into the target application" << endl;
 	
-			if (!file_exists (buffer))
+			if (!__Extrae_Utils_file_exists (buffer))
 			{
 				/* If the library does not exist, terminate the mutatee and exit */
 				cerr << PACKAGE_NAME << ": Cannot find the module. It must be under $EXTRAE_HOME/lib" << endl;

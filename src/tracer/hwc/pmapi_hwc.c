@@ -135,7 +135,7 @@ int HWCBE_PMAPI_Add_Set (int pretended_set, int rank, int ncounters, char **coun
 	/* Just check if the user wants us to change the counters in some manner */
 	if (change_at_time != NULL)
 	{
-		HWC_sets[num_set].change_at = getTimeFromStr (change_at_time, 
+		HWC_sets[num_set].change_at = __Extrae_Utils_getTimeFromStr (change_at_time, 
 			"change-at-time", rank);
 		HWC_sets[num_set].change_type = 
 				(HWC_sets[num_set].change_at == 0)?CHANGE_NEVER:CHANGE_TIME;

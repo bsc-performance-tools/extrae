@@ -943,7 +943,7 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i=0; i<FuncTab->num_functions; i++) 
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, FuncTab->function[i]);
 				if (shortened)
@@ -973,7 +973,7 @@ void Address2Info_Write_MPI_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf(pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 				if (shortened)
@@ -1026,7 +1026,7 @@ void Address2Info_Write_MemReferenceCaller_Labels (FILE * pcf_fd)
 
 			if (obj->is_static)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, obj->name);
 				if (!shortened)
@@ -1036,7 +1036,7 @@ void Address2Info_Write_MemReferenceCaller_Labels (FILE * pcf_fd)
 			}
 			else
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, obj->file_name);
 				if (!shortened)
@@ -1074,7 +1074,7 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, FuncTab->function[i]);
 				if (shortened)
@@ -1094,7 +1094,7 @@ void Address2Info_Write_OMP_Labels (FILE * pcf_fd, int eventtype,
 
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 				if (shortened)
@@ -1146,7 +1146,7 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 
 			for (i = 0; i < FuncTab->num_functions; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, FuncTab->function[i]);
 				if (shortened)
@@ -1167,7 +1167,7 @@ void Address2Info_Write_CUDA_Labels (FILE * pcf_fd, int uniqueid)
 
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 				if (shortened)
@@ -1219,7 +1219,7 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, FuncTab->function[i]);
 				if (shortened)
@@ -1239,7 +1239,7 @@ void Address2Info_Write_UF_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 				if (shortened)
@@ -1294,7 +1294,7 @@ void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, FuncTab->function[i]);
 				if (shortened)
@@ -1316,7 +1316,7 @@ void Address2Info_Write_OTHERS_Labels (FILE * pcf_fd, int uniqueid, int nlabels,
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 				if (shortened)
@@ -1372,7 +1372,7 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < FuncTab->num_functions; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, FuncTab->function[i]);
 				if (shortened)
@@ -1396,7 +1396,7 @@ void Address2Info_Write_Sample_Labels (FILE * pcf_fd, int uniqueid)
 			fprintf (pcf_fd, "%s\n0   %s\n", VALUES_LABEL, EVT_END_LBL);
 			for (i = 0; i < AddrTab->num_addresses; i ++)
 			{
-				int shortened = ExtraeUtils_shorten_string (SHORT_STRING_PREFIX,
+				int shortened = __Extrae_Utils_shorten_string (SHORT_STRING_PREFIX,
 				  SHORT_STRING_SUFFIX, SHORT_STRING_INFIX,
 				  sizeof(short_label), short_label, AddrTab->address[i].file_name);
 				if (shortened)

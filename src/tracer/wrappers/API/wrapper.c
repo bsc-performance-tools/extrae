@@ -566,10 +566,10 @@ void Backend_createExtraeDirectory (int taskid, int Temporal)
 
 	dirname = (Temporal)?Get_TemporalDir(taskid):Get_FinalDir(taskid);
 
-	ret = mkdir_recursive (dirname);
+	ret = __Extrae_Utils_mkdir_recursive (dirname);
 	while (!ret && attempts > 0)
 	{
-		ret = mkdir_recursive (dirname);
+		ret = __Extrae_Utils_mkdir_recursive (dirname);
 		attempts--;
 	}
 	
@@ -662,7 +662,7 @@ static int read_environment_variables (int me)
 	/* Minimum CPU Burst duration? */
 	if ((str = getenv("EXTRAE_BURST_THRESHOLD")) != NULL) 
 	{
-		TMODE_setBurstsThreshold (getTimeFromStr (str, "EXTRAE_BURST_THRESHOLD", me));
+		TMODE_setBurstsThreshold (__Extrae_Utils_getTimeFromStr (str, "EXTRAE_BURST_THRESHOLD", me));
 	}
 
 #if defined(MPI_SUPPORT)
@@ -765,7 +765,7 @@ static int read_environment_variables (int me)
 	/* 
 	 * EXTRAE_MINIMUM_TIME : Set the minimum tracing time...
 	 */
-	MinimumTracingTime = getTimeFromStr (getenv("EXTRAE_MINIMUM_TIME"), "EXTRAE_MINIMUM_TIME", me);
+	MinimumTracingTime = __Extrae_Utils_getTimeFromStr (getenv("EXTRAE_MINIMUM_TIME"), "EXTRAE_MINIMUM_TIME", me);
 	hasMinimumTracingTime = (MinimumTracingTime != 0);
 	if (me == 0 && hasMinimumTracingTime)
 	{
@@ -778,7 +778,7 @@ static int read_environment_variables (int me)
 	/* 
 	 * EXTRAE_CONTROL_TIME : Set the control tracing time...
 	 */
-	WantedCheckControlPeriod = getTimeFromStr (getenv("EXTRAE_CONTROL_TIME"), "EXTRAE_CONTROL_TIME", me);
+	WantedCheckControlPeriod = __Extrae_Utils_getTimeFromStr (getenv("EXTRAE_CONTROL_TIME"), "EXTRAE_CONTROL_TIME", me);
 	if (me == 0 && WantedCheckControlPeriod != 0)
 	{
 		if (WantedCheckControlPeriod >= 1000000000)
@@ -969,12 +969,12 @@ static int read_environment_variables (int me)
 	str = getenv ("EXTRAE_SAMPLING_PERIOD");
 	if (str != NULL)
 	{
-		unsigned long long sampling_period = getTimeFromStr (
+		unsigned long long sampling_period = __Extrae_Utils_getTimeFromStr (
 		  getenv("EXTRAE_SAMPLING_PERIOD"), "EXTRAE_SAMPLING_PERIOD", me);
 		unsigned long long sampling_variability = 0;
 		char *str_var = getenv("EXTRAE_SAMPLING_VARIABILITY");
 		if (str_var != NULL)
-			sampling_variability = getTimeFromStr (
+			sampling_variability = __Extrae_Utils_getTimeFromStr (
 				getenv("EXTRAE_SAMPLING_VARIABILITY"), "EXTRAE_SAMPLING_VARIABILITY", me);
 
 		if (sampling_period != 0)
@@ -1151,7 +1151,7 @@ void Parse_GlobalOps_Tracing_Intervals(char * sequence) {
 
    if ((sequence == (char *)NULL) || (strlen(sequence) == 0)) return;
 
-   n_pairs = explode(sequence, ",", &tmp);
+   n_pairs = __Extrae_Utils_explode(sequence, ",", &tmp);
 
    for (i=0; i<n_pairs; i++)
    {
@@ -1244,21 +1244,21 @@ int remove_temporal_files(void)
 		   instead of TASKID */
 		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name,
 		  hostname, getpid(), initialTASKID, thread, EXT_TMP_MPIT);
-		if (file_exists(tmpname))
+		if (__Extrae_Utils_file_exists(tmpname))
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing a temporal tracing file (%s)\n", tmpname);
 
 #if defined(SAMPLING_SUPPORT)
 		FileName_PTT(tmpname, Get_TemporalDir(initialTASKID), appl_name,
 		  hostname, getpid(), initialTASKID, thread, EXT_TMP_SAMPLE);
-		if (file_exists(tmpname))
+		if (__Extrae_Utils_file_exists(tmpname))
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing a temporal sampling file (%s)\n", tmpname);
 #endif
 
 		FileName_PTT(tmpname, Get_TemporalDir(TASKID), appl_name, hostname,
 		  getpid(), TASKID, thread, EXT_SYM);
-		if (file_exists (tmpname))
+		if (__Extrae_Utils_file_exists (tmpname))
 			if (unlink(tmpname) == -1)
 				fprintf (stderr, PACKAGE_NAME": Error removing symbol file (%s)\n", tmpname);
 	}
@@ -1735,7 +1735,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	if (me == 0 && !runningInDynInst)
 	{
 		FileName_P(trace_sym, final_dir, appl_name, EXT_SYM);
-		if (file_exists(trace_sym))
+		if (__Extrae_Utils_file_exists(trace_sym))
 			unlink (trace_sym);
 	}
 
@@ -1750,7 +1750,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 		FileName_PTT(trace_sym, Get_TemporalDir(Extrae_get_initial_TASKID()),
 		  appl_name, hostname, getpid(), Extrae_get_initial_TASKID(), u,
 		  EXT_SYM);
-		if (file_exists (trace_sym))
+		if (__Extrae_Utils_file_exists (trace_sym))
 			unlink (trace_sym);
 	}
 
@@ -2153,9 +2153,9 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 		  TASKID, thread, EXT_MPIT);
 	}
 	if (!append)
-		r = rename_or_copy (tmp_name, trace); 
+		r = __Extrae_Utils_rename_or_copy (tmp_name, trace); 
 	else
-		r = append_from_to_file (tmp_name, trace);
+		r = __Extrae_Utils_append_from_to_file (tmp_name, trace);
 
 	if (r == 0)
 		fprintf (stdout,
@@ -2175,7 +2175,7 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 
 		FileName_PTT(trace, Get_FinalDir(TASKID), appl_name, hostname, pid,
 		  TASKID, thread, EXT_SAMPLE);
-		r = rename_or_copy (tmp_name, trace);
+		r = __Extrae_Utils_rename_or_copy (tmp_name, trace);
 
 		if (r == 0)
 			fprintf (stdout,
@@ -2193,10 +2193,10 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
     /* Copy or move SYM file, if it exists */
     FileName_PTT(tmp_name, Get_TemporalDir(initialTASKID), appl_name, hostname,
 	  pid, initialTASKID, thread, EXT_SYM);
-    if (file_exists(tmp_name)){
+    if (__Extrae_Utils_file_exists(tmp_name)){
         FileName_PTT(trace, Get_FinalDir(initialTASKID), appl_name, hostname,
 		  pid, initialTASKID, thread, EXT_SYM);
-        r = rename_or_copy(tmp_name, trace);
+        r = __Extrae_Utils_rename_or_copy(tmp_name, trace);
 
 		if (r == 0)
 	    	fprintf (stdout,
@@ -2804,17 +2804,17 @@ void Backend_updateTaskID (void)
 		FileName_PTT(file1, Get_TemporalDir(Extrae_get_initial_TASKID()),
 		  appl_name, hostname, getpid(), Extrae_get_initial_TASKID(), thread,
 		  EXT_SYM);
-		if (file_exists (file1))
+		if (__Extrae_Utils_file_exists (file1))
 		{
 			FileName_PTT(file2, Get_TemporalDir(TASKID), appl_name, hostname, 
 			  getpid(), TASKID, thread, EXT_SYM);
 
 			/* Remove file if it already exists, and then copy the "new" version */
-			if (file_exists (file2))
+			if (__Extrae_Utils_file_exists (file2))
 				if (!unlink (file2) == 0)
 					fprintf (stderr, PACKAGE_NAME": Cannot unlink symbolic file: %s, symbols will be corrupted!\n", file2);
 
-			r = rename_or_copy (file1, file2); 
+			r = __Extrae_Utils_rename_or_copy (file1, file2); 
 			if (r < 0)
 				fprintf (stderr, PACKAGE_NAME": Error copying symbolicfile %s into %s!\n", file1, file2);
 		}

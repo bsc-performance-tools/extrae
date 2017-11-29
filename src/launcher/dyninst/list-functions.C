@@ -55,11 +55,11 @@ static BPatch *bpatch;
 #define DYNINST_NO_ERROR -1
 
 /******************************************************************************
- **      Function name : file_exists (char*)
+ **      Function name : __Extrae_Utils_file_exists (char*)
  **      Author : HSG
  **      Description : Checks whether a file exists
  ******************************************************************************/
-static int file_exists (char *fname)
+static int __Extrae_Utils_file_exists (char *fname)
 {
 #if defined(HAVE_ACCESS) || 1
 	return access (fname, F_OK) == 0;
@@ -170,7 +170,7 @@ int main (int argc, char *argv[])
 	putenv (envvar_dyn);
 
 	/* Does the binary exists? */
-	if (!file_exists(argv[1]))
+	if (!__Extrae_Utils_file_exists(argv[1]))
 	{
 		cout << PACKAGE_NAME << ": Executable " << argv[1] << " cannot be found!" << endl;
 		exit (-1);

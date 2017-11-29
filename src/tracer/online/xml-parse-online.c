@@ -281,7 +281,7 @@ void Parse_XML_SpectralAdvanced (int rank, xmlDocPtr xmldoc, xmlNodePtr current_
             xmlChar *min_duration = xmlGetProp (tag2, SPECTRAL_MIN_DURATION);
 
             Online_SetSpectralNonPeriodZoneLevel( detail_level );
-            Online_SetSpectralNonPeriodZoneMinDuration( getTimeFromStr( min_duration, "<non_periodic_zone min_duration=\"..\" />", rank ) );
+            Online_SetSpectralNonPeriodZoneMinDuration( __Extrae_Utils_getTimeFromStr( min_duration, "<non_periodic_zone min_duration=\"..\" />", rank ) );
 
             XML_FREE(detail_level);
             XML_FREE(min_duration);
