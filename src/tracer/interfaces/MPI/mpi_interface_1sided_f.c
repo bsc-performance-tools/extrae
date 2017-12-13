@@ -127,7 +127,7 @@ void NAME_ROUTINE_C2F(mpi_win_create)(void *base, void *size, MPI_Fint *disp_uni
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_create_Fortran_Wrapper (base, size, disp_unit, info, comm, win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -151,7 +151,7 @@ void NAME_ROUTINE_C2F(mpi_win_fence)(MPI_Fint *assert, void *win, MPI_Fint *ierr
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_fence_Fortran_Wrapper (assert, win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -175,7 +175,7 @@ void NAME_ROUTINE_C2F(mpi_win_start)(void *group, void *assert, void *win, MPI_F
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_start_Fortran_Wrapper (group, assert, win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -199,7 +199,7 @@ void NAME_ROUTINE_C2F(mpi_win_free)(void *win, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_free_Fortran_Wrapper (win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -225,7 +225,7 @@ void NAME_ROUTINE_C2F(mpi_win_complete)(void *win, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_complete_Fortran_Wrapper (win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -251,7 +251,7 @@ void NAME_ROUTINE_C2F(mpi_win_wait)(void *win, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_wait_Fortran_Wrapper (win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -277,7 +277,7 @@ void NAME_ROUTINE_C2F(mpi_win_post)(void *group, void *assert, void *win, MPI_Fi
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_post_Fortran_Wrapper (group, assert, win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -309,7 +309,7 @@ void NAME_ROUTINE_C2F(mpi_get)(void *origin_addr, MPI_Fint *origin_count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Get_Fortran_Wrapper (origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win, ierror);
 		Backend_Leave_Instrumentation ();
@@ -343,7 +343,7 @@ void NAME_ROUTINE_C2F(mpi_put)(void *origin_addr, MPI_Fint *origin_count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Put_Fortran_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win, ierror);
 		Backend_Leave_Instrumentation ();
@@ -369,7 +369,7 @@ void NAME_ROUTINE_C2F(mpi_win_lock)(MPI_Fint *lock_type,MPI_Fint *rank, MPI_Fint
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_lock_Fortran_Wrapper (lock_type, rank, assert, win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -392,7 +392,7 @@ void NAME_ROUTINE_C2F(mpi_win_unlock)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *i
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Win_unlock_Fortran_Wrapper (rank, win, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -419,7 +419,7 @@ void NAME_ROUTINE_C2F(mpi_get_accumulate)(void *origin_addr, MPI_Fint *origin_co
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		MPI_Get_accumulate_Fortran_Wrapper (origin_addr, origin_count, origin_datatype,
                         result_addr, result_count, result_datatype, target_rank, target_disp,
  			target_count, target_datatype, op, win, ierror);

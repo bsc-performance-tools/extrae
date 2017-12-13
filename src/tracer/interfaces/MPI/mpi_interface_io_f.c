@@ -135,7 +135,7 @@ void NAME_ROUTINE_C2F(mpi_file_open) (MPI_Fint *comm, char *filename,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_open_Fortran_Wrapper (comm, filename, amode, info, fh, len);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -161,7 +161,7 @@ void NAME_ROUTINE_C2F(mpi_file_close) (MPI_File *fh, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_close_Fortran_Wrapper (fh, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -191,7 +191,7 @@ void NAME_ROUTINE_C2F(mpi_file_read) (MPI_File *fh, void *buf, MPI_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_read_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -222,7 +222,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_all) (MPI_File *fh, void *buf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_read_all_Fortran_Wrapper (fh, buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -253,7 +253,7 @@ void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_write_Fortran_Wrapper (fh, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -284,7 +284,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, void *buf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_write_all_Fortran_Wrapper (fh, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -318,7 +318,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_read_at_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -352,7 +352,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_read_at_all_Fortran_Wrapper (fh, offset, buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -386,7 +386,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_write_at_Fortran_Wrapper (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -420,7 +420,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_File_write_at_all_Fortran_Wrapper (fh, offset, MPI3_VOID_P_CAST buf, count, datatype, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)

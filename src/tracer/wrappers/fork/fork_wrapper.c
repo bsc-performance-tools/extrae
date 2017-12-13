@@ -51,7 +51,7 @@ void Extrae_Probe_fork_Entry (void)
 {
 	MYPID = getpid();
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_fork_Entry ();
 
 	unsetTimeSampling();
@@ -101,7 +101,7 @@ void Extrae_Probe_fork_Exit (void)
 
 void Extrae_Probe_wait_Entry (void)
 {
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_wait_Entry();
 }
 
@@ -113,7 +113,7 @@ void Extrae_Probe_wait_Exit (void)
 
 void Extrae_Probe_waitpid_Entry (void)
 {
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_waitpid_Entry();
 }
 
@@ -128,7 +128,7 @@ static extrae_value_t last_system_id = 1;
 
 void Extrae_Probe_system_Entry (char *newbinary)
 {
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_system_Entry();
 
 	/* Dude!, grab the binary we're about to execute and post it into the .sym file */
@@ -149,7 +149,7 @@ void Extrae_Probe_exec_l_Entry (char *newbinary)
 {
 	printf ("Extrae_Probe_exec_l_Entry, Extrae_Probe_exec_l_Entry, Extrae_Probe_exec_l_Entry\n");
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_exec_Entry();
 
 	extrae_value_t v = getpid();
@@ -173,7 +173,7 @@ void Extrae_Probe_exec_v_Entry (char *newbinary, char *const argv[])
 
 	UNREFERENCED_PARAMETER(newbinary);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_exec_Entry();
 
 	for (i = 0; i < BUFFER_SIZE; i++)

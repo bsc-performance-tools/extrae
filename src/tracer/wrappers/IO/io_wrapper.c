@@ -228,7 +228,7 @@ int open(const char *pathname, int flags, ...)
   if (real_open != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
 	  errno = errno_real;                                                         
 #endif                                                                          
@@ -312,7 +312,7 @@ int open64(const char *pathname, int flags, ...)
   if (real_open64 != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -388,7 +388,7 @@ FILE * fopen(const char *path, const char *mode)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
 		int fd = -1;
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -469,7 +469,7 @@ FILE * fopen64(const char *path, const char *mode)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
 		int fd = -1;
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 	  errno = errno_real;
 #endif
@@ -548,7 +548,7 @@ ssize_t read (int fd, void *buf, size_t count)
   if (real_read != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
     Probe_IO_read_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -621,7 +621,7 @@ ssize_t write (int fd, const void *buf, size_t count)
   if (real_write != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
     Probe_IO_write_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -694,7 +694,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
     Probe_IO_fread_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -766,7 +766,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
     Probe_IO_fwrite_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -839,7 +839,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
   if (real_pread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
     Probe_IO_pread_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -912,7 +912,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
   if (real_pwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
     Probe_IO_pwrite_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -988,7 +988,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1070,7 +1070,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1152,7 +1152,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1234,7 +1234,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1316,7 +1316,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1398,7 +1398,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation (4+Caller_Count[CALLER_IO]);
+    Backend_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {

@@ -95,7 +95,7 @@ int NAME_ROUTINE_C(MPI_Bsend) (MPI3_CONST void* buf, int count, MPI_Datatype dat
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Bsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -121,7 +121,7 @@ int NAME_ROUTINE_C(MPI_Ssend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Ssend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -147,7 +147,7 @@ int NAME_ROUTINE_C(MPI_Rsend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Rsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -173,7 +173,7 @@ int NAME_ROUTINE_C(MPI_Send) (MPI3_CONST void *buf, int count, MPI_Datatype data
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Send_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -199,7 +199,7 @@ int NAME_ROUTINE_C(MPI_Ibsend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Ibsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -225,7 +225,7 @@ int NAME_ROUTINE_C(MPI_Isend) (MPI3_CONST void *buf, int count, MPI_Datatype dat
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Isend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -251,7 +251,7 @@ int NAME_ROUTINE_C(MPI_Issend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Issend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -277,7 +277,7 @@ int NAME_ROUTINE_C(MPI_Irsend) (MPI3_CONST void *buf, int count, MPI_Datatype da
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Irsend_C_Wrapper (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -303,7 +303,7 @@ int NAME_ROUTINE_C(MPI_Recv) (void* buf, int count, MPI_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Recv_C_Wrapper (buf, count, datatype, source, tag, comm, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -329,7 +329,7 @@ int NAME_ROUTINE_C(MPI_Irecv) (void* buf, int count, MPI_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Irecv_C_Wrapper (buf, count, datatype, source, tag, comm, request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -355,7 +355,7 @@ int NAME_ROUTINE_C(MPI_Probe) (int source, int tag, MPI_Comm comm,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Probe_C_Wrapper (source, tag, comm, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -381,7 +381,7 @@ int NAME_ROUTINE_C(MPI_Iprobe) (int source, int tag, MPI_Comm comm, int *flag,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Iprobe_C_Wrapper (source, tag, comm, flag, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -406,7 +406,7 @@ int NAME_ROUTINE_C(MPI_Test) (MPI_Request *request, int *flag, MPI_Status *statu
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (5+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Test_C_Wrapper (request, flag, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -432,7 +432,7 @@ int NAME_ROUTINE_C(MPI_Testall) (int count, MPI_Request *requests,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Testall_C_Wrapper (count, requests, flag, statuses);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -458,7 +458,7 @@ int NAME_ROUTINE_C(MPI_Testany) (int count, MPI_Request *requests, int *index,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Testany_C_Wrapper (count, requests, index, flag, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -484,7 +484,7 @@ int NAME_ROUTINE_C(MPI_Testsome) (int incount, MPI_Request * requests,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+incount+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Testsome_C_Wrapper (incount, requests, outcount, indices, statuses);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -509,7 +509,7 @@ int NAME_ROUTINE_C(MPI_Wait) (MPI_Request *request, MPI_Status *status)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Wait_C_Wrapper (request, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -535,7 +535,7 @@ int NAME_ROUTINE_C(MPI_Waitall) (int count, MPI_Request *requests,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Waitall_C_Wrapper (count, requests, statuses);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -561,7 +561,7 @@ int NAME_ROUTINE_C(MPI_Waitany) (int count, MPI_Request *requests, int *index,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Waitany_C_Wrapper (count, requests, index, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -587,7 +587,7 @@ int NAME_ROUTINE_C(MPI_Waitsome) (int incount, MPI_Request * requests,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+incount+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Waitsome_C_Wrapper (incount,requests, outcount, indices,
 			statuses);
 		Backend_Leave_Instrumentation ();
@@ -615,7 +615,7 @@ int NAME_ROUTINE_C(MPI_Recv_init) (void *buf, int count, MPI_Datatype datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Recv_init_C_Wrapper
 		  (buf, count, datatype, source, tag, comm, request);
 		Backend_Leave_Instrumentation ();
@@ -643,7 +643,7 @@ int NAME_ROUTINE_C(MPI_Send_init) (MPI3_CONST void *buf, int count, MPI_Datatype
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Send_init_C_Wrapper
 		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
@@ -671,7 +671,7 @@ int NAME_ROUTINE_C(MPI_Bsend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Bsend_init_C_Wrapper
 		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
@@ -699,7 +699,7 @@ int NAME_ROUTINE_C(MPI_Rsend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Rsend_init_C_Wrapper
 		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
@@ -726,7 +726,7 @@ int NAME_ROUTINE_C(MPI_Ssend_init) (MPI3_CONST void *buf, int count, MPI_Datatyp
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Ssend_init_C_Wrapper
 		  (MPI3_VOID_P_CAST buf, count, datatype, dest, tag, comm, request);
 		Backend_Leave_Instrumentation ();
@@ -756,7 +756,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv) (MPI3_CONST void *sendbuf, int sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Sendrecv_C_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, dest, sendtag,
 		  recvbuf, recvcount, recvtype, source, recvtag, comm, status); 
 		Backend_Leave_Instrumentation ();
@@ -786,7 +786,7 @@ int NAME_ROUTINE_C(MPI_Sendrecv_replace) (void *buf, int count, MPI_Datatype typ
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Sendrecv_replace_C_Wrapper (buf, count, type, dest, sendtag,
 		  source, recvtag, comm, status);
 		Backend_Leave_Instrumentation ();

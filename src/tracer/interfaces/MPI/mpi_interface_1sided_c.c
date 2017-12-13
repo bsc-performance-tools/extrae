@@ -94,7 +94,7 @@ int MPI_Win_create (void *base, MPI_Aint size, int disp_unit, MPI_Info info,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_create_C_Wrapper (base, size, disp_unit, info, comm, win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -116,7 +116,7 @@ int MPI_Win_fence (int assert, MPI_Win win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_fence_C_Wrapper (assert, win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -138,7 +138,7 @@ int MPI_Win_start (MPI_Group group, int assert, MPI_Win win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_start_C_Wrapper (group, assert, win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -160,7 +160,7 @@ int MPI_Win_free (MPI_Win *win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_free_C_Wrapper (win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -182,7 +182,7 @@ int MPI_Win_complete (MPI_Win win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_complete_C_Wrapper (win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -204,7 +204,7 @@ int MPI_Win_wait (MPI_Win win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_wait_C_Wrapper (win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -226,7 +226,7 @@ int MPI_Win_post (MPI_Group group, int assert, MPI_Win win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_post_C_Wrapper (group, assert, win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -251,7 +251,7 @@ int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Get_C_Wrapper (origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win);
 		Backend_Leave_Instrumentation ();
@@ -279,7 +279,7 @@ int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Put_C_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			target_rank, target_disp, target_count, target_datatype, win);
 		Backend_Leave_Instrumentation ();
@@ -305,7 +305,7 @@ int MPI_Win_lock (int lock_type, int rank, int assert, MPI_Win win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_lock_C_Wrapper (lock_type, rank, assert, win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -329,7 +329,7 @@ int MPI_Win_unlock (int rank, MPI_Win win)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Win_unlock_C_Wrapper (rank, win);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -357,7 +357,7 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Get_accumulate_C_Wrapper (MPI3_VOID_P_CAST origin_addr, origin_count, origin_datatype,
 			result_addr, result_count, result_datatype,
 			target_rank, target_disp, target_count, target_datatype, op, win);

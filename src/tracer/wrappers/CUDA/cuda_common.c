@@ -413,7 +413,7 @@ void Extrae_cudaLaunch_Enter (const char *p1)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_Launch_Entry ((UINT64) p1);
 
 	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
@@ -446,7 +446,7 @@ void Extrae_cudaConfigureCall_Enter (dim3 p1, dim3 p2, size_t p3, cudaStream_t p
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ConfigureCall_Entry ();
 
 	TRACE_USER_COMMUNICATION_EVENT (LAST_READ_TIME, USER_SEND_EV, TASKID, 0, tag, tag);
@@ -480,7 +480,7 @@ void Extrae_cudaDeviceSynchronize_Enter (void)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
 
 	/* Emit one thread synchronize per stream (begin event) */
@@ -519,7 +519,7 @@ void Extrae_cudaThreadSynchronize_Enter (void)
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadBarrier_Entry ();
 
 	/* Emit one thread synchronize per stream (begin event) */
@@ -600,7 +600,7 @@ void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)
 	strid = Extrae_CUDA_SearchStream (devid,
 	  Extrae_CUDA_saved_params[THREADID].css.stream);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_StreamBarrier_Entry (devices[devid].Stream[strid].threadid);
 
 	if (strid == -1)
@@ -658,7 +658,7 @@ void Extrae_cudaMemcpy_Enter (void* p1, const void* p2, size_t p3, enum cudaMemc
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_Memcpy_Entry (p3);
 
 	tag = Extrae_CUDA_tag_generator();
@@ -746,7 +746,7 @@ void Extrae_cudaMemcpyAsync_Enter (void* p1, const void* p2, size_t p3, enum cud
 	cudaGetDevice (&devid);
 	Extrae_CUDA_Initialize (devid);
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_MemcpyAsync_Entry (p3);
 
 	tag = Extrae_CUDA_tag_generator();
@@ -838,7 +838,7 @@ void Extrae_reallocate_CUDA_info (unsigned nthreads)
 
 void Extrae_cudaDeviceReset_Enter (void)
 {
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_DeviceReset_Enter();
 }
 
@@ -854,7 +854,7 @@ void Extrae_cudaDeviceReset_Exit (void)
 
 void Extrae_cudaThreadExit_Enter (void)
 {
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_Cuda_ThreadExit_Enter();
 }
 

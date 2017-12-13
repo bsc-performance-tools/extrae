@@ -32,7 +32,7 @@ void Extrae_Java_GarbageCollector_begin(void)
 {
 	if (EXTRAE_ON())
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME,
 		  JAVA_JVMTI_GARBAGECOLLECTOR_EV,
 		  EVT_BEGIN,
@@ -56,7 +56,7 @@ void Extrae_Java_Exception_begin(void)
 {
 	if (EXTRAE_ON())
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME,
 		  JAVA_JVMTI_EXCEPTION_EV,
 		  EVT_BEGIN,
@@ -80,7 +80,7 @@ void Extrae_Java_Object_Alloc (unsigned long long size)
 {
 	if (EXTRAE_ON())
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation ();
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME,
 		  JAVA_JVMTI_OBJECT_ALLOC_EV,
 		  size,
@@ -93,7 +93,7 @@ void Extrae_Java_Object_Free (void)
 {
 	if (EXTRAE_ON())
 	{
-		Backend_Enter_Instrumentation (1);
+		Backend_Enter_Instrumentation ();
 		TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME,
 		  JAVA_JVMTI_OBJECT_FREE_EV,
 		  EVT_BEGIN,

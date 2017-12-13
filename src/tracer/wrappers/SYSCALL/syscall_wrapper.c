@@ -132,7 +132,7 @@ int sched_yield(void)
   if (real_sched_yield != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_SYSCALL]);
+    Backend_Enter_Instrumentation ();
     Probe_SYSCALL_sched_yield_Entry ();
     TRACE_SYSCALL_CALLER(LAST_READ_TIME, 3);
 

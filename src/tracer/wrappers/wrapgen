@@ -242,7 +242,7 @@ for i in range(len(Functions)):
   fd_wrappers_c.write( "#endif\n\n" )
   fd_wrappers_c.write( "  if ("+name+"_real != NULL && EXTRAE_ON())\n" )
   fd_wrappers_c.write( "  {\n" )
-  fd_wrappers_c.write( "    Backend_Enter_Instrumentation(2);\n" )
+  fd_wrappers_c.write( "    Backend_Enter_Instrumentation ();\n" )
   fd_wrappers_c.write( "    PROBE_"+name+"_ENTRY("+all_arg_names_str+");\n" )
   fd_wrappers_c.write( "    " )
   if (rettype != "void"):

@@ -208,7 +208,7 @@ void *malloc (size_t s)
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_Malloc_Entry (s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_malloc (s);
@@ -264,7 +264,7 @@ void free (void *p)
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_Free_Entry (p);
 		real_free (p);
 		Probe_Free_Exit ();
@@ -304,7 +304,7 @@ void *calloc (size_t s1, size_t s2)
 
 	if (real_calloc != NULL && canInstrument)
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		Probe_Calloc_Entry (s1, s2);
 		res = real_calloc (s1, s2);
 		Probe_Calloc_Exit (res);
@@ -351,7 +351,7 @@ void *realloc (void *p, size_t s)
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and remove and add the pointers to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_Realloc_Entry (p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
@@ -403,7 +403,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 
   if (real_posix_memalign != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Backend_Enter_Instrumentation ();
     Probe_posix_memalign_Entry (size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_posix_memalign(memptr, alignment, size);
@@ -482,7 +482,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
 
   if (real_memkind_malloc != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Backend_Enter_Instrumentation ();
     Probe_memkind_malloc_Entry (get_memkind_partition( kind ), size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_malloc(kind, size);
@@ -531,7 +531,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
 
   if (real_memkind_calloc != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Backend_Enter_Instrumentation ();
     Probe_memkind_calloc_Entry (get_memkind_partition( kind ), num, size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_calloc(kind, num, size);
@@ -580,7 +580,7 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 
   if (real_memkind_realloc != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Backend_Enter_Instrumentation ();
     Probe_memkind_realloc_Entry (get_memkind_partition( kind ), ptr, size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_realloc(kind, ptr, size);
@@ -630,7 +630,7 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
 
   if (real_memkind_posix_memalign != NULL && canInstrument)
   {
-    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Backend_Enter_Instrumentation ();
     Probe_memkind_posix_memalign_Entry (get_memkind_partition( kind ), size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_posix_memalign(kind, memptr, alignment, size);
@@ -680,7 +680,7 @@ void memkind_free(memkind_t kind, void *ptr)
   
   if (Extrae_get_trace_malloc_free() && real_memkind_free != NULL && canInstrument && present)
   {
-    Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+    Backend_Enter_Instrumentation ();
     Probe_memkind_free_Entry (get_memkind_partition( kind ), ptr);
     real_memkind_free (kind, ptr);
     Probe_memkind_free_Exit ();
@@ -728,7 +728,7 @@ kmpc_malloc( size_t size )
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_kmpc_malloc_Entry (size);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_malloc (size);
@@ -782,7 +782,7 @@ kmpc_aligned_malloc( size_t size, size_t alignment )
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_kmpc_aligned_malloc_Entry (size, alignment);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_aligned_malloc (size, alignment);
@@ -836,7 +836,7 @@ kmpc_calloc( size_t nelem, size_t elsize )
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_kmpc_calloc_Entry (nelem, elsize);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_calloc (nelem, elsize);
@@ -890,7 +890,7 @@ kmpc_realloc( void *ptr, size_t size )
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_kmpc_realloc_Entry (ptr, size);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_realloc (ptr, size);
@@ -948,7 +948,7 @@ kmpc_free ( void *ptr )
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_DYNAMIC_MEMORY]);
+		Backend_Enter_Instrumentation ();
 		Probe_kmpc_free_Entry (ptr);
 		real_kmpc_free (ptr);
 		Probe_kmpc_free_Exit ();

@@ -235,7 +235,7 @@ static void * pthread_create_hook (void *p1)
 	pthread_cond_signal (&(i->wait));
 	pthread_mutex_unlock_real (&(i->lock));
 
-	Backend_Enter_Instrumentation (2);
+	Backend_Enter_Instrumentation ();
 	Probe_pthread_Function_Entry (routine);
 	Backend_Leave_Instrumentation ();
 
@@ -285,7 +285,7 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 		{
 			pthread_library_depth++;
 
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 
 			Probe_pthread_Create_Entry (p3);
 		
@@ -351,7 +351,7 @@ int pthread_join (pthread_t p1, void **p2)
 
 	if (pthread_join_real != NULL && EXTRAE_INITIALIZED() && Extrae_get_pthread_tracing())
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		Probe_pthread_Join_Entry ();
 
 		res = pthread_join_real (p1, p2);
@@ -391,7 +391,7 @@ void pthread_exit (void *p1)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (2);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_Function_Exit();
 			Probe_pthread_Exit_Entry();
 			Backend_Leave_Instrumentation ();
@@ -427,7 +427,7 @@ int pthread_detach (pthread_t p1)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_Detach_Entry ();
 			res = pthread_detach_real (p1);
 			Probe_pthread_Detach_Exit ();
@@ -464,7 +464,7 @@ int pthread_mutex_lock (pthread_mutex_t *m)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_mutex_lock_Entry (m);
 			res = pthread_mutex_lock_real (m);
 			Probe_pthread_mutex_lock_Exit (m);
@@ -500,7 +500,7 @@ int pthread_mutex_trylock (pthread_mutex_t *m)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_mutex_lock_Entry (m);
 			res = pthread_mutex_trylock_real (m);
 			Probe_pthread_mutex_lock_Exit (m);
@@ -537,7 +537,7 @@ int pthread_mutex_timedlock(pthread_mutex_t *m, const struct timespec *t)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_mutex_lock_Entry (m);
 			res = pthread_mutex_timedlock_real (m, t);
 			Probe_pthread_mutex_lock_Exit (m);
@@ -575,7 +575,7 @@ int pthread_mutex_unlock (pthread_mutex_t *m)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_mutex_unlock_Entry (m);
 			res = pthread_mutex_unlock_real (m);
 			Probe_pthread_mutex_unlock_Exit (m);
@@ -614,7 +614,7 @@ int pthread_cond_signal (pthread_cond_t *c)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_cond_signal_Entry (c);
 			res = pthread_cond_signal_real (c);
 			Probe_pthread_cond_signal_Exit (c);
@@ -651,7 +651,7 @@ int pthread_cond_broadcast (pthread_cond_t *c)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_cond_broadcast_Entry (c);
 			res = pthread_cond_broadcast_real (c);
 			Probe_pthread_cond_broadcast_Exit (c);
@@ -687,7 +687,7 @@ int pthread_cond_wait (pthread_cond_t *c, pthread_mutex_t *m)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_cond_wait_Entry (c);
 			res = pthread_cond_wait_real (c, m);
 			Probe_pthread_cond_wait_Exit (c);
@@ -723,7 +723,7 @@ int pthread_cond_timedwait (pthread_cond_t *c, pthread_mutex_t *m, const struct 
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_cond_wait_Entry (c);
 			res = pthread_cond_timedwait_real (c,m,t);
 			Probe_pthread_cond_wait_Exit (c);
@@ -761,7 +761,7 @@ int pthread_rwlock_rdlock (pthread_rwlock_t *l)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_rwlock_lockrd_Entry (l);
 			res = pthread_rwlock_rdlock_real (l);
 			Probe_pthread_rwlock_lockrd_Exit (l);
@@ -798,7 +798,7 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *l)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_rwlock_lockrd_Entry (l);
 			res = pthread_rwlock_tryrdlock_real (l);
 			Probe_pthread_rwlock_lockrd_Exit (l);
@@ -835,7 +835,7 @@ int pthread_rwlock_timedrdlock(pthread_rwlock_t *l, const struct timespec *t)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_rwlock_lockrd_Entry (l);
 			res = pthread_rwlock_timedrdlock_real (l, t);
 			Probe_pthread_rwlock_lockrd_Exit (l);
@@ -872,7 +872,7 @@ int pthread_rwlock_wrlock(pthread_rwlock_t *l)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_rwlock_lockwr_Entry (l);
 			res = pthread_rwlock_wrlock_real (l);
 			Probe_pthread_rwlock_lockwr_Exit (l);
@@ -908,7 +908,7 @@ int pthread_rwlock_trywrlock(pthread_rwlock_t *l)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_rwlock_lockwr_Entry (l);
 			res = pthread_rwlock_trywrlock_real (l);
 			Probe_pthread_rwlock_lockwr_Exit (l);
@@ -944,7 +944,7 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *l, const struct timespec *t)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_rwlock_lockwr_Entry (l);
 			res = pthread_rwlock_timedwrlock_real (l, t);
 			Probe_pthread_rwlock_lockwr_Exit (l);
@@ -981,7 +981,7 @@ int pthread_rwlock_unlock(pthread_rwlock_t *l)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (1);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_rwlock_unlock_Entry (l);
 			res = pthread_rwlock_unlock_real (l);
 			Probe_pthread_rwlock_unlock_Exit (l);
@@ -1018,7 +1018,7 @@ int pthread_barrier_wait (pthread_barrier_t *barrier)
 	{
 		if (!Backend_ispThreadFinished(THREADID))
 		{
-			Backend_Enter_Instrumentation (2);
+			Backend_Enter_Instrumentation ();
 			Probe_pthread_Barrier_Wait_Entry ();
 			res = pthread_barrier_wait_real (barrier);
 			Probe_pthread_Barrier_Wait_Exit ();

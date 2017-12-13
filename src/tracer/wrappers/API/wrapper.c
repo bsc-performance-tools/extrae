@@ -2486,7 +2486,7 @@ void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads)
 	}
 }
 
-void Backend_Enter_Instrumentation (int Nevents)
+void Backend_Enter_Instrumentation ()
 {
 	unsigned thread = THREADID;
 	UINT64 current_time;
@@ -2534,7 +2534,7 @@ void Backend_Enter_Instrumentation (int Nevents)
 #endif
 
 	/* Check whether we will fill the buffer soon (or now) */
-	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= Nevents)
+	if (Buffer_RemainingEvents(TracingBuffer[thread]) <= NEVENTS)
 		Buffer_ExecuteFlushCallback (TracingBuffer[thread]);
 
 	/* Record the time when this is happening

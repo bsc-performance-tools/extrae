@@ -1592,7 +1592,7 @@ void start_pes (int npes)
 
   if (start_pes_real != NULL)
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     start_pes_real(npes);
     atexit (shmem_finalize);
     Initialize_Extrae_Stuff();
@@ -1617,7 +1617,7 @@ int shmem_my_pe (void)
 
   if (shmem_my_pe_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_my_pe_ENTRY();
     res = shmem_my_pe_real();
     PROBE_shmem_my_pe_EXIT();
@@ -1645,7 +1645,7 @@ int _my_pe (void)
 
   if (_my_pe_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE__my_pe_ENTRY();
     res = _my_pe_real();
     PROBE__my_pe_EXIT();
@@ -1673,7 +1673,7 @@ int shmem_n_pes (void)
 
   if (shmem_n_pes_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_n_pes_ENTRY();
     res = shmem_n_pes_real();
     PROBE_shmem_n_pes_EXIT();
@@ -1701,7 +1701,7 @@ int _num_pes (void)
 
   if (_num_pes_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE__num_pes_ENTRY();
     res = _num_pes_real();
     PROBE__num_pes_EXIT();
@@ -1730,7 +1730,7 @@ int shmem_pe_accessible (int pe)
 
   if (shmem_pe_accessible_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_pe_accessible_ENTRY(pe);
     res = shmem_pe_accessible_real(pe);
     PROBE_shmem_pe_accessible_EXIT();
@@ -1759,7 +1759,7 @@ int shmem_addr_accessible (void *addr, int pe)
 
   if (shmem_addr_accessible_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_addr_accessible_ENTRY(addr, pe);
     res = shmem_addr_accessible_real(addr, pe);
     PROBE_shmem_addr_accessible_EXIT();
@@ -1788,7 +1788,7 @@ void * shmem_ptr (void *target, int pe)
 
   if (shmem_ptr_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_ptr_ENTRY(target, pe);
     res = shmem_ptr_real(target, pe);
     PROBE_shmem_ptr_EXIT();
@@ -1817,7 +1817,7 @@ void * shmalloc (size_t size)
 
   if (shmalloc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmalloc_ENTRY(size);
     res = shmalloc_real(size);
     PROBE_shmalloc_EXIT();
@@ -1844,7 +1844,7 @@ void shfree (void *ptr)
 
   if (shfree_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shfree_ENTRY(ptr);
     shfree_real(ptr);
     PROBE_shfree_EXIT();
@@ -1872,7 +1872,7 @@ void * shrealloc (void *ptr, size_t size)
 
   if (shrealloc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shrealloc_ENTRY(ptr, size);
     res = shrealloc_real(ptr, size);
     PROBE_shrealloc_EXIT();
@@ -1901,7 +1901,7 @@ void * shmemalign (size_t alignment, size_t size)
 
   if (shmemalign_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmemalign_ENTRY(alignment, size);
     res = shmemalign_real(alignment, size);
     PROBE_shmemalign_EXIT();
@@ -1928,7 +1928,7 @@ void shmem_double_put (double *target, const double *source, size_t len, int pe)
 
   if (shmem_double_put_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_put_ENTRY(target, source, len, pe);
     shmem_double_put_real(target, source, len, pe);
     PROBE_shmem_double_put_EXIT();
@@ -1954,7 +1954,7 @@ void shmem_float_put (float *target, const float *source, size_t len, int pe)
 
   if (shmem_float_put_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_put_ENTRY(target, source, len, pe);
     shmem_float_put_real(target, source, len, pe);
     PROBE_shmem_float_put_EXIT();
@@ -1980,7 +1980,7 @@ void shmem_int_put (int *target, const int *source, size_t len, int pe)
 
   if (shmem_int_put_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_put_ENTRY(target, source, len, pe);
     shmem_int_put_real(target, source, len, pe);
     PROBE_shmem_int_put_EXIT();
@@ -2006,7 +2006,7 @@ void shmem_long_put (long *target, const long *source, size_t len, int pe)
 
   if (shmem_long_put_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_put_ENTRY(target, source, len, pe);
     shmem_long_put_real(target, source, len, pe);
     PROBE_shmem_long_put_EXIT();
@@ -2032,7 +2032,7 @@ void shmem_longdouble_put (long double *target, const long double *source, size_
 
   if (shmem_longdouble_put_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longdouble_put_ENTRY(target, source, len, pe);
     shmem_longdouble_put_real(target, source, len, pe);
     PROBE_shmem_longdouble_put_EXIT();
@@ -2058,7 +2058,7 @@ void shmem_longlong_put (long long *target, const long long *source, size_t len,
 
   if (shmem_longlong_put_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_put_ENTRY(target, source, len, pe);
     shmem_longlong_put_real(target, source, len, pe);
     PROBE_shmem_longlong_put_EXIT();
@@ -2084,7 +2084,7 @@ void shmem_put32 (void *target, const void *source, size_t len, int pe)
 
   if (shmem_put32_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_put32_ENTRY(target, source, len, pe);
     shmem_put32_real(target, source, len, pe);
     PROBE_shmem_put32_EXIT();
@@ -2110,7 +2110,7 @@ void shmem_put64 (void *target, const void *source, size_t len, int pe)
 
   if (shmem_put64_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_put64_ENTRY(target, source, len, pe);
     shmem_put64_real(target, source, len, pe);
     PROBE_shmem_put64_EXIT();
@@ -2136,7 +2136,7 @@ void shmem_put128 (void *target, const void *source, size_t len, int pe)
 
   if (shmem_put128_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_put128_ENTRY(target, source, len, pe);
     shmem_put128_real(target, source, len, pe);
     PROBE_shmem_put128_EXIT();
@@ -2162,7 +2162,7 @@ void shmem_putmem (void *target, const void *source, size_t len, int pe)
 
   if (shmem_putmem_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_putmem_ENTRY(target, source, len, pe);
     shmem_putmem_real(target, source, len, pe);
     PROBE_shmem_putmem_EXIT();
@@ -2188,7 +2188,7 @@ void shmem_short_put (short*target, const short*source, size_t len, int pe)
 
   if (shmem_short_put_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_put_ENTRY(target, source, len, pe);
     shmem_short_put_real(target, source, len, pe);
     PROBE_shmem_short_put_EXIT();
@@ -2214,7 +2214,7 @@ void shmem_char_p (char *addr, char value, int pe)
 
   if (shmem_char_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_char_p_ENTRY(addr, value, pe);
     shmem_char_p_real(addr, value, pe);
     PROBE_shmem_char_p_EXIT();
@@ -2240,7 +2240,7 @@ void shmem_short_p (short *addr, short value, int pe)
 
   if (shmem_short_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_p_ENTRY(addr, value, pe);
     shmem_short_p_real(addr, value, pe);
     PROBE_shmem_short_p_EXIT();
@@ -2266,7 +2266,7 @@ void shmem_int_p (int *addr, int value, int pe)
 
   if (shmem_int_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_p_ENTRY(addr, value, pe);
     shmem_int_p_real(addr, value, pe);
     PROBE_shmem_int_p_EXIT();
@@ -2292,7 +2292,7 @@ void shmem_long_p (long *addr, long value, int pe)
 
   if (shmem_long_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_p_ENTRY(addr, value, pe);
     shmem_long_p_real(addr, value, pe);
     PROBE_shmem_long_p_EXIT();
@@ -2318,7 +2318,7 @@ void shmem_longlong_p (long long *addr, long long value, int pe)
 
   if (shmem_longlong_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_p_ENTRY(addr, value, pe);
     shmem_longlong_p_real(addr, value, pe);
     PROBE_shmem_longlong_p_EXIT();
@@ -2344,7 +2344,7 @@ void shmem_float_p (float *addr, float value, int pe)
 
   if (shmem_float_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_p_ENTRY(addr, value, pe);
     shmem_float_p_real(addr, value, pe);
     PROBE_shmem_float_p_EXIT();
@@ -2370,7 +2370,7 @@ void shmem_double_p (double *addr, double value, int pe)
 
   if (shmem_double_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_p_ENTRY(addr, value, pe);
     shmem_double_p_real(addr, value, pe);
     PROBE_shmem_double_p_EXIT();
@@ -2396,7 +2396,7 @@ void shmem_longdouble_p (long double *addr, long double value, int pe)
 
   if (shmem_longdouble_p_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longdouble_p_ENTRY(addr, value, pe);
     shmem_longdouble_p_real(addr, value, pe);
     PROBE_shmem_longdouble_p_EXIT();
@@ -2422,7 +2422,7 @@ void shmem_double_iput (double *target, const double *source, ptrdiff_t tst, ptr
 
   if (shmem_double_iput_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_iput_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_double_iput_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_double_iput_EXIT();
@@ -2448,7 +2448,7 @@ void shmem_float_iput (float *target, const float *source, ptrdiff_t tst, ptrdif
 
   if (shmem_float_iput_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_iput_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_float_iput_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_float_iput_EXIT();
@@ -2474,7 +2474,7 @@ void shmem_int_iput (int *target, const int *source, ptrdiff_t tst, ptrdiff_t ss
 
   if (shmem_int_iput_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_iput_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_int_iput_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_int_iput_EXIT();
@@ -2500,7 +2500,7 @@ void shmem_iput32 (void *target, const void *source, ptrdiff_t tst, ptrdiff_t ss
 
   if (shmem_iput32_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_iput32_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_iput32_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_iput32_EXIT();
@@ -2526,7 +2526,7 @@ void shmem_iput64 (void *target, const void *source, ptrdiff_t tst, ptrdiff_t ss
 
   if (shmem_iput64_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_iput64_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_iput64_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_iput64_EXIT();
@@ -2552,7 +2552,7 @@ void shmem_iput128 (void *target, const void *source, ptrdiff_t tst, ptrdiff_t s
 
   if (shmem_iput128_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_iput128_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_iput128_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_iput128_EXIT();
@@ -2578,7 +2578,7 @@ void shmem_long_iput (long *target, const long *source, ptrdiff_t tst, ptrdiff_t
 
   if (shmem_long_iput_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_iput_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_long_iput_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_long_iput_EXIT();
@@ -2604,7 +2604,7 @@ void shmem_longdouble_iput (long double *target, const long double *source, ptrd
 
   if (shmem_longdouble_iput_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longdouble_iput_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_longdouble_iput_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_longdouble_iput_EXIT();
@@ -2630,7 +2630,7 @@ void shmem_longlong_iput (long long *target, const long long *source, ptrdiff_t 
 
   if (shmem_longlong_iput_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_iput_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_longlong_iput_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_longlong_iput_EXIT();
@@ -2656,7 +2656,7 @@ void shmem_short_iput (short *target, const short *source, ptrdiff_t tst, ptrdif
 
   if (shmem_short_iput_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_iput_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_short_iput_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_short_iput_EXIT();
@@ -2682,7 +2682,7 @@ void shmem_double_get (double *target, const double *source, size_t nelems, int 
 
   if (shmem_double_get_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_get_ENTRY(target, source, nelems, pe);
     shmem_double_get_real(target, source, nelems, pe);
     PROBE_shmem_double_get_EXIT();
@@ -2708,7 +2708,7 @@ void shmem_float_get (float *target, const float *source, size_t nelems, int pe)
 
   if (shmem_float_get_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_get_ENTRY(target, source, nelems, pe);
     shmem_float_get_real(target, source, nelems, pe);
     PROBE_shmem_float_get_EXIT();
@@ -2734,7 +2734,7 @@ void shmem_get32 (void *target, const void *source, size_t nelems, int pe)
 
   if (shmem_get32_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_get32_ENTRY(target, source, nelems, pe);
     shmem_get32_real(target, source, nelems, pe);
     PROBE_shmem_get32_EXIT();
@@ -2760,7 +2760,7 @@ void shmem_get64 (void *target, const void *source, size_t nelems, int pe)
 
   if (shmem_get64_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_get64_ENTRY(target, source, nelems, pe);
     shmem_get64_real(target, source, nelems, pe);
     PROBE_shmem_get64_EXIT();
@@ -2786,7 +2786,7 @@ void shmem_get128 (void *target, const void *source, size_t nelems, int pe)
 
   if (shmem_get128_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_get128_ENTRY(target, source, nelems, pe);
     shmem_get128_real(target, source, nelems, pe);
     PROBE_shmem_get128_EXIT();
@@ -2812,7 +2812,7 @@ void shmem_getmem (void *target, const void *source, size_t nelems, int pe)
 
   if (shmem_getmem_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_getmem_ENTRY(target, source, nelems, pe);
     shmem_getmem_real(target, source, nelems, pe);
     PROBE_shmem_getmem_EXIT();
@@ -2838,7 +2838,7 @@ void shmem_int_get (int *target, const int *source, size_t nelems, int pe)
 
   if (shmem_int_get_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_get_ENTRY(target, source, nelems, pe);
     shmem_int_get_real(target, source, nelems, pe);
     PROBE_shmem_int_get_EXIT();
@@ -2864,7 +2864,7 @@ void shmem_long_get (long *target, const long *source, size_t nelems, int pe)
 
   if (shmem_long_get_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_get_ENTRY(target, source, nelems, pe);
     shmem_long_get_real(target, source, nelems, pe);
     PROBE_shmem_long_get_EXIT();
@@ -2890,7 +2890,7 @@ void shmem_longdouble_get (long double *target, const long double *source, size_
 
   if (shmem_longdouble_get_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longdouble_get_ENTRY(target, source, nelems, pe);
     shmem_longdouble_get_real(target, source, nelems, pe);
     PROBE_shmem_longdouble_get_EXIT();
@@ -2916,7 +2916,7 @@ void shmem_longlong_get (long long *target, const long long *source, size_t nele
 
   if (shmem_longlong_get_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_get_ENTRY(target, source, nelems, pe);
     shmem_longlong_get_real(target, source, nelems, pe);
     PROBE_shmem_longlong_get_EXIT();
@@ -2942,7 +2942,7 @@ void shmem_short_get (short *target, const short *source, size_t nelems, int pe)
 
   if (shmem_short_get_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_get_ENTRY(target, source, nelems, pe);
     shmem_short_get_real(target, source, nelems, pe);
     PROBE_shmem_short_get_EXIT();
@@ -2970,7 +2970,7 @@ char shmem_char_g (char *addr, int pe)
 
   if (shmem_char_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_char_g_ENTRY(addr, pe);
     res = shmem_char_g_real(addr, pe);
     PROBE_shmem_char_g_EXIT();
@@ -2999,7 +2999,7 @@ short shmem_short_g (short *addr, int pe)
 
   if (shmem_short_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_g_ENTRY(addr, pe);
     res = shmem_short_g_real(addr, pe);
     PROBE_shmem_short_g_EXIT();
@@ -3028,7 +3028,7 @@ int shmem_int_g (int *addr, int pe)
 
   if (shmem_int_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_g_ENTRY(addr, pe);
     res = shmem_int_g_real(addr, pe);
     PROBE_shmem_int_g_EXIT();
@@ -3057,7 +3057,7 @@ long shmem_long_g (long *addr, int pe)
 
   if (shmem_long_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_g_ENTRY(addr, pe);
     res = shmem_long_g_real(addr, pe);
     PROBE_shmem_long_g_EXIT();
@@ -3086,7 +3086,7 @@ long long shmem_longlong_g (long long *addr, int pe)
 
   if (shmem_longlong_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_g_ENTRY(addr, pe);
     res = shmem_longlong_g_real(addr, pe);
     PROBE_shmem_longlong_g_EXIT();
@@ -3115,7 +3115,7 @@ float shmem_float_g (float *addr, int pe)
 
   if (shmem_float_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_g_ENTRY(addr, pe);
     res = shmem_float_g_real(addr, pe);
     PROBE_shmem_float_g_EXIT();
@@ -3144,7 +3144,7 @@ double shmem_double_g (double *addr, int pe)
 
   if (shmem_double_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_g_ENTRY(addr, pe);
     res = shmem_double_g_real(addr, pe);
     PROBE_shmem_double_g_EXIT();
@@ -3173,7 +3173,7 @@ long double shmem_longdouble_g (long double *addr, int pe)
 
   if (shmem_longdouble_g_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longdouble_g_ENTRY(addr, pe);
     res = shmem_longdouble_g_real(addr, pe);
     PROBE_shmem_longdouble_g_EXIT();
@@ -3200,7 +3200,7 @@ void shmem_double_iget (double *target, const double *source, ptrdiff_t tst, ptr
 
   if (shmem_double_iget_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_iget_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_double_iget_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_double_iget_EXIT();
@@ -3226,7 +3226,7 @@ void shmem_float_iget (float *target, const float *source, ptrdiff_t tst, ptrdif
 
   if (shmem_float_iget_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_iget_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_float_iget_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_float_iget_EXIT();
@@ -3252,7 +3252,7 @@ void shmem_iget32 (void *target, const void *source, ptrdiff_t tst, ptrdiff_t ss
 
   if (shmem_iget32_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_iget32_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_iget32_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_iget32_EXIT();
@@ -3278,7 +3278,7 @@ void shmem_iget64 (void *target, const void *source, ptrdiff_t tst, ptrdiff_t ss
 
   if (shmem_iget64_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_iget64_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_iget64_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_iget64_EXIT();
@@ -3304,7 +3304,7 @@ void shmem_iget128 (void *target, const void *source, ptrdiff_t tst, ptrdiff_t s
 
   if (shmem_iget128_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_iget128_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_iget128_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_iget128_EXIT();
@@ -3330,7 +3330,7 @@ void shmem_int_iget (int *target, const int *source, ptrdiff_t tst, ptrdiff_t ss
 
   if (shmem_int_iget_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_iget_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_int_iget_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_int_iget_EXIT();
@@ -3356,7 +3356,7 @@ void shmem_long_iget (long *target, const long *source, ptrdiff_t tst, ptrdiff_t
 
   if (shmem_long_iget_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_iget_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_long_iget_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_long_iget_EXIT();
@@ -3382,7 +3382,7 @@ void shmem_longdouble_iget (long double *target, const long double *source, ptrd
 
   if (shmem_longdouble_iget_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longdouble_iget_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_longdouble_iget_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_longdouble_iget_EXIT();
@@ -3408,7 +3408,7 @@ void shmem_longlong_iget (long long *target, const long long *source, ptrdiff_t 
 
   if (shmem_longlong_iget_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_iget_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_longlong_iget_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_longlong_iget_EXIT();
@@ -3434,7 +3434,7 @@ void shmem_short_iget (short *target, const short *source, ptrdiff_t tst, ptrdif
 
   if (shmem_short_iget_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_iget_ENTRY(target, source, tst, sst, nelems, pe);
     shmem_short_iget_real(target, source, tst, sst, nelems, pe);
     PROBE_shmem_short_iget_EXIT();
@@ -3460,7 +3460,7 @@ void shmem_int_add (int *target, int value, int pe)
 
   if (shmem_int_add_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_add_ENTRY(target, value, pe);
     shmem_int_add_real(target, value, pe);
     PROBE_shmem_int_add_EXIT();
@@ -3486,7 +3486,7 @@ void shmem_long_add (long *target, long value, int pe)
 
   if (shmem_long_add_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_add_ENTRY(target, value, pe);
     shmem_long_add_real(target, value, pe);
     PROBE_shmem_long_add_EXIT();
@@ -3512,7 +3512,7 @@ void shmem_longlong_add (long long *target, long long value, int pe)
 
   if (shmem_longlong_add_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_add_ENTRY(target, value, pe);
     shmem_longlong_add_real(target, value, pe);
     PROBE_shmem_longlong_add_EXIT();
@@ -3540,7 +3540,7 @@ int shmem_int_cswap (int *target, int cond, int value, int pe)
 
   if (shmem_int_cswap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_cswap_ENTRY(target, cond, value, pe);
     res = shmem_int_cswap_real(target, cond, value, pe);
     PROBE_shmem_int_cswap_EXIT();
@@ -3569,7 +3569,7 @@ long shmem_long_cswap (long *target, long cond, long value, int pe)
 
   if (shmem_long_cswap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_cswap_ENTRY(target, cond, value, pe);
     res = shmem_long_cswap_real(target, cond, value, pe);
     PROBE_shmem_long_cswap_EXIT();
@@ -3598,7 +3598,7 @@ long long shmem_longlong_cswap (long long *target, long long cond, long long val
 
   if (shmem_longlong_cswap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_cswap_ENTRY(target, cond, value, pe);
     res = shmem_longlong_cswap_real(target, cond, value, pe);
     PROBE_shmem_longlong_cswap_EXIT();
@@ -3627,7 +3627,7 @@ double shmem_double_swap (double *target, double value, int pe)
 
   if (shmem_double_swap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_swap_ENTRY(target, value, pe);
     res = shmem_double_swap_real(target, value, pe);
     PROBE_shmem_double_swap_EXIT();
@@ -3656,7 +3656,7 @@ float shmem_float_swap (float *target, float value, int pe)
 
   if (shmem_float_swap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_swap_ENTRY(target, value, pe);
     res = shmem_float_swap_real(target, value, pe);
     PROBE_shmem_float_swap_EXIT();
@@ -3685,7 +3685,7 @@ int shmem_int_swap (int *target, int value, int pe)
 
   if (shmem_int_swap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_swap_ENTRY(target, value, pe);
     res = shmem_int_swap_real(target, value, pe);
     PROBE_shmem_int_swap_EXIT();
@@ -3714,7 +3714,7 @@ long shmem_long_swap (long *target, long value, int pe)
 
   if (shmem_long_swap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_swap_ENTRY(target, value, pe);
     res = shmem_long_swap_real(target, value, pe);
     PROBE_shmem_long_swap_EXIT();
@@ -3743,7 +3743,7 @@ long long shmem_longlong_swap (long long *target, long long value, int pe)
 
   if (shmem_longlong_swap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_swap_ENTRY(target, value, pe);
     res = shmem_longlong_swap_real(target, value, pe);
     PROBE_shmem_longlong_swap_EXIT();
@@ -3772,7 +3772,7 @@ long shmem_swap (long *target, long value, int pe)
 
   if (shmem_swap_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_swap_ENTRY(target, value, pe);
     res = shmem_swap_real(target, value, pe);
     PROBE_shmem_swap_EXIT();
@@ -3801,7 +3801,7 @@ int shmem_int_finc (int *target, int pe)
 
   if (shmem_int_finc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_finc_ENTRY(target, pe);
     res = shmem_int_finc_real(target, pe);
     PROBE_shmem_int_finc_EXIT();
@@ -3830,7 +3830,7 @@ long shmem_long_finc (long *target, int pe)
 
   if (shmem_long_finc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_finc_ENTRY(target, pe);
     res = shmem_long_finc_real(target, pe);
     PROBE_shmem_long_finc_EXIT();
@@ -3859,7 +3859,7 @@ long long shmem_longlong_finc (long long *target, int pe)
 
   if (shmem_longlong_finc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_finc_ENTRY(target, pe);
     res = shmem_longlong_finc_real(target, pe);
     PROBE_shmem_longlong_finc_EXIT();
@@ -3886,7 +3886,7 @@ void shmem_int_inc (int *target, int pe)
 
   if (shmem_int_inc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_inc_ENTRY(target, pe);
     shmem_int_inc_real(target, pe);
     PROBE_shmem_int_inc_EXIT();
@@ -3912,7 +3912,7 @@ void shmem_long_inc (long *target, int pe)
 
   if (shmem_long_inc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_inc_ENTRY(target, pe);
     shmem_long_inc_real(target, pe);
     PROBE_shmem_long_inc_EXIT();
@@ -3938,7 +3938,7 @@ void shmem_longlong_inc (long long *target, int pe)
 
   if (shmem_longlong_inc_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_inc_ENTRY(target, pe);
     shmem_longlong_inc_real(target, pe);
     PROBE_shmem_longlong_inc_EXIT();
@@ -3966,7 +3966,7 @@ int shmem_int_fadd (int *target, int value, int pe)
 
   if (shmem_int_fadd_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_fadd_ENTRY(target, value, pe);
     res = shmem_int_fadd_real(target, value, pe);
     PROBE_shmem_int_fadd_EXIT();
@@ -3995,7 +3995,7 @@ long shmem_long_fadd (long *target, long value, int pe)
 
   if (shmem_long_fadd_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_fadd_ENTRY(target, value, pe);
     res = shmem_long_fadd_real(target, value, pe);
     PROBE_shmem_long_fadd_EXIT();
@@ -4024,7 +4024,7 @@ long long shmem_longlong_fadd (long long *target, long long value, int pe)
 
   if (shmem_longlong_fadd_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_fadd_ENTRY(target, value, pe);
     res = shmem_longlong_fadd_real(target, value, pe);
     PROBE_shmem_longlong_fadd_EXIT();
@@ -4050,7 +4050,7 @@ void shmem_barrier_all (void)
 
   if (shmem_barrier_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_barrier_all_ENTRY();
     shmem_barrier_all_real();
     PROBE_shmem_barrier_all_EXIT();
@@ -4076,7 +4076,7 @@ void shmem_barrier (int PE_start, int logPE_stride, int PE_size, long *pSync)
 
   if (shmem_barrier_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_barrier_ENTRY(PE_start, logPE_stride, PE_size, pSync);
     shmem_barrier_real(PE_start, logPE_stride, PE_size, pSync);
     PROBE_shmem_barrier_EXIT();
@@ -4102,7 +4102,7 @@ void shmem_broadcast32 (void *target, const void *source, size_t nlong, int PE_r
 
   if (shmem_broadcast32_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_broadcast32_ENTRY(target, source, nlong, PE_root, PE_start, logPE_stride, PE_size, pSync);
     shmem_broadcast32_real(target, source, nlong, PE_root, PE_start, logPE_stride, PE_size, pSync);
     PROBE_shmem_broadcast32_EXIT();
@@ -4128,7 +4128,7 @@ void shmem_broadcast64 (void *target, const void *source, size_t nlong, int PE_r
 
   if (shmem_broadcast64_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_broadcast64_ENTRY(target, source, nlong, PE_root, PE_start, logPE_stride, PE_size, pSync);
     shmem_broadcast64_real(target, source, nlong, PE_root, PE_start, logPE_stride, PE_size, pSync);
     PROBE_shmem_broadcast64_EXIT();
@@ -4154,7 +4154,7 @@ void shmem_collect32 (void *target, const void *source, size_t nelems, int PE_st
 
   if (shmem_collect32_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_collect32_ENTRY(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     shmem_collect32_real(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     PROBE_shmem_collect32_EXIT();
@@ -4180,7 +4180,7 @@ void shmem_collect64 (void *target, const void *source, size_t nelems, int PE_st
 
   if (shmem_collect64_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_collect64_ENTRY(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     shmem_collect64_real(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     PROBE_shmem_collect64_EXIT();
@@ -4206,7 +4206,7 @@ void shmem_fcollect32 (void *target, const void *source, size_t nelems, int PE_s
 
   if (shmem_fcollect32_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_fcollect32_ENTRY(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     shmem_fcollect32_real(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     PROBE_shmem_fcollect32_EXIT();
@@ -4232,7 +4232,7 @@ void shmem_fcollect64 (void *target, const void *source, size_t nelems, int PE_s
 
   if (shmem_fcollect64_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_fcollect64_ENTRY(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     shmem_fcollect64_real(target, source, nelems, PE_start, logPE_stride, PE_size, pSync);
     PROBE_shmem_fcollect64_EXIT();
@@ -4258,7 +4258,7 @@ void shmem_int_and_to_all (int *target, int *source, int nreduce, int PE_start, 
 
   if (shmem_int_and_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_and_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_int_and_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_int_and_to_all_EXIT();
@@ -4284,7 +4284,7 @@ void shmem_long_and_to_all (long *target, long *source, int nreduce, int PE_star
 
   if (shmem_long_and_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_and_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_long_and_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_long_and_to_all_EXIT();
@@ -4310,7 +4310,7 @@ void shmem_longlong_and_to_all (long long *target, long long *source, int nreduc
 
   if (shmem_longlong_and_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_and_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_longlong_and_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_longlong_and_to_all_EXIT();
@@ -4336,7 +4336,7 @@ void shmem_short_and_to_all (short *target, short *source, int nreduce, int PE_s
 
   if (shmem_short_and_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_and_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_short_and_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_short_and_to_all_EXIT();
@@ -4362,7 +4362,7 @@ void shmem_double_max_to_all (double *target, double *source, int nreduce, int P
 
   if (shmem_double_max_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_max_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_double_max_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_double_max_to_all_EXIT();
@@ -4388,7 +4388,7 @@ void shmem_float_max_to_all (float *target, float *source, int nreduce, int PE_s
 
   if (shmem_float_max_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_float_max_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_float_max_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_float_max_to_all_EXIT();
@@ -4414,7 +4414,7 @@ void shmem_int_max_to_all (int *target, int *source, int nreduce, int PE_start, 
 
   if (shmem_int_max_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_max_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_int_max_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_int_max_to_all_EXIT();
@@ -4440,7 +4440,7 @@ void shmem_long_max_to_all (long *target, long *source, int nreduce, int PE_star
 
   if (shmem_long_max_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_max_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_long_max_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_long_max_to_all_EXIT();
@@ -4466,7 +4466,7 @@ void shmem_longdouble_max_to_all (long double *target, long double *source, int 
 
   if (shmem_longdouble_max_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longdouble_max_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_longdouble_max_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_longdouble_max_to_all_EXIT();
@@ -4492,7 +4492,7 @@ void shmem_longlong_max_to_all (long long *target, long long *source, int nreduc
 
   if (shmem_longlong_max_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_max_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_longlong_max_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_longlong_max_to_all_EXIT();
@@ -4518,7 +4518,7 @@ void shmem_short_max_to_all (short *target, short *source, int nreduce, int PE_s
 
   if (shmem_short_max_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_max_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_short_max_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_short_max_to_all_EXIT();
@@ -4544,7 +4544,7 @@ void shmem_double_min_to_all (double *target, double *source, int nreduce, int P
 
   if (shmem_double_min_to_all_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_double_min_to_all_ENTRY(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     shmem_double_min_to_all_real(target, source, nreduce, PE_start, logPE_stride, PE_size, pWrk, pSync);
     PROBE_shmem_double_min_to_all_EXIT();
@@ -4570,7 +4570,7 @@ void shmem_int_wait (int *ivar, int cmp_value)
 
   if (shmem_int_wait_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_wait_ENTRY(ivar, cmp_value);
     shmem_int_wait_real(ivar, cmp_value);
     PROBE_shmem_int_wait_EXIT();
@@ -4596,7 +4596,7 @@ void shmem_int_wait_until (int *ivar, int cmp, int cmp_value)
 
   if (shmem_int_wait_until_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_int_wait_until_ENTRY(ivar, cmp, cmp_value);
     shmem_int_wait_until_real(ivar, cmp, cmp_value);
     PROBE_shmem_int_wait_until_EXIT();
@@ -4622,7 +4622,7 @@ void shmem_long_wait (long *ivar, long cmp_value)
 
   if (shmem_long_wait_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_wait_ENTRY(ivar, cmp_value);
     shmem_long_wait_real(ivar, cmp_value);
     PROBE_shmem_long_wait_EXIT();
@@ -4648,7 +4648,7 @@ void shmem_long_wait_until (long *ivar, int cmp, long cmp_value)
 
   if (shmem_long_wait_until_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_long_wait_until_ENTRY(ivar, cmp, cmp_value);
     shmem_long_wait_until_real(ivar, cmp, cmp_value);
     PROBE_shmem_long_wait_until_EXIT();
@@ -4674,7 +4674,7 @@ void shmem_longlong_wait (long long *ivar, long long cmp_value)
 
   if (shmem_longlong_wait_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_wait_ENTRY(ivar, cmp_value);
     shmem_longlong_wait_real(ivar, cmp_value);
     PROBE_shmem_longlong_wait_EXIT();
@@ -4700,7 +4700,7 @@ void shmem_longlong_wait_until (long long *ivar, int cmp, long long cmp_value)
 
   if (shmem_longlong_wait_until_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_longlong_wait_until_ENTRY(ivar, cmp, cmp_value);
     shmem_longlong_wait_until_real(ivar, cmp, cmp_value);
     PROBE_shmem_longlong_wait_until_EXIT();
@@ -4726,7 +4726,7 @@ void shmem_short_wait (short *ivar, short cmp_value)
 
   if (shmem_short_wait_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_wait_ENTRY(ivar, cmp_value);
     shmem_short_wait_real(ivar, cmp_value);
     PROBE_shmem_short_wait_EXIT();
@@ -4752,7 +4752,7 @@ void shmem_short_wait_until (short *ivar, int cmp, short cmp_value)
 
   if (shmem_short_wait_until_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_short_wait_until_ENTRY(ivar, cmp, cmp_value);
     shmem_short_wait_until_real(ivar, cmp, cmp_value);
     PROBE_shmem_short_wait_until_EXIT();
@@ -4778,7 +4778,7 @@ void shmem_wait (long *ivar, long cmp_value)
 
   if (shmem_wait_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_wait_ENTRY(ivar, cmp_value);
     shmem_wait_real(ivar, cmp_value);
     PROBE_shmem_wait_EXIT();
@@ -4804,7 +4804,7 @@ void shmem_wait_until (long *ivar, int cmp, long cmp_value)
 
   if (shmem_wait_until_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_wait_until_ENTRY(ivar, cmp, cmp_value);
     shmem_wait_until_real(ivar, cmp, cmp_value);
     PROBE_shmem_wait_until_EXIT();
@@ -4829,7 +4829,7 @@ void shmem_fence (void)
 
   if (shmem_fence_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_fence_ENTRY();
     shmem_fence_real();
     PROBE_shmem_fence_EXIT();
@@ -4854,7 +4854,7 @@ void shmem_quiet (void)
 
   if (shmem_quiet_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_quiet_ENTRY();
     shmem_quiet_real();
     PROBE_shmem_quiet_EXIT();
@@ -4880,7 +4880,7 @@ void shmem_clear_lock (long *lock)
 
   if (shmem_clear_lock_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_clear_lock_ENTRY(lock);
     shmem_clear_lock_real(lock);
     PROBE_shmem_clear_lock_EXIT();
@@ -4906,7 +4906,7 @@ void shmem_set_lock (long *lock)
 
   if (shmem_set_lock_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_set_lock_ENTRY(lock);
     shmem_set_lock_real(lock);
     PROBE_shmem_set_lock_EXIT();
@@ -4934,7 +4934,7 @@ int shmem_test_lock (long *lock)
 
   if (shmem_test_lock_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_test_lock_ENTRY(lock);
     res = shmem_test_lock_real(lock);
     PROBE_shmem_test_lock_EXIT();
@@ -4960,7 +4960,7 @@ void shmem_clear_cache_inv (void)
 
   if (shmem_clear_cache_inv_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_clear_cache_inv_ENTRY();
     shmem_clear_cache_inv_real();
     PROBE_shmem_clear_cache_inv_EXIT();
@@ -4985,7 +4985,7 @@ void shmem_set_cache_inv (void)
 
   if (shmem_set_cache_inv_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_set_cache_inv_ENTRY();
     shmem_set_cache_inv_real();
     PROBE_shmem_set_cache_inv_EXIT();
@@ -5011,7 +5011,7 @@ void shmem_clear_cache_line_inv (void *target)
 
   if (shmem_clear_cache_line_inv_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_clear_cache_line_inv_ENTRY(target);
     shmem_clear_cache_line_inv_real(target);
     PROBE_shmem_clear_cache_line_inv_EXIT();
@@ -5037,7 +5037,7 @@ void shmem_set_cache_line_inv (void *target)
 
   if (shmem_set_cache_line_inv_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_set_cache_line_inv_ENTRY(target);
     shmem_set_cache_line_inv_real(target);
     PROBE_shmem_set_cache_line_inv_EXIT();
@@ -5062,7 +5062,7 @@ void shmem_udcflush (void)
 
   if (shmem_udcflush_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_udcflush_ENTRY();
     shmem_udcflush_real();
     PROBE_shmem_udcflush_EXIT();
@@ -5088,7 +5088,7 @@ void shmem_udcflush_line (void *target)
 
   if (shmem_udcflush_line_real != NULL && EXTRAE_ON() && !Backend_inInstrumentation(THREADID))
   {
-    Backend_Enter_Instrumentation(2);
+    Backend_Enter_Instrumentation ();
     PROBE_shmem_udcflush_line_ENTRY(target);
     shmem_udcflush_line_real(target);
     PROBE_shmem_udcflush_line_EXIT();

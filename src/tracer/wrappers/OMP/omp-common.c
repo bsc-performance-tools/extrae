@@ -224,7 +224,7 @@ void omp_set_num_threads (int num_threads)
 	{
 		Backend_ChangeNumberOfThreads (num_threads);
 
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		Probe_OpenMP_SetNumThreads_Entry (num_threads);
 		omp_set_num_threads_real (num_threads);
 		Probe_OpenMP_SetNumThreads_Exit ();
@@ -257,7 +257,7 @@ void omp_set_lock (omp_lock_t *lock)
 
 	if (omp_set_lock_real != NULL && EXTRAE_INITIALIZED())
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		Probe_OpenMP_Named_Lock_Entry();
 		omp_set_lock_real (lock_ptr);
 		Probe_OpenMP_Named_Lock_Exit(lock_ptr);
@@ -290,7 +290,7 @@ void omp_unset_lock (omp_lock_t *lock)
 
 	if (omp_unset_lock_real != NULL && EXTRAE_INITIALIZED())
 	{
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		Probe_OpenMP_Named_Unlock_Entry(lock_ptr);
 		omp_unset_lock_real (lock_ptr);
 		Probe_OpenMP_Named_Unlock_Exit();

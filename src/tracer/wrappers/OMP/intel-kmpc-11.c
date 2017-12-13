@@ -411,7 +411,7 @@ void ompc_set_num_threads (int arg)
 	{
 		Backend_ChangeNumberOfThreads (arg);
 
-		Backend_Enter_Instrumentation (2);
+		Backend_Enter_Instrumentation ();
 		Probe_OpenMP_SetNumThreads_Entry (arg);
 		ompc_set_num_threads_real (arg);
 		Probe_OpenMP_SetNumThreads_Exit ();

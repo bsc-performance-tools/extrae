@@ -217,7 +217,7 @@ void NAME_ROUTINE_C2F(mpi_finalize) (MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Finalize_Wrapper (ierror);
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -256,7 +256,7 @@ void NAME_ROUTINE_C2F(mpi_request_get_status) (MPI_Fint *request, int *flag, MPI
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Request_get_status_Wrapper (request, flag, status, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -285,7 +285,7 @@ void NAME_ROUTINE_C2F(mpi_cancel) (MPI_Fint *request, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Cancel_Wrapper (request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -316,7 +316,7 @@ void NAME_ROUTINE_C2F(mpi_comm_rank) (MPI_Fint *comm, MPI_Fint *rank,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Rank_Wrapper (comm, rank, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -346,7 +346,7 @@ void NAME_ROUTINE_C2F(mpi_comm_size) (MPI_Fint *comm, MPI_Fint *size,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Size_Wrapper (comm, size, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -381,7 +381,7 @@ void NAME_ROUTINE_C2F(mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Create_Wrapper (comm, group, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -416,7 +416,7 @@ void NAME_ROUTINE_C2F(mpi_comm_free) (MPI_Fint *comm, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Free_Wrapper (comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -452,7 +452,7 @@ void NAME_ROUTINE_C2F(mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Dup_Wrapper (comm, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -492,7 +492,7 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Split_Wrapper (comm, color, key, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -527,7 +527,7 @@ void NAME_ROUTINE_C2F(mpi_comm_spawn) (char *command, char *argv, MPI_Fint *maxp
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (5 + (*maxprocs) + Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Spawn_Wrapper (MPI3_CHAR_P_CAST command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -565,7 +565,7 @@ void NAME_ROUTINE_C2F(mpi_comm_spawn_multiple) (MPI_Fint *count, char *array_of_
 		{
 			n_events += 5 + array_of_maxprocs[i] + Caller_Count[CALLER_MPI];
 		}
-		Backend_Enter_Instrumentation (n_events);
+		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Spawn_Multiple_Wrapper (count, array_of_commands, array_of_argv, MPI3_F_INT_P_CAST array_of_maxprocs, MPI3_F_INT_P_CAST array_of_info, root, comm, intercomm, array_of_errcodes, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -601,7 +601,7 @@ void NAME_ROUTINE_C2F(mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Cart_create_Wrapper (comm_old, ndims, MPI3_F_INT_P_CAST dims, MPI3_F_INT_P_CAST periods, reorder,
                               comm_cart, ierror);
 		Backend_Leave_Instrumentation ();
@@ -634,7 +634,7 @@ void NAME_ROUTINE_C2F(mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Cart_sub_Wrapper (comm, MPI3_F_INT_P_CAST remain_dims, comm_new, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -669,7 +669,7 @@ void NAME_ROUTINE_C2F(mpi_intercomm_create) (MPI_Fint *local_comm,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Intercomm_create_F_Wrapper (local_comm, local_leader, peer_comm,
 		  remote_leader, tag, new_intercomm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -702,7 +702,7 @@ void NAME_ROUTINE_C2F(mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Intercomm_merge_F_Wrapper (intercomm, high, newintracomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -732,7 +732,7 @@ void NAME_ROUTINE_C2F(mpi_start) (MPI_Fint *request, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Start_Wrapper (request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -763,7 +763,7 @@ void NAME_ROUTINE_C2F(mpi_startall) (MPI_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+*count+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Startall_Wrapper (count, array_of_requests, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -792,7 +792,7 @@ void NAME_ROUTINE_C2F(mpi_request_free) (MPI_Fint *request, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Request_free_Wrapper (request, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -870,7 +870,7 @@ int NAME_ROUTINE_C(MPI_Finalize) (void)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Finalize_C_Wrapper ();
 		DEBUG_INTERFACE(LEAVE)
 	}
@@ -909,7 +909,7 @@ int NAME_ROUTINE_C(MPI_Request_get_status) (MPI_Request request, int *flag,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (4+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Request_get_status_C_Wrapper (request, flag, status);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -938,7 +938,7 @@ int NAME_ROUTINE_C(MPI_Cancel) (MPI_Request *request)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Cancel_C_Wrapper (request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -966,7 +966,7 @@ int NAME_ROUTINE_C(MPI_Comm_rank) (MPI_Comm comm, int *rank)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_rank_C_Wrapper (comm, rank);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -995,7 +995,7 @@ int NAME_ROUTINE_C(MPI_Comm_size) (MPI_Comm comm, int *size)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_size_C_Wrapper (comm, size);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1029,7 +1029,7 @@ int NAME_ROUTINE_C(MPI_Comm_create) (MPI_Comm comm, MPI_Group group,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_create_C_Wrapper (comm, group, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1060,7 +1060,7 @@ int NAME_ROUTINE_C(MPI_Comm_free) (MPI_Comm *comm)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_free_C_Wrapper (comm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1092,7 +1092,7 @@ int NAME_ROUTINE_C(MPI_Comm_dup) (MPI_Comm comm, MPI_Comm *newcomm)
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_dup_C_Wrapper (comm, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1129,7 +1129,7 @@ int NAME_ROUTINE_C(MPI_Comm_split) (MPI_Comm comm, int color, int key,
 #endif
 
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_split_C_Wrapper (comm, color, key, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1172,7 +1172,7 @@ int NAME_ROUTINE_C(MPI_Comm_spawn) (
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (5 + maxprocs + Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_spawn_C_Wrapper (MPI3_CHAR_P_CAST command, argv, maxprocs, info, root, comm, intercomm, array_of_errcodes);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1223,7 +1223,7 @@ int NAME_ROUTINE_C(MPI_Comm_spawn_multiple) (
 		{
 			n_events += 5 + array_of_maxprocs[i] + Caller_Count[CALLER_MPI];
 		}
-		Backend_Enter_Instrumentation (n_events);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_spawn_multiple_C_Wrapper (count, array_of_commands, array_of_argv, MPI3_C_INT_P_CAST array_of_maxprocs, MPI3_MPI_INFO_P_CAST array_of_info, root, comm, intercomm, array_of_errcodes);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1256,7 +1256,7 @@ int NAME_ROUTINE_C(MPI_Cart_create) (MPI_Comm comm_old, int ndims, MPI3_CONST in
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Cart_create_C_Wrapper (comm_old, ndims, MPI3_C_INT_P_CAST dims, MPI3_C_INT_P_CAST periods, reorder,
                                       comm_cart);
 		Backend_Leave_Instrumentation ();
@@ -1286,7 +1286,7 @@ int NAME_ROUTINE_C(MPI_Cart_sub) (MPI_Comm comm, MPI3_CONST int *remain_dims,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res =  MPI_Cart_sub_C_Wrapper (comm, MPI3_C_INT_P_CAST remain_dims, comm_new);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1315,7 +1315,7 @@ int NAME_ROUTINE_C(MPI_Intercomm_create) (MPI_Comm local_comm, int local_leader,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Intercomm_create_C_Wrapper (local_comm, local_leader, peer_comm,
 		  remote_leader, tag, newintercomm);
 		Backend_Leave_Instrumentation ();
@@ -1346,7 +1346,7 @@ int NAME_ROUTINE_C(MPI_Intercomm_merge) (MPI_Comm intercomm, int high,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Extrae_get_num_tasks()+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Intercomm_merge_C_Wrapper (intercomm, high, newintracomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1374,7 +1374,7 @@ int NAME_ROUTINE_C(MPI_Start) (MPI_Request *request)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+1+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res =  MPI_Start_C_Wrapper (request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1403,7 +1403,7 @@ int NAME_ROUTINE_C(MPI_Startall) (int count, MPI_Request *requests)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+count+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res = MPI_Startall_C_Wrapper (count, requests);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1432,7 +1432,7 @@ int NAME_ROUTINE_C(MPI_Request_free) (MPI_Request *request)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		res =  MPI_Request_free_C_Wrapper (request);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)

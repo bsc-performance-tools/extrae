@@ -43,6 +43,9 @@
 
 #define EVT_NUM 500000
 
+// Number of events to check if they fill in the buffer
+#define NEVENTS 100
+
 #define u_llong unsigned long long
 #define LONG_PID 10
 #define MASTER_ID 0
@@ -219,7 +222,7 @@ void Backend_Flush_pThread (pthread_t t);
 
 iotimer_t Backend_Get_Last_Enter_Time (void);
 iotimer_t Backend_Get_Last_Leave_Time (void);
-void Backend_Enter_Instrumentation (int Nevents);
+void Backend_Enter_Instrumentation ();
 void Backend_Leave_Instrumentation (void);
 int Backend_inInstrumentation (unsigned thread);
 void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);

@@ -137,7 +137,7 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Reduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                          ierror);
 		Backend_Leave_Instrumentation ();
@@ -173,7 +173,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Reduce_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -211,7 +211,7 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_AllReduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf,
 			count, datatype, op, comm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -243,7 +243,7 @@ void NAME_ROUTINE_C2F(mpi_barrier) (MPI_Fint *comm, MPI_Fint *ierror)
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Barrier_Wrapper (comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -276,7 +276,7 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_BCast_Wrapper (buffer, count, datatype, root, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -311,7 +311,7 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_AllToAll_Wrapper (MPI3_VOID_P_CAST sendbuf,
 			sendcount, sendtype, recvbuf, recvcount, recvtype, comm,
 			ierror);
@@ -349,7 +349,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_AllToAllV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf,
                             MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -386,7 +386,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Allgather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -423,7 +423,7 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Allgatherv_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, MPI3_VOID_P_CAST recvbuf, 
 			MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs,
@@ -462,7 +462,7 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Gather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			ierror);
@@ -499,7 +499,7 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_GatherV_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount,
 			MPI3_F_INT_P_CAST displs, recvtype, root, comm, ierror);
@@ -537,7 +537,7 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			ierror);
@@ -574,7 +574,7 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_ScatterV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf,
                            recvcount, recvtype, root, comm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -608,7 +608,7 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Scan_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 			datatype, op, comm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -647,7 +647,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Ireduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count, datatype, op, root, comm,
                          req, ierror);
 		Backend_Leave_Instrumentation ();
@@ -683,7 +683,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Ireduce_Scatter_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, MPI3_F_INT_P_CAST recvcounts, datatype, op,
 			comm, req, ierror);
 		Backend_Leave_Instrumentation ();
@@ -721,7 +721,7 @@ void NAME_ROUTINE_C2F(mpi_iallreduce) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_IallReduce_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf,
 			count, datatype, op, comm, req, ierror);
 		Backend_Leave_Instrumentation ();
@@ -754,7 +754,7 @@ void NAME_ROUTINE_C2F(mpi_ibarrier) (MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ie
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Ibarrier_Wrapper (comm, req, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -787,7 +787,7 @@ void NAME_ROUTINE_C2F(mpi_ibcast) (void *buffer, MPI_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Ibcast_Wrapper (buffer, count, datatype, root, comm, req, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -822,7 +822,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_IallToAll_Wrapper (MPI3_VOID_P_CAST sendbuf,
 			sendcount, sendtype, recvbuf, recvcount, recvtype, comm,
 			req, ierror);
@@ -861,7 +861,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_IallToAllV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST sdispls, sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST rdispls, recvtype, comm, req,  ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -898,7 +898,7 @@ void NAME_ROUTINE_C2F(mpi_iallgather) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Iallgather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, comm, req, ierror);
 		Backend_Leave_Instrumentation ();
@@ -936,7 +936,7 @@ void NAME_ROUTINE_C2F(mpi_iallgatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Iallgatherv_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, MPI3_VOID_P_CAST recvbuf, 
 			MPI3_F_INT_P_CAST recvcount, MPI3_F_INT_P_CAST displs,
@@ -976,7 +976,7 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Igather_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			req, ierror);
@@ -1014,7 +1014,7 @@ void NAME_ROUTINE_C2F(mpi_igatherv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_IgatherV_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, MPI3_F_INT_P_CAST recvcount,
 			MPI3_F_INT_P_CAST displs, recvtype, root, comm, req, ierror);
@@ -1052,7 +1052,7 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Iscatter_Wrapper (MPI3_VOID_P_CAST sendbuf, sendcount,
 			sendtype, recvbuf, recvcount, recvtype, root, comm,
 			req, ierror);
@@ -1090,7 +1090,7 @@ void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_IscatterV_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcount, MPI3_F_INT_P_CAST displs, sendtype, recvbuf, recvcount, recvtype, root, comm, req, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1124,7 +1124,7 @@ void NAME_ROUTINE_C2F(mpi_iscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Iscan_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, count,
 			datatype, op, comm, req, ierror);
 		Backend_Leave_Instrumentation ();
@@ -1160,7 +1160,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter_block) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Ireduce_Scatter_Block_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, recvcount, datatype, op, comm, req, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1194,7 +1194,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_Reduce_Scatter_Block_Wrapper (MPI3_VOID_P_CAST sendbuf, recvbuf, recvcount, datatype, op, comm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
@@ -1230,7 +1230,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_AllToAllW_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcounts, MPI3_F_INT_P_CAST sdispls, MPI3_F_INT_P_CAST sendtypes, recvbuf,
                             MPI3_F_INT_P_CAST recvcounts, MPI3_F_INT_P_CAST rdispls, MPI3_F_INT_P_CAST recvtypes, comm, ierror);
 		Backend_Leave_Instrumentation ();
@@ -1266,7 +1266,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 	if (mpitrace_on)
 	{
 		DEBUG_INTERFACE(ENTER)
-		Backend_Enter_Instrumentation (2+Caller_Count[CALLER_MPI]);
+		Backend_Enter_Instrumentation ();
 		PMPI_IallToAllW_Wrapper (MPI3_VOID_P_CAST sendbuf, MPI3_F_INT_P_CAST sendcounts, MPI3_F_INT_P_CAST sdispls, MPI3_F_INT_P_CAST sendtypes, recvbuf, MPI3_F_INT_P_CAST recvcounts, MPI3_F_INT_P_CAST rdispls, MPI3_F_INT_P_CAST recvtypes, comm, req, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
