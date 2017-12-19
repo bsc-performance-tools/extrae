@@ -76,36 +76,6 @@ static void* (*real_kmpc_realloc)(void *, size_t) = NULL;
 static void (*real_kmpc_free)(void *) = NULL;
 # endif
 
-void Extrae_malloctrace_init (void)
-{
-# if defined(PIC) /* This is only available for .so libraries */
-	real_free = (void(*)(void*)) dlsym (RTLD_NEXT, "free");
-	real_malloc = (void*(*)(size_t)) dlsym (RTLD_NEXT, "malloc");
-	/* real_calloc = (void*(*)(size_t, size_t)) dlsym (RTLD_NEXT, "calloc"); */
-	real_realloc = (void*(*)(void*, size_t)) dlsym (RTLD_NEXT, "realloc");
-	real_posix_memalign = (int(*)(void **, size_t, size_t)) dlsym (RTLD_NEXT, "posix_memalign");
-	
-#  if defined(HAVE_MEMKIND)
-	real_memkind_malloc = (void*(*)(memkind_t, size_t)) dlsym (RTLD_NEXT, "memkind_malloc");
-	real_memkind_calloc = (void*(*)(memkind_t, size_t, size_t)) dlsym (RTLD_NEXT, "memkind_calloc");
-	real_memkind_realloc = (void*(*)(memkind_t, void *, size_t)) dlsym (RTLD_NEXT, "memkind_realloc");
-	real_memkind_posix_memalign = (int(*)(memkind_t, void **, size_t, size_t)) dlsym (RTLD_NEXT, "memkind_posix_memalign");
-	real_memkind_free = (void(*)(memkind_t, void *)) dlsym (RTLD_NEXT, "memkind_free");
-#  endif
-
-#  if defined(HAVE_OPENMP)
-	real_kmpc_malloc = (void *(*)(size_t)) dlsym (RTLD_NEXT, "kmpc_malloc");
-	real_kmpc_aligned_malloc = (void *(*)(size_t, size_t)) dlsym (RTLD_NEXT, "kmpc_aligned_malloc");
-	real_kmpc_calloc = (void *(*)(size_t, size_t)) dlsym (RTLD_NEXT, "kmpc_calloc");
-	real_kmpc_realloc = (void *(*)(void *, size_t)) dlsym (RTLD_NEXT, "kmpc_realloc");
-	real_kmpc_free = (void (*)(void *)) dlsym (RTLD_NEXT, "kmpc_free");
-#  endif
-# else
-	fprintf (stderr, PACKAGE_NAME": Warning! dynamic memory instrumentation requires linking with shared library!\n");
-# endif
-}
-
-
 /* Note on the implementation!
    We will only instrument those malloc(), realloc() that are larger than
    a given threshold. Therefore, we will only instrument the free() associated to
@@ -194,7 +164,7 @@ void *malloc (size_t s)
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_malloc == NULL)
-		Extrae_malloctrace_init ();
+		real_malloc = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -245,7 +215,7 @@ void free (void *p)
         if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_free == NULL)
-		Extrae_malloctrace_init ();
+		real_free = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument && !__in_free) // fprintf() seems to call free()!
@@ -295,7 +265,7 @@ void *calloc (size_t s1, size_t s2)
         if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_calloc == NULL)
-		Extrae_malloctrace_init ();
+		real_calloc = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": calloc is at %p\n", real_calloc);
@@ -337,7 +307,7 @@ void *realloc (void *p, size_t s)
         if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_realloc == NULL)
-		Extrae_malloctrace_init ();
+		real_realloc = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -390,7 +360,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
 
   if (real_posix_memalign == NULL)
   {
-    Extrae_malloctrace_init ();
+	real_posix_memalign = EXTRAE_DL_INIT (__func__);
   }
 
 #if defined(DEBUG)
@@ -469,7 +439,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
 
   if (real_memkind_malloc == NULL)
   {
-    Extrae_malloctrace_init ();
+	real_memkind_malloc = EXTRAE_DL_INIT (__func__);
   }
 
 #if defined(DEBUG)
@@ -518,7 +488,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
 
   if (real_memkind_calloc == NULL)
   {
-    Extrae_malloctrace_init ();
+	real_memkind_calloc = EXTRAE_DL_INIT (__func__);
   }
 
 #if defined(DEBUG)
@@ -567,7 +537,7 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 
   if (real_memkind_realloc == NULL)
   {
-    Extrae_malloctrace_init ();
+	real_memkind_realloc = EXTRAE_DL_INIT (__func__);
   }
 
 #if defined(DEBUG)
@@ -617,7 +587,7 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
 
   if (real_memkind_posix_memalign == NULL)
   {
-    Extrae_malloctrace_init ();
+	real_memkind_posix_memalign = EXTRAE_DL_INIT (__func__);
   }
 
 #if defined(DEBUG)
@@ -663,7 +633,7 @@ void memkind_free(memkind_t kind, void *ptr)
 
   if (real_memkind_free == NULL)
   {
-    Extrae_malloctrace_init ();
+	real_memkind_free = EXTRAE_DL_INIT (__func__);
   }
 
 #if defined(DEBUG)
@@ -714,7 +684,7 @@ kmpc_malloc( size_t size )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_malloc == NULL)
-		Extrae_malloctrace_init ();
+		real_kmpc_malloc = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -768,7 +738,7 @@ kmpc_aligned_malloc( size_t size, size_t alignment )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_aligned_malloc == NULL)
-		Extrae_malloctrace_init ();
+		real_kmpc_aligned_malloc = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -822,7 +792,7 @@ kmpc_calloc( size_t nelem, size_t elsize )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_calloc == NULL)
-		Extrae_malloctrace_init ();
+		real_kmpc_calloc = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -876,7 +846,7 @@ kmpc_realloc( void *ptr, size_t size )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_realloc == NULL)
-		Extrae_malloctrace_init ();
+		real_kmpc_realloc = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument)
@@ -927,7 +897,7 @@ kmpc_free ( void *ptr )
 	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_kmpc_free == NULL)
-		Extrae_malloctrace_init ();
+		real_kmpc_free = EXTRAE_DL_INIT (__func__);
 
 #if defined(DEBUG)
 	if (canInstrument && !__in_free) // fprintf() seems to call free()!

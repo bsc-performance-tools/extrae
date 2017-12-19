@@ -1573,14 +1573,6 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	fprintf(stderr, "[DEBUG] current_NumOfThreads=%d maximum_NumOfThreads=%d\n", current_NumOfThreads, maximum_NumOfThreads);
 #else
 
-#if defined(INSTRUMENT_DYNAMIC_MEMORY)
-	Extrae_malloctrace_init();
-#endif
-
-#if defined(INSTRUMENT_IO)
-	Extrae_iotrace_init();
-#endif
-
 #if defined(PTHREAD_SUPPORT)
 	Backend_CreatepThreadIdentifier ();
 

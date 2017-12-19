@@ -34,6 +34,4 @@
     Extrae_trace_callers (evttime, offset, CALLER_IO); \
 }
 
-void Extrae_iotrace_init (void);
-
 #endif /* __IO_WRAPPER_H__ */

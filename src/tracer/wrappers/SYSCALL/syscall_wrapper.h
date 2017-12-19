@@ -34,6 +34,4 @@
     Extrae_trace_callers (evttime, offset, CALLER_SYSCALL); \
 }                                                                               
 
-void Extrae_syscalltrace_init (void);
-
 #endif /* __SYSCALL_WRAPPER_H__ */

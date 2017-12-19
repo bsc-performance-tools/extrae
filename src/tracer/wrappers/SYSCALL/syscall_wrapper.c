@@ -66,36 +66,6 @@
 /* Global pointers to the real implementation of the system calls */
 static int (*real_sched_yield)(void) = NULL;
 
-/**
- * Extrae_iotrace_init
- *
- * Initialization routine for the I/O tracing module. Performs a discovery of the
- * address of the real implementation of the I/O calls through dlsym. The initialization
- * is deferred until any of the instrumented symbols is used for the first time.
- */
-void Extrae_syscalltrace_init (void)
-{
-# if defined(PIC) /* Only available for .so libraries */
-
-  /*
-   * Find the first implementation of the system call in the default library search order
-   * after the current library. Not finding any of the symbols doesn't throw an error
-   * unless the application tries to use it later.
-   */
-  real_sched_yield = (int(*)(void)) dlsym(RTLD_NEXT, "sched_yield");
-
-#  if defined(DEBUG)
-  fprintf(stderr, "[DEBUG] Extrae installed the following system call hooks:\n");
-  fprintf(stderr, "[DEBUG] sched_yield hooked at %p\n", real_sched_yield);
-#  endif
-
-# else
-
-  fprintf (stderr, PACKAGE_NAME": Warning! System call instrumentation requires linking with shared library!\n");
-
-# endif
-}
-
 # if defined(PIC) /* Only available for .so libraries */
 
 /**
@@ -119,7 +89,7 @@ int sched_yield(void)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_sched_yield == NULL)
   {
-    Extrae_syscalltrace_init();
+	real_sched_yield = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)

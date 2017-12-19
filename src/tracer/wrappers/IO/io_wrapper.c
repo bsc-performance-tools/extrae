@@ -115,70 +115,6 @@ static ssize_t (*real_preadv64)(int fd, const struct iovec *iov, int iovcnt, off
 static ssize_t (*real_pwritev)(int fd, const struct iovec *iov, int iovcnt, off_t offset)       = NULL;
 static ssize_t (*real_pwritev64)(int fd, const struct iovec *iov, int iovcnt, __off64_t offset) = NULL;
 
-/**
- * Extrae_iotrace_init
- *
- * Initialization routine for the I/O tracing module. Performs a discovery of the
- * address of the real implementation of the I/O calls through dlsym. The initialization
- * is deferred until any of the instrumented symbols is used for the first time.
- */
-void Extrae_iotrace_init (void)
-{
-# if defined(PIC) /* Only available for .so libraries */
-
-  /*
-   * Find the first implementation of the I/O calls in the default library search order
-   * after the current library. Not finding any of the symbols doesn't throw an error
-   * unless the application tries to use it later.
-   */
-  real_open      = (int(*)(const char *, int, ...)) dlsym(RTLD_NEXT, "open");
-  real_open64    = (int(*)(const char *, int, ...)) dlsym(RTLD_NEXT, "open64");
-  real_fopen     = (FILE *(*)(const char *, const char *)) dlsym(RTLD_NEXT, "fopen");
-  real_fopen64   = (FILE *(*)(const char *, const char *)) dlsym(RTLD_NEXT, "fopen64");
-
-  real_read      = (ssize_t(*)(int, void*, size_t)) dlsym (RTLD_NEXT, "read");
-  real_write     = (ssize_t(*)(int, const void*, size_t)) dlsym (RTLD_NEXT, "write");
-
-  real_fread     = (size_t(*)(void *, size_t, size_t, FILE *)) dlsym (RTLD_NEXT, "fread");
-  real_fwrite    = (size_t(*)(const void *, size_t, size_t, FILE *)) dlsym (RTLD_NEXT, "fwrite");
-
-  real_pread     = (ssize_t(*)(int fd, void *buf, size_t count, off_t offset)) dlsym (RTLD_NEXT, "pread");
-  real_pwrite    = (ssize_t(*)(int fd, const void *buf, size_t count, off_t offset)) dlsym (RTLD_NEXT, "pwrite");
-
-  real_readv     = (ssize_t(*)(int, const struct iovec *, int)) dlsym (RTLD_NEXT, "readv");
-  real_writev    = (ssize_t(*)(int, const struct iovec *, int)) dlsym (RTLD_NEXT, "writev");
-  real_preadv    = (ssize_t(*)(int, const struct iovec *, int, off_t)) dlsym (RTLD_NEXT, "preadv");
-  real_preadv64  = (ssize_t(*)(int, const struct iovec *, int, __off64_t)) dlsym (RTLD_NEXT, "preadv64");
-  real_pwritev   = (ssize_t(*)(int, const struct iovec *, int, off_t)) dlsym (RTLD_NEXT, "pwritev");
-  real_pwritev64 = (ssize_t(*)(int, const struct iovec *, int, __off64_t)) dlsym (RTLD_NEXT, "pwritev64");
-
-#  if defined(DEBUG)
-  fprintf(stderr, "[DEBUG] Extrae installed the following I/O hooks:\n");
-  fprintf(stderr, "[DEBUG] open hooked at %p\n", real_open);
-  fprintf(stderr, "[DEBUG] open64 hooked at %p\n", real_open64);
-  fprintf(stderr, "[DEBUG] fopen hooked at %p\n", real_fopen);
-  fprintf(stderr, "[DEBUG] fopen64 hooked at %p\n", real_fopen64);
-  fprintf(stderr, "[DEBUG] read hooked at %p\n", real_read);
-  fprintf(stderr, "[DEBUG] write hooked at %p\n", real_write);
-  fprintf(stderr, "[DEBUG] fread hooked at %p\n", real_fread);
-  fprintf(stderr, "[DEBUG] fwrite hooked at %p\n", real_fwrite);
-  fprintf(stderr, "[DEBUG] pread hooked at %p\n", real_pread);
-  fprintf(stderr, "[DEBUG] pwrite hooked at %p\n", real_pwrite);
-  fprintf(stderr, "[DEBUG] readv hooked at %p\n", real_readv);
-  fprintf(stderr, "[DEBUG] writev hooked at %p\n", real_writev);
-  fprintf(stderr, "[DEBUG] preadv hooked at %p\n", real_preadv);
-  fprintf(stderr, "[DEBUG] preadv64 hooked at %p\n", real_preadv64);
-  fprintf(stderr, "[DEBUG] pwritev hooked at %p\n", real_pwritev);
-  fprintf(stderr, "[DEBUG] pwritev64 hooked at %p\n", real_pwritev64);
-#  endif
-
-# else
-
-  fprintf (stderr, PACKAGE_NAME": Warning! I/O instrumentation requires linking with shared library!\n");
-
-# endif
-}
-
 # if defined(PIC) /* Only available for .so libraries */
 
 /**
@@ -214,7 +150,7 @@ int open(const char *pathname, int flags, ...)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_open == NULL)
   {
-    Extrae_iotrace_init();
+    real_open = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -298,7 +234,7 @@ int open64(const char *pathname, int flags, ...)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_open64 == NULL)
   {
-    Extrae_iotrace_init();
+    real_open64 = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -373,7 +309,7 @@ FILE * fopen(const char *path, const char *mode)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen == NULL)
   {
-    Extrae_iotrace_init();
+    real_fopen = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -454,7 +390,7 @@ FILE * fopen64(const char *path, const char *mode)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen64 == NULL)
   {
-    Extrae_iotrace_init();
+    real_fopen64 = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -534,7 +470,7 @@ ssize_t read (int fd, void *buf, size_t count)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_read == NULL)
   {
-    Extrae_iotrace_init();
+    real_read = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -607,7 +543,7 @@ ssize_t write (int fd, const void *buf, size_t count)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_write == NULL)
   {
-    Extrae_iotrace_init();
+    real_write = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -680,7 +616,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fread == NULL)
   {
-    Extrae_iotrace_init();
+    real_fread = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -752,7 +688,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 
   if (real_fwrite == NULL)
   {
-    Extrae_iotrace_init();
+    real_fwrite = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -825,7 +761,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pread == NULL)
   {
-    Extrae_iotrace_init();
+    real_pread = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -898,7 +834,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwrite == NULL)
   {
-    Extrae_iotrace_init();
+    real_pwrite = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -971,7 +907,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_readv == NULL)
   {
-    Extrae_iotrace_init();
+    real_readv = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -1053,7 +989,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_writev == NULL)
   {
-    Extrae_iotrace_init();
+    real_writev = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -1135,7 +1071,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv == NULL)
   {
-    Extrae_iotrace_init();
+    real_preadv = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -1217,7 +1153,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv64 == NULL)
   {
-    Extrae_iotrace_init();
+    real_preadv64 = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -1299,7 +1235,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev == NULL)
   {
-    Extrae_iotrace_init();
+    real_pwritev = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)
@@ -1381,7 +1317,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev64 == NULL)
   {
-    Extrae_iotrace_init();
+    real_pwritev64 = EXTRAE_DL_INIT(__func__);
   }
 
 #if defined(DEBUG)

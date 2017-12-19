@@ -24,7 +24,5 @@
 #ifndef MALLOC_WRAPPER_H_INCLUDED
 #define MALLOC_WRAPPER_H_INCLUDED
 
-void Extrae_malloctrace_init (void);
-
 #endif /* MALLOC_WRAPPER_H_INCLUDED */
 

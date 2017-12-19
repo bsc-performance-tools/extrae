@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 19Dec2017 Defer the initialization of each IO, DYNAMIC MEMORY and SYSTEM calls to the first time they are used
  * 13Dec2017 Increase maximum events for buffer transactions
  * 29Nov2017 Refactor utils function names
  + 09Nov2017 Extended pyextrae API with calls to nevent and neventandcounters
