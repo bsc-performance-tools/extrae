@@ -106,6 +106,7 @@ static int processor_vendor=-2;
 #define PROCESSOR_BROADWELL		28
 #define PROCESSOR_HASWELL_EP		29
 #define PROCESSOR_KNIGHTS_LANDING       30
+#define PROCESSOR_SKYLAKE		31
 
 
 static int detect_processor_cpuinfo(void)
@@ -228,6 +229,9 @@ static int detect_processor_cpuinfo(void)
 				case 79:
 					processor_type=PROCESSOR_BROADWELL;
 					break;
+				case 85:
+					processor_type=PROCESSOR_SKYLAKE;
+					break;
 				case 87:
 					processor_type=PROCESSOR_KNIGHTS_LANDING;
 					break;
@@ -296,6 +300,11 @@ static int get_latency_load_event(unsigned long long *config,
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
 		break;
+	case PROCESSOR_SKYLAKE:
+		*config=0x1cd;
+		*precise_ip=2;
+		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
+		break;
 	case PROCESSOR_KNIGHTS_LANDING:
 	/* KNL Performance Counters
 	 * https://software.intel.com/en-us/articles/intel-xeon-phi-x200-family-processor-performance-monitoring-reference-manual
@@ -340,6 +349,11 @@ static int get_latency_store_event(unsigned long long *config,
 		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
 		break;
 	case PROCESSOR_BROADWELL:
+		*config=0x2cd;
+		*precise_ip=2;
+		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
+		break;
+	case PROCESSOR_SKYLAKE:
 		*config=0x2cd;
 		*precise_ip=2;
 		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
