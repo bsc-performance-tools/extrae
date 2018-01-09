@@ -214,6 +214,9 @@ int tracejant_hwc_omp = TRUE;
 /***** Variable global per saber si pthread s'ha de tracejar **************/
 int tracejant_pthread = TRUE;
 
+/* Mutex to prevent double free's from dying pthreads */
+pthread_mutex_t pthreadFreeBuffer_mtx = PTHREAD_MUTEX_INITIALIZER;
+
 void Extrae_set_pthread_tracing (int b)
 { tracejant_pthread = b; }
 
@@ -1479,15 +1482,24 @@ void Backend_Flush_pThread (pthread_t t)
 		{
 			pThreads[u] = (pthread_t)0; // This slot won't be used in the future
 
-			Buffer_Flush(TRACING_BUFFER(u));
-			Backend_Finalize_close_mpits (getpid(), u, FALSE);
+			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 
-			Buffer_Free (TRACING_BUFFER(u));
-			TRACING_BUFFER(u) = NULL;
+			if (TRACING_BUFFER(u) != NULL)
+			{
+				Buffer_Flush(TRACING_BUFFER(u));
+				Backend_Finalize_close_mpits (getpid(), u, FALSE);
+
+				Buffer_Free (TRACING_BUFFER(u));
+				TRACING_BUFFER(u) = NULL;
+			}
 #if defined(SAMPLING_SUPPORT)
-			Buffer_Free (SAMPLING_BUFFER(u));
-			SAMPLING_BUFFER(u) = NULL;
+			if (SAMPLING_BUFFER(u) != NULL)
+			{
+				Buffer_Free (SAMPLING_BUFFER(u));
+				SAMPLING_BUFFER(u) = NULL;
+			}
 #endif
+			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 			break;
 		}
 }
@@ -2338,12 +2350,16 @@ void Backend_Finalize (void)
 		Extrae_Flush_Wrapper_setCounters (FALSE);
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 		{
+			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+
 			if (TRACING_BUFFER(thread) != NULL)
 			{
 				TRACE_EVENT (TIME, APPL_EV, EVT_END);
 				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 				Backend_Finalize_close_mpits (getpid(), thread, FALSE);
 			}
+
+			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 		}
 	
 		/* Free allocated memory */
@@ -2356,12 +2372,20 @@ void Backend_Finalize (void)
 #if defined(PTHREAD_SUPPORT)
 				pThreads[thread] = (pthread_t)0;
 #endif
-				Buffer_Free (TRACING_BUFFER(thread));
-				TRACING_BUFFER(thread) = NULL;
+				pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+				if (TRACING_BUFFER(thread) != NULL)
+				{
+					Buffer_Free (TRACING_BUFFER(thread));
+					TRACING_BUFFER(thread) = NULL;
+				}
 #if defined(SAMPLING_SUPPORT)
-				Buffer_Free (SAMPLING_BUFFER(thread));
-				SAMPLING_BUFFER(thread) = NULL;
+				if (SAMPLING_BUFFER(thread) != NULL)
+				{
+					Buffer_Free (SAMPLING_BUFFER(thread));
+					SAMPLING_BUFFER(thread) = NULL;
+				}
 #endif
+				pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 			}
 			xfree(LastCPUEmissionTime);
 			xfree(LastCPUEvent);
@@ -2429,9 +2453,14 @@ void Backend_Finalize (void)
 	{
 		int pid;
 		Extrae_getAppendingEventsToGivenPID (&pid);
-		Buffer_Flush(TRACING_BUFFER(THREADID));
-		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
-			Backend_Finalize_close_mpits (pid, thread, TRUE);
+		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+		if (TRACING_BUFFER(THREADID) != NULL)
+		{
+			Buffer_Flush(TRACING_BUFFER(THREADID));
+			for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
+				Backend_Finalize_close_mpits (pid, thread, TRUE);
+		}
+		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 		remove_temporal_files ();
 	}
 }
