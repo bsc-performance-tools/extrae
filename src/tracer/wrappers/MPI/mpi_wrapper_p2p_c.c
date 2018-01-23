@@ -1100,7 +1100,7 @@ int MPI_Testsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 	memcpy (save_reqs, array_of_requests, incount * sizeof (MPI_Request));
 
 #if defined(DEBUG_MPITRACE)
-	fprintf (stderr, PACKAGE_NAME " %d: WAITSOME summary\n", TASKID);
+	fprintf (stderr, PACKAGE_NAME " %d: TESTSOME summary\n", TASKID);
 	for (index = 0; index < incount; index++)
 # if SIZEOF_LONG == 8
 		fprintf (stderr, "%d: position %d -> request %lu\n", TASKID, index, (UINT64) array_of_requests[index]);
@@ -1111,7 +1111,7 @@ int MPI_Testsome_C_Wrapper (int incount, MPI_Request *array_of_requests,
 
 	ptr_array_of_statuses = (MPI_STATUSES_IGNORE == array_of_statuses)?my_statuses:array_of_statuses;
 
-	ierror = PMPI_Waitsome (incount, array_of_requests, outcount, 
+	ierror = PMPI_Testsome (incount, array_of_requests, outcount, 
 		array_of_indices, ptr_array_of_statuses);
 
 	end_time = TIME;

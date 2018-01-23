@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 23Jan2018 Fixes Testsome wrapper calling PMPI_Waitsome instead of PMPI_Testsome (GitHub issue #3)
  * 09Jan2018 Added mutex to protect buffers' double frees from dying pthreads
  * 19Dec2017 Defer the initialization of each IO, DYNAMIC MEMORY and SYSTEM calls to the first time they are used
  * 13Dec2017 Increase maximum events for buffer transactions
