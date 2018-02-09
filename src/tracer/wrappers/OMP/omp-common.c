@@ -105,8 +105,8 @@ void allocate_nested_helpers()
 		__omp_nested_storage = (struct thread_helper_t **)malloc(omp_get_max_threads() * sizeof(struct thread_helper_t *));
 		for (i=0; i<omp_get_max_threads(); i++)
 		{
-			__omp_nested_storage[i] = (struct thread_helper_t *)malloc(MAX_NESTING_LEVEL * sizeof(struct thread_helper_t));
-			for (j=0; j<MAX_NESTING_LEVEL; j++)
+			__omp_nested_storage[i] = (struct thread_helper_t *)malloc((MAX_NESTING_LEVEL + 1) * sizeof(struct thread_helper_t));
+			for (j=0; j<=MAX_NESTING_LEVEL; j++)
 			{
 				__omp_nested_storage[i][j].par_uf = NULL;
 			}
@@ -137,7 +137,7 @@ struct thread_helper_t * get_thread_helper()
 struct thread_helper_t * get_parent_thread_helper()
 {
 	int nesting_level = omp_get_level();
-	int parent_level = nesting_level - 1;
+	int parent_level = nesting_level;
 	int parent_id = omp_get_ancestor_thread_num(parent_level);
 
 	return &(__omp_nested_storage[parent_id][parent_level]);
