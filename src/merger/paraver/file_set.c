@@ -186,7 +186,7 @@ static int newTemporalFile (int taskid, int initial, int depth, char *filename)
 	if ((ID = mkstemp (filename)) == -1)
 	{
 		perror ("mkstemp");
-		fprintf (stderr, "mpi2prv: Error! Unable to create temporal file using mkstemp");
+		fprintf (stderr, "mpi2prv: Error! Unable to create temporal file using mkstemp\n");
 		fflush (stderr);
 		exit (-1);
 	}

@@ -175,7 +175,10 @@ static void AddBinaryObjectInto (unsigned ptask, unsigned task,
 	unsigned found = FALSE, u;
 
 	if (!__Extrae_Utils_file_exists(binary))
+	{
+		fprintf (stderr, "mpi2prv: Warning: Couldn't open %s for reading, addresses may not be translated.\n", binary);
 		return;
+	}
 
 	for (u = 0; u < task_info->num_binary_objects && !found; u++)
 		found = strcmp (task_info->binary_objects[u].module, binary) == 0;

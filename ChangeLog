@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Feb2018 Adds message to warn about merger not able to open the binary to translate addresses
  * 09Feb2018 Changes index calculation when there is no nesting
  * 23Jan2018 Fixes Testsome wrapper calling PMPI_Waitsome instead of PMPI_Testsome (GitHub issue #3)
  * 09Jan2018 Added mutex to protect buffers' double frees from dying pthreads
