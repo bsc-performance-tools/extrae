@@ -103,8 +103,8 @@ void WriteFileBuffer_delete (WriteFileBuffer_t *wfb)
 	WriteFileBuffer_flush (wfb);
 	close (wfb->FD);
 	free (wfb->Buffer);
-	free (wfb);
 	unlink (wfb->filename);
+	free (wfb);
 }
 
 void WriteFileBuffer_deleteall (void)

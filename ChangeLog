@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 28Feb2018 Fix invalid read in WriteFileBuffer_delete (GitHub pull #9)
  * 28Feb2018 Adds R/W lock in OMPT-helper functions (GitHub pull #6)
  * 13Feb2018 Adds message to warn about merger not able to open the binary to translate addresses
  * 09Feb2018 Changes index calculation when there is no nesting
