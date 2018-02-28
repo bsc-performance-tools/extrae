@@ -298,15 +298,16 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 			i.pthreadID = Backend_getNumberOfThreads();
 
 			Backend_ChangeNumberOfThreads (i.pthreadID+1);
-
-			res = pthread_create_real (p1, p2, pthread_create_hook, (void*) &i);
+			pthread_t pid;
+			res = pthread_create_real (&pid, p2, pthread_create_hook, (void*) &i);
 
 			if (0 == res)
 			{
+				*p1 = pid;
 				/* if succeded, wait for a completion on copy the info */
 				pthread_cond_wait (&(i.wait), &(i.lock));
 
-				Backend_SetpThreadID (p1, i.pthreadID);
+				Backend_SetpThreadID (&pid, i.pthreadID);
 			}
 
 			pthread_mutex_unlock_real (&(i.lock));
