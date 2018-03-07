@@ -48,7 +48,10 @@ may remove or edit it.
 you want to change it or regenerate `configure' using a newer version
 of `autoconf'.
 
-   The simplest way to compile this package is:
+   To generate the `configure' file the following command can be used:
+     `autoreconf -i'
+     
+   Then, the simplest way to compile this package is:
 
   1. `cd' to the directory containing the package's source code and type
      `./configure' to configure the package for your system.
