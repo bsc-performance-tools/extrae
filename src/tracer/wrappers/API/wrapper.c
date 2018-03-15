@@ -1710,9 +1710,14 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 	if (!forked)
 	{
 #if defined(HAVE_XML2)
-		if (config_file != NULL)
+		if (config_file != NULL && config_file[0] != '\0')
 		{
-			Parse_XML_File  (me, world_size, config_file);
+			short int ret = Parse_XML_File  (me, world_size, config_file);
+
+			if (ret < 0)
+			{
+				read_environment_variables (me);
+			}
 		}
 		else
 		{

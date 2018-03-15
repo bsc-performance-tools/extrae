@@ -166,6 +166,6 @@
 #define TRACE_CPU_EVENTS_FREQUENCY	((xmlChar*) "frequency")
 #define TRACE_CPU_EVENTS_EMIT_ALWAYS    ((xmlChar*) "emit-always")
 
-void Parse_XML_File (int rank, int world_size, const char *filename);
+short int Parse_XML_File (int rank, int world_size, const char *filename);
 
 #endif

@@ -1538,7 +1538,7 @@ static void Parse_XML_Others (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag
 	}
 }
 
-void Parse_XML_File (int rank, int world_size, const char *filename)
+short int Parse_XML_File (int rank, int world_size, const char *filename)
 {
 	xmlNodePtr current_tag;
 	xmlDocPtr  xmldoc;
@@ -1546,7 +1546,8 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 	char cwd[TMP_DIR];
 	int DynamicMemoryInstrumentation = FALSE;
 	int IOInstrumentation = FALSE;
-  int SysCallInstrumentation = FALSE;
+	int SysCallInstrumentation = FALSE;
+	short int ret = 0;
 
 	/*
 	* This initialize the library and check potential ABI mismatches
@@ -1565,6 +1566,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 			if (xmlStrcasecmp(root_tag->name, TRACE_TAG))
 			{	
 				mfprintf (stderr, PACKAGE_NAME": Invalid configuration file\n");
+				ret = -1;
 			}
 			else
 			{
@@ -1934,6 +1936,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 		else
 		{
 			mfprintf (stderr, PACKAGE_NAME": Error! Empty mpitrace configuration file\n");
+			ret = -1;
 		}
 
 		xmlFreeDoc (xmldoc);
@@ -1941,6 +1944,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 	else
 	{
 		mfprintf (stderr, PACKAGE_NAME": Error! xmlParseFile routine failed!\n");
+		ret = -1;
 	}
 
 #if defined(PIC)
@@ -2022,6 +2026,8 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 
 	/* Clean Up the memory allocated by LIBXML_TEST_VERSION */
 	xmlCleanupParser();
+
+	return ret;
 }
 
 #endif /* HAVE_XML2 */
