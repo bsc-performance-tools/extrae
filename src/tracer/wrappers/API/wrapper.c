@@ -1149,7 +1149,7 @@ static void Add_GlOp_Interval (int glop_id, int trace_status)
 
 void Parse_GlobalOps_Tracing_Intervals(char * sequence) {
    int match, i, n_pairs;
-   int start = 0, stop = 0, last_stop = 0;
+   int start = 0, stop = 0, last_stop = -1;
    char ** tmp;
 
    if ((sequence == (char *)NULL) || (strlen(sequence) == 0)) return;
@@ -1168,8 +1168,11 @@ void Parse_GlobalOps_Tracing_Intervals(char * sequence) {
             fprintf(stderr, PACKAGE_NAME": WARNING! Ignoring overlapped pair '%s' (starting at %d but previous interval stops at %d)\n", tmp[i], start, last_stop);
             continue;
          }
-         Add_GlOp_Interval(start, RESTART);
-         Add_GlOp_Interval(stop, SHUTDOWN);
+		if (start != 0 )
+		{
+			Add_GlOp_Interval(start, RESTART);
+		}
+		Add_GlOp_Interval(stop, SHUTDOWN);
       }
       else {
          start = atoi(tmp[i]);
@@ -1191,23 +1194,22 @@ void Parse_GlobalOps_Tracing_Intervals(char * sequence) {
 
 int GlobalOp_Changes_Trace_Status (int current_glop)
 {
-   if (glops_intervals.n_glops > 0)
-   {
-      if (glops_intervals.glop_list[glops_intervals.next].glop_id == current_glop)
-      {
-         glops_intervals.n_glops --;
-         glops_intervals.next ++;
+	if (glops_intervals.n_glops > 0)
+	{
+		if (glops_intervals.glop_list[glops_intervals.next].glop_id == current_glop)
+		{
+			glops_intervals.n_glops --;
+			glops_intervals.next ++;
 
-         return glops_intervals.glop_list[glops_intervals.next-1].trace_status;
-      }
-      else {
-         return KEEP;
-      }
-   }
-   else
-   {
-      return KEEP;
-   }
+			return glops_intervals.glop_list[glops_intervals.next-1].trace_status;
+		} else
+		{
+			return KEEP;
+		}
+	} else
+	{
+		return KEEP;
+	}
 }
 
 /******************************************************************************
@@ -2075,10 +2077,12 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	}
 	else if (mpitrace_on &&
 	  !Extrae_getCheckControlFile() &&
-	  Extrae_getCheckForGlobalOpsTracingIntervals())
+	  Extrae_getCheckForGlobalOpsTracingIntervals() &&
+	  glops_intervals.glop_list[glops_intervals.next].trace_status != SHUTDOWN)
 	{
 		if (rank == 0)
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size, Backend_getNumberOfThreads());
+
 		Extrae_shutdown_Wrapper();
 	}
 
