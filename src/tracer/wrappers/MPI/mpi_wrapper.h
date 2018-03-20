@@ -44,6 +44,11 @@
 #define RANK_OBJ_SEND 1
 #define RANK_OBJ_RECV 0
 
+void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace);
+void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
+        int local_leader, MPI_Comm remote_comm, int remote_leader, UINT64 time,
+        int trace);
+
 void gettopology (void);
 void configure_MPI_vars (void);
 unsigned long long CalculateNumOpsForPeriod (unsigned long long wannaPeriod,
@@ -133,6 +138,11 @@ void PMPI_Intercomm_create_F_Wrapper (MPI_Fint *local_comm, MPI_Fint *local_lead
 void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
 	MPI_Fint *newintracomm, MPI_Fint *ierror);
 
+void PMPI_Graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
+
+void PMPI_Dist_graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr);
+
+
 #endif /* defined(FORTRAN_SYMBOLS) */
 
 /* C Wrappers */
@@ -190,6 +200,10 @@ int MPI_Start_C_Wrapper (MPI_Request* request);
 int MPI_Startall_C_Wrapper (int count, MPI_Request* requests);
 
 int MPI_Request_free_C_Wrapper (MPI_Request * request);
+
+int MPI_Graph_create_C_Wrapper (MPI_Comm comm_old, int nnodes, int *index, int *edges, int reorder, MPI_Comm *comm_graph);
+
+int MPI_Dist_graph_create_C_Wrapper (MPI_Comm comm_old, int n, int *sources, int *degrees, int *destinations, int *weights, MPI_Info info, int reorder, MPI_Comm *comm_dist_graph);
 
 #endif /* MPI_WRAPPER_DEFINED */
 

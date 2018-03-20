@@ -799,7 +799,7 @@ void NAME_ROUTINE_C2F(mpi_ibcast) (void *buffer, MPI_Fint *count,
 }
 
 /******************************************************************************
- ***  MPI_IAllToAll
+ ***  MPI_Ialltoall
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_ialltoall__,mpi_ialltoall_,MPI_IALLTOALL,mpi_ialltoall, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror))
@@ -838,7 +838,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 
 
 /******************************************************************************
- ***  MPI_IAllToAllV
+ ***  MPI_Ialltoallv
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_ialltoallv__,mpi_ialltoallv_,MPI_IALLTOALLV,mpi_ialltoallv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror))
@@ -875,7 +875,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 
 
 /******************************************************************************
- ***  MPI_IAllgather
+ ***  MPI_Iallgather
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_iallgather__,mpi_iallgather_,MPI_IALLGATHER,mpi_iallgather, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror))
@@ -991,7 +991,7 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 }
 
 /******************************************************************************
- ***  MPI_IGatherV
+ ***  MPI_Igatherv
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_igatherv__,mpi_igatherv_,MPI_IGATHERV,mpi_igatherv, (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror))
@@ -1067,7 +1067,7 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 }
 
 /******************************************************************************
- ***  MPI_IScatterV
+ ***  MPI_Iscatterv
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_iscatterv__,mpi_iscatterv_,MPI_ISCATTERV,mpi_iscatterv,(void *sendbuf, MPI_Fint *sendcount, MPI_Fint *displs, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror))
@@ -1207,7 +1207,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
 }
 
 /******************************************************************************
- ***  MPI_AllToAllW
+ ***  MPI_Alltoallw
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_alltoallw__,mpi_alltoallw_,MPI_ALLTOALLW,mpi_alltoallw, (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierror))
@@ -1243,7 +1243,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 }
 
 /******************************************************************************
- ***  MPI_IallToAllW
+ ***  MPI_Ialltoallw
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_ialltoallw__,mpi_ialltoallw_,MPI_IALLTOALLW,mpi_ialltoallw, (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror))
@@ -1275,6 +1275,406 @@ void NAME_ROUTINE_C2F(mpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 		CtoF77 (pmpi_ialltoallw) (sendbuf, sendcounts, sdispls, sendtypes,
 			recvbuf, recvcounts, rdispls, recvtypes, comm, req, ierror);
 	DLB(DLB_MPI_Ialltoallw_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Graph_create
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_graph_create__,mpi_graph_create_,MPI_GRAPH_CREATE,mpi_graph_create, 
+  (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
+#endif
+{
+	DLB(DLB_MPI_Graph_create_F_enter, comm_old, nnodes, index, edges, reorder, comm_graph, ierr);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Graph_create_Wrapper (comm_old, nnodes, index, edges, reorder, comm_graph, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_graph_create) (comm_old, nnodes, index, edges, reorder, comm_graph, ierr);
+	}
+
+	DLB(DLB_MPI_Graph_create_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Dist_graph_create
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_dist_graph_create__,mpi_dist_graph_create_,MPI_DIST_GRAPH_CREATE,mpi_dist_graph_create,
+  (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
+#endif
+{
+	DLB(DLB_MPI_Dist_graph_create_F_enter, comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_graph, ierr);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Dist_graph_create_Wrapper (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_graph, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_dist_graph_create) (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_graph, ierr);
+	}
+
+	DLB(DLB_MPI_Dist_graph_create_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Neighbor_allgather
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_neighbor_allgather__,mpi_neighbor_allgather_,MPI_NEIGHBOR_ALLGATHER,mpi_neighbor_allgather,
+  (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Neighbor_allgather_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Neighbor_allgather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77 (pmpi_neighbor_allgather) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+	}
+
+	DLB(DLB_MPI_Neighbor_allgather_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Ineighbor_allgather
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_ineighbor_allgather__,mpi_ineighbor_allgather_,MPI_INEIGHBOR_ALLGATHER,mpi_ineighbor_allgather,
+  (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Ineighbor_allgather_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Ineighbor_allgather_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77 (pmpi_ineighbor_allgather) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+	}
+
+	DLB(DLB_MPI_Ineighbor_allgather_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Neighbor_allgatherv
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_neighbor_allgatherv__,mpi_neighbor_allgatherv_,MPI_NEIGHBOR_ALLGATHERV,mpi_neighbor_allgatherv,
+  (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Neighbor_allgatherv_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Neighbor_allgatherv_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_neighbor_allgatherv) (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, ierr);
+	}
+
+	DLB(DLB_MPI_Neighbor_allgatherv_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Ineighbor_allgatherv
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_ineighbor_allgatherv__,mpi_ineighbor_allgatherv_,MPI_INEIGHBOR_ALLGATHERV,mpi_ineighbor_allgatherv,
+  (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Ineighbor_allgatherv_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Ineighbor_allgatherv_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_ineighbor_allgatherv) (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request, ierr);
+	}
+
+	DLB(DLB_MPI_Ineighbor_allgatherv_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Neighbor_alltoall
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_neighbor_alltoall__,mpi_neighbor_alltoall_,MPI_NEIGHBOR_ALLTOALL,mpi_neighbor_alltoall,
+  (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Neighbor_alltoall_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Neighbor_alltoall_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_neighbor_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+	}
+
+	DLB(DLB_MPI_Neighbor_alltoall_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Ineighbor_alltoall
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_ineighbor_alltoall__,mpi_ineighbor_alltoall_,MPI_INEIGHBOR_ALLTOALL,mpi_ineighbor_alltoall,
+  (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Ineighbor_alltoall_F_enter, sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Ineighbor_alltoall_Wrapper (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_ineighbor_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+	}
+
+	DLB(DLB_MPI_Ineighbor_alltoall_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Neighbor_alltoallv
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_neighbor_alltoallv__,mpi_neighbor_alltoallv_,MPI_NEIGHBOR_ALLTOALLV,mpi_neighbor_alltoallv,
+  (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Neighbor_alltoallv_F_enter, sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Neighbor_alltoallv_Wrapper (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_neighbor_alltoallv) (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
+	}
+
+	DLB(DLB_MPI_Neighbor_alltoallv_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Ineighbor_alltoallv
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_ineighbor_alltoallv__,mpi_ineighbor_alltoallv_,MPI_INEIGHBOR_ALLTOALLV,mpi_ineighbor_alltoallv,
+  (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Ineighbor_alltoallv_F_enter, sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Ineighbor_alltoallv_Wrapper (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_ineighbor_alltoallv) (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request, ierr);
+	}
+
+	DLB(DLB_MPI_Ineighbor_alltoallv_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Neighbor_alltoallw
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_neighbor_alltoallw__,mpi_neighbor_alltoallw_,MPI_NEIGHBOR_ALLTOALLW,mpi_neighbor_alltoallw,
+  (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Neighbor_alltoallw_F_enter, sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Neighbor_alltoallw_Wrapper (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_neighbor_alltoallw) (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
+	}
+
+	DLB(DLB_MPI_Neighbor_alltoallw_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Ineighbor_alltoallw
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_ineighbor_alltoallw__,mpi_ineighbor_alltoallw_,MPI_INEIGHBOR_ALLTOALLW,mpi_ineighbor_alltoallw,
+  (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr))
+
+void NAME_ROUTINE_F(mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#else
+void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+#endif
+{
+	MPI_Comm c = MPI_Comm_f2c(*comm);
+
+	DLB(DLB_MPI_Ineighbor_alltoallw_F_enter, sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request, ierr);
+
+	Extrae_MPI_ProcessCollectiveCommunicator (c);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER);
+		Backend_Enter_Instrumentation ();
+		PMPI_Ineighbor_alltoallw_Wrapper (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request, ierr);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE);
+	}
+	else
+	{
+		CtoF77(pmpi_ineighbor_alltoallw) (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request, ierr);
+	}
+
+	DLB(DLB_MPI_Ineighbor_alltoallw_F_leave);
 }
 
 #endif /* MPI3 */

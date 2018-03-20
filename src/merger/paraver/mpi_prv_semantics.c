@@ -428,12 +428,6 @@ static unsigned int Get_GlobalOP_isRoot (event_t *current, int task)
 		case MPI_ISCATTERV_EV:
 			res = Get_EvTarget(current) == task-1;
 		break;
-		case MPI_REDUCESCAT_EV:
-		case MPI_IREDUCESCAT_EV:
-		case MPI_REDUCE_SCATTER_BLOCK_EV:
-		case MPI_IREDUCE_SCATTER_BLOCK_EV:
-			res = Get_EvTarget(current) == 0;
-		break;
 	}
 	return res;
 }
@@ -1256,6 +1250,8 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_CART_SUB_EV, Other_MPI_Event },
 	{ MPI_INTERCOMM_CREATE_EV, Other_MPI_Event },
 	{ MPI_INTERCOMM_MERGE_EV, Other_MPI_Event },
+	{ MPI_GRAPH_CREATE_EV, Other_MPI_Event },
+	{ MPI_DIST_GRAPH_CREATE_EV, Other_MPI_Event },
 	{ MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_SoftwareCounter_Event },
 	{ MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, MPI_ElapsedTimeOutsideRequest_get_status_Event },
 	{ MPI_IPROBE_COUNTER_EV, MPI_IProbeSoftwareCounter_Event },
@@ -1298,6 +1294,16 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_IREDUCE_SCATTER_BLOCK_EV, GlobalOP_event},
 	{ MPI_ALLTOALLW_EV, GlobalOP_event},
 	{ MPI_IALLTOALLW_EV, GlobalOP_event},
+        { MPI_NEIGHBOR_ALLGATHER_EV, GlobalOP_event},
+        { MPI_INEIGHBOR_ALLGATHER_EV, GlobalOP_event},
+        { MPI_NEIGHBOR_ALLGATHERV_EV, GlobalOP_event},
+        { MPI_INEIGHBOR_ALLGATHERV_EV, GlobalOP_event},
+        { MPI_NEIGHBOR_ALLTOALL_EV, GlobalOP_event},
+        { MPI_INEIGHBOR_ALLTOALL_EV, GlobalOP_event},
+        { MPI_NEIGHBOR_ALLTOALLV_EV, GlobalOP_event},
+        { MPI_INEIGHBOR_ALLTOALLV_EV, GlobalOP_event},
+        { MPI_NEIGHBOR_ALLTOALLW_EV, GlobalOP_event},
+        { MPI_INEIGHBOR_ALLTOALLW_EV, GlobalOP_event},
 	{ MPI_GET_ACCUMULATE_EV, MPI_RMA_Event},
 	{ MPI_WIN_LOCK_EV, MPI_RMA_Event},
 	{ MPI_WIN_UNLOCK_EV, MPI_RMA_Event},

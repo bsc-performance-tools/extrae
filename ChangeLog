@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 20Mar2018 Added instrumentation support for MPI_*neighbor* routines
  * 19Mar2018 Allows defining a trace-control gops interval starting at 0
  * 15Mar2018 Fixes segfault when EXTRAE_CONFIG_FILE is wrong (GitHub issue #1)
  * 28Feb2018 Fix invalid read in WriteFileBuffer_delete (GitHub pull #9)

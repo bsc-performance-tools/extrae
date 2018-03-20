@@ -330,6 +330,8 @@ static int CPUEventInterval_Event (event_t * current_event,
 
 	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType,
 	  EvValue);
+
+	return 0;
 }
 
 
@@ -1740,6 +1742,8 @@ static int DynamicMemory_Partition_Event (event_t * event,
         unsigned long long EvValue = Get_EvValue (event);
 
 	trace_paraver_event (cpu, ptask, task, thread, time, MEMKIND_PARTITION_EV, EvValue);
+
+	return 0;
 }
 
 static int SystemCall_Event (event_t * event,                      
@@ -1763,6 +1767,8 @@ static int SystemCall_Event (event_t * event,
 
 	trace_paraver_event (cpu, ptask, task, thread, time, 
 	 SYSCALL_EV, (EvValue == EVT_BEGIN ? SysCallID+1 : 0));
+
+	return 0;
 }                                                                               
 
 

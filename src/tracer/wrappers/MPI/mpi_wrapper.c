@@ -147,11 +147,6 @@ static void Extrae_MPI_Finalize (void)
 	PMPI_Finalize ();
 }
 
-static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace);
-static void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
-	int local_leader, MPI_Comm remote_comm, int remote_leader, UINT64 time,
-	int trace);
-
 /******************************************************************************
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
@@ -2877,7 +2872,7 @@ void Extrae_tracing_tasks_Wrapper (unsigned from, unsigned to)
 /******************************************************************************
  ***  Trace_MPI_Communicator
  ******************************************************************************/
-static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
+void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 {
 	/* Store in the tracefile the definition of the communicator.
 	   If the communicator is self/world, store an alias, otherwise store the
@@ -2945,7 +2940,7 @@ static void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 /******************************************************************************
  ***  Trace_MPI_InterCommunicator
  ******************************************************************************/
-static void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm, 
+void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm, 
 	int local_leader, MPI_Comm remote_comm, int remote_leader, UINT64 time,
 	int trace)
 {

@@ -339,12 +339,12 @@ void PMPI_AllToAll_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 
 	/*
 	*   event : ALLTOALL_EV                  value : EVT_BEGIN
-	*   target : received size               size  : sent size
+	*   target : ---                         size  : sent size
 	*   tag : rank                           commid: communicator id
-	*   aux : ---
+	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALL_EV, EVT_BEGIN, *recvcount * recvsize,
-	  *sendcount * sendsize, me, c, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALL_EV, EVT_BEGIN, EMPTY,
+	  *sendcount * sendsize, me, c, *recvcount * recvsize * csize);
 
 	CtoF77 (pmpi_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
 	  recvtype, comm, ierror);
@@ -359,7 +359,7 @@ void PMPI_AllToAll_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	  Extrae_MPI_getCurrentOpGlobal());
 
 	/* MPI Stats */
-	updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize,  *sendcount * sendsize);
+	updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize,  *sendcount * sendsize);
 }
 
 
@@ -406,19 +406,19 @@ void PMPI_AllToAllV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	}
 
 	/*
-	*   event : ALLTOALLV_EV                  value : EVT_BEGIN
-	*   target : received size               size  : sent size
+	*   event : ALLTOALLV_EV                 value : EVT_BEGIN
+	*   target : ---                         size  : sent size
 	*   tag : rank                           commid: communicator id
-	*   aux : ---
+	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
-	  sendsize * sendc, me, c, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALLV_EV, EVT_BEGIN, EMPTY,
+	  sendsize * sendc, me, c, recvsize * recvc);
 
 	CtoF77 (pmpi_alltoallv) (sendbuf, sendcount, sdispls, sendtype,
 	  recvbuf, recvcount, rdispls, recvtype, comm, ierror);
 
 	/*
-	*   event : ALLTOALLV_EV                  value : EVT_END
+	*   event : ALLTOALLV_EV                 value : EVT_END
 	*   target : ---                         size  : size of the communicator
 	*   tag : ---                            commid : communicator id
 	*   aux : global op counter
@@ -495,14 +495,14 @@ void PMPI_Allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
  ******************************************************************************/
 
 void PMPI_Allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
+	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int ret, sendsize, me, csize;
 	int proc, recvsize, recvc = 0;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-	if (sendcount != NULL)
+	if (*sendcount != 0)
 	{
 		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
 		MPI_CHECK(ret, pmpi_type_size);
@@ -510,7 +510,7 @@ void PMPI_Allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	else
 		sendsize = 0;
 
-	if (recvcount != NULL)
+	if (recvcounts != NULL)
 	{	
 		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
 		MPI_CHECK(ret, pmpi_type_size);
@@ -524,9 +524,9 @@ void PMPI_Allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-	if (recvcount != NULL)
+	if (recvcounts != NULL)
 		for (proc = 0; proc < csize; proc++)
-			recvc += recvcount[proc];
+			recvc += recvcounts[proc];
 
 	/*
 	*   event : ALLGATHERV_EV                    value : EVT_BEGIN
@@ -538,7 +538,7 @@ void PMPI_Allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	  *sendcount * sendsize, me, c, recvsize * recvc);
 
 	CtoF77 (pmpi_allgatherv) (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcount, displs, recvtype, comm, ierror);
+	  recvbuf, recvcounts, displs, recvtype, comm, ierror);
 
 	/*
 	*   event : ALLGATHERV_EV                    value : EVT_END
@@ -1203,12 +1203,12 @@ void PMPI_IallToAll_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 
 	/*
 	*   event : IALLTOALL_EV                  value : EVT_BEGIN
-	*   target : received size               size  : sent size
+	*   target : ---                         size  : sent size
 	*   tag : rank                           commid: communicator id
-	*   aux : ---
+	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALL_EV, EVT_BEGIN, *recvcount * recvsize,
-	  *sendcount * sendsize, me, c, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALL_EV, EVT_BEGIN, EMPTY,
+	  *sendcount * sendsize, me, c, *recvcount * recvsize * csize);
 
 	CtoF77 (pmpi_ialltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount,
 	  recvtype, comm, req, ierror);
@@ -1223,7 +1223,7 @@ void PMPI_IallToAll_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	  Extrae_MPI_getCurrentOpGlobal());
 
 	/* MPI Stats */
-	updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize,  *sendcount * sendsize);
+	updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
 }
 
 
@@ -1272,12 +1272,12 @@ void PMPI_IallToAllV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 
 	/*
 	*   event : IALLTOALLV_EV                  value : EVT_BEGIN
-	*   target : received size               size  : sent size
+	*   target : ---                         size  : sent size
 	*   tag : rank                           commid: communicator id
-	*   aux : ---
+	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALLV_EV, EVT_BEGIN, recvsize * recvc,
-	  sendsize * sendc, me, c, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALLV_EV, EVT_BEGIN, EMPTY,
+	  sendsize * sendc, me, c, recvsize * recvc);
 
 	CtoF77 (pmpi_ialltoallv) (sendbuf, sendcount, sdispls, sendtype,
 	  recvbuf, recvcount, rdispls, recvtype, comm, req, ierror);
@@ -1360,14 +1360,14 @@ void PMPI_Iallgather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
  ******************************************************************************/
 
 void PMPI_Iallgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
-	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs,
+	MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs,
 	MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
 	int ret, sendsize, me, csize;
 	int proc, recvsize, recvc = 0;
 	MPI_Comm c = MPI_Comm_f2c (*comm);
 
-	if (sendcount != NULL)
+	if (*sendcount != 0)
 	{
 		CtoF77 (pmpi_type_size) (sendtype, &sendsize, &ret);
 		MPI_CHECK(ret, pmpi_type_size);
@@ -1375,7 +1375,7 @@ void PMPI_Iallgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	else
 		sendsize = 0;
 
-	if (recvcount != NULL)
+	if (recvcounts != NULL)
 	{	
 		CtoF77 (pmpi_type_size) (recvtype, &recvsize, &ret);
 		MPI_CHECK(ret, pmpi_type_size);
@@ -1389,9 +1389,9 @@ void PMPI_Iallgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
 
-	if (recvcount != NULL)
+	if (recvcounts != NULL)
 		for (proc = 0; proc < csize; proc++)
-			recvc += recvcount[proc];
+			recvc += recvcounts[proc];
 
 	/*
 	*   event : IALLGATHERV_EV                    value : EVT_BEGIN
@@ -1403,7 +1403,7 @@ void PMPI_Iallgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	  *sendcount * sendsize, me, c, recvsize * recvc);
 
 	CtoF77 (pmpi_iallgatherv) (sendbuf, sendcount, sendtype,
-	  recvbuf, recvcount, displs, recvtype, comm, req, ierror);
+	  recvbuf, recvcounts, displs, recvtype, comm, req, ierror);
 
 	/*
 	*   event : IALLGATHERV_EV                    value : EVT_END
@@ -1966,12 +1966,12 @@ void PMPI_AllToAllW_Wrapper (void *sendbuf, MPI_Fint *sendcounts,
 
 	/*
 	*   event : ALLTOALLW_EV                  value : EVT_BEGIN
-	*   target : received size               size  : sent size
+	*   target : ---                         size  : sent size
 	*   tag : rank                           commid: communicator id
-	*   aux : ---
+	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALLW_EV, EVT_BEGIN, recvbytes,
-	  sendbytes, me, c, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_ALLTOALLW_EV, EVT_BEGIN, EMPTY,
+	  sendbytes, me, c, recvbytes);
 
 	CtoF77 (pmpi_alltoallw) (sendbuf, sendcounts, sdispls, sendtypes,
 	  recvbuf, recvcounts, rdispls, recvtypes, comm, ierror);
@@ -2028,12 +2028,12 @@ void PMPI_IallToAllW_Wrapper (void *sendbuf, MPI_Fint *sendcounts,
 
 	/*
 	*   event : IALLTOALLW_EV                  value : EVT_BEGIN
-	*   target : received size               size  : sent size
+	*   target : ---                         size  : sent size
 	*   tag : rank                           commid: communicator id
-	*   aux : ---
+	*   aux : received size
 	*/
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALLW_EV, EVT_BEGIN, recvbytes,
-	  sendbytes, me, c, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_IALLTOALLW_EV, EVT_BEGIN, EMPTY,
+	  sendbytes, me, c, recvbytes);
 
 	CtoF77 (pmpi_ialltoallw) (sendbuf, sendcounts, sdispls, sendtypes,
 	  recvbuf, recvcounts, rdispls, recvtypes, comm, req, ierror);
@@ -2051,6 +2051,705 @@ void PMPI_IallToAllW_Wrapper (void *sendbuf, MPI_Fint *sendcounts,
 	updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
 }
 
+/**
+ * xtr_mpi_comm_neighbors_count 
+ * 
+ * Returns the number of neighbors of the given process topology. If the communicator 'comm' was created with...
+ * 1) MPI_Graph_create, both 'indegree' and 'outdegree' are set to the number of neighbors retrieved by MPI_Graph_neighbors_count
+ * 2) MPI_Cart_create, both 'indegree' and 'outdegree' are set to (2 * ndims), where ndims is retrieved by MPI_Cartdim_get
+ * 3) MPI_Dist_graph_create, 'indegree' and 'outdegree' are set to the corresponding return value of MPI_Dist_graph_neighbors_count
+ * 4) In any other case, 'indegree' and 'outdegree' are set to 0
+ * 
+ * @return the rank of the current task
+ */
+int xtr_mpi_comm_neighbors_count(MPI_Fint *comm, int *indegree, int *outdegree)
+{
+  int ret = 0, me = 0, status = 0, nneighbors = 0, ndims = 0;
+
+  CtoF77(pmpi_comm_rank) (comm, &me, &ret);
+  MPI_CHECK(ret, pmpi_comm_rank);
+
+  CtoF77(pmpi_topo_test) (comm, &status, &ret);
+  MPI_CHECK(ret, pmpi_topo_test);
+
+  switch (status)
+  {
+    case MPI_GRAPH:
+    {
+      CtoF77(pmpi_graph_neighbors_count) (comm, &me, &nneighbors, &ret);
+      MPI_CHECK(ret, pmpi_graph_neighbors_count);
+      if (indegree  != NULL) *indegree  = nneighbors;
+      if (outdegree != NULL) *outdegree = nneighbors;
+      break;
+    }
+    case MPI_CART:
+    {
+      CtoF77(pmpi_cartdim_get) (comm, &ndims, &ret);
+      MPI_CHECK(ret, pmpi_cartdim_get);
+      if (indegree  != NULL) *indegree  = (2 * ndims);
+      if (outdegree != NULL) *outdegree = (2 * ndims);
+      break;
+    }
+    case MPI_DIST_GRAPH:
+    {
+      int weighted; 
+      CtoF77(pmpi_dist_graph_neighbors_count) (comm, indegree, outdegree, &weighted, &ret);
+      MPI_CHECK(ret, pmpi_dist_graph_neighbors_count)
+      break;
+    }
+    case MPI_UNDEFINED:
+    default:
+    {
+      if (indegree  != NULL) *indegree  = 0;
+      if (outdegree != NULL) *outdegree = 0;
+      break;
+    }
+  }
+  return me;
+}
+
+/******************************************************************************
+ ***  PMPI_Graph_create_Wrapper
+ ******************************************************************************/
+
+void PMPI_Graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)
+{
+        MPI_Fint cnull;
+
+        cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_GRAPH_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	CtoF77 (pmpi_graph_create) (comm_old, nnodes, index, edges, reorder, comm_graph, ierr);
+
+        if (*comm_graph != cnull && *ierr == MPI_SUCCESS)
+        {
+                MPI_Comm comm_id = MPI_Comm_f2c(*comm_graph);
+                Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+        }
+
+	TRACE_MPIEVENT (TIME, MPI_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+        updateStats_OTHER(global_mpi_stats);
+}
+
+/******************************************************************************
+ ***  PMPI_Dist_graph_create_Wrapper
+ ******************************************************************************/
+
+void PMPI_Dist_graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)
+{
+        MPI_Fint cnull;
+
+        cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_DIST_GRAPH_CREATE_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	CtoF77 (pmpi_dist_graph_create) (comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_dist_graph, ierr);
+
+        if (*comm_dist_graph != cnull && *ierr == MPI_SUCCESS)
+        {
+                MPI_Comm comm_id = MPI_Comm_f2c(*comm_dist_graph);
+                Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+        }
+
+	TRACE_MPIEVENT (TIME, MPI_DIST_GRAPH_CREATE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+
+        updateStats_OTHER(global_mpi_stats);
+}
+
+/******************************************************************************
+ ***  PMPI_Neighbor_allgather_Wrapper
+ ******************************************************************************/
+
+void PMPI_Neighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+{
+  int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (*sendcount != 0)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  if (*recvcount != 0)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, NULL);
+
+  /*
+   *   event  : NEIGHBOR_ALLGATHER_EV       value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+    me, c, *recvcount * recvsize * indegree);
+
+  CtoF77(pmpi_neighbor_allgather) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+
+  /*
+   *   event  : NEIGHBOR_ALLGATHER_EV       value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+}
+
+/******************************************************************************
+ ***  PMPI_Ineighbor_allgather_Wrapper
+ ******************************************************************************/
+
+void PMPI_Ineighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+{
+  int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (*sendcount != 0)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  if (*recvcount != 0)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, NULL);
+
+  /*
+   *   event  : INEIGHBOR_ALLGATHER_EV      value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLGATHER_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+    me, c, *recvcount * recvsize * indegree);
+
+  CtoF77(pmpi_ineighbor_allgather) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+
+  /*
+   *   event  : INEIGHBOR_ALLGATHER_EV      value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLGATHER_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+}
+
+/******************************************************************************
+ ***  PMPI_Neighbor_allgatherv_Wrapper
+ ******************************************************************************/
+
+void PMPI_Neighbor_allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+{
+  int ret = 0, proc = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0, recvc = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (*sendcount != 0)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  if (recvcounts != NULL)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, NULL);
+
+  if (recvcounts != NULL)
+  {
+    for (proc = 0; proc < indegree; proc ++)
+    {
+      recvc += recvcounts[proc];
+    }
+  }
+
+  /*
+   *   event  : NEIGHBOR_ALLGATHERV_EV      value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+    me, c, recvsize * recvc);
+
+  CtoF77(pmpi_neighbor_allgatherv) (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, ierr);
+
+  /*
+   *   event  : NEIGHBOR_ALLGATHERV_EV      value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, *sendcount * sendsize);
+}
+
+
+/******************************************************************************
+ ***  PMPI_Ineighbor_allgatherv_Wrapper
+ ******************************************************************************/
+
+void PMPI_Ineighbor_allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+{
+  int ret = 0, proc = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0, recvc = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (*sendcount != 0)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, PMPI_Type_size);
+  }
+
+  if (recvcounts != NULL)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, PMPI_Type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, NULL);
+
+  if (recvcounts != NULL)
+  {
+    for (proc = 0; proc < indegree; proc ++)
+    {
+      recvc += recvcounts[proc];
+    }
+  }
+
+  /*
+   *   event  : INEIGHBOR_ALLGATHERV_EV     value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLGATHERV_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+    me, c, recvsize * recvc);
+
+  CtoF77(pmpi_ineighbor_allgatherv) (sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm, request, ierr);
+
+  /*
+   *   event  : INEIGHBOR_ALLGATHERV_EV     value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLGATHERV_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, *sendcount * sendsize);
+}
+
+
+/******************************************************************************
+ ***  PMPI_Neighbor_alltoall_Wrapper
+ ******************************************************************************/
+
+void PMPI_Neighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+{ 
+  int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (*sendcount != 0)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  if (*recvcount != 0)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, NULL);
+
+  /*
+   *   event  : NEIGHBOR_ALLTOALL_EV        value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+    me, c, *recvcount * recvsize * indegree);
+
+  CtoF77(pmpi_neighbor_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+
+  /*
+   *   event  : NEIGHBOR_ALLTOALL_EV        value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+}
+
+
+/******************************************************************************
+ ***  PMPI_Ineighbor_alltoall_Wrapper
+ ******************************************************************************/
+
+void PMPI_Ineighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+{
+  int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (*sendcount != 0)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  if (*recvcount != 0)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, NULL);
+
+  /*
+   *   event  : INEIGHBOR_ALLTOALL_EV       value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLTOALL_EV, EVT_BEGIN, EMPTY, *sendcount * sendsize,
+    me, c, *recvcount * recvsize * indegree);
+
+  CtoF77(pmpi_ineighbor_alltoall) (sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, request, ierr);
+
+  /*
+   *   event  : INEIGHBOR_ALLTOALL_EV        value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLTOALL_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, *recvcount * recvsize * csize, *sendcount * sendsize);
+}
+
+
+/******************************************************************************
+ ***  PMPI_Neighbor_alltoallv_Wrapper
+ ******************************************************************************/
+
+void PMPI_Neighbor_alltoallv_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
+{
+  int proc = 0, ret = 0, me = 0, sendsize = 0, sendc = 0, recvsize = 0, recvc = 0, csize = 0, indegree = 0, outdegree = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (sendcounts != NULL)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  if (recvcounts != NULL)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, &outdegree);
+
+  if (sendcounts != NULL)
+  {
+    for (proc = 0; proc < outdegree; proc++)
+    {
+      sendc += sendcounts[proc];
+    }
+  }
+  if (recvcounts != NULL)
+  {
+    for (proc = 0; proc < indegree; proc++)
+    {
+      recvc += recvcounts[proc];
+    }               
+  }
+
+  /*
+   *   event  : NEIGHBOR_ALLTOALLV_EV       value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
+    me, c, recvsize * recvc);
+
+  CtoF77(pmpi_neighbor_alltoallv) (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
+
+  /*
+   *   event  : NEIGHBOR_ALLTOALLV_EV       value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, c,
+  Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendc * sendsize);
+}
+
+
+/******************************************************************************
+ ***  PMPI_Ineighbor_alltoallv_Wrapper
+ ******************************************************************************/
+
+void PMPI_Ineighbor_alltoallv_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+{
+  int proc = 0, ret = 0, me = 0, sendsize = 0, sendc = 0, recvsize = 0, recvc = 0, csize = 0, indegree = 0, outdegree = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  if (sendcounts != NULL)
+  {
+    CtoF77(pmpi_type_size) (sendtype, &sendsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  if (recvcounts != NULL)
+  {
+    CtoF77(pmpi_type_size) (recvtype, &recvsize, &ret);
+    MPI_CHECK(ret, pmpi_type_size);
+  }
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, &outdegree);
+
+  if (sendcounts != NULL)
+  {
+    for (proc = 0; proc < outdegree; proc++)
+    {
+      sendc += sendcounts[proc];
+    }
+  }
+  if (recvcounts != NULL)
+  {
+    for (proc = 0; proc < indegree; proc++)
+    {
+      recvc += recvcounts[proc];
+    }               
+  }
+
+  /*
+   *   event  : INEIGHBOR_ALLTOALLV_EV      value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLTOALLV_EV, EVT_BEGIN, EMPTY, sendsize * sendc,
+    me, c, recvsize * recvc);
+
+  CtoF77(pmpi_ineighbor_alltoallv) (sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, request, ierr);
+
+  /*
+   *   event  : INEIGHBOR_ALLTOALLV_EV      value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLTOALLV_EV, EVT_END, EMPTY, csize, EMPTY, c,
+  Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, recvc * recvsize, sendc * sendsize);
+}
+
+
+/******************************************************************************
+ ***  PMPI_Neighbor_alltoallw_Wrapper
+ ******************************************************************************/
+
+void PMPI_Neighbor_alltoallw_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr)
+{
+  int ret = 0, proc = 0, me = 0, csize = 0, indegree = 0, outdegree = 0, sendbytes = 0, recvbytes = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, &outdegree);
+
+  for (proc = 0; proc < outdegree; proc++)
+  {
+    int sendsize = 0;
+
+    if (sendtypes != NULL)
+    {
+      CtoF77(pmpi_type_size) (&sendtypes[proc], &sendsize, &ret);
+      MPI_CHECK(ret, pmpi_type_size);
+
+      if (sendcounts != NULL)
+      {
+        sendbytes += sendcounts[proc] * sendsize;
+      }
+    }
+  }
+
+  for (proc = 0; proc < indegree; proc++)
+  {
+    int recvsize = 0;
+
+    if (recvtypes != NULL)
+    {
+      CtoF77(pmpi_type_size) (&recvtypes[proc], &recvsize, &ret);
+      MPI_CHECK(ret, pmpi_type_size);
+
+      if (recvcounts != NULL)
+      {
+        recvbytes += recvcounts[proc] * recvsize;
+      }
+    }
+  }
+
+  /*
+   *   event  : NEIGHBOR_ALLTOALLW_EV       value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
+    me, c, recvbytes);
+
+  CtoF77(pmpi_neighbor_alltoallw) (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
+
+  /*
+   *   event  : NEIGHBOR_ALLTOALLW_EV       value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_NEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+}
+
+
+/******************************************************************************
+ ***  PMPI_Ineighbor_alltoallw_Wrapper
+ ******************************************************************************/
+
+void PMPI_Ineighbor_alltoallw_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
+{
+  int proc = 0, me = 0, ret = 0, csize = 0, indegree = 0, outdegree = 0, sendbytes = 0, recvbytes = 0;
+  MPI_Comm c = MPI_Comm_f2c (*comm);
+
+  CtoF77(pmpi_comm_size) (comm, &csize, &ret);
+  MPI_CHECK(ret, pmpi_comm_size);
+
+  me = xtr_mpi_comm_neighbors_count (comm, &indegree, &outdegree);
+
+  for (proc = 0; proc < outdegree; proc++)
+  {
+    int sendsize = 0;
+
+    if (sendtypes != NULL)
+    {
+      CtoF77(pmpi_type_size) (&sendtypes[proc], &sendsize, &ret);
+      MPI_CHECK(ret, pmpi_type_size);
+
+      if (sendcounts != NULL)
+      {
+        sendbytes += sendcounts[proc] * sendsize;
+      }
+    }
+  }
+
+  for (proc = 0; proc < indegree; proc++)
+  {
+    int recvsize = 0;
+
+    if (recvtypes != NULL)
+    {
+      CtoF77(pmpi_type_size) (&recvtypes[proc], &recvsize, &ret);
+      MPI_CHECK(ret, pmpi_type_size);
+
+      if (recvcounts != NULL)
+      {
+        recvbytes += recvcounts[proc] * recvsize;
+      }
+    }
+  }
+
+  /*
+   *   event  : INEIGHBOR_ALLTOALLW_EV      value  : EVT_BEGIN
+   *   target : ---                         size   : bytes sent
+   *   tag    : rank                        commid : communicator identifier
+   *   aux    : bytes received
+   */
+  TRACE_MPIEVENT (LAST_READ_TIME, MPI_INEIGHBOR_ALLTOALLW_EV, EVT_BEGIN, EMPTY, sendbytes,
+    me, c, recvbytes);
+
+  CtoF77(pmpi_ineighbor_alltoallw) (sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, request, ierr);
+
+  /*
+   *   event  : INEIGHBOR_ALLTOALLW_EV      value  : EVT_END
+   *   target : ---                         size   : size of the communicator
+   *   tag    : ---                         commid : communicator identifier
+   *   aux    : global op counter
+   */
+  TRACE_MPIEVENT (TIME, MPI_INEIGHBOR_ALLTOALLW_EV, EVT_END, EMPTY, csize, EMPTY, c,
+    Extrae_MPI_getCurrentOpGlobal());
+
+  /* MPI Stats */
+  updateStats_COLLECTIVE(global_mpi_stats, recvbytes, sendbytes);
+}
 
 #endif /* MPI3 */
 

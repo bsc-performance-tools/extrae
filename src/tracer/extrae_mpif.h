@@ -253,6 +253,13 @@ void CtoF77 (mpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
 void CtoF77 (mpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror);
 
+void CtoF77 (mpi_intercomm_create)(MPI_Fint *local_comm,
+        MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader,
+        MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror);
+
+void CtoF77 (mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
+        MPI_Fint *newintracomm, MPI_Fint *ierror);
+
 void CtoF77 (mpi_start) (MPI_Fint *request, MPI_Fint *ierror);
 
 void CtoF77 (mpi_startall) (MPI_Fint *count, MPI_Fint array_of_requests[],
@@ -311,6 +318,37 @@ void CtoF77 (mpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 	MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
 	MPI_Fint *rdispls, MPI_Fint *recvtypes,	MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);
 
+void CtoF77 (mpi_topo_test) (MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
+
+void CtoF77 (mpi_cartdim_get) (MPI_Fint *comm, MPI_Fint *ndims, MPI_Fint *ierr);
+
+void CtoF77 (mpi_graph_neighbors_count) (MPI_Fint *comm, MPI_Fint *rank, MPI_Fint *nneighbors, MPI_Fint *ierr);
+
+void CtoF77 (mpi_dist_graph_neighbors_count) (MPI_Fint *comm, MPI_Fint *indegree, MPI_Fint *outdegree, MPI_Fint *weighted, MPI_Fint *ierr);
+
+void CtoF77 (mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
+
+void CtoF77 (mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
+
+void CtoF77 (mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (mpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (mpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (mpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (mpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (mpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (mpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (mpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
 
 
 #if defined(MPI_SUPPORTS_MPI_IO)
@@ -611,11 +649,11 @@ void CtoF77 (pmpi_cart_create) (MPI_Fint *comm_old, MPI_Fint *ndims,
 void CtoF77 (pmpi_cart_sub) (MPI_Fint *comm, MPI_Fint *remain_dims,
 	MPI_Fint *comm_new, MPI_Fint *ierror);
 
-void CtoF77(mpi_intercomm_create)(MPI_Fint *local_comm,
+void CtoF77(pmpi_intercomm_create)(MPI_Fint *local_comm,
 	MPI_Fint *local_leader, MPI_Fint *peer_comm, MPI_Fint *remote_leader,
 	MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror);
 
-void CtoF77 (mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
+void CtoF77 (pmpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
 	MPI_Fint *newintracomm, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_start) (MPI_Fint *request, MPI_Fint *ierror);
@@ -676,6 +714,37 @@ void CtoF77 (pmpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 	MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts,
 	MPI_Fint *rdispls, MPI_Fint *recvtypes,	MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror);
 
+void CtoF77 (pmpi_topo_test) (MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr); 
+
+void CtoF77 (pmpi_cartdim_get) (MPI_Fint *comm, MPI_Fint *ndims, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_graph_neighbors_count) (MPI_Fint *comm, MPI_Fint *rank, MPI_Fint *nneighbors, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_dist_graph_neighbors_count) (MPI_Fint *comm, MPI_Fint *indegree, MPI_Fint *outdegree, MPI_Fint *weighted, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr);
+
+void CtoF77 (pmpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
 
 
 #if (MPI_SUPPORTS_MPI_IO)
@@ -739,9 +808,6 @@ void CtoF77(pmpi_win_lock) (MPI_Fint* lock_type, MPI_Fint* rank, MPI_Fint* asser
 void CtoF77(pmpi_win_unlock) (MPI_Fint* rank, MPI_Fint* win, MPI_Fint* ierror);
 
 void CtoF77(pmpi_get_accumulate) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror);
-
-
-
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 

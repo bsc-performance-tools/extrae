@@ -34,6 +34,7 @@
 #define MPI3_C_INT_P_CAST (int *)
 #define MPI3_MPI_INFO_P_CAST (MPI_Info *)
 #define MPI3_MPI_DATATYPE_P_CAST (MPI_Datatype *)
+#define MPI3_MPI_AINT_P_CAST (MPI_Aint *)
 #else
 #define MPI3_CONST
 #define MPI3_VOID_P_CAST
@@ -42,6 +43,7 @@
 #define MPI3_C_INT_P_CAST
 #define MPI3_MPI_INFO_P_CAST
 #define MPI3_MPI_DATATYPE_P_CAST
+#define MPI3_MPI_AINT_P_CAST
 #endif
 
 

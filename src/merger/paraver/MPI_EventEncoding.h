@@ -34,7 +34,7 @@
 #define MPITYPE_OTHER              50000003
 #define MPITYPE_RMA                50000004
 #define MPITYPE_RMA_SIZE           50001000
-#define MPITYPE_RMA_TARGET_RANK           50001001
+#define MPITYPE_RMA_TARGET_RANK    50001001
 #define MPITYPE_RMA_ORIGIN_ADDR    50001002
 #define MPITYPE_RMA_TARGET_DISP    50001003
 #define MPITYPE_COMM               MPITYPE_OTHER
@@ -235,7 +235,18 @@ typedef enum
   MPI_IREDUCE_SCATTER_BLOCK_VAL,
   MPI_ALLTOALLW_VAL, /* 170 */
   MPI_IALLTOALLW_VAL,
-  MPI_GET_ACCUMULATE_VAL
+  MPI_GET_ACCUMULATE_VAL,
+  MPI_DIST_GRAPH_CREATE_VAL,
+  MPI_NEIGHBOR_ALLGATHER_VAL,
+  MPI_INEIGHBOR_ALLGATHER_VAL,
+  MPI_NEIGHBOR_ALLGATHERV_VAL,
+  MPI_INEIGHBOR_ALLGATHERV_VAL,
+  MPI_NEIGHBOR_ALLTOALL_VAL,
+  MPI_INEIGHBOR_ALLTOALL_VAL,
+  MPI_NEIGHBOR_ALLTOALLV_VAL, /* 180 */
+  MPI_INEIGHBOR_ALLTOALLV_VAL, 
+  MPI_NEIGHBOR_ALLTOALLW_VAL,
+  MPI_INEIGHBOR_ALLTOALLW_VAL
 }
 MPIVal;
 
@@ -285,6 +296,17 @@ MPIVal;
 #define  MPI_IREDUCE_SCATTER_BLOCK_LABEL   "MPI_Ireduce_scatter_block"
 #define  MPI_IALLTOALLW_LABEL		   	   "MPI_Ialltoallw"
 
+#define  MPI_NEIGHBOR_ALLGATHER_LABEL      "MPI_Neighbor_allgather"
+#define  MPI_INEIGHBOR_ALLGATHER_LABEL     "MPI_Ineighbor_allgather"
+#define  MPI_NEIGHBOR_ALLGATHERV_LABEL     "MPI_Neighbor_allgatherv"
+#define  MPI_INEIGHBOR_ALLGATHERV_LABEL    "MPI_Ineighbor_allgatherv"
+#define  MPI_NEIGHBOR_ALLTOALL_LABEL       "MPI_Neighbor_alltoall"
+#define  MPI_INEIGHBOR_ALLTOALL_LABEL      "MPI_Ineighbor_alltoall"
+#define  MPI_NEIGHBOR_ALLTOALLV_LABEL      "MPI_Neighbor_alltoallv"
+#define  MPI_INEIGHBOR_ALLTOALLV_LABEL     "MPI_Ineighbor_alltoallv"
+#define  MPI_NEIGHBOR_ALLTOALLW_LABEL      "MPI_Neighbor_alltoallw"
+#define  MPI_INEIGHBOR_ALLTOALLW_LABEL     "MPI_Ineighbor_alltoallw"
+
 #define  MPI_INIT_LABEL                    "MPI_Init"
 #define  MPI_FINALIZE_LABEL                "MPI_Finalize"
 #define  MPI_BSEND_LABEL                   "MPI_Bsend"
@@ -309,6 +331,7 @@ MPIVal;
 #define  MPI_GRAPH_GET_LABEL               "MPI_Graph_get"
 #define  MPI_GRAPH_MAP_LABEL               "MPI_Graph_map"
 #define  MPI_GRAPH_CREATE_LABEL            "MPI_Graph_create"
+#define  MPI_DIST_GRAPH_CREATE_LABEL       "MPI_Dist_graph_create"
 #define  MPI_GRAPH_NEIGHBORS_LABEL         "MPI_Graph_neighbors"
 #define  MPI_GRAPHDIMS_GET_LABEL           "MPI_Graphdims_get"
 #define  MPI_GRAPH_NEIGHBORS_COUNT_LABEL   "MPI_Graph_neighbors_count"

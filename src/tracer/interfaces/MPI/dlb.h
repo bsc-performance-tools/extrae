@@ -918,6 +918,54 @@ void DLB_MPI_Ialltoallw_F_enter (void *sendbuf, MPI_Fint *sendcounts,
 void DLB_MPI_Ialltoallw_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Graph_create_F_enter (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *index, MPI_Fint *edges, MPI_Fint *reorder, MPI_Fint *comm_graph, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Graph_create_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Dist_graph_create_F_enter (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *sources, MPI_Fint *degrees, MPI_Fint *destinations, MPI_Fint *weights, MPI_Fint *info, MPI_Fint *reorder, MPI_Fint *comm_dist_graph, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Dist_graph_create_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_allgather_F_enter (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Neighbor_allgather_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_allgather_F_enter (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Ineighbor_allgather_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_allgatherv_F_enter (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Neighbor_allgatherv_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_allgatherv_F_enter (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Ineighbor_allgatherv_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_alltoall_F_enter (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Neighbor_alltoall_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_alltoall_F_enter (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Ineighbor_alltoall_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_alltoallv_F_enter (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Neighbor_alltoallv_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_alltoallv_F_enter (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Ineighbor_alltoallv_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_alltoallw_F_enter (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Neighbor_alltoallw_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_alltoallw_F_enter (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Ineighbor_alltoallw_F_leave (void)__attribute__((weak));
+
+
 /***  C  ***/
 
 void DLB_MPI_Reduce_enter (MPI3_CONST void *sendbuf, void *recvbuf, int count,
@@ -1026,7 +1074,7 @@ void DLB_MPI_Ialltoall_leave (void)__attribute__((weak));
 void DLB_MPI_Ialltoallv_enter (MPI3_CONST void *sendbuf, MPI3_CONST int *sendcounts, MPI3_CONST int *sdispls,
 	MPI_Datatype sendtype, void *recvbuf, MPI3_CONST int *recvcounts, MPI3_CONST int *rdispls,
 	MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *req)__attribute__((weak));
-void DLB_MPI_Alltoallv_leave (void)__attribute__((weak));
+void DLB_MPI_Ialltoallv_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_Iallgather_enter (MPI3_CONST void *sendbuf, int sendcount,
@@ -1094,6 +1142,54 @@ void DLB_MPI_Ialltoallw_enter (MPI3_CONST void *sendbuf, MPI3_CONST int *sendcou
     MPI3_CONST MPI_Datatype *recvtypes, MPI_Comm comm,
     MPI_Request *req)__attribute__((weak));
 void DLB_MPI_Ialltoallw_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Graph_create_enter (MPI_Comm comm_old, int nnodes, int *index, int *edges, int reorder, MPI_Comm *comm_graph)__attribute__((weak));
+void DLB_MPI_Graph_create_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Dist_graph_create_enter (MPI_Comm comm_old, int n, int *sources, int *degrees, int *destinations, int *weights, MPI_Info info, int reorder, MPI_Comm *comm_dist_graph)__attribute__((weak));
+void DLB_MPI_Dist_graph_create_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_allgather_enter (void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Neighbor_allgather_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_allgather_enter (void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *request)__attribute__((weak));
+void DLB_MPI_Ineighbor_allgather_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_allgatherv_enter (void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *displs, MPI_Datatype recvtype, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Neighbor_allgatherv_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_allgatherv_enter (void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *displs, MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *request)__attribute__((weak));
+void DLB_MPI_Ineighbor_allgatherv_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_alltoall_enter (void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Neighbor_alltoall_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_alltoall_enter (void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *request)__attribute__((weak));
+void DLB_MPI_Ineighbor_alltoall_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_alltoallv_enter (void *sendbuf, int *sendcounts, int *sdispls, MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *rdispls, MPI_Datatype recvtype, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Neighbor_alltoallv_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_alltoallv_enter (void *sendbuf, int *sendcounts, int *sdispls, MPI_Datatype sendtype, void *recvbuf, int *recvcounts, int *rdispls, MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *request)__attribute__((weak));
+void DLB_MPI_Ineighbor_alltoallv_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Neighbor_alltoallw_enter (void *sendbuf, int *sendcounts, MPI_Aint *sdispls, MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, MPI_Aint *rdispls, MPI_Datatype *recvtypes, MPI_Comm comm)__attribute__((weak));
+void DLB_MPI_Neighbor_alltoallw_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Ineighbor_alltoallw_enter (void *sendbuf, int *sendcounts, MPI_Aint *sdispls, MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, MPI_Aint *rdispls, MPI_Datatype *recvtypes, MPI_Comm comm, MPI_Request *request)__attribute__((weak));
+void DLB_MPI_Ineighbor_alltoallw_leave (void)__attribute__((weak));
 
 
 #endif
