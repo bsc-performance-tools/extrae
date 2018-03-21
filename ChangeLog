@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 11May2018 Added support for ARM64 cross-compilation (GitHub pull #11)
  * 06Apr2018 Fixed missing states for MPI_*neighbor* routines
  * 20Mar2018 Added instrumentation support for MPI_*neighbor* routines
  * 19Mar2018 Allows defining a trace-control gops interval starting at 0
