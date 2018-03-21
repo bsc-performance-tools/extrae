@@ -5,7 +5,7 @@
 AC_DEFUN([AX_SHOW_CONFIGURATION],
 [
 	if test "${host}" != "${build}" ; then
-		CROSSC="${host} to ${build}"
+		CROSSC="${host} into ${build}"
 	else
 		if test "${IS_BGL_MACHINE}" = "yes" ; then
 			CROSSC="${host} with BG/L system support"
