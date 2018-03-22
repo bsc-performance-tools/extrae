@@ -1749,6 +1749,7 @@ void Parse_XML_File (int rank, int world_size, const char *filename)
 							tracejant_omp = TRUE;
 							Parse_XML_OMP (rank, xmldoc, current_tag);
 
+							ompt_enabled = FALSE; /* OMPT is disabled by default */
 							xmlChar *ompt = xmlGetProp_env (rank, current_tag, TRACE_OMP_OMPT);
 							if (ompt != NULL && !xmlStrcasecmp (ompt, xmlYES))
 							{
