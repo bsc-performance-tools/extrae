@@ -183,13 +183,13 @@ unsigned IsJava (unsigned EvType)
 /******************************************************************************
  ***  IsCUDA
  ******************************************************************************/
-#define CUDA_EVENTS 14
+#define CUDA_EVENTS 15
 static unsigned cuda_events[] = {
 	/* Host events */
 	CUDALAUNCH_EV, CUDACONFIGCALL_EV,
 	CUDAMEMCPY_EV, CUDAMEMCPYASYNC_EV, CUDATHREADBARRIER_EV,
 	CUDASTREAMBARRIER_EV, CUDASTREAMCREATE_EV, CUDADEVICERESET_EV,
-	CUDATHREADEXIT_EV,
+	CUDATHREADEXIT_EV, CUDASTREAMDESTROY_EV,
 	/* Accelerator events */
     CUDAKERNEL_GPU_EV, CUDACONFIGKERNEL_GPU_EV, CUDAMEMCPY_GPU_EV,
 	CUDAMEMCPYASYNC_GPU_EV, CUDATHREADBARRIER_GPU_EV };

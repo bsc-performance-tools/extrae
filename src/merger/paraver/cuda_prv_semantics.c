@@ -55,7 +55,9 @@ static int CUDA_Call (event_t* event, unsigned long long current_time,
 
 	switch (EvType)
 	{
-		case CUDACONFIGCALL_EV:	
+		case CUDACONFIGCALL_EV:
+		case CUDASTREAMCREATE_EV:
+		case CUDASTREAMDESTROY_EV:
 			state = STATE_OTHERS;
 			Switch_State (state, (EvValue != EVT_END), ptask, task, thread);
 			break;
@@ -169,6 +171,8 @@ SingleEv_Handler_t PRV_CUDA_Event_Handlers[] = {
 	{ CUDASTREAMBARRIER_EV, CUDA_Call },
 	{ CUDADEVICERESET_EV, CUDA_Call },
 	{ CUDATHREADEXIT_EV, CUDA_Call },
+	{ CUDASTREAMCREATE_EV, CUDA_Call },
+	{ CUDASTREAMDESTROY_EV, CUDA_Call },
 	/* Accelerator calls */
 	{ CUDAKERNEL_GPU_EV, CUDA_GPU_Call },
 	{ CUDACONFIGKERNEL_GPU_EV, CUDA_GPU_Call },

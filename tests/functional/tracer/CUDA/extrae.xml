@@ -51,18 +51,12 @@
 
   <sampling enabled="no" type="default" period="50m" variability="10m" />
 
-  <merge enabled="yes" 
+  <merge enabled="no" 
     synchronization="default"
-    binary="hello"
     tree-fan-out="16"
     max-memory="512"
     joint-states="yes"
     keep-mpits="yes"
     sort-addresses="yes"
-		remove-files="no"
-  >
-    hello.prv
-  </merge>
-
-
+    remove-files="no" />
 </trace>

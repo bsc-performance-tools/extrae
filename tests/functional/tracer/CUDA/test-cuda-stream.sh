@@ -67,25 +67,27 @@ function checkInPCF() {
 # The compilation part of the check is inserted here due to the difficulties of change the compiler to nvcc
 
 # Try first with -cudart shared (recent nvcc compilers requires this)
-nvcc -g -cudart shared hello.cu -o hello
-if [[ ! -x hello ]]; then
-	nvcc -g hello.cu -o hello
+nvcc -g -cudart shared stream.cu -o stream
+if [[ ! -x stream ]]; then
+	nvcc -g stream.cu -o stream
 fi
 
-./trace.sh ./hello
-${TOP_BUILDDIR}/src/merger/mpi2prv -f TRACE.mpits -o hello.prv
+./trace.sh ./stream
+${TOP_BUILDDIR}/src/merger/mpi2prv -f TRACE.mpits -o stream.prv
 
 # Check tests
-getEventType "Flushing Traces" hello.prv
-checkInPCF "CUDA" hello.pcf 
-checkInPCF "cudaLaunch" hello.pcf 
-checkInPCF "cudaConfigureCall" hello.pcf 
-checkInPCF "cudaMemcpy" hello.pcf 
-checkInPCF "cudaThreadSynchronize" hello.pcf 
-#checkInPCF "cudaStreamSynchronize" hello.pcf 
-checkInPCF "helloWorld" hello.pcf 
+getEventType "Flushing Traces" stream.prv
+checkInPCF "CUDA" stream.pcf 
+checkInPCF "cudaLaunch" stream.pcf 
+checkInPCF "cudaConfigureCall" stream.pcf 
+checkInPCF "cudaMemcpyAsync" stream.pcf 
+checkInPCF "cudaThreadSynchronize" stream.pcf 
+#checkInPCF "cudaStreamSynchronize" stream.pcf 
+checkInPCF "helloStream" stream.pcf 
+checkInPCF "cudaStreamCreate" stream.pcf
+checkInPCF "cudaStreamDestroy" stream.pcf
 
-checkInTrace "CUDA kernel" helloWorld hello.prv
-checkInTrace "CUDA library call" cudaThreadSynchronize hello.prv
+checkInTrace "CUDA kernel" helloStream stream.prv
+checkInTrace "CUDA library call" cudaThreadSynchronize stream.prv
 
 exit 0

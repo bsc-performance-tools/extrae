@@ -174,6 +174,26 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 					Extrae_cudaThreadExit_Enter();
 			}
 			break;
+
+			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v3020:
+			{
+			cudaStreamDestroy_v3020_params *p = (cudaStreamDestroy_v3020_params*)cbinfo->functionParams;
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaStreamDestroy_Enter (p->pStream);
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaStreamDestroy_Exit ();
+			}
+			break;
+
+			case CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v5050:
+			{
+			cudaStreamDestroy_v5050_params *p = (cudaStreamDestroy_v5050_params*)cbinfo->functionParams;
+			if (cbinfo->callbackSite == CUPTI_API_ENTER)
+				Extrae_cudaStreamDestroy_Enter (p->pStream);
+			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
+				Extrae_cudaStreamDestroy_Exit ();
+			}
+			break;
 		}
 	}
 }
@@ -199,7 +219,9 @@ void Extrae_CUDA_init (int rank)
 	  CUPTI_RUNTIME_TRACE_CBID_cudaMemcpy_v3020
 	  CUPTI_RUNTIME_TRACE_CBID_cudaMemcpyAsync_v3020
 	  CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020
-	  CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020 */
+	  CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v3020
+	  CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v5050 */
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
 		CUPTI_RUNTIME_TRACE_CBID_cudaLaunch_v3020);
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
@@ -224,5 +246,9 @@ void Extrae_CUDA_init (int rank)
 		CUPTI_RUNTIME_TRACE_CBID_cudaDeviceReset_v3020);
 	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
 		CUPTI_RUNTIME_TRACE_CBID_cudaThreadExit_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v3020);
+	cuptiEnableCallback (1, subscriber, CUPTI_CB_DOMAIN_RUNTIME_API,
+		CUPTI_RUNTIME_TRACE_CBID_cudaStreamDestroy_v5050);
 }
 

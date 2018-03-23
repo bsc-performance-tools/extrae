@@ -56,6 +56,9 @@ static cudaError_t (*real_cudaStreamSynchronize)(cudaStream_t) = NULL;
 static cudaError_t (*real_cudaMemcpy)(void*,const void*,size_t,enum cudaMemcpyKind) = NULL;
 static cudaError_t (*real_cudaMemcpyAsync)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t) = NULL;
 static cudaError_t (*real_cudaStreamCreate)(cudaStream_t*) = NULL;
+static cudaError_t (*real_cudaStreamCreateWithFlags)(cudaStream_t*, unsigned int) = NULL;
+static cudaError_t (*real_cudaStreamCreateWithPriority)(cudaStream_t*, unsigned int, int) = NULL;
+static cudaError_t (*real_cudaStreamDestroy)(cudaStream_t *) = NULL;
 static cudaError_t (*real_cudaDeviceReset)(void) = NULL;
 static cudaError_t (*real_cudaThreadExit)(void) = NULL;
 #endif /* PIC */
@@ -80,6 +83,12 @@ void Extrae_CUDA_init (int rank)
 	real_cudaMemcpyAsync = (cudaError_t(*)(void*,const void*,size_t,enum cudaMemcpyKind,cudaStream_t)) dlsym (RTLD_NEXT, "cudaMemcpyAsync");
 
 	real_cudaStreamCreate = (cudaError_t(*)(cudaStream_t*)) dlsym (RTLD_NEXT, "cudaStreamCreate");
+
+	real_cudaStreamCreateWithFlags = (cudaError_t(*)(cudaStream_t*, unsigned int)) dlsym (RTLD_NEXT, "cudaStreamCreateWithFlags");
+
+	real_cudaStreamCreateWithPriority = (cudaError_t(*)(cudaStream_t*, unsigned int, int)) dlsym (RTLD_NEXT, "cudaStreamCreateWithPriority");
+
+	real_cudaStreamDestroy = (cudaError_t(*)(cudaStream_t*)) dlsym (RTLD_NEXT, "cudaStreamDestroy");
 
 	real_cudaDeviceReset = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceReset");
 
@@ -157,28 +166,112 @@ cudaError_t cudaConfigureCall (dim3 p1, dim3 p2, size_t p3, cudaStream_t p4)
 	return res;
 }
 
-cudaError_t cudaStreamCreate (cudaStream_t *p1)
+cudaError_t cudaStreamCreate (cudaStream_t *pStream)
 {
 	cudaError_t res;
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate is at %p\n", THREADID, real_cudaStreamCreate);
-	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate params %p %p %d %d %d\n", THREADID, p1);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreate params %p\n", THREADID, pStream);
 #endif
 
 	if (real_cudaStreamCreate != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaStreamCreate_Enter (p1);
-		res = real_cudaStreamCreate (p1);
+		Extrae_cudaStreamCreate_Enter (pStream);
+		res = real_cudaStreamCreate (pStream);
 		Extrae_cudaStreamCreate_Exit ();
 	}
 	else if (real_cudaStreamCreate != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{
-		res = real_cudaStreamCreate (p1);
+		res = real_cudaStreamCreate (pStream);
 	}
 	else
 	{
 		fprintf (stderr, "Unable to find cudaStreamCreate in DSOs!! Dying...\n");
+		exit (0);
+	}
+
+	return res;
+}
+
+cudaError_t cudaStreamCreateWithFlags (cudaStream_t *pStream, unsigned int flags)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithFlags is at %p\n", THREADID, real_cudaStreamCreateWithFlags);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithFlags params %p %u\n", THREADID, pStream, flags);
+#endif
+
+	if (real_cudaStreamCreateWithFlags != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaStreamCreate_Enter (pStream);
+		res = real_cudaStreamCreateWithFlags (pStream, flags);
+		Extrae_cudaStreamCreate_Exit ();
+	}
+	else if (real_cudaStreamCreateWithFlags != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaStreamCreateWithFlags (pStream, flags);
+	}
+	else
+	{
+		fprintf (stderr, "Unable to find cudaStreamCreateWithFlags in DSOs!! Dying...\n");
+		exit (0);
+	}
+
+	return res;
+}
+
+cudaError_t cudaStreamCreateWithPriority (cudaStream_t *pStream, unsigned int flags, int priority)
+{
+	cudaError_t res;
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithPriority is at %p\n", THREADID, real_cudaStreamCreateWithFlags);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamCreateWithPriority params %p %u %d\n", THREADID, pStream, flags, priority);
+#endif
+
+	if (real_cudaStreamCreateWithPriority != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaStreamCreate_Enter (pStream);
+		res = real_cudaStreamCreateWithPriority (pStream, flags, priority);
+		Extrae_cudaStreamCreate_Exit ();
+	}
+	else if (real_cudaStreamCreateWithPriority != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaStreamCreateWithPriority (pStream, flags, priority);
+	}
+	else
+	{
+		fprintf (stderr, "Unable to find cudaStreamCreateWithPriority in DSOs!! Dying...\n");
+		exit (0);
+	}
+
+	return res;
+}
+
+cudaError_t cudaStreamDestroy (cudaStream_t *stream)
+{
+	cudaError_t res;
+
+#if defined (DEBUG)
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamDestroy is at %p\n", THREADID, real_cudaStreamDestroy);
+	fprintf (stderr, PACKAGE_NAME": THREAD %d cudaStreamDestroy params %p\n", THREADID, stream);
+#endif
+
+	if (real_cudaStreamDestroy != NULL && mpitrace_on && Extrae_get_trace_CUDA())
+	{
+		Extrae_cudaStreamDestroy_Enter (stream);
+		res = real_cudaStreamDestroy (stream);
+		Extrae_cudaStreamDestroy_Exit ();
+	}
+	else if (real_cudaStreamDestroy != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
+	{
+		res = real_cudaStreamDestroy (stream);
+	}
+	else
+	{
+		fprintf (stderr, "Unable to find cudaStreamDestroy in DSOs!! Dying...\n");
 		exit (0);
 	}
 
@@ -277,9 +370,9 @@ cudaError_t cudaDeviceSynchronize (void)
 
 	if (real_cudaDeviceSynchronize != NULL && mpitrace_on && Extrae_get_trace_CUDA())
 	{
-		Extrae_cudaThreadSynchronize_Enter ();
+		Extrae_cudaDeviceSynchronize_Enter ();
 		res = real_cudaDeviceSynchronize ();
-		Extrae_cudaThreadSynchronize_Exit ();
+		Extrae_cudaDeviceSynchronize_Exit ();
 	}
 	else if (real_cudaDeviceSynchronize != NULL && !(mpitrace_on && Extrae_get_trace_CUDA()))
 	{

@@ -4,7 +4,10 @@ EXTRA_DIST = \
  extrae.xml \
  trace.sh \
  hello.cu \
- test-cuda-simple.sh 
+ stream.cu \
+ test-cuda-simple.sh \
+ test-cuda-stream.sh
 
 TESTS = \
- test-cuda-simple.sh
+ test-cuda-simple.sh \
+ test-cuda-stream.sh

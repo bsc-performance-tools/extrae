@@ -60,6 +60,17 @@ typedef struct cudaStreamCreate_v3020_params_st {
 	cudaStream_t *pStream;
 } cudaStreamCreate_v3020_params;
 
+typedef struct cudaStreamCreateWithFlags_v5000_params_st {
+	cudaStream_t *pStream;
+	unsigned int flags;
+} cudaStreamCreateWithFlags_v5000_params;
+
+typedef struct cudaStreamCreateWithPriority_v5050_params_st {
+	cudaStream_t *pStream;
+	unsigned int flags;
+	int priority;
+} cudaStreamCreateWithPriority_v5050_params;
+
 typedef struct cudaStreamSynchronize_v3020_params_st {
 	cudaStream_t stream;
 } cudaStreamSynchronize_v3020_params;
@@ -78,6 +89,14 @@ typedef struct cudaMemcpyAsync_v3020_params_st {
 	enum cudaMemcpyKind kind;
 	cudaStream_t stream;
 } cudaMemcpyAsync_v3020_params;
+
+typedef struct cudaStreamDestroy_v3020_params_st {
+	cudaStream_t stream;
+} cudaStreamDestroy_v3020_params;
+
+typedef struct cudaStreamDestroy_v5050_params_st {
+	cudaStream_t stream;
+} cudaStreamDestroy_v5050_params;
 
 
 /* From cuda_runtime_api.h */
@@ -154,6 +173,8 @@ void Extrae_cudaDeviceSynchronize_Enter (void);
 void Extrae_cudaDeviceSynchronize_Exit (void);
 void Extrae_cudaStreamCreate_Enter (cudaStream_t*);
 void Extrae_cudaStreamCreate_Exit (void);
+void Extrae_cudaStreamDestroy_Enter (cudaStream_t*);
+void Extrae_cudaStreamDestroy_Exit (void);
 void Extrae_cudaStreamSynchronize_Enter (cudaStream_t);
 void Extrae_cudaStreamSynchronize_Exit (void);
 void Extrae_cudaMemcpy_Enter (void*, const void*, size_t, enum cudaMemcpyKind);

@@ -221,6 +221,35 @@ static int Extrae_CUDA_SearchStream (int devid, cudaStream_t stream)
 	return -1;
 }
 
+static void Extrae_CUDA_unRegisterStream (int devid, cudaStream_t stream)
+{
+	int stid = Extrae_CUDA_SearchStream (devid, stream);
+
+#ifdef DEBUG
+	fprintf (stderr, "Extrae_CUDA_unRegisterStream (devid=%d, stream=%p unassigned from streamid => %d/%d\n", devid, stream, stid, devices[devid].nstreams);
+#endif
+
+	int nstreams = devices[devid].nstreams - 1;
+
+	struct RegisteredStreams_t *rs_tmp = (struct RegisteredStreams_t*) malloc (nstreams*sizeof(struct RegisteredStreams_t));
+
+	if (rs_tmp != NULL)
+	{
+		memmove (rs_tmp, devices[devid].Stream, stid * sizeof(struct RegisteredStreams_t));
+		memmove (rs_tmp+stid, devices[devid].Stream + stid + 1, (devices[devid].nstreams - stid - 1)*sizeof(struct RegisteredStreams_t));
+
+		devices[devid].nstreams = nstreams;
+
+		free (devices[devid].Stream);
+		devices[devid].Stream = rs_tmp;
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME": Error! Couldn't reallocate information for CUDA stream in device %d!\n", devid);
+		exit (-1);
+	}
+}
+
 static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 {
 	int i,j, err; 
@@ -570,6 +599,9 @@ void Extrae_cudaStreamCreate_Enter (cudaStream_t *p1)
 	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
 
 	Extrae_CUDA_saved_params[THREADID].csc.stream = p1;
+
+	Backend_Enter_Instrumentation ();
+	Probe_Cuda_StreamCreate_Entry ();
 }
 
 void Extrae_cudaStreamCreate_Exit (void)
@@ -583,6 +615,34 @@ void Extrae_cudaStreamCreate_Exit (void)
 
 	Extrae_CUDA_RegisterStream (devid,
 	  *Extrae_CUDA_saved_params[THREADID].csc.stream);
+
+	Probe_Cuda_StreamCreate_Exit ();
+	Backend_Leave_Instrumentation ();
+}
+
+void Extrae_cudaStreamDestroy_Enter (cudaStream_t *stream)
+{
+	int devid;
+
+	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
+
+	Backend_Enter_Instrumentation ();
+	Probe_Cuda_StreamDestroy_Entry ();
+
+	Extrae_CUDA_saved_params[THREADID].css.stream = stream;
+
+	cudaGetDevice (&devid);
+	Extrae_CUDA_Initialize (devid);
+
+	Extrae_CUDA_unRegisterStream (devid, Extrae_CUDA_saved_params[THREADID].css.stream);
+}
+
+void Extrae_cudaStreamDestroy_Exit (void)
+{
+	ASSERT(Extrae_CUDA_saved_params!=NULL, "Unallocated Extrae_CUDA_saved_params");
+
+	Probe_Cuda_StreamDestroy_Exit ();
+	Backend_Leave_Instrumentation ();
 }
 
 void Extrae_cudaStreamSynchronize_Enter (cudaStream_t p1)

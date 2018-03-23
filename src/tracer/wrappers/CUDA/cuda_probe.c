@@ -154,3 +154,31 @@ void Probe_Cuda_ThreadExit_Exit (void)
 	if (mpitrace_on && Extrae_get_trace_CUDA())
 		TRACE_MISCEVENTANDCOUNTERS(TIME, CUDATHREADEXIT_EV, EVT_END, EMPTY); 
 }
+
+void Probe_Cuda_StreamDestroy_Entry (void)
+{
+	DEBUG
+	  if (mpitrace_on && Extrae_get_trace_CUDA())
+		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMDESTROY_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_Cuda_StreamDestroy_Exit (void)
+{
+	DEBUG
+	  if (mpitrace_on && Extrae_get_trace_CUDA())
+		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMDESTROY_EV, EVT_END, EMPTY);
+}
+
+void Probe_Cuda_StreamCreate_Entry (void)
+{
+	DEBUG
+	  if (mpitrace_on && Extrae_get_trace_CUDA())
+		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMCREATE_EV, EVT_BEGIN, EMPTY);
+}
+
+void Probe_Cuda_StreamCreate_Exit (void)
+{
+	DEBUG
+	  if (mpitrace_on && Extrae_get_trace_CUDA())
+		  TRACE_MISCEVENTANDCOUNTERS(TIME, CUDASTREAMCREATE_EV, EVT_END, EMPTY);
+}

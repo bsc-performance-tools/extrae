@@ -40,6 +40,10 @@ void Probe_Cuda_DeviceReset_Enter (void);
 void Probe_Cuda_DeviceReset_Exit (void);
 void Probe_Cuda_ThreadExit_Enter (void);
 void Probe_Cuda_ThreadExit_Exit (void);
+void Probe_Cuda_StreamCreate_Entry (void);
+void Probe_Cuda_StreamCreate_Exit(void);
+void Probe_Cuda_StreamDestroy_Entry (void);
+void Probe_Cuda_StreamDestroy_Exit(void);
 
 void Extrae_set_trace_CUDA (int b);
 int Extrae_get_trace_CUDA (void);

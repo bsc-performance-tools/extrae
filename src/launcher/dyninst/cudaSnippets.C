@@ -58,6 +58,10 @@ void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage)
 	  "Extrae_cudaConfigureCall_Enter", "Extrae_cudaConfigureCall_Exit", 4);
 	wrapRoutine (appImage, "cudaStreamCreate",
 	  "Extrae_cudaStreamCreate_Enter", "Extrae_cudaStreamCreate_Exit", 1);
+	wrapRoutine (appImage, "cudaStreamCreateWithFlags",
+	  "Extrae_cudaStreamCreate_Enter", "Extrae_cudaStreamCreate_Exit", 1);
+	wrapRoutine (appImage, "cudaStreamCreateWithPriority",
+	  "Extrae_cudaStreamCreate_Enter", "Extrae_cudaStreamCreate_Exit", 1);
 	wrapRoutine (appImage, "cudaMemcpyAsync",
 	  "Extrae_cudaMemcpyAsync_Enter", "Extrae_cudaMemcpyAsync_Exit", 5);
 	wrapRoutine (appImage, "cudaMemcpy",
@@ -66,5 +70,7 @@ void InstrumentCUDAruntime (ApplicationType *at, BPatch_image *appImage)
 	  "Extrae_cudaThreadSynchronize_Enter", "Extrae_cudaThreadSynchronize_Exit", 0);
 	wrapRoutine (appImage, "cudaStreamSynchronize",
 	  "Extrae_cudaStreamSynchronize_Enter", "Extrae_cudaStreamSynchronize_Exit", 1);
+	wrapRoutine (appImage, "cudaStreamDestroy",
+	  "Extrae_cudaStreamDestroy_Enter", "Extrae_cudaStreamDestroy_Exit", 1);
 }
 

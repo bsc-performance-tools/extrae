@@ -45,8 +45,10 @@
 #define CUDAMEMCPYASYNC_INDEX      5
 #define CUDATHREADEXIT_INDEX       6
 #define CUDADEVICERESET_INDEX      7
+#define CUDASTREAMCREATE_INDEX     8
+#define CUDASTREAMDESTROY_INDEX    9
 
-#define MAX_CUDA_INDEX             8
+#define MAX_CUDA_INDEX             10
 
 static int inuse[MAX_CUDA_INDEX] = { FALSE };
 
@@ -68,6 +70,10 @@ void Enable_CUDA_Operation (int type)
 		inuse[CUDADEVICERESET_INDEX] = TRUE;
 	else if (type == CUDATHREADEXIT_EV)
 		inuse[CUDATHREADEXIT_INDEX] = TRUE;
+	else if (type == CUDASTREAMCREATE_EV)
+		inuse[CUDASTREAMCREATE_INDEX] = TRUE;
+	else if (type == CUDASTREAMDESTROY_EV)
+		inuse[CUDASTREAMDESTROY_INDEX] = TRUE;
 }
 
 #if defined(PARALLEL_MERGE)
@@ -127,6 +133,12 @@ void CUDAEvent_WriteEnabledOperations (FILE * fd)
 
 		if (inuse[CUDATHREADEXIT_INDEX])
 			fprintf (fd, "%d cudaThreadExit\n", CUDATHREADEXIT_EV - CUDABASE_EV);
+
+		if (inuse[CUDASTREAMCREATE_INDEX])
+			fprintf (fd, "%d cudaStreamCreate\n", CUDASTREAMCREATE_EV - CUDABASE_EV);
+
+		if (inuse[CUDASTREAMDESTROY_INDEX])
+			fprintf (fd, "%d cudaStreamDestroy\n", CUDASTREAMDESTROY_EV - CUDABASE_EV);
 
 		fprintf (fd, "\n");
 

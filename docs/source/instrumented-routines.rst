@@ -287,13 +287,16 @@ These are the instrumented CUDA routines in the |TRACE| package:
 * cudaLaunch
 * cudaConfigureCall
 * cudaThreadSynchronize
+* cudaThreadExit
 * cudaStreamCreate
+* cudaStreamCreateWithFlags
+* cudaStreamCreateWithPriority
 * cudaStreamSynchronize
+* cudaStreamDestroy
 * cudaMemcpy
 * cudaMemcpyAsync
 * cudaDeviceReset
 * cudaDeviceSynchronize
-* cudaThreadExit
 
 The CUDA accelerators do not have memory for the tracing buffers, so the tracing
 buffer resides in the host side.
