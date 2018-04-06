@@ -103,6 +103,8 @@ static int Get_State (unsigned int EvType)
 		case MPI_WIN_CREATE_EV:
 		case MPI_WIN_LOCK_EV:
 		case MPI_WIN_UNLOCK_EV:
+                case MPI_GRAPH_CREATE_EV:
+                case MPI_DIST_GRAPH_CREATE_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:
@@ -166,6 +168,16 @@ static int Get_State (unsigned int EvType)
 		case MPI_REDUCE_SCATTER_BLOCK_EV:
 		case MPI_ALLTOALLW_EV:
 		case MPI_IALLTOALLW_EV:
+                case MPI_NEIGHBOR_ALLGATHER_EV:
+                case MPI_INEIGHBOR_ALLGATHER_EV:
+                case MPI_NEIGHBOR_ALLGATHERV_EV:
+                case MPI_INEIGHBOR_ALLGATHERV_EV:
+                case MPI_NEIGHBOR_ALLTOALL_EV:
+                case MPI_INEIGHBOR_ALLTOALL_EV:
+                case MPI_NEIGHBOR_ALLTOALLV_EV:
+                case MPI_INEIGHBOR_ALLTOALLV_EV:
+                case MPI_NEIGHBOR_ALLTOALLW_EV:
+                case MPI_INEIGHBOR_ALLTOALLW_EV:
 			state = STATE_BCAST;
 		break;
 		case MPI_WIN_FENCE_EV:
