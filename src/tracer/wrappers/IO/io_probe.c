@@ -510,3 +510,34 @@ void Probe_IO_pwritev_Exit (void)
   }
 }
 
+/**
+ * Probe_IO_ioctl_Entry
+ *
+ * Probe injected at the beginning of the I/O call 'ioctl'
+ * \param fd A file descriptor
+ * \param request The device-dependent request code
+ */
+void Probe_IO_ioctl_Entry (int fd, unsigned long request)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    unsigned type = Extrae_get_descriptor_type (fd);
+    TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, IOCTL_EV, EVT_BEGIN, fd);
+    TRACE_MISCEVENT(LAST_READ_TIME, IOCTL_EV, EVT_BEGIN+2, type);
+    TRACE_MISCEVENT(LAST_READ_TIME, IOCTL_EV, EVT_BEGIN+4, request);
+  }
+}
+
+/**
+ * Probe_IO_ioctl_Exit
+ *
+ * Probe injected at the end of the I/O call 'ioctl'
+ */
+void Probe_IO_ioctl_Exit (void)
+{
+  if (mpitrace_on && trace_io_enabled)
+  {
+    TRACE_MISCEVENTANDCOUNTERS(TIME, IOCTL_EV, EVT_END, EMPTY);
+  }
+}
+

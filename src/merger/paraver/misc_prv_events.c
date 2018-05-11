@@ -69,7 +69,7 @@
 
 #define MAX_MISC_INDEX	        9
 
-#define NUM_MISC_PRV_ELEMENTS  12
+#define NUM_MISC_PRV_ELEMENTS  13
 
 struct t_event_misc2prv
 {
@@ -96,7 +96,8 @@ static struct t_event_misc2prv event_misc2prv[NUM_MISC_PRV_ELEMENTS] = {
         {PREADV_EV, PREADV_VAL_EV, FALSE},
         {PWRITEV_EV, PWRITE_VAL_EV, FALSE},
         {OPEN_EV, OPEN_VAL_EV, FALSE},
-        {FOPEN_EV, FOPEN_VAL_EV, FALSE}
+        {FOPEN_EV, FOPEN_VAL_EV, FALSE},
+        {IOCTL_EV, IOCTL_VAL_EV, FALSE}
 };
 
 static struct t_prv_val_label misc_prv_val_label[NUM_MISC_PRV_ELEMENTS] = {
@@ -111,7 +112,8 @@ static struct t_prv_val_label misc_prv_val_label[NUM_MISC_PRV_ELEMENTS] = {
         {PREADV_VAL_EV, PREADV_LBL},
         {PWRITEV_VAL_EV, PWRITEV_LBL},
         {OPEN_VAL_EV, OPEN_LBL},
-        {FOPEN_VAL_EV, FOPEN_LBL}
+        {FOPEN_VAL_EV, FOPEN_LBL},
+        {IOCTL_VAL_EV, IOCTL_LBL}
 };
 
 /******************************************************************************
@@ -181,7 +183,8 @@ void Enable_MISC_Operation (int type)
                  type == PREAD_EV  || type == PWRITE_EV  ||
                  type == READV_EV  || type == WRITEV_EV  ||
                  type == PREADV_EV || type == PWRITEV_EV ||
-                 type == OPEN_EV   || type == FOPEN_EV)
+                 type == OPEN_EV   || type == FOPEN_EV   ||
+                 type == IOCTL_EV)
 		{
 			inuse[INOUT_INDEX] = TRUE;
 			Used_MISC_Operation(type);
@@ -362,14 +365,16 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_DESCRIPTOR_EV, IO_DESCRIPTOR_LBL);
 		LET_SPACES (fd);
 		fprintf (fd, "%s\n", TYPE_LABEL);
-		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_DESCRIPTOR_TYPE_EV,
-		  IO_DESCRIPTOR_TYPE_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IO_DESCRIPTOR_TYPE_EV, IO_DESCRIPTOR_TYPE_LBL);
 		fprintf (fd, "%s\n", VALUES_LABEL);
 		fprintf (fd, "%d    Unknown type\n", DESCRIPTOR_TYPE_UNKNOWN);
 		fprintf (fd, "%d    Regular file\n", DESCRIPTOR_TYPE_REGULARFILE);
 		fprintf (fd, "%d    Socket\n", DESCRIPTOR_TYPE_SOCKET);
 		fprintf (fd, "%d    FIFO or PIPE\n", DESCRIPTOR_TYPE_FIFO_PIPE);
 		fprintf (fd, "%d    Terminal\n", DESCRIPTOR_TYPE_ATTY);
+		LET_SPACES(fd);
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, IOCTL_REQUEST_EV, IOCTL_REQUEST_LBL);
 		LET_SPACES(fd);
 	}
 	if (inuse[FORK_SYSCALL_INDEX])

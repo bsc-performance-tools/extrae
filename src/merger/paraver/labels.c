@@ -1188,7 +1188,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 
 	Write_OpenFiles_Labels(fd);
 
-  Write_syscall_Labels(fd);
+	Write_syscall_Labels(fd);
     
 	Concat_User_Labels (fd);
 

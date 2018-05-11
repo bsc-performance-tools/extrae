@@ -67,4 +67,7 @@ void Probe_IO_preadv_Exit  (void);
 void Probe_IO_pwritev_Entry (int fd, ssize_t size);
 void Probe_IO_pwritev_Exit  (void);
 
+void Probe_IO_ioctl_Entry (int fd, unsigned long request);
+void Probe_IO_ioctl_Exit  (void);
+
 #endif /* __IO_PROBE_H__ */

@@ -114,6 +114,7 @@ static ssize_t (*real_preadv)(int fd, const struct iovec *iov, int iovcnt, off_t
 static ssize_t (*real_preadv64)(int fd, const struct iovec *iov, int iovcnt, off_t offset)      = NULL;
 static ssize_t (*real_pwritev)(int fd, const struct iovec *iov, int iovcnt, off_t offset)       = NULL;
 static ssize_t (*real_pwritev64)(int fd, const struct iovec *iov, int iovcnt, __off64_t offset) = NULL;
+static int     (*real_ioctl)(int fd, unsigned long request, ...)                                          = NULL;
 
 # if defined(PIC) /* Only available for .so libraries */
 
@@ -446,6 +447,76 @@ FILE * fopen64(const char *path, const char *mode)
   return f;
 }
 
+/**
+ * ioctl
+ *
+ * Wrapper for the system call 'ioctl'
+ */
+int ioctl(int fd, unsigned long request, char *argp)
+{
+#ifdef HAVE_ERRNO_H
+  int errno_real = errno;
+#endif
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED()                 &&
+                      !Backend_inInstrumentation(THREADID) && 
+                      mpitrace_on &&
+                      Extrae_get_trace_io();
+  ssize_t res;
+
+  /* Initialize the module if the pointer to the real call is not yet set */
+  if (real_ioctl == NULL)
+  {
+    real_ioctl = EXTRAE_DL_INIT(__func__);
+  }
+
+#if defined(DEBUG)
+  if (canInstrument)
+  {
+    fprintf (stderr, PACKAGE_NAME": ioctl is at %p\n", real_ioctl);
+    fprintf (stderr, PACKAGE_NAME": ioctl params %d %lu %p\n", fd, request, argp);
+  }
+#endif
+
+  if (real_ioctl != NULL && canInstrument)
+  {
+    /* Instrumentation is enabled, emit events and invoke the real call */
+    Backend_Enter_Instrumentation ();
+    Probe_IO_ioctl_Entry (fd, request);
+    TRACE_IO_CALLER(LAST_READ_TIME, 3);
+#ifdef HAVE_ERRNO_H
+    errno = errno_real;
+#endif
+    res = real_ioctl (fd, request, argp);
+#ifdef HAVE_ERRNO_H
+    errno_real = errno;
+#endif
+    Probe_IO_ioctl_Exit ();
+    Backend_Leave_Instrumentation ();
+#ifdef HAVE_ERRNO_H
+    errno = errno_real;
+#endif
+  }
+  else if (real_ioctl != NULL && !canInstrument)
+  {
+    /* Instrumentation is not enabled, bypass to the real call */
+    res = real_ioctl (fd, request, argp);
+  }
+  else
+  {
+    /*
+     * An error is thrown if the application uses this symbol but during the initialization 
+     * we couldn't find the real implementation. This kind of situation could happen in the 
+     * very strange case where, by the time this symbol is first called, the libc (where the 
+     * real implementation is) has not been loaded yet. One suggestion if we see this error
+     * is to try to prepend the libc.so to the LD_PRELOAD to force to load it first. 
+     */
+    fprintf (stderr, PACKAGE_NAME": ioctl is not hooked! exiting!!\n");
+    abort();
+  }
+
+  return res;
+}
 
 /**
  * read

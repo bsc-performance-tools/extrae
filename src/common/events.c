@@ -80,7 +80,7 @@ unsigned IsMPI (unsigned EvType)
 /******************************************************************************
  ***  IsMISC
  ******************************************************************************/
-#define MISC_EVENTS 66
+#define MISC_EVENTS 67
 static unsigned misc_events[] = {FLUSH_EV, OPEN_EV, FOPEN_EV, READ_EV, WRITE_EV, FREAD_EV, FWRITE_EV, 
         PREAD_EV, PWRITE_EV, READV_EV, WRITEV_EV, PREADV_EV, PWRITEV_EV, APPL_EV, USER_EV,
 	HWC_DEF_EV, HWC_CHANGE_EV, HWC_EV, TRACING_EV, SET_TRACE_EV, CALLER_EV,
@@ -95,7 +95,8 @@ static unsigned misc_events[] = {FLUSH_EV, OPEN_EV, FOPEN_EV, READ_EV, WRITE_EV,
 	MALLOC_EV, FREE_EV, CALLOC_EV, REALLOC_EV, POSIX_MEMALIGN_EV,
 	MEMKIND_MALLOC_EV, MEMKIND_CALLOC_EV, MEMKIND_REALLOC_EV, MEMKIND_POSIX_MEMALIGN_EV, MEMKIND_FREE_EV,
 	MEMKIND_PARTITION_EV, SYSCALL_EV,
-	KMPC_MALLOC_EV, KMPC_FREE_EV, KMPC_CALLOC_EV,	KMPC_REALLOC_EV, KMPC_ALIGNED_MALLOC_EV
+	KMPC_MALLOC_EV, KMPC_FREE_EV, KMPC_CALLOC_EV, KMPC_REALLOC_EV, KMPC_ALIGNED_MALLOC_EV,
+	IOCTL_EV
  };
 
 unsigned IsMISC (unsigned EvType)
