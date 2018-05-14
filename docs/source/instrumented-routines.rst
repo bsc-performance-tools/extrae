@@ -113,6 +113,18 @@ These are the instrumented MPI routines in the |TRACE| package:
 * MPI_Intercomm_create
 * MPI_Intercomm_merge
 
+* MPI_Graph_create
+* MPI_Dist_graph_create
+* MPI_Neighbor_allgather
+* MPI_Ineighbor_allgather
+* MPI_Neighbor_allgatherv
+* MPI_Ineighbor_allgatherv
+* MPI_Neighbor_alltoall
+* MPI_Ineighbor_alltoall
+* MPI_Neighbor_alltoallv
+* MPI_Ineighbor_alltoallv
+* MPI_Neighbor_alltoallw
+* MPI_Ineighbor_alltoall
 
 
 .. _sec:OpenMPruntimesinstrumented:

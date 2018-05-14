@@ -475,7 +475,8 @@ checked every 100 global operations on MPI_COMM_WORLD.
 
 If the ``global-ops`` tag is enabled, the instrumentation package begins
 disabled and starts the tracing when the given number of global operations on
-MPI_COMM_WORLD has been executed.
+MPI_COMM_WORLD has been executed. The user can also specify multiple intervals
+in the form ``start-stop`` separated by commas.
 
 The ``remote-control`` tag section allows to configure some external mechanisms
 to automatically control the tracing. Currently, there is only one option which
