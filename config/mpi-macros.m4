@@ -645,13 +645,30 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_1SIDED],
 			ierror = MPI_Put ((void*)0, 0, (MPI_Datatype)0, 0, (MPI_Aint)0, 0, (MPI_Datatype)0, (MPI_Win)0);
 			ierror = MPI_Get ((void*)0, 0, (MPI_Datatype)0, 0, (MPI_Aint)0, 0, (MPI_Datatype)0, (MPI_Win)0);
 		],
-		[mpi_lib_supports_mpi_1sided="yes" ],
-		[mpi_lib_supports_mpi_1sided="no" ]
+		[mpi_lib_supports_mpi_1sided="yes"],
+		[mpi_lib_supports_mpi_1sided="no"]
 	)
 	AC_MSG_RESULT([${mpi_lib_supports_mpi_1sided}])
 
 	if test "${mpi_lib_supports_mpi_1sided}" = "yes" ; then
 		AC_DEFINE([MPI_SUPPORTS_MPI_1SIDED], 1, [Defined if MPI library supports 1-sided operations])
+
+		# Test for MPI_Get_accumulate, we've seen that BullMPI supports 1-sided but does not implement this routine
+		AC_MSG_CHECKING([if MPI library supports MPI_Get_accumulate])
+		AC_TRY_LINK(
+			[#include <mpi.h>],
+			[
+				int ierror;
+				ierror = MPI_Get_accumulate ((void *)0, 0, (MPI_Datatype)0, (void *)0, 0, (MPI_Datatype)0, 0, (MPI_Aint)0, 0, (MPI_Datatype)0, (MPI_Op)0, (MPI_Win)0);
+			],
+			[mpi_lib_supports_mpi_get_accumulate="yes"],
+			[mpi_lib_supports_mpi_get_accumulate="no"]
+		)
+		AC_MSG_RESULT([${mpi_lib_supports_mpi_get_accumulate}])
+
+		if test "${mpi_lib_supports_mpi_get_accumulate}" = "yes" ; then
+			AC_DEFINE([MPI_SUPPORTS_MPI_GET_ACCUMULATE], 1, [Defined if MPI library supports MPI_Get_accumulate])
+		fi
 	fi
 
 	AX_FLAGS_RESTORE()

@@ -242,6 +242,7 @@ int MPI_Win_unlock_C_Wrapper (int rank, MPI_Win win)
 	return res;
 }
 
+#if MPI_SUPPORTS_MPI_GET_ACCUMULATE
 int MPI_Get_accumulate_C_Wrapper (void *origin_addr, int origin_count, MPI_Datatype origin_datatype, 	   void *result_addr, int result_count, MPI_Datatype result_datatype, int target_rank, 
 	MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype, MPI_Op op,
 	MPI_Win win)
@@ -266,6 +267,8 @@ int MPI_Get_accumulate_C_Wrapper (void *origin_addr, int origin_count, MPI_Datat
 
 	return ierror;
 }
+#endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
+
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 

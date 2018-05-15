@@ -402,7 +402,7 @@ void NAME_ROUTINE_C2F(mpi_win_unlock)(MPI_Fint *rank, MPI_Fint *win, MPI_Fint *i
 	DLB(DLB_MPI_Win_unlock_F_leave);
 }
 
-
+#if MPI_SUPPORTS_MPI_GET_ACCUMULATE
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_get_accumulate__,mpi_get_accumulate_,MPI_GET_ACCUMULATE,mpi_get_accumulate,(void *origin_addr, MPI_Fint *origin_count, MPI_Fint *origin_datatype, void *result_addr, MPI_Fint *result_count, MPI_Fint *result_datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *target_count, MPI_Fint *target_datatype, MPI_Fint *op, MPI_Fint *win, MPI_Fint *ierror))
 
@@ -432,7 +432,7 @@ void NAME_ROUTINE_C2F(mpi_get_accumulate)(void *origin_addr, MPI_Fint *origin_co
 			target_disp, target_count, target_datatype, op, win, ierror);
 	DLB(DLB_MPI_Get_accumulate_F_leave);
 }
-
+#endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 

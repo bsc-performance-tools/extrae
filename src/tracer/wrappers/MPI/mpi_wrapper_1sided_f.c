@@ -228,7 +228,7 @@ void MPI_Win_unlock_Fortran_Wrapper (MPI_Fint* rank, void *win, void *ierror)
 	updateStats_OTHER(global_mpi_stats);
 }
 
-
+#if MPI_SUPPORTS_MPI_GET_ACCUMULATE
 void MPI_Get_accumulate_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror)
 {
 	int origin_datatype_size, result_datatype_size, target_datatype_size;
@@ -248,7 +248,7 @@ void MPI_Get_accumulate_Fortran_Wrapper (void *origin_addr, MPI_Fint* origin_cou
 
 	updateStats_OTHER(global_mpi_stats);
 }
-
+#endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 

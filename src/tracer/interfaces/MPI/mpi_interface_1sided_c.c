@@ -342,7 +342,7 @@ int MPI_Win_unlock (int rank, MPI_Win win)
 
 }
 
-
+#if MPI_SUPPORTS_MPI_GET_ACCUMULATE
 int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
         void *result_addr, int result_count, MPI_Datatype result_datatype,
 	int target_rank, MPI_Aint target_disp, int target_count,
@@ -373,7 +373,7 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 
 	return res;
 }
-
+#endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
