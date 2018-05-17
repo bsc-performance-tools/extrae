@@ -1,4 +1,4 @@
-include_HEADERS = extrae_user_events.h extrae_types.h extrae_internals.h extraef_user_events.h
+include_HEADERS = extrae_user_events.h extrae_types.h extrae_internals.h extraef_user_events.h extrae_module.f90
 
 EXTRAE_VERSION_HEADER = extrae_version.h
 
