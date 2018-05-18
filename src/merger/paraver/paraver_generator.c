@@ -574,11 +574,11 @@ static int paraver_communication (struct fdz_fitxer fdz, paraver_rec_t *current)
    */
 #if !defined(NEW_PRINTF)
 # if SIZEOF_LONG == 8
-  sprintf (buffer, "3:%d:%d:%d:%d:%lu:%lu:%d:%d:%d:%d:%lu:%lu:%d:%d\n",
+  sprintf (buffer, "3:%d:%d:%d:%d:%lu:%lu:%d:%d:%d:%d:%lu:%lu:%d:%u\n",
            cpu_s, ptask_s, task_s, thread_s, log_s, phy_s,
            cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
 # elif SIZEOF_LONG == 4
-  sprintf (buffer, "3:%d:%d:%d:%d:%llu:%llu:%d:%d:%d:%d:%llu:%llu:%d:%d\n",
+  sprintf (buffer, "3:%d:%d:%d:%d:%llu:%llu:%d:%d:%d:%d:%llu:%llu:%d:%u\n",
            cpu_s, ptask_s, task_s, thread_s, log_s, phy_s,
            cpu_r, ptask_r, task_r, thread_r, log_r, phy_r, size, tag);
 # endif

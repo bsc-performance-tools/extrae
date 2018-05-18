@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  + 22May2018 Adds instrumentation support for MPI_Fetch_and_op, MPI_Compare_and_swap and MPI_Win_flush* routines (closes #2)
+ * 18May2018 Fixed wrong format of tag in the prv trace that resulted in negative comm tags
  * 17May2018 Adds extrae_module.f90 to distribution
  + 15May2018 Added configure check for MPI_Get_accumulate, BullMPI does not implement this routine
  + 11May2018 Added support for ARM64 cross-compilation (GitHub pull #11)
