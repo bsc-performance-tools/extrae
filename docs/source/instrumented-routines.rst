@@ -88,11 +88,17 @@ These are the instrumented MPI routines in the |TRACE| package:
 * MPI_File_read_at_all [#MPIIOSUPPORT]_
 * MPI_File_write_at [#MPIIOSUPPORT]_
 * MPI_File_write_at_all [#MPIIOSUPPORT]_
+* MPI_Compare_and_swap [#MPIRMASUPPORT]_
+* MPI_Fetch_and_op [#MPIRMASUPPORT]_
 * MPI_Get [#MPIRMASUPPORT]_
 * MPI_Put [#MPIRMASUPPORT]_
 * MPI_Win_complete [#MPIRMASUPPORT]_
 * MPI_Win_create [#MPIRMASUPPORT]_
 * MPI_Win_fence [#MPIRMASUPPORT]_
+* MPI_Win_flush [#MPIRMASUPPORT]_
+* MPI_Win_flush_all [#MPIRMASUPPORT]_
+* MPI_Win_flush_local [#MPIRMASUPPORT]_
+* MPI_Win_flush_local_all [#MPIRMASUPPORT]_
 * MPI_Win_free [#MPIRMASUPPORT]_
 * MPI_Win_post [#MPIRMASUPPORT]_
 * MPI_Win_start [#MPIRMASUPPORT]_

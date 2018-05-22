@@ -246,7 +246,13 @@ typedef enum
   MPI_NEIGHBOR_ALLTOALLV_VAL, /* 180 */
   MPI_INEIGHBOR_ALLTOALLV_VAL, 
   MPI_NEIGHBOR_ALLTOALLW_VAL,
-  MPI_INEIGHBOR_ALLTOALLW_VAL
+  MPI_INEIGHBOR_ALLTOALLW_VAL,
+  MPI_FETCH_AND_OP_VAL,
+  MPI_COMPARE_AND_SWAP_VAL, /* 185 */
+  MPI_WIN_FLUSH_VAL,
+  MPI_WIN_FLUSH_ALL_VAL,
+  MPI_WIN_FLUSH_LOCAL_VAL,
+  MPI_WIN_FLUSH_LOCAL_ALL_VAL
 }
 MPIVal;
 
@@ -355,6 +361,12 @@ MPIVal;
 #define  MPI_WIN_LOCK_LABEL                "MPI_Win_lock"
 #define  MPI_WIN_UNLOCK_LABEL              "MPI_Win_unlock"
 #define  MPI_GET_ACCUMULATE_LABEL	   "MPI_Get_accumulate"
+#define  MPI_FETCH_AND_OP_LABEL            "MPI_Fetch_and_op"
+#define  MPI_COMPARE_AND_SWAP_LABEL        "MPI_Compare_and_swap"
+#define  MPI_WIN_FLUSH_LABEL               "MPI_Win_flush"
+#define  MPI_WIN_FLUSH_ALL_LABEL           "MPI_Win_flush_all"
+#define  MPI_WIN_FLUSH_LOCAL_LABEL         "MPI_Win_flush_local"
+#define  MPI_WIN_FLUSH_LOCAL_ALL_LABEL     "MPI_Win_flush_local_all"
 
 #define  MPI_PACK_LABEL                    "MPI_Pack"
 #define  MPI_UNPACK_LABEL                  "MPI_Unpack"

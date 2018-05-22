@@ -414,6 +414,22 @@ void CtoF77(mpi_win_unlock) (MPI_Fint* rank, MPI_Fint* win, MPI_Fint* ierror);
 void CtoF77(mpi_get_accumulate) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror);
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
+void CtoF77(mpi_fetch_and_op) (void *origin_addr, void *result_addr, MPI_Fint
+  *datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *op,
+  MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(mpi_compare_and_swap) (void *origin_addr, void *compare_addr,
+  void *result_addr, MPI_Fint *datatype, MPI_Fint *target_rank,
+  MPI_Fint *target_disp, MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(mpi_win_flush) (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(mpi_win_flush_all) (MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(mpi_win_flush_local) (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(mpi_win_flush_local_all) (MPI_Fint *win, MPI_Fint *ierror);
+
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 /* PMPI Fortran interface */
@@ -810,6 +826,22 @@ void CtoF77(pmpi_win_unlock) (MPI_Fint* rank, MPI_Fint* win, MPI_Fint* ierror);
 #if MPI_SUPPORTS_MPI_GET_ACCUMULATE
 void CtoF77(pmpi_get_accumulate) (void *origin_addr, MPI_Fint* origin_count, MPI_Fint* origin_datatype, void *result_addr, MPI_Fint* result_count, MPI_Fint* result_datatype, MPI_Fint* target_rank, MPI_Fint* target_disp, MPI_Fint* target_count, MPI_Fint* target_datatype, MPI_Fint* op, MPI_Fint* win, MPI_Fint* ierror);
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
+
+void CtoF77(pmpi_fetch_and_op) (void *origin_addr, void *result_addr, MPI_Fint
+  *datatype, MPI_Fint *target_rank, MPI_Fint *target_disp, MPI_Fint *op,
+  MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_compare_and_swap) (void *origin_addr, void *compare_addr,
+  void *result_addr, MPI_Fint *datatype, MPI_Fint *target_rank,
+  MPI_Fint *target_disp, MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_flush) (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_flush_all) (MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_flush_local) (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror);
+
+void CtoF77(pmpi_win_flush_local_all) (MPI_Fint *win, MPI_Fint *ierror);
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 

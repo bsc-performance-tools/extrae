@@ -667,6 +667,27 @@ void DLB_MPI_Get_accumulate_F_enter (void *origin_addr, MPI_Fint *origin_count,
 				     MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_Get_accumulate_F_leave (void)__attribute__((weak));
 
+void DLB_MPI_Fetch_and_op_F_enter (void *origin_addr, void *result_addr,
+  MPI_Fint *datatype, MPI_Fint *target_rank, MPI_Fint *target_disp,
+  MPI_Fint *op, MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Fetch_and_op_F_leave (void)__attribute__((weak));
+
+void DLB_MPI_Compare_and_swap_F_enter (void *origin_addr, void *compare_addr,
+  void *result_addr, MPI_Fint *datatype, MPI_Fint *target_rank,
+  MPI_Fint *target_disp, MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Compare_and_swap_F_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_F_enter (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Win_flush_F_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_all_F_enter (MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Win_flush_all_F_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_local_F_enter (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Win_flush_local_F_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_local_all_F_enter (MPI_Fint *win, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Win_flush_local_all_F_leave (void)__attribute__((weak));
 
 /***  C  ***/
 
@@ -726,6 +747,28 @@ void DLB_MPI_Get_accumulate_enter (MPI3_CONST void *origin_addr, int origin_coun
 			           int target_count, MPI_Datatype target_datatype,
 			           MPI_Op op, MPI_Win win)__attribute__((weak));
 void DLB_MPI_Get_accumulate_leave (void)__attribute__((weak));
+
+void DLB_MPI_Fetch_and_op_enter (MPI3_CONST void *origin_addr, void *result_addr,
+  MPI_Datatype datatype, int target_rank, MPI_Aint target_disp, MPI_Op op,
+  MPI_Win win)__attribute__((weak));
+void DLB_MPI_Fetch_and_op_leave (void)__attribute__((weak));
+
+void DLB_MPI_Compare_and_swap_enter (MPI3_CONST void *origin_addr,
+  MPI3_CONST void *compare_addr, void *result_addr, MPI_Datatype datatype,
+  int target_rank, MPI_Aint target_disp, MPI_Win win)__attribute__((weak));
+void DLB_MPI_Compare_and_swap_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_enter (int rank, MPI_Win win)__attribute__((weak));
+void DLB_MPI_Win_flush_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_all_enter (MPI_Win win)__attribute__((weak));
+void DLB_MPI_Win_flush_all_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_local_enter (int rank, MPI_Win win)__attribute__((weak));
+void DLB_MPI_Win_flush_local_leave (void)__attribute__((weak));
+
+void DLB_MPI_Win_flush_local_all_enter (MPI_Win win)__attribute__((weak));
+void DLB_MPI_Win_flush_local_all_leave (void)__attribute__((weak));
 
 
 /******************************************************************************

@@ -103,8 +103,12 @@ static int Get_State (unsigned int EvType)
 		case MPI_WIN_CREATE_EV:
 		case MPI_WIN_LOCK_EV:
 		case MPI_WIN_UNLOCK_EV:
-                case MPI_GRAPH_CREATE_EV:
-                case MPI_DIST_GRAPH_CREATE_EV:
+		case MPI_GRAPH_CREATE_EV:
+		case MPI_DIST_GRAPH_CREATE_EV:
+		case MPI_WIN_FLUSH_EV:
+		case MPI_WIN_FLUSH_ALL_EV:
+		case MPI_WIN_FLUSH_LOCAL_EV:
+		case MPI_WIN_FLUSH_LOCAL_ALL_EV:
 			state = STATE_MIXED;
 		break;
 		case MPI_PROBE_EV:
@@ -184,6 +188,8 @@ static int Get_State (unsigned int EvType)
 		case MPI_GET_EV:
 		case MPI_PUT_EV:
 		case MPI_GET_ACCUMULATE_EV:
+		case MPI_FETCH_AND_OP_EV:
+		case MPI_COMPARE_AND_SWAP_EV:
 			state = STATE_MEMORY_XFER;
 		break;
 		default:
@@ -1172,7 +1178,7 @@ int MPI_RMA_Event (event_t * current_event, unsigned long long current_time,
 			MPI_RMA_SIZE, EvSize);
 	}
 
-	if(EvType == MPI_GET_EV || EvType == MPI_PUT_EV || EvType == MPI_GET_ACCUMULATE_EV)
+	if(EvType == MPI_GET_EV || EvType == MPI_PUT_EV || EvType == MPI_GET_ACCUMULATE_EV || EvType == MPI_FETCH_AND_OP_EV || EvType == MPI_COMPARE_AND_SWAP_EV)
 	{
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
 			MPI_RMA_TARGET_RANK, Get_EvTarget(current_event));
@@ -1185,7 +1191,7 @@ int MPI_RMA_Event (event_t * current_event, unsigned long long current_time,
 		
 	}
 	
-	if(EvType == MPI_WIN_LOCK_EV || EvType == MPI_WIN_UNLOCK_EV)
+	if(EvType == MPI_WIN_LOCK_EV || EvType == MPI_WIN_UNLOCK_EV || EvType == MPI_WIN_FLUSH_EV || EvType == MPI_WIN_FLUSH_LOCAL_EV)
 	{
 		trace_paraver_event (cpu, ptask, task, thread, current_time,
 			MPI_RMA_TARGET_RANK, Get_EvTarget(current_event));
@@ -1306,19 +1312,25 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_IREDUCE_SCATTER_BLOCK_EV, GlobalOP_event},
 	{ MPI_ALLTOALLW_EV, GlobalOP_event},
 	{ MPI_IALLTOALLW_EV, GlobalOP_event},
-        { MPI_NEIGHBOR_ALLGATHER_EV, GlobalOP_event},
-        { MPI_INEIGHBOR_ALLGATHER_EV, GlobalOP_event},
-        { MPI_NEIGHBOR_ALLGATHERV_EV, GlobalOP_event},
-        { MPI_INEIGHBOR_ALLGATHERV_EV, GlobalOP_event},
-        { MPI_NEIGHBOR_ALLTOALL_EV, GlobalOP_event},
-        { MPI_INEIGHBOR_ALLTOALL_EV, GlobalOP_event},
-        { MPI_NEIGHBOR_ALLTOALLV_EV, GlobalOP_event},
-        { MPI_INEIGHBOR_ALLTOALLV_EV, GlobalOP_event},
-        { MPI_NEIGHBOR_ALLTOALLW_EV, GlobalOP_event},
-        { MPI_INEIGHBOR_ALLTOALLW_EV, GlobalOP_event},
+	{ MPI_NEIGHBOR_ALLGATHER_EV, GlobalOP_event},
+	{ MPI_INEIGHBOR_ALLGATHER_EV, GlobalOP_event},
+	{ MPI_NEIGHBOR_ALLGATHERV_EV, GlobalOP_event},
+	{ MPI_INEIGHBOR_ALLGATHERV_EV, GlobalOP_event},
+	{ MPI_NEIGHBOR_ALLTOALL_EV, GlobalOP_event},
+	{ MPI_INEIGHBOR_ALLTOALL_EV, GlobalOP_event},
+	{ MPI_NEIGHBOR_ALLTOALLV_EV, GlobalOP_event},
+	{ MPI_INEIGHBOR_ALLTOALLV_EV, GlobalOP_event},
+	{ MPI_NEIGHBOR_ALLTOALLW_EV, GlobalOP_event},
+	{ MPI_INEIGHBOR_ALLTOALLW_EV, GlobalOP_event},
 	{ MPI_GET_ACCUMULATE_EV, MPI_RMA_Event},
 	{ MPI_WIN_LOCK_EV, MPI_RMA_Event},
 	{ MPI_WIN_UNLOCK_EV, MPI_RMA_Event},
+	{ MPI_FETCH_AND_OP_EV, MPI_RMA_Event},
+	{ MPI_COMPARE_AND_SWAP_EV, MPI_RMA_Event},
+	{ MPI_WIN_FLUSH_EV, MPI_RMA_Event},
+	{ MPI_WIN_FLUSH_ALL_EV, MPI_RMA_Event},
+	{ MPI_WIN_FLUSH_LOCAL_EV, MPI_RMA_Event},
+	{ MPI_WIN_FLUSH_LOCAL_ALL_EV, MPI_RMA_Event},
 	{ MPI_TIME_OUTSIDE_TESTS_EV, MPI_ElapsedTimeOutsideTests_Event },
 	{ NULL_EV, NULL }
 };

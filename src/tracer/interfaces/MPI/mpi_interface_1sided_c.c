@@ -375,6 +375,171 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 }
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
+#if MPI3_DRAFT
+int MPI_Fetch_and_op (void *origin_addr, void *result_addr,
+  MPI_Datatype datatype, int target_rank, MPI_Aint target_disp, MPI_Op op,
+  MPI_Win win)
+#else
+int MPI_Fetch_and_op (MPI3_CONST void *origin_addr, void *result_addr,
+  MPI_Datatype datatype, int target_rank, MPI_Aint target_disp, MPI_Op op,
+  MPI_Win win)
+#endif
+{
+	int res;
+
+	DLB(DLB_MPI_Fetch_and_op_enter, MPI3_VOID_P_CAST origin_addr,
+	  MPI3_VOID_P_CAST result_addr, datatype, target_rank, target_disp, op,
+	  win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Fetch_and_op_C_Wrapper (MPI3_VOID_P_CAST origin_addr,
+		  MPI3_VOID_P_CAST result_addr, datatype, target_rank, target_disp, op,
+		  win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	} else
+	{
+		res = PMPI_Fetch_and_op (MPI3_VOID_P_CAST origin_addr, MPI3_VOID_P_CAST
+		  result_addr, datatype, target_rank, target_disp, op, win);
+	}
+
+	DLB(DLB_MPI_Fetch_and_op_leave);
+
+	return res;
+}
+
+#if MPI3_DRAFT
+int MPI_Compare_and_swap(void *origin_addr, void *compare_addr,
+  void *result_addr, MPI_Datatype datatype, int target_rank, MPI_Aint target_disp,
+  MPI_Win win)
+#else
+int MPI_Compare_and_swap(MPI3_CONST void *origin_addr, MPI3_CONST void *compare_addr,
+  void *result_addr, MPI_Datatype datatype, int target_rank, MPI_Aint target_disp,
+  MPI_Win win)
+#endif
+{
+	int res;
+
+	DLB(DLB_MPI_Compare_and_swap_enter, MPI3_VOID_P_CAST origin_addr,
+	  MPI3_VOID_P_CAST compare_addr, MPI3_VOID_P_CAST result_addr, datatype,
+	  target_rank, target_disp, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Compare_and_swap_C_Wrapper (MPI3_VOID_P_CAST origin_addr,
+		  MPI3_VOID_P_CAST compare_addr, MPI3_VOID_P_CAST result_addr, datatype,
+		  target_rank, target_disp, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	} else
+	{
+		res = PMPI_Compare_and_swap (MPI3_VOID_P_CAST origin_addr,
+		  MPI3_VOID_P_CAST compare_addr, MPI3_VOID_P_CAST result_addr, datatype,
+		  target_rank, target_disp, win);
+	}
+
+	DLB(DLB_MPI_Compare_and_swap_leave);
+
+	return res;
+}
+
+int MPI_Win_flush (int rank, MPI_Win win)
+{
+	int res;
+
+	DLB(DLB_MPI_Win_flush_enter, rank, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Win_flush_C_Wrapper (rank, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	} else
+	{
+		res = PMPI_Win_flush (rank, win);
+	}
+
+	DLB(DLB_MPI_Win_flush_leave);
+
+	return res;
+}
+
+int MPI_Win_flush_all (MPI_Win win)
+{
+	int res;
+
+	DLB(DLB_MPI_Win_flush_all_enter, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Win_flush_all_C_Wrapper (win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	} else
+	{
+		res = PMPI_Win_flush_all (win);
+	}
+
+	DLB(DLB_MPI_Win_flush_all_leave);
+
+	return res;
+}
+
+int MPI_Win_flush_local (int rank, MPI_Win win)
+{
+	int res;
+
+	DLB(DLB_MPI_Win_flush_local_enter, rank, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Win_flush_local_C_Wrapper (rank, win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	} else
+	{
+		res = PMPI_Win_flush_local (rank, win);
+	}
+
+	DLB(DLB_MPI_Win_flush_local_leave);
+
+	return res;
+}
+
+int MPI_Win_flush_local_all (MPI_Win win)
+{
+	int res;
+
+	DLB(DLB_MPI_Win_flush_local_all_enter, win);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Win_flush_local_all_C_Wrapper (win);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	} else
+	{
+		res = PMPI_Win_flush_local_all (win);
+	}
+
+	DLB(DLB_MPI_Win_flush_local_all_leave);
+
+	return res;
+}
+
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* C_SYMBOLS */
