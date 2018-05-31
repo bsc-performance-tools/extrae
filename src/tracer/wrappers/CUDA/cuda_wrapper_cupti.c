@@ -41,6 +41,7 @@
 #include "wrapper.h"
 
 #include "cuda_common.h"
+#include "cuda_probe.h"
 
 static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain domain,
 	CUpti_CallbackId cbid, const CUpti_CallbackData *cbinfo)
@@ -179,7 +180,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			{
 			cudaStreamDestroy_v3020_params *p = (cudaStreamDestroy_v3020_params*)cbinfo->functionParams;
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamDestroy_Enter (p->pStream);
+				Extrae_cudaStreamDestroy_Enter (p->stream);
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 				Extrae_cudaStreamDestroy_Exit ();
 			}
@@ -189,7 +190,7 @@ static void CUPTIAPI Extrae_CUPTI_callback (void *udata, CUpti_CallbackDomain do
 			{
 			cudaStreamDestroy_v5050_params *p = (cudaStreamDestroy_v5050_params*)cbinfo->functionParams;
 			if (cbinfo->callbackSite == CUPTI_API_ENTER)
-				Extrae_cudaStreamDestroy_Enter (p->pStream);
+				Extrae_cudaStreamDestroy_Enter (p->stream);
 			else if (cbinfo->callbackSite == CUPTI_API_EXIT)
 				Extrae_cudaStreamDestroy_Exit ();
 			}

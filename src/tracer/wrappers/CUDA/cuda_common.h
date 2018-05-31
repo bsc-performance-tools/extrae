@@ -173,7 +173,7 @@ void Extrae_cudaDeviceSynchronize_Enter (void);
 void Extrae_cudaDeviceSynchronize_Exit (void);
 void Extrae_cudaStreamCreate_Enter (cudaStream_t*);
 void Extrae_cudaStreamCreate_Exit (void);
-void Extrae_cudaStreamDestroy_Enter (cudaStream_t*);
+void Extrae_cudaStreamDestroy_Enter (cudaStream_t);
 void Extrae_cudaStreamDestroy_Exit (void);
 void Extrae_cudaStreamSynchronize_Enter (cudaStream_t);
 void Extrae_cudaStreamSynchronize_Exit (void);

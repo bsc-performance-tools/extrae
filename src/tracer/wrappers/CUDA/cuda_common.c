@@ -620,7 +620,7 @@ void Extrae_cudaStreamCreate_Exit (void)
 	Backend_Leave_Instrumentation ();
 }
 
-void Extrae_cudaStreamDestroy_Enter (cudaStream_t *stream)
+void Extrae_cudaStreamDestroy_Enter (cudaStream_t stream)
 {
 	int devid;
 

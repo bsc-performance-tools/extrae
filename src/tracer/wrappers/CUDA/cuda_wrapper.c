@@ -58,7 +58,7 @@ static cudaError_t (*real_cudaMemcpyAsync)(void*,const void*,size_t,enum cudaMem
 static cudaError_t (*real_cudaStreamCreate)(cudaStream_t*) = NULL;
 static cudaError_t (*real_cudaStreamCreateWithFlags)(cudaStream_t*, unsigned int) = NULL;
 static cudaError_t (*real_cudaStreamCreateWithPriority)(cudaStream_t*, unsigned int, int) = NULL;
-static cudaError_t (*real_cudaStreamDestroy)(cudaStream_t *) = NULL;
+static cudaError_t (*real_cudaStreamDestroy)(cudaStream_t) = NULL;
 static cudaError_t (*real_cudaDeviceReset)(void) = NULL;
 static cudaError_t (*real_cudaThreadExit)(void) = NULL;
 #endif /* PIC */
@@ -88,7 +88,7 @@ void Extrae_CUDA_init (int rank)
 
 	real_cudaStreamCreateWithPriority = (cudaError_t(*)(cudaStream_t*, unsigned int, int)) dlsym (RTLD_NEXT, "cudaStreamCreateWithPriority");
 
-	real_cudaStreamDestroy = (cudaError_t(*)(cudaStream_t*)) dlsym (RTLD_NEXT, "cudaStreamDestroy");
+	real_cudaStreamDestroy = (cudaError_t(*)(cudaStream_t)) dlsym (RTLD_NEXT, "cudaStreamDestroy");
 
 	real_cudaDeviceReset = (cudaError_t(*)(void)) dlsym (RTLD_NEXT, "cudaDeviceReset");
 
@@ -250,7 +250,7 @@ cudaError_t cudaStreamCreateWithPriority (cudaStream_t *pStream, unsigned int fl
 	return res;
 }
 
-cudaError_t cudaStreamDestroy (cudaStream_t *stream)
+cudaError_t cudaStreamDestroy (cudaStream_t stream)
 {
 	cudaError_t res;
 
