@@ -1220,7 +1220,9 @@ void merger_pre (int numtasks)
 #if defined(PARALLEL_MERGE)
 	if (numtasks <= 1)
 	{
-		fprintf (stderr, "mpi2prv: The parallel version of the mpi2prv is not suited for 1 processor! Dying...\n");
+		fprintf (stderr, "mpimpi2prv: The parallel merger mpimpi2prv can not run with 1 MPI process.\n"
+                                 "mpimpi2prv: Please use the sequential merger mpi2prv or run with more MPI processes.\n"
+                                 "mpimpi2prv: Exiting...\n");
 		exit (1);
 	}
 #endif
