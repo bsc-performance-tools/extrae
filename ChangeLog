@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 01Jun2018 Fixes wrong include in UF_xl_instrument.c
  * 01Jun2018 Compile MPI_Fetch_and_op, MPI_Compare_and_swap and MPI_Win_flush* only if MPI3 is supported
  * 31May2018 Fixes cudaStreamDestroy wrappers
  + 29May2018 Adds missing CUDA wrappers and callbacks for the creation and destruction of streams

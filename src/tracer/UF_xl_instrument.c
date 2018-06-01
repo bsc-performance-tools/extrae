@@ -37,7 +37,7 @@
 
 #include "wrapper.h"
 #include "utils.h"
-#include "UF_gcc_instrument.h"
+#include "UF_xl_instrument.h"
 
 static int LookForUF (const char *fname);
 static int UF_names_allocated = 0;
