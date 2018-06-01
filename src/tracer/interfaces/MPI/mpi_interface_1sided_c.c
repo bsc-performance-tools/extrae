@@ -375,15 +375,17 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 }
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
-#if MPI3_DRAFT
+
+#if MPI3
+# if MPI3_DRAFT
 int MPI_Fetch_and_op (void *origin_addr, void *result_addr,
   MPI_Datatype datatype, int target_rank, MPI_Aint target_disp, MPI_Op op,
   MPI_Win win)
-#else
+# else
 int MPI_Fetch_and_op (MPI3_CONST void *origin_addr, void *result_addr,
   MPI_Datatype datatype, int target_rank, MPI_Aint target_disp, MPI_Op op,
   MPI_Win win)
-#endif
+# endif /* MPI3_DRAFT */
 {
 	int res;
 
@@ -411,15 +413,15 @@ int MPI_Fetch_and_op (MPI3_CONST void *origin_addr, void *result_addr,
 	return res;
 }
 
-#if MPI3_DRAFT
+# if MPI3_DRAFT
 int MPI_Compare_and_swap(void *origin_addr, void *compare_addr,
   void *result_addr, MPI_Datatype datatype, int target_rank, MPI_Aint target_disp,
   MPI_Win win)
-#else
+# else
 int MPI_Compare_and_swap(MPI3_CONST void *origin_addr, MPI3_CONST void *compare_addr,
   void *result_addr, MPI_Datatype datatype, int target_rank, MPI_Aint target_disp,
   MPI_Win win)
-#endif
+# endif
 {
 	int res;
 
@@ -539,6 +541,7 @@ int MPI_Win_flush_local_all (MPI_Win win)
 
 	return res;
 }
+#endif /* MPI3 */
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 

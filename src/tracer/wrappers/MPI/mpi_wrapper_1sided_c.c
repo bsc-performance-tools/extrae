@@ -269,6 +269,7 @@ int MPI_Get_accumulate_C_Wrapper (void *origin_addr, int origin_count, MPI_Datat
 }
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
+#if MPI3
 int MPI_Fetch_and_op_C_Wrapper (void *origin_addr, void *result_addr,
   MPI_Datatype datatype, int target_rank, MPI_Aint target_disp, MPI_Op op,
   MPI_Win win)
@@ -372,8 +373,8 @@ int MPI_Win_flush_local_all_C_Wrapper (MPI_Win win)
 
 	return ierror;
 }
+#endif /* MPI3 */
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
-
 
 #endif /* defined(C_SYMBOLS) */

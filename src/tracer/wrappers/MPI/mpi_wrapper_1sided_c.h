@@ -71,6 +71,7 @@ int MPI_Get_accumulate_C_Wrapper (void *origin_addr, int origin_count, MPI_Datat
   void *result_addr, int result_count, MPI_Datatype result_datatype, int target_rank, MPI_Aint target_disp, int target_count, MPI_Datatype target_datatype, MPI_Op op, MPI_Win win);
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
+#if MPI3
 int MPI_Fetch_and_op_C_Wrapper (void *origin_addr, void *result_addr,
   MPI_Datatype datatype, int target_rank, MPI_Aint target_disp, MPI_Op op,
   MPI_Win win);
@@ -86,10 +87,10 @@ int MPI_Win_flush_all_C_Wrapper (MPI_Win win);
 int MPI_Win_flush_local_C_Wrapper (int rank, MPI_Win win);
 
 int MPI_Win_flush_local_all_C_Wrapper (MPI_Win win);
+#endif /* MPI3 */
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
 
 #endif /* C_SYMBOLS */
 
 #endif /* MPI_WRAPPER_DEFINED */
-

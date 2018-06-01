@@ -434,6 +434,7 @@ void NAME_ROUTINE_C2F(mpi_get_accumulate)(void *origin_addr, MPI_Fint *origin_co
 }
 #endif /* MPI_SUPPORTS_MPI_GET_ACCUMULATE */
 
+#if MPI3
 #if defined(HAVE_ALIAS_ATTRIBUTE)
 MPI_F_SYMS(mpi_fetch_and_op__,mpi_fetch_and_op_,MPI_FETCH_AND_OP,mpi_fetch_and_op,
   (void *origin_addr, void *result_addr, MPI_Fint *datatype, MPI_Fint *target_rank,
@@ -604,8 +605,8 @@ void NAME_ROUTINE_C2F(mpi_win_flush_local_all)(MPI_Fint *win, MPI_Fint *ierror)
 
 	DLB(DLB_MPI_Win_flush_local_all_leave);
 }
+#endif /* MPI3 */
 
 #endif /* MPI_SUPPORTS_MPI_1SIDED */
-
 
 #endif /* defined(FORTRAN_SYMBOLS) */
