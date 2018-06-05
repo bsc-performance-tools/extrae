@@ -165,7 +165,7 @@ char *Extrae_core_get_mpits_file_name (void)
 	return MpitsFileName;
 }
 
-hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
+xtr_hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
 PR_Queue_t PR_queue;     /* Persistent requests queue */
 static int *ranks_global;       /* Global ranks vector (from 1 to NProcs) */
 static MPI_Group grup_global;   /* Group attached to the MPI_COMM_WORLD */
@@ -276,7 +276,7 @@ int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver, int send_or_recv)
 static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 {
 	persistent_req_t *p_request;
-	hash_data_t hash_req;
+	xtr_hash_data_t hash_req;
 	int inter;
 	int size, src_world, ret;
 	int send_or_recv;
@@ -332,7 +332,7 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 			}
 		}
 
-		hash_add (&requests, &hash_req);
+		xtr_hash_add (&requests, &hash_req);
 	}
 
 	/*
@@ -976,7 +976,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_init (&requests);
+	xtr_hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK
@@ -1094,7 +1094,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_init (&requests);
+	xtr_hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK
@@ -1462,7 +1462,7 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
  ***  get_Irank_obj
  ******************************************************************************/
 
-int get_Irank_obj (hash_data_t * hash_req, int *src_world, int *size,
+int get_Irank_obj (xtr_hash_data_t * hash_req, int *src_world, int *size,
 	int *tag, int *status)
 {
 	int ret, one = 1;
@@ -1918,7 +1918,7 @@ void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
  ***  get_Irank_obj_C
  ******************************************************************************/
 
-int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
+int get_Irank_obj_C (xtr_hash_data_t * hash_req, int *src_world, int *size,
 	int *tag, MPI_Status *status)
 {
 	int ret, dest, recved_count;
@@ -1965,7 +1965,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_init (&requests);
+	xtr_hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK
@@ -2081,7 +2081,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	hash_init (&requests);
+	xtr_hash_init (&requests);
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK

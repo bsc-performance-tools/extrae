@@ -67,12 +67,12 @@ void Extrae_MPI_stats_Wrapper (iotimer_t timestamp);
 
 int get_rank_obj (int *comm, int *dest, int *receiver, int send_or_recv);
 int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver, int send_or_recv);
-int get_Irank_obj (hash_data_t * hash_req, int *src_world, int *size,
+int get_Irank_obj (xtr_hash_data_t * hash_req, int *src_world, int *size,
 	int *tag, int *status);
-int get_Irank_obj_C (hash_data_t * hash_req, int *src_world, int *size,
+int get_Irank_obj_C (xtr_hash_data_t * hash_req, int *src_world, int *size,
 	int *tag, MPI_Status *status);
 
-extern hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
+extern xtr_hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
 extern PR_Queue_t PR_queue;     /* Persistent requests queue */
 
 /* Fortran Wrappers */

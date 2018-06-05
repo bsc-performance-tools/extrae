@@ -23,8 +23,8 @@
 
 #include <config.h>
 
-#ifndef _HASH_TABLE_H
-#define _HASH_TABLE_H
+#ifndef _XTR_HASH_TABLE_H
+#define _XTR_HASH_TABLE_H
 
 #if !defined(MPI_SUPPORT) /* This shouldn't be compiled if MPI is not used */
 # error "This should not be compiled outside MPI bounds"
@@ -45,14 +45,14 @@
 #endif
 
 /* Hash macros */
-#define HASH_NULL (-1)
-#define HASH_FREE (-2)
-#define HASH_TABLE_SIZE 458879
-#define HASH_OVERFLOW_SIZE ((HASH_TABLE_SIZE*15)/100)
-#define HASH_FUNCTION(x)   (((uintptr_t)(x))%HASH_TABLE_SIZE)
+#define XTR_HASH_NULL (-1)
+#define XTR_HASH_FREE (-2)
+#define XTR_HASH_TABLE_SIZE 458879
+#define XTR_HASH_OVERFLOW_SIZE ((XTR_HASH_TABLE_SIZE*15)/100)
+#define XTR_HASH_FUNCTION(x)   (((uintptr_t)(x))%XTR_HASH_TABLE_SIZE)
 
 /*
- * Some prime numbers for HASH_TABLE_SIZE
+ * Some prime numbers for XTR_HASH_TABLE_SIZE
  *
  *         5       11       19       31      127
  *       211      383      631      887     1151
@@ -90,33 +90,33 @@ typedef struct
 	int partner;                    /* MPI p2p partner */
 	int tag;                        /* MPI p2p tag */
 	int size;                       /* MPI p2p size */
-} hash_data_t;
+} xtr_hash_data_t;
 
 typedef struct
 {
   int ovf_link;                 /* First cell in overflow list. */
-  /* HASH_FREE: free & no overflow cells */
-  /* HASH_NULL: used & no overflow cells */
+  /* XTR_HASH_FREE: free & no overflow cells */
+  /* XTR_HASH_NULL: used & no overflow cells */
   /* >= 0:      used & overflow cells    */
-  hash_data_t data;             /* User data */
-} hash_tbl_t;
+  xtr_hash_data_t data;             /* User data */
+} xtr_hash_tbl_t;
 
 typedef struct
 {
   int next;                     /* Overflow links */
-  hash_data_t data;             /* User data */
-} hash_ovf_t;
+  xtr_hash_data_t data;             /* User data */
+} xtr_hash_ovf_t;
 
 typedef struct
 {
-  hash_tbl_t table[HASH_TABLE_SIZE];
-  hash_ovf_t overflow[HASH_OVERFLOW_SIZE];
+  xtr_hash_tbl_t table[XTR_HASH_TABLE_SIZE];
+  xtr_hash_ovf_t overflow[XTR_HASH_OVERFLOW_SIZE];
   int ovf_free;                 /* First overflow free */
-} hash_t;
+} xtr_hash_t;
 
-void hash_init (hash_t * hash);
-int hash_add (hash_t * hash, const hash_data_t * data);
-hash_data_t *hash_search (const hash_t * hash, MPI_Request key);
-int hash_remove (hash_t * hash, MPI_Request key);
+void xtr_hash_init (xtr_hash_t * hash);
+int xtr_hash_add (xtr_hash_t * hash, const xtr_hash_data_t * data);
+xtr_hash_data_t *xtr_hash_search (const xtr_hash_t * hash, MPI_Request key);
+int xtr_hash_remove (xtr_hash_t * hash, MPI_Request key);
 
 #endif

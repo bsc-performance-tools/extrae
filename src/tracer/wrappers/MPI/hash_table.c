@@ -50,30 +50,30 @@ pthread_mutex_t hash_lock;
 /*
  *   Initializes hashing table.
  */
-void hash_init (hash_t * hash)
+void xtr_hash_init (xtr_hash_t * hash)
 {
   int i;
 
 #if defined(MPI_HAS_INIT_THREAD_C) || defined(MPI_HAS_INIT_THREAD_F)
   if (pthread_mutex_init(&hash_lock, NULL) != 0)
   {
-    fprintf (stderr, PACKAGE_NAME": hash_init: Mutex initialization failed.\n");
+    fprintf (stderr, PACKAGE_NAME": xtr_hash_init: Mutex initialization failed.\n");
     exit(-1);
   }
 #endif
 
-  for (i = 0; i < HASH_TABLE_SIZE; i++)
-    hash->table[i].ovf_link = HASH_FREE;
+  for (i = 0; i < XTR_HASH_TABLE_SIZE; i++)
+    hash->table[i].ovf_link = XTR_HASH_FREE;
 
   /*
    * All overflow cells are free 
    */
-  for (i = 0; i < HASH_OVERFLOW_SIZE - 1; i++)
+  for (i = 0; i < XTR_HASH_OVERFLOW_SIZE - 1; i++)
     hash->overflow[i].next = i + 1;
   /*
    * Last in the list has different 'next' 
    */
-  hash->overflow[HASH_OVERFLOW_SIZE - 1].next = HASH_NULL;
+  hash->overflow[XTR_HASH_OVERFLOW_SIZE - 1].next = XTR_HASH_NULL;
   hash->ovf_free = 0;
 }
 
@@ -81,7 +81,7 @@ void hash_init (hash_t * hash)
  *   Adds a new hash entry to the hash table. Returns != 0 when there is no
  *  space left in the table.
  */
-int hash_add (hash_t * hash, const hash_data_t * data)
+int xtr_hash_add (xtr_hash_t * hash, const xtr_hash_data_t * data)
 {
   int cell, free;
   int rc = FALSE;
@@ -90,11 +90,11 @@ int hash_add (hash_t * hash, const hash_data_t * data)
   pthread_mutex_lock(&hash_lock);
 #endif
 
-  cell = HASH_FUNCTION (data->key);
+  cell = XTR_HASH_FUNCTION (data->key);
 
-  if (hash->table[cell].ovf_link == HASH_FREE)
+  if (hash->table[cell].ovf_link == XTR_HASH_FREE)
   {
-    hash->table[cell].ovf_link = HASH_NULL;     /* No longer free */
+    hash->table[cell].ovf_link = XTR_HASH_NULL;     /* No longer free */
     hash->table[cell].data = *data;
   }
   else
@@ -102,9 +102,9 @@ int hash_add (hash_t * hash, const hash_data_t * data)
     /*
      * Get a free overflow cell 
      */
-    if ((free = hash->ovf_free) == HASH_NULL)
+    if ((free = hash->ovf_free) == XTR_HASH_NULL)
     {
-      fprintf (stderr, PACKAGE_NAME": hash_add: No space left in hash table. Size is %d+%d\n", HASH_TABLE_SIZE, HASH_OVERFLOW_SIZE);
+      fprintf (stderr, PACKAGE_NAME": xtr_hash_add: No space left in hash table. Size is %d+%d\n", XTR_HASH_TABLE_SIZE, XTR_HASH_OVERFLOW_SIZE);
       rc = TRUE;
     }
     else
@@ -135,26 +135,26 @@ int hash_add (hash_t * hash, const hash_data_t * data)
  *   Searches for key in the hash table. Returns NULL when the key is not
  *  found in the table.
  */
-hash_data_t *hash_search (const hash_t * hash, MPI_Request key)
+xtr_hash_data_t *xtr_hash_search (const xtr_hash_t * hash, MPI_Request key)
 {
   int cell, ovf;
 
-  cell = HASH_FUNCTION (key);
+  cell = XTR_HASH_FUNCTION (key);
 
-  if (hash->table[cell].ovf_link == HASH_FREE)
+  if (hash->table[cell].ovf_link == XTR_HASH_FREE)
     return NULL;
 
   if (hash->table[cell].data.key == key)
-    return (hash_data_t *) & hash->table[cell].data;
+    return (xtr_hash_data_t *) & hash->table[cell].data;
 
   /*
    * Look for key in overflow list 
    */
   ovf = hash->table[cell].ovf_link;
-  while (ovf != HASH_NULL)
+  while (ovf != XTR_HASH_NULL)
   {
     if (hash->overflow[ovf].data.key == key)
-      return (hash_data_t *) & hash->overflow[ovf].data;
+      return (xtr_hash_data_t *) & hash->overflow[ovf].data;
     ovf = hash->overflow[ovf].next;
   }
   return NULL;
@@ -165,7 +165,7 @@ hash_data_t *hash_search (const hash_t * hash, MPI_Request key)
  *   Removes entry key in the hash table. Returns != 0 when key is not found in
  *  the table.
  */
-int hash_remove (hash_t * hash, MPI_Request key)
+int xtr_hash_remove (xtr_hash_t * hash, MPI_Request key)
 {
   int cell, ovf, prev;
   int rc = FALSE;
@@ -174,14 +174,14 @@ int hash_remove (hash_t * hash, MPI_Request key)
   pthread_mutex_lock(&hash_lock);
 #endif
 
-  cell = HASH_FUNCTION (key);
+  cell = XTR_HASH_FUNCTION (key);
 
-  if (hash->table[cell].ovf_link == HASH_FREE)
+  if (hash->table[cell].ovf_link == XTR_HASH_FREE)
   {
 #if SIZEOF_LONG == 8
-    fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
+    fprintf (stderr, PACKAGE_NAME": xtr_hash_remove: Key %08lx not in hash table\n", (long) key);
 #elif SIZEOF_LONG == 4
-    fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
+    fprintf (stderr, PACKAGE_NAME": xtr_hash_remove: Key %04x not in hash table\n", (long) key);
 #endif
     rc = TRUE;
   }
@@ -190,7 +190,7 @@ int hash_remove (hash_t * hash, MPI_Request key)
     /*
      * Remove the main entry 
      */
-    if ((ovf = hash->table[cell].ovf_link) != HASH_NULL)
+    if ((ovf = hash->table[cell].ovf_link) != XTR_HASH_NULL)
     {
       /*
        * Bring 1st overflow to main entry 
@@ -205,7 +205,7 @@ int hash_remove (hash_t * hash, MPI_Request key)
     }
     else
     {
-      hash->table[cell].ovf_link = HASH_FREE;   /* Mark as free */
+      hash->table[cell].ovf_link = XTR_HASH_FREE;   /* Mark as free */
     }
   }
   else
@@ -214,24 +214,24 @@ int hash_remove (hash_t * hash, MPI_Request key)
      * Search key in overflow list 
      */
     ovf = hash->table[cell].ovf_link;
-    prev = HASH_NULL;
-    while (ovf != HASH_NULL && hash->overflow[ovf].data.key != key)
+    prev = XTR_HASH_NULL;
+    while (ovf != XTR_HASH_NULL && hash->overflow[ovf].data.key != key)
     {
       prev = ovf;
       ovf = hash->overflow[ovf].next;
     }
-    if (ovf == HASH_NULL)       /* Not found */
+    if (ovf == XTR_HASH_NULL)       /* Not found */
     {
 #if SIZEOF_LONG == 8
-      fprintf (stderr, PACKAGE_NAME": hash_remove: Key %08lx not in hash table\n", (long) key);
+      fprintf (stderr, PACKAGE_NAME": xtr_hash_remove: Key %08lx not in hash table\n", (long) key);
 #elif SIZEOF_LONG == 4
-      fprintf (stderr, PACKAGE_NAME": hash_remove: Key %04x not in hash table\n", (long) key);
+      fprintf (stderr, PACKAGE_NAME": xtr_hash_remove: Key %04x not in hash table\n", (long) key);
 #endif
       rc = TRUE;
     }
     else
     {
-      if (prev == HASH_NULL)
+      if (prev == XTR_HASH_NULL)
       {
         hash->table[cell].ovf_link = hash->overflow[ovf].next;
       }
