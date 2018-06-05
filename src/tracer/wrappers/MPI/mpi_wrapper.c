@@ -1009,6 +1009,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 #endif
 
 	/* Proceed with initialization if it's not already init */
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		int res;
@@ -1127,6 +1128,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 #endif
 
 	/* Proceed with initialization if it's not already init */
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		int res;
@@ -1242,6 +1244,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Finalize only if its initialized by MPI_init call */
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
 		Backend_Finalize ();
@@ -1997,6 +2000,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 #endif
 
 	/* Proceed with initialization if it's not already init */
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		int res;
@@ -2113,6 +2117,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 #endif
 
 	/* Proceed with initialization if it's not already init */
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
 	{
 		int res;
@@ -2227,8 +2232,10 @@ int MPI_Finalize_C_Wrapper (void)
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Finalize only if its initialized by MPI_init call */
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
+		fprintf (stdout, "%s: calling Backend_Finalize\n", __func__);
 		Backend_Finalize ();
 
 #ifdef WITH_PMPI_HOOK
@@ -2981,7 +2988,10 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 {
 	/* Before proceeding, check if it's ok to call MPI. We might support
 	   MPI but maybe it's not initialized at this moment (nanos+mpi e.g.) */
-	if (world_size > 1)
+	int mpi_initialized;
+	PMPI_Initialized (&mpi_initialized);
+
+	if (mpi_initialized && world_size > 1)
 	{
 		/* If the directory is shared, then let task 0 create all temporal
 	  	 directories. This proves a significant speedup in GPFS */

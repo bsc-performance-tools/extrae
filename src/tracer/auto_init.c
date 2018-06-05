@@ -34,6 +34,8 @@
 
 #include "auto_fini.h"
 
+#include <stdio.h>
+
 static int Extrae_automatically_loaded = FALSE;
 
 __attribute__((destructor))
@@ -45,6 +47,7 @@ void Gateway_to_Extrae_auto_library_fini (void)
 __attribute__((constructor))
 void Extrae_auto_library_init (void)
 {
+	fprintf (stdout, "In library constructor\n");
 	int skip_auto_library_init = FALSE;
 	char *skip_envvar = getenv ("EXTRAE_SKIP_AUTO_LIBRARY_INITIALIZE");
 	if (skip_envvar != NULL)

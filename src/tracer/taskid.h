@@ -35,6 +35,8 @@ void Extrae_set_finalize_task_function (void (*finalizetask_function)(void));
 
 /* Internal routines */
 
+unsigned (*get_task_num) (void);
+unsigned (*get_num_tasks) (void);
 unsigned Extrae_get_task_number (void);
 unsigned Extrae_get_num_tasks (void);
 void Extrae_barrier_tasks (void);

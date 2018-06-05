@@ -548,11 +548,15 @@ static extrae_init_type_t Extrae_Init_Type = EXTRAE_NOT_INITIALIZED;
 
 extrae_init_type_t Extrae_is_initialized_Wrapper (void)
 {
-	return EXTRAE_INITIALIZED()?Extrae_Init_Type:EXTRAE_NOT_INITIALIZED;
+	extrae_init_type_t r = EXTRAE_INITIALIZED();
+//	fprintf (stdout, "Extrae initialized by %d\n", (int)r);
+
+	return r?Extrae_Init_Type:EXTRAE_NOT_INITIALIZED;
 }
 
 void Extrae_set_is_initialized (extrae_init_type_t type)
 {
+	fprintf (stdout, "Extrae set_is_initialized by %d\n", (int)type);
 	Extrae_Init_Type = type;
 }
 
@@ -2062,14 +2066,18 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	  !Extrae_getCheckForGlobalOpsTracingIntervals())
 	{
 		if (rank == 0)
+		{
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads\n\n", world_size, Backend_getNumberOfThreads());
+		}
 	}
 	else if (mpitrace_on &&
 	  Extrae_getCheckControlFile() &&
 	  !Extrae_getCheckForGlobalOpsTracingIntervals())
 	{
 		if (rank == 0)
+		{
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads BUT disabled by EXTRAE_CONTROL_FILE\n\n", world_size, Backend_getNumberOfThreads());
+		}
 
 		/* Just disable the tracing until the control file is created */
 		Extrae_shutdown_Wrapper();
@@ -2081,7 +2089,9 @@ int Backend_postInitialize (int rank, int world_size, unsigned init_event,
 	  glops_intervals.glop_list[glops_intervals.next].trace_status != SHUTDOWN)
 	{
 		if (rank == 0)
+		{
 			fprintf (stdout, PACKAGE_NAME": Successfully initiated with %d tasks and %d threads BUT disabled by EXTRAE_CONTROL_GLOPS\n\n", world_size, Backend_getNumberOfThreads());
+		}
 
 		Extrae_shutdown_Wrapper();
 	}

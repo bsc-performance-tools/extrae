@@ -1071,13 +1071,11 @@ void ompt_initialize(
 
 	UNREFERENCED_PARAMETER(ompt_version);
 
-  if (ompt_enabled) 
+	if (ompt_enabled)
 	{
-		Extrae_init();
-
 #if defined(DEBUG) 
 		printf("OMPT IS INITIALIZING: lookup functions with runtime version %s and ompt version %d\n",
-		 runtime_version_string, ompt_version);
+		  runtime_version_string, ompt_version);
 #endif
 
 		if (strstr (runtime_version_string, "Intel") != NULL)

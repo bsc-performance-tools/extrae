@@ -624,7 +624,7 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 			rc = PAPI_create_eventset (&(HWC_sets[i].eventsets[threadid]));
 			if (PAPI_OK != rc)
 			{
-				fprintf (stderr, PACKAGE_NAME": Error! Unable to create eventset (%d of %d) in thread %d\n", i+1, HWC_num_sets, threadid);
+				fprintf (stderr, PACKAGE_NAME": Error! Unable to create eventset (%d of %d) in task %d, thread %d\n", i+1, HWC_num_sets, TASKID, threadid);
 				continue;
 			}
 
@@ -639,7 +639,7 @@ int HWCBE_PAPI_Init_Thread (UINT64 time, int threadid, int forked)
 						char EventName[PAPI_MAX_STR_LEN];
 	
 						PAPI_event_code_to_name (HWC_sets[i].counters[j], EventName);
-						fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, threadid);
+						fprintf (stderr, PACKAGE_NAME": Error! Hardware counter %s (0x%08x) cannot be added in set %d (task %d, thread %d)\n", EventName, HWC_sets[i].counters[j], i+1, TASKID, threadid);
 						HWC_sets[i].counters[j] = NO_COUNTER;
 						/* break; */
 					}

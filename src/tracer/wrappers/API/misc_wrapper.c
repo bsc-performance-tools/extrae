@@ -342,6 +342,7 @@ void Extrae_init_tracing (int forked)
 	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), TRACE_INIT_EV, temps_init, temps_fini, NULL))
 		return;
 
+	fprintf (stdout, "%s: Extrae initialized by %d\n", __func__, (int)Extrae_is_initialized_Wrapper());
 	Extrae_set_is_initialized (EXTRAE_INITIALIZED_EXTRAE_INIT);
 }
 
