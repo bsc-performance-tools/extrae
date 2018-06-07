@@ -66,7 +66,8 @@
 // interface operations
 //*****************************************************************************
 
-int ompt_enabled = FALSE;
+/* OMPT is disabled by default but this variable must be TRUE until XML is parsed */
+int ompt_enabled = TRUE;
 
 int (*ompt_set_callback_fn)(ompt_event_t, ompt_callback_t) = NULL;
 ompt_thread_id_t (*ompt_get_thread_id_fn)(void) = NULL;
