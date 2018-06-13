@@ -1023,9 +1023,9 @@ static struct OMPT_callbacks_st ompt_callbacks[] =
 	CALLBACK_ENTRY (ompt_event_control, Extrae_OMPT_event_control),
 	CALLBACK_ENTRY (ompt_event_task_dependences, Extrae_OMPT_event_task_dependences),
 	CALLBACK_ENTRY (ompt_event_task_dependence_pair, Extrae_OMPT_event_task_dependence_pair),
- 	{ "empty,", (ompt_event_t) 0, 0 },
+	{ "empty,", (ompt_event_t) 0, 0 },
  };
- 
+
 struct OMPT_callbacks_st ompt_callbacks_locks[] =
 {
 	CALLBACK_ENTRY (ompt_event_master_begin, Extrae_OMPT_event_master_begin),
@@ -1052,7 +1052,7 @@ struct OMPT_callbacks_st ompt_callbacks_locks[] =
 	CALLBACK_ENTRY (ompt_event_acquired_atomic, Extrae_OMPT_event_acquired_atomic),
 	{ "empty,", (ompt_event_t) 0, 0 },
 };
- 
+
 typedef enum {
 	OMPT_RTE_IBM,
 	OMPT_RTE_INTEL,
@@ -1062,22 +1062,22 @@ typedef enum {
 
 void ompt_initialize(
 	ompt_function_lookup_t lookup,
-	const char *runtime_version_string, 
+	const char *runtime_version_string,
 	unsigned ompt_version)
 {
-	ompt_runtime_t ompt_rte = OMPT_UNKNOWN;	
+	ompt_runtime_t ompt_rte = OMPT_UNKNOWN;
 	int i;
 	int r;
 
 	UNREFERENCED_PARAMETER(ompt_version);
 
-  if (ompt_enabled) 
-	{
-		Extrae_init();
+	Extrae_init();
 
-#if defined(DEBUG) 
+	if (ompt_enabled)
+	{
+#if defined(DEBUG)
 		printf("OMPT IS INITIALIZING: lookup functions with runtime version %s and ompt version %d\n",
-		 runtime_version_string, ompt_version);
+		  runtime_version_string, ompt_version);
 #endif
 
 		if (strstr (runtime_version_string, "Intel") != NULL)
@@ -1089,7 +1089,7 @@ void ompt_initialize(
 
 #if defined(DEBUG)
 		printf ("OMPTOOL: ompt_rte = %d\n", ompt_rte);
-#endif 
+#endif
 
 		/* Ask OMPT for the routine ompt_set_callback */
 		ompt_set_callback_fn = (int(*)(ompt_event_t, ompt_callback_t)) lookup("ompt_set_callback");
@@ -1129,7 +1129,7 @@ void ompt_initialize(
 			else
 			{
 				r = ompt_set_callback_fn (ompt_callbacks[i].evt, ompt_callbacks[i].cbk);
-#if defined(DEBUG) 
+#if defined(DEBUG)
 				printf ("OMPTOOL: set_callback (%d) { %s } = %d\n", i, ompt_callbacks[i].evt_name, r);
 #endif
 			}
@@ -1140,7 +1140,7 @@ void ompt_initialize(
 		{
 #if defined(DEBUG)
 			printf ("OMPTOOL: processing callbacks for locks\n");
-#endif	
+#endif
 			i = 0;
 			while (ompt_callbacks_locks[i].evt != (ompt_event_t) 0)
 			{
@@ -1171,19 +1171,19 @@ void ompt_initialize(
 /**
  * ompt_finalize
  *
- * Called from Backend_Finalize when there's support for OpenMP and OMPT enabled to 
- * make the final flush of the devices' buffers. The finalization has to be started 
- * by Extrae, because when the OmpSs/OMPT runtime finalizes, Extrae has already closed, 
+ * Called from Backend_Finalize when there's support for OpenMP and OMPT enabled to
+ * make the final flush of the devices' buffers. The finalization has to be started
+ * by Extrae, because when the OmpSs/OMPT runtime finalizes, Extrae has already closed,
  * and it is too late to flush the buffers.
  */
 void ompt_finalize()
 {
   /* Check whether the tracing for devices has been enabled */
-  if (ompt_targets_initialized) 
+  if (ompt_targets_initialized)
   {
     ompt_target_finalize();
   }
-} 
+}
 
 ompt_initialize_fn_t ompt_tool (void)
 {

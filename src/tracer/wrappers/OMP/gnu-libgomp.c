@@ -2517,7 +2517,10 @@ static int gnu_libgomp_get_hook_points (int rank)
 		__GOMP_version = GOMP_API_3_1;
 	}
 
-	fprintf (stdout, PACKAGE_NAME": Detected GOMP version is %s\n", __GOMP_version);
+	if (TASKID == 0)
+	{
+		fprintf (stdout, PACKAGE_NAME": Detected GOMP version is %s\n", __GOMP_version);
+	}
 
   /**********************/
   /***** OpenMP 3.1 *****/

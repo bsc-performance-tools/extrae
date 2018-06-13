@@ -1754,10 +1754,10 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 							xmlChar *ompt = xmlGetProp_env (rank, current_tag, TRACE_OMP_OMPT);
 							if (ompt != NULL && !xmlStrcasecmp (ompt, xmlYES))
 							{
-# if defined(OMPT_SUPPORT)							
+# if defined(OMPT_SUPPORT)
 								ompt_enabled = TRUE;
-								mfprintf (stdout, PACKAGE_NAME": OMPT activated for OpenMP instrumentation.");
-# else 
+								mfprintf (stdout, PACKAGE_NAME": OMPT activated for OpenMP instrumentation.\n");
+# else
 								mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support OMPT.\n", TRACE_OMP_OMPT);
 # endif /* OMPT_SUPPORT */
 							}

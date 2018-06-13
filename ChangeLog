@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 13Jun2018 Activates library auto-init by default in all tracing libraries
  * 05Jun2018 Refactors functions and structures used in the requests hash table
  * 01Jun2018 Clarifies mpimpi2prv error message when running with 1 task
  * 01Jun2018 Fixes wrong include in UF_xl_instrument.c

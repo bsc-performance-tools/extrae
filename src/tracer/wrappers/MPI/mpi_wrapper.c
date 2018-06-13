@@ -2981,7 +2981,10 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 {
 	/* Before proceeding, check if it's ok to call MPI. We might support
 	   MPI but maybe it's not initialized at this moment (nanos+mpi e.g.) */
-	if (world_size > 1)
+	int mpi_initialized;
+	PMPI_Initialized (&mpi_initialized);
+
+	if (mpi_initialized && world_size > 1)
 	{
 		/* If the directory is shared, then let task 0 create all temporal
 	  	 directories. This proves a significant speedup in GPFS */

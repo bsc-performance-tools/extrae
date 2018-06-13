@@ -21,6 +21,9 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "common.h"
 
 #include "taskid.h"
@@ -30,19 +33,77 @@
    1 taskid in total, task id is always 0 and barrier does nothing
 */
 
-static unsigned Extrae_taskid_default_function (void)
-{ return 0; }
+/* Runtime rank environment variables */
+/* OMPI_COMM_WORLD_RANK               */
+/* PMI_RANK                           */
+/* MPI_RANKID                         */
+/* MP_CHILD                           */
+/* SLURM_PROCID                       */
+/**************************************/
+/* Change to read envvars, save value to a var and change callback to getter */
+static unsigned xtr_taskid = 0;
+static unsigned xtr_num_tasks = 1;
 
-static unsigned Extrae_num_tasks_default_function (void)
-{ return 1; }
+static unsigned (*get_task_num) (void);
+static unsigned (*get_num_tasks) (void);
+
+static unsigned xtr_get_taskid ()
+{
+	return xtr_taskid;
+}
+
+static unsigned xtr_set_taskid ()
+{
+	unsigned int NUM_ENVVARS = 6;
+	char *envvars[] =
+	{
+		"SLURM_PROCID",
+		"OMPI_COMM_WORLD_RANK",
+		"MV2_COMM_WORLD_RANK",
+		"PMI_RANK",
+		"MPI_RANKID",
+		"MP_CHILD"
+	};
+
+	unsigned int i = 0;
+	char *envread = NULL;
+
+	while ((i < NUM_ENVVARS) && ((envread = getenv(envvars[i])) == NULL)) i++;
+
+	if (envread != NULL)
+	{
+		xtr_taskid = strtol(envread, NULL, 10);
+#if defined(DEBUG)
+		fprintf (stdout, PACKAGE_NAME": Task %u got TASKID from %s\n", xtr_taskid, envvars[i]);
+#endif
+	} else
+	{
+		xtr_taskid = 0;
+#if defined(DEBUG)
+		fprintf (stdout, PACKAGE_NAME": Task %u could'nt get TASKID, using 0\n", xtr_taskid);
+#endif
+	}
+
+	if (xtr_taskid >= xtr_num_tasks) xtr_num_tasks = xtr_taskid + 1;
+
+	get_task_num = xtr_get_taskid;
+
+	return xtr_taskid;
+}
+
+static unsigned xtr_get_num_tasks (void)
+{
+	return xtr_num_tasks;
+}
 
 static void Extrae_callback_routine_do_nothing (void)
 { return; }
 
+
 /* Callback definitions and API */
 
-static unsigned (*get_task_num) (void) = Extrae_taskid_default_function;
-static unsigned (*get_num_tasks) (void) = Extrae_num_tasks_default_function;
+static unsigned (*get_task_num) (void) = xtr_set_taskid;
+static unsigned (*get_num_tasks) (void) = xtr_get_num_tasks;
 static void (*barrier_tasks) (void) = Extrae_callback_routine_do_nothing;
 static void (*finalize_task) (void) = Extrae_callback_routine_do_nothing;
 

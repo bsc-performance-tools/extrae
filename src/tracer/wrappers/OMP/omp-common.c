@@ -349,17 +349,15 @@ static int getnumProcessors (void)
 
 /**
  * Extrae_OpenMP_init
- * 
- * Main initialization for the OpenMP instrumentation module. 
+ *
+ * Main initialization for the OpenMP instrumentation module.
  * Detects the runtime that is present (IBM, Intel, GNU...) and loads
  * specific hooks for the present runtime.
- * Also loads some common hooks for basic OpenMP routines available in 
+ * Also loads some common hooks for basic OpenMP routines available in
  * all runtimes.
  */
 void Extrae_OpenMP_init(int me)
 {
-	UNREFERENCED_PARAMETER(me);
-
 #if defined(PIC)
 	int ibm_hooked = FALSE;
 	int intel_hooked = FALSE;
@@ -387,14 +385,17 @@ void Extrae_OpenMP_init(int me)
 	hooked = ibm_hooked + intel_hooked + gnu_hooked;
 
 	if (hooked > 0) {
-		fprintf (stdout, PACKAGE_NAME": Detected and hooked OpenMP runtime:%s%s%s\n",
-		         ibm_hooked?" [IBM XLSMP]":"",
-		         intel_hooked?" [Intel KMPC]":"",
-		         gnu_hooked?" [GNU GOMP]":"");
+		if (me == 0)
+		{
+			fprintf (stdout, PACKAGE_NAME": Detected and hooked OpenMP runtime:%s%s%s\n",
+			  ibm_hooked?" [IBM XLSMP]":"",
+		      intel_hooked?" [Intel KMPC]":"",
+		      gnu_hooked?" [GNU GOMP]":"");
+		}
 
-		/* 
-		* If we hooked any compiler-specific routines, just hook for the 
-		* common OpenMP routines 
+		/*
+		* If we hooked any compiler-specific routines, just hook for the
+		* common OpenMP routines
 		*/
 
 		omp_common_get_hook_points(0);
@@ -403,8 +404,10 @@ void Extrae_OpenMP_init(int me)
 	}
 
 #else  /* PIC */
-
-	fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
+	if (me == 0)
+	{
+		fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
+	}
 
 #endif /* PIC */
 
@@ -412,8 +415,8 @@ void Extrae_OpenMP_init(int me)
 	int numProcessors = 0;
 	char *new_num_omp_threads_clause = NULL;
 	char *omp_value = NULL;
-	
-	/* 
+
+	/*
 	 * Obtain the number of runnable threads in this execution.
 	 * Just check for OMP_NUM_THREADS env var (if this compilation
 	 * allows instrumenting OpenMP 
