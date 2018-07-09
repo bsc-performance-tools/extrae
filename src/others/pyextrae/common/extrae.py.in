@@ -87,13 +87,13 @@ def pyEx_trace_fini(Master=False):
       values = (ctypes.c_ulonglong * nvalues)()
       description_values = (ctypes.c_char_p * nvalues)()
       values[0] = 0
-      description_values[0] = "End"
+      description_values[0] = "End".encode('utf-8')
       for i in range(1, nvalues):
         values[i] = i
-        description_values[i] = Traced_Functions[i-1]
+        description_values[i] = Traced_Functions[i-1].encode('utf-8')
 
       Extrae[os.getpid()].Extrae_define_event_type( ctypes.pointer(ctypes.c_uint(USRFUNC_EV)),
-                                       ctypes.c_char_p(description),
+                                       ctypes.c_char_p(description.encode('utf-8')),
                                        ctypes.pointer(ctypes.c_uint(nvalues)),
                                        ctypes.pointer(values),
                                        ctypes.pointer(description_values) )
