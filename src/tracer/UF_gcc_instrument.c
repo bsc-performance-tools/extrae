@@ -21,6 +21,7 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
+#define _GNU_SOURCE
 #include "common.h"
 
 #include <config.h>
@@ -31,6 +32,8 @@
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #endif
+
+#include <dlfcn.h>
 
 #include "wrapper.h"
 #include "UF_gcc_instrument.h"
@@ -149,6 +152,13 @@ static void AddUFtoInstrument (void *address)
 
 static int LookForUFaddress (void *address)
 {
+	Dl_info di;
+
+	if (dladdr(address, &di))
+	{
+		address = (void *)(di.dli_saddr - di.dli_fbase);
+	}
+
 	int i = HASH((long)address);
 	int count = 0;
 
