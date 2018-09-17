@@ -70,13 +70,13 @@ unsigned long long proc_timebase (void)
 	unsigned long long clk;
 
 	fp = fopen( "/proc/cpuinfo", "r" );
-	bytes_read = fread( buffer, 1, sizeof( buffer ), fp );
+	bytes_read = fread( buffer, 1, sizeof(buffer) - sizeof(char), fp );
 	fclose( fp );
 
 	if (bytes_read == 0)
 		return 0ULL;
 
-	buffer[ bytes_read ] = '\0';
+	buffer[bytes_read] = '\0';
 	match = strstr( buffer, "timebase" );
 	if (match == NULL)
 		return 0ULL;

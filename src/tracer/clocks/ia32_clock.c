@@ -98,13 +98,13 @@ void ia32_Initialize (void)
   int res;
 
   fp = fopen( "/proc/cpuinfo", "r" );
-  bytes_read = fread( buffer, 1, sizeof( buffer ), fp );
+  bytes_read = fread( buffer, 1, sizeof(buffer) - sizeof(char), fp );
   fclose( fp );
 
   if (bytes_read == 0)
     return;
 
-  buffer[ bytes_read ] = '\0';
+  buffer[bytes_read] = '\0';
   match = strstr( buffer, "cpu MHz" );
   if (match == NULL)
     return;
