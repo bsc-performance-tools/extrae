@@ -61,7 +61,7 @@ function pointers?  All of them, maybe?
 */
 
 /* FIXME: Should we discover this dinamically? */ 
-#define MAX_THD 32
+#define MAX_THD 256
 
 typedef unsigned long long ull;
 typedef long long ll;
@@ -548,7 +548,7 @@ int _extrae_ibm_xlsmp_init (int rank)
 	hooked = ibm_xlsmp_get_hook_points (rank);
    
 	max_threads = omp_get_max_threads();
-	if (max_threads > MAX_THD) /* XXX */
+	if ((hooked) && (max_threads > MAX_THD)) /* XXX */
 	{
 		/* Has this happened? */
 		/* a) Increase MAX_THD to be higher than omp_get_max_threads() */

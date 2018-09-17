@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 17Sep2018 Increases maximum number of threads for IBM XL OMP runtime helpers to 256 and removes checks when the IBM runtime is not hooked
  * 17Sep2018 Adds wrapper for taskgroup construct in Intel runtime
  * 17Sep2018 Fixes dlsym loop when trying to obtain the pointer to calloc
  * 17Sep2018 Solves infinite loop when getting the real pointer for 'free'
