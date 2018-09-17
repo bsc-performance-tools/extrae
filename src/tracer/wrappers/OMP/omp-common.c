@@ -42,35 +42,15 @@
 #include "trace_macros.h"
 #include "omp-probe.h"
 #include "omp-common.h"
+#include "omp-common_c.h"
+#include "omp-common_f.h"
 #include "omp-events.h"
 
 #include "ibm-xlsmp-1.6.h"
 #include "gnu-libgomp.h"
 #include "intel-kmpc-11.h"
 
-//#define DEBUG
-
-/*
- * In case the constructor initialization didn't trigger
- * or the symbols couldn't be found, retry hooking.
- */
-#define RECHECK_INIT(real_fn_ptr)                                      \
-{                                                                      \
-  if (real_fn_ptr == NULL)                                             \
-  {                                                                    \
-    fprintf (stderr, PACKAGE_NAME": WARNING! %s is a NULL pointer. "   \
-                     "Did the initialization of this module trigger? " \
-                     "Retrying initialization...\n", #real_fn_ptr);    \
-    omp_common_get_hook_points(TASKID);                                \
-  }                                                                    \
-}                                                                                
-
-#if defined(PIC)
-static int (*omp_get_thread_num_real)(void) = NULL;
-static void (*omp_set_num_threads_real)(int) = NULL;
-static void (*omp_set_lock_real)(omp_lock_t *) = NULL;
-static void (*omp_unset_lock_real)(omp_lock_t *) = NULL;
-#endif /* PIC */
+#define DEBUG
 
 /******************************************************************************\
  *                                                                            * 
@@ -142,176 +122,6 @@ struct thread_helper_t * get_parent_thread_helper()
 
 	return &(__omp_nested_storage[parent_id][parent_level]);
 }
-
-
-static void omp_common_get_hook_points (int rank)
-{
-	UNREFERENCED_PARAMETER(rank);
-
-#if defined(PIC)
-	/* Obtain @ for omp_set_lock */
-	omp_get_thread_num_real =
-		(int(*)(void)) dlsym (RTLD_NEXT, "omp_get_thread_num");
-
-	/* Obtain @ for omp_set_num_threads */
-	omp_set_num_threads_real =
-		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads");
-
-	/* Obtain @ for omp_set_lock */
-	omp_set_lock_real =
-		(void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_set_lock");
-
-	/* Obtain @ for omp_unset_lock */
-	omp_unset_lock_real =
-		(void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_unset_lock");
-
-#endif /* PIC */
-}
-
-/******************************************************************************\
- *                                                                            * 
- *                                WRAPPERS                                    * 
- *                                                                            * 
-\******************************************************************************/
-
-#if defined(PIC)
-
-int omp_get_thread_num (void)
-{
-	static int shown = FALSE;
-	int res = 0;
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": omp_get_thread_num starts (real=%p) params=(void)\n", omp_get_thread_num_real);
-#endif
-
-  RECHECK_INIT(omp_get_thread_num_real);
-
-	if (omp_get_thread_num_real != NULL)
-	{
-		res = omp_get_thread_num_real();
-	}
-	else
-	{
-		res = 0;
-
-		if (!shown)
-		{
-			fprintf (stderr,
-			  PACKAGE_NAME": WARNING! You have ended executing Extrae's omp_get_thread_num weak symbol! "
-			  "That's likely to happen when you load the tracing library for OpenMP, "
-			  "but your application is not compiled/linked against OpenMP.\n" );
-			shown = TRUE;
-		}
-	}
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_get_thread_num ends\n", res);
-#endif
-
-	return res;
-}
-
-void omp_set_num_threads (int num_threads)
-{
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads starts (real=%p) params=(%d)\n", THREADID, omp_set_num_threads_real, num_threads);
-#endif
-
-	RECHECK_INIT(omp_set_num_threads_real);
-
-	if (omp_set_num_threads_real != NULL && EXTRAE_INITIALIZED())
-	{
-		Backend_ChangeNumberOfThreads (num_threads);
-
-		Backend_Enter_Instrumentation ();
-		Probe_OpenMP_SetNumThreads_Entry (num_threads);
-		omp_set_num_threads_real (num_threads);
-		Probe_OpenMP_SetNumThreads_Exit ();
-		Backend_Leave_Instrumentation ();
-	}
-	else if (omp_set_num_threads_real != NULL)
-	{
-		omp_set_num_threads_real (num_threads);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! omp_set_num_threads is not hooked! Exiting!!\n");
-		exit (-1);
-	}
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads ends\n", THREADID);
-#endif
-}
-
-void omp_set_lock (omp_lock_t *lock)
-{
-	void *lock_ptr = (void *)lock;
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_lock starts (real=%p) params=(%p)\n", THREADID, omp_set_lock_real, lock_ptr);
-#endif
-
-	RECHECK_INIT(omp_set_lock_real);
-
-	if (omp_set_lock_real != NULL && EXTRAE_INITIALIZED())
-	{
-		Backend_Enter_Instrumentation ();
-		Probe_OpenMP_Named_Lock_Entry();
-		omp_set_lock_real (lock_ptr);
-		Probe_OpenMP_Named_Lock_Exit(lock_ptr);
-		Backend_Leave_Instrumentation ();
-	}
-	else if (omp_set_lock_real != NULL)
-	{
-		omp_set_lock_real (lock);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! omp_set_lock is not hooked! Exiting!!\n");
-		exit (-1);
-	}
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_lock ends\n", THREADID);
-#endif
-}
-
-void omp_unset_lock (omp_lock_t *lock)
-{
-	void *lock_ptr = (void *)lock;
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_unset_lock starts (real=%p) params=(%p)\n", THREADID, omp_unset_lock_real, lock_ptr);
-#endif
-
-	RECHECK_INIT(omp_unset_lock_real);
-
-	if (omp_unset_lock_real != NULL && EXTRAE_INITIALIZED())
-	{
-		Backend_Enter_Instrumentation ();
-		Probe_OpenMP_Named_Unlock_Entry(lock_ptr);
-		omp_unset_lock_real (lock_ptr);
-		Probe_OpenMP_Named_Unlock_Exit();
-		Backend_Leave_Instrumentation ();
-	}
-	else if (omp_unset_lock_real != NULL)
-	{
-		omp_unset_lock_real (lock);
-	}
-	else
-	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! omp_unset_lock is not hooked! Exiting!!\n");
-		exit (-1);
-	}
-
-#if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_unlock ends\n", THREADID);
-#endif
-}
-
-#endif /* PIC */
 
 /******************************************************************************\
  *                                                                            * 
@@ -398,7 +208,8 @@ void Extrae_OpenMP_init(int me)
 		* common OpenMP routines
 		*/
 
-		omp_common_get_hook_points(0);
+		omp_common_get_hook_points_c(0);
+		omp_common_get_hook_points_f(0);
 	} else {
 		fprintf (stdout, PACKAGE_NAME": Warning! You have loaded an OpenMP tracing library but the application seems not to be linked with an OpenMP runtime. Did you compile with the proper flags? (-fopenmp, -openmp, ...).\n");
 	}

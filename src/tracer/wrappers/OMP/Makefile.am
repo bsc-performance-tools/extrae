@@ -14,8 +14,10 @@ endif
 
 WRAPPERS_OPENMP = \
  omp-common.c omp-common.h \
+ omp-common_c.c omp-common_c.h \
+ omp-common_f.c omp-common_f.h \
  omp-probe.c omp-probe.h   \
- omp-events.c omp-events.h 
+ omp-events.c omp-events.h
 
 EXTRA_OPENMP_CFLAGS =
 
