@@ -203,52 +203,63 @@ void *malloc (size_t s)
     return res;
 }
 
-#if defined(DEBUG)
-static int __in_free = FALSE;
-#endif
-void free (void *p)
+int __in_free = FALSE;
+void
+free(void *p)
 {
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
-                            mpitrace_on                          &&
-                            Extrae_get_trace_malloc();
-        /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
-        if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+	                    mpitrace_on                          &&
+	                    Extrae_get_trace_malloc();
+	/*
+	 * Can't be evaluated before, the compiler optimizes the if's clauses,
+	 * and THREADID calls a null callback if Extrae is not yet initialized
+	 */
+	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
-	if (real_free == NULL)
+	/*
+	 * If we don't have the pointer to the real free funtion and we are not
+	 * already inside a dlsym, call dlsym
+	*/
+	if (real_free == NULL && !__in_free)
+	{
+		__in_free = TRUE;
 		real_free = EXTRAE_DL_INIT (__func__);
+		__in_free = FALSE;
+	}
 
 #if defined(DEBUG)
 	if (canInstrument && !__in_free) // fprintf() seems to call free()!
 	{
 		__in_free = TRUE;
-		fprintf (stderr, PACKAGE_NAME": free is at %p\n", real_free);
-		fprintf (stderr, PACKAGE_NAME": free params %p\n", p);
+		fprintf(stderr, PACKAGE_NAME": free is at %p\n", real_free);
+		fprintf(stderr, PACKAGE_NAME": free params %p\n", p);
 		__in_free = FALSE;
 	}
 #endif
 
 	int present = Extrae_malloctrace_remove (p);
 
-	if (Extrae_get_trace_malloc_free() && real_free != NULL && canInstrument
-	    && present)
+	if (Extrae_get_trace_malloc_free() && real_free != NULL &&
+	    canInstrument && present)
 	{
 		/* If we can instrument, simply capture everything we need and
 		   remove the pointer from the list */
-		Backend_Enter_Instrumentation ();
-		Probe_Free_Entry (p);
-		real_free (p);
-		Probe_Free_Exit ();
-		Backend_Leave_Instrumentation ();
-	}
-	else if (real_free != NULL)
+		Backend_Enter_Instrumentation();
+		Probe_Free_Entry(p);
+		real_free(p);
+		Probe_Free_Exit();
+		Backend_Leave_Instrumentation();
+	} else if (real_free != NULL)
 	{
 		/* Otherwise, call the original */
-		real_free (p);
-	}
-	else
+		real_free(p);
+	} else
 	{
-		fprintf (stderr, PACKAGE_NAME": free is not hooked! exiting!!\n");
-		abort();
+		/*
+		 * If we don't have the real pointer and reach this point, do
+		 * nothing and leave the memory unfree'd. This should only
+		 * happen once during the initialization.
+		*/
 	}
 }
 

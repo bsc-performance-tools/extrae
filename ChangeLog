@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 17Sep2018 Solves infinite loop when getting the real pointer for 'free'
  * 09Jul2018 Fixes compatibility of pyextrae with Python 3
  * 13Jun2018 Activates library auto-init by default in all tracing libraries (closes #5 #12)
  * 06Jun2018 Implements OpenMP Fortran wrappers
