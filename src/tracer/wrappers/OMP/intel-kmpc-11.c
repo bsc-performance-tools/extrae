@@ -98,6 +98,9 @@ static int (*__kmpc_omp_taskwait_real)(void*,int) = NULL;
 
 static void (*__kmpc_taskloop_real)(void*,int,void*,int,void*,void*,long,int,int,long,void*) = NULL;
 
+static void (*__kmpc_taskgroup_real)(void *, int) = NULL;
+static void (*__kmpc_end_taskgroup_real)(void *, int) = NULL;
+
 
 /******************************************************************************\
  *                                                                            *
@@ -1229,6 +1232,79 @@ void __kmpc_taskloop(void *loc, int gtid, void *task, int if_val, void *lb, void
 #endif
 }
 
+void
+__kmpc_taskgroup(void *loc, int global_tid)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "__kmpc_taskgroup enter: @=%p args=(%p %d)\n ",
+	    THREAD_LEVEL_VAR, __kmpc_taskgroup_real, loc, global_tid);
+#endif
+
+	RECHECK_INIT(__kmpc_taskgroup_real);
+
+	if (TRACE(__kmpc_taskgroup_real))
+	{
+		Extrae_OpenMP_Taskgroup_start_Entry();
+		Extrae_OpenMP_EmitTaskStatistics();
+		__kmpc_taskgroup_real(loc, global_tid);
+		Extrae_OpenMP_Taskgroup_start_Exit();
+	}
+	else if (__kmpc_taskgroup_real != NULL)
+	{
+		__kmpc_taskgroup_real(loc, global_tid);
+	}
+	else
+	{
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "__kmpc_taskgroup: ERROR! This function is not hooked! Exiting!!\n ",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "__kmpc_taskgroup exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
+void
+__kmpc_end_taskgroup(void *loc, int global_tid)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "__kmpc_end_taskgroup enter: @=%p args=(%p %d)\n ",
+	    THREAD_LEVEL_VAR, __kmpc_end_taskgroup_real, loc, global_tid);
+#endif
+
+	RECHECK_INIT(__kmpc_end_taskgroup_real);
+
+	if (TRACE(__kmpc_end_taskgroup_real))
+	{
+		Extrae_OpenMP_Taskgroup_end_Entry();
+		__kmpc_end_taskgroup_real (loc, global_tid);
+		Extrae_OpenMP_Taskgroup_end_Exit();
+		Extrae_OpenMP_EmitTaskStatistics();
+	}
+	else if (__kmpc_end_taskgroup_real != NULL)
+	{
+		__kmpc_end_taskgroup_real(loc, global_tid);
+	}
+	else
+	{
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "__kmpc_end_taskgroup: ERROR! This function is not hooked! Exiting!!\n ",
+		    THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "__kmpc_taskgroup exit\n ", THREAD_LEVEL_VAR);
+#endif
+
+}
+
 /******************************************************************************\
  *                                                                            *
  *                             INITIALIZATIONS                                *
@@ -1349,6 +1425,16 @@ static int intel_kmpc_get_hook_points (int rank)
 	/* Obtain @ for __kmpc_taskloop */
 	__kmpc_taskloop_real = (void(*)(void*,int,void*,int,void*,void*,long,int,int,long,void*)) dlsym (RTLD_NEXT, "__kmpc_taskloop");
 	INC_IF_NOT_NULL(__kmpc_taskloop_real, count);
+
+	/* Obtain @ for __kmpc_taskgroup */
+	__kmpc_taskgroup_real = (void(*)(void *, int))
+	    dlsym(RTLD_NEXT, "__kmpc_taskgroup");
+	INC_IF_NOT_NULL(__kmpc_taskgroup_real, count);
+
+	/* Obtain @ for __kmpc_end_taskgroup */
+	__kmpc_end_taskgroup_real = (void(*)(void *, int))
+	    dlsym(RTLD_NEXT, "__kmpc_end_taskgroup");
+	INC_IF_NOT_NULL(__kmpc_end_taskgroup_real, count);
 
 	/* Any hook point? */
 	return count > 0;
