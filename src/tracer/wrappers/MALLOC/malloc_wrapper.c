@@ -56,7 +56,7 @@
 
 static void* (*real_malloc)(size_t) = NULL;
 static void (*real_free)(void *) = NULL;
-/* static void* (*real_calloc)(size_t, size_t) = NULL; */
+static void* (*real_calloc)(size_t, size_t) = NULL;
 static void* (*real_realloc)(void*, size_t) = NULL;
 static int   (*real_posix_memalign)(void **, size_t, size_t) = NULL;
 
@@ -203,10 +203,19 @@ void *malloc (size_t s)
     return res;
 }
 
-int __in_free = FALSE;
-void
-free(void *p)
+#define DLSYM_CALLOC_SIZE 8192
+/*
+ * Static buffer to return when calloc is called from within dlsym and we don't
+ * have the pointer to the real calloc function
+ */
+static unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
+
+static int __in_free = FALSE;
+
+void free (void *p)
 {
+	if (p == extrae_dlsym_static_buffer) return;
+
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
 	                    mpitrace_on                          &&
 	                    Extrae_get_trace_malloc();
@@ -263,38 +272,74 @@ free(void *p)
 	}
 }
 
-#if 0
 /* Unfortunately, calloc seems to be invoked if dlsym fails and generates an
 infinite loop of recursive calls to calloc */
-void *calloc (size_t s1, size_t s2)
+
+/* Used to know the depth of calloc calls */
+int __in_calloc_depth = 0;
+void *calloc (size_t nmemb, size_t size)
 {
+	__in_calloc_depth++;
 	void *res;
 	int canInstrument = EXTRAE_INITIALIZED()                 &&
                             mpitrace_on                          &&
                             Extrae_get_trace_malloc();
-        /* Can't be evaluated before because the compiler optimizes the if's clauses, and THREADID calls a null callback if Extrae is not yet initialized */
+	/*
+	 * Can't be evaluated before because the compiler optimizes the if's
+	 * clauses, and THREADID calls a null callback if Extrae is not yet
+	 * initialized
+	 */
         if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_calloc == NULL)
-		real_calloc = EXTRAE_DL_INIT (__func__);
+		if (__in_calloc_depth == 1)
+		{
+			real_calloc = EXTRAE_DL_INIT (__func__);
+		} else if (__in_calloc_depth == 2)
+		{
+			/* Check if the requested size fits in the static buffer */
+			if ((nmemb*size) > DLSYM_CALLOC_SIZE)
+			{
+				fprintf (stderr, PACKAGE_NAME
+				    ": The size requested by calloc is bigger"
+				    " than DLSYM_CALLOC_SIZE, please increase its"
+				    " value and recompile.\n");
+				abort();
+			}
+
+			/* Zero static buffer before returning it */
+			for (int i = 0; i<DLSYM_CALLOC_SIZE; i++)
+			{
+				extrae_dlsym_static_buffer[i] = 0;
+			}
+			__in_calloc_depth--;
+			return extrae_dlsym_static_buffer;
+		} else
+		{
+			/* in_calloc_depth shouldn't be greater than 2 */
+			fprintf (stderr, PACKAGE_NAME
+			    ": Please turn off calloc instrumentation.\n");
+			abort();
+
+		}
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": calloc is at %p\n", real_calloc);
-	fprintf (stderr, PACKAGE_NAME": calloc params %u %u\n", s1, s2);
+	fprintf (stderr, PACKAGE_NAME": calloc params %u %u\n", nmemb, size);
 #endif
 
 	if (real_calloc != NULL && canInstrument)
 	{
 		Backend_Enter_Instrumentation ();
-		Probe_Calloc_Entry (s1, s2);
-		res = real_calloc (s1, s2);
+		Probe_Calloc_Entry (nmemb, size);
+		res = real_calloc (nmemb, size);
 		Probe_Calloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
 	else if (real_calloc != NULL && !canInstrument)
 	{
 		/* Otherwise, call the original */
-		res = real_calloc (s1, s2);
+		res = real_calloc (nmemb, size);
 	}
 	else
 	{
@@ -302,9 +347,9 @@ void *calloc (size_t s1, size_t s2)
 		abort();
 	}
 
-    return res;
+	__in_calloc_depth--;
+	return res;
 }
-#endif
 
 void *realloc (void *p, size_t s)
 {
