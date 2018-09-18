@@ -6,8 +6,8 @@
 #########################
 
 m4_define([extrae_major], [3])
-m4_define([extrae_minor], [5])
-m4_define([extrae_micro], [4])
+m4_define([extrae_minor], [6])
+m4_define([extrae_micro], [0])
 
 m4_define([extrae_version], [extrae_major.extrae_minor.extrae_micro])
 
