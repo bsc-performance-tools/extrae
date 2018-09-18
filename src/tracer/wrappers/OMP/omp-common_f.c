@@ -29,7 +29,7 @@
  * In case the constructor initialization didn't trigger
  * or the symbols couldn't be found, retry hooking.
  */
-#define RECHECK_INIT_C(real_fn_ptr)                                            \
+#define RECHECK_INIT_F(real_fn_ptr)                                            \
 {                                                                              \
 	if (real_fn_ptr == NULL)                                               \
 	{                                                                      \
@@ -37,7 +37,7 @@
 		    ": WARNING! %s is a NULL pointer. "                        \
 		    "Did the initialization of this module trigger? "          \
 		    "Retrying initialization...\n", #real_fn_ptr);             \
-		omp_common_get_hook_points_c(TASKID);                          \
+		omp_common_get_hook_points_f(TASKID);                          \
 	}                                                                      \
 }
 

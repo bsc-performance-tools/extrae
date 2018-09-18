@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 18Sep2018 Fixes bug in OpenMP common wrapper hook points
  * 18Sep2018 Removes debug for OpenMP Fortran wrappers
  * 17Sep2018 Fixes race condition when issuing install in a parallel make (closes #18)
  * 17Sep2018 Fixes memory corruption when reading CPU frequency (closes #17)
