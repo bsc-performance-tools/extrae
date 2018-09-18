@@ -50,7 +50,7 @@
 #include "gnu-libgomp.h"
 #include "intel-kmpc-11.h"
 
-#define DEBUG
+// #define DEBUG
 
 /******************************************************************************\
  *                                                                            * 
