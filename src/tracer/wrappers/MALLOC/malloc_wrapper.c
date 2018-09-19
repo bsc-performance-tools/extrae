@@ -210,7 +210,7 @@ void *malloc (size_t s)
  */
 static unsigned char extrae_dlsym_static_buffer[DLSYM_CALLOC_SIZE];
 
-static int __in_free = FALSE;
+int __in_free = FALSE;
 
 void free (void *p)
 {
