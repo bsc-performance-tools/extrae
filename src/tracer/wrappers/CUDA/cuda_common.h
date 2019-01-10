@@ -26,8 +26,10 @@
 #if CUDA_WITHOUT_CUPTI_INSTRUMENTATION
 
 /**
- ** The following lines are convenient hacks to avoid including cupti.h
+ ** The following lines are convenient hacks to avoid including cupti.h -- these seem to be provided by cuda.h now, include that header and remove definitions below
  **/
+
+#define CU_STREAM_LEGACY 0x1
 
 typedef int cudaError_t;
 enum cudaMemcpyKind

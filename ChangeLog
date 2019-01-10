@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 25Mar2019 Fixes compatibility issue with cudaStreamLegacy available since CUDA 7
  * 25Mar2019 Fixes bug in initialization of OmpSs tracing (only master thread was detected)
  * 24Jan2019 Always use POSIX clock except if it is disabled setting the EXTRAE_USE_POSIX_CLOCK environment variable to 0
  * 19Sep2018 Fixes bug in variable declaration in 'free' wrapper
