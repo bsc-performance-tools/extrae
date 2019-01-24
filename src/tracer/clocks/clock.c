@@ -133,14 +133,14 @@ void Clock_Initialize (unsigned numthreads)
 		char *use_posix_clock = NULL;
 
 		use_posix_clock = getenv("EXTRAE_USE_POSIX_CLOCK");
-		if (use_posix_clock != NULL && strcmp(use_posix_clock, "1") == 0)
-		{
-			init_clock = posix_Initialize;
-			get_clock = posix_getTime;
-		} else
+		if (use_posix_clock != NULL && strcmp(use_posix_clock, "0") == 0)
 		{
 			init_clock = INIT_CLOCK;
 			get_clock = GET_CLOCK;
+		} else
+		{
+			init_clock = posix_Initialize;
+			get_clock = posix_getTime;
 		}
 
 /*  if no "nanosecond" clock is available 

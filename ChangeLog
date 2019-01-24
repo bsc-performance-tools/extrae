@@ -1,6 +1,8 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 24Jan2019 Always use POSIX clock except if it is disabled setting the
+ EXTRAE_USE_POSIX_CLOCK environment variable to 0
  * 19Sep2018 Fixes bug in variable declaration in 'free' wrapper
  * 18Sep2018 Fixes bug in OpenMP common wrapper hook points
  * 18Sep2018 Removes debug for OpenMP Fortran wrappers
