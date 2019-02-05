@@ -15,6 +15,7 @@ ExtraeHome     = "@sub_PREFIX@"
 LibrarySeq     = ExtraeHome + "/lib/libseqtrace.so"
 LibrarySubProc = "./.libseqtrace-subprocess.so" 
 
+pyEx_active_profile = None
 Extrae = dict()
 Traced_Functions = [] 
 Number_of_Traced_Functions = 0
@@ -122,6 +123,20 @@ def pyEx_profile_fini():
     print ('%-12i%-s' % (ncount, func))
 
 
+### Blocks the profiler hook from triggering
+def pyEx_profile_pause():
+  global pyEx_active_profile
+  if (pyEx_active_profile == None):
+    pyEx_active_profile = sys.getprofile()
+  sys.setprofile( None )
+
+### Allows the profiler hook to trigger again
+def pyEx_profile_restart():
+  global pyEx_active_profile
+  if (pyEx_active_profile != None):
+    sys.setprofile(pyEx_active_profile)
+
+  
 #############################
 ###  EXTRAE API WRAPPERS  ###
 #############################
@@ -210,6 +225,7 @@ def startTracing(SelectedLibrary, Multiproc=False):
 
   ### Register the exit handler for the parent process
   atexit.register(pyEx_trace_fini, Master=True)
+
 
 def startProfiling():
   sys.setprofile( pyEx_profile_hook )
