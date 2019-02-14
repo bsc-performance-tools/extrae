@@ -2341,6 +2341,7 @@ void Backend_Finalize (void)
 
 		if (THREADID == 0) 
 		{
+			TIME; // Forces a tick of the clock; if the trace doesn't have any event, the following would appear with the initialization events otherwise as they use LAST_READ_TIME
 			Extrae_getrusage_Wrapper ();
 			Extrae_memusage_Wrapper ();
 		}
