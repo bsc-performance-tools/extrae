@@ -117,7 +117,7 @@ struct thread_helper_t * get_thread_helper()
 struct thread_helper_t * get_parent_thread_helper()
 {
 	int nesting_level = omp_get_level();
-	int parent_level = nesting_level;
+	int parent_level = nesting_level - 1;
 	int parent_id = omp_get_ancestor_thread_num(parent_level);
 
 	return &(__omp_nested_storage[parent_id][parent_level]);

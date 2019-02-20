@@ -29,7 +29,7 @@
 #include "omp-probe.h"
 
 #if 0
-# define DEBUG fprintf (stdout, "THREAD %d: %s\n", THREADID, __FUNCTION__);
+# define DEBUG fprintf (stderr, "THREAD %d: %s\n", THREADID, __FUNCTION__);
 #else
 # define DEBUG
 #endif
