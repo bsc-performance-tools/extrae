@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 25Mar2019 Adds pyextrae.pthreads module
  * 25Mar2019 Fixes timestamp of rusage and memusage events
  + 25Mar2019 Adds functions in pyextrae to toggle the profiler on/off 
  * 25Mar2019 Fixes compatibility issue with cudaStreamLegacy available since CUDA 7

@@ -40,10 +40,11 @@ endif
 
 EXTRA_DIST = \
   pyextrae/__init__.py \
-	pyextrae/cuda/__init__.py \
+  pyextrae/cuda/__init__.py \
   pyextrae/mpi/__init__.py \
   pyextrae/multiprocessing/__init__.py \
-	pyextrae/profile/__init__.py \
+  pyextrae/profile/__init__.py \
+  pyextrae/pthreads/__init__.py \
   pyextrae/sequential/__init__.py \
   pyextrae/common/__init__.py \
   pyextrae/common/extrae.py.in
