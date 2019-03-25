@@ -29,15 +29,18 @@
 
 #include <intel-pebs-types.h>
 
-int Extrae_IntelPEBS_enable (int loads);
-void Extrae_IntelPEBS_disable (void); 
-
+void Extrae_IntelPEBS_setLoadFrequency (int frequency);
 void Extrae_IntelPEBS_setLoadPeriod (int period);
+void Extrae_IntelPEBS_setStoreFrequency (int frequency);
 void Extrae_IntelPEBS_setStorePeriod (int period);
+void Extrae_IntelPEBS_setLoadL3MFrequency (int frequency);
+void Extrae_IntelPEBS_setLoadL3MPeriod (int period);
 void Extrae_IntelPEBS_setLoadSampling (int enabled);
 void Extrae_IntelPEBS_setMinimumLoadLatency (int numcycles);
 void Extrae_IntelPEBS_setStoreSampling (int enabled);
+void Extrae_IntelPEBS_setLoadL3MSampling (int enabled);
 
-void Extrae_IntelPEBS_nextSampling (void);
+void Extrae_IntelPEBS_startSampling (void);
+void Extrae_IntelPEBS_stopSampling (void); 
 
 #endif

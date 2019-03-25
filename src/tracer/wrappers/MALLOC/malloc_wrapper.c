@@ -88,12 +88,15 @@ static unsigned nmallocentries = 0;
 #define NMALLOCENTRIES_MALLOC 16*1024
 
 /* Registers a new address to be tracked for future free() calls */
+static pthread_mutex_t mutex_allocations = PTHREAD_MUTEX_INITIALIZER;
 static void Extrae_malloctrace_add (void *p)
 {
 	if (p != NULL)
 	{
 		unsigned u;
 		assert (real_realloc != NULL);
+
+		pthread_mutex_lock (&mutex_allocations);
 	
 		if (nmallocentries == nmallocentries_allocated)
 		{
@@ -114,24 +117,50 @@ static void Extrae_malloctrace_add (void *p)
 				nmallocentries++;
 				break;
 			}
+
+		pthread_mutex_unlock (&mutex_allocations);
 	}
 }
 
 /* Removes an entry from the list of registered addresses */
 static int Extrae_malloctrace_remove (const void *p)
 {
+	unsigned found = FALSE;
 	if (p != NULL)
 	{
+		pthread_mutex_lock (&mutex_allocations);
+
 		unsigned u;
 		for (u = 0; u < nmallocentries_allocated; u++)
 			if (mallocentries[u] == p)
 			{
 				mallocentries[u] = NULL;
 				nmallocentries--;
-				return TRUE;
+				found = TRUE;
+				break;
 			}
+
+		pthread_mutex_unlock (&mutex_allocations);
 	}
-	return FALSE;
+	return found;
+}
+
+static void Extrae_malloctrace_replace (const void *p1, void *p2)
+{
+	if (p1 != NULL)
+	{
+		pthread_mutex_lock (&mutex_allocations);
+
+		unsigned u;
+		for (u = 0; u < nmallocentries_allocated; u++)
+			if (mallocentries[u] == p1)
+			{
+				mallocentries[u] = p2;
+				break;
+			}
+
+		pthread_mutex_unlock (&mutex_allocations);
+	}
 }
 
 
@@ -386,10 +415,7 @@ void *realloc (void *p, size_t s)
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
 		if (res != NULL)
-		{
-			Extrae_malloctrace_remove (p);
-			Extrae_malloctrace_add (res);
-		}
+			Extrae_malloctrace_replace (p, res);
 		Probe_Realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -615,10 +641,7 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_realloc(kind, ptr, size);
     if (res != NULL)
-    {
-      Extrae_malloctrace_remove (ptr);
-      Extrae_malloctrace_add (res);
-    }
+	  Extrae_malloctrace_replace (ptr, res);
     Probe_memkind_realloc_Exit (res);
     Backend_Leave_Instrumentation ();
   }
@@ -925,9 +948,7 @@ kmpc_realloc( void *ptr, size_t size )
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_realloc (ptr, size);
 		if (res != NULL)
-		{
-			Extrae_malloctrace_add (res);
-		}
+			Extrae_malloctrace_replace (ptr, res);
 		Probe_kmpc_realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}

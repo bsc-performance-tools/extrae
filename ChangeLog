@@ -3,6 +3,7 @@ ChangeLog
  [ + added, - removed, * changed ]
  * 02Apr2019 Adds support for changing num_threads in OpenMP parallel constructs
  * 29Mar2019 Changes order in which MPI env vars are checked to discover process' task id during auto init
+ * 28Mar2019 Extends support for PEBS sampling on Skylake processors, xml 'period' attribute changed to 'frequency'
  + 27Mar2019 Adds missing user_lock routines in kmp runtime
  * 27Mar2019 Removes warnings for ambiguous `if` and non-std99 compliant `for`
  * 27Mar2019 Fixes incorrect states for MPI_Win_flush_* calls

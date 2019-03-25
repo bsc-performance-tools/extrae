@@ -41,6 +41,7 @@
 #include <asm/unistd.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
+#include <assert.h>
 
 #include "sampling-common.h"
 #include "sampling-intel-pebs.h"
@@ -56,13 +57,30 @@
 # endif
 #endif
 
-#include "perf_event.h"
+static int pebs_init_threads = 0;
+static pthread_mutex_t pebs_init_lock = PTHREAD_MUTEX_INITIALIZER;
+
+#define LOAD_SAMPLE_TYPE         ( PERF_SAMPLE_IP | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC | PERF_SAMPLE_ADDR )
+#define STORE_SAMPLE_TYPE        ( PERF_SAMPLE_IP | PERF_SAMPLE_DATA_SRC | PERF_SAMPLE_ADDR )
+#define LOAD_L3M_SAMPLE_TYPE     ( PERF_SAMPLE_IP | PERF_SAMPLE_ADDR )
+
+typedef enum SamplingType_e {
+	LOAD_INDEX = 0,
+	STORE_INDEX,
+	LOAD_L3M_INDEX,
+	NUM_SAMPLING_TYPES }
+SamplingType_t;
+
+#ifdef HAVE_LINUX_PERF_EVENT_H
+# include <linux/perf_event.h>
+#else
+# error Missing linux/perf_event.h header file to compile PEBS support
+#endif
 
 int perf_event_open(struct perf_event_attr *hw_event_uptr, pid_t pid, int cpu,
 	int group_fd, unsigned long flags)
 {
-	return syscall(__NR_perf_event_open,hw_event_uptr, pid, cpu, group_fd,
-	  flags);
+	return syscall (__NR_perf_event_open,hw_event_uptr, pid, cpu, group_fd, flags);
 }
 
 #if defined(__x86_64)
@@ -111,11 +129,10 @@ static int processor_vendor=-2;
 
 static int detect_processor_cpuinfo(void)
 {
-	FILE *procinfo_file;
 	int cpu_family=0,model=0;
 	char string[BUFSIZ];
 
-	procinfo_file = fopen("/proc/cpuinfo","r");
+	FILE * procinfo_file = fopen("/proc/cpuinfo","r");
 	if (procinfo_file == NULL)
 	{
 		fprintf (stderr, PACKAGE_NAME ": Error! Can't open /proc/cpuinfo\n");
@@ -260,7 +277,6 @@ static int detect_processor_cpuinfo(void)
 	return 0;
 }
 
-
 static int detect_processor(void)
 {
 	if (processor_type==-2)
@@ -269,118 +285,129 @@ static int detect_processor(void)
 	return processor_type;
 }
 
-static int get_latency_load_event(unsigned long long *config,
-			int *precise_ip,
-			char *name)
+static int get_latency_load_event(unsigned long long *config)
 {
-	int processor,processor_notfound=0;
-	processor=detect_processor();
-	switch(processor)
+	int processor_notfound = 0;
+
+	switch (detect_processor())
 	{
-	case PROCESSOR_SANDYBRIDGE:
-	case PROCESSOR_SANDYBRIDGE_EP:
-		*config=0x1cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
-		break;
-	case PROCESSOR_IVYBRIDGE:
-	case PROCESSOR_IVYBRIDGE_EP:
-		*config=0x1cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
-		break;
-	case PROCESSOR_HASWELL:
-	case PROCESSOR_HASWELL_EP:
-		*config=0x1cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
-		break;
-	case PROCESSOR_BROADWELL:
-		*config=0x1cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
-		break;
-	case PROCESSOR_SKYLAKE:
-		*config=0x1cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD");
-		break;
-	case PROCESSOR_KNIGHTS_LANDING:
-	/* KNL Performance Counters
-	 * https://software.intel.com/en-us/articles/intel-xeon-phi-x200-family-processor-performance-monitoring-reference-manual
-	 */
-		*config=0x0404; /* Use 0x0204 for "MEM_UOPS_RETIRED:L2_HIT_LOADS; 0x0404 for "MEM_UOPS_RETIRED:L2_MISS_LOADS */
-		*precise_ip=2;
-		strcpy(name,"MEM_UOPS_RETIRED:L2_MISS_LOADS");
-		break;
-	default:
-		*config=0x0;
-		*precise_ip=0;
-		strcpy(name,"UNKNOWN");
-		processor_notfound=-1;
-		break;
+		case PROCESSOR_SANDYBRIDGE:
+		case PROCESSOR_SANDYBRIDGE_EP:
+		case PROCESSOR_IVYBRIDGE:
+		case PROCESSOR_IVYBRIDGE_EP:
+		case PROCESSOR_HASWELL:
+		case PROCESSOR_HASWELL_EP:
+		case PROCESSOR_BROADWELL:
+		case PROCESSOR_SKYLAKE:
+			*config=0x1cd; // MEM_TRANS_RETIRED.LOAD_LATENCY
+			break;
+		case PROCESSOR_KNIGHTS_LANDING:
+			*config=0x0404; /* Use 0x0204 for "MEM_UOPS_RETIRED:L2_HIT_LOADS; 0x0404 for "MEM_UOPS_RETIRED:L2_MISS_LOADS */
+			break;
+		default:
+			*config=0x0;
+			processor_notfound=-1;
+			break;
 	}
 	return processor_notfound;
 }
 
-static int get_latency_store_event(unsigned long long *config,
-			int *precise_ip,
-			char *name)
+static int get_store_event (unsigned long long *config)
 {
-	int processor,processor_notfound=0;
-	processor=detect_processor();
-	switch(processor) {
-	case PROCESSOR_SANDYBRIDGE:
-	case PROCESSOR_SANDYBRIDGE_EP:
-		*config=0x2cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
-		break;
-	case PROCESSOR_IVYBRIDGE:
-	case PROCESSOR_IVYBRIDGE_EP:
-		*config=0x2cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
-		break;
-	case PROCESSOR_HASWELL:
-	case PROCESSOR_HASWELL_EP:
-		*config=0x2cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
-		break;
-	case PROCESSOR_BROADWELL:
-		*config=0x2cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
-		break;
-	case PROCESSOR_SKYLAKE:
-		*config=0x2cd;
-		*precise_ip=2;
-		strcpy(name,"MEM_TRANS_RETIRED:PRECISE_STORE");
-		break;
-        case PROCESSOR_KNIGHTS_LANDING:
-	default:
-		*config=0x0;
-		*precise_ip=0;
-		strcpy(name,"UNKNOWN");
-		processor_notfound=-1;
-		break;
+	int processor_notfound = 0;
+
+	switch (detect_processor())
+	{
+		case PROCESSOR_SANDYBRIDGE:
+		case PROCESSOR_SANDYBRIDGE_EP: 
+		case PROCESSOR_IVYBRIDGE:
+		case PROCESSOR_IVYBRIDGE_EP:
+			*config=0x2cd; // MEM_TRANS_RETIRED.PRECISE_STORE
+			break;
+		case PROCESSOR_HASWELL:
+		case PROCESSOR_HASWELL_EP:
+		case PROCESSOR_BROADWELL:
+			*config=0x82d0; // MEM_UOPS_RETIRED.ALL_STORES
+			break;
+		case PROCESSOR_SKYLAKE:
+			*config=0x82d0; // MEM_INST_RETIRED.ALL_STORES
+			break;
+	        case PROCESSOR_KNIGHTS_LANDING:
+		default:
+			*config=0x0;
+			processor_notfound=-1;
+			break;
 	}
 	return processor_notfound;
 }
 
+static int get_load_l3m_event (unsigned long long *config)
+{
+	int processor_notfound = 0;
 
-static int PEBS_load_period  = 1000000;
-static int PEBS_store_period = 1000000;
+	switch (detect_processor())
+	{
+		case PROCESSOR_SKYLAKE:
+			*config= 0x20d1; // MEM_LOAD_RETIRED.L3_MISS
+			break;
+		default:
+			*config=0x0;
+			processor_notfound=-1;
+			break;
+	}
+	return processor_notfound;
+}
+
+static int PEBS_load_operates_in_frequency_mode     = 0;
+static int PEBS_store_operates_in_frequency_mode    = 0;
+static int PEBS_load_l3m_operates_in_frequency_mode = 0;
+static int PEBS_load_frequency                      = 100;
+static int PEBS_store_frequency                     = 100;
+static int PEBS_load_l3m_frequency                  = 100;
+static int PEBS_load_period                         = 1000000;
+static int PEBS_store_period                        = 1000000;
+static int PEBS_load_l3m_period                     = 1000000;
+
 static int PEBS_load_enabled = FALSE;
 static int PEBS_store_enabled = FALSE;
+static int PEBS_load_l3m_enabled = FALSE;
 static int PEBS_minimumLoadLatency = 3;
 
-void Extrae_IntelPEBS_setLoadPeriod(int period)
-{ PEBS_load_period = period; }
+void Extrae_IntelPEBS_setLoadFrequency(int frequency)
+{ 
+  PEBS_load_operates_in_frequency_mode = 1;
+  PEBS_load_frequency = frequency; 
+}
 
-void Extrae_IntelPEBS_setStorePeriod (int period)
-{ PEBS_store_period = period; }
+void Extrae_IntelPEBS_setLoadPeriod(int period)
+{ 
+  PEBS_load_operates_in_frequency_mode = 0;
+  PEBS_load_period = period;
+}
+
+void Extrae_IntelPEBS_setStoreFrequency (int frequency)
+{ 
+  PEBS_store_operates_in_frequency_mode = 1;
+  PEBS_store_frequency = frequency; 
+}
+
+void Extrae_IntelPEBS_setStorePeriod(int period)
+{
+  PEBS_store_operates_in_frequency_mode = 0;
+  PEBS_store_period = period;
+}
+
+void Extrae_IntelPEBS_setLoadL3MFrequency (int frequency)
+{ 
+  PEBS_load_l3m_operates_in_frequency_mode = 1;
+  PEBS_load_l3m_frequency = frequency; 
+}
+
+void Extrae_IntelPEBS_setLoadL3MPeriod(int period)
+{
+  PEBS_load_l3m_operates_in_frequency_mode = 0;
+  PEBS_load_l3m_period = period;
+}
 
 void Extrae_IntelPEBS_setLoadSampling (int enabled)
 { PEBS_load_enabled = enabled; }
@@ -391,160 +418,58 @@ void Extrae_IntelPEBS_setMinimumLoadLatency (int numcycles)
 void Extrae_IntelPEBS_setStoreSampling (int enabled)
 { PEBS_store_enabled = enabled; }
 
+void Extrae_IntelPEBS_setLoadL3MSampling (int enabled)
+{ PEBS_load_l3m_enabled = enabled; }
+
 #define MMAP_DATA_SIZE 8
 
-static char **extrae_intel_pebs_mmap = NULL;
-static long long prev_head;
-static long long global_sample_type;
-static int *perf_pebs_fd = NULL;
+static void ***extrae_intel_pebs_mmap = NULL;
+static long long **prev_head = NULL;
+static int **perf_pebs_fd = NULL;
 static int mmap_pages=1+MMAP_DATA_SIZE;
 
-#define MALLOC_ONCE /* Define this or there's a free that gets instrumented */
-
-#if defined(MALLOC_ONCE)
 #define ALLOCATED_SIZE MMAP_DATA_SIZE*4096
-static unsigned char **data_thread_buffer = NULL;
-#endif
+static char **data_thread_buffer = NULL;
 
 /* This function extracts PEBS entries from the previously allocated buffer 
    in data ptr. At this moment, we only should have 1 event in the buffer */
 static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap_thread,
-	int mmap_size, long long prev_head, int sample_type, int *events_read,
+	long long prev_head, int sample_type,
 	long long *ip, long long *addr, long long *weight,
 	union perf_mem_data_src *data_src)
 {
-
 	struct perf_event_mmap_page *control_page = extrae_intel_pebs_mmap_thread;
-	long long head,offset;
-	int size;
-	long long bytesize,prev_head_wrap;
-	unsigned char *data;
-	void *data_mmap=extrae_intel_pebs_mmap_thread+sysconf(_SC_PAGESIZE);
-
-	if (mmap_size==0)
-		return 0;
-
-	if (control_page == NULL)
-	{
-		fprintf (stderr, PACKAGE_NAME": Error mmap page NULL\n");
-		return -1;
-	}
-
-	head = control_page->data_head;
+	long long head = control_page->data_head;
 	rmb(); /* Must always follow read of data_head */
-
-	size = head-prev_head;
-
-	bytesize = mmap_size*sysconf(_SC_PAGESIZE);
+	void *data_mmap = extrae_intel_pebs_mmap_thread+sysconf(_SC_PAGESIZE);
+	int size = head-prev_head;
+#if defined(HAVE_PERF_EVENT_MMAP_PAGE_DATA_SIZE)
+	long long bytesize = control_page->data_size;
+#else
+	long long bytesize = mmap_size*sysconf(_SC_PAGESIZE);
+#endif
 
 	if (size > bytesize)
 		fprintf (stderr, PACKAGE_NAME": Error! overflowed the mmap buffer %d>%lld bytes\n", size, bytesize);
 
-#if !defined(MALLOC_ONCE)
-	data = malloc(bytesize);
-	if (data == NULL)
-		return -1;
-#else
-	data = data_thread_buffer[THREADID];
+	char * data = data_thread_buffer[THREADID];
 	if (bytesize > ALLOCATED_SIZE)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! overflow in the allocated size for PEBS buffer\n");
 		return -1;
 	}
-	if (data == NULL)
-		return -1;
-#endif
 
-	prev_head_wrap=prev_head%bytesize;
+	long long prev_head_wrap = prev_head % bytesize;
+	memcpy (data,(unsigned char*)data_mmap + prev_head_wrap, bytesize-prev_head_wrap);
+	memcpy(data+(bytesize-prev_head_wrap),(unsigned char *)data_mmap, prev_head_wrap);
 
-	//   printf("Copying %d bytes from %d to %d\n",
-	//	  bytesize-prev_head_wrap,prev_head_wrap,0);
-	memcpy (data,(unsigned char*)data_mmap + prev_head_wrap,
-		bytesize-prev_head_wrap);
-
-	//printf("Copying %d bytes from %d to %d\n",
-	//	  prev_head_wrap,0,bytesize-prev_head_wrap);
-
-	memcpy(data+(bytesize-prev_head_wrap),(unsigned char *)data_mmap,
-		prev_head_wrap);
-
-	struct perf_event_header *event;
-
-	offset=0;
-	if (events_read)
-		*events_read=0;
+	long long offset = 0;
 
 	while (offset < size)
 	{
-#if defined(DEBUG)
-		printf("Offset %d Size %d\n",offset,size);
-#endif
-		event = (struct perf_event_header *) & data[offset];
+		struct perf_event_header * event = (struct perf_event_header *) & data[offset];
 
-#if defined(DEBUG)
-		{
-			switch(event->type)
-			{
-				case PERF_RECORD_MMAP:
-					printf("PERF_RECORD_MMAP"); break;
-				case PERF_RECORD_LOST:
-					printf("PERF_RECORD_LOST"); break;
-				case PERF_RECORD_COMM:
-					printf("PERF_RECORD_COMM"); break;
-				case PERF_RECORD_EXIT:
-					printf("PERF_RECORD_EXIT"); break;
-				case PERF_RECORD_THROTTLE:
-					printf("PERF_RECORD_THROTTLE"); break;
-				case PERF_RECORD_UNTHROTTLE:
-					printf("PERF_RECORD_UNTHROTTLE"); break;
-				case PERF_RECORD_FORK:
-					printf("PERF_RECORD_FORK"); break;
-				case PERF_RECORD_READ:
-					printf("PERF_RECORD_READ"); break;
-				case PERF_RECORD_SAMPLE:
-					printf("PERF_RECORD_SAMPLE [%x]",sample_type); break;
-				case PERF_RECORD_MMAP2:
-					printf("PERF_RECORD_MMAP2"); break;
-				default: printf("UNKNOWN %d",event->type); break;
-			}
-
-			printf(", MISC=%d (",event->misc);
-			switch(event->misc & PERF_RECORD_MISC_CPUMODE_MASK)
-			{
-				case PERF_RECORD_MISC_CPUMODE_UNKNOWN:
-					printf("PERF_RECORD_MISC_CPUMODE_UNKNOWN"); break; 
-				case PERF_RECORD_MISC_KERNEL:
-					printf("PERF_RECORD_MISC_KERNEL"); break;
-				case PERF_RECORD_MISC_USER:
-					printf("PERF_RECORD_MISC_USER"); break;
-				case PERF_RECORD_MISC_HYPERVISOR:
-					printf("PERF_RECORD_MISC_HYPERVISOR"); break;
-				case PERF_RECORD_MISC_GUEST_KERNEL:
-					printf("PERF_RECORD_MISC_GUEST_KERNEL"); break;
-				case PERF_RECORD_MISC_GUEST_USER:
-					printf("PERF_RECORD_MISC_GUEST_USER"); break;
-				default:
-					printf("Unknown %d!\n",event->misc); break;
-			}
-
-			/* Both have the same value */
-			if (event->misc & PERF_RECORD_MISC_MMAP_DATA) {
-				printf(",PERF_RECORD_MISC_MMAP_DATA or PERF_RECORD_MISC_COMM_EXEC ");
-			}
-
-			if (event->misc & PERF_RECORD_MISC_EXACT_IP) {
-				printf(",PERF_RECORD_MISC_EXACT_IP ");
-			}
-
-			if (event->misc & PERF_RECORD_MISC_EXT_RESERVED) {
-				printf(",PERF_RECORD_MISC_EXT_RESERVED ");
-			}
-
-			printf("), Size=%d\n",event->size);
-		}
-#endif /* DEBUG */
-
-		offset+=8; /* skip header */
+		offset += 8; /* skip header */
 
 		/***********************/
 		/* Print event Details */
@@ -556,34 +481,35 @@ static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap_thread
 			if (sample_type & PERF_SAMPLE_IP)
 			{
 				if (ip != NULL)
-					memcpy (ip,&data[offset],sizeof(long long));
-
+				{
+					*ip = *((long long *) &data[offset]);
 #if defined(DEBUG)
-				printf("\tPERF_SAMPLE_IP, IP: %llx\n",*ip);
+					printf("\tPERF_SAMPLE_IP, IP: %llx\n",*ip);
 #endif
-				offset+=8;
+				}
+				offset += 8;
 			}
 			if (sample_type & PERF_SAMPLE_ADDR)
 			{
 				if (addr != NULL)
-					memcpy (addr,&data[offset],sizeof(long long));
-
+				{
+					*addr = *((long long *) &data[offset]);
 #if defined(DEBUG)
-				if (addr != NULL)
 					printf ("\tPERF_SAMPLE_ADDR, addr: %llx\n",*addr);
 #endif
-				offset+=8;
+				}
+				offset += 8;
 			}
 			if (sample_type & PERF_SAMPLE_WEIGHT)
 			{
 				if (weight != NULL)
-					memcpy(weight,&data[offset],sizeof(long long));
-
+				{
+					*weight = *((long long *) &data[offset]);
 #if defined(DEBUG)
-				if (weight != NULL)
 					printf ("\tPERF_SAMPLE_WEIGHT, Weight: %lld\n",*weight);
 #endif
-				offset+=8;
+				}
+				offset += 8;
 			}
 			if (sample_type & PERF_SAMPLE_DATA_SRC)
 			{
@@ -592,60 +518,7 @@ static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap_thread
 					  sizeof(union perf_mem_data_src));
 
 				offset += sizeof(union perf_mem_data_src);
-
-#if defined(DEBUG)
-				if (data_src != NULL)
-				{
-					printf("\t\t");
-
-					if (data_src->mem_lvl & PERF_MEM_LVL_NA)
-						printf("Level Not available ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_HIT)
-						printf("Hit ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_MISS)
-						printf("Miss ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_L1)
-						printf("L1 cache ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_LFB)
-						printf("Line fill buffer ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_L2)
-						printf("L2 cache ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_L3)
-						printf("L3 cache ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_LOC_RAM)
-						printf("Local DRAM ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_REM_RAM1)
-						printf("Remote DRAM 1 hop ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_REM_RAM2)
-						printf("Remote DRAM 2 hops ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_REM_CCE1)
-						printf("Remote cache 1 hop ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_REM_CCE2)
-						printf("Remote cache 2 hops ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_IO)
-						printf("I/O memory ");
-					if (data_src->mem_lvl & PERF_MEM_LVL_UNC)
-						printf("Uncached memory ");
-
-					if (data_src->mem_dtlb & PERF_MEM_TLB_NA)
-						printf("Not available ");
-					if (data_src->mem_dtlb & PERF_MEM_TLB_HIT)
-						printf("Hit ");
-					if (data_src->mem_dtlb & PERF_MEM_TLB_MISS)
-						printf("Miss ");
-					if (data_src->mem_dtlb & PERF_MEM_TLB_L1)
-						printf("Level 1 TLB ");
-					if (data_src->mem_dtlb & PERF_MEM_TLB_L2)
-						printf("Level 2 TLB ");
-					if (data_src->mem_dtlb & PERF_MEM_TLB_WK)
-						printf("Hardware walker ");
-					if (data_src->mem_dtlb & PERF_MEM_TLB_OS)
-						printf("OS fault handler ");
-					printf("\n");
-				}
-#endif /* DEBUG */
 			}
-
 		}
 		else
 		{
@@ -654,14 +527,9 @@ static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap_thread
 			  event->type);
 #endif
 		}
-		if (events_read) (*events_read)++;
 	}
 
 	control_page->data_tail = head;
-
-#if !defined(MALLOC_ONCE)
-	free(data);
-#endif
 
 	return head;
 }
@@ -670,259 +538,266 @@ static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap_thread
    and the buffer is full (1 entry only). It emits everythin Extrae needs
    timestamp, reference to memory, portion of the memory hierarchy that
    provides it, the access cost. */
-static void extrae_intel_pebs_handler_load (int signum, siginfo_t *info,
-	void *uc)
+static void extrae_intel_pebs_handler_load (int threadid)
 {
-	UINT64 t;
-	int ret;
-	int fd = info->si_fd;
-	long long ip, addr, weight;
-	union perf_mem_data_src data_src;
-	unsigned memlevel, memhitormiss;
-	unsigned tlblevel, tlbhitormiss;
-
-	UNREFERENCED_PARAMETER(signum);
-	UNREFERENCED_PARAMETER(uc);
-
-	if (extrae_intel_pebs_mmap[THREADID] == NULL) return;
-
-	ret = ioctl (fd, PERF_EVENT_IOC_DISABLE, 0);
-
-	prev_head = extrae_perf_mmap_read_pebs (extrae_intel_pebs_mmap[THREADID],
-	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
-	  &ip, &addr, &weight, &data_src);
-
-	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	void * _mmap = extrae_intel_pebs_mmap[threadid][LOAD_INDEX];
+	if (_mmap)
 	{
-		/* see linux/perf_event.h perf_mem_data_src */
-		if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
-			memhitormiss = PEBS_MEMORYHIERARCHY_HIT;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_MISS)
-			memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
-		else
-			memhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
-	
-		if (data_src.mem_dtlb & PERF_MEM_TLB_HIT)
-			tlbhitormiss = PEBS_MEMORYHIERARCHY_HIT;
-		else if (data_src.mem_dtlb & PERF_MEM_TLB_MISS)
-			tlbhitormiss = PEBS_MEMORYHIERARCHY_MISS;
-		else
-			tlbhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
+		long long ip, addr = 0, weight;
+		union perf_mem_data_src data_src;
 
-		if (data_src.mem_lvl & PERF_MEM_LVL_L1)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L1;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_LFB)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LFB;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_L2)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L2;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_L3)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L3;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE1)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_1HOP;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE2)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_2HOP;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_1HOP;
-		else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_2HOP;
-		else
-			memlevel = PEBS_MEMORYHIERARCHY_UNCACHEABLE_IO;
-	
-		/* PATCH #0 if data comes from dram, it can't be a hit! */
-		/* Seems unclear, but from table 18-19:
-		   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
-		*/
-		if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM ||
-		    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
-		    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
+		prev_head[threadid][LOAD_INDEX] = extrae_perf_mmap_read_pebs (_mmap, 
+		  prev_head[threadid][LOAD_INDEX], LOAD_SAMPLE_TYPE, &ip, &addr, &weight, &data_src);
+
+		if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
 		{
-			memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
+			unsigned memlevel, memhitormiss;
+			unsigned tlblevel, tlbhitormiss;
+
+			/* see linux/perf_event.h perf_mem_data_src */
+			if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
+				memhitormiss = PEBS_MEMORYHIERARCHY_HIT;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_MISS)
+				memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
+			else
+				memhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
+	
+			if (data_src.mem_dtlb & PERF_MEM_TLB_HIT)
+				tlbhitormiss = PEBS_MEMORYHIERARCHY_HIT;
+			else if (data_src.mem_dtlb & PERF_MEM_TLB_MISS)
+				tlbhitormiss = PEBS_MEMORYHIERARCHY_MISS;
+			else
+				tlbhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
+
+			if (data_src.mem_lvl & PERF_MEM_LVL_L1)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L1;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_LFB)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LFB;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_L2)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L2;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_L3)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L3;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE1)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_1HOP;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE2)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_RCACHE_2HOP;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_1HOP;
+			else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_REMOTE_RAM_2HOP;
+			else
+				memlevel = PEBS_MEMORYHIERARCHY_UNCACHEABLE_IO;
+	
+			/* PATCH #0 if data comes from dram, it can't be a hit! */
+			/* Seems unclear, but from table 18-19:
+			   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
+			*/
+			if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM ||
+			    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1 ||
+			    data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2)
+			{
+				memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
+			}
+	
+			/* PATCH #1 if data l3 & miss == data served by dram */
+			/* Seems unclear, but from table 18-19:
+			   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
+			*/
+			if (data_src.mem_lvl & PERF_MEM_LVL_MISS &&
+			    data_src.mem_lvl & PERF_MEM_LVL_L3)
+			{
+				memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
+				memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM;
+			}
+	
+			if (data_src.mem_dtlb & PERF_MEM_TLB_L1)
+				tlblevel = PEBS_MEMORYHIERARCHY_TLB_L1;
+			else if (data_src.mem_dtlb & PERF_MEM_TLB_L2)
+				tlblevel = PEBS_MEMORYHIERARCHY_TLB_L2;
+			else
+				tlblevel = PEBS_MEMORYHIERARCHY_TLB_OTHER;
+	
+			UINT64 t = Clock_getCurrentTime_nstore();
+	
+			SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_LD_EV, ip, addr);
+			SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_MEM_LEVEL_EV, memhitormiss,
+			  memlevel);
+			SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_TLB_LEVEL_EV, tlbhitormiss,
+			  tlblevel);
+			SAMPLE_EVENT_NOHWC(t, SAMPLING_ADDRESS_REFERENCE_COST_EV, weight);
+	
+			Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
 		}
-	
-		/* PATCH #1 if data l3 & miss == data served by dram */
-		/* Seems unclear, but from table 18-19:
-		   http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf
-		*/
-		if (data_src.mem_lvl & PERF_MEM_LVL_MISS &&
-		    data_src.mem_lvl & PERF_MEM_LVL_L3)
-		{
-			memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
-			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_LOCAL_RAM;
-		}
-	
-		if (data_src.mem_dtlb & PERF_MEM_TLB_L1)
-			tlblevel = PEBS_MEMORYHIERARCHY_TLB_L1;
-		else if (data_src.mem_dtlb & PERF_MEM_TLB_L2)
-			tlblevel = PEBS_MEMORYHIERARCHY_TLB_L2;
-		else
-			tlblevel = PEBS_MEMORYHIERARCHY_TLB_OTHER;
-	
-		t = Clock_getCurrentTime_nstore();
-	
-		SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_LD_EV, ip, addr);
-		SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_MEM_LEVEL_EV, memhitormiss,
-		  memlevel);
-		SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_TLB_LEVEL_EV, tlbhitormiss,
-		  tlblevel);
-		SAMPLE_EVENT_NOHWC(t, SAMPLING_ADDRESS_REFERENCE_COST_EV, weight);
-	
-		Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
 	}
-
-	ret = ioctl (fd, PERF_EVENT_IOC_REFRESH, 1);
-
-	(void) ret;
 }
 
 /* This handler will deal with the PEBS buffer when it monitors STORES
    and the buffer is full (1 entry only). It emits everythin Extrae needs
    timestamp  and reference to memory. */
-static void extrae_intel_pebs_handler_store (int signum, siginfo_t *info,
-	void *uc)
+static void extrae_intel_pebs_handler_store (int threadid)
 {
-	UINT64 t;
+	void * _mmap = extrae_intel_pebs_mmap[threadid][STORE_INDEX];
+	if (_mmap)
+	{
+		long long ip, addr = 0;
+		union perf_mem_data_src data_src;
+
+		prev_head[threadid][STORE_INDEX] = extrae_perf_mmap_read_pebs (_mmap,
+		  prev_head[threadid][STORE_INDEX], STORE_SAMPLE_TYPE, &ip, &addr, NULL, &data_src);
+	
+		if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
+		{
+			unsigned memlevel, memhitormiss;
+		
+			if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
+				memhitormiss = PEBS_MEMORYHIERARCHY_HIT;
+			else if (data_src.mem_lvl % PERF_MEM_LVL_MISS)
+				memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
+			else
+				memhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
+			
+			memlevel = PEBS_MEMORYHIERARCHY_MEM_LVL_L1;
+
+			UINT64 t = Clock_getCurrentTime_nstore();
+		
+			SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_ST_EV, ip, addr);
+			SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_MEM_LEVEL_EV, memhitormiss, memlevel);
+			Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
+		}
+	}
+}
+
+/* This handler will deal with the PEBS buffer when it monitors LOAD L3 MISSES
+   and the buffer is full (1 entry only). It emits everythin Extrae needs
+   timestamp  and reference to memory. */
+static void extrae_intel_pebs_handler_load_l3m (int threadid)
+{
+	void * _mmap = extrae_intel_pebs_mmap[threadid][LOAD_L3M_INDEX];
+	if (_mmap)
+	{
+		long long ip, addr = 0;
+
+		prev_head[threadid][LOAD_L3M_INDEX] = extrae_perf_mmap_read_pebs (_mmap,
+		  prev_head[threadid][LOAD_L3M_INDEX], LOAD_L3M_SAMPLE_TYPE, &ip, &addr, NULL, NULL);
+	
+		if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(threadid) && addr != 0)
+		{
+			UINT64 t = Clock_getCurrentTime_nstore();
+			SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_LD_EV, ip, addr);
+			SAMPLE_EVENT_NOHWC_PARAM(t, SAMPLING_ADDRESS_MEM_LEVEL_EV, PEBS_MEMORYHIERARCHY_MISS,
+			  PEBS_MEMORYHIERARCHY_MEM_LVL_L3);
+			Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
+		}
+	}
+}
+
+static void extrae_intel_pebs_handler (int signum, siginfo_t *info, void *uc)
+{
 	int ret;
-	int fd = info->si_fd;
-	long long ip, addr;
+	int thid = THREADID;
 
 	UNREFERENCED_PARAMETER(signum);
 	UNREFERENCED_PARAMETER(uc);
 
-	if (extrae_intel_pebs_mmap[THREADID] == NULL) return;
-
-	ret = ioctl (fd, PERF_EVENT_IOC_DISABLE, 0);
-
-	prev_head = extrae_perf_mmap_read_pebs (extrae_intel_pebs_mmap[THREADID],
-	  MMAP_DATA_SIZE, prev_head, global_sample_type, NULL,
-	  &ip, &addr, NULL, NULL);
-
-	if (tracejant && Extrae_isSamplingEnabled() && !Backend_inInstrumentation(THREADID))
+	// If there's a thread initializing, do not emit the sample as the
+	// reallocated data might have changed its addres.
+	// Use pthread_mutex_trylock to avoid locking if mutex is already locked.
+	if (pthread_mutex_trylock (&pebs_init_lock) == 0)
 	{
-		t = Clock_getCurrentTime_nstore();
-	
-		SAMPLE_EVENT_HWC_PARAM(t, SAMPLING_ADDRESS_ST_EV, ip, addr);
-	
-		Extrae_trace_callers (t, 5, CALLER_SAMPLING); 
+		if (info->si_fd == perf_pebs_fd[thid][LOAD_INDEX])
+			extrae_intel_pebs_handler_load (thid);
+		else if (info->si_fd == perf_pebs_fd[thid][STORE_INDEX])
+			extrae_intel_pebs_handler_store (thid);
+		else if (info->si_fd == perf_pebs_fd[thid][LOAD_L3M_INDEX])
+			extrae_intel_pebs_handler_load_l3m (thid);
+		pthread_mutex_unlock (&pebs_init_lock);
 	}
 
-	ret = ioctl (fd, PERF_EVENT_IOC_REFRESH, 1);
-
+	// restart sampling on the given counter
+	// If user did not request loads, try with stores
+	// int group_fd = perf_pebs_fd[thid][LOAD_INDEX] >= 0 ? perf_pebs_fd[thid][LOAD_INDEX] :
+	// 				(perf_pebs_fd[thid][STORE_INDEX] >= 0 ? perf_pebs_fd[thid][STORE_INDEX] : perf_pebs_fd[thid][LOAD_L3M_INDEX]);
+	// ret = ioctl (group_fd, PERF_EVENT_IOC_REFRESH, 1);
+	
+	// Rather than restarting the group leader, we restart this specific counter
+	ret = ioctl (info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
 	(void) ret;
 }
 
-static unsigned int pebs_init_threads = 0;
-static pthread_mutex_t pebs_init_lock;
-
-/* Extrae_IntelPEBS_enable (int loads).
+/* Extrae_IntelPEBS_enable (void)
    initializes the sampling based on PEBS. If loads is TRUE, then the PEBS is
    setup to monitor LOAD instructions, otherwise it monitors STORE instructions.
 */
-int Extrae_IntelPEBS_enable (int loads)
+static int Extrae_IntelPEBS_enable (void)
 {
+	__u64 hwc;
+	int group_fd = -1;
 	int ret;
-	int result,precise_ip;
-	char event_name[BUFSIZ];
 	struct perf_event_attr pe;
 	struct sigaction sa;
+	int thread_id = THREADID;
 
-	if (!PEBS_load_enabled && !PEBS_store_enabled)
+	if (!PEBS_load_enabled && !PEBS_store_enabled && !PEBS_load_l3m_enabled)
 		return 0;
 
 	/* Need a lock as different threads may be initializing, thus, allocating structures simultaneously */
-	pthread_mutex_lock(&pebs_init_lock);
-	if (THREADID >= pebs_init_threads)
+	pthread_mutex_lock (&pebs_init_lock);
+	if (thread_id >= pebs_init_threads)
 	{
-		unsigned int i = 0;
+		int i;
 
 		/* Extend the data structures to the maximum number of threads seen so far */
-		extrae_intel_pebs_mmap = (char **)realloc(extrae_intel_pebs_mmap, (THREADID+1) * sizeof(char *));
-		perf_pebs_fd = (int *)realloc(perf_pebs_fd, (THREADID+1) * sizeof(int));
-		for (i=pebs_init_threads; i<(THREADID+1); i++)
+		extrae_intel_pebs_mmap = (void ***) realloc(extrae_intel_pebs_mmap, (thread_id+1) * sizeof(void **));
+		assert (extrae_intel_pebs_mmap);
+
+		perf_pebs_fd = (int **)realloc(perf_pebs_fd, (thread_id+1) * sizeof(int*));
+		assert (perf_pebs_fd);
+
+		prev_head = (long long **) realloc (prev_head, (thread_id+1) * sizeof(long long*));
+		assert (prev_head);
+
+		for (i=pebs_init_threads; i<(thread_id+1); i++)
 		{
-			extrae_intel_pebs_mmap[i] = NULL;
-			perf_pebs_fd[i] = -1;
+			extrae_intel_pebs_mmap[i] = malloc (sizeof(void*)*NUM_SAMPLING_TYPES);
+			assert (extrae_intel_pebs_mmap[i]);
+			extrae_intel_pebs_mmap[i][LOAD_INDEX] =
+			  extrae_intel_pebs_mmap[i][STORE_INDEX] =
+			  extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] = NULL;
+
+			perf_pebs_fd[i] = malloc (sizeof(int)*NUM_SAMPLING_TYPES);
+			assert (perf_pebs_fd[i]);
+			perf_pebs_fd[i][LOAD_INDEX] =
+			  perf_pebs_fd[i][STORE_INDEX] =
+			  perf_pebs_fd[i][LOAD_L3M_INDEX] = -1;
+
+			prev_head[i] = (long long*) malloc  (sizeof (long long)*NUM_SAMPLING_TYPES);
+			assert (prev_head[i]);
+			prev_head[i][LOAD_INDEX] =
+			  prev_head[i][STORE_INDEX] =
+			  prev_head[i][LOAD_L3M_INDEX] = 0;
 		}
 
-#if defined(MALLOC_ONCE)
-		data_thread_buffer = (unsigned char **)realloc(data_thread_buffer, (THREADID+1) * sizeof(unsigned char *));
-		for (i=pebs_init_threads; i<(THREADID+1); i++)
+		data_thread_buffer = (char **) realloc (data_thread_buffer, (thread_id+1) * sizeof(char *));
+		assert (data_thread_buffer);
+
+		for (i=pebs_init_threads; i<(thread_id+1); i++)
 		{
 			data_thread_buffer[i] = malloc (ALLOCATED_SIZE);
-			if (data_thread_buffer[i] == NULL)
-				fprintf (stderr, PACKAGE_NAME": Error! overflow in the allocated size for PEBS buffer\n");
+			assert (data_thread_buffer[i]);
 		}
-#endif
 
-		pebs_init_threads = THREADID+1;
+		pebs_init_threads = thread_id+1;
 	}
-	pthread_mutex_unlock(&pebs_init_lock);
+	pthread_mutex_unlock (&pebs_init_lock);
 
 	memset(&sa, 0, sizeof(struct sigaction));
-	sa.sa_sigaction = loads?
-	  extrae_intel_pebs_handler_load:extrae_intel_pebs_handler_store;
+	sa.sa_sigaction = extrae_intel_pebs_handler;
 	sa.sa_flags = SA_SIGINFO;
-
 	if (sigaction( SIGIO, &sa, NULL) < 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Error setting up signal handler\n");
-		return -1;
-	}
-
-	/* Set up Appropriate Event */
-	memset (&pe,0,sizeof(struct perf_event_attr));
-
-	if (loads)
-	{
-		result = get_latency_load_event (&pe.config, &precise_ip, event_name);
-		pe.config1 = PEBS_minimumLoadLatency;
-	}
-	else
-	{
-		result = get_latency_store_event (&pe.config, &precise_ip, event_name);
-		pe.config1 = 0;
-	}
-
-	if (result<0)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot get latency %s event for PEBS\n",
-		  loads?"load":"store");
-		return -1;
-	}
-	else
-		pe.type = PERF_TYPE_RAW;
-
-	pe.size = sizeof(struct perf_event_attr);
-	pe.precise_ip = precise_ip;
-
-	pe.size = sizeof(struct perf_event_attr);
-	pe.sample_period = loads?PEBS_load_period:PEBS_store_period;
-	pe.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_WEIGHT |
-	  PERF_SAMPLE_DATA_SRC | PERF_SAMPLE_ADDR;
-
-	global_sample_type = pe.sample_type;
-
-	pe.read_format = 0;
-	pe.disabled = 1;
-	pe.pinned = 1;
-	pe.exclude_kernel = 1;
-	pe.exclude_hv = 1;
-	pe.wakeup_events = 1;
-
-	perf_pebs_fd[THREADID] = perf_event_open(&pe,0,-1,-1,0);
-	if (perf_pebs_fd[THREADID] < 0)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor\n");
-		return -1;
-	}
-
-	extrae_intel_pebs_mmap[THREADID] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
-	  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[THREADID], 0);
-	if (extrae_intel_pebs_mmap[THREADID] == MAP_FAILED)
-	{
-		fprintf (stderr, PACKAGE_NAME": Cannot mmap to the perf_event\n");
-		close (perf_pebs_fd[THREADID]);
 		return -1;
 	}
 
@@ -930,13 +805,167 @@ int Extrae_IntelPEBS_enable (int loads)
 	owner.type = F_OWNER_TID;
 	owner.pid = syscall(SYS_gettid);
 
-	ret = fcntl(perf_pebs_fd[THREADID], F_SETFL, O_RDWR|O_NONBLOCK|O_ASYNC);
-	ret = fcntl(perf_pebs_fd[THREADID], F_SETSIG, SIGIO);
-	ret = fcntl(perf_pebs_fd[THREADID], F_SETOWN, getpid());
-	ret = fcntl(perf_pebs_fd[THREADID], F_SETOWN_EX, &owner);
-	ret = ioctl(perf_pebs_fd[THREADID], PERF_EVENT_IOC_RESET, 0);
+	if (PEBS_load_enabled && get_latency_load_event (&hwc) >= 0)
+	{
+		memset (&pe,0,sizeof(struct perf_event_attr));
+		pe.config = hwc;
+		pe.type = PERF_TYPE_RAW;
+		pe.config1 = PEBS_minimumLoadLatency;
+		pe.size = sizeof(struct perf_event_attr);
+		pe.precise_ip = 2;
+		pe.sample_type = LOAD_SAMPLE_TYPE;
+		pe.disabled = 1;
+		pe.pinned = 1;
+		pe.exclude_kernel = 1;
+		pe.exclude_hv = 1;
+		pe.wakeup_events = 1;
+                if (PEBS_load_operates_in_frequency_mode)
+                {
+                        pe.freq = 1;
+                        pe.sample_freq = PEBS_load_frequency;
+                }
+                else // operates in period mode by default
+                {
+                        pe.freq = 0;
+                        pe.sample_period = PEBS_load_period;
+                }
+	
+		group_fd = perf_pebs_fd[thread_id][LOAD_INDEX] = perf_event_open (&pe, 0, -1, -1, 0);
+		if (perf_pebs_fd[thread_id][LOAD_INDEX] < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for loads\n");
+			return -1;
+		}
 
-	ret = ioctl(perf_pebs_fd[THREADID], PERF_EVENT_IOC_ENABLE,0);
+		extrae_intel_pebs_mmap[thread_id][LOAD_INDEX] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
+		  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[thread_id][LOAD_INDEX], 0);
+		if (extrae_intel_pebs_mmap[thread_id][LOAD_INDEX] == MAP_FAILED)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot mmap for load events\n");
+			close (perf_pebs_fd[thread_id][LOAD_INDEX]);
+			return -1;
+		}
+	
+		fcntl(perf_pebs_fd[thread_id][LOAD_INDEX], F_SETFL, fcntl(perf_pebs_fd[thread_id][LOAD_INDEX], F_GETFL, 0) | O_ASYNC);
+		fcntl(perf_pebs_fd[thread_id][LOAD_INDEX], F_SETSIG, SIGIO);
+		fcntl(perf_pebs_fd[thread_id][LOAD_INDEX], F_SETOWN, getpid());
+		fcntl(perf_pebs_fd[thread_id][LOAD_INDEX], F_SETOWN_EX, &owner);
+	}
+
+	if (PEBS_store_enabled && get_store_event (&hwc) >= 0)
+	{
+		memset (&pe,0,sizeof(struct perf_event_attr));
+		pe.config = hwc;
+		pe.type = PERF_TYPE_RAW;
+		pe.size = sizeof(struct perf_event_attr);
+		pe.precise_ip = 2;
+		pe.sample_type = STORE_SAMPLE_TYPE;
+		pe.exclude_kernel = 1;
+		pe.exclude_hv = 1;
+		pe.wakeup_events = 1;
+                if (PEBS_store_operates_in_frequency_mode)
+                {
+                        pe.freq = 1;
+                        pe.sample_freq = PEBS_store_frequency;
+                }
+                else // operates in period mode by default
+                {
+                        pe.freq = 0;
+                        pe.sample_period = PEBS_store_period;
+                }
+
+		// If we're creating this group, make sure that we pin the group and that the
+		// group starts disabled
+		if (group_fd == -1)
+		{
+			pe.pinned = 1;
+			pe.disabled = 1;
+		}
+	
+		perf_pebs_fd[thread_id][STORE_INDEX] = perf_event_open (&pe, 0, -1, group_fd, 0); // Chain on LOADS - if previously configured
+		if (perf_pebs_fd[thread_id][STORE_INDEX] < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for stores\n");
+			return -1;
+		}
+
+		if (group_fd == -1)
+			group_fd = perf_pebs_fd[thread_id][STORE_INDEX];
+
+		extrae_intel_pebs_mmap[thread_id][STORE_INDEX] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
+		  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[thread_id][STORE_INDEX], 0);
+		if (extrae_intel_pebs_mmap[thread_id][STORE_INDEX] == MAP_FAILED)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot mmap for store events\n");
+			close (perf_pebs_fd[thread_id][STORE_INDEX]);
+			return -1;
+		}
+
+	
+		fcntl(perf_pebs_fd[thread_id][STORE_INDEX], F_SETFL, fcntl(perf_pebs_fd[thread_id][STORE_INDEX], F_GETFL, 0) | O_ASYNC);
+		fcntl(perf_pebs_fd[thread_id][STORE_INDEX], F_SETSIG, SIGIO);
+		fcntl(perf_pebs_fd[thread_id][STORE_INDEX], F_SETOWN, getpid());
+		fcntl(perf_pebs_fd[thread_id][STORE_INDEX], F_SETOWN_EX, &owner);
+	}
+
+	if (PEBS_load_l3m_enabled && get_load_l3m_event (&hwc) >= 0)
+	{
+		memset (&pe,0,sizeof(struct perf_event_attr));
+		pe.config = hwc;
+		pe.type = PERF_TYPE_RAW;
+		pe.size = sizeof(struct perf_event_attr);
+		pe.precise_ip = 2;
+		pe.sample_type = LOAD_L3M_SAMPLE_TYPE;
+		pe.exclude_kernel = 1;
+		pe.exclude_hv = 1;
+		pe.wakeup_events = 1;
+		if (PEBS_load_l3m_operates_in_frequency_mode)
+		{
+			pe.freq = 1;
+			pe.sample_freq = PEBS_load_l3m_frequency;
+		}
+		else // operates in period mode by default
+		{
+			pe.freq = 0;
+			pe.sample_period = PEBS_load_l3m_period;
+		}
+
+		// If we're creating this group, make sure that we pin the group and that the
+		// group starts disabled
+		if (group_fd == -1)
+		{
+			pe.pinned = 1;
+			pe.disabled = 1;
+		}
+	
+		perf_pebs_fd[thread_id][LOAD_L3M_INDEX] = perf_event_open (&pe, 0, -1, group_fd, 0); // Chain on LOADS - if setup
+		if (perf_pebs_fd[thread_id][LOAD_L3M_INDEX] < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for loads L3M\n");
+			return -1;
+		}
+
+		if (group_fd == -1)
+			group_fd = perf_pebs_fd[thread_id][LOAD_L3M_INDEX];
+
+		extrae_intel_pebs_mmap[thread_id][LOAD_L3M_INDEX] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
+		  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[thread_id][LOAD_L3M_INDEX], 0);
+		if (extrae_intel_pebs_mmap[thread_id][LOAD_L3M_INDEX] == MAP_FAILED)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot mmap for load L3M events\n");
+			close (perf_pebs_fd[thread_id][LOAD_L3M_INDEX]);
+			return -1;
+		}
+	
+		fcntl(perf_pebs_fd[thread_id][LOAD_L3M_INDEX], F_SETFL, fcntl(perf_pebs_fd[thread_id][LOAD_L3M_INDEX], F_GETFL, 0) | O_ASYNC);
+		fcntl(perf_pebs_fd[thread_id][LOAD_L3M_INDEX], F_SETSIG, SIGIO);
+		fcntl(perf_pebs_fd[thread_id][LOAD_L3M_INDEX], F_SETOWN, getpid());
+		fcntl(perf_pebs_fd[thread_id][LOAD_L3M_INDEX], F_SETOWN_EX, &owner);
+	}
+
+
+	// Start sampling on the given counter -- which is a group leader.
+	ret = ioctl (group_fd, PERF_EVENT_IOC_REFRESH, 1);
 	if (ret < 0)
 	{
 		fprintf (stderr, PACKAGE_NAME": Cannot enable the PEBS sampling file descriptor\n");
@@ -946,40 +975,50 @@ int Extrae_IntelPEBS_enable (int loads)
 	return 0;
 }
 
-/*  Extrae_IntelPEBS_disable
+/*  Extrae_IntelPEBS_stopSampling
     Stops using PEBS. It stops the sampling mechanism */
-void Extrae_IntelPEBS_disable (void)
+void Extrae_IntelPEBS_stopSampling (void)
 {
-	unsigned int i = 0;
+	int i = 0;
 
-	for (i=0; i<pebs_init_threads; i++) {
-		if (perf_pebs_fd[i] < 0) {
-			ioctl(perf_pebs_fd[i], PERF_EVENT_IOC_REFRESH, 0);
-			close (perf_pebs_fd[i]);
-		}
-
-		if (extrae_intel_pebs_mmap[i] != NULL) {
-			munmap (extrae_intel_pebs_mmap[i], mmap_pages*sysconf(_SC_PAGESIZE));
-			extrae_intel_pebs_mmap[i] = NULL;
-		}
-	}
-}
-
-/* Extrae_IntelPEBS_nextSampling
-   Alternates between sampling loads and stores if multiplexing is requested
-   by the user. It simply stops the sampling and starts it again. */
-
-static int PEBS_current_sampling_load = TRUE;
-void Extrae_IntelPEBS_nextSampling (void)
-{
-	/* Alternate if both are enabled */
-	if (PEBS_load_enabled && PEBS_store_enabled)
+	pthread_mutex_lock (&pebs_init_lock);
+	for (i=0; i<pebs_init_threads; i++)
 	{
-		Extrae_IntelPEBS_disable();
-		if (PEBS_current_sampling_load)
-			PEBS_current_sampling_load = FALSE;
-		else
-			PEBS_current_sampling_load = TRUE;
-		Extrae_IntelPEBS_enable (PEBS_current_sampling_load);
+		// Stop Loads and unmap associated pages
+		if (perf_pebs_fd[i][LOAD_INDEX] >= 0) {
+			ioctl (perf_pebs_fd[i][LOAD_INDEX], PERF_EVENT_IOC_REFRESH, 0);
+			close (perf_pebs_fd[i][LOAD_INDEX]);
+		}
+		if (extrae_intel_pebs_mmap[i][LOAD_INDEX] != NULL) {
+			munmap (extrae_intel_pebs_mmap[i][LOAD_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
+			extrae_intel_pebs_mmap[i][LOAD_INDEX] = NULL;
+		}
+		// Stop Stores and unmap associated pages
+		if (perf_pebs_fd[i][STORE_INDEX] >= 0) {
+			ioctl (perf_pebs_fd[i][STORE_INDEX], PERF_EVENT_IOC_REFRESH, 0);
+			close (perf_pebs_fd[i][STORE_INDEX]);
+		}
+		if (extrae_intel_pebs_mmap[i][STORE_INDEX] != NULL) {
+			munmap (extrae_intel_pebs_mmap[i][STORE_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
+			extrae_intel_pebs_mmap[i][STORE_INDEX] = NULL;
+		}
+		// Stop LoadL3M and unmap associated pages
+		if (perf_pebs_fd[i][LOAD_L3M_INDEX] >= 0) {
+			ioctl (perf_pebs_fd[i][LOAD_L3M_INDEX], PERF_EVENT_IOC_REFRESH, 0);
+			close (perf_pebs_fd[i][LOAD_L3M_INDEX]);
+		}
+		if (extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] != NULL) {
+			munmap (extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
+			extrae_intel_pebs_mmap[i][LOAD_L3M_INDEX] = NULL;
+		}
 	}
+	pthread_mutex_unlock (&pebs_init_lock);
 }
+
+/*  Extrae_IntelPEBS_startSampling
+    Starts using PEBS. It starts the sampling mechanism */
+void Extrae_IntelPEBS_startSampling (void)
+{
+	Extrae_IntelPEBS_enable ();
+}
+

@@ -213,7 +213,7 @@ AC_CHECK_HEADERS(
   [asm-ppc/atomic.h asm-ppc64/atomic.h]
 )
 AC_CHECK_HEADERS(
-  [linux/limits.h linux/mmtimer.h]
+  [linux/limits.h linux/mmtimer.h linux/perf_event.h]
 )
 AC_CHECK_HEADERS(
   [netinet/in.h]
@@ -560,6 +560,17 @@ AC_CHECK_MEMBER(struct mallinfo.arena,
    [AC_DEFINE([HAVE_MALLINFO], [1], [Whether the system supports mallinfo structure])],
    [],
    [#include <malloc.h>])
+
+AC_CHECK_MEMBER(union perf_mem_data_src.val,
+	[AC_DEFINE([HAVE_PERF_MEM_DATA_SRC], [1], [Whether the system includes perf_mem_data_src/val])],
+	[],
+	[#include <linux/perf_event.h>])
+
+AC_CHECK_MEMBER(struct perf_event_mmap_page.data_size,
+	[AC_DEFINE([HAVE_PERF_EVENT_MMAP_PAGE_DATA_SIZE], [1], [Whether the system includes perf_event_mmap_page.data_size])],
+	[],
+	[#include <linux/perf_event.h>])
+
 
 if test "${IS_BGL_MACHINE}" = "yes" -o "${IS_BGP_MACHINE}" = "yes" -o "${IS_BGQ_MACHINE}" = "yes" ; then
    cross_compiling="no"

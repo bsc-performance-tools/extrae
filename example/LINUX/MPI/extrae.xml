@@ -87,6 +87,12 @@
     <free  enabled="yes" />
   </dynamic-memory>
 
+  <pebs-sampling enabled="no">
+    <loads enabled="no" frequency="100" minimum-latency="10" />
+    <stores enabled="no" frequency="50" />
+    <load-l3-misses enabled="no" frequency="25" />
+  </pebs-sampling>
+
   <input-output enabled="no" />
 
 	<syscall enabled="no" />

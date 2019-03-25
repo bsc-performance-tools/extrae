@@ -578,36 +578,70 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 			{
 				int min_mem_latency = 3;
 				int mem_latency = 0;
-				int period_default = 1000000;
+				int frequency_default = 100;
+				int ifrequency = 0;
 				int iperiod = 0;
+				int period_default = 1000000;
+
+				Extrae_IntelPEBS_setLoadSampling (TRUE);
 
 				xmlChar *slatency = xmlGetProp_env (rank, tag, TRACE_PEBS_MIN_MEM_LATENCY);
 				if (slatency != NULL)
+				{
 					mem_latency = atoi((char*)slatency);
-				if (mem_latency < min_mem_latency)
+					if (mem_latency < min_mem_latency)
+					{
+						mfprintf (stderr, PACKAGE_NAME": Invalid memory latency for tag '%s'. Setting it to %d\n",
+						  tag->name, min_mem_latency);
+						mem_latency = min_mem_latency;
+					}
+					Extrae_IntelPEBS_setMinimumLoadLatency (mem_latency);
+				}
+				else
 				{
-					mfprintf (stderr, PACKAGE_NAME": Invalid memory latency for tag '%s'. Setting it to %d\n",
-					  tag->name, min_mem_latency);
 					mem_latency = min_mem_latency;
+					Extrae_IntelPEBS_setMinimumLoadLatency (mem_latency);
 				}
 
-				xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
-				if (speriod != NULL)
-					iperiod = atoi((char*)speriod);
-				if (iperiod == 0)
+				xmlChar *sfrequency = xmlGetProp_env (rank, tag, TRACE_FREQUENCY);
+				if (sfrequency != NULL)
 				{
-					mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
-					  tag->name, period_default);
-					iperiod = period_default;
+					ifrequency = atoi((char*)sfrequency);
+					if (ifrequency == 0)
+					{
+						mfprintf (stderr, PACKAGE_NAME": Invalid frequency for tag '%s'. Setting it to %d\n",
+						  tag->name, frequency_default);
+						ifrequency = frequency_default;
+					}
+					Extrae_IntelPEBS_setLoadFrequency (ifrequency);
+					mfprintf (stdout, PACKAGE_NAME": Setting up PEBS loads sampling with frequency %d Hz and minimum latency of %d cycles\n",
+					  ifrequency, mem_latency);
 				}
 
-				Extrae_IntelPEBS_setLoadSampling (TRUE);
-				Extrae_IntelPEBS_setLoadPeriod (iperiod);
-				Extrae_IntelPEBS_setMinimumLoadLatency (mem_latency);
-				mfprintf (stdout, PACKAGE_NAME": Setting up PEBS sampling every %d loads with a minimum latency of %d cycles\n",
-				  iperiod, mem_latency);
+                                xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
+                                if (speriod != NULL)
+				{
+                                        iperiod = atoi((char*)speriod);
+	                                if (iperiod == 0)
+	                                {
+	                                        mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
+	                                          tag->name, period_default);
+	                                        iperiod = period_default;
+	                                }
+					Extrae_IntelPEBS_setLoadPeriod (iperiod);
+					mfprintf (stdout, PACKAGE_NAME": Setting up PEBS loads sampling with period %d and minimum latency of %d cycles %s\n",
+					  iperiod, mem_latency, ((sfrequency != NULL) ? "(overrides frequency setting)" : ""));
+				}
+				
+				if ((sfrequency == NULL) && (speriod == NULL))
+				{
+					Extrae_IntelPEBS_setLoadPeriod (period_default);
+					mfprintf (stdout, PACKAGE_NAME": Setting up PEBS loads sampling with default period %d and minimum latency of %d cycles\n",
+                                          period_default, mem_latency);
+				}
 
 				XML_FREE (slatency);
+				XML_FREE (sfrequency);
 				XML_FREE (speriod);
 			}
 			XML_FREE(enabled);
@@ -618,29 +652,115 @@ static void Parse_XML_PEBS_Sampling (int rank, xmlDocPtr xmldoc, xmlNodePtr curr
 			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
 			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
 			{
+				int frequency_default = 100;
 				int period_default = 1000000;
+				int ifrequency = 0;
 				int iperiod = 0;
-				xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
-				if (speriod != NULL)
-					iperiod = atoi((char*)speriod);
 
-				if (iperiod == 0)
-				{
-					mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
-					  tag->name, period_default);
-					iperiod = period_default;
-				}
 				Extrae_IntelPEBS_setStoreSampling (TRUE);
-				Extrae_IntelPEBS_setStorePeriod (iperiod);
-				mfprintf (stdout, PACKAGE_NAME": Setting up PEBS sampling every %d stores\n",
-				  iperiod);
+
+				xmlChar *sfrequency = xmlGetProp_env (rank, tag, TRACE_FREQUENCY);
+				if (sfrequency != NULL)
+				{
+					ifrequency = atoi((char*)sfrequency);
+
+					if (ifrequency == 0)
+					{
+						mfprintf (stderr, PACKAGE_NAME": Invalid frequency for tag '%s'. Setting it to %d\n",
+						  tag->name, frequency_default);
+						ifrequency = frequency_default;
+					}
+					Extrae_IntelPEBS_setStoreFrequency (ifrequency);
+					mfprintf (stdout, PACKAGE_NAME": Setting up PEBS stores sampling with frequency %d Hz\n",
+					  ifrequency);
+				}
+				
+                                xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
+                                if (speriod != NULL)
+                                {
+                                        iperiod = atoi((char*)speriod);
+                                        if (iperiod == 0)
+                                        {
+                                                mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
+                                                  tag->name, period_default);
+                                                iperiod = period_default;
+                                        }
+                                        Extrae_IntelPEBS_setStorePeriod (iperiod);
+                                        mfprintf (stdout, PACKAGE_NAME": Setting up PEBS stores sampling with period %d %s\n",
+                                          iperiod, ((sfrequency != NULL) ? "(overrides frequency setting)" : ""));
+                                }
+
+				if ((sfrequency == NULL) && (speriod == NULL))
+				{
+					Extrae_IntelPEBS_setStorePeriod (period_default);
+					mfprintf (stdout, PACKAGE_NAME": Setting up PEBS stores sampling with default period %d\n",
+                                          period_default);
+				}
+
+				XML_FREE (sfrequency);
+				XML_FREE (speriod);
+			}
+			XML_FREE(enabled);
+		}
+		/* Is the user passing information related to sampling pebs on Load L3M? */
+		else if (!xmlStrcasecmp (tag->name, TRACE_PEBS_SAMPLING_LOAD_L3Ms))
+		{
+			xmlChar *enabled = xmlGetProp_env (rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+			{
+				int frequency_default = 100;
+				int ifrequency = 0;
+				int iperiod = 0;
+				int period_default = 1000000;
+
+				Extrae_IntelPEBS_setLoadL3MSampling (TRUE);
+
+				xmlChar *sfrequency = xmlGetProp_env (rank, tag, TRACE_FREQUENCY);
+				if (sfrequency != NULL)
+				{
+					ifrequency = atoi((char*)sfrequency);
+
+					if (ifrequency == 0)
+					{
+						mfprintf (stderr, PACKAGE_NAME": Invalid frequency for tag '%s'. Setting it to %d\n",
+						  tag->name, frequency_default);
+						ifrequency = frequency_default;
+					}
+					Extrae_IntelPEBS_setLoadL3MFrequency (ifrequency);
+					mfprintf (stdout, PACKAGE_NAME": Setting up PEBS Load L3 misses sampling with frequency %d Hz\n",
+					  ifrequency);
+				}
+
+                                xmlChar *speriod = xmlGetProp_env (rank, tag, TRACE_PERIOD);
+                                if (speriod != NULL)
+                                {
+                                        iperiod = atoi((char*)speriod);
+                                        if (iperiod == 0)
+                                        {
+                                                mfprintf (stderr, PACKAGE_NAME": Invalid period for tag '%s'. Setting it to %d\n",
+                                                  tag->name, period_default);
+                                                iperiod = period_default;
+                                        }
+                                        Extrae_IntelPEBS_setLoadL3MPeriod (iperiod);
+                                        mfprintf (stdout, PACKAGE_NAME": Setting up PEBS Load L3 misses sampling with period %d %s\n",
+                                          iperiod, ((sfrequency != NULL) ? "(overrides frequency setting)" : ""));
+                                }
+
+				if ((sfrequency == NULL) && (speriod == NULL))
+				{
+					Extrae_IntelPEBS_setLoadL3MPeriod (period_default);
+					mfprintf (stdout, PACKAGE_NAME": Setting up PEBS Load L3 misses sampling with default period %d\n",
+                                          period_default);
+				}
+
+				XML_FREE (sfrequency);
 				XML_FREE (speriod);
 			}
 			XML_FREE(enabled);
 		}
 		else
 		{
-			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <OpenMP> level\n", tag->name);
+			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <%s> level\n", tag->name, TRACE_PEBS_SAMPLING);
 		}
 
 		tag = tag->next;

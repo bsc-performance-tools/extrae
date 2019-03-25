@@ -1,8 +1,7 @@
 include $(top_srcdir)/PATHS
 
 sampling_intel_pebs_API_SRCS = \
- sampling-intel-pebs.c sampling-intel-pebs.h \
- perf_event.h
+ sampling-intel-pebs.c sampling-intel-pebs.h
 
 iface_API_INCLUDES = \
    -I$(COMMON_INC)   \

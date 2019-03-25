@@ -2301,7 +2301,7 @@ void Backend_Finalize (void)
 	unsigned thread;
 
 #if defined(ENABLE_PEBS_SAMPLING)
-	Extrae_IntelPEBS_disable();
+	Extrae_IntelPEBS_stopSampling();
 #endif
 
 #if defined(CUDA_SUPPORT)

@@ -682,8 +682,11 @@ This section tells |TRACE| to use the PEBS feature from recent Intel processors
 address referenced, the component of the memory hierarchy that solved the
 reference and the number of cycles to solve the reference.
 
-In the example above, PEBS monitors one out of every million load instructions
-and only grabs those that require at least 10 cycles to be solved.
+In the example above, PEBS monitors one load instruction every 100 Hz that 
+requires at least 10 cycles to be solved. Alternatively, the setting 'frequency'
+can be replaced by 'period', then PEBS will monitor one load instruction every 
+given number of loads.  Please note that the 'period' setting is not available 
+for Skylake and newer processors. 
 
 
 .. _sec:XMLSectionMerge:
