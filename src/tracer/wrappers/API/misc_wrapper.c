@@ -365,6 +365,13 @@ void Extrae_init_Wrapper (void)
 
 		fprintf (stderr, PACKAGE_NAME": Warning! API tries to initialize more than once\n");
 		fprintf (stderr, PACKAGE_NAME":          Previous initialization was done by %s\n", previous);
+
+		/* It is necessary to update the number of threads after an explicit call to
+		 * Extrae_init(). In the case of Nanos instrumentation, the
+		 * auto-initialization only sees 1 thread, but after the Extrae_init() call
+		 * the runtime has created more internal threads that we are not aware of.
+		 */
+		Backend_ChangeNumberOfThreads( Extrae_get_num_threads() );
 	}
 }
 
