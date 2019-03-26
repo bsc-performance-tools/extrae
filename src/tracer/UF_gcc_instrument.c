@@ -152,13 +152,6 @@ static void AddUFtoInstrument (void *address)
 
 static int LookForUFaddress (void *address)
 {
-	Dl_info di;
-
-	if (dladdr(address, &di))
-	{
-		address = (void *)(di.dli_saddr - di.dli_fbase);
-	}
-
 	int i = HASH((long)address);
 	int count = 0;
 

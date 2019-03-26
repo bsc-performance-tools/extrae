@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 26Mar2019 Reverts commit 1a215e849f to stop using dladdr to translate UF from dynamic libraries
  * 25Mar2019 Fixes missing worksharings in GNU and Intel OpenMP
  + 25Mar2019 Adds pyextrae.pthreads module
  * 25Mar2019 Fixes timestamp of rusage and memusage events
