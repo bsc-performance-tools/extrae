@@ -86,6 +86,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(CUDA_SUPPORT)
 # include "cuda_probe.h"
 #endif
+#if defined(GASPI_SUPPORT)
+# include "gaspi_probe.h"
+#endif
 #if defined(SAMPLING_SUPPORT)
 # include "sampling-common.h"
 # include "sampling-timer.h"
@@ -229,7 +232,10 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
-			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <MPI> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			mfprintf (stdout, PACKAGE_NAME
+			    ": <%s> tag at <MPI> level will be ignored."
+			    " This library does not support CPU HW counters.\n",
+			    TRACE_COUNTERS);
 			tracejant_hwc_mpi = FALSE;
 #endif
 			XML_FREE(enabled);
@@ -246,6 +252,50 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		else
 		{
 			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <MPI> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
+
+#if defined(GASPI_SUPPORT)
+/* Configure GASPI related parameters */
+static void Parse_XML_GASPI(int rank, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	/* Parse all TAGs and annotate them for later use */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip comments */
+		if (!xmlStrcasecmp(tag->name, xmlCOMMENT) ||
+		    !xmlStrcasecmp(tag->name, xmlTEXT))
+		{
+		}
+		/* Shall we gather counters in GASPI calls? */
+		else if (!xmlStrcasecmp(tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp_env(rank, tag, TRACE_ENABLED);
+			Extrae_set_trace_GASPI_HWC(enabled != NULL && !xmlStrcasecmp(enabled, xmlYES));
+#if USE_HARDWARE_COUNTERS
+			mfprintf(stdout, PACKAGE_NAME
+			    ": GASPI routines will %scollect HW counters information.\n",
+			    Extrae_get_trace_GASPI_HWC()?"":"NOT ");
+#else
+			mfprintf(stdout, PACKAGE_NAME
+			    ": <%s> tag at <GASPI> level will be ignored."
+			    "This library does not support CPU HW counters.\n",
+			    TRACE_COUNTERS);
+			Extrae_set_trace_GASPI_HWC(FALSE);
+#endif
+			XML_FREE(enabled);
+		} else
+		{
+			mfprintf(stderr, PACKAGE_NAME
+			    ": XML unknown tag '%s' at <GASPI> level\n",
+			    tag->name);
 		}
 
 		tag = tag->next;
@@ -349,6 +399,22 @@ static void Parse_XML_Callers (int rank, xmlDocPtr xmldoc, xmlNodePtr current_ta
                         XML_FREE(enabled);
 #else
                         mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support SHMEM.\n", TRACE_SHMEM);
+#endif
+		}
+		else if (!xmlStrcasecmp(tag->name, TRACE_GASPI))
+		{
+#if defined(GASPI_SUPPORT)
+			xmlChar *enabled = xmlGetProp_env(rank, tag, TRACE_ENABLED);
+			if (enabled != NULL && !xmlStrcasecmp(enabled, xmlYES))
+			{
+				char *callers = (char *)xmlNodeListGetString_env(rank, xmldoc, tag->xmlChildrenNode, 1);
+				if (callers != NULL)
+					Parse_Callers(rank, callers, CALLER_MPI);
+				XML_FREE(callers);
+			}
+			XML_FREE(enabled);
+#else
+			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <Callers> level will be ignored. This library does not support GASPI.\n", TRACE_GASPI);
 #endif
 		}
 		else if (!xmlStrcasecmp (tag->name, TRACE_DYNAMIC_MEMORY))
@@ -1915,6 +1981,31 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						}
 						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
 							tracejant_mpi = FALSE;
+						XML_FREE(enabled);
+					}
+					/* GASPI related configuration */
+					else if (!xmlStrcasecmp(current_tag->name, TRACE_GASPI))
+					{
+						xmlChar *enabled = xmlGetProp_env(rank, current_tag, TRACE_ENABLED);
+
+						if (enabled != NULL && !xmlStrcasecmp(enabled, xmlYES))
+						{
+#if defined(GASPI_SUPPORT)
+							Extrae_set_trace_GASPI(TRUE);
+							Parse_XML_GASPI(rank, current_tag);
+#else
+							mfprintf(stdout, PACKAGE_NAME
+							    ": Warning! <%s> tag will be ignored. "
+							    "This library does not support GASPI.\n",
+							    TRACE_GASPI);
+#endif
+						}
+#if defined(GASPI_SUPPORT)
+						else if (enabled != NULL && !xmlStrcasecmp(enabled, xmlNO))
+						{
+							Extrae_set_trace_GASPI(FALSE);
+						}
+#endif
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */

@@ -21,27 +21,22 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#ifndef __EXTRAE_INTERNALS_H_INCLUDED__
-#define __EXTRAE_INTERNALS_H_INCLUDED__
+#pragma once
 
-#include "extrae_types.h"
+#include <config.h>
+#include "events.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+struct GASPI_event_label_t
+{
+	unsigned  eventtype;
+	unsigned  present;
+	char     *description;
+};
 
-void Extrae_set_threadid_function (unsigned (*threadid_function)(void));
-void Extrae_set_numthreads_function (unsigned (*numthreads_function)(void));
+extern struct GASPI_event_label_t GASPI_event_type_label[GASPI_MAX_VAL];
 
-void Extrae_set_taskid_function (unsigned (*taskid_function)(void));
-void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void));
-void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void));
+#define MAX_GASPI_PARAM_TYPE_ENTRIES 3
+extern struct GASPI_event_label_t GASPI_param_type_label[MAX_GASPI_PARAM_TYPE_ENTRIES];
 
-void Extrae_set_thread_name (unsigned thread, char *name);
-void Extrae_function_from_address (extrae_type_t type, void *address);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __EXTRAE_INTERNALS_H_INCLUDED__ */
+void	Enable_GASPI_Operation(unsigned, unsigned);
+void	WriteEnabled_GASPI_Operations(FILE *);

@@ -31,3 +31,7 @@ endif
 if WANT_OPENACC
 SUBDIRS += OPENACC
 endif
+
+if HAVE_GASPI
+SUBDIRS += GASPI
+endif

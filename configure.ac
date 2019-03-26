@@ -193,6 +193,9 @@ AX_PROG_OPENACC
 ## Check how we hook PMPI
 AX_PMPI_HOOK
 
+## Check whether we have GASPI
+AX_PROG_GASPI
+
 # Search for libtool support
 AC_LIBTOOL_DLOPEN
 #if test "${MPI_SHARED_LIB_FOUND}" != "yes" ; then
@@ -653,6 +656,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/fork/Makefile \
   src/tracer/wrappers/JAVA/Makefile \
   src/tracer/wrappers/OPENACC/Makefile \
+  src/tracer/wrappers/GASPI/Makefile \
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \

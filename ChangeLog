@@ -15,7 +15,13 @@ ChangeLog
  * 09Nov2021 Updates and upgrades CUDA support
  * 09Nov2021 Ensures native and uncore counters are uniquely identified
  * 19Oct2021 Fixes trace control file checks, skipping them if needed structures are not allocated
+ * 09Oct2020 GASPI parameters now start at 1 and PCF has labels to their actual values
+ + 01Oct2020 Adds instrumentation support for gaspi_queue_create/delete
+ + 30Sep2020 Adds instrumentation support for gaspi_read_notify & gaspi_read_list_notify
  * 27Sep2021 Fixes states in OpenMP taskgroup and taskloop regions 
+ + 22Sep2021 Adds dependency lines between instantiation and execution of OpenMP tasks for GNU libgomp runtime
+ + 09Sep2020 Adds callers at GASPI instrumentation points
+ * 07Sep2020 Fixes notification_id parameter for gaspi_notify_waitsome & gaspi_notify_reset
  + 06Sep2021 Adds missing wrapper for __kmpc_critical_with_hint
  + 31Aug2021 Extends communications matching algorithm to support applications calling MPI_Irecv and MPI_Wait from different threads
  * 24Aug2021 Fixes unreleased mutex in xtr_hash_query and xtr_hash_add
@@ -64,9 +70,10 @@ ChangeLog
  + 07Nov2019 Adds environment variable EXTRAE_UNSET_PRELOAD to clear the LD_PRELOAD once the tracing is loaded
  * 25Oct2019 Fixes double emission of python events call and c_call
  * 10Sep2019 Fixes configure check for MPI_Comm_spawn
+ * 09Sep2019 Fixes online install-data-hook directory creation, others substitution, & mispellings (closes #33 #34 #36)
+ * 04Sep2019 Adds support for GASPI next branch and adds notification_id and queue_id parameters
  + 17Jul2019 Adds Python bindings for Extrae_shutdown and _restart
  * 16Jul2019 Fixes correlation of PEBS samples with reallocated objects
- * 09Sep2019 Fixes online install-data-hook directory creation, others substitution, & mispellings (closes #33 #34 #36)
  + 09Jul2019 Adds wrappers for MPI split collective data access routines
  * 05Jul2019 Fixes bug in MPI_Test & MPI_Imrecv where the request is not properly copied for later processing
  * 21Jun2019 Fixes potentially incomplete paths in Makefiles (closes #22)
@@ -74,11 +81,12 @@ ChangeLog
  * 12Jun2019 Guards the definition of SaveMessage and ProcessMessage only under MPI3
  * 11Jun2019 Replaces request's hash table for a new implementation 
  * 11Jun2019 Fixes bug in MPI_Wait where the input request is not copied for later processing
- * 25Apr2019 Fixes race conditions between thread creations and PEBS samples 
- * 17Apr2019 Fixes bug in pebs sampling store misses identification
+ * 11Jun2019 Adds instrumentation support for GASPI
  * 03Jun2019 Increases static buffer for `calloc` to 8MB
  * 03Jun2019 Fixes libbfd detection in native arm64 machines
  * 03Jun2019 Fixes Dyninst URL
+ * 25Apr2019 Fixes race conditions between thread creations and PEBS samples 
+ * 17Apr2019 Fixes bug in pebs sampling store misses identification
  + 02Apr2019 Adds support for changing num_threads in OpenMP parallel constructs
  * 29Mar2019 Changes order in which MPI env vars are checked to discover process' task id during auto init
  * 28Mar2019 Extends support for PEBS sampling on Skylake processors, xml 'period' attribute changed to 'frequency'
@@ -97,6 +105,7 @@ ChangeLog
  + 25Mar2019 Adds functions in pyextrae to toggle the profiler on/off 
  * 25Mar2019 Fixes compatibility issue with cudaStreamLegacy available since CUDA 7
  * 25Mar2019 Fixes bug in initialization of OmpSs tracing (only master thread was detected)
+ + 06Mar2019 Adds GASPI and GASPI+OMP examples (closes #41)
  * 24Jan2019 Always use POSIX clock except if it is disabled setting the EXTRAE_USE_POSIX_CLOCK environment variable to 0
  * 19Sep2018 Fixes bug in variable declaration in 'free' wrapper
  * 18Sep2018 Fixes bug in OpenMP common wrapper hook points

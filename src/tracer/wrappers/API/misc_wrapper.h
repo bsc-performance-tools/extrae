@@ -30,7 +30,6 @@
 void Extrae_init_Wrapper(void);
 void Extrae_init_tracing (int forked);
 void Extrae_fini_Wrapper(void);
-void Extrae_fini_last_chance_Wrapper(void);
 void Extrae_shutdown_Wrapper (void);
 void Extrae_restart_Wrapper (void);
 

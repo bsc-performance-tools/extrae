@@ -41,6 +41,7 @@
 #include "openshmem_prv_semantics.h"
 #include "java_prv_semantics.h"
 #include "openacc_prv_semantics.h"
+#include "gaspi_prv_semantics.h"
 
 #include "mpi_trf_semantics.h"
 #include "misc_trf_semantics.h"
@@ -87,6 +88,7 @@ void Semantics_Initialize (int output_format)
 			Register_Event_Handlers (PRV_OPENSHMEM_Event_Handlers);
 			Register_Event_Handlers (PRV_Java_Event_Handlers);
 			Register_Event_Handlers (PRV_OPENACC_Event_Handlers);
+			Register_Event_Handlers (PRV_GASPI_Event_Handlers);
 			break;
 	}
 }

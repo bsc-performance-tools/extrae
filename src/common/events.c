@@ -313,6 +313,30 @@ unsigned IsOPENSHMEM (unsigned EvType)
   return FALSE;
 }
 
+/*
+ * IsGASPI
+ */
+#define GASPI_EVENTS 6
+static unsigned gaspi_events[] = {
+	GASPI_EV, GASPI_INIT_EV, GASPI_SIZE_EV, GASPI_RANK_EV,
+	GASPI_NOTIFICATION_ID_EV, GASPI_QUEUE_ID_EV
+};
+
+unsigned IsGASPI(unsigned EvType)
+{
+	unsigned evt;
+
+	for (evt = 0; evt<GASPI_EVENTS; evt++)
+	{
+		if (gaspi_events[evt] == EvType)
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 
 /******************************************************************************
  ***  IsBurst
@@ -436,6 +460,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 		*Type = JAVA_TYPE;
 		return TRUE;
 	}
+	else if (IsGASPI(EvType))
+	{
+		*Type = GASPI_TYPE;
+		return TRUE;
+	}
 	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)
 	{
 		*Type = MPI_COMM_ALIAS_TYPE;
@@ -448,4 +477,3 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	}
 	return FALSE;
 }
-
