@@ -588,7 +588,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
    CPPFLAGS="-I${binutils_home_dir}/include ${CPPFLAGS}"
    AC_CHECK_HEADERS([bfd.h], [BFD_HEADER_INSTALLED="yes"], [BFD_HEADER_INSTALLED="no"])
 
-   if test "${BFD_HEADER_INSTALLED}" = "yes" ; then
+   if test "${BFD_HEADER_INSTALLED}" = "yes" -a "${LIBERTY_LIBSDIR}" != ""; then
       AC_MSG_CHECKING([whether libbfd and libiberty work])
 
       if test "${OperatingSystem}" != "aix" -a "${OperatingSystem}" != "freebsd" ; then
