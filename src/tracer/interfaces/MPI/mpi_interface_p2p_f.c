@@ -452,6 +452,68 @@ void NAME_ROUTINE_C2F(mpi_irecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype
 
 }
 
+#if defined(MPI3)
+
+/******************************************************************************
+ ***  MPI_Mrecv
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_mrecv__,mpi_mrecv_,MPI_MRECV,mpi_mrecv,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_mrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_mrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
+#endif
+{
+        DLB(DLB_MPI_Mrecv_F_enter, buf, count, datatype, message, status, ierror);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                PMPI_Mrecv_Wrapper (buf, count, datatype, message, status, ierror);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                CtoF77 (pmpi_mrecv) (buf, count, datatype, message, status, ierror);
+
+        DLB(DLB_MPI_Mrecv_F_leave);
+}
+
+/******************************************************************************
+ ***  MPI_Imrecv
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_imrecv__,mpi_imrecv_,MPI_IMRECV,mpi_imrecv,(void *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_imrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_imrecv) (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierror)
+#endif
+{
+        DLB(DLB_MPI_Imrecv_F_enter, buf, count, datatype, message, request, ierror);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                PMPI_Imrecv_Wrapper (buf, count, datatype, message, request, ierror);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                CtoF77 (pmpi_imrecv) (buf, count, datatype, message, request, ierror);
+
+        DLB(DLB_MPI_Imrecv_F_leave);
+}
+
+#endif /* MPI3 */
+
 /******************************************************************************
  ***  MPI_Probe
  ******************************************************************************/
@@ -513,6 +575,69 @@ void NAME_ROUTINE_C2F(mpi_iprobe) (MPI_Fint *source, MPI_Fint *tag,
 	DLB(DLB_MPI_Iprobe_F_leave);
 
 }
+
+#if defined(MPI3)
+
+/******************************************************************************
+ ***  MPI_Mprobe
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_mprobe__,mpi_mprobe_,MPI_MPROBE,mpi_mprobe,(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Message *message, MPI_Fint *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_mprobe) (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
+        MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_mprobe) (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, 
+        MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
+#endif
+{
+        DLB(DLB_MPI_Mprobe_F_enter, source, tag, comm, message, status, ierror);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                PMPI_Mprobe_Wrapper (source, tag, comm, message, status, ierror);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                CtoF77 (pmpi_mprobe) (source, tag, comm, message, status, ierror);
+
+        DLB(DLB_MPI_Mprobe_F_leave);
+
+}
+
+/******************************************************************************
+ ***  MPI_Improbe
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_improbe__,mpi_improbe_,MPI_IMPROBE,mpi_improbe,(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_improbe) (MPI_Fint *source, MPI_Fint *tag,
+        MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_improbe) (MPI_Fint *source, MPI_Fint *tag,
+        MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)
+#endif
+{
+        DLB(DLB_MPI_Improbe_F_enter, source, tag, comm, flag, message, status, ierror);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation (); 
+                PMPI_Improbe_Wrapper (source, tag, comm, flag, message, status, ierror);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                CtoF77 (pmpi_improbe) (source, tag, comm, flag, message, status, ierror);
+
+        DLB(DLB_MPI_Improbe_F_leave);
+}
+
+#endif /* MPI3 */
 
 /******************************************************************************
  ***  MPI_Test

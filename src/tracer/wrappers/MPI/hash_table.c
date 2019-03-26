@@ -135,7 +135,7 @@ int xtr_hash_add (xtr_hash_t * hash, const xtr_hash_data_t * data)
  *   Searches for key in the hash table. Returns NULL when the key is not
  *  found in the table.
  */
-xtr_hash_data_t *xtr_hash_search (const xtr_hash_t * hash, MPI_Request key)
+xtr_hash_data_t *xtr_hash_search (const xtr_hash_t * hash, UINT64 key)
 {
   int cell, ovf;
 
@@ -165,7 +165,7 @@ xtr_hash_data_t *xtr_hash_search (const xtr_hash_t * hash, MPI_Request key)
  *   Removes entry key in the hash table. Returns != 0 when key is not found in
  *  the table.
  */
-int xtr_hash_remove (xtr_hash_t * hash, MPI_Request key)
+int xtr_hash_remove (xtr_hash_t * hash, UINT64 key)
 {
   int cell, ovf, prev;
   int rc = FALSE;

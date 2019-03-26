@@ -304,7 +304,6 @@ enum {
 #define MPI_TESTALL_EV               50000082
 #define MPI_TESTANY_EV               50000083
 #define MPI_TESTSOME_EV              50000084
-#define MPI_TEST_COUNTER_EV          50000080
 #define MPI_WAIT_EV                  50000027
 #define MPI_CANCEL_EV                50000030
 #define MPI_RSEND_EV                 50000031
@@ -341,6 +340,11 @@ enum {
 #define MPI_PROBE_EV                 50000065
 #define MPI_IPROBE_EV                50000066
 #define MPI_COMM_FREE_EV             50000067
+#define MPI_MPROBE_EV                50000087
+#define MPI_IMPROBE_EV               50000088
+#define MPI_MRECV_EV                 50000089
+#define MPI_IMRECV_EV                50000090
+#define MPI_REQUEST_CANCELLED_EV     50000091
 
 #define MPI_PERSIST_REQ_EV           50000070
 #define MPI_START_EV                 50000071
@@ -428,11 +432,15 @@ enum {
 #define MPI_WIN_FLUSH_LOCAL_EV       50000247
 #define MPI_WIN_FLUSH_LOCAL_ALL_EV   50000248
 
-#define MPI_IPROBE_COUNTER_EV        50000300
-#define MPI_TIME_OUTSIDE_IPROBES_EV  50000301
-#define MPI_REQUEST_GET_STATUS_COUNTER_EV               50000302
-#define MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV      50000303
-#define MPI_TIME_OUTSIDE_TESTS_EV    50000304
+// Software counters
+#define MPI_IPROBE_COUNTER_EV             50000300
+#define MPI_TIME_IN_IPROBE_EV             50000301
+#define MPI_REQUEST_GET_STATUS_COUNTER_EV 50000302
+#define MPI_TIME_IN_REQUEST_GET_STATUS_EV 50000303
+#define MPI_TEST_COUNTER_EV               50000304
+#define MPI_TIME_IN_TEST_EV               50000305
+#define MPI_IMPROBE_COUNTER_EV            50000306
+#define MPI_TIME_IN_IMPROBE_EV            50000307
 
 /******************************************************************************
  *   User events for BG PERSONALITY

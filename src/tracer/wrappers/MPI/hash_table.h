@@ -82,14 +82,14 @@
 
 /* Hash table type definitions */
 
+#define MPI_REQUEST_TO_HASH_KEY(key) (UINT64) key
+#define MPI_MESSAGE_TO_HASH_KEY(key) (UINT64) key
+
 typedef struct
 {
-  MPI_Request key;                /* Hash key */
-  MPI_Group group;                /* Allocated remote group of comm. GROUP_NULL => COMM_WORLD */
-  MPI_Comm commid;                /* Communicator identifier */
-	int partner;                    /* MPI p2p partner */
-	int tag;                        /* MPI p2p tag */
-	int size;                       /* MPI p2p size */
+  UINT64 key;                /* Hash key */
+  MPI_Group group;           /* Allocated remote group of comm. GROUP_NULL => COMM_WORLD */
+  MPI_Comm commid;           /* Communicator identifier */
 } xtr_hash_data_t;
 
 typedef struct
@@ -116,7 +116,7 @@ typedef struct
 
 void xtr_hash_init (xtr_hash_t * hash);
 int xtr_hash_add (xtr_hash_t * hash, const xtr_hash_data_t * data);
-xtr_hash_data_t *xtr_hash_search (const xtr_hash_t * hash, MPI_Request key);
-int xtr_hash_remove (xtr_hash_t * hash, MPI_Request key);
+xtr_hash_data_t *xtr_hash_search (const xtr_hash_t * hash, UINT64 key);
+int xtr_hash_remove (xtr_hash_t * hash, UINT64 key);
 
 #endif

@@ -21,7 +21,7 @@ CheckEntryInPCF ${TRACE}.pcf MPI_Init
 CheckEntryInPCF ${TRACE}.pcf MPI_Finalize
 CheckEntryInPCF ${TRACE}.pcf MPI_Iprobe
 CheckEntryInPCF ${TRACE}.pcf "MPI_Iprobe misses"
-CheckEntryInPCF ${TRACE}.pcf "Elapsed time outside MPI_Iprobe"
+CheckEntryInPCF ${TRACE}.pcf "Elapsed time in MPI_Iprobe"
 
 NumberEntriesInPRV ${TRACE}.prv 50000003 31
 if [[ "${?}" -ne 2 ]] ; then

@@ -41,8 +41,21 @@
 #include "hash_table.h"
 #include "persistent_requests.h"
 
-#define RANK_OBJ_SEND 1
-#define RANK_OBJ_RECV 0
+#define MAX_WAIT_REQUESTS 16384
+
+enum
+{
+  OP_TYPE_RECV=0,
+  OP_TYPE_SEND=1
+};
+
+int getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype);
+
+void SaveMessage(MPI_Message message, MPI_Comm comm);
+MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request);
+void SaveRequest(MPI_Request request, MPI_Comm comm);
+void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status);
+void CancelRequest(MPI_Request request);
 
 void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace);
 void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
@@ -65,14 +78,10 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size);
 
 void Extrae_MPI_stats_Wrapper (iotimer_t timestamp);
 
-int get_rank_obj (int *comm, int *dest, int *receiver, int send_or_recv);
-int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver, int send_or_recv);
-int get_Irank_obj (xtr_hash_data_t * hash_req, int *src_world, int *size,
-	int *tag, int *status);
-int get_Irank_obj_C (xtr_hash_data_t * hash_req, int *src_world, int *size,
-	int *tag, MPI_Status *status);
+void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *global_source);
+void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *receiver, int send_or_recv);
 
-extern xtr_hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
+extern xtr_hash_t requests;     /* Receive requests stored in a hash in order to search them fast */
 extern PR_Queue_t PR_queue;     /* Persistent requests queue */
 
 /* Fortran Wrappers */

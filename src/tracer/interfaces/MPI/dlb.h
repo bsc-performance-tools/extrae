@@ -271,6 +271,20 @@ void DLB_MPI_Irecv_F_enter (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 void DLB_MPI_Irecv_F_leave (void)__attribute__((weak));
 
 
+#if defined(MPI3)
+
+void DLB_MPI_Mrecv_F_enter (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+	MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Mrecv_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Imrecv_F_enter (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+	MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierr)__attribute__((weak));
+void DLB_MPI_Imrecv_F_leave (void)__attribute__((weak));
+
+#endif /* MPI3 */
+
+
 void DLB_MPI_Probe_F_enter (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *status, MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_Probe_F_leave (void)__attribute__((weak));
@@ -279,6 +293,20 @@ void DLB_MPI_Probe_F_leave (void)__attribute__((weak));
 void DLB_MPI_Iprobe_F_enter (MPI_Fint *source, MPI_Fint *tag,
 	MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_Iprobe_F_leave (void)__attribute__((weak));
+
+
+#if defined(MPI3)
+
+void DLB_MPI_Mprobe_F_enter (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
+	MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Mprobe_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Improbe_F_enter (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, 
+	MPI_Fint *flag, MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Improbe_F_leave (void)__attribute__((weak));
+
+#endif /* MPI3 */
 
 
 void DLB_MPI_Test_F_enter (MPI_Fint *request, MPI_Fint *flag,
@@ -420,6 +448,20 @@ void DLB_MPI_Irecv_enter (void* buf, int count, MPI_Datatype datatype,
 void DLB_MPI_Irecv_leave (void)__attribute__((weak));
 
 
+#if defined(MPI3) 
+
+void DLB_MPI_Mrecv_enter (void* buf, int count, MPI_Datatype datatype,
+        MPI_Message *message, MPI_Status *status)__attribute__((weak));
+void DLB_MPI_Mrecv_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Imrecv_enter (void* buf, int count, MPI_Datatype datatype,
+        MPI_Message *message, MPI_Request *request)__attribute__((weak));
+void DLB_MPI_Imrecv_leave (void)__attribute__((weak));
+
+#endif /* MPI3 */
+
+
 void DLB_MPI_Probe_enter (int source, int tag, MPI_Comm comm, MPI_Status *status)__attribute__((weak));
 void DLB_MPI_Probe_leave (void)__attribute__((weak));
 
@@ -427,6 +469,19 @@ void DLB_MPI_Probe_leave (void)__attribute__((weak));
 void DLB_MPI_Iprobe_enter (int source, int tag, MPI_Comm comm, int *flag,
 	MPI_Status *status)__attribute__((weak));
 void DLB_MPI_Iprobe_leave (void)__attribute__((weak));
+
+
+#if defined(MPI3) 
+
+void DLB_MPI_Mprobe_enter (int source, int tag, MPI_Comm comm, MPI_Message *message, MPI_Status *status)__attribute__((weak));
+void DLB_MPI_Mprobe_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Improbe_enter (int source, int tag, MPI_Comm comm, int *flag,
+        MPI_Message *message, MPI_Status *status)__attribute__((weak));
+void DLB_MPI_Improbe_leave (void)__attribute__((weak));
+
+#endif /* MPI3 */
 
 
 void DLB_MPI_Test_enter (MPI_Request *request, int *flag, MPI_Status *status)__attribute__((weak));

@@ -95,7 +95,7 @@ void PMPI_Reduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *ierror)
 {
 	int me, ret, size, csize;
-	MPI_Comm c = MPI_Comm_f2c(*comm);
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
@@ -146,7 +146,7 @@ void PMPI_AllReduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int me, ret, size, csize;
-	MPI_Comm c = MPI_Comm_f2c(*comm);
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
@@ -193,7 +193,7 @@ void PMPI_AllReduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 
 void PMPI_Barrier_Wrapper (MPI_Fint *comm, MPI_Fint *ierror)
 {
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
   int me, ret, csize;
 
   CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
@@ -252,7 +252,7 @@ void PMPI_BCast_Wrapper (void *buffer, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int me, ret, size, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
@@ -313,7 +313,7 @@ void PMPI_AllToAll_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int me, ret, sendsize, recvsize, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -373,7 +373,7 @@ void PMPI_AllToAllV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int me, ret, sendsize, recvsize, csize;
 	int proc, sendc = 0, recvc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (sendcount != NULL)
 	{
@@ -441,7 +441,7 @@ void PMPI_Allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int ret, sendsize, recvsize, me, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -500,7 +500,7 @@ void PMPI_Allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int ret, sendsize, me, csize;
 	int proc, recvsize, recvc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -563,7 +563,7 @@ void PMPI_Gather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int ret, sendsize, recvsize, me, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -634,7 +634,7 @@ void PMPI_GatherV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int ret, sendsize, me, csize;
 	int proc, recvsize, recvc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -706,7 +706,7 @@ void PMPI_Scatter_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int ret, sendsize, recvsize, me, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -776,7 +776,7 @@ void PMPI_ScatterV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int ret, recvsize, me, csize;
 	int proc, sendsize, sendc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (sendcount != NULL)
 	{
@@ -851,7 +851,7 @@ void PMPI_Reduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
 	int i;
 	int sendcount = 0;
 	int csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
@@ -906,7 +906,7 @@ void PMPI_Scan_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierror)
 {
 	int me, size, csize;
-	MPI_Comm c = MPI_Comm_f2c(*comm);
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
@@ -959,7 +959,7 @@ void PMPI_Ireduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *req, MPI_Fint *ierror)
 {
 	int me, ret, size, csize;
-	MPI_Comm c = MPI_Comm_f2c(*comm);
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
@@ -1010,7 +1010,7 @@ void PMPI_IallReduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
 	int me, ret, size, csize;
-	MPI_Comm c = MPI_Comm_f2c(*comm);
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
@@ -1057,7 +1057,7 @@ void PMPI_IallReduce_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 
 void PMPI_Ibarrier_Wrapper (MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
   int me, ret, csize;
 
   CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
@@ -1116,7 +1116,7 @@ void PMPI_Ibcast_Wrapper (void *buffer, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
 	int me, ret, size, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, &ret);
 	MPI_CHECK(ret, pmpi_comm_rank);
@@ -1177,7 +1177,7 @@ void PMPI_IallToAll_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
 	int me, ret, sendsize, recvsize, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -1238,7 +1238,7 @@ void PMPI_IallToAllV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int me, ret, sendsize, recvsize, csize;
 	int proc, sendc = 0, recvc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (sendcount != NULL)
 	{
@@ -1306,7 +1306,7 @@ void PMPI_Iallgather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
 	int ret, sendsize, recvsize, me, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -1365,7 +1365,7 @@ void PMPI_Iallgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int ret, sendsize, me, csize;
 	int proc, recvsize, recvc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -1428,7 +1428,7 @@ void PMPI_Igather_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
 	int ret, sendsize, recvsize, me, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -1500,7 +1500,7 @@ void PMPI_IgatherV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int ret, sendsize, me, csize;
 	int proc, recvsize, recvc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -1572,7 +1572,7 @@ void PMPI_Iscatter_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 	MPI_Fint *root, MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ierror)
 {
 	int ret, sendsize, recvsize, me, csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (*sendcount != 0)
 	{
@@ -1642,7 +1642,7 @@ void PMPI_IscatterV_Wrapper (void *sendbuf, MPI_Fint *sendcount,
 {
 	int ret, recvsize, me, csize;
 	int proc, sendsize, sendc = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	if (sendcount != NULL)
 	{
@@ -1717,7 +1717,7 @@ void PMPI_Ireduce_Scatter_Wrapper (void *sendbuf, void *recvbuf,
 	int i;
 	int sendcount = 0;
 	int csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
@@ -1773,7 +1773,7 @@ void PMPI_Iscan_Wrapper (void *sendbuf, void *recvbuf, MPI_Fint *count,
 	MPI_Fint *ierror)
 {
 	int me, size, csize;
-	MPI_Comm c = MPI_Comm_f2c(*comm);
+	MPI_Comm c = PMPI_Comm_f2c(*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
@@ -1825,7 +1825,7 @@ void PMPI_Reduce_Scatter_Block_Wrapper (void *sendbuf, void *recvbuf,
 	int me, size;
 	int sendcount = 0;
 	int csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
@@ -1881,7 +1881,7 @@ void PMPI_Ireduce_Scatter_Block_Wrapper (void *sendbuf, void *recvbuf,
 	int me, size;
 	int sendcount = 0;
 	int csize;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 	CtoF77 (pmpi_comm_rank) (comm, &me, ierror);
 	MPI_CHECK(*ierror, pmpi_comm_rank);
@@ -1938,7 +1938,7 @@ void PMPI_AllToAllW_Wrapper (void *sendbuf, MPI_Fint *sendcounts,
 {
 	int me, ret, csize;
 	int proc, sendbytes = 0, recvbytes = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 		
 	CtoF77 (pmpi_comm_size) (comm, &csize, &ret);
@@ -2000,7 +2000,7 @@ void PMPI_IallToAllW_Wrapper (void *sendbuf, MPI_Fint *sendcounts,
 {
 	int me, ret, csize;
 	int proc, sendbytes = 0, recvbytes = 0;
-	MPI_Comm c = MPI_Comm_f2c (*comm);
+	MPI_Comm c = PMPI_Comm_f2c (*comm);
 
 		
 	CtoF77 (pmpi_comm_size) (comm, &csize, &ret);
@@ -2124,7 +2124,7 @@ void PMPI_Graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *nnodes, MPI_Fint *
 
         if (*comm_graph != cnull && *ierr == MPI_SUCCESS)
         {
-                MPI_Comm comm_id = MPI_Comm_f2c(*comm_graph);
+                MPI_Comm comm_id = PMPI_Comm_f2c(*comm_graph);
                 Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
         }
 
@@ -2149,7 +2149,7 @@ void PMPI_Dist_graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *
 
         if (*comm_dist_graph != cnull && *ierr == MPI_SUCCESS)
         {
-                MPI_Comm comm_id = MPI_Comm_f2c(*comm_dist_graph);
+                MPI_Comm comm_id = PMPI_Comm_f2c(*comm_dist_graph);
                 Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
         }
 
@@ -2165,7 +2165,7 @@ void PMPI_Dist_graph_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *n, MPI_Fint *
 void PMPI_Neighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
 {
   int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (*sendcount != 0)
   {
@@ -2215,7 +2215,7 @@ void PMPI_Neighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fi
 void PMPI_Ineighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
 {
   int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (*sendcount != 0)
   {
@@ -2265,7 +2265,7 @@ void PMPI_Ineighbor_allgather_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_F
 void PMPI_Neighbor_allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
 {
   int ret = 0, proc = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0, recvc = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (*sendcount != 0)
   {
@@ -2324,7 +2324,7 @@ void PMPI_Neighbor_allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_F
 void PMPI_Ineighbor_allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
 {
   int ret = 0, proc = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0, recvc = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (*sendcount != 0)
   {
@@ -2383,7 +2383,7 @@ void PMPI_Ineighbor_allgatherv_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_
 void PMPI_Neighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
 { 
   int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (*sendcount != 0)
   {
@@ -2434,7 +2434,7 @@ void PMPI_Neighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fin
 void PMPI_Ineighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
 {
   int ret = 0, me = 0, sendsize = 0, recvsize = 0, csize = 0, indegree = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (*sendcount != 0)
   {
@@ -2485,7 +2485,7 @@ void PMPI_Ineighbor_alltoall_Wrapper (void *sendbuf, MPI_Fint *sendcount, MPI_Fi
 void PMPI_Neighbor_alltoallv_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)
 {
   int proc = 0, ret = 0, me = 0, sendsize = 0, sendc = 0, recvsize = 0, recvc = 0, csize = 0, indegree = 0, outdegree = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (sendcounts != NULL)
   {
@@ -2551,7 +2551,7 @@ void PMPI_Neighbor_alltoallv_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_F
 void PMPI_Ineighbor_alltoallv_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
 {
   int proc = 0, ret = 0, me = 0, sendsize = 0, sendc = 0, recvsize = 0, recvc = 0, csize = 0, indegree = 0, outdegree = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   if (sendcounts != NULL)
   {
@@ -2617,7 +2617,7 @@ void PMPI_Ineighbor_alltoallv_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_
 void PMPI_Neighbor_alltoallw_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr)
 {
   int ret = 0, proc = 0, me = 0, csize = 0, indegree = 0, outdegree = 0, sendbytes = 0, recvbytes = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   CtoF77(pmpi_comm_size) (comm, &csize, &ret);
   MPI_CHECK(ret, pmpi_comm_size);
@@ -2688,7 +2688,7 @@ void PMPI_Neighbor_alltoallw_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_F
 void PMPI_Ineighbor_alltoallw_Wrapper (void *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, void *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr)
 {
   int proc = 0, me = 0, ret = 0, csize = 0, indegree = 0, outdegree = 0, sendbytes = 0, recvbytes = 0;
-  MPI_Comm c = MPI_Comm_f2c (*comm);
+  MPI_Comm c = PMPI_Comm_f2c (*comm);
 
   CtoF77(pmpi_comm_size) (comm, &csize, &ret);
   MPI_CHECK(ret, pmpi_comm_size);

@@ -252,7 +252,11 @@ typedef enum
   MPI_WIN_FLUSH_VAL,
   MPI_WIN_FLUSH_ALL_VAL,
   MPI_WIN_FLUSH_LOCAL_VAL,
-  MPI_WIN_FLUSH_LOCAL_ALL_VAL
+  MPI_WIN_FLUSH_LOCAL_ALL_VAL,
+  MPI_MPROBE_VAL, /* 190 */
+  MPI_IMPROBE_VAL,
+  MPI_MRECV_VAL,
+  MPI_IMRECV_VAL
 }
 MPIVal;
 
@@ -346,6 +350,10 @@ MPIVal;
 #define  MPI_WAITSOME_LABEL                "MPI_Waitsome"
 #define  MPI_PROBE_LABEL                   "MPI_Probe"
 #define  MPI_IPROBE_LABEL                  "MPI_Iprobe"
+#define  MPI_MPROBE_LABEL                  "MPI_Mprobe"
+#define  MPI_IMPROBE_LABEL                 "MPI_Improbe"
+#define  MPI_MRECV_LABEL                   "MPI_Mrecv"
+#define  MPI_IMRECV_LABEL                  "MPI_Imrecv"
 
 #define  MPI_WIN_CREATE_LABEL              "MPI_Win_create"
 #define  MPI_WIN_FREE_LABEL                "MPI_Win_free"

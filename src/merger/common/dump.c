@@ -64,6 +64,7 @@ static void show_current (const event_t * c, UINT64 max_time)
 	}
 
 	if (c->event == MPI_IRECV_EV || c->event == MPI_IRECVED_EV || c->event == MPI_RECV_EV ||
+	    c->event == MPI_MRECV_EV || c->event == MPI_IMRECV_EV ||
 	    c->event == MPI_SENDRECV_EV || c->event == MPI_SENDRECV_REPLACE_EV ||
 	    c->event == MPI_PERSIST_REQ_EV ||
 	    c->event == MPI_SEND_EV || c->event == MPI_ISEND_EV ||

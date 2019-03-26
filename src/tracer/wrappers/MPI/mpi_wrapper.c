@@ -165,8 +165,8 @@ char *Extrae_core_get_mpits_file_name (void)
 	return MpitsFileName;
 }
 
-xtr_hash_t requests;         /* Receive requests stored in a hash in order to search them fast */
-PR_Queue_t PR_queue;     /* Persistent requests queue */
+xtr_hash_t requests;            /* MPI_Request and MPI_Message stored in a hash in order to search them fast */
+PR_Queue_t PR_queue;            /* Persistent requests queue */
 static int *ranks_global;       /* Global ranks vector (from 1 to NProcs) */
 static MPI_Group grup_global;   /* Group attached to the MPI_COMM_WORLD */
 static MPI_Fint grup_global_F;  /* Group attached to the MPI_COMM_WORLD (Fortran) */
@@ -190,24 +190,41 @@ void CheckGlobalOpsTracingIntervals (void)
 }
 
 /******************************************************************************
- ***  get_rank_obj_C
+ ***  getMsgSizeFromCountAndDatatype
  ******************************************************************************/
 
-int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver, int send_or_recv)
+int getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype)
 {
-	int ret, inter;
-	MPI_Group group;
+  int size = 0;
+
+  if (count > 0)
+  {
+    if ((PMPI_Type_size (datatype, &size)) != MPI_SUCCESS)
+    {
+      size = 0;
+    }
+  }
+
+  return (size * count);
+}
+
+/******************************************************************************
+ ***  translateLocalToGlobalRank
+ ******************************************************************************/
+
+void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *receiver, int send_or_recv)
+{
+	int inter = 0;
 
 	/* If rank in MPI_COMM_WORLD or if dest is PROC_NULL or any source,
 	   return value directly */
-	if (comm == MPI_COMM_WORLD || dest == MPI_PROC_NULL || dest == MPI_ANY_SOURCE)
+	if (comm == MPI_COMM_WORLD || comm == MPI_COMM_NULL || dest == MPI_PROC_NULL || dest == MPI_ANY_SOURCE)
 	{
 		*receiver = dest;
 	}
 	else
 	{
-		ret = PMPI_Comm_test_inter (comm, &inter);	
-		MPI_CHECK (ret, PMPI_Comm_test_inter);
+		PMPI_Comm_test_inter (comm, &inter);	
 
 		if (inter)
 		{
@@ -215,7 +232,7 @@ int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver, int send_or_recv)
                         PMPI_Comm_get_parent(&parent);
 
                         /* The communicator is an intercommunicator */
-                        if (send_or_recv == RANK_OBJ_SEND)
+                        if (send_or_recv == OP_TYPE_SEND)
                         {
                                 if (comm == parent)
                                 {
@@ -254,19 +271,27 @@ int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver, int send_or_recv)
 		}
 		else
 		{
-			/* The communicator is an intracommunicator */
-			ret = PMPI_Comm_group (comm, &group);
-			MPI_CHECK (ret, PMPI_Comm_group);
+			// The communicator is an intracommunicator
 
-			/* Translate the rank */
-			ret = PMPI_Group_translate_ranks (group, 1, &dest, grup_global, receiver); 
-			MPI_CHECK (ret, PMPI_Group_translate_ranks);
-			
-			ret = PMPI_Group_free (&group);
-			MPI_CHECK (ret, PMPI_Group_free);
+			// Get the communicator group if not provided
+			if (group == MPI_GROUP_NULL)
+			{
+				PMPI_Comm_group (comm, &group);
+			}
+
+			if ((group != MPI_GROUP_NULL) && (group != MPI_GROUP_EMPTY))
+			{
+				// Translate the rank 
+				PMPI_Group_translate_ranks (group, 1, &dest, grup_global, receiver); 
+				if (receiver == MPI_UNDEFINED) *receiver = dest;
+				PMPI_Group_free (&group);
+			}
+			else
+			{
+				*receiver = dest;
+			}
 		}
 	}
-	return MPI_SUCCESS;
 }
 
 /******************************************************************************
@@ -276,14 +301,12 @@ int get_rank_obj_C (MPI_Comm comm, int dest, int *receiver, int send_or_recv)
 static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 {
 	persistent_req_t *p_request;
-	xtr_hash_data_t hash_req;
-	int inter;
 	int size, src_world, ret;
 	int send_or_recv;
 
 	/*
-	* S'intenta recuperar la informacio d'aquesta request per tracejar-la 
-	*/
+	 * S'intenta recuperar la informacio d'aquesta request per tracejar-la 
+	 */
 	p_request = PR_Busca_request (&PR_queue, reqid);
 	if (p_request == NULL)
 		return;
@@ -296,51 +319,24 @@ static void Traceja_Persistent_Request (MPI_Request* reqid, iotimer_t temps)
 	ret = PMPI_Type_size (p_request->datatype, &size);
 	MPI_CHECK(ret, PMPI_Type_size);
 
-	send_or_recv = (p_request->tipus == MPI_IRECV_EV ? RANK_OBJ_RECV : RANK_OBJ_SEND );
-	if (get_rank_obj_C (p_request->comm, p_request->task, &src_world, send_or_recv) != MPI_SUCCESS)
-		return;
+	send_or_recv = (p_request->tipus == MPI_IRECV_EV ? OP_TYPE_RECV : OP_TYPE_SEND );
+
+	translateLocalToGlobalRank (p_request->comm, MPI_GROUP_NULL, p_request->task, &src_world, send_or_recv);
 
 	if (p_request->tipus == MPI_IRECV_EV)
 	{
 		/*
 		 * Als recv guardem informacio pels WAITs 
-		*/
-		hash_req.key = *reqid;
-		hash_req.commid = p_request->comm;
-		hash_req.partner = p_request->task;
-		hash_req.tag = p_request->tag;
-		hash_req.size = p_request->count * size;
-
-		if (p_request->comm == MPI_COMM_WORLD)
-		{
-			hash_req.group = MPI_GROUP_NULL;
-		}
-		else
-		{
-			ret = PMPI_Comm_test_inter (p_request->comm, &inter);
-			MPI_CHECK (ret, PMPI_Comm_test_inter);
-			
-			if (inter)
-			{
-				ret = PMPI_Comm_remote_group (p_request->comm, &hash_req.group);
-				MPI_CHECK (ret, PMPI_Comm_remote_group);
-			}
-			else
-			{
-				ret = PMPI_Comm_group (p_request->comm, &hash_req.group);	
-				MPI_CHECK (ret, PMPI_Comm_group);
-			}
-		}
-
-		xtr_hash_add (&requests, &hash_req);
+		 */
+		SaveRequest(*reqid, p_request->comm);
 	}
 
 	/*
-	*   event : PERSIST_REQ_EV                        value : Request type
-	*   target : MPI_ANY_SOURCE or sender/receiver    size  : buffer size
-	*   tag : message tag or MPI_ANY_TAG              commid: Communicator id
-	*   aux: request id
-	*/
+	 *   event : PERSIST_REQ_EV                        value : Request type
+	 *   target : MPI_ANY_SOURCE or sender/receiver    size  : buffer size
+	 *   tag : message tag or MPI_ANY_TAG              commid: Communicator id
+	 *   aux: request id
+	 */
 	TRACE_MPIEVENT_NOHWC (temps, MPI_PERSIST_REQ_EV, p_request->tipus,
 	  src_world, size, p_request->tag, p_request->comm, p_request->req);
 }
@@ -1265,87 +1261,6 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 
 
 /******************************************************************************
- ***  get_rank_obj
- ******************************************************************************/
-
-int get_rank_obj (int *comm, int *dest, int *receiver, int send_or_recv)
-{
-	int ret, inter, one = 1;
-	int group;
-	MPI_Fint comm_world = MPI_Comm_c2f(MPI_COMM_WORLD);
-
-        /* If rank in MPI_COMM_WORLD or if dest is PROC_NULL or any source,
-           return value directly */
-	if (*comm == comm_world || *dest == MPI_PROC_NULL || *dest == MPI_ANY_SOURCE)
-	{
-		*receiver = *dest;
-	}
-	else
-	{
-		CtoF77 (pmpi_comm_test_inter) (comm, &inter, &ret);
-		MPI_CHECK(ret, pmpi_comm_test_inter);
-
-		if (inter)
-		{
-                        /* The communicator is an intercommunicator */
-                        int parent;
-                        CtoF77( pmpi_comm_get_parent ) (&parent, &ret);
-
-                        if (send_or_recv == RANK_OBJ_SEND)
-                        {
-                                if (*comm == parent)
-                                {
-                                        /* Send to parent -- Translate the local rank for the parent into its MPI_COMM_WORLD rank */
-#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-                                        if (ParentWorldRanks != NULL)
-                                                *receiver = ParentWorldRanks[*dest];
-                                        else
-#endif
-                                                *receiver = *dest; /* Should never happen */
-                                }
-                                else
-                                {
-                                        /* Send to children -- When sending to specific childen X, there's no need to translate ranks */
-                                        *receiver = *dest;
-                                }
-                        }
-                        else
-                        {
-                                if (*comm == parent)
-                                {
-#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-                                        /* Recv from parent -- Translate the local rank for the parent into its MPI_COMM_WORLD rank */
-                                        if (ParentWorldRanks != NULL)
-                                                *receiver = ParentWorldRanks[*dest];
-                                        else
-#endif
-                                                *receiver = *dest; /* Should never happen */
-                                }
-                                else
-                                {
-                                        /* Recv from children -- When receiving from specific childen X, there's no need to translate ranks */
-                                        *receiver = *dest;
-                                }
-                        }
-		}
-		else
-		{
-			/* The communicator is an intracommunicator */
-			CtoF77 (pmpi_comm_group) (comm, &group, &ret);
-			MPI_CHECK(ret, pmpi_comm_group);
-
-			/* Translate the rank */
-			CtoF77 (pmpi_group_translate_ranks) (&group, &one, dest, &grup_global_F, receiver, &ret);
-			MPI_CHECK(ret, pmpi_group_translate_ranks);
-
-			CtoF77 (pmpi_group_free) (&group, &ret);
-			MPI_CHECK(ret, pmpi_group_free);
-		}
-	}
-	return MPI_SUCCESS;
-}
-
-/******************************************************************************
  ***  PMPI_Request_get_status_Wrapper
  ******************************************************************************/
 
@@ -1372,49 +1287,36 @@ void Bursts_PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, 
 void Normal_PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
     MPI_Fint *ierror)
 {
-  static int PMPI_Request_get_status_counter = 0;
-  iotimer_t begin_time, end_time;
-  static iotimer_t elapsed_time_outside_PMPI_Request_get_status = 0, last_PMPI_Request_get_status_exit_time = 0;
+   static int       mpi_request_get_status_software_counter = 0;
+   static iotimer_t mpi_request_get_status_elapsed_time = 0;
+   iotimer_t        mpi_request_get_status_begin_time = 0;
 
+   mpi_request_get_status_begin_time = LAST_READ_TIME;
 
-  begin_time = LAST_READ_TIME;
+   CtoF77 (pmpi_request_get_status) (request, flag, status, ierror);
 
-  if (PMPI_Request_get_status_counter == 0) {
-    /* First request */
-    elapsed_time_outside_PMPI_Request_get_status = 0;
-  }
-  else {
-    elapsed_time_outside_PMPI_Request_get_status += (begin_time - last_PMPI_Request_get_status_exit_time);
-  }
-
-  CtoF77 (pmpi_request_get_status) (request, flag, status, ierror);
-
-  end_time = TIME; 
-  last_PMPI_Request_get_status_exit_time = end_time;
-
-	if (tracejant_mpi)
-  {
-    if (*flag)
-    {
-      if (PMPI_Request_get_status_counter != 0) {
-        TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, elapsed_time_outside_PMPI_Request_get_status);
-        TRACE_EVENT (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, PMPI_Request_get_status_counter);
+   if (*flag)
+   {
+      if (mpi_request_get_status_software_counter > 0) {
+        TRACE_EVENT (mpi_request_get_status_begin_time, MPI_TIME_IN_REQUEST_GET_STATUS_EV, mpi_request_get_status_elapsed_time);
+        TRACE_EVENT (mpi_request_get_status_begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, mpi_request_get_status_software_counter);
       }
-      TRACE_MPIEVENT (begin_time, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+      TRACE_MPIEVENT (mpi_request_get_status_begin_time, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
-      TRACE_MPIEVENT (end_time, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-      PMPI_Request_get_status_counter = 0;
-    }
-    else
-    {
-      if (PMPI_Request_get_status_counter == 0)
+      TRACE_MPIEVENT (TIME, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+      mpi_request_get_status_software_counter = 0;
+      mpi_request_get_status_elapsed_time = 0;
+   }
+   else
+   {
+      if (mpi_request_get_status_software_counter == 0)
       {
-        /* First request fail */
-        TRACE_EVENTANDCOUNTERS (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, 0, TRUE);
+        // First request fail
+        TRACE_EVENTANDCOUNTERS (mpi_request_get_status_begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, 0, TRUE);
       }
-      PMPI_Request_get_status_counter ++;
-    }
-  }
+      mpi_request_get_status_software_counter ++;
+      mpi_request_get_status_elapsed_time += (TIME - mpi_request_get_status_begin_time);
+   }
 }
 
 void PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror)
@@ -1436,7 +1338,7 @@ void PMPI_Request_get_status_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fin
 
 void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 {
-	MPI_Request req = MPI_Request_f2c(*request);
+	MPI_Request req = PMPI_Request_f2c(*request);
 
   /*
    *   event : CANCEL_EV                    value : EVT_BEGIN
@@ -1455,41 +1357,7 @@ void PMPI_Cancel_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
    */
   TRACE_MPIEVENT (TIME, MPI_CANCEL_EV, EVT_END, req, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
-}
-
-/******************************************************************************
- ***  get_Irank_obj
- ******************************************************************************/
-
-int get_Irank_obj (xtr_hash_data_t * hash_req, int *src_world, int *size,
-	int *tag, int *status)
-{
-	int ret, one = 1;
-	MPI_Fint tbyte = MPI_Type_c2f(MPI_BYTE);
-	int recved_count, dest;
-
-	CtoF77 (pmpi_get_count) (status, &tbyte, &recved_count, &ret);
-	MPI_CHECK(ret, pmpi_get_count);
-
-	if (recved_count != MPI_UNDEFINED)
-		*size = recved_count;
-	else
-		*size = 0;
-
-	*tag = status[MPI_TAG_OFFSET];
-	dest = status[MPI_SOURCE_OFFSET];
-
-	if (MPI_GROUP_NULL != hash_req->group)
-	{
-		MPI_Fint group = MPI_Group_c2f(hash_req->group);
-		CtoF77 (pmpi_group_translate_ranks) (&group, &one, &dest, &grup_global_F, src_world, &ret);
-		MPI_CHECK(ret, pmpi_group_translate_ranks);
-	}
-	else
-		*src_world = dest;
-
-  return MPI_SUCCESS;
+  updateStats_OTHER(global_mpi_stats);
 }
 
 
@@ -1542,7 +1410,7 @@ void PMPI_Comm_Create_Wrapper (MPI_Fint *comm, MPI_Fint *group,
 
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{	
-		MPI_Comm comm_id = MPI_Comm_f2c(*newcomm);
+		MPI_Comm comm_id = PMPI_Comm_f2c(*newcomm);
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
@@ -1588,7 +1456,7 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{
-		MPI_Comm comm_id = MPI_Comm_f2c (*newcomm);
+		MPI_Comm comm_id = PMPI_Comm_f2c (*newcomm);
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
@@ -1618,7 +1486,7 @@ void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 
 	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
 	{
-		MPI_Comm comm_id = MPI_Comm_f2c (*newcomm);
+		MPI_Comm comm_id = PMPI_Comm_f2c (*newcomm);
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
@@ -1705,7 +1573,7 @@ void PMPI_Start_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
 	CtoF77 (pmpi_start) (request, ierror);
 
 	/* Store the resulting request */
-	req = MPI_Request_f2c(*request);
+	req = PMPI_Request_f2c(*request);
 	Traceja_Persistent_Request (&req, LAST_READ_TIME);
 
   /*
@@ -1753,7 +1621,7 @@ void PMPI_Startall_Wrapper (MPI_Fint *count, MPI_Fint array_of_requests[],
    */
 	for (ii = 0; ii < (*count); ii++)
 	{
-		MPI_Request req = MPI_Request_f2c(save_reqs[ii]);
+		MPI_Request req = PMPI_Request_f2c(save_reqs[ii]);
 		Traceja_Persistent_Request (&req, LAST_READ_TIME);
 	}
 
@@ -1789,7 +1657,7 @@ void PMPI_Request_free_Wrapper (MPI_Fint *request, MPI_Fint *ierror)
   /*
    * Cal guardar la request perque algunes implementacions se la carreguen. 
    */
-  req = MPI_Request_f2c (*request);
+  req = PMPI_Request_f2c (*request);
 
   /*
    * S'intenta alliberar aquesta persistent request 
@@ -1828,7 +1696,7 @@ void PMPI_Cart_sub_Wrapper (MPI_Fint *comm, MPI_Fint *remain_dims,
 
 	if (*ierror == MPI_SUCCESS && *comm_new != comm_null)
 	{
-		MPI_Comm comm_id = MPI_Comm_f2c (*comm_new);
+		MPI_Comm comm_id = PMPI_Comm_f2c (*comm_new);
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
@@ -1854,7 +1722,7 @@ void PMPI_Cart_create_Wrapper (MPI_Fint *comm_old, MPI_Fint *ndims,
 
 	if (*ierror == MPI_SUCCESS && *comm_cart != comm_null)
 	{
-		MPI_Comm comm_id = MPI_Comm_f2c (*comm_cart);
+		MPI_Comm comm_id = PMPI_Comm_f2c (*comm_cart);
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
@@ -1879,9 +1747,9 @@ void PMPI_Intercomm_create_F_Wrapper (MPI_Fint *local_comm, MPI_Fint *local_lead
 	  remote_leader, tag, newintercomm, ierror);
 
 	if (*ierror == MPI_SUCCESS && *newintercomm != comm_null)
-		Trace_MPI_InterCommunicator (MPI_Comm_f2c (*newintercomm),
-		  MPI_Comm_f2c(*local_comm), *local_leader,
-		  MPI_Comm_f2c(*peer_comm), *remote_leader,
+		Trace_MPI_InterCommunicator (PMPI_Comm_f2c (*newintercomm),
+		  PMPI_Comm_f2c(*local_comm), *local_leader,
+		  PMPI_Comm_f2c(*peer_comm), *remote_leader,
 		  LAST_READ_TIME, TRUE);
 
 	TRACE_MPIEVENT(TIME, MPI_INTERCOMM_CREATE_EV, EVT_END,
@@ -1902,7 +1770,7 @@ void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
 
 	if (*ierror == MPI_SUCCESS && *newintracomm != comm_null)
 	{
-		MPI_Comm comm_id = MPI_Comm_f2c (*newintracomm);
+		MPI_Comm comm_id = PMPI_Comm_f2c (*newintracomm);
 		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
 	}
 
@@ -1913,38 +1781,6 @@ void PMPI_Intercomm_merge_F_Wrapper (MPI_Fint *intercomm, MPI_Fint *high,
 #endif /* defined(FORTRAN_SYMBOLS) */
 
 #if defined(C_SYMBOLS)
-
-/******************************************************************************
- ***  get_Irank_obj_C
- ******************************************************************************/
-
-int get_Irank_obj_C (xtr_hash_data_t * hash_req, int *src_world, int *size,
-	int *tag, MPI_Status *status)
-{
-	int ret, dest, recved_count;
-
-	ret = PMPI_Get_count (status, MPI_BYTE, &recved_count);
-	MPI_CHECK(ret, PMPI_Get_count);
-
-	if (recved_count != MPI_UNDEFINED)
-		*size = recved_count;
-	else
-		*size = 0;
-
-	*tag = status->MPI_TAG;
-	dest = status->MPI_SOURCE;
-
-	if (MPI_GROUP_NULL != hash_req->group)
-	{
-		ret = PMPI_Group_translate_ranks (hash_req->group, 1, &dest, grup_global,
-			src_world);
-		MPI_CHECK(ret, PMPI_Group_translate_ranks);
-	}
-	else
-		*src_world = dest;
-
-	return MPI_SUCCESS;
-}
 
 
 /******************************************************************************
@@ -2275,54 +2111,41 @@ int Bursts_MPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *st
 
 int Normal_MPI_Request_get_status(MPI_Request request, int *flag, MPI_Status *status)
 {
-    static int MPI_Request_get_status_counter = 0;
-    static iotimer_t elapsed_time_outside_MPI_Request_get_status_C = 0, last_MPI_Request_get_status_C_exit_time = 0; 
-	iotimer_t begin_time, end_time;
+	static int       MPI_Request_get_status_software_counter = 0;
+	static iotimer_t MPI_Request_get_status_elapsed_time = 0;
+	iotimer_t        MPI_Request_get_status_begin_time;
 	int ierror;
 
-	begin_time = LAST_READ_TIME;
+	MPI_Request_get_status_begin_time = LAST_READ_TIME;
 
-	if (MPI_Request_get_status_counter == 0)
+	ierror = PMPI_Request_get_status(request, flag, status);
+
+	if (*flag)
 	{
-		/* Primer request */
-		elapsed_time_outside_MPI_Request_get_status_C = 0;
-	}
+		if (MPI_Request_get_status_software_counter > 0)
+		{
+			TRACE_EVENT (MPI_Request_get_status_begin_time, MPI_TIME_IN_REQUEST_GET_STATUS_EV, MPI_Request_get_status_elapsed_time);
+			TRACE_EVENT (MPI_Request_get_status_begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_software_counter);
+		}
+
+		TRACE_MPIEVENT (MPI_Request_get_status_begin_time, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+   
+		TRACE_MPIEVENT (TIME, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
+		MPI_Request_get_status_software_counter = 0;
+		MPI_Request_get_status_elapsed_time = 0;
+	} 
 	else
 	{
-		elapsed_time_outside_MPI_Request_get_status_C += (begin_time - last_MPI_Request_get_status_C_exit_time);
-	}
-
-    ierror = PMPI_Request_get_status(request, flag, status);
-	end_time = TIME;
-	last_MPI_Request_get_status_C_exit_time = end_time;
-
-	if (tracejant_mpi)
-	{
-		if (*flag)
+		if (MPI_Request_get_status_software_counter == 0)
 		{
-			if (MPI_Request_get_status_counter != 0)
-			{
-				TRACE_EVENT (begin_time, MPI_TIME_OUTSIDE_MPI_REQUEST_GET_STATUS_EV, elapsed_time_outside_MPI_Request_get_status_C);
-				TRACE_EVENT (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, MPI_Request_get_status_counter);
-			}
-
-			TRACE_MPIEVENT (begin_time, MPI_REQUEST_GET_STATUS_EV, EVT_BEGIN, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-    
-			TRACE_MPIEVENT (end_time, MPI_REQUEST_GET_STATUS_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
-			MPI_Request_get_status_counter = 0;
-		} 
-		else
-		{
-			if (MPI_Request_get_status_counter == 0)
-			{
-				/* El primer request que falla */
-				TRACE_EVENTANDCOUNTERS (begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, 0, TRUE);
-			}
-			MPI_Request_get_status_counter ++;
+			// First request fail
+			TRACE_EVENTANDCOUNTERS (MPI_Request_get_status_begin_time, MPI_REQUEST_GET_STATUS_COUNTER_EV, 0, TRUE);
 		}
+		MPI_Request_get_status_software_counter ++;
+		MPI_Request_get_status_elapsed_time += (TIME - MPI_Request_get_status_begin_time);
 	}
-	return ierror;
 
+	return ierror;
 }
 
 int MPI_Request_get_status_C_Wrapper(MPI_Request request, int *flag, MPI_Status *status)
@@ -2365,7 +2188,7 @@ int MPI_Cancel_C_Wrapper (MPI_Request *request)
    */
   TRACE_MPIEVENT (TIME, MPI_CANCEL_EV, EVT_END, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
-	updateStats_OTHER(global_mpi_stats);
+  updateStats_OTHER(global_mpi_stats);
 
   return ierror;
 }
@@ -3048,5 +2871,164 @@ void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 		Backend_createExtraeDirectory (me, TRUE);
 		Backend_createExtraeDirectory (me, FALSE);
 	}
+}
+
+void getCommunicatorGroup(MPI_Comm comm, MPI_Group *group)
+{
+	int ret, inter;
+
+        if (comm == MPI_COMM_WORLD)
+        {
+                *group = MPI_GROUP_NULL;
+        }
+        else
+        {
+                ret = PMPI_Comm_test_inter (comm, &inter);
+                MPI_CHECK(ret, PMPI_Comm_test_inter);
+
+                if (inter)
+                {
+                        ret = PMPI_Comm_remote_group (comm, group);
+                        MPI_CHECK(ret, PMPI_Comm_remote_group);
+                }
+                else
+                {
+                        ret = PMPI_Comm_group (comm, group);
+                        MPI_CHECK(ret, PMPI_Comm_group);
+                }
+        }
+}
+
+
+void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *global_source)
+{
+  int recved_count;
+  int local_source;
+
+  // Retrieve number of received elements
+  PMPI_Get_count (status, datatype, &recved_count);
+  if (recved_count == MPI_UNDEFINED)
+  {
+    recved_count = 0;
+  }
+  *size = getMsgSizeFromCountAndDatatype(recved_count, datatype);
+
+  // Retrieve the message tag
+  *tag = status->MPI_TAG;
+
+  // Retrieve the source rank (this is local to the communicator used)
+  local_source = status->MPI_SOURCE;
+
+  // Transform local rank into MPI_COMM_WORLD rank
+  translateLocalToGlobalRank (comm, group, local_source, global_source, OP_TYPE_RECV);
+}
+
+
+void SaveRequest(MPI_Request request, MPI_Comm comm)
+{
+        xtr_hash_data_t hash_req;
+
+	hash_req.key = MPI_REQUEST_TO_HASH_KEY(request);
+        hash_req.commid = comm;
+        getCommunicatorGroup(comm, &hash_req.group);
+
+        xtr_hash_add (&requests, &hash_req);
+}
+
+
+void SaveMessage(MPI_Message message, MPI_Comm comm)
+{
+        xtr_hash_data_t hash_msg;
+	
+	hash_msg.key = MPI_MESSAGE_TO_HASH_KEY(message);
+	hash_msg.commid = comm;
+	getCommunicatorGroup(comm, &hash_msg.group);
+
+	xtr_hash_add (&requests, &hash_msg);
+}
+
+void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
+{
+  int cancel_flag;
+  xtr_hash_data_t *hash_req;
+  int src_world, size, tag, ierror;
+
+  ierror = PMPI_Test_cancelled(status, &cancel_flag);
+  MPI_CHECK(ierror, PMPI_Test_cancelled);
+
+  if (cancel_flag)
+  {
+    // Communication was cancelled
+    TRACE_MPIEVENT_NOHWC (ts, MPI_REQUEST_CANCELLED_EV, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, request);
+
+    CancelRequest(request);
+  }
+  else
+  {
+    // Communication was completed 
+
+    if ((hash_req = xtr_hash_search(&requests, MPI_REQUEST_TO_HASH_KEY(request))) != NULL)
+    {
+      // Current request refers to a receive operation (only MPI_I*recv requests are stored in the hash)
+      
+      /* Retrieve the request from the hash table to query the communicator used in the MPI_I*recv.
+         Then, we query the status for the source rank of the sender (the source rank is local to the communicator used).
+         With the source rank and the communicator, we translate the local rank into the global rank.
+       */
+
+      getCommDataFromStatus(status, MPI_BYTE, hash_req->commid, hash_req->group, &size, &tag, &src_world);
+
+      updateStats_P2P(global_mpi_stats, src_world, size, 0);
+  
+      TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, request);
+      xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
+    }
+    else 
+    {
+      // Current request refers to a send operation (send requests are not stored in the hash) 
+
+      /* This case would also trigger if a receive request was not found in the hash (e.g. hash full) 
+         This should not happen unless there's errors in xtr_hash_add or we've missed instrumenting any recv calls. 
+       */
+      TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, EMPTY, EMPTY, status->MPI_TAG, EMPTY, request);
+    }
+  }
+}
+
+
+MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
+{
+	xtr_hash_data_t *hash_msg = NULL;
+	xtr_hash_data_t  hash_req;
+
+	// Retrieve message from hash
+	if (message != MPI_MESSAGE_NULL)
+	{	
+		if ((hash_msg = xtr_hash_search(&requests, MPI_MESSAGE_TO_HASH_KEY(message))) != NULL)
+		{
+			if (request != NULL)
+			{
+				// Fill request communicator data
+				hash_req.key = MPI_REQUEST_TO_HASH_KEY(*request);
+				hash_req.commid = hash_msg->commid;
+				hash_req.group = hash_msg->group;
+
+				// Save the request in the hash with the message's comm data
+				xtr_hash_add(&requests, &hash_req);
+			}
+
+			// Delete message from hash
+			xtr_hash_remove(&requests, MPI_MESSAGE_TO_HASH_KEY(message));
+
+			return hash_msg->commid;
+		}
+	}
+
+	return MPI_COMM_NULL;
+}
+
+void CancelRequest(MPI_Request request)
+{
+	xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
 }
 

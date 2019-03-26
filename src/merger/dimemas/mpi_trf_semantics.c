@@ -330,7 +330,7 @@ static int Receive_Event (event_t * current, unsigned long long current_time,
 {
 	thread_t * thread_info = GET_THREAD_INFO(ptask, task, thread);
 	UINT64 valor;
-	int isimmediate = (MPI_IRECV_EV == Get_EvEvent(current));
+	int isimmediate = (MPI_IRECV_EV == Get_EvEvent(current)) || (MPI_IMRECV_EV == Get_EvEvent(current));
 	int tipus;
 	int comunicador;
 	double temps;
@@ -571,6 +571,7 @@ static int PersistentRequest_Event (event_t * current,
 	switch (Get_EvValue(current))
 	{ 
 		case MPI_IRECV_EV:
+		case MPI_IMRECV_EV:
 			Dimemas_NX_Irecv (fset->output_file, task-1, thread-1, Get_EvTarget(current), comunicador, Get_EvSize(current), Get_EvTag(current) );
 		break;
 
@@ -602,11 +603,15 @@ SingleEv_Handler_t TRF_MPI_Event_Handlers[] = {
 	{ MPI_SENDRECV_EV, SendRecv_Event },
 	{ MPI_SENDRECV_REPLACE_EV, SendRecv_Event },
 	{ MPI_RECV_EV, Receive_Event },
+	{ MPI_MRECV_EV, Receive_Event },
 	{ MPI_IRECV_EV, Receive_Event },
+	{ MPI_IMRECV_EV, Receive_Event },
 	{ MPI_REDUCE_EV, GlobalOP_Event },
 	{ MPI_ALLREDUCE_EV, GlobalOP_Event },
 	{ MPI_PROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
 	{ MPI_IPROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
+	{ MPI_MPROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
+	{ MPI_IMPROBE_EV, NULL }, /* MUST BE IMPLEMENTED? */
 	{ MPI_IBSEND_EV, ANY_Send_Event },
 	{ MPI_ISSEND_EV, ANY_Send_Event },
 	{ MPI_IRSEND_EV, ANY_Send_Event },
@@ -644,8 +649,13 @@ SingleEv_Handler_t TRF_MPI_Event_Handlers[] = {
 	{ MPI_COMM_RANK_EV, MPI_Common_Event },
 	{ MPI_COMM_SIZE_EV, MPI_Common_Event },
 	{ MPI_IPROBE_COUNTER_EV, NULL }, /* Software counters are unimplemented in TRF */
-	{ MPI_TIME_OUTSIDE_IPROBES_EV, NULL },
+	{ MPI_IMPROBE_COUNTER_EV, NULL }, 
+	{ MPI_REQUEST_GET_STATUS_COUNTER_EV, NULL }, 
 	{ MPI_TEST_COUNTER_EV, NULL },
+	{ MPI_TIME_IN_IPROBE_EV, NULL },
+	{ MPI_TIME_IN_IMPROBE_EV, NULL },
+	{ MPI_TIME_IN_REQUEST_GET_STATUS_EV, NULL },
+	{ MPI_TIME_IN_TEST_EV, NULL },
 	{ MPI_FILE_OPEN_EV, NULL }, /* IO is unimplemented in TRF */
 	{ MPI_FILE_CLOSE_EV, NULL },
 	{ MPI_FILE_READ_EV, NULL },
@@ -658,7 +668,6 @@ SingleEv_Handler_t TRF_MPI_Event_Handlers[] = {
 	{ MPI_FILE_WRITE_AT_ALL_EV, NULL },
 	{ MPI_REDUCE_SCATTER_BLOCK_EV, GlobalOP_Event },
 	{ MPI_ALLTOALLW_EV, GlobalOP_Event },
-	{ MPI_TIME_OUTSIDE_TESTS_EV, NULL },
 	{ NULL_EV, NULL }
 };
 

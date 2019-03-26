@@ -342,6 +342,62 @@ int NAME_ROUTINE_C(MPI_Irecv) (void* buf, int count, MPI_Datatype datatype,
 	return res;
 }
 
+#if defined(MPI3)
+
+/******************************************************************************
+ ***  MPI_Mrecv
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Mrecv) (void* buf, int count, MPI_Datatype datatype,
+        MPI_Message *message, MPI_Status *status)
+{
+        int res;
+
+        DLB(DLB_MPI_Mrecv_enter, buf, count, datatype, message, status);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                res = MPI_Mrecv_C_Wrapper (buf, count, datatype, message, status);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                res = PMPI_Mrecv (buf, count, datatype, message, status);
+
+        DLB(DLB_MPI_Mrecv_leave);
+
+        return res;
+}
+
+/******************************************************************************
+ ***  MPI_Imrecv
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Imrecv) (void* buf, int count, MPI_Datatype datatype,
+        MPI_Message *message, MPI_Request *request)
+{
+        int res;
+
+        DLB(DLB_MPI_Imrecv_enter, buf, count, datatype, message, request);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                res = MPI_Imrecv_C_Wrapper (buf, count, datatype, message, request);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                res = PMPI_Imrecv (buf, count, datatype, message, request);
+
+        DLB(DLB_MPI_Imrecv_leave);
+
+        return res;
+}
+
+#endif /* MPI3 */
+
 /******************************************************************************
  ***  MPI_Probe
  ******************************************************************************/
@@ -393,6 +449,62 @@ int NAME_ROUTINE_C(MPI_Iprobe) (int source, int tag, MPI_Comm comm, int *flag,
 	
 	return res;
 }
+
+#if defined(MPI3)
+
+/******************************************************************************
+ ***  MPI_Mprobe
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Mprobe) (int source, int tag, MPI_Comm comm,
+        MPI_Message *message, MPI_Status *status)
+{
+        int res;
+
+        DLB(DLB_MPI_Mprobe_enter, source, tag, comm, message, status);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                res = MPI_Mprobe_C_Wrapper (source, tag, comm, message, status);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                res = PMPI_Mprobe (source, tag, comm, message, status);
+
+        DLB(DLB_MPI_Mprobe_leave);
+
+        return res;
+}
+
+/******************************************************************************
+ ***  MPI_Improbe
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Improbe) (int source, int tag, MPI_Comm comm, int *flag,
+        MPI_Message *message, MPI_Status *status)
+{
+        int res;
+
+        DLB(DLB_MPI_Improbe_enter, source, tag, comm, flag, message, status);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                res = MPI_Improbe_C_Wrapper (source, tag, comm, flag, message, status);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                return PMPI_Improbe (source, tag, comm, flag, message, status);
+
+        DLB(DLB_MPI_Improbe_leave);
+
+        return res;
+}
+
+#endif /* MPI3 */
 
 /******************************************************************************
  ***  MPI_Test

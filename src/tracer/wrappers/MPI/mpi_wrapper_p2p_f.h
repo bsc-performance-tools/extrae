@@ -80,11 +80,31 @@ void PMPI_IRecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 	MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request,
 	MPI_Fint *ierror);
 
+#if defined(MPI3)
+
+void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror);
+
+void PMPI_Imrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
+        MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierror);
+
+#endif /* MPI3 */
+
 void PMPI_Probe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *status, MPI_Fint *ierror);
 
 void PMPI_IProbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
 	MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierror);
+
+#if defined(MPI3)
+
+void PMPI_Mprobe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
+        MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror);
+
+void PMPI_Improbe_Wrapper (MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm,
+        MPI_Fint *flag, MPI_Fint *message, MPI_Fint *status, MPI_Fint *ierror);
+
+#endif /* MPI3 */
 
 void PMPI_Test_Wrapper (MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status,
 	MPI_Fint *ierror);

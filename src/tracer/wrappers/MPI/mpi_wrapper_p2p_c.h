@@ -67,10 +67,29 @@ int MPI_Recv_C_Wrapper (void *buf, int count, MPI_Datatype datatype,
 int MPI_Irecv_C_Wrapper (void *buf, int count, MPI_Datatype datatype,
   int source, int tag, MPI_Comm comm, MPI_Request * request);
 
+#if defined(MPI3)
+
+int MPI_Mrecv_C_Wrapper (void *buf, int count, MPI_Datatype datatype,
+  MPI_Message *message, MPI_Status *status);
+
+int MPI_Imrecv_C_Wrapper (void *buf, int count, MPI_Datatype datatype,
+  MPI_Message *message, MPI_Request * request);
+
+#endif /* MPI3 */
+
 int MPI_Probe_C_Wrapper (int source, int tag, MPI_Comm comm, MPI_Status *status);
 
 int MPI_Iprobe_C_Wrapper (int source, int tag, MPI_Comm comm, int *flag,
   MPI_Status *status);
+
+#if defined(MPI3)
+
+int MPI_Mprobe_C_Wrapper (int source, int tag, MPI_Comm comm, MPI_Message *message, MPI_Status *status);
+
+int MPI_Improbe_C_Wrapper (int source, int tag, MPI_Comm comm, int *flag,
+  MPI_Message *message, MPI_Status *status);
+
+#endif /* MPI3 */
 
 int MPI_Test_C_Wrapper (MPI_Request * request, int *flag, MPI_Status *status);
 
