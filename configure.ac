@@ -181,6 +181,9 @@ AX_PROG_OPENSHMEM
 ## Check how we hook PMPI
 AX_PMPI_HOOK
 
+## Check whether we have GPI
+AX_PROG_GPI
+
 # Search for libtool support
 AC_LIBTOOL_DLOPEN
 #if test "${MPI_SHARED_LIB_FOUND}" != "yes" ; then
@@ -640,6 +643,7 @@ AC_CONFIG_FILES([
   src/tracer/wrappers/SYSCALL/Makefile \
   src/tracer/wrappers/fork/Makefile \
   src/tracer/wrappers/JAVA/Makefile \
+  src/tracer/wrappers/GPI/Makefile \
   src/tracer/stats/Makefile \
   src/tracer/hwc/Makefile \
   src/tracer/sampling/Makefile \

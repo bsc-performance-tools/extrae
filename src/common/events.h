@@ -647,6 +647,10 @@ enum {
 /* To associate command queue with Paraver thread */
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
+/* GPI-2 events */
+#define GPI_INIT_EV 69000001
+#define GPI_FINI_EV 69999999
+
 
 #define CALLER_EV                70000000
 #define CALLER_LINE_EV           80000000
