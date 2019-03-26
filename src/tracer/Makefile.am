@@ -69,6 +69,10 @@ if WANT_NANOS
 endif
 endif
 
+if HAVE_GPI
+  lib_LTLIBRARIES += libgpitrace.la
+endif
+
 if HAVE_MPI
 if WANT_OPENMP
 if WANT_CUDAorCUPTI
@@ -167,6 +171,9 @@ core_SRCS = \
  $(auto_init_instr_SRCS)                     \
  $(auto_fini_instr_SRCS)                     \
  $(WRAPPERS_CORE)
+
+# GPI trace
+libgpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_GPI)
 
 # CUDA trace
 libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
@@ -362,11 +369,15 @@ ADDITIONAL_MPI_DYNLIBS_F = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpif.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 endif
 
+ADDITIONAL_GPI_LIBS = $(WRAPPERS_LIB)/GPI/libwrap_gpi.la
+
 ADDITIONAL_PTHREAD_LIBS = $(WRAPPERS_LIB)/pthread/libwrap_pthread.la $(PTHREAD_LIBS)
 ADDITIONAL_OPENMP_LIBS = $(WRAPPERS_LIB)/OMP/libwrap_openmp.la
 ADDITIONAL_OPENCL_LIBS = $(WRAPPERS_LIB)/OPENCL/libwrap_opencl.la
 ADDITIONAL_CUDA_LIBS = $(WRAPPERS_LIB)/CUDA/libwrap_cuda.la
 ADDITIONAL_OPENSHMEM_LIBS = $(WRAPPERS_LIB)/openshmem/libwrap_openshmem.la
+
+libgpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_GPI_LIBS) $(SEQUENTIAL_MERGE_LIB)
 
 libcudatrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_CUDA_LIBS) $(SEQUENTIAL_MERGE_LIB)
 libcudampitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
@@ -457,6 +468,7 @@ core_INCLUDES = \
  -I$(WRAPPERS_INC)/IO \
  -I$(WRAPPERS_INC)/SYSCALL \
  -I$(WRAPPERS_INC)/openshmem \
+ -I$(WRAPPERS_INC)/GPI \
  -I$(SAMPLING_DIR)/common \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)
 
@@ -511,6 +523,8 @@ endif
 if OS_ANDROID
 core_CFLAGS += -DHOST_NAME_MAX=255
 endif
+
+libgpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB)
 
 libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
@@ -640,6 +654,8 @@ COMMON_LINKER_FLAGS = \
  $(LDL)\
  $(LIBZ_LINKER_FLAGS) \
  $(MRNET_LINKER_FLAGS)
+
+libgpitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 
 libcudaompitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libcudaompitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
