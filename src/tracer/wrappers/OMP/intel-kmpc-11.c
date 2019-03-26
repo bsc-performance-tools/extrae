@@ -49,6 +49,14 @@
 #include "intel-kmpc-11-intermediate/intel-kmpc-11-intermediate.h"
 #include "intel-kmpc-11-intermediate/intel-kmpc-11-taskloop-helpers.h"
 
+/*
+ * This global variable stores the pointer to the outlined task from the parent thread,
+ * and is queried from the child threads inside the parallel region. FIXME: in order
+ * to support nesting, this should be stored in a tree structure indexed by all ancestor
+ * thread id's.
+ */
+static void *par_func = NULL;
+
 //#define DEBUG
 
 /*                                                                              
@@ -533,12 +541,11 @@ void __kmpc_dispatch_init_4 (void *loc, int gtid, int schedule, int lb, int ub, 
 	if (TRACE(__kmpc_dispatch_init_4_real))
 	{
 		/* 
-		 * Retrieve the outlined function from the parent's thread.
+		 * Retrieve the outlined function.
 		 * This is executed inside a parallel by multiple threads, so the current worker thread 
 		 * retrieves this data from the parent thread who store it at the start of the parallel.
 		 */
-		struct thread_helper_t *thread_helper = get_parent_thread_helper();
-		void *par_uf = thread_helper->par_uf;
+		void *par_uf = par_func;
 #if defined(DEBUG)
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_4: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
@@ -575,12 +582,11 @@ void __kmpc_dispatch_init_8 (void *loc, int gtid, int schedule, long long lb, lo
 	if (TRACE(__kmpc_dispatch_init_8_real))
 	{
 		/* 
-		 * Retrieve the outlined function from the parent's thread.
+		 * Retrieve the outlined function.
 		 * This is executed inside a parallel by multiple threads, so the current worker thread 
 		 * retrieves this data from the parent thread who store it at the start of the parallel.
 		 */
-		struct thread_helper_t *thread_helper = get_parent_thread_helper();
-		void *par_uf = thread_helper->par_uf;
+		void *par_uf = par_func;
 #if defined(DEBUG)
 		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_dispatch_init_8: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
@@ -776,21 +782,20 @@ void __kmpc_fork_call (void *loc, int argc, void *microtask, ...)
 	va_end (ap);
 
 	/* 
-	 * Store the outlined function on this thread's helper. 
+	 * Store the outlined function.
 	 * This corresponds to the start of a parallel region, 
 	 * which is executed by the master thread only.
 	 */
-	struct thread_helper_t *thread_helper = get_thread_helper();
-	thread_helper->par_uf = task_ptr;
+	par_func = task_ptr;
 
 	/* Retrieve handler to the scheduling routine that will call __kmpc_fork_call_real with the correct number of arguments */
 	snprintf(kmpc_parallel_sched_name, sizeof(kmpc_parallel_sched_name), "__kmpc_parallel_sched_%d_args", argc);
 	kmpc_parallel_sched_ptr = (void(*)(void*,int,void*,void*,void **)) dlsym(RTLD_DEFAULT, kmpc_parallel_sched_name);
 	if (kmpc_parallel_sched_ptr == NULL)
 	{
-    fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
+		fprintf (stderr, PACKAGE_NAME": Error! Can't retrieve handler to stub '%s' (%d arguments)! Quitting!\n"
 		                 PACKAGE_NAME":        Recompile Extrae to support this number of arguments!\n"
-										 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
+				 PACKAGE_NAME":        Use src/tracer/wrappers/OMP/genstubs-kmpc-11.sh to do so.\n",
 		                 kmpc_parallel_sched_name, argc);
 		exit (-1);                                                                  
 
@@ -937,13 +942,12 @@ int __kmpc_single (void *loc, int global_tid)
 
 		if (res) /* If the thread entered in the single region, track it */
 		{
-		/* 
-		 * Retrieve the outlined function from the parent's thread.
-		 * This is executed inside a parallel by multiple threads, so the current worker thread 
-		 * retrieves this data from the parent thread who store it at the start of the parallel.
-		 */
-  		struct thread_helper_t *thread_helper = get_parent_thread_helper();
-	  	void *par_uf = thread_helper->par_uf;
+			/* 
+			 * Retrieve the outlined function.
+			 * This is executed inside a parallel by multiple threads, so the current worker thread 
+			 * retrieves this data from the parent thread who store it at the start of the parallel.
+			 */
+		  	void *par_uf = par_func;
 #if defined(DEBUG)
 			fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_single: par_uf=%p\n ", THREAD_LEVEL_VAR, par_uf);
 #endif
@@ -1469,9 +1473,7 @@ int _extrae_intel_kmpc_init(int rank)
 {
 	preallocate_kmpc_helpers();
 
-	allocate_nested_helpers();
-
-  return intel_kmpc_get_hook_points(rank);
+	return intel_kmpc_get_hook_points(rank);
 }
 
 #endif /* PIC */

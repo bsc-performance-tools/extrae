@@ -52,76 +52,6 @@
 
 // #define DEBUG
 
-/******************************************************************************\
- *                                                                            * 
- *                                  HELPERS                                   * 
- *                                                                            * 
- ****************************************************************************** 
- * The following helper structures are used to pass information from the      *
- * master thread that opens a parallel, to the worker threads that run the    *
- * parallel constructs (for, do...). These is a generic structure that holds  *
- * data for the different runtimes, each runtime fills their respective       *
- * fields.                                                                    *
-\******************************************************************************/
-
-/*
- * A matrix indexed by thread id and nesting level to store helper data 
- */
-struct thread_helper_t **__omp_nested_storage = NULL;
-
-/**
- * allocate_nested_helpers
- *
- * Allocates a matrix indexed by thread id and nesting level so that master 
- * threads can store helper data that needs to be later retrieved by worker 
- * threads in a deeper nesting level.
- */
-void allocate_nested_helpers()
-{
-	int i = 0, j = 0;
-
-	if (__omp_nested_storage == NULL)
-	{
-		__omp_nested_storage = (struct thread_helper_t **)malloc(omp_get_max_threads() * sizeof(struct thread_helper_t *));
-		for (i=0; i<omp_get_max_threads(); i++)
-		{
-			__omp_nested_storage[i] = (struct thread_helper_t *)malloc((MAX_NESTING_LEVEL + 1) * sizeof(struct thread_helper_t));
-			for (j=0; j<=MAX_NESTING_LEVEL; j++)
-			{
-				__omp_nested_storage[i][j].par_uf = NULL;
-			}
-		}
-	}
-}
-
-/**
- * get_thread_helper
- *
- * @return the adress of the helper to store data for the current thread 
- * in the current nesting level.
- */
-struct thread_helper_t * get_thread_helper()
-{
-	int thread_id = THREADID;
-	int nesting_level = omp_get_level();
-
-	return &(__omp_nested_storage[thread_id][nesting_level]);
-}
-
-/**
- * get_parent_thread_helper
- *
- * @return the address of the helper that stores data for the current's thread
- * parent in the previous nesting level.
- */
-struct thread_helper_t * get_parent_thread_helper()
-{
-	int nesting_level = omp_get_level();
-	int parent_level = nesting_level - 1;
-	int parent_id = omp_get_ancestor_thread_num(parent_level);
-
-	return &(__omp_nested_storage[parent_id][parent_level]);
-}
 
 /******************************************************************************\
  *                                                                            * 
@@ -173,8 +103,6 @@ void Extrae_OpenMP_init(int me)
 	int intel_hooked = FALSE;
 	int gnu_hooked = FALSE;
 	int hooked = 0;
-
-	allocate_nested_helpers();
 
 # if defined(OS_LINUX) && defined(ARCH_PPC) && defined(IBM_OPENMP)
 	/*

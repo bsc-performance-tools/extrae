@@ -65,21 +65,6 @@ extern int omp_get_ancestor_thread_num(int level);
 #define THREAD_LEVEL_LBL " [THD:%d LVL:%d] "                                    
 #define THREAD_LEVEL_VAR THREADID, omp_get_level()                              
 
-/*
- * This helper structure is used to pass information 
- * from master threads at the start of the parallel region to
- * worker threads in a deeper nesting level.
- */
-struct thread_helper_t
-{
-	  void *par_uf;
-};
-
-struct thread_helper_t * get_thread_helper();
-struct thread_helper_t * get_parent_thread_helper();
-
 void Extrae_OpenMP_init(int me);
-
-void allocate_nested_helpers();
 
 #endif /* OMP_COMMON_H_ */

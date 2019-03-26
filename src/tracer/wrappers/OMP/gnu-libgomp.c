@@ -2971,8 +2971,6 @@ int _extrae_gnu_libgomp_init (int rank)
 {
 	preallocate_GOMP_helpers();
 
-	allocate_nested_helpers();
-
 	return gnu_libgomp_get_hook_points (rank);
 }
 
