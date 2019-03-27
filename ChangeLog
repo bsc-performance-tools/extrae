@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 26Mar2019 Installs Python modules only if their support is enabled by `configure`
  * 26Mar2019 Fixes bug in configure mis-detecting libiberty even if it is not available (closes #7)
  - 26Mar2019 Reverts partial support for nested OpenMP in Intel KMPC runtime
  + 26Mar2019 Adds instrumentation support for Mprobe, Improbe, Mrecv, Imrecv 

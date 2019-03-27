@@ -38,17 +38,6 @@ endif
 ### pyextrae ###
 ################
 
-EXTRA_DIST = \
-  pyextrae/__init__.py \
-  pyextrae/cuda/__init__.py \
-  pyextrae/mpi/__init__.py \
-  pyextrae/multiprocessing/__init__.py \
-  pyextrae/profile/__init__.py \
-  pyextrae/pthreads/__init__.py \
-  pyextrae/sequential/__init__.py \
-  pyextrae/common/__init__.py \
-  pyextrae/common/extrae.py.in
-
 install-data-hook:
 	cp pyextrae/common/extrae.py.in pyextrae/common/extrae.py
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} pyextrae/common/extrae.py
@@ -60,7 +49,20 @@ install-data-hook:
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_neventandcounters@" Extrae_nevent pyextrae/common/extrae.py
 #endif
 	mkdir -p $(DESTDIR)$(libexecdir)/pyextrae
-	cp -rL pyextrae/* $(DESTDIR)$(libexecdir)/pyextrae
+	cp -rL pyextrae/common $(DESTDIR)$(libexecdir)/pyextrae
+	cp -rL pyextrae/multiprocessing $(DESTDIR)$(libexecdir)/pyextrae
+	cp -rL pyextrae/profile $(DESTDIR)$(libexecdir)/pyextrae
+	cp -rL pyextrae/sequential $(DESTDIR)$(libexecdir)/pyextrae
+if HAVE_MPI
+	cp -rL pyextrae/mpi $(DESTDIR)$(libexecdir)/pyextrae
+endif
+if WANT_CUDAorCUPTI
+	cp -rL pyextrae/cuda $(DESTDIR)$(libexecdir)/pyextrae
+endif
+if WANT_PTHREAD
+	cp -rL pyextrae/pthreads $(DESTDIR)$(libexecdir)/pyextrae
+endif
+
 	rm $(DESTDIR)$(libexecdir)/pyextrae/common/extrae.py.in
 
 CLEANFILES = pyextrae/common/extrae.py

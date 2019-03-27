@@ -710,12 +710,15 @@ AC_CONFIG_LINKS([tests/functional/helper_functions.bash:tests/functional/helper_
 		[example/LINUX/MPI/extrae_bursts_1ms.xml:example/LINUX/MPI/extrae_bursts_1ms.xml] \
 		[example/LINUX/MPI/extrae_explained.xml:example/LINUX/MPI/extrae_explained.xml] \
 		[example/LINUX/MPI/summarized_trace_basic.xml:example/LINUX/MPI/summarized_trace_basic.xml] \
-		[src/others/pyextrae/multiprocessing/__init__.py:src/others/pyextrae/multiprocessing/__init__.py:] \
 		[src/others/pyextrae/__init__.py:src/others/pyextrae/__init__.py] \
-		[src/others/pyextrae/sequential/__init__.py:src/others/pyextrae/sequential/__init__.py] \
-		[src/others/pyextrae/mpi/__init__.py:src/others/pyextrae/mpi/__init__.py] \
 		[src/others/pyextrae/common/extrae.py.in:src/others/pyextrae/common/extrae.py.in] \
-		[src/others/pyextrae/common/__init__.py:src/others/pyextrae/common/__init__.py]
+		[src/others/pyextrae/common/__init__.py:src/others/pyextrae/common/__init__.py] \
+		[src/others/pyextrae/cuda/__init__.py:src/others/pyextrae/cuda/__init__.py] \
+		[src/others/pyextrae/mpi/__init__.py:src/others/pyextrae/mpi/__init__.py] \
+		[src/others/pyextrae/multiprocessing/__init__.py:src/others/pyextrae/multiprocessing/__init__.py:] \
+		[src/others/pyextrae/profile/__init__.py:src/others/pyextrae/profile/__init__.py:] \
+		[src/others/pyextrae/pthreads/__init__.py:src/others/pyextrae/pthreads/__init__.py:] \
+		[src/others/pyextrae/sequential/__init__.py:src/others/pyextrae/sequential/__init__.py] \
 		[docs/source/conf.py:docs/source/conf.py] \
 		[docs/source/index.rst:docs/source/index.rst] \
 		[docs/source/quick-guide.rst:docs/source/quick-guide.rst] \
