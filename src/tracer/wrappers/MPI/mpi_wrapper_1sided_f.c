@@ -294,7 +294,7 @@ void MPI_Win_flush_Fortran_Wrapper (MPI_Fint *rank, MPI_Fint *win, MPI_Fint *ier
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_EV, EVT_BEGIN, *rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush) (rank, win, ierror);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_EV, EVT_BEGIN, EMPTY, EMPTY,
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
@@ -305,7 +305,7 @@ void MPI_Win_flush_all_Fortran_Wrapper (MPI_Fint *win, MPI_Fint *ierror)
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush_all) (win, ierror);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_ALL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
@@ -316,7 +316,7 @@ void MPI_Win_flush_local_Fortran_Wrapper (MPI_Fint *rank, MPI_Fint *win, MPI_Fin
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_EV, EVT_BEGIN, *rank, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush_local) (rank, win, ierror);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_EV, EVT_BEGIN, EMPTY, EMPTY,
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
@@ -327,7 +327,7 @@ void MPI_Win_flush_local_all_Fortran_Wrapper (MPI_Fint *win, MPI_Fint *ierror)
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 	CtoF77(pmpi_win_flush_local_all) (win, ierror);
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_BEGIN, EMPTY, EMPTY,
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WIN_FLUSH_LOCAL_ALL_EV, EVT_END, EMPTY, EMPTY,
 	  EMPTY, EMPTY, EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
