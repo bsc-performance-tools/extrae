@@ -292,11 +292,14 @@ void *calloc (size_t nmemb, size_t size)
         if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
 
 	if (real_calloc == NULL)
+	{
 		if (__in_calloc_depth == 1)
 		{
 			real_calloc = EXTRAE_DL_INIT (__func__);
 		} else if (__in_calloc_depth == 2)
 		{
+			int i = 0;
+
 			/* Check if the requested size fits in the static buffer */
 			if ((nmemb*size) > DLSYM_CALLOC_SIZE)
 			{
@@ -308,7 +311,7 @@ void *calloc (size_t nmemb, size_t size)
 			}
 
 			/* Zero static buffer before returning it */
-			for (int i = 0; i<DLSYM_CALLOC_SIZE; i++)
+			for (i = 0; i<DLSYM_CALLOC_SIZE; i++)
 			{
 				extrae_dlsym_static_buffer[i] = 0;
 			}
@@ -322,6 +325,7 @@ void *calloc (size_t nmemb, size_t size)
 			abort();
 
 		}
+	}
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME": calloc is at %p\n", real_calloc);
