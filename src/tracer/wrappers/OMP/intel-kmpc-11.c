@@ -87,6 +87,9 @@ static void (*__kmpc_barrier_real)(void*,int) = NULL;
 static void (*__kmpc_critical_real)(void*,int,void*) = NULL;
 static void (*__kmpc_end_critical_real)(void*,int,void*) = NULL;
 
+static void (*__kmpc_set_lock_real)(void *, int, void **) = NULL;
+static void (*__kmpc_unset_lock_real)(void *, int, void **) = NULL;
+
 static void (*__kmpc_dispatch_init_4_real)(void*,int,int,int,int,int,int) = NULL;
 static void (*__kmpc_dispatch_init_8_real)(void*,int,int,long long,long long,long long,long long) = NULL;
 static int (*__kmpc_dispatch_next_4_real)(void*,int,int*,int*,int*,int*) = NULL;
@@ -527,6 +530,64 @@ void __kmpc_end_critical (void *loc, int global_tid, void *crit)
 
 #if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_end_critical exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
+void __kmpc_set_lock(void *loc, int gtid, void **user_lock)
+{
+//#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_set_lock enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_set_lock_real, loc, gtid, user_lock);
+//#endif
+
+	RECHECK_INIT(__kmpc_set_lock_real);
+
+	if (TRACE(__kmpc_set_lock_real))
+	{
+		Extrae_OpenMP_Named_Lock_Entry();
+		__kmpc_set_lock_real(loc, gtid, user_lock);
+		Extrae_OpenMP_Named_Lock_Exit(user_lock);
+	}
+	else if (__kmpc_set_lock_real != NULL)
+	{
+		__kmpc_set_lock_real(loc, gtid, user_lock);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_set_lock: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+//#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_set_lock exit\n ", THREAD_LEVEL_VAR);
+//#endif
+}
+
+void __kmpc_unset_lock(void *loc, int gtid, void **user_lock)
+{
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_unset_lock enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_unset_lock_real, loc, gtid, user_lock);
+#endif
+
+	RECHECK_INIT(__kmpc_unset_lock_real);
+
+	if (TRACE(__kmpc_unset_lock_real))
+	{
+		Extrae_OpenMP_Named_Unlock_Entry(user_lock);
+		__kmpc_unset_lock_real(loc, gtid, user_lock);
+		Extrae_OpenMP_Named_Unlock_Exit();
+	}
+	else if (__kmpc_unset_lock_real != NULL)
+	{
+		__kmpc_unset_lock_real(loc, gtid, user_lock);
+	}
+	else
+	{
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_unset_lock: ERROR! This function is not hooked! Exiting!!\n ", THREAD_LEVEL_VAR);
+		exit (-1);
+	}
+
+#if defined(DEBUG)
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_unset_lock exit\n ", THREAD_LEVEL_VAR);
 #endif
 }
 
@@ -1354,6 +1415,18 @@ static int intel_kmpc_get_hook_points (int rank)
 		(void(*)(void*,int,void*))
 		dlsym (RTLD_NEXT, "__kmpc_end_critical");
 	INC_IF_NOT_NULL(__kmpc_end_critical_real,count);
+
+	/* Obtain @ for __kmpc_set_lock */
+	__kmpc_set_lock_real =
+	    (void(*)(void*, int, void **))
+	    dlsym(RTLD_NEXT, "__kmpc_set_lock");
+	INC_IF_NOT_NULL(__kmpc_set_lock_real, count);
+
+	/* Obtain @ for __kmpc_unset_lock */
+	__kmpc_unset_lock_real =
+	    (void(*)(void*, int, void **))
+	    dlsym(RTLD_NEXT, "__kmpc_unset_lock");
+	INC_IF_NOT_NULL(__kmpc_unset_lock_real, count);
 
 	/* Obtain @ for __kmpc_dispatch_init_4 */
 	__kmpc_dispatch_init_4_real =

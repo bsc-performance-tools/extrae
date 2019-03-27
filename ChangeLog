@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ + 27Mar2019 Adds missing user_lock routines in kmp runtime
  * 27Mar2019 Removes warnings for ambiguous `if` and non-std99 compliant `for`
  * 27Mar2019 Fixes incorrect states for MPI_Win_flush_* calls
  * 27Mar2019 Breaks infinite loop in signal handler (closes #19)
