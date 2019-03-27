@@ -51,6 +51,7 @@
  * ----------------------------------------------------------------------- */
 
 int sigInhibited = FALSE;
+unsigned int flushTrials = 0;
 
 void Signals_Inhibit()
 {
@@ -94,7 +95,15 @@ void SigHandler_FlushAndTerminate (int signum)
 		fprintf (stderr, PACKAGE_NAME": Attention! Signal %d caught. Notifying to flush buffers whenever possible.\n",
 		  signum);
 #endif
-		Deferred_Signal_FlushAndTerminate = 1;
+		if (flushTrials <= 10)
+		{
+			Deferred_Signal_FlushAndTerminate = 1;
+			flushTrials++;
+		} else
+		{
+			Backend_Finalize();
+			exit(0);
+		}
 	}
 }
 
