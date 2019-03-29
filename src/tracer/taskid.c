@@ -57,12 +57,12 @@ static unsigned xtr_set_taskid ()
 	unsigned int NUM_ENVVARS = 6;
 	char *envvars[] =
 	{
-		"SLURM_PROCID",
 		"OMPI_COMM_WORLD_RANK",
 		"MV2_COMM_WORLD_RANK",
 		"PMI_RANK",
 		"MPI_RANKID",
-		"MP_CHILD"
+		"MP_CHILD",
+		"SLURM_PROCID"
 	};
 
 	unsigned int i = 0;

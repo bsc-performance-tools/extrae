@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 29Mar2019 Changes order in which MPI env vars are checked to discover process' task id during auto init
  + 27Mar2019 Adds missing user_lock routines in kmp runtime
  * 27Mar2019 Removes warnings for ambiguous `if` and non-std99 compliant `for`
  * 27Mar2019 Fixes incorrect states for MPI_Win_flush_* calls
