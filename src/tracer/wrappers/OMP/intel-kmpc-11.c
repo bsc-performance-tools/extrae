@@ -112,6 +112,8 @@ static void (*__kmpc_taskloop_real)(void*,int,void*,int,void*,void*,long,int,int
 static void (*__kmpc_taskgroup_real)(void *, int) = NULL;
 static void (*__kmpc_end_taskgroup_real)(void *, int) = NULL;
 
+static void (*__kmpc_push_num_threads_real)(void *, int, int) = NULL;
+
 
 /******************************************************************************\
  *                                                                            *
@@ -413,36 +415,41 @@ void helper__kmpc_taskloop_substitute (int arg, void *wrap_task, int helper_id)
  *                                                                            *
 \******************************************************************************/
 
-void ompc_set_num_threads (int arg)
+void
+ompc_set_num_threads(int num_threads)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": ompc_set_num_threads enter: @=%p args=(%d)\n", ompc_set_num_threads_real, arg);
+	fprintf(stderr, PACKAGE_NAME": ompc_set_num_threads enter: @=%p num_threads=(%d)\n",
+	    ompc_set_num_threads_real, num_threads);
 #endif
 
 	RECHECK_INIT(ompc_set_num_threads_real);
 
 	if (TRACE(ompc_set_num_threads_real))
 	{
-		Backend_ChangeNumberOfThreads (arg);
+		/*
+		 * Change number of threads only if in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Backend_Enter_Instrumentation ();
-		Probe_OpenMP_SetNumThreads_Entry (arg);
-		ompc_set_num_threads_real (arg);
-		Probe_OpenMP_SetNumThreads_Exit ();
-		Backend_Leave_Instrumentation ();
+		Backend_Enter_Instrumentation();
+		Probe_OpenMP_SetNumThreads_Entry(num_threads);
+		ompc_set_num_threads_real(num_threads);
+		Probe_OpenMP_SetNumThreads_Exit();
+		Backend_Leave_Instrumentation();
 	}
 	else if (ompc_set_num_threads_real != NULL)
 	{
-		ompc_set_num_threads_real (arg);
+		ompc_set_num_threads_real(num_threads);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": ompc_set_num_threads: ERROR! This function is not hooked! Exiting!!\n");
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME": ompc_set_num_threads: ERROR! This function is not hooked! Exiting!!\n");
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": ompc_set_num_threads exit\n");
+	fprintf(stderr, PACKAGE_NAME": ompc_set_num_threads exit\n");
 #endif
 }
 
@@ -535,9 +542,9 @@ void __kmpc_end_critical (void *loc, int global_tid, void *crit)
 
 void __kmpc_set_lock(void *loc, int gtid, void **user_lock)
 {
-//#if defined(DEBUG)
+#if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_set_lock enter: @=%p args=(%p %d %p)\n ", THREAD_LEVEL_VAR, __kmpc_set_lock_real, loc, gtid, user_lock);
-//#endif
+#endif
 
 	RECHECK_INIT(__kmpc_set_lock_real);
 
@@ -557,9 +564,9 @@ void __kmpc_set_lock(void *loc, int gtid, void **user_lock)
 		exit (-1);
 	}
 
-//#if defined(DEBUG)
+#if defined(DEBUG)
 	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "__kmpc_set_lock exit\n ", THREAD_LEVEL_VAR);
-//#endif
+#endif
 }
 
 void __kmpc_unset_lock(void *loc, int gtid, void **user_lock)
@@ -1370,6 +1377,47 @@ __kmpc_end_taskgroup(void *loc, int global_tid)
 
 }
 
+void
+__kmpc_push_num_threads(void *loc, int global_tid, int num_threads)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "__kmpc_push_num_threads enter: @=%p args=(%p %d %d)\n ",
+	    THREAD_LEVEL_VAR, __kmpc_push_num_threads_real, loc, global_tid, num_threads);
+#endif
+
+	RECHECK_INIT(__kmpc_push_num_threads_real);
+
+	if (TRACE(__kmpc_push_num_threads_real))
+	{
+		/*
+		 * Change number of threads only if in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
+
+		Backend_Enter_Instrumentation();
+		Probe_OpenMP_SetNumThreads_Entry(num_threads);
+		__kmpc_push_num_threads_real(loc, global_tid, num_threads);
+		Probe_OpenMP_SetNumThreads_Exit();
+		Backend_Leave_Instrumentation();
+	}
+	else if (__kmpc_push_num_threads_real != NULL)
+	{
+		__kmpc_push_num_threads(loc, global_tid, num_threads);
+	}
+	else
+	{
+		fprintf(stderr, PACKAGE_NAME
+		    ": __kmpc_push_num_threads: ERROR! This function is not hooked! Exiting!!\n");
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "__kmpc_push_num_threads exit\n ", THREAD_LEVEL_VAR);
+#endif
+}
+
 /******************************************************************************\
  *                                                                            *
  *                             INITIALIZATIONS                                *
@@ -1512,6 +1560,11 @@ static int intel_kmpc_get_hook_points (int rank)
 	__kmpc_end_taskgroup_real = (void(*)(void *, int))
 	    dlsym(RTLD_NEXT, "__kmpc_end_taskgroup");
 	INC_IF_NOT_NULL(__kmpc_end_taskgroup_real, count);
+
+	/* Obtain @ or __kmpc_push_num_threads */
+	__kmpc_push_num_threads_real = (void(*)(void *, int, int))
+	    dlsym(RTLD_NEXT, "__kmpc_push_num_threads");
+	INC_IF_NOT_NULL(__kmpc_push_num_threads_real, count);
 
 	/* Any hook point? */
 	return count > 0;

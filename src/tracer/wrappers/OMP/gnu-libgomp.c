@@ -147,6 +147,8 @@ static void (*GOMP_parallel_loop_dynamic_real)(void*, void*, unsigned, long, lon
 static void (*GOMP_parallel_loop_guided_real)(void*, void*, unsigned, long, long, long, long, unsigned) = NULL;
 static void (*GOMP_parallel_loop_runtime_real)(void*, void*, unsigned, long, long, long, unsigned) = NULL;
 
+static void (*GOMP_parallel_sections_real)(void *, void *, unsigned, unsigned, unsigned) = NULL;
+
 static void (*GOMP_taskgroup_start_real)(void) = NULL;
 static void (*GOMP_taskgroup_end_real)(void) = NULL;
 
@@ -428,7 +430,6 @@ static void callme_parsections (void *parsections_helper_ptr)
 	parsections_helper->fn (parsections_helper->data);
 	Backend_setInInstrumentation (THREADID, TRUE); /* We're about to execute OpenMP code */
 	Extrae_OpenMP_UF_Exit ();
-	Extrae_OpenMP_ParSections_Exit(); 
 }
 
 static void callme_pardo (void *pardo_helper_ptr)
@@ -448,7 +449,7 @@ static void callme_pardo (void *pardo_helper_ptr)
 	Extrae_OpenMP_DO_Entry ();
 	Extrae_OpenMP_UF_Entry (pardo_helper->fn);
 	Backend_setInInstrumentation (THREADID, FALSE); /* We're about to execute user code */
-  pardo_helper->fn (pardo_helper->data);
+	pardo_helper->fn (pardo_helper->data);
 	Backend_setInInstrumentation (THREADID, TRUE); /* We're about to execute OpenMP code */
 	Extrae_OpenMP_UF_Exit ();
 }
@@ -1394,11 +1395,16 @@ int GOMP_loop_ordered_runtime_next (long *istart, long *iend)
 	return res;
 }
 
-void GOMP_parallel_loop_static_start (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+void
+GOMP_parallel_loop_static_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_static_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_static_start_real, fn, data, num_threads, start, end, incr, chunk_size);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_static_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_static_start_real, fn, data, num_threads, start, end, incr, chunk_size);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_static_start_real);
 
@@ -1406,34 +1412,58 @@ void GOMP_parallel_loop_static_start (void (*fn)(void *), void *data, unsigned n
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_static_start_real (callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
-		Extrae_OpenMP_ParDO_Exit ();	
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this? */
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_static_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
+
+		/*
+		 * The master thread continues the execution and then calls fn
+		 */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
+		{
+			Extrae_OpenMP_DO_Entry ();
+			Extrae_OpenMP_UF_Entry(fn);
+		}
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_static_start_real != NULL)
 	{
-		GOMP_parallel_loop_static_start_real (fn, data, num_threads, start, end, incr, chunk_size);
+		GOMP_parallel_loop_static_start_real(fn, data, num_threads, start, end, incr, chunk_size);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_static_start: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_static_start: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_static_start exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_static_start exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_loop_dynamic_start (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+void
+GOMP_parallel_loop_dynamic_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_dynamic_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_dynamic_start_real, fn, data, num_threads, start, end, incr, chunk_size);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_dynamic_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_dynamic_start_real, fn, data, num_threads, start, end, incr, chunk_size);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_dynamic_start_real);
 
@@ -1441,34 +1471,58 @@ void GOMP_parallel_loop_dynamic_start (void (*fn)(void *), void *data, unsigned 
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_dynamic_start_real (callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
-		Extrae_OpenMP_ParDO_Exit ();	
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this? */
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_dynamic_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
+
+		/*
+		 * The master thread continues the execution and then calls fn
+		 */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
+		{
+			Extrae_OpenMP_DO_Entry ();
+			Extrae_OpenMP_UF_Entry(fn);
+		}
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_dynamic_start_real != NULL)
 	{
-		GOMP_parallel_loop_dynamic_start_real (fn, data, num_threads, start, end, incr, chunk_size);
+		GOMP_parallel_loop_dynamic_start_real(fn, data, num_threads, start, end, incr, chunk_size);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_dynamic_start: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_dynamic_start: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_dynamic_start exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_dynamic_start exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_loop_guided_start (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
+void
+GOMP_parallel_loop_guided_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_guided_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_guided_start_real, fn, data, num_threads, start, end, incr, chunk_size);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_guided_start enter: @=%p args=(%p %p %u %ld %ld %ld %ld)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_guided_start_real, fn, data, num_threads, start, end, incr, chunk_size);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_guided_start_real);
 
@@ -1476,34 +1530,58 @@ void GOMP_parallel_loop_guided_start (void (*fn)(void *), void *data, unsigned n
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_guided_start_real (callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
-		Extrae_OpenMP_ParDO_Exit ();	
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this? */
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_guided_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size);
+
+		/*
+		 * The master thread continues the execution and then calls fn
+		 */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
+		{
+			Extrae_OpenMP_DO_Entry ();
+			Extrae_OpenMP_UF_Entry(fn);
+		}
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_guided_start_real != NULL)
 	{
-		GOMP_parallel_loop_guided_start_real (fn, data, num_threads, start, end, incr, chunk_size);
+		GOMP_parallel_loop_guided_start_real(fn, data, num_threads, start, end, incr, chunk_size);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_guided_start: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_guided_start: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_guided_start exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_guided_start exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_loop_runtime_start (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr)
+void
+GOMP_parallel_loop_runtime_start(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_runtime_start enter: @=%p args=(%p %p %u %ld %ld %ld)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_runtime_start_real, fn, data, num_threads, start, end, incr);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_runtime_start enter: @=%p args=(%p %p %u %ld %ld %ld)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_runtime_start_real, fn, data, num_threads, start, end, incr);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_runtime_start_real);
 
@@ -1511,26 +1589,45 @@ void GOMP_parallel_loop_runtime_start (void (*fn)(void *), void *data, unsigned 
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_runtime_start_real (callme_pardo, pardo_helper, num_threads, start, end, incr);
-		Extrae_OpenMP_ParDO_Exit ();	
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this? */
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_runtime_start_real(callme_pardo, pardo_helper, num_threads, start, end, incr);
+
+		/*
+		 * The master thread continues the execution and then calls fn
+		 */
 		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
+		{
+			Extrae_OpenMP_DO_Entry ();
+			Extrae_OpenMP_UF_Entry(fn);
+		}
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_runtime_start_real != NULL)
 	{
-		GOMP_parallel_loop_runtime_start_real (fn, data, num_threads, start, end, incr);
+		GOMP_parallel_loop_runtime_start_real(fn, data, num_threads, start, end, incr);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_runtime_start: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_runtime_start: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_runtime_start exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_runtime_start exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
@@ -1652,10 +1749,13 @@ void GOMP_ordered_end (void)
 #endif
 }
 
-void GOMP_parallel_start (void (*fn)(void *), void *data, unsigned num_threads)
+void
+GOMP_parallel_start(void (*fn)(void *), void *data, unsigned num_threads)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_start enter: @=%p args=(%p %p %u)\n", THREAD_LEVEL_VAR, GOMP_parallel_start_real, fn, data, num_threads);
+	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_start enter: @=%p args=(%p %p %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_start_real, fn, data, num_threads);
 #endif
 
 	RECHECK_INIT(GOMP_parallel_start_real);
@@ -1663,8 +1763,14 @@ void GOMP_parallel_start (void (*fn)(void *), void *data, unsigned num_threads)
 	if (TRACE(GOMP_parallel_start_real))
 	{
 		SAVE_PARALLEL_UF(fn);
-		
+
 		void *par_helper = __GOMP_new_helper(fn, data);
+
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
 		Extrae_OpenMP_ParRegion_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
@@ -1673,57 +1779,76 @@ void GOMP_parallel_start (void (*fn)(void *), void *data, unsigned num_threads)
 
 		/* GCC/libgomp does not execute callme_par per root thread, emit
 		   the required event here - call Backend to get a new time! */
-		Extrae_OpenMP_UF_Entry (fn);
+		Extrae_OpenMP_UF_Entry(fn);
 	}
 	else if (GOMP_parallel_start_real != NULL)
 	{
-		GOMP_parallel_start_real (fn, data, num_threads);
+		GOMP_parallel_start_real(fn, data, num_threads);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_start: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_start: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_start exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_start exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_end (void)
+void
+GOMP_parallel_end(void)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_end enter: @=%p\n", THREAD_LEVEL_VAR, GOMP_parallel_end_real);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_end enter: @=%p\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_end_real);
 #endif
 
 	RECHECK_INIT(GOMP_parallel_end_real);
 
 	if (TRACE(GOMP_parallel_end_real))
 	{
-		Extrae_OpenMP_UF_Exit ();
-		GOMP_parallel_end_real ();
+		Extrae_OpenMP_UF_Exit();
+		GOMP_parallel_end_real();
 		Extrae_OpenMP_ParRegion_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_end_real != NULL)
 	{
-		GOMP_parallel_end_real ();
+		GOMP_parallel_end_real();
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_end: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_end: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_end exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_end exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_sections_start (void (*fn)(void *), void *data, unsigned num_threads, unsigned count)
+void
+GOMP_parallel_sections_start(void (*fn)(void *), void *data, unsigned num_threads, unsigned count)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_sections_start enter: @=%p args=(%p %p %u %u)\n", THREAD_LEVEL_VAR, GOMP_sections_start_real, fn, data, num_threads, count);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_sections_start enter: @=%p args=(%p %p %u %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_sections_start_real, fn, data, num_threads, count);
 #endif
 
 	RECHECK_INIT(GOMP_parallel_sections_start_real);
@@ -1732,27 +1857,36 @@ void GOMP_parallel_sections_start (void (*fn)(void *), void *data, unsigned num_
 	{
 		void *parsections_helper = __GOMP_new_helper(fn, data);
 
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
+
 		Extrae_OpenMP_ParSections_Entry();
-		GOMP_parallel_sections_start_real (callme_parsections, parsections_helper, num_threads, count);
+		GOMP_parallel_sections_start_real(callme_parsections, parsections_helper, num_threads, count);
 
 		/* The master thread continues the execution and then calls parsections_helper->fn */
 		if (THREADID == 0)
 		{
-			Extrae_OpenMP_UF_Entry (fn);
+			Extrae_OpenMP_UF_Entry(fn);
 		}
 	}
 	else if (GOMP_parallel_sections_start_real != NULL)
 	{
-		GOMP_parallel_sections_start_real (fn, data, num_threads, count);
+		GOMP_parallel_sections_start_real(fn, data, num_threads, count);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_sections_start: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_sections_start: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_sections_start exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_sections_start exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
@@ -1945,11 +2079,16 @@ void GOMP_taskwait (void)
 /***** Added (or changed) in OpenMP 4.0 *****/
 /********************************************/
 
-void GOMP_parallel (void (*fn)(void *), void *data, unsigned num_threads, unsigned int flags)
+void
+GOMP_parallel(void (*fn)(void *), void *data, unsigned num_threads, unsigned int flags)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel enter: @=%p args=(%p %p %u %u)\n", THREAD_LEVEL_VAR, GOMP_parallel_real, fn, data, num_threads, flags);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel enter: @=%p args=(%p %p %u %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_real, fn, data, num_threads, flags);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_real);
 
@@ -1957,10 +2096,19 @@ void GOMP_parallel (void (*fn)(void *), void *data, unsigned num_threads, unsign
 	{
 		SAVE_PARALLEL_UF(fn);
 
-		/* GOMP_parallel has an implicit join, so when we return, the helpers can be
-		 * freed, so rather than using the static array of active helpers, we
-		 * statically declare a private helper and pass it by reference.
-		void *par_helper = __GOMP_new_helper(fn, data); */
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
+
+		/*
+		 * GOMP_parallel has an implicit join, so when we return, the helpers
+		 * can be freed, so rather than using the static array of active
+		 * helpers, we statically declare a private helper and pass it by
+		 * reference.
+		 * void *par_helper = __GOMP_new_helper(fn, data);
+		 */
 		struct parallel_helper_t par_helper;
 		par_helper.fn = fn;
 		par_helper.data = data;
@@ -1968,31 +2116,44 @@ void GOMP_parallel (void (*fn)(void *), void *data, unsigned num_threads, unsign
 		Extrae_OpenMP_ParRegion_Entry();
 		Extrae_OpenMP_EmitTaskStatistics();
 
-		GOMP_parallel_real (callme_par, &par_helper, num_threads, flags);
+		GOMP_parallel_real(callme_par, &par_helper, num_threads, flags);
 
 		Extrae_OpenMP_ParRegion_Exit();
 		Extrae_OpenMP_EmitTaskStatistics();
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_real != NULL)
 	{
-		GOMP_parallel_real (fn, data, num_threads, flags);
+		GOMP_parallel_real(fn, data, num_threads, flags);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_loop_static (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+void
+GOMP_parallel_loop_static(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_static enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_static_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_static enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_static_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_static_real);
 
@@ -2000,35 +2161,50 @@ void GOMP_parallel_loop_static (void (*fn)(void *), void *data, unsigned num_thr
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_static_real (callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
-		Extrae_OpenMP_ParDO_Exit ();	
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this?
-		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
-		*/
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_static_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
+		Extrae_OpenMP_ParDO_Exit();
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_static_real != NULL)
 	{
-		GOMP_parallel_loop_static_real (fn, data, num_threads, start, end, incr, chunk_size, flags);
+		GOMP_parallel_loop_static_real(fn, data, num_threads, start, end, incr, chunk_size, flags);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_static: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_static: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_static exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_static exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_loop_dynamic (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+void
+GOMP_parallel_loop_dynamic(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_dynamic enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_dynamic_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_dynamic enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_dynamic_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_dynamic_real);
 
@@ -2036,23 +2212,32 @@ void GOMP_parallel_loop_dynamic (void (*fn)(void *), void *data, unsigned num_th
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_dynamic_real (callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
-		Extrae_OpenMP_ParDO_Exit ();
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this?
-		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
-			*/
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_dynamic_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
+		Extrae_OpenMP_ParDO_Exit();
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_dynamic_real != NULL)
 	{
-		GOMP_parallel_loop_dynamic_real (fn, data, num_threads, start, end, incr, chunk_size, flags);
+		GOMP_parallel_loop_dynamic_real(fn, data, num_threads, start, end, incr, chunk_size, flags);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_dynamic: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_dynamic: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
@@ -2060,11 +2245,16 @@ void GOMP_parallel_loop_dynamic (void (*fn)(void *), void *data, unsigned num_th
 #endif
 }
 
-void GOMP_parallel_loop_guided (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
+void
+GOMP_parallel_loop_guided(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, long chunk_size, unsigned flags)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_guided enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_guided_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_guided enter: @=%p args=(%p %p %u %ld %ld %ld %ld %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_guided_real, fn, data, num_threads, start, end, incr, chunk_size, flags);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_guided_real);
 
@@ -2072,35 +2262,50 @@ void GOMP_parallel_loop_guided (void (*fn)(void *), void *data, unsigned num_thr
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_guided_real (callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
-		Extrae_OpenMP_ParDO_Exit ();	
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this?
-		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
-		*/
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_guided_real(callme_pardo, pardo_helper, num_threads, start, end, incr, chunk_size, flags);
+		Extrae_OpenMP_ParDO_Exit();
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_guided_real != NULL)
 	{
-		GOMP_parallel_loop_guided_real (fn, data, num_threads, start, end, incr, chunk_size, flags);
+		GOMP_parallel_loop_guided_real(fn, data, num_threads, start, end, incr, chunk_size, flags);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_guided: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_guided: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_guided exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_guided exit\n", THREAD_LEVEL_VAR);
 #endif
 }
 
-void GOMP_parallel_loop_runtime (void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags)
+void
+GOMP_parallel_loop_runtime(void (*fn)(void *), void *data, unsigned num_threads, long start, long end, long incr, unsigned flags)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_runtime enter: @=%p args=(%p %p %u %ld %ld %ld %u)\n", THREAD_LEVEL_VAR, GOMP_parallel_loop_runtime_real, fn, data, num_threads, start, end, incr, flags);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_runtime enter: @=%p args=(%p %p %u %ld %ld %ld %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_loop_runtime_real, fn, data, num_threads, start, end, incr, flags);
 #endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
 
 	RECHECK_INIT(GOMP_parallel_loop_runtime_real);
 
@@ -2108,29 +2313,97 @@ void GOMP_parallel_loop_runtime (void (*fn)(void *), void *data, unsigned num_th
 	{
 		void *pardo_helper = __GOMP_new_helper(fn, data);
 
-		Extrae_OpenMP_ParDO_Entry ();
-		GOMP_parallel_loop_runtime_real (callme_pardo, pardo_helper, num_threads, start, end, incr, flags);
-		Extrae_OpenMP_ParDO_Exit ();	
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		/* The master thread continues the execution and then calls fn -- XXX do we need this? 
-		if (THREADID == 0)
-			Extrae_OpenMP_UF_Entry (fn);
-		*/
+		Extrae_OpenMP_ParDO_Entry();
+		GOMP_parallel_loop_runtime_real(callme_pardo, pardo_helper, num_threads, start, end, incr, flags);
+		Extrae_OpenMP_ParDO_Exit();
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
 	}
 	else if (GOMP_parallel_loop_runtime_real != NULL)
 	{
-		GOMP_parallel_loop_runtime_real (fn, data, num_threads, start, end, incr, flags);
+		GOMP_parallel_loop_runtime_real(fn, data, num_threads, start, end, incr, flags);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_runtime: This function is not hooked! Exiting!!\n", THREAD_LEVEL_VAR);
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_loop_runtime: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL "GOMP_parallel_loop_runtime exit\n", THREAD_LEVEL_VAR);
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_loop_runtime exit\n", THREAD_LEVEL_VAR);
 #endif
 }
+
+void
+GOMP_parallel_sections(void (*fn) (void *), void *data, unsigned num_threads, unsigned count, unsigned flags)
+{
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_sections enter: @=%p args=(%p %p %u %u %u)\n",
+	    THREAD_LEVEL_VAR, GOMP_parallel_sections_real, fn, data, num_threads, count, flags);
+#endif
+
+	OMP_CLAUSE_NUM_THREADS_SAVE(original_num_threads);
+
+	RECHECK_INIT(GOMP_parallel_sections_real);
+
+	if (TRACE(GOMP_parallel_sections_real))
+	{
+		void *parsections_helper = __GOMP_new_helper(fn, data);
+
+		/*
+		 * Change number of threads if specified by parallel directive only if
+		 * in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
+
+		Extrae_OpenMP_ParSections_Entry();
+		GOMP_parallel_sections_real(callme_parsections, parsections_helper, num_threads, count, flags);
+		Extrae_OpenMP_ParSections_Exit();
+
+		/* The master thread continues the execution and then calls parsections_helper->fn */
+		if (THREADID == 0)
+		{
+			Extrae_OpenMP_UF_Entry(fn);
+		}
+
+		/*
+		 * Return to the original number of threads only if in a library not
+		 * mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(original_num_threads);
+	}
+	else if (GOMP_parallel_sections_real != NULL)
+	{
+		GOMP_parallel_sections_real(fn, data, num_threads, count, flags);
+	}
+	else
+	{
+		fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+		    "GOMP_parallel_sections: This function is not hooked! Exiting!!\n",
+		    THREAD_LEVEL_VAR);
+		exit(-1);
+	}
+
+#if defined(DEBUG)
+	fprintf(stderr, PACKAGE_NAME ":" THREAD_LEVEL_LBL
+	    "GOMP_parallel_sections exit\n", THREAD_LEVEL_VAR);
+#endif
+}
+
 
 void GOMP_taskgroup_start (void)
 {
@@ -2887,35 +3160,40 @@ static int gnu_libgomp_get_hook_points (int rank)
 
 	/* Obtain @ for GOMP_parallel */
 	GOMP_parallel_real =
-		(void(*)(void*,void*,unsigned,unsigned int)) dlsym (RTLD_NEXT, "GOMP_parallel");
+		(void(*)(void*,void*,unsigned,unsigned int)) dlsym(RTLD_NEXT, "GOMP_parallel");
 	INC_IF_NOT_NULL(GOMP_parallel_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_static */
-  GOMP_parallel_loop_static_real = 
-	  (void(*)(void*, void*, unsigned, long, long, long, long, unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_static");
+	GOMP_parallel_loop_static_real =
+	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned))dlsym (RTLD_NEXT, "GOMP_parallel_loop_static");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_static_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_dynamic */
-  GOMP_parallel_loop_dynamic_real = 
-	  (void(*)(void*, void*, unsigned, long, long, long, long, unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_dynamic");
+	GOMP_parallel_loop_dynamic_real =
+	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned))dlsym (RTLD_NEXT, "GOMP_parallel_loop_dynamic");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_dynamic_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_guided */
-  GOMP_parallel_loop_guided_real = 
-	  (void(*)(void*, void*, unsigned, long, long, long, long, unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_guided");
+	GOMP_parallel_loop_guided_real =
+	    (void(*)(void*, void*, unsigned, long, long, long, long, unsigned))dlsym (RTLD_NEXT, "GOMP_parallel_loop_guided");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_guided_real,count);
 
 	/* Obtain @ for GOMP_parallel_loop_runtime */
-  GOMP_parallel_loop_runtime_real = 
-	  (void(*)(void*, void*, unsigned, long, long, long, unsigned)) dlsym (RTLD_NEXT, "GOMP_parallel_loop_runtime");
+	GOMP_parallel_loop_runtime_real =
+	    (void(*)(void*, void*, unsigned, long, long, long, unsigned)) dlsym(RTLD_NEXT, "GOMP_parallel_loop_runtime");
 	INC_IF_NOT_NULL(GOMP_parallel_loop_runtime_real,count);
 
+	/* Obtain @ for GOMP_parallel_sections */
+	GOMP_parallel_sections_real =
+	    (void(*)(void *, void *, unsigned, unsigned, unsigned)) dlsym(RTLD_NEXT, "GOMP_parallel_sections");
+	INC_IF_NOT_NULL(GOMP_parallel_sections_real,count);
+
 	/* Obtain @ for GOMP_taskgroup_start */
-	GOMP_taskgroup_start_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskgroup_start");
+	GOMP_taskgroup_start_real = (void(*)(void)) dlsym(RTLD_NEXT, "GOMP_taskgroup_start");
 	INC_IF_NOT_NULL(GOMP_taskgroup_start_real,count);
 
 	/* Obtain @ for GOMP_taskgroup_end */
-	GOMP_taskgroup_end_real = (void(*)(void)) dlsym (RTLD_NEXT, "GOMP_taskgroup_end");
+	GOMP_taskgroup_end_real = (void(*)(void)) dlsym(RTLD_NEXT, "GOMP_taskgroup_end");
 	INC_IF_NOT_NULL(GOMP_taskgroup_end_real,count);
 
   /**********************/

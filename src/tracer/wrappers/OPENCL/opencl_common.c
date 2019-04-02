@@ -204,11 +204,17 @@ void Extrae_OpenCL_clCreateCommandQueue (cl_command_queue queue,
 		else
 		{
 			/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
-			Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
+			/*
+			 * XXX Should this be Backend_getMaximumOfThreads()? If we
+			 * previously increased the number of threads in another runtime,
+			 * and then decreased them, we will end up with a line with mixed
+			 * semantics (thread&stream).
+			 */
+			Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads() + 1);
 			CommandQueues[idx].threadid = Backend_getNumberOfThreads()-1;
 
 			/* Set thread name */
-			Extrae_set_thread_name (CommandQueues[idx].threadid, _threadname);
+			Extrae_set_thread_name(CommandQueues[idx].threadid, _threadname);
 		}
 
 		CommandQueues[idx].nevents = 0;

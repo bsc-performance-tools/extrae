@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "omp-common_c.h"
+#include "omp-probe.h"
 
 // #define DEBUG
 
@@ -116,37 +117,47 @@ int omp_get_thread_num (void)
 	return res;
 }
 
-void omp_set_num_threads (int num_threads)
+void
+omp_set_num_threads(int num_threads)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads starts (real=%p) params=(%d)\n", THREADID, omp_set_num_threads_real, num_threads);
+	fprintf(stderr, PACKAGE_NAME
+	    ": THREAD %d: omp_set_num_threads starts (real=%p) params=(%d)\n",
+	    THREADID, omp_set_num_threads_real, num_threads);
 #endif
 
 	RECHECK_INIT_C(omp_set_num_threads_real);
-	
-	int canInstrument = EXTRAE_INITIALIZED()	&&
+
+	int canInstrument = EXTRAE_INITIALIZED() &&
 						omp_set_num_threads_real != NULL;
 
 	if (canInstrument && !Backend_inInstrumentation(THREADID))
 	{
-		Backend_ChangeNumberOfThreads (num_threads);
+		/*
+		 * Change number of threads only if in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(num_threads);
 
-		Extrae_OpenMP_SetNumThreads_Entry(num_threads);
-		omp_set_num_threads_real (num_threads);
-		Extrae_OpenMP_SetNumThreads_Exit();
+		Backend_Enter_Instrumentation();
+		Probe_OpenMP_SetNumThreads_Entry(num_threads);
+		omp_set_num_threads_real(num_threads);
+		Probe_OpenMP_SetNumThreads_Exit();
+		Backend_Leave_Instrumentation();
 	}
 	else if (omp_set_num_threads_real != NULL)
 	{
-		omp_set_num_threads_real (num_threads);
+		omp_set_num_threads_real(num_threads);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! omp_set_num_threads is not hooked! Exiting!!\n");
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME
+		    ": ERROR! omp_set_num_threads is not hooked! Exiting!!\n");
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads ends\n", THREADID);
+	fprintf(stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads ends\n",
+	    THREADID);
 #endif
 }
 

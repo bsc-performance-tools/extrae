@@ -181,11 +181,17 @@ static void Extrae_CUDA_Initialize (int devid)
 		else
 		{
 			/* For timing purposes we change num of threads here instead of doing Backend_getNumberOfThreads() + CUDAdevices*/
-			Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads() + 1);
+			/*
+			 * XXX Should this be Backend_getMaximumOfThreads()? If we
+			 * previously increased the number of threads in another runtime,
+			 * and then decreased them, we will end up with a line with mixed
+			 * semantics (thread&stream).
+			 */
+			Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads() + 1);
 			devices[devid].Stream[0].threadid = Backend_getNumberOfThreads()-1;
 
 			/* Set thread name */
-			Extrae_set_thread_name (devices[devid].Stream[0].threadid, _threadname);
+			Extrae_set_thread_name(devices[devid].Stream[0].threadid, _threadname);
 		}
 
 		/* default device stream */
@@ -269,14 +275,20 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 	{
 		devices[devid].nstreams++;
 
-		Backend_ChangeNumberOfThreads (Backend_getNumberOfThreads()+1);
+		/*
+		 * XXX Should this be Backend_getMaximumOfThreads()? If we
+		 * previously increased the number of threads in another runtime,
+		 * and then decreased them, we will end up with a line with mixed
+		 * semantics (thread&stream).
+		 */
+		Backend_ChangeNumberOfThreads(Backend_getNumberOfThreads()+1);
 
 		devices[devid].Stream[i].threadid = Backend_getNumberOfThreads()-1;
 		devices[devid].Stream[i].stream = stream;
 		devices[devid].Stream[i].nevents = 0;
 
 #ifdef DEBUG
-		fprintf (stderr, "Extrae_CUDA_RegisterStream (devid=%d, stream=%p assigned to streamid => %d\n", devid, stream, i);
+		fprintf(stderr, "Extrae_CUDA_RegisterStream (devid=%d, stream=%p assigned to streamid => %d\n", devid, stream, i);
 #endif
 
 		/* Set thread name */
@@ -285,25 +297,25 @@ static void Extrae_CUDA_RegisterStream (int devid, cudaStream_t stream)
 			char _hostname[HOST_NAME_MAX];
 
 			if (gethostname(_hostname, HOST_NAME_MAX) == 0)
-				sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, _hostname);
+				sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, _hostname);
 			else
-				sprintf (_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, "unknown-host");
-			Extrae_set_thread_name (devices[devid].Stream[i].threadid, _threadname);
+				sprintf(_threadname, "CUDA-D%d.S%d-%s", devid+1, i+1, "unknown-host");
+			Extrae_set_thread_name(devices[devid].Stream[i].threadid, _threadname);
 		}
 
-		/* Create an event record and process it through the stream! */	
+		/* Create an event record and process it through the stream! */
 		/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-		err = cudaEventCreateWithFlags (&(devices[devid].Stream[i].device_reference_time), 0);
+		err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].device_reference_time), 0);
 		CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
-		Extrae_CUDA_SynchronizeStream (devid, i);
+		Extrae_CUDA_SynchronizeStream(devid, i);
 
 		for (j = 0; j < MAX_CUDA_EVENTS; j++)
 		{
 			/* FIX CU_EVENT_BLOCKING_SYNC may be harmful!? */
-			err = cudaEventCreateWithFlags (&(devices[devid].Stream[i].ts_events[j]), 0);
+			err = cudaEventCreateWithFlags(&(devices[devid].Stream[i].ts_events[j]), 0);
 			CHECK_CU_ERROR(err, cudaEventCreateWithFlags);
 		}
-	}	
+	}
 	else
 	{
 		fprintf (stderr, PACKAGE_NAME": Error! Cannot register stream %p on device %d\n", stream, devid);

@@ -175,10 +175,17 @@ void Trace_Mode_Change (int tid, iotimer_t time)
 	}
 }
 
-void Trace_mode_switch (void)
-{   
+void
+Trace_mode_switch(void)
+{
 	unsigned i;
 
+	/*
+	 * XXX Should this be Backend_getMaximumOfThreads()? If we decrease the
+	 * number of threads, switch tracing mode and then increase again the the
+	 * number of threads, only the "old" threads will use burst mode, while the
+	 * "new" ones will continue in detail.
+	 */
 	for (i=0; i<Backend_getNumberOfThreads(); i++)
 	{
 		Pending_Trace_Mode_Change[i] = TRUE;

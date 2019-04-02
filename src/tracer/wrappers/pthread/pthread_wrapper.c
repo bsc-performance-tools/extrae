@@ -279,42 +279,48 @@ int pthread_create (pthread_t* p1, const pthread_attr_t* p2,
 		*/
 
 		/* Protect creation, just one at a time */
-		pthread_mutex_lock_real (&extrae_pthread_create_mutex);
+		pthread_mutex_lock_real(&extrae_pthread_create_mutex);
 
 		if (0 == pthread_library_depth)
 		{
 			pthread_library_depth++;
 
-			Backend_Enter_Instrumentation ();
+			Backend_Enter_Instrumentation();
 
-			Probe_pthread_Create_Entry (p3);
-		
-			pthread_cond_init (&(i.wait), NULL);
-			pthread_mutex_init (&(i.lock), NULL);
-			pthread_mutex_lock_real (&(i.lock));
+			Probe_pthread_Create_Entry(p3);
+
+			pthread_cond_init(&(i.wait), NULL);
+			pthread_mutex_init(&(i.lock), NULL);
+			pthread_mutex_lock_real(&(i.lock));
 
 			i.arg = p4;
 			i.routine = p3;
 			i.pthreadID = Backend_getNumberOfThreads();
 
-			Backend_ChangeNumberOfThreads (i.pthreadID+1);
+			/*
+			 * XXX Should this be Backend_getMaximumOfThreads()? If we
+			 * previously increased the number of threads in another runtime,
+			 * and then decreased them, we will end up with a line with mixed
+			 * semantics (thread&stream).
+			 */
+			Backend_ChangeNumberOfThreads(i.pthreadID+1);
 
-			res = pthread_create_real (p1, p2, pthread_create_hook, (void*) &i);
+			res = pthread_create_real(p1, p2, pthread_create_hook, (void*) &i);
 
 			if (0 == res)
 			{
 				/* if succeded, wait for a completion on copy the info */
-				pthread_cond_wait (&(i.wait), &(i.lock));
+				pthread_cond_wait(&(i.wait), &(i.lock));
 
-				Backend_SetpThreadID (p1, i.pthreadID);
+				Backend_SetpThreadID(p1, i.pthreadID);
 			}
 
-			pthread_mutex_unlock_real (&(i.lock));
-			pthread_mutex_destroy (&(i.lock));
-			pthread_cond_destroy (&(i.wait));
+			pthread_mutex_unlock_real(&(i.lock));
+			pthread_mutex_destroy(&(i.lock));
+			pthread_cond_destroy(&(i.wait));
 
-			Probe_pthread_Create_Exit ();
-			Backend_Leave_Instrumentation ();
+			Probe_pthread_Create_Exit();
+			Backend_Leave_Instrumentation();
 
 			pthread_library_depth--;
 		}

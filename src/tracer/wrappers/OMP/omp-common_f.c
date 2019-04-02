@@ -22,6 +22,7 @@
 \*****************************************************************************/
 
 #include "omp-common_f.h"
+#include "omp-probe.h"
 
 // #define DEBUG
 
@@ -56,19 +57,19 @@ void omp_common_get_hook_points_f (int rank)
 
 	/* Obtain @ for omp_set_num_threads_ */
 	omp_set_num_threads__real =
-		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads_");
-	
+	    (void(*)(int*)) dlsym (RTLD_NEXT, "omp_set_num_threads_");
+
 	/* Obtain @ for omp_set_num_threads_8_ */
 	omp_set_num_threads_8__real =
-		(void(*)(int)) dlsym (RTLD_NEXT, "omp_set_num_threads_8_");
-	
+	    (void(*)(int*)) dlsym (RTLD_NEXT, "omp_set_num_threads_8_");
+
 	/* Obtain @ for omp_set_lock_ */
 	omp_set_lock__real =
-		(void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_set_lock_");
+	    (void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_set_lock_");
 
 	/* Obtain @ for omp_unset_lock_ */
 	omp_unset_lock__real =
-		(void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_unset_lock_");
+	    (void(*)(omp_lock_t*)) dlsym (RTLD_NEXT, "omp_unset_lock_");
 
 #endif /* PIC */
 }
@@ -84,72 +85,91 @@ void omp_common_get_hook_points_f (int rank)
 
 #if defined(PIC)
 
-void omp_set_num_threads_ (int *num_threads)
+void
+omp_set_num_threads_(int *num_threads)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads_ starts (real=%p) params=(%d)\n", THREADID, omp_set_num_threads__real, *num_threads);
+	fprintf (stderr, PACKAGE_NAME
+	    ": THREAD %d: omp_set_num_threads_ starts (real=%p) params=(%d)\n",
+	    THREADID, omp_set_num_threads__real, *num_threads);
 #endif
 
 	RECHECK_INIT_F(omp_set_num_threads__real);
 
-	int canInstrument = EXTRAE_INITIALIZED()	&&
+	int canInstrument = EXTRAE_INITIALIZED() &&
 						omp_set_num_threads__real != NULL;
 
 	if (canInstrument && !Backend_inInstrumentation(THREADID))
 	{
-		Backend_ChangeNumberOfThreads (*num_threads);
+		/*
+		 * Change number of threads only if in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(*num_threads);
 
-		Extrae_OpenMP_SetNumThreads_Entry(*num_threads);
-		omp_set_num_threads__real (num_threads);
-		Extrae_OpenMP_SetNumThreads_Exit();
+		Backend_Enter_Instrumentation();
+		Probe_OpenMP_SetNumThreads_Entry(*num_threads);
+		omp_set_num_threads__real(num_threads);
+		Probe_OpenMP_SetNumThreads_Exit();
+		Backend_Leave_Instrumentation();
 	}
 	else if (omp_set_num_threads__real != NULL)
 	{
-		omp_set_num_threads__real (num_threads);
+		omp_set_num_threads__real(num_threads);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! omp_set_num_threads_ is not hooked! Exiting!!\n");
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME
+		    ": ERROR! omp_set_num_threads_ is not hooked! Exiting!!\n");
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads_ ends\n", THREADID);
+	fprintf(stderr, PACKAGE_NAME
+	    ": THREAD %d: omp_set_num_threads_ ends\n", THREADID);
 #endif
 }
 
-void omp_set_num_threads_8_ (int *num_threads)
+void
+omp_set_num_threads_8_(int *num_threads)
 {
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads_8_ starts (real=%p) params=(%d)\n", THREADID, omp_set_num_threads_8__real, *num_threads);
+	fprintf(stderr, PACKAGE_NAME
+	    ": THREAD %d: omp_set_num_threads_8_ starts (real=%p) params=(%d)\n",
+	    THREADID, omp_set_num_threads_8__real, *num_threads);
 #endif
 
 	RECHECK_INIT_F(omp_set_num_threads_8__real);
 
-
-	int canInstrument = EXTRAE_INITIALIZED()	&&
+	int canInstrument = EXTRAE_INITIALIZED() &&
 						omp_set_num_threads_8__real != NULL;
 
 	if (canInstrument && !Backend_inInstrumentation(THREADID))
 	{
-		Backend_ChangeNumberOfThreads (*num_threads);
+		/*
+		 * Change number of threads only if in a library not mixing runtimes.
+		 */
+		OMP_CLAUSE_NUM_THREADS_CHANGE(*num_threads);
 
-		Extrae_OpenMP_SetNumThreads_Entry(*num_threads);
-		omp_set_num_threads_8__real (num_threads);
-		Extrae_OpenMP_SetNumThreads_Exit();
+		Backend_Enter_Instrumentation();
+		Probe_OpenMP_SetNumThreads_Entry(*num_threads);
+		omp_set_num_threads_8__real(num_threads);
+		Probe_OpenMP_SetNumThreads_Exit();
+		Backend_Leave_Instrumentation();
 	}
 	else if (omp_set_num_threads_8__real != NULL)
 	{
-		omp_set_num_threads_8__real (num_threads);
+		omp_set_num_threads_8__real(num_threads);
 	}
 	else
 	{
-		fprintf (stderr, PACKAGE_NAME": ERROR! omp_set_num_threads_8_ is not hooked! Exiting!!\n");
-		exit (-1);
+		fprintf(stderr, PACKAGE_NAME
+		    ": ERROR! omp_set_num_threads_8_ is not hooked! Exiting!!\n");
+		exit(-1);
 	}
 
 #if defined(DEBUG)
-	fprintf (stderr, PACKAGE_NAME": THREAD %d: omp_set_num_threads_8_ ends\n", THREADID);
+	fprintf(stderr, PACKAGE_NAME
+	    ": THREAD %d: omp_set_num_threads_8_ ends\n", THREADID);
 #endif
 }
 
