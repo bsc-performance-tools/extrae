@@ -21,9 +21,40 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
-#pragma once
+#include "events.h"
+#include "file_set.h"
+#include "paraver_generator.h"
+#include "paraver_state.h"
+#include "record.h"
+#include "semantics.h"
 
-void Probe_GPI_Init_Entry();
-void Probe_GPI_Init_Exit();
-void Probe_GPI_Term_Entry();
-void Probe_GPI_Term_Exit();
+static int
+GPI_Event(event_t * current_event, unsigned long long current_time, unsigned cpu,
+    unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
+{
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
+
+	switch (EvType)
+	{
+		case GPI_INIT_EV:
+		case GPI_TERM_EV:
+		Switch_State(STATE_INITFINI, (EvValue != EVT_END), ptask, task, thread);
+		trace_paraver_state (cpu, ptask, task, thread, current_time);
+		break;
+	}
+
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
+SingleEv_Handler_t PRV_GPI_Event_Handlers[] =
+{
+	{GPI_INIT_EV, GPI_Event},
+	{GPI_TERM_EV, GPI_Event},
+	{ NULL_EV, NULL }
+};

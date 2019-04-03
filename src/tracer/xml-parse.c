@@ -221,7 +221,10 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 #if USE_HARDWARE_COUNTERS
 			mfprintf (stdout, PACKAGE_NAME": MPI routines will %scollect HW counters information.\n", tracejant_hwc_mpi?"":"NOT ");
 #else
-			mfprintf (stdout, PACKAGE_NAME": <%s> tag at <MPI> level will be ignored. This library does not support CPU HW.\n", TRACE_COUNTERS);
+			mfprintf (stdout, PACKAGE_NAME
+			    ": <%s> tag at <MPI> level will be ignored."
+			    " This library does not support CPU HW counters.\n",
+			    TRACE_COUNTERS);
 			tracejant_hwc_mpi = FALSE;
 #endif
 			XML_FREE(enabled);
@@ -229,6 +232,50 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 		else
 		{
 			mfprintf (stderr, PACKAGE_NAME": XML unknown tag '%s' at <MPI> level\n", tag->name);
+		}
+
+		tag = tag->next;
+	}
+}
+#endif
+
+#if defined(GPI_SUPPORT)
+/* Configure GPI related parameters */
+static void Parse_XML_GPI(int rank, xmlNodePtr current_tag)
+{
+	xmlNodePtr tag;
+
+	/* Parse all TAGs and annotate them for later use */
+	tag = current_tag->xmlChildrenNode;
+	while (tag != NULL)
+	{
+		/* Skip comments */
+		if (!xmlStrcasecmp(tag->name, xmlCOMMENT) ||
+		    !xmlStrcasecmp(tag->name, xmlTEXT))
+		{
+		}
+		/* Shall we gather counters in GPI calls? */
+		else if (!xmlStrcasecmp(tag->name, TRACE_COUNTERS))
+		{
+			xmlChar *enabled = xmlGetProp_env(rank, tag, TRACE_ENABLED);
+			trace_hwc_gpi = enabled != NULL && !xmlStrcasecmp(enabled, xmlYES);
+#if USE_HARDWARE_COUNTERS
+			mfprintf(stdout, PACKAGE_NAME
+			    ": GPI routines will %scollect HW counters information.\n",
+			    trace_hwc_gpi?"":"NOT ");
+#else
+			mfprintf(stdout, PACKAGE_NAME
+			    ": <%s> tag at <GPI> level will be ignored."
+			    "This library does not support CPU HW counters.\n",
+			    TRACE_COUNTERS);
+			trace_hwc_gpi = FALSE;
+#endif
+			XML_FREE(enabled);
+		} else
+		{
+			mfprintf(stderr, PACKAGE_NAME
+			    ": XML unknown tag '%s' at <GPI> level\n",
+			    tag->name);
 		}
 
 		tag = tag->next;
@@ -1849,6 +1896,28 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						}
 						else if (enabled != NULL && !xmlStrcasecmp (enabled, xmlNO))
 							tracejant_mpi = FALSE;
+						XML_FREE(enabled);
+					}
+					/* GPI related configuration */
+					else if (!xmlStrcasecmp(current_tag->name, TRACE_GPI))
+					{
+						xmlChar *enabled = xmlGetProp_env(rank, current_tag, TRACE_ENABLED);
+
+						if (enabled != NULL && !xmlStrcasecmp(enabled, xmlYES))
+						{
+#if defined(GPI_SUPPORT)
+							trace_gpi = TRUE;
+							Parse_XML_GPI(rank, current_tag);
+#else
+							mfprintf(stdout, PACKAGE_NAME
+							    ": Warning! <%s> tag will be ignored. "
+							    "This library does not support GPI.\n",
+							    TRACE_GPI);
+#endif
+						} else if (enabled != NULL && !xmlStrcasecmp(enabled, xmlNO))
+						{
+							trace_gpi = FALSE;
+						}
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */

@@ -648,8 +648,9 @@ enum {
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
 /* GPI-2 events */
+#define GPI_BASE_EV 69000000
 #define GPI_INIT_EV 69000001
-#define GPI_FINI_EV 69999999
+#define GPI_TERM_EV 69000999
 
 
 #define CALLER_EV                70000000
@@ -977,7 +978,8 @@ typedef enum
 	CUDA_TYPE,
 	OPENCL_TYPE,
 	OPENSHMEM_TYPE,
-	JAVA_TYPE
+	JAVA_TYPE,
+	GPI_TYPE
 } EventType_t;
 
 

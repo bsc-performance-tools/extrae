@@ -21,6 +21,8 @@
  *   Barcelona Supercomputing Center - Centro Nacional de Supercomputacion   *
 \*****************************************************************************/
 
+#include "wrapper.h"
+
 #include "gpi_probe.h"
 
 void
@@ -35,10 +37,26 @@ Probe_GPI_Init_Entry()
 void
 Probe_GPI_Init_Exit()
 {
-	DEBUG
 	if (mpitrace_on)
 	{
 		TRACE_EVENTANDCOUNTERS(TIME, GPI_INIT_EV, EVT_END, TRUE);
-		WORK_EV
+	}
+}
+
+void
+Probe_GPI_Term_Entry()
+{
+	if (mpitrace_on)
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_TERM_EV, EVT_BEGIN, TRUE);
+	}
+}
+
+void
+Probe_GPI_Term_Exit()
+{
+	if (mpitrace_on)
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_TERM_EV, EVT_END, TRUE);
 	}
 }

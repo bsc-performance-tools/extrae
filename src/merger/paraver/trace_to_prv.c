@@ -77,6 +77,7 @@
 #include "misc_prv_semantics.h"
 #include "omp_prv_semantics.h"
 #include "pthread_prv_semantics.h"
+#include "gpi_prv_semantics.h"
 #include "mpi_comunicadors.h"
 #include "labels.h"
 #include "trace_mode.h"
@@ -99,6 +100,7 @@
 #include "opencl_prv_events.h"
 #include "cuda_prv_events.h"
 #include "java_prv_events.h"
+#include "gpi_prv_events.h"
 #include "addr2info.h"
 #include "timesync.h"
 #include "vector.h"
@@ -477,6 +479,8 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 						Enable_OPENSHMEM_Operation (EvType);
 					else if (JAVA_TYPE == Type)
 						Enable_Java_Operation (EvType);
+					else if (GPI_TYPE == Type)
+						Enable_GPI_Operation(EvType);
 				}
 				else	
 				{

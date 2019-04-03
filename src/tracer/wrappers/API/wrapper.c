@@ -205,6 +205,12 @@ int tracejant_mpi = TRUE;
 /***** Variable global per saber si MPI s'ha de tracejar amb hwc *********/
 int tracejant_hwc_mpi = TRUE;
 
+/***** Variable global per saber si GPI s'ha de tracejar *****************/
+int trace_gpi = TRUE;
+
+/***** Variable global per saber si GPI s'ha de tracejar amb hwc *********/
+int trace_hwc_gpi = TRUE;
+
 /***** Variable global per saber si OpenMP s'ha de tracejar **************/
 int tracejant_omp = TRUE;
 

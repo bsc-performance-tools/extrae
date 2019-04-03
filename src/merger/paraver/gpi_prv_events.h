@@ -23,7 +23,7 @@
 
 #pragma once
 
-void Probe_GPI_Init_Entry();
-void Probe_GPI_Init_Exit();
-void Probe_GPI_Term_Entry();
-void Probe_GPI_Term_Exit();
+#include <config.h>
+
+void Enable_GPI_Operation(unsigned evttype);
+void WriteEnabled_GPI_Operations(FILE * fd);

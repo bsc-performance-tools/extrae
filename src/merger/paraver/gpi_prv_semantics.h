@@ -23,7 +23,7 @@
 
 #pragma once
 
-void Probe_GPI_Init_Entry();
-void Probe_GPI_Init_Exit();
-void Probe_GPI_Term_Entry();
-void Probe_GPI_Term_Exit();
+#include "semantics.h"
+#include "file_set.h"
+
+extern SingleEv_Handler_t PRV_GPI_Event_Handlers[]; 
