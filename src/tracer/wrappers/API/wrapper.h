@@ -82,6 +82,9 @@ extern int tracejant;
 // Serveix per tracejar una aplicacio sense contar res de MPI
 extern int tracejant_mpi;
 
+// Serveix per tracejar una aplicacio sense contar res de GPI
+extern int trace_gpi;
+
 // Serveix per tracejar una aplicacio sense contar res de OpenMP
 extern int tracejant_omp;
 
@@ -148,6 +151,10 @@ extern int Trace_HWC_Enabled;
 /* Must we collect HWC on the MPI calls */
 extern int tracejant_hwc_mpi;
 #define TRACING_HWC_MPI (tracejant_hwc_mpi)
+
+/* Must we collect HWC on the GPI calls */
+extern int trace_hwc_gpi;
+#define TRACING_HWC_GPI (trace_hwc_gpi)
 
 /* Must we collect HWC on the OpenMP runtime calls */
 extern int tracejant_hwc_omp;
