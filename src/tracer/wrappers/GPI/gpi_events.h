@@ -23,7 +23,13 @@
 
 #pragma once
 
-void Extrae_GPI_Init_Entry();
-void Extrae_GPI_Init_Exit();
-void Extrae_GPI_Term_Entry();
-void Extrae_GPI_Term_Exit();
+void Extrae_GPI_init_Entry();
+void Extrae_GPI_init_Exit();
+void Extrae_GPI_term_Entry();
+void Extrae_GPI_term_Exit();
+void Extrae_GPI_barrier_Entry();
+void Extrae_GPI_barrier_Exit();
+void Extrae_GPI_segment_create_Entry();
+void Extrae_GPI_segment_create_Exit();
+void Extrae_GPI_write_Entry();
+void Extrae_GPI_write_Exit();

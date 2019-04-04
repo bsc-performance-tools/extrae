@@ -23,7 +23,18 @@
 
 #pragma once
 
-void Probe_GPI_Init_Entry();
-void Probe_GPI_Init_Exit();
-void Probe_GPI_Term_Entry();
-void Probe_GPI_Term_Exit();
+void Extrae_set_trace_GPI(int trace);
+int  Extrae_get_trace_GPI();
+void Extrae_set_trace_GPI_HWC(int trace);
+int  Extrae_get_trace_GPI_HWC();
+
+void Probe_GPI_init_Entry();
+void Probe_GPI_init_Exit();
+void Probe_GPI_term_Entry();
+void Probe_GPI_term_Exit();
+void Probe_GPI_barrier_Entry();
+void Probe_GPI_barrier_Exit();
+void Probe_GPI_segment_create_Entry();
+void Probe_GPI_segment_create_Exit();
+void Probe_GPI_write_Entry();
+void Probe_GPI_write_Exit();

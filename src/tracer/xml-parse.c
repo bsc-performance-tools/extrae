@@ -84,6 +84,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(CUDA_SUPPORT)
 # include "cuda_probe.h"
 #endif
+#if defined(GPI_SUPPORT)
+# include "gpi_probe.h"
+#endif
 #if defined(SAMPLING_SUPPORT)
 # include "sampling-common.h"
 # include "sampling-timer.h"
@@ -258,17 +261,17 @@ static void Parse_XML_GPI(int rank, xmlNodePtr current_tag)
 		else if (!xmlStrcasecmp(tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env(rank, tag, TRACE_ENABLED);
-			trace_hwc_gpi = enabled != NULL && !xmlStrcasecmp(enabled, xmlYES);
+			Extrae_set_trace_GPI_HWC(enabled != NULL && !xmlStrcasecmp(enabled, xmlYES));
 #if USE_HARDWARE_COUNTERS
 			mfprintf(stdout, PACKAGE_NAME
 			    ": GPI routines will %scollect HW counters information.\n",
-			    trace_hwc_gpi?"":"NOT ");
+			    Extrae_get_trace_GPI_HWC()?"":"NOT ");
 #else
 			mfprintf(stdout, PACKAGE_NAME
 			    ": <%s> tag at <GPI> level will be ignored."
 			    "This library does not support CPU HW counters.\n",
 			    TRACE_COUNTERS);
-			trace_hwc_gpi = FALSE;
+			Extrae_set_trace_GPI_HWC(FALSE);
 #endif
 			XML_FREE(enabled);
 		} else
@@ -1906,7 +1909,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						if (enabled != NULL && !xmlStrcasecmp(enabled, xmlYES))
 						{
 #if defined(GPI_SUPPORT)
-							trace_gpi = TRUE;
+							Extrae_set_trace_GPI(TRUE);
 							Parse_XML_GPI(rank, current_tag);
 #else
 							mfprintf(stdout, PACKAGE_NAME
@@ -1914,10 +1917,13 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 							    "This library does not support GPI.\n",
 							    TRACE_GPI);
 #endif
-						} else if (enabled != NULL && !xmlStrcasecmp(enabled, xmlNO))
-						{
-							trace_gpi = FALSE;
 						}
+#if defined(GPI_SUPPORT)
+						else if (enabled != NULL && !xmlStrcasecmp(enabled, xmlNO))
+						{
+							Extrae_set_trace_GPI(FALSE);
+						}
+#endif
 						XML_FREE(enabled);
 					}
 					/* Bursts related configuration */

@@ -26,29 +26,68 @@
 #include "wrapper.h"
 
 void
-Extrae_GPI_Init_Entry()
+Extrae_GPI_init_Entry()
 {
 	Backend_Enter_Instrumentation();
-	Probe_GPI_Init_Entry();
+	Probe_GPI_init_Entry();
 }
 
 void
-Extrae_GPI_Init_Exit()
+Extrae_GPI_init_Exit()
 {
+	Probe_GPI_init_Exit();
 	Backend_Leave_Instrumentation();
-	Probe_GPI_Init_Exit();
 }
 
 void
-Extrae_GPI_Term_Entry()
+Extrae_GPI_term_Entry()
 {
 	Backend_Enter_Instrumentation();
-	Probe_GPI_Term_Entry();
+	Probe_GPI_term_Entry();
 }
 
 void
-Extrae_GPI_Term_Exit()
+Extrae_GPI_term_Exit()
 {
+	Probe_GPI_term_Exit();
 	Backend_Leave_Instrumentation();
-	Probe_GPI_Term_Exit();
+}
+
+void
+Extrae_GPI_barrier_Entry()
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_barrier_Entry();
+}
+
+void
+Extrae_GPI_barrier_Exit()
+{
+	Probe_GPI_barrier_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_segment_create_Entry()
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_segment_create_Entry();
+}
+
+void Extrae_GPI_segment_create_Exit()
+{
+	Probe_GPI_segment_create_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void Extrae_GPI_write_Entry()
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_write_Entry();
+}
+
+void Extrae_GPI_write_Exit()
+{
+	Probe_GPI_write_Exit();
+	Backend_Leave_Instrumentation();
 }

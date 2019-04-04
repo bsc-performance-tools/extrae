@@ -25,38 +25,119 @@
 
 #include "gpi_probe.h"
 
+static int trace_gpi = TRUE;
+static int trace_gpi_hwc = TRUE;
+
 void
-Probe_GPI_Init_Entry()
+Extrae_set_trace_GPI(int trace)
 {
-	if (mpitrace_on)
+	trace_gpi = trace;
+}
+
+int
+Extrae_get_trace_GPI()
+{
+	return trace_gpi;
+}
+
+void
+Extrae_set_trace_GPI_HWC(int trace)
+{
+	trace_gpi_hwc = trace;
+}
+
+int
+Extrae_get_trace_GPI_HWC()
+{
+	return trace_gpi_hwc;
+}
+
+void
+Probe_GPI_init_Entry()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_INIT_EV, EVT_BEGIN, TRUE);
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_INIT_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
 	}
 }
 
 void
-Probe_GPI_Init_Exit()
+Probe_GPI_init_Exit()
 {
-	if (mpitrace_on)
+	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
-		TRACE_EVENTANDCOUNTERS(TIME, GPI_INIT_EV, EVT_END, TRUE);
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_INIT_EV, EVT_END, Extrae_get_trace_GPI_HWC());
 	}
 }
 
 void
-Probe_GPI_Term_Entry()
+Probe_GPI_term_Entry()
 {
-	if (mpitrace_on)
+	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_TERM_EV, EVT_BEGIN, TRUE);
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_TERM_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
 	}
 }
 
 void
-Probe_GPI_Term_Exit()
+Probe_GPI_term_Exit()
 {
-	if (mpitrace_on)
+	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
-		TRACE_EVENTANDCOUNTERS(TIME, GPI_TERM_EV, EVT_END, TRUE);
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_TERM_EV, EVT_END, Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_barrier_Entry()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_BARRIER_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_barrier_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_BARRIER_EV, EVT_END, Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_segment_create_Entry()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_SEGMENT_CREATE_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_segment_create_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_SEGMENT_CREATE_EV, EVT_END, Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_write_Entry()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_WRITE_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_write_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_WRITE_EV, EVT_END, Extrae_get_trace_GPI_HWC());
 	}
 }
