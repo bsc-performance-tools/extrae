@@ -147,11 +147,8 @@ gaspi_proc_init(gaspi_timeout_t timeout_ms)
 
 	initTracingTime = GPI_Init_end_time = TIME;
 
-	if (!Backend_postInitialize (TASKID, Extrae_get_num_tasks(), GPI_INIT_EV,
-	    GPI_Init_start_time, GPI_Init_end_time, NULL))
-	{
-		return ret;
-	}
+	Backend_postInitialize(TASKID, Extrae_get_num_tasks(), GPI_INIT_EV,
+	    GPI_Init_start_time, GPI_Init_end_time, NULL);
 
 	return ret;
 }

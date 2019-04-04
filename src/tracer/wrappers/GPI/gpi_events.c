@@ -22,6 +22,8 @@
 \*****************************************************************************/
 
 #include "gpi_events.h"
+#include "gpi_probe.h"
+#include "wrapper.h"
 
 void
 Extrae_GPI_Init_Entry()
