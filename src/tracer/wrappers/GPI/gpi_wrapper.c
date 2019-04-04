@@ -160,9 +160,23 @@ gaspi_proc_term(gaspi_timeout_t timeout_ms)
 
 	int ret;
 
-	Extrae_GPI_Term_Entry();
+	Extrae_GPI_term_Entry();
 	ret = pgaspi_proc_term(timeout_ms);
-	Extrae_GPI_Term_Exit();
+	Extrae_GPI_term_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_barrier(const gaspi_group_t group, const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_barrier_Entry();
+	ret = pgaspi_barrier(group, timeout_ms);
+	Extrae_GPI_barrier_Exit();
 
 	return ret;
 }
@@ -176,7 +190,9 @@ gaspi_segment_create(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
+	Extrae_GPI_segment_create_Entry();
 	ret = pgaspi_segment_create(segment_id, size, group, timeout_ms, alloc_policy);
+	Extrae_GPI_segment_create_Exit();
 
 	return ret;
 }
@@ -192,7 +208,9 @@ gaspi_write(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
+	Extrae_GPI_write_Entry();
 	ret = pgaspi_write(segment_id_local, offset_local, rank, segment_id_remote, offset_remote, size, queue, timeout_ms);
+	Extrae_GPI_write_Exit();
 
 	return ret;
 }

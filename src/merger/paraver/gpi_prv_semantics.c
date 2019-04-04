@@ -28,6 +28,8 @@
 #include "record.h"
 #include "semantics.h"
 
+#include "gpi_prv_events.h"
+
 static int
 GPI_Event(event_t * current_event, unsigned long long current_time, unsigned cpu,
     unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
@@ -36,16 +38,25 @@ GPI_Event(event_t * current_event, unsigned long long current_time, unsigned cpu
 	unsigned long long EvValue, nEvValue;
 	UNREFERENCED_PARAMETER(fset);
 
-	EvType  = Get_EvEvent (current_event);
-	EvValue = Get_EvValue (current_event);
+	EvType  = Get_EvEvent(current_event);
+	EvValue = Get_EvValue(current_event);
 
 	switch (EvType)
 	{
 		case GPI_INIT_EV:
 		case GPI_TERM_EV:
-		Switch_State(STATE_INITFINI, (EvValue != EVT_END), ptask, task, thread);
-		trace_paraver_state (cpu, ptask, task, thread, current_time);
-		break;
+			Switch_State(STATE_INITFINI, (EvValue != EVT_END), ptask, task, thread);
+			trace_paraver_state(cpu, ptask, task, thread, current_time);
+			break;
+		case GPI_BARRIER_EV:
+			Switch_State(STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
+			trace_paraver_state(cpu, ptask, task, thread, current_time);
+			break;
+		case GPI_SEGMENT_CREATE_EV:
+		case GPI_WRITE_EV:
+			Switch_State(STATE_IO, (EvValue != EVT_END), ptask, task, thread);
+			trace_paraver_state(cpu, ptask, task, thread, current_time);
+			break;
 	}
 
 	Translate_GPI_Operation(EvType, EvValue, &nEvType, &nEvValue);
@@ -58,5 +69,8 @@ SingleEv_Handler_t PRV_GPI_Event_Handlers[] =
 {
 	{GPI_INIT_EV, GPI_Event},
 	{GPI_TERM_EV, GPI_Event},
+	{GPI_BARRIER_EV, GPI_Event},
+	{GPI_SEGMENT_CREATE_EV, GPI_Event},
+	{GPI_WRITE_EV, GPI_Event},
 	{ NULL_EV, NULL }
 };

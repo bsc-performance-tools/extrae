@@ -648,9 +648,12 @@ enum {
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
 /* GPI-2 events */
-#define GPI_BASE_EV 69000000
-#define GPI_INIT_EV 69000001
-#define GPI_TERM_EV 69000999
+#define GPI_BASE_EV           69000000
+#define GPI_INIT_EV           69000001
+#define GPI_BARRIER_EV        69000002
+#define GPI_SEGMENT_CREATE_EV 69000003
+#define GPI_WRITE_EV          69000004
+#define GPI_TERM_EV           69000999
 
 
 #define CALLER_EV                70000000

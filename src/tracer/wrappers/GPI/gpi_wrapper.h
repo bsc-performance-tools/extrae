@@ -29,14 +29,23 @@ gaspi_return_t	gaspi_proc_init(const gaspi_timeout_t timeout_ms);
 
 gaspi_return_t	gaspi_proc_term(const gaspi_timeout_t timeout_ms);
 
-gaspi_return_t	gaspi_segment_create(const gaspi_segment_id_t segment_id,
-				    const gaspi_size_t size, const gaspi_group_t group,
-				    const gaspi_timeout_t timeout_ms,
-				    const gaspi_alloc_t alloc_policy);
+gaspi_return_t  gaspi_barrier(
+                    const gaspi_group_t   group,
+                    const gaspi_timeout_t timeout_ms);
 
-gaspi_return_t	gaspi_write(const gaspi_segment_id_t segment_id_local,
-				    const gaspi_offset_t offset_local, const gaspi_rank_t rank,
-				    const gaspi_segment_id_t segment_id_remote,
-				    const gaspi_offset_t offset_remote, const gaspi_size_t size,
-				    const gaspi_queue_id_t queue,
-				    const gaspi_timeout_t timeout_ms);
+gaspi_return_t	gaspi_segment_create(
+                    const gaspi_segment_id_t segment_id,
+				    const gaspi_size_t       size,
+                    const gaspi_group_t      group,
+				    const gaspi_timeout_t    timeout_ms,
+				    const gaspi_alloc_t      alloc_policy);
+
+gaspi_return_t	gaspi_write(
+                    const gaspi_segment_id_t segment_id_local,
+                    const gaspi_offset_t     offset_local,
+                    const gaspi_rank_t       rank,
+                    const gaspi_segment_id_t segment_id_remote,
+                    const gaspi_offset_t     offset_remote,
+                    const gaspi_size_t       size,
+                    const gaspi_queue_id_t   queue,
+                    const gaspi_timeout_t    timeout_ms);

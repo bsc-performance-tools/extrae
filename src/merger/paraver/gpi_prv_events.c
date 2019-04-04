@@ -40,11 +40,14 @@ struct GPI_event_label_t
 	int       eventval;
 };
 
-#define MAX_GPI_TYPE_ENTRIES 2
+#define MAX_GPI_TYPE_ENTRIES 5
 
 static struct GPI_event_label_t GPI_event_label[MAX_GPI_TYPE_ENTRIES] =
 {
 	{GPI_INIT_EV, FALSE, "gaspi_proc_init", 1},
+	{GPI_BARRIER_EV, FALSE, "gaspi_barrier", 2},
+	{GPI_SEGMENT_CREATE_EV, FALSE, "gaspi_segment_create", 3},
+	{GPI_WRITE_EV, FALSE, "gaspi_write", 4},
 	{GPI_TERM_EV, FALSE, "gaspi_proc_term", 999}
 };
 
