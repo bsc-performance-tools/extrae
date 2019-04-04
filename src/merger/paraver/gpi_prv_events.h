@@ -26,4 +26,6 @@
 #include <config.h>
 
 void Enable_GPI_Operation(unsigned evttype);
+int Translate_GPI_Operation(unsigned in_evttype, unsigned long long in_evtvalue,
+     unsigned *out_evttype, unsigned long long *out_evtvalue);
 void WriteEnabled_GPI_Operations(FILE * fd);

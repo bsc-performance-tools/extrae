@@ -32,7 +32,8 @@ static int
 GPI_Event(event_t * current_event, unsigned long long current_time, unsigned cpu,
     unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
 {
-	unsigned int EvType, EvValue;
+	unsigned int EvType, nEvType;
+	unsigned long long EvValue, nEvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent (current_event);
@@ -47,7 +48,8 @@ GPI_Event(event_t * current_event, unsigned long long current_time, unsigned cpu
 		break;
 	}
 
-	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
+	Translate_GPI_Operation(EvType, EvValue, &nEvType, &nEvValue);
+	trace_paraver_event(cpu, ptask, task, thread, current_time, nEvType, nEvValue);
 
 	return 0;
 }

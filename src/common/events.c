@@ -305,6 +305,29 @@ unsigned IsOPENSHMEM (unsigned EvType)
   return FALSE;
 }
 
+/*
+ * IsGPI
+ */
+#define GPI_EVENTS 2
+static unsigned gpi_events[] = {
+	GPI_INIT_EV, GPI_TERM_EV
+};
+
+unsigned IsGPI(unsigned EvType)
+{
+	unsigned evt;
+
+	for (evt = 0; evt<GPI_EVENTS; evt++)
+	{
+		if (gpi_events[evt] == EvType)
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 
 /******************************************************************************
  ***  IsBurst
@@ -409,6 +432,11 @@ EventType_t getEventType (unsigned EvType, unsigned *Type)
 	else if (IsJava(EvType))
 	{
 		*Type = JAVA_TYPE;
+		return TRUE;
+	}
+	else if (IsGPI(EvType))
+	{
+		*Type = GPI_TYPE;
 		return TRUE;
 	}
 	else if (EvType == MPI_ALIAS_COMM_CREATE_EV)

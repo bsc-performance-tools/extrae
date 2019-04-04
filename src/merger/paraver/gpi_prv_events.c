@@ -38,7 +38,7 @@ struct GPI_event_label_t
 	unsigned  present;
 	char     *description;
 	int       eventval;
-}; 
+};
 
 #define MAX_GPI_TYPE_ENTRIES 2
 
@@ -63,13 +63,12 @@ Enable_GPI_Operation(unsigned evttype)
 	}
 }
 
-#if 0
 int
 Translate_GPI_Operation(unsigned in_evttype, unsigned long long in_evtvalue,
     unsigned *out_evttype, unsigned long long *out_evtvalue)
 {
 	unsigned u;
-	unsigned out_type;
+	unsigned out_type = GPI_BASE_EV;
 
 	for (u = 0; u < MAX_GPI_TYPE_ENTRIES; u++)
 		if (GPI_event_label[u].eventtype == in_evttype)
@@ -84,14 +83,13 @@ Translate_GPI_Operation(unsigned in_evttype, unsigned long long in_evtvalue,
 
 	return FALSE;
 }
-#endif
 
 void
 WriteEnabled_GPI_Operations(FILE * fd)
 {
 	unsigned u;
-	int anypresent = FALSE;
 #if 0
+	int anypresent = FALSE;
 	int memtransfersizepresent = FALSE;
 	int clfinishpresent = FALSE;
 
@@ -113,18 +111,19 @@ WriteEnabled_GPI_Operations(FILE * fd)
 	}
 #endif
 
-	if (anypresent)
-	{
+	fprintf (fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, GPI_BASE_EV, "GPI call");
+	fprintf (fd, "VALUES\n");
+	fprintf (fd, "0 Outside GPI\n");
 
-		fprintf (fd, "EVENT_TYPE\n");
-		fprintf (fd, "%d    %d    %s\n", 0, GPI_BASE_EV, "GPI call");
-		fprintf (fd, "VALUES\n");
-		fprintf (fd, "0 Outside GPI\n");
-		for (u = 0; u < MAX_GPI_TYPE_ENTRIES; u++)
-			if (GPI_event_label[u].present)
-				fprintf (fd, "%d %s\n", 
-				    GPI_event_label[u].eventval,
-				    GPI_event_label[u].description);
-		LET_SPACES(fd);
+	for (u = 0; u < MAX_GPI_TYPE_ENTRIES; u++)
+	{
+		if (GPI_event_label[u].present)
+		{
+			fprintf (fd, "%d %s\n",
+			    GPI_event_label[u].eventval,
+			    GPI_event_label[u].description);
+		}
 	}
+	LET_SPACES(fd);
 }
