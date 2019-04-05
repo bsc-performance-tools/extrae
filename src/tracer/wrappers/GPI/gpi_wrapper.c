@@ -190,7 +190,7 @@ gaspi_segment_create(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_segment_create_Entry();
+	Extrae_GPI_segment_create_Entry(segment_id, size, group);
 	ret = pgaspi_segment_create(segment_id, size, group, timeout_ms, alloc_policy);
 	Extrae_GPI_segment_create_Exit();
 

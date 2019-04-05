@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <PGASPI.h>
+
 void Extrae_set_trace_GPI(int trace);
 int  Extrae_get_trace_GPI();
 void Extrae_set_trace_GPI_HWC(int trace);
@@ -34,7 +36,9 @@ void Probe_GPI_term_Entry();
 void Probe_GPI_term_Exit();
 void Probe_GPI_barrier_Entry();
 void Probe_GPI_barrier_Exit();
-void Probe_GPI_segment_create_Entry();
+void Probe_GPI_segment_create_Entry(const gaspi_segment_id_t _segment_id,
+                                    const gaspi_size_t _size,
+                                    const gaspi_group_t _group);
 void Probe_GPI_segment_create_Exit();
 void Probe_GPI_write_Entry();
 void Probe_GPI_write_Exit();

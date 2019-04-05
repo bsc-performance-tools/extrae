@@ -31,7 +31,7 @@
 #include "gpi_prv_events.h"
 
 static int
-GPI_Event(event_t * current_event, unsigned long long current_time, unsigned cpu,
+GPI_Event(event_t *current_event, unsigned long long current_time, unsigned cpu,
     unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
 {
 	unsigned int EvType, nEvType;
@@ -65,8 +65,27 @@ GPI_Event(event_t * current_event, unsigned long long current_time, unsigned cpu
 	return 0;
 }
 
+static int
+GPI_Param(event_t *current_event, unsigned long long current_time, unsigned cpu,
+    unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
+{
+	unsigned int EvType, nEvType;
+	unsigned long long EvValue, nEvValue;
+	UNREFERENCED_PARAMETER(fset);
+
+	EvType  = Get_EvEvent(current_event);
+	EvValue = Get_EvValue(current_event);
+
+	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
+
+	return 0;
+}
+
 SingleEv_Handler_t PRV_GPI_Event_Handlers[] =
 {
+	{GPI_SIZE_EV, GPI_Param},
+	{GPI_GROUP_EV, GPI_Param},
+	{GPI_SEGMENT_ID_EV, GPI_Param},
 	{GPI_INIT_EV, GPI_Event},
 	{GPI_TERM_EV, GPI_Event},
 	{GPI_BARRIER_EV, GPI_Event},

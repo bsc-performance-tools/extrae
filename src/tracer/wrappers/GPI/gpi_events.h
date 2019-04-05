@@ -23,13 +23,17 @@
 
 #pragma once
 
+#include <PGASPI.h>
+
 void Extrae_GPI_init_Entry();
 void Extrae_GPI_init_Exit();
 void Extrae_GPI_term_Entry();
 void Extrae_GPI_term_Exit();
 void Extrae_GPI_barrier_Entry();
 void Extrae_GPI_barrier_Exit();
-void Extrae_GPI_segment_create_Entry();
+void Extrae_GPI_segment_create_Entry(const gaspi_segment_id_t _segment_id,
+                                     const gaspi_size_t _size,
+                                     const gaspi_group_t _group);
 void Extrae_GPI_segment_create_Exit();
 void Extrae_GPI_write_Entry();
 void Extrae_GPI_write_Exit();
