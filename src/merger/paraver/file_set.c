@@ -1358,6 +1358,11 @@ int Search_Synchronization_Times (int taskid, int ntasks, FileSet_t * fset,
 						mpi_init_end_time = Get_EvTime(current);
 						found_mpi_init_end_time = TRUE;
 					}
+					else if (Get_EvEvent(current) == GPI_INIT_EV && Get_EvValue(current) == EVT_END)
+					{
+						mpi_init_end_time = Get_EvTime(current);
+						found_mpi_init_end_time = TRUE;
+					}
 					else if (Get_EvEvent(current) == TRACE_INIT_EV && Get_EvValue(current) == EVT_END)
 					{
 						trace_init_end_time = Get_EvTime(current);
