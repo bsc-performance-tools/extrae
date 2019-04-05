@@ -647,13 +647,19 @@ enum {
 /* To associate command queue with Paraver thread */
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
-/* GPI-2 events */
+/* GPI-2 calls events */
 #define GPI_BASE_EV           69000000
 #define GPI_INIT_EV           69000001
 #define GPI_BARRIER_EV        69000002
 #define GPI_SEGMENT_CREATE_EV 69000003
 #define GPI_WRITE_EV          69000004
 #define GPI_TERM_EV           69000999
+
+/* GPI-2 parameters events*/
+#define GPI_PARAM_BASE_EV     69100000
+#define GPI_SIZE_EV           69100001
+#define GPI_GROUP_EV          69100002
+#define GPI_SEGMENT_ID_EV     69100003
 
 
 #define CALLER_EV                70000000

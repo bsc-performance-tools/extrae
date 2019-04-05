@@ -308,8 +308,9 @@ unsigned IsOPENSHMEM (unsigned EvType)
 /*
  * IsGPI
  */
-#define GPI_EVENTS 5
+#define GPI_EVENTS 8
 static unsigned gpi_events[] = {
+	GPI_SIZE_EV, GPI_GROUP_EV, GPI_SEGMENT_ID_EV,
 	GPI_INIT_EV, GPI_TERM_EV, GPI_BARRIER_EV, GPI_SEGMENT_CREATE_EV, GPI_WRITE_EV
 };
 

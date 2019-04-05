@@ -68,10 +68,12 @@ Extrae_GPI_barrier_Exit()
 }
 
 void
-Extrae_GPI_segment_create_Entry()
+Extrae_GPI_segment_create_Entry(const gaspi_segment_id_t segment_id,
+    const gaspi_size_t size,
+    const gaspi_group_t group)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GPI_segment_create_Entry();
+	Probe_GPI_segment_create_Entry(segment_id, size, group);
 }
 
 void Extrae_GPI_segment_create_Exit()

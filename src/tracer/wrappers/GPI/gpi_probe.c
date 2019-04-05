@@ -107,11 +107,18 @@ Probe_GPI_barrier_Exit()
 }
 
 void
-Probe_GPI_segment_create_Entry()
+Probe_GPI_segment_create_Entry(const gaspi_segment_id_t segment_id,
+    const gaspi_size_t size,
+    const gaspi_group_t group)
 {
 	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_SEGMENT_CREATE_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+		TRACE_EVENTANDCOUNTERS(
+		    LAST_READ_TIME, GPI_SEGMENT_CREATE_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_SEGMENT_ID_EV, (int)segment_id);
+		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GPI_GROUP_EV, (int)group);
 	}
 }
 

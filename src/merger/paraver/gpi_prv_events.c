@@ -40,9 +40,9 @@ struct GPI_event_label_t
 	int       eventval;
 };
 
-#define MAX_GPI_TYPE_ENTRIES 5
+#define MAX_GPI_EVENT_TYPE_ENTRIES 5
 
-static struct GPI_event_label_t GPI_event_label[MAX_GPI_TYPE_ENTRIES] =
+static struct GPI_event_label_t GPI_event_type_label[MAX_GPI_EVENT_TYPE_ENTRIES] =
 {
 	{GPI_INIT_EV, FALSE, "gaspi_proc_init", 1},
 	{GPI_BARRIER_EV, FALSE, "gaspi_barrier", 2},
@@ -56,11 +56,11 @@ Enable_GPI_Operation(unsigned evttype)
 {
 	unsigned u;
 
-	for (u = 0; u < MAX_GPI_TYPE_ENTRIES; u++)
+	for (u = 0; u < MAX_GPI_EVENT_TYPE_ENTRIES; u++)
 	{
-		if (GPI_event_label[u].eventtype == evttype)
+		if (GPI_event_type_label[u].eventtype == evttype)
 		{
-			GPI_event_label[u].present = TRUE;
+			GPI_event_type_label[u].present = TRUE;
 			break;
 		}
 	}
@@ -73,12 +73,12 @@ Translate_GPI_Operation(unsigned in_evttype, unsigned long long in_evtvalue,
 	unsigned u;
 	unsigned out_type = GPI_BASE_EV;
 
-	for (u = 0; u < MAX_GPI_TYPE_ENTRIES; u++)
-		if (GPI_event_label[u].eventtype == in_evttype)
+	for (u = 0; u < MAX_GPI_EVENT_TYPE_ENTRIES; u++)
+		if (GPI_event_type_label[u].eventtype == in_evttype)
 		{
 			*out_evttype = out_type;
 			if (in_evtvalue != 0)
-				*out_evtvalue = GPI_event_label[u].eventval;
+				*out_evtvalue = GPI_event_type_label[u].eventval;
 			else
 				*out_evtvalue = 0;
 			return TRUE;
@@ -98,13 +98,13 @@ WriteEnabled_GPI_Operations(FILE * fd)
 
 	for (u = 0; u < MAX_TYPE_ENTRIES; u++)
 	{
-		anypresent = GPI_event_label[u].present || anypresent;
+		anypresent = GPI_event_type_label[u].present || anypresent;
 
-		if (GPI_event_label[u].present && (
-		      GPI_event_label[u].eventtype == OPENCL_CLENQUEUEREADBUFFER_EV ||
-		      GPI_event_label[u].eventtype == OPENCL_CLENQUEUEREADBUFFERRECT_EV ||
-		      GPI_event_label[u].eventtype == OPENCL_CLENQUEUEWRITEBUFFER_EV ||
-		      GPI_event_label[u].eventtype == OPENCL_CLENQUEUEWRITEBUFFERRECT_EV )
+		if (GPI_event_type_label[u].present && (
+		      GPI_event_type_label[u].eventtype == OPENCL_CLENQUEUEREADBUFFER_EV ||
+		      GPI_event_type_label[u].eventtype == OPENCL_CLENQUEUEREADBUFFERRECT_EV ||
+		      GPI_event_type_label[u].eventtype == OPENCL_CLENQUEUEWRITEBUFFER_EV ||
+		      GPI_event_type_label[u].eventtype == OPENCL_CLENQUEUEWRITEBUFFERRECT_EV )
 		   )
 			memtransfersizepresent = TRUE;
 
@@ -119,14 +119,26 @@ WriteEnabled_GPI_Operations(FILE * fd)
 	fprintf (fd, "VALUES\n");
 	fprintf (fd, "0 Outside GPI\n");
 
-	for (u = 0; u < MAX_GPI_TYPE_ENTRIES; u++)
+	for (u = 0; u < MAX_GPI_EVENT_TYPE_ENTRIES; u++)
 	{
-		if (GPI_event_label[u].present)
+		if (GPI_event_type_label[u].present)
 		{
 			fprintf (fd, "%d %s\n",
-			    GPI_event_label[u].eventval,
-			    GPI_event_label[u].description);
+			    GPI_event_type_label[u].eventval,
+			    GPI_event_type_label[u].description);
 		}
 	}
+	LET_SPACES(fd);
+
+	fprintf (fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, GPI_SIZE_EV, "GPI size");
+	LET_SPACES(fd);
+
+	fprintf (fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, GPI_GROUP_EV, "GPI group");
+	LET_SPACES(fd);
+
+	fprintf (fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, GPI_SEGMENT_ID_EV, "GPI segment ID");
 	LET_SPACES(fd);
 }
