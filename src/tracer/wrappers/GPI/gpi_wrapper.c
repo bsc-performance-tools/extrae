@@ -163,7 +163,17 @@ gaspi_proc_term(gaspi_timeout_t timeout_ms)
 	int ret;
 
 	Extrae_GPI_term_Entry();
-	ret = pgaspi_proc_term(timeout_ms);
+
+	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+	{
+		Backend_Finalize ();
+		ret = pgaspi_proc_term(timeout_ms);
+		mpitrace_on = FALSE;
+	} else
+	{
+		ret = GASPI_SUCCESS;
+	}
+
 	Extrae_GPI_term_Exit();
 
 	return ret;
