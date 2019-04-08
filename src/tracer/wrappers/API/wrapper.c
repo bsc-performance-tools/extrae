@@ -519,6 +519,7 @@ char * Get_ApplName (void)
  ******************************************************************************/
 static int Extrae_Application_isMPI = FALSE;
 static int Extrae_Application_isSHMEM = FALSE;
+static int Extrae_Application_isGPI = FALSE;
 
 int Extrae_get_ApplicationIsMPI (void)
 {
@@ -538,6 +539,16 @@ int Extrae_get_ApplicationIsSHMEM (void)
 void Extrae_set_ApplicationIsSHMEM (int b)
 {
         Extrae_Application_isSHMEM = b;
+}
+
+int Extrae_get_ApplicationIsGPI(void)
+{
+	return Extrae_Application_isGPI;
+}
+
+void Extrae_set_ApplicationIsGPI(int isGPI)
+{
+	Extrae_Application_isGPI = isGPI;
 }
 
 

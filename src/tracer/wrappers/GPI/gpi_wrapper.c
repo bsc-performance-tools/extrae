@@ -115,6 +115,8 @@ gaspi_proc_init(gaspi_timeout_t timeout_ms)
 
 	ret = pgaspi_proc_init(timeout_ms);
 
+	Extrae_set_ApplicationIsGPI(TRUE);
+
 	/* Setup callbacks for TASK identification and barrier execution */
 	Extrae_set_taskid_function((unsigned int (*)(void))Extrae_GPI_TaskID);
 	Extrae_set_numtasks_function((unsigned int (*)(void))Extrae_GPI_NumTasks);
