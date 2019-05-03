@@ -25,20 +25,52 @@
 
 #include <PGASPI.h>
 
-void Extrae_set_trace_GPI(int trace);
+void Extrae_set_trace_GPI(int _trace);
 int  Extrae_get_trace_GPI();
-void Extrae_set_trace_GPI_HWC(int trace);
+
+void Extrae_set_trace_GPI_HWC(int _trace);
 int  Extrae_get_trace_GPI_HWC();
+
 
 void Probe_GPI_init_Entry();
 void Probe_GPI_init_Exit();
+
 void Probe_GPI_term_Entry();
 void Probe_GPI_term_Exit();
+
+void Probe_GPI_connect_Entry(const gaspi_rank_t _rank);
+void Probe_GPI_connect_Exit();
+
+void Probe_GPI_disconnect_Entry(const gaspi_rank_t _rank);
+void Probe_GPI_disconnect_Exit();
+
+void Probe_GPI_group_create_Entry();
+void Probe_GPI_group_create_Exit(const gaspi_group_t *_group);
+
+void Probe_GPI_group_add_Entry(
+    const gaspi_group_t _group,
+    const gaspi_rank_t  _rank);
+void Probe_GPI_group_add_Exit();
+
+void Probe_GPI_group_commit_Entry(
+    const gaspi_group_t   _group,
+    const gaspi_timeout_t _timeout);
+void Probe_GPI_group_commit_Exit();
+
 void Probe_GPI_barrier_Entry();
 void Probe_GPI_barrier_Exit();
-void Probe_GPI_segment_create_Entry(const gaspi_segment_id_t _segment_id,
-                                    const gaspi_size_t _size,
-                                    const gaspi_group_t _group);
+
+void Probe_GPI_segment_create_Entry(
+    const gaspi_segment_id_t _segment_id,
+    const gaspi_size_t       _size,
+    const gaspi_group_t      _group);
 void Probe_GPI_segment_create_Exit();
+
 void Probe_GPI_write_Entry();
 void Probe_GPI_write_Exit();
+
+void Probe_GPI_allreduce_Entry(
+    const gaspi_number_t   _num,
+    const gaspi_datatype_t _datatyp,
+    const gaspi_group_t    _group);
+void Probe_GPI_allreduce_Exit();

@@ -180,6 +180,76 @@ gaspi_proc_term(gaspi_timeout_t timeout_ms)
 }
 
 gaspi_return_t
+gaspi_connect(const gaspi_rank_t rank, const gaspi_timeout_t timeout)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_connect_Entry(rank);
+	ret = pgaspi_connect(rank, timeout);
+	Extrae_GPI_connect_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_disconnect(const gaspi_rank_t rank, const gaspi_timeout_t timeout)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_disconnect_Entry(rank);
+	ret = pgaspi_disconnect(rank, timeout);
+	Extrae_GPI_disconnect_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_group_create(const gaspi_group_t *group)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_group_create_Entry();
+	ret = pgaspi_group_create(group);
+	Extrae_GPI_group_create_Exit(group);
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_group_add(const gaspi_group_t group, const gaspi_rank_t rank)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_group_add_Entry(group, rank);
+	ret = pgaspi_group_add(group, rank);
+	Extrae_GPI_group_add_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_group_commit(const gaspi_group_t group, const gaspi_timeout_t timeout)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_group_commit_Entry(group);
+	ret = pgaspi_group_commit(group, timeout);
+	Extrae_GPI_group_commit_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
 gaspi_barrier(const gaspi_group_t group, const gaspi_timeout_t timeout_ms)
 {
 	DBG
@@ -221,8 +291,29 @@ gaspi_write(const gaspi_segment_id_t segment_id_local,
 	int ret;
 
 	Extrae_GPI_write_Entry();
-	ret = pgaspi_write(segment_id_local, offset_local, rank, segment_id_remote, offset_remote, size, queue, timeout_ms);
+	ret = pgaspi_write(segment_id_local, offset_local, rank, segment_id_remote,
+	    offset_remote, size, queue, timeout_ms);
 	Extrae_GPI_write_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_allreduce(gaspi_pointer_t const buffer_send,
+    gaspi_pointer_t const buffer_receive, const gaspi_number_t num,
+    const gaspi_operation_t operation, const gaspi_datatype_t datatyp,
+    const gaspi_group_t group, const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_allreduce_Entry(num, datatyp, group);
+
+	ret = pgaspi_allreduce(buffer_send, buffer_receive, num, operation, datatyp,
+	    group, timeout_ms);
+
+	Extrae_GPI_allreduce_Exit();
 
 	return ret;
 }

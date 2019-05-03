@@ -54,6 +54,77 @@ Extrae_GPI_term_Exit()
 }
 
 void
+Extrae_GPI_connect_Entry(const gaspi_rank_t rank)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_connect_Entry(rank);
+}
+
+void
+Extrae_GPI_connect_Exit()
+{
+	Probe_GPI_connect_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_disconnect_Entry(const gaspi_rank_t rank)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_disconnect_Entry(rank);
+}
+
+void
+Extrae_GPI_disconnect_Exit()
+{
+	Probe_GPI_disconnect_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_group_create_Entry()
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_group_create_Entry();
+}
+
+void
+Extrae_GPI_group_create_Exit(const gaspi_group_t *group)
+{
+	Probe_GPI_group_create_Exit(group);
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_group_add_Entry(const gaspi_group_t group, const gaspi_rank_t rank)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_group_add_Entry(group, rank);
+}
+
+void
+Extrae_GPI_group_add_Exit()
+{
+	Probe_GPI_group_add_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_group_commit_Entry(const gaspi_group_t group,
+    const gaspi_timeout_t timeout)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_group_commit_Entry(group);
+}
+
+void
+Extrae_GPI_group_commit_Exit()
+{
+	Probe_GPI_group_commit_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
 Extrae_GPI_barrier_Entry()
 {
 	Backend_Enter_Instrumentation();
@@ -91,5 +162,20 @@ void Extrae_GPI_write_Entry()
 void Extrae_GPI_write_Exit()
 {
 	Probe_GPI_write_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_allreduce_Entry(const gaspi_number_t num,
+    const gaspi_datatype_t datatyp, const gaspi_group_t group);
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_allreduce_Entry(num, datatyp, group);
+}
+
+void
+Extrae_GPI_allreduce_Exit()
+{
+	Probe_GPI_allreduce_Exit();
 	Backend_Leave_Instrumentation();
 }

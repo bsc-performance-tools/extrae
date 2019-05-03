@@ -89,6 +89,113 @@ Probe_GPI_term_Exit()
 }
 
 void
+Probe_GPI_connect_Entry(const gaspi_rank_t rank)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_CONNECT_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
+	}
+}
+
+void
+Probe_GPI_connect_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_CONNECT_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_disconnect_Entry(const gaspi_rank_t rank)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_DISCONNECT_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
+	}
+}
+
+void
+Probe_GPI_disconnect_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_DISCONNECT_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_group_create_Entry()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_GROUP_CREATE_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_group_create_Exit(const gaspi_group_t *group)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_GROUP_CREATE_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_GROUP_EV, (int)group);
+	}
+}
+
+void
+Probe_GPI_group_add_Entry(const gaspi_group_t group, const gaspi_rank_t rank)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_GROUP_ADD_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_GROUP_EV, (int)group);
+		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
+	}
+}
+
+void
+Probe_GPI_group_add_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_GROUP_ADD_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_group_commit_Entry(const gaspi_group_t group,
+    const gaspi_timeout_t timeout)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_GROUP_COMMIT_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_GROUP_EV, (int)group);
+	}
+}
+
+void
+Probe_GPI_group_commit_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_GROUP_COMMIT_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
 Probe_GPI_barrier_Entry()
 {
 	if (mpitrace_on && Extrae_get_trace_GPI())
@@ -146,5 +253,25 @@ Probe_GPI_write_Exit()
 	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
 		TRACE_EVENTANDCOUNTERS(TIME, GPI_WRITE_EV, EVT_END, Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_allreduce_Entry(const gaspi_number_t num,
+    const gaspi_datatype_t datatyp, const gaspi_group_t group)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_ALLREDUCE_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_GROUP_EV, (int)group);
+	}
+}
+
+void
+Probe GPI_allreduce_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_ALLREDUCE_EV, EVT_END, Extrae_get_trace_GPI_HWC());
 	}
 }
