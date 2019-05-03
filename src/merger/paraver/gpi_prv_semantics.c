@@ -57,6 +57,17 @@ GPI_Event(event_t *current_event, unsigned long long current_time, unsigned cpu,
 			Switch_State(STATE_IO, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
+		case GPI_CONNECT_EV:
+		case GPI_DISCONNECT_EV:
+		case GPI_ALLREDUCE_EV:
+			Switch_State(STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
+			trace_paraver_state(cpu, ptask, task, thread, current_time);
+			break;
+		case GPI_GROUP_CREATE_EV:
+		case GPI_GROUP_ADD_EV:
+		case GPI_GROUP_COMMIT_EV:
+			Switch_State(STATE_MIXED, (EvValue != EVT_END), ptask, task, thread);
+			trace_paraver_state(cpu, ptask, task, thread, current_time);
 	}
 
 	Translate_GPI_Operation(EvType, EvValue, &nEvType, &nEvValue);
@@ -83,13 +94,20 @@ GPI_Param(event_t *current_event, unsigned long long current_time, unsigned cpu,
 
 SingleEv_Handler_t PRV_GPI_Event_Handlers[] =
 {
-	{GPI_SIZE_EV, GPI_Param},
+	{GPI_RANK_EV, GPI_Param},
 	{GPI_GROUP_EV, GPI_Param},
+	{GPI_SIZE_EV, GPI_Param},
 	{GPI_SEGMENT_ID_EV, GPI_Param},
 	{GPI_INIT_EV, GPI_Event},
 	{GPI_TERM_EV, GPI_Event},
+	{GPI_CONNECT_EV, GPI_Event},
+	{GPI_DISCONNECT_EV, GPI_Event},
+	{GPI_GROUP_CREATE_EV, GPI_Event},
+	{GPI_GROUP_ADD_EV, GPI_Event},
+	{GPI_GROUP_COMMIT_EV, GPI_Event},
 	{GPI_BARRIER_EV, GPI_Event},
 	{GPI_SEGMENT_CREATE_EV, GPI_Event},
 	{GPI_WRITE_EV, GPI_Event},
+	{GPI_ALLREDUCE_EV, GPI_Event},
 	{ NULL_EV, NULL }
 };
