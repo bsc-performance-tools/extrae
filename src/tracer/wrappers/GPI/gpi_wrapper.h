@@ -37,7 +37,7 @@ gaspi_return_t gaspi_disconnect(
     const gaspi_rank_t _rank,
     const gaspi_timeout_t _timeout);
 
-gaspi_return_t gaspi_group_create(const gaspi_group_t _group);
+gaspi_return_t gaspi_group_create(gaspi_group_t * const _group);
 
 gaspi_return_t gaspi_group_add(
     const gaspi_group_t _group,
@@ -47,18 +47,42 @@ gaspi_return_t gaspi_group_commit(
     const gaspi_group_t   _group,
     const gaspi_timeout_t _timeout);
 
-gaspi_return_t  gaspi_barrier(
-    const gaspi_group_t   _group,
-    const gaspi_timeout_t _timeout_ms);
+gaspi_return_t gaspi_group_delete(const gaspi_group_t _group);
 
-gaspi_return_t	gaspi_segment_create(
+gaspi_return_t gaspi_segment_alloc(
+    const gaspi_segment_id_t _segment_id,
+    const gaspi_size_t       _size,
+    const gaspi_alloc_t      _alloc_policy);
+
+gaspi_return_t gaspi_segment_register(
+    const gaspi_segment_id_t _segment_id,
+    const gaspi_rank_t       _rank,
+    const gaspi_timeout_t    _timeout);
+
+gaspi_return_t gaspi_segment_create(
     const gaspi_segment_id_t _segment_id,
     const gaspi_size_t       _size,
     const gaspi_group_t      _group,
     const gaspi_timeout_t    _timeout_ms,
     const gaspi_alloc_t      _alloc_policy);
 
-gaspi_return_t	gaspi_write(
+gaspi_return_t gaspi_segment_bind(
+    const gaspi_segment_id_t         _segment_id,
+    const gaspi_pointer_t            _pointer,
+    const gaspi_size_t               _size,
+    const gaspi_memory_description_t _memory_description);
+
+gaspi_return_t gaspi_segment_use(
+    const gaspi_segment_id_t         _segment_id,
+    const gaspi_pointer_t            _pointer,
+    const gaspi_size_t               _size,
+    const gaspi_group_t              _group,
+    const gaspi_timeout_t            _timeout,
+    const gaspi_memory_description_t _memory_description);
+
+gaspi_return_t gaspi_segment_delete(const gaspi_segment_id_t _segment_id);
+
+gaspi_return_t gaspi_write(
     const gaspi_segment_id_t _segment_id_local,
     const gaspi_offset_t     _offset_local,
     const gaspi_rank_t       _rank,
@@ -68,7 +92,33 @@ gaspi_return_t	gaspi_write(
     const gaspi_queue_id_t   _queue,
     const gaspi_timeout_t    _timeout_ms);
 
-gaspi_return_t  gaspi_allreduce(
+gaspi_return_t gaspi_read(
+    const gaspi_segment_id_t _segment_id_local,
+    const gaspi_offset_t     _offset_local,
+    const gaspi_rank_t       _rank,
+    const gaspi_segment_id_t _segment_id_remote,
+    const gaspi_offset_t     _offset_remote,
+    const gaspi_size_t       _size,
+    const gaspi_queue_id_t   _queue,
+    const gaspi_timeout_t    _timeout_ms);
+
+gaspi_return_t gaspi_wait(
+    const gaspi_queue_id_t queue,
+    const gaspi_timeout_t timeout);
+
+gaspi_return_t gaspi_notify(
+    const gaspi_segment_id_t      _segment_id,
+    const gaspi_rank_t            _rank,
+    const gaspi_notification_id_t _notification_id,
+    const gaspi_notification_t    _notification_value,
+    const gaspi_queue_id_t        _queue,
+    const gaspi_timeout_t         _timeout);
+
+gaspi_return_t gaspi_barrier(
+    const gaspi_group_t   _group,
+    const gaspi_timeout_t _timeout_ms);
+
+gaspi_return_t gaspi_allreduce(
     gaspi_pointer_t const   _buffer_send,
     gaspi_pointer_t const   _buffer_receive,
     const gaspi_number_t    _num,

@@ -40,7 +40,7 @@ struct GPI_event_label_t
 	int       eventval;
 };
 
-#define MAX_GPI_EVENT_TYPE_ENTRIES 11
+#define MAX_GPI_EVENT_TYPE_ENTRIES 17
 
 static struct GPI_event_label_t GPI_event_type_label[MAX_GPI_EVENT_TYPE_ENTRIES] =
 {
@@ -50,9 +50,18 @@ static struct GPI_event_label_t GPI_event_type_label[MAX_GPI_EVENT_TYPE_ENTRIES]
 	{GPI_GROUP_CREATE_EV, FALSE, "gaspi_group_create", 10},
 	{GPI_GROUP_ADD_EV, FALSE, "gaspi_group_add", 11},
 	{GPI_GROUP_COMMIT_EV, FALSE, "gaspi_group_commit", 12},
+	{GPI_GROUP_DELETE_EV, FALSE, "gaspi_group_delete", 13},
+	{GPI_SEGMENT_ALLOC_EV, FALSE, "gaspi_segment_alloc", 20},
+	{GPI_SEGMENT_REGISTER_EV, FALSE, "gaspi_segment_register", 21},
+	{GPI_SEGMENT_CREATE_EV, FALSE, "gaspi_segment_create", 22},
+	{GPI_SEGMENT_BIND_EV, FALSE, "gaspi_segment_bind", 23},
+	{GPI_SEGMENT_USE_EV, FALSE, "gaspi_segment_use", 24},
+	{GPI_SEGMENT_DELETE_EV, FALSE, "gaspi_segment_delete", 25},
+	{GPI_WRITE_EV, FALSE, "gaspi_write", 30},
+	{GPI_READ_EV, FALSE, "gaspi_read", 31},
+	{GPI_WAIT_EV, FALSE, "gaspi_wait", 32},
+	{GPI_NOTIFY_EV, FALSE, "gaspi_notify", 33},
 	{GPI_BARRIER_EV, FALSE, "gaspi_barrier", 4},
-	{GPI_SEGMENT_CREATE_EV, FALSE, "gaspi_segment_create", 5},
-	{GPI_WRITE_EV, FALSE, "gaspi_write", 6},
 	{GPI_ALLREDUCE_EV, FALSE, "gaspi_allreduce", 7},
 	{GPI_TERM_EV, FALSE, "gaspi_proc_term", 999}
 };
@@ -137,18 +146,10 @@ WriteEnabled_GPI_Operations(FILE * fd)
 	LET_SPACES(fd);
 
 	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GPI_RANK_EV, "GPI rank");
-	LET_SPACES(fd);
-
-	fprintf (fd, "EVENT_TYPE\n");
 	fprintf (fd, "%d    %d    %s\n", 0, GPI_SIZE_EV, "GPI size");
 	LET_SPACES(fd);
 
 	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GPI_GROUP_EV, "GPI group");
-	LET_SPACES(fd);
-
-	fprintf (fd, "EVENT_TYPE\n");
-	fprintf (fd, "%d    %d    %s\n", 0, GPI_SEGMENT_ID_EV, "GPI segment ID");
+	fprintf (fd, "%d    %d    %s\n", 0, GPI_RANK_EV, "GPI rank");
 	LET_SPACES(fd);
 }
