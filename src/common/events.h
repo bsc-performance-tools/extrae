@@ -648,31 +648,36 @@ enum {
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
 /* GPI-2 calls events */
-#define GPI_BASE_EV           69000000
-#define GPI_INIT_EV           69000001
-#define GPI_CONNECT_EV        69000002
-#define GPI_DISCONNECT_EV     69000003
+#define GPI_BASE_EV              69000000
+#define GPI_INIT_EV              69000001
+#define GPI_CONNECT_EV           69000002
+#define GPI_DISCONNECT_EV        69000003
 
-#define GPI_GROUP_CREATE_EV   69000010
-#define GPI_GROUP_ADD_EV      69000011
-#define GPI_GROUP_COMMIT_EV   69000012
-//#define GPI_GROUP_DELETE_EV   69000013
-//#define GPI_GROUP_NUM_EV      69000014
-//#define GPI_GROUP_SIZE_EV     69000015
-//#define GPI_GROUP_RANKS_EV    69000016
+#define GPI_GROUP_CREATE_EV      69000010
+#define GPI_GROUP_ADD_EV         69000011
+#define GPI_GROUP_COMMIT_EV      69000012
+#define GPI_GROUP_DELETE_EV      69000013
 
-#define GPI_BARRIER_EV        69000004
-#define GPI_SEGMENT_CREATE_EV 69000005
-#define GPI_WRITE_EV          69000006
-#define GPI_ALLREDUCE_EV      69000007
-#define GPI_TERM_EV           69000999
+#define GPI_SEGMENT_ALLOC_EV     69000020
+#define GPI_SEGMENT_REGISTER_EV  69000021
+#define GPI_SEGMENT_CREATE_EV    69000022
+#define GPI_SEGMENT_BIND_EV      69000023
+#define GPI_SEGMENT_USE_EV       69000024
+#define GPI_SEGMENT_DELETE_EV    69000025
+
+#define GPI_WRITE_EV             69000030
+#define GPI_READ_EV              69000031
+#define GPI_WAIT_EV              69000032
+#define GPI_NOTIFY_EV            69000033
+
+#define GPI_BARRIER_EV           69000004
+#define GPI_ALLREDUCE_EV         69000007
+#define GPI_TERM_EV              69000999
 
 /* GPI-2 parameters events*/
-#define GPI_PARAM_BASE_EV     69100000
-#define GPI_RANK_EV           69100001
-#define GPI_GROUP_EV          69100002
-#define GPI_SIZE_EV           69100003
-#define GPI_SEGMENT_ID_EV     69100004
+#define GPI_PARAM_BASE_EV        69100000
+#define GPI_SIZE_EV              69100001
+#define GPI_RANK_EV              69100002
 
 
 #define CALLER_EV                70000000

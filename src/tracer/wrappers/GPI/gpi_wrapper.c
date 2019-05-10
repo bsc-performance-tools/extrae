@@ -186,7 +186,7 @@ gaspi_connect(const gaspi_rank_t rank, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GPI_connect_Entry(rank);
+	Extrae_GPI_connect_Entry();
 	ret = pgaspi_connect(rank, timeout);
 	Extrae_GPI_connect_Exit();
 
@@ -200,7 +200,7 @@ gaspi_disconnect(const gaspi_rank_t rank, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GPI_disconnect_Entry(rank);
+	Extrae_GPI_disconnect_Entry();
 	ret = pgaspi_disconnect(rank, timeout);
 	Extrae_GPI_disconnect_Exit();
 
@@ -208,7 +208,7 @@ gaspi_disconnect(const gaspi_rank_t rank, const gaspi_timeout_t timeout)
 }
 
 gaspi_return_t
-gaspi_group_create(const gaspi_group_t *group)
+gaspi_group_create(gaspi_group_t * const group)
 {
 	DBG
 
@@ -216,7 +216,7 @@ gaspi_group_create(const gaspi_group_t *group)
 
 	Extrae_GPI_group_create_Entry();
 	ret = pgaspi_group_create(group);
-	Extrae_GPI_group_create_Exit(group);
+	Extrae_GPI_group_create_Exit();
 
 	return ret;
 }
@@ -228,7 +228,7 @@ gaspi_group_add(const gaspi_group_t group, const gaspi_rank_t rank)
 
 	int ret;
 
-	Extrae_GPI_group_add_Entry(group, rank);
+	Extrae_GPI_group_add_Entry();
 	ret = pgaspi_group_add(group, rank);
 	Extrae_GPI_group_add_Exit();
 
@@ -242,9 +242,188 @@ gaspi_group_commit(const gaspi_group_t group, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GPI_group_commit_Entry(group);
+	Extrae_GPI_group_commit_Entry();
 	ret = pgaspi_group_commit(group, timeout);
 	Extrae_GPI_group_commit_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_group_delete(const gaspi_group_t group)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_group_delete_Entry();
+	ret = pgaspi_group_delete(group);
+	Extrae_GPI_group_delete_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_segment_alloc(const gaspi_segment_id_t segment_id,
+  const gaspi_size_t size, const gaspi_alloc_t alloc_policy)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_segment_alloc_Entry(size);
+	ret = pgaspi_segment_alloc(segment_id, size, alloc_policy);
+	Extrae_GPI_segment_alloc_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_segment_register(const gaspi_segment_id_t segment_id,
+  const gaspi_rank_t rank, const gaspi_timeout_t timeout)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_segment_register_Entry();
+	ret = pgaspi_segment_register(segment_id, rank, timeout);
+	Extrae_GPI_segment_register_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_segment_create(const gaspi_segment_id_t segment_id,
+    const gaspi_size_t size, const gaspi_group_t group,
+    const gaspi_timeout_t timeout_ms, const gaspi_alloc_t alloc_policy)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_segment_create_Entry(size);
+	ret = pgaspi_segment_create(segment_id, size, group, timeout_ms, alloc_policy);
+	Extrae_GPI_segment_create_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_segment_bind(const gaspi_segment_id_t segment_id,
+    const gaspi_pointer_t pointer, const gaspi_size_t size,
+    const gaspi_memory_description_t memory_description)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_segment_bind_Entry(size);
+	ret = pgaspi_segment_bind(segment_id, pointer, size, memory_description);
+	Extrae_GPI_segment_bind_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_segment_use(const gaspi_segment_id_t segment_id,
+    const gaspi_pointer_t pointer, const gaspi_size_t size,
+    const gaspi_group_t group, const gaspi_timeout_t timeout,
+    const gaspi_memory_description_t memory_description)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_segment_use_Entry(size);
+	ret = pgaspi_segment_use
+	    (segment_id, pointer, size, group, timeout, memory_description);
+	Extrae_GPI_segment_use_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_segment_delete(const gaspi_segment_id_t segment_id)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_segment_delete_Entry();
+	ret = pgaspi_segment_delete(segment_id);
+	Extrae_GPI_segment_delete_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_write(const gaspi_segment_id_t segment_id_local,
+    const gaspi_offset_t offset_local, const gaspi_rank_t rank,
+    const gaspi_segment_id_t segment_id_remote,
+    const gaspi_offset_t offset_remote, const gaspi_size_t size,
+    const gaspi_queue_id_t queue, const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_write_Entry(rank, size);
+	ret = pgaspi_write(segment_id_local, offset_local, rank, segment_id_remote,
+	    offset_remote, size, queue, timeout_ms);
+	Extrae_GPI_write_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_read(const gaspi_segment_id_t segment_id_local,
+    const gaspi_offset_t offset_local, const gaspi_rank_t rank,
+    const gaspi_segment_id_t segment_id_remote,
+    const gaspi_offset_t offset_remote, const gaspi_size_t size,
+    const gaspi_queue_id_t queue, const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_read_Entry(rank, size);
+	ret = pgaspi_read(segment_id_local, offset_local, rank, segment_id_remote,
+	    offset_remote, size, queue, timeout_ms);
+	Extrae_GPI_read_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_wait(const gaspi_queue_id_t queue, const gaspi_timeout_t timeout)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_wait_Entry();
+	ret = pgaspi_wait(queue, timeout);
+	Extrae_GPI_wait_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_notify(const gaspi_segment_id_t segment_id,
+    const gaspi_rank_t rank, const gaspi_notification_id_t notification_id,
+    const gaspi_notification_t notification_value, const gaspi_queue_id_t queue,
+    const gaspi_timeout_t timeout)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_notify_Entry(rank);
+	ret = pgaspi_notify
+	    (segment_id, rank, notification_id, notification_value, queue,
+	    timeout);
+	Extrae_GPI_notify_Exit();
 
 	return ret;
 }
@@ -264,41 +443,6 @@ gaspi_barrier(const gaspi_group_t group, const gaspi_timeout_t timeout_ms)
 }
 
 gaspi_return_t
-gaspi_segment_create(const gaspi_segment_id_t segment_id,
-    const gaspi_size_t size, const gaspi_group_t group,
-    const gaspi_timeout_t timeout_ms, const gaspi_alloc_t alloc_policy)
-{
-	DBG
-
-	int ret;
-
-	Extrae_GPI_segment_create_Entry(segment_id, size, group);
-	ret = pgaspi_segment_create(segment_id, size, group, timeout_ms, alloc_policy);
-	Extrae_GPI_segment_create_Exit();
-
-	return ret;
-}
-
-gaspi_return_t
-gaspi_write(const gaspi_segment_id_t segment_id_local,
-    const gaspi_offset_t offset_local, const gaspi_rank_t rank,
-    const gaspi_segment_id_t segment_id_remote,
-    const gaspi_offset_t offset_remote, const gaspi_size_t size,
-    const gaspi_queue_id_t queue, const gaspi_timeout_t timeout_ms)
-{
-	DBG
-
-	int ret;
-
-	Extrae_GPI_write_Entry();
-	ret = pgaspi_write(segment_id_local, offset_local, rank, segment_id_remote,
-	    offset_remote, size, queue, timeout_ms);
-	Extrae_GPI_write_Exit();
-
-	return ret;
-}
-
-gaspi_return_t
 gaspi_allreduce(gaspi_pointer_t const buffer_send,
     gaspi_pointer_t const buffer_receive, const gaspi_number_t num,
     const gaspi_operation_t operation, const gaspi_datatype_t datatyp,
@@ -308,7 +452,7 @@ gaspi_allreduce(gaspi_pointer_t const buffer_send,
 
 	int ret;
 
-	Extrae_GPI_allreduce_Entry(num, datatyp, group);
+	Extrae_GPI_allreduce_Entry();
 
 	ret = pgaspi_allreduce(buffer_send, buffer_receive, num, operation, datatyp,
 	    group, timeout_ms);

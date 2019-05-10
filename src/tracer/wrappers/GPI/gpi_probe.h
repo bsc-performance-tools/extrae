@@ -38,39 +38,56 @@ void Probe_GPI_init_Exit();
 void Probe_GPI_term_Entry();
 void Probe_GPI_term_Exit();
 
-void Probe_GPI_connect_Entry(const gaspi_rank_t _rank);
+void Probe_GPI_connect_Entry();
 void Probe_GPI_connect_Exit();
 
-void Probe_GPI_disconnect_Entry(const gaspi_rank_t _rank);
+void Probe_GPI_disconnect_Entry();
 void Probe_GPI_disconnect_Exit();
 
 void Probe_GPI_group_create_Entry();
-void Probe_GPI_group_create_Exit(const gaspi_group_t *_group);
+void Probe_GPI_group_create_Exit();
 
-void Probe_GPI_group_add_Entry(
-    const gaspi_group_t _group,
-    const gaspi_rank_t  _rank);
+void Probe_GPI_group_add_Entry();
 void Probe_GPI_group_add_Exit();
 
-void Probe_GPI_group_commit_Entry(
-    const gaspi_group_t   _group,
-    const gaspi_timeout_t _timeout);
+void Probe_GPI_group_commit_Entry();
 void Probe_GPI_group_commit_Exit();
+
+void Probe_GPI_group_delete_Entry();
+void Probe_GPI_group_delete_Exit();
+
+void Probe_GPI_segment_alloc_Entry(const gaspi_size_t _size);
+void Probe_GPI_segment_alloc_Exit();
+
+void Probe_GPI_segment_register_Entry();
+void Probe_GPI_segment_register_Exit();
+
+void Probe_GPI_segment_create_Entry(const gaspi_size_t _size);
+void Probe_GPI_segment_create_Exit();
+
+void Probe_GPI_segment_bind_Entry(const gaspi_size_t _size);
+void Probe_GPI_segment_bind_Exit();
+
+void Probe_GPI_segment_use_Entry(const gaspi_size_t _size);
+void Probe_GPI_segment_use_Exit();
+
+void Probe_GPI_segment_delete_Entry();
+void Probe_GPI_segment_delete_Exit();
+
+void Probe_GPI_write_Entry(const gaspi_rank_t _rank, const gaspi_size_t _size);
+void Probe_GPI_write_Exit();
+
+void Probe_GPI_read_Entry(const gaspi_rank_t _rank, const gaspi_size_t _size);
+void Probe_GPI_read_Exit();
+
+void Probe_GPI_wait_Entry();
+void Probe_GPI_wait_Exit();
+
+void Probe_GPI_notify_Entry(const gaspi_rank_t _rank);
+void Probe_GPI_notify_Exit();
 
 void Probe_GPI_barrier_Entry();
 void Probe_GPI_barrier_Exit();
 
-void Probe_GPI_segment_create_Entry(
-    const gaspi_segment_id_t _segment_id,
-    const gaspi_size_t       _size,
-    const gaspi_group_t      _group);
-void Probe_GPI_segment_create_Exit();
-
-void Probe_GPI_write_Entry();
-void Probe_GPI_write_Exit();
-
-void Probe_GPI_allreduce_Entry(
-    const gaspi_number_t   _num,
-    const gaspi_datatype_t _datatyp,
-    const gaspi_group_t    _group);
+void Probe_GPI_allreduce_Entry();
 void Probe_GPI_allreduce_Exit();
