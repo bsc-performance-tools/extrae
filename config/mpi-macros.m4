@@ -106,6 +106,9 @@ AC_DEFUN([AX_PROG_MPI],
          dnl Specific for BG/P machine
          elif test -f "${MPI_LIBSDIR}/libmpich.cnk.a" ; then
             MPI_LIBS="-lmpich.cnk"
+	 dnl check for newer impi
+         elif test -f "${MPI_LIBSDIR}/libmpi_ilp64.so" ; then
+            MPI_LIBS="-lmpi_ilp64"
          else
             MPI_LIBS="not found"
          fi
