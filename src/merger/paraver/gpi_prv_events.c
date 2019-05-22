@@ -40,30 +40,36 @@ struct GPI_event_label_t
 	int       eventval;
 };
 
-#define MAX_GPI_EVENT_TYPE_ENTRIES 17
+#define MAX_GPI_EVENT_TYPE_ENTRIES 26
 
 static struct GPI_event_label_t GPI_event_type_label[MAX_GPI_EVENT_TYPE_ENTRIES] =
 {
-	{GPI_INIT_EV, FALSE, "gaspi_proc_init", 1},
-	{GPI_CONNECT_EV, FALSE, "gaspi_connect", 2},
-	{GPI_DISCONNECT_EV, FALSE, "gaspi_disconnect", 3},
-	{GPI_GROUP_CREATE_EV, FALSE, "gaspi_group_create", 10},
-	{GPI_GROUP_ADD_EV, FALSE, "gaspi_group_add", 11},
-	{GPI_GROUP_COMMIT_EV, FALSE, "gaspi_group_commit", 12},
-	{GPI_GROUP_DELETE_EV, FALSE, "gaspi_group_delete", 13},
-	{GPI_SEGMENT_ALLOC_EV, FALSE, "gaspi_segment_alloc", 20},
-	{GPI_SEGMENT_REGISTER_EV, FALSE, "gaspi_segment_register", 21},
-	{GPI_SEGMENT_CREATE_EV, FALSE, "gaspi_segment_create", 22},
-	{GPI_SEGMENT_BIND_EV, FALSE, "gaspi_segment_bind", 23},
-	{GPI_SEGMENT_USE_EV, FALSE, "gaspi_segment_use", 24},
-	{GPI_SEGMENT_DELETE_EV, FALSE, "gaspi_segment_delete", 25},
-	{GPI_WRITE_EV, FALSE, "gaspi_write", 30},
-	{GPI_READ_EV, FALSE, "gaspi_read", 31},
-	{GPI_WAIT_EV, FALSE, "gaspi_wait", 32},
-	{GPI_NOTIFY_EV, FALSE, "gaspi_notify", 33},
-	{GPI_BARRIER_EV, FALSE, "gaspi_barrier", 4},
-	{GPI_ALLREDUCE_EV, FALSE, "gaspi_allreduce", 7},
-	{GPI_TERM_EV, FALSE, "gaspi_proc_term", 999}
+	{GPI_INIT_EV,              FALSE, "gaspi_proc_init",           1},
+	{GPI_CONNECT_EV,           FALSE, "gaspi_connect",             2},
+	{GPI_DISCONNECT_EV,        FALSE, "gaspi_disconnect",          3},
+	{GPI_GROUP_CREATE_EV,      FALSE, "gaspi_group_create",      100},
+	{GPI_GROUP_ADD_EV,         FALSE, "gaspi_group_add",         101},
+	{GPI_GROUP_COMMIT_EV,      FALSE, "gaspi_group_commit",      102},
+	{GPI_GROUP_DELETE_EV,      FALSE, "gaspi_group_delete",      103},
+	{GPI_SEGMENT_ALLOC_EV,     FALSE, "gaspi_segment_alloc",     200},
+	{GPI_SEGMENT_REGISTER_EV,  FALSE, "gaspi_segment_register",  201},
+	{GPI_SEGMENT_CREATE_EV,    FALSE, "gaspi_segment_create",    202},
+	{GPI_SEGMENT_BIND_EV,      FALSE, "gaspi_segment_bind",      203},
+	{GPI_SEGMENT_USE_EV,       FALSE, "gaspi_segment_use",       204},
+	{GPI_SEGMENT_DELETE_EV,    FALSE, "gaspi_segment_delete",    205},
+	{GPI_WRITE_EV,             FALSE, "gaspi_write",             300},
+	{GPI_READ_EV,              FALSE, "gaspi_read",              301},
+	{GPI_WAIT_EV,              FALSE, "gaspi_wait",              302},
+	{GPI_NOTIFY_EV,            FALSE, "gaspi_notify",            303},
+	{GPI_NOTIFY_WAITSOME_EV,   FALSE, "gaspi_notify_waitsome",   304},
+	{GPI_NOTIFY_RESET_EV,      FALSE, "gaspi_notify_reset",      305},
+	{GPI_WRITE_NOTIFY_EV,      FALSE, "gaspi_write_notify",      306},
+	{GPI_WRITE_LIST_EV,        FALSE, "gaspi_write_list",        307},
+	{GPI_WRITE_LIST_NOTIFY_EV, FALSE, "gaspi_write_list_notify", 308},
+	{GPI_READ_LIST_EV,         FALSE, "gaspi_read_list",         309},
+	{GPI_BARRIER_EV,           FALSE, "gaspi_barrier",             4},
+	{GPI_ALLREDUCE_EV,         FALSE, "gaspi_allreduce",           7},
+	{GPI_TERM_EV,              FALSE, "gaspi_proc_term",        9999}
 };
 
 void

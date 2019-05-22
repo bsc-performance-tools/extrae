@@ -278,6 +278,91 @@ Extrae_GPI_notify_Exit()
 }
 
 void
+Extrae_GPI_notify_waitsome_Entry()
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_notify_waitsome_Entry();
+}
+
+void
+Extrae_GPI_notify_waitsome_Exit()
+{
+	Probe_GPI_notify_waitsome_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_notify_reset_Entry()
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_notify_reset_Entry();
+}
+
+void
+Extrae_GPI_notify_reset_Exit()
+{
+	Probe_GPI_notify_reset_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_write_notify_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_write_notify_Entry(rank, size);
+}
+
+void
+Extrae_GPI_write_notify_Exit()
+{
+	Probe_GPI_write_notify_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_write_list_Entry(rank, size);
+}
+
+void
+Extrae_GPI_write_list_Exit()
+{
+	Probe_GPI_write_list_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_write_list_notify_Entry(const gaspi_rank_t rank,
+    gaspi_size_t * const size)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_write_list_notify_Entry(rank, size);
+}
+
+void
+Extrae_GPI_write_list_notify_Exit()
+{
+	Probe_GPI_write_list_notify_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_read_list_Entry(rank, size);
+}
+
+void
+Extrae_GPI_read_list_Exit()
+{
+	Probe_GPI_read_list_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
 Extrae_GPI_barrier_Entry()
 {
 	Backend_Enter_Instrumentation();
