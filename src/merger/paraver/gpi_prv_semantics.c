@@ -56,6 +56,12 @@ GPI_Event(event_t *current_event, unsigned long long current_time, unsigned cpu,
 		case GPI_READ_EV:
 		case GPI_WAIT_EV:
 		case GPI_NOTIFY_EV:
+		case GPI_NOTIFY_WAITSOME_EV:
+		case GPI_NOTIFY_RESET_EV:
+		case GPI_WRITE_NOTIFY_EV:
+		case GPI_WRITE_LIST_EV:
+		case GPI_WRITE_LIST_NOTIFY_EV:
+		case GPI_READ_LIST_EV:
 			Switch_State(STATE_1SIDED, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
@@ -107,27 +113,33 @@ GPI_Param(event_t *current_event, unsigned long long current_time, unsigned cpu,
 
 SingleEv_Handler_t PRV_GPI_Event_Handlers[] =
 {
-	{GPI_SIZE_EV, GPI_Param},
-	{GPI_RANK_EV, GPI_Param},
-	{GPI_INIT_EV, GPI_Event},
-	{GPI_TERM_EV, GPI_Event},
-	{GPI_CONNECT_EV, GPI_Event},
-	{GPI_DISCONNECT_EV, GPI_Event},
-	{GPI_GROUP_CREATE_EV, GPI_Event},
-	{GPI_GROUP_ADD_EV, GPI_Event},
-	{GPI_GROUP_COMMIT_EV, GPI_Event},
-	{GPI_GROUP_DELETE_EV, GPI_Event},
-	{GPI_SEGMENT_ALLOC_EV, GPI_Event},
-	{GPI_SEGMENT_REGISTER_EV, GPI_Event},
-	{GPI_SEGMENT_CREATE_EV, GPI_Event},
-	{GPI_SEGMENT_BIND_EV, GPI_Event},
-	{GPI_SEGMENT_USE_EV, GPI_Event},
-	{GPI_SEGMENT_DELETE_EV, GPI_Event},
-	{GPI_WRITE_EV, GPI_Event},
-	{GPI_READ_EV, GPI_Event},
-	{GPI_WAIT_EV, GPI_Event},
-	{GPI_NOTIFY_EV, GPI_Event},
-	{GPI_BARRIER_EV, GPI_Event},
-	{GPI_ALLREDUCE_EV, GPI_Event},
-	{ NULL_EV, NULL }
+	{GPI_SIZE_EV,              GPI_Param},
+	{GPI_RANK_EV,              GPI_Param},
+	{GPI_INIT_EV,              GPI_Event},
+	{GPI_TERM_EV,              GPI_Event},
+	{GPI_CONNECT_EV,           GPI_Event},
+	{GPI_DISCONNECT_EV,        GPI_Event},
+	{GPI_GROUP_CREATE_EV,      GPI_Event},
+	{GPI_GROUP_ADD_EV,         GPI_Event},
+	{GPI_GROUP_COMMIT_EV,      GPI_Event},
+	{GPI_GROUP_DELETE_EV,      GPI_Event},
+	{GPI_SEGMENT_ALLOC_EV,     GPI_Event},
+	{GPI_SEGMENT_REGISTER_EV,  GPI_Event},
+	{GPI_SEGMENT_CREATE_EV,    GPI_Event},
+	{GPI_SEGMENT_BIND_EV,      GPI_Event},
+	{GPI_SEGMENT_USE_EV,       GPI_Event},
+	{GPI_SEGMENT_DELETE_EV,    GPI_Event},
+	{GPI_WRITE_EV,             GPI_Event},
+	{GPI_READ_EV,              GPI_Event},
+	{GPI_WAIT_EV,              GPI_Event},
+	{GPI_NOTIFY_EV,            GPI_Event},
+	{GPI_NOTIFY_WAITSOME_EV,   GPI_Event},
+	{GPI_NOTIFY_RESET_EV,      GPI_Event},
+	{GPI_WRITE_NOTIFY_EV,      GPI_Event},
+	{GPI_WRITE_LIST_EV,        GPI_Event},
+	{GPI_WRITE_LIST_NOTIFY_EV, GPI_Event},
+	{GPI_READ_LIST_EV,         GPI_Event},
+	{GPI_BARRIER_EV,           GPI_Event},
+	{GPI_ALLREDUCE_EV,         GPI_Event},
+	{NULL_EV,                       NULL}
 };

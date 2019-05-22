@@ -25,62 +25,81 @@
 
 #include <PGASPI.h>
 
-void Extrae_GPI_init_Entry();
-void Extrae_GPI_init_Exit();
+void	Extrae_GPI_init_Entry();
+void	Extrae_GPI_init_Exit();
 
-void Extrae_GPI_term_Entry();
-void Extrae_GPI_term_Exit();
+void	Extrae_GPI_term_Entry();
+void	Extrae_GPI_term_Exit();
 
-void Extrae_GPI_connect_Entry();
-void Extrae_GPI_connect_Exit();
+void	Extrae_GPI_connect_Entry();
+void	Extrae_GPI_connect_Exit();
 
-void Extrae_GPI_disconnect_Entry();
-void Extrae_GPI_disconnect_Exit();
+void	Extrae_GPI_disconnect_Entry();
+void	Extrae_GPI_disconnect_Exit();
 
-void Extrae_GPI_group_create_Entry();
-void Extrae_GPI_group_create_Exit();
+void	Extrae_GPI_group_create_Entry();
+void	Extrae_GPI_group_create_Exit();
 
-void Extrae_GPI_group_add_Entry();
-void Extrae_GPI_group_add_Exit();
+void	Extrae_GPI_group_add_Entry();
+void	Extrae_GPI_group_add_Exit();
 
-void Extrae_GPI_group_commit_Entry();
-void Extrae_GPI_group_commit_Exit();
+void	Extrae_GPI_group_commit_Entry();
+void	Extrae_GPI_group_commit_Exit();
 
-void Extrae_GPI_group_delete_Entry();
-void Extrae_GPI_group_delete_Exit();
+void	Extrae_GPI_group_delete_Entry();
+void	Extrae_GPI_group_delete_Exit();
 
-void Extrae_GPI_segment_alloc_Entry(const gaspi_size_t _size);
-void Extrae_GPI_segment_alloc_Exit();
+void	Extrae_GPI_segment_alloc_Entry(const gaspi_size_t);
+void	Extrae_GPI_segment_alloc_Exit();
 
-void Extrae_GPI_segment_register_Entry();
-void Extrae_GPI_segment_register_Exit();
+void	Extrae_GPI_segment_register_Entry();
+void	Extrae_GPI_segment_register_Exit();
 
-void Extrae_GPI_segment_create_Entry(const gaspi_size_t _size);
-void Extrae_GPI_segment_create_Exit();
+void	Extrae_GPI_segment_create_Entry(const gaspi_size_t);
+void	Extrae_GPI_segment_create_Exit();
 
-void Extrae_GPI_segment_bind_Entry(const gaspi_size_t _size);
-void Extrae_GPI_segment_bind_Exit();
+void	Extrae_GPI_segment_bind_Entry(const gaspi_size_t);
+void	Extrae_GPI_segment_bind_Exit();
 
-void Extrae_GPI_segment_use_Entry(const gaspi_size_t _size);
-void Extrae_GPI_segment_use_Exit();
+void	Extrae_GPI_segment_use_Entry(const gaspi_size_t);
+void	Extrae_GPI_segment_use_Exit();
 
-void Extrae_GPI_segment_delete_Entry();
-void Extrae_GPI_segment_delete_Exit();
+void	Extrae_GPI_segment_delete_Entry();
+void	Extrae_GPI_segment_delete_Exit();
 
-void Extrae_GPI_write_Entry(const gaspi_rank_t _rank, const gaspi_size_t _size);
-void Extrae_GPI_write_Exit();
+void	Extrae_GPI_write_Entry(const gaspi_rank_t, const gaspi_size_t);
+void	Extrae_GPI_write_Exit();
 
-void Extrae_GPI_read_Entry(const gaspi_rank_t _rank, const gaspi_size_t _size);
-void Extrae_GPI_read_Exit();
+void	Extrae_GPI_read_Entry(const gaspi_rank_t, const gaspi_size_t);
+void	Extrae_GPI_read_Exit();
 
-void Extrae_GPI_wait_Entry();
-void Extrae_GPI_wait_Exit();
+void	Extrae_GPI_wait_Entry();
+void	Extrae_GPI_wait_Exit();
 
-void Extrae_GPI_notify_Entry(const gaspi_rank_t _rank);
-void Extrae_GPI_notify_Exit();
+void	Extrae_GPI_notify_Entry(const gaspi_rank_t);
+void	Extrae_GPI_notify_Exit();
 
-void Extrae_GPI_barrier_Entry();
-void Extrae_GPI_barrier_Exit();
+void	Extrae_GPI_notify_waitsome_Entry();
+void	Extrae_GPI_notify_waitsome_Exit();
 
-void Extrae_GPI_allreduce_Entry();
-void Extrae_GPI_allreduce_Exit();
+void	Extrae_GPI_notify_reset_Entry();
+void	Extrae_GPI_notify_reset_Exit();
+
+void	Extrae_GPI_write_notify_Entry(const gaspi_rank_t, const gaspi_size_t);
+void	Extrae_GPI_write_notify_Exit();
+
+void	Extrae_GPI_write_list_Entry(const gaspi_rank_t, gaspi_size_t * const);
+void	Extrae_GPI_write_list_Exit();
+
+void	Extrae_GPI_write_list_notify_Entry(const gaspi_rank_t,
+            gaspi_size_t * const);
+void	Extrae_GPI_write_list_notify_Exit();
+
+void	Extrae_GPI_read_list_Entry(const gaspi_rank_t, gaspi_size_t * const);
+void	Extrae_GPI_read_list_Exit();
+
+void	Extrae_GPI_barrier_Entry();
+void	Extrae_GPI_barrier_Exit();
+
+void	Extrae_GPI_allreduce_Entry();
+void	Extrae_GPI_allreduce_Exit();
