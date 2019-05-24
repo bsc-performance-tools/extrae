@@ -29,7 +29,7 @@ Please, make sure to install the development versions of all packages (-dev,
 * [libxml2 (>=2.5.0)](http://www.xmlsoft.org)  
 	Used to parse the configuration of the instrumentation package instead of
 	using environment variables. Highly recommended.
-* [Dyninst](http://www.dyninst.or)  
+* [Dyninst](http://www.dyninst.org)  
 	Support is in experimental status. It is known to work on Linux PPC32/64
 	systems and on Linux x86/x86_64 systems.
 * [libz](http://www.zlib.net)  
