@@ -215,7 +215,7 @@ Probe_GPI_segment_alloc_Entry(const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_SEGMENT_ALLOC_EV, EVT_BEGIN,
 		    Extrae_get_trace_GPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (long)size);
 	}
 }
 
@@ -488,7 +488,7 @@ Probe_GPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_WRITE_LIST_EV, EVT_BEGIN,
 		    Extrae_get_trace_GPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (long)size);
 	}
 }
 
@@ -511,7 +511,7 @@ Probe_GPI_write_list_notify_Entry(const gaspi_rank_t rank,
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_WRITE_LIST_NOTIFY_EV,
 		    EVT_BEGIN, Extrae_get_trace_GPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (long)size);
 	}
 }
 
@@ -533,7 +533,7 @@ Probe_GPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_READ_LIST_EV, EVT_BEGIN,
 		    Extrae_get_trace_GPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (long)size);
 	}
 }
 
@@ -543,6 +543,93 @@ Probe_GPI_read_list_Exit()
 	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
 		TRACE_EVENTANDCOUNTERS(TIME, GPI_READ_LIST_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_passive_send_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_PASSIVE_SEND_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
+		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (int)size);
+	}
+}
+
+void
+Probe_GPI_passive_send_exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_PASSIVE_SEND_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_passive_receive_Entry(gaspi_rank_t * const rem_rank,
+    const gaspi_size_t size)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_PASSIVE_RECEIVE_EV,
+		    EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (long)rem_rank);
+		TRACE_EVENT(LAST_READ_TIME, GPI_SIZE_EV, (int)size);
+	}
+}
+
+void
+Probe_GPI_passive_receive_exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_PASSIVE_RECEIVE_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_atomic_fetch_add_Entry(const gaspi_rank_t rank)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_ATOMIC_FETCH_ADD_EV,
+		    EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
+	}
+}
+
+void
+Probe_GPI_atomic_fetch_add_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_ATOMIC_FETCH_ADD_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_atomic_compare_swap_Entry(const gaspi_rank_t rank)
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_ATOMIC_COMPARE_SWAP_EV,
+		    EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GPI_RANK_EV, (int)rank);
+	}
+}
+
+void
+Probe_GPI_atomic_compare_swap_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_ATOMIC_COMPARE_SWAP_EV, EVT_END,
 		    Extrae_get_trace_GPI_HWC());
 	}
 }
@@ -570,7 +657,8 @@ Probe_GPI_allreduce_Entry()
 {
 	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
-		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_ALLREDUCE_EV, EVT_BEGIN, Extrae_get_trace_GPI_HWC());
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_ALLREDUCE_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
 	}
 }
 
@@ -579,6 +667,27 @@ Probe_GPI_allreduce_Exit()
 {
 	if (mpitrace_on && Extrae_get_trace_GPI())
 	{
-		TRACE_EVENTANDCOUNTERS(TIME, GPI_ALLREDUCE_EV, EVT_END, Extrae_get_trace_GPI_HWC());
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_ALLREDUCE_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_allreduce_user_Entry()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GPI_ALLREDUCE_USER_EV, EVT_BEGIN,
+		    Extrae_get_trace_GPI_HWC());
+	}
+}
+
+void
+Probe_GPI_allreduce_user_Exit()
+{
+	if (mpitrace_on && Extrae_get_trace_GPI())
+	{
+		TRACE_EVENTANDCOUNTERS(TIME, GPI_ALLREDUCE_USER_EV, EVT_END,
+		    Extrae_get_trace_GPI_HWC());
 	}
 }

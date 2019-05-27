@@ -648,42 +648,50 @@ enum {
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
 /* GPI-2 calls events */
-#define GPI_BASE_EV              69000000
-#define GPI_INIT_EV              69000001
-#define GPI_CONNECT_EV           69000002
-#define GPI_DISCONNECT_EV        69000003
+#define GPI_BASE_EV                69000000
+#define GPI_INIT_EV                69000001
+#define GPI_CONNECT_EV             69000002
+#define GPI_DISCONNECT_EV          69000003
 
-#define GPI_GROUP_CREATE_EV      69000100
-#define GPI_GROUP_ADD_EV         69000101
-#define GPI_GROUP_COMMIT_EV      69000102
-#define GPI_GROUP_DELETE_EV      69000103
+#define GPI_GROUP_CREATE_EV        69000100
+#define GPI_GROUP_ADD_EV           69000101
+#define GPI_GROUP_COMMIT_EV        69000102
+#define GPI_GROUP_DELETE_EV        69000103
 
-#define GPI_SEGMENT_ALLOC_EV     69000200
-#define GPI_SEGMENT_REGISTER_EV  69000201
-#define GPI_SEGMENT_CREATE_EV    69000202
-#define GPI_SEGMENT_BIND_EV      69000203
-#define GPI_SEGMENT_USE_EV       69000204
-#define GPI_SEGMENT_DELETE_EV    69000205
+#define GPI_SEGMENT_ALLOC_EV       69000200
+#define GPI_SEGMENT_REGISTER_EV    69000201
+#define GPI_SEGMENT_CREATE_EV      69000202
+#define GPI_SEGMENT_BIND_EV        69000203
+#define GPI_SEGMENT_USE_EV         69000204
+#define GPI_SEGMENT_DELETE_EV      69000205
 
-#define GPI_WRITE_EV             69000300
-#define GPI_READ_EV              69000301
-#define GPI_WAIT_EV              69000302
-#define GPI_NOTIFY_EV            69000303
-#define GPI_NOTIFY_WAITSOME_EV   69000304
-#define GPI_NOTIFY_RESET_EV      69000305
-#define GPI_WRITE_NOTIFY_EV      69000306
-#define GPI_WRITE_LIST_EV        69000307
-#define GPI_WRITE_LIST_NOTIFY_EV 69000308
-#define GPI_READ_LIST_EV         69000309
+#define GPI_WRITE_EV               69000300
+#define GPI_READ_EV                69000301
+#define GPI_WAIT_EV                69000302
+#define GPI_NOTIFY_EV              69000303
+#define GPI_NOTIFY_WAITSOME_EV     69000304
+#define GPI_NOTIFY_RESET_EV        69000305
+#define GPI_WRITE_NOTIFY_EV        69000306
+#define GPI_WRITE_LIST_EV          69000307
+#define GPI_WRITE_LIST_NOTIFY_EV   69000308
+#define GPI_READ_LIST_EV           69000309
 
-#define GPI_BARRIER_EV           69000004
-#define GPI_ALLREDUCE_EV         69000007
-#define GPI_TERM_EV              69009999
+#define GPI_PASSIVE_SEND_EV        69000400
+#define GPI_PASSIVE_RECEIVE_EV     69000401
+
+#define GPI_ATOMIC_FETCH_ADD_EV    69000500
+#define GPI_ATOMIC_COMPARE_SWAP_EV 69000501
+
+#define GPI_BARRIER_EV             69000600
+#define GPI_ALLREDUCE_EV           69000601
+#define GPI_ALLREDUCE_USER_EV      69000602
+
+#define GPI_TERM_EV                69009999
 
 /* GPI-2 parameters events*/
-#define GPI_PARAM_BASE_EV        69100000
-#define GPI_SIZE_EV              69100001
-#define GPI_RANK_EV              69100002
+#define GPI_PARAM_BASE_EV          69100000
+#define GPI_SIZE_EV                69100001
+#define GPI_RANK_EV                69100002
 
 
 #define CALLER_EV                70000000
