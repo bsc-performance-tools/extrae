@@ -550,6 +550,76 @@ gaspi_read_list(const gaspi_number_t num,
 }
 
 gaspi_return_t
+gaspi_passive_send(const gaspi_segment_id_t segment_id_local,
+    const gaspi_offset_t offset_local, const gaspi_rank_t rank,
+    const gaspi_size_t size, const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_passive_send_Entry(rank, size);
+	ret = pgaspi_passive_send(segment_id_local, offset_local, rank, size,
+	    timeout_ms);
+	Extrae_GPI_passive_send_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_passive_receive(const gaspi_segment_id_t segment_id_local,
+    const gaspi_offset_t offset_local, gaspi_rank_t * const rem_rank,
+    const gaspi_size_t size, const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_passive_receive_Entry(rem_rank, size);
+	ret = pgaspi_passive_receive(segment_id_local, offset_local, rem_rank, size,
+	    timeout_ms);
+	Extrae_GPI_passive_receive_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_atomic_fetch_add(const gaspi_segment_id_t segment_id,
+    const gaspi_offset_t offset, const gaspi_rank_t rank,
+    const gaspi_atomic_value_t val_add, gaspi_atomic_value_t * const val_old,
+    const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_atomic_fetch_add_Entry(rank);
+	ret = pgaspi_atomic_fetch_add(segment_id, offset, rank, val_add, val_old,
+	    timeout_ms);
+	Extrae_GPI_atomic_fetch_add_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_atomic_compare_swap(const gaspi_segment_id_t segment_id,
+    const gaspi_offset_t offset, const gaspi_rank_t rank,
+    const gaspi_atomic_value_t comparator, const gaspi_atomic_value_t val_new,
+    gaspi_atomic_value_t * const val_old, const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_atomic_compare_swap_Entry(rank);
+	ret = pgaspi_atomic_compare_swap(segment_id, offset, rank, comparator,
+	    val_new, val_old, timeout_ms);
+	Extrae_GPI_atomic_compare_swap_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
 gaspi_barrier(const gaspi_group_t group, const gaspi_timeout_t timeout_ms)
 {
 	DBG
@@ -574,11 +644,28 @@ gaspi_allreduce(gaspi_pointer_t const buffer_send,
 	int ret;
 
 	Extrae_GPI_allreduce_Entry();
-
 	ret = pgaspi_allreduce(buffer_send, buffer_receive, num, operation, datatyp,
 	    group, timeout_ms);
-
 	Extrae_GPI_allreduce_Exit();
+
+	return ret;
+}
+
+gaspi_return_t
+gaspi_allreduce_user(gaspi_pointer_t const buffer_send,
+    gaspi_pointer_t const buffer_receive, const gaspi_number_t num,
+    const gaspi_size_t element_size, const gaspi_reduce_operation_t operation,
+    const gaspi_state_t reduce_state, const gaspi_group_t group,
+    const gaspi_timeout_t timeout_ms)
+{
+	DBG
+
+	int ret;
+
+	Extrae_GPI_allreduce_user_Entry();
+	ret = pgaspi_allreduce_user(buffer_send, buffer_receive, num, element_size,
+	    operation, reduce_state, group, timeout_ms);
+	Extrae_GPI_allreduce_user_Exit();
 
 	return ret;
 }

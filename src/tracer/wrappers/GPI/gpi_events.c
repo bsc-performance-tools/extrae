@@ -363,6 +363,63 @@ Extrae_GPI_read_list_Exit()
 }
 
 void
+Extrae_GPI_passive_send_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_passive_send_Entry(rank, size);
+}
+
+void
+Extrae_GPI_passive_send_Exit()
+{
+	Probe_GPI_passive_send_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_passive_receive_Entry(gaspi_rank_t * const rem_rank,
+    const gaspi_size_t size)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_passive_receive_Entry(rem_rank, size);
+}
+
+void
+Extrae_GPI_passive_receive_Exit()
+{
+	Probe_GPI_passive_receive_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_atomic_fetch_add_Entry(const gaspi_rank_t rank)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_atomic_fetch_add_Entry(rank);
+}
+
+void
+Extrae_GPI_atomic_fetch_add_Exit()
+{
+	Probe_GPI_atomic_fetch_add_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_atomic_compare_swap_Entry(const gaspi_rank_t rank)
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_atomic_compare_swap_Entry(rank);
+}
+
+void
+Extrae_GPI_atomic_compare_swap_Exit()
+{
+	Probe_GPI_atomic_compare_swap_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
 Extrae_GPI_barrier_Entry()
 {
 	Backend_Enter_Instrumentation();
@@ -387,5 +444,19 @@ void
 Extrae_GPI_allreduce_Exit()
 {
 	Probe_GPI_allreduce_Exit();
+	Backend_Leave_Instrumentation();
+}
+
+void
+Extrae_GPI_allreduce_user_Entry()
+{
+	Backend_Enter_Instrumentation();
+	Probe_GPI_allreduce_user_Entry();
+}
+
+void
+Extrae_GPI_allreduce_user_Exit()
+{
+	Probe_GPI_allreduce_user_Exit();
 	Backend_Leave_Instrumentation();
 }

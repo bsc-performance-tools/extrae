@@ -89,8 +89,27 @@ gaspi_return_t  gaspi_read_list(const gaspi_number_t,
                     const gaspi_rank_t, gaspi_segment_id_t * const,
                     gaspi_offset_t * const, gaspi_size_t * const,
                     const gaspi_queue_id_t, const gaspi_timeout_t);
+gaspi_return_t  gaspi_passive_send(const gaspi_segment_id_t,
+                    const gaspi_offset_t, const gaspi_rank_t,
+                    const gaspi_size_t, const gaspi_timeout_t);
+gaspi_return_t  gaspi_passive_receive(const gaspi_segment_id_t,
+                    const gaspi_offset_t, gaspi_rank_t * const,
+                    const gaspi_size_t, const gaspi_timeout_t);
+gaspi_return_t  gaspi_atomic_fetch_add(const gaspi_segment_id_t,
+                    const gaspi_offset_t, const gaspi_rank_t,
+                    const gaspi_atomic_value_t, gaspi_atomic_value_t * const,
+                    const gaspi_timeout_t);
+gaspi_return_t  gaspi_atomic_compare_swap(const gaspi_segment_id_t,
+                    const gaspi_offset_t, const gaspi_rank_t,
+                    const gaspi_atomic_value_t, const gaspi_atomic_value_t,
+                    gaspi_atomic_value_t * const, const gaspi_timeout_t);
 gaspi_return_t  gaspi_barrier(const gaspi_group_t, const gaspi_timeout_t);
 gaspi_return_t  gaspi_allreduce(gaspi_pointer_t const, gaspi_pointer_t const,
                     const gaspi_number_t, const gaspi_operation_t,
                     const gaspi_datatype_t, const gaspi_group_t,
+                    const gaspi_timeout_t);
+gaspi_return_t  gaspi_allreduce_user(gaspi_pointer_t const,
+                    gaspi_pointer_t const, const gaspi_number_t,
+                    const gaspi_size_t, const gaspi_reduce_operation_t,
+                    const gaspi_state_t, const gaspi_group_t,
                     const gaspi_timeout_t);

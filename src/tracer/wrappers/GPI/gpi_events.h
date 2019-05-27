@@ -98,8 +98,24 @@ void	Extrae_GPI_write_list_notify_Exit();
 void	Extrae_GPI_read_list_Entry(const gaspi_rank_t, gaspi_size_t * const);
 void	Extrae_GPI_read_list_Exit();
 
+void	Extrae_GPI_passive_send_Entry(const gaspi_rank_t, const gaspi_size_t);
+void	Extrae_GPI_passive_send_Exit();
+
+void	Extrae_GPI_passive_receive_Entry(gaspi_rank_t * const,
+            const gaspi_size_t);
+void	Extrae_GPI_passive_receive_Exit();
+
+void	Extrae_GPI_atomic_fetch_add_Entry(const gaspi_rank_t);
+void	Extrae_GPI_atomic_fetch_add_Exit();
+
+void	Extrae_GPI_atomic_compare_swap_Entry(const gaspi_rank_t);
+void	Extrae_GPI_atomic_compare_swap_Exit();
+
 void	Extrae_GPI_barrier_Entry();
 void	Extrae_GPI_barrier_Exit();
 
 void	Extrae_GPI_allreduce_Entry();
 void	Extrae_GPI_allreduce_Exit();
+
+void	Extrae_GPI_allreduce_user_Entry();
+void	Extrae_GPI_allreduce_user_Exit();
