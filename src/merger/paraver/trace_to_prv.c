@@ -77,7 +77,7 @@
 #include "misc_prv_semantics.h"
 #include "omp_prv_semantics.h"
 #include "pthread_prv_semantics.h"
-#include "gpi_prv_semantics.h"
+#include "gaspi_prv_semantics.h"
 #include "mpi_comunicadors.h"
 #include "labels.h"
 #include "trace_mode.h"
@@ -100,7 +100,7 @@
 #include "opencl_prv_events.h"
 #include "cuda_prv_events.h"
 #include "java_prv_events.h"
-#include "gpi_prv_events.h"
+#include "gaspi_prv_events.h"
 #include "addr2info.h"
 #include "timesync.h"
 #include "vector.h"
@@ -454,7 +454,7 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 
 			if (Type == PTHREAD_TYPE || Type == OPENMP_TYPE || Type == MISC_TYPE ||
 			    Type == MPI_TYPE || Type == CUDA_TYPE || Type == OPENCL_TYPE ||
-			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE || Type == GPI_TYPE)
+			    Type == OPENSHMEM_TYPE || Type == JAVA_TYPE || Type == GASPI_TYPE)
 			{
 				task_t *task_info = GET_TASK_INFO(ptask, task);
 				Ev_Handler_t *handler = Semantics_getEventHandler (EvType);
@@ -479,8 +479,8 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 						Enable_OPENSHMEM_Operation (EvType);
 					else if (JAVA_TYPE == Type)
 						Enable_Java_Operation (EvType);
-					else if (GPI_TYPE == Type)
-						Enable_GPI_Operation(EvType);
+					else if (GASPI_TYPE == Type)
+						Enable_GASPI_Operation(EvType);
 				}
 				else	
 				{

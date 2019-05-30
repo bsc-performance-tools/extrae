@@ -28,10 +28,10 @@
 #include "record.h"
 #include "semantics.h"
 
-#include "gpi_prv_events.h"
+#include "gaspi_prv_events.h"
 
 static int
-GPI_Event(event_t *current_event, unsigned long long current_time, unsigned cpu,
+GASPI_Event(event_t *current_event, unsigned long long current_time, unsigned cpu,
     unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
 {
 	unsigned int EvType, nEvType;
@@ -43,77 +43,77 @@ GPI_Event(event_t *current_event, unsigned long long current_time, unsigned cpu,
 
 	switch (EvType)
 	{
-		case GPI_INIT_EV:
-		case GPI_TERM_EV:
+		case GASPI_INIT_EV:
+		case GASPI_TERM_EV:
 			Switch_State(STATE_INITFINI, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_BARRIER_EV:
+		case GASPI_BARRIER_EV:
 			Switch_State(STATE_BARRIER, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_WRITE_EV:
-		case GPI_READ_EV:
-		case GPI_WAIT_EV:
-		case GPI_NOTIFY_EV:
-		case GPI_NOTIFY_WAITSOME_EV:
-		case GPI_NOTIFY_RESET_EV:
-		case GPI_WRITE_NOTIFY_EV:
-		case GPI_WRITE_LIST_EV:
-		case GPI_WRITE_LIST_NOTIFY_EV:
-		case GPI_READ_LIST_EV:
+		case GASPI_WRITE_EV:
+		case GASPI_READ_EV:
+		case GASPI_WAIT_EV:
+		case GASPI_NOTIFY_EV:
+		case GASPI_NOTIFY_WAITSOME_EV:
+		case GASPI_NOTIFY_RESET_EV:
+		case GASPI_WRITE_NOTIFY_EV:
+		case GASPI_WRITE_LIST_EV:
+		case GASPI_WRITE_LIST_NOTIFY_EV:
+		case GASPI_READ_LIST_EV:
 			Switch_State(STATE_1SIDED, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_CONNECT_EV:
-		case GPI_DISCONNECT_EV:
+		case GASPI_CONNECT_EV:
+		case GASPI_DISCONNECT_EV:
 			Switch_State(STATE_SYNC, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_ALLREDUCE_EV:
-		case GPI_ALLREDUCE_USER_EV:
+		case GASPI_ALLREDUCE_EV:
+		case GASPI_ALLREDUCE_USER_EV:
 			Switch_State(STATE_BCAST, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_GROUP_CREATE_EV:
-		case GPI_GROUP_ADD_EV:
-		case GPI_GROUP_COMMIT_EV:
-		case GPI_GROUP_DELETE_EV:
+		case GASPI_GROUP_CREATE_EV:
+		case GASPI_GROUP_ADD_EV:
+		case GASPI_GROUP_COMMIT_EV:
+		case GASPI_GROUP_DELETE_EV:
 			Switch_State(STATE_MIXED, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_SEGMENT_ALLOC_EV:
-		case GPI_SEGMENT_REGISTER_EV:
-		case GPI_SEGMENT_CREATE_EV:
-		case GPI_SEGMENT_BIND_EV:
-		case GPI_SEGMENT_USE_EV:
-		case GPI_SEGMENT_DELETE_EV:
+		case GASPI_SEGMENT_ALLOC_EV:
+		case GASPI_SEGMENT_REGISTER_EV:
+		case GASPI_SEGMENT_CREATE_EV:
+		case GASPI_SEGMENT_BIND_EV:
+		case GASPI_SEGMENT_USE_EV:
+		case GASPI_SEGMENT_DELETE_EV:
 			Switch_State(STATE_ALLOCMEM, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_PASSIVE_SEND_EV:
+		case GASPI_PASSIVE_SEND_EV:
 			Switch_State(STATE_SEND, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_PASSIVE_RECEIVE_EV:
+		case GASPI_PASSIVE_RECEIVE_EV:
 			Switch_State(STATE_WAITMESS, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
-		case GPI_ATOMIC_FETCH_ADD_EV:
-		case GPI_ATOMIC_COMPARE_SWAP_EV:
+		case GASPI_ATOMIC_FETCH_ADD_EV:
+		case GASPI_ATOMIC_COMPARE_SWAP_EV:
 			Switch_State(STATE_ATOMIC_MEM_OP, (EvValue != EVT_END), ptask, task, thread);
 			trace_paraver_state(cpu, ptask, task, thread, current_time);
 			break;
 	}
 
-	Translate_GPI_Operation(EvType, EvValue, &nEvType, &nEvValue);
+	Translate_GASPI_Operation(EvType, EvValue, &nEvType, &nEvValue);
 	trace_paraver_event(cpu, ptask, task, thread, current_time, nEvType, nEvValue);
 
 	return 0;
 }
 
 static int
-GPI_Param(event_t *current_event, unsigned long long current_time, unsigned cpu,
+GASPI_Param(event_t *current_event, unsigned long long current_time, unsigned cpu,
     unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
 {
 	unsigned int EvType, nEvType;
@@ -128,40 +128,40 @@ GPI_Param(event_t *current_event, unsigned long long current_time, unsigned cpu,
 	return 0;
 }
 
-SingleEv_Handler_t PRV_GPI_Event_Handlers[] =
+SingleEv_Handler_t PRV_GASPI_Event_Handlers[] =
 {
-	{GPI_SIZE_EV,                 GPI_Param},
-	{GPI_RANK_EV,                 GPI_Param},
-	{GPI_INIT_EV,                 GPI_Event},
-	{GPI_TERM_EV,                 GPI_Event},
-	{GPI_CONNECT_EV,              GPI_Event},
-	{GPI_DISCONNECT_EV,           GPI_Event},
-	{GPI_GROUP_CREATE_EV,         GPI_Event},
-	{GPI_GROUP_ADD_EV,            GPI_Event},
-	{GPI_GROUP_COMMIT_EV,         GPI_Event},
-	{GPI_GROUP_DELETE_EV,         GPI_Event},
-	{GPI_SEGMENT_ALLOC_EV,        GPI_Event},
-	{GPI_SEGMENT_REGISTER_EV,     GPI_Event},
-	{GPI_SEGMENT_CREATE_EV,       GPI_Event},
-	{GPI_SEGMENT_BIND_EV,         GPI_Event},
-	{GPI_SEGMENT_USE_EV,          GPI_Event},
-	{GPI_SEGMENT_DELETE_EV,       GPI_Event},
-	{GPI_WRITE_EV,                GPI_Event},
-	{GPI_READ_EV,                 GPI_Event},
-	{GPI_WAIT_EV,                 GPI_Event},
-	{GPI_NOTIFY_EV,               GPI_Event},
-	{GPI_NOTIFY_WAITSOME_EV,      GPI_Event},
-	{GPI_NOTIFY_RESET_EV,         GPI_Event},
-	{GPI_WRITE_NOTIFY_EV,         GPI_Event},
-	{GPI_WRITE_LIST_EV,           GPI_Event},
-	{GPI_WRITE_LIST_NOTIFY_EV,    GPI_Event},
-	{GPI_READ_LIST_EV,            GPI_Event},
-	{GPI_PASSIVE_SEND_EV,         GPI_Event},
-	{GPI_PASSIVE_RECEIVE_EV,      GPI_Event},
-	{GPI_ATOMIC_FETCH_ADD_EV,     GPI_Event},
-	{GPI_ATOMIC_COMPARE_SWAP_EV,  GPI_Event},
-	{GPI_BARRIER_EV,              GPI_Event},
-	{GPI_ALLREDUCE_EV,            GPI_Event},
-	{GPI_ALLREDUCE_USER_EV,       GPI_Event},
+	{GASPI_SIZE_EV,                 GASPI_Param},
+	{GASPI_RANK_EV,                 GASPI_Param},
+	{GASPI_INIT_EV,                 GASPI_Event},
+	{GASPI_TERM_EV,                 GASPI_Event},
+	{GASPI_CONNECT_EV,              GASPI_Event},
+	{GASPI_DISCONNECT_EV,           GASPI_Event},
+	{GASPI_GROUP_CREATE_EV,         GASPI_Event},
+	{GASPI_GROUP_ADD_EV,            GASPI_Event},
+	{GASPI_GROUP_COMMIT_EV,         GASPI_Event},
+	{GASPI_GROUP_DELETE_EV,         GASPI_Event},
+	{GASPI_SEGMENT_ALLOC_EV,        GASPI_Event},
+	{GASPI_SEGMENT_REGISTER_EV,     GASPI_Event},
+	{GASPI_SEGMENT_CREATE_EV,       GASPI_Event},
+	{GASPI_SEGMENT_BIND_EV,         GASPI_Event},
+	{GASPI_SEGMENT_USE_EV,          GASPI_Event},
+	{GASPI_SEGMENT_DELETE_EV,       GASPI_Event},
+	{GASPI_WRITE_EV,                GASPI_Event},
+	{GASPI_READ_EV,                 GASPI_Event},
+	{GASPI_WAIT_EV,                 GASPI_Event},
+	{GASPI_NOTIFY_EV,               GASPI_Event},
+	{GASPI_NOTIFY_WAITSOME_EV,      GASPI_Event},
+	{GASPI_NOTIFY_RESET_EV,         GASPI_Event},
+	{GASPI_WRITE_NOTIFY_EV,         GASPI_Event},
+	{GASPI_WRITE_LIST_EV,           GASPI_Event},
+	{GASPI_WRITE_LIST_NOTIFY_EV,    GASPI_Event},
+	{GASPI_READ_LIST_EV,            GASPI_Event},
+	{GASPI_PASSIVE_SEND_EV,         GASPI_Event},
+	{GASPI_PASSIVE_RECEIVE_EV,      GASPI_Event},
+	{GASPI_ATOMIC_FETCH_ADD_EV,     GASPI_Event},
+	{GASPI_ATOMIC_COMPARE_SWAP_EV,  GASPI_Event},
+	{GASPI_BARRIER_EV,              GASPI_Event},
+	{GASPI_ALLREDUCE_EV,            GASPI_Event},
+	{GASPI_ALLREDUCE_USER_EV,       GASPI_Event},
 	{NULL_EV,                          NULL}
 };

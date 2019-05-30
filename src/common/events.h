@@ -647,51 +647,51 @@ enum {
 /* To associate command queue with Paraver thread */
 #define OPENCL_CLFINISH_THID_EV                       64300000
 
-/* GPI-2 calls events */
-#define GPI_BASE_EV                69000000
-#define GPI_INIT_EV                69000001
-#define GPI_CONNECT_EV             69000002
-#define GPI_DISCONNECT_EV          69000003
+/* GASPI-2 calls events */
+#define GASPI_BASE_EV                69000000
+#define GASPI_INIT_EV                69000001
+#define GASPI_CONNECT_EV             69000002
+#define GASPI_DISCONNECT_EV          69000003
 
-#define GPI_GROUP_CREATE_EV        69000100
-#define GPI_GROUP_ADD_EV           69000101
-#define GPI_GROUP_COMMIT_EV        69000102
-#define GPI_GROUP_DELETE_EV        69000103
+#define GASPI_GROUP_CREATE_EV        69000100
+#define GASPI_GROUP_ADD_EV           69000101
+#define GASPI_GROUP_COMMIT_EV        69000102
+#define GASPI_GROUP_DELETE_EV        69000103
 
-#define GPI_SEGMENT_ALLOC_EV       69000200
-#define GPI_SEGMENT_REGISTER_EV    69000201
-#define GPI_SEGMENT_CREATE_EV      69000202
-#define GPI_SEGMENT_BIND_EV        69000203
-#define GPI_SEGMENT_USE_EV         69000204
-#define GPI_SEGMENT_DELETE_EV      69000205
+#define GASPI_SEGMENT_ALLOC_EV       69000200
+#define GASPI_SEGMENT_REGISTER_EV    69000201
+#define GASPI_SEGMENT_CREATE_EV      69000202
+#define GASPI_SEGMENT_BIND_EV        69000203
+#define GASPI_SEGMENT_USE_EV         69000204
+#define GASPI_SEGMENT_DELETE_EV      69000205
 
-#define GPI_WRITE_EV               69000300
-#define GPI_READ_EV                69000301
-#define GPI_WAIT_EV                69000302
-#define GPI_NOTIFY_EV              69000303
-#define GPI_NOTIFY_WAITSOME_EV     69000304
-#define GPI_NOTIFY_RESET_EV        69000305
-#define GPI_WRITE_NOTIFY_EV        69000306
-#define GPI_WRITE_LIST_EV          69000307
-#define GPI_WRITE_LIST_NOTIFY_EV   69000308
-#define GPI_READ_LIST_EV           69000309
+#define GASPI_WRITE_EV               69000300
+#define GASPI_READ_EV                69000301
+#define GASPI_WAIT_EV                69000302
+#define GASPI_NOTIFY_EV              69000303
+#define GASPI_NOTIFY_WAITSOME_EV     69000304
+#define GASPI_NOTIFY_RESET_EV        69000305
+#define GASPI_WRITE_NOTIFY_EV        69000306
+#define GASPI_WRITE_LIST_EV          69000307
+#define GASPI_WRITE_LIST_NOTIFY_EV   69000308
+#define GASPI_READ_LIST_EV           69000309
 
-#define GPI_PASSIVE_SEND_EV        69000400
-#define GPI_PASSIVE_RECEIVE_EV     69000401
+#define GASPI_PASSIVE_SEND_EV        69000400
+#define GASPI_PASSIVE_RECEIVE_EV     69000401
 
-#define GPI_ATOMIC_FETCH_ADD_EV    69000500
-#define GPI_ATOMIC_COMPARE_SWAP_EV 69000501
+#define GASPI_ATOMIC_FETCH_ADD_EV    69000500
+#define GASPI_ATOMIC_COMPARE_SWAP_EV 69000501
 
-#define GPI_BARRIER_EV             69000600
-#define GPI_ALLREDUCE_EV           69000601
-#define GPI_ALLREDUCE_USER_EV      69000602
+#define GASPI_BARRIER_EV             69000600
+#define GASPI_ALLREDUCE_EV           69000601
+#define GASPI_ALLREDUCE_USER_EV      69000602
 
-#define GPI_TERM_EV                69009999
+#define GASPI_TERM_EV                69009999
 
-/* GPI-2 parameters events*/
-#define GPI_PARAM_BASE_EV          69100000
-#define GPI_SIZE_EV                69100001
-#define GPI_RANK_EV                69100002
+/* GASPI-2 parameters events*/
+#define GASPI_PARAM_BASE_EV          69100000
+#define GASPI_SIZE_EV                69100001
+#define GASPI_RANK_EV                69100002
 
 
 #define CALLER_EV                70000000
@@ -1020,7 +1020,7 @@ typedef enum
 	OPENCL_TYPE,
 	OPENSHMEM_TYPE,
 	JAVA_TYPE,
-	GPI_TYPE
+	GASPI_TYPE
 } EventType_t;
 
 

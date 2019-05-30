@@ -26,4 +26,4 @@
 #include "semantics.h"
 #include "file_set.h"
 
-extern SingleEv_Handler_t	PRV_GPI_Event_Handlers[]; 
+extern SingleEv_Handler_t	PRV_GASPI_Event_Handlers[]; 
