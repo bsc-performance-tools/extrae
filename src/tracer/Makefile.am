@@ -69,8 +69,14 @@ if WANT_NANOS
 endif
 endif
 
-if HAVE_GPI
-  lib_LTLIBRARIES += libgpitrace.la
+if HAVE_GASPI
+  lib_LTLIBRARIES += libgaspitrace.la
+if WANT_OPENMP
+  lib_LTLIBRARIES += libogaspitrace.la
+endif
+if WANT_PTHREAD
+  lib_LTLIBRARIES += libptgaspitrace.la
+endif
 endif
 
 if HAVE_MPI
@@ -172,8 +178,10 @@ core_SRCS = \
  $(auto_fini_instr_SRCS)                     \
  $(WRAPPERS_CORE)
 
-# GPI trace
-libgpitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_GPI)
+# GASPI trace
+libgaspitrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_GASPI)
+libogaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES) 
+libptgaspitrace_la_SOURCES = $(libgaspitrace_la_SOURCES)
 
 # CUDA trace
 libcudatrace_la_SOURCES = $(core_SRCS) $(WRAPPERS_CUDA)
@@ -369,7 +377,7 @@ ADDITIONAL_MPI_DYNLIBS_F = $(INTERFACES_LIB)/MPI/lib_dyn_iface_mpif.la \
  $(COMMON_MPI_LIB)/libcommon_mpi.la
 endif
 
-ADDITIONAL_GPI_LIBS = $(WRAPPERS_LIB)/GPI/libwrap_gpi.la
+ADDITIONAL_GASPI_LIBS = $(WRAPPERS_LIB)/GASPI/libwrap_gaspi.la
 
 ADDITIONAL_PTHREAD_LIBS = $(WRAPPERS_LIB)/pthread/libwrap_pthread.la $(PTHREAD_LIBS)
 ADDITIONAL_OPENMP_LIBS = $(WRAPPERS_LIB)/OMP/libwrap_openmp.la
@@ -377,7 +385,9 @@ ADDITIONAL_OPENCL_LIBS = $(WRAPPERS_LIB)/OPENCL/libwrap_opencl.la
 ADDITIONAL_CUDA_LIBS = $(WRAPPERS_LIB)/CUDA/libwrap_cuda.la
 ADDITIONAL_OPENSHMEM_LIBS = $(WRAPPERS_LIB)/openshmem/libwrap_openshmem.la
 
-libgpitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_GPI_LIBS) $(SEQUENTIAL_MERGE_LIB)
+libgaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB)
+libogaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_OPENMP_LIBS)
+libptgaspitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API_PTHREAD) $(ADDITIONAL_GASPI_LIBS) $(SEQUENTIAL_MERGE_LIB) $(ADDITIONAL_PTHREAD_LIBS)
 
 libcudatrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_CUDA_LIBS) $(SEQUENTIAL_MERGE_LIB)
 libcudampitrace_la_LIBADD = $(core_MODULES) $(INTERFACE_API) $(ADDITIONAL_MPI_LIBS_C) $(ADDITIONAL_CUDA_LIBS) $(PARALLEL_MERGE_LIB)
@@ -468,7 +478,7 @@ core_INCLUDES = \
  -I$(WRAPPERS_INC)/IO \
  -I$(WRAPPERS_INC)/SYSCALL \
  -I$(WRAPPERS_INC)/openshmem \
- -I$(WRAPPERS_INC)/GPI \
+ -I$(WRAPPERS_INC)/GASPI \
  -I$(SAMPLING_DIR)/common \
  -I$(top_srcdir) -I$(top_srcdir)/include -I$(COMMON_INC) $(UNWIND_CFLAGS)
 
@@ -524,7 +534,9 @@ if OS_ANDROID
 core_CFLAGS += -DHOST_NAME_MAX=255
 endif
 
-libgpitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DGPI_SUPPORT $(GPI_CFLAGS)
+libgaspitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DGASPI_SUPPORT $(GASPI_CFLAGS)
+libogaspitrace_la_CFLAGS = $(libgaspitrace_la_CFLAGS) -DOMP_SUPPORT
+libptgaspitrace_la_CFLAGS = $(libgaspitrace_la_CFLAGS) -DPTHREAD_SUPPORT $(PTHREAD_CFLAGS)
 
 libcudatrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) $(SEQUENTIAL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
 libcudampitrace_la_CFLAGS = $(core_INCLUDES) $(core_CFLAGS) -DMPI_SUPPORT $(MPI_CFLAGS) $(PARALLEL_CFLAGS_MERGE_LIB) -DCUDA_SUPPORT $(WRAPPERS_CUDA_CFLAGS)
@@ -655,7 +667,9 @@ COMMON_LINKER_FLAGS = \
  $(LIBZ_LINKER_FLAGS) \
  $(MRNET_LINKER_FLAGS)
 
-libgpitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libgaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libogaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
+libptgaspitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS) $(PTHREAD_LIBS)
 
 libcudaompitrace_la_LDFLAGS = $(COMMON_LINKER_FLAGS)
 libcudaompitracef_la_LDFLAGS = $(COMMON_LINKER_FLAGS)

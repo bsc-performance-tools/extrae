@@ -84,8 +84,8 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(CUDA_SUPPORT)
 # include "cuda_probe.h"
 #endif
-#if defined(GPI_SUPPORT)
-# include "gpi_probe.h"
+#if defined(GASPI_SUPPORT)
+# include "gaspi_probe.h"
 #endif
 #if defined(SAMPLING_SUPPORT)
 # include "sampling-common.h"
@@ -242,9 +242,9 @@ static void Parse_XML_MPI (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag)
 }
 #endif
 
-#if defined(GPI_SUPPORT)
-/* Configure GPI related parameters */
-static void Parse_XML_GPI(int rank, xmlNodePtr current_tag)
+#if defined(GASPI_SUPPORT)
+/* Configure GASPI related parameters */
+static void Parse_XML_GASPI(int rank, xmlNodePtr current_tag)
 {
 	xmlNodePtr tag;
 
@@ -257,27 +257,27 @@ static void Parse_XML_GPI(int rank, xmlNodePtr current_tag)
 		    !xmlStrcasecmp(tag->name, xmlTEXT))
 		{
 		}
-		/* Shall we gather counters in GPI calls? */
+		/* Shall we gather counters in GASPI calls? */
 		else if (!xmlStrcasecmp(tag->name, TRACE_COUNTERS))
 		{
 			xmlChar *enabled = xmlGetProp_env(rank, tag, TRACE_ENABLED);
-			Extrae_set_trace_GPI_HWC(enabled != NULL && !xmlStrcasecmp(enabled, xmlYES));
+			Extrae_set_trace_GASPI_HWC(enabled != NULL && !xmlStrcasecmp(enabled, xmlYES));
 #if USE_HARDWARE_COUNTERS
 			mfprintf(stdout, PACKAGE_NAME
-			    ": GPI routines will %scollect HW counters information.\n",
-			    Extrae_get_trace_GPI_HWC()?"":"NOT ");
+			    ": GASPI routines will %scollect HW counters information.\n",
+			    Extrae_get_trace_GASPI_HWC()?"":"NOT ");
 #else
 			mfprintf(stdout, PACKAGE_NAME
-			    ": <%s> tag at <GPI> level will be ignored."
+			    ": <%s> tag at <GASPI> level will be ignored."
 			    "This library does not support CPU HW counters.\n",
 			    TRACE_COUNTERS);
-			Extrae_set_trace_GPI_HWC(FALSE);
+			Extrae_set_trace_GASPI_HWC(FALSE);
 #endif
 			XML_FREE(enabled);
 		} else
 		{
 			mfprintf(stderr, PACKAGE_NAME
-			    ": XML unknown tag '%s' at <GPI> level\n",
+			    ": XML unknown tag '%s' at <GASPI> level\n",
 			    tag->name);
 		}
 
@@ -1901,27 +1901,27 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 							tracejant_mpi = FALSE;
 						XML_FREE(enabled);
 					}
-					/* GPI related configuration */
-					else if (!xmlStrcasecmp(current_tag->name, TRACE_GPI))
+					/* GASPI related configuration */
+					else if (!xmlStrcasecmp(current_tag->name, TRACE_GASPI))
 					{
 						xmlChar *enabled = xmlGetProp_env(rank, current_tag, TRACE_ENABLED);
 
 						if (enabled != NULL && !xmlStrcasecmp(enabled, xmlYES))
 						{
-#if defined(GPI_SUPPORT)
-							Extrae_set_trace_GPI(TRUE);
-							Parse_XML_GPI(rank, current_tag);
+#if defined(GASPI_SUPPORT)
+							Extrae_set_trace_GASPI(TRUE);
+							Parse_XML_GASPI(rank, current_tag);
 #else
 							mfprintf(stdout, PACKAGE_NAME
 							    ": Warning! <%s> tag will be ignored. "
-							    "This library does not support GPI.\n",
-							    TRACE_GPI);
+							    "This library does not support GASPI.\n",
+							    TRACE_GASPI);
 #endif
 						}
-#if defined(GPI_SUPPORT)
+#if defined(GASPI_SUPPORT)
 						else if (enabled != NULL && !xmlStrcasecmp(enabled, xmlNO))
 						{
-							Extrae_set_trace_GPI(FALSE);
+							Extrae_set_trace_GASPI(FALSE);
 						}
 #endif
 						XML_FREE(enabled);

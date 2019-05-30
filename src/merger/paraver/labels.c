@@ -66,7 +66,7 @@
 #include "misc_prv_events.h"
 #include "misc_prv_semantics.h"
 #include "openshmem_prv_events.h"
-#include "gpi_prv_events.h"
+#include "gaspi_prv_events.h"
 #include "trace_mode.h"
 #include "addr2info.h" 
 #include "options.h"
@@ -1182,7 +1182,7 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	Write_Spectral_Labels (fd);
 	WriteEnabled_OpenCL_Operations (fd);
 	WriteEnabled_OPENSHMEM_Operations (fd);
-	WriteEnabled_GPI_Operations(fd);
+	WriteEnabled_GASPI_Operations(fd);
 
 	Write_UserDefined_Labels(fd);
 

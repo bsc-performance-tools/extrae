@@ -25,7 +25,7 @@
 
 #include <config.h>
 
-void	Enable_GPI_Operation(unsigned);
-int		Translate_GPI_Operation(unsigned, unsigned long long, unsigned *,
+void	Enable_GASPI_Operation(unsigned);
+int		Translate_GASPI_Operation(unsigned, unsigned long long, unsigned *,
 		    unsigned long long *);
-void	WriteEnabled_GPI_Operations(FILE *);
+void	WriteEnabled_GASPI_Operations(FILE *);

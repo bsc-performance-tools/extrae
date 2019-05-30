@@ -40,11 +40,11 @@
 #include "taskid.h"
 #include "wrapper.h"
 
-#include "gpi_events.h"
-#include "gpi_wrapper.h"
+#include "gaspi_events.h"
+#include "gaspi_wrapper.h"
 
 static gaspi_rank_t
-Extrae_GPI_NumTasks()
+Extrae_GASPI_NumTasks()
 {
 	static int run = FALSE;
 	static gaspi_rank_t mysize;
@@ -59,7 +59,7 @@ Extrae_GPI_NumTasks()
 }
 
 static gaspi_rank_t
-Extrae_GPI_TaskID()
+Extrae_GASPI_TaskID()
 {
 	static int run = FALSE;
 	static gaspi_rank_t myrank;
@@ -74,24 +74,24 @@ Extrae_GPI_TaskID()
 }
 
 static void
-Extrae_GPI_Barrier()
+Extrae_GASPI_Barrier()
 {
 	// XXX Change GASPI_BLOCK to actual timeout
 	pgaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 }
 
 static void
-Extrae_GPI_Finalize()
+Extrae_GASPI_Finalize()
 {
 	// XXX Change GASPI_BLOCK to actual timeout
 	pgaspi_proc_term(GASPI_BLOCK);
 }
 
 /*
- * GPI_remove_file_list
+ * GASPI_remove_file_list
  */
 void
-GPI_remove_file_list(int all)
+GASPI_remove_file_list(int all)
 {
 	char tmpname[1024];
 
@@ -111,17 +111,17 @@ gaspi_proc_init(gaspi_timeout_t timeout_ms)
 	DBG
 
 	int ret;
-	iotimer_t GPI_Init_start_time, GPI_Init_end_time;
+	iotimer_t GASPI_Init_start_time, GASPI_Init_end_time;
 
 	ret = pgaspi_proc_init(timeout_ms);
 
-	Extrae_set_ApplicationIsGPI(TRUE);
+	Extrae_set_ApplicationIsGASPI(TRUE);
 
 	/* Setup callbacks for TASK identification and barrier execution */
-	Extrae_set_taskid_function((unsigned int (*)(void))Extrae_GPI_TaskID);
-	Extrae_set_numtasks_function((unsigned int (*)(void))Extrae_GPI_NumTasks);
-	Extrae_set_barrier_tasks_function(Extrae_GPI_Barrier);
-	Extrae_set_finalize_task_function(Extrae_GPI_Finalize);
+	Extrae_set_taskid_function((unsigned int (*)(void))Extrae_GASPI_TaskID);
+	Extrae_set_numtasks_function((unsigned int (*)(void))Extrae_GASPI_NumTasks);
+	Extrae_set_barrier_tasks_function(Extrae_GASPI_Barrier);
+	Extrae_set_finalize_task_function(Extrae_GASPI_Finalize);
 
 	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
 	{
@@ -134,10 +134,10 @@ gaspi_proc_init(gaspi_timeout_t timeout_ms)
 	 */
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
 	{
-		GPI_remove_file_list (TRUE);
+		GASPI_remove_file_list (TRUE);
 	}
 
-	GPI_Init_start_time = TIME;
+	GASPI_Init_start_time = TIME;
 
 	/*
 	 * Call a barrier in order to synchronize all tasks using MPIINIT_EV / END.
@@ -147,10 +147,10 @@ gaspi_proc_init(gaspi_timeout_t timeout_ms)
 	Extrae_barrier_tasks();
 	Extrae_barrier_tasks();
 
-	initTracingTime = GPI_Init_end_time = TIME;
+	initTracingTime = GASPI_Init_end_time = TIME;
 
-	Backend_postInitialize(TASKID, Extrae_get_num_tasks(), GPI_INIT_EV,
-	    GPI_Init_start_time, GPI_Init_end_time, NULL);
+	Backend_postInitialize(TASKID, Extrae_get_num_tasks(), GASPI_INIT_EV,
+	    GASPI_Init_start_time, GASPI_Init_end_time, NULL);
 
 	return ret;
 }
@@ -162,7 +162,7 @@ gaspi_proc_term(gaspi_timeout_t timeout_ms)
 
 	int ret;
 
-	Extrae_GPI_term_Entry();
+	Extrae_GASPI_term_Entry();
 
 	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
 	{
@@ -174,7 +174,7 @@ gaspi_proc_term(gaspi_timeout_t timeout_ms)
 		ret = GASPI_SUCCESS;
 	}
 
-	Extrae_GPI_term_Exit();
+	Extrae_GASPI_term_Exit();
 
 	return ret;
 }
@@ -186,9 +186,9 @@ gaspi_connect(const gaspi_rank_t rank, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GPI_connect_Entry();
+	Extrae_GASPI_connect_Entry();
 	ret = pgaspi_connect(rank, timeout);
-	Extrae_GPI_connect_Exit();
+	Extrae_GASPI_connect_Exit();
 
 	return ret;
 }
@@ -200,9 +200,9 @@ gaspi_disconnect(const gaspi_rank_t rank, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GPI_disconnect_Entry();
+	Extrae_GASPI_disconnect_Entry();
 	ret = pgaspi_disconnect(rank, timeout);
-	Extrae_GPI_disconnect_Exit();
+	Extrae_GASPI_disconnect_Exit();
 
 	return ret;
 }
@@ -214,9 +214,9 @@ gaspi_group_create(gaspi_group_t * const group)
 
 	int ret;
 
-	Extrae_GPI_group_create_Entry();
+	Extrae_GASPI_group_create_Entry();
 	ret = pgaspi_group_create(group);
-	Extrae_GPI_group_create_Exit();
+	Extrae_GASPI_group_create_Exit();
 
 	return ret;
 }
@@ -228,9 +228,9 @@ gaspi_group_add(const gaspi_group_t group, const gaspi_rank_t rank)
 
 	int ret;
 
-	Extrae_GPI_group_add_Entry();
+	Extrae_GASPI_group_add_Entry();
 	ret = pgaspi_group_add(group, rank);
-	Extrae_GPI_group_add_Exit();
+	Extrae_GASPI_group_add_Exit();
 
 	return ret;
 }
@@ -242,9 +242,9 @@ gaspi_group_commit(const gaspi_group_t group, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GPI_group_commit_Entry();
+	Extrae_GASPI_group_commit_Entry();
 	ret = pgaspi_group_commit(group, timeout);
-	Extrae_GPI_group_commit_Exit();
+	Extrae_GASPI_group_commit_Exit();
 
 	return ret;
 }
@@ -256,9 +256,9 @@ gaspi_group_delete(const gaspi_group_t group)
 
 	int ret;
 
-	Extrae_GPI_group_delete_Entry();
+	Extrae_GASPI_group_delete_Entry();
 	ret = pgaspi_group_delete(group);
-	Extrae_GPI_group_delete_Exit();
+	Extrae_GASPI_group_delete_Exit();
 
 	return ret;
 }
@@ -271,9 +271,9 @@ gaspi_segment_alloc(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_segment_alloc_Entry(size);
+	Extrae_GASPI_segment_alloc_Entry(size);
 	ret = pgaspi_segment_alloc(segment_id, size, alloc_policy);
-	Extrae_GPI_segment_alloc_Exit();
+	Extrae_GASPI_segment_alloc_Exit();
 
 	return ret;
 }
@@ -286,9 +286,9 @@ gaspi_segment_register(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_segment_register_Entry();
+	Extrae_GASPI_segment_register_Entry();
 	ret = pgaspi_segment_register(segment_id, rank, timeout);
-	Extrae_GPI_segment_register_Exit();
+	Extrae_GASPI_segment_register_Exit();
 
 	return ret;
 }
@@ -302,9 +302,9 @@ gaspi_segment_create(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_segment_create_Entry(size);
+	Extrae_GASPI_segment_create_Entry(size);
 	ret = pgaspi_segment_create(segment_id, size, group, timeout_ms, alloc_policy);
-	Extrae_GPI_segment_create_Exit();
+	Extrae_GASPI_segment_create_Exit();
 
 	return ret;
 }
@@ -318,9 +318,9 @@ gaspi_segment_bind(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_segment_bind_Entry(size);
+	Extrae_GASPI_segment_bind_Entry(size);
 	ret = pgaspi_segment_bind(segment_id, pointer, size, memory_description);
-	Extrae_GPI_segment_bind_Exit();
+	Extrae_GASPI_segment_bind_Exit();
 
 	return ret;
 }
@@ -335,10 +335,10 @@ gaspi_segment_use(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_segment_use_Entry(size);
+	Extrae_GASPI_segment_use_Entry(size);
 	ret = pgaspi_segment_use
 	    (segment_id, pointer, size, group, timeout, memory_description);
-	Extrae_GPI_segment_use_Exit();
+	Extrae_GASPI_segment_use_Exit();
 
 	return ret;
 }
@@ -350,9 +350,9 @@ gaspi_segment_delete(const gaspi_segment_id_t segment_id)
 
 	int ret;
 
-	Extrae_GPI_segment_delete_Entry();
+	Extrae_GASPI_segment_delete_Entry();
 	ret = pgaspi_segment_delete(segment_id);
-	Extrae_GPI_segment_delete_Exit();
+	Extrae_GASPI_segment_delete_Exit();
 
 	return ret;
 }
@@ -368,10 +368,10 @@ gaspi_write(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GPI_write_Entry(rank, size);
+	Extrae_GASPI_write_Entry(rank, size);
 	ret = pgaspi_write(segment_id_local, offset_local, rank, segment_id_remote,
 	    offset_remote, size, queue, timeout_ms);
-	Extrae_GPI_write_Exit();
+	Extrae_GASPI_write_Exit();
 
 	return ret;
 }
@@ -387,10 +387,10 @@ gaspi_read(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GPI_read_Entry(rank, size);
+	Extrae_GASPI_read_Entry(rank, size);
 	ret = pgaspi_read(segment_id_local, offset_local, rank, segment_id_remote,
 	    offset_remote, size, queue, timeout_ms);
-	Extrae_GPI_read_Exit();
+	Extrae_GASPI_read_Exit();
 
 	return ret;
 }
@@ -402,9 +402,9 @@ gaspi_wait(const gaspi_queue_id_t queue, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GPI_wait_Entry();
+	Extrae_GASPI_wait_Entry();
 	ret = pgaspi_wait(queue, timeout);
-	Extrae_GPI_wait_Exit();
+	Extrae_GASPI_wait_Exit();
 
 	return ret;
 }
@@ -419,11 +419,11 @@ gaspi_notify(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_notify_Entry(rank);
+	Extrae_GASPI_notify_Entry(rank);
 	ret = pgaspi_notify
 	    (segment_id, rank, notification_id, notification_value, queue,
 	    timeout);
-	Extrae_GPI_notify_Exit();
+	Extrae_GASPI_notify_Exit();
 
 	return ret;
 }
@@ -438,10 +438,10 @@ gaspi_notify_waitsome(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GPI_notify_waitsome_Entry();
+	Extrae_GASPI_notify_waitsome_Entry();
 	ret = pgaspi_notify_waitsome(segment_id_local, notification_begin, num,
 	    first_id, timeout_ms);
-	Extrae_GPI_notify_waitsome_Exit();
+	Extrae_GASPI_notify_waitsome_Exit();
 
 	return ret;
 }
@@ -455,10 +455,10 @@ gaspi_notify_reset(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GPI_notify_reset_Entry();
+	Extrae_GASPI_notify_reset_Entry();
 	ret = pgaspi_notify_reset(segment_id_local, notification_id,
 	    old_notification_val);
-	Extrae_GPI_notify_reset_Exit();
+	Extrae_GASPI_notify_reset_Exit();
 
 	return ret;
 }
@@ -476,11 +476,11 @@ gaspi_write_notify(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GPI_write_notify_Entry(rank, size);
+	Extrae_GASPI_write_notify_Entry(rank, size);
 	ret = pgaspi_write_notify(segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, notification_id,
 	    notification_value, queue, timeout);
-	Extrae_GPI_write_notify_Exit();
+	Extrae_GASPI_write_notify_Exit();
 
 	return ret;
 }
@@ -497,10 +497,10 @@ gaspi_write_list(const gaspi_number_t num,
 
 	int ret;
 
-	Extrae_GPI_write_list_Entry(rank, size);
+	Extrae_GASPI_write_list_Entry(rank, size);
 	ret = pgaspi_write_list(num, segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, queue, timeout);
-	Extrae_GPI_write_list_Exit();
+	Extrae_GASPI_write_list_Exit();
 
 	return ret;
 }
@@ -520,11 +520,11 @@ gaspi_write_list_notify(const gaspi_number_t num,
 
 	int ret;
 
-	Extrae_GPI_write_list_notify_Entry(rank, size);
+	Extrae_GASPI_write_list_notify_Entry(rank, size);
 	ret = pgaspi_write_list_notify(num, segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, segment_id_notification,
 	    notification_id, notification_value, queue, timeout_ms);
-	Extrae_GPI_write_list_notify_Exit();
+	Extrae_GASPI_write_list_notify_Exit();
 
 	return ret;
 }
@@ -541,10 +541,10 @@ gaspi_read_list(const gaspi_number_t num,
 
 	int ret;
 
-	Extrae_GPI_read_list_Entry(rank, size);
+	Extrae_GASPI_read_list_Entry(rank, size);
 	ret = pgaspi_read_list(num, segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, queue, timeout);
-	Extrae_GPI_read_list_Exit();
+	Extrae_GASPI_read_list_Exit();
 
 	return ret;
 }
@@ -558,10 +558,10 @@ gaspi_passive_send(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GPI_passive_send_Entry(rank, size);
+	Extrae_GASPI_passive_send_Entry(rank, size);
 	ret = pgaspi_passive_send(segment_id_local, offset_local, rank, size,
 	    timeout_ms);
-	Extrae_GPI_passive_send_Exit();
+	Extrae_GASPI_passive_send_Exit();
 
 	return ret;
 }
@@ -575,10 +575,10 @@ gaspi_passive_receive(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GPI_passive_receive_Entry(rem_rank, size);
+	Extrae_GASPI_passive_receive_Entry(rem_rank, size);
 	ret = pgaspi_passive_receive(segment_id_local, offset_local, rem_rank, size,
 	    timeout_ms);
-	Extrae_GPI_passive_receive_Exit();
+	Extrae_GASPI_passive_receive_Exit();
 
 	return ret;
 }
@@ -593,10 +593,10 @@ gaspi_atomic_fetch_add(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_atomic_fetch_add_Entry(rank);
+	Extrae_GASPI_atomic_fetch_add_Entry(rank);
 	ret = pgaspi_atomic_fetch_add(segment_id, offset, rank, val_add, val_old,
 	    timeout_ms);
-	Extrae_GPI_atomic_fetch_add_Exit();
+	Extrae_GASPI_atomic_fetch_add_Exit();
 
 	return ret;
 }
@@ -611,10 +611,10 @@ gaspi_atomic_compare_swap(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GPI_atomic_compare_swap_Entry(rank);
+	Extrae_GASPI_atomic_compare_swap_Entry(rank);
 	ret = pgaspi_atomic_compare_swap(segment_id, offset, rank, comparator,
 	    val_new, val_old, timeout_ms);
-	Extrae_GPI_atomic_compare_swap_Exit();
+	Extrae_GASPI_atomic_compare_swap_Exit();
 
 	return ret;
 }
@@ -626,9 +626,9 @@ gaspi_barrier(const gaspi_group_t group, const gaspi_timeout_t timeout_ms)
 
 	int ret;
 
-	Extrae_GPI_barrier_Entry();
+	Extrae_GASPI_barrier_Entry();
 	ret = pgaspi_barrier(group, timeout_ms);
-	Extrae_GPI_barrier_Exit();
+	Extrae_GASPI_barrier_Exit();
 
 	return ret;
 }
@@ -643,10 +643,10 @@ gaspi_allreduce(gaspi_pointer_t const buffer_send,
 
 	int ret;
 
-	Extrae_GPI_allreduce_Entry();
+	Extrae_GASPI_allreduce_Entry();
 	ret = pgaspi_allreduce(buffer_send, buffer_receive, num, operation, datatyp,
 	    group, timeout_ms);
-	Extrae_GPI_allreduce_Exit();
+	Extrae_GASPI_allreduce_Exit();
 
 	return ret;
 }
@@ -662,10 +662,10 @@ gaspi_allreduce_user(gaspi_pointer_t const buffer_send,
 
 	int ret;
 
-	Extrae_GPI_allreduce_user_Entry();
+	Extrae_GASPI_allreduce_user_Entry();
 	ret = pgaspi_allreduce_user(buffer_send, buffer_receive, num, element_size,
 	    operation, reduce_state, group, timeout_ms);
-	Extrae_GPI_allreduce_user_Exit();
+	Extrae_GASPI_allreduce_user_Exit();
 
 	return ret;
 }
