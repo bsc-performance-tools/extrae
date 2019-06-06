@@ -59,7 +59,7 @@ void	Probe_GASPI_group_delete_Exit();
 void	Probe_GASPI_segment_alloc_Entry(const gaspi_size_t);
 void	Probe_GASPI_segment_alloc_Exit();
 
-void	Probe_GASPI_segment_register_Entry();
+void	Probe_GASPI_segment_register_Entry(const gaspi_rank_t);
 void	Probe_GASPI_segment_register_Exit();
 
 void	Probe_GASPI_segment_create_Entry(const gaspi_size_t);

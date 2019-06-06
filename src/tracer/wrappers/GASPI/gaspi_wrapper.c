@@ -286,7 +286,7 @@ gaspi_segment_register(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GASPI_segment_register_Entry();
+	Extrae_GASPI_segment_register_Entry(rank);
 	ret = pgaspi_segment_register(segment_id, rank, timeout);
 	Extrae_GASPI_segment_register_Exit();
 
