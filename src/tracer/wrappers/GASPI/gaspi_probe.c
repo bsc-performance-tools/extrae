@@ -215,7 +215,7 @@ Probe_GASPI_segment_alloc_Entry(const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_SEGMENT_ALLOC_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (long)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -230,12 +230,13 @@ Probe_GASPI_segment_alloc_Exit()
 }
 
 void
-Probe_GASPI_segment_register_Entry()
+Probe_GASPI_segment_register_Entry(const gaspi_rank_t rank)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_SEGMENT_REGISTER_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 	}
 }
 
@@ -257,7 +258,7 @@ Probe_GASPI_segment_create_Entry(const gaspi_size_t size)
 		TRACE_EVENTANDCOUNTERS(
 		    LAST_READ_TIME, GASPI_SEGMENT_CREATE_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -278,7 +279,7 @@ Probe_GASPI_segment_bind_Entry(const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_SEGMENT_BIND_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -299,7 +300,7 @@ Probe_GASPI_segment_use_Entry(const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(TIME, GASPI_SEGMENT_USE_EV, EVT_END,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -340,8 +341,8 @@ Probe_GASPI_write_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_WRITE_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -362,8 +363,8 @@ Probe_GASPI_read_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_READ_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -404,7 +405,7 @@ Probe_GASPI_notify_Entry(const gaspi_rank_t rank)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_NOTIFY_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 	}
 }
 
@@ -465,8 +466,8 @@ Probe_GASPI_write_notify_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_WRITE_NOTIFY_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -487,8 +488,8 @@ Probe_GASPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_WRITE_LIST_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (long)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -510,8 +511,8 @@ Probe_GASPI_write_list_notify_Entry(const gaspi_rank_t rank,
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_WRITE_LIST_NOTIFY_EV,
 		    EVT_BEGIN, Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (long)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -532,8 +533,8 @@ Probe_GASPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_READ_LIST_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (long)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -554,8 +555,8 @@ Probe_GASPI_passive_send_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_PASSIVE_SEND_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -577,8 +578,8 @@ Probe_GASPI_passive_receive_Entry(gaspi_rank_t * const rem_rank,
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_PASSIVE_RECEIVE_EV,
 		    EVT_BEGIN, Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (long)rem_rank);
-		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (int)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rem_rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
 	}
 }
 
@@ -599,7 +600,7 @@ Probe_GASPI_atomic_fetch_add_Entry(const gaspi_rank_t rank)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_ATOMIC_FETCH_ADD_EV,
 		    EVT_BEGIN, Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 	}
 }
 
@@ -620,7 +621,7 @@ Probe_GASPI_atomic_compare_swap_Entry(const gaspi_rank_t rank)
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_ATOMIC_COMPARE_SWAP_EV,
 		    EVT_BEGIN, Extrae_get_trace_GASPI_HWC());
-		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (int)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 	}
 }
 

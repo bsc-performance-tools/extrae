@@ -152,10 +152,10 @@ Extrae_GASPI_segment_alloc_Exit()
 }
 
 void
-Extrae_GASPI_segment_register_Entry()
+Extrae_GASPI_segment_register_Entry(const gaspi_rank_t rank)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_segment_register_Entry();
+	Probe_GASPI_segment_register_Entry(rank);
 }
 
 void

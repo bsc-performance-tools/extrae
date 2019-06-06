@@ -52,7 +52,7 @@ void	Extrae_GASPI_group_delete_Exit();
 void	Extrae_GASPI_segment_alloc_Entry(const gaspi_size_t);
 void	Extrae_GASPI_segment_alloc_Exit();
 
-void	Extrae_GASPI_segment_register_Entry();
+void	Extrae_GASPI_segment_register_Entry(const gaspi_rank_t);
 void	Extrae_GASPI_segment_register_Exit();
 
 void	Extrae_GASPI_segment_create_Entry(const gaspi_size_t);
