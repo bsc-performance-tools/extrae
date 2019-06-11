@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 25Apr2019 Fixes race conditions between thread creations and PEBS samples 
+ * 17Apr2019 Fixes bug in pebs sampling store misses identification
  * 02Apr2019 Adds support for changing num_threads in OpenMP parallel constructs
  * 29Mar2019 Changes order in which MPI env vars are checked to discover process' task id during auto init
  * 28Mar2019 Extends support for PEBS sampling on Skylake processors, xml 'period' attribute changed to 'frequency'

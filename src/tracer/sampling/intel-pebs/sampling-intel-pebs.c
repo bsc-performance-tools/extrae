@@ -656,7 +656,7 @@ static void extrae_intel_pebs_handler_store (int threadid)
 		
 			if (data_src.mem_lvl & PERF_MEM_LVL_HIT)
 				memhitormiss = PEBS_MEMORYHIERARCHY_HIT;
-			else if (data_src.mem_lvl % PERF_MEM_LVL_MISS)
+			else if (data_src.mem_lvl & PERF_MEM_LVL_MISS)
 				memhitormiss = PEBS_MEMORYHIERARCHY_MISS;
 			else
 				memhitormiss = PEBS_MEMORYHIERARCHY_UNKNOWN;
