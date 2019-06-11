@@ -1894,6 +1894,10 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 		if (new_num_threads > get_maximum_NumOfThreads())
 		{
 			unsigned u;
+
+#if defined(ENABLE_PEBS_SAMPLING)
+			Extrae_IntelPEBS_pauseSampling();
+#endif
 	
 			/* Reallocate InInstrumentation structures */
 			Backend_ChangeNumberOfThreads_InInstrumentation (new_num_threads);
@@ -1932,6 +1936,11 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads)
 #endif
 	
 			maximum_NumOfThreads = current_NumOfThreads = new_num_threads;
+
+#if defined(ENABLE_PEBS_SAMPLING)
+			Extrae_IntelPEBS_resumeSampling(); 
+#endif
+
 		}
 		else
 			current_NumOfThreads = new_num_threads;
@@ -2141,6 +2150,10 @@ static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 	char tmp_name[TMP_DIR];
 	unsigned initialTASKID;
 	char hostname[1024];
+
+#if defined(SAMPLING_SUPPORT) && defined(ENABLE_PEBS_SAMPLING)
+	Extrae_IntelPEBS_stopSamplingThread (thread);
+#endif
 
 	if (Buffer_IsClosed(TRACING_BUFFER(thread)))
 		return;

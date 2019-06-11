@@ -43,4 +43,8 @@ void Extrae_IntelPEBS_setLoadL3MSampling (int enabled);
 void Extrae_IntelPEBS_startSampling (void);
 void Extrae_IntelPEBS_stopSampling (void); 
 
+void Extrae_IntelPEBS_pauseSampling (void);
+void Extrae_IntelPEBS_resumeSampling (void);
+void Extrae_IntelPEBS_stopSamplingThread (int thid);
+
 #endif

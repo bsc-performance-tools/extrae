@@ -57,8 +57,10 @@
 # endif
 #endif
 
+static int PEBS_enabled = 0;
 static int pebs_init_threads = 0;
 static pthread_mutex_t pebs_init_lock = PTHREAD_MUTEX_INITIALIZER;
+static int _PEBS_sampling_paused = FALSE;
 
 #define LOAD_SAMPLE_TYPE         ( PERF_SAMPLE_IP | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC | PERF_SAMPLE_ADDR )
 #define STORE_SAMPLE_TYPE        ( PERF_SAMPLE_IP | PERF_SAMPLE_DATA_SRC | PERF_SAMPLE_ADDR )
@@ -427,6 +429,7 @@ static void ***extrae_intel_pebs_mmap = NULL;
 static long long **prev_head = NULL;
 static int **perf_pebs_fd = NULL;
 static int mmap_pages=1+MMAP_DATA_SIZE;
+static int *group_fd = NULL;
 
 #define ALLOCATED_SIZE MMAP_DATA_SIZE*4096
 static char **data_thread_buffer = NULL;
@@ -446,7 +449,7 @@ static long long extrae_perf_mmap_read_pebs (void *extrae_intel_pebs_mmap_thread
 #if defined(HAVE_PERF_EVENT_MMAP_PAGE_DATA_SIZE)
 	long long bytesize = control_page->data_size;
 #else
-	long long bytesize = mmap_size*sysconf(_SC_PAGESIZE);
+	long long bytesize = mmap_pages*sysconf(_SC_PAGESIZE);
 #endif
 
 	if (size > bytesize)
@@ -733,7 +736,6 @@ static void extrae_intel_pebs_handler (int signum, siginfo_t *info, void *uc)
 static int Extrae_IntelPEBS_enable (void)
 {
 	__u64 hwc;
-	int group_fd = -1;
 	int ret;
 	struct perf_event_attr pe;
 	struct sigaction sa;
@@ -758,6 +760,12 @@ static int Extrae_IntelPEBS_enable (void)
 		prev_head = (long long **) realloc (prev_head, (thread_id+1) * sizeof(long long*));
 		assert (prev_head);
 
+		group_fd = (int*) realloc (group_fd, (thread_id+1) * sizeof(int));
+		assert (group_fd);
+
+		data_thread_buffer = (char **) realloc (data_thread_buffer, (thread_id+1) * sizeof(char *));
+		assert (data_thread_buffer);
+
 		for (i=pebs_init_threads; i<(thread_id+1); i++)
 		{
 			extrae_intel_pebs_mmap[i] = malloc (sizeof(void*)*NUM_SAMPLING_TYPES);
@@ -777,13 +785,9 @@ static int Extrae_IntelPEBS_enable (void)
 			prev_head[i][LOAD_INDEX] =
 			  prev_head[i][STORE_INDEX] =
 			  prev_head[i][LOAD_L3M_INDEX] = 0;
-		}
 
-		data_thread_buffer = (char **) realloc (data_thread_buffer, (thread_id+1) * sizeof(char *));
-		assert (data_thread_buffer);
+			group_fd[i] = -1;
 
-		for (i=pebs_init_threads; i<(thread_id+1); i++)
-		{
 			data_thread_buffer[i] = malloc (ALLOCATED_SIZE);
 			assert (data_thread_buffer[i]);
 		}
@@ -819,18 +823,18 @@ static int Extrae_IntelPEBS_enable (void)
 		pe.exclude_kernel = 1;
 		pe.exclude_hv = 1;
 		pe.wakeup_events = 1;
-                if (PEBS_load_operates_in_frequency_mode)
-                {
-                        pe.freq = 1;
-                        pe.sample_freq = PEBS_load_frequency;
-                }
-                else // operates in period mode by default
-                {
-                        pe.freq = 0;
-                        pe.sample_period = PEBS_load_period;
-                }
+		if (PEBS_load_operates_in_frequency_mode)
+		{
+			pe.freq = 1;
+			pe.sample_freq = PEBS_load_frequency;
+		}
+		else // operates in period mode by default
+		{
+			pe.freq = 0;
+			pe.sample_period = PEBS_load_period;
+		}
 	
-		group_fd = perf_pebs_fd[thread_id][LOAD_INDEX] = perf_event_open (&pe, 0, -1, -1, 0);
+		group_fd[thread_id] = perf_pebs_fd[thread_id][LOAD_INDEX] = perf_event_open (&pe, 0, -1, -1, 0);
 		if (perf_pebs_fd[thread_id][LOAD_INDEX] < 0)
 		{
 			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for loads\n");
@@ -863,34 +867,33 @@ static int Extrae_IntelPEBS_enable (void)
 		pe.exclude_kernel = 1;
 		pe.exclude_hv = 1;
 		pe.wakeup_events = 1;
-                if (PEBS_store_operates_in_frequency_mode)
-                {
-                        pe.freq = 1;
-                        pe.sample_freq = PEBS_store_frequency;
-                }
-                else // operates in period mode by default
-                {
-                        pe.freq = 0;
-                        pe.sample_period = PEBS_store_period;
-                }
+		if (PEBS_store_operates_in_frequency_mode)
+		{
+			pe.freq = 1;
+			pe.sample_freq = PEBS_store_frequency;
+		}
+		else // operates in period mode by default
+		{
+			pe.sample_period = PEBS_store_period;
+		}
 
 		// If we're creating this group, make sure that we pin the group and that the
 		// group starts disabled
-		if (group_fd == -1)
+		if (group_fd[thread_id] == -1)
 		{
 			pe.pinned = 1;
 			pe.disabled = 1;
 		}
 	
-		perf_pebs_fd[thread_id][STORE_INDEX] = perf_event_open (&pe, 0, -1, group_fd, 0); // Chain on LOADS - if previously configured
+		perf_pebs_fd[thread_id][STORE_INDEX] = perf_event_open (&pe, 0, -1, group_fd[thread_id], 0); // Chain on LOADS - if previously configured
 		if (perf_pebs_fd[thread_id][STORE_INDEX] < 0)
 		{
 			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for stores\n");
 			return -1;
 		}
 
-		if (group_fd == -1)
-			group_fd = perf_pebs_fd[thread_id][STORE_INDEX];
+		if (group_fd[thread_id] == -1)
+			group_fd[thread_id] = perf_pebs_fd[thread_id][STORE_INDEX];
 
 		extrae_intel_pebs_mmap[thread_id][STORE_INDEX] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
 		  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[thread_id][STORE_INDEX], 0);
@@ -932,21 +935,21 @@ static int Extrae_IntelPEBS_enable (void)
 
 		// If we're creating this group, make sure that we pin the group and that the
 		// group starts disabled
-		if (group_fd == -1)
+		if (group_fd[thread_id] == -1)
 		{
 			pe.pinned = 1;
 			pe.disabled = 1;
 		}
 	
-		perf_pebs_fd[thread_id][LOAD_L3M_INDEX] = perf_event_open (&pe, 0, -1, group_fd, 0); // Chain on LOADS - if setup
+		perf_pebs_fd[thread_id][LOAD_L3M_INDEX] = perf_event_open (&pe, 0, -1, group_fd[thread_id], 0); // Chain on LOADS - if setup
 		if (perf_pebs_fd[thread_id][LOAD_L3M_INDEX] < 0)
 		{
 			fprintf (stderr, PACKAGE_NAME": Cannot open the perf_event file descriptor for loads L3M\n");
 			return -1;
 		}
 
-		if (group_fd == -1)
-			group_fd = perf_pebs_fd[thread_id][LOAD_L3M_INDEX];
+		if (group_fd[thread_id] == -1)
+			group_fd[thread_id] = perf_pebs_fd[thread_id][LOAD_L3M_INDEX];
 
 		extrae_intel_pebs_mmap[thread_id][LOAD_L3M_INDEX] = mmap (NULL, mmap_pages*sysconf(_SC_PAGESIZE),
 		  PROT_READ|PROT_WRITE, MAP_SHARED, perf_pebs_fd[thread_id][LOAD_L3M_INDEX], 0);
@@ -965,14 +968,17 @@ static int Extrae_IntelPEBS_enable (void)
 
 
 	// Start sampling on the given counter -- which is a group leader.
-	ret = ioctl (group_fd, PERF_EVENT_IOC_REFRESH, 1);
-	if (ret < 0)
+	if (!_PEBS_sampling_paused)
 	{
-		fprintf (stderr, PACKAGE_NAME": Cannot enable the PEBS sampling file descriptor\n");
-		return -1;
+		ret = ioctl (group_fd[thread_id], PERF_EVENT_IOC_REFRESH, 1);
+		if (ret < 0)
+		{
+			fprintf (stderr, PACKAGE_NAME": Cannot enable the PEBS sampling file descriptor\n");
+			return -1;
+		}
 	}
 
-	return 0;
+	return 1;
 }
 
 /*  Extrae_IntelPEBS_stopSampling
@@ -980,6 +986,8 @@ static int Extrae_IntelPEBS_enable (void)
 void Extrae_IntelPEBS_stopSampling (void)
 {
 	int i = 0;
+
+	if (PEBS_enabled != 1) return;
 
 	pthread_mutex_lock (&pebs_init_lock);
 	for (i=0; i<pebs_init_threads; i++)
@@ -1019,6 +1027,64 @@ void Extrae_IntelPEBS_stopSampling (void)
     Starts using PEBS. It starts the sampling mechanism */
 void Extrae_IntelPEBS_startSampling (void)
 {
-	Extrae_IntelPEBS_enable ();
+	PEBS_enabled = Extrae_IntelPEBS_enable ();
 }
 
+void Extrae_IntelPEBS_pauseSampling (void)
+{
+	int i;
+
+	if (PEBS_enabled != 1) return;
+
+	pthread_mutex_lock (&pebs_init_lock);
+	for (i=0; i<pebs_init_threads; i++)
+		ioctl (group_fd[i], PERF_EVENT_IOC_REFRESH, 0);
+	_PEBS_sampling_paused = TRUE;
+	pthread_mutex_unlock (&pebs_init_lock);
+}
+
+void Extrae_IntelPEBS_resumeSampling (void)
+{
+	int i;
+
+	if (PEBS_enabled != 1) return;
+
+	pthread_mutex_lock (&pebs_init_lock);
+	for (i=0; i<pebs_init_threads; i++)
+		ioctl (group_fd[i], PERF_EVENT_IOC_REFRESH, 1);
+	_PEBS_sampling_paused = FALSE;
+	pthread_mutex_unlock (&pebs_init_lock);
+}
+
+void Extrae_IntelPEBS_stopSamplingThread (int thid)
+{
+	if (PEBS_enabled != 1) return;
+
+	// Stop Loads and unmap associated pages
+	if (perf_pebs_fd[thid][LOAD_INDEX] >= 0) {
+		ioctl (perf_pebs_fd[thid][LOAD_INDEX], PERF_EVENT_IOC_REFRESH, 0);
+		close (perf_pebs_fd[thid][LOAD_INDEX]);
+	}
+	if (extrae_intel_pebs_mmap[thid][LOAD_INDEX] != NULL) {
+		munmap (extrae_intel_pebs_mmap[thid][LOAD_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
+		extrae_intel_pebs_mmap[thid][LOAD_INDEX] = NULL;
+	}
+	// Stop Stores and unmap associated pages
+	if (perf_pebs_fd[thid][STORE_INDEX] >= 0) {
+		ioctl (perf_pebs_fd[thid][STORE_INDEX], PERF_EVENT_IOC_REFRESH, 0);
+		close (perf_pebs_fd[thid][STORE_INDEX]);
+	}
+	if (extrae_intel_pebs_mmap[thid][STORE_INDEX] != NULL) {
+		munmap (extrae_intel_pebs_mmap[thid][STORE_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
+		extrae_intel_pebs_mmap[thid][STORE_INDEX] = NULL;
+	}
+	// Stop LoadL3M and unmap associated pages
+	if (perf_pebs_fd[thid][LOAD_L3M_INDEX] >= 0) {
+		ioctl (perf_pebs_fd[thid][LOAD_L3M_INDEX], PERF_EVENT_IOC_REFRESH, 0);
+		close (perf_pebs_fd[thid][LOAD_L3M_INDEX]);
+	}
+	if (extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX] != NULL) {
+		munmap (extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX], mmap_pages*sysconf(_SC_PAGESIZE));
+		extrae_intel_pebs_mmap[thid][LOAD_L3M_INDEX] = NULL;
+	}
+}
