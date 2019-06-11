@@ -83,7 +83,33 @@ void Extrae_MPI_stats_Wrapper (iotimer_t timestamp);
 void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *global_source);
 void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *receiver, int send_or_recv);
 
-extern xtr_hash_t requests;     /* Receive requests stored in a hash in order to search them fast */
+#define MPI_REQUEST_TO_HASH_KEY(r) ((uintptr_t)r)
+#define MPI_MESSAGE_TO_HASH_KEY(m) ((uintptr_t)m)
+
+/** 
+ * xtr_hash_data_request_t
+ * 
+ * This structure holds extra data that needs to be stored when hashing MPI_Request data.
+ */
+typedef struct xtr_hash_data_request_t
+{
+	MPI_Comm  commid;
+	MPI_Group group;
+} xtr_hash_data_request_t;
+
+/** 
+ * xtr_hash_data_message_t
+ * 
+ * This structure holds extra data that needs to be stored when hashing MPI_Message data.
+ */
+typedef struct xtr_hash_data_message_t
+{
+	MPI_Comm  commid;
+	MPI_Group group;
+} xtr_hash_data_message_t;
+
+extern xtr_hash_t *hash_requests;     /* MPI_Request stored in a hash in order to search them fast */
+extern xtr_hash_t *hash_messages;     /* MPI_Message stored in a hash in order to search them fast */
 extern PR_Queue_t PR_queue;     /* Persistent requests queue */
 
 /* Fortran Wrappers */

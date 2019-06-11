@@ -165,13 +165,15 @@ char *Extrae_core_get_mpits_file_name (void)
 	return MpitsFileName;
 }
 
-xtr_hash_t requests;            /* MPI_Request and MPI_Message stored in a hash in order to search them fast */
-PR_Queue_t PR_queue;            /* Persistent requests queue */
-static int *ranks_global;       /* Global ranks vector (from 1 to NProcs) */
-static MPI_Group grup_global;   /* Group attached to the MPI_COMM_WORLD */
-static MPI_Fint grup_global_F;  /* Group attached to the MPI_COMM_WORLD (Fortran) */
+xtr_hash_t *hash_requests = NULL; // MPI_Request stored in a hash in order to search them fast
+xtr_hash_t *hash_messages = NULL; // MPI_Message stored in a hash in order to search them fast
 
-#if defined(IS_BGL_MACHINE)     /* BGL, s'intercepten algunes crides barrier dins d'altres cols */
+PR_Queue_t PR_queue;              // Persistent requests queue
+static int *ranks_global;         // Global ranks vector (from 1 to NProcs)
+static MPI_Group grup_global;     // Group attached to the MPI_COMM_WORLD
+static MPI_Fint grup_global_F;    // Group attached to the MPI_COMM_WORLD (Fortran)
+
+#if defined(IS_BGL_MACHINE)       // BGL, s'intercepten algunes crides barrier dins d'altres cols */
 static int BGL_disable_barrier_inside = 0;
 #endif
 
@@ -972,7 +974,9 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	xtr_hash_init (&requests);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_NONE);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_NONE);
+
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK
@@ -1090,7 +1094,9 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	MPI_Comm cparent = MPI_COMM_NULL;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	xtr_hash_init (&requests);
+        hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK);
+        hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK);
+
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK
@@ -1801,7 +1807,9 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	xtr_hash_init (&requests);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_NONE);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_NONE);
+
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK
@@ -1917,7 +1925,9 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	int val = 0;
 	iotimer_t MPI_Init_start_time, MPI_Init_end_time;
 
-	xtr_hash_init (&requests);
+	hash_requests = xtr_hash_new(XTR_HASH_SIZE_MEDIUM, sizeof(xtr_hash_data_request_t), XTR_HASH_LOCK);
+	hash_messages = xtr_hash_new(XTR_HASH_SIZE_TINY, sizeof(xtr_hash_data_message_t), XTR_HASH_LOCK);
+	
 	PR_queue_init (&PR_queue);
 
 #ifdef WITH_PMPI_HOOK
@@ -2926,13 +2936,12 @@ void SaveRequest(MPI_Request request, MPI_Comm comm)
 {
 	if (request != MPI_REQUEST_NULL) 
 	{
-		xtr_hash_data_t hash_req;
+		xtr_hash_data_request_t request_data;
 
-		hash_req.key = MPI_REQUEST_TO_HASH_KEY(request);
-		hash_req.commid = comm;
-		getCommunicatorGroup(comm, &hash_req.group);
+		request_data.commid = comm;
+		getCommunicatorGroup(comm, &request_data.group);
 
-		xtr_hash_add (&requests, &hash_req);
+		xtr_hash_add (hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data);
 	}
 }
 
@@ -2940,7 +2949,7 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 {
 	if (request != MPI_REQUEST_NULL)
 	{
-		xtr_hash_data_t *hash_req = NULL;
+		xtr_hash_data_request_t request_data;
 		int cancel_flag, src_world, size, tag, ierror;
 
 		ierror = PMPI_Test_cancelled(status, &cancel_flag);
@@ -2957,7 +2966,7 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 		{
 			// Communication was completed 
 
-			if ((hash_req = xtr_hash_search(&requests, MPI_REQUEST_TO_HASH_KEY(request))) != NULL)
+			if (xtr_hash_fetch(hash_requests, MPI_REQUEST_TO_HASH_KEY(request), &request_data))
 			{
 				// Current request refers to a receive operation (only MPI_I*recv requests are stored in the hash)
       
@@ -2966,12 +2975,11 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 				With the source rank and the communicator, we translate the local rank into the global rank.
 				*/
 
-				getCommDataFromStatus(status, MPI_BYTE, hash_req->commid, hash_req->group, &size, &tag, &src_world);
+				getCommDataFromStatus(status, MPI_BYTE, request_data.commid, request_data.group, &size, &tag, &src_world);
 
 				updateStats_P2P(global_mpi_stats, src_world, size, 0);
   
-				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, request);
-				xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
+				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, request_data.commid, request);
 			}
 			else 
 			{
@@ -2990,7 +2998,7 @@ void CancelRequest(MPI_Request request)
 {
 	if (request != MPI_REQUEST_NULL) 
 	{
-		xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
+		xtr_hash_fetch(hash_requests, MPI_REQUEST_TO_HASH_KEY(request), NULL);
 	}
 }
 
@@ -3000,13 +3008,12 @@ void SaveMessage(MPI_Message message, MPI_Comm comm)
 {
 	if (message != MPI_MESSAGE_NULL)
 	{
-		xtr_hash_data_t hash_msg;
+		xtr_hash_data_message_t message_data;
 
-		hash_msg.key = MPI_MESSAGE_TO_HASH_KEY(message);
-		hash_msg.commid = comm;
-		getCommunicatorGroup(comm, &hash_msg.group);
+		message_data.commid = comm;
+		getCommunicatorGroup(comm, &message_data.group);
 
-		xtr_hash_add (&requests, &hash_msg);
+		xtr_hash_add (hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data);
 	}
 }
 
@@ -3015,34 +3022,28 @@ MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 {
 	if (message != MPI_MESSAGE_NULL)
 	{	
-		xtr_hash_data_t *hash_msg = NULL;
+		xtr_hash_data_message_t message_data;
 
 		// Retrieve message from hash
-		if ((hash_msg = xtr_hash_search(&requests, MPI_MESSAGE_TO_HASH_KEY(message))) != NULL)
+		if (xtr_hash_fetch(hash_messages, MPI_MESSAGE_TO_HASH_KEY(message), &message_data))
 		{
 			if (request != NULL)
 			{
-				xtr_hash_data_t  hash_req;
+				xtr_hash_data_request_t request_data;
 	
 				// Fill request communicator data
-				hash_req.key = MPI_REQUEST_TO_HASH_KEY(*request);
-				hash_req.commid = hash_msg->commid;
-				hash_req.group = hash_msg->group;
+				request_data.commid = message_data.commid;
+				request_data.group  = message_data.group;
 
 				// Save the request in the hash with the message's comm data
-				xtr_hash_add(&requests, &hash_req);
+				xtr_hash_add(hash_requests, MPI_REQUEST_TO_HASH_KEY(*request), &request_data);
 			}
 
-			// Delete message from hash
-			xtr_hash_remove(&requests, MPI_MESSAGE_TO_HASH_KEY(message));
-
-			return hash_msg->commid;
+			return message_data.commid;
 		}
 	}
-
 	return MPI_COMM_NULL;
 }
 
 #endif /* MPI3 */
-
 
