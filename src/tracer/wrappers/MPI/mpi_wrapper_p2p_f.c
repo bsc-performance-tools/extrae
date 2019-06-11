@@ -1178,7 +1178,7 @@ void PMPI_TestSome_Wrapper (MPI_Fint *incount, MPI_Fint array_of_requests[],
 
 void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 {
-	MPI_Request c_request = PMPI_Request_f2c(*request);
+	MPI_Request c_request;
 	MPI_Fint    f_status[SIZEOF_MPI_STATUS];
 	MPI_Fint   *f_status_ptr      = NULL;
 	iotimer_t   mpi_wait_end_time = 0;
@@ -1189,7 +1189,9 @@ void PMPI_Wait_Wrapper (MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierror)
 	 *   tag    : ---                        commid : ---
 	 *   aux    : ---
 	 */
-	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, c_request, EMPTY, EMPTY, EMPTY, EMPTY);
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	copyRequests_F (1, request, &c_request, "mpì_wait");
 
 	f_status_ptr = (MPI_F_STATUS_IGNORE == status) ? f_status : status;
 

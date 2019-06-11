@@ -1175,6 +1175,7 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 	MPI_Status  my_status, *ptr_status = NULL;
 	iotimer_t   MPI_Wait_end_time;
 	int         ierror;
+	MPI_Request save_req;
 
 	/*
 	 *   event  : WAIT_EV                    value  : EVT_BEGIN
@@ -1184,6 +1185,8 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_WAIT_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
 
+	copyRequests_C (1, request, &save_req, "MPI_Wait");
+
 	ptr_status = (MPI_STATUS_IGNORE == status) ? &my_status : status;
 
 	ierror = PMPI_Wait (request, ptr_status);
@@ -1192,7 +1195,7 @@ int MPI_Wait_C_Wrapper (MPI_Request *request, MPI_Status *status)
 
 	if (ierror == MPI_SUCCESS)
 	{
-		ProcessRequest (MPI_Wait_end_time, *request, ptr_status);
+		ProcessRequest (MPI_Wait_end_time, save_req, ptr_status);
 	}
 
 	/*

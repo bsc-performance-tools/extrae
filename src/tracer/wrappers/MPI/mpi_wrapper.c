@@ -283,7 +283,7 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *
 			{
 				// Translate the rank 
 				PMPI_Group_translate_ranks (group, 1, &dest, grup_global, receiver); 
-				if (receiver == MPI_UNDEFINED) *receiver = dest;
+				if (*receiver == MPI_UNDEFINED) *receiver = dest;
 				PMPI_Group_free (&group);
 			}
 			else
@@ -2899,7 +2899,6 @@ void getCommunicatorGroup(MPI_Comm comm, MPI_Group *group)
         }
 }
 
-
 void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm comm, MPI_Group group, int *size, int *tag, int *global_source)
 {
   int recved_count;
@@ -2923,91 +2922,97 @@ void getCommDataFromStatus (MPI_Status *status, MPI_Datatype datatype, MPI_Comm 
   translateLocalToGlobalRank (comm, group, local_source, global_source, OP_TYPE_RECV);
 }
 
-
 void SaveRequest(MPI_Request request, MPI_Comm comm)
 {
-        xtr_hash_data_t hash_req;
+	if (request != MPI_REQUEST_NULL) 
+	{
+		xtr_hash_data_t hash_req;
 
-	hash_req.key = MPI_REQUEST_TO_HASH_KEY(request);
-        hash_req.commid = comm;
-        getCommunicatorGroup(comm, &hash_req.group);
+		hash_req.key = MPI_REQUEST_TO_HASH_KEY(request);
+		hash_req.commid = comm;
+		getCommunicatorGroup(comm, &hash_req.group);
 
-        xtr_hash_add (&requests, &hash_req);
+		xtr_hash_add (&requests, &hash_req);
+	}
 }
-
 
 void SaveMessage(MPI_Message message, MPI_Comm comm)
 {
-        xtr_hash_data_t hash_msg;
-	
-	hash_msg.key = MPI_MESSAGE_TO_HASH_KEY(message);
-	hash_msg.commid = comm;
-	getCommunicatorGroup(comm, &hash_msg.group);
+	if (message != MPI_MESSAGE_NULL)
+	{
+		xtr_hash_data_t hash_msg;
 
-	xtr_hash_add (&requests, &hash_msg);
+		hash_msg.key = MPI_MESSAGE_TO_HASH_KEY(message);
+		hash_msg.commid = comm;
+		getCommunicatorGroup(comm, &hash_msg.group);
+
+		xtr_hash_add (&requests, &hash_msg);
+	}
 }
 
 void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 {
-  int cancel_flag;
-  xtr_hash_data_t *hash_req;
-  int src_world, size, tag, ierror;
+	if (request != MPI_REQUEST_NULL)
+	{
+		xtr_hash_data_t *hash_req = NULL;
+		int cancel_flag, src_world, size, tag, ierror;
 
-  ierror = PMPI_Test_cancelled(status, &cancel_flag);
-  MPI_CHECK(ierror, PMPI_Test_cancelled);
+		ierror = PMPI_Test_cancelled(status, &cancel_flag);
+		MPI_CHECK(ierror, PMPI_Test_cancelled);
 
-  if (cancel_flag)
-  {
-    // Communication was cancelled
-    TRACE_MPIEVENT_NOHWC (ts, MPI_REQUEST_CANCELLED_EV, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, request);
+		if (cancel_flag)
+		{
+			// Communication was cancelled
+			TRACE_MPIEVENT_NOHWC (ts, MPI_REQUEST_CANCELLED_EV, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, request);
 
-    CancelRequest(request);
-  }
-  else
-  {
-    // Communication was completed 
+			CancelRequest(request);
+		}
+		else
+		{
+			// Communication was completed 
 
-    if ((hash_req = xtr_hash_search(&requests, MPI_REQUEST_TO_HASH_KEY(request))) != NULL)
-    {
-      // Current request refers to a receive operation (only MPI_I*recv requests are stored in the hash)
+			if ((hash_req = xtr_hash_search(&requests, MPI_REQUEST_TO_HASH_KEY(request))) != NULL)
+			{
+				// Current request refers to a receive operation (only MPI_I*recv requests are stored in the hash)
       
-      /* Retrieve the request from the hash table to query the communicator used in the MPI_I*recv.
-         Then, we query the status for the source rank of the sender (the source rank is local to the communicator used).
-         With the source rank and the communicator, we translate the local rank into the global rank.
-       */
+				/* Retrieve the request from the hash table to query the communicator used in the MPI_I*recv.
+				Then, we query the status for the source rank of the sender (the source rank is local to the communicator used).
+				With the source rank and the communicator, we translate the local rank into the global rank.
+				*/
 
-      getCommDataFromStatus(status, MPI_BYTE, hash_req->commid, hash_req->group, &size, &tag, &src_world);
+				getCommDataFromStatus(status, MPI_BYTE, hash_req->commid, hash_req->group, &size, &tag, &src_world);
 
-      updateStats_P2P(global_mpi_stats, src_world, size, 0);
+				updateStats_P2P(global_mpi_stats, src_world, size, 0);
   
-      TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, request);
-      xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
-    }
-    else 
-    {
-      // Current request refers to a send operation (send requests are not stored in the hash) 
+				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, src_world, size, tag, hash_req->commid, request);
+				xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
+			}
+			else 
+			{
+				// Current request refers to a send operation (send requests are not stored in the hash) 
 
-      /* This case would also trigger if a receive request was not found in the hash (e.g. hash full) 
-         This should not happen unless there's errors in xtr_hash_add or we've missed instrumenting any recv calls. 
-       */
-      TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, EMPTY, EMPTY, status->MPI_TAG, EMPTY, request);
-    }
-  }
+				/* This case would also trigger if a receive request was not found in the hash (e.g. hash full) 
+				This should not happen unless there's errors in xtr_hash_add or we've missed instrumenting any recv calls. 
+				*/
+				TRACE_MPIEVENT_NOHWC (ts, MPI_IRECVED_EV, EMPTY, EMPTY, EMPTY, status->MPI_TAG, EMPTY, request);
+			}
+		}
+	}
 }
-
 
 MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 {
-	xtr_hash_data_t *hash_msg = NULL;
-	xtr_hash_data_t  hash_req;
-
-	// Retrieve message from hash
 	if (message != MPI_MESSAGE_NULL)
 	{	
+		xtr_hash_data_t *hash_msg = NULL;
+
+		// Retrieve message from hash
 		if ((hash_msg = xtr_hash_search(&requests, MPI_MESSAGE_TO_HASH_KEY(message))) != NULL)
 		{
 			if (request != NULL)
 			{
+				xtr_hash_data_t  hash_req;
+	
 				// Fill request communicator data
 				hash_req.key = MPI_REQUEST_TO_HASH_KEY(*request);
 				hash_req.commid = hash_msg->commid;
@@ -3029,6 +3034,9 @@ MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 
 void CancelRequest(MPI_Request request)
 {
-	xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
+	if (request != MPI_REQUEST_NULL) 
+	{
+		xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
+	}
 }
 
