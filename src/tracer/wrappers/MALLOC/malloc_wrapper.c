@@ -232,7 +232,7 @@ void *malloc (size_t s)
     return res;
 }
 
-#define DLSYM_CALLOC_SIZE 8192
+#define DLSYM_CALLOC_SIZE 8 MB
 /*
  * Static buffer to return when calloc is called from within dlsym and we don't
  * have the pointer to the real calloc function
@@ -332,10 +332,10 @@ void *calloc (size_t nmemb, size_t size)
 			/* Check if the requested size fits in the static buffer */
 			if ((nmemb*size) > DLSYM_CALLOC_SIZE)
 			{
-				fprintf (stderr, PACKAGE_NAME
-				    ": The size requested by calloc is bigger"
-				    " than DLSYM_CALLOC_SIZE, please increase its"
-				    " value and recompile.\n");
+				fprintf(stderr, PACKAGE_NAME
+				    ": The size requested by calloc (%zu) is bigger"
+				    " than DLSYM_CALLOC_SIZE, please increase its value and"
+				    "recompile.\n", nmemb*size);
 				abort();
 			}
 

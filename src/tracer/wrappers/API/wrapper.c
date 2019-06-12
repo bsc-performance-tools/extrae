@@ -298,8 +298,6 @@ unsigned int min_BufferSize = EVT_NUM;
 unsigned int buffer_size = EVT_NUM;
 unsigned file_size = 0;
 
-#define MBytes							*1024*1024
-
 static unsigned current_NumOfThreads = 1;
 static unsigned maximum_NumOfThreads = 1;
 
@@ -2294,7 +2292,7 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 		check_size = !hasMinimumTracingTime || (hasMinimumTracingTime && (TIME > MinimumTracingTime+initTracingTime));
 		if (file_size > 0 && check_size)
 		{
-			if ((current_size = Buffer_GetFileSize (buffer)) >= file_size MBytes)
+			if ((current_size = Buffer_GetFileSize (buffer)) >= file_size MB)
 			{
 				if (THREADID == 0)
 				{

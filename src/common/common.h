@@ -58,6 +58,10 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
+#define KB * 1024
+#define MB * 1024 KB
+#define GB * 1024 MB
+
 #define MPTRACE_ERROR(x) \
      if ( (x) != 0 ) return (-1)
 
