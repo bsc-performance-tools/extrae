@@ -51,11 +51,13 @@ enum
 
 int getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype);
 
-void SaveMessage(MPI_Message message, MPI_Comm comm);
-MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request);
 void SaveRequest(MPI_Request request, MPI_Comm comm);
 void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status);
 void CancelRequest(MPI_Request request);
+#if defined(MPI3)
+void SaveMessage(MPI_Message message, MPI_Comm comm);
+MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request);
+#endif /* MPI3 */
 
 void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace);
 void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,

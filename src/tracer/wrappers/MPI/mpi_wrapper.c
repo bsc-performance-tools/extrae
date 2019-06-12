@@ -2936,20 +2936,6 @@ void SaveRequest(MPI_Request request, MPI_Comm comm)
 	}
 }
 
-void SaveMessage(MPI_Message message, MPI_Comm comm)
-{
-	if (message != MPI_MESSAGE_NULL)
-	{
-		xtr_hash_data_t hash_msg;
-
-		hash_msg.key = MPI_MESSAGE_TO_HASH_KEY(message);
-		hash_msg.commid = comm;
-		getCommunicatorGroup(comm, &hash_msg.group);
-
-		xtr_hash_add (&requests, &hash_msg);
-	}
-}
-
 void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 {
 	if (request != MPI_REQUEST_NULL)
@@ -3000,6 +2986,31 @@ void ProcessRequest(iotimer_t ts, MPI_Request request, MPI_Status *status)
 	}
 }
 
+void CancelRequest(MPI_Request request)
+{
+	if (request != MPI_REQUEST_NULL) 
+	{
+		xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
+	}
+}
+
+#if defined(MPI3)
+
+void SaveMessage(MPI_Message message, MPI_Comm comm)
+{
+	if (message != MPI_MESSAGE_NULL)
+	{
+		xtr_hash_data_t hash_msg;
+
+		hash_msg.key = MPI_MESSAGE_TO_HASH_KEY(message);
+		hash_msg.commid = comm;
+		getCommunicatorGroup(comm, &hash_msg.group);
+
+		xtr_hash_add (&requests, &hash_msg);
+	}
+}
+
+
 MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 {
 	if (message != MPI_MESSAGE_NULL)
@@ -3032,11 +3043,6 @@ MPI_Comm ProcessMessage(MPI_Message message, MPI_Request *request)
 	return MPI_COMM_NULL;
 }
 
-void CancelRequest(MPI_Request request)
-{
-	if (request != MPI_REQUEST_NULL) 
-	{
-		xtr_hash_remove(&requests, MPI_REQUEST_TO_HASH_KEY(request));
-	}
-}
+#endif /* MPI3 */
+
 
