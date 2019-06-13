@@ -480,45 +480,44 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
       for binutils_home_dir in [${binutils_paths} "notfound"]; do
    
-         if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" -o -r "${binutils_home_dir}/lib${BITS}/libbfd.dylib" ; then
+         if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" -o \
+                 -r "${binutils_home_dir}/lib${BITS}/libbfd.dylib" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.so" -o -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.dylib" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-         elif test -r "${binutils_home_dir}/lib/libbfd.so" ; then
-            BFD_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib${BITS}/libbfd.a" -a \
-		              "${binutils_require_shared}" = "no" ; then
+                    "${binutils_require_shared}" = "no" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
+         elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.so" -o \
+                   -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.dylib" ; then
+            BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
          elif test -r "${binutils_home_dir}/lib/${multiarch_triplet}/libbfd.a" -a \
                       "${binutils_require_shared}" = "no" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
+         elif test -r "${binutils_home_dir}/lib/libbfd.so" -o \
+                   -r "${binutils_home_dir}/lib/libbfd.dylib" ; then
+            BFD_LIBSDIR="${binutils_home_dir}/lib"
          elif test -r "${binutils_home_dir}/lib/libbfd.a" -a \
-		              "${binutils_require_shared}" = "no" ; then
+                      "${binutils_require_shared}" = "no" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib"
          else
-            dnl If we were unable to find, try this. This works if the library is named like
-            dnl  libbfd-2.23.1.so and there is no symbolic link to it!
+            dnl Try something more automatic using find command
+            libbfd_lib=""
+
             if test -d ${binutils_home_dir}/lib${BITS} ; then
-               shlibs1=`find ${binutils_home_dir}/lib${BITS} -maxdepth 1 -name libbfd\*.so | wc -l`
-            else
-               shlibs1=0
+               nlibbfd=`find ${binutils_home_dir}/lib${BITS} -name libbfd\*.so | wc -l`
+               if test ${nlibbfd} -ge 1 ; then
+                  libbfd_lib=`find ${binutils_home_dir}/lib${BITS} -name libbfd\*.so | head -1`
+               fi
             fi
-            if test -d ${binutils_home_dir}/lib/${multiarch_triplet} ; then
-               shlibs2=`find ${binutils_home_dir}/lib/${multiarch_triplet} -maxdepth 1 -name libbfd\*.so | wc -l`
-            else
-               shlibs2=0
+
+            if test -d ${binutils_home_dir}/lib -a "${libbfd_lib}" = "" ; then
+               nlibbfd=`find ${binutils_home_dir}/lib -name libbfd\*.so | wc -l`
+               if test ${nlibbfd} -ge 1 ; then
+                  libbfd_lib=`find ${binutils_home_dir}/lib -name libbfd\*.so | head -1`
+               fi
             fi
-            if test -d ${binutils_home_dir}/lib ; then
-               shlibs3=`find ${binutils_home_dir}/lib -maxdepth 1 -name libbfd\*.so | wc -l`
-            else
-               shlibs3=0
-            fi
-            if test ${shlibs1} -ge 1 ; then
-               BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
-            elif test ${shlibs2} -ge 1 ; then
-               BFD_LIBSDIR="${binutils_home_dir}/lib/${multiarch_triplet}"
-            elif test ${shlibs3} -ge 1 ; then 
-               BFD_LIBSDIR="${binutils_home_dir}/lib"
+
+            if test "${libbfd_lib}" != "" ; then
+               BFD_LIBSDIR=`dirname ${libbfd_lib}`
             fi
          fi
    
