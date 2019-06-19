@@ -1,10 +1,12 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 04Sep2019 Adds support for GASPI next branch and adds notification_id and queue_id parameters
  * 05Jul2019 Fixes bug in MPI_Test & MPI_Imrecv where the request is not properly copied for later processing
  * 21Jun2019 Fixes potentially incomplete paths in Makefiles (closes #22)
  * 13Jun2019 Adds support to read MPI task identifier from `PBS` environment variables
  * 12Jun2019 Guards the definition of SaveMessage and ProcessMessage only under MPI3
+ * 11Jun2019 Adds instrumentation support for GASPI
  * 11Jun2019 Replaces request's hash table for a new implementation 
  * 11Jun2019 Fixes bug in MPI_Wait where the input request is not copied for later processing
  * 25Apr2019 Fixes race conditions between thread creations and PEBS samples 
