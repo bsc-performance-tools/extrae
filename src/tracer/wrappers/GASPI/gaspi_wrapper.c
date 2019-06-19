@@ -26,8 +26,7 @@
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
-# define DBG fprintf(stderr, "Captured %s\n", __func__);
-#else
+//# define DBG fprintf(stderr, "Captured %s\n", __func__);
 # define DBG
 #endif
 
