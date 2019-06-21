@@ -152,13 +152,13 @@ $(SCRIPT_ONLINE_ROOT): $(SCRIPT_ONLINE_ROOT).in
 
 install-data-hook:
 	$(MKDIR_P) $(prefix)/etc
-	cp $(SCRIPT_ONLINE_ENV) $(prefix)/etc
-	cp $(SCRIPT_ONLINE_ROOT) $(prefix)/bin
-	chmod a+x $(prefix)/bin/$(SCRIPT_ONLINE_ROOT)
+	cp $(SCRIPT_ONLINE_ENV) $(DESTDIR)$(sysconfdir)
+	cp $(SCRIPT_ONLINE_ROOT) $(DESTDIR)$(bindir)
+	chmod a+x $(DESTDIR)$(bindir)/$(SCRIPT_ONLINE_ROOT)
 
 clean-local:
 	rm -f $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
 
 uninstall-local:
-	rm $(prefix)/etc/$(SCRIPT_ONLINE_ROOT)
-	rm $(prefix)/bin/$(SCRIPT_ONLINE_ENV)
+	rm $(DESTDIR)$(sysconfdir)/$(SCRIPT_ONLINE_ROOT)
+	rm $(DESTDIR)$(bindir)/$(SCRIPT_ONLINE_ENV)

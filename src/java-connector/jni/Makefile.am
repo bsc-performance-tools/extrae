@@ -15,8 +15,8 @@ clean-local:
 	rm -fr javatrace.jar es/bsc/cepbatools/extrae/Wrapper.class $(JNI_INCLUDE_DIR)
 
 install-data-local: javatrace.jar
-	$(MKDIR_P) $(libdir)
-	cp javatrace.jar $(libdir)
+	$(MKDIR_P) $(DESTDIR)$(libdir)
+	cp javatrace.jar $(DESTDIR)$(libdir)
 
 uninstall-local:
-	rm $(libdir)/javatrace.jar
+	rm $(DESTDIR)$(libdir)/javatrace.jar

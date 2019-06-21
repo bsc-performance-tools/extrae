@@ -11,9 +11,9 @@ extraej.bash: extraej.bash.skeleton
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $@
 
 install-data-hook: extraej.bash
-	cp -v extraej.bash $(prefix)/bin/extraej.bash
-	cd $(prefix)/bin; $(LN_S) -f extraej.bash extraej; cd -
+	cp -v extraej.bash $(DESTDIR)$(bindir)/extraej.bash
+	cd $(DESTDIR)$(bindir); $(LN_S) -f extraej.bash extraej; cd -
 
 uninstall-local:
-	rm $(prefix)/bin/extraej
-	rm $(prefix)/bin/extraej.bash
+	rm $(DESTDIR)$(bindir)/extraej
+	rm $(DESTDIR)$(bindir)/extraej.bash
