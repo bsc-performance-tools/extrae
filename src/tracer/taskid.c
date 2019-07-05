@@ -34,11 +34,15 @@
 */
 
 /* Runtime rank environment variables */
+/* SLURM_PROCID                       */
 /* OMPI_COMM_WORLD_RANK               */
+/* MV2_COMM_WORLD_RANK                */
 /* PMI_RANK                           */
 /* MPI_RANKID                         */
 /* MP_CHILD                           */
-/* SLURM_PROCID                       */
+/* EC_FARM_ID                         */
+/* EC_FARM_LOCALENT                   */
+/* ALPS_APP_PE                        */
 /**************************************/
 /* Change to read envvars, save value to a var and change callback to getter */
 static unsigned xtr_taskid = 0;
@@ -54,34 +58,37 @@ static unsigned xtr_get_taskid ()
 
 static unsigned xtr_set_taskid ()
 {
-	unsigned int NUM_ENVVARS = 6;
+	unsigned int NUM_ENVVARS = 9;
 	char *envvars[] =
 	{
-		"OMPI_COMM_WORLD_RANK",
-		"MV2_COMM_WORLD_RANK",
-		"PMI_RANK",
-		"MPI_RANKID",
-		"MP_CHILD",
-		"SLURM_PROCID"
+		"SLURM_PROCID",         // SLURM
+		"EC_FARM_ID",           // PBS
+		"EC_FARM_LOCALENT",     // PBS
+		"ALPS_APP_PE",          // ALPS
+		"OMPI_COMM_WORLD_RANK", // OpenMPI
+		"MV2_COMM_WORLD_RANK",  // MVAPICH
+		"PMI_RANK",             // MPICH, Intel
+		"MPI_RANKID",           // Platform MPI
+		"MP_CHILD"              // Spectrum MPI
 	};
 
 	unsigned int i = 0;
 	char *envread = NULL;
+	unsigned int localid = 0;
 
-	while ((i < NUM_ENVVARS) && ((envread = getenv(envvars[i])) == NULL)) i++;
+	while ((i < NUM_ENVVARS) && (xtr_taskid == 0))
+	{
+		envread = getenv(envvars[i]);
 
-	if (envread != NULL)
-	{
-		xtr_taskid = strtol(envread, NULL, 10);
+		if ((envread != NULL) && ((localid = (unsigned int)strtoul(envread, NULL, 10)) != 0))
+		{
+			xtr_taskid = localid;
 #if defined(DEBUG)
-		fprintf (stdout, PACKAGE_NAME": Task %u got TASKID from %s\n", xtr_taskid, envvars[i]);
+			fprintf (stdout, PACKAGE_NAME": Task %u got TASKID from %s\n", xtr_taskid, envvars[i]);
 #endif
-	} else
-	{
-		xtr_taskid = 0;
-#if defined(DEBUG)
-		fprintf (stdout, PACKAGE_NAME": Task %u could'nt get TASKID, using 0\n", xtr_taskid);
-#endif
+		}
+
+		i++;
 	}
 
 	if (xtr_taskid >= xtr_num_tasks) xtr_num_tasks = xtr_taskid + 1;
