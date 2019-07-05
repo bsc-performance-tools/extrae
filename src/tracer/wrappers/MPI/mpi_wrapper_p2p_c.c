@@ -824,6 +824,16 @@ int MPI_Improbe_C_Wrapper (int source, int tag, MPI_Comm comm, int *flag, MPI_Me
 #endif /* MPI3 */
 
 
+void copyRequests_C (int count, MPI_Request *array_of_requests, MPI_Request *copy, char *where)
+{
+	if (count > MAX_WAIT_REQUESTS)
+	{
+		fprintf (stderr, "PANIC! Number of requests in %s (%d) exceeds tha maximum supported (%d). Please increase the value of MAX_WAIT_REQUESTS and recompile Extrae.\n", where, count, MAX_WAIT_REQUESTS);
+	}
+	memcpy (copy, array_of_requests, count * sizeof(MPI_Request));
+}
+
+
 /******************************************************************************
  ***  MPI_Test_C_Wrapper
  ******************************************************************************/
@@ -850,7 +860,7 @@ int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 
         if (ierror == MPI_SUCCESS && *flag)
 	{
-		ProcessRequest (MPI_Test_end_time, *request, status);
+		ProcessRequest (MPI_Test_end_time, save_req, status);
 	}
 
 	/*
@@ -894,7 +904,7 @@ int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 
 		MPI_Test_end_time = TIME;
 
-		ProcessRequest (MPI_Test_end_time, *request, status);
+		ProcessRequest (MPI_Test_end_time, save_req, status);
 
 		TRACE_MPIEVENT (MPI_Test_end_time, MPI_TEST_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
@@ -932,15 +942,6 @@ int MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
 	}
 
 	return ret;
-}
-
-void copyRequests_C (int count, MPI_Request *array_of_requests, MPI_Request *copy, char *where)
-{
-	if (count > MAX_WAIT_REQUESTS)
-	{
-		fprintf (stderr, "PANIC! Number of requests in %s (%d) exceeds tha maximum supported (%d). Please increase the value of MAX_WAIT_REQUESTS and recompile Extrae.\n", where, count, MAX_WAIT_REQUESTS);
-	}
-	memcpy (copy, array_of_requests, count * sizeof(MPI_Request));
 }
 
 /******************************************************************************
