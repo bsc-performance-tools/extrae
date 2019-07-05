@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 05Jul2019 Fixes bug in MPI_Test & MPI_Imrecv where the request is not properly copied for later processing
  * 21Jun2019 Fixes potentially incomplete paths in Makefiles (closes #22)
  * 13Jun2019 Adds support to read MPI task identifier from `PBS` environment variables
  * 12Jun2019 Guards the definition of SaveMessage and ProcessMessage only under MPI3

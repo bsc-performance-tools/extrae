@@ -830,8 +830,9 @@ int MPI_Improbe_C_Wrapper (int source, int tag, MPI_Comm comm, int *flag, MPI_Me
 
 int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *status)
 {
-	int ierror;
-	iotimer_t MPI_Test_end_time;
+	int         ierror;
+	iotimer_t   MPI_Test_end_time;
+	MPI_Request save_req;
 
 	/*
 	 *   event  : TEST_EV                    value  : EVT_BEGIN
@@ -840,6 +841,8 @@ int Bursts_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 	 *   aux    : ---
 	 */
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_TEST_EV, EVT_BEGIN, *request, EMPTY, EMPTY, EMPTY, EMPTY);
+
+	copyRequests_C (1, request, &save_req, "MPI_Test");
 
 	ierror = PMPI_Test (request, flag, status);
 
@@ -868,8 +871,11 @@ int Normal_MPI_Test_C_Wrapper (MPI_Request *request, int *flag, MPI_Status *stat
 	iotimer_t        MPI_Test_begin_time = 0;
 	iotimer_t        MPI_Test_end_time = 0;
 	int              ierror;
+	MPI_Request      save_req;
 
 	MPI_Test_begin_time = LAST_READ_TIME;
+
+	copyRequests_C (1, request, &save_req, "MPI_Test");
 
 	ierror = PMPI_Test (request, flag, status);
 

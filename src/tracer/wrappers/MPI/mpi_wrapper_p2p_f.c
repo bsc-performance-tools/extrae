@@ -565,11 +565,11 @@ void PMPI_Mrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 void PMPI_Imrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
                           MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierror)
 {
-	MPI_Datatype c_type    = PMPI_Type_f2c(*datatype);
-	int          size      = 0;
-	MPI_Comm     c_comm    = MPI_COMM_NULL;
+	MPI_Datatype c_type         = PMPI_Type_f2c(*datatype);
+	int          size           = 0;
+	MPI_Comm     c_comm         = MPI_COMM_NULL;
 	MPI_Message  c_save_message = PMPI_Message_f2c(*message); // Save input value as it changes inside the PMPI
-	MPI_Request  c_request = PMPI_Request_f2c(*request);
+        MPI_Request  c_request      = MPI_REQUEST_NULL;
 
 	size = getMsgSizeFromCountAndDatatype (*count, c_type);
 
@@ -583,6 +583,7 @@ void PMPI_Imrecv_Wrapper (void *buf, MPI_Fint *count, MPI_Fint *datatype,
 
 	CtoF77 (pmpi_imrecv) (buf, count, datatype, message, request, ierror);
 
+	c_request = PMPI_Request_f2c(*request);
 	c_comm = ProcessMessage(c_save_message, &c_request);
 
 	/*
