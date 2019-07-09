@@ -195,12 +195,28 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
       case MPI_FILE_CLOSE_EV:
       case MPI_FILE_READ_EV:
       case MPI_FILE_READ_ALL_EV:
-      case MPI_FILE_WRITE_EV:
-      case MPI_FILE_WRITE_ALL_EV:
+      case MPI_FILE_READ_ALL_BEGIN_EV:
+      case MPI_FILE_READ_ALL_END_EV:
       case MPI_FILE_READ_AT_EV:
       case MPI_FILE_READ_AT_ALL_EV:
+      case MPI_FILE_READ_AT_ALL_BEGIN_EV:
+      case MPI_FILE_READ_AT_ALL_END_EV:
+      case MPI_FILE_READ_ORDERED_EV:
+      case MPI_FILE_READ_ORDERED_BEGIN_EV:
+      case MPI_FILE_READ_ORDERED_END_EV:
+      case MPI_FILE_READ_SHARED_EV:
+      case MPI_FILE_WRITE_EV:
+      case MPI_FILE_WRITE_ALL_EV:
+      case MPI_FILE_WRITE_ALL_BEGIN_EV:
+      case MPI_FILE_WRITE_ALL_END_EV:
       case MPI_FILE_WRITE_AT_EV:
       case MPI_FILE_WRITE_AT_ALL_EV:
+      case MPI_FILE_WRITE_AT_ALL_BEGIN_EV:
+      case MPI_FILE_WRITE_AT_ALL_END_EV:
+      case MPI_FILE_WRITE_ORDERED_EV:
+      case MPI_FILE_WRITE_ORDERED_BEGIN_EV:
+      case MPI_FILE_WRITE_ORDERED_END_EV:
+      case MPI_FILE_WRITE_SHARED_EV:
       case MPI_GET_EV:
       case MPI_PUT_EV:
       case MPI_FINALIZE_EV:

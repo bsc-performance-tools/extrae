@@ -67,6 +67,7 @@ These are the instrumented MPI routines in the |TRACE| package:
 * MPI_Comm_free
 * MPI_Comm_dup
 * MPI_Comm_split
+* MPI_Comm_split_type
 * MPI_Comm_spawn
 * MPI_Comm_spawn_multiple
 * MPI_Cart_create
@@ -82,12 +83,28 @@ These are the instrumented MPI routines in the |TRACE| package:
 * MPI_File_close [#MPIIOSUPPORT]_
 * MPI_File_read [#MPIIOSUPPORT]_
 * MPI_File_read_all [#MPIIOSUPPORT]_
-* MPI_File_write [#MPIIOSUPPORT]_
-* MPI_File_write_all [#MPIIOSUPPORT]_
+* MPI_File_read_all_begin [#MPIIOSUPPORT]_
+* MPI_File_read_all_end [#MPIIOSUPPORT]_
 * MPI_File_read_at [#MPIIOSUPPORT]_
 * MPI_File_read_at_all [#MPIIOSUPPORT]_
+* MPI_File_read_at_all_begin [#MPIIOSUPPORT]_
+* MPI_File_read_at_all_end [#MPIIOSUPPORT]_
+* MPI_File_read_ordered [#MPIIOSUPPORT]_
+* MPI_File_read_ordered_begin [#MPIIOSUPPORT]_
+* MPI_File_read_ordered_end [#MPIIOSUPPORT]_
+* MPI_File_read_shared [#MPIIOSUPPORT]_
+* MPI_File_write [#MPIIOSUPPORT]_
+* MPI_File_write_all [#MPIIOSUPPORT]_
+* MPI_File_write_all_begin [#MPIIOSUPPORT]_
+* MPI_File_write_all_end [#MPIIOSUPPORT]_
 * MPI_File_write_at [#MPIIOSUPPORT]_
 * MPI_File_write_at_all [#MPIIOSUPPORT]_
+* MPI_File_write_at_all_begin [#MPIIOSUPPORT]_
+* MPI_File_write_at_all_end [#MPIIOSUPPORT]_
+* MPI_File_write_ordered [#MPIIOSUPPORT]_
+* MPI_File_write_ordered_begin [#MPIIOSUPPORT]_
+* MPI_File_write_ordered_end [#MPIIOSUPPORT]_
+* MPI_File_write_shared [#MPIIOSUPPORT]_
 * MPI_Compare_and_swap [#MPIRMASUPPORT]_
 * MPI_Fetch_and_op [#MPIRMASUPPORT]_
 * MPI_Get [#MPIRMASUPPORT]_

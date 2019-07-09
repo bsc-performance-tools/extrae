@@ -73,12 +73,28 @@ static int Get_State (unsigned int EvType)
 		case MPI_FILE_CLOSE_EV:
 		case MPI_FILE_READ_EV:
 		case MPI_FILE_READ_ALL_EV:
-		case MPI_FILE_WRITE_EV:
-		case MPI_FILE_WRITE_ALL_EV:
+		case MPI_FILE_READ_ALL_BEGIN_EV:
+		case MPI_FILE_READ_ALL_END_EV:
 		case MPI_FILE_READ_AT_EV:
 		case MPI_FILE_READ_AT_ALL_EV:
+		case MPI_FILE_READ_AT_ALL_BEGIN_EV:
+		case MPI_FILE_READ_AT_ALL_END_EV:
+		case MPI_FILE_READ_ORDERED_EV:
+		case MPI_FILE_READ_ORDERED_BEGIN_EV:
+		case MPI_FILE_READ_ORDERED_END_EV:
+		case MPI_FILE_READ_SHARED_EV:
+		case MPI_FILE_WRITE_EV:
+		case MPI_FILE_WRITE_ALL_EV:
+		case MPI_FILE_WRITE_ALL_BEGIN_EV:
+		case MPI_FILE_WRITE_ALL_END_EV:
 		case MPI_FILE_WRITE_AT_EV:
 		case MPI_FILE_WRITE_AT_ALL_EV:
+		case MPI_FILE_WRITE_AT_ALL_BEGIN_EV:
+		case MPI_FILE_WRITE_AT_ALL_END_EV:
+		case MPI_FILE_WRITE_ORDERED_EV:
+		case MPI_FILE_WRITE_ORDERED_BEGIN_EV:
+		case MPI_FILE_WRITE_ORDERED_END_EV:
+		case MPI_FILE_WRITE_SHARED_EV:
 			state = STATE_IO;
 		break;
 		case MPI_WIN_FREE_EV:
@@ -183,16 +199,16 @@ static int Get_State (unsigned int EvType)
 		case MPI_REDUCE_SCATTER_BLOCK_EV:
 		case MPI_ALLTOALLW_EV:
 		case MPI_IALLTOALLW_EV:
-                case MPI_NEIGHBOR_ALLGATHER_EV:
-                case MPI_INEIGHBOR_ALLGATHER_EV:
-                case MPI_NEIGHBOR_ALLGATHERV_EV:
-                case MPI_INEIGHBOR_ALLGATHERV_EV:
-                case MPI_NEIGHBOR_ALLTOALL_EV:
-                case MPI_INEIGHBOR_ALLTOALL_EV:
-                case MPI_NEIGHBOR_ALLTOALLV_EV:
-                case MPI_INEIGHBOR_ALLTOALLV_EV:
-                case MPI_NEIGHBOR_ALLTOALLW_EV:
-                case MPI_INEIGHBOR_ALLTOALLW_EV:
+		case MPI_NEIGHBOR_ALLGATHER_EV:
+		case MPI_INEIGHBOR_ALLGATHER_EV:
+		case MPI_NEIGHBOR_ALLGATHERV_EV:
+		case MPI_INEIGHBOR_ALLGATHERV_EV:
+		case MPI_NEIGHBOR_ALLTOALL_EV:
+		case MPI_INEIGHBOR_ALLTOALL_EV:
+		case MPI_NEIGHBOR_ALLTOALLV_EV:
+		case MPI_INEIGHBOR_ALLTOALLV_EV:
+		case MPI_NEIGHBOR_ALLTOALLW_EV:
+		case MPI_INEIGHBOR_ALLTOALLW_EV:
 			state = STATE_BCAST;
 		break;
 		case MPI_WIN_FENCE_EV:
@@ -616,22 +632,24 @@ static int Other_MPI_Event (event_t * current_event,
  ******************************************************************************/
 
 static int MPIIO_Event (event_t * current_event,
-        unsigned long long current_time, unsigned int cpu, unsigned int ptask,
-        unsigned int task, unsigned int thread, FileSet_t *fset)
+	unsigned long long current_time, unsigned int cpu, unsigned int ptask,
+	unsigned int task, unsigned int thread, FileSet_t *fset)
 {
-        unsigned int EvType, EvValue;
-        UNREFERENCED_PARAMETER(fset);
+	unsigned int EvType, EvValue;
+	UNREFERENCED_PARAMETER(fset);
 
-        EvType  = Get_EvEvent (current_event);
-        EvValue = Get_EvValue (current_event);
+	EvType  = Get_EvEvent (current_event);
+	EvValue = Get_EvValue (current_event);
 
-        Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
+	Switch_State (Get_State(EvType), (EvValue == EVT_BEGIN), ptask, task, thread);
 
-        trace_paraver_state (cpu, ptask, task, thread, current_time);
-        trace_paraver_event (cpu, ptask, task, thread, current_time, EvType, EvValue);
-        trace_paraver_event (cpu, ptask, task, thread, current_time, MPI_IO_SIZE_EV, Get_EvSize( current_event ));
+	trace_paraver_state (cpu, ptask, task, thread, current_time);
+	trace_paraver_event (cpu, ptask, task, thread, current_time, EvType,
+	    EvValue);
+	trace_paraver_event (cpu, ptask, task, thread, current_time,
+	    MPI_IO_SIZE_EV, Get_EvSize(current_event));
 
-        Enable_MPI_Soft_Counter (EvType);
+	Enable_MPI_Soft_Counter (EvType);
 
 	return 0;
 }
@@ -1196,12 +1214,28 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_FILE_CLOSE_EV, Other_MPI_Event },
 	{ MPI_FILE_READ_EV, MPIIO_Event },
 	{ MPI_FILE_READ_ALL_EV, MPIIO_Event },
-	{ MPI_FILE_WRITE_EV, MPIIO_Event },
-	{ MPI_FILE_WRITE_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ALL_END_EV, MPIIO_Event },
 	{ MPI_FILE_READ_AT_EV, MPIIO_Event },
 	{ MPI_FILE_READ_AT_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_READ_AT_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_READ_AT_ALL_END_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ORDERED_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ORDERED_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_READ_ORDERED_END_EV, MPIIO_Event },
+	{ MPI_FILE_READ_SHARED_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ALL_END_EV, MPIIO_Event },
 	{ MPI_FILE_WRITE_AT_EV, MPIIO_Event },
 	{ MPI_FILE_WRITE_AT_ALL_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_AT_ALL_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_AT_ALL_END_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ORDERED_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ORDERED_BEGIN_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_ORDERED_END_EV, MPIIO_Event },
+	{ MPI_FILE_WRITE_SHARED_EV, MPIIO_Event },
 	{ MPI_PUT_EV, MPI_RMA_Event},
 	{ MPI_GET_EV, MPI_RMA_Event},
 	{ MPI_WIN_CREATE_EV, MPI_RMA_Event},

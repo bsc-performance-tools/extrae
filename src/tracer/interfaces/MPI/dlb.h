@@ -581,19 +581,19 @@ void DLB_MPI_File_read_F_enter (MPI_File *fh, void *buf, MPI_Fint *count,
 void DLB_MPI_File_read_F_leave (void)__attribute__((weak));
 
 
-void DLB_MPI_File_read_all_F_enter(MPI_File *fh, void *buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
-void DLB_MPI_File_read_all_F_leave (void)__attribute__((weak));
+void DLB_MPI_File_read_all_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_read_all_F_leave(void)__attribute__((weak));
 
 
-void DLB_MPI_File_write_F_enter (MPI_File *fh, void *buf, MPI_Fint *count,
-	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
-void DLB_MPI_File_write_F_leave (void)__attribute__((weak));
+void DLB_MPI_File_read_all_begin_F_enter(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_read_all_begin_F_leave(void)__attribute__((weak));
 
 
-void DLB_MPI_File_write_all_F_enter (MPI_File *fh, void *buf,
-	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
-void DLB_MPI_File_write_all_F_leave (void)__attribute__((weak));
+void DLB_MPI_File_read_all_end_F_enter(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_read_all_end_F_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_read_at_F_enter (MPI_File *fh, MPI_Offset *offset,
@@ -602,10 +602,63 @@ void DLB_MPI_File_read_at_F_enter (MPI_File *fh, MPI_Offset *offset,
 void DLB_MPI_File_read_at_F_leave (void)__attribute__((weak));
 
 
-void DLB_MPI_File_read_at_all_F_enter (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_read_at_all_F_enter(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_File_read_at_all_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_at_all_begin_F_enter(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_read_at_all_begin_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_at_all_end_F_enter(MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_read_at_all_end_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_ordered_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+	__attribute__((weak));
+void DLB_MPI_File_read_ordered_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_ordered_begin_F_enter(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Datatype *datatype, MPI_Fint *ierror)
+    __attribute__((weak));
+void DLB_MPI_File_read_ordered_begin_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_ordered_end_F_enter(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_read_ordered_end_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_shared_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+	__attribute__((weak));
+void DLB_MPI_File_read_shared_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_F_enter (MPI_File *fh, void *buf, MPI_Fint *count,
+	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_F_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_all_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_all_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_all_begin_F_enter(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_all_begin_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_all_end_F_enter(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_all_end_F_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_write_at_F_enter (MPI_File *fh, MPI_Offset *offset,
@@ -614,11 +667,45 @@ void DLB_MPI_File_write_at_F_enter (MPI_File *fh, MPI_Offset *offset,
 void DLB_MPI_File_write_at_F_leave (void)__attribute__((weak));
 
 
-void DLB_MPI_File_write_at_all_F_enter (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_at_all_F_enter(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_File_write_at_all_F_leave (void)__attribute__((weak));
-	
+
+
+void DLB_MPI_File_write_at_all_begin_F_enter(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_at_all_begin_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_at_all_end_F_enter(MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_at_all_end_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_ordered_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+	__attribute__((weak));
+void DLB_MPI_File_write_ordered_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_ordered_begin_F_enter(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Datatype *datatype, MPI_Fint *ierror)
+    __attribute__((weak));
+void DLB_MPI_File_write_ordered_begin_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_ordered_end_F_enter(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_File_write_ordered_end_F_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_shared_F_enter(MPI_File *fh, void *buf, MPI_Fint *count,
+    MPI_Datatype *datatype, MPI_Status *status, MPI_Fint *ierror)
+	__attribute__((weak));
+void DLB_MPI_File_write_shared_F_leave(void)__attribute__((weak));
+
+
 /***  C  ***/
 
 void DLB_MPI_File_open_enter(MPI_Comm comm, MPI3_CONST char * filename, int amode,
@@ -634,19 +721,19 @@ void DLB_MPI_File_read_enter (MPI_File fh, void* buf, int count,
 void DLB_MPI_File_read_leave (void)__attribute__((weak));
 
 
-void DLB_MPI_File_read_all_enter (MPI_File fh, void* buf, int count,
-	MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
-void DLB_MPI_File_read_all_leave (void)__attribute__((weak));
+void DLB_MPI_File_read_all_enter(MPI_File fh, void* buf, int count,
+    MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_read_all_leave(void)__attribute__((weak));
 
 
-void DLB_MPI_File_write_enter (MPI_File fh, MPI3_CONST void * buf, int count,
-	MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
-void DLB_MPI_File_write_leave (void)__attribute__((weak));
+void DLB_MPI_File_read_all_begin_enter(MPI_File fh, void* buf, int count,
+    MPI_Datatype datatype)__attribute__((weak));
+void DLB_MPI_File_read_all_begin_leave(void)__attribute__((weak));
 
 
-void DLB_MPI_File_write_all_enter (MPI_File fh, MPI3_CONST void* buf, int count, 
-	MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
-void DLB_MPI_File_write_all_leave (void)__attribute__((weak));
+void DLB_MPI_File_read_all_end_enter(MPI_File fh, void* buf,
+    MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_read_all_end_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_read_at_enter (MPI_File fh, MPI_Offset offset, void* buf,
@@ -654,9 +741,59 @@ void DLB_MPI_File_read_at_enter (MPI_File fh, MPI_Offset offset, void* buf,
 void DLB_MPI_File_read_at_leave (void)__attribute__((weak));
 
 
-void DLB_MPI_File_read_at_all_enter (MPI_File fh, MPI_Offset offset,
-	void* buf, int count, MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
-void DLB_MPI_File_read_at_all_leave (void)__attribute__((weak));
+void DLB_MPI_File_read_at_all_enter(MPI_File fh, MPI_Offset offset,
+    void* buf, int count, MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_read_at_all_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_at_all_begin_enter(MPI_File fh, MPI_Offset offset,
+    void* buf, int count, MPI_Datatype datatype)__attribute__((weak));
+void DLB_MPI_File_read_at_all_begin_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_at_all_end_enter(MPI_File fh, void* buf,
+    MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_read_at_all_end_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_ordered_enter(MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status)__attribute__((weak));
+void DLB_MPI_File_read_ordered_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_ordered_begin_enter(MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype)__attribute__((weak));
+void DLB_MPI_File_read_ordered_begin_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_ordered_end_enter(MPI_File fh, void *buf,
+    MPI_Status *status)__attribute__((weak));
+void DLB_MPI_File_read_ordered_end_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_read_shared_enter(MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status)__attribute__((weak));
+void DLB_MPI_File_read_shared_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_enter (MPI_File fh, MPI3_CONST void * buf, int count,
+	MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_write_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_all_enter(MPI_File fh, MPI3_CONST void* buf, int count, 
+    MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_write_all_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_all_begin_enter(MPI_File fh, MPI3_CONST void* buf, int count, 
+    MPI_Datatype datatype)__attribute__((weak));
+void DLB_MPI_File_write_all_begin_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_all_end_enter(MPI_File fh, MPI3_CONST void* buf,
+    MPI_Status *status)__attribute__((weak));
+void DLB_MPI_File_write_all_end_leave(void)__attribute__((weak));
 
 
 void DLB_MPI_File_write_at_enter (MPI_File fh, MPI_Offset offset, MPI3_CONST void * buf,
@@ -664,9 +801,40 @@ void DLB_MPI_File_write_at_enter (MPI_File fh, MPI_Offset offset, MPI3_CONST voi
 void DLB_MPI_File_write_at_leave (void)__attribute__((weak));
 
 
-void DLB_MPI_File_write_at_all_enter (MPI_File fh, MPI_Offset offset,
-	MPI3_CONST void* buf, int count, MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
-void DLB_MPI_File_write_at_all_leave (void)__attribute__((weak));
+void DLB_MPI_File_write_at_all_enter(MPI_File fh, MPI_Offset offset,
+    MPI3_CONST void* buf, int count, MPI_Datatype datatype, MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_write_at_all_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_at_all_begin_enter(MPI_File fh, MPI_Offset offset,
+    MPI3_CONST void* buf, int count, MPI_Datatype datatype)__attribute__((weak));
+void DLB_MPI_File_write_at_all_begin_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_at_all_end_enter(MPI_File fh, MPI3_CONST void* buf,
+    MPI_Status* status)__attribute__((weak));
+void DLB_MPI_File_write_at_all_end_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_ordered_enter(MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status)__attribute__((weak));
+void DLB_MPI_File_write_ordered_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_ordered_begin_enter(MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype)__attribute__((weak));
+void DLB_MPI_File_write_ordered_begin_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_ordered_end_enter(MPI_File fh, void *buf,
+    MPI_Status *status)__attribute__((weak));
+void DLB_MPI_File_write_ordered_end_leave(void)__attribute__((weak));
+
+
+void DLB_MPI_File_write_shared_enter(MPI_File fh, void *buf, int count,
+  MPI_Datatype datatype, MPI_Status *status)__attribute__((weak));
+void DLB_MPI_File_write_shared_leave(void)__attribute__((weak));
+
 
 /******************************************************************************
  *** 1sided
@@ -1296,6 +1464,5 @@ void DLB_MPI_Neighbor_alltoallw_leave (void)__attribute__((weak));
 
 void DLB_MPI_Ineighbor_alltoallw_enter (void *sendbuf, int *sendcounts, MPI_Aint *sdispls, MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts, MPI_Aint *rdispls, MPI_Datatype *recvtypes, MPI_Comm comm, MPI_Request *request)__attribute__((weak));
 void DLB_MPI_Ineighbor_alltoallw_leave (void)__attribute__((weak));
-
 
 #endif

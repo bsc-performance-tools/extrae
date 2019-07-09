@@ -52,27 +52,77 @@ void PMPI_File_read_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
 void PMPI_File_read_all_Fortran_Wrapper (MPI_File *fh, void *buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
+void PMPI_File_read_all_begin_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void PMPI_File_read_all_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void PMPI_File_read_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset,
+	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+	MPI_Fint *ierror);
+
+void PMPI_File_read_at_all_Fortran_Wrapper(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror);
+
+void PMPI_File_read_at_all_begin_Fortran_Wrapper(MPI_File *fh,
+    MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+    MPI_Fint *ierror);
+
+void PMPI_File_read_at_all_end_Fortran_Wrapper(MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void PMPI_File_read_ordered_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void PMPI_File_read_ordered_begin_Fortran_Wrapper(MPI_File *fh, void *buf,
+    int *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void PMPI_File_read_ordered_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void PMPI_File_read_shared_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
 void PMPI_File_write_Fortran_Wrapper (MPI_File *fh, void *buf, MPI_Fint *count,
 	MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
 void PMPI_File_write_all_Fortran_Wrapper (MPI_File *fh, void *buf,
 	MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
-void PMPI_File_read_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror);
+void PMPI_File_write_all_begin_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *ierror);
 
-void PMPI_File_read_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-   MPI_Fint *ierror);
+void PMPI_File_write_all_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
 
 void PMPI_File_write_at_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset,
 	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
 	MPI_Fint *ierror);
 
-void PMPI_File_write_at_all_Fortran_Wrapper (MPI_File *fh, MPI_Offset *offset,
-	void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
-	MPI_Fint *ierror);
+void PMPI_File_write_at_all_Fortran_Wrapper(MPI_File *fh, MPI_Offset *offset,
+    void* buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Status *status,
+    MPI_Fint *ierror);
+
+void PMPI_File_write_at_all_begin_Fortran_Wrapper(MPI_File *fh,
+    MPI_Offset *offset, void* buf, MPI_Fint *count, MPI_Fint *datatype,
+    MPI_Fint *ierror);
+
+void PMPI_File_write_at_all_end_Fortran_Wrapper(MPI_File *fh, void* buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void PMPI_File_write_ordered_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
+
+void PMPI_File_write_ordered_begin_Fortran_Wrapper(MPI_File *fh, void *buf,
+    int *count, MPI_Fint *datatype, MPI_Fint *ierror);
+
+void PMPI_File_write_ordered_end_Fortran_Wrapper(MPI_File *fh, void *buf,
+    MPI_Status *status, MPI_Fint *ierror);
+
+void PMPI_File_write_shared_Fortran_Wrapper(MPI_File *fh, void *buf, int *count,
+    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierror);
 
 #endif /* MPI_SUPPORTS_MPI_IO */
 
