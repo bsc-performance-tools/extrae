@@ -1074,15 +1074,20 @@ static void DistributeWork (unsigned num_processors, unsigned processor_id)
 
 	if (WorkDistribution == Block)
 	{
-		unsigned tasks_per_merger = (all_tasks + num_processors - 1) / num_processors;
+		unsigned offset = 0;
+		unsigned avg_tasks_per_merger = all_tasks / num_processors;
+		unsigned mod_tasks_per_merger = all_tasks % num_processors;
+
 		for (i=0; i<num_processors; i++)
 		{
-			for (j=0; j<tasks_per_merger; j++)
+			unsigned tasks_this_merger = avg_tasks_per_merger + (i < mod_tasks_per_merger ? 1 : 0);
+			for (j=0; j<tasks_this_merger; j++)
 			{
-				unsigned task_to_assign = (i * tasks_per_merger) + j;
+				unsigned task_to_assign = offset + j;
 				if (task_to_assign < all_tasks)
 					AssignFilesToWorker( i, all_tasks_ids[task_to_assign] );
 			}
+			offset += tasks_this_merger;
 		}
 	}
 	else if (WorkDistribution == Cyclic)
