@@ -1673,17 +1673,37 @@ static int DynamicMemory_Event (event_t * event,
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_IN_EV, EvParam);
 
-			thread_info->AddressSpace_size = EvParam;
+			AddressSpace_remove (task_info->AddressSpace, EvParam);
+
 		}
 		else if (EvValue == EVT_BEGIN+1)
 		{
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_REQUESTED_SIZE_EV, EvParam);
 
-			AddressSpace_remove (task_info->AddressSpace, EvParam);
+			thread_info->AddressSpace_size = EvParam;
+			thread_info->AddressSpace_timeCreation = time;
 		}
 		else
 		{
+			/* Emit information regarding the calling site to identify
+			   where the structure was allocated */
+			unsigned u;
+			for (u = 0; u < MAX_CALLERS; u++)
+			{
+				if (thread_info->AddressSpace_calleraddresses[u] != 0)
+					trace_paraver_event (cpu, ptask, task, thread,
+					  thread_info->AddressSpace_timeCreation,
+					  SAMPLING_ADDRESS_ALLOCATED_OBJECT_CALLER_EV+u,
+					  thread_info->AddressSpace_calleraddresses[u]);
+			}
+
+			/* Emit event that will be replaced by the ID of the 
+			   location of structure allocation */
+			trace_paraver_event (cpu, ptask, task, thread,
+			  thread_info->AddressSpace_timeCreation,
+			  SAMPLING_ADDRESS_ALLOCATED_OBJECT_ALLOC_EV, 0);
+
 			trace_paraver_event (cpu, ptask, task, thread, time,
 			  DYNAMIC_MEM_POINTER_OUT_EV, EvParam);
 

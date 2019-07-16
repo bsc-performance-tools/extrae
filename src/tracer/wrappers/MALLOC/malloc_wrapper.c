@@ -83,13 +83,15 @@ static void (*real_kmpc_free)(void *) = NULL;
    returned by malloc/realloc that surpass the threshold and that may need later
    instrumentation of their respective free. */
 static void ** mallocentries = NULL;
+/* Capture also the size of the allocations */
+static size_t * mallocentries_sz = NULL;
 static unsigned nmallocentries_allocated = 0;
 static unsigned nmallocentries = 0;
 #define NMALLOCENTRIES_MALLOC 16*1024
 
 /* Registers a new address to be tracked for future free() calls */
 static pthread_mutex_t mutex_allocations = PTHREAD_MUTEX_INITIALIZER;
-static void Extrae_malloctrace_add (void *p)
+static void Extrae_malloctrace_add (void *p, size_t s)
 {
 	if (p != NULL)
 	{
@@ -103,6 +105,9 @@ static void Extrae_malloctrace_add (void *p)
 			mallocentries = real_realloc (mallocentries,
 			  (nmallocentries_allocated+NMALLOCENTRIES_MALLOC) * sizeof(void*));
 			assert (mallocentries != NULL);
+			mallocentries_sz = (size_t*) real_realloc (mallocentries_sz,
+			  (nmallocentries_allocated+NMALLOCENTRIES_MALLOC) * sizeof(size_t));
+			assert (mallocentries != NULL);
 			for (u = nmallocentries_allocated;
 			     u < nmallocentries_allocated+NMALLOCENTRIES_MALLOC;
 			     u++)
@@ -113,7 +118,8 @@ static void Extrae_malloctrace_add (void *p)
 		for (u = 0; u < nmallocentries_allocated; u++)
 			if (mallocentries[u] == NULL)
 			{
-				mallocentries[u] = p;
+				mallocentries[u]    = p;
+				mallocentries_sz[u] = s;
 				nmallocentries++;
 				break;
 			}
@@ -128,13 +134,15 @@ static int Extrae_malloctrace_remove (const void *p)
 	unsigned found = FALSE;
 	if (p != NULL)
 	{
+		unsigned u;
+
 		pthread_mutex_lock (&mutex_allocations);
 
-		unsigned u;
 		for (u = 0; u < nmallocentries_allocated; u++)
 			if (mallocentries[u] == p)
 			{
-				mallocentries[u] = NULL;
+				mallocentries[u]    = NULL;
+				mallocentries_sz[u] = 0;
 				nmallocentries--;
 				found = TRUE;
 				break;
@@ -145,22 +153,62 @@ static int Extrae_malloctrace_remove (const void *p)
 	return found;
 }
 
-static void Extrae_malloctrace_replace (const void *p1, void *p2)
+static size_t Extrae_malloctrace_replace (const void *p1, void *p2, size_t s)
 {
-	if (p1 != NULL)
-	{
-		pthread_mutex_lock (&mutex_allocations);
+	size_t prev_sz = 0;
 
+	pthread_mutex_lock (&mutex_allocations);
+
+	int replaced = FALSE;
+	if (p1)
+	{
 		unsigned u;
 		for (u = 0; u < nmallocentries_allocated; u++)
 			if (mallocentries[u] == p1)
 			{
-				mallocentries[u] = p2;
+				prev_sz = mallocentries_sz[u];
+				mallocentries[u]    = p2;
+				mallocentries_sz[u] = s;
+				replaced = TRUE;
 				break;
 			}
-
-		pthread_mutex_unlock (&mutex_allocations);
 	}
+
+	// If we didn't find the pointer, we probably omitted its creation (because of
+	// threshold, e.g.). Need to create an entry for this new allocation if it is
+	// above the threshold.
+	if (!replaced)
+	{
+		unsigned u;
+
+		if (nmallocentries == nmallocentries_allocated)
+		{
+			mallocentries = real_realloc (mallocentries,
+			  (nmallocentries_allocated+NMALLOCENTRIES_MALLOC) * sizeof(void*));
+			assert (mallocentries != NULL);
+			mallocentries_sz = (size_t*) real_realloc (mallocentries_sz,
+			  (nmallocentries_allocated+NMALLOCENTRIES_MALLOC) * sizeof(size_t));
+			assert (mallocentries != NULL);
+			for (u = nmallocentries_allocated;
+			     u < nmallocentries_allocated+NMALLOCENTRIES_MALLOC;
+			     u++)
+				mallocentries[u] = NULL;
+			nmallocentries_allocated += NMALLOCENTRIES_MALLOC;
+		}
+	
+		for (u = 0; u < nmallocentries_allocated; u++)
+			if (mallocentries[u] == NULL)
+			{
+				mallocentries[u]    = p2;
+				mallocentries_sz[u] = s;
+				nmallocentries++;
+				break;
+			}
+	}
+
+	pthread_mutex_unlock (&mutex_allocations);
+
+	return prev_sz;
 }
 
 
@@ -213,7 +261,7 @@ void *malloc (size_t s)
 		res = real_malloc (s);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			Extrae_malloctrace_add (res, s);
 		}
 		Probe_Malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -332,10 +380,10 @@ void *calloc (size_t nmemb, size_t size)
 			/* Check if the requested size fits in the static buffer */
 			if ((nmemb*size) > DLSYM_CALLOC_SIZE)
 			{
-				fprintf(stderr, PACKAGE_NAME
+				fprintf (stderr, PACKAGE_NAME
 				    ": The size requested by calloc (%zu) is bigger"
 				    " than DLSYM_CALLOC_SIZE, please increase its value and"
-				    "recompile.\n", nmemb*size);
+				    " recompile.\n", nmemb*size);
 				abort();
 			}
 
@@ -365,7 +413,12 @@ void *calloc (size_t nmemb, size_t size)
 	{
 		Backend_Enter_Instrumentation ();
 		Probe_Calloc_Entry (nmemb, size);
+		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_calloc (nmemb, size);
+		if (res != NULL)
+		{
+			Extrae_malloctrace_add (res, size);
+		}
 		Probe_Calloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -415,7 +468,7 @@ void *realloc (void *p, size_t s)
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
 		if (res != NULL)
-			Extrae_malloctrace_replace (p, res);
+			Extrae_malloctrace_replace (p, res, s);
 		Probe_Realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -423,6 +476,8 @@ void *realloc (void *p, size_t s)
 	{
 		/* Otherwise, call the original */
 		res = real_realloc (p, s);
+		// We may need to remove the previous pointer
+		Extrae_malloctrace_remove (p);
 	}
 	else
 	{
@@ -465,7 +520,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size)
     res = real_posix_memalign(memptr, alignment, size);
     if (res == 0)
     {
-      Extrae_malloctrace_add (*memptr);
+      Extrae_malloctrace_add (*memptr, size);
     }
     Probe_memkind_malloc_Exit (*memptr);
     Backend_Leave_Instrumentation ();
@@ -544,7 +599,7 @@ void *memkind_malloc(memkind_t kind, size_t size)
     res = real_memkind_malloc(kind, size);
     if (res != NULL)
     {
-      Extrae_malloctrace_add (res);
+      Extrae_malloctrace_add (res, size);
     }
     Probe_memkind_malloc_Exit (res);
     Backend_Leave_Instrumentation ();
@@ -593,7 +648,7 @@ void *memkind_calloc(memkind_t kind, size_t num, size_t size)
     res = real_memkind_calloc(kind, num, size);
     if (res != NULL)
     {
-      Extrae_malloctrace_add (res); 
+      Extrae_malloctrace_add (res, num*size); 
     }
     Probe_memkind_calloc_Exit (res);
     Backend_Leave_Instrumentation ();
@@ -641,13 +696,15 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_realloc(kind, ptr, size);
     if (res != NULL)
-	  Extrae_malloctrace_replace (ptr, res);
+	  Extrae_malloctrace_replace (ptr, res, size);
     Probe_memkind_realloc_Exit (res);
     Backend_Leave_Instrumentation ();
   }
   else if (real_memkind_realloc != NULL)
   {
     res = real_memkind_realloc(kind, ptr, size);
+    // We may need to remove the previous pointer
+    Extrae_malloctrace_remove (ptr);
   }
   else
   {
@@ -689,7 +746,7 @@ int memkind_posix_memalign(memkind_t kind, void **memptr, size_t alignment, size
     res = real_memkind_posix_memalign(kind, memptr, alignment, size);
     if (res == 0)
     {
-      Extrae_malloctrace_add (*memptr);
+      Extrae_malloctrace_add (*memptr, size);
     }
     Probe_memkind_posix_memalign_Exit (*memptr);
     Backend_Leave_Instrumentation ();
@@ -787,7 +844,7 @@ kmpc_malloc( size_t size )
 		res = real_kmpc_malloc (size);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			Extrae_malloctrace_add (res, size);
 		}
 		Probe_kmpc_malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -841,7 +898,7 @@ kmpc_aligned_malloc( size_t size, size_t alignment )
 		res = real_kmpc_aligned_malloc (size, alignment);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			Extrae_malloctrace_add (res, size);
 		}
 		Probe_kmpc_aligned_malloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -895,7 +952,7 @@ kmpc_calloc( size_t nelem, size_t elsize )
 		res = real_kmpc_calloc (nelem, elsize);
 		if (res != NULL)
 		{
-			Extrae_malloctrace_add (res);
+			Extrae_malloctrace_add (res, nelem*elsize);
 		}
 		Probe_kmpc_calloc_Exit (res);
 		Backend_Leave_Instrumentation ();
@@ -948,7 +1005,7 @@ kmpc_realloc( void *ptr, size_t size )
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_realloc (ptr, size);
 		if (res != NULL)
-			Extrae_malloctrace_replace (ptr, res);
+			Extrae_malloctrace_replace (ptr, res, size);
 		Probe_kmpc_realloc_Exit (res);
 		Backend_Leave_Instrumentation ();
 	}
@@ -956,6 +1013,8 @@ kmpc_realloc( void *ptr, size_t size )
 	{
 		/* Otherwise, call the original */
 		res = real_kmpc_realloc (ptr, size);
+		// We may need to remove the previous pointer
+		Extrae_malloctrace_remove (ptr);
 	}
 	else
 	{
