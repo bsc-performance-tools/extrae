@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 19Jun2020 Updates common.h to meet C++11 syntax
  * 12Jun2020 Solves duplicate capture of C and Fortran MPI calls when using Intel implementations
  * 08Jun2020 Fixes finalization issues when Extrae is initialized by API and another runtime
  * 26May2020 Adds option to instrument I/O internals
