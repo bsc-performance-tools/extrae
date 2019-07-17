@@ -141,6 +141,14 @@ def pyEx_profile_restart():
 ###  EXTRAE API WRAPPERS  ###
 #############################
 
+def shutdown():
+  if (Extrae):
+    Extrae[os.getpid()].Extrae_shutdown()
+
+def restart():
+  if (Extrae):
+    Extrae[os.getpid()].Extrae_restart()
+
 def event(type, value):
   if (Extrae):
     Extrae[os.getpid()].Extrae_event(type, value)
