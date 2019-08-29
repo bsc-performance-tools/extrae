@@ -181,6 +181,7 @@ void PhaseStats::UpdateMPI(event_t *MPIBeginEv, event_t *MPIEndEv)
       case MPI_COMM_FREE_EV:
       case MPI_COMM_DUP_EV:
       case MPI_COMM_SPLIT_EV:
+      case MPI_COMM_SPLIT_TYPE_EV:
       case MPI_COMM_SPAWN_EV:
       case MPI_REQUEST_FREE_EV:
       case MPI_RECV_INIT_EV:

@@ -1520,6 +1520,36 @@ void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	updateStats_OTHER(global_mpi_stats);
 }
 
+#if defined(MPI3)
+/******************************************************************************
+ ***  PMPI_Comm_Split_Type_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Split_Type_Wrapper (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key,
+	MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror)
+{
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	CtoF77 (pmpi_comm_split_type) (comm, split_type, key, info, newcomm, ierror);
+
+	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
+	{
+                MPI_Comm comm_id = PMPI_Comm_f2c (*newcomm);
+                Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+#endif /* MPI3 */
+
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************
@@ -2356,6 +2386,33 @@ int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newco
 
   return ierror;
 }
+
+
+#if defined(MPI3)
+/******************************************************************************
+ ***  MPI_Comm_split_type_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_split_type_C_Wrapper (MPI_Comm comm, int split_type, int key, MPI_Info info, MPI_Comm *newcomm)
+{
+  int ierror;
+
+        TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_BEGIN, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY);
+
+  ierror = PMPI_Comm_split_type (comm, split_type, key, info, newcomm);
+  if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+    Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+
+        TRACE_MPIEVENT (TIME, MPI_COMM_SPLIT_TYPE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+                EMPTY);
+
+        updateStats_OTHER(global_mpi_stats);
+
+  return ierror;
+}
+#endif /* MPI3 */
+
 
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)

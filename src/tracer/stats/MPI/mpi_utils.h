@@ -31,7 +31,7 @@
 
 #define NUM_MPI_P2P_EVENT_TYPES 41
 #define NUM_MPI_COLLECTIVE_EVENT_TYPES 19
-#define NUM_MPI_OTHER_EVENT_TYPES 29
+#define NUM_MPI_OTHER_EVENT_TYPES 30
 
 unsigned isMPI_Global(unsigned EvtType);
 unsigned isMPI_P2P(unsigned EvtType);

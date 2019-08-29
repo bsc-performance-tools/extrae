@@ -86,19 +86,6 @@
 # define NAME_ROUTINE_C2F(x) CtoF77(x)
 #endif
 
-/*
-  MPICH 1.2.6/7 (not 1.2.7p1) contains a silly bug where
-  MPI_Comm_create/split/dup also invoke MPI_Allreduce directly (not
-  PMPI_Allreduce) and gets instrumentend when it shouldn't. The following code
-  is to circumvent the problem
-*/
-#if defined(MPI_VERSION) && defined(MPI_SUBVERSION) && defined(MPICH_NAME)
-# if MPI_VERSION == 1 && MPI_SUBVERSION == 2 && MPICH_NAME == 1
-#  define MPICH_1_2_Comm_Allreduce_bugfix /* we can control the subsubversion */
-static int Extrae_MPICH12_COMM_inside = FALSE;
-# endif
-#endif
-
 #if defined(FORTRAN_SYMBOLS)
 # include "extrae_mpif.h"
 #endif
@@ -376,19 +363,11 @@ void NAME_ROUTINE_C2F(mpi_comm_create) (MPI_Fint *comm, MPI_Fint *group,
 
 	if (mpitrace_on)
 	{
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = TRUE;
-#endif
-
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Create_Wrapper (comm, group, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = FALSE;
-#endif
 	}
 	else
 		CtoF77 (pmpi_comm_create) (comm, group, newcomm, ierror);
@@ -447,19 +426,11 @@ void NAME_ROUTINE_C2F(mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 
 	if (mpitrace_on)
 	{
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = TRUE;
-#endif
-
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Dup_Wrapper (comm, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = FALSE;
-#endif
 	}
 	else
 		CtoF77 (pmpi_comm_dup) (comm, newcomm, ierror);
@@ -487,19 +458,11 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
 
 	if (mpitrace_on)
 	{
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = TRUE;
-#endif
-
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		PMPI_Comm_Split_Wrapper (comm, color, key, newcomm, ierror);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = FALSE;
-#endif
 	}
 	else
 		CtoF77 (pmpi_comm_split) (comm, color, key, newcomm, ierror);
@@ -507,6 +470,40 @@ void NAME_ROUTINE_C2F(mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color,
 	DLB(DLB_MPI_Comm_split_F_leave);
 
 }
+
+
+#if defined(MPI3)
+/******************************************************************************
+ ***  MPI_Comm_Split_Type
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_comm_split_type__,mpi_comm_split_type_,MPI_COMM_SPLIT_TYPE,mpi_comm_split_type,(MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key, MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_comm_split_type) (MPI_Fint *comm, MPI_Fint *split_type,
+        MPI_Fint *key, MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_comm_split_type) (MPI_Fint *comm, MPI_Fint *split_type,
+        MPI_Fint *key, MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror)
+#endif
+{
+
+        DLB(DLB_MPI_Comm_split_type_F_enter, comm, split_type, key, info, newcomm, ierror);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                PMPI_Comm_Split_Type_Wrapper (comm, split_type, key, info, newcomm, ierror);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                CtoF77 (pmpi_comm_split_type) (comm, split_type, key, info, newcomm, ierror);
+
+        DLB(DLB_MPI_Comm_split_type_F_leave);
+
+}
+#endif /* MPI3 */
 
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
@@ -662,7 +659,6 @@ void NAME_ROUTINE_C2F(mpi_intercomm_create) (MPI_Fint *local_comm,
 	MPI_Fint *tag, MPI_Fint *new_intercomm, MPI_Fint *ierror)
 #endif
 {
-
 	DLB(DLB_MPI_Intercomm_create_F_enter, local_comm, local_leader, peer_comm,
 	  remote_leader, tag, new_intercomm, ierror);
 
@@ -676,11 +672,12 @@ void NAME_ROUTINE_C2F(mpi_intercomm_create) (MPI_Fint *local_comm,
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		CtoF77 (pmpi_intercomm_create) (local_comm, local_leader, peer_comm, 
 		  remote_leader, tag, new_intercomm, ierror);
+	}
 
 	DLB(DLB_MPI_Intercomm_create_F_leave);
-
 }
 
 /******************************************************************************
@@ -696,7 +693,6 @@ void NAME_ROUTINE_C2F(mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
 	MPI_Fint *newintracomm, MPI_Fint *ierror)
 #endif
 {
-
 	DLB(DLB_MPI_Intercomm_merge_F_enter, intercomm, high, newintracomm, ierror);
 
 	if (mpitrace_on)
@@ -708,10 +704,11 @@ void NAME_ROUTINE_C2F(mpi_intercomm_merge) (MPI_Fint *intercomm, MPI_Fint *high,
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		CtoF77 (mpi_intercomm_merge) (intercomm, high, newintracomm, ierror);
+	}
 
 	DLB(DLB_MPI_Intercomm_merge_F_leave);
-
 }
 
 
@@ -726,7 +723,6 @@ void NAME_ROUTINE_F(mpi_start) (MPI_Fint *request, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_start) (MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-
 	DLB(DLB_MPI_Start_F_enter, request, ierror);
 
 	if (mpitrace_on)
@@ -738,10 +734,11 @@ void NAME_ROUTINE_C2F(mpi_start) (MPI_Fint *request, MPI_Fint *ierror)
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		CtoF77 (pmpi_start) (request, ierror);
+	}
 
 	DLB(DLB_MPI_Start_F_leave);
-
 }
 
 /******************************************************************************
@@ -757,7 +754,6 @@ void NAME_ROUTINE_C2F(mpi_startall) (MPI_Fint *count,
 	MPI_Fint array_of_requests[], MPI_Fint *ierror)
 #endif
 {
-
 	DLB(DLB_MPI_Startall_F_enter, count, array_of_requests, ierror);
 
 	if (mpitrace_on)
@@ -769,10 +765,11 @@ void NAME_ROUTINE_C2F(mpi_startall) (MPI_Fint *count,
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		CtoF77 (pmpi_startall) (count, array_of_requests, ierror);
+	}
 
 	DLB(DLB_MPI_Startall_F_leave);
-
 }
 
 /******************************************************************************
@@ -786,7 +783,6 @@ void NAME_ROUTINE_F(mpi_request_free) (MPI_Fint *request, MPI_Fint *ierror)
 void NAME_ROUTINE_C2F(mpi_request_free) (MPI_Fint *request, MPI_Fint *ierror)
 #endif
 {
-
 	DLB(DLB_MPI_Request_free_F_enter, request, ierror);
 
 	if (mpitrace_on)
@@ -801,7 +797,6 @@ void NAME_ROUTINE_C2F(mpi_request_free) (MPI_Fint *request, MPI_Fint *ierror)
 		CtoF77 (pmpi_request_free) (request, ierror);
 
 	DLB(DLB_MPI_Request_free_F_leave);
-
 }
 
 #endif /* defined(FORTRAN_SYMBOLS) */
@@ -815,18 +810,14 @@ int NAME_ROUTINE_C(MPI_Init) (int *argc, char ***argv)
 {
 	int res;
 
-
 	DLB(DLB_MPI_Init_enter, argc, argv);
-
 
 	/* This should be called always, whenever the tracing takes place or not */
 	DEBUG_INTERFACE(ENTER)
 	res = MPI_Init_C_Wrapper (argc, argv);
 	DEBUG_INTERFACE(LEAVE)
 
-
 	DLB(DLB_MPI_Init_leave);
-
 
 	return res;
 }
@@ -839,18 +830,14 @@ int NAME_ROUTINE_C(MPI_Init_thread) (int *argc, char ***argv, int required, int 
 {
 	int res;
 
-
 	DLB(DLB_MPI_Init_thread_enter, argc, argv, required, provided);
-
 
 	/* This should be called always, whenever the tracing takes place or not */
 	DEBUG_INTERFACE(ENTER)
 	res = MPI_Init_thread_C_Wrapper (argc, argv, required, provided);
 	DEBUG_INTERFACE(LEAVE)
 
-
 	DLB(DLB_MPI_Init_thread_leave);
-
 
 	return res;
 }
@@ -863,9 +850,7 @@ int NAME_ROUTINE_C(MPI_Finalize) (void)
 {
 	int res;
 
-
 	DLB(DLB_MPI_Finalize_enter);
-
 
 	if (mpitrace_on)
 	{
@@ -885,11 +870,11 @@ int NAME_ROUTINE_C(MPI_Finalize) (void)
 		res = PMPI_Finalize ();
 	}
 	else
+	{
 		res = PMPI_Finalize ();
-
+	}
 
 	DLB(DLB_MPI_Finalize_leave);
-
 
 	return res;
 }
@@ -902,9 +887,7 @@ int NAME_ROUTINE_C(MPI_Request_get_status) (MPI_Request request, int *flag,
 {
 	int res;
 
-
 	DLB(DLB_MPI_Request_get_status_enter, request, flag, status);
-
 
 	if (mpitrace_on)
 	{
@@ -915,11 +898,11 @@ int NAME_ROUTINE_C(MPI_Request_get_status) (MPI_Request request, int *flag,
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		res = PMPI_Request_get_status(request, flag, status);
-
+	}
 
 	DLB(DLB_MPI_Request_get_status_leave);
-
 
 	return res;
 }
@@ -931,9 +914,7 @@ int NAME_ROUTINE_C(MPI_Cancel) (MPI_Request *request)
 {
 	int res;
 
-
 	DLB(DLB_MPI_Cancel_enter, request);
-
 
 	if (mpitrace_on)
 	{
@@ -944,8 +925,9 @@ int NAME_ROUTINE_C(MPI_Cancel) (MPI_Request *request)
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		res = PMPI_Cancel (request);
-
+	}
 
 	DLB(DLB_MPI_Cancel_leave);
 
@@ -959,9 +941,7 @@ int NAME_ROUTINE_C(MPI_Comm_rank) (MPI_Comm comm, int *rank)
 {
 	int res;
 
-
 	DLB(DLB_MPI_Comm_rank_enter, comm, rank);
-
 
 	if (mpitrace_on)
 	{
@@ -972,11 +952,11 @@ int NAME_ROUTINE_C(MPI_Comm_rank) (MPI_Comm comm, int *rank)
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		res = PMPI_Comm_rank (comm, rank);
-
+	}
 
 	DLB(DLB_MPI_Comm_rank_leave);
-
 
 	return res;
 }
@@ -988,9 +968,7 @@ int NAME_ROUTINE_C(MPI_Comm_size) (MPI_Comm comm, int *size)
 {
 	int res;
 
-
 	DLB(DLB_MPI_Comm_size_enter, comm, size);
-
 
 	if (mpitrace_on)
 	{
@@ -1001,11 +979,11 @@ int NAME_ROUTINE_C(MPI_Comm_size) (MPI_Comm comm, int *size)
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
+	{
 		res = PMPI_Comm_size (comm, size);
-
+	}
 
 	DLB(DLB_MPI_Comm_size_leave);
-
 
 	return res;
 }
@@ -1018,29 +996,20 @@ int NAME_ROUTINE_C(MPI_Comm_create) (MPI_Comm comm, MPI_Group group,
 {
 	int res;
 
-
 	DLB(DLB_MPI_Comm_create_enter, comm, group, newcomm);
-
 
 	if (mpitrace_on)
 	{
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = TRUE;
-#endif
-
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_create_C_Wrapper (comm, group, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = FALSE;
-#endif
 	}
 	else
-    		res = PMPI_Comm_create (comm, group, newcomm);
-
+	{
+  		res = PMPI_Comm_create (comm, group, newcomm);
+	}
 
 	DLB(DLB_MPI_Comm_create_leave);
 
@@ -1066,11 +1035,11 @@ int NAME_ROUTINE_C(MPI_Comm_free) (MPI_Comm *comm)
 		DEBUG_INTERFACE(LEAVE)
 	}
 	else
-    		res = MPI_SUCCESS;
-
+	{
+  		res = MPI_SUCCESS;
+	}
 
 	DLB(DLB_MPI_Comm_free_leave);
-
 
 	return res;
 }
@@ -1082,30 +1051,22 @@ int NAME_ROUTINE_C(MPI_Comm_dup) (MPI_Comm comm, MPI_Comm *newcomm)
 {
 	int res;
 
-
 	DLB(DLB_MPI_Comm_dup_enter, comm, newcomm);
 
 	if (mpitrace_on)
 	{
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = TRUE;
-#endif
-
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_dup_C_Wrapper (comm, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = FALSE;
-#endif
 	}
 	else
-    		res = PMPI_Comm_dup (comm, newcomm);
+	{
+   	res = PMPI_Comm_dup (comm, newcomm);
+	}
 
 	DLB(DLB_MPI_Comm_dup_leave);
-
 
 	return res;
 }
@@ -1118,35 +1079,59 @@ int NAME_ROUTINE_C(MPI_Comm_split) (MPI_Comm comm, int color, int key,
 {
 	int res;
 
-
 	DLB(DLB_MPI_Comm_split_enter, comm, color, key, newcomm);
-
 
 	if (mpitrace_on)
 	{
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = TRUE;
-#endif
-
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
 		res = MPI_Comm_split_C_Wrapper (comm, color, key, newcomm);
 		Backend_Leave_Instrumentation ();
 		DEBUG_INTERFACE(LEAVE)
-
-#ifdef MPICH_1_2_Comm_Allreduce_bugfix
-		Extrae_MPICH12_COMM_inside = FALSE;
-#endif
 	}
 	else
+	{
 		res = PMPI_Comm_split (comm, color, key, newcomm);
-
+	}
 
 	DLB(DLB_MPI_Comm_split_leave);
 
-
 	return res;
 }
+
+
+#if defined(MPI3)
+/******************************************************************************
+ ***  MPI_Comm_split_type
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Comm_split_type) (MPI_Comm comm, int split_type, int key,
+        MPI_Info info, MPI_Comm *newcomm)
+{
+        int res;
+
+
+        DLB(DLB_MPI_Comm_split_type_enter, comm, split_type, key, info, newcomm);
+
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                res = MPI_Comm_split_type_C_Wrapper (comm, split_type, key, info, newcomm);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                res = PMPI_Comm_split_type (comm, split_type, key, info, newcomm);
+
+
+        DLB(DLB_MPI_Comm_split_type_leave);
+
+
+        return res;
+}
+#endif /* MPI3 */
+
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 /******************************************************************************

@@ -256,7 +256,8 @@ typedef enum
   MPI_MPROBE_VAL, /* 190 */
   MPI_IMPROBE_VAL,
   MPI_MRECV_VAL,
-  MPI_IMRECV_VAL
+  MPI_IMRECV_VAL,
+  MPI_COMM_SPLIT_TYPE_VAL
 }
 MPIVal;
 
@@ -391,6 +392,7 @@ MPIVal;
 #define  MPI_COMM_CREATE_LABEL             "MPI_Comm_create"
 #define  MPI_COMM_DUP_LABEL                "MPI_Comm_dup"
 #define  MPI_COMM_SPLIT_LABEL              "MPI_Comm_split"
+#define  MPI_COMM_SPLIT_TYPE_LABEL         "MPI_Comm_split_type"
 #define  MPI_COMM_SPAWN_LABEL              "MPI_Comm_spawn"
 #define  MPI_COMM_SPAWN_MULTIPLE_LABEL     "MPI_Comm_spawn_multiple"
 #define  MPI_COMM_GROUP_LABEL              "MPI_Comm_group"

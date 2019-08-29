@@ -90,6 +90,7 @@ static int Get_State (unsigned int EvType)
 		case MPI_COMM_FREE_EV:
 		case MPI_COMM_DUP_EV:
 		case MPI_COMM_SPLIT_EV:
+		case MPI_COMM_SPLIT_TYPE_EV:
 		case MPI_COMM_SPAWN_EV:
 		case MPI_COMM_SPAWN_MULTIPLE_EV:
 		case MPI_CART_CREATE_EV:
@@ -1181,6 +1182,7 @@ SingleEv_Handler_t PRV_MPI_Event_Handlers[] = {
 	{ MPI_COMM_CREATE_EV, Other_MPI_Event },
 	{ MPI_COMM_FREE_EV, Other_MPI_Event },
 	{ MPI_COMM_SPLIT_EV, Other_MPI_Event },
+	{ MPI_COMM_SPLIT_TYPE_EV, Other_MPI_Event },
 	{ MPI_COMM_SPAWN_EV, Other_MPI_Event },
 	{ MPI_COMM_SPAWN_MULTIPLE_EV, Other_MPI_Event },
 	{ MPI_COMM_DUP_EV, Other_MPI_Event },

@@ -72,6 +72,10 @@ void DLB_MPI_Comm_split_F_enter (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 void DLB_MPI_Comm_split_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Comm_split_type_F_enter (MPI_Fint *comm, MPI_Fint *split_type, MPI_Fint *key, MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Comm_split_type_F_leave (void)__attribute__((weak));
+
+
 void DLB_MPI_Comm_spawn_F_enter (char *command, char *argv, MPI_Fint *maxprocs, MPI_Fint *info, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *intercomm, MPI_Fint *array_of_errcodes, MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_Comm_spawn_F_leave (void)__attribute__((weak));
 
@@ -150,6 +154,10 @@ void DLB_MPI_Comm_dup_leave (void)__attribute__((weak));
 
 void DLB_MPI_Comm_split_enter (MPI_Comm comm, int color, int key, MPI_Comm *newcomm)__attribute__((weak));
 void DLB_MPI_Comm_split_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Comm_split_type_enter (MPI_Comm comm, int split_type, int key, MPI_Info info, MPI_Comm *newcomm)__attribute__((weak));
+void DLB_MPI_Comm_split_type_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_Comm_spawn_enter (
