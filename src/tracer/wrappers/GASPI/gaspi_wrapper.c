@@ -367,7 +367,7 @@ gaspi_write(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GASPI_write_Entry(rank, size);
+	Extrae_GASPI_write_Entry(rank, size, queue);
 	ret = pgaspi_write(segment_id_local, offset_local, rank, segment_id_remote,
 	    offset_remote, size, queue, timeout_ms);
 	Extrae_GASPI_write_Exit();
@@ -386,7 +386,7 @@ gaspi_read(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GASPI_read_Entry(rank, size);
+	Extrae_GASPI_read_Entry(rank, size, queue);
 	ret = pgaspi_read(segment_id_local, offset_local, rank, segment_id_remote,
 	    offset_remote, size, queue, timeout_ms);
 	Extrae_GASPI_read_Exit();
@@ -401,7 +401,7 @@ gaspi_wait(const gaspi_queue_id_t queue, const gaspi_timeout_t timeout)
 
 	int ret;
 
-	Extrae_GASPI_wait_Entry();
+	Extrae_GASPI_wait_Entry(queue);
 	ret = pgaspi_wait(queue, timeout);
 	Extrae_GASPI_wait_Exit();
 
@@ -418,7 +418,7 @@ gaspi_notify(const gaspi_segment_id_t segment_id,
 
 	int ret;
 
-	Extrae_GASPI_notify_Entry(rank);
+	Extrae_GASPI_notify_Entry(rank, notification_id, queue);
 	ret = pgaspi_notify
 	    (segment_id, rank, notification_id, notification_value, queue,
 	    timeout);
@@ -437,7 +437,7 @@ gaspi_notify_waitsome(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GASPI_notify_waitsome_Entry();
+	Extrae_GASPI_notify_waitsome_Entry(notification_begin);
 	ret = pgaspi_notify_waitsome(segment_id_local, notification_begin, num,
 	    first_id, timeout_ms);
 	Extrae_GASPI_notify_waitsome_Exit();
@@ -454,7 +454,7 @@ gaspi_notify_reset(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GASPI_notify_reset_Entry();
+	Extrae_GASPI_notify_reset_Entry(notification_id);
 	ret = pgaspi_notify_reset(segment_id_local, notification_id,
 	    old_notification_val);
 	Extrae_GASPI_notify_reset_Exit();
@@ -475,7 +475,7 @@ gaspi_write_notify(const gaspi_segment_id_t segment_id_local,
 
 	int ret;
 
-	Extrae_GASPI_write_notify_Entry(rank, size);
+	Extrae_GASPI_write_notify_Entry(rank, size, notification_id, queue);
 	ret = pgaspi_write_notify(segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, notification_id,
 	    notification_value, queue, timeout);
@@ -496,7 +496,7 @@ gaspi_write_list(const gaspi_number_t num,
 
 	int ret;
 
-	Extrae_GASPI_write_list_Entry(rank, size);
+	Extrae_GASPI_write_list_Entry(rank, size, queue);
 	ret = pgaspi_write_list(num, segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, queue, timeout);
 	Extrae_GASPI_write_list_Exit();
@@ -519,7 +519,7 @@ gaspi_write_list_notify(const gaspi_number_t num,
 
 	int ret;
 
-	Extrae_GASPI_write_list_notify_Entry(rank, size);
+	Extrae_GASPI_write_list_notify_Entry(rank, size, notification_id, queue);
 	ret = pgaspi_write_list_notify(num, segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, segment_id_notification,
 	    notification_id, notification_value, queue, timeout_ms);
@@ -540,7 +540,7 @@ gaspi_read_list(const gaspi_number_t num,
 
 	int ret;
 
-	Extrae_GASPI_read_list_Entry(rank, size);
+	Extrae_GASPI_read_list_Entry(rank, size, queue);
 	ret = pgaspi_read_list(num, segment_id_local, offset_local, rank,
 	    segment_id_remote, offset_remote, size, queue, timeout);
 	Extrae_GASPI_read_list_Exit();
@@ -654,7 +654,7 @@ gaspi_return_t
 gaspi_allreduce_user(gaspi_pointer_t const buffer_send,
     gaspi_pointer_t const buffer_receive, const gaspi_number_t num,
     const gaspi_size_t element_size, const gaspi_reduce_operation_t operation,
-    const gaspi_state_t reduce_state, const gaspi_group_t group,
+    const gaspi_reduce_state_t reduce_state, const gaspi_group_t group,
     const gaspi_timeout_t timeout_ms)
 {
 	DBG

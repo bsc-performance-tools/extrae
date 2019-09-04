@@ -335,7 +335,8 @@ Probe_GASPI_segment_delete_Exit()
 }
 
 void
-Probe_GASPI_write_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+Probe_GASPI_write_Entry(const gaspi_rank_t rank, const gaspi_size_t size,
+    const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
@@ -343,6 +344,7 @@ Probe_GASPI_write_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 		    Extrae_get_trace_GASPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 
@@ -357,7 +359,8 @@ Probe_GASPI_write_Exit()
 }
 
 void
-Probe_GASPI_read_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+Probe_GASPI_read_Entry(const gaspi_rank_t rank, const gaspi_size_t size,
+    const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
@@ -365,6 +368,7 @@ Probe_GASPI_read_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 		    Extrae_get_trace_GASPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 
@@ -379,12 +383,13 @@ Probe_GASPI_read_Exit()
 }
 
 void
-Probe_GASPI_wait_Entry()
+Probe_GASPI_wait_Entry(const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_WAIT_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 
@@ -399,13 +404,17 @@ Probe_GASPI_wait_Exit()
 }
 
 void
-Probe_GASPI_notify_Entry(const gaspi_rank_t rank)
+Probe_GASPI_notify_Entry(const gaspi_rank_t rank,
+    const gaspi_notification_id_t notification_id, const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_NOTIFY_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_NOTIFICATION_ID_EV,
+		    (UINT64)notification_id);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 
@@ -420,12 +429,15 @@ Probe_GASPI_notify_Exit()
 }
 
 void
-Probe_GASPI_notify_waitsome_Entry()
+Probe_GASPI_notify_waitsome_Entry(
+    const gaspi_notification_id_t notification_begin)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_NOTIFY_WAITSOME_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GASPI_NOTIFICATION_ID_EV,
+		    (UINT64)notification_begin);
 	}
 }
 
@@ -440,12 +452,14 @@ Probe_GASPI_notify_waitsome_Exit()
 }
 
 void
-Probe_GASPI_notify_reset_Entry()
+Probe_GASPI_notify_reset_Entry(const gaspi_notification_id_t notification_id)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
 		TRACE_EVENTANDCOUNTERS(LAST_READ_TIME, GASPI_NOTIFY_RESET_EV, EVT_BEGIN,
 		    Extrae_get_trace_GASPI_HWC());
+		TRACE_EVENT(LAST_READ_TIME, GASPI_NOTIFICATION_ID_EV,
+		    (UINT64)notification_id);
 	}
 }
 
@@ -460,7 +474,8 @@ Probe_GASPI_notify_reset_Exit()
 }
 
 void
-Probe_GASPI_write_notify_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+Probe_GASPI_write_notify_Entry(const gaspi_rank_t rank, const gaspi_size_t size,
+    const gaspi_notification_id_t notification_id, const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
@@ -468,6 +483,8 @@ Probe_GASPI_write_notify_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 		    Extrae_get_trace_GASPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_NOTIFICATION_ID_EV, (UINT64)notification_id);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 
@@ -482,7 +499,8 @@ Probe_GASPI_write_notify_Exit()
 }
 
 void
-Probe_GASPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
+Probe_GASPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size,
+    const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
@@ -490,6 +508,7 @@ Probe_GASPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
 		    Extrae_get_trace_GASPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 
@@ -505,7 +524,8 @@ Probe_GASPI_write_list_Exit()
 
 void
 Probe_GASPI_write_list_notify_Entry(const gaspi_rank_t rank,
-    gaspi_size_t * const size)
+    gaspi_size_t * const size, const gaspi_notification_id_t notification_id,
+    const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
@@ -513,6 +533,8 @@ Probe_GASPI_write_list_notify_Entry(const gaspi_rank_t rank,
 		    EVT_BEGIN, Extrae_get_trace_GASPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_NOTIFICATION_ID_EV, (UINT64)notification_id);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 
@@ -527,7 +549,8 @@ Probe_GASPI_write_list_notify_Exit()
 }
 
 void
-Probe_GASPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
+Probe_GASPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size,
+    const gaspi_queue_id_t queue)
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
@@ -535,6 +558,7 @@ Probe_GASPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
 		    Extrae_get_trace_GASPI_HWC());
 		TRACE_EVENT(LAST_READ_TIME, GASPI_RANK_EV, (UINT64)rank);
 		TRACE_EVENT(LAST_READ_TIME, GASPI_SIZE_EV, (UINT64)size);
+		TRACE_EVENT(LAST_READ_TIME, GASPI_QUEUE_ID_EV, (UINT64)queue);
 	}
 }
 

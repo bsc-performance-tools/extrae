@@ -222,10 +222,11 @@ Extrae_GASPI_segment_delete_Exit()
 }
 
 void
-Extrae_GASPI_write_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+Extrae_GASPI_write_Entry(const gaspi_rank_t rank, const gaspi_size_t size,
+    const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_write_Entry(rank, size);
+	Probe_GASPI_write_Entry(rank, size, queue);
 }
 
 void
@@ -236,10 +237,11 @@ Extrae_GASPI_write_Exit()
 }
 
 void
-Extrae_GASPI_read_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+Extrae_GASPI_read_Entry(const gaspi_rank_t rank, const gaspi_size_t size,
+    const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_read_Entry(rank, size);
+	Probe_GASPI_read_Entry(rank, size, queue);
 }
 
 void
@@ -250,10 +252,10 @@ Extrae_GASPI_read_Exit()
 }
 
 void
-Extrae_GASPI_wait_Entry()
+Extrae_GASPI_wait_Entry(const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_wait_Entry();
+	Probe_GASPI_wait_Entry(queue);
 }
 
 void
@@ -264,10 +266,11 @@ Extrae_GASPI_wait_Exit()
 }
 
 void
-Extrae_GASPI_notify_Entry(const gaspi_rank_t rank)
+Extrae_GASPI_notify_Entry(const gaspi_rank_t rank,
+    const gaspi_notification_id_t notification_id, const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_notify_Entry(rank);
+	Probe_GASPI_notify_Entry(rank, notification_id, queue);
 }
 
 void
@@ -278,10 +281,11 @@ Extrae_GASPI_notify_Exit()
 }
 
 void
-Extrae_GASPI_notify_waitsome_Entry()
+Extrae_GASPI_notify_waitsome_Entry(
+    const gaspi_notification_id_t notification_begin)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_notify_waitsome_Entry();
+	Probe_GASPI_notify_waitsome_Entry(notification_begin);
 }
 
 void
@@ -292,10 +296,10 @@ Extrae_GASPI_notify_waitsome_Exit()
 }
 
 void
-Extrae_GASPI_notify_reset_Entry()
+Extrae_GASPI_notify_reset_Entry(const gaspi_notification_id_t notification_id)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_notify_reset_Entry();
+	Probe_GASPI_notify_reset_Entry(notification_id);
 }
 
 void
@@ -306,10 +310,11 @@ Extrae_GASPI_notify_reset_Exit()
 }
 
 void
-Extrae_GASPI_write_notify_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
+Extrae_GASPI_write_notify_Entry(const gaspi_rank_t rank, const gaspi_size_t size,
+    const gaspi_notification_id_t notification_id, const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_write_notify_Entry(rank, size);
+	Probe_GASPI_write_notify_Entry(rank, size, notification_id, queue);
 }
 
 void
@@ -320,10 +325,11 @@ Extrae_GASPI_write_notify_Exit()
 }
 
 void
-Extrae_GASPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
+Extrae_GASPI_write_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size,
+    const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_write_list_Entry(rank, size);
+	Probe_GASPI_write_list_Entry(rank, size, queue);
 }
 
 void
@@ -335,10 +341,11 @@ Extrae_GASPI_write_list_Exit()
 
 void
 Extrae_GASPI_write_list_notify_Entry(const gaspi_rank_t rank,
-    gaspi_size_t * const size)
+    gaspi_size_t * const size, const gaspi_notification_id_t notification_id,
+    const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_write_list_notify_Entry(rank, size);
+	Probe_GASPI_write_list_notify_Entry(rank, size, notification_id, queue);
 }
 
 void
@@ -349,10 +356,11 @@ Extrae_GASPI_write_list_notify_Exit()
 }
 
 void
-Extrae_GASPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size)
+Extrae_GASPI_read_list_Entry(const gaspi_rank_t rank, gaspi_size_t * const size,
+    const gaspi_queue_id_t queue)
 {
 	Backend_Enter_Instrumentation();
-	Probe_GASPI_read_list_Entry(rank, size);
+	Probe_GASPI_read_list_Entry(rank, size, queue);
 }
 
 void

@@ -111,5 +111,5 @@ gaspi_return_t  gaspi_allreduce(gaspi_pointer_t const, gaspi_pointer_t const,
 gaspi_return_t  gaspi_allreduce_user(gaspi_pointer_t const,
                     gaspi_pointer_t const, const gaspi_number_t,
                     const gaspi_size_t, const gaspi_reduce_operation_t,
-                    const gaspi_state_t, const gaspi_group_t,
+                    const gaspi_reduce_state_t, const gaspi_group_t,
                     const gaspi_timeout_t);
