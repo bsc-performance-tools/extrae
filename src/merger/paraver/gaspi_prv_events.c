@@ -163,4 +163,12 @@ WriteEnabled_GASPI_Operations(FILE * fd)
 	fprintf (fd, "EVENT_TYPE\n");
 	fprintf (fd, "%d    %d    %s\n", 0, GASPI_RANK_EV, "GASPI rank");
 	LET_SPACES(fd);
+
+	fprintf (fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, GASPI_NOTIFICATION_ID_EV, "GASPI notification_id");
+	LET_SPACES(fd);
+
+	fprintf (fd, "EVENT_TYPE\n");
+	fprintf (fd, "%d    %d    %s\n", 0, GASPI_QUEUE_ID_EV, "GASPI queue");
+	LET_SPACES(fd);
 }

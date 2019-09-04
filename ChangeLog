@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 04Sep2019 Adds support for GASPI next branch and adds notification_id and queue_id parameters
  * 11Jun2019 Adds instrumentation support for GASPI
  * 02Apr2019 Adds support for changing num_threads in OpenMP parallel constructs
  * 29Mar2019 Changes order in which MPI env vars are checked to discover process' task id during auto init

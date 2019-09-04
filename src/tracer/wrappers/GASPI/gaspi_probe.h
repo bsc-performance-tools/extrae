@@ -74,35 +74,42 @@ void	Probe_GASPI_segment_use_Exit();
 void	Probe_GASPI_segment_delete_Entry();
 void	Probe_GASPI_segment_delete_Exit();
 
-void	Probe_GASPI_write_Entry(const gaspi_rank_t, const gaspi_size_t);
+void	Probe_GASPI_write_Entry(const gaspi_rank_t, const gaspi_size_t,
+            const gaspi_queue_id_t);
 void	Probe_GASPI_write_Exit();
 
-void	Probe_GASPI_read_Entry(const gaspi_rank_t, const gaspi_size_t);
+void	Probe_GASPI_read_Entry(const gaspi_rank_t, const gaspi_size_t,
+            const gaspi_queue_id_t);
 void	Probe_GASPI_read_Exit();
 
-void	Probe_GASPI_wait_Entry();
+void	Probe_GASPI_wait_Entry(const gaspi_queue_id_t);
 void	Probe_GASPI_wait_Exit();
 
-void	Probe_GASPI_notify_Entry(const gaspi_rank_t);
+void	Probe_GASPI_notify_Entry(const gaspi_rank_t,
+            const gaspi_notification_id_t, const gaspi_queue_id_t);
 void	Probe_GASPI_notify_Exit();
 
-void	Probe_GASPI_notify_waitsome_Entry();
+void	Probe_GASPI_notify_waitsome_Entry(const gaspi_notification_id_t);
 void	Probe_GASPI_notify_waitsome_Exit();
 
-void	Probe_GASPI_notify_reset_Entry();
+void	Probe_GASPI_notify_reset_Entry(const gaspi_notification_id_t);
 void	Probe_GASPI_notify_reset_Exit();
 
-void	Probe_GASPI_write_notify_Entry(const gaspi_rank_t, const gaspi_size_t);
+void	Probe_GASPI_write_notify_Entry(const gaspi_rank_t, const gaspi_size_t,
+            const gaspi_notification_id_t, const gaspi_queue_id_t);
 void	Probe_GASPI_write_notify_Exit();
 
-void	Probe_GASPI_write_list_Entry(const gaspi_rank_t, gaspi_size_t * const);
+void	Probe_GASPI_write_list_Entry(const gaspi_rank_t, gaspi_size_t * const,
+            const gaspi_queue_id_t);
 void	Probe_GASPI_write_list_Exit();
 
 void	Probe_GASPI_write_list_notify_Entry(const gaspi_rank_t,
-            gaspi_size_t * const);
+            gaspi_size_t * const, const gaspi_notification_id_t notification_id,
+            const gaspi_queue_id_t queue);
 void	Probe_GASPI_write_list_notify_Exit();
 
-void	Probe_GASPI_read_list_Entry(const gaspi_rank_t, gaspi_size_t * const);
+void	Probe_GASPI_read_list_Entry(const gaspi_rank_t, gaspi_size_t * const,
+            const gaspi_queue_id_t queue);
 void	Probe_GASPI_read_list_Exit();
 
 void	Probe_GASPI_passive_send_Entry(const gaspi_rank_t, const gaspi_size_t);

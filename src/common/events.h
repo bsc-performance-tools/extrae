@@ -692,6 +692,8 @@ enum {
 #define GASPI_PARAM_BASE_EV          69100000
 #define GASPI_SIZE_EV                69100001
 #define GASPI_RANK_EV                69100002
+#define GASPI_QUEUE_ID_EV            69000003
+#define GASPI_NOTIFICATION_ID_EV     69000004
 
 
 #define CALLER_EV                70000000

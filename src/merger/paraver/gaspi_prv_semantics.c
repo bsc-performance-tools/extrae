@@ -132,6 +132,8 @@ SingleEv_Handler_t PRV_GASPI_Event_Handlers[] =
 {
 	{GASPI_SIZE_EV,                 GASPI_Param},
 	{GASPI_RANK_EV,                 GASPI_Param},
+	{GASPI_NOTIFICATION_ID_EV,      GASPI_Param},
+	{GASPI_QUEUE_ID_EV,             GASPI_Param},
 	{GASPI_INIT_EV,                 GASPI_Event},
 	{GASPI_TERM_EV,                 GASPI_Event},
 	{GASPI_CONNECT_EV,              GASPI_Event},
