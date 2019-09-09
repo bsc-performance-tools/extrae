@@ -9,6 +9,7 @@ ChangeLog
  * 10Sep2019 Fixes configure check for MPI_Comm_spawn
  + 17Jul2019 Adds Python bindings for Extrae_shutdown and _restart
  * 16Jul2019 Fixes correlation of PEBS samples with reallocated objects
+ * 09Sep2019 Fixes online install-data-hook directory creation, others substitution, & mispellings (closes #33 #34 #36)
  * 05Jul2019 Fixes bug in MPI_Test & MPI_Imrecv where the request is not properly copied for later processing
  * 21Jun2019 Fixes potentially incomplete paths in Makefiles (closes #22)
  * 13Jun2019 Adds support to read MPI task identifier from `PBS` environment variables

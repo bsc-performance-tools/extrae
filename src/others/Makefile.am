@@ -40,7 +40,7 @@ endif
 
 install-data-hook:
 	cp pyextrae/common/extrae.py.in pyextrae/common/extrae.py
-	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" $(DESTDIR)${prefix} pyextrae/common/extrae.py
+	$(top_srcdir)/substitute $(SED) "@sub_PREFIX@" ${prefix} pyextrae/common/extrae.py
 #if HAVE_PAPI
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_eventandcounters@" Extrae_eventandcounters pyextrae/common/extrae.py
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_neventandcounters@" Extrae_neventandcounters pyextrae/common/extrae.py

@@ -1396,7 +1396,7 @@ int merger_post (int numtasks, int taskid)
 
 	if (taskid == 0)
 	{
-		fprintf (stdout, "mpi2prv: Checking for target directory existance...");
+		fprintf (stdout, "mpi2prv: Checking for target directory existence...");
 		char *dirn = dirname(strdup(__Extrae_Utils_trim(get_merge_OutputTraceName())));
 		if (!__Extrae_Utils_directory_exists(dirn))
 		{

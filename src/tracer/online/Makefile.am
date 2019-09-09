@@ -151,7 +151,7 @@ $(SCRIPT_ONLINE_ROOT): $(SCRIPT_ONLINE_ROOT).in
 .PHONY : $(SCRIPT_ONLINE_ENV) $(SCRIPT_ONLINE_ROOT)
 
 install-data-hook:
-	$(MKDIR_P) $(prefix)/etc
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)
 	cp $(SCRIPT_ONLINE_ENV) $(DESTDIR)$(sysconfdir)
 	cp $(SCRIPT_ONLINE_ROOT) $(DESTDIR)$(bindir)
 	chmod a+x $(DESTDIR)$(bindir)/$(SCRIPT_ONLINE_ROOT)
