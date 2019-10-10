@@ -627,6 +627,8 @@ AC_DEFUN([AX_CHECK_MPI_SUPPORTS_MPI_COMM_SPAWN],
 	AX_FLAGS_SAVE()
 
 	AC_MSG_CHECKING([if MPI library supports MPI_Comm_spawn])
+	CFLAGS="${CFLAGS} ${MPI_CFLAGS}"
+	LDFLAGS="${LDFLAGS} -L${MPI_LIBSDIR} ${MPI_LIBS}"
 	AC_TRY_LINK(
 		[#include <mpi.h>], 
 		[
