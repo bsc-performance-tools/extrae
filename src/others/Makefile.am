@@ -49,6 +49,7 @@ install-data-hook:
 	$(top_srcdir)/substitute $(SED) "@sub_Extrae_neventandcounters@" Extrae_nevent pyextrae/common/extrae.py
 #endif
 	mkdir -p $(DESTDIR)$(libexecdir)/pyextrae
+	cp -L pyextrae/__init__.py $(DESTDIR)$(libexecdir)/pyextrae
 	cp -rL pyextrae/common $(DESTDIR)$(libexecdir)/pyextrae
 	cp -rL pyextrae/multiprocessing $(DESTDIR)$(libexecdir)/pyextrae
 	cp -rL pyextrae/profile $(DESTDIR)$(libexecdir)/pyextrae

@@ -8,6 +8,10 @@ from xml.dom.minidom import parse
 import ctypes 
 from ctypes import cdll
 from collections import defaultdict
+if sys.version_info[0] < 3:
+  from thread import get_ident as threadid
+else:
+  from threading import get_ident as threadid
 
 USRFUNC_EV = 60000100
 
@@ -22,6 +26,7 @@ Number_of_Traced_Functions = 0
 MPITS = "./TRACE.mpits"
 MultiprocessingEnabled = False
 CallsProfile = defaultdict(int)
+CheckNested = dict()
 
 ### Load the sequential tracing library
 def LoadExtrae(Library):
@@ -32,9 +37,19 @@ def pyEx_trace_hook(frame, event, arg):
   global Extrae
 
   if ((event == "call") or (event == "c_call") or (event == "return") or (event == "c_return")):
+    tid = threadid()
+
     function = frame.f_code.co_name
     file = frame.f_code.co_filename
     #print ("EV:", event, "; FUNC:", frame.f_code.co_name, "; LINE:", frame.f_lineno, "; FILE:", file, "; PID:", os.getpid())  #, "; ARG:", arg
+
+    if (event == "call"):
+      CheckNested[tid] = function
+    elif (((event == "c_call") or (event == "c_return")) and (tid in CheckNested) and (CheckNested[tid] != None) and (function == CheckNested[tid])):
+      # Ignore c_call inside call for the same function
+      return
+    elif (event == "return"):
+      CheckNested[tid] = None
 
     ### Detect a process spawn from the multiprocessing module
     if (MultiprocessingEnabled) and (function == "run") and ('/'.join(file.split('/')[-2:]) == "multiprocessing/process.py"):
