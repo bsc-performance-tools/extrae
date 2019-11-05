@@ -116,12 +116,17 @@ static int
 GASPI_Param(event_t *current_event, unsigned long long current_time, unsigned cpu,
     unsigned ptask, unsigned task, unsigned thread, FileSet_t *fset)
 {
-	unsigned int EvType, nEvType;
-	unsigned long long EvValue, nEvValue;
+	unsigned int EvType;
+	unsigned long long EvValue;
 	UNREFERENCED_PARAMETER(fset);
 
 	EvType  = Get_EvEvent(current_event);
 	EvValue = Get_EvValue(current_event);
+
+	if (EvType == GASPI_RANK_EV)
+	{
+		EvValue+=1;
+	}
 
 	trace_paraver_event(cpu, ptask, task, thread, current_time, EvType, EvValue);
 

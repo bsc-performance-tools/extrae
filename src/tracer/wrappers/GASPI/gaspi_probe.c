@@ -585,7 +585,7 @@ Probe_GASPI_passive_send_Entry(const gaspi_rank_t rank, const gaspi_size_t size)
 }
 
 void
-Probe_GASPI_passive_send_exit()
+Probe_GASPI_passive_send_Exit()
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
@@ -608,7 +608,7 @@ Probe_GASPI_passive_receive_Entry(gaspi_rank_t * const rem_rank,
 }
 
 void
-Probe_GASPI_passive_receive_exit()
+Probe_GASPI_passive_receive_Exit()
 {
 	if (mpitrace_on && Extrae_get_trace_GASPI())
 	{
