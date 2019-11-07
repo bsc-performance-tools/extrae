@@ -187,6 +187,8 @@ AC_DEFUN([AX_CHECK_POINTER_SIZE],
       POINTER_SIZE=64
    elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
       POINTER_SIZE=64
+   elif test "${IS_GR740_MACHINE}" = "yes" ; then
+      POINTER_SIZE=32
    else
       AC_TRY_RUN(
          [
@@ -890,6 +892,7 @@ AC_DEFUN([AX_PROG_COUNTERS],
 [
    AC_REQUIRE([AX_PROG_PMAPI])
    AC_REQUIRE([AX_PROG_PAPI])
+   AC_REQUIRE([AX_PROG_L4STAT])
 
    if test "${papi_paths}" = "not_set" ; then
       if test "${target_os}" = "aix" ; then
@@ -901,7 +904,7 @@ AC_DEFUN([AX_PROG_COUNTERS],
       fi
    fi
 
-   if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" ; then
+   if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" -o "${L4STAT_ENABLED}" = "yes"; then
       AC_DEFINE([USE_HARDWARE_COUNTERS], 1, [Enable HWC support])
       use_hw_counters="1"
    else
@@ -914,6 +917,27 @@ AC_DEFUN([AX_PROG_COUNTERS],
    fi
 ])
 
+# AX_PROG_L4STAT
+# -------------
+AC_DEFUN([AX_PROG_L4STAT],
+[
+    AC_ARG_ENABLE(l4stat,
+      AC_HELP_STRING(
+         [--enable-l4stat],
+         [Enable PMAPI library to gather CPU performance counters]
+      ),
+      [enable_l4stat="${enableval}"],
+      [enable_l4stat="not_set"]
+   )
+
+  if test "${enable_l4stat}" = "yes" ; then
+    L4STAT_ENABLED="yes"
+    AC_DEFINE([PAPI_COUNTERS], [1], [PAPI is used as API to gain access to CPU hwc])
+    AC_DEFINE([L4STAT], [1], [L4STAT is used as API to gain access to CPU hwc])
+  fi
+
+  AM_CONDITIONAL(L4STAT, test "${L4STAT_ENABLED}" = "yes") 
+])
 
 # AX_PROG_PMAPI
 # -------------

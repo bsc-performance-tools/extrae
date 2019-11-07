@@ -96,7 +96,7 @@ AC_DEFUN([AX_HAVE_SYNC_FETCH_AND_ADD],
 		[ have_sync_fetch_and_add="yes" ]
 	)
 
-	if test "${have_sync_fetch_and_add}" = "yes" ; then
+	if test "${have_sync_fetch_and_add}" = "yes" -a "${IS_GR740_MACHINE}" = "no" ; then
 		AC_DEFINE([HAVE__SYNC_FETCH_AND_ADD], 1, [Define if __sync_fetch_and_add is available])
 		AC_MSG_RESULT([yes])
 	else

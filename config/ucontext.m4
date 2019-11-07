@@ -33,7 +33,12 @@ AC_DEFUN([AX_CHECK_UCONTEXT],
 
 	AC_MSG_RESULT([${STRUCT_UCONTEXT_TYPE}])
 	if test "${STRUCT_UCONTEXT_TYPE}" = "unknown"; then
+	   if test "${IS_GR740_MACHINE}" = "yes"; then
+		AC_MSG_WARN([Ucontext not available for GR740, sampling is driven by hardware timers])
+	   else
 		AC_MSG_ERROR([Unknown definition of struct ucontext. Please check the definition in sys/ucontext.h or libc's ucontext.h and extend the configure macro])
+	   fi
+
 	else
 		AC_DEFINE_UNQUOTED([STRUCT_UCONTEXT], ${STRUCT_UCONTEXT_TYPE}, [Definition of struct ucontext])
 	fi

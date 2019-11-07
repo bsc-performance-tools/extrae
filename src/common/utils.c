@@ -224,6 +224,22 @@ int __Extrae_Utils_append_from_to_file (const char *source, const char *destinat
 
 int __Extrae_Utils_rename_or_copy (char *origen, char *desti)
 {
+
+#if defined(OS_RTEMS)
+	if (strcmp(origen,desti) != 0)
+	{
+		if (remove(desti) != 0)
+		{
+			if (errno != ENOENT)
+			{
+				fprintf (stderr, PACKAGE_NAME": Error while trying to remove %s \n", desti);
+				fflush(stderr);
+				return -1;
+			}
+		}
+	}
+	else return 0;
+#endif
 	if (rename (origen, desti) == -1)
 	{
 		if (errno == EXDEV)

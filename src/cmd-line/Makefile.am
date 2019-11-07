@@ -13,7 +13,7 @@ extrae_cmd_CFLAGS = -I$(INCLUDE_DIR) -I$(COMMON_INC) -I$(TRACER_INC) \
 
 extrae_cmd_LDADD = $(TRACER_LIB)/libseqtrace.la $(MERGER_LIB)/libmpi2prv.la -lm
 if HAVE_BINUTILS
-extrae_cmd_LDADD += $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS)
+extrae_cmd_LDADD += $(BFD_LDFLAGS) $(BFD_LIBS) $(LIBERTY_LDFLAGS) $(LIBERTY_LIBS) $(LIBZ_LIBS)
 endif
 if HAVE_SIONLIB
 extrae_cmd_LDADD += @SIONLIB_LIBS@

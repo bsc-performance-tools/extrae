@@ -124,7 +124,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 		/* If using PAPI, they can be stored in absolute or relative manner,
 		   depending whether sampling was activated or not */
 #if defined(PAPI_COUNTERS)
-# if defined(SAMPLING_SUPPORT)
+# if defined(SAMPLING_SUPPORT) && !defined(OS_RTEMS)
 		if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
 		    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
 # else
@@ -135,7 +135,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 			   the previous read value from the current PAPI_read because it's always
 			   adding */
 
-# if defined(SAMPLING_SUPPORT)
+# if defined(SAMPLING_SUPPORT) && !defined(OS_RTEMS)
 			/* Protect when counters are incorrect (major timestamp, lower counter value) */
 			if (Event->HWCValues[cnt] >= Sthread->counters[cnt])
 			{

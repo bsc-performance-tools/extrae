@@ -374,7 +374,7 @@ static int ValidAddress (void * Addr) {
 
 #endif /* OS_AIX */
 
-#if defined (OS_SOLARIS)
+#if defined (OS_SOLARIS) || defined(OS_RTEMS)
 void Extrae_trace_callers (iotimer_t time, int offset, int type)
 {
 	/* TODO */

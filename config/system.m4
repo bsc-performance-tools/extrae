@@ -53,7 +53,21 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 		target_cpu="sparc64"
 		target_os="linux"
 	fi
-	
+
+	AC_ARG_ENABLE(gr740,
+	   AC_HELP_STRING(
+	      [--enable-gr740],
+	      [Enable compilation for the GR740 board]
+	   ),
+	   [enable_gr740="${enableval}"],
+	   [enable_gr740="no"]
+	)
+	IS_GR740_MACHINE=${enable_gr740}
+	if test "${IS_GR740_MACHINE}" = "yes" ; then
+		target_cpu="sparc"
+		target_os="rtems"
+	fi
+	AM_CONDITIONAL(IS_GR740_MACHINE, test "${IS_GR740_MACHINE}" = "yes")
 	# Check if this is an Altix machine and if it has an /dev/mmtimer device
 	# (which is a global clock!)
 	AC_ARG_ENABLE(check-altix,
@@ -104,6 +118,8 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	             AC_DEFINE([ARCH_MIPS], [1], [Define if architecture is MIPS]) ;;
 	  sparc64  ) Architecture="sparc64"
 	             AC_DEFINE([ARCH_SPARC64], [1], [Define if architecture is SPARC64]) ;;
+	  sparc    ) Architecture="sparc"
+	             AC_DEFINE([ARCH_SPARC], [1], [Define if architecture is SPARC]) ;;
 	esac
 	
 	case "${target_os}" in
@@ -123,6 +139,8 @@ AC_DEFUN([AX_SYSTEM_TYPE],
 	             AC_DEFINE([OS_SOLARIS], [1], [Define if operating system is Solaris]) ;;
 	  darwin*  ) OperatingSystem="darwin"
 	             AC_DEFINE([OS_DARWIN], [1], [Define if operating system is Darwin]) ;;
+	  rtems*   ) OperatingSystem="rtems"
+	             AC_DEFINE([OS_RTEMS], [1], [Define if operating system is RTEMS]) ;;
 	esac
 	
 	# Publish these defines for conditional compilation 

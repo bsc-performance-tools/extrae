@@ -50,6 +50,20 @@
 	MARK_SET_READ(tid, evt, read_ok);                                       \
 } 
 
+/* Store counters values in the event and mark them as read */
+#if defined(OS_RTEMS)
+# define HARDWARE_COUNTERS_READ_SAMPLING(tid, evt, filter)                      \
+{                                                                      \
+	int read_ok = FALSE;                                               \
+	if (filter && HWC_IsEnabled())                                     \
+	{                                                                  \
+		read_ok = HWC_Read_Sampling (tid, evt.time, evt.HWCValues);             \
+	}                                                                  \
+	/* We write the counters even if there are errors while reading */ \
+	MARK_SET_READ(tid, evt, read_ok);                                       \
+}
+#endif
+
 # define HARDWARE_COUNTERS_ACCUMULATE(tid, evt, filter)                \
 {                                                                      \
     if (filter && HWC_IsEnabled())                                     \

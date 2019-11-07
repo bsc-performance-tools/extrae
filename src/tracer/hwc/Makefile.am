@@ -16,7 +16,12 @@ if HAVE_PMAPI
 HWC += common_hwc.c common_hwc.h \
  pmapi_hwc.c pmapi_hwc.h
 else
+if L4STAT
+HWC += common_hwc.c common_hwc.h \
+ l4stat_hwc.c l4stat_hwc.h
+else
 HWC += fake_hwc.c
+endif
 endif
 endif
 

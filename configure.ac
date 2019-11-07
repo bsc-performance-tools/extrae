@@ -107,7 +107,7 @@ AC_PROG_FC(${wanted_F_Compilers})
 
 AM_CONDITIONAL(HAVE_FC, test "$FC" != "")
 
-if test "${IS_SPARC64_MACHINE}" != "yes" ; then
+if test "${IS_SPARC64_MACHINE}" != "yes" -a test "${IS_GR740_MACHINE}" != "yes" ; then
 	AC_FC_WRAPPERS
 fi
 AX_JAVA
@@ -528,6 +528,17 @@ elif test "${IS_SPARC64_MACHINE}" = "yes" ; then
 	voidp_size=8
 	short_size=2
 	char_size=1
+elif test "${IS_GR740_MACHINE}" = "yes" ; then
+  cross_compiling="yes"
+  long_long_size=8
+  long_size=8
+  int_size=4
+  pid_t_size=4
+  ssize_t_size=8
+  size_t_size=8
+  voidp_size=8
+  short_size=2
+  char_size=1
 else
 	cross_compiling="no" # Force AC_CHECK_SIZEOF calculate these values
 	long_long_size=0
@@ -556,10 +567,12 @@ AC_CHECK_SIZEOF(ssize_t,${size_t_size})
 AC_CHECK_SIZEOF(size_t,${size_t_size})
 AC_CHECK_SIZEOF(void*,${voidp_size})
 
+if test "${IS_GR740_MACHINE}" != "yes" ; then
 AC_CHECK_MEMBER(struct mallinfo.arena,
    [AC_DEFINE([HAVE_MALLINFO], [1], [Whether the system supports mallinfo structure])],
    [],
    [#include <malloc.h>])
+fi
 
 AC_CHECK_MEMBER(union perf_mem_data_src.val,
 	[AC_DEFINE([HAVE_PERF_MEM_DATA_SRC], [1], [Whether the system includes perf_mem_data_src/val])],

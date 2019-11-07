@@ -54,6 +54,8 @@
 #include "threadid.h"
 #include "wrapper.h"
 
+#if !defined(OS_RTEMS)
+
 #if defined(SAMPLING_SUPPORT)
 int SamplingSupport = FALSE;
 static int SamplingRunning = FALSE;
@@ -335,3 +337,49 @@ void unsetTimeSampling (void)
 		SamplingRunning = FALSE;
 	}
 }
+#else
+#include <bsp.h> /* for device driver prototypes */
+#include <bsp/l4stat.h>
+
+rtems_id sampling_timer;
+int sampling_period;
+
+void sample()
+{
+		Backend_setInSampling(THREADID, TRUE);
+		for (unsigned int thread_id = 0; thread_id < Extrae_get_num_threads(); thread_id++)
+	{
+			event_t evt;
+			evt.time = TIME;
+			evt.event = SAMPLING_EV;
+			evt.value = 1;
+#if defined (PAPI_COUNTERS)
+			HARDWARE_COUNTERS_READ_SAMPLING(thread_id, evt, TRUE);
+#endif
+			BUFFER_INSERT(thread_id, SAMPLING_BUFFER(thread_id), evt);		
+	}
+		Backend_setInSampling(THREADID, FALSE);
+}
+
+rtems_timer_service_routine hwc_sampling(
+	rtems_id timer,
+	void *arg)
+{
+	sample();
+	rtems_timer_fire_after(timer, sampling_period, hwc_sampling, NULL);
+}
+
+void setTimeSampling (int sampling_p)
+{
+	sampling_period=sampling_p;
+	rtems_timer_create(1, &sampling_timer);
+	rtems_timer_fire_after(sampling_timer, sampling_period, hwc_sampling, NULL);
+}
+
+void unsetTimeSampling (void)
+{
+    rtems_timer_cancel(sampling_timer);
+}
+void setTimeSampling_postfork (void){};
+#endif
+

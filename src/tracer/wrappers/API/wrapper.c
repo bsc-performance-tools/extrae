@@ -403,7 +403,11 @@ event_t *circular_HEAD;
 static void Extrae_getExecutableInfo (void);
 
 #if defined(EMBED_MERGE_IN_TRACE)
-int MergeAfterTracing = FALSE;
+	#if defined(OS_RTEMS)
+		int MergeAfterTracing = TRUE;
+	#else
+		int MergeAfterTracing = FALSE;
+	#endif
 #endif
 
 static int AppendingEventsToGivenPID = FALSE;
@@ -623,6 +627,9 @@ static int read_environment_variables (int me)
 	{
 		HWC_Initialize (0);
 		HWC_Parse_Env_Config (me);
+#if defined(OS_RTEMS)
+		HWCBE_INITIALIZE(0);
+#endif
 	}
 #endif
 
@@ -969,6 +976,7 @@ static int read_environment_variables (int me)
 
 	/* Add sampling capabilities */
 #if defined(SAMPLING_SUPPORT)
+#if !defined(OS_RTEMS)
 	str = getenv ("EXTRAE_SAMPLING_PERIOD");
 	if (str != NULL)
 	{
@@ -1013,6 +1021,11 @@ static int read_environment_variables (int me)
 	}
 	if (getenv ("EXTRAE_SAMPLING_CALLER") != NULL)
 		Parse_Callers (me, getenv("EXTRAE_SAMPLING_CALLER"), CALLER_SAMPLING);
+#else
+	str = getenv ("EXTRAE_SAMPLING_PERIOD");
+	if(str!=NULL)
+		setTimeSampling(atoi(str));
+#endif
 #endif
 
 	return 1;
@@ -2823,7 +2836,10 @@ static void Extrae_getExecutableInfo (void)
         static Extrae_getExecutableInfo_first_time_call = 0;
         if (!Extrae_getExecutableInfo_first_time_call)
         {
+#if !defined(OS_RTEMS)
             fprintf (stderr, PACKAGE_NAME": Warning! File /proc/self/maps doesn't exist. Address translation may be limited.\n");
+#endif
+
         }
     }
 #endif

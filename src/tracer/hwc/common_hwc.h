@@ -35,7 +35,7 @@
 
 struct HWC_Set_t
 {
-#if defined(PAPI_COUNTERS)
+#if defined(PAPI_COUNTERS) && !defined(L4STAT)
     int domain;
     int *eventsets;
 #elif defined(PMAPI_COUNTERS)
@@ -106,7 +106,7 @@ extern int * HWC_current_set;
 
 /*------------------------------------------------ Backends access layer ----*/
 
-#if defined(PAPI_COUNTERS) /* -------------------- PAPI Backend -------------*/
+#if defined(PAPI_COUNTERS) && !defined(L4STAT) /* -------------------- PAPI Backend -------------*/
 
 # include "papi_hwc.h"
 
@@ -179,6 +179,51 @@ extern int * HWC_current_set;
 
 #define HWCBE_GET_COUNTER_DEFINITIONS(count) \
     HWCBE_PMAPI_GetCounterDefinitions(count)
+
+
+#elif defined(L4STAT)
+
+# include "l4stat_hwc.h"
+
+# define HWCBE_INITIALIZE(options) \
+    HWCBE_L4STAT_Initialize (options)
+
+# define HWCBE_START_COUNTERS_THREAD(time, tid, forked) \
+    HWCBE_L4STAT_Init_Thread(time, tid, forked)
+
+# define HWCBE_START_SET(glops, time, current_set, thread_id) \
+    HWCBE_L4STAT_Start_Set(glops, time, current_set, thread_id)
+
+# define HWCBE_STOP_SET(time, current_set, thread_id)  \
+    HWCBE_L4STAT_Stop_Set(time, current_set, thread_id)
+
+# define HWCBE_ADD_SET(pretended_set, rank, ncounters, counters, domain,   \
+                       change_at_globalops, change_at_time, num_overflows, \
+                       overflow_counters, overflow_values)                 \
+    HWCBE_L4STAT_Add_Set(pretended_set, rank, ncounters, counters, domain,   \
+	                   change_at_globalops, change_at_time, num_overflows,   \
+	                   overflow_counters, overflow_values)
+
+# define HWCBE_READ(thread_id, store_buffer)  \
+    HWCBE_L4STAT_Read(thread_id, store_buffer)
+
+# define HWCBE_READ_Sampling(thread_id, store_buffer)  \
+    HWCBE_L4STAT_Read_Sampling(thread_id, store_buffer)
+
+# define HWCBE_RESET(thread_id) \
+    HWCBE_L4STAT_Reset(thread_id)
+
+#define HWCBE_UPDATE_SAMPLING(thread_id) \
+	HWCBE_L4STAT_Update_Sampling_Cores(thread_id)
+
+# define HWCBE_ACCUM(thread_id, store_buffer) \
+    HWCBE_L4STAT_Accum(thread_id, store_buffer)
+
+# define HWCBE_CLEANUP_COUNTERS_THREAD(nthreads) \
+		HWCBE_L4STAT_CleanUp(nthreads)
+
+#define HWCBE_GET_COUNTER_DEFINITIONS(count) \
+    HWCBE_L4STAT_GetCounterDefinitions(count)
 
 #endif
 

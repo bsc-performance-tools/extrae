@@ -1197,6 +1197,19 @@ int Labels_GeneratePCFfile (char *name, long long options)
 	return 0;
 }
 
+#if defined(OS_RTEMS)
+void Labels_loadRTEMSSymbols(char *executable_path, struct input_t * IFiles)
+{
+
+	char path_binary2[256];
+	strcpy(path_binary2,executable_path);
+	path_binary2[strlen(path_binary2)-strlen(".prv")] = (char) 0;
+	ObjectTable_AddBinaryObject (FALSE, IFiles[0].ptask, IFiles[0].task,
+							  0, 0xFFFFFFFF, 0, path_binary2);
+
+}
+#endif
+
 void Labels_loadLocalSymbols (int taskid, unsigned long nfiles,
 	struct input_t * IFiles)
 {

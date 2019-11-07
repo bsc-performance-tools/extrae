@@ -252,6 +252,48 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	fset = Create_FS (nfiles, files, taskid, PRV_SEMANTICS);
 	error = (fset == NULL);
 
+
+
+#if defined(OS_RTEMS)
+
+	char *str,*path;
+	char PROGRAM_NAME[256];
+	char PATH_NAME[256];
+	char prvfile[256];
+	int binary_exists=0;
+	str = getenv ("EXTRAE_PROGRAM_NAME");
+	path = getenv ("EXTRAE_FINAL_DIR");
+
+	if(!path)
+		strncpy (PATH_NAME, "/mnt/traces/", strlen("TRACE")+1);
+	else
+		strncpy (PATH_NAME, path, sizeof(PATH_NAME));
+	if (!str)
+		strncpy (PROGRAM_NAME, "TRACE", strlen("TRACE")+1);
+	else
+		strncpy (PROGRAM_NAME, str, sizeof(PROGRAM_NAME));
+
+	strcpy(prvfile,PATH_NAME);
+	strcat(prvfile,"/");
+	strcat(prvfile,PROGRAM_NAME);
+
+#if defined(HAVE_BFD)
+	if (__Extrae_Utils_file_exists(prvfile)){
+		binary_exists=1;
+	}
+	else set_option_dump_Addresses(FALSE);
+#else
+	binary_exists=1;
+#endif
+	strcat(prvfile,".prv\0");
+	set_merge_OutputTraceName (prvfile);
+	set_merge_GivenTraceName (TRUE);
+
+	if (taskid == 0)
+		Labels_loadRTEMSSymbols(prvfile,files);
+
+#else
+
 	if (taskid == 0)
 		Labels_loadLocalSymbols (taskid, nfiles, files);
 
@@ -274,6 +316,8 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 			free (FirstBinaryName);
 		}
 	}
+
+#endif
 
 	if (__Extrae_Utils_file_exists(get_merge_OutputTraceName()) &&
 	    !get_option_merge_TraceOverwrite())
@@ -707,6 +751,10 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	{
 		if (error == 0)
 		{
+#if defined(OS_RTEMS)
+			if(!binary_exists)
+					fprintf (stdout, "mpi2prv: WARNING binary file can not be found at the NFS mounted folder, calltrace info (function names) will be empty \n");
+#endif
 			fprintf (stdout, "mpi2prv: Congratulations! %s has been generated.\n",
 			    get_merge_OutputTraceName());
 		} else

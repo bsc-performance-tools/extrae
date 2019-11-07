@@ -29,8 +29,9 @@
 #include "num_hwc.h"
 #include "hwc_version.h"
 #include "record.h"
-#include "papiStdEventDefs.h"
-
+#if !defined(L4STAT)
+	#include "papiStdEventDefs.h"
+#endif
 #if !USE_HARDWARE_COUNTERS
   /* Little things to have configured if PAPI cannot be used */
 # define PAPI_NATIVE_MASK 0x40000000 
@@ -48,6 +49,8 @@
 # elif defined(PAPIv3)
 #  define HWC_COUNTER_TYPE(x) \
 		(x&PAPI_NATIVE_MASK)?(HWC_BASE_NATIVE + (x & 0x0000FFFF)):(HWC_BASE + (x & 0x0000FFFF))
+# elif defined(L4STAT)
+#  define HWC_COUNTER_TYPE(x) ((x & 0xFFFFFFFF))
 # endif
 #elif defined(PMAPI_COUNTERS)
 # define HWC_COUNTER_TYPE(cnt,x) (HWC_BASE + cnt*1000 + x)

@@ -54,7 +54,7 @@
 /*------------------------------------------------ Global Variables ---------*/
 int HWCEnabled = FALSE;           /* Have the HWC been started? */
 
-#if !defined(SAMPLING_SUPPORT)
+#if !defined(SAMPLING_SUPPORT) || defined(OS_RTEMS)
 int Reset_After_Read = TRUE;
 #else
 int Reset_After_Read = FALSE;
@@ -75,8 +75,8 @@ int              AllHWCs    = 0;    /* Count of all the different counters from 
 
 /*------------------------------------------------ Static Variables ---------*/
 
-#if defined(PAPI_COUNTERS) && !defined(PAPIv3)
-# error "-DNEW_HWC_SYSTEM requires PAPI v3 support"
+#if defined(PAPI_COUNTERS) && !defined(PAPIv3) && !defined(L4STAT)
+# error "-DNEW_HWC_SYSTEM requires PAPI v3 support or L4STAT"
 #endif
 
 struct HWC_Set_t *HWC_sets = NULL;
@@ -335,7 +335,10 @@ void HWC_Initialize (int options)
 	HWC_current_glopsbegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
 	ASSERT(HWC_current_glopsbegin != NULL, "Cannot allocate memory for HWC_current_glopsbegin");
 
+//L4STAT must parse enviorment variables before initializing the HWCs
+#if !defined(L4STAT) 
 	HWCBE_INITIALIZE(options);
+ #endif
 }
 
 /**
@@ -425,7 +428,7 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 {
 	int i;
 
-#if defined(PAPI_COUNTERS)
+#if defined(PAPI_COUNTERS) && !defined(L4STAT)
 	for (i = 0; i < HWC_num_sets; i++)
 		HWCBE_PAPI_Allocate_eventsets_per_thread (i, old_num_threads, new_num_threads);
 #endif
@@ -582,6 +585,13 @@ void HWC_Parse_Env_Config (int task_id)
  * \param store_buffer Buffer where the counters will be stored.
  * \return 1 if counters were read successfully, 0 otherwise.
  */
+#if defined(OS_RTEMS)
+void HWC_update_sampling(unsigned int tid){
+
+	HWCBE_UPDATE_SAMPLING(tid);
+
+}
+#endif
 int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer)
 {
 	int read_ok = FALSE, reset_ok = FALSE; 
@@ -597,6 +607,18 @@ int HWC_Read (unsigned int tid, UINT64 time, long long *store_buffer)
 	}
 	return (HWCEnabled && read_ok && reset_ok);
 }
+#if defined(OS_RTEMS)
+int HWC_Read_Sampling (unsigned int tid, UINT64 time, uint32_t *store_buffer)
+{
+	int read_ok = FALSE;
+	if (HWCEnabled)
+	{
+		TOUCH_LASTFIELD( store_buffer );
+		read_ok = HWCBE_READ_Sampling (tid, store_buffer);
+	}
+	return (HWCEnabled && read_ok);
+}
+#endif
 
 /**
  * Resets the counters of the given thread.

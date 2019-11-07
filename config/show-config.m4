@@ -39,14 +39,17 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 	AX_JAVA_SHOW_CONFIGURATION
 
 	echo
-	if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" ; then
+	if test "${PMAPI_ENABLED}" = "yes" -o "${PAPI_ENABLED}" = "yes" -o "${L4STAT_ENABLED}" = "yes"; then
 		echo Performance counters: yes
 		if test "${PMAPI_ENABLED}" = "yes" ; then
 			echo -e \\\tPerformance API:  PMAPI
-		else
+		else if test "${PAPI_ENABLED}" = "yes"; then
 			echo -e \\\tPerformance API:  PAPI
 			echo -e \\\tPAPI home:        ${PAPI_HOME}
 			echo -e \\\tSampling support: ${PAPI_SAMPLING_ENABLED}
+		else
+			echo -e \\\tPerformance API:  L4STAT
+		fi
 		fi
 	else
 		echo Performance counters: no

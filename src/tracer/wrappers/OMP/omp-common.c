@@ -145,7 +145,13 @@ void Extrae_OpenMP_init(int me)
 #else  /* PIC */
 	if (me == 0)
 	{
+#if  defined(OS_RTEMS)
+		fprintf (stderr, PACKAGE_NAME": Alpha version static library linked wrapping\n");
+		_extrae_gnu_libgomp_init(0);
+		omp_common_get_hook_points_c(0);
+#else
 		fprintf (stderr, PACKAGE_NAME": Warning! OpenMP instrumentation requires linking with shared library!\n");
+#endif
 	}
 
 #endif /* PIC */

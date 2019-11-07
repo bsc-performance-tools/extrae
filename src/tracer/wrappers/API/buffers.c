@@ -489,7 +489,7 @@ int Buffer_Flush(Buffer_t *buffer)
 	DataBlocks_t *db = new_DataBlocks (buffer);
 	event_t *head = NULL, *tail = NULL;
 	int num_flushed, overflow;
-#if defined(ARCH_SPARC64)
+#if defined(ARCH_SPARC64) || defined(OS_RTEMS)
 	ssize_t r;
 #endif
 
@@ -503,7 +503,7 @@ int Buffer_Flush(Buffer_t *buffer)
 	num_flushed = Buffer_GetFillCount(buffer);
 	CIRCULAR_STEP (tail, num_flushed, buffer->FirstEvt, buffer->LastEvt, &overflow);
 
-#if !defined(ARCH_SPARC64)
+#if !defined(ARCH_SPARC64) && !defined(OS_RTEMS)
 
 # if defined(HAVE_ONLINE)
 	/* Select events depending on the mask */
@@ -525,11 +525,30 @@ int Buffer_Flush(Buffer_t *buffer)
 	DataBlocks_Free(db);
 
 #else /* ARCH_SPARC64 */
-
-	r = write (buffer->fd, head, buffer->FillCount*sizeof(event_t));
-	if (r != buffer->FillCount*sizeof(event_t))
+	#if !defined(OS_RTEMS) /* ARCH_SPARC64 */
+		r = write (buffer->fd, head, buffer->FillCount*sizeof(event_t));
+		if (r != buffer->FillCount*sizeof(event_t))
 		fprintf (stderr, "ERROR! Wrote %ld bytes instead of %ld bytes\n", r, buffer->FillCount*sizeof(event_t));
+   #else /* OS_RTEMS */
+		/* NFS V2 has a maximun of 8192 bytes of burst write
+		 * To avoid errors we write on the file per parts
+		 * 	sizeof(event_t)=112
+		 * 	60*112=6720 bytes write per iteration
+		 * */
+		int lines2Write=buffer->FillCount;
+		int iterationWrite=(lines2Write<60)? lines2Write : 60;
+		while (lines2Write>0){
 
+			r = write (buffer->fd, head, iterationWrite*sizeof(event_t));
+			if (r != iterationWrite*sizeof(event_t))
+				fprintf (stderr, "ERROR! Wrote %ld bytes instead of %ld bytes\n", r, buffer->FillCount*sizeof(event_t));
+
+			lines2Write-=iterationWrite;
+			head+=iterationWrite;
+			
+			iterationWrite=(lines2Write<iterationWrite)? lines2Write : iterationWrite;
+		}
+	#endif
 #endif
 
 	//Do not call DiscardAll. This allows one thread to flush another thread's buffer that is not locked.
