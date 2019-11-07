@@ -4,6 +4,7 @@ ChangeLog
  * 29Apr2020 Fixes local to world rank translations for comms going thru an intercommunicator created with MPI_Intercomm_create
  + 29Apr2020 Adds environment variable EXTRAE_ENFORCE_FS_SYNC to ensure file system synchronization after creating trace files and folders
  + 18Nov2019 Adds instrumentation wrappers for MPI_Comm_split_type
+ + 07Nov2019 Adds environment variable EXTRAE_UNSET_PRELOAD to clear the LD_PRELOAD once the tracing is loaded
  * 25Oct2019 Fixes double emission of python events call and c_call
  * 10Sep2019 Fixes configure check for MPI_Comm_spawn
  + 17Jul2019 Adds Python bindings for Extrae_shutdown and _restart

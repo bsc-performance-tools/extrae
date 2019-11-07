@@ -53,6 +53,16 @@ void Extrae_auto_library_init (void)
 		    strncmp (skip_envvar, "1", strlen ("1")) == 0)
 			skip_auto_library_init = TRUE;
 
+
+	char *unset_preload_envvar = getenv ("EXTRAE_UNSET_PRELOAD");
+	if (unset_preload_envvar != NULL)
+	{
+                if (strncasecmp (unset_preload_envvar, "yes", strlen("yes")) == 0 ||
+                    strncasecmp (unset_preload_envvar, "true", strlen("true")) == 0 ||
+                    strncmp (unset_preload_envvar, "1", strlen ("1")) == 0)
+			unsetenv("LD_PRELOAD");
+	}
+
 	if (!Extrae_automatically_loaded && !skip_auto_library_init)
 	{
 		/* Do not automatically load if DynInst is orchestrating the tracing */
