@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 22Jun2020 Fixes checks for `javah` to compile Extrae with JDK < 9
  * 19Jun2020 Updates common.h to meet C++11 syntax
  * 12Jun2020 Solves duplicate capture of C and Fortran MPI calls when using Intel implementations
  * 08Jun2020 Fixes finalization issues when Extrae is initialized by API and another runtime
