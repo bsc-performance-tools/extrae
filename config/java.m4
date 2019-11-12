@@ -49,9 +49,6 @@ AC_DEFUN([AX_JAVA],
 			if test -x "${java_path}/bin/javah" ; then
 				AC_MSG_RESULT(${java_path}/bin/javah)
 				JAVAH="${java_path}/bin/javah"
-				JAVAH_found="yes"
-			else
-				AC_MSG_ERROR([Java header and stub file generator was not found])
 			fi
 
 			AC_MSG_CHECKING([for Java archive tool])
