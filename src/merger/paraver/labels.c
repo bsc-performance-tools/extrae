@@ -422,7 +422,7 @@ static int Exist_Counter (fcounter_t *fcounter, long long EvCnt)
 
 static void HWC_PARAVER_Labels (FILE * pcfFD)
 {
-#if defined(PAPI_COUNTERS)
+#if defined (PAPI_COUNTERS) || defined(L4STAT)
 	struct fcounter_t *fcounter=NULL;
 #elif defined(PMAPI_COUNTERS)
 	pm_info2_t ProcessorMetric_Info; /* On AIX pre 5.3 it was pm_info_t */
@@ -450,7 +450,7 @@ static void HWC_PARAVER_Labels (FILE * pcfFD)
 		{
 			if (ptmp->Traced[cnt])
 			{
-#if defined(PAPI_COUNTERS)
+#if defined(PAPI_COUNTERS) || defined(L4STAT)
 				if (!Exist_Counter(fcounter,ptmp->Events[cnt]))
 				{
 					unsigned position;

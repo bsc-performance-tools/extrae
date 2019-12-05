@@ -171,8 +171,6 @@ int HWCBE_L4STAT_Add_Set(int pretended_set, int rank, int ncounters, char **coun
 
 	HWC_sets[num_set].change_type = CHANGE_NEVER;
 
-	//HWCBE_PAPI_Allocate_eventsets_per_thread (num_set, 0, Backend_getNumberOfThreads());
-
 	/* We validate this set */
 	HWC_num_sets++;
 

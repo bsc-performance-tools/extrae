@@ -489,7 +489,7 @@ int Buffer_Flush(Buffer_t *buffer)
 	DataBlocks_t *db = new_DataBlocks (buffer);
 	event_t *head = NULL, *tail = NULL;
 	int num_flushed, overflow;
-#if defined(ARCH_SPARC64) || defined(OS_RTEMS)
+#if defined(ARCH_SPARC64) || defined(ARCH_SPARC)
 	ssize_t r;
 #endif
 
@@ -503,7 +503,7 @@ int Buffer_Flush(Buffer_t *buffer)
 	num_flushed = Buffer_GetFillCount(buffer);
 	CIRCULAR_STEP (tail, num_flushed, buffer->FirstEvt, buffer->LastEvt, &overflow);
 
-#if !defined(ARCH_SPARC64) && !defined(OS_RTEMS)
+#if !defined(ARCH_SPARC64) && !defined(ARCH_SPARC)
 
 # if defined(HAVE_ONLINE)
 	/* Select events depending on the mask */

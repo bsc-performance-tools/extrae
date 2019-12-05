@@ -260,7 +260,6 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	char PROGRAM_NAME[256];
 	char PATH_NAME[256];
 	char prvfile[256];
-	int binary_exists=0;
 	str = getenv ("EXTRAE_PROGRAM_NAME");
 	path = getenv ("EXTRAE_FINAL_DIR");
 
@@ -278,13 +277,12 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	strcat(prvfile,PROGRAM_NAME);
 
 #if defined(HAVE_BFD)
-	if (__Extrae_Utils_file_exists(prvfile)){
-		binary_exists=1;
+	if (!__Extrae_Utils_file_exists(prvfile)){
+		fprintf (stdout, "mpi2prv: WARNING binary file can not be found at the NFS mounted folder, calltrace info (function names) will be empty \n");
+		set_option_dump_Addresses(FALSE);
 	}
-	else set_option_dump_Addresses(FALSE);
-#else
-	binary_exists=1;
 #endif
+
 	strcat(prvfile,".prv\0");
 	set_merge_OutputTraceName (prvfile);
 	set_merge_GivenTraceName (TRUE);
@@ -751,10 +749,6 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 	{
 		if (error == 0)
 		{
-#if defined(OS_RTEMS)
-			if(!binary_exists)
-					fprintf (stdout, "mpi2prv: WARNING binary file can not be found at the NFS mounted folder, calltrace info (function names) will be empty \n");
-#endif
 			fprintf (stdout, "mpi2prv: Congratulations! %s has been generated.\n",
 			    get_merge_OutputTraceName());
 		} else

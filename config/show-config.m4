@@ -43,13 +43,12 @@ AC_DEFUN([AX_SHOW_CONFIGURATION],
 		echo Performance counters: yes
 		if test "${PMAPI_ENABLED}" = "yes" ; then
 			echo -e \\\tPerformance API:  PMAPI
-		else if test "${PAPI_ENABLED}" = "yes"; then
+		elif test "${PAPI_ENABLED}" = "yes"; then
 			echo -e \\\tPerformance API:  PAPI
 			echo -e \\\tPAPI home:        ${PAPI_HOME}
 			echo -e \\\tSampling support: ${PAPI_SAMPLING_ENABLED}
 		else
 			echo -e \\\tPerformance API:  L4STAT
-		fi
 		fi
 	else
 		echo Performance counters: no

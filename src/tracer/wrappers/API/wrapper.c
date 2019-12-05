@@ -403,11 +403,7 @@ event_t *circular_HEAD;
 static void Extrae_getExecutableInfo (void);
 
 #if defined(EMBED_MERGE_IN_TRACE)
-	#if defined(OS_RTEMS)
-		int MergeAfterTracing = TRUE;
-	#else
-		int MergeAfterTracing = FALSE;
-	#endif
+int MergeAfterTracing = FALSE;
 #endif
 
 static int AppendingEventsToGivenPID = FALSE;
@@ -627,9 +623,6 @@ static int read_environment_variables (int me)
 	{
 		HWC_Initialize (0);
 		HWC_Parse_Env_Config (me);
-#if defined(OS_RTEMS)
-		HWCBE_INITIALIZE(0);
-#endif
 	}
 #endif
 
@@ -974,10 +967,18 @@ static int read_environment_variables (int me)
 		}
 	}
 
+	str = getenv ("EXTRAE_MERGE_AFTER_TRACING");
+	if (str != NULL && (strcmp (str, "1") == 0))
+	{
+		if (me == 0)
+			fprintf (stdout, PACKAGE_NAME": Merge after tracing active.\n");
+		MergeAfterTracing = TRUE;
+	}
+		
 	/* Add sampling capabilities */
 #if defined(SAMPLING_SUPPORT)
-#if !defined(OS_RTEMS)
 	str = getenv ("EXTRAE_SAMPLING_PERIOD");
+	#if !defined(OS_RTEMS)
 	if (str != NULL)
 	{
 		unsigned long long sampling_period = __Extrae_Utils_getTimeFromStr (
@@ -1022,7 +1023,6 @@ static int read_environment_variables (int me)
 	if (getenv ("EXTRAE_SAMPLING_CALLER") != NULL)
 		Parse_Callers (me, getenv("EXTRAE_SAMPLING_CALLER"), CALLER_SAMPLING);
 #else
-	str = getenv ("EXTRAE_SAMPLING_PERIOD");
 	if(str!=NULL)
 		setTimeSampling(atoi(str));
 #endif
@@ -2608,7 +2608,7 @@ void Backend_Enter_Instrumentation ()
 	if (Trace_Mode_FirstMode(thread))
 		Trace_Mode_Change (thread, current_time);
 
-#if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS)
+#if defined(PAPI_COUNTERS) || defined(PMAPI_COUNTERS) || defined(L4STAT)
 	/* Must change counters? check only at detail tracing, at bursty
      tracing it is leveraged to the mpi macros at BURSTS_MODE_TRACE_MPIEVENT */
 	if (CURRENT_TRACE_MODE(thread) == TRACE_MODE_DETAIL)

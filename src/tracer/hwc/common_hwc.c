@@ -75,8 +75,8 @@ int              AllHWCs    = 0;    /* Count of all the different counters from 
 
 /*------------------------------------------------ Static Variables ---------*/
 
-#if defined(PAPI_COUNTERS) && !defined(PAPIv3) && !defined(L4STAT)
-# error "-DNEW_HWC_SYSTEM requires PAPI v3 support or L4STAT"
+#if defined(PAPI_COUNTERS) && !defined(PAPIv3)
+# error "-DNEW_HWC_SYSTEM requires PAPI v3 support"
 #endif
 
 struct HWC_Set_t *HWC_sets = NULL;
@@ -335,10 +335,10 @@ void HWC_Initialize (int options)
 	HWC_current_glopsbegin = (unsigned long long *)malloc(sizeof(unsigned long long) * num_threads);
 	ASSERT(HWC_current_glopsbegin != NULL, "Cannot allocate memory for HWC_current_glopsbegin");
 
-//L4STAT must parse enviorment variables before initializing the HWCs
+//L4STAT must parse enviorment variables before initializing the HWCs, also the HWC_current_* arrays must be allocated before
 #if !defined(L4STAT) 
 	HWCBE_INITIALIZE(options);
- #endif
+#endif
 }
 
 /**
@@ -428,7 +428,7 @@ void HWC_Restart_Counters (int old_num_threads, int new_num_threads)
 {
 	int i;
 
-#if defined(PAPI_COUNTERS) && !defined(L4STAT)
+#if defined(PAPI_COUNTERS)
 	for (i = 0; i < HWC_num_sets; i++)
 		HWCBE_PAPI_Allocate_eventsets_per_thread (i, old_num_threads, new_num_threads);
 #endif
@@ -576,6 +576,10 @@ void HWC_Parse_Env_Config (int task_id)
 
     numofcounters = __Extrae_Utils_explode (getenv("EXTRAE_COUNTERS"), ",", &setofcounters);
     HWC_Add_Set (1, task_id, numofcounters, setofcounters, getenv("EXTRAE_COUNTERS_DOMAIN"), 0, 0, 0, NULL, 0);
+
+#if defined(L4STAT) 
+	HWCBE_INITIALIZE(0);
+#endif
 }
 
 /** 

@@ -35,7 +35,7 @@
 
 struct HWC_Set_t
 {
-#if defined(PAPI_COUNTERS) && !defined(L4STAT)
+#if defined(PAPI_COUNTERS)
     int domain;
     int *eventsets;
 #elif defined(PMAPI_COUNTERS)
@@ -106,7 +106,7 @@ extern int * HWC_current_set;
 
 /*------------------------------------------------ Backends access layer ----*/
 
-#if defined(PAPI_COUNTERS) && !defined(L4STAT) /* -------------------- PAPI Backend -------------*/
+#if defined(PAPI_COUNTERS) /* -------------------- PAPI Backend -------------*/
 
 # include "papi_hwc.h"
 

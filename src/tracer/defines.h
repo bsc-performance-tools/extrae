@@ -51,13 +51,14 @@
 #else /* HAVE_MPI */
 
 /* If we don't have MPI, rely on FC_FUNC if web have detected at configure time! */
-#if !defined(OS_RTEMS)
 # if defined(FC_FUNC)
 #  define CtoF77(x) FC_FUNC(x,x)
 # else
-#  error "Error! Not defined FC_FUNC, how do we deal with Fortran symbols?"
+#   if !defined(OS_RTEMS)
+#       error "Error! Not defined FC_FUNC, how do we deal with Fortran symbols?"
+#   endif
 # endif
-#endif
+
 #endif /* HAVE_MPI */
 
 #endif

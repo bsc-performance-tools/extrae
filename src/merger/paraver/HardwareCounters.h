@@ -29,7 +29,7 @@
 #include "num_hwc.h"
 #include "hwc_version.h"
 #include "record.h"
-#if !defined(L4STAT)
+#if defined(PAPI_COUNTERS)
 	#include "papiStdEventDefs.h"
 #endif
 #if !USE_HARDWARE_COUNTERS
@@ -43,14 +43,15 @@
  * per tant, nomes cal tenir en compte el byte mes baix per
  * no tenir numeros inmensos. */
 
-#if defined(PAPI_COUNTERS)
+# if defined(L4STAT)
+#  define HWC_L4STAT_BASE 72000000
+#  define HWC_COUNTER_TYPE(x) HWC_L4STAT_BASE + ((x & 0x000000FF))
+#elif defined(PAPI_COUNTERS)
 # if defined(PAPIv2)
 #  define HWC_COUNTER_TYPE(x) (HWC_BASE + (x & 0x000000FF))
 # elif defined(PAPIv3)
 #  define HWC_COUNTER_TYPE(x) \
 		(x&PAPI_NATIVE_MASK)?(HWC_BASE_NATIVE + (x & 0x0000FFFF)):(HWC_BASE + (x & 0x0000FFFF))
-# elif defined(L4STAT)
-#  define HWC_COUNTER_TYPE(x) ((x & 0xFFFFFFFF))
 # endif
 #elif defined(PMAPI_COUNTERS)
 # define HWC_COUNTER_TYPE(cnt,x) (HWC_BASE + cnt*1000 + x)

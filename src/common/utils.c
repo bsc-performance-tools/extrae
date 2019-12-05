@@ -224,22 +224,6 @@ int __Extrae_Utils_append_from_to_file (const char *source, const char *destinat
 
 int __Extrae_Utils_rename_or_copy (char *origen, char *desti)
 {
-
-#if defined(OS_RTEMS)
-	if (strcmp(origen,desti) != 0)
-	{
-		if (remove(desti) != 0)
-		{
-			if (errno != ENOENT)
-			{
-				fprintf (stderr, PACKAGE_NAME": Error while trying to remove %s \n", desti);
-				fflush(stderr);
-				return -1;
-			}
-		}
-	}
-	else return 0;
-#endif
 	if (rename (origen, desti) == -1)
 	{
 		if (errno == EXDEV)
@@ -293,6 +277,13 @@ int __Extrae_Utils_rename_or_copy (char *origen, char *desti)
 			/* Remove the files */
 			unlink (origen);
 		}
+#if defined (OS_RTEMS)
+		else if (errno == EEXIST)
+		{
+			if (remove(desti) != -1)
+			__Extrae_Utils_rename_or_copy (origen, desti);
+		}
+#endif
 		else
 		{
 			perror("rename");

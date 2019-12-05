@@ -30,7 +30,7 @@
 # define PAPIv3
 #else
 # if USE_HARDWARE_COUNTERS
-#  if defined(PAPI_COUNTERS) && !defined(L4STAT)
+#  if defined(PAPI_COUNTERS)
 #    include <papi.h>
 #    define PAPIv3
 #  elif defined(PMAPI_COUNTERS)

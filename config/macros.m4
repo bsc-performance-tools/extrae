@@ -924,7 +924,7 @@ AC_DEFUN([AX_PROG_L4STAT],
     AC_ARG_ENABLE(l4stat,
       AC_HELP_STRING(
          [--enable-l4stat],
-         [Enable PMAPI library to gather CPU performance counters]
+         [Enable L4STAT driver to gather CPU performance counters]
       ),
       [enable_l4stat="${enableval}"],
       [enable_l4stat="not_set"]
@@ -932,11 +932,10 @@ AC_DEFUN([AX_PROG_L4STAT],
 
   if test "${enable_l4stat}" = "yes" ; then
     L4STAT_ENABLED="yes"
-    AC_DEFINE([PAPI_COUNTERS], [1], [PAPI is used as API to gain access to CPU hwc])
     AC_DEFINE([L4STAT], [1], [L4STAT is used as API to gain access to CPU hwc])
   fi
 
-  AM_CONDITIONAL(L4STAT, test "${L4STAT_ENABLED}" = "yes") 
+  AM_CONDITIONAL(L4STAT, test "${L4STAT_ENABLED}" = "yes")
 ])
 
 # AX_PROG_PMAPI

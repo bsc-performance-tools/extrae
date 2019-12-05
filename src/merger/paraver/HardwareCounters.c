@@ -84,7 +84,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	   However, we must track the value of counters if SAMPLING_SUPPORT */
 	if (Sthread->last_hw_group_change == time && Sthread->HWCChange_count == 1)
 	{
-#if defined(PAPI_COUNTERS) && defined (SAMPLING_SUPPORT)
+#if defined(PAPI_COUNTERS) || defined(L4STAT) && defined (SAMPLING_SUPPORT)
 		for (cnt = 0; cnt < MAX_HWC; cnt++)
 			if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
 			    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
@@ -110,7 +110,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	}
 	else if (Sthread->last_hw_group_change == time && Sthread->HWCChange_count > 1)
 	{
-#if defined(PAPI_COUNTERS) && defined (SAMPLING_SUPPORT)
+#if defined(PAPI_COUNTERS) || defined(L4STAT) && defined (SAMPLING_SUPPORT)
 		for (cnt = 0; cnt < MAX_HWC; cnt++)
 			if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
 			    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
@@ -123,8 +123,8 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 	{
 		/* If using PAPI, they can be stored in absolute or relative manner,
 		   depending whether sampling was activated or not */
-#if defined(PAPI_COUNTERS)
-# if defined(SAMPLING_SUPPORT) && !defined(OS_RTEMS)
+#if defined (PAPI_COUNTERS) || defined(L4STAT)
+# if defined(SAMPLING_SUPPORT) && !defined(L4STAT)
 		if (Sthread->HWCSets[set_id][cnt] != NO_COUNTER &&
 		    Sthread->HWCSets[Sthread->current_HWCSet][cnt] != SAMPLE_COUNTER)
 # else
@@ -135,7 +135,7 @@ int HardwareCounters_Emit (int ptask, int task, int thread,
 			   the previous read value from the current PAPI_read because it's always
 			   adding */
 
-# if defined(SAMPLING_SUPPORT) && !defined(OS_RTEMS)
+# if defined(SAMPLING_SUPPORT) && !defined(L4STAT)
 			/* Protect when counters are incorrect (major timestamp, lower counter value) */
 			if (Event->HWCValues[cnt] >= Sthread->counters[cnt])
 			{
@@ -346,7 +346,7 @@ void HardwareCounters_Change (int ptask, int task, int thread,
 		{
 #if defined(PMAPI_COUNTERS)
 			outtypes[cnt+1] = HWC_COUNTER_TYPE(cnt, Sthread->HWCSets[newSet][cnt]);
-#elif defined(PAPI_COUNTERS)
+#elif defined(PAPI_COUNTERS) || defined(L4STAT)
 			outtypes[cnt+1] = Sthread->HWCSets_types[newSet][cnt];
 #endif
 			outvalues[cnt+1] = 0;
