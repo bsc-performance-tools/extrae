@@ -2356,6 +2356,7 @@ int Extrae_Flush_Wrapper (Buffer_t *buffer)
 void Backend_Finalize (void)
 {
 	unsigned thread;
+	int online_mode = 0;
 
 #if defined(ENABLE_PEBS_SAMPLING)
 	Extrae_IntelPEBS_stopSampling();
@@ -2382,6 +2383,7 @@ void Backend_Finalize (void)
 		/* Stop the analysis threads and flush the online buffers */
 		if (Online_isEnabled())
 		{
+			online_mode = 1;
 			Online_Stop();
 		}
 #endif /* HAVE_ONLINE */
@@ -2410,6 +2412,12 @@ void Backend_Finalize (void)
 		/* Write files back to disk , 1st part will include flushing events*/
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
 		{
+			// If buffer was working in circular mode, change it to flush mode to dump the final data into the trace
+			if ((circular_buffering) && (!online_mode))
+			{
+		                Buffer_SetFlushCallback (TracingBuffer[thread], Extrae_Flush_Wrapper);
+			}
+
 			/* Prevent writing performance counters from another thread */
 			if (thread != THREADID)
 				Extrae_Flush_Wrapper_setCounters (FALSE);
