@@ -2412,6 +2412,9 @@ void Backend_Finalize (void)
 		/* Write files back to disk , 1st part will include flushing events*/
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++) 
 		{
+			// Protects race condition with Backend_Flush_pThread
+			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
+
 			// If buffer was working in circular mode, change it to flush mode to dump the final data into the trace
 			if ((circular_buffering) && (!online_mode))
 			{
@@ -2426,6 +2429,8 @@ void Backend_Finalize (void)
 				Buffer_ExecuteFlushCallback (TRACING_BUFFER(thread));
 
 			Extrae_Flush_Wrapper_setCounters (TRUE);
+
+			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
 		}
 
 		/* Final write files to disk, include renaming of the filenames,
@@ -2433,6 +2438,7 @@ void Backend_Finalize (void)
 		Extrae_Flush_Wrapper_setCounters (FALSE);
 		for (thread = 0; thread < get_maximum_NumOfThreads(); thread++)
 		{
+			// Protects race condition with Backend_Flush_pThread
 			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 
 			if (TRACING_BUFFER(thread) != NULL)
@@ -2455,6 +2461,7 @@ void Backend_Finalize (void)
 #if defined(PTHREAD_SUPPORT)
 				pThreads[thread] = (pthread_t)0;
 #endif
+				// Protects race condition with Backend_Flush_pThread
 				pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 				if (TRACING_BUFFER(thread) != NULL)
 				{
@@ -2536,6 +2543,7 @@ void Backend_Finalize (void)
 	{
 		int pid;
 		Extrae_getAppendingEventsToGivenPID (&pid);
+		// Protects race condition with Backend_Flush_pThread
 		pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 		if (TRACING_BUFFER(THREADID) != NULL)
 		{
