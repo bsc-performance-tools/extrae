@@ -114,6 +114,7 @@ void Help (const char *ProgName)
 		  "    -no-keep-mpits       Removes MPIT files after trace generation.\n"
 		  "    -trace-overwrite     Overwrites the tracefile.\n"
 		  "    -no-trace-overwrite  Do not overwrite the tracefile, renaming the new one.\n"
+		  "    -stop-at-percentage  Stops the merging process at the specified percentage.\n"
 #if defined(IS_BG_MACHINE)
 		  "    -xyzt                Generates additional output file with BG/L torus coordinates.\n"
 #endif
@@ -558,6 +559,23 @@ void ProcessArgs (int rank, int argc, char *argv[])
 		if (!strcmp (argv[CurArg], "-absolute-counters"))
 		{
 			set_option_merge_AbsoluteCounters (TRUE);
+			continue;
+		}
+		if (!strcmp (argv[CurArg], "-stop-at-percentage"))
+		{
+			CurArg++;
+			if (CurArg < argc)
+			{
+				long stopatpct = strtol(argv[CurArg], NULL, 10);
+				if (stopatpct > 0 && stopatpct < 100)
+					set_option_merge_StopAtPercentage(stopatpct);
+			} else
+			{
+				if ( 0 == rank)
+					fprintf(stderr, PACKAGE_NAME": Option -stop-at-percentage: You must specify a percentage.\n");
+				Help(argv[0]);
+				exit(0);
+			}
 			continue;
 		}
 		if (!strcmp (argv[CurArg], "-o"))

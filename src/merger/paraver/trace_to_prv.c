@@ -544,11 +544,11 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 		(GET_THREAD_INFO(ptask,task,thread))->First_Event = FALSE;
 		(GET_THREAD_INFO(ptask,task,thread))->Previous_Event_Time = current_time;
 
+		parsed_events += tmp_nevents;
+		pct = ((double) parsed_events)/((double) num_of_events)*100.0f;
 		/* Right now, progress bar is only shown when numtasks is 1 */
 		if (1 == numtasks)
 		{
-			parsed_events += tmp_nevents;
-			pct = ((double) parsed_events)/((double) num_of_events)*100.0f;
 			if (pct > last_pct + 5.0 && pct <= 100.0f)
 			{
 				fprintf (stdout, "%d%% ", (int) pct);
@@ -560,16 +560,20 @@ int Paraver_ProcessTraceFiles (unsigned long nfiles,
 
 		current_event = GetNextEvent_FS (fset, &cpu, &ptask, &task, &thread);
 
+		long maxpct = get_option_merge_StopAtPercentage();
+		if ((maxpct > 0) && (maxpct < 100) && (pct >= maxpct))
+			current_event = NULL;
+
 	} while ((current_event != NULL) && !error);
 
 	if (1 == numtasks)
 	{
-		fprintf (stdout, "done\n");
-		fflush (stdout);
+		fprintf(stdout, "done\n");
+		fflush(stdout);
 	}
 
-	fprintf (stdout, "mpi2prv: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
-	fflush (stdout);
+	fprintf(stdout, "mpi2prv: Processor %d %s to translate its assigned files\n", taskid, error?"failed":"succeeded");
+	fflush(stdout);
 
 #if defined(PARALLEL_MERGE)
 	if (numtasks > 1)

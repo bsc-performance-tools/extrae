@@ -7,6 +7,7 @@
   keep-mpits="yes"
   sort-addresses="yes"
   overwrite="yes"
+  stop-at-percentage="50"
 >
   mpi_ping.prv
 </merge>

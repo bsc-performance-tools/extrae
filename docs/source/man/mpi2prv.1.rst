@@ -112,6 +112,10 @@ OPTIONS
 **-split-states**
   Do not join consecutive states that are the same into a single one.
 
+**-stop-at-percentage**
+  Stops the generation of the tracefile at a given percentage. Accepts integer
+  values from **1** to **99**. All other values disable this option.
+
 **-syn**, **-syn-node**, **-no-syn**
   If different nodes are used in the execution of a tracing run, there can exist
   some clock differences on all the nodes. This option makes **mpi2prv** to

@@ -728,6 +728,9 @@ given as attribute of the ``<merge>`` node and they are:
 * :option:`overwrite`: set to ``yes`` if the new tracefile can overwrite an existing
   tracefile with the same name. If set to ``no``, then the tracefile will be
   given a new name using a consecutive id.
+* :option:`stop-at-percentage`: stops the generation of the tracefile at a given
+  percentage. Accepts integer values from ``1`` to ``99``. All other values
+  disable this option.
 
 In Linux systems, the tracing package can take advantage of certain
 functionalities from the system and can guess the binary name, and from it the

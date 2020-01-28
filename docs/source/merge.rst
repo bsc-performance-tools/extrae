@@ -193,6 +193,11 @@ These are the available options for the sequential |PARAVER| merger:
 
   Do not join consecutive states that are the same into a single one.
 
+.. option:: -stop-at-percentage
+
+  Stops the generation of the tracefile at a given percentage. Accepts integer
+  values from ``1`` to ``99``. All other values disable this option.
+
 .. option:: -syn
 
   If different nodes are used in the execution of a tracing run, there can exist

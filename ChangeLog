@@ -20,6 +20,7 @@ ChangeLog
  + 28Jan2020 Adds events ADD_RESERVED_MEM_EV and SUB_RESERVED_MEM_EV to track dynamic memory usage
  * 22Jan2020 Fixes race condition in flushing/closing buffers between Backend_Finalize and Backend_Flush_pThread
  * 20Jan2019 Fixes circular buffering to dump remaining data at the end of the run outside online mode
+ + 13Jan2020 Adds xml option and flag to the merger to stop the process at a given percentage
  + 18Nov2019 Adds instrumentation wrappers for MPI_Comm_split_type
  + 07Nov2019 Adds environment variable EXTRAE_UNSET_PRELOAD to clear the LD_PRELOAD once the tracing is loaded
  * 25Oct2019 Fixes double emission of python events call and c_call

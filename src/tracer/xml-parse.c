@@ -1382,6 +1382,8 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 	xmlChar *sortaddresses;
 	xmlChar *keepmpits;
 	xmlChar *traceoverwrite;
+	xmlChar *stopatpct_s;
+	long     stopatpct = 0;
 	char *filename;
 
 	if (tracetype != NULL && !xmlStrcasecmp (tracetype, TRACE_TYPE_DIMEMAS))
@@ -1448,6 +1450,20 @@ static void Parse_XML_Merge (int rank, xmlDocPtr xmldoc, xmlNodePtr current_tag,
 		{
 			set_option_merge_MaxMem (atoi((char*)maxmemory));
 		}
+	}
+
+	stopatpct_s = xmlGetProp_env(rank, current_tag, TRACE_MERGE_STOP_AT_PCT);
+	if (stopatpct_s != NULL)
+	{
+		stopatpct = strtol((char *)stopatpct_s, NULL, 10);
+		if (stopatpct <= 0 || stopatpct >= 100)
+		{
+			mfprintf(stderr, PACKAGE_NAME": Warning! Invalid value '%ld' for property <%s> in tag <%s>. This option will be ignored.\n", stopatpct, TRACE_MERGE, TRACE_MERGE_STOP_AT_PCT);
+			stopatpct = 0;
+		}
+		set_option_merge_StopAtPercentage(stopatpct);
+
+		XML_FREE(stopatpct_s);
 	}
 
 #if defined(MPI_SUPPORT)

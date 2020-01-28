@@ -6,4 +6,5 @@
   keep-mpits="yes"
   sort-addresses="yes"
   overwrite="yes"
+  stop-at-percentage="50"
 />
