@@ -201,6 +201,8 @@ void Enable_MISC_Operation (int type)
 	else if (type == TRACE_INIT_EV)
 		inuse[TRACE_INIT_INDEX] = TRUE;
 	else if (type == MALLOC_EV                 ||
+			 type == ADD_RESERVED_MEM_EV       ||
+			 type == SUB_RESERVED_MEM_EV       ||
 	         type == REALLOC_EV                ||
 	         type == FREE_EV                   ||
 	         type == CALLOC_EV                 ||
@@ -415,6 +417,11 @@ void MISCEvent_WriteEnabledOperations (FILE * fd, long long options)
 		fprintf (fd, "%d      %s\n", PRV_KMPC_REALLOC_VALUE, KMPC_REALLOC_LBL);
 		fprintf (fd, "%d      %s\n", PRV_KMPC_CALLOC_VALUE, KMPC_CALLOC_LBL);
 		fprintf (fd, "%d      %s\n", PRV_KMPC_ALIGNED_MALLOC_VALUE, KMPC_ALIGNED_MALLOC_LBL);
+		LET_SPACES (fd);
+
+		fprintf (fd, "%s\n", TYPE_LABEL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, ADD_RESERVED_MEM_EV, ADD_RESERVED_MEM_LBL);
+		fprintf (fd, "%d    %d    %s\n", MISC_GRADIENT, SUB_RESERVED_MEM_EV, SUB_RESERVED_MEM_LBL);
 		LET_SPACES (fd);
 
 		fprintf (fd, "%s\n", TYPE_LABEL);

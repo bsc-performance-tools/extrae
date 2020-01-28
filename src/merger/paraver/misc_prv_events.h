@@ -48,6 +48,8 @@ void Share_MISC_Operations (void);
 
 #define DYNAMIC_MEM_LBL                 "Dynamic memory calls"
 #define MALLOC_LBL                      "malloc()"
+#define ADD_RESERVED_MEM_LBL            "Allocated usable memory size"
+#define SUB_RESERVED_MEM_LBL            "Freed usable memory size"
 #define CALLOC_LBL                      "calloc()"
 #define REALLOC_LBL                     "realloc()"
 #define FREE_LBL                        "free()"

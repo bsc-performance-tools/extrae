@@ -1737,6 +1737,11 @@ static int DynamicMemory_Event (event_t * event,
 			  thread_info->AddressSpace_callertype);
 		}
 	}
+	else if ((EvType == ADD_RESERVED_MEM_EV)	||
+			 (EvType == SUB_RESERVED_MEM_EV)) { 
+			trace_paraver_event (cpu, ptask, task, thread, time,
+			  EvType, EvValue);
+	}
 
 	if (EvValue == EVT_BEGIN || EvValue == EVT_END)
 	{
@@ -1857,6 +1862,8 @@ SingleEv_Handler_t PRV_MISC_Event_Handlers[] = {
 	{ SAMPLING_ADDRESS_TLB_LEVEL_EV, Sampling_Address_MEM_TLB_Event },
 	{ SAMPLING_ADDRESS_REFERENCE_COST_EV, Sampling_Address_MEM_TLB_Event },
 	{ MALLOC_EV, DynamicMemory_Event },
+	{ ADD_RESERVED_MEM_EV, DynamicMemory_Event },
+	{ SUB_RESERVED_MEM_EV, DynamicMemory_Event },
 	{ CALLOC_EV, DynamicMemory_Event },
 	{ FREE_EV, DynamicMemory_Event },
 	{ REALLOC_EV, DynamicMemory_Event },

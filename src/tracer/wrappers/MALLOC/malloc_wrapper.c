@@ -463,13 +463,18 @@ void *realloc (void *p, size_t s)
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and remove and add the pointers to the list of recorded pointers */
+
+		int usable_size;
+
 		Backend_Enter_Instrumentation ();
-		Probe_Realloc_Entry (p, s);
+		usable_size = Probe_Realloc_Entry (p, s);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_realloc (p, s);
 		if (res != NULL)
+		{
 			Extrae_malloctrace_replace (p, res, s);
-		Probe_Realloc_Exit (res);
+		}
+		Probe_Realloc_Exit (res, usable_size);
 		Backend_Leave_Instrumentation ();
 	}
 	else if (real_realloc != NULL)
@@ -691,13 +696,18 @@ void *memkind_realloc(memkind_t kind, void *ptr, size_t size)
 
   if (real_memkind_realloc != NULL && canInstrument)
   {
+
+  	int usable_size;
+
     Backend_Enter_Instrumentation ();
-    Probe_memkind_realloc_Entry (get_memkind_partition( kind ), ptr, size);
+    usable_size = Probe_memkind_realloc_Entry (get_memkind_partition( kind ), ptr, size);
     TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
     res = real_memkind_realloc(kind, ptr, size);
     if (res != NULL)
+    {
 	  Extrae_malloctrace_replace (ptr, res, size);
-    Probe_memkind_realloc_Exit (res);
+    }
+    Probe_memkind_realloc_Exit (res, usable_size);
     Backend_Leave_Instrumentation ();
   }
   else if (real_memkind_realloc != NULL)
@@ -1000,13 +1010,19 @@ kmpc_realloc( void *ptr, size_t size )
 	{
 		/* If we can instrument, simply capture everything we need 
 		   and add the pointer to the list of recorded pointers */
+
+		int usable_size;
+
+
 		Backend_Enter_Instrumentation ();
-		Probe_kmpc_realloc_Entry (ptr, size);
+		usable_size = Probe_kmpc_realloc_Entry (ptr, size);
 		TRACE_DYNAMIC_MEMORY_CALLER(LAST_READ_TIME, 3);
 		res = real_kmpc_realloc (ptr, size);
 		if (res != NULL)
+		{
 			Extrae_malloctrace_replace (ptr, res, size);
-		Probe_kmpc_realloc_Exit (res);
+		}
+		Probe_kmpc_realloc_Exit (res, usable_size);
 		Backend_Leave_Instrumentation ();
 	}
 	else if (real_kmpc_realloc != NULL)

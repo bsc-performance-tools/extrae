@@ -8,6 +8,7 @@ ChangeLog
  + 29Apr2020 Adds environment variable EXTRAE_ENFORCE_FS_SYNC to ensure file system synchronization after creating trace files and folders
  * 17Mar2020 Changes for Workflows and Distributed Computing group
  + 13Mar2020 Added instrumentation for MPI_Comm_dup_with_info
+ + 28Jan2020 Adds events ADD_RESERVED_MEM_EV and SUB_RESERVED_MEM_EV to track dynamic memory usage
  * 22Jan2020 Fixes race condition in flushing/closing buffers between Backend_Finalize and Backend_Flush_pThread
  * 20Jan2019 Fixes circular buffering to dump remaining data at the end of the run outside online mode
  + 18Nov2019 Adds instrumentation wrappers for MPI_Comm_split_type
