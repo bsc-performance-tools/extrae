@@ -44,8 +44,7 @@ AC_DEFUN([AX_PROG_GASPI],
 
 		AC_MSG_CHECKING([for GASPI library])
 
-		if test -f "${GASPI_LIBSDIR_MULTIARCH}/libGPI2.so"; then 
-			GASPI_LIBSDIR="${GASPI_LIBSDIR_MULTIARCH}"
+		if test -f "${GASPI_LIBSDIR}/libGPI2.so"; then
 			GASPI_LIBS="-lGPI2"
 		fi
 
@@ -55,6 +54,10 @@ AC_DEFUN([AX_PROG_GASPI],
 			AC_MSG_ERROR([Couldn't find GASPI libraries file in the GASPI specified path.])
 		fi
 	fi
+
+	AC_SUBST(GASPI_LIBSDIR)
+	AC_SUBST(GASPI_LIBS)
+	AC_SUBST(GASPI_CFLAGS)
 
 	AC_MSG_CHECKING([for GASPI launcher])
 	GASPIRUN=""
