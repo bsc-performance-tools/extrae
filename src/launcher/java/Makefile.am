@@ -8,6 +8,7 @@ extraej.bash: extraej.bash.skeleton
 	$(top_srcdir)/substitute $(SED) "@sub_JAVA@" "${JAVA}" $@
 	$(top_srcdir)/substitute $(SED) "@sub_AJC@" "${AJC}" $@
 	$(top_srcdir)/substitute $(SED) "@sub_ASPECTWEAVER_JAR@" "${ASPECT_WEAVER_JAR}"  $@
+	$(top_srcdir)/substitute $(SED) "@sub_ASPECTJRT_JAR@" "${ASPECTJRT_JAR}" $@
 	$(top_srcdir)/substitute $(SED) "@sub_PREFIXDIR@" "${prefix}" $@
 
 install-data-hook: extraej.bash

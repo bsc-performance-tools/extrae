@@ -225,6 +225,8 @@ application_separator_found="no"
 JAVA=@sub_JAVA@
 AJC=@sub_AJC@
 ASPECTWEAVER_JAR=@sub_ASPECTWEAVER_JAR@
+ASPECTJRT_JAR=@sub_ASPECTJRT_JAR@
+
 
 # Check existance for config file pointed by EXTRAE_CONFIG_FILE
 
@@ -286,10 +288,10 @@ if [[ -x "${AJC}" ]]; then
 			generate_aspects
 		
 			if [[ "${verbose}" = "yes" ]]; then
-				echo "Executing: CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} ${AJC} -inpath . -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
+				echo "Executing: CLASSPATH=${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} ${AJC} -inpath . -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
 			fi
 		
-			CLASSPATH=${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
+			CLASSPATH=${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
 			${AJC} \
 			 -inpath . \
 			 -sourceroots ${tmpdir}/aspects \
@@ -298,7 +300,7 @@ if [[ -x "${AJC}" ]]; then
 				die "Error! ${AJC} failed"
 			fi
 
-			execute_java ${tmpdir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
+			execute_java ${tmpdir}/instrumented:${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${CLASSPATH} \
 				${EXTRAEJ_LIBPTTRACE_PATH} \
 				"$@"
 		else
@@ -320,7 +322,7 @@ if [[ -x "${AJC}" ]]; then
 		fi
 
 		# Let's execute the code with Extrae support
-		execute_java ${reuse_dir}/instrumented:${ASPECTWEAVER_JAR}:${CLASSPATH} \
+		execute_java ${reuse_dir}/instrumented:${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${CLASSPATH} \
 			${EXTRAEJ_LIBPTTRACE_PATH} \
 			"$@"
 	fi

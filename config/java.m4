@@ -154,6 +154,15 @@ AC_DEFUN([AX_JAVA_ASPECTJ],
 		[aspectj_weaver_path="none"]
 	)
 
+	AC_ARG_WITH(java-aspectjrt,
+		AC_HELP_STRING(
+			[--with-java-aspectjrt@<:@=DIR@:>@],
+			[Enable support for tracing Java through AspectJ (experimental) -- also need --with-java-jdk and --with-java-aspectj. Indicates where to find aspectjrt.jar.]
+		),
+		[aspectjrt_path="${withval}"],
+		[aspectjrt_path="none"]
+	)
+
 	if test "${aspectj_ajc_found}" = "yes"; then
 
 		aspectj_weaver_found="no"
@@ -197,16 +206,61 @@ AC_DEFUN([AX_JAVA_ASPECTJ],
 		if test "${aspectj_weaver_found}" = "no"; then
 			AC_MSG_ERROR([AspectJ requires AspectJ weaver .jar file but it was not given or located. Did you provide a valid --with-aspectj-weaver?])
 		fi
+
+
+		aspectjrt_found="no"
+
+		if test "${aspectjrt_path}" = "no" ; then
+			AC_MSG_WARN([Java's AspectJ Runtime support has been disabled])	
+		elif test "${aspectjrt_path}" = "none" ; then
+			# Try to automatically locate aspectweaver.jar based from ASPECTJ directory
+			AC_MSG_NOTICE([--with-aspectjrt was not given. Trying to automatically locate aspectrt.jar])
+			if test -r "${aspectj_path}/share/java/aspectjrt.jar" ; then
+				aspectjrt_path=${aspectj_path}/share/java
+			elif test -r "${aspectj_path}/lib/aspectjrt.jar" ; then
+                                aspectjrt_path=${aspectj_path}/lib
+                        fi
+		fi
+
+		if test "${aspectjrt_path}" != "none" ; then
+			AC_MSG_CHECKING([for AspectJ Runtime directory])
+			if test -d "${aspectj_weaver_path}" ; then
+				AC_MSG_RESULT([found])
+				AC_MSG_CHECKING([for AspectJ aspectjrt.jar])
+				if test -r "${aspectj_weaver_path}/aspectjrt.jar"; then
+					AC_MSG_RESULT([found])
+					AC_MSG_CHECKING([for AspectJ aspectjrt.jar contents])
+					${JAR} tf ${aspectj_weaver_path}/aspectjrt.jar > /dev/null
+					if test "${?}" -eq 0 ; then
+						AC_MSG_RESULT([seems correct])
+						ASPECTJRT_JAR="${aspectjrt_path}/aspectjrt.jar"
+						aspectjrt_found="yes"
+					else
+						AC_MSG_ERROR([the aspectjrt.jar file does not seem valid])
+					fi
+				else
+					AC_MSG_ERROR([Cannot find aspectjrt.jar in the given AspectJ Runtime directory])
+				fi
+			else
+				AC_MSG_ERROR([Given path for AspectJ Runtime file does not exist!])
+			fi
+		fi
+
+		if test "${aspectjrt_found}" = "no"; then
+			AC_MSG_ERROR([AspectJ requires AspectJ Runtime aspectjrt.jar file but it was not given or located. Did you provide a valid --with-aspectjrt?])
+		fi
 	fi
 
-	if test "${aspectj_ajc_found}" = "yes" -a "${aspectj_weaver_found}" = "yes" ; then
+	if test "${aspectj_ajc_found}" = "yes" -a "${aspectj_weaver_found}" = "yes" -a "${aspectjrt_found}" = "yes" ; then
 		ASPECTJ_found="yes"
 	fi
 
 	AM_CONDITIONAL(WANT_JAVA_WITH_ASPECTJ, test "${ASPECTJ_found}" = "yes")
 	AC_SUBST(AJC)
 	AC_SUBST(ASPECT_WEAVER_JAR)
+	AC_SUBST(ASPECTJRT_JAR)
 ])
+
 
 
 # AX_JAVA_SHOW
@@ -220,6 +274,7 @@ AC_DEFUN([AX_JAVA_SHOW_CONFIGURATION],
 			echo -e \\\tAspectJ support: yes
 			echo -e \\\tAspectJ compiler: ${AJC}
 			echo -e \\\tAspectJ weaver: ${ASPECT_WEAVER_JAR}
+			echo -e \\\tAspectJ Runtime: ${ASPECTJRT_JAR}
 		else
 			echo -e \\\tAspectJ support: no
 		fi
