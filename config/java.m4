@@ -156,7 +156,7 @@ AC_DEFUN([AX_JAVA_ASPECTJ],
 
 	if test "${aspectj_ajc_found}" = "yes"; then
 
-		aspect_weaver_found="no"
+		aspectj_weaver_found="no"
 
 		if test "${aspectj_weaver_path}" = "no" ; then
 			AC_MSG_WARN([Java's AspectJ weaver support has been disabled])	
@@ -165,8 +165,12 @@ AC_DEFUN([AX_JAVA_ASPECTJ],
 			AC_MSG_NOTICE([--with-aspect-weaver was not given. Trying to automatically locate aspectweaver.jar])
 			if test -r "${aspectj_path}/share/java/aspectjweaver.jar" ; then
 				aspectj_weaver_path=${aspectj_path}/share/java
-			fi
-		else
+			elif test -r "${aspectj_path}/lib/aspectjweaver.jar" ; then
+                                aspectj_weaver_path=${aspectj_path}/lib
+                        fi
+		fi
+
+		if test "${aspectj_weaver_path}" != "none" ; then
 			AC_MSG_CHECKING([for AspectJ weaver directory])
 			if test -d "${aspectj_weaver_path}" ; then
 				AC_MSG_RESULT([found])
