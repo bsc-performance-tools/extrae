@@ -161,9 +161,11 @@ parse_parameters () {
 			keep_instrumented_files="yes"
 		elif [[ "${1}" = "-v" ]]; then
 			verbose="yes"
-		elif [[ "${1}" = "-reuse" ]] ; then
+		elif [[ "${1}" = "-reuse" ]]; then
 			shift
 			reuse_dir=${1}
+		elif [[ "${1}" = "-jar" ]]; then
+			jarmode="yes"
 		elif [[ "${1}" = "--" ]]; then
 			application_separator_found="yes"
 			break
@@ -181,6 +183,11 @@ execute_java () {
 	shift
 	local preload=$1
 	shift
+	local options=""
+
+	if [[ "${jarmode}" = "yes" ]]; then
+		options=-jar
+	fi
 
 	# Check whether Extrae supported JVMTI
 	if [[ ! -r ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ]]; then
@@ -191,7 +198,7 @@ execute_java () {
 		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
 		LD_PRELOAD=${preload} \
 		CLASSPATH=${cp} \
-		  ${JAVA} ${@}
+		  ${JAVA} ${options} ${@}
 	else
 		local agent=${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}
 
@@ -202,7 +209,7 @@ execute_java () {
 		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
 		LD_PRELOAD=${preload} \
 		CLASSPATH=${cp} \
-		  ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}
+		  ${JAVA} ${options} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}
 	fi
 }
 
@@ -217,6 +224,7 @@ extrae_function_list_enabled=""
 MemberArray=()
 keep_instrumented_files="no"
 verbose="no"
+jarmode="no"
 reuse_dir=""
 application_separator_found="no"
 
@@ -233,15 +241,17 @@ ASPECTJRT_JAR=@sub_ASPECTJRT_JAR@
 if [[ "${#}" -eq 0 ]]; then
 	echo "Usage for Extrae/Java-based instrumenter:"
 	echo ""
-	echo "  "`basename ${0}`" {options} -- <JavaMethod>"
+	echo "  "`basename ${0}`" {options} -- <JavaTarget>"
 	echo ""
 	echo "  where options:"
 	echo "    -v           Makes execution verbose"
-    echo "    -keep        Runs and saves the instrumented package for a future use"
-    echo "    -reuse <dir> Tells "`basename ${0}`" to reuse a previously instrumented package saved through -keep"
+	echo "    -keep        Runs and saves the instrumented package for a future use"
+	echo "    -reuse <dir> Tells "`basename ${0}`" to reuse a previously instrumented package saved through -keep"
+	echo "    -jar         Runs the target as a jar file"
 	echo
-	echo " Example:"
+	echo " Examples:"
 	echo "  \$\{EXTRAE_HOME\}/bin/"`basename ${0}`" -v -keep -- PiExample"
+	echo "  \$\{EXTRAE_HOME\}/bin/"`basename ${0}`" -v -jar -- PiExample.jar"
 	echo
 	echo " Note: Remember to indicate the configuration file through the EXTRAE_CONFIG_FILE environment variable"
 	die ""
