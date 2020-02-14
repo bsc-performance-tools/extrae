@@ -236,10 +236,13 @@ enum {
    MEMUSAGE_EVENTS_COUNT /* Total number of memusage events */
 };
 
-#define JAVA_JVMTI_GARBAGECOLLECTOR_EV     48000001
-#define JAVA_JVMTI_EXCEPTION_EV            48000002
-#define JAVA_JVMTI_OBJECT_ALLOC_EV         48000003
-#define JAVA_JVMTI_OBJECT_FREE_EV          48000004
+#define JAVA_JVMTI_GARBAGECOLLECTOR_EV      48000001
+#define JAVA_JVMTI_EXCEPTION_EV             48000002
+#define JAVA_JVMTI_OBJECT_ALLOC_EV          48000003
+#define JAVA_JVMTI_OBJECT_FREE_EV           48000004
+#define JAVA_JVMTI_THREAD_EV                48000005
+#define JAVA_JVMTI_WAIT_EV                  48000006
+
 
 #define OMP_STATS_BASE           65000000
 enum {
