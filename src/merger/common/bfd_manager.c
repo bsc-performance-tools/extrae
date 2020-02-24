@@ -115,7 +115,7 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 #if 0
 			/* HSG This is supposed to be space-efficient, but showed some errors .... :( */
 			symcount = bfd_read_minisymbols (bfdImage, FALSE, (PTR) bfdSymbols, &usize);
-			if (symcount == 0) 
+			if (symcount == 0)
 				symcount = bfd_read_minisymbols (bfdImage, TRUE, (PTR) bfdSymbols, &usize);
 #else
 			symcount = bfd_canonicalize_symtab (bfdImage, bfdSymbols);
@@ -130,7 +130,7 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 					if (((bfdSymbols[s]->flags & BSF_DEBUGGING) == 0) &&
 					    (syminfo.type == 'R' || syminfo.type == 'r' || /* read-only data */
 					    syminfo.type == 'B' || syminfo.type == 'b' || /* uninited data */
-					    syminfo.type == 'G' || syminfo.type == 'g' || /* inited data */ 
+					    syminfo.type == 'G' || syminfo.type == 'g' || /* inited data */
 					    syminfo.type == 'C')) /* common data*/
 					{
 						unsigned long long sz = 0;
@@ -153,7 +153,7 @@ static void BFDmanager_loadBFDdata (char *file, bfd **image, asymbol ***symbols,
 # endif
 #endif
 
-			if (symcount < 0) 
+			if (symcount < 0)
 			{
 				/* There aren't symbols! */
 				const char *errmsg = bfd_errmsg( bfd_get_error() );
@@ -233,7 +233,7 @@ asymbol **BFDmanager_getDefaultSymbols (void)
  */
 static void BFDmanager_findAddressInSection (bfd * abfd, asection * section, PTR data)
 {
-#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
+#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	bfd_size_type size;
 #endif
 	bfd_vma vma;
@@ -242,16 +242,27 @@ static void BFDmanager_findAddressInSection (bfd * abfd, asection * section, PTR
 	if (symdata->found)
 		return;
 
+#if HAVE_BFD_SECTION_VMA
+	if ((bfd_section_flags (section) & SEC_ALLOC) == 0)
+		return;
+
+	vma = bfd_section_vma (section);;
+#else
 	if ((bfd_get_section_flags (abfd, section) & SEC_ALLOC) == 0)
 		return;
 
 	vma = bfd_get_section_vma (abfd, section);;
+#endif
 
 	if (symdata->pc < vma)
 		return;
 
 #if HAVE_BFD_GET_SECTION_SIZE
 	size = bfd_get_section_size (section);
+	if (symdata->pc >= vma + size)
+		return;
+#elif HAVE_BFD_SECTION_SIZE
+	size = bfd_section_size (section);
 	if (symdata->pc >= vma + size)
 		return;
 #elif HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
@@ -367,7 +378,7 @@ int system_call_to_addr2line (char *binary, void *address,
 			perror("fork");
 			exit(1);
 
-		case 0: 
+		case 0:
 			close (1); /* close stdout */
 			dup (fd[1]); /* make stdout same as fd[1] */
 
@@ -383,7 +394,7 @@ int system_call_to_addr2line (char *binary, void *address,
 			execvp ("addr2line", cmd);
 			break;
 	}
-	close (fd[1]); 
+	close (fd[1]);
 	read (fd[0], addr2line_result, sizeof(addr2line_result));
 	wait(&status);
 
@@ -404,5 +415,4 @@ int system_call_to_addr2line (char *binary, void *address,
 		return TRUE;
 }
 
-#endif 
-
+#endif

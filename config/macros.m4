@@ -81,7 +81,7 @@ AC_DEFUN([AX_FIND_INSTALLATION],
 			$1_CFLAGS="-I$$1_INCLUDES"
 			$1_CXXFLAGS="-I$$1_INCLUDES"
 			$1_CPPFLAGS="-I$$1_INCLUDES"
-			
+
 			if test ! -z "${multiarch_triplet}" ; then
 				$1_CFLAGS="${$1_CFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
 				$1_CXXFLAGS="${$1_CXXFLAGS} -I${$1_HOME}/include/${multiarch_triplet}"
@@ -127,7 +127,7 @@ AC_DEFUN([AX_FIND_INSTALLATION],
           $1_SHAREDLIBSDIR=$$1_LIBSDIR
        fi
 		fi
-		
+
 		if test ! -z "${multiarch_triplet}" ; then
 			AC_MSG_CHECKING([for multiarch $1 libraries directory])
 			if test -d "$$1_HOME/lib/${multiarch_triplet}" ; then
@@ -161,7 +161,7 @@ AC_DEFUN([AX_FIND_INSTALLATION],
     CXXFLAGS="$CXXFLAGS $$1_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $$1_CPPFLAGS"
     LDFLAGS="$LDFLAGS $$1_LDFLAGS"
-	else	
+	else
 		$1_INSTALLED="no"
 	fi
 ])
@@ -228,7 +228,7 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 		AC_LANG_PUSH(language)
 
 		AC_CACHE_CHECK(
-			[for $_AC_LANG_PREFIX[]_compiler compiler default binary type], 
+			[for $_AC_LANG_PREFIX[]_compiler compiler default binary type],
 			[[]_AC_LANG_PREFIX[]_ac_cv_compiler_default_binary_type],
 			[
 				AX_CHECK_POINTER_SIZE
@@ -253,7 +253,7 @@ AC_DEFUN([AX_SELECT_BINARY_TYPE],
 			msg="language compiler '$_AC_LANG_PREFIX[]_compiler' seems not to be installed in the system.  Please verify there is a working installation of the language compiler '$_AC_LANG_PREFIX[]_compiler'."
 			if test "language" == "C" ; then
 				AC_MSG_ERROR($msg)
-			else 
+			else
 				AC_MSG_WARN($msg)
 			fi
 		else
@@ -420,7 +420,7 @@ AC_DEFUN([AX_PROG_XML2],
    fi
    XML2_LDFLAGS="-L${XML2_LIBSDIR}"
 
-   if test -d ${XML2_LIBSDIR}/shared ; then 
+   if test -d ${XML2_LIBSDIR}/shared ; then
       XML2_SHAREDLIBSDIR="${XML2_LIBSDIR}/shared"
    else
       XML2_SHAREDLIBSDIR=${XML2_LIBSDIR}
@@ -479,7 +479,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
       unset LIBERTY_LIBSDIR
 
       for binutils_home_dir in [${binutils_paths} "notfound"]; do
-   
+
          if test -r "${binutils_home_dir}/lib${BITS}/libbfd.so" -o \
                  -r "${binutils_home_dir}/lib${BITS}/libbfd.dylib" ; then
             BFD_LIBSDIR="${binutils_home_dir}/lib${BITS}"
@@ -520,7 +520,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
                BFD_LIBSDIR=`dirname ${libbfd_lib}`
             fi
          fi
-   
+
          if test -r "${binutils_home_dir}/lib${BITS}/libiberty.so" -o -r "${binutils_home_dir}/lib${BITS}/libiberty.dylib" ; then
             LIBERTY_LIBSDIR="${binutils_home_dir}/lib${BITS}"
          elif test -r "${binutils_home_dir}/lib${BITS}/libiberty.a" ; then
@@ -555,8 +555,8 @@ AC_DEFUN([AX_PROG_BINUTILS],
                LIBERTY_LIBSDIR=`dirname ${libiberty_lib}`
             fi
          fi
-         
-   
+
+
          if test ! -z "${BFD_LIBSDIR}" -a ! -z "${LIBERTY_LIBSDIR}" ; then
            # Both libraries are present
            break
@@ -597,7 +597,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
          libbfd_needs_lintl="yes"
       fi
       AC_TRY_LINK(
-         [ #include <bfd.h> ], 
+         [ #include <bfd.h> ],
          [ bfd *abfd = bfd_openr ("", ""); ],
          [ bfd_and_iberty_work="yes" ]
       )
@@ -606,7 +606,7 @@ AC_DEFUN([AX_PROG_BINUTILS],
          dnl Newer systems require libdl to be linked with -lbfd
          LIBS="${LIBS} -ldl"
          AC_TRY_LINK(
-            [ #include <bfd.h> ], 
+            [ #include <bfd.h> ],
             [ bfd *abfd = bfd_openr ("", ""); ],
             [ bfd_and_iberty_work="yes" ]
          )
@@ -616,9 +616,9 @@ AC_DEFUN([AX_PROG_BINUTILS],
          else
             dnl On some machines BFD/LIBERTY need an special symbol (e.g BGL)
             AC_TRY_LINK(
-               [ #include <bfd.h> 
+               [ #include <bfd.h>
                  int *__errno_location(void) { return 0; }
-               ], 
+               ],
                [ bfd *abfd = bfd_openr ("", ""); ],
                [ bfd_and_iberty_work="yes" ]
             )
@@ -683,12 +683,28 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
          AC_DEFINE([HAVE_BFD], 1, [Define to 1 if BFD is installed in the system])
 
-         AC_MSG_CHECKING([whether bfd_get_section_size is defined in bfd.h])
+	 AC_MSG_CHECKING([whether bfd_section_vma is defined in bfd.h])
+	 AC_TRY_LINK(
+	 [ #include <bfd.h> ],
+	   [
+	       asection *section;
+	       bfd_vma vma = bfd_section_vma(section)
+	   ],
+	   [ bfd_section_vma_found="yes"]
+	 )
+	 if test "${bfd_section_vma_found}" = "yes" ; then
+	    AC_DEFINE(HAVE_BFD_SECTION_VMA, [1], [Defined to 1 if bfd.h defines bfd_section_vma])
+	    AC_MSG_RESULT([yes])
+	 else
+	    AC_MSG_RESULT([no])
+	 fi
+
+	 AC_MSG_CHECKING([whether bfd_get_section_size is defined in bfd.h])
          AC_TRY_LINK(
            [ #include <bfd.h> ],
-           [ 
+           [
                asection *section;
-               int result = bfd_get_section_size(section); 
+               int result = bfd_get_section_size(section);
            ],
            [ bfd_get_section_size_found="yes"]
          )
@@ -699,12 +715,28 @@ AC_DEFUN([AX_PROG_BINUTILS],
             AC_MSG_RESULT([no])
          fi
 
+	 AC_MSG_CHECKING([whether bfd_section_size is defined in bfd.h])
+	 AC_TRY_LINK(
+	   [ #include <bfd.h> ],
+	   [
+	       asection *section;
+	       int result = bfd_section_size(section);
+	   ],
+	   [ bfd_section_size_found="yes"]
+	 )
+	 if test "${bfd_section_size_found}" = "yes" ; then
+	    AC_DEFINE(HAVE_BFD_SECTION_SIZE, [1], [Defined to 1 if bfd.h defines bfd_section_size])
+	    AC_MSG_RESULT([yes])
+	 else
+	    AC_MSG_RESULT([no])
+	 fi
+
          AC_MSG_CHECKING([whether bfd_get_section_size_before_reloc is defined in bfd.h])
          AC_TRY_LINK(
            [ #include <bfd.h> ],
-           [ 
+           [
                asection *section;
-               int result = bfd_get_section_size_before_reloc(section); 
+               int result = bfd_get_section_size_before_reloc(section);
            ],
            [ bfd_get_section_size_before_reloc_found="yes"]
          )
@@ -854,16 +886,16 @@ AC_DEFUN([AX_PROG_MX],
 
    if test "$MX_INSTALLED" = "yes" ; then
       AC_CHECK_HEADERS([myriexpress.h], [], [MX_INSTALLED="no"])
-      AC_CHECK_LIB([myriexpress], [mx_get_info], 
-         [ 
+      AC_CHECK_LIB([myriexpress], [mx_get_info],
+         [
            MX_LDFLAGS="${MX_LDFLAGS} -lmyriexpress"
            AC_SUBST(MX_LDFLAGS)
-         ], 
+         ],
          [ MX_INSTALLED="no" ]
       )
       AC_CHECK_HEADERS([mx_dispersion.h], [mx_dispersion_h_found="yes"], [mx_dispersion_h_found="no"])
-      AC_CHECK_LIB([myriexpress], [mx_get_dispersion_counters], 
-         [mx_get_dispersion_counters_found="yes"], 
+      AC_CHECK_LIB([myriexpress], [mx_get_dispersion_counters],
+         [mx_get_dispersion_counters_found="yes"],
          [mx_get_dispersion_counters="no"]
       )
       if test "$mx_dispersion_h_found" = "yes" -a "$mx_get_dispersion_counters_found" = "yes" ; then
@@ -1021,7 +1053,7 @@ AC_DEFUN([AX_PROG_PAPI],
                   LIBS="-lpapi64 -lpmapi"
                else
                   LIBS="-lpapi -lpmapi"
-               fi 
+               fi
             else
                LIBS="-lpapi -lpmapi"
             fi
@@ -1031,7 +1063,7 @@ AC_DEFUN([AX_PROG_PAPI],
       fi
 
       AC_CHECK_LIB([papi], [PAPI_start],
-         [ 
+         [
             PAPI_LIBS="${LIBS}"
             AC_SUBST(PAPI_LIBS)
          ],
@@ -1085,7 +1117,7 @@ AC_DEFUN([AX_PROG_PAPI],
 AC_DEFUN([AX_IS_ALTIX_MACHINE],
 [
    AC_MSG_CHECKING([if this is an Altix machine])
-   if test -r /etc/sgi-release ; then 
+   if test -r /etc/sgi-release ; then
       AC_MSG_RESULT([yes])
       IS_ALTIX_MACHINE="yes"
 			AC_DEFINE([IS_ALTIX], 1, [Defined if this machine is a SGI Altix])
@@ -1103,7 +1135,7 @@ AC_DEFUN([AX_HAVE_MMTIMER_DEVICE],
 
    if test "${IS_ALTIX_MACHINE}" = "yes" ; then
       AC_MSG_CHECKING([if this is an Altix machine has MMTimer device])
-      if test -r /dev/mmtimer ; then 
+      if test -r /dev/mmtimer ; then
          AC_MSG_RESULT([yes])
          AC_DEFINE([HAVE_MMTIMER_DEVICE], 1, [Defined if this machine has a MMTimer device and it is readable])
          HAVE_MMTIMER_DEVICE="yes"
@@ -1289,7 +1321,7 @@ AC_DEFUN([AX_CHECK_UNWIND],
 
       AX_FIND_INSTALLATION([UNWIND], [$unwind_paths], [unwind])
 
-      if test "${UNWIND_INSTALLED}" = "yes" ; then 
+      if test "${UNWIND_INSTALLED}" = "yes" ; then
 
          UNWIND_LIBS="-lunwind"
          AC_SUBST(UNWIND_LIBS)
@@ -1302,7 +1334,7 @@ AC_DEFUN([AX_CHECK_UNWIND],
 
          AC_TRY_LINK(
             [ #define UNW_LOCAL_ONLY
-              #include <libunwind.h> ], 
+              #include <libunwind.h> ],
             [ unw_cursor_t cursor;
               unw_context_t uc;
               unw_word_t ip;
@@ -1346,7 +1378,7 @@ AC_DEFUN([AX_CHECK_LIBZ],
    )
 
    for zhome_dir in [${libz_paths} "not found"]; do
-      if test -f "${zhome_dir}/${BITS}/include/zlib.h" ; then 
+      if test -f "${zhome_dir}/${BITS}/include/zlib.h" ; then
          if test -f "${zhome_dir}/${BITS}/lib/libz.a" -o \
                  -f "${zhome_dir}/${BITS}/lib/libz.so" -o \
                  -f "${zhome_dir}/${BITS}/lib/libz.dylib" ; then
@@ -1385,7 +1417,7 @@ AC_DEFUN([AX_CHECK_LIBZ],
    LIBZ_CXXFLAGS=${LIBZ_CFLAGS}
    LIBZ_LIBS="-lz"
    LIBZ_LDFLAGS="-L${LIBZ_LIBSDIR}"
-   if test -d ${LIBZ_LIBSDIR}/shared ; then 
+   if test -d ${LIBZ_LIBSDIR}/shared ; then
       LIBZ_SHAREDLIBSDIR="${LIBZ_LIBSDIR}/shared"
    else
       LIBZ_SHAREDLIBSDIR=${LIBZ_LIBSDIR}
@@ -1711,7 +1743,7 @@ AC_DEFUN([AX_PROG_SYNAPSE],
       AC_MSG_RESULT([no])
       SYNAPSE_INSTALLED="no"
     fi
-    
+
     dnl Check for libraries
     AC_MSG_CHECKING([for libsynapse_frontend])
 
@@ -1725,7 +1757,7 @@ AC_DEFUN([AX_PROG_SYNAPSE],
     fi
 
     AC_MSG_CHECKING([for libsynapse_backend])
-    
+
     if test -f ${SYNAPSE_LIBSDIR}/libsynapse_backend.a  ; then
       SYNAPSE_BE_LIBS="-lsynapse_backend"
       AC_SUBST(SYNAPSE_BE_LIBS)
@@ -1807,7 +1839,7 @@ AC_DEFUN([AX_PROG_SPECTRAL],
 
   dnl Search for Spectral Analysis installation
   AX_FIND_INSTALLATION([SPECTRAL], [$spectral_paths], [spectral])
-  
+
   spectral_works="no"
   if test "x${SPECTRAL_INSTALLED}" = "xyes" ; then
     LIBS="-L${SPECTRAL_HOME} -lspectral"
@@ -1941,7 +1973,7 @@ AC_DEFUN([AX_CHECK_WEAK_ALIAS_ATTRIBUTE],
     # isn't understood
 
     save_CFLAGS=${CFLAGS}
-    
+
     if test "${GCC}" = "yes" ; then
        CFLAGS="-Werror"
     elif test "`basename ${CC}`" = "xlc" ; then
@@ -1983,7 +2015,7 @@ AC_DEFUN([AX_CHECK_ALIAS_ATTRIBUTE],
     # isn't understood
 
     save_CFLAGS=${CFLAGS}
-    
+
     if test "${GCC}" = "yes" ; then
        CFLAGS="-Werror"
     elif test "`basename ${CC}`" = "xlc" ; then
@@ -2017,7 +2049,7 @@ AC_DEFUN([AX_CHECK_ALIAS_ATTRIBUTE],
 
 AC_DEFUN([AX_CHECK_UNUSED_ATTRIBUTE],
 [
-  # Test whether compiler accepts __attribute__ form of setting unused 
+  # Test whether compiler accepts __attribute__ form of setting unused
   AC_CACHE_CHECK([whether ${CC} accepts function __attribute__((unused))],
   [ax_cv_unused_attribute], [
 
@@ -2025,7 +2057,7 @@ AC_DEFUN([AX_CHECK_UNUSED_ATTRIBUTE],
     # isn't understood
 
     save_CFLAGS=${CFLAGS}
-    
+
     if test "${GCC}" = "yes" ; then
        CFLAGS="-Werror"
     elif test "`basename ${CC}`" = "xlc" ; then
