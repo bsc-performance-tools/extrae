@@ -74,10 +74,7 @@ void Extrae_Java_Wait_start(void)
         Backend_Enter_Instrumentation ();
 
         DEBUG
-        if (!Extrae_get_pthread_tracing())
-            TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, JAVA_JVMTI_WAIT_EV, EVT_BEGIN, EMPTY)
-        else
-            TRACE_PTHEVENTANDCOUNTERS(LAST_READ_TIME, PTHREAD_JOIN_EV, EVT_BEGIN, EMPTY)
+        TRACE_MISCEVENTANDCOUNTERS(LAST_READ_TIME, JAVA_JVMTI_WAIT_EV, EVT_BEGIN, EMPTY)
     }
 }
 
@@ -88,10 +85,7 @@ void Extrae_Java_Wait_end(void)
     if (EXTRAE_INITIALIZED())
     {
         DEBUG
-        if (!Extrae_get_pthread_tracing())
-            TRACE_MISCEVENTANDCOUNTERS(TIME, JAVA_JVMTI_WAIT_EV, EVT_END, EMPTY)
-        else
-            TRACE_PTHEVENTANDCOUNTERS(TIME, PTHREAD_JOIN_EV, EVT_END, EMPTY)
+        TRACE_MISCEVENTANDCOUNTERS(TIME, JAVA_JVMTI_WAIT_EV, EVT_END, EMPTY)
 
         Backend_Leave_Instrumentation ();
     }
