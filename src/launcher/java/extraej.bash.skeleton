@@ -239,7 +239,7 @@ ASPECTJRT_JAR=@sub_ASPECTJRT_JAR@
 if [[ "${#}" -eq 0 ]]; then
 	echo "Usage for Extrae/Java-based instrumenter:"
 	echo ""
-	echo "  "`basename ${0}`" {options} -- <JavaTarget>"
+	echo "  "`basename ${0}`" {options} -- <JavaClass>"
 	echo ""
 	echo "  where options:"
 	echo "    -v           Makes execution verbose"
