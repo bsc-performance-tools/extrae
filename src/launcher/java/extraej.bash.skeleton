@@ -165,7 +165,8 @@ parse_parameters () {
 			shift
 			reuse_dir=${1}
 		elif [[ "${1}" = "-jar" ]]; then
-			jarmode="yes"
+			shift
+            jartarget=${1}
 		elif [[ "${1}" = "--" ]]; then
 			application_separator_found="yes"
 			break
@@ -183,33 +184,30 @@ execute_java () {
 	shift
 	local preload=$1
 	shift
-	local options=""
-
-	if [[ "${jarmode}" = "yes" ]]; then
-		options=-jar
-	fi
 
 	# Check whether Extrae supported JVMTI
 	if [[ ! -r ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ]]; then
 		if [[ "${verbose}" = "yes" ]]; then
-			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} ${@}"
+			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\
+                ${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} ${@}"
 		fi
 
 		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
 		LD_PRELOAD=${preload} \
 		CLASSPATH=${cp} \
-		  ${JAVA} ${options} ${@}
+		  ${JAVA} ${@}
 	else
 		local agent=${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}
 
 		if [[ "${verbose}" = "yes" ]]; then
-			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}"
+			echo "Executing: LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:\
+                ${LD_LIBRARY_PATH} LD_PRELOAD=${preload} CLASSPATH=${cp} ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}"
 		fi
 
 		LD_LIBRARY_PATH=`dirname ${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH}`:${LD_LIBRARY_PATH} \
 		LD_PRELOAD=${preload} \
 		CLASSPATH=${cp} \
-		  ${JAVA} ${options} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}
+		  ${JAVA} -agentpath:${EXTRAEJ_LIBEXTRAEJVMTIAGENT_PATH} ${@}
 	fi
 }
 
@@ -224,7 +222,7 @@ extrae_function_list_enabled=""
 MemberArray=()
 keep_instrumented_files="no"
 verbose="no"
-jarmode="no"
+jartarget=""
 reuse_dir=""
 application_separator_found="no"
 
@@ -251,7 +249,7 @@ if [[ "${#}" -eq 0 ]]; then
 	echo
 	echo " Examples:"
 	echo "  \$\{EXTRAE_HOME\}/bin/"`basename ${0}`" -v -keep -- PiExample"
-	echo "  \$\{EXTRAE_HOME\}/bin/"`basename ${0}`" -v -jar -- PiExample.jar"
+	echo "  \$\{EXTRAE_HOME\}/bin/"`basename ${0}`" -v -jar PiExample.jar -- PiExample"
 	echo
 	echo " Note: Remember to indicate the configuration file through the EXTRAE_CONFIG_FILE environment variable"
 	die ""
@@ -283,6 +281,10 @@ do
 	shift
 done
 
+if [[ "${jartarget}" != "" ]]; then
+        CLASSPATH=${jartarget}:${CLASSPATH}
+fi
+
 # Do we support AspectJ?
 if [[ -x "${AJC}" ]]; then
 
@@ -296,14 +298,21 @@ if [[ -x "${AJC}" ]]; then
 			tmpdir=`mktemp -d extraej.XXXXXX`
 
 			generate_aspects
+
+            if [[ "${jartarget}" != "" ]]; then
+                inpath=${jartarget}
+            else
+                inpath=.
+            fi
 		
 			if [[ "${verbose}" = "yes" ]]; then
-				echo "Executing: CLASSPATH=${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} ${AJC} -inpath . -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
+				echo "Executing: CLASSPATH=${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
+                    ${AJC} -inpath ${inpath} -sourceroots ${tmpdir}/aspects -d ${tmpdir}/instrumented"
 			fi
 		
 			CLASSPATH=${ASPECTJRT_JAR}:${ASPECTWEAVER_JAR}:${EXTRAEJ_JAVATRACE_PATH}:${CLASSPATH} \
 			${AJC} \
-			 -inpath . \
+			 -inpath ${inpath} \
 			 -sourceroots ${tmpdir}/aspects \
 			 -d ${tmpdir}/instrumented
 			if [[ "${?}" -ne 0 ]]; then
