@@ -1,0 +1,8 @@
+This example is structured in two directories:
+
+  ld-preload/
+    Contains an example using the LD_PRELOAD feature and GPI-2 shared libraries
+
+	usage:
+	cd ld-preload && make
+	gaspi_run -m ~/machines ./trace.sh $PWD/write_all_mtt
