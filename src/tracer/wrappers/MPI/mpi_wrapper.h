@@ -147,6 +147,9 @@ void PMPI_Comm_Free_Wrapper (MPI_Fint *comm, MPI_Fint *ierror);
 void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
 
+void PMPI_Comm_Dup_With_Info_Wrapper (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror);
+
 void PMPI_Comm_Split_Wrapper (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
 
@@ -214,6 +217,8 @@ int MPI_Comm_create_C_Wrapper (MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm
 int MPI_Comm_free_C_Wrapper (MPI_Comm *comm);
 
 int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm);
+
+int MPI_Comm_dup_with_info_C_Wrapper (MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm);
 
 int MPI_Comm_split_C_Wrapper (MPI_Comm comm, int color, int key, MPI_Comm *newcomm);
 

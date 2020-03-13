@@ -441,6 +441,38 @@ void NAME_ROUTINE_C2F(mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 
 
 /******************************************************************************
+ ***  MPI_Comm_Dup_With_Info
+ ******************************************************************************/
+#if defined(HAVE_ALIAS_ATTRIBUTE)
+MPI_F_SYMS(mpi_comm_dup_with_info__,mpi_comm_dup_with_info_,MPI_COMM_DUP_WITH_INFO,mpi_comm_dup_with_info,(MPI_Fint *comm, MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror))
+
+void NAME_ROUTINE_F(mpi_comm_dup_with_info) (MPI_Fint *comm, MPI_Fint *info,
+	MPI_Fint *newcomm, MPI_Fint *ierror)
+#else
+void NAME_ROUTINE_C2F(mpi_comm_dup_with_info) (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror)
+#endif
+{
+
+        DLB(DLB_MPI_Comm_dup_with_info_F_enter, comm, info, newcomm, ierror);
+
+        if (mpitrace_on)
+        {
+                DEBUG_INTERFACE(ENTER)
+                Backend_Enter_Instrumentation ();
+                PMPI_Comm_Dup_With_Info_Wrapper (comm, info, newcomm, ierror);
+                Backend_Leave_Instrumentation ();
+                DEBUG_INTERFACE(LEAVE)
+        }
+        else
+                CtoF77 (pmpi_comm_dup_with_info) (comm, info, newcomm, ierror);
+
+        DLB(DLB_MPI_Comm_dup_with_info_F_leave);
+
+}
+
+
+/******************************************************************************
  ***  MPI_Comm_Split
  ******************************************************************************/
 #if defined(HAVE_ALIAS_ATTRIBUTE)
@@ -1070,6 +1102,36 @@ int NAME_ROUTINE_C(MPI_Comm_dup) (MPI_Comm comm, MPI_Comm *newcomm)
 
 	return res;
 }
+
+
+/******************************************************************************
+ ***  MPI_Comm_dup_with_info
+ ******************************************************************************/
+int NAME_ROUTINE_C(MPI_Comm_dup_with_info) (MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm)
+{
+	int res;
+
+	DLB(DLB_MPI_Comm_dup_with_info_enter, comm, info, newcomm);
+
+	if (mpitrace_on)
+	{
+		DEBUG_INTERFACE(ENTER)
+		Backend_Enter_Instrumentation ();
+		res = MPI_Comm_dup_with_info_C_Wrapper (comm, info, newcomm);
+		Backend_Leave_Instrumentation ();
+		DEBUG_INTERFACE(LEAVE)
+	}
+	else
+	{
+		res = PMPI_Comm_dup_with_info (comm, info, newcomm);
+	}
+
+	DLB(DLB_MPI_Comm_dup_with_info_leave);
+
+	return res;
+}
+
+
 
 /******************************************************************************
  ***  MPI_Comm_split

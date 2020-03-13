@@ -68,6 +68,10 @@ void DLB_MPI_Comm_dup_F_enter (MPI_Fint *comm, MPI_Fint *newcomm, MPI_Fint *ierr
 void DLB_MPI_Comm_dup_F_leave (void)__attribute__((weak));
 
 
+void DLB_MPI_Comm_dup_with_info_F_enter (MPI_Fint *comm, MPI_Fint *info, MPI_Fint *newcomm, MPI_Fint *ierror)__attribute__((weak));
+void DLB_MPI_Comm_dup_with_info_F_leave (void)__attribute__((weak));
+
+
 void DLB_MPI_Comm_split_F_enter (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key, MPI_Fint *newcomm, MPI_Fint *ierror)__attribute__((weak));
 void DLB_MPI_Comm_split_F_leave (void)__attribute__((weak));
 
@@ -150,6 +154,10 @@ void DLB_MPI_Comm_free_leave (void)__attribute__((weak));
 
 void DLB_MPI_Comm_dup_enter (MPI_Comm comm, MPI_Comm *newcomm)__attribute__((weak));
 void DLB_MPI_Comm_dup_leave (void)__attribute__((weak));
+
+
+void DLB_MPI_Comm_dup_with_info_enter (MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm)__attribute__((weak));
+void DLB_MPI_Comm_dup_with_info_leave (void)__attribute__((weak));
 
 
 void DLB_MPI_Comm_split_enter (MPI_Comm comm, int color, int key, MPI_Comm *newcomm)__attribute__((weak));

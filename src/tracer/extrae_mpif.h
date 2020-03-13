@@ -241,6 +241,9 @@ void CtoF77 (mpi_comm_free) (MPI_Fint *comm, MPI_Fint *ierror);
 void CtoF77 (mpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
 
+void CtoF77 (mpi_comm_dup_with_info) (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror);
+
 void CtoF77 (mpi_comm_split) (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);
 
@@ -720,6 +723,9 @@ void CtoF77 (pmpi_comm_free) (MPI_Fint *comm, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_comm_dup) (MPI_Fint *comm, MPI_Fint *newcomm,
 	MPI_Fint *ierror);
+
+void CtoF77 (pmpi_comm_dup_with_info) (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror);
 
 void CtoF77 (pmpi_comm_split) (MPI_Fint *comm, MPI_Fint *color, MPI_Fint *key,
 	MPI_Fint *newcomm, MPI_Fint *ierror);

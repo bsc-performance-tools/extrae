@@ -273,7 +273,8 @@ typedef enum
   MPI_FILE_WRITE_ORDERED_VAL,
   MPI_FILE_WRITE_ORDERED_BEGIN_VAL,
   MPI_FILE_WRITE_ORDERED_END_VAL,
-  MPI_FILE_WRITE_SHARED_VAL /* 210 */
+  MPI_FILE_WRITE_SHARED_VAL, /* 210 */
+  MPI_COMM_DUP_WITH_INFO_VAL
 }
 MPIVal;
 
@@ -407,6 +408,7 @@ MPIVal;
 #define  MPI_COMM_SIZE_LABEL               "MPI_Comm_size"
 #define  MPI_COMM_CREATE_LABEL             "MPI_Comm_create"
 #define  MPI_COMM_DUP_LABEL                "MPI_Comm_dup"
+#define  MPI_COMM_DUP_WITH_INFO_LABEL      "MPI_Comm_dup_with_info"
 #define  MPI_COMM_SPLIT_LABEL              "MPI_Comm_split"
 #define  MPI_COMM_SPLIT_TYPE_LABEL         "MPI_Comm_split_type"
 #define  MPI_COMM_SPAWN_LABEL              "MPI_Comm_spawn"

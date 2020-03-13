@@ -1491,6 +1491,34 @@ void PMPI_Comm_Dup_Wrapper (MPI_Fint *comm, MPI_Fint *newcomm,
 }
 
 
+/******************************************************************************
+ ***  PMPI_Comm_Dup_With_Info_Wrapper
+ ******************************************************************************/
+
+void PMPI_Comm_Dup_With_Info_Wrapper (MPI_Fint *comm, MPI_Fint *info, 
+	MPI_Fint *newcomm, MPI_Fint *ierror)
+{
+	MPI_Fint cnull;
+
+	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
+		EMPTY, EMPTY, EMPTY);
+
+	cnull = MPI_Comm_c2f(MPI_COMM_NULL);
+
+	CtoF77 (pmpi_comm_dup_with_info) (comm, info, newcomm, ierror);
+
+	if (*newcomm != cnull && *ierror == MPI_SUCCESS)
+	{
+		MPI_Comm comm_id = PMPI_Comm_f2c (*newcomm);
+		Trace_MPI_Communicator (comm_id, LAST_READ_TIME, TRUE);
+	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+		EMPTY);
+
+	updateStats_OTHER(global_mpi_stats);
+}
+
 
 /******************************************************************************
  ***  PMPI_Comm_Split_Wrapper
@@ -2346,24 +2374,52 @@ int MPI_Comm_free_C_Wrapper (MPI_Comm *comm)
 
 int MPI_Comm_dup_C_Wrapper (MPI_Comm comm, MPI_Comm *newcomm)
 {
-  int ierror;
+	int ierror;
 
 	TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_EV, EVT_BEGIN, EMPTY, EMPTY,
 		EMPTY, EMPTY, EMPTY);
 
-  ierror = PMPI_Comm_dup (comm, newcomm);
-  if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
-    Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+	ierror = PMPI_Comm_dup (comm, newcomm);
+	if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+	{
+		Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+	}
 
 	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
 		EMPTY);
 
 	updateStats_OTHER(global_mpi_stats);
 
-  return ierror;
+	return ierror;
 }
 
 
+/******************************************************************************
+ ***  MPI_Comm_dup_with_info_C_Wrapper
+ ******************************************************************************/
+
+int MPI_Comm_dup_with_info_C_Wrapper (MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm)
+{
+	int ierror;
+
+        TRACE_MPIEVENT (LAST_READ_TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_BEGIN, EMPTY, EMPTY,
+                EMPTY, EMPTY, EMPTY);
+
+	ierror = PMPI_Comm_dup_with_info (comm, info, newcomm);
+	if (*newcomm != MPI_COMM_NULL && ierror == MPI_SUCCESS)
+	{
+		Trace_MPI_Communicator (*newcomm, LAST_READ_TIME, FALSE);
+	}
+
+	TRACE_MPIEVENT (TIME, MPI_COMM_DUP_WITH_INFO_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY,
+                EMPTY);
+
+        updateStats_OTHER(global_mpi_stats);
+
+	return ierror;
+}
+
+    
 /******************************************************************************
  ***  MPI_Comm_split_C_Wrapper
  ******************************************************************************/

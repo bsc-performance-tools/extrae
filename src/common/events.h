@@ -325,6 +325,7 @@ enum {
 #define MPI_COMM_SIZE_EV             50000047
 #define MPI_COMM_CREATE_EV           50000048
 #define MPI_COMM_DUP_EV              50000049
+#define MPI_COMM_DUP_WITH_INFO_EV    50000057
 #define MPI_COMM_SPLIT_EV            50000050
 #define MPI_COMM_SPLIT_TYPE_EV       50000056
 #define MPI_COMM_SPAWN_EV            50000054
