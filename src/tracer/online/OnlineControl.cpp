@@ -86,8 +86,8 @@ unsigned long long AppResumedAt = 0;  // Timestamp when the previous analysis fi
 
 /* Tracing buffer for the online events */
 Buffer_t *OnlineBuffer = NULL;
-char      tmpBufferFile[TMP_DIR];
-char      finalBufferFile[TMP_DIR];
+char      tmpBufferFile[TMP_DIR_LEN];
+char      finalBufferFile[TMP_DIR_LEN];
 
 /* Prototypes for private functions */
 static void Stop_FE();

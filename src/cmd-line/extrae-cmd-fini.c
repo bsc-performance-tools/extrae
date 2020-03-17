@@ -42,6 +42,8 @@
 #include "extrae-cmd.h"
 #include "extrae-cmd-fini.h"
 
+#include "wrapper.h"
+
 int Extrae_CMD_Fini (int i, int argc, char *argv[])
 {
 	char HOST[1024];
@@ -53,9 +55,16 @@ int Extrae_CMD_Fini (int i, int argc, char *argv[])
 	if (0 == gethostname (HOST, sizeof(HOST)))
 	{
 		char TMPFILE[2048];
-		sprintf (TMPFILE, EXTRAE_CMD_FILE_PREFIX"%s", HOST);
-		if (unlink (TMPFILE) != 0)
-			fprintf (stderr, CMD_FINI " Error! Cannot remove temporal file\n");
+
+		char CMDPREFIX[TMP_DIR_LEN];
+		Extrae_get_cmd_prefix(CMDPREFIX);
+
+		sprintf(TMPFILE, "%s"EXTRAE_CMD_FILE_PREFIX"%s", CMDPREFIX, HOST);
+		if (unlink(TMPFILE) == -1)
+		{
+			int err = errno;
+			fprintf(stderr, PACKAGE_NAME"("CMD_FINI"): %s (%s)\n", strerror(err), TMPFILE);
+		}
 	}
 
 	return 0;

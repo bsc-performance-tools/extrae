@@ -30,6 +30,8 @@
 #ifdef HAVE_PTHREAD_H
 # include <pthread.h>
 #endif
+#include <errno.h>
+
 #include "clock.h"
 #include "threadid.h"
 #include "record.h"
@@ -108,12 +110,12 @@ void EXTRAE_SET_INITIALIZED (int);
 
 /****** Variable global per coneixer el nom del l'aplicacio *******/
 // Serveix per poder donar als fitxers generats el nom del programa
-#define TMP_DIR 1024
+#define TMP_DIR_LEN 1024
 extern char PROGRAM_NAME[256];
-extern char tmp_dir[TMP_DIR];
-extern char final_dir[TMP_DIR];
+extern char tmp_dir[TMP_DIR_LEN];
+extern char final_dir[TMP_DIR_LEN];
 extern char appl_name[512];
-extern char trace_home[TMP_DIR];
+extern char trace_home[TMP_DIR_LEN];
 
 #ifdef __cplusplus
 extern "C" {
@@ -222,6 +224,9 @@ void Backend_NotifyNewPthread (void);
 void Backend_CreatepThreadIdentifier (void);
 void Backend_Flush_pThread (pthread_t t);
 #endif
+
+/* Folder prefix for extrae-cmd */
+void Extrae_get_cmd_prefix(char *prefix);
 
 iotimer_t Backend_Get_Last_Enter_Time (void);
 iotimer_t Backend_Get_Last_Leave_Time (void);

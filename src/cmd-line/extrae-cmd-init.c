@@ -47,6 +47,8 @@
 #include "extrae-cmd.h"
 #include "extrae-cmd-init.h"
 
+#include "wrapper.h"
+
 static unsigned _TASKID = 0;
 static unsigned _NTHREADS = 1;
 static unsigned _NTASKS = 1;
@@ -76,18 +78,23 @@ static void Extrae_CMD_Init_dump_info (void)
 		char TMPFILE[2048];
 		int fd;
 
-		sprintf (TMPFILE, EXTRAE_CMD_FILE_PREFIX"%s", HOST);
+		char CMDPREFIX[TMP_DIR_LEN];
+		Extrae_get_cmd_prefix(CMDPREFIX);
+
+		sprintf(TMPFILE, "%s"EXTRAE_CMD_FILE_PREFIX"%s", CMDPREFIX, HOST);
 		fd = creat (TMPFILE, S_IRUSR|S_IWUSR);
-		if (fd >= 0)
+		if (fd != -1)
 		{
 			char buffer[1024];
 			sprintf (buffer, "%u\n%u\n%u\n", p, _TASKID, _NTHREADS);
 			if (write (fd, buffer, strlen(buffer)) != (ssize_t) strlen(buffer))
 				fprintf (stderr, CMD_INIT " Error! Failed to write on temporary file\n");
 			close (fd);
+		} else
+		{
+			int err = errno;
+			fprintf(stderr, PACKAGE_NAME"("CMD_INIT"): %s (%s)\n", strerror(err), TMPFILE);
 		}
-		else
-			fprintf (stderr, CMD_INIT " Error! Failed to create temporary file\n");
 	}
 }
 

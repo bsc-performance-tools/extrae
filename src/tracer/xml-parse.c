@@ -1666,7 +1666,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 	xmlNodePtr current_tag;
 	xmlDocPtr  xmldoc;
 	xmlNodePtr root_tag;
-	char cwd[TMP_DIR];
+	char cwd[TMP_DIR_LEN];
 	int DynamicMemoryInstrumentation = FALSE;
 	int IOInstrumentation = FALSE;
 	int SysCallInstrumentation = FALSE;
@@ -1714,7 +1714,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 				{
 					if (tracehome != NULL)
 					{
-						strncpy (trace_home, tracehome, TMP_DIR);
+						strncpy (trace_home, tracehome, TMP_DIR_LEN);
 						mfprintf (stdout, PACKAGE_NAME": Tracing package is located on %s\n", trace_home);
 					}
 					else

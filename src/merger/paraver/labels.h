@@ -66,7 +66,7 @@ typedef struct fcounter_t {
 
 #define LET_SPACES(fd) fprintf((fd),"\n\n")
 
-#define TYPE_LBL   150
+#define TYPE_LBL   256
 typedef struct color_t
 {
   int value;
@@ -76,7 +76,7 @@ typedef struct color_t
 color_t;
 
 
-#define EVENT_LBL   150
+#define EVENT_LBL   256
 typedef struct evttype_t
 {
   int type;
@@ -85,7 +85,7 @@ typedef struct evttype_t
 evttype_t;
 
 
-#define VALUE_LBL   150
+#define VALUE_LBL   256
 typedef struct value_t
 {
   int value;

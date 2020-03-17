@@ -255,7 +255,7 @@ int *TracingBitmap = NULL;
 int mpitrace_on = FALSE;
 
 /* Where is the tracing facility located                                 */
-char trace_home[TMP_DIR];
+char trace_home[TMP_DIR_LEN];
 
 /* Time of the first event (APPL_EV) */
 unsigned long long ApplBegin_Time = 0;
@@ -304,8 +304,8 @@ static unsigned maximum_NumOfThreads = 1;
 #define TMP_NAME_LENGTH     512
 #define APPL_NAME_LENGTH    512
 char appl_name[APPL_NAME_LENGTH];
-char final_dir[TMP_DIR];
-char tmp_dir[TMP_DIR];
+char final_dir[TMP_DIR_LEN];
+char tmp_dir[TMP_DIR_LEN];
 
 
 /*
@@ -336,7 +336,7 @@ PENDING_TRACE_CPU_EVENT(int thread_id, iotimer_t current_time)
 
 int Extrae_Get_FinalDir_BlockSize(void)
 { return 128; }
-static char _get_finaldir[TMP_DIR];
+static char _get_finaldir[TMP_DIR_LEN];
 char *Get_FinalDir (int task)
 {
 	sprintf (_get_finaldir, "%s/set-%d", final_dir,
@@ -352,7 +352,7 @@ char *Extrae_Get_FinalDirNoTask (void)
 
 int Extrae_Get_TemporalDir_BlockSize(void)
 { return 128; }
-static char _get_temporaldir[TMP_DIR];
+static char _get_temporaldir[TMP_DIR_LEN];
 char *Get_TemporalDir (int task)
 {
 	sprintf (_get_temporaldir, "%s/set-%d", tmp_dir,
@@ -367,7 +367,7 @@ char *Extrae_Get_TemporalDirNoTask (void)
 #endif
 
 /* Know if the run is controlled by a creation of a file  */
-static char ControlFileName[TMP_DIR];
+static char ControlFileName[TMP_DIR_LEN];
 static int CheckForControlFile = FALSE;
 static int CheckForGlobalOpsTracingIntervals = FALSE;
 
@@ -538,6 +538,14 @@ void Extrae_set_ApplicationIsSHMEM (int b)
         Extrae_Application_isSHMEM = b;
 }
 
+/* extrae_cmd tmpdir */
+
+static char xtr_cmd_prefix[TMP_DIR_LEN];
+void Extrae_get_cmd_prefix(char *prefix)
+{
+	strncpy(prefix, xtr_cmd_prefix, TMP_DIR_LEN);
+}
+
 
 /******************************************************************************
  *** Store the first mechanism to initialize the tracing 
@@ -641,7 +649,7 @@ static int read_environment_variables (int me)
 #endif
   char *dir, *str, *res_cwd;
 	char *file;
-	char cwd[TMP_DIR];
+	char cwd[TMP_DIR_LEN];
 
 	/* Check if the tracing is enabled. If not, just exit from here */
 	str = getenv ("EXTRAE_ON");
@@ -656,7 +664,7 @@ static int read_environment_variables (int me)
 	str = getenv ("EXTRAE_HOME");
 	if (str != NULL)
 	{
-		strncpy (trace_home, str, TMP_DIR);
+		strncpy (trace_home, str, TMP_DIR_LEN);
 	}
 	else
 	{
@@ -1011,6 +1019,13 @@ static int read_environment_variables (int me)
 			if (me == 0)
 				fprintf (stderr,"\nWARNING: Value '%s' for EXTRAE_SIGNAL_FLUSH is unrecognized\n", str);
 		}
+	}
+
+	/* Set extrae-cmd folder prefix */
+	str = getenv("EXTRAE_CMD_PREFIX");
+	if (str != NULL)
+	{
+		snprintf(xtr_cmd_prefix, sizeof(xtr_cmd_prefix), "%s/", str);
 	}
 
 	/* Add sampling capabilities */
@@ -1601,7 +1616,7 @@ int Backend_preInitialize (int me, int world_size, const char *config_file, int 
 {
 	unsigned u;
 	int runningInDynInst = FALSE;
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 #if defined(OMP_SUPPORT) 
 	char *omp_value;
 	char *new_num_omp_threads_clause;
@@ -2190,8 +2205,8 @@ void Backend_Finalize_close_files(void)
 static void Backend_Finalize_close_mpits (pid_t pid, int thread, int append)
 {
 	int r;
-	char trace[TMP_DIR];
-	char tmp_name[TMP_DIR];
+	char trace[TMP_DIR_LEN];
+	char tmp_name[TMP_DIR_LEN];
 	unsigned initialTASKID;
 	char hostname[1024];
 
@@ -2693,7 +2708,7 @@ void Extrae_AddTypeValuesEntryToGlobalSYM (char code_type, int type, char *descr
 {
 	#define LINE_SIZE 2048
 	char line[LINE_SIZE];
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 	int fd;
 
 	ASSERT(strlen(description)<LINE_SIZE, "Description for type is too large");
@@ -2749,7 +2764,7 @@ void Extrae_AddTypeValuesEntryToLocalSYM (char code_type, int type, char *descri
 {
 	#define LINE_SIZE 2048
 	char line[LINE_SIZE];
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 	int fd;
 	char hostname[1024];
 
@@ -2809,7 +2824,7 @@ void Extrae_AddFunctionDefinitionEntryToLocalSYM (char code_type, void *address,
 {
 	#define LINE_SIZE 2048
 	char line[LINE_SIZE];
-	char trace_sym[TMP_DIR];
+	char trace_sym[TMP_DIR_LEN];
 	int fd;
 	char hostname[1024];
 
@@ -2898,7 +2913,7 @@ static void Extrae_getExecutableInfo (void)
  */
 void Backend_updateTaskID (void)
 {
-	char file1[TMP_DIR], file2[TMP_DIR];
+	char file1[TMP_DIR_LEN], file2[TMP_DIR_LEN];
 	unsigned thread;
 	char hostname[1024];
 
