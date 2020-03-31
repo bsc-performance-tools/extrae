@@ -440,6 +440,26 @@ AC_DEFUN([AX_PROG_XML2],
 #
 # AX_PROG_BINUTILS
 # ----------------
+
+# receives "function" and defines "HAVE_FUNCTION"
+AC_DEFUN([TEST_BFD_SECTION_FUNCTION],
+[
+         AC_MSG_CHECKING([whether $1 is defined in bfd.h])
+	 AC_LINK_IFELSE(
+	   [AC_LANG_PROGRAM([[ #include <bfd.h> ]],
+             [[
+                 asection *section;
+                 int result = $1(section);
+	     ]])],
+           [
+	     AC_DEFINE(m4_join(_, [HAVE], m4_toupper($1)), [1], [Defined to 1 if bfd.h defines $1])
+             AC_MSG_RESULT([yes])
+	   ],[
+	     AC_MSG_RESULT([no])
+           ]
+	 )
+])
+
 AC_DEFUN([AX_PROG_BINUTILS],
 [
    BFD_INSTALLED="no"
@@ -683,52 +703,26 @@ AC_DEFUN([AX_PROG_BINUTILS],
 
          AC_DEFINE([HAVE_BFD], 1, [Define to 1 if BFD is installed in the system])
 
-         AC_MSG_CHECKING([whether bfd_get_section_size is defined in bfd.h])
-         AC_TRY_LINK(
-           [ #include <bfd.h> ],
-           [ 
-               asection *section;
-               int result = bfd_get_section_size(section); 
-           ],
-           [ bfd_get_section_size_found="yes"]
-         )
-         if test "${bfd_get_section_size_found}" = "yes" ; then
-            AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE, [1], [Defined to 1 if bfd.h defines bfd_get_section_size])
-            AC_MSG_RESULT([yes])
-         else
-            AC_MSG_RESULT([no])
-         fi
+	 # Test needed section functions
+	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_vma], [bfd_section_vma])
+	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_size], [bfd_section_size])
+	 m4_map_args([TEST_BFD_SECTION_FUNCTION], [bfd_get_section_flags], [bfd_section_flags])
 
-         AC_MSG_CHECKING([whether bfd_get_section_size_before_reloc is defined in bfd.h])
-         AC_TRY_LINK(
-           [ #include <bfd.h> ],
-           [ 
-               asection *section;
-               int result = bfd_get_section_size_before_reloc(section); 
-           ],
-           [ bfd_get_section_size_before_reloc_found="yes"]
-         )
-         if test "${bfd_get_section_size_before_reloc_found}" = "yes" ; then
-            AC_DEFINE(HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC, [1], [Defined to 1 if bfd.h defines bfd_get_section_size_before_reloc])
-            AC_MSG_RESULT([yes])
-         else
-            AC_MSG_RESULT([no])
-         fi
+	 TEST_BFD_SECTION_FUNCTION([bfd_get_section_size_before_reloc])
 
          AC_MSG_CHECKING([whether bfd_demangle is defined in bfd.h])
-         AC_TRY_LINK(
-           [ #include <bfd.h> ],
+	 AC_LINK_IFELSE(
+	   [AC_LANG_PROGRAM([[ #include <bfd.h> ]],
+             [[
+	         char *res = bfd_demangle ((void*)0, "", 0);
+	     ]])],
            [
-               char *res = bfd_demangle ((void*)0, "", 0);
-           ],
-           [ bfd_demangle_found="yes"]
-         )
-         if test "${bfd_demangle_found}" = "yes" ; then
-            AC_DEFINE(HAVE_BFD_DEMANGLE, [1], [Defined to 1 if bfd.h contains bfd_demangle])
-            AC_MSG_RESULT([yes])
-         else
-            AC_MSG_RESULT([no])
-         fi
+	     AC_DEFINE(HAVE_BFD_DEMANGLE, [1], [Defined to 1 if bfd.h contains bfd_demangle])
+             AC_MSG_RESULT([yes])
+	   ],[
+	     AC_MSG_RESULT([no])
+           ]
+	 )
 
       else
          AC_MSG_RESULT([no, see config.log for further details])
