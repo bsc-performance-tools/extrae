@@ -233,33 +233,47 @@ asymbol **BFDmanager_getDefaultSymbols (void)
  */
 static void BFDmanager_findAddressInSection (bfd * abfd, asection * section, PTR data)
 {
-#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
+#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	bfd_size_type size;
 #endif
+
 	bfd_vma vma;
 	BFDmanager_symbolInfo_t *symdata = (BFDmanager_symbolInfo_t*) data;
 
 	if (symdata->found)
 		return;
 
+#if HAVE_BFD_GET_SECTION_FLAGS
 	if ((bfd_get_section_flags (abfd, section) & SEC_ALLOC) == 0)
 		return;
+#elif HAVE_BFD_SECTION_FLAGS
+	if ((bfd_section_flags (section) & SEC_ALLOC) == 0)
+		return;
+#endif
 
+#ifdef HAVE_BFD_GET_SECTION_VMA
 	vma = bfd_get_section_vma (abfd, section);;
+#elif HAVE_BFD_SECTION_VMA
+	vma = bfd_section_vma (section);;
+#else
+	FATAL_ERROR("Problem no section_vma functuion defined");
+#endif
 
 	if (symdata->pc < vma)
 		return;
 
+#if HAVE_BFD_GET_SECTION_SIZE || HAVE_BFD_SECTION_SIZE || HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
+
 #if HAVE_BFD_GET_SECTION_SIZE
 	size = bfd_get_section_size (section);
-	if (symdata->pc >= vma + size)
-		return;
+#elif HAVE_BFD_SECTION_SIZE
+	size = bfd_section_size (section);
 #elif HAVE_BFD_GET_SECTION_SIZE_BEFORE_RELOC
 	size = bfd_get_section_size_before_reloc (section);
+#endif
+
 	if (symdata->pc >= vma + size)
 		return;
-#else
-	/* Do nothing? */
 #endif
 
 	symdata->found = bfd_find_nearest_line (abfd, section, symdata->symbols,
