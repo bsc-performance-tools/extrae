@@ -2812,65 +2812,96 @@ void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
 
 void Extrae_MPI_prepareDirectoryStructures (int me, int world_size)
 {
+	int i = 0;
+
 	/* Before proceeding, check if it's ok to call MPI. We might support
 	   MPI but maybe it's not initialized at this moment (nanos+mpi e.g.) */
 	int mpi_initialized;
 	PMPI_Initialized (&mpi_initialized);
 
+	/* If we are working on a global FS and EXTRAE_ENFORCE_FS_SYNC is set, after process 0 
+ 	 * creates the set-* directories, all other processes are forced to wait until they see
+ 	 * the folders created in the FS. This is useful in  environments where file synchronization
+ 	 * is not guaranteed (i.e. NFS takes a while to update and see a folder created from another node)
+ 	 */
+	char *env_enforce_fs_sync = getenv("EXTRAE_ENFORCE_FS_SYNC");
+	int enforce_fs_sync = (env_enforce_fs_sync != NULL)                && 
+	                       ((atoi(env_enforce_fs_sync) == 1)           || 
+	                        (strcmp(env_enforce_fs_sync, "TRUE") == 0) ||
+	                        (strcmp(env_enforce_fs_sync, "true") == 0));
+
 	if (mpi_initialized && world_size > 1)
 	{
 		/* If the directory is shared, then let task 0 create all temporal
-	  	 directories. This proves a significant speedup in GPFS */
+	  	 * directories. This proves a significant speedup in GPFS 
+	  	 */
 		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_TemporalDirNoTask()))
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n",
-				  Extrae_Get_TemporalDirNoTask());
-			if (me == 0)
 			{
-				int i;
-				for (i = 0; i < world_size; i+=Extrae_Get_TemporalDir_BlockSize())
+				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is shared among processes.\n", Extrae_Get_TemporalDirNoTask());
+			}
+
+			for (i = 0; i < world_size; i+=Extrae_Get_TemporalDir_BlockSize())
+			{
+				if (me == 0)
+				{
 					Backend_createExtraeDirectory (i, TRUE);
+				}
+				else if (enforce_fs_sync)
+				{
+					Backend_syncOnExtraeDirectory (i, TRUE);
+				}
 			}
 		}
 		else
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n",
-				  Extrae_Get_TemporalDirNoTask());
+			{
+				fprintf (stdout, PACKAGE_NAME": Temporal directory (%s) is private among processes.\n", Extrae_Get_TemporalDirNoTask());
+			}
+
 			Backend_createExtraeDirectory (me, TRUE);
 		}
 	
-		/* Now, wait for every process to reach this point, so directories are
-		   created */
+		/* Wait for every process to reach this point, so directories are created */
+		
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
 	
 		/* If the directory is shared, then let task 0 create all final
-		   directories. This proves a significant speedup in GPFS */
+		 * directories. This proves a significant speedup in GPFS 
+		 */ 
 		if (ExtraeUtilsMPI_CheckSharedDisk (Extrae_Get_FinalDirNoTask()))
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n",
-				  Extrae_Get_FinalDirNoTask());
-			if (me == 0)
 			{
-				int i;
-				for (i = 0; i < world_size; i+=Extrae_Get_FinalDir_BlockSize())
+				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is shared among processes.\n", Extrae_Get_FinalDirNoTask());
+			}
+
+			for (i = 0; i < world_size; i+=Extrae_Get_FinalDir_BlockSize())
+			{
+				if (me == 0) 
+				{
 					Backend_createExtraeDirectory (i, FALSE);
+				}
+				else if (enforce_fs_sync)
+				{
+					Backend_syncOnExtraeDirectory (i, FALSE);
+				}
 			}
 		}
 		else
 		{
 			if (me == 0)
-				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n",
-				  Extrae_Get_FinalDirNoTask());
+			{
+				fprintf (stdout, PACKAGE_NAME": Final directory (%s) is private among processes.\n", Extrae_Get_FinalDirNoTask());
+			}
 			Backend_createExtraeDirectory (me, FALSE);
 		}
 	
-		/* Now, wait for every process to reach this point, so directories are
-		   created */
+		/* Wait for every process to reach this point, so directories are created */
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);
 		PMPI_Barrier (MPI_COMM_WORLD);

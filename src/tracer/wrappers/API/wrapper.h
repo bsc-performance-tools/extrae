@@ -53,6 +53,9 @@
 #define MAX_FUNCTION_NAME 450
 #define MAX_FUNCTIONS 300
 
+#define FS_SYNC_MAX_ATTEMPTS 60
+#define FS_SYNC_RETRY_IN     1
+
 extern unsigned long long last_mpi_exit_time;
 extern unsigned long long last_mpi_begin_time;
 extern unsigned long long CPU_Burst_Threshold;
@@ -229,6 +232,7 @@ void Backend_setInInstrumentation (unsigned thread, int ininstrumentation);
 void Backend_setInSampling (unsigned thread, int insampling);
 void Backend_ChangeNumberOfThreads_InInstrumentation (unsigned nthreads);
 void Backend_createExtraeDirectory (int taskid, int Temporal);
+void Backend_syncOnExtraeDirectory (int taskid, int Temporal);
 int Extrae_Get_FinalDir_BlockSize(void);
 int Extrae_Get_TemporalDir_BlockSize(void);
 char *Extrae_Get_FinalDirNoTask (void);

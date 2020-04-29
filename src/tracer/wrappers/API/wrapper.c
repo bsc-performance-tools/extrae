@@ -567,7 +567,7 @@ void Backend_createExtraeDirectory (int taskid, int Temporal)
 	int attempts = 100;
 	char *dirname;
 
-	dirname = (Temporal)?Get_TemporalDir(taskid):Get_FinalDir(taskid);
+	dirname = (Temporal) ? Get_TemporalDir(taskid) : Get_FinalDir(taskid);
 
 	ret = __Extrae_Utils_mkdir_recursive (dirname);
 	while (!ret && attempts > 0)
@@ -580,6 +580,52 @@ void Backend_createExtraeDirectory (int taskid, int Temporal)
 		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create temporal directory %s\n", taskid, dirname);
 	else if (!ret && attempts == 0 && !Temporal)
 		fprintf (stderr, PACKAGE_NAME ": Error! Task %d was unable to create final directory %s\n", taskid, dirname);
+}
+
+void Backend_syncOnExtraeDirectory (int taskid, int Temporal)
+{
+	char *dirname;
+	int seen_dir = 0;
+	int attempts = 0;
+
+	dirname = (Temporal) ? Get_TemporalDir(taskid) : Get_FinalDir(taskid);
+
+	do
+	{
+		if (attempts > 0) sleep(FS_SYNC_RETRY_IN);
+
+		struct stat st;
+		int err = stat(dirname, &st);
+		if (-1 == err) 
+		{
+			// set-* folder still not exists
+			if (attempts == FS_SYNC_MAX_ATTEMPTS)
+			{
+				fprintf(stderr, PACKAGE_NAME ": Aborting due to task %d timeout waiting on file system synchronization. Folder is not ready: %s\n", taskid, dirname);
+				exit(-1);
+			}
+			if (attempts % (5 * taskid) == 0)
+			{
+				fprintf(stderr, PACKAGE_NAME ": Task %d is waiting on folder to be ready (%d second(s) elapsed): %s\n", taskid, attempts, dirname);
+			}
+		} 
+		else 
+		{
+			if (S_ISDIR(st.st_mode)) 
+			{
+				// set-* folder is accessible
+				seen_dir = 1;
+			} 
+			else 
+			{
+				// exists but is no dir
+       				fprintf(stderr, PACKAGE_NAME ": Task %d cannot access folder: %s: There's a file with the same name!\n", taskid, dirname);
+				exit(-1);
+			}
+		}
+		attempts ++;
+	} while (!seen_dir);
+
 }
 
 /******************************************************************************
