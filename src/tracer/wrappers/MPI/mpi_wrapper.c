@@ -158,6 +158,9 @@ int   SpawnGroup       = 0;
 int  *ParentWorldRanks = NULL;    /* World ranks of the parent processes 
   (index is local rank for the parent process, value is the parent world rank) */
 unsigned long long SpawnOffset = 0;
+
+// MPI_Comm attribute to mark intercommunicators created through MPI_Comm_spawn* calls
+int XTR_SPAWNED_INTERCOMM;
 #endif
 
 char *Extrae_core_get_mpits_file_name (void)
@@ -170,8 +173,7 @@ xtr_hash_t *hash_messages = NULL; // MPI_Message stored in a hash in order to se
 
 PR_Queue_t PR_queue;              // Persistent requests queue
 static int *ranks_global;         // Global ranks vector (from 1 to NProcs)
-static MPI_Group grup_global;     // Group attached to the MPI_COMM_WORLD
-static MPI_Fint grup_global_F;    // Group attached to the MPI_COMM_WORLD (Fortran)
+static MPI_Group CommWorldRanks;     // Group attached to the MPI_COMM_WORLD
 
 #if defined(IS_BGL_MACHINE)       // BGL, s'intercepten algunes crides barrier dins d'altres cols */
 static int BGL_disable_barrier_inside = 0;
@@ -214,15 +216,15 @@ int getMsgSizeFromCountAndDatatype(int count, MPI_Datatype datatype)
  ***  translateLocalToGlobalRank
  ******************************************************************************/
 
-void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *receiver, int send_or_recv)
+void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int partner_local, int *partner_world, int send_or_recv)
 {
 	int inter = 0;
 
-	/* If rank in MPI_COMM_WORLD or if dest is PROC_NULL or any source,
+	/* If rank in MPI_COMM_WORLD or if partner_local is PROC_NULL or any source,
 	   return value directly */
-	if (comm == MPI_COMM_WORLD || comm == MPI_COMM_NULL || dest == MPI_PROC_NULL || dest == MPI_ANY_SOURCE)
+	if (comm == MPI_COMM_WORLD || comm == MPI_COMM_NULL || partner_local == MPI_PROC_NULL || partner_local == MPI_ANY_SOURCE)
 	{
-		*receiver = dest;
+		*partner_world = partner_local;
 	}
 	else
 	{
@@ -230,46 +232,52 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *
 
 		if (inter)
 		{
-                        MPI_Comm parent;
-                        PMPI_Comm_get_parent(&parent);
+			// The communicator is an intercommunicator
 
-                        /* The communicator is an intercommunicator */
-                        if (send_or_recv == OP_TYPE_SEND)
-                        {
-                                if (comm == parent)
-                                {
-                                        /* Send to parent -- Translate the local rank for the parent into its MPI_COMM_WORLD rank */
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-                                        if (ParentWorldRanks != NULL)
-                                                *receiver = ParentWorldRanks[dest];
-                                        else
+			// The intercommunicator was created through MPI_Comm_spawn => each process has its own MPI_COMM_WORLD
+			
+			int *was_spawned, flag_spawned = FALSE;
+			PMPI_Comm_get_attr(comm, XTR_SPAWNED_INTERCOMM, &was_spawned, &flag_spawned);
+
+			MPI_Comm parent;
+			PMPI_Comm_get_parent(&parent);
+
+			if (flag_spawned && *was_spawned)
+			{
+				// Parent process sends/recvs to/from children -- When interacting with an specific child, there's no need to translate ranks
+				*partner_world = partner_local;
+			}
+			else if ((comm == parent) && (parent != MPI_COMM_NULL))
+			{
+				// Child process sends/recvs to/from parent -- Translate the local parent rank into its MPI_COMM_WORLD rank
+				if (ParentWorldRanks != NULL)
+					*partner_world = ParentWorldRanks[partner_local];
+				else
+					*partner_world = partner_local; // Should never happen
+			}
+			else
 #endif
-                                                *receiver = dest; /* Should never happen */
-                                }
-                                else
-                                {
-                                        /* Send to children -- When sending to specific childen X, there's no need to translate ranks */
-                                        *receiver = dest;
-                                }
-                        }
-                        else
-                        {
-                                if (comm == parent)
-                                {
-                                        /* Recv from parent -- Translate the local rank for the parent into its MPI_COMM_WORLD rank */
-#if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
-                                        if (ParentWorldRanks != NULL)
-                                                *receiver = ParentWorldRanks[dest];
-                                        else
-#endif
-                                                *receiver = dest; /* Should never happen */
-                                }
-                                else
-                                {
-                                        /* Recv from children -- When receiving from specific childen X, there's no need to translate ranks */
-                                        *receiver = dest;
-                                }
-                        }
+			{
+				// The intercommunicator was created through MPI_Intercomm_create => there's only 1 MPI_COMM_WORLD 
+
+				MPI_Group remote_group;
+				int remote_group_size;
+				int *local_ranks, *world_ranks;
+
+				PMPI_Comm_remote_group(comm, &remote_group);
+				PMPI_Group_size(remote_group, &remote_group_size);
+				local_ranks = (int *)malloc(sizeof(int) * remote_group_size);
+				world_ranks = (int *)malloc(sizeof(int) * remote_group_size);
+				for (int i = 0; i < remote_group_size; i++) local_ranks[i] = i;
+
+				PMPI_Group_translate_ranks (remote_group, remote_group_size, local_ranks, CommWorldRanks, world_ranks); 
+
+				*partner_world = world_ranks[partner_local];
+
+				free(local_ranks);
+				free(world_ranks);
+			}
 		}
 		else
 		{
@@ -284,13 +292,13 @@ void translateLocalToGlobalRank (MPI_Comm comm, MPI_Group group, int dest, int *
 			if ((group != MPI_GROUP_NULL) && (group != MPI_GROUP_EMPTY))
 			{
 				// Translate the rank 
-				PMPI_Group_translate_ranks (group, 1, &dest, grup_global, receiver); 
-				if (*receiver == MPI_UNDEFINED) *receiver = dest;
+				PMPI_Group_translate_ranks (group, 1, &partner_local, CommWorldRanks, partner_world); 
+				if (*partner_world == MPI_UNDEFINED) *partner_world = partner_local;
 				PMPI_Group_free (&group);
 			}
 			else
 			{
-				*receiver = dest;
+				*partner_world = partner_local;
 			}
 		}
 	}
@@ -437,11 +445,10 @@ static void InitMPICommunicators (void)
 	for (i = 0; i < Extrae_get_num_tasks(); i++)
 		ranks_global[i] = i;
 
-	PMPI_Comm_group (MPI_COMM_WORLD, &grup_global);
-	grup_global_F = MPI_Group_c2f(grup_global);
+	PMPI_Comm_group (MPI_COMM_WORLD, &CommWorldRanks);
 
 	int s = 0;
-	PMPI_Group_size( grup_global, &s );
+	PMPI_Group_size( CommWorldRanks, &s );
 }
 
 
@@ -797,9 +804,10 @@ static void MPI_Generate_Spawns_List (void)
  * writes this information in the SpawnsFileName file, which will be later processed by
  * the merger, and synchronizes with the spawned processes' MPI_Init.
  */
-static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm intercomm, MPI_Comm spawn_comm)
+static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm *intercomm_ptr, MPI_Comm spawn_comm)
 {
   int i = 0;
+  MPI_Comm intercomm = *intercomm_ptr;
 
   if ((intercomm != MPI_COMM_NULL) && (spawn_comm != MPI_COMM_NULL))
   {
@@ -811,8 +819,16 @@ static void Spawn_Parent_Sync (unsigned long long SpawnStartTime, MPI_Comm inter
     int        world_rank = TASKID;
     unsigned long long ChildSpawnOffset = 0;
 
-	UNREFERENCED_PARAMETER(SpawnStartTime);
-    
+    UNREFERENCED_PARAMETER(SpawnStartTime);
+ 
+    /* Set the attribute XTR_SPAWNED_INTERCOMM in intercomm to mark that this intercommunicator belongs
+     * to the parent process of an MPI_Comm_spawn operation. We need this at translateLocalToGlobalRank
+     * to know how to translate the local into world ranks.
+     */
+    int *was_spawned;
+    *was_spawned = 1;
+    PMPI_Comm_set_attr(*intercomm_ptr, XTR_SPAWNED_INTERCOMM, &was_spawned);
+
     PMPI_Comm_rank(spawn_comm, &my_rank);
 
     /* Register the intercommunicator */
@@ -1049,6 +1065,7 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
@@ -1169,6 +1186,7 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
@@ -1522,7 +1540,8 @@ void PMPI_Comm_Spawn_Wrapper (char *command, char *argv, MPI_Fint *maxprocs, MPI
 
     MPI_Comm comm_c;
     comm_c = PMPI_Comm_f2c(*comm);
-    Spawn_Parent_Sync (SpawnStartTime, intercomm_c, comm_c);
+    Spawn_Parent_Sync (SpawnStartTime, &intercomm_c, comm_c);
+    *intercomm = PMPI_Comm_c2f(comm_c); // Spawn_Parent_Sync sets the XTR_SPAWNED_INTERCOMM attribute in comm_c, copy this attribute to resulting intercomm
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1549,7 +1568,8 @@ void PMPI_Comm_Spawn_Multiple_Wrapper (MPI_Fint *count, char *array_of_commands,
     MPI_Comm comm_c;
     comm_c = PMPI_Comm_f2c(*comm);
 
-    Spawn_Parent_Sync (SpawnStartTime, intercomm_c, comm_c);
+    Spawn_Parent_Sync (SpawnStartTime, &intercomm_c, comm_c);
+    *intercomm = PMPI_Comm_c2f(comm_c); // Spawn_Parent_Sync sets the XTR_SPAWNED_INTERCOMM attribute in comm_c, copy this attribute to resulting intercomm
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -1881,6 +1901,7 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
@@ -1999,6 +2020,7 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 
 #if defined(MPI_SUPPORTS_MPI_COMM_SPAWN)
 	PMPI_Comm_get_parent (&cparent);
+	PMPI_Comm_create_keyval (MPI_COMM_DUP_FN, MPI_COMM_NULL_DELETE_FN, &XTR_SPAWNED_INTERCOMM, (void *)0);
 #endif
 	MPI_Generate_Task_File_List (TasksNodes, cparent != MPI_COMM_NULL);
 
@@ -2352,7 +2374,7 @@ int MPI_Comm_spawn_C_Wrapper (char *command, char **argv, int maxprocs, MPI_Info
 
   if (ierror == MPI_SUCCESS)
   {
-    Spawn_Parent_Sync (SpawnStartTime, *intercomm, comm);
+    Spawn_Parent_Sync (SpawnStartTime, intercomm, comm);
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -2379,7 +2401,7 @@ int MPI_Comm_spawn_multiple_C_Wrapper (int count, char *array_of_commands[], cha
 
   if (ierror == MPI_SUCCESS)
   {
-    Spawn_Parent_Sync (SpawnStartTime, *intercomm, comm);
+    Spawn_Parent_Sync (SpawnStartTime, intercomm, comm);
   }
 
   TRACE_MPIEVENT (TIME, MPI_COMM_SPAWN_MULTIPLE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
@@ -2738,7 +2760,7 @@ void Trace_MPI_Communicator (MPI_Comm newcomm, UINT64 time, int trace)
 			int ranks_aux[num_tasks];
 	
 			/* Obtain task id of each element */
-			ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, grup_global, ranks_aux);
+			ierror = PMPI_Group_translate_ranks (group, num_tasks, ranks_global, CommWorldRanks, ranks_aux);
 			MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 	
 			FORCE_TRACE_MPIEVENT (time, MPI_ALIAS_COMM_CREATE_EV, EVT_BEGIN, EMPTY, num_tasks, EMPTY, newcomm, trace);
@@ -2787,11 +2809,11 @@ void Trace_MPI_InterCommunicator (MPI_Comm newcomm, MPI_Comm local_comm,
 	MPI_CHECK(ierror, PMPI_Comm_group);
 
 	ierror = PMPI_Group_translate_ranks (l_group, 1, &local_leader,
-	 grup_global, &t_local_leader);
+	 CommWorldRanks, &t_local_leader);
 	MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 
 	ierror = PMPI_Group_translate_ranks (r_group, 1, &remote_leader,
-	  grup_global, &t_remote_leader);
+	  CommWorldRanks, &t_remote_leader);
 	MPI_CHECK(ierror, PMPI_Group_translate_ranks);
 
 	ierror = PMPI_Group_free (&l_group);
