@@ -604,7 +604,7 @@ void Backend_syncOnExtraeDirectory (int taskid, int Temporal)
 				fprintf(stderr, PACKAGE_NAME ": Aborting due to task %d timeout waiting on file system synchronization. Folder is not ready: %s\n", taskid, dirname);
 				exit(-1);
 			}
-			if (attempts % (5 * taskid) == 0)
+			if (attempts % (5 * (taskid+1)) == 0)
 			{
 				fprintf(stderr, PACKAGE_NAME ": Task %d is waiting on folder to be ready (%d second(s) elapsed): %s\n", taskid, attempts, dirname);
 			}
