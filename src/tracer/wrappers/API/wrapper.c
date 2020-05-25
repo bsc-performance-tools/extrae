@@ -1541,30 +1541,44 @@ void Backend_Flush_pThread (pthread_t t)
 	unsigned u;
 
 	for (u = 0; u < get_maximum_NumOfThreads(); u++)
+	{
 		if (pThreads[u] == t)
 		{
 			pThreads[u] = (pthread_t)0; // This slot won't be used in the future
 
+			// Protect race condition with the master thread flushing the buffers at
+			// the end of this pthread and the process
 			pthread_mutex_lock(&pthreadFreeBuffer_mtx);
 
-			if (TRACING_BUFFER(u) != NULL)
+			// TracingBuffer may have been already free'd by the master thread if the process finished
+			if (TracingBuffer != NULL)
 			{
-				Buffer_Flush(TRACING_BUFFER(u));
-				Backend_Finalize_close_mpits (getpid(), u, FALSE);
+				if (TRACING_BUFFER(u) != NULL)
+				{
+					Buffer_Flush(TRACING_BUFFER(u));
+					Backend_Finalize_close_mpits (getpid(), u, FALSE);
 
-				Buffer_Free (TRACING_BUFFER(u));
-				TRACING_BUFFER(u) = NULL;
+					Buffer_Free (TRACING_BUFFER(u));
+					TRACING_BUFFER(u) = NULL;
+				}
 			}
 #if defined(SAMPLING_SUPPORT)
-			if (SAMPLING_BUFFER(u) != NULL)
+			// SamplingBuffer may have been already free'd by the master thread if the process finished
+			if (SamplingBuffer != NULL)
 			{
-				Buffer_Free (SAMPLING_BUFFER(u));
-				SAMPLING_BUFFER(u) = NULL;
+				if (SAMPLING_BUFFER(u) != NULL)
+				{
+					Buffer_Free (SAMPLING_BUFFER(u));
+					SAMPLING_BUFFER(u) = NULL;
+				}
 			}
 #endif
+
 			pthread_mutex_unlock(&pthreadFreeBuffer_mtx);
+
 			break;
 		}
+	}
 }
 
 void Backend_CreatepThreadIdentifier (void)

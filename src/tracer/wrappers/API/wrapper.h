@@ -215,6 +215,8 @@ int Backend_ChangeNumberOfThreads (unsigned numberofthreads);
 void Backend_setNumTentativeThreads (int numofthreads);
 
 #if defined(PTHREAD_SUPPORT)
+extern pthread_mutex_t pthreadFreeBuffer_mtx;
+
 void Backend_SetpThreadIdentifier (int ID);
 int Backend_ispThreadFinished (int threadid);
 pthread_t Backend_GetpThreadID (int threadid);

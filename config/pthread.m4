@@ -46,10 +46,12 @@ AC_DEFUN([AX_PTHREAD],
 			AC_DEFINE([HAVE_PTHREAD_BARRIER_WAIT], [1], [Determine if pthread_barrier_wait exists and can be instrumented])
 		else
 			pthread_barrier_wait_exists="no"
+			enable_pthread="no"
+			AC_WARN([Instrumentation support for pthreads disabled because support for pthread barrier interface is not available])
 		fi
 	fi
 
-	AM_CONDITIONAL(WANT_PTHREAD, test "${enable_pthread}" = "yes" )
+	AM_CONDITIONAL(WANT_PTHREAD, test "${enable_pthread}" = "yes")
 
 	AC_ARG_ENABLE(pthread-support-in-all-libs,
 		AC_HELP_STRING(

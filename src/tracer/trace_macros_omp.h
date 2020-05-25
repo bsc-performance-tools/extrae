@@ -93,36 +93,52 @@
   TRACE_OMPEVENT2PARAM(evttime,evttype,evtvalue,evtparam1,evtparam2)
 #endif
 
-#define TRACE_PTHEVENT(evttime,evttype,evtvalue,evtparam)     \
-{                                                             \
-	int thread_id = THREADID;                                   \
-	event_t evt;                                                \
-	if (tracejant && TracingBitmap[TASKID] && Extrae_get_pthread_tracing())\
-	{                                                           \
-		evt.time = evttime;                                       \
-		evt.event = evttype;                                      \
-		evt.value = evtvalue;                                     \
-		evt.param.omp_param.param[0] = evtparam;                     \
-		HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);            \
-		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
-	}                                                           \
+#define TRACE_PTHEVENT(evttime,evttype,evtvalue,evtparam)                       \
+{                                                                               \
+	int thread_id = THREADID;                                                     \
+	event_t evt;                                                                  \
+	if (tracejant && TracingBitmap[TASKID] && Extrae_get_pthread_tracing())       \
+	{                                                                             \
+		/* Protect inserting events if main thread already finished and flushed */  \
+		pthread_mutex_lock(&pthreadFreeBuffer_mtx);                                 \
+		/* TracingBuffer may have been free'd by master thread if process ended */  \
+		if ((TracingBuffer != NULL) && (TRACING_BUFFER(thread_id) != NULL))         \
+		{                                                                           \
+			evt.time = evttime;                                                       \
+			evt.event = evttype;                                                      \
+			evt.value = evtvalue;                                                     \
+			evt.param.omp_param.param[0] = evtparam;                                  \
+			HARDWARE_COUNTERS_READ(thread_id, evt, FALSE);                            \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                 \
+		}                                                                           \
+		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);                               \
+	}                                                                             \
 }
 
 #if USE_HARDWARE_COUNTERS
-#define TRACE_PTHEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam) \
-{                                                             \
-	int thread_id = THREADID;                                   \
-	event_t evt;                                                \
-	if (tracejant && TracingBitmap[TASKID] && Extrae_get_pthread_tracing())\
-	{                                                           \
-		evt.time = (evttime);                                     \
-		evt.event = (evttype);                                    \
-		evt.value = (evtvalue);                                   \
-		evt.param.omp_param.param[0] = (evtparam);                   \
-		HARDWARE_COUNTERS_READ(thread_id, evt, Extrae_get_pthread_hwc_tracing());  \
-		BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt); \
-	}                                                           \
+
+#define TRACE_PTHEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam)            \
+{                                                                               \
+	int thread_id = THREADID;                                                     \
+	event_t evt;                                                                  \
+	if (tracejant && TracingBitmap[TASKID] && Extrae_get_pthread_tracing())       \
+	{																																				      \
+		/* Protect inserting events if main thread already finished and flushed */  \
+		pthread_mutex_lock(&pthreadFreeBuffer_mtx);                                 \
+		/* TracingBuffer may have been free'd by master thread if process ended */  \
+		if ((TracingBuffer != NULL) && (TRACING_BUFFER(thread_id) != NULL))         \
+		{                                                                           \
+			evt.time = (evttime);                                                     \
+			evt.event = (evttype);                                                    \
+			evt.value = (evtvalue);                                                   \
+			evt.param.omp_param.param[0] = (evtparam);                                \
+			HARDWARE_COUNTERS_READ(thread_id, evt, Extrae_get_pthread_hwc_tracing()); \
+			BUFFER_INSERT(thread_id, TRACING_BUFFER(thread_id), evt);                 \
+		}                                                                           \
+		pthread_mutex_unlock(&pthreadFreeBuffer_mtx);                               \
+	}                                                                             \
 }
+
 #else
 #define TRACE_PTHEVENTANDCOUNTERS(evttime,evttype,evtvalue,evtparam) \
   TRACE_PTHEVENT(evttime,evttype,evtvalue,evtparam)
