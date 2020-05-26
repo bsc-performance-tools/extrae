@@ -643,7 +643,8 @@ XML Section: Input/Output
 
 This section indicates whether I/O calls (``read`` and ``write``) are meant to
 be instrumented. If ``enabled`` is set to yes, the aforementioned calls will be
-instrumented, otherwise they will not be instrumented.
+instrumented, otherwise they will not be instrumented. If ``internals`` is set
+to yes, I/O calls that occur inside other traced calls will also be captured.
 
 
 .. _sec:XMLSectionDynamicMemory:

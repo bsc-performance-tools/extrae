@@ -189,7 +189,7 @@
   <dynamic-memory enabled="no" />
 
   <!-- Enable I/O (read, write) instrumentation (experimental) -->
-  <input-output enabled="no" />
+  <input-output enabled="no" internals="no"/>
 
 	<!-- Enable system calls instrumentation (experimental) -->
   <syscall enabled="no" />

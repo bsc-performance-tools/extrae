@@ -94,6 +94,9 @@ static char UNUSED rcsid[] = "$Id$";
 #if defined(PTHREAD_SUPPORT)
 # include "pthread_probe.h"
 #endif
+#if defined(INSTRUMENT_IO)
+# include "io_wrapper.h"
+#endif
 #include "malloc_probe.h"
 
 /* Some global (but local in the module) variables */
@@ -2005,7 +2008,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 						}
 						XML_FREE(enabled);
 #else
-						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting dynamic memory calls.\n", TRACE_DYNAMIC_MEMORY);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting dynamic memory calls.\n", TRACE_DYNAMIC_MEMORY);
 #endif
 					}
 					/* Check for basic I/O instrumentation */
@@ -2014,10 +2017,22 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 #if defined(INSTRUMENT_IO)
 						xmlChar *enabled = xmlGetProp_env (rank, current_tag, TRACE_ENABLED);
 						if (enabled != NULL && !xmlStrcasecmp (enabled, xmlYES))
+						{
 							IOInstrumentation = TRUE;
+
+							xmlChar *internals = xmlGetProp_env (rank, current_tag, TRACE_IO_INTERNALS);
+							if (internals != NULL && !xmlStrcasecmp (internals, xmlYES))
+							{
+								mfprintf (stdout, PACKAGE_NAME": Internals activated for I/O instrumentation.\n");
+								xtr_IO_enable_internals();
+							}
+							XML_FREE(internals);
+						}
 						XML_FREE(enabled);
+
+
 #else
-						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting I/O calls.\n", TRACE_IO);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting I/O calls.\n", TRACE_IO);
 #endif
 					}
           /* Check for syscall instrumentation */                             
@@ -2029,7 +2044,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
               SysCallInstrumentation = TRUE;                                         
             XML_FREE(enabled);                                                  
 #else                                                                           
-            mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support instrumenting system calls.\n", TRACE_SYSCALL);
+            mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support instrumenting system calls.\n", TRACE_SYSCALL);
 #endif                                                                          
           }                                                                     
 					/* Check for intel pebs sampling */
@@ -2041,7 +2056,7 @@ short int Parse_XML_File (int rank, int world_size, const char *filename)
 							Parse_XML_PEBS_Sampling (rank, xmldoc, current_tag);
 						XML_FREE(enabled);
 #else
-						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does support PEBS sampling.\n", TRACE_PEBS_SAMPLING);
+						mfprintf (stdout, PACKAGE_NAME": Warning! <%s> tag will be ignored. This library does not support PEBS sampling.\n", TRACE_PEBS_SAMPLING);
 #endif
 					}
 					else

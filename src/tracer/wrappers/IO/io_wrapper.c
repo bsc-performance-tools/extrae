@@ -77,6 +77,7 @@
 #include "io_wrapper.h"
 #include "io_probe.h"
 #include "wrapper.h"
+#include "taskid.h"
 
 #if defined(INSTRUMENT_IO)
 
@@ -116,6 +117,29 @@ static ssize_t (*real_pwritev)(int fd, const struct iovec *iov, int iovcnt, off_
 static ssize_t (*real_pwritev64)(int fd, const struct iovec *iov, int iovcnt, __off64_t offset) = NULL;
 static int     (*real_ioctl)(int fd, unsigned long request, ...)                                          = NULL;
 
+static unsigned traceInternalsIO = FALSE;
+
+__thread unsigned __in_io_depth = 0;
+
+void xtr_IO_enable_internals()
+{
+	traceInternalsIO = TRUE;
+}
+
+static void IO_Enter_Instrumentation()
+{
+	__in_io_depth ++;
+	Backend_Enter_Instrumentation ();
+}
+
+static void IO_Leave_Instrumentation()
+{
+	Backend_Leave_Instrumentation ();
+	__in_io_depth --;
+}
+
+#define CHECK_IO_INTERNALS() ((__in_io_depth < 1) && (traceInternalsIO || !Backend_inInstrumentation(THREADID)))
+
 # if defined(PIC) /* Only available for .so libraries */
 
 /**
@@ -132,13 +156,17 @@ int open(const char *pathname, int flags, ...)
   int fd = -1;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */ 
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: open() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   if (flags & O_CREAT)
   {
@@ -165,7 +193,7 @@ int open(const char *pathname, int flags, ...)
   if (real_open != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H                                                             
 	  errno = errno_real;                                                         
 #endif                                                                          
@@ -177,7 +205,7 @@ int open(const char *pathname, int flags, ...)
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
     Probe_IO_open_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -199,6 +227,9 @@ int open(const char *pathname, int flags, ...)
     fprintf (stderr, PACKAGE_NAME": open is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: open() returns\n", TASKID);
+#endif
   return fd;
 }
 
@@ -210,19 +241,23 @@ int open(const char *pathname, int flags, ...)
 int open64(const char *pathname, int flags, ...)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif
   int mode = 0;
   int fd = -1;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: open64() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   if (flags & O_CREAT)
   {
@@ -249,19 +284,19 @@ int open64(const char *pathname, int flags, ...)
   if (real_open64 != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
-  	errno = errno_real;
+    errno = errno_real;
 #endif
     fd = real_open64 (pathname, flags, mode);
 #ifdef HAVE_ERRNO_H
-  	errno_real = errno;
+    errno_real = errno;
 #endif
     Probe_IO_open_Entry (fd, pathname);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
     Probe_IO_open_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -283,6 +318,9 @@ int open64(const char *pathname, int flags, ...)
     fprintf (stderr, PACKAGE_NAME": open64 is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: open64() returns\n", TASKID);
+#endif
   return fd;
 }
 
@@ -294,18 +332,22 @@ int open64(const char *pathname, int flags, ...)
 FILE * fopen(const char *path, const char *mode)
 {
 #ifdef HAVE_ERRNO_H
- 	int errno_real = errno;
+  int errno_real = errno;
 #endif
   FILE *f = NULL;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fopen() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen == NULL)
@@ -325,7 +367,7 @@ FILE * fopen(const char *path, const char *mode)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
 		int fd = -1;
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -342,7 +384,7 @@ FILE * fopen(const char *path, const char *mode)
 		TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
 		Probe_IO_fopen_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
   	errno = errno_real;
 #endif
@@ -364,6 +406,9 @@ FILE * fopen(const char *path, const char *mode)
     fprintf (stderr, PACKAGE_NAME": fopen is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fopen() returns\n", TASKID);
+#endif
   return f;
 }
 
@@ -375,18 +420,22 @@ FILE * fopen(const char *path, const char *mode)
 FILE * fopen64(const char *path, const char *mode)
 {
 #ifdef HAVE_ERRNO_H
-	int errno_real = errno;
+  int errno_real = errno;
 #endif
   FILE *f = NULL;
 
   /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
                       Extrae_get_trace_io();
 
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fopen64() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fopen64 == NULL)
@@ -406,7 +455,7 @@ FILE * fopen64(const char *path, const char *mode)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
 		int fd = -1;
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 	  errno = errno_real;
 #endif
@@ -422,7 +471,7 @@ FILE * fopen64(const char *path, const char *mode)
 		TRACE_IO_CALLER(LAST_READ_TIME, 3);
 
     Probe_IO_fopen_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 	  errno = errno_real;
 #endif
@@ -444,6 +493,9 @@ FILE * fopen64(const char *path, const char *mode)
     fprintf (stderr, PACKAGE_NAME": fopen64 is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fopen64() returns\n", TASKID);
+#endif
   return f;
 }
 
@@ -457,12 +509,20 @@ int ioctl(int fd, unsigned long request, char *argp)
 #ifdef HAVE_ERRNO_H
   int errno_real = errno;
 #endif
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      !Backend_inInstrumentation(THREADID) && 
-                      mpitrace_on &&
-                      Extrae_get_trace_io();
   ssize_t res;
+
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          && 
+                      Extrae_get_trace_io();
+
+  /* Can't be evaluated before because the compiler optimizes the if's clauses,
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: ioctl() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_ioctl == NULL)
@@ -481,7 +541,7 @@ int ioctl(int fd, unsigned long request, char *argp)
   if (real_ioctl != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
     Probe_IO_ioctl_Entry (fd, request);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -492,7 +552,7 @@ int ioctl(int fd, unsigned long request, char *argp)
     errno_real = errno;
 #endif
     Probe_IO_ioctl_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
     errno = errno_real;
 #endif
@@ -514,7 +574,9 @@ int ioctl(int fd, unsigned long request, char *argp)
     fprintf (stderr, PACKAGE_NAME": ioctl is not hooked! exiting!!\n");
     abort();
   }
-
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: ioctl() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -526,17 +588,22 @@ int ioctl(int fd, unsigned long request, char *argp)
 ssize_t read (int fd, void *buf, size_t count)
 {
 #ifdef HAVE_ERRNO_H
-	int errno_real = errno;
+  int errno_real = errno;
 #endif
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: read() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_read == NULL)
@@ -555,7 +622,7 @@ ssize_t read (int fd, void *buf, size_t count)
   if (real_read != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
     Probe_IO_read_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -566,7 +633,7 @@ ssize_t read (int fd, void *buf, size_t count)
 		errno_real = errno;
 #endif
     Probe_IO_read_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -588,6 +655,9 @@ ssize_t read (int fd, void *buf, size_t count)
     fprintf (stderr, PACKAGE_NAME": read is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: read() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -599,17 +669,22 @@ ssize_t read (int fd, void *buf, size_t count)
 ssize_t write (int fd, const void *buf, size_t count)
 {
 #ifdef HAVE_ERRNO_H
-	int errno_real = errno;
+  int errno_real = errno;
 #endif
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: write() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_write == NULL)
@@ -628,7 +703,7 @@ ssize_t write (int fd, const void *buf, size_t count)
   if (real_write != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
     Probe_IO_write_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -639,7 +714,7 @@ ssize_t write (int fd, const void *buf, size_t count)
 		errno_real = errno;
 #endif
     Probe_IO_write_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -661,6 +736,9 @@ ssize_t write (int fd, const void *buf, size_t count)
     fprintf (stderr, PACKAGE_NAME": write is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: write() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -672,17 +750,22 @@ ssize_t write (int fd, const void *buf, size_t count)
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   size_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fread() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_fread == NULL)
@@ -701,7 +784,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
     Probe_IO_fread_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -712,7 +795,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 		errno_real = errno;
 #endif
     Probe_IO_fread_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -734,6 +817,9 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
     fprintf (stderr, PACKAGE_NAME": fread is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fread() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -747,15 +833,20 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   size_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fwrite() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   if (real_fwrite == NULL)
   {
@@ -773,7 +864,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
   if (real_fwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
     Probe_IO_fwrite_Entry (fileno(stream), size * nmemb);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -784,7 +875,7 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 		errno_real = errno;
 #endif
     Probe_IO_fwrite_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -806,6 +897,9 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
     fprintf (stderr, PACKAGE_NAME": fwrite is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: fwrite() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -819,15 +913,20 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 #ifdef HAVE_ERRNO_H                                                             
   int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pread() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pread == NULL)
@@ -846,7 +945,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
   if (real_pread != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
     Probe_IO_pread_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -857,7 +956,7 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pread_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -879,6 +978,9 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
     fprintf (stderr, PACKAGE_NAME": pread is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pread() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -890,17 +992,22 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset)
 ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pwrite() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwrite == NULL)
@@ -919,7 +1026,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
   if (real_pwrite != NULL && canInstrument)
   {
     /* Instrumentation is enabled, emit events and invoke the real call */
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
     Probe_IO_pwrite_Entry (fd, count);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
@@ -930,7 +1037,7 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pwrite_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -952,6 +1059,9 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
     fprintf (stderr, PACKAGE_NAME": pwrite is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pwrite() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -963,17 +1073,22 @@ ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset)
 ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: readv() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_readv == NULL)
@@ -995,7 +1110,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1012,7 +1127,7 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 		errno_real = errno;
 #endif
     Probe_IO_readv_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1034,6 +1149,9 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
     fprintf (stderr, PACKAGE_NAME": readv is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: readv() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -1045,17 +1163,22 @@ ssize_t readv (int fd, const struct iovec *iov, int iovcnt)
 ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: writev() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_writev == NULL)
@@ -1077,7 +1200,7 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1087,16 +1210,16 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
     Probe_IO_writev_Entry (fd, size);
     TRACE_IO_CALLER(LAST_READ_TIME, 3);
 #ifdef HAVE_ERRNO_H
-		errno = errno_real;
+    errno = errno_real;
 #endif
     res = real_writev (fd, iov, iovcnt);
 #ifdef HAVE_ERRNO_H
 		errno_real = errno;
 #endif
     Probe_IO_writev_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
-		errno = errno_real;
+    errno = errno_real;
 #endif
   }
   else if (real_writev != NULL && !canInstrument)
@@ -1116,6 +1239,9 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
     fprintf (stderr, PACKAGE_NAME": writev is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: writev() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -1127,17 +1253,22 @@ ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-  if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: preadv() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv == NULL)
@@ -1159,7 +1290,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1176,7 +1307,7 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_preadv_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1198,6 +1329,9 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     fprintf (stderr, PACKAGE_NAME": preadv is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: preadv() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -1209,17 +1343,22 @@ ssize_t preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: preadv64() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_preadv64 == NULL)
@@ -1241,7 +1380,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1258,7 +1397,7 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_preadv_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1280,6 +1419,9 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     fprintf (stderr, PACKAGE_NAME": preadv64 is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: preadv64() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -1291,17 +1433,22 @@ ssize_t preadv64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pwritev() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev == NULL)
@@ -1323,7 +1470,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1340,7 +1487,7 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pwritev_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1362,6 +1509,9 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
     fprintf (stderr, PACKAGE_NAME": pwritev is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pwritev() returns\n", TASKID);
+#endif
   return res;
 }
 
@@ -1373,17 +1523,22 @@ ssize_t pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset)
 ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 {
 #ifdef HAVE_ERRNO_H                                                             
-	int errno_real = errno;                                                       
+  int errno_real = errno;                                                       
 #endif                                                                          
-  /* Check whether IO instrumentation is enabled */
-  int canInstrument = EXTRAE_INITIALIZED()                 &&
-                      mpitrace_on                          &&
-                      Extrae_get_trace_io();
   ssize_t res;
 
+  /* Check whether IO instrumentation is enabled */
+  int canInstrument = EXTRAE_INITIALIZED() &&
+                      mpitrace_on          &&
+                      Extrae_get_trace_io();
+
   /* Can't be evaluated before because the compiler optimizes the if's clauses,
-	 * and THREADID calls a null callback if Extrae is not yet initialized */
-	if (canInstrument) canInstrument = !Backend_inInstrumentation(THREADID);
+   * and THREADID calls a null callback if Extrae is not yet initialized */
+  if (canInstrument) canInstrument = CHECK_IO_INTERNALS();
+
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pwritev64() wrapper (canInstrument=%d) (depth=%d)\n", TASKID, canInstrument, __in_io_depth);
+#endif
 
   /* Initialize the module if the pointer to the real call is not yet set */
   if (real_pwritev64 == NULL)
@@ -1405,7 +1560,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     int i;
     ssize_t size = 0;
 
-    Backend_Enter_Instrumentation ();
+    IO_Enter_Instrumentation ();
 
     for (i=0; i<iovcnt; i++)
     {
@@ -1422,7 +1577,7 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
 		errno_real = errno;
 #endif
     Probe_IO_pwritev_Exit ();
-    Backend_Leave_Instrumentation ();
+    IO_Leave_Instrumentation ();
 #ifdef HAVE_ERRNO_H
 		errno = errno_real;
 #endif
@@ -1444,6 +1599,9 @@ ssize_t pwritev64(int fd, const struct iovec *iov, int iovcnt, __off64_t offset)
     fprintf (stderr, PACKAGE_NAME": pwritev64 is not hooked! exiting!!\n");
     abort();
   }
+#if defined(DEBUG)
+  fprintf(stderr, "[DEBUG] Task %d: pwritev64() returns\n", TASKID);
+#endif
   return res;
 }
 

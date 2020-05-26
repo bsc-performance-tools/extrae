@@ -94,6 +94,7 @@
 #define TRACE_DYNAMIC_MEMORY_ALLOC_THRESHOLD   ((xmlChar*) "threshold")
 #define TRACE_DYNAMIC_MEMORY_FREE       ((xmlChar*) "free")
 #define TRACE_IO                        ((xmlChar*) "input-output")
+#define TRACE_IO_INTERNALS              ((xmlChar*) "internals")
 #define TRACE_SYSCALL                   ((xmlChar*) "syscall")
 #define TRACE_LIST                      ((xmlChar*) "list")
 #define TRACE_EXCLUDE_AUTOMATIC_FUNCTIONS ((xmlChar*) "exclude-automatic-functions")

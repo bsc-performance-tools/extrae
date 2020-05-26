@@ -58,7 +58,7 @@
 
 #if defined(DEBUG_MPITRACE)
 #	define DEBUG_INTERFACE(enter) \
-	{ fprintf (stderr, "Task %d %s %s\n", TASKID, (enter)?"enters":"leaves", __func__); }
+	{ fprintf (stderr, "[DEBUG] Task %d %s %s\n", TASKID, (enter)?"enters":"leaves", __func__); }
 #else
 #	define DEBUG_INTERFACE(enter)
 #endif

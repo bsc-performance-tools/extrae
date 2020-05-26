@@ -57,7 +57,7 @@
     <free  enabled="yes" />
   </dynamic-memory>
 
-	<input-output enabled="no" />
+	<input-output enabled="no" internals="no"/>
 
 	<syscall enabled="no" />
 

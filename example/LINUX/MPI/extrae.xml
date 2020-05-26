@@ -93,7 +93,7 @@
     <load-l3-misses enabled="no" frequency="25" />
   </pebs-sampling>
 
-  <input-output enabled="no" />
+  <input-output enabled="no" internals="no"/>
 
 	<syscall enabled="no" />
 

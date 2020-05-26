@@ -94,7 +94,7 @@ static struct t_event_misc2prv event_misc2prv[NUM_MISC_PRV_ELEMENTS] = {
         {READV_EV, READV_VAL_EV, FALSE},
         {WRITEV_EV, WRITEV_VAL_EV, FALSE},
         {PREADV_EV, PREADV_VAL_EV, FALSE},
-        {PWRITEV_EV, PWRITE_VAL_EV, FALSE},
+        {PWRITEV_EV, PWRITEV_VAL_EV, FALSE},
         {OPEN_EV, OPEN_VAL_EV, FALSE},
         {FOPEN_EV, FOPEN_VAL_EV, FALSE},
         {IOCTL_EV, IOCTL_VAL_EV, FALSE}
@@ -142,11 +142,13 @@ static int search_misc_event (int type)
 
 void Used_MISC_Operation (int Op)
 {
-        int index;
+	int index;
 
-        index = search_misc_event (Op);
-        if (index >= 0)
-                event_misc2prv[index].used = TRUE;
+	index = search_misc_event (Op);
+	if (index >= 0)
+	{
+		event_misc2prv[index].used = TRUE;
+	}
 }
 
 /******************************************************************************
@@ -163,7 +165,9 @@ static char *get_misc_prv_val_label (int val)
                 if (misc_prv_val_label[i].value == val)
                         break;
         if (i < NUM_MISC_PRV_ELEMENTS)
+	{
                 return misc_prv_val_label[i].label;
+	}
         return NULL;
 }
 

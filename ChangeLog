@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 26May2020 Adds option to instrument I/O internals
  * 29Apr2020 Fixes local to world rank translations for comms going thru an intercommunicator created with MPI_Intercomm_create
  + 29Apr2020 Adds environment variable EXTRAE_ENFORCE_FS_SYNC to ensure file system synchronization after creating trace files and folders
  + 13Mar2020 Added instrumentation for MPI_Comm_dup_with_info

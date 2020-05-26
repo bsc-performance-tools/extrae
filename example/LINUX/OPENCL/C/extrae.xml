@@ -61,7 +61,7 @@
 
   <dynamic-memory enabled="no" />
 
-	<input-output enabled="no" />
+	<input-output enabled="no" internals="no"/>
 
   <syscall enabled="no" />
 
