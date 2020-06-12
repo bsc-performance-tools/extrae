@@ -378,22 +378,20 @@ void Extrae_init_Wrapper (void)
 void Extrae_fini_Wrapper (void)
 {
 	/* Finalize only if its initialized by Extrae_init call */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_EXTRAE_INIT)
+	if (Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED)
 	{
 		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
+		{
 			/* If we are appending into the file (i.e. using the cmd-line) don't
 			   change the already existing .mpits file */
 			if (!Extrae_getAppendingEventsToGivenPID(NULL))
 				Generate_Task_File_List();
 
-		/* Finalize tracing library */
-		Backend_Finalize ();
-
-		/* Call additional code to finalize the task including
-	     MPI_Finalize,... */
-		Extrae_finalize_task();
+			/* Finalize tracing library */
+			Backend_Finalize ();
+		}
 	}
 }
 
@@ -411,17 +409,15 @@ void Extrae_fini_last_chance_Wrapper (void)
 		/* If the application is MPI the MPI wrappers are responsible
 		   for gathering and generating the .MPITS file*/
 		if (!Extrae_get_ApplicationIsMPI() && !Extrae_get_ApplicationIsSHMEM())
+		{
 			/* If we are appending into the file (i.e. using the cmd-line) don't
 			   change the already existing .mpits file */
 			if (!Extrae_getAppendingEventsToGivenPID(NULL))
 				Generate_Task_File_List();
 
-		/* Finalize tracing library */
-		Backend_Finalize ();
-
-		/* Call additional code to finalize the task including
-		MPI_Finalize, ... */
-		Extrae_finalize_task();
+			/* Finalize tracing library */
+			Backend_Finalize ();
+		}
 	}
 }
 

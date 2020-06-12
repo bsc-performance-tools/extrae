@@ -142,11 +142,6 @@ static void Extrae_MPI_Barrier (void)
 	PMPI_Barrier (MPI_COMM_WORLD);
 }
 
-static void Extrae_MPI_Finalize (void)
-{
-	PMPI_Finalize ();
-}
-
 /******************************************************************************
  ********************      L O C A L    V A R I A B L E S        **************
  ******************************************************************************/
@@ -1014,7 +1009,6 @@ void PMPI_Init_Wrapper (MPI_Fint *ierror)
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -1135,7 +1129,6 @@ void PMPI_Init_thread_Wrapper (MPI_Fint *required, MPI_Fint *provided, MPI_Fint 
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -1262,7 +1255,7 @@ void PMPI_Finalize_Wrapper (MPI_Fint *ierror)
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Finalize only if its initialized by MPI_init call */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+	if ((Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED) && (Extrae_get_ApplicationIsMPI() == TRUE))
 	{
 		Backend_Finalize ();
 
@@ -1908,7 +1901,6 @@ int MPI_Init_C_Wrapper (int *argc, char ***argv)
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -2027,7 +2019,6 @@ int MPI_Init_thread_C_Wrapper (int *argc, char ***argv, int required, int *provi
 	Extrae_set_taskid_function (Extrae_MPI_TaskID);
 	Extrae_set_numtasks_function (Extrae_MPI_NumTasks);
 	Extrae_set_barrier_tasks_function (Extrae_MPI_Barrier);
-	Extrae_set_finalize_task_function (Extrae_MPI_Finalize);
 
 	InitMPICommunicators();
 
@@ -2153,7 +2144,7 @@ int MPI_Finalize_C_Wrapper (void)
 	TRACE_MPIEVENT (TIME, MPI_FINALIZE_EV, EVT_END, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY);
 
 	/* Finalize only if its initialized by MPI_init call */
-	if (Extrae_is_initialized_Wrapper() == EXTRAE_INITIALIZED_MPI_INIT)
+	if ((Extrae_is_initialized_Wrapper() != EXTRAE_NOT_INITIALIZED) && (Extrae_get_ApplicationIsMPI() == TRUE))
 	{
 		Backend_Finalize ();
 

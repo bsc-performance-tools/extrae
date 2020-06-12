@@ -2,6 +2,7 @@
 ChangeLog
  [ + added, - removed, * changed ]
  * 12Jun2020 Solves duplicate capture of C and Fortran MPI calls when using Intel implementations
+ * 08Jun2020 Fixes finalization issues when Extrae is initialized by API and another runtime
  * 26May2020 Adds option to instrument I/O internals
  * 29Apr2020 Fixes local to world rank translations for comms going thru an intercommunicator created with MPI_Intercomm_create
  + 29Apr2020 Adds environment variable EXTRAE_ENFORCE_FS_SYNC to ensure file system synchronization after creating trace files and folders

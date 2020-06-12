@@ -206,11 +206,6 @@ static void Extrae_OPENSHMEM_Barrier(void)
   shmem_barrier_all_real();
 }
 
-static void Extrae_OPENSHMEM_Finalize(void)
-{
-  return;
-}
-
 #include "auto_fini.h"
 void shmem_finalize()
 {
@@ -1525,7 +1520,6 @@ static void Initialize_Extrae_Stuff()
   Extrae_set_taskid_function( Extrae_OPENSHMEM_TaskID );
   Extrae_set_numtasks_function( Extrae_OPENSHMEM_NumTasks );
   Extrae_set_barrier_tasks_function ( Extrae_OPENSHMEM_Barrier );
-  Extrae_set_finalize_task_function ( Extrae_OPENSHMEM_Finalize );
 
   if (Extrae_is_initialized_Wrapper() == EXTRAE_NOT_INITIALIZED)
   {

@@ -31,14 +31,12 @@ extern "C" {
 void Extrae_set_taskid_function (unsigned (*taskid_function)(void));
 void Extrae_set_numtasks_function (unsigned (*numtasks_function)(void));
 void Extrae_set_barrier_tasks_function (void (*barriertasks_function)(void));
-void Extrae_set_finalize_task_function (void (*finalizetask_function)(void));
 
 /* Internal routines */
 
 unsigned Extrae_get_task_number (void);
 unsigned Extrae_get_num_tasks (void);
 void Extrae_barrier_tasks (void);
-void Extrae_finalize_task (void);
 
 unsigned Extrae_get_initial_TASKID (void);
 void Extrae_set_initial_TASKID (unsigned u);
