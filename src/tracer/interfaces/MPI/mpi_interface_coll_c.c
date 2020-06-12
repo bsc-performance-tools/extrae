@@ -94,7 +94,7 @@ int NAME_ROUTINE_C(MPI_Reduce) (MPI3_CONST void *sendbuf, void *recvbuf, int cou
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -123,7 +123,7 @@ int NAME_ROUTINE_C(MPI_Reduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -153,7 +153,7 @@ int NAME_ROUTINE_C(MPI_Allreduce) (MPI3_CONST void *sendbuf, void *recvbuf, int 
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -180,7 +180,7 @@ int NAME_ROUTINE_C(MPI_Barrier) (MPI_Comm comm)
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -208,7 +208,7 @@ int NAME_ROUTINE_C(MPI_Bcast) (void *buffer, int count, MPI_Datatype datatype,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -237,7 +237,7 @@ int NAME_ROUTINE_C(MPI_Alltoall) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -268,7 +268,7 @@ int NAME_ROUTINE_C(MPI_Alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST int *sen
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -301,7 +301,7 @@ int NAME_ROUTINE_C(MPI_Allgather) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -334,7 +334,7 @@ int NAME_ROUTINE_C(MPI_Allgatherv) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -367,7 +367,7 @@ int NAME_ROUTINE_C(MPI_Gather) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -400,7 +400,7 @@ int NAME_ROUTINE_C(MPI_Gatherv) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -433,7 +433,7 @@ int NAME_ROUTINE_C(MPI_Scatter) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -466,7 +466,7 @@ int NAME_ROUTINE_C(MPI_Scatterv) (MPI3_CONST void *sendbuf, MPI3_CONST int *send
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -498,7 +498,7 @@ int NAME_ROUTINE_C(MPI_Scan) (MPI3_CONST void *sendbuf, void *recvbuf, int count
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -527,7 +527,7 @@ int NAME_ROUTINE_C(MPI_Ireduce) (MPI3_CONST void *sendbuf, void *recvbuf, int co
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -557,7 +557,7 @@ int NAME_ROUTINE_C(MPI_Ireduce_scatter) (MPI3_CONST void *sendbuf, void *recvbuf
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -586,7 +586,7 @@ int NAME_ROUTINE_C(MPI_Iallreduce) (MPI3_CONST void *sendbuf, void *recvbuf, int
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -613,7 +613,7 @@ int NAME_ROUTINE_C(MPI_Ibarrier) (MPI_Comm comm, MPI_Request *req)
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -641,7 +641,7 @@ int NAME_ROUTINE_C(MPI_Ibcast) (void *buffer, int count, MPI_Datatype datatype,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -670,7 +670,7 @@ int NAME_ROUTINE_C(MPI_Ialltoall) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -701,7 +701,7 @@ int NAME_ROUTINE_C(MPI_Ialltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST int *se
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -734,7 +734,7 @@ int NAME_ROUTINE_C(MPI_Iallgather) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -767,7 +767,7 @@ int NAME_ROUTINE_C(MPI_Iallgatherv) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -800,7 +800,7 @@ int NAME_ROUTINE_C(MPI_Igather) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -833,7 +833,7 @@ int NAME_ROUTINE_C(MPI_Igatherv) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -866,7 +866,7 @@ int NAME_ROUTINE_C(MPI_Iscatter) (MPI3_CONST void *sendbuf, int sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -899,7 +899,7 @@ int NAME_ROUTINE_C(MPI_Iscatterv) (MPI3_CONST void *sendbuf, MPI3_CONST int *sen
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -930,7 +930,7 @@ int NAME_ROUTINE_C(MPI_Iscan) (MPI3_CONST void *sendbuf, void *recvbuf, int coun
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -958,7 +958,7 @@ int NAME_ROUTINE_C(MPI_Reduce_scatter_block) (MPI3_CONST void *sendbuf, void *re
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -989,7 +989,7 @@ int NAME_ROUTINE_C(MPI_Ireduce_scatter_block) (MPI3_CONST void *sendbuf, void *r
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1019,7 +1019,7 @@ int NAME_ROUTINE_C(MPI_Alltoallw) (MPI3_CONST void *sendbuf, MPI3_CONST int *sen
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1052,7 +1052,7 @@ int NAME_ROUTINE_C(MPI_Ialltoallw) (MPI3_CONST void *sendbuf, MPI3_CONST int *se
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1083,7 +1083,7 @@ int NAME_ROUTINE_C(MPI_Graph_create) (MPI_Comm comm_old, int nnodes, const int i
 
 	DLB(DLB_MPI_Graph_create_enter, comm_old, nnodes, MPI3_C_INT_P_CAST index, MPI3_C_INT_P_CAST edges, reorder, comm_graph);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1112,7 +1112,7 @@ int NAME_ROUTINE_C(MPI_Dist_graph_create) (MPI_Comm comm_old, int n, const int s
 
 	DLB(DLB_MPI_Dist_graph_create_enter, comm_old, n, MPI3_C_INT_P_CAST sources, MPI3_C_INT_P_CAST degrees, MPI3_C_INT_P_CAST destinations, MPI3_C_INT_P_CAST weights, info, reorder, comm_dist_graph);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1143,7 +1143,7 @@ int NAME_ROUTINE_C(MPI_Neighbor_allgather) (MPI3_CONST void *sendbuf, int sendco
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1173,7 +1173,7 @@ int NAME_ROUTINE_C(MPI_Ineighbor_allgather) (MPI3_CONST void *sendbuf, int sendc
 	DLB(DLB_MPI_Ineighbor_allgather_enter, MPI3_VOID_P_CAST sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, req);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1204,7 +1204,7 @@ int NAME_ROUTINE_C(MPI_Neighbor_allgatherv) (MPI3_CONST void *sendbuf, int sendc
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1237,7 +1237,7 @@ int NAME_ROUTINE_C(MPI_Ineighbor_allgatherv) (MPI3_CONST void *sendbuf, int send
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1268,7 +1268,7 @@ int NAME_ROUTINE_C(MPI_Neighbor_alltoall) (MPI3_CONST void *sendbuf, int sendcou
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1299,7 +1299,7 @@ int NAME_ROUTINE_C(MPI_Ineighbor_alltoall) (MPI3_CONST void *sendbuf, int sendco
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1331,7 +1331,7 @@ int NAME_ROUTINE_C(MPI_Neighbor_alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONST
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1364,7 +1364,7 @@ int NAME_ROUTINE_C(MPI_Ineighbor_alltoallv) (MPI3_CONST void *sendbuf, MPI3_CONS
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1395,7 +1395,7 @@ int NAME_ROUTINE_C(MPI_Neighbor_alltoallw) (MPI3_CONST void *sendbuf, MPI3_CONST
 	DLB(DLB_MPI_Neighbor_alltoallw_enter, MPI3_VOID_P_CAST sendbuf, MPI3_C_INT_P_CAST sendcounts, MPI3_MPI_AINT_P_CAST sdispls, MPI3_MPI_DATATYPE_P_CAST sendtypes, recvbuf, MPI3_C_INT_P_CAST recvcounts, MPI3_MPI_AINT_P_CAST rdispls, MPI3_MPI_DATATYPE_P_CAST recvtypes, comm);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1426,7 +1426,7 @@ int NAME_ROUTINE_C(MPI_Ineighbor_alltoallw) (MPI3_CONST void *sendbuf, MPI3_CONS
 	DLB(DLB_MPI_Ineighbor_alltoallw_enter, MPI3_VOID_P_CAST sendbuf, MPI3_C_INT_P_CAST sendcounts, MPI3_MPI_AINT_P_CAST sdispls, MPI3_MPI_DATATYPE_P_CAST sendtypes, recvbuf, MPI3_C_INT_P_CAST recvcounts, MPI3_MPI_AINT_P_CAST rdispls, MPI3_MPI_DATATYPE_P_CAST recvtypes, comm, request);
 
 	Extrae_MPI_ProcessCollectiveCommunicator (comm);
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();

@@ -132,7 +132,7 @@ void NAME_ROUTINE_C2F(mpi_file_open) (MPI_Fint *comm, char *filename,
 	MPI_Fint *amode, MPI_Fint *info, MPI_File *fh, MPI_Fint *len)
 #endif
 {
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -158,7 +158,7 @@ void NAME_ROUTINE_C2F(mpi_file_close) (MPI_File *fh, MPI_Fint *ierror)
 {
 	DLB(DLB_MPI_File_close_F_enter, fh, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -188,7 +188,7 @@ void NAME_ROUTINE_C2F(mpi_file_read) (MPI_File *fh, void *buf, MPI_Fint *count,
 { 
 	DLB(DLB_MPI_File_read_F_enter, fh, buf, count, datatype, status, ierror);
 	
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -219,7 +219,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_all) (MPI_File *fh, void *buf,
 	
 	DLB(DLB_MPI_File_read_all_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -250,7 +250,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_all_begin)(MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_read_all_begin_F_enter, fh, buf, count, datatype, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -281,7 +281,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_all_end) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_read_all_end_F_enter, fh, buf, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -314,7 +314,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_at) (MPI_File *fh, MPI_Offset *offset,
 	DLB(DLB_MPI_File_read_at_F_enter, fh, offset, buf, count, datatype,
 	  status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -350,7 +350,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_at_all) (MPI_File *fh, MPI_Offset *offset,
 	DLB(DLB_MPI_File_read_at_all_F_enter, fh, offset, buf, count, datatype,
 	    status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -385,7 +385,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_at_all_begin) (MPI_File *fh,
 	DLB(DLB_MPI_File_read_at_all_begin_F_enter, fh, offset, buf, count,
 	    datatype, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -418,7 +418,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_at_all_end) (MPI_File *fh, void* buf,
 {
 	DLB(DLB_MPI_File_read_at_all_end_F_enter, fh, buf, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -452,7 +452,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_ordered) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_read_ordered_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -484,7 +484,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_ordered_begin) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_read_ordered_begin_F_enter, fh, buf, count, datatype, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -515,7 +515,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_ordered_end) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_read_ordered_end_F_enter, fh, buf, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -549,7 +549,7 @@ void NAME_ROUTINE_C2F(mpi_file_read_shared) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_read_shared_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -579,7 +579,7 @@ void NAME_ROUTINE_C2F(mpi_file_write) (MPI_File *fh, void *buf, MPI_Fint *count,
 
 	DLB(DLB_MPI_File_write_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -610,7 +610,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_all) (MPI_File *fh, void *buf,
 
 	DLB(DLB_MPI_File_write_all_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -643,7 +643,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_all_begin) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_write_all_begin_F_enter, fh, buf, count, datatype, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -676,7 +676,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_all_end) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_write_all_end_F_enter, fh, buf, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -711,7 +711,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at) (MPI_File *fh, MPI_Offset *offset,
 	DLB(DLB_MPI_File_write_at_F_enter, fh, offset, buf, count, datatype,
 	  status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -744,7 +744,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at_all) (MPI_File *fh, MPI_Offset *offset,
 	DLB(DLB_MPI_File_write_at_all_F_enter, fh, offset, buf, count, datatype,
 	    status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -774,7 +774,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at_all_begin) (MPI_File *fh, MPI_Offset *of
 	DLB(DLB_MPI_File_write_at_all_begin_F_enter, fh, offset, buf, count,
 	    datatype, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -805,7 +805,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_at_all_end) (MPI_File *fh, void* buf,
 {
 	DLB(DLB_MPI_File_write_at_all_end_F_enter, fh, buf, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -841,7 +841,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_ordered) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_write_ordered_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -873,7 +873,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_ordered_begin) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_write_ordered_begin_F_enter, fh, buf, count, datatype, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -904,7 +904,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_ordered_end) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_write_ordered_end_F_enter, fh, buf, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();
@@ -938,7 +938,7 @@ void NAME_ROUTINE_C2F(mpi_file_write_shared) (MPI_File *fh, void *buf,
 {
 	DLB(DLB_MPI_File_write_shared_F_enter, fh, buf, count, datatype, status, ierror);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation();

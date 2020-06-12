@@ -134,7 +134,7 @@ void NAME_ROUTINE_C2F(mpi_reduce) (void *sendbuf, void *recvbuf, MPI_Fint *count
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -170,7 +170,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter) (void *sendbuf, void *recvbuf,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -208,7 +208,7 @@ void NAME_ROUTINE_C2F(mpi_allreduce) (void *sendbuf, void *recvbuf,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -240,7 +240,7 @@ void NAME_ROUTINE_C2F(mpi_barrier) (MPI_Fint *comm, MPI_Fint *ierror)
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
     
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -273,7 +273,7 @@ void NAME_ROUTINE_C2F(mpi_bcast) (void *buffer, MPI_Fint *count,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -308,7 +308,7 @@ void NAME_ROUTINE_C2F(mpi_alltoall) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -346,7 +346,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -383,7 +383,7 @@ void NAME_ROUTINE_C2F(mpi_allgather) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -420,7 +420,7 @@ void NAME_ROUTINE_C2F(mpi_allgatherv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -459,7 +459,7 @@ void NAME_ROUTINE_C2F(mpi_gather) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -496,7 +496,7 @@ void NAME_ROUTINE_C2F(mpi_gatherv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -534,7 +534,7 @@ void NAME_ROUTINE_C2F(mpi_scatter) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -571,7 +571,7 @@ void NAME_ROUTINE_C2F(mpi_scatterv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -605,7 +605,7 @@ void NAME_ROUTINE_C2F(mpi_scan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -644,7 +644,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce) (void *sendbuf, void *recvbuf, MPI_Fint *coun
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -680,7 +680,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter) (void *sendbuf, void *recvbuf,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -718,7 +718,7 @@ void NAME_ROUTINE_C2F(mpi_iallreduce) (void *sendbuf, void *recvbuf,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -751,7 +751,7 @@ void NAME_ROUTINE_C2F(mpi_ibarrier) (MPI_Fint *comm, MPI_Fint *req, MPI_Fint *ie
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
     
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -784,7 +784,7 @@ void NAME_ROUTINE_C2F(mpi_ibcast) (void *buffer, MPI_Fint *count,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -819,7 +819,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoall) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -858,7 +858,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -895,7 +895,7 @@ void NAME_ROUTINE_C2F(mpi_iallgather) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -933,7 +933,7 @@ void NAME_ROUTINE_C2F(mpi_iallgatherv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -973,7 +973,7 @@ void NAME_ROUTINE_C2F(mpi_igather) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1011,7 +1011,7 @@ void NAME_ROUTINE_C2F(mpi_igatherv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1049,7 +1049,7 @@ void NAME_ROUTINE_C2F(mpi_iscatter) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1087,7 +1087,7 @@ void NAME_ROUTINE_C2F(mpi_iscatterv) (void *sendbuf, MPI_Fint *sendcount,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1121,7 +1121,7 @@ void NAME_ROUTINE_C2F(mpi_iscan) (void *sendbuf, void *recvbuf, MPI_Fint *count,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1157,7 +1157,7 @@ void NAME_ROUTINE_C2F(mpi_ireduce_scatter_block) (void *sendbuf, void *recvbuf,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1191,7 +1191,7 @@ void NAME_ROUTINE_C2F(mpi_reduce_scatter_block) (void *sendbuf, void *recvbuf,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1227,7 +1227,7 @@ void NAME_ROUTINE_C2F(mpi_alltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1263,7 +1263,7 @@ void NAME_ROUTINE_C2F(mpi_ialltoallw) (void *sendbuf, MPI_Fint *sendcounts,
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -1291,7 +1291,7 @@ void NAME_ROUTINE_C2F(mpi_graph_create) (MPI_Fint *comm_old, MPI_Fint *nnodes, M
 {
 	DLB(DLB_MPI_Graph_create_F_enter, comm_old, nnodes, index, edges, reorder, comm_graph, ierr);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1321,7 +1321,7 @@ void NAME_ROUTINE_C2F(mpi_dist_graph_create) (MPI_Fint *comm_old, MPI_Fint *n, M
 {
 	DLB(DLB_MPI_Dist_graph_create_F_enter, comm_old, n, sources, degrees, destinations, weights, info, reorder, comm_graph, ierr);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1355,7 +1355,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgather) (void *sendbuf, MPI_Fint *sendcoun
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1389,7 +1389,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgather) (void *sendbuf, MPI_Fint *sendcou
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1423,7 +1423,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_allgatherv) (void *sendbuf, MPI_Fint *sendcou
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1457,7 +1457,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_allgatherv) (void *sendbuf, MPI_Fint *sendco
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1491,7 +1491,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoall) (void *sendbuf, MPI_Fint *sendcount
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1525,7 +1525,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoall) (void *sendbuf, MPI_Fint *sendcoun
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1559,7 +1559,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcoun
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1593,7 +1593,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallv) (void *sendbuf, MPI_Fint *sendcou
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1627,7 +1627,7 @@ void NAME_ROUTINE_C2F(mpi_neighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcoun
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();
@@ -1661,7 +1661,7 @@ void NAME_ROUTINE_C2F(mpi_ineighbor_alltoallw) (void *sendbuf, MPI_Fint *sendcou
 
 	Extrae_MPI_ProcessCollectiveCommunicator (c);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER);
 		Backend_Enter_Instrumentation ();

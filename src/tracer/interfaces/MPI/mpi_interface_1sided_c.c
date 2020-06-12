@@ -91,7 +91,7 @@ int MPI_Win_create (void *base, MPI_Aint size, int disp_unit, MPI_Info info,
 
 	DLB(DLB_MPI_Win_create_enter, base, size, disp_unit, info, comm, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -113,7 +113,7 @@ int MPI_Win_fence (int assert, MPI_Win win)
 
 	DLB(DLB_MPI_Win_fence_enter, assert, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -135,7 +135,7 @@ int MPI_Win_start (MPI_Group group, int assert, MPI_Win win)
 
 	DLB(DLB_MPI_Win_start_enter, group, assert, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -157,7 +157,7 @@ int MPI_Win_free (MPI_Win *win)
 
 	DLB(DLB_MPI_Win_free_enter, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -179,7 +179,7 @@ int MPI_Win_complete (MPI_Win win)
 
 	DLB(DLB_MPI_Win_complete_enter, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -201,7 +201,7 @@ int MPI_Win_wait (MPI_Win win)
 
 	DLB(DLB_MPI_Win_wait_enter, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -223,7 +223,7 @@ int MPI_Win_post (MPI_Group group, int assert, MPI_Win win)
 
 	DLB(DLB_MPI_Win_post_enter, group, assert, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -248,7 +248,7 @@ int MPI_Get (void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
 	DLB(DLB_MPI_Get_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -276,7 +276,7 @@ int MPI_Put (MPI3_CONST void *origin_addr, int origin_count, MPI_Datatype origin
 	DLB(DLB_MPI_Put_enter, origin_addr, origin_count, origin_datatype,
 		target_rank, target_disp, target_count, target_datatype, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -302,7 +302,7 @@ int MPI_Win_lock (int lock_type, int rank, int assert, MPI_Win win)
 
 	DLB(DLB_MPI_Win_lock_enter, lock_type, rank, assert, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -326,7 +326,7 @@ int MPI_Win_unlock (int rank, MPI_Win win)
 
 	DLB(DLB_MPI_Win_unlock_enter, rank, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -354,7 +354,7 @@ int MPI_Get_accumulate (MPI3_CONST void *origin_addr, int origin_count, MPI_Data
 		result_count, result_datatype, target_rank, target_disp, target_count,
                 target_datatype, op, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -393,7 +393,7 @@ int MPI_Fetch_and_op (MPI3_CONST void *origin_addr, void *result_addr,
 	  MPI3_VOID_P_CAST result_addr, datatype, target_rank, target_disp, op,
 	  win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -429,7 +429,7 @@ int MPI_Compare_and_swap(MPI3_CONST void *origin_addr, MPI3_CONST void *compare_
 	  MPI3_VOID_P_CAST compare_addr, MPI3_VOID_P_CAST result_addr, datatype,
 	  target_rank, target_disp, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -456,7 +456,7 @@ int MPI_Win_flush (int rank, MPI_Win win)
 
 	DLB(DLB_MPI_Win_flush_enter, rank, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -479,7 +479,7 @@ int MPI_Win_flush_all (MPI_Win win)
 
 	DLB(DLB_MPI_Win_flush_all_enter, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -502,7 +502,7 @@ int MPI_Win_flush_local (int rank, MPI_Win win)
 
 	DLB(DLB_MPI_Win_flush_local_enter, rank, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
@@ -525,7 +525,7 @@ int MPI_Win_flush_local_all (MPI_Win win)
 
 	DLB(DLB_MPI_Win_flush_local_all_enter, win);
 
-	if (mpitrace_on)
+	if (INSTRUMENT_THIS_MPI)
 	{
 		DEBUG_INTERFACE(ENTER)
 		Backend_Enter_Instrumentation ();
