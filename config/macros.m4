@@ -1737,7 +1737,8 @@ AC_DEFUN([AX_PROG_SYNAPSE],
     dnl Check for libraries
     AC_MSG_CHECKING([for libsynapse_frontend])
 
-    if test -f ${SYNAPSE_LIBSDIR}/libsynapse_frontend.a ; then
+    if test -f ${SYNAPSE_LIBSDIR}/libsynapse_frontend.a -o \
+       -f ${SYNAPSE_LIBSDIR}/libsynapse_frontend.so ; then
       SYNAPSE_FE_LIBS="-lsynapse_frontend"
       AC_SUBST(SYNAPSE_FE_LIBS)
       AC_MSG_RESULT([yes])
@@ -1748,7 +1749,8 @@ AC_DEFUN([AX_PROG_SYNAPSE],
 
     AC_MSG_CHECKING([for libsynapse_backend])
     
-    if test -f ${SYNAPSE_LIBSDIR}/libsynapse_backend.a  ; then
+    if test -f ${SYNAPSE_LIBSDIR}/libsynapse_backend.a -o \
+        -f ${SYNAPSE_LIBSDIR}/libsynapse_backend.so; then
       SYNAPSE_BE_LIBS="-lsynapse_backend"
       AC_SUBST(SYNAPSE_BE_LIBS)
       AC_MSG_RESULT([yes])

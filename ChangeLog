@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 23Jun2020 Fixes for dyninst make check tests and configure checks for libsynapse
  * 23Jun2020 Forces exit on second termination signal
  * 22Jun2020 Changes to use new binutils >= 2.34 API
  * 22Jun2020 Changes merger block distribution to avoid processes with 0 traces
