@@ -49,6 +49,7 @@ AC_DEFUN([AX_JAVA],
 			if test -x "${java_path}/bin/javah" ; then
 				AC_MSG_RESULT(${java_path}/bin/javah)
 				JAVAH="${java_path}/bin/javah"
+				JAVAH_found="yes"
 			else
 				AC_MSG_WARN([javah header and stub file generator not found, using javac -h])
 			fi
@@ -102,6 +103,7 @@ AC_DEFUN([AX_JAVA],
 
 	AM_CONDITIONAL(WANT_JAVA, test "${JAVA_found}" = "yes")
 	AM_CONDITIONAL(WANT_JAVA_JVMTI, test "${JAVA_found}" = "yes" -a "${JVMTI_found}" = "yes")
+	AM_CONDITIONAL(JAVAH, test "${JAVAH_found}" = "yes")
 	AC_SUBST(JAVA)
 	AC_SUBST(JAVAC)
 	AC_SUBST(JAVAH)
