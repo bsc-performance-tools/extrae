@@ -1,6 +1,7 @@
 
 ChangeLog
  [ + added, - removed, * changed ]
+ * 25Jun2020 Changes call to MPI_Barrier into PMPI_Barrier
  * 23Jun2020 Fixes wrong JAVAH definition and conditional check
  * 23Jun2020 Fixes for dyninst make check tests and configure checks for libsynapse
  * 23Jun2020 Forces exit on second termination signal

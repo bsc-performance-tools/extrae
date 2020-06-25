@@ -2548,7 +2548,7 @@ void Backend_Finalize (void)
 			if (TASKID == 0)
 				fprintf (stdout, PACKAGE_NAME ": Waiting for all tasks to reach the checkpoint.\n");
 
-			MPI_Barrier (MPI_COMM_WORLD);
+			PMPI_Barrier (MPI_COMM_WORLD);
 #endif
 
 			merger_pre (Extrae_get_num_tasks());
